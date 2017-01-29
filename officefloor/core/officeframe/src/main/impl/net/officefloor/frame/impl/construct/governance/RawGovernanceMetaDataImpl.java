@@ -192,22 +192,31 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>>
 	}
 
 	@Override
-	public void loadOfficeMetaData(OfficeMetaData officeMetaData, FlowMetaDataFactory flowMetaDataFactory,
+	public boolean loadOfficeMetaData(OfficeMetaData officeMetaData, FlowMetaDataFactory flowMetaDataFactory,
 			EscalationFlowFactory escalationFlowFactory, OfficeFloorIssues issues) {
 
 		// Obtain the listing of flow meta-data
 		FlowMetaData[] flowMetaDatas = flowMetaDataFactory.createFlowMetaData(
 				this.governanceConfiguration.getFlowConfiguration(), officeMetaData, AssetType.GOVERNANCE,
 				this.governanceName, issues);
+		if (flowMetaDatas == null) {
+			return false; // not loaded
+		}
 
 		// Create the escalation procedure
 		EscalationFlow[] escalations = escalationFlowFactory.createEscalationFlows(
 				this.governanceConfiguration.getEscalations(), officeMetaData, AssetType.GOVERNANCE,
 				this.governanceName, issues);
+		if (escalations == null) {
+			return false; // not loaded
+		}
 		EscalationProcedure escalationProcedure = new EscalationProcedureImpl(escalations);
 
 		// Load the remaining state
 		this.governanceMetaData.loadOfficeMetaData(officeMetaData, flowMetaDatas, escalationProcedure);
+
+		// As here, successful
+		return true;
 	}
 
 }

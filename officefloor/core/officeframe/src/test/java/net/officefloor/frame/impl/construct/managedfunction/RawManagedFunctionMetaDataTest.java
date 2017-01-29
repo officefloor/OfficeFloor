@@ -33,13 +33,12 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.impl.construct.managedfunction.RawManagedFunctionMetaDataImpl;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionLogicImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
 import net.officefloor.frame.internal.configuration.EscalationConfiguration;
 import net.officefloor.frame.internal.configuration.FlowConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionGovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
@@ -68,7 +67,6 @@ import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -388,7 +386,7 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 
 		// Attempt to construct function meta-data
 		this.replayMockObjects();
-		RawManagedFunctionMetaData<O, F> metaData = this.fullyConstructRawFunctionMetaData();
+		RawManagedFunctionMetaData<O, F> metaData = this.fullyConstructRawFunctionMetaData(true);
 		this.verifyMockObjects();
 
 		// Verify function meta-data
@@ -423,7 +421,7 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 
 		// Attempt to construct function meta-data
 		this.replayMockObjects();
-		this.constructRawFunctionMetaData(true);
+		this.constructRawFunctionMetaData(false);
 		this.verifyMockObjects();
 	}
 
@@ -442,11 +440,10 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 				new ManagedFunctionObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(), null);
 		this.record_functionIssue("No type for object at index 0");
-		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		this.constructRawFunctionMetaData(true);
+		this.constructRawFunctionMetaData(false);
 		this.verifyMockObjects();
 	}
 
@@ -474,7 +471,7 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawManagedFunctionMetaData<O, F> rawMetaData = this.fullyConstructRawFunctionMetaData();
+		RawManagedFunctionMetaData<O, F> rawMetaData = this.fullyConstructRawFunctionMetaData(true);
 		ManagedFunctionMetaData<O, F> metaData = rawMetaData.getManagedFunctionMetaData();
 		this.verifyMockObjects();
 
@@ -521,7 +518,7 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawManagedFunctionMetaData<O, F> rawMetaData = this.fullyConstructRawFunctionMetaData();
+		RawManagedFunctionMetaData<O, F> rawMetaData = this.fullyConstructRawFunctionMetaData(true);
 		ManagedFunctionMetaData<O, F> metaData = rawMetaData.getManagedFunctionMetaData();
 		this.verifyMockObjects();
 
@@ -560,11 +557,10 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 		this.recordReturn(paramConfigTwo, paramConfigTwo.isParameter(), true);
 		this.record_functionIssue(
 				"Incompatible parameter types (" + paramTypeOne.getName() + ", " + paramTypeTwo.getName() + ")");
-		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		this.constructRawFunctionMetaData(true);
+		this.constructRawFunctionMetaData(false);
 		this.verifyMockObjects();
 	}
 
@@ -579,11 +575,10 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 		this.recordReturn(this.configuration, this.configuration.getObjectConfiguration(),
 				new ManagedFunctionObjectConfiguration[] { null });
 		this.record_functionIssue("No object configuration at index 0");
-		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		this.constructRawFunctionMetaData(true);
+		this.constructRawFunctionMetaData(false);
 		this.verifyMockObjects();
 	}
 
@@ -604,11 +599,10 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 		this.recordReturn(moConfiguration, moConfiguration.isParameter(), false);
 		this.recordReturn(moConfiguration, moConfiguration.getScopeManagedObjectName(), null);
 		this.record_functionIssue("No name for ManagedObject at index 0");
-		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		this.constructRawFunctionMetaData(true);
+		this.constructRawFunctionMetaData(false);
 		this.verifyMockObjects();
 	}
 
@@ -629,20 +623,11 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 		this.recordReturn(moConfiguration, moConfiguration.isParameter(), false);
 		this.recordReturn(moConfiguration, moConfiguration.getScopeManagedObjectName(), "MO");
 		this.record_functionIssue("Can not find scope managed object 'MO'");
-		this.record_NoGovernance();
-		this.record_NoFlows();
-		this.record_NoNextFunction();
-		this.record_NoEscalations();
-		this.record_NoAdministration();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawManagedFunctionMetaData<O, F> metaData = this.fullyConstructRawFunctionMetaData();
+		this.constructRawFunctionMetaData(false);
 		this.verifyMockObjects();
-
-		// Ensure no managed objects
-		assertEquals("Should be no managed objects", 0,
-				metaData.getManagedFunctionMetaData().getRequiredManagedObjects().length);
 	}
 
 	/**
@@ -675,20 +660,11 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 		this.record_functionIssue("ManagedObject MO is incompatible (require=" + Connection.class.getName()
 				+ ", object of ManagedObject type=" + Integer.class.getName()
 				+ ", ManagedObjectSource=MANAGED_OBJECT_SOURCE)");
-		this.record_NoGovernance();
-		this.record_NoFlows();
-		this.record_NoNextFunction();
-		this.record_NoEscalations();
-		this.record_NoAdministration();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawManagedFunctionMetaData<O, F> metaData = this.fullyConstructRawFunctionMetaData();
+		this.constructRawFunctionMetaData(false);
 		this.verifyMockObjects();
-
-		// Ensure no managed objects
-		assertEquals("Should be no managed objects", 0,
-				metaData.getManagedFunctionMetaData().getRequiredManagedObjects().length);
 	}
 
 	/**
@@ -737,7 +713,7 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawManagedFunctionMetaData<O, F> metaData = this.fullyConstructRawFunctionMetaData();
+		RawManagedFunctionMetaData<O, F> metaData = this.fullyConstructRawFunctionMetaData(true);
 		this.verifyMockObjects();
 
 		// Ensure have the required managed object
@@ -811,7 +787,7 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawManagedFunctionMetaData<O, F> metaData = this.fullyConstructRawFunctionMetaData();
+		RawManagedFunctionMetaData<O, F> metaData = this.fullyConstructRawFunctionMetaData(true);
 		this.verifyMockObjects();
 
 		// Ensure have managed objects with dependency first
@@ -879,186 +855,64 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 
 		// Should not construct task meta-data as cyclic dependency
 		this.replayMockObjects();
-		this.fullyConstructRawFunctionMetaData();
+		this.fullyConstructRawFunctionMetaData(false);
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensure issue if no {@link Flow} {@link ManagedFunctionReference}.
+	 * Ensure handle issue with {@link Flow}.
 	 */
-	public void testNoFlowFunctionReference() {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void testIssuesWithFlows() {
 
-		final FlowConfiguration<?> flowConfiguration = this.createMock(FlowConfiguration.class);
+		final FlowConfiguration[] flowConfiguration = new FlowConfiguration[] {
+				this.createMock(FlowConfiguration.class) };
 
 		// Record no task node reference
 		this.record_nameFactoryTeam();
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
 		this.record_NoGovernance();
-		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
-		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
-				new FlowConfiguration[] { flowConfiguration });
-		this.recordReturn(flowConfiguration, flowConfiguration.getInitialFunction(), null);
-		this.record_functionIssue("No function referenced for flow index 0");
-		this.record_NoNextFunction();
-		this.record_NoEscalations();
-		this.record_NoAdministration();
+		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(), flowConfiguration);
+		this.recordReturn(this.flowMetaDataFactory, this.flowMetaDataFactory.createFlowMetaData(flowConfiguration,
+				this.officeMetaData, AssetType.FUNCTION, FUNCTION_NAME, this.issues), null);
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
-		this.fullyConstructRawFunctionMetaData();
+		this.fullyConstructRawFunctionMetaData(false);
 		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure issue if no {@link Flow} {@link ManagedFunction} name.
-	 */
-	public void testNoFlowFunctionName() {
-
-		final FlowConfiguration<?> flowConfiguration = this.createMock(FlowConfiguration.class);
-		final ManagedFunctionReference taskNodeReference = this.createMock(ManagedFunctionReference.class);
-
-		// Record no task name
-		this.record_nameFactoryTeam();
-		this.record_functionBoundManagedObjects();
-		this.record_NoRequiredManagedObjects();
-		this.record_NoGovernance();
-		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
-		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
-				new FlowConfiguration[] { flowConfiguration });
-		this.recordReturn(flowConfiguration, flowConfiguration.getInitialFunction(), taskNodeReference);
-		this.recordReturn(taskNodeReference, taskNodeReference.getFunctionName(), null);
-		this.record_functionIssue("No function name provided for flow index 0");
-		this.record_NoNextFunction();
-		this.record_NoEscalations();
-		this.record_NoAdministration();
-
-		// Fully construct task meta-data
-		this.replayMockObjects();
-		this.fullyConstructRawFunctionMetaData();
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure issue if unknown {@link ManagedFunction} containing the
-	 * {@link Flow} {@link ManagedFunction}.
-	 */
-	public void testUnknownFlowFunction() {
-
-		final FlowConfiguration<?> flowConfiguration = this.createMock(FlowConfiguration.class);
-		final ManagedFunctionReference taskNodeReference = this.createMock(ManagedFunctionReference.class);
-
-		// Record unknown work
-		this.record_nameFactoryTeam();
-		this.record_functionBoundManagedObjects();
-		this.record_NoRequiredManagedObjects();
-		this.record_NoGovernance();
-		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
-		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
-				new FlowConfiguration[] { flowConfiguration });
-		this.recordReturn(flowConfiguration, flowConfiguration.getInitialFunction(), taskNodeReference);
-		this.recordReturn(taskNodeReference, taskNodeReference.getFunctionName(), "IGNORED TASK NAME");
-		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("IGNORED TASK NAME"),
-				null);
-		this.record_functionIssue("Can not find function meta-data IGNORED TASK NAME for flow index 0");
-		this.record_NoNextFunction();
-		this.record_NoEscalations();
-		this.record_NoAdministration();
-
-		// Fully construct task meta-data
-		this.replayMockObjects();
-		this.fullyConstructRawFunctionMetaData();
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure issue if argument to {@link Flow} is not compatible.
-	 */
-	public void testIncompatibleFlowArgument() {
-
-		final FlowConfiguration<?> flowConfiguration = this.createMock(FlowConfiguration.class);
-		final ManagedFunctionReference taskNodeReference = this.createMock(ManagedFunctionReference.class);
-		final ManagedFunctionMetaData<?, ?> flowTaskMetaData = this.createMock(ManagedFunctionMetaData.class);
-
-		// Record incompatible flow argument
-		this.record_nameFactoryTeam();
-		this.record_functionBoundManagedObjects();
-		this.record_NoRequiredManagedObjects();
-		this.record_NoGovernance();
-		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
-		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
-				new FlowConfiguration[] { flowConfiguration });
-		this.recordReturn(flowConfiguration, flowConfiguration.getInitialFunction(), taskNodeReference);
-		this.recordReturn(taskNodeReference, taskNodeReference.getFunctionName(), "TASK");
-		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("TASK"),
-				flowTaskMetaData);
-		this.recordReturn(taskNodeReference, taskNodeReference.getArgumentType(), Connection.class);
-		this.recordReturn(flowTaskMetaData, flowTaskMetaData.getParameterType(), Integer.class);
-		this.record_functionIssue(
-				"Argument is not compatible with function parameter (argument=" + Connection.class.getName()
-						+ ", parameter=" + Integer.class.getName() + ", function=TASK) for flow index 0");
-		this.record_NoNextFunction();
-		this.record_NoEscalations();
-		this.record_NoAdministration();
-
-		// Fully construct task meta-data
-		this.replayMockObjects();
-		this.fullyConstructRawFunctionMetaData();
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure able to construct an {@link Flow} with spawned
-	 * {@link ThreadState}.
-	 */
-	public void testConstructFlowWithSpawnedThreadState() {
-		this.doConstructFlowTest(true);
-	}
-
-	/**
-	 * Ensure able to construct a {@link Flow}.
-	 */
-	public void testConstructFlow() {
-		this.doConstructFlowTest(false);
 	}
 
 	/**
 	 * Ensure able to construct {@link Flow}.
 	 */
-	public void doConstructFlowTest(boolean isSpawnThreadState) {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void testConstructFlow() {
 
-		final FlowConfiguration<?> flowConfiguration = this.createMock(FlowConfiguration.class);
-		final ManagedFunctionReference taskNodeReference = this.createMock(ManagedFunctionReference.class);
-		final ManagedFunctionMetaData<?, ?> flowTaskMetaData = this.createMock(ManagedFunctionMetaData.class);
+		final FlowConfiguration[] flowConfiguration = new FlowConfiguration[] {
+				this.createMock(FlowConfiguration.class) };
+		final FlowMetaData[] flowMetaData = new FlowMetaData[] { this.createMock(FlowMetaData.class) };
 
 		// Record construct flow
 		this.record_nameFactoryTeam();
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
 		this.record_NoGovernance();
-		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
-		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
-				new FlowConfiguration[] { flowConfiguration });
-		this.recordReturn(flowConfiguration, flowConfiguration.getInitialFunction(), taskNodeReference);
-		this.recordReturn(taskNodeReference, taskNodeReference.getFunctionName(), "TASK");
-		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("TASK"),
-				flowTaskMetaData);
-		this.recordReturn(taskNodeReference, taskNodeReference.getArgumentType(), Connection.class);
-		this.recordReturn(flowTaskMetaData, flowTaskMetaData.getParameterType(), Connection.class);
-		this.recordReturn(flowConfiguration, flowConfiguration.isSpawnThreadState(), isSpawnThreadState);
+		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(), flowConfiguration);
+		this.recordReturn(this.flowMetaDataFactory, this.flowMetaDataFactory.createFlowMetaData(flowConfiguration,
+				this.officeMetaData, AssetType.FUNCTION, FUNCTION_NAME, this.issues), flowMetaData);
 		this.record_NoNextFunction();
 		this.record_NoEscalations();
 		this.record_NoAdministration();
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
-		RawManagedFunctionMetaData<O, F> metaData = this.fullyConstructRawFunctionMetaData();
+		RawManagedFunctionMetaData<O, F> metaData = this.fullyConstructRawFunctionMetaData(true);
 		this.verifyMockObjects();
 
 		// Verify flow
-		FlowMetaData flowMetaData = metaData.getManagedFunctionMetaData().getFlow(0);
-		assertEquals("Incorrect initial task meta-data", flowTaskMetaData, flowMetaData.getInitialFunctionMetaData());
-		assertEquals("Incorrect spawning of thread state", isSpawnThreadState, flowMetaData.isSpawnThreadState());
+		FlowMetaData flow = metaData.getManagedFunctionMetaData().getFlow(0);
+		assertEquals("Incorrect flow meta-data", flowMetaData[0], flow);
 	}
 
 	/**
@@ -1074,22 +928,21 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 		this.record_NoRequiredManagedObjects();
 		this.record_NoGovernance();
 		this.record_NoFlows();
+		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
 		this.recordReturn(this.configuration, this.configuration.getNextFunction(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getFunctionName(), null);
 		this.record_functionIssue("No function name provided for next function");
-		this.record_NoEscalations();
-		this.record_NoAdministration();
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
-		this.fullyConstructRawFunctionMetaData();
+		this.fullyConstructRawFunctionMetaData(false);
 		this.verifyMockObjects();
 	}
 
 	/**
 	 * Ensure issue if argument to next {@link ManagedFunction} is incompatible.
 	 */
-	public void testIncompatibleNextTaskArgument() {
+	public void testIncompatibleNextFunctionArgument() {
 
 		final ManagedFunctionReference taskNodeReference = this.createMock(ManagedFunctionReference.class);
 		final ManagedFunctionMetaData<?, ?> nextTaskMetaData = this.createMock(ManagedFunctionMetaData.class);
@@ -1100,6 +953,7 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 		this.record_NoRequiredManagedObjects();
 		this.record_NoGovernance();
 		this.record_NoFlows();
+		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
 		this.recordReturn(this.configuration, this.configuration.getNextFunction(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getFunctionName(), "NEXT_TASK");
 		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("NEXT_TASK"),
@@ -1109,19 +963,17 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 		this.record_functionIssue(
 				"Argument is not compatible with function parameter (argument=" + Integer.class.getName()
 						+ ", parameter=" + Connection.class.getName() + ", function=NEXT_TASK) for next function");
-		this.record_NoEscalations();
-		this.record_NoAdministration();
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
-		this.fullyConstructRawFunctionMetaData();
+		this.fullyConstructRawFunctionMetaData(false);
 		this.verifyMockObjects();
 	}
 
 	/**
 	 * Ensure able to construct next {@link ManagedFunctionMetaData}.
 	 */
-	public void testConstructNextTask() {
+	public void testConstructNextFunction() {
 
 		final ManagedFunctionReference taskNodeReference = this.createMock(ManagedFunctionReference.class);
 		final ManagedFunctionMetaData<?, ?> nextTaskMetaData = this.createMock(ManagedFunctionMetaData.class);
@@ -1132,6 +984,7 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 		this.record_NoRequiredManagedObjects();
 		this.record_NoGovernance();
 		this.record_NoFlows();
+		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
 		this.recordReturn(this.configuration, this.configuration.getNextFunction(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getFunctionName(), "NEXT_TASK");
 		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("NEXT_TASK"),
@@ -1143,7 +996,7 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
-		RawManagedFunctionMetaData<O, F> metaData = this.fullyConstructRawFunctionMetaData();
+		RawManagedFunctionMetaData<O, F> metaData = this.fullyConstructRawFunctionMetaData(true);
 		this.verifyMockObjects();
 
 		// Verify constructed next task
@@ -1152,38 +1005,12 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 	}
 
 	/**
-	 * Ensure issue if no {@link EscalationFlow} type.
+	 * Ensure handle issue with {@link EscalationFlow}.
 	 */
-	public void testNoEscalationType() {
+	public void testIssueWithEscalationFlows() {
 
-		final EscalationConfiguration escalationConfiguration = this.createMock(EscalationConfiguration.class);
-
-		// Record no escalation type
-		this.record_nameFactoryTeam();
-		this.record_functionBoundManagedObjects();
-		this.record_NoRequiredManagedObjects();
-		this.record_NoGovernance();
-		this.record_NoFlows();
-		this.record_NoNextFunction();
-		this.recordReturn(this.configuration, this.configuration.getEscalations(),
-				new EscalationConfiguration[] { escalationConfiguration });
-		this.recordReturn(escalationConfiguration, escalationConfiguration.getTypeOfCause(), null);
-		this.record_functionIssue("No escalation type for escalation index 0");
-		this.record_NoAdministration();
-
-		// Fully construct task meta-data
-		this.replayMockObjects();
-		this.fullyConstructRawFunctionMetaData();
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure issue if no {@link ManagedFunctionReference} for
-	 * {@link EscalationFlow}.
-	 */
-	public void testNoEscalationFunctionReference() {
-
-		final EscalationConfiguration escalationConfiguration = this.createMock(EscalationConfiguration.class);
+		final EscalationConfiguration[] escalationConfiguration = new EscalationConfiguration[] {
+				this.createMock(EscalationConfiguration.class) };
 
 		// Record no task referenced
 		this.record_nameFactoryTeam();
@@ -1192,84 +1019,13 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 		this.record_NoGovernance();
 		this.record_NoFlows();
 		this.record_NoNextFunction();
-		this.recordReturn(this.configuration, this.configuration.getEscalations(),
-				new EscalationConfiguration[] { escalationConfiguration });
-		this.recordReturn(escalationConfiguration, escalationConfiguration.getTypeOfCause(), IOException.class);
-		this.recordReturn(escalationConfiguration, escalationConfiguration.getManagedFunctionReference(), null);
-		this.record_functionIssue("No function referenced for escalation index 0");
-		this.record_NoAdministration();
+		this.recordReturn(this.configuration, this.configuration.getEscalations(), escalationConfiguration);
+		this.recordReturn(this.escalationFlowFactory, this.escalationFlowFactory.createEscalationFlows(
+				escalationConfiguration, this.officeMetaData, AssetType.FUNCTION, FUNCTION_NAME, this.issues), null);
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
-		this.fullyConstructRawFunctionMetaData();
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure issue if no {@link ManagedFunction} name for
-	 * {@link EscalationFlow}.
-	 */
-	public void testNoEscalationFunctionName() {
-
-		final EscalationConfiguration escalationConfiguration = this.createMock(EscalationConfiguration.class);
-		final ManagedFunctionReference taskNodeReference = this.createMock(ManagedFunctionReference.class);
-
-		// Record no escalation task name
-		this.record_nameFactoryTeam();
-		this.record_functionBoundManagedObjects();
-		this.record_NoRequiredManagedObjects();
-		this.record_NoGovernance();
-		this.record_NoFlows();
-		this.record_NoNextFunction();
-		this.recordReturn(this.configuration, this.configuration.getEscalations(),
-				new EscalationConfiguration[] { escalationConfiguration });
-		this.recordReturn(escalationConfiguration, escalationConfiguration.getTypeOfCause(), IOException.class);
-		this.recordReturn(escalationConfiguration, escalationConfiguration.getManagedFunctionReference(),
-				taskNodeReference);
-		this.recordReturn(taskNodeReference, taskNodeReference.getFunctionName(), null);
-		this.record_functionIssue("No function name provided for escalation index 0");
-		this.record_NoAdministration();
-
-		// Fully construct task meta-data
-		this.replayMockObjects();
-		this.fullyConstructRawFunctionMetaData();
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure issue if incompatible {@link EscalationFlow}.
-	 */
-	public void testIncompatibleEscalation() {
-
-		final EscalationConfiguration escalationConfiguration = this.createMock(EscalationConfiguration.class);
-		final ManagedFunctionReference taskNodeReference = this.createMock(ManagedFunctionReference.class);
-		final ManagedFunctionMetaData<?, ?> escalationTaskMetaData = this.createMock(ManagedFunctionMetaData.class);
-
-		// Record construct escalation
-		this.record_nameFactoryTeam();
-		this.record_functionBoundManagedObjects();
-		this.record_NoRequiredManagedObjects();
-		this.record_NoGovernance();
-		this.record_NoFlows();
-		this.record_NoNextFunction();
-		this.recordReturn(this.configuration, this.configuration.getEscalations(),
-				new EscalationConfiguration[] { escalationConfiguration });
-		this.recordReturn(escalationConfiguration, escalationConfiguration.getTypeOfCause(), IOException.class);
-		this.recordReturn(escalationConfiguration, escalationConfiguration.getManagedFunctionReference(),
-				taskNodeReference);
-		this.recordReturn(taskNodeReference, taskNodeReference.getFunctionName(), "ESCALATION_HANDLER");
-		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("ESCALATION_HANDLER"),
-				escalationTaskMetaData);
-		this.recordReturn(taskNodeReference, taskNodeReference.getArgumentType(), NullPointerException.class);
-		this.recordReturn(escalationTaskMetaData, escalationTaskMetaData.getParameterType(), Integer.class);
-		this.record_functionIssue("Argument is not compatible with function parameter (argument="
-				+ NullPointerException.class.getName() + ", parameter=" + Integer.class.getName()
-				+ ", function=ESCALATION_HANDLER) for escalation index 0");
-		this.record_NoAdministration();
-
-		// Fully construct task meta-data
-		this.replayMockObjects();
-		this.fullyConstructRawFunctionMetaData();
+		this.fullyConstructRawFunctionMetaData(false);
 		this.verifyMockObjects();
 	}
 
@@ -1278,9 +1034,9 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 	 */
 	public void testConstructEscalation() {
 
-		final EscalationConfiguration escalationConfiguration = this.createMock(EscalationConfiguration.class);
-		final ManagedFunctionReference taskNodeReference = this.createMock(ManagedFunctionReference.class);
-		final ManagedFunctionMetaData<?, ?> escalationTaskMetaData = this.createMock(ManagedFunctionMetaData.class);
+		final EscalationConfiguration[] escalationConfiguration = new EscalationConfiguration[] {
+				this.createMock(EscalationConfiguration.class) };
+		final EscalationFlow[] escalationFlows = new EscalationFlow[] { this.createMock(EscalationFlow.class) };
 
 		// Record construct escalation
 		this.record_nameFactoryTeam();
@@ -1289,29 +1045,26 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 		this.record_NoGovernance();
 		this.record_NoFlows();
 		this.record_NoNextFunction();
-		this.recordReturn(this.configuration, this.configuration.getEscalations(),
-				new EscalationConfiguration[] { escalationConfiguration });
-		this.recordReturn(escalationConfiguration, escalationConfiguration.getTypeOfCause(), IOException.class);
-		this.recordReturn(escalationConfiguration, escalationConfiguration.getManagedFunctionReference(),
-				taskNodeReference);
-		this.recordReturn(taskNodeReference, taskNodeReference.getFunctionName(), "ESCALATION_HANDLER");
-		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("ESCALATION_HANDLER"),
-				escalationTaskMetaData);
-		this.recordReturn(taskNodeReference, taskNodeReference.getArgumentType(), NullPointerException.class);
-		this.recordReturn(escalationTaskMetaData, escalationTaskMetaData.getParameterType(), RuntimeException.class);
+		this.recordReturn(this.configuration, this.configuration.getEscalations(), escalationConfiguration);
+		this.recordReturn(this.escalationFlowFactory,
+				this.escalationFlowFactory.createEscalationFlows(escalationConfiguration, this.officeMetaData,
+						AssetType.FUNCTION, FUNCTION_NAME, issues),
+				escalationFlows);
 		this.record_NoAdministration();
+
+		// Record escalation type
+		this.recordReturn(escalationFlows[0], escalationFlows[0].getTypeOfCause(), IOException.class);
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
-		RawManagedFunctionMetaData<O, F> metaData = this.fullyConstructRawFunctionMetaData();
-		this.verifyMockObjects();
+		RawManagedFunctionMetaData<O, F> metaData = this.fullyConstructRawFunctionMetaData(true);
 
 		// Verify constructed escalation
 		EscalationProcedure escalationProcedure = metaData.getManagedFunctionMetaData().getEscalationProcedure();
 		EscalationFlow escalation = escalationProcedure.getEscalation(new IOException("test"));
-		assertEquals("Incorrect type of cause", IOException.class, escalation.getTypeOfCause());
-		assertEquals("Incorrect escalation task meta-data", escalationTaskMetaData,
-				escalation.getManagedFunctionMetaData());
+		assertSame("Incorrect escalation flow", escalationFlows[0], escalation);
+
+		this.verifyMockObjects();
 	}
 
 	/**
@@ -1336,14 +1089,9 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 		this.recordReturn(gov, gov.getGovernanceName(), null);
 		this.record_functionIssue("No Governance name provided for Governance 0");
 
-		this.record_NoFlows();
-		this.record_NoNextFunction();
-		this.record_NoEscalations();
-		this.record_NoAdministration();
-
 		// Fully construct task meta-data
 		this.replayMockObjects();
-		this.fullyConstructRawFunctionMetaData();
+		this.constructRawFunctionMetaData(false);
 		this.verifyMockObjects();
 	}
 
@@ -1369,14 +1117,9 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 		this.recordReturn(gov, gov.getGovernanceName(), "UNKNOWN");
 		this.record_functionIssue("Unknown Governance 'UNKNOWN'");
 
-		this.record_NoFlows();
-		this.record_NoNextFunction();
-		this.record_NoEscalations();
-		this.record_NoAdministration();
-
 		// Fully construct task meta-data
 		this.replayMockObjects();
-		this.fullyConstructRawFunctionMetaData();
+		this.constructRawFunctionMetaData(false);
 		this.verifyMockObjects();
 	}
 
@@ -1419,7 +1162,7 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
-		RawManagedFunctionMetaData<O, F> metaData = this.fullyConstructRawFunctionMetaData();
+		RawManagedFunctionMetaData<O, F> metaData = this.fullyConstructRawFunctionMetaData(true);
 		this.verifyMockObjects();
 
 		// Ensure correct required governance
@@ -1450,14 +1193,9 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 		this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData.isManuallyManageGovernance(), true);
 		this.record_functionIssue("Manually manage Governance but Governance configured for OfficeFloor management");
 
-		this.record_NoFlows();
-		this.record_NoNextFunction();
-		this.record_NoEscalations();
-		this.record_NoAdministration();
-
 		// Fully construct task meta-data
 		this.replayMockObjects();
-		this.fullyConstructRawFunctionMetaData();
+		this.constructRawFunctionMetaData(false);
 		this.verifyMockObjects();
 	}
 
@@ -1484,7 +1222,7 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
-		RawManagedFunctionMetaData<O, F> metaData = this.fullyConstructRawFunctionMetaData();
+		RawManagedFunctionMetaData<O, F> metaData = this.fullyConstructRawFunctionMetaData(true);
 		this.verifyMockObjects();
 
 		// Ensure manual governance
@@ -1532,7 +1270,7 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawManagedFunctionMetaData<O, F> rawMetaData = this.fullyConstructRawFunctionMetaData();
+		RawManagedFunctionMetaData<O, F> rawMetaData = this.fullyConstructRawFunctionMetaData(true);
 		ManagedFunctionMetaData<O, F> functionMetaData = rawMetaData.getManagedFunctionMetaData();
 		this.verifyMockObjects();
 
@@ -1613,7 +1351,7 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawManagedFunctionMetaData<O, F> rawMetaData = this.fullyConstructRawFunctionMetaData();
+		RawManagedFunctionMetaData<O, F> rawMetaData = this.fullyConstructRawFunctionMetaData(true);
 		ManagedFunctionMetaData<O, F> functionMetaData = rawMetaData.getManagedFunctionMetaData();
 		this.verifyMockObjects();
 
@@ -1834,15 +1572,19 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 	/**
 	 * Records no {@link Flow}.
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void record_NoFlows() {
-		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
-		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(), new FlowConfiguration[0]);
+		final FlowConfiguration[] flowConfigurations = new FlowConfiguration[0];
+		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(), flowConfigurations);
+		this.recordReturn(this.flowMetaDataFactory, this.flowMetaDataFactory.createFlowMetaData(flowConfigurations,
+				this.officeMetaData, AssetType.FUNCTION, FUNCTION_NAME, issues), new FlowMetaData[0]);
 	}
 
 	/**
 	 * Records no next {@link ManagedFunction}.
 	 */
 	private void record_NoNextFunction() {
+		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
 		this.recordReturn(this.configuration, this.configuration.getNextFunction(), null);
 	}
 
@@ -1850,7 +1592,12 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 	 * Records no {@link EscalationFlow}.
 	 */
 	private void record_NoEscalations() {
-		this.recordReturn(this.configuration, this.configuration.getEscalations(), new EscalationConfiguration[0]);
+		final EscalationConfiguration[] escalationConfigurations = new EscalationConfiguration[0];
+		this.recordReturn(this.configuration, this.configuration.getEscalations(), escalationConfigurations);
+		this.recordReturn(this.escalationFlowFactory,
+				this.escalationFlowFactory.createEscalationFlows(escalationConfigurations, this.officeMetaData,
+						AssetType.FUNCTION, FUNCTION_NAME, issues),
+				new EscalationFlow[0]);
 	}
 
 	/**
@@ -1893,9 +1640,11 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 	 * remaining state is loaded. Will always expect to construct the
 	 * {@link RawManagedFunctionMetaData}.
 	 * 
+	 * @param isLoad
+	 *            Indicates if loaded.
 	 * @return {@link RawManagedFunctionMetaData}.
 	 */
-	private RawManagedFunctionMetaData<O, F> fullyConstructRawFunctionMetaData() {
+	private RawManagedFunctionMetaData<O, F> fullyConstructRawFunctionMetaData(boolean isLoad) {
 
 		// Construct the raw function meta-data
 		RawManagedFunctionMetaData<O, F> metaData = this.constructRawFunctionMetaData(true);
@@ -1903,8 +1652,9 @@ public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>
 		// Other functions expected to be constructed between these steps
 
 		// Link the functions and load remaining state to function meta-data
-		metaData.loadOfficeMetaData(this.officeMetaData, this.flowMetaDataFactory, this.escalationFlowFactory,
-				this.administrationMetaDataFactory, this.officeTeams, this.issues);
+		boolean isLoaded = metaData.loadOfficeMetaData(this.officeMetaData, this.flowMetaDataFactory,
+				this.escalationFlowFactory, this.administrationMetaDataFactory, this.officeTeams, this.issues);
+		assertEquals("Incorrect load", isLoad, isLoaded);
 
 		// Return the fully constructed meta-data
 		return metaData;

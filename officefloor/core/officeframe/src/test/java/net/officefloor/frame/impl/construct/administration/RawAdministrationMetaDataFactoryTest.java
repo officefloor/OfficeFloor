@@ -24,6 +24,7 @@ import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -33,7 +34,8 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaDat
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.AdministrationGovernanceConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
+import net.officefloor.frame.internal.configuration.EscalationConfiguration;
+import net.officefloor.frame.internal.configuration.FlowConfiguration;
 import net.officefloor.frame.internal.construct.EscalationFlowFactory;
 import net.officefloor.frame.internal.construct.FlowMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawAdministrationMetaData;
@@ -43,8 +45,10 @@ import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.Asset;
+import net.officefloor.frame.internal.structure.EscalationFlow;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedObjectExtensionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -60,6 +64,11 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * @author Daniel Sagenschneider
  */
 public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
+
+	/**
+	 * Name of the {@link Administration}.
+	 */
+	private final String ADMINISTRATION_NAME = "ADMIN";
 
 	/**
 	 * {@link AdministrationConfiguration}.
@@ -160,11 +169,6 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	private final EscalationFlowFactory escalationFlowFactory = this.createMock(EscalationFlowFactory.class);
 
 	/**
-	 * {@link ManagedFunctionLocator}.
-	 */
-	private final ManagedFunctionLocator functionLocator = this.createMock(ManagedFunctionLocator.class);
-
-	/**
 	 * Ensures issue if not {@link Administration} name.
 	 */
 	public void testNoAdministrationName() {
@@ -175,7 +179,7 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Construct the administrators
 		this.replayMockObjects();
-		this.constructRawAdministration(0, this.configuration);
+		this.constructRawAdministration(false, this.configuration);
 		this.verifyMockObjects();
 	}
 
@@ -192,7 +196,7 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Construct the administrators
 		this.replayMockObjects();
-		this.constructRawAdministration(0, this.configuration);
+		this.constructRawAdministration(false, this.configuration);
 		this.verifyMockObjects();
 	}
 
@@ -206,12 +210,13 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration, this.configuration.getResponsibleTeamName(), null);
 		this.record_managedObject();
 		this.record_noFlows();
+		this.record_noEscalations();
 		this.record_governanceMetaData(0);
 		this.record_noGovernance();
 
 		// Construct the administrators
 		this.replayMockObjects();
-		this.constructRawAdministration(1, this.configuration);
+		this.constructRawAdministration(true, this.configuration);
 		this.verifyMockObjects();
 	}
 
@@ -227,7 +232,7 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Construct the administrators
 		this.replayMockObjects();
-		this.constructRawAdministration(0, this.configuration);
+		this.constructRawAdministration(false, this.configuration);
 		this.verifyMockObjects();
 	}
 
@@ -245,7 +250,7 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Construct the administrators
 		this.replayMockObjects();
-		this.constructRawAdministration(0, this.configuration);
+		this.constructRawAdministration(false, this.configuration);
 		this.verifyMockObjects();
 	}
 
@@ -265,7 +270,7 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Construct the administrators
 		this.replayMockObjects();
-		this.constructRawAdministration(0, this.configuration);
+		this.constructRawAdministration(false, this.configuration);
 		this.verifyMockObjects();
 	}
 
@@ -285,7 +290,7 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Construct the administrators
 		this.replayMockObjects();
-		this.constructRawAdministration(0, this.configuration);
+		this.constructRawAdministration(false, this.configuration);
 		this.verifyMockObjects();
 	}
 
@@ -319,7 +324,7 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Construct the administrators
 		this.replayMockObjects();
-		this.constructRawAdministration(0, this.configuration);
+		this.constructRawAdministration(false, this.configuration);
 		this.verifyMockObjects();
 	}
 
@@ -356,7 +361,7 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Construct the administrators
 		this.replayMockObjects();
-		this.constructRawAdministration(0, this.configuration);
+		this.constructRawAdministration(false, this.configuration);
 		this.verifyMockObjects();
 	}
 
@@ -381,6 +386,7 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// No flows or governance
 		this.record_noFlows();
+		this.record_noEscalations();
 		this.record_governanceMetaData(0);
 		this.record_noGovernance();
 
@@ -388,7 +394,7 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Construct the administrators
-		RawAdministrationMetaData[] rawAdminMetaDatas = this.constructRawAdministration(1, this.configuration);
+		RawAdministrationMetaData[] rawAdminMetaDatas = this.constructRawAdministration(true, this.configuration);
 		RawAdministrationMetaData rawAdminMetaData = rawAdminMetaDatas[0];
 
 		// Verify extension interface factory by extracting ei
@@ -414,7 +420,6 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 				.getRawBoundManagedObjectMetaData();
 		assertEquals("Incorrect number of administered managed objects", 1, administeredManagedObjects.length);
 		assertSame("Incorrect administered managed object", this.rawBoundMoMetaData, administeredManagedObjects[0]);
-
 	}
 
 	/**
@@ -432,6 +437,7 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 		this.record_team();
 		this.record_managedObject();
 		this.record_noFlows();
+		this.record_noEscalations();
 
 		// Record governance configuration
 		GovernanceMetaData<?, ?>[] governanceMetaData = this.record_governanceMetaData(1);
@@ -446,13 +452,8 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Construct the administrator and link tasks
 		this.replayMockObjects();
-		RawAdministrationMetaData[] adminMetaDatas = this.constructRawAdministration(1, this.configuration);
-		AdministrationMetaData<?, ?, ?> adminMetaData = adminMetaDatas[0].getAdministrationMetaData();
+		this.constructRawAdministration(false, this.configuration);
 		this.verifyMockObjects();
-
-		// Verify the governance not mapped
-		int threadIndex = adminMetaData.translateGovernanceIndexToThreadIndex(GOVERNANCE_INDEX);
-		assertEquals("Thread index should not be translated", -1, threadIndex);
 	}
 
 	/**
@@ -469,6 +470,7 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 		this.record_team();
 		this.record_managedObject();
 		this.record_noFlows();
+		this.record_noEscalations();
 		this.recordReturn(this.configuration, this.configuration.getGovernanceConfiguration(),
 				new AdministrationGovernanceConfiguration<?>[] { governanceConfiguration });
 		this.recordReturn(governanceConfiguration, governanceConfiguration.getIndex(), GOVERNANCE_INDEX);
@@ -481,7 +483,7 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Construct the administration
 		this.replayMockObjects();
-		RawAdministrationMetaData[] adminMetaDatas = this.constructRawAdministration(1, this.configuration);
+		RawAdministrationMetaData[] adminMetaDatas = this.constructRawAdministration(true, this.configuration);
 		AdministrationMetaData<?, ?, ?> adminMetaData = adminMetaDatas[0].getAdministrationMetaData();
 		this.verifyMockObjects();
 
@@ -494,7 +496,7 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	 * Records initiating the {@link Administration}.
 	 */
 	private void record_init() {
-		this.recordReturn(this.configuration, this.configuration.getAdministrationName(), "ADMIN");
+		this.recordReturn(this.configuration, this.configuration.getAdministrationName(), ADMINISTRATION_NAME);
 		this.recordReturn(this.configuration, this.configuration.getAdministrationFactory(),
 				this.administrationFactory);
 	}
@@ -534,12 +536,28 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records no flows.
+	 * Records no {@link Flow} instances.
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void record_noFlows() {
-		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
-		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
-				new ManagedFunctionReference[0]);
+		FlowConfiguration[] flowConfiguration = new FlowConfiguration[0];
+		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(), flowConfiguration);
+		FlowMetaData[] flowMetaData = new FlowMetaData[0];
+		this.recordReturn(this.flowMetaDataFactory, this.flowMetaDataFactory.createFlowMetaData(flowConfiguration,
+				this.officeMetaData, AssetType.ADMINISTRATOR, ADMINISTRATION_NAME, this.issues), flowMetaData);
+	}
+
+	/**
+	 * Records no {@link Escalation} instances.
+	 */
+	private void record_noEscalations() {
+		EscalationConfiguration[] escalationConfiguration = new EscalationConfiguration[0];
+		this.recordReturn(this.configuration, this.configuration.getEscalations(), escalationConfiguration);
+		EscalationFlow[] escalationFlows = new EscalationFlow[0];
+		this.recordReturn(
+				this.escalationFlowFactory, this.escalationFlowFactory.createEscalationFlows(escalationConfiguration,
+						this.officeMetaData, AssetType.ADMINISTRATOR, ADMINISTRATION_NAME, this.issues),
+				escalationFlows);
 	}
 
 	/**
@@ -583,13 +601,13 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	/**
 	 * Constructs the {@link AdministrationMetaData}.
 	 * 
-	 * @param expectedCreateCount
-	 *            Expected number to be created.
+	 * @param isCreate
+	 *            Indicates if create the {@link RawAdministrationMetaData}.
 	 * @param configuration
 	 *            {@link AdministrationConfiguration} instances.
 	 * @return {@link AdministrationMetaData}.
 	 */
-	private RawAdministrationMetaData[] constructRawAdministration(int expectedCreateCount,
+	private RawAdministrationMetaData[] constructRawAdministration(boolean isCreate,
 			AdministrationConfiguration<?, ?, ?>... configuration) {
 
 		// Construct the meta-data
@@ -599,7 +617,12 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 						this.issues);
 
 		// Ensure correct number created
-		assertEquals("Incorrect number of created meta-data", expectedCreateCount, rawAdministrations.length);
+		if (isCreate) {
+			assertNotNull("Should create the raw administration", rawAdministrations);
+			assertEquals("Incorrect number of created meta-data", configuration.length, rawAdministrations.length);
+		} else {
+			assertNull("Should not create raw administration meta-data", rawAdministrations);
+		}
 
 		// Return the raw administrations
 		return rawAdministrations;

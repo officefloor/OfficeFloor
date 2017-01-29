@@ -56,8 +56,10 @@ public interface RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>
 	 *            {@link Team} instances within the {@link Office}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
+	 * @return <code>true</code> if sucessfully loaded the
+	 *         {@link OfficeMetaData}.
 	 */
-	void loadOfficeMetaData(OfficeMetaData officeMetaData, FlowMetaDataFactory flowMetaDataFactory,
+	boolean loadOfficeMetaData(OfficeMetaData officeMetaData, FlowMetaDataFactory flowMetaDataFactory,
 			EscalationFlowFactory escalationProcedureFactory,
 			RawAdministrationMetaDataFactory administrationMetaDataFactory, Map<String, TeamManagement> officeTeams,
 			OfficeFloorIssues issues);

@@ -105,20 +105,24 @@ public class RawAdministrationMetaDataImpl implements RawAdministrationMetaDataF
 			Map<String, RawBoundManagedObjectMetaData> scopeMo, OfficeFloorIssues issues) {
 
 		// Create the administrators
-		List<RawAdministrationMetaData> rawAdministrations = new LinkedList<RawAdministrationMetaData>();
-		for (AdministrationConfiguration<?, ?, ?> administrationConfiguration : configuration) {
+		RawAdministrationMetaData[] rawAdministrations = new RawAdministrationMetaData[configuration.length];
+		for (int i = 0; i < rawAdministrations.length; i++) {
+			AdministrationConfiguration<?, ?, ?> administrationConfiguration = configuration[i];
 
 			// Construct the raw administrator
 			RawAdministrationMetaData rawAdministration = this.constructRawAdministrationMetaData(
 					administrationConfiguration, assetType, assetName, officeMetaData, flowMetaDataFactory,
 					escalationFlowFactory, officeTeams, scopeMo, issues);
-			if (rawAdministration != null) {
-				rawAdministrations.add(rawAdministration);
+			if (rawAdministration == null) {
+				return null; // failed to create the administration
 			}
+
+			// Load the administration
+			rawAdministrations[i] = rawAdministration;
 		}
 
 		// Return the raw administrations
-		return rawAdministrations.toArray(new RawAdministrationMetaData[0]);
+		return rawAdministrations;
 	}
 
 	/**
@@ -306,6 +310,7 @@ public class RawAdministrationMetaDataImpl implements RawAdministrationMetaDataF
 			if (processGovernanceIndex < 0) {
 				// Did not find the process governance
 				issues.addIssue(AssetType.ADMINISTRATOR, adminName, "Can not find governance '" + governanceName + "'");
+				return null;
 			}
 
 			// Specify the governance mapping

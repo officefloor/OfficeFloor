@@ -225,14 +225,14 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 			// Ensure have configuration
 			if (objectConfiguration == null) {
 				issues.addIssue(AssetType.FUNCTION, functionName, "No object configuration at index " + i);
-				continue NEXT_OBJECT; // must have configuration
+				return null; // must have configuration
 			}
 
 			// Obtain the type of object required
 			Class<?> objectType = objectConfiguration.getObjectType();
 			if (objectType == null) {
 				issues.addIssue(AssetType.FUNCTION, functionName, "No type for object at index " + i);
-				continue NEXT_OBJECT; // must have object type
+				return null; // must have object type
 			}
 
 			// Determine if a parameter
@@ -257,6 +257,7 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 						// Parameter use is incompatible
 						issues.addIssue(AssetType.FUNCTION, functionName, "Incompatible parameter types ("
 								+ parameterType.getName() + ", " + objectType.getName() + ")");
+						return null;
 					}
 				}
 
@@ -269,7 +270,7 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 			if (ConstructUtil.isBlank(scopeMoName)) {
 				issues.addIssue(AssetType.FUNCTION, functionName,
 						"No name for " + ManagedObject.class.getSimpleName() + " at index " + i);
-				continue NEXT_OBJECT; // no managed object name
+				return null; // no managed object name
 			}
 
 			// Obtain the scope managed object
@@ -277,7 +278,7 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 			if (scopeMo == null) {
 				issues.addIssue(AssetType.FUNCTION, functionName,
 						"Can not find scope managed object '" + scopeMoName + "'");
-				continue NEXT_OBJECT; // no scope managed object
+				return null; // no scope managed object
 			}
 
 			// Ensure the objects of all the managed objects are compatible
@@ -294,6 +295,7 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 									+ " type=" + moObjectType.getName() + ", "
 									+ ManagedObjectSource.class.getSimpleName() + "="
 									+ scopeMoInstance.getRawManagedObjectMetaData().getManagedObjectName() + ")");
+					return null;
 				}
 			}
 			if (isCompatibleIssue) {
@@ -316,6 +318,7 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 						"Manually manage " + Governance.class.getSimpleName() + " but "
 								+ Governance.class.getSimpleName() + " configured for "
 								+ OfficeFloor.class.getSimpleName() + " management");
+				return null;
 			}
 
 			// No OfficeFloor managed governance for task
@@ -338,7 +341,7 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 				if (ConstructUtil.isBlank(governanceName)) {
 					issues.addIssue(AssetType.FUNCTION, functionName, "No " + Governance.class.getSimpleName()
 							+ " name provided for " + Governance.class.getSimpleName() + " " + i);
-					continue; // move on to next governance
+					return null;
 				}
 
 				// Obtain the raw governance meta-data
@@ -346,7 +349,7 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 				if (rawGovernance == null) {
 					issues.addIssue(AssetType.FUNCTION, functionName,
 							"Unknown " + Governance.class.getSimpleName() + " '" + governanceName + "'");
-					continue; // move on to next governance
+					return null;
 				}
 
 				// Flag activate the particular governance
@@ -371,6 +374,7 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 				issues.addIssue(AssetType.FUNCTION, functionName,
 						"No managed object meta-data for function managed object "
 								+ rawMoMetaData.getBoundManagedObjectName());
+				return null;
 			}
 		}
 
@@ -396,7 +400,7 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 	}
 
 	@Override
-	public void loadOfficeMetaData(OfficeMetaData officeMetaData, FlowMetaDataFactory flowMetaDataFactory,
+	public boolean loadOfficeMetaData(OfficeMetaData officeMetaData, FlowMetaDataFactory flowMetaDataFactory,
 			EscalationFlowFactory escalationFlowFactory,
 			RawAdministrationMetaDataFactory rawAdministrationMetaDataFactory, Map<String, TeamManagement> officeTeams,
 			OfficeFloorIssues issues) {
@@ -404,6 +408,9 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 		// Obtain the listing of flow meta-data
 		FlowMetaData[] flowMetaDatas = flowMetaDataFactory.createFlowMetaData(this.configuration.getFlowConfiguration(),
 				officeMetaData, AssetType.FUNCTION, this.functionName, issues);
+		if (flowMetaDatas == null) {
+			return false;
+		}
 
 		// Obtain the function locator
 		ManagedFunctionLocator functionLocator = officeMetaData.getManagedFunctionLocator();
@@ -414,11 +421,17 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 		if (nextFunctionReference != null) {
 			nextFunction = ConstructUtil.getFunctionMetaData(nextFunctionReference, functionLocator, issues,
 					AssetType.FUNCTION, this.functionName, "next function");
+			if (nextFunction == null) {
+				return false;
+			}
 		}
 
 		// Create the escalation procedure
 		EscalationFlow[] escalationFlows = escalationFlowFactory.createEscalationFlows(
 				this.configuration.getEscalations(), officeMetaData, AssetType.FUNCTION, this.functionName, issues);
+		if (escalationFlows == null) {
+			return false;
+		}
 		EscalationProcedure escalationProcedure = new EscalationProcedureImpl(escalationFlows);
 
 		// Create the administrations
@@ -439,8 +452,10 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 		}
 
 		// Sort the required managed objects
-		this.sortRequiredManagedObjects(requiredManagedObjectIndexes, this.requiredManagedObjects, this.functionName,
-				issues);
+		if (!this.sortRequiredManagedObjects(requiredManagedObjectIndexes, this.requiredManagedObjects,
+				this.functionName, issues)) {
+			return false;
+		}
 
 		// Provide details of each function (to aid debugging application)
 		Level logLevel = Level.FINE;
@@ -485,6 +500,9 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 		// Load the remaining state for the function meta-data
 		this.functionMetaData.loadOfficeMetaData(officeMetaData, flowMetaDatas, nextFunction, escalationProcedure,
 				preAdministrations, postAdministrations, requiredManagedObjectIndexes);
+
+		// As here, successfully loaded office meta-data
+		return true;
 	}
 
 	@Override

@@ -67,8 +67,10 @@ public interface RawGovernanceMetaData<E, F extends Enum<F>> {
 	 *            {@link EscalationFlowFactory}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
+	 * @return <code>true</code> if successfully loaded the
+	 *         {@link OfficeMetaData}.
 	 */
-	void loadOfficeMetaData(OfficeMetaData officeMetaData, FlowMetaDataFactory flowMetaDataFactory,
+	boolean loadOfficeMetaData(OfficeMetaData officeMetaData, FlowMetaDataFactory flowMetaDataFactory,
 			EscalationFlowFactory escalationFlowFactory, OfficeFloorIssues issues);
 
 	/**
