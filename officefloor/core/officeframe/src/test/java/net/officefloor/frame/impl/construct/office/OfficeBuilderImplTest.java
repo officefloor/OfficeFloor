@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.impl.construct.office;
 
+import net.officefloor.frame.api.build.FlowBuilder;
 import net.officefloor.frame.api.build.FunctionBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
@@ -51,7 +52,7 @@ public class OfficeBuilderImplTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to get the {@link FunctionBuilder}.
 	 */
-	public void testGetFlowNodeBuilder() {
+	public void testGetFlowBuilder() {
 
 		// Name spaced function name
 		String namespacedFunction = OfficeBuilderImpl.getNamespacedName("namespace", "function");
@@ -61,8 +62,8 @@ public class OfficeBuilderImplTest extends OfficeFrameTestCase {
 				.addManagedFunction(namespacedFunction, this.functionFactory);
 
 		// Ensure can get function as flow node builder
-		FunctionBuilder<?> flowNodeBuilder = this.officeBuilder.getFlowBuilder("namespace", "function");
-		assertEquals("Incorrect flow node builder", functionBuilder, flowNodeBuilder);
+		FlowBuilder<?> flowBuilder = this.officeBuilder.getFlowBuilder("namespace", "function");
+		assertEquals("Incorrect flow node builder", functionBuilder, flowBuilder);
 	}
 
 }

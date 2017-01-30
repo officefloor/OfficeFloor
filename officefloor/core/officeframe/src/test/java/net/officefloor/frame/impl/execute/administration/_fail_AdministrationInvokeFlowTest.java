@@ -35,15 +35,11 @@ public class _fail_AdministrationInvokeFlowTest extends AbstractOfficeConstructT
 	 * Ensure invoked {@link Flow} is completed before the
 	 * {@link ManagedFunction} is invoked.
 	 */
-	public void testAdministrationInvokeFlow() throws Exception {
-
-		fail("TODO implement");
+	public void testAdministrationFlowEscalation_handledByFlowCallback() throws Exception {
 
 		// Build functions
 		TestWork work = new TestWork(new Exception("TEST"));
 		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
-		task.buildParameter();
-		task.buildFlow("flow", null, false);
 		this.constructFunction(work, "flow");
 
 		// Build administration
@@ -51,78 +47,7 @@ public class _fail_AdministrationInvokeFlowTest extends AbstractOfficeConstructT
 
 		// Test
 		this.invokeFunctionAndValidate("task", false, "preTask", "flow", "task");
-	}
-
-	/**
-	 * Ensure {@link Flow} for {@link Administration} is complete before
-	 * {@link ManagedFunction} is invoked.
-	 */
-	public void testPreAdministrationCompletesFlowBeforeFunction() throws Exception {
-
-		fail("TODO implement");
-
-		// Build functions
-		TestWork work = new TestWork(new Exception("TEST"));
-		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
-		task.buildParameter();
-		task.buildFlow("flow", null, false);
-		this.constructFunction(work, "flow").setNextFunction("complete");
-		this.constructFunction(work, "complete");
-
-		// Build administration
-		task.preAdminister("preTask").buildFlow("flow", null, false);
-
-		// Test
-		this.invokeFunctionAndValidate("task", false, "preTask", "flow", "complete", "task");
-	}
-
-	/**
-	 * Ensure {@link Flow} for {@link Administration} is complete before
-	 * {@link ManagedFunction} invoked {@link Flow} is undertaken.
-	 */
-	public void testPostAdministrationCompletesBeforeInvokedFlow() throws Exception {
-
-		fail("TODO implement");
-
-		// Build functions
-		TestWork work = new TestWork(new Exception("TEST"));
-		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
-		task.buildParameter();
-		task.buildFlow("next", null, false);
-		this.constructFunction(work, "flow").setNextFunction("complete");
-		this.constructFunction(work, "complete");
-		this.constructFunction(work, "next");
-
-		// Build administration
-		task.postAdminister("postTask").buildFlow("flow", null, false);
-
-		// Test
-		this.invokeFunctionAndValidate("task", true, "task", "postTask", "flow", "complete", "next");
-	}
-
-	/**
-	 * Ensure {@link Flow} for {@link Administration} is complete before next
-	 * {@link ManagedFunction} is invoked.
-	 */
-	public void testPostAdministrationCompletesBeforeNextFunction() throws Exception {
-
-		fail("TODO implement");
-
-		// Build functions
-		TestWork work = new TestWork(new Exception("TEST"));
-		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
-		task.buildParameter();
-		task.buildFlow("next", null, false);
-		task.setNextFunction("next");
-		this.constructFunction(work, "flow").setNextFunction("complete");
-		this.constructFunction(work, "complete");
-		this.constructFunction(work, "next");
-
-		// Build administration
-		task.postAdminister("postTask").buildFlow("flow", null, false);
-
-		// Test
-		this.invokeFunctionAndValidate("task", false, "task", "postTask", "flow", "complete", "next");
+		assertSame("Incorrect handled exception", work.exception, work.handledException);
 	}
 
 	/**
@@ -132,32 +57,21 @@ public class _fail_AdministrationInvokeFlowTest extends AbstractOfficeConstructT
 
 		private final Exception exception;
 
+		private Throwable handledException = null;
+
 		public TestWork(Exception exception) {
 			this.exception = exception;
 		}
 
 		public void preTask(Object[] extensions, ReflectiveFlow flow) {
-			flow.doFlow(null, null);
+			flow.doFlow(null, (escalation) -> this.handledException = escalation);
 		}
 
-		public void task(Boolean isInvokeFlow, ReflectiveFlow flow) {
-			if (isInvokeFlow) {
-				flow.doFlow(null, null);
-			}
-		}
-
-		public void postTask(Object[] extensions, ReflectiveFlow flow) {
-			flow.doFlow(null, null);
+		public void task() {
 		}
 
 		public void flow() throws Exception {
 			throw this.exception;
-		}
-
-		public void complete() {
-		}
-
-		public void next() {
 		}
 	}
 

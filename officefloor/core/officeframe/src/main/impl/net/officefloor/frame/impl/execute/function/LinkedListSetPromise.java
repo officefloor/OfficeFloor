@@ -205,6 +205,18 @@ public class LinkedListSetPromise<I, E> extends AbstractDelegateFunctionState {
 			// Continue on for next item in the list
 			E nextHeadEntry = this.getEntry.apply(nextHead);
 			FunctionState nextHeadFunction = this.translate.translate(nextHeadEntry);
+
+			// Ensure have function
+			while (nextHeadFunction == null) {
+				nextHead = this.getNext.apply(nextHead);
+				if (nextHead == null) {
+					return null; // no further items
+				}
+				nextHeadEntry = this.getEntry.apply(nextHead);
+				nextHeadFunction = this.translate.translate(nextHeadEntry);
+			}
+
+			// Return promise for the function
 			return new LinkedListSetPromise<>(nextPreviousFunction, nextHead, nextHeadFunction, this.getEntry,
 					this.getNext, this.translate);
 		}

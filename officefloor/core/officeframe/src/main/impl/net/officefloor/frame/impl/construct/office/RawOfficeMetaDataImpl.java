@@ -554,13 +554,17 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 
 		// Link functions within the meta-data of the office
 		for (RawManagedFunctionMetaData<?, ?> rawFunctionMetaData : rawFunctionMetaDatas) {
-			rawFunctionMetaData.loadOfficeMetaData(officeMetaData, flowMetaDataFactory, escalationFlowFactory,
-					administrationMetaDataFactory, officeTeams, issues);
+			if (!rawFunctionMetaData.loadOfficeMetaData(officeMetaData, flowMetaDataFactory, escalationFlowFactory,
+					administrationMetaDataFactory, officeTeams, issues)) {
+				return null;
+			}
 		}
 
 		// Link governance within meta-data of the office
 		for (RawGovernanceMetaData<?, ?> rawGovernance : rawGovernanceMetaDataList) {
-			rawGovernance.loadOfficeMetaData(officeMetaData, flowMetaDataFactory, escalationFlowFactory, issues);
+			if (!rawGovernance.loadOfficeMetaData(officeMetaData, flowMetaDataFactory, escalationFlowFactory, issues)) {
+				return null;
+			}
 		}
 
 		// Return the raw office meta-data

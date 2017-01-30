@@ -18,8 +18,11 @@
 package net.officefloor.frame.impl.execute.administration;
 
 import net.officefloor.frame.api.administration.Administration;
-import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 
 /**
@@ -30,36 +33,32 @@ import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 public class _fail_AdministrationTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Ensure undertakes {@link Administration} before the
-	 * {@link ManagedFunction}.
+	 * Ensure {@link Administration} {@link Escalation} handled by
+	 * {@link EscalationProcedure}.
 	 */
-	public void testPreAdministrationFailure_handledByFunctionEscalationHandler() throws Exception {
-
-		fail("TODO implement");
+	public void testPreAdministrationFailure_handledByEscalationProcedure() throws Exception {
 
 		// Construct the functions
 		TestWork work = new TestWork(new Exception("TEST"));
 		this.constructFunction(work, "trigger").setNextFunction("task");
 		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
 		task.setNextFunction("complete");
-		this.constructFunction(work, "handle");
 		this.constructFunction(work, "complete");
+		this.constructFunction(work, "handle").buildParameter();
 
 		// Construct the administration
 		task.preAdminister("preTask").getBuilder().addEscalation(Exception.class, "handle");
 
 		// Ensure undertakes administration before
-		this.invokeFunctionAndValidate("trigger", null, "trigger", "preTask", "handle");
+		this.invokeFunctionAndValidate("trigger", null, "trigger", "preTask", "handle", "task", "complete");
 		assertSame("Incorrect handle exception", work.exception, work.handledException);
 	}
 
 	/**
-	 * Ensure undertakes {@link Administration} after the
-	 * {@link ManagedFunction}.
+	 * Ensure {@link Administration} {@link Escalation} handled by
+	 * {@link FlowCallback}.
 	 */
-	public void testPostAdministration() throws Exception {
-
-		fail("TODO implement");
+	public void testPreAdministrationFailure_handledByFlowCallback() throws Exception {
 
 		// Construct the functions
 		TestWork work = new TestWork(new Exception("TEST"));
@@ -67,12 +66,68 @@ public class _fail_AdministrationTest extends AbstractOfficeConstructTestCase {
 		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
 		task.setNextFunction("complete");
 		this.constructFunction(work, "complete");
+		this.constructFunction(work, "handle").buildParameter();
+
+		// Construct the administration
+		task.preAdminister("preTask");
+
+		// Ensure handle escalation
+		Closure<Throwable> failure = new Closure<>();
+		this.setRecordReflectiveFunctionMethodsInvoked(true);
+		this.triggerFunction("trigger", null, (escalation) -> failure.value = escalation);
+
+		// Incorrect escalation
+		this.validateReflectiveMethodOrder("trigger", "preTask");
+		assertSame("Incorrect escalation", work.exception, failure.value);
+	}
+
+	/**
+	 * Ensure {@link Administration} {@link Escalation} handled by
+	 * {@link EscalationProcedure}.
+	 */
+	public void testPostAdministrationFailure_handledByEscalationProcedure() throws Exception {
+
+		// Construct the functions
+		TestWork work = new TestWork(new Exception("TEST"));
+		this.constructFunction(work, "trigger").setNextFunction("task");
+		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
+		task.setNextFunction("complete");
+		this.constructFunction(work, "complete");
+		this.constructFunction(work, "handle").buildParameter();
+
+		// Construct the administration
+		task.postAdminister("postTask").getBuilder().addEscalation(Exception.class, "handle");
+
+		// Ensure undertakes administration before
+		this.invokeFunctionAndValidate("trigger", null, "trigger", "task", "postTask", "handle", "complete");
+		assertSame("Incorrect handle exception", work.exception, work.handledException);
+	}
+
+	/**
+	 * Ensure {@link Administration} {@link Escalation} handled by
+	 * {@link FlowCallback}.
+	 */
+	public void testPostAdministrationFailure_handledByFlowCallback() throws Exception {
+
+		// Construct the functions
+		TestWork work = new TestWork(new Exception("TEST"));
+		this.constructFunction(work, "trigger").setNextFunction("task");
+		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
+		task.setNextFunction("complete");
+		this.constructFunction(work, "complete");
+		this.constructFunction(work, "handle").buildParameter();
 
 		// Construct the administration
 		task.postAdminister("postTask");
 
-		// Ensure undertakes administration before
-		this.invokeFunctionAndValidate("trigger", null, "trigger", "task", "postTask", "complete");
+		// Ensure handle escalation
+		Closure<Throwable> failure = new Closure<>();
+		this.setRecordReflectiveFunctionMethodsInvoked(true);
+		this.triggerFunction("trigger", null, (escalation) -> failure.value = escalation);
+
+		// Incorrect escalation
+		this.validateReflectiveMethodOrder("trigger", "task", "postTask");
+		assertSame("Incorrect escalation", work.exception, failure.value);
 	}
 
 	/**

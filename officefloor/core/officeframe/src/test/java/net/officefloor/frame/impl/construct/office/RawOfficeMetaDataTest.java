@@ -27,6 +27,7 @@ import org.easymock.ArgumentsMatcher;
 import org.easymock.internal.AlwaysMatcher;
 
 import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.build.FlowBuilder;
 import net.officefloor.frame.api.build.FunctionBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
@@ -43,11 +44,11 @@ import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.ProcessContextListener;
 import net.officefloor.frame.internal.configuration.BoundInputManagedObjectConfiguration;
+import net.officefloor.frame.internal.configuration.EscalationConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
-import net.officefloor.frame.internal.configuration.EscalationConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
@@ -388,13 +389,13 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testGetFlowNodeBuilderForOfficeEnhancing() {
 
-		final FunctionBuilder<?> flowNodeBuilder = this.createMock(FunctionBuilder.class);
+		final FlowBuilder<?> flowBuilder = this.createMock(FlowBuilder.class);
 
 		// Office enhancer
 		OfficeEnhancer enhancer = new OfficeEnhancer() {
 			@Override
 			public void enhanceOffice(OfficeEnhancerContext context) {
-				assertEquals("Incorrect flow node builder", flowNodeBuilder,
+				assertEquals("Incorrect flow node builder", flowBuilder,
 						context.getFlowBuilder("MANAGED_OBJECT", "TASK"));
 			}
 		};
@@ -404,8 +405,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration, this.configuration.getMonitorOfficeInterval(), 1000);
 		this.recordReturn(this.configuration, this.configuration.getOfficeEnhancers(),
 				new OfficeEnhancer[] { enhancer });
-		this.recordReturn(this.configuration, this.configuration.getFlowBuilder("MANAGED_OBJECT", "TASK"),
-				flowNodeBuilder);
+		this.recordReturn(this.configuration, this.configuration.getFlowBuilder("MANAGED_OBJECT", "TASK"), flowBuilder);
 		this.record_teams();
 		this.record_defaultOfficeClock();
 		this.record_governance();
@@ -1484,9 +1484,10 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			assertNotNull("Missing raw Governance meta-data", rawGovernanceMetaData);
 
 			// Link the Office meta-data
-			rawGovernanceMetaData.loadOfficeMetaData(null, null, null, this.issues);
-			this.control(rawGovernanceMetaData).setMatcher(new TypeMatcher(OfficeMetaData.class,
-					FlowMetaDataFactory.class, EscalationFlowFactory.class, OfficeFloorIssues.class));
+			this.recordReturn(rawGovernanceMetaData,
+					rawGovernanceMetaData.loadOfficeMetaData(null, null, null, this.issues), true,
+					new TypeMatcher(OfficeMetaData.class, FlowMetaDataFactory.class, EscalationFlowFactory.class,
+							OfficeFloorIssues.class));
 		}
 	}
 
@@ -1815,11 +1816,10 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 */
 	private void record_linkFunctions(RawManagedFunctionMetaData<?, ?>... rawFunctionMetaDatas) {
 		for (int i = 0; i < rawFunctionMetaDatas.length; i++) {
-			rawFunctionMetaDatas[i].loadOfficeMetaData(null, null, null, null, this.officeTeams, this.issues);
-			this.control(rawFunctionMetaDatas[i])
-					.setMatcher(new TypeMatcher(OfficeMetaData.class, FlowMetaDataFactory.class,
-							EscalationFlowFactory.class, RawAdministrationMetaDataFactory.class, Map.class,
-							OfficeFloorIssues.class));
+			this.recordReturn(rawFunctionMetaDatas[i],
+					rawFunctionMetaDatas[i].loadOfficeMetaData(null, null, null, null, this.officeTeams, this.issues),
+					true, new TypeMatcher(OfficeMetaData.class, FlowMetaDataFactory.class, EscalationFlowFactory.class,
+							RawAdministrationMetaDataFactory.class, Map.class, OfficeFloorIssues.class));
 		}
 	}
 
