@@ -51,7 +51,7 @@ public class FunctionLoopImpl implements FunctionLoop {
 	 * Instantiates.
 	 * 
 	 * @param defaultTeam
-	 *            Default {@link TeamManagement}.
+	 *            Default {@link TeamManagement}. May be <code>null</code>.
 	 */
 	public FunctionLoopImpl(TeamManagement defaultTeam) {
 		this.defaultTeam = (defaultTeam != null) ? defaultTeam : new TeamManagementImpl(LOOP_TEAM, new PassiveTeam());

@@ -188,8 +188,14 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 		@Override
 		public FunctionState execute() {
 
-			// Check on the asset
-			AssetLatchImpl.this.asset.checkOnAsset(AssetLatchImpl.this);
+			try {
+				// Check on the asset
+				AssetLatchImpl.this.asset.checkOnAsset(AssetLatchImpl.this);
+
+			} catch (Throwable ex) {
+				// Fail the functions
+				return new FailOperation(ex, false);
+			}
 
 			// Nothing further, as release/fail functions continue independently
 			return null;
@@ -303,15 +309,22 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 				AssetLatchImpl.this.isPermanentlyActivate = true;
 			}
 
-			// Release the functions in their own threads
+			// Obtain the awaiting functions
 			AwaitingEntry entry = AssetLatchImpl.this.awaiting.purgeEntries();
-			while (entry != null) {
+			if (entry != null) {
 
-				// Release the function and continue its flow independently
-				AssetLatchImpl.this.assetManager.getFunctionLoop().delegateFunction(entry.function);
+				// Unregister from asset manager
+				AssetLatchImpl.this.assetManager.unregisterAssetLatch(AssetLatchImpl.this);
 
-				// Release the next waiting function
-				entry = entry.getNext();
+				// Release the functions in their own threads
+				do {
+					// Release the function and continue its flow independently
+					FunctionLoop functionLoop = AssetLatchImpl.this.assetManager.getFunctionLoop();
+					functionLoop.delegateFunction(entry.function);
+
+					// Release the next waiting function
+					entry = entry.getNext();
+				} while (entry != null);
 			}
 
 			// No further job nodes to fail
@@ -362,21 +375,27 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 				AssetLatchImpl.this.isPermanentlyActivate = true;
 			}
 
-			// Fail the functions in their own threads
+			// Obtain the awaiting functions
 			AwaitingEntry entry = AssetLatchImpl.this.awaiting.purgeEntries();
-			while (entry != null) {
+			if (entry != null) {
 
-				// Fail the function and continue its flow independently
-				AssetLatchImpl.this.assetManager.getFunctionLoop()
-						.delegateFunction(new AbstractDelegateFunctionState(entry.function) {
-							@Override
-							public FunctionState execute() throws Throwable {
-								throw FailOperation.this.failure;
-							}
-						});
+				// Unregister from asset manager
+				AssetLatchImpl.this.assetManager.unregisterAssetLatch(AssetLatchImpl.this);
 
-				// Fail the next waiting function
-				entry = entry.getNext();
+				// Fail the functions in their own threads
+				do {
+					// Fail the function and continue its flow independently
+					AssetLatchImpl.this.assetManager.getFunctionLoop()
+							.delegateFunction(new AbstractDelegateFunctionState(entry.function) {
+								@Override
+								public FunctionState execute() throws Throwable {
+									throw FailOperation.this.failure;
+								}
+							});
+
+					// Fail the next waiting function
+					entry = entry.getNext();
+				} while (entry != null);
 			}
 
 			// No further functions to fail
