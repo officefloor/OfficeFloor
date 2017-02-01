@@ -181,7 +181,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 		// Create and register the governance function
 		ManagedFunctionLogic governanceLogic = governanceMetaData.createGovernanceFunctionLogic(governanceActivity);
 		ManagedFunctionContainer governanceFunctionContainer = new ManagedFunctionContainerImpl<GovernanceMetaData<?, F>>(
-				null, governanceLogic, null, null, null, true, governanceMetaData, null, this, true);
+				null, governanceLogic, null, null, null, true, governanceMetaData, null, this, false);
 		this.activeFunctions.addEntry(governanceFunctionContainer);
 
 		// Return the governance function

@@ -150,6 +150,12 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 			// Spawned to different thread state, so no further override
 			return next;
 		}
+
+		@Override
+		public FunctionState handleEscalation(Throwable escalation) {
+			// Delegate handle escalation (ultimately by flow callback)
+			return this.delegate.getThreadState().handleEscalation(escalation);
+		}
 	}
 
 	/**
@@ -248,7 +254,7 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 		 */
 
 		@Override
-		public void run(Throwable escalation) throws Throwable {
+		public void run(Throwable escalation) {
 
 			// Add possible escalation
 			if (escalation != null) {

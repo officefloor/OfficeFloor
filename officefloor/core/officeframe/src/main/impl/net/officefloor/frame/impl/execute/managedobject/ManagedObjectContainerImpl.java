@@ -453,13 +453,14 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 
 				// Iterate over governance and govern by active governance
 				ThreadState managedFunctionThreadState = this.managedFunction.getThreadState();
+				FunctionState governanceFunctions = null;
 				NEXT_GOVERNANCE: for (int i = 0; i < governanceMetaDatas.length; i++) {
 					ManagedObjectGovernanceMetaData<?> governanceMetaData = governanceMetaDatas[i];
 
 					// Determine if already registered for governance
 					RegisteredGovernance registeredGovernance = container.registeredGovernances[i];
 					if (registeredGovernance != null) {
-						break NEXT_GOVERNANCE; // already registered
+						continue NEXT_GOVERNANCE; // already registered
 					}
 
 					// Obtain the governance container
@@ -473,11 +474,17 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 					// Register the governance for the managed object
 					registeredGovernance = governance.registerManagedObject(extensionInterface, container);
 					container.registeredGovernances[i] = registeredGovernance;
-					return registeredGovernance;
+					governanceFunctions = Promise.then(governanceFunctions, registeredGovernance);
 				}
 
-				// Now governed as always need to check governance
+				// Flag that will be governed after governance functions complete
 				container.containerState = ManagedObjectContainerState.GOVERNED;
+
+				// Undertake governance registrations
+				if (governanceFunctions != null) {
+					container.check = null; // must check
+					return Promise.then(governanceFunctions, this);
+				}
 
 			case GOVERNED:
 

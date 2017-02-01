@@ -139,20 +139,16 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>>
 			return null; // can not carry on
 		}
 
-		// Obtain the team name for the governance
+		// Obtain the team responsible for governance
+		TeamManagement responsibleTeam = null;
 		String teamName = configuration.getResponsibleTeamName();
-		if (ConstructUtil.isBlank(teamName)) {
-			issues.addIssue(AssetType.GOVERNANCE, governanceName, "Must specify " + Team.class.getSimpleName()
-					+ " responsible for " + Governance.class.getSimpleName() + " activities");
-			return null; // can not carry on
-		}
-
-		// Obtain the team
-		TeamManagement responsibleTeam = officeTeams.get(teamName);
-		if (responsibleTeam == null) {
-			issues.addIssue(AssetType.GOVERNANCE, governanceName,
-					"Can not find " + Team.class.getSimpleName() + " by name '" + teamName + "'");
-			return null; // can not carry on
+		if (!ConstructUtil.isBlank(teamName)) {
+			responsibleTeam = officeTeams.get(teamName);
+			if (responsibleTeam == null) {
+				issues.addIssue(AssetType.GOVERNANCE, governanceName,
+						"Can not find " + Team.class.getSimpleName() + " by name '" + teamName + "'");
+				return null; // can not carry on
+			}
 		}
 
 		// Create the Governance Meta-Data

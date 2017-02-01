@@ -63,6 +63,11 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 	private final Object object;
 
 	/**
+	 * Name of this {@link Governance}.
+	 */
+	private final String governanceName;
+
+	/**
 	 * {@link OfficeBuilder}.
 	 */
 	private final OfficeBuilder officeBuilder;
@@ -109,17 +114,37 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 	 *            Object should the method not be <code>static</code>. May be
 	 *            <code>null</code> if <code>static</code> {@link Method} of the
 	 *            {@link Class}.
+	 * @param governanceName
+	 *            Name of the {@link Governance}.
 	 * @param officeBuilder
 	 *            {@link OfficeBuilder}.
 	 * @param testCase
 	 *            {@link AbstractOfficeConstructTestCase}.
 	 */
-	public <C> ReflectiveGovernanceBuilder(Class<C> clazz, C object, OfficeBuilder officeBuilder,
+	public <C> ReflectiveGovernanceBuilder(Class<C> clazz, C object, String governanceName, OfficeBuilder officeBuilder,
 			AbstractOfficeConstructTestCase testCase) {
 		this.clazz = clazz;
 		this.object = object;
+		this.governanceName = governanceName;
 		this.testCase = testCase;
 		this.officeBuilder = officeBuilder;
+	}
+
+	/**
+	 * Obtains the {@link GovernanceBuilder}.
+	 * 
+	 * @return {@link GovernanceBuilder}.
+	 */
+	public GovernanceBuilder<Indexed> getBuilder() {
+
+		// Ensure the governance is registered
+		if (this.governanceBuilder == null) {
+			this.governanceBuilder = this.officeBuilder.addGovernance(this.governanceName, this.extensionInterface,
+					this);
+		}
+
+		// Return the governance builder
+		return this.governanceBuilder;
 	}
 
 	/**
@@ -191,11 +216,8 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 		activity.parameterFactories[0] = (isExtensionAnArray ? new ActivityExtensionParameterFactory()
 				: new RegisterExtensionParameterFactory());
 
-		// Ensure the governance is registered
-		if (this.governanceBuilder == null) {
-			this.governanceBuilder = this.officeBuilder.addGovernance(this.clazz.getSimpleName(),
-					this.extensionInterface, this);
-		}
+		// Ensure have governance
+		this.getBuilder();
 
 		// Return the activity
 		return activity;

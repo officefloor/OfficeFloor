@@ -24,7 +24,7 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
-import net.officefloor.frame.test.TestManagedObject;
+import net.officefloor.frame.test.TestObject;
 
 /**
  * Ensures the {@link ManagedObject} goes through appropriate life-cycle.
@@ -66,7 +66,7 @@ public class ManagedObjectPoolLifecycleTest extends AbstractOfficeConstructTestC
 	public void doManagedObjectPooledLifeCycleTest(ManagedObjectScope scope) throws Exception {
 
 		// Construct the managed object
-		TestManagedObject lifeCycle = new TestManagedObject("MO", this, true);
+		TestObject lifeCycle = new TestObject("MO", this, true);
 
 		// Construct the functionality
 		TestWork work = new TestWork();
@@ -90,9 +90,9 @@ public class ManagedObjectPoolLifecycleTest extends AbstractOfficeConstructTestC
 
 		public boolean isTaskInvoked = false;
 
-		public TestManagedObject lifeCycle = null;
+		public TestObject lifeCycle = null;
 
-		public void task(TestManagedObject lifeCycle) {
+		public void task(TestObject lifeCycle) {
 			this.isTaskInvoked = true;
 			this.lifeCycle = lifeCycle;
 		}

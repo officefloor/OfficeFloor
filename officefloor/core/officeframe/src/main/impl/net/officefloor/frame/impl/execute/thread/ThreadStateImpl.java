@@ -368,18 +368,23 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		// Remove flow from active flow listing
 		if (this.activeFlows.removeEntry(flow)) {
 
-			// Last flow, so thread state is now complete
-			FunctionState cleanUpFunctions = null;
-
 			// Enforce any active governance
+			FunctionState governanceFunctions = null;
 			for (int i = 0; i < this.governanceContainers.length; i++) {
 				GovernanceContainer<?> container = this.governanceContainers[i];
 				if ((container != null) && (container.isGovernanceActive())) {
-					cleanUpFunctions = Promise.then(cleanUpFunctions, container.enforceGovernance());
+					governanceFunctions = Promise.then(governanceFunctions, container.enforceGovernance());
 				}
 			}
+			if (governanceFunctions != null) {
+				// Creates new functions of flow (to complete thread again)
+				return governanceFunctions;
+			}
+
+			// Last functional flow, so thread state is now complete
 
 			// Unload managed objects (some may not have been used)
+			FunctionState cleanUpFunctions = null;
 			for (int i = 0; i < this.managedObjectContainers.length; i++) {
 				ManagedObjectContainer container = this.managedObjectContainers[i];
 				if (container != null) {

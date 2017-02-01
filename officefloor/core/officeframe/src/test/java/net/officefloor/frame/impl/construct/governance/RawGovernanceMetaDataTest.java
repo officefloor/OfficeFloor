@@ -156,7 +156,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no {@link Team} name.
+	 * Ensure can have no {@link Team} name (results in using any {@link Team}).
 	 */
 	public void testNoTeamName() {
 
@@ -165,18 +165,23 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration, this.configuration.getGovernanceFactory(), this.governanceFactory);
 		this.recordReturn(this.configuration, this.configuration.getExtensionInterface(), String.class);
 		this.recordReturn(this.configuration, this.configuration.getResponsibleTeamName(), null);
-		this.record_issue("Must specify Team responsible for Governance activities");
+		this.record_flows(0);
+		this.record_escalations(0);
 
 		// Attempt to construct governance
 		this.replayMockObjects();
-		this.constructRawGovernanceMetaData(false);
+		RawGovernanceMetaData<?, ?> rawMetaData = this.fullyConstructRawGovernanceMetaData(true);
+		GovernanceMetaData<?, ?> governanceMetaData = rawMetaData.getGovernanceMetaData();
 		this.verifyMockObjects();
+
+		// Ensure any team
+		assertNull("Should allow any team", governanceMetaData.getResponsibleTeam());
 	}
 
 	/**
 	 * Ensure issue if no corresponding {@link Team}.
 	 */
-	public void testNoTeam() {
+	public void testUnknownTeam() {
 
 		// No team
 		this.responsibleTeam = null;
@@ -216,6 +221,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Verify governance meta-data
 		assertEquals("Incorrect governance name", GOVERNANCE_NAME, governanceMetaData.getGovernanceName());
+		assertSame("Incorrect responsible team", this.responsibleTeam, governanceMetaData.getResponsibleTeam());
 	}
 
 	/**

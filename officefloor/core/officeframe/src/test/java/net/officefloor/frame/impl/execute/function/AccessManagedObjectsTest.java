@@ -24,6 +24,7 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.TestObject;
 
 /**
  * Ensure able to obtain access to the various {@link ManagedObject} instances.
@@ -65,8 +66,7 @@ public class AccessManagedObjectsTest extends AbstractOfficeConstructTestCase {
 	public void doBoundManagedObjectTest(ManagedObjectScope scope) throws Exception {
 
 		// Create the process bound managed object
-		TestObject object = new TestObject();
-		this.constructManagedObject(object, "MO");
+		TestObject object = new TestObject("MO", this);
 
 		// Construct function to access managed object
 		TestWork work = new TestWork();
@@ -90,12 +90,6 @@ public class AccessManagedObjectsTest extends AbstractOfficeConstructTestCase {
 		public void task(TestObject object) {
 			this.object = object;
 		}
-	}
-
-	/**
-	 * Test {@link ManagedObject}.
-	 */
-	public static class TestObject {
 	}
 
 }

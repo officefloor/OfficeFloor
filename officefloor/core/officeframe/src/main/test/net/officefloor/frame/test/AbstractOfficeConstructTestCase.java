@@ -37,6 +37,7 @@ import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -533,6 +534,23 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 */
 	public ManagedObjectBuilder<?> constructManagedObject(Object object, String managedObjectName) {
 		return this.constructManagedObject(object, managedObjectName, this.getOfficeName());
+	}
+
+	/**
+	 * Constructs the {@link Governance}.
+	 * 
+	 * @param object
+	 *            {@link Object} containing the {@link Method} instances used
+	 *            for {@link Governance}.
+	 * @param governanceName
+	 *            Name of the {@link Governance}.
+	 * @return {@link ReflectiveGovernanceBuilder}.
+	 */
+	public ReflectiveGovernanceBuilder constructGovernance(Object object, String governanceName) {
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		ReflectiveGovernanceBuilder builder = new ReflectiveGovernanceBuilder((Class) object.getClass(), object,
+				governanceName, this.officeBuilder, this);
+		return builder;
 	}
 
 	/**

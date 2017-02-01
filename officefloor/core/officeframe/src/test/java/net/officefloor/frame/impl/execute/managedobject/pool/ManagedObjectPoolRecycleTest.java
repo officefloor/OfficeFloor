@@ -20,8 +20,8 @@ package net.officefloor.frame.impl.execute.managedobject.pool;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 import net.officefloor.frame.test.TestManagedObject;
+import net.officefloor.frame.test.TestObject;
 
 /**
  * Ensure handle lost {@link ManagedObject}.
@@ -33,19 +33,18 @@ public class ManagedObjectPoolRecycleTest extends AbstractOfficeConstructTestCas
 	/**
 	 * {@link TestManagedObject}.
 	 */
-	private TestManagedObject object;
+	private TestObject object;
 
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
 		// Load the managed object
-		this.object = new TestManagedObject("MO", this, true);
+		this.object = new TestObject("MO", this, true);
 		this.object.isRecycleFunction = true;
 
 		// Construct the function
-		ReflectiveFunctionBuilder task = this.constructFunction(new TestWork(), "task");
-		task.buildObject("MO", ManagedObjectScope.THREAD);
+		this.constructFunction(new TestWork(), "task").buildObject("MO", ManagedObjectScope.THREAD);
 	}
 
 	/**
@@ -81,7 +80,7 @@ public class ManagedObjectPoolRecycleTest extends AbstractOfficeConstructTestCas
 	 * Test functionality.
 	 */
 	public static class TestWork {
-		public void task(TestManagedObject object) {
+		public void task(TestObject object) {
 		}
 	}
 
