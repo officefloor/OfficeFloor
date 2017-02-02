@@ -80,12 +80,12 @@ public class DisregardGovernanceOnFailureTest extends AbstractOfficeConstructTes
 		task.buildObject("MO", scope).mapGovernance("GOVERNANCE");
 		task.getBuilder().addGovernance("GOVERNANCE");
 		task.getBuilder().addEscalation(Exception.class, "handle");
-		this.constructFunction(work, "handle");
+		this.constructFunction(work, "handle").buildParameter();
 
 		// Provide governance
 		TestGovernance govern = new TestGovernance();
 		ReflectiveGovernanceBuilder governance = this.constructGovernance(govern, "GOVERNANCE");
-		governance.enforce("enforce");
+		governance.disregard("disregard");
 
 		// Invoke the function (ensuring disregard)
 		this.invokeFunctionAndValidate("task", null, "task", "disregard", "handle");
@@ -124,6 +124,7 @@ public class DisregardGovernanceOnFailureTest extends AbstractOfficeConstructTes
 
 		public void handle(Exception escalation) {
 			assertNull("Managed object should not be cleaned up", this.object.recycledManagedObject);
+			this.handledException = escalation;
 		}
 	}
 
