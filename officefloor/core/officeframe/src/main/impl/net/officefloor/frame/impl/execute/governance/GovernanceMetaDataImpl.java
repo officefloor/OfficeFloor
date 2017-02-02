@@ -150,8 +150,8 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 	}
 
 	@Override
-	public GovernanceContainer<I> createGovernanceContainer(ThreadState threadState) {
-		return new GovernanceContainerImpl<>(this, threadState);
+	public GovernanceContainer<I> createGovernanceContainer(ThreadState threadState, int governanceIndex) {
+		return new GovernanceContainerImpl<>(this, threadState, governanceIndex);
 	}
 
 	@Override

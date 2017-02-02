@@ -19,6 +19,7 @@ package net.officefloor.frame.internal.structure;
 
 import java.util.List;
 
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.team.Team;
 
@@ -98,6 +99,16 @@ public interface ManagedObjectContainer {
 	 * @return Object being managed by the {@link ManagedObject}.
 	 */
 	Object getObject();
+
+	/**
+	 * Unregisters the {@link ManagedObject} from {@link Governance}.
+	 * 
+	 * @param governanceIndex
+	 *            Index of the {@link Governance}.
+	 * @return {@link FunctionState} to unregister the {@link ManagedObject}
+	 *         from {@link Governance}.
+	 */
+	FunctionState unregisterGovernance(int governanceIndex);
 
 	/**
 	 * Creates a {@link FunctionState} to unload the {@link ManagedObject}.

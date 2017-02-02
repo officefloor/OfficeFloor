@@ -30,13 +30,4 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
  * @author Daniel Sagenschneider
  */
 public interface RegisteredGovernance extends FunctionState {
-
-	/**
-	 * Unregisters the {@link ManagedObject} from {@link Governance}.
-	 * 
-	 * @return {@link FunctionState} to unregister the {@link ManagedObject}
-	 *         from {@link Governance}.
-	 */
-	FunctionState unregisterManagedObject();
-
 }

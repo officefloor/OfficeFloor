@@ -413,6 +413,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 					if (container.metaData.isCoordinatingManagedObject()) {
 						ObjectRegistry<?> objectRegistry = container.metaData
 								.createObjectRegistry(this.managedFunction);
+						@SuppressWarnings("rawtypes")
 						CoordinatingManagedObject cmo = (CoordinatingManagedObject) container.managedObject;
 						cmo.loadObjects(objectRegistry);
 						isCheckReady = true;
@@ -465,10 +466,13 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 
 					// Obtain the governance container
 					int governanceIndex = governanceMetaData.getGovernanceIndex();
+					@SuppressWarnings("rawtypes")
 					GovernanceContainer governance = managedFunctionThreadState.getGovernanceContainer(governanceIndex);
 
 					// Obtain the extension interface
+					@SuppressWarnings("rawtypes")
 					ManagedObjectExtensionExtractor extractor = governanceMetaData.getExtensionInterfaceExtractor();
+					@SuppressWarnings("unchecked")
 					Object extensionInterface = extractor.extractExtension(container.managedObject, container.metaData);
 
 					// Register the governance for the managed object
@@ -477,7 +481,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 					governanceFunctions = Promise.then(governanceFunctions, registeredGovernance);
 				}
 
-				// Flag that will be governed after governance functions complete
+				// Flag that will be governed after governance functions
+				// complete
 				container.containerState = ManagedObjectContainerState.GOVERNED;
 
 				// Undertake governance registrations
@@ -740,6 +745,38 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	}
 
 	@Override
+	public FunctionState unregisterGovernance(final int governanceIndex) {
+		return new ManagedObjectOperation() {
+			@Override
+			public FunctionState execute() throws Throwable {
+
+				// Easy access to the container
+				ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
+
+				// Unregister the governance
+				container.registeredGovernances[governanceIndex] = null;
+
+				// Determine if waiting on unloading governance
+				if (container.containerState != ManagedObjectContainerState.UNLOAD_WAITING_GOVERNANCE) {
+					return null; // not waiting to unload
+				}
+
+				// Determine if all governance unloaded
+				for (int i = 0; i < container.registeredGovernances.length; i++) {
+					if (container.registeredGovernances[i] != null) {
+						// Governance still active
+						return null;
+					}
+				}
+
+				// No further governance, so unload the managed object
+				container.containerState = ManagedObjectContainerState.UNLOADING;
+				return new UnloadManagedObjectOperation();
+			}
+		};
+	}
+
+	@Override
 	public FunctionState unloadManagedObject() {
 		return new UnloadManagedObjectOperation();
 	}
@@ -764,25 +801,21 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 			case COORDINATING:
 			case OBJECT_AVAILABLE:
 
-				// Unregister from governance
-				FunctionState unregisterFunctions = null;
-				for (int i = 0; i < container.registeredGovernances.length; i++) {
-					RegisteredGovernance registeredGovernance = container.registeredGovernances[i];
-					if (registeredGovernance != null) {
-						unregisterFunctions = Promise.then(unregisterFunctions,
-								registeredGovernance.unregisterManagedObject());
-					}
-				}
-
 				// Flag that unloading governance
 				container.containerState = ManagedObjectContainerState.UNLOAD_WAITING_GOVERNANCE;
 
-				// Unregister from any governance
-				if (unregisterFunctions != null) {
-					return Promise.then(unregisterFunctions, this);
+			case UNLOAD_WAITING_GOVERNANCE:
+
+				// Ensure not registered with any governance
+				for (int i = 0; i < container.registeredGovernances.length; i++) {
+					RegisteredGovernance registeredGovernance = container.registeredGovernances[i];
+					if (registeredGovernance != null) {
+
+						// Wait on governance to unload
+						return null;
+					}
 				}
 
-			case UNLOAD_WAITING_GOVERNANCE:
 			case UNLOADING:
 
 				// Create the recycle function

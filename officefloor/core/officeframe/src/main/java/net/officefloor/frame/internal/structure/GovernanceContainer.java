@@ -58,7 +58,8 @@ public interface GovernanceContainer<E> {
 	RegisteredGovernance registerManagedObject(E managedObjectExtension, ManagedObjectContainer managedObjectContainer);
 
 	/**
-	 * Activates the {@link Governance}.
+	 * Activates the {@link Governance}. This will co-ordinate the
+	 * {@link Governance} over the {@link ManagedObject} instances.
 	 * 
 	 * @return {@link FunctionState} to activate the {@link Governance}.
 	 */
@@ -77,5 +78,13 @@ public interface GovernanceContainer<E> {
 	 * @return {@link FunctionState} to disregard the {@link Governance}.
 	 */
 	FunctionState disregardGovernance();
+
+	/**
+	 * Deactivates the {@link Governance}. This will release the
+	 * {@link ManagedObject} instances from {@link Governance}.
+	 * 
+	 * @return Deactivate the {@link Governance}.
+	 */
+	FunctionState deactivateGovernance();
 
 }

@@ -369,22 +369,30 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		if (this.activeFlows.removeEntry(flow)) {
 
 			// Enforce any active governance
-			FunctionState governanceFunctions = null;
+			boolean isEnforceGovernance = false;
+			FunctionState cleanUpFunctions = null;
 			for (int i = 0; i < this.governanceContainers.length; i++) {
 				GovernanceContainer<?> container = this.governanceContainers[i];
-				if ((container != null) && (container.isGovernanceActive())) {
-					governanceFunctions = Promise.then(governanceFunctions, container.enforceGovernance());
+				if (container != null) {
+
+					// Enforce the possible active governance
+					if (container.isGovernanceActive()) {
+						isEnforceGovernance = true;
+						cleanUpFunctions = Promise.then(cleanUpFunctions, container.enforceGovernance());
+					}
+
+					// Deactivate the governance
+					cleanUpFunctions = Promise.then(cleanUpFunctions, container.deactivateGovernance());
 				}
 			}
-			if (governanceFunctions != null) {
+			if (isEnforceGovernance) {
 				// Creates new functions of flow (to complete thread again)
-				return governanceFunctions;
+				return cleanUpFunctions;
 			}
 
 			// Last functional flow, so thread state is now complete
 
 			// Unload managed objects (some may not have been used)
-			FunctionState cleanUpFunctions = null;
 			for (int i = 0; i < this.managedObjectContainers.length; i++) {
 				ManagedObjectContainer container = this.managedObjectContainers[i];
 				if (container != null) {
@@ -426,7 +434,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		// Lazy load the Governance Container
 		GovernanceContainer<?> container = this.governanceContainers[index];
 		if (container == null) {
-			container = this.threadMetaData.getGovernanceMetaData()[index].createGovernanceContainer(this);
+			container = this.threadMetaData.getGovernanceMetaData()[index].createGovernanceContainer(this, index);
 			this.governanceContainers[index] = container;
 		}
 		return container;

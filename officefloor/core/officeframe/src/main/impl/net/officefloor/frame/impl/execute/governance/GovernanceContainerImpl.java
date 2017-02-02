@@ -20,6 +20,7 @@ package net.officefloor.frame.impl.execute.governance;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.governance.GovernanceContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.impl.execute.function.LinkedListSetPromise;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.internal.structure.Flow;
@@ -51,6 +52,11 @@ public class GovernanceContainerImpl<E, F extends Enum<F>> implements Governance
 	private final ThreadState threadState;
 
 	/**
+	 * Index of this {@link Governance} within the {@link ThreadState}.
+	 */
+	private final int governanceIndex;
+
+	/**
 	 * {@link RegisteredGovernance} instances.
 	 */
 	private final LinkedListSet<RegisteredGovernanceEntry, GovernanceContainer<E>> registeredGovernances = new StrictLinkedListSet<RegisteredGovernanceEntry, GovernanceContainer<E>>() {
@@ -72,10 +78,14 @@ public class GovernanceContainerImpl<E, F extends Enum<F>> implements Governance
 	 *            {@link GovernanceMetaData}.
 	 * @param threadState
 	 *            {@link ThreadState}.
+	 * @param governanceIndex
+	 *            Index of the {@link Governance} within the
+	 *            {@link ThreadState}.
 	 */
-	public GovernanceContainerImpl(GovernanceMetaData<E, F> metaData, ThreadState threadState) {
+	public GovernanceContainerImpl(GovernanceMetaData<E, F> metaData, ThreadState threadState, int governanceIndex) {
 		this.metaData = metaData;
 		this.threadState = threadState;
+		this.governanceIndex = governanceIndex;
 	}
 
 	/**
@@ -181,40 +191,6 @@ public class GovernanceContainerImpl<E, F extends Enum<F>> implements Governance
 			this.entry = entry;
 			this.managedObjectExtension = managedObjectExtension;
 			this.managedObjectContainer = managedObjectContainer;
-		}
-
-		/*
-		 * ==================== RegisteredGovernance ==========================
-		 */
-
-		@Override
-		public FunctionState unregisterManagedObject() {
-			return new GovernanceOperation() {
-				@Override
-				public FunctionState execute() {
-
-					// Easy access to container
-					GovernanceContainerImpl<E, F> container = GovernanceContainerImpl.this;
-
-					// Remove from registration
-					container.registeredGovernances.removeEntry(RegisteredGovernanceImpl.this.entry);
-
-					// Determine if have governance
-					if (container.governance != null) {
-						return container.doGovernanceActivity(new GovernanceActivity<F>() {
-							@Override
-							public FunctionState doActivity(GovernanceContext<F> context) throws Throwable {
-								// TODO what to handle here
-								throw new UnsupportedOperationException(
-										"TODO how to handle unregistering managed object from governance");
-							}
-						});
-					}
-
-					// No governance, so nothing to unregister
-					return null;
-				}
-			};
 		}
 
 		/*
@@ -324,6 +300,23 @@ public class GovernanceContainerImpl<E, F extends Enum<F>> implements Governance
 				return null;
 			}
 		});
+	}
+
+	@Override
+	public FunctionState deactivateGovernance() {
+		return new GovernanceOperation() {
+			@Override
+			public FunctionState execute() throws Throwable {
+
+				// Easy access to container
+				GovernanceContainerImpl<E, F> container = GovernanceContainerImpl.this;
+
+				// Unregistered the managed objects
+				return LinkedListSetPromise.purge(container.registeredGovernances,
+						(governance) -> governance.registeredGovernance.managedObjectContainer
+								.unregisterGovernance(container.governanceIndex));
+			}
+		};
 	}
 
 	/**

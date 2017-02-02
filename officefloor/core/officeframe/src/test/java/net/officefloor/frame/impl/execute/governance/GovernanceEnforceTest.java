@@ -22,6 +22,7 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 import net.officefloor.frame.test.ReflectiveGovernanceBuilder;
@@ -39,9 +40,9 @@ public class GovernanceEnforceTest extends AbstractOfficeConstructTestCase {
 	 * {@link ProcessState}.
 	 */
 	public void testEnforceGovernance_boundTo_ProcessState() throws Exception {
-		
-		fail("TODO find out why hanging");
-		
+
+		fail("TODO determine why recycling process managed object hangs");
+
 		this.doEnforceGovernanceTest(ManagedObjectScope.PROCESS);
 	}
 
@@ -63,7 +64,6 @@ public class GovernanceEnforceTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Ensure can enforce the {@link Governance}.
-	 * 
 	 */
 	public void doEnforceGovernanceTest(ManagedObjectScope scope) throws Exception {
 
@@ -90,6 +90,9 @@ public class GovernanceEnforceTest extends AbstractOfficeConstructTestCase {
 		// Ensure the managed object extension is enforced
 		assertEquals("Incorrect number of extensions", 1, govern.enforced.length);
 		assertSame("Incorrect extension", object, govern.enforced[0]);
+
+		// Ensure the managed object is also cleaned up
+		assertSame("Managed object should be cleaned up", object, object.recycledManagedObject);
 	}
 
 	/**
@@ -110,6 +113,9 @@ public class GovernanceEnforceTest extends AbstractOfficeConstructTestCase {
 		private TestObject[] enforced;
 
 		public void enforce(TestObject[] extensions) {
+			assertEquals("Incorrect number of extensions", 1, extensions.length);
+			assertNull("Should not clean up managed object until after enforcing governance",
+					extensions[0].recycledManagedObject);
 			this.enforced = extensions;
 		}
 	}
