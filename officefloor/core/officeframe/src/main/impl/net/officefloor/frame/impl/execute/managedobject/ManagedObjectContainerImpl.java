@@ -795,6 +795,11 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 			switch (container.containerState) {
 			case NOT_LOADED:
 			case LOADING:
+				// Not loaded, so no need to unload.
+				// Also stops infinite loop with recycle process creating
+				// further managed objects.
+				return null;
+
 			case LOADED:
 			case GOVERNING:
 			case GOVERNED:

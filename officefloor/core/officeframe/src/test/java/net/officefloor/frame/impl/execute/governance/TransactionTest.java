@@ -17,28 +17,21 @@
  */
 package net.officefloor.frame.impl.execute.governance;
 
-import java.sql.SQLException;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**
- * Mock transaction interface for testing.
- * 
+ * Typical use of {@link Governance} is for transactions.
+ *
  * @author Daniel Sagenschneider
  */
-public interface MockTransaction {
+public class TransactionTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Mock begin transaction.
+	 * Ensure can manage transaction.
 	 */
-	void begin() throws SQLException;
-
-	/**
-	 * Mock commit transaction.
-	 */
-	void commit() throws SQLException;
-
-	/**
-	 * Mock rollback transaction.
-	 */
-	void rollback() throws SQLException;
+	public void testTransaction() {
+		fail("TODO implement");
+	}
 
 }

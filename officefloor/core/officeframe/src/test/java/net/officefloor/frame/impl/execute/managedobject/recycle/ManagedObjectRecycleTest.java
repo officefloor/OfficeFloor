@@ -38,9 +38,6 @@ public class ManagedObjectRecycleTest extends AbstractOfficeConstructTestCase {
 	 * Ensure can recycle {@link ManagedObject} bound to {@link ProcessState}.
 	 */
 	public void testRecycleManaged_boundTo_ProcessState() throws Exception {
-
-		fail("TODO determine why hangs");
-
 		this.doRecycleTest(ManagedObjectScope.PROCESS);
 	}
 
