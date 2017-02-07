@@ -77,7 +77,7 @@ public class FunctionManagerImpl implements FunctionManager {
 	@Override
 	public void invokeProcess(Object parameter, FlowCallback callback) throws InvalidParameterTypeException {
 		// Invoke the process for the function
-		OfficeMetaDataImpl.invokeProcess(this.officeMetaData, this.flowMetaData, parameter, callback);
+		this.officeMetaData.invokeProcess(this.flowMetaData, parameter, 0, callback, null, null, null, -1);
 	}
 
 	/**

@@ -25,7 +25,6 @@ import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 
@@ -52,7 +51,7 @@ public class DynamicFlowStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressDynamicFlow_LeaderFollowerTeam() throws Exception {
-		this.doTest(new LeaderFollowerTeam("TEST", MockTeamSource.createTeamIdentifier(), 3, 100));
+		this.doTest(new LeaderFollowerTeam("TEST", 3, 100));
 	}
 
 	/**
@@ -61,7 +60,7 @@ public class DynamicFlowStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressDynamicFlow_ExecutorFixedTeam() throws Exception {
-		this.doTest(ExecutorFixedTeamSource.createTeam("TEST", MockTeamSource.createTeamIdentifier(), 3));
+		this.doTest(ExecutorFixedTeamSource.createTeam("TEST", 3));
 	}
 
 	/**

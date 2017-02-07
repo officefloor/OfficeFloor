@@ -15,29 +15,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.team.source;
+package net.officefloor.frame.impl.execute.team;
 
-import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.Job;
+import net.officefloor.frame.api.team.ThreadLocalAwareContext;
+import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 
 /**
- * Context for the {@link TeamSource}.
- * 
+ * {@link ThreadLocalAwareContext} implementation.
+ *
  * @author Daniel Sagenschneider
  */
-public interface TeamSourceContext extends SourceContext {
+public class ThreadLocalAwareContextImpl implements ThreadLocalAwareContext {
 
 	/**
-	 * <p>
-	 * Obtains the name of the {@link Team} to be created from the
-	 * {@link TeamSource}.
-	 * <p>
-	 * This enables naming the {@link Thread} instances for the {@link Team} to
-	 * be specific to the {@link Team}.
-	 * 
-	 * @return Name of the {@link Team} to be created from the
-	 *         {@link TeamSource}.
+	 * {@link ThreadLocalAwareExecutor}.
 	 */
-	String getTeamName();
+	private final ThreadLocalAwareExecutor executor;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param executor
+	 *            {@link ThreadLocalAwareExecutor}.
+	 */
+	public ThreadLocalAwareContextImpl(ThreadLocalAwareExecutor executor) {
+		this.executor = executor;
+	}
+
+	/*
+	 * ================= ThreadLocalAwareContext =======================
+	 */
+
+	@Override
+	public void execute(Job job) {
+		this.executor.execute(job);
+	}
 
 }

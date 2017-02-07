@@ -29,7 +29,6 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.profile.Profiler;
-import net.officefloor.frame.api.team.source.ProcessContextListener;
 import net.officefloor.frame.impl.construct.asset.AssetManagerFactoryImpl;
 import net.officefloor.frame.impl.construct.escalation.EscalationFlowFactoryImpl;
 import net.officefloor.frame.impl.construct.flow.FlowMetaDataFactoryImpl;
@@ -45,11 +44,11 @@ import net.officefloor.frame.impl.execute.office.OfficeStartupFunctionImpl;
 import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
 import net.officefloor.frame.internal.configuration.BoundInputManagedObjectConfiguration;
+import net.officefloor.frame.internal.configuration.EscalationConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
-import net.officefloor.frame.internal.configuration.EscalationConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
@@ -85,6 +84,7 @@ import net.officefloor.frame.internal.structure.OfficeStartupFunction;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
+import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 
@@ -236,6 +236,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 		OfficeEnhancerContextImpl.enhanceOffice(officeName, configuration, issues);
 
 		// Register the teams to office
+		boolean isRequireThreadLocalAwareness = false;
 		Map<String, TeamManagement> officeTeams = new HashMap<String, TeamManagement>();
 		for (LinkedTeamConfiguration teamConfig : configuration.getRegisteredTeams()) {
 
@@ -243,7 +244,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 			String officeTeamName = teamConfig.getOfficeTeamName();
 			if (ConstructUtil.isBlank(officeTeamName)) {
 				issues.addIssue(AssetType.OFFICE, officeName, "Team registered to Office without name");
-				continue; // can not register team
+				return null; // can not register team
 			}
 
 			// Ensure have OfficeFloor name for team
@@ -251,7 +252,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 			if (ConstructUtil.isBlank(officeFloorTeamName)) {
 				issues.addIssue(AssetType.OFFICE, officeName,
 						"No Office Floor Team name for Office Team '" + officeTeamName + "'");
-				continue; // can not register team
+				return null; // can not register team
 			}
 
 			// Obtain the team
@@ -259,7 +260,12 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 			if (rawTeamMetaData == null) {
 				issues.addIssue(AssetType.OFFICE, officeName,
 						"Unknown Team '" + officeFloorTeamName + "' not available to register to Office");
-				continue; // can not register team
+				return null; // can not register team
+			}
+
+			// Determine if requires thread local awareness
+			if (rawTeamMetaData.isRequireThreadLocalAwareness()) {
+				isRequireThreadLocalAwareness = true;
 			}
 
 			// Register the team
@@ -275,7 +281,14 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 			if (defaultTeam == null) {
 				issues.addIssue(AssetType.OFFICE, officeName,
 						"No default team " + officeDefaultTeamName + " linked to Office");
+				return null;
 			}
+		}
+
+		// Obtain the thread local aware executor (if required)
+		ThreadLocalAwareExecutor threadLocalAwareExecutor = null;
+		if (isRequireThreadLocalAwareness) {
+			threadLocalAwareExecutor = rawOfficeFloorMetaData.getThreadLocalAwareExecutor();
 		}
 
 		// Create the office details
@@ -481,9 +494,6 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 		ProcessMetaData processMetaData = new ProcessMetaDataImpl(
 				this.constructDefaultManagedObjectMetaData(processBoundManagedObjects), threadMetaData);
 
-		// Obtain the Process Context Listeners
-		ProcessContextListener[] processContextListeners = rawOfficeFloorMetaData.getProcessContextListeners();
-
 		// Obtain the profiler
 		Profiler profiler = configuration.getProfiler();
 
@@ -540,8 +550,8 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 
 		// Load the office meta-data
 		OfficeMetaData officeMetaData = new OfficeMetaDataImpl(officeName, officeManager, officeClock, timer,
-				functionLoop, functionMetaDatas.toArray(new ManagedFunctionMetaData[0]), functionLocator,
-				processMetaData, processContextListeners, startupFunctions, profiler);
+				functionLoop, threadLocalAwareExecutor, functionMetaDatas.toArray(new ManagedFunctionMetaData[0]),
+				functionLocator, processMetaData, startupFunctions, profiler);
 
 		// Create the factories
 		FlowMetaDataFactory flowMetaDataFactory = new FlowMetaDataFactoryImpl();

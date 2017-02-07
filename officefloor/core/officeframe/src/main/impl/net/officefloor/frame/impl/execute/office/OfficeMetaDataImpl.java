@@ -18,6 +18,7 @@
 package net.officefloor.frame.impl.execute.office;
 
 import java.util.Timer;
+import java.util.TimerTask;
 
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
@@ -25,7 +26,6 @@ import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.profile.Profiler;
-import net.officefloor.frame.api.team.source.ProcessContextListener;
 import net.officefloor.frame.impl.execute.process.ProcessStateImpl;
 import net.officefloor.frame.impl.execute.profile.ProcessProfilerImpl;
 import net.officefloor.frame.internal.structure.Flow;
@@ -42,6 +42,7 @@ import net.officefloor.frame.internal.structure.OfficeStartupFunction;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
@@ -50,48 +51,6 @@ import net.officefloor.frame.internal.structure.ThreadState;
  * @author Daniel Sagenschneider
  */
 public class OfficeMetaDataImpl implements OfficeMetaData {
-
-	/**
-	 * <p>
-	 * Convenience method to invoke a {@link Process}.
-	 * <p>
-	 * This is used by the {@link WorkManagerImpl} and
-	 * {@link FunctionManagerImpl} for invoking a {@link ProcessState}.
-	 * 
-	 * @param officeMetaData
-	 *            {@link OfficeMetaData}.
-	 * @param flowMetaData
-	 *            {@link FlowMetaData}.
-	 * @param parameter
-	 *            Parameter.
-	 * @param callback
-	 *            Optional {@link FlowCallback}. May be <code>null</code>.
-	 * @throws InvalidParameterTypeException
-	 *             Should the parameter type be incorrect the
-	 *             {@link ManagedFunction}.
-	 */
-	public static void invokeProcess(OfficeMetaData officeMetaData, FlowMetaData flowMetaData, Object parameter,
-			FlowCallback callback) throws InvalidParameterTypeException {
-
-		// Ensure correct parameter type
-		if (parameter != null) {
-			Class<?> taskParameterType = flowMetaData.getInitialFunctionMetaData().getParameterType();
-			if (taskParameterType != null) {
-				Class<?> inputParameterType = parameter.getClass();
-				if (!taskParameterType.isAssignableFrom(inputParameterType)) {
-					throw new InvalidParameterTypeException("Invalid parameter type (input="
-							+ inputParameterType.getName() + ", required=" + taskParameterType.getName() + ")");
-				}
-			}
-		}
-
-		// Create the function within a new process
-		ManagedFunctionContainer function = officeMetaData.createProcess(flowMetaData, parameter, callback, null);
-
-		// Execute the function (will delegate as required)
-		FunctionLoop functionLoop = officeMetaData.getFunctionLoop();
-		functionLoop.executeFunction(function);
-	}
 
 	/**
 	 * Name of the {@link Office}.
@@ -136,14 +95,14 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	private final ProcessMetaData processMetaData;
 
 	/**
-	 * {@link ProcessContextListener} instances.
-	 */
-	private final ProcessContextListener[] processContextListeners;
-
-	/**
 	 * {@link OfficeStartupFunction} instances.
 	 */
 	private final OfficeStartupFunction[] startupFunctions;
+
+	/**
+	 * {@link ThreadLocalAwareExecutor}.s
+	 */
+	private final ThreadLocalAwareExecutor threadLocalAwareExecutor;
 
 	/**
 	 * {@link Profiler}.
@@ -159,8 +118,12 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 *            {@link OfficeManager}.
 	 * @param officeClock
 	 *            {@link OfficeClock}.
+	 * @param timer
+	 *            {@link Timer} for the {@link Office}.
 	 * @param functionLoop
 	 *            {@link FunctionLoop}.
+	 * @param threadLocalAwareExecutor
+	 *            {@link ThreadLocalAwareExecutor}.
 	 * @param functionMetaDatas
 	 *            {@link ManagedFunctionMetaData} of the {@link ManagedFunction}
 	 *            that can be executed within the {@link Office}.
@@ -169,27 +132,24 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 * @param processMetaData
 	 *            {@link ProcessMetaData} of the {@link ProcessState} instances
 	 *            created within this {@link Office}.
-	 * @param processContextListeners
-	 *            {@link ProcessContextListener} instances.
 	 * @param startupFunctions
 	 *            {@link OfficeStartupFunction} instances.
 	 * @param profiler
 	 *            {@link Profiler}.
 	 */
 	public OfficeMetaDataImpl(String officeName, OfficeManager officeManager, OfficeClock officeClock, Timer timer,
-			FunctionLoop functionLoop, ManagedFunctionMetaData<?, ?>[] functionMetaDatas,
-			ManagedFunctionLocator functionLocator, ProcessMetaData processMetaData,
-			ProcessContextListener[] processContextListeners, OfficeStartupFunction[] startupFunctions,
-			Profiler profiler) {
+			FunctionLoop functionLoop, ThreadLocalAwareExecutor threadLocalAwareExecutor,
+			ManagedFunctionMetaData<?, ?>[] functionMetaDatas, ManagedFunctionLocator functionLocator,
+			ProcessMetaData processMetaData, OfficeStartupFunction[] startupFunctions, Profiler profiler) {
 		this.officeName = officeName;
 		this.officeClock = officeClock;
 		this.timer = timer;
 		this.functionLoop = functionLoop;
+		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
 		this.officeManager = officeManager;
 		this.functionMetaDatas = functionMetaDatas;
 		this.functionLocator = functionLocator;
 		this.processMetaData = processMetaData;
-		this.processContextListeners = processContextListeners;
 		this.startupFunctions = startupFunctions;
 		this.profiler = profiler;
 	}
@@ -211,11 +171,6 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	@Override
 	public OfficeClock getOfficeClock() {
 		return this.officeClock;
-	}
-
-	@Override
-	public Timer getOfficeTimer() {
-		return this.timer;
 	}
 
 	@Override
@@ -250,7 +205,92 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	}
 
 	@Override
-	public ManagedFunctionContainer createProcess(FlowMetaData flowMetaData, Object parameter, FlowCallback callback,
+	public void invokeProcess(FlowMetaData flowMetaData, Object parameter, long delay, FlowCallback callback,
+			ThreadState callbackThreadState, ManagedObject inputManagedObject,
+			ManagedObjectMetaData<?> inputManagedObjectMetaData, int processBoundIndexForInputManagedObject)
+			throws InvalidParameterTypeException {
+
+		// Obtain the initial function meta-data
+		ManagedFunctionMetaData<?, ?> initialFunctionMetaData = flowMetaData.getInitialFunctionMetaData();
+
+		// Ensure correct parameter type
+		if (parameter != null) {
+			Class<?> functionParameterType = initialFunctionMetaData.getParameterType();
+			if (functionParameterType != null) {
+				Class<?> inputParameterType = parameter.getClass();
+				if (!functionParameterType.isAssignableFrom(inputParameterType)) {
+					throw new InvalidParameterTypeException("Invalid parameter type (input="
+							+ inputParameterType.getName() + ", required=" + functionParameterType.getName() + ")");
+				}
+			}
+		}
+
+		// Create the process
+		final ManagedFunctionContainer function = this.createProcess(flowMetaData, parameter, callback,
+				callbackThreadState, inputManagedObject, inputManagedObjectMetaData,
+				processBoundIndexForInputManagedObject);
+
+		// Trigger the process
+		if (delay > 0) {
+
+			// Delay execution of the process
+			this.timer.schedule(new TimerTask() {
+				@Override
+				public void run() {
+
+					// Easy access to office meta-data
+					OfficeMetaDataImpl officeMetaData = OfficeMetaDataImpl.this;
+
+					// Must execute on another thread (not hold up timer thread)
+					new Thread(() -> {
+
+						// Execute the process
+						if (officeMetaData.threadLocalAwareExecutor != null) {
+							officeMetaData.threadLocalAwareExecutor.runInContext(function, officeMetaData.functionLoop);
+						} else {
+							officeMetaData.functionLoop.executeFunction(function);
+						}
+
+					}).run();
+				}
+			}, delay);
+
+		} else {
+			// Execute the process immediately on current thread
+			if (this.threadLocalAwareExecutor != null) {
+				this.threadLocalAwareExecutor.runInContext(function, this.functionLoop);
+			} else {
+				this.functionLoop.executeFunction(function);
+			}
+		}
+	}
+
+	/**
+	 * Creates a new {@link ProcessState}.
+	 * 
+	 * @param flowMetaData
+	 *            {@link FlowMetaData} for the initial {@link ManagedFunction}.
+	 * @param parameter
+	 *            Parameter for the initial {@link ManagedFunction}.
+	 * @param callback
+	 *            Optional {@link FlowCallback} to invoke on completion of the
+	 *            {@link ProcessState}. May be <code>null</code>.
+	 * @param callbackThreadState
+	 *            Optional {@link ThreadState} to invoked the
+	 *            {@link FlowCallback} within. May be <code>null</code>.
+	 * @param inputManagedObject
+	 *            Input {@link ManagedObject}. May be <code>null</code> if no
+	 *            input {@link ManagedObject}.
+	 * @param inputManagedObjectMetaData
+	 *            {@link ManagedObjectMetaData} to the input
+	 *            {@link ManagedObject}.
+	 * @param processBoundIndexForInputManagedObject
+	 *            Index of the input {@link ManagedObject} within the
+	 *            {@link ProcessState}.
+	 * @return Initial {@link ManagedFunctionContainer} to be executed for the
+	 *         {@link ProcessState}.
+	 */
+	private ManagedFunctionContainer createProcess(FlowMetaData flowMetaData, Object parameter, FlowCallback callback,
 			ThreadState callbackThreadState, ManagedObject inputManagedObject,
 			ManagedObjectMetaData<?> inputManagedObjectMetaData, int processBoundIndexForInputManagedObject) {
 
@@ -262,12 +302,12 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 		ProcessState processState;
 		if (inputManagedObject == null) {
 			// Create Process without an Input Managed Object
-			processState = new ProcessStateImpl(this.processMetaData, this.processContextListeners, this, callback,
-					callbackThreadState, processProfiler);
+			processState = new ProcessStateImpl(this.processMetaData, this, callback, callbackThreadState,
+					this.threadLocalAwareExecutor, processProfiler);
 		} else {
 			// Create Process with the Input Managed Object
-			processState = new ProcessStateImpl(this.processMetaData, this.processContextListeners, this, callback,
-					callbackThreadState, processProfiler, inputManagedObject, inputManagedObjectMetaData,
+			processState = new ProcessStateImpl(this.processMetaData, this, callback, callbackThreadState,
+					this.threadLocalAwareExecutor, processProfiler, inputManagedObject, inputManagedObjectMetaData,
 					processBoundIndexForInputManagedObject);
 		}
 
@@ -280,12 +320,6 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 
 		// Create the initial function of the process
 		ManagedFunctionContainer function = flow.createManagedFunction(parameter, functionMetaData, true, null);
-
-		// Notify of created process context
-		Object processIdentifier = processState.getProcessIdentifier();
-		for (int i = 0; i < this.processContextListeners.length; i++) {
-			this.processContextListeners[i].processCreated(processIdentifier);
-		}
 
 		// Return the function
 		return function;

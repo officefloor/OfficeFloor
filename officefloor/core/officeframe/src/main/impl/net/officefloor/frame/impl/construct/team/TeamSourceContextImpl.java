@@ -23,8 +23,7 @@ import java.util.List;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.api.team.TeamIdentifier;
-import net.officefloor.frame.api.team.source.ProcessContextListener;
+import net.officefloor.frame.api.team.ThreadLocalAwareTeam;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
@@ -34,8 +33,7 @@ import net.officefloor.frame.impl.construct.source.SourceContextImpl;
  * 
  * @author Daniel Sagenschneider
  */
-public class TeamSourceContextImpl extends SourceContextImpl implements
-		TeamSourceContext {
+public class TeamSourceContextImpl extends SourceContextImpl implements TeamSourceContext {
 
 	/**
 	 * Name of the {@link Team} to be created from the {@link TeamSource}.
@@ -43,19 +41,13 @@ public class TeamSourceContextImpl extends SourceContextImpl implements
 	private final String teamName;
 
 	/**
-	 * {@link TeamIdentifier} of the {@link Team} to be created from the
-	 * {@link TeamSource}.
-	 */
-	private final TeamIdentifier teamIdentifier;
-
-	/**
 	 * <p>
-	 * Registered {@link ProcessContextListener} instances.
+	 * Registered {@link ThreadLocalAwareTeam} instances.
 	 * <p>
 	 * <code>volatile</code> to ensure threading of {@link Team} sees the lock
 	 * (null list).
 	 */
-	private volatile List<ProcessContextListener> processContextListeners = new LinkedList<ProcessContextListener>();
+	private volatile List<ThreadLocalAwareTeam> processContextListeners = new LinkedList<ThreadLocalAwareTeam>();
 
 	/**
 	 * Initialise.
@@ -65,35 +57,28 @@ public class TeamSourceContextImpl extends SourceContextImpl implements
 	 * @param teamName
 	 *            Name of the {@link Team} to be created from the
 	 *            {@link TeamSource}.
-	 * @param teamIdentifier
-	 *            {@link TeamIdentifier} of the {@link Team} to be created from
-	 *            the {@link TeamSource}.
 	 * @param properties
 	 *            {@link SourceProperties} to initialise the {@link TeamSource}.
 	 * @param sourceContext
 	 *            {@link SourceContext}.
 	 */
-	public TeamSourceContextImpl(boolean isLoadingType, String teamName,
-			TeamIdentifier teamIdentifier, SourceProperties properties,
+	public TeamSourceContextImpl(boolean isLoadingType, String teamName, SourceProperties properties,
 			SourceContext sourceContext) {
 		super(isLoadingType, sourceContext, properties);
 		this.teamName = teamName;
-		this.teamIdentifier = teamIdentifier;
 	}
 
 	/**
-	 * Locks from adding further {@link ProcessContextListener} instances and
-	 * returns the listing of the registered {@link ProcessContextListener}
+	 * Locks from adding further {@link ThreadLocalAwareTeam} instances and
+	 * returns the listing of the registered {@link ThreadLocalAwareTeam}
 	 * instances.
 	 * 
-	 * @return Listing of the registered {@link ProcessContextListener}
-	 *         instances.
+	 * @return Listing of the registered {@link ThreadLocalAwareTeam} instances.
 	 */
-	public ProcessContextListener[] lockAndGetProcessContextListeners() {
+	public ThreadLocalAwareTeam[] lockAndGetProcessContextListeners() {
 
 		// Obtain the registered Process Context Listeners
-		ProcessContextListener[] registeredListeners = this.processContextListeners
-				.toArray(new ProcessContextListener[0]);
+		ThreadLocalAwareTeam[] registeredListeners = this.processContextListeners.toArray(new ThreadLocalAwareTeam[0]);
 
 		// Lock by releasing list
 		this.processContextListeners = null;
@@ -109,26 +94,6 @@ public class TeamSourceContextImpl extends SourceContextImpl implements
 	@Override
 	public String getTeamName() {
 		return this.teamName;
-	}
-
-	@Override
-	public TeamIdentifier getTeamIdentifier() {
-		return this.teamIdentifier;
-	}
-
-	@Override
-	public void registerProcessContextListener(
-			ProcessContextListener processContextListener) {
-
-		// Ensure not locked
-		if (this.processContextListeners == null) {
-			throw new IllegalStateException("May only register "
-					+ ProcessContextListener.class.getSimpleName()
-					+ " instances during init (team " + this.teamName + ")");
-		}
-
-		// Register the listener
-		this.processContextListeners.add(processContextListener);
 	}
 
 }

@@ -20,6 +20,7 @@ package net.officefloor.frame.internal.construct;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.impl.construct.officefloor.RawOfficeFloorMetaDataImpl;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
+import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 
 /**
  * Factory for creating {@link RawOfficeFloorMetaData}.
@@ -38,6 +39,8 @@ public interface RawOfficeFloorMetaDataFactory {
 	 *            {@link OfficeFloorIssues}.
 	 * @param rawTeamFactory
 	 *            {@link RawTeamMetaDataFactory}.
+	 * @param threadLocalAwareExecutor
+	 *            {@link ThreadLocalAwareExecutor}.
 	 * @param rawMosFactory
 	 *            {@link RawManagedObjectMetaDataFactory}.
 	 * @param rawBoundMoFactory
@@ -54,8 +57,8 @@ public interface RawOfficeFloorMetaDataFactory {
 	 */
 	RawOfficeFloorMetaData constructRawOfficeFloorMetaData(OfficeFloorConfiguration configuration,
 			OfficeFloorIssues issues, RawTeamMetaDataFactory rawTeamFactory,
-			RawManagedObjectMetaDataFactory rawMosFactory, RawBoundManagedObjectMetaDataFactory rawBoundMoFactory,
-			RawGovernanceMetaDataFactory rawGovernanceFactory,
+			ThreadLocalAwareExecutor threadLocalAwareExecutor, RawManagedObjectMetaDataFactory rawMosFactory,
+			RawBoundManagedObjectMetaDataFactory rawBoundMoFactory, RawGovernanceMetaDataFactory rawGovernanceFactory,
 			RawAdministrationMetaDataFactory rawBoundAdminFactory, RawOfficeMetaDataFactory rawOfficeFactory,
 			RawManagedFunctionMetaDataFactory rawFunctionFactory);
 

@@ -44,6 +44,7 @@ import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.team.RawTeamMetaDataImpl;
 import net.officefloor.frame.impl.construct.team.TeamBuilderImpl;
 import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
+import net.officefloor.frame.impl.execute.officefloor.ThreadLocalAwareExecutorImpl;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
@@ -169,10 +170,10 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 
 		// Build this OfficeFloor
 		RawOfficeFloorMetaData rawMetaData = RawOfficeFloorMetaDataImpl.getFactory().constructRawOfficeFloorMetaData(
-				this, issuesListener, RawTeamMetaDataImpl.getFactory(), RawManagedObjectMetaDataImpl.getFactory(),
-				RawBoundManagedObjectMetaDataImpl.getFactory(), RawGovernanceMetaDataImpl.getFactory(),
-				RawAdministrationMetaDataImpl.getFactory(), RawOfficeMetaDataImpl.getFactory(),
-				RawManagedFunctionMetaDataImpl.getFactory());
+				this, issuesListener, RawTeamMetaDataImpl.getFactory(), new ThreadLocalAwareExecutorImpl(),
+				RawManagedObjectMetaDataImpl.getFactory(), RawBoundManagedObjectMetaDataImpl.getFactory(),
+				RawGovernanceMetaDataImpl.getFactory(), RawAdministrationMetaDataImpl.getFactory(),
+				RawOfficeMetaDataImpl.getFactory(), RawManagedFunctionMetaDataImpl.getFactory());
 
 		// Obtain the office floor meta-data and return the office floor
 		OfficeFloorMetaData metaData = rawMetaData.getOfficeFloorMetaData();

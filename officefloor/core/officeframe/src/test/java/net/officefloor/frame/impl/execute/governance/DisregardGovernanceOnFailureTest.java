@@ -41,9 +41,6 @@ public class DisregardGovernanceOnFailureTest extends AbstractOfficeConstructTes
 	 * {@link ProcessState}.
 	 */
 	public void testDisregardGovernanceByEscalationHandler_boundTo_ProcessState() throws Exception {
-
-		fail("TODO determine why recycling process managed object hangs");
-
 		this.doDisregardGovernanceOnFaillureTest(ManagedObjectScope.PROCESS);
 	}
 

@@ -40,9 +40,6 @@ public class GovernanceEnforceTest extends AbstractOfficeConstructTestCase {
 	 * {@link ProcessState}.
 	 */
 	public void testEnforceGovernance_boundTo_ProcessState() throws Exception {
-
-		fail("TODO determine why recycling process managed object hangs");
-
 		this.doEnforceGovernanceTest(ManagedObjectScope.PROCESS);
 	}
 

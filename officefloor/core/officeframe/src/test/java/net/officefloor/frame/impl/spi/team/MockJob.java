@@ -35,14 +35,9 @@ class MockJob implements Job {
 	private final Object lock = new Object();
 
 	/**
-	 * {@link Team}.
-	 */
-	private Team team;
-
-	/**
 	 * Flag indicating if this {@link Job} has been started.
 	 */
-	private boolean isStarted = false;
+	private boolean isExecuted = false;
 
 	/**
 	 * Number of invocations of {@link Job}.
@@ -67,22 +62,28 @@ class MockJob implements Job {
 	 *            Wait time in seconds.
 	 */
 	public void assignJobToTeam(Team team, int waitTime) {
-		synchronized (this.lock) {
-			// Store team
-			this.team = team;
 
-			// Assign job to team
-			this.team.assignJob(this);
+		// Assign job to team
+		team.assignJob(this);
 
-			// Wait on processing to start
-			try {
-				this.lock.wait(waitTime * 1000);
-			} catch (InterruptedException ex) {
-				Assert.fail("Interrupted: " + ex.getMessage());
+		// Wait to be processed
+		long timeoutTime = System.currentTimeMillis() + (waitTime * 1000);
+		try {
+			synchronized (this.lock) {
+				while (!this.isExecuted) {
+
+					// Determine if timed out
+					long currentTime = System.currentTimeMillis();
+					if (currentTime > timeoutTime) {
+						Assert.fail("Timed out waiting on job to be executed");
+					}
+
+					// Wait to be executed
+					this.lock.wait(10);
+				}
 			}
-
-			// Ensure this job is started
-			Assert.assertTrue("Job must be started", this.isStarted);
+		} catch (InterruptedException ex) {
+			Assert.fail("Interrupted: " + ex.getMessage());
 		}
 	}
 
@@ -93,31 +94,19 @@ class MockJob implements Job {
 	@Override
 	public void run() {
 
-		// Notify processing so assignJobToTeam may return
-		synchronized (this.lock) {
-			this.isStarted = true;
-			this.lock.notify();
-		}
-
 		// Increment number of times invoked
 		this.doTaskInvocationCount++;
 
-		// Sleep some time to mimic processing
-		try {
-			Thread.sleep(10);
-		} catch (InterruptedException ex) {
-			Assert.fail("Interrupted: Failed processing task - " + ex.getMessage());
+		// Notify processing so assignJobToTeam may return
+		synchronized (this.lock) {
+			this.isExecuted = true;
+			this.lock.notify();
 		}
 	}
 
 	@Override
 	public void cancel(Throwable cause) {
-		/*
-		 * At moment, not seeing loads to require this as a priority.
-		 * 
-		 * TODO implement to allow admission control algorithms.
-		 */
-		throw new UnsupportedOperationException("TODO implement Job.cancelJob");
+		Assert.fail("Should not cancel job");
 	}
 
 	@Override

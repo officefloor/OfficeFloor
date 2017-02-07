@@ -18,7 +18,6 @@
 package net.officefloor.frame.impl.spi.team;
 
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.api.team.TeamIdentifier;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.api.team.source.impl.AbstractTeamSource;
@@ -41,8 +40,7 @@ public class LeaderFollowerTeamSource extends AbstractTeamSource {
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(TEAM_SIZE_PROPERTY_NAME,
-				"Number of threads in team");
+		context.addProperty(TEAM_SIZE_PROPERTY_NAME, "Number of threads in team");
 	}
 
 	@Override
@@ -50,16 +48,13 @@ public class LeaderFollowerTeamSource extends AbstractTeamSource {
 
 		// Obtain the required configuration
 		String teamName = context.getTeamName();
-		TeamIdentifier teamIdentifier = context.getTeamIdentifier();
-		int teamSize = Integer.parseInt(context
-				.getProperty(TEAM_SIZE_PROPERTY_NAME));
+		int teamSize = Integer.parseInt(context.getProperty(TEAM_SIZE_PROPERTY_NAME));
 
 		// Obtain the optional configuration
 		long waitTime = Long.parseLong(context.getProperty("wait.time", "100"));
 
 		// Create and return the team
-		return new LeaderFollowerTeam(teamName, teamIdentifier, teamSize,
-				waitTime);
+		return new LeaderFollowerTeam(teamName, teamSize, waitTime);
 	}
 
 }

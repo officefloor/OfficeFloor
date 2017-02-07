@@ -38,7 +38,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.api.team.source.ProcessContextListener;
+import net.officefloor.frame.api.team.ThreadLocalAwareTeam;
 import net.officefloor.frame.impl.execute.escalation.EscalationHandlerEscalationFlow.EscalationKey;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
@@ -62,6 +62,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectExecuteContextFacto
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
+import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -95,6 +96,11 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	 * {@link RawTeamMetaDataFactory}.
 	 */
 	private final RawTeamMetaDataFactory rawTeamFactory = this.createMock(RawTeamMetaDataFactory.class);
+
+	/**
+	 * {@link ThreadLocalAwareExecutor}.
+	 */
+	private final ThreadLocalAwareExecutor threadLocalAwareExecutor = this.createMock(ThreadLocalAwareExecutor.class);
 
 	/**
 	 * {@link RawManagedObjectMetaDataFactory}.
@@ -187,8 +193,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		this.record_officeFloorName();
 		this.recordReturn(this.configuration, this.configuration.getTeamConfiguration(),
 				new TeamConfiguration[] { teamConfiguration });
-		this.recordReturn(this.rawTeamFactory,
-				this.rawTeamFactory.constructRawTeamMetaData(teamConfiguration, this.sourceContext, this.issues), null);
+		this.recordReturn(this.rawTeamFactory, this.rawTeamFactory.constructRawTeamMetaData(teamConfiguration,
+				this.sourceContext, this.threadLocalAwareExecutor, this.issues), null);
 		this.record_constructManagedObjectSources("OFFICE");
 		this.record_constructEscalation();
 		this.record_constructOffices();
@@ -217,15 +223,12 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		this.record_officeFloorName();
 		this.recordReturn(this.configuration, this.configuration.getTeamConfiguration(),
 				new TeamConfiguration[] { teamConfigurationOne, teamConfigurationTwo });
-		this.recordReturn(this.rawTeamFactory,
-				this.rawTeamFactory.constructRawTeamMetaData(teamConfigurationOne, this.sourceContext, this.issues),
-				rawTeamOne);
+		this.recordReturn(this.rawTeamFactory, this.rawTeamFactory.constructRawTeamMetaData(teamConfigurationOne,
+				this.sourceContext, this.threadLocalAwareExecutor, this.issues), rawTeamOne);
 		this.recordReturn(rawTeamOne, rawTeamOne.getTeamName(), DUPLICATE_TEAM_NAME);
 		this.recordReturn(rawTeamOne, rawTeamOne.getTeamManagement(), teamOne);
-		this.recordReturn(rawTeamOne, rawTeamOne.getProcessContextListeners(), new ProcessContextListener[0]);
-		this.recordReturn(this.rawTeamFactory,
-				this.rawTeamFactory.constructRawTeamMetaData(teamConfigurationTwo, this.sourceContext, this.issues),
-				rawTeamTwo);
+		this.recordReturn(this.rawTeamFactory, this.rawTeamFactory.constructRawTeamMetaData(teamConfigurationTwo,
+				this.sourceContext, this.threadLocalAwareExecutor, this.issues), rawTeamTwo);
 		this.recordReturn(rawTeamTwo, rawTeamTwo.getTeamName(), DUPLICATE_TEAM_NAME);
 		this.record_issue("Teams registered with the same name '" + DUPLICATE_TEAM_NAME + "'");
 		this.record_constructManagedObjectSources("OFFICE");
@@ -264,9 +267,6 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		assertNotNull(metaData.getRawTeamMetaData("TWO"));
 		assertNotNull(metaData.getRawTeamMetaData("THREE"));
 
-		// Should have no Process Context Listeners
-		assertEquals("Should not have Process Context Listeners", 0, metaData.getProcessContextListeners().length);
-
 		// Validate the teams
 		assertEquals("Incorrect number of teams", 3, actualTeams.length);
 		for (int i = 0; i < 3; i++) {
@@ -276,28 +276,24 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensures successfully construct a {@link Team} with a
-	 * {@link ProcessContextListener}.
+	 * {@link ThreadLocalAwareTeam}.
 	 */
-	public void testConstructTeamWithProcessContextListener() {
+	public void testConstructThreadLocalAwareTeam() {
 
 		// Mock Process Context Listener
-		final ProcessContextListener listener = this.createMock(ProcessContextListener.class);
 		final TeamConfiguration<?> teamConfiguration = this.createMock(TeamConfiguration.class);
 		final RawTeamMetaData rawTeamMetaData = this.createMock(RawTeamMetaData.class);
 		final String TEAM_NAME = "TEAM";
 		final TeamManagement team = this.createMock(TeamManagement.class);
 
-		// Record constructing team registering Process Context Listener
+		// Record constructing team
 		this.record_officeFloorName();
 		this.recordReturn(this.configuration, this.configuration.getTeamConfiguration(),
 				new TeamConfiguration[] { teamConfiguration });
-		this.recordReturn(this.rawTeamFactory,
-				this.rawTeamFactory.constructRawTeamMetaData(teamConfiguration, this.sourceContext, this.issues),
-				rawTeamMetaData);
+		this.recordReturn(this.rawTeamFactory, this.rawTeamFactory.constructRawTeamMetaData(teamConfiguration,
+				this.sourceContext, this.threadLocalAwareExecutor, this.issues), rawTeamMetaData);
 		this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeamName(), TEAM_NAME);
 		this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeamManagement(), team);
-		this.recordReturn(rawTeamMetaData, rawTeamMetaData.getProcessContextListeners(),
-				new ProcessContextListener[] { listener });
 		this.record_constructManagedObjectSources("OFFICE");
 		this.record_constructEscalation();
 		this.record_constructOffices();
@@ -310,10 +306,9 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		// Ensure team registered
 		assertNotNull(metaData.getRawTeamMetaData("TEAM"));
 
-		// Should have a Process Context Listener
-		ProcessContextListener[] listeners = metaData.getProcessContextListeners();
-		assertEquals("Should have Process Context Listeners", 1, listeners.length);
-		assertEquals("Incorrect registered Process Context Listener", listener, listeners[0]);
+		// Should have a thread aware executor
+		assertSame("Incorrect thread local aware executor", this.threadLocalAwareExecutor,
+				metaData.getThreadLocalAwareExecutor());
 	}
 
 	/**
@@ -652,13 +647,10 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 			TeamManagement team = teams[i];
 
 			// Record constructing the team
-			this.recordReturn(this.rawTeamFactory,
-					this.rawTeamFactory.constructRawTeamMetaData(teamConfiguration, this.sourceContext, this.issues),
-					rawTeamMetaData);
+			this.recordReturn(this.rawTeamFactory, this.rawTeamFactory.constructRawTeamMetaData(teamConfiguration,
+					this.sourceContext, this.threadLocalAwareExecutor, this.issues), rawTeamMetaData);
 			this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeamName(), teamName);
 			this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeamManagement(), team);
-			this.recordReturn(rawTeamMetaData, rawTeamMetaData.getProcessContextListeners(),
-					new ProcessContextListener[0]);
 		}
 
 		// Return the constructed teams
@@ -856,8 +848,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 
 		// Create the raw office floor meta-data
 		RawOfficeFloorMetaData metaData = RawOfficeFloorMetaDataImpl.getFactory().constructRawOfficeFloorMetaData(
-				this.configuration, this.issues, this.rawTeamFactory, this.rawMosFactory, this.rawBoundMoFactory,
-				this.rawGovernanceFactory, this.rawBoundAdminFactory, this.rawOfficeFactory,
+				this.configuration, this.issues, this.rawTeamFactory, this.threadLocalAwareExecutor, this.rawMosFactory,
+				this.rawBoundMoFactory, this.rawGovernanceFactory, this.rawBoundAdminFactory, this.rawOfficeFactory,
 				this.rawFunctionMetaDataFactory);
 
 		// Meta-data should always be constructed

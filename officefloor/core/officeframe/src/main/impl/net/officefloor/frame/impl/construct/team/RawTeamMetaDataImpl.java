@@ -26,23 +26,23 @@ import net.officefloor.frame.api.source.UnknownClassError;
 import net.officefloor.frame.api.source.UnknownPropertyError;
 import net.officefloor.frame.api.source.UnknownResourceError;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.api.team.TeamIdentifier;
-import net.officefloor.frame.api.team.source.ProcessContextListener;
+import net.officefloor.frame.api.team.ThreadLocalAwareTeam;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
+import net.officefloor.frame.impl.execute.team.ThreadLocalAwareContextImpl;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
 import net.officefloor.frame.internal.construct.RawTeamMetaData;
 import net.officefloor.frame.internal.construct.RawTeamMetaDataFactory;
 import net.officefloor.frame.internal.structure.TeamManagement;
+import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 
 /**
  * Raw {@link Team} meta-data implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
-		RawTeamMetaData {
+public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory, RawTeamMetaData {
 
 	/**
 	 * Obtains the {@link RawTeamMetaDataFactory}.
@@ -50,7 +50,7 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 	 * @return {@link RawTeamMetaDataFactory}.
 	 */
 	public static RawTeamMetaDataFactory getFactory() {
-		return new RawTeamMetaDataImpl(null, null, null);
+		return new RawTeamMetaDataImpl(null, null, false);
 	}
 
 	/**
@@ -64,9 +64,9 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 	private final TeamManagement team;
 
 	/**
-	 * {@link ProcessContextListener} instances for the {@link Team}.
+	 * Flag indicating if a {@link ThreadLocalAwareTeam}.
 	 */
-	private final ProcessContextListener[] processContextListeners;
+	private final boolean isRequireThreadLocalAwareness;
 
 	/**
 	 * Initiate.
@@ -75,14 +75,13 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 	 *            Name of {@link Team}.
 	 * @param team
 	 *            {@link TeamManagement}.
-	 * @param processContextListeners
-	 *            {@link ProcessContextListener} instances for the {@link Team}.
+	 * @param isRequireThreadLocalAwareness
+	 *            Flag indicating if a {@link ThreadLocalAwareTeam}.
 	 */
-	private RawTeamMetaDataImpl(String teamName, TeamManagement team,
-			ProcessContextListener[] processContextListeners) {
+	private RawTeamMetaDataImpl(String teamName, TeamManagement team, boolean isRequireThreadLocalAwareness) {
 		this.teamName = teamName;
 		this.team = team;
-		this.processContextListeners = processContextListeners;
+		this.isRequireThreadLocalAwareness = isRequireThreadLocalAwareness;
 	}
 
 	/*
@@ -90,95 +89,79 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 	 */
 
 	@Override
-	public <TS extends TeamSource> RawTeamMetaData constructRawTeamMetaData(
-			TeamConfiguration<TS> configuration, SourceContext sourceContext,
-			OfficeFloorIssues issues) {
+	public <TS extends TeamSource> RawTeamMetaData constructRawTeamMetaData(TeamConfiguration<TS> configuration,
+			SourceContext sourceContext, ThreadLocalAwareExecutor threadLocalAwareExecutor, OfficeFloorIssues issues) {
 
 		// Obtain the team name
 		String teamName = configuration.getTeamName();
 		if (ConstructUtil.isBlank(teamName)) {
-			issues.addIssue(AssetType.OFFICE_FLOOR,
-					OfficeFloor.class.getSimpleName(),
-					"Team added without a name");
+			issues.addIssue(AssetType.OFFICE_FLOOR, OfficeFloor.class.getSimpleName(), "Team added without a name");
 			return null; // can not carry on
 		}
 
 		// Obtain the team source
 		Class<TS> teamSourceClass = configuration.getTeamSourceClass();
 		if (teamSourceClass == null) {
-			issues.addIssue(AssetType.TEAM, teamName,
-					"No TeamSource class provided");
+			issues.addIssue(AssetType.TEAM, teamName, "No TeamSource class provided");
 			return null; // can not carry on
 		}
 
 		// Instantiate the team source
-		TeamSource teamSource = ConstructUtil.newInstance(teamSourceClass,
-				TeamSource.class, "Team Source '" + teamName + "'",
-				AssetType.TEAM, teamName, issues);
+		TeamSource teamSource = ConstructUtil.newInstance(teamSourceClass, TeamSource.class,
+				"Team Source '" + teamName + "'", AssetType.TEAM, teamName, issues);
 		if (teamSource == null) {
 			return null; // can not carry one
 		}
 
-		// Create the team identifier
-		TeamIdentifier teamIdentifier = TeamManagementImpl
-				.createTeamIdentifier();
-
 		Team team;
-		ProcessContextListener[] processContextListeners;
+		boolean isRequireThreadLocalAwareness = false;
 		try {
 			// Create the team source context
 			SourceProperties properties = configuration.getProperties();
-			TeamSourceContextImpl context = new TeamSourceContextImpl(false,
-					teamName, teamIdentifier, properties, sourceContext);
+			TeamSourceContextImpl context = new TeamSourceContextImpl(false, teamName, properties, sourceContext);
 
 			// Create the team
 			team = teamSource.createTeam(context);
 			if (team == null) {
 				// Indicate failed to provide team
-				issues.addIssue(AssetType.TEAM, teamName,
-						"TeamSource failed to provide Team");
+				issues.addIssue(AssetType.TEAM, teamName, "TeamSource failed to provide Team");
 				return null; // can not carry on
 			}
 
-			// Obtain the Process Context Listeners
-			processContextListeners = context
-					.lockAndGetProcessContextListeners();
+			// Determine if requires thread local awareness
+			if (team instanceof ThreadLocalAwareTeam) {
+				ThreadLocalAwareTeam threadLocalAwareTeam = (ThreadLocalAwareTeam) team;
+				threadLocalAwareTeam.setThreadLocalAwareness(new ThreadLocalAwareContextImpl(threadLocalAwareExecutor));
+				isRequireThreadLocalAwareness = true;
+			}
 
 		} catch (UnknownPropertyError ex) {
 			// Indicate an unknown property
-			issues.addIssue(AssetType.TEAM, teamName, "Must specify property '"
-					+ ex.getUnknownPropertyName() + "'");
+			issues.addIssue(AssetType.TEAM, teamName, "Must specify property '" + ex.getUnknownPropertyName() + "'");
 			return null; // can not carry on
 
 		} catch (UnknownClassError ex) {
 			// Indicate an unknown class
-			issues.addIssue(AssetType.TEAM, teamName, "Can not load class '"
-					+ ex.getUnknownClassName() + "'");
+			issues.addIssue(AssetType.TEAM, teamName, "Can not load class '" + ex.getUnknownClassName() + "'");
 			return null; // can not carry on
 
 		} catch (UnknownResourceError ex) {
 			// Indicate an unknown resource
-			issues.addIssue(
-					AssetType.TEAM,
-					teamName,
-					"Can not obtain resource at location '"
-							+ ex.getUnknownResourceLocation() + "'");
+			issues.addIssue(AssetType.TEAM, teamName,
+					"Can not obtain resource at location '" + ex.getUnknownResourceLocation() + "'");
 			return null; // can not carry on
 
 		} catch (Throwable ex) {
 			// Indicate failure to initialise
-			issues.addIssue(AssetType.TEAM, teamName, "Failed to create Team",
-					ex);
+			issues.addIssue(AssetType.TEAM, teamName, "Failed to create Team", ex);
 			return null; // can not carry on
 		}
 
 		// Create the management for the team
-		TeamManagement teamManagement = new TeamManagementImpl(teamIdentifier,
-				team);
+		TeamManagement teamManagement = new TeamManagementImpl(team);
 
 		// Return the raw meta-data
-		return new RawTeamMetaDataImpl(teamName, teamManagement,
-				processContextListeners);
+		return new RawTeamMetaDataImpl(teamName, teamManagement, isRequireThreadLocalAwareness);
 	}
 
 	/*
@@ -196,8 +179,8 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 	}
 
 	@Override
-	public ProcessContextListener[] getProcessContextListeners() {
-		return this.processContextListeners;
+	public boolean isRequireThreadLocalAwareness() {
+		return this.isRequireThreadLocalAwareness;
 	}
 
 }

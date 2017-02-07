@@ -17,13 +17,11 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import java.util.Timer;
-
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * Meta-data for the {@link Office}.
@@ -52,13 +50,6 @@ public interface OfficeMetaData {
 	 * @return {@link OfficeClock} for the {@link Office}.
 	 */
 	OfficeClock getOfficeClock();
-
-	/**
-	 * Obtains the {@link Timer} for the {@link Office}.
-	 * 
-	 * @return {@link Timer} for the {@link Office}.
-	 */
-	Timer getOfficeTimer();
 
 	/**
 	 * Obtains the {@link ProcessMetaData} for processes within this
@@ -119,15 +110,17 @@ public interface OfficeMetaData {
 			ThreadState callbackThreadState);
 
 	/**
-	 * Creates a new {@link ProcessState} triggered by a
-	 * {@link ManagedObjectSource} within the {@link Office} returning the
-	 * starting {@link FunctionState} to be executed.
+	 * Invokes a {@link ProcessState}.
 	 * 
 	 * @param flowMetaData
 	 *            {@link FlowMetaData} of the starting {@link FunctionState} for
 	 *            the {@link ProcessState}.
 	 * @param parameter
 	 *            Parameter to the starting {@link FunctionState}.
+	 * @param delay
+	 *            Millisecond delay in invoking the {@link ProcessState}. 0 (or
+	 *            negative value) will invoke immediately on the current
+	 *            {@link Thread}.
 	 * @param callback
 	 *            Optional {@link FlowCallback} of the {@link ProcessState}. May
 	 *            be <code>null</code>.
@@ -147,11 +140,13 @@ public interface OfficeMetaData {
 	 *            Index of the {@link ManagedObject} within the
 	 *            {@link ProcessState}. Ignored if {@link ManagedObject} passed
 	 *            in is <code>null</code>.
-	 * @return {@link ManagedFunctionContainer} to start processing the
-	 *         {@link ProcessState}.
+	 * @throws InvalidParameterTypeException
+	 *             Should the type of parameter be invalid for the initial
+	 *             {@link ManagedFunction}.
 	 */
-	ManagedFunctionContainer createProcess(FlowMetaData flowMetaData, Object parameter, FlowCallback callback,
+	void invokeProcess(FlowMetaData flowMetaData, Object parameter, long delay, FlowCallback callback,
 			ThreadState callbackThreadState, ManagedObject inputManagedObject,
-			ManagedObjectMetaData<?> inputManagedObjectMetaData, int processBoundIndexForInputManagedObject);
+			ManagedObjectMetaData<?> inputManagedObjectMetaData, int processBoundIndexForInputManagedObject)
+			throws InvalidParameterTypeException;
 
 }

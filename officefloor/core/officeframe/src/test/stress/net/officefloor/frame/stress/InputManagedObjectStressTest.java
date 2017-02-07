@@ -37,7 +37,6 @@ import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 
@@ -73,7 +72,7 @@ public class InputManagedObjectStressTest extends AbstractOfficeConstructTestCas
 	 */
 	@StressTest
 	public void test_StressInputManagedObject_LeaderFollowerTeam() throws Exception {
-		this.doTest(new LeaderFollowerTeam("TEST", MockTeamSource.createTeamIdentifier(), 2, 100));
+		this.doTest(new LeaderFollowerTeam("TEST", 2, 100));
 	}
 
 	/**
@@ -82,7 +81,7 @@ public class InputManagedObjectStressTest extends AbstractOfficeConstructTestCas
 	 */
 	@StressTest
 	public void test_StressInputManagedObject_ExecutorFixedTeam() throws Exception {
-		this.doTest(ExecutorFixedTeamSource.createTeam("TEST", MockTeamSource.createTeamIdentifier(), 2));
+		this.doTest(ExecutorFixedTeamSource.createTeam("TEST", 2));
 	}
 
 	/**

@@ -20,7 +20,6 @@ package net.officefloor.frame.util;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.api.team.TeamIdentifier;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
@@ -51,8 +50,7 @@ public class TeamSourceStandAlone {
 	 *             If fails instantiation and initialising the
 	 *             {@link TeamSource}.
 	 */
-	public <TS extends TeamSource> TS loadTeamSource(Class<TS> teamSourceClass)
-			throws Exception {
+	public <TS extends TeamSource> TS loadTeamSource(Class<TS> teamSourceClass) throws Exception {
 
 		// Create the team source
 		TS teamSource = teamSourceClass.newInstance();
@@ -85,22 +83,15 @@ public class TeamSourceStandAlone {
 	 *             If fails loading the {@link TeamSource} and creating a
 	 *             {@link Team}.
 	 */
-	public <TS extends TeamSource> Team loadTeam(Class<TS> teamSourceClass)
-			throws Exception {
+	public <TS extends TeamSource> Team loadTeam(Class<TS> teamSourceClass) throws Exception {
 
 		// Load the team source
 		TS teamSource = this.loadTeamSource(teamSourceClass);
 
-		// Create identifier for team
-		TeamIdentifier teamIdentifier = new TeamIdentifier() {
-		};
-
 		// Create team source context
-		SourceContext sourceContext = new SourceContextImpl(false, Thread
-				.currentThread().getContextClassLoader());
-		TeamSourceContext context = new TeamSourceContextImpl(false,
-				teamSourceClass.getSimpleName(), teamIdentifier,
-				this.properties, sourceContext);
+		SourceContext sourceContext = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader());
+		TeamSourceContext context = new TeamSourceContextImpl(false, teamSourceClass.getSimpleName(), this.properties,
+				sourceContext);
 
 		// Return the created team
 		return teamSource.createTeam(context);

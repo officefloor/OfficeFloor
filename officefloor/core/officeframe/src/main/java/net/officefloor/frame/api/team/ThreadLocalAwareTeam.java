@@ -17,19 +17,28 @@
  */
 package net.officefloor.frame.api.team;
 
-import net.officefloor.frame.internal.structure.TeamManagement;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.ProcessState;
 
 /**
  * <p>
- * Identifier for a {@link Team}.
+ * Enables a {@link Team} to execute the {@link Job} with the {@link Thread}
+ * invoking the {@link ProcessState}.
  * <p>
- * There will only be one {@link TeamIdentifier} instance associated per
- * {@link Team} instance so that they may be compared with direct object
- * reference equality (==), which makes <code>null</code> checks easier.
+ * An example use is for embedding {@link OfficeFloor} within an Application
+ * Server and associating the {@link Thread} invoking the {@link ProcessState}
+ * for {@link ThreadLocal} instances of the Application Server.
  * 
  * @author Daniel Sagenschneider
- * 
- * @see TeamManagement
  */
-public interface TeamIdentifier {
+public interface ThreadLocalAwareTeam extends Team {
+
+	/**
+	 * Sets the {@link ThreadLocalAwareContext} for the {@link Team}.
+	 * 
+	 * @param context
+	 *            {@link ThreadLocalAwareContext} for the {@link Team}.
+	 */
+	void setThreadLocalAwareness(ThreadLocalAwareContext context);
+
 }

@@ -17,7 +17,6 @@
  */
 package net.officefloor.frame.impl.construct.officefloor;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,7 +29,6 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.api.team.source.ProcessContextListener;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.escalation.EscalationHandlerEscalationFlow;
@@ -65,6 +63,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
+import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 
 /**
  * Raw {@link OfficeFloorMetaData} implementation.
@@ -88,9 +87,9 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 	private final Map<String, RawTeamMetaData> teamRegistry;
 
 	/**
-	 * {@link ProcessContextListener} instances.
+	 * {@link ThreadLocalAwareExecutor}.
 	 */
-	private final ProcessContextListener[] processContextListeners;
+	private final ThreadLocalAwareExecutor threadLocalAwareExecutor;
 
 	/**
 	 * Registry of {@link RawManagedObjectMetaData} by the
@@ -113,8 +112,8 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 	 * 
 	 * @param teamRegistry
 	 *            Registry of {@link RawTeamMetaData} by the {@link Team} name.
-	 * @param processContextListeners
-	 *            {@link ProcessContextListener} instances.
+	 * @param threadLocalAwareExecutor
+	 *            {@link ThreadLocalAwareExecutor}.
 	 * @param mosRegistry
 	 *            Registry of {@link RawManagedObjectMetaData} by the
 	 *            {@link ManagedObjectSource} name.
@@ -122,10 +121,10 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 	 *            {@link EscalationProcedure}.
 	 */
 	private RawOfficeFloorMetaDataImpl(Map<String, RawTeamMetaData> teamRegistry,
-			ProcessContextListener[] processContextListeners, Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry,
+			ThreadLocalAwareExecutor threadLocalAwareExecutor, Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry,
 			EscalationFlow officeFloorEscalation) {
 		this.teamRegistry = teamRegistry;
-		this.processContextListeners = processContextListeners;
+		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
 		this.mosRegistry = mosRegistry;
 		this.officeFloorEscalation = officeFloorEscalation;
 	}
@@ -138,9 +137,10 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public RawOfficeFloorMetaData constructRawOfficeFloorMetaData(OfficeFloorConfiguration configuration,
 			OfficeFloorIssues issues, RawTeamMetaDataFactory rawTeamFactory,
-			RawManagedObjectMetaDataFactory rawMosFactory, RawBoundManagedObjectMetaDataFactory rawBoundMoFactory,
-			RawGovernanceMetaDataFactory rawGovernanceFactory, RawAdministrationMetaDataFactory rawBoundAdminFactory,
-			RawOfficeMetaDataFactory rawOfficeFactory, RawManagedFunctionMetaDataFactory rawTaskFactory) {
+			ThreadLocalAwareExecutor threadLocalAwareExecutor, RawManagedObjectMetaDataFactory rawMosFactory,
+			RawBoundManagedObjectMetaDataFactory rawBoundMoFactory, RawGovernanceMetaDataFactory rawGovernanceFactory,
+			RawAdministrationMetaDataFactory rawBoundAdminFactory, RawOfficeMetaDataFactory rawOfficeFactory,
+			RawManagedFunctionMetaDataFactory rawTaskFactory) {
 
 		// Name of office floor for reporting issues
 		String officeFloorName = configuration.getOfficeFloorName();
@@ -163,7 +163,6 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 
 		// Construct the teams
 		Map<String, RawTeamMetaData> teamRegistry = new HashMap<String, RawTeamMetaData>();
-		List<ProcessContextListener> processContextListeners = new LinkedList<ProcessContextListener>();
 		List<TeamManagement> teamListing = new LinkedList<TeamManagement>();
 
 		// Construct the configured teams
@@ -171,7 +170,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 
 			// Construct the raw team meta-data
 			RawTeamMetaData rawTeamMetaData = rawTeamFactory.constructRawTeamMetaData(teamConfiguration, sourceContext,
-					issues);
+					threadLocalAwareExecutor, issues);
 			if (rawTeamMetaData == null) {
 				continue; // issue with team
 			}
@@ -190,10 +189,6 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 			// Register the team
 			teamRegistry.put(teamName, rawTeamMetaData);
 			teamListing.add(team);
-
-			// Obtain and register the Process Context Listeners
-			ProcessContextListener[] listeners = rawTeamMetaData.getProcessContextListeners();
-			processContextListeners.addAll(Arrays.asList(listeners));
 		}
 
 		// Construct the managed object sources
@@ -259,8 +254,8 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 				officeFloorManagement);
 
 		// Create the raw office floor meta-data
-		RawOfficeFloorMetaDataImpl rawMetaData = new RawOfficeFloorMetaDataImpl(teamRegistry,
-				processContextListeners.toArray(new ProcessContextListener[0]), mosRegistry, officeFloorEscalation);
+		RawOfficeFloorMetaDataImpl rawMetaData = new RawOfficeFloorMetaDataImpl(teamRegistry, threadLocalAwareExecutor,
+				mosRegistry, officeFloorEscalation);
 
 		// Construct the offices
 		List<OfficeMetaData> officeMetaDatas = new LinkedList<OfficeMetaData>();
@@ -336,8 +331,8 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 	}
 
 	@Override
-	public ProcessContextListener[] getProcessContextListeners() {
-		return this.processContextListeners;
+	public ThreadLocalAwareExecutor getThreadLocalAwareExecutor() {
+		return this.threadLocalAwareExecutor;
 	}
 
 	@Override

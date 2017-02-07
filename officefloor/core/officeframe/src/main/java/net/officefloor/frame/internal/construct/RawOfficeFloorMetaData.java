@@ -20,9 +20,9 @@ package net.officefloor.frame.internal.construct;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.api.team.source.ProcessContextListener;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
+import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 
 /**
  * Raw meta-data for the {@link OfficeFloor}.
@@ -42,13 +42,11 @@ public interface RawOfficeFloorMetaData {
 	RawTeamMetaData getRawTeamMetaData(String teamName);
 
 	/**
-	 * Obtains the {@link ProcessContextListener} instances for the
-	 * {@link OfficeFloor}.
+	 * Obtains the {@link ThreadLocalAwareExecutor}.
 	 * 
-	 * @return {@link ProcessContextListener} instances for the
-	 *         {@link OfficeFloor}.
+	 * @return {@link ThreadLocalAwareExecutor}.
 	 */
-	ProcessContextListener[] getProcessContextListeners();
+	ThreadLocalAwareExecutor getThreadLocalAwareExecutor();
 
 	/**
 	 * Obtains the {@link RawManagedObjectMetaData} for the
@@ -59,8 +57,7 @@ public interface RawOfficeFloorMetaData {
 	 * @return {@link RawManagedObjectMetaData} or <code>null</code> if not
 	 *         exist for name.
 	 */
-	RawManagedObjectMetaData<?, ?> getRawManagedObjectMetaData(
-			String managedObjectSourceName);
+	RawManagedObjectMetaData<?, ?> getRawManagedObjectMetaData(String managedObjectSourceName);
 
 	/**
 	 * Obtains the {@link EscalationFlow} for the {@link OfficeFloor}.

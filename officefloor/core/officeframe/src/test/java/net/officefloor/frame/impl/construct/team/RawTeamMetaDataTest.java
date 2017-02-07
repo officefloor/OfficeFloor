@@ -24,12 +24,14 @@ import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.source.UnknownClassError;
 import net.officefloor.frame.api.source.UnknownResourceError;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.api.team.source.ProcessContextListener;
+import net.officefloor.frame.api.team.ThreadLocalAwareContext;
+import net.officefloor.frame.api.team.ThreadLocalAwareTeam;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
 import net.officefloor.frame.internal.construct.RawTeamMetaData;
+import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -47,20 +49,22 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * {@link TeamConfiguration}.
 	 */
-	private final TeamConfiguration<?> configuration = this
-			.createMock(TeamConfiguration.class);
+	private final TeamConfiguration<?> configuration = this.createMock(TeamConfiguration.class);
 
 	/**
 	 * {@link SourceContext}.
 	 */
-	private final SourceContext sourceContext = this
-			.createMock(SourceContext.class);
+	private final SourceContext sourceContext = this.createMock(SourceContext.class);
+
+	/**
+	 * {@link ThreadLocalAwareExecutor}.
+	 */
+	private final ThreadLocalAwareExecutor threadLocalAwareExecutor = this.createMock(ThreadLocalAwareExecutor.class);
 
 	/**
 	 * {@link OfficeFloorIssues}.
 	 */
-	private final OfficeFloorIssues issues = this
-			.createMock(OfficeFloorIssues.class);
+	private final OfficeFloorIssues issues = this.createMock(OfficeFloorIssues.class);
 
 	/**
 	 * Ensures issue if no {@link Team} name.
@@ -68,10 +72,8 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	public void testNoTeamName() {
 
 		// Record no team available
-		this.recordReturn(this.configuration, this.configuration.getTeamName(),
-				null);
-		this.issues.addIssue(AssetType.OFFICE_FLOOR, "OfficeFloor",
-				"Team added without a name");
+		this.recordReturn(this.configuration, this.configuration.getTeamName(), null);
+		this.issues.addIssue(AssetType.OFFICE_FLOOR, "OfficeFloor", "Team added without a name");
 
 		// Attempt to construct team
 		this.replayMockObjects();
@@ -85,12 +87,9 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	public void testNoTeamSource() {
 
 		// Record no source available
-		this.recordReturn(this.configuration, this.configuration.getTeamName(),
-				TEAM_NAME);
-		this.recordReturn(this.configuration,
-				this.configuration.getTeamSourceClass(), null);
-		this.issues.addIssue(AssetType.TEAM, TEAM_NAME,
-				"No TeamSource class provided");
+		this.recordReturn(this.configuration, this.configuration.getTeamName(), TEAM_NAME);
+		this.recordReturn(this.configuration, this.configuration.getTeamSourceClass(), null);
+		this.issues.addIssue(AssetType.TEAM, TEAM_NAME, "No TeamSource class provided");
 
 		// Attempt to construct team
 		this.replayMockObjects();
@@ -106,16 +105,10 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 		final Exception failure = new Exception("Instantiate failure");
 
 		// Record team source that fails instantiation
-		this.recordReturn(this.configuration, this.configuration.getTeamName(),
-				TEAM_NAME);
-		this.recordReturn(this.configuration,
-				this.configuration.getTeamSourceClass(),
-				FailInstantiateTeamSource.class);
-		this.issues.addIssue(
-				AssetType.TEAM,
-				TEAM_NAME,
-				"Failed to instantiate "
-						+ FailInstantiateTeamSource.class.getName(), failure);
+		this.recordReturn(this.configuration, this.configuration.getTeamName(), TEAM_NAME);
+		this.recordReturn(this.configuration, this.configuration.getTeamSourceClass(), FailInstantiateTeamSource.class);
+		this.issues.addIssue(AssetType.TEAM, TEAM_NAME,
+				"Failed to instantiate " + FailInstantiateTeamSource.class.getName(), failure);
 
 		// Attempt to construct team
 		this.replayMockObjects();
@@ -154,16 +147,11 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 		SourcePropertiesImpl noProperties = new SourcePropertiesImpl();
 
 		// Record team source that has missing required property
-		this.recordReturn(this.configuration, this.configuration.getTeamName(),
-				TEAM_NAME);
-		this.recordReturn(this.configuration,
-				this.configuration.getTeamSourceClass(),
-				NoPropertyTeamSource.class);
-		this.recordReturn(this.configuration,
-				this.configuration.getProperties(), noProperties);
+		this.recordReturn(this.configuration, this.configuration.getTeamName(), TEAM_NAME);
+		this.recordReturn(this.configuration, this.configuration.getTeamSourceClass(), NoPropertyTeamSource.class);
+		this.recordReturn(this.configuration, this.configuration.getProperties(), noProperties);
 		this.issues.addIssue(AssetType.TEAM, TEAM_NAME,
-				"Must specify property '" + NoPropertyTeamSource.PROPERTY_NAME
-						+ "'");
+				"Must specify property '" + NoPropertyTeamSource.PROPERTY_NAME + "'");
 
 		// Attempt to construct team
 		this.replayMockObjects();
@@ -201,19 +189,13 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	public void testMissingClass() {
 
 		// Record team source that has missing required class
-		this.recordReturn(this.configuration, this.configuration.getTeamName(),
-				TEAM_NAME);
-		this.recordReturn(this.configuration,
-				this.configuration.getTeamSourceClass(),
-				NoClassTeamSource.class);
-		this.recordReturn(this.configuration,
-				this.configuration.getProperties(), new SourcePropertiesImpl());
+		this.recordReturn(this.configuration, this.configuration.getTeamName(), TEAM_NAME);
+		this.recordReturn(this.configuration, this.configuration.getTeamSourceClass(), NoClassTeamSource.class);
+		this.recordReturn(this.configuration, this.configuration.getProperties(), new SourcePropertiesImpl());
 		this.sourceContext.loadClass(NoClassTeamSource.CLASS_NAME);
-		this.control(this.sourceContext).setThrowable(
-				new UnknownClassError("TEST ERROR",
-						NoClassTeamSource.CLASS_NAME));
-		this.issues.addIssue(AssetType.TEAM, TEAM_NAME, "Can not load class '"
-				+ NoClassTeamSource.CLASS_NAME + "'");
+		this.control(this.sourceContext)
+				.setThrowable(new UnknownClassError("TEST ERROR", NoClassTeamSource.CLASS_NAME));
+		this.issues.addIssue(AssetType.TEAM, TEAM_NAME, "Can not load class '" + NoClassTeamSource.CLASS_NAME + "'");
 
 		// Attempt to construct team
 		this.replayMockObjects();
@@ -246,20 +228,14 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	public void testMissingResource() {
 
 		// Record team source that has missing required resource
-		this.recordReturn(this.configuration, this.configuration.getTeamName(),
-				TEAM_NAME);
-		this.recordReturn(this.configuration,
-				this.configuration.getTeamSourceClass(),
-				NoResourceTeamSource.class);
-		this.recordReturn(this.configuration,
-				this.configuration.getProperties(), new SourcePropertiesImpl());
+		this.recordReturn(this.configuration, this.configuration.getTeamName(), TEAM_NAME);
+		this.recordReturn(this.configuration, this.configuration.getTeamSourceClass(), NoResourceTeamSource.class);
+		this.recordReturn(this.configuration, this.configuration.getProperties(), new SourcePropertiesImpl());
 		this.sourceContext.getResource(NoResourceTeamSource.RESOURCE_LOCATION);
-		this.control(this.sourceContext).setThrowable(
-				new UnknownResourceError("TEST ERROR",
-						NoResourceTeamSource.RESOURCE_LOCATION));
+		this.control(this.sourceContext)
+				.setThrowable(new UnknownResourceError("TEST ERROR", NoResourceTeamSource.RESOURCE_LOCATION));
 		this.issues.addIssue(AssetType.TEAM, TEAM_NAME,
-				"Can not obtain resource at location '"
-						+ NoResourceTeamSource.RESOURCE_LOCATION + "'");
+				"Can not obtain resource at location '" + NoResourceTeamSource.RESOURCE_LOCATION + "'");
 
 		// Attempt to construct team
 		this.replayMockObjects();
@@ -293,15 +269,10 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 		final RuntimeException failure = new RuntimeException("create failure");
 
 		// Record team source that fails to initialise
-		this.recordReturn(this.configuration, this.configuration.getTeamName(),
-				TEAM_NAME);
-		this.recordReturn(this.configuration,
-				this.configuration.getTeamSourceClass(),
-				FailCreateTeamSource.class);
-		this.recordReturn(this.configuration,
-				this.configuration.getProperties(), new SourcePropertiesImpl());
-		this.issues.addIssue(AssetType.TEAM, TEAM_NAME,
-				"Failed to create Team", failure);
+		this.recordReturn(this.configuration, this.configuration.getTeamName(), TEAM_NAME);
+		this.recordReturn(this.configuration, this.configuration.getTeamSourceClass(), FailCreateTeamSource.class);
+		this.recordReturn(this.configuration, this.configuration.getProperties(), new SourcePropertiesImpl());
+		this.issues.addIssue(AssetType.TEAM, TEAM_NAME, "Failed to create Team", failure);
 
 		// Attempt to construct team
 		this.replayMockObjects();
@@ -333,14 +304,10 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	public void testNullTeamSourced() {
 
 		// Record team source that fails to initialise
-		this.recordReturn(this.configuration, this.configuration.getTeamName(),
-				TEAM_NAME);
-		this.recordReturn(this.configuration,
-				this.configuration.getTeamSourceClass(), SourceTeamSource.class);
-		this.recordReturn(this.configuration,
-				this.configuration.getProperties(), new SourcePropertiesImpl());
-		this.issues.addIssue(AssetType.TEAM, TEAM_NAME,
-				"TeamSource failed to provide Team");
+		this.recordReturn(this.configuration, this.configuration.getTeamName(), TEAM_NAME);
+		this.recordReturn(this.configuration, this.configuration.getTeamSourceClass(), SourceTeamSource.class);
+		this.recordReturn(this.configuration, this.configuration.getProperties(), new SourcePropertiesImpl());
+		this.issues.addIssue(AssetType.TEAM, TEAM_NAME, "TeamSource failed to provide Team");
 
 		// Attempt to construct team
 		this.replayMockObjects();
@@ -358,12 +325,9 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 		final Team team = this.createMock(Team.class);
 
 		// Record constructing team
-		this.recordReturn(this.configuration, this.configuration.getTeamName(),
-				TEAM_NAME);
-		this.recordReturn(this.configuration,
-				this.configuration.getTeamSourceClass(), NameTeamSource.class);
-		this.recordReturn(this.configuration,
-				this.configuration.getProperties(), new SourcePropertiesImpl());
+		this.recordReturn(this.configuration, this.configuration.getTeamName(), TEAM_NAME);
+		this.recordReturn(this.configuration, this.configuration.getTeamSourceClass(), NameTeamSource.class);
+		this.recordReturn(this.configuration, this.configuration.getProperties(), new SourcePropertiesImpl());
 
 		// Attempt to construct team
 		this.replayMockObjects();
@@ -374,8 +338,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure team source initialise
-		assertTrue("Team Source should be initialised",
-				NameTeamSource.isInitialised);
+		assertTrue("Team Source should be initialised", NameTeamSource.isInitialised);
 	}
 
 	/**
@@ -407,12 +370,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 			isInitialised = true;
 
 			// Validate the team
-			assertEquals("Incorrect team name", expectedTeamName,
-					context.getTeamName());
-
-			// Ensure have team identifier
-			assertNotNull("Must have team identifier",
-					context.getTeamIdentifier());
+			assertEquals("Incorrect team name", expectedTeamName, context.getTeamName());
 
 			// Return the team
 			return team;
@@ -421,19 +379,16 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensures able to successfully source the {@link Team} and details of
-	 * {@link RawTeamMetaDataImpl} are correct.
+	 * {@link RawTeamMetaData} are correct.
 	 */
 	public void testTeamSourced() {
 
 		final Team team = this.createMock(Team.class);
 
 		// Record constructing team
-		this.recordReturn(this.configuration, this.configuration.getTeamName(),
-				TEAM_NAME);
-		this.recordReturn(this.configuration,
-				this.configuration.getTeamSourceClass(), SourceTeamSource.class);
-		this.recordReturn(this.configuration,
-				this.configuration.getProperties(), new SourcePropertiesImpl());
+		this.recordReturn(this.configuration, this.configuration.getTeamName(), TEAM_NAME);
+		this.recordReturn(this.configuration, this.configuration.getTeamSourceClass(), SourceTeamSource.class);
+		this.recordReturn(this.configuration, this.configuration.getProperties(), new SourcePropertiesImpl());
 
 		// Attempt to construct team
 		this.replayMockObjects();
@@ -443,10 +398,8 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 
 		// Ensure meta-data is correct
 		assertEquals("Incorrect team name", TEAM_NAME, metaData.getTeamName());
-		assertEquals("Incorrect team", team, metaData.getTeamManagement()
-				.getTeam());
-		assertEquals("Should be no listeners", 0,
-				metaData.getProcessContextListeners().length);
+		assertEquals("Incorrect team", team, metaData.getTeamManagement().getTeam());
+		assertFalse("Should not be thread local aware", metaData.isRequireThreadLocalAwareness());
 	}
 
 	/**
@@ -467,59 +420,40 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to register a {@link ProcessContextListener}.
+	 * Ensure able to register a {@link ThreadLocalAwareTeam}.
 	 */
-	public void testRegisterProcessContextListener() {
+	public void testRegisterThreadLocalAwareTeam() {
 
-		final ProcessContextListener listener = this
-				.createMock(ProcessContextListener.class);
-		final Team team = this.createMock(Team.class);
+		MockThreadLocalAwareTeamSource.context = null;
 
 		// Record constructing team
-		this.recordReturn(this.configuration, this.configuration.getTeamName(),
-				TEAM_NAME);
-		this.recordReturn(this.configuration,
-				this.configuration.getTeamSourceClass(),
-				ProcessContextListenerTeamSource.class);
-		this.recordReturn(this.configuration,
-				this.configuration.getProperties(), new SourcePropertiesImpl());
+		this.recordReturn(this.configuration, this.configuration.getTeamName(), TEAM_NAME);
+		this.recordReturn(this.configuration, this.configuration.getTeamSourceClass(),
+				MockThreadLocalAwareTeamSource.class);
+		this.recordReturn(this.configuration, this.configuration.getProperties(), new SourcePropertiesImpl());
 
 		// Attempt to construct team
 		this.replayMockObjects();
-		ProcessContextListenerTeamSource.listener = listener;
-		ProcessContextListenerTeamSource.team = team;
 		RawTeamMetaData metaData = this.constructRawTeamMetaData(true);
 		this.verifyMockObjects();
 
 		// Ensure meta-data is correct
 		assertEquals("Incorrect team name", TEAM_NAME, metaData.getTeamName());
-		assertEquals("Incorrect team", team, metaData.getTeamManagement()
-				.getTeam());
-		ProcessContextListener[] listeners = metaData
-				.getProcessContextListeners();
-		assertEquals("Should be a listener", 1, listeners.length);
-		assertEquals("Incorrect listener", listener, listeners[0]);
+		assertTrue("Should be thread local aware", metaData.isRequireThreadLocalAwareness());
+		assertNotNull("Should have thread local aware context", MockThreadLocalAwareTeamSource.context);
 	}
 
 	/**
-	 * {@link TeamSource} that registers a {@link ProcessContextListener}.
+	 * Mock {@link ThreadLocalAwareTeam}.
 	 */
 	@TestSource
-	public static class ProcessContextListenerTeamSource extends
-			SourceTeamSource {
+	public static class MockThreadLocalAwareTeamSource extends TeamSourceAdapter implements ThreadLocalAwareTeam {
 
-		/**
-		 * {@link ProcessContextListener}.
-		 */
-		public static ProcessContextListener listener;
+		public static ThreadLocalAwareContext context = null;
 
 		@Override
-		public Team createTeam(TeamSourceContext context) throws Exception {
-			// Register the listener
-			context.registerProcessContextListener(listener);
-
-			// Create and return the team
-			return super.createTeam(context);
+		public void setThreadLocalAwareness(ThreadLocalAwareContext context) {
+			MockThreadLocalAwareTeamSource.context = context;
 		}
 	}
 
@@ -528,13 +462,11 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	 * 
 	 * @return {@link RawTeamMetaDataImpl}.
 	 */
-	private RawTeamMetaData constructRawTeamMetaData(
-			boolean isExpectConstruction) {
+	private RawTeamMetaData constructRawTeamMetaData(boolean isExpectConstruction) {
 
 		// Attempt to construct
-		RawTeamMetaData metaData = RawTeamMetaDataImpl.getFactory()
-				.constructRawTeamMetaData(this.configuration,
-						this.sourceContext, this.issues);
+		RawTeamMetaData metaData = RawTeamMetaDataImpl.getFactory().constructRawTeamMetaData(this.configuration,
+				this.sourceContext, this.threadLocalAwareExecutor, this.issues);
 
 		// Provide assertion on whether should be constructed
 		if (isExpectConstruction) {

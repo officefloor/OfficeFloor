@@ -18,7 +18,6 @@
 package net.officefloor.frame.impl.execute.team;
 
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.api.team.TeamIdentifier;
 import net.officefloor.frame.internal.structure.TeamManagement;
 
 /**
@@ -29,20 +28,9 @@ import net.officefloor.frame.internal.structure.TeamManagement;
 public class TeamManagementImpl implements TeamManagement {
 
 	/**
-	 * Creates a {@link TeamIdentifier}.
-	 * 
-	 * @return {@link TeamIdentifier}.
+	 * Identifier for the {@link Team} under this {@link TeamManagement}.
 	 */
-	public static TeamIdentifier createTeamIdentifier() {
-		return new TeamIdentifier() {
-		};
-	}
-
-	/**
-	 * {@link TeamIdentifier} identifying the {@link Team} under this
-	 * {@link TeamManagement}.
-	 */
-	private final TeamIdentifier teamIdentifier;
+	private final Object teamIdentifier = new Object();
 
 	/**
 	 * {@link Team} under this {@link TeamManagement}.
@@ -53,24 +41,13 @@ public class TeamManagementImpl implements TeamManagement {
 	 * Initiate.
 	 * 
 	 * @param teamIdentifier
-	 *            {@link TeamIdentifier} identifying the {@link Team} under this
+	 *            Identifier for the {@link Team} under this
 	 *            {@link TeamManagement}.
 	 * @param team
 	 *            {@link Team} under this {@link TeamManagement}.
 	 */
-	public TeamManagementImpl(TeamIdentifier teamIdentifier, Team team) {
-		this.teamIdentifier = teamIdentifier;
-		this.team = team;
-	}
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param team
-	 *            {@link Team} under this {@link TeamManagement}.
-	 */
 	public TeamManagementImpl(Team team) {
-		this(createTeamIdentifier(), team);
+		this.team = team;
 	}
 
 	/*
@@ -78,7 +55,7 @@ public class TeamManagementImpl implements TeamManagement {
 	 */
 
 	@Override
-	public TeamIdentifier getIdentifier() {
+	public Object getIdentifier() {
 		return this.teamIdentifier;
 	}
 

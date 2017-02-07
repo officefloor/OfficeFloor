@@ -19,7 +19,6 @@ package net.officefloor.frame.impl.execute.job;
 
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.api.team.TeamIdentifier;
 import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
@@ -37,10 +36,9 @@ import net.officefloor.frame.internal.structure.ThreadState;
 public class FunctionLoopImpl implements FunctionLoop {
 
 	/**
-	 * {@link TeamIdentifier} for the {@link FunctionLoopImpl}.
+	 * Identifier for the {@link FunctionLoop}.
 	 */
-	private final TeamIdentifier LOOP_TEAM = new TeamIdentifier() {
-	};
+	private final Object LOOP_TEAM = new Object();
 
 	/**
 	 * Default {@link TeamManagement} to assign {@link FunctionState} instances.
@@ -54,7 +52,7 @@ public class FunctionLoopImpl implements FunctionLoop {
 	 *            Default {@link TeamManagement}. May be <code>null</code>.
 	 */
 	public FunctionLoopImpl(TeamManagement defaultTeam) {
-		this.defaultTeam = (defaultTeam != null) ? defaultTeam : new TeamManagementImpl(LOOP_TEAM, new PassiveTeam());
+		this.defaultTeam = (defaultTeam != null) ? defaultTeam : new TeamManagementImpl(new PassiveTeam());
 	}
 
 	/*
@@ -95,12 +93,12 @@ public class FunctionLoopImpl implements FunctionLoop {
 	 *            Flag indicating if changes to the {@link ThreadState} are safe
 	 *            on the current {@link Thread}.
 	 * @param currentTeam
-	 *            {@link TeamIdentifier} of the current {@link Team}.
+	 *            Identifier of the current {@link Team}.
 	 * @return Optional next {@link FunctionState} that requires execution by
 	 *         another {@link ThreadState} (or {@link TeamManagement}).
 	 */
 	private FunctionState executeThreadStateFunctionLoop(FunctionState headFunction, boolean isThreadStateSafe,
-			TeamIdentifier currentTeam) {
+			Object currentTeam) {
 
 		// Obtain the thread state for loop
 		ThreadState threadState = headFunction.getThreadState();
@@ -167,10 +165,9 @@ public class FunctionLoopImpl implements FunctionLoop {
 		private final FunctionState initialFunction;
 
 		/**
-		 * {@link TeamIdentifier} of the current {@link Team} executing this
-		 * {@link Job}.
+		 * Identifier of the current {@link Team} executing this {@link Job}.
 		 */
-		protected TeamIdentifier currentTeam;
+		protected Object currentTeam;
 
 		/**
 		 * Instantiate.
@@ -178,10 +175,10 @@ public class FunctionLoopImpl implements FunctionLoop {
 		 * @param initialFunction
 		 *            Initial {@link FunctionState}.
 		 * @param currentTeam
-		 *            {@link TeamIdentifier} of the current {@link Team}
-		 *            executing this {@link Job}.
+		 *            Identifier of the current {@link Team} executing this
+		 *            {@link Job}.
 		 */
-		public UnsafeLoop(FunctionState initialFunction, TeamIdentifier currentTeam) {
+		public UnsafeLoop(FunctionState initialFunction, Object currentTeam) {
 			this.initialFunction = initialFunction;
 			this.currentTeam = currentTeam;
 		}
@@ -282,9 +279,9 @@ public class FunctionLoopImpl implements FunctionLoop {
 		 * @param initialFunction
 		 *            Initial {@link FunctionState}.
 		 * @param currentTeam
-		 *            Current {@link TeamIdentifier}.
+		 *            Current {@link Team} identifier.
 		 */
-		public SafeLoop(FunctionState initialFunction, TeamIdentifier currentTeam) {
+		public SafeLoop(FunctionState initialFunction, Object currentTeam) {
 			super(initialFunction, currentTeam);
 		}
 

@@ -32,7 +32,6 @@ import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFlow;
 
 /**
@@ -55,7 +54,7 @@ public class NameAwareTaskStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressNameAware_LeaderFollowerTeam() throws Exception {
-		this.doTest(new LeaderFollowerTeam("TEST", MockTeamSource.createTeamIdentifier(), 5, 100));
+		this.doTest(new LeaderFollowerTeam("TEST", 5, 100));
 	}
 
 	/**
@@ -63,7 +62,7 @@ public class NameAwareTaskStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressNameAware_ExecutorFixedTeam() throws Exception {
-		this.doTest(ExecutorFixedTeamSource.createTeam("TEST", MockTeamSource.createTeamIdentifier(), 5));
+		this.doTest(ExecutorFixedTeamSource.createTeam("TEST", 5));
 	}
 
 	/**

@@ -204,11 +204,6 @@ public class JobQueue {
 		private final Job job;
 
 		/**
-		 * Previous {@link JobEntry}.
-		 */
-		private JobEntry prev = null;
-
-		/**
 		 * Next {@link JobEntry}.
 		 */
 		private JobEntry next = null;

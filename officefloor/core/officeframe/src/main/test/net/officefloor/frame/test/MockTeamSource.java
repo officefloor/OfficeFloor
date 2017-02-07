@@ -24,7 +24,6 @@ import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.api.team.TeamIdentifier;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.api.team.source.TeamSourceSpecification;
@@ -38,16 +37,6 @@ import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeam;
  */
 @TestSource
 public class MockTeamSource implements TeamSource {
-
-	/**
-	 * Creates a {@link TeamIdentifier} for testing.
-	 * 
-	 * @return {@link TeamIdentifier} for testing.
-	 */
-	public static TeamIdentifier createTeamIdentifier() {
-		return new TeamIdentifier() {
-		};
-	}
 
 	/**
 	 * Convenience method to create a {@link OnePersonTeam}.

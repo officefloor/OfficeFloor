@@ -43,9 +43,7 @@ import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
-import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
@@ -493,7 +491,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Ensures able to construct {@link Flow} for a {@link ManagedObject} .
 	 */
-	public void testConstructFlow() {
+	public void testConstructFlow() throws Exception {
 
 		final ManagedObjectFlowMetaData<?> flowMetaData = this.createMock(ManagedObjectFlowMetaData.class);
 		final ManagedObjectFlowConfiguration<?> flowConfiguration = this
@@ -502,7 +500,6 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		final ManagedFunctionMetaData<?, ?> taskMetaData = this.createMock(ManagedFunctionMetaData.class);
 		final String parameter = "PARAMETER";
 		final ManagedObject managedObject = this.createMock(ManagedObject.class);
-		final ManagedFunctionContainer function = this.createMock(ManagedFunctionContainer.class);
 
 		// Record construct flow
 		this.record_managedObjectSourceName_and_managedFunctionLocator();
@@ -518,33 +515,28 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(taskMetaData, taskMetaData.getParameterType(), Object.class);
 
 		// Record invoking the flow
-		this.recordReturn(this.officeMetaData,
-				this.officeMetaData.createProcess(null, parameter, null, null, managedObject, this.moMetaData, 0),
-				function, new AbstractMatcher() {
-					@Override
-					public boolean matches(Object[] expected, Object[] actual) {
-						FlowMetaData flowMetaData = (FlowMetaData) actual[0];
-						assertEquals("Incorrect parameter", parameter, actual[1]);
-						assertEquals("Incorrect managed object", managedObject, actual[4]);
-						assertEquals("Incorrect managed object meta-data",
-								RawManagingOfficeMetaDataTest.this.moMetaData, actual[5]);
-						assertEquals("Incorrect process index", 0, actual[6]);
+		this.officeMetaData.invokeProcess(null, parameter, 0, null, null, managedObject, this.moMetaData, 0);
+		this.control(this.officeMetaData).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				FlowMetaData flowMetaData = (FlowMetaData) actual[0];
+				assertEquals("Incorrect parameter", parameter, actual[1]);
+				assertEquals("Incorrect delay", Long.valueOf(0), actual[2]);
+				assertNull("Should be no flow callback", actual[3]);
+				assertNull("Should be no flow callback thread state", actual[4]);
+				assertEquals("Incorrect managed object", managedObject, actual[5]);
+				assertEquals("Incorrect managed object meta-data", RawManagingOfficeMetaDataTest.this.moMetaData,
+						actual[6]);
+				assertEquals("Incorrect process index", 0, actual[7]);
 
-						// Validate flow meta-data
-						assertEquals("Incorrect task meta-data", taskMetaData,
-								flowMetaData.getInitialFunctionMetaData());
-						assertFalse("Within new process so no need to spawn thread state",
-								flowMetaData.isSpawnThreadState());
+				// Validate flow meta-data
+				assertEquals("Incorrect task meta-data", taskMetaData, flowMetaData.getInitialFunctionMetaData());
+				assertFalse("Within new process so no need to spawn thread state", flowMetaData.isSpawnThreadState());
 
-						// Matches if at this point
-						return true;
-					}
-				});
-
-		// Record activating function (and subsequently process)
-		FunctionLoop functionLoop = this.createMock(FunctionLoop.class);
-		this.recordReturn(this.officeMetaData, this.officeMetaData.getFunctionLoop(), functionLoop);
-		functionLoop.executeFunction(function);
+				// Matches if at this point
+				return true;
+			}
+		});
 
 		// Manage by office
 		this.replayMockObjects();
@@ -559,7 +551,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	 * Ensures able to construct {@link Flow} for a {@link ManagedObject} that
 	 * is not the first bound or first instance.
 	 */
-	public void testConstructFlowOfNotFirstBoundOrInstance() {
+	public void testConstructFlowOfNotFirstBoundOrInstance() throws Exception {
 
 		final int processMoIndex = 2;
 		final int instanceIndex = 3;
@@ -571,7 +563,6 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		final ManagedFunctionMetaData<?, ?> functionMetaData = this.createMock(ManagedFunctionMetaData.class);
 		final String parameter = "PARAMETER";
 		final ManagedObject managedObject = this.createMock(ManagedObject.class);
-		final ManagedFunctionContainer function = this.createMock(ManagedFunctionContainer.class);
 
 		// Record construct flow
 		this.record_managedObjectSourceName_and_managedFunctionLocator();
@@ -589,32 +580,30 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(functionMetaData, functionMetaData.getParameterType(), Object.class);
 
 		// Record invoking the flow
-		this.recordReturn(this.officeMetaData, this.officeMetaData.createProcess(null, parameter, null, null,
-				managedObject, this.moMetaData, processMoIndex), function, new AbstractMatcher() {
-					@Override
-					public boolean matches(Object[] expected, Object[] actual) {
-						FlowMetaData flowMetaData = (FlowMetaData) actual[0];
-						assertEquals("Incorrect parameter", parameter, actual[1]);
-						assertNull("Should not have escalation handler", actual[2]);
-						assertEquals("Incorrect managed object", managedObject, actual[4]);
-						assertEquals("Incorrect managed object meta-data",
-								RawManagingOfficeMetaDataTest.this.moMetaData, actual[5]);
-						assertEquals("Incorrect process index", processMoIndex, actual[6]);
+		this.officeMetaData.invokeProcess(null, parameter, 0, null, null, managedObject, this.moMetaData,
+				processMoIndex);
+		this.control(this.officeMetaData).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				FlowMetaData flowMetaData = (FlowMetaData) actual[0];
+				assertEquals("Incorrect parameter", parameter, actual[1]);
+				assertEquals("Incorrect delay", Long.valueOf(0), actual[2]);
+				assertNull("Should not have flow callback", actual[3]);
+				assertNull("Should not have flow callback thread state", actual[4]);
+				assertEquals("Incorrect managed object", managedObject, actual[5]);
+				assertEquals("Incorrect managed object meta-data", RawManagingOfficeMetaDataTest.this.moMetaData,
+						actual[6]);
+				assertEquals("Incorrect process index", processMoIndex, actual[7]);
 
-						// Validate flow meta-data
-						assertEquals("Incorrect function meta-data", functionMetaData,
-								flowMetaData.getInitialFunctionMetaData());
-						assertFalse("In process, so no need to spawn thread state", flowMetaData.isSpawnThreadState());
+				// Validate flow meta-data
+				assertEquals("Incorrect function meta-data", functionMetaData,
+						flowMetaData.getInitialFunctionMetaData());
+				assertFalse("In process, so no need to spawn thread state", flowMetaData.isSpawnThreadState());
 
-						// Matches if at this point
-						return true;
-					}
-				});
-
-		// Record activating function (and subsequently process)
-		FunctionLoop functionLoop = this.createMock(FunctionLoop.class);
-		this.recordReturn(this.officeMetaData, this.officeMetaData.getFunctionLoop(), functionLoop);
-		functionLoop.executeFunction(function);
+				// Matches if at this point
+				return true;
+			}
+		});
 
 		// Manage by office
 		this.replayMockObjects();

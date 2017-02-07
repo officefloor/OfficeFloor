@@ -19,7 +19,6 @@ package net.officefloor.frame.impl.execute.process;
 
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.team.source.ProcessContextListener;
 import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
@@ -40,6 +39,7 @@ import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
@@ -75,9 +75,9 @@ public class ProcessStateImpl implements ProcessState {
 	private final ProcessMetaData processMetaData;
 
 	/**
-	 * {@link ProcessContextListener} instances.
+	 * {@link ThreadLocalAwareExecutor}.
 	 */
-	private final ProcessContextListener[] processContextListeners;
+	private final ThreadLocalAwareExecutor threadLocalAwareExecutor;
 
 	/**
 	 * Main {@link ThreadState} for this {@link ProcessState}.
@@ -104,8 +104,6 @@ public class ProcessStateImpl implements ProcessState {
 	 * 
 	 * @param processMetaData
 	 *            {@link ProcessMetaData} for this {@link ProcessState}.
-	 * @param processContextListeners
-	 *            {@link ProcessContextListener} instances.
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData}.
 	 * @param callback
@@ -113,13 +111,15 @@ public class ProcessStateImpl implements ProcessState {
 	 * @param callbackThreadState
 	 *            Optional {@link FlowCallback} {@link ThreadState}. May be
 	 *            <code>null</code>.
+	 * @param threadLocalAwareExecutor
+	 *            {@link ThreadLocalAwareExecutor}.
 	 * @param processProfiler
 	 *            Optional {@link ProcessProfiler}. May be <code>null</code>.
 	 */
-	public ProcessStateImpl(ProcessMetaData processMetaData, ProcessContextListener[] processContextListeners,
-			OfficeMetaData officeMetaData, FlowCallback callback, ThreadState callbackThreadState,
+	public ProcessStateImpl(ProcessMetaData processMetaData, OfficeMetaData officeMetaData, FlowCallback callback,
+			ThreadState callbackThreadState, ThreadLocalAwareExecutor threadLocalAwareExecutor,
 			ProcessProfiler processProfiler) {
-		this(processMetaData, processContextListeners, officeMetaData, callback, callbackThreadState, processProfiler,
+		this(processMetaData, officeMetaData, callback, callbackThreadState, threadLocalAwareExecutor, processProfiler,
 				null, null, -1);
 	}
 
@@ -128,8 +128,6 @@ public class ProcessStateImpl implements ProcessState {
 	 * 
 	 * @param processMetaData
 	 *            {@link ProcessMetaData} for this {@link ProcessState}.
-	 * @param processContextListeners
-	 *            {@link ProcessContextListener} instances.
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData}.
 	 * @param callback
@@ -137,6 +135,8 @@ public class ProcessStateImpl implements ProcessState {
 	 * @param callbackThreadState
 	 *            Optional {@link FlowCallback} {@link ThreadState}. May be
 	 *            <code>null</code>.
+	 * @param threadLocalAwareExecutor
+	 *            {@link ThreadLocalAwareExecutor}.
 	 * @param processProfiler
 	 *            Optional {@link ProcessProfiler}. May be <code>null</code>.
 	 * @param inputManagedObject
@@ -150,13 +150,13 @@ public class ProcessStateImpl implements ProcessState {
 	 *            Index of the input {@link ManagedObject} within this
 	 *            {@link ProcessState}.
 	 */
-	public ProcessStateImpl(ProcessMetaData processMetaData, ProcessContextListener[] processContextListeners,
-			OfficeMetaData officeMetaData, FlowCallback callback, ThreadState callbackThreadState,
+	public ProcessStateImpl(ProcessMetaData processMetaData, OfficeMetaData officeMetaData, FlowCallback callback,
+			ThreadState callbackThreadState, ThreadLocalAwareExecutor threadLocalAwareExecutor,
 			ProcessProfiler processProfiler, ManagedObject inputManagedObject,
 			ManagedObjectMetaData<?> inputManagedObjectMetaData, int inputManagedObjectIndex) {
 		this.processMetaData = processMetaData;
-		this.processContextListeners = processContextListeners;
 		this.officeMetaData = officeMetaData;
+		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
 		this.processProfiler = processProfiler;
 
 		// Create the main thread state
@@ -259,8 +259,8 @@ public class ProcessStateImpl implements ProcessState {
 						public FunctionState execute() throws Throwable {
 
 							// Notify process context complete
-							for (ProcessContextListener listener : process.processContextListeners) {
-								listener.processCompleted(process.processIdentifier);
+							if (process.threadLocalAwareExecutor != null) {
+								process.threadLocalAwareExecutor.processComplete(process);
 							}
 
 							// Flag to profile that process complete

@@ -63,10 +63,16 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 *            immediately.
 	 * @param callback
 	 *            {@link FlowCallback} on completion of the {@link Flow}.
-	 * 
-	 * @see ManagedObjectExecuteContext
+	 * @throws IllegalArgumentException
+	 *             If
+	 *             <ul>
+	 *             <li>unknown {@link Flow} key</li>
+	 *             <li>parameter is incorrect type</li>
+	 *             <li>no {@link ManagedObject} is supplied</li>
+	 *             </ul>
 	 */
-	void invokeProcess(F key, Object parameter, ManagedObject managedObject, long delay, FlowCallback callback);
+	void invokeProcess(F key, Object parameter, ManagedObject managedObject, long delay, FlowCallback callback)
+			throws IllegalArgumentException;
 
 	/**
 	 * Instigates a {@link Flow}.
@@ -85,9 +91,15 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 *            immediately.
 	 * @param callback
 	 *            {@link FlowCallback} on completion of the {@link Flow}.
-	 * 
-	 * @see ManagedObjectExecuteContext
+	 * @throws IllegalArgumentException
+	 *             If
+	 *             <ul>
+	 *             <li>unknown {@link Flow} index</li>
+	 *             <li>parameter is incorrect type</li>
+	 *             <li>no {@link ManagedObject} is supplied</li>
+	 *             </ul>
 	 */
-	void invokeProcess(int flowIndex, Object parameter, ManagedObject managedObject, long delay, FlowCallback callback);
+	void invokeProcess(int flowIndex, Object parameter, ManagedObject managedObject, long delay, FlowCallback callback)
+			throws IllegalArgumentException;
 
 }

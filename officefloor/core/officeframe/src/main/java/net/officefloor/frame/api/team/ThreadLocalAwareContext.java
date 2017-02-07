@@ -15,29 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.team.source;
+package net.officefloor.frame.api.team;
 
-import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.internal.structure.ProcessState;
 
 /**
- * Context for the {@link TeamSource}.
- * 
+ * Context for the {@link ThreadLocalAwareTeam} {@link Team}.
+ *
  * @author Daniel Sagenschneider
  */
-public interface TeamSourceContext extends SourceContext {
+public interface ThreadLocalAwareContext {
 
 	/**
-	 * <p>
-	 * Obtains the name of the {@link Team} to be created from the
-	 * {@link TeamSource}.
-	 * <p>
-	 * This enables naming the {@link Thread} instances for the {@link Team} to
-	 * be specific to the {@link Team}.
+	 * Executes the {@link Job} within the invoking {@link Thread} of the
+	 * {@link ProcessState} to respect the {@link ThreadLocal} instances.
 	 * 
-	 * @return Name of the {@link Team} to be created from the
-	 *         {@link TeamSource}.
+	 * @param job
+	 *            {@link Job} to be executed.
 	 */
-	String getTeamName();
+	void execute(Job job);
 
 }

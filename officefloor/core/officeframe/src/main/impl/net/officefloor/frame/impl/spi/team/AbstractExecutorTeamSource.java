@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.api.team.TeamIdentifier;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.api.team.source.impl.AbstractTeamSource;
@@ -94,11 +93,9 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 	 * 
 	 * @param executorServiceFactory
 	 *            {@link ExecutorServiceFactory}.
-	 * @param teamIdentifier
-	 *            {@link TeamIdentifier}.
 	 * @return {@link Team}.
 	 */
-	protected static Team createTeam(ExecutorServiceFactory executorServiceFactory, TeamIdentifier teamIdentifier) {
+	protected static Team createTeam(ExecutorServiceFactory executorServiceFactory) {
 		// Create and return the executor team
 		return new ExecutorTeam(executorServiceFactory);
 	}

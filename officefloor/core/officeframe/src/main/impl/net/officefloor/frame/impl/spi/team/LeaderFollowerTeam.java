@@ -19,7 +19,6 @@ package net.officefloor.frame.impl.spi.team;
 
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.api.team.TeamIdentifier;
 
 /**
  * {@link Team} implementation of many {@link Thread} instances that follow the
@@ -60,7 +59,7 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 	 * @param waitTime
 	 *            Time to wait in milliseconds for a {@link Job}.
 	 */
-	public LeaderFollowerTeam(String teamName, TeamIdentifier teamIdentifier, int teamMemberCount, long waitTime) {
+	public LeaderFollowerTeam(String teamName, int teamMemberCount, long waitTime) {
 		super(teamName);
 
 		// Create the Team Member stack (indicating number of Team Members)

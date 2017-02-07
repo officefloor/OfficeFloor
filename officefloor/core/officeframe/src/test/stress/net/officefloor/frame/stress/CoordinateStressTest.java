@@ -39,7 +39,6 @@ import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 
@@ -65,7 +64,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressCoordination_LeaderFollowerTeam() throws Exception {
-		this.doTest(new LeaderFollowerTeam("TEST", MockTeamSource.createTeamIdentifier(), 3, 100));
+		this.doTest(new LeaderFollowerTeam("TEST", 3, 100));
 	}
 
 	/**
@@ -74,7 +73,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressCoordination_ExecutorFixedTeam() throws Exception {
-		this.doTest(ExecutorFixedTeamSource.createTeam("TEST", MockTeamSource.createTeamIdentifier(), 3));
+		this.doTest(ExecutorFixedTeamSource.createTeam("TEST", 3));
 	}
 
 	/**

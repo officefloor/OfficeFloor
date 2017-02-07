@@ -17,14 +17,12 @@
  */
 package net.officefloor.frame.impl.execute.officefloor;
 
-import java.util.TimerTask;
-
 import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -100,24 +98,15 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements Manag
 		}
 		FlowMetaData flowMetaData = this.processLinks[flowIndex];
 
-		// Create the function in a new process
-		final FunctionState function = this.officeMetaData.createProcess(flowMetaData, parameter, callback, null,
-				managedObject, this.managedObjectMetaData, this.processMoIndex);
+		try {
+			
+			// Invoke the process
+			this.officeMetaData.invokeProcess(flowMetaData, parameter, delay, callback, null, managedObject,
+					this.managedObjectMetaData, this.processMoIndex);
 
-		// Trigger the process
-		if (delay > 0) {
-			// Delay execution of the process
-			ManagedObjectExecuteContextImpl.this.officeMetaData.getOfficeTimer().schedule(new TimerTask() {
-				@Override
-				public void run() {
-					// Must delegate to not hold up timer thread
-					ManagedObjectExecuteContextImpl.this.officeMetaData.getFunctionLoop().delegateFunction(function);
-				}
-			}, delay);
-
-		} else {
-			// Execute the process immediately on current thread
-			ManagedObjectExecuteContextImpl.this.officeMetaData.getFunctionLoop().executeFunction(function);
+		} catch (InvalidParameterTypeException ex) {
+			// Propagate (unlikely so no need for checked exception)
+			throw new IllegalArgumentException(ex);
 		}
 	}
 

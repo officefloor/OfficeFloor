@@ -21,15 +21,15 @@ import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.ThreadLocalAwareTeam;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.impl.spi.team.ProcessContextTeam;
-import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
+import net.officefloor.frame.impl.spi.team.ThreadLocalAwareTeamSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 
 /**
- * Stress tests the {@link ProcessContextTeam}.
+ * Stress tests the {@link ThreadLocalAwareTeam}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -41,7 +41,7 @@ public class ProcessContextTeamStressTest extends AbstractOfficeConstructTestCas
 	private volatile Throwable failure;
 
 	/**
-	 * Stress tests the {@link ProcessContextTeam}.
+	 * Stress tests the {@link ThreadLocalAwareTeam}.
 	 */
 	@StressTest
 	public void testStressProcessContextTeam() throws Throwable {
@@ -52,7 +52,7 @@ public class ProcessContextTeamStressTest extends AbstractOfficeConstructTestCas
 		final String officeName = this.getOfficeName();
 
 		// Provide the teams
-		this.constructTeam("CONTEXT_TEAM", ProcessContextTeamSource.class);
+		this.constructTeam("CONTEXT_TEAM", ThreadLocalAwareTeamSource.class);
 		this.constructTeam("STATIC_TEAM", new OnePersonTeam("STATIC_TEAM", 100));
 
 		// Create the context parameters
@@ -256,7 +256,8 @@ public class ProcessContextTeamStressTest extends AbstractOfficeConstructTestCas
 				}
 
 				// Invoke the function
-				ProcessContextTeam.doFunction(manager, this);
+				//ThreadLocalAwareTeam.doFunction(manager, this);
+				fail("No longer require wrapping doFunction, as handled internally if require thread local awareness");
 
 				// Ensure correct number of invocations.
 				// No need to synchronise as should be on the same Thread.

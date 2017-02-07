@@ -18,7 +18,6 @@
 package net.officefloor.frame.api.team;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.team.source.ProcessContextListener;
 import net.officefloor.frame.internal.structure.ProcessState;
 
 /**
@@ -38,13 +37,13 @@ public interface Job extends Runnable {
 	 * <p>
 	 * An example use would be embedding {@link OfficeFloor} within an
 	 * Application Server and using this identifier and a
-	 * {@link ProcessContextListener} to know the invoking {@link Thread} for
+	 * {@link ThreadLocalAwareTeam} to know the invoking {@link Thread} for
 	 * interaction with {@link ThreadLocal} instances of the Application Server.
 	 * 
 	 * @return Identifier for the {@link ProcessState} containing this
 	 *         {@link Job}
 	 * 
-	 * @see ProcessContextListener
+	 * @see ThreadLocalAwareTeam
 	 */
 	Object getProcessIdentifier();
 
@@ -53,7 +52,7 @@ public interface Job extends Runnable {
 	 * with {@link Job} instances.
 	 * 
 	 * @param cause
-	 *            Reason by {@link Team} for cancelling the {@link Job}.
+	 *            Reason by {@link Team} for canceling the {@link Job}.
 	 */
 	void cancel(Throwable cause);
 
