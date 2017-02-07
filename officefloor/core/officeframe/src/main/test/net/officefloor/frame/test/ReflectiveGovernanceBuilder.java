@@ -308,7 +308,7 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 		/**
 		 * Next index to specify the {@link ParameterFactory}.
 		 */
-		private int parameterIndex = 0;
+		private int parameterIndex = 1; // 0 is extensions
 
 		/**
 		 * Builder for the particular {@link Governance} action.
