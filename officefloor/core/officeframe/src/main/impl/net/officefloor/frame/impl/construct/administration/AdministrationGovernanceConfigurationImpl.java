@@ -72,18 +72,12 @@ public class AdministrationGovernanceConfigurationImpl<G extends Enum<G>>
 
 	@Override
 	public int getIndex() {
-		// TODO implement AdministrationGovernanceConfiguration<G>.getIndex
-		throw new UnsupportedOperationException("TODO implement AdministrationGovernanceConfiguration<G>.getIndex");
-
+		return this.index;
 	}
 
 	@Override
 	public String getGovernanceName() {
-		// TODO implement
-		// AdministrationGovernanceConfiguration<G>.getGovernanceName
-		throw new UnsupportedOperationException(
-				"TODO implement AdministrationGovernanceConfiguration<G>.getGovernanceName");
-
+		return this.governanceName;
 	}
 
 }

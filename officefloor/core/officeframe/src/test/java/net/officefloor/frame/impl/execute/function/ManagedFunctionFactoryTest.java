@@ -39,7 +39,7 @@ public class ManagedFunctionFactoryTest extends AbstractOfficeConstructTestCase 
 	 * Ensure able to open {@link OfficeFloor} with just
 	 * {@link ManagedFunctionFactory}.
 	 */
-	public void testWorkFactory() throws Exception {
+	public void testManagedFunctionFactory() throws Exception {
 
 		// Mock
 		final ManagedFunctionFactory<?, ?> functionFactory = this.createMock(ManagedFunctionFactory.class);
@@ -121,12 +121,12 @@ public class ManagedFunctionFactoryTest extends AbstractOfficeConstructTestCase 
 	 * Ensure both name and {@link Office} aware functionality is provided for
 	 * the {@link MockNameAndOfficeAwareWorkFactory}.
 	 */
-	public void testNameAndOfficeAwareWorkFactory() throws Exception {
+	public void testNameAndOfficeAwareManagedFunctionFactory() throws Exception {
 
 		// Mock
 		final String BOUND_NAME = "task";
-		final MockNameAndOfficeAwareWorkFactory functionFactory = this
-				.createMock(MockNameAndOfficeAwareWorkFactory.class);
+		final MockNameAndOfficeAwareManagedFunctionFactory functionFactory = this
+				.createMock(MockNameAndOfficeAwareManagedFunctionFactory.class);
 
 		// Record providing name and Office
 		functionFactory.setBoundFunctionName(BOUND_NAME);
@@ -161,7 +161,7 @@ public class ManagedFunctionFactoryTest extends AbstractOfficeConstructTestCase 
 	 * {@link NameAwareManagedFunctionFactory} and
 	 * {@link OfficeAwareManagedFunctionFactory}.
 	 */
-	public static interface MockNameAndOfficeAwareWorkFactory
+	public static interface MockNameAndOfficeAwareManagedFunctionFactory
 			extends NameAwareManagedFunctionFactory<None, None>, OfficeAwareManagedFunctionFactory<None, None> {
 	}
 

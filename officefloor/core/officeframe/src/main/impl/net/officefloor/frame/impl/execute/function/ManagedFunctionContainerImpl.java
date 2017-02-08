@@ -382,13 +382,14 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			// Spawn any thread states
 			if (this.spawnThreadStateFunction != null) {
 				FunctionState spawn = this.spawnThreadStateFunction;
-				this.spawnThreadStateFunction = null;
+				this.spawnThreadStateFunction = null; // avoid spawning again
 				executeFunctions = Promise.then(executeFunctions, spawn);
 			}
 
 			// Determine if next function registered
 			if (this.nextFunction != null) {
 				executeFunctions = Promise.then(executeFunctions, this.flow.createFunction(this.nextFunction));
+				this.nextFunction = null; // avoid infinite loop
 			}
 
 			// Undertake execute functions

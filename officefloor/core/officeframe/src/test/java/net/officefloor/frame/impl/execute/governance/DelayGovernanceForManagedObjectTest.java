@@ -18,9 +18,11 @@
 package net.officefloor.frame.impl.execute.governance;
 
 import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.managedobject.AsynchronousListener;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.TestObject;
 
 /**
  * Ensure delay {@link Governance} on a {@link ManagedObject} involved in an
@@ -30,7 +32,15 @@ import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
  */
 public class DelayGovernanceForManagedObjectTest extends AbstractOfficeConstructTestCase {
 
+	/**
+	 * Ensure delay {@link Governance} until {@link AsynchronousListener}
+	 * complete.
+	 */
 	public void testDelayGovernanceDueToAsynchronousOperation() {
+		
+		TestObject object = new TestObject("MO", this);
+		object.isAsynchronousManagedObject = true;
+		
 		fail("TODO implement");
 	}
 
@@ -38,4 +48,21 @@ public class DelayGovernanceForManagedObjectTest extends AbstractOfficeConstruct
 		fail("TODO implement");
 	}
 
+	/**
+	 * Test functionality.
+	 */
+	public class TestWork {
+		
+	}
+	
+	/**
+	 * Test {@link Governance}.
+	 */
+	public class TestGovernance {
+
+		public void register(TestObject object) {
+			object.asynchronousListener.notifyStarted();
+		}
+		
+	}
 }
