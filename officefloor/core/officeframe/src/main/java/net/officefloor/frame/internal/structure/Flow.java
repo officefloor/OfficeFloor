@@ -21,13 +21,12 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
-import net.officefloor.frame.impl.execute.function.ManagedFunctionContainerImpl;
 
 /**
- * Represents a sub-graph of the {@link ManagedFunctionContainerImpl} graph
- * making up the {@link ThreadState}. This enables knowing when to undertake the
- * {@link FlowCallback} on completion of all
- * {@link ManagedFunctionContainerImpl} instances of the {@link Flow}.
+ * Represents a sub-graph of the {@link ManagedFunctionContainer} graph making
+ * up the {@link ThreadState}. This enables knowing when to undertake the
+ * {@link FlowCallback} on completion of all {@link ManagedFunctionContainer}
+ * instances of the {@link Flow}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -58,21 +57,21 @@ public interface Flow extends LinkedListSetEntry<Flow, ThreadState> {
 	 * @param parallelFunctionOwner
 	 *            {@link ManagedFunctionContainer} that is the parallel owner of
 	 *            the new {@link ManagedFunction}.
-	 * @return New {@link FunctionState}.
+	 * @return New {@link ManagedFunctionContainer}.
 	 */
 	<O extends Enum<O>, F extends Enum<F>> ManagedFunctionContainer createManagedFunction(Object parameter,
 			ManagedFunctionMetaData<O, F> managedFunctionMetaData, boolean isEnforceGovernance,
 			ManagedFunctionContainer parallelFunctionOwner);
 
 	/**
-	 * Creates a new {@link ManagedFunctionContainerImpl} contained in this
+	 * Creates a new {@link ManagedFunctionContainer} contained in this
 	 * {@link Flow} for the {@link GovernanceActivity}.
 	 * 
 	 * @param governanceActivity
 	 *            {@link GovernanceActivity}.
-	 * @return New {@link ManagedFunctionContainerImpl}.
+	 * @return New {@link ManagedFunctionContainer}.
 	 */
-	<F extends Enum<F>> FunctionState createGovernanceFunction(GovernanceActivity<F> governanceActivity,
+	<F extends Enum<F>> ManagedFunctionContainer createGovernanceFunction(GovernanceActivity<F> governanceActivity,
 			GovernanceMetaData<?, F> governanceMetaData);
 
 	/**

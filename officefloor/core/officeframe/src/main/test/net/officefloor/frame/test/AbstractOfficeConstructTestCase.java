@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import junit.framework.TestCase;
 import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
@@ -46,6 +47,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.OfficeClock;
 
 /**
@@ -534,6 +536,40 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 */
 	public ManagedObjectBuilder<?> constructManagedObject(Object object, String managedObjectName) {
 		return this.constructManagedObject(object, managedObjectName, this.getOfficeName());
+	}
+
+	/**
+	 * Builds the {@link ManagedObject} for use at the desired
+	 * {@link ManagedObjectScope}.
+	 * 
+	 * @param officeManagedObjectName
+	 *            Name to bind the {@link ManagedObject} under.
+	 * @param managedObjectScope
+	 *            {@link ManagedObjectScope} for the {@link ManagedObject}.
+	 * @param managedFunctionBuilder
+	 *            {@link ManagedFunctionBuilder} if binding to
+	 *            {@link ManagedObjectScope#FUNCTION}.
+	 * @return {@link DependencyMappingBuilder} for the bound
+	 *         {@link ManagedObject}.
+	 */
+	public DependencyMappingBuilder bindManagedObject(String bindName, ManagedObjectScope managedObjectScope,
+			ManagedFunctionBuilder<?, ?> managedFunctionBuilder) {
+
+		// Build the managed object based on scope
+		switch (managedObjectScope) {
+		case FUNCTION:
+			return managedFunctionBuilder.addManagedObject(bindName, bindName);
+
+		case THREAD:
+			return this.officeBuilder.addThreadManagedObject(bindName, bindName);
+
+		case PROCESS:
+			return this.officeBuilder.addProcessManagedObject(bindName, bindName);
+
+		default:
+			TestCase.fail("Unknown managed object scope " + managedObjectScope);
+			return null;
+		}
 	}
 
 	/**

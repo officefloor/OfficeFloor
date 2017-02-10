@@ -17,7 +17,6 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 
@@ -48,14 +47,16 @@ public interface GovernanceContainer<E> {
 	 *            {@link Governance}.
 	 * @param managedObjectContainer
 	 *            {@link ManagedObjectContainer} for the {@link ManagedObject}.
-	 * @param flow
-	 *            {@link Flow} that the {@link Governance} will be involved in.
-	 *            {@link ManagedFunction}.
-	 * @param workContainer
-	 *            {@link WorkContainer}.
+	 * @param managedObjectMetaData
+	 *            {@link ManagedObjectMetaData} for the {@link ManagedObject}.
+	 * @param managedFunctionContainer
+	 *            {@link ManagedFunctionContainer} to enable access to
+	 *            {@link ManagedFunctionContainer} bound dependencies.
 	 * @return {@link RegisteredGovernance}.
 	 */
-	RegisteredGovernance registerManagedObject(E managedObjectExtension, ManagedObjectContainer managedObjectContainer);
+	<O extends Enum<O>> RegisteredGovernance registerManagedObject(E managedObjectExtension,
+			ManagedObjectContainer managedObjectContainer, ManagedObjectMetaData<O> managedObjectMetaData,
+			ManagedFunctionContainer managedFunctionContainer);
 
 	/**
 	 * Activates the {@link Governance}. This will co-ordinate the

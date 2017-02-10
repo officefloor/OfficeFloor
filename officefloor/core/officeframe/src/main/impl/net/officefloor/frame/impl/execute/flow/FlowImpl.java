@@ -25,12 +25,11 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.impl.execute.administration.AdministrationFunctionLogic;
 import net.officefloor.frame.impl.execute.function.LinkedListSetPromise;
+import net.officefloor.frame.impl.execute.function.ManagedFunctionBoundManagedObjects;
 import net.officefloor.frame.impl.execute.function.ManagedFunctionContainerImpl;
 import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
-import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionLogicImpl;
-import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
@@ -46,7 +45,6 @@ import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectExtensionExtractor;
 import net.officefloor.frame.internal.structure.ManagedObjectExtensionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
-import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 
@@ -115,13 +113,6 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 			ManagedFunctionMetaData<O, F> managedFunctionMetaData, boolean isEnforceGovernance,
 			ManagedFunctionContainer parallelFunctionOwner) {
 
-		// Create the managed object containers for this managed function
-		ManagedObjectMetaData<?>[] moMetaData = managedFunctionMetaData.getManagedObjectMetaData();
-		ManagedObjectContainer[] managedObjects = new ManagedObjectContainer[moMetaData.length];
-		for (int i = 0; i < moMetaData.length; i++) {
-			managedObjects[i] = new ManagedObjectContainerImpl(moMetaData[i], this.threadState);
-		}
-
 		// Obtain the administration meta-data to determine
 		AdministrationMetaData<?, ?, ?>[] preAdministration = managedFunctionMetaData.getPreAdministrationMetaData();
 		AdministrationMetaData<?, ?, ?>[] postAdministration = managedFunctionMetaData.getPostAdministrationMetaData();
@@ -130,8 +121,10 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 		boolean isFunctionUnload = (postAdministration.length == 0);
 
 		// Load the managed function
-		ManagedFunctionContainer managedFunctionContainer = this.createManagedFunction(parameter,
-				managedFunctionMetaData, managedObjects, isEnforceGovernance, parallelFunctionOwner, isFunctionUnload);
+		ManagedFunctionBoundManagedObjects boundManagedObjects = new ManagedFunctionBoundManagedObjects(parameter,
+				managedFunctionMetaData, isEnforceGovernance, parallelFunctionOwner, isFunctionUnload, this);
+		ManagedFunctionContainer managedFunctionContainer = boundManagedObjects.managedFunctionContainer;
+		this.activeFunctions.addEntry(managedFunctionContainer);
 
 		// Load the pre-function administration (as parallel functions)
 		for (int i = 0; i < preAdministration.length; i++) {
@@ -139,7 +132,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 
 			// Create the administration function container
 			ManagedFunctionContainer adminFunction = this.createAdministrationFunction(administrationMetaData,
-					managedFunctionMetaData, isEnforceGovernance, parallelFunctionOwner, managedObjects, false);
+					managedFunctionMetaData, isEnforceGovernance, parallelFunctionOwner, boundManagedObjects, false);
 
 			// Push out previous administration functions to do this last
 			managedFunctionContainer.setParallelManagedFunctionContainer(adminFunction);
@@ -155,7 +148,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 
 			// Create the administration function container
 			ManagedFunctionContainer adminFunction = this.createAdministrationFunction(administrationMetaData,
-					managedFunctionMetaData, isEnforceGovernance, parallelFunctionOwner, managedObjects,
+					managedFunctionMetaData, isEnforceGovernance, parallelFunctionOwner, boundManagedObjects,
 					isUnloadResponsible);
 
 			// Load the post-administration function
@@ -175,8 +168,8 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	}
 
 	@Override
-	public <F extends Enum<F>> FunctionState createGovernanceFunction(GovernanceActivity<F> governanceActivity,
-			GovernanceMetaData<?, F> governanceMetaData) {
+	public <F extends Enum<F>> ManagedFunctionContainer createGovernanceFunction(
+			GovernanceActivity<F> governanceActivity, GovernanceMetaData<?, F> governanceMetaData) {
 
 		// Create and register the governance function
 		ManagedFunctionLogic governanceLogic = governanceMetaData.createGovernanceFunctionLogic(governanceActivity);
@@ -186,44 +179,6 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 
 		// Return the governance function
 		return governanceFunctionContainer;
-	}
-
-	/**
-	 * Creates the {@link ManagedFunctionContainer} for the
-	 * {@link ManagedFunction}.
-	 * 
-	 * @param parameter
-	 *            Parameter for the {@link ManagedFunction}.
-	 * @param managedFunctionMetaData
-	 *            {@link ManagedFunctionMetaData} for the
-	 *            {@link ManagedFunction}.
-	 * @param functionBoundManagedObjects
-	 *            {@link ManagedFunction} bound {@link ManagedObjectContainer}
-	 *            instances.
-	 * @param isEnforceGovernance
-	 *            Whether to enforce {@link Governance}.
-	 * @param parallelOwner
-	 *            Parallel {@link ManagedFunctionContainer} owner.
-	 * @param isUnloadManagedObjects
-	 *            Whether the last {@link Administration} is to unload the
-	 *            {@link ManagedObject} instances for the
-	 *            {@link ManagedFunction}.
-	 * @return {@link ManagedFunctionContainer} for the {@link ManagedFunction}.
-	 */
-	private <O extends Enum<O>, F extends Enum<F>> ManagedFunctionContainer createManagedFunction(Object parameter,
-			ManagedFunctionMetaData<O, F> managedFunctionMetaData, ManagedObjectContainer[] functionBoundManagedObjects,
-			boolean isEnforceGovernance, ManagedFunctionContainer parallelOwner, boolean isUnloadManagedObjects) {
-
-		// Create and register the managed function
-		ManagedFunctionLogic managedFunctionLogic = new ManagedFunctionLogicImpl<>(managedFunctionMetaData, parameter);
-		ManagedFunctionContainer managedFunctionContainer = new ManagedFunctionContainerImpl<ManagedFunctionMetaData<?, ?>>(
-				null, managedFunctionLogic, functionBoundManagedObjects,
-				managedFunctionMetaData.getRequiredManagedObjects(), managedFunctionMetaData.getRequiredGovernance(),
-				isEnforceGovernance, managedFunctionMetaData, parallelOwner, this, isUnloadManagedObjects);
-		this.activeFunctions.addEntry(managedFunctionContainer);
-
-		// Return the function
-		return managedFunctionContainer;
 	}
 
 	/**
@@ -251,7 +206,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	private <E> ManagedFunctionContainer createAdministrationFunction(
 			AdministrationMetaData<E, ?, ?> administrationMetaData,
 			ManagedFunctionMetaData<?, ?> administeringFunctionMetaData, boolean isEnforceGovernance,
-			ManagedFunctionContainer parallelOwner, ManagedObjectContainer[] functionBoundManagedObjects,
+			ManagedFunctionContainer parallelOwner, ManagedFunctionBoundManagedObjects functionBoundManagedObjects,
 			boolean isUnloadResponsible) {
 
 		// Obtain the responsible team (ensure all done on same thread)
@@ -279,7 +234,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 			int scopeIndex = moIndex.getIndexOfManagedObjectWithinScope();
 			switch (moIndex.getManagedObjectScope()) {
 			case FUNCTION:
-				moContainer = functionBoundManagedObjects[scopeIndex];
+				moContainer = functionBoundManagedObjects.managedObjects[scopeIndex];
 				break;
 
 			case THREAD:

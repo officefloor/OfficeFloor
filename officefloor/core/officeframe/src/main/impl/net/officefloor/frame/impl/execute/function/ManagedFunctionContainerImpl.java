@@ -24,6 +24,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
+import net.officefloor.frame.impl.execute.managedobject.ManagedObjectReadyCheckImpl;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
@@ -33,12 +34,14 @@ import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
+import net.officefloor.frame.internal.structure.ManagedFunctionInterest;
 import net.officefloor.frame.internal.structure.ManagedFunctionLogic;
 import net.officefloor.frame.internal.structure.ManagedFunctionLogicContext;
 import net.officefloor.frame.internal.structure.ManagedFunctionLogicMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
+import net.officefloor.frame.internal.structure.ManagedObjectReadyCheck;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -65,7 +68,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	 * Optional {@link FunctionState} to be executed to setup this
 	 * {@link ManagedObjectContainer}.
 	 */
-	private FunctionState setupFunction;
+	private final FunctionState setupFunction;
 
 	/**
 	 * {@link ManagedFunctionLogic} to be executed by this
@@ -79,11 +82,11 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	private final M functionLogicMetaData;
 
 	/**
-	 * {@link ManagedObjectContainer} instances for the respective
-	 * {@link ManagedObject} instances bound to this
+	 * {@link ManagedFunctionBoundManagedObjects} for the
+	 * {@link ManagedObjectContainer} instances bound to this
 	 * {@link ManagedFunctionContainer}.
 	 */
-	private final ManagedObjectContainer[] managedObjects;
+	private final ManagedFunctionBoundManagedObjects boundManagedObjects;
 
 	/**
 	 * {@link ManagedFunctionContainer} {@link ManagedObjectIndex} instances to
@@ -136,6 +139,11 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	private int loadManagedObjectIndex = 0;
 
 	/**
+	 * {@link ManagedObjectReadyCheck}.
+	 */
+	private ManagedObjectReadyCheckImpl check = null;
+
+	/**
 	 * <p>
 	 * Owner if this {@link ManagedFunctionContainer} is a parallel
 	 * {@link ManagedFunctionContainer}.
@@ -186,7 +194,8 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	 * @param managedFunctionLogic
 	 *            {@link ManagedFunctionLogic} to be executed by this
 	 *            {@link ManagedFunctionContainer}.
-	 * @param functionBoundManagedObjects
+	 * @param boundManagedObjects
+	 *            {@link ManagedFunctionBoundManagedObjects} containing the
 	 *            {@link ManagedObjectContainer} instances for the
 	 *            {@link ManagedObject} instances bound to the
 	 *            {@link ManagedFunction}.
@@ -213,12 +222,12 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	 *            responsible for unloading the {@link ManagedObject} instances.
 	 */
 	public ManagedFunctionContainerImpl(FunctionState setupFunction, ManagedFunctionLogic managedFunctionLogic,
-			ManagedObjectContainer[] functionBoundManagedObjects, ManagedObjectIndex[] requiredManagedObjects,
+			ManagedFunctionBoundManagedObjects boundManagedObjects, ManagedObjectIndex[] requiredManagedObjects,
 			boolean[] requiredGovernance, boolean isEnforceGovernance, M functionLogicMetaData,
 			ManagedFunctionContainer parallelOwner, Flow flow, boolean isUnloadManagedObjects) {
 		this.setupFunction = setupFunction;
 		this.managedFunctionLogic = managedFunctionLogic;
-		this.managedObjects = functionBoundManagedObjects;
+		this.boundManagedObjects = boundManagedObjects;
 		this.requiredManagedObjects = requiredManagedObjects;
 		this.requiredGovernance = requiredGovernance;
 		this.isEnforceGovernance = isEnforceGovernance;
@@ -258,7 +267,12 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 
 	@Override
 	public ManagedObjectContainer getManagedObjectContainer(int index) {
-		return this.managedObjects[index];
+		return this.boundManagedObjects.managedObjects[index];
+	}
+
+	@Override
+	public ManagedFunctionInterest createInterest() {
+		return this.boundManagedObjects.createInterest();
 	}
 
 	/*
@@ -319,6 +333,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 		case GOVERN_MANAGED_OBJECTS:
 
 			// Ensure appropriate governance in place over managed objects
+			// (Does its own check to ensure managed objects are ready)
 			if (this.requiredGovernance != null) {
 				FunctionState updateGovernance = null;
 				for (int i = 0; i < this.requiredGovernance.length; i++) {
@@ -349,6 +364,28 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			}
 
 		case SYNCHRONISE_PROCESS_STATE:
+
+			// Check whether managed objects are ready
+			if (this.requiredManagedObjects != null) {
+				if (this.check == null) {
+					// Undertake check to ensure managed objects are ready
+					this.check = new ManagedObjectReadyCheckImpl(this, this);
+					FunctionState checkFunction = null;
+					for (int i = 0; i < this.requiredManagedObjects.length; i++) {
+						ManagedObjectIndex index = this.requiredManagedObjects[i];
+						ManagedObjectContainer moContainer = ManagedObjectContainerImpl.getManagedObjectContainer(index,
+								this);
+						checkFunction = Promise.then(checkFunction, moContainer.checkReady(this.check));
+					}
+					if (checkFunction != null) {
+						return Promise.then(checkFunction, this);
+					}
+				} else if (!this.check.isReady()) {
+					// Not ready so wait on latch release and try again
+					this.check = null;
+					return null;
+				}
+			}
 
 			// Synchronise process state to this thread (if required)
 			if (threadState != processState.getMainThreadState()) {
@@ -774,22 +811,43 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 					return null;
 				}
 
-				// Clean up functions
-				FunctionState cleanUpFunctions = null;
-
-				// Clean up the managed objects
-				if (container.isUnloadManagedObjects) {
-					for (int i = 0; i < container.managedObjects.length; i++) {
-						ManagedObjectContainer managedObject = container.managedObjects[i];
-						cleanUpFunctions = Promise.then(cleanUpFunctions, managedObject.unloadManagedObject());
-					}
-				}
+				// Attempt to clean up the managed objects
+				FunctionState cleanUpFunctions = container.cleanUpManagedObjects();
 
 				// Complete this function
 				container.containerState = ManagedFunctionState.COMPLETED;
 				return Promise.then(cleanUpFunctions, container.flow.managedFunctionComplete(container, isCancel));
 			}
 		};
+	}
+
+	/**
+	 * Cleans up the {@link ManagedObject} instances.
+	 */
+	FunctionState cleanUpManagedObjects() {
+
+		// Determine if responsible for unloading the managed objects
+		if (!this.isUnloadManagedObjects) {
+			return null;
+		}
+
+		// Ensure function is complete
+		if (this.containerState != ManagedFunctionState.COMPLETED) {
+			return null;
+		}
+
+		// Ensure there is no interest in the managed objects
+		if (this.boundManagedObjects.isInterest()) {
+			return null;
+		}
+
+		// As here, clean up the managed objects
+		FunctionState cleanUpFunctions = null;
+		for (int i = 0; i < this.boundManagedObjects.managedObjects.length; i++) {
+			ManagedObjectContainer managedObject = this.boundManagedObjects.managedObjects[i];
+			cleanUpFunctions = Promise.then(cleanUpFunctions, managedObject.unloadManagedObject());
+		}
+		return cleanUpFunctions;
 	}
 
 	/**

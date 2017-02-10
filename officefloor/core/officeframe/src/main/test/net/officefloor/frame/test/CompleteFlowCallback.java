@@ -1,0 +1,78 @@
+/*
+ * OfficeFloor - http://www.officefloor.net
+ * Copyright (C) 2005-2013 Daniel Sagenschneider
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package net.officefloor.frame.test;
+
+import org.junit.Assert;
+
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.internal.structure.Flow;
+
+/**
+ * {@link FlowCallback} that checks on completion and propagates failures.
+ *
+ * @author Daniel Sagenschneider
+ */
+public class CompleteFlowCallback implements FlowCallback {
+
+	/**
+	 * Indicates if {@link Flow} is complete.
+	 */
+	private boolean isComplate = false;
+
+	/**
+	 * Possible failure of {@link Flow}.
+	 */
+	private Throwable failure = null;
+
+	/**
+	 * Asserts the {@link Flow} is complete.
+	 */
+	public void assertComplete() throws Exception {
+		this.ensureNoFailure();
+		Assert.assertTrue("Flow should be complete", this.isComplate);
+	}
+
+	/**
+	 * Asserts the {@link Flow} is not complete.
+	 */
+	public void assertNotComplete() throws Exception {
+		this.ensureNoFailure();
+		Assert.assertFalse("Flow should not be complete", this.isComplate);
+	}
+
+	/**
+	 * Ensure no failure in {@link Flow}.
+	 */
+	private void ensureNoFailure() throws Exception {
+		if (this.failure != null) {
+			throw OfficeFrameTestCase.fail(this.failure);
+		}
+	}
+
+	/*
+	 * ==================== FlowCallback ========================
+	 */
+
+	@Override
+	public void run(Throwable escalation) throws Throwable {
+		Assert.assertFalse("Flow already flagged as complete", this.isComplate);
+		this.isComplate = true;
+		this.failure = escalation;
+	}
+
+}

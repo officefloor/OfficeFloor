@@ -476,7 +476,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 					Object extensionInterface = extractor.extractExtension(container.managedObject, container.metaData);
 
 					// Register the governance for the managed object
-					registeredGovernance = governance.registerManagedObject(extensionInterface, container);
+					registeredGovernance = governance.registerManagedObject(extensionInterface, container,
+							container.metaData, this.managedFunction);
 					container.registeredGovernances[i] = registeredGovernance;
 					governanceFunctions = Promise.then(governanceFunctions, registeredGovernance);
 				}

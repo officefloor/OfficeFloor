@@ -70,11 +70,6 @@ public class ReflectiveFunctionBuilder
 	private final ManagedFunctionBuilder<Indexed, Indexed> functionBuilder;
 
 	/**
-	 * {@link OfficeBuilder}.
-	 */
-	private final OfficeBuilder officeBuilder;
-
-	/**
 	 * {@link ParameterFactory} instances for the method.
 	 */
 	private final ParameterFactory[] parameterFactories;
@@ -113,7 +108,6 @@ public class ReflectiveFunctionBuilder
 	public <C> ReflectiveFunctionBuilder(Class<C> clazz, C object, String methodName, OfficeBuilder officeBuilder,
 			AbstractOfficeConstructTestCase testCase) {
 		this.object = object;
-		this.officeBuilder = officeBuilder;
 		this.testCase = testCase;
 
 		// Obtain the method
@@ -212,26 +206,8 @@ public class ReflectiveFunctionBuilder
 	public DependencyMappingBuilder buildObject(String officeManagedObjectName, ManagedObjectScope managedObjectScope) {
 
 		// Build the managed object based on scope
-		DependencyMappingBuilder mappingBuilder;
-		switch (managedObjectScope) {
-		case FUNCTION:
-			mappingBuilder = this.functionBuilder.addManagedObject(officeManagedObjectName, officeManagedObjectName);
-			break;
-
-		case THREAD:
-			mappingBuilder = this.officeBuilder.addThreadManagedObject(officeManagedObjectName,
-					officeManagedObjectName);
-			break;
-
-		case PROCESS:
-			mappingBuilder = this.officeBuilder.addProcessManagedObject(officeManagedObjectName,
-					officeManagedObjectName);
-			break;
-
-		default:
-			TestCase.fail("Unknown managed object scope " + managedObjectScope);
-			return null;
-		}
+		DependencyMappingBuilder mappingBuilder = this.testCase.bindManagedObject(officeManagedObjectName,
+				managedObjectScope, this.functionBuilder);
 
 		// Link to object to function
 		this.buildObject(officeManagedObjectName);

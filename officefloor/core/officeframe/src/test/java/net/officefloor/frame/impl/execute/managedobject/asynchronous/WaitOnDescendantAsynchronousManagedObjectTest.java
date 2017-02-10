@@ -34,7 +34,7 @@ import net.officefloor.frame.test.TestObject;
  * 
  * @author Daniel Sagenschneider
  */
-public class WaitOnDependentAsynchronousManagedObjectTest extends AbstractOfficeConstructTestCase {
+public class WaitOnDescendantAsynchronousManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Ensure {@link ProcessState} bound {@link AsynchronousManagedObject} stops
@@ -68,28 +68,39 @@ public class WaitOnDependentAsynchronousManagedObjectTest extends AbstractOffice
 	 */
 	public void doAsynchronousOperationTest(ManagedObjectScope scope) throws Exception {
 
-		// Construct the dependency managed object
-		TestObject dependency = new TestObject("DEPENDENCY", this);
-		dependency.isAsynchronousManagedObject = true;
-		dependency.managedObjectBuilder.setTimeout(10);
-		this.getOfficeBuilder().addProcessManagedObject("DEPENDENCY", "DEPENDENCY");
+		// Construct the asynchronous managed object
+		String childName = "ASYNCHRONOUS";
+		TestObject asynchronous = new TestObject(childName, this);
+		asynchronous.isAsynchronousManagedObject = true;
+		asynchronous.managedObjectBuilder.setTimeout(10);
+		this.getOfficeBuilder().addProcessManagedObject(childName, childName);
 
-		// Construct the managed object
-		TestObject object = new TestObject("MO", this);
-		object.isCoordinatingManagedObject = true;
-		object.enhanceMetaData = (metaData) -> metaData.addDependency(TestObject.class);
+		// Construct the parent managed objects
+		for (int i = 0; i < 10; i++) {
+			String parentName = "PARENT_" + i;
+			TestObject object = new TestObject(parentName, this);
+			object.isCoordinatingManagedObject = true;
+			object.enhanceMetaData = (metaData) -> metaData.addDependency(TestObject.class);
+			this.getOfficeBuilder().addProcessManagedObject(parentName, parentName).mapDependency(0, childName);
+			childName = parentName;
+		}
+
+		// Construct the used managed object
+		TestObject used = new TestObject("USED", this);
+		used.isCoordinatingManagedObject = true;
+		used.enhanceMetaData = (metaData) -> metaData.addDependency(TestObject.class);
 
 		// Construct functions
-		TestWork work = new TestWork(dependency);
+		TestWork work = new TestWork(asynchronous);
 		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
-		task.buildObject("MO", scope).mapDependency(0, "DEPENDENCY");
+		task.buildObject("USED", scope).mapDependency(0, childName);
 		task.setNextFunction("next");
 		this.constructFunction(work, "next").setNextFunction("await");
 		ReflectiveFunctionBuilder wait = this.constructFunction(work, "await");
 		if (scope == ManagedObjectScope.FUNCTION) {
-			wait.buildObject("MO", scope).mapDependency(0, "DEPENDENCY");
+			wait.buildObject("USED", scope).mapDependency(0, childName);
 		} else {
-			wait.buildObject("MO");
+			wait.buildObject("USED");
 		}
 
 		// Trigger function
@@ -103,7 +114,7 @@ public class WaitOnDependentAsynchronousManagedObjectTest extends AbstractOffice
 		assertFalse("Process should not be complete", isComplete.value);
 
 		// Complete the asynchronous operation
-		dependency.asynchronousListener.notifyComplete();
+		asynchronous.asynchronousListener.notifyComplete();
 
 		// Wait should now complete
 		assertTrue("Wait should now complete", work.isAwaitInvoked);

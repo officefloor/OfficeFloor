@@ -17,6 +17,9 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+
 /**
  * Container of {@link ManagedFunctionLogic}.
  *
@@ -61,5 +64,20 @@ public interface ManagedFunctionContainer extends FunctionState {
 	 *         {@link ManagedFunctionContainer}.
 	 */
 	ManagedObjectContainer getManagedObjectContainer(int index);
+
+	/**
+	 * <p>
+	 * Creates a {@link ManagedFunctionInterest} in this
+	 * {@link ManagedFunctionContainer}.
+	 * <p>
+	 * The {@link ManagedFunctionContainer} will not unload its
+	 * {@link ManagedFunction} bound {@link ManagedObject} instances until all
+	 * registered {@link ManagedFunctionInterest} instances have been
+	 * unregistered.
+	 * 
+	 * @return New {@link ManagedFunctionInterest} in this
+	 *         {@link ManagedFunctionContainer}.
+	 */
+	ManagedFunctionInterest createInterest();
 
 }
