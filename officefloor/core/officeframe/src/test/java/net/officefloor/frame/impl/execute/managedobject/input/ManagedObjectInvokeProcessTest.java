@@ -31,7 +31,6 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -43,7 +42,7 @@ import net.officefloor.frame.test.ReflectiveFunctionBuilder;
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
+public class ManagedObjectInvokeProcessTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * {@link ManagedObjectSource}.
@@ -316,13 +315,11 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		if (isManagedObjectOutside) {
 			// Provide the externally executed function from managed object
 			ReflectiveFunctionBuilder functionBuilder = this.constructFunction(this.work, "externalEvent");
-			functionBuilder.getBuilder().setResponsibleTeam("TEAM");
 			functionBuilder.buildParameter();
 		}
 		if (isManagedObjectInside) {
 			// Provide the invoked task dependent on managed object
 			ReflectiveFunctionBuilder taskBuilder = this.constructFunction(this.work, "invokedTask");
-			taskBuilder.getBuilder().setResponsibleTeam("TEAM");
 			taskBuilder.buildParameter();
 			this.getOfficeBuilder().registerManagedObjectSource("OFFICE_MO", "MO");
 			if (isManagedObjectOutside) {
@@ -333,7 +330,6 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 				taskBuilder.buildObject("OFFICE_MO", scope);
 			}
 		}
-		this.constructTeam("TEAM", new PassiveTeam());
 
 		// Construct and open the office floor
 		this.officeFloor = this.constructOfficeFloor();
@@ -367,8 +363,8 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		 */
 		public TestManagedObjectSource() {
 			// Should only be instantiated once
-			assertNull("Managd Object Source should only be instantiated once", ManagedObjectTest.managedObjectSource);
-			ManagedObjectTest.managedObjectSource = this;
+			assertNull("Managd Object Source should only be instantiated once", ManagedObjectInvokeProcessTest.managedObjectSource);
+			ManagedObjectInvokeProcessTest.managedObjectSource = this;
 		}
 
 		/**
