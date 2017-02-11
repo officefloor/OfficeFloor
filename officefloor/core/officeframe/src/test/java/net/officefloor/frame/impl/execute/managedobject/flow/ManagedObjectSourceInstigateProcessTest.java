@@ -149,12 +149,12 @@ public class ManagedObjectSourceInstigateProcessTest extends AbstractOfficeConst
 		/**
 		 * Parameter.
 		 */
-		protected volatile Object parameter;
+		public Object parameter;
 
 		/**
 		 * Object.
 		 */
-		protected volatile Object object;
+		public Object object;
 
 		/*
 		 * ===================== ManagedFunction =====================

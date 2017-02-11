@@ -289,7 +289,7 @@ public class ManagedObjectSourceHandleEscalationTest extends AbstractOfficeConst
 		final Exception exception = new Exception("TEST");
 		Closure<Boolean> isCallbackInvoked = new Closure<>(false);
 		this.constructOfficeFloor().openOfficeFloor();
-		String log = this.captureError(() -> {
+		String log = this.captureLoggerOutput(() -> {
 			object.managedObjectExecuteContext.invokeProcess(0, exception, object, 0, (escalation) -> {
 				isCallbackInvoked.value = true;
 				FlowCallback.ESCALATE.run(escalation);
@@ -299,7 +299,7 @@ public class ManagedObjectSourceHandleEscalationTest extends AbstractOfficeConst
 		// Ensure escalation handled by logging
 		assertTrue("Flow callback should be invoked", isCallbackInvoked.value);
 		assertSame("Should escalate to OfficeFloor handler", exception, failure.value);
-		assertTrue("Ensure finally handled by logging", log.contains(exception.getMessage()));
+		assertTrue("Ensure finally handled by logging: " + log, log.contains(exception.getMessage()));
 	}
 
 	/**

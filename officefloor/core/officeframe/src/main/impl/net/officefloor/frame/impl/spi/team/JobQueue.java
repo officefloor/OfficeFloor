@@ -29,17 +29,17 @@ public class JobQueue {
 	/**
 	 * Object to lock and wait on.
 	 */
-	protected final Object lock;
+	private final Object lock;
 
 	/**
 	 * Head {@link JobEntry} of the queue.
 	 */
-	protected JobEntry head = null;
+	private JobEntry head = null;
 
 	/**
 	 * Tail {@link JobEntry} of the queue.
 	 */
-	protected JobEntry tail = null;
+	private JobEntry tail = null;
 
 	/**
 	 * Initiate with private lock.

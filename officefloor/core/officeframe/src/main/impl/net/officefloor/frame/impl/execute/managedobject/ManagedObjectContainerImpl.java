@@ -44,6 +44,7 @@ import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
+import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectExtensionExtractor;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
@@ -294,6 +295,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		}
 
 		@Override
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public FunctionState execute() {
 
 			// Easy access to container
@@ -382,6 +384,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 				}
 
 			case LOADING:
+
 				// Ensure loaded (another function requiring managed object)
 				if (container.managedObject == null) {
 					return container.sourcingLatch.awaitOnAsset(this);
@@ -390,6 +393,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 				// Flag loaded and no longer waiting to source
 				container.managedObject = managedObject;
 				container.containerState = ManagedObjectContainerState.LOADED;
+
+			case LOADED:
 
 				try {
 					// If not setup, then managed object should still be ready
@@ -413,7 +418,6 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 					if (container.metaData.isCoordinatingManagedObject()) {
 						ObjectRegistry<?> objectRegistry = container.metaData
 								.createObjectRegistry(this.managedFunction);
-						@SuppressWarnings("rawtypes")
 						CoordinatingManagedObject cmo = (CoordinatingManagedObject) container.managedObject;
 						cmo.loadObjects(objectRegistry);
 						isCheckReady = true;
@@ -466,13 +470,10 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 
 					// Obtain the governance container
 					int governanceIndex = governanceMetaData.getGovernanceIndex();
-					@SuppressWarnings("rawtypes")
 					GovernanceContainer governance = managedFunctionThreadState.getGovernanceContainer(governanceIndex);
 
 					// Obtain the extension interface
-					@SuppressWarnings("rawtypes")
 					ManagedObjectExtensionExtractor extractor = governanceMetaData.getExtensionInterfaceExtractor();
-					@SuppressWarnings("unchecked")
 					Object extensionInterface = extractor.extractExtension(container.managedObject, container.metaData);
 
 					// Register the governance for the managed object
@@ -521,6 +522,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 				container.containerState = ManagedObjectContainerState.OBJECT_AVAILABLE;
 
 			case OBJECT_AVAILABLE:
+
 				// Managed Object loaded, so carry on with managed function
 				return this.managedFunction;
 
@@ -796,6 +798,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 			switch (container.containerState) {
 			case NOT_LOADED:
 			case LOADING:
+
 				// Not loaded, so no need to unload.
 				// Also stops infinite loop with recycle process creating
 				// further managed objects.
@@ -876,8 +879,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 			ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
 
 			// Create the recycle function
-			FunctionState recycle = container.metaData.recycle(this.managedObject,
-					container.responsibleThreadState.getProcessState().getManagedObjectCleanup());
+			ManagedObjectCleanup cleanup = container.responsibleThreadState.getProcessState().getManagedObjectCleanup();
+			FunctionState recycle = container.metaData.recycle(this.managedObject, cleanup);
 			if (recycle == null) {
 
 				// No recycle, so return directly to pool (if pooled)

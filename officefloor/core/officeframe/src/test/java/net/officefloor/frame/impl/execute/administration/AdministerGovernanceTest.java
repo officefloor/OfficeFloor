@@ -20,7 +20,10 @@ package net.officefloor.frame.impl.execute.administration;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.GovernanceManager;
 import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 import net.officefloor.frame.test.TestObject;
@@ -33,9 +36,33 @@ import net.officefloor.frame.test.TestObject;
 public class AdministerGovernanceTest extends AbstractOfficeConstructTestCase {
 
 	/**
+	 * Ensure can manually enforce {@link Governance} on {@link ManagedObject}
+	 * bound to {@link ProcessState}.
+	 */
+	public void testManuallyEnforceGovernanceOnFunction_boundTo_Process() throws Exception {
+		this.doManuallyEnforceGovernanceOnFunctionTest(ManagedObjectScope.PROCESS);
+	}
+
+	/**
+	 * Ensure can manually enforce {@link Governance} on {@link ManagedObject}
+	 * bound to {@link ThreadState}.
+	 */
+	public void testManuallyEnforceGovernanceOnFunction_boundTo_Thread() throws Exception {
+		this.doManuallyEnforceGovernanceOnFunctionTest(ManagedObjectScope.THREAD);
+	}
+
+	/**
+	 * Ensure can manually enforce {@link Governance} on {@link ManagedObject}
+	 * bound to {@link ManagedFunctionContainer}.
+	 */
+	public void testManuallyEnforceGovernanceOnFunction_boundTo_Function() throws Exception {
+		this.doManuallyEnforceGovernanceOnFunctionTest(ManagedObjectScope.FUNCTION);
+	}
+
+	/**
 	 * Ensure can manually enforce {@link Governance}.
 	 */
-	public void testManuallyEnforceGovernanceOnFunction() throws Exception {
+	public void doManuallyEnforceGovernanceOnFunctionTest(ManagedObjectScope scope) throws Exception {
 
 		// Manually manage governance
 		this.getOfficeBuilder().setManuallyManageGovernance(true);
@@ -49,7 +76,8 @@ public class AdministerGovernanceTest extends AbstractOfficeConstructTestCase {
 		// Construct the functions
 		TestWork work = new TestWork();
 		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
-		task.buildObject("MO", ManagedObjectScope.FUNCTION).mapGovernance("GOVERNANCE");
+		task.buildObject("MO");
+		this.bindManagedObject("MO", scope, task.getBuilder()).mapGovernance("GOVERNANCE");
 
 		// Construct governance
 		TestGovernance governance = new TestGovernance(object);
@@ -69,9 +97,33 @@ public class AdministerGovernanceTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
+	 * Ensure can manually disregard {@link Governance} on {@link ManagedObject}
+	 * bound to {@link ProcessState}.
+	 */
+	public void testManuallyDisregardGovernanceOnFunction_boundTo_Process() throws Exception {
+		this.doManuallyDisregardGovenranceOnFunctionTest(ManagedObjectScope.PROCESS);
+	}
+
+	/**
+	 * Ensure can manually disregard {@link Governance} on {@link ManagedObject}
+	 * bound to {@link ThreadState}.
+	 */
+	public void testManuallyDisregardGovernanceOnFunction_boundTo_Thread() throws Exception {
+		this.doManuallyDisregardGovenranceOnFunctionTest(ManagedObjectScope.THREAD);
+	}
+
+	/**
+	 * Ensure can manually disregard {@link Governance} on {@link ManagedObject}
+	 * bound to {@link ManagedFunctionContainer}.
+	 */
+	public void testManuallyDisregardGovernanceOnFunction_boundTo_Function() throws Exception {
+		this.doManuallyDisregardGovenranceOnFunctionTest(ManagedObjectScope.FUNCTION);
+	}
+
+	/**
 	 * Ensure can manually disregard {@link Governance}.
 	 */
-	public void testManuallyDisregardGovenranceOnFunction() throws Exception {
+	public void doManuallyDisregardGovenranceOnFunctionTest(ManagedObjectScope scope) throws Exception {
 
 		// Manually manage governance
 		this.getOfficeBuilder().setManuallyManageGovernance(true);
@@ -85,7 +137,8 @@ public class AdministerGovernanceTest extends AbstractOfficeConstructTestCase {
 		// Construct the functions
 		TestWork work = new TestWork();
 		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
-		task.buildObject("MO", ManagedObjectScope.FUNCTION).mapGovernance("GOVERNANCE");
+		task.buildObject("MO");
+		this.bindManagedObject("MO", scope, task.getBuilder()).mapGovernance("GOVERNANCE");
 
 		// Construct governance
 		TestGovernance governance = new TestGovernance(object);

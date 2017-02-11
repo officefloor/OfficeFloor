@@ -166,7 +166,7 @@ public class ThreadStateHandleEscalationTest extends AbstractOfficeConstructTest
 		FunctionManager function = officeFloor.getOffice(officeName).getFunctionManager("task");
 
 		// Execute the task to have escalation logged
-		String log = this.captureError(() -> function.invokeProcess(escalation, null));
+		String log = this.captureLoggerOutput(() -> function.invokeProcess(escalation, null));
 
 		// Ensure escalation handled by OfficeFloor escalation handler
 		assertTrue("Incorrect escalation logging", log.contains(escalation.getMessage()));

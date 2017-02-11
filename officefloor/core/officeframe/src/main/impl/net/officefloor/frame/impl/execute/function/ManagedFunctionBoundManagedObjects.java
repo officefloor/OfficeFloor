@@ -164,10 +164,13 @@ public class ManagedFunctionBoundManagedObjects {
 					ManagedFunctionBoundManagedObjects bindings = ManagedFunctionBoundManagedObjects.this;
 
 					// Unregister the interest
-					bindings.registeredInterests.removeEntry(ManagedFunctionInterestImpl.this);
+					if (bindings.registeredInterests.removeEntry(ManagedFunctionInterestImpl.this)) {
+						// Last interest removed, so clean up managed objects
+						return bindings.managedFunctionContainer.cleanUpManagedObjects();
+					}
 
-					// Attempt to clean up the managed objects
-					return bindings.managedFunctionContainer.cleanUpManagedObjects();
+					// Further interest, so nothing further
+					return null;
 				}
 			};
 		}

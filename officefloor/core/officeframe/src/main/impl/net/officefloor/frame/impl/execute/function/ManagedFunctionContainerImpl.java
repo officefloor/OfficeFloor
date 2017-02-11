@@ -811,11 +811,16 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 					return null;
 				}
 
+				// Complete the function
+				container.containerState = ManagedFunctionState.COMPLETED;
+
 				// Attempt to clean up the managed objects
-				FunctionState cleanUpFunctions = container.cleanUpManagedObjects();
+				FunctionState cleanUpFunctions = null;
+				if (container.isUnloadManagedObjects) {
+					cleanUpFunctions = container.cleanUpManagedObjects();
+				}
 
 				// Complete this function
-				container.containerState = ManagedFunctionState.COMPLETED;
 				return Promise.then(cleanUpFunctions, container.flow.managedFunctionComplete(container, isCancel));
 			}
 		};
@@ -825,11 +830,6 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	 * Cleans up the {@link ManagedObject} instances.
 	 */
 	FunctionState cleanUpManagedObjects() {
-
-		// Determine if responsible for unloading the managed objects
-		if (!this.isUnloadManagedObjects) {
-			return null;
-		}
 
 		// Ensure function is complete
 		if (this.containerState != ManagedFunctionState.COMPLETED) {

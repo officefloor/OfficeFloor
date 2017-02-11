@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringWriter;
@@ -1364,22 +1363,24 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @throws T
 	 *             Possible {@link Throwable}.
 	 */
-	protected final <T extends Throwable> String captureError(TestCapture<T> test) throws T {
+	protected final <T extends Throwable> String captureLoggerOutput(TestCapture<T> test) throws T {
 
+		// Add handler to capture the log error
 		ByteArrayOutputStream error = new ByteArrayOutputStream();
-		Handler handler = new StreamHandler(error, new SimpleFormatter());
-		PrintStream stdErr = System.err;
+		Handler errorHandler = new StreamHandler(error, new SimpleFormatter());
+		OfficeFloorImpl.getFrameworkLogger().addHandler(errorHandler);
+
+		// Undertake operation
 		try {
-			System.setErr(new PrintStream(error));
-			OfficeFloorImpl.getFrameworkLogger().addHandler(handler);
 
 			// Undertake test
 			test.run();
 
+			// Flush the handler
+			errorHandler.flush();
+
 		} finally {
-			System.setErr(stdErr);
-			OfficeFloorImpl.getFrameworkLogger().removeHandler(handler);
-			handler.flush();
+			OfficeFloorImpl.getFrameworkLogger().removeHandler(errorHandler);
 		}
 		return new String(error.toByteArray());
 	}

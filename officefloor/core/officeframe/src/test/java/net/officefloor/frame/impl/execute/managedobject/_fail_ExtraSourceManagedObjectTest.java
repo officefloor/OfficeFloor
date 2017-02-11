@@ -64,7 +64,7 @@ public class _fail_ExtraSourceManagedObjectTest extends AbstractOfficeConstructT
 
 			// Load the failure (after sourcing the managed object)
 			String log = _fail_ExtraSourceManagedObjectTest.this
-					.captureError(() -> object.managedObjectUser.setFailure(failure));
+					.captureLoggerOutput(() -> object.managedObjectUser.setFailure(failure));
 			assertTrue("Should log the failure", log.contains(failure.getMessage()));
 		}
 	}
@@ -94,7 +94,7 @@ public class _fail_ExtraSourceManagedObjectTest extends AbstractOfficeConstructT
 
 		// Fail again
 		Exception second = new Exception("SECOND");
-		String log = this.captureError(() -> object.managedObjectUser.setFailure(second));
+		String log = this.captureLoggerOutput(() -> object.managedObjectUser.setFailure(second));
 		assertTrue("Should log second failure", log.contains(second.getMessage()));
 		assertSame("Should still be failure on first failure", first, failure.value);
 	}

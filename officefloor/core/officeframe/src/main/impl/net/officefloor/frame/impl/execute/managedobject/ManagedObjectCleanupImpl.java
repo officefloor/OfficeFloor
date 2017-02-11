@@ -154,7 +154,8 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 		@Override
 		public FunctionState handleEscalation(Throwable escalation) {
 			// Delegate handle escalation (ultimately by flow callback)
-			return this.delegate.getThreadState().handleEscalation(escalation);
+			ThreadState threadState = this.delegate.getThreadState();
+			return threadState.handleEscalation(escalation);
 		}
 	}
 

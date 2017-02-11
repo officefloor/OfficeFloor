@@ -100,6 +100,12 @@ public class Promise {
 		}
 
 		@Override
+		public FunctionState handleEscalation(Throwable escalation) {
+			FunctionState handler = this.delegate.handleEscalation(escalation);
+			return Promise.then(handler, this.thenFunction);
+		}
+
+		@Override
 		public FunctionState cancel() {
 			return Promise.then(this.delegate.cancel(), this.thenFunction.cancel());
 		}

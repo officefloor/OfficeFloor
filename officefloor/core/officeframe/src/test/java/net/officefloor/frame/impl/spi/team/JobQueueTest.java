@@ -30,7 +30,7 @@ public class JobQueueTest extends OfficeFrameTestCase {
 	/**
 	 * {@link JobQueue} to test.
 	 */
-	private JobQueue taskQueue = new JobQueue();
+	private JobQueue jobQueue = new JobQueue();
 
 	/**
 	 * Time.
@@ -41,7 +41,7 @@ public class JobQueueTest extends OfficeFrameTestCase {
 	 * Ensure able to dequeue <code>null</code> from empty queue.
 	 */
 	public void testEmptyDequeue() {
-		Job returnedTask = this.taskQueue.dequeue();
+		Job returnedTask = this.jobQueue.dequeue();
 
 		// Validate
 		assertNull("Incorrect task returned", returnedTask);
@@ -52,8 +52,8 @@ public class JobQueueTest extends OfficeFrameTestCase {
 	 */
 	public void testSingleEnqueueDequeue() {
 		Job task = new MockJob();
-		this.taskQueue.enqueue(task);
-		Job returnedTask = this.taskQueue.dequeue();
+		this.jobQueue.enqueue(task);
+		Job returnedTask = this.jobQueue.dequeue();
 
 		// Validate
 		assertSame("Incorrect task returned", task, returnedTask);
@@ -65,19 +65,12 @@ public class JobQueueTest extends OfficeFrameTestCase {
 	public void testEnqueueDequeueHead() {
 		Job taskOne = new MockJob();
 		Job taskTwo = new MockJob();
-		this.taskQueue.enqueue(taskOne);
-		this.taskQueue.enqueue(taskTwo);
+		this.jobQueue.enqueue(taskOne);
+		this.jobQueue.enqueue(taskTwo);
 
 		// Validate state
-		assertSame("Incorrect head", this.taskQueue.head, taskOne);
-		assertSame("Incorrect tail", this.taskQueue.tail, taskTwo);
-
-		Job returnedTask = this.taskQueue.dequeue();
-
-		// Validate state
-		assertSame("Incorrect return", taskOne, returnedTask);
-		assertSame("Incorrect head", this.taskQueue.head, taskTwo);
-		assertSame("Incorrect tail", this.taskQueue.tail, taskTwo);
+		assertSame("Incorrect first object dequeued", taskOne, this.jobQueue.dequeue());
+		assertSame("Incorrect second object dequeued", taskTwo, this.jobQueue.dequeue());
 	}
 
 	/**
@@ -110,7 +103,7 @@ public class JobQueueTest extends OfficeFrameTestCase {
 					}
 
 					// Wait on task to be added
-					taskQueue.waitForTask(WAIT_TIME);
+					jobQueue.waitForTask(WAIT_TIME);
 
 					// Specify time waited
 					time = System.currentTimeMillis() - startTime;
@@ -146,7 +139,7 @@ public class JobQueueTest extends OfficeFrameTestCase {
 		Job task = new MockJob();
 
 		// Add the task
-		this.taskQueue.enqueue(task);
+		this.jobQueue.enqueue(task);
 
 		// Wait on return
 		boolean isComplete = false;
@@ -190,7 +183,7 @@ public class JobQueueTest extends OfficeFrameTestCase {
 					}
 
 					// Wait on task to be added
-					Job task = JobQueueTest.this.taskQueue.dequeue(WAIT_TIME);
+					Job task = JobQueueTest.this.jobQueue.dequeue(WAIT_TIME);
 
 					// Specify time waited
 					JobQueueTest.this.time = System.currentTimeMillis() - startTime;
@@ -226,7 +219,7 @@ public class JobQueueTest extends OfficeFrameTestCase {
 		Job task = new MockJob();
 
 		// Add the task
-		this.taskQueue.enqueue(task);
+		this.jobQueue.enqueue(task);
 
 		// Wait on return
 		boolean isComplete = false;

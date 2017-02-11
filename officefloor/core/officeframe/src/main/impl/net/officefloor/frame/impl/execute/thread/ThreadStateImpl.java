@@ -28,6 +28,7 @@ import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
+import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
@@ -56,7 +57,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	/**
 	 * {@link Logger}.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(ThreadState.class.getName());
+	private static final Logger LOGGER = OfficeFloorImpl.getFrameworkLogger();
 
 	/**
 	 * {@link ActiveThreadState} for the executing {@link Thread}.
