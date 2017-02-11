@@ -68,12 +68,14 @@ import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeFloorMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawTeamMetaData;
+import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.OfficeClock;
@@ -87,7 +89,6 @@ import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
-import net.officefloor.frame.util.MetaDataTestInstanceFactory;
 
 /**
  * Tests the {@link RawOfficeMetaDataImpl}.
@@ -1290,8 +1291,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	public void testCreateProcessAndOfficeFloorEscalation() {
 
 		final FlowMetaData flowMetaData = this.createMock(FlowMetaData.class);
-		final ManagedFunction<?, ?> task = this.createMock(ManagedFunction.class);
-		final ManagedFunctionMetaData<?, ?> taskMetaData = MetaDataTestInstanceFactory.createFunctionMetaData(task);
+		final ManagedFunctionMetaData<?, ?> functionMetaData = this.createMock(ManagedFunctionMetaData.class);
 
 		// Record creating a process
 		this.record_enhanceOffice();
@@ -1303,7 +1303,14 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
 		this.record_noProfiler();
-		this.recordReturn(flowMetaData, flowMetaData.getInitialFunctionMetaData(), taskMetaData);
+		this.recordReturn(flowMetaData, flowMetaData.getInitialFunctionMetaData(), functionMetaData);
+		this.recordReturn(functionMetaData, functionMetaData.getPreAdministrationMetaData(),
+				new AdministrationMetaData[0]);
+		this.recordReturn(functionMetaData, functionMetaData.getPostAdministrationMetaData(),
+				new AdministrationMetaData[0]);
+		this.recordReturn(functionMetaData, functionMetaData.getManagedObjectMetaData(), new ManagedObjectMetaData[0]);
+		this.recordReturn(functionMetaData, functionMetaData.getRequiredManagedObjects(), new ManagedObjectIndex[0]);
+		this.recordReturn(functionMetaData, functionMetaData.getRequiredGovernance(), new boolean[0]);
 
 		// Construct the office
 		this.replayMockObjects();

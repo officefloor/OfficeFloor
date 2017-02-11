@@ -15,29 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.managedobject;
+package net.officefloor.frame.impl.execute.managedobject.processaware;
 
-import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
+import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**
- * <p>
- * Enables the {@link ManagedObject} to undertake {@link ProcessSafeOperation}
- * instances.
- * <p>
- * This should be the preferred means to undertake any {@link ProcessState}
- * critical sections, as locks are only obtained if required. This,
- * subsequently, reduces {@link Thread} overheads and improves performance.
+ * Tests the {@link ProcessAwareManagedObject}.
  *
  * @author Daniel Sagenschneider
  */
-public interface ProcessAwareManagedObject {
+public class ProcessAwareManagedObjectTest extends AbstractOfficeConstructTestCase {
 
-	/**
-	 * Registers the {@link ProcessAwareContext} with the {@link ManagedObject}.
-	 * 
-	 * @param context
-	 *            {@link ProcessAwareContext}.
-	 */
-	void registerProcessAwareContext(ProcessAwareContext context);
+	public void testProcessAwareManagedObject() {
+		fail("TODO implement");
+	}
 
 }

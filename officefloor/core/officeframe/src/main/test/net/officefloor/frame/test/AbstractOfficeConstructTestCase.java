@@ -525,20 +525,6 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	}
 
 	/**
-	 * Facade method to register a {@link ManagedObject} within the current
-	 * {@link Office}.
-	 * 
-	 * @param object
-	 *            Object for the {@link ManagedObject}.
-	 * @param managedObjectName
-	 *            Name of the {@link ManagedObject}.
-	 * @return {@link ManagedObjectBuilder}.
-	 */
-	public ManagedObjectBuilder<?> constructManagedObject(Object object, String managedObjectName) {
-		return this.constructManagedObject(object, managedObjectName, this.getOfficeName());
-	}
-
-	/**
 	 * Builds the {@link ManagedObject} for use at the desired
 	 * {@link ManagedObjectScope}.
 	 * 

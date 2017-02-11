@@ -567,6 +567,16 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 						return new CleanupManagedObjectOperation(managedObject);
 					}
 
+					// Ensure have a managed object
+					if (managedObject == null) {
+						// Fail the container, as must have managed object
+						container.failure = new IllegalStateException("Null ManagedObject provided for "
+								+ container.metaData.getBoundManagedObjectName() + " from source "
+								+ container.metaData.getManagedObjectSource().getClass().getName());
+						container.sourcingLatch.failFunctions(container.failure, true);
+						return null;
+					}
+
 					// Load the managed object
 					container.managedObject = managedObject;
 					container.asynchronousStartTime = NO_ASYNC_OPERATION;
