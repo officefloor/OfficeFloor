@@ -26,54 +26,57 @@ import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.TestObject;
 
 /**
- * Ensure {@link NameAwareManagedObject} is loaded within its bound name.
+ * Ensure handle failure on loading name to {@link NameAwareManagedObject}.
  *
  * @author Daniel Sagenschneider
  */
-public class NameAwareManagedObjectTest extends AbstractOfficeConstructTestCase {
+public class _fail_NameAwareManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Ensure can obtain bound {@link ManagedObject} name when bound to
-	 * {@link ProcessState}.
+	 * Ensure handle failure on loading name to {@link ProcessState} bound
+	 * {@link ManagedObject}.
 	 */
-	public void testNameAwareManagedObject_boundTo_Process() throws Exception {
-		this.doNameAwareManagedObjectTest(ManagedObjectScope.PROCESS);
+	public void testFailSetName_boundTo_Process() throws Exception {
+		this.doFailSetNameTest(ManagedObjectScope.PROCESS);
 	}
 
 	/**
-	 * Ensure can obtain bound {@link ManagedObject} name when bound to
-	 * {@link ThreadState}.
+	 * Ensure handle failure on loading name to {@link ThreadState} bound
+	 * {@link ManagedObject}.
 	 */
-	public void testNameAwareManagedObject_boundTo_Thread() throws Exception {
-		this.doNameAwareManagedObjectTest(ManagedObjectScope.THREAD);
+	public void testFailSetName_boundTo_Thread() throws Exception {
+		this.doFailSetNameTest(ManagedObjectScope.THREAD);
 	}
 
 	/**
-	 * Ensure can obtain bound {@link ManagedObject} name when bound to
-	 * {@link ManagedFunction}.
+	 * Ensure handle failure on loading name to {@link ManagedFunction} bound
+	 * {@link ManagedObject}.
 	 */
-	public void testNameAwareManagedObject_boundTo_Function() throws Exception {
-		this.doNameAwareManagedObjectTest(ManagedObjectScope.FUNCTION);
+	public void testFailSetName_boundTo_Function() throws Exception {
+		this.doFailSetNameTest(ManagedObjectScope.FUNCTION);
 	}
 
 	/**
 	 * Ensure can obtain bound {@link ManagedObject} name.
 	 */
-	private void doNameAwareManagedObjectTest(ManagedObjectScope scope) throws Exception {
+	private void doFailSetNameTest(ManagedObjectScope scope) throws Exception {
 
 		// Construct the managed object
 		TestObject object = new TestObject("MO", this);
 		object.isNameAwareManagedObject = true;
+		object.bindNameAwareFailure = new RuntimeException("TEST");
 
 		// Construct functions
 		TestWork work = new TestWork();
 		this.constructFunction(work, "task").buildObject("MO", scope);
 
 		// Ensure invoke function
-		this.invokeFunction("task", null);
-
-		// Ensure appropriate bound name
-		assertEquals("Incorrect bound name", "MO", object.boundManagedObjectName);
+		try {
+			this.invokeFunction("task", null);
+			fail("Should not be successful");
+		} catch (Exception ex) {
+			assertSame("Incorrect cause", object.bindNameAwareFailure, ex);
+		}
 	}
 
 	/**
@@ -82,7 +85,7 @@ public class NameAwareManagedObjectTest extends AbstractOfficeConstructTestCase 
 	public class TestWork {
 
 		public void task(TestObject object) {
-			assertEquals("Should have name bound", "MO", object.boundManagedObjectName);
+			fail("Should not be invoked as fails to set name");
 		}
 	}
 
