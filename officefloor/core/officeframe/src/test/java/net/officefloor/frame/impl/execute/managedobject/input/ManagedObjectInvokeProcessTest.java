@@ -363,7 +363,8 @@ public class ManagedObjectInvokeProcessTest extends AbstractOfficeConstructTestC
 		 */
 		public TestManagedObjectSource() {
 			// Should only be instantiated once
-			assertNull("Managd Object Source should only be instantiated once", ManagedObjectInvokeProcessTest.managedObjectSource);
+			assertNull("Managd Object Source should only be instantiated once",
+					ManagedObjectInvokeProcessTest.managedObjectSource);
 			ManagedObjectInvokeProcessTest.managedObjectSource = this;
 		}
 
@@ -449,17 +450,17 @@ public class ManagedObjectInvokeProcessTest extends AbstractOfficeConstructTestC
 		/**
 		 * Flags if {@link #task()} was invoked.
 		 */
-		public volatile boolean isTaskInvoked = false;
+		public boolean isTaskInvoked = false;
 
 		/**
 		 * Parameter of the {@link ManagedFunction}.
 		 */
-		public volatile Object parameter = null;
+		public Object parameter = null;
 
 		/**
 		 * {@link TestManagedObjectSource}.
 		 */
-		public volatile TestManagedObjectSource managedObject = null;
+		public TestManagedObjectSource managedObject = null;
 
 		/**
 		 * {@link ManagedFunction} executed by the external event.

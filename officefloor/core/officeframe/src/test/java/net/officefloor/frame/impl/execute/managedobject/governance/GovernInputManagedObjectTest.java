@@ -29,7 +29,7 @@ import net.officefloor.frame.test.TestObject;
  *
  * @author Daniel Sagenschneider
  */
-public class GovernSourcedManagedObjectTest extends AbstractOfficeConstructTestCase {
+public class GovernInputManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Ensure can apply {@link Governance} to input {@link ManagedObject}.

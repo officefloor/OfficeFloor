@@ -133,6 +133,12 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>>
 	public boolean isRecycle = true;
 
 	/**
+	 * {@link Consumer} to be provided the {@link RecycleManagedObjectParameter}
+	 * on recycling.
+	 */
+	public Consumer<RecycleManagedObjectParameter<?>> recycleConsumer = null;
+
+	/**
 	 * Possible failure in recycling the {@link ManagedObject}.
 	 */
 	public Throwable recycleFailure = null;
@@ -387,6 +393,11 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>>
 			RecycleManagedObjectParameter<TestManagedObject<O, F>> parameter = (RecycleManagedObjectParameter<TestManagedObject<O, F>>) context
 					.getObject(0);
 			TestManagedObject.this.recycledManagedObject = parameter.getManagedObject();
+
+			// Consume parameter
+			if (TestManagedObject.this.recycleConsumer != null) {
+				TestManagedObject.this.recycleConsumer.accept(parameter);
+			}
 
 			// Indicate failure in recycling the object
 			if (TestManagedObject.this.recycleFailure != null) {

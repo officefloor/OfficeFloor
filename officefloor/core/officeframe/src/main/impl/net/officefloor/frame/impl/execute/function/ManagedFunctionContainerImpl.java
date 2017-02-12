@@ -306,9 +306,6 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 		ThreadState threadState = this.flow.getThreadState();
 		ProcessState processState = threadState.getProcessState();
 
-		// Profile function being executed
-		threadState.profile(this.functionLogicMetaData);
-
 		switch (this.containerState) {
 		case LOAD_MANAGED_OBJECTS:
 
@@ -403,6 +400,9 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			}
 
 		case EXECUTE_FUNCTION:
+
+			// Profile function being executed
+			threadState.profile(this.functionLogicMetaData);
 
 			// Execute the managed function
 			ManagedFunctionLogicContextImpl context = new ManagedFunctionLogicContextImpl();

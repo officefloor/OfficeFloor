@@ -18,7 +18,6 @@
 package net.officefloor.frame.impl.execute.thread;
 
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.FlowCallback;
@@ -53,11 +52,6 @@ import net.officefloor.frame.internal.structure.ThreadState;
  * @author Daniel Sagenschneider
  */
 public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, ProcessState> implements ThreadState {
-
-	/**
-	 * {@link Logger}.
-	 */
-	private static final Logger LOGGER = OfficeFloorImpl.getFrameworkLogger();
 
 	/**
 	 * {@link ActiveThreadState} for the executing {@link Thread}.
@@ -356,7 +350,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			}
 
 		case LOG:
-			LOGGER.log(Level.SEVERE, "Unhandle escalation", escalation);
+			OfficeFloorImpl.getFrameworkLogger().log(Level.SEVERE, "Unhandle escalation", escalation);
 		}
 
 		// Logged error

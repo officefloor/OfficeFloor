@@ -33,6 +33,7 @@ public interface ThreadProfiler {
 	 *            {@link ManagedFunctionLogicMetaData} of the
 	 *            {@link ManagedFunction} being executed.
 	 */
+	@Deprecated // return FunctionState to profile managed function
 	void profileManagedFunction(ManagedFunctionLogicMetaData functionMetaData);
 
 }
