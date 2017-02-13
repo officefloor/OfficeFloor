@@ -20,16 +20,16 @@ package net.officefloor.frame.impl.spi.team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Tests the {@link WorkerPerTaskTeam}.
+ * Tests the {@link WorkerPerJobTeam}.
  * 
  * @author Daniel Sagenschneider
  */
 public class WorkerPerTaskTeamTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link WorkerPerTaskTeam} to test.
+	 * {@link WorkerPerJobTeam} to test.
 	 */
-	private WorkerPerTaskTeam team = new WorkerPerTaskTeam("test");
+	private WorkerPerJobTeam team = new WorkerPerJobTeam("test");
 
 	/**
 	 * Ensures runs the tasks.

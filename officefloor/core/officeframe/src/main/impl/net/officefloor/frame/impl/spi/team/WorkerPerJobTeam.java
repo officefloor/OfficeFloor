@@ -23,12 +23,12 @@ import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
 
 /**
- * {@link Team} that uses a specific new worker dedicated to each new
- * {@link Job}.
+ * {@link Team} that uses a specific new worker ({@link Thread}) dedicated to
+ * each new {@link Job}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WorkerPerTaskTeam extends ThreadGroup implements Team {
+public class WorkerPerJobTeam extends ThreadGroup implements Team {
 
 	/**
 	 * Priority for the worker {@link Thread} instances.
@@ -48,7 +48,7 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 	 * @param threadPriority
 	 *            Priority for the worker {@link Thread} instances.
 	 */
-	public WorkerPerTaskTeam(String teamName, int threadPriority) {
+	public WorkerPerJobTeam(String teamName, int threadPriority) {
 		super(teamName);
 		this.threadPriority = threadPriority;
 	}
@@ -59,7 +59,7 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 	 * @param teamName
 	 *            Name of this team.
 	 */
-	public WorkerPerTaskTeam(String teamName) {
+	public WorkerPerJobTeam(String teamName) {
 		this(teamName, Thread.NORM_PRIORITY);
 	}
 

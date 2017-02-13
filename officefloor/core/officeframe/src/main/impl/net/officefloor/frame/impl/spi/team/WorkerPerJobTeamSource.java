@@ -23,11 +23,11 @@ import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.api.team.source.impl.AbstractTeamSource;
 
 /**
- * {@link TeamSource} for the {@link WorkerPerTaskTeam}.
+ * {@link TeamSource} for the {@link WorkerPerJobTeam}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WorkerPerTaskTeamSource extends AbstractTeamSource {
+public class WorkerPerJobTeamSource extends AbstractTeamSource {
 
 	/**
 	 * Property to specify the worker {@link Thread} priority.
@@ -59,7 +59,7 @@ public class WorkerPerTaskTeamSource extends AbstractTeamSource {
 				.valueOf(context.getProperty(PROPERTY_THREAD_PRIORITY, String.valueOf(DEFAULT_THREAD_PRIORITY)));
 
 		// Create and return the team
-		return new WorkerPerTaskTeam(teamName, priority);
+		return new WorkerPerJobTeam(teamName, priority);
 	}
 
 }

@@ -144,7 +144,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		} finally {
 			// Provide start of verbose output
 			if (this.isVerbose) {
-				System.out.println("++++++++++++++++++++++++++ END:" + this.getName() + " ++++++++++++++++++++++++++");
+				System.out.println("+++ END: " + this.getClass().getSimpleName() + " . " + this.getName() + " +++\n");
 			}
 		}
 	}
@@ -1120,7 +1120,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 		// Provide start of verbose output
 		if (this.isVerbose) {
-			System.out.println("++++++++++++++++++++++++++ START:" + this.getName() + " ++++++++++++++++++++++++++");
+			System.out.println("+++ START: " + this.getClass().getSimpleName() + " . " + this.getName() + " +++");
 		}
 	}
 
@@ -1764,6 +1764,19 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return Run time in human readable form.
 	 */
 	public String getDisplayRunTime(long startTime) {
+		return this.getDisplayRunTime(startTime, System.currentTimeMillis());
+	}
+
+	/**
+	 * Obtains run time in human readable form.
+	 * 
+	 * @param startTime
+	 *            Start time of running.
+	 * @param endTime
+	 *            End time of running.
+	 * @return Run time in human readable form.
+	 */
+	public String getDisplayRunTime(long startTime, long endTime) {
 
 		// Obtain the run time in milliseconds
 		long runTime = (System.currentTimeMillis() - startTime);
@@ -1795,7 +1808,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		}
 
 		// Print the message
-		System.out.println(this.getClass().getSimpleName() + "." + this.getName() + ": " + message);
+		System.out.println(message);
 	}
 
 	/**
