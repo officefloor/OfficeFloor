@@ -27,6 +27,7 @@ import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -71,8 +72,8 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static RawManagedObjectMetaDataFactory getFactory() {
-		return new RawManagedObjectMetaDataImpl(null, null, null, null, -1, null, null, false, false, false, null,
-				null);
+		return new RawManagedObjectMetaDataImpl(null, null, null, null, -1, null, null, false, false, false, false,
+				null, null);
 	}
 
 	/**
@@ -110,6 +111,11 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 	 * Type of the {@link Object} returned from the {@link ManagedObject}.
 	 */
 	private final Class<?> objectType;
+
+	/**
+	 * Flag indiating if {@link ProcessAwareManagedObject}.
+	 */
+	private final boolean isProcessAware;
 
 	/**
 	 * Flag indicating if {@link NameAwareManagedObject}.
@@ -156,6 +162,8 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 	 * @param objectType
 	 *            Type of the {@link Object} returned from the
 	 *            {@link ManagedObject}.
+	 * @param isProcessAware
+	 *            Flag indicating if {@link ProcessAwareManagedObject}.
 	 * @param isNameAware
 	 *            Flag indicating if {@link NameAwareManagedObject}.
 	 * @param isAsynchronous
@@ -172,8 +180,8 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 			ManagedObjectSourceConfiguration<F, ?> managedObjectSourceConfiguration,
 			ManagedObjectSource<D, F> managedObjectSource,
 			ManagedObjectSourceMetaData<D, F> managedObjectSourceMetaData, long timeout,
-			ManagedObjectPool managedObjectPool, Class<?> objectType, boolean isNameAware, boolean isAsynchronous,
-			boolean isCoordinating, TeamManagement escalationResponsibleTeam,
+			ManagedObjectPool managedObjectPool, Class<?> objectType, boolean isProcessAware, boolean isNameAware,
+			boolean isAsynchronous, boolean isCoordinating, TeamManagement escalationResponsibleTeam,
 			RawManagingOfficeMetaDataImpl<F> rawManagingOfficeMetaData) {
 		this.managedObjectName = managedObjectName;
 		this.managedObjectSourceConfiguration = managedObjectSourceConfiguration;
@@ -182,6 +190,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 		this.timeout = timeout;
 		this.managedObjectPool = managedObjectPool;
 		this.objectType = objectType;
+		this.isProcessAware = isProcessAware;
 		this.isNameAware = isNameAware;
 		this.isAsynchronous = isAsynchronous;
 		this.isCoordinating = isCoordinating;
@@ -308,7 +317,8 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 			return null; // can not carry on
 		}
 
-		// Determine if name aware, asynchronous, coordinating
+		// Determine if process aware, name aware, asynchronous, coordinating
+		boolean isManagedObjectProcessAware = ProcessAwareManagedObject.class.isAssignableFrom(managedObjectClass);
 		boolean isManagedObjectNameAware = NameAwareManagedObject.class.isAssignableFrom(managedObjectClass);
 		boolean isManagedObjectAsynchronous = AsynchronousManagedObject.class.isAssignableFrom(managedObjectClass);
 		boolean isManagedObjectCoordinating = CoordinatingManagedObject.class.isAssignableFrom(managedObjectClass);
@@ -351,13 +361,13 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 				recycleFunctionName, inputConfiguration, flowMetaDatas, managingOfficeConfiguration);
 
 		// TODO enable specifying a team responsible for handling escalations
-		TeamManagement escalationResponsibleTeam = null;
+		TeamManagement escalationResponsibleTeam = null; // any team
 
 		// Created raw managed object meta-data
 		RawManagedObjectMetaDataImpl<d, h> rawMoMetaData = new RawManagedObjectMetaDataImpl<d, h>(
 				managedObjectSourceName, configuration, managedObjectSource, metaData, timeout, managedObjectPool,
-				objectType, isManagedObjectNameAware, isManagedObjectAsynchronous, isManagedObjectCoordinating,
-				escalationResponsibleTeam, rawManagingOfficeMetaData);
+				objectType, isManagedObjectProcessAware, isManagedObjectNameAware, isManagedObjectAsynchronous,
+				isManagedObjectCoordinating, escalationResponsibleTeam, rawManagingOfficeMetaData);
 
 		// Make raw managed object available to the raw managing office
 		rawManagingOfficeMetaData.setRawManagedObjectMetaData(rawMoMetaData);
@@ -439,9 +449,9 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 
 		// Create the managed object meta-data
 		ManagedObjectMetaDataImpl<D> moMetaData = new ManagedObjectMetaDataImpl<D>(boundName, this.objectType,
-				instanceIndex, this.managedObjectSource, this.managedObjectPool, this.isNameAware, sourcingAssetManager,
-				this.isAsynchronous, operationsAssetManager, this.isCoordinating, dependencyMappings, this.timeout,
-				governanceMetaData);
+				instanceIndex, this.managedObjectSource, this.managedObjectPool, this.isProcessAware, this.isNameAware,
+				sourcingAssetManager, this.isAsynchronous, operationsAssetManager, this.isCoordinating,
+				dependencyMappings, this.timeout, governanceMetaData);
 
 		// Have the managed object managed by its managing office
 		this.rawManagingOfficeMetaData.manageManagedObject(moMetaData);

@@ -29,6 +29,9 @@ import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.ProcessAwareContext;
+import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
@@ -400,6 +403,12 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 					// If not setup, then managed object should still be ready
 					boolean isCheckReady = false;
 
+					// Provide process awareness if process aware
+					if (container.metaData.isProcessAwareManagedObject()) {
+						((ProcessAwareManagedObject) container.managedObject)
+								.registerProcessAwareContext(new ProcessAwareContextImpl());
+					}
+
 					// Provide bound name if name aware
 					if (container.metaData.isNameAwareManagedObject()) {
 						((NameAwareManagedObject) container.managedObject)
@@ -683,6 +692,22 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 				}
 			};
 			ManagedObjectContainerImpl.this.doOperation(notifyComplete);
+		}
+	}
+
+	/**
+	 * {@link ProcessAwareContext} implementation.
+	 */
+	private class ProcessAwareContextImpl implements ProcessAwareContext {
+		
+		@Override
+		public <R, T extends Throwable> R run(ProcessSafeOperation<R, T> operation) throws T {
+			
+			// Easy access to the container
+			ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
+
+			// Run the process safe operation
+			return container.responsibleThreadState.runProcessSafeOperation(operation);
 		}
 	}
 

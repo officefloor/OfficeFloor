@@ -22,6 +22,7 @@ import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -109,6 +110,15 @@ public interface ManagedObjectMetaData<O extends Enum<O>> {
 	 * @return Time out in milliseconds.
 	 */
 	long getTimeout();
+
+	/**
+	 * Indicates if the {@link ManagedObject} implements
+	 * {@link ProcessAwareManagedObject}.
+	 * 
+	 * @return <code>true</code> if the {@link ManagedObject} implements
+	 *         {@link ProcessAwareManagedObject}.
+	 */
+	boolean isProcessAwareManagedObject();
 
 	/**
 	 * Indicates if the {@link ManagedObject} implements

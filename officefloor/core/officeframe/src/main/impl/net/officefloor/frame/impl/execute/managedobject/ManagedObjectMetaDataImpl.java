@@ -23,6 +23,7 @@ import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.team.Job;
@@ -72,6 +73,12 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 	 * {@link ManagedObjectSource} of the {@link ManagedObject}.
 	 */
 	private final ManagedObjectSource<?, ?> source;
+
+	/**
+	 * Indicates if the {@link ManagedObject} implements
+	 * {@link ProcessAwareManagedObject}.
+	 */
+	private final boolean isProcessAwareManagedObject;
 
 	/**
 	 * Indicates if the {@link ManagedObject} implements
@@ -153,11 +160,14 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 	 *            Instance index.
 	 * @param source
 	 *            {@link ManagedObjectSource} of the {@link ManagedObject}.
+	 * @param pool
+	 *            {@link ManagedObjectPool} of the {@link ManagedObject}.
+	 * @param isProcessAwareManagedObject
+	 *            <code>true</code> if the {@link ManagedObject} is
+	 *            {@link ProcessAwareManagedObject}.
 	 * @param isNameAwareManagedObject
 	 *            <code>true</code> if the {@link ManagedObject} is
 	 *            {@link NameAwareManagedObject}.
-	 * @param pool
-	 *            {@link ManagedObjectPool} of the {@link ManagedObject}.
 	 * @param sourcingManager
 	 *            {@link AssetManager} to manage the sourcing of the
 	 *            {@link ManagedObject} instances.
@@ -181,15 +191,16 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 	 *            to this {@link ManagedObject}.
 	 */
 	public ManagedObjectMetaDataImpl(String boundManagedObjectName, Class<?> objectType, int instanceIndex,
-			ManagedObjectSource<?, ?> source, ManagedObjectPool pool, boolean isNameAwareManagedObject,
-			AssetManager sourcingManager, boolean isManagedObjectAsynchronous, AssetManager operationsManager,
-			boolean isCoordinatingManagedObject, ManagedObjectIndex[] dependencyMapping, long timeout,
-			ManagedObjectGovernanceMetaData<?>[] governanceMetaData) {
+			ManagedObjectSource<?, ?> source, ManagedObjectPool pool, boolean isProcessAwareManagedObject,
+			boolean isNameAwareManagedObject, AssetManager sourcingManager, boolean isManagedObjectAsynchronous,
+			AssetManager operationsManager, boolean isCoordinatingManagedObject, ManagedObjectIndex[] dependencyMapping,
+			long timeout, ManagedObjectGovernanceMetaData<?>[] governanceMetaData) {
 		this.boundManagedObjectName = boundManagedObjectName;
 		this.objectType = objectType;
 		this.instanceIndex = instanceIndex;
 		this.source = source;
 		this.timeout = timeout;
+		this.isProcessAwareManagedObject = isProcessAwareManagedObject;
 		this.isNameAwareManagedObject = isNameAwareManagedObject;
 		this.isCoordinatingManagedObject = isCoordinatingManagedObject;
 		this.dependencyMapping = dependencyMapping;
@@ -252,6 +263,11 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 	@Override
 	public long getTimeout() {
 		return this.timeout;
+	}
+
+	@Override
+	public boolean isProcessAwareManagedObject() {
+		return this.isProcessAwareManagedObject;
 	}
 
 	@Override

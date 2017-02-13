@@ -19,6 +19,7 @@ package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 
 /**
  * <p>
@@ -48,6 +49,17 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	 *         safe on the current {@link Thread}.
 	 */
 	boolean isThreadStateSafe();
+
+	/**
+	 * Runs the {@link ProcessSafeOperation}.
+	 * 
+	 * @param operation
+	 *            {@link ProcessSafeOperation}.
+	 * @return Optional return value from {@link ProcessSafeOperation}.
+	 * @throws T
+	 *             Optional {@link Throwable} from {@link ProcessSafeOperation}.
+	 */
+	<R, T extends Throwable> R runProcessSafeOperation(ProcessSafeOperation<R, T> operation) throws T;
 
 	/**
 	 * Creates a {@link Flow} contained in this {@link ThreadState}.

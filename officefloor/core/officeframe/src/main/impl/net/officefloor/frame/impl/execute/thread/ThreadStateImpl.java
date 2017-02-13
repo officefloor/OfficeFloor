@@ -21,6 +21,7 @@ import java.util.logging.Level;
 
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.frame.impl.execute.flow.FlowImpl;
 import net.officefloor.frame.impl.execute.function.LinkedListSetPromise;
 import net.officefloor.frame.impl.execute.function.Promise;
@@ -287,6 +288,29 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	public boolean isThreadStateSafe() {
 		ActiveThreadState active = activeThreadState.get();
 		return (active != null) ? active.isThreadStateSafe : false;
+	}
+
+	@Override
+	public <R, T extends Throwable> R runProcessSafeOperation(ProcessSafeOperation<R, T> operation) throws T {
+
+		// Obtain the main thread
+		ThreadState mainThreadState = this.processState.getMainThreadState();
+
+		// Obtain the active thread state
+		ActiveThreadState active = activeThreadState.get();
+		ThreadState activeThreadState = (active != null ? active.threadState : null);
+
+		// Determine if running on same thread state
+		if (mainThreadState == activeThreadState) {
+			// Safe on main thread, so no additional lock required
+			return operation.run();
+
+		} else {
+			// Not safe as different thread state, so lock on main thread state
+			synchronized (mainThreadState) {
+				return operation.run();
+			}
+		}
 	}
 
 	@Override

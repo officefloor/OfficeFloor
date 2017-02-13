@@ -37,6 +37,8 @@ import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.ProcessAwareContext;
+import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolContext;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
@@ -54,8 +56,8 @@ import net.officefloor.frame.api.source.TestSource;
  *
  * @author Daniel Sagenschneider
  */
-public class TestManagedObject<O extends Enum<O>, F extends Enum<F>>
-		implements NameAwareManagedObject, AsynchronousManagedObject, CoordinatingManagedObject<O>, ManagedObject {
+public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements NameAwareManagedObject,
+		AsynchronousManagedObject, CoordinatingManagedObject<O>, ProcessAwareManagedObject, ManagedObject {
 
 	/*
 	 * ================= Setup parameters ================
@@ -85,6 +87,11 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>>
 	 * Indicates if {@link CoordinatingManagedObject}.
 	 */
 	public boolean isCoordinatingManagedObject = false;
+
+	/**
+	 * Indicates if {@link ProcessAwareManagedObject}.
+	 */
+	public boolean isProcessAwareManagedObject = false;
 
 	/**
 	 * Optional {@link Consumer} to enhance the
@@ -171,6 +178,11 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>>
 	 * {@link ObjectRegistry}.
 	 */
 	public ObjectRegistry<O> objectRegistry = null;
+
+	/**
+	 * {@link ProcessAwareContext}.
+	 */
+	public ProcessAwareContext processAwareContext = null;
 
 	/*
 	 * =================== Results =========================
@@ -280,6 +292,15 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>>
 	}
 
 	/*
+	 * ================== ProcessAwareManagedObject ====================
+	 */
+
+	@Override
+	public void registerProcessAwareContext(ProcessAwareContext context) {
+		this.processAwareContext = context;
+	}
+
+	/*
 	 * ====================== ManagedObject ===========================
 	 */
 
@@ -317,6 +338,9 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>>
 			}
 			if (TestManagedObject.this.isCoordinatingManagedObject) {
 				interfaces.add(CoordinatingManagedObject.class);
+			}
+			if (TestManagedObject.this.isProcessAwareManagedObject) {
+				interfaces.add(ProcessAwareManagedObject.class);
 			}
 			Object proxy = Proxy.newProxyInstance(this.getClass().getClassLoader(), interfaces.toArray(new Class[0]),
 					new InvocationHandler() {

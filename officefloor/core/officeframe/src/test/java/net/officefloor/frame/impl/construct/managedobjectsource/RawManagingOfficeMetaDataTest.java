@@ -773,8 +773,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	 * @return {@link ManagedObjectMetaDataImpl}.
 	 */
 	private ManagedObjectMetaDataImpl<?> createMoMetaData() {
-		return new ManagedObjectMetaDataImpl<None>("BOUND", String.class, -1, null, null, false, null, false, null,
-				false, null, 0, null);
+		return new ManagedObjectMetaDataImpl<None>("BOUND", String.class, -1, null, null, false, false, null, false,
+				null, false, null, 0, null);
 	}
 
 	/**

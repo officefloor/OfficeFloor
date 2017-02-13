@@ -30,7 +30,7 @@ import net.officefloor.frame.internal.structure.ProcessState;
  *
  * @author Daniel Sagenschneider
  */
-public interface ProcessAwareManagedObject {
+public interface ProcessAwareManagedObject extends ManagedObject {
 
 	/**
 	 * Registers the {@link ProcessAwareContext} with the {@link ManagedObject}.

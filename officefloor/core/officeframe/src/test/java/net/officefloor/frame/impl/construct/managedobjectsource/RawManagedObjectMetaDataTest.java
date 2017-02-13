@@ -34,6 +34,7 @@ import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
@@ -674,6 +675,44 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		assertFalse("Should not be coordinating", moMetaData.isCoordinatingManagedObject());
 		assertEquals("Incorrect source asset manager", assetManager, moMetaData.getSourcingManager());
 		assertNull("Not asynchronous so no operations asset manager", moMetaData.getOperationsManager());
+	}
+
+	/**
+	 * Ensures flag name aware for {@link ProcessAwareManagedObject}.
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void testProcessAwareManagedObject() {
+
+		final RawBoundManagedObjectMetaData boundMetaData = this.createMock(RawBoundManagedObjectMetaData.class);
+		final int INSTANCE_INDEX = 0;
+		final RawBoundManagedObjectInstanceMetaData<?> boundInstanceMetaData = this
+				.createMock(RawBoundManagedObjectInstanceMetaData.class);
+		final String BOUND_NAME = "BOUND_NAME";
+		final ManagedObjectIndex moIndex = this.createMock(ManagedObjectIndex.class);
+		final AssetManager sourceAssetManager = this.createMock(AssetManager.class);
+
+		// Record name aware managed object
+		this.record_initManagedObject();
+		this.record_createRawMetaData(ProcessAwareManagedObject.class, 0, null);
+		this.recordReturn(boundMetaData, boundMetaData.getBoundManagedObjectName(), BOUND_NAME);
+		this.recordReturn(boundMetaData, boundMetaData.getManagedObjectIndex(), moIndex);
+		this.recordReturn(moIndex, moIndex.getManagedObjectScope(), ManagedObjectScope.FUNCTION);
+		this.recordReturn(this.assetManagerFactory,
+				this.assetManagerFactory.createAssetManager(AssetType.MANAGED_OBJECT,
+						ManagedObjectScope.FUNCTION + ":testFunction:" + INSTANCE_INDEX + ":" + BOUND_NAME, "source",
+						this.issues),
+				sourceAssetManager);
+
+		// Attempt to construct managed object
+		this.replayMockObjects();
+		RawManagedObjectMetaData rawMetaData = this.constructRawManagedObjectMetaData(true);
+		ManagedObjectMetaData<?> moMetaData = rawMetaData.createManagedObjectMetaData(AssetType.FUNCTION,
+				"testFunction", boundMetaData, INSTANCE_INDEX, boundInstanceMetaData, new ManagedObjectIndex[0],
+				new ManagedObjectGovernanceMetaData[0], this.assetManagerFactory, this.issues);
+		this.verifyMockObjects();
+
+		// Verify is process aware
+		assertTrue("Should be process aware", moMetaData.isProcessAwareManagedObject());
 	}
 
 	/**
