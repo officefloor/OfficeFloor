@@ -23,20 +23,41 @@ import java.util.List;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.profile.ProfiledManagedFunction;
 import net.officefloor.frame.api.profile.ProfiledThreadState;
+import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedFunctionLogicMetaData;
+import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ThreadProfiler;
+import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * {@link ThreadProfiler} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class ThreadProfilerImpl implements ThreadProfiler, ProfiledThreadState {
+public class ThreadProfilerImpl extends AbstractLinkedListSetEntry<FunctionState, Flow>
+		implements ThreadProfiler, ProfiledThreadState {
 
 	/**
-	 * Start time stamp.
+	 * {@link ThreadState} being profiled.
 	 */
-	private final long startTimestamp;
+	private final ThreadState threadState;
+
+	/**
+	 * {@link ProcessProfiler}.
+	 */
+	private final ProcessProfilerImpl processProfiler;
+
+	/**
+	 * Start time stamp in milliseconds.
+	 */
+	private final long startTimestampMilliseconds;
+
+	/**
+	 * Start time stamp in nanoseconds.
+	 */
+	private final long startTimestampNanoseconds;
 
 	/**
 	 * {@link ProfiledManagedFunction} instances.
@@ -45,12 +66,22 @@ public class ThreadProfilerImpl implements ThreadProfiler, ProfiledThreadState {
 
 	/**
 	 * Initiate.
-	 * 
-	 * @param startTimestamp
-	 *            Start time stamp.
+	 *
+	 * @param threadState
+	 *            {@link ThreadState} being profiled.
+	 * @param processProfiler
+	 *            {@link ProcessProfiler}.
+	 * @param startTimestampMilliseconds
+	 *            Start time stamp in milliseconds.
+	 * @param startTimestampNanoseconds
+	 *            Start time stamp in nanoseconds.
 	 */
-	public ThreadProfilerImpl(long startTimestamp) {
-		this.startTimestamp = startTimestamp;
+	ThreadProfilerImpl(ThreadState threadState, ProcessProfilerImpl processProfiler, long startTimestampMilliseconds,
+			long startTimestampNanoseconds) {
+		this.threadState = threadState;
+		this.processProfiler = processProfiler;
+		this.startTimestampMilliseconds = startTimestampMilliseconds;
+		this.startTimestampNanoseconds = startTimestampNanoseconds;
 	}
 
 	/*
@@ -60,8 +91,11 @@ public class ThreadProfilerImpl implements ThreadProfiler, ProfiledThreadState {
 	@Override
 	public void profileManagedFunction(ManagedFunctionLogicMetaData functionMetaData) {
 
-		// Obtain the start time stamp
-		long startTimestamp = System.nanoTime();
+		// Always invoked in ThreadState safety
+
+		// Obtain the start time stamps
+		long startTimestampMilliseconds = System.currentTimeMillis();
+		long startTimestampNanoseconds = System.nanoTime();
 
 		// Obtain the function name
 		String functionName = functionMetaData.getFunctionName();
@@ -70,7 +104,25 @@ public class ThreadProfilerImpl implements ThreadProfiler, ProfiledThreadState {
 		String executingThreadName = Thread.currentThread().getName();
 
 		// Create and add the profiled function
-		this.functions.add(new ProfiledManagedFunctionImpl(functionName, startTimestamp, executingThreadName));
+		this.functions.add(new ProfiledManagedFunctionImpl(functionName, startTimestampMilliseconds,
+				startTimestampNanoseconds, executingThreadName));
+	}
+
+	/*
+	 * ======================= FunctionState ===========================
+	 */
+
+	@Override
+	public ThreadState getThreadState() {
+
+		// Always register thread profilers on main thread state of process
+		return this.processProfiler.getMainThreadState();
+	}
+
+	@Override
+	public FunctionState execute() throws Throwable {
+		this.processProfiler.registerProfiledThreadState(this);
+		return null;
 	}
 
 	/*
@@ -78,13 +130,20 @@ public class ThreadProfilerImpl implements ThreadProfiler, ProfiledThreadState {
 	 */
 
 	@Override
-	public long getStartTimestamp() {
-		return this.startTimestamp;
+	public long getSTartTimestampMilliseconds() {
+		return this.startTimestampMilliseconds;
+	}
+
+	@Override
+	public long getStartTimestampNanoseconds() {
+		return this.startTimestampNanoseconds;
 	}
 
 	@Override
 	public List<ProfiledManagedFunction> getProfiledManagedFunctions() {
-		return this.functions;
+		synchronized (this.threadState) {
+			return this.functions;
+		}
 	}
 
 	/**
@@ -98,9 +157,14 @@ public class ThreadProfilerImpl implements ThreadProfiler, ProfiledThreadState {
 		private final String functionName;
 
 		/**
-		 * Start time stamp.
+		 * Start time stamp in milliseconds.
 		 */
-		private final long startTimestamp;
+		private final long startTimestampMilliseconds;
+
+		/**
+		 * Start time stamp in nanoseconds.
+		 */
+		private final long startTimestampNanoseconds;
 
 		/**
 		 * Name of the executing {@link Thread}.
@@ -112,12 +176,16 @@ public class ThreadProfilerImpl implements ThreadProfiler, ProfiledThreadState {
 		 * 
 		 * @param functionName
 		 *            {@link ManagedFunction} name.
-		 * @param startTimestamp
-		 *            Start time stamp.
+		 * @param startTimestampMilliseconds
+		 *            Start time stamp in milliseconds.
+		 * @param startTimestampNanoseconds
+		 *            Start time stamp in nanoseconds.
 		 */
-		public ProfiledManagedFunctionImpl(String functionName, long startTimestamp, String executingThreadName) {
+		public ProfiledManagedFunctionImpl(String functionName, long startTimestampMilliseconds,
+				long startTimestampNanoseconds, String executingThreadName) {
 			this.functionName = functionName;
-			this.startTimestamp = startTimestamp;
+			this.startTimestampMilliseconds = startTimestampMilliseconds;
+			this.startTimestampNanoseconds = startTimestampNanoseconds;
 			this.executingThreadName = executingThreadName;
 		}
 
@@ -131,13 +199,18 @@ public class ThreadProfilerImpl implements ThreadProfiler, ProfiledThreadState {
 		}
 
 		@Override
-		public long getStartTimestamp() {
-			return this.startTimestamp;
+		public String getExecutingThreadName() {
+			return this.executingThreadName;
 		}
 
 		@Override
-		public String getExecutingThreadName() {
-			return this.executingThreadName;
+		public long getStartTimestampMilliseconds() {
+			return this.startTimestampMilliseconds;
+		}
+
+		@Override
+		public long getStartTimestampNanoseconds() {
+			return this.startTimestampNanoseconds;
 		}
 	}
 

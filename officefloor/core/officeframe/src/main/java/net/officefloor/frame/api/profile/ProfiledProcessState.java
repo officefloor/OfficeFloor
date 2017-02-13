@@ -31,9 +31,16 @@ public interface ProfiledProcessState {
 	/**
 	 * Obtains the start time stamp.
 	 * 
+	 * @return Start time stamp in milliseconds.
+	 */
+	long getStartTimestampMilliseconds();
+
+	/**
+	 * Obtains the start time stamp.
+	 * 
 	 * @return Start time stamp in nanoseconds.
 	 */
-	long getStartTimestamp();
+	long getStartTimestampNanoseconds();
 
 	/**
 	 * Obtains the {@link ProfiledThreadState} instances.

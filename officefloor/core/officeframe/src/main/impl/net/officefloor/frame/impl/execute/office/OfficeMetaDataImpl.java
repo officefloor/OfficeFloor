@@ -26,12 +26,12 @@ import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.profile.Profiler;
+import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.process.ProcessStateImpl;
-import net.officefloor.frame.impl.execute.profile.ProcessProfilerImpl;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLoop;
-import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -40,7 +40,6 @@ import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.OfficeStartupFunction;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
-import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -199,7 +198,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	}
 
 	@Override
-	public ManagedFunctionContainer createProcess(FlowMetaData flowMetaData, Object parameter, FlowCallback callback,
+	public FunctionState createProcess(FlowMetaData flowMetaData, Object parameter, FlowCallback callback,
 			ThreadState callbackThreadState) {
 		return this.createProcess(flowMetaData, parameter, callback, callbackThreadState, null, null, -1);
 	}
@@ -226,9 +225,8 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 		}
 
 		// Create the process
-		final ManagedFunctionContainer function = this.createProcess(flowMetaData, parameter, callback,
-				callbackThreadState, inputManagedObject, inputManagedObjectMetaData,
-				processBoundIndexForInputManagedObject);
+		final FunctionState function = this.createProcess(flowMetaData, parameter, callback, callbackThreadState,
+				inputManagedObject, inputManagedObjectMetaData, processBoundIndexForInputManagedObject);
 
 		// Trigger the process
 		if (delay > 0) {
@@ -287,27 +285,23 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 * @param processBoundIndexForInputManagedObject
 	 *            Index of the input {@link ManagedObject} within the
 	 *            {@link ProcessState}.
-	 * @return Initial {@link ManagedFunctionContainer} to be executed for the
+	 * @return Initial {@link FunctionState} to be executed for the
 	 *         {@link ProcessState}.
 	 */
-	private ManagedFunctionContainer createProcess(FlowMetaData flowMetaData, Object parameter, FlowCallback callback,
+	private FunctionState createProcess(FlowMetaData flowMetaData, Object parameter, FlowCallback callback,
 			ThreadState callbackThreadState, ManagedObject inputManagedObject,
 			ManagedObjectMetaData<?> inputManagedObjectMetaData, int processBoundIndexForInputManagedObject) {
-
-		// Create the process profiler (if profiling)
-		ProcessProfiler processProfiler = (this.profiler == null ? null
-				: new ProcessProfilerImpl(this.profiler, System.nanoTime()));
 
 		// Create the Process State (based on whether have managed object)
 		ProcessState processState;
 		if (inputManagedObject == null) {
 			// Create Process without an Input Managed Object
 			processState = new ProcessStateImpl(this.processMetaData, this, callback, callbackThreadState,
-					this.threadLocalAwareExecutor, processProfiler);
+					this.threadLocalAwareExecutor, this.profiler);
 		} else {
 			// Create Process with the Input Managed Object
 			processState = new ProcessStateImpl(this.processMetaData, this, callback, callbackThreadState,
-					this.threadLocalAwareExecutor, processProfiler, inputManagedObject, inputManagedObjectMetaData,
+					this.threadLocalAwareExecutor, this.profiler, inputManagedObject, inputManagedObjectMetaData,
 					processBoundIndexForInputManagedObject);
 		}
 
@@ -319,7 +313,11 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 		ManagedFunctionMetaData<?, ?> functionMetaData = flowMetaData.getInitialFunctionMetaData();
 
 		// Create the initial function of the process
-		ManagedFunctionContainer function = flow.createManagedFunction(parameter, functionMetaData, true, null);
+		FunctionState function = flow.createManagedFunction(parameter, functionMetaData, true, null);
+
+		// Ensure register main thread profiler
+		FunctionState registerThreadProfiler = function.getThreadState().registerThreadProfiler();
+		function = Promise.then(registerThreadProfiler, function);
 
 		// Return the function
 		return function;

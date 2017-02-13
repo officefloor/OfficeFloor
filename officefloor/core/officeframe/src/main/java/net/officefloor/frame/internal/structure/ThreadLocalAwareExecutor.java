@@ -38,12 +38,11 @@ public interface ThreadLocalAwareExecutor {
 	 * {@link Thread} are complete.
 	 * 
 	 * @param function
-	 *            Initial {@link ManagedFunctionContainer} of the
-	 *            {@link ProcessState}.
+	 *            Initial {@link FunctionState} of the {@link ProcessState}.
 	 * @param loop
 	 *            {@link FunctionLoop}.
 	 */
-	void runInContext(ManagedFunctionContainer function, FunctionLoop loop);
+	void runInContext(FunctionState function, FunctionLoop loop);
 
 	/**
 	 * Executes the {@link Job} by the {@link Thread} registered to its

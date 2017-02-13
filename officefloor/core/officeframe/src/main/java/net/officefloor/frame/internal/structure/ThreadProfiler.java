@@ -24,7 +24,7 @@ import net.officefloor.frame.api.function.ManagedFunction;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ThreadProfiler {
+public interface ThreadProfiler extends FunctionState {
 
 	/**
 	 * Profiles execution of a {@link ManagedFunction}.
@@ -33,7 +33,6 @@ public interface ThreadProfiler {
 	 *            {@link ManagedFunctionLogicMetaData} of the
 	 *            {@link ManagedFunction} being executed.
 	 */
-	@Deprecated // return FunctionState to profile managed function
 	void profileManagedFunction(ManagedFunctionLogicMetaData functionMetaData);
 
 }

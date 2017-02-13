@@ -34,13 +34,22 @@ public interface ProfiledManagedFunction {
 	String getFunctionName();
 
 	/**
-	 * Obtains the timestamp in nanoseconds when the {@link ManagedFunction} was
-	 * started.
+	 * Obtains the time stamp in milliseconds when the {@link ManagedFunction}
+	 * was started.
 	 * 
-	 * @return Timestamp in nanoseconds when the {@link ManagedFunction} was
+	 * @return Time stamp in milliseconds when the {@link ManagedFunction} was
 	 *         started.
 	 */
-	long getStartTimestamp();
+	long getStartTimestampMilliseconds();
+
+	/**
+	 * Obtains the time stamp in nanoseconds when the {@link ManagedFunction}
+	 * was started.
+	 * 
+	 * @return Time stamp in nanoseconds when the {@link ManagedFunction} was
+	 *         started.
+	 */
+	long getStartTimestampNanoseconds();
 
 	/**
 	 * Obtains the name of the executing {@link Thread}.

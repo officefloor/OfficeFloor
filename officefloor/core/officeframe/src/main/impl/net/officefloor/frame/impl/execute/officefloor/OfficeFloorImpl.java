@@ -31,7 +31,7 @@ import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.impl.execute.office.OfficeImpl;
-import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
@@ -147,9 +147,9 @@ public class OfficeFloorImpl implements OfficeFloor {
 				}
 
 				// Create and activate the startup functions
-				ManagedFunctionContainer startupTask = officeMetaData.createProcess(officeStartupTask.getFlowMetaData(),
+				FunctionState startupFunction = officeMetaData.createProcess(officeStartupTask.getFlowMetaData(),
 						officeStartupTask.getParameter(), null, null);
-				officeMetaData.getFunctionLoop().delegateFunction(startupTask);
+				officeMetaData.getFunctionLoop().delegateFunction(startupFunction);
 			}
 		}
 	}

@@ -31,11 +31,11 @@ public interface ProcessProfiler {
 	 *            {@link ThreadState}.
 	 * @return {@link ThreadState} to be profiled.
 	 */
-	ThreadProfiler addThread(ThreadState threadState);
+	ThreadProfiler addThreadState(ThreadState threadState);
 
 	/**
 	 * Invoked once the {@link ProcessState} is complete.
 	 */
-	void processCompleted();
+	void processStateCompleted();
 
 }

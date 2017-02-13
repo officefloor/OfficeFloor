@@ -261,7 +261,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		this.governanceContainers = new GovernanceContainer[governanceMetaData.length];
 
 		// Create thread profiler
-		this.profiler = (processProfiler == null ? null : processProfiler.addThread(this));
+		this.profiler = (processProfiler == null ? null : processProfiler.addThreadState(this));
 	}
 
 	/*
@@ -439,6 +439,11 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	public boolean isGovernanceActive(int index) {
 		GovernanceContainer<?> container = this.governanceContainers[index];
 		return (container != null) ? container.isGovernanceActive() : false;
+	}
+
+	@Override
+	public FunctionState registerThreadProfiler() {
+		return this.profiler;
 	}
 
 	@Override

@@ -103,10 +103,10 @@ public interface OfficeMetaData {
 	 * @param callbackThreadState
 	 *            Optional {@link ThreadState} for the {@link FlowCallback}. May
 	 *            be <code>null</code>.
-	 * @return {@link ManagedFunctionContainer} to start processing the
+	 * @return {@link FunctionState} to start processing the
 	 *         {@link ProcessState}.
 	 */
-	ManagedFunctionContainer createProcess(FlowMetaData flowMetaData, Object parameter, FlowCallback callback,
+	FunctionState createProcess(FlowMetaData flowMetaData, Object parameter, FlowCallback callback,
 			ThreadState callbackThreadState);
 
 	/**

@@ -31,9 +31,16 @@ public interface ProfiledThreadState {
 	/**
 	 * Obtains the start time stamp.
 	 * 
+	 * @return Start time stamp in milliseconds.
+	 */
+	long getSTartTimestampMilliseconds();
+
+	/**
+	 * Obtains the start time stamp.
+	 * 
 	 * @return Start time stamp in nanoseconds.
 	 */
-	long getStartTimestamp();
+	long getStartTimestampNanoseconds();
 
 	/**
 	 * Obtains the {@link ProfiledManagedFunction} instances.

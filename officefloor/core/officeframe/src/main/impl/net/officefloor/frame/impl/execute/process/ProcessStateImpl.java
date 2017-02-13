@@ -19,18 +19,19 @@ package net.officefloor.frame.impl.execute.process;
 
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectCleanupImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
+import net.officefloor.frame.impl.execute.profile.ProcessProfilerImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.LinkedListSet;
-import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
@@ -113,14 +114,13 @@ public class ProcessStateImpl implements ProcessState {
 	 *            <code>null</code>.
 	 * @param threadLocalAwareExecutor
 	 *            {@link ThreadLocalAwareExecutor}.
-	 * @param processProfiler
-	 *            Optional {@link ProcessProfiler}. May be <code>null</code>.
+	 * @param profiler
+	 *            Optional {@link Profiler}. May be <code>null</code>.
 	 */
 	public ProcessStateImpl(ProcessMetaData processMetaData, OfficeMetaData officeMetaData, FlowCallback callback,
-			ThreadState callbackThreadState, ThreadLocalAwareExecutor threadLocalAwareExecutor,
-			ProcessProfiler processProfiler) {
-		this(processMetaData, officeMetaData, callback, callbackThreadState, threadLocalAwareExecutor, processProfiler,
-				null, null, -1);
+			ThreadState callbackThreadState, ThreadLocalAwareExecutor threadLocalAwareExecutor, Profiler profiler) {
+		this(processMetaData, officeMetaData, callback, callbackThreadState, threadLocalAwareExecutor, profiler, null,
+				null, -1);
 	}
 
 	/**
@@ -137,8 +137,8 @@ public class ProcessStateImpl implements ProcessState {
 	 *            <code>null</code>.
 	 * @param threadLocalAwareExecutor
 	 *            {@link ThreadLocalAwareExecutor}.
-	 * @param processProfiler
-	 *            Optional {@link ProcessProfiler}. May be <code>null</code>.
+	 * @param profiler
+	 *            Optional {@link Profiler}. May be <code>null</code>.
 	 * @param inputManagedObject
 	 *            {@link ManagedObject} that invoked this {@link ProcessState}.
 	 *            May be <code>null</code>.
@@ -151,13 +151,16 @@ public class ProcessStateImpl implements ProcessState {
 	 *            {@link ProcessState}.
 	 */
 	public ProcessStateImpl(ProcessMetaData processMetaData, OfficeMetaData officeMetaData, FlowCallback callback,
-			ThreadState callbackThreadState, ThreadLocalAwareExecutor threadLocalAwareExecutor,
-			ProcessProfiler processProfiler, ManagedObject inputManagedObject,
-			ManagedObjectMetaData<?> inputManagedObjectMetaData, int inputManagedObjectIndex) {
+			ThreadState callbackThreadState, ThreadLocalAwareExecutor threadLocalAwareExecutor, Profiler profiler,
+			ManagedObject inputManagedObject, ManagedObjectMetaData<?> inputManagedObjectMetaData,
+			int inputManagedObjectIndex) {
 		this.processMetaData = processMetaData;
 		this.officeMetaData = officeMetaData;
 		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
-		this.processProfiler = processProfiler;
+
+		// Create the process profiler (if profiling)
+		this.processProfiler = (profiler == null ? null
+				: new ProcessProfilerImpl(profiler, this, System.currentTimeMillis(), System.nanoTime()));
 
 		// Create the main thread state
 		this.mainThreadState = new ThreadStateImpl(this.processMetaData.getThreadMetaData(), callback,
@@ -219,8 +222,11 @@ public class ProcessStateImpl implements ProcessState {
 
 				// Create the function for spawned thread state
 				Flow flow = threadState.createFlow(null);
-				ManagedFunctionContainer function = flow.createManagedFunction(parameter, managedFunctionMetaData, true,
-						null);
+				FunctionState function = flow.createManagedFunction(parameter, managedFunctionMetaData, true, null);
+
+				// Ensure register profiling
+				FunctionState registerThreadProfiler = threadState.registerThreadProfiler();
+				function = Promise.then(registerThreadProfiler, function);
 
 				// Spawn the thread state
 				FunctionLoop loop = process.officeMetaData.getFunctionLoop();
@@ -265,7 +271,7 @@ public class ProcessStateImpl implements ProcessState {
 
 							// Flag to profile that process complete
 							if (process.processProfiler != null) {
-								process.processProfiler.processCompleted();
+								process.processProfiler.processStateCompleted();
 							}
 
 							// Nothing further for process

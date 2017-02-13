@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.impl.spi.team.JobQueue;
 import net.officefloor.frame.internal.structure.FunctionLoop;
-import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 
@@ -51,10 +51,10 @@ public class ThreadLocalAwareExecutorImpl implements ThreadLocalAwareExecutor {
 	 */
 
 	@Override
-	public void runInContext(ManagedFunctionContainer function, FunctionLoop loop) {
+	public void runInContext(FunctionState function, FunctionLoop loop) {
 
 		// Obtain the process
-		ProcessState process = function.getFlow().getThreadState().getProcessState();
+		ProcessState process = function.getThreadState().getProcessState();
 
 		// Obtain the executor for the context thread
 		Thread currentThread = Thread.currentThread();

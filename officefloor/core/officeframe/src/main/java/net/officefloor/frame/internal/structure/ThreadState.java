@@ -122,6 +122,14 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	boolean isGovernanceActive(int index);
 
 	/**
+	 * Obtains the {@link FunctionState} to register the {@link ThreadProfiler}.
+	 * 
+	 * @return {@link FunctionState} to register the {@link ThreadProfiler}. May
+	 *         be <code>null</code> if no {@link ThreadProfiler} required.
+	 */
+	FunctionState registerThreadProfiler();
+
+	/**
 	 * Profiles that {@link ManagedObjectContainer} is being executed.
 	 * 
 	 * @param functionMetaData
