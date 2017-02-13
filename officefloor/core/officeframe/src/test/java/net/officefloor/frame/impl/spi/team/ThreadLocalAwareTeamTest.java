@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotEquals;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.frame.api.team.ThreadLocalAwareTeam;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;

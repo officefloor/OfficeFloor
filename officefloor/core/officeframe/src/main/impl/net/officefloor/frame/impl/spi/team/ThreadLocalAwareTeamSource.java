@@ -19,8 +19,8 @@ package net.officefloor.frame.impl.spi.team;
 
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.api.team.ThreadLocalAwareTeam;
 import net.officefloor.frame.api.team.ThreadLocalAwareContext;
+import net.officefloor.frame.api.team.ThreadLocalAwareTeam;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.api.team.source.impl.AbstractTeamSource;

@@ -17,9 +17,8 @@
  */
 package net.officefloor.frame.test.match;
 
-import org.junit.Assert;
-
 import org.easymock.AbstractMatcher;
+import org.junit.Assert;
 
 /**
  * {@link AbstractMatcher} that checks type of objects only.
