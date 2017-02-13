@@ -1786,9 +1786,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		final long minutes = (60 * seconds);
 
 		if (runTime < seconds) {
-			return (runTime) + "ms";
+			return (runTime) + " milliseconds";
 		} else if (runTime < minutes) {
-			return (runTime / seconds) + "s";
+			return (runTime / seconds) + " seconds";
 		} else {
 			return (runTime / minutes) + " minutes";
 		}

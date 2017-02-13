@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.stress;
 
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -326,12 +327,14 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 
 		// Obtain the effective run time
 		float effectiveRunTime = (float) (endTimestamp - startTimestamp) / this.getIterationCount();
-		String effectiveRunTimeText = NumberFormat.getInstance().format(effectiveRunTime);
+		DecimalFormat formatter = new DecimalFormat();
+		formatter.setMinimumFractionDigits(5);
+		String effectiveRunTimeText = formatter.format(effectiveRunTime);
 
 		// Indicate details of run
 		this.printMessage("Construct: " + constructionTime);
 		this.printMessage("Run      : " + executionTime);
-		this.printMessage("Effective: 1 iteration per " + effectiveRunTimeText + " ms");
+		this.printMessage("Effective: 1 iteration per " + effectiveRunTimeText + " milliseconds");
 
 		// Undertake validation
 		if (context.validation != null) {
