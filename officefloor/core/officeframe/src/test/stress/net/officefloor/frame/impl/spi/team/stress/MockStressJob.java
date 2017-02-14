@@ -20,6 +20,8 @@ package net.officefloor.frame.impl.spi.team.stress;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import org.junit.Assert;
+
 import junit.framework.TestCase;
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
@@ -183,12 +185,7 @@ public abstract class MockStressJob implements Job {
 
 	@Override
 	public void cancel(Throwable cause) {
-		/*
-		 * At moment, not seeing loads to require this as a priority.
-		 * 
-		 * TODO implement to allow admission control algorithms.
-		 */
-		throw new UnsupportedOperationException("TODO implement Job.cancelJob");
+		Assert.fail("Should not cancel job");
 	}
 
 	/**

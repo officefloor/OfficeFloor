@@ -749,6 +749,9 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 			@Override
 			public void run(Throwable escalation) throws Throwable {
 
+				// Notify complete
+				AbstractOfficeConstructTestCase.this.printMessage("Complete");
+				
 				// Flag complete
 				synchronized (isComplete) {
 					isComplete.value = true;
@@ -765,7 +768,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 			long startBlockTime = System.currentTimeMillis();
 			synchronized (isComplete) {
 				while (!isComplete.value) {
-
+					
 					// Only timeout if positive time to run
 					if (secondsToRun > 0) {
 						// Provide heap diagnostics and time out
@@ -778,7 +781,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 						iteration = 0;
 						this.printHeapMemoryDiagnostics();
 					}
-
+					
 					// Wait some time as still executing
 					isComplete.wait(100);
 				}

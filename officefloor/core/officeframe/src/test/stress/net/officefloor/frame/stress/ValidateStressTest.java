@@ -40,10 +40,11 @@ public class ValidateStressTest extends AbstractStressTestCase {
 		// Create the function
 		TestWork work = new TestWork();
 		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
-		context.loadResponsibleTeam(task.getBuilder());
 		task.buildParameter();
 		task.buildFlow("flow", null, false);
-		this.constructFunction(work, "flow");
+		context.loadOtherTeam(task.getBuilder());
+		ReflectiveFunctionBuilder flow = this.constructFunction(work, "flow");
+		context.loadResponsibleTeam(flow.getBuilder());
 
 		// Indicate start point
 		context.setInitialFunction("task", this.getIterationCount());

@@ -52,11 +52,6 @@ public abstract class AbstractTeamStressTest extends OfficeFrameTestCase {
 	 */
 	private Team team;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -76,11 +71,6 @@ public abstract class AbstractTeamStressTest extends OfficeFrameTestCase {
 	 */
 	protected abstract Team getTeamToTest() throws Exception;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see junit.framework.TestCase#tearDown()
-	 */
 	@Override
 	protected void tearDown() throws Exception {
 		// Ensure team is stopped

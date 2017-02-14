@@ -17,9 +17,15 @@
  */
 package net.officefloor.frame.stress;
 
+import java.lang.management.GarbageCollectorMXBean;
+import java.lang.management.ManagementFactory;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.management.NotificationEmitter;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -105,18 +111,48 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 	 * @return Wait time in seconds for completion of {@link Test}.
 	 */
 	protected int getMaxWaitTime() {
-		return 100;
+		return 20;
 	}
 
 	/**
 	 * Context for the stress {@link Test}.
 	 */
-	protected static class StressContext {
+	public static class StressContext {
+
+		/**
+		 * {@link AbstractStressTestCase}.
+		 */
+		private final AbstractStressTestCase test;
 
 		/**
 		 * Name of the {@link Team}.
 		 */
 		private final String teamName;
+
+		/**
+		 * Maximum number of iterations.
+		 */
+		private final int maxIterations;
+
+		/**
+		 * Report on progress when this many iterations have occurred.
+		 */
+		private final int reportEveryCount;
+
+		/**
+		 * {@link NumberFormat}.
+		 */
+		private final NumberFormat formatter;
+
+		/**
+		 * Number of iterations undertaken.
+		 */
+		private final AtomicInteger iterations = new AtomicInteger(0);
+
+		/**
+		 * Index of the other {@link Team} instances.
+		 */
+		private int otherTeamIndex = 1;
 
 		/**
 		 * Initial {@link ManagedFunction} name.
@@ -136,11 +172,19 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		/**
 		 * Instantiate.
 		 * 
+		 * @param test
+		 *            {@link AbstractStressTestCase}.
 		 * @param teamName
 		 *            Name of the {@link Team}.
+		 * @param maxIterations
+		 *            Maximum number of iterations.
 		 */
-		private StressContext(String teamName) {
+		private StressContext(AbstractStressTestCase test, String teamName, int maxIterations) {
+			this.test = test;
 			this.teamName = teamName;
+			this.maxIterations = maxIterations;
+			this.reportEveryCount = (maxIterations / 10);
+			this.formatter = NumberFormat.getIntegerInstance();
 		}
 
 		/**
@@ -152,7 +196,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		 *            Parameter to the {@link ManagedFunction}. May be
 		 *            <code>null</code>.
 		 */
-		protected void setInitialFunction(String functionName, Object parameter) {
+		public void setInitialFunction(String functionName, Object parameter) {
 			this.initialFunctionName = functionName;
 			this.initialFunctionParameter = parameter;
 		}
@@ -164,7 +208,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		 * @param builder
 		 *            {@link ManagedFunctionBuilder}.
 		 */
-		protected void loadResponsibleTeam(ManagedFunctionBuilder<?, ?> builder) {
+		public void loadResponsibleTeam(ManagedFunctionBuilder<?, ?> builder) {
 			if (this.teamName != null) {
 				builder.setResponsibleTeam(this.teamName);
 			}
@@ -176,7 +220,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		 * @param builder
 		 *            {@link AdministrationBuilder}.
 		 */
-		protected void loadResponsibleTeam(AdministrationBuilder<?, ?> builder) {
+		public void loadResponsibleTeam(AdministrationBuilder<?, ?> builder) {
 			if (this.teamName != null) {
 				builder.setResponsibleTeam(this.teamName);
 			}
@@ -188,10 +232,23 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		 * @param builder
 		 *            {@link GovernanceBuilder}.
 		 */
-		protected void loadResponsibleTeam(GovernanceBuilder<?> builder) {
+		public void loadResponsibleTeam(GovernanceBuilder<?> builder) {
 			if (this.teamName != null) {
 				builder.setResponsibleTeam(this.teamName);
 			}
+		}
+
+		/**
+		 * Loads another {@link Team} responsible for the
+		 * {@link ManagedFunction}.
+		 * 
+		 * @param builder
+		 *            {@link ManagedFunctionBuilder}.
+		 */
+		public void loadOtherTeam(ManagedFunctionBuilder<?, ?> builder) {
+			int otherTeamIndex = this.otherTeamIndex++;
+			String otherTeamName = "OTHER_" + otherTeamIndex;
+			test.constructTeam(otherTeamName, OnePersonTeamSource.class);
 		}
 
 		/**
@@ -200,8 +257,60 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		 * @param validation
 		 *            {@link Runnable} containing the validation.
 		 */
-		protected void setValidation(Runnable validation) {
+		public void setValidation(Runnable validation) {
 			this.validation = validation;
+		}
+
+		/**
+		 * Obtains the maximum number of iterations.
+		 * 
+		 * @return Maximum number of iterations.
+		 */
+		public int getMaximumIterations() {
+			return this.maxIterations;
+		}
+
+		/**
+		 * Reports on progress.
+		 * 
+		 * @param iteration
+		 *            Current iteration.
+		 */
+		public void reportProgress(int iteration) {
+			if ((iteration % this.reportEveryCount) == 0) {
+				test.printMessage("Iterations " + this.formatter.format(iteration));
+			}
+		}
+
+		/**
+		 * Increments the number of iterations.
+		 * 
+		 * @return Number of iterations with increment.
+		 */
+		public int incrementIteration() {
+			int count = this.iterations.incrementAndGet();
+			this.reportProgress(count);
+			return count;
+		}
+
+		/**
+		 * Indicates if max iterations reached.
+		 * 
+		 * @return <code>true</code> if max iterations reached.
+		 */
+		public boolean isComplete() {
+			return (this.iterations.get() >= this.maxIterations);
+		}
+
+		/**
+		 * Convenience method to increment the iterations and check if complete.
+		 * 
+		 * @return <code>true</code> if complete after incrementing the
+		 *         iteration.
+		 */
+		public boolean incrementIterationAndIsComplete() {
+			int count = this.incrementIteration();
+			return (count >= this.maxIterations);
 		}
 	}
 
@@ -236,6 +345,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 	 * Load the {@link TeamConstructor} instances.
 	 */
 	static {
+		// Load the team constructors
 		teamConstructors.put(PassiveTeamSource.class,
 				(name, test) -> test.constructTeam(name, PassiveTeamSource.class));
 		teamConstructors.put(ExecutorCachedTeamSource.class,
@@ -249,6 +359,15 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 				(name, test) -> test.constructTeam(name, ThreadLocalAwareTeamSource.class));
 		teamConstructors.put(WorkerPerJobTeamSource.class,
 				(name, test) -> test.constructTeam(name, WorkerPerJobTeamSource.class));
+
+		// Hook in for GC
+		for (GarbageCollectorMXBean gcBean : ManagementFactory.getGarbageCollectorMXBeans()) {
+			System.out.println("GC: " + gcBean.getName());
+			NotificationEmitter emitter = (NotificationEmitter) gcBean;
+			emitter.addNotificationListener((notification, handback) -> {
+				System.out.println(" -> GC: " + gcBean.getName() + " (" + gcBean.getCollectionTime() + " ms) - " + notification.getType());
+			}, null, null);
+		}
 	}
 
 	/**
@@ -273,7 +392,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 			test.teamName = (teamSourceClass != null ? teamSourceClass.getSimpleName() : null);
 
 			// Set the name for the test
-			test.setName(test.teamName + "_i" + test.getIterationCount() + "_" + test.getClass().getSimpleName());
+			test.setName(test.teamName + "_i" + test.getIterationCount());
 
 			// Specify details
 			test.teamConstructor = teamConstructor;
@@ -311,7 +430,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		}
 
 		// Construct the test
-		StressContext context = new StressContext(this.teamName);
+		StressContext context = new StressContext(this, this.teamName, this.getIterationCount());
 		this.constructTest(context);
 		assertNotNull("Must configure initial function name", context.initialFunctionName);
 
@@ -330,15 +449,18 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		formatter.setMinimumFractionDigits(5);
 		String effectiveRunTimeText = formatter.format(effectiveRunTime);
 
+		// Undertake optional validation
+		if (context.validation != null) {
+			context.validation.run();
+		}
+
+		// Ensure appropriate number of iterations undertaken
+		assertEquals("Incorrect number of iterations", this.getIterationCount(), context.iterations.get());
+
 		// Indicate details of run
 		this.printMessage("Construct: " + constructionTime);
 		this.printMessage("Run      : " + executionTime);
 		this.printMessage("Effective: 1 iteration per " + effectiveRunTimeText + " milliseconds");
-
-		// Undertake validation
-		if (context.validation != null) {
-			context.validation.run();
-		}
 	}
 
 }

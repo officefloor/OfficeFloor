@@ -1788,9 +1788,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		if (runTime < seconds) {
 			return (runTime) + " milliseconds";
 		} else if (runTime < minutes) {
-			return (runTime / seconds) + " seconds";
+			return (((float) runTime) / seconds) + " seconds";
 		} else {
-			return (runTime / minutes) + " minutes";
+			return (((float) runTime) / minutes) + " minutes";
 		}
 	}
 
