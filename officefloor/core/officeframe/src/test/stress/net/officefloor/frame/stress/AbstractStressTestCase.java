@@ -246,9 +246,12 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		 *            {@link ManagedFunctionBuilder}.
 		 */
 		public void loadOtherTeam(ManagedFunctionBuilder<?, ?> builder) {
-			int otherTeamIndex = this.otherTeamIndex++;
-			String otherTeamName = "OTHER_" + otherTeamIndex;
-			test.constructTeam(otherTeamName, OnePersonTeamSource.class);
+			if (this.teamName != null) {
+				// Only load if have responsible team
+				int otherTeamIndex = this.otherTeamIndex++;
+				String otherTeamName = "OTHER_" + otherTeamIndex;
+				test.constructTeam(otherTeamName, OnePersonTeamSource.class);
+			}
 		}
 
 		/**
