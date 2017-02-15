@@ -237,6 +237,11 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 		this.isUnloadManagedObjects = isUnloadManagedObjects;
 	}
 
+	@Override
+	public String toString() {
+		return "Function " + this.functionLogicMetaData.getFunctionName() + " " + this.containerState.toString();
+	}
+
 	/*
 	 * =================== LinkedListSetEntry =================================
 	 */
@@ -492,6 +497,13 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	@Override
 	public FunctionState handleEscalation(final Throwable escalation) {
 		return new ManagedFunctionOperation() {
+
+			@Override
+			public String toString() {
+				return "Handle " + ManagedFunctionContainerImpl.this.functionLogicMetaData.getFunctionName() + ": "
+						+ escalation.toString();
+			}
+
 			@Override
 			public FunctionState execute() throws Throwable {
 
@@ -561,7 +573,9 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 
 		// Determine if have sequential node
 		if (this.sequentialFunction != null) {
-			return this.sequentialFunction;
+			nextFunction = this.sequentialFunction;
+			this.sequentialFunction = null; // avoid infinite loop
+			return nextFunction;
 		}
 
 		// Determine if have parallel owner
@@ -613,7 +627,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			// Create the flow completion
 			FlowCompletion completion = null;
 			if (callback != null) {
-				completion = new FlowCompletionImpl(callback);
+				completion = new FlowCompletionImpl(flowMetaData, callback);
 				container.awaitingFlowCompletions.addEntry(completion);
 			}
 
@@ -658,6 +672,11 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			implements FlowCompletion {
 
 		/**
+		 * {@link FlowMetaData}.
+		 */
+		private final FlowMetaData flowMetaData;
+
+		/**
 		 * {@link FlowCallback}.
 		 */
 		private final FlowCallback callback;
@@ -665,11 +684,20 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 		/**
 		 * Instantiate.
 		 * 
+		 * @param flowMetaData
+		 *            {@link FlowMetaData}.
 		 * @param callback
 		 *            {@link FlowCallback}.
 		 */
-		public FlowCompletionImpl(FlowCallback callback) {
+		public FlowCompletionImpl(FlowMetaData flowMetaData, FlowCallback callback) {
+			this.flowMetaData = flowMetaData;
 			this.callback = callback;
+		}
+
+		@Override
+		public String toString() {
+			return "FlowComplete " + ManagedFunctionContainerImpl.this.functionLogicMetaData.getFunctionName() + " for "
+					+ this.flowMetaData.getInitialFunctionMetaData().getFunctionName();
 		}
 
 		/*

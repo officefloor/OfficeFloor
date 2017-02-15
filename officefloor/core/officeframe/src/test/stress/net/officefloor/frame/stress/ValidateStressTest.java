@@ -17,8 +17,6 @@
  */
 package net.officefloor.frame.stress;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import junit.framework.TestSuite;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
@@ -38,7 +36,7 @@ public class ValidateStressTest extends AbstractStressTestCase {
 	protected void constructTest(StressContext context) throws Exception {
 
 		// Create the function
-		TestWork work = new TestWork();
+		TestWork work = new TestWork(context);
 		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
 		task.buildParameter();
 		task.buildFlow("flow", null, false);
@@ -48,10 +46,6 @@ public class ValidateStressTest extends AbstractStressTestCase {
 
 		// Indicate start point
 		context.setInitialFunction("task", this.getIterationCount());
-
-		// Validate correct
-		context.setValidation(
-				() -> assertEquals("Incorrect number of iterations", this.getIterationCount(), work.invocations.get()));
 	}
 
 	/**
@@ -59,7 +53,11 @@ public class ValidateStressTest extends AbstractStressTestCase {
 	 */
 	public class TestWork {
 
-		private AtomicInteger invocations = new AtomicInteger(0);
+		private StressContext context;
+
+		public TestWork(StressContext context) {
+			this.context = context;
+		}
 
 		public void task(Integer iterations, ReflectiveFlow flow) {
 			for (int i = 0; i < iterations; i++) {
@@ -68,7 +66,7 @@ public class ValidateStressTest extends AbstractStressTestCase {
 		}
 
 		public void flow() {
-			invocations.incrementAndGet();
+			this.context.incrementIteration();
 		}
 	}
 

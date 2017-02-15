@@ -111,7 +111,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 	 * @return Wait time in seconds for completion of {@link Test}.
 	 */
 	protected int getMaxWaitTime() {
-		return 20;
+		return 40;
 	}
 
 	/**
@@ -362,7 +362,6 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 
 		// Hook in for GC
 		for (GarbageCollectorMXBean gcBean : ManagementFactory.getGarbageCollectorMXBeans()) {
-			System.out.println("GC: " + gcBean.getName());
 			NotificationEmitter emitter = (NotificationEmitter) gcBean;
 			emitter.addNotificationListener((notification, handback) -> {
 				System.out.println(" -> GC: " + gcBean.getName() + " (" + gcBean.getCollectionTime() + " ms) - " + notification.getType());

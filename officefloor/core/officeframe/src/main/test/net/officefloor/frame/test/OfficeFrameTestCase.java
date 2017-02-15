@@ -59,7 +59,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Formatter;
 import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
 
@@ -1093,6 +1096,11 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	private boolean isVerbose = false;
 
 	/**
+	 * Indicates whether to have debug verbose output.
+	 */
+	private boolean isDebugVerbose = false;
+
+	/**
 	 * Default constructor.
 	 */
 	public OfficeFrameTestCase() {
@@ -1121,6 +1129,24 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		// Provide start of verbose output
 		if (this.isVerbose) {
 			System.out.println("+++ START: " + this.getClass().getSimpleName() + " . " + this.getName() + " +++");
+		}
+	}
+
+	/**
+	 * Specifies to provide debug verbose output to aid in debugging.
+	 */
+	public void setDebugVerbose() {
+		if (!this.isDebugVerbose) {
+			OfficeFloorImpl.getFrameworkLogger().setLevel(Level.FINEST);
+			StreamHandler handler = new StreamHandler(System.out, new Formatter() {
+				@Override
+				public String format(LogRecord record) {
+					return record.getMessage() + "\n";
+				}
+			});
+			handler.setLevel(Level.FINEST);
+			OfficeFloorImpl.getFrameworkLogger().addHandler(handler);
+			this.isDebugVerbose = true;
 		}
 	}
 

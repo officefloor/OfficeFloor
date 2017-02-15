@@ -44,8 +44,6 @@ public class ParallelFunctionStressTest extends AbstractStressTestCase {
 	@Override
 	protected void constructTest(StressContext context) throws Exception {
 
-		fail("TODO determine why hangs on completion");
-		
 		// Register the parallel tasks
 		ParallelInvoker work = new ParallelInvoker(context);
 		ReflectiveFunctionBuilder trigger = this.constructFunction(work, "trigger");

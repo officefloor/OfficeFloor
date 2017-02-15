@@ -17,8 +17,12 @@
  */
 package net.officefloor.frame.impl.execute.job;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
 import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
@@ -34,6 +38,11 @@ import net.officefloor.frame.internal.structure.ThreadState;
  * @author Daniel Sagenschneider
  */
 public class FunctionLoopImpl implements FunctionLoop {
+
+	/**
+	 * Enable debug logging of execution.
+	 */
+	private static Logger LOGGER = OfficeFloorImpl.getFrameworkLogger();
 
 	/**
 	 * Identifier for the {@link FunctionLoop}.
@@ -127,6 +136,13 @@ public class FunctionLoopImpl implements FunctionLoop {
 					if ((!isThreadStateSafe) && (nextFunction.isRequireThreadStateSafety())) {
 						// Exit loop to obtain thread state safety
 						return nextFunction;
+					}
+
+					// Provide debug level logging of execution
+					if (LOGGER.isLoggable(Level.FINEST)) {
+						LOGGER.log(Level.FINEST,
+								nextFunction.toString() + " (TS:" + Integer.toHexString(threadState.hashCode()) + ", T:"
+										+ Thread.currentThread().getName() + ")");
 					}
 
 					// Required team, thread state and safety, so execute

@@ -89,6 +89,11 @@ public class Promise {
 			this.thenFunction = thenFunction;
 		}
 
+		@Override
+		public String toString() {
+			return this.delegate.toString();
+		}
+
 		/*
 		 * =================== FunctionState ==============================
 		 */
