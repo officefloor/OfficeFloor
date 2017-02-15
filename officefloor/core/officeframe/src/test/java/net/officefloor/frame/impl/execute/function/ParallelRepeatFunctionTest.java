@@ -28,7 +28,7 @@ import net.officefloor.frame.test.ReflectiveFunctionBuilder;
  *
  * @author Daniel Sagenschneider
  */
-public class RepeatParallelFunctionTest extends AbstractOfficeConstructTestCase {
+public class ParallelRepeatFunctionTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Ensure avoid infinite loop on repeating same {@link ManagedFunction} with
