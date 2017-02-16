@@ -41,10 +41,13 @@ public class UnsetSequentialFuntionTest extends AbstractOfficeConstructTestCase 
 		ReflectiveFunctionBuilder repeat = this.constructFunction(work, "repeat");
 		repeat.buildFlow("parallel", null, false);
 		repeat.buildFlow("repeat", null, false);
-		this.constructFunction(work, "parallel");
+		ReflectiveFunctionBuilder parallel = this.constructFunction(work, "parallel");
+		parallel.buildParameter();
+		parallel.buildFlow("parallel", null, false);
 
 		// Ensure correct invocation
-		this.invokeFunctionAndValidate("repeat", null, "repeat", "parallel", "repeat", "parallel");
+		this.invokeFunctionAndValidate("repeat", null, "repeat", "parallel", "parallel", "parallel", "repeat",
+				"parallel", "parallel", "parallel");
 	}
 
 	/**
@@ -57,7 +60,7 @@ public class UnsetSequentialFuntionTest extends AbstractOfficeConstructTestCase 
 		public void repeat(ReflectiveFlow parallel, ReflectiveFlow repeat) {
 
 			// Invoke the parallel flow
-			parallel.doFlow(null, (escalation) -> {
+			parallel.doFlow(0, (escalation) -> {
 			});
 
 			// Invoke the repeat
@@ -67,7 +70,10 @@ public class UnsetSequentialFuntionTest extends AbstractOfficeConstructTestCase 
 			}
 		}
 
-		public void parallel() {
+		public void parallel(int iteration, ReflectiveFlow flow) {
+			if (iteration < 2) {
+				flow.doFlow(iteration + 1, null);
+			}
 		}
 	}
 

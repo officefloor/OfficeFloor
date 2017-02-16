@@ -342,6 +342,15 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 		}
 
 		/*
+		 * ========================= Object =========================
+		 */
+
+		@Override
+		public String toString() {
+			return this.functionLogic.toString();
+		}
+
+		/*
 		 * ==================== LinkedListSetEntry ===================
 		 */
 
@@ -362,6 +371,11 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 		@Override
 		public boolean isRequireThreadStateSafety() {
 			return this.functionLogic.isRequireThreadStateSafety();
+		}
+
+		@Override
+		public TeamManagement getResponsibleTeam() {
+			return this.functionLogic.getResponsibleTeam();
 		}
 
 		@Override

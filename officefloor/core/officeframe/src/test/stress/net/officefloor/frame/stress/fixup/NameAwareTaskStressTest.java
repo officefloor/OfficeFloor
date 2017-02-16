@@ -62,7 +62,7 @@ public class NameAwareTaskStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressNameAware_ExecutorFixedTeam() throws Exception {
-		this.doTest(ExecutorFixedTeamSource.createTeam("TEST", 5));
+		this.doTest(new ExecutorFixedTeamSource().createTeam(ExecutorFixedTeamSource.PROPERTY_TEAM_SIZE, "5"));
 	}
 
 	/**

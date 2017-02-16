@@ -31,6 +31,36 @@ import net.officefloor.frame.internal.structure.ThreadState;
  */
 public class SynchroniseProcessStateFunctionLogic implements FunctionLogic {
 
+	/**
+	 * Current {@link ThreadState}.
+	 */
+	private final ThreadState currentThreadState;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param currentThreadState
+	 *            Current {@link ThreadState}.
+	 */
+	public SynchroniseProcessStateFunctionLogic(ThreadState currentThreadState) {
+		this.currentThreadState = currentThreadState;
+	}
+
+	/*
+	 * ======================== Object =============================
+	 */
+
+	@Override
+	public String toString() {
+		return "Synchronising ThreadState " + Integer.toHexString(this.currentThreadState.hashCode())
+				+ " to ThreadState "
+				+ Integer.toHexString(this.currentThreadState.getProcessState().getMainThreadState().hashCode());
+	}
+
+	/*
+	 * ===================== FunctionLogic ==========================
+	 */
+
 	@Override
 	public boolean isRequireThreadStateSafety() {
 		// Ensure have thread state safety, to synchronise process state

@@ -50,6 +50,11 @@ public class SpawnThreadFunctionLogic implements FunctionLogic {
 	private final FlowCompletion completion;
 
 	/**
+	 * Current {@link ThreadState}
+	 */
+	private final ThreadState currentThreadState;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param flowMetaData
@@ -59,11 +64,25 @@ public class SpawnThreadFunctionLogic implements FunctionLogic {
 	 *            {@link Flow}.
 	 * @param completion
 	 *            Optional {@link FlowCompletion}.
+	 * @param currentThreadState
+	 *            Current {@link ThreadState}.
 	 */
-	public SpawnThreadFunctionLogic(FlowMetaData flowMetaData, Object parameter, FlowCompletion completion) {
+	public SpawnThreadFunctionLogic(FlowMetaData flowMetaData, Object parameter, FlowCompletion completion,
+			ThreadState currentThreadState) {
 		this.flowMetaData = flowMetaData;
 		this.parameter = parameter;
 		this.completion = completion;
+		this.currentThreadState = currentThreadState;
+	}
+
+	/*
+	 * ========================= Object ================================
+	 */
+
+	@Override
+	public String toString() {
+		return "Spawning ThreadState (synchronize ThreadState "
+				+ Integer.toHexString(this.currentThreadState.hashCode()) + ")";
 	}
 
 	/*

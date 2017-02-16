@@ -93,4 +93,11 @@ public interface ProcessState {
 	 */
 	ManagedObjectCleanup getManagedObjectCleanup();
 
+	/**
+	 * Obtains the {@link FunctionLoop} for this {@link ProcessState}.
+	 * 
+	 * @return {@link FunctionLoop} for this {@link ProcessState}.
+	 */
+	FunctionLoop getFunctionLoop();
+
 }

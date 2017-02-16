@@ -18,6 +18,7 @@
 package net.officefloor.frame.impl.execute.office;
 
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
+import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
 import net.officefloor.frame.internal.structure.FlowCompletion;
@@ -52,18 +53,27 @@ public class OfficeManagerProcessState implements ProcessState {
 	private final ThreadState mainThreadState;
 
 	/**
+	 * {@link FunctionLoop}.
+	 */
+	private final FunctionLoop functionLoop;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param officeClock
 	 *            {@link OfficeClock}.
+	 * @param maximumPromiseChainLength
+	 *            Maximum {@link Promise} chain length.
 	 * @param functionLoop
 	 *            {@link FunctionLoop}.
 	 */
-	public OfficeManagerProcessState(OfficeClock officeClock, FunctionLoop functionLoop) {
+	public OfficeManagerProcessState(OfficeClock officeClock, int maximumPromiseChainLength,
+			FunctionLoop functionLoop) {
+		this.functionLoop = functionLoop;
 
 		// Create the meta-data for the process and its main thread state
 		this.threadMetaData = new ThreadMetaDataImpl(new ManagedObjectMetaData[0], new GovernanceMetaData[0],
-				new EscalationProcedureImpl(), null);
+				maximumPromiseChainLength, new EscalationProcedureImpl(), null);
 
 		// Create the main thread state
 		// Note: purpose of this to enable synchronising changes to office
@@ -104,6 +114,11 @@ public class OfficeManagerProcessState implements ProcessState {
 	public ManagedObjectCleanup getManagedObjectCleanup() {
 		throw new IllegalStateException(
 				this.getClass().getSimpleName() + " should not need clean up as does not have managed objects");
+	}
+
+	@Override
+	public FunctionLoop getFunctionLoop() {
+		return this.functionLoop;
 	}
 
 }

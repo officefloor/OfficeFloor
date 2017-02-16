@@ -393,7 +393,8 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			if (threadState != processState.getMainThreadState()) {
 				// Must synchronise, so execute function when executing again
 				this.containerState = ManagedFunctionState.SETUP;
-				return Promise.then(this.flow.createFunction(new SynchroniseProcessStateFunctionLogic()), this);
+				return Promise.then(this.flow.createFunction(new SynchroniseProcessStateFunctionLogic(threadState)),
+						this);
 			}
 
 		case SETUP:
@@ -634,7 +635,8 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			// Determine if spawn thread
 			if (flowMetaData.isSpawnThreadState()) {
 				// Register to spawn the thread state
-				FunctionLogic spawnFunctionLogic = new SpawnThreadFunctionLogic(flowMetaData, parameter, completion);
+				FunctionLogic spawnFunctionLogic = new SpawnThreadFunctionLogic(flowMetaData, parameter, completion,
+						container.flow.getThreadState());
 				container.spawnThreadStateFunction = Promise.then(container.spawnThreadStateFunction,
 						container.flow.createFunction(spawnFunctionLogic));
 

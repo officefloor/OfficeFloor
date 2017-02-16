@@ -50,12 +50,12 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 	/**
 	 * {@link FunctionLoop}.
 	 */
-	private final FunctionLoop loop = new FunctionLoopImpl(null);
+	private final FunctionLoop loop = new FunctionLoopImpl(null, 100);
 
 	/**
 	 * {@link ProcessState}.
 	 */
-	private final ProcessState processState = new OfficeManagerProcessState(this.clock, this.loop);
+	private final ProcessState processState = new OfficeManagerProcessState(this.clock, 1000, this.loop);
 
 	/**
 	 * {@link AssetManager}.

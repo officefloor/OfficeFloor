@@ -81,7 +81,7 @@ public class InputManagedObjectStressTest extends AbstractOfficeConstructTestCas
 	 */
 	@StressTest
 	public void test_StressInputManagedObject_ExecutorFixedTeam() throws Exception {
-		this.doTest(ExecutorFixedTeamSource.createTeam("TEST", 2));
+		this.doTest(new ExecutorFixedTeamSource().createTeam(ExecutorFixedTeamSource.PROPERTY_TEAM_SIZE, "2"));
 	}
 
 	/**

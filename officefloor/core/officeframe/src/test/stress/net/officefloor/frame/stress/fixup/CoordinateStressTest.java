@@ -73,7 +73,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressCoordination_ExecutorFixedTeam() throws Exception {
-		this.doTest(ExecutorFixedTeamSource.createTeam("TEST", 3));
+		this.doTest(new ExecutorFixedTeamSource().createTeam(ExecutorFixedTeamSource.PROPERTY_TEAM_SIZE, "3"));
 	}
 
 	/**

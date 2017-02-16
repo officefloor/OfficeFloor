@@ -88,18 +88,6 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 
 	}
 
-	/**
-	 * Creates the {@link Team}.
-	 * 
-	 * @param executorServiceFactory
-	 *            {@link ExecutorServiceFactory}.
-	 * @return {@link Team}.
-	 */
-	protected static Team createTeam(ExecutorServiceFactory executorServiceFactory) {
-		// Create and return the executor team
-		return new ExecutorTeam(executorServiceFactory);
-	}
-
 	/*
 	 * ======================= TeamSource ==================
 	 */

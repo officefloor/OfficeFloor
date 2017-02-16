@@ -240,7 +240,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 		}
 
 		// Undertake OfficeFloor escalation on any team available
-		FunctionLoop officeFloorFunctionLoop = new FunctionLoopImpl(new TeamManagementImpl(new PassiveTeam()));
+		FunctionLoop officeFloorFunctionLoop = new FunctionLoopImpl(new TeamManagementImpl(new PassiveTeam()), 50);
 		OfficeMetaData officeFloorManagement = new OfficeMetaDataImpl("Management", null, null, null,
 				officeFloorFunctionLoop, null, null, null, null, null, null);
 

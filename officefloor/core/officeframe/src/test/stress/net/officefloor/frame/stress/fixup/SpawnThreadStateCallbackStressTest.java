@@ -61,7 +61,7 @@ public class SpawnThreadStateCallbackStressTest extends AbstractOfficeConstructT
 	 */
 	@StressTest
 	public void test_StressAsynchronousJoin_ExecutorFixedTeam() throws Exception {
-		this.doTest(ExecutorFixedTeamSource.createTeam("TEST", 5));
+		this.doTest(new ExecutorFixedTeamSource().createTeam(ExecutorFixedTeamSource.PROPERTY_TEAM_SIZE, "5"));
 	}
 
 	/**
@@ -72,7 +72,7 @@ public class SpawnThreadStateCallbackStressTest extends AbstractOfficeConstructT
 	 *            instances.
 	 */
 	private void doTest(Team team) throws Exception {
-		
+
 		fail("TODO fix hanging of test");
 
 		final int MAX_ASYNCHRONOUS_FLOWS = 10000;

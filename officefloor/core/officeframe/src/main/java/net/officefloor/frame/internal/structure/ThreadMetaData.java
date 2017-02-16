@@ -21,6 +21,7 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.impl.execute.function.Promise;
 
 /**
  * Meta-data for the {@link ThreadState}.
@@ -45,6 +46,21 @@ public interface ThreadMetaData {
 	 * @return {@link GovernanceMetaData} instances.
 	 */
 	GovernanceMetaData<?, ?>[] getGovernanceMetaData();
+
+	/**
+	 * <p>
+	 * Obtains the maximum {@link Promise} chain length for this
+	 * {@link ThreadState}.
+	 * <p>
+	 * Once the {@link Promise} chain has reached this length, it will be broken
+	 * to be spawned in another {@link Thread}. This avoids
+	 * {@link StackOverflowError} issues in {@link Promise} chain being too
+	 * large.
+	 * 
+	 * @return Maximum {@link Promise} chain length for this
+	 *         {@link ThreadState}.
+	 */
+	int getMaximumPromiseChainLength();
 
 	/**
 	 * Obtains the {@link EscalationProcedure} for the {@link Office}.

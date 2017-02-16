@@ -151,6 +151,7 @@ public class RawAdministrationMetaDataImpl implements RawAdministrationMetaDataF
 	 *            {@link OfficeFloorIssues}.
 	 * @return Constructed {@link RawAdministrationMetaData}.
 	 */
+	@SuppressWarnings("unchecked")
 	private <E, F extends Enum<F>, G extends Enum<G>> RawAdministrationMetaData constructRawAdministrationMetaData(
 			AdministrationConfiguration<E, F, G> configuration, AssetType assetType, String assetName,
 			OfficeMetaData officeMetaData, FlowMetaDataFactory flowMetaDataFactory,
@@ -215,7 +216,6 @@ public class RawAdministrationMetaDataImpl implements RawAdministrationMetaDataF
 			// Obtain the extension factories for the managed object instances.
 			// (Keeping order of factories as order of managed object instances)
 			RawBoundManagedObjectInstanceMetaData<?>[] moInstances = mo.getRawBoundManagedObjectInstanceMetaData();
-			@SuppressWarnings("unchecked")
 			ExtensionInterfaceFactory<E>[] extensionInterfaceFactories = new ExtensionInterfaceFactory[moInstances.length];
 			boolean isExtensionInterfaceFactoryIssue = false;
 			NEXT_INSTANCE: for (int i = 0; i < moInstances.length; i++) {

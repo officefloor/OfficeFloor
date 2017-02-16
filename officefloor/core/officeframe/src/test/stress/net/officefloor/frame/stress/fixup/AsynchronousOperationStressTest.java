@@ -64,7 +64,7 @@ public class AsynchronousOperationStressTest extends AbstractOfficeConstructTest
 	 */
 	@StressTest
 	public void test_StressAsynchronousOperation_ExecutorFixedTeam() throws Exception {
-		this.doTest(ExecutorFixedTeamSource.createTeam("TEST", 2));
+		this.doTest(new ExecutorFixedTeamSource().createTeam(ExecutorFixedTeamSource.PROPERTY_TEAM_SIZE, "2"));
 	}
 
 	/**

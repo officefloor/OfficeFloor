@@ -65,9 +65,7 @@ public class AdministrationGovernanceConfigurationImpl<G extends Enum<G>>
 
 	@Override
 	public G getKey() {
-		// TODO implement AdministrationGovernanceConfiguration<G>.getKey
-		throw new UnsupportedOperationException("TODO implement AdministrationGovernanceConfiguration<G>.getKey");
-
+		return this.key;
 	}
 
 	@Override

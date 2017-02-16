@@ -291,6 +291,10 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 			threadLocalAwareExecutor = rawOfficeFloorMetaData.getThreadLocalAwareExecutor();
 		}
 
+		// TODO configure the depths
+		int maxThreadStateRecursiveDepth = 100;
+		int maxPromiseChainLength = 1000;
+
 		// Create the office details
 		OfficeClockImpl officeClockImpl = null;
 		OfficeClock officeClock = configuration.getOfficeClock();
@@ -299,11 +303,12 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 			officeClockImpl = new OfficeClockImpl();
 			officeClock = officeClockImpl;
 		}
-		FunctionLoop functionLoop = new FunctionLoopImpl(defaultTeam);
+		FunctionLoop functionLoop = new FunctionLoopImpl(defaultTeam, maxThreadStateRecursiveDepth);
 		Timer timer = new Timer(true);
 
 		// Create the office manager process state
-		OfficeManagerProcessState officeManagerProcessState = new OfficeManagerProcessState(officeClock, functionLoop);
+		OfficeManagerProcessState officeManagerProcessState = new OfficeManagerProcessState(officeClock,
+				maxThreadStateRecursiveDepth, functionLoop);
 
 		// Create the asset manager factory
 		AssetManagerFactoryImpl officeAssetManagerFactory = new AssetManagerFactoryImpl(officeManagerProcessState,
@@ -488,7 +493,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 		// Create the thread meta-data
 		ThreadMetaData threadMetaData = new ThreadMetaDataImpl(
 				this.constructDefaultManagedObjectMetaData(threadBoundManagedObjects), governanceMetaDatas,
-				officeEscalationProcedure, officeFloorEscalation);
+				maxPromiseChainLength, officeEscalationProcedure, officeFloorEscalation);
 
 		// Create the process meta-data
 		ProcessMetaData processMetaData = new ProcessMetaDataImpl(

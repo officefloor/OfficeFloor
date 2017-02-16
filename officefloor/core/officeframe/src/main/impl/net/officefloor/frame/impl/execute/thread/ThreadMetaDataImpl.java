@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.execute.thread;
 
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
@@ -43,6 +44,11 @@ public class ThreadMetaDataImpl implements ThreadMetaData {
 	private final GovernanceMetaData<?, ?>[] governanceMetaData;
 
 	/**
+	 * Maximum {@link Promise} chain length.
+	 */
+	private final int maximumPromiseChainLength;
+
+	/**
 	 * {@link Office} {@link EscalationProcedure}.
 	 */
 	private final EscalationProcedure officeEscalationProcedure;
@@ -59,16 +65,19 @@ public class ThreadMetaDataImpl implements ThreadMetaData {
 	 *            {@link ManagedObjectMetaData} instances.
 	 * @param governanceMetaData
 	 *            {@link GovernanceMetaData} instances.
+	 * @param maximumPromiseChainLength
+	 *            Maximum {@link Promise} chain length.
 	 * @param officeEscalationProcedure
 	 *            {@link Office} {@link EscalationProcedure}.
 	 * @param officeFloorEscalation
 	 *            {@link OfficeFloor} {@link EscalationFlow}.
 	 */
 	public ThreadMetaDataImpl(ManagedObjectMetaData<?>[] managedObjectMetaData,
-			GovernanceMetaData<?, ?>[] governanceMetaData, EscalationProcedure officeEscalationProcedure,
-			EscalationFlow officeFloorEscalation) {
+			GovernanceMetaData<?, ?>[] governanceMetaData, int maximumPromiseChainLength,
+			EscalationProcedure officeEscalationProcedure, EscalationFlow officeFloorEscalation) {
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.governanceMetaData = governanceMetaData;
+		this.maximumPromiseChainLength = maximumPromiseChainLength;
 		this.officeEscalationProcedure = officeEscalationProcedure;
 		this.officeFloorEscalation = officeFloorEscalation;
 	}
@@ -85,6 +94,11 @@ public class ThreadMetaDataImpl implements ThreadMetaData {
 	@Override
 	public GovernanceMetaData<?, ?>[] getGovernanceMetaData() {
 		return this.governanceMetaData;
+	}
+
+	@Override
+	public int getMaximumPromiseChainLength() {
+		return this.maximumPromiseChainLength;
 	}
 
 	@Override

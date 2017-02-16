@@ -63,7 +63,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 	 */
 	public static TestSuite createSuite(Class<? extends AbstractStressTestCase> testClass) {
 		TestSuite suite = new TestSuite();
-
+				
 		// Add no team test
 		suite.addTest(createTestCase(testClass, null, null));
 
@@ -111,7 +111,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 	 * @return Wait time in seconds for completion of {@link Test}.
 	 */
 	protected int getMaxWaitTime() {
-		return 40;
+		return 100;
 	}
 
 	/**
@@ -183,7 +183,8 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 			this.test = test;
 			this.teamName = teamName;
 			this.maxIterations = maxIterations;
-			this.reportEveryCount = (maxIterations / 10);
+			int reportCount = (maxIterations / 10);
+			this.reportEveryCount = (reportCount == 0 ? 1 : reportCount);
 			this.formatter = NumberFormat.getIntegerInstance();
 		}
 
@@ -315,6 +316,21 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 			int count = this.incrementIteration();
 			return (count >= this.maxIterations);
 		}
+
+		/**
+		 * Convenience method to increment the iterations, check if complete and
+		 * validate current iteration is correct.
+		 * 
+		 * @param validateCorrectIteration
+		 *            Current iteration to validate is correct.
+		 * @return <code>true</code> if complete after incrementing the
+		 *         iteration.
+		 */
+		public boolean incrementIterationAndIsComplete(int validateCorrectIteration) {
+			int count = this.incrementIteration();
+			assertEquals("Incorrect iteration", count, validateCorrectIteration);
+			return (count >= this.maxIterations);
+		}
 	}
 
 	/*
@@ -367,7 +383,8 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		for (GarbageCollectorMXBean gcBean : ManagementFactory.getGarbageCollectorMXBeans()) {
 			NotificationEmitter emitter = (NotificationEmitter) gcBean;
 			emitter.addNotificationListener((notification, handback) -> {
-				System.out.println(" -> GC: " + gcBean.getName() + " (" + gcBean.getCollectionTime() + " ms) - " + notification.getType());
+				System.out.println(" -> GC: " + gcBean.getName() + " (" + gcBean.getCollectionTime() + " ms) - "
+						+ notification.getType());
 			}, null, null);
 		}
 	}

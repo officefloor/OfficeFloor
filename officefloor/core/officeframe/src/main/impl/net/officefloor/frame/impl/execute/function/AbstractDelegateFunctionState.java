@@ -48,6 +48,15 @@ public class AbstractDelegateFunctionState extends AbstractLinkedListSetEntry<Fu
 	}
 
 	/*
+	 * ======================= Object ==========================
+	 */
+
+	@Override
+	public String toString() {
+		return this.delegate.toString();
+	}
+
+	/*
 	 * ======================= FunctionState ==========================
 	 */
 

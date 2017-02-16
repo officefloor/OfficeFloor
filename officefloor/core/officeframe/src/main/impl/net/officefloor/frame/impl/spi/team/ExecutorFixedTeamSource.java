@@ -33,23 +33,6 @@ import net.officefloor.frame.api.team.source.TeamSourceContext;
 public class ExecutorFixedTeamSource extends AbstractExecutorTeamSource {
 
 	/**
-	 * <p>
-	 * Convenience method to create a {@link Team}.
-	 * <p>
-	 * This is intended only for use in testing.
-	 * 
-	 * @param teamName
-	 *            Name of the {@link Team}.
-	 * @param teamSize
-	 *            Size of the {@link Team}.
-	 * @return {@link Team}.
-	 */
-	public static Team createTeam(String teamName, int teamSize) {
-		return createTeam(
-				new FixedExecutorServiceFactory(teamSize, new TeamThreadFactory(teamName, Thread.NORM_PRIORITY)));
-	}
-
-	/**
 	 * Name of property to specify maximum number of {@link Thread} instances.
 	 */
 	public static final String PROPERTY_TEAM_SIZE = "team.size";

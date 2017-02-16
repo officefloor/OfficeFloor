@@ -67,7 +67,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressAdministrator_ExecutorFixedTeam() throws Exception {
-		this.doTest(ExecutorFixedTeamSource.createTeam("TEST", 5));
+		this.doTest(new ExecutorFixedTeamSource().createTeam(ExecutorFixedTeamSource.PROPERTY_TEAM_SIZE, "5"));
 	}
 
 	/**
@@ -78,7 +78,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 	 *            instances.
 	 */
 	public void doTest(Team team) throws Exception {
-		
+
 		fail("TODO fix infinite loop");
 
 		int ADMIN_TASK_COUNT = 1000000;
@@ -94,17 +94,21 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 		// Construct the team
 		this.constructTeam("TEAM", team);
 
-//		// Create the pre administration
-//		AdministrationBuilder<Indexed> preTaskAdmin = this.constructAdministrator("PRE", Administration.class, "TEAM");
-//		preTaskAdmin.addProperty(Administration.ADMINISTRATION_VALUE_PROPERTY_NAME, PRE_TASK_VALUE);
-//		preTaskAdmin.addDuty("DUTY");
-//		preTaskAdmin.administerManagedObject("MO");
-//
-//		// Create the post administration
-//		AdministrationBuilder<Indexed> postTaskAdmin = this.constructAdministrator("POST", Administration.class, "TEAM");
-//		postTaskAdmin.addProperty(Administration.ADMINISTRATION_VALUE_PROPERTY_NAME, POST_TASK_VALUE);
-//		postTaskAdmin.addDuty("DUTY");
-//		postTaskAdmin.administerManagedObject("MO");
+		// // Create the pre administration
+		// AdministrationBuilder<Indexed> preTaskAdmin =
+		// this.constructAdministrator("PRE", Administration.class, "TEAM");
+		// preTaskAdmin.addProperty(Administration.ADMINISTRATION_VALUE_PROPERTY_NAME,
+		// PRE_TASK_VALUE);
+		// preTaskAdmin.addDuty("DUTY");
+		// preTaskAdmin.administerManagedObject("MO");
+		//
+		// // Create the post administration
+		// AdministrationBuilder<Indexed> postTaskAdmin =
+		// this.constructAdministrator("POST", Administration.class, "TEAM");
+		// postTaskAdmin.addProperty(Administration.ADMINISTRATION_VALUE_PROPERTY_NAME,
+		// POST_TASK_VALUE);
+		// postTaskAdmin.addDuty("DUTY");
+		// postTaskAdmin.administerManagedObject("MO");
 
 		// Create the administered managed object
 		this.constructManagedObject("ADMIN_MO", AdministeredObject.class, officeName);
@@ -125,8 +129,8 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 		administeredTask.getBuilder().setResponsibleTeam("TEAM");
 		administeredTask.buildObject("MO");
 		ManagedFunctionBuilder<?, ?> adminTaskBuilder = administeredTask.getBuilder();
-//		adminTaskBuilder.linkPreFunctionAdministration("PRE", "DUTY");
-//		adminTaskBuilder.linkPostFunctionAdministration("POST", "DUTY");
+		// adminTaskBuilder.linkPreFunctionAdministration("PRE", "DUTY");
+		// adminTaskBuilder.linkPostFunctionAdministration("POST", "DUTY");
 
 		// Run the repeats
 		this.invokeFunction("setupTask", new Integer(1), MAX_RUN_TIME);

@@ -207,6 +207,12 @@ public class ProcessStateImpl implements ProcessState {
 	public FunctionState spawnThreadState(ManagedFunctionMetaData<?, ?> managedFunctionMetaData, Object parameter,
 			FlowCompletion completion) {
 		return new ProcessOperation() {
+
+			@Override
+			public String toString() {
+				return "Spawn ThreadState for ProcessState " + Integer.toHexString(ProcessStateImpl.this.hashCode());
+			}
+
 			@Override
 			public FunctionState execute() throws Throwable {
 
@@ -241,6 +247,12 @@ public class ProcessStateImpl implements ProcessState {
 	@Override
 	public FunctionState threadComplete(ThreadState thread) {
 		return new ProcessOperation() {
+
+			@Override
+			public String toString() {
+				return "ThreadState " + Integer.toHexString(thread.hashCode()) + " complete";
+			}
+
 			@Override
 			public FunctionState execute() throws Throwable {
 
@@ -261,6 +273,13 @@ public class ProcessStateImpl implements ProcessState {
 
 					// Clean up process state
 					return Promise.then(cleanUpFunctions, new ProcessOperation() {
+
+						@Override
+						public String toString() {
+							return "ProcessState " + Integer.toHexString(ProcessStateImpl.this.hashCode())
+									+ " complete";
+						}
+
 						@Override
 						public FunctionState execute() throws Throwable {
 
@@ -289,6 +308,11 @@ public class ProcessStateImpl implements ProcessState {
 	@Override
 	public ManagedObjectContainer getManagedObjectContainer(int index) {
 		return this.managedObjects[index];
+	}
+
+	@Override
+	public FunctionLoop getFunctionLoop() {
+		return this.officeMetaData.getFunctionLoop();
 	}
 
 	/**

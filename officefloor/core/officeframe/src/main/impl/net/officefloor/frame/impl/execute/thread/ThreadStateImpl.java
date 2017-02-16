@@ -76,9 +76,16 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		public final boolean isThreadStateSafe;
 
 		/**
+		 * Recursive depth of this {@link ActiveThreadState} within the
+		 * {@link Thread}.
+		 */
+		private final int threadStateRecursiveDepth;
+
+		/**
 		 * Previous {@link ActiveThreadState}. This enables
 		 * {@link FunctionLogic} to be executed within the context of another
-		 * {@link FunctionLogic}.
+		 * {@link FunctionLogic}. Will be <code>null</code> for top level
+		 * {@link ThreadState} of {@link Thread}.
 		 */
 		private final ActiveThreadState previousActiveThreadState;
 
@@ -90,11 +97,18 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		 * @param isThreadStateSafe
 		 *            Flag indicating if the {@link ThreadState} is safe on the
 		 *            current {@link Thread}.
+		 * @param threadStateRecursiveDepth
+		 *            Recursive depth of this {@link ActiveThreadState} within
+		 *            the {@link Thread}.
+		 * @param previousActiveThreadState
+		 *            Previous {@link ActiveThreadState} on the {@link Thread}.
+		 *            May be <code>null</code>.
 		 */
-		public ActiveThreadState(ThreadState threadState, boolean isThreadStateSafe,
+		private ActiveThreadState(ThreadState threadState, boolean isThreadStateSafe, int threadStateRecursiveDepth,
 				ActiveThreadState previousActiveThreadState) {
 			this.threadState = threadState;
 			this.isThreadStateSafe = isThreadStateSafe;
+			this.threadStateRecursiveDepth = threadStateRecursiveDepth;
 			this.previousActiveThreadState = previousActiveThreadState;
 		}
 	}
@@ -106,10 +120,34 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	 *            {@link ThreadState} to attached to the {@link Thread}.
 	 * @param isThreadStateSafe
 	 *            Indicates if the execution is {@link ThreadState} safe.
+	 * @return <code>true</code> if attached to {@link Thread}.
+	 *         <code>false</code> if reached the max {@link ThreadState}
+	 *         recursive depth.
 	 */
-	public static void attachThreadStateToThread(ThreadState threadState, boolean isThreadStateSafe) {
+	public static boolean attachThreadStateToThread(ThreadState threadState, boolean isThreadStateSafe,
+			int maxThreadStateRecursiveDepth) {
+
+		// Obtain the possible existing thread state on thread
 		ActiveThreadState previous = activeThreadState.get();
-		activeThreadState.set(new ActiveThreadState(threadState, isThreadStateSafe, previous));
+
+		// Determine new depth (ensuring max not reached)
+		int nextThreadStateDepth = 1;
+		if (previous != null) {
+
+			// Increment the depth for next thread state
+			nextThreadStateDepth = previous.threadStateRecursiveDepth + 1;
+
+			// Determine if max reached
+			if (nextThreadStateDepth > maxThreadStateRecursiveDepth) {
+				return false; // max reached
+			}
+		}
+
+		// Attach the next thread state to the thread
+		activeThreadState.set(new ActiveThreadState(threadState, isThreadStateSafe, nextThreadStateDepth, previous));
+
+		// As here, attached
+		return true;
 	}
 
 	/**
@@ -466,6 +504,11 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	}
 
 	@Override
+	public int getMaximumPromiseChainLength() {
+		return this.threadMetaData.getMaximumPromiseChainLength();
+	}
+
+	@Override
 	public FunctionState registerThreadProfiler() {
 		return this.profiler;
 	}
@@ -492,8 +535,8 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	/**
 	 * {@link FlowCompletion} for an invoked {@link ProcessState}.
 	 */
-	private static class ProcessFlowCompletion
-			extends AbstractLinkedListSetEntry<FlowCompletion, ManagedFunctionContainer> implements FlowCompletion {
+	private class ProcessFlowCompletion extends AbstractLinkedListSetEntry<FlowCompletion, ManagedFunctionContainer>
+			implements FlowCompletion {
 
 		/**
 		 * {@link ThreadState}.
@@ -547,6 +590,12 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			 */
 			public CompleteFunctionState(Throwable escalation) {
 				this.escalation = escalation;
+			}
+
+			@Override
+			public String toString() {
+				return "ThreadState " + Integer.toHexString(ThreadStateImpl.this.hashCode())
+						+ " callback with exception " + this.escalation;
 			}
 
 			@Override
