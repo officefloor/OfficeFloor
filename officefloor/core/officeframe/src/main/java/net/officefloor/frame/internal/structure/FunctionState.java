@@ -75,13 +75,16 @@ public interface FunctionState extends LinkedListSetEntry<FunctionState, Flow> {
 	/**
 	 * Executes the {@link FunctionState}.
 	 * 
+	 * @param context
+	 *            {@link FunctionContext} for executing the
+	 *            {@link FunctionState}.
 	 * @return Next {@link FunctionState} to be executed. May be
 	 *         <code>null</code> to indicate no further {@link FunctionState}
 	 *         instances to execute.
 	 * @throws Throwable
 	 *             Possible failure of {@link FunctionState} logic.
 	 */
-	FunctionState execute() throws Throwable;
+	FunctionState execute(FunctionContext context) throws Throwable;
 
 	/**
 	 * Cancels this {@link FunctionState} returning an optional
@@ -97,11 +100,13 @@ public interface FunctionState extends LinkedListSetEntry<FunctionState, Flow> {
 	/**
 	 * Handles {@link Escalation} from the {@link ManagedFunction}.
 	 * 
+	 * @param context
+	 *            {@link FunctionContext} for handling the {@link Escalation}.
 	 * @param escalation
 	 *            {@link Escalation}.
 	 * @return Optional {@link FunctionState} to handle the {@link Escalation}.
 	 */
-	default FunctionState handleEscalation(Throwable escalation) {
+	default FunctionState handleEscalation(Throwable escalation, FunctionContext context) {
 		return this.getThreadState().handleEscalation(escalation);
 	}
 

@@ -1104,7 +1104,6 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * Default constructor.
 	 */
 	public OfficeFrameTestCase() {
-		super();
 	}
 
 	/**
@@ -1742,17 +1741,13 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		// Obtain the memory management bean
 		MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
 
-		// Do best to garbage collect to get clearer results
-		memoryBean.gc(); // puts objects on finalise queue
-		memoryBean.gc(); // clears the finalise queue
-
 		// Obtain the heap diagnosis details
 		MemoryUsage heap = memoryBean.getHeapMemoryUsage();
 		float usedPercentage = (heap.getUsed() / (float) heap.getMax());
 
 		// Print the results
 		NumberFormat format = NumberFormat.getPercentInstance();
-		this.printMessage("HEAP: " + format.format(usedPercentage) + " (used=" + this.getMemorySize(heap.getUsed())
+		this.printMessage("    HEAP: " + format.format(usedPercentage) + " (used=" + this.getMemorySize(heap.getUsed())
 				+ ", max=" + this.getMemorySize(heap.getMax()) + ", init=" + this.getMemorySize(heap.getInit())
 				+ ", commit=" + this.getMemorySize(heap.getCommitted()) + ", fq="
 				+ memoryBean.getObjectPendingFinalizationCount() + ")");

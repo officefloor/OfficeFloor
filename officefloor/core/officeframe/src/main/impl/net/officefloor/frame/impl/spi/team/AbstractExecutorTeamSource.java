@@ -46,17 +46,25 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 	 * this {@link AbstractExecutorTeamSource}.
 	 * 
 	 * @return {@link Team}.
-	 * @throws Exception
-	 *             If fails to load {@link Team}.
+	 * @throws IllegalArgumentException
+	 *             If fails to provide correct information to load the
+	 *             {@link Team}.
 	 */
-	public Team createTeam(String... parameterNameValues) throws Exception {
+	public Team createTeam(String... parameterNameValues) throws IllegalArgumentException {
 		TeamSourceStandAlone standAlone = new TeamSourceStandAlone();
 		for (int i = 0; i < parameterNameValues.length; i += 2) {
 			String name = parameterNameValues[i];
 			String value = parameterNameValues[i + 1];
 			standAlone.addProperty(name, value);
 		}
-		return standAlone.loadTeam(this.getClass());
+		try {
+			Team team = standAlone.loadTeam(this.getClass());
+			team.startWorking();
+			return team;
+		} catch (Exception ex) {
+			// Propagate failure
+			throw new IllegalArgumentException(ex);
+		}
 	}
 
 	/**
@@ -215,7 +223,6 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		public void stopWorking() {
 			// Shutdown servicer
 			this.servicer.shutdown();
-			this.servicer = null;
 		}
 	}
 

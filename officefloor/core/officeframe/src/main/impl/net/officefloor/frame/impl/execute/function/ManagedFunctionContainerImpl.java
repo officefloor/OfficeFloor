@@ -29,6 +29,7 @@ import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.FunctionContext;
 import net.officefloor.frame.internal.structure.FunctionLogic;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
@@ -300,7 +301,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	}
 
 	@Override
-	public FunctionState execute() throws Throwable {
+	public FunctionState execute(FunctionContext context) throws Throwable {
 
 		// Ensure no parallel function to execute first
 		if (this.parallelFunction != null) {
@@ -411,8 +412,8 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			threadState.profile(this.functionLogicMetaData);
 
 			// Execute the managed function
-			ManagedFunctionLogicContextImpl context = new ManagedFunctionLogicContextImpl();
-			this.nextManagedFunctionParameter = this.managedFunctionLogic.execute(context);
+			ManagedFunctionLogicContextImpl logicContext = new ManagedFunctionLogicContextImpl();
+			this.nextManagedFunctionParameter = this.managedFunctionLogic.execute(logicContext);
 
 			// Function executed, so now await flow completions
 			this.containerState = ManagedFunctionState.AWAIT_FLOW_COMPLETIONS;
@@ -496,7 +497,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	}
 
 	@Override
-	public FunctionState handleEscalation(final Throwable escalation) {
+	public FunctionState handleEscalation(final Throwable escalation, FunctionContext context) {
 		return new ManagedFunctionOperation() {
 
 			@Override
@@ -506,7 +507,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			}
 
 			@Override
-			public FunctionState execute() throws Throwable {
+			public FunctionState execute(FunctionContext context) throws Throwable {
 
 				// Easy access to container
 				ManagedFunctionContainerImpl<M> container = ManagedFunctionContainerImpl.this;
@@ -530,7 +531,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 				}
 
 				// Not handled by this function, so escalate to flow
-				return Promise.then(clearFunctions, container.flow.handleEscalation(escalation));
+				return Promise.then(clearFunctions, container.flow.handleEscalation(escalation, context));
 			}
 		};
 	}
@@ -719,7 +720,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 		public FunctionState complete(final Throwable escalation) {
 			return new ManagedFunctionOperation() {
 				@Override
-				public FunctionState execute() throws Throwable {
+				public FunctionState execute(FunctionContext context) throws Throwable {
 
 					// Remove callback
 					ManagedFunctionContainerImpl.this.awaitingFlowCompletions.removeEntry(FlowCompletionImpl.this);
@@ -798,7 +799,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	private final FunctionState clear() {
 		return new ManagedFunctionOperation() {
 			@Override
-			public FunctionState execute() throws Throwable {
+			public FunctionState execute(FunctionContext context) throws Throwable {
 
 				// Easy access to container
 				final ManagedFunctionContainerImpl<M> container = ManagedFunctionContainerImpl.this;
@@ -831,7 +832,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	private FunctionState complete(final boolean isCancel) {
 		return new ManagedFunctionOperation() {
 			@Override
-			public FunctionState execute() throws Throwable {
+			public FunctionState execute(FunctionContext context) throws Throwable {
 
 				// Easy access to container
 				final ManagedFunctionContainerImpl<M> container = ManagedFunctionContainerImpl.this;

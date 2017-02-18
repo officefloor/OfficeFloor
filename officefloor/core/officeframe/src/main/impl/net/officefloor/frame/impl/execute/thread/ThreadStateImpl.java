@@ -23,6 +23,7 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.frame.impl.execute.flow.FlowImpl;
+import net.officefloor.frame.impl.execute.function.AbstractDelegateFunctionState;
 import net.officefloor.frame.impl.execute.function.LinkedListSetPromise;
 import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
@@ -32,6 +33,7 @@ import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
+import net.officefloor.frame.internal.structure.FunctionContext;
 import net.officefloor.frame.internal.structure.FunctionLogic;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
@@ -43,6 +45,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.ThreadContext;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadProfiler;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -62,12 +65,12 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	/**
 	 * Active {@link ThreadState}.
 	 */
-	private static class ActiveThreadState {
+	private static class ActiveThreadState implements ThreadContext, FunctionContext {
 
 		/**
 		 * {@link ThreadState}.
 		 */
-		public final ThreadState threadState;
+		private final ThreadState threadState;
 
 		/**
 		 * Flag indicating if the {@link ThreadState} is safe on the current
@@ -111,6 +114,34 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			this.threadStateRecursiveDepth = threadStateRecursiveDepth;
 			this.previousActiveThreadState = previousActiveThreadState;
 		}
+
+		/*
+		 * =========================== ThreadContext ===========================
+		 */
+
+		@Override
+		public FunctionState executeFunction(FunctionState function) throws Throwable {
+			return function.execute(this);
+		}
+
+		@Override
+		public FunctionState handleEscalation(FunctionState function, Throwable escalation) {
+			return function.handleEscalation(escalation, this);
+		}
+
+		/*
+		 * =========================== FunctionState ===========================
+		 */
+
+		@Override
+		public FunctionState executeDelegate(FunctionState delegate) throws Throwable {
+			return delegate.execute(this);
+		}
+
+		@Override
+		public FunctionState handleDelegateEscalation(FunctionState delegate, Throwable escalation) {
+			return delegate.handleEscalation(escalation, this);
+		}
 	}
 
 	/**
@@ -120,34 +151,24 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	 *            {@link ThreadState} to attached to the {@link Thread}.
 	 * @param isThreadStateSafe
 	 *            Indicates if the execution is {@link ThreadState} safe.
-	 * @return <code>true</code> if attached to {@link Thread}.
-	 *         <code>false</code> if reached the max {@link ThreadState}
-	 *         recursive depth.
+	 * @return {@link ThreadContext} for executing the {@link ThreadState}
+	 *         attached to the {@link Thread}.
 	 */
-	public static boolean attachThreadStateToThread(ThreadState threadState, boolean isThreadStateSafe,
-			int maxThreadStateRecursiveDepth) {
+	public static ThreadContext attachThreadStateToThread(ThreadState threadState, boolean isThreadStateSafe) {
 
 		// Obtain the possible existing thread state on thread
 		ActiveThreadState previous = activeThreadState.get();
 
-		// Determine new depth (ensuring max not reached)
-		int nextThreadStateDepth = 1;
-		if (previous != null) {
-
-			// Increment the depth for next thread state
-			nextThreadStateDepth = previous.threadStateRecursiveDepth + 1;
-
-			// Determine if max reached
-			if (nextThreadStateDepth > maxThreadStateRecursiveDepth) {
-				return false; // max reached
-			}
-		}
+		// Determine new depth
+		int nextThreadStateDepth = previous != null ? previous.threadStateRecursiveDepth + 1 : 1;
 
 		// Attach the next thread state to the thread
-		activeThreadState.set(new ActiveThreadState(threadState, isThreadStateSafe, nextThreadStateDepth, previous));
+		ActiveThreadState context = new ActiveThreadState(threadState, isThreadStateSafe, nextThreadStateDepth,
+				previous);
+		activeThreadState.set(context);
 
-		// As here, attached
-		return true;
+		// Return the function context
+		return context;
 	}
 
 	/**
@@ -160,6 +181,25 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 					"No " + ThreadState.class.getSimpleName() + " attached to " + Thread.class.getSimpleName());
 		}
 		activeThreadState.set(active.previousActiveThreadState);
+	}
+
+	/**
+	 * Obtains the current {@link ThreadContext}.
+	 * 
+	 * @return Current {@link ThreadContext}.
+	 */
+	public static ThreadContext currentThreadContext() {
+
+		// Obtain the context attached to the thread
+		ActiveThreadState current = activeThreadState.get();
+
+		// Ensure have current (even if temporary before loop)
+		if (current == null) {
+			current = new ActiveThreadState(null, false, 0, null);
+		}
+
+		// Return the current thread state
+		return current;
 	}
 
 	/**
@@ -326,6 +366,11 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	public boolean isThreadStateSafe() {
 		ActiveThreadState active = activeThreadState.get();
 		return (active != null) ? active.isThreadStateSafe : false;
+	}
+
+	@Override
+	public FunctionState then(FunctionState function, FunctionState thenFunction) {
+		return new ThenFunction(function, thenFunction);
 	}
 
 	@Override
@@ -504,11 +549,6 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	}
 
 	@Override
-	public int getMaximumPromiseChainLength() {
-		return this.threadMetaData.getMaximumPromiseChainLength();
-	}
-
-	@Override
 	public FunctionState registerThreadProfiler() {
 		return this.profiler;
 	}
@@ -604,7 +644,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			}
 
 			@Override
-			public FunctionState execute() throws Throwable {
+			public FunctionState execute(FunctionContext context) throws Throwable {
 
 				// Undertake callback
 				ProcessFlowCompletion.this.callback.run(this.escalation);
@@ -612,6 +652,64 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 				// Process now complete
 				return null;
 			}
+		}
+	}
+
+	/**
+	 * Then {@link FunctionState}.
+	 */
+	private static class ThenFunction extends AbstractDelegateFunctionState {
+
+		/**
+		 * Then {@link FunctionState}.
+		 */
+		protected final FunctionState thenFunction;
+
+		/**
+		 * Creation by static methods.
+		 * 
+		 * @param delegate
+		 *            Delegate {@link FunctionState} to complete it and all
+		 *            produced {@link FunctionState} instances before
+		 *            continuing.
+		 * @param thenFunction
+		 *            Then {@link FunctionState}.
+		 */
+		private ThenFunction(FunctionState delegate, FunctionState thenFunction) {
+			super(delegate);
+			this.thenFunction = thenFunction;
+		}
+
+		@Override
+		public String toString() {
+			return this.delegate.toString();
+		}
+
+		/*
+		 * =================== FunctionState ==============================
+		 */
+
+		@Override
+		public FunctionState execute(FunctionContext context) throws Throwable {
+			FunctionState next = this.delegate.execute(context);
+			if (next != null) {
+				return new ThenFunction(next, this.thenFunction);
+			}
+			return this.thenFunction;
+		}
+
+		@Override
+		public FunctionState handleEscalation(Throwable escalation, FunctionContext context) {
+			FunctionState handler = this.delegate.handleEscalation(escalation, context);
+			if (handler != null) {
+				return new ThenFunction(handler, this.thenFunction);
+			}
+			return this.thenFunction;
+		}
+
+		@Override
+		public FunctionState cancel() {
+			return Promise.then(this.delegate.cancel(), this.thenFunction.cancel());
 		}
 	}
 

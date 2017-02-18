@@ -21,6 +21,8 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.team.Job;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.execute.function.Promise;
 
 /**
@@ -61,6 +63,16 @@ public interface ThreadMetaData {
 	 *         {@link ThreadState}.
 	 */
 	int getMaximumPromiseChainLength();
+
+	/**
+	 * Obtains the {@link Team} to break the {@link Promise} and
+	 * {@link ThreadState} recursive call chains.
+	 * 
+	 * @return An active {@link Team}. An active {@link Team} contains
+	 *         {@link Thread} instances that will execute the {@link Job} with a
+	 *         different {@link Thread} stack.
+	 */
+	Team getBreakChainTeam();
 
 	/**
 	 * Obtains the {@link EscalationProcedure} for the {@link Office}.

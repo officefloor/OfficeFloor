@@ -29,6 +29,7 @@ import net.officefloor.frame.impl.execute.profile.ProcessProfilerImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
+import net.officefloor.frame.internal.structure.FunctionContext;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.LinkedListSet;
@@ -214,7 +215,7 @@ public class ProcessStateImpl implements ProcessState {
 			}
 
 			@Override
-			public FunctionState execute() throws Throwable {
+			public FunctionState execute(FunctionContext context) throws Throwable {
 
 				// Easy access to process state
 				ProcessStateImpl process = ProcessStateImpl.this;
@@ -254,7 +255,7 @@ public class ProcessStateImpl implements ProcessState {
 			}
 
 			@Override
-			public FunctionState execute() throws Throwable {
+			public FunctionState execute(FunctionContext context) throws Throwable {
 
 				// Easy access to process state
 				final ProcessStateImpl process = ProcessStateImpl.this;
@@ -281,7 +282,7 @@ public class ProcessStateImpl implements ProcessState {
 						}
 
 						@Override
-						public FunctionState execute() throws Throwable {
+						public FunctionState execute(FunctionContext context) throws Throwable {
 
 							// Notify process context complete
 							if (process.threadLocalAwareExecutor != null) {

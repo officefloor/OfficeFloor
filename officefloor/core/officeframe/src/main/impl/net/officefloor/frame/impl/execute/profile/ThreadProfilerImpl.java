@@ -25,6 +25,7 @@ import net.officefloor.frame.api.profile.ProfiledManagedFunction;
 import net.officefloor.frame.api.profile.ProfiledThreadState;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FunctionContext;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedFunctionLogicMetaData;
 import net.officefloor.frame.internal.structure.ProcessProfiler;
@@ -120,7 +121,7 @@ public class ThreadProfilerImpl extends AbstractLinkedListSetEntry<FunctionState
 	}
 
 	@Override
-	public FunctionState execute() throws Throwable {
+	public FunctionState execute(FunctionContext context) throws Throwable {
 		this.processProfiler.registerProfiledThreadState(this);
 		return null;
 	}

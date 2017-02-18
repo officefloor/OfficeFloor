@@ -21,6 +21,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FunctionContext;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectReadyCheck;
@@ -100,7 +101,7 @@ public class ManagedObjectReadyCheckImpl implements ManagedObjectReadyCheck {
 		}
 
 		@Override
-		public FunctionState execute() {
+		public FunctionState execute(FunctionContext context) {
 			ManagedObjectReadyCheckImpl.this.isReady = false;
 			return null;
 		}

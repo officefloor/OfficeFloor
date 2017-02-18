@@ -23,11 +23,13 @@ import java.util.function.Supplier;
 import net.officefloor.frame.impl.execute.job.FunctionLoopImpl;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.office.OfficeManagerProcessState;
+import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FunctionContext;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.OfficeClock;
@@ -50,12 +52,13 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 	/**
 	 * {@link FunctionLoop}.
 	 */
-	private final FunctionLoop loop = new FunctionLoopImpl(null, 100);
+	private final FunctionLoop loop = new FunctionLoopImpl(null);
 
 	/**
 	 * {@link ProcessState}.
 	 */
-	private final ProcessState processState = new OfficeManagerProcessState(this.clock, 1000, this.loop);
+	private final ProcessState processState = new OfficeManagerProcessState(this.clock, 1000,
+			new ExecutorCachedTeamSource().createTeam(), this.loop);
 
 	/**
 	 * {@link AssetManager}.
@@ -322,13 +325,13 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public FunctionState execute() throws Throwable {
+		public FunctionState execute(FunctionContext context) throws Throwable {
 			this.isExecuted = true;
 			return null;
 		}
 
 		@Override
-		public FunctionState handleEscalation(Throwable escalation) {
+		public FunctionState handleEscalation(Throwable escalation, FunctionContext context) {
 			this.exception = escalation;
 			return null;
 		}

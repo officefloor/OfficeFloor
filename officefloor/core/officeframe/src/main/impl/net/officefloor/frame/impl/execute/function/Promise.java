@@ -18,13 +18,7 @@
 package net.officefloor.frame.impl.execute.function;
 
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.team.Job;
-import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
-import net.officefloor.frame.impl.spi.team.WorkerPerJobTeam;
-import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
-import net.officefloor.frame.internal.structure.TeamManagement;
 
 /**
  * Provides promise like functionality for {@link FunctionState} instances.
@@ -58,20 +52,8 @@ public class Promise {
 
 		} else if (thenFunction != null) {
 
-			// Determine depth of the new then function
-			int functionDepth = (function instanceof ThenFunction) ? ((ThenFunction) function).depth : 0;
-			int thenFunctionDepth = (thenFunction instanceof ThenFunction) ? ((ThenFunction) thenFunction).depth : 0;
-			int newDepth = Math.max(functionDepth, thenFunctionDepth) + 1;
-
 			// Create continue link
-			int maximumPromiseChainLength = function.getThreadState().getMaximumPromiseChainLength();
-			if (newDepth > maximumPromiseChainLength) {
-				// Chain too large, so break
-				return new BreakThenFunction(function, thenFunction, 1);
-			} else {
-				// Continue existing chain
-				return new ThenFunction(function, thenFunction, newDepth);
-			}
+			return function.getThreadState().then(function, thenFunction);
 		}
 
 		// Only the initial function
@@ -79,135 +61,9 @@ public class Promise {
 	}
 
 	/**
-	 * Active {@link Team} to enable breaking the {@link Promise} chain to avoid
-	 * {@link StackOverflowError} in calling down the chain.
-	 */
-	private static final TeamManagement activeTeamToBreakChain = new TeamManagementImpl(
-			new WorkerPerJobTeam("BREAK_THEN_CHAIN"));
-
-	/**
 	 * All access via static methods.
 	 */
 	private Promise() {
-	}
-
-	/**
-	 * Then {@link FunctionState}.
-	 */
-	private static class ThenFunction extends AbstractDelegateFunctionState {
-
-		/**
-		 * Then {@link FunctionState}.
-		 */
-		protected final FunctionState thenFunction;
-
-		/**
-		 * Depth of this {@link ThenFunction};
-		 */
-		protected final int depth;
-
-		/**
-		 * Creation by static methods.
-		 * 
-		 * @param delegate
-		 *            Delegate {@link FunctionState} to complete it and all
-		 *            produced {@link FunctionState} instances before
-		 *            continuing.
-		 * @param thenFunction
-		 *            Then {@link FunctionState}.
-		 * @param depth
-		 *            Depth of this {@link ThenFunction}.
-		 */
-		private ThenFunction(FunctionState delegate, FunctionState thenFunction, int depth) {
-			super(delegate);
-			this.thenFunction = thenFunction;
-			this.depth = depth;
-		}
-
-		@Override
-		public String toString() {
-			return this.delegate.toString();
-		}
-
-		/*
-		 * =================== FunctionState ==============================
-		 */
-
-		@Override
-		public FunctionState execute() throws Throwable {
-			FunctionState next = this.delegate.execute();
-			return Promise.then(next, this.thenFunction);
-		}
-
-		@Override
-		public FunctionState handleEscalation(Throwable escalation) {
-			FunctionState handler = this.delegate.handleEscalation(escalation);
-			return Promise.then(handler, this.thenFunction);
-		}
-
-		@Override
-		public FunctionState cancel() {
-			return Promise.then(this.delegate.cancel(), this.thenFunction.cancel());
-		}
-	}
-
-	/**
-	 * Break then chain {@link FunctionState}.
-	 */
-	private static class BreakThenFunction extends ThenFunction implements Job {
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param delegate
-		 *            Delegate {@link FunctionState} to complete it and all
-		 *            produced {@link FunctionState} instances before
-		 *            continuing.
-		 * @param thenFunction
-		 *            Then {@link FunctionState}.
-		 * @param depth
-		 *            Depth of this {@link ThenFunction}.
-		 */
-		public BreakThenFunction(FunctionState delegate, FunctionState thenFunction, int depth) {
-			super(delegate, thenFunction, depth);
-		}
-
-		/*
-		 * =================== FunctionState ==============================
-		 */
-
-		@Override
-		public FunctionState execute() throws Throwable {
-
-			// Execute on another thread to break chain
-			activeTeamToBreakChain.getTeam().assignJob(this);
-
-			// Will continue chain on another thread
-			return null;
-		}
-
-		/*
-		 * ========================= Job ==================================
-		 */
-
-		@Override
-		public void run() {
-
-			// Continue executing the Promise chain
-			FunctionState continueFunction = new ThenFunction(this.delegate, this.thenFunction, this.depth);
-			FunctionLoop loop = this.delegate.getThreadState().getProcessState().getFunctionLoop();
-			loop.delegateFunction(continueFunction);
-		}
-
-		@Override
-		public Object getProcessIdentifier() {
-			return this.delegate.getThreadState().getProcessState().getProcessIdentifier();
-		}
-
-		@Override
-		public void cancel(Throwable cause) {
-			throw new IllegalStateException("Should never cancel " + BreakThenFunction.class.getSimpleName(), cause);
-		}
 	}
 
 }

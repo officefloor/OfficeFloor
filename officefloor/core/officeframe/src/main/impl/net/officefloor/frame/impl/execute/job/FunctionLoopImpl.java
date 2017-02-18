@@ -22,16 +22,15 @@ import java.util.logging.Logger;
 
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.impl.execute.function.AbstractDelegateFunctionState;
 import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
 import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
-import net.officefloor.frame.impl.spi.team.WorkerPerJobTeam;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
+import net.officefloor.frame.internal.structure.ThreadContext;
 import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
@@ -57,35 +56,15 @@ public class FunctionLoopImpl implements FunctionLoop {
 	private final TeamManagement defaultTeam;
 
 	/**
-	 * Maximum depth of {@link ThreadState} recursive attaching to
-	 * {@link Thread} before it is broken.
-	 */
-	private final int maxThreadStateRecursiveDepth;
-
-	/**
-	 * {@link Team} containing an active {@link Thread} implementation, to
-	 * enable breaking the {@link ThreadState} recursive attach to
-	 * {@link Thread} depth.
-	 */
-	private final TeamManagement activeTeamToBreakRecursion;
-
-	/**
 	 * Instantiates.
 	 * 
 	 * @param defaultTeam
 	 *            Default {@link TeamManagement}. May be <code>null</code>.
-	 * @param maxThreadStateRecursiveDepth
-	 *            Maximum recursive {@link ThreadState} depth in attaching to
-	 *            {@link Thread} before broken.
 	 */
-	public FunctionLoopImpl(TeamManagement defaultTeam, int maxThreadStateRecursiveDepth) {
+	public FunctionLoopImpl(TeamManagement defaultTeam) {
 
 		// Ensure have default team
 		this.defaultTeam = (defaultTeam != null) ? defaultTeam : new TeamManagementImpl(new PassiveTeam());
-
-		// Create active team to break thread state attach to thread recursion
-		this.maxThreadStateRecursiveDepth = maxThreadStateRecursiveDepth;
-		this.activeTeamToBreakRecursion = new TeamManagementImpl(new WorkerPerJobTeam("BREAK_THREAD_STATE_RECURSION"));
 	}
 
 	/*
@@ -137,12 +116,7 @@ public class FunctionLoopImpl implements FunctionLoop {
 		ThreadState threadState = headFunction.getThreadState();
 
 		// Attach thread state to thread
-		if (!ThreadStateImpl.attachThreadStateToThread(threadState, isThreadStateSafe,
-				this.maxThreadStateRecursiveDepth)) {
-			// Max thread state recursive depth reached
-			this.delegateFunction(new BreakThreadStateDepthFunction(headFunction));
-			return null; // break recursive depth
-		}
+		ThreadContext context = ThreadStateImpl.attachThreadStateToThread(threadState, isThreadStateSafe);
 
 		// Ensure detach thread state on exit of loop
 		try {
@@ -178,11 +152,11 @@ public class FunctionLoopImpl implements FunctionLoop {
 					}
 
 					// Required team, thread state and safety, so execute
-					nextFunction = nextFunction.execute();
+					nextFunction = context.executeFunction(nextFunction);
 
 				} catch (Throwable ex) {
-					// Handle failure
-					nextFunction = nextFunction.handleEscalation(ex);
+					// Handle escalation
+					nextFunction = context.handleEscalation(nextFunction, ex);
 				}
 
 			} while (nextFunction != null);
@@ -309,8 +283,11 @@ public class FunctionLoopImpl implements FunctionLoop {
 
 		@Override
 		public void cancel(Throwable cause) {
+
 			// Handle cancellation of the job
-			SafeLoop loop = new SafeLoop(this.initialFunction.handleEscalation(cause), this.currentTeam);
+			ThreadContext context = ThreadStateImpl.currentThreadContext();
+			FunctionState handler = context.handleEscalation(this.initialFunction, cause);
+			SafeLoop loop = new SafeLoop(handler, this.currentTeam);
 			loop.run();
 		}
 	}
@@ -347,39 +324,6 @@ public class FunctionLoopImpl implements FunctionLoop {
 		protected void assignFunction(FunctionState function, TeamManagement responsibleTeam) {
 			// No need to synchronise assigning function, as loop is thread safe
 			responsibleTeam.getTeam().assignJob(new SafeLoop(function, responsibleTeam.getIdentifier()));
-		}
-	}
-
-	/**
-	 * {@link FunctionState} to break the {@link ThreadState} attach to
-	 * {@link Thread} recursive depth.
-	 */
-	private class BreakThreadStateDepthFunction extends AbstractDelegateFunctionState {
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param delegate
-		 *            Delegate {@link FunctionState}.
-		 */
-		public BreakThreadStateDepthFunction(FunctionState delegate) {
-			super(delegate);
-		}
-
-		/*
-		 * ======================== FunctionState ========================
-		 */
-
-		@Override
-		public TeamManagement getResponsibleTeam() {
-			return FunctionLoopImpl.this.activeTeamToBreakRecursion;
-		}
-
-		@Override
-		public FunctionState execute() throws Throwable {
-
-			// Ensure delegate allowed to be executed by appropriate team
-			return this.delegate;
 		}
 	}
 

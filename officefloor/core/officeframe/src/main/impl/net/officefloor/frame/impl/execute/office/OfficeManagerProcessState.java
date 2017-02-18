@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.office;
 
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
@@ -64,16 +65,18 @@ public class OfficeManagerProcessState implements ProcessState {
 	 *            {@link OfficeClock}.
 	 * @param maximumPromiseChainLength
 	 *            Maximum {@link Promise} chain length.
+	 * @param breakChainTeam
+	 *            Break chain {@link Team}.
 	 * @param functionLoop
 	 *            {@link FunctionLoop}.
 	 */
-	public OfficeManagerProcessState(OfficeClock officeClock, int maximumPromiseChainLength,
+	public OfficeManagerProcessState(OfficeClock officeClock, int maximumPromiseChainLength, Team breakChainTeam,
 			FunctionLoop functionLoop) {
 		this.functionLoop = functionLoop;
 
 		// Create the meta-data for the process and its main thread state
 		this.threadMetaData = new ThreadMetaDataImpl(new ManagedObjectMetaData[0], new GovernanceMetaData[0],
-				maximumPromiseChainLength, new EscalationProcedureImpl(), null);
+				maximumPromiseChainLength, breakChainTeam, new EscalationProcedureImpl(), null);
 
 		// Create the main thread state
 		// Note: purpose of this to enable synchronising changes to office

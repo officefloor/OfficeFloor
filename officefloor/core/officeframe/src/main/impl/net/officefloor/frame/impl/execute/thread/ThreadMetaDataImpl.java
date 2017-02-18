@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.execute.thread;
 
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
@@ -49,6 +50,11 @@ public class ThreadMetaDataImpl implements ThreadMetaData {
 	private final int maximumPromiseChainLength;
 
 	/**
+	 * Break chain {@link Team}.
+	 */
+	private final Team breakChainTeam;
+
+	/**
 	 * {@link Office} {@link EscalationProcedure}.
 	 */
 	private final EscalationProcedure officeEscalationProcedure;
@@ -67,17 +73,20 @@ public class ThreadMetaDataImpl implements ThreadMetaData {
 	 *            {@link GovernanceMetaData} instances.
 	 * @param maximumPromiseChainLength
 	 *            Maximum {@link Promise} chain length.
+	 * @param breakChainTeam
+	 *            Break chain {@link Team}.
 	 * @param officeEscalationProcedure
 	 *            {@link Office} {@link EscalationProcedure}.
 	 * @param officeFloorEscalation
 	 *            {@link OfficeFloor} {@link EscalationFlow}.
 	 */
 	public ThreadMetaDataImpl(ManagedObjectMetaData<?>[] managedObjectMetaData,
-			GovernanceMetaData<?, ?>[] governanceMetaData, int maximumPromiseChainLength,
+			GovernanceMetaData<?, ?>[] governanceMetaData, int maximumPromiseChainLength, Team breakChainTeam,
 			EscalationProcedure officeEscalationProcedure, EscalationFlow officeFloorEscalation) {
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.governanceMetaData = governanceMetaData;
 		this.maximumPromiseChainLength = maximumPromiseChainLength;
+		this.breakChainTeam = breakChainTeam;
 		this.officeEscalationProcedure = officeEscalationProcedure;
 		this.officeFloorEscalation = officeFloorEscalation;
 	}
@@ -99,6 +108,11 @@ public class ThreadMetaDataImpl implements ThreadMetaData {
 	@Override
 	public int getMaximumPromiseChainLength() {
 		return this.maximumPromiseChainLength;
+	}
+
+	@Override
+	public Team getBreakChainTeam() {
+		return this.breakChainTeam;
 	}
 
 	@Override

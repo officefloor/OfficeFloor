@@ -20,7 +20,6 @@ package net.officefloor.frame.internal.structure;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
-import net.officefloor.frame.impl.execute.function.Promise;
 
 /**
  * <p>
@@ -50,6 +49,20 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	 *         safe on the current {@link Thread}.
 	 */
 	boolean isThreadStateSafe();
+
+	/**
+	 * Creates {@link FunctionState} to execute the chain of the first
+	 * {@link FunctionState} before moving onto execute the chain of the second
+	 * {@link FunctionState}.
+	 * 
+	 * @param function
+	 *            Head of initial {@link FunctionState} chain to complete.
+	 * @param thenFunction
+	 *            Head of the second {@link FunctionState} chain to then
+	 *            complete next.
+	 * @return {@link FunctionState} to execute the chains one after another.
+	 */
+	FunctionState then(FunctionState function, FunctionState thenFunction);
 
 	/**
 	 * Runs the {@link ProcessSafeOperation}.
@@ -133,21 +146,6 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	 * @return <code>true</code> if the {@link Governance} is active.
 	 */
 	boolean isGovernanceActive(int index);
-
-	/**
-	 * <p>
-	 * Obtains the maximum {@link Promise} chain length for this
-	 * {@link ThreadState}.
-	 * <p>
-	 * Once the {@link Promise} chain has reached this length, it will be broken
-	 * to be spawned in another {@link Thread}. This avoids
-	 * {@link StackOverflowError} issues in {@link Promise} chain being too
-	 * large.
-	 * 
-	 * @return Maximum {@link Promise} chain length for this
-	 *         {@link ThreadState}.
-	 */
-	int getMaximumPromiseChainLength();
 
 	/**
 	 * Obtains the {@link FunctionState} to register the {@link ThreadProfiler}.

@@ -26,6 +26,7 @@ import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FunctionContext;
 import net.officefloor.frame.internal.structure.FunctionLogic;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
@@ -136,7 +137,7 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 			if (failure != null) {
 				return new AbstractDelegateFunctionState(function) {
 					@Override
-					public FunctionState execute() throws Throwable {
+					public FunctionState execute(FunctionContext context) throws Throwable {
 						throw failure;
 					}
 				};
@@ -186,7 +187,7 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 		}
 
 		@Override
-		public FunctionState execute() {
+		public FunctionState execute(FunctionContext context) {
 
 			try {
 				// Check on the asset
@@ -254,7 +255,7 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 		}
 
 		@Override
-		public FunctionState execute() {
+		public FunctionState execute(FunctionContext context) {
 
 			// Determine if release is permanent
 			if (AssetLatchImpl.this.isPermanentlyActivate) {
@@ -302,7 +303,7 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 		}
 
 		@Override
-		public FunctionState execute() {
+		public FunctionState execute(FunctionContext context) {
 
 			// Flag if permanent proceeding
 			if (this.isPermanent) {
@@ -367,7 +368,7 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 		}
 
 		@Override
-		public FunctionState execute() {
+		public FunctionState execute(FunctionContext context) {
 
 			// Flag if permanent failure
 			if (this.isPermanent) {
@@ -388,7 +389,7 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 					AssetLatchImpl.this.assetManager.getFunctionLoop()
 							.delegateFunction(new AbstractDelegateFunctionState(entry.function) {
 								@Override
-								public FunctionState execute() throws Throwable {
+								public FunctionState execute(FunctionContext context) throws Throwable {
 									throw FailOperation.this.failure;
 								}
 							});

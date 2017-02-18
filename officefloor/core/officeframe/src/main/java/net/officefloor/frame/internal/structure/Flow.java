@@ -97,11 +97,13 @@ public interface Flow extends LinkedListSetEntry<Flow, ThreadState> {
 	 * Handles the {@link Escalation} from a {@link FunctionState} of this
 	 * {@link Flow}.
 	 * 
+	 * @param context
+	 *            {@link FunctionContext}.
 	 * @param escalation
 	 *            {@link Escalation}.
 	 * @return {@link FunctionState} to handle the {@link Escalation}.
 	 */
-	FunctionState handleEscalation(Throwable escalation);
+	FunctionState handleEscalation(Throwable escalation, FunctionContext context);
 
 	/**
 	 * Obtains the {@link ThreadState} containing this {@link Flow}.

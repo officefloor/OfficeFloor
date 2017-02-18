@@ -63,7 +63,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 	 */
 	public static TestSuite createSuite(Class<? extends AbstractStressTestCase> testClass) {
 		TestSuite suite = new TestSuite();
-				
+
 		// Add no team test
 		suite.addTest(createTestCase(testClass, null, null));
 
@@ -344,6 +344,11 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 	private static final Map<Class<? extends TeamSource>, TeamConstructor> teamConstructors = new HashMap<>();
 
 	/**
+	 * Currently running {@link AbstractStressTestCase}.
+	 */
+	private static volatile AbstractStressTestCase activeTestCase = null;
+
+	/**
 	 * Constructor for a {@link Team}.
 	 */
 	private static interface TeamConstructor {
@@ -383,8 +388,17 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		for (GarbageCollectorMXBean gcBean : ManagementFactory.getGarbageCollectorMXBeans()) {
 			NotificationEmitter emitter = (NotificationEmitter) gcBean;
 			emitter.addNotificationListener((notification, handback) -> {
+
+				// Indicate Garbage collection
 				System.out.println(" -> GC: " + gcBean.getName() + " (" + gcBean.getCollectionTime() + " ms) - "
 						+ notification.getType());
+
+				// Provide heap details for running test
+				AbstractStressTestCase test = activeTestCase;
+				if (test != null) {
+					test.printHeapMemoryDiagnostics();
+				}
+
 			}, null, null);
 		}
 	}
@@ -436,6 +450,9 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 
 	@Override
 	protected void runTest() throws Throwable {
+		
+		// Set as active test
+		activeTestCase = this;
 
 		// Provide verbose output
 		this.setVerbose(true);

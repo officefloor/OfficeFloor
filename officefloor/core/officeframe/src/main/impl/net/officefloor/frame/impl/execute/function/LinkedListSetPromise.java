@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.execute.function;
 
 import java.util.function.Function;
 
+import net.officefloor.frame.internal.structure.FunctionContext;
 import net.officefloor.frame.internal.structure.FunctionLogic;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.LinkedListSet;
@@ -183,11 +184,11 @@ public class LinkedListSetPromise<I, E> extends AbstractDelegateFunctionState {
 	 */
 
 	@Override
-	public FunctionState execute() throws Throwable {
+	public FunctionState execute(FunctionContext context) throws Throwable {
 
 		// Determine if previous chain of functions to complete
 		if (this.previousFunction != null) {
-			FunctionState nextFunction = this.previousFunction.execute();
+			FunctionState nextFunction = this.previousFunction.execute(context);
 			if (nextFunction != null) {
 				// Need to complete previous functions before next item in list
 				return new LinkedListSetPromise<I, E>(nextFunction, this.head, this.headFunction, this.getEntry,
@@ -196,7 +197,7 @@ public class LinkedListSetPromise<I, E> extends AbstractDelegateFunctionState {
 		}
 
 		// Undertake the head function
-		FunctionState nextPreviousFunction = this.headFunction.execute();
+		FunctionState nextPreviousFunction = this.headFunction.execute(context);
 		I nextHead = this.getNext.apply(this.head);
 		if (nextHead == null) {
 			// Nothing further in list, so complete last chain of functions

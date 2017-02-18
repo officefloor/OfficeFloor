@@ -32,7 +32,7 @@ public class CompleteFlowCallback implements FlowCallback {
 	/**
 	 * Indicates if {@link Flow} is complete.
 	 */
-	private boolean isComplate = false;
+	protected boolean isComplete = false;
 
 	/**
 	 * Possible failure of {@link Flow}.
@@ -44,7 +44,7 @@ public class CompleteFlowCallback implements FlowCallback {
 	 */
 	public void assertComplete() throws Exception {
 		this.ensureNoFailure();
-		Assert.assertTrue("Flow should be complete", this.isComplate);
+		Assert.assertTrue("Flow should be complete", this.isComplete);
 	}
 
 	/**
@@ -52,7 +52,7 @@ public class CompleteFlowCallback implements FlowCallback {
 	 */
 	public void assertNotComplete() throws Exception {
 		this.ensureNoFailure();
-		Assert.assertFalse("Flow should not be complete", this.isComplate);
+		Assert.assertFalse("Flow should not be complete", this.isComplete);
 	}
 
 	/**
@@ -70,8 +70,8 @@ public class CompleteFlowCallback implements FlowCallback {
 
 	@Override
 	public void run(Throwable escalation) throws Throwable {
-		Assert.assertFalse("Flow already flagged as complete", this.isComplate);
-		this.isComplate = true;
+		Assert.assertFalse("Flow already flagged as complete", this.isComplete);
+		this.isComplete = true;
 		this.failure = escalation;
 	}
 

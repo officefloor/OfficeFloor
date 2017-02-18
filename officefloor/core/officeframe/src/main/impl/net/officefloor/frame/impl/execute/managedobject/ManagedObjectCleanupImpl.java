@@ -31,6 +31,7 @@ import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEnt
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.FunctionContext;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
@@ -89,7 +90,8 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 		// Clean up the managed object
 		return new CleanupOperation() {
 			@Override
-			public FunctionState execute() {
+			public FunctionState execute(FunctionContext context) {
+
 				// Create the recycle managed object parameter
 				RecycleManagedObjectParameterImpl<ManagedObject> parameter = new RecycleManagedObjectParameterImpl<ManagedObject>(
 						objectType, managedObject, managedObjectPool);
@@ -137,10 +139,10 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 		}
 
 		@Override
-		public FunctionState execute() throws Throwable {
+		public FunctionState execute(FunctionContext context) throws Throwable {
 
 			// Execute the delegate
-			FunctionState next = this.delegate.execute();
+			FunctionState next = this.delegate.execute(context);
 
 			// If same thread state, continue override
 			if (this.delegate.getThreadState() == next.getThreadState()) {
@@ -152,7 +154,7 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 		}
 
 		@Override
-		public FunctionState handleEscalation(Throwable escalation) {
+		public FunctionState handleEscalation(Throwable escalation, FunctionContext context) {
 			// Delegate handle escalation (ultimately by flow callback)
 			ThreadState threadState = this.delegate.getThreadState();
 			return threadState.handleEscalation(escalation);

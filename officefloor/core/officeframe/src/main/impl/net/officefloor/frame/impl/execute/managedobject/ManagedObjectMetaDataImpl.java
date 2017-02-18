@@ -32,6 +32,7 @@ import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEnt
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.FunctionContext;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
@@ -433,11 +434,11 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 		}
 
 		@Override
-		public FunctionState execute() throws Throwable {
+		public FunctionState execute(FunctionContext context) throws Throwable {
 
 			// Undertake check for current function
 			FunctionState currentFunction = this.checkFunctions[this.currentFunctionIndex];
-			FunctionState nextFunction = currentFunction.execute();
+			FunctionState nextFunction = currentFunction.execute(context);
 
 			// Determine if not ready (only single checking)
 			if (!this.readyCheck.isReady) {
