@@ -106,7 +106,7 @@ public class AbstractDelegateFunctionState extends AbstractLinkedListSetEntry<Fu
 
 	@Override
 	public FunctionState execute(FunctionContext context) throws Throwable {
-		return context.executeDelegate(this.delegate);
+		return this.delegate.execute(context);
 	}
 
 	@Override

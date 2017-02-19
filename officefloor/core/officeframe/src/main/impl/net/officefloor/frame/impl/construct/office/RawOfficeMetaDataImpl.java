@@ -293,8 +293,8 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 			threadLocalAwareExecutor = rawOfficeFloorMetaData.getThreadLocalAwareExecutor();
 		}
 
-		// TODO configure the depths and break chain team
-		int maxFunctionChainLength = 100;
+		// TODO configure the max chain depth and break chain team
+		int maxFunctionChainLength = OfficeBuilderImpl.DEFAULT_MAXIMUM_DELEGATE_CHAIN_DEPTH;
 		TeamManagement breakChainTeam = new TeamManagementImpl(new ExecutorCachedTeamSource().createTeam());
 
 		// Create the office details

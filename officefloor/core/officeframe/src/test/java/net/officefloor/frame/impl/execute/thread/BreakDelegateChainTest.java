@@ -20,6 +20,7 @@ package net.officefloor.frame.impl.execute.thread;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFlow;
@@ -43,8 +44,8 @@ public class BreakDelegateChainTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Ensure break the {@link ThreadState} chain.
 	 */
-	public void testBreakThreadStateChain() throws Exception {
-		this.doBreakDelegateChainTest(500, true);
+	public void testDelegateStateChain() throws Exception {
+		this.doBreakDelegateChainTest(OfficeBuilderImpl.DEFAULT_MAXIMUM_DELEGATE_CHAIN_DEPTH + 10, true);
 	}
 
 	/**
@@ -99,7 +100,7 @@ public class BreakDelegateChainTest extends AbstractOfficeConstructTestCase {
 
 		private final AtomicInteger invocationCount = new AtomicInteger(0);
 
-		private final ConcurrentHashMap<String, Integer> threads = new ConcurrentHashMap<>();
+		private final ConcurrentHashMap<String, String> threads = new ConcurrentHashMap<>();
 
 		public TestWork(int maxInvocations) {
 			this.maxInvocations = maxInvocations;
@@ -110,11 +111,8 @@ public class BreakDelegateChainTest extends AbstractOfficeConstructTestCase {
 			// Ensure correct iteration
 			assertEquals("Incorrect iteration", this.invocationCount.incrementAndGet(), iteration.intValue());
 
-			// Ensure include the thread invoking this
-			String threadName = Thread.currentThread().getName();
-			if (this.threads.get(threadName) == null) {
-				this.threads.put(threadName, iteration);
-			}
+			// Capture the thread
+			this.recordThread("delegate-" + iteration);
 
 			// Determine if complete
 			if (iteration.intValue() >= this.maxInvocations) {
@@ -123,7 +121,15 @@ public class BreakDelegateChainTest extends AbstractOfficeConstructTestCase {
 
 			// Delegate again for another delegate depth
 			delegate.doFlow(iteration.intValue() + 1, (escalation) -> {
+				this.recordThread("callback-" + iteration);
 			});
+		}
+
+		private void recordThread(String description) {
+			String threadName = Thread.currentThread().getName();
+			if (this.threads.get(threadName) == null) {
+				this.threads.put(threadName, description);
+			}
 		}
 	}
 

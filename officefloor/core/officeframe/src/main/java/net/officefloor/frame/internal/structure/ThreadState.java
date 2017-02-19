@@ -20,6 +20,8 @@ package net.officefloor.frame.internal.structure;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
+import net.officefloor.frame.api.team.Job;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * <p>
@@ -63,6 +65,31 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	 * @return {@link FunctionState} to execute the chains one after another.
 	 */
 	FunctionState then(FunctionState function, FunctionState thenFunction);
+
+	/**
+	 * <p>
+	 * Obtains the maximum {@link FunctionState} chain length for this
+	 * {@link ThreadState}.
+	 * <p>
+	 * Once the {@link FunctionState} chain has reached this length, it will be
+	 * broken. (spawned in another {@link Thread}). This avoids
+	 * {@link StackOverflowError} issues in {@link FunctionState} chain being
+	 * too large.
+	 * 
+	 * @return Maximum {@link FunctionState} chain length for this
+	 *         {@link ThreadState}.
+	 */
+	int getMaximumFunctionChainLength();
+
+	/**
+	 * Obtains the {@link TeamManagement} to break {@link FunctionState} call
+	 * chains.
+	 * 
+	 * @return {@link TeamManagement} for an active {@link Team}. An active
+	 *         {@link Team} contains {@link Thread} instances that will execute
+	 *         the {@link Job} with a different {@link Thread} stack.
+	 */
+	TeamManagement getBreakChainTeamManagement();
 
 	/**
 	 * Runs the {@link ProcessSafeOperation}.

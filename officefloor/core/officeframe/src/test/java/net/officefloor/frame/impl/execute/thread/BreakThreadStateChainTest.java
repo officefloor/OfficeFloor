@@ -20,6 +20,7 @@ package net.officefloor.frame.impl.execute.thread;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFlow;
@@ -37,14 +38,14 @@ public class BreakThreadStateChainTest extends AbstractOfficeConstructTestCase {
 	 * Ensure the logic works without break chain complexities.
 	 */
 	public void testChainWorksWithoutBreak() throws Exception {
-		this.doBreakThreadStateChainTest(100, false);
+		this.doBreakThreadStateChainTest(50, false);
 	}
 
 	/**
 	 * Ensure break the {@link ThreadState} chain.
 	 */
 	public void testBreakThreadStateChain() throws Exception {
-		this.doBreakThreadStateChainTest(1000, true);
+		this.doBreakThreadStateChainTest(OfficeBuilderImpl.DEFAULT_MAXIMUM_DELEGATE_CHAIN_DEPTH + 10, true);
 	}
 
 	/**
@@ -57,8 +58,6 @@ public class BreakThreadStateChainTest extends AbstractOfficeConstructTestCase {
 	 */
 	private void doBreakThreadStateChainTest(int spawnCount, boolean isBreak) throws Exception {
 
-		fail("TODO implement");
-		
 		// Construct the function
 		TestWork work = new TestWork(spawnCount);
 		ReflectiveFunctionBuilder spawn = this.constructFunction(work, "spawn");
@@ -77,7 +76,7 @@ public class BreakThreadStateChainTest extends AbstractOfficeConstructTestCase {
 		}
 
 		// Wait for completion
-		complete.waitUntilComplete(100);
+		complete.waitUntilComplete(10000);
 
 		// Ensure all thread states spawned
 		assertEquals("Incorrect number of spawned thread states", spawnCount, work.spawnCount.intValue());
@@ -126,7 +125,8 @@ public class BreakThreadStateChainTest extends AbstractOfficeConstructTestCase {
 			// Spawn again for another thread state depth
 			// (Note: no responsible team so current thread will recurse into
 			// thread state to execute it)
-			spawn.doFlow(spawnIteration.intValue() + 1, null);
+			spawn.doFlow(spawnIteration.intValue() + 1, (escalation) -> {
+			});
 		}
 	}
 

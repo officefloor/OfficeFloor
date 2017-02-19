@@ -62,6 +62,11 @@ import net.officefloor.frame.internal.structure.ThreadState;
 public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 
 	/**
+	 * Default maximum delegate chain depth before it is broken.
+	 */
+	public static final int DEFAULT_MAXIMUM_DELEGATE_CHAIN_DEPTH = 1000;
+
+	/**
 	 * Obtains the name with the added namespace.
 	 * 
 	 * @param namespace

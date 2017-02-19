@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.thread;
 
+import java.lang.reflect.Proxy;
 import java.util.logging.Level;
 
 import net.officefloor.frame.api.escalate.Escalation;
@@ -302,6 +303,16 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	@Override
 	public FunctionState then(FunctionState function, FunctionState thenFunction) {
 		return new ThenFunction(function, thenFunction);
+	}
+
+	@Override
+	public int getMaximumFunctionChainLength() {
+		return this.threadMetaData.getMaximumFunctionChainLength();
+	}
+
+	@Override
+	public TeamManagement getBreakChainTeamManagement() {
+		return this.threadMetaData.getBreakChainTeamManagement();
 	}
 
 	@Override
@@ -596,6 +607,12 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		 */
 		private ProxyFunction proxy = null;
 
+		/**
+		 * {@link FunctionState} to continue on completion of the
+		 * {@link ProxyFunction}.
+		 */
+		private FunctionState thenFunction = null;
+
 	}
 
 	/**
@@ -682,6 +699,9 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			ProxyFunction proxy = this.functionChainBreak.proxy;
 			if (proxy != null) {
 
+				// Ensure each recursive thread state chain is continued
+				this.functionChainBreak.thenFunction = Promise.then(this.functionChainBreak.thenFunction, next);
+
 				// Determine if top level thread state loop
 				if (this.previousActiveThreadState == null) {
 
@@ -689,9 +709,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 					proxy.thenFunction = next;
 
 					// Create the break function
-					TeamManagement breakTeam = ((ThreadStateImpl) this.threadState).threadMetaData
-							.getBreakChainTeamManagement();
-					BreakFunction breakFunction = new BreakFunction(proxy, breakTeam);
+					BreakFunction breakFunction = new BreakFunction(proxy, this.functionChainBreak.thenFunction);
 
 					// Break off the proxy delegate function
 					FunctionLoop loop = this.threadState.getProcessState().getFunctionLoop();
@@ -722,8 +740,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			this.currentStackDepth++;
 
 			// Determine if max depth reached
-			if (this.currentStackDepth > ((ThreadStateImpl) this.threadState).threadMetaData
-					.getMaximumFunctionChainLength()) {
+			if (this.currentStackDepth > this.threadState.getMaximumFunctionChainLength()) {
 
 				// Proxy the delegate function to break
 				ProxyFunction proxy = new ProxyFunction(delegate);
@@ -871,10 +888,9 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		private final ProxyFunction proxy;
 
 		/**
-		 * {@link TeamManagement} with active {@link Thread} instances to break
-		 * the {@link FunctionState} chain.
+		 * {@link FunctionState} to continue after {@link Proxy} chain complete.
 		 */
-		private final TeamManagement breakTeam;
+		private final FunctionState thenFunction;
 
 		/**
 		 * Instantiate.
@@ -883,14 +899,11 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		 *            {@link ProxyFunction} to have its actual
 		 *            {@link FunctionState} broken away from the execution
 		 *            chain.
-		 * @param breakTeam
-		 *            {@link TeamManagement} with active {@link Thread}
-		 *            instances to break the {@link FunctionState} chain.
 		 */
-		private BreakFunction(ProxyFunction proxy, TeamManagement breakTeam) {
+		private BreakFunction(ProxyFunction proxy, FunctionState thenFunction) {
 			super(proxy.getDelegate());
 			this.proxy = proxy;
-			this.breakTeam = breakTeam;
+			this.thenFunction = thenFunction;
 		}
 
 		/*
@@ -900,15 +913,14 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		@Override
 		public TeamManagement getResponsibleTeam() {
 			// Break team responsible, so delegation to active thread
-			return this.breakTeam;
+			return this.proxy.getThreadState().getBreakChainTeamManagement();
 		}
 
 		@Override
 		public FunctionState execute(FunctionContext context) throws Throwable {
 
-			// Once delegate chain completes, carry on chain with proxy
-			return new ThenFunction(this.delegate, new AbstractDelegateFunctionState(this.proxy.thenFunction) {
-
+			// Create function to continue then function
+			FunctionState thenFunction = new AbstractDelegateFunctionState(this.thenFunction) {
 				@Override
 				public FunctionState execute(FunctionContext context) throws Throwable {
 
@@ -918,7 +930,10 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 					// Continue executing the proxy then function
 					return super.execute(context);
 				}
-			});
+			};
+
+			// Once delegate chain completes, carry on chain
+			return new ThenFunction(this.delegate, thenFunction);
 		}
 	}
 
