@@ -23,6 +23,7 @@ import java.util.function.Supplier;
 import net.officefloor.frame.impl.execute.job.FunctionLoopImpl;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.office.OfficeManagerProcessState;
+import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetLatch;
@@ -58,7 +59,7 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 	 * {@link ProcessState}.
 	 */
 	private final ProcessState processState = new OfficeManagerProcessState(this.clock, 1000,
-			new ExecutorCachedTeamSource().createTeam(), this.loop);
+			new TeamManagementImpl(new ExecutorCachedTeamSource().createTeam()), this.loop);
 
 	/**
 	 * {@link AssetManager}.

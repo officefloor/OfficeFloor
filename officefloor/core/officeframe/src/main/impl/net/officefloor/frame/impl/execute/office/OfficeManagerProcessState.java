@@ -17,7 +17,6 @@
  */
 package net.officefloor.frame.impl.execute.office;
 
-import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
@@ -33,6 +32,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 
@@ -65,18 +65,18 @@ public class OfficeManagerProcessState implements ProcessState {
 	 *            {@link OfficeClock}.
 	 * @param maximumPromiseChainLength
 	 *            Maximum {@link Promise} chain length.
-	 * @param breakChainTeam
-	 *            Break chain {@link Team}.
+	 * @param breakChainTeamManagement
+	 *            Break chain {@link TeamManagement}.
 	 * @param functionLoop
 	 *            {@link FunctionLoop}.
 	 */
-	public OfficeManagerProcessState(OfficeClock officeClock, int maximumPromiseChainLength, Team breakChainTeam,
-			FunctionLoop functionLoop) {
+	public OfficeManagerProcessState(OfficeClock officeClock, int maximumPromiseChainLength,
+			TeamManagement breakChainTeamManagement, FunctionLoop functionLoop) {
 		this.functionLoop = functionLoop;
 
 		// Create the meta-data for the process and its main thread state
 		this.threadMetaData = new ThreadMetaDataImpl(new ManagedObjectMetaData[0], new GovernanceMetaData[0],
-				maximumPromiseChainLength, breakChainTeam, new EscalationProcedureImpl(), null);
+				maximumPromiseChainLength, breakChainTeamManagement, new EscalationProcedureImpl(), null);
 
 		// Create the main thread state
 		// Note: purpose of this to enable synchronising changes to office

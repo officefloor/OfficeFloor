@@ -27,47 +27,45 @@ import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 import net.officefloor.frame.test.SafeCompleteFlowCallback;
 
 /**
- * Ensure breaks the {@link ThreadState} recursive chain.
+ * Ensure breaks the delegate chain.
  *
  * @author Daniel Sagenschneider
  */
-public class BreakThreadStateChainTest extends AbstractOfficeConstructTestCase {
+public class BreakDelegateChainTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Ensure the logic works without break chain complexities.
 	 */
 	public void testChainWorksWithoutBreak() throws Exception {
-		this.doBreakThreadStateChainTest(100, false);
+		this.doBreakDelegateChainTest(50, false);
 	}
 
 	/**
 	 * Ensure break the {@link ThreadState} chain.
 	 */
 	public void testBreakThreadStateChain() throws Exception {
-		this.doBreakThreadStateChainTest(1000, true);
+		this.doBreakDelegateChainTest(500, true);
 	}
 
 	/**
 	 * Undertakes the test.
 	 * 
-	 * @param spawnCount
-	 *            Number of {@link ThreadState} instances to spawn.
+	 * @param delegateCount
+	 *            Number of delegates to invoke.
 	 * @param isBreak
 	 *            Indicates if should break the chain.
 	 */
-	private void doBreakThreadStateChainTest(int spawnCount, boolean isBreak) throws Exception {
+	private void doBreakDelegateChainTest(int delegateCount, boolean isBreak) throws Exception {
 
-		fail("TODO implement");
-		
 		// Construct the function
-		TestWork work = new TestWork(spawnCount);
-		ReflectiveFunctionBuilder spawn = this.constructFunction(work, "spawn");
-		spawn.buildParameter();
-		spawn.buildFlow("spawn", Integer.class, true);
+		TestWork work = new TestWork(delegateCount);
+		ReflectiveFunctionBuilder delegate = this.constructFunction(work, "delegate");
+		delegate.buildParameter();
+		delegate.buildFlow("delegate", Integer.class, false);
 
 		// Invoke the recurse thread state chain
 		SafeCompleteFlowCallback complete = new SafeCompleteFlowCallback();
-		this.triggerFunction("spawn", 1, complete);
+		this.triggerFunction("delegate", 1, complete);
 
 		// Should break chain, so return but not complete
 		if (isBreak) {
@@ -79,14 +77,14 @@ public class BreakThreadStateChainTest extends AbstractOfficeConstructTestCase {
 		// Wait for completion
 		complete.waitUntilComplete(100);
 
-		// Ensure all thread states spawned
-		assertEquals("Incorrect number of spawned thread states", spawnCount, work.spawnCount.intValue());
+		// Ensure all delegates invoked
+		assertEquals("Incorrect number of invoked delegates", delegateCount, work.invocationCount.intValue());
 
 		// Ensure more than one thread involved in execution
 		int threadsUsedCount = work.threads.keySet().size();
 		if (isBreak) {
-			assertTrue("Ensure more than one thread used (as broken to another thread): " + threadsUsedCount + " used",
-					threadsUsedCount > 1);
+			assertTrue("Ensure more than one thread used (as broken to another thread) - " + threadsUsedCount
+					+ " used: " + work.threads, threadsUsedCount > 1);
 		} else {
 			assertEquals("No break, so only the one thread used: " + threadsUsedCount + " used", 1, threadsUsedCount);
 		}
@@ -97,36 +95,35 @@ public class BreakThreadStateChainTest extends AbstractOfficeConstructTestCase {
 	 */
 	public class TestWork {
 
-		private final int maxSpawns;
+		private final int maxInvocations;
 
-		private final AtomicInteger spawnCount = new AtomicInteger(0);
+		private final AtomicInteger invocationCount = new AtomicInteger(0);
 
 		private final ConcurrentHashMap<String, Integer> threads = new ConcurrentHashMap<>();
 
-		public TestWork(int maxSpawns) {
-			this.maxSpawns = maxSpawns;
+		public TestWork(int maxInvocations) {
+			this.maxInvocations = maxInvocations;
 		}
 
-		public void spawn(Integer spawnIteration, ReflectiveFlow spawn) {
+		public void delegate(Integer iteration, ReflectiveFlow delegate) {
 
-			// Ensure correct spawn iteration
-			assertEquals("Incorrect spawn iteration", this.spawnCount.incrementAndGet(), spawnIteration.intValue());
+			// Ensure correct iteration
+			assertEquals("Incorrect iteration", this.invocationCount.incrementAndGet(), iteration.intValue());
 
 			// Ensure include the thread invoking this
 			String threadName = Thread.currentThread().getName();
 			if (this.threads.get(threadName) == null) {
-				this.threads.put(threadName, spawnIteration);
+				this.threads.put(threadName, iteration);
 			}
 
 			// Determine if complete
-			if (spawnIteration.intValue() >= this.maxSpawns) {
+			if (iteration.intValue() >= this.maxInvocations) {
 				return;
 			}
 
-			// Spawn again for another thread state depth
-			// (Note: no responsible team so current thread will recurse into
-			// thread state to execute it)
-			spawn.doFlow(spawnIteration.intValue() + 1, null);
+			// Delegate again for another delegate depth
+			delegate.doFlow(iteration.intValue() + 1, (escalation) -> {
+			});
 		}
 	}
 

@@ -78,6 +78,13 @@ public interface ProcessState {
 	FunctionState threadComplete(ThreadState thread);
 
 	/**
+	 * Obtains the {@link FunctionLoop} for the {@link ProcessState}.
+	 * 
+	 * @return {@link FunctionLoop} for the {@link ProcessState}.
+	 */
+	FunctionLoop getFunctionLoop();
+
+	/**
 	 * Obtains the {@link ManagedObjectContainer} for the input index.
 	 * 
 	 * @param index
@@ -92,12 +99,5 @@ public interface ProcessState {
 	 * @return {@link ManagedObjectCleanup} for this {@link ProcessState}.
 	 */
 	ManagedObjectCleanup getManagedObjectCleanup();
-
-	/**
-	 * Obtains the {@link FunctionLoop} for this {@link ProcessState}.
-	 * 
-	 * @return {@link FunctionLoop} for this {@link ProcessState}.
-	 */
-	FunctionLoop getFunctionLoop();
 
 }
