@@ -50,6 +50,7 @@ import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.structure.EscalationFlow;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -60,11 +61,6 @@ import net.officefloor.frame.internal.structure.ThreadState;
  * @author Daniel Sagenschneider
  */
 public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
-
-	/**
-	 * Default maximum delegate chain depth before it is broken.
-	 */
-	public static final int DEFAULT_MAXIMUM_DELEGATE_CHAIN_DEPTH = 1000;
 
 	/**
 	 * Obtains the name with the added namespace.
@@ -165,6 +161,14 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	private long monitorOfficeInterval = 1000;
 
 	/**
+	 * <p>
+	 * Maximum {@link FunctionState} chain depth before it is broken.
+	 * <p>
+	 * Default set high enough to effectively have no breaking.
+	 */
+	private int maximumFunctionStateChainLength = Integer.MAX_VALUE;
+
+	/**
 	 * {@link Profiler}.
 	 */
 	private Profiler profiler = null;
@@ -191,6 +195,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	@Override
 	public void setMonitorOfficeInterval(long monitorOfficeInterval) {
 		this.monitorOfficeInterval = monitorOfficeInterval;
+	}
+
+	@Override
+	public void setMaximumFunctionStateChainLength(int maximumFunctionStateChainLength) {
+		this.maximumFunctionStateChainLength = maximumFunctionStateChainLength;
 	}
 
 	@Override
@@ -297,6 +306,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	@Override
 	public long getMonitorOfficeInterval() {
 		return this.monitorOfficeInterval;
+	}
+
+	@Override
+	public int getMaximumFunctionStateChainLength() {
+		return this.maximumFunctionStateChainLength;
 	}
 
 	@Override

@@ -29,6 +29,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.structure.EscalationFlow;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -67,6 +68,22 @@ public interface OfficeBuilder {
 	 *            {@link OfficeManager} monitors the {@link Office}.
 	 */
 	void setMonitorOfficeInterval(long monitorOfficeInterval);
+
+	/**
+	 * <p>
+	 * Specifies the maximum {@link FunctionState} chain length.
+	 * <p>
+	 * This value is a trade off between limiting {@link Thread} stack calls and
+	 * performance. Setting this value low runs the risk of
+	 * {@link StackOverflowError} occurring in having recursively call into the
+	 * {@link FunctionState} chain. Setting this value high, has more
+	 * {@link Thread} overheads in breaking the recursive chain, slowing
+	 * performance.
+	 * 
+	 * @param maximumFunctionStateChainLength
+	 *            Maximum {@link FunctionState} chain length.
+	 */
+	void setMaximumFunctionStateChainLength(int maximumFunctionStateChainLength);
 
 	/**
 	 * Registers a {@link Team} which will execute {@link ManagedFunction}

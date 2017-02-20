@@ -75,6 +75,7 @@ import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLoop;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
@@ -234,6 +235,17 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 			return null; // can not continue
 		}
 
+		// Obtain the maximum function state chain length
+		int maxFunctionChainLength = configuration.getMaximumFunctionStateChainLength();
+		if (maxFunctionChainLength <= 0) {
+			issues.addIssue(AssetType.OFFICE, officeName,
+					"Maximum " + FunctionState.class.getSimpleName() + " chain length must be positive");
+			return null; // can not continue
+		}
+
+		// TODO configure the break chain team
+		TeamManagement breakChainTeam = new TeamManagementImpl(new ExecutorCachedTeamSource().createTeam());
+
 		// Enhance the office
 		OfficeEnhancerContextImpl.enhanceOffice(officeName, configuration, issues);
 
@@ -292,10 +304,6 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 		if (isRequireThreadLocalAwareness) {
 			threadLocalAwareExecutor = rawOfficeFloorMetaData.getThreadLocalAwareExecutor();
 		}
-
-		// TODO configure the max chain depth and break chain team
-		int maxFunctionChainLength = OfficeBuilderImpl.DEFAULT_MAXIMUM_DELEGATE_CHAIN_DEPTH;
-		TeamManagement breakChainTeam = new TeamManagementImpl(new ExecutorCachedTeamSource().createTeam());
 
 		// Create the office details
 		OfficeClockImpl officeClockImpl = null;

@@ -603,6 +603,12 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	private static class FunctionChainBreak {
 
 		/**
+		 * Flag indicating a {@link ProxyFunction} is being invoked in
+		 * {@link FunctionState} chain.
+		 */
+		private boolean isProxy = false;
+
+		/**
 		 * Activated {@link ProxyFunction}.
 		 */
 		private ProxyFunction proxy = null;
@@ -697,13 +703,23 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 			// Determine if proxy within chain
 			ProxyFunction proxy = this.functionChainBreak.proxy;
-			if (proxy != null) {
+			boolean isProxy = this.functionChainBreak.isProxy;
+			if (isProxy || (proxy != null)) {
 
 				// Ensure each recursive thread state chain is continued
 				this.functionChainBreak.thenFunction = Promise.then(this.functionChainBreak.thenFunction, next);
 
-				// Determine if top level thread state loop
-				if (this.previousActiveThreadState == null) {
+				// Determine if run proxy
+				if (isProxy) {
+
+					// Already broken off, so wait
+					if (this.functionChainBreak.thenFunction != null) {
+						throw new IllegalStateException(
+								"Should not have recursive thread states on running wait proxy");
+					}
+					return null;
+
+				} else if (this.previousActiveThreadState == null) {
 
 					// Top level next is then function for proxy break chain
 					proxy.thenFunction = next;
@@ -864,11 +880,11 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 				// Chain not complete, so continue to proxy
 				ActiveThreadState activeThreadState = (ActiveThreadState) context;
-				if (activeThreadState.functionChainBreak.proxy != null) {
+				if (activeThreadState.functionChainBreak.isProxy) {
 					throw new IllegalStateException("Should only proxy once in function state execution chain");
 				}
-				activeThreadState.functionChainBreak.proxy = this;
-				return this;
+				activeThreadState.functionChainBreak.isProxy = true;
+				return this; // continue to proxy
 			}
 
 			// Chain complete, so continue with then function

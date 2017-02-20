@@ -31,6 +31,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.structure.Asset;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -66,6 +67,13 @@ public interface OfficeConfiguration {
 	 *         {@link OfficeManager} monitors the {@link Office}.
 	 */
 	long getMonitorOfficeInterval();
+
+	/**
+	 * Obtains the maximum {@link FunctionState} chain length.
+	 * 
+	 * @return Maximum {@link FunctionState} chain length.
+	 */
+	int getMaximumFunctionStateChainLength();
 
 	/**
 	 * Obtains the default {@link Team} name for the {@link Office}.

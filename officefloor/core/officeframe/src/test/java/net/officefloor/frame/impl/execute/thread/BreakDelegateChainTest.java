@@ -20,7 +20,6 @@ package net.officefloor.frame.impl.execute.thread;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFlow;
@@ -38,6 +37,7 @@ public class BreakDelegateChainTest extends AbstractOfficeConstructTestCase {
 	 * Ensure the logic works without break chain complexities.
 	 */
 	public void testChainWorksWithoutBreak() throws Exception {
+		this.getOfficeBuilder().setMaximumFunctionStateChainLength(1000);
 		this.doBreakDelegateChainTest(50, false);
 	}
 
@@ -45,7 +45,16 @@ public class BreakDelegateChainTest extends AbstractOfficeConstructTestCase {
 	 * Ensure break the {@link ThreadState} chain.
 	 */
 	public void testDelegateStateChain() throws Exception {
-		this.doBreakDelegateChainTest(OfficeBuilderImpl.DEFAULT_MAXIMUM_DELEGATE_CHAIN_DEPTH + 10, true);
+		this.getOfficeBuilder().setMaximumFunctionStateChainLength(10);
+		this.doBreakDelegateChainTest(20, true);
+	}
+
+	/**
+	 * Ensure break the {@link ThreadState} chain multiple times.
+	 */
+	public void testDelegateStateChainMultipleTimes() throws Exception {
+		this.getOfficeBuilder().setMaximumFunctionStateChainLength(10);
+		this.doBreakDelegateChainTest(60, true);
 	}
 
 	/**
@@ -76,7 +85,7 @@ public class BreakDelegateChainTest extends AbstractOfficeConstructTestCase {
 		}
 
 		// Wait for completion
-		complete.waitUntilComplete(100);
+		complete.waitUntilComplete(10000);
 
 		// Ensure all delegates invoked
 		assertEquals("Incorrect number of invoked delegates", delegateCount, work.invocationCount.intValue());

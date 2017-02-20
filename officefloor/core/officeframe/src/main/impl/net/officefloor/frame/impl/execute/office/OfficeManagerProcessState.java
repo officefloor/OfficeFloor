@@ -63,20 +63,20 @@ public class OfficeManagerProcessState implements ProcessState {
 	 * 
 	 * @param officeClock
 	 *            {@link OfficeClock}.
-	 * @param maximumPromiseChainLength
+	 * @param maximumFunctionChainLength
 	 *            Maximum {@link Promise} chain length.
 	 * @param breakChainTeamManagement
 	 *            Break chain {@link TeamManagement}.
 	 * @param functionLoop
 	 *            {@link FunctionLoop}.
 	 */
-	public OfficeManagerProcessState(OfficeClock officeClock, int maximumPromiseChainLength,
+	public OfficeManagerProcessState(OfficeClock officeClock, int maximumFunctionChainLength,
 			TeamManagement breakChainTeamManagement, FunctionLoop functionLoop) {
 		this.functionLoop = functionLoop;
 
 		// Create the meta-data for the process and its main thread state
 		this.threadMetaData = new ThreadMetaDataImpl(new ManagedObjectMetaData[0], new GovernanceMetaData[0],
-				maximumPromiseChainLength, breakChainTeamManagement, new EscalationProcedureImpl(), null);
+				maximumFunctionChainLength, breakChainTeamManagement, new EscalationProcedureImpl(), null);
 
 		// Create the main thread state
 		// Note: purpose of this to enable synchronising changes to office

@@ -217,6 +217,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record providing profiler
 		this.recordReturn(this.configuration, this.configuration.getOfficeName(), OFFICE_NAME);
 		this.recordReturn(this.configuration, this.configuration.getMonitorOfficeInterval(), 1000);
+		this.recordReturn(this.configuration, this.configuration.getMaximumFunctionStateChainLength(), 10000);
 		this.recordReturn(this.configuration, this.configuration.getOfficeEnhancers(), new OfficeEnhancer[0]);
 		this.record_teams();
 		this.recordReturn(this.configuration, this.configuration.getOfficeClock(), clock);
@@ -277,6 +278,23 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure issue if non-positivie functionst monitor {@link Office} interval.
+	 */
+	public void testNonPositiiveMaximumFunctionStateChainLength() {
+
+		// Record non-positive monitor office interval
+		this.recordReturn(this.configuration, this.configuration.getOfficeName(), OFFICE_NAME);
+		this.recordReturn(this.configuration, this.configuration.getMonitorOfficeInterval(), 1000);
+		this.recordReturn(this.configuration, this.configuration.getMaximumFunctionStateChainLength(), 0);
+		this.record_issue("Maximum FunctionState chain length must be positive");
+
+		// Construct the office
+		this.replayMockObjects();
+		this.constructRawOfficeMetaData(false);
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensure issue if fail to enhance office.
 	 */
 	public void testFailOfficeEnhancing() {
@@ -286,6 +304,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record failing to enhance office
 		this.recordReturn(this.configuration, this.configuration.getOfficeName(), OFFICE_NAME);
 		this.recordReturn(this.configuration, this.configuration.getMonitorOfficeInterval(), 1000);
+		this.recordReturn(this.configuration, this.configuration.getMaximumFunctionStateChainLength(), 1000);
 		this.recordReturn(this.configuration, this.configuration.getOfficeEnhancers(),
 				new OfficeEnhancer[] { this.officeEnhancer });
 		this.officeEnhancer.enhanceOffice(null);
@@ -324,6 +343,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record attempting to enhance office
 		this.recordReturn(this.configuration, this.configuration.getOfficeName(), OFFICE_NAME);
 		this.recordReturn(this.configuration, this.configuration.getMonitorOfficeInterval(), 1000);
+		this.recordReturn(this.configuration, this.configuration.getMaximumFunctionStateChainLength(), 1000);
 		this.recordReturn(this.configuration, this.configuration.getOfficeEnhancers(),
 				new OfficeEnhancer[] { enhancer });
 		this.recordReturn(this.configuration, this.configuration.getFlowBuilder(null, "TASK"), null);
@@ -361,6 +381,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record attempting to enhance office
 		this.recordReturn(this.configuration, this.configuration.getOfficeName(), OFFICE_NAME);
 		this.recordReturn(this.configuration, this.configuration.getMonitorOfficeInterval(), 1000);
+		this.recordReturn(this.configuration, this.configuration.getMaximumFunctionStateChainLength(), 1000);
 		this.recordReturn(this.configuration, this.configuration.getOfficeEnhancers(),
 				new OfficeEnhancer[] { enhancer });
 		this.recordReturn(this.configuration, this.configuration.getFlowBuilder("MANAGED_OBJECT", "TASK"), null);
@@ -400,6 +421,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record attempting to enhance office
 		this.recordReturn(this.configuration, this.configuration.getOfficeName(), OFFICE_NAME);
 		this.recordReturn(this.configuration, this.configuration.getMonitorOfficeInterval(), 1000);
+		this.recordReturn(this.configuration, this.configuration.getMaximumFunctionStateChainLength(), 1000);
 		this.recordReturn(this.configuration, this.configuration.getOfficeEnhancers(),
 				new OfficeEnhancer[] { enhancer });
 		this.recordReturn(this.configuration, this.configuration.getFlowBuilder("MANAGED_OBJECT", "TASK"), flowBuilder);
@@ -1332,6 +1354,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	private void record_enhanceOffice() {
 		this.recordReturn(this.configuration, this.configuration.getOfficeName(), OFFICE_NAME);
 		this.recordReturn(this.configuration, this.configuration.getMonitorOfficeInterval(), 1000);
+		this.recordReturn(this.configuration, this.configuration.getMaximumFunctionStateChainLength(), 1000);
 		this.recordReturn(this.configuration, this.configuration.getOfficeEnhancers(), new OfficeEnhancer[0]);
 	}
 
