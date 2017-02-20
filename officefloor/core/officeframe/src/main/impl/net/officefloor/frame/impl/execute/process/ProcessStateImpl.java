@@ -255,6 +255,12 @@ public class ProcessStateImpl implements ProcessState {
 			}
 
 			@Override
+			public boolean isRequireThreadStateSafety() {
+				// Only requires thread safety if not main thread
+				return (thread != ProcessStateImpl.this.mainThreadState);
+			}
+
+			@Override
 			public FunctionState execute(FunctionContext context) throws Throwable {
 
 				// Easy access to process state
@@ -323,7 +329,14 @@ public class ProcessStateImpl implements ProcessState {
 			implements FunctionState {
 
 		@Override
+		public boolean isRequireThreadStateSafety() {
+			// Must be safe on main thread state
+			return true;
+		}
+
+		@Override
 		public ThreadState getThreadState() {
+			// All process operations down on main thread state
 			return ProcessStateImpl.this.mainThreadState;
 		}
 	}

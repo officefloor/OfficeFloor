@@ -60,19 +60,20 @@ public class ThreadLocalAwareExecutorImpl implements ThreadLocalAwareExecutor {
 		Thread currentThread = Thread.currentThread();
 		JobQueueExecutor executor = this.threadToExecutor.get(currentThread);
 		boolean isWaitOnComplete;
-		if (executor != null) {
+		if (executor == null) {
 
-			// Already registered executor for thread
-			executor.registerProcess(process);
-			processToExecutor.put(process.getProcessIdentifier(), executor);
-			isWaitOnComplete = false;
-
-		} else {
 			// First process for the thread
 			executor = new JobQueueExecutor(currentThread, process);
 			this.threadToExecutor.put(currentThread, executor);
 			this.processToExecutor.put(process.getProcessIdentifier(), executor);
 			isWaitOnComplete = true;
+
+		} else {
+			
+			// Already registered executor for thread
+			executor.registerProcess(process);
+			processToExecutor.put(process.getProcessIdentifier(), executor);
+			isWaitOnComplete = false;
 		}
 
 		// Undertake the function within context

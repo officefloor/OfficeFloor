@@ -106,6 +106,16 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 	}
 
 	/**
+	 * Overrides the iteration count for a particular {@link TeamSource}.
+	 * 
+	 * @param overrides
+	 *            Overrides.
+	 */
+	protected void overrideIterationCount(Map<Class<? extends TeamSource>, Integer> overrides) {
+		// No overrides
+	}
+
+	/**
 	 * Maximum wait time for the {@link Test} to complete in seconds.
 	 * 
 	 * @return Wait time in seconds for completion of {@link Test}.
@@ -168,6 +178,12 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		 * Optional validation.
 		 */
 		private Runnable validation;
+
+		/**
+		 * {@link TeamSource} {@link Class} to only run. <code>null</code>
+		 * indicates to run all {@link TeamSource} types.
+		 */
+		private Class<? extends TeamSource> onlyTeamClass = null;
 
 		/**
 		 * Instantiate.
@@ -263,6 +279,16 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		 */
 		public void setValidation(Runnable validation) {
 			this.validation = validation;
+		}
+
+		/**
+		 * Specifies to run only the {@link TeamSource}.
+		 * 
+		 * @param teamSourceClass
+		 *            Only {@link TeamSource}.
+		 */
+		public void setOnly(Class<? extends TeamSource> teamSourceClass) {
+			this.onlyTeamClass = teamSourceClass;
 		}
 
 		/**
@@ -424,11 +450,22 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 			// Load values for testing
 			test.teamName = (teamSourceClass != null ? teamSourceClass.getSimpleName() : null);
 
+			// Obtain the iteration count
+			Map<Class<? extends TeamSource>, Integer> iterationCountOverrides = new HashMap<>();
+			test.overrideIterationCount(iterationCountOverrides);
+			Integer iterationCount = iterationCountOverrides.get(teamSourceClass);
+			if (iterationCount == null) {
+				// No override, so use default
+				iterationCount = test.getIterationCount();
+			}
+
 			// Set the name for the test
-			test.setName(test.teamName + "_i" + test.getIterationCount());
+			test.setName(test.teamName + "_i" + iterationCount);
 
 			// Specify details
+			test.teamSourceClass = teamSourceClass;
 			test.teamConstructor = teamConstructor;
+			test.iterationCount = iterationCount;
 
 			// Return the test
 			return test;
@@ -444,13 +481,23 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 	private String teamName;
 
 	/**
+	 * {@link TeamSource} {@link Class}.
+	 */
+	private Class<? extends TeamSource> teamSourceClass;
+
+	/**
 	 * {@link TeamConstructor}.
 	 */
 	private TeamConstructor teamConstructor;
 
+	/**
+	 * Iteration count.
+	 */
+	private int iterationCount;
+
 	@Override
 	protected void runTest() throws Throwable {
-		
+
 		// Set as active test
 		activeTestCase = this;
 
@@ -466,9 +513,15 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		}
 
 		// Construct the test
-		StressContext context = new StressContext(this, this.teamName, this.getIterationCount());
+		StressContext context = new StressContext(this, this.teamName, this.iterationCount);
 		this.constructTest(context);
 		assertNotNull("Must configure initial function name", context.initialFunctionName);
+
+		// Determine if running the type
+		if (context.onlyTeamClass != null) {
+			assertEquals("Only running " + context.onlyTeamClass.getSimpleName(), context.onlyTeamClass,
+					this.teamSourceClass);
+		}
 
 		// Capture construction time
 		String constructionTime = this.getDisplayRunTime(startTimestamp);
@@ -480,7 +533,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		String executionTime = this.getDisplayRunTime(startTimestamp, endTimestamp);
 
 		// Obtain the effective run time
-		float effectiveRunTime = (float) (endTimestamp - startTimestamp) / this.getIterationCount();
+		float effectiveRunTime = (float) (endTimestamp - startTimestamp) / this.iterationCount;
 		DecimalFormat formatter = new DecimalFormat();
 		formatter.setMinimumFractionDigits(5);
 		String effectiveRunTimeText = formatter.format(effectiveRunTime);
@@ -491,7 +544,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		}
 
 		// Ensure appropriate number of iterations undertaken
-		assertEquals("Incorrect number of iterations", this.getIterationCount(), context.iterations.get());
+		assertEquals("Incorrect number of iterations", this.iterationCount, context.iterations.get());
 
 		// Indicate details of run
 		this.printMessage("Construct: " + constructionTime);

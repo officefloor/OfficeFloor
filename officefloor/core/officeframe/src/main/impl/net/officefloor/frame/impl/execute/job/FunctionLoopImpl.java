@@ -155,6 +155,16 @@ public class FunctionLoopImpl implements FunctionLoop {
 					nextFunction = context.executeFunction(nextFunction);
 
 				} catch (Throwable ex) {
+
+					// Provide debug level logging of escalation
+					if (LOGGER.isLoggable(Level.FINEST)) {
+						LOGGER.log(Level.FINEST,
+								"ESCALTION: " + nextFunction.toString() + " (TS:"
+										+ Integer.toHexString(threadState.hashCode()) + ", T:"
+										+ Thread.currentThread().getName() + ")",
+								ex);
+					}
+
 					// Handle escalation
 					nextFunction = context.handleEscalation(nextFunction, ex);
 				}

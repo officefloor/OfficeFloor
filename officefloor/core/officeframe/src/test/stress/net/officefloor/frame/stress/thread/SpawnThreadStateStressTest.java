@@ -17,8 +17,12 @@
  */
 package net.officefloor.frame.stress.thread;
 
+import java.util.Map;
+
 import junit.framework.TestSuite;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.impl.spi.team.ThreadLocalAwareTeamSource;
 import net.officefloor.frame.stress.AbstractStressTestCase;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
@@ -36,7 +40,12 @@ public class SpawnThreadStateStressTest extends AbstractStressTestCase {
 
 	@Override
 	protected int getIterationCount() {
-		return 10000;
+		return 100000;
+	}
+
+	@Override
+	protected void overrideIterationCount(Map<Class<? extends TeamSource>, Integer> overrides) {
+		overrides.put(ThreadLocalAwareTeamSource.class, 100);
 	}
 
 	@Override
@@ -44,7 +53,7 @@ public class SpawnThreadStateStressTest extends AbstractStressTestCase {
 
 		// Break chain (to avoid stack overflow)
 		this.getOfficeBuilder().setMaximumFunctionStateChainLength(1000);
-		
+
 		// Construct functions
 		TestWork work = new TestWork(context);
 		ReflectiveFunctionBuilder trigger = this.constructFunction(work, "trigger");

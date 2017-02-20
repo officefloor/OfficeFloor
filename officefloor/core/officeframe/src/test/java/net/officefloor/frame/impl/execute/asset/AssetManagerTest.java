@@ -274,7 +274,7 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 		/**
 		 * {@link ThreadState}.
 		 */
-		private final ThreadState threadState = AssetManagerTest.this.createMock(ThreadState.class);
+		private final ThreadState threadState = AssetManagerTest.this.processState.getMainThreadState();
 
 		/**
 		 * {@link Consumer} to check on the {@link Asset}.
@@ -304,7 +304,7 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 		/**
 		 * {@link ThreadState}.
 		 */
-		private final ThreadState threadState = AssetManagerTest.this.createMock(ThreadState.class);
+		private final ThreadState threadState = AssetManagerTest.this.processState.getMainThreadState();
 
 		/**
 		 * Indicates if executed.
