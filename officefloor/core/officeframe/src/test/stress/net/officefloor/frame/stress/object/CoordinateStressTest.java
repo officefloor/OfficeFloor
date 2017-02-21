@@ -15,8 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.stress.fixup;
+package net.officefloor.frame.stress.object;
 
+import junit.framework.TestSuite;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.None;
@@ -33,12 +34,10 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuild
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
-import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
+import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
-import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.stress.AbstractStressTestCase;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 
@@ -47,67 +46,21 @@ import net.officefloor.frame.test.ReflectiveFunctionBuilder;
  * 
  * @author Daniel Sagenschneider
  */
-public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
+public class CoordinateStressTest extends AbstractStressTestCase {
 
-	/**
-	 * Ensures no issues arising in stress coordination with a
-	 * {@link OnePersonTeam}.
-	 */
-	@StressTest
-	public void test_StressCoordination_OnePersonTeam() throws Exception {
-		this.doTest(new OnePersonTeam("TEST", 100));
+	public static TestSuite suite() {
+		return createSuite(CoordinateStressTest.class);
 	}
 
-	/**
-	 * Ensures no issues arising in stress coordination with a
-	 * {@link LeaderFollowerTeam}.
-	 */
-	@StressTest
-	public void test_StressCoordination_LeaderFollowerTeam() throws Exception {
-		this.doTest(new LeaderFollowerTeam("TEST", 3, 100));
-	}
+	@Override
+	protected void constructTest(StressContext context) throws Exception {
 
-	/**
-	 * Ensures no issues arising in stress coordination with a
-	 * {@link ExecutorFixedTeamSource}.
-	 */
-	@StressTest
-	public void test_StressCoordination_ExecutorFixedTeam() throws Exception {
-		this.doTest(new ExecutorFixedTeamSource().createTeam(ExecutorFixedTeamSource.PROPERTY_TEAM_SIZE, "3"));
-	}
+		fail("TODO fix up");
 
-	/**
-	 * Ensures no issues arising in stress coordination with a
-	 * {@link PassiveTeam}.
-	 */
-	@StressTest
-	public void test_StressCoordination_PassiveTeam() throws Exception {
-		this.doTest(new PassiveTeam());
-	}
-
-	/**
-	 * Does the coordination stress test.
-	 * 
-	 * @param team
-	 *            {@link Team} to use to run the {@link ManagedFunction}
-	 *            instances.
-	 */
-	private void doTest(Team team) throws Exception {
-
-		fail("TODO handle timeout of stress test");
-
-		boolean isDebugging = false;
-
-		final int MANAGED_OBJECT_WAIT_TIME = 1000 * (isDebugging ? 1000 : 1);
-		final int TASK_INVOKE_COUNT = 100000;
-		final int MAX_RUN_TIME = 100;
-		this.setVerbose(true);
+		final int MANAGED_OBJECT_WAIT_TIME = 1000;
 
 		// Obtain the office name and builder
 		String officeName = this.getOfficeName();
-
-		// Construct the team
-		this.constructTeam("TEAM", team);
 
 		// Construct the direct use managed object
 		this.constructManagedObject("DIRECT_USE", DirectUseManagedObjectSource.class, officeName);
@@ -120,65 +73,34 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 		this.constructTeam("of-DEPENDENCY.MO_TEAM", new OnePersonTeam("MO_TEAM", 100));
 
 		// Construct the function
-		CoordinateWork work = new CoordinateWork(TASK_INVOKE_COUNT);
-		ReflectiveFunctionBuilder functionBuilder = this.constructFunction(work, "task");
-		functionBuilder.getBuilder().setResponsibleTeam("TEAM");
-		functionBuilder.getBuilder().addManagedObject("DIRECT_USE", "DIRECT_USE").mapDependency(0, "DEPENDENCY");
-		functionBuilder.getBuilder().addManagedObject("DEPENDENCY", "DEPENDENCY");
-		functionBuilder.buildObject("DIRECT_USE");
-		functionBuilder.buildFlow("task", null, false);
+		CoordinateWork work = new CoordinateWork(context);
+		ReflectiveFunctionBuilder function = this.constructFunction(work, "task");
+		context.loadResponsibleTeam(function.getBuilder());
+		function.buildObject("DIRECT_USE", ManagedObjectScope.FUNCTION).mapDependency(0, "DEPENDENCY");
+		function.buildFlow("task", null, false);
+
+		// Bind dependency to the function
+		this.bindManagedObject("DEPENDENCY", ManagedObjectScope.FUNCTION, function.getBuilder());
 
 		// Run the coordination
-		this.invokeFunction("task", null, MAX_RUN_TIME);
-
-		// Ensure correct number of invocations
-		assertEquals("Incorrect number of function invocations", TASK_INVOKE_COUNT, work.invokeCount);
+		context.setInitialFunction("task", null);
 	}
 
 	/**
-	 * Functionality.
+	 * Test functionality.
 	 */
 	public class CoordinateWork {
 
-		/**
-		 * Maximum number of times to invoke another {@link ManagedFunction}.
-		 */
-		private final int maxInvokes;
+		private final StressContext context;
 
-		/**
-		 * Number of times invoked.
-		 */
-		public volatile int invokeCount = 0;
-
-		/**
-		 * Previous {@link DirectUseManagedObject}.
-		 */
 		private volatile DirectUseManagedObject previousDirectUse;
 
-		/**
-		 * Previous {@link DependencyManagedObject}.
-		 */
 		private volatile DependencyManagedObject previousDependency;
 
-		/**
-		 * Initiate.
-		 * 
-		 * @param maxInvokes
-		 *            Maximum number of times to invoke another
-		 *            {@link ManagedFunction}.
-		 */
-		public CoordinateWork(int maxInvokes) {
-			this.maxInvokes = maxInvokes;
+		public CoordinateWork(StressContext context) {
+			this.context = context;
 		}
 
-		/**
-		 * Task to run.
-		 * 
-		 * @param directUse
-		 *            {@link DependencyManagedObject}.
-		 * @param flow
-		 *            {@link ReflectiveFlow} to invoke.
-		 */
 		public void task(DirectUseManagedObject directUse, ReflectiveFlow flow) {
 
 			// Ensure not the same previous direct use object
@@ -194,16 +116,13 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 			// Ensure asynchronous operations complete
 			assertEquals("Dependency should be ready", TransitionState.COORDINATE_COMPLETE, dependency.transitionState);
 
-			// Increment the number of times invoked
-			this.invokeCount++;
-			if (this.invokeCount < this.maxInvokes) {
-				flow.doFlow(null, null);
+			// Determine if complete
+			if (this.context.incrementIterationAndIsComplete()) {
+				return;
 			}
 
-			// Indicate progress
-			if ((this.invokeCount % (this.maxInvokes / 10)) == 0) {
-				System.out.println("Task invoked " + this.invokeCount + " times");
-			}
+			// Undertake another iteration
+			flow.doFlow(null, null);
 		}
 	}
 
@@ -246,6 +165,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * {@link ManagedObjectSource} for the {@link DirectUseManagedObject}.
 	 */
+	@TestSource
 	public static class DirectUseManagedObjectSource extends AbstractManagedObjectSource<Indexed, None> {
 
 		/*
@@ -360,6 +280,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Dependency {@link ManagedObjectSource}.
 	 */
+	@TestSource
 	public static class DependencyManagedObjectSource extends AbstractManagedObjectSource<None, Indexed>
 			implements ManagedFunctionFactory<Indexed, None>, ManagedFunction<Indexed, None> {
 

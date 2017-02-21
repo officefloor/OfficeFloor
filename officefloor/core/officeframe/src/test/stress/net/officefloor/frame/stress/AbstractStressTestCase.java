@@ -24,6 +24,8 @@ import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import javax.management.NotificationEmitter;
 
@@ -36,14 +38,21 @@ import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
+import net.officefloor.frame.impl.spi.team.LeaderFollowerTeamSource;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.impl.spi.team.ThreadLocalAwareTeamSource;
 import net.officefloor.frame.impl.spi.team.WorkerPerJobTeamSource;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**
@@ -65,12 +74,16 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		TestSuite suite = new TestSuite();
 
 		// Add no team test
-		suite.addTest(createTestCase(testClass, null, null));
+		for (Test test : createTestCases(testClass, null, null)) {
+			suite.addTest(test);
+		}
 
 		// Add the tests for different teams
 		for (Class<? extends TeamSource> teamSourceClass : teamConstructors.keySet()) {
 			TeamConstructor teamConstructor = teamConstructors.get(teamSourceClass);
-			suite.addTest(createTestCase(testClass, teamSourceClass, teamConstructor));
+			for (Test test : createTestCases(testClass, teamSourceClass, teamConstructor)) {
+				suite.addTest(test);
+			}
 		}
 
 		// Return the suite
@@ -86,6 +99,15 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 	 *             If failure in constructing the test.
 	 */
 	protected abstract void constructTest(StressContext context) throws Exception;
+
+	/**
+	 * Flags whether testing each {@link ManagedObjectScope}.
+	 * 
+	 * @return <code>true</code> to test each {@link ManagedObjectScope}.
+	 */
+	protected boolean isTestEachManagedObjectScope() {
+		return false;
+	}
 
 	/**
 	 * Obtains the {@link Team} size.
@@ -145,6 +167,11 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		private final int maxIterations;
 
 		/**
+		 * {@link ManagedObjectScope}. May be <code>null</code>.
+		 */
+		private final ManagedObjectScope managedObjectScope;
+
+		/**
 		 * Report on progress when this many iterations have occurred.
 		 */
 		private final int reportEveryCount;
@@ -194,11 +221,15 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		 *            Name of the {@link Team}.
 		 * @param maxIterations
 		 *            Maximum number of iterations.
+		 * @param managedObjectScope
+		 *            {@link ManagedObjectScope}.
 		 */
-		private StressContext(AbstractStressTestCase test, String teamName, int maxIterations) {
+		private StressContext(AbstractStressTestCase test, String teamName, int maxIterations,
+				ManagedObjectScope managedObjectScope) {
 			this.test = test;
 			this.teamName = teamName;
 			this.maxIterations = maxIterations;
+			this.managedObjectScope = managedObjectScope;
 			int reportCount = (maxIterations / 10);
 			this.reportEveryCount = (reportCount == 0 ? 1 : reportCount);
 			this.formatter = NumberFormat.getIntegerInstance();
@@ -298,6 +329,16 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		 */
 		public int getMaximumIterations() {
 			return this.maxIterations;
+		}
+
+		/**
+		 * Obtains the {@link ManagedObjectScope}.
+		 * 
+		 * @return {@link ManagedObjectScope}.
+		 */
+		public ManagedObjectScope getManagedObjectScope() {
+			assertNotNull("No managed object scope available", this.managedObjectScope);
+			return this.managedObjectScope;
 		}
 
 		/**
@@ -409,6 +450,9 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 				(name, test) -> test.constructTeam(name, ThreadLocalAwareTeamSource.class));
 		teamConstructors.put(WorkerPerJobTeamSource.class,
 				(name, test) -> test.constructTeam(name, WorkerPerJobTeamSource.class));
+		teamConstructors.put(LeaderFollowerTeamSource.class,
+				(name, test) -> test.constructTeam(name, LeaderFollowerTeamSource.class).addProperty(
+						LeaderFollowerTeamSource.TEAM_SIZE_PROPERTY_NAME, String.valueOf(test.getTeamSize())));
 
 		// Hook in for GC
 		for (GarbageCollectorMXBean gcBean : ManagementFactory.getGarbageCollectorMXBeans()) {
@@ -438,37 +482,58 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 	 *            {@link Class} of the {@link TeamSource}.
 	 * @param teamConstructor
 	 *            {@link TeamConstructor}.
+	 * @param managedObjectScope
+	 *            {@link ManagedObjectScope}.
 	 * @return {@link AbstractStressTestCase} for the {@link Test}.
 	 */
-	private static AbstractStressTestCase createTestCase(Class<? extends AbstractStressTestCase> testClass,
+	private static AbstractStressTestCase[] createTestCases(Class<? extends AbstractStressTestCase> testClass,
 			Class<? extends TeamSource> teamSourceClass, TeamConstructor teamConstructor) {
 		try {
 
 			// Create a new instance of the test
 			AbstractStressTestCase test = testClass.newInstance();
 
-			// Load values for testing
-			test.teamName = (teamSourceClass != null ? teamSourceClass.getSimpleName() : null);
+			// Determine managed object scopes
+			ManagedObjectScope[] managedObjectScopes = test.isTestEachManagedObjectScope() ? new ManagedObjectScope[] {
+					ManagedObjectScope.PROCESS, ManagedObjectScope.THREAD, ManagedObjectScope.FUNCTION }
+					: new ManagedObjectScope[] { null };
 
-			// Obtain the iteration count
-			Map<Class<? extends TeamSource>, Integer> iterationCountOverrides = new HashMap<>();
-			test.overrideIterationCount(iterationCountOverrides);
-			Integer iterationCount = iterationCountOverrides.get(teamSourceClass);
-			if (iterationCount == null) {
-				// No override, so use default
-				iterationCount = test.getIterationCount();
+			// Create the array of tests
+			AbstractStressTestCase[] tests = new AbstractStressTestCase[managedObjectScopes.length];
+			for (int i = 0; i < tests.length; i++) {
+				ManagedObjectScope managedObjectScope = managedObjectScopes[i];
+
+				// Create new test
+				test = testClass.newInstance();
+
+				// Load values for testing
+				test.teamName = (teamSourceClass != null ? teamSourceClass.getSimpleName() : null);
+
+				// Obtain the iteration count
+				Map<Class<? extends TeamSource>, Integer> iterationCountOverrides = new HashMap<>();
+				test.overrideIterationCount(iterationCountOverrides);
+				Integer iterationCount = iterationCountOverrides.get(teamSourceClass);
+				if (iterationCount == null) {
+					// No override, so use default
+					iterationCount = test.getIterationCount();
+				}
+
+				// Set the name for the test
+				test.setName(test.teamName + "_i" + iterationCount
+						+ (managedObjectScope != null ? "_" + managedObjectScope.name() : ""));
+
+				// Specify details
+				test.teamSourceClass = teamSourceClass;
+				test.teamConstructor = teamConstructor;
+				test.iterationCount = iterationCount;
+				test.managedObjectScope = managedObjectScope;
+
+				// Load the test for return
+				tests[i] = test;
 			}
 
-			// Set the name for the test
-			test.setName(test.teamName + "_i" + iterationCount);
-
-			// Specify details
-			test.teamSourceClass = teamSourceClass;
-			test.teamConstructor = teamConstructor;
-			test.iterationCount = iterationCount;
-
-			// Return the test
-			return test;
+			// Return the tests
+			return tests;
 
 		} catch (Exception ex) {
 			throw fail(ex);
@@ -495,6 +560,11 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 	 */
 	private int iterationCount;
 
+	/**
+	 * {@link ManagedObjectScope}.
+	 */
+	private ManagedObjectScope managedObjectScope;
+
 	@Override
 	protected void runTest() throws Throwable {
 
@@ -513,7 +583,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		}
 
 		// Construct the test
-		StressContext context = new StressContext(this, this.teamName, this.iterationCount);
+		StressContext context = new StressContext(this, this.teamName, this.iterationCount, this.managedObjectScope);
 		this.constructTest(context);
 		assertNotNull("Must configure initial function name", context.initialFunctionName);
 
@@ -550,6 +620,108 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		this.printMessage("Construct: " + constructionTime);
 		this.printMessage("Run      : " + executionTime);
 		this.printMessage("Effective: 1 iteration per " + effectiveRunTimeText + " milliseconds");
+	}
+
+	/**
+	 * Constructs the {@link ManagedObject} for stress testing.
+	 * 
+	 * @param managedObjectName
+	 *            Name of the {@link ManagedObject}.
+	 * @param configurer
+	 *            {@link Consumer}.
+	 * @param factory
+	 *            {@link Supplier} to create the {@link ManagedObject}.
+	 */
+	protected <O extends Enum<O>, F extends Enum<F>> void constructManagedObject(String managedObjectName,
+			Consumer<MetaDataContext<O, F>> configurer, Supplier<ManagedObject> factory) {
+		this.constructManagedObject(managedObjectName, new StressManagedObjectSource<O, F>(configurer, factory),
+				this.getOfficeName());
+	}
+
+	/**
+	 * Constructs the {@link ManagedObject} for stress testing.
+	 * 
+	 * @param managedObjectName
+	 *            Name of the {@link ManagedObject}.
+	 * @param factory
+	 *            {@link Supplier} to create the {@link Object} of the
+	 *            {@link ManagedObject}.
+	 */
+	protected void constructObject(String managedObjectName, Supplier<Object> factory) {
+		this.constructManagedObject(managedObjectName, (metaData) -> {
+		}, () -> {
+			return new ManagedObject() {
+				@Override
+				public Object getObject() {
+					return factory.get();
+				}
+			};
+		});
+	}
+
+	/**
+	 * Stress {@link ManagedObjectSource}.
+	 */
+	@TestSource
+	private static class StressManagedObjectSource<O extends Enum<O>, F extends Enum<F>>
+			extends AbstractManagedObjectSource<O, F> {
+
+		/**
+		 * {@link MetaDataContext} configurer.
+		 */
+		private final Consumer<MetaDataContext<O, F>> configurer;
+
+		/**
+		 * Factory to create the {@link ManagedObject}.
+		 */
+		private final Supplier<ManagedObject> factory;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param configurer
+		 *            {@link MetaDataContext} configurer.
+		 * @param factory
+		 *            Factory to create the {@link ManagedObject}.
+		 */
+		public StressManagedObjectSource(Consumer<MetaDataContext<O, F>> configurer, Supplier<ManagedObject> factory) {
+			this.configurer = configurer;
+			this.factory = factory;
+		}
+
+		/*
+		 * ================== ManagedObjectSource ======================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			// No specification
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<O, F> context) throws Exception {
+
+			// Create an instance to determine types
+			ManagedObject instance = this.factory.get();
+
+			// Provide meta-data
+			try {
+				context.setManagedObjectClass(instance.getClass());
+				context.setObjectClass(instance.getObject().getClass());
+			} catch (Throwable ex) {
+				throw fail(ex);
+			}
+
+			// Configure the meta-data
+			if (configurer != null) {
+				configurer.accept(context);
+			}
+		}
+
+		@Override
+		protected ManagedObject getManagedObject() throws Throwable {
+			return this.factory.get();
+		}
 	}
 
 }

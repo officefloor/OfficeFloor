@@ -17,8 +17,6 @@
  */
 package net.officefloor.frame.impl.execute.officefloor;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -69,7 +67,7 @@ public class ThreadLocalAwareExecutorImpl implements ThreadLocalAwareExecutor {
 			isWaitOnComplete = true;
 
 		} else {
-			
+
 			// Already registered executor for thread
 			executor.registerProcess(process);
 			processToExecutor.put(process.getProcessIdentifier(), executor);
@@ -123,7 +121,7 @@ public class ThreadLocalAwareExecutorImpl implements ThreadLocalAwareExecutor {
 		 * Registered {@link ProcessState} identifier instances. Typically
 		 * should only invoke the single {@link ProcessState}.
 		 */
-		private final List<Object> registeredProcessIdentifiers = new ArrayList<>(1);
+		private final Map<Object, Object> registeredProcessIdentifiers = new ConcurrentHashMap<>();
 
 		/**
 		 * {@link Thread}.
@@ -145,7 +143,8 @@ public class ThreadLocalAwareExecutorImpl implements ThreadLocalAwareExecutor {
 		 */
 		public JobQueueExecutor(Thread thread, ProcessState process) {
 			this.thread = thread;
-			this.registeredProcessIdentifiers.add(process.getProcessIdentifier());
+			Object processIdentifier = process.getProcessIdentifier();
+			this.registeredProcessIdentifiers.put(processIdentifier, processIdentifier);
 		}
 
 		/**
@@ -154,8 +153,9 @@ public class ThreadLocalAwareExecutorImpl implements ThreadLocalAwareExecutor {
 		 * @param process
 		 *            {@link ProcessState}.
 		 */
-		private synchronized void registerProcess(ProcessState process) {
-			this.registeredProcessIdentifiers.add(process.getProcessIdentifier());
+		private void registerProcess(ProcessState process) {
+			Object processIdentifier = process.getProcessIdentifier();
+			this.registeredProcessIdentifiers.remove(processIdentifier);
 		}
 
 		/**
@@ -164,7 +164,7 @@ public class ThreadLocalAwareExecutorImpl implements ThreadLocalAwareExecutor {
 		 * @param process
 		 *            {@link ProcessState} that has completed.
 		 */
-		private synchronized void processComplete(ProcessState process) {
+		private void processComplete(ProcessState process) {
 
 			// Unregister the completed process
 			Object processIdentifier = process.getProcessIdentifier();
@@ -188,10 +188,13 @@ public class ThreadLocalAwareExecutorImpl implements ThreadLocalAwareExecutor {
 
 				// Obtain the next job to execute
 				Job job = this.jobQueue.dequeue(100);
+				while (job != null) {
 
-				// Execute job if one
-				if (job != null) {
+					// Execute the job
 					job.run();
+
+					// Obtain the next job
+					job = this.jobQueue.dequeue(100);
 				}
 			}
 
