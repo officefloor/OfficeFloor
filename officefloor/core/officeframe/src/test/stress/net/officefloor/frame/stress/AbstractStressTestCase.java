@@ -35,7 +35,9 @@ import junit.framework.TestSuite;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.GovernanceBuilder;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -631,10 +633,11 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 	 *            {@link Consumer}.
 	 * @param factory
 	 *            {@link Supplier} to create the {@link ManagedObject}.
+	 * @return {@link ManagedObjectBuilder}.
 	 */
-	protected <O extends Enum<O>, F extends Enum<F>> void constructManagedObject(String managedObjectName,
-			Consumer<MetaDataContext<O, F>> configurer, Supplier<ManagedObject> factory) {
-		this.constructManagedObject(managedObjectName, new StressManagedObjectSource<O, F>(configurer, factory),
+	protected <O extends Enum<O>, F extends Enum<F>> ManagedObjectBuilder<F> constructManagedObject(
+			String managedObjectName, Consumer<MetaDataContext<O, F>> configurer, Supplier<ManagedObject> factory) {
+		return this.constructManagedObject(managedObjectName, new StressManagedObjectSource<O, F>(configurer, factory),
 				this.getOfficeName());
 	}
 
@@ -646,9 +649,10 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 	 * @param factory
 	 *            {@link Supplier} to create the {@link Object} of the
 	 *            {@link ManagedObject}.
+	 * @return {@link ManagedObjectBuilder}.
 	 */
-	protected void constructObject(String managedObjectName, Supplier<Object> factory) {
-		this.constructManagedObject(managedObjectName, (metaData) -> {
+	protected ManagedObjectBuilder<Indexed> constructObject(String managedObjectName, Supplier<Object> factory) {
+		return this.constructManagedObject(managedObjectName, (metaData) -> {
 		}, () -> {
 			return new ManagedObject() {
 				@Override

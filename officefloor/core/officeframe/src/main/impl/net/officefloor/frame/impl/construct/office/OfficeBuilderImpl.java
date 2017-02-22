@@ -166,7 +166,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	 * <p>
 	 * Default set high enough to effectively have no breaking.
 	 */
-	private int maximumFunctionStateChainLength = Integer.MAX_VALUE;
+	private int maximumFunctionStateChainLength = 1000;
 
 	/**
 	 * {@link Profiler}.
