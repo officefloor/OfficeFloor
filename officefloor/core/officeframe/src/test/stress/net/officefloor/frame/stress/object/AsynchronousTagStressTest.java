@@ -29,10 +29,10 @@ import net.officefloor.frame.test.ReflectiveFunctionBuilder;
  * 
  * @author Daniel Sagenschneider
  */
-public class AsynchronousObjectStressTest extends AbstractStressTestCase {
+public class AsynchronousTagStressTest extends AbstractStressTestCase {
 
 	public static TestSuite suite() {
-		return createSuite(AsynchronousObjectStressTest.class);
+		return createSuite(AsynchronousTagStressTest.class);
 	}
 
 	@Override
@@ -41,27 +41,27 @@ public class AsynchronousObjectStressTest extends AbstractStressTestCase {
 	}
 
 	@Override
-	protected int getIterationCount() {
-		return 100000;
-	}
-
-	@Override
 	protected void constructTest(StressContext context) throws Exception {
 
-		// Construct the managed object
-		this.constructManagedObject("ASYNCHRONOUS", null, () -> new Asynchronous()).setTimeout(1000);
+		// Construct the managed objects
+		this.constructManagedObject("ASYNCHRONOUS_ONE", null, () -> new Asynchronous()).setTimeout(1000);
+		this.constructManagedObject("ASYNCHRONOUS_TWO", null, () -> new Asynchronous()).setTimeout(1000);
 
 		// Construct the functions
 		TestWork work = new TestWork(context);
-		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
-		context.loadResponsibleTeam(task.getBuilder());
-		task.buildObject("ASYNCHRONOUS", context.getManagedObjectScope());
-		task.buildFlow("spawn", Asynchronous.class, true);
-		task.buildFlow("task", null, false);
-		this.constructFunction(work, "spawn").buildParameter();
+		ReflectiveFunctionBuilder taskOne = this.constructFunction(work, "taskOne");
+		context.loadResponsibleTeam(taskOne.getBuilder());
+		taskOne.buildParameter();
+		taskOne.buildObject("ASYNCHRONOUS_ONE", context.getManagedObjectScope());
+		taskOne.buildFlow("taskTwo", Asynchronous.class, false);
+		ReflectiveFunctionBuilder taskTwo = this.constructFunction(work, "taskTwo");
+		context.loadOtherTeam(taskTwo.getBuilder());
+		taskTwo.buildParameter();
+		taskTwo.buildObject("ASYNCHRONOUS_TWO", context.getManagedObjectScope());
+		taskTwo.buildFlow("taskOne", Asynchronous.class, false);
 
 		// Run
-		context.setInitialFunction("task", null);
+		context.setInitialFunction("taskOne", null);
 	}
 
 	/**
@@ -75,10 +75,12 @@ public class AsynchronousObjectStressTest extends AbstractStressTestCase {
 			this.context = context;
 		}
 
-		public void task(Asynchronous asynchronous, ReflectiveFlow spawn, ReflectiveFlow repeat) {
+		public void taskOne(Asynchronous parameter, Asynchronous managedObject, ReflectiveFlow taskTwo) {
 
-			// Ensure not within asynchronous operation
-			assertFalse("No asynchronous operation for function", asynchronous.isWithinAsynchronousOperation);
+			// Notify complete for other task
+			if (parameter != null) {
+				parameter.listener.notifyComplete();
+			}
 
 			// Determine if continue
 			if (this.context.incrementIterationAndIsComplete()) {
@@ -86,22 +88,14 @@ public class AsynchronousObjectStressTest extends AbstractStressTestCase {
 			}
 
 			// Trigger asynchronous operation
-			asynchronous.isWithinAsynchronousOperation = true;
-			asynchronous.listener.notifyStarted();
+			managedObject.listener.notifyStarted();
 
-			// Spawn thread state to complete operation
-			spawn.doFlow(asynchronous, (escalation) -> {
-				assertFalse("No asynchronous operation for callback", asynchronous.isWithinAsynchronousOperation);
-				
-				// Repeat
-				repeat.doFlow(null, null);
-			});
+			// Call other task to complete operation
+			taskTwo.doFlow(managedObject, null);
 		}
 
-		public void spawn(Asynchronous asynchronous) {
-			// Notify asynchronous complete
-			asynchronous.isWithinAsynchronousOperation = false;
-			asynchronous.listener.notifyComplete();
+		public void taskTwo(Asynchronous parameter, Asynchronous managedObject, ReflectiveFlow taskOne) {
+			this.taskOne(parameter, managedObject, taskOne);
 		}
 	}
 
@@ -111,8 +105,6 @@ public class AsynchronousObjectStressTest extends AbstractStressTestCase {
 	private static class Asynchronous implements AsynchronousManagedObject {
 
 		private AsynchronousListener listener;
-
-		private volatile boolean isWithinAsynchronousOperation = false;
 
 		@Override
 		public void registerAsynchronousListener(AsynchronousListener listener) {

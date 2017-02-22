@@ -329,14 +329,8 @@ public class ProcessStateImpl implements ProcessState {
 			implements FunctionState {
 
 		@Override
-		public boolean isRequireThreadStateSafety() {
-			// Must be safe on main thread state
-			return true;
-		}
-
-		@Override
 		public ThreadState getThreadState() {
-			// All process operations down on main thread state
+			// All process operations done on main thread state
 			return ProcessStateImpl.this.mainThreadState;
 		}
 	}

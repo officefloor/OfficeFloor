@@ -189,6 +189,16 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		private final AtomicInteger iterations = new AtomicInteger(0);
 
 		/**
+		 * Indicates whether a responsible {@link Team} was assigned.
+		 */
+		private boolean isResponsibleTeamAssigned = false;
+
+		/**
+		 * Indicates whether the {@link ManagedObjectScope} has been assigned.
+		 */
+		private boolean isManagedObjectScopeAssigned = false;
+
+		/**
 		 * Index of the other {@link Team} instances.
 		 */
 		private int otherTeamIndex = 1;
@@ -259,6 +269,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		 *            {@link ManagedFunctionBuilder}.
 		 */
 		public void loadResponsibleTeam(ManagedFunctionBuilder<?, ?> builder) {
+			this.isResponsibleTeamAssigned = true;
 			if (this.teamName != null) {
 				builder.setResponsibleTeam(this.teamName);
 			}
@@ -271,6 +282,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		 *            {@link AdministrationBuilder}.
 		 */
 		public void loadResponsibleTeam(AdministrationBuilder<?, ?> builder) {
+			this.isResponsibleTeamAssigned = true;
 			if (this.teamName != null) {
 				builder.setResponsibleTeam(this.teamName);
 			}
@@ -283,6 +295,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		 *            {@link GovernanceBuilder}.
 		 */
 		public void loadResponsibleTeam(GovernanceBuilder<?> builder) {
+			this.isResponsibleTeamAssigned = true;
 			if (this.teamName != null) {
 				builder.setResponsibleTeam(this.teamName);
 			}
@@ -340,6 +353,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		 */
 		public ManagedObjectScope getManagedObjectScope() {
 			assertNotNull("No managed object scope available", this.managedObjectScope);
+			this.isManagedObjectScopeAssigned = true;
 			return this.managedObjectScope;
 		}
 
@@ -521,8 +535,8 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 				}
 
 				// Set the name for the test
-				test.setName(test.teamName + "_i" + iterationCount
-						+ (managedObjectScope != null ? "_" + managedObjectScope.name() : ""));
+				test.setName(test.teamName + (managedObjectScope != null ? "_" + managedObjectScope.name() : "") + "_i"
+						+ iterationCount);
 
 				// Specify details
 				test.teamSourceClass = teamSourceClass;
@@ -588,6 +602,10 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		StressContext context = new StressContext(this, this.teamName, this.iterationCount, this.managedObjectScope);
 		this.constructTest(context);
 		assertNotNull("Must configure initial function name", context.initialFunctionName);
+		assertTrue("Must assign responsible team", context.isResponsibleTeamAssigned);
+		if (context.managedObjectScope != null) {
+			assertTrue("Must set ManagedObject scope", context.isManagedObjectScopeAssigned);
+		}
 
 		// Determine if running the type
 		if (context.onlyTeamClass != null) {
