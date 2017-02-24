@@ -46,7 +46,7 @@ public class AsynchronousDependencyStressTest extends AbstractStressTestCase {
 
 	@Override
 	protected int getIterationCount() {
-		return 10; // 100000;
+		return 100000;
 	}
 
 	@Override
@@ -100,7 +100,7 @@ public class AsynchronousDependencyStressTest extends AbstractStressTestCase {
 			coordinate.asynchronous.listener.notifyStarted();
 
 			// Spawn thread state to complete operation
-			spawn.doFlow(coordinate.asynchronous, (escalation) -> {
+			spawn.doFlow(coordinate, (escalation) -> {
 				assertFalse("No asynchronous operation for callback",
 						coordinate.asynchronous.isWithinAsynchronousOperation);
 

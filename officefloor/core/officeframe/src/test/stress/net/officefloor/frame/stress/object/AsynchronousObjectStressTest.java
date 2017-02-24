@@ -42,7 +42,7 @@ public class AsynchronousObjectStressTest extends AbstractStressTestCase {
 
 	@Override
 	protected int getIterationCount() {
-		return 10; // 100000;
+		return 100000;
 	}
 
 	@Override
