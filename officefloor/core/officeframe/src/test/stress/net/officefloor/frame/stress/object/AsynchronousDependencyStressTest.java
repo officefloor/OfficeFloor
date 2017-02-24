@@ -18,8 +18,12 @@
 package net.officefloor.frame.stress.object;
 
 import junit.framework.TestSuite;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.managedobject.AsynchronousListener;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.stress.AbstractStressTestCase;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
@@ -29,10 +33,10 @@ import net.officefloor.frame.test.ReflectiveFunctionBuilder;
  * 
  * @author Daniel Sagenschneider
  */
-public class AsynchronousObjectStressTest extends AbstractStressTestCase {
+public class AsynchronousDependencyStressTest extends AbstractStressTestCase {
 
 	public static TestSuite suite() {
-		return createSuite(AsynchronousObjectStressTest.class);
+		return createSuite(AsynchronousDependencyStressTest.class);
 	}
 
 	@Override
@@ -48,16 +52,19 @@ public class AsynchronousObjectStressTest extends AbstractStressTestCase {
 	@Override
 	protected void constructTest(StressContext context) throws Exception {
 
-		// Construct the managed object
+		// Construct the managed objects
+		this.constructManagedObject("COORDINATE", (metaData) -> metaData.addDependency(Asynchronous.class),
+				() -> new Coordinate());
 		this.constructManagedObject("ASYNCHRONOUS", null, () -> new Asynchronous()).setTimeout(1000);
 
 		// Construct the functions
 		TestWork work = new TestWork(context);
 		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
 		context.loadResponsibleTeam(task.getBuilder());
-		task.buildObject("ASYNCHRONOUS", context.getManagedObjectScope());
-		task.buildFlow("spawn", Asynchronous.class, true);
+		task.buildObject("COORDINATE", ManagedObjectScope.FUNCTION).mapDependency(0, "ASYNCHRONOUS");
+		task.buildFlow("spawn", Coordinate.class, true);
 		task.buildFlow("task", null, false);
+		this.bindManagedObject("ASYNCHRONOUS", context.getManagedObjectScope(), task.getBuilder());
 		ReflectiveFunctionBuilder spawn = this.constructFunction(work, "spawn");
 		context.loadOtherTeam(spawn.getBuilder());
 		spawn.buildParameter();
@@ -77,10 +84,11 @@ public class AsynchronousObjectStressTest extends AbstractStressTestCase {
 			this.context = context;
 		}
 
-		public void task(Asynchronous asynchronous, ReflectiveFlow spawn, ReflectiveFlow repeat) {
+		public void task(Coordinate coordinate, ReflectiveFlow spawn, ReflectiveFlow repeat) {
 
 			// Ensure not within asynchronous operation
-			assertFalse("No asynchronous operation for function", asynchronous.isWithinAsynchronousOperation);
+			assertFalse("No asynchronous operation for function",
+					coordinate.asynchronous.isWithinAsynchronousOperation);
 
 			// Determine if continue
 			if (this.context.incrementIterationAndIsComplete()) {
@@ -88,23 +96,41 @@ public class AsynchronousObjectStressTest extends AbstractStressTestCase {
 			}
 
 			// Trigger asynchronous operation
-			asynchronous.isWithinAsynchronousOperation = true;
-			asynchronous.listener.notifyStarted();
+			coordinate.asynchronous.isWithinAsynchronousOperation = true;
+			coordinate.asynchronous.listener.notifyStarted();
 
 			// Spawn thread state to complete operation
-			spawn.doFlow(asynchronous, (escalation) -> {
-				assertNull("Should be now failure", escalation);
-				assertFalse("No asynchronous operation for callback", asynchronous.isWithinAsynchronousOperation);
+			spawn.doFlow(coordinate.asynchronous, (escalation) -> {
+				assertFalse("No asynchronous operation for callback",
+						coordinate.asynchronous.isWithinAsynchronousOperation);
 
 				// Repeat
 				repeat.doFlow(null, null);
 			});
 		}
 
-		public void spawn(Asynchronous asynchronous) {
+		public void spawn(Coordinate coordinate) {
 			// Notify asynchronous complete
-			asynchronous.isWithinAsynchronousOperation = false;
-			asynchronous.listener.notifyComplete();
+			coordinate.asynchronous.isWithinAsynchronousOperation = false;
+			coordinate.asynchronous.listener.notifyComplete();
+		}
+	}
+
+	/**
+	 * {@link CoordinatingManagedObject}.
+	 */
+	public static class Coordinate implements CoordinatingManagedObject<Indexed> {
+
+		private Asynchronous asynchronous;
+
+		@Override
+		public void loadObjects(ObjectRegistry<Indexed> registry) throws Throwable {
+			this.asynchronous = (Asynchronous) registry.getObject(0);
+		}
+
+		@Override
+		public Object getObject() throws Throwable {
+			return this;
 		}
 	}
 

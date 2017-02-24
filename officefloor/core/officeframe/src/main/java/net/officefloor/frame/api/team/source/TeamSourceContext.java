@@ -17,6 +17,10 @@
  */
 package net.officefloor.frame.api.team.source;
 
+import java.util.concurrent.ThreadFactory;
+
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.Team;
 
@@ -39,5 +43,20 @@ public interface TeamSourceContext extends SourceContext {
 	 *         {@link TeamSource}.
 	 */
 	String getTeamName();
+
+	/**
+	 * <p>
+	 * Obtains the {@link ThreadFactory} for the {@link Team}.
+	 * <p>
+	 * It is encouraged for {@link Team} implementations to use this in creating
+	 * {@link Thread} instances. This is to enable performance improvements by
+	 * {@link OfficeFloor}, such as {@link ThreadLocal}
+	 * {@link ManagedObjectPool} solutions to reduce pool locking overheads.
+	 * 
+	 * @param threadPriority
+	 *            Priority for the created {@link Thread} instances.
+	 * @return {@link ThreadFactory} for the {@link Team}.
+	 */
+	ThreadFactory getThreadFactory(int threadPriority);
 
 }

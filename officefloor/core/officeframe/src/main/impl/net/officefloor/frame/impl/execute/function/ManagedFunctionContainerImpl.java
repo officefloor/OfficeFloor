@@ -415,6 +415,9 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			ManagedFunctionLogicContextImpl logicContext = new ManagedFunctionLogicContextImpl();
 			this.nextManagedFunctionParameter = this.managedFunctionLogic.execute(logicContext);
 
+			// Must recheck managed objects
+			this.check = null;
+
 			// Function executed, so now await flow completions
 			this.containerState = ManagedFunctionState.AWAIT_FLOW_COMPLETIONS;
 
@@ -498,42 +501,27 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 
 	@Override
 	public FunctionState handleEscalation(final Throwable escalation, FunctionContext context) {
-		return new ManagedFunctionOperation() {
 
-			@Override
-			public String toString() {
-				return "Handle " + ManagedFunctionContainerImpl.this.functionLogicMetaData.getFunctionName() + ": "
-						+ escalation.toString();
-			}
+		// Function failure
+		this.containerState = ManagedFunctionState.FAILED;
 
-			@Override
-			public FunctionState execute(FunctionContext context) throws Throwable {
+		// Escalation from this node, so nothing further
+		FunctionState clearFunctions = this.clear();
 
-				// Easy access to container
-				ManagedFunctionContainerImpl<M> container = ManagedFunctionContainerImpl.this;
+		// Obtain the escalation flow from this function
+		EscalationFlow escalationFlow = this.functionLogicMetaData.getEscalationProcedure().getEscalation(escalation);
+		if (escalationFlow != null) {
+			// Escalation handled by this function
+			ThreadState threadState = this.flow.getThreadState();
+			Flow parallelFlow = threadState.createFlow(null);
+			FunctionState escalationFunction = parallelFlow.createManagedFunction(escalation,
+					escalationFlow.getManagedFunctionMetaData(), false, this.parallelOwner);
+			return Promise.then(clearFunctions, escalationFunction);
+		}
 
-				// Function failure
-				container.containerState = ManagedFunctionState.FAILED;
-
-				// Escalation from this node, so nothing further
-				FunctionState clearFunctions = container.clear();
-
-				// Obtain the escalation flow from this function
-				EscalationFlow escalationFlow = container.functionLogicMetaData.getEscalationProcedure()
-						.getEscalation(escalation);
-				if (escalationFlow != null) {
-					// Escalation handled by this function
-					ThreadState threadState = container.flow.getThreadState();
-					Flow parallelFlow = threadState.createFlow(null);
-					FunctionState escalationFunction = parallelFlow.createManagedFunction(escalation,
-							escalationFlow.getManagedFunctionMetaData(), false, container.parallelOwner);
-					return Promise.then(clearFunctions, escalationFunction);
-				}
-
-				// Not handled by this function, so escalate to flow
-				return Promise.then(clearFunctions, container.flow.handleEscalation(escalation, context));
-			}
-		};
+		// Not handled by this function, so escalate to flow
+		// (Flow will handle clean up of functions)
+		return this.flow.handleEscalation(escalation, context);
 	}
 
 	/**
@@ -722,14 +710,42 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 				@Override
 				public FunctionState execute(FunctionContext context) throws Throwable {
 
+					// Easy access to container
+					ManagedFunctionContainerImpl<M> container = ManagedFunctionContainerImpl.this;
+
+					// Check whether managed objects are ready
+					if (container.requiredManagedObjects != null) {
+						if (container.check == null) {
+							// Undertake check to ensure objects are ready
+							container.check = new ManagedObjectReadyCheckImpl(this, container);
+							FunctionState checkFunction = null;
+							for (int i = 0; i < container.requiredManagedObjects.length; i++) {
+								ManagedObjectIndex index = container.requiredManagedObjects[i];
+								ManagedObjectContainer moContainer = ManagedObjectContainerImpl
+										.getManagedObjectContainer(index, container);
+								checkFunction = Promise.then(checkFunction, moContainer.checkReady(container.check));
+							}
+							if (checkFunction != null) {
+								return Promise.then(checkFunction, this);
+							}
+						} else if (!container.check.isReady()) {
+							// Not ready so wait on latch release and try again
+							container.check = null;
+							return null;
+						}
+					}
+
 					// Remove callback
-					ManagedFunctionContainerImpl.this.awaitingFlowCompletions.removeEntry(FlowCompletionImpl.this);
+					container.awaitingFlowCompletions.removeEntry(FlowCompletionImpl.this);
 
 					// Undertake the callback
 					FlowCompletionImpl.this.callback.run(escalation);
 
+					// Must recheck managed objects
+					container.check = null;
+
 					// Continue execution of this managed function
-					return ManagedFunctionContainerImpl.this;
+					return container;
 				}
 			};
 		}

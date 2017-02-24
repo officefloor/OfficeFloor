@@ -290,8 +290,9 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 			return Promise.then(cleanUpFunctions, this.completion.complete(escalation));
 
 		} else {
-			// Last flow, so handle by thread state
-			return Promise.then(cleanUpFunctions, this.threadState.handleEscalation(escalation));
+			// No flow completion, so handle by thread state
+			// (Thread will handle clean up of flows)
+			return this.threadState.handleEscalation(escalation);
 		}
 	}
 

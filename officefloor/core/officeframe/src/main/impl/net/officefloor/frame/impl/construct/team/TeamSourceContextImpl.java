@@ -19,6 +19,8 @@ package net.officefloor.frame.impl.construct.team;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
@@ -94,6 +96,73 @@ public class TeamSourceContextImpl extends SourceContextImpl implements TeamSour
 	@Override
 	public String getTeamName() {
 		return this.teamName;
+	}
+
+	@Override
+	public ThreadFactory getThreadFactory(int threadPriority) {
+		return new TeamThreadFactory(this.teamName, threadPriority);
+	}
+
+	/**
+	 * {@link ThreadFactory} for the {@link Team}.
+	 */
+	private static class TeamThreadFactory implements ThreadFactory {
+
+		/**
+		 * {@link ThreadGroup}.
+		 */
+		private final ThreadGroup group;
+
+		/**
+		 * Prefix of {@link Thread} name.
+		 */
+		private final String threadNamePrefix;
+
+		/**
+		 * Index of the next {@link Thread}.
+		 */
+		private final AtomicInteger nextThreadIndex = new AtomicInteger(1);
+
+		/**
+		 * {@link Thread} priority.
+		 */
+		private final int threadPriority;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param teamName
+		 *            Name of the {@link Team}.
+		 * @param threadPriority
+		 *            {@link Thread} priority.
+		 */
+		protected TeamThreadFactory(String teamName, int threadPriority) {
+			SecurityManager s = System.getSecurityManager();
+			this.group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
+			this.threadNamePrefix = teamName + "-";
+			this.threadPriority = threadPriority;
+		}
+
+		/*
+		 * ==================== ThreadFactory =======================
+		 */
+
+		@Override
+		public Thread newThread(Runnable r) {
+
+			// Create and configure the thread
+			Thread thread = new Thread(this.group, r, this.threadNamePrefix + this.nextThreadIndex.getAndIncrement(),
+					0);
+			if (thread.isDaemon()) {
+				thread.setDaemon(false);
+			}
+			if (thread.getPriority() != this.threadPriority) {
+				thread.setPriority(this.threadPriority);
+			}
+
+			// Return the thread
+			return thread;
+		}
 	}
 
 }

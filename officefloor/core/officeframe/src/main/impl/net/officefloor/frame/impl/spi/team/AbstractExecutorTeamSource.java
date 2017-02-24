@@ -20,7 +20,6 @@ package net.officefloor.frame.impl.spi.team;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
@@ -109,75 +108,11 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 	public Team createTeam(TeamSourceContext context) throws Exception {
 
 		// Obtain the details of the team
-		String teamName = context.getTeamName();
 		final int threadPriority = Integer
 				.valueOf(context.getProperty(PROPERTY_THREAD_PRIORITY, String.valueOf(Thread.NORM_PRIORITY)));
 
 		// Create and return the executor team
-		return new ExecutorTeam(
-				this.createExecutorServiceFactory(context, new TeamThreadFactory(teamName, threadPriority)));
-	}
-
-	/**
-	 * {@link ThreadFactory} for the {@link Team}.
-	 */
-	protected static class TeamThreadFactory implements ThreadFactory {
-
-		/**
-		 * {@link ThreadGroup}.
-		 */
-		private final ThreadGroup group;
-
-		/**
-		 * Prefix of {@link Thread} name.
-		 */
-		private final String threadNamePrefix;
-
-		/**
-		 * Index of the next {@link Thread}.
-		 */
-		private final AtomicInteger nextThreadIndex = new AtomicInteger(1);
-
-		/**
-		 * {@link Thread} priority.
-		 */
-		private final int threadPriority;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param teamName
-		 *            Name of the {@link Team}.
-		 * @param threadPriority
-		 *            {@link Thread} priority.
-		 */
-		protected TeamThreadFactory(String teamName, int threadPriority) {
-			SecurityManager s = System.getSecurityManager();
-			this.group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
-			this.threadNamePrefix = teamName + "-";
-			this.threadPriority = threadPriority;
-		}
-
-		/*
-		 * ==================== ThreadFactory =======================
-		 */
-
-		@Override
-		public Thread newThread(Runnable r) {
-
-			// Create and configure the thread
-			Thread thread = new Thread(this.group, r, this.threadNamePrefix + this.nextThreadIndex.getAndIncrement(),
-					0);
-			if (thread.isDaemon()) {
-				thread.setDaemon(false);
-			}
-			if (thread.getPriority() != this.threadPriority) {
-				thread.setPriority(this.threadPriority);
-			}
-
-			// Return the thread
-			return thread;
-		}
+		return new ExecutorTeam(this.createExecutorServiceFactory(context, context.getThreadFactory(threadPriority)));
 	}
 
 	/**

@@ -368,6 +368,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			EscalationFlow escalationFlow = this.threadMetaData.getOfficeEscalationProcedure()
 					.getEscalation(escalation);
 			if (escalationFlow != null) {
+				// Create new flow, to keep thread alive
 				Flow flow = this.createFlow(null);
 
 				// Next escalation will be flow completion
@@ -397,12 +398,22 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		case OFFICE_FLOOR:
 			escalationFlow = this.threadMetaData.getOfficeFloorEscalation();
 			if (escalationFlow != null) {
-				Flow flow = this.createFlow(null);
 
 				// Any further failure, log (not happen most applications)
 				this.escalationLevel = EscalationLevel.LOG;
-				return Promise.then(cleanUpFunctions, flow.createManagedFunction(escalation,
-						escalationFlow.getManagedFunctionMetaData(), false, null));
+
+				// Determine if current thread is still active
+				if (this.activeFlows.getHead() != null) {
+					// Current thread active, so create new flow for handling
+					Flow flow = this.createFlow(null);
+					return Promise.then(cleanUpFunctions, flow.createManagedFunction(escalation,
+							escalationFlow.getManagedFunctionMetaData(), false, null));
+
+				} else {
+					// Current thread is completed, so spawn thread to handle
+					return Promise.then(cleanUpFunctions, this.processState
+							.spawnThreadState(escalationFlow.getManagedFunctionMetaData(), escalation, null));
+				}
 			}
 
 		case LOG:
@@ -790,7 +801,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		}
 
 		/*
-		 * =========================== FunctionState ===========================
+		 * ========================= FunctionContext =========================
 		 */
 
 		@Override

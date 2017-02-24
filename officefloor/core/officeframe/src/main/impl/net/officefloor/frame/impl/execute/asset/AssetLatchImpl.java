@@ -370,23 +370,26 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 		@Override
 		public FunctionState execute(FunctionContext context) {
 
+			// Easy access to latch
+			AssetLatchImpl latch = AssetLatchImpl.this;
+
 			// Flag if permanent failure
 			if (this.isPermanent) {
-				AssetLatchImpl.this.failure = this.failure;
-				AssetLatchImpl.this.isPermanentlyActivate = true;
+				latch.failure = this.failure;
+				latch.isPermanentlyActivate = true;
 			}
 
 			// Obtain the awaiting functions
-			AwaitingEntry entry = AssetLatchImpl.this.awaiting.purgeEntries();
+			AwaitingEntry entry = latch.awaiting.purgeEntries();
 			if (entry != null) {
 
 				// Unregister from asset manager
-				AssetLatchImpl.this.assetManager.unregisterAssetLatch(AssetLatchImpl.this);
+				latch.assetManager.unregisterAssetLatch(AssetLatchImpl.this);
 
 				// Fail the functions in their own threads
 				do {
 					// Fail the function and continue its flow independently
-					AssetLatchImpl.this.assetManager.getFunctionLoop()
+					latch.assetManager.getFunctionLoop()
 							.delegateFunction(new AbstractDelegateFunctionState(entry.function) {
 								@Override
 								public FunctionState execute(FunctionContext context) throws Throwable {

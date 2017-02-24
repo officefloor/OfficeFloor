@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.managedobject.asynchronous;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import net.officefloor.frame.api.escalate.ManagedObjectOperationTimedOutEscalation;
@@ -58,6 +58,8 @@ public class _timeout_ThreadWaitOnAsynchronousManagedObjectTest extends Abstract
 		trigger.buildParameter();
 		trigger.buildObject("MO", ManagedObjectScope.PROCESS);
 		trigger.buildFlow("flow", null, true);
+		trigger.setNextFunction("next");
+		this.constructFunction(work, "next").buildObject("MO");
 		this.constructFunction(work, "flow").buildObject("MO");
 
 		// Trigger the functionality
@@ -72,6 +74,7 @@ public class _timeout_ThreadWaitOnAsynchronousManagedObjectTest extends Abstract
 		// Ensure triggered flows, by they are waiting on asynchronous operation
 		assertTrue("Trigger should have invoked flows", work.isTriggered);
 		assertEquals("Flows should be waitin on asynchronous operation", 0, work.flowsInvoked);
+		assertFalse("Callback for spawned thread should not be invoked", work.isCallback);
 
 		// Time out the asynchronous operation
 		this.adjustCurrentTimeMillis(100);
@@ -79,13 +82,12 @@ public class _timeout_ThreadWaitOnAsynchronousManagedObjectTest extends Abstract
 
 		// Timed out asynchronous operation
 		assertEquals("Flows should not be invoked", 0, work.flowsInvoked);
-		assertEquals("Incorrect number of failures", numberOfFlows, work.failures.size());
-		for (int i = 0; i < numberOfFlows; i++) {
-			assertTrue("Incorrect flow failure " + i,
-					work.failures.get(i) instanceof ManagedObjectOperationTimedOutEscalation);
-		}
+		assertTrue("Flow callback should however be executed", work.isCallback);
+		assertEquals("Incorrect number of callback escalations", numberOfFlows, work.escalations.size());
 		assertTrue("Process should also complete", isComplete.value);
-		assertNull("Flow callbacks did not escalate failure", failure.value);
+		assertNotNull("Should report timeout to main thread state", failure.value);
+		assertEquals("Incorrect type of escalation", ManagedObjectOperationTimedOutEscalation.class,
+				failure.value.getClass());
 	}
 
 	/**
@@ -95,16 +97,31 @@ public class _timeout_ThreadWaitOnAsynchronousManagedObjectTest extends Abstract
 
 		public boolean isTriggered = false;
 
+		public boolean isCallback = false;
+
+		public List<Throwable> escalations = new ArrayList<>();
+
+		public boolean isNextInvoked = false;
+		
 		public int flowsInvoked = 0;
 
-		public List<Throwable> failures = new LinkedList<>();
-
 		public void trigger(Integer numberOfFlows, TestObject object, ReflectiveFlow flow) {
+
+			// Trigger asynchronous operation (that will timeout)
 			object.asynchronousListener.notifyStarted();
+
 			for (int i = 0; i < numberOfFlows; i++) {
-				flow.doFlow(null, (escalation) -> this.failures.add(escalation));
+				flow.doFlow(null, (escalation) -> {
+					assertNotNull("Must report escalation");
+					this.escalations.add(escalation);
+					this.isCallback = true;
+				});
 			}
 			this.isTriggered = true;
+		}
+		
+		public void next(TestObject object) {
+			this.isNextInvoked = true;
 		}
 
 		public void flow(TestObject object) {

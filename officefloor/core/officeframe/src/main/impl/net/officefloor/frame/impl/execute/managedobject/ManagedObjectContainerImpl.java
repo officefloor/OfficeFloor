@@ -300,10 +300,15 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public FunctionState execute(FunctionContext context) {
+		public FunctionState execute(FunctionContext context) throws Throwable {
 
 			// Easy access to container
 			ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
+
+			// Propagate failure if in failed state
+			if (container.failure != null) {
+				throw container.failure;
+			}
 
 			// Check if asynchronous operation or still to source
 			if (container.asynchronousStartTime != NO_ASYNC_OPERATION) {
@@ -700,10 +705,10 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	 * {@link ProcessAwareContext} implementation.
 	 */
 	private class ProcessAwareContextImpl implements ProcessAwareContext {
-		
+
 		@Override
 		public <R, T extends Throwable> R run(ProcessSafeOperation<R, T> operation) throws T {
-			
+
 			// Easy access to the container
 			ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
 
@@ -717,7 +722,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		return new ManagedObjectOperation() {
 			@Override
 			public FunctionState execute(FunctionContext context) {
-				
+
 				// Easy access to the container
 				ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
 
@@ -970,6 +975,10 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 					timeoutFailure = new ManagedObjectOperationTimedOutEscalation(this.metaData.getObjectType());
 				}
 
+				// Flag now in error
+				this.failure = timeoutFailure;
+				this.asynchronousStartTime = NO_ASYNC_OPERATION;
+
 				// Fail job nodes waiting on this
 				this.sourcingLatch.failFunctions(timeoutFailure, true);
 				if (this.operationsLatch != null) {
@@ -1013,14 +1022,20 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		@Override
 		public FunctionState execute(FunctionContext context) {
 
+			// Easy access to container
+			ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
+
 			// Flag failure (puts container into failed state)
-			ManagedObjectContainerImpl.this.failure = this.failure;
+			if (container.failure == null) {
+				// Only capture first failure
+				container.failure = this.failure;
+			}
 
 			// Permanently fail latched functions
-			ManagedObjectContainerImpl.this.sourcingLatch.failFunctions(this.failure, true);
-			if (ManagedObjectContainerImpl.this.operationsLatch != null) {
+			container.sourcingLatch.failFunctions(this.failure, true);
+			if (container.operationsLatch != null) {
 				// Asynchronous so include permanently failing operations
-				ManagedObjectContainerImpl.this.operationsLatch.failFunctions(this.failure, true);
+				container.operationsLatch.failFunctions(this.failure, true);
 			}
 
 			// Propagate failure to managed function
