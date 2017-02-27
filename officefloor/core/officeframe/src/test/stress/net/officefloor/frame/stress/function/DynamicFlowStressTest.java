@@ -38,7 +38,7 @@ public class DynamicFlowStressTest extends AbstractStressTestCase {
 
 	@Override
 	protected int getIterationCount() {
-		return 10000000;
+		return 1000000;
 	}
 
 	@Override
