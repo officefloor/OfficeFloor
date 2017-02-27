@@ -18,7 +18,7 @@
 package net.officefloor.frame.stress.object;
 
 import junit.framework.TestSuite;
-import net.officefloor.frame.api.managedobject.AsynchronousListener;
+import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.stress.AbstractStressTestCase;
 import net.officefloor.frame.test.ReflectiveFlow;
@@ -79,7 +79,7 @@ public class AsynchronousTagStressTest extends AbstractStressTestCase {
 
 			// Notify complete for other task
 			if (parameter != null) {
-				parameter.listener.notifyComplete();
+				parameter.listener.complete(null);
 			}
 
 			// Determine if continue
@@ -88,7 +88,7 @@ public class AsynchronousTagStressTest extends AbstractStressTestCase {
 			}
 
 			// Trigger asynchronous operation
-			managedObject.listener.notifyStarted();
+			managedObject.listener.start(null);
 
 			// Call other task to complete operation
 			taskTwo.doFlow(managedObject, null);
@@ -104,10 +104,10 @@ public class AsynchronousTagStressTest extends AbstractStressTestCase {
 	 */
 	private static class Asynchronous implements AsynchronousManagedObject {
 
-		private AsynchronousListener listener;
+		private AsynchronousContext listener;
 
 		@Override
-		public void registerAsynchronousListener(AsynchronousListener listener) {
+		public void setAsynchronousContext(AsynchronousContext listener) {
 			this.listener = listener;
 		}
 

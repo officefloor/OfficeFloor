@@ -20,7 +20,7 @@ package net.officefloor.frame.impl.execute.managedobject.asynchronous;
 import net.officefloor.frame.api.escalate.ManagedObjectOperationTimedOutEscalation;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.managedobject.AsynchronousListener;
+import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -39,7 +39,7 @@ public class _timeout_WaitOnAsynchronousManagedObjectTest extends AbstractOffice
 
 	/**
 	 * Ensure {@link ProcessState} bound {@link AsynchronousManagedObject} stops
-	 * execution until {@link AsynchronousListener} timed out.
+	 * execution until {@link AsynchronousContext} timed out.
 	 */
 	public void test_AsynchronousOperation_TimeOut_ProcessBound() throws Exception {
 		this.doAsynchronousOperationTest(ManagedObjectScope.PROCESS);
@@ -47,7 +47,7 @@ public class _timeout_WaitOnAsynchronousManagedObjectTest extends AbstractOffice
 
 	/**
 	 * Ensure {@link ThreadState} bound {@link AsynchronousManagedObject} stops
-	 * execution until {@link AsynchronousListener} timed out.
+	 * execution until {@link AsynchronousContext} timed out.
 	 */
 	public void test_AsynchronousOperation_TimeOut_ThreadBound() throws Exception {
 		this.doAsynchronousOperationTest(ManagedObjectScope.THREAD);
@@ -55,7 +55,7 @@ public class _timeout_WaitOnAsynchronousManagedObjectTest extends AbstractOffice
 
 	/**
 	 * Ensure {@link ManagedFunction} bound {@link AsynchronousManagedObject}
-	 * stops execution until {@link AsynchronousListener} timed out.
+	 * stops execution until {@link AsynchronousContext} timed out.
 	 */
 	public void test_AsynchronousOperation_TimeOut_FunctionBound() throws Exception {
 		this.doAsynchronousOperationTest(ManagedObjectScope.FUNCTION);
@@ -94,11 +94,11 @@ public class _timeout_WaitOnAsynchronousManagedObjectTest extends AbstractOffice
 			isComplete.value = true;
 			failure.value = escalation;
 		});
-		
+
 		// Only the task should be invoked
 		assertTrue("Task should be invoked", work.isTaskInvoked);
 		assertTrue("Next should be invoked, as not dependent on managed object", work.isNextInvoked);
-		
+
 		// Different object if bound to function, so not wait
 		if (scope == ManagedObjectScope.FUNCTION) {
 			assertTrue("Should not wait, as different object", isComplete.value);
@@ -135,7 +135,7 @@ public class _timeout_WaitOnAsynchronousManagedObjectTest extends AbstractOffice
 
 		public void task(TestObject object) {
 			this.isTaskInvoked = true;
-			object.asynchronousListener.notifyStarted();
+			object.asynchronousListener.start(null);
 		}
 
 		public void next() {

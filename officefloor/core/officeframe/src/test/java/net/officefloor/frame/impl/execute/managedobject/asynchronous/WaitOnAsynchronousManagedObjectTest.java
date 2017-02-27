@@ -18,7 +18,7 @@
 package net.officefloor.frame.impl.execute.managedobject.asynchronous;
 
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.api.managedobject.AsynchronousListener;
+import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -38,7 +38,7 @@ public class WaitOnAsynchronousManagedObjectTest extends AbstractOfficeConstruct
 
 	/**
 	 * Ensure {@link ProcessState} bound {@link AsynchronousManagedObject} stops
-	 * execution until {@link AsynchronousListener} flags completion.
+	 * execution until {@link AsynchronousContext} flags completion.
 	 */
 	public void test_AsynchronousOperation_WaitOn_ProcessBound() throws Exception {
 		this.doAsynchronousOperationTest(ManagedObjectScope.PROCESS);
@@ -46,7 +46,7 @@ public class WaitOnAsynchronousManagedObjectTest extends AbstractOfficeConstruct
 
 	/**
 	 * Ensure {@link ThreadState} bound {@link AsynchronousManagedObject} stops
-	 * execution until {@link AsynchronousListener} flags completion.
+	 * execution until {@link AsynchronousContext} flags completion.
 	 */
 	public void test_AsynchronousOperation_WaitOn_ThreadBound() throws Exception {
 		this.doAsynchronousOperationTest(ManagedObjectScope.THREAD);
@@ -54,7 +54,7 @@ public class WaitOnAsynchronousManagedObjectTest extends AbstractOfficeConstruct
 
 	/**
 	 * Ensure {@link ManagedFunction} bound {@link AsynchronousManagedObject}
-	 * stops execution until {@link AsynchronousListener} flags completion.
+	 * stops execution until {@link AsynchronousContext} flags completion.
 	 */
 	public void test_AsynchronousOperation_WaitOn_FunctionBound() throws Exception {
 		this.doAsynchronousOperationTest(ManagedObjectScope.FUNCTION);
@@ -93,7 +93,7 @@ public class WaitOnAsynchronousManagedObjectTest extends AbstractOfficeConstruct
 		// Only the task should be invoked
 		assertTrue("Task should be invoked", work.isTaskInvoked);
 		assertTrue("Next should be invoked, as not dependent on managed object", work.isNextInvoked);
-		
+
 		// Different object if bound to function, so not wait
 		if (scope == ManagedObjectScope.FUNCTION) {
 			assertTrue("Should not wait, as different object", isComplete.value);
@@ -105,7 +105,7 @@ public class WaitOnAsynchronousManagedObjectTest extends AbstractOfficeConstruct
 		assertFalse("Process should not be complete", isComplete.value);
 
 		// Complete the asynchronous operation
-		object.asynchronousListener.notifyComplete();
+		object.asynchronousListener.complete(null);
 
 		// Wait should now complete
 		assertTrue("Wait should now complete", work.isNextInvoked);
@@ -125,7 +125,7 @@ public class WaitOnAsynchronousManagedObjectTest extends AbstractOfficeConstruct
 
 		public void task(TestObject object) {
 			this.isTaskInvoked = true;
-			object.asynchronousListener.notifyStarted();
+			object.asynchronousListener.start(null);
 		}
 
 		public void next() {

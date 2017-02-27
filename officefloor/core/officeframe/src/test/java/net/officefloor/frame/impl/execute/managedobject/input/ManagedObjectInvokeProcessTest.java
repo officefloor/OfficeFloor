@@ -24,7 +24,7 @@ import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.managedobject.AsynchronousListener;
+import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
@@ -430,7 +430,7 @@ public class ManagedObjectInvokeProcessTest extends AbstractOfficeConstructTestC
 		 */
 
 		@Override
-		public void registerAsynchronousListener(AsynchronousListener listener) {
+		public void setAsynchronousContext(AsynchronousContext listener) {
 			// Do nothing
 		}
 	}

@@ -18,7 +18,7 @@
 package net.officefloor.frame.stress.object;
 
 import junit.framework.TestSuite;
-import net.officefloor.frame.api.managedobject.AsynchronousListener;
+import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.stress.AbstractStressTestCase;
 import net.officefloor.frame.test.ReflectiveFlow;
@@ -89,7 +89,7 @@ public class AsynchronousObjectStressTest extends AbstractStressTestCase {
 
 			// Trigger asynchronous operation
 			asynchronous.isWithinAsynchronousOperation = true;
-			asynchronous.listener.notifyStarted();
+			asynchronous.listener.start(null);
 
 			// Spawn thread state to complete operation
 			spawn.doFlow(asynchronous, (escalation) -> {
@@ -104,7 +104,7 @@ public class AsynchronousObjectStressTest extends AbstractStressTestCase {
 		public void spawn(Asynchronous asynchronous) {
 			// Notify asynchronous complete
 			asynchronous.isWithinAsynchronousOperation = false;
-			asynchronous.listener.notifyComplete();
+			asynchronous.listener.complete(null);
 		}
 	}
 
@@ -113,12 +113,12 @@ public class AsynchronousObjectStressTest extends AbstractStressTestCase {
 	 */
 	private static class Asynchronous implements AsynchronousManagedObject {
 
-		private AsynchronousListener listener;
+		private AsynchronousContext listener;
 
 		private volatile boolean isWithinAsynchronousOperation = false;
 
 		@Override
-		public void registerAsynchronousListener(AsynchronousListener listener) {
+		public void setAsynchronousContext(AsynchronousContext listener) {
 			this.listener = listener;
 		}
 

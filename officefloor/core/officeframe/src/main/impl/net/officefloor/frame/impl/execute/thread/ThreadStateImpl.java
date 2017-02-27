@@ -737,6 +737,24 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		 */
 
 		@Override
+		public FunctionState createFunction(FunctionLogic logic, ThreadState fallbackThreadState) {
+
+			// Determine if active thread state
+			if (this.threadState != null) {
+				// Create function on active thread state
+				Flow flow = new FlowImpl(null, this.threadState);
+				return flow.createFunction(logic);
+
+			} else {
+				// External thread, so use fall back thread state
+				synchronized (fallbackThreadState) {
+					Flow flow = new FlowImpl(null, this.threadState);
+					return flow.createFunction(logic);
+				}
+			}
+		}
+
+		@Override
 		public FunctionState executeFunction(FunctionState function) throws Throwable {
 			return this.threadExecute((context) -> function.execute(context));
 		}

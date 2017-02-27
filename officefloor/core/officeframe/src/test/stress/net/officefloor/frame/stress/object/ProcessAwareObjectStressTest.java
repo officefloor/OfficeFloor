@@ -120,7 +120,7 @@ public class ProcessAwareObjectStressTest extends AbstractStressTestCase {
 		}
 
 		@Override
-		public void registerProcessAwareContext(ProcessAwareContext context) {
+		public void setProcessAwareContext(ProcessAwareContext context) {
 			this.context = context;
 		}
 

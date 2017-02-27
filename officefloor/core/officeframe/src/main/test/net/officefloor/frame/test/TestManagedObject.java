@@ -31,7 +31,7 @@ import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
-import net.officefloor.frame.api.managedobject.AsynchronousListener;
+import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -120,7 +120,7 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 	public RuntimeException bindNameAwareFailure = null;
 
 	/**
-	 * Possible failure in registering the {@link AsynchronousListener}.
+	 * Possible failure in registering the {@link AsynchronousContext}.
 	 */
 	public RuntimeException registerAsynchronousListenerFailure = null;
 
@@ -170,9 +170,9 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 	public String boundManagedObjectName = null;
 
 	/**
-	 * {@link AsynchronousListener}.
+	 * {@link AsynchronousContext}.
 	 */
-	public AsynchronousListener asynchronousListener = null;
+	public AsynchronousContext asynchronousListener = null;
 
 	/**
 	 * {@link ObjectRegistry}.
@@ -268,7 +268,7 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 	 */
 
 	@Override
-	public void registerAsynchronousListener(AsynchronousListener listener) {
+	public void setAsynchronousContext(AsynchronousContext listener) {
 		this.asynchronousListener = listener;
 
 		// Propagate possible failure
@@ -296,7 +296,7 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 	 */
 
 	@Override
-	public void registerProcessAwareContext(ProcessAwareContext context) {
+	public void setProcessAwareContext(ProcessAwareContext context) {
 		this.processAwareContext = context;
 	}
 

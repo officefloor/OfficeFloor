@@ -18,23 +18,33 @@
 package net.officefloor.frame.api.managedobject;
 
 /**
- * Listener to be notified about asynchronous operations by the
+ * Context to be notified about asynchronous operations by the
  * {@link AsynchronousManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AsynchronousListener {
+public interface AsynchronousContext {
 
 	/**
-	 * Indicates the {@link AsynchronousManagedObject} has started an
-	 * asynchronous operation.
+	 * Undertakes an {@link AsynchronousOperation}.
+	 * 
+	 * @param operation
+	 *            Optional operation to be undertaken, once the
+	 *            {@link AsynchronousManagedObject} is registered as started an
+	 *            asynchronous operation. May be <code>null</code>.
 	 */
-	void notifyStarted();
+	<T extends Throwable> void start(AsynchronousOperation<T> operation);
 
 	/**
 	 * Indicates that the {@link AsynchronousManagedObject} has completed and is
 	 * ready for another operation.
+	 * 
+	 * @param operation
+	 *            Optional operation to be undertaken, once the
+	 *            {@link AsynchronousManagedObject} is unregistered from
+	 *            undertaking an asynchronous operation. May be
+	 *            <code>null</code>.
 	 */
-	void notifyComplete();
+	<T extends Throwable> void complete(AsynchronousOperation<T> operation);
 
 }

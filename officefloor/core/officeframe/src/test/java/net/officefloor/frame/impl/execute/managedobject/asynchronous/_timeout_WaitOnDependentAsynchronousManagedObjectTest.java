@@ -20,7 +20,7 @@ package net.officefloor.frame.impl.execute.managedobject.asynchronous;
 import net.officefloor.frame.api.escalate.ManagedObjectOperationTimedOutEscalation;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.managedobject.AsynchronousListener;
+import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -40,7 +40,7 @@ public class _timeout_WaitOnDependentAsynchronousManagedObjectTest extends Abstr
 
 	/**
 	 * Ensure {@link ProcessState} bound {@link AsynchronousManagedObject} stops
-	 * execution until {@link AsynchronousListener} tmes out.
+	 * execution until {@link AsynchronousContext} tmes out.
 	 */
 	public void test_AsynchronousOperation_WaitOn_DependentProcessBound() throws Exception {
 		this.doAsynchronousOperationTest(ManagedObjectScope.PROCESS);
@@ -48,7 +48,7 @@ public class _timeout_WaitOnDependentAsynchronousManagedObjectTest extends Abstr
 
 	/**
 	 * Ensure {@link ThreadState} bound {@link AsynchronousManagedObject} stops
-	 * execution until {@link AsynchronousListener} tmes out.
+	 * execution until {@link AsynchronousContext} tmes out.
 	 */
 	public void test_AsynchronousOperation_WaitOn_DependentThreadBound() throws Exception {
 		this.doAsynchronousOperationTest(ManagedObjectScope.THREAD);
@@ -56,7 +56,7 @@ public class _timeout_WaitOnDependentAsynchronousManagedObjectTest extends Abstr
 
 	/**
 	 * Ensure {@link ManagedFunction} bound {@link AsynchronousManagedObject}
-	 * stops execution until {@link AsynchronousListener} tmes out.
+	 * stops execution until {@link AsynchronousContext} tmes out.
 	 */
 	public void test_AsynchronousOperation_WaitOn_DependentFunctionBound() throws Exception {
 		this.doAsynchronousOperationTest(ManagedObjectScope.FUNCTION);
@@ -137,7 +137,7 @@ public class _timeout_WaitOnDependentAsynchronousManagedObjectTest extends Abstr
 
 		public void task(TestObject object) {
 			this.isTaskInvoked = true;
-			_timeout_WaitOnDependentAsynchronousManagedObjectTest.this.dependency.asynchronousListener.notifyStarted();
+			_timeout_WaitOnDependentAsynchronousManagedObjectTest.this.dependency.asynchronousListener.start(null);
 		}
 
 		public void next() {

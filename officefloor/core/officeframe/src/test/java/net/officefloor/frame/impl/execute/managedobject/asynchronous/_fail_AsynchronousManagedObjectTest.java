@@ -17,21 +17,21 @@
  */
 package net.officefloor.frame.impl.execute.managedobject.asynchronous;
 
-import net.officefloor.frame.api.managedobject.AsynchronousListener;
+import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.TestObject;
 
 /**
- * Ensure issue if register {@link AsynchronousListener} fails.
+ * Ensure issue if register {@link AsynchronousContext} fails.
  *
  * @author Daniel Sagenschneider
  */
 public class _fail_AsynchronousManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Ensure handle failure to register {@link AsynchronousListener}.
+	 * Ensure handle failure to register {@link AsynchronousContext}.
 	 */
 	public void testHandleFailureToRegisterAsynchronousListener() throws Exception {
 

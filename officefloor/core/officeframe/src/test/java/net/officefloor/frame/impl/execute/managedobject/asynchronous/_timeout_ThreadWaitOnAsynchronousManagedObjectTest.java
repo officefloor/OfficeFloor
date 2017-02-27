@@ -102,13 +102,13 @@ public class _timeout_ThreadWaitOnAsynchronousManagedObjectTest extends Abstract
 		public List<Throwable> escalations = new ArrayList<>();
 
 		public boolean isNextInvoked = false;
-		
+
 		public int flowsInvoked = 0;
 
 		public void trigger(Integer numberOfFlows, TestObject object, ReflectiveFlow flow) {
 
 			// Trigger asynchronous operation (that will timeout)
-			object.asynchronousListener.notifyStarted();
+			object.asynchronousListener.start(null);
 
 			for (int i = 0; i < numberOfFlows; i++) {
 				flow.doFlow(null, (escalation) -> {
@@ -119,7 +119,7 @@ public class _timeout_ThreadWaitOnAsynchronousManagedObjectTest extends Abstract
 			}
 			this.isTriggered = true;
 		}
-		
+
 		public void next(TestObject object) {
 			this.isNextInvoked = true;
 		}

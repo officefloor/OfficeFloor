@@ -19,7 +19,7 @@ package net.officefloor.frame.impl.execute.governance;
 
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.governance.Governance;
-import net.officefloor.frame.api.managedobject.AsynchronousListener;
+import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
@@ -42,7 +42,7 @@ public class DelayGovernanceForManagedObjectTest extends AbstractOfficeConstruct
 
 	/**
 	 * Ensure delay {@link Governance} until {@link ProcessState} bound
-	 * {@link AsynchronousListener} is complete.
+	 * {@link AsynchronousContext} is complete.
 	 */
 	public void testDelayGovernanceDueToAsynchronousOperation_boundTo_Process() throws Exception {
 		this.doDelayGovernanceDueToAsynchronousOperationTest(ManagedObjectScope.PROCESS);
@@ -50,7 +50,7 @@ public class DelayGovernanceForManagedObjectTest extends AbstractOfficeConstruct
 
 	/**
 	 * Ensure delay {@link Governance} until {@link ThreadState} bound
-	 * {@link AsynchronousListener} is complete.
+	 * {@link AsynchronousContext} is complete.
 	 */
 	public void testDelayGovernanceDueToAsynchronousOperation_boundTo_Thread() throws Exception {
 		this.doDelayGovernanceDueToAsynchronousOperationTest(ManagedObjectScope.THREAD);
@@ -58,14 +58,14 @@ public class DelayGovernanceForManagedObjectTest extends AbstractOfficeConstruct
 
 	/**
 	 * Ensure delay {@link Governance} until {@link ManagedFunctionContainer}
-	 * bound {@link AsynchronousListener} is complete.
+	 * bound {@link AsynchronousContext} is complete.
 	 */
 	public void testDelayGovernanceDueToAsynchronousOperation_boundTo_Function() throws Exception {
 		this.doDelayGovernanceDueToAsynchronousOperationTest(ManagedObjectScope.FUNCTION);
 	}
 
 	/**
-	 * Ensure delay {@link Governance} until {@link AsynchronousListener}
+	 * Ensure delay {@link Governance} until {@link AsynchronousContext}
 	 * complete.
 	 */
 	private void doDelayGovernanceDueToAsynchronousOperationTest(ManagedObjectScope scope) throws Exception {
@@ -100,19 +100,19 @@ public class DelayGovernanceForManagedObjectTest extends AbstractOfficeConstruct
 		this.validateReflectiveMethodOrder("register");
 
 		// Continue to execute task
-		object.asynchronousListener.notifyComplete();
+		object.asynchronousListener.complete(null);
 		complete.assertNotComplete();
 		this.validateReflectiveMethodOrder("register", "task");
 
 		// Continue to enforce governance
-		object.asynchronousListener.notifyComplete();
+		object.asynchronousListener.complete(null);
 		complete.assertComplete();
 		this.validateReflectiveMethodOrder("register", "task", "enforce");
 	}
 
 	/**
 	 * Ensure delay {@link Governance} until a {@link ProcessState} bound
-	 * dependent {@link AsynchronousListener} is complete.
+	 * dependent {@link AsynchronousContext} is complete.
 	 */
 	public void testDelayGovernanceDueToDependencyAsynchronousOperation_boundTo_Process() throws Exception {
 		this.doDelayGovernanceDueToDependencyAsynchronousOperationTest(ManagedObjectScope.PROCESS);
@@ -120,7 +120,7 @@ public class DelayGovernanceForManagedObjectTest extends AbstractOfficeConstruct
 
 	/**
 	 * Ensure delay {@link Governance} until a {@link ThreadState} bound
-	 * dependent {@link AsynchronousListener} is complete.
+	 * dependent {@link AsynchronousContext} is complete.
 	 */
 	public void testDelayGovernanceDueToDependencyAsynchronousOperation_boundTo_Thread() throws Exception {
 		this.doDelayGovernanceDueToDependencyAsynchronousOperationTest(ManagedObjectScope.THREAD);
@@ -128,7 +128,7 @@ public class DelayGovernanceForManagedObjectTest extends AbstractOfficeConstruct
 
 	/**
 	 * Ensure delay {@link Governance} until a {@link ManagedFunctionContainer}
-	 * bound dependent {@link AsynchronousListener} is complete.
+	 * bound dependent {@link AsynchronousContext} is complete.
 	 */
 	public void testDelayGovernanceDueToDependencyAsynchronousOperation_boundTo_Function() throws Exception {
 		this.doDelayGovernanceDueToDependencyAsynchronousOperationTest(ManagedObjectScope.FUNCTION);
@@ -136,7 +136,7 @@ public class DelayGovernanceForManagedObjectTest extends AbstractOfficeConstruct
 
 	/**
 	 * Ensure delay {@link Governance} until dependent
-	 * {@link AsynchronousListener} complete.
+	 * {@link AsynchronousContext} complete.
 	 */
 	private void doDelayGovernanceDueToDependencyAsynchronousOperationTest(ManagedObjectScope scope) throws Exception {
 
@@ -199,13 +199,13 @@ public class DelayGovernanceForManagedObjectTest extends AbstractOfficeConstruct
 		ensureNotRecycled.run();
 
 		// Continue to execute task
-		transitiveDependentObject.asynchronousListener.notifyComplete();
+		transitiveDependentObject.asynchronousListener.complete(null);
 		complete.assertNotComplete();
 		this.validateReflectiveMethodOrder("register", "task");
 		ensureNotRecycled.run();
 
 		// Continue to enforce governance
-		transitiveDependentObject.asynchronousListener.notifyComplete();
+		transitiveDependentObject.asynchronousListener.complete(null);
 		complete.assertComplete();
 		this.validateReflectiveMethodOrder("register", "task", "enforce");
 		assertNotNull("Used managed object should be recycled", object.recycledManagedObject);
@@ -225,7 +225,7 @@ public class DelayGovernanceForManagedObjectTest extends AbstractOfficeConstruct
 		}
 
 		public void task(TestObject object) {
-			this.object.asynchronousListener.notifyStarted();
+			this.object.asynchronousListener.start(null);
 		}
 	}
 
@@ -244,7 +244,7 @@ public class DelayGovernanceForManagedObjectTest extends AbstractOfficeConstruct
 			if (this.object != null) {
 				object = this.object;
 			}
-			object.asynchronousListener.notifyStarted();
+			object.asynchronousListener.start(null);
 		}
 
 		public void enforce(TestObject[] extensions) {

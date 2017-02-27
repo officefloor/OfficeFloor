@@ -26,6 +26,8 @@ import net.officefloor.frame.api.escalate.Escalation;
  */
 public interface ThreadContext {
 
+	FunctionState createFunction(FunctionLogic logic, ThreadState fallbackThreadState);
+	
 	/**
 	 * Executes the {@link FunctionState} returning the next
 	 * {@link FunctionState} to execute.

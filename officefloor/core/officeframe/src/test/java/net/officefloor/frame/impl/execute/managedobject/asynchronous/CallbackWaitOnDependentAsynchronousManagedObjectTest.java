@@ -19,7 +19,7 @@ package net.officefloor.frame.impl.execute.managedobject.asynchronous;
 
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.api.managedobject.AsynchronousListener;
+import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -40,7 +40,7 @@ public class CallbackWaitOnDependentAsynchronousManagedObjectTest extends Abstra
 
 	/**
 	 * Ensure {@link ProcessState} bound {@link AsynchronousManagedObject} stops
-	 * {@link FlowCallback} until {@link AsynchronousListener} flags completion.
+	 * {@link FlowCallback} until {@link AsynchronousContext} flags completion.
 	 */
 	public void test_Callback_WaitOn_AsynchronousDependentProcessBound() throws Exception {
 		this.doAsynchronousCallbackTest(ManagedObjectScope.PROCESS);
@@ -48,7 +48,7 @@ public class CallbackWaitOnDependentAsynchronousManagedObjectTest extends Abstra
 
 	/**
 	 * Ensure {@link ThreadState} bound {@link AsynchronousManagedObject} stops
-	 * {@link FlowCallback} until {@link AsynchronousListener} flags completion.
+	 * {@link FlowCallback} until {@link AsynchronousContext} flags completion.
 	 */
 	public void test_Callback_WaitOn_AsynchronousDependentThreadBound() throws Exception {
 		this.doAsynchronousCallbackTest(ManagedObjectScope.THREAD);
@@ -56,7 +56,7 @@ public class CallbackWaitOnDependentAsynchronousManagedObjectTest extends Abstra
 
 	/**
 	 * Ensure {@link ManagedFunction} bound {@link AsynchronousManagedObject}
-	 * stops {@link FlowCallback} until {@link AsynchronousListener} flags
+	 * stops {@link FlowCallback} until {@link AsynchronousContext} flags
 	 * completion.
 	 */
 	public void test_Callback_WaitOn_AsynchronousDependentFunctionBound() throws Exception {
@@ -101,7 +101,7 @@ public class CallbackWaitOnDependentAsynchronousManagedObjectTest extends Abstra
 		complete.assertNotComplete();
 
 		// Complete the asynchronous operation
-		asynchronous.asynchronousListener.notifyComplete();
+		asynchronous.asynchronousListener.complete(null);
 
 		// Callback should now be invoked
 		assertTrue("Callback should now complete", work.isCallbackInvoked);
@@ -127,7 +127,7 @@ public class CallbackWaitOnDependentAsynchronousManagedObjectTest extends Abstra
 
 		public void task(TestObject object, ReflectiveFlow spawn) {
 			this.isTaskInvoked = true;
-			this.dependency.asynchronousListener.notifyStarted();
+			this.dependency.asynchronousListener.start(null);
 
 			spawn.doFlow(this.dependency, (escalation) -> {
 				this.isCallbackInvoked = true;

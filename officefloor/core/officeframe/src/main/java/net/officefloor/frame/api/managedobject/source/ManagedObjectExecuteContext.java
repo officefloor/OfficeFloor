@@ -19,7 +19,7 @@ package net.officefloor.frame.api.managedobject.source;
 
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.api.managedobject.AsynchronousListener;
+import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
@@ -36,9 +36,9 @@ import net.officefloor.frame.internal.structure.ProcessState;
  * dependencies to be instantiated.</li>
  * <li>The {@link ManagedObject} passed to the invocation will go through a full
  * life-cycle so be careful passing in an existing initialised
- * {@link ManagedObject}. For example the {@link AsynchronousListener} instance
+ * {@link ManagedObject}. For example the {@link AsynchronousContext} instance
  * will be overwritten which will likely cause live-lock as the
- * {@link AsynchronousListener#notifyComplete()} will notify on the wrong
+ * {@link AsynchronousContext#notifyComplete()} will notify on the wrong
  * {@link ManagedObjectContainer}.</li>
  * </ol>
  * 

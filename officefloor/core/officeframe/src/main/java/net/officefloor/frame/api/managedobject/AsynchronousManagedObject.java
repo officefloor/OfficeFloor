@@ -31,13 +31,13 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 public interface AsynchronousManagedObject extends ManagedObject {
 
 	/**
-	 * Provides the {@link AsynchronousListener} to the
+	 * Provides the {@link AsynchronousContext} to the
 	 * {@link AsynchronousManagedObject} to enable call back to notify state and
 	 * completion of asynchronous processing.
 	 * 
-	 * @param listener
-	 *            {@link AsynchronousListener}.
+	 * @param context
+	 *            {@link AsynchronousContext}.
 	 */
-	void registerAsynchronousListener(AsynchronousListener listener);
+	void setAsynchronousContext(AsynchronousContext context);
 
 }

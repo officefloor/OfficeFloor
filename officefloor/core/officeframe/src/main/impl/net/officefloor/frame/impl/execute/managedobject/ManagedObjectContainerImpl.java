@@ -17,14 +17,17 @@
  */
 package net.officefloor.frame.impl.execute.managedobject;
 
+import java.util.Deque;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.logging.Level;
 
 import net.officefloor.frame.api.escalate.FailedToSourceManagedObjectEscalation;
 import net.officefloor.frame.api.escalate.ManagedObjectOperationTimedOutEscalation;
 import net.officefloor.frame.api.escalate.SourceManagedObjectTimedOutEscalation;
 import net.officefloor.frame.api.governance.Governance;
-import net.officefloor.frame.api.managedobject.AsynchronousListener;
+import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.AsynchronousOperation;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
@@ -39,6 +42,7 @@ import net.officefloor.frame.impl.execute.function.AbstractDelegateFunctionState
 import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
+import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
@@ -58,6 +62,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectReadyCheck;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.RegisteredGovernance;
 import net.officefloor.frame.internal.structure.TeamManagement;
+import net.officefloor.frame.internal.structure.ThreadContext;
 import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
@@ -163,6 +168,12 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	private Throwable failure = null;
 
 	/**
+	 * Indicates the {@link ManagedObjectContainer} requires {@link ThreadState}
+	 * safety.
+	 */
+	private boolean isRequireThreadStateSafety = false;
+
+	/**
 	 * Time that an asynchronous operation was started by the
 	 * {@link ManagedObject}.
 	 */
@@ -222,6 +233,12 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		this.containerState = ManagedObjectContainerState.LOADED;
 
 		try {
+
+			// Provide process awareness if process aware
+			if (this.metaData.isProcessAwareManagedObject()) {
+				((ProcessAwareManagedObject) this.managedObject).setProcessAwareContext(new ProcessAwareContextImpl());
+			}
+
 			// Provide bound name if name aware
 			if (this.metaData.isNameAwareManagedObject()) {
 				((NameAwareManagedObject) this.managedObject)
@@ -230,8 +247,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 
 			// Provide listener if asynchronous managed object
 			if (this.metaData.isManagedObjectAsynchronous()) {
-				((AsynchronousManagedObject) this.managedObject)
-						.registerAsynchronousListener(new AsynchronousListenerImpl());
+				((AsynchronousManagedObject) this.managedObject).setAsynchronousContext(new AsynchronousContextImpl());
 			}
 		} catch (Throwable ex) {
 			// Flag failure to handle later when Job attempts to use it
@@ -385,6 +401,9 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 				// Determine if loaded managed object
 				if (container.managedObject == null) {
 
+					// Require thread state safety to load managed object
+					container.isRequireThreadStateSafety = true;
+
 					// Record time that attempted to source the managed object
 					container.asynchronousStartTime = container.metaData.getOfficeClock().currentTimeMillis();
 
@@ -412,7 +431,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 					// Provide process awareness if process aware
 					if (container.metaData.isProcessAwareManagedObject()) {
 						((ProcessAwareManagedObject) container.managedObject)
-								.registerProcessAwareContext(new ProcessAwareContextImpl());
+								.setProcessAwareContext(new ProcessAwareContextImpl());
 					}
 
 					// Provide bound name if name aware
@@ -425,7 +444,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 					// Provide listener if asynchronous managed object
 					if (container.metaData.isManagedObjectAsynchronous()) {
 						((AsynchronousManagedObject) container.managedObject)
-								.registerAsynchronousListener(new AsynchronousListenerImpl());
+								.setAsynchronousContext(new AsynchronousContextImpl());
 						isCheckReady = true;
 					}
 
@@ -643,18 +662,55 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	}
 
 	/**
-	 * {@link AsynchronousListener} implementation.
+	 * Asynchronous {@link FunctionState}.
 	 */
-	private class AsynchronousListenerImpl implements AsynchronousListener {
+	private class AsynchronousFunction extends ManagedObjectOperation {
+
+		/**
+		 * {@link FunctionState} instances for asynchronous operations.
+		 */
+		private final Deque<FunctionState> functions = new ConcurrentLinkedDeque<>();
 
 		@Override
-		public void notifyStarted() {
-			ManagedObjectOperation notifyStarted = new ManagedObjectOperation() {
+		public FunctionState execute(FunctionContext context) throws Throwable {
+
+			// Remove all the functions for execution
+			FunctionState asynchronousFunctions = null;
+			while (!this.functions.isEmpty()) {
+				asynchronousFunctions = Promise.then(asynchronousFunctions, this.functions.remove());
+			}
+
+			// Undertake the asynchronous operations
+			return asynchronousFunctions;
+		}
+	}
+
+	/**
+	 * {@link AsynchronousContext} implementation.
+	 */
+	private class AsynchronousContextImpl implements AsynchronousContext {
+
+		/**
+		 * {@link AsynchronousFunction}.
+		 */
+		private final AsynchronousFunction asynchronousFunction = new AsynchronousFunction();
+
+		@Override
+		public <T extends Throwable> void start(AsynchronousOperation<T> operation) {
+
+			// Easy access to the container
+			ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
+
+			// Require thread state safety, as different threads
+			container.isRequireThreadStateSafety = true;
+
+			// Start asynchronous operation
+			FunctionState function = new ManagedObjectOperation() {
 				@Override
 				public FunctionState execute(FunctionContext context) {
 
-					// Easy access to the container
-					ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
+					// Ensure also thread state safety to complete
+					container.isRequireThreadStateSafety = true;
 
 					// Ignore starting operation if in failed state
 					if (container.failure != null) {
@@ -672,32 +728,65 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 
 				}
 			};
-			ManagedObjectContainerImpl.this.doOperation(notifyStarted);
+
+			// Undertake the asynchronous operation
+			function = Promise.then(function, this.createAsynchronousFunction(operation));
+			this.asynchronousFunction.functions.add(function);
+			container.doOperation(this.asynchronousFunction);
 		}
 
 		@Override
-		public void notifyComplete() {
-			ManagedObjectOperation notifyComplete = new ManagedObjectOperation() {
+		public <T extends Throwable> void complete(AsynchronousOperation<T> operation) {
+
+			// Easy access to the container
+			ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
+
+			// Complete asynchronous operation
+			FunctionState function = new ManagedObjectOperation() {
 				@Override
 				public FunctionState execute(FunctionContext context) {
 
-					// Easy access to the container
-					ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
+					// Flag no asynchronous operation occurring
+					container.asynchronousStartTime = NO_ASYNC_OPERATION;
 
 					// Ignore completing operation if in failed state
 					if (container.failure != null) {
 						return null;
 					}
 
-					// Flag no asynchronous operation occurring
-					container.asynchronousStartTime = NO_ASYNC_OPERATION;
-
 					// Release functions waiting on the asynchronous operation
 					container.operationsLatch.releaseFunctions(false);
 					return null;
 				}
 			};
-			ManagedObjectContainerImpl.this.doOperation(notifyComplete);
+
+			// Undertake the asynchronous operation
+			function = Promise.then(function, this.createAsynchronousFunction(operation));
+			this.asynchronousFunction.functions.add(function);
+			container.doOperation(this.asynchronousFunction);
+		}
+
+		/**
+		 * Create the {@link FunctionState} for the
+		 * {@link AsynchronousOperation}.
+		 * 
+		 * @param operation
+		 *            {@link AsynchronousOperation}.
+		 * @return {@link FunctionState} for the {@link AsynchronousOperation}.
+		 */
+		private <T extends Throwable> FunctionState createAsynchronousFunction(AsynchronousOperation<T> operation) {
+
+			// Ensure have operation
+			if (operation == null) {
+				return null;
+			}
+
+			// Obtain the thread state for the function
+			ThreadContext threadContext = ThreadStateImpl.currentThreadContext();
+			return threadContext.createFunction((flow) -> {
+				operation.run();
+				return null;
+			}, ManagedObjectContainerImpl.this.responsibleThreadState);
 		}
 	}
 
@@ -1059,6 +1148,23 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	 */
 	private abstract class ManagedObjectOperation extends AbstractLinkedListSetEntry<FunctionState, Flow>
 			implements FunctionState {
+
+		/**
+		 * Indicates if requires {@link ThreadState} safety.
+		 */
+		private final boolean isRequireThreadStateSafety;
+
+		/**
+		 * Instantiate capturing requirement for {@link ThreadState} safety.
+		 */
+		public ManagedObjectOperation() {
+			this.isRequireThreadStateSafety = ManagedObjectContainerImpl.this.isRequireThreadStateSafety;
+		}
+
+		@Override
+		public boolean isRequireThreadStateSafety() {
+			return this.isRequireThreadStateSafety;
+		}
 
 		@Override
 		public ThreadState getThreadState() {

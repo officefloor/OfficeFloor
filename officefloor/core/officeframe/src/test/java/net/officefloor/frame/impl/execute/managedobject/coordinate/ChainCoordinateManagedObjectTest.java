@@ -25,7 +25,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.api.managedobject.AsynchronousListener;
+import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -44,9 +44,9 @@ import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 public class ChainCoordinateManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * {@link AsynchronousListener} instances to trigger.
+	 * {@link AsynchronousContext} instances to trigger.
 	 */
-	private static final List<AsynchronousListener> listeners = new ArrayList<AsynchronousListener>();
+	private static final List<AsynchronousContext> listeners = new ArrayList<AsynchronousContext>();
 
 	/**
 	 * Ensure that {@link CoordinatingManagedObject} can depend on another
@@ -103,8 +103,8 @@ public class ChainCoordinateManagedObjectTest extends AbstractOfficeConstructTes
 			// Ensure have completion listener
 			// (otherwise should be complete)
 			assertTrue("Should have completion listener", listeners.size() == 1);
-			AsynchronousListener listener = listeners.remove(0);
-			listener.notifyComplete();
+			AsynchronousContext listener = listeners.remove(0);
+			listener.complete(null);
 		}
 
 		// Verify the resulting coordination
@@ -213,9 +213,9 @@ public class ChainCoordinateManagedObjectTest extends AbstractOfficeConstructTes
 		private final boolean isObtainDependency;
 
 		/**
-		 * {@link AsynchronousListener}.
+		 * {@link AsynchronousContext}.
 		 */
-		private AsynchronousListener listener;
+		private AsynchronousContext listener;
 
 		/**
 		 * Dependency.
@@ -240,7 +240,7 @@ public class ChainCoordinateManagedObjectTest extends AbstractOfficeConstructTes
 		 */
 
 		@Override
-		public void registerAsynchronousListener(AsynchronousListener listener) {
+		public void setAsynchronousContext(AsynchronousContext listener) {
 			this.listener = listener;
 		}
 
@@ -253,7 +253,7 @@ public class ChainCoordinateManagedObjectTest extends AbstractOfficeConstructTes
 			}
 
 			// Trigger asynchronous operation (so continues coordinating)
-			this.listener.notifyStarted();
+			this.listener.start(null);
 
 			// Register the lister for triggering completion
 			listeners.add(this.listener);

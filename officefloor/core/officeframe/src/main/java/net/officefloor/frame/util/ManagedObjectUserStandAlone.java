@@ -21,8 +21,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.frame.api.escalate.SourceManagedObjectTimedOutEscalation;
-import net.officefloor.frame.api.managedobject.AsynchronousListener;
+import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.AsynchronousOperation;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
@@ -37,8 +38,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
  * @author Daniel Sagenschneider
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class ManagedObjectUserStandAlone implements ManagedObjectUser,
-		AsynchronousListener, ObjectRegistry {
+public class ManagedObjectUserStandAlone implements ManagedObjectUser, AsynchronousContext, ObjectRegistry {
 
 	/**
 	 * Object to synchronise sourcing the {@link ManagedObject}.
@@ -67,9 +67,9 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser,
 	private String boundManagedObjectName = "STAND_ALONE";
 
 	/**
-	 * {@link AsynchronousListener} for an {@link AsynchronousManagedObject}.
+	 * {@link AsynchronousContext} for an {@link AsynchronousManagedObject}.
 	 */
-	private AsynchronousListener asynchronousListener = this;
+	private AsynchronousContext asynchronousListener = this;
 
 	/**
 	 * {@link ObjectRegistry} for a {@link CoordinatingManagedObject}.
@@ -102,13 +102,13 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser,
 	}
 
 	/**
-	 * Allows overriding the {@link AsynchronousListener} to initialise an
+	 * Allows overriding the {@link AsynchronousContext} to initialise an
 	 * {@link AsynchronousManagedObject}.
 	 * 
 	 * @param listener
-	 *            {@link AsynchronousListener}.
+	 *            {@link AsynchronousContext}.
 	 */
-	public void setAsynchronousListener(AsynchronousListener listener) {
+	public void setAsynchronousListener(AsynchronousContext listener) {
 		this.asynchronousListener = listener;
 	}
 
@@ -156,8 +156,7 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser,
 	 * @throws Throwable
 	 *             If fails to source the {@link ManagedObject}.
 	 */
-	public ManagedObject sourceManagedObject(ManagedObjectSource<?, ?> source)
-			throws Throwable {
+	public ManagedObject sourceManagedObject(ManagedObjectSource<?, ?> source) throws Throwable {
 		return sourceManagedObject(source, true);
 	}
 
@@ -174,8 +173,8 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser,
 	 * @throws Throwable
 	 *             If fails to source the {@link ManagedObject}.
 	 */
-	public synchronized ManagedObject sourceManagedObject(
-			ManagedObjectSource<?, ?> source, boolean isWait) throws Throwable {
+	public synchronized ManagedObject sourceManagedObject(ManagedObjectSource<?, ?> source, boolean isWait)
+			throws Throwable {
 
 		// Method synchronised so can only load one at time.
 		try {
@@ -206,8 +205,7 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser,
 					long currentTime = System.currentTimeMillis();
 					if ((currentTime - sourceStartTime) > this.sourceTimeout) {
 						// Taken too long to source
-						throw new SourceManagedObjectTimedOutEscalation(
-								Object.class);
+						throw new SourceManagedObjectTimedOutEscalation(Object.class);
 					}
 
 					// Not timed out, so wait some time for sourcing
@@ -224,20 +222,17 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser,
 			// Have managed object so determine if name aware
 			if (mo instanceof NameAwareManagedObject) {
 				// Provide the bound name
-				((NameAwareManagedObject) mo)
-						.setBoundManagedObjectName(this.boundManagedObjectName);
+				((NameAwareManagedObject) mo).setBoundManagedObjectName(this.boundManagedObjectName);
 			}
 
 			// Provide asynchronous listener
 			if (mo instanceof AsynchronousManagedObject) {
-				((AsynchronousManagedObject) mo)
-						.registerAsynchronousListener(this.asynchronousListener);
+				((AsynchronousManagedObject) mo).setAsynchronousContext(this.asynchronousListener);
 			}
 
 			// Coordinate if required
 			if (mo instanceof CoordinatingManagedObject) {
-				((CoordinatingManagedObject) mo)
-						.loadObjects(this.objectRegistry);
+				((CoordinatingManagedObject) mo).loadObjects(this.objectRegistry);
 			}
 
 			// Return the managed object
@@ -269,20 +264,29 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser,
 	}
 
 	/*
-	 * ===================== AsynchronousListener =========================
+	 * ===================== AsynchronousContext =========================
 	 */
 
 	@Override
-	public void notifyStarted() {
+	public <T extends Throwable> void start(AsynchronousOperation<T> operation) {
 		// Provide output to hint nothing happens
-		System.out.println(this.getClass().getSimpleName() + ": notifyStarted");
+		System.out.println(this.getClass().getSimpleName() + ": start");
+		try {
+			operation.run();
+		} catch (Throwable ex) {
+			ex.printStackTrace();
+		}
 	}
 
 	@Override
-	public void notifyComplete() {
+	public <T extends Throwable> void complete(AsynchronousOperation<T> operation) {
 		// Provide output to hint nothing happens
-		System.out
-				.println(this.getClass().getSimpleName() + ": notifyComplete");
+		System.out.println(this.getClass().getSimpleName() + ": complete");
+		try {
+			operation.run();
+		} catch (Throwable ex) {
+			ex.printStackTrace();
+		}
 	}
 
 	/*
@@ -300,8 +304,7 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser,
 		// Obtain the dependency
 		Object dependency = this.dependencies.get(new Integer(index));
 		if (dependency == null) {
-			throw new IllegalStateException(
-					"No dependency configured for index " + index);
+			throw new IllegalStateException("No dependency configured for index " + index);
 		}
 
 		// Return the dependency

@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,27 +17,21 @@
  */
 package net.officefloor.frame.api.managedobject;
 
-import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.api.escalate.Escalation;
 
 /**
- * <p>
- * Enables the {@link ManagedObject} to undertake {@link ProcessSafeOperation}
- * instances.
- * <p>
- * This should be the preferred means to undertake any {@link ProcessState}
- * critical sections, as locks are only obtained if required. This,
- * subsequently, reduces {@link Thread} overheads and improves performance.
- *
+ * Asynchronous operation.
+ * 
  * @author Daniel Sagenschneider
  */
-public interface ProcessAwareManagedObject extends ManagedObject {
+public interface AsynchronousOperation<T extends Throwable> {
 
 	/**
-	 * Provides the {@link ProcessAwareContext} to the {@link ManagedObject}.
+	 * Undertakes the asynchronous operation.
 	 * 
-	 * @param context
-	 *            {@link ProcessAwareContext}.
+	 * @throws E
+	 *             Possible {@link Escalation}.
 	 */
-	void setProcessAwareContext(ProcessAwareContext context);
+	void run() throws T;
 
 }

@@ -65,7 +65,7 @@ public class ThreadWaitOnAsynchronousManagedObjectTest extends AbstractOfficeCon
 		assertEquals("Flows should be waitin on asynchronous operation", 0, work.flowsInvoked);
 
 		// Complete asynchronous operation
-		object.asynchronousListener.notifyComplete();
+		object.asynchronousListener.complete(null);
 		assertEquals("Flows should now be invoked", numberOfFlows, work.flowsInvoked);
 		assertEquals("Flows should also complete", numberOfFlows, work.flowsComplete);
 		assertTrue("Process should also complete", isComplete.value);
@@ -83,7 +83,7 @@ public class ThreadWaitOnAsynchronousManagedObjectTest extends AbstractOfficeCon
 		public int flowsComplete = 0;
 
 		public void trigger(Integer numberOfFlows, TestObject object, ReflectiveFlow flow) {
-			object.asynchronousListener.notifyStarted();
+			object.asynchronousListener.start(null);
 			for (int i = 0; i < numberOfFlows; i++) {
 				flow.doFlow(null, (escalation) -> this.flowsComplete++);
 			}
