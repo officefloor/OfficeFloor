@@ -172,7 +172,7 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 	/**
 	 * {@link AsynchronousContext}.
 	 */
-	public AsynchronousContext asynchronousListener = null;
+	public AsynchronousContext asynchronousContext = null;
 
 	/**
 	 * {@link ObjectRegistry}.
@@ -269,7 +269,7 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 
 	@Override
 	public void setAsynchronousContext(AsynchronousContext listener) {
-		this.asynchronousListener = listener;
+		this.asynchronousContext = listener;
 
 		// Propagate possible failure
 		if (this.registerAsynchronousListenerFailure != null) {

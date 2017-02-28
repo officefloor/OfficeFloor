@@ -135,7 +135,7 @@ public class _timeout_WaitOnAsynchronousManagedObjectTest extends AbstractOffice
 
 		public void task(TestObject object) {
 			this.isTaskInvoked = true;
-			object.asynchronousListener.start(null);
+			object.asynchronousContext.start(null);
 		}
 
 		public void next() {

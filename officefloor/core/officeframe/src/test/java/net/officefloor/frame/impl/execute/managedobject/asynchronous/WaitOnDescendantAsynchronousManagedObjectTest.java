@@ -114,7 +114,7 @@ public class WaitOnDescendantAsynchronousManagedObjectTest extends AbstractOffic
 		assertFalse("Process should not be complete", isComplete.value);
 
 		// Complete the asynchronous operation
-		asynchronous.asynchronousListener.complete(null);
+		asynchronous.asynchronousContext.complete(null);
 
 		// Wait should now complete
 		assertTrue("Wait should now complete", work.isAwaitInvoked);
@@ -140,7 +140,7 @@ public class WaitOnDescendantAsynchronousManagedObjectTest extends AbstractOffic
 
 		public void task(TestObject object) {
 			this.isTaskInvoked = true;
-			this.dependency.asynchronousListener.start(null);
+			this.dependency.asynchronousContext.start(null);
 		}
 
 		public void next() {

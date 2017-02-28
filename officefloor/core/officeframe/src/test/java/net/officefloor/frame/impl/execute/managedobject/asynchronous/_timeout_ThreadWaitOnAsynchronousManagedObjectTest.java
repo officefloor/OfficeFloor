@@ -108,7 +108,7 @@ public class _timeout_ThreadWaitOnAsynchronousManagedObjectTest extends Abstract
 		public void trigger(Integer numberOfFlows, TestObject object, ReflectiveFlow flow) {
 
 			// Trigger asynchronous operation (that will timeout)
-			object.asynchronousListener.start(null);
+			object.asynchronousContext.start(null);
 
 			for (int i = 0; i < numberOfFlows; i++) {
 				flow.doFlow(null, (escalation) -> {

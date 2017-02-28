@@ -100,12 +100,12 @@ public class DelayGovernanceForManagedObjectTest extends AbstractOfficeConstruct
 		this.validateReflectiveMethodOrder("register");
 
 		// Continue to execute task
-		object.asynchronousListener.complete(null);
+		object.asynchronousContext.complete(null);
 		complete.assertNotComplete();
 		this.validateReflectiveMethodOrder("register", "task");
 
 		// Continue to enforce governance
-		object.asynchronousListener.complete(null);
+		object.asynchronousContext.complete(null);
 		complete.assertComplete();
 		this.validateReflectiveMethodOrder("register", "task", "enforce");
 	}
@@ -199,13 +199,13 @@ public class DelayGovernanceForManagedObjectTest extends AbstractOfficeConstruct
 		ensureNotRecycled.run();
 
 		// Continue to execute task
-		transitiveDependentObject.asynchronousListener.complete(null);
+		transitiveDependentObject.asynchronousContext.complete(null);
 		complete.assertNotComplete();
 		this.validateReflectiveMethodOrder("register", "task");
 		ensureNotRecycled.run();
 
 		// Continue to enforce governance
-		transitiveDependentObject.asynchronousListener.complete(null);
+		transitiveDependentObject.asynchronousContext.complete(null);
 		complete.assertComplete();
 		this.validateReflectiveMethodOrder("register", "task", "enforce");
 		assertNotNull("Used managed object should be recycled", object.recycledManagedObject);
@@ -225,7 +225,7 @@ public class DelayGovernanceForManagedObjectTest extends AbstractOfficeConstruct
 		}
 
 		public void task(TestObject object) {
-			this.object.asynchronousListener.start(null);
+			this.object.asynchronousContext.start(null);
 		}
 	}
 
@@ -244,7 +244,7 @@ public class DelayGovernanceForManagedObjectTest extends AbstractOfficeConstruct
 			if (this.object != null) {
 				object = this.object;
 			}
-			object.asynchronousListener.start(null);
+			object.asynchronousContext.start(null);
 		}
 
 		public void enforce(TestObject[] extensions) {

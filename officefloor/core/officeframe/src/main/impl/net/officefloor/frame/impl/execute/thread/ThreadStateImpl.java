@@ -27,6 +27,7 @@ import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.impl.execute.flow.FlowImpl;
 import net.officefloor.frame.impl.execute.function.AbstractDelegateFunctionState;
+import net.officefloor.frame.impl.execute.function.AbstractFunctionState;
 import net.officefloor.frame.impl.execute.function.LinkedListSetPromise;
 import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
@@ -742,14 +743,28 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			// Determine if active thread state
 			if (this.threadState != null) {
 				// Create function on active thread state
-				Flow flow = new FlowImpl(null, this.threadState);
-				return flow.createFunction(logic);
+				Flow flow = this.threadState.createFlow(null);
+				FunctionState logicFunction = flow.createFunction(logic);
+				FunctionState completeFlow = new AbstractFunctionState(this.threadState) {
+					@Override
+					public FunctionState execute(FunctionContext context) throws Throwable {
+						return ActiveThreadState.this.threadState.flowComplete(flow, false);
+					}
+				};
+				return Promise.then(logicFunction, completeFlow);
 
 			} else {
 				// External thread, so use fall back thread state
 				synchronized (fallbackThreadState) {
-					Flow flow = new FlowImpl(null, this.threadState);
-					return flow.createFunction(logic);
+					Flow flow = fallbackThreadState.createFlow(null);
+					FunctionState logicFunction = flow.createFunction(logic);
+					FunctionState completeFlow = new AbstractFunctionState(fallbackThreadState) {
+						@Override
+						public FunctionState execute(FunctionContext context) throws Throwable {
+							return fallbackThreadState.flowComplete(flow, false);
+						}
+					};
+					return Promise.then(logicFunction, completeFlow);
 				}
 			}
 		}

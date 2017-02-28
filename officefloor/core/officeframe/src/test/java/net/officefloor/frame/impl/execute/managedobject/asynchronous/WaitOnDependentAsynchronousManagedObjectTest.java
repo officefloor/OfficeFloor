@@ -103,7 +103,7 @@ public class WaitOnDependentAsynchronousManagedObjectTest extends AbstractOffice
 		assertFalse("Process should not be complete", isComplete.value);
 
 		// Complete the asynchronous operation
-		dependency.asynchronousListener.complete(null);
+		dependency.asynchronousContext.complete(null);
 
 		// Wait should now complete
 		assertTrue("Wait should now complete", work.isAwaitInvoked);
@@ -129,7 +129,7 @@ public class WaitOnDependentAsynchronousManagedObjectTest extends AbstractOffice
 
 		public void task(TestObject object) {
 			this.isTaskInvoked = true;
-			this.dependency.asynchronousListener.start(null);
+			this.dependency.asynchronousContext.start(null);
 		}
 
 		public void next() {

@@ -105,7 +105,7 @@ public class WaitOnAsynchronousManagedObjectTest extends AbstractOfficeConstruct
 		assertFalse("Process should not be complete", isComplete.value);
 
 		// Complete the asynchronous operation
-		object.asynchronousListener.complete(null);
+		object.asynchronousContext.complete(null);
 
 		// Wait should now complete
 		assertTrue("Wait should now complete", work.isNextInvoked);
@@ -125,7 +125,7 @@ public class WaitOnAsynchronousManagedObjectTest extends AbstractOfficeConstruct
 
 		public void task(TestObject object) {
 			this.isTaskInvoked = true;
-			object.asynchronousListener.start(null);
+			object.asynchronousContext.start(null);
 		}
 
 		public void next() {

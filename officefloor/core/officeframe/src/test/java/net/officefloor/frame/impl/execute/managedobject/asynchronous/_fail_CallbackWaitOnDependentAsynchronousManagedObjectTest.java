@@ -101,7 +101,7 @@ public class _fail_CallbackWaitOnDependentAsynchronousManagedObjectTest extends 
 		complete.assertNotComplete();
 
 		// Complete the asynchronous operation
-		asynchronous.asynchronousListener.complete(null);
+		asynchronous.asynchronousContext.complete(null);
 
 		// Callback should now be invoked
 		assertTrue("Callback should now complete", work.isCallbackInvoked);
@@ -133,7 +133,7 @@ public class _fail_CallbackWaitOnDependentAsynchronousManagedObjectTest extends 
 
 		public void task(TestObject object, ReflectiveFlow spawn) {
 			this.isTaskInvoked = true;
-			this.dependency.asynchronousListener.start(null);
+			this.dependency.asynchronousContext.start(null);
 
 			spawn.doFlow(this.dependency, (escalation) -> {
 				this.isCallbackInvoked = true;

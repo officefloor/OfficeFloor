@@ -137,7 +137,7 @@ public class _timeout_WaitOnDependentAsynchronousManagedObjectTest extends Abstr
 
 		public void task(TestObject object) {
 			this.isTaskInvoked = true;
-			_timeout_WaitOnDependentAsynchronousManagedObjectTest.this.dependency.asynchronousListener.start(null);
+			_timeout_WaitOnDependentAsynchronousManagedObjectTest.this.dependency.asynchronousContext.start(null);
 		}
 
 		public void next() {
