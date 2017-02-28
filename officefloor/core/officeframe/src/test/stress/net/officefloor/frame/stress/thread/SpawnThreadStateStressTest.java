@@ -50,7 +50,7 @@ public class SpawnThreadStateStressTest extends AbstractStressTestCase {
 
 	@Override
 	protected void constructTest(StressContext context) throws Exception {
-
+		
 		// Break chain (to avoid stack overflow)
 		this.getOfficeBuilder().setMaximumFunctionStateChainLength(1000);
 

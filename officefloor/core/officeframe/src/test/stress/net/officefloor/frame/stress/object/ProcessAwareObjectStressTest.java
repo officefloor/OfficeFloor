@@ -64,7 +64,7 @@ public class ProcessAwareObjectStressTest extends AbstractStressTestCase {
 
 		// Validate (+1 for additional increment to get value)
 		context.setValidation(() -> assertEquals("Incorrect number of increments",
-				(this.getIterationCount() * work.spawnCount) + 1, managedObject.increment()));
+				(context.getMaximumIterations() * work.spawnCount) + 1, managedObject.increment()));
 	}
 
 	/**

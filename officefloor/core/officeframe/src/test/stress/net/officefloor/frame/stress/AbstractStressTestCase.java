@@ -525,8 +525,11 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 				// Load values for testing
 				test.teamName = (teamSourceClass != null ? teamSourceClass.getSimpleName() : null);
 
-				// Obtain the iteration count
+				// Avoid creating too many threads (but allow override)
 				Map<Class<? extends TeamSource>, Integer> iterationCountOverrides = new HashMap<>();
+				iterationCountOverrides.put(WorkerPerJobTeamSource.class, 100);
+
+				// Obtain the iteration count
 				test.overrideIterationCount(iterationCountOverrides);
 				Integer iterationCount = iterationCountOverrides.get(teamSourceClass);
 				if (iterationCount == null) {

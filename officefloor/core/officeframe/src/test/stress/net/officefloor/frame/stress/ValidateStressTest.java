@@ -45,7 +45,7 @@ public class ValidateStressTest extends AbstractStressTestCase {
 		context.loadResponsibleTeam(flow.getBuilder());
 
 		// Indicate start point
-		context.setInitialFunction("task", this.getIterationCount());
+		context.setInitialFunction("task", context.getMaximumIterations());
 	}
 
 	/**
