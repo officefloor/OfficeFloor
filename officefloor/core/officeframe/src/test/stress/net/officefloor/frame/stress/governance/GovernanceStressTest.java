@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.stress.governance;
 
+import junit.framework.TestSuite;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.stress.AbstractStressTestCase;
 
@@ -26,6 +27,10 @@ import net.officefloor.frame.stress.AbstractStressTestCase;
  * @author Daniel Sagenschneider
  */
 public class GovernanceStressTest extends AbstractStressTestCase {
+
+	public static TestSuite suite() {
+		return createSuite(GovernanceStressTest.class);
+	}
 
 	@Override
 	protected void constructTest(StressContext context) throws Exception {
