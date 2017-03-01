@@ -123,6 +123,11 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	private final RawOfficeFloorMetaData rawOfficeFloorMetaData = this.createMock(RawOfficeFloorMetaData.class);
 
 	/**
+	 * Break chain {@link TeamManagement}.
+	 */
+	private final TeamManagement breakChainTeamManagement = this.createMock(TeamManagement.class);
+
+	/**
 	 * {@link ProcessState} bound {@link RawBoundManagedObjectMetaData}.
 	 */
 	private Map<String, RawBoundManagedObjectMetaData> processManagedObjects = new HashMap<>();
@@ -540,6 +545,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(rawTeamMetaData, rawTeamMetaData.isRequireThreadLocalAwareness(), true);
 		this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeamManagement(), teamManagement);
 		this.recordReturn(this.configuration, this.configuration.getOfficeDefaultTeamName(), null);
+		this.recordReturn(this.rawOfficeFloorMetaData, this.rawOfficeFloorMetaData.getBreakChainTeamManagement(),
+				this.breakChainTeamManagement);
 		this.recordReturn(this.rawOfficeFloorMetaData, this.rawOfficeFloorMetaData.getThreadLocalAwareExecutor(),
 				threadLocalAwareExecutor);
 		this.record_defaultOfficeClock();
@@ -578,6 +585,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(rawTeamMetaData, rawTeamMetaData.isRequireThreadLocalAwareness(), true);
 		this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeamManagement(), teamManagement);
 		this.recordReturn(this.configuration, this.configuration.getOfficeDefaultTeamName(), "TEAM");
+		this.recordReturn(this.rawOfficeFloorMetaData, this.rawOfficeFloorMetaData.getBreakChainTeamManagement(),
+				this.breakChainTeamManagement);
 		this.recordReturn(this.rawOfficeFloorMetaData, this.rawOfficeFloorMetaData.getThreadLocalAwareExecutor(),
 				threadLocalAwareExecutor);
 		this.record_defaultOfficeClock();
@@ -1401,6 +1410,10 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Record the no default team
 		this.recordReturn(this.configuration, this.configuration.getOfficeDefaultTeamName(), null);
+
+		// Record the break chain team management
+		this.recordReturn(this.rawOfficeFloorMetaData, this.rawOfficeFloorMetaData.getBreakChainTeamManagement(),
+				this.breakChainTeamManagement);
 
 		// Return the registry of the teams
 		return this.officeTeams;

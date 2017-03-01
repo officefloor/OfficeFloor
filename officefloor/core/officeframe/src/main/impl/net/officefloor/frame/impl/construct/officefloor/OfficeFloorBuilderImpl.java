@@ -32,6 +32,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaDataImpl;
@@ -47,12 +48,14 @@ import net.officefloor.frame.impl.construct.team.RawTeamMetaDataImpl;
 import net.officefloor.frame.impl.construct.team.TeamBuilderImpl;
 import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
 import net.officefloor.frame.impl.execute.officefloor.ThreadLocalAwareExecutorImpl;
+import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
 import net.officefloor.frame.internal.construct.RawOfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 
 /**
@@ -61,6 +64,11 @@ import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorConfiguration {
+
+	/**
+	 * Name of the break {@link FunctionState} chain {@link Team}.
+	 */
+	private static final String BREAK_CHAIN_TEAM_NAME = "_BREAK_CHAIN_";
 
 	/**
 	 * Name of the {@link OfficeFloor}.
@@ -76,6 +84,13 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	 * Listing of {@link TeamConfiguration} instances.
 	 */
 	private final List<TeamConfiguration<?>> teams = new LinkedList<TeamConfiguration<?>>();
+
+	/**
+	 * Break {@link FunctionState} chain {@link Team}. Initiate with default
+	 * {@link TeamSource}.
+	 */
+	private TeamBuilderImpl<?> breakChainTeam = new TeamBuilderImpl<>(BREAK_CHAIN_TEAM_NAME,
+			ExecutorCachedTeamSource.class);
 
 	/**
 	 * Listing of {@link OfficeConfiguration} instances.
@@ -161,6 +176,11 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	}
 
 	@Override
+	public TeamConfiguration<?> getBreakChainTeamConfiguration() {
+		return this.breakChainTeam;
+	}
+
+	@Override
 	public OfficeBuilder addOffice(String officeName) {
 		// Create, register and return the builder
 		OfficeBuilderImpl builder = new OfficeBuilderImpl(officeName);
@@ -229,6 +249,13 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	@Override
 	public TeamConfiguration<?>[] getTeamConfiguration() {
 		return this.teams.toArray(new TeamConfiguration[0]);
+	}
+
+	@Override
+	public <TS extends TeamSource> TeamBuilder<TS> setBreakChainTeam(Class<TS> teamSourceClass) {
+		TeamBuilderImpl<TS> builder = new TeamBuilderImpl<>(BREAK_CHAIN_TEAM_NAME, teamSourceClass);
+		this.breakChainTeam = builder;
+		return builder;
 	}
 
 	@Override

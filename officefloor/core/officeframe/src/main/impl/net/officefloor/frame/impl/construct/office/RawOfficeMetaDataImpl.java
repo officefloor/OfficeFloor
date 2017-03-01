@@ -42,9 +42,7 @@ import net.officefloor.frame.impl.execute.office.OfficeManagerProcessState;
 import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
 import net.officefloor.frame.impl.execute.office.OfficeStartupFunctionImpl;
 import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
-import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
-import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.internal.configuration.BoundInputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.EscalationConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
@@ -243,9 +241,6 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 			return null; // can not continue
 		}
 
-		// TODO configure the break chain team
-		TeamManagement breakChainTeam = new TeamManagementImpl(new ExecutorCachedTeamSource().createTeam());
-
 		// Enhance the office
 		OfficeEnhancerContextImpl.enhanceOffice(officeName, configuration, issues);
 
@@ -298,6 +293,9 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 				return null;
 			}
 		}
+
+		// Obtain the break chain team
+		TeamManagement breakChainTeam = rawOfficeFloorMetaData.getBreakChainTeamManagement();
 
 		// Obtain the thread local aware executor (if required)
 		ThreadLocalAwareExecutor threadLocalAwareExecutor = null;

@@ -59,6 +59,7 @@ import net.officefloor.frame.internal.construct.RawTeamMetaData;
 import net.officefloor.frame.internal.construct.RawTeamMetaDataFactory;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedObjectExecuteContextFactory;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
@@ -154,18 +155,19 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testNoOfficeFloorName() {
 
-		// Record no office floor name
+		// Record no OfficeFloor name
 		this.recordReturn(this.configuration, this.configuration.getOfficeFloorName(), null);
 		this.issues.addIssue(AssetType.OFFICE_FLOOR, "Unknown", "Name not provided for Office Floor");
 		this.recordReturn(this.configuration, this.configuration.getSourceContext(), this.sourceContext);
 		this.record_constructTeams();
+		this.record_constructBreakChainTeam();
 		this.record_constructManagedObjectSources("OFFICE");
 		this.record_constructEscalation();
 		this.record_constructOffices();
 
-		// Attempt to construct office floor
+		// Attempt to construct OfficeFloor
 		this.replayMockObjects();
-		this.constructRawOfficeFloorMetaData();
+		this.constructRawOfficeFloorMetaData(true);
 		this.verifyMockObjects();
 	}
 
@@ -179,13 +181,14 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration, this.configuration.getSourceContext(), null);
 		this.issues.addIssue(AssetType.OFFICE_FLOOR, OFFICE_FLOOR_NAME, "No SourceContext provided from configuration");
 		this.record_constructTeams();
+		this.record_constructBreakChainTeam();
 		this.record_constructManagedObjectSources("OFFICE");
 		this.record_constructEscalation();
 		this.record_constructOffices();
 
-		// Attempt to construct office floor
+		// Attempt to construct OfficeFloor
 		this.replayMockObjects();
-		this.constructRawOfficeFloorMetaData();
+		this.constructRawOfficeFloorMetaData(true);
 		this.verifyMockObjects();
 	}
 
@@ -203,13 +206,10 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 				new TeamConfiguration[] { teamConfiguration });
 		this.recordReturn(this.rawTeamFactory, this.rawTeamFactory.constructRawTeamMetaData(teamConfiguration,
 				this.sourceContext, this.threadDecorator, this.threadLocalAwareExecutor, this.issues), null);
-		this.record_constructManagedObjectSources("OFFICE");
-		this.record_constructEscalation();
-		this.record_constructOffices();
 
-		// Attempt to construct office floor
+		// Attempt to construct OfficeFloor
 		this.replayMockObjects();
-		this.constructRawOfficeFloorMetaData();
+		this.constructRawOfficeFloorMetaData(false);
 		this.verifyMockObjects();
 	}
 
@@ -244,13 +244,14 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 				rawTeamTwo);
 		this.recordReturn(rawTeamTwo, rawTeamTwo.getTeamName(), DUPLICATE_TEAM_NAME);
 		this.record_issue("Teams registered with the same name '" + DUPLICATE_TEAM_NAME + "'");
+		this.record_constructBreakChainTeam();
 		this.record_constructManagedObjectSources("OFFICE");
 		this.record_constructEscalation();
 		this.record_constructOffices();
 
-		// Attempt to construct office floor
+		// Attempt to construct OfficeFloor
 		this.replayMockObjects();
-		RawOfficeFloorMetaData metaData = this.constructRawOfficeFloorMetaData();
+		RawOfficeFloorMetaData metaData = this.constructRawOfficeFloorMetaData(true);
 		this.verifyMockObjects();
 
 		// Ensure obtain the only first team
@@ -265,13 +266,14 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		// Record constructing teams
 		this.record_officeFloorName();
 		TeamManagement[] expectedTeams = this.record_constructTeams("ONE", "TWO", "THREE");
+		TeamManagement breakChainTeam = this.record_constructBreakChainTeam();
 		this.record_constructManagedObjectSources("OFFICE");
 		this.record_constructEscalation();
 		this.record_constructOffices();
 
-		// Attempt to construct office floor
+		// Attempt to construct OfficeFloor
 		this.replayMockObjects();
-		RawOfficeFloorMetaData metaData = this.constructRawOfficeFloorMetaData();
+		RawOfficeFloorMetaData metaData = this.constructRawOfficeFloorMetaData(true);
 		TeamManagement[] actualTeams = metaData.getOfficeFloorMetaData().getTeams();
 		this.verifyMockObjects();
 
@@ -281,10 +283,11 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		assertNotNull(metaData.getRawTeamMetaData("THREE"));
 
 		// Validate the teams
-		assertEquals("Incorrect number of teams", 3, actualTeams.length);
+		assertEquals("Incorrect number of teams", 4, actualTeams.length);
 		for (int i = 0; i < 3; i++) {
 			assertEquals("Incorrect team " + i, expectedTeams[i], actualTeams[i]);
 		}
+		assertEquals("Incorrect break chain team", breakChainTeam, actualTeams[3]);
 	}
 
 	/**
@@ -308,13 +311,14 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 				this.sourceContext, this.threadDecorator, this.threadLocalAwareExecutor, this.issues), rawTeamMetaData);
 		this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeamName(), TEAM_NAME);
 		this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeamManagement(), team);
+		this.record_constructBreakChainTeam();
 		this.record_constructManagedObjectSources("OFFICE");
 		this.record_constructEscalation();
 		this.record_constructOffices();
 
-		// Attempt to construct office floor
+		// Attempt to construct OfficeFloor
 		this.replayMockObjects();
-		RawOfficeFloorMetaData metaData = this.constructRawOfficeFloorMetaData();
+		RawOfficeFloorMetaData metaData = this.constructRawOfficeFloorMetaData(true);
 		this.verifyMockObjects();
 
 		// Ensure team registered
@@ -323,6 +327,29 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		// Should have a thread aware executor
 		assertSame("Incorrect thread local aware executor", this.threadLocalAwareExecutor,
 				metaData.getThreadLocalAwareExecutor());
+	}
+
+	/**
+	 * Ensures successfully construct break {@link FunctionState} chain
+	 * {@link Team}.
+	 */
+	public void testConstructBreakChainTeam() {
+
+		// Record constructing teams
+		this.record_officeFloorName();
+		this.record_constructTeams();
+		TeamManagement breakChainTeam = this.record_constructBreakChainTeam();
+		this.record_constructManagedObjectSources("OFFICE");
+		this.record_constructEscalation();
+		this.record_constructOffices();
+
+		// Attempt to construct OfficeFloor
+		this.replayMockObjects();
+		RawOfficeFloorMetaData metaData = this.constructRawOfficeFloorMetaData(true);
+		this.verifyMockObjects();
+
+		// Ensure providing break chain team
+		assertEquals("Incorrect break chain team", breakChainTeam, metaData.getBreakChainTeamManagement());
 	}
 
 	/**
@@ -337,16 +364,15 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		// Record not construct managed object
 		this.record_officeFloorName();
 		this.record_constructTeams();
+		this.record_constructBreakChainTeam();
 		this.recordReturn(this.configuration, this.configuration.getManagedObjectSourceConfiguration(),
 				new ManagedObjectSourceConfiguration[] { mosConfiguration });
 		this.recordReturn(this.rawMosFactory, this.rawMosFactory.constructRawManagedObjectMetaData(mosConfiguration,
 				this.sourceContext, this.issues, this.configuration), null);
-		this.record_constructEscalation();
-		this.record_constructOffices();
 
-		// Attempt to construct office floor
+		// Attempt to construct OfficeFloor
 		this.replayMockObjects();
-		this.constructRawOfficeFloorMetaData();
+		this.constructRawOfficeFloorMetaData(false);
 		this.verifyMockObjects();
 	}
 
@@ -370,6 +396,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		// Record construct managed object sources with duplicate name
 		this.record_officeFloorName();
 		this.record_constructTeams();
+		this.record_constructBreakChainTeam();
 		this.recordReturn(this.configuration, this.configuration.getManagedObjectSourceConfiguration(),
 				new ManagedObjectSourceConfiguration[] { mosConfigurationOne, mosConfigurationTwo });
 		this.recordReturn(this.rawMosFactory, this.rawMosFactory.constructRawManagedObjectMetaData(mosConfigurationOne,
@@ -387,9 +414,9 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		this.record_constructOffices("OFFICE", new RawManagingOfficeMetaData[] { rawOfficeMoMetaData });
 		this.record_constructManagedObjectInstances();
 
-		// Attempt to construct office floor
+		// Attempt to construct OfficeFloor
 		this.replayMockObjects();
-		RawOfficeFloorMetaData metaData = this.constructRawOfficeFloorMetaData();
+		RawOfficeFloorMetaData metaData = this.constructRawOfficeFloorMetaData(true);
 		this.verifyMockObjects();
 
 		// Ensure obtain the only first managed object
@@ -409,6 +436,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		// Record no managing office for managed object
 		this.record_officeFloorName();
 		this.record_constructTeams();
+		this.record_constructBreakChainTeam();
 		RawManagingOfficeMetaData<?> managingOffice = this.record_constructManagedObjectSources("UNKNOWN_OFFICE",
 				managedObjectSourceName)[0];
 		this.record_constructEscalation();
@@ -419,9 +447,9 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 				"Can not find managing office 'UNKNOWN_OFFICE'");
 		this.record_constructManagedObjectInstances();
 
-		// Attempt to construct office floor
+		// Attempt to construct OfficeFloor
 		this.replayMockObjects();
-		this.constructRawOfficeFloorMetaData();
+		this.constructRawOfficeFloorMetaData(true);
 		this.verifyMockObjects();
 	}
 
@@ -433,15 +461,16 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		// Record construction of the teams
 		this.record_officeFloorName();
 		this.record_constructTeams();
+		this.record_constructBreakChainTeam();
 		RawManagingOfficeMetaData<?>[] managingOffices = this.record_constructManagedObjectSources("OFFICE", "ONE",
 				"TWO", "THREE");
 		this.record_constructEscalation();
 		this.record_constructOffices("OFFICE", managingOffices);
 		ManagedObjectSource<?, ?>[] managedObjectSources = this.record_constructManagedObjectInstances();
 
-		// Attempt to construct office floor
+		// Attempt to construct OfficeFloor
 		this.replayMockObjects();
-		RawOfficeFloorMetaData metaData = this.constructRawOfficeFloorMetaData();
+		RawOfficeFloorMetaData metaData = this.constructRawOfficeFloorMetaData(true);
 		ManagedObjectSourceInstance<?>[] mosInstances = metaData.getOfficeFloorMetaData()
 				.getManagedObjectSourceInstances();
 		this.verifyMockObjects();
@@ -477,6 +506,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 			// Record no escalation procedure
 			this.record_officeFloorName();
 			this.record_constructTeams();
+			this.record_constructBreakChainTeam();
 			this.record_constructManagedObjectSources("OFFICE");
 			this.recordReturn(this.configuration, this.configuration.getEscalationHandler(), null);
 			this.record_constructOffices();
@@ -484,9 +514,9 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 			// Record escalation
 			this.recordReturn(context, context.getObject(EscalationKey.EXCEPTION), escalation);
 
-			// Attempt to construct office floor
+			// Attempt to construct OfficeFloor
 			this.replayMockObjects();
-			RawOfficeFloorMetaData metaData = this.constructRawOfficeFloorMetaData();
+			RawOfficeFloorMetaData metaData = this.constructRawOfficeFloorMetaData(true);
 
 			// Ensure default escalation handler
 			EscalationFlow officeFloorEscalation = metaData.getOfficeFloorEscalation();
@@ -523,6 +553,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		// Record have escalation handler
 		this.record_officeFloorName();
 		this.record_constructTeams();
+		this.record_constructBreakChainTeam();
 		this.record_constructManagedObjectSources("OFFICE");
 		this.recordReturn(this.configuration, this.configuration.getEscalationHandler(), escalationHandler);
 		this.record_constructOffices();
@@ -531,9 +562,9 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(context, context.getObject(EscalationKey.EXCEPTION), escalation);
 		escalationHandler.handleEscalation(escalation);
 
-		// Attempt to construct office floor
+		// Attempt to construct OfficeFloor
 		this.replayMockObjects();
-		RawOfficeFloorMetaData metaData = this.constructRawOfficeFloorMetaData();
+		RawOfficeFloorMetaData metaData = this.constructRawOfficeFloorMetaData(true);
 
 		// Ensure default escalation handler
 		EscalationFlow officeFloorEscalation = metaData.getOfficeFloorEscalation();
@@ -554,6 +585,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		// Record have escalation procedure
 		this.record_officeFloorName();
 		this.record_constructTeams();
+		this.record_constructBreakChainTeam();
 		this.record_constructManagedObjectSources("OFFICE");
 		this.record_constructEscalation();
 		this.recordReturn(this.configuration, this.configuration.getOfficeConfiguration(),
@@ -561,14 +593,10 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(officeConfiguration, officeConfiguration.getOfficeName(), null);
 		this.record_issue("Office added without a name");
 
-		// Attempt to construct office floor
+		// Attempt to construct OfficeFloor
 		this.replayMockObjects();
-		RawOfficeFloorMetaData metaData = this.constructRawOfficeFloorMetaData();
-		OfficeMetaData[] officeMetaDatas = metaData.getOfficeFloorMetaData().getOfficeMetaData();
+		this.constructRawOfficeFloorMetaData(false);
 		this.verifyMockObjects();
-
-		// Ensure no office meta-data
-		assertEquals("Should not have office meta-data", 0, officeMetaDatas.length);
 	}
 
 	/**
@@ -581,6 +609,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		// Record have escalation procedure
 		this.record_officeFloorName();
 		this.record_constructTeams();
+		this.record_constructBreakChainTeam();
 		this.record_constructManagedObjectSources("OFFICE");
 		this.record_constructEscalation();
 		this.recordReturn(this.configuration, this.configuration.getOfficeConfiguration(),
@@ -591,14 +620,10 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 						this.rawBoundMoFactory, null, this.rawBoundAdminFactory, this.rawFunctionMetaDataFactory),
 				null, new AlwaysMatcher());
 
-		// Attempt to construct office floor
+		// Attempt to construct OfficeFloor
 		this.replayMockObjects();
-		RawOfficeFloorMetaData metaData = this.constructRawOfficeFloorMetaData();
-		OfficeMetaData[] officeMetaDatas = metaData.getOfficeFloorMetaData().getOfficeMetaData();
+		this.constructRawOfficeFloorMetaData(false);
 		this.verifyMockObjects();
-
-		// Ensure no office meta-data
-		assertEquals("Should not have office meta-data", 0, officeMetaDatas.length);
 	}
 
 	/**
@@ -609,13 +634,14 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		// Record have escalation procedure
 		this.record_officeFloorName();
 		this.record_constructTeams();
+		this.record_constructBreakChainTeam();
 		this.record_constructManagedObjectSources("OFFICE");
 		this.record_constructEscalation();
 		OfficeMetaData expectedOffice = this.record_constructOffices("OFFICE", null)[0];
 
 		// Attempt to construct office floor
 		this.replayMockObjects();
-		RawOfficeFloorMetaData metaData = this.constructRawOfficeFloorMetaData();
+		RawOfficeFloorMetaData metaData = this.constructRawOfficeFloorMetaData(true);
 		OfficeMetaData actualOffice = metaData.getOfficeFloorMetaData().getOfficeMetaData()[0];
 		this.verifyMockObjects();
 
@@ -674,6 +700,30 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 
 		// Return the constructed teams
 		return teams;
+	}
+
+	/**
+	 * Record constructing the break {@link FunctionState} chain
+	 * {@link TeamManagement}.
+	 * 
+	 * @return Break {@link FunctionState} chain {@link TeamManagement}.
+	 */
+	private TeamManagement record_constructBreakChainTeam() {
+
+		// Record building the break chain team
+		TeamConfiguration<?> breakChainConfiguration = this.createMock(TeamConfiguration.class);
+		this.recordReturn(this.configuration, this.configuration.getBreakChainTeamConfiguration(),
+				breakChainConfiguration);
+		RawTeamMetaData breakChainMetaData = this.createMock(RawTeamMetaData.class);
+		this.recordReturn(
+				this.rawTeamFactory, this.rawTeamFactory.constructRawTeamMetaData(breakChainConfiguration,
+						this.sourceContext, this.threadDecorator, this.threadLocalAwareExecutor, this.issues),
+				breakChainMetaData);
+		TeamManagement breakChainTeam = this.createMock(TeamManagement.class);
+		this.recordReturn(breakChainMetaData, breakChainMetaData.getTeamManagement(), breakChainTeam);
+
+		// Return the break chain team
+		return breakChainTeam;
 	}
 
 	/**
@@ -859,11 +909,14 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Constructs the {@link RawOfficeFloorMetaDataImpl}.
+	 * Constructs the {@link RawOfficeFloorMetaData}.
 	 * 
-	 * @return {@link RawOfficeFloorMetaDataImpl}.
+	 * @param isConstruct
+	 *            Indicates if the {@link RawOfficeFloorMetaData} should be
+	 *            returned.
+	 * @return {@link RawOfficeFloorMetaData}.
 	 */
-	private RawOfficeFloorMetaData constructRawOfficeFloorMetaData() {
+	private RawOfficeFloorMetaData constructRawOfficeFloorMetaData(boolean isConstruct) {
 
 		// Create the raw office floor meta-data
 		RawOfficeFloorMetaData metaData = RawOfficeFloorMetaDataImpl.getFactory().constructRawOfficeFloorMetaData(
@@ -871,8 +924,12 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 				this.rawBoundMoFactory, this.rawGovernanceFactory, this.rawBoundAdminFactory, this.rawOfficeFactory,
 				this.rawFunctionMetaDataFactory);
 
-		// Meta-data should always be constructed
-		assertNotNull("Meta-data should be constructed", metaData);
+		// Determine if constructed
+		if (isConstruct) {
+			assertNotNull("Meta-data should be constructed", metaData);
+		} else {
+			assertNull("Meta-data should not be constructed", metaData);
+		}
 
 		// Return the raw office floor meta-data
 		return metaData;

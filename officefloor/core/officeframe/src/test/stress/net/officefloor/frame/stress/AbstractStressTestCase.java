@@ -455,8 +455,8 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		// Load the team constructors
 		teamConstructors.put(PassiveTeamSource.class,
 				(name, test) -> test.constructTeam(name, PassiveTeamSource.class));
-		teamConstructors.put(ExecutorCachedTeamSource.class,
-				(name, test) -> test.constructTeam(name, ExecutorCachedTeamSource.class));
+//		teamConstructors.put(ExecutorCachedTeamSource.class,
+//				(name, test) -> test.constructTeam(name, ExecutorCachedTeamSource.class));
 		teamConstructors.put(ExecutorFixedTeamSource.class,
 				(name, test) -> test.constructTeam(name, ExecutorFixedTeamSource.class)
 						.addProperty(ExecutorFixedTeamSource.PROPERTY_TEAM_SIZE, String.valueOf(test.getTeamSize())));
@@ -587,6 +587,9 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 	@Override
 	protected void runTest() throws Throwable {
 
+		// Sleep some time to allow previous test to complete
+		Thread.sleep(2 * 1000);
+		
 		// Set as active test
 		activeTestCase = this;
 

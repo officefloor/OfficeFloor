@@ -161,20 +161,18 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 
 		// Propagate possible failure
 		synchronized (this.exceptionLock) {
-			// Return if no failure
-			if (this.exception == null) {
-				return;
-			}
 
 			// Propagate failure
-			if (this.exception instanceof Exception) {
-				throw (Exception) this.exception;
-			} else if (this.exception instanceof Error) {
-				throw (Error) this.exception;
-			} else {
-				StringWriter buffer = new StringWriter();
-				this.exception.printStackTrace(new PrintWriter(buffer));
-				fail("Unknown failure " + this.exception.getClass().getName() + ": " + buffer.toString());
+			if (this.exception != null) {
+				if (this.exception instanceof Exception) {
+					throw (Exception) this.exception;
+				} else if (this.exception instanceof Error) {
+					throw (Error) this.exception;
+				} else {
+					StringWriter buffer = new StringWriter();
+					this.exception.printStackTrace(new PrintWriter(buffer));
+					fail("Unknown failure " + this.exception.getClass().getName() + ": " + buffer.toString());
+				}
 			}
 		}
 

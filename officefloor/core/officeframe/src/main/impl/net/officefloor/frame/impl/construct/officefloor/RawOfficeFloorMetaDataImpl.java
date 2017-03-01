@@ -58,6 +58,7 @@ import net.officefloor.frame.internal.construct.RawTeamMetaDataFactory;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FunctionLoop;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
@@ -77,13 +78,18 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 	 * @return {@link RawOfficeFloorMetaDataFactory}.
 	 */
 	public static RawOfficeFloorMetaDataFactory getFactory() {
-		return new RawOfficeFloorMetaDataImpl(null, null, null, null);
+		return new RawOfficeFloorMetaDataImpl(null, null, null, null, null);
 	}
 
 	/**
 	 * Registry of {@link RawTeamMetaData} by the {@link Team} name.
 	 */
 	private final Map<String, RawTeamMetaData> teamRegistry;
+
+	/**
+	 * {@link TeamManagement} to break the {@link FunctionState} chain.
+	 */
+	private final TeamManagement breakChainTeamManagement;
 
 	/**
 	 * {@link ThreadLocalAwareExecutor}.
@@ -111,6 +117,9 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 	 * 
 	 * @param teamRegistry
 	 *            Registry of {@link RawTeamMetaData} by the {@link Team} name.
+	 * @param breakChainTeamManagement
+	 *            {@link TeamManagement} to break the {@link FunctionState}
+	 *            chain.
 	 * @param threadLocalAwareExecutor
 	 *            {@link ThreadLocalAwareExecutor}.
 	 * @param mosRegistry
@@ -120,9 +129,10 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 	 *            {@link EscalationProcedure}.
 	 */
 	private RawOfficeFloorMetaDataImpl(Map<String, RawTeamMetaData> teamRegistry,
-			ThreadLocalAwareExecutor threadLocalAwareExecutor, Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry,
-			EscalationFlow officeFloorEscalation) {
+			TeamManagement breakChainTeamManagement, ThreadLocalAwareExecutor threadLocalAwareExecutor,
+			Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry, EscalationFlow officeFloorEscalation) {
 		this.teamRegistry = teamRegistry;
+		this.breakChainTeamManagement = breakChainTeamManagement;
 		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
 		this.mosRegistry = mosRegistry;
 		this.officeFloorEscalation = officeFloorEscalation;
@@ -146,7 +156,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 		if (ConstructUtil.isBlank(officeFloorName)) {
 			issues.addIssue(AssetType.OFFICE_FLOOR, "Unknown", "Name not provided for Office Floor");
 
-			// Not that important to name the Office Floor, so provide default
+			// Not that important to name the OfficeFloor, so provide default
 			officeFloorName = OfficeFloor.class.getSimpleName();
 		}
 
@@ -174,7 +184,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 			RawTeamMetaData rawTeamMetaData = rawTeamFactory.constructRawTeamMetaData(teamConfiguration, sourceContext,
 					threadDecorator, threadLocalAwareExecutor, issues);
 			if (rawTeamMetaData == null) {
-				continue; // issue with team
+				return null; // issue with team
 			}
 
 			// Obtain the team name
@@ -193,6 +203,13 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 			teamListing.add(team);
 		}
 
+		// Construct the break chain team
+		TeamConfiguration<?> breakTeamConfiguration = configuration.getBreakChainTeamConfiguration();
+		RawTeamMetaData breakTeamMetaData = rawTeamFactory.constructRawTeamMetaData(breakTeamConfiguration,
+				sourceContext, threadDecorator, threadLocalAwareExecutor, issues);
+		TeamManagement breakChainTeamManagement = breakTeamMetaData.getTeamManagement();
+		teamListing.add(breakChainTeamManagement);
+
 		// Construct the managed object sources
 		Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry = new HashMap<String, RawManagedObjectMetaData<?, ?>>();
 		List<RawManagedObjectMetaData<?, ?>> mosListing = new LinkedList<RawManagedObjectMetaData<?, ?>>();
@@ -203,7 +220,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 			RawManagedObjectMetaData<?, ?> mosMetaData = rawMosFactory
 					.constructRawManagedObjectMetaData(mosConfiguration, sourceContext, issues, configuration);
 			if (mosMetaData == null) {
-				continue; // issue with managed object source
+				return null; // issue with managed object source
 			}
 
 			// Obtain the managed object source name
@@ -219,13 +236,13 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 			if (managingOfficeMetaData == null) {
 				issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
 						"Managing Object Source did not specify managing office meta-data");
-				continue; // must have a managing office
+				return null; // must have a managing office
 			}
 			String managingOfficeName = managingOfficeMetaData.getManagingOfficeName();
 			if (ConstructUtil.isBlank(managingOfficeName)) {
 				issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
 						"Managed Object Source did not specify a managing Office");
-				continue; // must have a managing office
+				return null; // must have a managing office
 			}
 
 			// Register the managed object source
@@ -256,8 +273,8 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 				officeFloorManagement);
 
 		// Create the raw office floor meta-data
-		RawOfficeFloorMetaDataImpl rawMetaData = new RawOfficeFloorMetaDataImpl(teamRegistry, threadLocalAwareExecutor,
-				mosRegistry, officeFloorEscalation);
+		RawOfficeFloorMetaDataImpl rawMetaData = new RawOfficeFloorMetaDataImpl(teamRegistry, breakChainTeamManagement,
+				threadLocalAwareExecutor, mosRegistry, officeFloorEscalation);
 
 		// Construct the offices
 		List<OfficeMetaData> officeMetaDatas = new LinkedList<OfficeMetaData>();
@@ -267,7 +284,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 			String officeName = officeConfiguration.getOfficeName();
 			if (ConstructUtil.isBlank(officeName)) {
 				issues.addIssue(AssetType.OFFICE_FLOOR, officeFloorName, "Office added without a name");
-				continue; // office must have name
+				return null; // office must have name
 			}
 
 			// Obtain the managed objects being managed by the office
@@ -284,7 +301,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 					issues, officeManagingManagedObjects, rawMetaData, rawBoundMoFactory, rawGovernanceFactory,
 					rawBoundAdminFactory, rawTaskFactory);
 			if (rawOfficeMetaData == null) {
-				continue; // issue with office
+				return null; // issue with office
 			}
 
 			// Add the office meta-data to listing
@@ -330,6 +347,11 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 	@Override
 	public RawTeamMetaData getRawTeamMetaData(String teamName) {
 		return this.teamRegistry.get(teamName);
+	}
+
+	@Override
+	public TeamManagement getBreakChainTeamManagement() {
+		return this.breakChainTeamManagement;
 	}
 
 	@Override

@@ -21,7 +21,9 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.structure.EscalationFlow;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 
 /**
@@ -40,6 +42,14 @@ public interface RawOfficeFloorMetaData {
 	 *         name.
 	 */
 	RawTeamMetaData getRawTeamMetaData(String teamName);
+
+	/**
+	 * Obtains the {@link TeamManagement} to break the {@link FunctionState}
+	 * chain.
+	 * 
+	 * @return {@link TeamManagement} to break the {@link FunctionState} chain.
+	 */
+	TeamManagement getBreakChainTeamManagement();
 
 	/**
 	 * Obtains the {@link ThreadLocalAwareExecutor}.

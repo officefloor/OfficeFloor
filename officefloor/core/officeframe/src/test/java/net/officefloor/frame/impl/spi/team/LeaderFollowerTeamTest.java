@@ -105,6 +105,9 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 		// Stop processing (should have all threads finished)
 		team.stopWorking();
 
+		// Allow some time for last thread to terminate
+		Thread.sleep(1);
+
 		// Ensure all threads are stopped
 		for (Thread thread : teamThreads) {
 			assertEquals("Thread " + thread.getName() + " should be terminated", State.TERMINATED, thread.getState());

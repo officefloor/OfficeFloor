@@ -113,6 +113,19 @@ public interface OfficeFloorBuilder {
 	<TS extends TeamSource> TeamBuilder<TS> addTeam(String teamName, Class<TS> teamSourceClass);
 
 	/**
+	 * <p>
+	 * Specifies the break {@link FunctionState} chain {@link Team}.
+	 * <p>
+	 * This need not be specified, but is available to override the default
+	 * {@link Team}.
+	 * 
+	 * @param teamSourceClass
+	 *            {@link TeamSource} to source the {@link Team}.
+	 * @return {@link TeamBuilder} to build the {@link Team}.
+	 */
+	<TS extends TeamSource> TeamBuilder<TS> setBreakChainTeam(Class<TS> teamSourceClass);
+
+	/**
 	 * Adds an {@link Office} on the {@link OfficeFloor}.
 	 * 
 	 * @param officeName
