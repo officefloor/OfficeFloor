@@ -17,6 +17,8 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
+import java.util.concurrent.ThreadFactory;
+
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
@@ -34,6 +36,16 @@ public class LeaderFollowerTeamSource extends AbstractTeamSource {
 	 */
 	public static final String TEAM_SIZE_PROPERTY_NAME = "size";
 
+	/**
+	 * Property to specify the worker {@link Thread} priority.
+	 */
+	public static final String PROPERTY_THREAD_PRIORITY = "person.thread.priority";
+
+	/**
+	 * Default {@link Thread} priority.
+	 */
+	public static final int DEFAULT_THREAD_PRIORITY = Thread.NORM_PRIORITY;
+
 	/*
 	 * =================== AbstractTeamSource =============================
 	 */
@@ -47,14 +59,18 @@ public class LeaderFollowerTeamSource extends AbstractTeamSource {
 	public Team createTeam(TeamSourceContext context) throws Exception {
 
 		// Obtain the required configuration
-		String teamName = context.getTeamName();
 		int teamSize = Integer.parseInt(context.getProperty(TEAM_SIZE_PROPERTY_NAME));
 
 		// Obtain the optional configuration
 		long waitTime = Long.parseLong(context.getProperty("wait.time", "100"));
 
+		// Obtain the thread priority
+		int priority = Integer
+				.valueOf(context.getProperty(PROPERTY_THREAD_PRIORITY, String.valueOf(DEFAULT_THREAD_PRIORITY)));
+
 		// Create and return the team
-		return new LeaderFollowerTeam(teamName, teamSize, waitTime);
+		ThreadFactory threadFactory = context.getThreadFactory(priority);
+		return new LeaderFollowerTeam(teamSize, threadFactory, waitTime);
 	}
 
 }

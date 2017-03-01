@@ -20,12 +20,15 @@ package net.officefloor.frame.impl.spi.team;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.api.team.source.impl.AbstractTeamSource;
+import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
 import net.officefloor.frame.util.TeamSourceStandAlone;
 
 /**
@@ -39,6 +42,12 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 	 * Name of property to obtain the {@link Thread} priority.
 	 */
 	public static final String PROPERTY_THREAD_PRIORITY = "thread.priority";
+
+	/**
+	 * Maximum time to wait in seconds for the {@link ExecutorService} to
+	 * shutdown.
+	 */
+	public static final String PROPERTY_SHUTDOWN_TIME_IN_SECONDS = "max.shutdown.time";
 
 	/**
 	 * Convenience method to create a {@link Team} from the implementation of
@@ -108,11 +117,16 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 	public Team createTeam(TeamSourceContext context) throws Exception {
 
 		// Obtain the details of the team
-		final int threadPriority = Integer
+		String teamName = context.getTeamName();
+		int maxShutdownWaitTimeInSeconds = Integer
+				.valueOf(context.getProperty(PROPERTY_SHUTDOWN_TIME_IN_SECONDS, String.valueOf(10)));
+		int threadPriority = Integer
 				.valueOf(context.getProperty(PROPERTY_THREAD_PRIORITY, String.valueOf(Thread.NORM_PRIORITY)));
 
 		// Create and return the executor team
-		return new ExecutorTeam(this.createExecutorServiceFactory(context, context.getThreadFactory(threadPriority)));
+		ThreadFactory threadFactory = context.getThreadFactory(threadPriority);
+		ExecutorServiceFactory serviceFactory = this.createExecutorServiceFactory(context, threadFactory);
+		return new ExecutorTeam(teamName, serviceFactory, maxShutdownWaitTimeInSeconds);
 	}
 
 	/**
@@ -126,6 +140,16 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		private final ExecutorServiceFactory factory;
 
 		/**
+		 * Name of the {@link Team}.
+		 */
+		private final String teamName;
+
+		/**
+		 * Maximum time in seconds to wait for shutdown.
+		 */
+		private final int maxShutdownWaitTimeInSeconds;
+
+		/**
 		 * {@link ExecutorService}.
 		 */
 		private ExecutorService servicer;
@@ -133,11 +157,17 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		/**
 		 * Initiate.
 		 * 
+		 * @param teamName
+		 *            Name of the {@link Team}.
 		 * @param factory
 		 *            {@link ExecutorServiceFactory}.
+		 * @param maxShutdownWaitTimeInSeconds
+		 *            Maximum time in seconds to wait for shutdown.
 		 */
-		public ExecutorTeam(ExecutorServiceFactory factory) {
+		public ExecutorTeam(String teamName, ExecutorServiceFactory factory, int maxShutdownWaitTimeInSeconds) {
+			this.teamName = teamName;
 			this.factory = factory;
+			this.maxShutdownWaitTimeInSeconds = maxShutdownWaitTimeInSeconds;
 		}
 
 		/*
@@ -156,8 +186,21 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 
 		@Override
 		public void stopWorking() {
+
 			// Shutdown servicer
 			this.servicer.shutdown();
+
+			// Await termination
+			try {
+				if (this.servicer.awaitTermination(this.maxShutdownWaitTimeInSeconds, TimeUnit.SECONDS)) {
+					return; // successful completion
+				}
+			} catch (InterruptedException ex) {
+			}
+
+			// Failed shutdown within time period
+			OfficeFloorImpl.getFrameworkLogger().log(Level.WARNING, "Team " + this.teamName + " failed to stop within "
+					+ this.maxShutdownWaitTimeInSeconds + " seconds");
 		}
 	}
 
