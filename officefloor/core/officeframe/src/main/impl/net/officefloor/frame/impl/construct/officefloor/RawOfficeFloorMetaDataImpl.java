@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -37,8 +38,6 @@ import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
 import net.officefloor.frame.impl.execute.officefloor.DefaultOfficeFloorEscalationHandler;
 import net.officefloor.frame.impl.execute.officefloor.ManagedObjectSourceInstanceImpl;
 import net.officefloor.frame.impl.execute.officefloor.OfficeFloorMetaDataImpl;
-import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
@@ -165,12 +164,15 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 		Map<String, RawTeamMetaData> teamRegistry = new HashMap<String, RawTeamMetaData>();
 		List<TeamManagement> teamListing = new LinkedList<TeamManagement>();
 
+		// Obtain the thread decorator
+		Consumer<Thread> threadDecorator = configuration.getThreadDecorator();
+
 		// Construct the configured teams
 		for (TeamConfiguration<?> teamConfiguration : configuration.getTeamConfiguration()) {
 
 			// Construct the raw team meta-data
 			RawTeamMetaData rawTeamMetaData = rawTeamFactory.constructRawTeamMetaData(teamConfiguration, sourceContext,
-					threadLocalAwareExecutor, issues);
+					threadDecorator, threadLocalAwareExecutor, issues);
 			if (rawTeamMetaData == null) {
 				continue; // issue with team
 			}
@@ -240,7 +242,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 		}
 
 		// Undertake OfficeFloor escalation on any team available
-		FunctionLoop officeFloorFunctionLoop = new FunctionLoopImpl(new TeamManagementImpl(new PassiveTeam()));
+		FunctionLoop officeFloorFunctionLoop = new FunctionLoopImpl(null);
 		OfficeMetaData officeFloorManagement = new OfficeMetaDataImpl("Management", null, null, null,
 				officeFloorFunctionLoop, null, null, null, null, null, null);
 

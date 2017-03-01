@@ -25,7 +25,7 @@ import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
 import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
+import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -64,7 +64,8 @@ public class FunctionLoopImpl implements FunctionLoop {
 	public FunctionLoopImpl(TeamManagement defaultTeam) {
 
 		// Ensure have default team
-		this.defaultTeam = (defaultTeam != null) ? defaultTeam : new TeamManagementImpl(new PassiveTeam());
+		this.defaultTeam = (defaultTeam != null) ? defaultTeam
+				: new TeamManagementImpl(PassiveTeamSource.createPassiveTeam());
 	}
 
 	/*

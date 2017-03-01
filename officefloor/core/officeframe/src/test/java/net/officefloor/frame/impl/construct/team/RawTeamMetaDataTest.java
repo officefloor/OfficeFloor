@@ -17,6 +17,8 @@
  */
 package net.officefloor.frame.impl.construct.team;
 
+import java.util.function.Consumer;
+
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.source.SourceContext;
@@ -50,6 +52,12 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	 * {@link TeamConfiguration}.
 	 */
 	private final TeamConfiguration<?> configuration = this.createMock(TeamConfiguration.class);
+
+	/**
+	 * {@link Thread} decorator.
+	 */
+	@SuppressWarnings("unchecked")
+	private final Consumer<Thread> threadDecorator = this.createMock(Consumer.class);
 
 	/**
 	 * {@link SourceContext}.
@@ -466,7 +474,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 
 		// Attempt to construct
 		RawTeamMetaData metaData = RawTeamMetaDataImpl.getFactory().constructRawTeamMetaData(this.configuration,
-				this.sourceContext, this.threadLocalAwareExecutor, this.issues);
+				this.sourceContext, this.threadDecorator, this.threadLocalAwareExecutor, this.issues);
 
 		// Provide assertion on whether should be constructed
 		if (isExpectConstruction) {

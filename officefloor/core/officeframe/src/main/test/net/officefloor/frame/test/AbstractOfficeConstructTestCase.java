@@ -19,9 +19,12 @@ package net.officefloor.frame.test;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.Thread.State;
 import java.lang.reflect.Method;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicLong;
 
 import junit.framework.TestCase;
@@ -73,6 +76,11 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 * down of tests.
 	 */
 	private final List<OfficeFloor> constructedOfficeFloors = new LinkedList<OfficeFloor>();
+
+	/**
+	 * {@link Thread} instances used by the {@link OfficeFloor}.
+	 */
+	private final Deque<Thread> usedThreads = new ConcurrentLinkedDeque<>();
 
 	/**
 	 * {@link OfficeFloorBuilder}.
@@ -138,6 +146,47 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 
 		// No monitoring by default
 		this.getOfficeBuilder().setMonitorOfficeInterval(0);
+
+		// Track the teams (to ensure correctly stopped)
+		this.officeFloorBuilder.setThreadDecorator((thread) -> this.usedThreads.add(thread));
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+
+		// Close the constructed OfficeFloors
+		for (OfficeFloor officeFloor : this.constructedOfficeFloors) {
+			officeFloor.closeOfficeFloor();
+		}
+
+		// Propagate possible failure
+		synchronized (this.exceptionLock) {
+			// Return if no failure
+			if (this.exception == null) {
+				return;
+			}
+
+			// Propagate failure
+			if (this.exception instanceof Exception) {
+				throw (Exception) this.exception;
+			} else if (this.exception instanceof Error) {
+				throw (Error) this.exception;
+			} else {
+				StringWriter buffer = new StringWriter();
+				this.exception.printStackTrace(new PrintWriter(buffer));
+				fail("Unknown failure " + this.exception.getClass().getName() + ": " + buffer.toString());
+			}
+		}
+
+		// Ensure all the threads have been terminated
+		while (!this.usedThreads.isEmpty()) {
+			Thread usedThread = this.usedThreads.remove();
+			assertEquals("Thread " + usedThread.getName() + " should be terminated", State.TERMINATED,
+					usedThread.getState());
+		}
+
+		// Ensure complete tear down of test
+		super.tearDown();
 	}
 
 	/*
@@ -188,38 +237,6 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 				// Exception thrown, so have it cleared
 				this.exception = null;
 			}
-		}
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-		try {
-
-			// Close the constructed office floors
-			for (OfficeFloor officeFloor : this.constructedOfficeFloors) {
-				officeFloor.closeOfficeFloor();
-			}
-
-			// Propagate possible failure
-			synchronized (this.exceptionLock) {
-				// Return if no failure
-				if (this.exception == null) {
-					return;
-				}
-
-				// Propagate failure
-				if (this.exception instanceof Exception) {
-					throw (Exception) this.exception;
-				} else if (this.exception instanceof Error) {
-					throw (Error) this.exception;
-				} else {
-					StringWriter buffer = new StringWriter();
-					this.exception.printStackTrace(new PrintWriter(buffer));
-					fail("Unknown failure " + this.exception.getClass().getName() + ": " + buffer.toString());
-				}
-			}
-		} finally {
-			super.tearDown();
 		}
 	}
 
@@ -644,6 +661,9 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 		OFFICE_INDEX++;
 		this.officeBuilder = this.officeFloorBuilder.addOffice(this.getOfficeName());
 
+		// Track the threads created
+		this.officeFloorBuilder.setThreadDecorator((thread) -> this.usedThreads.add(thread));
+
 		// Return the OfficeFloor
 		return this.officeFloor;
 	}
@@ -751,7 +771,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 
 				// Notify complete
 				AbstractOfficeConstructTestCase.this.printMessage("Complete");
-				
+
 				// Flag complete
 				synchronized (isComplete) {
 					isComplete.value = true;
@@ -768,7 +788,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 			long startBlockTime = System.currentTimeMillis();
 			synchronized (isComplete) {
 				while (!isComplete.value) {
-					
+
 					// Only timeout if positive time to run
 					if (secondsToRun > 0) {
 						// Provide heap diagnostics and time out
@@ -781,7 +801,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 						iteration = 0;
 						this.printHeapMemoryDiagnostics();
 					}
-					
+
 					// Wait some time as still executing
 					isComplete.wait(100);
 				}

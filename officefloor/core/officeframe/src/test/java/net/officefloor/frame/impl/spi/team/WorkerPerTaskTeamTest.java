@@ -17,7 +17,9 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.util.TeamSourceStandAlone;
 
 /**
  * Tests the {@link WorkerPerJobTeam}.
@@ -27,24 +29,22 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class WorkerPerTaskTeamTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link WorkerPerJobTeam} to test.
-	 */
-	private WorkerPerJobTeam team = new WorkerPerJobTeam("test");
-
-	/**
 	 * Ensures runs the tasks.
 	 */
-	public void testRunning() {
+	public void testRunning() throws Exception {
+
+		// Create the worker per job team
+		Team workPerTaskTeam = new TeamSourceStandAlone().loadTeam(WorkerPerJobTeamSource.class);
 
 		// Start processing
-		this.team.startWorking();
+		workPerTaskTeam.startWorking();
 
 		// Assign task and wait on it to be started for execution
 		MockJob task = new MockJob();
-		task.assignJobToTeam(this.team, 10);
+		task.assignJobToTeam(workPerTaskTeam, 10);
 
 		// Stop processing
-		this.team.stopWorking();
+		workPerTaskTeam.stopWorking();
 	}
 
 }

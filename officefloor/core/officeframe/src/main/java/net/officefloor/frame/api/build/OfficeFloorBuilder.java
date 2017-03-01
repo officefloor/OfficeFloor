@@ -17,6 +17,8 @@
  */
 package net.officefloor.frame.api.build;
 
+import java.util.function.Consumer;
+
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -25,6 +27,7 @@ import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.internal.structure.FunctionState;
 
 /**
@@ -42,6 +45,16 @@ public interface OfficeFloorBuilder {
 	 *            {@link ClassLoader}.
 	 */
 	void setClassLoader(ClassLoader classLoader);
+
+	/**
+	 * Decorates all the {@link Thread} instances created by the
+	 * {@link TeamSourceContext}.
+	 * 
+	 * @param decorator
+	 *            Decorates all the {@link Thread} instances created by the
+	 *            {@link TeamSourceContext}.
+	 */
+	void setThreadDecorator(Consumer<Thread> decorator);
 
 	/**
 	 * Adds a {@link ResourceSource} to locate resources.

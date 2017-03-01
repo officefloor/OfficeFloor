@@ -21,7 +21,6 @@ import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
@@ -44,9 +43,6 @@ public class ManagedFunctionProcessStateTest extends AbstractOfficeConstructTest
 		// Parameter to be passed between work instances
 		final Object parameter = new Object();
 
-		// Add the team
-		this.constructTeam("TEAM", new OnePersonTeam("TEAM", 10));
-
 		// Add the Managed Object
 		this.constructManagedObject(new ManagedObjectOne(), "MANAGED_OBJECT", officeName);
 
@@ -54,7 +50,6 @@ public class ManagedFunctionProcessStateTest extends AbstractOfficeConstructTest
 		WorkOne workOne = new WorkOne(parameter);
 		ManagedFunctionBuilder<WorkOneManagedObjectsEnum, WorkOneDelegatesEnum> taskOneBuilder = this
 				.constructFunction("SENDER", workOne);
-		taskOneBuilder.setResponsibleTeam("TEAM");
 		taskOneBuilder.addManagedObject("mo-one", "MANAGED_OBJECT");
 		taskOneBuilder.linkFlow(WorkOneDelegatesEnum.WORK_TWO.ordinal(), "RECEIVER", Object.class, false);
 		taskOneBuilder.linkManagedObject(WorkOneManagedObjectsEnum.MANAGED_OBJECT_ONE.ordinal(), "mo-one",
@@ -64,7 +59,6 @@ public class ManagedFunctionProcessStateTest extends AbstractOfficeConstructTest
 		WorkTwo workTwo = new WorkTwo();
 		ManagedFunctionBuilder<WorkTwoManagedObjectsEnum, NoDelegatesEnum> taskTwoBuilder = this
 				.constructFunction("RECEIVER", workTwo);
-		taskTwoBuilder.setResponsibleTeam("TEAM");
 		taskTwoBuilder.addManagedObject("mo-two", "MANAGED_OBJECT");
 		taskTwoBuilder.linkManagedObject(WorkTwoManagedObjectsEnum.MANAGED_OBJECT_ONE.ordinal(), "mo-two",
 				ManagedObjectOne.class);

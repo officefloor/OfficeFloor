@@ -24,8 +24,8 @@ import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
-import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
+import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
+import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**
@@ -37,25 +37,28 @@ import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 public class PassParameterTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Validates with {@link PassiveTeam}.
+	 * Validates with any {@link Team}.
+	 */
+	public void test_any_PassParameterBetweenFunctions() throws Exception {
+		this.doPassParameterBetweenFunctionsTest(null);
+	}
+
+	/**
+	 * Validates with {@link PassiveTeamSource}.
 	 */
 	public void test_passive_PassParameterBetweenFunctions() throws Exception {
-		this.doPassParameterBetweenFunctionsTest(new PassiveTeam());
+		this.doPassParameterBetweenFunctionsTest(PassiveTeamSource.createPassiveTeam());
 	}
 
 	/**
-	 * Validates with {@link OnePersonTeam}.
-	 * 
-	 * @throws Exception
+	 * Validates with {@link OnePersonTeamSource}.
 	 */
 	public void test_onePerson_PassParameterBetweenFunctions() throws Exception {
-		this.doPassParameterBetweenFunctionsTest(new OnePersonTeam("TEAM", 10));
+		this.doPassParameterBetweenFunctionsTest(OnePersonTeamSource.createOnePersonTeam("TEAM"));
 	}
 
 	/**
-	 * Validates with execu
-	 * 
-	 * @throws Exception
+	 * Validates with {@link ExecutorCachedTeamSource}.
 	 */
 	public void test_executor_PassParameterBetweenFunctions() throws Exception {
 		this.doPassParameterBetweenFunctionsTest(new ExecutorCachedTeamSource().createTeam());
@@ -74,20 +77,26 @@ public class PassParameterTest extends AbstractOfficeConstructTestCase {
 		final Object parameter = new Object();
 
 		// Add the team
-		this.constructTeam("TEAM", team);
+		if (team != null) {
+			this.constructTeam("TEAM", team);
+		}
 
 		// Add the first function
 		FunctionOne functionOne = new FunctionOne(parameter);
 		ManagedFunctionBuilder<None, FunctionOneDelegatesEnum> functionOneBuilder = this.constructFunction("SENDER",
 				functionOne);
-		functionOneBuilder.setResponsibleTeam("TEAM");
+		if (team != null) {
+			functionOneBuilder.setResponsibleTeam("TEAM");
+		}
 		functionOneBuilder.linkFlow(FunctionOneDelegatesEnum.FUNCTION_TWO.ordinal(), "RECEIVER", Object.class, false);
 
 		// Add the second function
 		FunctionTwo functionTwo = new FunctionTwo();
 		ManagedFunctionBuilder<FunctionTwoDependenciesEnum, None> functionTwoBuilder = this
 				.constructFunction("RECEIVER", functionTwo);
-		functionTwoBuilder.setResponsibleTeam("TEAM");
+		if (team != null) {
+			functionTwoBuilder.setResponsibleTeam("TEAM");
+		}
 		functionTwoBuilder.linkParameter(FunctionTwoDependenciesEnum.PARAMETER, Object.class);
 
 		// Invoke first function

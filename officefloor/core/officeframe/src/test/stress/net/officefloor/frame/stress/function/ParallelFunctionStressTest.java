@@ -58,8 +58,8 @@ public class ParallelFunctionStressTest extends AbstractStressTestCase {
 		context.setInitialFunction("trigger", null);
 
 		// Ensure correct number of completions of parallel flows
-		context.setValidation(() -> assertEquals("Incorrect number of parallel completions", this.getIterationCount(),
-				work.completions.get()));
+		context.setValidation(() -> assertEquals("Incorrect number of parallel completions",
+				context.getMaximumIterations(), work.completions.get()));
 	}
 
 	/**

@@ -50,10 +50,8 @@ public class ThreadLocalAwareTeamTest extends AbstractOfficeConstructTestCase {
 	public void testInvokeFunctionsWithThreadLocalAwareness() throws Exception {
 
 		// Obtain the thread names
-		OnePersonTeam anotherTeam = new OnePersonTeam("ANOTHER", 10);
+		OnePersonTeam anotherTeam = OnePersonTeamSource.createOnePersonTeam("ANOTHER");
 		String contextThreadName = Thread.currentThread().getName();
-		String anotherThreadName = anotherTeam.getTeamName();
-		assertNotEquals("Should be different names", contextThreadName, anotherThreadName);
 
 		// Construct the teams
 		this.constructTeam("CONTEXT", ThreadLocalAwareTeamSource.class);
@@ -78,9 +76,12 @@ public class ThreadLocalAwareTeamTest extends AbstractOfficeConstructTestCase {
 		this.triggerFunction("taskOne", Integer.valueOf(1), (escalation) -> failure.value = escalation);
 		assertNull("Should be no failure", failure.value);
 
+		// Ensure test is valid with different names
+		assertNotEquals("Should be different names", contextThreadName, anotherTeam.getThreadName());
+
 		// Ensure the methods invoked with correct teams
 		assertEquals("Incorrect task one thread", contextThreadName, work.taskOneThreadName);
-		assertEquals("Incorrect task two thread", anotherThreadName, work.taskTwoThreadName);
+		assertEquals("Incorrect task two thread", anotherTeam.getThreadName(), work.taskTwoThreadName);
 		assertEquals("Incorrect task three thread", contextThreadName, work.taskThreeThreadName);
 
 		// Ensure appropriate thread local values

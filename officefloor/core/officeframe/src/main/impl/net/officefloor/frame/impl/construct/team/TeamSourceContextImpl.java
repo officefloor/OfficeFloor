@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
@@ -43,6 +44,12 @@ public class TeamSourceContextImpl extends SourceContextImpl implements TeamSour
 	private final String teamName;
 
 	/**
+	 * Decorator of the created {@link Thread} instances. May be
+	 * <code>null</code>.
+	 */
+	private final Consumer<Thread> decorator;
+
+	/**
 	 * <p>
 	 * Registered {@link ThreadLocalAwareTeam} instances.
 	 * <p>
@@ -59,15 +66,19 @@ public class TeamSourceContextImpl extends SourceContextImpl implements TeamSour
 	 * @param teamName
 	 *            Name of the {@link Team} to be created from the
 	 *            {@link TeamSource}.
+	 * @param decorator
+	 *            Decorator of the created {@link Thread} instances. May be
+	 *            <code>null</code>.
 	 * @param properties
 	 *            {@link SourceProperties} to initialise the {@link TeamSource}.
 	 * @param sourceContext
 	 *            {@link SourceContext}.
 	 */
-	public TeamSourceContextImpl(boolean isLoadingType, String teamName, SourceProperties properties,
-			SourceContext sourceContext) {
+	public TeamSourceContextImpl(boolean isLoadingType, String teamName, Consumer<Thread> decorator,
+			SourceProperties properties, SourceContext sourceContext) {
 		super(isLoadingType, sourceContext, properties);
 		this.teamName = teamName;
+		this.decorator = decorator;
 	}
 
 	/**
@@ -100,7 +111,7 @@ public class TeamSourceContextImpl extends SourceContextImpl implements TeamSour
 
 	@Override
 	public ThreadFactory getThreadFactory(int threadPriority) {
-		return new TeamThreadFactory(this.teamName, threadPriority);
+		return new TeamThreadFactory(this.teamName, threadPriority, this.decorator);
 	}
 
 	/**
@@ -129,18 +140,28 @@ public class TeamSourceContextImpl extends SourceContextImpl implements TeamSour
 		private final int threadPriority;
 
 		/**
+		 * Decorator of the created {@link Thread} instances. May be
+		 * <code>null</code>.
+		 */
+		private final Consumer<Thread> decorator;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param teamName
 		 *            Name of the {@link Team}.
 		 * @param threadPriority
 		 *            {@link Thread} priority.
+		 * @param decorator
+		 *            Decorator of the created {@link Thread} instances. May be
+		 *            <code>null</code>.
 		 */
-		protected TeamThreadFactory(String teamName, int threadPriority) {
+		protected TeamThreadFactory(String teamName, int threadPriority, Consumer<Thread> decorator) {
 			SecurityManager s = System.getSecurityManager();
 			this.group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
 			this.threadNamePrefix = teamName + "-";
 			this.threadPriority = threadPriority;
+			this.decorator = decorator;
 		}
 
 		/*
@@ -158,6 +179,9 @@ public class TeamSourceContextImpl extends SourceContextImpl implements TeamSour
 			}
 			if (thread.getPriority() != this.threadPriority) {
 				thread.setPriority(this.threadPriority);
+			}
+			if (this.decorator != null) {
+				this.decorator.accept(thread);
 			}
 
 			// Return the thread

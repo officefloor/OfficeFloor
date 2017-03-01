@@ -20,6 +20,7 @@ package net.officefloor.frame.impl.execute.function;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
+import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 
@@ -60,11 +61,11 @@ public class AppropriateNextResponsibleTeamTest extends AbstractOfficeConstructT
 	public void doNextFunctionWithAppropriateTeamTest(boolean isNextHaveTeam) throws Exception {
 
 		// Construct the teams
-		OnePersonTeam taskTeam = new OnePersonTeam("TASK", 10);
+		OnePersonTeam taskTeam = OnePersonTeamSource.createOnePersonTeam("TASK");
 		this.constructTeam("TASK_TEAM", taskTeam);
 		OnePersonTeam nextTeam = null;
 		if (isNextHaveTeam) {
-			nextTeam = new OnePersonTeam("FLOW", 10);
+			nextTeam = OnePersonTeamSource.createOnePersonTeam("FLOW");
 			this.constructTeam("NEXT_TEAM", nextTeam);
 		}
 
@@ -83,9 +84,9 @@ public class AppropriateNextResponsibleTeamTest extends AbstractOfficeConstructT
 
 		// Ensure appropriate threads used
 		assertTrue("Task should be invoked", work.isTaskInvoked);
-		assertEquals("Incorrect task team", work.taskThreadName, taskTeam.getTeamName());
+		assertEquals("Incorrect task team", work.taskThreadName, taskTeam.getThreadName());
 		assertEquals("Incorrect next team", work.nextThreadName,
-				(isNextHaveTeam ? nextTeam.getTeamName() : taskTeam.getTeamName()));
+				(isNextHaveTeam ? nextTeam.getThreadName() : taskTeam.getThreadName()));
 	}
 
 	/**

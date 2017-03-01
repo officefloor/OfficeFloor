@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.construct.officefloor;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -32,6 +33,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaDataImpl;
 import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaDataImpl;
 import net.officefloor.frame.impl.construct.managedfunction.RawManagedFunctionMetaDataImpl;
@@ -86,6 +88,12 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	private ClassLoader classLoader = null;
 
 	/**
+	 * Decorator of the {@link Thread} instances created by the
+	 * {@link TeamSourceContext}.
+	 */
+	private Consumer<Thread> threadDecorator = null;
+
+	/**
 	 * {@link ResourceSource} instances.
 	 */
 	private final List<ResourceSource> resourceSources = new LinkedList<ResourceSource>();
@@ -112,6 +120,11 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	@Override
 	public void setClassLoader(ClassLoader classLoader) {
 		this.classLoader = classLoader;
+	}
+
+	@Override
+	public void setThreadDecorator(Consumer<Thread> decorator) {
+		this.threadDecorator = decorator;
 	}
 
 	@Override
@@ -187,6 +200,11 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	@Override
 	public String getOfficeFloorName() {
 		return this.officeFloorName;
+	}
+
+	@Override
+	public Consumer<Thread> getThreadDecorator() {
+		return this.threadDecorator;
 	}
 
 	@Override

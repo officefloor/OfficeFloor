@@ -69,7 +69,7 @@ public class ThreadLocalAwareTeamStressTest extends AbstractStressTestCase {
 		context.setInitialFunction("task", null);
 
 		// Validate updated thread local value
-		context.setValidation(() -> assertEquals("Incorrect thread local value", this.getIterationCount(),
+		context.setValidation(() -> assertEquals("Incorrect thread local value", context.getMaximumIterations(),
 				this.value.get().invokeCount));
 	}
 

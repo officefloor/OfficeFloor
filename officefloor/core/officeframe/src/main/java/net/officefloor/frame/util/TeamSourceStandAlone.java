@@ -17,6 +17,8 @@
  */
 package net.officefloor.frame.util;
 
+import java.util.function.Consumer;
+
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.api.team.Team;
@@ -34,9 +36,36 @@ import net.officefloor.frame.impl.construct.team.TeamSourceContextImpl;
 public class TeamSourceStandAlone {
 
 	/**
+	 * Name of the {@link Team}.
+	 */
+	private final String teamName;
+
+	/**
 	 * {@link SourceProperties} to initialise the {@link TeamSource}.
 	 */
 	private final SourcePropertiesImpl properties = new SourcePropertiesImpl();
+
+	/**
+	 * {@link Thread} decorator. May be <code>null</code>.
+	 */
+	private Consumer<Thread> threadDecorator = null;
+
+	/**
+	 * Default instantiation.
+	 */
+	public TeamSourceStandAlone() {
+		this.teamName = null;
+	}
+
+	/**
+	 * Instantiate with {@link Team} name.
+	 * 
+	 * @param teamName
+	 *            Name of the {@link Team}.
+	 */
+	public TeamSourceStandAlone(String teamName) {
+		this.teamName = teamName;
+	}
 
 	/**
 	 * Initialises and returns the {@link TeamSource} instance.
@@ -72,6 +101,17 @@ public class TeamSourceStandAlone {
 	}
 
 	/**
+	 * Specifies the decorator of the {@link Thread} instances created by the
+	 * {@link TeamSourceContext}.
+	 * 
+	 * @param decorator
+	 *            {@link Thread} decorator.
+	 */
+	public void setThreadDecorator(Consumer<Thread> decorator) {
+		this.threadDecorator = decorator;
+	}
+
+	/**
 	 * Returns a {@link Team} from the loaded {@link TeamSource}.
 	 * 
 	 * @param <TS>
@@ -88,9 +128,12 @@ public class TeamSourceStandAlone {
 		// Load the team source
 		TS teamSource = this.loadTeamSource(teamSourceClass);
 
+		// Obtain the team name (default to class name if not provided)
+		String teamName = (this.teamName != null ? this.teamName : teamSourceClass.getSimpleName());
+
 		// Create team source context
 		SourceContext sourceContext = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader());
-		TeamSourceContext context = new TeamSourceContextImpl(false, teamSourceClass.getSimpleName(), this.properties,
+		TeamSourceContext context = new TeamSourceContextImpl(false, teamName, this.threadDecorator, this.properties,
 				sourceContext);
 
 		// Return the created team

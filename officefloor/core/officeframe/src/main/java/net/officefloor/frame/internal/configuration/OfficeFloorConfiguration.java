@@ -17,12 +17,15 @@
  */
 package net.officefloor.frame.internal.configuration;
 
+import java.util.function.Consumer;
+
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSourceContext;
 
 /**
  * Configuration for an {@link OfficeFloor}.
@@ -44,6 +47,15 @@ public interface OfficeFloorConfiguration {
 	 * @return {@link SourceContext}.
 	 */
 	SourceContext getSourceContext();
+
+	/**
+	 * Obtains the decorator of {@link Thread} instances created by the
+	 * {@link TeamSourceContext}.
+	 * 
+	 * @return Decorator of {@link Thread} instances created by the
+	 *         {@link TeamSourceContext}. May be <code>null</code>.
+	 */
+	Consumer<Thread> getThreadDecorator();
 
 	/**
 	 * Obtains the configuration of the {@link ManagedObjectSource} instances.

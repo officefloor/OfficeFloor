@@ -17,6 +17,8 @@
  */
 package net.officefloor.frame.impl.construct.team;
 
+import java.util.function.Consumer;
+
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -90,7 +92,8 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory, RawTeamMetaD
 
 	@Override
 	public <TS extends TeamSource> RawTeamMetaData constructRawTeamMetaData(TeamConfiguration<TS> configuration,
-			SourceContext sourceContext, ThreadLocalAwareExecutor threadLocalAwareExecutor, OfficeFloorIssues issues) {
+			SourceContext sourceContext, Consumer<Thread> threadDecorator,
+			ThreadLocalAwareExecutor threadLocalAwareExecutor, OfficeFloorIssues issues) {
 
 		// Obtain the team name
 		String teamName = configuration.getTeamName();
@@ -118,7 +121,8 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory, RawTeamMetaD
 		try {
 			// Create the team source context
 			SourceProperties properties = configuration.getProperties();
-			TeamSourceContextImpl context = new TeamSourceContextImpl(false, teamName, properties, sourceContext);
+			TeamSourceContextImpl context = new TeamSourceContextImpl(false, teamName, threadDecorator, properties,
+					sourceContext);
 
 			// Create the team
 			team = teamSource.createTeam(context);

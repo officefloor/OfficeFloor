@@ -17,7 +17,6 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
-import net.officefloor.frame.impl.spi.team.OnePersonTeam.OnePerson;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -28,30 +27,25 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class OnePersonTeamTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link OnePersonTeam} to test.
-	 */
-	protected OnePersonTeam team = new OnePersonTeam("TEST", 100);
-
-	/**
 	 * Ensures runs the tasks.
 	 */
-	public void testRunning() {
+	public void testRunning() throws Exception {
+
+		// Create the team
+		OnePersonTeam team = OnePersonTeamSource.createOnePersonTeam("TEAM");
 
 		// Start processing
-		this.team.startWorking();
+		team.startWorking();
 
 		// Assign task and wait on it to be started for execution
 		MockJob task = new MockJob();
-		task.assignJobToTeam(this.team, 10);
-
-		// Obtain the person
-		OnePerson person = this.team.person;
+		task.assignJobToTeam(team, 10);
 
 		// Stop processing (should block until person stops working)
-		this.team.stopWorking();
+		team.stopWorking();
 
 		// Ensure person stopped working
-		assertTrue("Person should be stopped working", person.finished);
+		assertNull("Person should be stopped working", team.getThreadName());
 
 		// Should have execute the task at least once
 		assertTrue("Should have execute the task at least once", task.doTaskInvocationCount >= 1);

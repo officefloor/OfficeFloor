@@ -17,20 +17,22 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
+import java.util.concurrent.ThreadFactory;
+
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
 
 /**
- * Team having only one {@link Thread}.
+ * {@link Team} having only one {@link Thread}.
  * 
  * @author Daniel Sagenschneider
  */
 public class OnePersonTeam implements Team {
 
 	/**
-	 * Name of this {@link Team}.
+	 * {@link ThreadFactory}.
 	 */
-	private final String teamName;
+	private final ThreadFactory threadFactory;
 
 	/**
 	 * Time to wait in milliseconds for a {@link Job}.
@@ -38,38 +40,41 @@ public class OnePersonTeam implements Team {
 	private final long waitTime;
 
 	/**
-	 * {@link OnePerson} of this {@link Team}.
-	 */
-	protected OnePerson person = null;
-
-	/**
 	 * {@link JobQueue}.
 	 */
-	private final JobQueue taskQueue = new JobQueue();
+	private final JobQueue jobQueue = new JobQueue();
+
+	/**
+	 * {@link OnePerson} of this {@link Team}.
+	 */
+	private OnePerson person = null;
+
+	/**
+	 * Single {@link Thread}.
+	 */
+	private Thread thread = null;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param teamName
-	 *            Name of this {@link Team}.
+	 * @param threadFactory
+	 *            {@link ThreadFactory}.
 	 * @param waitTime
 	 *            Time to wait in milliseconds for a {@link Job}.
 	 */
-	public OnePersonTeam(String teamName, long waitTime) {
-		this.teamName = teamName;
+	public OnePersonTeam(ThreadFactory threadFactory, long waitTime) {
+		this.threadFactory = threadFactory;
 		this.waitTime = waitTime;
 	}
 
 	/**
-	 * <p>
-	 * Obtains the name of this {@link Team}.
-	 * <p>
-	 * This name is also used to name the {@link Thread}.
+	 * Obtains the name of the single {@link Thread}.
 	 * 
-	 * @return Name of this {@link Team}.
+	 * @return Name of the single {@link Thread}. Will be <code>null</code> if
+	 *         {@link Team} not started.
 	 */
-	public String getTeamName() {
-		return this.getClass().getSimpleName() + "_" + this.teamName;
+	public String getThreadName() {
+		return (this.thread != null ? this.thread.getName() : null);
 	}
 
 	/*
@@ -83,18 +88,16 @@ public class OnePersonTeam implements Team {
 		}
 
 		// Hire the person for the team
-		this.person = new OnePerson(this.taskQueue, this.waitTime);
+		this.person = new OnePerson(this.jobQueue, this.waitTime);
 
 		// Start the person working
-		String threadName = this.getTeamName();
-		Thread thread = new Thread(this.person, threadName);
-		thread.setDaemon(true);
-		thread.start();
+		this.thread = this.threadFactory.newThread(this.person);
+		this.thread.start();
 	}
 
 	@Override
 	public void assignJob(Job job) {
-		this.taskQueue.enqueue(job);
+		this.jobQueue.enqueue(job);
 	}
 
 	@Override
@@ -113,8 +116,9 @@ public class OnePersonTeam implements Team {
 					}
 				}
 			} finally {
-				// Release the person
+				// Release the person and thread
 				this.person = null;
+				this.thread = null;
 			}
 		}
 	}
@@ -127,7 +131,7 @@ public class OnePersonTeam implements Team {
 		/**
 		 * {@link JobQueue}.
 		 */
-		private final JobQueue taskQueue;
+		private final JobQueue jobQueue;
 
 		/**
 		 * Time to wait in milliseconds for a {@link Job}.
@@ -147,13 +151,13 @@ public class OnePersonTeam implements Team {
 		/**
 		 * Initiate.
 		 * 
-		 * @param taskQueue
+		 * @param jobQueue
 		 *            {@link JobQueue}.
 		 * @param waitTime
 		 *            Time to wait in milliseconds for a {@link Job}.
 		 */
-		public OnePerson(JobQueue taskQueue, long waitTime) {
-			this.taskQueue = taskQueue;
+		public OnePerson(JobQueue jobQueue, long waitTime) {
+			this.jobQueue = jobQueue;
 			this.waitTime = waitTime;
 		}
 
@@ -167,7 +171,7 @@ public class OnePersonTeam implements Team {
 				while (this.continueWorking) {
 
 					// Obtain the next job
-					Job job = this.taskQueue.dequeue(this.waitTime);
+					Job job = this.jobQueue.dequeue(this.waitTime);
 					if (job != null) {
 						// Have job therefore execute it
 						job.run();

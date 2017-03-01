@@ -21,6 +21,7 @@ import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
+import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
@@ -110,11 +111,11 @@ public class AppropriateFlowResponsibleTeamTest extends AbstractOfficeConstructT
 			boolean isSpawnThreadState) throws Exception {
 
 		// Construct the teams
-		OnePersonTeam taskTeam = new OnePersonTeam("TASK", 10);
+		OnePersonTeam taskTeam = OnePersonTeamSource.createOnePersonTeam("TASK");
 		this.constructTeam("TASK_TEAM", taskTeam);
 		OnePersonTeam flowTeam = null;
 		if (isFlowHaveTeam) {
-			flowTeam = new OnePersonTeam("FLOW", 10);
+			flowTeam = OnePersonTeamSource.createOnePersonTeam("FLOW");
 			this.constructTeam("FLOW_TEAM", flowTeam);
 		}
 
@@ -134,11 +135,11 @@ public class AppropriateFlowResponsibleTeamTest extends AbstractOfficeConstructT
 
 		// Ensure appropriate threads used
 		assertTrue("Task should be invoked", work.isTaskInvoked);
-		assertEquals("Incorrect task team", work.taskThreadName, taskTeam.getTeamName());
+		assertEquals("Incorrect task team", work.taskThreadName, taskTeam.getThreadName());
 		assertEquals("Incorrect flow team", work.flowThreadName,
-				(isFlowHaveTeam ? flowTeam.getTeamName() : taskTeam.getTeamName()));
+				(isFlowHaveTeam ? flowTeam.getThreadName() : taskTeam.getThreadName()));
 		if (isProvideCallback) {
-			assertEquals("Incorrect callback team", work.callbackThreadName, taskTeam.getTeamName());
+			assertEquals("Incorrect callback team", work.callbackThreadName, taskTeam.getThreadName());
 		} else {
 			assertNull("Should not have callback team, as not invoked", work.callbackThreadName);
 		}

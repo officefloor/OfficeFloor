@@ -17,6 +17,8 @@
  */
 package net.officefloor.frame.internal.construct;
 
+import java.util.function.Consumer;
+
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.source.TeamSource;
@@ -37,6 +39,9 @@ public interface RawTeamMetaDataFactory {
 	 *            {@link TeamSource} type.
 	 * @param configuration
 	 *            {@link TeamConfiguration}.
+	 * @param threadDecorator
+	 *            Decorator for the created {@link Thread} instances. May be
+	 *            <code>null</code>.
 	 * @param sourceContext
 	 *            {@link SourceContext}.
 	 * @param threadLocalAwareExecutor
@@ -47,6 +52,7 @@ public interface RawTeamMetaDataFactory {
 	 *         construct.
 	 */
 	<TS extends TeamSource> RawTeamMetaData constructRawTeamMetaData(TeamConfiguration<TS> configuration,
-			SourceContext sourceContext, ThreadLocalAwareExecutor threadLocalAwareExecutor, OfficeFloorIssues issues);
+			SourceContext sourceContext, Consumer<Thread> threadDecorator,
+			ThreadLocalAwareExecutor threadLocalAwareExecutor, OfficeFloorIssues issues);
 
 }

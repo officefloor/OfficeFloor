@@ -27,8 +27,6 @@ import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.api.team.source.TeamSourceSpecification;
-import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.impl.spi.team.WorkerPerJobTeam;
 
 /**
  * Mock {@link TeamSource}.
@@ -37,28 +35,6 @@ import net.officefloor.frame.impl.spi.team.WorkerPerJobTeam;
  */
 @TestSource
 public class MockTeamSource implements TeamSource {
-
-	/**
-	 * Convenience method to create a {@link OnePersonTeam}.
-	 * 
-	 * @param teamName
-	 *            Name of the {@link Team}.
-	 * @return {@link OnePersonTeam}.
-	 */
-	public static OnePersonTeam createOnePersonTeam(String teamName) {
-		return new OnePersonTeam(teamName, 100);
-	}
-
-	/**
-	 * Convenience method to create a {@link WorkerPerJobTeam}.
-	 * 
-	 * @param teamName
-	 *            Name of the {@link Team}.
-	 * @return {@link WorkerPerJobTeam}
-	 */
-	public static WorkerPerJobTeam createWorkerPerTaskTeam(String teamName) {
-		return new WorkerPerJobTeam(teamName);
-	}
 
 	/**
 	 * Property name to source the {@link Team}.

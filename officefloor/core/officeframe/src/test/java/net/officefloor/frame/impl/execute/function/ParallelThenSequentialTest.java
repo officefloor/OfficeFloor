@@ -19,8 +19,8 @@ package net.officefloor.frame.impl.execute.function;
 
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
+import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
+import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFlow;
@@ -34,24 +34,24 @@ import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 public class ParallelThenSequentialTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Flag to record task method invocations.
+	 * Ensure invokes parallel task with any {@link Team}.
 	 */
-	public ParallelThenSequentialTest() {
-		this.setRecordReflectiveFunctionMethodsInvoked(true);
+	public void testParallelWithAnyTeam() throws Exception {
+		this.doTest((Team) null);
 	}
 
 	/**
-	 * Ensures invokes parallel task with parallel team.
+	 * Ensures invokes parallel task with passive {@link Team}.
 	 */
 	public void testParallelWithPassiveTeam() throws Exception {
-		this.doTest(new PassiveTeam());
+		this.doTest(PassiveTeamSource.createPassiveTeam());
 	}
 
 	/**
-	 * Ensures invokes parallel task with active team.
+	 * Ensures invokes parallel task with active {@link Team}.
 	 */
 	public void testParallelWithActiveTeam() throws Exception {
-		this.doTest(new OnePersonTeam("PARALLEL", 100));
+		this.doTest(OnePersonTeamSource.createOnePersonTeam("PARALLEL"));
 	}
 
 	/**
@@ -67,20 +67,27 @@ public class ParallelThenSequentialTest extends AbstractOfficeConstructTestCase 
 	public void doTest(Team team) throws Exception {
 
 		// Configure
-		this.constructTeam("team", team);
+		if (team != null) {
+			this.constructTeam("team", team);
+		}
 		ParallelWorkObject work = new ParallelWorkObject();
 		ReflectiveFunctionBuilder firstFunctionBuilder = this.constructFunction(work, "first");
-		firstFunctionBuilder.getBuilder().setResponsibleTeam("team");
+		if (team != null) {
+			firstFunctionBuilder.getBuilder().setResponsibleTeam("team");
+		}
 		firstFunctionBuilder.buildFlow("parallel", Object.class, false);
 		firstFunctionBuilder.setNextFunction("second");
-		this.constructFunction(work, "parallel").getBuilder().setResponsibleTeam("team");
-		this.constructFunction(work, "second").getBuilder().setResponsibleTeam("team");
+		ReflectiveFunctionBuilder parallel = this.constructFunction(work, "parallel");
+		if (team != null) {
+			parallel.getBuilder().setResponsibleTeam("team");
+		}
+		ReflectiveFunctionBuilder second = this.constructFunction(work, "second");
+		if (team != null) {
+			second.getBuilder().setResponsibleTeam("team");
+		}
 
 		// Run
-		this.invokeFunction("first", null);
-
-		// Validate methods invoked
-		this.validateReflectiveMethodOrder("first", "parallel", "second");
+		this.invokeFunctionAndValidate("first", null, "first", "parallel", "second");
 	}
 
 	public static class ParallelWorkObject {

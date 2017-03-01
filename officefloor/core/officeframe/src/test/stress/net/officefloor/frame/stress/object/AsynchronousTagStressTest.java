@@ -41,6 +41,11 @@ public class AsynchronousTagStressTest extends AbstractStressTestCase {
 	}
 
 	@Override
+	protected int getIterationCount() {
+		return 100000;
+	}
+
+	@Override
 	protected void constructTest(StressContext context) throws Exception {
 
 		// Construct the managed objects
