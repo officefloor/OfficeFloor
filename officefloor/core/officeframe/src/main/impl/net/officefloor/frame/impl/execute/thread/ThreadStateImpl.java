@@ -17,14 +17,12 @@
  */
 package net.officefloor.frame.impl.execute.thread;
 
-import java.lang.reflect.Proxy;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
-import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.impl.execute.flow.FlowImpl;
 import net.officefloor.frame.impl.execute.function.AbstractDelegateFunctionState;
 import net.officefloor.frame.impl.execute.function.AbstractFunctionState;
@@ -37,10 +35,10 @@ import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
-import net.officefloor.frame.internal.structure.FunctionContext;
 import net.officefloor.frame.internal.structure.FunctionLogic;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.LinkedListSet;
@@ -51,10 +49,10 @@ import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.internal.structure.ThreadContext;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadProfiler;
 import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.frame.internal.structure.ThreadStateContext;
 
 /**
  * Implementation of the {@link ThreadState}.
@@ -80,10 +78,10 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	 *            {@link ThreadState} to attached to the {@link Thread}.
 	 * @param isThreadStateSafe
 	 *            Indicates if the execution is {@link ThreadState} safe.
-	 * @return {@link ThreadContext} for executing the {@link ThreadState}
+	 * @return {@link ThreadStateContext} for executing the {@link ThreadState}
 	 *         attached to the {@link Thread}.
 	 */
-	public static ThreadContext attachThreadStateToThread(ThreadState threadState, boolean isThreadStateSafe) {
+	public static ThreadStateContext attachThreadStateToThread(ThreadState threadState, boolean isThreadStateSafe) {
 
 		// Obtain the possible existing thread state on thread
 		ActiveThreadState previous = activeThreadState.get();
@@ -124,11 +122,11 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	}
 
 	/**
-	 * Obtains the current {@link ThreadContext}.
+	 * Obtains the current {@link ThreadStateContext}.
 	 * 
-	 * @return Current {@link ThreadContext}.
+	 * @return Current {@link ThreadStateContext}.
 	 */
-	public static ThreadContext currentThreadContext() {
+	public static ThreadStateContext currentThreadContext() {
 
 		// Obtain the context attached to the thread
 		ActiveThreadState current = activeThreadState.get();
@@ -605,7 +603,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			}
 
 			@Override
-			public FunctionState execute(FunctionContext context) throws Throwable {
+			public FunctionState execute(FunctionStateContext context) throws Throwable {
 
 				// Undertake callback
 				ProcessFlowCompletion.this.callback.run(this.escalation);
@@ -622,12 +620,6 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	private static class FunctionChainBreak {
 
 		/**
-		 * Flag indicating a {@link ProxyFunction} is being invoked in
-		 * {@link FunctionState} chain.
-		 */
-		private boolean isProxy = false;
-
-		/**
 		 * Activated {@link ProxyFunction}.
 		 */
 		private ProxyFunction proxy = null;
@@ -638,30 +630,17 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		 */
 		private FunctionState thenFunction = null;
 
-	}
-
-	/**
-	 * Interface to wrap executing or handling {@link Escalation} for a
-	 * {@link FunctionState}.
-	 */
-	private static interface ExecuteFunctionState<T extends Throwable> {
-
 		/**
-		 * Executes the {@link FunctionState} or handles {@link Escalation}.
-		 * 
-		 * @param context
-		 *            {@link FunctionContext}.
-		 * @return Next {@link FunctionState} to execute.
-		 * @throws Throwable
-		 *             If failure in executing the {@link FunctionState}.
+		 * {@link FunctionState} to continue should {@link BreakFunction} have
+		 * to handle {@link Escalation}.
 		 */
-		FunctionState execute(FunctionContext context) throws T;
+		private FunctionState handleThenFunction = null;
 	}
 
 	/**
 	 * Active {@link ThreadState}.
 	 */
-	private static class ActiveThreadState implements ThreadContext, FunctionContext {
+	private static class ActiveThreadState implements ThreadStateContext, FunctionStateContext {
 
 		/**
 		 * {@link FunctionChainBreak}.
@@ -734,7 +713,8 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		}
 
 		/*
-		 * =========================== ThreadContext ===========================
+		 * =========================== ThreadStateContext
+		 * ===========================
 		 */
 
 		@Override
@@ -747,7 +727,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 				FunctionState logicFunction = flow.createFunction(logic);
 				FunctionState completeFlow = new AbstractFunctionState(this.threadState) {
 					@Override
-					public FunctionState execute(FunctionContext context) throws Throwable {
+					public FunctionState execute(FunctionStateContext context) throws Throwable {
 						return ActiveThreadState.this.threadState.flowComplete(flow, false);
 					}
 				};
@@ -760,7 +740,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 					FunctionState logicFunction = flow.createFunction(logic);
 					FunctionState completeFlow = new AbstractFunctionState(fallbackThreadState) {
 						@Override
-						public FunctionState execute(FunctionContext context) throws Throwable {
+						public FunctionState execute(FunctionStateContext context) throws Throwable {
 							return fallbackThreadState.flowComplete(flow, false);
 						}
 					};
@@ -771,56 +751,30 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 		@Override
 		public FunctionState executeFunction(FunctionState function) throws Throwable {
-			return this.threadExecute((context) -> function.execute(context));
-		}
-
-		@Override
-		public FunctionState handleEscalation(FunctionState function, Throwable escalation) {
-			return this.threadExecute((context) -> function.handleEscalation(escalation, context));
-		}
-
-		/**
-		 * Undertakes execution of the {@link FunctionState} by the
-		 * {@link FunctionLoop}.
-		 * 
-		 * @param executor
-		 *            {@link ExecuteFunctionState}.
-		 * @return Next {@link FunctionState} to execute.
-		 * @throws T
-		 *             If fails to execute the {@link FunctionState}.
-		 */
-		private <T extends Throwable> FunctionState threadExecute(ExecuteFunctionState<T> executor) throws T {
 
 			// Reset the stack depth (with additional depth for the thread)
 			this.currentStackDepth = this.threadStateStackDepth;
 
 			// Execute the function
-			FunctionState next = executor.execute(this);
+			FunctionState next = function.execute(this);
 
 			// Determine if proxy within chain
 			ProxyFunction proxy = this.functionChainBreak.proxy;
-			boolean isProxy = this.functionChainBreak.isProxy;
-			if (isProxy || (proxy != null)) {
+			if (proxy != null) {
 
 				// Ensure each recursive thread state chain is continued
+				this.functionChainBreak.handleThenFunction = this.functionChainBreak.thenFunction;
 				this.functionChainBreak.thenFunction = Promise.then(this.functionChainBreak.thenFunction, next);
 
-				// Determine if run proxy
-				if (isProxy) {
+				// Determine if top level thread state
+				if (this.previousActiveThreadState == null) {
 
-					// Already broken off, so wait
-					if (this.functionChainBreak.thenFunction != null) {
-						throw new IllegalStateException(
-								"Should not have recursive thread states on running wait proxy");
-					}
-					return null;
-
-				} else if (this.previousActiveThreadState == null) {
-
-					// Create the break function
-					BreakFunction breakFunction = new BreakFunction(proxy, this.functionChainBreak.thenFunction);
+					// Clear proxy as being executed
+					this.functionChainBreak.proxy = null;
 
 					// Break off the proxy delegate function
+					BreakFunction breakFunction = new BreakFunction(proxy, this.functionChainBreak.thenFunction,
+							this.functionChainBreak.handleThenFunction);
 					FunctionLoop loop = this.threadState.getProcessState().getFunctionLoop();
 					loop.delegateFunction(breakFunction);
 				}
@@ -839,26 +793,6 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 		@Override
 		public FunctionState executeDelegate(FunctionState delegate) throws Throwable {
-			return this.functionExecute(delegate, (context) -> delegate.execute(context));
-		}
-
-		@Override
-		public FunctionState handleDelegateEscalation(FunctionState delegate, Throwable escalation) {
-			return this.functionExecute(delegate, (context) -> delegate.handleEscalation(escalation, context));
-		}
-
-		/**
-		 * Undertakes execution of the {@link FunctionState} by
-		 * {@link ThenFunction}.
-		 * 
-		 * @param executor
-		 *            {@link ExecuteFunctionState}.
-		 * @return Next {@link FunctionState}.
-		 * @throws T
-		 *             If fails to execute the {@link FunctionState}.
-		 */
-		private <T extends Throwable> FunctionState functionExecute(FunctionState delegate,
-				ExecuteFunctionState<T> executor) throws T {
 
 			// Increment the stack depth
 			this.currentStackDepth++;
@@ -872,13 +806,16 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 				}
 
 				// Proxy the delegate function to break
-				ProxyFunction proxy = new ProxyFunction(delegate, executor);
+				ProxyFunction proxy = new ProxyFunction(delegate);
+				if (this.functionChainBreak.proxy != null) {
+					throw new IllegalStateException("May only have one proxy in function chain");
+				}
 				this.functionChainBreak.proxy = proxy;
 				return proxy;
 			}
 
 			// Undertake the delegate function
-			return executor.execute(this);
+			return delegate.execute(this);
 		}
 	}
 
@@ -917,7 +854,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		 */
 
 		@Override
-		public FunctionState execute(FunctionContext context) throws Throwable {
+		public FunctionState execute(FunctionStateContext context) throws Throwable {
 			FunctionState next = context.executeDelegate(this.delegate);
 			if (next != null) {
 				return new ThenFunction(next, this.thenFunction);
@@ -926,8 +863,8 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		}
 
 		@Override
-		public FunctionState handleEscalation(Throwable escalation, FunctionContext context) {
-			FunctionState handler = context.handleDelegateEscalation(this.delegate, escalation);
+		public FunctionState handleEscalation(Throwable escalation) {
+			FunctionState handler = this.delegate.handleEscalation(escalation);
 			if (handler != null) {
 				return new ThenFunction(handler, this.thenFunction);
 			}
@@ -947,17 +884,6 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	private static class ProxyFunction extends AbstractDelegateFunctionState {
 
 		/**
-		 * {@link ExecuteFunctionState}.
-		 */
-		private final ExecuteFunctionState<? extends Throwable> executor;
-
-		/**
-		 * Flag indicating the broken off {@link FunctionState} chain is
-		 * complete.
-		 */
-		private volatile boolean isComplete = false;
-
-		/**
 		 * Instantiate with the {@link FunctionState} to proxy.
 		 * 
 		 * @param delegate
@@ -965,9 +891,17 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		 * @param executor
 		 *            {@link ExecuteFunctionState}.
 		 */
-		private ProxyFunction(FunctionState delegate, ExecuteFunctionState<? extends Throwable> executor) {
+		private ProxyFunction(FunctionState delegate) {
 			super(delegate);
-			this.executor = executor;
+		}
+
+		/**
+		 * Obtains the {@link FunctionState} being proxied.
+		 * 
+		 * @return {@link FunctionState} being proxied.
+		 */
+		private FunctionState getProxiedFunction() {
+			return this.delegate;
 		}
 
 		/*
@@ -975,40 +909,26 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		 */
 
 		@Override
-		public FunctionState execute(FunctionContext context) throws Throwable {
-
-			// Determine if complete
-			if (!this.isComplete) {
-
-				// Chain not complete, so continue to proxy
-				ActiveThreadState activeThreadState = (ActiveThreadState) context;
-				if (activeThreadState.functionChainBreak.isProxy) {
-					throw new IllegalStateException("Should only proxy once in function state execution chain");
-				}
-				activeThreadState.functionChainBreak.isProxy = true;
-				return this; // continue to proxy
-			}
-
-			// Chain complete, so nothing further
+		public FunctionState execute(FunctionStateContext context) throws Throwable {
+			// Execution completed on break function
 			return null;
 		}
 	}
 
 	/**
-	 * {@link Job} to break the {@link FunctionState} away from existing
-	 * execution chain.
+	 * {@link FunctionState} to break the {@link FunctionState} chain.
 	 */
-	private static class BreakFunction extends AbstractDelegateFunctionState {
+	private static class BreakFunction extends ThenFunction {
 
 		/**
-		 * {@link ProxyFunction}.
+		 * <p>
+		 * {@link FunctionState} to continue on handling {@link Escalation}.
+		 * <p>
+		 * Because the current {@link ThreadState} will not be continued on
+		 * {@link Escalation}, only the next outer {@link ThreadState} will
+		 * continue.
 		 */
-		private final ProxyFunction proxy;
-
-		/**
-		 * {@link FunctionState} to continue after {@link Proxy} chain complete.
-		 */
-		private final FunctionState thenFunction;
+		private final FunctionState handleThenFunction;
 
 		/**
 		 * Instantiate.
@@ -1017,11 +937,16 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		 *            {@link ProxyFunction} to have its actual
 		 *            {@link FunctionState} broken away from the execution
 		 *            chain.
+		 * @param thenFunction
+		 *            {@link FunctionState} to complete after the
+		 *            {@link ProxyFunction} chain is complete.
+		 * @param handleThenFunction
+		 *            {@link FunctionState} to continue on handling
+		 *            {@link Escalation}.
 		 */
-		private BreakFunction(ProxyFunction proxy, FunctionState thenFunction) {
-			super(proxy);
-			this.proxy = proxy;
-			this.thenFunction = thenFunction;
+		private BreakFunction(final ProxyFunction proxy, FunctionState thenFunction, FunctionState handleThenFunction) {
+			super(proxy.getProxiedFunction(), thenFunction);
+			this.handleThenFunction = handleThenFunction;
 		}
 
 		/*
@@ -1031,35 +956,17 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		@Override
 		public TeamManagement getResponsibleTeam() {
 			// Break team responsible, so delegation to active thread
-			return this.proxy.getThreadState().getBreakChainTeamManagement();
+			return this.delegate.getThreadState().getBreakChainTeamManagement();
 		}
 
 		@Override
-		public FunctionState execute(FunctionContext context) throws Throwable {
-
-			// Create function to execute the executor
-			FunctionState executeFunction = new AbstractDelegateFunctionState(this.proxy) {
-				@Override
-				public FunctionState execute(FunctionContext context) throws Throwable {
-					return BreakFunction.this.proxy.executor.execute(context);
-				}
-			};
-
-			// Create function to continue then function
-			FunctionState thenFunction = new AbstractDelegateFunctionState(this.thenFunction) {
-				@Override
-				public FunctionState execute(FunctionContext context) throws Throwable {
-
-					// Flag proxy delegate chain break complete
-					BreakFunction.this.proxy.isComplete = true;
-
-					// Continue executing the proxy then function
-					return super.execute(context);
-				}
-			};
-
-			// Once delegate chain completes, carry on chain
-			return new ThenFunction(executeFunction, thenFunction);
+		public FunctionState handleEscalation(Throwable escalation) {
+			
+			// Handle escalation
+			FunctionState next = this.delegate.handleEscalation(escalation);
+			
+			// Undertake possible handling and then outer thread state
+			return Promise.then(next, this.handleThenFunction);
 		}
 	}
 

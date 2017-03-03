@@ -19,7 +19,7 @@ package net.officefloor.frame.impl.execute.function;
 
 import java.util.function.Function;
 
-import net.officefloor.frame.internal.structure.FunctionContext;
+import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.FunctionLogic;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.LinkedListSet;
@@ -184,7 +184,7 @@ public class LinkedListSetPromise<I, E> extends AbstractDelegateFunctionState {
 	 */
 
 	@Override
-	public FunctionState execute(FunctionContext context) throws Throwable {
+	public FunctionState execute(FunctionStateContext context) throws Throwable {
 
 		// Determine if previous chain of functions to complete
 		if (this.previousFunction != null) {

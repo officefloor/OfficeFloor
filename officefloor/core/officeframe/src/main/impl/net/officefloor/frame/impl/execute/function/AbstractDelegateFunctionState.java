@@ -19,7 +19,7 @@ package net.officefloor.frame.impl.execute.function;
 
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FunctionContext;
+import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -105,7 +105,7 @@ public class AbstractDelegateFunctionState extends AbstractLinkedListSetEntry<Fu
 	}
 
 	@Override
-	public FunctionState execute(FunctionContext context) throws Throwable {
+	public FunctionState execute(FunctionStateContext context) throws Throwable {
 		return context.executeDelegate(this.delegate);
 	}
 
@@ -115,8 +115,8 @@ public class AbstractDelegateFunctionState extends AbstractLinkedListSetEntry<Fu
 	}
 
 	@Override
-	public FunctionState handleEscalation(Throwable escalation, FunctionContext context) {
-		return context.handleDelegateEscalation(this.delegate, escalation);
+	public FunctionState handleEscalation(Throwable escalation) {
+		return this.delegate.handleEscalation(escalation);
 	}
 
 }

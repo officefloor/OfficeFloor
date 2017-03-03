@@ -30,7 +30,7 @@ import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.internal.structure.ThreadContext;
+import net.officefloor.frame.internal.structure.ThreadStateContext;
 import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
@@ -117,7 +117,7 @@ public class FunctionLoopImpl implements FunctionLoop {
 		ThreadState threadState = headFunction.getThreadState();
 
 		// Attach thread state to thread
-		ThreadContext context = ThreadStateImpl.attachThreadStateToThread(threadState, isThreadStateSafe);
+		ThreadStateContext context = ThreadStateImpl.attachThreadStateToThread(threadState, isThreadStateSafe);
 
 		// Ensure detach thread state on exit of loop
 		try {
@@ -167,7 +167,7 @@ public class FunctionLoopImpl implements FunctionLoop {
 					}
 
 					// Handle escalation
-					nextFunction = context.handleEscalation(nextFunction, ex);
+					nextFunction = nextFunction.handleEscalation(ex);
 				}
 
 			} while (nextFunction != null);
@@ -294,12 +294,17 @@ public class FunctionLoopImpl implements FunctionLoop {
 
 		@Override
 		public void cancel(Throwable cause) {
+			try {
 
-			// Handle cancellation of the job
-			ThreadContext context = ThreadStateImpl.currentThreadContext();
-			FunctionState handler = context.handleEscalation(this.initialFunction, cause);
-			SafeLoop loop = new SafeLoop(handler, this.currentTeam);
-			loop.run();
+				// Handle cancellation of the job
+				FunctionState handler = this.initialFunction.handleEscalation(cause);
+				SafeLoop loop = new SafeLoop(handler, this.currentTeam);
+				loop.run();
+
+			} catch (Throwable ex) {
+				// Log failure to cancel job
+				LOGGER.log(Level.WARNING, "Failed to handle cancellation of job", cause);
+			}
 		}
 	}
 

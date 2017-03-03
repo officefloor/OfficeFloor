@@ -26,7 +26,7 @@ import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FunctionContext;
+import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.LinkedListSet;
@@ -130,7 +130,7 @@ public class AssetManagerImpl extends AbstractLinkedListSetEntry<FunctionState, 
 	}
 
 	@Override
-	public FunctionState execute(FunctionContext context) throws Throwable {
+	public FunctionState execute(FunctionStateContext context) throws Throwable {
 		// Undertake checks for each of the latches
 		return LinkedListSetPromise.all(this.latches, LATCH_TO_CHECK);
 	}

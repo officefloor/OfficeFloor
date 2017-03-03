@@ -17,14 +17,12 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.escalate.Escalation;
-
 /**
  * Context for executing a {@link FunctionState}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface FunctionContext {
+public interface FunctionStateContext {
 
 	/**
 	 * Wraps executing the delegate {@link FunctionState} to enable breaking the
@@ -37,18 +35,5 @@ public interface FunctionContext {
 	 *             If failure in executing the delegate {@link FunctionState}.
 	 */
 	FunctionState executeDelegate(FunctionState delegate) throws Throwable;
-
-	/**
-	 * Wraps executing the delegate {@link FunctionState} handling of
-	 * {@link Escalation} to enable breaking the delegate chain. This avoids
-	 * {@link StackOverflowError} issues.
-	 * 
-	 * @param delegate
-	 *            Delegate {@link FunctionState}.
-	 * @param escalation
-	 *            {@link Escalation}.
-	 * @return {@link FunctionState} to handle the {@link Escalation}.
-	 */
-	FunctionState handleDelegateEscalation(FunctionState delegate, Throwable escalation);
 
 }

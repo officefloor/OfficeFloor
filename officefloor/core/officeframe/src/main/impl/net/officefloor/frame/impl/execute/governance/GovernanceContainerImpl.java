@@ -26,7 +26,7 @@ import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEnt
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectReadyCheckImpl;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FunctionContext;
+import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
@@ -121,7 +121,7 @@ public class GovernanceContainerImpl<E, F extends Enum<F>> implements Governance
 			private ManagedFunctionContainer governanceFunction = null;
 
 			@Override
-			public FunctionState execute(FunctionContext context) {
+			public FunctionState execute(FunctionStateContext context) {
 
 				// Easy access to container
 				GovernanceContainerImpl<E, F> container = GovernanceContainerImpl.this;
@@ -293,7 +293,7 @@ public class GovernanceContainerImpl<E, F extends Enum<F>> implements Governance
 		}
 
 		@Override
-		public FunctionState execute(FunctionContext context) {
+		public FunctionState execute(FunctionStateContext context) {
 
 			// Easy access to registered governance
 			RegisteredGovernanceImpl registeredGovernance = RegisteredGovernanceImpl.this;
@@ -401,7 +401,7 @@ public class GovernanceContainerImpl<E, F extends Enum<F>> implements Governance
 	public FunctionState deactivateGovernance() {
 		return new GovernanceOperation() {
 			@Override
-			public FunctionState execute(FunctionContext context) throws Throwable {
+			public FunctionState execute(FunctionStateContext context) throws Throwable {
 
 				// Easy access to container
 				GovernanceContainerImpl<E, F> container = GovernanceContainerImpl.this;

@@ -47,7 +47,6 @@ import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObject
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
-import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeamSource;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;

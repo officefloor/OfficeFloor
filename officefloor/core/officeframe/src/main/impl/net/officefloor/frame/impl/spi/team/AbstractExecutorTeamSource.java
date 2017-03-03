@@ -17,9 +17,12 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
@@ -177,6 +180,14 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		@Override
 		public void startWorking() {
 			this.servicer = this.factory.createExecutorService();
+
+			// Determine if can handle rejected jobs
+			if (this.servicer instanceof ThreadPoolExecutor) {
+				ThreadPoolExecutor threadPool = (ThreadPoolExecutor) this.servicer;
+				threadPool.setRejectedExecutionHandler((job, exception) -> {
+					((Job) job).cancel(new RejectedExecutionException());
+				});
+			}
 		}
 
 		@Override
@@ -187,13 +198,34 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		@Override
 		public void stopWorking() {
 
-			// Shutdown servicer
+			// Determine if can wait for thread pool to complete
+			if (this.servicer instanceof ThreadPoolExecutor) {
+				ThreadPoolExecutor threadPool = (ThreadPoolExecutor) this.servicer;
+				BlockingQueue<Runnable> queue = threadPool.getQueue();
+
+				// Wait some time until queue is empty
+				long endWaitTime = System.currentTimeMillis() + (this.maxShutdownWaitTimeInSeconds * 1000);
+				while ((!queue.isEmpty()) || (threadPool.getActiveCount() > 0)) {
+
+					// Determine if still within time
+					if (System.currentTimeMillis() <= endWaitTime) {
+
+						// Still within time, so wait a little
+						try {
+							Thread.sleep(10);
+						} catch (InterruptedException ex) {
+						}
+					}
+				}
+			}
+
+			// Shutdown executor
 			this.servicer.shutdown();
 
 			// Await termination
 			try {
 				if (this.servicer.awaitTermination(this.maxShutdownWaitTimeInSeconds, TimeUnit.SECONDS)) {
-					return; // successful completion
+					return; // successful shutdown
 				}
 			} catch (InterruptedException ex) {
 			}

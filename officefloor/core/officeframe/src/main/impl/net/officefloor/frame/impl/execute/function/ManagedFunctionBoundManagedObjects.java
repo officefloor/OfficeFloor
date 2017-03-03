@@ -22,7 +22,7 @@ import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionLogicImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FunctionContext;
+import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
@@ -141,7 +141,7 @@ public class ManagedFunctionBoundManagedObjects {
 		public FunctionState registerInterest() {
 			return new AbstractDelegateFunctionState(ManagedFunctionBoundManagedObjects.this.managedFunctionContainer) {
 				@Override
-				public FunctionState execute(FunctionContext context) throws Throwable {
+				public FunctionState execute(FunctionStateContext context) throws Throwable {
 
 					// Easy access to bindings
 					ManagedFunctionBoundManagedObjects bindings = ManagedFunctionBoundManagedObjects.this;
@@ -159,7 +159,7 @@ public class ManagedFunctionBoundManagedObjects {
 		public FunctionState unregisterInterest() {
 			return new AbstractDelegateFunctionState(ManagedFunctionBoundManagedObjects.this.managedFunctionContainer) {
 				@Override
-				public FunctionState execute(FunctionContext context) throws Throwable {
+				public FunctionState execute(FunctionStateContext context) throws Throwable {
 
 					// Easy access to bindings
 					ManagedFunctionBoundManagedObjects bindings = ManagedFunctionBoundManagedObjects.this;

@@ -47,7 +47,7 @@ import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FunctionContext;
+import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
@@ -62,7 +62,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectReadyCheck;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.RegisteredGovernance;
 import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.internal.structure.ThreadContext;
+import net.officefloor.frame.internal.structure.ThreadStateContext;
 import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
@@ -316,7 +316,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public FunctionState execute(FunctionContext context) throws Throwable {
+		public FunctionState execute(FunctionStateContext context) throws Throwable {
 
 			// Easy access to container
 			ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
@@ -573,7 +573,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		}
 
 		@Override
-		public FunctionState handleEscalation(Throwable escalation, FunctionContext context) {
+		public FunctionState handleEscalation(Throwable escalation) {
 
 			// Fail the managed object and escalate to function
 			return new FailManagedObjectOperation(escalation, this.managedFunction);
@@ -589,7 +589,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		public void setManagedObject(final ManagedObject managedObject) {
 			ManagedObjectOperation setManagedObject = new ManagedObjectOperation() {
 				@Override
-				public FunctionState execute(FunctionContext context) {
+				public FunctionState execute(FunctionStateContext context) {
 
 					// Easy access to the container
 					ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
@@ -629,7 +629,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		public void setFailure(final Throwable cause) {
 			ManagedObjectOperation failManagedObject = new ManagedObjectOperation() {
 				@Override
-				public FunctionState execute(FunctionContext context) {
+				public FunctionState execute(FunctionStateContext context) {
 
 					// Easy access to the container
 					ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
@@ -672,7 +672,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		private final Deque<FunctionState> functions = new ConcurrentLinkedDeque<>();
 
 		@Override
-		public FunctionState execute(FunctionContext context) throws Throwable {
+		public FunctionState execute(FunctionStateContext context) throws Throwable {
 
 			// Remove all the functions for execution
 			FunctionState asynchronousFunctions = null;
@@ -707,7 +707,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 			// Start asynchronous operation
 			FunctionState function = new ManagedObjectOperation() {
 				@Override
-				public FunctionState execute(FunctionContext context) {
+				public FunctionState execute(FunctionStateContext context) {
 
 					// Ensure also thread state safety to complete
 					container.isRequireThreadStateSafety = true;
@@ -744,7 +744,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 			// Complete asynchronous operation
 			FunctionState function = new ManagedObjectOperation() {
 				@Override
-				public FunctionState execute(FunctionContext context) {
+				public FunctionState execute(FunctionStateContext context) {
 
 					// Flag no asynchronous operation occurring
 					container.asynchronousStartTime = NO_ASYNC_OPERATION;
@@ -782,7 +782,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 			}
 
 			// Obtain the thread state for the function
-			ThreadContext threadContext = ThreadStateImpl.currentThreadContext();
+			ThreadStateContext threadContext = ThreadStateImpl.currentThreadContext();
 			return threadContext.createFunction((flow) -> {
 				operation.run();
 				return null;
@@ -810,7 +810,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	public FunctionState checkReady(final ManagedObjectReadyCheck check) {
 		return new ManagedObjectOperation() {
 			@Override
-			public FunctionState execute(FunctionContext context) {
+			public FunctionState execute(FunctionStateContext context) {
 
 				// Easy access to the container
 				ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
@@ -854,7 +854,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 			final E[] managedObjectExtensions, final int extensionIndex, TeamManagement responsibleTeam) {
 		return new ManagedObjectOperation() {
 			@Override
-			public FunctionState execute(FunctionContext context) {
+			public FunctionState execute(FunctionStateContext context) {
 
 				// Easy access to the container
 				ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
@@ -882,7 +882,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	public FunctionState unregisterGovernance(final int governanceIndex) {
 		return new ManagedObjectOperation() {
 			@Override
-			public FunctionState execute(FunctionContext context) {
+			public FunctionState execute(FunctionStateContext context) {
 
 				// Easy access to the container
 				ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
@@ -921,7 +921,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	private class UnloadManagedObjectOperation extends ManagedObjectOperation {
 
 		@Override
-		public FunctionState execute(FunctionContext context) {
+		public FunctionState execute(FunctionStateContext context) {
 
 			// Easy access to the container
 			ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
@@ -1004,7 +1004,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		}
 
 		@Override
-		public FunctionState execute(FunctionContext context) {
+		public FunctionState execute(FunctionStateContext context) {
 
 			// Easy access to the container
 			ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
@@ -1109,7 +1109,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		}
 
 		@Override
-		public FunctionState execute(FunctionContext context) {
+		public FunctionState execute(FunctionStateContext context) {
 
 			// Easy access to container
 			ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
@@ -1131,7 +1131,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 			if (this.managedFunction != null) {
 				return new AbstractDelegateFunctionState(this.managedFunction) {
 					@Override
-					public FunctionState execute(FunctionContext context) throws Throwable {
+					public FunctionState execute(FunctionStateContext context) throws Throwable {
 						// Propagate failure to the managed function
 						throw FailManagedObjectOperation.this.failure;
 					}

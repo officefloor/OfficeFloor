@@ -17,17 +17,26 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.escalate.Escalation;
-
 /**
  * Context for executing a {@link ThreadState}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ThreadContext {
+public interface ThreadStateContext {
 
+	/**
+	 * Creates a {@link FunctionState} for the {@link FunctionLogic} under the
+	 * current {@link ThreadState}.
+	 * 
+	 * @param logic
+	 *            {@link FunctionLogic}.
+	 * @param fallbackThreadState
+	 *            Fall back {@link ThreadState} should there be no current
+	 *            {@link ThreadState}.
+	 * @return {@link FunctionState} for the {@link FunctionLogic}.
+	 */
 	FunctionState createFunction(FunctionLogic logic, ThreadState fallbackThreadState);
-	
+
 	/**
 	 * Executes the {@link FunctionState} returning the next
 	 * {@link FunctionState} to execute.
@@ -41,15 +50,4 @@ public interface ThreadContext {
 	 */
 	FunctionState executeFunction(FunctionState function) throws Throwable;
 
-	/**
-	 * Creates the {@link FunctionState} to handle the {@link Escalation}.
-	 * 
-	 * @param function
-	 *            {@link FunctionState} triggering the {@link Escalation} that
-	 *            should now be responsible for handling the {@link Escalation}.
-	 * @param escalation
-	 *            {@link Escalation} to be handled.
-	 * @return {@link FunctionState} to handle the {@link Escalation}.
-	 */
-	FunctionState handleEscalation(FunctionState function, Throwable escalation);
 }

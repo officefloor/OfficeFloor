@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 import net.officefloor.frame.test.SafeCompleteFlowCallback;
@@ -134,7 +135,11 @@ public class BreakThreadStateChainTest extends AbstractOfficeConstructTestCase {
 			// Spawn again for another thread state depth
 			// (Note: no responsible team so current thread will recurse into
 			// thread state to execute it)
+			Closure<Boolean> isCallbackInvoked = new Closure<>(false);
 			spawn.doFlow(spawnIteration.intValue() + 1, (escalation) -> {
+				assertNull("Should be no escalation", escalation);
+				assertFalse("Should only invoke the callback once", isCallbackInvoked.value);
+				isCallbackInvoked.value = true;
 			});
 		}
 	}

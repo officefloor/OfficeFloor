@@ -29,7 +29,7 @@ import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.FunctionContext;
+import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.FunctionLogic;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
@@ -301,7 +301,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	}
 
 	@Override
-	public FunctionState execute(FunctionContext context) throws Throwable {
+	public FunctionState execute(FunctionStateContext context) throws Throwable {
 
 		// Ensure no parallel function to execute first
 		if (this.parallelFunction != null) {
@@ -500,7 +500,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	}
 
 	@Override
-	public FunctionState handleEscalation(final Throwable escalation, FunctionContext context) {
+	public FunctionState handleEscalation(Throwable escalation) {
 
 		// Function failure
 		this.containerState = ManagedFunctionState.FAILED;
@@ -521,7 +521,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 
 		// Not handled by this function, so escalate to flow
 		// (Flow will handle clean up of functions)
-		return this.flow.handleEscalation(escalation, context);
+		return this.flow.handleEscalation(escalation);
 	}
 
 	/**
@@ -708,7 +708,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 		public FunctionState complete(final Throwable escalation) {
 			return new ManagedFunctionOperation() {
 				@Override
-				public FunctionState execute(FunctionContext context) throws Throwable {
+				public FunctionState execute(FunctionStateContext context) throws Throwable {
 
 					// Easy access to container
 					ManagedFunctionContainerImpl<M> container = ManagedFunctionContainerImpl.this;
@@ -815,7 +815,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	private final FunctionState clear() {
 		return new ManagedFunctionOperation() {
 			@Override
-			public FunctionState execute(FunctionContext context) throws Throwable {
+			public FunctionState execute(FunctionStateContext context) throws Throwable {
 
 				// Easy access to container
 				final ManagedFunctionContainerImpl<M> container = ManagedFunctionContainerImpl.this;
@@ -848,7 +848,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	private FunctionState complete(final boolean isCancel) {
 		return new ManagedFunctionOperation() {
 			@Override
-			public FunctionState execute(FunctionContext context) throws Throwable {
+			public FunctionState execute(FunctionStateContext context) throws Throwable {
 
 				// Easy access to container
 				final ManagedFunctionContainerImpl<M> container = ManagedFunctionContainerImpl.this;

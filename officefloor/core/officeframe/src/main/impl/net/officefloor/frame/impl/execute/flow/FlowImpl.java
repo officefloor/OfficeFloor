@@ -33,7 +33,7 @@ import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
-import net.officefloor.frame.internal.structure.FunctionContext;
+import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.FunctionLogic;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
@@ -279,7 +279,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	}
 
 	@Override
-	public FunctionState handleEscalation(Throwable escalation, FunctionContext context) {
+	public FunctionState handleEscalation(Throwable escalation) {
 
 		// Cancel this flow
 		FunctionState cleanUpFunctions = this.cancel();
@@ -381,7 +381,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 		}
 
 		@Override
-		public FunctionState execute(FunctionContext context) throws Throwable {
+		public FunctionState execute(FunctionStateContext context) throws Throwable {
 			FlowImpl.this.activeFunctions.removeEntry(this);
 			return this.functionLogic.execute(FlowImpl.this);
 		}
@@ -392,8 +392,8 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 		}
 
 		@Override
-		public FunctionState handleEscalation(Throwable escalation, FunctionContext context) {
-			return FlowImpl.this.handleEscalation(escalation, context);
+		public FunctionState handleEscalation(Throwable escalation) {
+			return FlowImpl.this.handleEscalation(escalation);
 		}
 	}
 

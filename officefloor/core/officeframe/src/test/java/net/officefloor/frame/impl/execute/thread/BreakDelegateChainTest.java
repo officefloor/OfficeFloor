@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 import net.officefloor.frame.test.SafeCompleteFlowCallback;
@@ -86,7 +87,7 @@ public class BreakDelegateChainTest extends AbstractOfficeConstructTestCase {
 
 		// Wait for completion
 		complete.waitUntilComplete(10000);
-
+		
 		// Ensure all delegates invoked
 		assertEquals("Incorrect number of invoked delegates", delegateCount, work.invocationCount.intValue());
 
@@ -129,7 +130,10 @@ public class BreakDelegateChainTest extends AbstractOfficeConstructTestCase {
 			}
 
 			// Delegate again for another delegate depth
+			Closure<Boolean> isCallbackInvoked = new Closure<>(false);
 			delegate.doFlow(iteration.intValue() + 1, (escalation) -> {
+				assertFalse("Callback should only be invoked once", isCallbackInvoked.value);
+				isCallbackInvoked.value = true;
 				this.recordThread("callback-" + iteration);
 			});
 		}

@@ -30,7 +30,7 @@ import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FunctionContext;
+import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.OfficeClock;
@@ -326,13 +326,13 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public FunctionState execute(FunctionContext context) throws Throwable {
+		public FunctionState execute(FunctionStateContext context) throws Throwable {
 			this.isExecuted = true;
 			return null;
 		}
 
 		@Override
-		public FunctionState handleEscalation(Throwable escalation, FunctionContext context) {
+		public FunctionState handleEscalation(Throwable escalation) {
 			this.exception = escalation;
 			return null;
 		}

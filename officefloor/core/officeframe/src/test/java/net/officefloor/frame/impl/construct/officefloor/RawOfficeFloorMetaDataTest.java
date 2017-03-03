@@ -181,7 +181,26 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration, this.configuration.getSourceContext(), null);
 		this.issues.addIssue(AssetType.OFFICE_FLOOR, OFFICE_FLOOR_NAME, "No SourceContext provided from configuration");
 		this.record_constructTeams();
-		this.record_constructBreakChainTeam();
+		TeamConfiguration<?> breakChainConfiguration = this.createMock(TeamConfiguration.class);
+		this.recordReturn(this.configuration, this.configuration.getBreakChainTeamConfiguration(),
+				breakChainConfiguration);
+		RawTeamMetaData breakChainMetaData = this.createMock(RawTeamMetaData.class);
+		this.recordReturn(
+				this.rawTeamFactory, this.rawTeamFactory.constructRawTeamMetaData(breakChainConfiguration, null,
+						this.threadDecorator, this.threadLocalAwareExecutor, this.issues),
+				breakChainMetaData, new AbstractMatcher() {
+					@Override
+					public boolean matches(Object[] expected, Object[] actual) {
+						assertEquals("Incorrect configuration", expected[0], actual[0]);
+						assertNotNull("Must have default source context", actual[1]);
+						for (int i = 2; i < 5; i++) {
+							assertEquals("Incorrect value " + i, expected[0], actual[0]);
+						}
+						return true;
+					}
+				});
+		TeamManagement breakChainTeam = this.createMock(TeamManagement.class);
+		this.recordReturn(breakChainMetaData, breakChainMetaData.getTeamManagement(), breakChainTeam);
 		this.record_constructManagedObjectSources("OFFICE");
 		this.record_constructEscalation();
 		this.record_constructOffices();

@@ -159,6 +159,32 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 			officeFloor.closeOfficeFloor();
 		}
 
+		// Give the thread pools some chance to terminate threads
+		long maxEndTime = System.currentTimeMillis() + 1000;
+		boolean isContinueChecking;
+		do {
+			// Determine if all complete
+			isContinueChecking = false;
+			for (Thread thread : this.usedThreads) {
+				if (!State.TERMINATED.equals(thread.getState())) {
+					isContinueChecking = true;
+					Thread.sleep(1); // allow active threads to complete
+				}
+			}
+
+			// If timed out waiting, just exit
+			if (System.currentTimeMillis() > maxEndTime) {
+				isContinueChecking = false;
+			}
+		} while (isContinueChecking);
+
+		// Enough time provided, so ensure all threads terminated
+		while (!this.usedThreads.isEmpty()) {
+			Thread usedThread = this.usedThreads.remove();
+			assertEquals("Thread " + usedThread.getName() + " should be terminated", State.TERMINATED,
+					usedThread.getState());
+		}
+
 		// Propagate possible failure
 		synchronized (this.exceptionLock) {
 
@@ -174,13 +200,6 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 					fail("Unknown failure " + this.exception.getClass().getName() + ": " + buffer.toString());
 				}
 			}
-		}
-
-		// Ensure all the threads have been terminated
-		while (!this.usedThreads.isEmpty()) {
-			Thread usedThread = this.usedThreads.remove();
-			assertEquals("Thread " + usedThread.getName() + " should be terminated", State.TERMINATED,
-					usedThread.getState());
 		}
 
 		// Ensure complete tear down of test
