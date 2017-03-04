@@ -124,16 +124,19 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	/**
 	 * Obtains the current {@link ThreadStateContext}.
 	 * 
+	 * @param fallbackThreadState
+	 *            Fall back {@link ThreadState} if no {@link ThreadState} bound
+	 *            to {@link Thread}.
 	 * @return Current {@link ThreadStateContext}.
 	 */
-	public static ThreadStateContext currentThreadContext() {
+	public static ThreadStateContext currentThreadContext(ThreadState fallbackThreadState) {
 
 		// Obtain the context attached to the thread
 		ActiveThreadState current = activeThreadState.get();
 
 		// Ensure have current (even if temporary before loop)
 		if (current == null) {
-			current = new ActiveThreadState(new FunctionChainBreak(), null, false, 0, null);
+			current = new ActiveThreadState(new FunctionChainBreak(), fallbackThreadState, false, 0, null);
 		}
 
 		// Return the current thread state
@@ -677,6 +680,11 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		private final int maximumStackDepth;
 
 		/**
+		 * Flag requires {@link ThreadState} safety.
+		 */
+		private boolean isRequireThreadStateSafety = false;
+
+		/**
 		 * Current stack depth.
 		 */
 		private int currentStackDepth;
@@ -713,9 +721,18 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		}
 
 		/*
-		 * =========================== ThreadStateContext
-		 * ===========================
+		 * ======================== ThreadStateContext ========================
 		 */
+
+		@Override
+		public boolean isRequireThreadStateSafety() {
+			return this.isRequireThreadStateSafety;
+		}
+
+		@Override
+		public void flagRequiresThreadStateSafety() {
+			this.isRequireThreadStateSafety = true;
+		}
 
 		@Override
 		public FunctionState createFunction(FunctionLogic logic, ThreadState fallbackThreadState) {
@@ -805,6 +822,11 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 					LOGGER.log(Level.FINEST, "BREAK (D:" + this.currentStackDepth + "): " + delegate.toString());
 				}
 
+				// Determine if executing proxy chain
+				if (delegate instanceof ProxyFunction) {
+					return null; // break chain is complete
+				}
+
 				// Proxy the delegate function to break
 				ProxyFunction proxy = new ProxyFunction(delegate);
 				if (this.functionChainBreak.proxy != null) {
@@ -817,6 +839,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			// Undertake the delegate function
 			return delegate.execute(this);
 		}
+
 	}
 
 	/**
@@ -961,10 +984,10 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 		@Override
 		public FunctionState handleEscalation(Throwable escalation) {
-			
+
 			// Handle escalation
 			FunctionState next = this.delegate.handleEscalation(escalation);
-			
+
 			// Undertake possible handling and then outer thread state
 			return Promise.then(next, this.handleThenFunction);
 		}

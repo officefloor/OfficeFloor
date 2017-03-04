@@ -140,7 +140,8 @@ public class FunctionLoopImpl implements FunctionLoop {
 					}
 
 					// Ensure providing appropriate thread state safety
-					if ((!isThreadStateSafe) && (nextFunction.isRequireThreadStateSafety())) {
+					if ((!isThreadStateSafe)
+							&& (nextFunction.isRequireThreadStateSafety() || context.isRequireThreadStateSafety())) {
 						// Exit loop to obtain thread state safety
 						return nextFunction;
 					}

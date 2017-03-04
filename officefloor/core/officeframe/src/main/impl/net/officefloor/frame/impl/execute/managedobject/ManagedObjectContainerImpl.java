@@ -776,13 +776,21 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		 */
 		private <T extends Throwable> FunctionState createAsynchronousFunction(AsynchronousOperation<T> operation) {
 
+			// Easy access to the container
+			ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
+
+			// Obtain the thread state for the function
+			ThreadStateContext threadContext = ThreadStateImpl.currentThreadContext(container.responsibleThreadState);
+
+			// As asynchronous operation, must have thread safety
+			threadContext.flagRequiresThreadStateSafety();
+
 			// Ensure have operation
 			if (operation == null) {
 				return null;
 			}
 
-			// Obtain the thread state for the function
-			ThreadStateContext threadContext = ThreadStateImpl.currentThreadContext();
+			// Createfunction for asynchronous opertion
 			return threadContext.createFunction((flow) -> {
 				operation.run();
 				return null;
@@ -1149,21 +1157,9 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	private abstract class ManagedObjectOperation extends AbstractLinkedListSetEntry<FunctionState, Flow>
 			implements FunctionState {
 
-		/**
-		 * Indicates if requires {@link ThreadState} safety.
-		 */
-		private final boolean isRequireThreadStateSafety;
-
-		/**
-		 * Instantiate capturing requirement for {@link ThreadState} safety.
-		 */
-		public ManagedObjectOperation() {
-			this.isRequireThreadStateSafety = ManagedObjectContainerImpl.this.isRequireThreadStateSafety;
-		}
-
 		@Override
 		public boolean isRequireThreadStateSafety() {
-			return this.isRequireThreadStateSafety;
+			return ManagedObjectContainerImpl.this.isRequireThreadStateSafety;
 		}
 
 		@Override

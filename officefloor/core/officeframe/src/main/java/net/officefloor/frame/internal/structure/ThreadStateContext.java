@@ -25,6 +25,19 @@ package net.officefloor.frame.internal.structure;
 public interface ThreadStateContext {
 
 	/**
+	 * Indicates if the {@link ThreadState} requires {@link Thread} safety.
+	 * 
+	 * @return <code>true</code> if {@link ThreadState} requires {@link Thread}
+	 *         safety.
+	 */
+	boolean isRequireThreadStateSafety();
+
+	/**
+	 * Flag the {@link ThreadState} requires {@link Thread} safety.
+	 */
+	void flagRequiresThreadStateSafety();
+
+	/**
 	 * Creates a {@link FunctionState} for the {@link FunctionLogic} under the
 	 * current {@link ThreadState}.
 	 * 

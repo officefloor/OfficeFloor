@@ -47,6 +47,7 @@ import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObject
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeamSource;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
@@ -454,8 +455,8 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 		// Load the team constructors
 		teamConstructors.put(PassiveTeamSource.class,
 				(name, test) -> test.constructTeam(name, PassiveTeamSource.class));
-//		teamConstructors.put(ExecutorCachedTeamSource.class,
-//				(name, test) -> test.constructTeam(name, ExecutorCachedTeamSource.class));
+		teamConstructors.put(ExecutorCachedTeamSource.class,
+				(name, test) -> test.constructTeam(name, ExecutorCachedTeamSource.class));
 		teamConstructors.put(ExecutorFixedTeamSource.class,
 				(name, test) -> test.constructTeam(name, ExecutorFixedTeamSource.class)
 						.addProperty(ExecutorFixedTeamSource.PROPERTY_TEAM_SIZE, String.valueOf(test.getTeamSize())));

@@ -43,7 +43,7 @@ public class ParallelFunctionStressTest extends AbstractStressTestCase {
 
 	@Override
 	protected void constructTest(StressContext context) throws Exception {
-
+		
 		// Register the parallel tasks
 		ParallelInvoker work = new ParallelInvoker(context);
 		ReflectiveFunctionBuilder trigger = this.constructFunction(work, "trigger");
