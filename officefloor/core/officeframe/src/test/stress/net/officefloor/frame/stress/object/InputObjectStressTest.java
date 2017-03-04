@@ -80,11 +80,15 @@ public class InputObjectStressTest extends AbstractStressTestCase {
 
 		private final StressContext context;
 
+		private volatile TestState state = TestState.INIT;
+
 		public TestWork(StressContext context) {
 			this.context = context;
 		}
 
 		public void task(StressInputManagedObject object, ReflectiveFlow repeat) {
+			assertEquals(TestState.INIT, this.state);
+			this.state = TestState.RUN;
 
 			// Ensure not input managed object
 			assertFalse("Should not be input managed object", object.isInput);
@@ -96,18 +100,22 @@ public class InputObjectStressTest extends AbstractStressTestCase {
 
 			// Must be in asynchronous operation
 			object.asynchronous.start(() -> {
-
-				// Repeat
-				repeat.doFlow(null, null);
+				assertEquals(TestState.RUN, this.state);
+				this.state = TestState.ASYNC;
 
 				// Trigger the flow (to stop waiting)
 				object.execute.invokeProcess(0, object, new StressInputManagedObject(true), 0, (escalation) -> {
 					assertNull("Should be no escalation", escalation);
 				});
 			});
+
+			// Repeat
+			repeat.doFlow(null, null);
 		}
 
 		public void flow(StressInputManagedObject parameter, StressInputManagedObject managedObject) {
+			assertEquals(TestState.ASYNC, this.state);
+			this.state = TestState.INIT;
 
 			// Ensure correct parameter
 			assertFalse("Should not be input", parameter.isInput);
@@ -118,6 +126,13 @@ public class InputObjectStressTest extends AbstractStressTestCase {
 			// Allow invoking task to continue
 			parameter.asynchronous.complete(null);
 		}
+	}
+
+	/**
+	 * Test states.
+	 */
+	private static enum TestState {
+		INIT, RUN, ASYNC
 	}
 
 	/**

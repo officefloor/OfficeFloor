@@ -610,6 +610,17 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			// Easy access to container
 			final ManagedFunctionContainerImpl<?> container = ManagedFunctionContainerImpl.this;
 
+			// Ensure in appropriate state to invoke flows
+			switch (container.containerState) {
+			case EXECUTE_FUNCTION:
+			case AWAIT_FLOW_COMPLETIONS:
+				break; // correct states to invoke flow
+
+			default:
+				throw new IllegalStateException("Can not invoke flow outside function/callback execution (state: "
+						+ container.containerState + ")");
+			}
+
 			// Obtain the task meta-data for instigating the flow
 			@SuppressWarnings("rawtypes")
 			ManagedFunctionMetaData initialFunctionMetaData = flowMetaData.getInitialFunctionMetaData();

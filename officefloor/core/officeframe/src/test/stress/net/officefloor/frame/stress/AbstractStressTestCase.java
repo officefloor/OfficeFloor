@@ -588,7 +588,7 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 	protected void runTest() throws Throwable {
 
 		// Sleep some time to allow previous test to complete
-		Thread.sleep(2 * 1000);
+		Thread.sleep(500);
 		
 		// Set as active test
 		activeTestCase = this;
