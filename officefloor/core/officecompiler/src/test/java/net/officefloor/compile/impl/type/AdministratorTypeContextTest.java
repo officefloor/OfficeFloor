@@ -17,26 +17,26 @@
  */
 package net.officefloor.compile.impl.type;
 
-import net.officefloor.compile.administrator.AdministratorType;
-import net.officefloor.compile.internal.structure.AdministratorNode;
+import net.officefloor.compile.administration.AdministrationType;
+import net.officefloor.compile.internal.structure.AdministrationNode;
 import net.officefloor.compile.type.TypeContext;
 
 /**
- * Tests loading the {@link AdministratorType} from the {@link TypeContext}.
+ * Tests loading the {@link AdministrationType} from the {@link TypeContext}.
  *
  * @author Daniel Sagenschneider
  */
 @SuppressWarnings("rawtypes")
 public class AdministratorTypeContextTest extends
-		AbstractTestTypeContext<AdministratorNode, AdministratorType> {
+		AbstractTestTypeContext<AdministrationNode, AdministrationType> {
 
 	/**
 	 * Instantiate.
 	 */
 	public AdministratorTypeContextTest() {
-		super(AdministratorNode.class, AdministratorType.class,
-				(node) -> (AdministratorType) node.loadAdministratorType(), (
-						context, node) -> (AdministratorType) context
+		super(AdministrationNode.class, AdministrationType.class,
+				(node) -> (AdministrationType) node.loadAdministratorType(), (
+						context, node) -> (AdministrationType) context
 						.getOrLoadAdministratorType(node));
 	}
 

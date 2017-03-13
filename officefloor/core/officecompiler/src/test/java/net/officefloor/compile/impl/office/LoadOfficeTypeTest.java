@@ -25,7 +25,7 @@ import java.util.Properties;
 import javax.transaction.xa.XAResource;
 
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.administrator.AdministratorType;
+import net.officefloor.compile.administration.AdministrationType;
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.impl.administrator.MockLoadAdministrator;
 import net.officefloor.compile.impl.governance.MockLoadGovernance;
@@ -48,7 +48,7 @@ import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.office.OfficeAdministrator;
+import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeInput;
@@ -625,7 +625,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 					OfficeSourceContext context) throws Exception {
 				OfficeObject mo = office.addOfficeObject("MO",
 						Connection.class.getName());
-				OfficeAdministrator admin = LoadOfficeTypeTest.this
+				OfficeAdministration admin = LoadOfficeTypeTest.this
 						.addAdministrator(office, "ADMIN", XAResource.class,
 								SimpleDutyKey.DUTY);
 				admin.administerManagedObject(mo);
@@ -888,7 +888,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure can obtain the {@link AdministratorType}.
+	 * Ensure can obtain the {@link AdministrationType}.
 	 */
 	public void testLoadAdministratorType() {
 
@@ -906,7 +906,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 				properties.addProperty(
 						ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME)
 						.setValue(MockLoadAdministrator.class.getName());
-				AdministratorType<?, ?> administratorType = context
+				AdministrationType<?, ?> administratorType = context
 						.loadAdministratorType(
 								ClassAdministratorSource.class.getName(),
 								properties);
@@ -919,7 +919,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure issue if fails to load the {@link AdministratorType}.
+	 * Ensure issue if fails to load the {@link AdministrationType}.
 	 */
 	public void testFailLoadingAdministratorType() {
 

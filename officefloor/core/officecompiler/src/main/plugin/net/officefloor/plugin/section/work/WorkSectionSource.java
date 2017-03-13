@@ -34,10 +34,10 @@ import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
-import net.officefloor.compile.spi.section.SectionTask;
-import net.officefloor.compile.spi.section.SectionWork;
-import net.officefloor.compile.spi.section.TaskFlow;
-import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
+import net.officefloor.compile.spi.section.FunctionFlow;
+import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
@@ -96,7 +96,7 @@ public class WorkSectionSource extends AbstractSectionSource {
 		FunctionNamespaceType<?> workType = context.loadWorkType(workSourceName, properties);
 
 		// Add the work
-		SectionWork work = designer.addSectionWork("WORK", workSourceName);
+		SectionFunctionNamespace work = designer.addSectionWork("WORK", workSourceName);
 		for (Property property : properties) {
 			work.addProperty(property.getName(), property.getValue());
 		}
@@ -118,7 +118,7 @@ public class WorkSectionSource extends AbstractSectionSource {
 			String taskName = taskType.getFunctionName();
 
 			// Add the task
-			SectionTask task = work.addSectionTask(taskName, taskName);
+			SectionFunction task = work.addSectionTask(taskName, taskName);
 
 			// Determine the index of the parameter
 			int parameterIndex = Integer.parseInt(context.getProperty(
@@ -139,7 +139,7 @@ public class WorkSectionSource extends AbstractSectionSource {
 						: typeQualifier + "-") + objectClass.getName();
 
 				// Obtain the object
-				TaskObject object = task.getTaskObject(objectName);
+				FunctionObject object = task.getTaskObject(objectName);
 
 				// Determine if parameter
 				if (objectIndex == parameterIndex) {
@@ -195,7 +195,7 @@ public class WorkSectionSource extends AbstractSectionSource {
 				Class<?> argumentType = flowType.getArgumentType();
 
 				// Obtain the flow
-				TaskFlow flow = task.getTaskFlow(flowName);
+				FunctionFlow flow = task.getTaskFlow(flowName);
 
 				// Obtain the section output
 				SectionOutput sectionOutput = sectionOutputs.get(flowName);
@@ -221,7 +221,7 @@ public class WorkSectionSource extends AbstractSectionSource {
 						.getEscalationType();
 
 				// Obtain the escalation
-				TaskFlow flow = task.getTaskEscalation(escalation.getName());
+				FunctionFlow flow = task.getTaskEscalation(escalation.getName());
 
 				// Obtain the section output
 				String outputName = escalation.getName();

@@ -24,23 +24,21 @@ import java.util.Map;
 
 import net.officefloor.compile.SectionSourceService;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.spi.section.FunctionFlow;
+import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
-import net.officefloor.compile.spi.section.SectionTask;
-import net.officefloor.compile.spi.section.SectionWork;
-import net.officefloor.compile.spi.section.TaskFlow;
-import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
-import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.DeskManagedObjectDependencyModel;
@@ -49,29 +47,28 @@ import net.officefloor.model.desk.DeskManagedObjectDependencyToExternalManagedOb
 import net.officefloor.model.desk.DeskManagedObjectModel;
 import net.officefloor.model.desk.DeskManagedObjectSourceFlowModel;
 import net.officefloor.model.desk.DeskManagedObjectSourceFlowToExternalFlowModel;
-import net.officefloor.model.desk.DeskManagedObjectSourceFlowToTaskModel;
+import net.officefloor.model.desk.DeskManagedObjectSourceFlowToFunctionModel;
 import net.officefloor.model.desk.DeskManagedObjectSourceModel;
 import net.officefloor.model.desk.DeskManagedObjectToDeskManagedObjectSourceModel;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
+import net.officefloor.model.desk.FunctionEscalationModel;
+import net.officefloor.model.desk.FunctionEscalationToExternalFlowModel;
+import net.officefloor.model.desk.FunctionEscalationToFunctionModel;
+import net.officefloor.model.desk.FunctionFlowModel;
+import net.officefloor.model.desk.FunctionFlowToExternalFlowModel;
+import net.officefloor.model.desk.FunctionFlowToFunctionModel;
+import net.officefloor.model.desk.FunctionModel;
+import net.officefloor.model.desk.FunctionNamespaceModel;
+import net.officefloor.model.desk.FunctionToNextExternalFlowModel;
+import net.officefloor.model.desk.FunctionToNextFunctionModel;
+import net.officefloor.model.desk.ManagedFunctionModel;
+import net.officefloor.model.desk.ManagedFunctionObjectModel;
+import net.officefloor.model.desk.ManagedFunctionObjectToDeskManagedObjectModel;
+import net.officefloor.model.desk.ManagedFunctionObjectToExternalManagedObjectModel;
+import net.officefloor.model.desk.ManagedFunctionToFunctionModel;
 import net.officefloor.model.desk.PropertyModel;
-import net.officefloor.model.desk.TaskEscalationModel;
-import net.officefloor.model.desk.TaskEscalationToExternalFlowModel;
-import net.officefloor.model.desk.TaskEscalationToTaskModel;
-import net.officefloor.model.desk.TaskFlowModel;
-import net.officefloor.model.desk.TaskFlowToExternalFlowModel;
-import net.officefloor.model.desk.TaskFlowToTaskModel;
-import net.officefloor.model.desk.TaskModel;
-import net.officefloor.model.desk.TaskToNextExternalFlowModel;
-import net.officefloor.model.desk.TaskToNextTaskModel;
-import net.officefloor.model.desk.WorkModel;
-import net.officefloor.model.desk.WorkTaskModel;
-import net.officefloor.model.desk.WorkTaskObjectModel;
-import net.officefloor.model.desk.WorkTaskObjectToDeskManagedObjectModel;
-import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
-import net.officefloor.model.desk.WorkTaskToTaskModel;
-import net.officefloor.model.desk.WorkToInitialTaskModel;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.inputstream.InputStreamConfigurationItem;
 import net.officefloor.model.section.SectionManagedObjectModel;
@@ -81,8 +78,8 @@ import net.officefloor.model.section.SectionManagedObjectModel;
  * 
  * @author Daniel Sagenschneider
  */
-public class DeskModelSectionSource extends AbstractSectionSource implements
-		SectionSourceService<DeskModelSectionSource> {
+public class DeskModelSectionSource extends AbstractSectionSource
+		implements SectionSourceService<DeskModelSectionSource> {
 
 	/*
 	 * =================== SectionSourceService ===============================
@@ -108,16 +105,13 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 	}
 
 	@Override
-	public void sourceSection(SectionDesigner designer,
-			SectionSourceContext context) throws Exception {
+	public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
 
 		// Obtain the configuration to the desk
-		InputStream configuration = context.getResource(context
-				.getSectionLocation());
+		InputStream configuration = context.getResource(context.getSectionLocation());
 		if (configuration == null) {
 			// Must have configuration
-			throw new FileNotFoundException("Can not find desk '"
-					+ context.getSectionLocation() + "'");
+			throw new FileNotFoundException("Can not find desk '" + context.getSectionLocation() + "'");
 		}
 
 		// Retrieve the desk model
@@ -128,39 +122,33 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 		Map<String, SectionOutput> sectionOutputs = new HashMap<String, SectionOutput>();
 		for (ExternalFlowModel extFlow : desk.getExternalFlows()) {
 
-			// Determine if escalation only (only has task escalation connected)
-			boolean isEscalationOnly = ((extFlow.getPreviousTasks().size() == 0)
-					&& (extFlow.getTaskFlows().size() == 0) && (extFlow
-					.getTaskEscalations().size() > 0));
+			// Determine if escalation only (only function escalation)
+			boolean isEscalationOnly = ((extFlow.getPreviousFunctions().size() == 0)
+					&& (extFlow.getFunctionFlows().size() == 0) && (extFlow.getFunctionEscalations().size() > 0));
 
 			// Add the section output and register
 			String sectionOutputName = extFlow.getExternalFlowName();
-			SectionOutput sectionOutput = designer.addSectionOutput(
-					sectionOutputName, extFlow.getArgumentType(),
+			SectionOutput sectionOutput = designer.addSectionOutput(sectionOutputName, extFlow.getArgumentType(),
 					isEscalationOnly);
 			sectionOutputs.put(sectionOutputName, sectionOutput);
 		}
 
 		// Add the external managed objects as objects, keeping registry of them
 		Map<String, SectionObject> sectionObjects = new HashMap<String, SectionObject>();
-		for (ExternalManagedObjectModel extMo : desk
-				.getExternalManagedObjects()) {
+		for (ExternalManagedObjectModel extMo : desk.getExternalManagedObjects()) {
 			String sectionObjectName = extMo.getExternalManagedObjectName();
-			SectionObject sectionObject = designer.addSectionObject(
-					sectionObjectName, extMo.getObjectType());
+			SectionObject sectionObject = designer.addSectionObject(sectionObjectName, extMo.getObjectType());
 			sectionObjects.put(sectionObjectName, sectionObject);
 		}
 
 		// Add the managed object sources, keeping registry of them
 		Map<String, SectionManagedObjectSource> managedObjectSources = new HashMap<String, SectionManagedObjectSource>();
-		for (DeskManagedObjectSourceModel mosModel : desk
-				.getDeskManagedObjectSources()) {
+		for (DeskManagedObjectSourceModel mosModel : desk.getDeskManagedObjectSources()) {
 
 			// Add the managed object source
 			String mosName = mosModel.getDeskManagedObjectSourceName();
-			SectionManagedObjectSource mos = designer
-					.addSectionManagedObjectSource(mosName,
-							mosModel.getManagedObjectSourceClassName());
+			SectionManagedObjectSource mos = designer.addSectionManagedObjectSource(mosName,
+					mosModel.getManagedObjectSourceClassName());
 			for (PropertyModel property : mosModel.getProperties()) {
 				mos.addProperty(property.getName(), property.getValue());
 			}
@@ -171,8 +159,8 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 				try {
 					mos.setTimeout(Long.valueOf(timeoutValue));
 				} catch (NumberFormatException ex) {
-					designer.addIssue("Invalid timeout value: " + timeoutValue
-							+ " for managed object source " + mosName);
+					designer.addIssue(
+							"Invalid timeout value: " + timeoutValue + " for managed object source " + mosName);
 				}
 			}
 
@@ -186,20 +174,16 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 
 			// Obtain the managed object details
 			String managedObjectName = moModel.getDeskManagedObjectName();
-			ManagedObjectScope managedObjectScope = this.getManagedObjectScope(
-					moModel.getManagedObjectScope(), designer,
-					managedObjectName);
+			ManagedObjectScope managedObjectScope = this.getManagedObjectScope(moModel.getManagedObjectScope(),
+					designer, managedObjectName);
 
 			// Obtain the managed object source for the managed object
 			SectionManagedObjectSource moSource = null;
-			DeskManagedObjectToDeskManagedObjectSourceModel moToSource = moModel
-					.getDeskManagedObjectSource();
+			DeskManagedObjectToDeskManagedObjectSourceModel moToSource = moModel.getDeskManagedObjectSource();
 			if (moToSource != null) {
-				DeskManagedObjectSourceModel moSourceModel = moToSource
-						.getDeskManagedObjectSource();
+				DeskManagedObjectSourceModel moSourceModel = moToSource.getDeskManagedObjectSource();
 				if (moSourceModel != null) {
-					moSource = managedObjectSources.get(moSourceModel
-							.getDeskManagedObjectSourceName());
+					moSource = managedObjectSources.get(moSourceModel.getDeskManagedObjectSourceName());
 				}
 			}
 			if (moSource == null) {
@@ -207,9 +191,8 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 			}
 
 			// Add the managed object and also register it
-			SectionManagedObject managedObject = moSource
-					.addSectionManagedObject(managedObjectName,
-							managedObjectScope);
+			SectionManagedObject managedObject = moSource.addSectionManagedObject(managedObjectName,
+					managedObjectScope);
 			managedObjects.put(managedObjectName, managedObject);
 		}
 
@@ -217,31 +200,26 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 		for (DeskManagedObjectModel moModel : desk.getDeskManagedObjects()) {
 
 			// Obtain the managed object
-			SectionManagedObject managedObject = managedObjects.get(moModel
-					.getDeskManagedObjectName());
+			SectionManagedObject managedObject = managedObjects.get(moModel.getDeskManagedObjectName());
 			if (managedObject == null) {
 				continue; // should always have
 			}
 
 			// Link dependencies to managed object/external object
-			for (DeskManagedObjectDependencyModel dependencyModel : moModel
-					.getDeskManagedObjectDependencies()) {
+			for (DeskManagedObjectDependencyModel dependencyModel : moModel.getDeskManagedObjectDependencies()) {
 
 				// Obtain the dependency
 				ManagedObjectDependency dependency = managedObject
-						.getManagedObjectDependency(dependencyModel
-								.getDeskManagedObjectDependencyName());
+						.getManagedObjectDependency(dependencyModel.getDeskManagedObjectDependencyName());
 
 				// Link dependency to managed object
 				SectionManagedObject linkedManagedObject = null;
 				DeskManagedObjectDependencyToDeskManagedObjectModel dependencyToMo = dependencyModel
 						.getDeskManagedObject();
 				if (dependencyToMo != null) {
-					DeskManagedObjectModel linkedMoModel = dependencyToMo
-							.getDeskManagedObject();
+					DeskManagedObjectModel linkedMoModel = dependencyToMo.getDeskManagedObject();
 					if (linkedMoModel != null) {
-						linkedManagedObject = managedObjects.get(linkedMoModel
-								.getDeskManagedObjectName());
+						linkedManagedObject = managedObjects.get(linkedMoModel.getDeskManagedObjectName());
 					}
 				}
 				if (linkedManagedObject != null) {
@@ -254,11 +232,9 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 				DeskManagedObjectDependencyToExternalManagedObjectModel dependencyToExtMo = dependencyModel
 						.getExternalManagedObject();
 				if (dependencyToExtMo != null) {
-					ExternalManagedObjectModel extMoModel = dependencyToExtMo
-							.getExternalManagedObject();
+					ExternalManagedObjectModel extMoModel = dependencyToExtMo.getExternalManagedObject();
 					if (extMoModel != null) {
-						linkedObject = sectionObjects.get(extMoModel
-								.getExternalManagedObjectName());
+						linkedObject = sectionObjects.get(extMoModel.getExternalManagedObjectName());
 					}
 				}
 				if (linkedObject != null) {
@@ -268,326 +244,273 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 			}
 		}
 
-		// Add the works, keeping registry of the tasks
-		Map<String, SectionTask> tasks = new HashMap<String, SectionTask>();
-		for (WorkModel workModel : desk.getWorks()) {
+		// Add the functions, keeping registry of the functions
+		Map<String, SectionFunction> functions = new HashMap<String, SectionFunction>();
+		for (FunctionNamespaceModel namespaceModel : desk.getFunctionNamespaces()) {
 
-			// Add the work
-			SectionWork work = designer.addSectionWork(workModel.getWorkName(),
-					workModel.getWorkSourceClassName());
-			for (PropertyModel property : workModel.getProperties()) {
-				work.addProperty(property.getName(), property.getValue());
+			// Add the namespace
+			SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace(
+					namespaceModel.getFunctionNamespaceName(), namespaceModel.getManagedFunctionSourceClassName());
+			for (PropertyModel property : namespaceModel.getProperties()) {
+				namespace.addProperty(property.getName(), property.getValue());
 			}
 
-			// Determine if an initial task for the work
-			TaskModel initialTask = null;
-			WorkToInitialTaskModel initialTaskConn = workModel.getInitialTask();
-			if (initialTaskConn != null) {
-				initialTask = initialTaskConn.getInitialTask();
-			}
-
-			// Add the tasks for the work
-			for (WorkTaskModel workTaskModel : workModel.getWorkTasks()) {
-				for (WorkTaskToTaskModel conn : workTaskModel.getTasks()) {
-					TaskModel taskModel = conn.getTask();
-					if (taskModel != null) {
-						// Add the task for the work and register
-						String taskName = taskModel.getTaskName();
-						SectionTask task = work.addSectionTask(taskName,
-								taskModel.getWorkTaskName());
-						tasks.put(taskName, task);
-
-						// Determine if the initial task
-						if (taskModel == initialTask) {
-							// Specify as the initial task
-							work.setInitialTask(task);
-						}
+			// Add the functions for the namespace
+			for (ManagedFunctionModel managedFunctionModel : namespaceModel.getManagedFunctions()) {
+				for (ManagedFunctionToFunctionModel conn : managedFunctionModel.getFunctions()) {
+					FunctionModel functionModel = conn.getFunction();
+					if (functionModel != null) {
+						// Add the function for the namespace and register
+						String functionName = functionModel.getFunctionName();
+						SectionFunction function = namespace.addSectionFunction(functionName,
+								functionModel.getManagedFunctionName());
+						functions.put(functionName, function);
 					}
 				}
 			}
 		}
 
 		// Link the flows/objects/escalations (as all links registered)
-		for (TaskModel taskModel : desk.getTasks()) {
+		for (FunctionModel functionModel : desk.getFunctions()) {
 
-			// Obtain the task for the task model
-			String taskName = taskModel.getTaskName();
-			SectionTask task = tasks.get(taskName);
-			if (task == null) {
-				continue; // task not linked to work
+			// Obtain the function for the function model
+			String functionName = functionModel.getFunctionName();
+			SectionFunction function = functions.get(functionName);
+			if (function == null) {
+				continue; // function not linked to namespace
 			}
 
-			// Obtain the work task for the task
-			WorkTaskModel workTaskModel = null;
-			WorkTaskToTaskModel workTaskToTask = taskModel.getWorkTask();
-			if (workTaskToTask != null) {
-				workTaskModel = workTaskToTask.getWorkTask();
+			// Obtain the managed function for the function
+			ManagedFunctionModel managedFunctionModel = null;
+			ManagedFunctionToFunctionModel managedFunctionToFunction = functionModel.getManagedFunction();
+			if (managedFunctionToFunction != null) {
+				managedFunctionModel = managedFunctionToFunction.getManagedFunction();
 			}
-			if (workTaskModel != null) {
-				// Link in the objects for the task
-				for (WorkTaskObjectModel taskObjectModel : workTaskModel
-						.getTaskObjects()) {
+			if (managedFunctionModel != null) {
+				// Link in the objects for the managed functions
+				for (ManagedFunctionObjectModel managedFunctionObjectModel : managedFunctionModel
+						.getManagedFunctionObjects()) {
 
-					// Obtain the task object
-					String objectName = taskObjectModel.getObjectName();
-					TaskObject taskObject = task.getTaskObject(objectName);
+					// Obtain the function object
+					String objectName = managedFunctionObjectModel.getObjectName();
+					FunctionObject functionObject = function.getFunctionObject(objectName);
 
 					// Determine if object is a parameter
-					if (taskObjectModel.getIsParameter()) {
-						taskObject.flagAsParameter();
+					if (managedFunctionObjectModel.getIsParameter()) {
+						functionObject.flagAsParameter();
 						continue; // flagged as parameter
 					}
 
 					// Determine if link object to external managed object
 					SectionObject linkedSectionObject = null;
-					WorkTaskObjectToExternalManagedObjectModel objectToExtMo = taskObjectModel
+					ManagedFunctionObjectToExternalManagedObjectModel objectToExtMo = managedFunctionObjectModel
 							.getExternalManagedObject();
 					if (objectToExtMo != null) {
-						ExternalManagedObjectModel linkedExtMo = objectToExtMo
-								.getExternalManagedObject();
+						ExternalManagedObjectModel linkedExtMo = objectToExtMo.getExternalManagedObject();
 						if (linkedExtMo != null) {
 							// Obtain the linked section object
-							linkedSectionObject = sectionObjects
-									.get(linkedExtMo
-											.getExternalManagedObjectName());
+							linkedSectionObject = sectionObjects.get(linkedExtMo.getExternalManagedObjectName());
 						}
 					}
 					if (linkedSectionObject != null) {
 						// Link the object to its section object
-						designer.link(taskObject, linkedSectionObject);
+						designer.link(functionObject, linkedSectionObject);
 					}
 
 					// Determine if link object to managed object
 					SectionManagedObject linkedManagedObject = null;
-					WorkTaskObjectToDeskManagedObjectModel objectToMo = taskObjectModel
+					ManagedFunctionObjectToDeskManagedObjectModel objectToMo = managedFunctionObjectModel
 							.getDeskManagedObject();
 					if (objectToMo != null) {
-						DeskManagedObjectModel linkedMo = objectToMo
-								.getDeskManagedObject();
+						DeskManagedObjectModel linkedMo = objectToMo.getDeskManagedObject();
 						if (linkedMo != null) {
-							linkedManagedObject = managedObjects.get(linkedMo
-									.getDeskManagedObjectName());
+							linkedManagedObject = managedObjects.get(linkedMo.getDeskManagedObjectName());
 						}
 					}
 					if (linkedManagedObject != null) {
 						// Link the object to its managed object
-						designer.link(taskObject, linkedManagedObject);
+						designer.link(functionObject, linkedManagedObject);
 					}
 				}
 			}
 
-			// Link in the flows for the task
-			for (TaskFlowModel taskFlowModel : taskModel.getTaskFlows()) {
+			// Link in the flows for the function
+			for (FunctionFlowModel functionFlowModel : functionModel.getFunctionFlows()) {
 
-				// Obtain the task flow
-				String flowName = taskFlowModel.getFlowName();
-				TaskFlow taskFlow = task.getTaskFlow(flowName);
+				// Obtain the function flow
+				String flowName = functionFlowModel.getFlowName();
+				FunctionFlow functionFlow = function.getFunctionFlow(flowName);
 
-				// Determine the instigation strategy
-				FlowInstigationStrategyEnum instigationStrategy = null;
-
-				// Determine if link flow to another task
-				SectionTask linkedTask = null;
-				TaskFlowToTaskModel flowToTask = taskFlowModel.getTask();
-				if (flowToTask != null) {
-					TaskModel linkedTaskModel = flowToTask.getTask();
-					if (linkedTaskModel != null) {
-						// Obtain the linked task and instigation strategy
-						linkedTask = tasks.get(linkedTaskModel.getTaskName());
-						instigationStrategy = this
-								.getFlowInstatigationStrategy(
-										flowToTask.getLinkType(), designer,
-										taskName, flowName);
+				// Determine if link flow to another function
+				SectionFunction linkedFunction = null;
+				boolean isSpawnThreadState = false;
+				FunctionFlowToFunctionModel flowToFunction = functionFlowModel.getFunction();
+				if (flowToFunction != null) {
+					FunctionModel linkedFunctionModel = flowToFunction.getFunction();
+					if (linkedFunctionModel != null) {
+						// Obtain the linked function and whether spawn
+						linkedFunction = functions.get(linkedFunctionModel.getFunctionName());
+						isSpawnThreadState = flowToFunction.getIsSpawnThreadState();
 					}
 				}
-				if (linkedTask != null) {
-					// Link the flow to its task
-					designer.link(taskFlow, linkedTask, instigationStrategy);
+				if (linkedFunction != null) {
+					// Link the flow to its function
+					designer.link(functionFlow, linkedFunction, isSpawnThreadState);
 					continue;
 				}
 
 				// Determine if link flow to external flow
 				SectionOutput linkedSectionOutput = null;
-				TaskFlowToExternalFlowModel flowToExtFlow = taskFlowModel
-						.getExternalFlow();
+				FunctionFlowToExternalFlowModel flowToExtFlow = functionFlowModel.getExternalFlow();
 				if (flowToExtFlow != null) {
-					ExternalFlowModel linkedExtFlow = flowToExtFlow
-							.getExternalFlow();
+					ExternalFlowModel linkedExtFlow = flowToExtFlow.getExternalFlow();
 					if (linkedExtFlow != null) {
 						// Obtain the linked flow and instigation strategy
-						linkedSectionOutput = sectionOutputs.get(linkedExtFlow
-								.getExternalFlowName());
-						instigationStrategy = this
-								.getFlowInstatigationStrategy(
-										flowToExtFlow.getLinkType(), designer,
-										taskName, flowName);
+						linkedSectionOutput = sectionOutputs.get(linkedExtFlow.getExternalFlowName());
+						isSpawnThreadState = flowToExtFlow.getIsSpawnThreadState();
 					}
 				}
 				if (linkedSectionOutput != null) {
 					// Link the flow to section output
-					designer.link(taskFlow, linkedSectionOutput,
-							instigationStrategy);
+					designer.link(functionFlow, linkedSectionOutput, isSpawnThreadState);
 				}
 			}
 
-			// Determine if link task to next task
-			SectionTask nextTask = null;
-			TaskToNextTaskModel taskToNextTask = taskModel.getNextTask();
-			if (taskToNextTask != null) {
-				TaskModel nextTaskModel = taskToNextTask.getNextTask();
-				if (nextTaskModel != null) {
-					nextTask = tasks.get(nextTaskModel.getTaskName());
+			// Determine if link function to next function
+			SectionFunction nextFunction = null;
+			FunctionToNextFunctionModel functionToNextFunction = functionModel.getNextFunction();
+			if (functionToNextFunction != null) {
+				FunctionModel nextFunctionModel = functionToNextFunction.getNextFunction();
+				if (nextFunctionModel != null) {
+					nextFunction = functions.get(nextFunctionModel.getFunctionName());
 				}
 			}
-			if (nextTask != null) {
-				// Link the task to its next task
-				designer.link(task, nextTask);
+			if (nextFunction != null) {
+				// Link the function to its next function
+				designer.link(function, nextFunction);
 			}
 
-			// Determine if link task to next external flow
+			// Determine if link function to next external flow
 			SectionOutput nextSectionOutput = null;
-			TaskToNextExternalFlowModel taskToNextExtFlow = taskModel
-					.getNextExternalFlow();
-			if (taskToNextExtFlow != null) {
-				ExternalFlowModel nextExtFlow = taskToNextExtFlow
-						.getNextExternalFlow();
+			FunctionToNextExternalFlowModel functionToNextExtFlow = functionModel.getNextExternalFlow();
+			if (functionToNextExtFlow != null) {
+				ExternalFlowModel nextExtFlow = functionToNextExtFlow.getNextExternalFlow();
 				if (nextExtFlow != null) {
-					nextSectionOutput = sectionOutputs.get(nextExtFlow
-							.getExternalFlowName());
+					nextSectionOutput = sectionOutputs.get(nextExtFlow.getExternalFlowName());
 				}
 			}
 			if (nextSectionOutput != null) {
-				// Link the task to its next section output
-				designer.link(task, nextSectionOutput);
+				// Link the function to its next section output
+				designer.link(function, nextSectionOutput);
 			}
 
-			// Link in the escalations for the task
-			for (TaskEscalationModel taskEscalationModel : taskModel
-					.getTaskEscalations()) {
+			// Link in the escalations for the function
+			for (FunctionEscalationModel functionEscalationModel : functionModel.getFunctionEscalations()) {
 
-				// Obtain the task escalation
-				String escalationTypeName = taskEscalationModel
-						.getEscalationType();
-				TaskFlow taskEscalation = task
-						.getTaskEscalation(escalationTypeName);
+				// Obtain the function escalation
+				String escalationTypeName = functionEscalationModel.getEscalationType();
+				FunctionFlow functionEscalation = function.getFunctionEscalation(escalationTypeName);
 
-				// Determine if link escalation to another task
-				SectionTask linkedTask = null;
-				TaskEscalationToTaskModel escalationToTask = taskEscalationModel
-						.getTask();
-				if (escalationToTask != null) {
-					TaskModel linkedTaskModel = escalationToTask.getTask();
-					if (linkedTaskModel != null) {
-						linkedTask = tasks.get(linkedTaskModel.getTaskName());
+				// Determine if link escalation to another function
+				SectionFunction linkedFunction = null;
+				FunctionEscalationToFunctionModel escalationToFunction = functionEscalationModel.getFunction();
+				if (escalationToFunction != null) {
+					FunctionModel linkedFunctionModel = escalationToFunction.getFunction();
+					if (linkedFunctionModel != null) {
+						linkedFunction = functions.get(linkedFunctionModel.getFunctionName());
 					}
 				}
-				if (linkedTask != null) {
-					// Link the escalation to its task
-					designer.link(taskEscalation, linkedTask,
-							FlowInstigationStrategyEnum.PARALLEL);
+				if (linkedFunction != null) {
+					// Link the escalation to its function
+					designer.link(functionEscalation, linkedFunction, false);
 				}
 
 				// Determine if link escalation to section output
 				SectionOutput linkedSectionOutput = null;
-				TaskEscalationToExternalFlowModel escalationToExtFlow = taskEscalationModel
-						.getExternalFlow();
+				FunctionEscalationToExternalFlowModel escalationToExtFlow = functionEscalationModel.getExternalFlow();
 				if (escalationToExtFlow != null) {
-					ExternalFlowModel linkedExtFlow = escalationToExtFlow
-							.getExternalFlow();
+					ExternalFlowModel linkedExtFlow = escalationToExtFlow.getExternalFlow();
 					if (linkedExtFlow != null) {
-						linkedSectionOutput = sectionOutputs.get(linkedExtFlow
-								.getExternalFlowName());
+						linkedSectionOutput = sectionOutputs.get(linkedExtFlow.getExternalFlowName());
 					}
 				}
 				if (linkedSectionOutput != null) {
 					// Link the escalation to its section output
-					designer.link(taskEscalation, linkedSectionOutput,
-							FlowInstigationStrategyEnum.PARALLEL);
+					designer.link(functionEscalation, linkedSectionOutput, false);
 				}
 			}
 		}
 
-		// Add the public tasks as inputs and link to tasks
-		for (TaskModel task : desk.getTasks()) {
-			if (task.getIsPublic()) {
+		// Add the public functions as inputs and link to functions
+		for (FunctionModel function : desk.getFunctions()) {
+			if (function.getIsPublic()) {
 
-				// Obtain the work task
-				WorkTaskModel workTask = null;
-				WorkTaskToTaskModel conn = task.getWorkTask();
+				// Obtain the managed function
+				ManagedFunctionModel managedFunction = null;
+				ManagedFunctionToFunctionModel conn = function.getManagedFunction();
 				if (conn != null) {
-					workTask = conn.getWorkTask();
+					managedFunction = conn.getManagedFunction();
 				}
-				if (workTask == null) {
-					designer.addIssue("Task " + task.getTaskName()
-							+ " not linked to a work task");
-					continue; // must have work task
+				if (managedFunction == null) {
+					designer.addIssue("Function " + function.getFunctionName() + " not linked to a managed function");
+					continue; // must have managed function
 				}
 
-				// Determine the parameter type from the work task
+				// Determine the parameter type from the managed function
 				String parameterType = null;
-				for (WorkTaskObjectModel taskObject : workTask.getTaskObjects()) {
-					if (taskObject.getIsParameter()) {
-						// TODO handle two parameters to work for a desk
-						parameterType = taskObject.getObjectType();
+				for (ManagedFunctionObjectModel managedFunctionObject : managedFunction.getManagedFunctionObjects()) {
+					if (managedFunctionObject.getIsParameter()) {
+						// TODO handle two parameters to function
+						parameterType = managedFunctionObject.getObjectType();
 					}
 				}
 
 				// Add the section input and register
-				String taskName = task.getTaskName();
-				SectionInput sectionInput = designer.addSectionInput(taskName,
-						parameterType);
+				String functionName = function.getFunctionName();
+				SectionInput sectionInput = designer.addSectionInput(functionName, parameterType);
 
-				// Obtain the section task and link input to task
-				SectionTask sectionTask = tasks.get(taskName);
-				designer.link(sectionInput, sectionTask);
+				// Obtain the section function and link input to function
+				SectionFunction sectionFunction = functions.get(functionName);
+				designer.link(sectionInput, sectionFunction);
 			}
 		}
 
-		// Link managed object source flows to tasks/section outputs
-		for (DeskManagedObjectSourceModel mosModel : desk
-				.getDeskManagedObjectSources()) {
+		// Link managed object source flows to functions/section outputs
+		for (DeskManagedObjectSourceModel mosModel : desk.getDeskManagedObjectSources()) {
 
 			// Obtain the managed object source
-			SectionManagedObjectSource mos = managedObjectSources.get(mosModel
-					.getDeskManagedObjectSourceName());
+			SectionManagedObjectSource mos = managedObjectSources.get(mosModel.getDeskManagedObjectSourceName());
 			if (mos == null) {
 				continue; // should always have
 			}
 
-			// Link flows to tasks/section outputs
-			for (DeskManagedObjectSourceFlowModel mosFlowModel : mosModel
-					.getDeskManagedObjectSourceFlows()) {
+			// Link flows to functions/section outputs
+			for (DeskManagedObjectSourceFlowModel mosFlowModel : mosModel.getDeskManagedObjectSourceFlows()) {
 
 				// Obtain the managed object source flow
-				ManagedObjectFlow mosFlow = mos
-						.getManagedObjectFlow(mosFlowModel
-								.getDeskManagedObjectSourceFlowName());
+				ManagedObjectFlow mosFlow = mos.getManagedObjectFlow(mosFlowModel.getDeskManagedObjectSourceFlowName());
 
-				// Link managed object source flow to task
-				SectionTask linkedTask = null;
-				DeskManagedObjectSourceFlowToTaskModel flowToTask = mosFlowModel
-						.getTask();
-				if (flowToTask != null) {
-					TaskModel taskModel = flowToTask.getTask();
-					if (taskModel != null) {
-						linkedTask = tasks.get(taskModel.getTaskName());
+				// Link managed object source flow to function
+				SectionFunction linkedFunction = null;
+				DeskManagedObjectSourceFlowToFunctionModel flowToFunction = mosFlowModel.getFunction();
+				if (flowToFunction != null) {
+					FunctionModel functionModel = flowToFunction.getFunction();
+					if (functionModel != null) {
+						linkedFunction = functions.get(functionModel.getFunctionName());
 					}
 				}
-				if (linkedTask != null) {
-					// Link managed object source flow to task
-					designer.link(mosFlow, linkedTask);
+				if (linkedFunction != null) {
+					// Link managed object source flow to function
+					designer.link(mosFlow, linkedFunction);
 				}
 
 				// Link managed object source flow to external flow
 				SectionOutput linkedOutput = null;
-				DeskManagedObjectSourceFlowToExternalFlowModel flowToOutput = mosFlowModel
-						.getExternalFlow();
+				DeskManagedObjectSourceFlowToExternalFlowModel flowToOutput = mosFlowModel.getExternalFlow();
 				if (flowToOutput != null) {
-					ExternalFlowModel extOutput = flowToOutput
-							.getExternalFlow();
+					ExternalFlowModel extOutput = flowToOutput.getExternalFlow();
 					if (extOutput != null) {
-						linkedOutput = sectionOutputs.get(extOutput
-								.getExternalFlowName());
+						linkedOutput = sectionOutputs.get(extOutput.getExternalFlowName());
 					}
 				}
 				if (linkedOutput != null) {
@@ -596,40 +519,6 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 				}
 			}
 		}
-	}
-
-	/**
-	 * Obtains the {@link FlowInstigationStrategyEnum}.
-	 * 
-	 * @param instigationStrategyName
-	 *            Name identifying the {@link FlowInstigationStrategyEnum}.
-	 * @param designer
-	 *            {@link SectionDesigner}.
-	 * @param taskName
-	 *            Name of the {@link ManagedFunction} for reporting issues.
-	 * @param flowName
-	 *            Name of the {@link TaskFlow} for reporting issues.
-	 * @return {@link FlowInstigationStrategyEnum}.
-	 */
-	private FlowInstigationStrategyEnum getFlowInstatigationStrategy(
-			String instigationStrategyName, SectionDesigner designer,
-			String taskName, String flowName) {
-
-		// Obtain the flow instigation strategy
-		if (DeskChanges.SEQUENTIAL_LINK.equals(instigationStrategyName)) {
-			return FlowInstigationStrategyEnum.SEQUENTIAL;
-		} else if (DeskChanges.PARALLEL_LINK.equals(instigationStrategyName)) {
-			return FlowInstigationStrategyEnum.PARALLEL;
-		} else if (DeskChanges.ASYNCHRONOUS_LINK
-				.equals(instigationStrategyName)) {
-			return FlowInstigationStrategyEnum.ASYNCHRONOUS;
-		}
-
-		// Unknown flow instigation strategy if at this point
-		designer.addIssue("Unknown flow instigation strategy '"
-				+ instigationStrategyName + "' for flow " + flowName
-				+ " of task " + taskName);
-		return null;
 	}
 
 	/**
@@ -645,23 +534,21 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 	 * @return {@link ManagedObjectScope} or <code>null</code> with issue
 	 *         reported to the {@link SectionDesigner}.
 	 */
-	private ManagedObjectScope getManagedObjectScope(String managedObjectScope,
-			SectionDesigner designer, String managedObjectName) {
+	private ManagedObjectScope getManagedObjectScope(String managedObjectScope, SectionDesigner designer,
+			String managedObjectName) {
 
 		// Obtain the managed object scope
 		if (DeskChanges.PROCESS_MANAGED_OBJECT_SCOPE.equals(managedObjectScope)) {
 			return ManagedObjectScope.PROCESS;
-		} else if (DeskChanges.THREAD_MANAGED_OBJECT_SCOPE
-				.equals(managedObjectScope)) {
+		} else if (DeskChanges.THREAD_MANAGED_OBJECT_SCOPE.equals(managedObjectScope)) {
 			return ManagedObjectScope.THREAD;
-		} else if (DeskChanges.WORK_MANAGED_OBJECT_SCOPE
-				.equals(managedObjectScope)) {
-			return ManagedObjectScope.WORK;
+		} else if (DeskChanges.FUNCTION_MANAGED_OBJECT_SCOPE.equals(managedObjectScope)) {
+			return ManagedObjectScope.FUNCTION;
 		}
 
 		// Unknown scope if at this point
-		designer.addIssue("Unknown managed object scope " + managedObjectScope
-				+ " for managed object " + managedObjectName);
+		designer.addIssue(
+				"Unknown managed object scope " + managedObjectScope + " for managed object " + managedObjectName);
 		return null;
 	}
 

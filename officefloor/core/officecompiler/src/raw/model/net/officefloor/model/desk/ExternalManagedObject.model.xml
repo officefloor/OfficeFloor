@@ -2,7 +2,8 @@
 <model>
 	<field name="external managed object name" type="String" />
 	<field name="object type" type="String" />
-	<list type="WorkTaskObjectToExternalManagedObjectModel" name="task object" />
+	<list type="ManagedFunctionObjectToExternalManagedObjectModel"
+		name="managed function object" />
 	<list type="DeskManagedObjectDependencyToExternalManagedObjectModel"
 		name="dependent desk managed object" />
 </model>

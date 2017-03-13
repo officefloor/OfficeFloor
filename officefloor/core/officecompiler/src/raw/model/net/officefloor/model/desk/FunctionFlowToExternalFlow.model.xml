@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="external flow name" />
+	<field type="FunctionFlowModel" name="function flow" end-field="external flow" />
+	<field type="ExternalFlowModel" name="external flow" end-list="function flow" />
+	<field type="boolean" name="is spawn thread state" />
+</model>

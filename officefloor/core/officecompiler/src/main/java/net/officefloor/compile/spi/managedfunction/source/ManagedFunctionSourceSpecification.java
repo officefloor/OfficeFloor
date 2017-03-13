@@ -17,18 +17,16 @@
  */
 package net.officefloor.compile.spi.managedfunction.source;
 
-import net.officefloor.frame.api.function.Work;
-
 /**
- * Provides the specification of the {@link Work} to be loaded by the particular
- * {@link ManagedFunctionSource}.
+ * Provides the specification of the {@link ManagedFunctionSource}.
  * 
  * @author Daniel Sagenschneider
  */
 public interface ManagedFunctionSourceSpecification {
 
 	/**
-	 * Obtains the specification of the properties for the {@link Work}.
+	 * Obtains the specification of the properties for the
+	 * {@link ManagedFunctionSource}.
 	 * 
 	 * @return Property specification.
 	 */

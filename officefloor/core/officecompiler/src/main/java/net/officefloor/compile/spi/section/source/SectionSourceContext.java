@@ -24,7 +24,6 @@ import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SubSection;
-import net.officefloor.frame.api.function.Work;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.SourceContext;
@@ -57,19 +56,20 @@ public interface SectionSourceContext extends SourceContext {
 	 * <p>
 	 * Loads the {@link FunctionNamespaceType}.
 	 * <p>
-	 * This is to enable obtaining the type information for the {@link Work} to
-	 * allow reflective configuration by the {@link SectionSource}.
+	 * This is to enable obtaining the type information for the
+	 * {@link ManagedFunctionSource} to allow reflective configuration by the
+	 * {@link SectionSource}.
 	 * 
-	 * @param workSourceClassName
-	 *            Name of the implementing {@link ManagedFunctionSource} class. May also be
-	 *            an alias.
+	 * @param managedFunctionSourceClassName
+	 *            Name of the implementing {@link ManagedFunctionSource} class.
+	 *            May also be an alias.
 	 * @param properties
 	 *            {@link PropertyList} to configure the implementing
 	 *            {@link ManagedFunctionSource}.
-	 * @return {@link FunctionNamespaceType} or <code>null</code> if fails to load the
-	 *         {@link FunctionNamespaceType}.
+	 * @return {@link FunctionNamespaceType} or <code>null</code> if fails to
+	 *         load the {@link FunctionNamespaceType}.
 	 */
-	FunctionNamespaceType<?> loadWorkType(String workSourceClassName, PropertyList properties);
+	FunctionNamespaceType loadFunctionNamespaceType(String managedFunctionSourceClassName, PropertyList properties);
 
 	/**
 	 * <p>
@@ -88,8 +88,7 @@ public interface SectionSourceContext extends SourceContext {
 	 * @return {@link ManagedObjectType} or <code>null</code> if fails to load
 	 *         the {@link ManagedObjectType}.
 	 */
-	ManagedObjectType<?> loadManagedObjectType(
-			String managedObjectSourceClassName, PropertyList properties);
+	ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceClassName, PropertyList properties);
 
 	/**
 	 * <p>
@@ -109,7 +108,6 @@ public interface SectionSourceContext extends SourceContext {
 	 * @return {@link SectionType} or <code>null</code> if fails to load the
 	 *         {@link SectionType}.
 	 */
-	SectionType loadSectionType(String sectionSourceClassName, String location,
-			PropertyList properties);
+	SectionType loadSectionType(String sectionSourceClassName, String location, PropertyList properties);
 
 }

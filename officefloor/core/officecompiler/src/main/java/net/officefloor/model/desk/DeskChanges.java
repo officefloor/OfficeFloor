@@ -19,22 +19,20 @@ package net.officefloor.model.desk;
 
 import java.util.Map;
 
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
-import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.api.function.Work;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.model.ConnectionModel;
+import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.model.change.Change;
 
 /**
@@ -42,25 +40,8 @@ import net.officefloor.model.change.Change;
  *
  * @author Daniel Sagenschneider
  */
+@Deprecated // Move functions to Section and deprecate Desk
 public interface DeskChanges {
-
-	/**
-	 * Value for {@link FlowInstigationStrategyEnum#SEQUENTIAL} on the
-	 * {@link DeskModel} {@link ConnectionModel} instances.
-	 */
-	String SEQUENTIAL_LINK = FlowInstigationStrategyEnum.SEQUENTIAL.name();
-
-	/**
-	 * Value for {@link FlowInstigationStrategyEnum#PARALLEL} on the
-	 * {@link DeskModel} {@link ConnectionModel} instances.
-	 */
-	String PARALLEL_LINK = FlowInstigationStrategyEnum.PARALLEL.name();
-
-	/**
-	 * Value for {@link FlowInstigationStrategyEnum#ASYNCHRONOUS} on the
-	 * {@link DeskModel} {@link ConnectionModel} instances.
-	 */
-	String ASYNCHRONOUS_LINK = FlowInstigationStrategyEnum.ASYNCHRONOUS.name();
 
 	/**
 	 * Value for {@link ManagedObjectScope#PROCESS} on
@@ -75,200 +56,205 @@ public interface DeskChanges {
 	String THREAD_MANAGED_OBJECT_SCOPE = ManagedObjectScope.THREAD.name();
 
 	/**
-	 * Value for {@link ManagedObjectScope#WORK} on
+	 * Value for {@link ManagedObjectScope#FUNCTION} on
 	 * {@link DeskManagedObjectModel} instances.
 	 */
-	String WORK_MANAGED_OBJECT_SCOPE = ManagedObjectScope.WORK.name();
+	String FUNCTION_MANAGED_OBJECT_SCOPE = ManagedObjectScope.FUNCTION.name();
 
 	/**
-	 * Adds a {@link WorkModel} to the {@link DeskModel}.
+	 * Adds a {@link FunctionNamespaceModel} to the {@link DeskModel}.
 	 *
-	 * @param <W>
-	 *            {@link Work} type.
-	 * @param workName
-	 *            Name of the {@link Work}.
-	 * @param workSourceClassName
+	 * @param functionNamspaceName
+	 *            Name of the {@link ManagedFunctionSource}.
+	 * @param functionNamspaceSourceClassName
 	 *            Fully qualified name of the {@link ManagedFunctionSource}.
 	 * @param properties
-	 *            {@link PropertyList} to configure the {@link ManagedFunctionSource}.
-	 * @param workType
-	 *            {@link FunctionNamespaceType} from the {@link ManagedFunctionSource}.
-	 * @param taskNames
+	 *            {@link PropertyList} to configure the
+	 *            {@link ManagedFunctionSource}.
+	 * @param functionNamspaceType
+	 *            {@link FunctionNamespaceType} from the
+	 *            {@link ManagedFunctionSource}.
+	 * @param managedFunctionNames
 	 *            Listing of {@link WorkTaskModel} names to be loaded. Empty
 	 *            list results in loading all {@link WorkTaskModel} instances
 	 *            for the {@link FunctionNamespaceType}.
 	 * @return {@link Change} to add the {@link WorkModel}.
 	 */
-	<W extends Work> Change<WorkModel> addWork(String workName,
-			String workSourceClassName, PropertyList properties,
-			FunctionNamespaceType<W> workType, String... taskNames);
+	Change<FunctionNamespaceModel> addFunctionNamespace(String functionNamspaceName,
+			String functionNamspaceSourceClassName, PropertyList properties, FunctionNamespaceType functionNamspaceType,
+			String... managedFunctionNames);
 
 	/**
-	 * Removes a {@link WorkModel} from the {@link DeskModel}.
+	 * Removes a {@link FunctionNamespaceModel} from the {@link DeskModel}.
 	 *
-	 * @param workModel
-	 *            {@link WorkModel} to be removed.
-	 * @return {@link Change} to remove the {@link WorkModel}.
+	 * @param functionNamespaceModel
+	 *            {@link FunctionNamespaceModel} to be removed.
+	 * @return {@link Change} to remove the {@link FunctionNamespaceModel}.
 	 */
-	Change<WorkModel> removeWork(WorkModel workModel);
+	Change<FunctionNamespaceModel> removeFunctionNamespace(FunctionNamespaceModel functionNamspaceModel);
 
 	/**
-	 * Renames the {@link WorkModel}.
+	 * Renames the {@link FunctionNamespaceModel}.
 	 *
-	 * @param workModel
-	 *            {@link WorkModel} to rename.
-	 * @param newWorkName
-	 *            New name for the {@link WorkModel}.
-	 * @return {@link Change} to rename the {@link WorkModel}.
+	 * @param functionNamspaceModel
+	 *            {@link FunctionNamespaceModel} to rename.
+	 * @param newFunctionNamespaceName
+	 *            New name for the {@link FunctionNamespaceModel}.
+	 * @return {@link Change} to rename the {@link FunctionNamespaceModel}.
 	 */
-	Change<WorkModel> renameWork(WorkModel workModel, String newWorkName);
+	Change<FunctionNamespaceModel> renameFunctionNamespace(FunctionNamespaceModel functionNamspaceModel,
+			String newFunctionNamespaceName);
 
 	/**
-	 * Refactors the {@link WorkModel}.
+	 * Refactors the {@link FunctionNamespaceModel}.
 	 *
-	 * @param <W>
-	 *            {@link Work} type.
-	 * @param workModel
-	 *            {@link WorkModel} to refactor.
-	 * @param workName
-	 *            New name for the {@link WorkModel}.
-	 * @param workSourceClassName
-	 *            New {@link ManagedFunctionSource} class name for the {@link WorkModel}.
+	 * @param functionNamspaceModel
+	 *            {@link FunctionNamespaceModel} to refactor.
+	 * @param functionNamespaceName
+	 *            New name for the {@link FunctionNamespaceModel}.
+	 * @param managedFunctionSourceClassName
+	 *            New {@link ManagedFunctionSource} class name for the
+	 *            {@link FunctionNamespaceModel}.
 	 * @param properties
-	 *            New {@link PropertyList} for the {@link WorkModel}.
-	 * @param workType
-	 *            {@link FunctionNamespaceType} that the {@link WorkModel} is being
-	 *            refactored to.
-	 * @param workTaskNameMapping
+	 *            New {@link PropertyList} for the
+	 *            {@link FunctionNamespaceModel}.
+	 * @param functionNamespaceType
+	 *            {@link FunctionNamespaceType} that the
+	 *            {@link FunctionNamespaceModel} is being refactored to.
+	 * @param managedFunctionNameMapping
 	 *            Mapping of the {@link ManagedFunctionType} name to the
-	 *            {@link WorkTaskModel} name.
-	 * @param workTaskToObjectNameMapping
-	 *            Mapping of the {@link WorkTaskModel} name to the
-	 *            {@link ManagedFunctionObjectType} name to the {@link WorkTaskObjectModel}
-	 *            name.
-	 * @param taskToFlowNameMapping
-	 *            Mapping of the {@link TaskModel} name to the
-	 *            {@link ManagedFunctionFlowType} name to the {@link TaskFlowModel} name.
-	 * @param taskToEscalationTypeMapping
-	 *            Mapping of the {@link TaskModel} name to the
+	 *            {@link ManagedFunctionModel} name.
+	 * @param managedFunctionToObjectNameMapping
+	 *            Mapping of the {@link ManagedFunctionModel} name to the
+	 *            {@link ManagedFunctionObjectType} name to the
+	 *            {@link ManagedFunctionObjectModel} name.
+	 * @param functionToFlowNameMapping
+	 *            Mapping of the {@link FunctionModel} name to the
+	 *            {@link ManagedFunctionFlowType} name to the
+	 *            {@link FunctionFlowModel} name.
+	 * @param functionToEscalationTypeMapping
+	 *            Mapping of the {@link FunctionModel} name to the
 	 *            {@link ManagedFunctionEscalationType} type to the
-	 *            {@link TaskEscalationModel} type.
-	 * @param taskNames
-	 *            Listing of {@link WorkTaskModel} names to be loaded. Empty
-	 *            list results in loading all {@link WorkTaskModel} instances
-	 *            for the {@link FunctionNamespaceType}.
-	 * @return {@link Change} to refactor the {@link WorkModel}.
+	 *            {@link FunctionEscalationModel} type.
+	 * @param managedFunctionNames
+	 *            Listing of {@link ManagedFunctionModel} names to be loaded.
+	 *            Empty list results in loading all {@link ManagedFunctionModel}
+	 *            instances for the {@link FunctionNamespaceType}.
+	 * @return {@link Change} to refactor the {@link FunctionNamespaceModel}.
 	 */
-	<W extends Work> Change<WorkModel> refactorWork(WorkModel workModel,
-			String workName, String workSourceClassName,
-			PropertyList properties, FunctionNamespaceType<W> workType,
-			Map<String, String> workTaskNameMapping,
-			Map<String, Map<String, String>> workTaskToObjectNameMapping,
-			Map<String, Map<String, String>> taskToFlowNameMapping,
-			Map<String, Map<String, String>> taskToEscalationTypeMapping,
-			String... taskNames);
+	Change<FunctionNamespaceModel> refactorFunctionNamespace(FunctionNamespaceModel functionNamespaceModel,
+			String functionNamespaceName, String managedFunctionSourceClassName, PropertyList properties,
+			FunctionNamespaceType functionNamespaceType, Map<String, String> managedFunctionNameMapping,
+			Map<String, Map<String, String>> managedFunctionToObjectNameMapping,
+			Map<String, Map<String, String>> functionToFlowNameMapping,
+			Map<String, Map<String, String>> functionToEscalationTypeMapping, String... managedFunctionNames);
 
 	/**
-	 * Adds the {@link ManagedFunctionType} as a {@link WorkTaskModel} to the
-	 * {@link WorkModel}.
+	 * Adds the {@link ManagedFunctionType} as a {@link ManagedFunctionModel} to
+	 * the {@link FunctionNamspaceModel}.
 	 *
-	 * @param <W>
-	 *            {@link Work} type.
-	 * @param <D>
+	 * @param <M>
 	 *            Dependency type keys.
 	 * @param <F>
 	 *            {@link Flow} type keys.
-	 * @param workModel
-	 *            {@link WorkModel} to have the {@link ManagedFunctionType} added.
-	 * @param taskType
-	 *            {@link ManagedFunctionType} to be added to the {@link WorkModel}.
+	 * @param functionNamespaceModel
+	 *            {@link FunctionNamespaceModel} to have the
+	 *            {@link ManagedFunctionType} added.
+	 * @param managedFunctionType
+	 *            {@link ManagedFunctionType} to be added to the
+	 *            {@link FunctionNamespaceModel}.
 	 * @return {@link Change} to add the {@link ManagedFunctionType} to the
-	 *         {@link WorkModel}.
+	 *         {@link FunctionNamespaceModel}.
 	 */
-	<W extends Work, D extends Enum<D>, F extends Enum<F>> Change<WorkTaskModel> addWorkTask(
-			WorkModel workModel, ManagedFunctionType<W, D, F> taskType);
+	<M extends Enum<M>, F extends Enum<F>> Change<ManagedFunctionModel> addManagedFunction(
+			FunctionNamespaceModel functionNamespaceModel, ManagedFunctionType<M, F> managedFunctionType);
 
 	/**
-	 * Removes the {@link WorkTaskModel} from the {@link WorkModel}.
+	 * Removes the {@link ManagedFunctionModel} from the
+	 * {@link FunctionNamespaceModel}.
 	 *
-	 * @param workModel
-	 *            {@link WorkModel} to have the {@link WorkTaskModel} removed.
-	 * @param taskModel
-	 *            {@link WorkTaskModel} to be removed.
-	 * @return {@link Change} to remove the {@link WorkTaskModel} from the
-	 *         {@link WorkModel}.
+	 * @param functionNamespaceModel
+	 *            {@link FunctionNamespaceModel} to have the
+	 *            {@link ManagedFunctionModel} removed.
+	 * @param managedFunctionModel
+	 *            {@link ManagdedFunctionModel} to be removed.
+	 * @return {@link Change} to remove the {@link ManagedFunctionModel} from
+	 *         the {@link FunctionNamespaceModel}.
 	 */
-	Change<WorkTaskModel> removeWorkTask(WorkModel workModel,
-			WorkTaskModel taskModel);
+	Change<ManagedFunctionModel> removeManagedFunction(FunctionNamespaceModel functionNamespaceModel,
+			ManagedFunctionModel managedFunctionModel);
 
 	/**
-	 * Adds a {@link ManagedFunctionType} as a {@link TaskModel} to the {@link DeskModel}.
+	 * Adds a {@link ManagedFunctionType} as a {@link FunctionModel} to the
+	 * {@link DeskModel}.
 	 *
-	 * @param <W>
-	 *            {@link Work} type.
-	 * @param <D>
+	 * @param <M>
 	 *            Dependency type keys.
 	 * @param <F>
 	 *            {@link Flow} type keys.
-	 * @param taskName
+	 * @param functionName
 	 *            Name of the {@link ManagedFunction}.
-	 * @param workTaskModel
-	 *            {@link WorkTaskModel} for the {@link ManagedFunctionType}.
-	 * @param taskType
-	 *            {@link ManagedFunctionType} for the {@link TaskModel}.
+	 * @param managedFunctionModel
+	 *            {@link ManagedFunctionModel} for the
+	 *            {@link ManagedFunctionType}.
+	 * @param managedFunctionType
+	 *            {@link ManagedFunctionType} for the {@link FunctionModel}.
 	 * @return {@link Change} to add the {@link ManagedFunctionType} to the
 	 *         {@link DeskModel}.
 	 */
-	<W extends Work, D extends Enum<D>, F extends Enum<F>> Change<TaskModel> addTask(
-			String taskName, WorkTaskModel workTaskModel,
-			ManagedFunctionType<W, D, F> taskType);
+	<M extends Enum<M>, F extends Enum<F>> Change<FunctionModel> addFunction(String functionName,
+			ManagedFunctionModel managedFunctionModel, ManagedFunctionType<M, F> managedFunctionType);
 
 	/**
-	 * Removes the {@link TaskModel} from the {@link DeskModel}.
+	 * Removes the {@link FunctionModel} from the {@link DeskModel}.
 	 *
-	 * @param taskModel
-	 *            {@link TaskModel} to be removed.
-	 * @return {@link Change} to remove the {@link TaskModel} from the
+	 * @param functionModel
+	 *            {@link FunctionModel} to be removed.
+	 * @return {@link Change} to remove the {@link FunctionModel} from the
 	 *         {@link DeskModel}.
 	 */
-	Change<TaskModel> removeTask(TaskModel taskModel);
+	Change<FunctionModel> removeFunction(FunctionModel functionModel);
 
 	/**
-	 * Renames the {@link TaskModel}.
+	 * Renames the {@link FunctionModel}.
 	 *
-	 * @param taskModel
-	 *            {@link TaskModel} to be renamed.
-	 * @param newTaskName
-	 *            New name for the {@link TaskModel}.
-	 * @return {@link Change} to rename the {@link TaskModel}.
+	 * @param functionModel
+	 *            {@link FunctionModel} to be renamed.
+	 * @param newFunctionName
+	 *            New name for the {@link FunctionModel}.
+	 * @return {@link Change} to rename the {@link FunctionModel}.
 	 */
-	Change<TaskModel> renameTask(TaskModel taskModel, String newTaskName);
+	Change<FunctionModel> renameFunction(FunctionModel functionModel, String newFunctionName);
 
 	/**
-	 * Specifies a {@link WorkTaskObjectModel} as a parameter or an object.
+	 * Specifies a {@link ManagedFunctionObjectModel} as a parameter or an
+	 * object.
 	 *
 	 * @param isParameter
-	 *            <code>true</code> for the {@link WorkTaskObjectModel} to be a
-	 *            parameter. <code>false</code> to be a dependency object.
-	 * @param taskObjectModel
-	 *            {@link WorkTaskObjectModel} to set as a parameter or object.
-	 * @return {@link Change} to set the {@link WorkTaskObjectModel} as a
+	 *            <code>true</code> for the {@link ManagedFunctionObjectModel}
+	 *            to be a parameter. <code>false</code> to be a dependency
+	 *            object.
+	 * @param managedFunctionObjectModel
+	 *            {@link ManagedFunctionObjectModel} to set as a parameter or
+	 *            object.
+	 * @return {@link Change} to set the {@link ManagedFunctionObjectModel} as a
 	 *         parameter or object.
 	 */
-	Change<WorkTaskObjectModel> setObjectAsParameter(boolean isParameter,
-			WorkTaskObjectModel taskObjectModel);
+	Change<ManagedFunctionObjectModel> setObjectAsParameter(boolean isParameter,
+			ManagedFunctionObjectModel managedFunctionObjectModel);
 
 	/**
-	 * Specifies a {@link TaskModel} as public/private.
+	 * Specifies a {@link FunctionModel} as public/private.
 	 *
 	 * @param isPublic
-	 *            <code>true</code> for the {@link TaskModel} to be public.
-	 *            <code>false</code> for the {@link TaskModel} to be private.
-	 * @param taskModel
-	 *            {@link TaskModel} to set public/private.
-	 * @return {@link Change} to set the {@link TaskModel} public/private.
+	 *            <code>true</code> for the {@link FunctionModel} to be public.
+	 *            <code>false</code> for the {@link FunctionModel} to be
+	 *            private.
+	 * @param functionModel
+	 *            {@link FunctionModel} to set public/private.
+	 * @return {@link Change} to set the {@link FunctionModel} public/private.
 	 */
-	Change<TaskModel> setTaskAsPublic(boolean isPublic, TaskModel taskModel);
+	Change<FunctionModel> setFunctionAsPublic(boolean isPublic, FunctionModel functionModel);
 
 	/**
 	 * Adds an {@link ExternalFlowModel} to the {@link DeskModel}.
@@ -279,8 +265,7 @@ public interface DeskChanges {
 	 *            Argument type for the {@link ExternalFlowModel}.
 	 * @return {@link Change} to add the {@link ExternalFlowModel}.
 	 */
-	Change<ExternalFlowModel> addExternalFlow(String externalFlowName,
-			String argumentType);
+	Change<ExternalFlowModel> addExternalFlow(String externalFlowName, String argumentType);
 
 	/**
 	 * Removes an {@link ExternalFlowModel} from the {@link DeskModel}.
@@ -302,8 +287,7 @@ public interface DeskChanges {
 	 *            New name for the {@link ExternalFlowModel}.
 	 * @return {@link Change} to rename the {@link ExternalFlowModel}.
 	 */
-	Change<ExternalFlowModel> renameExternalFlow(
-			ExternalFlowModel externalFlow, String newExternalFlowName);
+	Change<ExternalFlowModel> renameExternalFlow(ExternalFlowModel externalFlow, String newExternalFlowName);
 
 	/**
 	 * Adds an {@link ExternalManagedObjectModel} to the {@link DeskModel}.
@@ -314,8 +298,7 @@ public interface DeskChanges {
 	 *            Object type for the {@link ExternalManagedObjectModel}.
 	 * @return {@link Change} to add the {@link ExternalManagedObjectModel}.
 	 */
-	Change<ExternalManagedObjectModel> addExternalManagedObject(
-			String externalManagedObjectName, String objectType);
+	Change<ExternalManagedObjectModel> addExternalManagedObject(String externalManagedObjectName, String objectType);
 
 	/**
 	 * Removes an {@link ExternalManagedObjectModel} from the {@link DeskModel}.
@@ -326,8 +309,7 @@ public interface DeskChanges {
 	 * @return {@link Change} to remove the {@link ExternalManagedObjectModel}
 	 *         from the {@link DeskModel}.
 	 */
-	Change<ExternalManagedObjectModel> removeExternalManagedObject(
-			ExternalManagedObjectModel externalManagedObject);
+	Change<ExternalManagedObjectModel> removeExternalManagedObject(ExternalManagedObjectModel externalManagedObject);
 
 	/**
 	 * Renames the {@link ExternalManagedObjectModel}.
@@ -338,8 +320,7 @@ public interface DeskChanges {
 	 *            New name for the {@link ExternalManagedObjectModel}.
 	 * @return {@link Change} to rename the {@link ExternalManagedObjectModel}.
 	 */
-	Change<ExternalManagedObjectModel> renameExternalManagedObject(
-			ExternalManagedObjectModel externalManagedObject,
+	Change<ExternalManagedObjectModel> renameExternalManagedObject(ExternalManagedObjectModel externalManagedObject,
 			String newExternalManagedObjectName);
 
 	/**
@@ -357,10 +338,9 @@ public interface DeskChanges {
 	 *            {@link ManagedObjectType}.
 	 * @return {@link Change} to add the {@link DeskManagedObjectSourceModel} .
 	 */
-	Change<DeskManagedObjectSourceModel> addDeskManagedObjectSource(
-			String managedObjectSourceName,
-			String managedObjectSourceClassName, PropertyList properties,
-			long timeout, ManagedObjectType<?> managedObjectType);
+	Change<DeskManagedObjectSourceModel> addDeskManagedObjectSource(String managedObjectSourceName,
+			String managedObjectSourceClassName, PropertyList properties, long timeout,
+			ManagedObjectType<?> managedObjectType);
 
 	/**
 	 * Removes the {@link DeskManagedObjectSourceModel}.
@@ -383,8 +363,7 @@ public interface DeskChanges {
 	 * @return {@link Change} to rename the {@link DeskManagedObjectSourceModel}
 	 *         .
 	 */
-	Change<DeskManagedObjectSourceModel> renameDeskManagedObjectSource(
-			DeskManagedObjectSourceModel managedObjectSource,
+	Change<DeskManagedObjectSourceModel> renameDeskManagedObjectSource(DeskManagedObjectSourceModel managedObjectSource,
 			String newManagedObjectSourceName);
 
 	/**
@@ -402,10 +381,8 @@ public interface DeskChanges {
 	 *            {@link ManagedObjectType}.
 	 * @return {@link Change} to add the {@link DeskManagedObjectModel}.
 	 */
-	Change<DeskManagedObjectModel> addDeskManagedObject(
-			String managedObjectName, ManagedObjectScope managedObjectScope,
-			DeskManagedObjectSourceModel managedObjectSource,
-			ManagedObjectType<?> managedObjectType);
+	Change<DeskManagedObjectModel> addDeskManagedObject(String managedObjectName, ManagedObjectScope managedObjectScope,
+			DeskManagedObjectSourceModel managedObjectSource, ManagedObjectType<?> managedObjectType);
 
 	/**
 	 * Removes the {@link DeskManagedObjectModel}.
@@ -414,8 +391,7 @@ public interface DeskChanges {
 	 *            {@link DeskManagedObjectModel} to remove.
 	 * @return {@link Change} to remove the {@link DeskManagedObjectModel}.
 	 */
-	Change<DeskManagedObjectModel> removeDeskManagedObject(
-			DeskManagedObjectModel managedObject);
+	Change<DeskManagedObjectModel> removeDeskManagedObject(DeskManagedObjectModel managedObject);
 
 	/**
 	 * Renames the {@link DeskManagedObjectModel}.
@@ -426,8 +402,8 @@ public interface DeskChanges {
 	 *            New name for the {@link DeskManagedObjectModel}.
 	 * @return {@link Change} to rename the {@link DeskManagedObjectModel}.
 	 */
-	Change<DeskManagedObjectModel> renameDeskManagedObject(
-			DeskManagedObjectModel managedObject, String newManagedObjectName);
+	Change<DeskManagedObjectModel> renameDeskManagedObject(DeskManagedObjectModel managedObject,
+			String newManagedObjectName);
 
 	/**
 	 * Scopes the {@link DeskManagedObjectModel}.
@@ -439,247 +415,224 @@ public interface DeskChanges {
 	 *            {@link DeskManagedObjectModel}.
 	 * @return {@link Change} to scope {@link DeskManagedObjectModel}.
 	 */
-	Change<DeskManagedObjectModel> rescopeDeskManagedObject(
-			DeskManagedObjectModel managedObject,
+	Change<DeskManagedObjectModel> rescopeDeskManagedObject(DeskManagedObjectModel managedObject,
 			ManagedObjectScope newManagedObjectScope);
 
 	/**
-	 * Links the {@link WorkTaskObjectModel} to be the
+	 * Links the {@link ManagedFunctionObjectModel} to be the
 	 * {@link ExternalManagedObjectModel}.
 	 *
-	 * @param workTaskObject
+	 * @param managedFunctionObject
 	 *            {@link WorkTaskObjectModel}.
 	 * @param externalManagedObject
 	 *            {@link ExternalManagedObjectModel}.
 	 * @return {@link Change} to add a
-	 *         {@link WorkTaskObjectToExternalManagedObjectModel}.
+	 *         {@link ManagedFunctionObjectToExternalManagedObjectModel}.
 	 */
-	Change<WorkTaskObjectToExternalManagedObjectModel> linkWorkTaskObjectToExternalManagedObject(
-			WorkTaskObjectModel workTaskObject,
-			ExternalManagedObjectModel externalManagedObject);
+	Change<ManagedFunctionObjectToExternalManagedObjectModel> linkManagedFunctionObjectToExternalManagedObject(
+			ManagedFunctionObjectModel managedFunctionTaskObject, ExternalManagedObjectModel externalManagedObject);
 
 	/**
-	 * Removes the {@link WorkTaskObjectToExternalManagedObjectModel}.
+	 * Removes the {@link ManagedFunctionObjectToExternalManagedObjectModel}.
 	 *
 	 * @param objectToExternalManagedObject
-	 *            {@link WorkTaskObjectToExternalManagedObjectModel} to remove.
+	 *            {@link ManagedFunctionObjectToExternalManagedObjectModel} to
+	 *            remove.
 	 * @return {@link Change} to remove the
-	 *         {@link WorkTaskObjectToExternalManagedObjectModel}.
+	 *         {@link ManagedFunctionObjectToExternalManagedObjectModel}.
 	 */
-	Change<WorkTaskObjectToExternalManagedObjectModel> removeWorkTaskObjectToExternalManagedObject(
-			WorkTaskObjectToExternalManagedObjectModel objectToExternalManagedObject);
+	Change<ManagedFunctionObjectToExternalManagedObjectModel> removeManagedFunctionObjectToExternalManagedObject(
+			ManagedFunctionObjectToExternalManagedObjectModel objectToExternalManagedObject);
 
 	/**
-	 * Links the {@link WorkTaskObjectModel} to the
+	 * Links the {@link ManagedFunctionObjectModel} to the
 	 * {@link DeskManagedObjectModel}.
 	 *
-	 * @param workTaskObject
-	 *            {@link WorkTaskObjectModel}.
+	 * @param managedFunctionObject
+	 *            {@link ManagedFunctionObjectModel}.
 	 * @param managedObject
 	 *            {@link DeskManagedObjectModel}.
 	 * @return {@link Change} to add the
-	 *         {@link WorkTaskObjectToDeskManagedObjectModel}.
+	 *         {@link ManagedFunctionObjectToDeskManagedObjectModel}.
 	 */
-	Change<WorkTaskObjectToDeskManagedObjectModel> linkWorkTaskObjectToDeskManagedObject(
-			WorkTaskObjectModel workTaskObject,
-			DeskManagedObjectModel managedObject);
+	Change<ManagedFunctionObjectToDeskManagedObjectModel> linkManagedFunctionObjectToDeskManagedObject(
+			ManagedFunctionObjectModel managedFunctionTaskObject, DeskManagedObjectModel managedObject);
 
 	/**
-	 * Removes the {@link WorkTaskObjectToDeskManagedObjectModel}.
+	 * Removes the {@link ManagedFunctionObjectToDeskManagedObjectModel}.
 	 *
-	 * @param workTaskObjectToManagedObject
-	 *            {@link WorkTaskObjectToDeskManagedObjectModel} to remove.
+	 * @param managedFunctionObjectToManagedObject
+	 *            {@link ManagedFunctionObjectToDeskManagedObjectModel} to
+	 *            remove.
 	 * @return {@link Change} to remove the
-	 *         {@link WorkTaskObjectToDeskManagedObjectModel}.
+	 *         {@link ManagedFunctionObjectToDeskManagedObjectModel}.
 	 */
-	Change<WorkTaskObjectToDeskManagedObjectModel> removeWorkTaskObjectToDeskManagedObject(
-			WorkTaskObjectToDeskManagedObjectModel workTaskObjectToManagedObject);
+	Change<ManagedFunctionObjectToDeskManagedObjectModel> removeManagedFunctionObjectToDeskManagedObject(
+			ManagedFunctionObjectToDeskManagedObjectModel managedFunctionObjectToManagedObject);
 
 	/**
-	 * Links the {@link TaskFlowModel} to the {@link TaskModel}.
+	 * Links the {@link FunctionFlowModel} to the {@link FunctionModel}.
 	 *
-	 * @param taskFlow
-	 *            {@link TaskFlowModel}.
-	 * @param task
-	 *            {@link TaskModel}.
-	 * @param instigationStrategy
-	 *            {@link FlowInstigationStrategyEnum}.
-	 * @return {@link Change} to add a {@link TaskFlowToTaskModel}.
+	 * @param functionFlow
+	 *            {@link FunctionFlowModel}.
+	 * @param function
+	 *            {@link FunctionModel}.
+	 * @param isSpawnThreadState
+	 *            Indicates if to spawn a {@link ThreadState}.
+	 * @return {@link Change} to add a {@link FunctionFlowToFunctionModel}.
 	 */
-	Change<TaskFlowToTaskModel> linkTaskFlowToTask(TaskFlowModel taskFlow,
-			TaskModel task, FlowInstigationStrategyEnum instigationStrategy);
+	Change<FunctionFlowToFunctionModel> linkFunctionFlowToFunction(FunctionFlowModel functionFlow,
+			FunctionModel function, boolean isSpawnThreadState);
 
 	/**
-	 * Removes the {@link TaskFlowToTaskModel}.
+	 * Removes the {@link FunctionFlowToFunctionModel}.
 	 *
-	 * @param taskFlowToTask
-	 *            {@link TaskFlowToTaskModel} to remove.
-	 * @return {@link Change} to remove {@link TaskFlowToTaskModel}.
+	 * @param functionFlowToFunction
+	 *            {@link FunctionFlowToFunctionModel} to remove.
+	 * @return {@link Change} to remove {@link FunctionFlowToFunctionModel}.
 	 */
-	Change<TaskFlowToTaskModel> removeTaskFlowToTask(
-			TaskFlowToTaskModel taskFlowToTask);
+	Change<FunctionFlowToFunctionModel> removeFunctionFlowToFunction(FunctionFlowToFunctionModel taskFlowToTask);
 
 	/**
-	 * Links the {@link TaskFlowModel} to the {@link ExternalFlowModel}.
+	 * Links the {@link FunctionFlowModel} to the {@link ExternalFlowModel}.
 	 *
-	 * @param taskFlow
-	 *            {@link TaskFlowModel}.
+	 * @param functionFlow
+	 *            {@link FunctionFlowModel}.
 	 * @param externalFlow
 	 *            {@link ExternalFlowModel}.
-	 * @param instigationStrategy
-	 *            {@link FlowInstigationStrategyEnum}.
-	 * @return {@link Change} to add a {@link TaskFlowToExternalFlowModel}.
+	 * @param isSpawnThreadState
+	 *            Indicates if to spawn a {@link ThreadState}.
+	 * @return {@link Change} to add a {@link FunctionFlowToExternalFlowModel}.
 	 */
-	Change<TaskFlowToExternalFlowModel> linkTaskFlowToExternalFlow(
-			TaskFlowModel taskFlow, ExternalFlowModel externalFlow,
-			FlowInstigationStrategyEnum instigationStrategy);
+	Change<FunctionFlowToExternalFlowModel> linkFunctionFlowToExternalFlow(FunctionFlowModel functionFlow,
+			ExternalFlowModel externalFlow, boolean isSpawnThreadState);
 
 	/**
-	 * Removes the {@link TaskFlowToExternalFlowModel}.
+	 * Removes the {@link FunctionFlowToExternalFlowModel}.
 	 *
-	 * @param taskFlowToExternalFlow
-	 *            {@link TaskFlowToExternalFlowModel} to remove.
-	 * @return {@link Change} to remove {@link TaskFlowToExternalFlowModel}.
+	 * @param functionFlowToExternalFlow
+	 *            {@link FunctionFlowToExternalFlowModel} to remove.
+	 * @return {@link Change} to remove {@link FunctionFlowToExternalFlowModel}.
 	 */
-	Change<TaskFlowToExternalFlowModel> removeTaskFlowToExternalFlow(
-			TaskFlowToExternalFlowModel taskFlowToExternalFlow);
+	Change<FunctionFlowToExternalFlowModel> removeFunctionFlowToExternalFlow(
+			FunctionFlowToExternalFlowModel functionFlowToExternalFlow);
 
 	/**
-	 * Links {@link TaskModel} to next {@link TaskModel}.
+	 * Links {@link FunctionModel} to next {@link FunctionModel}.
 	 *
-	 * @param task
-	 *            {@link TaskModel}.
-	 * @param nextTask
-	 *            Next {@link TaskModel}.
-	 * @return {@link Change} to add a {@link TaskToNextTaskModel}.
+	 * @param function
+	 *            {@link FunctionModel}.
+	 * @param nextFunction
+	 *            Next {@link FunctionModel}.
+	 * @return {@link Change} to add a {@link FunctionToNextFunctionModel}.
 	 */
-	Change<TaskToNextTaskModel> linkTaskToNextTask(TaskModel task,
-			TaskModel nextTask);
+	Change<FunctionToNextFunctionModel> linkFunctionToNextFunction(FunctionModel function, FunctionModel nextFunction);
 
 	/**
-	 * Removes the {@link TaskToNextTaskModel}.
+	 * Removes the {@link FunctionToNextFunctionModel}.
 	 *
-	 * @param taskToNextTask
-	 *            {@link TaskToNextTaskModel} to remove.
-	 * @return {@link Change} to remove {@link TaskToNextTaskModel}.
+	 * @param functionToNextFunction
+	 *            {@link FunctionToNextFunctionModel} to remove.
+	 * @return {@link Change} to remove {@link FunctionToNextFunctionModel}.
 	 */
-	Change<TaskToNextTaskModel> removeTaskToNextTask(
-			TaskToNextTaskModel taskToNextTask);
+	Change<FunctionToNextFunctionModel> removeFunctionToNextFunction(
+			FunctionToNextFunctionModel functionToNextFunction);
 
 	/**
-	 * Links {@link TaskModel} to next {@link ExternalFlowModel}.
+	 * Links {@link FunctionModel} to next {@link ExternalFlowModel}.
 	 *
-	 * @param task
-	 *            {@link TaskModel}.
+	 * @param function
+	 *            {@link FunctionModel}.
 	 * @param nextExternalFlow
 	 *            Next {@link ExternalFlowModel}.
-	 * @return {@link Change} to add a {@link TaskToNextExternalFlowModel}.
+	 * @return {@link Change} to add a {@link FunctionToNextExternalFlowModel}.
 	 */
-	Change<TaskToNextExternalFlowModel> linkTaskToNextExternalFlow(
-			TaskModel task, ExternalFlowModel nextExternalFlow);
+	Change<FunctionToNextExternalFlowModel> linkFunctionToNextExternalFlow(FunctionModel function,
+			ExternalFlowModel nextExternalFlow);
 
 	/**
-	 * Removes the {@link TaskToNextExternalFlowModel}.
+	 * Removes the {@link FunctionToNextExternalFlowModel}.
 	 *
-	 * @param taskToNextExternalFlow
-	 *            {@link TaskToNextExternalFlowModel} to remove.
-	 * @return {@link Change} to remove {@link TaskToNextExternalFlowModel}.
+	 * @param functionToNextExternalFlow
+	 *            {@link FunctionToNextExternalFlowModel} to remove.
+	 * @return {@link Change} to remove {@link FunctionToNextExternalFlowModel}.
 	 */
-	Change<TaskToNextExternalFlowModel> removeTaskToNextExternalFlow(
-			TaskToNextExternalFlowModel taskToNextExternalFlow);
+	Change<FunctionToNextExternalFlowModel> removeFunctionToNextExternalFlow(
+			FunctionToNextExternalFlowModel functionToNextExternalFlow);
 
 	/**
-	 * Links {@link TaskEscalationModel} to the {@link TaskModel}.
+	 * Links {@link FunctionEscalationModel} to the {@link FunctionModel}.
 	 *
-	 * @param taskEscalation
-	 *            {@link TaskEscalationModel}.
-	 * @param task
-	 *            {@link TaskModel}.
-	 * @return {@link Change} to add a {@link TaskEscalationToTaskModel}.
+	 * @param functionEscalation
+	 *            {@link FunctionEscalationModel}.
+	 * @param function
+	 *            {@link FunctionModel}.
+	 * @return {@link Change} to add a
+	 *         {@link FunctionEscalationToFunctionModel}.
 	 */
-	Change<TaskEscalationToTaskModel> linkTaskEscalationToTask(
-			TaskEscalationModel taskEscalation, TaskModel task);
+	Change<FunctionEscalationToFunctionModel> linkFunctionEscalationToFunction(
+			FunctionEscalationModel functionEscalation, FunctionModel function);
 
 	/**
-	 * Removes the {@link TaskEscalationToTaskModel}.
+	 * Removes the {@link FunctionEscalationToFunctionModel}.
 	 *
-	 * @param taskEscalationToTask
-	 *            {@link TaskEscalationToTaskModel} to remove.
-	 * @return {@link Change} to remove {@link TaskEscalationToTaskModel}.
+	 * @param functionEscalationToFunction
+	 *            {@link FunctionEscalationToFunctionModel} to remove.
+	 * @return {@link Change} to remove
+	 *         {@link FunctionEscalationToFunctionModel}.
 	 */
-	Change<TaskEscalationToTaskModel> removeTaskEscalationToTask(
-			TaskEscalationToTaskModel taskEscalationToTask);
+	Change<FunctionEscalationToFunctionModel> removeFunctionEscalationToFunction(
+			FunctionEscalationToFunctionModel functionEscalationToFunction);
 
 	/**
-	 * Links {@link TaskEscalationModel} to the {@link ExternalFlowModel}.
+	 * Links {@link FunctionEscalationModel} to the {@link ExternalFlowModel}.
 	 *
-	 * @param taskEscalation
-	 *            {@link TaskEscalationModel}.
+	 * @param functionEscalation
+	 *            {@link FunctionEscalationModel}.
 	 * @param externalFlow
 	 *            {@link ExternalFlowModel}.
-	 * @return {@link Change} to add {@link TaskEscalationToExternalFlowModel}.
+	 * @return {@link Change} to add
+	 *         {@link FunctionEscalationToExternalFlowModel}.
 	 */
-	Change<TaskEscalationToExternalFlowModel> linkTaskEscalationToExternalFlow(
-			TaskEscalationModel taskEscalation, ExternalFlowModel externalFlow);
+	Change<FunctionEscalationToExternalFlowModel> linkFunctionEscalationToExternalFlow(
+			FunctionEscalationModel functionEscalation, ExternalFlowModel externalFlow);
 
 	/**
-	 * Removes the {@link TaskEscalationToExternalFlowModel}.
+	 * Removes the {@link FunctionEscalationToExternalFlowModel}.
 	 *
-	 * @param taskEscalationToExternalFlow
-	 *            {@link TaskEscalationToExternalFlowModel} to remove.
+	 * @param functionEscalationToExternalFlow
+	 *            {@link FunctionEscalationToExternalFlowModel} to remove.
 	 * @return {@link Change} to remove
-	 *         {@link TaskEscalationToExternalFlowModel}.
+	 *         {@link FunctionEscalationToExternalFlowModel}.
 	 */
-	Change<TaskEscalationToExternalFlowModel> removeTaskEscalationToExternalFlow(
-			TaskEscalationToExternalFlowModel taskEscalationToExternalFlow);
-
-	/**
-	 * Links the {@link WorkModel} to its initial {@link TaskModel}.
-	 *
-	 * @param work
-	 *            {@link WorkModel}.
-	 * @param initialTask
-	 *            Initial {@link TaskModel}.
-	 * @return {@link Change} to add a {@link WorkToInitialTaskModel}.
-	 */
-	Change<WorkToInitialTaskModel> linkWorkToInitialTask(WorkModel work,
-			TaskModel initialTask);
-
-	/**
-	 * Removes the {@link WorkToInitialTaskModel}.
-	 *
-	 * @param workToInitialTask
-	 *            {@link WorkToInitialTaskModel} to remove.
-	 * @return {@link Change} to remove {@link WorkToInitialTaskModel}.
-	 */
-	Change<WorkToInitialTaskModel> removeWorkToInitialTask(
-			WorkToInitialTaskModel workToInitialTask);
+	Change<FunctionEscalationToExternalFlowModel> removeFunctionEscalationToExternalFlow(
+			FunctionEscalationToExternalFlowModel functionEscalationToExternalFlow);
 
 	/**
 	 * Links the {@link DeskManagedObjectSourceFlowModel} to the
-	 * {@link TaskModel}.
+	 * {@link FunctionModel}.
 	 *
 	 * @param managedObjectSourceFlow
 	 *            {@link DeskManagedObjectSourceFlowModel}.
-	 * @param task
-	 *            {@link TaskModel}.
+	 * @param function
+	 *            {@link FunctionModel}.
 	 * @return {@link Change} to add the
-	 *         {@link DeskManagedObjectSourceFlowToTaskModel}.
+	 *         {@link DeskManagedObjectSourceFlowToFunctionModel}.
 	 */
-	Change<DeskManagedObjectSourceFlowToTaskModel> linkDeskManagedObjectSourceFlowToTask(
-			DeskManagedObjectSourceFlowModel managedObjectSourceFlow,
-			TaskModel task);
+	Change<DeskManagedObjectSourceFlowToFunctionModel> linkDeskManagedObjectSourceFlowToFunction(
+			DeskManagedObjectSourceFlowModel managedObjectSourceFlow, FunctionModel function);
 
 	/**
-	 * Removes the {@link DeskManagedObjectSourceFlowToTaskModel}.
+	 * Removes the {@link DeskManagedObjectSourceFlowToFunctionModel}.
 	 *
-	 * @param managedObjectSourceFlowToTask
-	 *            {@link DeskManagedObjectSourceFlowToTaskModel} to be removed.
+	 * @param managedObjectSourceFlowToFunction
+	 *            {@link DeskManagedObjectSourceFlowToFunctionModel} to be
+	 *            removed.
 	 * @return {@link Change} to remove the
-	 *         {@link DeskManagedObjectSourceFlowToTaskModel}.
+	 *         {@link DeskManagedObjectSourceFlowToFunctionModel}.
 	 */
-	Change<DeskManagedObjectSourceFlowToTaskModel> removeDeskManagedObjectSourceFlowToTask(
-			DeskManagedObjectSourceFlowToTaskModel managedObjectSourceFlowToTask);
+	Change<DeskManagedObjectSourceFlowToFunctionModel> removeDeskManagedObjectSourceFlowToFunction(
+			DeskManagedObjectSourceFlowToFunctionModel managedObjectSourceFlowToFunction);
 
 	/**
 	 * Links the {@link DeskManagedObjectSourceFlowModel} to the
@@ -693,8 +646,7 @@ public interface DeskChanges {
 	 *         {@link DeskManagedObjectSourceFlowToExternalFlowModel}.
 	 */
 	Change<DeskManagedObjectSourceFlowToExternalFlowModel> linkDeskManagedObjectSourceFlowToExternalFlow(
-			DeskManagedObjectSourceFlowModel managedObjectSourceFlow,
-			ExternalFlowModel externalFlow);
+			DeskManagedObjectSourceFlowModel managedObjectSourceFlow, ExternalFlowModel externalFlow);
 
 	/**
 	 * Removes the {@link DeskManagedObjectSourceFlowToExternalFlowModel}.
@@ -720,8 +672,7 @@ public interface DeskChanges {
 	 *         {@link DeskManagedObjectDependencyToDeskManagedObjectModel}.
 	 */
 	Change<DeskManagedObjectDependencyToDeskManagedObjectModel> linkDeskManagedObjectDependencyToDeskManagedObject(
-			DeskManagedObjectDependencyModel dependency,
-			DeskManagedObjectModel managedObject);
+			DeskManagedObjectDependencyModel dependency, DeskManagedObjectModel managedObject);
 
 	/**
 	 * Removes the {@link DeskManagedObjectDependencyToDeskManagedObjectModel}.
@@ -747,8 +698,7 @@ public interface DeskChanges {
 	 *         {@link DeskManagedObjectDependencyToExternalManagedObjectModel}.
 	 */
 	Change<DeskManagedObjectDependencyToExternalManagedObjectModel> linkDeskManagedObjectDependencyToExternalManagedObject(
-			DeskManagedObjectDependencyModel dependency,
-			ExternalManagedObjectModel externalManagedObject);
+			DeskManagedObjectDependencyModel dependency, ExternalManagedObjectModel externalManagedObject);
 
 	/**
 	 * Removes the

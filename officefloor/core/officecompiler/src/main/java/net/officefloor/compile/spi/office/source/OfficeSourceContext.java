@@ -17,12 +17,12 @@
  */
 package net.officefloor.compile.spi.office.source;
 
-import net.officefloor.compile.administrator.AdministratorType;
+import net.officefloor.compile.administration.AdministrationType;
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.OfficeSectionType;
-import net.officefloor.compile.spi.administration.source.AdministratorSource;
+import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
@@ -76,8 +76,7 @@ public interface OfficeSourceContext extends SourceContext {
 	 * @return {@link OfficeSectionType} or <code>null</code> if fails to load
 	 *         the {@link OfficeSectionType}.
 	 */
-	OfficeSectionType loadOfficeSectionType(String sectionName,
-			String sectionSourceClassName, String sectionLocation,
+	OfficeSectionType loadOfficeSectionType(String sectionName, String sectionSourceClassName, String sectionLocation,
 			PropertyList properties);
 
 	/**
@@ -97,28 +96,26 @@ public interface OfficeSourceContext extends SourceContext {
 	 * @return {@link ManagedObjectType} or <code>null</code> if fails to load
 	 *         the {@link ManagedObjectType}.
 	 */
-	ManagedObjectType<?> loadManagedObjectType(
-			String managedObjectSourceClassName, PropertyList properties);
+	ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceClassName, PropertyList properties);
 
 	/**
 	 * <p>
-	 * Loads the {@link AdministratorType}.
+	 * Loads the {@link AdministrationType}.
 	 * <p>
 	 * This is to enable obtaining the type information for the
 	 * {@link Administration} to allow reflective configuration by the
 	 * {@link OfficeSource}.
 	 * 
-	 * @param administratorSourceClassName
-	 *            Name of the implementing {@link AdministratorSource} class.
+	 * @param administrationSourceClassName
+	 *            Name of the implementing {@link AdministrationSource} class.
 	 *            May also be an alias.
 	 * @param properties
 	 *            {@link PropertyList} to configure the
-	 *            {@link AdministratorSource}.
-	 * @return {@link AdministratorType} or <code>null</code> if fails to load
-	 *         the {@link AdministratorType}.
+	 *            {@link AdministrationSource}.
+	 * @return {@link AdministrationType} or <code>null</code> if fails to load
+	 *         the {@link AdministrationType}.
 	 */
-	AdministratorType<?, ?> loadAdministratorType(
-			String administratorSourceClassName, PropertyList properties);
+	AdministrationType<?, ?, ?> loadAdministrationType(String administrationSourceClassName, PropertyList properties);
 
 	/**
 	 * <p>
@@ -137,7 +134,6 @@ public interface OfficeSourceContext extends SourceContext {
 	 * @return {@link GovernanceType} or <code>null</code> if fails to load the
 	 *         {@link GovernanceType}.
 	 */
-	GovernanceType<?, ?> loadGovernanceType(String governanceSourceClassName,
-			PropertyList properties);
+	GovernanceType<?, ?> loadGovernanceType(String governanceSourceClassName, PropertyList properties);
 
 }

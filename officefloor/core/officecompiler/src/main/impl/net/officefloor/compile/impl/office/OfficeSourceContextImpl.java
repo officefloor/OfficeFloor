@@ -17,8 +17,8 @@
  */
 package net.officefloor.compile.impl.office;
 
-import net.officefloor.compile.administrator.AdministratorLoader;
-import net.officefloor.compile.administrator.AdministratorType;
+import net.officefloor.compile.administration.AdministrationLoader;
+import net.officefloor.compile.administration.AdministrationType;
 import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
@@ -39,8 +39,7 @@ import net.officefloor.frame.impl.construct.source.SourceContextImpl;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeSourceContextImpl extends SourceContextImpl implements
-		OfficeSourceContext {
+public class OfficeSourceContextImpl extends SourceContextImpl implements OfficeSourceContext {
 
 	/**
 	 * Location of the {@link Office}.
@@ -71,11 +70,9 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements
 	 * @param nodeContext
 	 *            {@link NodeContext}.
 	 */
-	public OfficeSourceContextImpl(boolean isLoadingType,
-			String officeLocation, PropertyList propertyList, Node node,
+	public OfficeSourceContextImpl(boolean isLoadingType, String officeLocation, PropertyList propertyList, Node node,
 			NodeContext nodeContext) {
-		super(isLoadingType, nodeContext.getRootSourceContext(),
-				new PropertyListSourceProperties(propertyList));
+		super(isLoadingType, nodeContext.getRootSourceContext(), new PropertyListSourceProperties(propertyList));
 		this.officeLocation = officeLocation;
 		this.node = node;
 		this.context = nodeContext;
@@ -97,106 +94,79 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public OfficeSectionType loadOfficeSectionType(String sectionName,
-			String sectionSourceClassName, String sectionLocation,
-			PropertyList properties) {
-		return CompileUtil.loadType(
-				OfficeSectionType.class,
-				sectionSourceClassName,
-				this.context.getCompilerIssues(),
+	public OfficeSectionType loadOfficeSectionType(String sectionName, String sectionSourceClassName,
+			String sectionLocation, PropertyList properties) {
+		return CompileUtil.loadType(OfficeSectionType.class, sectionSourceClassName, this.context.getCompilerIssues(),
 				() -> {
 
 					// Obtain the section source class
-					Class sectionSourceClass = this.context
-							.getSectionSourceClass(sectionSourceClassName,
-									this.node);
+					Class sectionSourceClass = this.context.getSectionSourceClass(sectionSourceClassName, this.node);
 					if (sectionSourceClass == null) {
 						return null;
 					}
 
 					// Load and return the section type
-					SectionLoader sectionLoader = this.context
-							.getSectionLoader(this.node);
-					return sectionLoader.loadOfficeSectionType(sectionName,
-							sectionSourceClass, sectionLocation, properties);
+					SectionLoader sectionLoader = this.context.getSectionLoader(this.node);
+					return sectionLoader.loadOfficeSectionType(sectionName, sectionSourceClass, sectionLocation,
+							properties);
 				});
 	}
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public ManagedObjectType<?> loadManagedObjectType(
-			String managedObjectSourceClassName, PropertyList properties) {
-		return CompileUtil.loadType(
-				ManagedObjectType.class,
-				managedObjectSourceClassName,
-				this.context.getCompilerIssues(),
-				() -> {
+	public ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceClassName, PropertyList properties) {
+		return CompileUtil.loadType(ManagedObjectType.class, managedObjectSourceClassName,
+				this.context.getCompilerIssues(), () -> {
 
 					// Obtain the managed object source class
 					Class managedObjectSourceClass = this.context
-							.getManagedObjectSourceClass(
-									managedObjectSourceClassName, this.node);
+							.getManagedObjectSourceClass(managedObjectSourceClassName, this.node);
 					if (managedObjectSourceClass == null) {
 						return null;
 					}
 
 					// Load and return the managed object type
-					ManagedObjectLoader managedObjectLoader = this.context
-							.getManagedObjectLoader(this.node);
-					return managedObjectLoader.loadManagedObjectType(
-							managedObjectSourceClass, properties);
+					ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(this.node);
+					return managedObjectLoader.loadManagedObjectType(managedObjectSourceClass, properties);
 				});
 	}
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public GovernanceType<?, ?> loadGovernanceType(
-			String governanceSourceClassName, PropertyList properties) {
-		return CompileUtil.loadType(
-				GovernanceType.class,
-				governanceSourceClassName,
-				this.context.getCompilerIssues(),
+	public GovernanceType<?, ?> loadGovernanceType(String governanceSourceClassName, PropertyList properties) {
+		return CompileUtil.loadType(GovernanceType.class, governanceSourceClassName, this.context.getCompilerIssues(),
 				() -> {
 
 					// Obtain the governance source class
-					Class governanceSourceClass = this.context
-							.getGovernanceSourceClass(
-									governanceSourceClassName, this.node);
+					Class governanceSourceClass = this.context.getGovernanceSourceClass(governanceSourceClassName,
+							this.node);
 					if (governanceSourceClass == null) {
 						return null;
 					}
 
 					// Load and return the governance type
-					GovernanceLoader governanceLoader = this.context
-							.getGovernanceLoader(this.node);
-					return governanceLoader.loadGovernanceType(
-							governanceSourceClass, properties);
+					GovernanceLoader governanceLoader = this.context.getGovernanceLoader(this.node);
+					return governanceLoader.loadGovernanceType(governanceSourceClass, properties);
 				});
 	}
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public AdministratorType<?, ?> loadAdministratorType(
-			String administratorSourceClassName, PropertyList properties) {
-		return CompileUtil.loadType(
-				AdministratorType.class,
-				administratorSourceClassName,
-				this.context.getCompilerIssues(),
-				() -> {
+	public AdministrationType<?, ?, ?> loadAdministrationType(String administratorSourceClassName,
+			PropertyList properties) {
+		return CompileUtil.loadType(AdministrationType.class, administratorSourceClassName,
+				this.context.getCompilerIssues(), () -> {
 
 					// Obtain the administrator source class
 					Class administratorSourceClass = this.context
-							.getAdministratorSourceClass(
-									administratorSourceClassName, this.node);
+							.getAdministrationSourceClass(administratorSourceClassName, this.node);
 					if (administratorSourceClass == null) {
 						return null;
 					}
 
 					// Load and return the administrator type
-					AdministratorLoader administratorLoader = this.context
-							.getAdministratorLoader(this.node);
-					return administratorLoader.loadAdministratorType(
-							administratorSourceClass, properties);
+					AdministrationLoader administratorLoader = this.context.getAdministrationLoader(this.node);
+					return administratorLoader.loadAdministrationType(administratorSourceClass, properties);
 				});
 	}
 

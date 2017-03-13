@@ -20,7 +20,6 @@ package net.officefloor.compile.impl.managedobject;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.api.function.Work;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.Flow;
 
@@ -29,8 +28,7 @@ import net.officefloor.frame.internal.structure.Flow;
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectFlowTypeImpl<F extends Enum<F>> implements
-		ManagedObjectFlowType<F> {
+public class ManagedObjectFlowTypeImpl<F extends Enum<F>> implements ManagedObjectFlowType<F> {
 
 	/**
 	 * Name describing this flow.
@@ -38,16 +36,10 @@ public class ManagedObjectFlowTypeImpl<F extends Enum<F>> implements
 	private final String name;
 
 	/**
-	 * Name of {@link Work} instigating the {@link Flow} or <code>null</code> if
-	 * done directly by {@link ManagedObjectSource}.
+	 * Name of {@link ManagedFunction} instigating the {@link Flow} or
+	 * <code>null</code> if done directly by {@link ManagedObjectSource}.
 	 */
-	private final String workName;
-
-	/**
-	 * Name of {@link ManagedFunction} instigating the {@link Flow} or <code>null</code> if
-	 * done directly by {@link ManagedObjectSource}.
-	 */
-	private final String taskName;
+	private final String functionName;
 
 	/**
 	 * Index identifying this flow.
@@ -65,16 +57,12 @@ public class ManagedObjectFlowTypeImpl<F extends Enum<F>> implements
 	private final F key;
 
 	/**
-	 * Initiate for a {@link ManagedObjectFlowType} invoked from a {@link ManagedFunction}
-	 * added by the {@link ManagedObjectSource}.
+	 * Initiate for a {@link ManagedObjectFlowType} invoked from a
+	 * {@link ManagedFunction} added by the {@link ManagedObjectSource}.
 	 * 
-	 * @param workName
-	 *            Name of {@link Work} instigating the {@link Flow} or
-	 *            <code>null</code> if done directly by
-	 *            {@link ManagedObjectSource}.
-	 * @param taskName
-	 *            Name of {@link ManagedFunction} instigating the {@link Flow} or
-	 *            <code>null</code> if done directly by
+	 * @param functionName
+	 *            Name of {@link ManagedFunction} instigating the {@link Flow}
+	 *            or <code>null</code> if done directly by
 	 *            {@link ManagedObjectSource}.
 	 * @param index
 	 *            Index identifying this flow.
@@ -85,10 +73,8 @@ public class ManagedObjectFlowTypeImpl<F extends Enum<F>> implements
 	 * @param label
 	 *            Label describing this flow. May be <code>null</code>.
 	 */
-	public ManagedObjectFlowTypeImpl(String workName, String taskName,
-			int index, Class<?> argumentType, F key, String label) {
-		this.workName = workName;
-		this.taskName = taskName;
+	public ManagedObjectFlowTypeImpl(String functionName, int index, Class<?> argumentType, F key, String label) {
+		this.functionName = functionName;
 		this.index = index;
 		this.key = key;
 
@@ -118,9 +104,8 @@ public class ManagedObjectFlowTypeImpl<F extends Enum<F>> implements
 	 * @param label
 	 *            Label describing this flow. May be <code>null</code>.
 	 */
-	public ManagedObjectFlowTypeImpl(int index, Class<?> argumentType, F key,
-			String label) {
-		this(null, null, index, argumentType, key, label);
+	public ManagedObjectFlowTypeImpl(int index, Class<?> argumentType, F key, String label) {
+		this(null, index, argumentType, key, label);
 	}
 
 	/*
@@ -133,13 +118,8 @@ public class ManagedObjectFlowTypeImpl<F extends Enum<F>> implements
 	}
 
 	@Override
-	public String getWorkName() {
-		return this.workName;
-	}
-
-	@Override
-	public String getTaskName() {
-		return this.taskName;
+	public String getFunctionName() {
+		return this.functionName;
 	}
 
 	@Override

@@ -20,10 +20,10 @@ package net.officefloor.plugin.administrator.clazz;
 import java.util.Arrays;
 import java.util.List;
 
-import net.officefloor.compile.administrator.AdministratorType;
-import net.officefloor.compile.test.administrator.AdministratorLoaderUtil;
-import net.officefloor.compile.test.administrator.AdministratorTypeBuilder;
-import net.officefloor.compile.util.AdministratorSourceStandAlone;
+import net.officefloor.compile.administration.AdministrationType;
+import net.officefloor.compile.test.administration.AdministratorLoaderUtil;
+import net.officefloor.compile.test.administration.AdministratorTypeBuilder;
+import net.officefloor.compile.util.AdministrationSourceStandAlone;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.Duty;
 import net.officefloor.frame.api.administration.AdministrationContext;
@@ -48,7 +48,7 @@ public class ClassAdministratorSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures {@link AdministratorType} is correct.
+	 * Ensures {@link AdministrationType} is correct.
 	 */
 	public void testAdministratorType() {
 
@@ -110,7 +110,7 @@ public class ClassAdministratorSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Load the class administrator source
-		AdministratorSourceStandAlone standAlone = new AdministratorSourceStandAlone();
+		AdministrationSourceStandAlone standAlone = new AdministrationSourceStandAlone();
 		standAlone.addProperty(
 				ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME,
 				MockClass.class.getName());

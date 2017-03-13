@@ -524,9 +524,9 @@ public class SectionModelSectionSource extends AbstractSectionSource implements
 		} else if (SectionChanges.THREAD_MANAGED_OBJECT_SCOPE
 				.equals(managedObjectScope)) {
 			return ManagedObjectScope.THREAD;
-		} else if (SectionChanges.WORK_MANAGED_OBJECT_SCOPE
+		} else if (SectionChanges.FUNCTION_MANAGED_OBJECT_SCOPE
 				.equals(managedObjectScope)) {
-			return ManagedObjectScope.WORK;
+			return ManagedObjectScope.FUNCTION;
 		}
 
 		// Unknown scope if at this point

@@ -19,10 +19,10 @@ package net.officefloor.compile.object;
 
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
-import net.officefloor.compile.spi.office.OfficeSectionTask;
+import net.officefloor.compile.spi.office.OfficeSectionFunction;
 
 /**
- * <code>Type definition</code> of a dependent object of an {@link OfficeSectionTask}.
+ * <code>Type definition</code> of a dependent object of an {@link OfficeSectionFunction}.
  *
  * @author Daniel Sagenschneider
  */

@@ -40,10 +40,10 @@ import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
-import net.officefloor.compile.spi.section.SectionTask;
-import net.officefloor.compile.spi.section.SectionWork;
+import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SubSection;
-import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.api.escalate.Escalation;
@@ -147,7 +147,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		SectionDesigner expected = this.createSectionDesigner(
 				MockChildSection.class,
 				(designer, work) -> {
-					SectionTask task = this.addClassSectionTask(designer, work,
+					SectionFunction task = this.addClassSectionTask(designer, work,
 							"task", "task");
 					task.getTaskObject(Integer.class.getName())
 							.flagAsParameter();
@@ -266,7 +266,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		SectionDesigner expected = this.createSectionDesigner(
 				MockParameterArgumentSection.class,
 				(designer, work) -> {
-					SectionTask task = this.addClassSectionTask(designer, work,
+					SectionFunction task = this.addClassSectionTask(designer, work,
 							"doInput", "doInput");
 					task.getTaskObject(String.class.getName())
 							.flagAsParameter();
@@ -298,9 +298,9 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		SectionDesigner expected = this.createSectionDesigner(
 				MockObjectSection.class,
 				(designer, work) -> {
-					SectionTask task = this.addClassSectionTask(designer, work,
+					SectionFunction task = this.addClassSectionTask(designer, work,
 							"doInput", "doInput");
-					TaskObject taskObject = task.getTaskObject(Connection.class
+					FunctionObject taskObject = task.getTaskObject(Connection.class
 							.getName());
 					SectionObject sectionObject = designer.addSectionObject(
 							Connection.class.getName(),
@@ -336,11 +336,11 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 				.createSectionDesigner(
 						MockQualifiedObjectSection.class,
 						(designer, work) -> {
-							SectionTask task = this.addClassSectionTask(
+							SectionFunction task = this.addClassSectionTask(
 									designer, work, "doInput", "doInput");
 
 							// Qualified dependency
-							TaskObject qualifiedTaskObject = task
+							FunctionObject qualifiedTaskObject = task
 									.getTaskObject(QUALIFIED_NAME);
 							SectionObject qualifiedSectionObject = designer
 									.addSectionObject(QUALIFIED_NAME,
@@ -352,7 +352,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 									qualifiedSectionObject);
 
 							// Unqualified dependency
-							TaskObject unqualifiedTaskObject = task
+							FunctionObject unqualifiedTaskObject = task
 									.getTaskObject(UNQUALIFIED_NAME);
 							SectionObject unqualifiedSectionObject = designer
 									.addSectionObject(UNQUALIFIED_NAME,
@@ -396,11 +396,11 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 				.createSectionDesigner(
 						MockSameQualifierObjectSection.class,
 						(designer, work) -> {
-							SectionTask task = this.addClassSectionTask(
+							SectionFunction task = this.addClassSectionTask(
 									designer, work, "doInput", "doInput");
 
 							// First qualified object
-							TaskObject firstTaskObject = task
+							FunctionObject firstTaskObject = task
 									.getTaskObject(MockQualification.class
 											.getName()
 											+ "-"
@@ -418,7 +418,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 							designer.link(firstTaskObject, firstSectionObject);
 
 							// Second qualified object
-							TaskObject secondTaskObject = task
+							FunctionObject secondTaskObject = task
 									.getTaskObject(MockQualification.class
 											.getName()
 											+ "-"
@@ -480,7 +480,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		SectionDesigner expected = this.createSectionDesigner(
 				MockMultipleQualifiedObjectSection.class,
 				(designer, work) -> {
-					SectionTask task = this.addClassSectionTask(designer, work,
+					SectionFunction task = this.addClassSectionTask(designer, work,
 							"doInput", "doInput");
 					task.getTaskObject("Connection");
 					designer.addSectionObject(
@@ -673,9 +673,9 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		SectionDesigner expected = this.createSectionDesigner(
 				MockChangeTaskNameWithLinksSection.class,
 				(designer, work) -> {
-					SectionTask doInput = this.addClassSectionTask(designer,
+					SectionFunction doInput = this.addClassSectionTask(designer,
 							work, "doInput", "doInput");
-					TaskObject doInputReturnValue = doInput
+					FunctionObject doInputReturnValue = doInput
 							.getTaskObject(ReturnValue.class.getName());
 					SectionObject returnSectionObject = designer
 							.addSectionObject(ReturnValue.class.getName(),
@@ -684,23 +684,23 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 					doInput.getTaskObject(Boolean.class.getName())
 							.flagAsParameter();
 
-					SectionTask newName = this.addClassSectionTask(designer,
+					SectionFunction newName = this.addClassSectionTask(designer,
 							work, "newName", "oldName");
-					TaskObject newNameReturnValue = newName
+					FunctionObject newNameReturnValue = newName
 							.getTaskObject(ReturnValue.class.getName());
 					designer.link(newNameReturnValue, returnSectionObject);
 					newName.getTaskObject(String.class.getName())
 							.flagAsParameter();
-					TaskObject newNameConnection = newName
+					FunctionObject newNameConnection = newName
 							.getTaskObject(Connection.class.getName());
 					SectionObject connectionSectionObject = designer
 							.addSectionObject(Connection.class.getName(),
 									Connection.class.getName());
 					designer.link(newNameConnection, connectionSectionObject);
 
-					SectionTask finished = this.addClassSectionTask(designer,
+					SectionFunction finished = this.addClassSectionTask(designer,
 							work, "finished", "finished");
-					TaskObject finishedReturnValue = finished
+					FunctionObject finishedReturnValue = finished
 							.getTaskObject(ReturnValue.class.getName());
 					designer.link(finishedReturnValue, returnSectionObject);
 				});
@@ -1170,19 +1170,19 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * {@link SectionWork} configurer.
+	 * {@link SectionFunctionNamespace} configurer.
 	 */
 	private static interface WorkConfigurer {
 
 		/**
-		 * Configures the {@link SectionWork}.
+		 * Configures the {@link SectionFunctionNamespace}.
 		 * 
 		 * @param designer
 		 *            {@link SectionDesigner}.
 		 * @param work
-		 *            {@link SectionWork} to configure.
+		 *            {@link SectionFunctionNamespace} to configure.
 		 */
-		void configureWork(SectionDesigner designer, SectionWork work);
+		void configureWork(SectionDesigner designer, SectionFunctionNamespace work);
 	}
 
 	/**
@@ -1207,7 +1207,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 				sectionClass.getName());
 		this.objectManagedObject = managedObjectSource.addSectionManagedObject(
 				"OBJECT", ManagedObjectScope.THREAD);
-		SectionWork work = designer.addSectionWork("WORK",
+		SectionFunctionNamespace work = designer.addSectionWork("WORK",
 				SectionClassWorkSource.class.getName());
 		work.addProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
 				sectionClass.getName());
@@ -1218,10 +1218,10 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Convenience method to add {@link ClassSectionSource} {@link SectionTask}.
+	 * Convenience method to add {@link ClassSectionSource} {@link SectionFunction}.
 	 * 
 	 * @param taskName
-	 *            {@link SectionTask} and {@link ManagedFunctionType} name.
+	 *            {@link SectionFunction} and {@link ManagedFunctionType} name.
 	 * @return {@link WorkConfigurer}.
 	 */
 	public WorkConfigurer configureClassSectionTask(String taskName) {
@@ -1229,10 +1229,10 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Convenience method to add {@link ClassSectionSource} {@link SectionTask}.
+	 * Convenience method to add {@link ClassSectionSource} {@link SectionFunction}.
 	 * 
 	 * @param taskName
-	 *            {@link SectionTask} name.
+	 *            {@link SectionFunction} name.
 	 * @param taskTypeName
 	 *            {@link ManagedFunctionType} name.
 	 * @return {@link WorkConfigurer}.
@@ -1245,22 +1245,22 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Convenience method to add a {@link ClassSectionSource}
-	 * {@link SectionTask}.
+	 * {@link SectionFunction}.
 	 * 
 	 * @param designer
 	 *            {@link SectionDesigner}.
 	 * @param work
-	 *            {@link SectionWork}.
+	 *            {@link SectionFunctionNamespace}.
 	 * @param taskName
-	 *            {@link SectionTask} name.
+	 *            {@link SectionFunction} name.
 	 * @param taskTypeName
 	 *            {@link ManagedFunctionType} name.
-	 * @return {@link SectionTask}.
+	 * @return {@link SectionFunction}.
 	 */
-	public SectionTask addClassSectionTask(SectionDesigner designer,
-			SectionWork work, String taskName, String taskTypeName) {
-		SectionTask task = work.addSectionTask(taskName, taskTypeName);
-		TaskObject taskObject = task
+	public SectionFunction addClassSectionTask(SectionDesigner designer,
+			SectionFunctionNamespace work, String taskName, String taskTypeName) {
+		SectionFunction task = work.addSectionTask(taskName, taskTypeName);
+		FunctionObject taskObject = task
 				.getTaskObject(ClassSectionSource.CLASS_OBJECT_NAME);
 		designer.link(taskObject, objectManagedObject);
 		return task;

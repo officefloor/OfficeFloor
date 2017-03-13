@@ -19,8 +19,8 @@ package net.officefloor.compile.test.work;
 
 import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.managedfunction.FunctionNamespaceTypeImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.work.WorkTypeImpl;
 import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
@@ -84,7 +84,7 @@ public class WorkLoaderUtil {
 	 */
 	public static <W extends Work> FunctionNamespaceBuilder<W> createWorkTypeBuilder(
 			WorkFactory<W> workFactory) {
-		FunctionNamespaceBuilder<W> workTypeBuilder = new WorkTypeImpl<W>();
+		FunctionNamespaceBuilder<W> workTypeBuilder = new FunctionNamespaceTypeImpl<W>();
 		workTypeBuilder.setWorkFactory(workFactory);
 		return workTypeBuilder;
 	}

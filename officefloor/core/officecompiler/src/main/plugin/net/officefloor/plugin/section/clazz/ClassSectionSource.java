@@ -45,14 +45,14 @@ import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
-import net.officefloor.compile.spi.section.SectionTask;
-import net.officefloor.compile.spi.section.SectionWork;
+import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.SubSectionInput;
 import net.officefloor.compile.spi.section.SubSectionObject;
 import net.officefloor.compile.spi.section.SubSectionOutput;
-import net.officefloor.compile.spi.section.TaskFlow;
-import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.compile.spi.section.FunctionFlow;
+import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
@@ -118,42 +118,42 @@ public class ClassSectionSource extends AbstractSectionSource implements
 	}
 
 	/**
-	 * {@link SectionTask} instances by name.
+	 * {@link SectionFunction} instances by name.
 	 */
-	private final Map<String, SectionTask> _tasksByName = new HashMap<String, SectionTask>();
+	private final Map<String, SectionFunction> _tasksByName = new HashMap<String, SectionFunction>();
 
 	/**
-	 * Obtains the {@link SectionTask} by its name.
+	 * Obtains the {@link SectionFunction} by its name.
 	 * 
 	 * @param taskName
-	 *            Name of the {@link SectionTask}.
-	 * @return {@link SectionTask} or <code>null</code> if no
-	 *         {@link SectionTask} by the name.
+	 *            Name of the {@link SectionFunction}.
+	 * @return {@link SectionFunction} or <code>null</code> if no
+	 *         {@link SectionFunction} by the name.
 	 */
-	public SectionTask getTaskByName(String taskName) {
+	public SectionFunction getTaskByName(String taskName) {
 		return this._tasksByName.get(taskName);
 	}
 
 	/**
-	 * {@link SectionTask} instances by {@link ManagedFunctionType} name.
+	 * {@link SectionFunction} instances by {@link ManagedFunctionType} name.
 	 */
-	private final Map<String, SectionTask> _tasksByTypeName = new HashMap<String, SectionTask>();
+	private final Map<String, SectionFunction> _tasksByTypeName = new HashMap<String, SectionFunction>();
 
 	/**
-	 * Obtains the {@link SectionTask} by its {@link ManagedFunctionType} name.
+	 * Obtains the {@link SectionFunction} by its {@link ManagedFunctionType} name.
 	 * 
 	 * @param taskTypeName
 	 *            {@link ManagedFunctionType} name.
-	 * @return {@link SectionTask} or <code>null</code> if no
-	 *         {@link SectionTask} by the {@link ManagedFunctionType} name.
+	 * @return {@link SectionFunction} or <code>null</code> if no
+	 *         {@link SectionFunction} by the {@link ManagedFunctionType} name.
 	 */
-	public SectionTask getTaskByTypeName(String taskTypeName) {
+	public SectionFunction getTaskByTypeName(String taskTypeName) {
 		return this._tasksByTypeName.get(taskTypeName);
 	}
 
 	/**
 	 * <p>
-	 * Allows being made aware of further {@link SectionTask} instances within
+	 * Allows being made aware of further {@link SectionFunction} instances within
 	 * the section to be considered for linking flows.
 	 * <p>
 	 * This allows {@link ClassSectionSource} to be used in conjunction with
@@ -161,11 +161,11 @@ public class ClassSectionSource extends AbstractSectionSource implements
 	 * pages.
 	 * 
 	 * @param taskTypeName
-	 *            Name to register the {@link SectionTask}.
+	 *            Name to register the {@link SectionFunction}.
 	 * @param task
-	 *            {@link SectionTask}.
+	 *            {@link SectionFunction}.
 	 */
-	public void registerTaskByTypeName(String taskTypeName, SectionTask task) {
+	public void registerTaskByTypeName(String taskTypeName, SectionFunction task) {
 		this._tasksByTypeName.put(taskTypeName, task);
 	}
 
@@ -316,7 +316,7 @@ public class ClassSectionSource extends AbstractSectionSource implements
 
 			// Obtain the section task for output
 			String linkTaskName = flowLink.method();
-			SectionTask linkTask = this.getTaskByTypeName(linkTaskName);
+			SectionFunction linkTask = this.getTaskByTypeName(linkTaskName);
 			if (linkTask != null) {
 				// Link flow internally
 				this.getDesigner().link(subSectionOuput, linkTask);
@@ -441,16 +441,16 @@ public class ClassSectionSource extends AbstractSectionSource implements
 	 * Enriches the {@link ManagedFunction}.
 	 * 
 	 * @param task
-	 *            {@link SectionTask}.
+	 *            {@link SectionFunction}.
 	 * @param taskType
-	 *            {@link ManagedFunctionType} for the {@link SectionTask}.
+	 *            {@link ManagedFunctionType} for the {@link SectionFunction}.
 	 * @param taskMethod
-	 *            {@link Method} for the {@link SectionTask}.
+	 *            {@link Method} for the {@link SectionFunction}.
 	 * @param parameterType
-	 *            Parameter type for the {@link SectionTask}. May be
+	 *            Parameter type for the {@link SectionFunction}. May be
 	 *            <code>null</code> if no parameter.
 	 */
-	protected void enrichTask(SectionTask task, ManagedFunctionType<?, ?, ?> taskType,
+	protected void enrichTask(SectionFunction task, ManagedFunctionType<?, ?, ?> taskType,
 			Method taskMethod, Class<?> parameterType) {
 
 		// Obtain the task name
@@ -470,17 +470,17 @@ public class ClassSectionSource extends AbstractSectionSource implements
 	 * Links the next {@link ManagedFunction}.
 	 * 
 	 * @param task
-	 *            {@link SectionTask}.
+	 *            {@link SectionFunction}.
 	 * @param taskType
 	 *            {@link ManagedFunctionType}.
 	 * @param taskMethod
-	 *            {@link Method} for the {@link SectionTask}.
+	 *            {@link Method} for the {@link SectionFunction}.
 	 * @param argumentType
 	 *            Argument type. May be <code>null</code> if no argument type.
 	 * @param nextTaskAnnotation
 	 *            {@link NextTask} annotation on the {@link Method}.
 	 */
-	protected void linkNextTask(SectionTask task, ManagedFunctionType<?, ?, ?> taskType,
+	protected void linkNextTask(SectionFunction task, ManagedFunctionType<?, ?, ?> taskType,
 			Method taskMethod, Class<?> argumentType,
 			NextTask nextTaskAnnotation) {
 
@@ -492,7 +492,7 @@ public class ClassSectionSource extends AbstractSectionSource implements
 				.getName());
 
 		// Attempt to obtain next task internally
-		SectionTask nextTask = this.getTaskByTypeName(nextTaskName);
+		SectionFunction nextTask = this.getTaskByTypeName(nextTaskName);
 		if (nextTask != null) {
 			// Link task internally
 			this.getDesigner().link(task, nextTask);
@@ -506,10 +506,10 @@ public class ClassSectionSource extends AbstractSectionSource implements
 	}
 
 	/**
-	 * Links the {@link TaskFlow}.
+	 * Links the {@link FunctionFlow}.
 	 * 
 	 * @param task
-	 *            {@link SectionTask}.
+	 *            {@link SectionFunction}.
 	 * @param taskType
 	 *            {@link ManagedFunctionType}.
 	 * @param flowInterfaceType
@@ -517,10 +517,10 @@ public class ClassSectionSource extends AbstractSectionSource implements
 	 * @param flowMethod
 	 *            Method on the interface for the flow to be linked.
 	 * @param flowArgumentType
-	 *            {@link TaskFlow} argument type. May be <code>null</code> if no
+	 *            {@link FunctionFlow} argument type. May be <code>null</code> if no
 	 *            argument.
 	 */
-	protected void linkTaskFlow(SectionTask task, ManagedFunctionType<?, ?, ?> taskType,
+	protected void linkTaskFlow(SectionFunction task, ManagedFunctionType<?, ?, ?> taskType,
 			Class<?> flowInterfaceType, Method flowMethod,
 			Class<?> flowArgumentType) {
 
@@ -528,7 +528,7 @@ public class ClassSectionSource extends AbstractSectionSource implements
 		String flowName = flowMethod.getName();
 
 		// Obtain the task flow
-		TaskFlow taskFlow = task.getTaskFlow(flowName);
+		FunctionFlow taskFlow = task.getTaskFlow(flowName);
 
 		// Determine if section interface (or flow interface)
 		SectionInterface sectionAnnotation = flowInterfaceType
@@ -552,10 +552,10 @@ public class ClassSectionSource extends AbstractSectionSource implements
 	}
 
 	/**
-	 * Links the {@link TaskFlow}.
+	 * Links the {@link FunctionFlow}.
 	 * 
 	 * @param taskFlow
-	 *            {@link TaskFlow}.
+	 *            {@link FunctionFlow}.
 	 * @param taskType
 	 *            {@link ManagedFunctionType}.
 	 * @param flowInterfaceType
@@ -563,10 +563,10 @@ public class ClassSectionSource extends AbstractSectionSource implements
 	 * @param flowMethod
 	 *            Method on the interface for the flow to be linked.
 	 * @param flowArgumentType
-	 *            {@link TaskFlow} argument type. May be <code>null</code> if no
+	 *            {@link FunctionFlow} argument type. May be <code>null</code> if no
 	 *            argument.
 	 */
-	protected void linkTaskFlow(TaskFlow taskFlow, ManagedFunctionType<?, ?, ?> taskType,
+	protected void linkTaskFlow(FunctionFlow taskFlow, ManagedFunctionType<?, ?, ?> taskType,
 			Class<?> flowInterfaceType, Method flowMethod,
 			Class<?> flowArgumentType) {
 
@@ -578,7 +578,7 @@ public class ClassSectionSource extends AbstractSectionSource implements
 				: flowArgumentType.getName());
 
 		// Flow interface so attempt to obtain the task internally
-		SectionTask linkTask = this.getTaskByTypeName(flowName);
+		SectionFunction linkTask = this.getTaskByTypeName(flowName);
 		if (linkTask != null) {
 			// Link flow internally
 			this.getDesigner().link(taskFlow, linkTask,
@@ -597,26 +597,26 @@ public class ClassSectionSource extends AbstractSectionSource implements
 	 * Links the {@link ManagedFunction} escalation.
 	 * 
 	 * @param task
-	 *            {@link SectionTask}.
+	 *            {@link SectionFunction}.
 	 * @param taskType
 	 *            {@link ManagedFunctionType}.
 	 * @param escalationType
 	 *            {@link ManagedFunctionEscalationType}.
 	 * @param escalationHandler
-	 *            Potential {@link SectionTask} that can handle escalation based
+	 *            Potential {@link SectionFunction} that can handle escalation based
 	 *            on its parameter. May be <code>null</code> if no
-	 *            {@link SectionTask} can handle the escalation.
+	 *            {@link SectionFunction} can handle the escalation.
 	 */
-	protected void linkTaskEscalation(SectionTask task,
+	protected void linkTaskEscalation(SectionFunction task,
 			ManagedFunctionType<?, ?, ?> taskType, ManagedFunctionEscalationType escalationType,
-			SectionTask escalationHandler) {
+			SectionFunction escalationHandler) {
 
 		// Obtain the escalation type name
 		String escalationTypeName = escalationType.getEscalationType()
 				.getName();
 
 		// Obtain the task escalation
-		TaskFlow taskEscalation = task.getTaskEscalation(escalationTypeName);
+		FunctionFlow taskEscalation = task.getTaskEscalation(escalationTypeName);
 
 		// Link to escalation handler (if available)
 		// (Do not allow handling own escalation as potential for infinite loop)
@@ -635,16 +635,16 @@ public class ClassSectionSource extends AbstractSectionSource implements
 	}
 
 	/**
-	 * Links the {@link TaskObject}.
+	 * Links the {@link FunctionObject}.
 	 * 
 	 * @param task
-	 *            {@link SectionTask}.
+	 *            {@link SectionFunction}.
 	 * @param taskType
 	 *            {@link ManagedFunctionType}.
 	 * @param objectType
 	 *            {@link ManagedFunctionObjectType}.
 	 */
-	protected void linkTaskObject(SectionTask task, ManagedFunctionType<?, ?, ?> taskType,
+	protected void linkTaskObject(SectionFunction task, ManagedFunctionType<?, ?, ?> taskType,
 			ManagedFunctionObjectType<?> objectType) {
 
 		// Obtain the object name and its type
@@ -653,7 +653,7 @@ public class ClassSectionSource extends AbstractSectionSource implements
 		String typeQualifier = objectType.getTypeQualifier();
 
 		// Obtain the task object
-		TaskObject taskObject = task.getTaskObject(objectName);
+		FunctionObject taskObject = task.getTaskObject(objectName);
 
 		// Attempt to link to managed object
 		SectionManagedObject mo = this.getManagedObject(objectTypeName);
@@ -871,13 +871,13 @@ public class ClassSectionSource extends AbstractSectionSource implements
 				SectionClassWorkSource.class.getName(), workProperties);
 
 		// Add the work for the section class
-		SectionWork work = designer.addSectionWork("WORK",
+		SectionFunctionNamespace work = designer.addSectionWork("WORK",
 				SectionClassWorkSource.class.getName());
 		work.addProperty(SectionClassWorkSource.CLASS_NAME_PROPERTY_NAME,
 				sectionClassName);
 
 		// Load tasks
-		Map<String, SectionTask> tasksByParameterType = new HashMap<String, SectionTask>();
+		Map<String, SectionFunction> tasksByParameterType = new HashMap<String, SectionFunction>();
 		Map<String, Integer> parameterIndexes = new HashMap<String, Integer>();
 		for (ManagedFunctionType<?, ?, ?> taskType : workType.getManagedFunctionTypes()) {
 
@@ -891,7 +891,7 @@ public class ClassSectionSource extends AbstractSectionSource implements
 			Method method = taskFactory.getMethod();
 
 			// Add the task (both by name and type name for internal linking)
-			SectionTask task = work.addSectionTask(taskName, taskTypeName);
+			SectionFunction task = work.addSectionTask(taskName, taskTypeName);
 			this._tasksByName.put(taskName, task);
 			this.registerTaskByTypeName(taskTypeName, task);
 
@@ -957,7 +957,7 @@ public class ClassSectionSource extends AbstractSectionSource implements
 			String taskName = taskType.getFunctionName();
 
 			// Obtain the task
-			SectionTask task = this.getTaskByTypeName(taskName);
+			SectionFunction task = this.getTaskByTypeName(taskName);
 
 			// Obtain the task method
 			SectionTaskFactory taskFactory = (SectionTaskFactory) taskType
@@ -1035,7 +1035,7 @@ public class ClassSectionSource extends AbstractSectionSource implements
 				// Obtain task handling escalation (if available)
 				String escalationTypeName = escalationType.getEscalationType()
 						.getName();
-				SectionTask escalationHandler = tasksByParameterType
+				SectionFunction escalationHandler = tasksByParameterType
 						.get(escalationTypeName);
 
 				// Link escalation
@@ -1051,7 +1051,7 @@ public class ClassSectionSource extends AbstractSectionSource implements
 
 			// First object is always the section object
 			ManagedFunctionObjectType<?> sectionObjectType = objectTypes[0];
-			TaskObject objectSection = task.getTaskObject(sectionObjectType
+			FunctionObject objectSection = task.getTaskObject(sectionObjectType
 					.getObjectName());
 			designer.link(objectSection, managedObject);
 
@@ -1064,7 +1064,7 @@ public class ClassSectionSource extends AbstractSectionSource implements
 						&& (parameterIndex.intValue() == i)) {
 					// Parameter so flag as parameter
 					String objectName = objectType.getObjectName();
-					TaskObject taskObject = task.getTaskObject(objectName);
+					FunctionObject taskObject = task.getTaskObject(objectName);
 					taskObject.flagAsParameter();
 					continue; // next object
 				}

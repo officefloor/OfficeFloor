@@ -19,23 +19,21 @@ package net.officefloor.model.office;
 
 import java.util.Map;
 
-import net.officefloor.compile.administrator.AdministratorType;
+import net.officefloor.compile.administration.AdministrationType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.OfficeFunctionType;
 import net.officefloor.compile.section.OfficeSectionType;
-import net.officefloor.compile.section.OfficeTaskType;
-import net.officefloor.compile.spi.administration.source.AdministratorSource;
+import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionFunction;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
-import net.officefloor.compile.spi.office.OfficeSectionTask;
 import net.officefloor.compile.spi.section.source.SectionSource;
-import net.officefloor.frame.api.administration.Duty;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.change.Change;
 
@@ -45,24 +43,6 @@ import net.officefloor.model.change.Change;
  * @author Daniel Sagenschneider
  */
 public interface OfficeChanges {
-
-	/**
-	 * Value for {@link AdministratorScope#PROCESS} on
-	 * {@link AdministratorModel} instances.
-	 */
-	String PROCESS_ADMINISTRATOR_SCOPE = AdministratorScope.PROCESS.name();
-
-	/**
-	 * Value for {@link AdministratorScope#THREAD} on {@link AdministratorModel}
-	 * instances.
-	 */
-	String THREAD_ADMINISTRATOR_SCOPE = AdministratorScope.THREAD.name();
-
-	/**
-	 * Value for {@link AdministratorScope#WORK} on {@link AdministratorModel}
-	 * instances.
-	 */
-	String WORK_ADMINISTRATOR_SCOPE = AdministratorScope.WORK.name();
 
 	/**
 	 * Value for {@link ManagedObjectScope#PROCESS} on
@@ -77,10 +57,10 @@ public interface OfficeChanges {
 	String THREAD_MANAGED_OBJECT_SCOPE = ManagedObjectScope.THREAD.name();
 
 	/**
-	 * Value for {@link ManagedObjectScope#WORK} on
+	 * Value for {@link ManagedObjectScope#FUNCTION} on
 	 * {@link OfficeManagedObjectModel} instances.
 	 */
-	String WORK_MANAGED_OBJECT_SCOPE = ManagedObjectScope.WORK.name();
+	String FUNCTION_MANAGED_OBJECT_SCOPE = ManagedObjectScope.FUNCTION.name();
 
 	/**
 	 * Adds an {@link OfficeSectionModel} to the {@link OfficeModel}.
@@ -95,9 +75,8 @@ public interface OfficeChanges {
 	 *            {@link OfficeSectionType}.
 	 * @return {@link Change} to add the {@link OfficeSectionModel}.
 	 */
-	Change<OfficeSectionModel> addOfficeSection(String sectionSourceClassName,
-			String sectionLocation, PropertyList properties,
-			OfficeSectionType officeSectionType);
+	Change<OfficeSectionModel> addOfficeSection(String sectionSourceClassName, String sectionLocation,
+			PropertyList properties, OfficeSectionType officeSectionType);
 
 	/**
 	 * Removes the {@link OfficeSectionModel}.
@@ -106,8 +85,7 @@ public interface OfficeChanges {
 	 *            {@link OfficeSectionModel} to remove.
 	 * @return {@link Change} to remove the {@link OfficeSectionModel}.
 	 */
-	Change<OfficeSectionModel> removeOfficeSection(
-			OfficeSectionModel officeSection);
+	Change<OfficeSectionModel> removeOfficeSection(OfficeSectionModel officeSection);
 
 	/**
 	 * Renames the {@link OfficeSectionModel}.
@@ -118,8 +96,7 @@ public interface OfficeChanges {
 	 *            New {@link OfficeSectionModel} name.
 	 * @return {@link Change} to rename the {@link OfficeSectionModel}.
 	 */
-	Change<OfficeSectionModel> renameOfficeSection(
-			OfficeSectionModel officeSection, String newOfficeSectionName);
+	Change<OfficeSectionModel> renameOfficeSection(OfficeSectionModel officeSection, String newOfficeSectionName);
 
 	/**
 	 * Refactors the {@link OfficeSectionModel}.
@@ -149,13 +126,10 @@ public interface OfficeChanges {
 	 *            {@link OfficeSectionObjectModel} name.
 	 * @return {@link Change} to refactor the {@link OfficeSectionModel}.
 	 */
-	Change<OfficeSectionModel> refactorOfficeSection(
-			OfficeSectionModel sectionModel, String sectionName,
-			String sectionSourceClassName, String sectionLocation,
-			PropertyList properties, OfficeSectionType officeSectionType,
-			Map<String, String> inputNameMapping,
-			Map<String, String> outputNameMapping,
-			Map<String, String> objectNameMapping);
+	Change<OfficeSectionModel> refactorOfficeSection(OfficeSectionModel sectionModel, String sectionName,
+			String sectionSourceClassName, String sectionLocation, PropertyList properties,
+			OfficeSectionType officeSectionType, Map<String, String> inputNameMapping,
+			Map<String, String> outputNameMapping, Map<String, String> objectNameMapping);
 
 	/**
 	 * Adds an {@link OfficeTeamModel} to the {@link OfficeModel}.
@@ -200,8 +174,7 @@ public interface OfficeChanges {
 	 *            New name for the {@link OfficeTeamModel}.
 	 * @return {@link Change} to rename the {@link OfficeTeamModel}.
 	 */
-	Change<OfficeTeamModel> renameOfficeTeam(OfficeTeamModel officeTeam,
-			String newOfficeTeamName);
+	Change<OfficeTeamModel> renameOfficeTeam(OfficeTeamModel officeTeam, String newOfficeTeamName);
 
 	/**
 	 * Adds an {@link ExternalManagedObjectModel} to the {@link OfficeModel}.
@@ -212,8 +185,7 @@ public interface OfficeChanges {
 	 *            Object type.
 	 * @return {@link Change} to add the {@link ExternalManagedObjectModel}.
 	 */
-	Change<ExternalManagedObjectModel> addExternalManagedObject(
-			String externalManagedObjectName, String objectType);
+	Change<ExternalManagedObjectModel> addExternalManagedObject(String externalManagedObjectName, String objectType);
 
 	/**
 	 * Removes the {@link ExternalManagedObjectModel}.
@@ -222,8 +194,7 @@ public interface OfficeChanges {
 	 *            {@link ExternalManagedObjectModel} to remove.
 	 * @return {@link Change} to remove the {@link ExternalManagedObjectModel}.
 	 */
-	Change<ExternalManagedObjectModel> removeExternalManagedObject(
-			ExternalManagedObjectModel externalManagedObject);
+	Change<ExternalManagedObjectModel> removeExternalManagedObject(ExternalManagedObjectModel externalManagedObject);
 
 	/**
 	 * Renames the {@link ExternalManagedObjectModel}.
@@ -234,8 +205,7 @@ public interface OfficeChanges {
 	 *            New name for the {@link ExternalManagedObjectModel}.
 	 * @return {@link Change} to rename the {@link ExternalManagedObjectModel}.
 	 */
-	Change<ExternalManagedObjectModel> renameExternalManagedObject(
-			ExternalManagedObjectModel externalManagedObject,
+	Change<ExternalManagedObjectModel> renameExternalManagedObject(ExternalManagedObjectModel externalManagedObject,
 			String newExternalManagedObjectName);
 
 	/**
@@ -253,10 +223,9 @@ public interface OfficeChanges {
 	 *            {@link ManagedObjectType}.
 	 * @return {@link Change} to add the {@link OfficeManagedObjectSourceModel}.
 	 */
-	Change<OfficeManagedObjectSourceModel> addOfficeManagedObjectSource(
-			String managedObjectSourceName,
-			String managedObjectSourceClassName, PropertyList properties,
-			long timeout, ManagedObjectType<?> managedObjectType);
+	Change<OfficeManagedObjectSourceModel> addOfficeManagedObjectSource(String managedObjectSourceName,
+			String managedObjectSourceClassName, PropertyList properties, long timeout,
+			ManagedObjectType<?> managedObjectType);
 
 	/**
 	 * Removes the {@link OfficeManagedObjectSourceModel}.
@@ -280,8 +249,7 @@ public interface OfficeChanges {
 	 *         {@link OfficeManagedObjectSourceModel}.
 	 */
 	Change<OfficeManagedObjectSourceModel> renameOfficeManagedObjectSource(
-			OfficeManagedObjectSourceModel managedObjectSource,
-			String newManagedObjectSourceName);
+			OfficeManagedObjectSourceModel managedObjectSource, String newManagedObjectSourceName);
 
 	/**
 	 * Adds an {@link OfficeManagedObjectModel} for an
@@ -298,9 +266,8 @@ public interface OfficeChanges {
 	 *            {@link ManagedObjectType}.
 	 * @return {@link Change} to add the {@link OfficeManagedObjectModel}.
 	 */
-	Change<OfficeManagedObjectModel> addOfficeManagedObject(
-			String managedObjectName, ManagedObjectScope managedObjectScope,
-			OfficeManagedObjectSourceModel managedObjectSource,
+	Change<OfficeManagedObjectModel> addOfficeManagedObject(String managedObjectName,
+			ManagedObjectScope managedObjectScope, OfficeManagedObjectSourceModel managedObjectSource,
 			ManagedObjectType<?> managedObjectType);
 
 	/**
@@ -310,8 +277,7 @@ public interface OfficeChanges {
 	 *            {@link OfficeManagedObjectModel} to remove.
 	 * @return {@link Change} to remove the {@link OfficeManagedObjectModel}.
 	 */
-	Change<OfficeManagedObjectModel> removeOfficeManagedObject(
-			OfficeManagedObjectModel managedObject);
+	Change<OfficeManagedObjectModel> removeOfficeManagedObject(OfficeManagedObjectModel managedObject);
 
 	/**
 	 * Renames the {@link OfficeManagedObjectModel}.
@@ -322,8 +288,8 @@ public interface OfficeChanges {
 	 *            New name for the {@link OfficeManagedObjectModel}.
 	 * @return {@link Change} to rename the {@link OfficeManagedObjectModel}.
 	 */
-	Change<OfficeManagedObjectModel> renameOfficeManagedObject(
-			OfficeManagedObjectModel managedObject, String newManagedObjectName);
+	Change<OfficeManagedObjectModel> renameOfficeManagedObject(OfficeManagedObjectModel managedObject,
+			String newManagedObjectName);
 
 	/**
 	 * Scopes the {@link OfficeManagedObjectModel}.
@@ -335,51 +301,44 @@ public interface OfficeChanges {
 	 *            {@link OfficeManagedObjectModel}.
 	 * @return {@link Change} to scope {@link OfficeManagedObjectModel}.
 	 */
-	Change<OfficeManagedObjectModel> rescopeOfficeManagedObject(
-			OfficeManagedObjectModel managedObject,
+	Change<OfficeManagedObjectModel> rescopeOfficeManagedObject(OfficeManagedObjectModel managedObject,
 			ManagedObjectScope newManagedObjectScope);
 
 	/**
-	 * Adds an {@link AdministratorModel} to the {@link OfficeModel}.
+	 * Adds an {@link AdministrationModel} to the {@link OfficeModel}.
 	 * 
-	 * @param administratorName
-	 *            Name of the {@link AdministratorModel}.
-	 * @param administratorSourceClassName
-	 *            Class name of the {@link AdministratorSource}.
+	 * @param administrationName
+	 *            Name of the {@link AdministrationModel}.
+	 * @param administrationSourceClassName
+	 *            Class name of the {@link AdministrationSource}.
 	 * @param properties
 	 *            {@link PropertyList}.
-	 * @param administratorScope
-	 *            {@link AdministratorScope} for the {@link AdministratorModel}.
-	 * @param administratorType
-	 *            {@link AdministratorType}.
-	 * @return {@link Change} to add the {@link AdministratorModel}.
+	 * @param administrationType
+	 *            {@link AdministrationType}.
+	 * @return {@link Change} to add the {@link AdministrationModel}.
 	 */
-	Change<AdministratorModel> addAdministrator(String administratorName,
-			String administratorSourceClassName, PropertyList properties,
-			AdministratorScope administratorScope,
-			AdministratorType<?, ?> administratorType);
+	Change<AdministrationModel> addAdministration(String administrationName, String administrationSourceClassName,
+			PropertyList properties, AdministrationType<?, ?, ?> administrationType);
 
 	/**
-	 * Removes the {@link AdministratorModel}.
+	 * Removes the {@link AdministrationModel}.
 	 * 
-	 * @param administrator
-	 *            {@link AdministratorModel} to remove.
-	 * @return {@link Change} to remove the {@link AdministratorModel}.
+	 * @param administration
+	 *            {@link AdministrationModel} to remove.
+	 * @return {@link Change} to remove the {@link AdministrationModel}.
 	 */
-	Change<AdministratorModel> removeAdministrator(
-			AdministratorModel administrator);
+	Change<AdministrationModel> removeAdministration(AdministrationModel administration);
 
 	/**
-	 * Renames the {@link AdministratorModel}.
+	 * Renames the {@link AdministrationModel}.
 	 * 
-	 * @param administrator
-	 *            {@link AdministratorModel}.
-	 * @param newAdministratorName
-	 *            New name for the {@link AdministratorModel}.
-	 * @return {@link Change} to rename the {@link AdministratorModel}.
+	 * @param administration
+	 *            {@link AdministrationModel}.
+	 * @param newAdministrationName
+	 *            New name for the {@link AdministrationModel}.
+	 * @return {@link Change} to rename the {@link AdministrationModel}.
 	 */
-	Change<AdministratorModel> renameAdministrator(
-			AdministratorModel administrator, String newAdministratorName);
+	Change<AdministrationModel> renameAdministration(AdministrationModel administration, String newAdministrationName);
 
 	/**
 	 * Adds an {@link OfficeEscalationModel} to the {@link OfficeModel}.
@@ -397,8 +356,7 @@ public interface OfficeChanges {
 	 *            {@link OfficeEscalationModel} to remove.
 	 * @return {@link Change} to remove the {@link OfficeEscalationModel}.
 	 */
-	Change<OfficeEscalationModel> removeOfficeEscalation(
-			OfficeEscalationModel officeEscalation);
+	Change<OfficeEscalationModel> removeOfficeEscalation(OfficeEscalationModel officeEscalation);
 
 	/**
 	 * Adds a {@link OfficeSectionResponsibilityModel} to the
@@ -412,8 +370,8 @@ public interface OfficeChanges {
 	 * @return {@link Change} to add the
 	 *         {@link OfficeSectionResponsibilityModel}.
 	 */
-	Change<OfficeSectionResponsibilityModel> addOfficeSectionResponsibility(
-			OfficeSectionModel section, String officeSectionResponsibilityName);
+	Change<OfficeSectionResponsibilityModel> addOfficeSectionResponsibility(OfficeSectionModel section,
+			String officeSectionResponsibilityName);
 
 	/**
 	 * Removes the {@link OfficeSectionResponsibilityModel}.
@@ -437,8 +395,7 @@ public interface OfficeChanges {
 	 *         {@link OfficeSectionResponsibilityModel}.
 	 */
 	Change<OfficeSectionResponsibilityModel> renameOfficeSectionResponsibility(
-			OfficeSectionResponsibilityModel officeSectionResponsibility,
-			String newOfficeSectionResponsibilityName);
+			OfficeSectionResponsibilityModel officeSectionResponsibility, String newOfficeSectionResponsibilityName);
 
 	/**
 	 * Links the {@link OfficeSectionObjectModel} to the
@@ -452,8 +409,7 @@ public interface OfficeChanges {
 	 *         {@link OfficeSectionObjectToExternalManagedObjectModel}.
 	 */
 	Change<OfficeSectionObjectToExternalManagedObjectModel> linkOfficeSectionObjectToExternalManagedObject(
-			OfficeSectionObjectModel officeSectionObject,
-			ExternalManagedObjectModel externalManagedObject);
+			OfficeSectionObjectModel officeSectionObject, ExternalManagedObjectModel externalManagedObject);
 
 	/**
 	 * Removes the {@link OfficeSectionObjectToExternalManagedObjectModel}.
@@ -479,8 +435,7 @@ public interface OfficeChanges {
 	 *         {@link OfficeSectionObjectToOfficeManagedObjectModel}.
 	 */
 	Change<OfficeSectionObjectToOfficeManagedObjectModel> linkOfficeSectionObjectToOfficeManagedObject(
-			OfficeSectionObjectModel officeSectionObject,
-			OfficeManagedObjectModel officeManagedObject);
+			OfficeSectionObjectModel officeSectionObject, OfficeManagedObjectModel officeManagedObject);
 
 	/**
 	 * Removes the {@link OfficeSectionObjectToOfficeManagedObjectModel}.
@@ -506,8 +461,7 @@ public interface OfficeChanges {
 	 *         {@link OfficeManagedObjectDependencyToOfficeManagedObjectModel}.
 	 */
 	Change<OfficeManagedObjectDependencyToOfficeManagedObjectModel> linkOfficeManagedObjectDependencyToOfficeManagedObject(
-			OfficeManagedObjectDependencyModel dependency,
-			OfficeManagedObjectModel managedObject);
+			OfficeManagedObjectDependencyModel dependency, OfficeManagedObjectModel managedObject);
 
 	/**
 	 * Removes the
@@ -535,8 +489,7 @@ public interface OfficeChanges {
 	 *         .
 	 */
 	Change<OfficeManagedObjectDependencyToExternalManagedObjectModel> linkOfficeManagedObjectDependencyToExternalManagedObject(
-			OfficeManagedObjectDependencyModel dependency,
-			ExternalManagedObjectModel externalManagedObject);
+			OfficeManagedObjectDependencyModel dependency, ExternalManagedObjectModel externalManagedObject);
 
 	/**
 	 * Removes the
@@ -564,8 +517,7 @@ public interface OfficeChanges {
 	 *         {@link OfficeManagedObjectSourceFlowToOfficeSectionInputModel}.
 	 */
 	Change<OfficeManagedObjectSourceFlowToOfficeSectionInputModel> linkOfficeManagedObjectSourceFlowToOfficeSectionInput(
-			OfficeManagedObjectSourceFlowModel managedObjectSourceFlow,
-			OfficeSectionInputModel officeSectionInput);
+			OfficeManagedObjectSourceFlowModel managedObjectSourceFlow, OfficeSectionInputModel officeSectionInput);
 
 	/**
 	 * Removes the the
@@ -592,8 +544,7 @@ public interface OfficeChanges {
 	 *         {@link OfficeSectionOutputToOfficeSectionInputModel}.
 	 */
 	Change<OfficeSectionOutputToOfficeSectionInputModel> linkOfficeSectionOutputToOfficeSectionInput(
-			OfficeSectionOutputModel officeSectionOutput,
-			OfficeSectionInputModel officeSectionInput);
+			OfficeSectionOutputModel officeSectionOutput, OfficeSectionInputModel officeSectionInput);
 
 	/**
 	 * Removes the {@link OfficeSectionOutputToOfficeSectionInputModel}.
@@ -619,8 +570,7 @@ public interface OfficeChanges {
 	 *         {@link OfficeSectionResponsibilityToOfficeTeamModel}.
 	 */
 	Change<OfficeSectionResponsibilityToOfficeTeamModel> linkOfficeSectionResponsibilityToOfficeTeam(
-			OfficeSectionResponsibilityModel officeSectionResponsibility,
-			OfficeTeamModel officeTeam);
+			OfficeSectionResponsibilityModel officeSectionResponsibility, OfficeTeamModel officeTeam);
 
 	/**
 	 * Removes the {@link OfficeSectionResponsibilityToOfficeTeamModel}.
@@ -646,8 +596,7 @@ public interface OfficeChanges {
 	 *         {@link OfficeManagedObjectSourceTeamModel}.
 	 */
 	Change<OfficeManagedObjectSourceTeamToOfficeTeamModel> linkOfficeManagedObjectSourceTeamToOfficeTeam(
-			OfficeManagedObjectSourceTeamModel mosTeam,
-			OfficeTeamModel officeTeam);
+			OfficeManagedObjectSourceTeamModel mosTeam, OfficeTeamModel officeTeam);
 
 	/**
 	 * Removes the {@link OfficeManagedObjectSourceTeamToOfficeTeamModel}.
@@ -662,27 +611,28 @@ public interface OfficeChanges {
 			OfficeManagedObjectSourceTeamToOfficeTeamModel officeManagedObjectSourceTeamToOfficeTeam);
 
 	/**
-	 * Links the {@link AdministratorModel} to the {@link OfficeTeamModel}.
+	 * Links the {@link AdministrationModel} to the {@link OfficeTeamModel}.
 	 * 
-	 * @param administrator
-	 *            {@link AdministratorModel}.
+	 * @param administration
+	 *            {@link AdministrationModel}.
 	 * @param officeTeam
 	 *            {@link OfficeTeamModel}.
-	 * @return {@link Change} to add the {@link AdministratorToOfficeTeamModel}.
+	 * @return {@link Change} to add the
+	 *         {@link AdministrationToOfficeTeamModel}.
 	 */
-	Change<AdministratorToOfficeTeamModel> linkAdministratorToOfficeTeam(
-			AdministratorModel administrator, OfficeTeamModel officeTeam);
+	Change<AdministrationToOfficeTeamModel> linkAdministrationToOfficeTeam(AdministrationModel administration,
+			OfficeTeamModel officeTeam);
 
 	/**
-	 * Removes the {@link AdministratorToOfficeTeamModel}.
+	 * Removes the {@link AdministrationToOfficeTeamModel}.
 	 * 
-	 * @param administratorToOfficeTeam
-	 *            {@link AdministratorToOfficeTeamModel} to remove.
+	 * @param administrationToOfficeTeam
+	 *            {@link AdministrationToOfficeTeamModel} to remove.
 	 * @return {@link Change} to remove the
-	 *         {@link AdministratorToOfficeTeamModel}.
+	 *         {@link AdministrationToOfficeTeamModel}.
 	 */
-	Change<AdministratorToOfficeTeamModel> removeAdministratorToOfficeTeam(
-			AdministratorToOfficeTeamModel administratorToOfficeTeam);
+	Change<AdministrationToOfficeTeamModel> removeAdministrationToOfficeTeam(
+			AdministrationToOfficeTeamModel administrationToOfficeTeam);
 
 	/**
 	 * Links the {@link ExternalManagedObjectModel} to the
@@ -690,25 +640,24 @@ public interface OfficeChanges {
 	 * 
 	 * @param externalManagedObject
 	 *            {@link ExternalManagedObjectModel}.
-	 * @param administrator
-	 *            {@link AdministratorModel}.
+	 * @param administration
+	 *            {@link AdministrationModel}.
 	 * @return {@link Change} to add the
-	 *         {@link ExternalManagedObjectToAdministratorModel}.
+	 *         {@link ExternalManagedObjectToAdministrationModel}.
 	 */
-	Change<ExternalManagedObjectToAdministratorModel> linkExternalManagedObjectToAdministrator(
-			ExternalManagedObjectModel externalManagedObject,
-			AdministratorModel administrator);
+	Change<ExternalManagedObjectToAdministrationModel> linkExternalManagedObjectToAdministration(
+			ExternalManagedObjectModel externalManagedObject, AdministrationModel administration);
 
 	/**
-	 * Removes the {@link ExternalManagedObjectToAdministratorModel}.
+	 * Removes the {@link ExternalManagedObjectToAdministrationModel}.
 	 * 
-	 * @param externalManagedObjectToAdministrator
-	 *            {@link ExternalManagedObjectToAdministratorModel} to remove.
+	 * @param externalManagedObjectToAdministration
+	 *            {@link ExternalManagedObjectToAdministrationModel} to remove.
 	 * @return {@link Change} to remove the
-	 *         {@link ExternalManagedObjectToAdministratorModel}.
+	 *         {@link ExternalManagedObjectToAdministrationModel}.
 	 */
-	Change<ExternalManagedObjectToAdministratorModel> removeExternalManagedObjectToAdministrator(
-			ExternalManagedObjectToAdministratorModel externalManagedObjectToAdministrator);
+	Change<ExternalManagedObjectToAdministrationModel> removeExternalManagedObjectToAdministration(
+			ExternalManagedObjectToAdministrationModel externalManagedObjectToAdministration);
 
 	/**
 	 * Links the {@link OfficeManagedObjectModel} to the
@@ -716,81 +665,84 @@ public interface OfficeChanges {
 	 * 
 	 * @param managedObject
 	 *            {@link OfficeManagedObjectModel}.
-	 * @param administrator
-	 *            {@link AdministratorModel}.
+	 * @param administration
+	 *            {@link AdministrationModel}.
 	 * @return {@link Change} to remove the
-	 *         {@link OfficeManagedObjectToAdministratorModel}.
+	 *         {@link OfficeManagedObjectToAdministrationModel}.
 	 */
-	Change<OfficeManagedObjectToAdministratorModel> linkOfficeManagedObjectToAdministrator(
-			OfficeManagedObjectModel managedObject,
-			AdministratorModel administrator);
+	Change<OfficeManagedObjectToAdministrationModel> linkOfficeManagedObjectToAdministration(
+			OfficeManagedObjectModel managedObject, AdministrationModel administration);
 
 	/**
-	 * Removes the {@link OfficeManagedObjectToAdministratorModel}.
+	 * Removes the {@link OfficeManagedObjectToAdministrationModel}.
 	 * 
-	 * @param managedObjectToAdministrator
-	 *            {@link OfficeManagedObjectToAdministratorModel} to remove.
+	 * @param managedObjectToAdministration
+	 *            {@link OfficeManagedObjectToAdministrationModel} to remove.
 	 * @return {@link Change} to remove the
-	 *         {@link OfficeManagedObjectToAdministratorModel}.
+	 *         {@link OfficeManagedObjectToAdministrationModel}.
 	 */
-	Change<OfficeManagedObjectToAdministratorModel> removeOfficeManagedObjectToAdministrator(
-			OfficeManagedObjectToAdministratorModel managedObjectToAdministrator);
+	Change<OfficeManagedObjectToAdministrationModel> removeOfficeManagedObjectToAdministration(
+			OfficeManagedObjectToAdministrationModel managedObjectToAdministration);
 
 	/**
-	 * Links the {@link OfficeTaskModel} to the {@link Duty} for
-	 * pre-administration.
+	 * Links the {@link OfficeFunctionModel} to the {@link AdministrationModel}
+	 * for pre-administration.
 	 * 
 	 * @param officeSectionModel
 	 *            {@link OfficeSectionModel} containing the
-	 *            {@link OfficeTaskModel}.
-	 * @param officeTaskType
-	 *            {@link OfficeSectionTask} of the {@link OfficeSection} to ensure an
-	 *            {@link OfficeTaskModel} exists for it.
-	 * @param duty
-	 *            {@link DutyModel}.
-	 * @return {@link Change} to add the {@link OfficeTaskToPreDutyModel}.
+	 *            {@link OfficeFunctionModel}.
+	 * @param officeFunctionType
+	 *            {@link OfficeSectionFunction} of the {@link OfficeSection} to
+	 *            ensure an {@link OfficeFunctionModel} exists for it.
+	 * @param administration
+	 *            {@link AdministrationModel}.
+	 * @return {@link Change} to add the
+	 *         {@link OfficeFunctionToPreAdministrationModel}.
 	 */
-	Change<OfficeTaskToPreDutyModel> linkOfficeTaskToPreDuty(
-			OfficeSectionModel officeSectionModel,
-			OfficeTaskType officeTaskType, DutyModel duty);
+	Change<OfficeFunctionToPreAdministrationModel> linkOfficeFunctionToPreAdministration(
+			OfficeSectionModel officeSectionModel, OfficeFunctionType officeFunctionType,
+			AdministrationModel administration);
 
 	/**
-	 * Removes the {@link OfficeTaskToPreDutyModel}.
+	 * Removes the {@link OfficeFunctionToPreAdministrationModel}.
 	 * 
-	 * @param officeTaskToPreDuty
-	 *            {@link OfficeTaskToPreDutyModel} to remove.
-	 * @return {@link Change} to remove the {@link OfficeTaskToPreDutyModel}.
+	 * @param officeFunctionToPreAdministration
+	 *            {@link OfficeFunctionToPreAdministrationModel} to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link OfficeFunctionToPreAdministrationModel}.
 	 */
-	Change<OfficeTaskToPreDutyModel> removeOfficeTaskToPreDuty(
-			OfficeTaskToPreDutyModel officeTaskToPreDuty);
+	Change<OfficeFunctionToPreAdministrationModel> removeOfficeFunctionToPreAdministration(
+			OfficeFunctionToPreAdministrationModel officeFunctionToPreAdministration);
 
 	/**
-	 * Links the {@link OfficeTaskModel} to the {@link Duty} for
-	 * post-administration.
+	 * Links the {@link OfficeFunctionModel} to the {@link AdministrationModel}
+	 * for post-administration.
 	 * 
 	 * @param officeSectionModel
 	 *            {@link OfficeSectionModel} containing the
-	 *            {@link OfficeTaskModel}.
-	 * @param officeTaskType
-	 *            {@link OfficeSectionTask} of the {@link OfficeSection} to ensure an
-	 *            {@link OfficeTaskModel} exists for it.
-	 * @param duty
-	 *            {@link DutyModel}.
-	 * @return {@link Change} to add the {@link OfficeTaskToPostDutyModel}.
+	 *            {@link OfficeFunctionModel}.
+	 * @param officeFunctionType
+	 *            {@link OfficeSectionFunction} of the {@link OfficeSection} to
+	 *            ensure an {@link OfficeFunctionModel} exists for it.
+	 * @param administration
+	 *            {@link AdministrationModel}.
+	 * @return {@link Change} to add the
+	 *         {@link OfficeFunctionToPostAdministrationModel}.
 	 */
-	Change<OfficeTaskToPostDutyModel> linkOfficeTaskToPostDuty(
-			OfficeSectionModel officeSectionModel,
-			OfficeTaskType officeTaskType, DutyModel duty);
+	Change<OfficeFunctionToPostAdministrationModel> linkOfficeFunctionToPostAdministration(
+			OfficeSectionModel officeSectionModel, OfficeFunctionType officeFunctionType,
+			AdministrationModel administration);
 
 	/**
-	 * Removes the {@link OfficeTaskToPostDutyModel}.
+	 * Removes the {@link OfficeFunctionToPostAdministrationModel}.
 	 * 
-	 * @param officeTaskToPostDuty
-	 *            {@link OfficeTaskToPostDutyModel} to remove.
-	 * @return {@link Change} to remove the {@link OfficeTaskToPostDutyModel}.
+	 * @param officeFunctionToAdministration
+	 *            {@link OfficeFunctionToPostAdministrationModel} to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link OfficeFunctionToPostAdministrationModel}.
 	 */
-	Change<OfficeTaskToPostDutyModel> removeOfficeTaskToPostDuty(
-			OfficeTaskToPostDutyModel officeTaskToPostDuty);
+	Change<OfficeFunctionToPostAdministrationModel> removeOfficeFunctionToPostAdministration(
+			OfficeFunctionToPostAdministrationModel officeFunctionToAdministrationDuty);
 
 	/**
 	 * Links the {@link OfficeEscalationModel} to the
@@ -804,8 +756,7 @@ public interface OfficeChanges {
 	 *         {@link OfficeEscalationToOfficeSectionInputModel}.
 	 */
 	Change<OfficeEscalationToOfficeSectionInputModel> linkOfficeEscalationToOfficeSectionInput(
-			OfficeEscalationModel escalation,
-			OfficeSectionInputModel sectionInput);
+			OfficeEscalationModel escalation, OfficeSectionInputModel sectionInput);
 
 	/**
 	 * Removes the {@link OfficeEscalationToOfficeSectionInputModel}.
@@ -828,8 +779,8 @@ public interface OfficeChanges {
 	 * @return {@link Change} to add the
 	 *         {@link OfficeStartToOfficeSectionInputModel}.
 	 */
-	Change<OfficeStartToOfficeSectionInputModel> linkOfficeStartToOfficeSectionInput(
-			OfficeStartModel start, OfficeSectionInputModel sectionInput);
+	Change<OfficeStartToOfficeSectionInputModel> linkOfficeStartToOfficeSectionInput(OfficeStartModel start,
+			OfficeSectionInputModel sectionInput);
 
 	/**
 	 * Removes the {@link OfficeStartToOfficeSectionInputModel}.

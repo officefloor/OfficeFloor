@@ -41,13 +41,13 @@ import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
-import net.officefloor.compile.spi.section.SectionTask;
-import net.officefloor.compile.spi.section.SectionWork;
+import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.SubSectionInput;
 import net.officefloor.compile.spi.section.SubSectionObject;
 import net.officefloor.compile.spi.section.SubSectionOutput;
-import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -445,20 +445,20 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 					"OBJECT", ManagedObjectScope.PROCESS);
 
 			// Tasks
-			SectionWork work = type.addSectionWork("WORK",
+			SectionFunctionNamespace work = type.addSectionWork("WORK",
 					SectionClassWorkSource.class.getName());
 			work.addProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
 					MockSectionTypeClass.class.getName());
 
-			SectionTask taskOne = work.addSectionTask("inputOne", "inputOne");
-			TaskObject taskOneObject = taskOne.getTaskObject("OBJECT");
+			SectionFunction taskOne = work.addSectionTask("inputOne", "inputOne");
+			FunctionObject taskOneObject = taskOne.getTaskObject("OBJECT");
 			type.link(taskOneObject, objectMo);
-			TaskObject taskOneConnection = taskOne
+			FunctionObject taskOneConnection = taskOne
 					.getTaskObject(Connection.class.getName());
 			type.link(taskOneConnection, connectionSectionObject);
 
-			SectionTask taskTwo = work.addSectionTask("inputTwo", "inputTwo");
-			TaskObject taskTwoObject = taskTwo.getTaskObject("OBJECT");
+			SectionFunction taskTwo = work.addSectionTask("inputTwo", "inputTwo");
+			FunctionObject taskTwoObject = taskTwo.getTaskObject("OBJECT");
 			type.link(taskTwoObject, objectMo);
 			taskTwo.getTaskObject(String.class.getName()).flagAsParameter();
 		}

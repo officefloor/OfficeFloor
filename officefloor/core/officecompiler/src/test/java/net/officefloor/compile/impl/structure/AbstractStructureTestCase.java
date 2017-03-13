@@ -43,7 +43,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.SectionLoader;
-import net.officefloor.compile.spi.administration.source.AdministratorSource;
+import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.administration.source.impl.AbstractAdministratorSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.governance.source.impl.AbstractGovernanceSource;
@@ -55,7 +55,7 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBui
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceSpecification;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
-import net.officefloor.compile.spi.office.OfficeAdministrator;
+import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
@@ -75,11 +75,11 @@ import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
-import net.officefloor.compile.spi.section.SectionTask;
-import net.officefloor.compile.spi.section.SectionWork;
+import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SubSection;
-import net.officefloor.compile.spi.section.TaskFlow;
-import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.compile.spi.section.FunctionFlow;
+import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
@@ -447,17 +447,17 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Adds an {@link OfficeAdministrator} to the {@link OfficeArchitect}.
+	 * Adds an {@link OfficeAdministration} to the {@link OfficeArchitect}.
 	 * 
 	 * @param officeArchitect
 	 *            {@link OfficeArchitect}.
 	 * @param administratorName
-	 *            Name of the {@link OfficeAdministrator}.
+	 *            Name of the {@link OfficeAdministration}.
 	 * @param maker
 	 *            {@link AdministratorMaker}.
-	 * @return {@link OfficeAdministrator}.
+	 * @return {@link OfficeAdministration}.
 	 */
-	protected OfficeAdministrator addAdministrator(
+	protected OfficeAdministration addAdministrator(
 			OfficeArchitect officeArchitect, String administratorName,
 			AdministratorMaker maker) {
 
@@ -465,7 +465,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		PropertyList propertyList = MakerAdministratorSource.register(maker);
 
 		// Add and return the administrator
-		OfficeAdministrator admin = officeArchitect.addOfficeAdministrator(
+		OfficeAdministration admin = officeArchitect.addOfficeAdministrator(
 				administratorName, MakerAdministratorSource.class.getName());
 		for (Property property : propertyList) {
 			admin.addProperty(property.getName(), property.getValue());
@@ -474,19 +474,19 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Adds a simple {@link OfficeAdministrator} to the
-	 * {@link OfficeAdministrator} with the supplied extension interface and a
+	 * Adds a simple {@link OfficeAdministration} to the
+	 * {@link OfficeAdministration} with the supplied extension interface and a
 	 * single {@link Duty}.
 	 * 
 	 * @param officeArchitect
 	 *            {@link OfficeArchitect}.
 	 * @param administratorName
-	 *            Name of the {@link OfficeAdministrator}.
+	 *            Name of the {@link OfficeAdministration}.
 	 * @param extensionInterface
 	 *            Extension interface.
-	 * @return {@link OfficeAdministrator}.
+	 * @return {@link OfficeAdministration}.
 	 */
-	protected OfficeAdministrator addAdministrator(
+	protected OfficeAdministration addAdministrator(
 			OfficeArchitect officeArchitect, String administratorName,
 			final Class<?> extensionInterface, final Enum<?> firstDutyKey,
 			final Enum<?>... remainingDutyKeys) {
@@ -511,7 +511,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * {@link Duty} key for a simple {@link OfficeAdministrator}.
+	 * {@link Duty} key for a simple {@link OfficeAdministration}.
 	 */
 	protected enum SimpleDutyKey {
 		DUTY
@@ -685,72 +685,72 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 				String managedObjectSourceName, ManagedObjectMaker maker);
 
 		/**
-		 * Adds a {@link SectionWork}.
+		 * Adds a {@link SectionFunctionNamespace}.
 		 * 
 		 * @param workName
-		 *            Name of the {@link SectionWork}.
+		 *            Name of the {@link SectionFunctionNamespace}.
 		 * @param workFactory
 		 *            {@link WorkFactory}.
 		 * @param maker
 		 *            {@link WorkMaker}.
-		 * @return Added {@link SectionWork}.
+		 * @return Added {@link SectionFunctionNamespace}.
 		 */
-		<W extends Work> SectionWork addWork(String workName,
+		<W extends Work> SectionFunctionNamespace addWork(String workName,
 				WorkFactory<W> workFactory, WorkMaker maker);
 
 		/**
-		 * Adds a {@link SectionTask}.
+		 * Adds a {@link SectionFunction}.
 		 * 
 		 * @param workName
-		 *            Name of the {@link SectionWork} for the
-		 *            {@link SectionTask}.
+		 *            Name of the {@link SectionFunctionNamespace} for the
+		 *            {@link SectionFunction}.
 		 * @param workFactory
 		 *            {@link WorkFactory}.
 		 * @param taskName
-		 *            Name of the {@link SectionTask}.
+		 *            Name of the {@link SectionFunction}.
 		 * @param taskFactory
 		 *            {@link ManagedFunctionFactory}.
 		 * @param taskMaker
-		 *            {@link TaskMaker} for the {@link SectionTask}.
-		 * @return {@link SectionTask}.
+		 *            {@link TaskMaker} for the {@link SectionFunction}.
+		 * @return {@link SectionFunction}.
 		 */
-		<W extends Work> SectionTask addTask(String workName,
+		<W extends Work> SectionFunction addTask(String workName,
 				WorkFactory<W> workFactory, String taskName,
 				ManagedFunctionFactory<W, ?, ?> taskFactory, TaskMaker taskMaker);
 
 		/**
-		 * Adds a {@link TaskFlow}.
+		 * Adds a {@link FunctionFlow}.
 		 * 
 		 * @param workName
-		 *            Name of the {@link SectionWork} for the
-		 *            {@link SectionTask}.
+		 *            Name of the {@link SectionFunctionNamespace} for the
+		 *            {@link SectionFunction}.
 		 * @param workFactory
 		 *            {@link WorkFactory}.
 		 * @param taskName
-		 *            Name of the {@link SectionTask}.
+		 *            Name of the {@link SectionFunction}.
 		 * @param taskFactory
 		 *            {@link ManagedFunctionFactory}.
 		 * @param flowName
 		 *            Name of the {@link ManagedFunctionFlowType}.
 		 * @param argumentType
 		 *            Argument type.
-		 * @return {@link TaskFlow}.
+		 * @return {@link FunctionFlow}.
 		 */
-		<W extends Work> TaskFlow addTaskFlow(String workName,
+		<W extends Work> FunctionFlow addTaskFlow(String workName,
 				WorkFactory<W> workFactory, String taskName,
 				ManagedFunctionFactory<W, ?, ?> taskFactory, String flowName,
 				Class<?> argumentType);
 
 		/**
-		 * Adds a {@link TaskObject}.
+		 * Adds a {@link FunctionObject}.
 		 * 
 		 * @param workName
-		 *            Name of the {@link SectionWork} for the
-		 *            {@link SectionTask}.
+		 *            Name of the {@link SectionFunctionNamespace} for the
+		 *            {@link SectionFunction}.
 		 * @param workFactory
 		 *            {@link WorkFactory}.
 		 * @param taskName
-		 *            Name of the {@link SectionTask}.
+		 *            Name of the {@link SectionFunction}.
 		 * @param taskFactory
 		 *            {@link ManagedFunctionFactory}.
 		 * @param objectName
@@ -759,32 +759,32 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		 *            Object type.
 		 * @param typeQualifier
 		 *            Type qualifier.
-		 * @return {@link TaskObject}.
+		 * @return {@link FunctionObject}.
 		 */
-		<W extends Work> TaskObject addTaskObject(String workName,
+		<W extends Work> FunctionObject addTaskObject(String workName,
 				WorkFactory<W> workFactory, String taskName,
 				ManagedFunctionFactory<W, ?, ?> taskFactory, String objectName,
 				Class<?> objectType, String typeQualifier);
 
 		/**
-		 * Adds a {@link TaskFlow} for a {@link ManagedFunctionEscalationType}.
+		 * Adds a {@link FunctionFlow} for a {@link ManagedFunctionEscalationType}.
 		 * 
 		 * @param workName
-		 *            Name of the {@link SectionWork} for the
-		 *            {@link SectionTask}.
+		 *            Name of the {@link SectionFunctionNamespace} for the
+		 *            {@link SectionFunction}.
 		 * @param workFactory
 		 *            {@link WorkFactory}.
 		 * @param taskName
-		 *            Name of the {@link SectionTask}.
+		 *            Name of the {@link SectionFunction}.
 		 * @param taskFactory
 		 *            {@link ManagedFunctionFactory}.
 		 * @param escalationName
 		 *            Name of the {@link ManagedFunctionEscalationType}.
 		 * @param escalationType
 		 *            Escalation type.
-		 * @return {@link TaskFlow}.
+		 * @return {@link FunctionFlow}.
 		 */
-		<E extends Throwable, W extends Work> TaskFlow addTaskEscalation(
+		<E extends Throwable, W extends Work> FunctionFlow addTaskEscalation(
 				String workName, WorkFactory<W> workFactory, String taskName,
 				ManagedFunctionFactory<W, ?, ?> taskFactory, String escalationName,
 				Class<E> escalationType);
@@ -930,7 +930,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public <W extends Work> SectionWork addWork(String workName,
+		public <W extends Work> SectionFunctionNamespace addWork(String workName,
 				WorkFactory<W> workFactory, WorkMaker maker) {
 
 			// Register the work maker
@@ -938,7 +938,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 					workFactory);
 
 			// Return the created work
-			SectionWork work = this.builder.addSectionWork(workName,
+			SectionFunctionNamespace work = this.builder.addSectionWork(workName,
 					MakerWorkSource.class.getName());
 			for (Property property : properties) {
 				work.addProperty(property.getName(), property.getValue());
@@ -947,7 +947,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public <W extends Work> SectionTask addTask(String workName,
+		public <W extends Work> SectionFunction addTask(String workName,
 				WorkFactory<W> workFactory, final String taskName,
 				final ManagedFunctionFactory<W, ?, ?> taskFactory,
 				final TaskMaker taskMaker) {
@@ -963,14 +963,14 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 					}
 				}
 			};
-			SectionWork work = this.addWork(workName, workFactory, workMaker);
+			SectionFunctionNamespace work = this.addWork(workName, workFactory, workMaker);
 
 			// Return the section task
 			return work.addSectionTask(taskName, taskName);
 		}
 
 		@Override
-		public <W extends Work> TaskFlow addTaskFlow(String workName,
+		public <W extends Work> FunctionFlow addTaskFlow(String workName,
 				WorkFactory<W> workFactory, String taskName,
 				ManagedFunctionFactory<W, ?, ?> taskFactory, final String flowName,
 				final Class<?> argumentType) {
@@ -982,7 +982,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 					maker.addFlow(flowName, argumentType);
 				}
 			};
-			SectionTask task = this.addTask(workName, workFactory, taskName,
+			SectionFunction task = this.addTask(workName, workFactory, taskName,
 					taskFactory, taskMaker);
 
 			// Return the task flow
@@ -990,7 +990,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public <W extends Work> TaskObject addTaskObject(String workName,
+		public <W extends Work> FunctionObject addTaskObject(String workName,
 				WorkFactory<W> workFactory, String taskName,
 				ManagedFunctionFactory<W, ?, ?> taskFactory, final String objectName,
 				final Class<?> objectType, final String typeQualifier) {
@@ -1002,7 +1002,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 					maker.addObject(objectName, objectType, typeQualifier);
 				}
 			};
-			SectionTask task = this.addTask(workName, workFactory, taskName,
+			SectionFunction task = this.addTask(workName, workFactory, taskName,
 					taskFactory, taskMaker);
 
 			// Return the task object
@@ -1010,7 +1010,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public <E extends Throwable, W extends Work> TaskFlow addTaskEscalation(
+		public <E extends Throwable, W extends Work> FunctionFlow addTaskEscalation(
 				String workName, WorkFactory<W> workFactory, String taskName,
 				ManagedFunctionFactory<W, ?, ?> taskFactory, final String escalationName,
 				final Class<E> escalationType) {
@@ -1022,7 +1022,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 					maker.addEscalation(escalationName, escalationType);
 				}
 			};
-			SectionTask task = this.addTask(workName, workFactory, taskName,
+			SectionFunction task = this.addTask(workName, workFactory, taskName,
 					taskFactory, taskMaker);
 
 			// Return the task escalation
@@ -1278,12 +1278,12 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Makes the {@link SectionWork}.
+	 * Makes the {@link SectionFunctionNamespace}.
 	 */
 	protected static interface WorkMaker {
 
 		/**
-		 * Makes the {@link SectionWork}.
+		 * Makes the {@link SectionFunctionNamespace}.
 		 * 
 		 * @param context
 		 *            {@link WorkMakerContext}.
@@ -1311,9 +1311,9 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		ManagedFunctionSourceContext getContext();
 
 		/**
-		 * Obtains the {@link WorkFactory} used for the {@link SectionWork}.
+		 * Obtains the {@link WorkFactory} used for the {@link SectionFunctionNamespace}.
 		 * 
-		 * @return {@link WorkFactory} used for the {@link SectionWork}.
+		 * @return {@link WorkFactory} used for the {@link SectionFunctionNamespace}.
 		 */
 		WorkFactory<Work> getWorkFactory();
 
@@ -1546,7 +1546,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			 * Initiate.
 			 * 
 			 * @param taskName
-			 *            Name of the {@link SectionTask}.
+			 *            Name of the {@link SectionFunction}.
 			 * @param taskFactory
 			 *            {@link ManagedFunctionFactory}.
 			 * @param workTypeBuilder
@@ -1778,7 +1778,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Maker {@link AdministratorSource}.
+	 * Maker {@link AdministrationSource}.
 	 */
 	@TestSource
 	public static class MakerAdministratorSource extends

@@ -22,19 +22,19 @@ import java.util.Properties;
 import javax.transaction.xa.XAResource;
 
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.administrator.AdministratorLoader;
-import net.officefloor.compile.administrator.AdministratorType;
-import net.officefloor.compile.administrator.DutyType;
+import net.officefloor.compile.administration.AdministrationLoader;
+import net.officefloor.compile.administration.AdministrationType;
+import net.officefloor.compile.administration.DutyType;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.administration.source.AdministratorDutyMetaData;
-import net.officefloor.compile.spi.administration.source.AdministratorSource;
-import net.officefloor.compile.spi.administration.source.AdministratorSourceContext;
-import net.officefloor.compile.spi.administration.source.AdministratorSourceMetaData;
-import net.officefloor.compile.spi.administration.source.AdministratorSourceSpecification;
+import net.officefloor.compile.spi.administration.source.AdministrationSource;
+import net.officefloor.compile.spi.administration.source.AdministrationSourceContext;
+import net.officefloor.compile.spi.administration.source.AdministrationSourceMetaData;
+import net.officefloor.compile.spi.administration.source.AdministrationSourceSpecification;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.Duty;
@@ -44,7 +44,7 @@ import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Tests loading the {@link AdministratorType}.
+ * Tests loading the {@link AdministrationType}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -56,10 +56,10 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 	private final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 	/**
-	 * {@link AdministratorSourceMetaData}.
+	 * {@link AdministrationSourceMetaData}.
 	 */
-	private final AdministratorSourceMetaData<?, ?> metaData = this
-			.createMock(AdministratorSourceMetaData.class);
+	private final AdministrationSourceMetaData<?, ?> metaData = this
+			.createMock(AdministrationSourceMetaData.class);
 
 	@Override
 	protected void setUp() throws Exception {
@@ -67,7 +67,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if fail to instantiate the {@link AdministratorSource}.
+	 * Ensure issue if fail to instantiate the {@link AdministrationSource}.
 	 */
 	public void testFailInstantiate() {
 
@@ -95,7 +95,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		// Attempt to load
 		this.loadAdministratorType(false, new Init() {
 			@Override
-			public void init(AdministratorSourceContext context) {
+			public void init(AdministrationSourceContext context) {
 				context.getProperty("missing");
 			}
 		});
@@ -112,7 +112,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		// Attempt to load
 		this.loadAdministratorType(true, new Init() {
 			@Override
-			public void init(AdministratorSourceContext context) {
+			public void init(AdministrationSourceContext context) {
 				assertEquals("Ensure get defaulted property", "DEFAULT",
 						context.getProperty("missing", "DEFAULT"));
 				assertEquals("Ensure get property ONE", "1",
@@ -141,7 +141,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		// Attempt to load
 		this.loadAdministratorType(false, new Init() {
 			@Override
-			public void init(AdministratorSourceContext context) {
+			public void init(AdministrationSourceContext context) {
 				context.loadClass("missing");
 			}
 		});
@@ -159,14 +159,14 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		// Attempt to load
 		this.loadAdministratorType(false, new Init() {
 			@Override
-			public void init(AdministratorSourceContext context) {
+			public void init(AdministrationSourceContext context) {
 				context.getResource("missing");
 			}
 		});
 	}
 
 	/**
-	 * Ensure issue if fails to init the {@link AdministratorSource}.
+	 * Ensure issue if fails to init the {@link AdministrationSource}.
 	 */
 	public void testFailInitAdministratorSource() {
 
@@ -179,14 +179,14 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		// Attempt to load
 		this.loadAdministratorType(false, new Init() {
 			@Override
-			public void init(AdministratorSourceContext context) {
+			public void init(AdministrationSourceContext context) {
 				throw failure;
 			}
 		});
 	}
 
 	/**
-	 * Ensure issue if <code>null</code> {@link AdministratorSourceMetaData}.
+	 * Ensure issue if <code>null</code> {@link AdministrationSourceMetaData}.
 	 */
 	public void testNullAdministratorSourceMetaData() {
 
@@ -196,14 +196,14 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		// Attempt to load
 		this.loadAdministratorType(false, new Init() {
 			@Override
-			public void init(AdministratorSourceContext context) {
+			public void init(AdministrationSourceContext context) {
 				MockAdministratorSource.metaData = null;
 			}
 		});
 	}
 
 	/**
-	 * Ensure issue if fails to obtain the {@link AdministratorSourceMetaData}.
+	 * Ensure issue if fails to obtain the {@link AdministrationSourceMetaData}.
 	 */
 	public void testFailGetAdministratorSourceMetaData() {
 
@@ -391,7 +391,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Validates the loaded {@link AdministratorType} with keys.
+	 * Validates the loaded {@link AdministrationType} with keys.
 	 */
 	public void testLoadAdministratorTypeWithKeys() {
 
@@ -400,7 +400,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		this.record_loadAdminType(DutyKey.TWO, DutyKey.ONE);
 
 		// Load the administrator type
-		AdministratorType<?, ?> adminType = this.loadAdministratorType(true,
+		AdministrationType<?, ?> adminType = this.loadAdministratorType(true,
 				null);
 
 		// Validate the administrator type
@@ -419,7 +419,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Validates the loaded {@link AdministratorType} without keys.
+	 * Validates the loaded {@link AdministrationType} without keys.
 	 */
 	public void testLoadAdministratorTypeWithoutKeys() {
 
@@ -428,7 +428,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		this.record_loadAdminType(false, DutyKey.ONE, DutyKey.TWO);
 
 		// Load the administrator type
-		AdministratorType<?, ?> adminType = this.loadAdministratorType(true,
+		AdministrationType<?, ?> adminType = this.loadAdministratorType(true,
 				null);
 
 		// Validate the administrator type
@@ -469,7 +469,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records loading the {@link AdministratorType}.
+	 * Records loading the {@link AdministrationType}.
 	 * 
 	 * @param keys
 	 *            Keys of the {@link AdministratorDutyMetaData}.
@@ -479,7 +479,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records loading the {@link AdministratorType}.
+	 * Records loading the {@link AdministrationType}.
 	 * 
 	 * @param isIncludeKeys
 	 *            Flag whether names only (<code>false</code> to not include
@@ -515,7 +515,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Loads the {@link AdministratorType}.
+	 * Loads the {@link AdministrationType}.
 	 * 
 	 * @param isExpectedToLoad
 	 *            Flag indicating if expecting to load the {@link FunctionNamespaceType}.
@@ -523,10 +523,10 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 	 *            {@link Init}.
 	 * @param propertyNameValuePairs
 	 *            {@link Property} name value pairs.
-	 * @return Loaded {@link AdministratorType}.
+	 * @return Loaded {@link AdministrationType}.
 	 */
 	@SuppressWarnings("rawtypes")
-	public AdministratorType<?, ?> loadAdministratorType(
+	public AdministrationType<?, ?> loadAdministratorType(
 			boolean isExpectedToLoad, Init init,
 			String... propertyNameValuePairs) {
 
@@ -545,9 +545,9 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
 				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
-		AdministratorLoader adminLoader = compiler.getAdministratorLoader();
+		AdministrationLoader adminLoader = compiler.getAdministratorLoader();
 		MockAdministratorSource.init = init;
-		AdministratorType adminType = adminLoader.loadAdministratorType(
+		AdministrationType adminType = adminLoader.loadAdministratorType(
 				MockAdministratorSource.class, propertyList);
 
 		// Verify the mock objects
@@ -570,21 +570,21 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 	private static interface Init {
 
 		/**
-		 * Implemented to init the {@link AdministratorSource}.
+		 * Implemented to init the {@link AdministrationSource}.
 		 * 
 		 * @param context
-		 *            {@link AdministratorSourceContext}.
+		 *            {@link AdministrationSourceContext}.
 		 */
-		void init(AdministratorSourceContext context);
+		void init(AdministrationSourceContext context);
 	}
 
 	/**
-	 * Mock {@link AdministratorSource}.
+	 * Mock {@link AdministrationSource}.
 	 */
 	@TestSource
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static class MockAdministratorSource implements
-			AdministratorSource<Object, Indexed> {
+			AdministrationSource<Object, Indexed> {
 
 		/**
 		 * Failure to instantiate an instance.
@@ -592,7 +592,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		public static RuntimeException instantiateFailure = null;
 
 		/**
-		 * {@link Init} to init the {@link AdministratorSource}.
+		 * {@link Init} to init the {@link AdministrationSource}.
 		 */
 		public static Init init = null;
 
@@ -602,17 +602,17 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		public static Error metaDataFailure = null;
 
 		/**
-		 * {@link AdministratorSourceSpecification}.
+		 * {@link AdministrationSourceSpecification}.
 		 */
-		public static AdministratorSourceMetaData metaData;
+		public static AdministrationSourceMetaData metaData;
 
 		/**
 		 * Resets the state for next test.
 		 * 
 		 * @param metaData
-		 *            {@link AdministratorSourceMetaData}.
+		 *            {@link AdministrationSourceMetaData}.
 		 */
-		public static void reset(AdministratorSourceMetaData<?, ?> metaData) {
+		public static void reset(AdministrationSourceMetaData<?, ?> metaData) {
 			instantiateFailure = null;
 			init = null;
 			metaDataFailure = null;
@@ -634,13 +634,13 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		 */
 
 		@Override
-		public AdministratorSourceSpecification getSpecification() {
+		public AdministrationSourceSpecification getSpecification() {
 			fail("Should not obtain specification");
 			return null;
 		}
 
 		@Override
-		public void init(AdministratorSourceContext context) throws Exception {
+		public void init(AdministrationSourceContext context) throws Exception {
 			// Run the init if available
 			if (init != null) {
 				init.init(context);
@@ -648,7 +648,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public AdministratorSourceMetaData getMetaData() {
+		public AdministrationSourceMetaData getMetaData() {
 
 			// Throw meta-data failure
 			if (metaDataFailure != null) {

@@ -41,13 +41,13 @@ public interface TypeLoader {
 	/**
 	 * Loads the {@link FunctionNamespaceType}.
 	 * 
-	 * @param workSourceClassName
+	 * @param managedFunctionSourceClassName
 	 *            {@link ManagedFunctionSource} class name.
 	 * @param properties
 	 *            {@link PropertyList}.
 	 * @return {@link FunctionNamespaceType}.
 	 */
-	FunctionNamespaceType<?> loadWorkType(String workSourceClassName, PropertyList properties);
+	FunctionNamespaceType loadManagedFunctionType(String managedFunctionSourceClassName, PropertyList properties);
 
 	/**
 	 * Loads the {@link ManagedObjectType}.
@@ -58,7 +58,6 @@ public interface TypeLoader {
 	 *            {@link PropertyList}.
 	 * @return {@link ManagedObjectType}.
 	 */
-	ManagedObjectType<?> loadManagedObjectType(
-			String managedObjectSourceClassName, PropertyList properties);
+	ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceClassName, PropertyList properties);
 
 }

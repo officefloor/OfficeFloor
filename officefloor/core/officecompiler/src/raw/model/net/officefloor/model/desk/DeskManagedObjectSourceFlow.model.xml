@@ -4,5 +4,5 @@
 	<field type="String" name="argument type" />
 	<field type="DeskManagedObjectSourceFlowToExternalFlowModel"
 		name="external flow" />
-	<field type="DeskManagedObjectSourceFlowToTaskModel" name="task" />
+	<field type="DeskManagedObjectSourceFlowToFunctionModel" name="function" />
 </model>

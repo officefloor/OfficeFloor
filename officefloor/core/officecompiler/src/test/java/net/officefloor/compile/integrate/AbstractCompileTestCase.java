@@ -24,7 +24,7 @@ import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
-import net.officefloor.compile.spi.administration.source.AdministratorSource;
+import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
@@ -403,13 +403,13 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 * @param administratorName
 	 *            Name of the {@link Administration}.
 	 * @param administratorSourceClass
-	 *            {@link AdministratorSource} class.
+	 *            {@link AdministrationSource} class.
 	 * @param propertyNameValues
 	 *            {@link Property} name/value listing.
 	 * @return {@link AdministrationBuilder} for the added {@link Administration}.
 	 */
 	@SuppressWarnings("unchecked")
-	protected <I, A extends Enum<A>, S extends AdministratorSource<I, A>> AdministrationBuilder<A> record_officeBuilder_addThreadAdministrator(
+	protected <I, A extends Enum<A>, S extends AdministrationSource<I, A>> AdministrationBuilder<A> record_officeBuilder_addThreadAdministrator(
 			String administratorName, Class<S> administratorSourceClass,
 			String... propertyNameValues) {
 		final AdministrationBuilder<A> admin = this
@@ -436,12 +436,12 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 *            {@link Office} {@link Team} name responsible for
 	 *            administration.
 	 * @param administratorSourceClass
-	 *            {@link AdministratorSource} class.
+	 *            {@link AdministrationSource} class.
 	 * @param propertyNameValues
 	 *            {@link Property} name/value listing.
 	 * @return {@link AdministrationBuilder} for the added {@link Administration}.
 	 */
-	protected <I, A extends Enum<A>, S extends AdministratorSource<I, A>> AdministrationBuilder<A> record_officeBuilder_addThreadAdministrator(
+	protected <I, A extends Enum<A>, S extends AdministrationSource<I, A>> AdministrationBuilder<A> record_officeBuilder_addThreadAdministrator(
 			String administratorName, String officeTeamName,
 			Class<S> administratorSourceClass, String... propertyNameValues) {
 		AdministrationBuilder<A> builder = this

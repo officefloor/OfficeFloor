@@ -24,7 +24,7 @@ import javax.transaction.xa.XAResource;
 
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
 import net.officefloor.compile.impl.structure.ManagedObjectDependencyNodeImpl;
-import net.officefloor.compile.impl.structure.TaskObjectNodeImpl;
+import net.officefloor.compile.impl.structure.FunctionObjectNodeImpl;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.object.DependentObjectType;
 import net.officefloor.compile.object.ObjectDependencyType;
@@ -35,7 +35,7 @@ import net.officefloor.compile.section.OfficeSectionObjectType;
 import net.officefloor.compile.section.OfficeSectionOutputType;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
-import net.officefloor.compile.section.OfficeTaskType;
+import net.officefloor.compile.section.OfficeFunctionType;
 import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.office.DependentManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
@@ -46,10 +46,10 @@ import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
-import net.officefloor.compile.spi.section.SectionTask;
+import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.SubSectionObject;
-import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.function.Work;
@@ -185,7 +185,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 				section.getOfficeSectionManagedObjectTypes().length);
 		assertEquals("Should have a single task", 1,
 				section.getOfficeTaskTypes().length);
-		OfficeTaskType task = section.getOfficeTaskTypes()[0];
+		OfficeFunctionType task = section.getOfficeTaskTypes()[0];
 		assertEquals("Incorrect task name", "TASK", task.getOfficeTaskName());
 		assertSame("Incorrect parent section for task", section,
 				task.getOfficeSubSectionType());
@@ -203,7 +203,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 
 		// Record not linked on first attempt to retrieve dependent
 		this.issues
-				.recordIssue("QUALIFIED-OBJECT", TaskObjectNodeImpl.class,
+				.recordIssue("QUALIFIED-OBJECT", FunctionObjectNodeImpl.class,
 						"Task Object QUALIFIED-OBJECT is not linked to a DependentObjectNode");
 		// Note: does not make it to UNQUALIFIED-OBJECT
 
@@ -215,7 +215,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 				"SECTION", new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
-						SectionTask task = context.addTask("WORK", workFactory,
+						SectionFunction task = context.addTask("WORK", workFactory,
 								"TASK", taskFactory, new TaskMaker() {
 									@Override
 									public void make(TaskTypeMaker maker) {
@@ -513,7 +513,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 					public void make(SectionMakerContext context) {
 
 						// Add the task object and managed object
-						TaskObject object = context.addTaskObject("WORK",
+						FunctionObject object = context.addTaskObject("WORK",
 								workFactory, "TASK", taskFactory, "OBJECT",
 								Connection.class, null);
 						SectionManagedObjectSource moSource = context
@@ -528,7 +528,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 				});
 
 		// Validate link to dependent managed object
-		OfficeTaskType task = section.getOfficeTaskTypes()[0];
+		OfficeFunctionType task = section.getOfficeTaskTypes()[0];
 		assertEquals("Incorrect number of dependencies", 1,
 				task.getObjectDependencies().length);
 		ObjectDependencyType dependency = task.getObjectDependencies()[0];
@@ -564,7 +564,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 					public void make(SectionMakerContext context) {
 
 						// Add the task object and managed object
-						TaskObject object = context.addTaskObject("WORK",
+						FunctionObject object = context.addTaskObject("WORK",
 								workFactory, "TASK", taskFactory, "OBJECT",
 								Connection.class, null);
 						SectionManagedObjectSource moSource = context
@@ -585,7 +585,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 				});
 
 		// Validate link to dependent managed object
-		OfficeTaskType task = section.getOfficeTaskTypes()[0];
+		OfficeFunctionType task = section.getOfficeTaskTypes()[0];
 		assertEquals("Incorrect number of dependencies", 1,
 				task.getObjectDependencies().length);
 		ObjectDependencyType dependency = task.getObjectDependencies()[0];
@@ -633,7 +633,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 									@Override
 									public void make(SectionMakerContext context) {
 										// Add the task object
-										TaskObject object = context
+										FunctionObject object = context
 												.addTaskObject("WORK",
 														workFactory, "TASK",
 														taskFactory, "OBJECT",
@@ -666,7 +666,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 				});
 
 		// Validate link to dependent managed object
-		OfficeTaskType task = section.getOfficeSubSectionTypes()[0]
+		OfficeFunctionType task = section.getOfficeSubSectionTypes()[0]
 				.getOfficeTaskTypes()[0];
 		assertEquals("Incorrect number of dependencies", 1,
 				task.getObjectDependencies().length);
@@ -769,7 +769,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure can get {@link TaskObject} linked to {@link ManagedObject} which
+	 * Ensure can get {@link FunctionObject} linked to {@link ManagedObject} which
 	 * has a {@link ManagedObjectDependency} linked to another
 	 * {@link ManagedObject}.
 	 */
@@ -786,7 +786,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 					public void make(SectionMakerContext context) {
 
 						// Add the task object
-						TaskObject taskObject = context.addTaskObject("WORK",
+						FunctionObject taskObject = context.addTaskObject("WORK",
 								workFactory, "TASK", taskFactory, "OBJECT",
 								Connection.class, null);
 
@@ -825,7 +825,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 				});
 
 		// Validate link to dependent managed object
-		OfficeTaskType task = section.getOfficeTaskTypes()[0];
+		OfficeFunctionType task = section.getOfficeTaskTypes()[0];
 		assertEquals("Incorrect number of task object dependencies", 1,
 				task.getObjectDependencies().length);
 		ObjectDependencyType taskDependency = task.getObjectDependencies()[0];
@@ -853,7 +853,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure {@link TaskObject} flagged as parameter does not provide a
+	 * Ensure {@link FunctionObject} flagged as parameter does not provide a
 	 * {@link DependentManagedObject}.
 	 */
 	public void testTaskObjectAsParameter() {
@@ -868,7 +868,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 					@Override
 					public void make(SectionMakerContext context) {
 						// Add the task object as parameter
-						TaskObject taskObject = context.addTaskObject("WORK",
+						FunctionObject taskObject = context.addTaskObject("WORK",
 								workFactory, "TASK", taskFactory, "OBJECT",
 								Connection.class, null);
 						taskObject.flagAsParameter();
@@ -876,7 +876,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 				});
 
 		// Validate no dependent object
-		OfficeTaskType task = section.getOfficeTaskTypes()[0];
+		OfficeFunctionType task = section.getOfficeTaskTypes()[0];
 		assertEquals("Incorrect number of task object dependencies", 1,
 				task.getObjectDependencies().length);
 		ObjectDependencyType taskDependency = task.getObjectDependencies()[0];
@@ -893,7 +893,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure {@link TaskObject} not flagged as parameter but issue as not
+	 * Ensure {@link FunctionObject} not flagged as parameter but issue as not
 	 * linked.
 	 */
 	public void testTaskObjectNotParameterAndNotLinked() {
@@ -903,7 +903,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 				.createMockTaskFactory();
 
 		// Issue as not linked
-		this.issues.recordIssue("OBJECT", TaskObjectNodeImpl.class,
+		this.issues.recordIssue("OBJECT", FunctionObjectNodeImpl.class,
 				"Task Object OBJECT is not linked to a DependentObjectNode");
 
 		// Load the task object dependent on section object
@@ -920,7 +920,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure {@link TaskObject} not flagged as parameter.
+	 * Ensure {@link FunctionObject} not flagged as parameter.
 	 */
 	public void testTaskObjectNotParameterLinked() {
 
@@ -934,7 +934,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 					@Override
 					public void make(SectionMakerContext context) {
 						// Add the task object as parameter
-						TaskObject taskObject = context.addTaskObject("WORK",
+						FunctionObject taskObject = context.addTaskObject("WORK",
 								workFactory, "TASK", taskFactory, "OBJECT",
 								Connection.class, null);
 						SectionObject sectionObject = context.getBuilder()
@@ -946,7 +946,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 				});
 
 		// Validate dependent object
-		OfficeTaskType task = section.getOfficeTaskTypes()[0];
+		OfficeFunctionType task = section.getOfficeTaskTypes()[0];
 		assertEquals("Incorrect number of task object dependencies", 1,
 				task.getObjectDependencies().length);
 		ObjectDependencyType taskDependency = task.getObjectDependencies()[0];

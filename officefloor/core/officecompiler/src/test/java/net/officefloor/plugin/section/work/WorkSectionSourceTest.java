@@ -31,9 +31,9 @@ import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionObject;
-import net.officefloor.compile.spi.section.SectionTask;
-import net.officefloor.compile.spi.section.SectionWork;
-import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
+import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.api.function.Work;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -92,26 +92,26 @@ public class WorkSectionSourceTest extends OfficeFrameTestCase {
 				List.class.getName(), List.class.getName());
 
 		// Tasks
-		SectionWork work = expected.addSectionWork("WORK",
+		SectionFunctionNamespace work = expected.addSectionWork("WORK",
 				ClassWorkSource.class.getName());
 		work.addProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
 				MockWork.class.getName());
 
-		SectionTask taskOne = work.addSectionTask("taskOne", "taskOne");
-		TaskObject taskOneInteger = taskOne.getTaskObject(Integer.class
+		SectionFunction taskOne = work.addSectionTask("taskOne", "taskOne");
+		FunctionObject taskOneInteger = taskOne.getTaskObject(Integer.class
 				.getName());
 		expected.link(taskOneInteger, integerObject);
-		TaskObject taskOneConnection = taskOne
+		FunctionObject taskOneConnection = taskOne
 				.getTaskObject(MockQualification.class.getName() + "-"
 						+ Connection.class.getName());
 		expected.link(taskOneConnection, qualifiedConnectionObject);
 
-		SectionTask taskTwo = work.addSectionTask("taskTwo", "taskTwo");
-		TaskObject taskTwoConnection = taskTwo.getTaskObject(Connection.class
+		SectionFunction taskTwo = work.addSectionTask("taskTwo", "taskTwo");
+		FunctionObject taskTwoConnection = taskTwo.getTaskObject(Connection.class
 				.getName());
 		expected.link(taskTwoConnection, connectionObject);
 		taskTwo.getTaskObject(String.class.getName()).flagAsParameter();
-		TaskObject taskTwoList = taskTwo.getTaskObject(List.class.getName());
+		FunctionObject taskTwoList = taskTwo.getTaskObject(List.class.getName());
 		expected.link(taskTwoList, listObject);
 
 		work.addSectionTask("taskThree", "taskThree");

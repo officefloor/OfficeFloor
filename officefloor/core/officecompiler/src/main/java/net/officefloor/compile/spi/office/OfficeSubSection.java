@@ -44,14 +44,14 @@ public interface OfficeSubSection {
 	OfficeSubSection getOfficeSubSection(String sectionName);
 
 	/**
-	 * Obtains the {@link OfficeSectionTask} instance particular to this
+	 * Obtains the {@link OfficeSectionFunction} instance particular to this
 	 * {@link OfficeSubSection}.
 	 * 
 	 * @param taskName
-	 *            Name of the {@link OfficeSectionTask} to obtain.
-	 * @return {@link OfficeSectionTask}.
+	 *            Name of the {@link OfficeSectionFunction} to obtain.
+	 * @return {@link OfficeSectionFunction}.
 	 */
-	OfficeSectionTask getOfficeSectionTask(String taskName);
+	OfficeSectionFunction getOfficeSectionFunction(String taskName);
 
 	/**
 	 * Obtains the {@link OfficeSectionManagedObject} particular to this
@@ -61,8 +61,7 @@ public interface OfficeSubSection {
 	 *            Name of the {@link OfficeSectionManagedObject} to obtain.
 	 * @return {@link OfficeSectionManagedObject}.
 	 */
-	OfficeSectionManagedObject getOfficeSectionManagedObject(
-			String managedObjectName);
+	OfficeSectionManagedObject getOfficeSectionManagedObject(String managedObjectName);
 
 	/**
 	 * Obtains the {@link OfficeSectionManagedObjectSource} particular to this
@@ -73,16 +72,16 @@ public interface OfficeSubSection {
 	 *            obtain.
 	 * @return {@link OfficeSectionManagedObjectSource}.
 	 */
-	OfficeSectionManagedObjectSource getOfficeSectionManagedObjectSource(
-			String managedObjectSourceName);
+	OfficeSectionManagedObjectSource getOfficeSectionManagedObjectSource(String managedObjectSourceName);
 
 	/**
 	 * <p>
 	 * Adds {@link Governance} for this {@link OfficeSubSection}.
 	 * <p>
-	 * This enables providing {@link Governance} over all {@link OfficeSectionTask}
-	 * instances within the {@link OfficeSubSection} and all its subsequent
-	 * {@link OfficeSubSection} instances.
+	 * This enables providing {@link Governance} over all
+	 * {@link OfficeSectionFunction} instances within the
+	 * {@link OfficeSubSection} and all its subsequent {@link OfficeSubSection}
+	 * instances.
 	 * 
 	 * @param governance
 	 *            {@link OfficeGovernance}.

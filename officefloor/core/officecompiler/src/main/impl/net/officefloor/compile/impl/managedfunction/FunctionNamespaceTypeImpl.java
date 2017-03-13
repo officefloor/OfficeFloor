@@ -1,0 +1,76 @@
+/*
+ * OfficeFloor - http://www.officefloor.net
+ * Copyright (C) 2005-2013 Daniel Sagenschneider
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package net.officefloor.compile.impl.managedfunction;
+
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+
+import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+
+/**
+ * {@link FunctionNamespaceType} implementation.
+ * 
+ * @author Daniel Sagenschneider
+ */
+public class FunctionNamespaceTypeImpl implements FunctionNamespaceType, FunctionNamespaceBuilder {
+
+	/**
+	 * Listing of the {@link ManagedFunctionType} definitions.
+	 */
+	private final List<ManagedFunctionType<?, ?>> functions = new LinkedList<ManagedFunctionType<?, ?>>();
+
+	/*
+	 * =================== FunctionNamespaceBuilder ===================
+	 */
+
+	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public <M extends Enum<M>, F extends Enum<F>> ManagedFunctionTypeBuilder<M, F> addManagedFunctionType(
+			String taskName, ManagedFunctionFactory<M, F> functionFactory, Class<M> objectKeysClass,
+			Class<F> flowKeysClass) {
+		ManagedFunctionTypeImpl functionType = new ManagedFunctionTypeImpl(taskName, functionFactory, objectKeysClass,
+				flowKeysClass);
+		this.functions.add(functionType);
+		return functionType;
+	}
+
+	/*
+	 * =================== FunctionNamespaceType ===================
+	 */
+
+	@Override
+	public ManagedFunctionType<?, ?>[] getManagedFunctionTypes() {
+		// Create and return the sorted listing of task types
+		ManagedFunctionType<?, ?>[] taskTypes = CompileUtil.toArray(this.functions, new ManagedFunctionType[0]);
+		Arrays.sort(taskTypes, new Comparator<ManagedFunctionType<?, ?>>() {
+			@Override
+			public int compare(ManagedFunctionType<?, ?> a, ManagedFunctionType<?, ?> b) {
+				return a.getFunctionName().compareTo(b.getFunctionName());
+			}
+		});
+		return taskTypes;
+	}
+
+}

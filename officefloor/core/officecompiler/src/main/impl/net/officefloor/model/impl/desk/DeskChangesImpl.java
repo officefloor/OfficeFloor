@@ -28,18 +28,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
-import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.frame.api.function.Work;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.change.Change;
@@ -50,29 +48,28 @@ import net.officefloor.model.desk.DeskManagedObjectDependencyToExternalManagedOb
 import net.officefloor.model.desk.DeskManagedObjectModel;
 import net.officefloor.model.desk.DeskManagedObjectSourceFlowModel;
 import net.officefloor.model.desk.DeskManagedObjectSourceFlowToExternalFlowModel;
-import net.officefloor.model.desk.DeskManagedObjectSourceFlowToTaskModel;
+import net.officefloor.model.desk.DeskManagedObjectSourceFlowToFunctionModel;
 import net.officefloor.model.desk.DeskManagedObjectSourceModel;
 import net.officefloor.model.desk.DeskManagedObjectToDeskManagedObjectSourceModel;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
+import net.officefloor.model.desk.FunctionEscalationModel;
+import net.officefloor.model.desk.FunctionEscalationToExternalFlowModel;
+import net.officefloor.model.desk.FunctionEscalationToFunctionModel;
+import net.officefloor.model.desk.FunctionFlowModel;
+import net.officefloor.model.desk.FunctionFlowToExternalFlowModel;
+import net.officefloor.model.desk.FunctionFlowToFunctionModel;
+import net.officefloor.model.desk.FunctionModel;
+import net.officefloor.model.desk.FunctionNamespaceModel;
+import net.officefloor.model.desk.FunctionToNextExternalFlowModel;
+import net.officefloor.model.desk.FunctionToNextFunctionModel;
+import net.officefloor.model.desk.ManagedFunctionModel;
+import net.officefloor.model.desk.ManagedFunctionObjectModel;
+import net.officefloor.model.desk.ManagedFunctionObjectToDeskManagedObjectModel;
+import net.officefloor.model.desk.ManagedFunctionObjectToExternalManagedObjectModel;
+import net.officefloor.model.desk.ManagedFunctionToFunctionModel;
 import net.officefloor.model.desk.PropertyModel;
-import net.officefloor.model.desk.TaskEscalationModel;
-import net.officefloor.model.desk.TaskEscalationToExternalFlowModel;
-import net.officefloor.model.desk.TaskEscalationToTaskModel;
-import net.officefloor.model.desk.TaskFlowModel;
-import net.officefloor.model.desk.TaskFlowToExternalFlowModel;
-import net.officefloor.model.desk.TaskFlowToTaskModel;
-import net.officefloor.model.desk.TaskModel;
-import net.officefloor.model.desk.TaskToNextExternalFlowModel;
-import net.officefloor.model.desk.TaskToNextTaskModel;
-import net.officefloor.model.desk.WorkModel;
-import net.officefloor.model.desk.WorkTaskModel;
-import net.officefloor.model.desk.WorkTaskObjectModel;
-import net.officefloor.model.desk.WorkTaskObjectToDeskManagedObjectModel;
-import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
-import net.officefloor.model.desk.WorkTaskToTaskModel;
-import net.officefloor.model.desk.WorkToInitialTaskModel;
 import net.officefloor.model.impl.change.AbstractChange;
 import net.officefloor.model.impl.change.DisconnectChange;
 import net.officefloor.model.impl.change.NoChange;
@@ -85,103 +82,71 @@ import net.officefloor.model.impl.change.NoChange;
 public class DeskChangesImpl implements DeskChanges {
 
 	/**
-	 * Obtains the link type name for the {@link FlowInstigationStrategyEnum}.
-	 *
-	 * @param instigationStrategy
-	 *            {@link FlowInstigationStrategyEnum}.
-	 * @return Link type name for the {@link FlowInstigationStrategyEnum}.
-	 */
-	public static String getFlowInstigationStrategyLink(
-			FlowInstigationStrategyEnum instigationStrategy) {
-
-		// Ensure have instigation strategy
-		if (instigationStrategy == null) {
-			return null;
-		}
-
-		// Return instigation strategy link type
-		switch (instigationStrategy) {
-		case SEQUENTIAL:
-			return DeskChanges.SEQUENTIAL_LINK;
-		case PARALLEL:
-			return DeskChanges.PARALLEL_LINK;
-		case ASYNCHRONOUS:
-			return DeskChanges.ASYNCHRONOUS_LINK;
-		default:
-			throw new IllegalStateException("Unknown instigation strategy "
-					+ instigationStrategy);
-		}
-	}
-
-	/**
 	 * <p>
-	 * Sorts the {@link WorkModel} instances.
+	 * Sorts the {@link FunctionNamespaceModel} instances.
 	 * <p>
 	 * This enable easier merging of configuration under SCM.
 	 *
-	 * @param workModels
-	 *            {@link WorkTaskModel} instances.
+	 * @param namespaceModels
+	 *            {@link FunctionNamespaceModel} instances.
 	 */
-	public static void sortWorkModels(List<WorkModel> workModels) {
-		Collections.sort(workModels, new Comparator<WorkModel>() {
+	public static void sortNamespaceModels(List<FunctionNamespaceModel> namespaceModels) {
+		Collections.sort(namespaceModels, new Comparator<FunctionNamespaceModel>() {
 			@Override
-			public int compare(WorkModel a, WorkModel b) {
-				return a.getWorkName().compareTo(b.getWorkName());
+			public int compare(FunctionNamespaceModel a, FunctionNamespaceModel b) {
+				return a.getFunctionNamespaceName().compareTo(b.getFunctionNamespaceName());
 			}
 		});
 	}
 
 	/**
 	 * <p>
-	 * Sorts the {@link WorkTaskModel} instances.
+	 * Sorts the {@link ManagedFunctionModel} instances.
 	 * <p>
 	 * This enables easier merging of configuration under SCM.
 	 *
-	 * @param workTaskModels
-	 *            {@link WorkTaskModel} instances.
+	 * @param managedFunctionModels
+	 *            {@link ManagedFunctionModel} instances.
 	 */
-	public static void sortWorkTaskModels(List<WorkTaskModel> workTaskModels) {
-		Collections.sort(workTaskModels, new Comparator<WorkTaskModel>() {
+	public static void sortManagedFunctionModels(List<ManagedFunctionModel> managedFunctionModels) {
+		Collections.sort(managedFunctionModels, new Comparator<ManagedFunctionModel>() {
 			@Override
-			public int compare(WorkTaskModel a, WorkTaskModel b) {
-				return a.getWorkTaskName().compareTo(b.getWorkTaskName());
+			public int compare(ManagedFunctionModel a, ManagedFunctionModel b) {
+				return a.getManagedFunctionName().compareTo(b.getManagedFunctionName());
 			}
 		});
 	}
 
 	/**
-	 * Sorts the {@link WorkTaskToTaskModel} connections.
+	 * Sorts the {@link ManagedFunctionToFunctionModel} connections.
 	 *
-	 * @param workTaskToTaskConnections
-	 *            {@link WorkTaskToTaskModel} instances.
+	 * @param managedFunctionToFunctionConnections
+	 *            {@link ManagedFunctionToFunctionModel} instances.
 	 */
-	public static void sortWorkTaskToTaskConnections(
-			List<WorkTaskToTaskModel> workTaskToTaskConnections) {
-		Collections.sort(workTaskToTaskConnections,
-				new Comparator<WorkTaskToTaskModel>() {
-					@Override
-					public int compare(WorkTaskToTaskModel a,
-							WorkTaskToTaskModel b) {
-						return a.getTask().getTaskName().compareTo(
-								b.getTask().getTaskName());
-					}
-				});
+	public static void sortManagedFunctionToFunctionConnections(
+			List<ManagedFunctionToFunctionModel> managedFunctionToFunctionConnections) {
+		Collections.sort(managedFunctionToFunctionConnections, new Comparator<ManagedFunctionToFunctionModel>() {
+			@Override
+			public int compare(ManagedFunctionToFunctionModel a, ManagedFunctionToFunctionModel b) {
+				return a.getFunction().getFunctionName().compareTo(b.getFunction().getFunctionName());
+			}
+		});
 	}
 
 	/**
 	 * <p>
-	 * Sorts the {@link TaskModel} instances.
+	 * Sorts the {@link FunctionModel} instances.
 	 * <p>
 	 * This enable easier merging of configuration under SCM.
 	 *
-	 * @param taskModels
-	 *            {@link TaskModel} instances.
+	 * @param functionModels
+	 *            {@link FunctionModel} instances.
 	 */
-	public static void sortTaskModels(List<TaskModel> taskModels) {
-		Collections.sort(taskModels, new Comparator<TaskModel>() {
+	public static void sortFunctionModels(List<FunctionModel> functionModels) {
+		Collections.sort(functionModels, new Comparator<FunctionModel>() {
 			@Override
-			public int compare(TaskModel a, TaskModel b) {
-				return a.getTaskName().compareTo(b.getTaskName());
+			public int compare(FunctionModel a, FunctionModel b) {
+				return a.getFunctionName().compareTo(b.getFunctionName());
 			}
 		});
 	}
@@ -199,8 +164,7 @@ public class DeskChangesImpl implements DeskChanges {
 		Collections.sort(externalFlows, new Comparator<ExternalFlowModel>() {
 			@Override
 			public int compare(ExternalFlowModel a, ExternalFlowModel b) {
-				return a.getExternalFlowName().compareTo(
-						b.getExternalFlowName());
+				return a.getExternalFlowName().compareTo(b.getExternalFlowName());
 			}
 		});
 	}
@@ -214,17 +178,13 @@ public class DeskChangesImpl implements DeskChanges {
 	 * @param externalManagedObjects
 	 *            {@link ExternalManagedObjectModel} instances.
 	 */
-	public static void sortExternalManagedObjects(
-			List<ExternalManagedObjectModel> externalManagedObjects) {
-		Collections.sort(externalManagedObjects,
-				new Comparator<ExternalManagedObjectModel>() {
-					@Override
-					public int compare(ExternalManagedObjectModel a,
-							ExternalManagedObjectModel b) {
-						return a.getExternalManagedObjectName().compareTo(
-								b.getExternalManagedObjectName());
-					}
-				});
+	public static void sortExternalManagedObjects(List<ExternalManagedObjectModel> externalManagedObjects) {
+		Collections.sort(externalManagedObjects, new Comparator<ExternalManagedObjectModel>() {
+			@Override
+			public int compare(ExternalManagedObjectModel a, ExternalManagedObjectModel b) {
+				return a.getExternalManagedObjectName().compareTo(b.getExternalManagedObjectName());
+			}
+		});
 	}
 
 	/**
@@ -247,8 +207,8 @@ public class DeskChangesImpl implements DeskChanges {
 			return PROCESS_MANAGED_OBJECT_SCOPE;
 		case THREAD:
 			return THREAD_MANAGED_OBJECT_SCOPE;
-		case WORK:
-			return WORK_MANAGED_OBJECT_SCOPE;
+		case FUNCTION:
+			return FUNCTION_MANAGED_OBJECT_SCOPE;
 		default:
 			throw new IllegalStateException("Unknown scope " + scope);
 		}
@@ -270,17 +230,17 @@ public class DeskChangesImpl implements DeskChanges {
 	}
 
 	/**
-	 * Sorts the {@link WorkModel} instances.
+	 * Sorts the {@link FunctionNamespaceModel} instances.
 	 */
-	protected void sortWorkModels() {
-		sortWorkModels(this.desk.getWorks());
+	protected void sortNamespaceModels() {
+		sortNamespaceModels(this.desk.getFunctionNamespaces());
 	}
 
 	/**
-	 * Sorts the {@link TaskModel} instances.
+	 * Sorts the {@link FunctionModel} instances.
 	 */
-	protected void sortTaskModels() {
-		sortTaskModels(this.desk.getTasks());
+	protected void sortFunctionModels() {
+		sortFunctionModels(this.desk.getFunctions());
 	}
 
 	/**
@@ -298,104 +258,101 @@ public class DeskChangesImpl implements DeskChanges {
 	}
 
 	/**
-	 * Creates a {@link WorkTaskModel} for a {@link ManagedFunctionType}.
+	 * Creates a {@link ManagedFunctionModel} for a {@link ManagedFunctionType}.
 	 *
-	 * @param taskType
+	 * @param managedFunctionType
 	 *            {@link ManagedFunctionType}.
-	 * @return {@link WorkTaskModel} for the {@link ManagedFunctionType}.
+	 * @return {@link ManagedFunctionkModel} for the
+	 *         {@link ManagedFunctionType}.
 	 */
-	private WorkTaskModel createWorkTaskModel(ManagedFunctionType<?, ?, ?> taskType) {
+	private ManagedFunctionModel createManagedFunctionModel(ManagedFunctionType<?, ?> managedFunctionType) {
 
-		// Create the work task model
-		WorkTaskModel workTask = new WorkTaskModel(taskType.getFunctionName());
+		// Create the managed function model
+		ManagedFunctionModel managedFunction = new ManagedFunctionModel(managedFunctionType.getFunctionName());
 
-		// Add the task object models
-		for (ManagedFunctionObjectType<?> taskObjectType : taskType.getObjectTypes()) {
-			Enum<?> key = taskObjectType.getKey();
-			WorkTaskObjectModel taskObject = new WorkTaskObjectModel(
-					taskObjectType.getObjectName(), (key == null ? null : key
-							.name()), taskObjectType.getObjectType().getName(),
-					false);
-			workTask.addTaskObject(taskObject);
+		// Add the managed function object models
+		for (ManagedFunctionObjectType<?> managedFunctionObjectType : managedFunctionType.getObjectTypes()) {
+			Enum<?> key = managedFunctionObjectType.getKey();
+			ManagedFunctionObjectModel managedFunctionObject = new ManagedFunctionObjectModel(
+					managedFunctionObjectType.getObjectName(), (key == null ? null : key.name()),
+					managedFunctionObjectType.getObjectType().getName(), false);
+			managedFunction.addManagedFunctionObject(managedFunctionObject);
 		}
 
-		// Return the work task model
-		return workTask;
+		// Return the managed function model
+		return managedFunction;
 	}
 
 	/**
-	 * Removes the connections to the {@link TaskModel} (except to its
-	 * {@link WorkTaskModel}).
+	 * Removes the connections to the {@link FunctionModel} (except to its
+	 * {@link ManagedFunctionModel}).
 	 *
-	 * @param task
-	 *            {@link TaskModel}.
+	 * @param function
+	 *            {@link FunctionModel}.
 	 * @param connectionList
 	 *            Listing to add removed {@link ConnectionModel} instances.
 	 */
-	private void removeTaskConnections(TaskModel task,
-			List<ConnectionModel> connectionList) {
+	private void removeFunctionConnections(FunctionModel function, List<ConnectionModel> connectionList) {
 
 		// Remove input connections (copy to stop concurrent)
-		for (TaskToNextTaskModel conn : new ArrayList<TaskToNextTaskModel>(task
-				.getPreviousTasks())) {
+		for (FunctionToNextFunctionModel conn : new ArrayList<FunctionToNextFunctionModel>(
+				function.getPreviousFunctions())) {
 			conn.remove();
 			connectionList.add(conn);
 		}
-		for (TaskFlowToTaskModel conn : new ArrayList<TaskFlowToTaskModel>(task
-				.getTaskFlowInputs())) {
+		for (FunctionFlowToFunctionModel conn : new ArrayList<FunctionFlowToFunctionModel>(
+				function.getFunctionFlowInputs())) {
 			conn.remove();
 			connectionList.add(conn);
 		}
-		for (TaskEscalationToTaskModel conn : new ArrayList<TaskEscalationToTaskModel>(
-				task.getTaskEscalationInputs())) {
+		for (FunctionEscalationToFunctionModel conn : new ArrayList<FunctionEscalationToFunctionModel>(
+				function.getFunctionEscalationInputs())) {
 			conn.remove();
 			connectionList.add(conn);
 		}
 
 		// Remove flow connections
-		for (TaskFlowModel flow : task.getTaskFlows()) {
-			this.removeTaskFlowConnections(flow, connectionList);
+		for (FunctionFlowModel flow : function.getFunctionFlows()) {
+			this.removeFunctionFlowConnections(flow, connectionList);
 		}
 
 		// Remove next connections
-		TaskToNextTaskModel connNextTask = task.getNextTask();
-		if (connNextTask != null) {
-			connNextTask.remove();
-			connectionList.add(connNextTask);
+		FunctionToNextFunctionModel connNextFunction = function.getNextFunction();
+		if (connNextFunction != null) {
+			connNextFunction.remove();
+			connectionList.add(connNextFunction);
 		}
-		TaskToNextExternalFlowModel connNextExtFlow = task
-				.getNextExternalFlow();
+		FunctionToNextExternalFlowModel connNextExtFlow = function.getNextExternalFlow();
 		if (connNextExtFlow != null) {
 			connNextExtFlow.remove();
 			connectionList.add(connNextExtFlow);
 		}
 
 		// Remove escalation connections
-		for (TaskEscalationModel escalation : task.getTaskEscalations()) {
-			this.removeTaskEscalationConnections(escalation, connectionList);
+		for (FunctionEscalationModel escalation : function.getFunctionEscalations()) {
+			this.removeFunctionEscalationConnections(escalation, connectionList);
 		}
 	}
 
 	/**
-	 * Removes the connections to the {@link TaskFlowModel}.
+	 * Removes the connections to the {@link FunctionFlowModel}.
 	 *
-	 * @param taskFlow
-	 *            {@link TaskFlowModel}.
+	 * @param functionFlow
+	 *            {@link FunctionFlowModel}.
 	 * @param connectionList
 	 *            Listing to add the removed {@link ConnectionModel} instances.
 	 */
-	private void removeTaskFlowConnections(TaskFlowModel taskFlow,
-			List<ConnectionModel> connectionList) {
+	private void removeFunctionFlowConnections(FunctionFlowModel functionFlow, List<ConnectionModel> connectionList) {
 
-		// Remove connection to task
-		TaskFlowToTaskModel connTask = taskFlow.getTask();
-		if (connTask != null) {
-			connTask.remove();
-			connectionList.add(connTask);
+		// Remove connection to function
+		FunctionFlowToFunctionModel connFunction = functionFlow.getFunction();
+		if (connFunction != null) {
+			connFunction.remove();
+			connectionList.add(connFunction);
 		}
 
 		// Remove connection to external flow
-		TaskFlowToExternalFlowModel connExtFlow = taskFlow.getExternalFlow();
+		FunctionFlowToExternalFlowModel connExtFlow = functionFlow.getExternalFlow();
 		if (connExtFlow != null) {
 			connExtFlow.remove();
 			connectionList.add(connExtFlow);
@@ -403,27 +360,25 @@ public class DeskChangesImpl implements DeskChanges {
 	}
 
 	/**
-	 * Removes the connections to the {@link TaskEscalationModel}.
+	 * Removes the connections to the {@link FunctionEscalationModel}.
 	 *
-	 * @param taskEscalation
-	 *            {@link TaskEscalationModel}.
+	 * @param functionEscalation
+	 *            {@link FunctionEscalationModel}.
 	 * @param connectionList
 	 *            Listing to add the removed {@link ConnectionModel} instances.
 	 */
-	private void removeTaskEscalationConnections(
-			TaskEscalationModel taskEscalation,
+	private void removeFunctionEscalationConnections(FunctionEscalationModel functionEscalation,
 			List<ConnectionModel> connectionList) {
 
-		// Remove connection to task
-		TaskEscalationToTaskModel connTask = taskEscalation.getTask();
-		if (connTask != null) {
-			connTask.remove();
-			connectionList.add(connTask);
+		// Remove connection to function
+		FunctionEscalationToFunctionModel connFunction = functionEscalation.getFunction();
+		if (connFunction != null) {
+			connFunction.remove();
+			connectionList.add(connFunction);
 		}
 
 		// Remove connection to external flow
-		TaskEscalationToExternalFlowModel connExtFlow = taskEscalation
-				.getExternalFlow();
+		FunctionEscalationToExternalFlowModel connExtFlow = functionEscalation.getExternalFlow();
 		if (connExtFlow != null) {
 			connExtFlow.remove();
 			connectionList.add(connExtFlow);
@@ -431,45 +386,43 @@ public class DeskChangesImpl implements DeskChanges {
 	}
 
 	/**
-	 * Removes the connections to the {@link WorkTaskModel} and its associated
-	 * {@link TaskModel} instances.
+	 * Removes the connections to the {@link ManagedFunctionModel} and its
+	 * associated {@link FunctionModel} instances.
 	 *
-	 * @param workTask
-	 *            {@link WorkTaskModel}.
+	 * @param managedFunction
+	 *            {@link ManagedFunctionModel}.
 	 * @param connectionList
 	 *            Listing to add the removed {@link ConnectionModel} instances.
 	 */
-	private void removeWorkTaskConnections(WorkTaskModel workTask,
+	private void removeManagedFunctionConnections(ManagedFunctionModel managedFunction,
 			List<ConnectionModel> connectionList) {
 
 		// Remove object connections
-		for (WorkTaskObjectModel taskObject : workTask.getTaskObjects()) {
-			this.removeWorkTaskObjectConnections(taskObject, connectionList);
+		for (ManagedFunctionObjectModel managedFunctionObject : managedFunction.getManagedFunctionObjects()) {
+			this.removeManagedFunctionObjectConnections(managedFunctionObject, connectionList);
 		}
 
-		// Remove task connections (copy to stop concurrent)
-		for (WorkTaskToTaskModel taskConn : new ArrayList<WorkTaskToTaskModel>(
-				workTask.getTasks())) {
-			TaskModel task = taskConn.getTask();
-			this.removeTaskConnections(task, connectionList);
+		// Remove function connections (copy to stop concurrent)
+		for (ManagedFunctionToFunctionModel functionConn : new ArrayList<ManagedFunctionToFunctionModel>(
+				managedFunction.getFunctions())) {
+			FunctionModel function = functionConn.getFunction();
+			this.removeFunctionConnections(function, connectionList);
 		}
 	}
 
 	/**
-	 * Removes the connections to the {@link WorkTaskObjectModel}.
+	 * Removes the connections to the {@link ManagedFunctionObjectModel}.
 	 *
-	 * @param workTaskObject
-	 *            {@link WorkTaskObjectModel}.
+	 * @param managedFunctionObject
+	 *            {@link ManagedFunctionObjectModel}.
 	 * @param connectionList
 	 *            Listing to add the removed {@link ConnectionModel} instances.
 	 */
-	private void removeWorkTaskObjectConnections(
-			WorkTaskObjectModel workTaskObject,
+	private void removeManagedFunctionObjectConnections(ManagedFunctionObjectModel managedFunctionObject,
 			List<ConnectionModel> connectionList) {
 
 		// Remove connection to external managed object
-		WorkTaskObjectToExternalManagedObjectModel conn = workTaskObject
-				.getExternalManagedObject();
+		ManagedFunctionObjectToExternalManagedObjectModel conn = managedFunctionObject.getExternalManagedObject();
 		if (conn != null) {
 			conn.remove();
 			connectionList.add(conn);
@@ -477,21 +430,21 @@ public class DeskChangesImpl implements DeskChanges {
 	}
 
 	/**
-	 * Removes the {@link TaskModel} instances associated to the
-	 * {@link WorkTaskModel}.
+	 * Removes the {@link FunctionModel} instances associated to the
+	 * {@link ManagedFunctionModel}.
 	 *
-	 * @param workTask
-	 *            {@link WorkTaskModel}.
-	 * @param taskList
-	 *            Listing to add the removed {@link TaskModel} instances.
+	 * @param managedFunction
+	 *            {@link ManagedFunctionModel}.
+	 * @param functionList
+	 *            Listing to add the removed {@link FunctionModel} instances.
 	 */
-	private void removeWorkTask(WorkTaskModel workTask, List<TaskModel> taskList) {
-		for (WorkTaskToTaskModel conn : workTask.getTasks()) {
-			TaskModel task = conn.getTask();
+	private void removeManagedFunction(ManagedFunctionModel managedFunction, List<FunctionModel> functionList) {
+		for (ManagedFunctionToFunctionModel conn : managedFunction.getFunctions()) {
+			FunctionModel function = conn.getFunction();
 
-			// Remove task and store for revert
-			DeskChangesImpl.this.desk.removeTask(task);
-			taskList.add(task);
+			// Remove function and store for revert
+			DeskChangesImpl.this.desk.removeFunction(function);
+			functionList.add(function);
 		}
 	}
 
@@ -500,127 +453,124 @@ public class DeskChangesImpl implements DeskChanges {
 	 */
 
 	@Override
-	public <W extends Work> Change<WorkModel> addWork(String workName,
-			String workSourceClassName, PropertyList properties,
-			FunctionNamespaceType<W> workType, String... taskNames) {
+	public Change<FunctionNamespaceModel> addFunctionNamespace(String namespaceName,
+			String managedFunctionSourceClassName, PropertyList properties, FunctionNamespaceType namespaceType,
+			String... managedFunctionNames) {
 
-		// Create the work model for the work type
-		final WorkModel work = new WorkModel(workName, workSourceClassName);
+		// Create the namespace model for the namespace type
+		final FunctionNamespaceModel namespace = new FunctionNamespaceModel(namespaceName,
+				managedFunctionSourceClassName);
 
-		// Add the properties to source the work again
+		// Add the properties to source the namespace again
 		for (Property property : properties) {
-			work.addProperty(new PropertyModel(property.getName(), property
-					.getValue()));
+			namespace.addProperty(new PropertyModel(property.getName(), property.getValue()));
 		}
 
-		// Create the set of task names to include
-		Set<String> includeTaskNames = new HashSet<String>();
-		for (String taskName : taskNames) {
-			includeTaskNames.add(taskName);
+		// Create the set of managed function names to include
+		Set<String> includeFunctionNames = new HashSet<String>();
+		for (String functionName : managedFunctionNames) {
+			includeFunctionNames.add(functionName);
 		}
 
-		// Add the work task models
-		for (ManagedFunctionType<?, ?, ?> taskType : workType.getManagedFunctionTypes()) {
+		// Add the managed function models
+		for (ManagedFunctionType<?, ?> managedFunctionType : namespaceType.getManagedFunctionTypes()) {
 
-			// Determine if include the task type
-			String taskName = taskType.getFunctionName();
-			if ((includeTaskNames.size() > 0)
-					&& (!includeTaskNames.contains(taskName))) {
-				// Task to not be included
+			// Determine if include the function type
+			String functionName = managedFunctionType.getFunctionName();
+			if ((includeFunctionNames.size() > 0) && (!includeFunctionNames.contains(functionName))) {
+				// Function to not be included
 				continue;
 			}
 
-			// Create and add the work task model
-			WorkTaskModel workTask = DeskChangesImpl.this
-					.createWorkTaskModel(taskType);
-			work.addWorkTask(workTask);
+			// Create and add the managed function model
+			ManagedFunctionModel managedFunction = DeskChangesImpl.this.createManagedFunctionModel(managedFunctionType);
+			namespace.addManagedFunction(managedFunction);
 		}
 
-		// Ensure work task models in sorted order
-		DeskChangesImpl.sortWorkTaskModels(work.getWorkTasks());
+		// Ensure managed function models in sorted order
+		DeskChangesImpl.sortManagedFunctionModels(namespace.getManagedFunctions());
 
 		// Return the change to add the work
-		return new AbstractChange<WorkModel>(work, "Add work " + workName) {
+		return new AbstractChange<FunctionNamespaceModel>(namespace, "Add function namespace " + namespaceName) {
 			@Override
 			public void apply() {
-				// Add the work (ensuring in sorted order)
-				DeskChangesImpl.this.desk.addWork(work);
-				DeskChangesImpl.this.sortWorkModels();
+				// Add the namespace (ensuring in sorted order)
+				DeskChangesImpl.this.desk.addFunctionNamespace(namespace);
+				DeskChangesImpl.this.sortNamespaceModels();
 			}
 
 			@Override
 			public void revert() {
-				DeskChangesImpl.this.desk.removeWork(work);
+				DeskChangesImpl.this.desk.removeFunctionNamespace(namespace);
 			}
 		};
 	}
 
 	@Override
-	public Change<WorkModel> removeWork(final WorkModel workModel) {
+	public Change<FunctionNamespaceModel> removeFunctionNamespace(final FunctionNamespaceModel workModel) {
 
 		// Ensure the work is on the desk
 		boolean isOnDesk = false;
-		for (WorkModel work : this.desk.getWorks()) {
+		for (FunctionNamespaceModel work : this.desk.getFunctionNamespaces()) {
 			if (work == workModel) {
 				isOnDesk = true;
 			}
 		}
 		if (!isOnDesk) {
 			// Not on desk so can not remove
-			return new NoChange<WorkModel>(workModel, "Remove work "
-					+ workModel.getWorkName(), "Work "
-					+ workModel.getWorkName() + " not on desk");
+			return new NoChange<FunctionNamespaceModel>(workModel,
+					"Remove work " + workModel.getFunctionNamespaceName(),
+					"FunctionNamespace " + workModel.getFunctionNamespaceName() + " not on desk");
 		}
 
 		// Return change to remove the work
-		return new AbstractChange<WorkModel>(workModel, "Remove work "
-				+ workModel.getWorkName()) {
+		return new AbstractChange<FunctionNamespaceModel>(workModel,
+				"Remove work " + workModel.getFunctionNamespaceName()) {
 
 			/**
-			 * {@link TaskModel} instances associated to {@link WorkModel}.
+			 * {@link FunctionModel} instances associated to
+			 * {@link FunctionNamespaceModel}.
 			 */
-			private TaskModel[] tasks;
+			private FunctionModel[] functions;
 
 			/**
 			 * {@link ConnectionModel} instances associated to the
-			 * {@link WorkModel}.
+			 * {@link FunctionNamespaceModel}.
 			 */
 			private ConnectionModel[] connections;
 
 			@Override
 			public void apply() {
 
-				// Remove connections to work and its tasks
+				// Remove connections to work and its functions
 				List<ConnectionModel> connectionList = new LinkedList<ConnectionModel>();
-				for (WorkTaskModel workTask : workModel.getWorkTasks()) {
-					DeskChangesImpl.this.removeWorkTaskConnections(workTask,
-							connectionList);
+				for (ManagedFunctionModel managedFunction : workModel.getManagedFunctions()) {
+					DeskChangesImpl.this.removeManagedFunctionConnections(managedFunction, connectionList);
 				}
-				this.connections = connectionList
-						.toArray(new ConnectionModel[0]);
+				this.connections = connectionList.toArray(new ConnectionModel[0]);
 
-				// Remove the associated tasks (storing for revert)
-				List<TaskModel> taskList = new LinkedList<TaskModel>();
-				for (WorkTaskModel workTask : workModel.getWorkTasks()) {
-					DeskChangesImpl.this.removeWorkTask(workTask, taskList);
+				// Remove the associated functions (storing for revert)
+				List<FunctionModel> functionList = new LinkedList<FunctionModel>();
+				for (ManagedFunctionModel managedFunction : workModel.getManagedFunctions()) {
+					DeskChangesImpl.this.removeManagedFunction(managedFunction, functionList);
 				}
-				this.tasks = taskList.toArray(new TaskModel[0]);
+				this.functions = functionList.toArray(new FunctionModel[0]);
 
 				// Remove the work
-				DeskChangesImpl.this.desk.removeWork(workModel);
+				DeskChangesImpl.this.desk.removeFunctionNamespace(workModel);
 			}
 
 			@Override
 			public void revert() {
-				// Add the work (ensuring in sorted order)
-				DeskChangesImpl.this.desk.addWork(workModel);
-				DeskChangesImpl.this.sortWorkModels();
+				// Add the namespace (ensuring in sorted order)
+				DeskChangesImpl.this.desk.addFunctionNamespace(workModel);
+				DeskChangesImpl.this.sortNamespaceModels();
 
-				// Add the tasks (in reverse order, ensuring sorted)
-				for (int i = (this.tasks.length - 1); i >= 0; i--) {
-					DeskChangesImpl.this.desk.addTask(this.tasks[i]);
+				// Add the functions (in reverse order, ensuring sorted)
+				for (int i = (this.functions.length - 1); i >= 0; i--) {
+					DeskChangesImpl.this.desk.addFunction(this.functions[i]);
 				}
-				DeskChangesImpl.this.sortTaskModels();
+				DeskChangesImpl.this.sortFunctionModels();
 
 				// Reconnect connections
 				for (ConnectionModel connection : this.connections) {
@@ -631,626 +581,571 @@ public class DeskChangesImpl implements DeskChanges {
 	}
 
 	@Override
-	public Change<WorkModel> renameWork(final WorkModel workModel,
-			final String newWorkName) {
+	public Change<FunctionNamespaceModel> renameFunctionNamespace(final FunctionNamespaceModel workModel,
+			final String newFunctionNamespaceName) {
 
 		// Ensure the work is on the desk
 		boolean isOnDesk = false;
-		for (WorkModel work : this.desk.getWorks()) {
+		for (FunctionNamespaceModel work : this.desk.getFunctionNamespaces()) {
 			if (work == workModel) {
 				isOnDesk = true;
 			}
 		}
 		if (!isOnDesk) {
 			// Not on desk so can not remove
-			return new NoChange<WorkModel>(workModel, "Rename work "
-					+ workModel.getWorkName() + " to " + newWorkName, "Work "
-					+ workModel.getWorkName() + " not on desk");
+			return new NoChange<FunctionNamespaceModel>(workModel,
+					"Rename work " + workModel.getFunctionNamespaceName() + " to " + newFunctionNamespaceName,
+					"FunctionNamespace " + workModel.getFunctionNamespaceName() + " not on desk");
 		}
 
 		// Store the old name for reverting
-		final String oldWorkName = workModel.getWorkName();
+		final String oldFunctionNamespaceName = workModel.getFunctionNamespaceName();
 
 		// Return change to rename work
-		return new AbstractChange<WorkModel>(workModel, "Rename work "
-				+ workModel.getWorkName() + " to " + newWorkName) {
+		return new AbstractChange<FunctionNamespaceModel>(workModel,
+				"Rename work " + workModel.getFunctionNamespaceName() + " to " + newFunctionNamespaceName) {
 			@Override
 			public void apply() {
-				// Rename and ensure work in sorted order
-				workModel.setWorkName(newWorkName);
-				DeskChangesImpl.this.sortWorkModels();
+				// Rename and ensure namespace in sorted order
+				workModel.setFunctionNamespaceName(newFunctionNamespaceName);
+				DeskChangesImpl.this.sortNamespaceModels();
 			}
 
 			@Override
 			public void revert() {
-				// Revert to old name, ensuring work sorted
-				workModel.setWorkName(oldWorkName);
-				DeskChangesImpl.this.sortWorkModels();
+				// Revert to old name, ensuring namespace sorted
+				workModel.setFunctionNamespaceName(oldFunctionNamespaceName);
+				DeskChangesImpl.this.sortNamespaceModels();
 			}
 		};
 	}
 
 	@Override
-	public <W extends Work> Change<WorkModel> refactorWork(
-			final WorkModel workModel, final String workName,
-			final String workSourceClassName, PropertyList properties,
-			FunctionNamespaceType<W> workType, Map<String, String> workTaskNameMapping,
-			Map<String, Map<String, String>> workTaskToObjectNameMapping,
-			Map<String, Map<String, String>> taskToFlowNameMapping,
-			Map<String, Map<String, String>> taskToEscalationTypeMapping,
-			String... taskNames) {
+	public Change<FunctionNamespaceModel> refactorFunctionNamespace(final FunctionNamespaceModel namespaceModel,
+			final String workName, final String managedFunctionSourceClassName, PropertyList properties,
+			FunctionNamespaceType namespaceType, Map<String, String> managedFunctionNameMapping,
+			Map<String, Map<String, String>> managedFunctionToObjectNameMapping,
+			Map<String, Map<String, String>> functionToFlowNameMapping,
+			Map<String, Map<String, String>> functionToEscalationTypeMapping, String... functionNames) {
 
 		// Create the list to contain all refactor changes
 		final List<Change<?>> refactor = new LinkedList<Change<?>>();
 
-		// ------------------- Details of WorkModel --------------------
+		// ------------ Details of FunctionNamespaceModel ------------
 
 		// Add change to rename the work
-		final String existingWorkName = workModel.getWorkName();
-		refactor.add(new AbstractChange<WorkModel>(workModel, "Rename work") {
+		final String existingNamespaceName = namespaceModel.getFunctionNamespaceName();
+		refactor.add(new AbstractChange<FunctionNamespaceModel>(namespaceModel, "Rename namespace") {
 			@Override
 			public void apply() {
-				workModel.setWorkName(workName);
+				namespaceModel.setFunctionNamespaceName(workName);
 			}
 
 			@Override
 			public void revert() {
-				workModel.setWorkName(existingWorkName);
+				namespaceModel.setFunctionNamespaceName(existingNamespaceName);
 			}
 		});
 
-		// Add change for work class source name
-		final String existingWorkSourceClassName = workModel
-				.getWorkSourceClassName();
-		refactor.add(new AbstractChange<WorkModel>(workModel,
-				"Change WorkSource class") {
+		// Add change for managed function class source name
+		final String existingManagedFunctionSourceClassName = namespaceModel.getManagedFunctionSourceClassName();
+		refactor.add(new AbstractChange<FunctionNamespaceModel>(namespaceModel, "Change ManagedFunctionSource class") {
 			@Override
 			public void apply() {
-				workModel.setWorkSourceClassName(workSourceClassName);
+				namespaceModel.setManagedFunctionSourceClassName(managedFunctionSourceClassName);
 			}
 
 			@Override
 			public void revert() {
-				workModel.setWorkSourceClassName(existingWorkSourceClassName);
+				namespaceModel.setManagedFunctionSourceClassName(existingManagedFunctionSourceClassName);
 			}
 		});
 
 		// Add change to the properties
-		final List<PropertyModel> existingProperties = new ArrayList<PropertyModel>(
-				workModel.getProperties());
+		final List<PropertyModel> existingProperties = new ArrayList<PropertyModel>(namespaceModel.getProperties());
 		final List<PropertyModel> newProperties = new LinkedList<PropertyModel>();
 		for (Property property : properties) {
-			newProperties.add(new PropertyModel(property.getName(), property
-					.getValue()));
+			newProperties.add(new PropertyModel(property.getName(), property.getValue()));
 		}
-		refactor.add(new AbstractChange<WorkModel>(workModel,
-				"Change work properties") {
+		refactor.add(new AbstractChange<FunctionNamespaceModel>(namespaceModel, "Change namespace properties") {
 			@Override
 			public void apply() {
 				for (PropertyModel property : existingProperties) {
-					workModel.removeProperty(property);
+					namespaceModel.removeProperty(property);
 				}
 				for (PropertyModel property : newProperties) {
-					workModel.addProperty(property);
+					namespaceModel.addProperty(property);
 				}
 			}
 
 			@Override
 			public void revert() {
 				for (PropertyModel property : newProperties) {
-					workModel.removeProperty(property);
+					namespaceModel.removeProperty(property);
 				}
 				for (PropertyModel property : existingProperties) {
-					workModel.addProperty(property);
+					namespaceModel.addProperty(property);
 				}
 			}
 		});
 
-		// ---------------- WorkTaskModel / TaskModel --------------------
+		// ------- ManagedFunctionModel / FunctionModel -------
 
-		// Create the map of existing work tasks to their names
-		Map<String, WorkTaskModel> existingWorkTasks = new HashMap<String, WorkTaskModel>();
-		for (WorkTaskModel workTask : workModel.getWorkTasks()) {
-			existingWorkTasks.put(workTask.getWorkTaskName(), workTask);
+		// Create the map of existing managed functions to their names
+		Map<String, ManagedFunctionModel> existingManagedFunctions = new HashMap<String, ManagedFunctionModel>();
+		for (ManagedFunctionModel managedFunction : namespaceModel.getManagedFunctions()) {
+			existingManagedFunctions.put(managedFunction.getManagedFunctionName(), managedFunction);
 		}
 
-		// Create the set of tasks to include
-		Set<String> includeTaskNames = new HashSet<String>(Arrays
-				.asList(taskNames));
+		// Create the set of functions to include
+		Set<String> includeFunctionNames = new HashSet<String>(Arrays.asList(functionNames));
 
-		// Refactor tasks
-		ManagedFunctionType<?, ?, ?>[] taskTypes = workType.getManagedFunctionTypes();
-		List<WorkTaskModel> targetTaskList = new LinkedList<WorkTaskModel>();
-		for (int t = 0; t < taskTypes.length; t++) {
-			ManagedFunctionType<?, ?, ?> taskType = taskTypes[t];
+		// Refactor functions
+		ManagedFunctionType<?, ?>[] functionTypes = namespaceType.getManagedFunctionTypes();
+		List<ManagedFunctionModel> targetFunctionList = new LinkedList<ManagedFunctionModel>();
+		for (int t = 0; t < functionTypes.length; t++) {
+			ManagedFunctionType<?, ?> functionType = functionTypes[t];
 
-			// Obtain the details of the task type
-			final String workTaskName = taskType.getFunctionName();
-			Class<?> returnClass = taskType.getReturnType();
-			final String returnTypeName = (returnClass == null ? null
-					: returnClass.getName());
+			// Obtain the details of the function type
+			final String managedFunctionName = functionType.getFunctionName();
+			Class<?> returnClass = functionType.getReturnType();
+			final String returnTypeName = (returnClass == null ? null : returnClass.getName());
 
-			// Determine if include the task
-			if ((includeTaskNames.size() > 0)
-					&& (!(includeTaskNames.contains(workTaskName)))) {
-				continue; // task filtered from being included
+			// Determine if include the function
+			if ((includeFunctionNames.size() > 0) && (!(includeFunctionNames.contains(managedFunctionName)))) {
+				continue; // function filtered from being included
 			}
 
-			// Obtain the work task for task type (may need to create)
-			WorkTaskModel findWorkTask = this.getExistingItem(workTaskName,
-					workTaskNameMapping, existingWorkTasks);
-			final WorkTaskModel workTask = ((findWorkTask == null) ? new WorkTaskModel(
-					workTaskName)
-					: findWorkTask);
-			targetTaskList.add(workTask);
+			// Obtain managed function for function type (may need to create)
+			ManagedFunctionModel findManagedFunction = this.getExistingItem(managedFunctionName,
+					managedFunctionNameMapping, existingManagedFunctions);
+			final ManagedFunctionModel managedFunction = ((findManagedFunction == null)
+					? new ManagedFunctionModel(managedFunctionName) : findManagedFunction);
+			targetFunctionList.add(managedFunction);
 
-			// Refactor details of work task (and tasks)
-			final String existingWorkTaskName = workTask.getWorkTaskName();
-			refactor.add(new AbstractChange<WorkTaskModel>(workTask,
-					"Refactor work task") {
+			// Refactor details of managed function (and functions)
+			final String existingManagedFunctionName = managedFunction.getManagedFunctionName();
+			refactor.add(new AbstractChange<ManagedFunctionModel>(managedFunction, "Refactor managed function") {
 
 				/**
-				 * Existing return types for the {@link TaskModel} instances.
+				 * Existing return types for {@link FunctionModel} instances.
 				 */
-				private Map<TaskModel, String> existingReturnTypes = new HashMap<TaskModel, String>();
+				private Map<FunctionModel, String> existingReturnTypes = new HashMap<FunctionModel, String>();
 
 				@Override
 				public void apply() {
-					// Specify new task name
-					workTask.setWorkTaskName(workTaskName);
-					for (WorkTaskToTaskModel conn : workTask.getTasks()) {
-						TaskModel task = conn.getTask();
-						task.setWorkTaskName(workTaskName);
-						this.existingReturnTypes
-								.put(task, task.getReturnType());
-						task.setReturnType(returnTypeName);
+					// Specify new function name
+					managedFunction.setManagedFunctionName(managedFunctionName);
+					for (ManagedFunctionToFunctionModel conn : managedFunction.getFunctions()) {
+						FunctionModel function = conn.getFunction();
+						function.setManagedFunctionName(managedFunctionName);
+						this.existingReturnTypes.put(function, function.getReturnType());
+						function.setReturnType(returnTypeName);
 					}
 				}
 
 				@Override
 				public void revert() {
-					// Revert to existing task name
-					workTask.setWorkTaskName(existingWorkTaskName);
-					for (WorkTaskToTaskModel conn : workTask.getTasks()) {
-						TaskModel task = conn.getTask();
-						task.setWorkTaskName(existingWorkTaskName);
-						task.setReturnType(this.existingReturnTypes.get(task));
+					// Revert to existing function name
+					managedFunction.setManagedFunctionName(existingManagedFunctionName);
+					for (ManagedFunctionToFunctionModel conn : managedFunction.getFunctions()) {
+						FunctionModel function = conn.getFunction();
+						function.setManagedFunctionName(existingManagedFunctionName);
+						function.setReturnType(this.existingReturnTypes.get(function));
 					}
 				}
 			});
 
-			// ------------------- WorkTaskObjectModel --------------------
+			// ---------- ManagedFunctionObjectModel ----------
 
-			// Work task to be refactored, so obtain object name mappings
-			Map<String, String> objectTargetToExisting = workTaskToObjectNameMapping
-					.get(workTaskName);
+			// Managed function to be refactored, so obtain object name mappings
+			Map<String, String> objectTargetToExisting = managedFunctionToObjectNameMapping.get(managedFunctionName);
 			if (objectTargetToExisting == null) {
 				// Provide default empty map
 				objectTargetToExisting = new HashMap<String, String>(0);
 			}
 
-			// Create the map of existing work task objects to their names
-			Map<String, WorkTaskObjectModel> existingWorkTaskObjects = new HashMap<String, WorkTaskObjectModel>();
-			for (WorkTaskObjectModel workTaskObject : workTask.getTaskObjects()) {
-				existingWorkTaskObjects.put(workTaskObject.getObjectName(),
-						workTaskObject);
+			// Create map of existing managed function objects to their names
+			Map<String, ManagedFunctionObjectModel> existingManagedFunctionObjects = new HashMap<String, ManagedFunctionObjectModel>();
+			for (ManagedFunctionObjectModel managedFunctionObject : managedFunction.getManagedFunctionObjects()) {
+				existingManagedFunctionObjects.put(managedFunctionObject.getObjectName(), managedFunctionObject);
 			}
 
 			// Obtain the objects in order as per type
-			ManagedFunctionObjectType<?>[] objectTypes = taskType.getObjectTypes();
-			final WorkTaskObjectModel[] targetObjectOrder = new WorkTaskObjectModel[objectTypes.length];
+			ManagedFunctionObjectType<?>[] objectTypes = functionType.getObjectTypes();
+			final ManagedFunctionObjectModel[] targetObjectOrder = new ManagedFunctionObjectModel[objectTypes.length];
 			for (int o = 0; o < objectTypes.length; o++) {
 				ManagedFunctionObjectType<?> objectType = objectTypes[o];
 
 				// Obtain the details of the object type
 				final String objectName = objectType.getObjectName();
 				Enum<?> objectKey = objectType.getKey();
-				final String objectKeyName = (objectKey == null ? null
-						: objectKey.name());
+				final String objectKeyName = (objectKey == null ? null : objectKey.name());
 				Class<?> objectClass = objectType.getObjectType();
-				final String objectTypeName = (objectClass == null ? null
-						: objectClass.getName());
+				final String objectTypeName = (objectClass == null ? null : objectClass.getName());
 
 				// Obtain the object for object type (may need to create)
-				WorkTaskObjectModel findWorkTaskObject = this.getExistingItem(
-						objectName, objectTargetToExisting,
-						existingWorkTaskObjects);
-				final WorkTaskObjectModel workTaskObject = ((findWorkTaskObject == null) ? new WorkTaskObjectModel(
-						objectName, objectKeyName, objectTypeName, false)
-						: findWorkTaskObject);
-				targetObjectOrder[o] = workTaskObject;
+				ManagedFunctionObjectModel findManagedFunctionObject = this.getExistingItem(objectName,
+						objectTargetToExisting, existingManagedFunctionObjects);
+				final ManagedFunctionObjectModel managedFunctionObject = ((findManagedFunctionObject == null)
+						? new ManagedFunctionObjectModel(objectName, objectKeyName, objectTypeName, false)
+						: findManagedFunctionObject);
+				targetObjectOrder[o] = managedFunctionObject;
 
 				// Refactor details of object
-				final String existingObjectName = workTaskObject
-						.getObjectName();
-				final String existingKeyName = workTaskObject.getKey();
-				final String existingTypeName = workTaskObject.getObjectType();
-				refactor.add(new AbstractChange<WorkTaskObjectModel>(
-						workTaskObject, "Refactor work task object") {
+				final String existingObjectName = managedFunctionObject.getObjectName();
+				final String existingKeyName = managedFunctionObject.getKey();
+				final String existingTypeName = managedFunctionObject.getObjectType();
+				refactor.add(new AbstractChange<ManagedFunctionObjectModel>(managedFunctionObject,
+						"Refactor managed function object") {
 					@Override
 					public void apply() {
-						workTaskObject.setObjectName(objectName);
-						workTaskObject.setKey(objectKeyName);
-						workTaskObject.setObjectType(objectTypeName);
+						managedFunctionObject.setObjectName(objectName);
+						managedFunctionObject.setKey(objectKeyName);
+						managedFunctionObject.setObjectType(objectTypeName);
 					}
 
 					@Override
 					public void revert() {
-						workTaskObject.setObjectName(existingObjectName);
-						workTaskObject.setKey(existingKeyName);
-						workTaskObject.setObjectType(existingTypeName);
+						managedFunctionObject.setObjectName(existingObjectName);
+						managedFunctionObject.setKey(existingKeyName);
+						managedFunctionObject.setObjectType(existingTypeName);
 					}
 				});
 			}
 
 			// Obtain the existing object order
-			final WorkTaskObjectModel[] existingObjectOrder = workTask
-					.getTaskObjects().toArray(new WorkTaskObjectModel[0]);
+			final ManagedFunctionObjectModel[] existingObjectOrder = managedFunction.getManagedFunctionObjects()
+					.toArray(new ManagedFunctionObjectModel[0]);
 
 			// Add changes to disconnect existing objects to be removed
-			Set<WorkTaskObjectModel> targetObjects = new HashSet<WorkTaskObjectModel>(
+			Set<ManagedFunctionObjectModel> targetObjects = new HashSet<ManagedFunctionObjectModel>(
 					Arrays.asList(targetObjectOrder));
-			for (WorkTaskObjectModel existingObject : existingObjectOrder) {
+			for (ManagedFunctionObjectModel existingObject : existingObjectOrder) {
 				if (!(targetObjects.contains(existingObject))) {
 					// Add change to disconnect object
-					final WorkTaskObjectModel taskObject = existingObject;
-					refactor.add(new DisconnectChange<WorkTaskObjectModel>(
-							existingObject) {
+					final ManagedFunctionObjectModel functionObject = existingObject;
+					refactor.add(new DisconnectChange<ManagedFunctionObjectModel>(existingObject) {
 						@Override
-						protected void populateRemovedConnections(
-								List<ConnectionModel> connList) {
-							DeskChangesImpl.this
-									.removeWorkTaskObjectConnections(
-											taskObject, connList);
+						protected void populateRemovedConnections(List<ConnectionModel> connList) {
+							DeskChangesImpl.this.removeManagedFunctionObjectConnections(functionObject, connList);
 						}
 					});
 				}
 			}
 
 			// Add change to order the refactored objects
-			refactor.add(new AbstractChange<WorkTaskModel>(workTask,
-					"Refactor objects of work task") {
-				@Override
-				public void apply() {
-					// Remove existing objects, add target objects
-					for (WorkTaskObjectModel object : existingObjectOrder) {
-						workTask.removeTaskObject(object);
-					}
-					for (WorkTaskObjectModel object : targetObjectOrder) {
-						workTask.addTaskObject(object);
-					}
+			refactor.add(
+					new AbstractChange<ManagedFunctionModel>(managedFunction, "Refactor objects of managed function") {
+						@Override
+						public void apply() {
+							// Remove existing objects, add target objects
+							for (ManagedFunctionObjectModel object : existingObjectOrder) {
+								managedFunction.removeManagedFunctionObject(object);
+							}
+							for (ManagedFunctionObjectModel object : targetObjectOrder) {
+								managedFunction.addManagedFunctionObject(object);
+							}
+						}
+
+						@Override
+						public void revert() {
+							// Remove the target objects, add back existing
+							for (ManagedFunctionObjectModel object : targetObjectOrder) {
+								managedFunction.removeManagedFunctionObject(object);
+							}
+							for (ManagedFunctionObjectModel object : existingObjectOrder) {
+								managedFunction.addManagedFunctionObject(object);
+							}
+						}
+					});
+
+			// ---------------------- FunctionModel ------------------------
+
+			// Refactor the functions of the managed function
+			for (ManagedFunctionToFunctionModel managedFunctionToFunction : managedFunction.getFunctions()) {
+
+				// Ensure have function for connection
+				final FunctionModel function = managedFunctionToFunction.getFunction();
+				if (function == null) {
+					continue; // must have function
 				}
 
-				@Override
-				public void revert() {
-					// Remove the target objects, add back existing
-					for (WorkTaskObjectModel object : targetObjectOrder) {
-						workTask.removeTaskObject(object);
-					}
-					for (WorkTaskObjectModel object : existingObjectOrder) {
-						workTask.addTaskObject(object);
-					}
-				}
-			});
+				// Obtain details of function
+				String functionName = function.getFunctionName();
 
-			// ---------------------- TaskModel ------------------------
+				// --------------- FunctionFlowModel ------------------------
 
-			// Refactor the tasks of the work task
-			for (WorkTaskToTaskModel workTaskToTask : workTask.getTasks()) {
-
-				// Ensure have task for connection
-				final TaskModel task = workTaskToTask.getTask();
-				if (task == null) {
-					continue; // must have task
-				}
-
-				// Obtain details of task
-				String taskName = task.getTaskName();
-
-				// --------------- TaskFlowModel ------------------------
-
-				// Task to be refactored, so obtain flow name mappings
-				Map<String, String> flowTargetToExisting = taskToFlowNameMapping
-						.get(taskName);
+				// Function to be refactored, so obtain flow name mappings
+				Map<String, String> flowTargetToExisting = functionToFlowNameMapping.get(functionName);
 				if (flowTargetToExisting == null) {
 					// Provide default empty map
 					flowTargetToExisting = new HashMap<String, String>(0);
 				}
 
-				// Create the map of existing task flows to their names
-				Map<String, TaskFlowModel> existingTaskFlows = new HashMap<String, TaskFlowModel>();
-				for (TaskFlowModel taskFlow : task.getTaskFlows()) {
-					existingTaskFlows.put(taskFlow.getFlowName(), taskFlow);
+				// Create the map of existing function flows to their names
+				Map<String, FunctionFlowModel> existingFunctionFlows = new HashMap<String, FunctionFlowModel>();
+				for (FunctionFlowModel functionFlow : function.getFunctionFlows()) {
+					existingFunctionFlows.put(functionFlow.getFlowName(), functionFlow);
 				}
 
 				// Obtain the flows in order of type
-				ManagedFunctionFlowType<?>[] flowTypes = taskType.getFlowTypes();
-				final TaskFlowModel[] targetFlowOrder = new TaskFlowModel[flowTypes.length];
+				ManagedFunctionFlowType<?>[] flowTypes = functionType.getFlowTypes();
+				final FunctionFlowModel[] targetFlowOrder = new FunctionFlowModel[flowTypes.length];
 				for (int f = 0; f < targetFlowOrder.length; f++) {
 					ManagedFunctionFlowType<?> flowType = flowTypes[f];
 
 					// Obtain the details of the flow type
 					final String flowName = flowType.getFlowName();
 					Enum<?> flowKey = flowType.getKey();
-					final String flowKeyName = (flowKey == null ? null
-							: flowKey.name());
+					final String flowKeyName = (flowKey == null ? null : flowKey.name());
 					Class<?> argumentType = flowType.getArgumentType();
-					final String argumentTypeName = (argumentType == null ? null
-							: argumentType.getName());
+					final String argumentTypeName = (argumentType == null ? null : argumentType.getName());
 
 					// Obtain the flow for flow type (may need to create)
-					TaskFlowModel findTaskFlow = this.getExistingItem(flowName,
-							flowTargetToExisting, existingTaskFlows);
-					final TaskFlowModel taskFlow = ((findTaskFlow == null) ? new TaskFlowModel(
-							flowName, flowKeyName, argumentTypeName)
-							: findTaskFlow);
-					targetFlowOrder[f] = taskFlow;
+					FunctionFlowModel findFunctionFlow = this.getExistingItem(flowName, flowTargetToExisting,
+							existingFunctionFlows);
+					final FunctionFlowModel functionFlow = ((findFunctionFlow == null)
+							? new FunctionFlowModel(flowName, flowKeyName, argumentTypeName) : findFunctionFlow);
+					targetFlowOrder[f] = functionFlow;
 
 					// Refactor details of flow
-					final String existingFlowName = taskFlow.getFlowName();
-					final String existingFlowKeyName = taskFlow.getKey();
-					final String existingArgumentTypeName = taskFlow
-							.getArgumentType();
-					refactor.add(new AbstractChange<TaskFlowModel>(taskFlow,
-							"Refactor task flow") {
+					final String existingFlowName = functionFlow.getFlowName();
+					final String existingFlowKeyName = functionFlow.getKey();
+					final String existingArgumentTypeName = functionFlow.getArgumentType();
+					refactor.add(new AbstractChange<FunctionFlowModel>(functionFlow, "Refactor function flow") {
 						@Override
 						public void apply() {
-							taskFlow.setFlowName(flowName);
-							taskFlow.setKey(flowKeyName);
-							taskFlow.setArgumentType(argumentTypeName);
+							functionFlow.setFlowName(flowName);
+							functionFlow.setKey(flowKeyName);
+							functionFlow.setArgumentType(argumentTypeName);
 						}
 
 						@Override
 						public void revert() {
-							taskFlow.setFlowName(existingFlowName);
-							taskFlow.setKey(existingFlowKeyName);
-							taskFlow.setArgumentType(existingArgumentTypeName);
+							functionFlow.setFlowName(existingFlowName);
+							functionFlow.setKey(existingFlowKeyName);
+							functionFlow.setArgumentType(existingArgumentTypeName);
 						}
 					});
 				}
 
 				// Obtain the existing flow order
-				final TaskFlowModel[] existingFlowOrder = task.getTaskFlows()
-						.toArray(new TaskFlowModel[0]);
+				final FunctionFlowModel[] existingFlowOrder = function.getFunctionFlows()
+						.toArray(new FunctionFlowModel[0]);
 
 				// Add changes to disconnect existing flows to be removed
-				Set<TaskFlowModel> targetFlows = new HashSet<TaskFlowModel>(
-						Arrays.asList(targetFlowOrder));
-				for (TaskFlowModel existingTaskFlow : existingFlowOrder) {
-					if (!(targetFlows.contains(existingTaskFlow))) {
+				Set<FunctionFlowModel> targetFlows = new HashSet<FunctionFlowModel>(Arrays.asList(targetFlowOrder));
+				for (FunctionFlowModel existingFunctionFlow : existingFlowOrder) {
+					if (!(targetFlows.contains(existingFunctionFlow))) {
 						// Add change to disconnect flow
-						final TaskFlowModel taskFlow = existingTaskFlow;
-						refactor.add(new DisconnectChange<TaskFlowModel>(
-								taskFlow) {
+						final FunctionFlowModel functionFlow = existingFunctionFlow;
+						refactor.add(new DisconnectChange<FunctionFlowModel>(functionFlow) {
 							@Override
-							protected void populateRemovedConnections(
-									List<ConnectionModel> connList) {
-								DeskChangesImpl.this.removeTaskFlowConnections(
-										taskFlow, connList);
+							protected void populateRemovedConnections(List<ConnectionModel> connList) {
+								DeskChangesImpl.this.removeFunctionFlowConnections(functionFlow, connList);
 							}
 						});
 					}
 				}
 
 				// Add change to order the refactored flows
-				refactor.add(new AbstractChange<TaskModel>(task,
-						"Refactor task flows") {
+				refactor.add(new AbstractChange<FunctionModel>(function, "Refactor function flows") {
 					@Override
 					public void apply() {
 						// Remove existing flows, add target flows
-						for (TaskFlowModel flow : existingFlowOrder) {
-							task.removeTaskFlow(flow);
+						for (FunctionFlowModel flow : existingFlowOrder) {
+							function.removeFunctionFlow(flow);
 						}
-						for (TaskFlowModel flow : targetFlowOrder) {
-							task.addTaskFlow(flow);
+						for (FunctionFlowModel flow : targetFlowOrder) {
+							function.addFunctionFlow(flow);
 						}
 					}
 
 					@Override
 					public void revert() {
 						// Remove target flows, add back existing flows
-						for (TaskFlowModel flow : targetFlowOrder) {
-							task.removeTaskFlow(flow);
+						for (FunctionFlowModel flow : targetFlowOrder) {
+							function.removeFunctionFlow(flow);
 						}
-						for (TaskFlowModel flow : existingFlowOrder) {
-							task.addTaskFlow(flow);
+						for (FunctionFlowModel flow : existingFlowOrder) {
+							function.addFunctionFlow(flow);
 						}
 					}
 				});
 
-				// --------------- TaskEscalationModel ------------------
+				// --------------- FunctionEscalationModel ------------------
 
-				// Task to be refactored, so obtain escalation name mappings
-				Map<String, String> escalationTargetToExisting = taskToEscalationTypeMapping
-						.get(taskName);
+				// Function to be refactored, so obtain escalation name mappings
+				Map<String, String> escalationTargetToExisting = functionToEscalationTypeMapping.get(functionName);
 				if (escalationTargetToExisting == null) {
 					// Provide default empty map
 					escalationTargetToExisting = new HashMap<String, String>(0);
 				}
 
-				// Create the map of existing task escalations to their names
-				Map<String, TaskEscalationModel> existingTaskEscalations = new HashMap<String, TaskEscalationModel>();
-				for (TaskEscalationModel taskEscalation : task
-						.getTaskEscalations()) {
-					existingTaskEscalations.put(taskEscalation
-							.getEscalationType(), taskEscalation);
+				// Create the map of existing function escalations to their
+				// names
+				Map<String, FunctionEscalationModel> existingFunctionEscalations = new HashMap<String, FunctionEscalationModel>();
+				for (FunctionEscalationModel functionEscalation : function.getFunctionEscalations()) {
+					existingFunctionEscalations.put(functionEscalation.getEscalationType(), functionEscalation);
 				}
 
 				// Obtain the escalations in order of type
-				ManagedFunctionEscalationType[] escalationTypes = taskType
-						.getEscalationTypes();
-				final TaskEscalationModel[] targetEscalationOrder = new TaskEscalationModel[escalationTypes.length];
+				ManagedFunctionEscalationType[] escalationTypes = functionType.getEscalationTypes();
+				final FunctionEscalationModel[] targetEscalationOrder = new FunctionEscalationModel[escalationTypes.length];
 				for (int e = 0; e < targetEscalationOrder.length; e++) {
 					ManagedFunctionEscalationType escalationType = escalationTypes[e];
 
 					// Obtain details of the escalation type
-					final String escalationTypeName = escalationType
-							.getEscalationType().getName();
+					final String escalationTypeName = escalationType.getEscalationType().getName();
 
 					// Obtain the escalation for escalation type (may create)
-					TaskEscalationModel findTaskEscalation = this
-							.getExistingItem(escalationTypeName,
-									escalationTargetToExisting,
-									existingTaskEscalations);
-					final TaskEscalationModel taskEscalation = ((findTaskEscalation == null) ? new TaskEscalationModel(
-							escalationTypeName)
-							: findTaskEscalation);
-					targetEscalationOrder[e] = taskEscalation;
+					FunctionEscalationModel findFunctionEscalation = this.getExistingItem(escalationTypeName,
+							escalationTargetToExisting, existingFunctionEscalations);
+					final FunctionEscalationModel functionEscalation = ((findFunctionEscalation == null)
+							? new FunctionEscalationModel(escalationTypeName) : findFunctionEscalation);
+					targetEscalationOrder[e] = functionEscalation;
 
 					// Refactor details of escalation
-					final String existingEscalationTypeName = taskEscalation
-							.getEscalationType();
-					refactor.add(new AbstractChange<TaskEscalationModel>(
-							taskEscalation, "Refactor task escalation") {
+					final String existingEscalationTypeName = functionEscalation.getEscalationType();
+					refactor.add(new AbstractChange<FunctionEscalationModel>(functionEscalation,
+							"Refactor function escalation") {
 						@Override
 						public void apply() {
-							taskEscalation
-									.setEscalationType(escalationTypeName);
+							functionEscalation.setEscalationType(escalationTypeName);
 						}
 
 						@Override
 						public void revert() {
-							taskEscalation
-									.setEscalationType(existingEscalationTypeName);
+							functionEscalation.setEscalationType(existingEscalationTypeName);
 						}
 					});
 				}
 
 				// Obtain the existing escalation order
-				final TaskEscalationModel[] existingEscalationOrder = task
-						.getTaskEscalations().toArray(
-								new TaskEscalationModel[0]);
+				final FunctionEscalationModel[] existingEscalationOrder = function.getFunctionEscalations()
+						.toArray(new FunctionEscalationModel[0]);
 
 				// Add changes to disconnect existing escalations to be removed
-				Set<TaskEscalationModel> targetEscalations = new HashSet<TaskEscalationModel>(
+				Set<FunctionEscalationModel> targetEscalations = new HashSet<FunctionEscalationModel>(
 						Arrays.asList(targetEscalationOrder));
-				for (TaskEscalationModel existingEscalation : existingEscalationOrder) {
+				for (FunctionEscalationModel existingEscalation : existingEscalationOrder) {
 					if (!(targetEscalations.contains(existingEscalation))) {
 						// Add change to disconnect escalation
-						final TaskEscalationModel taskEscalation = existingEscalation;
-						refactor.add(new DisconnectChange<TaskEscalationModel>(
-								taskEscalation) {
+						final FunctionEscalationModel functionEscalation = existingEscalation;
+						refactor.add(new DisconnectChange<FunctionEscalationModel>(functionEscalation) {
 							@Override
-							protected void populateRemovedConnections(
-									List<ConnectionModel> connList) {
-								DeskChangesImpl.this
-										.removeTaskEscalationConnections(
-												taskEscalation, connList);
+							protected void populateRemovedConnections(List<ConnectionModel> connList) {
+								DeskChangesImpl.this.removeFunctionEscalationConnections(functionEscalation, connList);
 							}
 						});
 					}
 				}
 
 				// Add change to order the refactored escalations
-				refactor.add(new AbstractChange<TaskModel>(task,
-						"Refactor task escalations") {
+				refactor.add(new AbstractChange<FunctionModel>(function, "Refactor function escalations") {
 					@Override
 					public void apply() {
 						// Remove existing escalations, add target escalations
-						for (TaskEscalationModel escalation : existingEscalationOrder) {
-							task.removeTaskEscalation(escalation);
+						for (FunctionEscalationModel escalation : existingEscalationOrder) {
+							function.removeFunctionEscalation(escalation);
 						}
-						for (TaskEscalationModel escalation : targetEscalationOrder) {
-							task.addTaskEscalation(escalation);
+						for (FunctionEscalationModel escalation : targetEscalationOrder) {
+							function.addFunctionEscalation(escalation);
 						}
 					}
 
 					@Override
 					public void revert() {
 						// Remove target escalations, add back existing
-						for (TaskEscalationModel escalation : targetEscalationOrder) {
-							task.removeTaskEscalation(escalation);
+						for (FunctionEscalationModel escalation : targetEscalationOrder) {
+							function.removeFunctionEscalation(escalation);
 						}
-						for (TaskEscalationModel escalation : existingEscalationOrder) {
-							task.addTaskEscalation(escalation);
+						for (FunctionEscalationModel escalation : existingEscalationOrder) {
+							function.addFunctionEscalation(escalation);
 						}
 					}
 				});
 			}
 		}
 
-		// ------------ WorkTaskModel / TaskModel (continued) ----------------
+		// ------ ManagedFunctionModel / FunctionModel (continued) ------
 
-		// Obtain the target work task order
-		final WorkTaskModel[] targetTaskOrder = targetTaskList
-				.toArray(new WorkTaskModel[0]);
+		// Obtain the target managed function order
+		final ManagedFunctionModel[] targetFunctionOrder = targetFunctionList.toArray(new ManagedFunctionModel[0]);
 
-		// Obtain existing work task order
-		final WorkTaskModel[] existingTaskOrder = workModel.getWorkTasks()
-				.toArray(new WorkTaskModel[0]);
+		// Obtain existing managed function order
+		final ManagedFunctionModel[] existingFunctionOrder = namespaceModel.getManagedFunctions()
+				.toArray(new ManagedFunctionModel[0]);
 
-		// Add changes to disconnect existing tasks to be removed
-		Set<WorkTaskModel> targetTasks = new HashSet<WorkTaskModel>(Arrays
-				.asList(targetTaskOrder));
-		for (WorkTaskModel existingTask : existingTaskOrder) {
-			if (!(targetTasks.contains(existingTask))) {
-				final WorkTaskModel workTask = existingTask;
+		// Add changes to disconnect existing functions to be removed
+		Set<ManagedFunctionModel> targetFunctions = new HashSet<ManagedFunctionModel>(
+				Arrays.asList(targetFunctionOrder));
+		for (ManagedFunctionModel existingFunction : existingFunctionOrder) {
+			if (!(targetFunctions.contains(existingFunction))) {
+				final ManagedFunctionModel managedFunction = existingFunction;
 
-				// Add change to disconnect work task (and its tasks)
-				refactor.add(new DisconnectChange<WorkTaskModel>(workTask) {
+				// Add change to disconnect managed function (and its functions)
+				refactor.add(new DisconnectChange<ManagedFunctionModel>(managedFunction) {
 					@Override
-					protected void populateRemovedConnections(
-							List<ConnectionModel> connList) {
-						DeskChangesImpl.this.removeWorkTaskConnections(
-								workTask, connList);
+					protected void populateRemovedConnections(List<ConnectionModel> connList) {
+						DeskChangesImpl.this.removeManagedFunctionConnections(managedFunction, connList);
 					}
 				});
 
-				// Add change to remove tasks of work task
-				refactor.add(new AbstractChange<WorkTaskModel>(workTask,
-						"Remove tasks of work task") {
+				// Add change to remove functions of managed function
+				refactor.add(new AbstractChange<ManagedFunctionModel>(managedFunction,
+						"Remove functions of managed function") {
 
 					/**
-					 * Removed {@link TaskModel} instances.
+					 * Removed {@link FunctionModel} instances.
 					 */
-					private List<TaskModel> tasks;
+					private List<FunctionModel> functions;
 
 					@Override
 					public void apply() {
-						this.tasks = new LinkedList<TaskModel>();
-						DeskChangesImpl.this.removeWorkTask(workTask,
-								this.tasks);
+						this.functions = new LinkedList<FunctionModel>();
+						DeskChangesImpl.this.removeManagedFunction(managedFunction, this.functions);
 					}
 
 					@Override
 					public void revert() {
-						// Add back the task models
-						for (TaskModel task : this.tasks) {
-							DeskChangesImpl.this.desk.addTask(task);
+						// Add back the function models
+						for (FunctionModel function : this.functions) {
+							DeskChangesImpl.this.desk.addFunction(function);
 						}
 					}
 				});
 			}
 		}
 
-		// Add change to order the new tasks
-		refactor.add(new AbstractChange<WorkModel>(workModel,
-				"Refactor tasks of work") {
+		// Add change to order the new functions
+		refactor.add(new AbstractChange<FunctionNamespaceModel>(namespaceModel, "Refactor functions of namespace") {
 			@Override
 			public void apply() {
-				// Remove existing tasks, add target tasks
-				for (WorkTaskModel task : existingTaskOrder) {
-					workModel.removeWorkTask(task);
+				// Remove existing functions, add target functions
+				for (ManagedFunctionModel function : existingFunctionOrder) {
+					namespaceModel.removeManagedFunction(function);
 				}
-				for (WorkTaskModel task : targetTaskOrder) {
-					workModel.addWorkTask(task);
+				for (ManagedFunctionModel function : targetFunctionOrder) {
+					namespaceModel.addManagedFunction(function);
 				}
 			}
 
 			@Override
 			public void revert() {
-				// Remove the target tasks, add back existing
-				for (WorkTaskModel task : targetTaskOrder) {
-					workModel.removeWorkTask(task);
+				// Remove the target functions, add back existing
+				for (ManagedFunctionModel function : targetFunctionOrder) {
+					namespaceModel.removeManagedFunction(function);
 				}
-				for (WorkTaskModel task : existingTaskOrder) {
-					workModel.addWorkTask(task);
+				for (ManagedFunctionModel function : existingFunctionOrder) {
+					namespaceModel.addManagedFunction(function);
 				}
 			}
 		});
 
 		// Return change to do all the refactoring
-		return new AbstractChange<WorkModel>(workModel, "Refactor work") {
+		return new AbstractChange<FunctionNamespaceModel>(namespaceModel, "Refactor namespace") {
 			@Override
 			public void apply() {
 				for (Change<?> change : refactor) {
@@ -1279,8 +1174,7 @@ public class DeskChangesImpl implements DeskChanges {
 	 * @param existingNameToItem
 	 *            Mapping of existing item name to the existing item.
 	 */
-	private <T> T getExistingItem(String targetItemName,
-			Map<String, String> targetToExistingName,
+	private <T> T getExistingItem(String targetItemName, Map<String, String> targetToExistingName,
 			Map<String, T> existingNameToItem) {
 
 		// Obtain the existing item name
@@ -1295,64 +1189,62 @@ public class DeskChangesImpl implements DeskChanges {
 	}
 
 	@Override
-	public <W extends Work, D extends Enum<D>, F extends Enum<F>> Change<WorkTaskModel> addWorkTask(
-			final WorkModel workModel, ManagedFunctionType<W, D, F> taskType) {
+	public <M extends Enum<M>, F extends Enum<F>> Change<ManagedFunctionModel> addManagedFunction(
+			final FunctionNamespaceModel namespaceModel, ManagedFunctionType<M, F> functionType) {
 
-		// Ensure the work task is not already added
-		String taskName = taskType.getFunctionName();
-		for (WorkTaskModel workTask : workModel.getWorkTasks()) {
-			if (taskName.equals(taskName)) {
-				// Task already added
-				return new NoChange<WorkTaskModel>(workTask, "Add work task "
-						+ taskName, "Task " + taskName
-						+ " already added to work " + workModel.getWorkName());
+		// Ensure the managed function is not already added
+		String functionName = functionType.getFunctionName();
+		for (ManagedFunctionModel managedFunction : namespaceModel.getManagedFunctions()) {
+			if (functionName.equals(functionName)) {
+				// Function already added
+				return new NoChange<ManagedFunctionModel>(managedFunction, "Add managed function " + functionName,
+						"Function " + functionName + " already added to namespace "
+								+ namespaceModel.getFunctionNamespaceName());
 			}
 		}
 
-		// Create the work task model
-		final WorkTaskModel workTask = DeskChangesImpl.this
-				.createWorkTaskModel(taskType);
+		// Create the managed function model
+		final ManagedFunctionModel managedFunction = DeskChangesImpl.this.createManagedFunctionModel(functionType);
 
-		// Return the add work task change
-		return new AbstractChange<WorkTaskModel>(workTask, "Add work task "
-				+ taskName) {
+		// Return the add managed function change
+		return new AbstractChange<ManagedFunctionModel>(managedFunction, "Add managed function " + functionName) {
 			@Override
 			public void apply() {
-				// Add work task (ensuring work tasks sorted)
-				workModel.addWorkTask(workTask);
-				DeskChangesImpl.sortWorkTaskModels(workModel.getWorkTasks());
+				// Add managed function (ensuring managed functions sorted)
+				namespaceModel.addManagedFunction(managedFunction);
+				DeskChangesImpl.sortManagedFunctionModels(namespaceModel.getManagedFunctions());
 			}
 
 			@Override
 			public void revert() {
-				// Remove work task (should already be sorted)
-				workModel.removeWorkTask(workTask);
+				// Remove managed function (should already be sorted)
+				namespaceModel.removeManagedFunction(managedFunction);
 			}
 		};
 	}
 
 	@Override
-	public Change<WorkTaskModel> removeWorkTask(final WorkModel work,
-			final WorkTaskModel workTask) {
+	public Change<ManagedFunctionModel> removeManagedFunction(final FunctionNamespaceModel namespace,
+			final ManagedFunctionModel managedFunction) {
 
-		// Ensure work task on work
+		// Ensure managed function on work
 		boolean isOnWork = false;
-		for (WorkTaskModel workTaskModel : work.getWorkTasks()) {
-			if (workTaskModel == workTask) {
+		for (ManagedFunctionModel managedFunctionModel : namespace.getManagedFunctions()) {
+			if (managedFunctionModel == managedFunction) {
 				isOnWork = true;
 			}
 		}
 		if (!isOnWork) {
-			// Work task not on work
-			return new NoChange<WorkTaskModel>(workTask, "Remove work task "
-					+ workTask.getWorkTaskName(), "Work task "
-					+ workTask.getWorkTaskName() + " not on work "
-					+ work.getWorkName());
+			// Managed function not on work
+			return new NoChange<ManagedFunctionModel>(managedFunction,
+					"Remove managed function " + managedFunction.getManagedFunctionName(),
+					"Managed function " + managedFunction.getManagedFunctionName() + " not on namespace "
+							+ namespace.getFunctionNamespaceName());
 		}
 
-		// Return the remove work task change
-		return new AbstractChange<WorkTaskModel>(workTask, "Remove work task "
-				+ workTask.getWorkTaskName()) {
+		// Return the remove managed function change
+		return new AbstractChange<ManagedFunctionModel>(managedFunction,
+				"Remove managed function " + managedFunction.getManagedFunctionName()) {
 
 			/**
 			 * Removed {@link ConnectionModel} instances.
@@ -1360,38 +1252,37 @@ public class DeskChangesImpl implements DeskChanges {
 			private ConnectionModel[] connections;
 
 			/**
-			 * Removed {@link TaskModel} instances.
+			 * Removed {@link FunctionModel} instances.
 			 */
-			private TaskModel[] tasks;
+			private FunctionModel[] functions;
 
 			@Override
 			public void apply() {
 				// Remove the connections
 				List<ConnectionModel> connList = new LinkedList<ConnectionModel>();
-				DeskChangesImpl.this.removeWorkTaskConnections(workTask,
-						connList);
+				DeskChangesImpl.this.removeManagedFunctionConnections(managedFunction, connList);
 				this.connections = connList.toArray(new ConnectionModel[0]);
 
-				// Remove the tasks of the work task
-				List<TaskModel> taskList = new LinkedList<TaskModel>();
-				DeskChangesImpl.this.removeWorkTask(workTask, taskList);
-				this.tasks = taskList.toArray(new TaskModel[0]);
+				// Remove the functions of the managed function
+				List<FunctionModel> functionList = new LinkedList<FunctionModel>();
+				DeskChangesImpl.this.removeManagedFunction(managedFunction, functionList);
+				this.functions = functionList.toArray(new FunctionModel[0]);
 
-				// Remove the work task
-				work.removeWorkTask(workTask);
+				// Remove the managed function
+				namespace.removeManagedFunction(managedFunction);
 			}
 
 			@Override
 			public void revert() {
-				// Add the work task (ensuring sorted)
-				work.addWorkTask(workTask);
-				DeskChangesImpl.sortWorkTaskModels(work.getWorkTasks());
+				// Add the managed function (ensuring sorted)
+				namespace.addManagedFunction(managedFunction);
+				DeskChangesImpl.sortManagedFunctionModels(namespace.getManagedFunctions());
 
-				// Add the tasks (in reverse order, ensuring sorted)
-				for (int i = (this.tasks.length - 1); i >= 0; i--) {
-					DeskChangesImpl.this.desk.addTask(this.tasks[i]);
+				// Add the functions (in reverse order, ensuring sorted)
+				for (int i = (this.functions.length - 1); i >= 0; i--) {
+					DeskChangesImpl.this.desk.addFunction(this.functions[i]);
 				}
-				DeskChangesImpl.this.sortTaskModels();
+				DeskChangesImpl.this.sortFunctionModels();
 
 				// Reconnect connections
 				for (ConnectionModel connection : this.connections) {
@@ -1402,105 +1293,98 @@ public class DeskChangesImpl implements DeskChanges {
 	}
 
 	@Override
-	public <W extends Work, D extends Enum<D>, F extends Enum<F>> Change<TaskModel> addTask(
-			String taskName, final WorkTaskModel workTask,
-			ManagedFunctionType<W, D, F> taskType) {
+	public <M extends Enum<M>, F extends Enum<F>> Change<FunctionModel> addFunction(String functionName,
+			final ManagedFunctionModel managedFunction, ManagedFunctionType<M, F> functionType) {
 
-		// Create the task model
-		Class<?> returnType = taskType.getReturnType();
-		final TaskModel task = new TaskModel(taskName, false, null, workTask
-				.getWorkTaskName(), (returnType != null ? returnType.getName()
-				: null));
-		for (ManagedFunctionFlowType<?> flowType : taskType.getFlowTypes()) {
+		// Create the function model
+		Class<?> returnType = functionType.getReturnType();
+		final FunctionModel function = new FunctionModel(functionName, false, null,
+				managedFunction.getManagedFunctionName(), (returnType != null ? returnType.getName() : null));
+		for (ManagedFunctionFlowType<?> flowType : functionType.getFlowTypes()) {
 			Enum<?> key = flowType.getKey();
 			Class<?> argumentType = flowType.getArgumentType();
-			TaskFlowModel taskFlow = new TaskFlowModel(flowType.getFlowName(),
-					(key != null ? key.name() : null),
-					(argumentType != null ? argumentType.getName() : null));
-			task.addTaskFlow(taskFlow);
+			FunctionFlowModel functionFlow = new FunctionFlowModel(flowType.getFlowName(),
+					(key != null ? key.name() : null), (argumentType != null ? argumentType.getName() : null));
+			function.addFunctionFlow(functionFlow);
 		}
-		for (ManagedFunctionEscalationType escalationType : taskType.getEscalationTypes()) {
-			TaskEscalationModel taskEscalation = new TaskEscalationModel(
+		for (ManagedFunctionEscalationType escalationType : functionType.getEscalationTypes()) {
+			FunctionEscalationModel functionEscalation = new FunctionEscalationModel(
 					escalationType.getEscalationType().getName());
-			task.addTaskEscalation(taskEscalation);
+			function.addFunctionEscalation(functionEscalation);
 		}
 
-		// Ensure the work task is on the desk and obtain its work
-		WorkModel work = null;
-		for (WorkModel workModel : this.desk.getWorks()) {
-			for (WorkTaskModel workTaskModel : workModel.getWorkTasks()) {
-				if (workTaskModel == workTask) {
+		// Ensure the managed function is on the desk and obtain its namespace
+		FunctionNamespaceModel namespace = null;
+		for (FunctionNamespaceModel namespaceModel : this.desk.getFunctionNamespaces()) {
+			for (ManagedFunctionModel managedFunctionModel : namespaceModel.getManagedFunctions()) {
+				if (managedFunctionModel == managedFunction) {
 					// On the desk
-					work = workModel;
+					namespace = namespaceModel;
 				}
 			}
 		}
-		if (work == null) {
-			// Work task not on desk so can not add task
-			return new NoChange<TaskModel>(task, "Add task " + taskName,
-					"Work task " + workTask.getWorkTaskName() + " not on desk");
+		if (namespace == null) {
+			// Managed function not on desk so can not add function
+			return new NoChange<FunctionModel>(function, "Add function " + functionName,
+					"Managed function " + managedFunction.getManagedFunctionName() + " not on desk");
 		}
 
-		// Specify the work name of the task (now that have work)
-		task.setWorkName(work.getWorkName());
+		// Specify the namespace name of the function (now that have namespace)
+		function.setFunctionNamespaceName(namespace.getFunctionNamespaceName());
 
-		// Ensure the work task for the task type
-		if (!workTask.getWorkTaskName().equals(taskType.getFunctionName())) {
-			// Not correct task type for the work task
-			return new NoChange<TaskModel>(task, "Add task " + taskName,
-					"Task type " + taskType.getFunctionName()
-							+ " does not match work task "
-							+ workTask.getWorkTaskName());
+		// Ensure the managed function for the function type
+		if (!managedFunction.getManagedFunctionName().equals(functionType.getFunctionName())) {
+			// Not correct function type for the managed function
+			return new NoChange<FunctionModel>(function, "Add function " + functionName,
+					"Function type " + functionType.getFunctionName() + " does not match managed function "
+							+ managedFunction.getManagedFunctionName());
 		}
 
-		// Create the connection from work task to task
-		final WorkTaskToTaskModel conn = new WorkTaskToTaskModel(task, workTask);
+		// Create the connection from managed function to function
+		final ManagedFunctionToFunctionModel conn = new ManagedFunctionToFunctionModel(function, managedFunction);
 
-		// Return the change to add the task
-		return new AbstractChange<TaskModel>(task, "Add task " + taskName) {
+		// Return the change to add the function
+		return new AbstractChange<FunctionModel>(function, "Add function " + functionName) {
 			@Override
 			public void apply() {
-				// Add the task ensuring ordering
-				DeskChangesImpl.this.desk.addTask(task);
-				DeskChangesImpl.this.sortTaskModels();
+				// Add the function ensuring ordering
+				DeskChangesImpl.this.desk.addFunction(function);
+				DeskChangesImpl.this.sortFunctionModels();
 
-				// Connect work task to the task (ensuring ordering)
+				// Connect managed function to the function (ensuring ordering)
 				conn.connect();
-				DeskChangesImpl.sortWorkTaskToTaskConnections(workTask
-						.getTasks());
+				DeskChangesImpl.sortManagedFunctionToFunctionConnections(managedFunction.getFunctions());
 			}
 
 			@Override
 			public void revert() {
-				// Disconnect work task from the task
+				// Disconnect managed function from the function
 				conn.remove();
 
-				// Remove task (should maintain ordering)
-				DeskChangesImpl.this.desk.removeTask(task);
+				// Remove function (should maintain ordering)
+				DeskChangesImpl.this.desk.removeFunction(function);
 			}
 		};
 	}
 
 	@Override
-	public Change<TaskModel> removeTask(final TaskModel task) {
+	public Change<FunctionModel> removeFunction(final FunctionModel function) {
 
-		// Ensure the task is on the desk
+		// Ensure the function is on the desk
 		boolean isOnDesk = false;
-		for (TaskModel taskModel : this.desk.getTasks()) {
-			if (task == taskModel) {
-				isOnDesk = true; // task on desk
+		for (FunctionModel functionModel : this.desk.getFunctions()) {
+			if (function == functionModel) {
+				isOnDesk = true; // function on desk
 			}
 		}
 		if (!isOnDesk) {
 			// Not on desk so can not remove it
-			return new NoChange<TaskModel>(task, "Remove task "
-					+ task.getTaskName(), "Task " + task.getTaskName()
-					+ " not on desk");
+			return new NoChange<FunctionModel>(function, "Remove function " + function.getFunctionName(),
+					"Function " + function.getFunctionName() + " not on desk");
 		}
 
-		// Create change to remove the task
-		return new AbstractChange<TaskModel>(task, "Remove task "
-				+ task.getTaskName()) {
+		// Create change to remove the function
+		return new AbstractChange<FunctionModel>(function, "Remove function " + function.getFunctionName()) {
 
 			/**
 			 * {@link ConnectionModel} instances removed.
@@ -1509,97 +1393,95 @@ public class DeskChangesImpl implements DeskChanges {
 
 			@Override
 			public void apply() {
-				// Remove connections to the task
+				// Remove connections to the function
 				List<ConnectionModel> connList = new LinkedList<ConnectionModel>();
-				DeskChangesImpl.this.removeTaskConnections(task, connList);
+				DeskChangesImpl.this.removeFunctionConnections(function, connList);
 
-				// Remove connection to work task
-				WorkTaskToTaskModel workTaskConn = task.getWorkTask();
-				if (workTaskConn != null) {
-					workTaskConn.remove();
-					connList.add(workTaskConn);
+				// Remove connection to managed function
+				ManagedFunctionToFunctionModel managedFunctionConn = function.getManagedFunction();
+				if (managedFunctionConn != null) {
+					managedFunctionConn.remove();
+					connList.add(managedFunctionConn);
 				}
 
 				// Store for revert
 				this.connections = connList.toArray(new ConnectionModel[0]);
 
-				// Remove the task (should maintain order)
-				DeskChangesImpl.this.desk.removeTask(task);
+				// Remove the function (should maintain order)
+				DeskChangesImpl.this.desk.removeFunction(function);
 			}
 
 			@Override
 			public void revert() {
-				// Add task back in (ensuring order)
-				DeskChangesImpl.this.desk.addTask(task);
-				DeskChangesImpl.this.sortTaskModels();
+				// Add function back in (ensuring order)
+				DeskChangesImpl.this.desk.addFunction(function);
+				DeskChangesImpl.this.sortFunctionModels();
 
 				// Reconnect connections
 				for (ConnectionModel conn : this.connections) {
 					conn.connect();
 				}
 
-				// Ensure work task connections sorted by task name
-				DeskChangesImpl.sortWorkTaskToTaskConnections(task
-						.getWorkTask().getWorkTask().getTasks());
+				// Ensure managed function connections sorted by function name
+				DeskChangesImpl.sortManagedFunctionToFunctionConnections(
+						function.getManagedFunction().getManagedFunction().getFunctions());
 			}
 		};
 	}
 
 	@Override
-	public Change<TaskModel> renameTask(final TaskModel task,
-			final String newTaskName) {
+	public Change<FunctionModel> renameFunction(final FunctionModel function, final String newFunctionName) {
 
-		// Ensure the task is on the desk
+		// Ensure the function is on the desk
 		boolean isOnDesk = false;
-		for (TaskModel taskModel : DeskChangesImpl.this.desk.getTasks()) {
-			if (task == taskModel) {
-				isOnDesk = true; // task on desk
+		for (FunctionModel functionModel : DeskChangesImpl.this.desk.getFunctions()) {
+			if (function == functionModel) {
+				isOnDesk = true; // function on desk
 			}
 		}
 		if (!isOnDesk) {
-			// Can not remove task as not on desk
-			return new NoChange<TaskModel>(task, "Rename task "
-					+ task.getTaskName() + " to " + newTaskName, "Task "
-					+ task.getTaskName() + " not on desk");
+			// Can not remove function as not on desk
+			return new NoChange<FunctionModel>(function,
+					"Rename function " + function.getFunctionName() + " to " + newFunctionName,
+					"Function " + function.getFunctionName() + " not on desk");
 		}
 
-		// Maintain old task name for revert
-		final String oldTaskName = task.getTaskName();
+		// Maintain old function name for revert
+		final String oldFunctionName = function.getFunctionName();
 
 		// Return rename change
-		return new AbstractChange<TaskModel>(task, "Rename task " + oldTaskName
-				+ " to " + newTaskName) {
+		return new AbstractChange<FunctionModel>(function,
+				"Rename function " + oldFunctionName + " to " + newFunctionName) {
 			@Override
 			public void apply() {
-				// Rename task (ensuring ordering)
-				task.setTaskName(newTaskName);
-				DeskChangesImpl.this.sortTaskModels();
-				DeskChangesImpl.sortWorkTaskToTaskConnections(task
-						.getWorkTask().getWorkTask().getTasks());
+				// Rename function (ensuring ordering)
+				function.setFunctionName(newFunctionName);
+				DeskChangesImpl.this.sortFunctionModels();
+				DeskChangesImpl.sortManagedFunctionToFunctionConnections(
+						function.getManagedFunction().getManagedFunction().getFunctions());
 			}
 
 			@Override
 			public void revert() {
-				// Revert to old task name (ensuring ordering)
-				task.setTaskName(oldTaskName);
-				DeskChangesImpl.this.sortTaskModels();
-				DeskChangesImpl.sortWorkTaskToTaskConnections(task
-						.getWorkTask().getWorkTask().getTasks());
+				// Revert to old function name (ensuring ordering)
+				function.setFunctionName(oldFunctionName);
+				DeskChangesImpl.this.sortFunctionModels();
+				DeskChangesImpl.sortManagedFunctionToFunctionConnections(
+						function.getManagedFunction().getManagedFunction().getFunctions());
 			}
 		};
 	}
 
 	@Override
-	public Change<WorkTaskObjectModel> setObjectAsParameter(
-			boolean isParameter, final WorkTaskObjectModel taskObject) {
+	public Change<ManagedFunctionObjectModel> setObjectAsParameter(boolean isParameter,
+			final ManagedFunctionObjectModel functionObject) {
 
-		// Ensure the task object on the desk
+		// Ensure the function object on the desk
 		boolean isOnDesk = false;
-		for (WorkModel work : DeskChangesImpl.this.desk.getWorks()) {
-			for (WorkTaskModel workTask : work.getWorkTasks()) {
-				for (WorkTaskObjectModel taskObjectModel : workTask
-						.getTaskObjects()) {
-					if (taskObject == taskObjectModel) {
+		for (FunctionNamespaceModel work : DeskChangesImpl.this.desk.getFunctionNamespaces()) {
+			for (ManagedFunctionModel managedFunction : work.getManagedFunctions()) {
+				for (ManagedFunctionObjectModel functionObjectModel : managedFunction.getManagedFunctionObjects()) {
+					if (functionObject == functionObjectModel) {
 						isOnDesk = true; // on the desk
 					}
 				}
@@ -1607,21 +1489,18 @@ public class DeskChangesImpl implements DeskChanges {
 		}
 		if (!isOnDesk) {
 			// Not on desk so can not set as parameter
-			return new NoChange<WorkTaskObjectModel>(taskObject,
-					"Set task object " + taskObject.getObjectName() + " as "
+			return new NoChange<ManagedFunctionObjectModel>(functionObject,
+					"Set function object " + functionObject.getObjectName() + " as "
 							+ (isParameter ? "a parameter" : "an object"),
-					"Task object " + taskObject.getObjectName()
-							+ " not on desk");
+					"Function object " + functionObject.getObjectName() + " not on desk");
 		}
 
 		// Return the appropriate change
 		if (isParameter) {
 			// Return change to set as parameter
-			final WorkTaskObjectToExternalManagedObjectModel conn = taskObject
-					.getExternalManagedObject();
-			return new AbstractChange<WorkTaskObjectModel>(taskObject,
-					"Set task object " + taskObject.getObjectName()
-							+ " as a parameter") {
+			final ManagedFunctionObjectToExternalManagedObjectModel conn = functionObject.getExternalManagedObject();
+			return new AbstractChange<ManagedFunctionObjectModel>(functionObject,
+					"Set function object " + functionObject.getObjectName() + " as a parameter") {
 				@Override
 				public void apply() {
 					// Remove possible connection to external managed object
@@ -1630,13 +1509,13 @@ public class DeskChangesImpl implements DeskChanges {
 					}
 
 					// Flag as parameter
-					taskObject.setIsParameter(true);
+					functionObject.setIsParameter(true);
 				}
 
 				@Override
 				public void revert() {
 					// Flag as object
-					taskObject.setIsParameter(false);
+					functionObject.setIsParameter(false);
 
 					// Reconnect to possible external managed object
 					if (conn != null) {
@@ -1646,70 +1525,67 @@ public class DeskChangesImpl implements DeskChanges {
 			};
 		} else {
 			// Return change to set as object
-			return new AbstractChange<WorkTaskObjectModel>(taskObject,
-					"Set task object " + taskObject.getObjectName()
-							+ " as an object") {
+			return new AbstractChange<ManagedFunctionObjectModel>(functionObject,
+					"Set function object " + functionObject.getObjectName() + " as an object") {
+
 				@Override
 				public void apply() {
 					// Flag as object (no connection as parameter)
-					taskObject.setIsParameter(false);
+					functionObject.setIsParameter(false);
 				}
 
 				@Override
 				public void revert() {
 					// Flag back as parameter
-					taskObject.setIsParameter(true);
+					functionObject.setIsParameter(true);
 				}
+
 			};
 		}
 	}
 
 	@Override
-	public Change<TaskModel> setTaskAsPublic(final boolean isPublic,
-			final TaskModel task) {
+	public Change<FunctionModel> setFunctionAsPublic(final boolean isPublic, final FunctionModel function) {
 
-		// Ensure task on desk
+		// Ensure function on desk
 		boolean isOnDesk = false;
-		for (TaskModel taskModel : DeskChangesImpl.this.desk.getTasks()) {
-			if (task == taskModel) {
-				isOnDesk = true; // task on desk
+		for (FunctionModel functionModel : DeskChangesImpl.this.desk.getFunctions()) {
+			if (function == functionModel) {
+				isOnDesk = true; // function on desk
 			}
 		}
 		if (!isOnDesk) {
-			// Task not on desk so can not make public
-			return new NoChange<TaskModel>(task, "Set task "
-					+ task.getTaskName() + (isPublic ? " public" : " private"),
-					"Task " + task.getTaskName() + " not on desk");
+			// Function not on desk so can not make public
+			return new NoChange<FunctionModel>(function,
+					"Set function " + function.getFunctionName() + (isPublic ? " public" : " private"),
+					"Function " + function.getFunctionName() + " not on desk");
 		}
 
 		// Return the change
-		return new AbstractChange<TaskModel>(task, "Set task "
-				+ task.getTaskName() + (isPublic ? " public" : " private")) {
+		return new AbstractChange<FunctionModel>(function,
+				"Set function " + function.getFunctionName() + (isPublic ? " public" : " private")) {
 			@Override
 			public void apply() {
 				// Specify public/private
-				task.setIsPublic(isPublic);
+				function.setIsPublic(isPublic);
 			}
 
 			@Override
 			public void revert() {
 				// Revert public/private
-				task.setIsPublic(!isPublic);
+				function.setIsPublic(!isPublic);
 			}
 		};
 	}
 
 	@Override
-	public Change<ExternalFlowModel> addExternalFlow(String externalFlowName,
-			String argumentType) {
+	public Change<ExternalFlowModel> addExternalFlow(String externalFlowName, String argumentType) {
 
 		// Create the external flow
-		final ExternalFlowModel externalFlow = new ExternalFlowModel(
-				externalFlowName, argumentType);
+		final ExternalFlowModel externalFlow = new ExternalFlowModel(externalFlowName, argumentType);
 
 		// Return change to add external flow
-		return new AbstractChange<ExternalFlowModel>(externalFlow,
-				"Add external flow " + externalFlowName) {
+		return new AbstractChange<ExternalFlowModel>(externalFlow, "Add external flow " + externalFlowName) {
 			@Override
 			public void apply() {
 				// Add external flow (ensuring ordering)
@@ -1726,13 +1602,11 @@ public class DeskChangesImpl implements DeskChanges {
 	}
 
 	@Override
-	public Change<ExternalFlowModel> removeExternalFlow(
-			final ExternalFlowModel externalFlow) {
+	public Change<ExternalFlowModel> removeExternalFlow(final ExternalFlowModel externalFlow) {
 
 		// Ensure external flow on desk
 		boolean isOnDesk = false;
-		for (ExternalFlowModel externalFlowModel : DeskChangesImpl.this.desk
-				.getExternalFlows()) {
+		for (ExternalFlowModel externalFlowModel : DeskChangesImpl.this.desk.getExternalFlows()) {
 			if (externalFlow == externalFlowModel) {
 				isOnDesk = true; // on the desk
 			}
@@ -1740,10 +1614,8 @@ public class DeskChangesImpl implements DeskChanges {
 		if (!isOnDesk) {
 			// No change as external flow not on desk
 			return new NoChange<ExternalFlowModel>(externalFlow,
-					"Remove external flow "
-							+ externalFlow.getExternalFlowName(),
-					"External flow " + externalFlow.getExternalFlowName()
-							+ " not on desk");
+					"Remove external flow " + externalFlow.getExternalFlowName(),
+					"External flow " + externalFlow.getExternalFlowName() + " not on desk");
 		}
 
 		// Return change to remove external flow
@@ -1759,18 +1631,18 @@ public class DeskChangesImpl implements DeskChanges {
 			public void apply() {
 				// Remove the connections to the external flows
 				List<ConnectionModel> connList = new LinkedList<ConnectionModel>();
-				for (TaskFlowToExternalFlowModel conn : new ArrayList<TaskFlowToExternalFlowModel>(
-						externalFlow.getTaskFlows())) {
+				for (FunctionFlowToExternalFlowModel conn : new ArrayList<FunctionFlowToExternalFlowModel>(
+						externalFlow.getFunctionFlows())) {
 					conn.remove();
 					connList.add(conn);
 				}
-				for (TaskToNextExternalFlowModel conn : new ArrayList<TaskToNextExternalFlowModel>(
-						externalFlow.getPreviousTasks())) {
+				for (FunctionToNextExternalFlowModel conn : new ArrayList<FunctionToNextExternalFlowModel>(
+						externalFlow.getPreviousFunctions())) {
 					conn.remove();
 					connList.add(conn);
 				}
-				for (TaskEscalationToExternalFlowModel conn : new ArrayList<TaskEscalationToExternalFlowModel>(
-						externalFlow.getTaskEscalations())) {
+				for (FunctionEscalationToExternalFlowModel conn : new ArrayList<FunctionEscalationToExternalFlowModel>(
+						externalFlow.getFunctionEscalations())) {
 					conn.remove();
 					connList.add(conn);
 				}
@@ -1795,8 +1667,7 @@ public class DeskChangesImpl implements DeskChanges {
 	}
 
 	@Override
-	public Change<ExternalFlowModel> renameExternalFlow(
-			final ExternalFlowModel externalFlow,
+	public Change<ExternalFlowModel> renameExternalFlow(final ExternalFlowModel externalFlow,
 			final String newExternalFlowName) {
 
 		// TODO test this method (renameExternalFlow)
@@ -1805,8 +1676,7 @@ public class DeskChangesImpl implements DeskChanges {
 		final String oldExternalFlowName = externalFlow.getExternalFlowName();
 
 		// Return change to rename the external flow
-		return new AbstractChange<ExternalFlowModel>(externalFlow,
-				"Rename external flow to " + newExternalFlowName) {
+		return new AbstractChange<ExternalFlowModel>(externalFlow, "Rename external flow to " + newExternalFlowName) {
 			@Override
 			public void apply() {
 				externalFlow.setExternalFlowName(newExternalFlowName);
@@ -1820,12 +1690,12 @@ public class DeskChangesImpl implements DeskChanges {
 	}
 
 	@Override
-	public Change<ExternalManagedObjectModel> addExternalManagedObject(
-			String externalManagedObjectName, String objectType) {
+	public Change<ExternalManagedObjectModel> addExternalManagedObject(String externalManagedObjectName,
+			String objectType) {
 
 		// Create the external managed object
-		final ExternalManagedObjectModel externalMo = new ExternalManagedObjectModel(
-				externalManagedObjectName, objectType);
+		final ExternalManagedObjectModel externalMo = new ExternalManagedObjectModel(externalManagedObjectName,
+				objectType);
 
 		// Return the change to add external managed object
 		return new AbstractChange<ExternalManagedObjectModel>(externalMo,
@@ -1840,8 +1710,7 @@ public class DeskChangesImpl implements DeskChanges {
 			@Override
 			public void revert() {
 				// Remove external managed object (should maintain order)
-				DeskChangesImpl.this.desk
-						.removeExternalManagedObject(externalMo);
+				DeskChangesImpl.this.desk.removeExternalManagedObject(externalMo);
 			}
 		};
 	}
@@ -1860,20 +1729,14 @@ public class DeskChangesImpl implements DeskChanges {
 		}
 		if (!isOnDesk) {
 			// Not on desk so can not remove it
-			return new NoChange<ExternalManagedObjectModel>(
-					externalManagedObject, "Remove external managed object "
-							+ externalManagedObject
-									.getExternalManagedObjectName(),
-					"External managed object "
-							+ externalManagedObject
-									.getExternalManagedObjectName()
-							+ " not on desk");
+			return new NoChange<ExternalManagedObjectModel>(externalManagedObject,
+					"Remove external managed object " + externalManagedObject.getExternalManagedObjectName(),
+					"External managed object " + externalManagedObject.getExternalManagedObjectName() + " not on desk");
 		}
 
 		// Return change to remove the external managed object
-		return new AbstractChange<ExternalManagedObjectModel>(
-				externalManagedObject, "Remove external managed object "
-						+ externalManagedObject.getExternalManagedObjectName()) {
+		return new AbstractChange<ExternalManagedObjectModel>(externalManagedObject,
+				"Remove external managed object " + externalManagedObject.getExternalManagedObjectName()) {
 
 			/**
 			 * {@link ConnectionModel} instances.
@@ -1884,23 +1747,21 @@ public class DeskChangesImpl implements DeskChanges {
 			public void apply() {
 				// Remove the connections to the external managed object
 				List<ConnectionModel> connList = new LinkedList<ConnectionModel>();
-				for (WorkTaskObjectToExternalManagedObjectModel conn : new ArrayList<WorkTaskObjectToExternalManagedObjectModel>(
-						externalManagedObject.getTaskObjects())) {
+				for (ManagedFunctionObjectToExternalManagedObjectModel conn : new ArrayList<ManagedFunctionObjectToExternalManagedObjectModel>(
+						externalManagedObject.getManagedFunctionObjects())) {
 					conn.remove();
 					connList.add(conn);
 				}
 				this.connections = connList.toArray(new ConnectionModel[0]);
 
 				// Remove the external managed object (should maintain order)
-				DeskChangesImpl.this.desk
-						.removeExternalManagedObject(externalManagedObject);
+				DeskChangesImpl.this.desk.removeExternalManagedObject(externalManagedObject);
 			}
 
 			@Override
 			public void revert() {
 				// Add back the external managed object (ensure ordering)
-				DeskChangesImpl.this.desk
-						.addExternalManagedObject(externalManagedObject);
+				DeskChangesImpl.this.desk.addExternalManagedObject(externalManagedObject);
 				DeskChangesImpl.this.sortExternalManagedObjects();
 
 				// Reconnect connections
@@ -1913,72 +1774,59 @@ public class DeskChangesImpl implements DeskChanges {
 
 	@Override
 	public Change<ExternalManagedObjectModel> renameExternalManagedObject(
-			final ExternalManagedObjectModel externalManagedObject,
-			final String newExternalManagedObjectName) {
+			final ExternalManagedObjectModel externalManagedObject, final String newExternalManagedObjectName) {
 
 		// TODO test this method (renameExternalManagedObject)
 
 		// Obtain the old name
-		final String oldExternalManagedObjectName = externalManagedObject
-				.getExternalManagedObjectName();
+		final String oldExternalManagedObjectName = externalManagedObject.getExternalManagedObjectName();
 
 		// Return change to rename the external managed object
-		return new AbstractChange<ExternalManagedObjectModel>(
-				externalManagedObject, "Rename external managed object to "
-						+ newExternalManagedObjectName) {
+		return new AbstractChange<ExternalManagedObjectModel>(externalManagedObject,
+				"Rename external managed object to " + newExternalManagedObjectName) {
 			@Override
 			public void apply() {
-				externalManagedObject
-						.setExternalManagedObjectName(newExternalManagedObjectName);
+				externalManagedObject.setExternalManagedObjectName(newExternalManagedObjectName);
 			}
 
 			@Override
 			public void revert() {
-				externalManagedObject
-						.setExternalManagedObjectName(oldExternalManagedObjectName);
+				externalManagedObject.setExternalManagedObjectName(oldExternalManagedObjectName);
 			}
 		};
 	}
 
 	@Override
-	public Change<DeskManagedObjectSourceModel> addDeskManagedObjectSource(
-			String managedObjectSourceName,
-			String managedObjectSourceClassName, PropertyList properties,
-			long timeout, ManagedObjectType<?> managedObjectType) {
+	public Change<DeskManagedObjectSourceModel> addDeskManagedObjectSource(String managedObjectSourceName,
+			String managedObjectSourceClassName, PropertyList properties, long timeout,
+			ManagedObjectType<?> managedObjectType) {
 
 		// TODO test this method (addDeskManagedObjectSource)
 
 		// Create the managed object source
 		final DeskManagedObjectSourceModel managedObjectSource = new DeskManagedObjectSourceModel(
-				managedObjectSourceName, managedObjectSourceClassName,
-				managedObjectType.getObjectClass().getName(), String
-						.valueOf(timeout));
+				managedObjectSourceName, managedObjectSourceClassName, managedObjectType.getObjectClass().getName(),
+				String.valueOf(timeout));
 		for (Property property : properties) {
-			managedObjectSource.addProperty(new PropertyModel(property
-					.getName(), property.getValue()));
+			managedObjectSource.addProperty(new PropertyModel(property.getName(), property.getValue()));
 		}
 
 		// Add the flows for the managed object source
 		for (ManagedObjectFlowType<?> flow : managedObjectType.getFlowTypes()) {
-			managedObjectSource
-					.addDeskManagedObjectSourceFlow(new DeskManagedObjectSourceFlowModel(
-							flow.getFlowName(), flow.getArgumentType()
-									.getName()));
+			managedObjectSource.addDeskManagedObjectSourceFlow(
+					new DeskManagedObjectSourceFlowModel(flow.getFlowName(), flow.getArgumentType().getName()));
 		}
 
 		// Return the change to add the managed object source
-		return new AbstractChange<DeskManagedObjectSourceModel>(
-				managedObjectSource, "Add managed object source") {
+		return new AbstractChange<DeskManagedObjectSourceModel>(managedObjectSource, "Add managed object source") {
 			@Override
 			public void apply() {
-				DeskChangesImpl.this.desk
-						.addDeskManagedObjectSource(managedObjectSource);
+				DeskChangesImpl.this.desk.addDeskManagedObjectSource(managedObjectSource);
 			}
 
 			@Override
 			public void revert() {
-				DeskChangesImpl.this.desk
-						.removeDeskManagedObjectSource(managedObjectSource);
+				DeskChangesImpl.this.desk.removeDeskManagedObjectSource(managedObjectSource);
 			}
 		};
 	}
@@ -1990,70 +1838,58 @@ public class DeskChangesImpl implements DeskChanges {
 		// TODO test this method (removeDeskManagedObjectSource)
 
 		// Return change to remove the managed object source
-		return new AbstractChange<DeskManagedObjectSourceModel>(
-				managedObjectSource, "Remove managed object source") {
+		return new AbstractChange<DeskManagedObjectSourceModel>(managedObjectSource, "Remove managed object source") {
 			@Override
 			public void apply() {
-				DeskChangesImpl.this.desk
-						.removeDeskManagedObjectSource(managedObjectSource);
+				DeskChangesImpl.this.desk.removeDeskManagedObjectSource(managedObjectSource);
 			}
 
 			@Override
 			public void revert() {
-				DeskChangesImpl.this.desk
-						.addDeskManagedObjectSource(managedObjectSource);
+				DeskChangesImpl.this.desk.addDeskManagedObjectSource(managedObjectSource);
 			}
 		};
 	}
 
 	@Override
 	public Change<DeskManagedObjectSourceModel> renameDeskManagedObjectSource(
-			final DeskManagedObjectSourceModel managedObjectSource,
-			final String newManagedObjectSourceName) {
+			final DeskManagedObjectSourceModel managedObjectSource, final String newManagedObjectSourceName) {
 
 		// TODO test this method (renameDeskManagedObjectSource)
 
 		// Obtain the old managed object source name
-		final String oldManagedObjectSourceName = managedObjectSource
-				.getDeskManagedObjectSourceName();
+		final String oldManagedObjectSourceName = managedObjectSource.getDeskManagedObjectSourceName();
 
 		// Return change to rename the managed object source
-		return new AbstractChange<DeskManagedObjectSourceModel>(
-				managedObjectSource, "Rename managed object source to "
-						+ newManagedObjectSourceName) {
+		return new AbstractChange<DeskManagedObjectSourceModel>(managedObjectSource,
+				"Rename managed object source to " + newManagedObjectSourceName) {
 			@Override
 			public void apply() {
-				managedObjectSource
-						.setDeskManagedObjectSourceName(newManagedObjectSourceName);
+				managedObjectSource.setDeskManagedObjectSourceName(newManagedObjectSourceName);
 			}
 
 			@Override
 			public void revert() {
-				managedObjectSource
-						.setDeskManagedObjectSourceName(oldManagedObjectSourceName);
+				managedObjectSource.setDeskManagedObjectSourceName(oldManagedObjectSourceName);
 			}
 		};
 	}
 
 	@Override
-	public Change<DeskManagedObjectModel> addDeskManagedObject(
-			String managedObjectName, ManagedObjectScope managedObjectScope,
-			DeskManagedObjectSourceModel managedObjectSource,
+	public Change<DeskManagedObjectModel> addDeskManagedObject(String managedObjectName,
+			ManagedObjectScope managedObjectScope, DeskManagedObjectSourceModel managedObjectSource,
 			ManagedObjectType<?> managedObjectType) {
 
 		// TODO test this method (addDeskManagedObject)
 
 		// Create the managed object
-		final DeskManagedObjectModel managedObject = new DeskManagedObjectModel(
-				managedObjectName, getManagedObjectScope(managedObjectScope));
+		final DeskManagedObjectModel managedObject = new DeskManagedObjectModel(managedObjectName,
+				getManagedObjectScope(managedObjectScope));
 
 		// Add the dependencies for the managed object
-		for (ManagedObjectDependencyType<?> dependency : managedObjectType
-				.getDependencyTypes()) {
-			managedObject
-					.addDeskManagedObjectDependency(new DeskManagedObjectDependencyModel(
-							dependency.getDependencyName(), dependency
-									.getDependencyType().getName()));
+		for (ManagedObjectDependencyType<?> dependency : managedObjectType.getDependencyTypes()) {
+			managedObject.addDeskManagedObjectDependency(new DeskManagedObjectDependencyModel(
+					dependency.getDependencyName(), dependency.getDependencyType().getName()));
 		}
 
 		// Create connection to the managed object source
@@ -2062,8 +1898,7 @@ public class DeskChangesImpl implements DeskChanges {
 		conn.setDeskManagedObjectSource(managedObjectSource);
 
 		// Return change to add the managed object
-		return new AbstractChange<DeskManagedObjectModel>(managedObject,
-				"Add managed object") {
+		return new AbstractChange<DeskManagedObjectModel>(managedObject, "Add managed object") {
 			@Override
 			public void apply() {
 				DeskChangesImpl.this.desk.addDeskManagedObject(managedObject);
@@ -2073,25 +1908,21 @@ public class DeskChangesImpl implements DeskChanges {
 			@Override
 			public void revert() {
 				conn.remove();
-				DeskChangesImpl.this.desk
-						.removeDeskManagedObject(managedObject);
+				DeskChangesImpl.this.desk.removeDeskManagedObject(managedObject);
 			}
 		};
 	}
 
 	@Override
-	public Change<DeskManagedObjectModel> removeDeskManagedObject(
-			final DeskManagedObjectModel managedObject) {
+	public Change<DeskManagedObjectModel> removeDeskManagedObject(final DeskManagedObjectModel managedObject) {
 
 		// TODO test this method (removeDeskManagedObject)
 
 		// Return change to remove the managed object
-		return new AbstractChange<DeskManagedObjectModel>(managedObject,
-				"Remove managed object") {
+		return new AbstractChange<DeskManagedObjectModel>(managedObject, "Remove managed object") {
 			@Override
 			public void apply() {
-				DeskChangesImpl.this.desk
-						.removeDeskManagedObject(managedObject);
+				DeskChangesImpl.this.desk.removeDeskManagedObject(managedObject);
 			}
 
 			@Override
@@ -2102,15 +1933,13 @@ public class DeskChangesImpl implements DeskChanges {
 	}
 
 	@Override
-	public Change<DeskManagedObjectModel> renameDeskManagedObject(
-			final DeskManagedObjectModel managedObject,
+	public Change<DeskManagedObjectModel> renameDeskManagedObject(final DeskManagedObjectModel managedObject,
 			final String newManagedObjectName) {
 
 		// TODO test this method (renameDeskManagedObject)
 
 		// Obtain the old managed object name
-		final String oldManagedObjectName = managedObject
-				.getDeskManagedObjectName();
+		final String oldManagedObjectName = managedObject.getDeskManagedObjectName();
 
 		// Return change to rename the managed object
 		return new AbstractChange<DeskManagedObjectModel>(managedObject,
@@ -2128,8 +1957,7 @@ public class DeskChangesImpl implements DeskChanges {
 	}
 
 	@Override
-	public Change<DeskManagedObjectModel> rescopeDeskManagedObject(
-			final DeskManagedObjectModel managedObject,
+	public Change<DeskManagedObjectModel> rescopeDeskManagedObject(final DeskManagedObjectModel managedObject,
 			final ManagedObjectScope newManagedObjectScope) {
 
 		// TODO test this method (rescopeDeskManagedObject)
@@ -2141,8 +1969,7 @@ public class DeskChangesImpl implements DeskChanges {
 		final String oldScope = managedObject.getManagedObjectScope();
 
 		// Return change to re-scope the managed object
-		return new AbstractChange<DeskManagedObjectModel>(managedObject,
-				"Rescope managed object to " + newScope) {
+		return new AbstractChange<DeskManagedObjectModel>(managedObject, "Rescope managed object to " + newScope) {
 			@Override
 			public void apply() {
 				managedObject.setManagedObjectScope(newScope);
@@ -2156,20 +1983,19 @@ public class DeskChangesImpl implements DeskChanges {
 	}
 
 	@Override
-	public Change<WorkTaskObjectToExternalManagedObjectModel> linkWorkTaskObjectToExternalManagedObject(
-			WorkTaskObjectModel workTaskObject,
-			ExternalManagedObjectModel externalManagedObject) {
+	public Change<ManagedFunctionObjectToExternalManagedObjectModel> linkManagedFunctionObjectToExternalManagedObject(
+			ManagedFunctionObjectModel managedFunctionObject, ExternalManagedObjectModel externalManagedObject) {
 
-		// TODO test this method (linkWorkTaskObjectToExternalManagedObject)
+		// TODO test this method
+		// (linkManagedFunctionObjectToExternalManagedObject)
 
 		// Create the connection
-		final WorkTaskObjectToExternalManagedObjectModel conn = new WorkTaskObjectToExternalManagedObjectModel();
-		conn.setTaskObject(workTaskObject);
+		final ManagedFunctionObjectToExternalManagedObjectModel conn = new ManagedFunctionObjectToExternalManagedObjectModel();
+		conn.setManagedFunctionObject(managedFunctionObject);
 		conn.setExternalManagedObject(externalManagedObject);
 
 		// Return the change
-		return new AbstractChange<WorkTaskObjectToExternalManagedObjectModel>(
-				conn, "Connect") {
+		return new AbstractChange<ManagedFunctionObjectToExternalManagedObjectModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -2183,14 +2009,14 @@ public class DeskChangesImpl implements DeskChanges {
 	}
 
 	@Override
-	public Change<WorkTaskObjectToExternalManagedObjectModel> removeWorkTaskObjectToExternalManagedObject(
-			final WorkTaskObjectToExternalManagedObjectModel objectToExternalManagedObject) {
+	public Change<ManagedFunctionObjectToExternalManagedObjectModel> removeManagedFunctionObjectToExternalManagedObject(
+			final ManagedFunctionObjectToExternalManagedObjectModel objectToExternalManagedObject) {
 
-		// TODO test this method (removeWorkTaskObjectToExternalManagedObject)
+		// TODO test this method
+		// (removeManagedFunctionObjectToExternalManagedObject)
 
 		// Return change to remove object to external managed object
-		return new AbstractChange<WorkTaskObjectToExternalManagedObjectModel>(
-				objectToExternalManagedObject,
+		return new AbstractChange<ManagedFunctionObjectToExternalManagedObjectModel>(objectToExternalManagedObject,
 				"Remove object to external managed object") {
 			@Override
 			public void apply() {
@@ -2205,20 +2031,18 @@ public class DeskChangesImpl implements DeskChanges {
 	}
 
 	@Override
-	public Change<WorkTaskObjectToDeskManagedObjectModel> linkWorkTaskObjectToDeskManagedObject(
-			WorkTaskObjectModel workTaskObject,
-			DeskManagedObjectModel managedObject) {
+	public Change<ManagedFunctionObjectToDeskManagedObjectModel> linkManagedFunctionObjectToDeskManagedObject(
+			ManagedFunctionObjectModel managedFunctionObject, DeskManagedObjectModel managedObject) {
 
-		// TODO test this method (linkWorkTaskObjectToDeskManagedObject)
+		// TODO test this method (linkManagedFunctionObjectToDeskManagedObject)
 
 		// Create the connection
-		final WorkTaskObjectToDeskManagedObjectModel conn = new WorkTaskObjectToDeskManagedObjectModel();
-		conn.setWorkTaskObject(workTaskObject);
+		final ManagedFunctionObjectToDeskManagedObjectModel conn = new ManagedFunctionObjectToDeskManagedObjectModel();
+		conn.setManagedFunctionObject(managedFunctionObject);
 		conn.setDeskManagedObject(managedObject);
 
 		// Return change to add connection
-		return new AbstractChange<WorkTaskObjectToDeskManagedObjectModel>(conn,
-				"Connect") {
+		return new AbstractChange<ManagedFunctionObjectToDeskManagedObjectModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -2232,366 +2056,41 @@ public class DeskChangesImpl implements DeskChanges {
 	}
 
 	@Override
-	public Change<WorkTaskObjectToDeskManagedObjectModel> removeWorkTaskObjectToDeskManagedObject(
-			final WorkTaskObjectToDeskManagedObjectModel workTaskObjectToManagedObject) {
+	public Change<ManagedFunctionObjectToDeskManagedObjectModel> removeManagedFunctionObjectToDeskManagedObject(
+			final ManagedFunctionObjectToDeskManagedObjectModel managedFunctionObjectToManagedObject) {
 
-		// TODO test this method (removeWorkTaskObjectToDeskManagedObject)
+		// TODO test this method
+		// (removeManagedFunctionObjectToDeskManagedObject)
 
 		// Return change to remove connection
-		return new AbstractChange<WorkTaskObjectToDeskManagedObjectModel>(
-				workTaskObjectToManagedObject, "Remove") {
-			@Override
-			public void apply() {
-				workTaskObjectToManagedObject.remove();
-			}
-
-			@Override
-			public void revert() {
-				workTaskObjectToManagedObject.connect();
-			}
-		};
-	}
-
-	@Override
-	public Change<TaskFlowToTaskModel> linkTaskFlowToTask(
-			TaskFlowModel taskFlow, TaskModel task,
-			FlowInstigationStrategyEnum instigationStrategy) {
-
-		// TODO test this method (linkTaskFlowToTask)
-
-		// Create the connection
-		final TaskFlowToTaskModel conn = new TaskFlowToTaskModel();
-		conn.setTaskFlow(taskFlow);
-		conn.setTask(task);
-		conn.setLinkType(getFlowInstigationStrategyLink(instigationStrategy));
-
-		// Return the change
-		return new AbstractChange<TaskFlowToTaskModel>(conn, "Connect") {
-			@Override
-			public void apply() {
-				conn.connect();
-			}
-
-			@Override
-			public void revert() {
-				conn.remove();
-			}
-		};
-	}
-
-	@Override
-	public Change<TaskFlowToTaskModel> removeTaskFlowToTask(
-			final TaskFlowToTaskModel taskFlowToTask) {
-
-		// TODO test this method (removeTaskFlowToTask)
-
-		// Return the change
-		return new AbstractChange<TaskFlowToTaskModel>(taskFlowToTask, "Remove") {
-			@Override
-			public void apply() {
-				taskFlowToTask.remove();
-			}
-
-			@Override
-			public void revert() {
-				taskFlowToTask.connect();
-			}
-		};
-	}
-
-	@Override
-	public Change<TaskFlowToExternalFlowModel> linkTaskFlowToExternalFlow(
-			TaskFlowModel taskFlow, ExternalFlowModel externalFlow,
-			FlowInstigationStrategyEnum instigationStrategy) {
-
-		// TODO test this method (linkTaskFlowToExternalFlow)
-
-		// Create the connection
-		final TaskFlowToExternalFlowModel conn = new TaskFlowToExternalFlowModel();
-		conn.setTaskFlow(taskFlow);
-		conn.setExternalFlow(externalFlow);
-		conn.setLinkType(getFlowInstigationStrategyLink(instigationStrategy));
-
-		// Return the change
-		return new AbstractChange<TaskFlowToExternalFlowModel>(conn, "Connect") {
-			@Override
-			public void apply() {
-				conn.connect();
-			}
-
-			@Override
-			public void revert() {
-				conn.remove();
-			}
-		};
-	}
-
-	@Override
-	public Change<TaskFlowToExternalFlowModel> removeTaskFlowToExternalFlow(
-			final TaskFlowToExternalFlowModel taskFlowToExternalFlow) {
-
-		// TODO test this method (removeTaskFlowToExternalFlow)
-
-		// Return the change
-		return new AbstractChange<TaskFlowToExternalFlowModel>(
-				taskFlowToExternalFlow, "Remove") {
-			@Override
-			public void apply() {
-				taskFlowToExternalFlow.remove();
-			}
-
-			@Override
-			public void revert() {
-				taskFlowToExternalFlow.connect();
-			}
-		};
-	}
-
-	@Override
-	public Change<TaskToNextTaskModel> linkTaskToNextTask(TaskModel task,
-			TaskModel nextTask) {
-
-		// TODO test this method (linkTaskToNextTask)
-
-		// Create the connection
-		final TaskToNextTaskModel conn = new TaskToNextTaskModel();
-		conn.setPreviousTask(task);
-		conn.setNextTask(nextTask);
-
-		// Return the change
-		return new AbstractChange<TaskToNextTaskModel>(conn, "Connect") {
-			@Override
-			public void apply() {
-				conn.connect();
-			}
-
-			@Override
-			public void revert() {
-				conn.remove();
-			}
-		};
-	}
-
-	@Override
-	public Change<TaskToNextTaskModel> removeTaskToNextTask(
-			final TaskToNextTaskModel taskToNextTask) {
-
-		// TODO test this method (removeTaskToNextTaskModel)
-
-		// Return the change
-		return new AbstractChange<TaskToNextTaskModel>(taskToNextTask, "Remove") {
-			@Override
-			public void apply() {
-				taskToNextTask.remove();
-			}
-
-			@Override
-			public void revert() {
-				taskToNextTask.connect();
-			}
-		};
-	}
-
-	@Override
-	public Change<TaskToNextExternalFlowModel> linkTaskToNextExternalFlow(
-			TaskModel task, ExternalFlowModel nextExternalFlow) {
-
-		// TODO test this method (linkTaskToNextExternalFlow)
-
-		// Create the connection
-		final TaskToNextExternalFlowModel conn = new TaskToNextExternalFlowModel();
-		conn.setPreviousTask(task);
-		conn.setNextExternalFlow(nextExternalFlow);
-
-		// Return the change
-		return new AbstractChange<TaskToNextExternalFlowModel>(conn, "Connect") {
-			@Override
-			public void apply() {
-				conn.connect();
-			}
-
-			@Override
-			public void revert() {
-				conn.remove();
-			}
-		};
-	}
-
-	@Override
-	public Change<TaskToNextExternalFlowModel> removeTaskToNextExternalFlow(
-			final TaskToNextExternalFlowModel taskToNextExternalFlow) {
-
-		// TODO test this method (removeTaskToNextExternalFlow)
-
-		// Return the change
-		return new AbstractChange<TaskToNextExternalFlowModel>(
-				taskToNextExternalFlow, "Remove") {
-			@Override
-			public void apply() {
-				taskToNextExternalFlow.remove();
-			}
-
-			@Override
-			public void revert() {
-				taskToNextExternalFlow.connect();
-			}
-		};
-	}
-
-	@Override
-	public Change<TaskEscalationToTaskModel> linkTaskEscalationToTask(
-			TaskEscalationModel taskEscalation, TaskModel task) {
-
-		// TODO test this method (linkTaskEscalationToTask)
-
-		// Create the connection
-		final TaskEscalationToTaskModel conn = new TaskEscalationToTaskModel();
-		conn.setEscalation(taskEscalation);
-		conn.setTask(task);
-
-		// Return the change
-		return new AbstractChange<TaskEscalationToTaskModel>(conn, "Connect") {
-			@Override
-			public void apply() {
-				conn.connect();
-			}
-
-			@Override
-			public void revert() {
-				conn.remove();
-			}
-		};
-	}
-
-	@Override
-	public Change<TaskEscalationToTaskModel> removeTaskEscalationToTask(
-			final TaskEscalationToTaskModel taskEscalationToTask) {
-
-		// TODO test this method (removeTaskEscalationToTask)
-
-		// Return the change
-		return new AbstractChange<TaskEscalationToTaskModel>(
-				taskEscalationToTask, "Remove") {
-			@Override
-			public void apply() {
-				taskEscalationToTask.remove();
-			}
-
-			@Override
-			public void revert() {
-				taskEscalationToTask.connect();
-			}
-		};
-	}
-
-	@Override
-	public Change<TaskEscalationToExternalFlowModel> linkTaskEscalationToExternalFlow(
-			TaskEscalationModel taskEscalation, ExternalFlowModel externalFlow) {
-
-		// TODO test this method (linkTaskEscalationToExternalFlow)
-
-		// Create the connection
-		final TaskEscalationToExternalFlowModel conn = new TaskEscalationToExternalFlowModel();
-		conn.setTaskEscalation(taskEscalation);
-		conn.setExternalFlow(externalFlow);
-
-		// Return the change
-		return new AbstractChange<TaskEscalationToExternalFlowModel>(conn,
-				"Connect") {
-			@Override
-			public void apply() {
-				conn.connect();
-			}
-
-			@Override
-			public void revert() {
-				conn.remove();
-			}
-		};
-	}
-
-	@Override
-	public Change<TaskEscalationToExternalFlowModel> removeTaskEscalationToExternalFlow(
-			final TaskEscalationToExternalFlowModel taskEscalationToExternalFlow) {
-
-		// TODO test this method (removeTaskEscalationToExternalFlow)
-
-		// Return the change
-		return new AbstractChange<TaskEscalationToExternalFlowModel>(
-				taskEscalationToExternalFlow, "Remove") {
-			@Override
-			public void apply() {
-				taskEscalationToExternalFlow.remove();
-			}
-
-			@Override
-			public void revert() {
-				taskEscalationToExternalFlow.connect();
-			}
-		};
-	}
-
-	@Override
-	public Change<WorkToInitialTaskModel> linkWorkToInitialTask(WorkModel work,
-			TaskModel initialTask) {
-
-		// TODO test this method (linkWorkToInitialTask)
-
-		// Create the connection
-		final WorkToInitialTaskModel conn = new WorkToInitialTaskModel();
-		conn.setWork(work);
-		conn.setInitialTask(initialTask);
-
-		// Return the change
-		return new AbstractChange<WorkToInitialTaskModel>(conn, "Connect") {
-			@Override
-			public void apply() {
-				conn.connect();
-			}
-
-			@Override
-			public void revert() {
-				conn.remove();
-			}
-		};
-	}
-
-	@Override
-	public Change<WorkToInitialTaskModel> removeWorkToInitialTask(
-			final WorkToInitialTaskModel workToInitialTask) {
-
-		// TODO test this method (removeWorkToInitialTask)
-
-		// Return the change
-		return new AbstractChange<WorkToInitialTaskModel>(workToInitialTask,
+		return new AbstractChange<ManagedFunctionObjectToDeskManagedObjectModel>(managedFunctionObjectToManagedObject,
 				"Remove") {
 			@Override
 			public void apply() {
-				workToInitialTask.remove();
+				managedFunctionObjectToManagedObject.remove();
 			}
 
 			@Override
 			public void revert() {
-				workToInitialTask.connect();
+				managedFunctionObjectToManagedObject.connect();
 			}
 		};
 	}
 
 	@Override
-	public Change<DeskManagedObjectSourceFlowToTaskModel> linkDeskManagedObjectSourceFlowToTask(
-			DeskManagedObjectSourceFlowModel managedObjectSourceFlow,
-			TaskModel task) {
+	public Change<FunctionFlowToFunctionModel> linkFunctionFlowToFunction(FunctionFlowModel functionFlow,
+			FunctionModel function, boolean isSpawnThreadState) {
 
-		// TODO test this method (linkDeskManagedObjectSourceFlowToTask)
+		// TODO test this method (linkFunctionFlowToFunction)
 
 		// Create the connection
-		final DeskManagedObjectSourceFlowToTaskModel conn = new DeskManagedObjectSourceFlowToTaskModel();
-		conn.setDeskManagedObjectSourceFlow(managedObjectSourceFlow);
-		conn.setTask(task);
+		final FunctionFlowToFunctionModel conn = new FunctionFlowToFunctionModel();
+		conn.setFunctionFlow(functionFlow);
+		conn.setFunction(function);
+		conn.setIsSpawnThreadState(isSpawnThreadState);
 
-		// Return change to add connection
-		return new AbstractChange<DeskManagedObjectSourceFlowToTaskModel>(conn,
-				"Connect") {
+		// Return the change
+		return new AbstractChange<FunctionFlowToFunctionModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -2605,30 +2104,300 @@ public class DeskChangesImpl implements DeskChanges {
 	}
 
 	@Override
-	public Change<DeskManagedObjectSourceFlowToTaskModel> removeDeskManagedObjectSourceFlowToTask(
-			final DeskManagedObjectSourceFlowToTaskModel managedObjectSourceFlowToTask) {
+	public Change<FunctionFlowToFunctionModel> removeFunctionFlowToFunction(
+			final FunctionFlowToFunctionModel functionFlowToFunction) {
 
-		// TODO test this method (removeDeskManagedObjectSourceFlowToTask)
+		// TODO test this method (removeFunctionFlowToFunction)
 
-		// Return change to remove connection
-		return new AbstractChange<DeskManagedObjectSourceFlowToTaskModel>(
-				managedObjectSourceFlowToTask, "Remove") {
+		// Return the change
+		return new AbstractChange<FunctionFlowToFunctionModel>(functionFlowToFunction, "Remove") {
 			@Override
 			public void apply() {
-				managedObjectSourceFlowToTask.remove();
+				functionFlowToFunction.remove();
 			}
 
 			@Override
 			public void revert() {
-				managedObjectSourceFlowToTask.connect();
+				functionFlowToFunction.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<FunctionFlowToExternalFlowModel> linkFunctionFlowToExternalFlow(FunctionFlowModel functionFlow,
+			ExternalFlowModel externalFlow, boolean isSpawnThreadState) {
+
+		// TODO test this method (linkFunctionFlowToExternalFlow)
+
+		// Create the connection
+		final FunctionFlowToExternalFlowModel conn = new FunctionFlowToExternalFlowModel();
+		conn.setFunctionFlow(functionFlow);
+		conn.setExternalFlow(externalFlow);
+		conn.setIsSpawnThreadState(isSpawnThreadState);
+
+		// Return the change
+		return new AbstractChange<FunctionFlowToExternalFlowModel>(conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<FunctionFlowToExternalFlowModel> removeFunctionFlowToExternalFlow(
+			final FunctionFlowToExternalFlowModel functionFlowToExternalFlow) {
+
+		// TODO test this method (removeFunctionFlowToExternalFlow)
+
+		// Return the change
+		return new AbstractChange<FunctionFlowToExternalFlowModel>(functionFlowToExternalFlow, "Remove") {
+			@Override
+			public void apply() {
+				functionFlowToExternalFlow.remove();
+			}
+
+			@Override
+			public void revert() {
+				functionFlowToExternalFlow.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<FunctionToNextFunctionModel> linkFunctionToNextFunction(FunctionModel function,
+			FunctionModel nextFunction) {
+
+		// TODO test this method (linkFunctionToNextFunction)
+
+		// Create the connection
+		final FunctionToNextFunctionModel conn = new FunctionToNextFunctionModel();
+		conn.setPreviousFunction(function);
+		conn.setNextFunction(nextFunction);
+
+		// Return the change
+		return new AbstractChange<FunctionToNextFunctionModel>(conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<FunctionToNextFunctionModel> removeFunctionToNextFunction(
+			final FunctionToNextFunctionModel functionToNextFunction) {
+
+		// TODO test this method (removeFunctionToNextFunctionModel)
+
+		// Return the change
+		return new AbstractChange<FunctionToNextFunctionModel>(functionToNextFunction, "Remove") {
+			@Override
+			public void apply() {
+				functionToNextFunction.remove();
+			}
+
+			@Override
+			public void revert() {
+				functionToNextFunction.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<FunctionToNextExternalFlowModel> linkFunctionToNextExternalFlow(FunctionModel function,
+			ExternalFlowModel nextExternalFlow) {
+
+		// TODO test this method (linkFunctionToNextExternalFlow)
+
+		// Create the connection
+		final FunctionToNextExternalFlowModel conn = new FunctionToNextExternalFlowModel();
+		conn.setPreviousFunction(function);
+		conn.setNextExternalFlow(nextExternalFlow);
+
+		// Return the change
+		return new AbstractChange<FunctionToNextExternalFlowModel>(conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<FunctionToNextExternalFlowModel> removeFunctionToNextExternalFlow(
+			final FunctionToNextExternalFlowModel functionToNextExternalFlow) {
+
+		// TODO test this method (removeFunctionToNextExternalFlow)
+
+		// Return the change
+		return new AbstractChange<FunctionToNextExternalFlowModel>(functionToNextExternalFlow, "Remove") {
+			@Override
+			public void apply() {
+				functionToNextExternalFlow.remove();
+			}
+
+			@Override
+			public void revert() {
+				functionToNextExternalFlow.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<FunctionEscalationToFunctionModel> linkFunctionEscalationToFunction(
+			FunctionEscalationModel functionEscalation, FunctionModel function) {
+
+		// TODO test this method (linkFunctionEscalationToFunction)
+
+		// Create the connection
+		final FunctionEscalationToFunctionModel conn = new FunctionEscalationToFunctionModel();
+		conn.setEscalation(functionEscalation);
+		conn.setFunction(function);
+
+		// Return the change
+		return new AbstractChange<FunctionEscalationToFunctionModel>(conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<FunctionEscalationToFunctionModel> removeFunctionEscalationToFunction(
+			final FunctionEscalationToFunctionModel functionEscalationToFunction) {
+
+		// TODO test this method (removeFunctionEscalationToFunction)
+
+		// Return the change
+		return new AbstractChange<FunctionEscalationToFunctionModel>(functionEscalationToFunction, "Remove") {
+			@Override
+			public void apply() {
+				functionEscalationToFunction.remove();
+			}
+
+			@Override
+			public void revert() {
+				functionEscalationToFunction.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<FunctionEscalationToExternalFlowModel> linkFunctionEscalationToExternalFlow(
+			FunctionEscalationModel functionEscalation, ExternalFlowModel externalFlow) {
+
+		// TODO test this method (linkFunctionEscalationToExternalFlow)
+
+		// Create the connection
+		final FunctionEscalationToExternalFlowModel conn = new FunctionEscalationToExternalFlowModel();
+		conn.setFunctionEscalation(functionEscalation);
+		conn.setExternalFlow(externalFlow);
+
+		// Return the change
+		return new AbstractChange<FunctionEscalationToExternalFlowModel>(conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<FunctionEscalationToExternalFlowModel> removeFunctionEscalationToExternalFlow(
+			final FunctionEscalationToExternalFlowModel functionEscalationToExternalFlow) {
+
+		// TODO test this method (removeFunctionEscalationToExternalFlow)
+
+		// Return the change
+		return new AbstractChange<FunctionEscalationToExternalFlowModel>(functionEscalationToExternalFlow, "Remove") {
+			@Override
+			public void apply() {
+				functionEscalationToExternalFlow.remove();
+			}
+
+			@Override
+			public void revert() {
+				functionEscalationToExternalFlow.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<DeskManagedObjectSourceFlowToFunctionModel> linkDeskManagedObjectSourceFlowToFunction(
+			DeskManagedObjectSourceFlowModel managedObjectSourceFlow, FunctionModel function) {
+
+		// TODO test this method (linkDeskManagedObjectSourceFlowToFunction)
+
+		// Create the connection
+		final DeskManagedObjectSourceFlowToFunctionModel conn = new DeskManagedObjectSourceFlowToFunctionModel();
+		conn.setDeskManagedObjectSourceFlow(managedObjectSourceFlow);
+		conn.setFunction(function);
+
+		// Return change to add connection
+		return new AbstractChange<DeskManagedObjectSourceFlowToFunctionModel>(conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<DeskManagedObjectSourceFlowToFunctionModel> removeDeskManagedObjectSourceFlowToFunction(
+			final DeskManagedObjectSourceFlowToFunctionModel managedObjectSourceFlowToFunction) {
+
+		// TODO test this method (removeDeskManagedObjectSourceFlowToFunction)
+
+		// Return change to remove connection
+		return new AbstractChange<DeskManagedObjectSourceFlowToFunctionModel>(managedObjectSourceFlowToFunction,
+				"Remove") {
+			@Override
+			public void apply() {
+				managedObjectSourceFlowToFunction.remove();
+			}
+
+			@Override
+			public void revert() {
+				managedObjectSourceFlowToFunction.connect();
 			}
 		};
 	}
 
 	@Override
 	public Change<DeskManagedObjectSourceFlowToExternalFlowModel> linkDeskManagedObjectSourceFlowToExternalFlow(
-			DeskManagedObjectSourceFlowModel managedObjectSourceFlow,
-			ExternalFlowModel externalFlow) {
+			DeskManagedObjectSourceFlowModel managedObjectSourceFlow, ExternalFlowModel externalFlow) {
 
 		// TODO test this method (linkDeskManagedObjectSourceFlowToExternalFlow)
 
@@ -2638,8 +2407,7 @@ public class DeskChangesImpl implements DeskChanges {
 		conn.setExternalFlow(externalFlow);
 
 		// Return change to add connection
-		return new AbstractChange<DeskManagedObjectSourceFlowToExternalFlowModel>(
-				conn, "Connect") {
+		return new AbstractChange<DeskManagedObjectSourceFlowToExternalFlowModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -2659,8 +2427,8 @@ public class DeskChangesImpl implements DeskChanges {
 		// TODO test (removeDeskManagedObjectSourceFlowToExternalFlow)
 
 		// Return change to remove connection
-		return new AbstractChange<DeskManagedObjectSourceFlowToExternalFlowModel>(
-				managedObjectSourceFlowToExternalFlow, "Remove") {
+		return new AbstractChange<DeskManagedObjectSourceFlowToExternalFlowModel>(managedObjectSourceFlowToExternalFlow,
+				"Remove") {
 			@Override
 			public void apply() {
 				managedObjectSourceFlowToExternalFlow.remove();
@@ -2675,8 +2443,7 @@ public class DeskChangesImpl implements DeskChanges {
 
 	@Override
 	public Change<DeskManagedObjectDependencyToDeskManagedObjectModel> linkDeskManagedObjectDependencyToDeskManagedObject(
-			DeskManagedObjectDependencyModel dependency,
-			DeskManagedObjectModel managedObject) {
+			DeskManagedObjectDependencyModel dependency, DeskManagedObjectModel managedObject) {
 
 		// TODO test (linkDeskManagedObjectDependencyToDeskManagedObject)
 
@@ -2686,8 +2453,7 @@ public class DeskChangesImpl implements DeskChanges {
 		conn.setDeskManagedObject(managedObject);
 
 		// Return change to add connection
-		return new AbstractChange<DeskManagedObjectDependencyToDeskManagedObjectModel>(
-				conn, "Connect") {
+		return new AbstractChange<DeskManagedObjectDependencyToDeskManagedObjectModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -2707,8 +2473,8 @@ public class DeskChangesImpl implements DeskChanges {
 		// TODO test (removeDeskManagedObjectDependencyToDeskManagedObject)
 
 		// Return change to remove connection
-		return new AbstractChange<DeskManagedObjectDependencyToDeskManagedObjectModel>(
-				dependencyToManagedObject, "Remove") {
+		return new AbstractChange<DeskManagedObjectDependencyToDeskManagedObjectModel>(dependencyToManagedObject,
+				"Remove") {
 			@Override
 			public void apply() {
 				dependencyToManagedObject.remove();
@@ -2723,8 +2489,7 @@ public class DeskChangesImpl implements DeskChanges {
 
 	@Override
 	public Change<DeskManagedObjectDependencyToExternalManagedObjectModel> linkDeskManagedObjectDependencyToExternalManagedObject(
-			DeskManagedObjectDependencyModel dependency,
-			ExternalManagedObjectModel externalManagedObject) {
+			DeskManagedObjectDependencyModel dependency, ExternalManagedObjectModel externalManagedObject) {
 
 		// TODO test (linkDeskManagedObjectDependencyToExternalManagedObject)
 
@@ -2734,8 +2499,7 @@ public class DeskChangesImpl implements DeskChanges {
 		conn.setExternalManagedObject(externalManagedObject);
 
 		// Return change to add connection
-		return new AbstractChange<DeskManagedObjectDependencyToExternalManagedObjectModel>(
-				conn, "Connect") {
+		return new AbstractChange<DeskManagedObjectDependencyToExternalManagedObjectModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();

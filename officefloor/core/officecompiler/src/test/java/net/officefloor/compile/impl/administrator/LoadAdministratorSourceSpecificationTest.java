@@ -18,15 +18,15 @@
 package net.officefloor.compile.impl.administrator;
 
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.administrator.AdministratorLoader;
+import net.officefloor.compile.administration.AdministrationLoader;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.administration.source.AdministratorSource;
-import net.officefloor.compile.spi.administration.source.AdministratorSourceContext;
-import net.officefloor.compile.spi.administration.source.AdministratorSourceMetaData;
-import net.officefloor.compile.spi.administration.source.AdministratorSourceProperty;
-import net.officefloor.compile.spi.administration.source.AdministratorSourceSpecification;
+import net.officefloor.compile.spi.administration.source.AdministrationSource;
+import net.officefloor.compile.spi.administration.source.AdministrationSourceContext;
+import net.officefloor.compile.spi.administration.source.AdministrationSourceMetaData;
+import net.officefloor.compile.spi.administration.source.AdministrationSourceProperty;
+import net.officefloor.compile.spi.administration.source.AdministrationSourceSpecification;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.administration.Administration;
@@ -35,7 +35,7 @@ import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Tests the {@link AdministratorLoader}.
+ * Tests the {@link AdministrationLoader}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -48,10 +48,10 @@ public class LoadAdministratorSourceSpecificationTest extends
 	private final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 	/**
-	 * {@link AdministratorSourceSpecification}.
+	 * {@link AdministrationSourceSpecification}.
 	 */
-	private final AdministratorSourceSpecification specification = this
-			.createMock(AdministratorSourceSpecification.class);
+	private final AdministrationSourceSpecification specification = this
+			.createMock(AdministrationSourceSpecification.class);
 
 	/*
 	 * (non-Javadoc)
@@ -64,7 +64,7 @@ public class LoadAdministratorSourceSpecificationTest extends
 	}
 
 	/**
-	 * Ensures issue if fails to instantiate the {@link AdministratorSource}.
+	 * Ensures issue if fails to instantiate the {@link AdministrationSource}.
 	 */
 	public void testFailInstantiateForAdministratorSourceSpecification() {
 
@@ -85,7 +85,7 @@ public class LoadAdministratorSourceSpecificationTest extends
 
 	/**
 	 * Ensures issue if failure in obtaining the
-	 * {@link AdministratorSourceSpecification}.
+	 * {@link AdministrationSourceSpecification}.
 	 */
 	public void testFailGetAdministratorSourceSpecification() {
 
@@ -104,7 +104,7 @@ public class LoadAdministratorSourceSpecificationTest extends
 	}
 
 	/**
-	 * Ensures issue if no {@link AdministratorSourceSpecification} obtained.
+	 * Ensures issue if no {@link AdministrationSourceSpecification} obtained.
 	 */
 	public void testNoAdministratorSourceSpecification() {
 
@@ -121,7 +121,7 @@ public class LoadAdministratorSourceSpecificationTest extends
 	}
 
 	/**
-	 * Ensures issue if fails to obtain the {@link AdministratorSourceProperty}
+	 * Ensures issue if fails to obtain the {@link AdministrationSourceProperty}
 	 * instances.
 	 */
 	public void testFailGetAdministratorSourceProperties() {
@@ -145,7 +145,7 @@ public class LoadAdministratorSourceSpecificationTest extends
 	}
 
 	/**
-	 * Ensures considers null {@link AdministratorSourceProperty} array as no
+	 * Ensures considers null {@link AdministrationSourceProperty} array as no
 	 * properties.
 	 */
 	public void testNullAdministratorSourcePropertiesArray() {
@@ -161,7 +161,7 @@ public class LoadAdministratorSourceSpecificationTest extends
 	}
 
 	/**
-	 * Ensures issue if element in {@link AdministratorSourceProperty} array is
+	 * Ensures issue if element in {@link AdministrationSourceProperty} array is
 	 * null.
 	 */
 	public void testNullAdministratorSourcePropertyElement() {
@@ -169,7 +169,7 @@ public class LoadAdministratorSourceSpecificationTest extends
 		// Record null properties
 		this.recordReturn(this.specification,
 				this.specification.getProperties(),
-				new AdministratorSourceProperty[] { null });
+				new AdministrationSourceProperty[] { null });
 		this.issues
 				.recordIssue("AdministratorSourceProperty 0 is null from AdministratorSourceSpecification for "
 						+ MockAdministratorSource.class.getName());
@@ -181,18 +181,18 @@ public class LoadAdministratorSourceSpecificationTest extends
 	}
 
 	/**
-	 * Ensures issue if <code>null</code> {@link AdministratorSourceProperty}
+	 * Ensures issue if <code>null</code> {@link AdministrationSourceProperty}
 	 * name.
 	 */
 	public void testNullAdministratorSourcePropertyName() {
 
-		final AdministratorSourceProperty property = this
-				.createMock(AdministratorSourceProperty.class);
+		final AdministrationSourceProperty property = this
+				.createMock(AdministrationSourceProperty.class);
 
 		// Record obtaining properties
 		this.recordReturn(this.specification,
 				this.specification.getProperties(),
-				new AdministratorSourceProperty[] { property });
+				new AdministrationSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
 		this.issues
 				.recordIssue("AdministratorSourceProperty 0 provided blank name from AdministratorSourceSpecification for "
@@ -205,20 +205,20 @@ public class LoadAdministratorSourceSpecificationTest extends
 	}
 
 	/**
-	 * Ensures issue if fails to get the {@link AdministratorSourceProperty}
+	 * Ensures issue if fails to get the {@link AdministrationSourceProperty}
 	 * name.
 	 */
 	public void testFailGetAdministratorSourcePropertyName() {
 
 		final RuntimeException failure = new RuntimeException(
 				"Failed to get property name");
-		final AdministratorSourceProperty property = this
-				.createMock(AdministratorSourceProperty.class);
+		final AdministrationSourceProperty property = this
+				.createMock(AdministrationSourceProperty.class);
 
 		// Record obtaining properties
 		this.recordReturn(this.specification,
 				this.specification.getProperties(),
-				new AdministratorSourceProperty[] { property });
+				new AdministrationSourceProperty[] { property });
 		this.control(property).expectAndThrow(property.getName(), failure);
 		this.issues
 				.recordIssue(
@@ -233,20 +233,20 @@ public class LoadAdministratorSourceSpecificationTest extends
 	}
 
 	/**
-	 * Ensures issue if fails to get the {@link AdministratorSourceProperty}
+	 * Ensures issue if fails to get the {@link AdministrationSourceProperty}
 	 * label.
 	 */
 	public void testFailGetAdministratorSourcePropertyLabel() {
 
 		final RuntimeException failure = new RuntimeException(
 				"Failed to get property label");
-		final AdministratorSourceProperty property = this
-				.createMock(AdministratorSourceProperty.class);
+		final AdministrationSourceProperty property = this
+				.createMock(AdministrationSourceProperty.class);
 
 		// Record obtaining properties
 		this.recordReturn(this.specification,
 				this.specification.getProperties(),
-				new AdministratorSourceProperty[] { property });
+				new AdministrationSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
 		this.control(property).expectAndThrow(property.getLabel(), failure);
 		this.issues
@@ -262,19 +262,19 @@ public class LoadAdministratorSourceSpecificationTest extends
 	}
 
 	/**
-	 * Ensures able to load the {@link AdministratorSourceSpecification}.
+	 * Ensures able to load the {@link AdministrationSourceSpecification}.
 	 */
 	public void testLoadAdministratorSourceSpecification() {
 
-		final AdministratorSourceProperty propertyWithLabel = this
-				.createMock(AdministratorSourceProperty.class);
-		final AdministratorSourceProperty propertyWithoutLabel = this
-				.createMock(AdministratorSourceProperty.class);
+		final AdministrationSourceProperty propertyWithLabel = this
+				.createMock(AdministrationSourceProperty.class);
+		final AdministrationSourceProperty propertyWithoutLabel = this
+				.createMock(AdministrationSourceProperty.class);
 
 		// Record obtaining properties
 		this.recordReturn(this.specification,
 				this.specification.getProperties(),
-				new AdministratorSourceProperty[] { propertyWithLabel,
+				new AdministrationSourceProperty[] { propertyWithLabel,
 						propertyWithoutLabel });
 		this.recordReturn(propertyWithLabel, propertyWithLabel.getName(),
 				"NAME");
@@ -292,11 +292,11 @@ public class LoadAdministratorSourceSpecificationTest extends
 	}
 
 	/**
-	 * Loads the {@link AdministratorSourceSpecification}.
+	 * Loads the {@link AdministrationSourceSpecification}.
 	 * 
 	 * @param isExpectToLoad
 	 *            Flag indicating if expect to obtain the
-	 *            {@link AdministratorSourceSpecification}.
+	 *            {@link AdministrationSourceSpecification}.
 	 * @param propertyNames
 	 *            Expected {@link Property} names for being returned.
 	 */
@@ -307,7 +307,7 @@ public class LoadAdministratorSourceSpecificationTest extends
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
 				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
-		AdministratorLoader administratorLoader = compiler
+		AdministrationLoader administratorLoader = compiler
 				.getAdministratorLoader();
 		PropertyList propertyList = administratorLoader
 				.loadSpecification(MockAdministratorSource.class);
@@ -326,11 +326,11 @@ public class LoadAdministratorSourceSpecificationTest extends
 	}
 
 	/**
-	 * Mock {@link AdministratorSource} for testing.
+	 * Mock {@link AdministrationSource} for testing.
 	 */
 	@TestSource
 	public static class MockAdministratorSource implements
-			AdministratorSource<None, None> {
+			AdministrationSource<None, None> {
 
 		/**
 		 * Failure to instantiate an instance.
@@ -338,22 +338,22 @@ public class LoadAdministratorSourceSpecificationTest extends
 		public static RuntimeException instantiateFailure = null;
 
 		/**
-		 * Failure to obtain the {@link AdministratorSourceSpecification}.
+		 * Failure to obtain the {@link AdministrationSourceSpecification}.
 		 */
 		public static Error specificationFailure = null;
 
 		/**
-		 * {@link AdministratorSourceSpecification}.
+		 * {@link AdministrationSourceSpecification}.
 		 */
-		public static AdministratorSourceSpecification specification;
+		public static AdministrationSourceSpecification specification;
 
 		/**
 		 * Resets the state for next test.
 		 * 
 		 * @param specification
-		 *            {@link AdministratorSourceSpecification}.
+		 *            {@link AdministrationSourceSpecification}.
 		 */
-		public static void reset(AdministratorSourceSpecification specification) {
+		public static void reset(AdministrationSourceSpecification specification) {
 			instantiateFailure = null;
 			specificationFailure = null;
 			MockAdministratorSource.specification = specification;
@@ -374,7 +374,7 @@ public class LoadAdministratorSourceSpecificationTest extends
 		 */
 
 		@Override
-		public AdministratorSourceSpecification getSpecification() {
+		public AdministrationSourceSpecification getSpecification() {
 			// Determine if failure to obtain
 			if (specificationFailure != null) {
 				throw specificationFailure;
@@ -385,12 +385,12 @@ public class LoadAdministratorSourceSpecificationTest extends
 		}
 
 		@Override
-		public void init(AdministratorSourceContext context) throws Exception {
+		public void init(AdministrationSourceContext context) throws Exception {
 			fail("Should not be invoked for obtaining specification");
 		}
 
 		@Override
-		public AdministratorSourceMetaData<None, None> getMetaData() {
+		public AdministrationSourceMetaData<None, None> getMetaData() {
 			fail("Should not be invoked for obtaining specification");
 			return null;
 		}

@@ -17,11 +17,11 @@
  */
 package net.officefloor.model.impl.desk;
 
-import net.officefloor.compile.impl.work.WorkTypeImpl;
 import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.impl.managedfunction.FunctionNamespaceTypeImpl;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionEscalationTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
@@ -92,7 +92,7 @@ public abstract class AbstractDeskChangesTestCase extends
 	protected FunctionNamespaceType<Work> constructWorkType(WorkTypeConstructor constructor) {
 
 		// Create the work type builder
-		WorkTypeImpl<Work> workTypeBuilder = new WorkTypeImpl<Work>();
+		FunctionNamespaceTypeImpl<Work> workTypeBuilder = new FunctionNamespaceTypeImpl<Work>();
 
 		// Build the work type via the constructor
 		WorkTypeContext context = new WorkTypeContextImpl(workTypeBuilder);

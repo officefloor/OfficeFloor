@@ -58,9 +58,8 @@ public class AutoWireManagement implements AutoWireManagementMBean {
 
 	static {
 		try {
-			SEARCH_QUERY = new ObjectName("officefloor:type="
-					+ AutoWireManagement.class.getName() + ",name="
-					+ MBEAN_NAME + "*");
+			SEARCH_QUERY = new ObjectName(
+					"officefloor:type=" + AutoWireManagement.class.getName() + ",name=" + MBEAN_NAME + "*");
 		} catch (Exception ex) {
 			// This should never be the case
 		}
@@ -77,27 +76,25 @@ public class AutoWireManagement implements AutoWireManagementMBean {
 	 * @throws Exception
 	 *             If fails to create the {@link AutoWireOfficeFloor}.
 	 */
-	public static AutoWireOfficeFloor createAutoWireOfficeFloor(
-			OfficeFloor officeFloor, String officeName) throws Exception {
+	public static AutoWireOfficeFloor createAutoWireOfficeFloor(OfficeFloor officeFloor, String officeName)
+			throws Exception {
 		synchronized (AutoWireManagement.class) {
 
 			// Obtain the unique index for the OfficeFloor
 			int index = nextNameIndex++; // increment for next
 
 			// Create the Object Name
-			ObjectName objectName = new ObjectName("officefloor:type="
-					+ AutoWireManagement.class.getName() + ",name="
-					+ MBEAN_NAME + "_" + index);
+			ObjectName objectName = new ObjectName(
+					"officefloor:type=" + AutoWireManagement.class.getName() + ",name=" + MBEAN_NAME + "_" + index);
 
 			// Create the auto-wire OfficeFloor (and its administration)
 			AutoWireManagement administration = new AutoWireManagement();
-			AutoWireOfficeFloorImpl autoWire = new AutoWireOfficeFloorImpl(
-					officeFloor, officeName, objectName, administration);
+			AutoWireOfficeFloorImpl autoWire = new AutoWireOfficeFloorImpl(officeFloor, officeName, objectName,
+					administration);
 			administration.autoWireOfficeFloor = autoWire;
 
 			// Register the auto-wire administration
-			ManagementFactory.getPlatformMBeanServer().registerMBean(
-					administration, objectName);
+			ManagementFactory.getPlatformMBeanServer().registerMBean(administration, objectName);
 
 			// Return the auto-wire OfficeFloor
 			return autoWire;
@@ -118,11 +115,9 @@ public class AutoWireManagement implements AutoWireManagementMBean {
 		Set<ObjectName> names = mbeanServer.queryNames(null, SEARCH_QUERY);
 
 		// Create the listing of the AutoWireOfficeFloor MBeans
-		List<AutoWireManagementMBean> mbeans = new ArrayList<AutoWireManagementMBean>(
-				names.size());
+		List<AutoWireManagementMBean> mbeans = new ArrayList<AutoWireManagementMBean>(names.size());
 		for (ObjectName name : names) {
-			AutoWireManagementMBean mbean = JMX.newMBeanProxy(mbeanServer,
-					name, AutoWireManagementMBean.class);
+			AutoWireManagementMBean mbean = JMX.newMBeanProxy(mbeanServer, name, AutoWireManagementMBean.class);
 			mbeans.add(mbean);
 		}
 
@@ -156,9 +151,9 @@ public class AutoWireManagement implements AutoWireManagementMBean {
 	 */
 
 	@Override
-	public void invokeTask(String workName, String taskName) throws Exception {
+	public void invokeFunction(String functionName) throws Exception {
 		synchronized (AutoWireManagement.class) {
-			this.autoWireOfficeFloor.invokeTask(workName, taskName, null);
+			this.autoWireOfficeFloor.invokeFunction(functionName, null);
 		}
 	}
 
@@ -171,17 +166,14 @@ public class AutoWireManagement implements AutoWireManagementMBean {
 
 			// Ensure unregistered
 			try {
-				MBeanServer mbeanServer = ManagementFactory
-						.getPlatformMBeanServer();
+				MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
 				ObjectName name = this.autoWireOfficeFloor.getObjectName();
 				if (mbeanServer.isRegistered(name)) {
 					mbeanServer.unregisterMBean(name);
 				}
 			} catch (Exception ex) {
 				throw new IllegalStateException(
-						"Should not fail to unregister "
-								+ AutoWireManagementMBean.class.getSimpleName(),
-						ex);
+						"Should not fail to unregister " + AutoWireManagementMBean.class.getSimpleName(), ex);
 			}
 		}
 	}

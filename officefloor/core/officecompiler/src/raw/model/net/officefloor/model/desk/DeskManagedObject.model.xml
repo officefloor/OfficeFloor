@@ -4,7 +4,7 @@
 	<field type="String" name="managed object scope" />
 	<field type="DeskManagedObjectToDeskManagedObjectSourceModel"
 		name="desk managed object source" />
-	<list type="WorkTaskObjectToDeskManagedObjectModel" name="work task object" />
+	<list type="ManagedFunctionObjectToDeskManagedObjectModel" name="managed function object" />
 	<list type="DeskManagedObjectDependencyModel" name="desk managed object dependency"
 		plural="desk managed object dependencies" />
 	<list type="DeskManagedObjectDependencyToDeskManagedObjectModel"

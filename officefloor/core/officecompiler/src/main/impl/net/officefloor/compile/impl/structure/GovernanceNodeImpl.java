@@ -96,8 +96,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 		 *            {@link GovernanceSource} instance to use. Should this be
 		 *            specified it overrides the {@link Class}.
 		 */
-		public InitialisedState(String governanceSourceClassName,
-				GovernanceSource<?, ?> governanceSource) {
+		public InitialisedState(String governanceSourceClassName, GovernanceSource<?, ?> governanceSource) {
 			this.governanceSourceClassName = governanceSourceClassName;
 			this.governanceSource = governanceSource;
 		}
@@ -114,8 +113,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public GovernanceNodeImpl(String governanceName, OfficeNode officeNode,
-			NodeContext context) {
+	public GovernanceNodeImpl(String governanceName, OfficeNode officeNode, NodeContext context) {
 		this.governanceName = governanceName;
 		this.officeNode = officeNode;
 		this.context = context;
@@ -154,11 +152,9 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	}
 
 	@Override
-	public void initialise(String governanceSourceClassName,
-			GovernanceSource<?, ?> governanceSource) {
+	public void initialise(String governanceSourceClassName, GovernanceSource<?, ?> governanceSource) {
 		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialisedState(governanceSourceClassName,
-						governanceSource));
+				() -> new InitialisedState(governanceSourceClassName, governanceSource));
 	}
 
 	/*
@@ -170,22 +166,19 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	public GovernanceType<?, ?> loadGovernanceType() {
 
 		// Obtain the governance source class
-		Class governanceSourceClass = this.context.getGovernanceSourceClass(
-				this.state.governanceSourceClassName, this);
+		Class governanceSourceClass = this.context.getGovernanceSourceClass(this.state.governanceSourceClassName, this);
 		if (governanceSourceClass == null) {
 			return null; // must obtain source class
 		}
 
 		// Load and return the governance type
 		GovernanceLoader loader = this.context.getGovernanceLoader(this);
-		return loader
-				.loadGovernanceType(governanceSourceClass, this.properties);
+		return loader.loadGovernanceType(governanceSourceClass, this.properties);
 	}
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void buildGovernance(OfficeBuilder officeBuilder,
-			TypeContext typeContext) {
+	public void buildGovernance(OfficeBuilder officeBuilder, TypeContext typeContext) {
 
 		// Obtain the governance type
 		GovernanceType govType = typeContext.getOrLoadGovernanceType(this);
@@ -194,16 +187,15 @@ public class GovernanceNodeImpl implements GovernanceNode {
 		}
 
 		// Build the governance
-		GovernanceBuilder govBuilder = officeBuilder.addGovernance(
-				this.governanceName, govType.getGovernanceFactory(),
-				govType.getExtensionInterface());
+		GovernanceBuilder govBuilder = officeBuilder.addGovernance(this.governanceName, govType.getExtensionInterface(),
+				govType.getGovernanceFactory());
 
 		// Obtain the office team responsible for this governance
-		OfficeTeamNode officeTeam = LinkUtil.retrieveTarget(this,
-				OfficeTeamNode.class, this.context.getCompilerIssues());
+		OfficeTeamNode officeTeam = LinkUtil.retrieveTarget(this, OfficeTeamNode.class,
+				this.context.getCompilerIssues());
 		if (officeTeam != null) {
 			// Build the team responsible for the governance
-			govBuilder.setTeam(officeTeam.getOfficeTeamName());
+			govBuilder.setResponsibleTeam(officeTeam.getOfficeTeamName());
 		}
 	}
 
@@ -237,11 +229,8 @@ public class GovernanceNodeImpl implements GovernanceNode {
 
 		} else {
 			// Unknown governerable managed object node
-			this.context.getCompilerIssues().addIssue(
-					this,
-					"Unknown "
-							+ GovernerableManagedObject.class.getSimpleName()
-							+ " node");
+			this.context.getCompilerIssues().addIssue(this,
+					"Unknown " + GovernerableManagedObject.class.getSimpleName() + " node");
 		}
 	}
 
@@ -256,8 +245,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 
 	@Override
 	public boolean linkTeamNode(LinkTeamNode node) {
-		return LinkUtil.linkTeamNode(this, node,
-				this.context.getCompilerIssues(),
+		return LinkUtil.linkTeamNode(this, node, this.context.getCompilerIssues(),
 				(link) -> this.linkedTeamNode = link);
 	}
 

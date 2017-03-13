@@ -22,7 +22,7 @@ import java.sql.Connection;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
-import net.officefloor.compile.spi.office.OfficeAdministrator;
+import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeDuty;
 import net.officefloor.compile.spi.office.OfficeEscalation;
@@ -40,9 +40,9 @@ import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeStart;
 import net.officefloor.compile.spi.office.OfficeSubSection;
-import net.officefloor.compile.spi.office.OfficeSectionTask;
+import net.officefloor.compile.spi.office.OfficeSectionFunction;
 import net.officefloor.compile.spi.office.OfficeTeam;
-import net.officefloor.compile.spi.office.TaskTeam;
+import net.officefloor.compile.spi.office.ResponsibleTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
@@ -665,12 +665,12 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Tests adding an {@link OfficeAdministrator}.
+	 * Tests adding an {@link OfficeAdministration}.
 	 */
 	public void testAddOfficeAdministrator() {
 		// Add two different administrators verifying details
 		this.replayMockObjects();
-		OfficeAdministrator admin = this.addAdministrator(this.node, "ADMIN",
+		OfficeAdministration admin = this.addAdministrator(this.node, "ADMIN",
 				null);
 		assertNotNull("Must have administrator", admin);
 		assertEquals("Incorrect administrator name", "ADMIN",
@@ -681,19 +681,19 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure issue if add the {@link OfficeAdministrator} twice.
+	 * Ensure issue if add the {@link OfficeAdministration} twice.
 	 */
 	public void testAddOfficeAdministratorTwice() {
 
 		// Record issue in adding the administrator twice
-		this.issues.recordIssue("ADMIN", AdministratorNodeImpl.class,
+		this.issues.recordIssue("ADMIN", AdministrationNodeImpl.class,
 				"Administrator ADMIN already added");
 
 		// Add the administrator twice
 		this.replayMockObjects();
-		OfficeAdministrator adminFirst = this.addAdministrator(this.node,
+		OfficeAdministration adminFirst = this.addAdministrator(this.node,
 				"ADMIN", null);
-		OfficeAdministrator adminSecond = this.addAdministrator(this.node,
+		OfficeAdministration adminSecond = this.addAdministrator(this.node,
 				"ADMIN", null);
 		this.verifyMockObjects();
 
@@ -703,12 +703,12 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Tests adding an {@link OfficeAdministrator} instance.
+	 * Tests adding an {@link OfficeAdministration} instance.
 	 */
 	public void testAddOfficeAdministratorInstance() {
 		// Add two different administrators verifying details
 		this.replayMockObjects();
-		OfficeAdministrator admin = this.node.addOfficeAdministrator("ADMIN",
+		OfficeAdministration admin = this.node.addOfficeAdministrator("ADMIN",
 				new ClassAdministratorSource());
 		assertNotNull("Must have administrator", admin);
 		assertEquals("Incorrect administrator name", "ADMIN",
@@ -720,19 +720,19 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure issue if add the {@link OfficeAdministrator} instance twice.
+	 * Ensure issue if add the {@link OfficeAdministration} instance twice.
 	 */
 	public void testAddOfficeAdministratorInstanceTwice() {
 
 		// Record issue in adding the administrator twice
-		this.issues.recordIssue("ADMIN", AdministratorNodeImpl.class,
+		this.issues.recordIssue("ADMIN", AdministrationNodeImpl.class,
 				"Administrator ADMIN already added");
 
 		// Add the administrator twice
 		this.replayMockObjects();
-		OfficeAdministrator adminFirst = this.node.addOfficeAdministrator(
+		OfficeAdministration adminFirst = this.node.addOfficeAdministrator(
 				"ADMIN", new ClassAdministratorSource());
-		OfficeAdministrator adminSecond = this.node.addOfficeAdministrator(
+		OfficeAdministration adminSecond = this.node.addOfficeAdministrator(
 				"ADMIN", new ClassAdministratorSource());
 		this.verifyMockObjects();
 
@@ -861,23 +861,23 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure can link the {@link TaskTeam} to an {@link OfficeTeam}.
+	 * Ensure can link the {@link ResponsibleTeam} to an {@link OfficeTeam}.
 	 */
 	public void testLinkTaskTeamToOfficeTeam() {
 
 		// Record already being linked
-		this.issues.recordIssue("Team for task TASK", TaskTeamNodeImpl.class,
+		this.issues.recordIssue("Team for task TASK", ResponsibleTeamNodeImpl.class,
 				"Task Team Team for task TASK linked more than once");
 
 		this.replayMockObjects();
 
 		// Add section with task
 		OfficeSection section = this.addSection(this.node, "SECTION", null);
-		OfficeSectionTask task = section.getOfficeSectionTask("TASK");
+		OfficeSectionFunction task = section.getOfficeSectionTask("TASK");
 		assertEquals("Incorrect office task", "TASK", task.getOfficeTaskName());
 
 		// Link
-		TaskTeam team = task.getTeamResponsible();
+		ResponsibleTeam team = task.getTeamResponsible();
 		OfficeTeam officeTeam = this.node.addOfficeTeam("TEAM");
 		this.node.link(team, officeTeam);
 		assertTeamLink("task team -> office team", team, officeTeam);
@@ -915,18 +915,18 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensures can link {@link OfficeAdministrator} to the {@link OfficeTeam}.
+	 * Ensures can link {@link OfficeAdministration} to the {@link OfficeTeam}.
 	 */
 	public void testLinkOfficeAdministratorToOfficeTeam() {
 
 		// Record already being linked
-		this.issues.recordIssue("ADMIN", AdministratorNodeImpl.class,
+		this.issues.recordIssue("ADMIN", AdministrationNodeImpl.class,
 				"Administrator ADMIN linked more than once");
 
 		this.replayMockObjects();
 
 		// Link
-		OfficeAdministrator admin = this.addAdministrator(this.node, "ADMIN",
+		OfficeAdministration admin = this.addAdministrator(this.node, "ADMIN",
 				null);
 		OfficeTeam officeTeam = this.node.addOfficeTeam("OFFICE_TEAM");
 		this.node.link(admin, officeTeam);
@@ -992,7 +992,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 	/**
 	 * Ensure can specify {@link OfficeGovernance} for a specific
-	 * {@link OfficeSectionTask}.
+	 * {@link OfficeSectionFunction}.
 	 */
 	public void testLinkOfficeGovernanceForOfficeTask() {
 
@@ -1000,7 +1000,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Add section with task
 		OfficeSection section = this.addSection(this.node, "SECTION", null);
-		OfficeSectionTask task = section.getOfficeSectionTask("TASK");
+		OfficeSectionFunction task = section.getOfficeSectionTask("TASK");
 
 		// Link
 		OfficeGovernance governance = this.addGovernance(this.node,
@@ -1017,7 +1017,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure can specify pre {@link OfficeDuty} for the {@link OfficeSectionTask}.
+	 * Ensure can specify pre {@link OfficeDuty} for the {@link OfficeSectionFunction}.
 	 */
 	public void testLinkPreOfficeDutyForOfficeTask() {
 
@@ -1025,10 +1025,10 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Add section with task
 		OfficeSection section = this.addSection(this.node, "SECTION", null);
-		OfficeSectionTask task = section.getOfficeSectionTask("TASK");
+		OfficeSectionFunction task = section.getOfficeSectionTask("TASK");
 
 		// Link
-		OfficeAdministrator administrator = this.addAdministrator(this.node,
+		OfficeAdministration administrator = this.addAdministrator(this.node,
 				"ADMINISTRATOR", null);
 		assertEquals("Incorrect administrator name", "ADMINISTRATOR",
 				administrator.getOfficeAdministratorName());
@@ -1044,7 +1044,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure can specify post {@link OfficeDuty} for the {@link OfficeSectionTask}.
+	 * Ensure can specify post {@link OfficeDuty} for the {@link OfficeSectionFunction}.
 	 */
 	public void testLinkPostOfficeDutyForOfficeTask() {
 
@@ -1052,10 +1052,10 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Add section with task
 		OfficeSection section = this.addSection(this.node, "SECTION", null);
-		OfficeSectionTask task = section.getOfficeSectionTask("TASK");
+		OfficeSectionFunction task = section.getOfficeSectionTask("TASK");
 
 		// Link
-		OfficeAdministrator administrator = this.addAdministrator(this.node,
+		OfficeAdministration administrator = this.addAdministrator(this.node,
 				"ADMINISTRATOR", null);
 		OfficeDuty duty = administrator.getDuty("DUTY");
 		task.addPostTaskDuty(duty);
@@ -1144,7 +1144,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 				.getOfficeSectionManagedObject("MO");
 
 		// Link
-		OfficeAdministrator administrator = this.addAdministrator(this.node,
+		OfficeAdministration administrator = this.addAdministrator(this.node,
 				"ADMINISTRATOR", null);
 		administrator.administerManagedObject(mo);
 		// TODO test that administering the section managed object
@@ -1162,7 +1162,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Link
-		OfficeAdministrator administrator = this.addAdministrator(this.node,
+		OfficeAdministration administrator = this.addAdministrator(this.node,
 				"ADMINISTRATOR", null);
 		OfficeManagedObjectSource moSource = this.addManagedObjectSource(
 				this.node, "MO_SOURCE", null);
@@ -1184,7 +1184,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Link
-		OfficeAdministrator administrator = this.addAdministrator(this.node,
+		OfficeAdministration administrator = this.addAdministrator(this.node,
 				"ADMINISTRATOR", null);
 		OfficeObject mo = this.node.addOfficeObject("MO",
 				Connection.class.getName());

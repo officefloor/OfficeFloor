@@ -21,7 +21,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * {@link ManagedObject} that may be administered by an
- * {@link OfficeAdministrator}.
+ * {@link OfficeAdministration}.
  * 
  * @author Daniel Sagenschneider
  */

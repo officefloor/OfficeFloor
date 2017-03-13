@@ -22,7 +22,6 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceProperty;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceSpecification;
-import net.officefloor.frame.api.function.Work;
 
 /**
  * Loads the {@link FunctionNamespaceType} from the
@@ -34,27 +33,24 @@ public interface ManagedFunctionLoader {
 
 	/**
 	 * Loads and returns the {@link PropertyList} from the
-	 * {@link ManagedFunctionSourceSpecification} for the {@link ManagedFunctionSource}.
+	 * {@link ManagedFunctionSourceSpecification} for the
+	 * {@link ManagedFunctionSource}.
 	 * 
-	 * @param <W>
-	 *            {@link Work} type.
 	 * @param <WS>
 	 *            {@link ManagedFunctionSource} type.
 	 * @param mangedFunctionSourceClass
 	 *            Class of the {@link ManagedFunctionSource}.
-	 * @return {@link PropertyList} of the {@link ManagedFunctionSourceProperty} instances
-	 *         of the {@link ManagedFunctionSourceSpecification} or <code>null</code> if
-	 *         issue, which is reported to the {@link CompilerIssues}.
+	 * @return {@link PropertyList} of the {@link ManagedFunctionSourceProperty}
+	 *         instances of the {@link ManagedFunctionSourceSpecification} or
+	 *         <code>null</code> if issue, which is reported to the
+	 *         {@link CompilerIssues}.
 	 */
-	<W extends Work, WS extends ManagedFunctionSource<W>> PropertyList loadSpecification(
-			Class<WS> mangedFunctionSourceClass);
+	<WS extends ManagedFunctionSource> PropertyList loadSpecification(Class<WS> mangedFunctionSourceClass);
 
 	/**
 	 * Loads and returns the {@link FunctionNamespaceType} from the
 	 * {@link ManagedFunctionSource} class.
 	 * 
-	 * @param <W>
-	 *            {@link Work} type.
 	 * @param <WS>
 	 *            {@link ManagedFunctionSource} type.
 	 * @param workSourceClass
@@ -65,7 +61,7 @@ public interface ManagedFunctionLoader {
 	 * @return {@link FunctionNamespaceType} or <code>null</code> if issues,
 	 *         which is reported to the {@link CompilerIssues}.
 	 */
-	<W extends Work, WS extends ManagedFunctionSource<W>> FunctionNamespaceType<W> loadFunctionNamespaceType(
-			Class<WS> workSourceClass, PropertyList properties);
+	<WS extends ManagedFunctionSource> FunctionNamespaceType loadFunctionNamespaceType(Class<WS> workSourceClass,
+			PropertyList properties);
 
 }

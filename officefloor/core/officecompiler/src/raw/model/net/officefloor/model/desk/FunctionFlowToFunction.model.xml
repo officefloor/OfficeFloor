@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="function name" />
+	<field type="FunctionFlowModel" name="function flow" end-field="function" />
+	<field type="FunctionModel" name="function" end-list="function flow input" />
+	<field type="boolean" name="is spawn thread state" />
+</model>

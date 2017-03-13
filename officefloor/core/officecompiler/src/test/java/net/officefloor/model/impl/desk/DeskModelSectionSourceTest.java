@@ -20,8 +20,8 @@ package net.officefloor.model.impl.desk;
 import java.sql.Connection;
 
 import net.officefloor.compile.spi.section.SectionDesigner;
-import net.officefloor.compile.spi.section.SectionTask;
-import net.officefloor.compile.spi.section.SectionWork;
+import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.desk.DeskModel;
@@ -52,9 +52,9 @@ public class DeskModelSectionSourceTest extends OfficeFrameTestCase {
 		designer.addSectionOutput("OUTPUT", Float.class.getName(), false);
 		designer.addSectionOutput("ESCALATION", Exception.class.getName(), true);
 		designer.addSectionObject("OBJECT", Connection.class.getName());
-		SectionWork work = designer.addSectionWork("WORK",
+		SectionFunctionNamespace work = designer.addSectionWork("WORK",
 				MockWorkSource.class.getName());
-		SectionTask task = work.addSectionTask("INPUT", "WORK_TASK");
+		SectionFunction task = work.addSectionTask("INPUT", "WORK_TASK");
 		task.getTaskObject("PARAMETER").flagAsParameter();
 
 		// Validates the section is as expected

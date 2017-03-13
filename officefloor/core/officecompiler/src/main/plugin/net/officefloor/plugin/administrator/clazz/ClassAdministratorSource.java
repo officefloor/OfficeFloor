@@ -23,9 +23,9 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.compile.AdministratorSourceService;
-import net.officefloor.compile.spi.administration.source.AdministratorSource;
-import net.officefloor.compile.spi.administration.source.AdministratorSourceContext;
+import net.officefloor.compile.AdministrationSourceService;
+import net.officefloor.compile.spi.administration.source.AdministrationSource;
+import net.officefloor.compile.spi.administration.source.AdministrationSourceContext;
 import net.officefloor.compile.spi.administration.source.impl.AbstractAdministratorSource;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.Duty;
@@ -33,13 +33,13 @@ import net.officefloor.frame.api.administration.DutyKey;
 import net.officefloor.frame.api.build.Indexed;
 
 /**
- * {@link AdministratorSource} that delegates to {@link Object}.
+ * {@link AdministrationSource} that delegates to {@link Object}.
  * 
  * @author Daniel Sagenschneider
  */
 public class ClassAdministratorSource extends
 		AbstractAdministratorSource<Object, Indexed> implements
-		AdministratorSourceService<Object, Indexed, ClassAdministratorSource> {
+		AdministrationSourceService<Object, Indexed, ClassAdministratorSource> {
 
 	/**
 	 * Property name providing the {@link Class} name.
@@ -125,7 +125,7 @@ public class ClassAdministratorSource extends
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected void loadMetaData(MetaDataContext<Object, Indexed> context)
 			throws Exception {
-		AdministratorSourceContext adminContext = context
+		AdministrationSourceContext adminContext = context
 				.getAdministratorSourceContext();
 
 		// Obtain the administrator class

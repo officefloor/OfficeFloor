@@ -18,14 +18,13 @@
 package net.officefloor.compile.spi.managedfunction.source;
 
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
-import net.officefloor.frame.api.function.Work;
 
 /**
  * Sources the {@link FunctionNamespaceType}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedFunctionSource<W extends Work> {
+public interface ManagedFunctionSource {
 
 	/**
 	 * <p>
@@ -45,16 +44,17 @@ public interface ManagedFunctionSource<W extends Work> {
 	 * Sources the {@link FunctionNamespaceType} by populating it via the input
 	 * {@link FunctionNamespaceBuilder}.
 	 * 
-	 * @param workTypeBuilder
+	 * @param namespaceTypeBuilder
 	 *            {@link FunctionNamespaceBuilder} to be populated with the
-	 *            <code>type definition</code> of the {@link Work}.
+	 *            <code>type definition</code> of the
+	 *            {@link ManagedFunctionSource}.
 	 * @param context
 	 *            {@link ManagedFunctionSourceContext} to source details to
 	 *            populate the {@link FunctionNamespaceBuilder}.
 	 * @throws Exception
 	 *             If fails to populate the {@link FunctionNamespaceBuilder}.
 	 */
-	void sourceManagedFunctions(FunctionNamespaceBuilder<W> workTypeBuilder, ManagedFunctionSourceContext context)
-			throws Exception;
+	void sourceManagedFunctions(FunctionNamespaceBuilder functionNamespaceTypeBuilder,
+			ManagedFunctionSourceContext context) throws Exception;
 
 }

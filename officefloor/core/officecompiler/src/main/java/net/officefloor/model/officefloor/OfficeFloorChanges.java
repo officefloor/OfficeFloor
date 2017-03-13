@@ -59,10 +59,10 @@ public interface OfficeFloorChanges {
 	String THREAD_MANAGED_OBJECT_SCOPE = ManagedObjectScope.THREAD.name();
 
 	/**
-	 * Value for {@link ManagedObjectScope#WORK} on
+	 * Value for {@link ManagedObjectScope#FUNCTION} on
 	 * {@link OfficeFloorManagedObjectModel} instances.
 	 */
-	String WORK_MANAGED_OBJECT_SCOPE = ManagedObjectScope.WORK.name();
+	String FUNCTION_MANAGED_OBJECT_SCOPE = ManagedObjectScope.FUNCTION.name();
 
 	/**
 	 * Adds a {@link OfficeFloorTeamModel} to the {@link OfficeFloorModel}.

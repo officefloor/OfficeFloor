@@ -32,8 +32,7 @@ public interface OfficeBindings {
 	 * @param managedObjectSourceNode
 	 *            {@link ManagedObjectSourceNode}.
 	 */
-	void buildManagedObjectSourceIntoOffice(
-			ManagedObjectSourceNode managedObjectSourceNode);
+	void buildManagedObjectSourceIntoOffice(ManagedObjectSourceNode managedObjectSourceNode);
 
 	/**
 	 * Builds the {@link BoundManagedObjectNode} into the {@link Office}.
@@ -49,15 +48,14 @@ public interface OfficeBindings {
 	 * @param inputManagedObjectNode
 	 *            {@link InputManagedObjectNode}.
 	 */
-	void buildInputManagedObjectIntoOffice(
-			InputManagedObjectNode inputManagedObjectNode);
+	void buildInputManagedObjectIntoOffice(InputManagedObjectNode inputManagedObjectNode);
 
 	/**
-	 * Builds the {@link TaskNode} into the {@link Office}.
+	 * Builds the {@link ManagedFunctionNode} into the {@link Office}.
 	 * 
-	 * @param taskNode
-	 *            {@link TaskNode}.
+	 * @param managedFunctionNode
+	 *            {@link ManagedFunctionNode}.
 	 */
-	void buildTaskIntoOffice(TaskNode taskNode);
+	void buildManagedFunctionIntoOffice(ManagedFunctionNode managedFunctionNode);
 
 }

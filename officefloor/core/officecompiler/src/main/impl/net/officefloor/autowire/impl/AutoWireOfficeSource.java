@@ -47,7 +47,7 @@ import net.officefloor.compile.section.OfficeSectionObjectType;
 import net.officefloor.compile.section.OfficeSectionOutputType;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
-import net.officefloor.compile.section.OfficeTaskType;
+import net.officefloor.compile.section.OfficeFunctionType;
 import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.DependentManagedObject;
@@ -60,7 +60,7 @@ import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
-import net.officefloor.compile.spi.office.OfficeSectionTask;
+import net.officefloor.compile.spi.office.OfficeSectionFunction;
 import net.officefloor.compile.spi.office.OfficeStart;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTeam;
@@ -387,11 +387,13 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	}
 
 	/**
-	 * Adds an available {@link OfficeTeam} for executing {@link ManagedFunction} instances
-	 * that has an object dependency of the input type.
+	 * Adds an available {@link OfficeTeam} for executing
+	 * {@link ManagedFunction} instances that has an object dependency of the
+	 * input type.
 	 * 
 	 * @param autoWire
-	 *            Object dependency {@link AutoWire} for the {@link ManagedFunction}.
+	 *            Object dependency {@link AutoWire} for the
+	 *            {@link ManagedFunction}.
 	 */
 	public void addAvailableOfficeTeam(AutoWire autoWire) {
 		this.availableTeamAutoWiring.add(autoWire);
@@ -542,14 +544,14 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 			// Link section tasks to team.
 			// Must be after objects to ensure linked.
-			for (OfficeTaskType taskType : officeSectionType.getOfficeTaskTypes()) {
+			for (OfficeFunctionType functionType : officeSectionType.getOfficeFunctionTypes()) {
 
-				// Obtain the task
-				String taskName = taskType.getOfficeTaskName();
-				OfficeSectionTask task = officeSection.getOfficeSectionTask(taskName);
+				// Obtain the function
+				String functionName = functionType.getOfficeFunctionName();
+				OfficeSectionFunction function = officeSection.getOfficeSectionFunction(functionName);
 
 				// Assign the team
-				this.assignTeam(task, taskType, responsibleTeams, defaultTeam, architect);
+				this.assignTeam(function, functionType, responsibleTeams, defaultTeam, architect);
 			}
 
 			// Link sub section tasks to team
@@ -917,7 +919,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	}
 
 	/**
-	 * Links the {@link OfficeSectionTask} instances of the
+	 * Links the {@link OfficeSectionFunction} instances of the
 	 * {@link OfficeSubSection} to the {@link OfficeTeam}.
 	 * 
 	 * @param subSection
@@ -935,14 +937,14 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			List<ResponsibleTeam> responsibleTeams, ResponsibleTeam defaultTeam, OfficeArchitect architect) {
 
 		// Link section tasks to team
-		for (OfficeTaskType taskType : subSectionType.getOfficeTaskTypes()) {
+		for (OfficeFunctionType functionType : subSectionType.getOfficeFunctionTypes()) {
 
-			// Obtain the task
-			String taskName = taskType.getOfficeTaskName();
-			OfficeSectionTask task = subSection.getOfficeSectionTask(taskName);
+			// Obtain the function
+			String functionName = functionType.getOfficeFunctionName();
+			OfficeSectionFunction function = subSection.getOfficeSectionFunction(functionName);
 
 			// Assign the team
-			this.assignTeam(task, taskType, responsibleTeams, defaultTeam, architect);
+			this.assignTeam(function, functionType, responsibleTeams, defaultTeam, architect);
 		}
 
 		// Recursively link the sub sections
@@ -958,12 +960,12 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	}
 
 	/**
-	 * Assigns the {@link OfficeTeam} for the {@link OfficeSectionTask}.
+	 * Assigns the {@link OfficeTeam} for the {@link OfficeSectionFunction}.
 	 * 
-	 * @param task
-	 *            {@link OfficeSectionTask}.
-	 * @param taskType
-	 *            {@link OfficeTaskType}.
+	 * @param function
+	 *            {@link OfficeSectionFunction}.
+	 * @param functionType
+	 *            {@link OfficeFunctionType}.
 	 * @param responsibleTeams
 	 *            {@link ResponsibleTeam} instances.
 	 * @param defaultTeam
@@ -971,18 +973,18 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * @param architect
 	 *            {@link OfficeArchitect}.
 	 */
-	private void assignTeam(OfficeSectionTask task, OfficeTaskType taskType, List<ResponsibleTeam> responsibleTeams,
-			ResponsibleTeam defaultTeam, OfficeArchitect architect) {
+	private void assignTeam(OfficeSectionFunction function, OfficeFunctionType functionType,
+			List<ResponsibleTeam> responsibleTeams, ResponsibleTeam defaultTeam, OfficeArchitect architect) {
 
 		// Determine if team to be responsible
 		for (ResponsibleTeam responsibleTeam : responsibleTeams) {
-			if (responsibleTeam.isResponsible(taskType)) {
+			if (responsibleTeam.isResponsible(functionType)) {
 
 				// Obtain the OfficeTeam responsible
 				OfficeTeam team = responsibleTeam.getOfficeTeam(architect);
 
 				// Team responsible for the task, so link
-				architect.link(task.getTeamResponsible(), team);
+				architect.link(function.getResponsibleTeam(), team);
 
 				// Team assigned
 				return;
@@ -991,7 +993,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 		// As here, default team is responsible
 		OfficeTeam team = defaultTeam.getOfficeTeam(architect);
-		architect.link(task.getTeamResponsible(), team);
+		architect.link(function.getResponsibleTeam(), team);
 	}
 
 	/**
@@ -1189,14 +1191,14 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 		/**
 		 * Determines if the {@link OfficeTeam} is responsible for the
-		 * {@link OfficeSectionTask}.
+		 * {@link OfficeSectionFunction}.
 		 * 
 		 * @param taskType
-		 *            {@link OfficeTaskType} to check if responsible.
+		 *            {@link OfficeFunctionType} to check if responsible.
 		 * @return <code>true</code> if the {@link OfficeTeam} is potentially
-		 *         responsible for the {@link OfficeSectionTask}.
+		 *         responsible for the {@link OfficeSectionFunction}.
 		 */
-		public boolean isResponsible(OfficeTaskType taskType) {
+		public boolean isResponsible(OfficeFunctionType taskType) {
 			return this.isResponsible(taskType.getObjectDependencies(), new HashSet<DependentObjectType>());
 		}
 

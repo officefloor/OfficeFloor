@@ -10,5 +10,5 @@
 	<list type="OfficeSectionManagedObjectToOfficeGovernanceModel"
 		name="office section managed object" />
 	<list type="OfficeSubSectionToOfficeGovernanceModel" name="office sub section" />
-	<list type="OfficeTaskToOfficeGovernanceModel" name="office task" />
+	<list type="OfficeFunctionToOfficeGovernanceModel" name="office function" />
 </model>

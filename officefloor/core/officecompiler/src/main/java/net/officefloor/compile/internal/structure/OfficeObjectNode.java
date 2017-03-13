@@ -46,7 +46,7 @@ public interface OfficeObjectNode extends LinkObjectNode, OfficeObject {
 
 	/**
 	 * <p>
-	 * Adds an {@link AdministratorNode} for this
+	 * Adds an {@link AdministrationNode} for this
 	 * {@link OfficeManagedObjectType}.
 	 * <p>
 	 * This allows the {@link OfficeManagedObjectType} to report the extension
@@ -54,9 +54,9 @@ public interface OfficeObjectNode extends LinkObjectNode, OfficeObject {
 	 * {@link OfficeFloorManagedObject} for the {@link OfficeObject}.
 	 * 
 	 * @param administrator
-	 *            {@link AdministratorNode}.
+	 *            {@link AdministrationNode}.
 	 */
-	void addAdministrator(AdministratorNode administrator);
+	void addAdministrator(AdministrationNode administrator);
 
 	/**
 	 * <p>

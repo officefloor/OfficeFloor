@@ -18,7 +18,6 @@
 package net.officefloor.autowire;
 
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.api.function.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -31,14 +30,12 @@ public interface AutoWireManagementMBean {
 	/**
 	 * Invokes the {@link ManagedFunction} on the {@link OfficeFloor}.
 	 * 
-	 * @param workName
-	 *            Name of the {@link Work}.
-	 * @param taskName
+	 * @param functionName
 	 *            Name of the {@link ManagedFunction}.
 	 * @throws Exception
 	 *             If fails to invoke the {@link ManagedFunction}.
 	 */
-	void invokeTask(String workName, String taskName) throws Exception;
+	void invokeFunction(String functionName) throws Exception;
 
 	/**
 	 * Closes the {@link OfficeFloor}.

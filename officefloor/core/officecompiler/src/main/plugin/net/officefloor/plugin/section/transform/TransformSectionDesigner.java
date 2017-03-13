@@ -29,14 +29,14 @@ import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
-import net.officefloor.compile.spi.section.SectionTask;
-import net.officefloor.compile.spi.section.SectionWork;
+import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.SubSectionInput;
 import net.officefloor.compile.spi.section.SubSectionObject;
 import net.officefloor.compile.spi.section.SubSectionOutput;
-import net.officefloor.compile.spi.section.TaskFlow;
-import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.compile.spi.section.FunctionFlow;
+import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -158,13 +158,13 @@ public class TransformSectionDesigner implements SectionDesigner {
 	}
 
 	@Override
-	public SectionWork addSectionWork(String workName,
+	public SectionFunctionNamespace addSectionWork(String workName,
 			String workSourceClassName) {
 		return this.delegate.addSectionWork(workName, workSourceClassName);
 	}
 
 	@Override
-	public SectionWork addSectionWork(String workName, ManagedFunctionSource<?> workSource) {
+	public SectionFunctionNamespace addSectionWork(String workName, ManagedFunctionSource<?> workSource) {
 		return this.delegate.addSectionWork(workName, workSource);
 	}
 
@@ -200,7 +200,7 @@ public class TransformSectionDesigner implements SectionDesigner {
 	}
 
 	@Override
-	public void link(SectionInput sectionInput, SectionTask task) {
+	public void link(SectionInput sectionInput, SectionFunction task) {
 		this.delegate.link(sectionInput, task);
 	}
 
@@ -215,40 +215,40 @@ public class TransformSectionDesigner implements SectionDesigner {
 	}
 
 	@Override
-	public void link(TaskFlow taskFlow, SectionTask task,
+	public void link(FunctionFlow taskFlow, SectionFunction task,
 			FlowInstigationStrategyEnum instigationStrategy) {
 		this.delegate.link(taskFlow, task, instigationStrategy);
 	}
 
 	@Override
-	public void link(TaskFlow taskFlow, SubSectionInput subSectionInput,
+	public void link(FunctionFlow taskFlow, SubSectionInput subSectionInput,
 			FlowInstigationStrategyEnum instigationStrategy) {
 		this.delegate.link(taskFlow, subSectionInput, instigationStrategy);
 	}
 
 	@Override
-	public void link(TaskFlow taskFlow, SectionOutput sectionOutput,
+	public void link(FunctionFlow taskFlow, SectionOutput sectionOutput,
 			FlowInstigationStrategyEnum instigationStrategy) {
 		this.delegate.link(taskFlow, sectionOutput, instigationStrategy);
 	}
 
 	@Override
-	public void link(SectionTask task, SectionTask nextTask) {
+	public void link(SectionFunction task, SectionFunction nextTask) {
 		this.delegate.link(task, nextTask);
 	}
 
 	@Override
-	public void link(SectionTask task, SubSectionInput subSectionInput) {
+	public void link(SectionFunction task, SubSectionInput subSectionInput) {
 		this.delegate.link(task, subSectionInput);
 	}
 
 	@Override
-	public void link(SectionTask task, SectionOutput sectionOutput) {
+	public void link(SectionFunction task, SectionOutput sectionOutput) {
 		this.delegate.link(task, sectionOutput);
 	}
 
 	@Override
-	public void link(SubSectionOutput subSectionOutput, SectionTask task) {
+	public void link(SubSectionOutput subSectionOutput, SectionFunction task) {
 		this.delegate.link(subSectionOutput, task);
 	}
 
@@ -265,7 +265,7 @@ public class TransformSectionDesigner implements SectionDesigner {
 	}
 
 	@Override
-	public void link(ManagedObjectFlow managedObjectFlow, SectionTask task) {
+	public void link(ManagedObjectFlow managedObjectFlow, SectionFunction task) {
 		this.delegate.link(managedObjectFlow, task);
 	}
 
@@ -282,12 +282,12 @@ public class TransformSectionDesigner implements SectionDesigner {
 	}
 
 	@Override
-	public void link(TaskObject taskObject, SectionObject sectionObject) {
+	public void link(FunctionObject taskObject, SectionObject sectionObject) {
 		this.delegate.link(taskObject, sectionObject);
 	}
 
 	@Override
-	public void link(TaskObject taskObject,
+	public void link(FunctionObject taskObject,
 			SectionManagedObject sectionManagedObject) {
 		this.delegate.link(taskObject, sectionManagedObject);
 	}

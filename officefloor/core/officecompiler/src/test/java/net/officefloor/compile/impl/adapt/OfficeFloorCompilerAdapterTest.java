@@ -33,7 +33,7 @@ import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.OfficeFloorCompilerRunnable;
 import net.officefloor.compile.TypeLoader;
-import net.officefloor.compile.administrator.AdministratorLoader;
+import net.officefloor.compile.administration.AdministrationLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssue;
@@ -499,10 +499,10 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Tests the {@link AdministratorLoader}.
+	 * Tests the {@link AdministrationLoader}.
 	 */
 	public void testAdministratorLoader() {
-		AdministratorLoader loader = this.compiler.getAdministratorLoader();
+		AdministrationLoader loader = this.compiler.getAdministratorLoader();
 		PropertyList specification = loader
 				.loadSpecification(ClassAdministratorSource.class);
 		assertEquals("Should have a property", 1,

@@ -18,22 +18,22 @@
 package net.officefloor.compile.integrate.task;
 
 import net.officefloor.compile.impl.structure.SectionNodeImpl;
-import net.officefloor.compile.impl.structure.TaskNodeImpl;
+import net.officefloor.compile.impl.structure.ManagedFunctionNodeImpl;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
-import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SubSection;
-import net.officefloor.compile.spi.section.TaskFlow;
-import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.compile.spi.section.FunctionFlow;
+import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -128,7 +128,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensures issue if {@link TaskFlow} not linked.
+	 * Ensures issue if {@link FunctionFlow} not linked.
 	 */
 	public void testTaskFlowNotLinked() {
 
@@ -143,7 +143,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
-		this.issues.recordIssue("TASK", TaskNodeImpl.class,
+		this.issues.recordIssue("TASK", ManagedFunctionNodeImpl.class,
 				"Flow flow is not linked to a TaskNode");
 
 		// Compile the OfficeFloor
@@ -173,7 +173,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.issues
 				.recordIssue("SECTION", SectionNodeImpl.class,
 						"Unknown flow instigation strategy 'unknown' for flow flow of task TASK_A");
-		this.issues.recordIssue("TASK_A", TaskNodeImpl.class,
+		this.issues.recordIssue("TASK_A", ManagedFunctionNodeImpl.class,
 				"No instigation strategy provided for flow flow");
 
 		// Compile the OfficeFloor
@@ -396,7 +396,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensures issue if {@link TaskObject} not linked.
+	 * Ensures issue if {@link FunctionObject} not linked.
 	 */
 	public void testTaskObjectNotLinked() throws Exception {
 
@@ -411,7 +411,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
-		this.issues.recordIssue("TASK", TaskNodeImpl.class, "Object "
+		this.issues.recordIssue("TASK", ManagedFunctionNodeImpl.class, "Object "
 				+ CompileManagedObject.class.getName()
 				+ " is not linked to a BoundManagedObjectNode");
 
@@ -420,7 +420,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure compiling a {@link ManagedFunction} link the {@link TaskObject} as a
+	 * Ensure compiling a {@link ManagedFunction} link the {@link FunctionObject} as a
 	 * parameter.
 	 */
 	public void testLinkTaskObjectAsParameter() {
@@ -444,7 +444,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure compiling a {@link ManagedFunction} linking the {@link TaskObject} to a
+	 * Ensure compiling a {@link ManagedFunction} linking the {@link FunctionObject} to a
 	 * {@link OfficeFloorManagedObject}.
 	 */
 	public void testLinkTaskObjectToOfficeFloorManagedObject() {
@@ -476,7 +476,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure compiling a {@link ManagedFunction} linking the {@link TaskObject} to an
+	 * Ensure compiling a {@link ManagedFunction} linking the {@link FunctionObject} to an
 	 * {@link OfficeFloorInputManagedObject}.
 	 */
 	public void testLinkTaskObjectToOfficeFloorInputManagedObject() {
@@ -508,7 +508,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure compiling a {@link ManagedFunction} linking the {@link TaskObject} to an
+	 * Ensure compiling a {@link ManagedFunction} linking the {@link FunctionObject} to an
 	 * {@link OfficeManagedObject}.
 	 */
 	public void testLinkTaskObjectToOfficeManagedObject() {
@@ -541,7 +541,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure compiling a {@link ManagedFunction} linking the {@link TaskObject} to a
+	 * Ensure compiling a {@link ManagedFunction} linking the {@link FunctionObject} to a
 	 * {@link SectionManagedObject}.
 	 */
 	public void testLinkTaskObjectToSectionManagedObject() {
@@ -576,7 +576,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure compiling a {@link ManagedFunction} linking the {@link TaskObject} to a
+	 * Ensure compiling a {@link ManagedFunction} linking the {@link FunctionObject} to a
 	 * {@link DeskManagedObject}.
 	 */
 	public void testLinkTaskObjectToDeskManagedObject() {
@@ -612,7 +612,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensures compiling a {@link TaskObject} linking
+	 * Ensures compiling a {@link FunctionObject} linking
 	 * {@link OfficeManagedObject} that is through a parent {@link SubSection}.
 	 */
 	public void testLinkTaskObjectThroughParentSection() {
@@ -711,7 +711,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
-		this.issues.recordIssue("TASK", TaskNodeImpl.class, "Escalation "
+		this.issues.recordIssue("TASK", ManagedFunctionNodeImpl.class, "Escalation "
 				+ Exception.class.getName()
 				+ " not handled by a Task nor propagated to the Office");
 
@@ -808,7 +808,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 * {@link ManagedFunctionSource} to load differentiator for {@link ManagedFunction}.
 	 */
 	public static class DifferentiatorWorkSource extends
-			AbstractWorkSource<ClassWork> {
+			AbstractManagedFunctionSource<ClassWork> {
 
 		public static final String DIFFERENTIATOR = "DIFFERENTIATOR";
 

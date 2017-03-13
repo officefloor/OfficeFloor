@@ -29,14 +29,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.officefloor.compile.WorkSourceService;
+import net.officefloor.compile.ManagedFunctionSourceService;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
-import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.function.FlowFuture;
@@ -51,8 +51,8 @@ import net.officefloor.frame.api.function.Work;
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
-		WorkSourceService<ClassWork, ClassWorkSource> {
+public class ClassWorkSource extends AbstractManagedFunctionSource<ClassWork> implements
+		ManagedFunctionSourceService<ClassWork, ClassWorkSource> {
 
 	/**
 	 * Property name providing the {@link Class} name.

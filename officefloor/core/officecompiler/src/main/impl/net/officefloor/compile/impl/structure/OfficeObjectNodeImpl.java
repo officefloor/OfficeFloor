@@ -23,12 +23,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import net.officefloor.compile.administrator.AdministratorType;
+import net.officefloor.compile.administration.AdministrationType;
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.impl.office.OfficeManagedObjectTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
-import net.officefloor.compile.internal.structure.AdministratorNode;
+import net.officefloor.compile.internal.structure.AdministrationNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.Node;
@@ -37,7 +37,7 @@ import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.section.SectionObjectType;
-import net.officefloor.compile.spi.office.OfficeAdministrator;
+import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeObject;
@@ -57,11 +57,11 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 	private final String objectName;
 
 	/**
-	 * Listing of the {@link AdministratorNode} instances of the
-	 * {@link OfficeAdministrator} instances administering this
+	 * Listing of the {@link AdministrationNode} instances of the
+	 * {@link OfficeAdministration} instances administering this
 	 * {@link OfficeObjectNode}.
 	 */
-	private final List<AdministratorNode> administrators = new LinkedList<AdministratorNode>();
+	private final List<AdministrationNode> administrators = new LinkedList<AdministrationNode>();
 
 	/**
 	 * Listing of the {@link GovernanceNode} instances of the
@@ -121,8 +121,7 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public OfficeObjectNodeImpl(String objectName, OfficeNode office,
-			NodeContext context) {
+	public OfficeObjectNodeImpl(String objectName, OfficeNode office, NodeContext context) {
 		this.objectName = objectName;
 		this.officeNode = office;
 		this.context = context;
@@ -159,8 +158,7 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 
 	@Override
 	public void initialise(String objectType) {
-		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialisedState(objectType));
+		this.state = NodeUtil.initialise(this, this.context, this.state, () -> new InitialisedState(objectType));
 	}
 
 	/*
@@ -168,7 +166,7 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 	 */
 
 	@Override
-	public void addAdministrator(AdministratorNode administrator) {
+	public void addAdministrator(AdministrationNode administrator) {
 		this.administrators.add(administrator);
 	}
 
@@ -179,27 +177,22 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 
 	@Override
 	public GovernanceNode[] getGovernances() {
-		return this.governances.toArray(new GovernanceNode[this.governances
-				.size()]);
+		return this.governances.toArray(new GovernanceNode[this.governances.size()]);
 	}
 
 	@Override
-	public OfficeManagedObjectType loadOfficeManagedObjectType(
-			TypeContext typeContext) {
+	public OfficeManagedObjectType loadOfficeManagedObjectType(TypeContext typeContext) {
 
 		// Ensure have name
 		if (CompileUtil.isBlank(this.objectName)) {
-			this.context.getCompilerIssues().addIssue(this,
-					"Null name for " + TYPE);
+			this.context.getCompilerIssues().addIssue(this, "Null name for " + TYPE);
 			return null; // must have name
 		}
 
 		// Ensure have type
 		if (CompileUtil.isBlank(this.state.objectType)) {
-			this.context.getCompilerIssues().addIssue(
-					this,
-					"Null type for managed object (name=" + this.objectName
-							+ ")");
+			this.context.getCompilerIssues().addIssue(this,
+					"Null type for managed object (name=" + this.objectName + ")");
 			return null; // must have type
 		}
 
@@ -207,11 +200,10 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 		Set<String> extensionInterfaces = new HashSet<String>();
 
 		// Load the extension interfaces for administration
-		for (AdministratorNode admin : this.administrators) {
+		for (AdministrationNode admin : this.administrators) {
 
 			// Attempt to obtain the administrator type
-			AdministratorType<?, ?> adminType = typeContext
-					.getOrLoadAdministratorType(admin);
+			AdministrationType<?, ?, ?> adminType = typeContext.getOrLoadAdministrationType(admin);
 			if (adminType == null) {
 				continue; // problem loading administrator type
 			}
@@ -225,8 +217,7 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 		for (GovernanceNode governance : this.governances) {
 
 			// Attempt to obtain the governance type
-			GovernanceType<?, ?> govType = typeContext
-					.getOrLoadGovernanceType(governance);
+			GovernanceType<?, ?> govType = typeContext.getOrLoadGovernanceType(governance);
 			if (govType == null) {
 				continue; // problem loading governance type
 			}
@@ -241,8 +232,7 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 		Arrays.sort(listing);
 
 		// Create and return the extension interfaces
-		return new OfficeManagedObjectTypeImpl(this.objectName,
-				(this.state != null ? this.state.objectType : null),
+		return new OfficeManagedObjectTypeImpl(this.objectName, (this.state != null ? this.state.objectType : null),
 				this.typeQualifier, listing);
 	}
 
@@ -298,8 +288,7 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 
 	@Override
 	public boolean linkObjectNode(LinkObjectNode node) {
-		return LinkUtil.linkObjectNode(this, node,
-				this.context.getCompilerIssues(),
+		return LinkUtil.linkObjectNode(this, node, this.context.getCompilerIssues(),
 				(link) -> this.linkedObjectNode = link);
 	}
 

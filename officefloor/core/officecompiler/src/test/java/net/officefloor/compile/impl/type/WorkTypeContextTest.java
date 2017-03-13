@@ -17,7 +17,7 @@
  */
 package net.officefloor.compile.impl.type;
 
-import net.officefloor.compile.internal.structure.WorkNode;
+import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.type.TypeContext;
 
@@ -28,13 +28,13 @@ import net.officefloor.compile.type.TypeContext;
  */
 @SuppressWarnings("rawtypes")
 public class WorkTypeContextTest extends
-		AbstractTestTypeContext<WorkNode, FunctionNamespaceType> {
+		AbstractTestTypeContext<FunctionNamespaceNode, FunctionNamespaceType> {
 
 	/**
 	 * Instantiate.
 	 */
 	public WorkTypeContextTest() {
-		super(WorkNode.class, FunctionNamespaceType.class, (node) -> (FunctionNamespaceType) node
+		super(FunctionNamespaceNode.class, FunctionNamespaceType.class, (node) -> (FunctionNamespaceType) node
 				.loadWorkType(), (context, node) -> (FunctionNamespaceType) context
 				.getOrLoadWorkType(node));
 	}

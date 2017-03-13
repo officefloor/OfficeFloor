@@ -23,7 +23,7 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
-import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.function.ManagedFunction;
@@ -37,7 +37,7 @@ import net.officefloor.frame.api.source.TestSource;
  * @author Daniel Sagenschneider
  */
 @TestSource
-public class MockWorkSource extends AbstractWorkSource<Work> implements
+public class MockWorkSource extends AbstractManagedFunctionSource<Work> implements
 		WorkFactory<Work>, Work, ManagedFunctionFactory<Work, Indexed, Indexed> {
 
 	/*

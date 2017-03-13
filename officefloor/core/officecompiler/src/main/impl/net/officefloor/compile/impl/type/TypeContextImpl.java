@@ -21,14 +21,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import net.officefloor.compile.administrator.AdministratorType;
+import net.officefloor.compile.administration.AdministrationType;
 import net.officefloor.compile.governance.GovernanceType;
-import net.officefloor.compile.internal.structure.AdministratorNode;
+import net.officefloor.compile.internal.structure.AdministrationNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.TeamNode;
-import net.officefloor.compile.internal.structure.WorkNode;
+import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.team.TeamType;
@@ -47,9 +47,9 @@ public class TypeContextImpl implements TypeContext {
 	private final Map<ManagedObjectSourceNode, TypeHolder<ManagedObjectType<?>>> managedObjectTypes = new HashMap<ManagedObjectSourceNode, TypeContextImpl.TypeHolder<ManagedObjectType<?>>>();
 
 	/**
-	 * {@link FunctionNamespaceType} by {@link WorkNode} instances.
+	 * {@link FunctionNamespaceType} by {@link FunctionNamespaceNode} instances.
 	 */
-	private final Map<WorkNode, TypeHolder<FunctionNamespaceType<?>>> workTypes = new HashMap<WorkNode, TypeContextImpl.TypeHolder<FunctionNamespaceType<?>>>();
+	private final Map<FunctionNamespaceNode, TypeHolder<FunctionNamespaceType>> namespaceTypes = new HashMap<FunctionNamespaceNode, TypeContextImpl.TypeHolder<FunctionNamespaceType>>();
 
 	/**
 	 * {@link TeamType} by {@link TeamNode} instances.
@@ -57,9 +57,9 @@ public class TypeContextImpl implements TypeContext {
 	private final Map<TeamNode, TypeHolder<TeamType>> teamTypes = new HashMap<TeamNode, TypeContextImpl.TypeHolder<TeamType>>();
 
 	/**
-	 * {@link AdministratorType} by {@link AdministratorNode} instances.
+	 * {@link AdministrationType} by {@link AdministrationNode} instances.
 	 */
-	private final Map<AdministratorNode, TypeHolder<AdministratorType<?, ?>>> administratorTypes = new HashMap<AdministratorNode, TypeContextImpl.TypeHolder<AdministratorType<?, ?>>>();
+	private final Map<AdministrationNode, TypeHolder<AdministrationType<?, ?, ?>>> administrationTypes = new HashMap<AdministrationNode, TypeContextImpl.TypeHolder<AdministrationType<?, ?, ?>>>();
 
 	/**
 	 * {@link GovernanceType} by {@link GovernanceNode} instances.
@@ -76,8 +76,7 @@ public class TypeContextImpl implements TypeContext {
 	 * @param typeLoader
 	 *            {@link Function} to load the type.
 	 */
-	private static <N extends Node, T> T getOrLoadType(N node,
-			Map<N, TypeHolder<T>> types, Function<N, T> typeLoader) {
+	private static <N extends Node, T> T getOrLoadType(N node, Map<N, TypeHolder<T>> types, Function<N, T> typeLoader) {
 
 		// Obtain from already registered
 		TypeHolder<T> holder = types.get(node);
@@ -118,38 +117,33 @@ public class TypeContextImpl implements TypeContext {
 	 */
 
 	@Override
-	public ManagedObjectType<?> getOrLoadManagedObjectType(
-			ManagedObjectSourceNode managedObjectSourceNode) {
-		return getOrLoadType(managedObjectSourceNode, this.managedObjectTypes,
-				(node) -> node.loadManagedObjectType());
+	public ManagedObjectType<?> getOrLoadManagedObjectType(ManagedObjectSourceNode managedObjectSourceNode) {
+		return getOrLoadType(managedObjectSourceNode, this.managedObjectTypes, (node) -> node.loadManagedObjectType());
 	}
 
 	@Override
-	public FunctionNamespaceType<?> getOrLoadWorkType(WorkNode workNode) {
-		return getOrLoadType(workNode, this.workTypes,
-				(node) -> node.loadWorkType());
+	public FunctionNamespaceType getOrLoadFunctionNamespaceType(FunctionNamespaceNode workNode) {
+		return getOrLoadType(workNode, this.namespaceTypes, (node) -> node.loadFunctionNamespaceType());
 	}
 
 	@Override
 	public TeamType getOrLoadTeamType(TeamNode teamNode) {
-		return getOrLoadType(teamNode, this.teamTypes,
-				(node) -> node.loadTeamType());
+		return getOrLoadType(teamNode, this.teamTypes, (node) -> node.loadTeamType());
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <I, A extends Enum<A>> AdministratorType<I, A> getOrLoadAdministratorType(
-			AdministratorNode administratorNode) {
-		return (AdministratorType<I, A>) getOrLoadType(administratorNode,
-				this.administratorTypes, (node) -> node.loadAdministratorType());
+	public <E, F extends Enum<F>, G extends Enum<G>> AdministrationType<E, F, G> getOrLoadAdministrationType(
+			AdministrationNode administrationNode) {
+		return (AdministrationType<E, F, G>) getOrLoadType(administrationNode, this.administrationTypes,
+				(node) -> node.loadAdministrationType());
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <I, F extends Enum<F>> GovernanceType<I, F> getOrLoadGovernanceType(
-			GovernanceNode governanceNode) {
-		return (GovernanceType<I, F>) getOrLoadType(governanceNode,
-				this.governanceTypes, (node) -> node.loadGovernanceType());
+	public <I, F extends Enum<F>> GovernanceType<I, F> getOrLoadGovernanceType(GovernanceNode governanceNode) {
+		return (GovernanceType<I, F>) getOrLoadType(governanceNode, this.governanceTypes,
+				(node) -> node.loadGovernanceType());
 	}
 
 }

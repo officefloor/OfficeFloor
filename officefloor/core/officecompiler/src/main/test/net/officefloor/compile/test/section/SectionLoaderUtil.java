@@ -40,7 +40,7 @@ import net.officefloor.compile.section.OfficeSectionObjectType;
 import net.officefloor.compile.section.OfficeSectionOutputType;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
-import net.officefloor.compile.section.OfficeTaskType;
+import net.officefloor.compile.section.OfficeFunctionType;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
@@ -360,15 +360,15 @@ public class SectionLoaderUtil {
 		subSectionName = (subSectionName == null ? "" : subSectionName + ".") + eSection.getOfficeSectionName();
 
 		// Validate the tasks
-		OfficeTaskType[] eTasks = eSection.getOfficeTaskTypes();
-		OfficeTaskType[] aTasks = aSection.getOfficeTaskTypes();
+		OfficeFunctionType[] eTasks = eSection.getOfficeTaskTypes();
+		OfficeFunctionType[] aTasks = aSection.getOfficeTaskTypes();
 		IntFunction<String> tasksLister = createCompareLister(eTasks, aTasks,
 				(taskType) -> taskType.getOfficeTaskName());
 		TestCase.assertEquals("Incorrect number of tasks (section=" + subSectionName + ")" + tasksLister.apply(-1),
 				eTasks.length, aTasks.length);
 		for (int i = 0; i < eTasks.length; i++) {
-			OfficeTaskType eTask = eTasks[i];
-			OfficeTaskType aTask = aTasks[i];
+			OfficeFunctionType eTask = eTasks[i];
+			OfficeFunctionType aTask = aTasks[i];
 			TestCase.assertEquals(
 					"Incorrect name for task " + i + " (sub section=" + subSectionName + ")" + tasksLister.apply(i),
 					eTask.getOfficeTaskName(), aTask.getOfficeTaskName());

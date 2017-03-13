@@ -23,7 +23,7 @@ import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.office.OfficeSubSection;
-import net.officefloor.compile.spi.office.OfficeSectionTask;
+import net.officefloor.compile.spi.office.OfficeSectionFunction;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
@@ -266,7 +266,7 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling {@link Governance} for a specific {@link OfficeSectionTask}.
+	 * Tests compiling {@link Governance} for a specific {@link OfficeSectionFunction}.
 	 */
 	public void testGovernOfficeTask() {
 

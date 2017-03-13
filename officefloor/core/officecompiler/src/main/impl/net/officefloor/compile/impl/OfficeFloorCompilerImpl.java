@@ -28,22 +28,26 @@ import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.TypeLoader;
-import net.officefloor.compile.administrator.AdministratorLoader;
+import net.officefloor.compile.administration.AdministrationLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
-import net.officefloor.compile.impl.administrator.AdministratorLoaderImpl;
+import net.officefloor.compile.impl.administrator.AdministrationLoaderImpl;
 import net.officefloor.compile.impl.governance.GovernanceLoaderImpl;
 import net.officefloor.compile.impl.issues.FailCompilerIssues;
+import net.officefloor.compile.impl.managedfunction.ManagedFunctionLoaderImpl;
 import net.officefloor.compile.impl.managedobject.ManagedObjectLoaderImpl;
 import net.officefloor.compile.impl.office.OfficeLoaderImpl;
 import net.officefloor.compile.impl.officefloor.OfficeFloorLoaderImpl;
 import net.officefloor.compile.impl.pool.ManagedObjectPoolLoaderImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.section.SectionLoaderImpl;
-import net.officefloor.compile.impl.structure.AdministratorNodeImpl;
-import net.officefloor.compile.impl.structure.DutyNodeImpl;
+import net.officefloor.compile.impl.structure.AdministrationNodeImpl;
 import net.officefloor.compile.impl.structure.EscalationNodeImpl;
+import net.officefloor.compile.impl.structure.FunctionFlowNodeImpl;
+import net.officefloor.compile.impl.structure.FunctionNamespaceNodeImpl;
+import net.officefloor.compile.impl.structure.FunctionObjectNodeImpl;
 import net.officefloor.compile.impl.structure.GovernanceNodeImpl;
 import net.officefloor.compile.impl.structure.InputManagedObjectNodeImpl;
+import net.officefloor.compile.impl.structure.ManagedFunctionNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectDependencyNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectFlowNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectNodeImpl;
@@ -57,26 +61,24 @@ import net.officefloor.compile.impl.structure.OfficeObjectNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeOutputNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeStartNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeTeamNodeImpl;
+import net.officefloor.compile.impl.structure.ResponsibleTeamNodeImpl;
 import net.officefloor.compile.impl.structure.SectionInputNodeImpl;
 import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.impl.structure.SectionObjectNodeImpl;
 import net.officefloor.compile.impl.structure.SectionOutputNodeImpl;
 import net.officefloor.compile.impl.structure.SuppliedManagedObjectNodeImpl;
 import net.officefloor.compile.impl.structure.SupplierNodeImpl;
-import net.officefloor.compile.impl.structure.TaskFlowNodeImpl;
-import net.officefloor.compile.impl.structure.TaskNodeImpl;
-import net.officefloor.compile.impl.structure.TaskObjectNodeImpl;
-import net.officefloor.compile.impl.structure.TaskTeamNodeImpl;
 import net.officefloor.compile.impl.structure.TeamNodeImpl;
-import net.officefloor.compile.impl.structure.WorkNodeImpl;
 import net.officefloor.compile.impl.team.TeamLoaderImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.impl.work.WorkLoaderImpl;
-import net.officefloor.compile.internal.structure.AdministratorNode;
-import net.officefloor.compile.internal.structure.DutyNode;
+import net.officefloor.compile.internal.structure.AdministrationNode;
 import net.officefloor.compile.internal.structure.EscalationNode;
+import net.officefloor.compile.internal.structure.FunctionFlowNode;
+import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
+import net.officefloor.compile.internal.structure.FunctionObjectNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
+import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
@@ -92,21 +94,17 @@ import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.internal.structure.OfficeOutputNode;
 import net.officefloor.compile.internal.structure.OfficeStartNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
+import net.officefloor.compile.internal.structure.ResponsibleTeamNode;
 import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
-import net.officefloor.compile.internal.structure.TaskFlowNode;
-import net.officefloor.compile.internal.structure.TaskNode;
-import net.officefloor.compile.internal.structure.TaskObjectNode;
-import net.officefloor.compile.internal.structure.TaskTeamNode;
 import net.officefloor.compile.internal.structure.TeamNode;
-import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.managedfunction.ManagedFunctionLoader;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.compile.managedfunction.ManagedFunctionLoader;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeLoader;
@@ -114,7 +112,7 @@ import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.pool.ManagedObjectPoolLoader;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
-import net.officefloor.compile.spi.administration.source.AdministratorSource;
+import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.office.source.OfficeSource;
@@ -124,7 +122,6 @@ import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.function.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -144,8 +141,7 @@ import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
-		NodeContext, TypeLoader {
+public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements NodeContext, TypeLoader {
 
 	/**
 	 * {@link ResourceSource} instances.
@@ -203,9 +199,10 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	private final Map<String, Class<?>> sectionSourceAliases = new HashMap<String, Class<?>>();
 
 	/**
-	 * {@link ManagedFunctionSource} {@link Class} instances by their alias name.
+	 * {@link ManagedFunctionSource} {@link Class} instances by their alias
+	 * name.
 	 */
-	private final Map<String, Class<?>> workSourceAliases = new HashMap<String, Class<?>>();
+	private final Map<String, Class<?>> managedFunctionSourceAliases = new HashMap<String, Class<?>>();
 
 	/**
 	 * {@link ManagedObjectSource} {@link Class} instances by their alias name.
@@ -218,9 +215,9 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	private final Map<String, Class<?>> supplierSourceAliases = new HashMap<String, Class<?>>();
 
 	/**
-	 * {@link AdministratorSource} {@link Class} instances by their alias name.
+	 * {@link AdministrationSource} {@link Class} instances by their alias name.
 	 */
-	private final Map<String, Class<?>> administratorSourceAliases = new HashMap<String, Class<?>>();
+	private final Map<String, Class<?>> administrationSourceAliases = new HashMap<String, Class<?>>();
 
 	/**
 	 * {@link GovernanceSource} {@link Class} instances by their alias name.
@@ -269,8 +266,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	 * @param aliasType
 	 *            Type of alias for providing a warning of duplicate aliases.
 	 */
-	private <C> void registerAlias(String alias, C aliasSourceClass,
-			Map<String, C> aliasMap, String aliasType) {
+	private <C> void registerAlias(String alias, C aliasSourceClass, Map<String, C> aliasMap, String aliasType) {
 
 		// Ensure the alias is not already registered
 		C sourceClass = aliasMap.get(alias);
@@ -282,8 +278,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 			}
 
 			// Issue as alias with different source classes
-			this.getCompilerIssues().addIssue(this,
-					"Duplicate " + aliasType + " alias " + alias);
+			this.getCompilerIssues().addIssue(this, "Duplicate " + aliasType + " alias " + alias);
 			return; // do not register the duplicate
 		}
 
@@ -316,8 +311,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
-	public <S extends OfficeFloorSource> void setOfficeFloorSourceClass(
-			Class<S> officeFloorSourceClass) {
+	public <S extends OfficeFloorSource> void setOfficeFloorSourceClass(Class<S> officeFloorSourceClass) {
 		this.officeFloorSourceClass = officeFloorSourceClass;
 	}
 
@@ -332,59 +326,47 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
-	public <S extends OfficeSource> void addOfficeSourceAlias(String alias,
-			Class<S> officeSourceClass) {
-		this.registerAlias(alias, officeSourceClass, this.officeSourceAliases,
-				"office");
+	public <S extends OfficeSource> void addOfficeSourceAlias(String alias, Class<S> officeSourceClass) {
+		this.registerAlias(alias, officeSourceClass, this.officeSourceAliases, "office");
 	}
 
 	@Override
-	public <S extends SectionSource> void addSectionSourceAlias(String alias,
-			Class<S> sectionSourceClass) {
-		this.registerAlias(alias, sectionSourceClass,
-				this.sectionSourceAliases, "section");
+	public <S extends SectionSource> void addSectionSourceAlias(String alias, Class<S> sectionSourceClass) {
+		this.registerAlias(alias, sectionSourceClass, this.sectionSourceAliases, "section");
 	}
 
 	@Override
-	public <W extends Work, S extends ManagedFunctionSource<W>> void addWorkSourceAlias(
-			String alias, Class<S> workSourceClass) {
-		this.registerAlias(alias, workSourceClass, this.workSourceAliases,
-				"work");
+	public <S extends ManagedFunctionSource> void addManagedFunctionSourceAlias(String alias,
+			Class<S> managedFunctionSourceClass) {
+		this.registerAlias(alias, managedFunctionSourceClass, this.managedFunctionSourceAliases, "managed function");
 	}
 
 	@Override
 	public <D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> void addManagedObjectSourceAlias(
 			String alias, Class<S> managedObjectSourceClass) {
-		this.registerAlias(alias, managedObjectSourceClass,
-				this.managedObjectSourceAliases, "managed object");
+		this.registerAlias(alias, managedObjectSourceClass, this.managedObjectSourceAliases, "managed object");
 	}
 
 	@Override
-	public <S extends SupplierSource> void addSupplierSourceAlias(String alias,
-			Class<S> supplierSourceClass) {
-		this.registerAlias(alias, supplierSourceClass,
-				this.supplierSourceAliases, "supplier");
+	public <S extends SupplierSource> void addSupplierSourceAlias(String alias, Class<S> supplierSourceClass) {
+		this.registerAlias(alias, supplierSourceClass, this.supplierSourceAliases, "supplier");
 	}
 
 	@Override
-	public <I, A extends Enum<A>, S extends AdministratorSource<I, A>> void addAdministratorSourceAlias(
-			String alias, Class<S> administratorSourceClass) {
-		this.registerAlias(alias, administratorSourceClass,
-				this.administratorSourceAliases, "administrator");
+	public <E, F extends Enum<F>, G extends Enum<G>, S extends AdministrationSource<E, F, G>> void addAdministrationSourceAlias(
+			String alias, Class<S> administrationSourceClass) {
+		this.registerAlias(alias, administrationSourceClass, this.administrationSourceAliases, "administration");
 	}
 
 	@Override
-	public <I, F extends Enum<F>, S extends GovernanceSource<I, F>> void addGovernanceSourceAlias(
-			String alias, Class<S> governanceSourceClass) {
-		this.registerAlias(alias, governanceSourceClass,
-				this.governanceSourceAliases, "governance");
+	public <I, F extends Enum<F>, S extends GovernanceSource<I, F>> void addGovernanceSourceAlias(String alias,
+			Class<S> governanceSourceClass) {
+		this.registerAlias(alias, governanceSourceClass, this.governanceSourceAliases, "governance");
 	}
 
 	@Override
-	public <S extends TeamSource> void addTeamSourceAlias(String alias,
-			Class<S> teamSourceClass) {
-		this.registerAlias(alias, teamSourceClass, this.teamSourceAliases,
-				"team");
+	public <S extends TeamSource> void addTeamSourceAlias(String alias, Class<S> teamSourceClass) {
+		this.registerAlias(alias, teamSourceClass, this.teamSourceAliases, "team");
 	}
 
 	@Override
@@ -418,8 +400,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
-	public ManagedFunctionLoader getWorkLoader() {
-		return new WorkLoaderImpl(this, this);
+	public ManagedFunctionLoader getManagedFunctionLoader() {
+		return new ManagedFunctionLoaderImpl(this, this);
 	}
 
 	@Override
@@ -443,8 +425,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
-	public AdministratorLoader getAdministratorLoader() {
-		return new AdministratorLoaderImpl(this, this);
+	public AdministrationLoader getAdministrationLoader() {
+		return new AdministrationLoaderImpl(this, this);
 	}
 
 	@Override
@@ -464,17 +446,15 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 		// Compile, build and return the office floor
 		if (this.officeFloorSource != null) {
 			// Load from supplied instance
-			return officeFloorLoader.loadOfficeFloor(this.officeFloorSource,
-					officeFloorLocation, this.properties);
+			return officeFloorLoader.loadOfficeFloor(this.officeFloorSource, officeFloorLocation, this.properties);
 
 		} else {
 			// Obtain the OfficeFloor source class
-			Class<? extends OfficeFloorSource> officeFloorSourceClass = (this.officeFloorSourceClass != null ? this.officeFloorSourceClass
-					: OfficeFloorModelOfficeFloorSource.class);
+			Class<? extends OfficeFloorSource> officeFloorSourceClass = (this.officeFloorSourceClass != null
+					? this.officeFloorSourceClass : OfficeFloorModelOfficeFloorSource.class);
 
 			// Load from class
-			return officeFloorLoader.loadOfficeFloor(officeFloorSourceClass,
-					officeFloorLocation, this.properties);
+			return officeFloorLoader.loadOfficeFloor(officeFloorSourceClass, officeFloorLocation, this.properties);
 		}
 	}
 
@@ -484,35 +464,31 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public FunctionNamespaceType<?> loadWorkType(String workSourceClassName,
+	public FunctionNamespaceType loadManagedFunctionType(String managedFunctionSourceClassName,
 			PropertyList properties) {
 
-		// Obtain the work source class
-		Class workSourceClass = this.getWorkSourceClass(workSourceClassName,
-				this);
-		if (workSourceClass == null) {
+		// Obtain the managed function source class
+		Class managedFunctionSourceClass = this.getManagedFunctionSourceClass(managedFunctionSourceClassName, this);
+		if (managedFunctionSourceClass == null) {
 			return null; // not able to load type
 		}
 
-		// Load and return the work type
-		return this.getWorkLoader().loadFunctionNamespaceType(workSourceClass, properties);
+		// Load and return the managed function type
+		return this.getManagedFunctionLoader().loadFunctionNamespaceType(managedFunctionSourceClass, properties);
 	}
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public ManagedObjectType<?> loadManagedObjectType(
-			String managedObjectSourceClassName, PropertyList properties) {
+	public ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceClassName, PropertyList properties) {
 
 		// Obtain the managed object source class
-		Class managedObjectSourceClass = this.getManagedObjectSourceClass(
-				managedObjectSourceClassName, this);
+		Class managedObjectSourceClass = this.getManagedObjectSourceClass(managedObjectSourceClassName, this);
 		if (managedObjectSourceClass == null) {
 			return null; // not able to load type
 		}
 
 		// Load and return the managed object type
-		return this.getManagedObjectLoader().loadManagedObjectType(
-				managedObjectSourceClass, properties);
+		return this.getManagedObjectLoader().loadManagedObjectType(managedObjectSourceClass, properties);
 	}
 
 	/*
@@ -523,11 +499,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	public SourceContext getRootSourceContext() {
 		// Ensure have source context
 		if (this.sourceContext == null) {
-			this.sourceContext = new SourceContextImpl(false,
-					this.getClassLoader(),
-					this.resourceSources
-							.toArray(new ResourceSource[this.resourceSources
-									.size()]));
+			this.sourceContext = new SourceContextImpl(false, this.getClassLoader(),
+					this.resourceSources.toArray(new ResourceSource[this.resourceSources.size()]));
 		}
 
 		// Return the source context
@@ -548,8 +521,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	@Override
 	public OfficeFrame getOfficeFrame() {
 		// Return the OfficeFrame (default if none specified)
-		return (this.officeFrame != null ? this.officeFrame : OfficeFrame
-				.getInstance());
+		return (this.officeFrame != null ? this.officeFrame : OfficeFrame.getInstance());
 	}
 
 	@Override
@@ -565,11 +537,10 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <S extends OfficeFloorSource> Class<S> getOfficeFloorSourceClass(
-			String officeFloorSourceClassName, Node node) {
-		return (Class<S>) CompileUtil.obtainClass(officeFloorSourceClassName,
-				OfficeFloorSource.class, this.officeFloorAliases,
-				this.getRootSourceContext(), node, this.getCompilerIssues());
+	public <S extends OfficeFloorSource> Class<S> getOfficeFloorSourceClass(String officeFloorSourceClassName,
+			Node node) {
+		return (Class<S>) CompileUtil.obtainClass(officeFloorSourceClassName, OfficeFloorSource.class,
+				this.officeFloorAliases, this.getRootSourceContext(), node, this.getCompilerIssues());
 	}
 
 	@Override
@@ -578,19 +549,16 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
-	public OfficeFloorNode createOfficeFloorNode(
-			String officeFloorSourceClassName,
-			OfficeFloorSource officeFloorSource, String officeFloorLocation) {
-		return new OfficeFloorNodeImpl(officeFloorSourceClassName,
-				officeFloorSource, officeFloorLocation, this, this.profilers);
+	public OfficeFloorNode createOfficeFloorNode(String officeFloorSourceClassName, OfficeFloorSource officeFloorSource,
+			String officeFloorLocation) {
+		return new OfficeFloorNodeImpl(officeFloorSourceClassName, officeFloorSource, officeFloorLocation, this,
+				this.profilers);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <S extends OfficeSource> Class<S> getOfficeSourceClass(
-			String officeSourceName, Node node) {
-		return (Class<S>) CompileUtil.obtainClass(officeSourceName,
-				OfficeSource.class, this.officeSourceAliases,
+	public <S extends OfficeSource> Class<S> getOfficeSourceClass(String officeSourceName, Node node) {
+		return (Class<S>) CompileUtil.obtainClass(officeSourceName, OfficeSource.class, this.officeSourceAliases,
 				this.getRootSourceContext(), node, this.getCompilerIssues());
 	}
 
@@ -600,53 +568,44 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
-	public OfficeNode createOfficeNode(String officeName,
-			OfficeFloorNode officeFloor) {
+	public OfficeNode createOfficeNode(String officeName, OfficeFloorNode officeFloor) {
 		return new OfficeNodeImpl(officeName, officeFloor, this);
 	}
 
 	@Override
-	public OfficeInputNode createOfficeInputNode(String officeInputName,
-			OfficeNode office) {
+	public OfficeInputNode createOfficeInputNode(String officeInputName, OfficeNode office) {
 		return new OfficeInputNodeImpl(officeInputName, office, this);
 	}
 
 	@Override
-	public OfficeObjectNode createOfficeObjectNode(String objectName,
-			OfficeNode office) {
+	public OfficeObjectNode createOfficeObjectNode(String objectName, OfficeNode office) {
 		return new OfficeObjectNodeImpl(objectName, office, this);
 	}
 
 	@Override
-	public OfficeOutputNode createOfficeOutputNode(String name,
-			OfficeNode office) {
+	public OfficeOutputNode createOfficeOutputNode(String name, OfficeNode office) {
 		return new OfficeOutputNodeImpl(name, office, this);
 	}
 
 	@Override
-	public OfficeStartNode createOfficeStartNode(String startName,
-			OfficeNode office) {
+	public OfficeStartNode createOfficeStartNode(String startName, OfficeNode office) {
 		return new OfficeStartNodeImpl(startName, office, this);
 	}
 
 	@Override
-	public OfficeTeamNode createOfficeTeamNode(String officeTeamName,
-			OfficeNode office) {
+	public OfficeTeamNode createOfficeTeamNode(String officeTeamName, OfficeNode office) {
 		return new OfficeTeamNodeImpl(officeTeamName, office, this);
 	}
 
 	@Override
-	public EscalationNode createEscalationNode(String escalationType,
-			OfficeNode officeNode) {
+	public EscalationNode createEscalationNode(String escalationType, OfficeNode officeNode) {
 		return new EscalationNodeImpl(escalationType, officeNode, this);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <S extends SectionSource> Class<S> getSectionSourceClass(
-			String sectionSourceName, Node node) {
-		return (Class<S>) CompileUtil.obtainClass(sectionSourceName,
-				SectionSource.class, this.sectionSourceAliases,
+	public <S extends SectionSource> Class<S> getSectionSourceClass(String sectionSourceName, Node node) {
+		return (Class<S>) CompileUtil.obtainClass(sectionSourceName, SectionSource.class, this.sectionSourceAliases,
 				this.getRootSourceContext(), node, this.getCompilerIssues());
 	}
 
@@ -656,28 +615,23 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
-	public SectionInputNode createSectionInputNode(String inputName,
-			SectionNode section) {
+	public SectionInputNode createSectionInputNode(String inputName, SectionNode section) {
 		return new SectionInputNodeImpl(inputName, section, this);
 	}
 
 	@Override
-	public SectionObjectNode createSectionObjectNode(String objectName,
-			SectionNode section) {
+	public SectionObjectNode createSectionObjectNode(String objectName, SectionNode section) {
 		return new SectionObjectNodeImpl(objectName, section, this);
 	}
 
 	@Override
-	public SectionOutputNode createSectionOutputNode(String outputName,
-			SectionNode section) {
+	public SectionOutputNode createSectionOutputNode(String outputName, SectionNode section) {
 		return new SectionOutputNodeImpl(outputName, section, this);
 	}
 
 	@Override
-	public SectionNode createSectionNode(String sectionName,
-			SectionNode parentSection) {
-		return new SectionNodeImpl(sectionName, parentSection,
-				parentSection.getOfficeNode(), this);
+	public SectionNode createSectionNode(String sectionName, SectionNode parentSection) {
+		return new SectionNodeImpl(sectionName, parentSection, parentSection.getOfficeNode(), this);
 	}
 
 	@Override
@@ -687,25 +641,23 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <S extends ManagedFunctionSource<?>> Class<S> getWorkSourceClass(
-			String workSourceName, Node node) {
-		return (Class<S>) CompileUtil.obtainClass(workSourceName,
-				ManagedFunctionSource.class, this.workSourceAliases,
-				this.getRootSourceContext(), node, this.getCompilerIssues());
+	public <S extends ManagedFunctionSource> Class<S> getManagedFunctionSourceClass(String managedFunctionSourceName,
+			Node node) {
+		return (Class<S>) CompileUtil.obtainClass(managedFunctionSourceName, ManagedFunctionSource.class,
+				this.managedFunctionSourceAliases, this.getRootSourceContext(), node, this.getCompilerIssues());
 	}
 
 	@Override
-	public ManagedFunctionLoader getWorkLoader(Node node) {
-		return new WorkLoaderImpl(node, this);
+	public ManagedFunctionLoader getManagedFunctionLoader(Node node) {
+		return new ManagedFunctionLoaderImpl(node, this);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <S extends ManagedObjectSource<?, ?>> Class<S> getManagedObjectSourceClass(
-			String managedObjectSourceName, Node node) {
-		return (Class<S>) CompileUtil.obtainClass(managedObjectSourceName,
-				ManagedObjectSource.class, this.managedObjectSourceAliases,
-				this.getRootSourceContext(), node, this.getCompilerIssues());
+	public <S extends ManagedObjectSource<?, ?>> Class<S> getManagedObjectSourceClass(String managedObjectSourceName,
+			Node node) {
+		return (Class<S>) CompileUtil.obtainClass(managedObjectSourceName, ManagedObjectSource.class,
+				this.managedObjectSourceAliases, this.getRootSourceContext(), node, this.getCompilerIssues());
 	}
 
 	@Override
@@ -714,43 +666,36 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
-	public InputManagedObjectNode createInputManagedNode(
-			String inputManagedObjectName, OfficeFloorNode officeFloor) {
-		return new InputManagedObjectNodeImpl(inputManagedObjectName,
-				officeFloor, this);
+	public InputManagedObjectNode createInputManagedNode(String inputManagedObjectName, OfficeFloorNode officeFloor) {
+		return new InputManagedObjectNodeImpl(inputManagedObjectName, officeFloor, this);
 	}
 
 	@Override
-	public ManagedObjectDependencyNode createManagedObjectDependencyNode(
-			String dependencyName, ManagedObjectNode managedObject) {
-		return new ManagedObjectDependencyNodeImpl(dependencyName,
-				managedObject, this);
+	public ManagedObjectDependencyNode createManagedObjectDependencyNode(String dependencyName,
+			ManagedObjectNode managedObject) {
+		return new ManagedObjectDependencyNodeImpl(dependencyName, managedObject, this);
 	}
 
 	@Override
-	public ManagedObjectDependencyNode createManagedObjectDependencyNode(
-			String dependencyName, ManagedObjectSourceNode managedObjectSource) {
-		return new ManagedObjectDependencyNodeImpl(dependencyName,
-				managedObjectSource, this);
+	public ManagedObjectDependencyNode createManagedObjectDependencyNode(String dependencyName,
+			ManagedObjectSourceNode managedObjectSource) {
+		return new ManagedObjectDependencyNodeImpl(dependencyName, managedObjectSource, this);
 	}
 
 	@Override
 	public ManagedObjectFlowNode createManagedObjectFlowNode(String flowName,
 			ManagedObjectSourceNode managedObjectSource) {
-		return new ManagedObjectFlowNodeImpl(flowName, managedObjectSource,
-				this);
+		return new ManagedObjectFlowNodeImpl(flowName, managedObjectSource, this);
 	}
 
 	@Override
 	public ManagedObjectTeamNode createManagedObjectTeamNode(String teamName,
 			ManagedObjectSourceNode managedObjectSource) {
-		return new ManagedObjectTeamNodeImpl(teamName, managedObjectSource,
-				this);
+		return new ManagedObjectTeamNodeImpl(teamName, managedObjectSource, this);
 	}
 
 	@Override
-	public ManagingOfficeNode createManagingOfficeNode(
-			ManagedObjectSourceNode managedObjectSource) {
+	public ManagingOfficeNode createManagingOfficeNode(ManagedObjectSourceNode managedObjectSource) {
 		return new ManagingOfficeNodeImpl(managedObjectSource, this);
 	}
 
@@ -760,38 +705,31 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
-	public ManagedObjectSourceNode createManagedObjectSourceNode(
-			String managedObjectSourceName, SectionNode section) {
+	public ManagedObjectSourceNode createManagedObjectSourceNode(String managedObjectSourceName, SectionNode section) {
 		OfficeNode office = section.getOfficeNode();
-		OfficeFloorNode officeFloor = (office != null ? office
-				.getOfficeFloorNode() : null);
-		return new ManagedObjectSourceNodeImpl(managedObjectSourceName,
-				section, office, null, officeFloor, this);
+		OfficeFloorNode officeFloor = (office != null ? office.getOfficeFloorNode() : null);
+		return new ManagedObjectSourceNodeImpl(managedObjectSourceName, section, office, null, officeFloor, this);
 	}
 
 	@Override
-	public ManagedObjectSourceNode createManagedObjectSourceNode(
-			String managedObjectSourceName, OfficeNode office) {
+	public ManagedObjectSourceNode createManagedObjectSourceNode(String managedObjectSourceName, OfficeNode office) {
 		OfficeFloorNode officeFloor = office.getOfficeFloorNode();
-		return new ManagedObjectSourceNodeImpl(managedObjectSourceName, null,
-				office, null, officeFloor, this);
+		return new ManagedObjectSourceNodeImpl(managedObjectSourceName, null, office, null, officeFloor, this);
 	}
 
 	@Override
-	public ManagedObjectSourceNode createManagedObjectSourceNode(
-			String managedObjectSourceName,
+	public ManagedObjectSourceNode createManagedObjectSourceNode(String managedObjectSourceName,
 			SuppliedManagedObjectNode suppliedManagedObject) {
 		OfficeFloorNode officeFloor = (suppliedManagedObject == null ? null
 				: suppliedManagedObject.getSupplierNode().getOfficeFloorNode());
-		return new ManagedObjectSourceNodeImpl(managedObjectSourceName, null,
-				null, suppliedManagedObject, officeFloor, this);
+		return new ManagedObjectSourceNodeImpl(managedObjectSourceName, null, null, suppliedManagedObject, officeFloor,
+				this);
 	}
 
 	@Override
-	public ManagedObjectSourceNode createManagedObjectSourceNode(
-			String managedObjectSourceName, OfficeFloorNode officeFloor) {
-		return new ManagedObjectSourceNodeImpl(managedObjectSourceName, null,
-				null, null, officeFloor, this);
+	public ManagedObjectSourceNode createManagedObjectSourceNode(String managedObjectSourceName,
+			OfficeFloorNode officeFloor) {
+		return new ManagedObjectSourceNodeImpl(managedObjectSourceName, null, null, null, officeFloor, this);
 	}
 
 	@Override
@@ -801,11 +739,9 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <S extends SupplierSource> Class<S> getSupplierSourceClass(
-			String supplierSourceClassName, Node node) {
-		return (Class<S>) CompileUtil.obtainClass(supplierSourceClassName,
-				SupplierSource.class, this.supplierSourceAliases,
-				this.getRootSourceContext(), node, this.getCompilerIssues());
+	public <S extends SupplierSource> Class<S> getSupplierSourceClass(String supplierSourceClassName, Node node) {
+		return (Class<S>) CompileUtil.obtainClass(supplierSourceClassName, SupplierSource.class,
+				this.supplierSourceAliases, this.getRootSourceContext(), node, this.getCompilerIssues());
 	}
 
 	@Override
@@ -814,51 +750,40 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
-	public SuppliedManagedObjectNode createSuppliedManagedObjectNode(
-			AutoWire autoWire, SupplierNode supplier) {
+	public SuppliedManagedObjectNode createSuppliedManagedObjectNode(AutoWire autoWire, SupplierNode supplier) {
 		return new SuppliedManagedObjectNodeImpl(autoWire, supplier, this);
 	}
 
 	@Override
-	public SupplierNode createSupplierNode(String supplierName,
-			String supplierSourceClassName, OfficeFloorNode officeFloor) {
-		return new SupplierNodeImpl(supplierName, supplierSourceClassName,
-				officeFloor, this);
+	public SupplierNode createSupplierNode(String supplierName, String supplierSourceClassName,
+			OfficeFloorNode officeFloor) {
+		return new SupplierNodeImpl(supplierName, supplierSourceClassName, officeFloor, this);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <S extends AdministratorSource<?, ?>> Class<S> getAdministratorSourceClass(
-			String administratorSourceName, Node node) {
-		return (Class<S>) CompileUtil.obtainClass(administratorSourceName,
-				AdministratorSource.class, this.administratorSourceAliases,
-				this.getRootSourceContext(), node, this.getCompilerIssues());
+	public <S extends AdministrationSource<?, ?, ?>> Class<S> getAdministrationSourceClass(
+			String administrationSourceName, Node node) {
+		return (Class<S>) CompileUtil.obtainClass(administrationSourceName, AdministrationSource.class,
+				this.administrationSourceAliases, this.getRootSourceContext(), node, this.getCompilerIssues());
 	}
 
 	@Override
-	public AdministratorLoader getAdministratorLoader(Node node) {
-		return new AdministratorLoaderImpl(node, this);
+	public AdministrationLoader getAdministrationLoader(Node node) {
+		return new AdministrationLoaderImpl(node, this);
 	}
 
 	@Override
-	public AdministratorNode createAdministratorNode(String administratorName,
-			OfficeNode office) {
-		return new AdministratorNodeImpl(administratorName, office, this);
-	}
-
-	@Override
-	public DutyNode createDutyNode(String dutyName,
-			AdministratorNode administrator) {
-		return new DutyNodeImpl(dutyName, administrator, this);
+	public AdministrationNode createAdministrationNode(String administrationName, OfficeNode office) {
+		return new AdministrationNodeImpl(administrationName, office, this);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <S extends GovernanceSource<?, ?>> Class<S> getGovernanceSourceClass(
-			String governanceSourceName, Node node) {
-		return (Class<S>) CompileUtil.obtainClass(governanceSourceName,
-				GovernanceSource.class, this.governanceSourceAliases,
-				this.getRootSourceContext(), node, this.getCompilerIssues());
+	public <S extends GovernanceSource<?, ?>> Class<S> getGovernanceSourceClass(String governanceSourceName,
+			Node node) {
+		return (Class<S>) CompileUtil.obtainClass(governanceSourceName, GovernanceSource.class,
+				this.governanceSourceAliases, this.getRootSourceContext(), node, this.getCompilerIssues());
 	}
 
 	@Override
@@ -867,17 +792,14 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
-	public GovernanceNode createGovernanceNode(String governanceName,
-			OfficeNode office) {
+	public GovernanceNode createGovernanceNode(String governanceName, OfficeNode office) {
 		return new GovernanceNodeImpl(governanceName, office, this);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <S extends TeamSource> Class<S> getTeamSourceClass(
-			String teamSourceName, Node node) {
-		return (Class<S>) CompileUtil.obtainClass(teamSourceName,
-				TeamSource.class, this.teamSourceAliases,
+	public <S extends TeamSource> Class<S> getTeamSourceClass(String teamSourceName, Node node) {
+		return (Class<S>) CompileUtil.obtainClass(teamSourceName, TeamSource.class, this.teamSourceAliases,
 				this.getRootSourceContext(), node, this.getCompilerIssues());
 	}
 
@@ -892,30 +814,29 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
-	public TaskFlowNode createTaskFlowNode(String flowName,
-			boolean isEscalation, TaskNode task) {
-		return new TaskFlowNodeImpl(flowName, isEscalation, task, this);
+	public FunctionFlowNode createFunctionFlowNode(String flowName, boolean isEscalation,
+			ManagedFunctionNode function) {
+		return new FunctionFlowNodeImpl(flowName, isEscalation, function, this);
 	}
 
 	@Override
-	public TaskObjectNode createTaskObjectNode(String objectName,
-			TaskNode taskNode) {
-		return new TaskObjectNodeImpl(objectName, taskNode, this);
+	public FunctionObjectNode createFunctionObjectNode(String objectName, ManagedFunctionNode functionNode) {
+		return new FunctionObjectNodeImpl(objectName, functionNode, this);
 	}
 
 	@Override
-	public TaskTeamNode createTaskTeamNode(String teamName, TaskNode task) {
-		return new TaskTeamNodeImpl(teamName, task, this);
+	public ResponsibleTeamNode createResponsibleTeamNode(String teamName, ManagedFunctionNode function) {
+		return new ResponsibleTeamNodeImpl(teamName, function, this);
 	}
 
 	@Override
-	public TaskNode createTaskNode(String taskName) {
-		return new TaskNodeImpl(taskName, this);
+	public ManagedFunctionNode createFunctionNode(String functionName) {
+		return new ManagedFunctionNodeImpl(functionName, this);
 	}
 
 	@Override
-	public WorkNode createWorkNode(String workName, SectionNode section) {
-		return new WorkNodeImpl(workName, section, this);
+	public FunctionNamespaceNode createFunctionNamespaceNode(String functionNamespaceName, SectionNode section) {
+		return new FunctionNamespaceNodeImpl(functionNamespaceName, section, this);
 	}
 
 }

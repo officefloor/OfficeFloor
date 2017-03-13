@@ -21,7 +21,6 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
-import net.officefloor.frame.api.function.Work;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 
@@ -30,7 +29,7 @@ import net.officefloor.frame.internal.structure.Flow;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedFunctionType<W extends Work, M extends Enum<M>, F extends Enum<F>> {
+public interface ManagedFunctionType<M extends Enum<M>, F extends Enum<F>> {
 
 	/**
 	 * Obtains the name of the {@link ManagedFunction}.
@@ -44,7 +43,7 @@ public interface ManagedFunctionType<W extends Work, M extends Enum<M>, F extend
 	 * 
 	 * @return {@link ManagedFunctionFactory}.
 	 */
-	ManagedFunctionFactory<W, M, F> getManagedFunctionFactory();
+	ManagedFunctionFactory<M, F> getManagedFunctionFactory();
 
 	/**
 	 * Obtains the differentiator.
@@ -56,8 +55,9 @@ public interface ManagedFunctionType<W extends Work, M extends Enum<M>, F extend
 	Object getDifferentiator();
 
 	/**
-	 * Obtains the type of {@link Object} returned from the {@link ManagedFunction} that is
-	 * to be used as the argument to the next {@link ManagedFunction}.
+	 * Obtains the type of {@link Object} returned from the
+	 * {@link ManagedFunction} that is to be used as the argument to the next
+	 * {@link ManagedFunction}.
 	 * 
 	 * @return Return type of the {@link ManagedFunction}.
 	 */
@@ -73,8 +73,9 @@ public interface ManagedFunctionType<W extends Work, M extends Enum<M>, F extend
 	Class<M> getObjectKeyClass();
 
 	/**
-	 * Obtains the {@link ManagedFunctionObjectType} definitions for the dependent
-	 * {@link Object} instances required by the {@link ManagedFunction}.
+	 * Obtains the {@link ManagedFunctionObjectType} definitions for the
+	 * dependent {@link Object} instances required by the
+	 * {@link ManagedFunction}.
 	 * 
 	 * @return {@link ManagedFunctionObjectType} definitions for the dependent
 	 *         {@link Object} instances required by the {@link ManagedFunction}.
@@ -95,17 +96,18 @@ public interface ManagedFunctionType<W extends Work, M extends Enum<M>, F extend
 	 * Obtains the {@link ManagedFunctionFlowType} definitions for the possible
 	 * {@link Flow} instances instigated by the {@link ManagedFunction}.
 	 * 
-	 * @return {@link ManagedFunctionFlowType} definitions for the possible {@link Flow}
-	 *         instances instigated by the {@link ManagedFunction}.
+	 * @return {@link ManagedFunctionFlowType} definitions for the possible
+	 *         {@link Flow} instances instigated by the {@link ManagedFunction}.
 	 */
 	ManagedFunctionFlowType<F>[] getFlowTypes();
 
 	/**
-	 * Obtains the {@link ManagedFunctionEscalationType} definitions for the possible
-	 * {@link EscalationFlow} instances by the {@link ManagedFunction}.
+	 * Obtains the {@link ManagedFunctionEscalationType} definitions for the
+	 * possible {@link EscalationFlow} instances by the {@link ManagedFunction}.
 	 * 
-	 * @return {@link ManagedFunctionEscalationType} definitions for the possible
-	 *         {@link EscalationFlow} instances by the {@link ManagedFunction}.
+	 * @return {@link ManagedFunctionEscalationType} definitions for the
+	 *         possible {@link EscalationFlow} instances by the
+	 *         {@link ManagedFunction}.
 	 */
 	ManagedFunctionEscalationType[] getEscalationTypes();
 

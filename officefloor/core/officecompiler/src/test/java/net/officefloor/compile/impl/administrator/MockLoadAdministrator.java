@@ -18,13 +18,13 @@
 package net.officefloor.compile.impl.administrator;
 
 import junit.framework.TestCase;
-import net.officefloor.compile.administrator.AdministratorType;
-import net.officefloor.compile.administrator.DutyType;
+import net.officefloor.compile.administration.AdministrationType;
+import net.officefloor.compile.administration.DutyType;
 import net.officefloor.plugin.administrator.clazz.ClassAdministratorSource;
 
 /**
  * Class for {@link ClassAdministratorSource} that enables validating loading a
- * {@link AdministratorType}.
+ * {@link AdministrationType}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -46,13 +46,13 @@ public class MockLoadAdministrator {
 	}
 
 	/**
-	 * Validates the {@link AdministratorType} is correct for this class object.
+	 * Validates the {@link AdministrationType} is correct for this class object.
 	 * 
 	 * @param administratorType
-	 *            {@link AdministratorType}
+	 *            {@link AdministrationType}
 	 */
 	public static void assertAdministratorType(
-			AdministratorType<?, ?> administratorType) {
+			AdministrationType<?, ?> administratorType) {
 
 		TestCase.assertEquals("Incorrect extension interface",
 				MockExtensionInterface.class, administratorType

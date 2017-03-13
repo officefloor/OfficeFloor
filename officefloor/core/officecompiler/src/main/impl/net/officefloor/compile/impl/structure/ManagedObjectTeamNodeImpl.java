@@ -23,13 +23,13 @@ import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.ManagedObjectTeamNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
-import net.officefloor.compile.internal.structure.TaskTeamNode;
+import net.officefloor.compile.internal.structure.ResponsibleTeamNode;
 import net.officefloor.compile.section.OfficeSectionManagedObjectTeamType;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.type.TypeContext;
 
 /**
- * {@link TaskTeamNode} implementation.
+ * {@link ResponsibleTeamNode} implementation.
  * 
  * @author Daniel Sagenschneider
  */

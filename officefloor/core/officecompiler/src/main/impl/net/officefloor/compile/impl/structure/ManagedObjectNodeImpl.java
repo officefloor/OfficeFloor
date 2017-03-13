@@ -126,18 +126,15 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		 *            {@link ManagedObjectSource} to source this
 		 *            {@link ManagedObject}.
 		 */
-		public InitialiseState(ManagedObjectScope managedObjectScope,
-				ManagedObjectSourceNode managedObjectSourceNode) {
+		public InitialiseState(ManagedObjectScope managedObjectScope, ManagedObjectSourceNode managedObjectSourceNode) {
 			this.managedObjectScope = managedObjectScope;
 			this.managedObjectSourceNode = managedObjectSourceNode;
-			this.containingSectionNode = this.managedObjectSourceNode
-					.getSectionNode();
-			this.containingOfficeNode = (this.containingSectionNode != null ? this.containingSectionNode
-					.getOfficeNode() : this.managedObjectSourceNode
-					.getOfficeNode());
-			this.containingOfficeFloorNode = (this.containingOfficeNode != null ? this.containingOfficeNode
-					.getOfficeFloorNode() : this.managedObjectSourceNode
-					.getOfficeFloorNode());
+			this.containingSectionNode = this.managedObjectSourceNode.getSectionNode();
+			this.containingOfficeNode = (this.containingSectionNode != null ? this.containingSectionNode.getOfficeNode()
+					: this.managedObjectSourceNode.getOfficeNode());
+			this.containingOfficeFloorNode = (this.containingOfficeNode != null
+					? this.containingOfficeNode.getOfficeFloorNode()
+					: this.managedObjectSourceNode.getOfficeFloorNode());
 		}
 	}
 
@@ -195,11 +192,9 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	}
 
 	@Override
-	public void initialise(ManagedObjectScope managedObjectScope,
-			ManagedObjectSourceNode managedObjectSourceNode) {
+	public void initialise(ManagedObjectScope managedObjectScope, ManagedObjectSourceNode managedObjectSourceNode) {
 		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialiseState(managedObjectScope,
-						managedObjectSourceNode));
+				() -> new InitialiseState(managedObjectScope, managedObjectSourceNode));
 	}
 
 	/*
@@ -212,8 +207,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	}
 
 	@Override
-	public OfficeSectionManagedObjectType loadOfficeSectionManagedObjectType(
-			TypeContext typeContext) {
+	public OfficeSectionManagedObjectType loadOfficeSectionManagedObjectType(TypeContext typeContext) {
 
 		// Obtain the managed object type
 		ManagedObjectType<?> managedObjectType = typeContext
@@ -223,25 +217,20 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		}
 
 		// Create the type qualifications
-		TypeQualification[] qualifications = this.typeQualifications.stream()
-				.toArray(TypeQualification[]::new);
+		TypeQualification[] qualifications = this.typeQualifications.stream().toArray(TypeQualification[]::new);
 		if (qualifications.length == 0) {
 			// No qualifications, so use managed object type
-			qualifications = new TypeQualification[] { new TypeQualificationImpl(
-					null, managedObjectType.getObjectClass().getName()) };
+			qualifications = new TypeQualification[] {
+					new TypeQualificationImpl(null, managedObjectType.getObjectClass().getName()) };
 		}
 
 		// Obtain the extension interfaces
-		Class<?>[] extensionInterfaces = managedObjectType
-				.getExtensionInterfaces();
+		Class<?>[] extensionInterfaces = managedObjectType.getExtensionInterfaces();
 
 		// Obtain the dependencies
-		ObjectDependencyType[] objectDependencyTypes = CompileUtil.loadTypes(
-				this.dependencies, (dependency) -> dependency
-						.getManagedObjectDependencyName(),
-				(dependency) -> dependency
-						.loadObjectDependencyType(typeContext),
-				ObjectDependencyType[]::new);
+		ObjectDependencyType[] objectDependencyTypes = CompileUtil.loadTypes(this.dependencies,
+				(dependency) -> dependency.getManagedObjectDependencyName(),
+				(dependency) -> dependency.loadObjectDependencyType(typeContext), ObjectDependencyType[]::new);
 		if (objectDependencyTypes == null) {
 			return null;
 		}
@@ -254,9 +243,8 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		}
 
 		// Create and return the managed object type
-		return new OfficeSectionManagedObjectTypeImpl(this.managedObjectName,
-				qualifications, extensionInterfaces, objectDependencyTypes,
-				managedObjectSourceType);
+		return new OfficeSectionManagedObjectTypeImpl(this.managedObjectName, qualifications, extensionInterfaces,
+				objectDependencyTypes, managedObjectSourceType);
 	}
 
 	/*
@@ -283,15 +271,12 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		// Obtain the name based on location
 		if (this.state.containingSectionNode != null) {
 			// Use name qualified with both office and section
-			return this.state.containingOfficeNode.getDeployedOfficeName()
-					+ "."
-					+ this.state.containingSectionNode
-							.getSectionQualifiedName(this.managedObjectName);
+			return this.state.containingOfficeNode.getDeployedOfficeName() + "."
+					+ this.state.containingSectionNode.getSectionQualifiedName(this.managedObjectName);
 
 		} else if (this.state.containingOfficeNode != null) {
 			// Use name qualified with office name
-			return this.state.containingOfficeNode.getDeployedOfficeName()
-					+ "." + this.managedObjectName;
+			return this.state.containingOfficeNode.getDeployedOfficeName() + "." + this.managedObjectName;
 
 		} else {
 			// Use name unqualified
@@ -303,8 +288,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	public void addGovernance(GovernanceNode governance, OfficeNode office) {
 
 		// Obtain the listing of governances for the office
-		List<GovernanceNode> governances = this.governancesPerOffice
-				.get(office);
+		List<GovernanceNode> governances = this.governancesPerOffice.get(office);
 		if (governances == null) {
 			// Create and register listing to add the governance
 			governances = new LinkedList<GovernanceNode>();
@@ -317,8 +301,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void buildOfficeManagedObject(OfficeNode office,
-			OfficeBuilder officeBuilder, OfficeBindings officeBindings,
+	public void buildOfficeManagedObject(OfficeNode office, OfficeBuilder officeBuilder, OfficeBindings officeBindings,
 			TypeContext typeContext) {
 
 		// Obtain the managed object type
@@ -332,33 +315,27 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		String managedObjectName = this.getBoundManagedObjectName();
 
 		// Register to the office
-		officeBuilder
-				.registerManagedObjectSource(managedObjectName,
-						this.state.managedObjectSourceNode
-								.getManagedObjectSourceName());
+		officeBuilder.registerManagedObjectSource(managedObjectName,
+				this.state.managedObjectSourceNode.getManagedObjectSourceName());
 
 		// Add the managed object to the office
 		DependencyMappingBuilder mapper;
 		switch (this.state.managedObjectScope) {
 		case PROCESS:
-			mapper = officeBuilder.addProcessManagedObject(managedObjectName,
-					managedObjectName);
+			mapper = officeBuilder.addProcessManagedObject(managedObjectName, managedObjectName);
 			break;
 		case THREAD:
-			mapper = officeBuilder.addThreadManagedObject(managedObjectName,
-					managedObjectName);
+			mapper = officeBuilder.addThreadManagedObject(managedObjectName, managedObjectName);
 			break;
-		case WORK:
-			// work not built here
+		case FUNCTION:
+			// function bound not built here
 			return;
 		default:
-			throw new IllegalStateException("Unknown managed object scope "
-					+ this.state.managedObjectScope);
+			throw new IllegalStateException("Unknown managed object scope " + this.state.managedObjectScope);
 		}
 
 		// Load the dependencies for the managed object
-		for (ManagedObjectDependencyType<?> dependencyType : managedObjectType
-				.getDependencyTypes()) {
+		for (ManagedObjectDependencyType<?> dependencyType : managedObjectType.getDependencyTypes()) {
 
 			// Obtain the dependency type details
 			String dependencyName = dependencyType.getDependencyName();
@@ -366,10 +343,8 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 			int dependencyIndex = dependencyType.getIndex();
 
 			// Obtain the dependency
-			ManagedObjectDependencyNode dependencyNode = this.dependencies
-					.get(dependencyName);
-			BoundManagedObjectNode dependency = LinkUtil.retrieveTarget(
-					dependencyNode, BoundManagedObjectNode.class,
+			ManagedObjectDependencyNode dependencyNode = this.dependencies.get(dependencyName);
+			BoundManagedObjectNode dependency = LinkUtil.retrieveTarget(dependencyNode, BoundManagedObjectNode.class,
 					this.context.getCompilerIssues());
 			if (dependency == null) {
 				continue; // must have dependency
@@ -379,19 +354,16 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 			officeBindings.buildManagedObjectIntoOffice(dependency);
 
 			// Link the dependency
-			String dependentManagedObjectName = dependency
-					.getBoundManagedObjectName();
+			String dependentManagedObjectName = dependency.getBoundManagedObjectName();
 			if (dependencyKey != null) {
 				mapper.mapDependency(dependencyKey, dependentManagedObjectName);
 			} else {
-				mapper.mapDependency(dependencyIndex,
-						dependentManagedObjectName);
+				mapper.mapDependency(dependencyIndex, dependentManagedObjectName);
 			}
 		}
 
 		// Load governances for the managed object from the office
-		List<GovernanceNode> governances = this.governancesPerOffice
-				.get(office);
+		List<GovernanceNode> governances = this.governancesPerOffice.get(office);
 		if (governances != null) {
 			// Load the governance for the managed object
 			for (GovernanceNode governance : governances) {
@@ -410,11 +382,9 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	}
 
 	@Override
-	public ManagedObjectDependency getManagedObjectDependency(
-			String managedObjectDependencyName) {
+	public ManagedObjectDependency getManagedObjectDependency(String managedObjectDependencyName) {
 		return NodeUtil.getNode(managedObjectDependencyName, this.dependencies,
-				() -> this.context.createManagedObjectDependencyNode(
-						managedObjectDependencyName, this));
+				() -> this.context.createManagedObjectDependencyNode(managedObjectDependencyName, this));
 	}
 
 	/*
@@ -491,8 +461,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	@Override
 	public boolean linkObjectNode(LinkObjectNode node) {
-		return LinkUtil.linkObjectNode(this, node,
-				this.context.getCompilerIssues(),
+		return LinkUtil.linkObjectNode(this, node, this.context.getCompilerIssues(),
 				(link) -> this.linkedObjectNode = link);
 	}
 

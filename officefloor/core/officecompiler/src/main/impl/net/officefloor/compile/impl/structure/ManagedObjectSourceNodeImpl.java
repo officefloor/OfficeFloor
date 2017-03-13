@@ -29,8 +29,10 @@ import net.officefloor.compile.impl.section.OfficeSectionManagedObjectSourceType
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
+import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
+import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
 import net.officefloor.compile.internal.structure.ManagedObjectRegistry;
@@ -44,9 +46,7 @@ import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
-import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.TeamNode;
-import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
@@ -67,7 +67,7 @@ import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
-import net.officefloor.frame.api.build.FlowNodeBuilder;
+import net.officefloor.frame.api.build.FlowBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -80,7 +80,6 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
 /**
@@ -657,63 +656,60 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			Enum<?> flowKey = flowType.getKey();
 			int flowIndex = flowType.getIndex();
 
-			// Obtain the task for the flow
+			// Obtain the function for the flow
 			ManagedObjectFlowNode flowNode = this.flows.get(flowName);
-			TaskNode taskNode = LinkUtil.retrieveTarget(flowNode, TaskNode.class, this.context.getCompilerIssues());
-			if (taskNode == null) {
+			ManagedFunctionNode functionNode = LinkUtil.retrieveTarget(flowNode, ManagedFunctionNode.class,
+					this.context.getCompilerIssues());
+			if (functionNode == null) {
 				continue; // must have task node
 			}
 
-			// Ensure the task is contained in the managing office
-			WorkNode workNode = taskNode.getWorkNode();
-			SectionNode section = workNode.getSectionNode();
-			OfficeNode taskOffice = section.getOfficeNode();
-			if (taskOffice != managingOffice) {
+			// Ensure the function is contained in the managing office
+			FunctionNamespaceNode namespaceNode = functionNode.getFunctionNamespaceNode();
+			SectionNode section = namespaceNode.getSectionNode();
+			OfficeNode functionOffice = section.getOfficeNode();
+			if (functionOffice != managingOffice) {
 				this.context.getCompilerIssues().addIssue(this,
-						"Linked task of flow " + flowName + " from managed object source "
+						"Linked function of flow " + flowName + " from managed object source "
 								+ this.managedObjectSourceName + " must be within the managing office");
-				continue; // task must be within managing office
+				continue; // function must be within managing office
 			}
 
-			// Obtain the details of task to link flow
-			final String workName = workNode.getQualifiedWorkName();
-			final String taskName = taskNode.getOfficeTaskName();
+			// Obtain the details of function to link flow
+			final String functionName = functionNode.getFullyQualifiedFunctionName();
 
-			// Determine if flow from task
-			String flowTaskName = flowType.getTaskName();
-			if (CompileUtil.isBlank(flowTaskName)) {
-				// Link the flow directly from managed object source to the task
+			// Determine if flow from function
+			String flowFunctionName = flowType.getFunctionName();
+			if (CompileUtil.isBlank(flowFunctionName)) {
+				// Link flow directly from managed object source to function
 				if (flowKey != null) {
-					managingOfficeBuilder.linkProcess(flowKey, workName, taskName);
+					managingOfficeBuilder.linkProcess(flowKey, functionName);
 				} else {
-					managingOfficeBuilder.linkProcess(flowIndex, workName, taskName);
+					managingOfficeBuilder.linkProcess(flowIndex, functionName);
 				}
 
 			} else {
 
 				// TODO test office enhancing for managed object source
 
-				// Link flow from task to its task
+				// Link flow from function to its function
 				officeBuilder.addOfficeEnhancer(new OfficeEnhancer() {
 					@Override
 					public void enhanceOffice(OfficeEnhancerContext context) {
 
-						// Obtain the flow builder for the task
-						String flowWorkName = OfficeBuilderImpl.getNamespacedName(managedObjectSourceName,
-								flowType.getWorkName());
-						String flowTaskName = flowType.getTaskName();
-						FlowNodeBuilder flowBuilder = context.getFlowNodeBuilder(flowWorkName, flowTaskName);
+						// Obtain the flow builder for the function
+						String flowFunctionName = OfficeBuilderImpl.getNamespacedName(managedObjectSourceName,
+								flowType.getFunctionName());
+						FlowBuilder flowBuilder = context.getFlowBuilder(flowFunctionName);
 
 						// Link in the flow
 						Enum<?> flowKey = flowType.getKey();
 						Class<?> argumentType = flowType.getArgumentType();
 						if (flowKey != null) {
-							flowBuilder.linkFlow(flowKey, workName, taskName, FlowInstigationStrategyEnum.SEQUENTIAL,
-									argumentType);
+							flowBuilder.linkFlow(flowKey, functionName, argumentType, false);
 						} else {
 							int flowIndex = flowType.getIndex();
-							flowBuilder.linkFlow(flowIndex, workName, taskName, FlowInstigationStrategyEnum.SEQUENTIAL,
-									argumentType);
+							flowBuilder.linkFlow(flowIndex, functionName, argumentType, false);
 						}
 					}
 				});

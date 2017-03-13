@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="function name" />
+	<field type="DeskManagedObjectSourceFlowModel" name="desk managed object source flow"
+		end-field="function" />
+	<field type="FunctionModel" name="function"
+		end-list="desk managed object source flow" />
+</model>

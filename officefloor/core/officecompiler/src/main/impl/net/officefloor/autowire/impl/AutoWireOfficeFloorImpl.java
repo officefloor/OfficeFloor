@@ -22,11 +22,9 @@ import javax.management.ObjectName;
 import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireManagementMBean;
 import net.officefloor.autowire.AutoWireOfficeFloor;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.manage.FunctionManager;
-import net.officefloor.frame.api.manage.WorkManager;
-import net.officefloor.frame.impl.spi.team.ProcessContextTeam;
 
 /**
  * {@link AutoWireManagementMBean} implementation.
@@ -67,8 +65,8 @@ public class AutoWireOfficeFloorImpl implements AutoWireOfficeFloor {
 	 * @param administration
 	 *            {@link AutoWireManagement}.
 	 */
-	public AutoWireOfficeFloorImpl(OfficeFloor officeFloor, String officeName,
-			ObjectName objectName, AutoWireManagement administration) {
+	public AutoWireOfficeFloorImpl(OfficeFloor officeFloor, String officeName, ObjectName objectName,
+			AutoWireManagement administration) {
 		this.officeFloor = officeFloor;
 		this.officeName = officeName;
 		this.objectName = objectName;
@@ -90,16 +88,14 @@ public class AutoWireOfficeFloorImpl implements AutoWireOfficeFloor {
 	}
 
 	@Override
-	public void invokeTask(String workName, String taskName, Object parameter)
-			throws Exception {
+	public void invokeFunction(String functionName, Object parameter) throws Exception {
 
-		// Obtain the Task
+		// Obtain the function
 		Office office = this.officeFloor.getOffice(this.officeName);
-		WorkManager workManager = office.getWorkManager(workName);
-		FunctionManager taskManager = workManager.getTaskManager(taskName);
+		FunctionManager functionManager = office.getFunctionManager(functionName);
 
-		// Invoke the task
-		ProcessContextTeam.doTask(taskManager, parameter);
+		// Invoke the function
+		functionManager.invokeProcess(parameter, null);
 	}
 
 	@Override

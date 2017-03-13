@@ -30,12 +30,13 @@ import net.officefloor.compile.impl.office.OfficeTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.impl.util.LoadTypeError;
-import net.officefloor.compile.internal.structure.AdministratorNode;
+import net.officefloor.compile.internal.structure.AdministrationNode;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.EscalationNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.LinkSynchronousNode;
+import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
@@ -49,7 +50,6 @@ import net.officefloor.compile.internal.structure.OfficeOutputNode;
 import net.officefloor.compile.internal.structure.OfficeStartNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.internal.structure.SectionNode;
-import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.office.OfficeAvailableSectionInputType;
@@ -59,10 +59,10 @@ import net.officefloor.compile.office.OfficeOutputType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.administration.source.AdministratorSource;
+import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
-import net.officefloor.compile.spi.office.OfficeAdministrator;
+import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeInput;
@@ -76,7 +76,7 @@ import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeStart;
 import net.officefloor.compile.spi.office.OfficeTeam;
-import net.officefloor.compile.spi.office.TaskTeam;
+import net.officefloor.compile.spi.office.ResponsibleTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
@@ -205,10 +205,10 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	private final Map<String, ManagedObjectNode> managedObjects = new HashMap<String, ManagedObjectNode>();
 
 	/**
-	 * {@link AdministratorNode} instances by their {@link OfficeAdministrator}
-	 * name.
+	 * {@link AdministrationNode} instances by their
+	 * {@link OfficeAdministration} name.
 	 */
-	private final Map<String, AdministratorNode> administrators = new HashMap<String, AdministratorNode>();
+	private final Map<String, AdministrationNode> administrators = new HashMap<String, AdministrationNode>();
 
 	/**
 	 * {@link GovernanceNode} instances by their {@link OfficeGovernance} name.
@@ -587,13 +587,6 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 					section.buildSection(officeBuilder, officeBindings, typeContext);
 				});
 
-		// Build the administrators for the office (in deterministic order)
-		this.administrators.values().stream().sorted(
-				(a, b) -> CompileUtil.sortCompare(a.getOfficeAdministratorName(), b.getOfficeAdministratorName()))
-				.forEachOrdered((admin) -> {
-					admin.buildAdministrator(officeBuilder);
-				});
-
 		// Build the list of escalations of the office
 		List<EscalationStruct> escalationStructs = new LinkedList<OfficeNodeImpl.EscalationStruct>();
 		for (EscalationNode node : this.escalations.values()) {
@@ -634,32 +627,32 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		// Build the escalation handling for the office (in deterministic order)
 		for (EscalationStruct escalation : escalationStructs) {
 
-			// Obtain the target task
-			TaskNode task = LinkUtil.findTarget(escalation.node, TaskNode.class, this.context.getCompilerIssues());
-			if (task == null) {
-				continue; // task not linked
+			// Obtain the target function
+			ManagedFunctionNode function = LinkUtil.findTarget(escalation.node, ManagedFunctionNode.class,
+					this.context.getCompilerIssues());
+			if (function == null) {
+				continue; // function not linked
 			}
 
 			// Build the escalation handling
-			String workName = task.getWorkNode().getQualifiedWorkName();
-			String taskName = task.getOfficeTaskName();
-			officeBuilder.addEscalation(escalation.type, workName, taskName);
+			String functionName = function.getFullyQualifiedFunctionName();
+			officeBuilder.addEscalation(escalation.type, functionName);
 		}
 
 		// Build the start-up triggers for the office (in deterministic order)
 		this.starts.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeStartName(), b.getOfficeStartName()))
 				.forEachOrdered((start) -> {
-					// Obtain the target task
-					TaskNode task = LinkUtil.findTarget(start, TaskNode.class, this.context.getCompilerIssues());
-					if (task == null) {
-						return; // task not linked
+					// Obtain the target function
+					ManagedFunctionNode function = LinkUtil.findTarget(start, ManagedFunctionNode.class,
+							this.context.getCompilerIssues());
+					if (function == null) {
+						return; // function not linked
 					}
 
 					// Build the start-up trigger
-					String workName = task.getWorkNode().getQualifiedWorkName();
-					String taskName = task.getOfficeTaskName();
-					officeBuilder.addStartupTask(workName, taskName);
+					String functionName = function.getFullyQualifiedFunctionName();
+					officeBuilder.addStartupFunction(functionName);
 				});
 
 		// Return the office bindings
@@ -742,18 +735,19 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
-	public OfficeAdministrator addOfficeAdministrator(String administratorName, String administratorSourceClassName) {
-		return NodeUtil.getInitialisedNode(administratorName, this.administrators, this.context,
-				() -> this.context.createAdministratorNode(administratorName, this),
-				(administrator) -> administrator.initialise(administratorSourceClassName, null));
+	public OfficeAdministration addOfficeAdministration(String administrationName,
+			String administrationSourceClassName) {
+		return NodeUtil.getInitialisedNode(administrationName, this.administrators, this.context,
+				() -> this.context.createAdministrationNode(administrationName, this),
+				(administrator) -> administrator.initialise(administrationSourceClassName, null));
 	}
 
 	@Override
-	public OfficeAdministrator addOfficeAdministrator(String administratorName,
-			AdministratorSource<?, ?> administratorSource) {
-		return NodeUtil.getInitialisedNode(administratorName, this.administrators, this.context,
-				() -> this.context.createAdministratorNode(administratorName, this), (administrator) -> administrator
-						.initialise(administratorSource.getClass().getName(), administratorSource));
+	public OfficeAdministration addOfficeAdministration(String administrationName,
+			AdministrationSource<?, ?, ?> administrationSource) {
+		return NodeUtil.getInitialisedNode(administrationName, this.administrators, this.context,
+				() -> this.context.createAdministrationNode(administrationName, this), (administrator) -> administrator
+						.initialise(administrationSource.getClass().getName(), administrationSource));
 	}
 
 	@Override
@@ -825,7 +819,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
-	public void link(TaskTeam team, OfficeTeam officeTeam) {
+	public void link(ResponsibleTeam team, OfficeTeam officeTeam) {
 		this.linkTeam(team, officeTeam);
 	}
 
@@ -840,7 +834,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
-	public void link(OfficeAdministrator administrator, OfficeTeam officeTeam) {
+	public void link(OfficeAdministration administrator, OfficeTeam officeTeam) {
 		this.linkTeam(administrator, officeTeam);
 	}
 

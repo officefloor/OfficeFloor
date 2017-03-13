@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="administration name" />
+	<field type="OfficeFunctionModel" name="office function"
+		end-list="post administration" />
+	<field type="AdministrationModel" name="administration"
+		end-list="post office function" />
+</model>

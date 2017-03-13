@@ -38,8 +38,7 @@ import net.officefloor.frame.impl.construct.source.SourceContextImpl;
  * 
  * @author Daniel Sagenschneider
  */
-public class SectionSourceContextImpl extends SourceContextImpl implements
-		SectionSourceContext {
+public class SectionSourceContextImpl extends SourceContextImpl implements SectionSourceContext {
 
 	/**
 	 * Location of the {@link OfficeSection}.
@@ -70,18 +69,16 @@ public class SectionSourceContextImpl extends SourceContextImpl implements
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public SectionSourceContextImpl(boolean isLoadingType,
-			String sectionLocation, PropertyList propertyList, Node node,
+	public SectionSourceContextImpl(boolean isLoadingType, String sectionLocation, PropertyList propertyList, Node node,
 			NodeContext context) {
-		super(isLoadingType, context.getRootSourceContext(),
-				new PropertyListSourceProperties(propertyList));
+		super(isLoadingType, context.getRootSourceContext(), new PropertyListSourceProperties(propertyList));
 		this.sectionLocation = sectionLocation;
 		this.node = node;
 		this.context = context;
 	}
 
 	/*
-	 * ================= SectionLoaderContext ================================
+	 * ================= SectionSourceContext ================================
 	 */
 
 	@Override
@@ -96,75 +93,58 @@ public class SectionSourceContextImpl extends SourceContextImpl implements
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public FunctionNamespaceType<?> loadWorkType(String workSourceClassName,
-			PropertyList properties) {
-		return CompileUtil.loadType(FunctionNamespaceType.class,
-				workSourceClassName,
-				this.context.getCompilerIssues(),
+	public FunctionNamespaceType loadFunctionNamespaceType(String workSourceClassName, PropertyList properties) {
+		return CompileUtil.loadType(FunctionNamespaceType.class, workSourceClassName, this.context.getCompilerIssues(),
 				() -> {
 
-					// Obtain the work source class
-				Class workSourceClass = this.context.getWorkSourceClass(
-						workSourceClassName, this.node);
-				if (workSourceClass == null) {
-					return null;
-				}
+					// Obtain the managed function source class
+					Class managedFunctionSourceClass = this.context.getManagedFunctionSourceClass(workSourceClassName,
+							this.node);
+					if (managedFunctionSourceClass == null) {
+						return null;
+					}
 
-				// Load and return the work type
-				ManagedFunctionLoader workLoader = this.context.getWorkLoader(this.node);
-				return workLoader.loadFunctionNamespaceType(workSourceClass, properties);
-			});
+					// Load and return the function namespace type
+					ManagedFunctionLoader managedFunctionLoader = this.context.getManagedFunctionLoader(this.node);
+					return managedFunctionLoader.loadFunctionNamespaceType(managedFunctionSourceClass, properties);
+				});
 	}
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public ManagedObjectType<?> loadManagedObjectType(
-			String managedObjectSourceClassName, PropertyList properties) {
-		return CompileUtil.loadType(
-				ManagedObjectType.class,
-				managedObjectSourceClassName,
-				this.context.getCompilerIssues(),
-				() -> {
+	public ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceClassName, PropertyList properties) {
+		return CompileUtil.loadType(ManagedObjectType.class, managedObjectSourceClassName,
+				this.context.getCompilerIssues(), () -> {
 
 					// Obtain the managed object source class
 					Class managedObjectSourceClass = this.context
-							.getManagedObjectSourceClass(
-									managedObjectSourceClassName, this.node);
+							.getManagedObjectSourceClass(managedObjectSourceClassName, this.node);
 					if (managedObjectSourceClass == null) {
 						return null;
 					}
 
 					// Load and return the managed object type
-					ManagedObjectLoader managedObjectLoader = this.context
-							.getManagedObjectLoader(this.node);
-					return managedObjectLoader.loadManagedObjectType(
-							managedObjectSourceClass, properties);
+					ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(this.node);
+					return managedObjectLoader.loadManagedObjectType(managedObjectSourceClass, properties);
 				});
 
 	}
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public SectionType loadSectionType(String sectionSourceClassName,
-			String location, PropertyList properties) {
-		return CompileUtil.loadType(SectionType.class,
-				sectionSourceClassName,
-				this.context.getCompilerIssues(),
-				() -> {
+	public SectionType loadSectionType(String sectionSourceClassName, String location, PropertyList properties) {
+		return CompileUtil.loadType(SectionType.class, sectionSourceClassName, this.context.getCompilerIssues(), () -> {
 
-					// Obtain the section source class
-				Class sectionSourceClass = this.context.getSectionSourceClass(
-						sectionSourceClassName, this.node);
-				if (sectionSourceClass == null) {
-					return null;
-				}
+			// Obtain the section source class
+			Class sectionSourceClass = this.context.getSectionSourceClass(sectionSourceClassName, this.node);
+			if (sectionSourceClass == null) {
+				return null;
+			}
 
-				// Load and return the section type
-				SectionLoader sectionLoader = this.context
-						.getSectionLoader(this.node);
-				return sectionLoader.loadSectionType(sectionSourceClass,
-						location, properties);
-			});
+			// Load and return the section type
+			SectionLoader sectionLoader = this.context.getSectionLoader(this.node);
+			return sectionLoader.loadSectionType(sectionSourceClass, location, properties);
+		});
 	}
 
 }

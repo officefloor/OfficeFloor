@@ -18,7 +18,6 @@
 package net.officefloor.compile.managedobject;
 
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.api.function.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.Flow;
@@ -39,39 +38,25 @@ public interface ManagedObjectFlowType<F extends Enum<F>> {
 	String getFlowName();
 
 	/**
-	 * Obtains the name of the {@link Work} instigating the {@link Flow}.
-	 * Should the {@link Flow} be instigated by the
-	 * {@link ManagedObjectSource} directly (rather than a {@link ManagedFunction} it
-	 * added) this will return <code>null</code>.
-	 * 
-	 * @return {@link Work} name instigating {@link Flow} or
-	 *         <code>null</code> if instigated directly by
-	 *         {@link ManagedObjectSource}.
-	 * 
-	 * @see #getTaskName()
-	 */
-	String getWorkName();
-
-	/**
 	 * <p>
-	 * Obtains the name of the {@link ManagedFunction} instigating the {@link Flow}.
-	 * Should the {@link Flow} be instigated by the
-	 * {@link ManagedObjectSource} directly (rather than a {@link ManagedFunction} it
-	 * added) this will return <code>null</code>.
+	 * Obtains the name of the {@link ManagedFunction} instigating the
+	 * {@link Flow}. Should the {@link Flow} be instigated by the
+	 * {@link ManagedObjectSource} directly (rather than a
+	 * {@link ManagedFunction} it added) this will return <code>null</code>.
 	 * <p>
-	 * For clarity, this is not the name of the {@link ManagedFunction} to be invoked by
-	 * the {@link Flow} but rather the {@link ManagedFunction} triggering the
-	 * {@link Flow}. In other words, it is a {@link Flow}
+	 * For clarity, this is not the name of the {@link ManagedFunction} to be
+	 * invoked by the {@link Flow} but rather the {@link ManagedFunction}
+	 * triggering the {@link Flow}. In other words, it is a {@link Flow}
 	 * invocation that requires to be defined for the
-	 * {@link ManagedObjectSource} as it is triggered from a {@link ManagedFunction} added
-	 * by the {@link ManagedObjectSource} and handled by some {@link Office}
-	 * {@link ManagedFunction}.
+	 * {@link ManagedObjectSource} as it is triggered from a
+	 * {@link ManagedFunction} added by the {@link ManagedObjectSource} and
+	 * handled by some {@link Office} {@link ManagedFunction}.
 	 * 
 	 * @return {@link ManagedFunction} name instigating {@link Flow} or
 	 *         <code>null</code> if instigated directly by
 	 *         {@link ManagedObjectSource}.
 	 */
-	String getTaskName();
+	String getFunctionName();
 
 	/**
 	 * Obtains the key identifying the {@link Flow}.

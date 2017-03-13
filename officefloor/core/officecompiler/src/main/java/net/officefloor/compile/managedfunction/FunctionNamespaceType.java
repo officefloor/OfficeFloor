@@ -17,28 +17,20 @@
  */
 package net.officefloor.compile.managedfunction;
 
-import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.function.Work;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 
 /**
- * <code>Type definition</code> of a {@link Work}.
+ * <code>Type definition</code> of a {@link ManagedFunctionSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface FunctionNamespaceType<W extends Work> {
-
-	/**
-	 * Obtains the {@link WorkFactory} to create the {@link Work} instances.
-	 * 
-	 * @return {@link WorkFactory}.
-	 */
-	WorkFactory<W> getWorkFactory();
+public interface FunctionNamespaceType {
 
 	/**
 	 * Obtains the {@link ManagedFunctionType} definitions.
 	 * 
 	 * @return {@link ManagedFunctionType} definitions.
 	 */
-	ManagedFunctionType<W, ?, ?>[] getManagedFunctionTypes();
+	ManagedFunctionType<?, ?>[] getManagedFunctionTypes();
 
 }

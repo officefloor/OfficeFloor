@@ -29,7 +29,6 @@ import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 
@@ -38,7 +37,7 @@ import net.officefloor.frame.api.manage.Office;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionNode extends Node, ManagedObjectRegistry, TaskRegistry,
+public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctionRegistry,
 		SectionDesigner, SubSection, OfficeSection {
 
 	/**

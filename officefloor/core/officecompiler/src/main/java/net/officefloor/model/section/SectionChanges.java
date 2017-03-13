@@ -46,10 +46,10 @@ public interface SectionChanges {
 	String THREAD_MANAGED_OBJECT_SCOPE = ManagedObjectScope.THREAD.name();
 
 	/**
-	 * Value for {@link ManagedObjectScope#WORK} on
+	 * Value for {@link ManagedObjectScope#FUNCTION} on
 	 * {@link SectionManagedObjectModel} instances.
 	 */
-	String WORK_MANAGED_OBJECT_SCOPE = ManagedObjectScope.WORK.name();
+	String FUNCTION_MANAGED_OBJECT_SCOPE = ManagedObjectScope.FUNCTION.name();
 
 	/**
 	 * Adds a {@link SubSectionModel} to the {@link SectionModel}.
@@ -66,8 +66,7 @@ public interface SectionChanges {
 	 *            {@link SectionType}.
 	 * @return {@link Change} to add the {@link SubSectionModel}.
 	 */
-	Change<SubSectionModel> addSubSection(String subSectionName,
-			String sectionSourceClassName, String sectionLocation,
+	Change<SubSectionModel> addSubSection(String subSectionName, String sectionSourceClassName, String sectionLocation,
 			PropertyList properties, SectionType sectionType);
 
 	/**
@@ -88,8 +87,7 @@ public interface SectionChanges {
 	 *            New name for the {@link SubSectionModel}.
 	 * @return {@link Change} to rename the {@link SubSectionModel}.
 	 */
-	Change<SubSectionModel> renameSubSection(SubSectionModel subSection,
-			String newSubSectionName);
+	Change<SubSectionModel> renameSubSection(SubSectionModel subSection, String newSubSectionName);
 
 	/**
 	 * Sets the {@link SubSectionInputModel} public/private.
@@ -102,8 +100,8 @@ public interface SectionChanges {
 	 *            {@link SubSectionInputModel} to set public/private.
 	 * @return {@link SubSectionInputModel} to set public/private.
 	 */
-	Change<SubSectionInputModel> setSubSectionInputPublic(boolean isPublic,
-			String publicName, SubSectionInputModel input);
+	Change<SubSectionInputModel> setSubSectionInputPublic(boolean isPublic, String publicName,
+			SubSectionInputModel input);
 
 	/**
 	 * Adds an {@link ExternalFlowModel} to the {@link SectionModel}.
@@ -114,8 +112,7 @@ public interface SectionChanges {
 	 *            Argument type for the {@link ExternalFlowModel}.
 	 * @return {@link Change} to add the {@link ExternalFlowModel}.
 	 */
-	Change<ExternalFlowModel> addExternalFlow(String externalFlowName,
-			String argumentType);
+	Change<ExternalFlowModel> addExternalFlow(String externalFlowName, String argumentType);
 
 	/**
 	 * Removes the {@link ExternalFlowModel} from the {@link SectionModel}.
@@ -135,8 +132,7 @@ public interface SectionChanges {
 	 *            New name for the {@link ExternalFlowModel}.
 	 * @return {@link Change} to rename the {@link ExternalFlowModel}.
 	 */
-	Change<ExternalFlowModel> renameExternalFlow(
-			ExternalFlowModel externalFlow, String newExternalFlowName);
+	Change<ExternalFlowModel> renameExternalFlow(ExternalFlowModel externalFlow, String newExternalFlowName);
 
 	/**
 	 * Adds the {@link ExternalManagedObjectModel} to the {@link SectionModel}.
@@ -147,8 +143,7 @@ public interface SectionChanges {
 	 *            Object type for the {@link ExternalManagedObjectModel}.
 	 * @return {@link Change} to add the {@link ExternalManagedObjectModel}.
 	 */
-	Change<ExternalManagedObjectModel> addExternalManagedObject(
-			String externalManagedObjectName, String objectType);
+	Change<ExternalManagedObjectModel> addExternalManagedObject(String externalManagedObjectName, String objectType);
 
 	/**
 	 * Removes the {@link ExternalManagedObjectModel} from the
@@ -158,8 +153,7 @@ public interface SectionChanges {
 	 *            {@link ExternalManagedObjectModel} to remove.
 	 * @return {@link Change} to remove the {@link ExternalManagedObjectModel}.
 	 */
-	Change<ExternalManagedObjectModel> removeExternalManagedObject(
-			ExternalManagedObjectModel externalManagedObject);
+	Change<ExternalManagedObjectModel> removeExternalManagedObject(ExternalManagedObjectModel externalManagedObject);
 
 	/**
 	 * Renames the {@link ExternalManagedObjectModel}.
@@ -170,8 +164,7 @@ public interface SectionChanges {
 	 *            New name for the {@link ExternalManagedObjectModel}.
 	 * @return {@link Change} to rename the {@link ExternalManagedObjectModel}.
 	 */
-	Change<ExternalManagedObjectModel> renameExternalManagedObject(
-			ExternalManagedObjectModel externalManagedObject,
+	Change<ExternalManagedObjectModel> renameExternalManagedObject(ExternalManagedObjectModel externalManagedObject,
 			String newExternalManagedObjectName);
 
 	/**
@@ -190,10 +183,9 @@ public interface SectionChanges {
 	 * @return {@link Change} to add the {@link SectionManagedObjectSourceModel}
 	 *         .
 	 */
-	Change<SectionManagedObjectSourceModel> addSectionManagedObjectSource(
-			String managedObjectSourceName,
-			String managedObjectSourceClassName, PropertyList properties,
-			long timeout, ManagedObjectType<?> managedObjectType);
+	Change<SectionManagedObjectSourceModel> addSectionManagedObjectSource(String managedObjectSourceName,
+			String managedObjectSourceClassName, PropertyList properties, long timeout,
+			ManagedObjectType<?> managedObjectType);
 
 	/**
 	 * Removes the {@link SectionManagedObjectSourceModel}.
@@ -217,8 +209,7 @@ public interface SectionChanges {
 	 *         {@link SectionManagedObjectSourceModel}.
 	 */
 	Change<SectionManagedObjectSourceModel> renameSectionManagedObjectSource(
-			SectionManagedObjectSourceModel managedObjectSource,
-			String newManagedObjectSourceName);
+			SectionManagedObjectSourceModel managedObjectSource, String newManagedObjectSourceName);
 
 	/**
 	 * Adds an {@link SectionManagedObjectModel} for an
@@ -235,9 +226,8 @@ public interface SectionChanges {
 	 *            {@link ManagedObjectType}.
 	 * @return {@link Change} to add the {@link SectionManagedObjectModel}.
 	 */
-	Change<SectionManagedObjectModel> addSectionManagedObject(
-			String managedObjectName, ManagedObjectScope managedObjectScope,
-			SectionManagedObjectSourceModel managedObjectSource,
+	Change<SectionManagedObjectModel> addSectionManagedObject(String managedObjectName,
+			ManagedObjectScope managedObjectScope, SectionManagedObjectSourceModel managedObjectSource,
 			ManagedObjectType<?> managedObjectType);
 
 	/**
@@ -247,8 +237,7 @@ public interface SectionChanges {
 	 *            {@link SectionManagedObjectModel} to remove.
 	 * @return {@link Change} to remove the {@link SectionManagedObjectModel}.
 	 */
-	Change<SectionManagedObjectModel> removeSectionManagedObject(
-			SectionManagedObjectModel managedObject);
+	Change<SectionManagedObjectModel> removeSectionManagedObject(SectionManagedObjectModel managedObject);
 
 	/**
 	 * Renames the {@link SectionManagedObjectModel}.
@@ -259,8 +248,8 @@ public interface SectionChanges {
 	 *            New name for the {@link SectionManagedObjectModel}.
 	 * @return {@link Change} to rename the {@link SectionManagedObjectModel}.
 	 */
-	Change<SectionManagedObjectModel> renameSectionManagedObject(
-			SectionManagedObjectModel managedObject, String newManagedObjectName);
+	Change<SectionManagedObjectModel> renameSectionManagedObject(SectionManagedObjectModel managedObject,
+			String newManagedObjectName);
 
 	/**
 	 * Scopes the {@link SectionManagedObjectModel}.
@@ -272,8 +261,7 @@ public interface SectionChanges {
 	 *            {@link SectionManagedObjectModel}.
 	 * @return {@link Change} to scope {@link SectionManagedObjectModel}.
 	 */
-	Change<SectionManagedObjectModel> rescopeSectionManagedObject(
-			SectionManagedObjectModel managedObject,
+	Change<SectionManagedObjectModel> rescopeSectionManagedObject(SectionManagedObjectModel managedObject,
 			ManagedObjectScope newManagedObjectScope);
 
 	/**
@@ -288,8 +276,7 @@ public interface SectionChanges {
 	 *         {@link SubSectionObjectToExternalManagedObjectModel}.
 	 */
 	Change<SubSectionObjectToExternalManagedObjectModel> linkSubSectionObjectToExternalManagedObject(
-			SubSectionObjectModel subSectionObject,
-			ExternalManagedObjectModel externalManagedObject);
+			SubSectionObjectModel subSectionObject, ExternalManagedObjectModel externalManagedObject);
 
 	/**
 	 * Removes the {@link SubSectionObjectToExternalManagedObjectModel}.
@@ -315,8 +302,7 @@ public interface SectionChanges {
 	 *         {@link SubSectionObjectToSectionManagedObjectModel}.
 	 */
 	Change<SubSectionObjectToSectionManagedObjectModel> linkSubSectionObjectToSectionManagedObject(
-			SubSectionObjectModel subSectionObject,
-			SectionManagedObjectModel managedObject);
+			SubSectionObjectModel subSectionObject, SectionManagedObjectModel managedObject);
 
 	/**
 	 * Removes the {@link SubSectionObjectToSectionManagedObjectModel}.
@@ -341,8 +327,7 @@ public interface SectionChanges {
 	 *         {@link SubSectionOutputToSubSectionInputModel}.
 	 */
 	Change<SubSectionOutputToSubSectionInputModel> linkSubSectionOutputToSubSectionInput(
-			SubSectionOutputModel subSectionOutput,
-			SubSectionInputModel subSectionInput);
+			SubSectionOutputModel subSectionOutput, SubSectionInputModel subSectionInput);
 
 	/**
 	 * Removes the {@link SubSectionOutputToSubSectionInputModel}.
@@ -366,8 +351,7 @@ public interface SectionChanges {
 	 *         {@link SubSectionOutputToExternalFlowModel}.
 	 */
 	Change<SubSectionOutputToExternalFlowModel> linkSubSectionOutputToExternalFlow(
-			SubSectionOutputModel subSectionOutput,
-			ExternalFlowModel externalFlow);
+			SubSectionOutputModel subSectionOutput, ExternalFlowModel externalFlow);
 
 	/**
 	 * Removes the {@link SubSectionOutputToExternalFlowModel}.
@@ -392,8 +376,7 @@ public interface SectionChanges {
 	 *         {@link SectionManagedObjectSourceFlowToSubSectionInputModel}.
 	 */
 	Change<SectionManagedObjectSourceFlowToSubSectionInputModel> linkSectionManagedObjectSourceFlowToSubSectionInput(
-			SectionManagedObjectSourceFlowModel managedObjectSourceFlow,
-			SubSectionInputModel subSectionInput);
+			SectionManagedObjectSourceFlowModel managedObjectSourceFlow, SubSectionInputModel subSectionInput);
 
 	/**
 	 * Removes the {@link SectionManagedObjectSourceFlowToSubSectionInputModel}.
@@ -419,8 +402,7 @@ public interface SectionChanges {
 	 *         {@link SectionManagedObjectSourceFlowToExternalFlowModel}.
 	 */
 	Change<SectionManagedObjectSourceFlowToExternalFlowModel> linkSectionManagedObjectSourceFlowToExternalFlow(
-			SectionManagedObjectSourceFlowModel managedObjectSourceFlow,
-			ExternalFlowModel externalFlow);
+			SectionManagedObjectSourceFlowModel managedObjectSourceFlow, ExternalFlowModel externalFlow);
 
 	/**
 	 * Removes the {@link SectionManagedObjectSourceFlowToExternalFlowModel}.
@@ -447,8 +429,7 @@ public interface SectionChanges {
 	 *         .
 	 */
 	Change<SectionManagedObjectDependencyToSectionManagedObjectModel> linkSectionManagedObjectDependencyToSectionManagedObject(
-			SectionManagedObjectDependencyModel dependency,
-			SectionManagedObjectModel managedObject);
+			SectionManagedObjectDependencyModel dependency, SectionManagedObjectModel managedObject);
 
 	/**
 	 * Removes the
@@ -477,8 +458,7 @@ public interface SectionChanges {
 	 *         .
 	 */
 	Change<SectionManagedObjectDependencyToExternalManagedObjectModel> linkSectionManagedObjectDependencyToExternalManagedObject(
-			SectionManagedObjectDependencyModel dependency,
-			ExternalManagedObjectModel externalManagedObject);
+			SectionManagedObjectDependencyModel dependency, ExternalManagedObjectModel externalManagedObject);
 
 	/**
 	 * Removes the

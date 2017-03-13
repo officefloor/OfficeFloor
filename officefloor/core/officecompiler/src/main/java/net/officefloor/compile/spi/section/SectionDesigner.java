@@ -25,7 +25,8 @@ import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * Designer to design the {@link SectionNode}.
@@ -53,12 +54,12 @@ public interface SectionDesigner {
 	 * @param argumentType
 	 *            Argument type for the {@link SectionOutputType}.
 	 * @param isEscalationOnly
-	 *            <code>true</code> if only {@link ManagedFunctionEscalationType} instances
-	 *            are using the {@link SectionOutputType}.
+	 *            <code>true</code> if only
+	 *            {@link ManagedFunctionEscalationType} instances are using the
+	 *            {@link SectionOutputType}.
 	 * @return {@link SectionOutput} for linking.
 	 */
-	SectionOutput addSectionOutput(String outputName, String argumentType,
-			boolean isEscalationOnly);
+	SectionOutput addSectionOutput(String outputName, String argumentType, boolean isEscalationOnly);
 
 	/**
 	 * Adds a {@link SectionObject} to the {@link SectionNode} being built.
@@ -72,28 +73,33 @@ public interface SectionDesigner {
 	SectionObject addSectionObject(String objectName, String objectType);
 
 	/**
-	 * Adds a {@link SectionWork} to the {@link SectionNode} being built.
+	 * Adds a {@link SectionFunctionNamespace} to the {@link SectionNode} being
+	 * built.
 	 * 
 	 * @param workName
-	 *            Name of the {@link SectionWork}.
+	 *            Name of the {@link SectionFunctionNamespace}.
 	 * @param workSourceClassName
-	 *            Fully qualified class name of the {@link ManagedFunctionSource}. This
-	 *            allows adding the {@link SectionWork} without having to worry
-	 *            if the {@link ManagedFunctionSource} is available on the class path.
-	 * @return {@link SectionWork}.
+	 *            Fully qualified class name of the
+	 *            {@link ManagedFunctionSource}. This allows adding the
+	 *            {@link SectionFunctionNamespace} without having to worry if
+	 *            the {@link ManagedFunctionSource} is available on the class
+	 *            path.
+	 * @return {@link SectionFunctionNamespace}.
 	 */
-	SectionWork addSectionWork(String workName, String workSourceClassName);
+	SectionFunctionNamespace addSectionFunctionNamespace(String workName, String workSourceClassName);
 
 	/**
-	 * Adds a {@link SectionWork} to the {@link SectionNode} being built.
+	 * Adds a {@link SectionFunctionNamespace} to the {@link SectionNode} being
+	 * built.
 	 * 
-	 * @param workName
-	 *            Name of the {@link SectionWork}.
-	 * @param workSource
+	 * @param functionNamespaceName
+	 *            Name of the {@link SectionFunctionNamespace}.
+	 * @param managedFunctionSource
 	 *            {@link ManagedFunctionSource} instance to use.
-	 * @return {@link SectionWork}.
+	 * @return {@link SectionFunctionNamespace}.
 	 */
-	SectionWork addSectionWork(String workName, ManagedFunctionSource<?> workSource);
+	SectionFunctionNamespace addSectionFunctionNamespace(String functionNamespaceName,
+			ManagedFunctionSource managedFunctionSource);
 
 	/**
 	 * Adds a {@link SectionManagedObjectSource} to the {@link SectionNode}
@@ -108,8 +114,8 @@ public interface SectionDesigner {
 	 *            available on the class path.
 	 * @return {@link SectionManagedObject}.
 	 */
-	SectionManagedObjectSource addSectionManagedObjectSource(
-			String managedObjectSourceName, String managedObjectSourceClassName);
+	SectionManagedObjectSource addSectionManagedObjectSource(String managedObjectSourceName,
+			String managedObjectSourceClassName);
 
 	/**
 	 * Adds a {@link SectionManagedObjectSource} to the {@link SectionNode}
@@ -121,8 +127,7 @@ public interface SectionDesigner {
 	 *            {@link ManagedObjectSource} instance to use.
 	 * @return {@link SectionManagedObject}.
 	 */
-	SectionManagedObjectSource addSectionManagedObjectSource(
-			String managedObjectSourceName,
+	SectionManagedObjectSource addSectionManagedObjectSource(String managedObjectSourceName,
 			ManagedObjectSource<?, ?> managedObjectSource);
 
 	/**
@@ -142,8 +147,7 @@ public interface SectionDesigner {
 	 *            Location of the {@link SubSection}.
 	 * @return {@link SubSection}.
 	 */
-	SubSection addSubSection(String subSectionName,
-			String sectionSourceClassName, String location);
+	SubSection addSubSection(String subSectionName, String sectionSourceClassName, String location);
 
 	/**
 	 * Adds a {@link SubSection} to the {@link SectionNode} being built.
@@ -159,19 +163,18 @@ public interface SectionDesigner {
 	 *            Location of the {@link SubSection}.
 	 * @return {@link SubSection}.
 	 */
-	SubSection addSubSection(String subSectionName,
-			SectionSource sectionSource, String location);
+	SubSection addSubSection(String subSectionName, SectionSource sectionSource, String location);
 
 	/**
 	 * Links the {@link SectionInput} to be undertaken by the
-	 * {@link SectionTask}.
+	 * {@link SectionFunction}.
 	 * 
 	 * @param sectionInput
 	 *            {@link SectionInput}.
 	 * @param task
-	 *            {@link SectionTask}.
+	 *            {@link SectionFunction}.
 	 */
-	void link(SectionInput sectionInput, SectionTask task);
+	void link(SectionInput sectionInput, SectionFunction task);
 
 	/**
 	 * Links the {@link SectionInput} to be undertaken by the
@@ -196,88 +199,87 @@ public interface SectionDesigner {
 	void link(SectionInput sectionInput, SectionOutput sectionOutput);
 
 	/**
-	 * Links the {@link TaskFlow} to be undertaken by the {@link SectionTask}.
+	 * Links the {@link FunctionFlow} to be undertaken by the
+	 * {@link SectionFunction}.
 	 * 
-	 * @param taskFlow
-	 *            {@link TaskFlow}.
-	 * @param task
-	 *            {@link SectionTask}.
-	 * @param instigationStrategy
-	 *            {@link FlowInstigationStrategyEnum}.
+	 * @param functionFlow
+	 *            {@link FunctionFlow}.
+	 * @param function
+	 *            {@link SectionFunction}.
+	 * @param isSpawnThreadState
+	 *            Indicates if spawns {@link ThreadState} for {@link Flow}.
 	 */
-	void link(TaskFlow taskFlow, SectionTask task,
-			FlowInstigationStrategyEnum instigationStrategy);
+	void link(FunctionFlow functionFlow, SectionFunction task, boolean isSpawnThreadState);
 
 	/**
-	 * Links the {@link TaskFlow} to be undertaken by the
+	 * Links the {@link FunctionFlow} to be undertaken by the
 	 * {@link SubSectionInput}.
 	 * 
-	 * @param taskFlow
-	 *            {@link TaskFlow}.
+	 * @param functionFlow
+	 *            {@link FunctionFlow}.
 	 * @param subSectionInput
-	 *            {@link SectionTask}.
-	 * @param instigationStrategy
-	 *            {@link FlowInstigationStrategyEnum}.
+	 *            {@link SectionFunction}.
+	 * @param isSpawnThreadState
+	 *            Indicates if spawns {@link ThreadState} for {@link Flow}.
 	 */
-	void link(TaskFlow taskFlow, SubSectionInput subSectionInput,
-			FlowInstigationStrategyEnum instigationStrategy);
+	void link(FunctionFlow functionFlow, SubSectionInput subSectionInput, boolean isSpawnThreadState);
 
 	/**
-	 * Links the {@link TaskFlow} to be undertaken by the {@link SectionOutput}.
+	 * Links the {@link FunctionFlow} to be undertaken by the
+	 * {@link SectionOutput}.
 	 * 
-	 * @param taskFlow
-	 *            {@link TaskFlow}.
+	 * @param functionFlow
+	 *            {@link FunctionFlow}.
 	 * @param sectionOutput
 	 *            {@link SectionOutput}.
-	 * @param instigationStrategy
-	 *            {@link FlowInstigationStrategyEnum}.
+	 * @param isSpawnThreadState
+	 *            Indicates if spawns {@link ThreadState} for {@link Flow}.
 	 */
-	void link(TaskFlow taskFlow, SectionOutput sectionOutput,
-			FlowInstigationStrategyEnum instigationStrategy);
+	void link(FunctionFlow functionFlow, SectionOutput sectionOutput, boolean isSpawnThreadState);
 
 	/**
-	 * Links the {@link SectionTask} with the next {@link SectionTask} to be
-	 * undertaken.
+	 * Links the {@link SectionFunction} with the next {@link SectionFunction}
+	 * to be undertaken.
 	 * 
 	 * @param task
-	 *            {@link SectionTask}.
+	 *            {@link SectionFunction}.
 	 * @param nextTask
-	 *            Next {@link SectionTask}.
+	 *            Next {@link SectionFunction}.
 	 */
-	void link(SectionTask task, SectionTask nextTask);
+	void link(SectionFunction task, SectionFunction nextTask);
 
 	/**
-	 * Links the {@link SectionTask} with the next {@link SubSectionInput} to be
-	 * undertaken.
+	 * Links the {@link SectionFunction} with the next {@link SubSectionInput}
+	 * to be undertaken.
 	 * 
 	 * @param task
-	 *            {@link SectionTask}.
+	 *            {@link SectionFunction}.
 	 * @param subSectionInput
 	 *            Next {@link SubSectionInput}.
 	 */
-	void link(SectionTask task, SubSectionInput subSectionInput);
+	void link(SectionFunction task, SubSectionInput subSectionInput);
 
 	/**
-	 * Links the {@link SectionTask} with the next {@link SectionOutput} to be
-	 * undertaken.
+	 * Links the {@link SectionFunction} with the next {@link SectionOutput} to
+	 * be undertaken.
 	 * 
 	 * @param task
-	 *            {@link SectionTask}.
+	 *            {@link SectionFunction}.
 	 * @param sectionOutput
 	 *            Next {@link SectionOutput}.
 	 */
-	void link(SectionTask task, SectionOutput sectionOutput);
+	void link(SectionFunction task, SectionOutput sectionOutput);
 
 	/**
 	 * Links the {@link SubSectionOutput} to be undertaken by the
-	 * {@link SectionTask}.
+	 * {@link SectionFunction}.
 	 * 
 	 * @param subSectionOutput
 	 *            {@link SubSectionOutput}.
 	 * @param task
-	 *            {@link SectionTask}.
+	 *            {@link SectionFunction}.
 	 */
-	void link(SubSectionOutput subSectionOutput, SectionTask task);
+	void link(SubSectionOutput subSectionOutput, SectionFunction task);
 
 	/**
 	 * Links the {@link SubSectionOutput} to be undertaken by the
@@ -303,14 +305,14 @@ public interface SectionDesigner {
 
 	/**
 	 * Links the {@link ManagedObjectFlow} to be undertaken by the
-	 * {@link SectionTask}.
+	 * {@link SectionFunction}.
 	 * 
 	 * @param managedObjectFlow
 	 *            {@link ManagedObjectFlow}.
 	 * @param task
-	 *            {@link SectionTask}.
+	 *            {@link SectionFunction}.
 	 */
-	void link(ManagedObjectFlow managedObjectFlow, SectionTask task);
+	void link(ManagedObjectFlow managedObjectFlow, SectionFunction task);
 
 	/**
 	 * Links the {@link ManagedObjectFlow} to be undertaken by the
@@ -321,8 +323,7 @@ public interface SectionDesigner {
 	 * @param subSectionInput
 	 *            {@link SubSectionInput}.
 	 */
-	void link(ManagedObjectFlow managedObjectFlow,
-			SubSectionInput subSectionInput);
+	void link(ManagedObjectFlow managedObjectFlow, SubSectionInput subSectionInput);
 
 	/**
 	 * Links the {@link ManagedObjectFlow} to be undertaken by the
@@ -336,24 +337,24 @@ public interface SectionDesigner {
 	void link(ManagedObjectFlow managedObjectFlow, SectionOutput sectionOutput);
 
 	/**
-	 * Links the {@link TaskObject} to be the {@link SectionObject}.
+	 * Links the {@link FunctionObject} to be the {@link SectionObject}.
 	 * 
 	 * @param taskObject
-	 *            {@link TaskObject}.
+	 *            {@link FunctionObject}.
 	 * @param sectionObject
 	 *            {@link SectionObject}.
 	 */
-	void link(TaskObject taskObject, SectionObject sectionObject);
+	void link(FunctionObject taskObject, SectionObject sectionObject);
 
 	/**
-	 * Links the {@link TaskObject} to be the {@link SectionManagedObject}.
+	 * Links the {@link FunctionObject} to be the {@link SectionManagedObject}.
 	 * 
 	 * @param taskObject
-	 *            {@link TaskObject}.
+	 *            {@link FunctionObject}.
 	 * @param sectionManagedObject
 	 *            {@link SectionManagedObject}.
 	 */
-	void link(TaskObject taskObject, SectionManagedObject sectionManagedObject);
+	void link(FunctionObject taskObject, SectionManagedObject sectionManagedObject);
 
 	/**
 	 * Links the {@link SubSectionObject} to be the {@link SectionObject}.
@@ -373,8 +374,7 @@ public interface SectionDesigner {
 	 * @param sectionManagedObject
 	 *            {@link SectionManagedObject}.
 	 */
-	void link(SubSectionObject subSectionObject,
-			SectionManagedObject sectionManagedObject);
+	void link(SubSectionObject subSectionObject, SectionManagedObject sectionManagedObject);
 
 	/**
 	 * Links {@link ManagedObjectDependency} to be the {@link SectionObject}.
@@ -395,8 +395,7 @@ public interface SectionDesigner {
 	 * @param sectionManagedObject
 	 *            {@link SectionManagedObject}.
 	 */
-	void link(ManagedObjectDependency dependency,
-			SectionManagedObject sectionManagedObject);
+	void link(ManagedObjectDependency dependency, SectionManagedObject sectionManagedObject);
 
 	/**
 	 * <p>

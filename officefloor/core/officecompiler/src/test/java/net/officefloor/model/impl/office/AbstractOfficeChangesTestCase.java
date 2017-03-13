@@ -26,7 +26,7 @@ import net.officefloor.compile.section.OfficeSectionObjectType;
 import net.officefloor.compile.section.OfficeSectionOutputType;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
-import net.officefloor.compile.section.OfficeTaskType;
+import net.officefloor.compile.section.OfficeFunctionType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
@@ -251,7 +251,7 @@ public abstract class AbstractOfficeChangesTestCase extends
 		}
 
 		@Override
-		public OfficeTaskType[] getOfficeTaskTypes() {
+		public OfficeFunctionType[] getOfficeTaskTypes() {
 			// TODO implement OfficeSubSectionType.getOfficeTaskTypes
 			throw new UnsupportedOperationException(
 					"TODO implement OfficeSubSectionType.getOfficeTaskTypes");

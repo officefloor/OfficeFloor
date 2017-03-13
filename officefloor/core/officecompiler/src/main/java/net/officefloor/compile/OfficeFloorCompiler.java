@@ -25,7 +25,7 @@ import java.util.ServiceLoader;
 
 import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.autowire.supplier.SupplierLoader;
-import net.officefloor.compile.administrator.AdministratorLoader;
+import net.officefloor.compile.administration.AdministrationLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.impl.OfficeFloorCompilerImpl;
 import net.officefloor.compile.impl.adapt.OfficeFloorCompilerAdapter;
@@ -41,7 +41,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
-import net.officefloor.compile.spi.administration.source.AdministratorSource;
+import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.office.source.OfficeSource;
@@ -51,7 +51,7 @@ import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.function.Work;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -125,14 +125,12 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * @param factory
 	 *            {@link OfficeFloorCompilerFactory}.
 	 */
-	public synchronized static final void setFactory(
-			OfficeFloorCompilerFactory factory) {
+	public synchronized static final void setFactory(OfficeFloorCompilerFactory factory) {
 
 		// Ensure not already specified
 		if (FACTORY != null) {
 			throw new IllegalStateException(
-					OfficeFloorCompilerFactory.class.getSimpleName()
-							+ " has already been specified");
+					OfficeFloorCompilerFactory.class.getSimpleName() + " has already been specified");
 		}
 
 		// Specify OfficeFloor compiler factory
@@ -148,8 +146,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 *            {@link Thread#getContextClassLoader()}.
 	 * @return New {@link OfficeFloorCompiler}.
 	 */
-	public synchronized static final OfficeFloorCompiler newOfficeFloorCompiler(
-			ClassLoader implClassLoader) {
+	public synchronized static final OfficeFloorCompiler newOfficeFloorCompiler(ClassLoader implClassLoader) {
 
 		// Ensure have implementation class loader
 		if (implClassLoader == null) {
@@ -157,8 +154,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 		}
 
 		// Obtain the client class loader
-		ClassLoader clientClassLoader = OfficeFloorCompiler.class
-				.getClassLoader();
+		ClassLoader clientClassLoader = OfficeFloorCompiler.class.getClassLoader();
 
 		// Determine if use factory
 		Object implementation = null;
@@ -168,22 +164,18 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 
 		} else {
 			// Determine if overriding the implementation
-			String implementationClassName = System
-					.getProperty(IMPLEMENTATION_CLASS_PROPERTY_NAME);
+			String implementationClassName = System.getProperty(IMPLEMENTATION_CLASS_PROPERTY_NAME);
 			if (CompileUtil.isBlank(implementationClassName)) {
 				// Use default implementation as no override
-				implementationClassName = OfficeFloorCompilerImpl.class
-						.getName();
+				implementationClassName = OfficeFloorCompilerImpl.class.getName();
 			}
 
 			// Load implementation
 			try {
-				implementation = implClassLoader.loadClass(
-						implementationClassName).newInstance();
+				implementation = implClassLoader.loadClass(implementationClassName).newInstance();
 			} catch (Throwable ex) {
 				throw new IllegalArgumentException(
-						"Can not create instance of " + implementationClassName
-								+ " from default constructor", ex);
+						"Can not create instance of " + implementationClassName + " from default constructor", ex);
 			}
 		}
 
@@ -195,8 +187,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 
 		} else {
 			// Not compatible so must wrap to enable compatibility
-			compiler = new OfficeFloorCompilerAdapter(implementation,
-					clientClassLoader, implClassLoader);
+			compiler = new OfficeFloorCompilerAdapter(implementation, clientClassLoader, implClassLoader);
 
 			// Specify class loader on the implementation
 			try {
@@ -205,11 +196,9 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 				Class<?> implementationClass = implementation.getClass();
 				do {
 					// Determine if the OfficeFloor Compiler
-					if (OfficeFloorCompiler.class.getName().equals(
-							implementationClass.getName())) {
+					if (OfficeFloorCompiler.class.getName().equals(implementationClass.getName())) {
 						// Find the classLoader field on the compiler
-						for (Field field : implementationClass
-								.getDeclaredFields()) {
+						for (Field field : implementationClass.getDeclaredFields()) {
 							if ("classLoader".equals(field.getName())) {
 								classLoaderField = field; // found
 							}
@@ -223,10 +212,8 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 				classLoaderField.set(implementation, implClassLoader);
 
 			} catch (Exception ex) {
-				throw new IllegalStateException(
-						"Unable to specify class loader on "
-								+ OfficeFloorCompiler.class.getSimpleName()
-								+ " implementation", ex);
+				throw new IllegalStateException("Unable to specify class loader on "
+						+ OfficeFloorCompiler.class.getSimpleName() + " implementation", ex);
 			}
 		}
 
@@ -245,8 +232,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	public static final PropertyList newPropertyList() {
 
 		// Create the OfficeFloor compiler
-		OfficeFloorCompiler compiler = newOfficeFloorCompiler(Thread
-				.currentThread().getContextClassLoader());
+		OfficeFloorCompiler compiler = newOfficeFloorCompiler(Thread.currentThread().getContextClassLoader());
 
 		// Use the compiler to return a new property list
 		return compiler.createPropertyList();
@@ -297,9 +283,8 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * @throws Exception
 	 *             If fails to run the {@link OfficeFloorCompilerRunnable}.
 	 */
-	public <T> T run(
-			Class<? extends OfficeFloorCompilerRunnable<T>> runnableClass,
-			Object... parameters) throws Exception {
+	public <T> T run(Class<? extends OfficeFloorCompilerRunnable<T>> runnableClass, Object... parameters)
+			throws Exception {
 
 		// Run the runnable
 		T result = runnableClass.newInstance().run(this, parameters);
@@ -346,61 +331,51 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	public void addSourceAliases() {
 
 		// Add the office source aliases from the class path
-		for (OfficeSourceService<?> service : ServiceLoader.load(
-				OfficeSourceService.class, this.getClassLoader())) {
-			this.addOfficeSourceAlias(service.getOfficeSourceAlias(),
-					service.getOfficeSourceClass());
+		for (OfficeSourceService<?> service : ServiceLoader.load(OfficeSourceService.class, this.getClassLoader())) {
+			this.addOfficeSourceAlias(service.getOfficeSourceAlias(), service.getOfficeSourceClass());
 		}
 
 		// Add the section source aliases from the class path
-		for (SectionSourceService<?> service : ServiceLoader.load(
-				SectionSourceService.class, this.getClassLoader())) {
-			this.addSectionSourceAlias(service.getSectionSourceAlias(),
-					service.getSectionSourceClass());
+		for (SectionSourceService<?> service : ServiceLoader.load(SectionSourceService.class, this.getClassLoader())) {
+			this.addSectionSourceAlias(service.getSectionSourceAlias(), service.getSectionSourceClass());
 		}
 
 		// Add the work source aliases from the class path
-		for (WorkSourceService<?, ?> service : ServiceLoader.load(
-				WorkSourceService.class, this.getClassLoader())) {
-			this.addWorkSourceAlias(service.getWorkSourceAlias(),
-					service.getWorkSourceClass());
+		for (ManagedFunctionSourceService<?> service : ServiceLoader.load(ManagedFunctionSourceService.class,
+				this.getClassLoader())) {
+			this.addManagedFunctionSourceAlias(service.getManagedFunctionSourceAlias(),
+					service.getManagedFunctionSourceClass());
 		}
 
 		// Add the managed object source aliases from the class path
-		for (ManagedObjectSourceService<?, ?, ?> service : ServiceLoader.load(
-				ManagedObjectSourceService.class, this.getClassLoader())) {
-			this.addManagedObjectSourceAlias(
-					service.getManagedObjectSourceAlias(),
+		for (ManagedObjectSourceService<?, ?, ?> service : ServiceLoader.load(ManagedObjectSourceService.class,
+				this.getClassLoader())) {
+			this.addManagedObjectSourceAlias(service.getManagedObjectSourceAlias(),
 					service.getManagedObjectSourceClass());
 		}
 
 		// Add the supplier source aliases from the class path
-		for (SupplierSourceService<?> service : ServiceLoader.load(
-				SupplierSourceService.class, this.getClassLoader())) {
-			this.addSupplierSourceAlias(service.getSupplierSourceAlias(),
-					service.getSupplierSourceClass());
+		for (SupplierSourceService<?> service : ServiceLoader.load(SupplierSourceService.class,
+				this.getClassLoader())) {
+			this.addSupplierSourceAlias(service.getSupplierSourceAlias(), service.getSupplierSourceClass());
 		}
 
-		// Add the administrator source aliases from the class path
-		for (AdministratorSourceService<?, ?, ?> service : ServiceLoader.load(
-				AdministratorSourceService.class, this.getClassLoader())) {
-			this.addAdministratorSourceAlias(
-					service.getAdministratorSourceAlias(),
-					service.getAdministratorSourceClass());
+		// Add the administration source aliases from the class path
+		for (AdministrationSourceService<?, ?, ?, ?> service : ServiceLoader.load(AdministrationSourceService.class,
+				this.getClassLoader())) {
+			this.addAdministrationSourceAlias(service.getAdministrationSourceAlias(),
+					service.getAdministrationSourceClass());
 		}
 
 		// Add the governance source alias from the class path
-		for (GovernanceSourceService<?, ?, ?> service : ServiceLoader.load(
-				GovernanceSourceService.class, this.getClassLoader())) {
-			this.addGovernanceSourceAlias(service.getGovernanceSourceAlias(),
-					service.getGovernanceSourceClass());
+		for (GovernanceSourceService<?, ?, ?> service : ServiceLoader.load(GovernanceSourceService.class,
+				this.getClassLoader())) {
+			this.addGovernanceSourceAlias(service.getGovernanceSourceAlias(), service.getGovernanceSourceClass());
 		}
 
 		// Add the team source aliases from the class path
-		for (TeamSourceService<?> service : ServiceLoader.load(
-				TeamSourceService.class, this.getClassLoader())) {
-			this.addTeamSourceAlias(service.getTeamSourceAlias(),
-					service.getTeamSourceClass());
+		for (TeamSourceService<?> service : ServiceLoader.load(TeamSourceService.class, this.getClassLoader())) {
+			this.addTeamSourceAlias(service.getTeamSourceAlias(), service.getTeamSourceClass());
 		}
 	}
 
@@ -430,10 +405,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 
 	@Override
 	public boolean isInitialised() {
-		// TODO implement Node.isInitialised
-		throw new UnsupportedOperationException(
-				"TODO implement Node.isInitialised");
-
+		return true; // always initialised
 	}
 
 	/*
@@ -463,8 +435,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * @param escalationHandler
 	 *            {@link EscalationHandler}.
 	 */
-	public abstract void setEscalationHandler(
-			EscalationHandler escalationHandler);
+	public abstract void setEscalationHandler(EscalationHandler escalationHandler);
 
 	/**
 	 * <p>
@@ -511,8 +482,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * @param officeFloorSourceClass
 	 *            {@link OfficeFloorSource} {@link Class}.
 	 */
-	public abstract <S extends OfficeFloorSource> void setOfficeFloorSourceClass(
-			Class<S> officeFloorSourceClass);
+	public abstract <S extends OfficeFloorSource> void setOfficeFloorSourceClass(Class<S> officeFloorSourceClass);
 
 	/**
 	 * <p>
@@ -525,8 +495,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * @param officeFloorSource
 	 *            {@link OfficeFloorSource}.
 	 */
-	public abstract void setOfficeFloorSource(
-			OfficeFloorSource officeFloorSource);
+	public abstract void setOfficeFloorSource(OfficeFloorSource officeFloorSource);
 
 	/**
 	 * <p>
@@ -549,8 +518,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * @param officeSourceClass
 	 *            {@link OfficeSource} {@link Class} for the alias.
 	 */
-	public abstract <S extends OfficeSource> void addOfficeSourceAlias(
-			String alias, Class<S> officeSourceClass);
+	public abstract <S extends OfficeSource> void addOfficeSourceAlias(String alias, Class<S> officeSourceClass);
 
 	/**
 	 * <p>
@@ -573,34 +541,31 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * @param sectionSourceClass
 	 *            {@link SectionSource} {@link Class} for the alias.
 	 */
-	public abstract <S extends SectionSource> void addSectionSourceAlias(
-			String alias, Class<S> sectionSourceClass);
+	public abstract <S extends SectionSource> void addSectionSourceAlias(String alias, Class<S> sectionSourceClass);
 
 	/**
 	 * <p>
 	 * Allows providing an alias name for a {@link ManagedFunctionSource}.
 	 * <p>
 	 * This stops the configuration files from being littered with fully
-	 * qualified class names of the {@link ManagedFunctionSource} classes. This is
-	 * anticipated to allow flexibility as the functionality evolves so that
+	 * qualified class names of the {@link ManagedFunctionSource} classes. This
+	 * is anticipated to allow flexibility as the functionality evolves so that
 	 * relocating/renaming classes does not require significant configuration
 	 * changes.
 	 * <p>
 	 * Typically this should not be used directly as the
-	 * {@link WorkSourceService} is the preferred means to provide
+	 * {@link ManagedFunctionSourceService} is the preferred means to provide
 	 * {@link ManagedFunctionSource} aliases.
 	 * 
-	 * @param <W>
-	 *            {@link Work} type.
 	 * @param <S>
 	 *            {@link ManagedFunctionSource} type.
 	 * @param alias
 	 *            Alias name for the {@link ManagedFunctionSource}.
-	 * @param workSourceClass
+	 * @param managedFunctionSourceClass
 	 *            {@link ManagedFunctionSource} {@link Class} for the alias.
 	 */
-	public abstract <W extends Work, S extends ManagedFunctionSource<W>> void addWorkSourceAlias(
-			String alias, Class<S> workSourceClass);
+	public abstract <S extends ManagedFunctionSource> void addManagedFunctionSourceAlias(String alias,
+			Class<S> managedFunctionSourceClass);
 
 	/**
 	 * <p>
@@ -651,36 +616,37 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * @param supplierSourceClass
 	 *            {@link SupplierSource} {@link Class} for the alias.
 	 */
-	public abstract <S extends SupplierSource> void addSupplierSourceAlias(
-			String alias, Class<S> supplierSourceClass);
+	public abstract <S extends SupplierSource> void addSupplierSourceAlias(String alias, Class<S> supplierSourceClass);
 
 	/**
 	 * <p>
-	 * Allows providing an alias name for a {@link AdministratorSource}.
+	 * Allows providing an alias name for a {@link AdministrationSource}.
 	 * <p>
 	 * This stops the configuration files from being littered with fully
-	 * qualified class names of the {@link AdministratorSource} classes. This is
-	 * anticipated to allow flexibility as the functionality evolves so that
+	 * qualified class names of the {@link AdministrationSource} classes. This
+	 * is anticipated to allow flexibility as the functionality evolves so that
 	 * relocating/renaming classes does not require significant configuration
 	 * changes.
 	 * <p>
 	 * Typically this should not be used directly as the
-	 * {@link AdministratorSourceService} is the preferred means to provide
-	 * {@link AdministratorSource} aliases.
+	 * {@link AdministrationSourceService} is the preferred means to provide
+	 * {@link AdministrationSource} aliases.
 	 * 
 	 * @param <I>
 	 *            Extension interface type.
-	 * @param <A>
-	 *            {@link Administration} type keys.
+	 * @param <F>
+	 *            {@link Flow} keys for the {@link Administration}.
+	 * @param <G>
+	 *            {@link Governance} keys for the {@link Administration}.
 	 * @param <S>
-	 *            {@link AdministratorSource} type.
+	 *            {@link AdministrationSource} type.
 	 * @param alias
-	 *            Alias name for the {@link AdministratorSource}.
+	 *            Alias name for the {@link AdministrationSource}.
 	 * @param administratorSourceClass
-	 *            {@link AdministratorSource} {@link Class} for the alias.
+	 *            {@link AdministrationSource} {@link Class} for the alias.
 	 */
-	public abstract <I, A extends Enum<A>, S extends AdministratorSource<I, A>> void addAdministratorSourceAlias(
-			String alias, Class<S> administratorSourceClass);
+	public abstract <E, F extends Enum<F>, G extends Enum<G>, S extends AdministrationSource<E, F, G>> void addAdministrationSourceAlias(
+			String alias, Class<S> administrationSourceClass);
 
 	/**
 	 * <p>
@@ -707,8 +673,8 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * @param governanceSourceClass
 	 *            {@link GovernanceSource} {@link Class} for the alias.
 	 */
-	public abstract <I, F extends Enum<F>, S extends GovernanceSource<I, F>> void addGovernanceSourceAlias(
-			String alias, Class<S> governanceSourceClass);
+	public abstract <I, F extends Enum<F>, S extends GovernanceSource<I, F>> void addGovernanceSourceAlias(String alias,
+			Class<S> governanceSourceClass);
 
 	/**
 	 * <p>
@@ -731,8 +697,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * @param teamSourceClass
 	 *            {@link TeamSource} {@link Class} for the alias.
 	 */
-	public abstract <S extends TeamSource> void addTeamSourceAlias(
-			String alias, Class<S> teamSourceClass);
+	public abstract <S extends TeamSource> void addTeamSourceAlias(String alias, Class<S> teamSourceClass);
 
 	/**
 	 * Adds the {@link Profiler} for the {@link Office}.
@@ -784,7 +749,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * 
 	 * @return {@link ManagedFunctionLoader}.
 	 */
-	public abstract ManagedFunctionLoader getWorkLoader();
+	public abstract ManagedFunctionLoader getManagedFunctionLoader();
 
 	/**
 	 * Obtains the {@link ManagedObjectLoader}.
@@ -815,11 +780,11 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	public abstract ManagedObjectPoolLoader getManagedObjectPoolLoader();
 
 	/**
-	 * Obtains the {@link AdministratorLoader}.
+	 * Obtains the {@link AdministrationLoader}.
 	 * 
-	 * @return {@link AdministratorLoader}.
+	 * @return {@link AdministrationLoader}.
 	 */
-	public abstract AdministratorLoader getAdministratorLoader();
+	public abstract AdministrationLoader getAdministrationLoader();
 
 	/**
 	 * Obtains the {@link TeamLoader}.

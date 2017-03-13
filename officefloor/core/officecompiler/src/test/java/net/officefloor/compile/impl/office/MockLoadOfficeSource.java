@@ -27,7 +27,7 @@ import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeOutputType;
 import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.office.OfficeType;
-import net.officefloor.compile.spi.office.OfficeAdministrator;
+import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeInput;
 import net.officefloor.compile.spi.office.OfficeObject;
@@ -140,7 +140,7 @@ public class MockLoadOfficeSource extends AbstractOfficeSource {
 		// Add the object
 		OfficeObject object = architect.addOfficeObject("object",
 				Connection.class.getName());
-		OfficeAdministrator admin = architect.addOfficeAdministrator("admin",
+		OfficeAdministration admin = architect.addOfficeAdministrator("admin",
 				ClassAdministratorSource.class.getName());
 		admin.addProperty(ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME,
 				MockAdministrator.class.getName());

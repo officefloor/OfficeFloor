@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="next function name" />
+	<field type="FunctionModel" name="previous function" end-field="next function" />
+	<field type="FunctionModel" name="next function" end-list="previous function" />
+</model>

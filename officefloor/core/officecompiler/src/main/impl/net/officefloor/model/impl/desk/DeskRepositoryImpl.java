@@ -27,29 +27,28 @@ import net.officefloor.model.desk.DeskManagedObjectDependencyToExternalManagedOb
 import net.officefloor.model.desk.DeskManagedObjectModel;
 import net.officefloor.model.desk.DeskManagedObjectSourceFlowModel;
 import net.officefloor.model.desk.DeskManagedObjectSourceFlowToExternalFlowModel;
-import net.officefloor.model.desk.DeskManagedObjectSourceFlowToTaskModel;
+import net.officefloor.model.desk.DeskManagedObjectSourceFlowToFunctionModel;
 import net.officefloor.model.desk.DeskManagedObjectSourceModel;
 import net.officefloor.model.desk.DeskManagedObjectToDeskManagedObjectSourceModel;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskRepository;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
-import net.officefloor.model.desk.TaskEscalationModel;
-import net.officefloor.model.desk.TaskEscalationToExternalFlowModel;
-import net.officefloor.model.desk.TaskEscalationToTaskModel;
-import net.officefloor.model.desk.TaskFlowModel;
-import net.officefloor.model.desk.TaskFlowToExternalFlowModel;
-import net.officefloor.model.desk.TaskFlowToTaskModel;
-import net.officefloor.model.desk.TaskModel;
-import net.officefloor.model.desk.TaskToNextExternalFlowModel;
-import net.officefloor.model.desk.TaskToNextTaskModel;
-import net.officefloor.model.desk.WorkModel;
-import net.officefloor.model.desk.WorkTaskModel;
-import net.officefloor.model.desk.WorkTaskObjectModel;
-import net.officefloor.model.desk.WorkTaskObjectToDeskManagedObjectModel;
-import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
-import net.officefloor.model.desk.WorkTaskToTaskModel;
-import net.officefloor.model.desk.WorkToInitialTaskModel;
+import net.officefloor.model.desk.FunctionEscalationModel;
+import net.officefloor.model.desk.FunctionEscalationToExternalFlowModel;
+import net.officefloor.model.desk.FunctionEscalationToFunctionModel;
+import net.officefloor.model.desk.FunctionFlowModel;
+import net.officefloor.model.desk.FunctionFlowToExternalFlowModel;
+import net.officefloor.model.desk.FunctionFlowToFunctionModel;
+import net.officefloor.model.desk.FunctionModel;
+import net.officefloor.model.desk.FunctionNamespaceModel;
+import net.officefloor.model.desk.FunctionToNextExternalFlowModel;
+import net.officefloor.model.desk.FunctionToNextFunctionModel;
+import net.officefloor.model.desk.ManagedFunctionModel;
+import net.officefloor.model.desk.ManagedFunctionObjectModel;
+import net.officefloor.model.desk.ManagedFunctionObjectToDeskManagedObjectModel;
+import net.officefloor.model.desk.ManagedFunctionObjectToExternalManagedObjectModel;
+import net.officefloor.model.desk.ManagedFunctionToFunctionModel;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
@@ -80,27 +79,22 @@ public class DeskRepositoryImpl implements DeskRepository {
 	 */
 
 	@Override
-	public DeskModel retrieveDesk(ConfigurationItem configuration)
-			throws Exception {
+	public DeskModel retrieveDesk(ConfigurationItem configuration) throws Exception {
 
 		// Load the desk from the configuration
-		DeskModel desk = this.modelRepository.retrieve(new DeskModel(),
-				configuration);
+		DeskModel desk = this.modelRepository.retrieve(new DeskModel(), configuration);
 
 		// Create the set of managed object sources
 		Map<String, DeskManagedObjectSourceModel> managedObjectSources = new HashMap<String, DeskManagedObjectSourceModel>();
-		for (DeskManagedObjectSourceModel mos : desk
-				.getDeskManagedObjectSources()) {
+		for (DeskManagedObjectSourceModel mos : desk.getDeskManagedObjectSources()) {
 			managedObjectSources.put(mos.getDeskManagedObjectSourceName(), mos);
 		}
 
 		// Connect the managed objects to their managed object sources
 		for (DeskManagedObjectModel mo : desk.getDeskManagedObjects()) {
-			DeskManagedObjectToDeskManagedObjectSourceModel conn = mo
-					.getDeskManagedObjectSource();
+			DeskManagedObjectToDeskManagedObjectSourceModel conn = mo.getDeskManagedObjectSource();
 			if (conn != null) {
-				DeskManagedObjectSourceModel mos = managedObjectSources
-						.get(conn.getDeskManagedObjectSourceName());
+				DeskManagedObjectSourceModel mos = managedObjectSources.get(conn.getDeskManagedObjectSourceName());
 				if (mos != null) {
 					conn.setDeskManagedObject(mo);
 					conn.setDeskManagedObjectSource(mos);
@@ -115,12 +109,12 @@ public class DeskRepositoryImpl implements DeskRepository {
 			externalManagedObjects.put(mo.getExternalManagedObjectName(), mo);
 		}
 
-		// Connect the task objects to external managed objects
-		for (WorkModel work : desk.getWorks()) {
-			for (WorkTaskModel task : work.getWorkTasks()) {
-				for (WorkTaskObjectModel taskObject : task.getTaskObjects()) {
+		// Connect the managed function objects to external managed objects
+		for (FunctionNamespaceModel namespace : desk.getFunctionNamespaces()) {
+			for (ManagedFunctionModel managedFunction : namespace.getManagedFunctions()) {
+				for (ManagedFunctionObjectModel managedFunctionObject : managedFunction.getManagedFunctionObjects()) {
 					// Obtain the connection
-					WorkTaskObjectToExternalManagedObjectModel conn = taskObject
+					ManagedFunctionObjectToExternalManagedObjectModel conn = managedFunctionObject
 							.getExternalManagedObject();
 					if (conn != null) {
 						// Obtain the external managed object
@@ -128,7 +122,7 @@ public class DeskRepositoryImpl implements DeskRepository {
 								.get(conn.getExternalManagedObjectName());
 						if (extMo != null) {
 							// Connect
-							conn.setTaskObject(taskObject);
+							conn.setManagedFunctionObject(managedFunctionObject);
 							conn.setExternalManagedObject(extMo);
 							conn.connect();
 						}
@@ -143,17 +137,15 @@ public class DeskRepositoryImpl implements DeskRepository {
 			managedObjects.put(mo.getDeskManagedObjectName(), mo);
 		}
 
-		// Connect the task objects to managed objects
-		for (WorkModel work : desk.getWorks()) {
-			for (WorkTaskModel task : work.getWorkTasks()) {
-				for (WorkTaskObjectModel object : task.getTaskObjects()) {
-					WorkTaskObjectToDeskManagedObjectModel conn = object
-							.getDeskManagedObject();
+		// Connect the managed function objects to managed objects
+		for (FunctionNamespaceModel namespace : desk.getFunctionNamespaces()) {
+			for (ManagedFunctionModel managedFunction : namespace.getManagedFunctions()) {
+				for (ManagedFunctionObjectModel object : managedFunction.getManagedFunctionObjects()) {
+					ManagedFunctionObjectToDeskManagedObjectModel conn = object.getDeskManagedObject();
 					if (conn != null) {
-						DeskManagedObjectModel mo = managedObjects.get(conn
-								.getDeskManagedObjectName());
+						DeskManagedObjectModel mo = managedObjects.get(conn.getDeskManagedObjectName());
 						if (mo != null) {
-							conn.setWorkTaskObject(object);
+							conn.setManagedFunctionObject(object);
 							conn.setDeskManagedObject(mo);
 							conn.connect();
 						}
@@ -164,13 +156,10 @@ public class DeskRepositoryImpl implements DeskRepository {
 
 		// Connect the dependencies to external managed objects
 		for (DeskManagedObjectModel mo : desk.getDeskManagedObjects()) {
-			for (DeskManagedObjectDependencyModel dependency : mo
-					.getDeskManagedObjectDependencies()) {
-				DeskManagedObjectDependencyToExternalManagedObjectModel conn = dependency
-						.getExternalManagedObject();
+			for (DeskManagedObjectDependencyModel dependency : mo.getDeskManagedObjectDependencies()) {
+				DeskManagedObjectDependencyToExternalManagedObjectModel conn = dependency.getExternalManagedObject();
 				if (conn != null) {
-					ExternalManagedObjectModel extMo = externalManagedObjects
-							.get(conn.getExternalManagedObjectName());
+					ExternalManagedObjectModel extMo = externalManagedObjects.get(conn.getExternalManagedObjectName());
 					if (extMo != null) {
 						conn.setDeskManagedObjectDependency(dependency);
 						conn.setExternalManagedObject(extMo);
@@ -182,13 +171,10 @@ public class DeskRepositoryImpl implements DeskRepository {
 
 		// Connect the dependencies to managed objects
 		for (DeskManagedObjectModel mo : desk.getDeskManagedObjects()) {
-			for (DeskManagedObjectDependencyModel dependency : mo
-					.getDeskManagedObjectDependencies()) {
-				DeskManagedObjectDependencyToDeskManagedObjectModel conn = dependency
-						.getDeskManagedObject();
+			for (DeskManagedObjectDependencyModel dependency : mo.getDeskManagedObjectDependencies()) {
+				DeskManagedObjectDependencyToDeskManagedObjectModel conn = dependency.getDeskManagedObject();
 				if (conn != null) {
-					DeskManagedObjectModel dependentMo = managedObjects
-							.get(conn.getDeskManagedObjectName());
+					DeskManagedObjectModel dependentMo = managedObjects.get(conn.getDeskManagedObjectName());
 					if (dependentMo != null) {
 						conn.setDeskManagedObjectDependency(dependency);
 						conn.setDeskManagedObject(dependentMo);
@@ -205,15 +191,11 @@ public class DeskRepositoryImpl implements DeskRepository {
 		}
 
 		// Connect the managed object source flows to external flows
-		for (DeskManagedObjectSourceModel mos : desk
-				.getDeskManagedObjectSources()) {
-			for (DeskManagedObjectSourceFlowModel mosFlow : mos
-					.getDeskManagedObjectSourceFlows()) {
-				DeskManagedObjectSourceFlowToExternalFlowModel conn = mosFlow
-						.getExternalFlow();
+		for (DeskManagedObjectSourceModel mos : desk.getDeskManagedObjectSources()) {
+			for (DeskManagedObjectSourceFlowModel mosFlow : mos.getDeskManagedObjectSourceFlows()) {
+				DeskManagedObjectSourceFlowToExternalFlowModel conn = mosFlow.getExternalFlow();
 				if (conn != null) {
-					ExternalFlowModel extFlow = externalFlows.get(conn
-							.getExternalFlowName());
+					ExternalFlowModel extFlow = externalFlows.get(conn.getExternalFlowName());
 					if (extFlow != null) {
 						conn.setDeskManagedObjectSourceFlow(mosFlow);
 						conn.setExternalFlow(extFlow);
@@ -223,18 +205,17 @@ public class DeskRepositoryImpl implements DeskRepository {
 			}
 		}
 
-		// Connect the task flows to external flow
-		for (TaskModel task : desk.getTasks()) {
-			for (TaskFlowModel flow : task.getTaskFlows()) {
+		// Connect the function flows to external flow
+		for (FunctionModel function : desk.getFunctions()) {
+			for (FunctionFlowModel flow : function.getFunctionFlows()) {
 				// Obtain the connection
-				TaskFlowToExternalFlowModel conn = flow.getExternalFlow();
+				FunctionFlowToExternalFlowModel conn = flow.getExternalFlow();
 				if (conn != null) {
 					// Obtain the external flow
-					ExternalFlowModel extFlow = externalFlows.get(conn
-							.getExternalFlowName());
+					ExternalFlowModel extFlow = externalFlows.get(conn.getExternalFlowName());
 					if (extFlow != null) {
 						// Connect
-						conn.setTaskFlow(flow);
+						conn.setFunctionFlow(flow);
 						conn.setExternalFlow(extFlow);
 						conn.connect();
 					}
@@ -242,76 +223,73 @@ public class DeskRepositoryImpl implements DeskRepository {
 			}
 		}
 
-		// Connect the tasks to next external flow
-		for (TaskModel task : desk.getTasks()) {
+		// Connect the functions to next external flow
+		for (FunctionModel function : desk.getFunctions()) {
 			// Obtain the connection
-			TaskToNextExternalFlowModel conn = task.getNextExternalFlow();
+			FunctionToNextExternalFlowModel conn = function.getNextExternalFlow();
 			if (conn != null) {
 				// Obtain the external flow
-				ExternalFlowModel extFlow = externalFlows.get(conn
-						.getExternalFlowName());
+				ExternalFlowModel extFlow = externalFlows.get(conn.getExternalFlowName());
 				if (extFlow != null) {
 					// Connect
-					conn.setPreviousTask(task);
+					conn.setPreviousFunction(function);
 					conn.setNextExternalFlow(extFlow);
 					conn.connect();
 				}
 			}
 		}
 
-		// Create the set of tasks
-		Map<String, TaskModel> tasks = new HashMap<String, TaskModel>();
-		for (TaskModel task : desk.getTasks()) {
-			tasks.put(task.getTaskName(), task);
+		// Create the set of functions
+		Map<String, FunctionModel> functions = new HashMap<String, FunctionModel>();
+		for (FunctionModel function : desk.getFunctions()) {
+			functions.put(function.getFunctionName(), function);
 		}
 
-		// Connect the managed object source flows to tasks
-		for (DeskManagedObjectSourceModel mos : desk
-				.getDeskManagedObjectSources()) {
-			for (DeskManagedObjectSourceFlowModel mosFlow : mos
-					.getDeskManagedObjectSourceFlows()) {
-				DeskManagedObjectSourceFlowToTaskModel conn = mosFlow.getTask();
+		// Connect the managed object source flows to functions
+		for (DeskManagedObjectSourceModel mos : desk.getDeskManagedObjectSources()) {
+			for (DeskManagedObjectSourceFlowModel mosFlow : mos.getDeskManagedObjectSourceFlows()) {
+				DeskManagedObjectSourceFlowToFunctionModel conn = mosFlow.getFunction();
 				if (conn != null) {
-					TaskModel task = tasks.get(conn.getTaskName());
-					if (task != null) {
+					FunctionModel function = functions.get(conn.getFunctionName());
+					if (function != null) {
 						conn.setDeskManagedObjectSourceFlow(mosFlow);
-						conn.setTask(task);
+						conn.setFunction(function);
 						conn.connect();
 					}
 				}
 			}
 		}
 
-		// Connect the task flows to tasks
-		for (TaskModel task : desk.getTasks()) {
-			for (TaskFlowModel flow : task.getTaskFlows()) {
+		// Connect the function flows to functions
+		for (FunctionModel function : desk.getFunctions()) {
+			for (FunctionFlowModel flow : function.getFunctionFlows()) {
 				// Obtain the connection
-				TaskFlowToTaskModel conn = flow.getTask();
+				FunctionFlowToFunctionModel conn = flow.getFunction();
 				if (conn != null) {
-					// Obtain the task
-					TaskModel flowTask = tasks.get(conn.getTaskName());
-					if (flowTask != null) {
+					// Obtain the function
+					FunctionModel flowFunction = functions.get(conn.getFunctionName());
+					if (flowFunction != null) {
 						// Connect
-						conn.setTaskFlow(flow);
-						conn.setTask(flowTask);
+						conn.setFunctionFlow(flow);
+						conn.setFunction(flowFunction);
 						conn.connect();
 					}
 				}
 			}
 		}
 
-		// Connect the escalation to tasks
-		for (TaskModel task : desk.getTasks()) {
-			for (TaskEscalationModel escalation : task.getTaskEscalations()) {
+		// Connect the escalation to functions
+		for (FunctionModel function : desk.getFunctions()) {
+			for (FunctionEscalationModel escalation : function.getFunctionEscalations()) {
 				// Obtain the connection
-				TaskEscalationToTaskModel conn = escalation.getTask();
+				FunctionEscalationToFunctionModel conn = escalation.getFunction();
 				if (conn != null) {
-					// Obtain the handling task
-					TaskModel escalationTask = tasks.get(conn.getTaskName());
-					if (escalationTask != null) {
+					// Obtain the handling function
+					FunctionModel escalationFunction = functions.get(conn.getFunctionName());
+					if (escalationFunction != null) {
 						// Connect
 						conn.setEscalation(escalation);
-						conn.setTask(escalationTask);
+						conn.setFunction(escalationFunction);
 						conn.connect();
 					}
 				}
@@ -319,18 +297,16 @@ public class DeskRepositoryImpl implements DeskRepository {
 		}
 
 		// Connect the escalation to external flows
-		for (TaskModel task : desk.getTasks()) {
-			for (TaskEscalationModel escalation : task.getTaskEscalations()) {
+		for (FunctionModel function : desk.getFunctions()) {
+			for (FunctionEscalationModel escalation : function.getFunctionEscalations()) {
 				// Obtain the connection
-				TaskEscalationToExternalFlowModel conn = escalation
-						.getExternalFlow();
+				FunctionEscalationToExternalFlowModel conn = escalation.getExternalFlow();
 				if (conn != null) {
 					// Obtain the external flow
-					ExternalFlowModel externalFlow = externalFlows.get(conn
-							.getExternalFlowName());
+					ExternalFlowModel externalFlow = externalFlows.get(conn.getExternalFlowName());
 					if (externalFlow != null) {
 						// Connect
-						conn.setTaskEscalation(escalation);
+						conn.setFunctionEscalation(escalation);
 						conn.setExternalFlow(externalFlow);
 						conn.connect();
 					}
@@ -338,55 +314,39 @@ public class DeskRepositoryImpl implements DeskRepository {
 			}
 		}
 
-		// Connect the work to initial task
-		for (WorkModel work : desk.getWorks()) {
+		// Connect the function to its next function
+		for (FunctionModel previous : desk.getFunctions()) {
 			// Obtain the connection
-			WorkToInitialTaskModel conn = work.getInitialTask();
+			FunctionToNextFunctionModel conn = previous.getNextFunction();
 			if (conn != null) {
-				// Obtain the initial task
-				TaskModel task = tasks.get(conn.getInitialTaskName());
-				if (task != null) {
-					// Connect
-					conn.setWork(work);
-					conn.setInitialTask(task);
-					conn.connect();
-				}
-			}
-		}
-
-		// Connect the task to its next task
-		for (TaskModel previous : desk.getTasks()) {
-			// Obtain the connection
-			TaskToNextTaskModel conn = previous.getNextTask();
-			if (conn != null) {
-				// Obtain the next task
-				TaskModel next = tasks.get(conn.getNextTaskName());
+				// Obtain the next function
+				FunctionModel next = functions.get(conn.getNextFunctionName());
 				if (next != null) {
 					// Connect
-					conn.setPreviousTask(previous);
-					conn.setNextTask(next);
+					conn.setPreviousFunction(previous);
+					conn.setNextFunction(next);
 					conn.connect();
 				}
 			}
 		}
 
-		// Create the set of tasks
-		DoubleKeyMap<String, String, WorkTaskModel> taskRegistry = new DoubleKeyMap<String, String, WorkTaskModel>();
-		for (WorkModel deskWork : desk.getWorks()) {
-			for (WorkTaskModel deskTask : deskWork.getWorkTasks()) {
-				taskRegistry.put(deskWork.getWorkName(), deskTask
-						.getWorkTaskName(), deskTask);
+		// Create the set of managed functions
+		DoubleKeyMap<String, String, ManagedFunctionModel> managedFunctionRegistry = new DoubleKeyMap<String, String, ManagedFunctionModel>();
+		for (FunctionNamespaceModel namespace : desk.getFunctionNamespaces()) {
+			for (ManagedFunctionModel managedFunction : namespace.getManagedFunctions()) {
+				managedFunctionRegistry.put(namespace.getFunctionNamespaceName(),
+						managedFunction.getManagedFunctionName(), managedFunction);
 			}
 		}
 
-		// Connect the tasks to their work task
-		for (TaskModel task : desk.getTasks()) {
-			// Obtain the work task
-			WorkTaskModel workTask = taskRegistry.get(task.getWorkName(), task
-					.getWorkTaskName());
-			if (workTask != null) {
+		// Connect the functions to their managed functions
+		for (FunctionModel function : desk.getFunctions()) {
+			// Obtain the managed function
+			ManagedFunctionModel managedFunction = managedFunctionRegistry.get(function.getFunctionNamespaceName(),
+					function.getFunctionName());
+			if (managedFunction != null) {
 				// Connect
-				new WorkTaskToTaskModel(task, workTask).connect();
+				new ManagedFunctionToFunctionModel(function, managedFunction).connect();
 			}
 		}
 
@@ -395,141 +355,118 @@ public class DeskRepositoryImpl implements DeskRepository {
 	}
 
 	@Override
-	public void storeDesk(DeskModel desk, ConfigurationItem configuration)
-			throws Exception {
+	public void storeDesk(DeskModel desk, ConfigurationItem configuration) throws Exception {
 
 		// Specify managed object to its managed object source
-		for (DeskManagedObjectSourceModel mos : desk
-				.getDeskManagedObjectSources()) {
-			for (DeskManagedObjectToDeskManagedObjectSourceModel conn : mos
-					.getDeskManagedObjects()) {
-				conn.setDeskManagedObjectSourceName(mos
-						.getDeskManagedObjectSourceName());
+		for (DeskManagedObjectSourceModel mos : desk.getDeskManagedObjectSources()) {
+			for (DeskManagedObjectToDeskManagedObjectSourceModel conn : mos.getDeskManagedObjects()) {
+				conn.setDeskManagedObjectSourceName(mos.getDeskManagedObjectSourceName());
 			}
 		}
 
 		// Specify managed object source flow to its external flow
 		for (ExternalFlowModel extFlow : desk.getExternalFlows()) {
-			for (DeskManagedObjectSourceFlowToExternalFlowModel conn : extFlow
-					.getDeskManagedObjectSourceFlows()) {
+			for (DeskManagedObjectSourceFlowToExternalFlowModel conn : extFlow.getDeskManagedObjectSourceFlows()) {
 				conn.setExternalFlowName(extFlow.getExternalFlowName());
 			}
 		}
 
-		// Specify managed object source flow to its task
-		for (TaskModel task : desk.getTasks()) {
-			for (DeskManagedObjectSourceFlowToTaskModel conn : task
-					.getDeskManagedObjectSourceFlows()) {
-				conn.setTaskName(task.getTaskName());
+		// Specify managed object source flow to its function
+		for (FunctionModel function : desk.getFunctions()) {
+			for (DeskManagedObjectSourceFlowToFunctionModel conn : function.getDeskManagedObjectSourceFlows()) {
+				conn.setFunctionName(function.getFunctionName());
 			}
 		}
 
-		// Specify task object to external managed object
-		for (WorkModel work : desk.getWorks()) {
-			for (WorkTaskModel workTask : work.getWorkTasks()) {
-				for (WorkTaskObjectModel taskObject : workTask.getTaskObjects()) {
-					WorkTaskObjectToExternalManagedObjectModel conn = taskObject
+		// Specify managed function object to external managed object
+		for (FunctionNamespaceModel namespace : desk.getFunctionNamespaces()) {
+			for (ManagedFunctionModel managedFunction : namespace.getManagedFunctions()) {
+				for (ManagedFunctionObjectModel managedFunctionObject : managedFunction.getManagedFunctionObjects()) {
+					ManagedFunctionObjectToExternalManagedObjectModel conn = managedFunctionObject
 							.getExternalManagedObject();
 					if (conn != null) {
-						conn.setExternalManagedObjectName(conn
-								.getExternalManagedObject()
-								.getExternalManagedObjectName());
+						conn.setExternalManagedObjectName(
+								conn.getExternalManagedObject().getExternalManagedObjectName());
 					}
 				}
 			}
 		}
 
-		// Specify task object to managed object
+		// Specify managed function object to managed object
 		for (DeskManagedObjectModel mo : desk.getDeskManagedObjects()) {
-			for (WorkTaskObjectToDeskManagedObjectModel conn : mo
-					.getWorkTaskObjects()) {
+			for (ManagedFunctionObjectToDeskManagedObjectModel conn : mo.getManagedFunctionObjects()) {
 				conn.setDeskManagedObjectName(mo.getDeskManagedObjectName());
 			}
 		}
 
 		// Specify dependency to external managed object
-		for (ExternalManagedObjectModel extMo : desk
-				.getExternalManagedObjects()) {
+		for (ExternalManagedObjectModel extMo : desk.getExternalManagedObjects()) {
 			for (DeskManagedObjectDependencyToExternalManagedObjectModel conn : extMo
 					.getDependentDeskManagedObjects()) {
-				conn.setExternalManagedObjectName(extMo
-						.getExternalManagedObjectName());
+				conn.setExternalManagedObjectName(extMo.getExternalManagedObjectName());
 			}
 		}
 
 		// Specify dependency to managed object
 		for (DeskManagedObjectModel mo : desk.getDeskManagedObjects()) {
-			for (DeskManagedObjectDependencyToDeskManagedObjectModel conn : mo
-					.getDependentDeskManagedObjects()) {
+			for (DeskManagedObjectDependencyToDeskManagedObjectModel conn : mo.getDependentDeskManagedObjects()) {
 				conn.setDeskManagedObjectName(mo.getDeskManagedObjectName());
 			}
 		}
 
-		// Specify task flow to external flow
-		for (TaskModel task : desk.getTasks()) {
-			for (TaskFlowModel flow : task.getTaskFlows()) {
-				TaskFlowToExternalFlowModel conn = flow.getExternalFlow();
+		// Specify function flow to external flow
+		for (FunctionModel function : desk.getFunctions()) {
+			for (FunctionFlowModel flow : function.getFunctionFlows()) {
+				FunctionFlowToExternalFlowModel conn = flow.getExternalFlow();
 				if (conn != null) {
-					conn.setExternalFlowName(conn.getExternalFlow()
-							.getExternalFlowName());
+					conn.setExternalFlowName(conn.getExternalFlow().getExternalFlowName());
 				}
 			}
 		}
 
-		// Specify task next to external flow
-		for (TaskModel task : desk.getTasks()) {
-			TaskToNextExternalFlowModel conn = task.getNextExternalFlow();
+		// Specify function next to external flow
+		for (FunctionModel function : desk.getFunctions()) {
+			FunctionToNextExternalFlowModel conn = function.getNextExternalFlow();
 			if (conn != null) {
-				conn.setExternalFlowName(conn.getNextExternalFlow()
-						.getExternalFlowName());
+				conn.setExternalFlowName(conn.getNextExternalFlow().getExternalFlowName());
 			}
 		}
 
-		// Specify task flow to task
-		for (TaskModel task : desk.getTasks()) {
-			for (TaskFlowModel flow : task.getTaskFlows()) {
-				TaskFlowToTaskModel conn = flow.getTask();
+		// Specify function flow to function
+		for (FunctionModel function : desk.getFunctions()) {
+			for (FunctionFlowModel flow : function.getFunctionFlows()) {
+				FunctionFlowToFunctionModel conn = flow.getFunction();
 				if (conn != null) {
-					conn.setTaskName(conn.getTask().getTaskName());
+					conn.setFunctionName(conn.getFunction().getFunctionName());
 				}
 			}
 		}
 
-		// Specify task escalation to task
-		for (TaskModel task : desk.getTasks()) {
-			for (TaskEscalationModel taskEscalation : task.getTaskEscalations()) {
-				TaskEscalationToTaskModel conn = taskEscalation.getTask();
+		// Specify function escalation to function
+		for (FunctionModel function : desk.getFunctions()) {
+			for (FunctionEscalationModel functionEscalation : function.getFunctionEscalations()) {
+				FunctionEscalationToFunctionModel conn = functionEscalation.getFunction();
 				if (conn != null) {
-					conn.setTaskName(conn.getTask().getTaskName());
+					conn.setFunctionName(conn.getFunction().getFunctionName());
 				}
 			}
 		}
 
-		// Specify task escalation to external flow
-		for (TaskModel task : desk.getTasks()) {
-			for (TaskEscalationModel taskEscalation : task.getTaskEscalations()) {
-				TaskEscalationToExternalFlowModel conn = taskEscalation
-						.getExternalFlow();
+		// Specify function escalation to external function
+		for (FunctionModel function : desk.getFunctions()) {
+			for (FunctionEscalationModel functionEscalation : function.getFunctionEscalations()) {
+				FunctionEscalationToExternalFlowModel conn = functionEscalation.getExternalFlow();
 				if (conn != null) {
-					conn.setExternalFlowName(conn.getExternalFlow()
-							.getExternalFlowName());
+					conn.setExternalFlowName(conn.getExternalFlow().getExternalFlowName());
 				}
 			}
 		}
 
-		// Specify initial task for work
-		for (WorkModel work : desk.getWorks()) {
-			WorkToInitialTaskModel conn = work.getInitialTask();
+		// Specify next functions
+		for (FunctionModel function : desk.getFunctions()) {
+			FunctionToNextFunctionModel conn = function.getNextFunction();
 			if (conn != null) {
-				conn.setInitialTaskName(conn.getInitialTask().getTaskName());
-			}
-		}
-
-		// Specify next tasks
-		for (TaskModel task : desk.getTasks()) {
-			TaskToNextTaskModel conn = task.getNextTask();
-			if (conn != null) {
-				conn.setNextTaskName(conn.getNextTask().getTaskName());
+				conn.setNextFunctionName(conn.getNextFunction().getFunctionName());
 			}
 		}
 
