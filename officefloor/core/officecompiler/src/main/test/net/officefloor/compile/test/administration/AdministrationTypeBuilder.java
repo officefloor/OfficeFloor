@@ -17,16 +17,22 @@
  */
 package net.officefloor.compile.test.administration;
 
+import net.officefloor.compile.administration.AdministrationEscalationType;
 import net.officefloor.compile.administration.AdministrationFlowType;
-import net.officefloor.compile.administration.DutyType;
+import net.officefloor.compile.administration.AdministrationGovernanceType;
+import net.officefloor.compile.administration.AdministrationType;
+import net.officefloor.compile.spi.administration.source.AdministrationSource;
+import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.internal.structure.Flow;
 
 /**
- * Builder of the {@link DutyType}.
+ * Builder of the {@link AdministrationType} to validate the loaded
+ * {@link AdministrationType} from the {@link AdministrationSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface DutyTypeBuilder<F extends Enum<F>> {
+public interface AdministrationTypeBuilder<F extends Enum<F>, G extends Enum<G>> {
 
 	/**
 	 * Adds a {@link AdministrationFlowType}.
@@ -41,5 +47,27 @@ public interface DutyTypeBuilder<F extends Enum<F>> {
 	 *            Key of the {@link Flow}.
 	 */
 	void addFlow(String flowName, Class<?> argumentType, int index, F flowKey);
+
+	/**
+	 * Adds an {@link AdministrationEscalationType}.
+	 * 
+	 * @param escalationName
+	 *            Name of {@link AdministrationEscalationType}.
+	 * @param escalationType
+	 *            Type of {@link Escalation}.
+	 */
+	void addEscalation(String escalationName, Class<? extends Throwable> escalationType);
+
+	/**
+	 * Adds an {@link AdministrationGovernanceType}.
+	 * 
+	 * @param governanceName
+	 *            Name of {@link Governance}.
+	 * @param index
+	 *            Index of the {@link Governance}.
+	 * @param governanceKey
+	 *            Key of the {@link Governance}.
+	 */
+	void addGovernance(String governanceName, int index, G governanceKey);
 
 }

@@ -22,9 +22,10 @@ import java.util.List;
 
 import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.administration.AdministrationEscalationType;
 import net.officefloor.compile.administration.AdministrationFlowType;
+import net.officefloor.compile.administration.AdministrationGovernanceType;
 import net.officefloor.compile.administration.AdministrationType;
-import net.officefloor.compile.administration.DutyType;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.Property;
@@ -33,9 +34,9 @@ import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.administration.source.AdministrationSourceSpecification;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
-import net.officefloor.frame.api.administration.Administration;
-import net.officefloor.frame.api.administration.Duty;
-import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.administration.AdministrationFactory;
+import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.internal.structure.Flow;
 
 /**
@@ -49,55 +50,53 @@ public class AdministratorLoaderUtil {
 	 * Validates the {@link AdministrationSourceSpecification} for the
 	 * {@link AdministrationSource}.
 	 * 
-	 * @param <I>
+	 * @param <E>
 	 *            Extension interface type.
-	 * @param <A>
-	 *            {@link Administration} key type.
-	 * @param <S>
-	 *            {@link AdministrationSource} type.
-	 * @param administratorSourceClass
+	 * @param <F>
+	 *            {@link Flow} key type.
+	 * @param <G>
+	 *            {@link Governance} key type.
+	 * @param administrationSourceClass
 	 *            {@link AdministrationSource} class.
 	 * @param propertyNameLabels
 	 *            Listing of name/label pairs for the {@link Property}
 	 *            instances.
 	 * @return Loaded {@link PropertyList}.
 	 */
-	public static <I, A extends Enum<A>, S extends AdministrationSource<I, A>> PropertyList validateSpecification(
-			Class<S> administratorSourceClass, String... propertyNameLabels) {
+	public static <E, F extends Enum<F>, G extends Enum<G>, S extends AdministrationSource<E, F, G>> PropertyList validateSpecification(
+			Class<S> administrationSourceClass, String... propertyNameLabels) {
 
 		// Load the specification
-		PropertyList propertyList = getOfficeFloorCompiler()
-				.getAdministratorLoader().loadSpecification(
-						administratorSourceClass);
+		PropertyList propertyList = getOfficeFloorCompiler().getAdministrationLoader()
+				.loadSpecification(administrationSourceClass);
 
 		// Verify the properties
-		PropertyListUtil.validatePropertyNameLabels(propertyList,
-				propertyNameLabels);
+		PropertyListUtil.validatePropertyNameLabels(propertyList, propertyNameLabels);
 
 		// Return the property list
 		return propertyList;
 	}
 
 	/**
-	 * Creates the {@link AdministratorTypeBuilder} to create the expected
+	 * Creates the {@link AdministrationTypeBuilder} to create the expected
 	 * {@link AdministrationType}.
 	 * 
-	 * @return {@link AdministratorTypeBuilder}.
+	 * @return {@link AdministrationTypeBuilder}.
 	 */
-	@SuppressWarnings("rawtypes")
-	public static AdministratorTypeBuilder createAdministratorTypeBuilder() {
-		return new AdministratorTypeBuilderImpl();
+	public static <E, F extends Enum<F>, G extends Enum<G>> AdministrationTypeBuilder<F, G> createAdministrationTypeBuilder(
+			Class<E> extensionInterface, Class<F> flowKeyClass, Class<G> governanceKeyClass) {
+		return new AdministrationTypeBuilderImpl<E, F, G>(extensionInterface, flowKeyClass, governanceKeyClass);
 	}
 
 	/**
 	 * Validates the {@link AdministrationType} contained in the
-	 * {@link AdministratorTypeBuilder} against the {@link AdministrationType}
+	 * {@link AdministrationTypeBuilder} against the {@link AdministrationType}
 	 * loaded from the {@link AdministrationSource}.
 	 * 
-	 * @param <I>
+	 * @param <E>
 	 *            Extension interface type.
-	 * @param <A>
-	 *            {@link Administration} key type.
+	 * @param <F>
+	 *            {@link Flow} key type.
 	 * @param <S>
 	 *            {@link AdministrationSource} type
 	 * @param expectedAdministratorType
@@ -110,89 +109,81 @@ public class AdministratorLoaderUtil {
 	 *         {@link AdministrationSource}.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <I, A extends Enum<A>, S extends AdministrationSource<I, A>> AdministrationType<I, A> validateAdministratorType(
-			AdministratorTypeBuilder expectedAdministratorType,
-			Class<S> administratorSourceClass, String... propertyNameValues) {
+	public static <E, F extends Enum<F>, G extends Enum<G>, S extends AdministrationSource<E, F, G>> AdministrationType<E, F, G> validateAdministratorType(
+			AdministrationTypeBuilder<F, G> expectedAdministratorType, Class<S> administratorSourceClass,
+			String... propertyNameValues) {
 
 		// Cast to obtain expected administrator type
 		if (!(expectedAdministratorType instanceof AdministrationType)) {
-			TestCase.fail("builder must be created from createAdministratorTypeBuilder");
+			TestCase.fail("builder must be created from createAdministrationTypeBuilder");
 		}
-		AdministrationType<I, A> eType = (AdministrationType<I, A>) expectedAdministratorType;
+		AdministrationType<E, F, G> eType = (AdministrationType<E, F, G>) expectedAdministratorType;
 
-		// Load the administrator type
-		AdministrationType<I, A> aType = loadAdministratorType(
-				administratorSourceClass, propertyNameValues);
+		// Load the administration type
+		AdministrationType<E, F, G> aType = loadAdministrationType(administratorSourceClass, propertyNameValues);
 
 		// Ensure correct administrator type
-		TestCase.assertEquals("Incorrect extension interface type",
-				eType.getExtensionInterface(), aType.getExtensionInterface());
+		TestCase.assertEquals("Incorrect extension interface type", eType.getExtensionInterface(),
+				aType.getExtensionInterface());
 
-		// Validate the duties
-		DutyType<A, ?>[] eDuties = eType.getDutyTypes();
-		DutyType<A, ?>[] aDuties = aType.getDutyTypes();
-		TestCase.assertEquals("Incorrect number of duties", eDuties.length,
-				aDuties.length);
-		for (int d = 0; d < eDuties.length; d++) {
-			DutyType<A, ?> eDuty = eType.getDutyTypes()[d];
-			DutyType<A, ?> aDuty = aType.getDutyTypes()[d];
+		// Validate the type
+		TestCase.assertEquals("Incorrect extension interface", eType.getExtensionInterface(),
+				aType.getExtensionInterface());
+		TestCase.assertEquals("Incorrect flow key class", eType.getFlowKeyClass(), aType.getFlowKeyClass());
+		TestCase.assertEquals("Incorrect governance key class", eType.getGovernanceKeyClass(),
+				aType.getGovernanceKeyClass());
 
-			// Validate the duty
-			TestCase.assertEquals("Incorrect name for duty " + d,
-					eDuty.getDutyName(), aDuty.getDutyName());
-			TestCase.assertEquals("Incorrect key for duty " + d,
-					eDuty.getDutyKey(), aDuty.getDutyKey());
-			TestCase.assertEquals("Incorrect flow key class " + d,
-					eDuty.getFlowKeyClass(), aDuty.getFlowKeyClass());
+		// Validate the flows
+		AdministrationFlowType<?>[] eFlows = eType.getFlowTypes();
+		AdministrationFlowType<?>[] aFlows = aType.getFlowTypes();
+		for (int f = 0; f < eFlows.length; f++) {
+			AdministrationFlowType<?> eFlow = eFlows[f];
+			AdministrationFlowType<?> aFlow = aFlows[f];
 
-			// Validate the flows
-			AdministrationFlowType<?>[] eFlows = eDuty.getFlowTypes();
-			AdministrationFlowType<?>[] aFlows = aDuty.getFlowTypes();
-			for (int f = 0; f < eFlows.length; f++) {
-				AdministrationFlowType<?> eFlow = eFlows[f];
-				AdministrationFlowType<?> aFlow = aFlows[f];
+			String flowLabel = "flow" + f;
 
-				String flowLabel = "flow" + f + " (duty " + d + ")";
-
-				// Validate the flow
-				TestCase.assertEquals("Incorrect name for " + flowLabel,
-						eFlow.getFlowName(), aFlow.getFlowName());
-				TestCase.assertEquals("Incorrect index for " + flowLabel,
-						eFlow.getIndex(), aFlow.getIndex());
-				TestCase.assertEquals("Incorrect key for " + flowLabel,
-						eFlow.getKey(), aFlow.getKey());
-				TestCase.assertEquals("Incorrect argument type for "
-						+ flowLabel, eFlow.getArgumentType(),
-						aFlow.getArgumentType());
-			}
+			// Validate the flow
+			TestCase.assertEquals("Incorrect name for " + flowLabel, eFlow.getFlowName(), aFlow.getFlowName());
+			TestCase.assertEquals("Incorrect index for " + flowLabel, eFlow.getIndex(), aFlow.getIndex());
+			TestCase.assertEquals("Incorrect key for " + flowLabel, eFlow.getKey(), aFlow.getKey());
+			TestCase.assertEquals("Incorrect argument type for " + flowLabel, eFlow.getArgumentType(),
+					aFlow.getArgumentType());
 		}
+
+		// TODO validate the escalations
+		if (true)
+			throw new UnsupportedOperationException("TODO validate escalations");
+
+		// TODO validate the governance
+		if (true)
+			throw new UnsupportedOperationException("TODO validate goverances");
 
 		// Return the administrator type
 		return aType;
 	}
 
 	/**
-	 * Loads the {@link AdministrationType} from the {@link AdministrationSource}.
+	 * Loads the {@link AdministrationType} from the
+	 * {@link AdministrationSource}.
 	 * 
-	 * @param <I>
+	 * @param <E>
 	 *            Extension interface type.
-	 * @param <A>
-	 *            {@link Administration} key type.
-	 * @param <S>
-	 *            {@link AdministrationSource} type.
-	 * @param administratorSourceClass
+	 * @param <F>
+	 *            {@link Flow} key type.
+	 * @param <G>
+	 *            {@link Governance} key type.
+	 * @param administrationSourceClass
 	 *            {@link AdministrationSource} class.
 	 * @param propertyNameValues
 	 *            {@link Property} name/value listing.
 	 * @return {@link AdministrationType}.
 	 */
-	public static <I, A extends Enum<A>, S extends AdministrationSource<I, A>> AdministrationType<I, A> loadAdministratorType(
-			Class<S> administratorSourceClass, String... propertyNameValues) {
+	public static <E, F extends Enum<F>, G extends Enum<G>, S extends AdministrationSource<E, F, G>> AdministrationType<E, F, G> loadAdministrationType(
+			Class<S> administrationSourceClass, String... propertyNameValues) {
 
-		// Load and return the administrator type
-		return getOfficeFloorCompiler().getAdministratorLoader()
-				.loadAdministratorType(administratorSourceClass,
-						new PropertyListImpl(propertyNameValues));
+		// Load and return the administration type
+		return getOfficeFloorCompiler().getAdministrationLoader().loadAdministrationType(administrationSourceClass,
+				new PropertyListImpl(propertyNameValues));
 	}
 
 	/**
@@ -202,8 +193,7 @@ public class AdministratorLoaderUtil {
 	 */
 	private static OfficeFloorCompiler getOfficeFloorCompiler() {
 		// Create the office floor compiler that fails on first issue
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(new FailTestCompilerIssues());
 		return compiler;
 	}
@@ -215,80 +205,15 @@ public class AdministratorLoaderUtil {
 	}
 
 	/**
-	 * {@link AdministratorTypeBuilder} implementation.
+	 * {@link AdministrationTypeBuilder} implementation.
 	 */
-	private static class AdministratorTypeBuilderImpl<I, A extends Enum<A>>
-			implements AdministratorTypeBuilder, AdministrationType<I, A> {
+	private static class AdministrationTypeBuilderImpl<E, F extends Enum<F>, G extends Enum<G>>
+			implements AdministrationTypeBuilder<F, G>, AdministrationType<E, F, G> {
 
 		/**
 		 * Extension interface.
 		 */
-		private Class<I> extensionInterface;
-
-		/**
-		 * {@link DutyType} instances.
-		 */
-		private final List<DutyType<A, ?>> duties = new LinkedList<DutyType<A, ?>>();
-
-		/*
-		 * ================ AdministratorTypeBuilder ======================
-		 */
-
-		@Override
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public void setExtensionInterface(Class extensionInterface) {
-			this.extensionInterface = extensionInterface;
-		}
-
-		@Override
-		@SuppressWarnings("unchecked")
-		public DutyTypeBuilder<Indexed> addDuty(String dutyName, Enum<?> dutyKey) {
-			DutyTypeBuilderImpl<A, Indexed> duty = new DutyTypeBuilderImpl<A, Indexed>(
-					dutyName, (A) dutyKey, null);
-			this.duties.add(duty);
-			return duty;
-		}
-
-		@Override
-		@SuppressWarnings("unchecked")
-		public <F extends Enum<F>> DutyTypeBuilder<F> addDuty(String dutyName,
-				Enum<?> dutyKey, Class<F> flowKeyClass) {
-			DutyTypeBuilderImpl<A, F> duty = new DutyTypeBuilderImpl<A, F>(
-					dutyName, (A) dutyKey, flowKeyClass);
-			this.duties.add(duty);
-			return duty;
-		}
-
-		/*
-		 * ================== AdministratorType ==========================
-		 */
-
-		@Override
-		public Class<I> getExtensionInterface() {
-			return this.extensionInterface;
-		}
-
-		@Override
-		public DutyType<A, ?>[] getDutyTypes() {
-			return CompileUtil.toArray(this.duties, new DutyType[0]);
-		}
-	}
-
-	/**
-	 * {@link DutyTypeBuilder} implementation.
-	 */
-	private static class DutyTypeBuilderImpl<A extends Enum<A>, F extends Enum<F>>
-			implements DutyTypeBuilder<F>, DutyType<A, F> {
-
-		/**
-		 * Name of the {@link Duty}.
-		 */
-		private final String dutyName;
-
-		/**
-		 * Key identifying the {@link Duty}.
-		 */
-		private final A dutyKey;
+		private Class<E> extensionInterface;
 
 		/**
 		 * {@link Flow} {@link Enum}.
@@ -298,48 +223,72 @@ public class AdministratorLoaderUtil {
 		/**
 		 * Listing of {@link AdministrationFlowType} instances.
 		 */
-		private final List<AdministrationFlowType<F>> flows = new LinkedList<AdministrationFlowType<F>>();
+		private final List<AdministrationFlowType<F>> flows = new LinkedList<>();
 
 		/**
-		 * Initiate.
+		 * Listing of {@link AdministrationEscalationType} instances.
+		 */
+		private final List<AdministrationEscalationType> escalations = new LinkedList<>();
+
+		/**
+		 * {@link Governance} {@link Enum}.
+		 */
+		private final Class<G> governanceKeyClass;
+
+		/**
+		 * Listing of {@link AdministrationGovernanceType} instances.
+		 */
+		private final List<AdministrationGovernanceType<G>> governances = new LinkedList<>();
+
+		/**
+		 * Instantiate.
 		 * 
-		 * @param dutyName
-		 *            Name of the {@link Duty}.
-		 * @param dutyKey
-		 *            Key identifying the {@link Duty}.
+		 * @param extensionInterface
+		 *            Extension interface.
 		 * @param flowKeyClass
 		 *            {@link Flow} {@link Enum}.
+		 * @param governanceKeyClass
+		 *            {@link Governance} {@link Enum}.
 		 */
-		public DutyTypeBuilderImpl(String dutyName, A dutyKey,
-				Class<F> flowKeyClass) {
-			this.dutyName = dutyName;
-			this.dutyKey = dutyKey;
+		public AdministrationTypeBuilderImpl(Class<E> extensionInterface, Class<F> flowKeyClass,
+				Class<G> governanceKeyClass) {
+			this.extensionInterface = extensionInterface;
 			this.flowKeyClass = flowKeyClass;
+			this.governanceKeyClass = governanceKeyClass;
 		}
 
 		/*
-		 * ================ DutyTypeBuilder ===============================
+		 * ================ AdministrationTypeBuilder ======================
 		 */
 
 		@Override
-		public void addFlow(String flowName, Class<?> argumentType, int index,
-				F flowKey) {
-			this.flows.add(new DutyFlowTypeImpl<F>(flowName, argumentType,
-					index, flowKey));
+		public void addFlow(String flowName, Class<?> argumentType, int index, F flowKey) {
+			this.flows.add(new AdministrationFlowTypeImpl<F>(flowName, argumentType, index, flowKey));
+		}
+
+		@Override
+		public void addEscalation(String escalationName, Class<? extends Throwable> escalationType) {
+			this.escalations.add(new AdministrationEscalationTypeImpl(escalationName, escalationType));
+		}
+
+		@Override
+		public void addGovernance(String governanceName, int index, G governanceKey) {
+			this.governances.add(new AdministrationGovernanceTypeImpl<G>(governanceName, index, governanceKey));
 		}
 
 		/*
-		 * ======================= DutyType ===========================
+		 * ================== AdministrationType ==========================
 		 */
 
 		@Override
-		public String getDutyName() {
-			return this.dutyName;
+		public Class<E> getExtensionInterface() {
+			return this.extensionInterface;
 		}
 
 		@Override
-		public A getDutyKey() {
-			return this.dutyKey;
+		public AdministrationFactory<E, F, G> getAdministrationFactory() {
+			// TODO implement
+			throw new UnsupportedOperationException("TODO implement");
 		}
 
 		@Override
@@ -351,13 +300,27 @@ public class AdministratorLoaderUtil {
 		public AdministrationFlowType<F>[] getFlowTypes() {
 			return CompileUtil.toArray(this.flows, new AdministrationFlowType[0]);
 		}
+
+		@Override
+		public AdministrationEscalationType[] getEscalationTypes() {
+			return CompileUtil.toArray(this.escalations, new AdministrationEscalationType[0]);
+		}
+
+		@Override
+		public Class<G> getGovernanceKeyClass() {
+			return this.governanceKeyClass;
+		}
+
+		@Override
+		public AdministrationGovernanceType<G>[] getGovernanceTypes() {
+			return CompileUtil.toArray(this.governances, new AdministrationGovernanceType[0]);
+		}
 	}
 
 	/**
 	 * {@link AdministrationFlowType} implementation.
 	 */
-	private static class DutyFlowTypeImpl<F extends Enum<F>> implements
-			AdministrationFlowType<F> {
+	private static class AdministrationFlowTypeImpl<F extends Enum<F>> implements AdministrationFlowType<F> {
 
 		/**
 		 * Name of the {@link Flow}.
@@ -391,8 +354,7 @@ public class AdministratorLoaderUtil {
 		 * @param key
 		 *            Key identifying the {@link Flow}.
 		 */
-		public DutyFlowTypeImpl(String flowName, Class<?> argumentType,
-				int index, F key) {
+		public AdministrationFlowTypeImpl(String flowName, Class<?> argumentType, int index, F key) {
 			this.flowName = flowName;
 			this.argumentType = argumentType;
 			this.index = index;
@@ -400,7 +362,7 @@ public class AdministratorLoaderUtil {
 		}
 
 		/*
-		 * ==================== DutyFlowType =======================
+		 * ==================== AdministrationFlowType =======================
 		 */
 
 		@Override
@@ -420,6 +382,108 @@ public class AdministratorLoaderUtil {
 
 		@Override
 		public F getKey() {
+			return this.key;
+		}
+	}
+
+	/**
+	 * {@link AdministrationEscalationType} implementation.
+	 */
+	private static class AdministrationEscalationTypeImpl implements AdministrationEscalationType {
+
+		/**
+		 * {@link Escalation} name.
+		 */
+		private final String escalationName;
+
+		/**
+		 * {@link Escalation} type.
+		 */
+		private final Class<? extends Throwable> escalationType;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param escalationName
+		 *            {@link Escalation} name.
+		 * @param escalationType
+		 *            {@link Escalation} type.
+		 */
+		public AdministrationEscalationTypeImpl(String escalationName, Class<? extends Throwable> escalationType) {
+			this.escalationName = escalationName;
+			this.escalationType = escalationType;
+		}
+
+		/*
+		 * ================= AdministrationEscalationType ===============
+		 */
+
+		@Override
+		public String getEscalationName() {
+			return this.escalationName;
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public <E extends Throwable> Class<E> getEscalationType() {
+			return (Class<E>) this.escalationType;
+		}
+	}
+
+	/**
+	 * {@link AdministrationGovernanceType} implementation.
+	 */
+	private static class AdministrationGovernanceTypeImpl<G extends Enum<G>>
+			implements AdministrationGovernanceType<G> {
+
+		/**
+		 * Name of {@link Governance}.
+		 */
+		private final String governanceName;
+
+		/**
+		 * Index identifying the {@link AdministrationGovernanceType}.
+		 */
+		private final int index;
+
+		/**
+		 * Key identifying the {@link AdministrationGovernanceType}.
+		 */
+		private final G key;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param governanceName
+		 *            Name of {@link Governance}.
+		 * @param index
+		 *            Index identifying the
+		 *            {@link AdministrationGovernanceType}.
+		 * @param key
+		 *            Key identifying the {@link AdministrationGovernanceType}.
+		 */
+		public AdministrationGovernanceTypeImpl(String governanceName, int index, G key) {
+			this.governanceName = governanceName;
+			this.index = index;
+			this.key = key;
+		}
+
+		/*
+		 * ================= AdministrationGovernanceType ============
+		 */
+
+		@Override
+		public String getGovernanceName() {
+			return this.governanceName;
+		}
+
+		@Override
+		public int getIndex() {
+			return this.index;
+		}
+
+		@Override
+		public G getKey() {
 			return this.key;
 		}
 	}

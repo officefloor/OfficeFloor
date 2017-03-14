@@ -22,7 +22,7 @@ import java.util.List;
 
 import net.officefloor.compile.administration.AdministrationType;
 import net.officefloor.compile.test.administration.AdministratorLoaderUtil;
-import net.officefloor.compile.test.administration.AdministratorTypeBuilder;
+import net.officefloor.compile.test.administration.AdministrationTypeBuilder;
 import net.officefloor.compile.util.AdministrationSourceStandAlone;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.Duty;
@@ -53,7 +53,7 @@ public class ClassAdministratorSourceTest extends OfficeFrameTestCase {
 	public void testAdministratorType() {
 
 		// Create the expected administration type
-		AdministratorTypeBuilder type = AdministratorLoaderUtil
+		AdministrationTypeBuilder type = AdministratorLoaderUtil
 				.createAdministratorTypeBuilder();
 		type.setExtensionInterface(MockExtensionInterface.class);
 		type.addDuty("admin_A", null, None.class);
