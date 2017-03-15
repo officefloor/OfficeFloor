@@ -20,7 +20,8 @@ package net.officefloor.compile.test.administration;
 import java.util.LinkedList;
 import java.util.List;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administration.AdministrationEscalationType;
 import net.officefloor.compile.administration.AdministrationFlowType;
@@ -115,7 +116,7 @@ public class AdministratorLoaderUtil {
 
 		// Cast to obtain expected administrator type
 		if (!(expectedAdministratorType instanceof AdministrationType)) {
-			TestCase.fail("builder must be created from createAdministrationTypeBuilder");
+			Assert.fail("builder must be created from createAdministrationTypeBuilder");
 		}
 		AdministrationType<E, F, G> eType = (AdministrationType<E, F, G>) expectedAdministratorType;
 
@@ -123,15 +124,16 @@ public class AdministratorLoaderUtil {
 		AdministrationType<E, F, G> aType = loadAdministrationType(administratorSourceClass, propertyNameValues);
 
 		// Ensure correct administrator type
-		TestCase.assertEquals("Incorrect extension interface type", eType.getExtensionInterface(),
+		Assert.assertEquals("Incorrect extension interface type", eType.getExtensionInterface(),
 				aType.getExtensionInterface());
 
 		// Validate the type
-		TestCase.assertEquals("Incorrect extension interface", eType.getExtensionInterface(),
+		Assert.assertEquals("Incorrect extension interface", eType.getExtensionInterface(),
 				aType.getExtensionInterface());
-		TestCase.assertEquals("Incorrect flow key class", eType.getFlowKeyClass(), aType.getFlowKeyClass());
-		TestCase.assertEquals("Incorrect governance key class", eType.getGovernanceKeyClass(),
+		Assert.assertEquals("Incorrect flow key class", eType.getFlowKeyClass(), aType.getFlowKeyClass());
+		Assert.assertEquals("Incorrect governance key class", eType.getGovernanceKeyClass(),
 				aType.getGovernanceKeyClass());
+		Assert.assertNotNull("Must have administratration factory", aType.getAdministrationFactory());
 
 		// Validate the flows
 		AdministrationFlowType<?>[] eFlows = eType.getFlowTypes();
@@ -143,20 +145,45 @@ public class AdministratorLoaderUtil {
 			String flowLabel = "flow" + f;
 
 			// Validate the flow
-			TestCase.assertEquals("Incorrect name for " + flowLabel, eFlow.getFlowName(), aFlow.getFlowName());
-			TestCase.assertEquals("Incorrect index for " + flowLabel, eFlow.getIndex(), aFlow.getIndex());
-			TestCase.assertEquals("Incorrect key for " + flowLabel, eFlow.getKey(), aFlow.getKey());
-			TestCase.assertEquals("Incorrect argument type for " + flowLabel, eFlow.getArgumentType(),
+			Assert.assertEquals("Incorrect name for " + flowLabel, eFlow.getFlowName(), aFlow.getFlowName());
+			Assert.assertEquals("Incorrect index for " + flowLabel, eFlow.getIndex(), aFlow.getIndex());
+			Assert.assertEquals("Incorrect key for " + flowLabel, eFlow.getKey(), aFlow.getKey());
+			Assert.assertEquals("Incorrect argument type for " + flowLabel, eFlow.getArgumentType(),
 					aFlow.getArgumentType());
 		}
 
-		// TODO validate the escalations
-		if (true)
-			throw new UnsupportedOperationException("TODO validate escalations");
+		// Validate the escalations
+		AdministrationEscalationType[] eEscalations = eType.getEscalationTypes();
+		AdministrationEscalationType[] aEscalations = aType.getEscalationTypes();
+		for (int e = 0; e < eEscalations.length; e++) {
+			AdministrationEscalationType eEscalation = eEscalations[e];
+			AdministrationEscalationType aEscalation = aEscalations[e];
 
-		// TODO validate the governance
-		if (true)
-			throw new UnsupportedOperationException("TODO validate goverances");
+			String escalationLabel = "escalation " + e;
+
+			// Validate the escalation
+			Assert.assertEquals("Incorrect escalation name for " + escalationLabel, eEscalation.getEscalationName(),
+					aEscalation.getEscalationName());
+			Assert.assertEquals("Incorrect escalation type for " + escalationLabel, eEscalation.getEscalationType(),
+					aEscalation.getEscalationType());
+		}
+
+		// Validate the governances
+		AdministrationGovernanceType<G>[] eGovernances = eType.getGovernanceTypes();
+		AdministrationGovernanceType<G>[] aGovernances = aType.getGovernanceTypes();
+		for (int g = 0; g < eGovernances.length; g++) {
+			AdministrationGovernanceType<G> eGovernance = eGovernances[g];
+			AdministrationGovernanceType<G> aGovernance = aGovernances[g];
+
+			String governanceLabel = "governance " + g;
+
+			// Validate the governance
+			Assert.assertEquals("Incorrect governance name for " + governanceLabel, eGovernance.getGovernanceName(),
+					aGovernance.getGovernanceName());
+			Assert.assertEquals("Incorrect index for " + governanceLabel, eGovernance.getIndex(),
+					aGovernance.getIndex());
+			Assert.assertEquals("Incorrect key for " + governanceLabel, eGovernance.getKey(), aGovernance.getKey());
+		}
 
 		// Return the administrator type
 		return aType;
@@ -287,8 +314,7 @@ public class AdministratorLoaderUtil {
 
 		@Override
 		public AdministrationFactory<E, F, G> getAdministrationFactory() {
-			// TODO implement
-			throw new UnsupportedOperationException("TODO implement");
+			throw new IllegalStateException("Should not require administration factory in validation");
 		}
 
 		@Override

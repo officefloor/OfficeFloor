@@ -28,8 +28,8 @@ import net.officefloor.autowire.impl.AutoWireEscalationCauseRouteWorkSource.Auto
 import net.officefloor.autowire.impl.AutoWireEscalationCauseRouteWorkSource.Dependencies;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.test.managedfunction.ManagedFunctionLoaderUtil;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
-import net.officefloor.compile.test.work.WorkLoaderUtil;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
@@ -83,7 +83,7 @@ public class AutoWireEscalationCauseRouteWorkSourceTest extends
 	 * Validate specification.
 	 */
 	public void testSpecification() {
-		WorkLoaderUtil
+		ManagedFunctionLoaderUtil
 				.validateSpecification(AutoWireEscalationCauseRouteWorkSource.class);
 	}
 
@@ -95,7 +95,7 @@ public class AutoWireEscalationCauseRouteWorkSourceTest extends
 		// Create the expected type
 		AutoWireEscalationCauseRouteTask factory = new AutoWireEscalationCauseRouteTask(
 				null);
-		FunctionNamespaceBuilder<AutoWireEscalationCauseRouteTask> type = WorkLoaderUtil
+		FunctionNamespaceBuilder<AutoWireEscalationCauseRouteTask> type = ManagedFunctionLoaderUtil
 				.createWorkTypeBuilder(factory);
 		ManagedFunctionTypeBuilder<Dependencies, Indexed> task = type.addManagedFunctionType(
 				"Handle", factory, Dependencies.class, Indexed.class);
@@ -103,7 +103,7 @@ public class AutoWireEscalationCauseRouteWorkSourceTest extends
 		task.addEscalation(Throwable.class);
 
 		// Validate the type
-		WorkLoaderUtil.validateWorkType(type,
+		ManagedFunctionLoaderUtil.validateWorkType(type,
 				AutoWireEscalationCauseRouteWorkSource.class);
 	}
 
@@ -115,7 +115,7 @@ public class AutoWireEscalationCauseRouteWorkSourceTest extends
 		// Create the expected type
 		AutoWireEscalationCauseRouteTask factory = new AutoWireEscalationCauseRouteTask(
 				null);
-		FunctionNamespaceBuilder<AutoWireEscalationCauseRouteTask> type = WorkLoaderUtil
+		FunctionNamespaceBuilder<AutoWireEscalationCauseRouteTask> type = ManagedFunctionLoaderUtil
 				.createWorkTypeBuilder(factory);
 		ManagedFunctionTypeBuilder<Dependencies, Indexed> task = type.addManagedFunctionType(
 				"Handle", factory, Dependencies.class, Indexed.class);
@@ -126,7 +126,7 @@ public class AutoWireEscalationCauseRouteWorkSourceTest extends
 		task.addEscalation(Throwable.class);
 
 		// Validate the type
-		WorkLoaderUtil
+		ManagedFunctionLoaderUtil
 				.validateWorkType(
 						type,
 						AutoWireEscalationCauseRouteWorkSource.class,

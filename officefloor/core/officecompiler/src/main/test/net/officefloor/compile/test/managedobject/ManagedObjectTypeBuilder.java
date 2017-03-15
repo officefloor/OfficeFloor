@@ -25,7 +25,6 @@ import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.api.function.Work;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.Flow;
@@ -62,8 +61,7 @@ public interface ManagedObjectTypeBuilder {
 	 * @param key
 	 *            Key identifying the {@link ManagedObjectDependency}.
 	 */
-	void addDependency(String name, Class<?> type, String typeQualifier,
-			int index, Enum<?> key);
+	void addDependency(String name, Class<?> type, String typeQualifier, int index, Enum<?> key);
 
 	/**
 	 * <p>
@@ -93,17 +91,12 @@ public interface ManagedObjectTypeBuilder {
 	 *            Index of the {@link ManagedObjectFlow}.
 	 * @param key
 	 *            Key identifying the {@link ManagedObjectFlow}.
-	 * @param workName
-	 *            Name of {@link Work} instigating the {@link Flow} or
-	 *            <code>null</code> if done directly by
-	 *            {@link ManagedObjectSource}.
-	 * @param taskName
-	 *            Name of {@link ManagedFunction} instigating the {@link Flow} or
-	 *            <code>null</code> if done directly by
+	 * @param functionName
+	 *            Name of {@link ManagedFunction} instigating the {@link Flow}
+	 *            or <code>null</code> if done directly by
 	 *            {@link ManagedObjectSource}.
 	 */
-	void addFlow(String name, Class<?> argumentType, int index, Enum<?> key,
-			String workName, String taskName);
+	void addFlow(String name, Class<?> argumentType, int index, Enum<?> key, String functionName);
 
 	/**
 	 * <p>
@@ -117,17 +110,12 @@ public interface ManagedObjectTypeBuilder {
 	 *            Key identifying the {@link ManagedObjectFlow}.
 	 * @param argumentType
 	 *            Type of argument passed from the {@link ManagedObjectFlow}.
-	 * @param workName
-	 *            Name of {@link Work} instigating the {@link Flow} or
-	 *            <code>null</code> if done directly by
-	 *            {@link ManagedObjectSource}.
-	 * @param taskName
-	 *            Name of {@link ManagedFunction} instigating the {@link Flow} or
-	 *            <code>null</code> if done directly by
+	 * @param functionName
+	 *            Name of {@link ManagedFunction} instigating the {@link Flow}
+	 *            or <code>null</code> if done directly by
 	 *            {@link ManagedObjectSource}.
 	 */
-	void addFlow(Enum<?> key, Class<?> argumentType, String workName,
-			String taskName);
+	void addFlow(Enum<?> key, Class<?> argumentType, String functionName);
 
 	/**
 	 * Adds a {@link ManagedObjectTeamType}.
