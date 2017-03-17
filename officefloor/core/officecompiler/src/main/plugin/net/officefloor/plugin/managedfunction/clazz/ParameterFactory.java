@@ -15,32 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.team;
+package net.officefloor.plugin.managedfunction.clazz;
 
-import net.officefloor.compile.TeamSourceService;
-import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeam;
-import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeamSource;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 
 /**
- * {@link TeamSourceService} for a {@link WorkerPerTaskTeam}.
+ * Creates the parameter for the {@link ClassFunction}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WorkerPerTaskTeamSourceService implements
-		TeamSourceService<WorkerPerTaskTeamSource> {
+public interface ParameterFactory {
 
-	/*
-	 * ====================== TeamSourceService ==================
+	/**
+	 * Creates the parameter from the {@link ManagedFunctionContext}.
+	 * 
+	 * @param context
+	 *            {@link ManagedFunctionContext}.
+	 * @return Parameter.
+	 * @throws Exception
+	 *             If fails to create the parameter.
 	 */
-
-	@Override
-	public String getTeamSourceAlias() {
-		return "WORKER_PER_TASK";
-	}
-
-	@Override
-	public Class<WorkerPerTaskTeamSource> getTeamSourceClass() {
-		return WorkerPerTaskTeamSource.class;
-	}
+	Object createParameter(ManagedFunctionContext<?, ?> context) throws Exception;
 
 }

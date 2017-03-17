@@ -24,9 +24,9 @@ import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourcePropertyType;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourceType;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
-import net.officefloor.plugin.work.clazz.FlowInterface;
 
 /**
  * Class for {@link ClassManagedObjectSource} that enables validating loading a

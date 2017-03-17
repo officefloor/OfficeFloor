@@ -43,10 +43,10 @@ import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
-import net.officefloor.plugin.work.clazz.ClassWorkSource;
-import net.officefloor.plugin.work.clazz.FlowInterface;
 
 /**
  * Tests compiling an {@link Office} {@link ManagedObject}.
@@ -397,7 +397,7 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Class for {@link ClassWorkSource}.
+	 * Class for {@link ClassManagedFunctionSource}.
 	 */
 	public static class ProcessWork {
 

@@ -15,26 +15,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.work.clazz;
+package net.officefloor.plugin.team;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import net.officefloor.compile.TeamSourceService;
+import net.officefloor.frame.impl.spi.team.WorkerPerJobTeamSource;
 
 /**
- * <p>
- * Enables qualifying dependencies.
- * <p>
- * TODO consider following JSR299 specification to use the
- * javax.inject.Qualifier annotation. Until available and not tied to the heavy
- * JEE specification using this annotation.
+ * {@link TeamSourceService} for a {@link WorkerPerJobTeamSource}.
  * 
  * @author Daniel Sagenschneider
  */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.ANNOTATION_TYPE)
-public @interface Qualifier {
+public class WorkerPerJobTeamSourceService implements TeamSourceService<WorkerPerJobTeamSource> {
+
+	/*
+	 * ====================== TeamSourceService ==================
+	 */
+
+	@Override
+	public String getTeamSourceAlias() {
+		return "WORKER_PER_JOB";
+	}
+
+	@Override
+	public Class<WorkerPerJobTeamSource> getTeamSourceClass() {
+		return WorkerPerJobTeamSource.class;
+	}
+
 }

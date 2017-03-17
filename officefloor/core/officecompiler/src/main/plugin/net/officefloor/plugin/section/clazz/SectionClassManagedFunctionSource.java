@@ -17,101 +17,69 @@
  */
 package net.officefloor.plugin.section.clazz;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
-import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
-import net.officefloor.plugin.work.clazz.ClassTask;
-import net.officefloor.plugin.work.clazz.ClassWork;
-import net.officefloor.plugin.work.clazz.ClassWorkSource;
-import net.officefloor.plugin.work.clazz.ParameterFactory;
-import net.officefloor.plugin.work.clazz.Sequence;
+import net.officefloor.plugin.managedfunction.clazz.ClassFunction;
+import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
+import net.officefloor.plugin.managedfunction.clazz.ParameterFactory;
+import net.officefloor.plugin.managedfunction.clazz.Sequence;
 
 /**
- * {@link ManagedFunctionSource} implementation to provide the {@link ManagedFunction} instances for
- * the {@link ClassSectionSource}.
+ * {@link ManagedFunctionSource} implementation to provide the
+ * {@link ManagedFunction} instances for the {@link ClassSectionSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class SectionClassWorkSource extends ClassWorkSource {
+public class SectionClassManagedFunctionSource extends ClassManagedFunctionSource {
 
 	/*
-	 * =================== ClassWorkSource ==========================
+	 * =================== ClassManagedFunctionSource ==========================
 	 */
 
 	@Override
-	protected void loadParameterManufacturers(
-			List<ParameterManufacturer> manufacturers) {
-		manufacturers
-				.add(new FlowInterfaceParameterManufacturer<SectionInterface>(
-						SectionInterface.class));
+	protected void loadParameterManufacturers(List<ParameterManufacturer> manufacturers) {
+		manufacturers.add(new FlowInterfaceParameterManufacturer<SectionInterface>(SectionInterface.class));
 	}
 
 	@Override
-	protected WorkFactory<ClassWork> createWorkFactory(Class<?> clazz) {
-		return new SectionWorkFactory();
+	protected ManagedFunctionFactory<Indexed, Indexed> createManagedFunctionFactory(Constructor<?> constructor,
+			Method method, ParameterFactory[] parameters) {
+		boolean isStatic = (constructor == null);
+		return new SectionManagedFunctionFactory(method, isStatic, parameters);
 	}
 
 	@Override
-	protected ManagedFunctionFactory<ClassWork, Indexed, Indexed> createTaskFactory(
-			Class<?> clazz, Method method, boolean isStatic,
-			ParameterFactory[] parameters) {
-		return new SectionTaskFactory(method, isStatic, parameters);
-	}
+	protected ManagedFunctionTypeBuilder<Indexed, Indexed> addManagedFunctionType(Class<?> clazz,
+			FunctionNamespaceBuilder namespaceBuilder, String functionName,
+			ManagedFunctionFactory<Indexed, Indexed> functionFactory, Sequence objectSequence, Sequence flowSequence) {
 
-	@Override
-	protected ManagedFunctionTypeBuilder<Indexed, Indexed> addTaskType(Class<?> clazz,
-			FunctionNamespaceBuilder<ClassWork> workTypeBuilder, String taskName,
-			ManagedFunctionFactory<ClassWork, Indexed, Indexed> taskFactory,
-			Sequence objectSequence, Sequence flowSequence) {
-
-		// Include method as task in type definition
-		ManagedFunctionTypeBuilder<Indexed, Indexed> taskTypeBuilder = workTypeBuilder
-				.addManagedFunctionType(taskName, taskFactory, null, null);
+		// Include method as function in type definition
+		ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder = namespaceBuilder
+				.addManagedFunctionType(functionName, functionFactory, Indexed.class, Indexed.class);
 
 		// Add the section object always as first dependency
-		taskTypeBuilder.addObject(clazz).setLabel("OBJECT");
+		functionTypeBuilder.addObject(clazz).setLabel("OBJECT");
 		objectSequence.nextIndex(); // index for section object
 
-		// Return the task type builder
-		return taskTypeBuilder;
+		// Return the function type builder
+		return functionTypeBuilder;
 	}
 
 	/**
-	 * <p>
-	 * {@link WorkFactory} for overriding {@link ClassWorkSource} behaviour.
-	 * <p>
-	 * The object is a dependency rather than being instantiated.
+	 * {@link ManagedFunctionFactory} for overriding
+	 * {@link ClassManagedFunctionSource} behaviour.
 	 */
-	private static class SectionWorkFactory extends ClassWork implements
-			WorkFactory<ClassWork> {
-
-		/**
-		 * Initiate.
-		 */
-		public SectionWorkFactory() {
-			super(null);
-		}
-
-		@Override
-		public ClassWork createWork() {
-			return this;
-		}
-	}
-
-	/**
-	 * {@link ManagedFunctionFactory} for overriding {@link ClassWorkSource} behaviour.
-	 */
-	public static class SectionTaskFactory implements
-			ManagedFunctionFactory<ClassWork, Indexed, Indexed>,
-			ManagedFunction<ClassWork, Indexed, Indexed> {
+	public static class SectionManagedFunctionFactory
+			implements ManagedFunctionFactory<Indexed, Indexed>, ManagedFunction<Indexed, Indexed> {
 
 		/**
 		 * {@link Method} for the {@link ManagedFunction}.
@@ -140,8 +108,7 @@ public class SectionClassWorkSource extends ClassWorkSource {
 		 *            {@link ParameterFactory} instances for the parameters of
 		 *            the {@link Method}.
 		 */
-		public SectionTaskFactory(Method method, boolean isStatic,
-				ParameterFactory[] parameters) {
+		public SectionManagedFunctionFactory(Method method, boolean isStatic, ParameterFactory[] parameters) {
 			this.method = method;
 			this.isStatic = isStatic;
 			this.parameters = parameters;
@@ -166,21 +133,20 @@ public class SectionClassWorkSource extends ClassWorkSource {
 		}
 
 		/*
-		 * ================= TaskFactory ========================
+		 * ================= ManagedFunctionFactory ========================
 		 */
 
 		@Override
-		public ManagedFunction<ClassWork, Indexed, Indexed> createManagedFunction(ClassWork work) {
+		public ManagedFunction<Indexed, Indexed> createManagedFunction() {
 			return this;
 		}
 
 		/*
-		 * ===================== Task ===========================
+		 * ===================== ManagedFunction ===========================
 		 */
 
 		@Override
-		public Object execute(ManagedFunctionContext<ClassWork, Indexed, Indexed> context)
-				throws Throwable {
+		public Object execute(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
 
 			// Obtain the section object
 			Object sectionObject = context.getObject(0);
@@ -195,7 +161,7 @@ public class SectionClassWorkSource extends ClassWorkSource {
 			}
 
 			// Invoke the method as the task
-			return ClassTask.invokeMethod(instance, this.method, params);
+			return ClassFunction.invokeMethod(instance, this.method, params);
 		}
 	}
 

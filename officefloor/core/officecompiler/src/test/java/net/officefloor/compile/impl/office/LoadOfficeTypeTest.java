@@ -65,7 +65,7 @@ import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.plugin.administrator.clazz.ClassAdministratorSource;
+import net.officefloor.plugin.administrator.clazz.ClassAdministrationSource;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -904,11 +904,11 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 				// Load the administrator type
 				PropertyList properties = context.createPropertyList();
 				properties.addProperty(
-						ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME)
+						ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME)
 						.setValue(MockLoadAdministrator.class.getName());
 				AdministrationType<?, ?> administratorType = context
 						.loadAdministratorType(
-								ClassAdministratorSource.class.getName(),
+								ClassAdministrationSource.class.getName(),
 								properties);
 
 				// Ensure correct administrator type
@@ -929,7 +929,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 				"Missing property 'class.name'");
 		this.issues.recordIssue("Type", OfficeNodeImpl.class,
 				"Failure loading AdministratorType from source "
-						+ ClassAdministratorSource.class.getName(), causes);
+						+ ClassAdministrationSource.class.getName(), causes);
 
 		// Fail to load the administrator type
 		this.loadOfficeType(false, new Loader() {
@@ -940,7 +940,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 				// Do not specify class causing failure to load type
 				PropertyList properties = context.createPropertyList();
 				context.loadAdministratorType(
-						ClassAdministratorSource.class.getName(), properties);
+						ClassAdministrationSource.class.getName(), properties);
 
 				// Should not reach this point
 				fail("Should not successfully load administrator type");

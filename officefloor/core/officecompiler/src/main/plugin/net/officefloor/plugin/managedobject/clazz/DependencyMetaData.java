@@ -21,7 +21,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
-import net.officefloor.plugin.work.clazz.Qualifier;
+import net.officefloor.plugin.managedfunction.clazz.Qualifier;
 
 /**
  * Meta-data for a {@link Dependency}.

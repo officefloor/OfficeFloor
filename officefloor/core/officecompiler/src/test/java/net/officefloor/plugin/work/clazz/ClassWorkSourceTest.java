@@ -37,9 +37,16 @@ import net.officefloor.frame.api.function.FlowFuture;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedfunction.clazz.ClassFunctionFactory;
+import net.officefloor.plugin.managedfunction.clazz.ClassWork;
+import net.officefloor.plugin.managedfunction.clazz.ClassWorkFactory;
+import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.managedfunction.clazz.NonFunctionMethod;
+import net.officefloor.plugin.managedfunction.clazz.Qualifier;
 
 /**
- * Test the {@link ClassWorkSource}.
+ * Test the {@link ClassManagedFunctionSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -60,8 +67,8 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 	 * Ensures specification correct.
 	 */
 	public void testSpecification() {
-		ManagedFunctionLoaderUtil.validateSpecification(ClassWorkSource.class,
-				ClassWorkSource.CLASS_NAME_PROPERTY_NAME, "Class");
+		ManagedFunctionLoaderUtil.validateSpecification(ClassManagedFunctionSource.class,
+				ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, "Class");
 	}
 
 	/**
@@ -76,7 +83,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 						MockQualifiedClass.class));
 
 		// Task
-		ManagedFunctionTypeBuilder task = work.addManagedFunctionType("task", new ClassTaskFactory(
+		ManagedFunctionTypeBuilder task = work.addManagedFunctionType("task", new ClassFunctionFactory(
 				null, false, null), null, null);
 		ManagedFunctionObjectTypeBuilder<?> objectOne = task.addObject(String.class);
 		objectOne.setTypeQualifier(MockQualification.class.getName());
@@ -87,8 +94,8 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 
 		// Validate the work type
 		FunctionNamespaceType<?> workType = ManagedFunctionLoaderUtil.validateWorkType(work,
-				ClassWorkSource.class,
-				ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+				ClassManagedFunctionSource.class,
+				ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
 				MockQualifiedClass.class.getName());
 
 		// Ensure appropriate objects for task
@@ -136,7 +143,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 		// Record issue
 		issues.recordIssue(
 				"Failed to source WorkType definition from WorkSource "
-						+ ClassWorkSource.class.getName(),
+						+ ClassManagedFunctionSource.class.getName(),
 				new IllegalArgumentException(
 						"Method task parameter 0 has more than one Qualifier"));
 
@@ -146,7 +153,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 						MockMultipleQualifiedClass.class));
 
 		// task
-		ManagedFunctionTypeBuilder task = work.addManagedFunctionType("task", new ClassTaskFactory(
+		ManagedFunctionTypeBuilder task = work.addManagedFunctionType("task", new ClassFunctionFactory(
 				null, false, null), null, null);
 		task.addObject(String.class)
 				.setLabel(MockQualification.class.getName());
@@ -155,8 +162,8 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Validate the work type
-		FunctionNamespaceType<?> type = ManagedFunctionLoaderUtil.loadWorkType(ClassWorkSource.class,
-				compiler, ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+		FunctionNamespaceType<?> type = ManagedFunctionLoaderUtil.loadWorkType(ClassManagedFunctionSource.class,
+				compiler, ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
 				MockMultipleQualifiedClass.class.getName());
 		assertNull("Should not load work with multiple qualifers", type);
 
@@ -182,7 +189,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to load {@link FunctionNamespaceType} for the {@link ClassWorkSource}.
+	 * Ensure able to load {@link FunctionNamespaceType} for the {@link ClassManagedFunctionSource}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testWorkType() throws Exception {
@@ -193,7 +200,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 
 		// taskInstanceMethod
 		ManagedFunctionTypeBuilder instanceMethod = work.addManagedFunctionType("taskInstanceMethod",
-				new ClassTaskFactory(null, false, null), null, null);
+				new ClassFunctionFactory(null, false, null), null, null);
 		instanceMethod.setReturnType(String.class);
 		instanceMethod.addObject(String.class).setLabel(String.class.getName());
 		ManagedFunctionFlowTypeBuilder<?> asynchronous = instanceMethod.addFlow();
@@ -207,17 +214,17 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 
 		// taskFailMethod
 		ManagedFunctionTypeBuilder failMethod = work.addManagedFunctionType("taskFailMethod",
-				new ClassTaskFactory(null, false, null), null, null);
+				new ClassFunctionFactory(null, false, null), null, null);
 		failMethod.addEscalation(SQLException.class);
 
 		// taskStaticMethod
 		ManagedFunctionTypeBuilder staticMethod = work.addManagedFunctionType("taskStaticMethod",
-				new ClassTaskFactory(null, false, null), null, null);
+				new ClassFunctionFactory(null, false, null), null, null);
 		staticMethod.setReturnType(Object.class);
 
 		// Validate the work type
-		ManagedFunctionLoaderUtil.validateWorkType(work, ClassWorkSource.class,
-				ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+		ManagedFunctionLoaderUtil.validateWorkType(work, ClassManagedFunctionSource.class,
+				ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
 				MockClass.class.getName());
 	}
 
@@ -239,8 +246,8 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 
 		// Create the task
 		FunctionNamespaceType<ClassWork> workType = ManagedFunctionLoaderUtil.loadWorkType(
-				ClassWorkSource.class,
-				ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+				ClassManagedFunctionSource.class,
+				ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
 				MockClass.class.getName());
 		ClassWork work = workType.getWorkFactory().createWork();
 		ManagedFunctionType<ClassWork, ?, ?> taskType = workType.getManagedFunctionTypes()[1];
@@ -285,8 +292,8 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 
 		// Create the task
 		FunctionNamespaceType<ClassWork> workType = ManagedFunctionLoaderUtil.loadWorkType(
-				ClassWorkSource.class,
-				ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+				ClassManagedFunctionSource.class,
+				ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
 				MockClass.class.getName());
 		ClassWork work = workType.getWorkFactory().createWork();
 		ManagedFunctionType<ClassWork, ?, ?> taskType = workType.getManagedFunctionTypes()[0];
@@ -322,8 +329,8 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 
 		// Create the task
 		FunctionNamespaceType<ClassWork> workType = ManagedFunctionLoaderUtil.loadWorkType(
-				ClassWorkSource.class,
-				ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+				ClassManagedFunctionSource.class,
+				ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
 				MockClass.class.getName());
 		ClassWork work = workType.getWorkFactory().createWork();
 		ManagedFunctionType<ClassWork, ?, ?> taskType = workType.getManagedFunctionTypes()[2];
@@ -431,14 +438,14 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 		/**
 		 * Annotated method to NOT be a {@link ManagedFunction}.
 		 */
-		@NonTaskMethod
+		@NonFunctionMethod
 		public void nonTaskMethod() {
 		}
 
 		/**
 		 * Annotated static method to NOT be a {@link ManagedFunction}.
 		 */
-		@NonTaskMethod
+		@NonFunctionMethod
 		public static void nonStaticTaskMethod() {
 		}
 	}
@@ -473,7 +480,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to inherit by method name for the {@link ClassWorkSource}.
+	 * Ensure able to inherit by method name for the {@link ClassManagedFunctionSource}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testWorkInheritance() throws Exception {
@@ -488,13 +495,13 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 
 		// task
 		ManagedFunctionTypeBuilder taskMethod = work.addManagedFunctionType("task",
-				new ClassTaskFactory(null, false, null), null, null);
+				new ClassFunctionFactory(null, false, null), null, null);
 		taskMethod.setReturnType(Integer.class);
 		taskMethod.addObject(Integer.class).setLabel(Integer.class.getName());
 
 		// Validate the work type
-		ManagedFunctionLoaderUtil.validateWorkType(work, ClassWorkSource.class,
-				ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+		ManagedFunctionLoaderUtil.validateWorkType(work, ClassManagedFunctionSource.class,
+				ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
 				ChildClass.class.getName());
 	}
 
@@ -519,7 +526,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 		}
 
 		// Non task method so not included in method name inheritance
-		@NonTaskMethod
+		@NonFunctionMethod
 		public Character task(Character parameter) {
 			return parameter;
 		}
@@ -540,7 +547,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 		// Record issue
 		issues.recordIssue(
 				"Failed to source WorkType definition from WorkSource "
-						+ ClassWorkSource.class.getName(),
+						+ ClassManagedFunctionSource.class.getName(),
 				new IllegalStateException(
 						"Two methods by the same name 'task' in class "
 								+ GrandChildClass.class.getName()
@@ -548,8 +555,8 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 
 		// Validate the work type
 		this.replayMockObjects();
-		ManagedFunctionLoaderUtil.loadWorkType(ClassWorkSource.class, compiler,
-				ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+		ManagedFunctionLoaderUtil.loadWorkType(ClassManagedFunctionSource.class, compiler,
+				ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
 				GrandChildClass.class.getName());
 		this.verifyMockObjects();
 	}

@@ -75,14 +75,14 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedfunction.clazz.Qualifier;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.ManagedObject;
 import net.officefloor.plugin.section.clazz.Property;
 import net.officefloor.plugin.section.clazz.TypeQualifier;
-import net.officefloor.plugin.section.work.WorkSectionSource;
-import net.officefloor.plugin.work.clazz.Qualifier;
+import net.officefloor.plugin.section.managedfunction.ManagedFunctionSectionSource;
 
 /**
  * Tests the {@link AutoWireOfficeSource}.
@@ -616,7 +616,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordSectionOutputs("SECTION");
 		this.recordReturn(this.context, this.context.createPropertyList(), propertyList);
 		this.recordReturn(propertyList,
-				propertyList.addProperty(WorkSectionSource.PROPERTY_PARAMETER_PREFIX + "Handle"), property);
+				propertyList.addProperty(ManagedFunctionSectionSource.PROPERTY_PARAMETER_PREFIX + "Handle"), property);
 		property.setValue("1");
 		this.recordEscalation(Exception.class, "SECTION", "INPUT");
 		this.recordReturn(propertyList,

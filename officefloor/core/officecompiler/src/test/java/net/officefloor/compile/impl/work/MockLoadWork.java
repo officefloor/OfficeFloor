@@ -21,11 +21,11 @@ import java.io.IOException;
 
 import junit.framework.TestCase;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
-import net.officefloor.plugin.work.clazz.ClassWorkSource;
 
 /**
- * Class for {@link ClassWorkSource} that enables validating loading a
+ * Class for {@link ClassManagedFunctionSource} that enables validating loading a
  * {@link FunctionNamespaceType}.
  * 
  * @author Daniel Sagenschneider

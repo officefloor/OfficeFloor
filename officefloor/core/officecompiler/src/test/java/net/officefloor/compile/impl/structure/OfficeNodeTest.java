@@ -59,7 +59,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuild
 import net.officefloor.frame.api.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.impl.section.SectionModelSectionSource;
-import net.officefloor.plugin.administrator.clazz.ClassAdministratorSource;
+import net.officefloor.plugin.administrator.clazz.ClassAdministrationSource;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
@@ -709,13 +709,13 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		// Add two different administrators verifying details
 		this.replayMockObjects();
 		OfficeAdministration admin = this.node.addOfficeAdministrator("ADMIN",
-				new ClassAdministratorSource());
+				new ClassAdministrationSource());
 		assertNotNull("Must have administrator", admin);
 		assertEquals("Incorrect administrator name", "ADMIN",
 				admin.getOfficeAdministratorName());
 		assertNotSame("Should obtain another administrator", admin,
 				this.node.addOfficeAdministrator("ANOTHER",
-						new ClassAdministratorSource()));
+						new ClassAdministrationSource()));
 		this.verifyMockObjects();
 	}
 
@@ -731,9 +731,9 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		// Add the administrator twice
 		this.replayMockObjects();
 		OfficeAdministration adminFirst = this.node.addOfficeAdministrator(
-				"ADMIN", new ClassAdministratorSource());
+				"ADMIN", new ClassAdministrationSource());
 		OfficeAdministration adminSecond = this.node.addOfficeAdministrator(
-				"ADMIN", new ClassAdministratorSource());
+				"ADMIN", new ClassAdministrationSource());
 		this.verifyMockObjects();
 
 		// Should be the same administrator

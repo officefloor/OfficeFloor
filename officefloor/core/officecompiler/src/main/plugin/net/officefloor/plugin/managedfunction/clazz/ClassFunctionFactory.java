@@ -15,31 +15,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.work.clazz;
+package net.officefloor.plugin.managedfunction.clazz;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
-import net.officefloor.frame.api.function.Work;
 
 /**
- * {@link ManagedFunctionFactory} for the {@link ClassTask}.
+ * {@link ManagedFunctionFactory} for the {@link ClassFunction}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassTaskFactory implements
-		ManagedFunctionFactory<ClassWork, Indexed, Indexed> {
+public class ClassFunctionFactory implements ManagedFunctionFactory<Indexed, Indexed> {
 
 	/**
-	 * Method to invoke for this task.
+	 * Default {@link Constructor} for the {@link Class} containing the
+	 * {@link Method}. Will be <code>null</code> if static {@link Method}.
+	 */
+	private final Constructor<?> constructor;
+
+	/**
+	 * Method to invoke for this {@link ManagedFunction}.
 	 */
 	private final Method method;
-
-	/**
-	 * Indicates if the {@link Method} is <code>static</code>.
-	 */
-	private final boolean isStaticMethod;
 
 	/**
 	 * Parameters.
@@ -49,17 +50,18 @@ public class ClassTaskFactory implements
 	/**
 	 * Initiate.
 	 * 
+	 * @param constructor
+	 *            Default {@link Constructor} for the {@link Class} containing
+	 *            the {@link Method}. Will be <code>null</code> if static
+	 *            {@link Method}.
 	 * @param method
-	 *            {@link Method} to invoke on the {@link Work} class.
-	 * @param isStaticMethod
-	 *            Indicates if the {@link Method} is <code>static</code>.
+	 *            {@link Method} to invoke for the {@link ManagedFunction}.
 	 * @param parameters
 	 *            {@link ParameterFactory} instances.
 	 */
-	public ClassTaskFactory(Method method, boolean isStaticMethod,
-			ParameterFactory[] parameters) {
+	public ClassFunctionFactory(Constructor<?> constructor, Method method, ParameterFactory[] parameters) {
+		this.constructor = constructor;
 		this.method = method;
-		this.isStaticMethod = isStaticMethod;
 		this.parameters = parameters;
 	}
 
@@ -73,12 +75,12 @@ public class ClassTaskFactory implements
 	}
 
 	/*
-	 * =============== TaskFactory ===========================================
+	 * =============== ManagedFunctionFactory ===============
 	 */
 
 	@Override
-	public ClassTask createManagedFunction(ClassWork work) {
-		return new ClassTask(this.method, this.isStaticMethod, this.parameters);
+	public ClassFunction createManagedFunction() {
+		return new ClassFunction(this.constructor, this.method, this.parameters);
 	}
 
 }

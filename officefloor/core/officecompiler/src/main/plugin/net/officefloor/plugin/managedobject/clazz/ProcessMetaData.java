@@ -25,6 +25,7 @@ import java.lang.reflect.Proxy;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -42,9 +43,10 @@ public class ProcessMetaData {
 	public final Field field;
 
 	/**
-	 * Indexes for the {@link Method} instances of the process interface.
+	 * {@link ProcessMetaData} for the {@link Method} instances of the process
+	 * interface.
 	 */
-	private final Map<String, Integer> methodIndexes;
+	private final Map<String, ProcessMethodMetaData> methodMetaData;
 
 	/**
 	 * {@link Constructor} to create the process interface implementation.
@@ -61,8 +63,9 @@ public class ProcessMetaData {
 	 * 
 	 * @param field
 	 *            {@link Field} receiving the injected process interface.
-	 * @param methodIndexes
-	 *            Indexes for the {@link Method} instances.
+	 * @param methodMetaData
+	 *            {@link ProcessMetaData} for the {@link Method} instances of
+	 *            the process interface.
 	 * @param classLoader
 	 *            {@link ClassLoader}.
 	 * @param executeContext
@@ -70,17 +73,15 @@ public class ProcessMetaData {
 	 * @throws Exception
 	 *             If fails to create the proxy for the process interface.
 	 */
-	public ProcessMetaData(Field field, Map<String, Integer> methodIndexes,
-			ClassLoader classLoader,
-			ManagedObjectExecuteContext<Indexed> executeContext)
-			throws Exception {
+	public ProcessMetaData(Field field, Map<String, ProcessMethodMetaData> methodMetaData, ClassLoader classLoader,
+			ManagedObjectExecuteContext<Indexed> executeContext) throws Exception {
 		this.field = field;
-		this.methodIndexes = methodIndexes;
+		this.methodMetaData = methodMetaData;
 		this.executeContext = executeContext;
 
 		// Create the proxy object to invoke processes
-		this.processInterfaceConstructor = Proxy.getProxyClass(classLoader,
-				field.getType()).getConstructor(InvocationHandler.class);
+		this.processInterfaceConstructor = Proxy.getProxyClass(classLoader, field.getType())
+				.getConstructor(InvocationHandler.class);
 	}
 
 	/**
@@ -93,12 +94,10 @@ public class ProcessMetaData {
 	 * @throws Exception
 	 *             If fails to instantiate the process interface implementation.
 	 */
-	public Object createProcessInterfaceImplementation(
-			ManagedObject managedObject) throws Exception {
+	public Object createProcessInterfaceImplementation(ManagedObject managedObject) throws Exception {
 
 		// Create the invocation handler
-		ProcessInvocationHandler handler = new ProcessInvocationHandler(
-				managedObject);
+		ProcessInvocationHandler handler = new ProcessInvocationHandler(managedObject);
 
 		// Return the process interface implementation
 		return this.processInterfaceConstructor.newInstance(handler);
@@ -129,20 +128,26 @@ public class ProcessMetaData {
 		 */
 
 		@Override
-		public Object invoke(Object proxy, Method method, Object[] args)
-				throws Throwable {
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
-			// Obtain the parameter
-			Object parameter = ((args != null) && (args.length == 1)) ? args[0]
-					: null;
+			// Obtain the meta-data for the method
+			ProcessMethodMetaData metaData = ProcessMetaData.this.methodMetaData.get(method.getName());
 
-			// Obtain the index for the method
-			Integer index = ProcessMetaData.this.methodIndexes.get(method
-					.getName());
+			// Obtain the parameter and flow callback
+			Object parameter = null;
+			FlowCallback flowCallback = null;
+			int flowCallbackIndex = 0;
+			if (metaData.isParameter()) {
+				parameter = args[0];
+				flowCallbackIndex = 1;
+			}
+			if (metaData.isFlowCallback()) {
+				flowCallback = (FlowCallback) args[flowCallbackIndex];
+			}
 
 			// Invoke the process
-			ProcessMetaData.this.executeContext.invokeProcess(index, parameter,
-					this.managedObject, 0);
+			ProcessMetaData.this.executeContext.invokeProcess(metaData.getProcessIndex(), parameter, this.managedObject,
+					0, flowCallback);
 
 			// Never returns a value
 			return null;

@@ -69,7 +69,7 @@ public interface SectionSourceContext extends SourceContext {
 	 * @return {@link FunctionNamespaceType} or <code>null</code> if fails to
 	 *         load the {@link FunctionNamespaceType}.
 	 */
-	FunctionNamespaceType loadFunctionNamespaceType(String managedFunctionSourceClassName, PropertyList properties);
+	FunctionNamespaceType loadManagedFunctionType(String managedFunctionSourceClassName, PropertyList properties);
 
 	/**
 	 * <p>

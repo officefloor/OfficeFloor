@@ -38,13 +38,13 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.plugin.governance.clazz.Enforce;
 import net.officefloor.plugin.governance.clazz.Govern;
+import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.ManagedObject;
 import net.officefloor.plugin.section.clazz.Property;
 import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
-import net.officefloor.plugin.work.clazz.ClassWorkSource;
-import net.officefloor.plugin.work.clazz.FlowInterface;
 
 /**
  * Tests compiling a {@link Governance}.
@@ -340,7 +340,7 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Simple class for {@link ClassWorkSource}.
+	 * Simple class for {@link ClassManagedFunctionSource}.
 	 */
 	public static class SimpleWork {
 
@@ -351,7 +351,7 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 
 	/**
 	 * {@link Work} for {@link InputManagedObject} for the
-	 * {@link ClassWorkSource}.
+	 * {@link ClassManagedFunctionSource}.
 	 */
 	public static class InputManagedObjectWork {
 

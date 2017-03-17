@@ -35,7 +35,7 @@ import net.officefloor.compile.spi.office.OfficeOutput;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
-import net.officefloor.plugin.administrator.clazz.ClassAdministratorSource;
+import net.officefloor.plugin.administrator.clazz.ClassAdministrationSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
 
@@ -141,8 +141,8 @@ public class MockLoadOfficeSource extends AbstractOfficeSource {
 		OfficeObject object = architect.addOfficeObject("object",
 				Connection.class.getName());
 		OfficeAdministration admin = architect.addOfficeAdministrator("admin",
-				ClassAdministratorSource.class.getName());
-		admin.addProperty(ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME,
+				ClassAdministrationSource.class.getName());
+		admin.addProperty(ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME,
 				MockAdministrator.class.getName());
 		admin.administerManagedObject(object);
 
@@ -173,7 +173,7 @@ public class MockLoadOfficeSource extends AbstractOfficeSource {
 	}
 
 	/**
-	 * Mock class for the {@link ClassAdministratorSource}.
+	 * Mock class for the {@link ClassAdministrationSource}.
 	 */
 	public static class MockAdministrator {
 		public void admin(XAResource[] resources) {

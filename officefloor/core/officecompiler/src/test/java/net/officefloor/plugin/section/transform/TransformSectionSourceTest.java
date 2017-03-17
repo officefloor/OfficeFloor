@@ -52,12 +52,12 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
-import net.officefloor.plugin.section.clazz.SectionClassWorkSource;
-import net.officefloor.plugin.work.clazz.ClassWorkSource;
-import net.officefloor.plugin.work.clazz.FlowInterface;
+import net.officefloor.plugin.section.clazz.SectionClassManagedFunctionSource;
 
 /**
  * Tests the {@link TransformSectionSource}.
@@ -446,8 +446,8 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 
 			// Tasks
 			SectionFunctionNamespace work = type.addSectionWork("WORK",
-					SectionClassWorkSource.class.getName());
-			work.addProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+					SectionClassManagedFunctionSource.class.getName());
+			work.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
 					MockSectionTypeClass.class.getName());
 
 			SectionFunction taskOne = work.addSectionTask("inputOne", "inputOne");

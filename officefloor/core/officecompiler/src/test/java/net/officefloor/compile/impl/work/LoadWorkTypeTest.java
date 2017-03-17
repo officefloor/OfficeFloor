@@ -1100,7 +1100,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(this.issues);
 		ManagedFunctionLoader workLoader = compiler.getWorkLoader();
 		MockWorkSource.loader = loader;
-		FunctionNamespaceType<Work> workType = workLoader.loadFunctionNamespaceType(MockWorkSource.class,
+		FunctionNamespaceType<Work> workType = workLoader.loadManagedFunctionType(MockWorkSource.class,
 				propertyList);
 
 		// Verify the mock objects

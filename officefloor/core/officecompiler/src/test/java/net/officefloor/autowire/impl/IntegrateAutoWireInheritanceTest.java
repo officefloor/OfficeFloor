@@ -22,7 +22,7 @@ import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.section.clazz.NextFunction;
 
 /**
  * Tests the integration using inheritance of link configuration.
@@ -77,7 +77,7 @@ public class IntegrateAutoWireInheritanceTest extends OfficeFrameTestCase {
 	 * Mock inherit class.
 	 */
 	public static class MockInheritClass {
-		@NextTask("output")
+		@NextFunction("output")
 		public void task() {
 		}
 	}

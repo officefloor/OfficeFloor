@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.work.clazz;
+package net.officefloor.plugin.managedfunction.clazz;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
@@ -23,7 +23,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
 
-import net.officefloor.frame.api.function.FlowFuture;
+import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.internal.structure.Flow;
 
@@ -57,15 +57,13 @@ public class FlowParameterFactory implements ParameterFactory {
 	 * @throws Exception
 	 *             If fails to create the {@link Proxy}.
 	 */
-	public FlowParameterFactory(ClassLoader classLoader,
-			Class<?> flowInterface,
+	public FlowParameterFactory(ClassLoader classLoader, Class<?> flowInterface,
 			Map<String, FlowMethodMetaData> methodMetaDatas) throws Exception {
 		this.methodMetaDatas = methodMetaDatas;
 
 		// Create the proxy class and obtain the constructor to use
 		Class<?> proxyClass = Proxy.getProxyClass(classLoader, flowInterface);
-		this.proxyConstructor = proxyClass
-				.getConstructor(InvocationHandler.class);
+		this.proxyConstructor = proxyClass.getConstructor(InvocationHandler.class);
 	}
 
 	/**
@@ -74,8 +72,7 @@ public class FlowParameterFactory implements ParameterFactory {
 	 * @return {@link FlowMethodMetaData}.
 	 */
 	public FlowMethodMetaData[] getFlowMethodMetaData() {
-		return this.methodMetaDatas.values().toArray(
-				new FlowMethodMetaData[this.methodMetaDatas.size()]);
+		return this.methodMetaDatas.values().toArray(new FlowMethodMetaData[this.methodMetaDatas.size()]);
 	}
 
 	/*
@@ -83,11 +80,9 @@ public class FlowParameterFactory implements ParameterFactory {
 	 */
 
 	@Override
-	public Object createParameter(ManagedFunctionContext<?, ?, ?> context)
-			throws Exception {
+	public Object createParameter(ManagedFunctionContext<?, ?> context) throws Exception {
 		// Return a new instance of the proxy to invoke the flows
-		return this.proxyConstructor
-				.newInstance(new Object[] { new FlowInvocationHandler(context) });
+		return this.proxyConstructor.newInstance(new Object[] { new FlowInvocationHandler(context) });
 	}
 
 	/**
@@ -98,16 +93,16 @@ public class FlowParameterFactory implements ParameterFactory {
 		/**
 		 * {@link ManagedFunctionContext}.
 		 */
-		private final ManagedFunctionContext<?, ?, ?> taskContext;
+		private final ManagedFunctionContext<?, ?> functionContext;
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param taskContext
+		 * @param functionContext
 		 *            {@link ManagedFunctionContext}.
 		 */
-		public FlowInvocationHandler(ManagedFunctionContext<?, ?, ?> taskContext) {
-			this.taskContext = taskContext;
+		public FlowInvocationHandler(ManagedFunctionContext<?, ?> functionContext) {
+			this.functionContext = functionContext;
 		}
 
 		/*
@@ -115,23 +110,29 @@ public class FlowParameterFactory implements ParameterFactory {
 		 */
 
 		@Override
-		public Object invoke(Object proxy, Method method, Object[] args)
-				throws Throwable {
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
 			// Obtain the method meta-data
 			String methodName = method.getName();
-			FlowMethodMetaData metaData = FlowParameterFactory.this.methodMetaDatas
-					.get(methodName);
+			FlowMethodMetaData metaData = FlowParameterFactory.this.methodMetaDatas.get(methodName);
 
-			// Obtain the parameter
-			Object parameter = (metaData.isParameter() ? args[0] : null);
+			// Obtain the parameter and flow callback
+			Object parameter = null;
+			FlowCallback flowCallback = null;
+			int flowCallbackIndex = 0;
+			if (metaData.isParameter()) {
+				parameter = args[0];
+				flowCallbackIndex = 1;
+			}
+			if (metaData.isFlowCallback()) {
+				flowCallback = (FlowCallback) args[flowCallbackIndex];
+			}
 
 			// Invoke the flow
-			FlowFuture flowFuture = this.taskContext.doFlow(
-					metaData.getFlowIndex(), parameter);
+			this.functionContext.doFlow(metaData.getFlowIndex(), parameter, flowCallback);
 
-			// Return the flow future if required
-			return (metaData.isReturnFlowFuture() ? flowFuture : null);
+			// Never returns a value
+			return null;
 		}
 	}
 

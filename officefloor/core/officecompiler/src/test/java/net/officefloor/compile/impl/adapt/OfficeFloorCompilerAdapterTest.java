@@ -61,12 +61,12 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.impl.office.OfficeModelOfficeSource;
 import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
 import net.officefloor.model.impl.section.SectionModelSectionSource;
-import net.officefloor.plugin.administrator.clazz.ClassAdministratorSource;
+import net.officefloor.plugin.administrator.clazz.ClassAdministrationSource;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
+import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
-import net.officefloor.plugin.work.clazz.ClassWorkSource;
 
 /**
  * Tests the {@link OfficeFloorCompilerAdapter}.
@@ -414,7 +414,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	public void testWorkLoaderSpecification() {
 		ManagedFunctionLoader loader = this.compiler.getWorkLoader();
 		PropertyList specification = loader
-				.loadSpecification(ClassWorkSource.class);
+				.loadSpecification(ClassManagedFunctionSource.class);
 		assertEquals("Should have a property", 1,
 				specification.getPropertyNames().length);
 	}
@@ -424,10 +424,10 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	 */
 	public void testWorkFromTypeLoader() {
 		PropertyList properties = this.compiler.createPropertyList();
-		properties.addProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME)
+		properties.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME)
 				.setValue(AdaptManagedObjectWork.class.getName());
 		FunctionNamespaceType<?> workType = this.typeLoader.loadWorkType(
-				ClassWorkSource.class.getName(), properties);
+				ClassManagedFunctionSource.class.getName(), properties);
 		assertNotNull("Must have work type", workType);
 	}
 
@@ -504,7 +504,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	public void testAdministratorLoader() {
 		AdministrationLoader loader = this.compiler.getAdministratorLoader();
 		PropertyList specification = loader
-				.loadSpecification(ClassAdministratorSource.class);
+				.loadSpecification(ClassAdministrationSource.class);
 		assertEquals("Should have a property", 1,
 				specification.getPropertyNames().length);
 	}

@@ -25,7 +25,7 @@ import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
-import net.officefloor.plugin.work.clazz.ClassWorkSource;
+import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 
 /**
  * Tests compiling the {@link Office} {@link Escalation}.
@@ -87,7 +87,7 @@ public class CompileOfficeEscalationTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Class for {@link ClassWorkSource}.
+	 * Class for {@link ClassManagedFunctionSource}.
 	 */
 	public static class EscalationWork {
 		public void handle(Throwable parameter) {

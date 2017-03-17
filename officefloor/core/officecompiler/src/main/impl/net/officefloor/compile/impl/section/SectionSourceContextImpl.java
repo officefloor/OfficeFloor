@@ -93,7 +93,7 @@ public class SectionSourceContextImpl extends SourceContextImpl implements Secti
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public FunctionNamespaceType loadFunctionNamespaceType(String workSourceClassName, PropertyList properties) {
+	public FunctionNamespaceType loadManagedFunctionType(String workSourceClassName, PropertyList properties) {
 		return CompileUtil.loadType(FunctionNamespaceType.class, workSourceClassName, this.context.getCompilerIssues(),
 				() -> {
 

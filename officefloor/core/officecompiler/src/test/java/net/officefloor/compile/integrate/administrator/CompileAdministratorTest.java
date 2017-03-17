@@ -28,7 +28,7 @@ import net.officefloor.frame.api.function.Work;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
-import net.officefloor.plugin.administrator.clazz.ClassAdministratorSource;
+import net.officefloor.plugin.administrator.clazz.ClassAdministrationSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**
@@ -50,8 +50,8 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
 				"TEAM");
 		this.record_officeBuilder_addThreadAdministrator("ADMIN",
-				"OFFICE_TEAM", ClassAdministratorSource.class,
-				ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME,
+				"OFFICE_TEAM", ClassAdministrationSource.class,
+				ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME,
 				SimpleAdmin.class.getName());
 
 		// Compile
@@ -79,8 +79,8 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 		task.linkPreTaskAdministration("ADMIN", "duty");
 		AdministrationBuilder admin = this
 				.record_officeBuilder_addThreadAdministrator("ADMIN",
-						"OFFICE_TEAM", ClassAdministratorSource.class,
-						ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME,
+						"OFFICE_TEAM", ClassAdministrationSource.class,
+						ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME,
 						SimpleAdmin.class.getName());
 		this.recordReturn(admin, admin.addDuty("duty"), null);
 
@@ -109,8 +109,8 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 		task.linkPostTaskAdministration("ADMIN", "duty");
 		AdministrationBuilder admin = this
 				.record_officeBuilder_addThreadAdministrator("ADMIN",
-						"OFFICE_TEAM", ClassAdministratorSource.class,
-						ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME,
+						"OFFICE_TEAM", ClassAdministrationSource.class,
+						ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME,
 						SimpleAdmin.class.getName());
 		this.recordReturn(admin, admin.addDuty("duty"), null);
 
@@ -136,8 +136,8 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 				"MANAGED_OBJECT");
 		AdministrationBuilder admin = this
 				.record_officeBuilder_addThreadAdministrator("ADMIN",
-						"OFFICE_TEAM", ClassAdministratorSource.class,
-						ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME,
+						"OFFICE_TEAM", ClassAdministrationSource.class,
+						ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME,
 						SimpleAdmin.class.getName());
 		admin.administerManagedObject("MANAGED_OBJECT");
 		this.record_officeFloorBuilder_addManagedObject(
@@ -171,8 +171,8 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 				"OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT");
 		AdministrationBuilder admin = this
 				.record_officeBuilder_addThreadAdministrator("ADMIN",
-						"OFFICE_TEAM", ClassAdministratorSource.class,
-						ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME,
+						"OFFICE_TEAM", ClassAdministrationSource.class,
+						ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME,
 						SimpleAdmin.class.getName());
 		admin.administerManagedObject("OFFICE.MANAGED_OBJECT");
 

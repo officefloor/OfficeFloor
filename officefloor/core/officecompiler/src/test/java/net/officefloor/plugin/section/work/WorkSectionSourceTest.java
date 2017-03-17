@@ -37,12 +37,13 @@ import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.api.function.Work;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.work.clazz.ClassWorkSource;
-import net.officefloor.plugin.work.clazz.FlowInterface;
-import net.officefloor.plugin.work.clazz.Qualifier;
+import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.managedfunction.clazz.Qualifier;
+import net.officefloor.plugin.section.managedfunction.ManagedFunctionSectionSource;
 
 /**
- * Tests the {@link WorkSectionSource}.
+ * Tests the {@link ManagedFunctionSectionSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -52,7 +53,7 @@ public class WorkSectionSourceTest extends OfficeFrameTestCase {
 	 * Ensure correct specification.
 	 */
 	public void testSpecification() {
-		SectionLoaderUtil.validateSpecification(WorkSectionSource.class);
+		SectionLoaderUtil.validateSpecification(ManagedFunctionSectionSource.class);
 	}
 
 	/**
@@ -93,8 +94,8 @@ public class WorkSectionSourceTest extends OfficeFrameTestCase {
 
 		// Tasks
 		SectionFunctionNamespace work = expected.addSectionWork("WORK",
-				ClassWorkSource.class.getName());
-		work.addProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+				ClassManagedFunctionSource.class.getName());
+		work.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
 				MockWork.class.getName());
 
 		SectionFunction taskOne = work.addSectionTask("taskOne", "taskOne");
@@ -117,12 +118,12 @@ public class WorkSectionSourceTest extends OfficeFrameTestCase {
 		work.addSectionTask("taskThree", "taskThree");
 
 		// Validate the type
-		SectionLoaderUtil.validateSection(expected, WorkSectionSource.class,
-				ClassWorkSource.class.getName(),
-				WorkSectionSource.PROPERTY_PARAMETER_PREFIX + "taskTwo", "2",
-				WorkSectionSource.PROPERTY_TASKS_NEXT_TO_OUTPUTS,
+		SectionLoaderUtil.validateSection(expected, ManagedFunctionSectionSource.class,
+				ClassManagedFunctionSource.class.getName(),
+				ManagedFunctionSectionSource.PROPERTY_PARAMETER_PREFIX + "taskTwo", "2",
+				ManagedFunctionSectionSource.PROPERTY_TASKS_NEXT_TO_OUTPUTS,
 				"taskTwo , taskThree",
-				ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+				ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
 				MockWork.class.getName());
 	}
 
@@ -142,20 +143,20 @@ public class WorkSectionSourceTest extends OfficeFrameTestCase {
 
 		// Create Work section
 		AutoWireSection section = autoWire.addSection("SECTION",
-				WorkSectionSource.class.getName(),
-				ClassWorkSource.class.getName());
-		section.addProperty(WorkSectionSource.PROPERTY_PARAMETER_PREFIX
+				ManagedFunctionSectionSource.class.getName(),
+				ClassManagedFunctionSource.class.getName());
+		section.addProperty(ManagedFunctionSectionSource.PROPERTY_PARAMETER_PREFIX
 				+ "taskTwo", "2");
-		section.addProperty(WorkSectionSource.PROPERTY_TASKS_NEXT_TO_OUTPUTS,
+		section.addProperty(ManagedFunctionSectionSource.PROPERTY_TASKS_NEXT_TO_OUTPUTS,
 				"taskTwo");
-		section.addProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+		section.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
 				MockWork.class.getName());
 
 		// Create handle section
 		AutoWireSection handle = autoWire.addSection("HANDLE",
-				WorkSectionSource.class.getName(),
-				ClassWorkSource.class.getName());
-		handle.addProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+				ManagedFunctionSectionSource.class.getName(),
+				ClassManagedFunctionSource.class.getName());
+		handle.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
 				MockFinishTask.class.getName());
 
 		// Link flows

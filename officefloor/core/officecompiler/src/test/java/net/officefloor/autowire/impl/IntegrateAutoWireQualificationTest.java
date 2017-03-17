@@ -27,9 +27,9 @@ import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedfunction.clazz.Qualifier;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
-import net.officefloor.plugin.work.clazz.Qualifier;
 
 /**
  * Integration of qualified {@link AutoWire}.

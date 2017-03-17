@@ -21,25 +21,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.section.FunctionFlow;
+import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
-import net.officefloor.compile.spi.section.SectionFunction;
-import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.SubSectionInput;
 import net.officefloor.compile.spi.section.SubSectionObject;
 import net.officefloor.compile.spi.section.SubSectionOutput;
-import net.officefloor.compile.spi.section.FunctionFlow;
-import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
 /**
  * {@link SectionDesigner} to intercept configuration to provide access to the
@@ -139,69 +138,59 @@ public class TransformSectionDesigner implements SectionDesigner {
 
 	@Override
 	public SectionInput addSectionInput(String inputName, String parameterType) {
-		return register(inputName, this.inputs,
-				this.delegate.addSectionInput(inputName, parameterType));
+		return register(inputName, this.inputs, this.delegate.addSectionInput(inputName, parameterType));
 	}
 
 	@Override
-	public SectionOutput addSectionOutput(String outputName,
-			String argumentType, boolean isEscalationOnly) {
+	public SectionOutput addSectionOutput(String outputName, String argumentType, boolean isEscalationOnly) {
 		return register(outputName, this.outputs,
-				this.delegate.addSectionOutput(outputName, argumentType,
-						isEscalationOnly));
+				this.delegate.addSectionOutput(outputName, argumentType, isEscalationOnly));
 	}
 
 	@Override
 	public SectionObject addSectionObject(String objectName, String objectType) {
-		return register(objectName, this.objects,
-				this.delegate.addSectionObject(objectName, objectType));
+		return register(objectName, this.objects, this.delegate.addSectionObject(objectName, objectType));
 	}
 
 	@Override
-	public SectionFunctionNamespace addSectionWork(String workName,
-			String workSourceClassName) {
-		return this.delegate.addSectionWork(workName, workSourceClassName);
+	public SectionFunctionNamespace addSectionFunctionNamespace(String namespaceName,
+			String managedFunctionSourceClassName) {
+		return this.delegate.addSectionFunctionNamespace(namespaceName, managedFunctionSourceClassName);
 	}
 
 	@Override
-	public SectionFunctionNamespace addSectionWork(String workName, ManagedFunctionSource<?> workSource) {
-		return this.delegate.addSectionWork(workName, workSource);
+	public SectionFunctionNamespace addSectionFunctionNamespace(String namespaceName,
+			ManagedFunctionSource managedFunctionSource) {
+		return this.delegate.addSectionFunctionNamespace(namespaceName, managedFunctionSource);
 	}
 
 	@Override
-	public SectionManagedObjectSource addSectionManagedObjectSource(
-			String managedObjectSourceName, String managedObjectSourceClassName) {
-		return this.delegate.addSectionManagedObjectSource(
-				managedObjectSourceName, managedObjectSourceClassName);
+	public SectionManagedObjectSource addSectionManagedObjectSource(String managedObjectSourceName,
+			String managedObjectSourceClassName) {
+		return this.delegate.addSectionManagedObjectSource(managedObjectSourceName, managedObjectSourceClassName);
 	}
 
 	@Override
-	public SectionManagedObjectSource addSectionManagedObjectSource(
-			String managedObjectSourceName,
+	public SectionManagedObjectSource addSectionManagedObjectSource(String managedObjectSourceName,
 			ManagedObjectSource<?, ?> managedObjectSource) {
-		return this.delegate.addSectionManagedObjectSource(
-				managedObjectSourceName, managedObjectSource);
+		return this.delegate.addSectionManagedObjectSource(managedObjectSourceName, managedObjectSource);
 	}
 
 	@Override
-	public SubSection addSubSection(String subSectionName,
-			String sectionSourceClassName, String location) {
+	public SubSection addSubSection(String subSectionName, String sectionSourceClassName, String location) {
 		return register(subSectionName, this.subSections,
-				this.delegate.addSubSection(subSectionName,
-						sectionSourceClassName, location));
+				this.delegate.addSubSection(subSectionName, sectionSourceClassName, location));
 	}
 
 	@Override
-	public SubSection addSubSection(String subSectionName,
-			SectionSource sectionSource, String location) {
+	public SubSection addSubSection(String subSectionName, SectionSource sectionSource, String location) {
 		return register(subSectionName, this.subSections,
-				this.delegate.addSubSection(subSectionName, sectionSource,
-						location));
+				this.delegate.addSubSection(subSectionName, sectionSource, location));
 	}
 
 	@Override
-	public void link(SectionInput sectionInput, SectionFunction task) {
-		this.delegate.link(sectionInput, task);
+	public void link(SectionInput sectionInput, SectionFunction function) {
+		this.delegate.link(sectionInput, function);
 	}
 
 	@Override
@@ -215,104 +204,92 @@ public class TransformSectionDesigner implements SectionDesigner {
 	}
 
 	@Override
-	public void link(FunctionFlow taskFlow, SectionFunction task,
-			FlowInstigationStrategyEnum instigationStrategy) {
-		this.delegate.link(taskFlow, task, instigationStrategy);
+	public void link(FunctionFlow functionFlow, SectionFunction function, boolean isSpawnThreadState) {
+		this.delegate.link(functionFlow, function, isSpawnThreadState);
 	}
 
 	@Override
-	public void link(FunctionFlow taskFlow, SubSectionInput subSectionInput,
-			FlowInstigationStrategyEnum instigationStrategy) {
-		this.delegate.link(taskFlow, subSectionInput, instigationStrategy);
+	public void link(FunctionFlow functionFlow, SubSectionInput subSectionInput, boolean isSpawnThreadState) {
+		this.delegate.link(functionFlow, subSectionInput, isSpawnThreadState);
 	}
 
 	@Override
-	public void link(FunctionFlow taskFlow, SectionOutput sectionOutput,
-			FlowInstigationStrategyEnum instigationStrategy) {
-		this.delegate.link(taskFlow, sectionOutput, instigationStrategy);
+	public void link(FunctionFlow functionFlow, SectionOutput sectionOutput, boolean isSpawnThreadState) {
+		this.delegate.link(functionFlow, sectionOutput, isSpawnThreadState);
 	}
 
 	@Override
-	public void link(SectionFunction task, SectionFunction nextTask) {
-		this.delegate.link(task, nextTask);
+	public void link(SectionFunction function, SectionFunction nextFunction) {
+		this.delegate.link(function, nextFunction);
 	}
 
 	@Override
-	public void link(SectionFunction task, SubSectionInput subSectionInput) {
-		this.delegate.link(task, subSectionInput);
+	public void link(SectionFunction function, SubSectionInput subSectionInput) {
+		this.delegate.link(function, subSectionInput);
 	}
 
 	@Override
-	public void link(SectionFunction task, SectionOutput sectionOutput) {
-		this.delegate.link(task, sectionOutput);
+	public void link(SectionFunction function, SectionOutput sectionOutput) {
+		this.delegate.link(function, sectionOutput);
 	}
 
 	@Override
-	public void link(SubSectionOutput subSectionOutput, SectionFunction task) {
-		this.delegate.link(subSectionOutput, task);
+	public void link(SubSectionOutput subSectionOutput, SectionFunction function) {
+		this.delegate.link(subSectionOutput, function);
 	}
 
 	@Override
-	public void link(SubSectionOutput subSectionOutput,
-			SubSectionInput subSectionInput) {
+	public void link(SubSectionOutput subSectionOutput, SubSectionInput subSectionInput) {
 		this.delegate.link(subSectionOutput, subSectionInput);
 	}
 
 	@Override
-	public void link(SubSectionOutput subSectionOutput,
-			SectionOutput sectionOutput) {
+	public void link(SubSectionOutput subSectionOutput, SectionOutput sectionOutput) {
 		this.delegate.link(subSectionOutput, sectionOutput);
 	}
 
 	@Override
-	public void link(ManagedObjectFlow managedObjectFlow, SectionFunction task) {
-		this.delegate.link(managedObjectFlow, task);
+	public void link(ManagedObjectFlow managedObjectFlow, SectionFunction function) {
+		this.delegate.link(managedObjectFlow, function);
 	}
 
 	@Override
-	public void link(ManagedObjectFlow managedObjectFlow,
-			SubSectionInput subSectionInput) {
+	public void link(ManagedObjectFlow managedObjectFlow, SubSectionInput subSectionInput) {
 		this.delegate.link(managedObjectFlow, subSectionInput);
 	}
 
 	@Override
-	public void link(ManagedObjectFlow managedObjectFlow,
-			SectionOutput sectionOutput) {
+	public void link(ManagedObjectFlow managedObjectFlow, SectionOutput sectionOutput) {
 		this.delegate.link(managedObjectFlow, sectionOutput);
 	}
 
 	@Override
-	public void link(FunctionObject taskObject, SectionObject sectionObject) {
-		this.delegate.link(taskObject, sectionObject);
+	public void link(FunctionObject functionObject, SectionObject sectionObject) {
+		this.delegate.link(functionObject, sectionObject);
 	}
 
 	@Override
-	public void link(FunctionObject taskObject,
-			SectionManagedObject sectionManagedObject) {
-		this.delegate.link(taskObject, sectionManagedObject);
+	public void link(FunctionObject functionObject, SectionManagedObject sectionManagedObject) {
+		this.delegate.link(functionObject, sectionManagedObject);
 	}
 
 	@Override
-	public void link(SubSectionObject subSectionObject,
-			SectionObject sectionObject) {
+	public void link(SubSectionObject subSectionObject, SectionObject sectionObject) {
 		this.delegate.link(subSectionObject, sectionObject);
 	}
 
 	@Override
-	public void link(SubSectionObject subSectionObject,
-			SectionManagedObject sectionManagedObject) {
+	public void link(SubSectionObject subSectionObject, SectionManagedObject sectionManagedObject) {
 		this.delegate.link(subSectionObject, sectionManagedObject);
 	}
 
 	@Override
-	public void link(ManagedObjectDependency dependency,
-			SectionObject sectionObject) {
+	public void link(ManagedObjectDependency dependency, SectionObject sectionObject) {
 		this.delegate.link(dependency, sectionObject);
 	}
 
 	@Override
-	public void link(ManagedObjectDependency dependency,
-			SectionManagedObject sectionManagedObject) {
+	public void link(ManagedObjectDependency dependency, SectionManagedObject sectionManagedObject) {
 		this.delegate.link(dependency, sectionManagedObject);
 	}
 

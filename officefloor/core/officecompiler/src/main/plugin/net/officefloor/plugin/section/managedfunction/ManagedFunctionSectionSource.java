@@ -15,59 +15,58 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.section.work;
+package net.officefloor.plugin.section.managedfunction;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
-import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.section.FunctionFlow;
+import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
-import net.officefloor.compile.spi.section.SectionFunction;
-import net.officefloor.compile.spi.section.SectionFunctionNamespace;
-import net.officefloor.compile.spi.section.FunctionFlow;
-import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.api.function.Work;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
 /**
- * {@link SectionSource} implementation that wraps a {@link ManagedFunctionSource} to
- * expose it as a section.
+ * {@link SectionSource} implementation that wraps a
+ * {@link ManagedFunctionSource} to expose it as a section.
  * 
  * @author Daniel Sagenschneider
  */
-public class WorkSectionSource extends AbstractSectionSource {
+public class ManagedFunctionSectionSource extends AbstractSectionSource {
 
 	/**
 	 * Name of property prefix to specify the index of the parameter on the
-	 * {@link Work}. The resulting parameter name and value are as:
+	 * {@link ManagedFunction}. The resulting parameter name and value are as:
 	 * 
 	 * <pre>
-	 *      PROPERTY_PARAMETER_PREFIX + "TaskName" = "index in objects for the parameter (starting at 1)"
+	 *      PROPERTY_PARAMETER_PREFIX + "FunctionName" = "index in objects for the parameter (starting at 1)"
 	 * </pre>
 	 */
 	public static final String PROPERTY_PARAMETER_PREFIX = "parameter.index.prefix.";
 
 	/**
-	 * Name of property specifying a comma separated list of {@link ManagedFunction} names
-	 * that will have a {@link SectionOutput} created and linked as next.
+	 * Name of property specifying a comma separated list of
+	 * {@link ManagedFunction} names that will have a {@link SectionOutput}
+	 * created and linked as next.
 	 */
-	public static final String PROPERTY_TASKS_NEXT_TO_OUTPUTS = "tasks.next.to.outputs";
+	public static final String PROPERTY_FUNCTIONS_NEXT_TO_OUTPUTS = "functions.next.to.outputs";
 
 	/*
 	 * ====================== SectionSource ========================
@@ -79,11 +78,10 @@ public class WorkSectionSource extends AbstractSectionSource {
 	}
 
 	@Override
-	public void sourceSection(SectionDesigner designer,
-			SectionSourceContext context) throws Exception {
+	public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
 
-		// Obtain the work source name
-		String workSourceName = context.getSectionLocation();
+		// Obtain the managed function source name
+		String managedFunctionSourceName = context.getSectionLocation();
 
 		// Obtain the properties
 		PropertyList properties = context.createPropertyList();
@@ -92,42 +90,41 @@ public class WorkSectionSource extends AbstractSectionSource {
 			properties.addProperty(name).setValue(value);
 		}
 
-		// Obtain the work type
-		FunctionNamespaceType<?> workType = context.loadWorkType(workSourceName, properties);
+		// Obtain the namespace type
+		FunctionNamespaceType namespaceType = context.loadManagedFunctionType(managedFunctionSourceName, properties);
 
-		// Add the work
-		SectionFunctionNamespace work = designer.addSectionWork("WORK", workSourceName);
+		// Add the namespace
+		SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace("NAMESPACE",
+				managedFunctionSourceName);
 		for (Property property : properties) {
-			work.addProperty(property.getName(), property.getValue());
+			namespace.addProperty(property.getName(), property.getValue());
 		}
 
-		// Determine the tasks which have next outputs
-		Set<String> tasksWithNextOutput = new HashSet<String>();
-		String nextTasksText = context.getProperty(
-				PROPERTY_TASKS_NEXT_TO_OUTPUTS, "");
-		for (String nextTaskName : nextTasksText.split(",")) {
-			tasksWithNextOutput.add(nextTaskName.trim());
+		// Determine the functions which have next outputs
+		Set<String> functionsWithNextOutput = new HashSet<String>();
+		String nextFunctionsText = context.getProperty(PROPERTY_FUNCTIONS_NEXT_TO_OUTPUTS, "");
+		for (String nextFunctionName : nextFunctionsText.split(",")) {
+			functionsWithNextOutput.add(nextFunctionName.trim());
 		}
 
-		// Add the tasks
+		// Add the functions
 		Map<String, SectionObject> sectionObjects = new HashMap<String, SectionObject>();
 		Map<String, SectionOutput> sectionOutputs = new HashMap<String, SectionOutput>();
-		for (ManagedFunctionType<?, ?, ?> taskType : workType.getManagedFunctionTypes()) {
+		for (ManagedFunctionType<?, ?> functionType : namespaceType.getManagedFunctionTypes()) {
 
-			// Obtain the task name
-			String taskName = taskType.getFunctionName();
+			// Obtain the function name
+			String functionName = functionType.getFunctionName();
 
-			// Add the task
-			SectionFunction task = work.addSectionTask(taskName, taskName);
+			// Add the function
+			SectionFunction function = namespace.addSectionFunction(functionName, functionName);
 
 			// Determine the index of the parameter
-			int parameterIndex = Integer.parseInt(context.getProperty(
-					PROPERTY_PARAMETER_PREFIX + taskName, "-1"));
+			int parameterIndex = Integer.parseInt(context.getProperty(PROPERTY_PARAMETER_PREFIX + functionName, "-1"));
 
 			// Link objects and flag parameter
 			Class<?> parameterType = null;
 			int objectIndex = 1;
-			for (ManagedFunctionObjectType<?> objectType : taskType.getObjectTypes()) {
+			for (ManagedFunctionObjectType<?> objectType : functionType.getObjectTypes()) {
 
 				// Obtain object details
 				String objectName = objectType.getObjectName();
@@ -135,11 +132,10 @@ public class WorkSectionSource extends AbstractSectionSource {
 				String typeQualifier = objectType.getTypeQualifier();
 
 				// Determine the section object name
-				String sectionObjectName = (typeQualifier == null ? ""
-						: typeQualifier + "-") + objectClass.getName();
+				String sectionObjectName = (typeQualifier == null ? "" : typeQualifier + "-") + objectClass.getName();
 
 				// Obtain the object
-				FunctionObject object = task.getTaskObject(objectName);
+				FunctionObject object = function.getFunctionObject(objectName);
 
 				// Determine if parameter
 				if (objectIndex == parameterIndex) {
@@ -149,11 +145,9 @@ public class WorkSectionSource extends AbstractSectionSource {
 
 				} else {
 					// Obtain the section object
-					SectionObject sectionObject = sectionObjects
-							.get(sectionObjectName);
+					SectionObject sectionObject = sectionObjects.get(sectionObjectName);
 					if (sectionObject == null) {
-						sectionObject = designer.addSectionObject(
-								sectionObjectName, objectClass.getName());
+						sectionObject = designer.addSectionObject(sectionObjectName, objectClass.getName());
 						if (typeQualifier != null) {
 							sectionObject.setTypeQualifier(typeQualifier);
 						}
@@ -169,78 +163,70 @@ public class WorkSectionSource extends AbstractSectionSource {
 			}
 
 			// Link next output (if configured)
-			if (tasksWithNextOutput.contains(taskName)) {
+			if (functionsWithNextOutput.contains(functionName)) {
 
-				// Obtain argument type for task
-				Class<?> returnType = taskType.getReturnType();
+				// Obtain argument type for function
+				Class<?> returnType = functionType.getReturnType();
 
 				// Obtain the section output
-				SectionOutput sectionOutput = sectionOutputs.get(taskName);
+				SectionOutput sectionOutput = sectionOutputs.get(functionName);
 				if (sectionOutput == null) {
-					sectionOutput = designer.addSectionOutput(taskName,
-							(returnType == null ? null : returnType.getName()),
-							false);
-					sectionOutputs.put(taskName, sectionOutput);
+					sectionOutput = designer.addSectionOutput(functionName,
+							(returnType == null ? null : returnType.getName()), false);
+					sectionOutputs.put(functionName, sectionOutput);
 				}
 
-				// Link task to next output
-				designer.link(task, sectionOutput);
+				// Link function to next output
+				designer.link(function, sectionOutput);
 			}
 
-			// Link task flows to section outputs
-			for (ManagedFunctionFlowType<?> flowType : taskType.getFlowTypes()) {
+			// Link function flows to section outputs
+			for (ManagedFunctionFlowType<?> flowType : functionType.getFlowTypes()) {
 
 				// Obtain the flow details
 				String flowName = flowType.getFlowName();
 				Class<?> argumentType = flowType.getArgumentType();
 
 				// Obtain the flow
-				FunctionFlow flow = task.getTaskFlow(flowName);
+				FunctionFlow flow = function.getFunctionFlow(flowName);
 
 				// Obtain the section output
 				SectionOutput sectionOutput = sectionOutputs.get(flowName);
 				if (sectionOutput == null) {
-					sectionOutput = designer.addSectionOutput(
-							flowName,
-							(argumentType == null ? null : argumentType
-									.getName()), false);
+					sectionOutput = designer.addSectionOutput(flowName,
+							(argumentType == null ? null : argumentType.getName()), false);
 					sectionOutputs.put(flowName, sectionOutput);
 				}
 
 				// Link flow to output
-				designer.link(flow, sectionOutput,
-						FlowInstigationStrategyEnum.SEQUENTIAL);
+				designer.link(flow, sectionOutput, false);
 			}
 
-			// Link task escalations to section outputs
-			for (ManagedFunctionEscalationType escalationType : taskType
-					.getEscalationTypes()) {
+			// Link function escalations to section outputs
+			for (ManagedFunctionEscalationType escalationType : functionType.getEscalationTypes()) {
 
 				// Obtain the escalation type
-				Class<? extends Throwable> escalation = escalationType
-						.getEscalationType();
+				Class<? extends Throwable> escalation = escalationType.getEscalationType();
 
 				// Obtain the escalation
-				FunctionFlow flow = task.getTaskEscalation(escalation.getName());
+				FunctionFlow flow = function.getFunctionEscalation(escalation.getName());
 
 				// Obtain the section output
 				String outputName = escalation.getName();
 				SectionOutput sectionOutput = sectionOutputs.get(outputName);
 				if (sectionOutput == null) {
-					sectionOutput = designer.addSectionOutput(outputName,
-							escalation.getName(), true);
+					sectionOutput = designer.addSectionOutput(outputName, escalation.getName(), true);
 					sectionOutputs.put(outputName, sectionOutput);
 				}
 
 				// Link the escalation to output
-				designer.link(flow, sectionOutput,
-						FlowInstigationStrategyEnum.SEQUENTIAL);
+				designer.link(flow, sectionOutput, false);
 			}
 
-			// Link task for input
-			SectionInput input = designer.addSectionInput(taskName,
+			// Link function for input
+			SectionInput input = designer.addSectionInput(functionName,
 					(parameterType == null ? null : parameterType.getName()));
-			designer.link(input, task);
+			designer.link(input, function);
 		}
 	}
 

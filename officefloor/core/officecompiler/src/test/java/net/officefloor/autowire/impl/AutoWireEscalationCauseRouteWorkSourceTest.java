@@ -36,7 +36,7 @@ import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
-import net.officefloor.plugin.section.work.WorkSectionSource;
+import net.officefloor.plugin.section.managedfunction.ManagedFunctionSectionSource;
 
 /**
  * Tests the {@link AutoWireEscalationCauseRouteWorkSource}.
@@ -246,9 +246,9 @@ public class AutoWireEscalationCauseRouteWorkSourceTest extends
 
 		// Add the escalation cause router
 		AutoWireSection router = source.addSection("ROUTE",
-				WorkSectionSource.class.getName(),
+				ManagedFunctionSectionSource.class.getName(),
 				AutoWireEscalationCauseRouteWorkSource.class.getName());
-		router.addProperty(WorkSectionSource.PROPERTY_PARAMETER_PREFIX
+		router.addProperty(ManagedFunctionSectionSource.PROPERTY_PARAMETER_PREFIX
 				+ "Handle", "1");
 		source.linkEscalation(Error.class, router, "Handle");
 

@@ -15,24 +15,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.work.clazz;
-
-import net.officefloor.frame.api.function.ManagedFunctionContext;
+package net.officefloor.plugin.managedfunction.clazz;
 
 /**
- * {@link ParameterFactory} for the {@link ManagedFunctionContext}.
+ * Sequence to obtain the next index.
  * 
  * @author Daniel Sagenschneider
  */
-public class TaskContextParameterFactory implements ParameterFactory {
+public class Sequence {
 
-	/*
-	 * ====================== ParameterFactory =============================
+	/**
+	 * Value for next index in the sequence.
 	 */
+	private int nextIndex = 0;
 
-	@Override
-	public Object createParameter(ManagedFunctionContext<?, ?, ?> context) {
-		return context;
+	/**
+	 * Obtains the next index in the sequence.
+	 * 
+	 * @return Next index in the sequence.
+	 */
+	public int nextIndex() {
+		return this.nextIndex++;
 	}
 
 }

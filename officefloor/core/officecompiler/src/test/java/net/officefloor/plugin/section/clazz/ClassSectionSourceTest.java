@@ -52,13 +52,13 @@ import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.managedfunction.clazz.NonFunctionMethod;
+import net.officefloor.plugin.managedfunction.clazz.Qualifier;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObject;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
-import net.officefloor.plugin.work.clazz.ClassWorkSource;
-import net.officefloor.plugin.work.clazz.FlowInterface;
-import net.officefloor.plugin.work.clazz.NonTaskMethod;
-import net.officefloor.plugin.work.clazz.Qualifier;
 
 /**
  * Tests the {@link ClassSectionSource}.
@@ -104,7 +104,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure ignore methods annotated with {@link NonTaskMethod}.
+	 * Ensure ignore methods annotated with {@link NonFunctionMethod}.
 	 */
 	public void testIgnoreNonTaskMethods() {
 		// Create the expected section
@@ -125,11 +125,11 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		public void includedInput() {
 		}
 
-		@NonTaskMethod
+		@NonFunctionMethod
 		public void nonIncludedInput() {
 		}
 
-		@NonTaskMethod
+		@NonFunctionMethod
 		public void nonIncludedStaticInput() {
 		}
 	}
@@ -196,7 +196,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 * Section with an output.
 	 */
 	public static class MockOutputSection {
-		@NextTask("doOutput")
+		@NextFunction("doOutput")
 		public void doInput() {
 		}
 	}
@@ -283,7 +283,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 * Section with parameter and arguments.
 	 */
 	public static class MockParameterArgumentSection {
-		@NextTask("doOutput")
+		@NextFunction("doOutput")
 		public Integer doInput(@Parameter String parameter) {
 			return null;
 		}
@@ -469,12 +469,12 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 				"Type",
 				SectionNodeImpl.class,
 				"Failed to source WorkType definition from WorkSource "
-						+ SectionClassWorkSource.class.getName(),
+						+ SectionClassManagedFunctionSource.class.getName(),
 				new IllegalArgumentException(
 						"Method doInput parameter 0 has more than one Qualifier"));
 		issues.recordIssue("Type", SectionNodeImpl.class,
 				"Failure loading WorkType from source "
-						+ SectionClassWorkSource.class.getName(), cause);
+						+ SectionClassManagedFunctionSource.class.getName(), cause);
 
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(
@@ -775,7 +775,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public static class MockChangeTaskNameWithLinksSection {
 
 		// even with name change, should still link by method name
-		@NextTask("oldName")
+		@NextFunction("oldName")
 		public void doInput(MockChangeNameFlows flow, ReturnValue returnValue,
 				@Parameter Boolean isInvokeFlow) {
 
@@ -789,7 +789,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 			}
 		}
 
-		@NextTask("externalFlow")
+		@NextFunction("externalFlow")
 		public void oldName(ReturnValue returnValue,
 				@Parameter String parameter, Connection connection)
 				throws SQLException {
@@ -1002,7 +1002,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockInternalFlowSection {
 
-		@NextTask("doSecond")
+		@NextFunction("doSecond")
 		public ReturnValue doFirst(@Parameter ReturnValue returnValue) {
 			returnValue.value = "one";
 			return returnValue;
@@ -1150,7 +1150,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 * Section to invoke sub section.
 	 */
 	public static class MockSubSection {
-		@NextTask("output")
+		@NextFunction("output")
 		public void doSubSectionInput(ReturnValue returnValue) {
 			returnValue.value = "sub";
 		}
@@ -1208,8 +1208,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		this.objectManagedObject = managedObjectSource.addSectionManagedObject(
 				"OBJECT", ManagedObjectScope.THREAD);
 		SectionFunctionNamespace work = designer.addSectionWork("WORK",
-				SectionClassWorkSource.class.getName());
-		work.addProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+				SectionClassManagedFunctionSource.class.getName());
+		work.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
 				sectionClass.getName());
 		workConfigurer.configureWork(designer, work);
 

@@ -38,8 +38,8 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
-import net.officefloor.plugin.work.clazz.FlowInterface;
-import net.officefloor.plugin.work.clazz.Qualifier;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.managedfunction.clazz.Qualifier;
 
 import org.easymock.AbstractMatcher;
 

@@ -20,10 +20,10 @@ package net.officefloor.compile.impl.administrator;
 import junit.framework.TestCase;
 import net.officefloor.compile.administration.AdministrationType;
 import net.officefloor.compile.administration.DutyType;
-import net.officefloor.plugin.administrator.clazz.ClassAdministratorSource;
+import net.officefloor.plugin.administrator.clazz.ClassAdministrationSource;
 
 /**
- * Class for {@link ClassAdministratorSource} that enables validating loading a
+ * Class for {@link ClassAdministrationSource} that enables validating loading a
  * {@link AdministrationType}.
  * 
  * @author Daniel Sagenschneider

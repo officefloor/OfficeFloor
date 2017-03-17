@@ -78,7 +78,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.plugin.section.work.WorkSectionSource;
+import net.officefloor.plugin.section.managedfunction.ManagedFunctionSectionSource;
 
 /**
  * {@link OfficeSource} implementation that auto-wires the configuration based
@@ -684,7 +684,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 			// Properties for failed to source managed object handling
 			PropertyList failedToSourceProperties = context.createPropertyList();
-			failedToSourceProperties.addProperty(WorkSectionSource.PROPERTY_PARAMETER_PREFIX + "Handle").setValue("1");
+			failedToSourceProperties.addProperty(ManagedFunctionSectionSource.PROPERTY_PARAMETER_PREFIX + "Handle").setValue("1");
 
 			// Link escalations to inputs
 			OfficeSectionInput[] escalationSectionInput = new OfficeSectionInput[this.escalations.size()];
@@ -732,13 +732,13 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 				// Add handling of failing to source managed object
 				OfficeSection failedToSourceSection = architect.addOfficeSection(
-						FailedToSourceManagedObjectEscalation.class.getSimpleName(), WorkSectionSource.class.getName(),
+						FailedToSourceManagedObjectEscalation.class.getSimpleName(), ManagedFunctionSectionSource.class.getName(),
 						AutoWireEscalationCauseRouteWorkSource.class.getName());
 				failedToSourceProperties.configureProperties(failedToSourceSection);
 
 				// Obtain the type
 				OfficeSectionType failedToSourceSectionType = context.loadOfficeSectionType(
-						FailedToSourceManagedObjectEscalation.class.getSimpleName(), WorkSectionSource.class.getName(),
+						FailedToSourceManagedObjectEscalation.class.getSimpleName(), ManagedFunctionSectionSource.class.getName(),
 						AutoWireEscalationCauseRouteWorkSource.class.getName(), failedToSourceProperties);
 
 				// Configure the outputs

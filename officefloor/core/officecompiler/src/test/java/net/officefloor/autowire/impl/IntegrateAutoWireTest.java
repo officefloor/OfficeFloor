@@ -34,7 +34,7 @@ import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
 
 /**
@@ -226,7 +226,7 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 	 * First mock section.
 	 */
 	public static class MockSectionOne {
-		@NextTask("output")
+		@NextFunction("output")
 		public Integer doInput(@Parameter Value value) {
 			registerTaskThread();
 			value.value = "doInput";

@@ -18,15 +18,14 @@
 package net.officefloor.plugin.team;
 
 import net.officefloor.compile.TeamSourceService;
-import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
+import net.officefloor.frame.impl.spi.team.ThreadLocalAwareTeamSource;
 
 /**
- * {@link TeamSourceService} for a {@link ProcessContextTeamSource}.
+ * {@link TeamSourceService} for a {@link ThreadLocalAwareTeamSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ProcessContextTeamSourceService implements
-		TeamSourceService<ProcessContextTeamSource> {
+public class ProcessContextTeamSourceService implements TeamSourceService<ThreadLocalAwareTeamSource> {
 
 	/*
 	 * ======================= TeamSourceService ===========================
@@ -38,8 +37,8 @@ public class ProcessContextTeamSourceService implements
 	}
 
 	@Override
-	public Class<ProcessContextTeamSource> getTeamSourceClass() {
-		return ProcessContextTeamSource.class;
+	public Class<ThreadLocalAwareTeamSource> getTeamSourceClass() {
+		return ThreadLocalAwareTeamSource.class;
 	}
 
 }

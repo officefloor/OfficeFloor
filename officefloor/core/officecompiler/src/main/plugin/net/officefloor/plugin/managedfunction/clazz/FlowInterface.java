@@ -15,27 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.work.clazz;
+package net.officefloor.plugin.managedfunction.clazz;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
- * Sequence to obtain the next index.
+ * Annotates an interface to have each of its methods be a {@link Flow} that may
+ * be invoked by the {@link ManagedFunction} class method.
  * 
  * @author Daniel Sagenschneider
  */
-public class Sequence {
-
-	/**
-	 * Value for next index in the sequence.
-	 */
-	private int nextIndex = 0;
-
-	/**
-	 * Obtains the next index in the sequence.
-	 * 
-	 * @return Next index in the sequence.
-	 */
-	public int nextIndex() {
-		return this.nextIndex++;
-	}
-
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface FlowInterface {
 }

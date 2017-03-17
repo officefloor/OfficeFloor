@@ -52,9 +52,9 @@ import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.work.clazz.ClassWorkSource;
 
 /**
  * Tests loading the {@link SectionType} from the {@link SectionSource}.
@@ -579,10 +579,10 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 				// Load the work type
 				PropertyList properties = context.createPropertyList();
 				properties
-						.addProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME)
+						.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME)
 						.setValue(MockLoadWork.class.getName());
 				FunctionNamespaceType<?> workType = context.loadWorkType(
-						ClassWorkSource.class.getName(), properties);
+						ClassManagedFunctionSource.class.getName(), properties);
 
 				// Ensure correct work type
 				MockLoadWork.assertWorkType(workType);
@@ -599,12 +599,12 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		CompilerIssue[] issues = this.issues.recordCaptureIssues(true);
 		this.issues.recordIssue("Type", SectionNodeImpl.class,
 				"Missing property 'class.name' for WorkSource "
-						+ ClassWorkSource.class.getName());
+						+ ClassManagedFunctionSource.class.getName());
 		this.issues.recordIssue(
 				"Type",
 				SectionNodeImpl.class,
 				"Failure loading WorkType from source "
-						+ ClassWorkSource.class.getName(), issues);
+						+ ClassManagedFunctionSource.class.getName(), issues);
 
 		// Fail to load the work type
 		this.loadSectionType(false, new Loader() {
@@ -614,7 +614,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 
 				// Do not specify class causing failure to load work type
 				PropertyList properties = context.createPropertyList();
-				context.loadWorkType(ClassWorkSource.class.getName(),
+				context.loadWorkType(ClassManagedFunctionSource.class.getName(),
 						properties);
 
 				// Should not reach this point

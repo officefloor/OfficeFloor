@@ -32,7 +32,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Tests the {@link ClassAdministratorSource}.
+ * Tests the {@link ClassAdministrationSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -43,8 +43,8 @@ public class ClassAdministratorSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testSpecification() {
 		AdministratorLoaderUtil.validateSpecification(
-				ClassAdministratorSource.class,
-				ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME, "Class");
+				ClassAdministrationSource.class,
+				ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME, "Class");
 	}
 
 	/**
@@ -62,8 +62,8 @@ public class ClassAdministratorSourceTest extends OfficeFrameTestCase {
 
 		// Validate the administration type
 		AdministratorLoaderUtil.validateAdministratorType(type,
-				ClassAdministratorSource.class,
-				ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME,
+				ClassAdministrationSource.class,
+				ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME,
 				MockClass.class.getName());
 	}
 
@@ -112,10 +112,10 @@ public class ClassAdministratorSourceTest extends OfficeFrameTestCase {
 		// Load the class administrator source
 		AdministrationSourceStandAlone standAlone = new AdministrationSourceStandAlone();
 		standAlone.addProperty(
-				ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME,
+				ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME,
 				MockClass.class.getName());
-		ClassAdministratorSource adminSource = standAlone
-				.loadAdministratorSource(ClassAdministratorSource.class);
+		ClassAdministrationSource adminSource = standAlone
+				.loadAdministratorSource(ClassAdministrationSource.class);
 
 		// Obtain the duty to invoke
 		Administration<Object, Indexed> admin = adminSource

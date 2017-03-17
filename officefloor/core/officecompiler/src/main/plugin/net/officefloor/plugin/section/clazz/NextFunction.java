@@ -15,26 +15,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.work.clazz;
+package net.officefloor.plugin.section.clazz;
 
-import net.officefloor.frame.api.function.ManagedFunctionContext;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import net.officefloor.frame.api.function.ManagedFunction;
 
 /**
- * Creates the parameter for the {@link ClassTask}.
+ * Annotates a method with the name of the next method ({@link ManagedFunction}),
  * 
  * @author Daniel Sagenschneider
  */
-public interface ParameterFactory {
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface NextFunction {
 
 	/**
-	 * Creates the parameter from the {@link ManagedFunctionContext}.
+	 * Obtains the name of the next method.
 	 * 
-	 * @param context
-	 *            {@link ManagedFunctionContext}.
-	 * @return Parameter.
-	 * @throws Exception
-	 *             If fails to create the parameter.
+	 * @return Name of the next method.
 	 */
-	Object createParameter(ManagedFunctionContext<?, ?, ?> context) throws Exception;
+	String value();
 
 }

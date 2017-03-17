@@ -15,9 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.work.clazz;
+package net.officefloor.plugin.managedfunction.clazz;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -30,29 +31,27 @@ import java.util.Map;
 import java.util.Set;
 
 import net.officefloor.compile.ManagedFunctionSourceService;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
-import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.function.FlowFuture;
+import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
-import net.officefloor.frame.api.function.Work;
 
 /**
- * {@link ManagedFunctionSource} for a {@link Class} having the {@link Object} as the
- * {@link Work} and {@link Method} instances as the {@link ManagedFunction} instances.
+ * {@link ManagedFunctionSource} for a {@link Class} having the {@link Method}
+ * instances as the {@link ManagedFunction} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassWorkSource extends AbstractManagedFunctionSource<ClassWork> implements
-		ManagedFunctionSourceService<ClassWork, ClassWorkSource> {
+public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
+		implements ManagedFunctionSourceService<ClassManagedFunctionSource> {
 
 	/**
 	 * Property name providing the {@link Class} name.
@@ -67,12 +66,10 @@ public class ClassWorkSource extends AbstractManagedFunctionSource<ClassWork> im
 	/**
 	 * Initiate.
 	 */
-	public ClassWorkSource() {
+	public ClassManagedFunctionSource() {
 		// Add the default manufacturers
-		this.manufacturers.add(new TaskContextParameterManufacturer());
-		this.manufacturers
-				.add(new FlowInterfaceParameterManufacturer<FlowInterface>(
-						FlowInterface.class));
+		this.manufacturers.add(new ManagedFunctionContextParameterManufacturer());
+		this.manufacturers.add(new FlowInterfaceParameterManufacturer<FlowInterface>(FlowInterface.class));
 
 		// Load any additional manufacturers
 		this.loadParameterManufacturers(this.manufacturers);
@@ -84,51 +81,38 @@ public class ClassWorkSource extends AbstractManagedFunctionSource<ClassWork> im
 	 * @param manufacturers
 	 *            List of {@link ParameterManufacturer} instances to use.
 	 */
-	protected void loadParameterManufacturers(
-			List<ParameterManufacturer> manufacturers) {
+	protected void loadParameterManufacturers(List<ParameterManufacturer> manufacturers) {
 		// By default adds no further manufacturers
 	}
 
 	/**
 	 * Allows overriding the creation of the {@link ManagedFunctionFactory}.
 	 * 
-	 * @param clazz
-	 *            {@link Work} class.
-	 * @return {@link WorkFactory}.
-	 */
-	protected WorkFactory<ClassWork> createWorkFactory(Class<?> clazz) {
-		return new ClassWorkFactory(clazz);
-	}
-
-	/**
-	 * Allows overriding the creation of the {@link ManagedFunctionFactory}.
-	 * 
-	 * @param clazz
-	 *            {@link Work} class.
+	 * @param constructor
+	 *            Default {@link Constructor} for the {@link Class} containing
+	 *            the {@link Method}. Will be <code>null</code> if static
+	 *            method.
 	 * @param method
 	 *            {@link Method} on the class.
-	 * @param isStatic
-	 *            Indicates if the {@link Method} is static.
 	 * @param parameters
 	 *            {@link ParameterFactory} instances.
 	 * @return {@link ManagedFunctionFactory}.
 	 */
-	protected ManagedFunctionFactory<ClassWork, Indexed, Indexed> createTaskFactory(
-			Class<?> clazz, Method method, boolean isStatic,
-			ParameterFactory[] parameters) {
-		return new ClassTaskFactory(method, isStatic, parameters);
+	protected ManagedFunctionFactory<Indexed, Indexed> createManagedFunctionFactory(Constructor<?> constructor,
+			Method method, ParameterFactory[] parameters) {
+		return new ClassFunctionFactory(constructor, method, parameters);
 	}
 
 	/**
 	 * Allows overriding the addition of the {@link ManagedFunctionTypeBuilder}.
 	 * 
 	 * @param clazz
-	 *            {@link Work} class.
-	 * @param workTypeBuilder
+	 *            {@link Class} containing the {@link Method}.
+	 * @param namespaceBuilder
 	 *            {@link FunctionNamespaceBuilder}.
-	 * @param taskName
+	 * @param functionName
 	 *            Name of the {@link ManagedFunction}.
-	 * @param taskFactory
+	 * @param functionFactory
 	 *            {@link ManagedFunctionFactory}.
 	 * @param objectSequence
 	 *            Object {@link Sequence}.
@@ -136,35 +120,34 @@ public class ClassWorkSource extends AbstractManagedFunctionSource<ClassWork> im
 	 *            Flow {@link Sequence}.
 	 * @return Added {@link ManagedFunctionTypeBuilder}.
 	 */
-	protected ManagedFunctionTypeBuilder<Indexed, Indexed> addTaskType(Class<?> clazz,
-			FunctionNamespaceBuilder<ClassWork> workTypeBuilder, String taskName,
-			ManagedFunctionFactory<ClassWork, Indexed, Indexed> taskFactory,
-			Sequence objectSequence, Sequence flowSequence) {
+	protected ManagedFunctionTypeBuilder<Indexed, Indexed> addManagedFunctionType(Class<?> clazz,
+			FunctionNamespaceBuilder namespaceBuilder, String functionName,
+			ManagedFunctionFactory<Indexed, Indexed> functionFactory, Sequence objectSequence, Sequence flowSequence) {
 
-		// Include method as task in type definition
-		ManagedFunctionTypeBuilder<Indexed, Indexed> taskTypeBuilder = workTypeBuilder
-				.addManagedFunctionType(taskName, taskFactory, null, null);
+		// Include method as function in type definition
+		ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder = namespaceBuilder
+				.addManagedFunctionType(functionName, functionFactory, Indexed.class, Indexed.class);
 
-		// Return the task type builder
-		return taskTypeBuilder;
+		// Return the function type builder
+		return functionTypeBuilder;
 	}
 
 	/*
-	 * =================== WorkSourceService ================================
+	 * =================== ManagedFunctionSourceService ===================
 	 */
 
 	@Override
-	public String getWorkSourceAlias() {
+	public String getManagedFunctionSourceAlias() {
 		return "CLASS";
 	}
 
 	@Override
-	public Class<ClassWorkSource> getWorkSourceClass() {
-		return ClassWorkSource.class;
+	public Class<ClassManagedFunctionSource> getManagedFunctionSourceClass() {
+		return ClassManagedFunctionSource.class;
 	}
 
 	/*
-	 * =================== AbstractWorkLoader ==============================
+	 * =================== AbstractManagedFunctionSource ===================
 	 */
 
 	@Override
@@ -173,8 +156,8 @@ public class ClassWorkSource extends AbstractManagedFunctionSource<ClassWork> im
 	}
 
 	@SuppressWarnings("unchecked")
-	public void sourceManagedFunctions(FunctionNamespaceBuilder<ClassWork> workTypeBuilder,
-			ManagedFunctionSourceContext context) throws Exception {
+	public void sourceManagedFunctions(FunctionNamespaceBuilder namespaceBuilder, ManagedFunctionSourceContext context)
+			throws Exception {
 
 		// Obtain the class loader
 		ClassLoader classLoader = context.getClassLoader();
@@ -183,15 +166,11 @@ public class ClassWorkSource extends AbstractManagedFunctionSource<ClassWork> im
 		String className = context.getProperty(CLASS_NAME_PROPERTY_NAME);
 		Class<?> clazz = context.loadClass(className);
 
-		// Define the work factory
-		WorkFactory<ClassWork> workFactory = this.createWorkFactory(clazz);
-		workTypeBuilder.setWorkFactory(workFactory);
-
 		// Work up the hierarchy of classes to inherit methods by name
 		Set<String> includedMethodNames = new HashSet<String>();
 		while ((clazz != null) && (!(Object.class.equals(clazz)))) {
 
-			// Obtain the listing of tasks from the methods of the class
+			// Obtain the listing of functions from the methods of the class
 			Set<String> currentClassMethods = new HashSet<String>();
 			for (Method method : clazz.getDeclaredMethods()) {
 
@@ -200,8 +179,8 @@ public class ClassWorkSource extends AbstractManagedFunctionSource<ClassWork> im
 					continue;
 				}
 
-				// Ignore methods annotated to not be tasks
-				if (method.isAnnotationPresent(NonTaskMethod.class)) {
+				// Ignore methods annotated to not be functions
+				if (method.isAnnotationPresent(NonFunctionMethod.class)) {
 					continue;
 				}
 
@@ -211,13 +190,9 @@ public class ClassWorkSource extends AbstractManagedFunctionSource<ClassWork> im
 
 				// Determine if method already exists on the current class
 				if (currentClassMethods.contains(methodName)) {
-					throw new IllegalStateException(
-							"Two methods by the same name '"
-									+ methodName
-									+ "' in class "
-									+ clazz.getName()
-									+ ".  Either rename one of the methods or annotate one with @"
-									+ NonTaskMethod.class.getSimpleName());
+					throw new IllegalStateException("Two methods by the same name '" + methodName + "' in class "
+							+ clazz.getName() + ".  Either rename one of the methods or annotate one with @"
+							+ NonFunctionMethod.class.getSimpleName());
 				}
 				currentClassMethods.add(methodName);
 
@@ -237,24 +212,28 @@ public class ClassWorkSource extends AbstractManagedFunctionSource<ClassWork> im
 				Sequence objectSequence = new Sequence();
 				Sequence flowSequence = new Sequence();
 
-				// Create the task factory
-				ManagedFunctionFactory<ClassWork, Indexed, Indexed> taskFactory = this
-						.createTaskFactory(clazz, method, isStatic, parameters);
+				// Obtain the constructor (if not static)
+				Constructor<?> constructor = null;
+				if (!isStatic) {
+					constructor = clazz.getConstructor(new Class<?>[0]);
+				}
 
-				// Include method as task in type definition
-				ManagedFunctionTypeBuilder<Indexed, Indexed> taskTypeBuilder = this
-						.addTaskType(clazz, workTypeBuilder, methodName,
-								taskFactory, objectSequence, flowSequence);
+				// Create the function factory
+				ManagedFunctionFactory<Indexed, Indexed> functionFactory = this
+						.createManagedFunctionFactory(constructor, method, parameters);
+
+				// Include method as function in type definition
+				ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder = this.addManagedFunctionType(clazz,
+						namespaceBuilder, methodName, functionFactory, objectSequence, flowSequence);
 
 				// Define the return type (it not void)
 				Class<?> returnType = method.getReturnType();
 				if ((returnType != null) && (!Void.TYPE.equals(returnType))) {
-					taskTypeBuilder.setReturnType(returnType);
+					functionTypeBuilder.setReturnType(returnType);
 				}
 
 				// Obtain the parameter annotations (for qualifying)
-				Annotation[][] methodParamAnnotations = method
-						.getParameterAnnotations();
+				Annotation[][] methodParamAnnotations = method.getParameterAnnotations();
 
 				// Define the listing of task objects and flows
 				for (int i = 0; i < paramTypes.length; i++) {
@@ -266,9 +245,8 @@ public class ClassWorkSource extends AbstractManagedFunctionSource<ClassWork> im
 					// Obtain the parameter factory
 					ParameterFactory parameterFactory = null;
 					CREATED: for (ParameterManufacturer manufacturer : this.manufacturers) {
-						parameterFactory = manufacturer.createParameterFactory(
-								methodName, paramType, taskTypeBuilder,
-								objectSequence, flowSequence, classLoader);
+						parameterFactory = manufacturer.createParameterFactory(methodName, paramType,
+								functionTypeBuilder, objectSequence, flowSequence, classLoader);
 						if (parameterFactory != null) {
 							// Created parameter factory, so use
 							break CREATED;
@@ -278,9 +256,8 @@ public class ClassWorkSource extends AbstractManagedFunctionSource<ClassWork> im
 					// Default to object if no parameter factory
 					if (parameterFactory == null) {
 						// Otherwise must be an dependency object
-						parameterFactory = new ObjectParameterFactory(
-								objectSequence.nextIndex());
-						ManagedFunctionObjectTypeBuilder<Indexed> objectTypeBuilder = taskTypeBuilder
+						parameterFactory = new ObjectParameterFactory(objectSequence.nextIndex());
+						ManagedFunctionObjectTypeBuilder<Indexed> objectTypeBuilder = functionTypeBuilder
 								.addObject(paramType);
 
 						// Determine type qualifier
@@ -288,36 +265,25 @@ public class ClassWorkSource extends AbstractManagedFunctionSource<ClassWork> im
 						for (Annotation annotation : paramAnnotations) {
 
 							// Obtain the annotation type
-							Class<?> annotationType = annotation
-									.annotationType();
+							Class<?> annotationType = annotation.annotationType();
 
 							// Determine if qualifier annotation
-							if (annotationType
-									.isAnnotationPresent(Qualifier.class)) {
+							if (annotationType.isAnnotationPresent(Qualifier.class)) {
 
 								// Allow only one qualifier
 								if (typeQualifier != null) {
-									throw new IllegalArgumentException(
-											"Method "
-													+ methodName
-													+ " parameter "
-													+ i
-													+ " has more than one "
-													+ Qualifier.class
-															.getSimpleName());
+									throw new IllegalArgumentException("Method " + methodName + " parameter " + i
+											+ " has more than one " + Qualifier.class.getSimpleName());
 								}
 
 								// Provide type qualifier
 								typeQualifier = annotationType.getName();
-								objectTypeBuilder
-										.setTypeQualifier(typeQualifier);
+								objectTypeBuilder.setTypeQualifier(typeQualifier);
 							}
 						}
 
 						// Specify the label
-						String label = (typeQualifier != null ? typeQualifier
-								+ "-" : "")
-								+ paramType.getName();
+						String label = (typeQualifier != null ? typeQualifier + "-" : "") + paramType.getName();
 						objectTypeBuilder.setLabel(label);
 					}
 
@@ -327,8 +293,7 @@ public class ClassWorkSource extends AbstractManagedFunctionSource<ClassWork> im
 
 				// Define the escalation listing
 				for (Class<?> escalationType : method.getExceptionTypes()) {
-					taskTypeBuilder
-							.addEscalation((Class<Throwable>) escalationType);
+					functionTypeBuilder.addEscalation((Class<Throwable>) escalationType);
 				}
 			}
 
@@ -345,11 +310,11 @@ public class ClassWorkSource extends AbstractManagedFunctionSource<ClassWork> im
 		/**
 		 * Creates the {@link ParameterFactory}.
 		 * 
-		 * @param taskName
+		 * @param functionName
 		 *            Name of the {@link ManagedFunction}.
 		 * @param parameterType
 		 *            Parameter type.
-		 * @param taskTypeBuilder
+		 * @param functionTypeBuilder
 		 *            {@link ManagedFunctionTypeBuilder}.
 		 * @param objectSequence
 		 *            Object {@link Sequence}.
@@ -363,32 +328,27 @@ public class ClassWorkSource extends AbstractManagedFunctionSource<ClassWork> im
 		 * @throws Exception
 		 *             If fails to create the {@link ParameterFactory}.
 		 */
-		ParameterFactory createParameterFactory(String taskName,
-				Class<?> parameterType,
-				ManagedFunctionTypeBuilder<Indexed, Indexed> taskTypeBuilder,
-				Sequence objectSequence, Sequence flowSequence,
-				ClassLoader classLoader) throws Exception;
+		ParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
+				ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder, Sequence objectSequence,
+				Sequence flowSequence, ClassLoader classLoader) throws Exception;
 	}
 
 	/**
 	 * {@link ParameterManufacturer} for the {@link ManagedFunctionContext}.
 	 */
-	protected static class TaskContextParameterManufacturer implements
-			ParameterManufacturer {
+	protected static class ManagedFunctionContextParameterManufacturer implements ParameterManufacturer {
 		@Override
-		public ParameterFactory createParameterFactory(String taskName,
-				Class<?> parameterType,
-				ManagedFunctionTypeBuilder<Indexed, Indexed> taskTypeBuilder,
-				Sequence objectSequence, Sequence flowSequence,
-				ClassLoader classLoader) {
+		public ParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
+				ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder, Sequence objectSequence,
+				Sequence flowSequence, ClassLoader classLoader) {
 
 			// Determine if task context
 			if (ManagedFunctionContext.class.equals(parameterType)) {
 				// Parameter is a task context
-				return new TaskContextParameterFactory();
+				return new ManagedFunctionContextParameterFactory();
 			}
 
-			// Not task context
+			// Not function context
 			return null;
 		}
 	}
@@ -396,8 +356,7 @@ public class ClassWorkSource extends AbstractManagedFunctionSource<ClassWork> im
 	/**
 	 * {@link ParameterManufacturer} for the {@link FlowInterface}.
 	 */
-	protected static class FlowInterfaceParameterManufacturer<A extends Annotation>
-			implements ParameterManufacturer {
+	protected static class FlowInterfaceParameterManufacturer<A extends Annotation> implements ParameterManufacturer {
 
 		/**
 		 * Annotation class expected on the parameter type.
@@ -419,11 +378,9 @@ public class ClassWorkSource extends AbstractManagedFunctionSource<ClassWork> im
 		 */
 
 		@Override
-		public ParameterFactory createParameterFactory(String taskName,
-				Class<?> parameterType,
-				ManagedFunctionTypeBuilder<Indexed, Indexed> taskTypeBuilder,
-				Sequence objectSequence, Sequence flowSequence,
-				ClassLoader classLoader) throws Exception {
+		public ParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
+				ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder, Sequence objectSequence,
+				Sequence flowSequence, ClassLoader classLoader) throws Exception {
 
 			// Determine if flow interface
 			if (parameterType.getAnnotation(this.annotationClass) == null) {
@@ -432,13 +389,9 @@ public class ClassWorkSource extends AbstractManagedFunctionSource<ClassWork> im
 
 			// Ensure is an interface
 			if (!parameterType.isInterface()) {
-				throw new Exception(
-						"Parameter "
-								+ parameterType.getSimpleName()
-								+ " on method "
-								+ taskName
-								+ " must be an interface as parameter type is annotated with "
-								+ this.annotationClass.getSimpleName());
+				throw new Exception("Parameter " + parameterType.getSimpleName() + " on method " + functionName
+						+ " must be an interface as parameter type is annotated with "
+						+ this.annotationClass.getSimpleName());
 			}
 
 			// Obtain the methods sorted (deterministic order)
@@ -464,57 +417,63 @@ public class ClassWorkSource extends AbstractManagedFunctionSource<ClassWork> im
 
 				// Ensure not duplicate flow names
 				if (flowMethodMetaDatas.containsKey(flowMethodName)) {
-					throw new Exception(
-							"May not have duplicate flow method names (task="
-									+ taskName + ", flow="
-									+ parameterType.getSimpleName() + "."
-									+ flowMethodName + ")");
+					throw new Exception("May not have duplicate flow method names (function=" + functionName + ", flow="
+							+ parameterType.getSimpleName() + "." + flowMethodName + ")");
 				}
 
-				// Ensure at most one parameter
-				Class<?> flowParameterType;
+				// Ensure at appropriate parameters
+				Class<?> flowParameterType = null;
+				boolean isFlowCallback = false;
 				Class<?>[] flowMethodParams = flowMethod.getParameterTypes();
-				if (flowMethodParams.length == 0) {
-					flowParameterType = null;
-				} else if (flowMethodParams.length == 1) {
+				switch (flowMethodParams.length) {
+				case 2:
+					// Two parameters, first parameter, second flow callback
 					flowParameterType = flowMethodParams[0];
-				} else {
-					// Invalid to have more than one parameter
+					if (!FlowCallback.class.isAssignableFrom(flowMethodParams[1])) {
+						throw new Exception("Second parameter must be " + FlowCallback.class.getSimpleName()
+								+ " (function " + functionName + ", flow " + parameterType.getSimpleName() + "."
+								+ flowMethodName + ")");
+					}
+					isFlowCallback = true;
+					break;
+
+				case 1:
+					// Single parameter, either parameter or flow callback
+					if (FlowCallback.class.isAssignableFrom(flowMethodParams[0])) {
+						isFlowCallback = true;
+					} else {
+						flowParameterType = flowMethodParams[0];
+					}
+					break;
+
+				case 0:
+					// No parameters
+					break;
+
+				default:
+					// Invalid to have more than two parameter
 					throw new Exception(
-							"Flow methods may only have at most one parameter (task "
-									+ taskName + ", flow "
-									+ parameterType.getSimpleName() + "."
-									+ flowMethodName + ")");
+							"Flow methods may only have at most two parameters [<parameter>, <flow callback>] (function "
+									+ functionName + ", flow " + parameterType.getSimpleName() + "." + flowMethodName
+									+ ")");
 				}
 
-				// Ensure correct return type
-				boolean isReturnFlowFuture;
+				// Ensure void return type
 				Class<?> flowReturnType = flowMethod.getReturnType();
-				if (FlowFuture.class.equals(flowReturnType)) {
-					// Returns a flow future
-					isReturnFlowFuture = true;
-				} else if (Void.TYPE.equals(flowReturnType)
-						|| (flowReturnType == null)) {
-					// Does not return value
-					isReturnFlowFuture = false;
-				} else {
+				if ((flowReturnType != null) && (!Void.TYPE.equals(flowReturnType))) {
 					// Invalid return type
-					throw new Exception("Flow method "
-							+ parameterType.getSimpleName() + "." + taskName
-							+ " return type is invalid (return type="
-							+ flowReturnType.getName() + ", task=" + taskName
-							+ ")");
+					throw new Exception("Flow method " + parameterType.getSimpleName() + "." + flowMethodName
+							+ " return type is invalid (return type=" + flowReturnType.getName() + ", function="
+							+ functionName + ").  Must not have return type.");
 				}
 
 				// Create and register the flow method meta-data
-				FlowMethodMetaData flowMethodMetaData = new FlowMethodMetaData(
-						parameterType, flowMethod, flowSequence.nextIndex(),
-						(flowParameterType != null), isReturnFlowFuture);
+				FlowMethodMetaData flowMethodMetaData = new FlowMethodMetaData(parameterType, flowMethod,
+						flowSequence.nextIndex(), (flowParameterType != null), isFlowCallback);
 				flowMethodMetaDatas.put(flowMethodName, flowMethodMetaData);
 
 				// Register the flow
-				ManagedFunctionFlowTypeBuilder<Indexed> flowTypeBuilder = taskTypeBuilder
-						.addFlow();
+				ManagedFunctionFlowTypeBuilder<Indexed> flowTypeBuilder = functionTypeBuilder.addFlow();
 				flowTypeBuilder.setLabel(flowMethodName);
 				if (flowParameterType != null) {
 					flowTypeBuilder.setArgumentType(flowParameterType);
@@ -522,8 +481,7 @@ public class ClassWorkSource extends AbstractManagedFunctionSource<ClassWork> im
 			}
 
 			// Create and return the flow interface parameter factory
-			return new FlowParameterFactory(classLoader, parameterType,
-					flowMethodMetaDatas);
+			return new FlowParameterFactory(classLoader, parameterType, flowMethodMetaDatas);
 		}
 	}
 

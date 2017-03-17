@@ -36,7 +36,7 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
-import net.officefloor.plugin.section.work.WorkSectionSource;
+import net.officefloor.plugin.section.managedfunction.ManagedFunctionSectionSource;
 
 /**
  * {@link ManagedFunctionSource} to route the cause of an {@link Escalation}.
@@ -61,7 +61,7 @@ public class AutoWireEscalationCauseRouteWorkSource extends AbstractManagedFunct
 	 * Configures handling the {@link Escalation} cause.
 	 * 
 	 * @param section
-	 *            {@link AutoWireSection} for the {@link WorkSectionSource}
+	 *            {@link AutoWireSection} for the {@link ManagedFunctionSectionSource}
 	 *            containing the {@link AutoWireEscalationCauseRouteWorkSource}
 	 *            being configured.
 	 * @param causeType

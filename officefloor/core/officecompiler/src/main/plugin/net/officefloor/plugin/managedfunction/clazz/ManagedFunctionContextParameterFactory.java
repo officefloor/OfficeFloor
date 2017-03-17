@@ -15,24 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.work.clazz;
+package net.officefloor.plugin.managedfunction.clazz;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 
 /**
- * Enables flagging a <code>public</code> method of a {@link Class} to not be
- * {@link ManagedFunction} for the {@link ClassWorkSource}.
+ * {@link ParameterFactory} for the {@link ManagedFunctionContext}.
  * 
  * @author Daniel Sagenschneider
  */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface NonTaskMethod {
+public class ManagedFunctionContextParameterFactory implements ParameterFactory {
+
+	/*
+	 * ====================== ParameterFactory =============================
+	 */
+
+	@Override
+	public Object createParameter(ManagedFunctionContext<?, ?> context) {
+		return context;
+	}
+
 }

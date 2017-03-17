@@ -46,13 +46,13 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.plugin.managedfunction.clazz.ClassFunctionFactory;
+import net.officefloor.plugin.managedfunction.clazz.ClassWork;
+import net.officefloor.plugin.managedfunction.clazz.ClassWorkFactory;
+import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.managedfunction.clazz.ParameterFactory;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
-import net.officefloor.plugin.work.clazz.ClassTaskFactory;
-import net.officefloor.plugin.work.clazz.ClassWork;
-import net.officefloor.plugin.work.clazz.ClassWorkFactory;
-import net.officefloor.plugin.work.clazz.ClassWorkSource;
-import net.officefloor.plugin.work.clazz.FlowInterface;
-import net.officefloor.plugin.work.clazz.ParameterFactory;
 
 /**
  * Tests compiling a {@link ManagedFunction}.
@@ -774,7 +774,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Class for {@link ClassWorkSource}.
+	 * Class for {@link ClassManagedFunctionSource}.
 	 */
 	public static class CompileTaskWork {
 
@@ -827,7 +827,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 			workTypeBuilder.setWorkFactory(new ClassWorkFactory(
 					CompileTaskWork.class));
 			ManagedFunctionTypeBuilder<Indexed, Indexed> task = workTypeBuilder
-					.addManagedFunctionType("task", new ClassTaskFactory(
+					.addManagedFunctionType("task", new ClassFunctionFactory(
 							CompileTaskWork.class.getMethod("simpleTask"),
 							false, new ParameterFactory[0]), Indexed.class,
 							Indexed.class);

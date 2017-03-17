@@ -15,31 +15,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.section.clazz;
+package net.officefloor.plugin.managedfunction.clazz;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 
 /**
- * Annotates a method with the name of the next method ({@link ManagedFunction}),
+ * {@link ParameterFactory} for an {@link Object}.
  * 
  * @author Daniel Sagenschneider
  */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface NextTask {
+public class ObjectParameterFactory implements ParameterFactory {
 
 	/**
-	 * Obtains the name of the next method.
-	 * 
-	 * @return Name of the next method.
+	 * Index of the {@link Object}.
 	 */
-	String value();
+	private final int objectIndex;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param objectIndex
+	 *            Index of the {@link Object}.
+	 */
+	public ObjectParameterFactory(int objectIndex) {
+		this.objectIndex = objectIndex;
+	}
+
+	/*
+	 * ================== ParameterFactory ====================================
+	 */
+
+	@Override
+	public Object createParameter(ManagedFunctionContext<?, ?> context) {
+		return context.getObject(this.objectIndex);
+	}
 
 }

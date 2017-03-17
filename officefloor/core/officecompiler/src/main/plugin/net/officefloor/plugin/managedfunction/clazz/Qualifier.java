@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.work.clazz;
+package net.officefloor.plugin.managedfunction.clazz;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -23,17 +23,18 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.internal.structure.Flow;
-
 /**
- * Annotates an interface to have each of its methods be a {@link Flow} that may
- * be invoked by the {@link ManagedFunction} class method.
+ * <p>
+ * Enables qualifying dependencies.
+ * <p>
+ * TODO consider following JSR299 specification to use the
+ * javax.inject.Qualifier annotation. Until available and not tied to the heavy
+ * JEE specification using this annotation.
  * 
  * @author Daniel Sagenschneider
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface FlowInterface {
+@Target(ElementType.ANNOTATION_TYPE)
+public @interface Qualifier {
 }
