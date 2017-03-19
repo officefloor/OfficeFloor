@@ -15,28 +15,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.impl.type;
+package net.officefloor.compile.spi.administration.source;
 
-import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
-import net.officefloor.compile.managedfunction.FunctionNamespaceType;
-import net.officefloor.compile.type.TypeContext;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.escalate.Escalation;
 
 /**
- * Tests loading the {@link FunctionNamespaceType} from the {@link TypeContext}.
- *
+ * Describes a {@link Escalation} from the {@link Administration}.
+ * 
  * @author Daniel Sagenschneider
  */
-@SuppressWarnings("rawtypes")
-public class WorkTypeContextTest extends
-		AbstractTestTypeContext<FunctionNamespaceNode, FunctionNamespaceType> {
+public interface AdministrationEscalationMetaData {
 
 	/**
-	 * Instantiate.
+	 * Obtains the {@link Class} of the {@link Escalation}.
+	 * 
+	 * @return {@link Class} of the {@link Escalation}.
 	 */
-	public WorkTypeContextTest() {
-		super(FunctionNamespaceNode.class, FunctionNamespaceType.class, (node) -> (FunctionNamespaceType) node
-				.loadWorkType(), (context, node) -> (FunctionNamespaceType) context
-				.getOrLoadWorkType(node));
-	}
+	<E extends Throwable> Class<E> getEscalationType();
+
+	/**
+	 * Provides a descriptive name for this {@link Escalation}. This is useful
+	 * to better describe the {@link Escalation}.
+	 * 
+	 * @return Descriptive name for this {@link Escalation}.
+	 */
+	String getLabel();
 
 }

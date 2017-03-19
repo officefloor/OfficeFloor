@@ -20,7 +20,9 @@ package net.officefloor.compile.spi.administration.source.impl;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.compile.spi.administration.source.AdministrationEscalationMetaData;
 import net.officefloor.compile.spi.administration.source.AdministrationFlowMetaData;
+import net.officefloor.compile.spi.administration.source.AdministrationGovernanceMetaData;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.administration.source.AdministrationSourceContext;
 import net.officefloor.compile.spi.administration.source.AdministrationSourceMetaData;
@@ -28,6 +30,8 @@ import net.officefloor.compile.spi.administration.source.AdministrationSourcePro
 import net.officefloor.compile.spi.administration.source.AdministrationSourceSpecification;
 import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.internal.structure.Flow;
 
 /**
@@ -202,6 +206,31 @@ public abstract class AbstractAdministratorSource<E, F extends Enum<F>, G extend
 		 */
 		Labeller addFlow(Class<?> argumentType);
 
+		/**
+		 * Adds an {@link Escalation}.
+		 * 
+		 * @param escalationType
+		 *            Type of {@link Escalation}.
+		 * @return {@link Labeller} to possibly label the {@link Escalation}.
+		 */
+		Labeller addEscalation(Class<? extends Throwable> escalationType);
+
+		/**
+		 * Adds {@link Governance} identified by the key.
+		 * 
+		 * @param key
+		 *            {@link Enum} to identify the {@link Governance}.
+		 * @return {@link Labeller} to possibly label the {@link Governance}.
+		 */
+		Labeller addGovernance(G key);
+
+		/**
+		 * Adds {@link Governance} identified by an index into the order the
+		 * {@link Governance} was added.
+		 * 
+		 * @return {@link Labeller} to possibly label the {@link Governance}.
+		 */
+		Labeller addGovernance();
 	}
 
 	/**
@@ -239,7 +268,17 @@ public abstract class AbstractAdministratorSource<E, F extends Enum<F>, G extend
 		/**
 		 * Listing of {@link AdministrationFlowMetaData} instances.
 		 */
-		private final List<AdministrationFlowMetaData<?>> flows = new LinkedList<AdministrationFlowMetaData<?>>();
+		private final List<AdministrationFlowMetaData<?>> flows = new LinkedList<>();
+
+		/**
+		 * Listing of {@link AdministrationEscalationMetaData} instances.
+		 */
+		private final List<AdministrationEscalationMetaData> escalations = new LinkedList<>();
+
+		/**
+		 * Listing of {@link AdministrationGovernanceMetaData} instances.
+		 */
+		private final List<AdministrationGovernanceMetaData<?>> governances = new LinkedList<>();
 
 		/**
 		 * Extension interface.
@@ -257,7 +296,7 @@ public abstract class AbstractAdministratorSource<E, F extends Enum<F>, G extend
 		 * @param context
 		 *            {@link AdministrationSourceContext}.
 		 */
-		public MetaData(AdministrationSourceContext context) {
+		private MetaData(AdministrationSourceContext context) {
 			this.context = context;
 		}
 
@@ -296,6 +335,30 @@ public abstract class AbstractAdministratorSource<E, F extends Enum<F>, G extend
 			return flow;
 		}
 
+		@Override
+		public Labeller addEscalation(Class<? extends Throwable> escalationType) {
+			AdministrationEscalationMetaDataImpl escalation = new AdministrationEscalationMetaDataImpl(escalationType,
+					this.escalations.size());
+			this.escalations.add(escalation);
+			return escalation;
+		}
+
+		@Override
+		public Labeller addGovernance(G key) {
+			AdministrationGovernanceMetaDataImpl<G> governance = new AdministrationGovernanceMetaDataImpl<G>(key,
+					key.ordinal());
+			this.governances.add(governance);
+			return governance;
+		}
+
+		@Override
+		public Labeller addGovernance() {
+			AdministrationGovernanceMetaDataImpl<G> governance = new AdministrationGovernanceMetaDataImpl<G>(null,
+					this.governances.size());
+			this.governances.add(governance);
+			return governance;
+		}
+
 		/*
 		 * ================= AdministratorSourceMetaData =======================
 		 */
@@ -316,6 +379,16 @@ public abstract class AbstractAdministratorSource<E, F extends Enum<F>, G extend
 			return this.flows.toArray(new AdministrationFlowMetaData[0]);
 		}
 
+		@Override
+		public AdministrationEscalationMetaData[] getEscalationMetaData() {
+			return this.escalations.toArray(new AdministrationEscalationMetaData[0]);
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public AdministrationGovernanceMetaData<G>[] getGovernanceMetaData() {
+			return this.governances.toArray(new AdministrationGovernanceMetaData[0]);
+		}
 	}
 
 	/**
@@ -354,7 +427,7 @@ public abstract class AbstractAdministratorSource<E, F extends Enum<F>, G extend
 		 * @param index
 		 *            Index of this {@link Flow}.
 		 */
-		public AdministrationFlowMetaDataImpl(F key, Class<?> argumentType, int index) {
+		private AdministrationFlowMetaDataImpl(F key, Class<?> argumentType, int index) {
 			this.key = key;
 			this.argumentType = argumentType;
 			this.index = index;
@@ -387,6 +460,134 @@ public abstract class AbstractAdministratorSource<E, F extends Enum<F>, G extend
 		@Override
 		public Class<?> getArgumentType() {
 			return this.argumentType;
+		}
+
+		@Override
+		public String getLabel() {
+			return this.label;
+		}
+	}
+
+	/**
+	 * {@link AdministrationEscalationMetaData} implementation.
+	 */
+	private static class AdministrationEscalationMetaDataImpl implements Labeller, AdministrationEscalationMetaData {
+
+		/**
+		 * Type of {@link Escalation}.
+		 */
+		private final Class<? extends Throwable> escalationType;
+
+		/**
+		 * Index of this {@link Escalation}.
+		 */
+		private final int index;
+
+		/**
+		 * Label for this {@link Escalation}.
+		 */
+		private String label;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param escalationType
+		 *            Type of {@link Escalation}.
+		 * @param index
+		 *            Index of this {@link Escalation}.
+		 */
+		private AdministrationEscalationMetaDataImpl(Class<? extends Throwable> escalationType, int index) {
+			this.escalationType = escalationType;
+			this.index = index;
+		}
+
+		/*
+		 * ==================== Labeller ===============================
+		 */
+
+		@Override
+		public Labeller setLabel(String label) {
+			this.label = label;
+			return this;
+		}
+
+		@Override
+		public int getIndex() {
+			return this.index;
+		}
+
+		/*
+		 * ============= AdministrationEscalationMetaData ===============
+		 */
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public <E extends Throwable> Class<E> getEscalationType() {
+			return (Class<E>) this.escalationType;
+		}
+
+		@Override
+		public String getLabel() {
+			return this.label;
+		}
+	}
+
+	/**
+	 * {@link AdministrationGovernanceMetaData} implementation.
+	 */
+	private static class AdministrationGovernanceMetaDataImpl<G extends Enum<G>>
+			implements Labeller, AdministrationGovernanceMetaData<G> {
+
+		/**
+		 * Key identifying this {@link Governance}.
+		 */
+		private final G key;
+
+		/**
+		 * Index of this {@link Escalation}.
+		 */
+		private final int index;
+
+		/**
+		 * Label for this {@link Escalation}.
+		 */
+		private String label;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param key
+		 *            Key identifying this {@link Escalation}.
+		 * @param index
+		 *            Index of this {@link Escalation}.
+		 */
+		private AdministrationGovernanceMetaDataImpl(G key, int index) {
+			this.key = key;
+			this.index = index;
+		}
+
+		/*
+		 * ==================== Labeller ===============================
+		 */
+
+		@Override
+		public Labeller setLabel(String label) {
+			this.label = label;
+			return this;
+		}
+
+		@Override
+		public int getIndex() {
+			return this.index;
+		}
+
+		/*
+		 * ========== AdministrationGovernanceMetaData ===============
+		 */
+
+		@Override
+		public G getKey() {
+			return this.key;
 		}
 
 		@Override

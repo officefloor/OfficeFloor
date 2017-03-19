@@ -286,7 +286,7 @@ public class ManagedFunctionLoaderUtil {
 
 		// Return the loaded namespace type
 		return getOfficeFloorCompiler(compiler).getManagedFunctionLoader()
-				.loadFunctionNamespaceType(managedFunctionSourceClass, propertyList);
+				.loadManagedFunctionType(managedFunctionSourceClass, propertyList);
 	}
 
 	/**

@@ -15,21 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.impl.work;
+package net.officefloor.compile.impl.managedfunction;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedfunction.ManagedFunctionLoader;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceProperty;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceSpecification;
-import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
-import net.officefloor.frame.api.function.Work;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -38,7 +37,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * 
  * @author Daniel Sagenschneider
  */
-public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
+public class LoadManagedFunctionSpecificationTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link CompilerIssues}.
@@ -53,44 +52,43 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		MockWorkSource.reset(this.specification);
+		MockManagedFunctionSource.reset(this.specification);
 	}
 
 	/**
 	 * Ensures issue if fails to instantiate the {@link ManagedFunctionSource}.
 	 */
-	public void testFailInstantiateForWorkSpecification() {
+	public void testFailInstantiateForManagedFunctionSpecification() {
 
-		final RuntimeException failure = new RuntimeException(
-				"instantiate failure");
+		final RuntimeException failure = new RuntimeException("instantiate failure");
 
 		// Record failure to instantiate
 		this.issues.recordIssue(
-				"Failed to instantiate " + MockWorkSource.class.getName()
-						+ " by default constructor", failure);
+				"Failed to instantiate " + MockManagedFunctionSource.class.getName() + " by default constructor",
+				failure);
 
 		// Attempt to obtain specification
-		MockWorkSource.instantiateFailure = failure;
+		MockManagedFunctionSource.instantiateFailure = failure;
 		this.replayMockObjects();
 		this.loadSpecification(false);
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensures issue if failure in obtaining the {@link ManagedFunctionSourceSpecification}
-	 * .
+	 * Ensures issue if failure in obtaining the
+	 * {@link ManagedFunctionSourceSpecification} .
 	 */
-	public void testFailGetWorkSpecification() {
+	public void testFailGetManagedFunctionSpecification() {
 
 		final Error failure = new Error("specification failure");
 
 		// Record failure to instantiate
 		this.issues.recordIssue(
-				"Failed to obtain WorkSourceSpecification from "
-						+ MockWorkSource.class.getName(), failure);
+				"Failed to obtain ManagedFunctionSourceSpecification from " + MockManagedFunctionSource.class.getName(),
+				failure);
 
 		// Attempt to obtain specification
-		MockWorkSource.specificationFailure = failure;
+		MockManagedFunctionSource.specificationFailure = failure;
 		this.replayMockObjects();
 		this.loadSpecification(false);
 		this.verifyMockObjects();
@@ -99,35 +97,33 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	/**
 	 * Ensures issue if no {@link ManagedFunctionSourceSpecification} obtained.
 	 */
-	public void testNoWorkSpecification() {
+	public void testNoManagedFunctionSpecification() {
 
 		// Record no specification returned
-		this.issues.recordIssue("No WorkSourceSpecification returned from "
-				+ MockWorkSource.class.getName());
+		this.issues.recordIssue(
+				"No ManagedFunctionSourceSpecification returned from " + MockManagedFunctionSource.class.getName());
 
 		// Attempt to obtain specification
-		MockWorkSource.specification = null;
+		MockManagedFunctionSource.specification = null;
 		this.replayMockObjects();
 		this.loadSpecification(false);
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensures issue if fails to obtain the {@link ManagedFunctionSourceProperty}
-	 * instances.
+	 * Ensures issue if fails to obtain the
+	 * {@link ManagedFunctionSourceProperty} instances.
 	 */
-	public void testFailGetWorkProperties() {
+	public void testFailGetManagedFunctionProperties() {
 
-		final NullPointerException failure = new NullPointerException(
-				"Fail to get work properties");
+		final NullPointerException failure = new NullPointerException("Fail to get work properties");
 
 		// Record null work properties
-		this.control(this.specification).expectAndThrow(
-				this.specification.getProperties(), failure);
-		this.issues
-				.recordIssue(
-						"Failed to obtain WorkSourceProperty instances from WorkSourceSpecification for "
-								+ MockWorkSource.class.getName(), failure);
+		this.control(this.specification).expectAndThrow(this.specification.getProperties(), failure);
+		this.issues.recordIssue(
+				"Failed to obtain ManagedFunctionSourceProperty instances from ManagedFunctionSourceSpecification for "
+						+ MockManagedFunctionSource.class.getName(),
+				failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -136,13 +132,13 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures considers null {@link ManagedFunctionSourceProperty} array as no properties.
+	 * Ensures considers null {@link ManagedFunctionSourceProperty} array as no
+	 * properties.
 	 */
-	public void testNullWorkPropertiesArray() {
+	public void testNullManagedFunctionPropertiesArray() {
 
 		// Record null work properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(), null);
+		this.recordReturn(this.specification, this.specification.getProperties(), null);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -151,17 +147,16 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if element in {@link ManagedFunctionSourceProperty} array is null.
+	 * Ensures issue if element in {@link ManagedFunctionSourceProperty} array
+	 * is null.
 	 */
-	public void testNullWorkPropertyElement() {
+	public void testNullManagedFunctionPropertyElement() {
 
 		// Record null work properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new ManagedFunctionSourceProperty[] { null });
-		this.issues
-				.recordIssue("WorkSourceProperty 0 is null from WorkSourceSpecification for "
-						+ MockWorkSource.class.getName());
+		this.issues.recordIssue("ManagedFunctionSourceProperty 0 is null from ManagedFunctionSourceSpecification for "
+				+ MockManagedFunctionSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -170,21 +165,20 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if <code>null</code> {@link ManagedFunctionSourceProperty} name.
+	 * Ensures issue if <code>null</code> {@link ManagedFunctionSourceProperty}
+	 * name.
 	 */
-	public void testNullWorkPropertyName() {
+	public void testNullManagedFunctionPropertyName() {
 
-		final ManagedFunctionSourceProperty property = this
-				.createMock(ManagedFunctionSourceProperty.class);
+		final ManagedFunctionSourceProperty property = this.createMock(ManagedFunctionSourceProperty.class);
 
 		// Record obtaining work properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new ManagedFunctionSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
-		this.issues
-				.recordIssue("WorkSourceProperty 0 provided blank name from WorkSourceSpecification for "
-						+ MockWorkSource.class.getName());
+		this.issues.recordIssue(
+				"ManagedFunctionSourceProperty 0 provided blank name from ManagedFunctionSourceSpecification for "
+						+ MockManagedFunctionSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -193,23 +187,22 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if fails to get the {@link ManagedFunctionSourceProperty} name.
+	 * Ensures issue if fails to get the {@link ManagedFunctionSourceProperty}
+	 * name.
 	 */
-	public void testFailGetWorkPropertyName() {
+	public void testFailGetManagedFunctionPropertyName() {
 
-		final RuntimeException failure = new RuntimeException(
-				"Failed to get property name");
-		final ManagedFunctionSourceProperty property = this
-				.createMock(ManagedFunctionSourceProperty.class);
+		final RuntimeException failure = new RuntimeException("Failed to get property name");
+		final ManagedFunctionSourceProperty property = this.createMock(ManagedFunctionSourceProperty.class);
 
 		// Record obtaining work properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new ManagedFunctionSourceProperty[] { property });
 		this.control(property).expectAndThrow(property.getName(), failure);
 		this.issues.recordIssue(
-				"Failed to get name for WorkSourceProperty 0 from WorkSourceSpecification for "
-						+ MockWorkSource.class.getName(), failure);
+				"Failed to get name for ManagedFunctionSourceProperty 0 from ManagedFunctionSourceSpecification for "
+						+ MockManagedFunctionSource.class.getName(),
+				failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -218,25 +211,23 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if fails to get the {@link ManagedFunctionSourceProperty} label.
+	 * Ensures issue if fails to get the {@link ManagedFunctionSourceProperty}
+	 * label.
 	 */
-	public void testFailGetWorkPropertyLabel() {
+	public void testFailGetManagedFunctionPropertyLabel() {
 
-		final RuntimeException failure = new RuntimeException(
-				"Failed to get property label");
-		final ManagedFunctionSourceProperty property = this
-				.createMock(ManagedFunctionSourceProperty.class);
+		final RuntimeException failure = new RuntimeException("Failed to get property label");
+		final ManagedFunctionSourceProperty property = this.createMock(ManagedFunctionSourceProperty.class);
 
 		// Record obtaining work properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new ManagedFunctionSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
 		this.control(property).expectAndThrow(property.getLabel(), failure);
-		this.issues
-				.recordIssue(
-						"Failed to get label for WorkSourceProperty 0 (NAME) from WorkSourceSpecification for "
-								+ MockWorkSource.class.getName(), failure);
+		this.issues.recordIssue(
+				"Failed to get label for ManagedFunctionSourceProperty 0 (NAME) from ManagedFunctionSourceSpecification for "
+						+ MockManagedFunctionSource.class.getName(),
+				failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -247,25 +238,18 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	/**
 	 * Ensures able to load the {@link ManagedFunctionSourceSpecification}.
 	 */
-	public void testLoadWorkSpecification() {
+	public void testLoadManagedFunctionSpecification() {
 
-		final ManagedFunctionSourceProperty propertyWithLabel = this
-				.createMock(ManagedFunctionSourceProperty.class);
-		final ManagedFunctionSourceProperty propertyWithoutLabel = this
-				.createMock(ManagedFunctionSourceProperty.class);
+		final ManagedFunctionSourceProperty propertyWithLabel = this.createMock(ManagedFunctionSourceProperty.class);
+		final ManagedFunctionSourceProperty propertyWithoutLabel = this.createMock(ManagedFunctionSourceProperty.class);
 
 		// Record obtaining work properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(), new ManagedFunctionSourceProperty[] {
-						propertyWithLabel, propertyWithoutLabel });
-		this.recordReturn(propertyWithLabel, propertyWithLabel.getName(),
-				"NAME");
-		this.recordReturn(propertyWithLabel, propertyWithLabel.getLabel(),
-				"LABEL");
-		this.recordReturn(propertyWithoutLabel, propertyWithoutLabel.getName(),
-				"NO LABEL");
-		this.recordReturn(propertyWithoutLabel,
-				propertyWithoutLabel.getLabel(), null);
+		this.recordReturn(this.specification, this.specification.getProperties(),
+				new ManagedFunctionSourceProperty[] { propertyWithLabel, propertyWithoutLabel });
+		this.recordReturn(propertyWithLabel, propertyWithLabel.getName(), "NAME");
+		this.recordReturn(propertyWithLabel, propertyWithLabel.getLabel(), "LABEL");
+		this.recordReturn(propertyWithoutLabel, propertyWithoutLabel.getName(), "NO LABEL");
+		this.recordReturn(propertyWithoutLabel, propertyWithoutLabel.getLabel(), null);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -282,24 +266,20 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	 * @param propertyNames
 	 *            Expected {@link Property} names for being returned.
 	 */
-	private void loadSpecification(boolean isExpectToLoad,
-			String... propertyNameLabelPairs) {
+	private void loadSpecification(boolean isExpectToLoad, String... propertyNameLabelPairs) {
 
 		// Load the work specification
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
-		ManagedFunctionLoader workLoader = compiler.getWorkLoader();
-		PropertyList propertyList = workLoader
-				.loadSpecification(MockWorkSource.class);
+		ManagedFunctionLoader functionLoader = compiler.getManagedFunctionLoader();
+		PropertyList propertyList = functionLoader.loadSpecification(MockManagedFunctionSource.class);
 
 		// Determine if expected to load
 		if (isExpectToLoad) {
 			assertNotNull("Expected to load specification", propertyList);
 
 			// Ensure the properties are as expected
-			PropertyListUtil.validatePropertyNameLabels(propertyList,
-					propertyNameLabelPairs);
+			PropertyListUtil.validatePropertyNameLabels(propertyList, propertyNameLabelPairs);
 
 		} else {
 			assertNull("Should not load specification", propertyList);
@@ -310,7 +290,7 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	 * Mock {@link ManagedFunctionSource} for testing.
 	 */
 	@TestSource
-	public static class MockWorkSource implements ManagedFunctionSource<Work> {
+	public static class MockManagedFunctionSource implements ManagedFunctionSource {
 
 		/**
 		 * Failure to instantiate an instance.
@@ -336,13 +316,13 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 		public static void reset(ManagedFunctionSourceSpecification specification) {
 			instantiateFailure = null;
 			specificationFailure = null;
-			MockWorkSource.specification = specification;
+			MockManagedFunctionSource.specification = specification;
 		}
 
 		/**
 		 * Default constructor.
 		 */
-		public MockWorkSource() {
+		public MockManagedFunctionSource() {
 			// Determine if fail to instantiate
 			if (instantiateFailure != null) {
 				throw instantiateFailure;
@@ -350,7 +330,7 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 		}
 
 		/*
-		 * ================ WorkSource ================================
+		 * ================ ManagedFunctionSource ================
 		 */
 
 		@Override
@@ -366,7 +346,7 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void sourceManagedFunctions(FunctionNamespaceBuilder<Work> workTypeBuilder,
+		public void sourceManagedFunctions(FunctionNamespaceBuilder namespaceBuilder,
 				ManagedFunctionSourceContext context) throws Exception {
 			fail("Should not be invoked for obtaining specification");
 		}

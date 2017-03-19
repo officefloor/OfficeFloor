@@ -94,8 +94,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 
 		// Ensure adapted for testing
 		this.compiler = OfficeFloorCompiler.newOfficeFloorCompiler(classLoader);
-		assertTrue("Ensure compiler is adapted",
-				this.compiler instanceof OfficeFloorCompilerAdapter);
+		assertTrue("Ensure compiler is adapted", this.compiler instanceof OfficeFloorCompilerAdapter);
 
 		// Load the properties and aliases
 		this.compiler.addEnvProperties();
@@ -117,18 +116,14 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	public void testOfficeFloorCompilerRunnable() throws Exception {
 
 		// Obtain non-adapted compiler executes runnable
-		OfficeFloorCompiler nonAdaptedCompiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
-		assertFalse("Should not be adapted",
-				nonAdaptedCompiler instanceof OfficeFloorCompilerAdapter);
+		OfficeFloorCompiler nonAdaptedCompiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+		assertFalse("Should not be adapted", nonAdaptedCompiler instanceof OfficeFloorCompilerAdapter);
 
 		// Ensure obtain changes in this class loader
 		MockOfficeFloorCompilerRunnable.value = "CURRENT";
-		MockRunnableResult result = nonAdaptedCompiler.run(
-				MockOfficeFloorCompilerRunnable.class, "ONE", "TWO",
+		MockRunnableResult result = nonAdaptedCompiler.run(MockOfficeFloorCompilerRunnable.class, "ONE", "TWO",
 				new MockOfficeFloorCompilerRunnable());
-		assertEquals("Should be value from current class loader", "CURRENT",
-				result.getValue());
+		assertEquals("Should be value from current class loader", "CURRENT", result.getValue());
 	}
 
 	/**
@@ -139,11 +134,9 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 
 		// Ensure not use current class loader values
 		MockOfficeFloorCompilerRunnable.value = "CURRENT";
-		MockRunnableResult result = this.compiler.run(
-				MockOfficeFloorCompilerRunnable.class, "ONE", "TWO",
+		MockRunnableResult result = this.compiler.run(MockOfficeFloorCompilerRunnable.class, "ONE", "TWO",
 				new MockOfficeFloorCompilerRunnable());
-		assertEquals("Should be initial value from newly loaded class",
-				"INITIAL", result.getValue());
+		assertEquals("Should be initial value from newly loaded class", "INITIAL", result.getValue());
 	}
 
 	/**
@@ -163,8 +156,8 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link OfficeFloorCompilerRunnable}.
 	 */
-	public static class MockOfficeFloorCompilerRunnable implements
-			OfficeFloorCompilerRunnable<MockRunnableResult>, MockRunnableResult {
+	public static class MockOfficeFloorCompilerRunnable
+			implements OfficeFloorCompilerRunnable<MockRunnableResult>, MockRunnableResult {
 
 		/**
 		 * Initial value for each {@link ClassLoader}.
@@ -176,8 +169,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		 */
 
 		@Override
-		public MockRunnableResult run(OfficeFloorCompiler compiler,
-				Object[] parameters) throws Exception {
+		public MockRunnableResult run(OfficeFloorCompiler compiler, Object[] parameters) throws Exception {
 
 			// Ensure have OfficeFloorCompiler
 			assertNotNull("Should have compiler", compiler);
@@ -189,8 +181,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 
 			// Ensure can bridge parameter interfaces
 			MockRunnableResult parameter = (MockRunnableResult) parameters[2];
-			assertEquals("Incorrect third parameter", "CURRENT",
-					parameter.getValue());
+			assertEquals("Incorrect third parameter", "CURRENT", parameter.getValue());
 
 			// Return to ensure can adapt result
 			return this;
@@ -213,18 +204,14 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	public void testCompileAndRunOfficeFloor() throws Exception {
 
 		// Build OfficeFloor
-		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource(
-				this.compiler);
+		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource(this.compiler);
 		source.assignDefaultTeam(PassiveTeamSource.class.getName());
-		source.addSection("TEST", ClassSectionSource.class.getName(),
-				AdaptWork.class.getName());
+		source.addSection("TEST", ClassSectionSource.class.getName(), AdaptWork.class.getName());
 		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
 
-		// Invoke the task
-		File checkFile = File.createTempFile(this.getClass().getSimpleName(),
-				"test");
-		officeFloor
-				.invokeTask("TEST.WORK", "task", checkFile.getAbsolutePath());
+		// Invoke the function
+		File checkFile = File.createTempFile(this.getClass().getSimpleName(), "test");
+		officeFloor.invokeFunction("TEST.WORK.task", checkFile.getAbsolutePath());
 
 		// Ensure the invoked task
 		String contents = this.getFileContents(checkFile);
@@ -261,27 +248,20 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	public void testManagedObject() throws Exception {
 
 		// Build OfficeFloor
-		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource(
-				this.compiler);
+		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource(this.compiler);
 		source.assignDefaultTeam(PassiveTeamSource.class.getName());
-		source.addSection("TEST", ClassSectionSource.class.getName(),
-				AdaptManagedObjectWork.class.getName());
-		source.addManagedObject(ClassManagedObjectSource.class.getName(), null,
-				new AutoWire(AdaptManagedObject.class)).addProperty(
-				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
-				AdaptManagedObjectImpl.class.getName());
+		source.addSection("TEST", ClassSectionSource.class.getName(), AdaptManagedObjectWork.class.getName());
+		source.addManagedObject(ClassManagedObjectSource.class.getName(), null, new AutoWire(AdaptManagedObject.class))
+				.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, AdaptManagedObjectImpl.class.getName());
 		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
 
-		// Invoke the task
-		File checkFile = File.createTempFile(this.getClass().getSimpleName(),
-				"test");
-		officeFloor
-				.invokeTask("TEST.WORK", "task", checkFile.getAbsolutePath());
+		// Invoke the function
+		File checkFile = File.createTempFile(this.getClass().getSimpleName(), "test");
+		officeFloor.invokeFunction("TEST.WORK.task", checkFile.getAbsolutePath());
 
 		// Ensure the invoked task
 		String contents = this.getFileContents(checkFile);
-		assertEquals("Task should be invoked", "MANAGED OBJECT INVOKED",
-				contents);
+		assertEquals("Task should be invoked", "MANAGED OBJECT INVOKED", contents);
 	}
 
 	/**
@@ -292,26 +272,20 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		final AdaptManagedObjectImpl object = new AdaptManagedObjectImpl();
 
 		// Build OfficeFloor
-		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource(
-				this.compiler);
+		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource(this.compiler);
 		source.assignDefaultTeam(PassiveTeamSource.class.getName());
-		source.addSection("TEST", ClassSectionSource.class.getName(),
-				AdaptManagedObjectWork.class.getName());
+		source.addSection("TEST", ClassSectionSource.class.getName(), AdaptManagedObjectWork.class.getName());
 		source.addObject(object, new AutoWire(AdaptManagedObject.class));
 		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
 
-		// Invoke the task
-		File checkFile = File.createTempFile(this.getClass().getSimpleName(),
-				"test");
-		officeFloor
-				.invokeTask("TEST.WORK", "task", checkFile.getAbsolutePath());
+		// Invoke the function
+		File checkFile = File.createTempFile(this.getClass().getSimpleName(), "test");
+		officeFloor.invokeFunction("TEST.WORK.task", checkFile.getAbsolutePath());
 
 		// Ensure the invoked managed object
-		assertTrue("Managed Object should be flagged as invoked",
-				object.isInvoked);
+		assertTrue("Managed Object should be flagged as invoked", object.isInvoked);
 		String contents = this.getFileContents(checkFile);
-		assertEquals("Managed Object should be invoked",
-				"MANAGED OBJECT INVOKED", contents);
+		assertEquals("Managed Object should be invoked", "MANAGED OBJECT INVOKED", contents);
 	}
 
 	/**
@@ -327,8 +301,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		 * @param fileLocation
 		 *            Location of the file.
 		 */
-		public void task(AdaptManagedObject mo, @Parameter String fileLocation)
-				throws IOException {
+		public void task(AdaptManagedObject mo, @Parameter String fileLocation) throws IOException {
 			mo.useManagedObject(fileLocation);
 		}
 	}
@@ -380,10 +353,8 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	 */
 	public void testOfficeFloorLoader() {
 		OfficeFloorLoader loader = this.compiler.getOfficeFloorLoader();
-		PropertyList specification = loader
-				.loadSpecification(OfficeFloorModelOfficeFloorSource.class);
-		assertEquals("Should be no properties", 0,
-				specification.getPropertyNames().length);
+		PropertyList specification = loader.loadSpecification(OfficeFloorModelOfficeFloorSource.class);
+		assertEquals("Should be no properties", 0, specification.getPropertyNames().length);
 	}
 
 	/**
@@ -391,10 +362,8 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	 */
 	public void testOfficeLoader() {
 		OfficeLoader loader = this.compiler.getOfficeLoader();
-		PropertyList specification = loader
-				.loadSpecification(OfficeModelOfficeSource.class);
-		assertEquals("Should be no properties", 0,
-				specification.getPropertyNames().length);
+		PropertyList specification = loader.loadSpecification(OfficeModelOfficeSource.class);
+		assertEquals("Should be no properties", 0, specification.getPropertyNames().length);
 	}
 
 	/**
@@ -402,33 +371,29 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	 */
 	public void testSectionLoader() {
 		SectionLoader loader = this.compiler.getSectionLoader();
-		PropertyList specification = loader
-				.loadSpecification(SectionModelSectionSource.class);
-		assertEquals("Should be no properties", 0,
-				specification.getPropertyNames().length);
+		PropertyList specification = loader.loadSpecification(SectionModelSectionSource.class);
+		assertEquals("Should be no properties", 0, specification.getPropertyNames().length);
 	}
 
 	/**
 	 * Tests obtaining specification from {@link ManagedFunctionLoader}.
 	 */
-	public void testWorkLoaderSpecification() {
-		ManagedFunctionLoader loader = this.compiler.getWorkLoader();
-		PropertyList specification = loader
-				.loadSpecification(ClassManagedFunctionSource.class);
-		assertEquals("Should have a property", 1,
-				specification.getPropertyNames().length);
+	public void testManagedFunctionLoaderSpecification() {
+		ManagedFunctionLoader loader = this.compiler.getManagedFunctionLoader();
+		PropertyList specification = loader.loadSpecification(ClassManagedFunctionSource.class);
+		assertEquals("Should have a property", 1, specification.getPropertyNames().length);
 	}
 
 	/**
 	 * Tests obtaining {@link FunctionNamespaceType} from {@link TypeLoader}.
 	 */
-	public void testWorkFromTypeLoader() {
+	public void testManagedFunctionFromTypeLoader() {
 		PropertyList properties = this.compiler.createPropertyList();
 		properties.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME)
 				.setValue(AdaptManagedObjectWork.class.getName());
-		FunctionNamespaceType<?> workType = this.typeLoader.loadWorkType(
-				ClassManagedFunctionSource.class.getName(), properties);
-		assertNotNull("Must have work type", workType);
+		FunctionNamespaceType namespaceType = this.typeLoader
+				.loadManagedFunctionType(ClassManagedFunctionSource.class.getName(), properties);
+		assertNotNull("Must have managed function type", namespaceType);
 	}
 
 	/**
@@ -436,10 +401,8 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	 */
 	public void testManagedObjectLoader() {
 		ManagedObjectLoader loader = this.compiler.getManagedObjectLoader();
-		PropertyList specification = loader
-				.loadSpecification(ClassManagedObjectSource.class);
-		assertEquals("Should have a property", 1,
-				specification.getPropertyNames().length);
+		PropertyList specification = loader.loadSpecification(ClassManagedObjectSource.class);
+		assertEquals("Should have a property", 1, specification.getPropertyNames().length);
 	}
 
 	/**
@@ -447,12 +410,10 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	 */
 	public void testManagedObjectFromTypeLoader() {
 		PropertyList properties = this.compiler.createPropertyList();
-		properties.addProperty(
-				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME).setValue(
-				AdaptManagedObjectImpl.class.getName());
+		properties.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME)
+				.setValue(AdaptManagedObjectImpl.class.getName());
 		ManagedObjectType<?> managedObjectType = this.typeLoader
-				.loadManagedObjectType(
-						ClassManagedObjectSource.class.getName(), properties);
+				.loadManagedObjectType(ClassManagedObjectSource.class.getName(), properties);
 		assertNotNull("Must have managed object type", managedObjectType);
 	}
 
@@ -461,10 +422,8 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	 */
 	public void testSupplierLoader() {
 		SupplierLoader loader = this.compiler.getSupplierLoader();
-		PropertyList specification = loader
-				.loadSpecification(MockSupplierSource.class);
-		assertEquals("Should have a property", 1,
-				specification.getPropertyNames().length);
+		PropertyList specification = loader.loadSpecification(MockSupplierSource.class);
+		assertEquals("Should have a property", 1, specification.getPropertyNames().length);
 	}
 
 	/**
@@ -492,21 +451,17 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	 */
 	public void testGovernanceLoader() {
 		GovernanceLoader loader = this.compiler.getGovernanceLoader();
-		PropertyList specification = loader
-				.loadSpecification(ClassGovernanceSource.class);
-		assertEquals("Should have a property", 1,
-				specification.getPropertyNames().length);
+		PropertyList specification = loader.loadSpecification(ClassGovernanceSource.class);
+		assertEquals("Should have a property", 1, specification.getPropertyNames().length);
 	}
 
 	/**
 	 * Tests the {@link AdministrationLoader}.
 	 */
-	public void testAdministratorLoader() {
-		AdministrationLoader loader = this.compiler.getAdministratorLoader();
-		PropertyList specification = loader
-				.loadSpecification(ClassAdministrationSource.class);
-		assertEquals("Should have a property", 1,
-				specification.getPropertyNames().length);
+	public void testAdministrationLoader() {
+		AdministrationLoader loader = this.compiler.getAdministrationLoader();
+		PropertyList specification = loader.loadSpecification(ClassAdministrationSource.class);
+		assertEquals("Should have a property", 1, specification.getPropertyNames().length);
 	}
 
 	/**
@@ -514,10 +469,8 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	 */
 	public void testTeamLoader() {
 		TeamLoader loader = this.compiler.getTeamLoader();
-		PropertyList specification = loader
-				.loadSpecification(PassiveTeamSource.class);
-		assertEquals("Should be no properties", 0,
-				specification.getPropertyNames().length);
+		PropertyList specification = loader.loadSpecification(PassiveTeamSource.class);
+		assertEquals("Should be no properties", 0, specification.getPropertyNames().length);
 	}
 
 	/**
@@ -525,8 +478,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	 * {@link CompilerIssues} issue maintaining type.
 	 */
 	public void testCompilerIssueSameTypeCause() {
-		this.doCompilerIssueCauseTest(new NullPointerException("TEST"),
-				NullPointerException.class);
+		this.doCompilerIssueCauseTest(new NullPointerException("TEST"), NullPointerException.class);
 	}
 
 	/**
@@ -534,29 +486,25 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	 * {@link CompilerIssues} issue, with need to adapt the cause.
 	 */
 	public void testCompilerIssueAdaptCause() {
-		this.doCompilerIssueCauseTest(new NonAdaptableException("TEST", null),
-				AdaptedException.class);
+		this.doCompilerIssueCauseTest(new NonAdaptableException("TEST", null), AdaptedException.class);
 	}
 
 	/**
 	 * Undertakes the {@link CompilerIssues} cause test.
 	 */
-	private void doCompilerIssueCauseTest(Exception cause,
-			Class<?> expectedCauseType) {
+	private void doCompilerIssueCauseTest(Exception cause, Class<?> expectedCauseType) {
 
 		// Specify to capture the cause
 		final Throwable[] adaptedCause = new Throwable[1];
 		final CompilerIssues issues = new CompilerIssues() {
 			@Override
-			public void addIssue(Node node, String issueDescription,
-					Throwable cause) {
+			public void addIssue(Node node, String issueDescription, Throwable cause) {
 				// Register the adapted cause
 				adaptedCause[0] = cause;
 			}
 
 			@Override
-			public void addIssue(Node node, String issueDescription,
-					CompilerIssue... causes) {
+			public void addIssue(Node node, String issueDescription, CompilerIssue... causes) {
 				fail("Should not be invoked - " + issueDescription);
 			}
 
@@ -570,18 +518,15 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 
 		// Load type to trigger issue with cause
 		ManagedObjectLoader loader = this.compiler.getManagedObjectLoader();
-		ManagedObjectType<None> type = loader.loadManagedObjectType(
-				new MockFailManagedObjectSource(cause),
+		ManagedObjectType<None> type = loader.loadManagedObjectType(new MockFailManagedObjectSource(cause),
 				this.compiler.createPropertyList());
 		assertNull("Should not load type", type);
 
 		// Validate adapted the cause
 		Throwable actualCause = adaptedCause[0];
 		assertNotNull("Should have adapted cause", actualCause);
-		assertEquals("Incorrect adapted cause type", expectedCauseType,
-				actualCause.getClass());
-		assertEquals("Ensure provides details of original cause",
-				cause.getMessage(), adaptedCause[0].getMessage());
+		assertEquals("Incorrect adapted cause type", expectedCauseType, actualCause.getClass());
+		assertEquals("Ensure provides details of original cause", cause.getMessage(), adaptedCause[0].getMessage());
 	}
 
 	/**
@@ -606,8 +551,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	 * Mock {@link ManagedObjectSource} to propagate a failure.
 	 */
 	@TestSource
-	public static class MockFailManagedObjectSource extends
-			AbstractManagedObjectSource<None, None> {
+	public static class MockFailManagedObjectSource extends AbstractManagedObjectSource<None, None> {
 
 		/**
 		 * Failure.
@@ -634,8 +578,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		protected void loadMetaData(MetaDataContext<None, None> context)
-				throws Exception {
+		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
 			throw this.failure;
 		}
 

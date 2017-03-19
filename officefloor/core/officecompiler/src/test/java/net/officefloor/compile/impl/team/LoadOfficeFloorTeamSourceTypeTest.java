@@ -19,7 +19,6 @@ package net.officefloor.compile.impl.team;
 
 import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.impl.structure.TeamNodeImpl;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;

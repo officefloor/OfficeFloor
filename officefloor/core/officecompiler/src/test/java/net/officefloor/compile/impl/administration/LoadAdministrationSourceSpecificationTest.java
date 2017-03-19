@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.impl.administrator;
+package net.officefloor.compile.impl.administration;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administration.AdministrationLoader;
@@ -29,7 +29,6 @@ import net.officefloor.compile.spi.administration.source.AdministrationSourcePro
 import net.officefloor.compile.spi.administration.source.AdministrationSourceSpecification;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
-import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -39,8 +38,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * 
  * @author Daniel Sagenschneider
  */
-public class LoadAdministratorSourceSpecificationTest extends
-		OfficeFrameTestCase {
+public class LoadAdministrationSourceSpecificationTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link CompilerIssues}.
@@ -53,31 +51,25 @@ public class LoadAdministratorSourceSpecificationTest extends
 	private final AdministrationSourceSpecification specification = this
 			.createMock(AdministrationSourceSpecification.class);
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	@Override
 	protected void setUp() throws Exception {
-		MockAdministratorSource.reset(this.specification);
+		MockAdministrationSource.reset(this.specification);
 	}
 
 	/**
 	 * Ensures issue if fails to instantiate the {@link AdministrationSource}.
 	 */
-	public void testFailInstantiateForAdministratorSourceSpecification() {
+	public void testFailInstantiateForAdministrationSourceSpecification() {
 
-		final RuntimeException failure = new RuntimeException(
-				"instantiate failure");
+		final RuntimeException failure = new RuntimeException("instantiate failure");
 
 		// Record failure to instantiate
-		this.issues.recordIssue("Failed to instantiate "
-				+ MockAdministratorSource.class.getName()
-				+ " by default constructor", failure);
+		this.issues.recordIssue(
+				"Failed to instantiate " + MockAdministrationSource.class.getName() + " by default constructor",
+				failure);
 
 		// Attempt to obtain specification
-		MockAdministratorSource.instantiateFailure = failure;
+		MockAdministrationSource.instantiateFailure = failure;
 		this.replayMockObjects();
 		this.loadSpecification(false);
 		this.verifyMockObjects();
@@ -87,17 +79,17 @@ public class LoadAdministratorSourceSpecificationTest extends
 	 * Ensures issue if failure in obtaining the
 	 * {@link AdministrationSourceSpecification}.
 	 */
-	public void testFailGetAdministratorSourceSpecification() {
+	public void testFailGetAdministrationSourceSpecification() {
 
 		final Error failure = new Error("specification failure");
 
 		// Record failure to instantiate
 		this.issues.recordIssue(
-				"Failed to obtain AdministratorSourceSpecification from "
-						+ MockAdministratorSource.class.getName(), failure);
+				"Failed to obtain AdministrationSourceSpecification from " + MockAdministrationSource.class.getName(),
+				failure);
 
 		// Attempt to obtain specification
-		MockAdministratorSource.specificationFailure = failure;
+		MockAdministrationSource.specificationFailure = failure;
 		this.replayMockObjects();
 		this.loadSpecification(false);
 		this.verifyMockObjects();
@@ -106,15 +98,14 @@ public class LoadAdministratorSourceSpecificationTest extends
 	/**
 	 * Ensures issue if no {@link AdministrationSourceSpecification} obtained.
 	 */
-	public void testNoAdministratorSourceSpecification() {
+	public void testNoAdministrationSourceSpecification() {
 
 		// Record no specification returned
-		this.issues
-				.recordIssue("No AdministratorSourceSpecification returned from "
-						+ MockAdministratorSource.class.getName());
+		this.issues.recordIssue(
+				"No AdministrationSourceSpecification returned from " + MockAdministrationSource.class.getName());
 
 		// Attempt to obtain specification
-		MockAdministratorSource.specification = null;
+		MockAdministrationSource.specification = null;
 		this.replayMockObjects();
 		this.loadSpecification(false);
 		this.verifyMockObjects();
@@ -124,19 +115,16 @@ public class LoadAdministratorSourceSpecificationTest extends
 	 * Ensures issue if fails to obtain the {@link AdministrationSourceProperty}
 	 * instances.
 	 */
-	public void testFailGetAdministratorSourceProperties() {
+	public void testFailGetAdministrationSourceProperties() {
 
-		final NullPointerException failure = new NullPointerException(
-				"Fail to get managed object source properties");
+		final NullPointerException failure = new NullPointerException("Fail to get managed object source properties");
 
 		// Record null properties
-		this.control(this.specification).expectAndThrow(
-				this.specification.getProperties(), failure);
-		this.issues
-				.recordIssue(
-						"Failed to obtain AdministratorSourceProperty instances from AdministratorSourceSpecification for "
-								+ MockAdministratorSource.class.getName(),
-						failure);
+		this.control(this.specification).expectAndThrow(this.specification.getProperties(), failure);
+		this.issues.recordIssue(
+				"Failed to obtain AdministrationSourceProperty instances from AdministrationSourceSpecification for "
+						+ MockAdministrationSource.class.getName(),
+				failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -148,11 +136,10 @@ public class LoadAdministratorSourceSpecificationTest extends
 	 * Ensures considers null {@link AdministrationSourceProperty} array as no
 	 * properties.
 	 */
-	public void testNullAdministratorSourcePropertiesArray() {
+	public void testNullAdministrationSourcePropertiesArray() {
 
 		// Record null properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(), null);
+		this.recordReturn(this.specification, this.specification.getProperties(), null);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -164,15 +151,13 @@ public class LoadAdministratorSourceSpecificationTest extends
 	 * Ensures issue if element in {@link AdministrationSourceProperty} array is
 	 * null.
 	 */
-	public void testNullAdministratorSourcePropertyElement() {
+	public void testNullAdministrationSourcePropertyElement() {
 
 		// Record null properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new AdministrationSourceProperty[] { null });
-		this.issues
-				.recordIssue("AdministratorSourceProperty 0 is null from AdministratorSourceSpecification for "
-						+ MockAdministratorSource.class.getName());
+		this.issues.recordIssue("AdministrationSourceProperty 0 is null from AdministrationSourceSpecification for "
+				+ MockAdministrationSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -184,19 +169,17 @@ public class LoadAdministratorSourceSpecificationTest extends
 	 * Ensures issue if <code>null</code> {@link AdministrationSourceProperty}
 	 * name.
 	 */
-	public void testNullAdministratorSourcePropertyName() {
+	public void testNullAdministrationSourcePropertyName() {
 
-		final AdministrationSourceProperty property = this
-				.createMock(AdministrationSourceProperty.class);
+		final AdministrationSourceProperty property = this.createMock(AdministrationSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new AdministrationSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
-		this.issues
-				.recordIssue("AdministratorSourceProperty 0 provided blank name from AdministratorSourceSpecification for "
-						+ MockAdministratorSource.class.getName());
+		this.issues.recordIssue(
+				"AdministrationSourceProperty 0 provided blank name from AdministrationSourceSpecification for "
+						+ MockAdministrationSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -208,23 +191,19 @@ public class LoadAdministratorSourceSpecificationTest extends
 	 * Ensures issue if fails to get the {@link AdministrationSourceProperty}
 	 * name.
 	 */
-	public void testFailGetAdministratorSourcePropertyName() {
+	public void testFailGetAdministrationSourcePropertyName() {
 
-		final RuntimeException failure = new RuntimeException(
-				"Failed to get property name");
-		final AdministrationSourceProperty property = this
-				.createMock(AdministrationSourceProperty.class);
+		final RuntimeException failure = new RuntimeException("Failed to get property name");
+		final AdministrationSourceProperty property = this.createMock(AdministrationSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new AdministrationSourceProperty[] { property });
 		this.control(property).expectAndThrow(property.getName(), failure);
-		this.issues
-				.recordIssue(
-						"Failed to get name for AdministratorSourceProperty 0 from AdministratorSourceSpecification for "
-								+ MockAdministratorSource.class.getName(),
-						failure);
+		this.issues.recordIssue(
+				"Failed to get name for AdministrationSourceProperty 0 from AdministrationSourceSpecification for "
+						+ MockAdministrationSource.class.getName(),
+				failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -236,24 +215,20 @@ public class LoadAdministratorSourceSpecificationTest extends
 	 * Ensures issue if fails to get the {@link AdministrationSourceProperty}
 	 * label.
 	 */
-	public void testFailGetAdministratorSourcePropertyLabel() {
+	public void testFailGetAdministrationSourcePropertyLabel() {
 
-		final RuntimeException failure = new RuntimeException(
-				"Failed to get property label");
-		final AdministrationSourceProperty property = this
-				.createMock(AdministrationSourceProperty.class);
+		final RuntimeException failure = new RuntimeException("Failed to get property label");
+		final AdministrationSourceProperty property = this.createMock(AdministrationSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new AdministrationSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
 		this.control(property).expectAndThrow(property.getLabel(), failure);
-		this.issues
-				.recordIssue(
-						"Failed to get label for AdministratorSourceProperty 0 (NAME) from AdministratorSourceSpecification for "
-								+ MockAdministratorSource.class.getName(),
-						failure);
+		this.issues.recordIssue(
+				"Failed to get label for AdministrationSourceProperty 0 (NAME) from AdministrationSourceSpecification for "
+						+ MockAdministrationSource.class.getName(),
+				failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -264,26 +239,18 @@ public class LoadAdministratorSourceSpecificationTest extends
 	/**
 	 * Ensures able to load the {@link AdministrationSourceSpecification}.
 	 */
-	public void testLoadAdministratorSourceSpecification() {
+	public void testLoadAdministrationSourceSpecification() {
 
-		final AdministrationSourceProperty propertyWithLabel = this
-				.createMock(AdministrationSourceProperty.class);
-		final AdministrationSourceProperty propertyWithoutLabel = this
-				.createMock(AdministrationSourceProperty.class);
+		final AdministrationSourceProperty propertyWithLabel = this.createMock(AdministrationSourceProperty.class);
+		final AdministrationSourceProperty propertyWithoutLabel = this.createMock(AdministrationSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
-				new AdministrationSourceProperty[] { propertyWithLabel,
-						propertyWithoutLabel });
-		this.recordReturn(propertyWithLabel, propertyWithLabel.getName(),
-				"NAME");
-		this.recordReturn(propertyWithLabel, propertyWithLabel.getLabel(),
-				"LABEL");
-		this.recordReturn(propertyWithoutLabel, propertyWithoutLabel.getName(),
-				"NO LABEL");
-		this.recordReturn(propertyWithoutLabel,
-				propertyWithoutLabel.getLabel(), null);
+		this.recordReturn(this.specification, this.specification.getProperties(),
+				new AdministrationSourceProperty[] { propertyWithLabel, propertyWithoutLabel });
+		this.recordReturn(propertyWithLabel, propertyWithLabel.getName(), "NAME");
+		this.recordReturn(propertyWithLabel, propertyWithLabel.getLabel(), "LABEL");
+		this.recordReturn(propertyWithoutLabel, propertyWithoutLabel.getName(), "NO LABEL");
+		this.recordReturn(propertyWithoutLabel, propertyWithoutLabel.getLabel(), null);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -300,25 +267,20 @@ public class LoadAdministratorSourceSpecificationTest extends
 	 * @param propertyNames
 	 *            Expected {@link Property} names for being returned.
 	 */
-	private void loadSpecification(boolean isExpectToLoad,
-			String... propertyNameLabelPairs) {
+	private void loadSpecification(boolean isExpectToLoad, String... propertyNameLabelPairs) {
 
 		// Load the managed object specification specification
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
-		AdministrationLoader administratorLoader = compiler
-				.getAdministratorLoader();
-		PropertyList propertyList = administratorLoader
-				.loadSpecification(MockAdministratorSource.class);
+		AdministrationLoader administrationLoader = compiler.getAdministrationLoader();
+		PropertyList propertyList = administrationLoader.loadSpecification(MockAdministrationSource.class);
 
 		// Determine if expected to load
 		if (isExpectToLoad) {
 			assertNotNull("Expected to load specification", propertyList);
 
 			// Ensure the properties are as expected
-			PropertyListUtil.validatePropertyNameLabels(propertyList,
-					propertyNameLabelPairs);
+			PropertyListUtil.validatePropertyNameLabels(propertyList, propertyNameLabelPairs);
 
 		} else {
 			assertNull("Should not load specification", propertyList);
@@ -329,8 +291,7 @@ public class LoadAdministratorSourceSpecificationTest extends
 	 * Mock {@link AdministrationSource} for testing.
 	 */
 	@TestSource
-	public static class MockAdministratorSource implements
-			AdministrationSource<None, None> {
+	public static class MockAdministrationSource implements AdministrationSource<Object, None, None> {
 
 		/**
 		 * Failure to instantiate an instance.
@@ -356,13 +317,13 @@ public class LoadAdministratorSourceSpecificationTest extends
 		public static void reset(AdministrationSourceSpecification specification) {
 			instantiateFailure = null;
 			specificationFailure = null;
-			MockAdministratorSource.specification = specification;
+			MockAdministrationSource.specification = specification;
 		}
 
 		/**
 		 * Default constructor.
 		 */
-		public MockAdministratorSource() {
+		public MockAdministrationSource() {
 			// Determine if fail to instantiate
 			if (instantiateFailure != null) {
 				throw instantiateFailure;
@@ -370,7 +331,8 @@ public class LoadAdministratorSourceSpecificationTest extends
 		}
 
 		/*
-		 * ================ AdministratorSource ================================
+		 * ================ AdministrationSource
+		 * ================================
 		 */
 
 		@Override
@@ -390,13 +352,7 @@ public class LoadAdministratorSourceSpecificationTest extends
 		}
 
 		@Override
-		public AdministrationSourceMetaData<None, None> getMetaData() {
-			fail("Should not be invoked for obtaining specification");
-			return null;
-		}
-
-		@Override
-		public Administration<None, None> createAdministrator() {
+		public AdministrationSourceMetaData<Object, None, None> getMetaData() {
 			fail("Should not be invoked for obtaining specification");
 			return null;
 		}

@@ -200,7 +200,7 @@ public class FunctionNamespaceNodeImpl implements FunctionNamespaceNode {
 
 		// Load and return the managed function type
 		ManagedFunctionLoader managedFunctionLoader = this.context.getManagedFunctionLoader(this);
-		return managedFunctionLoader.loadFunctionNamespaceType(managedFunctionSourceClass, this.propertyList);
+		return managedFunctionLoader.loadManagedFunctionType(managedFunctionSourceClass, this.propertyList);
 	}
 
 }

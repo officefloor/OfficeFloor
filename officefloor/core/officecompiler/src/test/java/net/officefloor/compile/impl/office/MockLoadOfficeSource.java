@@ -60,59 +60,42 @@ public class MockLoadOfficeSource extends AbstractOfficeSource {
 	public static void assertOfficeType(OfficeType officeType) {
 
 		// Ensure correct section inputs
-		TestCase.assertEquals("Incorrect number of inputs", 1,
-				officeType.getOfficeSectionInputTypes().length);
-		OfficeAvailableSectionInputType sectionInput = officeType
-				.getOfficeSectionInputTypes()[0];
-		TestCase.assertEquals("Incorrect section name", "section",
-				sectionInput.getOfficeSectionName());
-		TestCase.assertEquals("Incorrect input name", "input",
-				sectionInput.getOfficeSectionInputName());
-		TestCase.assertEquals("Incorrect input parameter type",
-				String.class.getName(), sectionInput.getParameterType());
+		TestCase.assertEquals("Incorrect number of inputs", 1, officeType.getOfficeSectionInputTypes().length);
+		OfficeAvailableSectionInputType sectionInput = officeType.getOfficeSectionInputTypes()[0];
+		TestCase.assertEquals("Incorrect section name", "section", sectionInput.getOfficeSectionName());
+		TestCase.assertEquals("Incorrect input name", "input", sectionInput.getOfficeSectionInputName());
+		TestCase.assertEquals("Incorrect input parameter type", String.class.getName(),
+				sectionInput.getParameterType());
 
 		// Ensure correct objects
-		TestCase.assertEquals("Incorrect number of objects", 1,
-				officeType.getOfficeManagedObjectTypes().length);
-		OfficeManagedObjectType objectType = officeType
-				.getOfficeManagedObjectTypes()[0];
-		TestCase.assertEquals("Incorrect object name", "object",
-				objectType.getOfficeManagedObjectName());
-		TestCase.assertEquals("Incorrect object type",
-				Connection.class.getName(), objectType.getObjectType());
+		TestCase.assertEquals("Incorrect number of objects", 1, officeType.getOfficeManagedObjectTypes().length);
+		OfficeManagedObjectType objectType = officeType.getOfficeManagedObjectTypes()[0];
+		TestCase.assertEquals("Incorrect object name", "object", objectType.getOfficeManagedObjectName());
+		TestCase.assertEquals("Incorrect object type", Connection.class.getName(), objectType.getObjectType());
 		TestCase.assertEquals("Incorrect number of extension interfaces", 1,
 				objectType.getExtensionInterfaces().length);
-		TestCase.assertEquals("Incorrect extension interface",
-				XAResource.class.getName(),
+		TestCase.assertEquals("Incorrect extension interface", XAResource.class.getName(),
 				objectType.getExtensionInterfaces()[0]);
 
 		// Ensure correct team
-		TestCase.assertEquals("Incorrect number of teams", 1,
-				officeType.getOfficeTeamTypes().length);
-		TestCase.assertEquals("Incorrect team name", "team",
-				officeType.getOfficeTeamTypes()[0].getOfficeTeamName());
+		TestCase.assertEquals("Incorrect number of teams", 1, officeType.getOfficeTeamTypes().length);
+		TestCase.assertEquals("Incorrect team name", "team", officeType.getOfficeTeamTypes()[0].getOfficeTeamName());
 
 		// Ensure correct inputs
-		TestCase.assertEquals("Incorrect number of inputs", 1,
-				officeType.getOfficeInputTypes().length);
+		TestCase.assertEquals("Incorrect number of inputs", 1, officeType.getOfficeInputTypes().length);
 		OfficeInputType input = officeType.getOfficeInputTypes()[0];
-		TestCase.assertEquals("Incorrect input name", "INPUT",
-				input.getOfficeInputName());
-		TestCase.assertEquals("Incorrect input parameter type",
-				Integer.class.getName(), input.getParameterType());
-		TestCase.assertEquals("Incorrect input response", "OUTPUT_LINK", input
-				.getResponseOfficeOutputType().getOfficeOutputName());
+		TestCase.assertEquals("Incorrect input name", "INPUT", input.getOfficeInputName());
+		TestCase.assertEquals("Incorrect input parameter type", Integer.class.getName(), input.getParameterType());
+		TestCase.assertEquals("Incorrect input response", "OUTPUT_LINK",
+				input.getResponseOfficeOutputType().getOfficeOutputName());
 
 		// Ensure correct outputs
-		TestCase.assertEquals("Incorrect number of outputs", 1,
-				officeType.getOfficeOutputTypes().length);
+		TestCase.assertEquals("Incorrect number of outputs", 1, officeType.getOfficeOutputTypes().length);
 		OfficeOutputType output = officeType.getOfficeOutputTypes()[0];
-		TestCase.assertEquals("Incorrect output name", "OUTPUT",
-				output.getOfficeOutputName());
-		TestCase.assertEquals("Incorrect output argument type",
-				Long.class.getName(), output.getArgumentType());
-		TestCase.assertEquals("Incorrect output handler", "INPUT_LINK", output
-				.getHandlingOfficeInputType().getOfficeInputName());
+		TestCase.assertEquals("Incorrect output name", "OUTPUT", output.getOfficeOutputName());
+		TestCase.assertEquals("Incorrect output argument type", Long.class.getName(), output.getArgumentType());
+		TestCase.assertEquals("Incorrect output handler", "INPUT_LINK",
+				output.getHandlingOfficeInputType().getOfficeInputName());
 	}
 
 	/*
@@ -125,43 +108,31 @@ public class MockLoadOfficeSource extends AbstractOfficeSource {
 	}
 
 	@Override
-	public void sourceOffice(OfficeArchitect architect,
-			OfficeSourceContext context) throws Exception {
+	public void sourceOffice(OfficeArchitect architect, OfficeSourceContext context) throws Exception {
 
 		// Obtain the required property
 		context.getProperty(PROPERTY_REQUIRED);
 
 		// Add the input
-		architect
-				.addOfficeSection("section",
-						ClassSectionSource.class.getName(),
-						MockSection.class.getName());
+		architect.addOfficeSection("section", ClassSectionSource.class.getName(), MockSection.class.getName());
 
 		// Add the object
-		OfficeObject object = architect.addOfficeObject("object",
-				Connection.class.getName());
-		OfficeAdministration admin = architect.addOfficeAdministrator("admin",
+		OfficeObject object = architect.addOfficeObject("object", Connection.class.getName());
+		OfficeAdministration admin = architect.addOfficeAdministration("admin",
 				ClassAdministrationSource.class.getName());
-		admin.addProperty(ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME,
-				MockAdministrator.class.getName());
+		admin.addProperty(ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME, MockAdministrator.class.getName());
 		admin.administerManagedObject(object);
 
 		// Add the team
 		architect.addOfficeTeam("team");
 
 		// Add the input
-		OfficeInput input = architect.addOfficeInput("INPUT",
-				Integer.class.getName());
-		architect.link(
-				input,
-				architect.addOfficeOutput("OUTPUT_LINK",
-						Character.class.getName()));
+		OfficeInput input = architect.addOfficeInput("INPUT", Integer.class.getName());
+		architect.link(input, architect.addOfficeOutput("OUTPUT_LINK", Character.class.getName()));
 
 		// Add the output
-		OfficeOutput output = architect.addOfficeOutput("OUTPUT",
-				Long.class.getName());
-		architect.link(output,
-				architect.addOfficeInput("INPUT_LINK", Short.class.getName()));
+		OfficeOutput output = architect.addOfficeOutput("OUTPUT", Long.class.getName());
+		architect.link(output, architect.addOfficeInput("INPUT_LINK", Short.class.getName()));
 	}
 
 	/**

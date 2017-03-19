@@ -27,16 +27,13 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
-import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.TeamBuilder;
-import net.officefloor.frame.api.build.WorkBuilder;
-import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
-import net.officefloor.frame.api.function.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.team.Team;
@@ -48,8 +45,7 @@ import net.officefloor.frame.test.match.TypeMatcher;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractOfficeFloorTestCase extends
-		AbstractStructureTestCase {
+public abstract class AbstractOfficeFloorTestCase extends AbstractStructureTestCase {
 
 	/**
 	 * Location of the {@link OfficeFloor}.
@@ -59,8 +55,7 @@ public abstract class AbstractOfficeFloorTestCase extends
 	/**
 	 * Enhances {@link CompilerIssues}.
 	 */
-	private final CompilerIssues enhancedIssues = this
-			.enhanceIssues(this.issues);
+	private final CompilerIssues enhancedIssues = this.enhanceIssues(this.issues);
 
 	/**
 	 * <p>
@@ -80,8 +75,7 @@ public abstract class AbstractOfficeFloorTestCase extends
 	/**
 	 * {@link OfficeFloorBuilder}.
 	 */
-	protected final OfficeFloorBuilder officeFloorBuilder = this
-			.createMock(OfficeFloorBuilder.class);
+	protected final OfficeFloorBuilder officeFloorBuilder = this.createMock(OfficeFloorBuilder.class);
 
 	/**
 	 * Creates a mock {@link TeamBuilder}.
@@ -103,22 +97,11 @@ public abstract class AbstractOfficeFloorTestCase extends
 	}
 
 	/**
-	 * Creates a mock {@link WorkBuilder}.
-	 * 
-	 * @return Mock {@link WorkBuilder}.
-	 */
-	@SuppressWarnings("unchecked")
-	protected WorkBuilder<Work> createMockWorkBuilder() {
-		return this.createMock(WorkBuilder.class);
-	}
-
-	/**
 	 * Creates the mock {@link ManagedFunctionBuilder}.
 	 * 
 	 * @return Mock {@link ManagedFunctionBuilder}.
 	 */
-	@SuppressWarnings("unchecked")
-	protected ManagedFunctionBuilder<Work, ?, ?> createMockTaskBuilder() {
+	protected ManagedFunctionBuilder<?, ?> createMockManagedFunctionBuilder() {
 		return this.createMock(ManagedFunctionBuilder.class);
 	}
 
@@ -127,8 +110,7 @@ public abstract class AbstractOfficeFloorTestCase extends
 	 */
 	protected void record_initiateOfficeFloorBuilder() {
 		// Record initiate OfficeFloor builder
-		this.officeFloorBuilder.setClassLoader(Thread.currentThread()
-				.getContextClassLoader());
+		this.officeFloorBuilder.setClassLoader(Thread.currentThread().getContextClassLoader());
 		this.officeFloorBuilder.addResources(this.resourceSource);
 	}
 
@@ -146,8 +128,8 @@ public abstract class AbstractOfficeFloorTestCase extends
 	 */
 	protected TeamBuilder<?> record_officefloor_addTeam(String teamName) {
 		TeamBuilder<?> teamBuilder = this.createMockTeamBuilder();
-		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder
-				.addTeam(teamName, MakerTeamSource.class), teamBuilder);
+		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder.addTeam(teamName, MakerTeamSource.class),
+				teamBuilder);
 		teamBuilder.addProperty(MakerTeamSource.MAKER_IDENTIFIER_PROPERTY_NAME,
 				String.valueOf(this.makerTeamSourceIdentifier++));
 		return teamBuilder;
@@ -167,64 +149,36 @@ public abstract class AbstractOfficeFloorTestCase extends
 	 */
 	protected OfficeBuilder record_officefloor_addOffice(String officeName) {
 		this.officeBuilder = this.createMockOfficeBuilder();
-		this.recordReturn(this.officeFloorBuilder,
-				this.officeFloorBuilder.addOffice(officeName),
-				this.officeBuilder);
+		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder.addOffice(officeName), this.officeBuilder);
 		return this.officeBuilder;
-	}
-
-	/**
-	 * Current {@link WorkBuilder}.
-	 */
-	@SuppressWarnings("rawtypes")
-	private WorkBuilder workBuilder = null;
-
-	/**
-	 * Records adding a {@link Work}.
-	 * 
-	 * @param workName
-	 *            Name of the {@link Work}.
-	 * @param workFactory
-	 *            {@link WorkFactory}.
-	 * @return {@link WorkBuilder}.
-	 */
-	@SuppressWarnings("unchecked")
-	protected <W extends Work> WorkBuilder<W> record_office_addWork(
-			String workName, WorkFactory<W> workFactory) {
-		this.workBuilder = this.createMockWorkBuilder();
-		this.recordReturn(this.officeBuilder,
-				this.officeBuilder.addWork(workName, workFactory),
-				this.workBuilder);
-		return this.workBuilder;
 	}
 
 	/**
 	 * Current {@link ManagedFunctionBuilder}.
 	 */
 	@SuppressWarnings("rawtypes")
-	private ManagedFunctionBuilder taskBuilder = null;
+	private ManagedFunctionBuilder functionBuilder = null;
 
 	/**
 	 * Records adding a {@link ManagedFunction}.
 	 * 
-	 * @param taskName
+	 * @param functionName
 	 *            Name of the {@link ManagedFunction}.
 	 * @param factory
 	 *            {@link ManagedFunctionFactory}.
 	 * @return {@link ManagedFunctionBuilder}.
 	 */
-	@SuppressWarnings("unchecked")
-	protected <W extends Work> ManagedFunctionBuilder<W, ?, ?> record_work_addTask(
-			String taskName, ManagedFunctionFactory<W, ?, ?> factory) {
+	protected ManagedFunctionBuilder<?, ?> record_office_addFunction(String functionName,
+			ManagedFunctionFactory<?, ?> factory) {
 
 		// Ensure manufacturer is a mock
 		assertNotNull("Manufacturer must be a mock", this.control(factory));
 
-		// Record adding the task
-		this.taskBuilder = this.createMockTaskBuilder();
-		this.recordReturn(this.workBuilder,
-				this.workBuilder.addManagedFunction("TASK", factory), this.taskBuilder);
-		return this.taskBuilder;
+		// Record adding the function
+		this.functionBuilder = this.createMockManagedFunctionBuilder();
+		this.recordReturn(this.officeBuilder, this.officeBuilder.addManagedFunction(functionName, factory),
+				this.functionBuilder);
+		return this.functionBuilder;
 	}
 
 	/**
@@ -238,8 +192,7 @@ public abstract class AbstractOfficeFloorTestCase extends
 	 *            Name/value pairs for the necessary {@link Property} instances
 	 *            to load the {@link OfficeFloor}.
 	 */
-	protected void loadOfficeFloor(boolean isExpectBuild,
-			OfficeFloorMaker maker, String... propertyNameValuePairs) {
+	protected void loadOfficeFloor(boolean isExpectBuild, OfficeFloorMaker maker, String... propertyNameValuePairs) {
 
 		// Office floor potentially built
 		OfficeFloor officeFloor = null;
@@ -251,9 +204,8 @@ public abstract class AbstractOfficeFloorTestCase extends
 			officeFloor = this.createMock(OfficeFloor.class);
 
 			// Record successfully building the office floor
-			this.recordReturn(this.officeFloorBuilder,
-					this.officeFloorBuilder.buildOfficeFloor(null),
-					officeFloor, new TypeMatcher(OfficeFloorIssues.class));
+			this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder.buildOfficeFloor(null), officeFloor,
+					new TypeMatcher(OfficeFloorIssues.class));
 		}
 
 		// Create the property list
@@ -267,37 +219,31 @@ public abstract class AbstractOfficeFloorTestCase extends
 		// Create the office frame to return mock office floor builder
 		OfficeFrame officeFrame = new OfficeFrame() {
 			@Override
-			public OfficeFloorBuilder createOfficeFloorBuilder(
-					String officeFloorName) {
+			public OfficeFloorBuilder createOfficeFloorBuilder(String officeFloorName) {
 				return AbstractOfficeFloorTestCase.this.officeFloorBuilder;
 			}
 		};
 
 		// Register the office floor maker and add to property list
-		PropertyList registerProperties = MakerOfficeFloorSource
-				.register(maker);
+		PropertyList registerProperties = MakerOfficeFloorSource.register(maker);
 		for (Property property : registerProperties) {
-			propertyList.addProperty(property.getName()).setValue(
-					property.getValue());
+			propertyList.addProperty(property.getName()).setValue(property.getValue());
 		}
 
 		// Create the office loader and load the office floor
 		this.replayMockObjects();
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.enhancedIssues);
 		compiler.addResources(this.resourceSource);
 		compiler.setOfficeFrame(officeFrame);
 		OfficeFloorLoader officeFloorLoader = compiler.getOfficeFloorLoader();
-		OfficeFloor loadedOfficeFloor = officeFloorLoader.loadOfficeFloor(
-				MakerOfficeFloorSource.class, OFFICE_FLOOR_LOCATION,
-				propertyList);
+		OfficeFloor loadedOfficeFloor = officeFloorLoader.loadOfficeFloor(MakerOfficeFloorSource.class,
+				OFFICE_FLOOR_LOCATION, propertyList);
 		this.verifyMockObjects();
 
 		// Ensure the correct loaded office floor
 		if (isExpectBuild) {
-			assertEquals("Incorrect built office floor", officeFloor,
-					loadedOfficeFloor);
+			assertEquals("Incorrect built office floor", officeFloor, loadedOfficeFloor);
 		} else {
 			assertNull("Should not build the office floor", officeFloor);
 		}

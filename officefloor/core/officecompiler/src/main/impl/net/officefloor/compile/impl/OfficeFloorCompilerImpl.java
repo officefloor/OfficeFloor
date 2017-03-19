@@ -474,7 +474,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		}
 
 		// Load and return the managed function type
-		return this.getManagedFunctionLoader().loadFunctionNamespaceType(managedFunctionSourceClass, properties);
+		return this.getManagedFunctionLoader().loadManagedFunctionType(managedFunctionSourceClass, properties);
 	}
 
 	@Override

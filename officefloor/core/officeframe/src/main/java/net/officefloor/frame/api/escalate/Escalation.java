@@ -18,16 +18,18 @@
 package net.officefloor.frame.api.escalate;
 
 import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * <p>
  * Internal failures within the {@link OfficeFrame} extend {@link Escalation}.
  * <p>
- * However, all {@link Throwable} instances thrown from {@link ManagedObject}
- * instances are considered to follow the {@link Escalation} paradigm. This is
- * that the invoking {@link ManagedObject} need not deal with {@link Escalation}
- * instances, and these are handled by other {@link ManagedObject} instances.
+ * However, all {@link Throwable} instances thrown from {@link ManagedFunction}
+ * and {@link ManagedObject} instances are considered to follow the
+ * {@link Escalation} paradigm. This is that the invoker need not deal with
+ * {@link Escalation} instances, and these are handled by other
+ * {@link ManagedFunction} instances.
  * 
  * @author Daniel Sagenschneider
  */

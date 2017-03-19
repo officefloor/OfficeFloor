@@ -170,7 +170,7 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader {
 	}
 
 	@Override
-	public <S extends ManagedFunctionSource> FunctionNamespaceType loadFunctionNamespaceType(
+	public <S extends ManagedFunctionSource> FunctionNamespaceType loadManagedFunctionType(
 			Class<S> managedFunctionSourceClass, PropertyList propertyList) {
 
 		// Instantiate the managed function source

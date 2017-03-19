@@ -106,7 +106,7 @@ public class SectionSourceContextImpl extends SourceContextImpl implements Secti
 
 					// Load and return the function namespace type
 					ManagedFunctionLoader managedFunctionLoader = this.context.getManagedFunctionLoader(this.node);
-					return managedFunctionLoader.loadFunctionNamespaceType(managedFunctionSourceClass, properties);
+					return managedFunctionLoader.loadManagedFunctionType(managedFunctionSourceClass, properties);
 				});
 	}
 

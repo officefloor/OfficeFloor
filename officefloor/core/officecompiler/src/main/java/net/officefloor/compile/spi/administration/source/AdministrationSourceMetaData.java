@@ -19,6 +19,8 @@ package net.officefloor.compile.spi.administration.source;
 
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationFactory;
+import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.Flow;
@@ -54,5 +56,23 @@ public interface AdministrationSourceMetaData<E, F extends Enum<F>, G extends En
 	 *         {@link Administration}.
 	 */
 	AdministrationFlowMetaData<F>[] getFlowMetaData();
+
+	/**
+	 * Obtains the list of {@link AdministrationEscalationMetaData} instances
+	 * from this {@link Administration}.
+	 * 
+	 * @return Meta-data of {@link Escalation} instances instigated by this
+	 *         {@link Administration}.
+	 */
+	AdministrationEscalationMetaData[] getEscalationMetaData();
+
+	/**
+	 * Obtains the list of {@link AdministrationGovernanceMetaData} instances
+	 * should this {@link Administration} manually managed {@link Governance}.
+	 * 
+	 * @return Meta-data of {@link Governance} used by this
+	 *         {@link Administration}.
+	 */
+	AdministrationGovernanceMetaData<G>[] getGovernanceMetaData();
 
 }

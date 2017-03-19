@@ -47,14 +47,14 @@ import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.administration.source.impl.AbstractAdministratorSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.governance.source.impl.AbstractGovernanceSource;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionEscalationTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceSpecification;
-import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeGovernance;
@@ -72,24 +72,22 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceSpecification;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
-import net.officefloor.compile.spi.section.SectionDesigner;
-import net.officefloor.compile.spi.section.SectionManagedObject;
-import net.officefloor.compile.spi.section.SectionManagedObjectSource;
-import net.officefloor.compile.spi.section.SectionFunction;
-import net.officefloor.compile.spi.section.SectionFunctionNamespace;
-import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.FunctionFlow;
 import net.officefloor.compile.spi.section.FunctionObject;
+import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
+import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.compile.spi.section.SectionManagedObjectSource;
+import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.administration.Administration;
-import net.officefloor.frame.api.administration.Duty;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.WorkFactory;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
-import net.officefloor.frame.api.function.Work;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.manage.Office;
@@ -97,16 +95,16 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.api.team.TeamIdentifier;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.api.team.source.TeamSourceSpecification;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -124,8 +122,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * {@link ResourceSource}.
 	 */
-	protected final ResourceSource resourceSource = this
-			.createMock(ResourceSource.class);
+	protected final ResourceSource resourceSource = this.createMock(ResourceSource.class);
 
 	/**
 	 * {@link ClassLoader}.
@@ -146,8 +143,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 * Initiate.
 	 */
 	public AbstractStructureTestCase() {
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(this.classLoader);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(this.classLoader);
 		compiler.setCompilerIssues(this.issues);
 		compiler.addResources(this.resourceSource);
 		this.nodeContext = (NodeContext) compiler;
@@ -158,9 +154,9 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		MakerSectionSource.reset();
 		MakerManagedObjectSource.reset();
 		MakerSupplierSource.reset();
-		MakerWorkSource.reset();
+		MakerManagedFunctionSource.reset();
 		MakerGovernanceSource.reset();
-		MakerAdministratorSource.reset();
+		MakerAdministrationSource.reset();
 		MakerTeamSource.reset();
 		MakerOfficeSource.reset(this);
 		MakerOfficeFloorSource.reset(this);
@@ -177,13 +173,9 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 * @param linkTarget
 	 *            Target {@link LinkFlowNode}.
 	 */
-	protected static void assertFlowLink(String msg, Object linkSource,
-			Object linkTarget) {
-		assertTrue(
-				msg + ": source must be " + LinkFlowNode.class.getSimpleName(),
-				linkSource instanceof LinkFlowNode);
-		assertEquals(msg, linkTarget,
-				((LinkFlowNode) linkSource).getLinkedFlowNode());
+	protected static void assertFlowLink(String msg, Object linkSource, Object linkTarget) {
+		assertTrue(msg + ": source must be " + LinkFlowNode.class.getSimpleName(), linkSource instanceof LinkFlowNode);
+		assertEquals(msg, linkTarget, ((LinkFlowNode) linkSource).getLinkedFlowNode());
 	}
 
 	/**
@@ -197,14 +189,10 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 * @param linkTarget
 	 *            Target {@link LinkSynchronousNode}.
 	 */
-	protected static void assertSynchronousLink(String msg, Object linkSource,
-			Object linkTarget) {
-		assertTrue(
-				msg + ": source must be "
-						+ LinkSynchronousNode.class.getSimpleName(),
+	protected static void assertSynchronousLink(String msg, Object linkSource, Object linkTarget) {
+		assertTrue(msg + ": source must be " + LinkSynchronousNode.class.getSimpleName(),
 				linkSource instanceof LinkSynchronousNode);
-		assertEquals(msg, linkTarget,
-				((LinkSynchronousNode) linkSource).getLinkedSynchronousNode());
+		assertEquals(msg, linkTarget, ((LinkSynchronousNode) linkSource).getLinkedSynchronousNode());
 	}
 
 	/**
@@ -218,14 +206,10 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 * @param linkTarget
 	 *            Target {@link LinkObjectNode}.
 	 */
-	protected static void assertObjectLink(String msg, Object linkSource,
-			Object linkTarget) {
-		assertTrue(
-				msg + ": source must be "
-						+ LinkObjectNode.class.getSimpleName(),
+	protected static void assertObjectLink(String msg, Object linkSource, Object linkTarget) {
+		assertTrue(msg + ": source must be " + LinkObjectNode.class.getSimpleName(),
 				linkSource instanceof LinkObjectNode);
-		assertEquals(msg, linkTarget,
-				((LinkObjectNode) linkSource).getLinkedObjectNode());
+		assertEquals(msg, linkTarget, ((LinkObjectNode) linkSource).getLinkedObjectNode());
 	}
 
 	/**
@@ -239,13 +223,9 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 * @param linkTarget
 	 *            Target {@link LinkTeamNode}.
 	 */
-	protected static void assertTeamLink(String msg, Object linkSource,
-			Object linkTarget) {
-		assertTrue(
-				msg + ": source must be " + LinkTeamNode.class.getSimpleName(),
-				linkSource instanceof LinkTeamNode);
-		assertEquals(msg, linkTarget,
-				((LinkTeamNode) linkSource).getLinkedTeamNode());
+	protected static void assertTeamLink(String msg, Object linkSource, Object linkTarget) {
+		assertTrue(msg + ": source must be " + LinkTeamNode.class.getSimpleName(), linkSource instanceof LinkTeamNode);
+		assertEquals(msg, linkTarget, ((LinkTeamNode) linkSource).getLinkedTeamNode());
 	}
 
 	/**
@@ -259,14 +239,10 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 * @param linkTarget
 	 *            Target {@link LinkOfficeNode}.
 	 */
-	protected static void assertOfficeLink(String msg, Object linkSource,
-			Object linkTarget) {
-		assertTrue(
-				msg + ": source must be "
-						+ LinkOfficeNode.class.getSimpleName(),
+	protected static void assertOfficeLink(String msg, Object linkSource, Object linkTarget) {
+		assertTrue(msg + ": source must be " + LinkOfficeNode.class.getSimpleName(),
 				linkSource instanceof LinkOfficeNode);
-		assertEquals(msg, linkTarget,
-				((LinkOfficeNode) linkSource).getLinkedOfficeNode());
+		assertEquals(msg, linkTarget, ((LinkOfficeNode) linkSource).getLinkedOfficeNode());
 	}
 
 	/**
@@ -280,35 +256,11 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 * @param inputManagedObjectNode
 	 *            Linked {@link InputManagedObjectNode}.
 	 */
-	protected static void assertSourceInput(String msg,
-			Object managedObjectSourceNode, Object inputManagedObjectNode) {
-		assertTrue(
-				msg + ": source must be "
-						+ ManagedObjectSourceNode.class.getSimpleName(),
+	protected static void assertSourceInput(String msg, Object managedObjectSourceNode, Object inputManagedObjectNode) {
+		assertTrue(msg + ": source must be " + ManagedObjectSourceNode.class.getSimpleName(),
 				managedObjectSourceNode instanceof ManagedObjectSourceNode);
 		assertEquals(msg, inputManagedObjectNode,
-				((ManagedObjectSourceNode) managedObjectSourceNode)
-						.getInputManagedObjectNode());
-	}
-
-	/**
-	 * Creates a mock {@link WorkFactory}.
-	 * 
-	 * @return Mock {@link WorkFactory}.
-	 */
-	@SuppressWarnings("unchecked")
-	protected WorkFactory<Work> createMockWorkFactory() {
-		return this.createMock(WorkFactory.class);
-	}
-
-	/**
-	 * Creates a mock {@link ManagedFunctionFactory}.
-	 * 
-	 * @return Mock {@link ManagedFunctionFactory}.
-	 */
-	@SuppressWarnings("unchecked")
-	protected ManagedFunctionFactory<Work, ?, ?> createMockTaskFactory() {
-		return this.createMock(ManagedFunctionFactory.class);
+				((ManagedObjectSourceNode) managedObjectSourceNode).getInputManagedObjectNode());
 	}
 
 	/**
@@ -320,8 +272,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 *            {@link SectionMaker} to make the {@link OfficeSection}.
 	 * @return Loaded {@link OfficeSectionType}.
 	 */
-	protected OfficeSectionType loadOfficeSectionType(String sectionName,
-			SectionMaker maker) {
+	protected OfficeSectionType loadOfficeSectionType(String sectionName, SectionMaker maker) {
 		return this.loadOfficeSectionType(true, sectionName, maker);
 	}
 
@@ -336,8 +287,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 *            {@link SectionMaker} to make the {@link OfficeSection}.
 	 * @return Loaded {@link OfficeSectionType}.
 	 */
-	protected OfficeSectionType loadOfficeSectionType(
-			boolean isHandleMockState, String sectionName, SectionMaker maker) {
+	protected OfficeSectionType loadOfficeSectionType(boolean isHandleMockState, String sectionName,
+			SectionMaker maker) {
 
 		// Register the section maker
 		PropertyList propertyList = MakerSectionSource.register(maker);
@@ -348,14 +299,12 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 
 		// Load the section
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(this.classLoader);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(this.classLoader);
 		compiler.setCompilerIssues(this.issues);
 		compiler.addResources(this.resourceSource);
 		SectionLoader loader = compiler.getSectionLoader();
-		OfficeSectionType sectionType = loader.loadOfficeSectionType(
-				sectionName, MakerSectionSource.class, SECTION_LOCATION,
-				propertyList);
+		OfficeSectionType sectionType = loader.loadOfficeSectionType(sectionName, MakerSectionSource.class,
+				SECTION_LOCATION, propertyList);
 
 		// Verify the mocks if handling mock state
 		if (isHandleMockState) {
@@ -377,15 +326,14 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 *            {@link SectionMaker}.
 	 * @return Added {@link OfficeSection}.
 	 */
-	protected OfficeSection addSection(OfficeArchitect officeArchitect,
-			String sectionName, SectionMaker maker) {
+	protected OfficeSection addSection(OfficeArchitect officeArchitect, String sectionName, SectionMaker maker) {
 
 		// Register the section maker
 		PropertyList propertyList = MakerSectionSource.register(maker);
 
 		// Add and return the section
-		OfficeSection section = officeArchitect.addOfficeSection(sectionName,
-				MakerSectionSource.class.getName(), sectionName);
+		OfficeSection section = officeArchitect.addOfficeSection(sectionName, MakerSectionSource.class.getName(),
+				sectionName);
 		for (Property property : propertyList) {
 			section.addProperty(property.getName(), property.getValue());
 		}
@@ -403,17 +351,15 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 *            {@link ManagedObjectMaker}.
 	 * @return {@link OfficeManagedObjectSource}.
 	 */
-	protected OfficeManagedObjectSource addManagedObjectSource(
-			OfficeArchitect officeArchitect, String managedObjectSourceName,
-			ManagedObjectMaker maker) {
+	protected OfficeManagedObjectSource addManagedObjectSource(OfficeArchitect officeArchitect,
+			String managedObjectSourceName, ManagedObjectMaker maker) {
 
 		// Register the managed object maker
 		PropertyList propertyList = MakerManagedObjectSource.register(maker);
 
 		// Add and return the managed object source
-		OfficeManagedObjectSource moSource = officeArchitect
-				.addOfficeManagedObjectSource(managedObjectSourceName,
-						MakerManagedObjectSource.class.getName());
+		OfficeManagedObjectSource moSource = officeArchitect.addOfficeManagedObjectSource(managedObjectSourceName,
+				MakerManagedObjectSource.class.getName());
 		for (Property property : propertyList) {
 			moSource.addProperty(property.getName(), property.getValue());
 		}
@@ -431,15 +377,15 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 *            {@link GovernanceMaker}.
 	 * @return {@link OfficeGovernance}.
 	 */
-	protected OfficeGovernance addGovernance(OfficeArchitect officeArchitect,
-			String governanceName, GovernanceMaker maker) {
+	protected OfficeGovernance addGovernance(OfficeArchitect officeArchitect, String governanceName,
+			GovernanceMaker maker) {
 
 		// Register the governance maker
 		PropertyList propertyList = MakerGovernanceSource.register(maker);
 
 		// Add and return the governance
-		OfficeGovernance gov = officeArchitect.addOfficeGovernance(
-				governanceName, MakerGovernanceSource.class.getName());
+		OfficeGovernance gov = officeArchitect.addOfficeGovernance(governanceName,
+				MakerGovernanceSource.class.getName());
 		for (Property property : propertyList) {
 			gov.addProperty(property.getName(), property.getValue());
 		}
@@ -447,75 +393,47 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Adds an {@link OfficeAdministration} to the {@link OfficeArchitect}.
+	 * Adds a simple {@link OfficeAdministration} to the
+	 * {@link OfficeAdministration} with the supplied extension interface.
 	 * 
 	 * @param officeArchitect
 	 *            {@link OfficeArchitect}.
-	 * @param administratorName
+	 * @param administrationName
 	 *            Name of the {@link OfficeAdministration}.
+	 * @param extensionInterface
+	 *            Extension interface.
 	 * @param maker
-	 *            {@link AdministratorMaker}.
+	 *            {@link AdministrationMaker}.
 	 * @return {@link OfficeAdministration}.
 	 */
-	protected OfficeAdministration addAdministrator(
-			OfficeArchitect officeArchitect, String administratorName,
-			AdministratorMaker maker) {
+	protected OfficeAdministration addAdministration(OfficeArchitect officeArchitect, String administrationName,
+			final Class<?> extensionInterface, final AdministrationMaker maker) {
 
-		// Register the administrator maker
-		PropertyList propertyList = MakerAdministratorSource.register(maker);
+		// Create the administration maker
+		AdministrationMaker adminMaker = new AdministrationMaker() {
+			@Override
+			public void make(AdministrationMakerContext context) {
+				// Specify the extension interface
+				context.setExtensionInterface(extensionInterface);
 
-		// Add and return the administrator
-		OfficeAdministration admin = officeArchitect.addOfficeAdministrator(
-				administratorName, MakerAdministratorSource.class.getName());
+				// Make the rest of administration
+				if (maker != null) {
+					maker.make(context);
+				}
+			}
+		};
+
+		// Register the administration maker
+		PropertyList propertyList = MakerAdministrationSource.register(adminMaker);
+
+		// Add and return the administration
+		OfficeAdministration admin = officeArchitect.addOfficeAdministration(administrationName,
+				MakerAdministrationSource.class.getName());
 		for (Property property : propertyList) {
 			admin.addProperty(property.getName(), property.getValue());
 		}
 		return admin;
 	}
-
-	/**
-	 * Adds a simple {@link OfficeAdministration} to the
-	 * {@link OfficeAdministration} with the supplied extension interface and a
-	 * single {@link Duty}.
-	 * 
-	 * @param officeArchitect
-	 *            {@link OfficeArchitect}.
-	 * @param administratorName
-	 *            Name of the {@link OfficeAdministration}.
-	 * @param extensionInterface
-	 *            Extension interface.
-	 * @return {@link OfficeAdministration}.
-	 */
-	protected OfficeAdministration addAdministrator(
-			OfficeArchitect officeArchitect, String administratorName,
-			final Class<?> extensionInterface, final Enum<?> firstDutyKey,
-			final Enum<?>... remainingDutyKeys) {
-
-		// Create the simple administrator maker
-		AdministratorMaker maker = new AdministratorMaker() {
-			@Override
-			public void make(AdministratorMakerContext context) {
-				// Specify the extension interface
-				context.setExtensionInterface(extensionInterface);
-
-				// Specify the duties
-				context.addDuty(firstDutyKey); // must be at least one
-				for (Enum<?> dutyKey : remainingDutyKeys) {
-					context.addDuty(dutyKey);
-				}
-			}
-		};
-
-		// Add and return the administrator
-		return this.addAdministrator(officeArchitect, administratorName, maker);
-	}
-
-	/**
-	 * {@link Duty} key for a simple {@link OfficeAdministration}.
-	 */
-	protected enum SimpleDutyKey {
-		DUTY
-	};
 
 	/**
 	 * Adds an {@link OfficeFloorTeam} to the {@link OfficeFloorDeployer}.
@@ -528,15 +446,13 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 *            {@link TeamMaker}.
 	 * @return {@link OfficeFloorTeam}.
 	 */
-	protected OfficeFloorTeam addTeam(OfficeFloorDeployer officeFloorDeployer,
-			String teamName, TeamMaker maker) {
+	protected OfficeFloorTeam addTeam(OfficeFloorDeployer officeFloorDeployer, String teamName, TeamMaker maker) {
 
 		// Register the team maker
 		PropertyList propertyList = MakerTeamSource.register(maker);
 
 		// Add and return the team
-		OfficeFloorTeam team = officeFloorDeployer.addTeam(teamName,
-				MakerTeamSource.class.getName());
+		OfficeFloorTeam team = officeFloorDeployer.addTeam(teamName, MakerTeamSource.class.getName());
 		for (Property property : propertyList) {
 			team.addProperty(property.getName(), property.getValue());
 		}
@@ -555,17 +471,15 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 *            {@link ManagedObjectMaker}.
 	 * @return {@link OfficeFloorManagedObjectSource}.
 	 */
-	protected OfficeFloorManagedObjectSource addManagedObjectSource(
-			OfficeFloorDeployer officeFloorDeployer,
+	protected OfficeFloorManagedObjectSource addManagedObjectSource(OfficeFloorDeployer officeFloorDeployer,
 			String managedObjectSourceName, ManagedObjectMaker maker) {
 
 		// Register the managed object maker
 		PropertyList propertyList = MakerManagedObjectSource.register(maker);
 
 		// Add and return the managed object source
-		OfficeFloorManagedObjectSource moSource = officeFloorDeployer
-				.addManagedObjectSource(managedObjectSourceName,
-						MakerManagedObjectSource.class.getName());
+		OfficeFloorManagedObjectSource moSource = officeFloorDeployer.addManagedObjectSource(managedObjectSourceName,
+				MakerManagedObjectSource.class.getName());
 		for (Property property : propertyList) {
 			moSource.addProperty(property.getName(), property.getValue());
 		}
@@ -583,16 +497,15 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 *            {@link SupplierMaker}.
 	 * @return {@link OfficeFloorSupplier}.
 	 */
-	protected OfficeFloorSupplier addSupplier(
-			OfficeFloorDeployer officeFloorDeployer, String supplierName,
+	protected OfficeFloorSupplier addSupplier(OfficeFloorDeployer officeFloorDeployer, String supplierName,
 			SupplierMaker maker) {
 
 		// Register the supplier maker
 		PropertyList propertyList = MakerSupplierSource.register(maker);
 
 		// Add and return the supplier
-		OfficeFloorSupplier supplier = officeFloorDeployer.addSupplier(
-				supplierName, MakerSupplierSource.class.getName());
+		OfficeFloorSupplier supplier = officeFloorDeployer.addSupplier(supplierName,
+				MakerSupplierSource.class.getName());
 		for (Property property : propertyList) {
 			supplier.addProperty(property.getName(), property.getValue());
 		}
@@ -611,16 +524,15 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 *            {@link OfficeMaker}.
 	 * @return {@link DeployedOffice}.
 	 */
-	protected DeployedOffice addDeployedOffice(
-			OfficeFloorDeployer officeFloorDeployer, String officeName,
+	protected DeployedOffice addDeployedOffice(OfficeFloorDeployer officeFloorDeployer, String officeName,
 			OfficeMaker maker) {
 
 		// Register the office maker
 		PropertyList propertyList = MakerOfficeSource.register(maker);
 
 		// Add and return the deployed office
-		DeployedOffice office = officeFloorDeployer.addDeployedOffice(
-				officeName, MakerOfficeSource.class.getName(), officeName);
+		DeployedOffice office = officeFloorDeployer.addDeployedOffice(officeName, MakerOfficeSource.class.getName(),
+				officeName);
 		for (Property property : propertyList) {
 			office.addProperty(property.getName(), property.getValue());
 		}
@@ -681,54 +593,43 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		 *            {@link ManagedObjectMaker}.
 		 * @return Added {@link SectionManagedObjectSource}.
 		 */
-		SectionManagedObjectSource addManagedObjectSource(
-				String managedObjectSourceName, ManagedObjectMaker maker);
+		SectionManagedObjectSource addManagedObjectSource(String managedObjectSourceName, ManagedObjectMaker maker);
 
 		/**
 		 * Adds a {@link SectionFunctionNamespace}.
 		 * 
-		 * @param workName
+		 * @param namespaceName
 		 *            Name of the {@link SectionFunctionNamespace}.
-		 * @param workFactory
-		 *            {@link WorkFactory}.
 		 * @param maker
-		 *            {@link WorkMaker}.
-		 * @return Added {@link SectionFunctionNamespace}.
+		 *            {@link NamespaceMaker}.
+		 * @return {@link SectionFunctionNamespace}.
 		 */
-		<W extends Work> SectionFunctionNamespace addWork(String workName,
-				WorkFactory<W> workFactory, WorkMaker maker);
+		SectionFunctionNamespace addFunctionNamespace(String namespaceName, NamespaceMaker maker);
 
 		/**
 		 * Adds a {@link SectionFunction}.
 		 * 
-		 * @param workName
-		 *            Name of the {@link SectionFunctionNamespace} for the
-		 *            {@link SectionFunction}.
-		 * @param workFactory
-		 *            {@link WorkFactory}.
-		 * @param taskName
+		 * @param namespace
+		 *            Name of the {@link SectionFunctionNamespace}.
+		 * @param functionName
 		 *            Name of the {@link SectionFunction}.
-		 * @param taskFactory
+		 * @param functionFactory
 		 *            {@link ManagedFunctionFactory}.
-		 * @param taskMaker
-		 *            {@link TaskMaker} for the {@link SectionFunction}.
+		 * @param functionMaker
+		 *            {@link FunctionMaker} for the {@link SectionFunction}.
 		 * @return {@link SectionFunction}.
 		 */
-		<W extends Work> SectionFunction addTask(String workName,
-				WorkFactory<W> workFactory, String taskName,
-				ManagedFunctionFactory<W, ?, ?> taskFactory, TaskMaker taskMaker);
+		SectionFunction addFunction(String namespace, String functionName, ManagedFunctionFactory<?, ?> functionFactory,
+				FunctionMaker functionMaker);
 
 		/**
 		 * Adds a {@link FunctionFlow}.
 		 * 
-		 * @param workName
-		 *            Name of the {@link SectionFunctionNamespace} for the
-		 *            {@link SectionFunction}.
-		 * @param workFactory
-		 *            {@link WorkFactory}.
-		 * @param taskName
+		 * @param namespace
+		 *            Name of the {@link SectionFunctionNamespace}.
+		 * @param functionName
 		 *            Name of the {@link SectionFunction}.
-		 * @param taskFactory
+		 * @param functionFactory
 		 *            {@link ManagedFunctionFactory}.
 		 * @param flowName
 		 *            Name of the {@link ManagedFunctionFlowType}.
@@ -736,22 +637,17 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		 *            Argument type.
 		 * @return {@link FunctionFlow}.
 		 */
-		<W extends Work> FunctionFlow addTaskFlow(String workName,
-				WorkFactory<W> workFactory, String taskName,
-				ManagedFunctionFactory<W, ?, ?> taskFactory, String flowName,
-				Class<?> argumentType);
+		FunctionFlow addFunctionFlow(String namespace, String functionName,
+				ManagedFunctionFactory<?, ?> functionFactory, String flowName, Class<?> argumentType);
 
 		/**
 		 * Adds a {@link FunctionObject}.
 		 * 
-		 * @param workName
-		 *            Name of the {@link SectionFunctionNamespace} for the
-		 *            {@link SectionFunction}.
-		 * @param workFactory
-		 *            {@link WorkFactory}.
-		 * @param taskName
+		 * @param namespace
+		 *            Name of the {@link SectionFunctionNamespace}.
+		 * @param functionName
 		 *            Name of the {@link SectionFunction}.
-		 * @param taskFactory
+		 * @param functionFactory
 		 *            {@link ManagedFunctionFactory}.
 		 * @param objectName
 		 *            Name of the {@link ManagedFunctionObjectType}.
@@ -761,22 +657,19 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		 *            Type qualifier.
 		 * @return {@link FunctionObject}.
 		 */
-		<W extends Work> FunctionObject addTaskObject(String workName,
-				WorkFactory<W> workFactory, String taskName,
-				ManagedFunctionFactory<W, ?, ?> taskFactory, String objectName,
-				Class<?> objectType, String typeQualifier);
+		FunctionObject addFunctionObject(String namespace, String functionName,
+				ManagedFunctionFactory<?, ?> functionFactory, String objectName, Class<?> objectType,
+				String typeQualifier);
 
 		/**
-		 * Adds a {@link FunctionFlow} for a {@link ManagedFunctionEscalationType}.
+		 * Adds a {@link FunctionFlow} for a
+		 * {@link ManagedFunctionEscalationType}.
 		 * 
-		 * @param workName
-		 *            Name of the {@link SectionFunctionNamespace} for the
-		 *            {@link SectionFunction}.
-		 * @param workFactory
-		 *            {@link WorkFactory}.
-		 * @param taskName
+		 * @param namespace
+		 *            Name of the {@link SectionFunctionNamespace}.
+		 * @param functionName
 		 *            Name of the {@link SectionFunction}.
-		 * @param taskFactory
+		 * @param functionFactory
 		 *            {@link ManagedFunctionFactory}.
 		 * @param escalationName
 		 *            Name of the {@link ManagedFunctionEscalationType}.
@@ -784,18 +677,15 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		 *            Escalation type.
 		 * @return {@link FunctionFlow}.
 		 */
-		<E extends Throwable, W extends Work> FunctionFlow addTaskEscalation(
-				String workName, WorkFactory<W> workFactory, String taskName,
-				ManagedFunctionFactory<W, ?, ?> taskFactory, String escalationName,
-				Class<E> escalationType);
+		<E extends Throwable> FunctionFlow addFunctionEscalation(String namespace, String functionName,
+				ManagedFunctionFactory<?, ?> functionFactory, String escalationName, Class<E> escalationType);
 	}
 
 	/**
 	 * Maker {@link SectionSource}.
 	 */
 	@TestSource
-	public static class MakerSectionSource implements SectionSource,
-			SectionMakerContext {
+	public static class MakerSectionSource implements SectionSource, SectionMakerContext {
 
 		/**
 		 * Property name to obtain the {@link SectionMaker} identifier.
@@ -839,8 +729,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			sectionMakers.put(identifier, maker);
 
 			// Create and return the properties to load
-			PropertyList propertyList = new PropertyListImpl(
-					MAKER_IDENTIFIER_PROPERTY_NAME, identifier);
+			PropertyList propertyList = new PropertyListImpl(MAKER_IDENTIFIER_PROPERTY_NAME, identifier);
 			return propertyList;
 		}
 
@@ -865,16 +754,14 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void sourceSection(SectionDesigner sectionBuilder,
-				SectionSourceContext context) throws Exception {
+		public void sourceSection(SectionDesigner sectionBuilder, SectionSourceContext context) throws Exception {
 
 			// Store details to load
 			this.builder = sectionBuilder;
 			this.context = context;
 
 			// Obtain the section maker
-			String identifier = context
-					.getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
+			String identifier = context.getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
 			SectionMaker maker = sectionMakers.get(identifier);
 
 			// Make the section
@@ -896,15 +783,14 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public SubSection addSubSection(String subSectionName,
-				SectionMaker maker) {
+		public SubSection addSubSection(String subSectionName, SectionMaker maker) {
 
 			// Register the section source
 			PropertyList properties = MakerSectionSource.register(maker);
 
 			// Return the created sub section (using name as location)
-			SubSection subSection = this.builder.addSubSection(subSectionName,
-					MakerSectionSource.class.getName(), subSectionName);
+			SubSection subSection = this.builder.addSubSection(subSectionName, MakerSectionSource.class.getName(),
+					subSectionName);
 			for (Property property : properties) {
 				subSection.addProperty(property.getName(), property.getValue());
 			}
@@ -912,17 +798,15 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public SectionManagedObjectSource addManagedObjectSource(
-				String managedObjectSourceName, ManagedObjectMaker maker) {
+		public SectionManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
+				ManagedObjectMaker maker) {
 
 			// Register the managed object source
-			PropertyList propertyList = MakerManagedObjectSource
-					.register(maker);
+			PropertyList propertyList = MakerManagedObjectSource.register(maker);
 
 			// Create and return the section managed object
-			SectionManagedObjectSource moSource = this.builder
-					.addSectionManagedObjectSource(managedObjectSourceName,
-							MakerManagedObjectSource.class.getName());
+			SectionManagedObjectSource moSource = this.builder.addSectionManagedObjectSource(managedObjectSourceName,
+					MakerManagedObjectSource.class.getName());
 			for (Property property : propertyList) {
 				moSource.addProperty(property.getName(), property.getValue());
 			}
@@ -930,103 +814,95 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public <W extends Work> SectionFunctionNamespace addWork(String workName,
-				WorkFactory<W> workFactory, WorkMaker maker) {
+		public SectionFunctionNamespace addFunctionNamespace(String namespaceName, NamespaceMaker maker) {
 
-			// Register the work maker
-			PropertyList properties = MakerWorkSource.register(maker,
-					workFactory);
+			// Register the namespace maker
+			PropertyList properties = MakerManagedFunctionSource.register(maker);
 
-			// Return the created work
-			SectionFunctionNamespace work = this.builder.addSectionWork(workName,
-					MakerWorkSource.class.getName());
+			// Return the created namespace
+			SectionFunctionNamespace namespace = this.builder.addSectionFunctionNamespace(namespaceName,
+					MakerManagedFunctionSource.class.getName());
 			for (Property property : properties) {
-				work.addProperty(property.getName(), property.getValue());
+				namespace.addProperty(property.getName(), property.getValue());
 			}
-			return work;
+			return namespace;
 		}
 
 		@Override
-		public <W extends Work> SectionFunction addTask(String workName,
-				WorkFactory<W> workFactory, final String taskName,
-				final ManagedFunctionFactory<W, ?, ?> taskFactory,
-				final TaskMaker taskMaker) {
-			// Create the section work containing the single task type
-			WorkMaker workMaker = new WorkMaker() {
+		public SectionFunction addFunction(String namespace, final String functionName,
+				final ManagedFunctionFactory<?, ?> functionFactory, final FunctionMaker functionMaker) {
+
+			// Create the section namespace containing the single function type
+			NamespaceMaker namespaceMaker = new NamespaceMaker() {
 				@Override
-				public void make(WorkMakerContext context) {
-					// Create the task type and make if required
-					TaskTypeMaker maker = context
-							.addTask(taskName, taskFactory);
-					if (taskMaker != null) {
-						taskMaker.make(maker);
+				public void make(NamespaceMakerContext context) {
+					// Create the function type and make if required
+					FunctionMakerContext maker = context.addFunction(functionName, functionFactory);
+					if (functionMaker != null) {
+						functionMaker.make(maker);
 					}
 				}
 			};
-			SectionFunctionNamespace work = this.addWork(workName, workFactory, workMaker);
+			SectionFunctionNamespace sectionNamespace = this.addFunctionNamespace(namespace, namespaceMaker);
 
-			// Return the section task
-			return work.addSectionTask(taskName, taskName);
+			// Return the section function
+			return sectionNamespace.addSectionFunction(functionName, functionName);
 		}
 
 		@Override
-		public <W extends Work> FunctionFlow addTaskFlow(String workName,
-				WorkFactory<W> workFactory, String taskName,
-				ManagedFunctionFactory<W, ?, ?> taskFactory, final String flowName,
-				final Class<?> argumentType) {
-			// Create the section task containing of a single flow
-			TaskMaker taskMaker = new TaskMaker() {
+		public FunctionFlow addFunctionFlow(String namespace, String functionName,
+				ManagedFunctionFactory<?, ?> functionFactory, final String flowName, final Class<?> argumentType) {
+
+			// Create the section function containing of a single flow
+			FunctionMaker flowMaker = new FunctionMaker() {
 				@Override
-				public void make(TaskTypeMaker maker) {
+				public void make(FunctionMakerContext maker) {
 					// Create the flow
 					maker.addFlow(flowName, argumentType);
 				}
 			};
-			SectionFunction task = this.addTask(workName, workFactory, taskName,
-					taskFactory, taskMaker);
+			SectionFunction function = this.addFunction(namespace, functionName, functionFactory, flowMaker);
 
-			// Return the task flow
-			return task.getTaskFlow(flowName);
+			// Return the function flow
+			return function.getFunctionFlow(flowName);
 		}
 
 		@Override
-		public <W extends Work> FunctionObject addTaskObject(String workName,
-				WorkFactory<W> workFactory, String taskName,
-				ManagedFunctionFactory<W, ?, ?> taskFactory, final String objectName,
-				final Class<?> objectType, final String typeQualifier) {
-			// Create the section task containing of a single object
-			TaskMaker taskMaker = new TaskMaker() {
+		public FunctionObject addFunctionObject(String namespace, String functionName,
+				ManagedFunctionFactory<?, ?> functionFactory, final String objectName, final Class<?> objectType,
+				final String typeQualifier) {
+
+			// Create the section function containing of a single object
+			FunctionMaker objectMaker = new FunctionMaker() {
 				@Override
-				public void make(TaskTypeMaker maker) {
+				public void make(FunctionMakerContext maker) {
 					// Create the object
 					maker.addObject(objectName, objectType, typeQualifier);
 				}
 			};
-			SectionFunction task = this.addTask(workName, workFactory, taskName,
-					taskFactory, taskMaker);
+			SectionFunction function = this.addFunction(namespace, functionName, functionFactory, objectMaker);
 
-			// Return the task object
-			return task.getTaskObject(objectName);
+			// Return the function object
+			return function.getFunctionObject(objectName);
 		}
 
 		@Override
-		public <E extends Throwable, W extends Work> FunctionFlow addTaskEscalation(
-				String workName, WorkFactory<W> workFactory, String taskName,
-				ManagedFunctionFactory<W, ?, ?> taskFactory, final String escalationName,
+		public <E extends Throwable> FunctionFlow addFunctionEscalation(String namespace, String functionName,
+				ManagedFunctionFactory<?, ?> functionFactory, final String escalationName,
 				final Class<E> escalationType) {
-			// Create the section task containing of a single escalation
-			TaskMaker taskMaker = new TaskMaker() {
+
+			// Create the section function containing of a single escalation
+			FunctionMaker escalationMaker = new FunctionMaker() {
 				@Override
-				public void make(TaskTypeMaker maker) {
+				public void make(FunctionMakerContext maker) {
 					// Create the escalation
 					maker.addEscalation(escalationName, escalationType);
 				}
 			};
-			SectionFunction task = this.addTask(workName, workFactory, taskName,
-					taskFactory, taskMaker);
+			SectionFunction function = this.addFunction(namespace, functionName, functionFactory, escalationMaker);
 
-			// Return the task escalation
-			return task.getTaskEscalation(escalationName);
+			// Return the function escalation
+			return function.getFunctionEscalation(escalationName);
 		}
 	}
 
@@ -1069,9 +945,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 * Maker {@link ManagedObjectSource}.
 	 */
 	@TestSource
-	public static class MakerManagedObjectSource extends
-			AbstractManagedObjectSource<Indexed, Indexed> implements
-			ManagedObjectMakerContext {
+	public static class MakerManagedObjectSource extends AbstractManagedObjectSource<Indexed, Indexed>
+			implements ManagedObjectMakerContext {
 
 		/**
 		 * Name of property holding the identifier for the
@@ -1115,8 +990,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			managedObjectMakers.put(identifier, maker);
 
 			// Return the property list
-			return new PropertyListImpl(MAKER_IDENTIFIER_PROPERTY_NAME,
-					identifier);
+			return new PropertyListImpl(MAKER_IDENTIFIER_PROPERTY_NAME, identifier);
 		}
 
 		/**
@@ -1134,8 +1008,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		protected void loadMetaData(MetaDataContext<Indexed, Indexed> context)
-				throws Exception {
+		protected void loadMetaData(MetaDataContext<Indexed, Indexed> context) throws Exception {
 
 			// Provide default object type
 			context.setObjectClass(Object.class);
@@ -1144,10 +1017,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			this.context = context;
 
 			// Obtain the managed object maker
-			String identifier = context.getManagedObjectSourceContext()
-					.getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
-			ManagedObjectMaker managedObjectMaker = managedObjectMakers
-					.get(identifier);
+			String identifier = context.getManagedObjectSourceContext().getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
+			ManagedObjectMaker managedObjectMaker = managedObjectMakers.get(identifier);
 
 			// Make the managed object
 			managedObjectMaker.make(this);
@@ -1172,15 +1043,13 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public void addExtensionInterface(Class<?> extensionInterface) {
 			// Add the extension interface
-			this.context.addManagedObjectExtensionInterface(extensionInterface,
-					new ExtensionInterfaceFactory() {
-						@Override
-						public Object createExtensionInterface(
-								ManagedObject managedObject) {
-							fail("Should not require to create extension interface");
-							return null;
-						}
-					});
+			this.context.addManagedObjectExtensionInterface(extensionInterface, new ExtensionInterfaceFactory() {
+				@Override
+				public Object createExtensionInterface(ManagedObject managedObject) {
+					fail("Should not require to create extension interface");
+					return null;
+				}
+			});
 		}
 	}
 
@@ -1238,8 +1107,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			if (maker == null) {
 				maker = new SupplierMaker() {
 					@Override
-					public void supply(SupplierSourceContext context)
-							throws Exception {
+					public void supply(SupplierSourceContext context) throws Exception {
 						// No managed objects
 					}
 				};
@@ -1250,8 +1118,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			supplierMakers.put(identifier, maker);
 
 			// Return the property list
-			return new PropertyListImpl(MAKER_IDENTIFIER_PROPERTY_NAME,
-					identifier);
+			return new PropertyListImpl(MAKER_IDENTIFIER_PROPERTY_NAME, identifier);
 		}
 
 		/*
@@ -1267,8 +1134,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		public void supply(SupplierSourceContext context) throws Exception {
 
 			// Obtain the supplier maker
-			String identifier = context
-					.getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
+			String identifier = context.getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
 			SupplierMaker maker = supplierMakers.get(identifier);
 			assertNotNull("Unknown supplier maker " + identifier, maker);
 
@@ -1280,28 +1146,28 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * Makes the {@link SectionFunctionNamespace}.
 	 */
-	protected static interface WorkMaker {
+	protected static interface NamespaceMaker {
 
 		/**
 		 * Makes the {@link SectionFunctionNamespace}.
 		 * 
 		 * @param context
-		 *            {@link WorkMakerContext}.
+		 *            {@link NamespaceMakerContext}.
 		 */
-		void make(WorkMakerContext context);
+		void make(NamespaceMakerContext context);
 	}
 
 	/**
-	 * Context for the {@link WorkMaker}.
+	 * Context for the {@link NamespaceMaker}.
 	 */
-	protected static interface WorkMakerContext {
+	protected static interface NamespaceMakerContext {
 
 		/**
 		 * Obtains the {@link FunctionNamespaceBuilder}.
 		 * 
 		 * @return {@link FunctionNamespaceBuilder}.
 		 */
-		FunctionNamespaceBuilder<Work> getBuilder();
+		FunctionNamespaceBuilder getBuilder();
 
 		/**
 		 * Obtains the {@link ManagedFunctionSourceContext}.
@@ -1311,43 +1177,36 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		ManagedFunctionSourceContext getContext();
 
 		/**
-		 * Obtains the {@link WorkFactory} used for the {@link SectionFunctionNamespace}.
-		 * 
-		 * @return {@link WorkFactory} used for the {@link SectionFunctionNamespace}.
-		 */
-		WorkFactory<Work> getWorkFactory();
-
-		/**
 		 * Adds a {@link ManagedFunctionType}.
 		 * 
-		 * @param taskTypeName
+		 * @param functionTypeName
 		 *            Name of the {@link ManagedFunctionType}.
-		 * @param taskFactory
+		 * @param functionFactory
 		 *            {@link ManagedFunctionFactory}.
-		 * @return {@link TaskTypeMaker} to make the {@link ManagedFunctionType}.
+		 * @return {@link FunctionMakerContext} to make the
+		 *         {@link ManagedFunctionType}.
 		 */
-		<W extends Work> TaskTypeMaker addTask(String taskTypeName,
-				ManagedFunctionFactory<W, ?, ?> taskFactory);
+		FunctionMakerContext addFunction(String functionTypeName, ManagedFunctionFactory<?, ?> functionFactory);
 	}
 
 	/**
 	 * Makes the {@link ManagedFunctionType}.
 	 */
-	protected static interface TaskMaker {
+	protected static interface FunctionMaker {
 
 		/**
 		 * Makes the {@link ManagedFunctionType}.
 		 * 
-		 * @param maker
-		 *            {@link TaskTypeMaker}.
+		 * @param context
+		 *            {@link FunctionMakerContext}.
 		 */
-		void make(TaskTypeMaker maker);
+		void make(FunctionMakerContext context);
 	}
 
 	/**
-	 * Context for the {@link TaskMaker}.
+	 * Context for the {@link FunctionMaker}.
 	 */
-	protected static interface TaskTypeMaker {
+	protected static interface FunctionMakerContext {
 
 		/**
 		 * Adds a {@link ManagedFunctionFlowType}.
@@ -1371,8 +1230,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		 *            Type qualifier.
 		 * @return {@link ManagedFunctionObjectTypeBuilder}.
 		 */
-		ManagedFunctionObjectTypeBuilder<?> addObject(String objectName,
-				Class<?> objectType, String typeQualifier);
+		ManagedFunctionObjectTypeBuilder<?> addObject(String objectName, Class<?> objectType, String typeQualifier);
 
 		/**
 		 * Adds a {@link ManagedFunctionEscalationTypeBuilder}.
@@ -1383,82 +1241,63 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		 *            Escalation type.
 		 * @return {@link ManagedFunctionEscalationTypeBuilder}.
 		 */
-		<E extends Throwable> ManagedFunctionEscalationTypeBuilder addEscalation(
-				String escalationName, Class<E> escalationType);
+		<E extends Throwable> ManagedFunctionEscalationTypeBuilder addEscalation(String escalationName,
+				Class<E> escalationType);
 	}
 
 	/**
 	 * Maker {@link ManagedFunctionSource}.
 	 */
 	@TestSource
-	public static class MakerWorkSource implements ManagedFunctionSource<Work>,
-			WorkMakerContext {
+	public static class MakerManagedFunctionSource implements ManagedFunctionSource, NamespaceMakerContext {
 
 		/**
-		 * Property name for the {@link WorkMaker} identifier.
+		 * Property name for the {@link NamespaceMaker} identifier.
 		 */
-		public static final String MAKER_IDENTIFIER_PROPERTY_NAME = "work.maker";
+		public static final String MAKER_IDENTIFIER_PROPERTY_NAME = "namespace.maker";
 
 		/**
-		 * {@link WorkMaker} instances by their identifiers.
+		 * {@link NamespaceMaker} instances by their identifiers.
 		 */
-		private static Map<String, WorkMaker> workMakers;
-
-		/**
-		 * {@link WorkFactory} instances by their identifiers.
-		 */
-		private static Map<String, WorkFactory<?>> workFactories;
+		private static Map<String, NamespaceMaker> namespaceMakers;
 
 		/**
 		 * Resets for the next load.
 		 */
 		public static void reset() {
-			workMakers = new HashMap<String, WorkMaker>();
-			workFactories = new HashMap<String, WorkFactory<?>>();
+			namespaceMakers = new HashMap<String, NamespaceMaker>();
 		}
 
 		/**
-		 * Registers a {@link WorkMaker}.
+		 * Registers a {@link NamespaceMaker}.
 		 * 
 		 * @param maker
-		 *            {@link WorkMaker}.
-		 * @param workFactory
-		 *            {@link WorkFactory}.
+		 *            {@link NamespaceMaker}.
 		 * @return {@link PropertyList}.
 		 */
-		public static <W extends Work> PropertyList register(WorkMaker maker,
-				WorkFactory<W> workFactory) {
+		public static PropertyList register(NamespaceMaker maker) {
 
 			// Ensure have a maker
 			if (maker == null) {
-				maker = new WorkMaker() {
+				maker = new NamespaceMaker() {
 					@Override
-					public void make(WorkMakerContext context) {
-						// Empty work
+					public void make(NamespaceMakerContext context) {
+						// Empty namespace
 					}
 				};
 			}
 
-			// Register the work maker and factory
-			String identifier = String.valueOf(workMakers.size());
-			workMakers.put(identifier, maker);
-			workFactories.put(identifier, workFactory);
+			// Register the namespace maker and factory
+			String identifier = String.valueOf(namespaceMakers.size());
+			namespaceMakers.put(identifier, maker);
 
 			// Return the property list
-			return new PropertyListImpl(MAKER_IDENTIFIER_PROPERTY_NAME,
-					identifier);
+			return new PropertyListImpl(MAKER_IDENTIFIER_PROPERTY_NAME, identifier);
 		}
-
-		/**
-		 * {@link WorkFactory}.
-		 */
-		@SuppressWarnings("rawtypes")
-		private WorkFactory workFactory;
 
 		/**
 		 * {@link FunctionNamespaceBuilder}.
 		 */
-		@SuppressWarnings("rawtypes")
 		private FunctionNamespaceBuilder builder;
 
 		/**
@@ -1467,7 +1306,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		private ManagedFunctionSourceContext context;
 
 		/*
-		 * ==================== WorkSource ==============================
+		 * ==================== ManagedFuntionSource ====================
 		 */
 
 		@Override
@@ -1477,34 +1316,27 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
-		public void sourceManagedFunctions(FunctionNamespaceBuilder<Work> workTypeBuilder,
+		public void sourceManagedFunctions(FunctionNamespaceBuilder namespaceTypeBuilder,
 				ManagedFunctionSourceContext context) throws Exception {
 
-			// Obtain the work maker
-			String identifier = context
-					.getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
-			WorkMaker workMaker = workMakers.get(identifier);
-
-			// Obtain and load the work factory
-			this.workFactory = workFactories.get(identifier);
-			workTypeBuilder.setWorkFactory(this.workFactory);
+			// Obtain the namespace maker
+			String identifier = context.getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
+			NamespaceMaker namespaceMaker = namespaceMakers.get(identifier);
 
 			// Store details to load
-			this.builder = workTypeBuilder;
+			this.builder = namespaceTypeBuilder;
 			this.context = context;
 
-			// Make the work
-			workMaker.make(this);
+			// Make the namespace
+			namespaceMaker.make(this);
 		}
 
 		/*
-		 * ================== WorkMakerContext ===========================
+		 * ================== NamespaceMakerContext ===========================
 		 */
 
 		@Override
-		@SuppressWarnings("unchecked")
-		public FunctionNamespaceBuilder<Work> getBuilder() {
+		public FunctionNamespaceBuilder getBuilder() {
 			return this.builder;
 		}
 
@@ -1514,64 +1346,55 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
-		public WorkFactory<Work> getWorkFactory() {
-			return this.workFactory;
-		}
-
-		@Override
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public TaskTypeMaker addTask(String taskName, ManagedFunctionFactory taskFactory) {
-			// Create and return the task type maker
-			return new TaskTypeMakerImpl(taskName, taskFactory, this.builder);
+		@SuppressWarnings("rawtypes")
+		public FunctionMakerContext addFunction(String functionName, ManagedFunctionFactory functionFactory) {
+			// Create and return the function type maker
+			return new FunctionTypeMakerImpl(functionName, functionFactory, this.builder);
 		}
 
 		/**
-		 * {@link TaskTypeMaker} implementation.
+		 * {@link FunctionMakerContext} implementation.
 		 */
-		private class TaskTypeMakerImpl implements TaskTypeMaker {
+		private class FunctionTypeMakerImpl implements FunctionMakerContext {
 
 			/**
-			 * {@link TaskFactoryManufacturer}.
+			 * {@link ManagedFunctionFactory}.
 			 */
-			private final ManagedFunctionFactory<Work, ?, ?> taskFactory;
+			private final ManagedFunctionFactory<?, ?> functionFactory;
 
 			/**
 			 * {@link ManagedFunctionTypeBuilder}.
 			 */
 			@SuppressWarnings("rawtypes")
-			private final ManagedFunctionTypeBuilder taskTypeBuilder;
+			private final ManagedFunctionTypeBuilder functionTypeBuilder;
 
 			/**
 			 * Initiate.
 			 * 
-			 * @param taskName
+			 * @param functionName
 			 *            Name of the {@link SectionFunction}.
-			 * @param taskFactory
+			 * @param functionFactory
 			 *            {@link ManagedFunctionFactory}.
-			 * @param workTypeBuilder
+			 * @param namespaceTypeBuilder
 			 *            {@link FunctionNamespaceBuilder}.
 			 */
-			public TaskTypeMakerImpl(String taskName,
-					ManagedFunctionFactory<Work, ?, ?> taskFactory,
-					FunctionNamespaceBuilder<Work> workTypeBuilder) {
-				this.taskFactory = taskFactory;
+			public FunctionTypeMakerImpl(String functionName, ManagedFunctionFactory<?, ?> functionFactory,
+					FunctionNamespaceBuilder namespaceTypeBuilder) {
+				this.functionFactory = functionFactory;
 
-				// Create the task type builder
-				this.taskTypeBuilder = workTypeBuilder.addManagedFunctionType(taskName,
-						this.taskFactory, null, null);
+				// Create the function type builder
+				this.functionTypeBuilder = namespaceTypeBuilder.addManagedFunctionType(functionName,
+						this.functionFactory, null, null);
 			}
 
 			/*
-			 * ================ TaskMake =================================
+			 * ================ FunctionTypeMaker ================
 			 */
 
 			@Override
-			public ManagedFunctionFlowTypeBuilder<?> addFlow(String flowName,
-					Class<?> argumentType) {
-				// Create and return the task flow type builder
-				ManagedFunctionFlowTypeBuilder<?> flowBuilder = this.taskTypeBuilder
-						.addFlow();
+			public ManagedFunctionFlowTypeBuilder<?> addFlow(String flowName, Class<?> argumentType) {
+				// Create and return the function flow type builder
+				ManagedFunctionFlowTypeBuilder<?> flowBuilder = this.functionTypeBuilder.addFlow();
 				flowBuilder.setArgumentType(argumentType);
 				flowBuilder.setLabel(flowName);
 				return flowBuilder;
@@ -1579,11 +1402,10 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 			@Override
 			@SuppressWarnings("unchecked")
-			public ManagedFunctionObjectTypeBuilder<?> addObject(String objectName,
-					Class<?> objectType, String typeQualifier) {
-				// Create and return the task object type builder
-				ManagedFunctionObjectTypeBuilder<?> objectBuilder = this.taskTypeBuilder
-						.addObject(objectType);
+			public ManagedFunctionObjectTypeBuilder<?> addObject(String objectName, Class<?> objectType,
+					String typeQualifier) {
+				// Create and return the function object type builder
+				ManagedFunctionObjectTypeBuilder<?> objectBuilder = this.functionTypeBuilder.addObject(objectType);
 				objectBuilder.setLabel(objectName);
 				if (typeQualifier != null) {
 					objectBuilder.setTypeQualifier(typeQualifier);
@@ -1593,10 +1415,10 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 			@Override
 			@SuppressWarnings("unchecked")
-			public <E extends Throwable> ManagedFunctionEscalationTypeBuilder addEscalation(
-					String escalationName, Class<E> escalationType) {
-				// Create and return the task escalation type builder
-				ManagedFunctionEscalationTypeBuilder escalationBuilder = this.taskTypeBuilder
+			public <E extends Throwable> ManagedFunctionEscalationTypeBuilder addEscalation(String escalationName,
+					Class<E> escalationType) {
+				// Create and return the function escalation type builder
+				ManagedFunctionEscalationTypeBuilder escalationBuilder = this.functionTypeBuilder
 						.addEscalation(escalationType);
 				escalationBuilder.setLabel(escalationName);
 				return escalationBuilder;
@@ -1636,9 +1458,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 * Maker {@link GovernanceSource}.
 	 */
 	@TestSource
-	public static class MakerGovernanceSource extends
-			AbstractGovernanceSource<Object, Indexed> implements
-			GovernanceMakerContext, GovernanceFactory<Object, Indexed> {
+	public static class MakerGovernanceSource extends AbstractGovernanceSource<Object, Indexed>
+			implements GovernanceMakerContext, GovernanceFactory<Object, Indexed> {
 
 		/**
 		 * Property name to obtain the {@link GovernanceMaker} identifier.
@@ -1681,8 +1502,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			governanceMakers.put(identifier, maker);
 
 			// Return the property list
-			return new PropertyListImpl(MAKER_IDENTIFIER_PROPERTY_NAME,
-					identifier);
+			return new PropertyListImpl(MAKER_IDENTIFIER_PROPERTY_NAME, identifier);
 		}
 
 		/**
@@ -1701,8 +1521,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		protected void loadMetaData(MetaDataContext<Object, Indexed> context)
-				throws Exception {
+		protected void loadMetaData(MetaDataContext<Object, Indexed> context) throws Exception {
 
 			// Store details to load
 			this.metaDataContext = context;
@@ -1711,8 +1530,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			context.setGovernanceFactory(this);
 
 			// Obtain the governance maker
-			String identifier = context.getGovernanceSourceContext()
-					.getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
+			String identifier = context.getGovernanceSourceContext().getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
 			GovernanceMaker governanceMaker = governanceMakers.get(identifier);
 
 			// Make the governance
@@ -1743,7 +1561,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * Maker of an {@link Administration}.
 	 */
-	protected static interface AdministratorMaker {
+	protected static interface AdministrationMaker {
 
 		/**
 		 * Makes the {@link Administration}.
@@ -1751,13 +1569,13 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		 * @param context
 		 *            {@link AdministratorMakerContext}.
 		 */
-		void make(AdministratorMakerContext context);
+		void make(AdministrationMakerContext context);
 	}
 
 	/**
-	 * Context for the {@link AdministratorMaker}.
+	 * Context for the {@link AdministrationMaker}.
 	 */
-	protected static interface AdministratorMakerContext {
+	protected static interface AdministrationMakerContext {
 
 		/**
 		 * Specifies the extension interface.
@@ -1768,66 +1586,83 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		void setExtensionInterface(Class<?> extensionInterface);
 
 		/**
-		 * Adds a {@link Duty} for the {@link Administration}.
+		 * Adds a {@link Flow}.
 		 * 
-		 * @param dutyKey
-		 *            Key identifying the {@link Duty}.
+		 * @param flowName
+		 *            Name of {@link Flow}.
+		 * @param argumentType
+		 *            Type of argument.
 		 */
-		void addDuty(Enum<?> dutyKey);
+		void addFlow(String flowName, Class<?> argumentType);
 
+		/**
+		 * Adds an {@link Escalation}.
+		 * 
+		 * @param escalationName
+		 *            Name of {@link Escalation}.
+		 * @param escalationType
+		 *            Type of {@link Escalation}.
+		 */
+		void addEscalation(String escalationName, Class<? extends Throwable> escalationType);
+
+		/**
+		 * Adds {@link Governance}.
+		 * 
+		 * @param governanceName
+		 *            Name of {@link Governance}.
+		 */
+		void addGovernance(String governanceName);
 	}
 
 	/**
 	 * Maker {@link AdministrationSource}.
 	 */
 	@TestSource
-	public static class MakerAdministratorSource extends
-			AbstractAdministratorSource<Object, Indexed> implements
-			AdministratorMakerContext {
+	public static class MakerAdministrationSource extends AbstractAdministratorSource<Object, Indexed, Indexed>
+			implements AdministrationMakerContext {
 
 		/**
 		 * Property name to obtain the {@link AdministratorMaker} identifier.
 		 */
-		private static final String MAKER_IDENTIFIER_PROPERTY_NAME = "administrator.maker";
+		private static final String MAKER_IDENTIFIER_PROPERTY_NAME = "administration.maker";
 
 		/**
-		 * {@link AdministratorMaker} instances by their identifiers.
+		 * {@link AdministrationMaker} instances by their identifiers.
 		 */
-		private static Map<String, AdministratorMaker> adminMakers;
+		private static Map<String, AdministrationMaker> adminMakers;
 
 		/**
 		 * Resets for the next test.
 		 */
 		public static void reset() {
-			adminMakers = new HashMap<String, AdministratorMaker>();
+			adminMakers = new HashMap<String, AdministrationMaker>();
 		}
 
 		/**
-		 * Registers a {@link AdministratorMaker}.
+		 * Registers a {@link AdministrationMaker}.
 		 * 
 		 * @param maker
-		 *            {@link AdministratorMaker}.
+		 *            {@link AdministrationMaker}.
 		 * @return {@link PropertyList}.
 		 */
-		public static PropertyList register(AdministratorMaker maker) {
+		public static PropertyList register(AdministrationMaker maker) {
 
 			// Ensure have a maker
 			if (maker == null) {
-				maker = new AdministratorMaker() {
+				maker = new AdministrationMaker() {
 					@Override
-					public void make(AdministratorMakerContext context) {
+					public void make(AdministrationMakerContext context) {
 						// Empty administrator
 					}
 				};
 			}
 
-			// Register the administrator maker
+			// Register the administration maker
 			String identifier = String.valueOf(adminMakers.size());
 			adminMakers.put(identifier, maker);
 
 			// Return the property list
-			return new PropertyListImpl(MAKER_IDENTIFIER_PROPERTY_NAME,
-					identifier);
+			return new PropertyListImpl(MAKER_IDENTIFIER_PROPERTY_NAME, identifier);
 		}
 
 		/**
@@ -1846,29 +1681,21 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		protected void loadMetaData(MetaDataContext<Object, Indexed> context)
-				throws Exception {
+		protected void loadMetaData(MetaDataContext<Object, Indexed, Indexed> context) throws Exception {
 
 			// Store details to load
 			this.metaDataContext = context;
 
 			// Obtain the administrator maker
-			String identifier = context.getAdministratorSourceContext()
-					.getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
-			AdministratorMaker adminMaker = adminMakers.get(identifier);
+			String identifier = context.getAdministrationSourceContext().getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
+			AdministrationMaker adminMaker = adminMakers.get(identifier);
 
 			// Make the administrator
 			adminMaker.make(this);
 		}
 
-		@Override
-		public Administration<Object, Indexed> createAdministrator() {
-			fail("Should not require creating an administrator");
-			return null;
-		}
-
 		/*
-		 * ================= AdministratorMakerContext =========================
+		 * ================= AdministrationMakerContext =================
 		 */
 
 		@Override
@@ -1879,8 +1706,19 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public void addDuty(Enum<?> dutyKey) {
-			this.metaDataContext.addDuty(dutyKey);
+		public void addFlow(String flowName, Class<?> argumentType) {
+			this.metaDataContext.addFlow(argumentType).setLabel(flowName);
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public void addEscalation(String escalationName, Class<? extends Throwable> escalationType) {
+			this.metaDataContext.addEscalation(escalationType).setLabel(escalationName);
+		}
+
+		@Override
+		public void addGovernance(String governanceName) {
+			this.metaDataContext.addGovernance().setLabel(governanceName);
 		}
 	}
 
@@ -1908,8 +1746,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 * Maker {@link TeamSource}.
 	 */
 	@TestSource
-	public static class MakerTeamSource implements TeamSource,
-			TeamMakerContext, Team {
+	public static class MakerTeamSource implements TeamSource, TeamMakerContext, Team {
 
 		/**
 		 * Property name to obtain the {@link TeamMaker} identifier.
@@ -1952,8 +1789,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			teamMakers.put(identifier, maker);
 
 			// Return the property list
-			return new PropertyListImpl(MAKER_IDENTIFIER_PROPERTY_NAME,
-					identifier);
+			return new PropertyListImpl(MAKER_IDENTIFIER_PROPERTY_NAME, identifier);
 		}
 
 		/*
@@ -1970,8 +1806,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		public Team createTeam(TeamSourceContext context) throws Exception {
 
 			// Obtain the team maker
-			String identifier = context
-					.getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
+			String identifier = context.getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
 			TeamMaker teamMaker = teamMakers.get(identifier);
 
 			// Make the team
@@ -1991,7 +1826,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void assignJob(Job job, TeamIdentifier assignerTeam) {
+		public void assignJob(Job job) {
 			fail("Should not require the Team");
 		}
 
@@ -2043,8 +1878,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 * Maker {@link OfficeSource}.
 	 */
 	@TestSource
-	public static class MakerOfficeSource implements OfficeSource,
-			OfficeMakerContext {
+	public static class MakerOfficeSource implements OfficeSource, OfficeMakerContext {
 
 		/**
 		 * Property name to obtain the {@link OfficeMaker} identifier.
@@ -2096,8 +1930,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			officeMakers.put(identifier, maker);
 
 			// Return the property list
-			return new PropertyListImpl(MAKER_IDENTIFIER_PROPERTY_NAME,
-					identifier);
+			return new PropertyListImpl(MAKER_IDENTIFIER_PROPERTY_NAME, identifier);
 		}
 
 		/**
@@ -2116,15 +1949,13 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void sourceOffice(OfficeArchitect officeArchitect,
-				OfficeSourceContext context) throws Exception {
+		public void sourceOffice(OfficeArchitect officeArchitect, OfficeSourceContext context) throws Exception {
 
 			// Store details to make available
 			this.architect = officeArchitect;
 
 			// Obtain the office maker
-			String identifier = context
-					.getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
+			String identifier = context.getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
 			OfficeMaker officeMaker = officeMakers.get(identifier);
 
 			// Make the office
@@ -2141,10 +1972,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public OfficeSection addSection(String sectionName,
-				SectionMaker sectionMaker) {
-			return testCase.addSection(this.architect, sectionName,
-					sectionMaker);
+		public OfficeSection addSection(String sectionName, SectionMaker sectionMaker) {
+			return testCase.addSection(this.architect, sectionName, sectionMaker);
 		}
 	}
 
@@ -2209,8 +2038,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * Maker {@link OfficeFloorSource}.
 	 */
-	public static class MakerOfficeFloorSource implements OfficeFloorSource,
-			OfficeFloorMakerContext {
+	public static class MakerOfficeFloorSource implements OfficeFloorSource, OfficeFloorMakerContext {
 
 		/**
 		 * Property name to obtain the {@link OfficeFloorMaker} identifier.
@@ -2268,8 +2096,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			officeFloorMakers.put(identifier, maker);
 
 			// Return the property list
-			return new PropertyListImpl(MAKER_IDENTIFIER_PROPERTY_NAME,
-					identifier);
+			return new PropertyListImpl(MAKER_IDENTIFIER_PROPERTY_NAME, identifier);
 		}
 
 		/**
@@ -2303,25 +2130,21 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void specifyConfigurationProperties(
-				RequiredProperties requiredProperties,
+		public void specifyConfigurationProperties(RequiredProperties requiredProperties,
 				OfficeFloorSourceContext context) throws Exception {
 			fail("Should not required to specify configuration properties");
 		}
 
 		@Override
-		public void sourceOfficeFloor(OfficeFloorDeployer deployer,
-				OfficeFloorSourceContext context) throws Exception {
+		public void sourceOfficeFloor(OfficeFloorDeployer deployer, OfficeFloorSourceContext context) throws Exception {
 
 			// Store details to make available
 			this.deployer = deployer;
 			this.context = context;
 
 			// Obtain the office floor maker
-			String identifier = context
-					.getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
-			OfficeFloorMaker officeFloorMaker = officeFloorMakers
-					.get(identifier);
+			String identifier = context.getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
+			OfficeFloorMaker officeFloorMaker = officeFloorMakers.get(identifier);
 
 			// Make the office floor
 			officeFloorMaker.make(this);
@@ -2342,10 +2165,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public DeployedOffice addOffice(String officeName,
-				OfficeMaker officeMaker) {
-			return testCase.addDeployedOffice(this.deployer, officeName,
-					officeMaker);
+		public DeployedOffice addOffice(String officeName, OfficeMaker officeMaker) {
+			return testCase.addDeployedOffice(this.deployer, officeName, officeMaker);
 		}
 
 		@Override

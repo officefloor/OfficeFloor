@@ -36,7 +36,7 @@ public interface ManagedFunctionLoader {
 	 * {@link ManagedFunctionSourceSpecification} for the
 	 * {@link ManagedFunctionSource}.
 	 * 
-	 * @param <WS>
+	 * @param <S>
 	 *            {@link ManagedFunctionSource} type.
 	 * @param mangedFunctionSourceClass
 	 *            Class of the {@link ManagedFunctionSource}.
@@ -45,15 +45,15 @@ public interface ManagedFunctionLoader {
 	 *         <code>null</code> if issue, which is reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	<WS extends ManagedFunctionSource> PropertyList loadSpecification(Class<WS> mangedFunctionSourceClass);
+	<S extends ManagedFunctionSource> PropertyList loadSpecification(Class<S> mangedFunctionSourceClass);
 
 	/**
 	 * Loads and returns the {@link FunctionNamespaceType} from the
 	 * {@link ManagedFunctionSource} class.
 	 * 
-	 * @param <WS>
+	 * @param <S>
 	 *            {@link ManagedFunctionSource} type.
-	 * @param workSourceClass
+	 * @param managedFunctionSourceClass
 	 *            Class of the {@link ManagedFunctionSource}.
 	 * @param properties
 	 *            {@link PropertyList} containing the properties to source the
@@ -61,7 +61,7 @@ public interface ManagedFunctionLoader {
 	 * @return {@link FunctionNamespaceType} or <code>null</code> if issues,
 	 *         which is reported to the {@link CompilerIssues}.
 	 */
-	<WS extends ManagedFunctionSource> FunctionNamespaceType loadFunctionNamespaceType(Class<WS> workSourceClass,
+	<S extends ManagedFunctionSource> FunctionNamespaceType loadManagedFunctionType(Class<S> managedFunctionSourceClass,
 			PropertyList properties);
 
 }

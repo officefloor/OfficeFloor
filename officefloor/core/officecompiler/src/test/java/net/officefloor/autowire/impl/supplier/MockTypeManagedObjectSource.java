@@ -20,23 +20,21 @@ package net.officefloor.autowire.impl.supplier;
 import java.util.LinkedList;
 import java.util.List;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
 import net.officefloor.autowire.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
-import net.officefloor.frame.api.function.Work;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
 
@@ -46,10 +44,8 @@ import net.officefloor.frame.api.source.TestSource;
  * @author Daniel Sagenschneider
  */
 @TestSource
-public class MockTypeManagedObjectSource extends
-		AbstractManagedObjectSource<Indexed, Indexed> implements
-		WorkFactory<Work>, ManagedFunctionFactory<Work, Indexed, Indexed>,
-		ExtensionInterfaceFactory<Object> {
+public class MockTypeManagedObjectSource extends AbstractManagedObjectSource<Indexed, Indexed>
+		implements ManagedFunctionFactory<Indexed, Indexed>, ExtensionInterfaceFactory<Object> {
 
 	/**
 	 * Object type.
@@ -96,8 +92,7 @@ public class MockTypeManagedObjectSource extends
 	 *            {@link ManagedObjectSourceWirer}. May be <code>null</code> if
 	 *            no wiring necessary.
 	 */
-	public void addAsManagedObject(SupplierSourceContext context,
-			ManagedObjectSourceWirer wirer) {
+	public void addAsManagedObject(SupplierSourceContext context, ManagedObjectSourceWirer wirer) {
 		context.addManagedObject(this, wirer, this.getAutoWire());
 	}
 
@@ -167,16 +162,14 @@ public class MockTypeManagedObjectSource extends
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	protected void loadMetaData(MetaDataContext<Indexed, Indexed> context)
-			throws Exception {
+	protected void loadMetaData(MetaDataContext<Indexed, Indexed> context) throws Exception {
 
 		// Specify the meta-data
 		context.setObjectClass(this.objectType);
 
 		// Configure the dependencies
 		for (MockTypeDependency dependency : this.dependencies) {
-			DependencyLabeller labeller = context
-					.addDependency(dependency.type);
+			DependencyLabeller labeller = context.addDependency(dependency.type);
 			labeller.setLabel(dependency.name);
 			if (dependency.qualifier != null) {
 				labeller.setTypeQualifier(dependency.qualifier);
@@ -191,13 +184,10 @@ public class MockTypeManagedObjectSource extends
 
 		// Configure the required teams
 		for (String teamName : this.teams) {
-			ManagedObjectSourceContext<Indexed> mosContext = context
-					.getManagedObjectSourceContext();
-			ManagedObjectWorkBuilder<Work> work = mosContext.addWork("WORK-"
-					+ teamName, this);
-			ManagedObjectFunctionBuilder<Indexed, Indexed> task = work.addTask(
-					"TASK-" + teamName, this);
-			task.setTeam(teamName);
+			ManagedObjectSourceContext<Indexed> mosContext = context.getManagedObjectSourceContext();
+			ManagedObjectFunctionBuilder<Indexed, Indexed> function = mosContext
+					.addManagedFunction("FUNCTION-" + teamName, this);
+			function.setResponsibleTeam(teamName);
 		}
 
 		// Configure the extension interfaces
@@ -208,27 +198,17 @@ public class MockTypeManagedObjectSource extends
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-		TestCase.fail("Should not require obtaining the Managed Object for type testing");
+		Assert.fail("Should not require obtaining the Managed Object for type testing");
 		return null;
 	}
 
 	/*
-	 * ========================== WorkFactory ===========================
+	 * ====================== ManagedFunctionFactory ======================
 	 */
 
 	@Override
-	public Work createWork() {
-		TestCase.fail("Should not require creating work for type testing");
-		return null;
-	}
-
-	/*
-	 * ========================== TaskFactory ===========================
-	 */
-
-	@Override
-	public ManagedFunction<Work, Indexed, Indexed> createManagedFunction(Work work) {
-		TestCase.fail("Should not require creating a task for type testing");
+	public ManagedFunction<Indexed, Indexed> createManagedFunction() {
+		Assert.fail("Should not require creating a function for type testing");
 		return null;
 	}
 
@@ -238,7 +218,7 @@ public class MockTypeManagedObjectSource extends
 
 	@Override
 	public Object createExtensionInterface(ManagedObject managedObject) {
-		TestCase.fail("Should not require creating an extension for type testing");
+		Assert.fail("Should not require creating an extension for type testing");
 		return null;
 	}
 

@@ -22,10 +22,13 @@ import java.util.function.Consumer;
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.internal.structure.AdministrationNode;
-import net.officefloor.compile.internal.structure.DutyNode;
 import net.officefloor.compile.internal.structure.EscalationNode;
+import net.officefloor.compile.internal.structure.FunctionFlowNode;
+import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
+import net.officefloor.compile.internal.structure.FunctionObjectNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
+import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
@@ -41,20 +44,15 @@ import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.internal.structure.OfficeOutputNode;
 import net.officefloor.compile.internal.structure.OfficeStartNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
+import net.officefloor.compile.internal.structure.ResponsibleTeamNode;
 import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
-import net.officefloor.compile.internal.structure.FunctionFlowNode;
-import net.officefloor.compile.internal.structure.ManagedFunctionNode;
-import net.officefloor.compile.internal.structure.FunctionObjectNode;
-import net.officefloor.compile.internal.structure.ResponsibleTeamNode;
 import net.officefloor.compile.internal.structure.TeamNode;
-import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -88,7 +86,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link ManagedFunctionNode}.
 	 */
-	private final ManagedFunctionNode task = this.createMock(ManagedFunctionNode.class);
+	private final ManagedFunctionNode function = this.createMock(ManagedFunctionNode.class);
 
 	/**
 	 * Mock {@link ManagedObjectSourceNode}.
@@ -134,21 +132,12 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure create {@link AdministrationNode}.
 	 */
-	public void testCreateAdministratorNode() {
-		AdministrationNode node = this.doTest(() -> this.context.createAdministratorNode("ADMINISTRATOR", this.office));
-		assertNode(node, "ADMINISTRATOR", "Administrator", null, this.office);
-		assertEquals("Incorrect administrator name", "ADMINISTRATOR", node.getOfficeAdministratorName());
+	public void testCreateAdministrationNode() {
+		AdministrationNode node = this
+				.doTest(() -> this.context.createAdministrationNode("ADMINISTRATION", this.office));
+		assertNode(node, "ADMINISTRATION", "Administration", null, this.office);
+		assertEquals("Incorrect administrator name", "ADMINISTRATION", node.getOfficeAdministrationName());
 		assertInitialise(node, (n) -> n.initialise("ExampleAdministratorSource", null));
-	}
-
-	/**
-	 * Ensure can create {@link DutyNode}.
-	 */
-	public void testCreateDutyNode() {
-		AdministrationNode admin = this.createMock(AdministrationNode.class);
-		DutyNode node = this.doTest(() -> this.context.createDutyNode("DUTY", admin));
-		assertNode(node, "DUTY", "Duty", null, admin);
-		assertInitialise(node, (n) -> n.initialise());
 	}
 
 	/**
@@ -575,45 +564,44 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can create {@link FunctionFlowNode}.
 	 */
-	public void testCreateTaskFlowNode() {
-		FunctionFlowNode node = this.doTest(() -> this.context.createTaskFlowNode("FLOW", true, this.task));
-		assertNode(node, "FLOW", "Task Flow", null, this.task);
-		assertEquals("Escalation is sequential", FlowInstigationStrategyEnum.SEQUENTIAL,
-				node.getFlowInstigationStrategy());
-		assertEquals("Incorrect task flow name", "FLOW", node.getTaskFlowName());
+	public void testCreateFunctionFlowNode() {
+		FunctionFlowNode node = this.doTest(() -> this.context.createFunctionFlowNode("FLOW", true, this.function));
+		assertNode(node, "FLOW", "Function Flow", null, this.function);
+		assertFalse("Escalation does not spawn thread state", node.isSpawnThreadState());
+		assertEquals("Incorrect function flow name", "FLOW", node.getFunctionFlowName());
 		assertInitialise(node, (n) -> n.initialise());
 	}
 
 	/**
 	 * Ensure can create {@link ManagedFunctionNode}.
 	 */
-	public void testCreateTaskNode() {
-		FunctionNamespaceNode work = this.createMock(FunctionNamespaceNode.class);
-		ManagedFunctionNode node = this.doTest(() -> this.context.createTaskNode("TASK"));
-		assertNode(node, "TASK", "Task", null, null);
-		assertEquals("Incorrct office task name", "TASK", node.getOfficeTaskName());
-		assertEquals("Incorrect section task name", "TASK", node.getSectionTaskName());
-		assertNull("Should not have work", node.getWorkNode());
-		assertInitialise(node, (n) -> n.initialise("TYPE", work));
-		assertSame("Incorrect work", work, node.getWorkNode());
+	public void testCreateFunctionNode() {
+		FunctionNamespaceNode namespace = this.createMock(FunctionNamespaceNode.class);
+		ManagedFunctionNode node = this.doTest(() -> this.context.createFunctionNode("FUNCTION"));
+		assertNode(node, "FUNCTION", "Function", null, null);
+		assertEquals("Incorrct office function name", "FUNCTION", node.getOfficeFunctionName());
+		assertEquals("Incorrect section function name", "FUNCTION", node.getSectionFunctionName());
+		assertNull("Should not have namespace", node.getFunctionNamespaceNode());
+		assertInitialise(node, (n) -> n.initialise("TYPE", namespace));
+		assertSame("Incorrect namespace", namespace, node.getFunctionNamespaceNode());
 	}
 
 	/**
 	 * Ensure can create {@link FunctionObjectNode}.
 	 */
 	public void testCreateTaskObjectNode() {
-		FunctionObjectNode node = this.doTest(() -> this.context.createTaskObjectNode("OBJECT", this.task));
-		assertNode(node, "OBJECT", "Task Object", null, this.task);
-		assertEquals("Incorrect task object name", "OBJECT", node.getTaskObjectName());
+		FunctionObjectNode node = this.doTest(() -> this.context.createFunctionObjectNode("OBJECT", this.function));
+		assertNode(node, "OBJECT", "Function Object", null, this.function);
+		assertEquals("Incorrect function object name", "OBJECT", node.getFunctionObjectName());
 		assertInitialise(node, (n) -> n.initialise());
 	}
 
 	/**
 	 * Ensure can create {@link ResponsibleTeamNode}.
 	 */
-	public void testCreateTaskTeamNode() {
-		ResponsibleTeamNode node = this.doTest(() -> this.context.createTaskTeamNode("TEAM", this.task));
-		assertNode(node, "TEAM", "Task Team", null, this.task);
+	public void testCreateResponsibleTeamNode() {
+		ResponsibleTeamNode node = this.doTest(() -> this.context.createResponsibleTeamNode("TEAM", this.function));
+		assertNode(node, "TEAM", "Responsible Team", null, this.function);
 		assertInitialise(node, (n) -> n.initialise());
 	}
 
@@ -630,17 +618,18 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can create {@link FunctionNamespaceNode}.
 	 */
-	public void testCreateWorkNode() {
-		this.recordReturn(this.section, this.section.getSectionQualifiedName("WORK"), "SECTION.WORK");
+	public void testCreateNamespaceNode() {
+		this.recordReturn(this.section, this.section.getSectionQualifiedName("NAMESPACE"), "SECTION.NAMESPACE");
 		FunctionNamespaceNode node = this.doTest(() -> {
-			FunctionNamespaceNode work = this.context.createWorkNode("WORK", this.section);
-			assertEquals("Incorrect qualified work name", "SECTION.WORK", work.getQualifiedWorkName());
-			return work;
+			FunctionNamespaceNode namespace = this.context.createFunctionNamespaceNode("NAMESPACE", this.section);
+			assertEquals("Incorrect qualified namespace name", "SECTION.NAMESPACE",
+					namespace.getQualifiedFunctionNamespaceName());
+			return namespace;
 		});
-		assertNode(node, "WORK", "Work", null, this.section);
+		assertNode(node, "NAMESPACE", "Function Namespace", null, this.section);
 		assertSame("Incorrect section", this.section, node.getSectionNode());
-		assertEquals("Incorrect section work name", "WORK", node.getSectionWorkName());
-		assertInitialise(node, (n) -> n.initialise("ExampleWorkSource", null));
+		assertEquals("Incorrect section namespace name", "NAMESPACE", node.getSectionFunctionNamespaceName());
+		assertInitialise(node, (n) -> n.initialise("ExampleManagedFunctionSource", null));
 	}
 
 	/**

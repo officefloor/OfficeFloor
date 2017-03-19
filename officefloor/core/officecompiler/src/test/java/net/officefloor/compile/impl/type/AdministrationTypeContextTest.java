@@ -27,17 +27,15 @@ import net.officefloor.compile.type.TypeContext;
  * @author Daniel Sagenschneider
  */
 @SuppressWarnings("rawtypes")
-public class AdministratorTypeContextTest extends
-		AbstractTestTypeContext<AdministrationNode, AdministrationType> {
+public class AdministrationTypeContextTest extends AbstractTestTypeContext<AdministrationNode, AdministrationType> {
 
 	/**
 	 * Instantiate.
 	 */
-	public AdministratorTypeContextTest() {
+	public AdministrationTypeContextTest() {
 		super(AdministrationNode.class, AdministrationType.class,
-				(node) -> (AdministrationType) node.loadAdministratorType(), (
-						context, node) -> (AdministrationType) context
-						.getOrLoadAdministratorType(node));
+				(node) -> (AdministrationType) node.loadAdministrationType(),
+				(context, node) -> (AdministrationType) context.getOrLoadAdministrationType(node));
 	}
 
 }

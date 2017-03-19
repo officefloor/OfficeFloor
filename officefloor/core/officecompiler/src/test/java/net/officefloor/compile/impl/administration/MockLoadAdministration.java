@@ -15,11 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.impl.administrator;
+package net.officefloor.compile.impl.administration;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+
 import net.officefloor.compile.administration.AdministrationType;
-import net.officefloor.compile.administration.DutyType;
 import net.officefloor.plugin.administrator.clazz.ClassAdministrationSource;
 
 /**
@@ -28,7 +28,7 @@ import net.officefloor.plugin.administrator.clazz.ClassAdministrationSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockLoadAdministrator {
+public class MockLoadAdministration {
 
 	/**
 	 * Mock extension interface.
@@ -46,23 +46,15 @@ public class MockLoadAdministrator {
 	}
 
 	/**
-	 * Validates the {@link AdministrationType} is correct for this class object.
+	 * Validates the {@link AdministrationType} is correct for this class
+	 * object.
 	 * 
-	 * @param administratorType
+	 * @param administrationType
 	 *            {@link AdministrationType}
 	 */
-	public static void assertAdministratorType(
-			AdministrationType<?, ?> administratorType) {
-
-		TestCase.assertEquals("Incorrect extension interface",
-				MockExtensionInterface.class, administratorType
-						.getExtensionInterface());
-
-		TestCase.assertEquals("Incorrect number of duties", 1,
-				administratorType.getDutyTypes().length);
-		DutyType<?, ?> dutyType = administratorType.getDutyTypes()[0];
-		TestCase.assertEquals("Incorrect duty name", "admin", dutyType
-				.getDutyName());
+	public static void assertAdministrationType(AdministrationType<?, ?, ?> administrationType) {
+		Assert.assertEquals("Incorrect extension interface", MockExtensionInterface.class,
+				administrationType.getExtensionInterface());
 	}
 
 }
