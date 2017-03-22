@@ -7,4 +7,7 @@
 	<list type="SubSectionOutputToSubSectionInputModel" name="sub section output" />
 	<list type="SectionManagedObjectSourceFlowToSubSectionInputModel"
 		name="section managed object source flow" />
+	<list type="FunctionToNextSubSectionInputModel" name="previous function" />
+	<list type="FunctionFlowToSubSectionInputModel" name="function flow" />
+	<list type="FunctionEscalationToSubSectionInputModel" name="function escalation" />
 </model>

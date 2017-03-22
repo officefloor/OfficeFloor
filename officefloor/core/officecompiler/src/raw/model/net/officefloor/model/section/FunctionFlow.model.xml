@@ -5,4 +5,5 @@
 	<field type="String" name="argument type" />
 	<field type="FunctionFlowToExternalFlowModel" name="external flow" />
 	<field type="FunctionFlowToFunctionModel" name="function" />
+	<field type="FunctionFlowToSubSectionInputModel" name="sub section input" />
 </model>

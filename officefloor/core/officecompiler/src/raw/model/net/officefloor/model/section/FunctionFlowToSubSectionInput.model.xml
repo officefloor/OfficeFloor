@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="sub section name" />
+	<field type="String" name="sub section input name" />
+	<field type="FunctionFlowModel" name="function flow" end-field="sub section input" />
+	<field type="SubSectionInputModel" name="sub section input"
+		end-list="function flow" />
+	<field type="boolean" name="is spawn thread state" />
+</model>

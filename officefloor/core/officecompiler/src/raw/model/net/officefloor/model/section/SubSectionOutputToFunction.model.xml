@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="function name" />
+	<field type="SubSectionOutputModel" name="sub section output"
+		end-field="function" />
+	<field type="FunctionModel" name="function" end-list="sub section output" />
+</model>

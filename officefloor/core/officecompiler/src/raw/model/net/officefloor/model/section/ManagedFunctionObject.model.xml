@@ -6,5 +6,6 @@
 	<field type="boolean" name="is parameter" />
 	<field type="ManagedFunctionObjectToExternalManagedObjectModel"
 		name="external managed object" />
-	<field type="ManagedFunctionObjectToDeskManagedObjectModel" name="desk managed object" />
+	<field type="ManagedFunctionObjectToSectionManagedObjectModel"
+		name="section managed object" />
 </model>

@@ -2,7 +2,7 @@
 <model>
 	<field type="String" name="desk managed object name" />
 	<field type="ManagedFunctionObjectModel" name="managed function object"
-		end-field="desk managed object" />
-	<field type="DeskManagedObjectModel" name="desk managed object"
+		end-field="section managed object" />
+	<field type="SectionManagedObjectModel" name="section managed object"
 		end-list="managed function object" />
 </model>

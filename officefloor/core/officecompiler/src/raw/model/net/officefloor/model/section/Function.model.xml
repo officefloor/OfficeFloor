@@ -6,14 +6,16 @@
 	<field type="String" name="managed function name" />
 	<field type="String" name="return type" />
 	<field type="ManagedFunctionToFunctionModel" name="managed function" />
-	<field type="FunctionToNextExternalFlowModel" name="next external flow" />
 	<field type="FunctionToNextFunctionModel" name="next function" />
+	<field type="FunctionToNextExternalFlowModel" name="next external flow" />
+	<field type="FunctionToNextSubSectionInputModel" name="next sub section input" />
 	<list type="FunctionToNextFunctionModel" name="previous function" />
 	<list type="FunctionFlowModel" name="function flow"
 		cascade-remove="true" />
-	<list type="FunctionFlowToFunctionModel" name="function flow input" />
 	<list type="FunctionEscalationModel" name="function escalation"
 		cascade-remove="true" />
+	<list type="FunctionFlowToFunctionModel" name="function flow input" />
 	<list type="FunctionEscalationToFunctionModel" name="function escalation input" />
-	<list type="DeskManagedObjectSourceFlowToFunctionModel" name="desk managed object source flow" />
+	<list type="SubSectionOutputToFunctionModel" name="sub section output" />
+	<list type="SectionManagedObjectSourceFlowToFunctionModel" name="section managed object source flow" />
 </model>

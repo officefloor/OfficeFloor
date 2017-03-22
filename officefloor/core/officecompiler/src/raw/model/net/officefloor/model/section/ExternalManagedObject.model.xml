@@ -7,6 +7,4 @@
 		name="dependent section managed object" />
 	<list type="ManagedFunctionObjectToExternalManagedObjectModel"
 		name="managed function object" />
-	<list type="DeskManagedObjectDependencyToExternalManagedObjectModel"
-		name="dependent desk managed object" />
 </model>
