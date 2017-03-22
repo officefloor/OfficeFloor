@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<list type="ExternalManagedObjectModel" name="external managed object" />
-	<list type="DeskManagedObjectSourceModel" name="desk managed object source" />
-	<list type="DeskManagedObjectModel" name="desk managed object" />
-	<list type="FunctionNamespaceModel" name="function namespace" />
-	<list type="FunctionModel" name="function" />
-	<list type="ExternalFlowModel" name="external flow" />
-</model>

@@ -5,4 +5,6 @@
     <list type="SectionManagedObjectModel" name="section managed object" />
 	<list type="ExternalFlowModel" name="external flow" />
     <list type="SubSectionModel" name="sub section" />
+	<list type="FunctionNamespaceModel" name="function namespace" />
+	<list type="FunctionModel" name="function" />
 </model>

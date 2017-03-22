@@ -5,6 +5,7 @@
 	<field type="SectionManagedObjectToSectionManagedObjectSourceModel"
 		name="section managed object source" />
 	<list type="SubSectionObjectToSectionManagedObjectModel" name="sub section object" />
+	<list type="ManagedFunctionObjectToDeskManagedObjectModel" name="managed function object" />
 	<list type="SectionManagedObjectDependencyModel" name="section managed object dependency"
 		plural="section managed object dependencies" />
 	<list type="SectionManagedObjectDependencyToSectionManagedObjectModel"

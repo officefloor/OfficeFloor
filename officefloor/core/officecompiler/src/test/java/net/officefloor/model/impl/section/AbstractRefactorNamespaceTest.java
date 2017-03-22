@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.model.impl.desk;
+package net.officefloor.model.impl.section;
 
 import java.util.HashMap;
 import java.util.LinkedList;

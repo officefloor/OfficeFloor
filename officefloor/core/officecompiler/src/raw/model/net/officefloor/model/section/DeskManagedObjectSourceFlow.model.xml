@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="desk managed object source flow name" />
-	<field type="String" name="argument type" />
-	<field type="DeskManagedObjectSourceFlowToExternalFlowModel"
-		name="external flow" />
-	<field type="DeskManagedObjectSourceFlowToFunctionModel" name="function" />
-</model>
