@@ -20,8 +20,8 @@ package net.officefloor.model.impl.desk;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.WorkTaskModel;
-import net.officefloor.model.desk.WorkTaskObjectModel;
+import net.officefloor.model.desk.ManagedFunctionModel;
+import net.officefloor.model.desk.ManagedFunctionObjectModel;
 
 /**
  * Tests setting the {@link Object} as parameter.
@@ -31,76 +31,61 @@ import net.officefloor.model.desk.WorkTaskObjectModel;
 public class SetObjectAsParameterTest extends AbstractDeskChangesTestCase {
 
 	/**
-	 * {@link Object} {@link WorkTaskObjectModel}.
+	 * {@link Object} {@link ManagedFunctionObjectModel}.
 	 */
-	private WorkTaskObjectModel object;
+	private ManagedFunctionObjectModel object;
 
 	/**
-	 * Parameter {@link WorkTaskObjectModel}.
+	 * Parameter {@link ManagedFunctionObjectModel}.
 	 */
-	private WorkTaskObjectModel parameter;
+	private ManagedFunctionObjectModel parameter;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.compile.impl.desk.AbstractDeskOperationsTestCase#setUp()
-	 */
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
-		// Obtain the object parameter task object
-		WorkTaskModel workTask = this.model.getWorks().get(0).getWorkTasks()
-				.get(0);
-		this.object = workTask.getTaskObjects().get(0);
-		this.parameter = workTask.getTaskObjects().get(1);
+		// Obtain the object parameter function object
+		ManagedFunctionModel managedFunction = this.model.getFunctionNamespaces().get(0).getManagedFunctions().get(0);
+		this.object = managedFunction.getManagedFunctionObjects().get(0);
+		this.parameter = managedFunction.getManagedFunctionObjects().get(1);
 	}
 
 	/**
-	 * Ensures no change if {@link WorkTaskModel} is not on the
+	 * Ensures no change if {@link ManagedFunctionModel} is not on the
 	 * {@link DeskModel}.
 	 */
-	public void testWorkTaskNotOnDesk() {
-		WorkTaskObjectModel taskObject = new WorkTaskObjectModel("NOT_ON_DESK",
-				null, String.class.getName(), false);
-		Change<WorkTaskObjectModel> change = this.operations
-				.setObjectAsParameter(true, taskObject);
-		this.assertChange(change, taskObject,
-				"Set task object NOT_ON_DESK as a parameter", false,
-				"Task object NOT_ON_DESK not on desk");
+	public void testManagedFunctionNotOnDesk() {
+		ManagedFunctionObjectModel functionObject = new ManagedFunctionObjectModel("NOT_ON_DESK", null,
+				String.class.getName(), false);
+		Change<ManagedFunctionObjectModel> change = this.operations.setObjectAsParameter(true, functionObject);
+		this.assertChange(change, functionObject, "Set managed function object NOT_ON_DESK as a parameter", false,
+				"Managed function object NOT_ON_DESK not on desk");
 	}
 
 	/**
-	 * Ensures can set a {@link WorkTaskObjectModel} as a parameter.
+	 * Ensures can set a {@link ManagedFunctionObjectModel} as a parameter.
 	 */
 	public void testSetToParameter() {
-		Change<WorkTaskObjectModel> change = this.operations
-				.setObjectAsParameter(true, this.object);
-		this.assertChange(change, this.object,
-				"Set task object OBJECT as a parameter", true);
+		Change<ManagedFunctionObjectModel> change = this.operations.setObjectAsParameter(true, this.object);
+		this.assertChange(change, this.object, "Set managed function object OBJECT as a parameter", true);
 	}
 
 	/**
-	 * Ensures can set a {@link WorkTaskObjectModel} as an object.
+	 * Ensures can set a {@link ManagedFunctionObjectModel} as an object.
 	 */
 	public void testSetToObject() {
-		Change<WorkTaskObjectModel> change = this.operations
-				.setObjectAsParameter(false, this.parameter);
-		this.assertChange(change, this.parameter,
-				"Set task object PARAMETER as an object", true);
+		Change<ManagedFunctionObjectModel> change = this.operations.setObjectAsParameter(false, this.parameter);
+		this.assertChange(change, this.parameter, "Set managed function object PARAMETER as an object", true);
 	}
 
 	/**
-	 * Ensures can set a {@link WorkTaskObjectModel} as a parameter with
+	 * Ensures can set a {@link ManagedFunctionObjectModel} as a parameter with
 	 * connected {@link ConnectionModel} instances.
 	 */
 	public void testSetToParameterWithConnections() {
 		this.useTestSetupModel();
-		Change<WorkTaskObjectModel> change = this.operations
-				.setObjectAsParameter(true, this.object);
-		this.assertChange(change, this.object,
-				"Set task object OBJECT as a parameter", true);
+		Change<ManagedFunctionObjectModel> change = this.operations.setObjectAsParameter(true, this.object);
+		this.assertChange(change, this.object, "Set managed function object OBJECT as a parameter", true);
 	}
 
 }

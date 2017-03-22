@@ -103,8 +103,7 @@ public class IntegrateAutoWireGovernanceTest extends OfficeFrameTestCase {
 	private void doGovernanceTest(boolean isManagedObject) throws Exception {
 
 		final MockObject object = this.createSynchronizedMock(MockObject.class);
-		final CallableStatement statement = this
-				.createSynchronizedMock(CallableStatement.class);
+		final CallableStatement statement = this.createSynchronizedMock(CallableStatement.class);
 
 		// Ensure in valid state for running test
 		synchronized (threadForJob) {
@@ -113,9 +112,7 @@ public class IntegrateAutoWireGovernanceTest extends OfficeFrameTestCase {
 
 		// Record execution
 		object.start(xid, 1);
-		this.recordReturn(object,
-				object.prepareCall("UPDATE TEST_CASE SET TEST = 'PASSED'"),
-				statement);
+		this.recordReturn(object, object.prepareCall("UPDATE TEST_CASE SET TEST = 'PASSED'"), statement);
 		this.recordReturn(statement, statement.execute(), false);
 		this.recordReturn(object, object.prepare(xid), 0);
 		object.commit(xid, true);
@@ -125,34 +122,28 @@ public class IntegrateAutoWireGovernanceTest extends OfficeFrameTestCase {
 
 		// Configure the application
 		AutoWireApplication application = new AutoWireOfficeFloorSource();
-		AutoWireSection section = application
-				.addSection("SECTION", ClassSectionSource.class.getName(),
-						MockSection.class.getName());
-		AutoWireGovernance governance = application.addGovernance("GOVERNANCE",
-				ClassGovernanceSource.class.getName());
-		governance.addProperty(ClassGovernanceSource.CLASS_NAME_PROPERTY_NAME,
-				MockGovernance.class.getName());
+		AutoWireSection section = application.addSection("SECTION", ClassSectionSource.class.getName(),
+				MockSection.class.getName());
+		AutoWireGovernance governance = application.addGovernance("GOVERNANCE", ClassGovernanceSource.class.getName());
+		governance.addProperty(ClassGovernanceSource.CLASS_NAME_PROPERTY_NAME, MockGovernance.class.getName());
 		governance.governSection(section);
-		application.assignTeam(OnePersonTeamSource.class.getName(),
-				new AutoWire(XAResource.class));
+		application.assignTeam(OnePersonTeamSource.class.getName(), new AutoWire(XAResource.class));
 		application.assignDefaultTeam(OnePersonTeamSource.class.getName());
 
 		// Configure the object / managed object
 		if (isManagedObject) {
 			// Configure the managed object
 			MockManagedObjectSource.object = object;
-			application.addManagedObject(
-					MockManagedObjectSource.class.getName(), null,
-					new AutoWire(Connection.class));
+			application.addManagedObject(MockManagedObjectSource.class.getName(), null, new AutoWire(Connection.class));
 
 		} else {
 			// Configure the object
 			application.addObject(object, new AutoWire(Connection.class));
 		}
 
-		// Execute the task
+		// Execute the function
 		AutoWireOfficeFloor officeFloor = application.openOfficeFloor();
-		officeFloor.invokeTask("SECTION.WORK", "task", null);
+		officeFloor.invokeFunction("SECTION.NAMESPACE.function", null);
 
 		// Verify functionality
 		this.verifyMockObjects();
@@ -161,8 +152,7 @@ public class IntegrateAutoWireGovernanceTest extends OfficeFrameTestCase {
 		synchronized (threadForJob) {
 			// Ensure appropriate threads executing teams
 			assertEquals("Incorrect number of teams", 2, threadForJob.size());
-			assertTrue(
-					"Should be different threads executing governance and the task",
+			assertTrue("Should be different threads executing governance and the function",
 					threadForJob.get(0) != threadForJob.get(1));
 		}
 	}
@@ -172,10 +162,9 @@ public class IntegrateAutoWireGovernanceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockSection {
 
-		public void task(Connection connection) throws SQLException {
+		public void function(Connection connection) throws SQLException {
 			registerJobThread();
-			CallableStatement statement = connection
-					.prepareCall("UPDATE TEST_CASE SET TEST = 'PASSED'");
+			CallableStatement statement = connection.prepareCall("UPDATE TEST_CASE SET TEST = 'PASSED'");
 			statement.execute();
 		}
 	}
@@ -222,9 +211,8 @@ public class IntegrateAutoWireGovernanceTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link ManagedObjectSource}.
 	 */
-	public static class MockManagedObjectSource extends
-			AbstractManagedObjectSource<None, None> implements ManagedObject,
-			ExtensionInterfaceFactory<XAResource> {
+	public static class MockManagedObjectSource extends AbstractManagedObjectSource<None, None>
+			implements ManagedObject, ExtensionInterfaceFactory<XAResource> {
 
 		/**
 		 * {@link MockObject}.
@@ -241,8 +229,7 @@ public class IntegrateAutoWireGovernanceTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		protected void loadMetaData(MetaDataContext<None, None> context)
-				throws Exception {
+		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
 			context.setObjectClass(Connection.class);
 			context.addManagedObjectExtensionInterface(XAResource.class, this);
 		}

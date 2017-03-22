@@ -17,19 +17,19 @@
  */
 package net.officefloor.plugin.administrator.clazz;
 
-import java.util.Arrays;
-import java.util.List;
+import java.io.IOException;
+import java.sql.SQLException;
 
 import net.officefloor.compile.administration.AdministrationType;
-import net.officefloor.compile.test.administration.AdministratorLoaderUtil;
+import net.officefloor.compile.test.administration.AdministrationLoaderUtil;
 import net.officefloor.compile.test.administration.AdministrationTypeBuilder;
-import net.officefloor.compile.util.AdministrationSourceStandAlone;
 import net.officefloor.frame.api.administration.Administration;
-import net.officefloor.frame.api.administration.Duty;
 import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 
 /**
  * Tests the {@link ClassAdministrationSource}.
@@ -42,8 +42,7 @@ public class ClassAdministratorSourceTest extends OfficeFrameTestCase {
 	 * Ensures specification context.
 	 */
 	public void testSpecification() {
-		AdministratorLoaderUtil.validateSpecification(
-				ClassAdministrationSource.class,
+		AdministrationLoaderUtil.validateSpecification(ClassAdministrationSource.class,
 				ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME, "Class");
 	}
 
@@ -53,80 +52,58 @@ public class ClassAdministratorSourceTest extends OfficeFrameTestCase {
 	public void testAdministratorType() {
 
 		// Create the expected administration type
-		AdministrationTypeBuilder type = AdministratorLoaderUtil
-				.createAdministratorTypeBuilder();
-		type.setExtensionInterface(MockExtensionInterface.class);
-		type.addDuty("admin_A", null, None.class);
-		type.addDuty("admin_B", null, None.class);
-		type.addDuty("admin_C", null, None.class);
+		AdministrationTypeBuilder<Indexed, Indexed> type = AdministrationLoaderUtil
+				.createAdministrationTypeBuilder(MockExtensionInterface.class, Indexed.class, Indexed.class);
+		type.addFlow("flowOne", null, 0, null);
+		type.addFlow("flowTwo", String.class, 1, null);
+		type.addFlow("flowThree", null, 2, null);
+		type.addFlow("flowFour", Integer.class, 3, null);
+		type.addEscalation(IOException.class.getSimpleName(), IOException.class);
+		type.addEscalation(SQLException.class.getSimpleName(), SQLException.class);
 
 		// Validate the administration type
-		AdministratorLoaderUtil.validateAdministratorType(type,
-				ClassAdministrationSource.class,
-				ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME,
+		AdministrationLoaderUtil.validateAdministratorType(type, ClassAdministrationSource.class,
+				ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME, MockClass.class.getName());
+	}
+
+	/**
+	 * Ensure invoke {@link Administration}.
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void testInvokeAdministration() throws Throwable {
+
+		// Load the type
+		AdministrationType<?, ?, ?> type = AdministrationLoaderUtil.loadAdministrationType(
+				ClassAdministrationSource.class, ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME,
 				MockClass.class.getName());
-	}
 
-	/**
-	 * Ensures able to invoke administration where array type is exact type of
-	 * extension interface.
-	 */
-	public void testInvokeExactTypeAdministration() throws Throwable {
-		this.doInvokeAdministrationTest(0, "admin_A");
-	}
+		// Create the administration
+		Administration<?, ?, ?> administration = type.getAdministrationFactory().createAdministration();
 
-	/**
-	 * Ensures able to invoke administration where input array type is super
-	 * type of extension interface.
-	 */
-	public void testInvokeSuperTypeAdministration() throws Throwable {
-		this.doInvokeAdministrationTest(2, "admin_C");
-	}
+		// Create the mocks
+		AdministrationContext context = this.createMock(AdministrationContext.class);
+		MockExtensionInterface extension = this.createMock(MockExtensionInterface.class);
+		MockExtensionInterface[] extensions = new MockExtensionInterface[] { extension };
 
-	/**
-	 * Does the invoking of administration testing.
-	 * 
-	 * @param dutyIndex
-	 *            Index of the {@link Duty} to invoke.
-	 * @param methodName
-	 *            Name of administration method.
-	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void doInvokeAdministrationTest(int dutyIndex, String methodName)
-			throws Throwable {
-
-		final AdministrationContext<Object, ?, ?> dutyContext = this
-				.createMock(AdministrationContext.class);
-		final MockExtensionInterface extensionInterface = this
-				.createMock(MockExtensionInterface.class);
-		final List<MockExtensionInterface> interfaces = Arrays
-				.asList(extensionInterface);
-
-		// Record invoking duty
-		this.recordReturn(dutyContext, dutyContext.getExtensionInterfaces(),
-				interfaces);
-		extensionInterface.administer(methodName);
+		// Record invoking administration
+		this.recordReturn(context, context.getExtensions(), extensions);
+		extension.administer();
 
 		this.replayMockObjects();
 
-		// Load the class administrator source
-		AdministrationSourceStandAlone standAlone = new AdministrationSourceStandAlone();
-		standAlone.addProperty(
-				ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME,
-				MockClass.class.getName());
-		ClassAdministrationSource adminSource = standAlone
-				.loadAdministratorSource(ClassAdministrationSource.class);
+		// Invoke the administration
+		administration.administer(context);
 
-		// Obtain the duty to invoke
-		Administration<Object, Indexed> admin = adminSource
-				.createAdministrator();
-		Duty duty = standAlone.getDuty(admin, dutyIndex);
-
-		// Invoke the duty
-		duty.doDuty(dutyContext);
-
-		// Verify functionality (extension interface invoked for method)
+		// Verify functionality (extension interface invoked)
 		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure unit tests can invoke {@link Flow} from {@link Administration} in
+	 * testing.
+	 */
+	public void testInvokeFlowFromAdministration() {
+		fail("TODO implement invoking a flow from administration when writing unit tests");
 	}
 
 	/**
@@ -134,26 +111,21 @@ public class ClassAdministratorSourceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockClass {
 
-		public void admin_A(MockExtensionInterface[] extensions) {
-			this.administer(extensions, "admin_A");
+		@FlowInterface
+		public static interface MockFlows {
+
+			void flowOne();
+
+			void flowTwo(String parameter);
+
+			void flowThree(FlowCallback callback);
+
+			void flowFour(Integer parameter, FlowCallback callback);
 		}
 
-		public void admin_B(MockExtensionInterface[] extensions) {
-			this.administer(extensions, "admin_B");
-		}
-
-		public void admin_C(Object[] extensions) {
-			this.administer((MockExtensionInterface[]) extensions, "admin_C");
-		}
-
-		public void notAdmin(MockExtensionInterface singleExtension) {
-			fail("Should not be invoked");
-		}
-
-		private void administer(MockExtensionInterface[] extensions,
-				String methodName) {
+		public void admin(MockExtensionInterface[] extensions, MockFlows flows) throws IOException, SQLException {
 			for (MockExtensionInterface ei : extensions) {
-				ei.administer(methodName);
+				ei.administer();
 			}
 		}
 	}
@@ -163,7 +135,7 @@ public class ClassAdministratorSourceTest extends OfficeFrameTestCase {
 	 */
 	public static interface MockExtensionInterface {
 
-		void administer(String methodName);
+		void administer();
 	}
 
 }

@@ -45,7 +45,7 @@ import net.officefloor.frame.internal.structure.Flow;
  * 
  * @author Daniel Sagenschneider
  */
-public class AdministratorLoaderUtil {
+public class AdministrationLoaderUtil {
 
 	/**
 	 * Validates the {@link AdministrationSourceSpecification} for the
@@ -228,7 +228,7 @@ public class AdministratorLoaderUtil {
 	/**
 	 * All access via static methods.
 	 */
-	private AdministratorLoaderUtil() {
+	private AdministrationLoaderUtil() {
 	}
 
 	/**

@@ -42,19 +42,16 @@ public class IntegrateAutoWireInheritanceTest extends OfficeFrameTestCase {
 		// Configure the object and service section
 		MockObject object = new MockObject();
 		source.addObject(object);
-		AutoWireSection service = source.addSection("SERVICE",
-				ClassSectionSource.class.getName(),
+		AutoWireSection service = source.addSection("SERVICE", ClassSectionSource.class.getName(),
 				MockServiceClass.class.getName());
 
 		// Configure the parent section
-		AutoWireSection parent = source.addSection("PARENT",
-				ClassSectionSource.class.getName(),
+		AutoWireSection parent = source.addSection("PARENT", ClassSectionSource.class.getName(),
 				MockInheritClass.class.getName());
 		source.link(parent, "output", service, "service");
 
 		// Configure the child section (inheriting from parent)
-		AutoWireSection child = source.addSection("CHILD",
-				ClassSectionSource.class.getName(),
+		AutoWireSection child = source.addSection("CHILD", ClassSectionSource.class.getName(),
 				MockInheritClass.class.getName());
 		child.setSuperSection(parent);
 
@@ -63,13 +60,13 @@ public class IntegrateAutoWireInheritanceTest extends OfficeFrameTestCase {
 
 		// Ensure parent services
 		assertNull("Object should not have value for parent test", object.value);
-		officeFloor.invokeTask("PARENT.WORK", "task", null);
+		officeFloor.invokeFunction("PARENT.NAMESPACE.function", null);
 		assertEquals("Incorrect parent object value", "SERVICED", object.value);
 
 		// Rest and ensure child inherits link configuration to service
 		object.value = null;
 		assertNull("Object should not have value for child test", object.value);
-		officeFloor.invokeTask("CHILD.WORK", "task", null);
+		officeFloor.invokeFunction("CHILD.NAMESPACE.function", null);
 		assertEquals("Incorrect child object value", "SERVICED", object.value);
 	}
 
@@ -78,7 +75,7 @@ public class IntegrateAutoWireInheritanceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockInheritClass {
 		@NextFunction("output")
-		public void task() {
+		public void function() {
 		}
 	}
 

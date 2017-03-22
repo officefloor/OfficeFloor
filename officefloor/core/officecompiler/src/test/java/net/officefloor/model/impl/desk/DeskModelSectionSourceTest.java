@@ -25,7 +25,6 @@ import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.impl.desk.DeskModelSectionSource;
 
 /**
  * Tests the {@link DeskModelSectionSource}.
@@ -52,14 +51,13 @@ public class DeskModelSectionSourceTest extends OfficeFrameTestCase {
 		designer.addSectionOutput("OUTPUT", Float.class.getName(), false);
 		designer.addSectionOutput("ESCALATION", Exception.class.getName(), true);
 		designer.addSectionObject("OBJECT", Connection.class.getName());
-		SectionFunctionNamespace work = designer.addSectionWork("WORK",
-				MockWorkSource.class.getName());
-		SectionFunction task = work.addSectionTask("INPUT", "WORK_TASK");
-		task.getTaskObject("PARAMETER").flagAsParameter();
+		SectionFunctionNamespace work = designer.addSectionFunctionNamespace("NAMESPACE",
+				MockManagedFunctionSource.class.getName());
+		SectionFunction task = work.addSectionFunction("INPUT", "MANAGED_FUNCTION");
+		task.getFunctionObject("PARAMETER").flagAsParameter();
 
 		// Validates the section is as expected
-		SectionLoaderUtil.validateSection(designer,
-				DeskModelSectionSource.class, this.getClass(),
+		SectionLoaderUtil.validateSection(designer, DeskModelSectionSource.class, this.getClass(),
 				"DeskModelSectionSourceTest.desk.xml");
 	}
 

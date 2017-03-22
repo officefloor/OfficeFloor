@@ -44,15 +44,12 @@ public class CompileOfficeEscalationTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM",
-				OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addTeam("TEAM", OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeBuilder_registerTeam("OFFICE_TEAM", "TEAM");
-		this.record_officeBuilder_addWork("SECTION.WORK");
-		this.record_workBuilder_addTask("INPUT", "OFFICE_TEAM").linkParameter(
-				0, Throwable.class);
-		this.record_officeBuilder_addEscalation(Exception.class,
-				"SECTION.WORK", "INPUT");
+		this.record_officeBuilder_addFunction("SECTION.NAMESPACE.INPUT", "OFFICE_TEAM").linkParameter(0,
+				Throwable.class);
+		this.record_officeBuilder_addEscalation(Exception.class, "SECTION.NAMESPACE.INPUT");
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -68,19 +65,14 @@ public class CompileOfficeEscalationTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM",
-				OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addTeam("TEAM", OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeBuilder_registerTeam("OFFICE_TEAM", "TEAM");
-		this.record_officeBuilder_addWork("SECTION.WORK");
-		this.record_workBuilder_addTask("INPUT", "OFFICE_TEAM").linkParameter(
-				0, Throwable.class);
-		this.record_officeBuilder_addEscalation(IOException.class,
-				"SECTION.WORK", "INPUT");
-		this.record_officeBuilder_addEscalation(SQLException.class,
-				"SECTION.WORK", "INPUT");
-		this.record_officeBuilder_addEscalation(Exception.class,
-				"SECTION.WORK", "INPUT");
+		this.record_officeBuilder_addFunction("SECTION.NAMESPACE.INPUT", "OFFICE_TEAM").linkParameter(0,
+				Throwable.class);
+		this.record_officeBuilder_addEscalation(IOException.class, "SECTION.NAMESPACE.INPUT");
+		this.record_officeBuilder_addEscalation(SQLException.class, "SECTION.NAMESPACE.INPUT");
+		this.record_officeBuilder_addEscalation(Exception.class, "SECTION.NAMESPACE.INPUT");
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -89,7 +81,7 @@ public class CompileOfficeEscalationTest extends AbstractCompileTestCase {
 	/**
 	 * Class for {@link ClassManagedFunctionSource}.
 	 */
-	public static class EscalationWork {
+	public static class EscalationClass {
 		public void handle(Throwable parameter) {
 		}
 	}

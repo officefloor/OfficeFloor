@@ -40,13 +40,13 @@ import net.officefloor.autowire.AutoWireSectionTransformer;
 import net.officefloor.autowire.AutoWireSectionTransformerContext;
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.OfficeFunctionType;
 import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectType;
 import net.officefloor.compile.section.OfficeSectionObjectType;
 import net.officefloor.compile.section.OfficeSectionOutputType;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
-import net.officefloor.compile.section.OfficeFunctionType;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeEscalation;
@@ -54,18 +54,18 @@ import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeOutput;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionFunction;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
-import net.officefloor.compile.spi.office.OfficeSectionFunction;
 import net.officefloor.compile.spi.office.OfficeStart;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.ResponsibleTeam;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
-import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.FunctionObject;
+import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.api.escalate.Escalation;
@@ -116,7 +116,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(SECTION, "name", "value");
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
-		this.recordSectionTasks(SECTION);
+		this.recordSectionFunctions(SECTION);
 		this.recordSubSections(SECTION);
 		this.recordSectionOutputs(SECTION);
 
@@ -167,7 +167,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 				new OfficeSectionObjectType[0]);
 		this.recordReturn(officeSectionType, officeSectionType.getOfficeSectionInputTypes(),
 				new OfficeSectionInputType[0]);
-		this.recordReturn(officeSectionType, officeSectionType.getOfficeTaskTypes(), new OfficeFunctionType[0]);
+		this.recordReturn(officeSectionType, officeSectionType.getOfficeFunctionTypes(), new OfficeFunctionType[0]);
 		this.recordReturn(officeSectionType, officeSectionType.getOfficeSubSectionTypes(), new OfficeSubSectionType[0]);
 		this.recordReturn(overridden, overridden.getSectionName(), SECTION);
 		this.recordReturn(officeSectionType, officeSectionType.getOfficeSectionOutputTypes(),
@@ -244,7 +244,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 				new OfficeSectionObjectType[0]);
 		this.recordReturn(officeSectionType, officeSectionType.getOfficeSectionInputTypes(),
 				new OfficeSectionInputType[0]);
-		this.recordReturn(officeSectionType, officeSectionType.getOfficeTaskTypes(), new OfficeFunctionType[0]);
+		this.recordReturn(officeSectionType, officeSectionType.getOfficeFunctionTypes(), new OfficeFunctionType[0]);
 		this.recordReturn(officeSectionType, officeSectionType.getOfficeSubSectionTypes(), new OfficeSubSectionType[0]);
 		this.recordReturn(officeSectionType, officeSectionType.getOfficeSectionOutputTypes(),
 				new OfficeSectionOutputType[0]);
@@ -276,7 +276,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(SECTION, "name", "value");
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
-		this.recordSectionTasks(SECTION);
+		this.recordSectionFunctions(SECTION);
 		this.recordSubSections(SECTION, "SubSection");
 		this.recordSubSections("SubSection", "SubSubSectionOne", "SubSubSectionTwo");
 		this.recordSubSections("SubSubSectionOne");
@@ -309,12 +309,12 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(ONE);
 		this.recordSectionObjects(ONE);
 		this.recordSectionInputs(ONE);
-		this.recordSectionTasks(ONE);
+		this.recordSectionFunctions(ONE);
 		this.recordSubSections(ONE);
 		this.recordOfficeSection(TWO);
 		this.recordSectionObjects(TWO);
 		this.recordSectionInputs(TWO, TWO_INPUT);
-		this.recordSectionTasks(TWO);
+		this.recordSectionFunctions(TWO);
 		this.recordSubSections(TWO);
 		this.recordSectionOutputs(ONE, ONE_OUTPUT);
 		this.recordSectionOutputs(TWO);
@@ -344,7 +344,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
-		this.recordSectionTasks(SECTION);
+		this.recordSectionFunctions(SECTION);
 		this.recordSubSections(SECTION);
 		OfficeSectionOutputType outputType = this.recordSectionUnlinkedOutput(SECTION, SECTION_OUTPUT);
 		this.recordReturn(outputType, outputType.isEscalationOnly(), false);
@@ -372,7 +372,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
-		this.recordSectionTasks(SECTION);
+		this.recordSectionFunctions(SECTION);
 		this.recordSubSections(SECTION);
 		OfficeSectionOutputType outputType = this.recordSectionUnlinkedOutput(SECTION, SECTION_OUTPUT);
 		this.recordReturn(outputType, outputType.isEscalationOnly(), true);
@@ -410,17 +410,17 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(PARENT);
 		this.recordSectionObjects(PARENT);
 		this.recordSectionInputs(PARENT);
-		this.recordSectionTasks(PARENT);
+		this.recordSectionFunctions(PARENT);
 		this.recordSubSections(PARENT);
 		this.recordOfficeSection(CHILD);
 		this.recordSectionObjects(CHILD);
 		this.recordSectionInputs(CHILD);
-		this.recordSectionTasks(CHILD);
+		this.recordSectionFunctions(CHILD);
 		this.recordSubSections(CHILD);
 		this.recordOfficeSection(TARGET);
 		this.recordSectionObjects(TARGET);
 		this.recordSectionInputs(TARGET, TARGET_INPUT);
-		this.recordSectionTasks(TARGET);
+		this.recordSectionFunctions(TARGET);
 		this.recordSubSections(TARGET);
 		this.recordSectionOutputs(PARENT, TEMPLATE_OUTPUT);
 		OfficeSectionOutput parentOutput = this.outputs.get(PARENT).get(TEMPLATE_OUTPUT);
@@ -457,12 +457,12 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(ONE);
 		this.recordSectionObjects(ONE);
 		this.recordSectionInputs(ONE);
-		this.recordSectionTasks(ONE);
+		this.recordSectionFunctions(ONE);
 		this.recordSubSections(ONE);
 		this.recordOfficeSection(TWO);
 		this.recordSectionObjects(TWO);
 		this.recordSectionInputs(TWO);
-		this.recordSectionTasks(TWO);
+		this.recordSectionFunctions(TWO);
 		this.recordSubSections(TWO);
 		OfficeSectionOutputType outputType = this.recordSectionUnlinkedOutput(ONE, OUTPUT);
 		this.recordReturn(outputType, outputType.isEscalationOnly(), true);
@@ -538,12 +538,12 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(ONE);
 		this.recordSectionObjects(ONE);
 		this.recordSectionInputs(ONE);
-		this.recordSectionTasks(ONE);
+		this.recordSectionFunctions(ONE);
 		this.recordSubSections(ONE);
 		this.recordOfficeSection(TWO);
 		this.recordSectionObjects(TWO);
 		this.recordSectionInputs(TWO, TWO_INPUT);
-		this.recordSectionTasks(TWO);
+		this.recordSectionFunctions(TWO);
 		this.recordSubSections(TWO);
 		this.recordSectionOutputs(ONE);
 		this.recordSectionOutputs(TWO);
@@ -575,12 +575,12 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(ONE);
 		this.recordSectionObjects(ONE);
 		this.recordSectionInputs(ONE);
-		this.recordSectionTasks(ONE);
+		this.recordSectionFunctions(ONE);
 		this.recordSubSections(ONE);
 		this.recordOfficeSection(TWO);
 		this.recordSectionObjects(TWO);
 		this.recordSectionInputs(TWO);
-		this.recordSectionTasks(TWO);
+		this.recordSectionFunctions(TWO);
 		this.recordSubSections(TWO);
 		this.recordSectionUnlinkedOutput(ONE, ONE_OUTPUT);
 		this.recordSectionOutputs(TWO);
@@ -611,7 +611,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection("SECTION");
 		this.recordSectionObjects("SECTION");
 		this.recordSectionInputs("SECTION", "INPUT");
-		this.recordSectionTasks("SECTION");
+		this.recordSectionFunctions("SECTION");
 		this.recordSubSections("SECTION");
 		this.recordSectionOutputs("SECTION");
 		this.recordReturn(this.context, this.context.createPropertyList(), propertyList);
@@ -620,14 +620,16 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		property.setValue("1");
 		this.recordEscalation(Exception.class, "SECTION", "INPUT");
 		this.recordReturn(propertyList,
-				propertyList.addProperty(AutoWireEscalationCauseRouteWorkSource.PROPERTY_PREFIX_ESCALATION_TYPE + "0"),
+				propertyList.addProperty(
+						AutoWireEscalationCauseRouteManagedFunctionSource.PROPERTY_PREFIX_ESCALATION_TYPE + "0"),
 				property);
 		property.setValue(Exception.class.getName());
 
 		// Record manually handling failed to source
 		this.recordEscalation(FailedToSourceManagedObjectEscalation.class, "SECTION", "INPUT");
 		this.recordReturn(propertyList,
-				propertyList.addProperty(AutoWireEscalationCauseRouteWorkSource.PROPERTY_PREFIX_ESCALATION_TYPE + "1"),
+				propertyList.addProperty(
+						AutoWireEscalationCauseRouteManagedFunctionSource.PROPERTY_PREFIX_ESCALATION_TYPE + "1"),
 				property);
 		property.setValue(FailedToSourceManagedObjectEscalation.class.getName());
 
@@ -652,7 +654,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection("SECTION");
 		this.recordSectionObjects("SECTION");
 		this.recordSectionInputs("SECTION", "INPUT");
-		this.recordSectionTasks("SECTION");
+		this.recordSectionFunctions("SECTION");
 		this.recordSubSections("SECTION");
 		this.recordSectionOutputs("SECTION");
 		this.recordStartupFlow("SECTION", "INPUT");
@@ -679,7 +681,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION, new ExpectedAutoWire(Connection.class));
 		this.recordSectionInputs(SECTION);
-		this.recordSectionTasks(SECTION);
+		this.recordSectionFunctions(SECTION);
 		this.recordSubSections(SECTION);
 		this.recordSectionOutputs(SECTION);
 
@@ -717,7 +719,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordSectionObjects(SECTION, qualifiedConnection, unqualifiedConnection, qualifiedString);
 
 		this.recordSectionInputs(SECTION);
-		this.recordSectionTasks(SECTION);
+		this.recordSectionFunctions(SECTION);
 		this.recordSubSections(SECTION);
 		this.recordSectionOutputs(SECTION);
 
@@ -749,7 +751,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordSectionObjects(SECTION, new ExpectedAutoWire("QUALIFIED", null, Connection.class));
 
 		this.recordSectionInputs(SECTION);
-		this.recordSectionTasks(SECTION);
+		this.recordSectionFunctions(SECTION);
 		this.recordSubSections(SECTION);
 		this.recordSectionOutputs(SECTION);
 
@@ -789,7 +791,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 				+ Connection.class.getName() + ") from OfficeSection SECTION");
 
 		this.recordSectionInputs(SECTION);
-		this.recordSectionTasks(SECTION);
+		this.recordSectionFunctions(SECTION);
 		this.recordSubSections(SECTION);
 		this.recordSectionOutputs(SECTION);
 
@@ -821,7 +823,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
-		this.recordSectionTasks(SECTION);
+		this.recordSectionFunctions(SECTION);
 		this.recordSubSections(SECTION);
 		this.recordSectionOutputs(SECTION);
 
@@ -849,7 +851,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION, new ExpectedAutoWire(Connection.class));
 		this.recordSectionInputs(SECTION);
-		this.recordSectionTasks(SECTION);
+		this.recordSectionFunctions(SECTION);
 		this.recordSubSections(SECTION);
 		this.recordSectionOutputs(SECTION);
 		OfficeGovernance governance = this.recordGovernance(GOVERNANCE, XAResource.class);
@@ -887,7 +889,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION, new ExpectedAutoWire(Connection.class));
 		this.recordSectionInputs(SECTION);
-		this.recordSectionTasks(SECTION);
+		this.recordSectionFunctions(SECTION);
 		this.recordSubSections(SECTION);
 		this.recordSectionOutputs(SECTION);
 		OfficeGovernance governance = this.recordGovernance(GOVERNANCE, XAResource.class);
@@ -920,7 +922,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
-		this.recordSectionTasks(SECTION);
+		this.recordSectionFunctions(SECTION);
 		this.recordSubSections(SECTION, SUB_SECTION);
 		this.recordSubSections(SUB_SECTION, SUB_SUB_SECTION);
 		this.recordSubSections(SUB_SUB_SECTION);
@@ -957,7 +959,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
-		this.recordSectionTasks(SECTION);
+		this.recordSectionFunctions(SECTION);
 		this.recordSubSections(SECTION, SUB_SECTION);
 		this.recordSubSections(SUB_SECTION, SUB_SUB_SECTION);
 		this.recordSubSections(SUB_SUB_SECTION);
@@ -998,7 +1000,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
-		this.recordSectionTasks(SECTION);
+		this.recordSectionFunctions(SECTION);
 		this.recordSubSections(SECTION, SUB_SECTION);
 		this.recordSubSections(SUB_SECTION, SUB_SUB_SECTION);
 		this.recordSubSections(SUB_SUB_SECTION);
@@ -1039,7 +1041,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
-		this.recordSectionTasks(SECTION);
+		this.recordSectionFunctions(SECTION);
 		this.recordSubSections(SECTION, SUB_SECTION);
 		this.recordSubSections(SUB_SECTION, SUB_SUB_SECTION);
 		this.recordSubSections(SUB_SUB_SECTION);
@@ -1083,7 +1085,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
-		this.recordSectionTasks(SECTION);
+		this.recordSectionFunctions(SECTION);
 		this.recordSubSections(SECTION);
 		this.recordSectionOutputs(SECTION);
 		OfficeGovernance officeGovernance = this.recordGovernance(GOVERNANCE, XAResource.class);
@@ -1116,7 +1118,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
-		this.recordSectionTasks(SECTION);
+		this.recordSectionFunctions(SECTION);
 		this.recordSubSections(SECTION);
 		this.recordSectionOutputs(SECTION);
 		OfficeGovernance officeGovernance = this.recordGovernance(GOVERNANCE, XAResource.class);
@@ -1151,7 +1153,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
-		this.recordSectionTasks(SECTION);
+		this.recordSectionFunctions(SECTION);
 		this.recordSubSections(SECTION);
 		this.recordSectionOutputs(SECTION);
 		OfficeGovernance officeGovernance = this.recordGovernance(GOVERNANCE, XAResource.class);
@@ -1187,7 +1189,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
-		this.recordSectionTasks(SECTION);
+		this.recordSectionFunctions(SECTION);
 		this.recordSubSections(SECTION, SUB_SECTION);
 		this.recordSubSections(SUB_SECTION);
 		this.recordSectionOutputs(SECTION);
@@ -1283,16 +1285,16 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can assign a {@link Team} for {@link FunctionObject}.
 	 */
-	public void testAssignTeamForTaskObject() throws Exception {
-		this.doAssignTeamTest(new AutoWire(Connection.class), true, MockTeamTaskObjectSection.class,
+	public void testAssignTeamForFunctionObject() throws Exception {
+		this.doAssignTeamTest(new AutoWire(Connection.class), true, MockTeamFunctionObjectSection.class,
 				new AutoWire(Connection.class), new AutoWire(String.class));
 	}
 
 	/**
 	 * Ensure unused {@link Team} not loaded for {@link FunctionObject}.
 	 */
-	public void testUnusedTeamForTaskObject() throws Exception {
-		this.doAssignTeamTest(new AutoWire(UnusedTeam.class), false, MockTeamTaskObjectSection.class,
+	public void testUnusedTeamForFunctionObject() throws Exception {
+		this.doAssignTeamTest(new AutoWire(UnusedTeam.class), false, MockTeamFunctionObjectSection.class,
 				new AutoWire(Connection.class), new AutoWire(String.class));
 	}
 
@@ -1307,21 +1309,21 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link Team} section class with direct dependency.
 	 */
-	public static class MockTeamTaskObjectSection {
+	public static class MockTeamFunctionObjectSection {
 
-		public void taskNotAssign(String value) {
+		public void functionNotAssign(String value) {
 		}
 
-		public void taskAssign(Connection connection) {
+		public void functionAssign(Connection connection) {
 		}
 	}
 
 	/**
 	 * Ensure can assign a {@link Team} for qualified {@link FunctionObject}.
 	 */
-	public void testAssignTeamForQualifiedTaskObject() throws Exception {
+	public void testAssignTeamForQualifiedFunctionObject() throws Exception {
 		this.doAssignTeamTest(new AutoWire(MockQualifier.class, Integer.class), true,
-				MockTeamQualifiedTaskObjectSection.class, new AutoWire(Integer.class),
+				MockTeamQualifiedFunctionObjectSection.class, new AutoWire(Integer.class),
 				new AutoWire(MockQualifier.class, Integer.class));
 	}
 
@@ -1329,20 +1331,20 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	 * Ensure used {@link Team} not loaded for qualified {@link ManagedFunction}
 	 * dependency.
 	 */
-	public void testUnusedTeamForQualifiedTaskObject() throws Exception {
-		this.doAssignTeamTest(new AutoWire(UnusedTeam.class), false, MockTeamQualifiedTaskObjectSection.class,
+	public void testUnusedTeamForQualifiedFunctionObject() throws Exception {
+		this.doAssignTeamTest(new AutoWire(UnusedTeam.class), false, MockTeamQualifiedFunctionObjectSection.class,
 				new AutoWire(Integer.class), new AutoWire(MockQualifier.class, Integer.class));
 	}
 
 	/**
 	 * Mock {@link Team} section class with qualified {@link Dependency}.
 	 */
-	public static class MockTeamQualifiedTaskObjectSection {
+	public static class MockTeamQualifiedFunctionObjectSection {
 
-		public void taskAssign(@MockQualifier Integer object) {
+		public void functionAssign(@MockQualifier Integer object) {
 		}
 
-		public void taskNotAssign(Integer object) {
+		public void functionNotAssign(Integer object) {
 		}
 	}
 
@@ -1380,7 +1382,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		/**
 		 * {@link ManagedFunction} depends on {@link #managedObject}.
 		 */
-		public void taskAssign() {
+		public void functionAssign() {
 		}
 	}
 
@@ -1427,13 +1429,14 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		/**
 		 * {@link ManagedFunction} depends on {@link #managedObject}.
 		 */
-		public void taskAssign() {
+		public void functionAssign() {
 		}
 	}
 
 	/**
-	 * Ensure can assign a {@link Team} for {@link ManagedFunction} having dependency on a
-	 * {@link ManagedObject} that depends on the matching {@link AutoWire}.
+	 * Ensure can assign a {@link Team} for {@link ManagedFunction} having
+	 * dependency on a {@link ManagedObject} that depends on the matching
+	 * {@link AutoWire}.
 	 */
 	public void testAssignTeamForManagedObjectDependency() throws Exception {
 		this.doAssignTeamTest(new AutoWire(Connection.class), true, MockTeamManagedObjectDependencySection.class,
@@ -1441,8 +1444,9 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure not load unused {@link Team} for {@link ManagedFunction} having dependency on
-	 * a {@link ManagedObject} that depends on the matching {@link AutoWire}.
+	 * Ensure not load unused {@link Team} for {@link ManagedFunction} having
+	 * dependency on a {@link ManagedObject} that depends on the matching
+	 * {@link AutoWire}.
 	 */
 	public void testUnusedTeamForManagedObjectDependency() throws Exception {
 		this.doAssignTeamTest(new AutoWire(UnusedTeam.class), false, MockTeamManagedObjectDependencySection.class,
@@ -1469,17 +1473,17 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		MockTeamDependencyManagedObject managedObject;
 
 		/**
-		 * {@link ManagedFunction} depends on {@link #managedObject} which depends on
-		 * {@link Connection}.
+		 * {@link ManagedFunction} depends on {@link #managedObject} which
+		 * depends on {@link Connection}.
 		 */
-		public void taskAssign() {
+		public void functionAssign() {
 		}
 	}
 
 	/**
-	 * Ensure can assign a {@link Team} for {@link ManagedFunction} having dependency on a
-	 * {@link ManagedObject} that depends on the matching qualified
-	 * {@link AutoWire}.
+	 * Ensure can assign a {@link Team} for {@link ManagedFunction} having
+	 * dependency on a {@link ManagedObject} that depends on the matching
+	 * qualified {@link AutoWire}.
 	 */
 	public void testAssignTeamForQualifiedManagedObjectDependency() throws Exception {
 		this.doAssignTeamTest(new AutoWire(MockQualifier.class, Connection.class), true,
@@ -1488,9 +1492,9 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure not load unused {@link Team} for {@link ManagedFunction} having dependency on
-	 * a {@link ManagedObject} that depends on the matching qualified
-	 * {@link AutoWire}.
+	 * Ensure not load unused {@link Team} for {@link ManagedFunction} having
+	 * dependency on a {@link ManagedObject} that depends on the matching
+	 * qualified {@link AutoWire}.
 	 */
 	public void testUnusedTeamForQualifiedManagedObjectDependency() throws Exception {
 		this.doAssignTeamTest(new AutoWire(MockQualifier.class, Connection.class), true,
@@ -1519,10 +1523,10 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		MockTeamDependencyManagedObject managedObject;
 
 		/**
-		 * {@link ManagedFunction} depends on {@link #managedObject} which depends on
-		 * {@link Connection}.
+		 * {@link ManagedFunction} depends on {@link #managedObject} which
+		 * depends on {@link Connection}.
 		 */
-		public void taskAssign() {
+		public void functionAssign() {
 		}
 	}
 
@@ -1563,29 +1567,29 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 			/**
 			 * Indicates if using the {@link OfficeTeam}.
 			 * 
-			 * @param taskName
+			 * @param functionName
 			 *            Name of the {@link OfficeSectionFunction}.
 			 * @return <code>true</code> to use the specific {@link OfficeTeam}.
 			 *         <code>false</code> for default {@link OfficeTeam}.
 			 */
-			private boolean isUseAddedTeam(String taskName) {
-				return (isUseTeam && ("taskAssign".equals(taskName)));
+			private boolean isUseAddedTeam(String functionName) {
+				return (isUseTeam && ("functionAssign".equals(functionName)));
 			}
 
 			@Override
-			public void recordAssignTeam(String taskName, OfficeSectionFunction task, OfficeFunctionType taskType,
-					OfficeFunctionType actualTaskType) {
+			public void recordAssignTeam(String functionName, OfficeSectionFunction function,
+					OfficeFunctionType functionType, OfficeFunctionType actualFunctionType) {
 
 				// Record obtaining the object dependencies (use actual
 				// dependencies)
-				AutoWireOfficeSourceTest.this.recordReturn(taskType, taskType.getObjectDependencies(),
-						actualTaskType.getObjectDependencies());
+				AutoWireOfficeSourceTest.this.recordReturn(functionType, functionType.getObjectDependencies(),
+						actualFunctionType.getObjectDependencies());
 
 				// Obtain team responsible
 				OfficeTeam assignedTeam = null;
 
 				// Determine if using specific assigned team
-				if (this.isUseAddedTeam(taskName)) {
+				if (this.isUseAddedTeam(functionName)) {
 					// Only obtain the used team once if using
 					if (this.usedTeam == null) {
 						this.usedTeam = AutoWireOfficeSourceTest.this.recordTeam(teamAutoWire);
@@ -1604,7 +1608,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 				// Assign the team
 				ResponsibleTeam responsibleTeam = AutoWireOfficeSourceTest.this.createMock(ResponsibleTeam.class);
-				AutoWireOfficeSourceTest.this.recordReturn(task, task.getTeamResponsible(), responsibleTeam);
+				AutoWireOfficeSourceTest.this.recordReturn(function, function.getResponsibleTeam(), responsibleTeam);
 				AutoWireOfficeSourceTest.this.architect.link(responsibleTeam, assignedTeam);
 			}
 		});
@@ -1685,13 +1689,13 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	 * {@link OfficeFunctionType} instances by {@link OfficeSection} name and
 	 * {@link ManagedFunction} name.
 	 */
-	private final Map<String, Map<String, OfficeFunctionType>> taskTypes = new HashMap<String, Map<String, OfficeFunctionType>>();
+	private final Map<String, Map<String, OfficeFunctionType>> functionTypes = new HashMap<String, Map<String, OfficeFunctionType>>();
 
 	/**
 	 * {@link OfficeSectionFunction} instances by {@link OfficeSection} name and
 	 * {@link ManagedFunction} name.
 	 */
-	private final Map<String, Map<String, OfficeSectionFunction>> tasks = new HashMap<String, Map<String, OfficeSectionFunction>>();
+	private final Map<String, Map<String, OfficeSectionFunction>> functions = new HashMap<String, Map<String, OfficeSectionFunction>>();
 
 	/**
 	 * {@link OfficeGovernance} instances by name.
@@ -1849,25 +1853,25 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 			this.recordReturn(officeSection, officeSection.getOfficeSectionInput(inputName), input);
 		}
 
-		// Record obtaining the task types
-		OfficeFunctionType[] actualTaskTypes = actualType.getOfficeTaskTypes();
-		String[] taskNames = (Arrays.asList(actualTaskTypes)).stream().map(t -> t.getOfficeTaskName())
+		// Record obtaining the function types
+		OfficeFunctionType[] actualFunctionTypes = actualType.getOfficeFunctionTypes();
+		String[] functionNames = (Arrays.asList(actualFunctionTypes)).stream().map(t -> t.getOfficeFunctionName())
 				.toArray(String[]::new);
-		OfficeFunctionType[] taskTypes = this.createSectionItems(SECTION_NAME, OfficeFunctionType.class, this.taskTypes,
-				taskNames);
-		OfficeSectionFunction[] tasks = this.createSectionItems(SECTION_NAME, OfficeSectionFunction.class, this.tasks,
-				taskNames);
-		this.recordReturn(officeSectionType, officeSectionType.getOfficeTaskTypes(), taskTypes);
-		for (int i = 0; i < taskTypes.length; i++) {
-			String taskName = taskNames[i];
-			OfficeFunctionType taskType = taskTypes[i];
-			OfficeSectionFunction task = tasks[i];
-			OfficeFunctionType actualTaskType = actualTaskTypes[i];
-			this.recordReturn(taskType, taskType.getOfficeTaskName(), taskName);
-			this.recordReturn(officeSection, officeSection.getOfficeSectionTask(taskName), task);
+		OfficeFunctionType[] functionTypes = this.createSectionItems(SECTION_NAME, OfficeFunctionType.class,
+				this.functionTypes, functionNames);
+		OfficeSectionFunction[] functions = this.createSectionItems(SECTION_NAME, OfficeSectionFunction.class,
+				this.functions, functionNames);
+		this.recordReturn(officeSectionType, officeSectionType.getOfficeFunctionTypes(), functionTypes);
+		for (int i = 0; i < functionTypes.length; i++) {
+			String functionName = functionNames[i];
+			OfficeFunctionType functionType = functionTypes[i];
+			OfficeSectionFunction function = functions[i];
+			OfficeFunctionType actualFunctionType = actualFunctionTypes[i];
+			this.recordReturn(functionType, functionType.getOfficeFunctionName(), functionName);
+			this.recordReturn(officeSection, officeSection.getOfficeSectionFunction(functionName), function);
 
 			// Record assigning the team
-			assigner.recordAssignTeam(taskName, task, taskType, actualTaskType);
+			assigner.recordAssignTeam(functionName, function, functionType, actualFunctionType);
 		}
 
 		// No sub sections
@@ -1911,19 +1915,20 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	private static interface TeamAssigner {
 
 		/**
-		 * Records assigning the {@link Team} for the {@link OfficeSectionFunction}.
+		 * Records assigning the {@link Team} for the
+		 * {@link OfficeSectionFunction}.
 		 * 
-		 * @param taskName
+		 * @param functionName
 		 *            Name of the {@link OfficeSectionFunction}.
-		 * @param task
+		 * @param function
 		 *            {@link OfficeSectionFunction}.
-		 * @param taskType
+		 * @param functionType
 		 *            {@link OfficeFunctionType}.
-		 * @param actualTaskType
+		 * @param actualFunctionType
 		 *            Actual {@link OfficeFunctionType}.
 		 */
-		void recordAssignTeam(String taskName, OfficeSectionFunction task, OfficeFunctionType taskType,
-				OfficeFunctionType actualTaskType);
+		void recordAssignTeam(String functionName, OfficeSectionFunction function, OfficeFunctionType functionType,
+				OfficeFunctionType actualFunctionType);
 	}
 
 	/**
@@ -2317,12 +2322,12 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	 * 
 	 * @param sectionName
 	 *            Name of {@link OfficeSection}.
-	 * @param taskNames
-	 *            Names of the tasks.
+	 * @param functionNames
+	 *            Names of the functions.
 	 */
-	private void recordSectionTasks(String sectionName) {
+	private void recordSectionFunctions(String sectionName) {
 		OfficeSectionType sectionType = this.getOfficeSectionType(sectionName);
-		this.recordReturn(sectionType, sectionType.getOfficeTaskTypes(), new OfficeFunctionType[0]);
+		this.recordReturn(sectionType, sectionType.getOfficeFunctionTypes(), new OfficeFunctionType[0]);
 	}
 
 	/**
@@ -2476,8 +2481,8 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 			// Record obtaining the sub section
 			this.recordReturn(section, section.getOfficeSubSection(subSectionName), subSection);
 
-			// Record no tasks for section
-			this.recordReturn(subSectionType, subSectionType.getOfficeTaskTypes(), new OfficeFunctionType[0]);
+			// Record no functions for section
+			this.recordReturn(subSectionType, subSectionType.getOfficeFunctionTypes(), new OfficeFunctionType[0]);
 		}
 	}
 

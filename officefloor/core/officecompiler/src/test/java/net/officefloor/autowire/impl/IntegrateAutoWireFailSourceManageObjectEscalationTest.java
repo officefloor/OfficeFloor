@@ -36,8 +36,7 @@ import net.officefloor.plugin.section.clazz.Parameter;
  * 
  * @author Daniel Sagenschneider
  */
-public class IntegrateAutoWireFailSourceManageObjectEscalationTest extends
-		OfficeFrameTestCase {
+public class IntegrateAutoWireFailSourceManageObjectEscalationTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link AutoWireOfficeFloor}.
@@ -64,7 +63,7 @@ public class IntegrateAutoWireFailSourceManageObjectEscalationTest extends
 		final IOException escalation = new IOException();
 		MockObject.initialiseFailure = escalation;
 		Handler.cause = null;
-		this.officeFloor.invokeTask("Servicer.WORK", "service", null);
+		this.officeFloor.invokeFunction("Servicer.NAMESPACE.service", null);
 		assertSame("Incorrect escalation", escalation, Handler.cause);
 	}
 
@@ -81,7 +80,7 @@ public class IntegrateAutoWireFailSourceManageObjectEscalationTest extends
 		final SQLException escalation = new SQLException();
 		MockObject.initialiseFailure = escalation;
 		Handler.cause = null;
-		this.officeFloor.invokeTask("Servicer.WORK", "service", null);
+		this.officeFloor.invokeFunction("Servicer.NAMESPACE.service", null);
 		assertSame("Incorrect escalation", escalation, Handler.cause);
 	}
 
@@ -97,10 +96,8 @@ public class IntegrateAutoWireFailSourceManageObjectEscalationTest extends
 		final IOException escalation = new IOException();
 		MockObject.initialiseFailure = escalation;
 		Handler.cause = null;
-		this.officeFloor.invokeTask("Servicer.WORK", "service", null);
-		assertTrue(
-				"Incorrect escalation",
-				(Handler.cause instanceof FailedToSourceManagedObjectEscalation));
+		this.officeFloor.invokeFunction("Servicer.NAMESPACE.service", null);
+		assertTrue("Incorrect escalation", (Handler.cause instanceof FailedToSourceManagedObjectEscalation));
 		assertSame("Incorrect cause", escalation, Handler.cause.getCause());
 	}
 
@@ -117,23 +114,19 @@ public class IntegrateAutoWireFailSourceManageObjectEscalationTest extends
 		AutoWireApplication source = new AutoWireOfficeFloorSource();
 
 		// Configure the managed object causing escalation
-		source.addManagedObject(ClassManagedObjectSource.class.getName(), null,
-				new AutoWire(MockObject.class)).addProperty(
-				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
-				MockObject.class.getName());
+		source.addManagedObject(ClassManagedObjectSource.class.getName(), null, new AutoWire(MockObject.class))
+				.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, MockObject.class.getName());
 
 		// Configure servicer to trigger escalation
-		source.addSection("Servicer", ClassSectionSource.class.getName(),
-				Servicer.class.getName());
+		source.addSection("Servicer", ClassSectionSource.class.getName(), Servicer.class.getName());
 
 		// Configure handling of escalation
-		AutoWireSection handler = source.addSection("Handler",
-				ClassSectionSource.class.getName(), Handler.class.getName());
+		AutoWireSection handler = source.addSection("Handler", ClassSectionSource.class.getName(),
+				Handler.class.getName());
 		source.linkEscalation(IOException.class, handler, "handle");
 		source.linkEscalation(SQLException.class, handler, "handle");
 		if (isManual) {
-			source.linkEscalation(FailedToSourceManagedObjectEscalation.class,
-					handler, "handle");
+			source.linkEscalation(FailedToSourceManagedObjectEscalation.class, handler, "handle");
 		}
 
 		// Start the application

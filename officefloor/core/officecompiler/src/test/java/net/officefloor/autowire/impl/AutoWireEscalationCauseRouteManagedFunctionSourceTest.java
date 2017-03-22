@@ -24,8 +24,8 @@ import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.autowire.impl.AutoWireEscalationCauseRouteWorkSource.AutoWireEscalationCauseRouteTask;
-import net.officefloor.autowire.impl.AutoWireEscalationCauseRouteWorkSource.Dependencies;
+import net.officefloor.autowire.impl.AutoWireEscalationCauseRouteManagedFunctionSource.AutoWireEscalationCauseRouteManagedFunction;
+import net.officefloor.autowire.impl.AutoWireEscalationCauseRouteManagedFunctionSource.Dependencies;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.test.managedfunction.ManagedFunctionLoaderUtil;
@@ -39,12 +39,11 @@ import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.section.managedfunction.ManagedFunctionSectionSource;
 
 /**
- * Tests the {@link AutoWireEscalationCauseRouteWorkSource}.
+ * Tests the {@link AutoWireEscalationCauseRouteManagedFunctionSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class AutoWireEscalationCauseRouteWorkSourceTest extends
-		OfficeFrameTestCase {
+public class AutoWireEscalationCauseRouteManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link MockHandlerState}.
@@ -62,7 +61,7 @@ public class AutoWireEscalationCauseRouteWorkSourceTest extends
 	private final EscalationHandler handler = new EscalationHandler() {
 		@Override
 		public void handleEscalation(Throwable escalation) throws Throwable {
-			AutoWireEscalationCauseRouteWorkSourceTest.this.escalation = escalation;
+			AutoWireEscalationCauseRouteManagedFunctionSourceTest.this.escalation = escalation;
 		}
 	};
 
@@ -83,8 +82,7 @@ public class AutoWireEscalationCauseRouteWorkSourceTest extends
 	 * Validate specification.
 	 */
 	public void testSpecification() {
-		ManagedFunctionLoaderUtil
-				.validateSpecification(AutoWireEscalationCauseRouteWorkSource.class);
+		ManagedFunctionLoaderUtil.validateSpecification(AutoWireEscalationCauseRouteManagedFunctionSource.class);
 	}
 
 	/**
@@ -93,18 +91,16 @@ public class AutoWireEscalationCauseRouteWorkSourceTest extends
 	public void testTypeNoHandling() {
 
 		// Create the expected type
-		AutoWireEscalationCauseRouteTask factory = new AutoWireEscalationCauseRouteTask(
-				null);
-		FunctionNamespaceBuilder<AutoWireEscalationCauseRouteTask> type = ManagedFunctionLoaderUtil
-				.createWorkTypeBuilder(factory);
-		ManagedFunctionTypeBuilder<Dependencies, Indexed> task = type.addManagedFunctionType(
-				"Handle", factory, Dependencies.class, Indexed.class);
-		task.addObject(Throwable.class).setKey(Dependencies.ESCALATION);
-		task.addEscalation(Throwable.class);
+		AutoWireEscalationCauseRouteManagedFunction factory = new AutoWireEscalationCauseRouteManagedFunction(null);
+		FunctionNamespaceBuilder type = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
+		ManagedFunctionTypeBuilder<Dependencies, Indexed> function = type.addManagedFunctionType("Handle", factory,
+				Dependencies.class, Indexed.class);
+		function.addObject(Throwable.class).setKey(Dependencies.ESCALATION);
+		function.addEscalation(Throwable.class);
 
 		// Validate the type
-		ManagedFunctionLoaderUtil.validateWorkType(type,
-				AutoWireEscalationCauseRouteWorkSource.class);
+		ManagedFunctionLoaderUtil.validateManagedFunctionType(type,
+				AutoWireEscalationCauseRouteManagedFunctionSource.class);
 	}
 
 	/**
@@ -113,44 +109,38 @@ public class AutoWireEscalationCauseRouteWorkSourceTest extends
 	public void testTypeWithHandling() {
 
 		// Create the expected type
-		AutoWireEscalationCauseRouteTask factory = new AutoWireEscalationCauseRouteTask(
-				null);
-		FunctionNamespaceBuilder<AutoWireEscalationCauseRouteTask> type = ManagedFunctionLoaderUtil
-				.createWorkTypeBuilder(factory);
-		ManagedFunctionTypeBuilder<Dependencies, Indexed> task = type.addManagedFunctionType(
-				"Handle", factory, Dependencies.class, Indexed.class);
-		task.addObject(Throwable.class).setKey(Dependencies.ESCALATION);
-		this.registerFlow(task, IOException.class);
-		this.registerFlow(task, SQLException.class);
-		this.registerFlow(task, Exception.class);
-		task.addEscalation(Throwable.class);
+		AutoWireEscalationCauseRouteManagedFunction factory = new AutoWireEscalationCauseRouteManagedFunction(null);
+		FunctionNamespaceBuilder type = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
+		ManagedFunctionTypeBuilder<Dependencies, Indexed> function = type.addManagedFunctionType("Handle", factory,
+				Dependencies.class, Indexed.class);
+		function.addObject(Throwable.class).setKey(Dependencies.ESCALATION);
+		this.registerFlow(function, IOException.class);
+		this.registerFlow(function, SQLException.class);
+		this.registerFlow(function, Exception.class);
+		function.addEscalation(Throwable.class);
 
 		// Validate the type
-		ManagedFunctionLoaderUtil
-				.validateWorkType(
-						type,
-						AutoWireEscalationCauseRouteWorkSource.class,
-						AutoWireEscalationCauseRouteWorkSource.PROPERTY_PREFIX_ESCALATION_TYPE
-								+ "0",
-						IOException.class.getName(),
-						AutoWireEscalationCauseRouteWorkSource.PROPERTY_PREFIX_ESCALATION_TYPE
-								+ "1",
-						SQLException.class.getName(),
-						AutoWireEscalationCauseRouteWorkSource.PROPERTY_PREFIX_ESCALATION_TYPE
-								+ "2", Exception.class.getName());
+		ManagedFunctionLoaderUtil.validateManagedFunctionType(type,
+				AutoWireEscalationCauseRouteManagedFunctionSource.class,
+				AutoWireEscalationCauseRouteManagedFunctionSource.PROPERTY_PREFIX_ESCALATION_TYPE + "0",
+				IOException.class.getName(),
+				AutoWireEscalationCauseRouteManagedFunctionSource.PROPERTY_PREFIX_ESCALATION_TYPE + "1",
+				SQLException.class.getName(),
+				AutoWireEscalationCauseRouteManagedFunctionSource.PROPERTY_PREFIX_ESCALATION_TYPE + "2",
+				Exception.class.getName());
 	}
 
 	/**
 	 * Register the flow.
 	 * 
-	 * @param task
+	 * @param function
 	 *            {@link ManagedFunctionTypeBuilder}.
 	 * @param cause
 	 *            {@link Class} of the cause.
 	 */
-	private void registerFlow(ManagedFunctionTypeBuilder<Dependencies, Indexed> task,
+	private void registerFlow(ManagedFunctionTypeBuilder<Dependencies, Indexed> function,
 			Class<? extends Throwable> cause) {
-		ManagedFunctionFlowTypeBuilder<Indexed> flow = task.addFlow();
+		ManagedFunctionFlowTypeBuilder<Indexed> flow = function.addFlow();
 		flow.setArgumentType(cause);
 		flow.setLabel(cause.getName());
 	}
@@ -165,8 +155,7 @@ public class AutoWireEscalationCauseRouteWorkSourceTest extends
 
 		// Ensure cause of escalation routed
 		final IOException cause = new IOException("TEST");
-		this.officeFloor.invokeTask("HANDLER.WORK", "escalate",
-				new Error(cause));
+		this.officeFloor.invokeFunction("HANDLER.NAMESPACE.escalate", new Error(cause));
 		assertSame("Incorrect cause handled", cause, this.state.cause);
 	}
 
@@ -180,8 +169,7 @@ public class AutoWireEscalationCauseRouteWorkSourceTest extends
 
 		// Ensure cause of escalation routed
 		final SQLException cause = new SQLException("TEST");
-		this.officeFloor.invokeTask("HANDLER.WORK", "escalate",
-				new Error(cause));
+		this.officeFloor.invokeFunction("HANDLER.NAMESPACE.escalate", new Error(cause));
 		assertSame("Incorrect cause handled", cause, this.state.cause);
 	}
 
@@ -195,8 +183,7 @@ public class AutoWireEscalationCauseRouteWorkSourceTest extends
 
 		// Ensure cause of escalation routed
 		final Exception cause = new Exception("TEST");
-		this.officeFloor.invokeTask("HANDLER.WORK", "escalate",
-				new Error(cause));
+		this.officeFloor.invokeFunction("HANDLER.NAMESPACE.escalate", new Error(cause));
 		assertSame("Incorrect cause handled", cause, this.state.cause);
 	}
 
@@ -210,9 +197,8 @@ public class AutoWireEscalationCauseRouteWorkSourceTest extends
 
 		// Ensure escalation propagated
 		final Error escalation = new Error("TEST", new Error());
-		this.officeFloor.invokeTask("HANDLER.WORK", "escalate", escalation);
-		assertSame("Escalation should be propagated", escalation,
-				this.escalation);
+		this.officeFloor.invokeFunction("HANDLER.NAMESPACE.escalate", escalation);
+		assertSame("Escalation should be propagated", escalation, this.escalation);
 	}
 
 	/**
@@ -225,9 +211,8 @@ public class AutoWireEscalationCauseRouteWorkSourceTest extends
 
 		// Ensure escalation propagated
 		final Error escalation = new Error("TEST");
-		this.officeFloor.invokeTask("HANDLER.WORK", "escalate", escalation);
-		assertSame("Escalation should be propagated", escalation,
-				this.escalation);
+		this.officeFloor.invokeFunction("HANDLER.NAMESPACE.escalate", escalation);
+		assertSame("Escalation should be propagated", escalation, this.escalation);
 	}
 
 	/**
@@ -245,16 +230,13 @@ public class AutoWireEscalationCauseRouteWorkSourceTest extends
 		source.getOfficeFloorCompiler().setEscalationHandler(this.handler);
 
 		// Add the escalation cause router
-		AutoWireSection router = source.addSection("ROUTE",
-				ManagedFunctionSectionSource.class.getName(),
-				AutoWireEscalationCauseRouteWorkSource.class.getName());
-		router.addProperty(ManagedFunctionSectionSource.PROPERTY_PARAMETER_PREFIX
-				+ "Handle", "1");
+		AutoWireSection router = source.addSection("ROUTE", ManagedFunctionSectionSource.class.getName(),
+				AutoWireEscalationCauseRouteManagedFunctionSource.class.getName());
+		router.addProperty(ManagedFunctionSectionSource.PROPERTY_PARAMETER_PREFIX + "Handle", "1");
 		source.linkEscalation(Error.class, router, "Handle");
 
 		// Add the escalation handlers
-		AutoWireSection handler = source.addSection("HANDLER",
-				ClassSectionSource.class.getName(),
+		AutoWireSection handler = source.addSection("HANDLER", ClassSectionSource.class.getName(),
 				MockEscalationHandler.class.getName());
 
 		// Configure the escalation cause handling
@@ -274,19 +256,16 @@ public class AutoWireEscalationCauseRouteWorkSourceTest extends
 	 *            {@link Escalation} cause type.
 	 * @param router
 	 *            {@link AutoWireSection} for the
-	 *            {@link AutoWireEscalationCauseRouteWorkSource}.
+	 *            {@link AutoWireEscalationCauseRouteManagedFunctionSource}.
 	 * @param handler
 	 *            Handling {@link AutoWireSection}.
 	 * @param source
 	 *            {@link AutoWireApplication}.
 	 */
-	private static void linkEscalationCauseHandling(
-			Class<? extends Throwable> causeType, AutoWireSection router,
+	private static void linkEscalationCauseHandling(Class<? extends Throwable> causeType, AutoWireSection router,
 			AutoWireSection handler, AutoWireApplication source) {
-		AutoWireEscalationCauseRouteWorkSource.configureEscalationCause(router,
-				causeType);
-		source.link(router, causeType.getName(), handler,
-				"handle" + causeType.getSimpleName());
+		AutoWireEscalationCauseRouteManagedFunctionSource.configureEscalationCause(router, causeType);
+		source.link(router, causeType.getName(), handler, "handle" + causeType.getSimpleName());
 	}
 
 	/**
@@ -309,22 +288,17 @@ public class AutoWireEscalationCauseRouteWorkSourceTest extends
 			throw escalation;
 		}
 
-		public void handleIOException(@Parameter IOException cause,
-				MockHandlerState state) {
+		public void handleIOException(@Parameter IOException cause, MockHandlerState state) {
 			state.cause = cause;
 		}
 
-		public void handleSQLException(@Parameter SQLException cause,
-				MockHandlerState state) {
+		public void handleSQLException(@Parameter SQLException cause, MockHandlerState state) {
 			state.cause = cause;
 		}
 
-		public void handleException(@Parameter Exception cause,
-				MockHandlerState state) {
-			assertFalse("Ensure not IOException",
-					(cause instanceof IOException));
-			assertFalse("Ensure not SQLException",
-					(cause instanceof SQLException));
+		public void handleException(@Parameter Exception cause, MockHandlerState state) {
+			assertFalse("Ensure not IOException", (cause instanceof IOException));
+			assertFalse("Ensure not SQLException", (cause instanceof SQLException));
 			state.cause = cause;
 		}
 	}

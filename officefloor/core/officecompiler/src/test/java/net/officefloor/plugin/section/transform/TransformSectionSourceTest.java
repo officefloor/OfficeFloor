@@ -71,8 +71,7 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testSpecification() {
 		SectionLoaderUtil.validateSpecification(TransformSectionSource.class,
-				TransformSectionSource.PROPERTY_SECTION_SOURCE_CLASS_NAME,
-				"Section Source");
+				TransformSectionSource.PROPERTY_SECTION_SOURCE_CLASS_NAME, "Section Source");
 	}
 
 	/**
@@ -84,8 +83,7 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 		SectionDesigner type = this.createExpectedType(false, "");
 
 		// Validate type is correct
-		SectionLoaderUtil.validateSection(type, ClassSectionSource.class,
-				MockSectionTypeClass.class.getName());
+		SectionLoaderUtil.validateSection(type, ClassSectionSource.class, MockSectionTypeClass.class.getName());
 	}
 
 	/**
@@ -97,12 +95,9 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 		SectionDesigner type = this.createExpectedType(true, "");
 
 		// Validate wrap section
-		SectionLoaderUtil.validateSection(type, TransformSectionSource.class,
-				(String) null,
-				TransformSectionSource.PROPERTY_SECTION_SOURCE_CLASS_NAME,
-				ClassSectionSource.class.getName(),
-				TransformSectionSource.PROPERTY_SECTION_LOCATION,
-				MockSectionTypeClass.class.getName());
+		SectionLoaderUtil.validateSection(type, TransformSectionSource.class, (String) null,
+				TransformSectionSource.PROPERTY_SECTION_SOURCE_CLASS_NAME, ClassSectionSource.class.getName(),
+				TransformSectionSource.PROPERTY_SECTION_LOCATION, MockSectionTypeClass.class.getName());
 	}
 
 	/**
@@ -111,23 +106,14 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 	public void testTransformedType() {
 
 		// Create the type
-		SectionDesigner type = this.createExpectedType(true,
-				MockTransformSectionSource.MOCK_PREFIX);
+		SectionDesigner type = this.createExpectedType(true, MockTransformSectionSource.MOCK_PREFIX);
 
 		// Validate wrap section
-		SectionLoaderUtil
-				.validateSection(
-						type,
-						MockTransformSectionSource.class,
-						(String) null,
-						TransformSectionSource.PROPERTY_SECTION_SOURCE_CLASS_NAME,
-						ClassSectionSource.class.getName(),
-						TransformSectionSource.PROPERTY_SECTION_LOCATION,
-						MockSectionTypeClass.class.getName(),
-						TransformSectionSource.PROPERTY_SECTION_PROPERTY_PREFIX
-								+ "one", "A",
-						TransformSectionSource.PROPERTY_SECTION_PROPERTY_PREFIX
-								+ "two", "B", "ignore", "C");
+		SectionLoaderUtil.validateSection(type, MockTransformSectionSource.class, (String) null,
+				TransformSectionSource.PROPERTY_SECTION_SOURCE_CLASS_NAME, ClassSectionSource.class.getName(),
+				TransformSectionSource.PROPERTY_SECTION_LOCATION, MockSectionTypeClass.class.getName(),
+				TransformSectionSource.PROPERTY_SECTION_PROPERTY_PREFIX + "one", "A",
+				TransformSectionSource.PROPERTY_SECTION_PROPERTY_PREFIX + "two", "B", "ignore", "C");
 	}
 
 	/**
@@ -142,15 +128,13 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 		source.addSectionTransformer(new MockTransformSectionSource());
 
 		// Add first section
-		AutoWireSection one = source.addSection("ONE",
-				ClassSectionSource.class.getName(),
+		AutoWireSection one = source.addSection("ONE", ClassSectionSource.class.getName(),
 				MockSectionRunClass.class.getName());
 		one.addProperty("one", "A");
 		one.addProperty("two", "B");
 
 		// Add section section
-		AutoWireSection two = source.addSection("TWO",
-				ClassSectionSource.class.getName(),
+		AutoWireSection two = source.addSection("TWO", ClassSectionSource.class.getName(),
 				MockSectionRunClass.class.getName());
 		two.addProperty("one", "A");
 		two.addProperty("two", "B");
@@ -163,18 +147,15 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
 		try {
 
-			// Trigger task to ensure linking via enhancements
+			// Trigger function to ensure linking via enhancements
 			final int NUMBER_OF_VALUES = 2;
 			List<String> values = new ArrayList<String>(NUMBER_OF_VALUES);
-			officeFloor.invokeTask("ONE.MOCK_TRANSFORMED.WORK", "inputTwo",
-					values);
+			officeFloor.invokeFunction("ONE.MOCK_TRANSFORMED.NAMESPACE.inputTwo", values);
 
-			// Ensure appropriate tasks triggered
-			assertEquals("Incorrect number of values", NUMBER_OF_VALUES,
-					values.size());
+			// Ensure appropriate functions triggered
+			assertEquals("Incorrect number of values", NUMBER_OF_VALUES, values.size());
 			for (int i = 0; i < NUMBER_OF_VALUES; i++) {
-				assertEquals("Incorrect value", String.valueOf(i),
-						values.get(i));
+				assertEquals("Incorrect value", String.valueOf(i), values.get(i));
 			}
 
 		} finally {
@@ -197,15 +178,13 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 		source.addSectionTransformer(new MockTransformSectionSource());
 
 		// Add first section
-		AutoWireSection one = source.addSection("ONE",
-				ClassSectionSource.class.getName(),
+		AutoWireSection one = source.addSection("ONE", ClassSectionSource.class.getName(),
 				MockSectionRunClass.class.getName());
 		one.addProperty("one", "A");
 		one.addProperty("two", "B");
 
 		// Add section section
-		AutoWireSection two = source.addSection("TWO",
-				ClassSectionSource.class.getName(),
+		AutoWireSection two = source.addSection("TWO", ClassSectionSource.class.getName(),
 				MockSectionRunClass.class.getName());
 		two.addProperty("one", "A");
 		two.addProperty("two", "B");
@@ -218,19 +197,15 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
 		try {
 
-			// Trigger task to ensure linking via enhancements
+			// Trigger function to ensure linking via enhancements
 			final int NUMBER_OF_VALUES = 2;
 			List<String> values = new ArrayList<String>(NUMBER_OF_VALUES);
-			officeFloor.invokeTask(
-					"ONE.MOCK_TRANSFORMED.MOCK_TRANSFORMED.WORK", "inputTwo",
-					values);
+			officeFloor.invokeFunction("ONE.MOCK_TRANSFORMED.MOCK_TRANSFORMED.NAMESPACE.inputTwo", values);
 
-			// Ensure appropriate tasks triggered
-			assertEquals("Incorrect number of values", NUMBER_OF_VALUES,
-					values.size());
+			// Ensure appropriate functions triggered
+			assertEquals("Incorrect number of values", NUMBER_OF_VALUES, values.size());
 			for (int i = 0; i < NUMBER_OF_VALUES; i++) {
-				assertEquals("Incorrect value", String.valueOf(i),
-						values.get(i));
+				assertEquals("Incorrect value", String.valueOf(i), values.get(i));
 			}
 
 		} finally {
@@ -242,8 +217,7 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link TransformSectionSource}.
 	 */
-	public static class MockTransformSectionSource extends
-			TransformSectionSource {
+	public static class MockTransformSectionSource extends TransformSectionSource {
 
 		/**
 		 * Prefix on transformed {@link SectionSource}.
@@ -253,21 +227,19 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 		/**
 		 * Name of the transformed {@link SubSection}.
 		 */
-		private static final String MOCK_SECTION_NAME = MOCK_PREFIX
-				+ SUB_SECTION_NAME;
+		private static final String MOCK_SECTION_NAME = MOCK_PREFIX + SUB_SECTION_NAME;
 
 		/*
 		 * ================= TransformSectionSource ================
 		 */
 
 		@Override
-		protected void loadSubSection(String sectionSourceClassName,
-				String sectionLocation, PropertyList properties)
+		protected void loadSubSection(String sectionSourceClassName, String sectionLocation, PropertyList properties)
 				throws Exception {
 
 			// Create the sub section
-			SubSection subSection = this.getDesginer().addSubSection(
-					MOCK_SECTION_NAME, sectionSourceClassName, sectionLocation);
+			SubSection subSection = this.getDesginer().addSubSection(MOCK_SECTION_NAME, sectionSourceClassName,
+					sectionLocation);
 
 			// Load the properties
 			for (Property property : properties) {
@@ -279,35 +251,19 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 			switch (nameValues.size()) {
 			case 4:
 				// Validate the sub section properties
-				assertEquals(
-						"Incorrect property one",
-						"A",
-						nameValues
-								.get(TransformSectionSource.PROPERTY_SECTION_PROPERTY_PREFIX
-										+ "one"));
-				assertEquals(
-						"Incorrect property two",
-						"B",
-						nameValues
-								.get(TransformSectionSource.PROPERTY_SECTION_PROPERTY_PREFIX
-										+ "two"));
-				assertEquals(
-						"Incorrect section source",
-						ClassSectionSource.class.getName(),
-						nameValues
-								.get(TransformSectionSource.PROPERTY_SECTION_SOURCE_CLASS_NAME));
-				assertEquals(
-						"Incorrect section location",
-						MockSectionRunClass.class.getName(),
-						nameValues
-								.get(TransformSectionSource.PROPERTY_SECTION_LOCATION));
+				assertEquals("Incorrect property one", "A",
+						nameValues.get(TransformSectionSource.PROPERTY_SECTION_PROPERTY_PREFIX + "one"));
+				assertEquals("Incorrect property two", "B",
+						nameValues.get(TransformSectionSource.PROPERTY_SECTION_PROPERTY_PREFIX + "two"));
+				assertEquals("Incorrect section source", ClassSectionSource.class.getName(),
+						nameValues.get(TransformSectionSource.PROPERTY_SECTION_SOURCE_CLASS_NAME));
+				assertEquals("Incorrect section location", MockSectionRunClass.class.getName(),
+						nameValues.get(TransformSectionSource.PROPERTY_SECTION_LOCATION));
 				break;
 			case 2:
 				// Validate the section properties
-				assertEquals("Incorrect property one", "A",
-						nameValues.get("one"));
-				assertEquals("Incorrect property two", "B",
-						nameValues.get("two"));
+				assertEquals("Incorrect property one", "A", nameValues.get("one"));
+				assertEquals("Incorrect property two", "B", nameValues.get("two"));
 				break;
 
 			default:
@@ -316,8 +272,7 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		protected void loadSectionInput(SectionInputType inputType)
-				throws Exception {
+		protected void loadSectionInput(SectionInputType inputType) throws Exception {
 
 			// Obtain the designer
 			TransformSectionDesigner designer = this.getDesginer();
@@ -327,16 +282,13 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 
 			// Default map to Section Input
 			String inputName = inputType.getSectionInputName();
-			SubSectionInput wrappedInput = subSection
-					.getSubSectionInput(inputName);
-			SectionInput input = designer.addSectionInput(MOCK_PREFIX
-					+ inputName, inputType.getParameterType());
+			SubSectionInput wrappedInput = subSection.getSubSectionInput(inputName);
+			SectionInput input = designer.addSectionInput(MOCK_PREFIX + inputName, inputType.getParameterType());
 			designer.link(input, wrappedInput);
 		}
 
 		@Override
-		protected void loadSectionOutput(SectionOutputType outputType)
-				throws Exception {
+		protected void loadSectionOutput(SectionOutputType outputType) throws Exception {
 
 			// Obtain the designer
 			TransformSectionDesigner designer = this.getDesginer();
@@ -346,17 +298,14 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 
 			// Default map to Section Output
 			String outputName = outputType.getSectionOutputName();
-			SubSectionOutput wrappedOutput = subSection
-					.getSubSectionOutput(outputName);
-			SectionOutput output = designer.addSectionOutput(MOCK_PREFIX
-					+ outputName, outputType.getArgumentType(),
+			SubSectionOutput wrappedOutput = subSection.getSubSectionOutput(outputName);
+			SectionOutput output = designer.addSectionOutput(MOCK_PREFIX + outputName, outputType.getArgumentType(),
 					outputType.isEscalationOnly());
 			designer.link(wrappedOutput, output);
 		}
 
 		@Override
-		protected void loadSectionObject(SectionObjectType objectType)
-				throws Exception {
+		protected void loadSectionObject(SectionObjectType objectType) throws Exception {
 
 			// Obtain the designer
 			TransformSectionDesigner designer = this.getDesginer();
@@ -366,10 +315,8 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 
 			// Default map to Section Object
 			String objectName = objectType.getSectionObjectName();
-			SubSectionObject wrappedObject = subSection
-					.getSubSectionObject(objectName);
-			SectionObject object = designer.addSectionObject(MOCK_PREFIX
-					+ objectName, objectType.getObjectType());
+			SubSectionObject wrappedObject = subSection.getSubSectionObject(objectName);
+			SectionObject object = designer.addSectionObject(MOCK_PREFIX + objectName, objectType.getObjectType());
 			object.setTypeQualifier(objectType.getTypeQualifier());
 			designer.link(wrappedObject, object);
 		}
@@ -380,10 +327,8 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 			// Add an enhancement by providing an additional input
 			TransformSectionDesigner designer = this.getDesginer();
 			SubSection subSection = designer.getSubSection(MOCK_SECTION_NAME);
-			SectionInput input = designer.addSectionInput("ENHANCED_INPUT",
-					String.class.getName());
-			SubSectionInput wrappedInput = subSection
-					.getSubSectionInput("inputTwo");
+			SectionInput input = designer.addSectionInput("ENHANCED_INPUT", String.class.getName());
+			SubSectionInput wrappedInput = subSection.getSubSectionInput("inputTwo");
 			designer.link(input, wrappedInput);
 		}
 	}
@@ -410,22 +355,19 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 		type.addSectionOutput(prefix + "one", Integer.class.getName(), false);
 		type.addSectionOutput(prefix + "two", null, false);
 		type.addSectionOutput(prefix + "three", char.class.getName(), false);
-		type.addSectionOutput(prefix + SQLException.class.getName(),
-				SQLException.class.getName(), true);
-		type.addSectionOutput(prefix + IOException.class.getName(),
-				IOException.class.getName(), true);
-		type.addSectionOutput(prefix + NumberFormatException.class.getName(),
-				NumberFormatException.class.getName(), true);
+		type.addSectionOutput(prefix + SQLException.class.getName(), SQLException.class.getName(), true);
+		type.addSectionOutput(prefix + IOException.class.getName(), IOException.class.getName(), true);
+		type.addSectionOutput(prefix + NumberFormatException.class.getName(), NumberFormatException.class.getName(),
+				true);
 
 		// Objects
-		SectionObject connectionSectionObject = type.addSectionObject(prefix
-				+ Connection.class.getName(), Connection.class.getName());
+		SectionObject connectionSectionObject = type.addSectionObject(prefix + Connection.class.getName(),
+				Connection.class.getName());
 
 		// Type differences based on transforming
 		if (isTransform) {
 			// Sub section
-			type.addSubSection(prefix + "TRANSFORMED",
-					ClassSectionSource.class.getName(),
+			type.addSubSection(prefix + "TRANSFORMED", ClassSectionSource.class.getName(),
 					MockSectionTypeClass.class.getName());
 
 			// Provide the enhancements
@@ -435,32 +377,28 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 
 		} else {
 			// Managed Objects
-			SectionManagedObjectSource objectMos = type
-					.addSectionManagedObjectSource("OBJECT",
-							ClassManagedObjectSource.class.getName());
-			objectMos.addProperty(
-					ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+			SectionManagedObjectSource objectMos = type.addSectionManagedObjectSource("OBJECT",
+					ClassManagedObjectSource.class.getName());
+			objectMos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 					MockSectionTypeClass.class.getName());
-			SectionManagedObject objectMo = objectMos.addSectionManagedObject(
-					"OBJECT", ManagedObjectScope.PROCESS);
+			SectionManagedObject objectMo = objectMos.addSectionManagedObject("OBJECT", ManagedObjectScope.PROCESS);
 
-			// Tasks
-			SectionFunctionNamespace work = type.addSectionWork("WORK",
+			// Functions
+			SectionFunctionNamespace namespace = type.addSectionFunctionNamespace("NAMESPACE",
 					SectionClassManagedFunctionSource.class.getName());
-			work.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
+			namespace.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
 					MockSectionTypeClass.class.getName());
 
-			SectionFunction taskOne = work.addSectionTask("inputOne", "inputOne");
-			FunctionObject taskOneObject = taskOne.getTaskObject("OBJECT");
-			type.link(taskOneObject, objectMo);
-			FunctionObject taskOneConnection = taskOne
-					.getTaskObject(Connection.class.getName());
-			type.link(taskOneConnection, connectionSectionObject);
+			SectionFunction functionOne = namespace.addSectionFunction("inputOne", "inputOne");
+			FunctionObject functionOneObject = functionOne.getFunctionObject("OBJECT");
+			type.link(functionOneObject, objectMo);
+			FunctionObject functionOneConnection = functionOne.getFunctionObject(Connection.class.getName());
+			type.link(functionOneConnection, connectionSectionObject);
 
-			SectionFunction taskTwo = work.addSectionTask("inputTwo", "inputTwo");
-			FunctionObject taskTwoObject = taskTwo.getTaskObject("OBJECT");
-			type.link(taskTwoObject, objectMo);
-			taskTwo.getTaskObject(String.class.getName()).flagAsParameter();
+			SectionFunction functionTwo = namespace.addSectionFunction("inputTwo", "inputTwo");
+			FunctionObject functionTwoObject = functionTwo.getFunctionObject("OBJECT");
+			type.link(functionTwoObject, objectMo);
+			functionTwo.getFunctionObject(String.class.getName()).flagAsParameter();
 		}
 
 		// Return the type
@@ -483,12 +421,10 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 			void three(char parameter);
 		}
 
-		public void inputOne(Connection connection, Flows flows)
-				throws SQLException {
+		public void inputOne(Connection connection, Flows flows) throws SQLException {
 		}
 
-		public Double inputTwo(@Parameter String parameter) throws IOException,
-				NumberFormatException {
+		public Double inputTwo(@Parameter String parameter) throws IOException, NumberFormatException {
 			return null;
 		}
 	}

@@ -461,7 +461,7 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 		// Connect the sub section functions to pre administration
 		for (OfficeFunctionModel function : subSection.getOfficeFunctions()) {
 			for (OfficeFunctionToPreAdministrationModel conn : function.getPreAdministrations()) {
-				AdministrationModel admin = administrations.get(conn.getAdministratorName());
+				AdministrationModel admin = administrations.get(conn.getAdministrationName());
 				if (admin != null) {
 					conn.setOfficeFunction(function);
 					conn.setAdministration(admin);
@@ -646,7 +646,7 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 		// Specify pre administration to office functions
 		for (AdministrationModel admin : office.getOfficeAdministrations()) {
 			for (OfficeFunctionToPreAdministrationModel conn : admin.getPreOfficeFunctions()) {
-				conn.setAdministratorName(admin.getAdministrationName());
+				conn.setAdministrationName(admin.getAdministrationName());
 			}
 		}
 

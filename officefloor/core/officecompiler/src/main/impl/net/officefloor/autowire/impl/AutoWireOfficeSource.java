@@ -722,7 +722,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 				// Provide property and section input for failed to source
 				failedToSourceProperties.addProperty(
-						AutoWireEscalationCauseRouteWorkSource.PROPERTY_PREFIX_ESCALATION_TYPE + String.valueOf(i))
+						AutoWireEscalationCauseRouteManagedFunctionSource.PROPERTY_PREFIX_ESCALATION_TYPE + String.valueOf(i))
 						.setValue(escalationTypeName);
 				escalationSectionInput[i] = sectionInput;
 			}
@@ -733,13 +733,13 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 				// Add handling of failing to source managed object
 				OfficeSection failedToSourceSection = architect.addOfficeSection(
 						FailedToSourceManagedObjectEscalation.class.getSimpleName(), ManagedFunctionSectionSource.class.getName(),
-						AutoWireEscalationCauseRouteWorkSource.class.getName());
+						AutoWireEscalationCauseRouteManagedFunctionSource.class.getName());
 				failedToSourceProperties.configureProperties(failedToSourceSection);
 
 				// Obtain the type
 				OfficeSectionType failedToSourceSectionType = context.loadOfficeSectionType(
 						FailedToSourceManagedObjectEscalation.class.getSimpleName(), ManagedFunctionSectionSource.class.getName(),
-						AutoWireEscalationCauseRouteWorkSource.class.getName(), failedToSourceProperties);
+						AutoWireEscalationCauseRouteManagedFunctionSource.class.getName(), failedToSourceProperties);
 
 				// Configure the outputs
 				for (OfficeSectionOutputType escalationOutputType : failedToSourceSectionType
@@ -772,7 +772,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 				OfficeEscalation failedToSourceEscalation = architect
 						.addOfficeEscalation(FailedToSourceManagedObjectEscalation.class.getName());
 				OfficeSectionInput failedToSourceHandler = failedToSourceSection
-						.getOfficeSectionInput(AutoWireEscalationCauseRouteWorkSource.HANDLER_TASK_NAME);
+						.getOfficeSectionInput(AutoWireEscalationCauseRouteManagedFunctionSource.HANDLER_TASK_NAME);
 				architect.link(failedToSourceEscalation, failedToSourceHandler);
 
 				// Link teams for failed to source tasks

@@ -43,7 +43,7 @@ import net.officefloor.plugin.section.managedfunction.ManagedFunctionSectionSour
  * 
  * @author Daniel Sagenschneider
  */
-public class AutoWireEscalationCauseRouteWorkSource extends AbstractManagedFunctionSource {
+public class AutoWireEscalationCauseRouteManagedFunctionSource extends AbstractManagedFunctionSource {
 
 	/**
 	 * Name of the {@link ManagedFunction} handling the {@link Escalation}.
@@ -61,8 +61,9 @@ public class AutoWireEscalationCauseRouteWorkSource extends AbstractManagedFunct
 	 * Configures handling the {@link Escalation} cause.
 	 * 
 	 * @param section
-	 *            {@link AutoWireSection} for the {@link ManagedFunctionSectionSource}
-	 *            containing the {@link AutoWireEscalationCauseRouteWorkSource}
+	 *            {@link AutoWireSection} for the
+	 *            {@link ManagedFunctionSectionSource} containing the
+	 *            {@link AutoWireEscalationCauseRouteManagedFunctionSource}
 	 *            being configured.
 	 * @param causeType
 	 *            Type of cause.
@@ -136,7 +137,8 @@ public class AutoWireEscalationCauseRouteWorkSource extends AbstractManagedFunct
 		Class<? extends Throwable>[] escalations = escalationTypes.toArray(new Class[escalationTypes.size()]);
 
 		// Configure the work
-		AutoWireEscalationCauseRouteTask factory = new AutoWireEscalationCauseRouteTask(escalations);
+		AutoWireEscalationCauseRouteManagedFunction factory = new AutoWireEscalationCauseRouteManagedFunction(
+				escalations);
 		ManagedFunctionTypeBuilder<Dependencies, Indexed> task = workTypeBuilder
 				.addManagedFunctionType(HANDLER_TASK_NAME, factory, Dependencies.class, Indexed.class);
 		task.addObject(Throwable.class).setKey(Dependencies.ESCALATION);
@@ -158,7 +160,7 @@ public class AutoWireEscalationCauseRouteWorkSource extends AbstractManagedFunct
 	/**
 	 * {@link ManagedFunction} for the routing the {@link Escalation} cause.
 	 */
-	public static class AutoWireEscalationCauseRouteTask
+	public static class AutoWireEscalationCauseRouteManagedFunction
 			implements ManagedFunctionFactory<Dependencies, Indexed>, ManagedFunction<Dependencies, Indexed> {
 
 		/**
@@ -176,7 +178,7 @@ public class AutoWireEscalationCauseRouteWorkSource extends AbstractManagedFunct
 		 *            More specific {@link Escalation} types should be first as
 		 *            matching is sequential.
 		 */
-		public AutoWireEscalationCauseRouteTask(Class<? extends Throwable>[] causeRoutes) {
+		public AutoWireEscalationCauseRouteManagedFunction(Class<? extends Throwable>[] causeRoutes) {
 			this.causeRoutes = causeRoutes;
 		}
 

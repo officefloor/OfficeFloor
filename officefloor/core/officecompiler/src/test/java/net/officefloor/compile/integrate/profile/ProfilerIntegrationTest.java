@@ -22,7 +22,6 @@ import java.util.List;
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.frame.api.OfficeFrame;
-import net.officefloor.frame.api.function.Work;
 import net.officefloor.frame.api.profile.ProfiledManagedFunction;
 import net.officefloor.frame.api.profile.ProfiledProcessState;
 import net.officefloor.frame.api.profile.ProfiledThreadState;
@@ -44,39 +43,37 @@ public class ProfilerIntegrationTest extends OfficeFrameTestCase {
 
 		// Configure OfficeFloor
 		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
-		source.addSection("SECTION", ClassSectionSource.class.getName(),
-				ProfiledWork.class.getName());
+		source.addSection("SECTION", ClassSectionSource.class.getName(), ProfiledClass.class.getName());
 
 		// Configure the profiler
 		final ProfiledProcessState[] profiledProcess = new ProfiledProcessState[1];
 		source.setProfiler(new Profiler() {
 			@Override
-			public void profileProcess(ProfiledProcessState process) {
+			public void profileProcessState(ProfiledProcessState process) {
 				profiledProcess[0] = process;
 			}
 		});
 
-		// Invoke the work
+		// Invoke the function
 		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
-		officeFloor.invokeTask("SECTION.WORK", "task", null);
+		officeFloor.invokeFunction("SECTION.NAMESPACE.function", null);
 		officeFloor.closeOfficeFloor();
 
 		// Ensure profiled
 		assertNotNull("Should be profiling office", profiledProcess[0]);
-		List<ProfiledThreadState> threads = profiledProcess[0].getProfiledThreads();
+		List<ProfiledThreadState> threads = profiledProcess[0].getProfiledThreadStates();
 		assertEquals("Should have one thread profiled", 1, threads.size());
-		List<ProfiledManagedFunction> jobs = threads.get(0).getProfiledJobs();
-		assertEquals("Should just be one job profiled", 1, jobs.size());
-		ProfiledManagedFunction job = jobs.get(0);
-		assertEquals("Incorrect profiled job", "SECTION.WORK.task",
-				job.getJobName());
+		List<ProfiledManagedFunction> functions = threads.get(0).getProfiledManagedFunctions();
+		assertEquals("Should just be one function profiled", 1, functions.size());
+		ProfiledManagedFunction function = functions.get(0);
+		assertEquals("Incorrect profiled function", "SECTION.NAMESPACE.function", function.getFunctionName());
 	}
 
 	/**
-	 * Profiled {@link Work}.
+	 * Profiled {@link Class}.
 	 */
-	public static class ProfiledWork {
-		public void task() {
+	public static class ProfiledClass {
+		public void function() {
 		}
 	}
 

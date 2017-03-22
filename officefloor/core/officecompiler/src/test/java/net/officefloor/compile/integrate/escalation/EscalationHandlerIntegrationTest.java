@@ -51,18 +51,15 @@ public class EscalationHandlerIntegrationTest extends OfficeFrameTestCase {
 		source.getOfficeFloorCompiler().setEscalationHandler(handler);
 
 		// Add the failing service
-		source.addSection("FAILURE", ClassSectionSource.class.getName(),
-				FailingService.class.getName());
+		source.addSection("FAILURE", ClassSectionSource.class.getName(), FailingService.class.getName());
 
 		// Open OfficeFloor
 		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
 
 		// Ensure handled escalation
 		IOException failure = new IOException("TEST");
-		officeFloor.invokeTask("FAILURE.WORK", "service", failure);
-		assertSame(
-				"Failure should be handled by overridden escalation handler",
-				failure, handler.escalation);
+		officeFloor.invokeFunction("FAILURE.NAMESPACE.service", failure);
+		assertSame("Failure should be handled by overridden escalation handler", failure, handler.escalation);
 
 		// Close OfficeFloor
 		officeFloor.closeOfficeFloor();

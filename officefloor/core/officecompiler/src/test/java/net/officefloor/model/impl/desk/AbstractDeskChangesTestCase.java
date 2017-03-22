@@ -17,22 +17,21 @@
  */
 package net.officefloor.model.impl.desk;
 
+import net.officefloor.compile.impl.managedfunction.FunctionNamespaceTypeImpl;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
-import net.officefloor.compile.impl.managedfunction.FunctionNamespaceTypeImpl;
-import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionEscalationTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
-import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.api.function.Work;
-import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskChanges;
+import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.test.changes.AbstractChangesTestCase;
@@ -42,8 +41,7 @@ import net.officefloor.model.test.changes.AbstractChangesTestCase;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractDeskChangesTestCase extends
-		AbstractChangesTestCase<DeskModel, DeskChanges> {
+public abstract class AbstractDeskChangesTestCase extends AbstractChangesTestCase<DeskModel, DeskChanges> {
 
 	/**
 	 * Initiate.
@@ -66,10 +64,8 @@ public abstract class AbstractDeskChangesTestCase extends
 	 */
 
 	@Override
-	protected DeskModel retrieveModel(ConfigurationItem configurationItem)
-			throws Exception {
-		return new DeskRepositoryImpl(new ModelRepositoryImpl())
-				.retrieveDesk(configurationItem);
+	protected DeskModel retrieveModel(ConfigurationItem configurationItem) throws Exception {
+		return new DeskRepositoryImpl(new ModelRepositoryImpl()).retrieveDesk(configurationItem);
 	}
 
 	@Override
@@ -86,55 +82,57 @@ public abstract class AbstractDeskChangesTestCase extends
 	 * Creates a {@link FunctionNamespaceType}.
 	 * 
 	 * @param constructor
-	 *            {@link WorkTypeConstructor} to construct the {@link FunctionNamespaceType}.
+	 *            {@link NamespaceTypeConstructor} to construct the
+	 *            {@link FunctionNamespaceType}.
 	 * @return {@link FunctionNamespaceType}.
 	 */
-	protected FunctionNamespaceType<Work> constructWorkType(WorkTypeConstructor constructor) {
+	protected FunctionNamespaceType constructNamespaceType(NamespaceTypeConstructor constructor) {
 
-		// Create the work type builder
-		FunctionNamespaceTypeImpl<Work> workTypeBuilder = new FunctionNamespaceTypeImpl<Work>();
+		// Create the namespace type builder
+		FunctionNamespaceTypeImpl namespaceBuilder = new FunctionNamespaceTypeImpl();
 
-		// Build the work type via the constructor
-		WorkTypeContext context = new WorkTypeContextImpl(workTypeBuilder);
+		// Build the namespace type via the constructor
+		NamespaceTypeContext context = new NamespaceTypeContextImpl(namespaceBuilder);
 		constructor.construct(context);
 
-		// Return the work type
-		return workTypeBuilder;
+		// Return the namespace type
+		return namespaceBuilder;
 	}
 
 	/**
-	 * {@link WorkTypeConstructor} to construct the {@link FunctionNamespaceType}.
+	 * {@link NamespaceTypeConstructor} to construct the
+	 * {@link FunctionNamespaceType}.
 	 */
-	protected interface WorkTypeConstructor {
+	protected interface NamespaceTypeConstructor {
 
 		/**
 		 * Constructs the {@link FunctionNamespaceType}.
 		 * 
 		 * @param context
-		 *            {@link WorkTypeContext}.
+		 *            {@link NamespaceTypeContext}.
 		 */
-		void construct(WorkTypeContext context);
+		void construct(NamespaceTypeContext context);
 	}
 
 	/**
 	 * Context to construct the {@link FunctionNamespaceType}.
 	 */
-	protected interface WorkTypeContext {
+	protected interface NamespaceTypeContext {
 
 		/**
 		 * Adds a {@link ManagedFunctionType}.
 		 * 
-		 * @param taskName
+		 * @param functionName
 		 *            Name of the {@link ManagedFunction}.
-		 * @return {@link TaskTypeConstructor} to provide simplified
+		 * @return {@link FunctionTypeConstructor} to provide simplified
 		 *         {@link ManagedFunctionType} construction.
 		 */
-		TaskTypeConstructor addTask(String taskName);
+		FunctionTypeConstructor addFunction(String functionName);
 
 		/**
 		 * Adds a {@link ManagedFunctionTypeBuilder}.
 		 * 
-		 * @param taskName
+		 * @param functionName
 		 *            Name of the {@link ManagedFunction}.
 		 * @param dependencyKeys
 		 *            Dependency keys {@link Enum}.
@@ -142,14 +140,14 @@ public abstract class AbstractDeskChangesTestCase extends
 		 *            Flow keys {@link Enum}.
 		 * @return {@link ManagedFunctionTypeBuilder}.
 		 */
-		<D extends Enum<D>, F extends Enum<F>> ManagedFunctionTypeBuilder<D, F> addTask(
-				String taskName, Class<D> dependencyKeys, Class<F> flowKeys);
+		<M extends Enum<M>, F extends Enum<F>> ManagedFunctionTypeBuilder<M, F> addFunction(String functionName,
+				Class<M> dependencyKeys, Class<F> flowKeys);
 	}
 
 	/**
 	 * Provides simplified construction of a {@link ManagedFunctionType}.
 	 */
-	protected interface TaskTypeConstructor {
+	protected interface FunctionTypeConstructor {
 
 		/**
 		 * Adds a {@link ManagedFunctionObjectType}.
@@ -183,8 +181,7 @@ public abstract class AbstractDeskChangesTestCase extends
 		 * @return {@link ManagedFunctionEscalationTypeBuilder} for the added
 		 *         {@link ManagedFunctionEscalationType}.
 		 */
-		ManagedFunctionEscalationTypeBuilder addEscalation(
-				Class<? extends Throwable> escalationType);
+		ManagedFunctionEscalationTypeBuilder addEscalation(Class<? extends Throwable> escalationType);
 
 		/**
 		 * Obtains the underlying {@link ManagedFunctionTypeBuilder}.
@@ -195,79 +192,76 @@ public abstract class AbstractDeskChangesTestCase extends
 	}
 
 	/**
-	 * {@link WorkTypeContext} implementation.
+	 * {@link NamespaceTypeContext} implementation.
 	 */
-	private class WorkTypeContextImpl implements WorkTypeContext {
+	private class NamespaceTypeContextImpl implements NamespaceTypeContext {
 
 		/**
 		 * {@link FunctionNamespaceBuilder}.
 		 */
-		private final FunctionNamespaceBuilder<?> workTypeBuilder;
+		private final FunctionNamespaceBuilder namespaceBuilder;
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param workTypeBuilder
+		 * @param namespaceBuilder
 		 *            {@link FunctionNamespaceBuilder}.
 		 */
-		public WorkTypeContextImpl(FunctionNamespaceBuilder<?> workTypeBuilder) {
-			this.workTypeBuilder = workTypeBuilder;
+		public NamespaceTypeContextImpl(FunctionNamespaceBuilder namespaceBuilder) {
+			this.namespaceBuilder = namespaceBuilder;
 		}
 
 		/*
-		 * ================== WorkTypeContext ============================
+		 * ================== NamespaceTypeContext ============================
 		 */
 
 		@Override
 		@SuppressWarnings("rawtypes")
-		public TaskTypeConstructor addTask(String taskName) {
-			// Add the task
-			ManagedFunctionTypeBuilder taskTypeBuilder = this.workTypeBuilder
-					.addManagedFunctionType(taskName, null, (Class<Indexed>) null,
-							(Class<Indexed>) null);
+		public FunctionTypeConstructor addFunction(String functionName) {
+			// Add the function
+			ManagedFunctionTypeBuilder functionTypeBuilder = this.namespaceBuilder.addManagedFunctionType(functionName,
+					null, (Class<Indexed>) null, (Class<Indexed>) null);
 
-			// Return the task type constructor for the task type builder
-			return new TaskTypeConstructorImpl(taskTypeBuilder);
+			// Return the function type constructor for the function type
+			// builder
+			return new FunctionTypeConstructorImpl(functionTypeBuilder);
 		}
 
 		@Override
-		public <D extends Enum<D>, F extends Enum<F>> ManagedFunctionTypeBuilder<D, F> addTask(
-				String taskName, Class<D> dependencyKeys, Class<F> flowKeys) {
-			return this.workTypeBuilder.addManagedFunctionType(taskName, null,
-					dependencyKeys, flowKeys);
+		public <D extends Enum<D>, F extends Enum<F>> ManagedFunctionTypeBuilder<D, F> addFunction(String functionName,
+				Class<D> dependencyKeys, Class<F> flowKeys) {
+			return this.namespaceBuilder.addManagedFunctionType(functionName, null, dependencyKeys, flowKeys);
 		}
 	}
 
 	/**
-	 * {@link TaskTypeConstructor} implementation.
+	 * {@link FunctionTypeConstructor} implementation.
 	 */
-	private class TaskTypeConstructorImpl implements TaskTypeConstructor {
+	private class FunctionTypeConstructorImpl implements FunctionTypeConstructor {
 
 		/**
 		 * {@link ManagedFunctionTypeBuilder}.
 		 */
-		private final ManagedFunctionTypeBuilder<?, ?> taskTypeBuilder;
+		private final ManagedFunctionTypeBuilder<?, ?> functionTypeBuilder;
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param taskTypeBuilder
+		 * @param functionTypeBuilder
 		 *            {@link ManagedFunctionTypeBuilder}.
 		 */
-		public TaskTypeConstructorImpl(ManagedFunctionTypeBuilder<?, ?> taskTypeBuilder) {
-			this.taskTypeBuilder = taskTypeBuilder;
+		public FunctionTypeConstructorImpl(ManagedFunctionTypeBuilder<?, ?> functionTypeBuilder) {
+			this.functionTypeBuilder = functionTypeBuilder;
 		}
 
 		/*
-		 * ================= TaskTypeConstructor ===========================
+		 * ================= FunctionTypeConstructor ===========================
 		 */
 
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public ManagedFunctionObjectTypeBuilder<?> addObject(Class<?> objectType,
-				Enum<?> key) {
-			ManagedFunctionObjectTypeBuilder object = this.taskTypeBuilder
-					.addObject(objectType);
+		public ManagedFunctionObjectTypeBuilder<?> addObject(Class<?> objectType, Enum<?> key) {
+			ManagedFunctionObjectTypeBuilder object = this.functionTypeBuilder.addObject(objectType);
 			if (key != null) {
 				object.setKey(key);
 			}
@@ -277,7 +271,7 @@ public abstract class AbstractDeskChangesTestCase extends
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public ManagedFunctionFlowTypeBuilder<?> addFlow(Class<?> argumentType, Enum<?> key) {
-			ManagedFunctionFlowTypeBuilder flow = this.taskTypeBuilder.addFlow();
+			ManagedFunctionFlowTypeBuilder flow = this.functionTypeBuilder.addFlow();
 			flow.setArgumentType(argumentType);
 			if (key != null) {
 				flow.setKey(key);
@@ -286,60 +280,57 @@ public abstract class AbstractDeskChangesTestCase extends
 		}
 
 		@Override
-		public ManagedFunctionEscalationTypeBuilder addEscalation(
-				Class<? extends Throwable> escalationType) {
-			ManagedFunctionEscalationTypeBuilder escalation = this.taskTypeBuilder
-					.addEscalation(escalationType);
+		public ManagedFunctionEscalationTypeBuilder addEscalation(Class<? extends Throwable> escalationType) {
+			ManagedFunctionEscalationTypeBuilder escalation = this.functionTypeBuilder.addEscalation(escalationType);
 			return escalation;
 		}
 
 		@Override
 		public ManagedFunctionTypeBuilder<?, ?> getBuilder() {
-			return this.taskTypeBuilder;
+			return this.functionTypeBuilder;
 		}
 	}
 
 	/**
 	 * Constructor to construct the {@link ManagedFunctionType}.
 	 */
-	protected interface TaskConstructor {
+	protected interface FunctionConstructor {
 
 		/**
 		 * Constructs the {@link ManagedFunctionType}.
 		 * 
-		 * @param task
+		 * @param function
 		 *            {@link ManagedFunctionType}.
 		 */
-		void construct(TaskTypeConstructor task);
+		void construct(FunctionTypeConstructor function);
 	}
 
 	/**
 	 * Constructs the {@link ManagedFunctionType}.
 	 * 
-	 * @param taskName
+	 * @param functionName
 	 *            Name of the {@link ManagedFunctionType}.
 	 * @param constructor
-	 *            {@link TaskConstructor}.
+	 *            {@link FunctionConstructor}.
 	 * @return {@link ManagedFunctionType}.
 	 */
-	protected ManagedFunctionType<?, ?, ?> constructTaskType(final String taskName,
-			final TaskConstructor constructor) {
+	protected ManagedFunctionType<?, ?> constructFunctionType(final String functionName,
+			final FunctionConstructor constructor) {
 
-		// Construct the work
-		FunctionNamespaceType<?> workType = this
-				.constructWorkType(new WorkTypeConstructor() {
-					@Override
-					public void construct(WorkTypeContext context) {
-						// Construct the task
-						TaskTypeConstructor task = context.addTask(taskName);
-						if (constructor != null) {
-							constructor.construct(task);
-						}
-					}
-				});
+		// Construct the namespace
+		FunctionNamespaceType namespaceType = this.constructNamespaceType(new NamespaceTypeConstructor() {
+			@Override
+			public void construct(NamespaceTypeContext context) {
+				// Construct the function
+				FunctionTypeConstructor function = context.addFunction(functionName);
+				if (constructor != null) {
+					constructor.construct(function);
+				}
+			}
+		});
 
-		// Return the task from the work
-		return workType.getManagedFunctionTypes()[0];
+		// Return the function from the namespace
+		return namespaceType.getManagedFunctionTypes()[0];
 	}
 
 }
