@@ -30,10 +30,12 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectT
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.model.desk.DeskChanges;
-import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
+import net.officefloor.model.impl.section.DeskChangesImpl;
+import net.officefloor.model.impl.section.DeskRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.section.DeskChanges;
+import net.officefloor.model.section.DeskModel;
 import net.officefloor.model.test.changes.AbstractChangesTestCase;
 
 /**

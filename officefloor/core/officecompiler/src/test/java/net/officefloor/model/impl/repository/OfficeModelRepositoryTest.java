@@ -21,7 +21,6 @@ import java.sql.Connection;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
-import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationItem;
 import net.officefloor.model.impl.repository.memory.MemoryConfigurationItem;
 import net.officefloor.model.office.AdministrationModel;
@@ -73,6 +72,7 @@ import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.office.PropertyModel;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
+import net.officefloor.model.section.DeskModel;
 
 /**
  * Tests the marshaling/unmarshaling of the {@link OfficeModel} via the

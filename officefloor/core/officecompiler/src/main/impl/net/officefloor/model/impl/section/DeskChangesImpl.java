@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.model.impl.desk;
+package net.officefloor.model.impl.section;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,38 +41,38 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.desk.DeskChanges;
-import net.officefloor.model.desk.DeskManagedObjectDependencyModel;
-import net.officefloor.model.desk.DeskManagedObjectDependencyToDeskManagedObjectModel;
-import net.officefloor.model.desk.DeskManagedObjectDependencyToExternalManagedObjectModel;
-import net.officefloor.model.desk.DeskManagedObjectModel;
-import net.officefloor.model.desk.DeskManagedObjectSourceFlowModel;
-import net.officefloor.model.desk.DeskManagedObjectSourceFlowToExternalFlowModel;
-import net.officefloor.model.desk.DeskManagedObjectSourceFlowToFunctionModel;
-import net.officefloor.model.desk.DeskManagedObjectSourceModel;
-import net.officefloor.model.desk.DeskManagedObjectToDeskManagedObjectSourceModel;
-import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.ExternalFlowModel;
-import net.officefloor.model.desk.ExternalManagedObjectModel;
-import net.officefloor.model.desk.FunctionEscalationModel;
-import net.officefloor.model.desk.FunctionEscalationToExternalFlowModel;
-import net.officefloor.model.desk.FunctionEscalationToFunctionModel;
-import net.officefloor.model.desk.FunctionFlowModel;
-import net.officefloor.model.desk.FunctionFlowToExternalFlowModel;
-import net.officefloor.model.desk.FunctionFlowToFunctionModel;
-import net.officefloor.model.desk.FunctionModel;
-import net.officefloor.model.desk.FunctionNamespaceModel;
-import net.officefloor.model.desk.FunctionToNextExternalFlowModel;
-import net.officefloor.model.desk.FunctionToNextFunctionModel;
-import net.officefloor.model.desk.ManagedFunctionModel;
-import net.officefloor.model.desk.ManagedFunctionObjectModel;
-import net.officefloor.model.desk.ManagedFunctionObjectToDeskManagedObjectModel;
-import net.officefloor.model.desk.ManagedFunctionObjectToExternalManagedObjectModel;
-import net.officefloor.model.desk.ManagedFunctionToFunctionModel;
-import net.officefloor.model.desk.PropertyModel;
 import net.officefloor.model.impl.change.AbstractChange;
 import net.officefloor.model.impl.change.DisconnectChange;
 import net.officefloor.model.impl.change.NoChange;
+import net.officefloor.model.section.DeskChanges;
+import net.officefloor.model.section.DeskManagedObjectDependencyModel;
+import net.officefloor.model.section.DeskManagedObjectDependencyToDeskManagedObjectModel;
+import net.officefloor.model.section.DeskManagedObjectDependencyToExternalManagedObjectModel;
+import net.officefloor.model.section.DeskManagedObjectModel;
+import net.officefloor.model.section.DeskManagedObjectSourceFlowModel;
+import net.officefloor.model.section.DeskManagedObjectSourceFlowToExternalFlowModel;
+import net.officefloor.model.section.DeskManagedObjectSourceFlowToFunctionModel;
+import net.officefloor.model.section.DeskManagedObjectSourceModel;
+import net.officefloor.model.section.DeskManagedObjectToDeskManagedObjectSourceModel;
+import net.officefloor.model.section.DeskModel;
+import net.officefloor.model.section.ExternalFlowModel;
+import net.officefloor.model.section.ExternalManagedObjectModel;
+import net.officefloor.model.section.FunctionEscalationModel;
+import net.officefloor.model.section.FunctionEscalationToExternalFlowModel;
+import net.officefloor.model.section.FunctionEscalationToFunctionModel;
+import net.officefloor.model.section.FunctionFlowModel;
+import net.officefloor.model.section.FunctionFlowToExternalFlowModel;
+import net.officefloor.model.section.FunctionFlowToFunctionModel;
+import net.officefloor.model.section.FunctionModel;
+import net.officefloor.model.section.FunctionNamespaceModel;
+import net.officefloor.model.section.FunctionToNextExternalFlowModel;
+import net.officefloor.model.section.FunctionToNextFunctionModel;
+import net.officefloor.model.section.ManagedFunctionModel;
+import net.officefloor.model.section.ManagedFunctionObjectModel;
+import net.officefloor.model.section.ManagedFunctionObjectToDeskManagedObjectModel;
+import net.officefloor.model.section.ManagedFunctionObjectToExternalManagedObjectModel;
+import net.officefloor.model.section.ManagedFunctionToFunctionModel;
+import net.officefloor.model.section.PropertyModel;
 
 /**
  * {@link DeskChanges} implementation.

@@ -24,9 +24,9 @@ import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.desk.DeskChanges;
-import net.officefloor.model.desk.FunctionNamespaceModel;
-import net.officefloor.model.desk.ManagedFunctionModel;
+import net.officefloor.model.section.DeskChanges;
+import net.officefloor.model.section.FunctionNamespaceModel;
+import net.officefloor.model.section.ManagedFunctionModel;
 
 /**
  * Tests the {@link DeskChanges}.

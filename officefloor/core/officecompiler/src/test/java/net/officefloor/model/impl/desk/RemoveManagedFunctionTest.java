@@ -18,9 +18,9 @@
 package net.officefloor.model.impl.desk;
 
 import net.officefloor.model.change.Change;
-import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.FunctionNamespaceModel;
-import net.officefloor.model.desk.ManagedFunctionModel;
+import net.officefloor.model.section.DeskModel;
+import net.officefloor.model.section.FunctionNamespaceModel;
+import net.officefloor.model.section.ManagedFunctionModel;
 
 /**
  * Tests removing a {@link ManagedFunctionModel} from a {@link FunctionNamespaceModel}.

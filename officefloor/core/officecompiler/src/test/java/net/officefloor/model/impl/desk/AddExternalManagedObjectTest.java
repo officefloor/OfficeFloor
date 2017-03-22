@@ -18,7 +18,7 @@
 package net.officefloor.model.impl.desk;
 
 import net.officefloor.model.change.Change;
-import net.officefloor.model.desk.ExternalManagedObjectModel;
+import net.officefloor.model.section.ExternalManagedObjectModel;
 
 /**
  * Tests adding an {@link ExternalManagedObjectModel}.

@@ -32,7 +32,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.model.desk.DeskModel;
+import net.officefloor.model.section.DeskModel;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;

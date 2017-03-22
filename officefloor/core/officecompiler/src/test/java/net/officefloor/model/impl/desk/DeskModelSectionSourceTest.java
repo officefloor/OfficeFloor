@@ -24,7 +24,8 @@ import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.model.desk.DeskModel;
+import net.officefloor.model.impl.section.DeskModelSectionSource;
+import net.officefloor.model.section.DeskModel;
 
 /**
  * Tests the {@link DeskModelSectionSource}.

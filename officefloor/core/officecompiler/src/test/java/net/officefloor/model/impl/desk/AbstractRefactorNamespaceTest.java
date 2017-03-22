@@ -31,14 +31,14 @@ import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.desk.DeskChanges;
-import net.officefloor.model.desk.FunctionEscalationModel;
-import net.officefloor.model.desk.FunctionFlowModel;
-import net.officefloor.model.desk.FunctionModel;
-import net.officefloor.model.desk.FunctionNamespaceModel;
-import net.officefloor.model.desk.ManagedFunctionModel;
-import net.officefloor.model.desk.ManagedFunctionObjectModel;
-import net.officefloor.model.desk.PropertyModel;
+import net.officefloor.model.section.DeskChanges;
+import net.officefloor.model.section.FunctionEscalationModel;
+import net.officefloor.model.section.FunctionFlowModel;
+import net.officefloor.model.section.FunctionModel;
+import net.officefloor.model.section.FunctionNamespaceModel;
+import net.officefloor.model.section.ManagedFunctionModel;
+import net.officefloor.model.section.ManagedFunctionObjectModel;
+import net.officefloor.model.section.PropertyModel;
 
 /**
  * Abstract functionality to test refactoring the {@link FunctionNamespaceModel}

@@ -22,11 +22,11 @@ import java.sql.SQLException;
 
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.FunctionFlowModel;
-import net.officefloor.model.desk.FunctionModel;
-import net.officefloor.model.desk.FunctionNamespaceModel;
-import net.officefloor.model.desk.ManagedFunctionModel;
+import net.officefloor.model.section.DeskModel;
+import net.officefloor.model.section.FunctionFlowModel;
+import net.officefloor.model.section.FunctionModel;
+import net.officefloor.model.section.FunctionNamespaceModel;
+import net.officefloor.model.section.ManagedFunctionModel;
 
 /**
  * Tests adding a {@link FunctionModel}.

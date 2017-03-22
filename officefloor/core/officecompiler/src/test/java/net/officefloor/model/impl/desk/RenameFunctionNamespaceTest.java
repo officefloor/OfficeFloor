@@ -18,8 +18,8 @@
 package net.officefloor.model.impl.desk;
 
 import net.officefloor.model.change.Change;
-import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.FunctionNamespaceModel;
+import net.officefloor.model.section.DeskModel;
+import net.officefloor.model.section.FunctionNamespaceModel;
 
 /**
  * Tests renaming the {@link FunctionNamespaceModel}.

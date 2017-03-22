@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="external flow name" />
-	<field type="String" name="argument type" />
-	<list type="FunctionFlowToExternalFlowModel" name="function flow" />
-	<list type="FunctionToNextExternalFlowModel" name="previous function" />
-	<list type="FunctionEscalationToExternalFlowModel" name="function escalation" />
-	<list type="DeskManagedObjectSourceFlowToExternalFlowModel" name="desk managed object source flow" />
-</model>

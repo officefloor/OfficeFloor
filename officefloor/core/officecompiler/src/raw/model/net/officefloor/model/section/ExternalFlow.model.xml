@@ -5,4 +5,8 @@
 	<list type="SubSectionOutputToExternalFlowModel" name="sub section output" />
 	<list type="SectionManagedObjectSourceFlowToExternalFlowModel"
 		name="section managed object source flow" />
+	<list type="FunctionFlowToExternalFlowModel" name="function flow" />
+	<list type="FunctionToNextExternalFlowModel" name="previous function" />
+	<list type="FunctionEscalationToExternalFlowModel" name="function escalation" />
+	<list type="DeskManagedObjectSourceFlowToExternalFlowModel" name="desk managed object source flow" />
 </model>

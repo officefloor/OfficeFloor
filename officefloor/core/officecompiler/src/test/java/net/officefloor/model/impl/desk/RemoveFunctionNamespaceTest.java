@@ -19,9 +19,9 @@ package net.officefloor.model.impl.desk;
 
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.FunctionModel;
-import net.officefloor.model.desk.FunctionNamespaceModel;
+import net.officefloor.model.section.DeskModel;
+import net.officefloor.model.section.FunctionModel;
+import net.officefloor.model.section.FunctionNamespaceModel;
 
 /**
  * Tests removing a {@link FunctionNamespaceModel}.

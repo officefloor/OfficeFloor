@@ -19,9 +19,9 @@ package net.officefloor.model.impl.desk;
 
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.ManagedFunctionModel;
-import net.officefloor.model.desk.ManagedFunctionObjectModel;
+import net.officefloor.model.section.DeskModel;
+import net.officefloor.model.section.ManagedFunctionModel;
+import net.officefloor.model.section.ManagedFunctionObjectModel;
 
 /**
  * Tests setting the {@link Object} as parameter.
