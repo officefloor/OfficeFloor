@@ -74,17 +74,15 @@ public class IntegrateSuppliedManagedObjectTest extends OfficeFrameTestCase {
 		final MockConnection connection = this.createMock(MockConnection.class);
 		final MockQueue queue = this.createMock(MockQueue.class);
 
-		final PreparedStatement statement = this
-				.createMock(PreparedStatement.class);
+		final PreparedStatement statement = this.createMock(PreparedStatement.class);
 		final Xid xid = this.createMock(Xid.class);
 
 		// Setup the supplier
-		MockInputManagedObjectSource inputManagedObject = new MockInputManagedObjectSource(
-				queue);
+		MockInputManagedObjectSource inputManagedObject = new MockInputManagedObjectSource(queue);
 		ManagedObjectSourceWirer inputWirer = new ManagedObjectSourceWirer() {
 			@Override
 			public void wire(ManagedObjectSourceWirerContext context) {
-				context.mapFlow(InputFlows.INPUT.name(), "SECTION", "task");
+				context.mapFlow(InputFlows.INPUT.name(), "SECTION", "function");
 			}
 		};
 		MockSupplierSource.reset(connection, inputManagedObject, inputWirer);
@@ -96,9 +94,7 @@ public class IntegrateSuppliedManagedObjectTest extends OfficeFrameTestCase {
 		connection.start(xid, 0);
 		queue.start(xid, 0);
 		this.recordReturn(queue, queue.peek(), "QUEUED_VALUE");
-		this.recordReturn(connection,
-				connection.prepareStatement("UPDATE TEST WHERE PASS = 'YES'"),
-				statement);
+		this.recordReturn(connection, connection.prepareStatement("UPDATE TEST WHERE PASS = 'YES'"), statement);
 		this.recordReturn(statement, statement.execute(), false);
 		this.recordReturn(connection, connection.prepare(xid), XAResource.XA_OK);
 		this.recordReturn(queue, queue.prepare(xid), XAResource.XA_OK);
@@ -107,16 +103,12 @@ public class IntegrateSuppliedManagedObjectTest extends OfficeFrameTestCase {
 
 		// Create the application
 		AutoWireApplication application = new AutoWireOfficeFloorSource();
-		AutoWireSection section = application
-				.addSection("SECTION", ClassSectionSource.class.getName(),
-						MockSection.class.getName());
-		AutoWireSupplier supplier = application
-				.addSupplier(MockSupplierSource.class.getName());
+		AutoWireSection section = application.addSection("SECTION", ClassSectionSource.class.getName(),
+				MockSection.class.getName());
+		AutoWireSupplier supplier = application.addSupplier(MockSupplierSource.class.getName());
 		supplier.addProperty(MockSupplierSource.PROPERTY_TEST, "supplier.value");
-		AutoWireGovernance governance = application.addGovernance(
-				"TRANSACTION", ClassGovernanceSource.class.getName());
-		governance.addProperty(ClassGovernanceSource.CLASS_NAME_PROPERTY_NAME,
-				MockGovernance.class.getName());
+		AutoWireGovernance governance = application.addGovernance("TRANSACTION", ClassGovernanceSource.class.getName());
+		governance.addProperty(ClassGovernanceSource.CLASS_NAME_PROPERTY_NAME, MockGovernance.class.getName());
 		governance.governSection(section);
 
 		// Test
@@ -143,8 +135,7 @@ public class IntegrateSuppliedManagedObjectTest extends OfficeFrameTestCase {
 		 * @param connection
 		 *            {@link MockConnection}.
 		 */
-		public void task(@Parameter String parameter, Queue<?> queue,
-				Connection connection) throws SQLException {
+		public void function(@Parameter String parameter, Queue<?> queue, Connection connection) throws SQLException {
 
 			// Ensure correct input parameter
 			assertEquals("Incorrect parameter", "TEST", parameter);
@@ -153,8 +144,7 @@ public class IntegrateSuppliedManagedObjectTest extends OfficeFrameTestCase {
 			assertEquals("Incorrect queued value", "QUEUED_VALUE", queue.peek());
 
 			// Ensure can interact with connection
-			connection.prepareStatement("UPDATE TEST WHERE PASS = 'YES'")
-					.execute();
+			connection.prepareStatement("UPDATE TEST WHERE PASS = 'YES'").execute();
 		}
 	}
 
@@ -265,8 +255,7 @@ public class IntegrateSuppliedManagedObjectTest extends OfficeFrameTestCase {
 		 * @param inputWirer
 		 *            Input {@link ManagedObjectSourceWirer}.
 		 */
-		public static void reset(Connection connection,
-				MockInputManagedObjectSource inputManagedObject,
+		public static void reset(Connection connection, MockInputManagedObjectSource inputManagedObject,
 				ManagedObjectSourceWirer inputWirer) {
 			MockSupplierSource.connection = connection;
 			MockSupplierSource.inputManagedObject = inputManagedObject;
@@ -286,16 +275,13 @@ public class IntegrateSuppliedManagedObjectTest extends OfficeFrameTestCase {
 		public void supply(SupplierSourceContext context) throws Exception {
 
 			// Ensure have property
-			assertEquals("Incorrect property value", "supplier.value",
-					context.getProperty(PROPERTY_TEST));
+			assertEquals("Incorrect property value", "supplier.value", context.getProperty(PROPERTY_TEST));
 
 			// Supply the managed objects
-			context.addManagedObject(new SingletonManagedObjectSource(
-					connection), null, new AutoWire(Connection.class));
-			AutoWireObject object = context.addManagedObject(
-					inputManagedObject, inputWirer, new AutoWire(Queue.class));
-			object.addProperty(MockInputManagedObjectSource.PROPERTY_TEST,
-					"mo.value");
+			context.addManagedObject(new SingletonManagedObjectSource(connection), null,
+					new AutoWire(Connection.class));
+			AutoWireObject object = context.addManagedObject(inputManagedObject, inputWirer, new AutoWire(Queue.class));
+			object.addProperty(MockInputManagedObjectSource.PROPERTY_TEST, "mo.value");
 		}
 	}
 
@@ -310,9 +296,8 @@ public class IntegrateSuppliedManagedObjectTest extends OfficeFrameTestCase {
 	 * Mock Input {@link ManagedObject}.
 	 */
 	@TestSource
-	public static class MockInputManagedObjectSource extends
-			AbstractManagedObjectSource<None, InputFlows> implements
-			ManagedObject, ExtensionInterfaceFactory<XAResource> {
+	public static class MockInputManagedObjectSource extends AbstractManagedObjectSource<None, InputFlows>
+			implements ManagedObject, ExtensionInterfaceFactory<XAResource> {
 
 		/**
 		 * {@link Property} to test provided in supplying.
@@ -346,8 +331,7 @@ public class IntegrateSuppliedManagedObjectTest extends OfficeFrameTestCase {
 		 *            Parameter.
 		 */
 		public void invokeProcess(String parameter) {
-			this.executeContext.invokeProcess(InputFlows.INPUT, parameter,
-					this, 0);
+			this.executeContext.invokeProcess(InputFlows.INPUT, parameter, this, 0, null);
 		}
 
 		/*
@@ -360,14 +344,11 @@ public class IntegrateSuppliedManagedObjectTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		protected void loadMetaData(MetaDataContext<None, InputFlows> context)
-				throws Exception {
-			ManagedObjectSourceContext<InputFlows> mosContext = context
-					.getManagedObjectSourceContext();
+		protected void loadMetaData(MetaDataContext<None, InputFlows> context) throws Exception {
+			ManagedObjectSourceContext<InputFlows> mosContext = context.getManagedObjectSourceContext();
 
 			// Ensure have property
-			assertEquals("Incorrect property value", "mo.value",
-					mosContext.getProperty(PROPERTY_TEST));
+			assertEquals("Incorrect property value", "mo.value", mosContext.getProperty(PROPERTY_TEST));
 
 			// Provide the meta-data
 			context.setObjectClass(Queue.class);
@@ -376,8 +357,7 @@ public class IntegrateSuppliedManagedObjectTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void start(ManagedObjectExecuteContext<InputFlows> context)
-				throws Exception {
+		public void start(ManagedObjectExecuteContext<InputFlows> context) throws Exception {
 			this.executeContext = context;
 		}
 

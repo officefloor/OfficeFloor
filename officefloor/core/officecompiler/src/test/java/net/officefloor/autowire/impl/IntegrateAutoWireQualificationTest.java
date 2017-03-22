@@ -71,13 +71,12 @@ public class IntegrateAutoWireQualificationTest extends OfficeFrameTestCase {
 		app.addObject(a, new AutoWire(MockA.class, Connection.class));
 		app.addObject(b, new AutoWire(MockB.class, Connection.class));
 		app.addObject(d, new AutoWire(Connection.class));
-		app.addSection("TEST", ClassSectionSource.class.getName(),
-				MockSection.class.getName());
+		app.addSection("TEST", ClassSectionSource.class.getName(), MockSection.class.getName());
 		app.assignDefaultTeam(PassiveTeamSource.class.getName());
 
-		// Ensure invoke task with appropriate dependencies
+		// Ensure invoke function with appropriate dependencies
 		AutoWireOfficeFloor officeFloor = app.openOfficeFloor();
-		officeFloor.invokeTask("TEST.WORK", "task", null);
+		officeFloor.invokeFunction("TEST.NAMESPACE.function", null);
 		officeFloor.closeOfficeFloor();
 
 		// Verify
@@ -118,8 +117,8 @@ public class IntegrateAutoWireQualificationTest extends OfficeFrameTestCase {
 	 */
 	public static class MockSection {
 
-		public void task(@MockA Connection a, @MockB Connection b,
-				@MockC Connection c, Connection d) throws SQLException {
+		public void function(@MockA Connection a, @MockB Connection b, @MockC Connection c, Connection d)
+				throws SQLException {
 			assertEquals("Qualified A", "A", a.nativeSQL("a"));
 			assertEquals("Qualified B", "B", b.nativeSQL("b"));
 			assertEquals("Default unqualified C", "C", c.nativeSQL("c"));

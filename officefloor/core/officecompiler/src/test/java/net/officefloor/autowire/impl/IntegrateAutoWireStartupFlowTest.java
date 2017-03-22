@@ -20,7 +20,6 @@ package net.officefloor.autowire.impl;
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.frame.api.function.Work;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -40,13 +39,12 @@ public class IntegrateAutoWireStartupFlowTest extends OfficeFrameTestCase {
 		final MockObject object = this.createMock(MockObject.class);
 
 		// Record start-up trigger
-		object.doStartupTask();
+		object.doStartupFunction();
 
 		// Create the office floor
 		AutoWireApplication app = new AutoWireOfficeFloorSource();
-		AutoWireSection section = app.addSection("TEST",
-				ClassSectionSource.class.getName(), MockWork.class.getName());
-		app.addStartupFlow(section, "task");
+		AutoWireSection section = app.addSection("TEST", ClassSectionSource.class.getName(), MockClass.class.getName());
+		app.addStartupFlow(section, "function");
 		app.addObject(object, new AutoWire(MockObject.class));
 		app.assignDefaultTeam(PassiveTeamSource.class.getName());
 
@@ -57,11 +55,11 @@ public class IntegrateAutoWireStartupFlowTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Mock {@link Work} for validating start-up triggered.
+	 * Mock {@link Class} for validating start-up triggered.
 	 */
-	public static class MockWork {
-		public void task(MockObject object) {
-			object.doStartupTask();
+	public static class MockClass {
+		public void function(MockObject object) {
+			object.doStartupFunction();
 		}
 	}
 
@@ -69,7 +67,7 @@ public class IntegrateAutoWireStartupFlowTest extends OfficeFrameTestCase {
 	 * Mock object for validating start-up triggered.
 	 */
 	public static interface MockObject {
-		void doStartupTask();
+		void doStartupFunction();
 	}
 
 }

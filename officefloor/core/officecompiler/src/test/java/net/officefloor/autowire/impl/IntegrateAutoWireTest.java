@@ -50,16 +50,17 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 	private static volatile Connection dependencyObject = null;
 
 	/**
-	 * {@link Thread} instances that executed the {@link ManagedFunction} instances.
+	 * {@link Thread} instances that executed the {@link ManagedFunction}
+	 * instances.
 	 */
-	private static final List<Thread> threadForTask = new ArrayList<Thread>(2);
+	private static final List<Thread> threadForFunction = new ArrayList<Thread>(2);
 
 	/**
 	 * Registers the {@link Thread} for the {@link ManagedFunction}.
 	 */
-	private static void registerTaskThread() {
-		synchronized (threadForTask) {
-			threadForTask.add(Thread.currentThread());
+	private static void registerFunctionThread() {
+		synchronized (threadForFunction) {
+			threadForFunction.add(Thread.currentThread());
 		}
 	}
 
@@ -88,32 +89,30 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 		// Open the OfficeFloor
 		this.officeFloor = source.openOfficeFloor();
 
-		// Run the task
-		this.officeFloor.invokeTask("one.WORK", "doInput", value);
+		// Run the function
+		this.officeFloor.invokeFunction("one.NAMESPACE.doInput", value);
 
 		// Close the OfficeFloor
 		this.officeFloor.closeOfficeFloor();
 
-		// Should now not be able to invoke task
+		// Should now not be able to invoke function
 		try {
-			this.officeFloor.invokeTask("one.WORK", "doInput", value);
-			fail("Should not be able to invoke task after closing OfficeFloor");
+			this.officeFloor.invokeFunction("one.NAMESPACE.doInput", value);
+			fail("Should not be able to invoke function after closing OfficeFloor");
 		} catch (IllegalStateException ex) {
-			assertEquals("Incorrect cause",
-					"Must open the Office Floor before obtaining Offices",
-					ex.getMessage());
+			assertEquals("Incorrect cause", "Must open the Office Floor before obtaining Offices", ex.getMessage());
 		}
 	}
 
 	/**
 	 * Ensure can integrate on running a {@link ManagedFunction}.
 	 */
-	public void testIntegrationByTask() throws Exception {
+	public void testIntegrationByFunction() throws Exception {
 
 		// Ensure in valid state for running test
-		synchronized (threadForTask) {
+		synchronized (threadForFunction) {
 			dependencyObject = null;
-			threadForTask.clear();
+			threadForFunction.clear();
 		}
 
 		// Create the office floor
@@ -122,22 +121,22 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 		AutoWireOfficeFloorSource source = this.createSource(value, connection);
 		this.officeFloor = source.openOfficeFloor();
 
-		// Invoke the task
-		this.officeFloor.invokeTask("one.WORK", "doInput", value);
+		// Invoke the function
+		this.officeFloor.invokeFunction("one.NAMESPACE.doInput", value);
 
 		// Ensure correct value created
 		assertEquals("Incorrect value", "doInput-1", value.value);
 
 		// Validate object and teams
-		synchronized (threadForTask) {
+		synchronized (threadForFunction) {
 
 			// Ensure appropriate object
 			assertEquals("Incorrect dependency", connection, dependencyObject);
 
 			// Ensure appropriate threads executing teams
-			assertEquals("Incorrect number of teams", 2, threadForTask.size());
-			assertTrue("Should be different threads executing the tasks",
-					threadForTask.get(0) != threadForTask.get(1));
+			assertEquals("Incorrect number of teams", 2, threadForFunction.size());
+			assertTrue("Should be different threads executing the functions",
+					threadForFunction.get(0) != threadForFunction.get(1));
 		}
 	}
 
@@ -158,18 +157,15 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
 
 		// Obtain the MBean
-		AutoWireManagementMBean[] mbeans = AutoWireManagement
-				.getAutoWireManagers();
+		AutoWireManagementMBean[] mbeans = AutoWireManagement.getAutoWireManagers();
 		assertEquals("Incorrect number of OfficeFloor MBeans", 1, mbeans.length);
 
 		// Close the OfficeFloor
 		officeFloor.closeOfficeFloor();
 
 		// Ensure MBean unregistered
-		AutoWireManagementMBean[] remainingMBeans = AutoWireManagement
-				.getAutoWireManagers();
-		assertEquals("Should unregister OfficeFloor MBean", 0,
-				remainingMBeans.length);
+		AutoWireManagementMBean[] remainingMBeans = AutoWireManagement.getAutoWireManagers();
+		assertEquals("Should unregister OfficeFloor MBean", 0, remainingMBeans.length);
 	}
 
 	/**
@@ -181,22 +177,18 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 	 *            {@link Connection}.
 	 * @return {@link AutoWireOfficeFloorSource} for testing.
 	 */
-	private AutoWireOfficeFloorSource createSource(Value value,
-			Connection connection) {
+	private AutoWireOfficeFloorSource createSource(Value value, Connection connection) {
 
 		// Create the office floor
 		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
 
 		// Indicate fail immediately
-		source.getOfficeFloorCompiler().setCompilerIssues(
-				new FailTestCompilerIssues());
+		source.getOfficeFloorCompiler().setCompilerIssues(new FailTestCompilerIssues());
 
 		// Add sections
-		AutoWireSection one = source.addSection("one",
-				ClassSectionSource.class.getName(),
+		AutoWireSection one = source.addSection("one", ClassSectionSource.class.getName(),
 				MockSectionOne.class.getName());
-		AutoWireSection two = source.addSection("two",
-				ClassSectionSource.class.getName(),
+		AutoWireSection two = source.addSection("two", ClassSectionSource.class.getName(),
 				MockSectionTwo.class.getName());
 		source.link(one, "output", two, "doInput");
 
@@ -206,10 +198,9 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 		// Add the Connection
 		source.addObject(connection, new AutoWire(Connection.class));
 
-		// Provide teams for separate tasks
+		// Provide teams for separate functions
 		source.assignDefaultTeam(OnePersonTeamSource.class.getName());
-		source.assignTeam(OnePersonTeamSource.class.getName(), new AutoWire(
-				Connection.class));
+		source.assignTeam(OnePersonTeamSource.class.getName(), new AutoWire(Connection.class));
 
 		// Return the office floor source
 		return source;
@@ -228,7 +219,7 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 	public static class MockSectionOne {
 		@NextFunction("output")
 		public Integer doInput(@Parameter Value value) {
-			registerTaskThread();
+			registerFunctionThread();
 			value.value = "doInput";
 			return new Integer(1);
 		}
@@ -243,10 +234,10 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 		private Value value;
 
 		public void doInput(@Parameter Integer parameter, Connection connection) {
-			synchronized (threadForTask) {
+			synchronized (threadForFunction) {
 				dependencyObject = connection;
 			}
-			registerTaskThread();
+			registerFunctionThread();
 			this.value.value += "-" + String.valueOf(parameter.intValue());
 		}
 	}
