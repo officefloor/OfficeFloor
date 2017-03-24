@@ -18,7 +18,7 @@
 package net.officefloor.model.impl.section;
 
 import net.officefloor.model.change.Change;
-import net.officefloor.model.section.DeskModel;
+import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.ExternalManagedObjectModel;
 
 /**
@@ -30,7 +30,7 @@ public class RemoveExternalManagedObjectTest extends
 		AbstractSectionChangesTestCase {
 
 	/**
-	 * Initiate to use specific setup {@link DeskModel}.
+	 * Initiate to use specific setup {@link SectionModel}.
 	 */
 	public RemoveExternalManagedObjectTest() {
 		super(true);

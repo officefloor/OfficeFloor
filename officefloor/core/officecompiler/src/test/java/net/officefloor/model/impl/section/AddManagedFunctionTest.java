@@ -28,7 +28,7 @@ import net.officefloor.model.section.ManagedFunctionObjectModel;
  * 
  * @author Daniel Sagenschneider
  */
-public class AddManagedFunctionTest extends AbstractDeskChangesTestCase {
+public class AddManagedFunctionTest extends AbstractSectionChangesTestCase {
 
 	/**
 	 * {@link FunctionNamespaceModel}.
@@ -156,7 +156,8 @@ public class AddManagedFunctionTest extends AbstractDeskChangesTestCase {
 
 		// Create the change to add the function
 		Change<ManagedFunctionModel> change = this.operations.addManagedFunction(this.namespace, function);
-		this.assertChange(change, null, "Add managed function FUNCTION", false, "Function FUNCTION already added to namespace NAMESPACE");
+		this.assertChange(change, null, "Add managed function FUNCTION", false,
+				"Function FUNCTION already added to namespace NAMESPACE");
 	}
 
 }

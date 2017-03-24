@@ -25,12 +25,28 @@ import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.ExternalManagedObjectModel;
+import net.officefloor.model.section.FunctionEscalationModel;
+import net.officefloor.model.section.FunctionEscalationToExternalFlowModel;
+import net.officefloor.model.section.FunctionEscalationToFunctionModel;
+import net.officefloor.model.section.FunctionFlowModel;
+import net.officefloor.model.section.FunctionFlowToExternalFlowModel;
+import net.officefloor.model.section.FunctionFlowToFunctionModel;
+import net.officefloor.model.section.FunctionModel;
+import net.officefloor.model.section.FunctionNamespaceModel;
+import net.officefloor.model.section.FunctionToNextExternalFlowModel;
+import net.officefloor.model.section.FunctionToNextFunctionModel;
+import net.officefloor.model.section.ManagedFunctionModel;
+import net.officefloor.model.section.ManagedFunctionObjectModel;
+import net.officefloor.model.section.ManagedFunctionObjectToExternalManagedObjectModel;
+import net.officefloor.model.section.ManagedFunctionObjectToSectionManagedObjectModel;
+import net.officefloor.model.section.ManagedFunctionToFunctionModel;
 import net.officefloor.model.section.SectionManagedObjectDependencyModel;
 import net.officefloor.model.section.SectionManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.section.SectionManagedObjectDependencyToSectionManagedObjectModel;
 import net.officefloor.model.section.SectionManagedObjectModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowToExternalFlowModel;
+import net.officefloor.model.section.SectionManagedObjectSourceFlowToFunctionModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowToSubSectionInputModel;
 import net.officefloor.model.section.SectionManagedObjectSourceModel;
 import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectSourceModel;
@@ -72,58 +88,22 @@ public class SectionRepositoryImpl implements SectionRepository {
 	 */
 
 	@Override
-	public SectionModel retrieveSection(ConfigurationItem configuration)
-			throws Exception {
+	public SectionModel retrieveSection(ConfigurationItem configuration) throws Exception {
 
 		// Load the section from the configuration
-		SectionModel section = this.modelRepository.retrieve(
-				new SectionModel(), configuration);
+		SectionModel section = this.modelRepository.retrieve(new SectionModel(), configuration);
+
+		// Create the set of functions
+		Map<String, FunctionModel> functions = new HashMap<String, FunctionModel>();
+		for (FunctionModel function : section.getFunctions()) {
+			functions.put(function.getFunctionName(), function);
+		}
 
 		// Create the map of inputs
 		DoubleKeyMap<String, String, SubSectionInputModel> inputs = new DoubleKeyMap<String, String, SubSectionInputModel>();
 		for (SubSectionModel subSection : section.getSubSections()) {
 			for (SubSectionInputModel input : subSection.getSubSectionInputs()) {
-				inputs.put(subSection.getSubSectionName(), input
-						.getSubSectionInputName(), input);
-			}
-		}
-
-		// Connect the outputs to the inputs
-		for (SubSectionModel subSection : section.getSubSections()) {
-			for (SubSectionOutputModel output : subSection
-					.getSubSectionOutputs()) {
-				SubSectionOutputToSubSectionInputModel conn = output
-						.getSubSectionInput();
-				if (conn != null) {
-					SubSectionInputModel input = inputs
-							.get(conn.getSubSectionName(), conn
-									.getSubSectionInputName());
-					if (input != null) {
-						conn.setSubSectionOutput(output);
-						conn.setSubSectionInput(input);
-						conn.connect();
-					}
-				}
-			}
-		}
-
-		// Connect the managed object source flows to the inputs
-		for (SectionManagedObjectSourceModel mos : section
-				.getSectionManagedObjectSources()) {
-			for (SectionManagedObjectSourceFlowModel mosFlow : mos
-					.getSectionManagedObjectSourceFlows()) {
-				SectionManagedObjectSourceFlowToSubSectionInputModel conn = mosFlow
-						.getSubSectionInput();
-				if (conn != null) {
-					SubSectionInputModel input = inputs
-							.get(conn.getSubSectionName(), conn
-									.getSubSectionInputName());
-					if (input != null) {
-						conn.setSectionManagedObjectSourceFlow(mosFlow);
-						conn.setSubSectionInput(input);
-						conn.connect();
-					}
-				}
+				inputs.put(subSection.getSubSectionName(), input.getSubSectionInputName(), input);
 			}
 		}
 
@@ -133,15 +113,139 @@ public class SectionRepositoryImpl implements SectionRepository {
 			externalFlows.put(externalFlow.getExternalFlowName(), externalFlow);
 		}
 
+		// Connect the function to its next function
+		for (FunctionModel previous : section.getFunctions()) {
+			// Obtain the connection
+			FunctionToNextFunctionModel conn = previous.getNextFunction();
+			if (conn != null) {
+				// Obtain the next function
+				FunctionModel next = functions.get(conn.getNextFunctionName());
+				if (next != null) {
+					// Connect
+					conn.setPreviousFunction(previous);
+					conn.setNextFunction(next);
+					conn.connect();
+				}
+			}
+		}
+
+		// TODO Connect the function to its next input
+
+		// Connect the functions to next external flow
+		for (FunctionModel function : section.getFunctions()) {
+			// Obtain the connection
+			FunctionToNextExternalFlowModel conn = function.getNextExternalFlow();
+			if (conn != null) {
+				// Obtain the external flow
+				ExternalFlowModel extFlow = externalFlows.get(conn.getExternalFlowName());
+				if (extFlow != null) {
+					// Connect
+					conn.setPreviousFunction(function);
+					conn.setNextExternalFlow(extFlow);
+					conn.connect();
+				}
+			}
+		}
+
+		// Connect the function flows to functions
+		for (FunctionModel function : section.getFunctions()) {
+			for (FunctionFlowModel flow : function.getFunctionFlows()) {
+				// Obtain the connection
+				FunctionFlowToFunctionModel conn = flow.getFunction();
+				if (conn != null) {
+					// Obtain the function
+					FunctionModel flowFunction = functions.get(conn.getFunctionName());
+					if (flowFunction != null) {
+						// Connect
+						conn.setFunctionFlow(flow);
+						conn.setFunction(flowFunction);
+						conn.connect();
+					}
+				}
+			}
+		}
+
+		// TODO Connect the function flows to inputs
+
+		// Connect the function flows to external flow
+		for (FunctionModel function : section.getFunctions()) {
+			for (FunctionFlowModel flow : function.getFunctionFlows()) {
+				// Obtain the connection
+				FunctionFlowToExternalFlowModel conn = flow.getExternalFlow();
+				if (conn != null) {
+					// Obtain the external flow
+					ExternalFlowModel extFlow = externalFlows.get(conn.getExternalFlowName());
+					if (extFlow != null) {
+						// Connect
+						conn.setFunctionFlow(flow);
+						conn.setExternalFlow(extFlow);
+						conn.connect();
+					}
+				}
+			}
+		}
+
+		// Connect the escalation to functions
+		for (FunctionModel function : section.getFunctions()) {
+			for (FunctionEscalationModel escalation : function.getFunctionEscalations()) {
+				// Obtain the connection
+				FunctionEscalationToFunctionModel conn = escalation.getFunction();
+				if (conn != null) {
+					// Obtain the handling function
+					FunctionModel escalationFunction = functions.get(conn.getFunctionName());
+					if (escalationFunction != null) {
+						// Connect
+						conn.setEscalation(escalation);
+						conn.setFunction(escalationFunction);
+						conn.connect();
+					}
+				}
+			}
+		}
+
+		// TODO Connect the escalation to inputs
+
+		// Connect the escalation to external flows
+		for (FunctionModel function : section.getFunctions()) {
+			for (FunctionEscalationModel escalation : function.getFunctionEscalations()) {
+				// Obtain the connection
+				FunctionEscalationToExternalFlowModel conn = escalation.getExternalFlow();
+				if (conn != null) {
+					// Obtain the external flow
+					ExternalFlowModel externalFlow = externalFlows.get(conn.getExternalFlowName());
+					if (externalFlow != null) {
+						// Connect
+						conn.setFunctionEscalation(escalation);
+						conn.setExternalFlow(externalFlow);
+						conn.connect();
+					}
+				}
+			}
+		}
+
+		// TODO Connect the outputs to functions
+
+		// Connect the outputs to the inputs
+		for (SubSectionModel subSection : section.getSubSections()) {
+			for (SubSectionOutputModel output : subSection.getSubSectionOutputs()) {
+				SubSectionOutputToSubSectionInputModel conn = output.getSubSectionInput();
+				if (conn != null) {
+					SubSectionInputModel input = inputs.get(conn.getSubSectionName(), conn.getSubSectionInputName());
+					if (input != null) {
+						conn.setSubSectionOutput(output);
+						conn.setSubSectionInput(input);
+						conn.connect();
+					}
+				}
+			}
+		}
+
 		// Connect the outputs to the external flows
 		for (SubSectionModel subSection : section.getSubSections()) {
-			for (SubSectionOutputModel output : subSection
-					.getSubSectionOutputs()) {
-				SubSectionOutputToExternalFlowModel conn = output
-						.getExternalFlow();
+			for (SubSectionOutputModel output : subSection.getSubSectionOutputs()) {
+				SubSectionOutputToExternalFlowModel conn = output.getExternalFlow();
 				if (conn != null) {
-					ExternalFlowModel externalFlow = externalFlows.get(conn
-							.getExternalFlowName());
+					ExternalFlowModel externalFlow = externalFlows.get(conn.getExternalFlowName());
 					if (externalFlow != null) {
 						conn.setSubSectionOutput(output);
 						conn.setExternalFlow(externalFlow);
@@ -151,16 +255,42 @@ public class SectionRepositoryImpl implements SectionRepository {
 			}
 		}
 
-		// Connect the managed object source flows to the external flows
-		for (SectionManagedObjectSourceModel mos : section
-				.getSectionManagedObjectSources()) {
-			for (SectionManagedObjectSourceFlowModel mosFlow : mos
-					.getSectionManagedObjectSourceFlows()) {
-				SectionManagedObjectSourceFlowToExternalFlowModel conn = mosFlow
-						.getExternalFlow();
+		// Connect the managed object source flows to functions
+		for (SectionManagedObjectSourceModel mos : section.getSectionManagedObjectSources()) {
+			for (SectionManagedObjectSourceFlowModel mosFlow : mos.getSectionManagedObjectSourceFlows()) {
+				SectionManagedObjectSourceFlowToFunctionModel conn = mosFlow.getFunction();
 				if (conn != null) {
-					ExternalFlowModel externalFlow = externalFlows.get(conn
-							.getExternalFlowName());
+					FunctionModel function = functions.get(conn.getFunctionName());
+					if (function != null) {
+						conn.setSectionManagedObjectSourceFlow(mosFlow);
+						conn.setFunction(function);
+						conn.connect();
+					}
+				}
+			}
+		}
+
+		// Connect the managed object source flows to the inputs
+		for (SectionManagedObjectSourceModel mos : section.getSectionManagedObjectSources()) {
+			for (SectionManagedObjectSourceFlowModel mosFlow : mos.getSectionManagedObjectSourceFlows()) {
+				SectionManagedObjectSourceFlowToSubSectionInputModel conn = mosFlow.getSubSectionInput();
+				if (conn != null) {
+					SubSectionInputModel input = inputs.get(conn.getSubSectionName(), conn.getSubSectionInputName());
+					if (input != null) {
+						conn.setSectionManagedObjectSourceFlow(mosFlow);
+						conn.setSubSectionInput(input);
+						conn.connect();
+					}
+				}
+			}
+		}
+
+		// Connect the managed object source flows to the external flows
+		for (SectionManagedObjectSourceModel mos : section.getSectionManagedObjectSources()) {
+			for (SectionManagedObjectSourceFlowModel mosFlow : mos.getSectionManagedObjectSourceFlows()) {
+				SectionManagedObjectSourceFlowToExternalFlowModel conn = mosFlow.getExternalFlow();
+				if (conn != null) {
+					ExternalFlowModel externalFlow = externalFlows.get(conn.getExternalFlowName());
 					if (externalFlow != null) {
 						conn.setSectionManagedObjectSourceFlow(mosFlow);
 						conn.setExternalFlow(externalFlow);
@@ -172,16 +302,13 @@ public class SectionRepositoryImpl implements SectionRepository {
 
 		// Create the map of managed object sources
 		Map<String, SectionManagedObjectSourceModel> managedObjectSources = new HashMap<String, SectionManagedObjectSourceModel>();
-		for (SectionManagedObjectSourceModel mos : section
-				.getSectionManagedObjectSources()) {
-			managedObjectSources.put(mos.getSectionManagedObjectSourceName(),
-					mos);
+		for (SectionManagedObjectSourceModel mos : section.getSectionManagedObjectSources()) {
+			managedObjectSources.put(mos.getSectionManagedObjectSourceName(), mos);
 		}
 
 		// Connect the managed objects to their managed object sources
 		for (SectionManagedObjectModel mo : section.getSectionManagedObjects()) {
-			SectionManagedObjectToSectionManagedObjectSourceModel conn = mo
-					.getSectionManagedObjectSource();
+			SectionManagedObjectToSectionManagedObjectSourceModel conn = mo.getSectionManagedObjectSource();
 			if (conn != null) {
 				SectionManagedObjectSourceModel mos = managedObjectSources
 						.get(conn.getSectionManagedObjectSourceName());
@@ -195,27 +322,42 @@ public class SectionRepositoryImpl implements SectionRepository {
 
 		// Create the map of external managed objects
 		Map<String, ExternalManagedObjectModel> externalMos = new HashMap<String, ExternalManagedObjectModel>();
-		for (ExternalManagedObjectModel externalMo : section
-				.getExternalManagedObjects()) {
-			externalMos.put(externalMo.getExternalManagedObjectName(),
-					externalMo);
+		for (ExternalManagedObjectModel externalMo : section.getExternalManagedObjects()) {
+			externalMos.put(externalMo.getExternalManagedObjectName(), externalMo);
 		}
 
 		// Connect the objects to external managed objects
 		for (SubSectionModel subSection : section.getSubSections()) {
-			for (SubSectionObjectModel object : subSection
-					.getSubSectionObjects()) {
-				SubSectionObjectToExternalManagedObjectModel conn = object
-						.getExternalManagedObject();
+			for (SubSectionObjectModel object : subSection.getSubSectionObjects()) {
+				SubSectionObjectToExternalManagedObjectModel conn = object.getExternalManagedObject();
 				if (conn != null) {
-					ExternalManagedObjectModel externalMo = externalMos
-							.get(conn.getExternalManagedObjectName());
+					ExternalManagedObjectModel externalMo = externalMos.get(conn.getExternalManagedObjectName());
 					if (externalMo != null) {
 						conn.setSubSectionObject(object);
 						conn.setExternalManagedObject(externalMo);
 						conn.connect();
 					}
 				}
+			}
+		}
+
+		// Create the set of managed functions
+		DoubleKeyMap<String, String, ManagedFunctionModel> managedFunctionRegistry = new DoubleKeyMap<String, String, ManagedFunctionModel>();
+		for (FunctionNamespaceModel namespace : section.getFunctionNamespaces()) {
+			for (ManagedFunctionModel managedFunction : namespace.getManagedFunctions()) {
+				managedFunctionRegistry.put(namespace.getFunctionNamespaceName(),
+						managedFunction.getManagedFunctionName(), managedFunction);
+			}
+		}
+
+		// Connect the functions to their managed functions
+		for (FunctionModel function : section.getFunctions()) {
+			// Obtain the managed function
+			ManagedFunctionModel managedFunction = managedFunctionRegistry.get(function.getFunctionNamespaceName(),
+					function.getFunctionName());
+			if (managedFunction != null) {
+				// Connect
+				new ManagedFunctionToFunctionModel(function, managedFunction).connect();
 			}
 		}
 
@@ -227,13 +369,10 @@ public class SectionRepositoryImpl implements SectionRepository {
 
 		// Connect the objects to managed objects
 		for (SubSectionModel subSection : section.getSubSections()) {
-			for (SubSectionObjectModel object : subSection
-					.getSubSectionObjects()) {
-				SubSectionObjectToSectionManagedObjectModel conn = object
-						.getSectionManagedObject();
+			for (SubSectionObjectModel object : subSection.getSubSectionObjects()) {
+				SubSectionObjectToSectionManagedObjectModel conn = object.getSectionManagedObject();
 				if (conn != null) {
-					SectionManagedObjectModel mo = managedObjects.get(conn
-							.getSectionManagedObjectName());
+					SectionManagedObjectModel mo = managedObjects.get(conn.getSectionManagedObjectName());
 					if (mo != null) {
 						conn.setSubSectionObject(object);
 						conn.setSectionManagedObject(mo);
@@ -243,15 +382,29 @@ public class SectionRepositoryImpl implements SectionRepository {
 			}
 		}
 
+		// Connect the managed function objects to managed objects
+		for (FunctionNamespaceModel namespace : section.getFunctionNamespaces()) {
+			for (ManagedFunctionModel managedFunction : namespace.getManagedFunctions()) {
+				for (ManagedFunctionObjectModel object : managedFunction.getManagedFunctionObjects()) {
+					ManagedFunctionObjectToSectionManagedObjectModel conn = object.getSectionManagedObject();
+					if (conn != null) {
+						SectionManagedObjectModel mo = managedObjects.get(conn.getSectionManagedObjectName());
+						if (mo != null) {
+							conn.setManagedFunctionObject(object);
+							conn.setSectionManagedObject(mo);
+							conn.connect();
+						}
+					}
+				}
+			}
+		}
+
 		// Connect the dependencies to the external managed objects
 		for (SectionManagedObjectModel mo : section.getSectionManagedObjects()) {
-			for (SectionManagedObjectDependencyModel dependency : mo
-					.getSectionManagedObjectDependencies()) {
-				SectionManagedObjectDependencyToExternalManagedObjectModel conn = dependency
-						.getExternalManagedObject();
+			for (SectionManagedObjectDependencyModel dependency : mo.getSectionManagedObjectDependencies()) {
+				SectionManagedObjectDependencyToExternalManagedObjectModel conn = dependency.getExternalManagedObject();
 				if (conn != null) {
-					ExternalManagedObjectModel extMo = externalMos.get(conn
-							.getExternalManagedObjectName());
+					ExternalManagedObjectModel extMo = externalMos.get(conn.getExternalManagedObjectName());
 					if (extMo != null) {
 						conn.setSectionManagedObjectDependency(dependency);
 						conn.setExternalManagedObject(extMo);
@@ -261,15 +414,33 @@ public class SectionRepositoryImpl implements SectionRepository {
 			}
 		}
 
+		// Connect the managed function objects to external managed objects
+		for (FunctionNamespaceModel namespace : section.getFunctionNamespaces()) {
+			for (ManagedFunctionModel managedFunction : namespace.getManagedFunctions()) {
+				for (ManagedFunctionObjectModel managedFunctionObject : managedFunction.getManagedFunctionObjects()) {
+					// Obtain the connection
+					ManagedFunctionObjectToExternalManagedObjectModel conn = managedFunctionObject
+							.getExternalManagedObject();
+					if (conn != null) {
+						// Obtain the external managed object
+						ExternalManagedObjectModel extMo = externalMos.get(conn.getExternalManagedObjectName());
+						if (extMo != null) {
+							// Connect
+							conn.setManagedFunctionObject(managedFunctionObject);
+							conn.setExternalManagedObject(extMo);
+							conn.connect();
+						}
+					}
+				}
+			}
+		}
+
 		// Connect the dependencies to the managed objects
 		for (SectionManagedObjectModel mo : section.getSectionManagedObjects()) {
-			for (SectionManagedObjectDependencyModel dependency : mo
-					.getSectionManagedObjectDependencies()) {
-				SectionManagedObjectDependencyToSectionManagedObjectModel conn = dependency
-						.getSectionManagedObject();
+			for (SectionManagedObjectDependencyModel dependency : mo.getSectionManagedObjectDependencies()) {
+				SectionManagedObjectDependencyToSectionManagedObjectModel conn = dependency.getSectionManagedObject();
 				if (conn != null) {
-					SectionManagedObjectModel dependentMo = managedObjects
-							.get(conn.getSectionManagedObjectName());
+					SectionManagedObjectModel dependentMo = managedObjects.get(conn.getSectionManagedObjectName());
 					if (dependentMo != null) {
 						conn.setSectionManagedObjectDependency(dependency);
 						conn.setSectionManagedObject(dependentMo);
@@ -284,17 +455,93 @@ public class SectionRepositoryImpl implements SectionRepository {
 	}
 
 	@Override
-	public void storeSection(SectionModel section,
-			ConfigurationItem configuration) throws Exception {
+	public void storeSection(SectionModel section, ConfigurationItem configuration) throws Exception {
+
+		// Specify function flow to function
+		for (FunctionModel function : section.getFunctions()) {
+			for (FunctionFlowModel flow : function.getFunctionFlows()) {
+				FunctionFlowToFunctionModel conn = flow.getFunction();
+				if (conn != null) {
+					conn.setFunctionName(conn.getFunction().getFunctionName());
+				}
+			}
+		}
+
+		// TODO Specify function flow to input
+
+		// Specify function flow to external flow
+		for (FunctionModel function : section.getFunctions()) {
+			for (FunctionFlowModel flow : function.getFunctionFlows()) {
+				FunctionFlowToExternalFlowModel conn = flow.getExternalFlow();
+				if (conn != null) {
+					conn.setExternalFlowName(conn.getExternalFlow().getExternalFlowName());
+				}
+			}
+		}
+
+		// Specify function to next functions
+		for (FunctionModel function : section.getFunctions()) {
+			FunctionToNextFunctionModel conn = function.getNextFunction();
+			if (conn != null) {
+				conn.setNextFunctionName(conn.getNextFunction().getFunctionName());
+			}
+		}
+
+		// Specify function to next input
+
+		// Specify function next to external flow
+		for (FunctionModel function : section.getFunctions()) {
+			FunctionToNextExternalFlowModel conn = function.getNextExternalFlow();
+			if (conn != null) {
+				conn.setExternalFlowName(conn.getNextExternalFlow().getExternalFlowName());
+			}
+		}
+
+		// Specify function escalation to function
+		for (FunctionModel function : section.getFunctions()) {
+			for (FunctionEscalationModel functionEscalation : function.getFunctionEscalations()) {
+				FunctionEscalationToFunctionModel conn = functionEscalation.getFunction();
+				if (conn != null) {
+					conn.setFunctionName(conn.getFunction().getFunctionName());
+				}
+			}
+		}
+
+		// TODO Specify function escalation to input
+
+		// Specify function escalation to external function
+		for (FunctionModel function : section.getFunctions()) {
+			for (FunctionEscalationModel functionEscalation : function.getFunctionEscalations()) {
+				FunctionEscalationToExternalFlowModel conn = functionEscalation.getExternalFlow();
+				if (conn != null) {
+					conn.setExternalFlowName(conn.getExternalFlow().getExternalFlowName());
+				}
+			}
+		}
+
+		// TODO Specify output to function
 
 		// Specify output to input
 		for (SubSectionModel subSection : section.getSubSections()) {
 			for (SubSectionInputModel input : subSection.getSubSectionInputs()) {
-				for (SubSectionOutputToSubSectionInputModel conn : input
-						.getSubSectionOutputs()) {
+				for (SubSectionOutputToSubSectionInputModel conn : input.getSubSectionOutputs()) {
 					conn.setSubSectionName(subSection.getSubSectionName());
 					conn.setSubSectionInputName(input.getSubSectionInputName());
 				}
+			}
+		}
+
+		// Specify output to external flow
+		for (ExternalFlowModel extFlow : section.getExternalFlows()) {
+			for (SubSectionOutputToExternalFlowModel conn : extFlow.getSubSectionOutputs()) {
+				conn.setExternalFlowName(extFlow.getExternalFlowName());
+			}
+		}
+
+		// Specify managed object source flow to its function
+		for (FunctionModel function : section.getFunctions()) {
+			for (SectionManagedObjectSourceFlowToFunctionModel conn : function.getSectionManagedObjectSourceFlows()) {
+				conn.setFunctionName(function.getFunctionName());
 			}
 		}
 
@@ -309,14 +556,6 @@ public class SectionRepositoryImpl implements SectionRepository {
 			}
 		}
 
-		// Specify output to external flow
-		for (ExternalFlowModel extFlow : section.getExternalFlows()) {
-			for (SubSectionOutputToExternalFlowModel conn : extFlow
-					.getSubSectionOutputs()) {
-				conn.setExternalFlowName(extFlow.getExternalFlowName());
-			}
-		}
-
 		// Specify managed object source flow to external flow
 		for (ExternalFlowModel extFlow : section.getExternalFlows()) {
 			for (SectionManagedObjectSourceFlowToExternalFlowModel conn : extFlow
@@ -326,41 +565,52 @@ public class SectionRepositoryImpl implements SectionRepository {
 		}
 
 		// Specify managed objects to their managed object sources
-		for (SectionManagedObjectSourceModel mos : section
-				.getSectionManagedObjectSources()) {
-			for (SectionManagedObjectToSectionManagedObjectSourceModel conn : mos
-					.getSectionManagedObjects()) {
-				conn.setSectionManagedObjectSourceName(mos
-						.getSectionManagedObjectSourceName());
+		for (SectionManagedObjectSourceModel mos : section.getSectionManagedObjectSources()) {
+			for (SectionManagedObjectToSectionManagedObjectSourceModel conn : mos.getSectionManagedObjects()) {
+				conn.setSectionManagedObjectSourceName(mos.getSectionManagedObjectSourceName());
+			}
+		}
+
+		// Specify managed function object to managed object
+		for (SectionManagedObjectModel mo : section.getSectionManagedObjects()) {
+			for (ManagedFunctionObjectToSectionManagedObjectModel conn : mo.getManagedFunctionObjects()) {
+				conn.setSectionManagedObjectName(mo.getSectionManagedObjectName());
+			}
+		}
+
+		// Specify managed function object to external managed object
+		for (FunctionNamespaceModel namespace : section.getFunctionNamespaces()) {
+			for (ManagedFunctionModel managedFunction : namespace.getManagedFunctions()) {
+				for (ManagedFunctionObjectModel managedFunctionObject : managedFunction.getManagedFunctionObjects()) {
+					ManagedFunctionObjectToExternalManagedObjectModel conn = managedFunctionObject
+							.getExternalManagedObject();
+					if (conn != null) {
+						conn.setExternalManagedObjectName(
+								conn.getExternalManagedObject().getExternalManagedObjectName());
+					}
+				}
 			}
 		}
 
 		// Specify object to external managed object
-		for (ExternalManagedObjectModel extMo : section
-				.getExternalManagedObjects()) {
-			for (SubSectionObjectToExternalManagedObjectModel conn : extMo
-					.getSubSectionObjects()) {
-				conn.setExternalManagedObjectName(extMo
-						.getExternalManagedObjectName());
+		for (ExternalManagedObjectModel extMo : section.getExternalManagedObjects()) {
+			for (SubSectionObjectToExternalManagedObjectModel conn : extMo.getSubSectionObjects()) {
+				conn.setExternalManagedObjectName(extMo.getExternalManagedObjectName());
 			}
 		}
 
 		// Specify object to managed object
 		for (SectionManagedObjectModel mo : section.getSectionManagedObjects()) {
-			for (SubSectionObjectToSectionManagedObjectModel conn : mo
-					.getSubSectionObjects()) {
-				conn.setSectionManagedObjectName(mo
-						.getSectionManagedObjectName());
+			for (SubSectionObjectToSectionManagedObjectModel conn : mo.getSubSectionObjects()) {
+				conn.setSectionManagedObjectName(mo.getSectionManagedObjectName());
 			}
 		}
 
 		// Specify dependency to external managed object
-		for (ExternalManagedObjectModel extMo : section
-				.getExternalManagedObjects()) {
+		for (ExternalManagedObjectModel extMo : section.getExternalManagedObjects()) {
 			for (SectionManagedObjectDependencyToExternalManagedObjectModel conn : extMo
 					.getDependentSectionManagedObjects()) {
-				conn.setExternalManagedObjectName(extMo
-						.getExternalManagedObjectName());
+				conn.setExternalManagedObjectName(extMo.getExternalManagedObjectName());
 			}
 		}
 
@@ -368,8 +618,7 @@ public class SectionRepositoryImpl implements SectionRepository {
 		for (SectionManagedObjectModel mo : section.getSectionManagedObjects()) {
 			for (SectionManagedObjectDependencyToSectionManagedObjectModel conn : mo
 					.getDependentSectionManagedObjects()) {
-				conn.setSectionManagedObjectName(mo
-						.getSectionManagedObjectName());
+				conn.setSectionManagedObjectName(mo.getSectionManagedObjectName());
 			}
 		}
 

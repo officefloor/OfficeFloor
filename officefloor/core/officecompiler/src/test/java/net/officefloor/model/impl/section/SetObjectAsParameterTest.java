@@ -19,7 +19,7 @@ package net.officefloor.model.impl.section;
 
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.section.DeskModel;
+import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.ManagedFunctionModel;
 import net.officefloor.model.section.ManagedFunctionObjectModel;
 
@@ -28,7 +28,7 @@ import net.officefloor.model.section.ManagedFunctionObjectModel;
  * 
  * @author Daniel Sagenschneider
  */
-public class SetObjectAsParameterTest extends AbstractDeskChangesTestCase {
+public class SetObjectAsParameterTest extends AbstractSectionChangesTestCase {
 
 	/**
 	 * {@link Object} {@link ManagedFunctionObjectModel}.
@@ -52,14 +52,14 @@ public class SetObjectAsParameterTest extends AbstractDeskChangesTestCase {
 
 	/**
 	 * Ensures no change if {@link ManagedFunctionModel} is not on the
-	 * {@link DeskModel}.
+	 * {@link SectionModel}.
 	 */
-	public void testManagedFunctionNotOnDesk() {
-		ManagedFunctionObjectModel functionObject = new ManagedFunctionObjectModel("NOT_ON_DESK", null,
+	public void testManagedFunctionNotInSection() {
+		ManagedFunctionObjectModel functionObject = new ManagedFunctionObjectModel("NOT_IN_SECTION", null,
 				String.class.getName(), false);
 		Change<ManagedFunctionObjectModel> change = this.operations.setObjectAsParameter(true, functionObject);
-		this.assertChange(change, functionObject, "Set managed function object NOT_ON_DESK as a parameter", false,
-				"Managed function object NOT_ON_DESK not on desk");
+		this.assertChange(change, functionObject, "Set managed function object NOT_IN_SECTION as a parameter", false,
+				"Managed function object NOT_IN_SECTION not in section");
 	}
 
 	/**

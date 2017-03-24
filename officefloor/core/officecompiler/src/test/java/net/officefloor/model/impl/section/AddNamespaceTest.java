@@ -24,16 +24,16 @@ import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.section.DeskChanges;
+import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.FunctionNamespaceModel;
 import net.officefloor.model.section.ManagedFunctionModel;
 
 /**
- * Tests the {@link DeskChanges}.
+ * Tests the {@link SectionChanges}.
  * 
  * @author Daniel Sagenschneider
  */
-public class AddNamespaceTest extends AbstractDeskChangesTestCase {
+public class AddNamespaceTest extends AbstractSectionChangesTestCase {
 
 	/**
 	 * Ensure can add {@link FunctionNamespaceModel} that uses indexing.

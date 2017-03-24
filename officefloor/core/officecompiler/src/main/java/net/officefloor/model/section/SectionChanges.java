@@ -17,13 +17,24 @@
  */
 package net.officefloor.model.section;
 
+import java.util.Map;
+
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
+import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.model.change.Change;
 
 /**
@@ -102,6 +113,201 @@ public interface SectionChanges {
 	 */
 	Change<SubSectionInputModel> setSubSectionInputPublic(boolean isPublic, String publicName,
 			SubSectionInputModel input);
+
+	/**
+	 * Adds a {@link FunctionNamespaceModel} to the {@link SectionModel}.
+	 *
+	 * @param functionNamspaceName
+	 *            Name of the {@link ManagedFunctionSource}.
+	 * @param functionNamspaceSourceClassName
+	 *            Fully qualified name of the {@link ManagedFunctionSource}.
+	 * @param properties
+	 *            {@link PropertyList} to configure the
+	 *            {@link ManagedFunctionSource}.
+	 * @param functionNamspaceType
+	 *            {@link FunctionNamespaceType} from the
+	 *            {@link ManagedFunctionSource}.
+	 * @param managedFunctionNames
+	 *            Listing of {@link WorkTaskModel} names to be loaded. Empty
+	 *            list results in loading all {@link WorkTaskModel} instances
+	 *            for the {@link FunctionNamespaceType}.
+	 * @return {@link Change} to add the {@link WorkModel}.
+	 */
+	Change<FunctionNamespaceModel> addFunctionNamespace(String functionNamspaceName,
+			String functionNamspaceSourceClassName, PropertyList properties, FunctionNamespaceType functionNamspaceType,
+			String... managedFunctionNames);
+
+	/**
+	 * Removes a {@link FunctionNamespaceModel} from the {@link SectionModel}.
+	 *
+	 * @param functionNamespaceModel
+	 *            {@link FunctionNamespaceModel} to be removed.
+	 * @return {@link Change} to remove the {@link FunctionNamespaceModel}.
+	 */
+	Change<FunctionNamespaceModel> removeFunctionNamespace(FunctionNamespaceModel functionNamspaceModel);
+
+	/**
+	 * Renames the {@link FunctionNamespaceModel}.
+	 *
+	 * @param functionNamspaceModel
+	 *            {@link FunctionNamespaceModel} to rename.
+	 * @param newFunctionNamespaceName
+	 *            New name for the {@link FunctionNamespaceModel}.
+	 * @return {@link Change} to rename the {@link FunctionNamespaceModel}.
+	 */
+	Change<FunctionNamespaceModel> renameFunctionNamespace(FunctionNamespaceModel functionNamspaceModel,
+			String newFunctionNamespaceName);
+
+	/**
+	 * Refactors the {@link FunctionNamespaceModel}.
+	 *
+	 * @param functionNamspaceModel
+	 *            {@link FunctionNamespaceModel} to refactor.
+	 * @param functionNamespaceName
+	 *            New name for the {@link FunctionNamespaceModel}.
+	 * @param managedFunctionSourceClassName
+	 *            New {@link ManagedFunctionSource} class name for the
+	 *            {@link FunctionNamespaceModel}.
+	 * @param properties
+	 *            New {@link PropertyList} for the
+	 *            {@link FunctionNamespaceModel}.
+	 * @param functionNamespaceType
+	 *            {@link FunctionNamespaceType} that the
+	 *            {@link FunctionNamespaceModel} is being refactored to.
+	 * @param managedFunctionNameMapping
+	 *            Mapping of the {@link ManagedFunctionType} name to the
+	 *            {@link ManagedFunctionModel} name.
+	 * @param managedFunctionToObjectNameMapping
+	 *            Mapping of the {@link ManagedFunctionModel} name to the
+	 *            {@link ManagedFunctionObjectType} name to the
+	 *            {@link ManagedFunctionObjectModel} name.
+	 * @param functionToFlowNameMapping
+	 *            Mapping of the {@link FunctionModel} name to the
+	 *            {@link ManagedFunctionFlowType} name to the
+	 *            {@link FunctionFlowModel} name.
+	 * @param functionToEscalationTypeMapping
+	 *            Mapping of the {@link FunctionModel} name to the
+	 *            {@link ManagedFunctionEscalationType} type to the
+	 *            {@link FunctionEscalationModel} type.
+	 * @param managedFunctionNames
+	 *            Listing of {@link ManagedFunctionModel} names to be loaded.
+	 *            Empty list results in loading all {@link ManagedFunctionModel}
+	 *            instances for the {@link FunctionNamespaceType}.
+	 * @return {@link Change} to refactor the {@link FunctionNamespaceModel}.
+	 */
+	Change<FunctionNamespaceModel> refactorFunctionNamespace(FunctionNamespaceModel functionNamespaceModel,
+			String functionNamespaceName, String managedFunctionSourceClassName, PropertyList properties,
+			FunctionNamespaceType functionNamespaceType, Map<String, String> managedFunctionNameMapping,
+			Map<String, Map<String, String>> managedFunctionToObjectNameMapping,
+			Map<String, Map<String, String>> functionToFlowNameMapping,
+			Map<String, Map<String, String>> functionToEscalationTypeMapping, String... managedFunctionNames);
+
+	/**
+	 * Adds the {@link ManagedFunctionType} as a {@link ManagedFunctionModel} to
+	 * the {@link FunctionNamspaceModel}.
+	 *
+	 * @param <M>
+	 *            Dependency type keys.
+	 * @param <F>
+	 *            {@link Flow} type keys.
+	 * @param functionNamespaceModel
+	 *            {@link FunctionNamespaceModel} to have the
+	 *            {@link ManagedFunctionType} added.
+	 * @param managedFunctionType
+	 *            {@link ManagedFunctionType} to be added to the
+	 *            {@link FunctionNamespaceModel}.
+	 * @return {@link Change} to add the {@link ManagedFunctionType} to the
+	 *         {@link FunctionNamespaceModel}.
+	 */
+	<M extends Enum<M>, F extends Enum<F>> Change<ManagedFunctionModel> addManagedFunction(
+			FunctionNamespaceModel functionNamespaceModel, ManagedFunctionType<M, F> managedFunctionType);
+
+	/**
+	 * Removes the {@link ManagedFunctionModel} from the
+	 * {@link FunctionNamespaceModel}.
+	 *
+	 * @param functionNamespaceModel
+	 *            {@link FunctionNamespaceModel} to have the
+	 *            {@link ManagedFunctionModel} removed.
+	 * @param managedFunctionModel
+	 *            {@link ManagdedFunctionModel} to be removed.
+	 * @return {@link Change} to remove the {@link ManagedFunctionModel} from
+	 *         the {@link FunctionNamespaceModel}.
+	 */
+	Change<ManagedFunctionModel> removeManagedFunction(FunctionNamespaceModel functionNamespaceModel,
+			ManagedFunctionModel managedFunctionModel);
+
+	/**
+	 * Adds a {@link ManagedFunctionType} as a {@link FunctionModel} to the
+	 * {@link SectionModel}.
+	 *
+	 * @param <M>
+	 *            Dependency type keys.
+	 * @param <F>
+	 *            {@link Flow} type keys.
+	 * @param functionName
+	 *            Name of the {@link ManagedFunction}.
+	 * @param managedFunctionModel
+	 *            {@link ManagedFunctionModel} for the
+	 *            {@link ManagedFunctionType}.
+	 * @param managedFunctionType
+	 *            {@link ManagedFunctionType} for the {@link FunctionModel}.
+	 * @return {@link Change} to add the {@link ManagedFunctionType} to the
+	 *         {@link SectionModel}.
+	 */
+	<M extends Enum<M>, F extends Enum<F>> Change<FunctionModel> addFunction(String functionName,
+			ManagedFunctionModel managedFunctionModel, ManagedFunctionType<M, F> managedFunctionType);
+
+	/**
+	 * Removes the {@link FunctionModel} from the {@link SectionModel}.
+	 *
+	 * @param functionModel
+	 *            {@link FunctionModel} to be removed.
+	 * @return {@link Change} to remove the {@link FunctionModel} from the
+	 *         {@link SectionModel}.
+	 */
+	Change<FunctionModel> removeFunction(FunctionModel functionModel);
+
+	/**
+	 * Renames the {@link FunctionModel}.
+	 *
+	 * @param functionModel
+	 *            {@link FunctionModel} to be renamed.
+	 * @param newFunctionName
+	 *            New name for the {@link FunctionModel}.
+	 * @return {@link Change} to rename the {@link FunctionModel}.
+	 */
+	Change<FunctionModel> renameFunction(FunctionModel functionModel, String newFunctionName);
+
+	/**
+	 * Specifies a {@link ManagedFunctionObjectModel} as a parameter or an
+	 * object.
+	 *
+	 * @param isParameter
+	 *            <code>true</code> for the {@link ManagedFunctionObjectModel}
+	 *            to be a parameter. <code>false</code> to be a dependency
+	 *            object.
+	 * @param managedFunctionObjectModel
+	 *            {@link ManagedFunctionObjectModel} to set as a parameter or
+	 *            object.
+	 * @return {@link Change} to set the {@link ManagedFunctionObjectModel} as a
+	 *         parameter or object.
+	 */
+	Change<ManagedFunctionObjectModel> setObjectAsParameter(boolean isParameter,
+			ManagedFunctionObjectModel managedFunctionObjectModel);
+
+	/**
+	 * Specifies a {@link FunctionModel} as public/private.
+	 *
+	 * @param isPublic
+	 *            <code>true</code> for the {@link FunctionModel} to be public.
+	 *            <code>false</code> for the {@link FunctionModel} to be
+	 *            private.
+	 * @param functionModel
+	 *            {@link FunctionModel} to set public/private.
+	 * @return {@link Change} to set the {@link FunctionModel} public/private.
+	 */
+	Change<FunctionModel> setFunctionAsPublic(boolean isPublic, FunctionModel functionModel);
 
 	/**
 	 * Adds an {@link ExternalFlowModel} to the {@link SectionModel}.
@@ -316,6 +522,58 @@ public interface SectionChanges {
 			SubSectionObjectToSectionManagedObjectModel subSectionObjectToManagedObject);
 
 	/**
+	 * Links the {@link ManagedFunctionObjectModel} to be the
+	 * {@link ExternalManagedObjectModel}.
+	 *
+	 * @param managedFunctionObject
+	 *            {@link WorkTaskObjectModel}.
+	 * @param externalManagedObject
+	 *            {@link ExternalManagedObjectModel}.
+	 * @return {@link Change} to add a
+	 *         {@link ManagedFunctionObjectToExternalManagedObjectModel}.
+	 */
+	Change<ManagedFunctionObjectToExternalManagedObjectModel> linkManagedFunctionObjectToExternalManagedObject(
+			ManagedFunctionObjectModel managedFunctionTaskObject, ExternalManagedObjectModel externalManagedObject);
+
+	/**
+	 * Removes the {@link ManagedFunctionObjectToExternalManagedObjectModel}.
+	 *
+	 * @param objectToExternalManagedObject
+	 *            {@link ManagedFunctionObjectToExternalManagedObjectModel} to
+	 *            remove.
+	 * @return {@link Change} to remove the
+	 *         {@link ManagedFunctionObjectToExternalManagedObjectModel}.
+	 */
+	Change<ManagedFunctionObjectToExternalManagedObjectModel> removeManagedFunctionObjectToExternalManagedObject(
+			ManagedFunctionObjectToExternalManagedObjectModel objectToExternalManagedObject);
+
+	/**
+	 * Links the {@link ManagedFunctionObjectModel} to the
+	 * {@link SectionManagedObjectModel}.
+	 *
+	 * @param managedFunctionObject
+	 *            {@link ManagedFunctionObjectModel}.
+	 * @param managedObject
+	 *            {@link SectionManagedObjectModel}.
+	 * @return {@link Change} to add the
+	 *         {@link ManagedFunctionObjectToSectionManagedObjectModel}.
+	 */
+	Change<ManagedFunctionObjectToSectionManagedObjectModel> linkManagedFunctionObjectToSectionManagedObject(
+			ManagedFunctionObjectModel managedFunctionTaskObject, SectionManagedObjectModel managedObject);
+
+	/**
+	 * Removes the {@link ManagedFunctionObjectToSectionManagedObjectModel}.
+	 *
+	 * @param managedFunctionObjectToManagedObject
+	 *            {@link ManagedFunctionObjectToSectionManagedObjectModel} to
+	 *            remove.
+	 * @return {@link Change} to remove the
+	 *         {@link ManagedFunctionObjectToSectionManagedObjectModel}.
+	 */
+	Change<ManagedFunctionObjectToSectionManagedObjectModel> removeManagedFunctionObjectToSectionManagedObject(
+			ManagedFunctionObjectToSectionManagedObjectModel managedFunctionObjectToManagedObject);
+
+	/**
 	 * Links the {@link SubSectionOutputModel} to the
 	 * {@link SubSectionInputModel}.
 	 *
@@ -363,6 +621,269 @@ public interface SectionChanges {
 	 */
 	Change<SubSectionOutputToExternalFlowModel> removeSubSectionOutputToExternalFlow(
 			SubSectionOutputToExternalFlowModel subSectionOutputToExternalFlow);
+
+	/**
+	 * Links the {@link SubSectionOutputModel} to the {@link FunctionModel}.
+	 *
+	 * @param subSectionOutput
+	 *            {@link FunctionModel}.
+	 * @param function
+	 *            {@link FunctionModel}.
+	 * @return {@link Change} to add the
+	 *         {@link SubSectionOutputToFunctionModel}.
+	 */
+	Change<SubSectionOutputToFunctionModel> linkSubSectionOutputToFunction(SubSectionOutputModel subSectionOutput,
+			FunctionModel function);
+
+	/**
+	 * Removes the {@link SubSectionOutputToFunctionModel}.
+	 *
+	 * @param subSectionOutputToFunction
+	 *            {@link SubSectionOutputToFunctionModel} to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link SubSectionOutputToFunctionModel}.
+	 */
+	Change<SubSectionOutputToFunctionModel> removeSubSectionOutputToFunction(
+			SubSectionOutputToFunctionModel subSectionOutputToFunction);
+
+	/**
+	 * Links the {@link FunctionFlowModel} to the {@link FunctionModel}.
+	 *
+	 * @param functionFlow
+	 *            {@link FunctionFlowModel}.
+	 * @param function
+	 *            {@link FunctionModel}.
+	 * @param isSpawnThreadState
+	 *            Indicates if to spawn a {@link ThreadState}.
+	 * @return {@link Change} to add a {@link FunctionFlowToFunctionModel}.
+	 */
+	Change<FunctionFlowToFunctionModel> linkFunctionFlowToFunction(FunctionFlowModel functionFlow,
+			FunctionModel function, boolean isSpawnThreadState);
+
+	/**
+	 * Removes the {@link FunctionFlowToFunctionModel}.
+	 *
+	 * @param functionFlowToFunction
+	 *            {@link FunctionFlowToFunctionModel} to remove.
+	 * @return {@link Change} to remove {@link FunctionFlowToFunctionModel}.
+	 */
+	Change<FunctionFlowToFunctionModel> removeFunctionFlowToFunction(FunctionFlowToFunctionModel taskFlowToTask);
+
+	/**
+	 * Links the {@link FunctionFlowModel} to the {@link ExternalFlowModel}.
+	 *
+	 * @param functionFlow
+	 *            {@link FunctionFlowModel}.
+	 * @param externalFlow
+	 *            {@link ExternalFlowModel}.
+	 * @param isSpawnThreadState
+	 *            Indicates if to spawn a {@link ThreadState}.
+	 * @return {@link Change} to add a {@link FunctionFlowToExternalFlowModel}.
+	 */
+	Change<FunctionFlowToExternalFlowModel> linkFunctionFlowToExternalFlow(FunctionFlowModel functionFlow,
+			ExternalFlowModel externalFlow, boolean isSpawnThreadState);
+
+	/**
+	 * Removes the {@link FunctionFlowToExternalFlowModel}.
+	 *
+	 * @param functionFlowToExternalFlow
+	 *            {@link FunctionFlowToExternalFlowModel} to remove.
+	 * @return {@link Change} to remove {@link FunctionFlowToExternalFlowModel}.
+	 */
+	Change<FunctionFlowToExternalFlowModel> removeFunctionFlowToExternalFlow(
+			FunctionFlowToExternalFlowModel functionFlowToExternalFlow);
+
+	/**
+	 * Links the {@link FunctionFlowModel} to the {@link SubSectionInputModel}.
+	 *
+	 * @param functionFlow
+	 *            {@link FunctionFlowModel}.
+	 * @param subSectionInput
+	 *            {@link SubSectionInputModel}.
+	 * @param isSpawnThreadState
+	 *            Indicates if to spawn a {@link ThreadState}.
+	 * @return {@link Change} to add a
+	 *         {@link FunctionFlowToSubSectionInputModel}.
+	 */
+	Change<FunctionFlowToSubSectionInputModel> linkFunctionFlowToSubSectionInput(FunctionFlowModel functionFlow,
+			SubSectionInputModel subSectionInput, boolean isSpawnThreadState);
+
+	/**
+	 * Removes the {@link FunctionFlowToSubSectionInputModel}.
+	 *
+	 * @param functionFlowToSubSectionInput
+	 *            {@link FunctionFlowToSubSectionInputModel} to remove.
+	 * @return {@link Change} to remove
+	 *         {@link FunctionFlowToSubSectionInputModel}.
+	 */
+	Change<FunctionFlowToSubSectionInputModel> removeFunctionFlowToSubSectionInput(
+			FunctionFlowToSubSectionInputModel functionFlowToSubSectionInput);
+
+	/**
+	 * Links {@link FunctionModel} to next {@link FunctionModel}.
+	 *
+	 * @param function
+	 *            {@link FunctionModel}.
+	 * @param nextFunction
+	 *            Next {@link FunctionModel}.
+	 * @return {@link Change} to add a {@link FunctionToNextFunctionModel}.
+	 */
+	Change<FunctionToNextFunctionModel> linkFunctionToNextFunction(FunctionModel function, FunctionModel nextFunction);
+
+	/**
+	 * Removes the {@link FunctionToNextFunctionModel}.
+	 *
+	 * @param functionToNextFunction
+	 *            {@link FunctionToNextFunctionModel} to remove.
+	 * @return {@link Change} to remove {@link FunctionToNextFunctionModel}.
+	 */
+	Change<FunctionToNextFunctionModel> removeFunctionToNextFunction(
+			FunctionToNextFunctionModel functionToNextFunction);
+
+	/**
+	 * Links {@link FunctionModel} to next {@link ExternalFlowModel}.
+	 *
+	 * @param function
+	 *            {@link FunctionModel}.
+	 * @param nextExternalFlow
+	 *            Next {@link ExternalFlowModel}.
+	 * @return {@link Change} to add a {@link FunctionToNextExternalFlowModel}.
+	 */
+	Change<FunctionToNextExternalFlowModel> linkFunctionToNextExternalFlow(FunctionModel function,
+			ExternalFlowModel nextExternalFlow);
+
+	/**
+	 * Removes the {@link FunctionToNextExternalFlowModel}.
+	 *
+	 * @param functionToNextExternalFlow
+	 *            {@link FunctionToNextExternalFlowModel} to remove.
+	 * @return {@link Change} to remove {@link FunctionToNextExternalFlowModel}.
+	 */
+	Change<FunctionToNextExternalFlowModel> removeFunctionToNextExternalFlow(
+			FunctionToNextExternalFlowModel functionToNextExternalFlow);
+
+	/**
+	 * Links {@link FunctionModel} to next {@link SubSectionInput}.
+	 *
+	 * @param function
+	 *            {@link FunctionModel}.
+	 * @param nextSubSectionInput
+	 *            Next {@link SubSectionInputModel}.
+	 * @return {@link Change} to add a
+	 *         {@link FunctionToNextSubSectionInputModel}.
+	 */
+	Change<FunctionToNextSubSectionInputModel> linkFunctionToNextSubSectionInput(FunctionModel function,
+			SubSectionInputModel nextSubSectionInput);
+
+	/**
+	 * Removes the {@link FunctionToNextSubSectionInputModel}.
+	 *
+	 * @param functionToNextSubSectionInput
+	 *            {@link FunctionToNextSubSectionInputModel} to remove.
+	 * @return {@link Change} to remove
+	 *         {@link FunctionToNextSubSectionInputModel}.
+	 */
+	Change<FunctionToNextSubSectionInputModel> removeFunctionToNextSubSectionInput(
+			FunctionToNextSubSectionInputModel functionToNextSubSectionInput);
+
+	/**
+	 * Links {@link FunctionEscalationModel} to the {@link FunctionModel}.
+	 *
+	 * @param functionEscalation
+	 *            {@link FunctionEscalationModel}.
+	 * @param function
+	 *            {@link FunctionModel}.
+	 * @return {@link Change} to add a
+	 *         {@link FunctionEscalationToFunctionModel}.
+	 */
+	Change<FunctionEscalationToFunctionModel> linkFunctionEscalationToFunction(
+			FunctionEscalationModel functionEscalation, FunctionModel function);
+
+	/**
+	 * Removes the {@link FunctionEscalationToFunctionModel}.
+	 *
+	 * @param functionEscalationToFunction
+	 *            {@link FunctionEscalationToFunctionModel} to remove.
+	 * @return {@link Change} to remove
+	 *         {@link FunctionEscalationToFunctionModel}.
+	 */
+	Change<FunctionEscalationToFunctionModel> removeFunctionEscalationToFunction(
+			FunctionEscalationToFunctionModel functionEscalationToFunction);
+
+	/**
+	 * Links {@link FunctionEscalationModel} to the {@link ExternalFlowModel}.
+	 *
+	 * @param functionEscalation
+	 *            {@link FunctionEscalationModel}.
+	 * @param externalFlow
+	 *            {@link ExternalFlowModel}.
+	 * @return {@link Change} to add
+	 *         {@link FunctionEscalationToExternalFlowModel}.
+	 */
+	Change<FunctionEscalationToExternalFlowModel> linkFunctionEscalationToExternalFlow(
+			FunctionEscalationModel functionEscalation, ExternalFlowModel externalFlow);
+
+	/**
+	 * Removes the {@link FunctionEscalationToExternalFlowModel}.
+	 *
+	 * @param functionEscalationToExternalFlow
+	 *            {@link FunctionEscalationToExternalFlowModel} to remove.
+	 * @return {@link Change} to remove
+	 *         {@link FunctionEscalationToExternalFlowModel}.
+	 */
+	Change<FunctionEscalationToExternalFlowModel> removeFunctionEscalationToExternalFlow(
+			FunctionEscalationToExternalFlowModel functionEscalationToExternalFlow);
+
+	/**
+	 * Links {@link FunctionEscalationModel} to the
+	 * {@link SubSectionInputModel}.
+	 *
+	 * @param functionEscalation
+	 *            {@link FunctionEscalationModel}.
+	 * @param subSectionInput
+	 *            {@link SubSectionInputModel}.
+	 * @return {@link Change} to add
+	 *         {@link FunctionEscalationToSubSectionInputModel}.
+	 */
+	Change<FunctionEscalationToSubSectionInputModel> linkFunctionEscalationToSubSectionInput(
+			FunctionEscalationModel functionEscalation, SubSectionInputModel subSectionInput);
+
+	/**
+	 * Removes the {@link FunctionEscalationToSubSectionInputModel}.
+	 *
+	 * @param functionEscalationToSubSectionInput
+	 *            {@link FunctionEscalationToSubSectionInputModel} to remove.
+	 * @return {@link Change} to remove
+	 *         {@link FunctionEscalationToSubSectionInputModel}.
+	 */
+	Change<FunctionEscalationToSubSectionInputModel> removeFunctionEscalationToSubSectionInput(
+			FunctionEscalationToSubSectionInputModel functionEscalationToSubSectionInput);
+
+	/**
+	 * Links the {@link SectionManagedObjectSourceFlowModel} to the
+	 * {@link FunctionModel}.
+	 *
+	 * @param managedObjectSourceFlow
+	 *            {@link SectionManagedObjectSourceFlowModel}.
+	 * @param function
+	 *            {@link FunctionModel}.
+	 * @return {@link Change} to add the
+	 *         {@link SectionManagedObjectSourceFlowToFunctionModel}.
+	 */
+	Change<SectionManagedObjectSourceFlowToFunctionModel> linkSectionManagedObjectSourceFlowToFunction(
+			SectionManagedObjectSourceFlowModel managedObjectSourceFlow, FunctionModel function);
+
+	/**
+	 * Removes the {@link SectionManagedObjectSourceFlowToFunctionModel}.
+	 *
+	 * @param managedObjectSourceFlowToFunction
+	 *            {@link SectionManagedObjectSourceFlowToFunctionModel} to be
+	 *            removed.
+	 * @return {@link Change} to remove the
+	 *         {@link SectionManagedObjectSourceFlowToFunctionModel}.
+	 */
+	Change<SectionManagedObjectSourceFlowToFunctionModel> removeSectionManagedObjectSourceFlowToFunction(
+			SectionManagedObjectSourceFlowToFunctionModel managedObjectSourceFlowToFunction);
 
 	/**
 	 * Links the {@link SectionManagedObjectSourceFlowModel} to the

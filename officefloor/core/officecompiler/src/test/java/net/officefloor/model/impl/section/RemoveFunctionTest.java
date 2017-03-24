@@ -18,18 +18,18 @@
 package net.officefloor.model.impl.section;
 
 import net.officefloor.model.change.Change;
-import net.officefloor.model.section.DeskModel;
+import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.FunctionModel;
 
 /**
- * Tests removing a {@link FunctionModel} from a {@link DeskModel}.
+ * Tests removing a {@link FunctionModel} from a {@link SectionModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class RemoveFunctionTest extends AbstractDeskChangesTestCase {
+public class RemoveFunctionTest extends AbstractSectionChangesTestCase {
 
 	/**
-	 * Initiate to use specific setup {@link DeskModel}.
+	 * Initiate to use specific setup {@link SectionModel}.
 	 */
 	public RemoveFunctionTest() {
 		super(true);
@@ -37,19 +37,18 @@ public class RemoveFunctionTest extends AbstractDeskChangesTestCase {
 
 	/**
 	 * Tests attempting to remove a {@link FunctionModel} not on the
-	 * {@link DeskModel}.
+	 * {@link SectionModel}.
 	 */
-	public void testRemoveFunctionNotOnDesk() {
-		FunctionModel function = new FunctionModel("NOT_ON_DESK", false, "WORK",
-				"WORK_Function", null);
+	public void testRemoveFunctionNotInSection() {
+		FunctionModel function = new FunctionModel("NOT_IN_SECTION", false, "NAMESPACE", "MANAGED_FUNCTION", null);
 		Change<FunctionModel> change = this.operations.removeFunction(function);
-		this.assertChange(change, function, "Remove function NOT_ON_DESK", false,
-				"Function NOT_ON_DESK not on desk");
+		this.assertChange(change, function, "Remove function NOT_IN_SECTION", false,
+				"Function NOT_IN_SECTION not in section");
 	}
 
 	/**
-	 * Ensure can remove the {@link FunctionModel} from the {@link DeskModel} when
-	 * other {@link FunctionModel} instances on the {@link DeskModel}.
+	 * Ensure can remove the {@link FunctionModel} from the {@link SectionModel}
+	 * when other {@link FunctionModel} instances on the {@link SectionModel}.
 	 */
 	public void testRemoveFunctionWhenOtherFunctions() {
 		FunctionModel function = this.model.getFunctions().get(1);
@@ -59,7 +58,7 @@ public class RemoveFunctionTest extends AbstractDeskChangesTestCase {
 
 	/**
 	 * Ensure can remove the connected {@link FunctionModel} from the
-	 * {@link DeskModel}.
+	 * {@link SectionModel}.
 	 */
 	public void testRemoveFunctionWithConnections() {
 		FunctionModel function = this.model.getFunctions().get(0);

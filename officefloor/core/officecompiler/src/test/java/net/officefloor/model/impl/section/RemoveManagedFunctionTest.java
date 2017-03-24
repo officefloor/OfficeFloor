@@ -18,16 +18,17 @@
 package net.officefloor.model.impl.section;
 
 import net.officefloor.model.change.Change;
-import net.officefloor.model.section.DeskModel;
+import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.FunctionNamespaceModel;
 import net.officefloor.model.section.ManagedFunctionModel;
 
 /**
- * Tests removing a {@link ManagedFunctionModel} from a {@link FunctionNamespaceModel}.
+ * Tests removing a {@link ManagedFunctionModel} from a
+ * {@link FunctionNamespaceModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class RemoveManagedFunctionTest extends AbstractDeskChangesTestCase {
+public class RemoveManagedFunctionTest extends AbstractSectionChangesTestCase {
 
 	/**
 	 * {@link FunctionNamespaceModel}.
@@ -35,7 +36,7 @@ public class RemoveManagedFunctionTest extends AbstractDeskChangesTestCase {
 	private FunctionNamespaceModel namespace;
 
 	/**
-	 * Initiate to use specific setup {@link DeskModel}.
+	 * Initiate to use specific setup {@link SectionModel}.
 	 */
 	public RemoveManagedFunctionTest() {
 		super(true);
@@ -55,20 +56,19 @@ public class RemoveManagedFunctionTest extends AbstractDeskChangesTestCase {
 	 */
 	public void testRemoveManagedFunctionNotOnFunctionNamespace() {
 		ManagedFunctionModel managedFunction = new ManagedFunctionModel("NOT_ON_NAMESPACE");
-		Change<ManagedFunctionModel> change = this.operations.removeManagedFunction(
-				this.namespace, managedFunction);
-		this.assertChange(change, managedFunction, "Remove managed function NOT_ON_NAMESPACE",
-				false, "Managed function NOT_ON_NAMESPACE not on namespace NAMESPACE");
+		Change<ManagedFunctionModel> change = this.operations.removeManagedFunction(this.namespace, managedFunction);
+		this.assertChange(change, managedFunction, "Remove managed function NOT_ON_NAMESPACE", false,
+				"Managed function NOT_ON_NAMESPACE not on namespace NAMESPACE");
 	}
 
 	/**
-	 * Ensure can remove the {@link ManagedFunctionModel} from the {@link FunctionNamespaceModel}
-	 * when other {@link ManagedFunctionModel} instances on the {@link FunctionNamespaceModel}.
+	 * Ensure can remove the {@link ManagedFunctionModel} from the
+	 * {@link FunctionNamespaceModel} when other {@link ManagedFunctionModel}
+	 * instances on the {@link FunctionNamespaceModel}.
 	 */
 	public void testRemoveManagedFunctionWhenOtherManagedFunctions() {
 		ManagedFunctionModel managedFunction = this.namespace.getManagedFunctions().get(1);
-		Change<ManagedFunctionModel> change = this.operations.removeManagedFunction(
-				this.namespace, managedFunction);
+		Change<ManagedFunctionModel> change = this.operations.removeManagedFunction(this.namespace, managedFunction);
 		this.assertChange(change, managedFunction, "Remove managed function FUNCTION_B", true);
 	}
 
@@ -78,10 +78,8 @@ public class RemoveManagedFunctionTest extends AbstractDeskChangesTestCase {
 	 */
 	public void testRemoveManagedFunctionWithConnections() {
 		ManagedFunctionModel managedFunction = this.namespace.getManagedFunctions().get(0);
-		Change<ManagedFunctionModel> change = this.operations.removeManagedFunction(
-				this.namespace, managedFunction);
-		this.assertChange(change, managedFunction, "Remove namespace function MANAGED_FUNCTION_A",
-				true);
+		Change<ManagedFunctionModel> change = this.operations.removeManagedFunction(this.namespace, managedFunction);
+		this.assertChange(change, managedFunction, "Remove namespace function MANAGED_FUNCTION_A", true);
 	}
 
 }

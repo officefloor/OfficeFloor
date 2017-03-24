@@ -18,7 +18,7 @@
 package net.officefloor.model.impl.section;
 
 import net.officefloor.model.change.Change;
-import net.officefloor.model.section.DeskModel;
+import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.FunctionModel;
 
 /**
@@ -26,16 +26,17 @@ import net.officefloor.model.section.FunctionModel;
  * 
  * @author Daniel Sagenschneider
  */
-public class RenameFunctionTest extends AbstractDeskChangesTestCase {
+public class RenameFunctionTest extends AbstractSectionChangesTestCase {
 
 	/**
-	 * Ensures handles {@link FunctionModel} not being on the {@link DeskModel}.
+	 * Ensures handles {@link FunctionModel} not being on the
+	 * {@link SectionModel}.
 	 */
-	public void testRenameFunctionNotOnDesk() {
-		FunctionModel function = new FunctionModel("NOT_ON_DESK", false, "NAMESPACE", "MANAGED_FUNCTION", null);
+	public void testRenameFunctionNotOnSection() {
+		FunctionModel function = new FunctionModel("NOT_IN_SECTION", false, "NAMESPACE", "MANAGED_FUNCTION", null);
 		Change<FunctionModel> change = this.operations.renameFunction(function, "NEW_NAME");
-		this.assertChange(change, function, "Rename function NOT_ON_DESK to NEW_NAME", false,
-				"Function NOT_ON_DESK not on desk");
+		this.assertChange(change, function, "Rename function NOT_IN_SECTION to NEW_NAME", false,
+				"Function NOT_IN_SECTION not in section");
 	}
 
 	/**

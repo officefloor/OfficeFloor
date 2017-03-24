@@ -18,7 +18,7 @@
 package net.officefloor.model.impl.section;
 
 import net.officefloor.model.change.Change;
-import net.officefloor.model.section.DeskModel;
+import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.FunctionNamespaceModel;
 
 /**
@@ -26,17 +26,17 @@ import net.officefloor.model.section.FunctionNamespaceModel;
  * 
  * @author Daniel Sagenschneider
  */
-public class RenameFunctionNamespaceTest extends AbstractDeskChangesTestCase {
+public class RenameFunctionNamespaceTest extends AbstractSectionChangesTestCase {
 
 	/**
 	 * Ensures handles {@link FunctionNamespaceModel} not being on the
-	 * {@link DeskModel}.
+	 * {@link SectionModel}.
 	 */
-	public void testRenameFunctionNamespaceNotOnDesk() {
-		FunctionNamespaceModel namespace = new FunctionNamespaceModel("NOT_ON_DESK", null);
+	public void testRenameFunctionNamespaceNotOnSection() {
+		FunctionNamespaceModel namespace = new FunctionNamespaceModel("NOT_IN_SECTION", null);
 		Change<FunctionNamespaceModel> change = this.operations.renameFunctionNamespace(namespace, "NEW_NAME");
-		this.assertChange(change, namespace, "Rename namespace NOT_ON_DESK to NEW_NAME", false,
-				"Function namespace NOT_ON_DESK not on desk");
+		this.assertChange(change, namespace, "Rename namespace NOT_IN_SECTION to NEW_NAME", false,
+				"Function namespace NOT_IN_SECTION not in section");
 	}
 
 	/**

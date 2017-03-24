@@ -28,11 +28,11 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.source.TestSource;
-import net.officefloor.model.impl.section.DeskModelSectionSource;
+import net.officefloor.model.impl.section.SectionModelSectionSource;
 
 /**
  * Mock {@link ManagedFunctionSource} for testing the
- * {@link DeskModelSectionSource}.
+ * {@link SectionModelSectionSource}.
  *
  * @author Daniel Sagenschneider
  */

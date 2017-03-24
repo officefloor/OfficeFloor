@@ -23,7 +23,7 @@ import java.sql.SQLException;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
-import net.officefloor.model.section.DeskChanges;
+import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.FunctionEscalationModel;
 import net.officefloor.model.section.FunctionFlowModel;
 import net.officefloor.model.section.FunctionModel;
@@ -33,7 +33,7 @@ import net.officefloor.model.section.ManagedFunctionObjectModel;
 
 /**
  * Tests refactoring the {@link FunctionNamespaceModel} to a
- * {@link FunctionNamespaceType} via the {@link DeskChanges}.
+ * {@link FunctionNamespaceType} via the {@link SectionChanges}.
  * 
  * @author Daniel Sagenschneider
  */

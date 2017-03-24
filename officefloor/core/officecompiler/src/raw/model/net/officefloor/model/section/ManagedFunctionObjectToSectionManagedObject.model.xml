@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
-	<field type="String" name="desk managed object name" />
+	<field type="String" name="section managed object name" />
 	<field type="ManagedFunctionObjectModel" name="managed function object"
 		end-field="section managed object" />
 	<field type="SectionManagedObjectModel" name="section managed object"

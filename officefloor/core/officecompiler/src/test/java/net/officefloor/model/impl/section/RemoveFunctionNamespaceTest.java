@@ -19,7 +19,7 @@ package net.officefloor.model.impl.section;
 
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.section.DeskModel;
+import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.FunctionModel;
 import net.officefloor.model.section.FunctionNamespaceModel;
 
@@ -28,7 +28,7 @@ import net.officefloor.model.section.FunctionNamespaceModel;
  * 
  * @author Daniel Sagenschneider
  */
-public class RemoveFunctionNamespaceTest extends AbstractDeskChangesTestCase {
+public class RemoveFunctionNamespaceTest extends AbstractSectionChangesTestCase {
 
 	/**
 	 * Specific setup file per test.
@@ -39,14 +39,14 @@ public class RemoveFunctionNamespaceTest extends AbstractDeskChangesTestCase {
 
 	/**
 	 * Ensure no {@link Change} for removing {@link FunctionNamespaceModel} not
-	 * on the {@link DeskModel}.
+	 * on the {@link SectionModel}.
 	 */
-	public void testRemoveFunctionNamespaceNotOnDesk() {
-		// Attempt to remove namespace not on the desk
-		FunctionNamespaceModel namespaceNotOnDesk = new FunctionNamespaceModel("NOT ON DESK", null);
-		Change<FunctionNamespaceModel> change = this.operations.removeFunctionNamespace(namespaceNotOnDesk);
-		this.assertChange(change, namespaceNotOnDesk, "Remove namespace NOT ON DESK", false,
-				"Function namespace NOT ON DESK not on desk");
+	public void testRemoveFunctionNamespaceNotOnSection() {
+		// Attempt to remove namespace not in the section
+		FunctionNamespaceModel namespaceNotOnSection = new FunctionNamespaceModel("NOT IN SECTION", null);
+		Change<FunctionNamespaceModel> change = this.operations.removeFunctionNamespace(namespaceNotOnSection);
+		this.assertChange(change, namespaceNotOnSection, "Remove namespace NOT IN SECTION", false,
+				"Function namespace NOT IN SECTION not in section");
 	}
 
 	/**

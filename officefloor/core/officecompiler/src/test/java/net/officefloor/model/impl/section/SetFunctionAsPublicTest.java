@@ -18,7 +18,7 @@
 package net.officefloor.model.impl.section;
 
 import net.officefloor.model.change.Change;
-import net.officefloor.model.section.DeskModel;
+import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.FunctionModel;
 
 /**
@@ -26,7 +26,7 @@ import net.officefloor.model.section.FunctionModel;
  * 
  * @author Daniel Sagenschneider
  */
-public class SetFunctionAsPublicTest extends AbstractDeskChangesTestCase {
+public class SetFunctionAsPublicTest extends AbstractSectionChangesTestCase {
 
 	/**
 	 * Public {@link FunctionModel}.
@@ -49,12 +49,12 @@ public class SetFunctionAsPublicTest extends AbstractDeskChangesTestCase {
 
 	/**
 	 * Ensure no change if the {@link FunctionModel} not on the
-	 * {@link DeskModel}.
+	 * {@link SectionModel}.
 	 */
-	public void testFunctionNotOnDesk() {
+	public void testFunctionNotInSection() {
 		FunctionModel function = new FunctionModel("FUNCTION", false, "NAMESPACE", "MANAGED_FUNCTION", null);
 		Change<FunctionModel> change = this.operations.setFunctionAsPublic(true, function);
-		this.assertChange(change, function, "Set function FUNCTION public", false, "Function FUNCTION not on desk");
+		this.assertChange(change, function, "Set function FUNCTION public", false, "Function FUNCTION not in section");
 	}
 
 	/**

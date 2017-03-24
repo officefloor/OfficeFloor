@@ -22,7 +22,7 @@ import java.sql.SQLException;
 
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.section.DeskModel;
+import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.FunctionFlowModel;
 import net.officefloor.model.section.FunctionModel;
 import net.officefloor.model.section.FunctionNamespaceModel;
@@ -33,7 +33,7 @@ import net.officefloor.model.section.ManagedFunctionModel;
  * 
  * @author Daniel Sagenschneider
  */
-public class AddFunctionTest extends AbstractDeskChangesTestCase {
+public class AddFunctionTest extends AbstractSectionChangesTestCase {
 
 	/**
 	 * {@link ManagedFunctionModel}.
@@ -50,18 +50,19 @@ public class AddFunctionTest extends AbstractDeskChangesTestCase {
 
 	/**
 	 * Ensure can not apply change if {@link ManagedFunctionModel} is not on the
-	 * {@link DeskModel} (specifically a {@link FunctionNamespaceModel} of the
-	 * {@link DeskModel}).
+	 * {@link SectionModel} (specifically a {@link FunctionNamespaceModel} of
+	 * the {@link SectionModel}).
 	 */
-	public void testManagedFunctionNotOnDesk() {
+	public void testManagedFunctionNotOnSection() {
 
-		// Create the managed function not on the desk
-		ManagedFunctionModel managedFunction = new ManagedFunctionModel("NOT_ON_DESK");
+		// Create the managed function not un the section
+		ManagedFunctionModel managedFunction = new ManagedFunctionModel("NOT_IN_SECTION");
 
-		// Validate not able to add function if managed function not on desk
-		ManagedFunctionType<?, ?> functionType = this.constructFunctionType("NOT_ON_DESK", null);
+		// Validate not able to add function if managed function not in section
+		ManagedFunctionType<?, ?> functionType = this.constructFunctionType("NOT_IN_SECTION", null);
 		Change<FunctionModel> change = this.operations.addFunction("FUNCTION", managedFunction, functionType);
-		this.assertChange(change, null, "Add function FUNCTION", false, "Managed function NOT_ON_DESK not on desk");
+		this.assertChange(change, null, "Add function FUNCTION", false,
+				"Managed function NOT_IN_SECTION not in section");
 		assertNotNull("Must have target", change.getTarget());
 	}
 

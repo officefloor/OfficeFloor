@@ -20,6 +20,8 @@ package net.officefloor.model.impl.section;
 import java.sql.Connection;
 
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.section.SectionModel;
@@ -35,8 +37,7 @@ public class SectionModelSectionSourceTest extends OfficeFrameTestCase {
 	 * No specification properties required.
 	 */
 	public void testNoSpecification() {
-		SectionLoaderUtil
-				.validateSpecification(SectionModelSectionSource.class);
+		SectionLoaderUtil.validateSpecification(SectionModelSectionSource.class);
 	}
 
 	/**
@@ -51,10 +52,13 @@ public class SectionModelSectionSourceTest extends OfficeFrameTestCase {
 		designer.addSectionOutput("ESCALATION", Exception.class.getName(), true);
 		designer.addSectionObject("OBJECT", Connection.class.getName());
 		designer.addSubSection("SUB_SECTION", "TODO SOURCE", "TODO LOCATION");
+		SectionFunctionNamespace work = designer.addSectionFunctionNamespace("NAMESPACE",
+				MockManagedFunctionSource.class.getName());
+		SectionFunction task = work.addSectionFunction("INPUT", "MANAGED_FUNCTION");
+		task.getFunctionObject("PARAMETER").flagAsParameter();
 
 		// Validate the section is as expected
-		SectionLoaderUtil.validateSection(designer,
-				SectionModelSectionSource.class, this.getClass(),
+		SectionLoaderUtil.validateSection(designer, SectionModelSectionSource.class, this.getClass(),
 				"SectionModelSectionSourceTest.section.xml");
 	}
 

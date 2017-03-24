@@ -31,7 +31,7 @@ import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.section.DeskChanges;
+import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.FunctionEscalationModel;
 import net.officefloor.model.section.FunctionFlowModel;
 import net.officefloor.model.section.FunctionModel;
@@ -42,11 +42,11 @@ import net.officefloor.model.section.PropertyModel;
 
 /**
  * Abstract functionality to test refactoring the {@link FunctionNamespaceModel}
- * to a {@link FunctionNamespaceType} via the {@link DeskChanges}.
+ * to a {@link FunctionNamespaceType} via the {@link SectionChanges}.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractRefactorNamespaceTest extends AbstractDeskChangesTestCase {
+public abstract class AbstractRefactorNamespaceTest extends AbstractSectionChangesTestCase {
 
 	/**
 	 * {@link FunctionNamespaceModel} to refactor.
@@ -110,11 +110,6 @@ public abstract class AbstractRefactorNamespaceTest extends AbstractDeskChangesT
 		super(true);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.impl.AbstractChangesTestCase#setUp()
-	 */
 	@Override
 	protected void setUp() throws Exception {
 
