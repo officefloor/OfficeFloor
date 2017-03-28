@@ -41,6 +41,7 @@ import net.officefloor.model.section.ManagedFunctionModel;
 import net.officefloor.model.section.ManagedFunctionObjectModel;
 import net.officefloor.model.section.ManagedFunctionObjectToExternalManagedObjectModel;
 import net.officefloor.model.section.ManagedFunctionObjectToSectionManagedObjectModel;
+import net.officefloor.model.section.ManagedFunctionToFunctionModel;
 import net.officefloor.model.section.SectionManagedObjectDependencyModel;
 import net.officefloor.model.section.SectionManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.section.SectionManagedObjectDependencyToSectionManagedObjectModel;

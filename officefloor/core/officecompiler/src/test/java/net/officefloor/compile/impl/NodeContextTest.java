@@ -578,7 +578,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	public void testCreateFunctionNode() {
 		FunctionNamespaceNode namespace = this.createMock(FunctionNamespaceNode.class);
 		ManagedFunctionNode node = this.doTest(() -> this.context.createFunctionNode("FUNCTION"));
-		assertNode(node, "FUNCTION", "Function", null, null);
+		assertNode(node, "FUNCTION", "Managed Function", null, null);
 		assertEquals("Incorrct office function name", "FUNCTION", node.getOfficeFunctionName());
 		assertEquals("Incorrect section function name", "FUNCTION", node.getSectionFunctionName());
 		assertNull("Should not have namespace", node.getFunctionNamespaceNode());

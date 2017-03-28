@@ -32,7 +32,7 @@ public interface FunctionNamespaceNode extends Node, SectionFunctionNamespace {
 	/**
 	 * {@link Node} type.
 	 */
-	static String TYPE = "FunctionNamespace";
+	static String TYPE = "Function Namespace";
 
 	/**
 	 * Initialises the {@link FunctionNamespaceNode}.

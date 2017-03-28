@@ -22,4 +22,19 @@
 			</output>
 		</sub-section>
 	</sub-sections>
+	<works>
+		<work name="WORK" source="net.officefloor.model.impl.desk.MockWorkSource">
+			<work-task name="WORK_TASK">
+				<task-object name="PARAMETER" object-type="java.lang.Integer"
+					parameter="true" />
+			</work-task>
+		</work>
+	</works>
+	<tasks>
+		<task name="INPUT" public="true" work="WORK" task="WORK_TASK">
+			<task-escalation escalation-type="java.lang.Exception">
+				<external-flow name="ESCALATION" />
+			</task-escalation>
+		</task>
+	</tasks>
 </section>

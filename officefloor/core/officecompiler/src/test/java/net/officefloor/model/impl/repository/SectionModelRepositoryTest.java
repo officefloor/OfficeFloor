@@ -32,13 +32,16 @@ import net.officefloor.model.section.ExternalManagedObjectModel;
 import net.officefloor.model.section.FunctionEscalationModel;
 import net.officefloor.model.section.FunctionEscalationToExternalFlowModel;
 import net.officefloor.model.section.FunctionEscalationToFunctionModel;
+import net.officefloor.model.section.FunctionEscalationToSubSectionInputModel;
 import net.officefloor.model.section.FunctionFlowModel;
 import net.officefloor.model.section.FunctionFlowToExternalFlowModel;
 import net.officefloor.model.section.FunctionFlowToFunctionModel;
+import net.officefloor.model.section.FunctionFlowToSubSectionInputModel;
 import net.officefloor.model.section.FunctionModel;
 import net.officefloor.model.section.FunctionNamespaceModel;
 import net.officefloor.model.section.FunctionToNextExternalFlowModel;
 import net.officefloor.model.section.FunctionToNextFunctionModel;
+import net.officefloor.model.section.FunctionToNextSubSectionInputModel;
 import net.officefloor.model.section.ManagedFunctionModel;
 import net.officefloor.model.section.ManagedFunctionObjectModel;
 import net.officefloor.model.section.ManagedFunctionObjectToExternalManagedObjectModel;
@@ -61,6 +64,7 @@ import net.officefloor.model.section.SubSectionObjectToExternalManagedObjectMode
 import net.officefloor.model.section.SubSectionObjectToSectionManagedObjectModel;
 import net.officefloor.model.section.SubSectionOutputModel;
 import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
+import net.officefloor.model.section.SubSectionOutputToFunctionModel;
 import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
 
 /**
@@ -150,14 +154,13 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 		assertList(new String[] { "getExternalFlowName", "getArgumentType", "getX", "getY" },
 				section.getExternalFlows(),
 				new ExternalFlowModel("FLOW", String.class.getName(), null, null, null, null, null, 400, 401),
-				new ExternalFlowModel("flow", "java.lang.Object", null, null, null, null, null, 410, 411),
-				new ExternalFlowModel("escalation", "java.lang.Throwable", null, null, null, null, null, 410, 411));
+				new ExternalFlowModel("ESCALATION", "java.lang.Throwable", null, null, null, null, null, 410, 411));
 
 		// ----------------------------------------
 		// Validate the Function Namespace
 		// ----------------------------------------
 		assertList(new String[] { "getFunctionNamespaceName", "getManagedFunctionSourceClassName", "getX", "getY" },
-				section.getFunctionNamespaces(), new FunctionNamespaceModel("namespace",
+				section.getFunctionNamespaces(), new FunctionNamespaceModel("function-namespace",
 						"net.example.ExampleManagedFunctionSource", null, null, 500, 501));
 		FunctionNamespaceModel namespace = section.getFunctionNamespaces().get(0);
 
@@ -202,7 +205,7 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 		assertNull(managedFunctionThree.getManagedFunctionObjects().get(0).getExternalManagedObject());
 		assertProperties(new ManagedFunctionObjectToSectionManagedObjectModel("MANAGED_OBJECT"),
 				managedFunctionTwo.getManagedFunctionObjects().get(2).getSectionManagedObject(),
-				"getDeskManagedObjectName");
+				"getSectionManagedObjectName");
 
 		// ----------------------------------------
 		// Validate the Functions
@@ -237,21 +240,35 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 
 		// Validate the flow connections
 		FunctionFlowModel functionOneFirst = functionOne.getFunctionFlows().get(0);
-		assertProperties(new FunctionFlowToExternalFlowModel("flow", false), functionOneFirst.getExternalFlow(),
+		assertProperties(new FunctionFlowToExternalFlowModel("flow", true), functionOneFirst.getExternalFlow(),
 				"getExternalFlowName", "getIsSpawnThreadState");
 		assertNull(functionOneFirst.getFunction());
+		assertNull(functionOneFirst.getSubSectionInput());
 		FunctionFlowModel functionOneSecond = functionOne.getFunctionFlows().get(1);
-		assertNull(functionOneSecond.getExternalFlow());
 		assertProperties(new FunctionFlowToFunctionModel("functionTwo", true), functionOneSecond.getFunction(),
 				"getFunctionName", "getIsSpawnThreadState");
+		assertNull(functionOneSecond.getExternalFlow());
+		assertNull(functionOneSecond.getSubSectionInput());
+		FunctionFlowModel functionOneThird = functionOne.getFunctionFlows().get(2);
+		assertProperties(new FunctionFlowToSubSectionInputModel("SECTION_A", "INPUT_A", true),
+				functionOneThird.getSubSectionInput(), "getSubSectionName", "getSubSectionInputName",
+				"getIsSpawnThreadState");
+		assertNull(functionOneThird.getExternalFlow());
+		assertNull(functionOneThird.getFunction());
 
 		// Validate next flows
-		assertProperties(new FunctionToNextFunctionModel("functionTwo"), functionOne.getNextFunction(),
-				"getNextFunctionName");
-		assertNull(functionOne.getNextExternalFlow());
-		assertNull(functionTwo.getNextFunction());
-		assertProperties(new FunctionToNextExternalFlowModel("flow"), functionTwo.getNextExternalFlow(),
+		assertProperties(new FunctionToNextExternalFlowModel("FLOW"), functionOne.getNextExternalFlow(),
 				"getExternalFlowName");
+		assertNull(functionOne.getNextFunction());
+		assertNull(functionOne.getNextSubSectionInput());
+		assertProperties(new FunctionToNextFunctionModel("functionTwo"), functionTwo.getNextFunction(),
+				"getNextFunctionName");
+		assertNull(functionTwo.getNextExternalFlow());
+		assertNull(functionTwo.getNextSubSectionInput());
+		assertProperties(new FunctionToNextSubSectionInputModel("SECTION_A", "INPUT_A"),
+				functionThree.getNextSubSectionInput(), "getSubSectionName", "getSubSectionInputName");
+		assertNull(functionThree.getNextExternalFlow());
+		assertNull(functionThree.getNextFunction());
 
 		// Validate escalations
 		String[] escalationValidate = new String[] { "getEscalationType" };
@@ -271,6 +288,9 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 		assertProperties(functionOneSQL.getExternalFlow(), new FunctionEscalationToExternalFlowModel("escalation"),
 				"getExternalFlowName");
 		FunctionEscalationModel functionOneNull = functionOne.getFunctionEscalations().get(2);
+		assertProperties(functionOneNull.getSubSectionInput(),
+				new FunctionEscalationToSubSectionInputModel("SECTION_C", "INPUT_C"), "getSubSectionName",
+				"getSubSectionInputName");
 		assertNull(functionOneNull.getFunction());
 		assertNull(functionOneNull.getExternalFlow());
 
@@ -309,18 +329,24 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 		assertList(outputValidation, subSectionA.getSubSectionOutputs(),
 				new SubSectionOutputModel("OUTPUT_A", String.class.getName(), false),
 				new SubSectionOutputModel("OUTPUT_B", Exception.class.getName(), true),
-				new SubSectionOutputModel("OUTPUT_C", null, false));
+				new SubSectionOutputModel("OUTPUT_C", null, false), new SubSectionOutputModel("OUTPUT_D", null, false));
 		assertList(outputValidation, subSectionB.getSubSectionOutputs());
 		SubSectionOutputModel outputA = subSectionA.getSubSectionOutputs().get(0);
 		SubSectionOutputModel outputB = subSectionA.getSubSectionOutputs().get(1);
+		SubSectionOutputModel outputC = subSectionA.getSubSectionOutputs().get(2);
 
 		// Validate the output connections
 		assertProperties(new SubSectionOutputToExternalFlowModel("FLOW"), outputA.getExternalFlow(),
 				"getExternalFlowName");
-		assertNull("Should not link input", outputA.getSubSectionInput());
-		assertNull("Should not link external flow", outputB.getExternalFlow());
+		assertNull(outputA.getFunction());
+		assertNull(outputA.getSubSectionInput());
+		assertProperties(new SubSectionOutputToFunctionModel("functionOne"), outputB.getFunction(), "getFunctionName");
+		assertNull(outputB.getExternalFlow());
+		assertNull(outputB.getSubSectionInput());
 		assertProperties(new SubSectionOutputToSubSectionInputModel("SECTION_B", "INPUT_A"),
-				outputB.getSubSectionInput(), "getSubSectionName", "getSubSectionInputName");
+				outputC.getSubSectionInput(), "getSubSectionName", "getSubSectionInputName");
+		assertNull(outputC.getExternalFlow());
+		assertNull(outputC.getFunction());
 
 		// Validate the objects
 		String[] objectValidation = new String[] {};

@@ -36,7 +36,7 @@ import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassAdministratorSourceTest extends OfficeFrameTestCase {
+public class ClassAdministrationSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensures specification context.
@@ -47,9 +47,23 @@ public class ClassAdministratorSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure {@link AdministrationType} is correct.
+	 */
+	public void testAdministrationWithoutFlowsType() {
+
+		// Create the expected administration type
+		AdministrationTypeBuilder<Indexed, Indexed> type = AdministrationLoaderUtil
+				.createAdministrationTypeBuilder(MockExtensionInterface.class, Indexed.class, Indexed.class);
+
+		// Validate the administration type
+		AdministrationLoaderUtil.validateAdministratorType(type, ClassAdministrationSource.class,
+				ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME, MockClassWithoutFlows.class.getName());
+	}
+
+	/**
 	 * Ensures {@link AdministrationType} is correct.
 	 */
-	public void testAdministratorType() {
+	public void testAdministrationWithFlowsType() {
 
 		// Create the expected administration type
 		AdministrationTypeBuilder<Indexed, Indexed> type = AdministrationLoaderUtil
@@ -63,7 +77,7 @@ public class ClassAdministratorSourceTest extends OfficeFrameTestCase {
 
 		// Validate the administration type
 		AdministrationLoaderUtil.validateAdministratorType(type, ClassAdministrationSource.class,
-				ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME, MockClass.class.getName());
+				ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME, MockClassWithFlows.class.getName());
 	}
 
 	/**
@@ -75,7 +89,7 @@ public class ClassAdministratorSourceTest extends OfficeFrameTestCase {
 		// Load the type
 		AdministrationType<?, ?, ?> type = AdministrationLoaderUtil.loadAdministrationType(
 				ClassAdministrationSource.class, ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME,
-				MockClass.class.getName());
+				MockClassWithoutFlows.class.getName());
 
 		// Create the administration
 		Administration<?, ?, ?> administration = type.getAdministrationFactory().createAdministration();
@@ -107,9 +121,28 @@ public class ClassAdministratorSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Mock {@link FlowCallback}.
+	 */
+	private final FlowCallback callback = this.createMock(FlowCallback.class);
+
+	/**
 	 * Mock {@link Administration} class.
 	 */
-	public static class MockClass {
+	public static class MockClassWithoutFlows {
+
+		public void admin(MockExtensionInterface[] extensions) {
+			for (MockExtensionInterface ei : extensions) {
+				ei.administer();
+			}
+		}
+	}
+
+	/**
+	 * Mock {@link Administration} class.
+	 */
+	public static class MockClassWithFlows {
+
+		private static FlowCallback callback;
 
 		@FlowInterface
 		public static interface MockFlows {
@@ -127,6 +160,10 @@ public class ClassAdministratorSourceTest extends OfficeFrameTestCase {
 			for (MockExtensionInterface ei : extensions) {
 				ei.administer();
 			}
+			flows.flowOne();
+			flows.flowTwo("TWO");
+			flows.flowThree(callback);
+			flows.flowFour(4, callback);
 		}
 	}
 

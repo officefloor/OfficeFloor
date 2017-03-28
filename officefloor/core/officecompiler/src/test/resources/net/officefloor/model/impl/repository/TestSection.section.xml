@@ -41,11 +41,93 @@
 	<external-flows>
 		<external-flow name="FLOW" argument-type="java.lang.String"
 			x="400" y="401" />
+		<external-flow name="ESCALATION" argument-type="java.lang.Throwable"
+			x="410" y="411" />
 	</external-flows>
+
+	<function-namespaces>
+		<function-namespace name="function-namespace"
+			source="net.example.ExampleManagedFunctionSource" x="500" y="501">
+			<properties>
+				<property name="property.one" value="VALUE_ONE" />
+				<property name="property.two" value="VALUE_TWO" />
+			</properties>
+			<managed-function name="managedFunctionOne">
+				<managed-function-object name="ONE" key="ONE"
+					object-type="java.lang.String">
+					<external-managed-object name="EXTERNAL_MANAGED_OBJECT" />
+				</managed-function-object>
+			</managed-function>
+			<managed-function name="managedFunctionTwo">
+				<managed-function-object name="0"
+					object-type="java.lang.Integer" parameter="true" /> <!-- may not key -->
+				<managed-function-object name="1"
+					object-type="java.lang.String">
+					<external-managed-object name="EXTERNAL_MANAGED_OBJECT" />
+				</managed-function-object>
+				<managed-function-object name="2"
+					object-type="net.orm.Session">
+					<managed-object name="MANAGED_OBJECT" />
+				</managed-function-object>
+			</managed-function>
+			<managed-function name="managedFunctionThree">
+				<managed-function-object name="parameter"
+					object-type="java.lang.Throwable" parameter="true" />
+			</managed-function>
+			<managed-function name="managedFunctionFour" /> <!-- May not require objects -->
+		</function-namespace>
+	</function-namespaces>
+
+	<functions>
+		<function name="functionOne" public="true"
+			function-namespace="namespace" managed-function="managedFunctionOne"
+			return-type="java.lang.Integer" x="600" y="601">
+			<function-flow name="First" key="ONE" argument-type="java.lang.Double">
+				<external-flow name="flow" spawn-thread-state="true" />
+			</function-flow>
+			<function-flow name="Second" key="TWO" argument-type="java.lang.Integer">
+				<function name="functionTwo" spawn-thread-state="true" />
+			</function-flow>
+			<function-flow name="Third" key="THREE"> <!-- argument-type may be null -->
+				<input sub-section="SECTION_A" input="INPUT_A"
+					spawn-thread-state="true" />
+			</function-flow>
+			<next-external-flow name="FLOW" />
+			<function-escalation escalation-type="java.io.IOException">
+				<function name="functionThree" />
+			</function-escalation>
+			<function-escalation escalation-type="java.sql.SQLException">
+				<external-flow name="escalation" />
+			</function-escalation>
+			<function-escalation escalation-type="java.lang.NullPointerException">
+				<input sub-section="SECTION_C" input="INPUT_C" />
+			</function-escalation>
+		</function>
+		<function name="functionTwo" public="false"
+			function-namespace="namespace" managed-function="managedFunctionTwo"
+			x="610" y="611"> <!-- return-type may be null -->
+			<next-function name="functionTwo" />
+		</function>
+		<function name="functionThree" public="false"
+			function-namespace="namespace" managed-function="managedFunctionThree"
+			return-type="java.lang.Integer" x="620" y="621">
+			<function-flow name="0" argument-type="java.lang.Integer"> <!-- key may be null -->
+				<function name="taskTwo" link="PARALLEL" />
+			</function-flow>
+			<function-flow name="1" argument-type="java.lang.Double">
+				<external-flow name="flow" link="SEQUENTIAL" />
+			</function-flow>
+			<next-input sub-section="SECTION_A" input="INPUT_A" />
+		</function>
+		<function name="functionFour" public="false"
+			function-namespace="namespace" managed-function="managedFunctionFour"
+			x="630" y="631">
+		</function>
+	</functions>
 
 	<sub-sections>
 		<sub-section name="SECTION_A" source="DESK" location="DESK_LOCATION"
-			x="500" y="501">
+			x="700" y="701">
 			<properties>
 				<property name="name.one" value="value.one" />
 				<property name="name.two" value="value.two" />
@@ -59,9 +141,12 @@
 			</output>
 			<output name="OUTPUT_B" argument-type="java.lang.Exception"
 				escalation-only="true">
+				<function name="functionOne" />
+			</output>
+			<output name="OUTPUT_C">
 				<input sub-section="SECTION_B" input="INPUT_A" />
 			</output>
-			<output name="OUTPUT_C" />
+			<output name="OUTPUT_D" />
 			<object name="OBJECT_A" object-type="java.lang.Object">
 				<external-managed-object name="MO" />
 			</object>
@@ -71,11 +156,11 @@
 			</object>
 		</sub-section>
 		<sub-section name="SECTION_B" source="SECTION" location="SECTION_LOCATION"
-			x="510" y="511">
+			x="710" y="711">
 			<input name="INPUT_A" parameter-type="java.lang.Exception"
 				public="true" public-name="PUBLIC_INPUT_A" />
 		</sub-section>
 		<sub-section name="SECTION_C" source="net.example.ExampleSectionSource"
-			location="EXAMPLE_LOCATION" x="520" y="521" />
+			location="EXAMPLE_LOCATION" x="720" y="721" />
 	</sub-sections>
 </section>
