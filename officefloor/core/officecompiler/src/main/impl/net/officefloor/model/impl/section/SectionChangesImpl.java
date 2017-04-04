@@ -635,7 +635,7 @@ public class SectionChangesImpl implements SectionChanges {
 			// Not on section so can not remove
 			return new NoChange<FunctionNamespaceModel>(namespaceModel,
 					"Rename namespace " + namespaceModel.getFunctionNamespaceName() + " to " + newFunctionNamespaceName,
-					"FunctionNamespace " + namespaceModel.getFunctionNamespaceName() + " not on section");
+					"FunctionNamespace " + namespaceModel.getFunctionNamespaceName() + " not in section");
 		}
 
 		// Store the old name for reverting
@@ -1485,7 +1485,7 @@ public class SectionChangesImpl implements SectionChanges {
 			// Can not remove function as not on section
 			return new NoChange<FunctionModel>(function,
 					"Rename function " + function.getFunctionName() + " to " + newFunctionName,
-					"Function " + function.getFunctionName() + " not on section");
+					"Function " + function.getFunctionName() + " not in section");
 		}
 
 		// Maintain old function name for revert
@@ -1499,8 +1499,11 @@ public class SectionChangesImpl implements SectionChanges {
 				// Rename function (ensuring ordering)
 				function.setFunctionName(newFunctionName);
 				SectionChangesImpl.this.sortFunctionModels();
-				SectionChangesImpl.sortManagedFunctionToFunctionConnections(
-						function.getManagedFunction().getManagedFunction().getFunctions());
+				ManagedFunctionToFunctionModel conn = function.getManagedFunction();
+				if (conn != null) {
+					SectionChangesImpl
+							.sortManagedFunctionToFunctionConnections(conn.getManagedFunction().getFunctions());
+				}
 			}
 
 			@Override
@@ -1508,8 +1511,11 @@ public class SectionChangesImpl implements SectionChanges {
 				// Revert to old function name (ensuring ordering)
 				function.setFunctionName(oldFunctionName);
 				SectionChangesImpl.this.sortFunctionModels();
-				SectionChangesImpl.sortManagedFunctionToFunctionConnections(
-						function.getManagedFunction().getManagedFunction().getFunctions());
+				ManagedFunctionToFunctionModel conn = function.getManagedFunction();
+				if (conn != null) {
+					SectionChangesImpl
+							.sortManagedFunctionToFunctionConnections(conn.getManagedFunction().getFunctions());
+				}
 			}
 		};
 	}

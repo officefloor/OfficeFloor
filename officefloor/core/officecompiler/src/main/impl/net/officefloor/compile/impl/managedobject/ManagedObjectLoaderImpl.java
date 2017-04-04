@@ -491,7 +491,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 
 			// Ensure the linked function was added
 			if (!this.isFunctionAdded(linkFunctionName, office)) {
-				this.addIssue("Unknown function for " + linkLabel + "(link function=" + linkFunctionName + ")");
+				this.addIssue("Unknown function for " + linkLabel + ", link function=" + linkFunctionName + ")");
 				return null;
 			}
 

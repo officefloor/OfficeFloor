@@ -8,14 +8,14 @@
 		<value method="setObjectType" node="external-managed-object@object-type" />
 		<value method="setX" node="external-managed-object@x" />
 		<value method="setY" node="external-managed-object@y" />
-		<object method="addAdministrator" node="administer"
-			class="net.officefloor.model.office.ExternalManagedObjectToAdministratorModel">
-			<value method="setAdministratorName" node="administer@administrator" />
+		<object method="addAdministration" node="administer"
+			class="net.officefloor.model.office.ExternalManagedObjectToAdministrationModel">
+			<value method="setAdministrationName" node="administer@administration" />
 			<value method="setOrder" node="administer@order" />
 		</object>
-		<object method="addOfficeGovernance" node="govern"
-			class="net.officefloor.model.office.ExternalManagedObjectToOfficeGovernanceModel">
-			<value method="setOfficeGovernanceName" node="govern@governance" />
+		<object method="addGovernance" node="govern"
+			class="net.officefloor.model.office.ExternalManagedObjectToGovernanceModel">
+			<value method="setGovernanceName" node="govern@governance" />
 		</object>
 	</object>
 
@@ -77,14 +77,14 @@
 			class="net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel">
 			<value method="setOfficeManagedObjectSourceName" node="managed-object-source@name" />
 		</object>
-		<object method="addAdministrator" node="administer"
-			class="net.officefloor.model.office.OfficeManagedObjectToAdministratorModel">
-			<value method="setAdministratorName" node="administer@administrator" />
+		<object method="addAdministration" node="administer"
+			class="net.officefloor.model.office.OfficeManagedObjectToAdministrationModel">
+			<value method="setAdministrationName" node="administer@administration" />
 			<value method="setOrder" node="administer@order" />
 		</object>
-		<object method="addOfficeGovernance" node="govern"
-			class="net.officefloor.model.office.OfficeManagedObjectToOfficeGovernanceModel">
-			<value method="setOfficeGovernanceName" node="govern@governance" />
+		<object method="addGovernance" node="govern"
+			class="net.officefloor.model.office.OfficeManagedObjectToGovernanceModel">
+			<value method="setGovernanceName" node="govern@governance" />
 		</object>
 		<object method="addOfficeManagedObjectDependency" node="dependency"
 			class="net.officefloor.model.office.OfficeManagedObjectDependencyModel">
@@ -122,33 +122,47 @@
 		</object>
 	</object>
 
-	<!-- OFFICE ADMINISTRATORS -->
-	<object method="addOfficeAdministrator" node="administrator"
-		class="net.officefloor.model.office.AdministratorModel">
-		<value method="setAdministratorName" node="administrator@name" />
-		<value method="setAdministratorSourceClassName" node="administrator@source" />
-		<value method="setAdministratorScope" node="administrator@scope" />
-		<value method="setX" node="administrator@x" />
-		<value method="setY" node="administrator@y" />
+	<!-- ADMINISTRATIONS -->
+	<object method="addAdministration" node="administration"
+		class="net.officefloor.model.office.AdministrationModel">
+		<value method="setAdministrationName" node="administration@name" />
+		<value method="setAdministrationSourceClassName" node="administration@source" />
+		<value method="setX" node="administration@x" />
+		<value method="setY" node="administration@y" />
 		<object method="addProperty" node="property"
 			class="net.officefloor.model.office.PropertyModel">
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
 		<object method="setOfficeTeam" node="team"
-			class="net.officefloor.model.office.AdministratorToOfficeTeamModel">
+			class="net.officefloor.model.office.AdministrationToOfficeTeamModel">
 			<value method="setOfficeTeamName" node="team@name" />
 		</object>
-		<object method="addDuty" node="duty"
-			class="net.officefloor.model.office.DutyModel">
-			<value method="setDutyName" node="duty@name" />
+		<object method="addAdministrationFlow" node="flow"
+			class="net.officefloor.model.office.AdministrationFlowModel">
+			<value method="setFlowName" node="flow@name" />
+			<value method="setArgumentType" node="flow@argument-type" />
+			<object method="setOfficeSectionInput" node="input"
+				class="net.officefloor.model.office.AdministrationFlowToOfficeSectionInputModel">
+				<value method="setOfficeSectionName" node="input@section" />
+				<value method="setOfficeSectionInputName" node="input@input" />
+			</object>
+		</object>
+		<object method="addAdministrationEscalation" node="escalation"
+			class="net.officefloor.model.office.AdministrationEscalationModel">
+			<value method="setEscalationType" node="escalation@type" />
+			<object method="setOfficeSectionInput" node="input"
+				class="net.officefloor.model.office.AdministrationEscalationToOfficeSectionInputModel">
+				<value method="setOfficeSectionName" node="input@section" />
+				<value method="setOfficeSectionInputName" node="input@input" />
+			</object>
 		</object>
 	</object>
 
-	<!-- OFFICE GOVERNANCES -->
-	<object method="addOfficeGovernance" node="governance"
-		class="net.officefloor.model.office.OfficeGovernanceModel">
-		<value method="setOfficeGovernanceName" node="governance@name" />
+	<!-- GOVERNANCES -->
+	<object method="addGovernance" node="governance"
+		class="net.officefloor.model.office.GovernanceModel">
+		<value method="setGovernanceName" node="governance@name" />
 		<value method="setGovernanceSourceClassName" node="governance@source" />
 		<value method="setX" node="governance@x" />
 		<value method="setY" node="governance@y" />
@@ -157,12 +171,31 @@
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
+		<object method="addGovernanceFlow" node="flow"
+			class="net.officefloor.model.office.GovernanceFlowModel">
+			<value method="setFlowName" node="flow@name" />
+			<value method="setArgumentType" node="flow@argument-type" />
+			<object method="setOfficeSectionInput" node="input"
+				class="net.officefloor.model.office.GovernanceFlowToOfficeSectionInputModel">
+				<value method="setOfficeSectionName" node="input@section" />
+				<value method="setOfficeSectionInputName" node="input@input" />
+			</object>
+		</object>
+		<object method="addGovernanceEscalation" node="escalation"
+			class="net.officefloor.model.office.GovernanceEscalationModel">
+			<value method="setEscalationType" node="escalation@type" />
+			<object method="setOfficeSectionInput" node="input"
+				class="net.officefloor.model.office.GovernanceEscalationToOfficeSectionInputModel">
+				<value method="setOfficeSectionName" node="input@section" />
+				<value method="setOfficeSectionInputName" node="input@input" />
+			</object>
+		</object>
 		<object method="setOfficeTeam" node="team"
-			class="net.officefloor.model.office.OfficeGovernanceToOfficeTeamModel">
+			class="net.officefloor.model.office.GovernanceToOfficeTeamModel">
 			<value method="setOfficeTeamName" node="team@name" />
 		</object>
-		<object method="addOfficeGovernanceArea" node="governance-area"
-			class="net.officefloor.model.office.OfficeGovernanceAreaModel">
+		<object method="addGovernanceArea" node="governance-area"
+			class="net.officefloor.model.office.GovernanceAreaModel">
 			<value method="setX" node="governance-area@x" />
 			<value method="setY" node="governance-area@y" />
 			<value method="setHeight" node="governance-area@height" />
@@ -236,9 +269,9 @@
 		<object method="setOfficeSubSection" node="sub-section"
 			class="net.officefloor.model.office.OfficeSubSectionModel" id="SUB_SECTION">
 			<value method="setOfficeSubSectionName" node="sub-section@name" />
-			<object method="addOfficeGovernance" node="govern"
-				class="net.officefloor.model.office.OfficeSubSectionToOfficeGovernanceModel">
-				<value method="setOfficeGovernanceName" node="govern@governance" />
+			<object method="addGovernance" node="govern"
+				class="net.officefloor.model.office.OfficeSubSectionToGovernanceModel">
+				<value method="setGovernanceName" node="govern@governance" />
 			</object>
 			<object method="addOfficeSectionManagedObject" node="section-managed-object"
 				class="net.officefloor.model.office.OfficeSectionManagedObjectModel">
@@ -247,27 +280,25 @@
 					class="net.officefloor.model.office.OfficeSectionManagedObjectTeamModel">
 					<value method="setOfficeSectionManagedObjectTeamName" node="team@name" />
 				</object>
-				<object method="addOfficeGovernance" node="govern"
-					class="net.officefloor.model.office.OfficeSectionManagedObjectToOfficeGovernanceModel">
-					<value method="setOfficeGovernanceName" node="govern@governance" />
+				<object method="addGovernance" node="govern"
+					class="net.officefloor.model.office.OfficeSectionManagedObjectToGovernanceModel">
+					<value method="setGovernanceName" node="govern@governance" />
 				</object>
 			</object>
-			<object method="addOfficeTask" node="task"
-				class="net.officefloor.model.office.OfficeTaskModel">
-				<value method="setOfficeTaskName" node="task@name" />
-				<object method="addPreDuty" node="pre-administer"
-					class="net.officefloor.model.office.OfficeTaskToPreDutyModel">
-					<value method="setAdministratorName" node="pre-administer@administrator" />
-					<value method="setDutyName" node="pre-administer@duty" />
+			<object method="addOfficeFunction" node="function"
+				class="net.officefloor.model.office.OfficeFunctionModel">
+				<value method="setOfficeFunctionName" node="function@name" />
+				<object method="addPreAdministration" node="pre-administer"
+					class="net.officefloor.model.office.OfficeFunctionToPreAdministrationModel">
+					<value method="setAdministrationName" node="pre-administer@administration" />
 				</object>
-				<object method="addPostDuty" node="post-administer"
-					class="net.officefloor.model.office.OfficeTaskToPostDutyModel">
-					<value method="setAdministratorName" node="post-administer@administrator" />
-					<value method="setDutyName" node="post-administer@duty" />
+				<object method="addPostAdministration" node="post-administer"
+					class="net.officefloor.model.office.OfficeFunctionToPostAdministrationModel">
+					<value method="setAdministrationName" node="post-administer@administration" />
 				</object>
-				<object method="addOfficeGovernance" node="govern"
-					class="net.officefloor.model.office.OfficeTaskToOfficeGovernanceModel">
-					<value method="setOfficeGovernanceName" node="govern@governance" />
+				<object method="addGovernance" node="govern"
+					class="net.officefloor.model.office.OfficeFunctionToGovernanceModel">
+					<value method="setGovernanceName" node="govern@governance" />
 				</object>
 			</object>
 			<reference id="SUB_SECTION" method="addOfficeSubSection" />

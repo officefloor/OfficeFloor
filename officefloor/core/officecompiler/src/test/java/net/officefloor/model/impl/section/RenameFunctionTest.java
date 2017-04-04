@@ -44,6 +44,7 @@ public class RenameFunctionTest extends AbstractSectionChangesTestCase {
 	 */
 	public void testRenameFunction() {
 		FunctionModel function = this.model.getFunctions().get(0);
+		assertNotNull("Ensure have function", function);
 		Change<FunctionModel> change = this.operations.renameFunction(function, "NEW_NAME");
 		this.assertChange(change, function, "Rename function OLD_NAME to NEW_NAME", true);
 	}

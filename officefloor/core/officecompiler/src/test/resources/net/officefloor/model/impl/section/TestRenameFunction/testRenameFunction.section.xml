@@ -1,0 +1,12 @@
+<section>
+	<function-namespaces>
+		<function-namespace name="NAMESPACE"
+			source="net.example.ExampleManagedFunctionSource">
+			<managed-function name="MANAGED_FUNCTION" />
+		</function-namespace>
+	</function-namespaces>
+	<functions>
+		<function name="NEW_NAME" function-namespace="NAMESPACE"
+			managed-function="MANAGED_FUNCTION" />
+	</functions>
+</section>

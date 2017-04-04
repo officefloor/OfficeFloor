@@ -1307,16 +1307,16 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 		// TODO add escalations for administration
 
-		// Return change to add the administrator
+		// Return change to add the administration
 		return new AbstractChange<AdministrationModel>(administration, "Add administration") {
 			@Override
 			public void apply() {
-				OfficeChangesImpl.this.office.addOfficeAdministration(administration);
+				OfficeChangesImpl.this.office.addAdministration(administration);
 			}
 
 			@Override
 			public void revert() {
-				OfficeChangesImpl.this.office.removeOfficeAdministration(administration);
+				OfficeChangesImpl.this.office.removeAdministration(administration);
 			}
 		};
 	}
@@ -1326,16 +1326,16 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 		// TODO test this method (removeAdministration)
 
-		// Return change to remove administrator
+		// Return change to remove administration
 		return new AbstractChange<AdministrationModel>(administration, "Remove administration") {
 			@Override
 			public void apply() {
-				OfficeChangesImpl.this.office.removeOfficeAdministration(administration);
+				OfficeChangesImpl.this.office.removeAdministration(administration);
 			}
 
 			@Override
 			public void revert() {
-				OfficeChangesImpl.this.office.addOfficeAdministration(administration);
+				OfficeChangesImpl.this.office.addAdministration(administration);
 			}
 		};
 	}

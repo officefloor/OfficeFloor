@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="governance name" />
+	<field type="OfficeSectionManagedObjectModel" name="office section managed object"
+		end-list="governance" />
+	<field type="GovernanceModel" name="governance"
+		end-list="office section managed object" />
+</model>

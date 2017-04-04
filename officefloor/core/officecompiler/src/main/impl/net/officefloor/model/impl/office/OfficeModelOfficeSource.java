@@ -67,17 +67,18 @@ import net.officefloor.model.office.AdministrationModel;
 import net.officefloor.model.office.AdministrationToOfficeTeamModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalManagedObjectToAdministrationModel;
-import net.officefloor.model.office.ExternalManagedObjectToOfficeGovernanceModel;
+import net.officefloor.model.office.ExternalManagedObjectToGovernanceModel;
+import net.officefloor.model.office.GovernanceModel;
+import net.officefloor.model.office.GovernanceToOfficeTeamModel;
 import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeFunctionModel;
-import net.officefloor.model.office.OfficeFunctionToOfficeGovernanceModel;
+import net.officefloor.model.office.OfficeFunctionToGovernanceModel;
 import net.officefloor.model.office.OfficeFunctionToPostAdministrationModel;
 import net.officefloor.model.office.OfficeFunctionToPreAdministrationModel;
-import net.officefloor.model.office.OfficeGovernanceAreaModel;
-import net.officefloor.model.office.OfficeGovernanceModel;
-import net.officefloor.model.office.OfficeGovernanceToOfficeTeamModel;
+import net.officefloor.model.office.GovernanceAreaModel;
+import net.officefloor.model.office.GovernanceModel;
 import net.officefloor.model.office.OfficeInputManagedObjectDependencyModel;
 import net.officefloor.model.office.OfficeInputManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeInputManagedObjectDependencyToOfficeManagedObjectModel;
@@ -91,12 +92,12 @@ import net.officefloor.model.office.OfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectToAdministrationModel;
-import net.officefloor.model.office.OfficeManagedObjectToOfficeGovernanceModel;
+import net.officefloor.model.office.OfficeManagedObjectToGovernanceModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionManagedObjectModel;
-import net.officefloor.model.office.OfficeSectionManagedObjectToOfficeGovernanceModel;
+import net.officefloor.model.office.OfficeSectionManagedObjectToGovernanceModel;
 import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.office.OfficeSectionObjectModel;
 import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel;
@@ -108,7 +109,7 @@ import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel
 import net.officefloor.model.office.OfficeStartModel;
 import net.officefloor.model.office.OfficeStartToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSubSectionModel;
-import net.officefloor.model.office.OfficeSubSectionToOfficeGovernanceModel;
+import net.officefloor.model.office.OfficeSubSectionToGovernanceModel;
 import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.office.PropertyModel;
 
@@ -170,10 +171,10 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 
 		// Obtain the listing of governances
 		Map<String, OfficeGovernance> governances = new HashMap<String, OfficeGovernance>();
-		for (OfficeGovernanceModel govModel : office.getOfficeGovernances()) {
+		for (GovernanceModel govModel : office.getGovernances()) {
 
 			// Add the governance
-			String governanceName = govModel.getOfficeGovernanceName();
+			String governanceName = govModel.getGovernanceName();
 			OfficeGovernance governance = architect.addOfficeGovernance(governanceName,
 					govModel.getGovernanceSourceClassName());
 			for (PropertyModel property : govModel.getProperties()) {
@@ -181,7 +182,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 			}
 
 			// Provide team responsible for governance
-			OfficeGovernanceToOfficeTeamModel govToTeam = govModel.getOfficeTeam();
+			GovernanceToOfficeTeamModel govToTeam = govModel.getOfficeTeam();
 			if (govToTeam != null) {
 				OfficeTeamModel teamModel = govToTeam.getOfficeTeam();
 				if (teamModel != null) {
@@ -208,10 +209,10 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 			OfficeObject officeObject = architect.addOfficeObject(officeObjectName, object.getObjectType());
 
 			// Provide governance over managed object
-			for (ExternalManagedObjectToOfficeGovernanceModel moToGov : object.getOfficeGovernances()) {
-				OfficeGovernanceModel govModel = moToGov.getOfficeGovernance();
+			for (ExternalManagedObjectToGovernanceModel moToGov : object.getGovernances()) {
+				GovernanceModel govModel = moToGov.getGovernance();
 				if (govModel != null) {
-					OfficeGovernance governance = governances.get(govModel.getOfficeGovernanceName());
+					OfficeGovernance governance = governances.get(govModel.getGovernanceName());
 					if (governance != null) {
 						governance.governManagedObject(officeObject);
 					}
@@ -276,10 +277,10 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 			managedObjects.put(managedObjectName, managedObject);
 
 			// Provide governance over managed object
-			for (OfficeManagedObjectToOfficeGovernanceModel moToGov : moModel.getOfficeGovernances()) {
-				OfficeGovernanceModel govModel = moToGov.getOfficeGovernance();
+			for (OfficeManagedObjectToGovernanceModel moToGov : moModel.getGovernances()) {
+				GovernanceModel govModel = moToGov.getGovernance();
 				if (govModel != null) {
-					OfficeGovernance governance = governances.get(govModel.getOfficeGovernanceName());
+					OfficeGovernance governance = governances.get(govModel.getGovernanceName());
 					if (governance != null) {
 						governance.governManagedObject(managedObject);
 					}
@@ -448,11 +449,11 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 			}
 
 			// Obtain the governances of section
-			OfficeGovernanceModel[] governingGovernances = this.getOfficeGovernancesOverLocation(sectionModel.getX(),
-					sectionModel.getY(), office.getOfficeGovernances());
-			for (OfficeGovernanceModel govModel : governingGovernances) {
+			GovernanceModel[] governingGovernances = this.getGovernancesOverLocation(sectionModel.getX(),
+					sectionModel.getY(), office.getGovernances());
+			for (GovernanceModel govModel : governingGovernances) {
 				// Obtain the governance to govern the section
-				OfficeGovernance governance = governances.get(govModel.getOfficeGovernanceName());
+				OfficeGovernance governance = governances.get(govModel.getGovernanceName());
 				if (governance != null) {
 					// Add the governance to the section
 					section.addGovernance(governance);
@@ -627,7 +628,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 
 		// Add the administration (keeping registry of administration)
 		Map<String, OfficeAdministration> administrations = new HashMap<String, OfficeAdministration>();
-		for (AdministrationModel adminModel : office.getOfficeAdministrations()) {
+		for (AdministrationModel adminModel : office.getAdministrations()) {
 
 			// Add the administration and register it
 			String adminName = adminModel.getAdministrationName();
@@ -698,7 +699,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 		}
 
 		// Administer the managed objects
-		for (AdministrationModel adminModel : office.getOfficeAdministrations()) {
+		for (AdministrationModel adminModel : office.getAdministrations()) {
 
 			// Obtain the administration
 			String administrationName = adminModel.getAdministrationName();
@@ -764,7 +765,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 	}
 
 	/**
-	 * Obtains the {@link OfficeGovernanceModel} instances that provide
+	 * Obtains the {@link GovernanceModel} instances that provide
 	 * {@link Governance} over the particular location.
 	 * 
 	 * @param x
@@ -772,20 +773,19 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 	 * @param y
 	 *            Y co-ordinate of location.
 	 * @param governances
-	 *            {@link OfficeGovernanceModel} instances.
-	 * @return {@link OfficeGovernanceModel} instances that provide
-	 *         {@link Governance} over the particular location. May be empty
-	 *         array if no {@link Governance} for location.
+	 *            {@link GovernanceModel} instances.
+	 * @return {@link GovernanceModel} instances that provide {@link Governance}
+	 *         over the particular location. May be empty array if no
+	 *         {@link Governance} for location.
 	 */
-	private OfficeGovernanceModel[] getOfficeGovernancesOverLocation(int x, int y,
-			List<OfficeGovernanceModel> governances) {
+	private GovernanceModel[] getGovernancesOverLocation(int x, int y, List<GovernanceModel> governances) {
 
 		// Create listing of governances for the location
-		List<OfficeGovernanceModel> governing = new LinkedList<OfficeGovernanceModel>();
+		List<GovernanceModel> governing = new LinkedList<GovernanceModel>();
 
 		// Add governances that cover the location
-		for (OfficeGovernanceModel governance : governances) {
-			for (OfficeGovernanceAreaModel area : governance.getOfficeGovernanceAreas()) {
+		for (GovernanceModel governance : governances) {
+			for (GovernanceAreaModel area : governance.getGovernanceAreas()) {
 
 				// Calculate points for area
 				int leftX = area.getX();
@@ -814,7 +814,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 		}
 
 		// Return the listing of governing governances for the location
-		return governing.toArray(new OfficeGovernanceModel[governing.size()]);
+		return governing.toArray(new GovernanceModel[governing.size()]);
 	}
 
 	/**
@@ -1225,7 +1225,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 	private static class GovernanceSubSectionProcessor extends AbstractSubSectionProcessor {
 
 		/**
-		 * {@link OfficeGovernance} instances by their name.
+		 * {@link Governance} instances by their name.
 		 */
 		private final Map<String, OfficeGovernance> governances;
 
@@ -1233,7 +1233,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 		 * Initiate.
 		 * 
 		 * @param governances
-		 *            {@link OfficeGovernance} instances by their name.
+		 *            {@link Governance} instances by their name.
 		 */
 		public GovernanceSubSectionProcessor(Map<String, OfficeGovernance> governances) {
 			this.governances = governances;
@@ -1248,12 +1248,12 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 				OfficeArchitect architect, String subSectionPath) {
 
 			// Link the governances
-			for (OfficeSubSectionToOfficeGovernanceModel conn : subSectionModel.getOfficeGovernances()) {
-				OfficeGovernanceModel govModel = conn.getOfficeGovernance();
+			for (OfficeSubSectionToGovernanceModel conn : subSectionModel.getGovernances()) {
+				GovernanceModel govModel = conn.getGovernance();
 				if (govModel != null) {
 
 					// Obtain the governance
-					OfficeGovernance governance = this.governances.get(govModel.getOfficeGovernanceName());
+					OfficeGovernance governance = this.governances.get(govModel.getGovernanceName());
 					if (governance != null) {
 
 						// Provide governance over the sub section
@@ -1268,12 +1268,12 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 				OfficeSectionManagedObject managedObject, OfficeArchitect architect, String subSectionPath) {
 
 			// Link the governances
-			for (OfficeSectionManagedObjectToOfficeGovernanceModel conn : managedObjectModel.getOfficeGovernances()) {
-				OfficeGovernanceModel govModel = conn.getOfficeGovernance();
+			for (OfficeSectionManagedObjectToGovernanceModel conn : managedObjectModel.getGovernances()) {
+				GovernanceModel govModel = conn.getGovernance();
 				if (govModel != null) {
 
 					// Obtain the governance
-					OfficeGovernance governance = this.governances.get(govModel.getOfficeGovernanceName());
+					OfficeGovernance governance = this.governances.get(govModel.getGovernanceName());
 					if (governance != null) {
 
 						// Provide governance over the managed object
@@ -1288,12 +1288,12 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 				OfficeArchitect architect, String subSectionPath) {
 
 			// Link the governances
-			for (OfficeFunctionToOfficeGovernanceModel conn : functionModel.getOfficeGovernances()) {
-				OfficeGovernanceModel govModel = conn.getOfficeGovernance();
+			for (OfficeFunctionToGovernanceModel conn : functionModel.getGovernances()) {
+				GovernanceModel govModel = conn.getGovernance();
 				if (govModel != null) {
 
 					// Obtain the governance
-					OfficeGovernance governance = this.governances.get(govModel.getOfficeGovernanceName());
+					OfficeGovernance governance = this.governances.get(govModel.getGovernanceName());
 					if (governance != null) {
 
 						// Provide governance of the function

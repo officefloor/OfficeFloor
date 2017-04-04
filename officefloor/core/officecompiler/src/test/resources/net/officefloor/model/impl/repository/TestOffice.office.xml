@@ -3,7 +3,7 @@
 	<external-managed-objects>
 		<external-managed-object name="EXTERNAL_MANAGED_OBJECT"
 			object-type="java.sql.Connection" object-scope="PROCESS" x="100" y="101">
-			<administer administrator="ADMINISTRATOR" order="1" />
+			<administer administration="ADMINISTRATION" order="1" />
 			<govern governance="GOVERNANCE" />
 		</external-managed-object>
 	</external-managed-objects>
@@ -25,7 +25,7 @@
 				<external-managed-object name="EXTERNAL_MANAGED_OBJECT" />
 			</input-dependency>
 			<flow name="FLOW" argument-type="java.lang.Integer">
-				<section-input section="SECTION" input="INPUT" />
+				<section-input section="SECTION" input="INPUT_A" />
 			</flow>
 			<team name="MO_TEAM">
 				<office-team name="TEAM" />
@@ -37,7 +37,7 @@
 		<managed-object name="MANAGED_OBJECT_ONE" scope="THREAD"
 			x="300" y="301">
 			<managed-object-source name="MANAGED_OBJECT_SOURCE" />
-			<administer administrator="ADMINISTRATOR" order="1" />
+			<administer administration="ADMINISTRATION" order="1" />
 			<govern governance="GOVERNANCE" />
 			<dependency name="DEPENDENCY_ONE" object-type="java.sql.Connection">
 				<managed-object name="MANAGED_OBJECT_TWO" />
@@ -59,23 +59,28 @@
 	<escalations>
 		<escalation escalation-type="java.lang.Exception" x="500"
 			y="501">
-			<handler section="SECTION" input="INPUT" />
+			<handler section="SECTION" input="INPUT_B" />
 		</escalation>
 	</escalations>
 
-	<administrators>
-		<administrator name="ADMINISTRATOR"
-			source="net.example.ExampleAdministratorSource" scope="THREAD" x="600"
-			y="601">
+	<administrations>
+		<administration name="ADMINISTRATION"
+			source="net.example.ExampleAdministrationSource" x="600" y="601">
 			<properties>
 				<property name="ADMIN_ONE" value="VALUE_ONE" />
 				<property name="ADMIN_TWO" value="VALUE_TWO" />
 			</properties>
 			<team name="TEAM" />
-			<duty name="DUTY_ONE" />
-			<duty name="DUTY_TWO" />
-		</administrator>
-	</administrators>
+			<flow name="FLOW_ONE" argument-type="java.lang.Integer">
+				<input sub-section="SECTION" input="INPUT_A" />
+			</flow>
+			<flow name="FLOW_TWO" />
+			<escalation type="java.sql.SQLException">
+				<input sub-section="SECTION" input="INPUT_B" />
+			</escalation>
+			<escalation type="java.io.IOException" />
+		</administration>
+	</administrations>
 
 	<governances>
 		<governance name="GOVERNANCE" source="net.example.ExampleGovernanceSource"
@@ -85,13 +90,21 @@
 				<property name="GOV_TWO" value="VALUE_TWO" />
 			</properties>
 			<team name="TEAM" />
+			<flow name="FLOW_A" argument-type="java.lang.String">
+				<input sub-section="SECTION" input="INPUT_A" />
+			</flow>
+			<flow name="FLOW_B" />
+			<escalation type="java.lang.NullPointerException">
+				<input sub-section="SECTION" input="INPUT_B" />
+			</escalation>
+			<escalation type="java.lang.RuntimeException" />
 			<governance-area x="710" y="711" height="720" width="721" />
 		</governance>
 	</governances>
-	
+
 	<starting>
 		<start name="START" x="800" y="801">
-			<flow section="SECTION" input="INPUT" />
+			<flow section="SECTION" input="INPUT_A" />
 		</start>
 	</starting>
 
@@ -102,7 +115,8 @@
 				<property name="PROP_ONE" value="VALUE_ONE" />
 				<property name="PROP_TWO" value="VALUE_TWO" />
 			</properties>
-			<input name="INPUT" parameter-type="java.lang.Integer" />
+			<input name="INPUT_A" parameter-type="java.lang.Integer" />
+			<input name="INPUT_B" parameter-type="java.lang.Exception" />
 			<output name="OUTPUT_ONE" argument-type="java.lang.Float"
 				escalation-only="false">
 				<section-input section="SECTION_TARGET" input="INPUT" />
@@ -124,18 +138,17 @@
 					<team name="MO_TEAM" />
 					<govern governance="GOVERNANCE" />
 				</section-managed-object>
-				<task name="TASK">
-					<pre-administer administrator="ADMINISTRATOR" duty="DUTY_ONE" />
+				<function name="FUNCTION">
+					<pre-administer administration="ADMINISTRATION" />
 					<govern governance="GOVERNANCE" />
-				</task>
+				</function>
 				<govern governance="GOVERNANCE" />
 				<sub-section name="SUB_SECTION">
 					<section-managed-object name="SUB_SECTION_MANAGED_OBJECT" />
-					<task name="SUB_SECTION_TASK">
-						<post-administer administrator="ADMINISTRATOR"
-							duty="DUTY_TWO" />
+					<function name="SUB_SECTION_FUNCTION">
+						<post-administer administration="ADMINISTRATION" />
 						<govern governance="GOVERNANCE" />
-					</task>
+					</function>
 					<sub-section name="SUB_SUB_SECTION" />
 				</sub-section>
 			</sub-section>

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
 	<field type="String" name="office section managed object name" />
-	<list type="OfficeSectionManagedObjectToOfficeGovernanceModel"
-		name="office governance" />
+	<list type="OfficeSectionManagedObjectToGovernanceModel" name="governance" />
 	<list type="OfficeSectionManagedObjectTeamModel" name="office section managed object team" />
 </model>

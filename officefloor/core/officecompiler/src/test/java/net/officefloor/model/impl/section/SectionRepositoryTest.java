@@ -30,18 +30,20 @@ import net.officefloor.model.section.ExternalManagedObjectModel;
 import net.officefloor.model.section.FunctionEscalationModel;
 import net.officefloor.model.section.FunctionEscalationToExternalFlowModel;
 import net.officefloor.model.section.FunctionEscalationToFunctionModel;
+import net.officefloor.model.section.FunctionEscalationToSubSectionInputModel;
 import net.officefloor.model.section.FunctionFlowModel;
 import net.officefloor.model.section.FunctionFlowToExternalFlowModel;
 import net.officefloor.model.section.FunctionFlowToFunctionModel;
+import net.officefloor.model.section.FunctionFlowToSubSectionInputModel;
 import net.officefloor.model.section.FunctionModel;
 import net.officefloor.model.section.FunctionNamespaceModel;
 import net.officefloor.model.section.FunctionToNextExternalFlowModel;
 import net.officefloor.model.section.FunctionToNextFunctionModel;
+import net.officefloor.model.section.FunctionToNextSubSectionInputModel;
 import net.officefloor.model.section.ManagedFunctionModel;
 import net.officefloor.model.section.ManagedFunctionObjectModel;
 import net.officefloor.model.section.ManagedFunctionObjectToExternalManagedObjectModel;
 import net.officefloor.model.section.ManagedFunctionObjectToSectionManagedObjectModel;
-import net.officefloor.model.section.ManagedFunctionToFunctionModel;
 import net.officefloor.model.section.SectionManagedObjectDependencyModel;
 import net.officefloor.model.section.SectionManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.section.SectionManagedObjectDependencyToSectionManagedObjectModel;
@@ -61,6 +63,7 @@ import net.officefloor.model.section.SubSectionObjectToExternalManagedObjectMode
 import net.officefloor.model.section.SubSectionObjectToSectionManagedObjectModel;
 import net.officefloor.model.section.SubSectionOutputModel;
 import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
+import net.officefloor.model.section.SubSectionOutputToFunctionModel;
 import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
 
 /**
@@ -132,21 +135,6 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 				"MANAGED_OBJECT_SOURCE");
 		mo.setSectionManagedObjectSource(moToMos);
 
-		// managed object source flow -> external flow
-		SectionManagedObjectSourceFlowToExternalFlowModel flowToExtFlow = new SectionManagedObjectSourceFlowToExternalFlowModel(
-				"EXTERNAL_FLOW");
-		mosFlow.setExternalFlow(flowToExtFlow);
-
-		// managed object source flow -> sub section input
-		SectionManagedObjectSourceFlowToSubSectionInputModel flowToInput = new SectionManagedObjectSourceFlowToSubSectionInputModel(
-				"SUB_SECTION", "INPUT");
-		mosFlow.setSubSectionInput(flowToInput);
-
-		// managed object source flow -> function
-		SectionManagedObjectSourceFlowToFunctionModel mosFlowToFunction = new SectionManagedObjectSourceFlowToFunctionModel(
-				"FUNCTION");
-		mosFlow.setFunction(mosFlowToFunction);
-
 		// dependency -> external managed object
 		SectionManagedObjectDependencyToExternalManagedObjectModel dependencyToExtMo = new SectionManagedObjectDependencyToExternalManagedObjectModel(
 				"EXTERNAL_MANAGED_OBJECT");
@@ -157,17 +145,20 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 				"MANAGED_OBJECT");
 		dependency.setSectionManagedObject(dependencyToMo);
 
-		// output -> input
-		SubSectionOutputToSubSectionInputModel outputToInput = new SubSectionOutputToSubSectionInputModel("SUB_SECTION",
-				"INPUT");
-		output.setSubSectionInput(outputToInput);
+		// managed object source flow -> external flow
+		SectionManagedObjectSourceFlowToExternalFlowModel mosFlowToExtFlow = new SectionManagedObjectSourceFlowToExternalFlowModel(
+				"EXTERNAL_FLOW");
+		mosFlow.setExternalFlow(mosFlowToExtFlow);
 
-		// output -> extFlow
-		SubSectionOutputModel output_extFlow = new SubSectionOutputModel("OUTPUT_EXTERNAL_FLOW",
-				Exception.class.getName(), true);
-		subSection.addSubSectionOutput(output_extFlow);
-		SubSectionOutputToExternalFlowModel outputToExtFlow = new SubSectionOutputToExternalFlowModel("EXTERNAL_FLOW");
-		output_extFlow.setExternalFlow(outputToExtFlow);
+		// managed object source flow -> sub section input
+		SectionManagedObjectSourceFlowToSubSectionInputModel mosFlowToInput = new SectionManagedObjectSourceFlowToSubSectionInputModel(
+				"SUB_SECTION", "INPUT");
+		mosFlow.setSubSectionInput(mosFlowToInput);
+
+		// managed object source flow -> function
+		SectionManagedObjectSourceFlowToFunctionModel mosFlowToFunction = new SectionManagedObjectSourceFlowToFunctionModel(
+				"FUNCTION");
+		mosFlow.setFunction(mosFlowToFunction);
 
 		// section object -> extMo
 		SubSectionObjectModel sectionObject_extMo = new SubSectionObjectModel("OBJECT_EXT", Object.class.getName());
@@ -176,12 +167,31 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 				"EXTERNAL_MANAGED_OBJECT");
 		sectionObject_extMo.setExternalManagedObject(sectionObjectToExtMo);
 
-		// object -> managed object
-		SubSectionObjectModel object_mo = new SubSectionObjectModel("OBJECT_MO", Connection.class.getName());
-		subSection.addSubSectionObject(object_mo);
-		SubSectionObjectToSectionManagedObjectModel objectToMo = new SubSectionObjectToSectionManagedObjectModel(
+		// section object -> managed object
+		SubSectionObjectModel sectionObject_mo = new SubSectionObjectModel("OBJECT_MO", Connection.class.getName());
+		subSection.addSubSectionObject(sectionObject_mo);
+		SubSectionObjectToSectionManagedObjectModel sectionObjectToMo = new SubSectionObjectToSectionManagedObjectModel(
 				"MANAGED_OBJECT");
-		object_mo.setSectionManagedObject(objectToMo);
+		sectionObject_mo.setSectionManagedObject(sectionObjectToMo);
+
+		// output -> extFlow
+		SubSectionOutputModel output_extFlow = new SubSectionOutputModel("OUTPUT_EXTERNAL_FLOW",
+				Exception.class.getName(), true);
+		subSection.addSubSectionOutput(output_extFlow);
+		SubSectionOutputToExternalFlowModel outputToExtFlow = new SubSectionOutputToExternalFlowModel("EXTERNAL_FLOW");
+		output_extFlow.setExternalFlow(outputToExtFlow);
+
+		// output -> input
+		SubSectionOutputToSubSectionInputModel outputToInput = new SubSectionOutputToSubSectionInputModel("SUB_SECTION",
+				"INPUT");
+		output.setSubSectionInput(outputToInput);
+
+		// output -> function
+		SubSectionOutputModel output_function = new SubSectionOutputModel("OUTPUT_FUNCTION", Integer.class.getName(),
+				false);
+		subSection.addSubSectionOutput(output_function);
+		SubSectionOutputToFunctionModel outputToFunction = new SubSectionOutputToFunctionModel("FUNCTION");
+		output_function.setFunction(outputToFunction);
 
 		// functionObject -> extMo
 		ManagedFunctionObjectToExternalManagedObjectModel functionObjectToExtMo = new ManagedFunctionObjectToExternalManagedObjectModel(
@@ -203,6 +213,13 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 				"functionFlow - extFlow", false);
 		functionFlow_extFlow.setExternalFlow(functionFlowToExtFlow);
 
+		// functionFlow -> input
+		FunctionFlowModel functionFlow_input = new FunctionFlowModel();
+		function.addFunctionFlow(functionFlow_input);
+		FunctionFlowToSubSectionInputModel functionFlowToInput = new FunctionFlowToSubSectionInputModel("SUB_SECTION",
+				"INPUT", true);
+		functionFlow_input.setSubSectionInput(functionFlowToInput);
+
 		// functionFlow -> function
 		FunctionFlowModel functionFlow_function = new FunctionFlowModel();
 		function.addFunctionFlow(functionFlow_function);
@@ -217,6 +234,10 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		section.addExternalFlow(extFlow_next);
 		FunctionToNextExternalFlowModel nextToExtFlow = new FunctionToNextExternalFlowModel("next - extFlow");
 		function.setNextExternalFlow(nextToExtFlow);
+
+		// next -> input
+		FunctionToNextSubSectionInputModel nextToInput = new FunctionToNextSubSectionInputModel("SUB_SECTION", "INPUT");
+		function.setNextSubSectionInput(nextToInput);
 
 		// next -> function
 		FunctionModel function_next = new FunctionModel("next - function", false, "namespace", "managed_function",
@@ -234,6 +255,13 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		FunctionEscalationToExternalFlowModel escalationToExtFlow = new FunctionEscalationToExternalFlowModel(
 				"escalation - extFlow");
 		functionEscalation_extFlow.setExternalFlow(escalationToExtFlow);
+
+		// functionEscalation -> input
+		FunctionEscalationModel functionEscalation_input = new FunctionEscalationModel();
+		function.addFunctionEscalation(functionEscalation_input);
+		FunctionEscalationToSubSectionInputModel escalationToInput = new FunctionEscalationToSubSectionInputModel(
+				"SUB_SECTION", "INPUT");
+		functionEscalation_input.setSubSectionInput(escalationToInput);
 
 		// functionEscalation -> function
 		FunctionEscalationModel functionEscalation_function = new FunctionEscalationModel();
@@ -267,18 +295,6 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("mo -> mos", mos, moToMos.getSectionManagedObjectSource());
 		assertEquals("mo <- mos", mo, moToMos.getSectionManagedObject());
 
-		// Ensure managed object source flow connected to external flow
-		assertEquals("mos flow <- external flow", mosFlow, flowToExtFlow.getSectionManagedObjectSourceFlow());
-		assertEquals("mos flow -> external flow", extFlow, flowToExtFlow.getExternalFlow());
-
-		// Ensure managed object source flow connected to sub section input
-		assertEquals("mos flow <- sub section input", mosFlow, flowToInput.getSectionManagedObjectSourceFlow());
-		assertEquals("mos flow -> sub section input", input, flowToInput.getSubSectionInput());
-
-		// Ensure managed object source flow connected to function
-		assertEquals("mos flow <- function", mosFlow, mosFlowToFunction.getSectionManagedObjectSourceFlow());
-		assertEquals("mos flow -> function", function, mosFlowToFunction.getFunction());
-
 		// Ensure dependency connected to external managed object
 		assertEquals("dependency <- external mo", dependency, dependencyToExtMo.getSectionManagedObjectDependency());
 		assertEquals("dependency -> managed object", extMo, dependencyToExtMo.getExternalManagedObject());
@@ -287,61 +303,92 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("dependency <- managed object", dependency, dependencyToMo.getSectionManagedObjectDependency());
 		assertEquals("dependency -> managed object", mo, dependencyToMo.getSectionManagedObject());
 
+		// Ensure managed object source flow connected to external flow
+		assertEquals("mos flow <- external flow", mosFlow, mosFlowToExtFlow.getSectionManagedObjectSourceFlow());
+		assertEquals("mos flow -> external flow", extFlow, mosFlowToExtFlow.getExternalFlow());
+
+		// Ensure managed object source flow connected to sub section input
+		assertEquals("mos flow <- sub section input", mosFlow, mosFlowToInput.getSectionManagedObjectSourceFlow());
+		assertEquals("mos flow -> sub section input", input, mosFlowToInput.getSubSectionInput());
+
+		// Ensure managed object source flow connected to function
+		assertEquals("mos flow <- function", mosFlow, mosFlowToFunction.getSectionManagedObjectSourceFlow());
+		assertEquals("mos flow -> function", function, mosFlowToFunction.getFunction());
+
+		// Ensure section object to external managed object connected
+		assertEquals("section object -> extMo", extMo, sectionObjectToExtMo.getExternalManagedObject());
+		assertEquals("section object <- extMo", sectionObject_extMo, sectionObjectToExtMo.getSubSectionObject());
+
+		// Ensure section object to section managed object connected
+		assertEquals("section object -> mo", mo, sectionObjectToMo.getSectionManagedObject());
+		assertEquals("section object <- mo", sectionObject_mo, sectionObjectToMo.getSubSectionObject());
+
+		// Ensure output to external flow connected
+		assertEquals("section output -> extFlow", extFlow, outputToExtFlow.getExternalFlow());
+		assertEquals("section output <- extFlow", output_extFlow, outputToExtFlow.getSubSectionOutput());
+
 		// Ensure output to input connected
-		assertEquals("output -> input", input, outputToInput.getSubSectionInput());
-		assertEquals("output <- input", output, outputToInput.getSubSectionOutput());
+		assertEquals("section output -> input", input, outputToInput.getSubSectionInput());
+		assertEquals("section output <- input", output, outputToInput.getSubSectionOutput());
 
-		// Ensure the external flow connected
-		assertEquals("output -> extFlow", extFlow, outputToExtFlow.getExternalFlow());
-		assertEquals("output <- extFlow", output_extFlow, outputToExtFlow.getSubSectionOutput());
+		// Ensure output to function connected
+		assertEquals("section output -> function", function, outputToFunction.getFunction());
+		assertEquals("section output <- function", output_function, outputToFunction.getSubSectionOutput());
 
-		// Ensure the external managed object connected
-		assertEquals("object -> extMo", extMo, sectionObjectToExtMo.getExternalManagedObject());
-		assertEquals("object <- extMo", sectionObject_extMo, sectionObjectToExtMo.getSubSectionObject());
-
-		// Ensure the section managed object connected
-		assertEquals("object -> mo", mo, objectToMo.getSectionManagedObject());
-		assertEquals("object <- mo", object_mo, objectToMo.getSubSectionObject());
-
-		// Ensure the external managed object connected
-		assertEquals("functionObject <- extMo", functionObject, functionObjectToExtMo.getManagedFunctionObject());
-		assertEquals("functionObject -> extMo", extMo, functionObjectToExtMo.getExternalManagedObject());
-
-		// Ensure function object connected to managed object
-		assertEquals("functionObject <- managed object", functionObject, functionObjectToMo.getManagedFunctionObject());
-		assertEquals("functionObject -> managed object", mo, functionObjectToMo.getSectionManagedObject());
-
-		// Ensure the external flow connected
-		assertEquals("functionFlow <- extFlow", functionFlow_extFlow, functionFlowToExtFlow.getFunctionFlow());
-		assertEquals("functionFlow -> extFlow", extFlow_functionFlow, functionFlowToExtFlow.getExternalFlow());
-
-		// Ensure the next external flow connected
-		assertEquals("next -> extFlow", function, nextToExtFlow.getPreviousFunction());
-		assertEquals("next <- extFlow", extFlow_next, nextToExtFlow.getNextExternalFlow());
-
-		// Ensure flow to function connected
-		assertEquals("functionFlow <- function", functionFlow_function, functionFlowToFunction.getFunctionFlow());
-		assertEquals("functionFlow -> function", function_functionFlow, functionFlowToFunction.getFunction());
-
-		// Ensure escalation to function connected
-		assertEquals("functionEscalation <- function", functionEscalation_function,
-				escalationToFunction.getEscalation());
-		assertEquals("functionEscalation -> function", function_functionEscalation, escalationToFunction.getFunction());
-
-		// Ensure escalation to external flow connected
-		assertEquals("functionEscalation <- extFlow", functionEscalation_extFlow,
-				escalationToExtFlow.getFunctionEscalation());
-		assertEquals("functionEscalation -> extFlow", extFlow_functionEscalation,
-				escalationToExtFlow.getExternalFlow());
-
-		// Ensure the next function connected
-		assertEquals("next <- function", function, nextToFunction.getPreviousFunction());
-		assertEquals("next -> function", function_next, nextToFunction.getNextFunction());
-
-		// Ensure the functions are connected to their namespace functions
+		// Ensure the functions are connected to their managed functions
 		assertEquals("function <- managedFunction", managedFunction,
 				function.getManagedFunction().getManagedFunction());
 		assertEquals("function -> managedFunction", function, managedFunction.getFunctions().get(0).getFunction());
+
+		// Ensure the external managed object connected
+		assertEquals("function object <- extMo", functionObject, functionObjectToExtMo.getManagedFunctionObject());
+		assertEquals("function object -> extMo", extMo, functionObjectToExtMo.getExternalManagedObject());
+
+		// Ensure function object connected to managed object
+		assertEquals("function object <- managed object", functionObject,
+				functionObjectToMo.getManagedFunctionObject());
+		assertEquals("function object -> managed object", mo, functionObjectToMo.getSectionManagedObject());
+
+		// Ensure function flow to external flow connected
+		assertEquals("function flow <- extFlow", functionFlow_extFlow, functionFlowToExtFlow.getFunctionFlow());
+		assertEquals("function flow -> extFlow", extFlow_functionFlow, functionFlowToExtFlow.getExternalFlow());
+
+		// Ensure function flow to input connected
+		assertEquals("function flow <- input", functionFlow_input, functionFlowToInput.getFunctionFlow());
+		assertEquals("function flow -> input", input, functionFlowToInput.getSubSectionInput());
+
+		// Ensure function flow to function connected
+		assertEquals("function flow <- function", functionFlow_function, functionFlowToFunction.getFunctionFlow());
+		assertEquals("function flow -> function", function_functionFlow, functionFlowToFunction.getFunction());
+
+		// Ensure next to external flow connected
+		assertEquals("next -> extFlow", function, nextToExtFlow.getPreviousFunction());
+		assertEquals("next <- extFlow", extFlow_next, nextToExtFlow.getNextExternalFlow());
+
+		// Ensure next to section input connected
+		assertEquals("next -> input", function, nextToInput.getPreviousFunction());
+		assertEquals("next <- input", input, nextToInput.getNextSubSectionInput());
+
+		// Ensure next to function connected
+		assertEquals("next <- function", function, nextToFunction.getPreviousFunction());
+		assertEquals("next -> function", function_next, nextToFunction.getNextFunction());
+
+		// Ensure escalation to external flow connected
+		assertEquals("function escalation <- extFlow", functionEscalation_extFlow,
+				escalationToExtFlow.getFunctionEscalation());
+		assertEquals("function escalation -> extFlow", extFlow_functionEscalation,
+				escalationToExtFlow.getExternalFlow());
+
+		// Ensure escalation to input connected
+		assertEquals("function escalation <- input", functionEscalation_input,
+				escalationToInput.getFunctionEscalation());
+		assertEquals("function escalation -> input", input, escalationToInput.getSubSectionInput());
+
+		// Ensure escalation to function connected
+		assertEquals("function escalation <- function", functionEscalation_function,
+				escalationToFunction.getEscalation());
+		assertEquals("function escalation -> function", function_functionEscalation,
+				escalationToFunction.getFunction());
 	}
 
 	/**
@@ -357,16 +404,20 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		section.addSubSection(subSection);
 		SubSectionInputModel input = new SubSectionInputModel("INPUT", Integer.class.getName(), false, null);
 		subSection.addSubSectionInput(input);
-		SubSectionOutputModel output_input = new SubSectionOutputModel("OUTPUT_INPUT", Integer.class.getName(), false);
-		subSection.addSubSectionOutput(output_input);
 		SubSectionOutputModel output_extFlow = new SubSectionOutputModel("OUTPUT_EXTERNAL_FLOW",
 				Exception.class.getName(), true);
 		subSection.addSubSectionOutput(output_extFlow);
-		ExternalFlowModel extFlow = new ExternalFlowModel("FLOW", Integer.class.getName());
+		SubSectionOutputModel output_input = new SubSectionOutputModel("OUTPUT_INPUT", Integer.class.getName(), false);
+		subSection.addSubSectionOutput(output_input);
+		SubSectionOutputModel output_function = new SubSectionOutputModel("OUTPUT_FUNCTION", String.class.getName(),
+				false);
+		subSection.addSubSectionOutput(output_function);
+		ExternalFlowModel extFlow = new ExternalFlowModel("EXTERNAL_FLOW", Integer.class.getName());
 		section.addExternalFlow(extFlow);
 		SubSectionObjectModel object = new SubSectionObjectModel("OBJECT", Object.class.getName());
 		subSection.addSubSectionObject(object);
-		ExternalManagedObjectModel extMo = new ExternalManagedObjectModel("MO", Object.class.getName());
+		ExternalManagedObjectModel extMo = new ExternalManagedObjectModel("EXTERNAL_MANAGED_OBJECT",
+				Object.class.getName());
 		section.addExternalManagedObject(extMo);
 		SectionManagedObjectModel mo = new SectionManagedObjectModel("MANAGED_OBJECT", "THREAD");
 		section.addSectionManagedObject(mo);
@@ -403,6 +454,18 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		moToMos.setSectionManagedObjectSource(mos);
 		moToMos.connect();
 
+		// dependency -> extMo
+		SectionManagedObjectDependencyToExternalManagedObjectModel dependencyToExtMo = new SectionManagedObjectDependencyToExternalManagedObjectModel();
+		dependencyToExtMo.setSectionManagedObjectDependency(dependency);
+		dependencyToExtMo.setExternalManagedObject(extMo);
+		dependencyToExtMo.connect();
+
+		// dependency -> mo
+		SectionManagedObjectDependencyToSectionManagedObjectModel dependencyToMo = new SectionManagedObjectDependencyToSectionManagedObjectModel();
+		dependencyToMo.setSectionManagedObjectDependency(dependency);
+		dependencyToMo.setSectionManagedObject(mo);
+		dependencyToMo.connect();
+
 		// mos flow -> external flow
 		SectionManagedObjectSourceFlowToExternalFlowModel mosFlowToExtFlow = new SectionManagedObjectSourceFlowToExternalFlowModel();
 		mosFlowToExtFlow.setSectionManagedObjectSourceFlow(mosFlow);
@@ -421,30 +484,6 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		mosFlowToFunction.setFunction(function);
 		mosFlowToFunction.connect();
 
-		// dependency -> extMo
-		SectionManagedObjectDependencyToExternalManagedObjectModel dependencyToExtMo = new SectionManagedObjectDependencyToExternalManagedObjectModel();
-		dependencyToExtMo.setSectionManagedObjectDependency(dependency);
-		dependencyToExtMo.setExternalManagedObject(extMo);
-		dependencyToExtMo.connect();
-
-		// dependency -> mo
-		SectionManagedObjectDependencyToSectionManagedObjectModel dependencyToMo = new SectionManagedObjectDependencyToSectionManagedObjectModel();
-		dependencyToMo.setSectionManagedObjectDependency(dependency);
-		dependencyToMo.setSectionManagedObject(mo);
-		dependencyToMo.connect();
-
-		// output -> input
-		SubSectionOutputToSubSectionInputModel outputToInput = new SubSectionOutputToSubSectionInputModel();
-		outputToInput.setSubSectionOutput(output_input);
-		outputToInput.setSubSectionInput(input);
-		outputToInput.connect();
-
-		// output -> extFlow
-		SubSectionOutputToExternalFlowModel outputToExtFlow = new SubSectionOutputToExternalFlowModel();
-		outputToExtFlow.setSubSectionOutput(output_extFlow);
-		outputToExtFlow.setExternalFlow(extFlow);
-		outputToExtFlow.connect();
-
 		// section object -> extMo
 		SubSectionObjectToExternalManagedObjectModel sectionObjectToExtMo = new SubSectionObjectToExternalManagedObjectModel();
 		sectionObjectToExtMo.setSubSectionObject(object);
@@ -456,6 +495,24 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		sectionObjectToMo.setSubSectionObject(object);
 		sectionObjectToMo.setSectionManagedObject(mo);
 		sectionObjectToMo.connect();
+
+		// output -> extFlow
+		SubSectionOutputToExternalFlowModel outputToExtFlow = new SubSectionOutputToExternalFlowModel();
+		outputToExtFlow.setSubSectionOutput(output_extFlow);
+		outputToExtFlow.setExternalFlow(extFlow);
+		outputToExtFlow.connect();
+
+		// output -> input
+		SubSectionOutputToSubSectionInputModel outputToInput = new SubSectionOutputToSubSectionInputModel();
+		outputToInput.setSubSectionOutput(output_input);
+		outputToInput.setSubSectionInput(input);
+		outputToInput.connect();
+
+		// output -> function
+		SubSectionOutputToFunctionModel outputToFunction = new SubSectionOutputToFunctionModel();
+		outputToFunction.setSubSectionOutput(output_function);
+		outputToFunction.setFunction(function);
+		outputToFunction.connect();
 
 		// functionObject -> extMo
 		ManagedFunctionObjectToExternalManagedObjectModel functionObjectToExtMo = new ManagedFunctionObjectToExternalManagedObjectModel();
@@ -470,10 +527,22 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		functionObjectToMo.connect();
 
 		// functionFlow -> extFlow
-		FunctionFlowToExternalFlowModel flowToExtFlow = new FunctionFlowToExternalFlowModel();
-		flowToExtFlow.setFunctionFlow(functionFlow);
-		flowToExtFlow.setExternalFlow(extFlow);
-		flowToExtFlow.connect();
+		FunctionFlowToExternalFlowModel functionFlowToExtFlow = new FunctionFlowToExternalFlowModel();
+		functionFlowToExtFlow.setFunctionFlow(functionFlow);
+		functionFlowToExtFlow.setExternalFlow(extFlow);
+		functionFlowToExtFlow.connect();
+
+		// functionFlow -> input
+		FunctionFlowToSubSectionInputModel functionFlowToInput = new FunctionFlowToSubSectionInputModel();
+		functionFlowToInput.setFunctionFlow(functionFlow);
+		functionFlowToInput.setSubSectionInput(input);
+		functionFlowToInput.connect();
+
+		// functionFlow -> function
+		FunctionFlowToFunctionModel functionFlowToFunction = new FunctionFlowToFunctionModel();
+		functionFlowToFunction.setFunctionFlow(functionFlow);
+		functionFlowToFunction.setFunction(function);
+		functionFlowToFunction.connect();
 
 		// next -> extFlow
 		FunctionToNextExternalFlowModel nextToExtFlow = new FunctionToNextExternalFlowModel();
@@ -481,17 +550,17 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		nextToExtFlow.setNextExternalFlow(extFlow);
 		nextToExtFlow.connect();
 
-		// functionFlow -> function
-		FunctionFlowToFunctionModel flowToFunction = new FunctionFlowToFunctionModel();
-		flowToFunction.setFunctionFlow(functionFlow);
-		flowToFunction.setFunction(function);
-		flowToFunction.connect();
+		// next -> input
+		FunctionToNextSubSectionInputModel nextToInput = new FunctionToNextSubSectionInputModel();
+		nextToInput.setPreviousFunction(function);
+		nextToInput.setNextSubSectionInput(input);
+		nextToInput.connect();
 
-		// functionEscalation -> function
-		FunctionEscalationToFunctionModel escalationToFunction = new FunctionEscalationToFunctionModel();
-		escalationToFunction.setEscalation(functionEscalation);
-		escalationToFunction.setFunction(function);
-		escalationToFunction.connect();
+		// next -> function
+		FunctionToNextFunctionModel nextToFunction = new FunctionToNextFunctionModel();
+		nextToFunction.setPreviousFunction(function);
+		nextToFunction.setNextFunction(function);
+		nextToFunction.connect();
 
 		// functionEscalation -> extFlow
 		FunctionEscalationToExternalFlowModel escalationToExtFlow = new FunctionEscalationToExternalFlowModel();
@@ -499,11 +568,17 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		escalationToExtFlow.setExternalFlow(extFlow);
 		escalationToExtFlow.connect();
 
-		// next -> function
-		FunctionToNextFunctionModel nextToFunction = new FunctionToNextFunctionModel();
-		nextToFunction.setPreviousFunction(function);
-		nextToFunction.setNextFunction(function);
-		nextToFunction.connect();
+		// functionEscalation -> input
+		FunctionEscalationToSubSectionInputModel escalationToInput = new FunctionEscalationToSubSectionInputModel();
+		escalationToInput.setFunctionEscalation(functionEscalation);
+		escalationToInput.setSubSectionInput(input);
+		escalationToInput.connect();
+
+		// functionEscalation -> function
+		FunctionEscalationToFunctionModel escalationToFunction = new FunctionEscalationToFunctionModel();
+		escalationToFunction.setEscalation(functionEscalation);
+		escalationToFunction.setFunction(function);
+		escalationToFunction.connect();
 
 		// Record storing the section
 		this.modelRepository.store(section, this.configurationItem);
@@ -515,26 +590,34 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 
 		// Ensure the connections have links to enable retrieving
 		assertEquals("mo - mos", "MANAGED_OBJECT_SOURCE", moToMos.getSectionManagedObjectSourceName());
-		assertEquals("mos flow - extFlow", "FLOW", mosFlowToExtFlow.getExternalFlowName());
+		assertEquals("dependency - extMo", "EXTERNAL_MANAGED_OBJECT", dependencyToExtMo.getExternalManagedObjectName());
+		assertEquals("dependency - mo", "MANAGED_OBJECT", dependencyToMo.getSectionManagedObjectName());
+		assertEquals("mos flow - extFlow", "EXTERNAL_FLOW", mosFlowToExtFlow.getExternalFlowName());
 		assertEquals("mos flow - input (sub section)", "SUB_SECTION", mosFlowToInput.getSubSectionName());
 		assertEquals("mos flow - input (input)", "INPUT", mosFlowToInput.getSubSectionInputName());
 		assertEquals("mos flow - function", "FUNCTION", mosFlowToFunction.getFunctionName());
-		assertEquals("dependency - extMo", "MO", dependencyToExtMo.getExternalManagedObjectName());
-		assertEquals("dependency - mo", "MANAGED_OBJECT", dependencyToMo.getSectionManagedObjectName());
+		assertEquals("section object - extMo", "EXTERNAL_MANAGED_OBJECT",
+				sectionObjectToExtMo.getExternalManagedObjectName());
+		assertEquals("section object - mo", "MANAGED_OBJECT", sectionObjectToMo.getSectionManagedObjectName());
+		assertEquals("output - extFlow", "EXTERNAL_FLOW", outputToExtFlow.getExternalFlowName());
 		assertEquals("output - input (sub section)", "SUB_SECTION", outputToInput.getSubSectionName());
 		assertEquals("output - input (input)", "INPUT", outputToInput.getSubSectionInputName());
-		assertEquals("output - extFlow", "FLOW", outputToExtFlow.getExternalFlowName());
-		assertEquals("section object - extMo", "MO", sectionObjectToExtMo.getExternalManagedObjectName());
-		assertEquals("section object - mo", "MANAGED_OBJECT", sectionObjectToMo.getSectionManagedObjectName());
+		assertEquals("output - function", "FUNCTION", outputToFunction.getFunctionName());
 		assertEquals("function object - extMo", "EXTERNAL_MANAGED_OBJECT",
 				functionObjectToExtMo.getExternalManagedObjectName());
 		assertEquals("function object - mo", "MANAGED_OBJECT", functionObjectToMo.getSectionManagedObjectName());
-		assertEquals("function flow - extFlow", "EXTERNAL_FLOW", flowToExtFlow.getExternalFlowName());
+		assertEquals("function flow - extFlow", "EXTERNAL_FLOW", functionFlowToExtFlow.getExternalFlowName());
+		assertEquals("function flow - input (sub section)", "SUB_SECTION", functionFlowToInput.getSubSectionName());
+		assertEquals("function flow - input (input)", "INPUT", functionFlowToInput.getSubSectionInputName());
+		assertEquals("function flow - function", "FUNCTION", functionFlowToFunction.getFunctionName());
 		assertEquals("next - extFlow", "EXTERNAL_FLOW", nextToExtFlow.getExternalFlowName());
-		assertEquals("flow - function", "FUNCTION", flowToFunction.getFunctionName());
-		assertEquals("escalation - function", "FUNCTION", escalationToFunction.getFunctionName());
-		assertEquals("escalation - extFlow", "EXTERNAL_FLOW", escalationToExtFlow.getExternalFlowName());
+		assertEquals("next - input (sub section)", "SUB_SECTION", nextToInput.getSubSectionName());
+		assertEquals("next - input (input)", "INPUT", nextToInput.getSubSectionInputName());
 		assertEquals("next - function", "FUNCTION", nextToFunction.getNextFunctionName());
+		assertEquals("escalation - extFlow", "EXTERNAL_FLOW", escalationToExtFlow.getExternalFlowName());
+		assertEquals("escalation - input (sub section)", "SUB_SECTION", escalationToInput.getSubSectionName());
+		assertEquals("escalation - input (input)", "INPUT", escalationToInput.getSubSectionInputName());
+		assertEquals("escalation - function", "FUNCTION", escalationToFunction.getFunctionName());
 	}
 
 }

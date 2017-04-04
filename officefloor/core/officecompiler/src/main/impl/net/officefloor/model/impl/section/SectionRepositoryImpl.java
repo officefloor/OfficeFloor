@@ -28,13 +28,16 @@ import net.officefloor.model.section.ExternalManagedObjectModel;
 import net.officefloor.model.section.FunctionEscalationModel;
 import net.officefloor.model.section.FunctionEscalationToExternalFlowModel;
 import net.officefloor.model.section.FunctionEscalationToFunctionModel;
+import net.officefloor.model.section.FunctionEscalationToSubSectionInputModel;
 import net.officefloor.model.section.FunctionFlowModel;
 import net.officefloor.model.section.FunctionFlowToExternalFlowModel;
 import net.officefloor.model.section.FunctionFlowToFunctionModel;
+import net.officefloor.model.section.FunctionFlowToSubSectionInputModel;
 import net.officefloor.model.section.FunctionModel;
 import net.officefloor.model.section.FunctionNamespaceModel;
 import net.officefloor.model.section.FunctionToNextExternalFlowModel;
 import net.officefloor.model.section.FunctionToNextFunctionModel;
+import net.officefloor.model.section.FunctionToNextSubSectionInputModel;
 import net.officefloor.model.section.ManagedFunctionModel;
 import net.officefloor.model.section.ManagedFunctionObjectModel;
 import net.officefloor.model.section.ManagedFunctionObjectToExternalManagedObjectModel;
@@ -59,6 +62,7 @@ import net.officefloor.model.section.SubSectionObjectToExternalManagedObjectMode
 import net.officefloor.model.section.SubSectionObjectToSectionManagedObjectModel;
 import net.officefloor.model.section.SubSectionOutputModel;
 import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
+import net.officefloor.model.section.SubSectionOutputToFunctionModel;
 import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
 
 /**
@@ -129,7 +133,18 @@ public class SectionRepositoryImpl implements SectionRepository {
 			}
 		}
 
-		// TODO Connect the function to its next input
+		// Connect the function to its next input
+		for (FunctionModel function : section.getFunctions()) {
+			FunctionToNextSubSectionInputModel conn = function.getNextSubSectionInput();
+			if (conn != null) {
+				SubSectionInputModel input = inputs.get(conn.getSubSectionName(), conn.getSubSectionInputName());
+				if (input != null) {
+					conn.setPreviousFunction(function);
+					conn.setNextSubSectionInput(input);
+					conn.connect();
+				}
+			}
+		}
 
 		// Connect the functions to next external flow
 		for (FunctionModel function : section.getFunctions()) {
@@ -165,7 +180,20 @@ public class SectionRepositoryImpl implements SectionRepository {
 			}
 		}
 
-		// TODO Connect the function flows to inputs
+		// Connect the function flows to inputs
+		for (FunctionModel function : section.getFunctions()) {
+			for (FunctionFlowModel flow : function.getFunctionFlows()) {
+				FunctionFlowToSubSectionInputModel conn = flow.getSubSectionInput();
+				if (conn != null) {
+					SubSectionInputModel input = inputs.get(conn.getSubSectionName(), conn.getSubSectionInputName());
+					if (input != null) {
+						conn.setFunctionFlow(flow);
+						conn.setSubSectionInput(input);
+						conn.connect();
+					}
+				}
+			}
+		}
 
 		// Connect the function flows to external flow
 		for (FunctionModel function : section.getFunctions()) {
@@ -203,7 +231,20 @@ public class SectionRepositoryImpl implements SectionRepository {
 			}
 		}
 
-		// TODO Connect the escalation to inputs
+		// Connect the escalation to inputs
+		for (FunctionModel function : section.getFunctions()) {
+			for (FunctionEscalationModel escalation : function.getFunctionEscalations()) {
+				FunctionEscalationToSubSectionInputModel conn = escalation.getSubSectionInput();
+				if (conn != null) {
+					SubSectionInputModel input = inputs.get(conn.getSubSectionName(), conn.getSubSectionInputName());
+					if (input != null) {
+						conn.setFunctionEscalation(escalation);
+						conn.setSubSectionInput(input);
+						conn.connect();
+					}
+				}
+			}
+		}
 
 		// Connect the escalation to external flows
 		for (FunctionModel function : section.getFunctions()) {
@@ -223,7 +264,20 @@ public class SectionRepositoryImpl implements SectionRepository {
 			}
 		}
 
-		// TODO Connect the outputs to functions
+		// Connect the outputs to functions
+		for (SubSectionModel subSection : section.getSubSections()) {
+			for (SubSectionOutputModel output : subSection.getSubSectionOutputs()) {
+				SubSectionOutputToFunctionModel conn = output.getFunction();
+				if (conn != null) {
+					FunctionModel function = functions.get(conn.getFunctionName());
+					if (function != null) {
+						conn.setSubSectionOutput(output);
+						conn.setFunction(function);
+						conn.connect();
+					}
+				}
+			}
+		}
 
 		// Connect the outputs to the inputs
 		for (SubSectionModel subSection : section.getSubSections()) {
@@ -354,7 +408,7 @@ public class SectionRepositoryImpl implements SectionRepository {
 		for (FunctionModel function : section.getFunctions()) {
 			// Obtain the managed function
 			ManagedFunctionModel managedFunction = managedFunctionRegistry.get(function.getFunctionNamespaceName(),
-					function.getFunctionName());
+					function.getManagedFunctionName());
 			if (managedFunction != null) {
 				// Connect
 				new ManagedFunctionToFunctionModel(function, managedFunction).connect();
@@ -467,7 +521,15 @@ public class SectionRepositoryImpl implements SectionRepository {
 			}
 		}
 
-		// TODO Specify function flow to input
+		// Specify function flow to input
+		for (SubSectionModel subSection : section.getSubSections()) {
+			for (SubSectionInputModel input : subSection.getSubSectionInputs()) {
+				for (FunctionFlowToSubSectionInputModel conn : input.getFunctionFlows()) {
+					conn.setSubSectionName(subSection.getSubSectionName());
+					conn.setSubSectionInputName(input.getSubSectionInputName());
+				}
+			}
+		}
 
 		// Specify function flow to external flow
 		for (FunctionModel function : section.getFunctions()) {
@@ -488,6 +550,14 @@ public class SectionRepositoryImpl implements SectionRepository {
 		}
 
 		// Specify function to next input
+		for (SubSectionModel subSection : section.getSubSections()) {
+			for (SubSectionInputModel input : subSection.getSubSectionInputs()) {
+				for (FunctionToNextSubSectionInputModel conn : input.getPreviousFunctions()) {
+					conn.setSubSectionName(subSection.getSubSectionName());
+					conn.setSubSectionInputName(input.getSubSectionInputName());
+				}
+			}
+		}
 
 		// Specify function next to external flow
 		for (FunctionModel function : section.getFunctions()) {
@@ -507,7 +577,15 @@ public class SectionRepositoryImpl implements SectionRepository {
 			}
 		}
 
-		// TODO Specify function escalation to input
+		// Specify function escalation to input
+		for (SubSectionModel subSection : section.getSubSections()) {
+			for (SubSectionInputModel input : subSection.getSubSectionInputs()) {
+				for (FunctionEscalationToSubSectionInputModel conn : input.getFunctionEscalations()) {
+					conn.setSubSectionName(subSection.getSubSectionName());
+					conn.setSubSectionInputName(input.getSubSectionInputName());
+				}
+			}
+		}
 
 		// Specify function escalation to external function
 		for (FunctionModel function : section.getFunctions()) {
@@ -519,7 +597,12 @@ public class SectionRepositoryImpl implements SectionRepository {
 			}
 		}
 
-		// TODO Specify output to function
+		// Specify output to function
+		for (FunctionModel function : section.getFunctions()) {
+			for (SubSectionOutputToFunctionModel conn : function.getSubSectionOutputs()) {
+				conn.setFunctionName(function.getFunctionName());
+			}
+		}
 
 		// Specify output to input
 		for (SubSectionModel subSection : section.getSubSections()) {

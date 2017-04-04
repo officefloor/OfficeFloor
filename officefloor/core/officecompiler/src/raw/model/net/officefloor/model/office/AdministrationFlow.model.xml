@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="flow name" />
+	<field type="String" name="key" />
+	<field type="String" name="argument type" />
+	<field type="AdministrationFlowToOfficeSectionInputModel" name="office section input" />
+</model>

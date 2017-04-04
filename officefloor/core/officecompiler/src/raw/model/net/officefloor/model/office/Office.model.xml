@@ -6,7 +6,7 @@
 	<list type="OfficeManagedObjectSourceModel" name="office managed object source" />
 	<list type="OfficeManagedObjectModel" name="office managed object" />
 	<list type="OfficeEscalationModel" name="office escalation" />
-	<list type="AdministrationModel" name="office administration" />
-	<list type="OfficeGovernanceModel" name="office governance" />
+	<list type="AdministrationModel" name="administration" />
+	<list type="GovernanceModel" name="governance" />
 	<list type="OfficeStartModel" name="office start" />
 </model>

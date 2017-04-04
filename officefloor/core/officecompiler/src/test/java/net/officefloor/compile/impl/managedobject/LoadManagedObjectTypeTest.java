@@ -1001,7 +1001,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		// Record basic meta-data
 		this.record_basicMetaData();
 		this.issues.recordIssue(
-				"Unknown function being linked (function=FUNCTION, flow=0, link link function=LINK_FUNCTION)");
+				"Unknown function being linked (function=FUNCTION, flow=0, link function=LINK_FUNCTION)");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<None>() {
