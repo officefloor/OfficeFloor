@@ -25,14 +25,18 @@ import org.easymock.AbstractMatcher;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.office.AdministrationEscalationModel;
+import net.officefloor.model.office.AdministrationEscalationToOfficeSectionInputModel;
 import net.officefloor.model.office.AdministrationFlowModel;
+import net.officefloor.model.office.AdministrationFlowToOfficeSectionInputModel;
 import net.officefloor.model.office.AdministrationModel;
 import net.officefloor.model.office.AdministrationToOfficeTeamModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalManagedObjectToAdministrationModel;
 import net.officefloor.model.office.ExternalManagedObjectToGovernanceModel;
 import net.officefloor.model.office.GovernanceEscalationModel;
+import net.officefloor.model.office.GovernanceEscalationToOfficeSectionInputModel;
 import net.officefloor.model.office.GovernanceFlowModel;
+import net.officefloor.model.office.GovernanceFlowToOfficeSectionInputModel;
 import net.officefloor.model.office.GovernanceModel;
 import net.officefloor.model.office.GovernanceToOfficeTeamModel;
 import net.officefloor.model.office.OfficeEscalationModel;
@@ -139,6 +143,7 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		section.addOfficeSectionResponsibility(responsibility);
 		AdministrationModel admin = new AdministrationModel("ADMINISTRATION",
 				"net.example.ExampleAdministrationSource");
+		office.addAdministration(admin);
 		AdministrationFlowModel adminFlow = new AdministrationFlowModel("ADMIN_FLOW", null, Integer.class.getName());
 		admin.addAdministrationFlow(adminFlow);
 		AdministrationEscalationModel adminEscalation = new AdministrationEscalationModel(Exception.class.getName());
@@ -192,6 +197,11 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				"TEAM");
 		moTeam.setOfficeTeam(mosTeamToTeam);
 
+		// start -> section input
+		OfficeStartToOfficeSectionInputModel startToInput = new OfficeStartToOfficeSectionInputModel("SECTION_TARGET",
+				"INPUT");
+		start.setOfficeSectionInput(startToInput);
+
 		// escalation -> section input
 		OfficeEscalationToOfficeSectionInputModel escalationToInput = new OfficeEscalationToOfficeSectionInputModel(
 				"SECTION_TARGET", "INPUT");
@@ -219,11 +229,6 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				"TEAM");
 		responsibility.setOfficeTeam(respToTeam);
 
-		// start -> section input
-		OfficeStartToOfficeSectionInputModel startToInput = new OfficeStartToOfficeSectionInputModel("SECTION_TARGET",
-				"INPUT");
-		start.setOfficeSectionInput(startToInput);
-
 		// office function
 		OfficeSubSectionModel subSection = new OfficeSubSectionModel();
 		section.setOfficeSubSection(subSection);
@@ -242,8 +247,15 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				"ADMINISTRATION");
 		officeFunction.addPostAdministration(functionToPostAdmin);
 
-		fail("TODO administration flow -> section input");
-		fail("TODO administration escalation -> section input");
+		// administration flow -> section input
+		AdministrationFlowToOfficeSectionInputModel adminFlowToInput = new AdministrationFlowToOfficeSectionInputModel(
+				"SECTION_TARGET", "INPUT");
+		adminFlow.setOfficeSectionInput(adminFlowToInput);
+
+		// administration escalation -> section input
+		AdministrationEscalationToOfficeSectionInputModel adminEscalationToInput = new AdministrationEscalationToOfficeSectionInputModel(
+				"SECTION_TARGET", "INPUT");
+		adminEscalation.setOfficeSectionInput(adminEscalationToInput);
 
 		// external managed object -> administration
 		ExternalManagedObjectToAdministrationModel extMoToAdmin = new ExternalManagedObjectToAdministrationModel(
@@ -271,8 +283,15 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		OfficeSubSectionToGovernanceModel subSectionToGov = new OfficeSubSectionToGovernanceModel("GOVERNANCE");
 		subSection.addGovernance(subSectionToGov);
 
-		fail("TODO governance flow -> section input");
-		fail("TODO governance escalation -> section input");
+		// governance flow -> section input
+		GovernanceFlowToOfficeSectionInputModel govFlowToInput = new GovernanceFlowToOfficeSectionInputModel(
+				"SECTION_TARGET", "INPUT");
+		govFlow.setOfficeSectionInput(govFlowToInput);
+
+		// governance escalation -> section input
+		GovernanceEscalationToOfficeSectionInputModel govEscalationToInput = new GovernanceEscalationToOfficeSectionInputModel(
+				"SECTION_TARGET", "INPUT");
+		govEscalation.setOfficeSectionInput(govEscalationToInput);
 
 		// external managed object -> governance
 		ExternalManagedObjectToGovernanceModel extMoToGov = new ExternalManagedObjectToGovernanceModel("GOVERNANCE");
@@ -339,6 +358,10 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("mos team <- office team", moTeam, mosTeamToTeam.getOfficeManagedObjectSourceTeam());
 		assertEquals("mos team -> office team", team, mosTeamToTeam.getOfficeTeam());
 
+		// Ensure start flows connected
+		assertEquals("start <- section input", start, startToInput.getOfficeStart());
+		assertEquals("start -> section input", targetInput, startToInput.getOfficeSectionInput());
+
 		// Ensure escalation connected to section input
 		assertEquals("escalation <- section input", escalation, escalationToInput.getOfficeEscalation());
 		assertEquals("escalation -> section input", targetInput, escalationToInput.getOfficeSectionInput());
@@ -359,15 +382,15 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("section responsibility <- team", responsibility, respToTeam.getOfficeSectionResponsibility());
 		assertEquals("section responsibility -> team", team, respToTeam.getOfficeTeam());
 
-		// Ensure start flows connected
-		assertEquals("start <- section input", start, startToInput.getOfficeStart());
-		assertEquals("start -> section input", targetInput, startToInput.getOfficeSectionInput());
-		
-		fail("administration flow -> section input");
-		fail("administration flow <- section input");
+		// Ensure administration flow connected
+		assertEquals("administration flow -> section input", adminFlow, adminFlowToInput.getAdministrationFlow());
+		assertEquals("administration flow <- section input", targetInput, adminFlowToInput.getOfficeSectionInput());
 
-		fail("administration escalation -> section input");
-		fail("administration escalation <- section input");
+		// Ensure administration escalation connected
+		assertEquals("administration escalation -> section input", adminEscalation,
+				adminEscalationToInput.getAdministrationEscalation());
+		assertEquals("administration escalation <- section input", targetInput,
+				adminEscalationToInput.getOfficeSectionInput());
 
 		// Ensure the office function pre administration connected
 		assertEquals("function <- pre admin", officeFunction, functionToPreAdmin.getOfficeFunction());
@@ -396,6 +419,16 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		// Ensure the sub section governance connected
 		assertEquals("sub section <- governance", subSection, subSectionToGov.getOfficeSubSection());
 		assertEquals("sub section -> governance", governance, subSectionToGov.getGovernance());
+
+		// Ensure governance flow connected
+		assertEquals("governance flow -> section input", govFlow, govFlowToInput.getGovernanceFlow());
+		assertEquals("governance flow <- section input", targetInput, govFlowToInput.getOfficeSectionInput());
+
+		// Ensure governance escalation connected
+		assertEquals("governance escalation -> section input", govEscalation,
+				govEscalationToInput.getGovernanceEscalation());
+		assertEquals("governance escalation <- section input ", targetInput,
+				govEscalationToInput.getOfficeSectionInput());
 
 		// Ensure section managed object governed
 		assertEquals("section managed object <- governance", sectionMo, sectionMoToGov.getOfficeSectionManagedObject());
@@ -454,47 +487,26 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		section.addOfficeSectionResponsibility(responsibility);
 		AdministrationModel admin = new AdministrationModel("ADMINISTRATION",
 				"net.example.ExampleAdministrationSource");
-
-		fail("TODO test administration flows and escalations");
-
+		office.addAdministration(admin);
+		AdministrationFlowModel adminFlow = new AdministrationFlowModel("ADMIN_FLOW", null, null);
+		admin.addAdministrationFlow(adminFlow);
+		AdministrationEscalationModel adminEscalation = new AdministrationEscalationModel("java.io.IOException");
+		admin.addAdministrationEscalation(adminEscalation);
 		GovernanceModel governance = new GovernanceModel("GOVERNANCE", "net.example.ExampleGovernanceSource");
 		office.addGovernance(governance);
-
-		fail("TODO test governance flows and escalations");
-
+		GovernanceFlowModel govFlow = new GovernanceFlowModel("GOV_FLOW", null, null);
+		governance.addGovernanceFlow(govFlow);
+		GovernanceEscalationModel govEscalation = new GovernanceEscalationModel("java.sql.SQLException");
+		governance.addGovernanceEscalation(govEscalation);
 		OfficeStartModel start = new OfficeStartModel("START");
 		office.addOfficeStart(start);
 
-		// responsibility -> team
-		OfficeSectionResponsibilityToOfficeTeamModel respToTeam = new OfficeSectionResponsibilityToOfficeTeamModel();
-		respToTeam.setOfficeSectionResponsibility(responsibility);
-		respToTeam.setOfficeTeam(team);
-		respToTeam.connect();
-
-		// section output -> section input
-		OfficeSectionOutputModel output = new OfficeSectionOutputModel("OUTPUT", String.class.getName(), false);
-		section.addOfficeSectionOutput(output);
+		// Create the target section input
 		OfficeSectionModel targetSection = new OfficeSectionModel("SECTION_TARGET", "net.example.ExcampleSectionSource",
 				"SECTION_LOCATION");
 		office.addOfficeSection(targetSection);
-		OfficeSectionInputModel targetInput = new OfficeSectionInputModel("INPUT", String.class.getName());
+		OfficeSectionInputModel targetInput = new OfficeSectionInputModel("INPUT", Object.class.getName());
 		targetSection.addOfficeSectionInput(targetInput);
-		OfficeSectionOutputToOfficeSectionInputModel outputToInput = new OfficeSectionOutputToOfficeSectionInputModel();
-		outputToInput.setOfficeSectionOutput(output);
-		outputToInput.setOfficeSectionInput(targetInput);
-		outputToInput.connect();
-
-		// section object -> external managed object
-		OfficeSectionObjectToExternalManagedObjectModel objectToExtMo = new OfficeSectionObjectToExternalManagedObjectModel();
-		objectToExtMo.setOfficeSectionObject(object);
-		objectToExtMo.setExternalManagedObject(extMo);
-		objectToExtMo.connect();
-
-		// section object -> office managed object
-		OfficeSectionObjectToOfficeManagedObjectModel objectToMo = new OfficeSectionObjectToOfficeManagedObjectModel();
-		objectToMo.setOfficeSectionObject(object);
-		objectToMo.setOfficeManagedObject(mo);
-		objectToMo.connect();
 
 		// managed object -> managed object source
 		OfficeManagedObjectToOfficeManagedObjectSourceModel moToMos = new OfficeManagedObjectToOfficeManagedObjectSourceModel();
@@ -507,12 +519,6 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		flowToInput.setOfficeManagedObjectSourceFlow(moFlow);
 		flowToInput.setOfficeSectionInput(targetInput);
 		flowToInput.connect();
-
-		// managed object source team -> office team
-		OfficeManagedObjectSourceTeamToOfficeTeamModel moTeamToTeam = new OfficeManagedObjectSourceTeamToOfficeTeamModel();
-		moTeamToTeam.setOfficeManagedObjectSourceTeam(moTeam);
-		moTeamToTeam.setOfficeTeam(team);
-		moTeamToTeam.connect();
 
 		// dependency -> external managed object
 		OfficeManagedObjectDependencyToExternalManagedObjectModel dependencyToExtMo = new OfficeManagedObjectDependencyToExternalManagedObjectModel();
@@ -538,17 +544,11 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		inputDependencyToMo.setOfficeManagedObject(mo);
 		inputDependencyToMo.connect();
 
-		// administration -> team
-		AdministrationToOfficeTeamModel adminToTeam = new AdministrationToOfficeTeamModel();
-		adminToTeam.setAdministration(admin);
-		adminToTeam.setOfficeTeam(team);
-		adminToTeam.connect();
-
-		// governance -> team
-		GovernanceToOfficeTeamModel govToTeam = new GovernanceToOfficeTeamModel();
-		govToTeam.setGovernance(governance);
-		govToTeam.setOfficeTeam(team);
-		govToTeam.connect();
+		// managed object source team -> office team
+		OfficeManagedObjectSourceTeamToOfficeTeamModel moTeamToTeam = new OfficeManagedObjectSourceTeamToOfficeTeamModel();
+		moTeamToTeam.setOfficeManagedObjectSourceTeam(moTeam);
+		moTeamToTeam.setOfficeTeam(team);
+		moTeamToTeam.connect();
 
 		// start -> input
 		OfficeStartToOfficeSectionInputModel startToInput = new OfficeStartToOfficeSectionInputModel();
@@ -556,7 +556,13 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		startToInput.setOfficeSectionInput(targetInput);
 		startToInput.connect();
 
-		// office function -> duty (setup)
+		// escalation -> section input
+		OfficeEscalationToOfficeSectionInputModel escalationToInput = new OfficeEscalationToOfficeSectionInputModel();
+		escalationToInput.setOfficeEscalation(escalation);
+		escalationToInput.setOfficeSectionInput(targetInput);
+		escalationToInput.connect();
+
+		// office function -> administration (setup)
 		OfficeSubSectionModel subSection = new OfficeSubSectionModel();
 		section.setOfficeSubSection(subSection);
 		OfficeSubSectionModel subSubSection = new OfficeSubSectionModel("SUB_SECTION");
@@ -576,11 +582,53 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		functionToPostAdmin.setAdministration(admin);
 		functionToPostAdmin.connect();
 
+		// administration flow -> section input
+		AdministrationFlowToOfficeSectionInputModel adminFlowToInput = new AdministrationFlowToOfficeSectionInputModel();
+		adminFlowToInput.setAdministrationFlow(adminFlow);
+		adminFlowToInput.setOfficeSectionInput(targetInput);
+		adminFlowToInput.connect();
+
+		// administration escalation -> section input
+		AdministrationEscalationToOfficeSectionInputModel adminEscalationToInput = new AdministrationEscalationToOfficeSectionInputModel();
+		adminEscalationToInput.setAdministrationEscalation(adminEscalation);
+		adminEscalationToInput.setOfficeSectionInput(targetInput);
+		adminEscalationToInput.connect();
+
+		// external managed object -> administration
+		ExternalManagedObjectToAdministrationModel extMoToAdmin = new ExternalManagedObjectToAdministrationModel();
+		extMoToAdmin.setExternalManagedObject(extMo);
+		extMoToAdmin.setAdministration(admin);
+		extMoToAdmin.connect();
+
+		// managed object -> administration
+		OfficeManagedObjectToAdministrationModel moToAdmin = new OfficeManagedObjectToAdministrationModel();
+		moToAdmin.setOfficeManagedObject(mo);
+		moToAdmin.setAdministration(admin);
+		moToAdmin.connect();
+
+		// administration -> team
+		AdministrationToOfficeTeamModel adminToTeam = new AdministrationToOfficeTeamModel();
+		adminToTeam.setAdministration(admin);
+		adminToTeam.setOfficeTeam(team);
+		adminToTeam.connect();
+
 		// office function -> governance
 		OfficeFunctionToGovernanceModel functionToGov = new OfficeFunctionToGovernanceModel();
 		functionToGov.setOfficeFunction(officeFunction);
 		functionToGov.setGovernance(governance);
 		functionToGov.connect();
+
+		// governance flow -> section input
+		GovernanceFlowToOfficeSectionInputModel govFlowToInput = new GovernanceFlowToOfficeSectionInputModel();
+		govFlowToInput.setGovernanceFlow(govFlow);
+		govFlowToInput.setOfficeSectionInput(targetInput);
+		govFlowToInput.connect();
+
+		// governance escalation -> section input
+		GovernanceEscalationToOfficeSectionInputModel govEscalationToInput = new GovernanceEscalationToOfficeSectionInputModel();
+		govEscalationToInput.setGovernanceEscalation(govEscalation);
+		govEscalationToInput.setOfficeSectionInput(targetInput);
+		govEscalationToInput.connect();
 
 		// sub section -> governance
 		OfficeSubSectionToGovernanceModel subSectionToGov = new OfficeSubSectionToGovernanceModel();
@@ -598,23 +646,11 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		sectionMoToGov.setGovernance(governance);
 		sectionMoToGov.connect();
 
-		// external managed object -> administration
-		ExternalManagedObjectToAdministrationModel extMoToAdmin = new ExternalManagedObjectToAdministrationModel();
-		extMoToAdmin.setExternalManagedObject(extMo);
-		extMoToAdmin.setAdministration(admin);
-		extMoToAdmin.connect();
-
 		// external managed object -> governance
 		ExternalManagedObjectToGovernanceModel extMoToGov = new ExternalManagedObjectToGovernanceModel();
 		extMoToGov.setExternalManagedObject(extMo);
 		extMoToGov.setGovernance(governance);
 		extMoToGov.connect();
-
-		// managed object -> administration
-		OfficeManagedObjectToAdministrationModel moToAdmin = new OfficeManagedObjectToAdministrationModel();
-		moToAdmin.setOfficeManagedObject(mo);
-		moToAdmin.setAdministration(admin);
-		moToAdmin.connect();
 
 		// managed object -> governance
 		OfficeManagedObjectToGovernanceModel moToGov = new OfficeManagedObjectToGovernanceModel();
@@ -622,11 +658,37 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		moToGov.setGovernance(governance);
 		moToGov.connect();
 
-		// escalation -> section input
-		OfficeEscalationToOfficeSectionInputModel escalationToInput = new OfficeEscalationToOfficeSectionInputModel();
-		escalationToInput.setOfficeEscalation(escalation);
-		escalationToInput.setOfficeSectionInput(targetInput);
-		escalationToInput.connect();
+		// governance -> team
+		GovernanceToOfficeTeamModel govToTeam = new GovernanceToOfficeTeamModel();
+		govToTeam.setGovernance(governance);
+		govToTeam.setOfficeTeam(team);
+		govToTeam.connect();
+
+		// section output -> section input
+		OfficeSectionOutputModel output = new OfficeSectionOutputModel("OUTPUT", String.class.getName(), false);
+		section.addOfficeSectionOutput(output);
+		OfficeSectionOutputToOfficeSectionInputModel outputToInput = new OfficeSectionOutputToOfficeSectionInputModel();
+		outputToInput.setOfficeSectionOutput(output);
+		outputToInput.setOfficeSectionInput(targetInput);
+		outputToInput.connect();
+
+		// section object -> external managed object
+		OfficeSectionObjectToExternalManagedObjectModel objectToExtMo = new OfficeSectionObjectToExternalManagedObjectModel();
+		objectToExtMo.setOfficeSectionObject(object);
+		objectToExtMo.setExternalManagedObject(extMo);
+		objectToExtMo.connect();
+
+		// section object -> office managed object
+		OfficeSectionObjectToOfficeManagedObjectModel objectToMo = new OfficeSectionObjectToOfficeManagedObjectModel();
+		objectToMo.setOfficeSectionObject(object);
+		objectToMo.setOfficeManagedObject(mo);
+		objectToMo.connect();
+
+		// section responsibility -> team
+		OfficeSectionResponsibilityToOfficeTeamModel respToTeam = new OfficeSectionResponsibilityToOfficeTeamModel();
+		respToTeam.setOfficeSectionResponsibility(responsibility);
+		respToTeam.setOfficeTeam(team);
+		respToTeam.connect();
 
 		// Record storing the office
 		this.modelRepository.store(office, this.configurationItem);
@@ -637,19 +699,12 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure the connections have links to enable retrieving
-		assertEquals("responsibility - team", "TEAM", respToTeam.getOfficeTeamName());
-		assertEquals("output - input (section name)", "SECTION_TARGET", outputToInput.getOfficeSectionName());
-		assertEquals("output - input (input name)", "INPUT", outputToInput.getOfficeSectionInputName());
-		assertEquals("object - external managed object", "EXTERNAL_MANAGED_OBJECT",
-				objectToExtMo.getExternalManagedObjectName());
-		assertEquals("object - office managed object", "MANAGED_OBJECT", objectToMo.getOfficeManagedObjectName());
 		assertEquals("managed object - managed object source", "MANAGED_OBJECT_SOURCE",
 				moToMos.getOfficeManagedObjectSourceName());
 		assertEquals("managed object source flow - input (section name)", "SECTION_TARGET",
 				flowToInput.getOfficeSectionName());
 		assertEquals("managed object source flow - input (input name)", "INPUT",
 				flowToInput.getOfficeSectionInputName());
-		assertEquals("managed object source team - office team", "TEAM", moTeamToTeam.getOfficeTeamName());
 		assertEquals("dependency - external managed object", "EXTERNAL_MANAGED_OBJECT",
 				dependencyToExtMo.getExternalManagedObjectName());
 		assertEquals("dependency - managed object", "MANAGED_OBJECT", dependencyToMo.getOfficeManagedObjectName());
@@ -657,30 +712,45 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				inputDependencyToExtMo.getExternalManagedObjectName());
 		assertEquals("input dependency - managed object", "MANAGED_OBJECT",
 				inputDependencyToMo.getOfficeManagedObjectName());
-		assertEquals("administration - team", "TEAM", adminToTeam.getOfficeTeamName());
-		assertEquals("governance - team", "TEAM", govToTeam.getOfficeTeamName());
+		assertEquals("managed object source team - office team", "TEAM", moTeamToTeam.getOfficeTeamName());
 		assertEquals("start - input (section name)", "SECTION_TARGET", startToInput.getOfficeSectionName());
 		assertEquals("start - input (input name)", "INPUT", startToInput.getOfficeSectionInputName());
-		assertEquals("function - pre admin (administration name)", "ADMINISTRATION",
-				functionToPreAdmin.getAdministrationName());
-
-		fail("TODO test administration flows and escalations");
-
-		assertEquals("function - post duty (administration name)", "ADMINISTRATION",
-				functionToPostAdmin.getAdministrationName());
-
-		fail("TODO test administration flows and escalations");
-
-		assertEquals("function - governance", "GOVERNANCE", functionToGov.getGovernanceName());
-		assertEquals("sub section - governance", "GOVERNANCE", subSectionToGov.getGovernanceName());
-		assertEquals("section managed object - governance", "GOVERNANCE", sectionMoToGov.getGovernanceName());
-		assertEquals("external managed object - administration", "ADMINISTRATION",
-				extMoToAdmin.getAdministrationName());
-		assertEquals("external managed object - governance", "GOVERNANCE", extMoToGov.getGovernanceName());
-		assertEquals("office managed object - administration", "ADMINISTRATION", moToAdmin.getAdministrationName());
-		assertEquals("office managed object - governance", "GOVERNANCE", moToGov.getGovernanceName());
 		assertEquals("escalation - input (section name)", "SECTION_TARGET", escalationToInput.getOfficeSectionName());
 		assertEquals("escalation - input (input name", "INPUT", escalationToInput.getOfficeSectionInputName());
+		assertEquals("function - pre admin (administration name)", "ADMINISTRATION",
+				functionToPreAdmin.getAdministrationName());
+		assertEquals("function - post duty (administration name)", "ADMINISTRATION",
+				functionToPostAdmin.getAdministrationName());
+		assertEquals("administration flow - input (section name)", "SECTION_TARGET",
+				adminFlowToInput.getOfficeSectionName());
+		assertEquals("administration flow - input (input name)", "INPUT", adminFlowToInput.getOfficeSectionInputName());
+		assertEquals("administration escalation - input (section name)", "SECTION_TARGET",
+				adminEscalationToInput.getOfficeSectionName());
+		assertEquals("administration escalation - input (input name)", "INPUT",
+				adminEscalationToInput.getOfficeSectionInputName());
+		assertEquals("external managed object - administration", "ADMINISTRATION",
+				extMoToAdmin.getAdministrationName());
+		assertEquals("office managed object - administration", "ADMINISTRATION", moToAdmin.getAdministrationName());
+		assertEquals("function - governance", "GOVERNANCE", functionToGov.getGovernanceName());
+		assertEquals("governance flow - input (section name)", "SECTION_TARGET", govFlowToInput.getOfficeSectionName());
+		assertEquals("governance flow - input (input name)", "INPUT", govFlowToInput.getOfficeSectionInputName());
+		assertEquals("governance escalation - input (section name)", "SECTION_TARGET",
+				govEscalationToInput.getOfficeSectionName());
+		assertEquals("governance escalation - input (input name)", "INPUT",
+				govEscalationToInput.getOfficeSectionInputName());
+		assertEquals("sub section - governance", "GOVERNANCE", subSectionToGov.getGovernanceName());
+		assertEquals("section managed object - governance", "GOVERNANCE", sectionMoToGov.getGovernanceName());
+		assertEquals("external managed object - governance", "GOVERNANCE", extMoToGov.getGovernanceName());
+		assertEquals("office managed object - governance", "GOVERNANCE", moToGov.getGovernanceName());
+		assertEquals("governance - team", "TEAM", govToTeam.getOfficeTeamName());
+		assertEquals("section output - input (section name)", "SECTION_TARGET", outputToInput.getOfficeSectionName());
+		assertEquals("section output - input (input name)", "INPUT", outputToInput.getOfficeSectionInputName());
+		assertEquals("section object - external managed object", "EXTERNAL_MANAGED_OBJECT",
+				objectToExtMo.getExternalManagedObjectName());
+		assertEquals("section object - office managed object", "MANAGED_OBJECT",
+				objectToMo.getOfficeManagedObjectName());
+		assertEquals("section responsibility - team", "TEAM", respToTeam.getOfficeTeamName());
+		assertEquals("section administration - team", "TEAM", adminToTeam.getOfficeTeamName());
 	}
 
 }
