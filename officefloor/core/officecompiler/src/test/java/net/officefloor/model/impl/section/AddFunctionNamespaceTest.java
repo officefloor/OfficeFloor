@@ -33,7 +33,7 @@ import net.officefloor.model.section.ManagedFunctionModel;
  * 
  * @author Daniel Sagenschneider
  */
-public class AddNamespaceTest extends AbstractSectionChangesTestCase {
+public class AddFunctionNamespaceTest extends AbstractSectionChangesTestCase {
 
 	/**
 	 * Ensure can add {@link FunctionNamespaceModel} that uses indexing.
@@ -61,7 +61,7 @@ public class AddNamespaceTest extends AbstractSectionChangesTestCase {
 		Change<FunctionNamespaceModel> change = this.operations.addFunctionNamespace("NAMESPACE",
 				"net.example.ExampleManagedFunctionSource",
 				new PropertyListImpl("name.one", "value.one", "name.two", "value.two"), namespace);
-		this.assertChange(change, null, "Add namespace NAMESPACE", true);
+		this.assertChange(change, null, "Add function namespace NAMESPACE", true);
 		change.apply();
 		assertEquals("Ensure correct target", this.model.getFunctionNamespaces().get(0), change.getTarget());
 	}
@@ -92,7 +92,7 @@ public class AddNamespaceTest extends AbstractSectionChangesTestCase {
 		// Validate adding the namespace and reverting
 		Change<FunctionNamespaceModel> change = this.operations.addFunctionNamespace("NAMESPACE",
 				"net.example.ExampleManagedFunctionSource", new PropertyListImpl("name", "value"), namespace);
-		this.assertChange(change, null, "Add namespace NAMESPACE", true);
+		this.assertChange(change, null, "Add function namespace NAMESPACE", true);
 	}
 
 	/**
@@ -124,7 +124,7 @@ public class AddNamespaceTest extends AbstractSectionChangesTestCase {
 		Change<FunctionNamespaceModel> change = this.operations.addFunctionNamespace("NAMESPACE",
 				"net.example.ExampleManagedFunctionSource", new PropertyListImpl(), namespace, "FUNCTION_ONE",
 				"FUNCTION_THREE");
-		this.assertChange(change, null, "Add namespace NAMESPACE", true);
+		this.assertChange(change, null, "Add function namespace NAMESPACE", true);
 	}
 
 	/**
@@ -150,7 +150,7 @@ public class AddNamespaceTest extends AbstractSectionChangesTestCase {
 		// Validate adding the namespace and reverting
 		Change<FunctionNamespaceModel> change = this.operations.addFunctionNamespace("NAMESPACE",
 				"net.example.ExampleManagedFunctionSource", new PropertyListImpl(), namespace);
-		this.assertChange(change, null, "Add namespace NAMESPACE", true);
+		this.assertChange(change, null, "Add function namespace NAMESPACE", true);
 	}
 
 	/**

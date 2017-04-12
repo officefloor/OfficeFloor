@@ -839,4 +839,10 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		return new FunctionNamespaceNodeImpl(functionNamespaceName, section, this);
 	}
 
+	@Override
+	public String extractUnqualifiedFunctionName(String qualifiedFunctionName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

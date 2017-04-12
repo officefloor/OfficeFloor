@@ -134,18 +134,16 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	 * Ensure able to find the furtherest target.
 	 */
 	public void testFindFurtherestFlowTarget() {
-		this.doFindFurtherestTargetTest((link) -> LinkUtil
-				.findFurtherestTarget((LinkFlowNode) link,
-						TargetLinkNode.class, this.issues));
+		this.doFindFurtherestTargetTest(
+				(link) -> LinkUtil.findFurtherestTarget((LinkFlowNode) link, TargetLinkNode.class, this.issues));
 	}
 
 	/**
 	 * Ensure able to find the furtherest target.
 	 */
 	public void testFindFurtherestObjectTarget() {
-		this.doFindFurtherestTargetTest((link) -> LinkUtil
-				.retrieveFurtherestTarget((LinkObjectNode) link,
-						TargetLinkNode.class, this.issues));
+		this.doFindFurtherestTargetTest(
+				(link) -> LinkUtil.retrieveFurtherestTarget((LinkObjectNode) link, TargetLinkNode.class, this.issues));
 	}
 
 	/**
@@ -154,8 +152,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	 * @param finder
 	 *            Finds the furtherest target.
 	 */
-	private void doFindFurtherestTargetTest(
-			Function<Node, TargetLinkNode> finder) {
+	private void doFindFurtherestTargetTest(Function<Node, TargetLinkNode> finder) {
 
 		// Create extra links without target
 		LinkNode link = new LinkNode("EXTRA_LINK", null);
@@ -166,8 +163,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		link = new LinkNode("BEFORE_TARGET", target);
 		// Provide various possible links to the furtherest target
 		for (int i = 0; i < 20; i++) {
-			link = ((i % 2 == 0) ? new LinkNode("LINK_" + i, link)
-					: new TargetLinkNode("TARGET_" + i, link));
+			link = ((i % 2 == 0) ? new LinkNode("LINK_" + i, link) : new TargetLinkNode("TARGET_" + i, link));
 		}
 
 		// Find the target
@@ -189,16 +185,12 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		}
 
 		// Record issue in not finding target
-		this.issues.recordIssue(
-				"LINK",
-				LinkNode.class,
-				"Link LINK is not linked to a "
-						+ TargetLinkNode.class.getSimpleName());
+		this.issues.recordIssue("LINK", LinkNode.class,
+				"Link LINK is not linked to a " + TargetLinkNode.class.getSimpleName());
 
 		// Find the target
 		this.replayMockObjects();
-		TargetLinkNode target = LinkUtil.retrieveFurtherestTarget(link,
-				TargetLinkNode.class, this.issues);
+		TargetLinkNode target = LinkUtil.retrieveFurtherestTarget(link, TargetLinkNode.class, this.issues);
 		this.verifyMockObjects();
 		assertNull("Should not find target", target);
 	}
@@ -211,8 +203,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 			this.retrieveFlowTarget(null);
 			fail("Should not be successful if null initial node");
 		} catch (IllegalArgumentException ex) {
-			assertEquals("Incorrect cause",
-					"No starting link to find TargetLinkNode", ex.getMessage());
+			assertEquals("Incorrect cause", "No starting link to find TargetLinkNode", ex.getMessage());
 		}
 	}
 
@@ -259,11 +250,8 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		}
 
 		// Record not retrieving target
-		this.issues.recordIssue(
-				"LINK",
-				LinkNode.class,
-				"Link LINK is not linked to a "
-						+ TargetLinkNode.class.getSimpleName());
+		this.issues.recordIssue("LINK", LinkNode.class,
+				"Link LINK is not linked to a " + TargetLinkNode.class.getSimpleName());
 
 		// Attempt to obtain the target
 		TargetLinkNode retrieved = this.retrieveFlowTarget(link);
@@ -281,8 +269,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 
 		// Record detecting cycle
 		this.issues.recordIssue("LOOP", LinkNode.class,
-				"LOOP results in a cycle on linking to a "
-						+ TargetLinkNode.class.getSimpleName());
+				"LOOP results in a cycle on linking to a " + TargetLinkNode.class.getSimpleName());
 
 		// Attempt to obtain the target
 		TargetLinkNode retrieved = this.retrieveFlowTarget(loopLink);
@@ -308,8 +295,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 
 		// Record detecting cycle
 		this.issues.recordIssue("LOOP", LinkNode.class,
-				"LOOP results in a cycle on linking to a "
-						+ TargetLinkNode.class.getSimpleName());
+				"LOOP results in a cycle on linking to a " + TargetLinkNode.class.getSimpleName());
 
 		// Attempt to obtain the target
 		TargetLinkNode retrieved = this.retrieveFlowTarget(link);
@@ -330,20 +316,17 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		TargetLinkNode target = new TargetLinkNode("FURTHEST_TARGET", link);
 		link = new LinkNode("BEFORE_TARGET", target);
 		for (int i = 0; i < 20; i++) {
-			link = ((i % 2 == 0) ? new LinkNode("LINK_" + i, link)
-					: new TargetLinkNode("TARGET_" + i, link));
+			link = ((i % 2 == 0) ? new LinkNode("LINK_" + i, link) : new TargetLinkNode("TARGET_" + i, link));
 		}
 		loopLink.linkNode(link);
 
 		// Record detecting cycle
 		this.issues.recordIssue("LOOP", LinkNode.class,
-				"LOOP results in a cycle on linking to a "
-						+ TargetLinkNode.class.getSimpleName());
+				"LOOP results in a cycle on linking to a " + TargetLinkNode.class.getSimpleName());
 
 		// Attempt to obtain the target
 		this.replayMockObjects();
-		TargetLinkNode found = LinkUtil.findFurtherestTarget(link,
-				TargetLinkNode.class, this.issues);
+		TargetLinkNode found = LinkUtil.findFurtherestTarget(link, TargetLinkNode.class, this.issues);
 		this.verifyMockObjects();
 		assertNull("Should not retrieve target", found);
 	}
@@ -363,20 +346,17 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		TargetLinkNode target = new TargetLinkNode("FURTHEST_TARGET", link);
 		link = new LinkNode("BEFORE_TARGET", target);
 		for (int i = 0; i < 20; i++) {
-			link = ((i % 2 == 0) ? new LinkNode("LINK_" + i, link)
-					: new TargetLinkNode("TARGET_" + i, link));
+			link = ((i % 2 == 0) ? new LinkNode("LINK_" + i, link) : new TargetLinkNode("TARGET_" + i, link));
 		}
 		loopLink.linkNode(link);
 
 		// Record detecting cycle
 		this.issues.recordIssue("LOOP", TargetLinkNode.class,
-				"LOOP results in a cycle on linking to a "
-						+ TargetLinkNode.class.getSimpleName());
+				"LOOP results in a cycle on linking to a " + TargetLinkNode.class.getSimpleName());
 
 		// Attempt to obtain the target
 		this.replayMockObjects();
-		TargetLinkNode found = LinkUtil.findFurtherestTarget(link,
-				TargetLinkNode.class, this.issues);
+		TargetLinkNode found = LinkUtil.findFurtherestTarget(link, TargetLinkNode.class, this.issues);
 		this.verifyMockObjects();
 		assertNull("Should not retrieve target", found);
 	}
@@ -388,8 +368,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		LinkNode node = new LinkNode("NODE", null);
 		LinkNode linkNode = new LinkNode("LINK", null);
 		LinkFlowNode[] loadedNode = new LinkFlowNode[1];
-		LinkUtil.linkFlowNode(node, linkNode, this.issues,
-				(link) -> loadedNode[0] = link);
+		LinkUtil.linkFlowNode(node, linkNode, this.issues, (link) -> loadedNode[0] = link);
 		assertSame("Ensure link loaded", linkNode, loadedNode[0]);
 	}
 
@@ -402,8 +381,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		LinkNode newLinkNode = new LinkNode("LINK", null);
 
 		// Issue in linking
-		this.issues.recordIssue("NODE", LinkNode.class,
-				"Link NODE linked more than once");
+		this.issues.recordIssue("NODE", LinkNode.class, "Link NODE linked more than once");
 
 		// Undertake link
 		this.replayMockObjects();
@@ -420,8 +398,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		LinkNode node = new LinkNode("NODE", null);
 		LinkNode linkNode = new LinkNode("LINK", null);
 		LinkObjectNode[] loadedNode = new LinkObjectNode[1];
-		LinkUtil.linkObjectNode(node, linkNode, this.issues,
-				(link) -> loadedNode[0] = link);
+		LinkUtil.linkObjectNode(node, linkNode, this.issues, (link) -> loadedNode[0] = link);
 		assertSame("Ensure link loaded", linkNode, loadedNode[0]);
 	}
 
@@ -434,8 +411,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		LinkNode newLinkNode = new LinkNode("LINK", null);
 
 		// Issue in linking
-		this.issues.recordIssue("NODE", LinkNode.class,
-				"Link NODE linked more than once");
+		this.issues.recordIssue("NODE", LinkNode.class, "Link NODE linked more than once");
 
 		// Undertake link
 		this.replayMockObjects();
@@ -454,8 +430,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	 */
 	private TargetLinkNode retrieveFlowTarget(LinkFlowNode link) {
 		this.replayMockObjects();
-		TargetLinkNode retrieved = LinkUtil.retrieveTarget(link,
-				TargetLinkNode.class, this.issues);
+		TargetLinkNode retrieved = LinkUtil.retrieveTarget(link, TargetLinkNode.class, this.issues);
 		this.verifyMockObjects();
 		return retrieved;
 	}
@@ -469,8 +444,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	 */
 	private TargetLinkNode findFlowTarget(LinkFlowNode link) {
 		this.replayMockObjects();
-		TargetLinkNode found = LinkUtil.findTarget(link, TargetLinkNode.class,
-				this.issues);
+		TargetLinkNode found = LinkUtil.findTarget(link, TargetLinkNode.class, this.issues);
 		this.verifyMockObjects();
 		return found;
 	}
@@ -484,8 +458,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	 */
 	private TargetLinkNode retrieveObjectTarget(LinkObjectNode link) {
 		this.replayMockObjects();
-		TargetLinkNode retrieved = LinkUtil.retrieveTarget(link,
-				TargetLinkNode.class, this.issues);
+		TargetLinkNode retrieved = LinkUtil.retrieveTarget(link, TargetLinkNode.class, this.issues);
 		this.verifyMockObjects();
 		return retrieved;
 	}
@@ -499,8 +472,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	 */
 	private TargetLinkNode retrieveTeamTarget(LinkTeamNode link) {
 		this.replayMockObjects();
-		TargetLinkNode retrieved = LinkUtil.retrieveTarget(link,
-				TargetLinkNode.class, this.issues);
+		TargetLinkNode retrieved = LinkUtil.findTarget(link, TargetLinkNode.class, this.issues);
 		this.verifyMockObjects();
 		return retrieved;
 	}
@@ -514,8 +486,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	 */
 	private TargetLinkNode retrieveOfficeTarget(LinkOfficeNode link) {
 		this.replayMockObjects();
-		TargetLinkNode retrieved = LinkUtil.retrieveTarget(link,
-				TargetLinkNode.class, this.issues);
+		TargetLinkNode retrieved = LinkUtil.retrieveTarget(link, TargetLinkNode.class, this.issues);
 		this.verifyMockObjects();
 		return retrieved;
 	}
@@ -523,8 +494,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	/**
 	 * Link node for testing.
 	 */
-	private class LinkNode implements LinkFlowNode, LinkObjectNode,
-			LinkTeamNode, LinkOfficeNode {
+	private class LinkNode implements LinkFlowNode, LinkObjectNode, LinkTeamNode, LinkOfficeNode {
 
 		/**
 		 * Name of this {@link Node}.

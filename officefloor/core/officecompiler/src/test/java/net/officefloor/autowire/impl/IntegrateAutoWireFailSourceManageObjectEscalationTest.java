@@ -24,15 +24,16 @@ import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.frame.api.escalate.FailedToSourceManagedObjectEscalation;
+import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
 
 /**
- * Integration tests automatically handling causes of
- * {@link FailedToSourceManagedObjectEscalation}.
+ * Integration tests automatically handling causes failing to source
+ * {@link ManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -51,13 +52,12 @@ public class IntegrateAutoWireFailSourceManageObjectEscalationTest extends Offic
 	}
 
 	/**
-	 * Ensure automatically handle {@link FailedToSourceManagedObjectEscalation}
-	 * for {@link IOException} cause.
+	 * Ensure automatically handle {@link IOException} cause.
 	 */
 	public void testHandleIOCause() throws Exception {
 
 		// Start
-		this.openOfficeFloor(false);
+		this.openOfficeFloor();
 
 		// Trigger escalation
 		final IOException escalation = new IOException();
@@ -68,13 +68,12 @@ public class IntegrateAutoWireFailSourceManageObjectEscalationTest extends Offic
 	}
 
 	/**
-	 * Ensure automatically handle {@link FailedToSourceManagedObjectEscalation}
-	 * for {@link SQLException} cause.
+	 * Ensure automatically handle {@link SQLException} cause.
 	 */
 	public void testHandleSQLCause() throws Exception {
 
 		// Start
-		this.openOfficeFloor(false);
+		this.openOfficeFloor();
 
 		// Trigger escalation
 		final SQLException escalation = new SQLException();
@@ -85,30 +84,9 @@ public class IntegrateAutoWireFailSourceManageObjectEscalationTest extends Offic
 	}
 
 	/**
-	 * Ensure can manually handle {@link FailedToSourceManagedObjectEscalation}.
-	 */
-	public void testManuallyHandle() throws Exception {
-
-		// Start
-		this.openOfficeFloor(true);
-
-		// Trigger escalation
-		final IOException escalation = new IOException();
-		MockObject.initialiseFailure = escalation;
-		Handler.cause = null;
-		this.officeFloor.invokeFunction("Servicer.NAMESPACE.service", null);
-		assertTrue("Incorrect escalation", (Handler.cause instanceof FailedToSourceManagedObjectEscalation));
-		assertSame("Incorrect cause", escalation, Handler.cause.getCause());
-	}
-
-	/**
 	 * Opens the {@link AutoWireOfficeFloor}.
-	 * 
-	 * @param isManual
-	 *            If manually handling
-	 *            {@link FailedToSourceManagedObjectEscalation}.
 	 */
-	private void openOfficeFloor(boolean isManual) throws Exception {
+	private void openOfficeFloor() throws Exception {
 
 		// Configure the application
 		AutoWireApplication source = new AutoWireOfficeFloorSource();
@@ -125,9 +103,6 @@ public class IntegrateAutoWireFailSourceManageObjectEscalationTest extends Offic
 				Handler.class.getName());
 		source.linkEscalation(IOException.class, handler, "handle");
 		source.linkEscalation(SQLException.class, handler, "handle");
-		if (isManual) {
-			source.linkEscalation(FailedToSourceManagedObjectEscalation.class, handler, "handle");
-		}
 
 		// Start the application
 		this.officeFloor = source.openOfficeFloor();
@@ -154,7 +129,7 @@ public class IntegrateAutoWireFailSourceManageObjectEscalationTest extends Offic
 	}
 
 	/**
-	 * Mock object triggering {@link FailedToSourceManagedObjectEscalation}.
+	 * Mock object triggering {@link Escalation}.
 	 */
 	public static class MockObject {
 

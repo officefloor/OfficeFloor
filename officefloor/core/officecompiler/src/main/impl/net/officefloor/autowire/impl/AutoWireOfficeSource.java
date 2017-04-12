@@ -41,13 +41,13 @@ import net.officefloor.compile.object.DependentObjectType;
 import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.OfficeFunctionType;
 import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectType;
 import net.officefloor.compile.section.OfficeSectionObjectType;
 import net.officefloor.compile.section.OfficeSectionOutputType;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
-import net.officefloor.compile.section.OfficeFunctionType;
 import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.DependentManagedObject;
@@ -56,11 +56,11 @@ import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionFunction;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
-import net.officefloor.compile.spi.office.OfficeSectionFunction;
 import net.officefloor.compile.spi.office.OfficeStart;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTeam;
@@ -71,7 +71,6 @@ import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.escalate.FailedToSourceManagedObjectEscalation;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
@@ -688,7 +687,6 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 			// Link escalations to inputs
 			OfficeSectionInput[] escalationSectionInput = new OfficeSectionInput[this.escalations.size()];
-			boolean isFailedToSourceManuallyConfigured = false;
 			for (int i = 0; i < this.escalations.size(); i++) {
 				EscalationLink link = this.escalations.get(i);
 
@@ -696,11 +694,6 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 				String escalationTypeName = link.escalationType.getName();
 				String sectionName = link.targetSection.getSectionName();
 				String inputName = link.targetInputName;
-
-				// Determine if manually handling failed to source escalation
-				if (FailedToSourceManagedObjectEscalation.class.getName().equals(escalationTypeName)) {
-					isFailedToSourceManuallyConfigured = true;
-				}
 
 				// Add the Escalation
 				OfficeEscalation escalation = architect.addOfficeEscalation(escalationTypeName);
@@ -725,59 +718,6 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 						AutoWireEscalationCauseRouteManagedFunctionSource.PROPERTY_PREFIX_ESCALATION_TYPE + String.valueOf(i))
 						.setValue(escalationTypeName);
 				escalationSectionInput[i] = sectionInput;
-			}
-
-			// Determine if automatically handle failed to source cause
-			if (!isFailedToSourceManuallyConfigured) {
-
-				// Add handling of failing to source managed object
-				OfficeSection failedToSourceSection = architect.addOfficeSection(
-						FailedToSourceManagedObjectEscalation.class.getSimpleName(), ManagedFunctionSectionSource.class.getName(),
-						AutoWireEscalationCauseRouteManagedFunctionSource.class.getName());
-				failedToSourceProperties.configureProperties(failedToSourceSection);
-
-				// Obtain the type
-				OfficeSectionType failedToSourceSectionType = context.loadOfficeSectionType(
-						FailedToSourceManagedObjectEscalation.class.getSimpleName(), ManagedFunctionSectionSource.class.getName(),
-						AutoWireEscalationCauseRouteManagedFunctionSource.class.getName(), failedToSourceProperties);
-
-				// Configure the outputs
-				for (OfficeSectionOutputType escalationOutputType : failedToSourceSectionType
-						.getOfficeSectionOutputTypes()) {
-					String escalationTypeName = escalationOutputType.getOfficeSectionOutputName();
-
-					// Find escalation for output
-					for (int i = 0; i < this.escalations.size(); i++) {
-						EscalationLink link = this.escalations.get(i);
-						if (!(escalationTypeName.equals(link.escalationType.getName()))) {
-							continue; // not match
-						}
-
-						// Ensure have the corresponding handling section input
-						OfficeSectionInput sectionInput = escalationSectionInput[i];
-						if (sectionInput == null) {
-							continue; // no section input handling escalation
-						}
-
-						// Obtain the section output
-						OfficeSectionOutput escalationOutput = failedToSourceSection
-								.getOfficeSectionOutput(escalationTypeName);
-
-						// Link the escalation output to handling section input
-						architect.link(escalationOutput, sectionInput);
-					}
-				}
-
-				// Provide handling of failed to source escalation
-				OfficeEscalation failedToSourceEscalation = architect
-						.addOfficeEscalation(FailedToSourceManagedObjectEscalation.class.getName());
-				OfficeSectionInput failedToSourceHandler = failedToSourceSection
-						.getOfficeSectionInput(AutoWireEscalationCauseRouteManagedFunctionSource.HANDLER_TASK_NAME);
-				architect.link(failedToSourceEscalation, failedToSourceHandler);
-
-				// Link teams for failed to source tasks
-				this.linkTasksToTeams(failedToSourceSection, failedToSourceSectionType, responsibleTeams, defaultTeam,
-						architect);
 			}
 		}
 

@@ -1,0 +1,21 @@
+<section>
+	<function-namespaces>
+		<function-namespace name="NAMESPACE"
+			source="net.example.ExampleManagedFunctionSource">
+			<properties>
+				<property name="name.one" value="value.one" />
+				<property name="name.two" value="value.two" />
+			</properties>
+			<managed-function name="FUNCTION_ONE">
+				<managed-function-object name="0"
+					object-type="java.lang.String" />
+				<managed-function-object name="1"
+					object-type="java.lang.Integer" />
+			</managed-function>
+			<managed-function name="FUNCTION_TWO">
+				<managed-function-object name="LABEL"
+					object-type="java.lang.Object" />
+			</managed-function>
+		</function-namespace>
+	</function-namespaces>
+</section>

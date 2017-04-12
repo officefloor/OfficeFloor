@@ -635,7 +635,7 @@ public class SectionChangesImpl implements SectionChanges {
 			// Not on section so can not remove
 			return new NoChange<FunctionNamespaceModel>(namespaceModel,
 					"Rename namespace " + namespaceModel.getFunctionNamespaceName() + " to " + newFunctionNamespaceName,
-					"FunctionNamespace " + namespaceModel.getFunctionNamespaceName() + " not in section");
+					"Function namespace " + namespaceModel.getFunctionNamespaceName() + " not in section");
 		}
 
 		// Store the old name for reverting
@@ -1606,7 +1606,7 @@ public class SectionChangesImpl implements SectionChanges {
 			// Function not on section so can not make public
 			return new NoChange<FunctionModel>(function,
 					"Set function " + function.getFunctionName() + (isPublic ? " public" : " private"),
-					"Function " + function.getFunctionName() + " not on section");
+					"Function " + function.getFunctionName() + " not in section");
 		}
 
 		// Return the change

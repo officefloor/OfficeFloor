@@ -140,7 +140,7 @@ public class OfficeBindingsImpl implements OfficeBindings {
 
 	@Override
 	public void buildManagedFunctionIntoOffice(ManagedFunctionNode managedFunctionNode) {
-
+		
 		// Build the function into the office
 		if (this.builtManagedFunctions.contains(managedFunctionNode)) {
 			return; // already built into office

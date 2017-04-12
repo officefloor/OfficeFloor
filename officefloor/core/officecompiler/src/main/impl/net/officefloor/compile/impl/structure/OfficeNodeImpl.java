@@ -530,7 +530,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 					String officeTeamName = team.getOfficeTeamName();
 
 					// Obtain the OfficeFloor team name
-					TeamNode officeFloorTeam = LinkUtil.retrieveTarget(team, TeamNode.class,
+					TeamNode officeFloorTeam = LinkUtil.findTarget(team, TeamNode.class,
 							this.context.getCompilerIssues());
 					if (officeFloorTeam == null) {
 						return; // OfficeFloor team not linked

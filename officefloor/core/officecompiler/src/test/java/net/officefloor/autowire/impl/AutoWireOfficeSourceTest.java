@@ -69,7 +69,6 @@ import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.escalate.FailedToSourceManagedObjectEscalation;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.team.Team;
@@ -605,7 +604,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		AutoWireOfficeSource source = new AutoWireOfficeSource();
 		AutoWireSection section = this.addSection(source, "SECTION");
 		source.linkEscalation(Exception.class, section, "INPUT");
-		source.linkEscalation(FailedToSourceManagedObjectEscalation.class, section, "INPUT");
 
 		// Record linking escalation
 		this.recordOfficeSection("SECTION");
@@ -624,14 +622,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 						AutoWireEscalationCauseRouteManagedFunctionSource.PROPERTY_PREFIX_ESCALATION_TYPE + "0"),
 				property);
 		property.setValue(Exception.class.getName());
-
-		// Record manually handling failed to source
-		this.recordEscalation(FailedToSourceManagedObjectEscalation.class, "SECTION", "INPUT");
-		this.recordReturn(propertyList,
-				propertyList.addProperty(
-						AutoWireEscalationCauseRouteManagedFunctionSource.PROPERTY_PREFIX_ESCALATION_TYPE + "1"),
-				property);
-		property.setValue(FailedToSourceManagedObjectEscalation.class.getName());
 
 		// Test
 		this.replayMockObjects();
@@ -1573,15 +1563,14 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 			 *         <code>false</code> for default {@link OfficeTeam}.
 			 */
 			private boolean isUseAddedTeam(String functionName) {
-				return (isUseTeam && ("functionAssign".equals(functionName)));
+				return (isUseTeam && ("NAMESPACE.functionAssign".equals(functionName)));
 			}
 
 			@Override
 			public void recordAssignTeam(String functionName, OfficeSectionFunction function,
 					OfficeFunctionType functionType, OfficeFunctionType actualFunctionType) {
 
-				// Record obtaining the object dependencies (use actual
-				// dependencies)
+				// Record object dependencies (use actual dependencies)
 				AutoWireOfficeSourceTest.this.recordReturn(functionType, functionType.getObjectDependencies(),
 						actualFunctionType.getObjectDependencies());
 

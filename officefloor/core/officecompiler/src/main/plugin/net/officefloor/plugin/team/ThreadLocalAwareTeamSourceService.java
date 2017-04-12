@@ -25,7 +25,7 @@ import net.officefloor.frame.impl.spi.team.ThreadLocalAwareTeamSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class ProcessContextTeamSourceService implements TeamSourceService<ThreadLocalAwareTeamSource> {
+public class ThreadLocalAwareTeamSourceService implements TeamSourceService<ThreadLocalAwareTeamSource> {
 
 	/*
 	 * ======================= TeamSourceService ===========================

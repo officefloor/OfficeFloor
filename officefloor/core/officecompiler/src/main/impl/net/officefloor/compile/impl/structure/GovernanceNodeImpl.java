@@ -191,8 +191,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 				govType.getGovernanceFactory());
 
 		// Obtain the office team responsible for this governance
-		OfficeTeamNode officeTeam = LinkUtil.retrieveTarget(this, OfficeTeamNode.class,
-				this.context.getCompilerIssues());
+		OfficeTeamNode officeTeam = LinkUtil.findTarget(this, OfficeTeamNode.class, this.context.getCompilerIssues());
 		if (officeTeam != null) {
 			// Build the team responsible for the governance
 			govBuilder.setResponsibleTeam(officeTeam.getOfficeTeamName());

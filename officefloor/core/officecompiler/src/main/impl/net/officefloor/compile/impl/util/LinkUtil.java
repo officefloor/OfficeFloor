@@ -38,26 +38,22 @@ public class LinkUtil {
 	/**
 	 * {@link LinkFlowNode} {@link Traverser}.
 	 */
-	private static final Traverser<LinkFlowNode> FLOW_TRAVERSER = (link) -> link
-			.getLinkedFlowNode();
+	private static final Traverser<LinkFlowNode> FLOW_TRAVERSER = (link) -> link.getLinkedFlowNode();
 
 	/**
 	 * {@link LinkObjectNode} {@link Traverser}.
 	 */
-	private static final Traverser<LinkObjectNode> OBJECT_TRAVERSER = (object) -> object
-			.getLinkedObjectNode();
+	private static final Traverser<LinkObjectNode> OBJECT_TRAVERSER = (object) -> object.getLinkedObjectNode();
 
 	/**
 	 * {@link LinkTeamNode} {@link Traverser}.
 	 */
-	private static final Traverser<LinkTeamNode> TEAM_TRAVERSER = (team) -> team
-			.getLinkedTeamNode();
+	private static final Traverser<LinkTeamNode> TEAM_TRAVERSER = (team) -> team.getLinkedTeamNode();
 
 	/**
 	 * {@link LinkOfficeNode} {@link Traverser}.
 	 */
-	private static final Traverser<LinkOfficeNode> OFFICE_TRAVERSER = (office) -> office
-			.getLinkedOfficeNode();
+	private static final Traverser<LinkOfficeNode> OFFICE_TRAVERSER = (office) -> office.getLinkedOfficeNode();
 
 	/**
 	 * Finds the furtherest target link by the specified type.
@@ -73,10 +69,9 @@ public class LinkUtil {
 	 * @return Furtherest target {@link LinkFlowNode} or <code>null</code> if no
 	 *         targets found.
 	 */
-	public static <T extends LinkFlowNode> T findFurtherestTarget(
-			LinkFlowNode link, Class<T> targetType, CompilerIssues issues) {
-		return retrieveFurtherestTarget(link, FLOW_TRAVERSER, targetType,
-				false, issues);
+	public static <T extends LinkFlowNode> T findFurtherestTarget(LinkFlowNode link, Class<T> targetType,
+			CompilerIssues issues) {
+		return retrieveFurtherestTarget(link, FLOW_TRAVERSER, targetType, false, issues);
 	}
 
 	/**
@@ -93,10 +88,9 @@ public class LinkUtil {
 	 * @return Furthurest target {@link LinkObjectNode} or <code>null</code> if
 	 *         no targets found.
 	 */
-	public static <T extends LinkObjectNode> T retrieveFurtherestTarget(
-			LinkObjectNode link, Class<T> targetType, CompilerIssues issues) {
-		return retrieveFurtherestTarget(link, OBJECT_TRAVERSER, targetType,
-				true, issues);
+	public static <T extends LinkObjectNode> T retrieveFurtherestTarget(LinkObjectNode link, Class<T> targetType,
+			CompilerIssues issues) {
+		return retrieveFurtherestTarget(link, OBJECT_TRAVERSER, targetType, true, issues);
 	}
 
 	/**
@@ -113,10 +107,8 @@ public class LinkUtil {
 	 * @return Target {@link LinkFlowNode} or <code>null</code> if target not
 	 *         found.
 	 */
-	public static <T extends LinkFlowNode> T findTarget(LinkFlowNode link,
-			Class<T> targetType, CompilerIssues issues) {
-		return retrieveTarget(link, FLOW_TRAVERSER, targetType, false, issues,
-				null).target;
+	public static <T extends LinkFlowNode> T findTarget(LinkFlowNode link, Class<T> targetType, CompilerIssues issues) {
+		return retrieveTarget(link, FLOW_TRAVERSER, targetType, false, issues, null).target;
 	}
 
 	/**
@@ -133,10 +125,9 @@ public class LinkUtil {
 	 * @return Target {@link LinkFlowNode} or <code>null</code> if issue
 	 *         obtaining which is reported to the {@link CompilerIssues}.
 	 */
-	public static <T extends LinkFlowNode> T retrieveTarget(LinkFlowNode link,
-			Class<T> targetType, CompilerIssues issues) {
-		return retrieveTarget(link, FLOW_TRAVERSER, targetType, true, issues,
-				null).target;
+	public static <T extends LinkFlowNode> T retrieveTarget(LinkFlowNode link, Class<T> targetType,
+			CompilerIssues issues) {
+		return retrieveTarget(link, FLOW_TRAVERSER, targetType, true, issues, null).target;
 	}
 
 	/**
@@ -153,14 +144,13 @@ public class LinkUtil {
 	 * @return Target {@link LinkObjectNode} or <code>null</code> if issue
 	 *         obtaining which is reported to the {@link CompilerIssues}.
 	 */
-	public static <T extends LinkObjectNode> T retrieveTarget(
-			LinkObjectNode link, Class<T> targetType, CompilerIssues issues) {
-		return retrieveTarget(link, OBJECT_TRAVERSER, targetType, true, issues,
-				null).target;
+	public static <T extends LinkObjectNode> T retrieveTarget(LinkObjectNode link, Class<T> targetType,
+			CompilerIssues issues) {
+		return retrieveTarget(link, OBJECT_TRAVERSER, targetType, true, issues, null).target;
 	}
 
 	/**
-	 * Retrieves the target link by the specified type.
+	 * Finds the target link by the specified type.
 	 * 
 	 * @param <T>
 	 *            Target type.
@@ -170,13 +160,10 @@ public class LinkUtil {
 	 *            Target {@link LinkTeamNode} type to retrieve.
 	 * @param issues
 	 *            {@link CompilerIssues}.
-	 * @return Target {@link LinkTeamNode} or <code>null</code> if issue
-	 *         obtaining which is reported to the {@link CompilerIssues}.
+	 * @return Target {@link LinkTeamNode} or <code>null</code> if not found.
 	 */
-	public static <T extends Node> T retrieveTarget(LinkTeamNode link,
-			Class<T> targetType, CompilerIssues issues) {
-		return retrieveTarget(link, TEAM_TRAVERSER, targetType, true, issues,
-				null).target;
+	public static <T extends Node> T findTarget(LinkTeamNode link, Class<T> targetType, CompilerIssues issues) {
+		return retrieveTarget(link, TEAM_TRAVERSER, targetType, false, issues, null).target;
 	}
 
 	/**
@@ -193,10 +180,8 @@ public class LinkUtil {
 	 * @return Target {@link LinkOfficeNode} or <code>null</code> if issue
 	 *         obtaining which is reported to the {@link CompilerIssues}.
 	 */
-	public static <T extends Node> T retrieveTarget(LinkOfficeNode link,
-			Class<T> targetType, CompilerIssues issues) {
-		return retrieveTarget(link, OFFICE_TRAVERSER, targetType, true, issues,
-				null).target;
+	public static <T extends Node> T retrieveTarget(LinkOfficeNode link, Class<T> targetType, CompilerIssues issues) {
+		return retrieveTarget(link, OFFICE_TRAVERSER, targetType, true, issues, null).target;
 	}
 
 	/**
@@ -214,8 +199,7 @@ public class LinkUtil {
 	 * @return <code>true</code> if successful, or <code>false</code> with issue
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	public static boolean linkFlowNode(LinkFlowNode node,
-			LinkFlowNode linkNode, CompilerIssues issues,
+	public static boolean linkFlowNode(LinkFlowNode node, LinkFlowNode linkNode, CompilerIssues issues,
 			Consumer<LinkFlowNode> loader) {
 		return linkNode(node, linkNode, FLOW_TRAVERSER, issues, loader);
 	}
@@ -235,8 +219,7 @@ public class LinkUtil {
 	 * @return <code>true</code> if successful, or <code>false</code> with issue
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	public static boolean linkObjectNode(LinkObjectNode node,
-			LinkObjectNode linkNode, CompilerIssues issues,
+	public static boolean linkObjectNode(LinkObjectNode node, LinkObjectNode linkNode, CompilerIssues issues,
 			Consumer<LinkObjectNode> loader) {
 		return linkNode(node, linkNode, OBJECT_TRAVERSER, issues, loader);
 	}
@@ -256,8 +239,7 @@ public class LinkUtil {
 	 * @return <code>true</code> if successful, or <code>false</code> with issue
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	public static boolean linkTeamNode(LinkTeamNode node,
-			LinkTeamNode linkNode, CompilerIssues issues,
+	public static boolean linkTeamNode(LinkTeamNode node, LinkTeamNode linkNode, CompilerIssues issues,
 			Consumer<LinkTeamNode> loader) {
 		return linkNode(node, linkNode, TEAM_TRAVERSER, issues, loader);
 	}
@@ -277,8 +259,7 @@ public class LinkUtil {
 	 * @return <code>true</code> if successful, or <code>false</code> with issue
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	public static boolean linkOfficeNode(LinkOfficeNode node,
-			LinkOfficeNode linkNode, CompilerIssues issues,
+	public static boolean linkOfficeNode(LinkOfficeNode node, LinkOfficeNode linkNode, CompilerIssues issues,
 			Consumer<LinkOfficeNode> loader) {
 		return linkNode(node, linkNode, OFFICE_TRAVERSER, issues, loader);
 	}
@@ -300,14 +281,13 @@ public class LinkUtil {
 	 *         Otherwise, <code>false</code> with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	private static <L extends Node> boolean linkNode(L node, L linkNode,
-			Traverser<L> traverser, CompilerIssues issues, Consumer<L> loader) {
+	private static <L extends Node> boolean linkNode(L node, L linkNode, Traverser<L> traverser, CompilerIssues issues,
+			Consumer<L> loader) {
 
 		// Ensure not already linked
 		L existingLink = traverser.getNextLinkNode(node);
 		if (existingLink != null) {
-			issues.addIssue(node, node.getNodeType() + " " + node.getNodeName()
-					+ " linked more than once");
+			issues.addIssue(node, node.getNodeType() + " " + node.getNodeName() + " linked more than once");
 			return false; // already linked
 		}
 
@@ -337,16 +317,14 @@ public class LinkUtil {
 	 *         targets found.
 	 */
 	@SuppressWarnings("unchecked")
-	private static <T extends Node, L extends Node> T retrieveFurtherestTarget(
-			L link, Traverser<L> traverser, Class<T> targetType,
-			boolean isIssueOnNoTarget, CompilerIssues issues) {
+	private static <T extends Node, L extends Node> T retrieveFurtherestTarget(L link, Traverser<L> traverser,
+			Class<T> targetType, boolean isIssueOnNoTarget, CompilerIssues issues) {
 
 		// Keep track of all traversed links
 		Set<Object> traversedLinks = new HashSet<Object>();
 
 		// Find the first target
-		T target = retrieveTarget(link, traverser, targetType,
-				isIssueOnNoTarget, issues, traversedLinks).target;
+		T target = retrieveTarget(link, traverser, targetType, isIssueOnNoTarget, issues, traversedLinks).target;
 
 		// Loop to find the furtherest target
 		T furtherestTarget = null;
@@ -356,8 +334,7 @@ public class LinkUtil {
 
 			// Attempt to obtain the next target
 			link = (L) target;
-			Target<T> result = retrieveTarget(link, traverser, targetType,
-					false, issues, traversedLinks);
+			Target<T> result = retrieveTarget(link, traverser, targetType, false, issues, traversedLinks);
 			if (result.isError) {
 				return null;
 			}
@@ -389,15 +366,12 @@ public class LinkUtil {
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	@SuppressWarnings("unchecked")
-	private static <T extends Node, L extends Node> Target<T> retrieveTarget(
-			L link, Traverser<L> traverser, Class<T> targetType,
-			boolean isIssueOnNoTarget, CompilerIssues issues,
-			Set<Object> traversedLinks) {
+	private static <T extends Node, L extends Node> Target<T> retrieveTarget(L link, Traverser<L> traverser,
+			Class<T> targetType, boolean isIssueOnNoTarget, CompilerIssues issues, Set<Object> traversedLinks) {
 
 		// Ensure have starting link
 		if (link == null) {
-			throw new IllegalArgumentException("No starting link to find "
-					+ targetType.getSimpleName());
+			throw new IllegalArgumentException("No starting link to find " + targetType.getSimpleName());
 		}
 
 		// Ensure have traversed links
@@ -416,10 +390,8 @@ public class LinkUtil {
 			// Determine if a cycle
 			if (traversedLinks.contains(link)) {
 				// In a cycle
-				issues.addIssue(previousLink,
-						previousLink.getNodeName()
-								+ " results in a cycle on linking to a "
-								+ targetType.getSimpleName());
+				issues.addIssue(previousLink, previousLink.getNodeName() + " results in a cycle on linking to a "
+						+ targetType.getSimpleName());
 				return new Target<T>(null, true);
 			}
 
@@ -439,9 +411,8 @@ public class LinkUtil {
 
 		// Run out of links, so could not find target
 		if (isIssueOnNoTarget) {
-			issues.addIssue(previousLink, previousLink.getNodeType() + " "
-					+ previousLink.getNodeName() + " is not linked to a "
-					+ targetType.getSimpleName());
+			issues.addIssue(previousLink, previousLink.getNodeType() + " " + previousLink.getNodeName()
+					+ " is not linked to a " + targetType.getSimpleName());
 		}
 		return new Target<T>(null, false); // target not found
 	}

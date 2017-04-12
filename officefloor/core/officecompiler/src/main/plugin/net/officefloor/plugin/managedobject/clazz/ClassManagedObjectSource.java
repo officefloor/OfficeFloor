@@ -19,6 +19,7 @@ package net.officefloor.plugin.managedobject.clazz;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -352,7 +353,12 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 	protected ManagedObject getManagedObject() throws Throwable {
 
 		// Create an instance of the object
-		Object object = this.objectConstructor.newInstance(DEFAULT_CONSTRUCTOR_ARGUMENTS);
+		Object object;
+		try {
+			object = this.objectConstructor.newInstance(DEFAULT_CONSTRUCTOR_ARGUMENTS);
+		} catch (InvocationTargetException ex) {
+			throw ex.getTargetException();
+		}
 
 		// Return a managed object to manage the object
 		return new ClassManagedObject(object, this.dependencyMetaData, this.processMetaData);

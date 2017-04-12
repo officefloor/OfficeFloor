@@ -36,7 +36,7 @@ import net.officefloor.compile.spi.section.SectionFunctionNamespace;
  * @author Daniel Sagenschneider
  */
 public class FunctionNamespaceNodeImpl implements FunctionNamespaceNode {
-
+	
 	/**
 	 * Name of this {@link SectionFunctionNamespace}.
 	 */
@@ -186,6 +186,11 @@ public class FunctionNamespaceNodeImpl implements FunctionNamespaceNode {
 	@Override
 	public String getQualifiedFunctionNamespaceName() {
 		return this.section.getSectionQualifiedName(this.namespaceName);
+	}
+
+	@Override
+	public String getFunctionNamespaceQualifiedFunctionName(String functionName) {
+		return this.namespaceName + "." + functionName;
 	}
 
 	@Override

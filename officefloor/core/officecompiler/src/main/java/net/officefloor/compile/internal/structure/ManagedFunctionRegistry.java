@@ -30,18 +30,6 @@ public interface ManagedFunctionRegistry {
 
 	/**
 	 * <p>
-	 * Obtains the {@link ManagedFunctionNode} from the registry.
-	 * <p>
-	 * The returned {@link ManagedFunctionNode} may or may not be initialised.
-	 * 
-	 * @param functionName
-	 *            Name of the {@link ManagedFunctionNode} to obtain.
-	 * @return {@link ManagedFunctionNode} from the registry.
-	 */
-	ManagedFunctionNode getManagedFunctionNode(String functionName);
-
-	/**
-	 * <p>
 	 * Adds an initialised {@link ManagedFunctionNode} to the registry.
 	 * <p>
 	 * Should an {@link ManagedFunctionNode} already be added by the name, then

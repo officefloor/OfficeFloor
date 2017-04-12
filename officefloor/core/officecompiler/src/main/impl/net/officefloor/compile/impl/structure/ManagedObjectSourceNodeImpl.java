@@ -729,8 +729,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 			// Obtain the team
 			ManagedObjectTeamNode managedObjectTeam = this.teams.get(teamName);
-			TeamNode team = LinkUtil.retrieveTarget(managedObjectTeam, TeamNode.class,
-					this.context.getCompilerIssues());
+			TeamNode team = LinkUtil.findTarget(managedObjectTeam, TeamNode.class, this.context.getCompilerIssues());
 			if (team == null) {
 				continue; // must have the team
 			}

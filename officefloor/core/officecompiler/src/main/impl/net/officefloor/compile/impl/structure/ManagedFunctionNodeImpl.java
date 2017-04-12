@@ -202,9 +202,9 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 	}
 
 	@Override
-	public void initialise(String taskTypeName, FunctionNamespaceNode workNode) {
+	public void initialise(String managedFunctionTypeName, FunctionNamespaceNode namespaceNode) {
 		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialisedState(taskTypeName, workNode));
+				() -> new InitialisedState(managedFunctionTypeName, namespaceNode));
 	}
 
 	/*
@@ -213,8 +213,7 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 
 	@Override
 	public String getFullyQualifiedFunctionName() {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+		return this.state.namespaceNode.getQualifiedFunctionNamespaceName() + "." + this.functionName;
 	}
 
 	@Override
@@ -264,7 +263,9 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 		}
 
 		// Create and return the type
-		return new OfficeFunctionTypeImpl(this.functionName, parentSubSectionType, dependencies);
+		String officeFunctionName = this.state.namespaceNode.getSectionFunctionNamespaceName() + "."
+				+ this.functionName;
+		return new OfficeFunctionTypeImpl(officeFunctionName, parentSubSectionType, dependencies);
 	}
 
 	@Override
@@ -279,13 +280,17 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 			return; // must have type
 		}
 
+		// Obtain the name of the function
+		String qualifiedFunctionName = this.getFullyQualifiedFunctionName();
+
 		// Obtain the office team for the function
-		OfficeTeamNode officeTeam = LinkUtil.retrieveTarget(this.teamResponsible, OfficeTeamNode.class,
+		OfficeTeamNode officeTeam = LinkUtil.findTarget(this.teamResponsible, OfficeTeamNode.class,
 				this.context.getCompilerIssues());
 
 		// Build the function
 		ManagedFunctionFactory functionFactory = functionType.getManagedFunctionFactory();
-		ManagedFunctionBuilder functionBuilder = officeBuilder.addManagedFunction(this.functionName, functionFactory);
+		ManagedFunctionBuilder functionBuilder = officeBuilder.addManagedFunction(qualifiedFunctionName,
+				functionFactory);
 		if (officeTeam != null) {
 			functionBuilder.setResponsibleTeam(officeTeam.getOfficeTeamName());
 		}

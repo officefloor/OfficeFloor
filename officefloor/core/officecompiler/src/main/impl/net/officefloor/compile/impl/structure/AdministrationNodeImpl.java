@@ -251,8 +251,7 @@ public class AdministrationNodeImpl implements AdministrationNode {
 		}
 
 		// Obtain the office team responsible for this administration
-		OfficeTeamNode officeTeam = LinkUtil.retrieveTarget(this, OfficeTeamNode.class,
-				this.context.getCompilerIssues());
+		OfficeTeamNode officeTeam = LinkUtil.findTarget(this, OfficeTeamNode.class, this.context.getCompilerIssues());
 		if (officeTeam != null) {
 			// Build the team responsible for the administrator
 			adminBuilder.setResponsibleTeam(officeTeam.getOfficeTeamName());

@@ -434,14 +434,14 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	protected void enrichFunction(SectionFunction function, ManagedFunctionType<?, ?> functionType,
 			Method functionMethod, Class<?> parameterType) {
 
-		// Obtain the function name
-		String functionName = function.getSectionFunctionName();
+		// Obtain the input name
+		String inputName = functionMethod.getName();
 
 		// Obtain the parameter type name
 		String parameterTypeName = (parameterType == null ? null : parameterType.getName());
 
 		// Add input for function
-		SectionInput sectionInput = this.getDesigner().addSectionInput(functionName, parameterTypeName);
+		SectionInput sectionInput = this.getDesigner().addSectionInput(inputName, parameterTypeName);
 		this.getDesigner().link(sectionInput, function);
 	}
 

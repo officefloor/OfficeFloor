@@ -43,6 +43,7 @@ import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -343,17 +344,27 @@ public interface NodeContext {
 	FunctionNamespaceNode createFunctionNamespaceNode(String functionNamespaceName, SectionNode section);
 
 	/**
+	 * Extracts the unqualified {@link ManagedFunction} name from the qualified
+	 * {@link ManagedFunction} name.
+	 * 
+	 * @param qualifiedFunctionName
+	 *            Qualified {@link ManagedFunction} name.
+	 * @return Unqualified {@link ManagedFunction} name.
+	 */
+	String extractUnqualifiedFunctionName(String qualifiedFunctionName);
+
+	/**
 	 * Creates the {@link FunctionFlowNode}.
 	 * 
 	 * @param flowName
 	 *            Name of the {@link FunctionFlowNode}.
 	 * @param isEscalation
 	 *            Indicates if is {@link Escalation}.
-	 * @param task
+	 * @param function
 	 *            Parent {@link ManagedFunctionNode}.
 	 * @return {@link FunctionFlowNode}.
 	 */
-	FunctionFlowNode createFunctionFlowNode(String flowName, boolean isEscalation, ManagedFunctionNode task);
+	FunctionFlowNode createFunctionFlowNode(String flowName, boolean isEscalation, ManagedFunctionNode function);
 
 	/**
 	 * Creates the {@link ManagedFunctionNode}.

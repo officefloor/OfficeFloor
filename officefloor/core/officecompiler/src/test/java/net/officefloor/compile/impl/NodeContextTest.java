@@ -52,6 +52,7 @@ import net.officefloor.compile.internal.structure.SectionOutputNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.TeamNode;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -630,6 +631,17 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertSame("Incorrect section", this.section, node.getSectionNode());
 		assertEquals("Incorrect section namespace name", "NAMESPACE", node.getSectionFunctionNamespaceName());
 		assertInitialise(node, (n) -> n.initialise("ExampleManagedFunctionSource", null));
+	}
+
+	/**
+	 * Ensure able to extract the unqualified {@link ManagedFunction} name.
+	 */
+	public void testExtractUnqualifiedFunctionName() {
+		assertEquals("Not qualified name", "function", this.context.extractUnqualifiedFunctionName("function"));
+		assertEquals("Function namespace qualified", "function",
+				this.context.extractUnqualifiedFunctionName("NAMESPACE.function"));
+		assertEquals("Office/Section qualified", "function",
+				this.context.extractUnqualifiedFunctionName("other.NAMESPACE.function"));
 	}
 
 	/**

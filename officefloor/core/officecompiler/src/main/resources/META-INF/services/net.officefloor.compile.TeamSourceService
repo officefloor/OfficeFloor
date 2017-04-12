@@ -1,5 +1,5 @@
 # TeamSource implementations from OfficeFrame
 net.officefloor.plugin.team.OnePersonTeamSourceService
 net.officefloor.plugin.team.PassiveTeamSourceService
-net.officefloor.plugin.team.ProcessContextTeamSourceService
-net.officefloor.plugin.team.WorkerPerTaskTeamSourceService
+net.officefloor.plugin.team.ThreadLocalAwareTeamSourceService
+net.officefloor.plugin.team.WorkerPerJobTeamSourceService

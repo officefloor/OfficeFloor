@@ -21,7 +21,6 @@ import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.logging.Level;
 
-import net.officefloor.frame.api.escalate.FailedToSourceManagedObjectEscalation;
 import net.officefloor.frame.api.escalate.ManagedObjectOperationTimedOutEscalation;
 import net.officefloor.frame.api.escalate.SourceManagedObjectTimedOutEscalation;
 import net.officefloor.frame.api.governance.Governance;
@@ -47,9 +46,9 @@ import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
@@ -62,8 +61,8 @@ import net.officefloor.frame.internal.structure.ManagedObjectReadyCheck;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.RegisteredGovernance;
 import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.internal.structure.ThreadStateContext;
 import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.frame.internal.structure.ThreadStateContext;
 
 /**
  * Container of a {@link ManagedObject}.
@@ -250,8 +249,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 				((AsynchronousManagedObject) this.managedObject).setAsynchronousContext(new AsynchronousContextImpl());
 			}
 		} catch (Throwable ex) {
-			// Flag failure to handle later when Job attempts to use it
-			this.failure = new FailedToSourceManagedObjectEscalation(this.metaData.getObjectType(), ex);
+			// Flag failure to handle later when funciton attempts to use it
+			this.failure = ex;
 		}
 	}
 
