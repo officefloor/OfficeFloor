@@ -1,0 +1,34 @@
+<section>
+	<external-managed-objects>
+		<external-managed-object name="MO_REMOVE" />
+		<external-managed-object name="MO_CHANGE_DETAILS" />
+		<external-managed-object name="MO_RENAME" />
+		<external-managed-object name="MO_REORDER_A" />
+		<external-managed-object name="MO_REORDER_B" />
+	</external-managed-objects>
+	<function-namespaces>
+		<function-namespace name="NAMESPACE"
+			source="net.example.ExampleManagedFunctionSource">
+			<managed-function name="FUNCTION">
+				<managed-function-object name="CHANGE_DETAILS"
+					key="KEY_TWO" object-type="java.lang.String">
+					<external-managed-object name="MO_CHANGE_DETAILS" />
+				</managed-function-object>
+				<managed-function-object name="ADDED"
+					object-type="java.lang.Integer" />
+				<managed-function-object name="RENAME_NEW"
+					parameter="true" object-type="java.lang.String">
+					<external-managed-object name="MO_RENAME" />
+				</managed-function-object>
+				<managed-function-object name="REORDER_B"
+					object-type="java.lang.Double">
+					<external-managed-object name="MO_REORDER_B" />
+				</managed-function-object>
+				<managed-function-object name="REORDER_A"
+					object-type="java.lang.Float">
+					<external-managed-object name="MO_REORDER_A" />
+				</managed-function-object>
+			</managed-function>
+		</function-namespace>
+	</function-namespaces>
+</section>

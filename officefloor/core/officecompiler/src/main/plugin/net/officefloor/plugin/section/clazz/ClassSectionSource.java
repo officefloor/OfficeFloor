@@ -58,10 +58,10 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.plugin.clazz.ClassFlowMethodMetaData;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
-import net.officefloor.plugin.managedfunction.clazz.FlowMethodMetaData;
-import net.officefloor.plugin.managedfunction.clazz.FlowParameterFactory;
-import net.officefloor.plugin.managedfunction.clazz.ParameterFactory;
+import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionFlowParameterFactory;
+import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionParameterFactory;
 import net.officefloor.plugin.managedfunction.clazz.Qualifier;
 import net.officefloor.plugin.managedobject.clazz.DependencyMetaData;
 import net.officefloor.plugin.section.clazz.SectionClassManagedFunctionSource.SectionManagedFunctionFactory;
@@ -435,7 +435,7 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 			Method functionMethod, Class<?> parameterType) {
 
 		// Obtain the input name
-		String inputName = functionMethod.getName();
+		String inputName = this.getFunctionName(functionType);
 
 		// Obtain the parameter type name
 		String parameterTypeName = (parameterType == null ? null : parameterType.getName());
@@ -905,30 +905,30 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 			}
 
 			// Obtain the flow meta-data for the function
-			List<FlowMethodMetaData> flowMetaDatas = new LinkedList<FlowMethodMetaData>();
-			ParameterFactory[] parameterFactories = functionFactory.getParameterFactories();
-			for (ParameterFactory factory : parameterFactories) {
+			List<ClassFlowMethodMetaData> flowMetaDatas = new LinkedList<ClassFlowMethodMetaData>();
+			ManagedFunctionParameterFactory[] parameterFactories = functionFactory.getParameterFactories();
+			for (ManagedFunctionParameterFactory factory : parameterFactories) {
 
 				// Ignore if not flow parameter factory
-				if (!(factory instanceof FlowParameterFactory)) {
+				if (!(factory instanceof ManagedFunctionFlowParameterFactory)) {
 					continue; // ignore as not flow parameter factory
 				}
-				FlowParameterFactory flowParameterFactory = (FlowParameterFactory) factory;
+				ManagedFunctionFlowParameterFactory flowParameterFactory = (ManagedFunctionFlowParameterFactory) factory;
 
 				// Add the flow meta-data
 				flowMetaDatas.addAll(Arrays.asList(flowParameterFactory.getFlowMethodMetaData()));
 			}
 
 			// Sort the flows by index
-			Collections.sort(flowMetaDatas, new Comparator<FlowMethodMetaData>() {
+			Collections.sort(flowMetaDatas, new Comparator<ClassFlowMethodMetaData>() {
 				@Override
-				public int compare(FlowMethodMetaData a, FlowMethodMetaData b) {
+				public int compare(ClassFlowMethodMetaData a, ClassFlowMethodMetaData b) {
 					return a.getFlowIndex() - b.getFlowIndex();
 				}
 			});
 
 			// Link flows for the function
-			for (FlowMethodMetaData flowMetaData : flowMetaDatas) {
+			for (ClassFlowMethodMetaData flowMetaData : flowMetaDatas) {
 
 				// Obtain the flow interface type
 				Class<?> flowInterfaceType = flowMetaData.getFlowType();

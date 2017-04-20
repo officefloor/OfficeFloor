@@ -1,0 +1,56 @@
+<section>
+	<external-managed-objects>
+		<external-managed-object name="MO"
+			object-type="java.lang.Object" />
+	</external-managed-objects>
+	<external-flows>
+		<external-flow name="FLOW" argument-type="java.lang.String" />
+	</external-flows>
+	<function-namespaces>
+		<function-namespace name="NAMESPACE_A"
+			source="net.example.ExampleManagedFunctionSource">
+			<managed-function name="FUNCTION">
+				<managed-function-object name="OBJECT"
+					object-type="java.lang.Object">
+					<external-managed-object name="MO" />
+				</managed-function-object>
+			</managed-function>
+		</function-namespace>
+		<function-namespace name="NAMESPACE_B"
+			source="net.example.ExampleManagedFunctionSource">
+			<managed-function name="FUNCTION" />
+		</function-namespace>
+	</function-namespaces>
+	<functions>
+		<function name="FUNCTION_A" function-namespace="NAMESPACE_A"
+			managed-function="FUNCTION" return-type="java.lang.Integer">
+			<function-flow name="FLOW_TO_FUNCTION" argument-type="java.lang.Double">
+				<function name="FUNCTION_C" />
+			</function-flow>
+			<function-flow name="FLOW_TO_EXT_FLOW" argument-type="java.lang.String">
+				<external-flow name="FLOW" />
+			</function-flow>
+			<next-function name="FUNCTION_C" />
+			<function-escalation escalation-type="java.lang.Exception">
+				<function name="FUNCTION_C" />
+			</function-escalation>
+			<function-escalation escalation-type="java.lang.Error">
+				<external-flow name="FLOW" />
+			</function-escalation>
+		</function>
+		<function name="FUNCTION_B" function-namespace="NAMESPACE_A"
+			managed-function="FUNCTION" return-type="java.lang.String">
+			<next-external-flow name="FLOW" />
+		</function>
+		<function name="FUNCTION_C" function-namespace="NAMESPACE_B"
+			managed-function="FUNCTION">
+			<function-flow name="FLOW" argument-type="java.lang.Object">
+				<function name="FUNCTION_A" />
+			</function-flow>
+			<next-function name="FUNCTION_A" />
+			<function-escalation escalation-type="java.lang.Exception">
+				<function name="FUNCTION_B" />
+			</function-escalation>
+		</function>
+	</functions>
+</section>

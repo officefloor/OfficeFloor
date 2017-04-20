@@ -741,7 +741,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Record already being linked
 		this.issues.recordIssue("Team for function FUNCTION", ResponsibleTeamNodeImpl.class,
-				"Function Team Team for function FUNCTION linked more than once");
+				"Responsible Team Team for function FUNCTION linked more than once");
 
 		this.replayMockObjects();
 
@@ -917,13 +917,13 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		OfficeSectionFunction function = section.getOfficeSectionFunction("FUNCTION");
 
 		// Link
-		OfficeAdministration administration = this.addAdministration(this.node, "ADMINISTRATION", Connection.class,
+		OfficeAdministration administration = this.addAdministration(this.node, "ADMINISTRATION_A", Connection.class,
 				null);
 		function.addPostAdministration(administration);
 		// TODO test that post administration specified
 
 		// May have many post administrations
-		function.addPostAdministration(this.addAdministration(this.node, "ADMINISTRATION", Connection.class, null));
+		function.addPostAdministration(this.addAdministration(this.node, "ADMINISTRATION_B", Connection.class, null));
 
 		this.verifyMockObjects();
 	}

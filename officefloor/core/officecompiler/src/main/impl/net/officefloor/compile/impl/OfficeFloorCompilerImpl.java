@@ -841,8 +841,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public String extractUnqualifiedFunctionName(String qualifiedFunctionName) {
-		// TODO Auto-generated method stub
-		return null;
+		String[] parts = qualifiedFunctionName.split("\\.");
+		return parts[parts.length - 1]; // last part is function name
 	}
 
 }

@@ -25,7 +25,9 @@ import net.officefloor.compile.test.administration.AdministrationLoaderUtil;
 import net.officefloor.compile.test.administration.AdministrationTypeBuilder;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationContext;
+import net.officefloor.frame.api.administration.GovernanceManager;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -53,7 +55,7 @@ public class ClassAdministrationSourceTest extends OfficeFrameTestCase {
 
 		// Create the expected administration type
 		AdministrationTypeBuilder<Indexed, Indexed> type = AdministrationLoaderUtil
-				.createAdministrationTypeBuilder(MockExtensionInterface.class, Indexed.class, Indexed.class);
+				.createAdministrationTypeBuilder(MockExtensionInterface.class, null, null);
 
 		// Validate the administration type
 		AdministrationLoaderUtil.validateAdministratorType(type, ClassAdministrationSource.class,
@@ -78,6 +80,21 @@ public class ClassAdministrationSourceTest extends OfficeFrameTestCase {
 		// Validate the administration type
 		AdministrationLoaderUtil.validateAdministratorType(type, ClassAdministrationSource.class,
 				ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME, MockClassWithFlows.class.getName());
+	}
+
+	/**
+	 * Ensure {@link AdministrationType} is correct.
+	 */
+	public void testAdministrationWithGovernance() {
+
+		// Create the expected administration type
+		AdministrationTypeBuilder<Indexed, Indexed> type = AdministrationLoaderUtil
+				.createAdministrationTypeBuilder(MockExtensionInterface.class, null, Indexed.class);
+		type.addGovernance("governance", 0, null);
+
+		// Validate the administration type
+		AdministrationLoaderUtil.validateAdministratorType(type, ClassAdministrationSource.class,
+				ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME, MockClassWithGovernance.class.getName());
 	}
 
 	/**
@@ -164,6 +181,16 @@ public class ClassAdministrationSourceTest extends OfficeFrameTestCase {
 			flows.flowTwo("TWO");
 			flows.flowThree(callback);
 			flows.flowFour(4, callback);
+		}
+	}
+
+	/**
+	 * Mock {@link Administration} class.
+	 */
+	public static class MockClassWithGovernance {
+
+		public void admin(MockExtensionInterface[] extensions, GovernanceManager governance) {
+			governance.enforceGovernance();
 		}
 	}
 

@@ -41,7 +41,7 @@ public class RemoveFunctionNamespaceTest extends AbstractSectionChangesTestCase 
 	 * Ensure no {@link Change} for removing {@link FunctionNamespaceModel} not
 	 * on the {@link SectionModel}.
 	 */
-	public void testRemoveFunctionNamespaceNotOnSection() {
+	public void testRemoveFunctionNamespaceNotInSection() {
 		// Attempt to remove namespace not in the section
 		FunctionNamespaceModel namespaceNotOnSection = new FunctionNamespaceModel("NOT IN SECTION", null);
 		Change<FunctionNamespaceModel> change = this.operations.removeFunctionNamespace(namespaceNotOnSection);

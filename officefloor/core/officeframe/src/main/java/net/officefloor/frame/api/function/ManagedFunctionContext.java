@@ -39,7 +39,7 @@ import net.officefloor.frame.internal.structure.Flow;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedFunctionContext<O extends Enum<O>, F extends Enum<F>> {
+public interface ManagedFunctionContext<O extends Enum<O>, F extends Enum<F>> extends FunctionFlowContext<F> {
 
 	/**
 	 * Obtains the dependency object.
@@ -65,39 +65,6 @@ public interface ManagedFunctionContext<O extends Enum<O>, F extends Enum<F>> {
 	Object getObject(int dependencyIndex);
 
 	/**
-	 * Instigates a {@link Flow} to be run.
-	 * 
-	 * @param key
-	 *            Key identifying the {@link Flow} to instigate.
-	 * @param parameter
-	 *            Parameter for the first {@link ManagedFunction} of the
-	 *            {@link Flow} instigated.
-	 * @param callback
-	 *            Optional {@link FlowCallback} that is invoked on completion of
-	 *            the {@link Flow}.
-	 */
-	void doFlow(F key, Object parameter, FlowCallback callback);
-
-	/**
-	 * <p>
-	 * Similar to {@link #doFlow(Enum, Object)} except that allows dynamic
-	 * instigation of {@link Flow}.
-	 * <p>
-	 * In other words, an {@link Enum} is not required to define the possible
-	 * {@link Flow} instances available.
-	 * 
-	 * @param flowIndex
-	 *            Index identifying the {@link Flow} to instigate.
-	 * @param parameter
-	 *            Parameter that will be available for the first
-	 *            {@link ManagedFunction} of the {@link Flow} to be run.
-	 * @param callback
-	 *            Optional {@link FlowCallback} that is invoked on completion of
-	 *            the {@link Flow}.
-	 */
-	void doFlow(int flowIndex, Object parameter, FlowCallback callback);
-
-	/**
 	 * <p>
 	 * Invokes a {@link Flow} by dynamically naming the initial
 	 * {@link ManagedFunction} of the {@link Flow}.
@@ -108,7 +75,8 @@ public interface ManagedFunctionContext<O extends Enum<O>, F extends Enum<F>> {
 	 * compile unsafe.
 	 * <p>
 	 * The {@link ManagedFunction} reflective meta-data may be obtained from the
-	 * {@link Office} made available via the {@link OfficeAwareManagedFunctionFactory}.
+	 * {@link Office} made available via the
+	 * {@link OfficeAwareManagedFunctionFactory}.
 	 * 
 	 * @param functionName
 	 *            Name of {@link ManagedFunction} within the {@link Work}.

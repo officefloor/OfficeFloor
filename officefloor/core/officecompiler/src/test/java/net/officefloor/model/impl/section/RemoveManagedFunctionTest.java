@@ -79,7 +79,7 @@ public class RemoveManagedFunctionTest extends AbstractSectionChangesTestCase {
 	public void testRemoveManagedFunctionWithConnections() {
 		ManagedFunctionModel managedFunction = this.namespace.getManagedFunctions().get(0);
 		Change<ManagedFunctionModel> change = this.operations.removeManagedFunction(this.namespace, managedFunction);
-		this.assertChange(change, managedFunction, "Remove namespace function MANAGED_FUNCTION_A", true);
+		this.assertChange(change, managedFunction, "Remove managed function MANAGED_FUNCTION_A", true);
 	}
 
 }

@@ -25,6 +25,8 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.administration.source.AdministrationFlowMetaData;
+import net.officefloor.compile.spi.administration.source.AdministrationGovernanceMetaData;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.administration.source.AdministrationSourceContext;
 import net.officefloor.compile.spi.administration.source.AdministrationSourceMetaData;
@@ -201,36 +203,59 @@ public class AdministrationLoaderImpl implements AdministrationLoader {
 			return null; // must initialise
 		}
 
+		// Ensure handle issues obtaining meta-data
+		AdministrationSourceMetaData<E, F, G> metaData;
 		try {
-			// Obtain the meta-data
-			AdministrationSourceMetaData<E, F, G> metaData;
-			try {
-				metaData = administratorSource.getMetaData();
-			} catch (Throwable ex) {
-				this.addIssue("Failed to get " + AdministrationSourceMetaData.class.getSimpleName(), ex);
-				return null; // must successfully get meta-data
-			}
-			if (metaData == null) {
-				this.addIssue("Returned null " + AdministrationSourceMetaData.class.getSimpleName());
-				return null; // must have meta-data
-			}
+			metaData = administratorSource.getMetaData();
+		} catch (Throwable ex) {
+			this.addIssue("Failed to get " + AdministrationSourceMetaData.class.getSimpleName(), ex);
+			return null; // must successfully get meta-data
+		}
+		if (metaData == null) {
+			this.addIssue("Returned null " + AdministrationSourceMetaData.class.getSimpleName());
+			return null; // must have meta-data
+		}
+
+		// Ensure handle issues interacting with meta-data
+		Class<E> extensionInterface;
+		Class<F> flowKeyClass = null;
+		Class<G> governanceKeyClass = null;
+		try {
 
 			// Obtain the extension interface type
-			Class<E> extensionInterface = metaData.getExtensionInterface();
+			extensionInterface = metaData.getExtensionInterface();
 			if (extensionInterface == null) {
 				this.addIssue("No extension interface provided");
 				return null; // must have extension interface
 			}
 
-			// TODO obtain remaining details of administrations
+			// Obtain the flow key class
+			AdministrationFlowMetaData<F>[] flowMetaDatas = metaData.getFlowMetaData();
+			for (AdministrationFlowMetaData<F> flowMetaData : flowMetaDatas) {
 
-			// Return the administrator type
-			return new AdministrationTypeImpl<E, F, G>(extensionInterface);
+				// Obtain the flow key class
+				flowKeyClass = (Class<F>) flowMetaData.getKey().getClass();
+
+			}
+
+			// Obtain the governancey key class
+			AdministrationGovernanceMetaData<G>[] governanceMetaDatas = metaData.getGovernanceMetaData();
+			for (AdministrationGovernanceMetaData<G> governanceMetaData : governanceMetaDatas) {
+
+				// Obtain the governance key class
+				governanceKeyClass = (Class<G>) governanceMetaData.getKey().getClass();
+			}
+
+			// TODO obtain remaining details of administrations
 
 		} catch (Throwable ex) {
 			this.addIssue("Exception from " + administratorSourceClass.getName(), ex);
 			return null; // must be successful with meta-data
 		}
+
+		// Return the administrator type
+		return new AdministrationTypeImpl<E, F, G>(extensionInterface, flowKeyClass, governanceKeyClass);
+
 	}
 
 	/**

@@ -557,10 +557,10 @@ public class SectionChangesImpl implements SectionChanges {
 			}
 		}
 		if (!isOnSection) {
-			// Not on section so can not remove
+			// Not in section so can not remove
 			return new NoChange<FunctionNamespaceModel>(namespaceModel,
 					"Remove namespace " + namespaceModel.getFunctionNamespaceName(),
-					"FunctionNamespace " + namespaceModel.getFunctionNamespaceName() + " not on section");
+					"Function namespace " + namespaceModel.getFunctionNamespaceName() + " not in section");
 		}
 
 		// Return change to remove the namespace
@@ -632,7 +632,7 @@ public class SectionChangesImpl implements SectionChanges {
 			}
 		}
 		if (!isOnSection) {
-			// Not on section so can not remove
+			// Not in section so can not remove
 			return new NoChange<FunctionNamespaceModel>(namespaceModel,
 					"Rename namespace " + namespaceModel.getFunctionNamespaceName() + " to " + newFunctionNamespaceName,
 					"Function namespace " + namespaceModel.getFunctionNamespaceName() + " not in section");
@@ -1366,9 +1366,9 @@ public class SectionChangesImpl implements SectionChanges {
 			}
 		}
 		if (namespace == null) {
-			// Managed function not on section so can not add function
+			// Managed function not in section so can not add function
 			return new NoChange<FunctionModel>(function, "Add function " + functionName,
-					"Managed function " + managedFunction.getManagedFunctionName() + " not on section");
+					"Managed function " + managedFunction.getManagedFunctionName() + " not in section");
 		}
 
 		// Specify the namespace name of the function (now that have namespace)
@@ -1416,13 +1416,13 @@ public class SectionChangesImpl implements SectionChanges {
 		boolean isOnSection = false;
 		for (FunctionModel functionModel : this.section.getFunctions()) {
 			if (function == functionModel) {
-				isOnSection = true; // function on section
+				isOnSection = true; // function in section
 			}
 		}
 		if (!isOnSection) {
-			// Not on section so can not remove it
+			// Not in section so can not remove it
 			return new NoChange<FunctionModel>(function, "Remove function " + function.getFunctionName(),
-					"Function " + function.getFunctionName() + " not on section");
+					"Function " + function.getFunctionName() + " not in section");
 		}
 
 		// Create change to remove the function
@@ -1478,11 +1478,11 @@ public class SectionChangesImpl implements SectionChanges {
 		boolean isOnSection = false;
 		for (FunctionModel functionModel : SectionChangesImpl.this.section.getFunctions()) {
 			if (function == functionModel) {
-				isOnSection = true; // function on section
+				isOnSection = true; // function in section
 			}
 		}
 		if (!isOnSection) {
-			// Can not remove function as not on section
+			// Can not remove function as not in section
 			return new NoChange<FunctionModel>(function,
 					"Rename function " + function.getFunctionName() + " to " + newFunctionName,
 					"Function " + function.getFunctionName() + " not in section");
@@ -1536,11 +1536,11 @@ public class SectionChangesImpl implements SectionChanges {
 			}
 		}
 		if (!isOnSection) {
-			// Not on section so can not set as parameter
+			// Not in section so can not set as parameter
 			return new NoChange<ManagedFunctionObjectModel>(functionObject,
 					"Set function object " + functionObject.getObjectName() + " as "
 							+ (isParameter ? "a parameter" : "an object"),
-					"Function object " + functionObject.getObjectName() + " not on section");
+					"Function object " + functionObject.getObjectName() + " not in section");
 		}
 
 		// Return the appropriate change
@@ -1595,15 +1595,15 @@ public class SectionChangesImpl implements SectionChanges {
 	@Override
 	public Change<FunctionModel> setFunctionAsPublic(final boolean isPublic, final FunctionModel function) {
 
-		// Ensure function on section
+		// Ensure function in section
 		boolean isOnSection = false;
 		for (FunctionModel functionModel : SectionChangesImpl.this.section.getFunctions()) {
 			if (function == functionModel) {
-				isOnSection = true; // function on section
+				isOnSection = true; // function in section
 			}
 		}
 		if (!isOnSection) {
-			// Function not on section so can not make public
+			// Function not in section so can not make public
 			return new NoChange<FunctionModel>(function,
 					"Set function " + function.getFunctionName() + (isPublic ? " public" : " private"),
 					"Function " + function.getFunctionName() + " not in section");

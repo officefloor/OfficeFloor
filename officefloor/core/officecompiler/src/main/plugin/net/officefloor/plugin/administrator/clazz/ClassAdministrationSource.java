@@ -28,6 +28,11 @@ import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.administration.source.AdministrationSourceContext;
 import net.officefloor.compile.spi.administration.source.impl.AbstractAdministratorSource;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.plugin.clazz.ClassFlowParameterFactory;
+import net.officefloor.plugin.clazz.ClassFlowRegistry;
+import net.officefloor.plugin.clazz.ClassFlowBuilder;
+import net.officefloor.plugin.clazz.Sequence;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 
 /**
  * {@link AdministrationSource} that delegates to {@link Object}.
@@ -84,20 +89,42 @@ public class ClassAdministrationSource extends AbstractAdministratorSource<Objec
 		});
 
 		// Interrogate for administration methods and extension interface
-		Class extensionInterface = null;
 		Method adminMethod = null;
+		Class extensionInterface = null;
 		for (Method method : methods) {
 
 			// Method must have only one parameter
 			Class<?>[] paramTypes = method.getParameterTypes();
-			if ((paramTypes == null) || (paramTypes.length != 1)) {
-				continue; // must have one parameter
+			if ((paramTypes == null) || (paramTypes.length < 1) || (paramTypes.length > 2)) {
+				continue; // must have one or two parameters
 			}
-			Class<?> paramType = paramTypes[0];
 
-			// The parameter must be an array
+			// Obtain the extension types
+			Class<?> paramType = paramTypes[0];
 			if (!(paramType.isArray())) {
 				continue; // must be an array
+			}
+
+			// Ensure the possible second parameter is flow interface
+			ClassFlowParameterFactory flowParameterFactory = null;
+			if (paramTypes.length == 2) {
+
+				// Obtain flow interface details
+				String functionName = method.getName();
+				Class<?> parameterType = paramTypes[1];
+				Sequence flowSequence = new Sequence();
+				ClassFlowRegistry flowRegistry = (label, flowParameterType) -> {
+					// Register the flow
+					context.addFlow(flowParameterType).setLabel(label);
+				};
+				ClassLoader classLoader = context.getAdministrationSourceContext().getClassLoader();
+
+				// Build the flow parameter factory
+				flowParameterFactory = new ClassFlowBuilder(FlowInterface.class).buildFlowParameterFactory(functionName,
+						parameterType, flowSequence, flowRegistry, classLoader);
+				if (flowParameterFactory == null) {
+					continue; // second parameter must be flow interface
+				}
 			}
 
 			// Ensure only the one administration method

@@ -1,0 +1,14 @@
+<section>
+	<external-managed-objects>
+		<external-managed-object name="MO" />
+	</external-managed-objects>
+	<external-flows>
+		<external-flow name="FLOW" />
+	</external-flows>
+	<function-namespaces>
+		<function-namespace name="NAMESPACE"
+			source="net.example.ExampleManagedFunctionSource">
+			<managed-function name="FUNCTION_B" />
+		</function-namespace>
+	</function-namespaces>
+</section>

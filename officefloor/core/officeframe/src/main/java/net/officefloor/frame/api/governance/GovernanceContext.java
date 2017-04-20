@@ -17,46 +17,12 @@
  */
 package net.officefloor.frame.api.governance;
 
-import net.officefloor.frame.api.function.FlowCallback;
-import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.api.function.FunctionFlowContext;
 
 /**
  * Context for {@link Governance}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface GovernanceContext<F> {
-
-	/**
-	 * Instigates a {@link Flow} to be run in parallel to {@link Governance}.
-	 * 
-	 * @param key
-	 *            Key identifying the {@link Flow} to instigate.
-	 * @param parameter
-	 *            Parameter for the first {@link ManagedFunction} of the
-	 *            {@link Flow}.
-	 * @param callback
-	 *            {@link FlowCallback}.
-	 */
-	void doFlow(F key, Object parameter, FlowCallback callback);
-
-	/**
-	 * <p>
-	 * Similar to {@link #doFlow(Object, Object)} except that allows dynamic
-	 * instigation of flows.
-	 * <p>
-	 * In other words, an {@link Enum} is not required to define the possible
-	 * flows available.
-	 * 
-	 * @param flowIndex
-	 *            Index identifying the {@link Flow} to instigate.
-	 * @param parameter
-	 *            Parameter for the first {@link ManagedFunction} of the
-	 *            {@link Flow}.
-	 * @param callback
-	 *            {@link FlowCallback}.
-	 */
-	void doFlow(int flowIndex, Object parameter, FlowCallback callback);
-
+public interface GovernanceContext<F extends Enum<F>> extends FunctionFlowContext<F> {
 }

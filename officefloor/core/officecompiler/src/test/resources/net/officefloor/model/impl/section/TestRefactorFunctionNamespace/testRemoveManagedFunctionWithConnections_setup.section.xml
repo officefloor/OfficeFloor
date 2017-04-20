@@ -1,0 +1,38 @@
+<section>
+	<external-managed-objects>
+		<external-managed-object name="MO" />
+	</external-managed-objects>
+	<external-flows>
+		<external-flow name="FLOW" />
+	</external-flows>
+	<function-namespaces>
+		<function-namespace name="NAMESPACE"
+			source="net.example.ExampleManagedFunctionSource">
+			<managed-function name="FUNCTION_A">
+				<managed-function-object name="OBJECT">
+					<external-managed-object name="MO" />
+				</managed-function-object>
+			</managed-function>
+			<work-task name="TASK_B" />
+		</function-namespace>
+	</function-namespaces>
+	<functions>
+		<function name="FUNCTION" function-namespace="NAMESPACE"
+			managed-function="FUNCTION_A">
+			<function-flow name="FLOW_A">
+				<external-flow name="FLOW" />
+			</function-flow>
+			<function-flow name="FLOW_B">
+				<function name="FUNCTION" />
+			</function-flow>
+			<next-function name="FUNCTION" />
+			<next-external-flow name="FLOW" /> <!-- focus on testing connections -->
+			<function-escalation escalation-type="java.sql.SQLException">
+				<external-flow name="FLOW" />
+			</function-escalation>
+			<function-escalation escalation-type="java.io.IOException">
+				<function name="FUNCTION" />
+			</function-escalation>
+		</function>
+	</functions>
+</section>

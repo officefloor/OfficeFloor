@@ -20,11 +20,11 @@ package net.officefloor.plugin.managedfunction.clazz;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 
 /**
- * {@link ParameterFactory} for the {@link ManagedFunctionContext}.
+ * {@link ManagedFunctionParameterFactory} for the {@link ManagedFunctionContext}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedFunctionContextParameterFactory implements ParameterFactory {
+public class ManagedFunctionContextParameterFactory implements ManagedFunctionParameterFactory {
 
 	/*
 	 * ====================== ParameterFactory =============================

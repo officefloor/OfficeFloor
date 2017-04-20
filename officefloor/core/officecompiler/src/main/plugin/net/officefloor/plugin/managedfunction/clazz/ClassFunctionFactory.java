@@ -45,7 +45,7 @@ public class ClassFunctionFactory implements ManagedFunctionFactory<Indexed, Ind
 	/**
 	 * Parameters.
 	 */
-	private final ParameterFactory[] parameters;
+	private final ManagedFunctionParameterFactory[] parameters;
 
 	/**
 	 * Initiate.
@@ -57,9 +57,9 @@ public class ClassFunctionFactory implements ManagedFunctionFactory<Indexed, Ind
 	 * @param method
 	 *            {@link Method} to invoke for the {@link ManagedFunction}.
 	 * @param parameters
-	 *            {@link ParameterFactory} instances.
+	 *            {@link ManagedFunctionParameterFactory} instances.
 	 */
-	public ClassFunctionFactory(Constructor<?> constructor, Method method, ParameterFactory[] parameters) {
+	public ClassFunctionFactory(Constructor<?> constructor, Method method, ManagedFunctionParameterFactory[] parameters) {
 		this.constructor = constructor;
 		this.method = method;
 		this.parameters = parameters;

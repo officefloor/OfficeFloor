@@ -22,6 +22,8 @@ import net.officefloor.compile.administration.AdministrationFlowType;
 import net.officefloor.compile.administration.AdministrationGovernanceType;
 import net.officefloor.compile.administration.AdministrationType;
 import net.officefloor.frame.api.administration.AdministrationFactory;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * {@link AdministrationType} implementation.
@@ -36,13 +38,27 @@ public class AdministrationTypeImpl<E, F extends Enum<F>, G extends Enum<G>> imp
 	private final Class<E> extensionInterface;
 
 	/**
+	 * {@link Flow} key {@link Enum}.
+	 */
+	private final Class<F> flowKeyClass;
+
+	/**
+	 * {@link Governance} key {@link Enum}.
+	 */
+	private final Class<G> governanceKeyClass;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param extensionInterface
 	 *            Extension interface.
+	 * @param flowKeyClass
+	 *            {@link Flow} key {@link Enum}.
 	 */
-	public AdministrationTypeImpl(Class<E> extensionInterface) {
+	public AdministrationTypeImpl(Class<E> extensionInterface, Class<F> flowKeyClass, Class<G> governanceKeyClass) {
 		this.extensionInterface = extensionInterface;
+		this.flowKeyClass = flowKeyClass;
+		this.governanceKeyClass = governanceKeyClass;
 	}
 
 	/*
@@ -62,8 +78,7 @@ public class AdministrationTypeImpl<E, F extends Enum<F>, G extends Enum<G>> imp
 
 	@Override
 	public Class<F> getFlowKeyClass() {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+		return this.flowKeyClass;
 	}
 
 	@Override
@@ -80,8 +95,7 @@ public class AdministrationTypeImpl<E, F extends Enum<F>, G extends Enum<G>> imp
 
 	@Override
 	public Class<G> getGovernanceKeyClass() {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+		return this.governanceKeyClass;
 	}
 
 	@Override

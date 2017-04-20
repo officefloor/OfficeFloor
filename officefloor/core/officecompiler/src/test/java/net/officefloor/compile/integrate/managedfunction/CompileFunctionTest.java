@@ -45,7 +45,7 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.managedfunction.clazz.ClassFunctionFactory;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
-import net.officefloor.plugin.managedfunction.clazz.ParameterFactory;
+import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionParameterFactory;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**
@@ -658,7 +658,7 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 				ManagedFunctionSourceContext context) throws Exception {
 			ManagedFunctionTypeBuilder<Indexed, Indexed> function = namespaceBuilder.addManagedFunctionType("function",
 					new ClassFunctionFactory(CompileFunctionFunctionNamespace.class.getConstructor(new Class[0]),
-							CompileFunctionFunctionNamespace.class.getMethod("simpleFunction"), new ParameterFactory[0]),
+							CompileFunctionFunctionNamespace.class.getMethod("simpleFunction"), new ManagedFunctionParameterFactory[0]),
 					Indexed.class, Indexed.class);
 			function.setDifferentiator(DIFFERENTIATOR);
 		}

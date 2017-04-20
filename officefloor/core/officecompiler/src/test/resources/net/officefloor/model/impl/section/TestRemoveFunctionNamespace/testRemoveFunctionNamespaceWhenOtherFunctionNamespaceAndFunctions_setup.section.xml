@@ -1,0 +1,24 @@
+<section>
+	<function-namespaces>
+		<function-namespace name="NAMESPACE_A"
+			source="net.example.ExampleManagedFunctionSource">
+			<managed-function name="FUNCTION" />
+		</function-namespace>
+		<function-namespace name="NAMESPACE_B"
+			source="net.example.ExampleManagedFunctionSource">
+			<managed-function name="FUNCTION" />
+		</function-namespace>
+		<function-namespace name="NAMESPACE_C"
+			source="net.example.ExampleManagedFunctionSource">
+			<managed-function name="FUNCTION" />
+		</function-namespace>
+	</function-namespaces>
+	<functions>
+		<function name="FUNCTION_A" function-namespace="NAMESPACE_A"
+			managed-function="FUNCTION" />
+		<function name="FUNCTION_B" function-namespace="NAMESPACE_B"
+			managed-function="FUNCTION" />
+		<function name="FUNCTION_C" function-namespace="NAMESPACE_C"
+			managed-function="FUNCTION" />
+	</functions>
+</section>

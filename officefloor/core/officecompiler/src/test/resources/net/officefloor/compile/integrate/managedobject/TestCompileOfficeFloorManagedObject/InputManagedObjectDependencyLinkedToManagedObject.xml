@@ -50,7 +50,7 @@
 			<team name="OFFICE_TEAM" />
 		</teams>
 		<sections>
-			<section name="SECTION" source="DESK" location="desk">
+			<section name="SECTION" source="SECTION" location="section">
 				<input name="INPUT" />
 				<responsibility name="RESPONSIBILITY">
 					<team name="OFFICE_TEAM" />
@@ -58,19 +58,21 @@
 			</section>
 		</sections>
 	</office>
-	<desk>
-		<works>
-			<work name="WORK" source="CLASS">
+	<section>
+		<function-namespaces>
+			<function-namespace name="NAMESPACE" source="CLASS">
 				<properties>
-					<property name="class.name" value="${testcase}$ProcessWork" />
+					<property name="class.name" value="${testcase}$ProcessClass" />
 				</properties>
-				<work-task name="process">
-					<task-object name="java.lang.Integer" parameter="true" />
-				</work-task>
-			</work>
-		</works>
-		<tasks>
-			<task name="INPUT" work="WORK" task="process" public="true" />
-		</tasks>
-	</desk>
+				<managed-function name="process">
+					<managed-function-object name="java.lang.Integer"
+						parameter="true" />
+				</managed-function>
+			</function-namespace>
+		</function-namespaces>
+		<functions>
+			<function name="INPUT" function-namespace="NAMESPACE"
+				managed-function="process" public="true" />
+		</functions>
+	</section>
 </context>

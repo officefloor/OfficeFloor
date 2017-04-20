@@ -28,10 +28,10 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.plugin.clazz.Sequence;
 import net.officefloor.plugin.managedfunction.clazz.ClassFunction;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
-import net.officefloor.plugin.managedfunction.clazz.ParameterFactory;
-import net.officefloor.plugin.managedfunction.clazz.Sequence;
+import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionParameterFactory;
 
 /**
  * {@link ManagedFunctionSource} implementation to provide the
@@ -47,12 +47,12 @@ public class SectionClassManagedFunctionSource extends ClassManagedFunctionSourc
 
 	@Override
 	protected void loadParameterManufacturers(List<ParameterManufacturer> manufacturers) {
-		manufacturers.add(new FlowInterfaceParameterManufacturer<SectionInterface>(SectionInterface.class));
+		manufacturers.add(new FlowParameterManufacturer<SectionInterface>(SectionInterface.class));
 	}
 
 	@Override
 	protected ManagedFunctionFactory<Indexed, Indexed> createManagedFunctionFactory(Constructor<?> constructor,
-			Method method, ParameterFactory[] parameters) {
+			Method method, ManagedFunctionParameterFactory[] parameters) {
 		boolean isStatic = (constructor == null);
 		return new SectionManagedFunctionFactory(method, isStatic, parameters);
 	}
@@ -92,10 +92,10 @@ public class SectionClassManagedFunctionSource extends ClassManagedFunctionSourc
 		private final boolean isStatic;
 
 		/**
-		 * {@link ParameterFactory} instances for the parameters of the
+		 * {@link ManagedFunctionParameterFactory} instances for the parameters of the
 		 * {@link Method}.
 		 */
-		private final ParameterFactory[] parameters;
+		private final ManagedFunctionParameterFactory[] parameters;
 
 		/**
 		 * Initiate.
@@ -105,10 +105,10 @@ public class SectionClassManagedFunctionSource extends ClassManagedFunctionSourc
 		 * @param isStatic
 		 *            Indicates if the {@link Method} is static.
 		 * @param parameters
-		 *            {@link ParameterFactory} instances for the parameters of
+		 *            {@link ManagedFunctionParameterFactory} instances for the parameters of
 		 *            the {@link Method}.
 		 */
-		public SectionManagedFunctionFactory(Method method, boolean isStatic, ParameterFactory[] parameters) {
+		public SectionManagedFunctionFactory(Method method, boolean isStatic, ManagedFunctionParameterFactory[] parameters) {
 			this.method = method;
 			this.isStatic = isStatic;
 			this.parameters = parameters;
@@ -124,11 +124,11 @@ public class SectionClassManagedFunctionSource extends ClassManagedFunctionSourc
 		}
 
 		/**
-		 * Obtains the {@link ParameterFactory} instances.
+		 * Obtains the {@link ManagedFunctionParameterFactory} instances.
 		 * 
-		 * @return {@link ParameterFactory} instances.
+		 * @return {@link ManagedFunctionParameterFactory} instances.
 		 */
-		public ParameterFactory[] getParameterFactories() {
+		public ManagedFunctionParameterFactory[] getParameterFactories() {
 			return this.parameters;
 		}
 

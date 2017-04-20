@@ -1,0 +1,61 @@
+<context>
+	<office-floor>
+		<managed-object-sources>
+			<managed-object-source name="MANAGED_OBJECT_SOURCE"
+				source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$ProcessManagedObject" />
+				</properties>
+				<managing-office name="OFFICE" />
+				<input-managed-object name="INPUT_MO" />
+				<flow name="doProcess">
+					<office-input office="OFFICE" section="SECTION" input="INPUT" />
+				</flow>
+			</managed-object-source>
+		</managed-object-sources>
+		<input-managed-objects>
+			<input-managed-object name="INPUT_MO" />
+		</input-managed-objects>
+		<teams>
+			<team name="TEAM" source="ONE_PERSON" />
+		</teams>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office">
+				<input section="SECTION" input="INPUT" />
+				<team name="OFFICE_TEAM">
+					<office-floor-team name="TEAM" />
+				</team>
+			</office>
+		</offices>
+	</office-floor>
+	<office>
+		<teams>
+			<team name="OFFICE_TEAM" />
+		</teams>
+		<sections>
+			<section name="SECTION" source="SECTION" location="section">
+				<input name="INPUT" />
+				<responsibility name="RESPONSIBILITY">
+					<team name="OFFICE_TEAM" />
+				</responsibility>
+			</section>
+		</sections>
+	</office>
+	<section>
+		<function-namespaces>
+			<function-namespace name="NAMESPACE" source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$ProcessClass" />
+				</properties>
+				<managed-function name="process">
+					<managed-function-object name="java.lang.Integer"
+						parameter="true" />
+				</managed-function>
+			</function-namespace>
+		</function-namespaces>
+		<functions>
+			<function name="INPUT" function-namespace="NAMESPACE"
+				managed-function="process" public="true" />
+		</functions>
+	</section>
+</context>

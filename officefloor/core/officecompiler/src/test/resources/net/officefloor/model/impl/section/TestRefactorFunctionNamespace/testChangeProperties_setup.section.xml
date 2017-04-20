@@ -1,0 +1,10 @@
+<section>
+	<function-namespaces>
+		<function-namespace name="NAME"
+			source="net.example.ExampleManagedFunctionSource">
+			<properties>
+				<property name="EXAMPLE_NAME" value="EXAMPLE_VALUE" />
+			</properties>
+		</function-namespace>
+	</function-namespaces>
+</section>

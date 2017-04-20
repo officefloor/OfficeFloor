@@ -103,9 +103,9 @@ public class ClassFunction implements ManagedFunction<Indexed, Indexed> {
 	private final Method method;
 
 	/**
-	 * {@link ParameterFactory} instances.
+	 * {@link ManagedFunctionParameterFactory} instances.
 	 */
-	private final ParameterFactory[] parameterFactories;
+	private final ManagedFunctionParameterFactory[] parameterFactories;
 
 	/**
 	 * Initiate.
@@ -117,9 +117,9 @@ public class ClassFunction implements ManagedFunction<Indexed, Indexed> {
 	 * @param method
 	 *            Method to invoke for this {@link ManagedFunction}.
 	 * @param parameterFactories
-	 *            {@link ParameterFactory} instances.
+	 *            {@link ManagedFunctionParameterFactory} instances.
 	 */
-	public ClassFunction(Constructor<?> constructor, Method method, ParameterFactory[] parameterFactories) {
+	public ClassFunction(Constructor<?> constructor, Method method, ManagedFunctionParameterFactory[] parameterFactories) {
 		this.method = method;
 		this.constructor = constructor;
 		this.parameterFactories = parameterFactories;

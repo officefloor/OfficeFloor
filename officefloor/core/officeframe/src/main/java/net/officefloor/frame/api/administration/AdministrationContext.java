@@ -17,18 +17,16 @@
  */
 package net.officefloor.frame.api.administration;
 
-import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.function.FlowCallback;
-import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.FunctionFlowContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * Context in which the {@link Administration} executes.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdministrationContext<E extends Object, F extends Enum<F>, G extends Enum<G>> {
+public interface AdministrationContext<E extends Object, F extends Enum<F>, G extends Enum<G>>
+		extends FunctionFlowContext<F> {
 
 	/**
 	 * Obtains the particular extensions.
@@ -37,39 +35,6 @@ public interface AdministrationContext<E extends Object, F extends Enum<F>, G ex
 	 *         administered.
 	 */
 	E[] getExtensions();
-
-	/**
-	 * Instigates a {@link Flow} to be run.
-	 * 
-	 * @param key
-	 *            Key identifying the {@link Flow} to instigate.
-	 * @param parameter
-	 *            Parameter for the first {@link ManagedFunction} of the
-	 *            {@link Flow}.
-	 * @param callback
-	 *            {@link FlowCallback}.
-	 */
-	void doFlow(F key, Object parameter, FlowCallback callback);
-
-	/**
-	 * <p>
-	 * Similar to {@link #doFlow(Enum, Object)} except that allows dynamic
-	 * instigation of flows.
-	 * <p>
-	 * In other words, an {@link Enum} is not required to define the possible
-	 * {@link Flow} instances available.
-	 * 
-	 * @param flowIndex
-	 *            Index identifying the {@link Flow} to instigate.
-	 * @param parameter
-	 *            Parameter for the first {@link ManagedFunction} of the
-	 *            {@link Flow}.
-	 * @param callback
-	 *            {@link FlowCallback}.
-	 * 
-	 * @see Indexed
-	 */
-	void doFlow(int flowIndex, Object parameter, FlowCallback callback);
 
 	/**
 	 * Obtains the {@link GovernanceManager} for the particular key.

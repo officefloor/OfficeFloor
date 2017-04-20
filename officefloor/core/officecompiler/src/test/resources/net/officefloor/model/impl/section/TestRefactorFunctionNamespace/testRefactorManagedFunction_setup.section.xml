@@ -1,0 +1,12 @@
+<section>
+	<function-namespaces>
+		<function-namespace name="NAMESPACE"
+			source="net.example.ExampleManagedFunctionSource">
+			<managed-function name="FUNCTION_OLD" />
+		</function-namespace>
+	</function-namespaces>
+	<functions>
+		<function name="FUNCTION" function-namespace="NAMESPACE"
+			managed-function="FUNCTION_OLD" return-type="java.lang.Integer" />
+	</functions>
+</section>

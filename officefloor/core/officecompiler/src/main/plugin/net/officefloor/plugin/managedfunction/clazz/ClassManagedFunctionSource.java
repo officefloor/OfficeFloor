@@ -21,13 +21,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import net.officefloor.compile.ManagedFunctionSourceService;
@@ -39,10 +35,13 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceC
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.plugin.clazz.ClassFlowBuilder;
+import net.officefloor.plugin.clazz.ClassFlowParameterFactory;
+import net.officefloor.plugin.clazz.ClassFlowRegistry;
+import net.officefloor.plugin.clazz.Sequence;
 
 /**
  * {@link ManagedFunctionSource} for a {@link Class} having the {@link Method}
@@ -69,7 +68,7 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 	public ClassManagedFunctionSource() {
 		// Add the default manufacturers
 		this.manufacturers.add(new ManagedFunctionContextParameterManufacturer());
-		this.manufacturers.add(new FlowInterfaceParameterManufacturer<FlowInterface>(FlowInterface.class));
+		this.manufacturers.add(new FlowParameterManufacturer<FlowInterface>(FlowInterface.class));
 
 		// Load any additional manufacturers
 		this.loadParameterManufacturers(this.manufacturers);
@@ -95,11 +94,11 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 	 * @param method
 	 *            {@link Method} on the class.
 	 * @param parameters
-	 *            {@link ParameterFactory} instances.
+	 *            {@link ManagedFunctionParameterFactory} instances.
 	 * @return {@link ManagedFunctionFactory}.
 	 */
 	protected ManagedFunctionFactory<Indexed, Indexed> createManagedFunctionFactory(Constructor<?> constructor,
-			Method method, ParameterFactory[] parameters) {
+			Method method, ManagedFunctionParameterFactory[] parameters) {
 		return new ClassFunctionFactory(constructor, method, parameters);
 	}
 
@@ -202,8 +201,8 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 				}
 				includedMethodNames.add(methodName);
 
-				// Create to parameters to method to be populated
-				ParameterFactory[] parameters = new ParameterFactory[paramTypes.length];
+				// Create parameters to method to be populated
+				ManagedFunctionParameterFactory[] parameters = new ManagedFunctionParameterFactory[paramTypes.length];
 
 				// Determine if the method is static
 				boolean isStatic = Modifier.isStatic(method.getModifiers());
@@ -243,7 +242,7 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 					Annotation[] paramAnnotations = methodParamAnnotations[i];
 
 					// Obtain the parameter factory
-					ParameterFactory parameterFactory = null;
+					ManagedFunctionParameterFactory parameterFactory = null;
 					CREATED: for (ParameterManufacturer manufacturer : this.manufacturers) {
 						parameterFactory = manufacturer.createParameterFactory(methodName, paramType,
 								functionTypeBuilder, objectSequence, flowSequence, classLoader);
@@ -256,7 +255,7 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 					// Default to object if no parameter factory
 					if (parameterFactory == null) {
 						// Otherwise must be an dependency object
-						parameterFactory = new ObjectParameterFactory(objectSequence.nextIndex());
+						parameterFactory = new ManagedFunctionObjectParameterFactory(objectSequence.nextIndex());
 						ManagedFunctionObjectTypeBuilder<Indexed> objectTypeBuilder = functionTypeBuilder
 								.addObject(paramType);
 
@@ -303,12 +302,12 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 	}
 
 	/**
-	 * Manufactures the {@link ParameterFactory}.
+	 * Manufactures the {@link ManagedFunctionParameterFactory}.
 	 */
 	protected static interface ParameterManufacturer {
 
 		/**
-		 * Creates the {@link ParameterFactory}.
+		 * Creates the {@link ManagedFunctionParameterFactory}.
 		 * 
 		 * @param functionName
 		 *            Name of the {@link ManagedFunction}.
@@ -322,13 +321,14 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 		 *            Flow {@link Sequence}.
 		 * @param classLoader
 		 *            {@link ClassLoader}.
-		 * @return {@link ParameterFactory} or <code>null</code> if not
-		 *         appropriate for this to manufacture a
-		 *         {@link ParameterFactory}.
+		 * @return {@link ManagedFunctionParameterFactory} or <code>null</code>
+		 *         if not appropriate for this to manufacture a
+		 *         {@link ManagedFunctionParameterFactory}.
 		 * @throws Exception
-		 *             If fails to create the {@link ParameterFactory}.
+		 *             If fails to create the
+		 *             {@link ManagedFunctionParameterFactory}.
 		 */
-		ParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
+		ManagedFunctionParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
 				ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder, Sequence objectSequence,
 				Sequence flowSequence, ClassLoader classLoader) throws Exception;
 	}
@@ -338,7 +338,7 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 	 */
 	protected static class ManagedFunctionContextParameterManufacturer implements ParameterManufacturer {
 		@Override
-		public ParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
+		public ManagedFunctionParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
 				ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder, Sequence objectSequence,
 				Sequence flowSequence, ClassLoader classLoader) {
 
@@ -356,132 +356,51 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 	/**
 	 * {@link ParameterManufacturer} for the {@link FlowInterface}.
 	 */
-	protected static class FlowInterfaceParameterManufacturer<A extends Annotation> implements ParameterManufacturer {
+	protected static class FlowParameterManufacturer<A extends Annotation> implements ParameterManufacturer {
 
 		/**
-		 * Annotation class expected on the parameter type.
+		 * {@link Class} of the {@link Annotation}.
 		 */
 		private final Class<A> annotationClass;
 
 		/**
-		 * Initiate.
+		 * Instantiate.
 		 * 
 		 * @param annotationClass
-		 *            Annotation class expected on the parameter type.
+		 *            {@link Class} of the {@link Annotation}.
 		 */
-		public FlowInterfaceParameterManufacturer(Class<A> annotationClass) {
+		public FlowParameterManufacturer(Class<A> annotationClass) {
 			this.annotationClass = annotationClass;
 		}
 
 		/*
-		 * ================== ParameterManufacturer ====================
+		 * =================== ParameterManufacturer ===================
 		 */
 
 		@Override
-		public ParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
+		public ManagedFunctionParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
 				ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder, Sequence objectSequence,
 				Sequence flowSequence, ClassLoader classLoader) throws Exception {
 
-			// Determine if flow interface
-			if (parameterType.getAnnotation(this.annotationClass) == null) {
-				return null; // not a flow interface
-			}
-
-			// Ensure is an interface
-			if (!parameterType.isInterface()) {
-				throw new Exception("Parameter " + parameterType.getSimpleName() + " on method " + functionName
-						+ " must be an interface as parameter type is annotated with "
-						+ this.annotationClass.getSimpleName());
-			}
-
-			// Obtain the methods sorted (deterministic order)
-			Method[] flowMethods = parameterType.getMethods();
-			Arrays.sort(flowMethods, new Comparator<Method>() {
-				@Override
-				public int compare(Method a, Method b) {
-					return a.getName().compareTo(b.getName());
-				}
-			});
-
-			// Create a flow for each method of the interface
-			Map<String, FlowMethodMetaData> flowMethodMetaDatas = new HashMap<String, FlowMethodMetaData>(
-					flowMethods.length);
-			for (int m = 0; m < flowMethods.length; m++) {
-				Method flowMethod = flowMethods[m];
-				String flowMethodName = flowMethod.getName();
-
-				// Not include object methods
-				if (Object.class.equals(flowMethod.getDeclaringClass())) {
-					continue;
-				}
-
-				// Ensure not duplicate flow names
-				if (flowMethodMetaDatas.containsKey(flowMethodName)) {
-					throw new Exception("May not have duplicate flow method names (function=" + functionName + ", flow="
-							+ parameterType.getSimpleName() + "." + flowMethodName + ")");
-				}
-
-				// Ensure at appropriate parameters
-				Class<?> flowParameterType = null;
-				boolean isFlowCallback = false;
-				Class<?>[] flowMethodParams = flowMethod.getParameterTypes();
-				switch (flowMethodParams.length) {
-				case 2:
-					// Two parameters, first parameter, second flow callback
-					flowParameterType = flowMethodParams[0];
-					if (!FlowCallback.class.isAssignableFrom(flowMethodParams[1])) {
-						throw new Exception("Second parameter must be " + FlowCallback.class.getSimpleName()
-								+ " (function " + functionName + ", flow " + parameterType.getSimpleName() + "."
-								+ flowMethodName + ")");
-					}
-					isFlowCallback = true;
-					break;
-
-				case 1:
-					// Single parameter, either parameter or flow callback
-					if (FlowCallback.class.isAssignableFrom(flowMethodParams[0])) {
-						isFlowCallback = true;
-					} else {
-						flowParameterType = flowMethodParams[0];
-					}
-					break;
-
-				case 0:
-					// No parameters
-					break;
-
-				default:
-					// Invalid to have more than two parameter
-					throw new Exception(
-							"Flow methods may only have at most two parameters [<parameter>, <flow callback>] (function "
-									+ functionName + ", flow " + parameterType.getSimpleName() + "." + flowMethodName
-									+ ")");
-				}
-
-				// Ensure void return type
-				Class<?> flowReturnType = flowMethod.getReturnType();
-				if ((flowReturnType != null) && (!Void.TYPE.equals(flowReturnType))) {
-					// Invalid return type
-					throw new Exception("Flow method " + parameterType.getSimpleName() + "." + flowMethodName
-							+ " return type is invalid (return type=" + flowReturnType.getName() + ", function="
-							+ functionName + ").  Must not have return type.");
-				}
-
-				// Create and register the flow method meta-data
-				FlowMethodMetaData flowMethodMetaData = new FlowMethodMetaData(parameterType, flowMethod,
-						flowSequence.nextIndex(), (flowParameterType != null), isFlowCallback);
-				flowMethodMetaDatas.put(flowMethodName, flowMethodMetaData);
-
+			// Create the flow registry
+			ClassFlowRegistry flowRegistry = (label, flowParameterType) -> {
 				// Register the flow
 				ManagedFunctionFlowTypeBuilder<Indexed> flowTypeBuilder = functionTypeBuilder.addFlow();
-				flowTypeBuilder.setLabel(flowMethodName);
+				flowTypeBuilder.setLabel(label);
 				if (flowParameterType != null) {
 					flowTypeBuilder.setArgumentType(flowParameterType);
 				}
+			};
+
+			// Attempt to build flow parameter factory
+			ClassFlowParameterFactory flowParameterFactory = new ClassFlowBuilder<A>(this.annotationClass)
+					.buildFlowParameterFactory(functionName, parameterType, flowSequence, flowRegistry, classLoader);
+			if (flowParameterFactory == null) {
+				return null; // not flow interface
 			}
 
-			// Create and return the flow interface parameter factory
-			return new FlowParameterFactory(classLoader, parameterType, flowMethodMetaDatas);
+			// Return wrapping managed function flow parameter factory
+			return new ManagedFunctionFlowParameterFactory(flowParameterFactory);
 		}
 	}
 

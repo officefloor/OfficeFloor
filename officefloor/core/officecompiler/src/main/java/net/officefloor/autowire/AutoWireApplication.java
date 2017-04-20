@@ -40,6 +40,7 @@ import net.officefloor.plugin.section.clazz.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated // TODO make this part of ServiceLocator that will load services to configure Office
 public interface AutoWireApplication {
 
 	/**
