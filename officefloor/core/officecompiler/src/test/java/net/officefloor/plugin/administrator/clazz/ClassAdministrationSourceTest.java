@@ -19,6 +19,7 @@ package net.officefloor.plugin.administrator.clazz;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.function.Function;
 
 import net.officefloor.compile.administration.AdministrationType;
 import net.officefloor.compile.test.administration.AdministrationLoaderUtil;
@@ -27,7 +28,6 @@ import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.administration.GovernanceManager;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -69,11 +69,11 @@ public class ClassAdministrationSourceTest extends OfficeFrameTestCase {
 
 		// Create the expected administration type
 		AdministrationTypeBuilder<Indexed, Indexed> type = AdministrationLoaderUtil
-				.createAdministrationTypeBuilder(MockExtensionInterface.class, Indexed.class, Indexed.class);
-		type.addFlow("flowOne", null, 0, null);
-		type.addFlow("flowTwo", String.class, 1, null);
+				.createAdministrationTypeBuilder(MockExtensionInterface.class, Indexed.class, null);
+		type.addFlow("flowFour", Integer.class, 0, null);
+		type.addFlow("flowOne", null, 1, null);
 		type.addFlow("flowThree", null, 2, null);
-		type.addFlow("flowFour", Integer.class, 3, null);
+		type.addFlow("flowTwo", String.class, 3, null);
 		type.addEscalation(IOException.class.getSimpleName(), IOException.class);
 		type.addEscalation(SQLException.class.getSimpleName(), SQLException.class);
 
@@ -90,7 +90,7 @@ public class ClassAdministrationSourceTest extends OfficeFrameTestCase {
 		// Create the expected administration type
 		AdministrationTypeBuilder<Indexed, Indexed> type = AdministrationLoaderUtil
 				.createAdministrationTypeBuilder(MockExtensionInterface.class, null, Indexed.class);
-		type.addGovernance("governance", 0, null);
+		type.addGovernance("0", 0, null);
 
 		// Validate the administration type
 		AdministrationLoaderUtil.validateAdministratorType(type, ClassAdministrationSource.class,
@@ -98,15 +98,96 @@ public class ClassAdministrationSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure {@link AdministrationType} is correct.
+	 */
+	public void testAdministrationWithContext() {
+
+		// Create the expected administration type
+		AdministrationTypeBuilder<Indexed, Indexed> type = AdministrationLoaderUtil
+				.createAdministrationTypeBuilder(MockExtensionInterface.class, null, null);
+
+		// Validate the administration type
+		AdministrationLoaderUtil.validateAdministratorType(type, ClassAdministrationSource.class,
+				ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME, MockClassWithContext.class.getName());
+	}
+
+	/**
 	 * Ensure invoke {@link Administration}.
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testInvokeAdministration() throws Throwable {
+		this.doInvokeAdministration(MockClassWithoutFlows.class, (context, extensions) -> {
+			this.recordReturn(context, context.getExtensions(), extensions);
+			extensions[0].administer();
+		});
+	}
+
+	/**
+	 * Ensure invoke {@link Flow}.
+	 */
+	public void testInvokeFlow() throws Throwable {
+		MockClassWithFlows.callback = this.callback;
+		this.doInvokeAdministration(MockClassWithFlows.class, (context, extensions) -> {
+			this.recordReturn(context, context.getExtensions(), extensions);
+			extensions[0].administer();
+			context.doFlow(1, null, null);
+			context.doFlow(3, "TWO", null);
+			context.doFlow(2, null, this.callback);
+			context.doFlow(0, 4, this.callback);
+		});
+	}
+
+	/**
+	 * Ensure invoke {@link GovernanceManager}.
+	 */
+	public void testInvokeGovernance() throws Throwable {
+		this.doInvokeAdministration(MockClassWithGovernance.class, (context, extensions) -> {
+			this.recordReturn(context, context.getExtensions(), extensions);
+			GovernanceManager governance = this.createMock(GovernanceManager.class);
+			this.recordReturn(context, context.getGovernance(0), governance);
+			governance.enforceGovernance();
+		});
+	}
+
+	/**
+	 * Ensure invoke {@link AdministrationContext}.
+	 */
+	public void testInvokeContext() throws Throwable {
+		this.doInvokeAdministration(MockClassWithContext.class, (context, extensions) -> {
+			this.recordReturn(context, context.getExtensions(), extensions);
+			context.doFlow(0, "TEST", null);
+		});
+	}
+
+	/**
+	 * {@link Function} to record interaction.
+	 */
+	private static interface RecordFunctionality {
+
+		/**
+		 * Records interaction.
+		 * 
+		 * @param context
+		 *            {@link AdministrationContext}.
+		 * @param extensions
+		 *            {@link MockExtensionInterface} array.
+		 */
+		void record(AdministrationContext<?, ?, ?> context, MockExtensionInterface[] extensions);
+	}
+
+	/**
+	 * Undertakes invoking the {@link Administration}.
+	 * 
+	 * @param recorder
+	 *            {@link RecordFunctionality}.
+	 * @throws Throwable
+	 *             If fails.
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void doInvokeAdministration(Class<?> clazz, RecordFunctionality recorder) throws Throwable {
 
 		// Load the type
 		AdministrationType<?, ?, ?> type = AdministrationLoaderUtil.loadAdministrationType(
-				ClassAdministrationSource.class, ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME,
-				MockClassWithoutFlows.class.getName());
+				ClassAdministrationSource.class, ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME, clazz.getName());
 
 		// Create the administration
 		Administration<?, ?, ?> administration = type.getAdministrationFactory().createAdministration();
@@ -117,8 +198,7 @@ public class ClassAdministrationSourceTest extends OfficeFrameTestCase {
 		MockExtensionInterface[] extensions = new MockExtensionInterface[] { extension };
 
 		// Record invoking administration
-		this.recordReturn(context, context.getExtensions(), extensions);
-		extension.administer();
+		recorder.record(context, extensions);
 
 		this.replayMockObjects();
 
@@ -127,14 +207,6 @@ public class ClassAdministrationSourceTest extends OfficeFrameTestCase {
 
 		// Verify functionality (extension interface invoked)
 		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure unit tests can invoke {@link Flow} from {@link Administration} in
-	 * testing.
-	 */
-	public void testInvokeFlowFromAdministration() {
-		fail("TODO implement invoking a flow from administration when writing unit tests");
 	}
 
 	/**
@@ -191,6 +263,17 @@ public class ClassAdministrationSourceTest extends OfficeFrameTestCase {
 
 		public void admin(MockExtensionInterface[] extensions, GovernanceManager governance) {
 			governance.enforceGovernance();
+		}
+	}
+
+	/**
+	 * Mock {@link Administration} class.
+	 */
+	public static class MockClassWithContext {
+
+		public void admin(AdministrationContext<MockExtensionInterface, ?, ?> context,
+				MockExtensionInterface[] extensions) {
+			context.doFlow(0, "TEST", null);
 		}
 	}
 

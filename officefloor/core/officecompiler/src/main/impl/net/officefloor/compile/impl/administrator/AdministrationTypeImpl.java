@@ -33,6 +33,11 @@ import net.officefloor.frame.internal.structure.Flow;
 public class AdministrationTypeImpl<E, F extends Enum<F>, G extends Enum<G>> implements AdministrationType<E, F, G> {
 
 	/**
+	 * {@link AdministrationFactory}.
+	 */
+	private final AdministrationFactory<E, F, G> administrationFactory;
+
+	/**
 	 * Extension interface.
 	 */
 	private final Class<E> extensionInterface;
@@ -43,22 +48,53 @@ public class AdministrationTypeImpl<E, F extends Enum<F>, G extends Enum<G>> imp
 	private final Class<F> flowKeyClass;
 
 	/**
+	 * {@link AdministrationFlowType} instances.
+	 */
+	private final AdministrationFlowType<F>[] flows;
+
+	/**
+	 * {@link AdministrationEscalationType} instances.
+	 */
+	private final AdministrationEscalationType[] escalations;
+
+	/**
 	 * {@link Governance} key {@link Enum}.
 	 */
 	private final Class<G> governanceKeyClass;
 
 	/**
+	 * {@link AdministrationGovernanceType} instances.
+	 */
+	private final AdministrationGovernanceType<G>[] governances;
+
+	/**
 	 * Initiate.
 	 * 
+	 * @param administrationFactory
+	 *            {@link AdministrationFactory}.
 	 * @param extensionInterface
 	 *            Extension interface.
 	 * @param flowKeyClass
 	 *            {@link Flow} key {@link Enum}.
+	 * @param flows
+	 *            {@link AdministrationFlowType} instances.
+	 * @param escalations
+	 *            {@link AdministrationEscalationType} instances.
+	 * @param governanceKeyClass
+	 *            {@link Governance} key {@link Enum}.
+	 * @param governances
+	 *            {@link AdministrationGovernanceType} instances.
 	 */
-	public AdministrationTypeImpl(Class<E> extensionInterface, Class<F> flowKeyClass, Class<G> governanceKeyClass) {
+	public AdministrationTypeImpl(AdministrationFactory<E, F, G> administrationFactory, Class<E> extensionInterface,
+			Class<F> flowKeyClass, AdministrationFlowType<F>[] flows, AdministrationEscalationType[] escalations,
+			Class<G> governanceKeyClass, AdministrationGovernanceType<G>[] governances) {
+		this.administrationFactory = administrationFactory;
 		this.extensionInterface = extensionInterface;
 		this.flowKeyClass = flowKeyClass;
+		this.flows = flows;
+		this.escalations = escalations;
 		this.governanceKeyClass = governanceKeyClass;
+		this.governances = governances;
 	}
 
 	/*
@@ -72,8 +108,7 @@ public class AdministrationTypeImpl<E, F extends Enum<F>, G extends Enum<G>> imp
 
 	@Override
 	public AdministrationFactory<E, F, G> getAdministrationFactory() {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+		return this.administrationFactory;
 	}
 
 	@Override
@@ -83,14 +118,12 @@ public class AdministrationTypeImpl<E, F extends Enum<F>, G extends Enum<G>> imp
 
 	@Override
 	public AdministrationFlowType<F>[] getFlowTypes() {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+		return flows;
 	}
 
 	@Override
 	public AdministrationEscalationType[] getEscalationTypes() {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+		return this.escalations;
 	}
 
 	@Override
@@ -100,8 +133,7 @@ public class AdministrationTypeImpl<E, F extends Enum<F>, G extends Enum<G>> imp
 
 	@Override
 	public AdministrationGovernanceType<G>[] getGovernanceTypes() {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+		return this.governances;
 	}
 
 }

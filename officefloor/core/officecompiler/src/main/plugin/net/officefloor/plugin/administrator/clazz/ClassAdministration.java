@@ -53,6 +53,11 @@ public class ClassAdministration
 	private final Method administrationMethod;
 
 	/**
+	 * {@link AdministrationParameterFactory} instances.
+	 */
+	private final AdministrationParameterFactory[] parameterFactories;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param constructor
@@ -61,10 +66,14 @@ public class ClassAdministration
 	 * @param administrationMethod
 	 *            {@link Method} to invoke on the {@link Object} for this
 	 *            {@link Administration}.
+	 * @param parameterFactories
+	 *            {@link AdministrationParameterFactory} instances.
 	 */
-	public ClassAdministration(Constructor<?> constructor, Method administrationMethod) {
+	public ClassAdministration(Constructor<?> constructor, Method administrationMethod,
+			AdministrationParameterFactory[] parameterFactories) {
 		this.constructor = constructor;
 		this.administrationMethod = administrationMethod;
+		this.parameterFactories = parameterFactories;
 	}
 
 	/*
@@ -83,15 +92,18 @@ public class ClassAdministration
 	@Override
 	public void administer(AdministrationContext<Object, Indexed, Indexed> context) throws Throwable {
 
-		// Obtain the listing of extensions
-		Object[] extensions = context.getExtensions();
+		// Create the parameters
+		Object[] parameters = new Object[this.parameterFactories.length];
+		for (int i = 0; i < parameters.length; i++) {
+			parameters[i] = this.parameterFactories[i].createParameter(context);
+		}
 
 		try {
 			// Obtain the object
 			Object object = (constructor != null ? constructor.newInstance(DEFAULT_CONSTRUCTOR_ARGS) : null);
 
-			// Invoke the method to administer extensions
-			this.administrationMethod.invoke(object, (Object) extensions);
+			// Invoke the method to administer
+			this.administrationMethod.invoke(object, parameters);
 
 		} catch (InvocationTargetException ex) {
 			// Propagate cause

@@ -27,6 +27,9 @@ import net.officefloor.compile.administration.AdministrationEscalationType;
 import net.officefloor.compile.administration.AdministrationFlowType;
 import net.officefloor.compile.administration.AdministrationGovernanceType;
 import net.officefloor.compile.administration.AdministrationType;
+import net.officefloor.compile.impl.administrator.AdministrationEscalationTypeImpl;
+import net.officefloor.compile.impl.administrator.AdministrationFlowTypeImpl;
+import net.officefloor.compile.impl.administrator.AdministrationGovernanceTypeImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.Property;
@@ -36,7 +39,6 @@ import net.officefloor.compile.spi.administration.source.AdministrationSourceSpe
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.administration.AdministrationFactory;
-import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.internal.structure.Flow;
 
@@ -340,177 +342,6 @@ public class AdministrationLoaderUtil {
 		@Override
 		public AdministrationGovernanceType<G>[] getGovernanceTypes() {
 			return CompileUtil.toArray(this.governances, new AdministrationGovernanceType[0]);
-		}
-	}
-
-	/**
-	 * {@link AdministrationFlowType} implementation.
-	 */
-	private static class AdministrationFlowTypeImpl<F extends Enum<F>> implements AdministrationFlowType<F> {
-
-		/**
-		 * Name of the {@link Flow}.
-		 */
-		private final String flowName;
-
-		/**
-		 * Argument type to the {@link Flow}.
-		 */
-		private final Class<?> argumentType;
-
-		/**
-		 * Index identifying the {@link Flow}.
-		 */
-		private final int index;
-
-		/**
-		 * Key identifying the {@link Flow}.
-		 */
-		private final F key;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param flowName
-		 *            Name of the {@link Flow}.
-		 * @param argumentType
-		 *            Argument type to the {@link Flow}.
-		 * @param index
-		 *            Index identifying the {@link Flow}.
-		 * @param key
-		 *            Key identifying the {@link Flow}.
-		 */
-		public AdministrationFlowTypeImpl(String flowName, Class<?> argumentType, int index, F key) {
-			this.flowName = flowName;
-			this.argumentType = argumentType;
-			this.index = index;
-			this.key = key;
-		}
-
-		/*
-		 * ==================== AdministrationFlowType =======================
-		 */
-
-		@Override
-		public String getFlowName() {
-			return this.flowName;
-		}
-
-		@Override
-		public Class<?> getArgumentType() {
-			return this.argumentType;
-		}
-
-		@Override
-		public int getIndex() {
-			return this.index;
-		}
-
-		@Override
-		public F getKey() {
-			return this.key;
-		}
-	}
-
-	/**
-	 * {@link AdministrationEscalationType} implementation.
-	 */
-	private static class AdministrationEscalationTypeImpl implements AdministrationEscalationType {
-
-		/**
-		 * {@link Escalation} name.
-		 */
-		private final String escalationName;
-
-		/**
-		 * {@link Escalation} type.
-		 */
-		private final Class<? extends Throwable> escalationType;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param escalationName
-		 *            {@link Escalation} name.
-		 * @param escalationType
-		 *            {@link Escalation} type.
-		 */
-		public AdministrationEscalationTypeImpl(String escalationName, Class<? extends Throwable> escalationType) {
-			this.escalationName = escalationName;
-			this.escalationType = escalationType;
-		}
-
-		/*
-		 * ================= AdministrationEscalationType ===============
-		 */
-
-		@Override
-		public String getEscalationName() {
-			return this.escalationName;
-		}
-
-		@Override
-		@SuppressWarnings("unchecked")
-		public <E extends Throwable> Class<E> getEscalationType() {
-			return (Class<E>) this.escalationType;
-		}
-	}
-
-	/**
-	 * {@link AdministrationGovernanceType} implementation.
-	 */
-	private static class AdministrationGovernanceTypeImpl<G extends Enum<G>>
-			implements AdministrationGovernanceType<G> {
-
-		/**
-		 * Name of {@link Governance}.
-		 */
-		private final String governanceName;
-
-		/**
-		 * Index identifying the {@link AdministrationGovernanceType}.
-		 */
-		private final int index;
-
-		/**
-		 * Key identifying the {@link AdministrationGovernanceType}.
-		 */
-		private final G key;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param governanceName
-		 *            Name of {@link Governance}.
-		 * @param index
-		 *            Index identifying the
-		 *            {@link AdministrationGovernanceType}.
-		 * @param key
-		 *            Key identifying the {@link AdministrationGovernanceType}.
-		 */
-		public AdministrationGovernanceTypeImpl(String governanceName, int index, G key) {
-			this.governanceName = governanceName;
-			this.index = index;
-			this.key = key;
-		}
-
-		/*
-		 * ================= AdministrationGovernanceType ============
-		 */
-
-		@Override
-		public String getGovernanceName() {
-			return this.governanceName;
-		}
-
-		@Override
-		public int getIndex() {
-			return this.index;
-		}
-
-		@Override
-		public G getKey() {
-			return this.key;
 		}
 	}
 

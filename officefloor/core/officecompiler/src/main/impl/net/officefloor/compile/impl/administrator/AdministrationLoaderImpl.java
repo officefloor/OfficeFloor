@@ -17,6 +17,9 @@
  */
 package net.officefloor.compile.impl.administrator;
 
+import net.officefloor.compile.administration.AdministrationEscalationType;
+import net.officefloor.compile.administration.AdministrationFlowType;
+import net.officefloor.compile.administration.AdministrationGovernanceType;
 import net.officefloor.compile.administration.AdministrationLoader;
 import net.officefloor.compile.administration.AdministrationType;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
@@ -25,6 +28,7 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.administration.source.AdministrationEscalationMetaData;
 import net.officefloor.compile.spi.administration.source.AdministrationFlowMetaData;
 import net.officefloor.compile.spi.administration.source.AdministrationGovernanceMetaData;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
@@ -33,6 +37,8 @@ import net.officefloor.compile.spi.administration.source.AdministrationSourceMet
 import net.officefloor.compile.spi.administration.source.AdministrationSourceProperty;
 import net.officefloor.compile.spi.administration.source.AdministrationSourceSpecification;
 import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.AdministrationFactory;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.api.source.UnknownClassError;
@@ -217,10 +223,21 @@ public class AdministrationLoaderImpl implements AdministrationLoader {
 		}
 
 		// Ensure handle issues interacting with meta-data
+		AdministrationFactory<E, F, G> administrationFactory;
 		Class<E> extensionInterface;
 		Class<F> flowKeyClass = null;
+		AdministrationFlowType<F>[] flowTypes;
+		AdministrationEscalationType[] escalationTypes;
 		Class<G> governanceKeyClass = null;
+		AdministrationGovernanceType<G>[] governanceTypes;
 		try {
+
+			// Obtain the administration factory
+			administrationFactory = metaData.getAdministrationFactory();
+			if (administrationFactory == null) {
+				this.addIssue("No " + AdministrationFactory.class.getSimpleName() + " provided");
+				return null; // must have administration factory
+			}
 
 			// Obtain the extension interface type
 			extensionInterface = metaData.getExtensionInterface();
@@ -229,24 +246,75 @@ public class AdministrationLoaderImpl implements AdministrationLoader {
 				return null; // must have extension interface
 			}
 
-			// Obtain the flow key class
+			// Obtain the flow details
 			AdministrationFlowMetaData<F>[] flowMetaDatas = metaData.getFlowMetaData();
-			for (AdministrationFlowMetaData<F> flowMetaData : flowMetaDatas) {
+			flowTypes = new AdministrationFlowType[flowMetaDatas.length];
+			for (int i = 0; i < flowMetaDatas.length; i++) {
+				AdministrationFlowMetaData<F> flowMetaData = flowMetaDatas[i];
 
 				// Obtain the flow key class
-				flowKeyClass = (Class<F>) flowMetaData.getKey().getClass();
+				F flowKey = flowMetaData.getKey();
+				if (flowKey != null) {
+					flowKeyClass = (Class<F>) flowKey.getClass();
+				} else {
+					flowKeyClass = (Class<F>) Indexed.class;
+				}
 
+				// Obtain the flow details
+				Class<?> argumentType = flowMetaData.getArgumentType();
+				int flowIndex = (flowKey != null ? flowKey.ordinal() : i);
+				String flowName = flowMetaData.getLabel();
+				if (flowName == null) {
+					flowName = (flowKey != null ? flowKey.toString() : String.valueOf(flowIndex));
+				}
+
+				// Create the flow type
+				flowTypes[i] = new AdministrationFlowTypeImpl<F>(flowName, argumentType, flowIndex, flowKey);
 			}
 
-			// Obtain the governancey key class
+			// Obtain the escalation details
+			AdministrationEscalationMetaData[] escalationMetaDatas = metaData.getEscalationMetaData();
+			escalationTypes = new AdministrationEscalationType[escalationMetaDatas.length];
+			for (int i = 0; i < escalationMetaDatas.length; i++) {
+				AdministrationEscalationMetaData escalationMetaData = escalationMetaDatas[i];
+
+				// Obtain the escalation details
+				Class<? extends Throwable> escalationType = escalationMetaData.getEscalationType();
+				String escalationName = escalationMetaData.getLabel();
+				if (escalationName == null) {
+					escalationName = escalationType.getSimpleName();
+				}
+
+				// Create the escalation type
+				escalationTypes[i] = new AdministrationEscalationTypeImpl(escalationName, escalationType);
+			}
+
+			// Obtain the governance details
 			AdministrationGovernanceMetaData<G>[] governanceMetaDatas = metaData.getGovernanceMetaData();
-			for (AdministrationGovernanceMetaData<G> governanceMetaData : governanceMetaDatas) {
+			governanceTypes = new AdministrationGovernanceType[governanceMetaDatas.length];
+			for (int i = 0; i < governanceMetaDatas.length; i++) {
+				AdministrationGovernanceMetaData<G> governanceMetaData = governanceMetaDatas[i];
 
 				// Obtain the governance key class
-				governanceKeyClass = (Class<G>) governanceMetaData.getKey().getClass();
-			}
+				G governanceKey = governanceMetaData.getKey();
+				if (governanceKey != null) {
+					governanceKeyClass = (Class<G>) governanceKey.getClass();
+				} else {
+					governanceKeyClass = (Class<G>) Indexed.class;
+				}
 
-			// TODO obtain remaining details of administrations
+				// Obtain the governance details
+				int governanceIndex = (governanceKey != null ? governanceKey.ordinal() : i);
+				String governanceName = governanceMetaData.getLabel();
+				if (governanceName == null) {
+					governanceName = (governanceKey != null ? governanceKey.toString()
+							: String.valueOf(governanceIndex));
+				}
+
+				// Create the governance type
+				governanceTypes[i] = new AdministrationGovernanceTypeImpl<G>(governanceName, governanceIndex,
+						governanceKey);
+			}
 
 		} catch (Throwable ex) {
 			this.addIssue("Exception from " + administratorSourceClass.getName(), ex);
@@ -254,7 +322,8 @@ public class AdministrationLoaderImpl implements AdministrationLoader {
 		}
 
 		// Return the administrator type
-		return new AdministrationTypeImpl<E, F, G>(extensionInterface, flowKeyClass, governanceKeyClass);
+		return new AdministrationTypeImpl<E, F, G>(administrationFactory, extensionInterface, flowKeyClass, flowTypes,
+				escalationTypes, governanceKeyClass, governanceTypes);
 
 	}
 
