@@ -58,7 +58,7 @@ public class EscalationHandlerIntegrationTest extends OfficeFrameTestCase {
 
 		// Ensure handled escalation
 		IOException failure = new IOException("TEST");
-		officeFloor.invokeFunction("FAILURE.NAMESPACE.service", failure);
+		officeFloor.invokeFunction("FAILURE.service", failure);
 		assertSame("Failure should be handled by overridden escalation handler", failure, handler.escalation);
 
 		// Close OfficeFloor

@@ -35,19 +35,19 @@ import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
-import net.officefloor.compile.spi.section.SectionFunction;
-import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.SubSectionInput;
 import net.officefloor.compile.spi.section.SubSectionObject;
 import net.officefloor.compile.spi.section.SubSectionOutput;
-import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -150,7 +150,7 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 			// Trigger function to ensure linking via enhancements
 			final int NUMBER_OF_VALUES = 2;
 			List<String> values = new ArrayList<String>(NUMBER_OF_VALUES);
-			officeFloor.invokeFunction("ONE.MOCK_TRANSFORMED.NAMESPACE.inputTwo", values);
+			officeFloor.invokeFunction("ONE.MOCK_TRANSFORMED.inputTwo", values);
 
 			// Ensure appropriate functions triggered
 			assertEquals("Incorrect number of values", NUMBER_OF_VALUES, values.size());
@@ -200,7 +200,7 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 			// Trigger function to ensure linking via enhancements
 			final int NUMBER_OF_VALUES = 2;
 			List<String> values = new ArrayList<String>(NUMBER_OF_VALUES);
-			officeFloor.invokeFunction("ONE.MOCK_TRANSFORMED.MOCK_TRANSFORMED.NAMESPACE.inputTwo", values);
+			officeFloor.invokeFunction("ONE.MOCK_TRANSFORMED.MOCK_TRANSFORMED.inputTwo", values);
 
 			// Ensure appropriate functions triggered
 			assertEquals("Incorrect number of values", NUMBER_OF_VALUES, values.size());

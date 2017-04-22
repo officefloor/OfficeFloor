@@ -15,16 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.administrator.clazz;
+package net.officefloor.plugin.administration.clazz;
 
 import net.officefloor.frame.api.administration.AdministrationContext;
 
 /**
- * {@link AdministrationParameterFactory} to obtain the extensions.
+ * {@link AdministrationParameterFactory} to obtain the
+ * {@link AdministrationContext}.
  * 
  * @author Daniel Sagenschneider
  */
-public class AdministrationExtensionParameterFactory implements AdministrationParameterFactory {
+public class AdministrationContextParameterFactory implements AdministrationParameterFactory {
 
 	/*
 	 * ==================== ParameterFactory ========================
@@ -32,7 +33,7 @@ public class AdministrationExtensionParameterFactory implements AdministrationPa
 
 	@Override
 	public Object createParameter(AdministrationContext<?, ?, ?> context) throws Exception {
-		return context.getExtensions();
+		return context;
 	}
 
 }

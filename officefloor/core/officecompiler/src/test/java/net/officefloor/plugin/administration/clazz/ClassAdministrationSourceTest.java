@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.administrator.clazz;
+package net.officefloor.plugin.administration.clazz;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -31,6 +31,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.administration.clazz.ClassAdministrationSource;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 
 /**

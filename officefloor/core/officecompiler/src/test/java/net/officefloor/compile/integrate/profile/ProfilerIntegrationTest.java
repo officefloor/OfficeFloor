@@ -56,7 +56,7 @@ public class ProfilerIntegrationTest extends OfficeFrameTestCase {
 
 		// Invoke the function
 		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
-		officeFloor.invokeFunction("SECTION.NAMESPACE.function", null);
+		officeFloor.invokeFunction("SECTION.function", null);
 		officeFloor.closeOfficeFloor();
 
 		// Ensure profiled
@@ -66,7 +66,7 @@ public class ProfilerIntegrationTest extends OfficeFrameTestCase {
 		List<ProfiledManagedFunction> functions = threads.get(0).getProfiledManagedFunctions();
 		assertEquals("Should just be one function profiled", 1, functions.size());
 		ProfiledManagedFunction function = functions.get(0);
-		assertEquals("Incorrect profiled function", "SECTION.NAMESPACE.function", function.getFunctionName());
+		assertEquals("Incorrect profiled function", "SECTION.function", function.getFunctionName());
 	}
 
 	/**

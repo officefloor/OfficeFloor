@@ -287,8 +287,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	@Override
 	public ManagedFunctionNode addManagedFunctionNode(String functionName, String functionTypeName,
 			FunctionNamespaceNode namespaceNode) {
-		String namespaceQualifiedFunctionName = namespaceNode.getFunctionNamespaceQualifiedFunctionName(functionName);
-		return NodeUtil.getInitialisedNode(namespaceQualifiedFunctionName, this.functionNodes, this.context,
+		return NodeUtil.getInitialisedNode(functionName, this.functionNodes, this.context,
 				() -> this.context.createFunctionNode(functionName),
 				(function) -> function.initialise(functionTypeName, namespaceNode));
 	}
@@ -895,10 +894,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
-	public OfficeSectionFunction getOfficeSectionFunction(String namespaceQualifiedFunctionName) {
-		String functionName = this.context.extractUnqualifiedFunctionName(namespaceQualifiedFunctionName);
-		return NodeUtil.getNode(namespaceQualifiedFunctionName, this.functionNodes,
-				() -> this.context.createFunctionNode(functionName));
+	public OfficeSectionFunction getOfficeSectionFunction(String functionName) {
+		return NodeUtil.getNode(functionName, this.functionNodes, () -> this.context.createFunctionNode(functionName));
 	}
 
 	@Override

@@ -839,10 +839,4 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		return new FunctionNamespaceNodeImpl(functionNamespaceName, section, this);
 	}
 
-	@Override
-	public String extractUnqualifiedFunctionName(String qualifiedFunctionName) {
-		String[] parts = qualifiedFunctionName.split("\\.");
-		return parts[parts.length - 1]; // last part is function name
-	}
-
 }

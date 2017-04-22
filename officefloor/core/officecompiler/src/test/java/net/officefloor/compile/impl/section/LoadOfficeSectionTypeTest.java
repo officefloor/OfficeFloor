@@ -155,7 +155,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 		assertEquals("Should be no managed object s", 0, section.getOfficeSectionManagedObjectTypes().length);
 		assertEquals("Should have a single function", 1, section.getOfficeFunctionTypes().length);
 		OfficeFunctionType function = section.getOfficeFunctionTypes()[0];
-		assertEquals("Incorrect function name", "NAMESPACE.FUNCTION", function.getOfficeFunctionName());
+		assertEquals("Incorrect function name", "FUNCTION", function.getOfficeFunctionName());
 		assertSame("Incorrect parent section for function", section, function.getOfficeSubSectionType());
 	}
 

@@ -16,15 +16,15 @@
 			<team name="OFFICE_TEAM" />
 		</teams>
 		<sections>
-			<section name="SECTION" source="SECTION" location="section">
+			<section name="SECTION_ONE" source="SECTION" location="sectionOne">
 				<output name="EXTERNAL_FLOW">
-					<section-input section="DESK" input="INPUT" />
+					<section-input section="SECTION_TWO" input="INPUT" />
 				</output>
 				<responsibility name="RESPONSIBILITY">
 					<team name="OFFICE_TEAM" />
 				</responsibility>
 			</section>
-			<section name="DESK" source="DESK" location="desk">
+			<section name="SECTION_TWO" source="SECTION" location="sectionTwo">
 				<input name="INPUT" />
 				<responsibility name="RESPONSIBILITY">
 					<team name="OFFICE_TEAM" />
@@ -32,35 +32,41 @@
 			</section>
 		</sections>
 	</office>
-	<section>
-		<external-flows>
-			<external-flow name="EXTERNAL_FLOW" argument-type="java.lang.Integer" />
-		</external-flows>
-		<managed-object-sources>
-			<managed-object-source name="MANAGED_OBJECT_SOURCE"
-				source="CLASS">
-				<properties>
-					<property name="class.name" value="${testcase}$ProcessManagedObject" />
-				</properties>
-				<flow name="doProcess">
-					<external-flow name="EXTERNAL_FLOW" />
-				</flow>
-			</managed-object-source>
-		</managed-object-sources>
-	</section>
-	<desk>
-		<works>
-			<work name="WORK" source="CLASS">
-				<properties>
-					<property name="class.name" value="${testcase}$ProcessWork" />
-				</properties>
-				<work-task name="process">
-					<task-object name="java.lang.Integer" parameter="true" />
-				</work-task>
-			</work>
-		</works>
-		<tasks>
-			<task name="INPUT" work="WORK" task="process" public="true" />
-		</tasks>
-	</desk>
+	<sectionOne>
+		<section>
+			<external-flows>
+				<external-flow name="EXTERNAL_FLOW" argument-type="java.lang.Integer" />
+			</external-flows>
+			<managed-object-sources>
+				<managed-object-source name="MANAGED_OBJECT_SOURCE"
+					source="CLASS">
+					<properties>
+						<property name="class.name" value="${testcase}$ProcessManagedObject" />
+					</properties>
+					<flow name="doProcess">
+						<external-flow name="EXTERNAL_FLOW" />
+					</flow>
+				</managed-object-source>
+			</managed-object-sources>
+		</section>
+	</sectionOne>
+	<sectionTwo>
+		<section>
+			<function-namespaces>
+				<function-namespace name="NAMESPACE" source="CLASS">
+					<properties>
+						<property name="class.name" value="${testcase}$ProcessClass" />
+					</properties>
+					<managed-function name="process">
+						<managed-function-object name="java.lang.Integer"
+							parameter="true" />
+					</managed-function>
+				</function-namespace>
+			</function-namespaces>
+			<functions>
+				<function name="INPUT" function-namespace="NAMESPACE"
+					managed-function="process" public="true" />
+			</functions>
+		</section>
+	</sectionTwo>
 </context>

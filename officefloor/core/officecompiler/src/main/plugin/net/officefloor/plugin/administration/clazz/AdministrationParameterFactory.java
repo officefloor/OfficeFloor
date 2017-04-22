@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.administrator.clazz;
+package net.officefloor.plugin.administration.clazz;
 
 import net.officefloor.frame.api.administration.AdministrationContext;
 

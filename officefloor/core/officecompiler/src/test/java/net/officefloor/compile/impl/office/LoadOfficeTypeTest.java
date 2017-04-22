@@ -62,10 +62,11 @@ import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.OfficeSourceSpecification;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
+import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.plugin.administrator.clazz.ClassAdministrationSource;
+import net.officefloor.plugin.administration.clazz.ClassAdministrationSource;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -536,6 +537,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	 * extension interfaces).
 	 */
 	public void testAdministeredManagedObjectType() {
+		final AdministrationFactory<?, ?, ?> factory = this.createMock(AdministrationFactory.class);
 
 		// Load office type with administered OfficeFloor managed object
 		OfficeType officeType = this.loadOfficeType(true, new Loader() {
@@ -543,7 +545,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
 				OfficeObject mo = office.addOfficeObject("MO", Connection.class.getName());
 				OfficeAdministration admin = LoadOfficeTypeTest.this.addAdministration(office, "ADMIN",
-						XAResource.class, null);
+						XAResource.class, factory, null);
 				admin.administerManagedObject(mo);
 			}
 		});

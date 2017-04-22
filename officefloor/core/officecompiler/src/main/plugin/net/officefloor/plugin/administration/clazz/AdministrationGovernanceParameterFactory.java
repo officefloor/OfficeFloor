@@ -15,42 +15,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.administrator.clazz;
+package net.officefloor.plugin.administration.clazz;
 
 import net.officefloor.frame.api.administration.AdministrationContext;
-import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.plugin.clazz.ClassFlowMethodMetaData;
-import net.officefloor.plugin.clazz.ClassFlowParameterFactory;
+import net.officefloor.frame.api.administration.GovernanceManager;
 
 /**
- * {@link AdministrationParameterFactory} to obtain the {@link Flow}.
+ * {@link AdministrationParameterFactory} to obtain the
+ * {@link GovernanceManager}.
  * 
  * @author Daniel Sagenschneider
  */
-public class AdministrationFlowParameterFactory implements AdministrationParameterFactory {
+public class AdministrationGovernanceParameterFactory implements AdministrationParameterFactory {
 
 	/**
-	 * {@link ClassFlowParameterFactory}.
+	 * Index of the {@link GovernanceManager}.
 	 */
-	private final ClassFlowParameterFactory flowParameterFactory;
+	private final int governanceIndex;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param flowParameterFactory
-	 *            {@link ClassFlowParameterFactory}.
+	 * @param governanceIndex
+	 *            Index of the {@link GovernanceManager}.
 	 */
-	public AdministrationFlowParameterFactory(ClassFlowParameterFactory flowParameterFactory) {
-		this.flowParameterFactory = flowParameterFactory;
-	}
-
-	/**
-	 * Obtains the {@link ClassFlowMethodMetaData}.
-	 * 
-	 * @return {@link ClassFlowMethodMetaData} instances.
-	 */
-	public ClassFlowMethodMetaData[] getFlowMethodMetaData() {
-		return this.flowParameterFactory.getFlowMethodMetaData();
+	public AdministrationGovernanceParameterFactory(int governanceIndex) {
+		this.governanceIndex = governanceIndex;
 	}
 
 	/*
@@ -59,7 +49,7 @@ public class AdministrationFlowParameterFactory implements AdministrationParamet
 
 	@Override
 	public Object createParameter(AdministrationContext<?, ?, ?> context) throws Exception {
-		return this.flowParameterFactory.createParameter(context);
+		return context.getGovernance(this.governanceIndex);
 	}
 
 }

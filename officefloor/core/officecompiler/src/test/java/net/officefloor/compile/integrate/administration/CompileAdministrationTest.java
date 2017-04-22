@@ -62,8 +62,9 @@ public class CompileAdministrationTest extends AbstractCompileTestCase {
 		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM", OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
-		this.record_officeBuilder_addFunction("DESK.NAMESPACE.FUNCTION", "OFFICE_TEAM");
-		this.record_functionBuilder_preAdministration("ADMIN", SimpleManagedObject.class);
+		this.record_officeBuilder_addFunction("SECTION", "FUNCTION").setResponsibleTeam("OFFICE_TEAM");
+		this.record_functionBuilder_preAdministration("ADMIN", SimpleManagedObject.class)
+				.setResponsibleTeam("OFFICE_TEAM");
 
 		// Compile
 		this.compile(true);
@@ -82,8 +83,9 @@ public class CompileAdministrationTest extends AbstractCompileTestCase {
 		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM", OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
-		this.record_officeBuilder_addFunction("DESK.NAMESPACE.FUNCTION", "OFFICE_TEAM");
-		this.record_functionBuilder_postAdministration("ADMIN", SimpleManagedObject.class);
+		this.record_officeBuilder_addFunction("SECTION", "FUNCTION").setResponsibleTeam("OFFICE_TEAM");
+		this.record_functionBuilder_postAdministration("ADMIN", SimpleManagedObject.class)
+				.setResponsibleTeam("OFFICE_TEAM");
 
 		// Compile
 		this.compile(true);
@@ -94,6 +96,9 @@ public class CompileAdministrationTest extends AbstractCompileTestCase {
 	 */
 	public void testAdministerOfficeFloorManagedObject() {
 
+		// Record obtaining the section type
+		this.issues.recordCaptureIssues(false);
+
 		// Record building the OfficeFloor
 		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM", OnePersonTeamSource.class);
@@ -103,7 +108,7 @@ public class CompileAdministrationTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this.record_officeBuilder_addFunction("DESK.NAMESPACE.FUNCTION", "OFFICE_TEAM");
+		this.record_officeBuilder_addFunction("SECTION", "FUNCTION").setResponsibleTeam("OFFICE_TEAM");
 		AdministrationBuilder<?, ?> admin = this.record_functionBuilder_preAdministration("ADMIN",
 				SimpleManagedObject.class);
 		admin.administerManagedObject("MANAGED_OBJECT");
@@ -117,15 +122,18 @@ public class CompileAdministrationTest extends AbstractCompileTestCase {
 	 */
 	public void testAdministerOfficeManagedObject() {
 
+		// Record obtaining the section type
+		this.issues.recordCaptureIssues(false);
+
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", OnePersonTeamSource.class);
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 		office.registerManagedObjectSource("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT_SOURCE");
 		this.record_officeFloorBuilder_addManagedObject("OFFICE.MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
 				0, "class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_officeBuilder_addThreadManagedObject("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT");
+		this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
 		AdministrationBuilder<?, ?> admin = this.record_functionBuilder_preAdministration("ADMIN",
 				SimpleManagedObject.class);
 		admin.administerManagedObject("OFFICE.MANAGED_OBJECT");

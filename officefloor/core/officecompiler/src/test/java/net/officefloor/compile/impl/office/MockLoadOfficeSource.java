@@ -35,7 +35,7 @@ import net.officefloor.compile.spi.office.OfficeOutput;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
-import net.officefloor.plugin.administrator.clazz.ClassAdministrationSource;
+import net.officefloor.plugin.administration.clazz.ClassAdministrationSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
 

@@ -541,7 +541,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 		this.recordReturn(this.functionBuilder,
 				this.functionBuilder.preAdminister(administrationName, extensionInterface, adminFactory), admin);
 		if (!this.isMatcherSet_functionBuilder_preAdministration) {
-			this.control(this.officeBuilder).setMatcher(new AbstractMatcher() {
+			this.control(this.functionBuilder).setMatcher(new AbstractMatcher() {
 				@Override
 				public boolean matches(Object[] expected, Object[] actual) {
 					assertNotNull("Must have administration factory", actual[2]);
@@ -582,7 +582,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 		this.recordReturn(this.functionBuilder,
 				this.functionBuilder.postAdminister(administrationName, extensionInterface, adminFactory), admin);
 		if (!this.isMatcherSet_functionBuilder_postAdministration) {
-			this.control(this.officeBuilder).setMatcher(new AbstractMatcher() {
+			this.control(this.functionBuilder).setMatcher(new AbstractMatcher() {
 				@Override
 				public boolean matches(Object[] expected, Object[] actual) {
 					assertNotNull("Must have administration factory", actual[2]);

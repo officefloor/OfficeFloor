@@ -45,7 +45,7 @@ public class LoadFunctionTest extends AbstractOfficeFloorTestCase {
 		this.record_officefloor_addTeam("OFFICE_FLOOR_TEAM");
 		OfficeBuilder officeBuilder = this.record_officefloor_addOffice("OFFICE");
 		officeBuilder.registerTeam("OFFICE_TEAM", "OFFICE_FLOOR_TEAM");
-		ManagedFunctionBuilder<?, ?> functionBuilder = this.record_office_addFunction("SECTION.NAMESPACE.FUNCTION",
+		ManagedFunctionBuilder<?, ?> functionBuilder = this.record_office_addFunction("SECTION.FUNCTION",
 				functionFactory);
 		functionBuilder.setResponsibleTeam("OFFICE_TEAM");
 

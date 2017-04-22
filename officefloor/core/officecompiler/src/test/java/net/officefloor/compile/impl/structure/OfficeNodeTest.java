@@ -49,13 +49,14 @@ import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionOutput;
+import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.impl.section.SectionModelSectionSource;
-import net.officefloor.plugin.administrator.clazz.ClassAdministrationSource;
+import net.officefloor.plugin.administration.clazz.ClassAdministrationSource;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
@@ -574,13 +575,15 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	 * Tests adding an {@link OfficeAdministration}.
 	 */
 	public void testAddOfficeAdministration() {
+		final AdministrationFactory<?, ?, ?> factory = this.createMock(AdministrationFactory.class);
+
 		// Add two different administrations verifying details
 		this.replayMockObjects();
-		OfficeAdministration admin = this.addAdministration(this.node, "ADMIN", Connection.class, null);
+		OfficeAdministration admin = this.addAdministration(this.node, "ADMIN", Connection.class, factory, null);
 		assertNotNull("Must have administration", admin);
 		assertEquals("Incorrect administration name", "ADMIN", admin.getOfficeAdministrationName());
 		assertNotSame("Should obtain another administration", admin,
-				this.addAdministration(this.node, "ANOTHER", Connection.class, null));
+				this.addAdministration(this.node, "ANOTHER", Connection.class, factory, null));
 		this.verifyMockObjects();
 	}
 
@@ -588,14 +591,15 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	 * Ensure issue if add the {@link OfficeAdministration} twice.
 	 */
 	public void testAddOfficeAdministrationTwice() {
+		final AdministrationFactory<?, ?, ?> factory = this.createMock(AdministrationFactory.class);
 
 		// Record issue in adding the administration twice
 		this.issues.recordIssue("ADMIN", AdministrationNodeImpl.class, "Administration ADMIN already added");
 
 		// Add the administration twice
 		this.replayMockObjects();
-		OfficeAdministration adminFirst = this.addAdministration(this.node, "ADMIN", Connection.class, null);
-		OfficeAdministration adminSecond = this.addAdministration(this.node, "ADMIN", Connection.class, null);
+		OfficeAdministration adminFirst = this.addAdministration(this.node, "ADMIN", Connection.class, factory, null);
+		OfficeAdministration adminSecond = this.addAdministration(this.node, "ADMIN", Connection.class, factory, null);
 		this.verifyMockObjects();
 
 		// Should be the same administration
@@ -790,6 +794,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	 * Ensures can link {@link OfficeAdministration} to the {@link OfficeTeam}.
 	 */
 	public void testLinkOfficeAdministrationToOfficeTeam() {
+		final AdministrationFactory<?, ?, ?> factory = this.createMock(AdministrationFactory.class);
 
 		// Record already being linked
 		this.issues.recordIssue("ADMIN", AdministrationNodeImpl.class, "Administration ADMIN linked more than once");
@@ -797,7 +802,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Link
-		OfficeAdministration admin = this.addAdministration(this.node, "ADMIN", Connection.class, null);
+		OfficeAdministration admin = this.addAdministration(this.node, "ADMIN", Connection.class, factory, null);
 		OfficeTeam officeTeam = this.node.addOfficeTeam("OFFICE_TEAM");
 		this.node.link(admin, officeTeam);
 		assertTeamLink("administration -> office team", admin, officeTeam);
@@ -884,6 +889,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	 * {@link OfficeSectionFunction}.
 	 */
 	public void testLinkPreOfficeAdministrationForOfficeFunction() {
+		final AdministrationFactory<?, ?, ?> factory = this.createMock(AdministrationFactory.class);
 
 		this.replayMockObjects();
 
@@ -893,13 +899,13 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Link
 		OfficeAdministration administration = this.addAdministration(this.node, "ADMINISTRATION", Connection.class,
-				null);
+				factory, null);
 		assertEquals("Incorrect administration name", "ADMINISTRATION", administration.getOfficeAdministrationName());
 		function.addPreAdministration(administration);
 		// TODO test that pre administration specified
 
 		// May have many pre administration
-		function.addPreAdministration(this.addAdministration(this.node, "ANOTHER", Connection.class, null));
+		function.addPreAdministration(this.addAdministration(this.node, "ANOTHER", Connection.class, factory, null));
 
 		this.verifyMockObjects();
 	}
@@ -909,6 +915,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	 * {@link OfficeSectionFunction}.
 	 */
 	public void testLinkPostOfficeAdministrationForOfficeFunction() {
+		final AdministrationFactory<?, ?, ?> factory = this.createMock(AdministrationFactory.class);
 
 		this.replayMockObjects();
 
@@ -918,12 +925,13 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Link
 		OfficeAdministration administration = this.addAdministration(this.node, "ADMINISTRATION_A", Connection.class,
-				null);
+				factory, null);
 		function.addPostAdministration(administration);
 		// TODO test that post administration specified
 
 		// May have many post administrations
-		function.addPostAdministration(this.addAdministration(this.node, "ADMINISTRATION_B", Connection.class, null));
+		function.addPostAdministration(
+				this.addAdministration(this.node, "ADMINISTRATION_B", Connection.class, factory, null));
 
 		this.verifyMockObjects();
 	}
@@ -990,6 +998,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	 * Ensure can administer {@link OfficeSectionManagedObject}.
 	 */
 	public void testAdministerOfficeSectionManagedObject() {
+		final AdministrationFactory<?, ?, ?> factory = this.createMock(AdministrationFactory.class);
+
 		this.replayMockObjects();
 
 		// Add section with managed object
@@ -998,7 +1008,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Link
 		OfficeAdministration administration = this.addAdministration(this.node, "ADMINISTRATION", Connection.class,
-				null);
+				factory, null);
 		administration.administerManagedObject(mo);
 		// TODO test that administering the section managed object
 
@@ -1012,11 +1022,13 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	 * Ensure can administer {@link OfficeManagedObject}.
 	 */
 	public void testAdministerOfficeManagedObject() {
+		final AdministrationFactory<?, ?, ?> factory = this.createMock(AdministrationFactory.class);
+
 		this.replayMockObjects();
 
 		// Link
 		OfficeAdministration administration = this.addAdministration(this.node, "ADMINISTRATION", Connection.class,
-				null);
+				factory, null);
 		OfficeManagedObjectSource moSource = this.addManagedObjectSource(this.node, "MO_SOURCE", null);
 		OfficeManagedObject mo = moSource.addOfficeManagedObject("MO", ManagedObjectScope.THREAD);
 		administration.administerManagedObject(mo);
@@ -1032,11 +1044,13 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	 * Ensure can administer {@link OfficeObject}.
 	 */
 	public void testAdministerOfficeObject() {
+		final AdministrationFactory<?, ?, ?> factory = this.createMock(AdministrationFactory.class);
+
 		this.replayMockObjects();
 
 		// Link
 		OfficeAdministration administration = this.addAdministration(this.node, "ADMINISTRATION", Connection.class,
-				null);
+				factory, null);
 		OfficeObject mo = this.node.addOfficeObject("MO", Connection.class.getName());
 		administration.administerManagedObject(mo);
 		// TODO test that administering the section managed object

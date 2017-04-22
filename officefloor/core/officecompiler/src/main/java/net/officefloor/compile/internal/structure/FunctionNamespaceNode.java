@@ -21,7 +21,6 @@ import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SectionFunctionNamespace;
-import net.officefloor.frame.api.function.ManagedFunction;
 
 /**
  * {@link SectionFunctionNamespace} node.
@@ -54,27 +53,6 @@ public interface FunctionNamespaceNode extends Node, SectionFunctionNamespace {
 	 *         {@link FunctionNamespaceNode}.
 	 */
 	SectionNode getSectionNode();
-
-	/**
-	 * Obtains the name of this {@link FunctionNamespaceNode} qualified with the
-	 * {@link OfficeSection} hierarchy containing this
-	 * {@link FunctionNamespaceNode}.
-	 * 
-	 * @return Qualified name of this {@link FunctionNamespaceNode}.
-	 */
-	String getQualifiedFunctionNamespaceName();
-
-	/**
-	 * Obtains the {@link ManagedFunction} name qualified with the
-	 * {@link FunctionNamespaceNode}.
-	 * 
-	 * @param functionName
-	 *            Name of the {@link ManagedFunction} within the
-	 *            {@link FunctionNamespaceNode}.
-	 * @return Qualified name of {@link ManagedFunction} within the
-	 *         {@link FunctionNamespaceNode}.
-	 */
-	String getFunctionNamespaceQualifiedFunctionName(String functionName);
 
 	/**
 	 * Obtains the {@link FunctionNamespaceType} for this

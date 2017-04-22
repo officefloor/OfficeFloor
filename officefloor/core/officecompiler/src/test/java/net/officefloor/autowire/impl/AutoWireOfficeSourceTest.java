@@ -1563,7 +1563,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 			 *         <code>false</code> for default {@link OfficeTeam}.
 			 */
 			private boolean isUseAddedTeam(String functionName) {
-				return (isUseTeam && ("NAMESPACE.functionAssign".equals(functionName)));
+				return (isUseTeam && ("functionAssign".equals(functionName)));
 			}
 
 			@Override

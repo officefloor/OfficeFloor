@@ -20,7 +20,7 @@ package net.officefloor.compile.impl.administration;
 import org.junit.Assert;
 
 import net.officefloor.compile.administration.AdministrationType;
-import net.officefloor.plugin.administrator.clazz.ClassAdministrationSource;
+import net.officefloor.plugin.administration.clazz.ClassAdministrationSource;
 
 /**
  * Class for {@link ClassAdministrationSource} that enables validating loading a

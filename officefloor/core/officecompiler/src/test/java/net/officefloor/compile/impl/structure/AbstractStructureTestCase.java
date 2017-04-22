@@ -85,6 +85,7 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
@@ -393,8 +394,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Adds a simple {@link OfficeAdministration} to the
-	 * {@link OfficeAdministration} with the supplied extension interface.
+	 * Adds a simple {@link OfficeAdministration} with the supplied extension
+	 * interface, allowing specification of the {@link AdministrationFactory}.
 	 * 
 	 * @param officeArchitect
 	 *            {@link OfficeArchitect}.
@@ -402,18 +403,22 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 *            Name of the {@link OfficeAdministration}.
 	 * @param extensionInterface
 	 *            Extension interface.
+	 * @param administrationFactory
+	 *            {@link AdministrationFactory}.
 	 * @param maker
 	 *            {@link AdministrationMaker}.
 	 * @return {@link OfficeAdministration}.
 	 */
 	protected OfficeAdministration addAdministration(OfficeArchitect officeArchitect, String administrationName,
-			final Class<?> extensionInterface, final AdministrationMaker maker) {
+			final Class<?> extensionInterface, final AdministrationFactory<?, ?, ?> administrationFactory,
+			final AdministrationMaker maker) {
 
 		// Create the administration maker
 		AdministrationMaker adminMaker = new AdministrationMaker() {
 			@Override
 			public void make(AdministrationMakerContext context) {
-				// Specify the extension interface
+				// Specify administration details
+				context.setAdministrationFactory(administrationFactory);
 				context.setExtensionInterface(extensionInterface);
 
 				// Make the rest of administration
@@ -1578,6 +1583,14 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	protected static interface AdministrationMakerContext {
 
 		/**
+		 * Specifies the {@link AdministrationFactory}.
+		 * 
+		 * @param administrationFactory
+		 *            {@link AdministrationFactory}.
+		 */
+		void setAdministrationFactory(AdministrationFactory<?, ?, ?> administrationFactory);
+
+		/**
 		 * Specifies the extension interface.
 		 * 
 		 * @param extensionInterface
@@ -1697,6 +1710,12 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/*
 		 * ================= AdministrationMakerContext =================
 		 */
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public void setAdministrationFactory(AdministrationFactory<?, ?, ?> administrationFactory) {
+			this.metaDataContext.setAdministrationFactory(administrationFactory);
+		}
 
 		@Override
 		@SuppressWarnings("unchecked")

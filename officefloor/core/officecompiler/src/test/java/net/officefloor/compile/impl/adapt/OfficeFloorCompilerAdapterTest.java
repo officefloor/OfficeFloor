@@ -61,7 +61,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.impl.office.OfficeModelOfficeSource;
 import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
 import net.officefloor.model.impl.section.SectionModelSectionSource;
-import net.officefloor.plugin.administrator.clazz.ClassAdministrationSource;
+import net.officefloor.plugin.administration.clazz.ClassAdministrationSource;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;

@@ -52,7 +52,6 @@ import net.officefloor.compile.internal.structure.SectionOutputNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.TeamNode;
-import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -620,28 +619,13 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 * Ensure can create {@link FunctionNamespaceNode}.
 	 */
 	public void testCreateNamespaceNode() {
-		this.recordReturn(this.section, this.section.getSectionQualifiedName("NAMESPACE"), "SECTION.NAMESPACE");
 		FunctionNamespaceNode node = this.doTest(() -> {
-			FunctionNamespaceNode namespace = this.context.createFunctionNamespaceNode("NAMESPACE", this.section);
-			assertEquals("Incorrect qualified namespace name", "SECTION.NAMESPACE",
-					namespace.getQualifiedFunctionNamespaceName());
-			return namespace;
+			return this.context.createFunctionNamespaceNode("NAMESPACE", this.section);
 		});
 		assertNode(node, "NAMESPACE", "Function Namespace", null, this.section);
 		assertSame("Incorrect section", this.section, node.getSectionNode());
 		assertEquals("Incorrect section namespace name", "NAMESPACE", node.getSectionFunctionNamespaceName());
 		assertInitialise(node, (n) -> n.initialise("ExampleManagedFunctionSource", null));
-	}
-
-	/**
-	 * Ensure able to extract the unqualified {@link ManagedFunction} name.
-	 */
-	public void testExtractUnqualifiedFunctionName() {
-		assertEquals("Not qualified name", "function", this.context.extractUnqualifiedFunctionName("function"));
-		assertEquals("Function namespace qualified", "function",
-				this.context.extractUnqualifiedFunctionName("NAMESPACE.function"));
-		assertEquals("Office/Section qualified", "function",
-				this.context.extractUnqualifiedFunctionName("other.NAMESPACE.function"));
 	}
 
 	/**

@@ -514,26 +514,28 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if fails to load the {@link FunctionNamespaceType}.
 	 */
-	public void testFailLoadingWorkType() {
+	public void testFailLoadingFunctionNamespaceType() {
 
 		// Ensure issue in not loading work type
 		CompilerIssue[] issues = this.issues.recordCaptureIssues(true);
 		this.issues.recordIssue("Type", SectionNodeImpl.class,
-				"Missing property 'class.name' for WorkSource " + ClassManagedFunctionSource.class.getName());
+				"Missing property 'class.name' for ManagedFunctionSource "
+						+ ClassManagedFunctionSource.class.getName());
 		this.issues.recordIssue("Type", SectionNodeImpl.class,
-				"Failure loading WorkType from source " + ClassManagedFunctionSource.class.getName(), issues);
+				"Failure loading FunctionNamespaceType from source " + ClassManagedFunctionSource.class.getName(),
+				issues);
 
-		// Fail to load the work type
+		// Fail to load the function namespace type
 		this.loadSectionType(false, new Loader() {
 			@Override
 			public void sourceSection(SectionDesigner section, SectionSourceContext context) throws Exception {
 
-				// Do not specify class causing failure to load work type
+				// Do not specify class causing failure to load type
 				PropertyList properties = context.createPropertyList();
 				context.loadManagedFunctionType(ClassManagedFunctionSource.class.getName(), properties);
 
 				// Should not reach this point
-				fail("Should not successfully load work type");
+				fail("Should not successfully load function namespace type");
 			}
 		});
 	}

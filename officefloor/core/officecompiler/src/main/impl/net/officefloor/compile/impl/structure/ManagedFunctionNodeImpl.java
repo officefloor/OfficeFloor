@@ -213,7 +213,7 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 
 	@Override
 	public String getFullyQualifiedFunctionName() {
-		return this.state.namespaceNode.getQualifiedFunctionNamespaceName() + "." + this.functionName;
+		return this.state.namespaceNode.getSectionNode().getSectionQualifiedName(this.functionName);
 	}
 
 	@Override
@@ -223,6 +223,12 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 
 	@Override
 	public ManagedFunctionType<?, ?> loadManagedFunctionType(TypeContext typeContext) {
+
+		// Ensure initialised
+		if (this.state == null) {
+			this.context.getCompilerIssues().addIssue(this,
+					"Can not load type as " + TYPE + " " + this.functionName + " is not initialised");
+		}
 
 		// Obtain the namespace type
 		FunctionNamespaceType namespaceType = typeContext.getOrLoadFunctionNamespaceType(this.state.namespaceNode);
@@ -240,7 +246,7 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 
 		// As here, did not find corresponding managed function type
 		this.context.getCompilerIssues().addIssue(this, "Can not find function '" + this.state.functionTypeName
-				+ "' on namespace " + this.state.namespaceNode.getQualifiedFunctionNamespaceName());
+				+ "' on namespace " + this.state.namespaceNode.getSectionFunctionNamespaceName());
 		return null;
 	}
 
@@ -263,9 +269,7 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 		}
 
 		// Create and return the type
-		String officeFunctionName = this.state.namespaceNode.getSectionFunctionNamespaceName() + "."
-				+ this.functionName;
-		return new OfficeFunctionTypeImpl(officeFunctionName, parentSubSectionType, dependencies);
+		return new OfficeFunctionTypeImpl(this.functionName, parentSubSectionType, dependencies);
 	}
 
 	@Override

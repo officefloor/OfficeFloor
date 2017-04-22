@@ -644,11 +644,11 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		try {
 
 			// Run invoking flow
-			officeFloor.invokeFunction("test.NAMESPACE.doInput", new Boolean(true));
+			officeFloor.invokeFunction("test.doInput", new Boolean(true));
 			assertEquals("Incorrect value on invoking flow", "doInput -> oldName(Flow) -> finished", returnValue.value);
 
 			// Run using next function
-			officeFloor.invokeFunction("test.NAMESPACE.doInput", null);
+			officeFloor.invokeFunction("test.doInput", null);
 			assertEquals("Incorrect value on next function", "doInput -> oldName(null) -> finished", returnValue.value);
 
 		} finally {
@@ -712,7 +712,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 			// Run to ensure obtained message
 			ReturnValue returnValue = new ReturnValue();
-			officeFloor.invokeFunction("test.NAMESPACE.doInput", returnValue);
+			officeFloor.invokeFunction("test.doInput", returnValue);
 			assertEquals("Incorrect value from managed object", "test", returnValue.value);
 
 		} finally {
@@ -767,7 +767,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 			// Run to ensure obtained message
 			ReturnValue returnValue = new ReturnValue();
-			officeFloor.invokeFunction("test.NAMESPACE.doInput", returnValue);
+			officeFloor.invokeFunction("test.doInput", returnValue);
 			assertEquals("Incorrect value from managed object", "test", returnValue.value);
 
 		} finally {
@@ -870,7 +870,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 			// Run to ensure obtained message
 			ReturnValue returnValue = new ReturnValue();
-			officeFloor.invokeFunction("test.NAMESPACE.doFirst", returnValue);
+			officeFloor.invokeFunction("test.doFirst", returnValue);
 			assertEquals("Incorrect value from flow", "one-two-three", returnValue.value);
 
 		} finally {
@@ -924,7 +924,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		try {
 
 			// Run to ensure obtained message
-			officeFloor.invokeFunction("test.NAMESPACE.triggerEscalation", null);
+			officeFloor.invokeFunction("test.triggerEscalation", null);
 			assertEquals("Incorrect value from handling escalation", "test", returnValue.value);
 
 		} finally {
@@ -972,7 +972,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 			// Run triggering escalation
 			final IOException escalation = new IOException("TEST");
-			officeFloor.invokeFunction("test.NAMESPACE.handleEscalation", escalation);
+			officeFloor.invokeFunction("test.handleEscalation", escalation);
 
 			// Ensure not handling itself (escalated to OfficeFloor level)
 			assertEquals("Incorrect escalation", escalation, escalated[0]);
@@ -1010,7 +1010,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		try {
 
 			// Run to ensure obtained message
-			officeFloor.invokeFunction("test.NAMESPACE.doFirst", null);
+			officeFloor.invokeFunction("test.doFirst", null);
 			assertEquals("Incorrect value from sub section", "sub section", returnValue.value);
 
 		} finally {
