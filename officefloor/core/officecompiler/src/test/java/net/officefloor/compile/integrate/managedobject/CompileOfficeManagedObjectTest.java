@@ -193,12 +193,12 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 		office.registerManagedObjectSource("OFFICE.SIMPLE", "OFFICE.SIMPLE_SOURCE");
 		this.record_officeBuilder_addProcessManagedObject("OFFICE.SIMPLE", "OFFICE.SIMPLE");
 		inputDependencies.mapDependency(0, "OFFICE.SIMPLE");
-		inputMos.linkProcess(0, "SECTION.NAMESPACE.INPUT");
+		inputMos.linkProcess(0, "SECTION.INPUT");
 		this.record_officeFloorBuilder_addManagedObject("OFFICE.SIMPLE_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION.NAMESPACE.INPUT",
-				"OFFICE_TEAM");
+		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "INPUT");
+		function.setResponsibleTeam("OFFICE_TEAM");
 		function.linkParameter(0, Integer.class);
 
 		// Compile the OfficeFloor
@@ -232,9 +232,9 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 		DependencyMappingBuilder inputDependencies = this
 				.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.INPUT_SOURCE");
 		inputDependencies.mapDependency(0, "SIMPLE");
-		inputMos.linkProcess(0, "SECTION.NAMESPACE.INPUT");
-		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION.NAMESPACE.INPUT",
-				"OFFICE_TEAM");
+		inputMos.linkProcess(0, "SECTION.INPUT");
+		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "INPUT");
+		function.setResponsibleTeam("OFFICE_TEAM");
 		function.linkParameter(0, Integer.class);
 
 		// Compile the OfficeFloor
@@ -255,7 +255,7 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.MANAGED_OBJECT_SOURCE");
 		this.issues.recordIssue("doProcess", ManagedObjectFlowNodeImpl.class,
-				"Managed Object Source Flow doProcess is not linked to a FunctionNode");
+				"Managed Object Source Flow doProcess is not linked to a ManagedFunctionNode");
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -274,22 +274,22 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM", OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
-		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION.NAMESPACE.INPUT",
-				"OFFICE_TEAM");
+		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "INPUT");
+		function.setResponsibleTeam("OFFICE_TEAM");
 		function.linkParameter(0, Integer.class);
 		this.record_officeFloorBuilder_addManagedObject("OFFICE.MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
 				0, "class.name", ProcessManagedObject.class.getName());
 		ManagingOfficeBuilder<?> managingOffice = this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.MANAGED_OBJECT_SOURCE");
-		managingOffice.linkProcess(0, "SECTION.NAMESPACE.INPUT");
+		managingOffice.linkProcess(0, "SECTION.INPUT");
 
 		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
 	/**
-	 * Ensure issue if {@link ManagedObjectTeam} of {@link ManagedObjectSource}
-	 * is not linked.
+	 * Ensure not required to provide {@link ManagedObjectTeam} for
+	 * {@link ManagedObjectSource}.
 	 */
 	public void testManagedObjectSourceTeamNotLinked() {
 
@@ -299,8 +299,6 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addManagedObject("OFFICE.MANAGED_OBJECT_SOURCE", TeamManagedObject.class, 0);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.MANAGED_OBJECT_SOURCE");
-		this.issues.recordIssue("MANAGED_OBJECT_SOURCE_TEAM", ManagedObjectTeamNodeImpl.class,
-				"Managed Object Source Team MANAGED_OBJECT_SOURCE_TEAM is not linked to a TeamNode");
 
 		// Compile the OfficeFloor
 		this.compile(true);
