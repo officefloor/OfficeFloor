@@ -150,7 +150,7 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 			// Trigger function to ensure linking via enhancements
 			final int NUMBER_OF_VALUES = 2;
 			List<String> values = new ArrayList<String>(NUMBER_OF_VALUES);
-			officeFloor.invokeFunction("ONE.MOCK_TRANSFORMED.inputTwo", values);
+			officeFloor.invokeFunction("ONE.MOCK_TRANSFORMED.inputTwo", values, null);
 
 			// Ensure appropriate functions triggered
 			assertEquals("Incorrect number of values", NUMBER_OF_VALUES, values.size());
@@ -200,7 +200,7 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 			// Trigger function to ensure linking via enhancements
 			final int NUMBER_OF_VALUES = 2;
 			List<String> values = new ArrayList<String>(NUMBER_OF_VALUES);
-			officeFloor.invokeFunction("ONE.MOCK_TRANSFORMED.MOCK_TRANSFORMED.inputTwo", values);
+			officeFloor.invokeFunction("ONE.MOCK_TRANSFORMED.MOCK_TRANSFORMED.inputTwo", values, null);
 
 			// Ensure appropriate functions triggered
 			assertEquals("Incorrect number of values", NUMBER_OF_VALUES, values.size());

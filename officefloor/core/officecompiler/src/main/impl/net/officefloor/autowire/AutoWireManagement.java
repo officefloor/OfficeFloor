@@ -153,7 +153,7 @@ public class AutoWireManagement implements AutoWireManagementMBean {
 	@Override
 	public void invokeFunction(String functionName) throws Exception {
 		synchronized (AutoWireManagement.class) {
-			this.autoWireOfficeFloor.invokeFunction(functionName, null);
+			this.autoWireOfficeFloor.invokeFunction(functionName, null, null);
 		}
 	}
 

@@ -1,0 +1,47 @@
+<context>
+	<office-floor>
+		<teams>
+			<team name="TEAM" source="ONE_PERSON" />
+		</teams>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office">
+				<team name="OFFICE_TEAM">
+					<office-floor-team name="TEAM" />
+				</team>
+			</office>
+		</offices>
+	</office-floor>
+	<office>
+		<teams>
+			<team name="OFFICE_TEAM" />
+		</teams>
+		<sections>
+			<section name="SECTION" source="SECTION" location="section">
+				<responsibility name="RESPONSIBILITY">
+					<team name="OFFICE_TEAM" />
+				</responsibility>
+			</section>
+		</sections>
+	</office>
+	<section>
+		<function-namespaces>
+			<function-namespace name="NAMESPACE" source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$CompileFunctionClass" />
+				</properties>
+				<managed-function name="flowFunction" />
+				<managed-function name="simpleFunction" />
+			</function-namespace>
+		</function-namespaces>
+		<functions>
+			<function name="FUNCTION_A" function-namespace="NAMESPACE"
+				managed-function="flowFunction">
+				<function-flow name="flow">
+					<function name="FUNCTION_B" spawn-thread-state="true" />
+				</function-flow>
+			</function>
+			<function name="FUNCTION_B" function-namespace="NAMESPACE"
+				managed-function="simpleFunction" />
+		</functions>
+	</section>
+</context>

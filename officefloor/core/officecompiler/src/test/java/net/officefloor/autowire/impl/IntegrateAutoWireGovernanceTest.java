@@ -43,6 +43,7 @@ import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObject
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.test.SafeCompleteFlowCallback;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.plugin.governance.clazz.Enforce;
 import net.officefloor.plugin.governance.clazz.Govern;
@@ -143,7 +144,9 @@ public class IntegrateAutoWireGovernanceTest extends OfficeFrameTestCase {
 
 		// Execute the function
 		AutoWireOfficeFloor officeFloor = application.openOfficeFloor();
-		officeFloor.invokeFunction("SECTION.function", null);
+		SafeCompleteFlowCallback callback = new SafeCompleteFlowCallback();
+		officeFloor.invokeFunction("SECTION.function", null, callback);
+		callback.waitUntilComplete(1);
 
 		// Verify functionality
 		this.verifyMockObjects();

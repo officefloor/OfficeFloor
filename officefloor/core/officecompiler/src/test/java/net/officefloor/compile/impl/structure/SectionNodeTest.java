@@ -456,7 +456,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 
 		// Record issue in adding the section namespace twice
 		this.issues.recordIssue("NAMESPACE", FunctionNamespaceNodeImpl.class,
-				"FunctionNamespace NAMESPACE already added");
+				"Function Namespace NAMESPACE already added");
 
 		// Add the section namespace twice
 		this.replayMockObjects();
@@ -493,7 +493,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 
 		// Record issue in adding the section namespace twice
 		this.issues.recordIssue("NAMESPACE", FunctionNamespaceNodeImpl.class,
-				"FunctionNamespace NAMESPACE already added");
+				"Function Namespace NAMESPACE already added");
 
 		// Add the section namespace twice
 		this.replayMockObjects();
@@ -529,7 +529,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testAddSectionFunctionTwice() {
 
 		// Record issue in adding the section function twice
-		this.issues.recordIssue("FUNCTION", ManagedFunctionNodeImpl.class, "Function FUNCTION already added");
+		this.issues.recordIssue("FUNCTION", ManagedFunctionNodeImpl.class, "Managed Function FUNCTION already added");
 
 		// Add the section function twice by same namespace
 		this.replayMockObjects();
@@ -550,7 +550,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testAddSectionFunctionTwiceByDifferentSectionFunctionNamespace() {
 
 		// Record issue in adding the section function twice
-		this.issues.recordIssue("FUNCTION", ManagedFunctionNodeImpl.class, "Function FUNCTION already added");
+		this.issues.recordIssue("FUNCTION", ManagedFunctionNodeImpl.class, "Managed Function FUNCTION already added");
 
 		// Add the section function twice by different namespace
 		this.replayMockObjects();
@@ -885,7 +885,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkSectionFunctionToNextSectionFunction() {
 
 		// Record already being linked
-		this.issues.recordIssue("FUNCTION", ManagedFunctionNodeImpl.class, "Function FUNCTION linked more than once");
+		this.issues.recordIssue("FUNCTION", ManagedFunctionNodeImpl.class,
+				"Managed Function FUNCTION linked more than once");
 
 		this.replayMockObjects();
 
@@ -911,7 +912,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkSectionFunctionToNextSubSectionInput() {
 
 		// Record already being linked
-		this.issues.recordIssue("FUNCTION", ManagedFunctionNodeImpl.class, "Function FUNCTION linked more than once");
+		this.issues.recordIssue("FUNCTION", ManagedFunctionNodeImpl.class,
+				"Managed Function FUNCTION linked more than once");
 
 		this.replayMockObjects();
 
@@ -937,7 +939,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkSectionFunctionToNextSectionOutput() {
 
 		// Record already being linked
-		this.issues.recordIssue("FUNCTION", ManagedFunctionNodeImpl.class, "Function FUNCTION linked more than once");
+		this.issues.recordIssue("FUNCTION", ManagedFunctionNodeImpl.class,
+				"Managed Function FUNCTION linked more than once");
 
 		this.replayMockObjects();
 

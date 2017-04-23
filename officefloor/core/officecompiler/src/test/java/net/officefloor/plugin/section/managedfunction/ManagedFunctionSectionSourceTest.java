@@ -154,7 +154,7 @@ public class ManagedFunctionSectionSourceTest extends OfficeFrameTestCase {
 
 			// Invoke the function
 			final String PARAMETER = "test";
-			officeFloor.invokeFunction("SECTION.NAMESPACE.functionTwo", PARAMETER);
+			officeFloor.invokeFunction("SECTION.functionTwo", PARAMETER, null);
 
 			// Ensure invoked as parameter should be in list
 			synchronized (list) {

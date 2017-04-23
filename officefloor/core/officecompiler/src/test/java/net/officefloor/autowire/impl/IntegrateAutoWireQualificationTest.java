@@ -76,7 +76,7 @@ public class IntegrateAutoWireQualificationTest extends OfficeFrameTestCase {
 
 		// Ensure invoke function with appropriate dependencies
 		AutoWireOfficeFloor officeFloor = app.openOfficeFloor();
-		officeFloor.invokeFunction("TEST.NAMESPACE.function", null);
+		officeFloor.invokeFunction("TEST.function", null, null);
 		officeFloor.closeOfficeFloor();
 
 		// Verify

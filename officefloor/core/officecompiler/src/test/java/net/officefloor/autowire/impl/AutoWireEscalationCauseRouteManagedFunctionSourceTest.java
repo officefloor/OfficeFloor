@@ -26,10 +26,10 @@ import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.autowire.impl.AutoWireEscalationCauseRouteManagedFunctionSource.AutoWireEscalationCauseRouteManagedFunction;
 import net.officefloor.autowire.impl.AutoWireEscalationCauseRouteManagedFunctionSource.Dependencies;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.test.managedfunction.ManagedFunctionLoaderUtil;
-import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
@@ -155,7 +155,7 @@ public class AutoWireEscalationCauseRouteManagedFunctionSourceTest extends Offic
 
 		// Ensure cause of escalation routed
 		final IOException cause = new IOException("TEST");
-		this.officeFloor.invokeFunction("HANDLER.NAMESPACE.escalate", new Error(cause));
+		this.officeFloor.invokeFunction("HANDLER.NAMESPACE.escalate", new Error(cause), null);
 		assertSame("Incorrect cause handled", cause, this.state.cause);
 	}
 
@@ -169,7 +169,7 @@ public class AutoWireEscalationCauseRouteManagedFunctionSourceTest extends Offic
 
 		// Ensure cause of escalation routed
 		final SQLException cause = new SQLException("TEST");
-		this.officeFloor.invokeFunction("HANDLER.NAMESPACE.escalate", new Error(cause));
+		this.officeFloor.invokeFunction("HANDLER.NAMESPACE.escalate", new Error(cause), null);
 		assertSame("Incorrect cause handled", cause, this.state.cause);
 	}
 
@@ -183,7 +183,7 @@ public class AutoWireEscalationCauseRouteManagedFunctionSourceTest extends Offic
 
 		// Ensure cause of escalation routed
 		final Exception cause = new Exception("TEST");
-		this.officeFloor.invokeFunction("HANDLER.NAMESPACE.escalate", new Error(cause));
+		this.officeFloor.invokeFunction("HANDLER.NAMESPACE.escalate", new Error(cause), null);
 		assertSame("Incorrect cause handled", cause, this.state.cause);
 	}
 
@@ -197,7 +197,7 @@ public class AutoWireEscalationCauseRouteManagedFunctionSourceTest extends Offic
 
 		// Ensure escalation propagated
 		final Error escalation = new Error("TEST", new Error());
-		this.officeFloor.invokeFunction("HANDLER.NAMESPACE.escalate", escalation);
+		this.officeFloor.invokeFunction("HANDLER.NAMESPACE.escalate", escalation, null);
 		assertSame("Escalation should be propagated", escalation, this.escalation);
 	}
 
@@ -211,7 +211,7 @@ public class AutoWireEscalationCauseRouteManagedFunctionSourceTest extends Offic
 
 		// Ensure escalation propagated
 		final Error escalation = new Error("TEST");
-		this.officeFloor.invokeFunction("HANDLER.NAMESPACE.escalate", escalation);
+		this.officeFloor.invokeFunction("HANDLER.NAMESPACE.escalate", escalation, null);
 		assertSame("Escalation should be propagated", escalation, this.escalation);
 	}
 

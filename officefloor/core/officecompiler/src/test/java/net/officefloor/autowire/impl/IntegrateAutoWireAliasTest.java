@@ -143,7 +143,7 @@ public class IntegrateAutoWireAliasTest extends OfficeFrameTestCase {
 
 		// Execute the function
 		AutoWireOfficeFloor officeFloor = application.openOfficeFloor();
-		officeFloor.invokeFunction("SECTION.NAMESPACE.function", null);
+		officeFloor.invokeFunction("SECTION.function", null, null);
 
 		// Verify functionality
 		this.verifyMockObjects();

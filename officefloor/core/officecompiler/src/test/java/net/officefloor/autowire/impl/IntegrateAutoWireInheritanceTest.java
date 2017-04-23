@@ -60,13 +60,13 @@ public class IntegrateAutoWireInheritanceTest extends OfficeFrameTestCase {
 
 		// Ensure parent services
 		assertNull("Object should not have value for parent test", object.value);
-		officeFloor.invokeFunction("PARENT.NAMESPACE.function", null);
+		officeFloor.invokeFunction("PARENT.function", null, null);
 		assertEquals("Incorrect parent object value", "SERVICED", object.value);
 
 		// Rest and ensure child inherits link configuration to service
 		object.value = null;
 		assertNull("Object should not have value for child test", object.value);
-		officeFloor.invokeFunction("CHILD.NAMESPACE.function", null);
+		officeFloor.invokeFunction("CHILD.function", null, null);
 		assertEquals("Incorrect child object value", "SERVICED", object.value);
 	}
 

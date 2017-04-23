@@ -32,6 +32,7 @@ import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.test.SafeCompleteFlowCallback;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextFunction;
@@ -90,14 +91,14 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 		this.officeFloor = source.openOfficeFloor();
 
 		// Run the function
-		this.officeFloor.invokeFunction("one.NAMESPACE.doInput", value);
+		this.officeFloor.invokeFunction("one.doInput", value, null);
 
 		// Close the OfficeFloor
 		this.officeFloor.closeOfficeFloor();
 
 		// Should now not be able to invoke function
 		try {
-			this.officeFloor.invokeFunction("one.NAMESPACE.doInput", value);
+			this.officeFloor.invokeFunction("one.doInput", value, null);
 			fail("Should not be able to invoke function after closing OfficeFloor");
 		} catch (IllegalStateException ex) {
 			assertEquals("Incorrect cause", "Must open the Office Floor before obtaining Offices", ex.getMessage());
@@ -122,7 +123,9 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 		this.officeFloor = source.openOfficeFloor();
 
 		// Invoke the function
-		this.officeFloor.invokeFunction("one.NAMESPACE.doInput", value);
+		SafeCompleteFlowCallback callback = new SafeCompleteFlowCallback();
+		this.officeFloor.invokeFunction("one.doInput", value, callback);
+		callback.waitUntilComplete(1);
 
 		// Ensure correct value created
 		assertEquals("Incorrect value", "doInput-1", value.value);

@@ -67,7 +67,7 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM", OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
-		this.record_officeBuilder_addFunction("SECTION.NAMESPACE.FUNCTION", "OFFICE_TEAM");
+		this.record_officeBuilder_addFunction("SECTION", "FUNCTION").setResponsibleTeam("OFFICE_TEAM");
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -85,7 +85,7 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM", OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
-		this.record_officeBuilder_addFunction("SECTION.NAMESPACE.FUNCTION", "OFFICE_TEAM");
+		this.record_officeBuilder_addFunction("SECTION", "FUNCTION").setResponsibleTeam("OFFICE_TEAM");
 		this.record_functionBuilder_setDifferentiator(DifferentiatorManagedFunctionSource.DIFFERENTIATOR);
 
 		// Compile the OfficeFloor
@@ -104,8 +104,9 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM", OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
-		this.record_officeBuilder_addFunction("SECTION.NAMESPACE.FUNCTION", "OFFICE_TEAM");
-		this.issues.recordIssue("FUNCTION", ManagedFunctionNodeImpl.class, "Flow flow is not linked to a FunctionNode");
+		this.record_officeBuilder_addFunction("SECTION", "FUNCTION").setResponsibleTeam("OFFICE_TEAM");
+		this.issues.recordIssue("FUNCTION", ManagedFunctionNodeImpl.class,
+				"Flow flow is not linked to a ManagedFunctionNode");
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -124,10 +125,10 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM", OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
-		ManagedFunctionBuilder<?, ?> functionOne = this.record_officeBuilder_addFunction("SECTION.NAMESPACE.FUNCTION_A",
-				"OFFICE_TEAM");
-		this.record_officeBuilder_addFunction("SECTION.NAMESPACE.FUNCTION_B", "OFFICE_TEAM");
-		functionOne.linkFlow(0, "SECTION.NAMESPACE.FUNCTION_B", String.class, true);
+		ManagedFunctionBuilder<?, ?> functionOne = this.record_officeBuilder_addFunction("SECTION", "FUNCTION_A");
+		functionOne.setResponsibleTeam("OFFICE_TEAM");
+		this.record_officeBuilder_addFunction("SECTION", "FUNCTION_B").setResponsibleTeam("OFFICE_TEAM");
+		functionOne.linkFlow(0, "SECTION.FUNCTION_B", String.class, true);
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -608,7 +609,7 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 	/**
 	 * Class for {@link ClassManagedFunctionSource}.
 	 */
-	public static class CompileFunctionFunctionNamespace {
+	public static class CompileFunctionClass {
 
 		public void simpleFunction() {
 			fail("Should not be invoked in compiling");
@@ -657,8 +658,9 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 		public void sourceManagedFunctions(FunctionNamespaceBuilder namespaceBuilder,
 				ManagedFunctionSourceContext context) throws Exception {
 			ManagedFunctionTypeBuilder<Indexed, Indexed> function = namespaceBuilder.addManagedFunctionType("function",
-					new ClassFunctionFactory(CompileFunctionFunctionNamespace.class.getConstructor(new Class[0]),
-							CompileFunctionFunctionNamespace.class.getMethod("simpleFunction"), new ManagedFunctionParameterFactory[0]),
+					new ClassFunctionFactory(CompileFunctionClass.class.getConstructor(new Class[0]),
+							CompileFunctionClass.class.getMethod("simpleFunction"),
+							new ManagedFunctionParameterFactory[0]),
 					Indexed.class, Indexed.class);
 			function.setDifferentiator(DIFFERENTIATOR);
 		}

@@ -22,6 +22,7 @@ import javax.management.ObjectName;
 import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireManagementMBean;
 import net.officefloor.autowire.AutoWireOfficeFloor;
+import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -88,14 +89,14 @@ public class AutoWireOfficeFloorImpl implements AutoWireOfficeFloor {
 	}
 
 	@Override
-	public void invokeFunction(String functionName, Object parameter) throws Exception {
+	public void invokeFunction(String functionName, Object parameter, FlowCallback callback) throws Exception {
 
 		// Obtain the function
 		Office office = this.officeFloor.getOffice(this.officeName);
 		FunctionManager functionManager = office.getFunctionManager(functionName);
 
 		// Invoke the function
-		functionManager.invokeProcess(parameter, null);
+		functionManager.invokeProcess(parameter, callback);
 	}
 
 	@Override

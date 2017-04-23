@@ -19,6 +19,7 @@ package net.officefloor.autowire;
 
 import javax.management.ObjectName;
 
+import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -56,10 +57,12 @@ public interface AutoWireOfficeFloor {
 	 * @param parameter
 	 *            Parameter for the {@link ManagedFunction}. May be
 	 *            <code>null</code>.
+	 * @param callback
+	 *            Optional {@link FlowCallback}. May be <code>null</code>.
 	 * @throws Exception
 	 *             If fails invoking the {@link ManagedFunction}.
 	 */
-	void invokeFunction(String functionName, Object parameter) throws Exception;
+	void invokeFunction(String functionName, Object parameter, FlowCallback callback) throws Exception;
 
 	/**
 	 * Closes the {@link OfficeFloor}.

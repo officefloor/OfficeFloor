@@ -63,7 +63,7 @@ public class IntegrateAutoWireFailSourceManageObjectEscalationTest extends Offic
 		final IOException escalation = new IOException();
 		MockObject.initialiseFailure = escalation;
 		Handler.cause = null;
-		this.officeFloor.invokeFunction("Servicer.service", null);
+		this.officeFloor.invokeFunction("Servicer.service", null, null);
 		assertSame("Incorrect escalation", escalation, Handler.cause);
 	}
 
@@ -79,7 +79,7 @@ public class IntegrateAutoWireFailSourceManageObjectEscalationTest extends Offic
 		final SQLException escalation = new SQLException();
 		MockObject.initialiseFailure = escalation;
 		Handler.cause = null;
-		this.officeFloor.invokeFunction("Servicer.service", null);
+		this.officeFloor.invokeFunction("Servicer.service", null, null);
 		assertSame("Incorrect escalation", escalation, Handler.cause);
 	}
 

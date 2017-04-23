@@ -56,7 +56,7 @@ public class ProfilerIntegrationTest extends OfficeFrameTestCase {
 
 		// Invoke the function
 		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
-		officeFloor.invokeFunction("SECTION.function", null);
+		officeFloor.invokeFunction("SECTION.function", null, null);
 		officeFloor.closeOfficeFloor();
 
 		// Ensure profiled

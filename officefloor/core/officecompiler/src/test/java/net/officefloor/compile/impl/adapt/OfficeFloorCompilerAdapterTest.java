@@ -211,7 +211,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 
 		// Invoke the function
 		File checkFile = File.createTempFile(this.getClass().getSimpleName(), "test");
-		officeFloor.invokeFunction("TEST.WORK.task", checkFile.getAbsolutePath());
+		officeFloor.invokeFunction("TEST.task", checkFile.getAbsolutePath(), null);
 
 		// Ensure the invoked task
 		String contents = this.getFileContents(checkFile);
@@ -257,7 +257,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 
 		// Invoke the function
 		File checkFile = File.createTempFile(this.getClass().getSimpleName(), "test");
-		officeFloor.invokeFunction("TEST.WORK.task", checkFile.getAbsolutePath());
+		officeFloor.invokeFunction("TEST.task", checkFile.getAbsolutePath(), null);
 
 		// Ensure the invoked task
 		String contents = this.getFileContents(checkFile);
@@ -280,7 +280,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 
 		// Invoke the function
 		File checkFile = File.createTempFile(this.getClass().getSimpleName(), "test");
-		officeFloor.invokeFunction("TEST.WORK.task", checkFile.getAbsolutePath());
+		officeFloor.invokeFunction("TEST.task", checkFile.getAbsolutePath(), null);
 
 		// Ensure the invoked managed object
 		assertTrue("Managed Object should be flagged as invoked", object.isInvoked);

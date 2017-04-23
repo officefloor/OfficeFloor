@@ -83,7 +83,7 @@ public class ResourceIntegrationTest extends OfficeFrameTestCase {
 		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
 
 		// Invoke the function
-		officeFloor.invokeFunction("SECTION.function", null);
+		officeFloor.invokeFunction("SECTION.function", null, null);
 
 		// Ensure correct resources
 		assertSame("Incorrect resource", resource, namespaceResource);
