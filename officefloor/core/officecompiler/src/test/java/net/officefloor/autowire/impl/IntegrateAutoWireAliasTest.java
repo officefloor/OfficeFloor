@@ -20,7 +20,6 @@ package net.officefloor.autowire.impl;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -33,7 +32,6 @@ import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.autowire.AutoWireGovernance;
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -41,7 +39,6 @@ import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFacto
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
-import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.plugin.governance.clazz.Enforce;
@@ -54,20 +51,6 @@ import net.officefloor.plugin.section.clazz.ClassSectionSource;
  * @author Daniel Sagenschneider
  */
 public class IntegrateAutoWireAliasTest extends OfficeFrameTestCase {
-
-	/**
-	 * {@link Thread} instances that executed the {@link Job} instances.
-	 */
-	private static final List<Thread> threadForJob = new ArrayList<Thread>(2);
-
-	/**
-	 * Registers the {@link Thread} for the {@link Job}.
-	 */
-	private static void registerJobThread() {
-		synchronized (threadForJob) {
-			threadForJob.add(Thread.currentThread());
-		}
-	}
 
 	/**
 	 * {@link Xid} for testing.
@@ -105,11 +88,6 @@ public class IntegrateAutoWireAliasTest extends OfficeFrameTestCase {
 		final MockObject object = this.createSynchronizedMock(MockObject.class);
 		final CallableStatement statement = this.createSynchronizedMock(CallableStatement.class);
 
-		// Ensure in valid state for running test
-		synchronized (threadForJob) {
-			threadForJob.clear();
-		}
-
 		// Record execution
 		object.start(xid, 1);
 		this.recordReturn(object, object.prepareCall("UPDATE TEST_CASE SET TEST = 'PASSED'"), statement);
@@ -126,8 +104,6 @@ public class IntegrateAutoWireAliasTest extends OfficeFrameTestCase {
 		AutoWireGovernance governance = application.addGovernance("GOVERNANCE", "CLASS");
 		governance.addProperty(ClassGovernanceSource.CLASS_NAME_PROPERTY_NAME, MockGovernance.class.getName());
 		governance.governSection(section);
-		application.assignTeam("ONE_PERSON", new AutoWire(XAResource.class));
-		application.assignDefaultTeam("ONE_PERSON");
 
 		// Configure the object / managed object
 		if (isManagedObject) {
@@ -147,14 +123,6 @@ public class IntegrateAutoWireAliasTest extends OfficeFrameTestCase {
 
 		// Verify functionality
 		this.verifyMockObjects();
-
-		// Validate teams
-		synchronized (threadForJob) {
-			// Ensure appropriate threads executing teams
-			assertEquals("Incorrect number of teams", 2, threadForJob.size());
-			assertTrue("Should be different threads executing governance and the function",
-					threadForJob.get(0) != threadForJob.get(1));
-		}
 	}
 
 	/**
@@ -163,7 +131,6 @@ public class IntegrateAutoWireAliasTest extends OfficeFrameTestCase {
 	public static class MockSection {
 
 		public void function(Connection connection) throws SQLException {
-			registerJobThread();
 			CallableStatement statement = connection.prepareCall("UPDATE TEST_CASE SET TEST = 'PASSED'");
 			statement.execute();
 		}
@@ -188,7 +155,6 @@ public class IntegrateAutoWireAliasTest extends OfficeFrameTestCase {
 
 		@Govern
 		public void govern(XAResource resource) throws XAException {
-			registerJobThread();
 			resource.start(xid, 1);
 			this.resources.add(resource);
 		}

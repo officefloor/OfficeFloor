@@ -18,21 +18,16 @@
 package net.officefloor.autowire.impl;
 
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.List;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireManagementMBean;
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.frame.test.SafeCompleteFlowCallback;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextFunction;
@@ -49,21 +44,6 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 	 * Dependency object.
 	 */
 	private static volatile Connection dependencyObject = null;
-
-	/**
-	 * {@link Thread} instances that executed the {@link ManagedFunction}
-	 * instances.
-	 */
-	private static final List<Thread> threadForFunction = new ArrayList<Thread>(2);
-
-	/**
-	 * Registers the {@link Thread} for the {@link ManagedFunction}.
-	 */
-	private static void registerFunctionThread() {
-		synchronized (threadForFunction) {
-			threadForFunction.add(Thread.currentThread());
-		}
-	}
 
 	/**
 	 * {@link AutoWireOfficeFloor}.
@@ -110,37 +90,20 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 	 */
 	public void testIntegrationByFunction() throws Exception {
 
-		// Ensure in valid state for running test
-		synchronized (threadForFunction) {
-			dependencyObject = null;
-			threadForFunction.clear();
-		}
-
-		// Create the office floor
+		// Create the OfficeFloor
 		final Connection connection = this.createMock(Connection.class);
 		final Value value = new Value();
 		AutoWireOfficeFloorSource source = this.createSource(value, connection);
 		this.officeFloor = source.openOfficeFloor();
 
 		// Invoke the function
-		SafeCompleteFlowCallback callback = new SafeCompleteFlowCallback();
-		this.officeFloor.invokeFunction("one.doInput", value, callback);
-		callback.waitUntilComplete(1);
+		this.officeFloor.invokeFunction("one.doInput", value, null);
 
 		// Ensure correct value created
 		assertEquals("Incorrect value", "doInput-1", value.value);
 
-		// Validate object and teams
-		synchronized (threadForFunction) {
-
-			// Ensure appropriate object
-			assertEquals("Incorrect dependency", connection, dependencyObject);
-
-			// Ensure appropriate threads executing teams
-			assertEquals("Incorrect number of teams", 2, threadForFunction.size());
-			assertTrue("Should be different threads executing the functions",
-					threadForFunction.get(0) != threadForFunction.get(1));
-		}
+		// Ensure appropriate object
+		assertEquals("Incorrect dependency", connection, dependencyObject);
 	}
 
 	/**
@@ -201,10 +164,6 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 		// Add the Connection
 		source.addObject(connection, new AutoWire(Connection.class));
 
-		// Provide teams for separate functions
-		source.assignDefaultTeam(OnePersonTeamSource.class.getName());
-		source.assignTeam(OnePersonTeamSource.class.getName(), new AutoWire(Connection.class));
-
 		// Return the office floor source
 		return source;
 	}
@@ -222,7 +181,6 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 	public static class MockSectionOne {
 		@NextFunction("output")
 		public Integer doInput(@Parameter Value value) {
-			registerFunctionThread();
 			value.value = "doInput";
 			return new Integer(1);
 		}
@@ -237,10 +195,7 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 		private Value value;
 
 		public void doInput(@Parameter Integer parameter, Connection connection) {
-			synchronized (threadForFunction) {
-				dependencyObject = connection;
-			}
-			registerFunctionThread();
+			dependencyObject = connection;
 			this.value.value += "-" + String.valueOf(parameter.intValue());
 		}
 	}

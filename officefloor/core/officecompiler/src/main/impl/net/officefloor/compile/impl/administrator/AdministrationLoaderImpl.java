@@ -17,6 +17,9 @@
  */
 package net.officefloor.compile.impl.administrator;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import net.officefloor.compile.administration.AdministrationEscalationType;
 import net.officefloor.compile.administration.AdministrationFlowType;
 import net.officefloor.compile.administration.AdministrationGovernanceType;
@@ -248,16 +251,40 @@ public class AdministrationLoaderImpl implements AdministrationLoader {
 
 			// Obtain the flow details
 			AdministrationFlowMetaData<F>[] flowMetaDatas = metaData.getFlowMetaData();
+			if (flowMetaDatas == null) {
+				this.addIssue("Must provide flow meta-data");
+				return null; // must have flows
+			}
+			Set<F> flowKeys = new HashSet<>();
 			flowTypes = new AdministrationFlowType[flowMetaDatas.length];
 			for (int i = 0; i < flowMetaDatas.length; i++) {
 				AdministrationFlowMetaData<F> flowMetaData = flowMetaDatas[i];
 
+				// Ensure have flow meta-data
+				if (flowMetaData == null) {
+					this.addIssue("Null meta-data for flow " + i);
+					return null; // must have flow meta-data
+				}
+
 				// Obtain the flow key class
 				F flowKey = flowMetaData.getKey();
+				Class<?> keyClass;
 				if (flowKey != null) {
-					flowKeyClass = (Class<F>) flowKey.getClass();
+					if (flowKeys.contains(flowKey)) {
+						this.addIssue("Duplicate flow key " + flowKey.name() + " on flow meta-data");
+						return null; // can not have duplicate key
+					}
+					flowKeys.add(flowKey);
+					keyClass = flowKey.getClass();
 				} else {
-					flowKeyClass = (Class<F>) Indexed.class;
+					keyClass = Indexed.class;
+				}
+				if (flowKeyClass == null) {
+					flowKeyClass = (Class<F>) keyClass;
+				} else if (!flowKeyClass.equals(keyClass)) {
+					this.addIssue("May only use one enum type to define flow keys (" + flowKeyClass.getName() + ", "
+							+ keyClass.getName() + ")");
+					return null; // invalid flow key
 				}
 
 				// Obtain the flow details
@@ -274,15 +301,37 @@ public class AdministrationLoaderImpl implements AdministrationLoader {
 
 			// Obtain the escalation details
 			AdministrationEscalationMetaData[] escalationMetaDatas = metaData.getEscalationMetaData();
+			if (escalationMetaDatas == null) {
+				this.addIssue("Must provide escalation meta-data");
+				return null; // must have escalations
+			}
+			Set<Class<? extends Throwable>> uniqueEscalations = new HashSet<>();
 			escalationTypes = new AdministrationEscalationType[escalationMetaDatas.length];
 			for (int i = 0; i < escalationMetaDatas.length; i++) {
 				AdministrationEscalationMetaData escalationMetaData = escalationMetaDatas[i];
 
-				// Obtain the escalation details
+				// Ensure have escalation meta-data
+				if (escalationMetaData == null) {
+					this.addIssue("Null meta-data for escalation " + i);
+					return null; // must have escalation meta-data
+				}
+
+				// Obtain the escalation type
 				Class<? extends Throwable> escalationType = escalationMetaData.getEscalationType();
+				if (escalationType == null) {
+					this.addIssue("Null escalation type from escalation " + i);
+					return null; // must have escalation type
+				}
+				if (uniqueEscalations.contains(escalationType)) {
+					this.addIssue("Escalation listed twice (" + escalationType.getName() + ")");
+					return null; // all escalations must be unique
+				}
+				uniqueEscalations.add(escalationType);
+
+				// Obtain the escalation details
 				String escalationName = escalationMetaData.getLabel();
 				if (escalationName == null) {
-					escalationName = escalationType.getSimpleName();
+					escalationName = escalationType.getName();
 				}
 
 				// Create the escalation type
@@ -291,16 +340,40 @@ public class AdministrationLoaderImpl implements AdministrationLoader {
 
 			// Obtain the governance details
 			AdministrationGovernanceMetaData<G>[] governanceMetaDatas = metaData.getGovernanceMetaData();
+			if (governanceMetaDatas == null) {
+				this.addIssue("Must provide governance meta-data");
+				return null; // must have governance
+			}
+			Set<G> governanceKeys = new HashSet<>();
 			governanceTypes = new AdministrationGovernanceType[governanceMetaDatas.length];
 			for (int i = 0; i < governanceMetaDatas.length; i++) {
 				AdministrationGovernanceMetaData<G> governanceMetaData = governanceMetaDatas[i];
 
+				// Ensure have governance meta-data
+				if (governanceMetaData == null) {
+					this.addIssue("Null meta-data for governance " + i);
+					return null; // must have governance meta-data
+				}
+
 				// Obtain the governance key class
 				G governanceKey = governanceMetaData.getKey();
+				Class<?> keyClass;
 				if (governanceKey != null) {
-					governanceKeyClass = (Class<G>) governanceKey.getClass();
+					if (governanceKeys.contains(governanceKey)) {
+						this.addIssue("Duplicate governance key " + governanceKey.name() + " on governance meta-data");
+						return null; // duplicate key
+					}
+					governanceKeys.add(governanceKey);
+					keyClass = governanceKey.getClass();
 				} else {
-					governanceKeyClass = (Class<G>) Indexed.class;
+					keyClass = Indexed.class;
+				}
+				if (governanceKeyClass == null) {
+					governanceKeyClass = (Class<G>) keyClass;
+				} else if (!governanceKeyClass.equals(keyClass)) {
+					this.addIssue("May only use one enum type to define governance keys ("
+							+ governanceKeyClass.getName() + ", " + keyClass.getName() + ")");
+					return null; // invalid governance key
 				}
 
 				// Obtain the governance details

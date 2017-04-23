@@ -33,6 +33,7 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectT
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.managedfunction.ManagedFunctionLoaderUtil;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
@@ -75,7 +76,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 		// Function
 		ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("function",
-				new ClassFunctionFactory(null, null, null), null, null);
+				new ClassFunctionFactory(null, null, null), Indexed.class, Indexed.class);
 		ManagedFunctionObjectTypeBuilder<?> objectOne = function.addObject(String.class);
 		objectOne.setTypeQualifier(MockQualification.class.getName());
 		objectOne.setLabel(MockQualification.class.getName() + "-" + String.class.getName());
@@ -179,7 +180,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 		// functionInstanceMethod
 		ManagedFunctionTypeBuilder instanceMethod = namespace.addManagedFunctionType("functionInstanceMethod",
-				new ClassFunctionFactory(null, null, null), null, null);
+				new ClassFunctionFactory(null, null, null), Indexed.class, Indexed.class);
 		instanceMethod.setReturnType(String.class);
 		instanceMethod.addObject(String.class).setLabel(String.class.getName());
 		ManagedFunctionFlowTypeBuilder<?> asynchronous = instanceMethod.addFlow();
@@ -193,12 +194,12 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 		// functionFailMethod
 		ManagedFunctionTypeBuilder failMethod = namespace.addManagedFunctionType("functionFailMethod",
-				new ClassFunctionFactory(null, null, null), null, null);
+				new ClassFunctionFactory(null, null, null), Indexed.class, Indexed.class);
 		failMethod.addEscalation(SQLException.class);
 
 		// functionStaticMethod
 		ManagedFunctionTypeBuilder staticMethod = namespace.addManagedFunctionType("functionStaticMethod",
-				new ClassFunctionFactory(null, null, null), null, null);
+				new ClassFunctionFactory(null, null, null), Indexed.class, Indexed.class);
 		staticMethod.setReturnType(Object.class);
 
 		// Validate the namespace type
@@ -450,7 +451,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 		// function
 		ManagedFunctionTypeBuilder functionMethod = namespace.addManagedFunctionType("function",
-				new ClassFunctionFactory(null, null, null), null, null);
+				new ClassFunctionFactory(null, null, null), Indexed.class, Indexed.class);
 		functionMethod.setReturnType(Integer.class);
 		functionMethod.addObject(Integer.class).setLabel(Integer.class.getName());
 

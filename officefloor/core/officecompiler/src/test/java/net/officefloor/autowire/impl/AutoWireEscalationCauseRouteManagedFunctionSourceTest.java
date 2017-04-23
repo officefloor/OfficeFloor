@@ -155,7 +155,7 @@ public class AutoWireEscalationCauseRouteManagedFunctionSourceTest extends Offic
 
 		// Ensure cause of escalation routed
 		final IOException cause = new IOException("TEST");
-		this.officeFloor.invokeFunction("HANDLER.NAMESPACE.escalate", new Error(cause), null);
+		this.officeFloor.invokeFunction("HANDLER.escalate", new Error(cause), null);
 		assertSame("Incorrect cause handled", cause, this.state.cause);
 	}
 
@@ -169,7 +169,7 @@ public class AutoWireEscalationCauseRouteManagedFunctionSourceTest extends Offic
 
 		// Ensure cause of escalation routed
 		final SQLException cause = new SQLException("TEST");
-		this.officeFloor.invokeFunction("HANDLER.NAMESPACE.escalate", new Error(cause), null);
+		this.officeFloor.invokeFunction("HANDLER.escalate", new Error(cause), null);
 		assertSame("Incorrect cause handled", cause, this.state.cause);
 	}
 
@@ -183,7 +183,7 @@ public class AutoWireEscalationCauseRouteManagedFunctionSourceTest extends Offic
 
 		// Ensure cause of escalation routed
 		final Exception cause = new Exception("TEST");
-		this.officeFloor.invokeFunction("HANDLER.NAMESPACE.escalate", new Error(cause), null);
+		this.officeFloor.invokeFunction("HANDLER.escalate", new Error(cause), null);
 		assertSame("Incorrect cause handled", cause, this.state.cause);
 	}
 
@@ -197,7 +197,7 @@ public class AutoWireEscalationCauseRouteManagedFunctionSourceTest extends Offic
 
 		// Ensure escalation propagated
 		final Error escalation = new Error("TEST", new Error());
-		this.officeFloor.invokeFunction("HANDLER.NAMESPACE.escalate", escalation, null);
+		this.officeFloor.invokeFunction("HANDLER.escalate", escalation, null);
 		assertSame("Escalation should be propagated", escalation, this.escalation);
 	}
 
@@ -211,7 +211,7 @@ public class AutoWireEscalationCauseRouteManagedFunctionSourceTest extends Offic
 
 		// Ensure escalation propagated
 		final Error escalation = new Error("TEST");
-		this.officeFloor.invokeFunction("HANDLER.NAMESPACE.escalate", escalation, null);
+		this.officeFloor.invokeFunction("HANDLER.escalate", escalation, null);
 		assertSame("Escalation should be propagated", escalation, this.escalation);
 	}
 

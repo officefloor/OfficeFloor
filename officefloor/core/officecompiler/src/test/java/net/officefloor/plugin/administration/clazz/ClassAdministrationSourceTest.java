@@ -75,8 +75,8 @@ public class ClassAdministrationSourceTest extends OfficeFrameTestCase {
 		type.addFlow("flowOne", null, 1, null);
 		type.addFlow("flowThree", null, 2, null);
 		type.addFlow("flowTwo", String.class, 3, null);
-		type.addEscalation(IOException.class.getSimpleName(), IOException.class);
-		type.addEscalation(SQLException.class.getSimpleName(), SQLException.class);
+		type.addEscalation(IOException.class.getName(), IOException.class);
+		type.addEscalation(SQLException.class.getName(), SQLException.class);
 
 		// Validate the administration type
 		AdministrationLoaderUtil.validateAdministratorType(type, ClassAdministrationSource.class,

@@ -119,11 +119,13 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 	public void testGetProperties() {
 
 		// Record basic meta-data
-		this.recordReturn(this.metaData, this.metaData.getExtensionInterface(), XAResource.class);
 		this.recordReturn(this.metaData, this.metaData.getAdministrationFactory(), this.factory);
+		this.recordReturn(this.metaData, this.metaData.getExtensionInterface(), XAResource.class);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), new AdministrationFlowMetaData[0]);
 		this.recordReturn(this.metaData, this.metaData.getEscalationMetaData(),
 				new AdministrationEscalationMetaData[0]);
+		this.recordReturn(this.metaData, this.metaData.getGovernanceMetaData(),
+				new AdministrationGovernanceMetaData[0]);
 
 		// Attempt to load
 		this.loadAdministrationType(true, new Init() {
@@ -226,27 +228,27 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no extension interface type from meta-data.
+	 * Ensure issue if no {@link AdministrationFactory} from meta-data.
 	 */
-	public void testNoExtensionInterface() {
+	public void testNoAdministrationFactory() {
 
-		// Record no extension class
-		this.recordReturn(this.metaData, this.metaData.getExtensionInterface(), null);
-		this.issues.recordIssue("No extension interface provided");
+		// Record no administration factory
+		this.recordReturn(this.metaData, this.metaData.getAdministrationFactory(), null);
+		this.issues.recordIssue("No AdministrationFactory provided");
 
 		// Attempt to load
 		this.loadAdministrationType(false, null);
 	}
 
 	/**
-	 * Ensure issue if no {@link AdministrationFactory} from meta-data.
+	 * Ensure issue if no extension interface type from meta-data.
 	 */
-	public void testNoAdministrationFactory() {
+	public void testNoExtensionInterface() {
 
-		// Record no administration factory
-		this.recordReturn(this.metaData, this.metaData.getExtensionInterface(), XAResource.class);
-		this.recordReturn(this.metaData, this.metaData.getAdministrationFactory(), null);
-		this.issues.recordIssue("No administration factory");
+		// Record no extension class
+		this.recordReturn(this.metaData, this.metaData.getAdministrationFactory(), this.factory);
+		this.recordReturn(this.metaData, this.metaData.getExtensionInterface(), null);
+		this.issues.recordIssue("No extension interface provided");
 
 		// Attempt to load
 		this.loadAdministrationType(false, null);
@@ -268,12 +270,12 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 
 		// Validate simple details of type
 		AdministrationType<?, ?, ?> type = this.loadAdministrationType(true, null);
-		assertEquals("Incorrect extension interface", XAResource.class, type.getExtensionInterface());
 		assertEquals("Incorrect administration factory", this.factory, type.getAdministrationFactory());
+		assertEquals("Incorrect extension interface", XAResource.class, type.getExtensionInterface());
 		assertNull("No flow key class", type.getFlowKeyClass());
 		assertEquals("No flow meta-data", 0, type.getFlowTypes().length);
 		assertEquals("No escalation meta-data", 0, type.getEscalationTypes().length);
-		assertEquals("No governance key class", type.getGovernanceKeyClass());
+		assertNull("No governance key class", type.getGovernanceKeyClass());
 		assertEquals("No governance meta-data", 0, type.getGovernanceTypes().length);
 	}
 
@@ -319,13 +321,14 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 				new AdministrationFlowMetaData[] { flowMetaData });
 		this.recordReturn(flowMetaData, flowMetaData.getKey(), null);
-		this.recordReturn(flowMetaData, flowMetaData.getLabel(), null);
 		this.recordReturn(flowMetaData, flowMetaData.getArgumentType(), null);
+		this.recordReturn(flowMetaData, flowMetaData.getLabel(), null);
 		this.record_escalationMetaData();
+		this.record_governanceMetaData();
 
 		// Load the administration type
 		AdministrationType<?, ?, ?> type = this.loadAdministrationType(true, null);
-		assertNull("Should be no flow key class", type.getFlowKeyClass());
+		assertEquals("Should be no flow key class", Indexed.class, type.getFlowKeyClass());
 		AdministrationFlowType<?>[] flows = type.getFlowTypes();
 		assertEquals("Incorrect number of flows", 1, flows.length);
 		AdministrationFlowType<?> flow = flows[0];
@@ -347,9 +350,10 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 				new AdministrationFlowMetaData[] { flowMetaData });
 		this.recordReturn(flowMetaData, flowMetaData.getKey(), MockFlowKey.FLOW);
-		this.recordReturn(flowMetaData, flowMetaData.getLabel(), "LABEL");
 		this.recordReturn(flowMetaData, flowMetaData.getArgumentType(), Connection.class);
+		this.recordReturn(flowMetaData, flowMetaData.getLabel(), "LABEL");
 		this.record_escalationMetaData();
+		this.record_governanceMetaData();
 
 		// Load the administration type
 		AdministrationType<?, ?, ?> type = this.loadAdministrationType(true, null);
@@ -375,9 +379,10 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 				new AdministrationFlowMetaData[] { flowMetaData });
 		this.recordReturn(flowMetaData, flowMetaData.getKey(), MockFlowKey.FLOW);
-		this.recordReturn(flowMetaData, flowMetaData.getLabel(), null);
 		this.recordReturn(flowMetaData, flowMetaData.getArgumentType(), null);
+		this.recordReturn(flowMetaData, flowMetaData.getLabel(), null);
 		this.record_escalationMetaData();
+		this.record_governanceMetaData();
 
 		// Load the administration type
 		AdministrationType<?, ?, ?> type = this.loadAdministrationType(true, null);
@@ -398,8 +403,8 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 				new AdministrationFlowMetaData[] { flowOne, flowTwo });
 		this.recordReturn(flowOne, flowOne.getKey(), MockFlowKey.FLOW);
-		this.recordReturn(flowOne, flowOne.getLabel(), null);
 		this.recordReturn(flowOne, flowOne.getArgumentType(), null);
+		this.recordReturn(flowOne, flowOne.getLabel(), null);
 		this.recordReturn(flowTwo, flowTwo.getKey(), MockFlowKey.FLOW);
 		this.issues.recordIssue("Duplicate flow key FLOW on flow meta-data");
 
@@ -420,8 +425,8 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 				new AdministrationFlowMetaData[] { flowOne, flowTwo });
 		this.recordReturn(flowOne, flowOne.getKey(), MockFlowKey.FLOW);
-		this.recordReturn(flowOne, flowOne.getLabel(), null);
 		this.recordReturn(flowOne, flowOne.getArgumentType(), null);
+		this.recordReturn(flowOne, flowOne.getLabel(), null);
 		this.recordReturn(flowTwo, flowTwo.getKey(), InvalidFlowKey.INVALID_KEY);
 		this.issues.recordIssue("May only use one enum type to define flow keys (" + MockFlowKey.class.getName() + ", "
 				+ InvalidFlowKey.class.getName() + ")");
@@ -603,11 +608,10 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 				new AdministrationGovernanceMetaData[] { governanceMetaData });
 		this.recordReturn(governanceMetaData, governanceMetaData.getKey(), null);
 		this.recordReturn(governanceMetaData, governanceMetaData.getLabel(), null);
-		this.record_escalationMetaData();
 
 		// Load the administration type
 		AdministrationType<?, ?, ?> type = this.loadAdministrationType(true, null);
-		assertNull("Should be no governance key class", type.getGovernanceKeyClass());
+		assertEquals("Incorrect governance key class", Indexed.class, type.getGovernanceKeyClass());
 		AdministrationGovernanceType<?>[] governances = type.getGovernanceTypes();
 		assertEquals("Incorrect number of governances", 1, governances.length);
 		AdministrationGovernanceType<?> governance = governances[0];
@@ -635,7 +639,7 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 
 		// Load the administration type
 		AdministrationType<?, ?, ?> type = this.loadAdministrationType(true, null);
-		assertEquals("Incorrect governance key class", MockFlowKey.class, type.getFlowKeyClass());
+		assertEquals("Incorrect governance key class", MockGovernanceKey.class, type.getGovernanceKeyClass());
 		AdministrationGovernanceType<?>[] governances = type.getGovernanceTypes();
 		assertEquals("Incorrect number of flows", 1, governances.length);
 		AdministrationGovernanceType<?> governance = governances[0];
@@ -746,8 +750,8 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 	 * Record initial details of extension and {@link AdministrationFactory}.
 	 */
 	private void record_init() {
-		this.recordReturn(this.metaData, this.metaData.getExtensionInterface(), XAResource.class);
 		this.recordReturn(this.metaData, this.metaData.getAdministrationFactory(), this.factory);
+		this.recordReturn(this.metaData, this.metaData.getExtensionInterface(), XAResource.class);
 	}
 
 	/**
