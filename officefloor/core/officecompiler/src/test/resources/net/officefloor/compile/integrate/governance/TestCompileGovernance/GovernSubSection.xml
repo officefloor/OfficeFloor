@@ -24,7 +24,7 @@
 			</governance>
 		</governances>
 		<sections>
-			<section name="SECTION" source="SECTION" location="section">
+			<section name="SECTION" source="SECTION" location="sectionOne">
 				<responsibility name="RESPONSIBILITY">
 					<team name="OFFICE_TEAM" />
 				</responsibility>
@@ -34,22 +34,28 @@
 			</section>
 		</sections>
 	</office>
-	<section>
-		<sub-sections>
-			<sub-section name="DESK" source="DESK" location="desk" />
-		</sub-sections>
-	</section>
-	<desk>
-		<works>
-			<work name="WORK" source="CLASS">
-				<properties>
-					<property name="class.name" value="${testcase}$SimpleWork" />
-				</properties>
-				<work-task name="simpleTask" />
-			</work>
-		</works>
-		<tasks>
-			<task name="TASK" work="WORK" task="simpleTask" />
-		</tasks>
-	</desk>
+	<sectionOne>
+		<section>
+			<sub-sections>
+				<sub-section name="SUB_SECTION" source="SECTION"
+					location="sectionTwo" />
+			</sub-sections>
+		</section>
+	</sectionOne>
+	<sectionTwo>
+		<section>
+			<function-namespaces>
+				<function-namespace name="NAMESPACE" source="CLASS">
+					<properties>
+						<property name="class.name" value="${testcase}$SimpleClass" />
+					</properties>
+					<managed-function name="simpleFunction" />
+				</function-namespace>
+			</function-namespaces>
+			<functions>
+				<function name="FUNCTION" function-namespace="NAMESPACE"
+					managed-function="simpleFunction" />
+			</functions>
+		</section>
+	</sectionTwo>
 </context>

@@ -25,24 +25,26 @@
 			</governance>
 		</governances>
 		<sections>
-			<section name="DESK" source="DESK" location="desk" x="40" y="40">
+			<section name="SECTION" source="SECTION" location="section"
+				x="40" y="40">
 				<responsibility name="RESPONSIBILITY">
 					<team name="OFFICE_TEAM" />
 				</responsibility>
 			</section>
 		</sections>
 	</office>
-	<desk>
-		<works>
-			<work name="WORK" source="CLASS">
+	<section>
+		<function-namespaces>
+			<function-namespace name="NAMESPACE" source="CLASS">
 				<properties>
-					<property name="class.name" value="${testcase}$SimpleWork" />
+					<property name="class.name" value="${testcase}$SimpleClass" />
 				</properties>
-				<work-task name="simpleTask" />
-			</work>
-		</works>
-		<tasks>
-			<task name="TASK" work="WORK" task="simpleTask" />
-		</tasks>
-	</desk>
+				<managed-function name="simpleFunction" />
+			</function-namespace>
+		</function-namespaces>
+		<functions>
+			<function name="FUNCTION" function-namespace="NAMESPACE"
+				managed-function="simpleFunction" />
+		</functions>
+	</section>
 </context>

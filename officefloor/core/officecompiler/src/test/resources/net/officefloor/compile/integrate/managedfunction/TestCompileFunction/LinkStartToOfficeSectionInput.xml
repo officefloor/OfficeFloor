@@ -21,7 +21,7 @@
 			</start>
 		</starting>
 		<sections>
-			<section name="SECTION" source="DESK" location="desk">
+			<section name="SECTION" source="SECTION" location="section">
 				<input name="INPUT" />
 				<responsibility name="RESPONSIBILITY">
 					<team name="OFFICE_TEAM" />
@@ -29,17 +29,18 @@
 			</section>
 		</sections>
 	</office>
-	<desk>
-		<works>
-			<work name="WORK" source="CLASS">
+	<section>
+		<function-namespaces>
+			<function-namespace name="NAMESPACE" source="CLASS">
 				<properties>
-					<property name="class.name" value="${testcase}$CompileTaskWork" />
+					<property name="class.name" value="${testcase}$CompileFunctionClass" />
 				</properties>
-				<work-task name="simpleTask" />
-			</work>
-		</works>
-		<tasks>
-			<task name="INPUT" work="WORK" task="simpleTask" public="true" />
-		</tasks>
-	</desk>
+				<managed-function name="simpleFunction" />
+			</function-namespace>
+		</function-namespaces>
+		<functions>
+			<function name="INPUT" function-namespace="NAMESPACE"
+				managed-function="simpleFunction" public="true" />
+		</functions>
+	</section>
 </context>

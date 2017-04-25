@@ -1,0 +1,78 @@
+<context item-labels="true">
+	<office-floor>
+		<office-floor>
+			<teams>
+				<team name="TEAM" source="ONE_PERSON" />
+			</teams>
+			<offices>
+				<office name="OFFICE" source="OFFICE" location="office">
+					<team name="OFFICE_TEAM">
+						<office-floor-team name="TEAM" />
+					</team>
+				</office>
+			</offices>
+		</office-floor>
+	</office-floor>
+	<office>
+		<office>
+			<teams>
+				<team name="OFFICE_TEAM" />
+			</teams>
+			<sections>
+				<section name="SECTION_A" source="SECTION" location="section-one">
+					<output name="OUTPUT">
+						<section-input section="SECTION_B" input="INPUT" />
+					</output>
+					<responsibility name="RESPONSIBILITY">
+						<team name="OFFICE_TEAM" />
+					</responsibility>
+				</section>
+				<section name="SECTION_B" source="SECTION" location="section-two">
+					<input name="INPUT" />
+					<responsibility name="RESPONSIBILITY">
+						<team name="OFFICE_TEAM" />
+					</responsibility>
+				</section>
+			</sections>
+		</office>
+	</office>
+	<section-one>
+		<section>
+			<external-flows>
+				<external-flow name="OUTPUT" />
+			</external-flows>
+			<function-namespaces>
+				<function-namespace name="NAMESPACE" source="CLASS">
+					<properties>
+						<property name="class.name" value="${testcase}$CompileFunctionClass" />
+					</properties>
+					<managed-function name="escalationFunction" />
+				</function-namespace>
+			</function-namespaces>
+			<functions>
+				<function name="FUNCTION" function-namespace="NAMESPACE"
+					managed-function="escalationFunction">
+					<function-escalation escalation-type="java.lang.Exception">
+						<external-flow name="OUTPUT" />
+					</function-escalation>
+				</function>
+			</functions>
+		</section>
+	</section-one>
+	<section-two>
+		<section>
+			<function-namespaces>
+				<function-namespace name="NAMESPACE" source="CLASS">
+					<properties>
+						<property name="class.name" value="${testcase}$CompileFunctionClass" />
+					</properties>
+					<managed-function name="simpleFunction" />
+				</function-namespace>
+			</function-namespaces>
+			<functions>
+				<function name="INPUT" function-namespace="NAMESPACE"
+					managed-function="simpleFunction" public="true" />
+			</functions>
+		</section>
+	</section-two>
+</context>

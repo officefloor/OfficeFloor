@@ -15,11 +15,24 @@
 		<teams>
 			<team name="OFFICE_TEAM" />
 		</teams>
+		<governances>
+			<governance name="GOVERNANCE" source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$SimpleGovernance" />
+				</properties>
+				<team name="OFFICE_TEAM" />
+			</governance>
+		</governances>
 		<sections>
 			<section name="SECTION" source="SECTION" location="section">
 				<responsibility name="RESPONSIBILITY">
 					<team name="OFFICE_TEAM" />
 				</responsibility>
+				<sub-section>
+					<task name="TASK">
+						<govern governance="GOVERNANCE" />
+					</task>
+				</sub-section>
 			</section>
 		</sections>
 	</office>
@@ -27,14 +40,14 @@
 		<function-namespaces>
 			<function-namespace name="NAMESPACE" source="CLASS">
 				<properties>
-					<property name="class.name" value="${testcase}$CompileFunctionClass" />
+					<property name="class.name" value="${testcase}$SimpleClass" />
 				</properties>
-				<managed-function name="escalationFunction" />
+				<managed-function name="simpleFunction" />
 			</function-namespace>
 		</function-namespaces>
 		<functions>
 			<function name="FUNCTION" function-namespace="NAMESPACE"
-				managed-function="escalationFunction" />
+				managed-function="simpleFunction" />
 		</functions>
 	</section>
 </context>

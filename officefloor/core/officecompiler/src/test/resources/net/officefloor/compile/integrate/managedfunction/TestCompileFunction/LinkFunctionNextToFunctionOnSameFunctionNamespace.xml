@@ -29,12 +29,17 @@
 				<properties>
 					<property name="class.name" value="${testcase}$CompileFunctionClass" />
 				</properties>
-				<managed-function name="escalationFunction" />
+				<managed-function name="nextFunction" />
+				<managed-function name="simpleFunction" />
 			</function-namespace>
 		</function-namespaces>
 		<functions>
-			<function name="FUNCTION" function-namespace="NAMESPACE"
-				managed-function="escalationFunction" />
+			<function name="FUNCTION_A" function-namespace="NAMESPACE"
+				managed-function="nextFunction">
+				<next-function name="FUNCTION_B" />
+			</function>
+			<function name="FUNCTION_B" function-namespace="NAMESPACE"
+				managed-function="simpleFunction" />
 		</functions>
 	</section>
 </context>

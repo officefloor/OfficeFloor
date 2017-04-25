@@ -338,10 +338,10 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 				@Override
 				public boolean matches(Object[] expected, Object[] actual) {
 					// Ensure have governance factory
-					assertNotNull("Must have governance factory", actual[1]);
+					assertNotNull("Must have governance factory", actual[2]);
 
 					// Match if name and extension interface same
-					return this.argumentMatches(expected[0], actual[0]) && this.argumentMatches(expected[2], actual[2]);
+					return this.argumentMatches(expected[0], actual[0]) && this.argumentMatches(expected[1], actual[1]);
 				}
 			});
 			this.isMatcherSet_officeBuilder_addGovernance = true;
