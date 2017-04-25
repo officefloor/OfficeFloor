@@ -1538,9 +1538,9 @@ public class SectionChangesImpl implements SectionChanges {
 		if (!isOnSection) {
 			// Not in section so can not set as parameter
 			return new NoChange<ManagedFunctionObjectModel>(functionObject,
-					"Set function object " + functionObject.getObjectName() + " as "
+					"Set managed function object " + functionObject.getObjectName() + " as "
 							+ (isParameter ? "a parameter" : "an object"),
-					"Function object " + functionObject.getObjectName() + " not in section");
+					"Managed function object " + functionObject.getObjectName() + " not in section");
 		}
 
 		// Return the appropriate change
@@ -1548,7 +1548,7 @@ public class SectionChangesImpl implements SectionChanges {
 			// Return change to set as parameter
 			final ManagedFunctionObjectToExternalManagedObjectModel conn = functionObject.getExternalManagedObject();
 			return new AbstractChange<ManagedFunctionObjectModel>(functionObject,
-					"Set function object " + functionObject.getObjectName() + " as a parameter") {
+					"Set managed function object " + functionObject.getObjectName() + " as a parameter") {
 				@Override
 				public void apply() {
 					// Remove possible connection to external managed object
@@ -1574,7 +1574,7 @@ public class SectionChangesImpl implements SectionChanges {
 		} else {
 			// Return change to set as object
 			return new AbstractChange<ManagedFunctionObjectModel>(functionObject,
-					"Set function object " + functionObject.getObjectName() + " as an object") {
+					"Set managed function object " + functionObject.getObjectName() + " as an object") {
 
 				@Override
 				public void apply() {

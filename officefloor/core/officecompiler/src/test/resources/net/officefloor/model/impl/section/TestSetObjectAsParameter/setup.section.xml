@@ -1,0 +1,13 @@
+<section>
+	<function-namespaces>
+		<function-namespace name="NAMESPACE"
+			source="net.example.ExampleManagedFunctionSource">
+			<managed-function name="MANAGED_FUNCTION">
+				<managed-function-object name="OBJECT"
+					parameter="false" />
+				<managed-function-object name="PARAMETER"
+					parameter="true" />
+			</managed-function>
+		</function-namespace>
+	</function-namespaces>
+</section>

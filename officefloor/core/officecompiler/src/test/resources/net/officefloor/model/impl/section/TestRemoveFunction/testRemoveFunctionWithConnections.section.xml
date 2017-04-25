@@ -1,0 +1,18 @@
+<section>
+	<external-flows>
+		<external-flow name="FLOW" argument-type="java.lang.Object" />
+	</external-flows>
+	<function-namespaces>
+		<function-namespace name="NAMESPACE"
+			source="net.example.ExampleManagedFunctionSource">
+			<managed-function name="MANAGED_FUNCTION" />
+		</function-namespace>
+	</function-namespaces>
+	<functions>
+		<function name="FUNCTION_B" function-namespace="NAMESPACE"
+			managed-function="MANAGED_FUNCTION" return-type="java.lang.String">
+			<function-flow name="FLOW" argument-type="java.lang.Object" />
+			<function-escalation escalation-type="java.lang.Exception" />
+		</function>
+	</functions>
+</section>
