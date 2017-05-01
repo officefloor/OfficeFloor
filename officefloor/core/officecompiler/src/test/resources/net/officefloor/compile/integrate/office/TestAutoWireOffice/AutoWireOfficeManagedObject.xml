@@ -1,0 +1,30 @@
+<context>
+	<office-floor>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office>
+		<managed-object-sources>
+			<managed-object-source name="MANAGED_OBJECT_SOURCE"
+				source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$CompileManagedObject" />
+				</properties>
+				<managing-office name="OFFICE" />
+			</managed-object-source>
+		</managed-object-sources>
+		<managed-objects>
+			<managed-object name="MANAGED_OBJECT" scope="THREAD">
+				<managed-object-source name="MANAGED_OBJECT_SOURCE" />
+			</managed-object>
+		</managed-objects>
+		<sections>
+			<section name="SECTION" source="CLASS"
+				location="${testcase}$CompileSectionClass">
+				<input name="function" />
+				<object name="OBJECT" object-type="${testcase}$CompileManagedObject" />
+			</section>
+		</sections>
+	</office>
+</context>

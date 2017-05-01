@@ -19,7 +19,6 @@ package net.officefloor.compile.integrate.managedobject;
 
 import net.officefloor.compile.impl.structure.ManagedObjectDependencyNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectFlowNodeImpl;
-import net.officefloor.compile.impl.structure.ManagedObjectTeamNodeImpl;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;

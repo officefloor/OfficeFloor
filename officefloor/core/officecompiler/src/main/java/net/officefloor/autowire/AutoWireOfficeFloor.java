@@ -28,6 +28,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated // auto-wire available via OfficeExtensionService
 public interface AutoWireOfficeFloor {
 
 	/**

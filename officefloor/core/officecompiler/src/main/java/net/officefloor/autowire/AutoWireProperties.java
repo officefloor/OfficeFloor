@@ -29,6 +29,7 @@ import net.officefloor.compile.properties.PropertyList;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated // all sources to enable overriding properties
 public interface AutoWireProperties extends PropertyConfigurable {
 
 	/**

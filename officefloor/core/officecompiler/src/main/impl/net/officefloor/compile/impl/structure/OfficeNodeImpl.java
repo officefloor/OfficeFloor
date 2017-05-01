@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -24,7 +25,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 
+import net.officefloor.autowire.AutoWire;
 import net.officefloor.compile.impl.office.OfficeSourceContextImpl;
 import net.officefloor.compile.impl.office.OfficeTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
@@ -77,8 +80,8 @@ import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeStart;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.ResponsibleTeam;
+import net.officefloor.compile.spi.office.extension.OfficeExtensionService;
 import net.officefloor.compile.spi.office.source.OfficeSource;
-import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
@@ -226,6 +229,11 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	private final Map<String, OfficeStartNode> starts = new HashMap<String, OfficeStartNode>();
 
 	/**
+	 * Indicates whether to {@link AutoWire} the objects.
+	 */
+	private boolean isAutoWireObjects = false;
+
+	/**
 	 * Initialise with all parameters.
 	 * 
 	 * @param officeName
@@ -342,12 +350,24 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		}
 
 		// Create the office source context
-		OfficeSourceContext context = new OfficeSourceContextImpl(false, this.state.officeLocation, properties, this,
-				this.context);
+		OfficeSourceContextImpl context = new OfficeSourceContextImpl(false, this.state.officeLocation, properties,
+				this, this.context);
+
+		// Obtain the extension services (ensuring all are available)
+		List<OfficeExtensionService> extensionServices = new ArrayList<>();
+		for (OfficeExtensionService extensionService : ServiceLoader.load(OfficeExtensionService.class,
+				context.getClassLoader())) {
+			extensionServices.add(extensionService);
+		}
 
 		try {
 			// Source the office
 			source.sourceOffice(this, context);
+
+			// Extend the office
+			for (OfficeExtensionService extensionService : extensionServices) {
+				extensionService.extendOffice(this, context);
+			}
 
 		} catch (UnknownPropertyError ex) {
 			this.addIssue("Missing property '" + ex.getUnknownPropertyName() + "' for "
@@ -372,6 +392,15 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			this.addIssue("Failed to source " + OfficeType.class.getSimpleName() + " definition from "
 					+ OfficeSource.class.getSimpleName() + " " + source.getClass().getName(), ex);
 			return false; // must be successful
+		}
+
+		// Undertake auto-wire of objects
+		if (this.isAutoWireObjects) {
+
+			// Iterate over objects creating list of possible options
+
+			// TODO implement auto-wire objects for office
+			throw new UnsupportedOperationException("TODO implement auto-wire objects for office");
 		}
 
 		// As here, successfully sourced
@@ -662,6 +691,11 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	/*
 	 * ===================== OfficeArchitect ================================
 	 */
+
+	@Override
+	public void enableAutoWireObjects() {
+		this.isAutoWireObjects = true;
+	}
 
 	@Override
 	public OfficeObject addOfficeObject(String officeManagedObjectName, String objectType) {

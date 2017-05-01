@@ -94,6 +94,13 @@ public interface NodeContext {
 	PropertyList createPropertyList();
 
 	/**
+	 * Creates a new {@link AutoWirer}.
+	 * 
+	 * @return New {@link AutoWirer}.
+	 */
+	AutoWirer createAutoWirer();
+
+	/**
 	 * Obtains the {@link OfficeFloorSource} class.
 	 * 
 	 * @param <S>

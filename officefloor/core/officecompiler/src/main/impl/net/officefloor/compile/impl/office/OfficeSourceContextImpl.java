@@ -30,6 +30,7 @@ import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.SectionLoader;
+import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
@@ -39,7 +40,7 @@ import net.officefloor.frame.impl.construct.source.SourceContextImpl;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeSourceContextImpl extends SourceContextImpl implements OfficeSourceContext {
+public class OfficeSourceContextImpl extends SourceContextImpl implements OfficeSourceContext, OfficeExtensionContext {
 
 	/**
 	 * Location of the {@link Office}.

@@ -41,6 +41,7 @@ import net.officefloor.compile.impl.pool.ManagedObjectPoolLoaderImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.section.SectionLoaderImpl;
 import net.officefloor.compile.impl.structure.AdministrationNodeImpl;
+import net.officefloor.compile.impl.structure.AutoWirerImpl;
 import net.officefloor.compile.impl.structure.EscalationNodeImpl;
 import net.officefloor.compile.impl.structure.FunctionFlowNodeImpl;
 import net.officefloor.compile.impl.structure.FunctionNamespaceNodeImpl;
@@ -72,6 +73,7 @@ import net.officefloor.compile.impl.structure.TeamNodeImpl;
 import net.officefloor.compile.impl.team.TeamLoaderImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.AdministrationNode;
+import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.EscalationNode;
 import net.officefloor.compile.internal.structure.FunctionFlowNode;
 import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
@@ -377,6 +379,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	@Override
 	public PropertyList createPropertyList() {
 		return new PropertyListImpl();
+	}
+
+	@Override
+	public AutoWirer createAutoWirer() {
+		return new AutoWirerImpl(this.sourceContext, this.getCompilerIssues());
 	}
 
 	@Override

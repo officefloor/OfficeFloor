@@ -35,6 +35,11 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 public interface OfficeArchitect {
 
 	/**
+	 * Flags to attempt to auto wire any non-configured object links.
+	 */
+	void enableAutoWireObjects();
+
+	/**
 	 * Adds a {@link OfficeInput}.
 	 * 
 	 * @param inputName

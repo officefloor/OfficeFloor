@@ -30,6 +30,7 @@ import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
+import net.officefloor.extension.AutoWireOfficeExtensionService;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationFactory;
@@ -90,6 +91,14 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 * {@link OfficeFloorBuilder}.
 	 */
 	protected final OfficeFloorBuilder officeFloorBuilder = this.createMock(OfficeFloorBuilder.class);
+
+	@Override
+	protected void tearDown() throws Exception {
+		super.tearDown();
+
+		// Reset the extension services
+		AutoWireOfficeExtensionService.reset();
+	}
 
 	/**
 	 * <p>

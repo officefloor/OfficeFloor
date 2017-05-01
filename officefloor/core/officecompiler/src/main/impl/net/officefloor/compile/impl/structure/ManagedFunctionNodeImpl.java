@@ -392,7 +392,7 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 				continue; // must have linked managed object
 			}
 
-			// Link task object to managed object
+			// Link function object to managed object
 			String linkedManagedObjectName = linkedManagedObject.getBoundManagedObjectName();
 			if (objectKey != null) {
 				functionBuilder.linkManagedObject(objectKey, linkedManagedObjectName, objectClass);
