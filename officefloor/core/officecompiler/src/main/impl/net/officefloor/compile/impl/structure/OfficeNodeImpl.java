@@ -27,16 +27,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 
-import net.officefloor.autowire.AutoWire;
 import net.officefloor.compile.impl.office.OfficeSourceContextImpl;
 import net.officefloor.compile.impl.office.OfficeTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.internal.structure.AdministrationNode;
+import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.EscalationNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
+import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.LinkSynchronousNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
@@ -319,10 +321,12 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	/**
 	 * Sources the {@link Office}.
 	 * 
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return <true> to indicate sourced, otherwise <false> with issues
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	private boolean sourceOffice() {
+	private boolean sourceOffice(TypeContext typeContext) {
 
 		// Ensure the office is initialised
 		if (!this.isInitialised()) {
@@ -394,24 +398,15 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			return false; // must be successful
 		}
 
-		// Undertake auto-wire of objects
-		if (this.isAutoWireObjects) {
-
-			// Iterate over objects creating list of possible options
-
-			// TODO implement auto-wire objects for office
-			throw new UnsupportedOperationException("TODO implement auto-wire objects for office");
-		}
-
 		// As here, successfully sourced
 		return true;
 	}
 
 	@Override
-	public boolean sourceOfficeWithTopLevelSections() {
+	public boolean sourceOfficeWithTopLevelSections(TypeContext typeContext) {
 
 		// Source the office
-		boolean isSourced = this.sourceOffice();
+		boolean isSourced = this.sourceOffice(typeContext);
 		if (!isSourced) {
 			return false;
 		}
@@ -428,10 +423,10 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
-	public boolean sourceOfficeTree() {
+	public boolean sourceOfficeTree(TypeContext typeContext) {
 
 		// Source the office
-		boolean isSourced = this.sourceOffice();
+		boolean isSourced = this.sourceOffice(typeContext);
 		if (!isSourced) {
 			return false;
 		}
@@ -441,6 +436,25 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 				(section) -> section.sourceSectionTree());
 		if (!isSourced) {
 			return false; // must source all top level sections
+		}
+
+		// Undertake auto-wire of objects
+		if (this.isAutoWireObjects) {
+
+			// Iterate over managed objects creating list of possible targets
+			final AutoWirer<LinkObjectNode> autoWirer = this.context.createAutoWirer(LinkObjectNode.class);
+			this.managedObjects.values().forEach((mo) -> {
+
+				// Create the auto-wires
+				AutoWire[] targetAutoWires = Arrays.stream(mo.getTypeQualifications(typeContext))
+						.map((type) -> new AutoWire(type.getQualifier(), type.getType())).toArray(AutoWire[]::new);
+
+				// Add the target
+				autoWirer.addAutoWireTarget(mo, targetAutoWires);
+			});
+
+			// Iterate over sections (auto-wiring unlinked dependencies)
+			this.sections.values().stream().forEach((section) -> section.autoWireObjects(autoWirer, typeContext));
 		}
 
 		// As here, successfully loaded the office

@@ -35,8 +35,7 @@ import net.officefloor.frame.api.profile.Profiler;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorNode extends Node, PropertyConfigurable,
-		ManagedObjectRegistry, OfficeFloorDeployer {
+public interface OfficeFloorNode extends Node, PropertyConfigurable, ManagedObjectRegistry, OfficeFloorDeployer {
 
 	/**
 	 * Default name of the {@link OfficeFloorNode}.
@@ -74,8 +73,7 @@ public interface OfficeFloorNode extends Node, PropertyConfigurable,
 	 *            {@link OfficeFloorManagedObjectSource}.
 	 * @return {@link OfficeFloorManagedObjectSource}.
 	 */
-	OfficeFloorManagedObjectSource addManagedObjectSource(
-			String managedObjectSourceName,
+	OfficeFloorManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
 			SuppliedManagedObjectNode suppliedManagedObject);
 
 	/**
@@ -84,21 +82,25 @@ public interface OfficeFloorNode extends Node, PropertyConfigurable,
 	 * <p>
 	 * This will only source the top level {@link OfficeSection}.
 	 * 
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	boolean sourceOfficeFloor();
+	boolean sourceOfficeFloor(TypeContext typeContext);
 
 	/**
 	 * Sources this {@link OfficeFloorNode} and all its descendant {@link Node}
 	 * instances recursively.
 	 * 
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	boolean sourceOfficeFloorTree();
+	boolean sourceOfficeFloorTree(TypeContext typeContext);
 
 	/**
 	 * Loads the {@link OfficeFloorType}.
@@ -118,7 +120,6 @@ public interface OfficeFloorNode extends Node, PropertyConfigurable,
 	 *            {@link TypeContext}.
 	 * @return {@link OfficeFloor}.
 	 */
-	OfficeFloor deployOfficeFloor(OfficeFrame officeFrame,
-			TypeContext typeContext);
+	OfficeFloor deployOfficeFloor(OfficeFrame officeFrame, TypeContext typeContext);
 
 }

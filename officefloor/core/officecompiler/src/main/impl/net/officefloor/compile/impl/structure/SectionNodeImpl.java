@@ -29,9 +29,13 @@ import net.officefloor.compile.impl.section.SectionSourceContextImpl;
 import net.officefloor.compile.impl.section.SectionTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LoadTypeError;
+import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.internal.structure.AutoWireLink;
+import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.FunctionFlowNode;
 import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
+import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
@@ -576,6 +580,30 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 			// Further parent sections
 			return this.parentSection.getSectionQualifiedName(qualifiedName);
 		}
+	}
+
+	@Override
+	public void autoWireObjects(AutoWirer<LinkObjectNode> autoWirer, TypeContext typeContext) {
+		this.objects.values().forEach((object) -> {
+
+			// Ignore if already configured
+			if (object.getLinkedObjectNode() != null) {
+				return;
+			}
+
+			// Obtain the type
+			SectionObjectType objectType = object.loadSectionObjectType(typeContext);
+			if (objectType == null) {
+				return; // must have type
+			}
+
+			// Auto-wire the object
+			AutoWireLink<LinkObjectNode>[] links = autoWirer.getAutoWireLinks(object,
+					new AutoWire(objectType.getTypeQualifier(), objectType.getObjectType()));
+			if (links.length == 1) {
+				this.linkObject(object, links[0].getTargetNode());
+			}
+		});
 	}
 
 	@Override

@@ -21,6 +21,7 @@ import java.util.function.Consumer;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.type.TypeContextImpl;
 import net.officefloor.compile.internal.structure.AdministrationNode;
 import net.officefloor.compile.internal.structure.EscalationNode;
 import net.officefloor.compile.internal.structure.FunctionFlowNode;
@@ -52,6 +53,8 @@ import net.officefloor.compile.internal.structure.SectionOutputNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.TeamNode;
+import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -218,6 +221,10 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		this.recordReturn(this.office, this.office.getOfficeFloorNode(), this.officeFloor);
 		this.recordReturn(this.office, this.office.getDeployedOfficeName(), "OFFICE");
 		this.recordReturn(this.section, this.section.getSectionQualifiedName("MO"), "SECTION.MO");
+		ManagedObjectType<?> managedObjectType = this.createMock(ManagedObjectType.class);
+		this.recordReturn(this.managedObjectSource, this.managedObjectSource.loadManagedObjectType(),
+				managedObjectType);
+		this.recordReturn(managedObjectType, managedObjectType.getObjectClass(), String.class);
 		ManagedObjectNode node = this.doTest(() -> {
 			ManagedObjectNode mo = this.context.createManagedObjectNode("MO");
 
@@ -234,9 +241,15 @@ public class NodeContextTest extends OfficeFrameTestCase {
 			// Initialise, as must obtain details from managed object source
 			assertInitialise(mo, (n) -> n.initialise(ManagedObjectScope.THREAD, this.managedObjectSource));
 			assertEquals("Incorrect bound name", "OFFICE.SECTION.MO", mo.getBoundManagedObjectName());
+
+			// Validate default type
+			assertTypeQualifications(mo, null, String.class.getName());
+
 			return mo;
 		});
 		assertNode(node, "MO", "Managed Object", null, this.managedObjectSource);
+		node.addTypeQualification("QUALIFIER", "TYPE");
+		assertTypeQualifications(node, "QUALIFIER", "TYPE");
 	}
 
 	/**
@@ -647,6 +660,25 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect node type", type, node.getNodeType());
 		assertEquals("Incorrect node location", location, node.getLocation());
 		assertSame("Incorrect node parent", parent, node.getParentNode());
+	}
+
+	/**
+	 * Asserts the {@link TypeQualification} for the {@link ManagedObjectNode}.
+	 * 
+	 * @param managedObjectNode
+	 *            {@link ManagedObjectNode}.
+	 * @param qualifierTypePairs
+	 *            Pairings of expected qualifier and types.
+	 */
+	private static void assertTypeQualifications(ManagedObjectNode managedObjectNode, String... qualifierTypePairs) {
+		TypeQualification[] qualifications = managedObjectNode.getTypeQualifications(new TypeContextImpl());
+		assertEquals("Incorrect number of type qualifications", (qualifierTypePairs.length / 2), qualifications.length);
+		for (int i = 0; i < qualifierTypePairs.length; i += 2) {
+			int index = i / 2;
+			TypeQualification qualification = qualifications[index];
+			assertEquals("Incorrect qualification " + index, qualifierTypePairs[i], qualification.getQualifier());
+			assertEquals("Incorrect type " + index, qualifierTypePairs[i + 1], qualification.getType());
+		}
 	}
 
 	/**

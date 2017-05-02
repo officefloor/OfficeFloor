@@ -20,12 +20,12 @@ package net.officefloor.compile.integrate.office;
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.extension.AutoWireOfficeExtensionService;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
-import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
 
 /**
@@ -40,8 +40,9 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 	 */
 	public void testAutoWireOfficeManagedObject() {
 
+		// Flag to enable auto-wiring of the objects
 		AutoWireOfficeExtensionService.enableAutoWireObjects();
-		
+
 		// Record loading section type
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
@@ -50,11 +51,15 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		// Record building the OfficeFloor
 		this.record_init();
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+
+		// Build the Managed Object
 		office.registerManagedObjectSource("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT_SOURCE");
 		this.record_officeFloorBuilder_addManagedObject("OFFICE.MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
 				0, "class.name", CompileManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_officeBuilder_addThreadManagedObject("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT");
+
+		// Build the section
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "function");
 		function.linkManagedObject(0, "OFFICE.SECTION.OBJECT", CompileSectionClass.class);
 		this.record_officeFloorBuilder_addManagedObject("OFFICE.SECTION.OBJECT", SectionClassManagedObjectSource.class,
@@ -64,9 +69,16 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		this.record_officeBuilder_addThreadManagedObject("OFFICE.SECTION.OBJECT", "OFFICE.SECTION.OBJECT");
 
 		// Auto-wire
-		function.linkManagedObject(0, "OFFICE.SECTION.MANAGED_OBJECT", CompileManagedObject.class);
+		function.linkManagedObject(1, "OFFICE.MANAGED_OBJECT", CompileManagedObject.class);
 
 		this.compile(true);
+	}
+
+	/**
+	 * Ensure can auto-wire an {@link OfficeFloorManagedObject}.
+	 */
+	public void testAutoWireOfficeFloorManagedObject() {
+		fail("TODO implement");
 	}
 
 	public static class CompileSectionClass {

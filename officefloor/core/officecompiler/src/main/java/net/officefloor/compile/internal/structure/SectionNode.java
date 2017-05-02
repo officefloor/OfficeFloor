@@ -37,8 +37,8 @@ import net.officefloor.frame.api.manage.Office;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctionRegistry,
-		SectionDesigner, SubSection, OfficeSection {
+public interface SectionNode
+		extends Node, ManagedObjectRegistry, ManagedFunctionRegistry, SectionDesigner, SubSection, OfficeSection {
 
 	/**
 	 * {@link Node} type.
@@ -56,8 +56,7 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection}.
 	 */
-	void initialise(String sectionSourceClassName, SectionSource sectionSource,
-			String sectionLocation);
+	void initialise(String sectionSourceClassName, SectionSource sectionSource, String sectionLocation);
 
 	/**
 	 * <p>
@@ -115,8 +114,7 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	 * @return {@link OfficeSubSectionType} or <code>null</code> if issue
 	 *         loading with issue reported to the {@link CompilerIssues}.
 	 */
-	OfficeSubSectionType loadOfficeSubSectionType(
-			OfficeSubSectionType parentSectionType, TypeContext typeContext);
+	OfficeSubSectionType loadOfficeSubSectionType(OfficeSubSectionType parentSectionType, TypeContext typeContext);
 
 	/**
 	 * Loads the {@link OfficeAvailableSectionInputType} instances.
@@ -127,8 +125,7 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	 *         <code>null</code> with issues reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	OfficeAvailableSectionInputType[] loadOfficeAvailableSectionInputTypes(
-			TypeContext typeContext);
+	OfficeAvailableSectionInputType[] loadOfficeAvailableSectionInputTypes(TypeContext typeContext);
 
 	/**
 	 * Obtains the {@link DeployedOfficeInput}.
@@ -148,7 +145,8 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	 * <ol>
 	 * <li>{@link GovernanceNode} assigned to this particular
 	 * {@link SectionNode}</li>
-	 * <li>{@link GovernanceNode} assigned to any parent {@link SectionNode}</li>
+	 * <li>{@link GovernanceNode} assigned to any parent
+	 * {@link SectionNode}</li>
 	 * </ol>
 	 * 
 	 * @return {@link GovernanceNode} instances providing {@link Governance}
@@ -184,6 +182,16 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	String getSectionQualifiedName(String simpleName);
 
 	/**
+	 * Auto-wires the {@link SectionObjectNode} instances that are unlinked.
+	 * 
+	 * @param autoWirer
+	 *            {@link AutoWirer}.
+	 * @param typeContext
+	 *            {@link TypeContext}.
+	 */
+	void autoWireObjects(AutoWirer<LinkObjectNode> autoWirer, TypeContext typeContext);
+
+	/**
 	 * Builds this {@link OfficeSection} for this {@link SectionNode}.
 	 * 
 	 * @param officeBuilder
@@ -195,7 +203,6 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	 * @param typeContext
 	 *            {@link TypeContext}.
 	 */
-	void buildSection(OfficeBuilder officeBuilder,
-			OfficeBindings officeBindings, TypeContext typeContext);
+	void buildSection(OfficeBuilder officeBuilder, OfficeBindings officeBindings, TypeContext typeContext);
 
 }

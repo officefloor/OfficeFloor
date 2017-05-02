@@ -34,8 +34,7 @@ import net.officefloor.frame.api.profile.Profiler;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeNode extends LinkOfficeNode, ManagedObjectRegistry,
-		OfficeArchitect, DeployedOffice {
+public interface OfficeNode extends LinkOfficeNode, ManagedObjectRegistry, OfficeArchitect, DeployedOffice {
 
 	/**
 	 * {@link Node} type.
@@ -53,27 +52,30 @@ public interface OfficeNode extends LinkOfficeNode, ManagedObjectRegistry,
 	 * @param officeLocation
 	 *            Location of the {@link Office}.
 	 */
-	void initialise(String officeSourceClassName, OfficeSource officeSource,
-			String officeLocation);
+	void initialise(String officeSourceClassName, OfficeSource officeSource, String officeLocation);
 
 	/**
 	 * Sources this {@link Office} along with its top level
 	 * {@link OfficeSection} instances into this {@link OfficeNode}.
 	 * 
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	boolean sourceOfficeWithTopLevelSections();
+	boolean sourceOfficeWithTopLevelSections(TypeContext typeContext);
 
 	/**
 	 * Sources this {@link Office} and all descendant {@link Node} instances.
 	 * 
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	boolean sourceOfficeTree();
+	boolean sourceOfficeTree(TypeContext typeContext);
 
 	/**
 	 * Obtains the {@link OfficeFloorNode} containing this {@link OfficeNode}.
@@ -103,7 +105,6 @@ public interface OfficeNode extends LinkOfficeNode, ManagedObjectRegistry,
 	 *            Optional {@link Profiler}. May be <code>null</code>.
 	 * @return {@link OfficeBuilder} for the built {@link Office}.
 	 */
-	OfficeBindings buildOffice(OfficeFloorBuilder builder,
-			TypeContext typeContext, Profiler profiler);
+	OfficeBindings buildOffice(OfficeFloorBuilder builder, TypeContext typeContext, Profiler profiler);
 
 }

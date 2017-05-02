@@ -382,8 +382,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
-	public AutoWirer createAutoWirer() {
-		return new AutoWirerImpl(this.sourceContext, this.getCompilerIssues());
+	public <N extends Node> AutoWirer<N> createAutoWirer(Class<N> nodeType) {
+		return new AutoWirerImpl<>(this.sourceContext, this.getCompilerIssues());
 	}
 
 	@Override

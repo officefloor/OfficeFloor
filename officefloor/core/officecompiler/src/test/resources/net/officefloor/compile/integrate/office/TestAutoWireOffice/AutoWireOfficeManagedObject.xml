@@ -11,7 +11,6 @@
 				<properties>
 					<property name="class.name" value="${testcase}$CompileManagedObject" />
 				</properties>
-				<managing-office name="OFFICE" />
 			</managed-object-source>
 		</managed-object-sources>
 		<managed-objects>
@@ -23,7 +22,7 @@
 			<section name="SECTION" source="CLASS"
 				location="${testcase}$CompileSectionClass">
 				<input name="function" />
-				<object name="OBJECT" object-type="${testcase}$CompileManagedObject" />
+				<object name="${testcase}$CompileManagedObject" object-type="${testcase}$CompileManagedObject" />
 			</section>
 		</sections>
 	</office>

@@ -372,7 +372,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements OfficeFloorNode
 	}
 
 	@Override
-	public boolean sourceOfficeFloor() {
+	public boolean sourceOfficeFloor(TypeContext typeContext) {
 
 		// Determine if must instantiate
 		OfficeFloorSource source = this.officeFloorSource;
@@ -432,10 +432,10 @@ public class OfficeFloorNodeImpl extends AbstractNode implements OfficeFloorNode
 	}
 
 	@Override
-	public boolean sourceOfficeFloorTree() {
+	public boolean sourceOfficeFloorTree(TypeContext typeContext) {
 
 		// Source the OfficeFloor
-		boolean isSourced = this.sourceOfficeFloor();
+		boolean isSourced = this.sourceOfficeFloor(typeContext);
 		if (!isSourced) {
 			return false;
 		}
@@ -443,7 +443,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements OfficeFloorNode
 		// Source all the offices
 		isSourced = this.offices.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getDeployedOfficeName(), b.getDeployedOfficeName()))
-				.allMatch((office) -> office.sourceOfficeTree());
+				.allMatch((office) -> office.sourceOfficeTree(typeContext));
 		if (!isSourced) {
 			return false;
 		}

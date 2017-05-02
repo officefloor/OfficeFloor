@@ -98,8 +98,7 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public SectionObjectNodeImpl(String objectName, SectionNode section,
-			NodeContext context) {
+	public SectionObjectNodeImpl(String objectName, SectionNode section, NodeContext context) {
 		this.objectName = objectName;
 		this.section = section;
 		this.context = context;
@@ -136,8 +135,7 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 
 	@Override
 	public void initialise(String objectType) {
-		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialisedState(objectType));
+		this.state = NodeUtil.initialise(this, this.context, this.state, () -> new InitialisedState(objectType));
 	}
 
 	/*
@@ -163,29 +161,25 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 
 		// Ensure have name and type
 		if (CompileUtil.isBlank(this.objectName)) {
-			this.context.getCompilerIssues().addIssue(this,
-					"Null name for " + TYPE);
+			this.context.getCompilerIssues().addIssue(this, "Null name for " + TYPE);
 			return null; // must have name for object
 		}
+		if (this.state == null) {
+			this.context.getCompilerIssues().addIssue(this, "Not initialised");
+		}
 		if (CompileUtil.isBlank(this.state.objectType)) {
-			this.context.getCompilerIssues()
-					.addIssue(
-							this,
-							"Null type for " + TYPE + " (name="
-									+ this.objectName + ")");
+			this.context.getCompilerIssues().addIssue(this,
+					"Null type for " + TYPE + " (name=" + this.objectName + ")");
 			return null; // must have types for objects
 		}
 
 		// Create and return the type
-		return new SectionObjectTypeImpl(this.objectName,
-				this.state.objectType, this.typeQualifier);
+		return new SectionObjectTypeImpl(this.objectName, this.state.objectType, this.typeQualifier);
 	}
 
 	@Override
-	public OfficeSectionObjectType loadOfficeSectionObjectType(
-			TypeContext typeContext) {
-		return new OfficeSectionObjectTypeImpl(this.objectName,
-				this.state.objectType, this.typeQualifier);
+	public OfficeSectionObjectType loadOfficeSectionObjectType(TypeContext typeContext) {
+		return new OfficeSectionObjectTypeImpl(this.objectName, this.state.objectType, this.typeQualifier);
 	}
 
 	/*
@@ -194,10 +188,9 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 
 	@Override
 	public DependentObjectType loadDependentObjectType(TypeContext typeContext) {
-		TypeQualification[] typeQualifications = new TypeQualification[] { new TypeQualificationImpl(
-				this.typeQualifier, this.state.objectType) };
-		return new DependentObjectTypeImpl(this.objectName, typeQualifications,
-				new ObjectDependencyType[0]);
+		TypeQualification[] typeQualifications = new TypeQualification[] {
+				new TypeQualificationImpl(this.typeQualifier, this.state.objectType) };
+		return new DependentObjectTypeImpl(this.objectName, typeQualifications, new ObjectDependencyType[0]);
 	}
 
 	/*
@@ -238,8 +231,7 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 
 	@Override
 	public boolean linkObjectNode(LinkObjectNode node) {
-		return LinkUtil.linkObjectNode(this, node,
-				this.context.getCompilerIssues(),
+		return LinkUtil.linkObjectNode(this, node, this.context.getCompilerIssues(),
 				(link) -> this.linkedObjectNode = link);
 	}
 

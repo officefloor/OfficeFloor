@@ -207,6 +207,27 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	}
 
 	@Override
+	public TypeQualification[] getTypeQualifications(TypeContext typeContext) {
+
+		// Obtain the type qualifications
+		TypeQualification[] qualifications = this.typeQualifications.stream().toArray(TypeQualification[]::new);
+		if (qualifications.length == 0) {
+
+			// No qualifications, so use managed object type
+			ManagedObjectType<?> managedObjectType = typeContext
+					.getOrLoadManagedObjectType(this.state.managedObjectSourceNode);
+			if (managedObjectType == null) {
+				return null; // must have type
+			}
+
+			// Use the managed object type
+			qualifications = new TypeQualification[] {
+					new TypeQualificationImpl(null, managedObjectType.getObjectClass().getName()) };
+		}
+		return qualifications;
+	}
+
+	@Override
 	public OfficeSectionManagedObjectType loadOfficeSectionManagedObjectType(TypeContext typeContext) {
 
 		// Obtain the managed object type
@@ -217,12 +238,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		}
 
 		// Create the type qualifications
-		TypeQualification[] qualifications = this.typeQualifications.stream().toArray(TypeQualification[]::new);
-		if (qualifications.length == 0) {
-			// No qualifications, so use managed object type
-			qualifications = new TypeQualification[] {
-					new TypeQualificationImpl(null, managedObjectType.getObjectClass().getName()) };
-		}
+		TypeQualification[] qualifications = this.getTypeQualifications(typeContext);
 
 		// Obtain the extension interfaces
 		Class<?>[] extensionInterfaces = managedObjectType.getExtensionInterfaces();
