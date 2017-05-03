@@ -68,8 +68,8 @@ public class ManagedObjectFlowNodeImpl implements ManagedObjectFlowNode {
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public ManagedObjectFlowNodeImpl(String managedObjectFlowName,
-			ManagedObjectSourceNode managedObjectSource, NodeContext context) {
+	public ManagedObjectFlowNodeImpl(String managedObjectFlowName, ManagedObjectSourceNode managedObjectSource,
+			NodeContext context) {
 		this.managedObjectFlowName = managedObjectFlowName;
 		this.managedObjectSource = managedObjectSource;
 		this.context = context;
@@ -100,14 +100,18 @@ public class ManagedObjectFlowNodeImpl implements ManagedObjectFlowNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return NodeUtil.getChildNodes();
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}
 
 	@Override
 	public void initialise() {
-		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialisedState());
+		this.state = NodeUtil.initialise(this, this.context, this.state, () -> new InitialisedState());
 	}
 
 	/*
@@ -130,8 +134,7 @@ public class ManagedObjectFlowNodeImpl implements ManagedObjectFlowNode {
 
 	@Override
 	public boolean linkFlowNode(LinkFlowNode node) {
-		return LinkUtil.linkFlowNode(this, node,
-				this.context.getCompilerIssues(),
+		return LinkUtil.linkFlowNode(this, node, this.context.getCompilerIssues(),
 				(link) -> this.linkedFlowNode = link);
 	}
 

@@ -274,6 +274,12 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return NodeUtil.getChildNodes(this.inputs, this.outputs, this.objects, this.subSections, this.functionNodes,
+				this.managedObjectSourceNodes, this.managedObjects);
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}

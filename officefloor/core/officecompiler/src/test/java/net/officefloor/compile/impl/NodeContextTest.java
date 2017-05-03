@@ -17,10 +17,15 @@
  */
 package net.officefloor.compile.impl;
 
+import static org.junit.Assert.assertArrayEquals;
+
 import java.util.function.Consumer;
+
+import org.easymock.AbstractMatcher;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.structure.SuppliedManagedObjectNodeImpl;
 import net.officefloor.compile.impl.type.TypeContextImpl;
 import net.officefloor.compile.internal.structure.AdministrationNode;
 import net.officefloor.compile.internal.structure.EscalationNode;
@@ -58,6 +63,7 @@ import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.test.match.TypeMatcher;
 
 /**
  * Tests the {@link OfficeFloorCompiler}.
@@ -100,11 +106,18 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 * Ensure create {@link SectionNode} within {@link OfficeNode}.
 	 */
 	public void testCreateSectionNode_withinOffice() {
-
-		SectionNode node = this.doTest(() -> this.context.createSectionNode("SECTION", this.office));
+		this.recordReturn(this.office, this.office.getOfficeFloorNode(), this.officeFloor);
+		SectionNode node = this.doTest(() -> {
+			SectionNode section = this.context.createSectionNode("SECTION", this.office);
+			assertNode(section, "SECTION", "Section", "[NOT INITIALISED]", this.office);
+			assertChildren(section, section.getOfficeSectionInput("INPUT"), section.getOfficeSectionOutput("OUTPUT"),
+					section.getOfficeSectionObject("OBJECT"), section.getOfficeSubSection("SUB_SECTION"),
+					section.getOfficeSectionFunction("FUNCTION"), section.getOfficeSectionManagedObjectSource("MOS"),
+					section.getOfficeSectionManagedObject("MO"));
+			return section;
+		});
 
 		// Ensure section node valid
-		assertNode(node, "SECTION", "Section", "[NOT INITIALISED]", this.office);
 		assertEquals("Incorrect section name", "SECTION", node.getOfficeSectionName());
 		assertSame("Incorrect office node", this.office, node.getOfficeNode());
 		assertNull("Should not have parent section", node.getParentSectionNode());
@@ -130,6 +143,10 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertSame("Incorrect parent section", this.section, node.getParentSectionNode());
 		assertInitialise(node, (n) -> n.initialise("ExampleSectionSource", null, "LOCATION"));
 		assertEquals("Incorrect initialised location", "ExampleSectionSource(LOCATION)", node.getLocation());
+
+		// Ensure correct child nodes
+		assertChildren(node, node.getSubSectionInput("INPUT"), node.getSubSectionOutput("OUTPUT"),
+				node.getSubSectionObject("OBJECT"));
 	}
 
 	/**
@@ -248,8 +265,13 @@ public class NodeContextTest extends OfficeFrameTestCase {
 			return mo;
 		});
 		assertNode(node, "MO", "Managed Object", null, this.managedObjectSource);
+
+		// Validate type qualifications
 		node.addTypeQualification("QUALIFIER", "TYPE");
 		assertTypeQualifications(node, "QUALIFIER", "TYPE");
+
+		// Validate children
+		assertChildren(node, node.getManagedObjectDependency("DEPENDENCY"));
 	}
 
 	/**
@@ -335,6 +357,10 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect section managed object source name", "MOS", node.getSectionManagedObjectSourceName());
 		assertSame("Incorrect parent section", this.section, node.getSectionNode());
 		assertInitialise(node, (n) -> n.initialise("ExampleManagedObjectSource", null));
+
+		// Validate children
+		assertChildren(node, node.getManagedObjectFlow("FLOW"), node.getInputManagedObjectDependency("DEPENDENCY"),
+				node.addSectionManagedObject("MO", ManagedObjectScope.THREAD));
 	}
 
 	/**
@@ -361,6 +387,11 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				node.getSectionManagedObjectSourceName());
 		assertNull("Should not have parent section, as not contained in section", node.getSectionNode());
 		assertInitialise(node, (n) -> n.initialise("ExampleManagedObjectSource", null));
+
+		// Validate children
+		assertChildren(node, node.getManagedObjectFlow("FLOW"), node.getManagedObjectTeam("TEAM"),
+				node.getInputManagedObjectDependency("DEPENDENCY"),
+				node.addOfficeManagedObject("MO", ManagedObjectScope.THREAD));
 	}
 
 	/**
@@ -413,6 +444,11 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				node.getSectionManagedObjectSourceName());
 		assertNull("Should not have parent section, as not contained in section", node.getSectionNode());
 		assertInitialise(node, (n) -> n.initialise("ExampleManagedObjectSource", null));
+
+		// Validate children
+		assertChildren(node, node.getManagedObjectFlow("FLOW"), node.getManagedObjectTeam("TEAM"),
+				node.getInputManagedObjectDependency("DEPENDENCY"),
+				node.addSectionManagedObject("MO", ManagedObjectScope.THREAD));
 	}
 
 	/**
@@ -444,9 +480,23 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 * Ensure can create {@link OfficeFloorNode}.
 	 */
 	public void testCreateOfficeFloorNode() {
-		OfficeFloorNode node = this
-				.doTest(() -> this.context.createOfficeFloorNode("ExampleOfficeFloorSource", null, "LOCATION"));
-		assertNode(node, OfficeFloorNode.OFFICE_FLOOR_NAME, "OfficeFloor", "ExampleOfficeFloorSource(LOCATION)", null);
+		this.recordReturn(this.managedObjectSource, this.managedObjectSource.getSectionNode(), this.section);
+		this.recordReturn(this.section, this.section.getOfficeNode(), this.office);
+		this.recordReturn(this.office, this.office.getOfficeFloorNode(), this.officeFloor);
+		OfficeFloorNode node = this.doTest(() -> {
+			OfficeFloorNode officeFloor = this.context.createOfficeFloorNode("ExampleOfficeFloorSource", null,
+					"LOCATION");
+			assertNode(officeFloor, OfficeFloorNode.OFFICE_FLOOR_NAME, "OfficeFloor",
+					"ExampleOfficeFloorSource(LOCATION)", null);
+			assertChildren(officeFloor, officeFloor.addTeam("TEAM", "net.example.ExampleTeamSource"),
+					officeFloor.addManagedObjectSource("MOS", "net.example.ExampleManagedObjectSource"),
+					officeFloor.addInputManagedObject("INPUT"),
+					officeFloor.addSupplier("SUPPLIER", "net.example.ExampleSupplierSource"),
+					officeFloor.getManagedObjectNode("MO_ONE"),
+					officeFloor.addManagedObjectNode("MO_TWO", ManagedObjectScope.THREAD, this.managedObjectSource),
+					officeFloor.addDeployedOffice("OFFICE", "net.example.ExampleOfficeSource", "LOCATION"));
+			return officeFloor;
+		});
 		assertInitialise(node, (n) -> n.initialise());
 	}
 
@@ -464,8 +514,24 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 * Ensure can create {@link OfficeNode}.
 	 */
 	public void testCreateOfficeNode() {
-		OfficeNode node = this.doTest(() -> this.context.createOfficeNode("OFFICE", this.officeFloor));
-		assertNode(node, "OFFICE", "Office", "[NOT INITIALISED]", this.officeFloor);
+		this.recordReturn(this.managedObjectSource, this.managedObjectSource.getSectionNode(), this.section);
+		this.recordReturn(this.section, this.section.getOfficeNode(), this.office);
+		this.recordReturn(this.office, this.office.getOfficeFloorNode(), this.officeFloor);
+		OfficeNode node = this.doTest(() -> {
+			OfficeNode office = this.context.createOfficeNode("OFFICE", this.officeFloor);
+			assertNode(office, "OFFICE", "Office", "[NOT INITIALISED]", this.officeFloor);
+			assertChildren(office, office.addOfficeInput("INPUT", null), office.addOfficeOutput("OUTPUT", null),
+					office.getDeployedOfficeObject("OBJECT"),
+					office.addOfficeSection("SECTION", "net.example.ExampleSectionSource", "LOCATION"),
+					office.getDeployedOfficeTeam("TEAM_ONE"), office.addOfficeTeam("TEAM_TWO"),
+					office.getManagedObjectNode("MO_ONE"),
+					office.addManagedObjectNode("MO_TWO", ManagedObjectScope.THREAD, this.managedObjectSource),
+					office.addOfficeManagedObjectSource("MOS", "net.example.ExampleManagedObjectSource"),
+					office.addOfficeGovernance("GOVERNANCE", "net.example.ExampleGovernanceSource"),
+					office.addOfficeAdministration("ADMINISTRATION", "net.example.ExampleAdministrationSource"),
+					office.addOfficeEscalation("net.example.ExampleEscalation"), office.addOfficeStart("START"));
+			return office;
+		});
 		assertEquals("Incorrect office name", "OFFICE", node.getDeployedOfficeName());
 		assertInitialise(node, (n) -> n.initialise("ExampleOfficeSource", null, "LOCATION"));
 		assertEquals("Should be initialised with location", "ExampleOfficeSource(LOCATION)", node.getLocation());
@@ -567,9 +633,28 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 * Ensure can create {@link SupplierNode}.
 	 */
 	public void testCreateSupplierNode() {
-		SupplierNode node = this
-				.doTest(() -> this.context.createSupplierNode("SUPPLIER", "ExampleSupplierSource", this.officeFloor));
-		assertNode(node, "SUPPLIER", "Supplier", null, this.officeFloor);
+		SuppliedManagedObjectNode[] suppliedManagedObjectNode = new SuppliedManagedObjectNode[] { null };
+		this.recordReturn(this.officeFloor,
+				this.officeFloor.addManagedObjectSource("MOS", new SuppliedManagedObjectNodeImpl(null, null, context)),
+				this.managedObjectSource, new TypeMatcher(String.class, SuppliedManagedObjectNodeImpl.class) {
+					@Override
+					public boolean matches(Object[] expected, Object[] actual) {
+						// Capture the supplied managed object
+						suppliedManagedObjectNode[0] = (SuppliedManagedObjectNode) actual[1];
+						
+						// Ensure match on type
+						return super.matches(expected, actual);
+					}
+				});
+		SupplierNode node = this.doTest(() -> {
+			SupplierNode supplier = this.context.createSupplierNode("SUPPLIER", "ExampleSupplierSource",
+					this.officeFloor);
+			assertNode(supplier, "SUPPLIER", "Supplier", null, this.officeFloor);
+			supplier.addManagedObjectSource("MOS", new AutoWire("TYPE"));
+			assertChildren(supplier, suppliedManagedObjectNode[0]);
+			return supplier;
+		});
+
 		assertEquals("Incorrect supplier name", "SUPPLIER", node.getOfficeFloorSupplierName());
 		assertInitialise(node, (n) -> n.initialise());
 	}
@@ -588,7 +673,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can create {@link ManagedFunctionNode}.
 	 */
-	public void testCreateFunctionNode() {
+	public void testCreateManagedFunctionNode() {
 		FunctionNamespaceNode namespace = this.createMock(FunctionNamespaceNode.class);
 		ManagedFunctionNode node = this.doTest(() -> this.context.createFunctionNode("FUNCTION"));
 		assertNode(node, "FUNCTION", "Managed Function", null, null);
@@ -597,6 +682,8 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertNull("Should not have namespace", node.getFunctionNamespaceNode());
 		assertInitialise(node, (n) -> n.initialise("TYPE", namespace));
 		assertSame("Incorrect namespace", namespace, node.getFunctionNamespaceNode());
+		assertChildren(node, node.getFunctionFlow("FLOW"), node.getFunctionEscalation("ESCALATION"),
+				node.getFunctionObject("OBJECT"));
 	}
 
 	/**
@@ -631,7 +718,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can create {@link FunctionNamespaceNode}.
 	 */
-	public void testCreateNamespaceNode() {
+	public void testCreateFunctionNamespaceNode() {
 		FunctionNamespaceNode node = this.doTest(() -> {
 			return this.context.createFunctionNamespaceNode("NAMESPACE", this.section);
 		});
@@ -660,6 +747,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect node type", type, node.getNodeType());
 		assertEquals("Incorrect node location", location, node.getLocation());
 		assertSame("Incorrect node parent", parent, node.getParentNode());
+		assertChildren(node); // ensure no children
 	}
 
 	/**
@@ -679,6 +767,18 @@ public class NodeContextTest extends OfficeFrameTestCase {
 			assertEquals("Incorrect qualification " + index, qualifierTypePairs[i], qualification.getQualifier());
 			assertEquals("Incorrect type " + index, qualifierTypePairs[i + 1], qualification.getType());
 		}
+	}
+
+	/**
+	 * Asserts the correct children {@link Node} instances.
+	 * 
+	 * @param node
+	 *            {@link Node} to check its children.
+	 * @param children
+	 *            Child {@link Node} instances.
+	 */
+	private static void assertChildren(Node node, Object... children) {
+		assertArrayEquals("Incorrect children", node.getChildNodes(), children);
 	}
 
 	/**

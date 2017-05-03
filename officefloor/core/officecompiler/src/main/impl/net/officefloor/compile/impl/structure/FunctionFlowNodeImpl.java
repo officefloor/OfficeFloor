@@ -117,6 +117,11 @@ public class FunctionFlowNodeImpl implements FunctionFlowNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return NodeUtil.getChildNodes();
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}

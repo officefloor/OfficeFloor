@@ -122,6 +122,11 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return NodeUtil.getChildNodes();
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}

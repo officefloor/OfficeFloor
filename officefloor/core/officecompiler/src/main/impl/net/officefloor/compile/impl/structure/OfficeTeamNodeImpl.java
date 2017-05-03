@@ -72,8 +72,7 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public OfficeTeamNodeImpl(String teamName, OfficeNode office,
-			NodeContext context) {
+	public OfficeTeamNodeImpl(String teamName, OfficeNode office, NodeContext context) {
 		this.teamName = teamName;
 		this.office = office;
 		this.context = context;
@@ -104,14 +103,18 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return NodeUtil.getChildNodes();
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}
 
 	@Override
 	public void initialise() {
-		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialisedState());
+		this.state = NodeUtil.initialise(this, this.context, this.state, () -> new InitialisedState());
 	}
 
 	/*
@@ -132,8 +135,7 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 
 		// Ensure have name
 		if (CompileUtil.isBlank(this.teamName)) {
-			this.context.getCompilerIssues().addIssue(this,
-					"Null name for " + TYPE);
+			this.context.getCompilerIssues().addIssue(this, "Null name for " + TYPE);
 			return null; // must have name
 		}
 
@@ -152,8 +154,7 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 
 	@Override
 	public boolean linkTeamNode(LinkTeamNode node) {
-		return LinkUtil.linkTeamNode(this, node,
-				this.context.getCompilerIssues(),
+		return LinkUtil.linkTeamNode(this, node, this.context.getCompilerIssues(),
 				(link) -> this.linkedTeamNode = link);
 	}
 

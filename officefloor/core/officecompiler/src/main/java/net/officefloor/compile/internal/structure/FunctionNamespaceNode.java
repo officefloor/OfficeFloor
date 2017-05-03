@@ -19,7 +19,6 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
-import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 
 /**

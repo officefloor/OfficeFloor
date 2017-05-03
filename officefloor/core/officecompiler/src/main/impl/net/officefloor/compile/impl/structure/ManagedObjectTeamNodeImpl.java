@@ -73,8 +73,8 @@ public class ManagedObjectTeamNodeImpl implements ManagedObjectTeamNode {
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public ManagedObjectTeamNodeImpl(String teamName,
-			ManagedObjectSourceNode managedObjectSource, NodeContext context) {
+	public ManagedObjectTeamNodeImpl(String teamName, ManagedObjectSourceNode managedObjectSource,
+			NodeContext context) {
 		this.teamName = teamName;
 		this.managedObjectSourceNode = managedObjectSource;
 		this.context = context;
@@ -105,14 +105,18 @@ public class ManagedObjectTeamNodeImpl implements ManagedObjectTeamNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return NodeUtil.getChildNodes();
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}
 
 	@Override
 	public void initialise() {
-		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialisedState());
+		this.state = NodeUtil.initialise(this, this.context, this.state, () -> new InitialisedState());
 	}
 
 	/*
@@ -120,8 +124,7 @@ public class ManagedObjectTeamNodeImpl implements ManagedObjectTeamNode {
 	 */
 
 	@Override
-	public OfficeSectionManagedObjectTeamType loadOfficeSectionManagedObjectTeamType(
-			TypeContext typeContext) {
+	public OfficeSectionManagedObjectTeamType loadOfficeSectionManagedObjectTeamType(TypeContext typeContext) {
 		// TODO implement
 		// ManagedObjectTeamNode.loadOfficeSectionManagedObjectTeamType
 		throw new UnsupportedOperationException(
@@ -149,8 +152,7 @@ public class ManagedObjectTeamNodeImpl implements ManagedObjectTeamNode {
 
 	@Override
 	public boolean linkTeamNode(LinkTeamNode node) {
-		return LinkUtil.linkTeamNode(this, node,
-				this.context.getCompilerIssues(),
+		return LinkUtil.linkTeamNode(this, node, this.context.getCompilerIssues(),
 				(link) -> this.linkedTeamNode = link);
 	}
 

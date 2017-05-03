@@ -145,6 +145,11 @@ public class FunctionNamespaceNodeImpl implements FunctionNamespaceNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return NodeUtil.getChildNodes();
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}

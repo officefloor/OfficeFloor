@@ -98,8 +98,7 @@ public class TeamNodeImpl implements TeamNode {
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public TeamNodeImpl(String teamName, OfficeFloorNode officeFloor,
-			NodeContext context) {
+	public TeamNodeImpl(String teamName, OfficeFloorNode officeFloor, NodeContext context) {
 		this.teamName = teamName;
 		this.officeFloorNode = officeFloor;
 		this.context = context;
@@ -133,6 +132,11 @@ public class TeamNodeImpl implements TeamNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return NodeUtil.getChildNodes();
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}
@@ -159,32 +163,27 @@ public class TeamNodeImpl implements TeamNode {
 		TeamLoader loader = this.context.getTeamLoader(this);
 
 		// Obtain the team source class
-		Class<TeamSource> teamSourceClass = this.context.getTeamSourceClass(
-				this.state.teamSourceClassName, this);
+		Class<TeamSource> teamSourceClass = this.context.getTeamSourceClass(this.state.teamSourceClassName, this);
 		if (teamSourceClass == null) {
 			return null; // must have source class
 		}
 
 		// Load and return the team type
-		return loader.loadTeamType(this.teamName, teamSourceClass,
-				this.propertyList);
+		return loader.loadTeamType(this.teamName, teamSourceClass, this.propertyList);
 	}
 
 	@Override
-	public OfficeFloorTeamSourceType loadOfficeFloorTeamSourceType(
-			TypeContext typeContext) {
+	public OfficeFloorTeamSourceType loadOfficeFloorTeamSourceType(TypeContext typeContext) {
 
 		// Ensure have the team name
 		if (CompileUtil.isBlank(this.teamName)) {
-			this.context.getCompilerIssues().addIssue(this,
-					"Null name for " + TYPE);
+			this.context.getCompilerIssues().addIssue(this, "Null name for " + TYPE);
 			return null; // must have name
 		}
 
 		// Ensure have the team source
 		if (!this.hasTeamSource()) {
-			this.context.getCompilerIssues().addIssue(this,
-					"Null source for " + TYPE + " " + teamName);
+			this.context.getCompilerIssues().addIssue(this, "Null source for " + TYPE + " " + teamName);
 			return null; // must have source
 		}
 
@@ -192,30 +191,27 @@ public class TeamNodeImpl implements TeamNode {
 		TeamLoader loader = this.context.getTeamLoader(this);
 
 		// Obtain the team source class
-		Class<TeamSource> teamSourceClass = this.context.getTeamSourceClass(
-				this.state.teamSourceClassName, this);
+		Class<TeamSource> teamSourceClass = this.context.getTeamSourceClass(this.state.teamSourceClassName, this);
 		if (teamSourceClass == null) {
 			return null; // must have source class
 		}
 
 		// Load and return the team source type
-		return loader.loadOfficeFloorTeamSourceType(this.teamName,
-				teamSourceClass, this.propertyList);
+		return loader.loadOfficeFloorTeamSourceType(this.teamName, teamSourceClass, this.propertyList);
 	}
 
 	@Override
 	public void buildTeam(OfficeFloorBuilder builder) {
 
 		// Obtain the team source class
-		Class<? extends TeamSource> teamSourceClass = this.context
-				.getTeamSourceClass(this.state.teamSourceClassName, this);
+		Class<? extends TeamSource> teamSourceClass = this.context.getTeamSourceClass(this.state.teamSourceClassName,
+				this);
 		if (teamSourceClass == null) {
 			return; // must obtain team source class
 		}
 
 		// Build the team
-		TeamBuilder<?> teamBuilder = builder.addTeam(this.teamName,
-				teamSourceClass);
+		TeamBuilder<?> teamBuilder = builder.addTeam(this.teamName, teamSourceClass);
 		for (Property property : this.propertyList) {
 			teamBuilder.addProperty(property.getName(), property.getValue());
 		}

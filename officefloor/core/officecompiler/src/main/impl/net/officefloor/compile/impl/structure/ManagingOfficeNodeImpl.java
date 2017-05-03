@@ -60,8 +60,7 @@ public class ManagingOfficeNodeImpl implements ManagingOfficeNode {
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public ManagingOfficeNodeImpl(ManagedObjectSourceNode managedObjectSource,
-			NodeContext context) {
+	public ManagingOfficeNodeImpl(ManagedObjectSourceNode managedObjectSource, NodeContext context) {
 		this.managedObjectSourceNode = managedObjectSource;
 		this.context = context;
 	}
@@ -92,14 +91,19 @@ public class ManagingOfficeNodeImpl implements ManagingOfficeNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		// TODO implement getChildNodes
+		throw new UnsupportedOperationException("TODO implement getChildNodes");
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}
 
 	@Override
 	public void initialise() {
-		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialisedState());
+		this.state = NodeUtil.initialise(this, this.context, this.state, () -> new InitialisedState());
 	}
 
 	/*
@@ -113,8 +117,7 @@ public class ManagingOfficeNodeImpl implements ManagingOfficeNode {
 
 	@Override
 	public boolean linkOfficeNode(LinkOfficeNode node) {
-		return LinkUtil.linkOfficeNode(this, node,
-				this.context.getCompilerIssues(),
+		return LinkUtil.linkOfficeNode(this, node, this.context.getCompilerIssues(),
 				(link) -> this.linkedOfficeNode = link);
 	}
 

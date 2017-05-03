@@ -64,12 +64,12 @@ public class ResponsibleTeamNodeImpl implements ResponsibleTeamNode {
 	 * @param teamName
 	 *            Name of this {@link OfficeTeam}.
 	 * @param taskNode
-	 *            {@link ManagedFunctionNode} containing this {@link ResponsibleTeamNode}.
+	 *            {@link ManagedFunctionNode} containing this
+	 *            {@link ResponsibleTeamNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public ResponsibleTeamNodeImpl(String teamName, ManagedFunctionNode taskNode,
-			NodeContext context) {
+	public ResponsibleTeamNodeImpl(String teamName, ManagedFunctionNode taskNode, NodeContext context) {
 		this.teamName = teamName;
 		this.taskNode = taskNode;
 		this.context = context;
@@ -100,14 +100,19 @@ public class ResponsibleTeamNodeImpl implements ResponsibleTeamNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		// TODO implement getChildNodes
+		throw new UnsupportedOperationException("TODO implement getChildNodes");
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}
 
 	@Override
 	public void initialise() {
-		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialisedState());
+		this.state = NodeUtil.initialise(this, this.context, this.state, () -> new InitialisedState());
 	}
 
 	/*
@@ -121,8 +126,7 @@ public class ResponsibleTeamNodeImpl implements ResponsibleTeamNode {
 
 	@Override
 	public boolean linkTeamNode(LinkTeamNode node) {
-		return LinkUtil.linkTeamNode(this, node,
-				this.context.getCompilerIssues(),
+		return LinkUtil.linkTeamNode(this, node, this.context.getCompilerIssues(),
 				(link) -> this.linkedTeamNode = link);
 	}
 

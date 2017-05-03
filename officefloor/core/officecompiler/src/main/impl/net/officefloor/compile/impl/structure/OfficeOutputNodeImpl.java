@@ -119,6 +119,11 @@ public class OfficeOutputNodeImpl implements OfficeOutputNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return NodeUtil.getChildNodes();
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}

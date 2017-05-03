@@ -157,6 +157,11 @@ public class AdministrationNodeImpl implements AdministrationNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return NodeUtil.getChildNodes();
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 
@@ -233,6 +238,7 @@ public class AdministrationNodeImpl implements AdministrationNode {
 	 * @param functionBuilder
 	 *            {@link ManagedFunctionBuilder}.
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void buildAdministration(boolean isPreNotPost, ManagedFunctionBuilder<?, ?> functionBuilder) {
 
 		// Build the administration type

@@ -70,8 +70,7 @@ public class SuppliedManagedObjectNodeImpl implements SuppliedManagedObjectNode 
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public SuppliedManagedObjectNodeImpl(AutoWire autoWire,
-			SupplierNode supplierNode, NodeContext context) {
+	public SuppliedManagedObjectNodeImpl(AutoWire autoWire, SupplierNode supplierNode, NodeContext context) {
 		this.autoWire = autoWire;
 		this.supplierNode = supplierNode;
 		this.context = context;
@@ -102,14 +101,19 @@ public class SuppliedManagedObjectNodeImpl implements SuppliedManagedObjectNode 
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		// TODO implement getChildNodes
+		throw new UnsupportedOperationException("TODO implement getChildNodes");
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}
 
 	@Override
 	public void initialise() {
-		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialisedState());
+		this.state = NodeUtil.initialise(this, this.context, this.state, () -> new InitialisedState());
 	}
 
 	/*

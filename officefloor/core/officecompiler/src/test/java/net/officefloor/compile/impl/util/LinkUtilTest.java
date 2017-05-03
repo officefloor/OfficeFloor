@@ -578,6 +578,12 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		}
 
 		@Override
+		public Node[] getChildNodes() {
+			fail("Should not require children");
+			return null;
+		}
+
+		@Override
 		public boolean isInitialised() {
 			fail("Should not require initialisation");
 			return false;

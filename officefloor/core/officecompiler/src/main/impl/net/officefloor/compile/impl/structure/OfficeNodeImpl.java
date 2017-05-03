@@ -281,6 +281,13 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return NodeUtil.getChildNodes(this.inputs, this.outputs, this.objects, this.sections, this.teams,
+				this.managedObjects, this.managedObjectSources, this.governances, this.administrators, this.escalations,
+				this.starts);
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}
@@ -438,6 +445,9 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			return false; // must source all top level sections
 		}
 
+		// Ensure all sections have been initialised correctly
+		// TODO recursively check that all nodes have been initialised correctly
+
 		// Undertake auto-wire of objects
 		if (this.isAutoWireObjects) {
 
@@ -454,7 +464,9 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			});
 
 			// Iterate over sections (auto-wiring unlinked dependencies)
-			this.sections.values().stream().forEach((section) -> section.autoWireObjects(autoWirer, typeContext));
+			this.sections.values().stream()
+					.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSectionName(), b.getOfficeSectionName()))
+					.forEach((section) -> section.autoWireObjects(autoWirer, typeContext));
 		}
 
 		// As here, successfully loaded the office

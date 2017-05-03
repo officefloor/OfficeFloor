@@ -26,7 +26,6 @@ import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
-import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
 
 /**
  * Tests the {@link AutoWire} of the {@link Office}.
@@ -60,13 +59,8 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		this.record_officeBuilder_addThreadManagedObject("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT");
 
 		// Build the section
-		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "function");
-		function.linkManagedObject(0, "OFFICE.SECTION.OBJECT", CompileSectionClass.class);
-		this.record_officeFloorBuilder_addManagedObject("OFFICE.SECTION.OBJECT", SectionClassManagedObjectSource.class,
-				0, SectionClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, CompileSectionClass.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		office.registerManagedObjectSource("OFFICE.SECTION.OBJECT", "OFFICE.SECTION.OBJECT");
-		this.record_officeBuilder_addThreadManagedObject("OFFICE.SECTION.OBJECT", "OFFICE.SECTION.OBJECT");
+		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION",
+				CompileSectionClass.class, "function");
 
 		// Auto-wire
 		function.linkManagedObject(1, "OFFICE.MANAGED_OBJECT", CompileManagedObject.class);

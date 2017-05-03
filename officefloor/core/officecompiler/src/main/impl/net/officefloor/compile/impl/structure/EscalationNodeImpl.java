@@ -68,8 +68,7 @@ public class EscalationNodeImpl implements EscalationNode {
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public EscalationNodeImpl(String escalationType, OfficeNode officeNode,
-			NodeContext context) {
+	public EscalationNodeImpl(String escalationType, OfficeNode officeNode, NodeContext context) {
 		this.escalationType = escalationType;
 		this.officeNode = officeNode;
 		this.context = context;
@@ -100,14 +99,18 @@ public class EscalationNodeImpl implements EscalationNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return NodeUtil.getChildNodes();
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}
 
 	@Override
 	public void initialise() {
-		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialisedState());
+		this.state = NodeUtil.initialise(this, this.context, this.state, () -> new InitialisedState());
 	}
 
 	/*
@@ -130,8 +133,7 @@ public class EscalationNodeImpl implements EscalationNode {
 
 	@Override
 	public boolean linkFlowNode(LinkFlowNode node) {
-		return LinkUtil.linkFlowNode(this, node,
-				this.context.getCompilerIssues(),
+		return LinkUtil.linkFlowNode(this, node, this.context.getCompilerIssues(),
 				(link) -> this.linkedFlowNode = link);
 	}
 

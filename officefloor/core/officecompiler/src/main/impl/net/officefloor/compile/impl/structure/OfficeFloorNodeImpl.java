@@ -205,6 +205,12 @@ public class OfficeFloorNodeImpl extends AbstractNode implements OfficeFloorNode
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return NodeUtil.getChildNodes(this.teams, this.managedObjectSources, this.inputManagedObjects, this.suppliers,
+				this.managedObjects, this.offices);
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}

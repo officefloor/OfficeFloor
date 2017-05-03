@@ -93,8 +93,7 @@ public class SupplierNodeImpl implements SupplierNode {
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public SupplierNodeImpl(String supplierName,
-			String supplierSourceClassName, OfficeFloorNode officeFloorNode,
+	public SupplierNodeImpl(String supplierName, String supplierSourceClassName, OfficeFloorNode officeFloorNode,
 			NodeContext context) {
 		this.supplierName = supplierName;
 		this.supplierSourceClassName = supplierSourceClassName;
@@ -130,14 +129,18 @@ public class SupplierNodeImpl implements SupplierNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return this.suppliedManagedObjects.toArray(new Node[this.suppliedManagedObjects.size()]);
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}
 
 	@Override
 	public void initialise() {
-		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialisedState());
+		this.state = NodeUtil.initialise(this, this.context, this.state, () -> new InitialisedState());
 	}
 
 	/*
@@ -155,19 +158,17 @@ public class SupplierNodeImpl implements SupplierNode {
 	}
 
 	@Override
-	public OfficeFloorManagedObjectSource addManagedObjectSource(
-			String managedObjectSourceName, AutoWire autoWire) {
+	public OfficeFloorManagedObjectSource addManagedObjectSource(String managedObjectSourceName, AutoWire autoWire) {
 
 		// Create the supplied managed object node
-		SuppliedManagedObjectNode suppliedManagedObjectNode = this.context
-				.createSuppliedManagedObjectNode(autoWire, this);
+		SuppliedManagedObjectNode suppliedManagedObjectNode = this.context.createSuppliedManagedObjectNode(autoWire,
+				this);
 
 		// Register the supplied managed object
 		this.suppliedManagedObjects.add(suppliedManagedObjectNode);
 
 		// Add and return the managed object source
-		return this.officeFloorNode.addManagedObjectSource(
-				managedObjectSourceName, suppliedManagedObjectNode);
+		return this.officeFloorNode.addManagedObjectSource(managedObjectSourceName, suppliedManagedObjectNode);
 	}
 
 	/*
@@ -184,16 +185,14 @@ public class SupplierNodeImpl implements SupplierNode {
 	public void fillSupplyOrders(SupplyOrder... supplyOrders) {
 
 		// Load the supplier source class
-		Class supplierSourceClass = this.context.getSupplierSourceClass(
-				this.supplierSourceClassName, this);
+		Class supplierSourceClass = this.context.getSupplierSourceClass(this.supplierSourceClassName, this);
 		if (supplierSourceClass == null) {
 			return; // must have supplier source class
 		}
 
 		// Fill the supply orders
 		SupplierLoader supplierLoader = this.context.getSupplierLoader(this);
-		supplierLoader.fillSupplyOrders(supplierSourceClass, this.propertyList,
-				supplyOrders);
+		supplierLoader.fillSupplyOrders(supplierSourceClass, this.propertyList, supplyOrders);
 	}
 
 }

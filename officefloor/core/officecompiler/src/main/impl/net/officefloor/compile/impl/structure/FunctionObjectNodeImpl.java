@@ -114,6 +114,12 @@ public class FunctionObjectNodeImpl implements FunctionObjectNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		// TODO implement getChildNodes
+		throw new UnsupportedOperationException("TODO implement getChildNodes");
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}

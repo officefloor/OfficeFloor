@@ -20,10 +20,7 @@ package net.officefloor.compile.impl.structure;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Supplier;
-
-import org.easymock.internal.OrderedBehavior;
 
 import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.AutoWireLink;

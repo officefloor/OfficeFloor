@@ -17,6 +17,8 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -137,6 +139,27 @@ public class NodeUtil {
 	 */
 	public static String getLocation(String sourceClassName, Object sourceInstance, String location) {
 		return (sourceInstance != null ? sourceInstance.toString() : sourceClassName) + "(" + location + ")";
+	}
+
+	/**
+	 * Obtains the child {@link Node} instances.
+	 * 
+	 * @param children
+	 *            {@link Map} instances containing the child {@link Node}
+	 *            instances.
+	 * @return Child {@link Node} instances.
+	 */
+	@SafeVarargs
+	public static Node[] getChildNodes(Map<String, ? extends Node>... children) {
+
+		// Create the listing of children
+		final List<Node> childNodes = new ArrayList<>();
+		for (final Map<String, ? extends Node> childMap : children) {
+			childMap.keySet().stream().sorted().forEach((key) -> childNodes.add(childMap.get(key)));
+		}
+
+		// Return the children
+		return childNodes.toArray(new Node[childNodes.size()]);
 	}
 
 	/**

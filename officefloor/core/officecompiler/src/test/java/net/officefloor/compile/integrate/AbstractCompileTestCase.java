@@ -19,6 +19,7 @@ package net.officefloor.compile.integrate;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Method;
 
 import org.easymock.AbstractMatcher;
 
@@ -28,7 +29,9 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
+import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.extension.AutoWireOfficeExtensionService;
 import net.officefloor.frame.api.OfficeFrame;
@@ -63,6 +66,8 @@ import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
 import net.officefloor.model.impl.repository.xml.XmlConfigurationContext;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
 
 /**
  * Provides abstract functionality for testing integration of the
@@ -502,6 +507,42 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 
 		// Return the task builder
 		return this.functionBuilder;
+	}
+
+	/**
+	 * Convenience method for recording an {@link OfficeSection} added via
+	 * {@link ClassSectionSource} for a {@link Class} with a single
+	 * {@link Method}.
+	 * 
+	 * @param officeName
+	 *            Name of the {@link Office}.
+	 * @param sectionPath
+	 *            {@link OfficeSection} to {@link SubSection} path.
+	 * @param sectionClass
+	 *            {@link Class} for the {@link ClassSectionSource}.
+	 * @param functionName
+	 *            Name of the {@link Method}.
+	 * @return {@link ManagedFunctionBuilder} for the {@link Method}.
+	 */
+	public ManagedFunctionBuilder<?, ?> record_officeBuilder_addSectionClassFunction(String officeName,
+			String sectionPath, Class<?> sectionClass, String functionName) {
+
+		// Obtain the qualified section object name
+		String qualifiedObjectName = officeName + "." + sectionPath + ".OBJECT";
+
+		// Record the function
+		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction(sectionPath, functionName);
+
+		// Record the section object
+		function.linkManagedObject(0, qualifiedObjectName, sectionClass);
+		this.record_officeFloorBuilder_addManagedObject(qualifiedObjectName, SectionClassManagedObjectSource.class, 0,
+				SectionClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, sectionClass.getName());
+		this.record_managedObjectBuilder_setManagingOffice(officeName);
+		this.officeBuilder.registerManagedObjectSource(qualifiedObjectName, qualifiedObjectName);
+		this.record_officeBuilder_addThreadManagedObject(qualifiedObjectName, qualifiedObjectName);
+
+		// Return the function
+		return function;
 	}
 
 	/**

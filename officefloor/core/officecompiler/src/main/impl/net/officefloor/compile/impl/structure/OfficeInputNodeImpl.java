@@ -119,6 +119,11 @@ public class OfficeInputNodeImpl implements OfficeInputNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return NodeUtil.getChildNodes();
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}

@@ -187,6 +187,11 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return NodeUtil.getChildNodes(this.dependencies);
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}

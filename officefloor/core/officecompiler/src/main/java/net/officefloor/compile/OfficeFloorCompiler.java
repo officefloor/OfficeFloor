@@ -404,6 +404,11 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return null;
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return true; // always initialised
 	}

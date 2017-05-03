@@ -96,8 +96,7 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public SectionOutputNodeImpl(String outputName, SectionNode section,
-			NodeContext context) {
+	public SectionOutputNodeImpl(String outputName, SectionNode section, NodeContext context) {
 		this.outputName = outputName;
 		this.section = section;
 		this.context = context;
@@ -128,6 +127,11 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return NodeUtil.getChildNodes();
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}
@@ -152,21 +156,17 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 
 		// Ensure have output name
 		if (CompileUtil.isBlank(this.outputName)) {
-			this.context.getCompilerIssues().addIssue(this,
-					"Null name for " + TYPE);
+			this.context.getCompilerIssues().addIssue(this, "Null name for " + TYPE);
 			return null; // must have names for outputs
 		}
 
 		// Create and return type
-		return new SectionOutputTypeImpl(this.outputName,
-				this.state.argumentType, this.state.isEscalationOnly);
+		return new SectionOutputTypeImpl(this.outputName, this.state.argumentType, this.state.isEscalationOnly);
 	}
 
 	@Override
-	public OfficeSectionOutputType loadOfficeSectionOutputType(
-			TypeContext typeContext) {
-		return new OfficeSectionOutputTypeImpl(this.outputName,
-				this.state.argumentType, this.state.isEscalationOnly);
+	public OfficeSectionOutputType loadOfficeSectionOutputType(TypeContext typeContext) {
+		return new OfficeSectionOutputTypeImpl(this.outputName, this.state.argumentType, this.state.isEscalationOnly);
 	}
 
 	/*
@@ -207,8 +207,7 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 
 	@Override
 	public boolean linkFlowNode(LinkFlowNode node) {
-		return LinkUtil.linkFlowNode(this, node,
-				this.context.getCompilerIssues(),
+		return LinkUtil.linkFlowNode(this, node, this.context.getCompilerIssues(),
 				(link) -> this.linkedFlowNode = link);
 	}
 

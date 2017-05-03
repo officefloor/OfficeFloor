@@ -90,8 +90,7 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public SectionInputNodeImpl(String inputName, SectionNode section,
-			NodeContext context) {
+	public SectionInputNodeImpl(String inputName, SectionNode section, NodeContext context) {
 		this.inputName = inputName;
 		this.section = section;
 		this.context = context;
@@ -122,14 +121,19 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		// TODO implement getChildNodes
+		throw new UnsupportedOperationException("TODO implement getChildNodes");
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}
 
 	@Override
 	public void initialise(String parameterType) {
-		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialisedState(parameterType));
+		this.state = NodeUtil.initialise(this, this.context, this.state, () -> new InitialisedState(parameterType));
 	}
 
 	/*
@@ -141,21 +145,17 @@ public class SectionInputNodeImpl implements SectionInputNode {
 
 		// Ensure have input name
 		if (CompileUtil.isBlank(this.inputName)) {
-			this.context.getCompilerIssues().addIssue(this,
-					"Null name for " + TYPE);
+			this.context.getCompilerIssues().addIssue(this, "Null name for " + TYPE);
 			return null; // must have names for inputs
 		}
 
 		// Create and return type
-		return new SectionInputTypeImpl(this.inputName,
-				this.state.parameterType);
+		return new SectionInputTypeImpl(this.inputName, this.state.parameterType);
 	}
 
 	@Override
-	public OfficeSectionInputType loadOfficeSectionInputType(
-			TypeContext typeContext) {
-		return new OfficeSectionInputTypeImpl(this.inputName,
-				this.state.parameterType);
+	public OfficeSectionInputType loadOfficeSectionInputType(TypeContext typeContext) {
+		return new OfficeSectionInputTypeImpl(this.inputName, this.state.parameterType);
 	}
 
 	/*
@@ -205,8 +205,7 @@ public class SectionInputNodeImpl implements SectionInputNode {
 
 	@Override
 	public boolean linkFlowNode(LinkFlowNode node) {
-		return LinkUtil.linkFlowNode(this, node,
-				this.context.getCompilerIssues(),
+		return LinkUtil.linkFlowNode(this, node, this.context.getCompilerIssues(),
 				(link) -> this.linkedFlowNode = link);
 	}
 
