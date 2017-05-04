@@ -35,6 +35,7 @@
 		<functions>
 			<function name="FUNCTION" function-namespace="NAMESPACE"
 				managed-function="flowFunction" />
+			<function-flow name="flow" argument-type="java.lang.String" />
 		</functions>
 	</section>
 </context>

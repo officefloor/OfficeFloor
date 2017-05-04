@@ -29,7 +29,10 @@
 				<properties>
 					<property name="class.name" value="${testcase}$CompileFunctionClass" />
 				</properties>
-				<managed-function name="objectFunction" />
+				<managed-function name="objectFunction">
+					<managed-function-object name="${testcase}$CompileManagedObject"
+						object-type="${testcase}$CompileManagedObject" />
+				</managed-function>
 			</function-namespace>
 		</function-namespaces>
 		<functions>

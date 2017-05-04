@@ -20,7 +20,9 @@ package net.officefloor.compile.integrate.managedfunction;
 import net.officefloor.compile.impl.structure.FunctionFlowNodeImpl;
 import net.officefloor.compile.impl.structure.FunctionObjectNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedFunctionNodeImpl;
+import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
+import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
@@ -302,18 +304,16 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 	public void testFunctionObjectNotLinked() throws Exception {
 
 		// Record loading section type
-		this.issues.recordCaptureIssues(true);
+		CompilerIssue[] capturedIssues = this.issues.recordCaptureIssues(true);
 
-		// Record building the OfficeFloor
-		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", OnePersonTeamSource.class);
-		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
-		this.record_officeBuilder_addFunction("SECTION", "FUNCTION").setResponsibleTeam("OFFICE_TEAM");
+		// Record building the OfficeFloor (fails on loading type, so no build)
 		this.issues.recordIssue(CompileManagedObject.class.getName(), FunctionObjectNodeImpl.class,
 				"Function Object " + CompileManagedObject.class.getName() + " is not linked to a DependentObjectNode");
+		this.issues.recordIssue("OFFICE", OfficeNodeImpl.class, "Failure loading OfficeSectionType from source SECTION",
+				capturedIssues);
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile(false);
 	}
 
 	/**

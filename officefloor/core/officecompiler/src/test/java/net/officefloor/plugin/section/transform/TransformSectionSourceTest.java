@@ -330,6 +330,9 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 			SectionInput input = designer.addSectionInput("ENHANCED_INPUT", String.class.getName());
 			SubSectionInput wrappedInput = subSection.getSubSectionInput("inputTwo");
 			designer.link(input, wrappedInput);
+
+			// Must also keep inputTwo available for multiple transforms
+			designer.link(designer.addSectionInput("inputTwo", String.class.getName()), wrappedInput);
 		}
 	}
 
@@ -350,6 +353,9 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 		// Inputs
 		type.addSectionInput(prefix + "inputOne", null);
 		type.addSectionInput(prefix + "inputTwo", String.class.getName());
+		if (prefix.length() > 0) {
+			type.addSectionInput("inputTwo", String.class.getName());
+		}
 
 		// Outputs
 		type.addSectionOutput(prefix + "one", Integer.class.getName(), false);

@@ -9,7 +9,7 @@
 			<section name="SECTION" source="CLASS"
 				location="${testcase}$CompileSectionClass">
 				<input name="function" />
-				<input name="UNKNOWN" />
+				<output name="UNKNOWN" />
 			</section>
 		</sections>
 	</office>

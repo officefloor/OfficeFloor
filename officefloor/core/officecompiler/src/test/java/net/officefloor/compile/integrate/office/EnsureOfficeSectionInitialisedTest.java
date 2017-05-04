@@ -17,8 +17,8 @@
  */
 package net.officefloor.compile.integrate.office;
 
-import net.officefloor.compile.impl.structure.SectionInputNodeImpl;
 import net.officefloor.compile.impl.structure.SectionObjectNodeImpl;
+import net.officefloor.compile.impl.structure.SectionOutputNodeImpl;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
@@ -37,9 +37,9 @@ public class EnsureOfficeSectionInitialisedTest extends AbstractCompileTestCase 
 	/**
 	 * Ensure the {@link OfficeSectionInput} is initialised.
 	 */
-	public void testEnsureOfficeSectionInputInitialised() {
-		this.doEnsureInitialised(
-				() -> this.issues.recordIssue("UNKNOWN", SectionInputNodeImpl.class, "Section Input not implemented"));
+	public void testEnsureOfficeSectionOutputInitialised() {
+		this.doEnsureInitialised(() -> this.issues.recordIssue("UNKNOWN", SectionOutputNodeImpl.class,
+				"Section Output not implemented\n\nTree = { \"name\": \"OFFICE\", \"type\": \"Office\", \"initialised\": true, \"children\": [ { \"name\": \"SECTION\", \"type\": \"Section\", \"initialised\": true, \"children\": [ { \"name\": \"function\", \"type\": \"Section Input\", \"initialised\": true }, { \"name\": \"UNKNOWN\", \"type\": \"Section Output\", \"initialised\": false }, { \"name\": \"function\", \"type\": \"Managed Function\", \"initialised\": true, \"children\": [ { \"name\": \"OBJECT\", \"type\": \"Function Object\", \"initialised\": true } ] }, { \"name\": \"OBJECT\", \"type\": \"Managed Object Source\", \"initialised\": true }, { \"name\": \"OBJECT\", \"type\": \"Managed Object\", \"initialised\": true } ] } ] }\n\n"));
 	}
 
 	/**
