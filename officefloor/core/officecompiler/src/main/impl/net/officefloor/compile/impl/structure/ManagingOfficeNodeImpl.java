@@ -92,8 +92,7 @@ public class ManagingOfficeNodeImpl implements ManagingOfficeNode {
 
 	@Override
 	public Node[] getChildNodes() {
-		// TODO implement getChildNodes
-		throw new UnsupportedOperationException("TODO implement getChildNodes");
+		return NodeUtil.getChildNodes();
 	}
 
 	@Override

@@ -22,5 +22,11 @@
 			</office>
 		</offices>
 	</office-floor>
-	<office />
+	<office>
+		<external-managed-objects>
+			<external-managed-object name="OBJECT"
+				object-type="${testcase}$SimpleManagedObject" object-scope="PROCESS">
+			</external-managed-object>
+		</external-managed-objects>
+	</office>
 </context>

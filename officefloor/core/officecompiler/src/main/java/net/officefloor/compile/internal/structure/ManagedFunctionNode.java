@@ -58,6 +58,17 @@ public interface ManagedFunctionNode extends LinkFlowNode, SectionFunction, Offi
 	void initialise(String managedFunctionTypeName, FunctionNamespaceNode functionNamespace);
 
 	/**
+	 * Sources the {@link ManagedFunction}.
+	 * 
+	 * @param typeContext
+	 *            {@link TypeContext}.
+	 * @return <code>true</code> if successfully sourced the
+	 *         {@link ManagedFunction}. <code>false</code> if failed to source
+	 *         with issues reported to the {@link CompilerIssues}.
+	 */
+	boolean souceManagedFunction(TypeContext typeContext);
+
+	/**
 	 * Loads the {@link OfficeFunctionType}.
 	 * 
 	 * @param parentSubSectionType

@@ -26,5 +26,11 @@
 			</office>
 		</offices>
 	</office-floor>
-	<office />
+	<office>
+		<external-managed-objects>
+			<external-managed-object name="OBJECT"
+				object-type="java.sql.Connection" object-scope="THREAD">
+			</external-managed-object>
+		</external-managed-objects>
+	</office>
 </context>

@@ -68,12 +68,10 @@ public class SectionLoaderImpl implements SectionLoader {
 	 */
 
 	@Override
-	public <S extends SectionSource> PropertyList loadSpecification(
-			Class<S> sectionSourceClass) {
+	public <S extends SectionSource> PropertyList loadSpecification(Class<S> sectionSourceClass) {
 
 		// Instantiate the section source
-		SectionSource sectionSource = CompileUtil.newInstance(
-				sectionSourceClass, SectionSource.class, this.node,
+		SectionSource sectionSource = CompileUtil.newInstance(sectionSourceClass, SectionSource.class, this.node,
 				this.nodeContext.getCompilerIssues());
 		if (sectionSource == null) {
 			return null; // failed to instantiate
@@ -84,17 +82,15 @@ public class SectionLoaderImpl implements SectionLoader {
 		try {
 			specification = sectionSource.getSpecification();
 		} catch (Throwable ex) {
-			this.addIssue("Failed to obtain "
-					+ SectionSourceSpecification.class.getSimpleName()
-					+ " from " + sectionSourceClass.getName(), ex);
+			this.addIssue("Failed to obtain " + SectionSourceSpecification.class.getSimpleName() + " from "
+					+ sectionSourceClass.getName(), ex);
 			return null; // failed to obtain
 		}
 
 		// Ensure have specification
 		if (specification == null) {
-			this.addIssue("No "
-					+ SectionSourceSpecification.class.getSimpleName()
-					+ " returned from " + sectionSourceClass.getName());
+			this.addIssue("No " + SectionSourceSpecification.class.getSimpleName() + " returned from "
+					+ sectionSourceClass.getName());
 			return null; // no specification obtained
 		}
 
@@ -104,11 +100,9 @@ public class SectionLoaderImpl implements SectionLoader {
 			sectionProperties = specification.getProperties();
 		} catch (Throwable ex) {
 			this.addIssue(
-					"Failed to obtain "
-							+ SectionSourceProperty.class.getSimpleName()
-							+ " instances from "
-							+ SectionSourceSpecification.class.getSimpleName()
-							+ " for " + sectionSourceClass.getName(), ex);
+					"Failed to obtain " + SectionSourceProperty.class.getSimpleName() + " instances from "
+							+ SectionSourceSpecification.class.getSimpleName() + " for " + sectionSourceClass.getName(),
+					ex);
 			return null; // failed to obtain properties
 		}
 
@@ -120,10 +114,9 @@ public class SectionLoaderImpl implements SectionLoader {
 
 				// Ensure have the section property
 				if (sectionProperty == null) {
-					this.addIssue(SectionSourceProperty.class.getSimpleName()
-							+ " " + i + " is null from "
-							+ SectionSourceSpecification.class.getSimpleName()
-							+ " for " + sectionSourceClass.getName());
+					this.addIssue(SectionSourceProperty.class.getSimpleName() + " " + i + " is null from "
+							+ SectionSourceSpecification.class.getSimpleName() + " for "
+							+ sectionSourceClass.getName());
 					return null; // must have complete property details
 				}
 
@@ -132,23 +125,15 @@ public class SectionLoaderImpl implements SectionLoader {
 				try {
 					name = sectionProperty.getName();
 				} catch (Throwable ex) {
-					this.addIssue(
-							"Failed to get name for "
-									+ SectionSourceProperty.class
-											.getSimpleName()
-									+ " "
-									+ i
-									+ " from "
-									+ SectionSourceSpecification.class
-											.getSimpleName() + " for "
-									+ sectionSourceClass.getName(), ex);
+					this.addIssue("Failed to get name for " + SectionSourceProperty.class.getSimpleName() + " " + i
+							+ " from " + SectionSourceSpecification.class.getSimpleName() + " for "
+							+ sectionSourceClass.getName(), ex);
 					return null; // must have complete property details
 				}
 				if (CompileUtil.isBlank(name)) {
-					this.addIssue(SectionSourceProperty.class.getSimpleName()
-							+ " " + i + " provided blank name from "
-							+ SectionSourceSpecification.class.getSimpleName()
-							+ " for " + sectionSourceClass.getName());
+					this.addIssue(SectionSourceProperty.class.getSimpleName() + " " + i + " provided blank name from "
+							+ SectionSourceSpecification.class.getSimpleName() + " for "
+							+ sectionSourceClass.getName());
 					return null; // must have complete property details
 				}
 
@@ -157,11 +142,9 @@ public class SectionLoaderImpl implements SectionLoader {
 				try {
 					label = sectionProperty.getLabel();
 				} catch (Throwable ex) {
-					this.addIssue("Failed to get label for "
-							+ SectionSourceProperty.class.getSimpleName() + " "
-							+ i + " (" + name + ") from "
-							+ SectionSourceSpecification.class.getSimpleName()
-							+ " for " + sectionSourceClass.getName(), ex);
+					this.addIssue("Failed to get label for " + SectionSourceProperty.class.getSimpleName() + " " + i
+							+ " (" + name + ") from " + SectionSourceSpecification.class.getSimpleName() + " for "
+							+ sectionSourceClass.getName(), ex);
 					return null; // must have complete property details
 				}
 
@@ -175,36 +158,30 @@ public class SectionLoaderImpl implements SectionLoader {
 	}
 
 	@Override
-	public <S extends SectionSource> SectionType loadSectionType(
-			Class<S> sectionSourceClass, String sectionLocation,
+	public <S extends SectionSource> SectionType loadSectionType(Class<S> sectionSourceClass, String sectionLocation,
 			PropertyList propertyList) {
 
 		// Instantiate the section source
-		SectionSource sectionSource = CompileUtil.newInstance(
-				sectionSourceClass, SectionSource.class, this.node,
+		SectionSource sectionSource = CompileUtil.newInstance(sectionSourceClass, SectionSource.class, this.node,
 				this.nodeContext.getCompilerIssues());
 		if (sectionSource == null) {
 			return null; // failed to instantiate
 		}
 
 		// Return loaded section type
-		return this.loadSectionType(sectionSource, sectionLocation,
-				propertyList);
+		return this.loadSectionType(sectionSource, sectionLocation, propertyList);
 	}
 
 	@Override
-	public SectionType loadSectionType(SectionSource sectionSource,
-			String sectionLocation, PropertyList propertyList) {
+	public SectionType loadSectionType(SectionSource sectionSource, String sectionLocation, PropertyList propertyList) {
 
 		// Create the section node
-		SectionNode sectionNode = this.nodeContext.createSectionNode("Type",
-				(OfficeNode) null);
-		sectionNode.initialise(sectionSource.getClass().getName(),
-				sectionSource, sectionLocation);
+		SectionNode sectionNode = this.nodeContext.createSectionNode("Type", (OfficeNode) null);
+		sectionNode.initialise(sectionSource.getClass().getName(), sectionSource, sectionLocation);
 		propertyList.configureProperties(sectionNode);
 
 		// Source the section
-		boolean isSourced = sectionNode.sourceSection();
+		boolean isSourced = sectionNode.sourceSection(new TypeContextImpl());
 		if (!isSourced) {
 			return null; // must source section successfully
 		}
@@ -214,37 +191,31 @@ public class SectionLoaderImpl implements SectionLoader {
 	}
 
 	@Override
-	public <S extends SectionSource> OfficeSectionType loadOfficeSectionType(
-			String sectionName, Class<S> sectionSourceClass,
-			String sectionLocation, PropertyList propertyList) {
+	public <S extends SectionSource> OfficeSectionType loadOfficeSectionType(String sectionName,
+			Class<S> sectionSourceClass, String sectionLocation, PropertyList propertyList) {
 
 		// Instantiate the section source
-		SectionSource sectionSource = CompileUtil.newInstance(
-				sectionSourceClass, SectionSource.class, this.node,
+		SectionSource sectionSource = CompileUtil.newInstance(sectionSourceClass, SectionSource.class, this.node,
 				this.nodeContext.getCompilerIssues());
 		if (sectionSource == null) {
 			return null; // failed to instantiate
 		}
 
 		// Return loaded office section type
-		return this.loadOfficeSectionType(sectionName, sectionSource,
-				sectionLocation, propertyList);
+		return this.loadOfficeSectionType(sectionName, sectionSource, sectionLocation, propertyList);
 	}
 
 	@Override
-	public OfficeSectionType loadOfficeSectionType(String sectionName,
-			SectionSource sectionSource, String sectionLocation,
-			PropertyList propertyList) {
+	public OfficeSectionType loadOfficeSectionType(String sectionName, SectionSource sectionSource,
+			String sectionLocation, PropertyList propertyList) {
 
 		// Create the section node
-		SectionNode sectionNode = this.nodeContext.createSectionNode(
-				sectionName, (OfficeNode) null);
-		sectionNode.initialise(sectionSource.getClass().getName(),
-				sectionSource, sectionLocation);
+		SectionNode sectionNode = this.nodeContext.createSectionNode(sectionName, (OfficeNode) null);
+		sectionNode.initialise(sectionSource.getClass().getName(), sectionSource, sectionLocation);
 		propertyList.configureProperties(sectionNode);
 
 		// Source the section
-		boolean isSourced = sectionNode.sourceSectionTree();
+		boolean isSourced = sectionNode.sourceSectionTree(new TypeContextImpl());
 		if (!isSourced) {
 			return null; // must source section successfully
 		}
@@ -260,8 +231,7 @@ public class SectionLoaderImpl implements SectionLoader {
 	 *            Description of the issue.
 	 */
 	private void addIssue(String issueDescription) {
-		this.nodeContext.getCompilerIssues().addIssue(this.node,
-				issueDescription);
+		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription);
 	}
 
 	/**
@@ -273,8 +243,7 @@ public class SectionLoaderImpl implements SectionLoader {
 	 *            Cause of the issue.
 	 */
 	private void addIssue(String issueDescription, Throwable cause) {
-		this.nodeContext.getCompilerIssues().addIssue(this.node,
-				issueDescription, cause);
+		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription, cause);
 	}
 
 }

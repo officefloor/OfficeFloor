@@ -39,8 +39,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
  *
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectSourceNode extends Node,
-		SectionManagedObjectSource, OfficeManagedObjectSource,
+public interface ManagedObjectSourceNode extends Node, SectionManagedObjectSource, OfficeManagedObjectSource,
 		OfficeSectionManagedObjectSource, OfficeFloorManagedObjectSource {
 
 	/**
@@ -57,18 +56,18 @@ public interface ManagedObjectSourceNode extends Node,
 	 *            Optional instantiated {@link ManagedObjectSource}. May be
 	 *            <code>null</code>.
 	 */
-	void initialise(String managedObjectSourceClassName,
-			ManagedObjectSource<?, ?> managedObjectSource);
+	void initialise(String managedObjectSourceClassName, ManagedObjectSource<?, ?> managedObjectSource);
 
 	/**
-	 * Indicates if have a {@link ManagedObjectSource} configured.
+	 * Sources the {@link ManagedObjectSource}.
 	 * 
-	 * @return <code>true</code> if have the {@link ManagedObjectSource}
-	 *         configured.
+	 * @param typeContext
+	 *            {@link TypeContext}.
+	 * @return <code>true</code> if successfully sourced the
+	 *         {@link ManagedObjectSource}. <code>false</code> if failed to
+	 *         source, with issues reported to the {@link CompilerIssues}.
 	 */
-	@Deprecated
-	// determine another means than exposing the method (such as isInitialised)
-	boolean hasManagedObjectSource();
+	boolean sourceManagedObjectSource(TypeContext typeContext);
 
 	/**
 	 * Loads the {@link ManagedObjectType}.
@@ -87,8 +86,7 @@ public interface ManagedObjectSourceNode extends Node,
 	 *         if issue loading with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	OfficeSectionManagedObjectSourceType loadOfficeSectionManagedObjectSourceType(
-			TypeContext typeContext);
+	OfficeSectionManagedObjectSourceType loadOfficeSectionManagedObjectSourceType(TypeContext typeContext);
 
 	/**
 	 * Loads the {@link OfficeFloorManagedObjectSourceType}.
@@ -99,8 +97,7 @@ public interface ManagedObjectSourceNode extends Node,
 	 *         if issue loading with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	OfficeFloorManagedObjectSourceType loadOfficeFloorManagedObjectSourceType(
-			TypeContext typeContext);
+	OfficeFloorManagedObjectSourceType loadOfficeFloorManagedObjectSourceType(TypeContext typeContext);
 
 	/**
 	 * Obtains the name that this {@link ManagedObjectSource} was added to the
@@ -187,8 +184,7 @@ public interface ManagedObjectSourceNode extends Node,
 	 * @param typeContext
 	 *            {@link TypeContext}.
 	 */
-	void buildManagedObject(OfficeFloorBuilder builder,
-			OfficeNode managingOffice, OfficeBuilder managingOfficeBuilder,
+	void buildManagedObject(OfficeFloorBuilder builder, OfficeNode managingOffice, OfficeBuilder managingOfficeBuilder,
 			OfficeBindings officeBindings, TypeContext typeContext);
 
 }

@@ -102,8 +102,7 @@ public class SuppliedManagedObjectNodeImpl implements SuppliedManagedObjectNode 
 
 	@Override
 	public Node[] getChildNodes() {
-		// TODO implement getChildNodes
-		throw new UnsupportedOperationException("TODO implement getChildNodes");
+		return NodeUtil.getChildNodes();
 	}
 
 	@Override

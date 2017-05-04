@@ -419,8 +419,8 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		}
 
 		// Source the top level sections
-		isSourced = CompileUtil.sourceTree(this.sections, (section) -> section.getOfficeSectionName(),
-				(section) -> section.sourceSection());
+		isSourced = CompileUtil.source(this.sections, (section) -> section.getOfficeSectionName(),
+				(section) -> section.sourceSection(typeContext));
 		if (!isSourced) {
 			return false; // must source all top level sections
 		}
@@ -439,14 +439,32 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		}
 
 		// Source the all section trees
-		isSourced = CompileUtil.sourceTree(this.sections, (section) -> section.getOfficeSectionName(),
-				(section) -> section.sourceSectionTree());
+		isSourced = CompileUtil.source(this.sections, (section) -> section.getOfficeSectionName(),
+				(section) -> section.sourceSectionTree(typeContext));
 		if (!isSourced) {
 			return false; // must source all top level sections
 		}
 
-		// Ensure all sections have been initialised correctly
-		// TODO recursively check that all nodes have been initialised correctly
+		// Ensure all managed object sources are source
+		isSourced = CompileUtil.source(this.managedObjectSources,
+				(managedObjectSource) -> managedObjectSource.getSectionManagedObjectSourceName(),
+				(managedObjectSource) -> managedObjectSource.sourceManagedObjectSource(typeContext));
+		if (!isSourced) {
+			return false;
+		}
+
+		// Ensure all managed objects are sourced
+		isSourced = CompileUtil.source(this.managedObjects,
+				(managedObject) -> managedObject.getSectionManagedObjectName(),
+				(managedObject) -> managedObject.sourceManagedObject(typeContext));
+		if (!isSourced) {
+			return false;
+		}
+
+		// Ensure the office tree is initialised
+		if (!NodeUtil.isNodeTreeInitialised(this, this.context.getCompilerIssues())) {
+			return false; // must have fully initialised tree
+		}
 
 		// Undertake auto-wire of objects
 		if (this.isAutoWireObjects) {

@@ -198,8 +198,7 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 
 	@Override
 	public Node[] getChildNodes() {
-		// TODO implement getChildNodes
-		throw new UnsupportedOperationException("TODO implement getChildNodes");
+		return NodeUtil.getChildNodes(this.functionFlows, this.functionEscalations, this.functionObjects);
 	}
 
 	@Override
@@ -279,14 +278,47 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 	}
 
 	@Override
+	public boolean souceManagedFunction(TypeContext typeContext) {
+
+		// Obtain the type for this function
+		ManagedFunctionType<?, ?> functionType = this.loadManagedFunctionType(typeContext);
+		if (functionType == null) {
+			return false; // must have type
+		}
+
+		// Initialise the flows
+		for (ManagedFunctionFlowType<?> flowType : functionType.getFlowTypes()) {
+			String flowName = flowType.getFlowName();
+			NodeUtil.getInitialisedNode(flowName, this.functionFlows, this.context,
+					() -> this.context.createFunctionFlowNode(flowName, false, this), (flow) -> flow.initialise());
+		}
+
+		// Initialise the objects
+		for (ManagedFunctionObjectType<?> objectType : functionType.getObjectTypes()) {
+			String objectName = objectType.getObjectName();
+			NodeUtil.getInitialisedNode(objectName, this.functionObjects, this.context,
+					() -> this.context.createFunctionObjectNode(objectName, this), (object) -> object.initialise());
+		}
+
+		// Initialise the escalations
+		for (ManagedFunctionEscalationType escalationType : functionType.getEscalationTypes()) {
+			String escalationName = escalationType.getEscalationType().getName();
+			NodeUtil.getInitialisedNode(escalationName, this.functionEscalations, this.context,
+					() -> this.context.createFunctionFlowNode(escalationName, true, this),
+					(escalation) -> escalation.initialise());
+		}
+
+		// Successfully sourced
+		return true;
+	}
+
+	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void buildManagedFunction(OfficeBuilder officeBuilder, TypeContext typeContext) {
 
-		// Obtain the factory for this function
+		// Obtain the type for this function
 		ManagedFunctionType<?, ?> functionType = this.loadManagedFunctionType(typeContext);
 		if (functionType == null) {
-			this.context.getCompilerIssues().addIssue(this,
-					"Can not find function type '" + this.state.functionTypeName + "'");
 			return; // must have type
 		}
 

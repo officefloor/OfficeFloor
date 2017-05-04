@@ -17,6 +17,9 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -124,6 +127,96 @@ public class NodeUtil {
 
 		// Not initialised, so create the initialised state
 		return createState.get();
+	}
+
+	/**
+	 * Indicates if the {@link Node} tree is fully initialised.
+	 * 
+	 * @param root
+	 *            Root {@link Node} of tree.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @return <code>true</code> if all {@link Node} instances within the tree
+	 *         are initialised. <code>false</code> if non-initialised
+	 *         {@link Node} instances within the tree, with issues reported to
+	 *         the {@link CompilerIssues}.
+	 */
+	public static boolean isNodeTreeInitialised(Node root, CompilerIssues issues) {
+		return isNodeTreeInitialised(root, root, issues);
+	}
+
+	/**
+	 * Indicates if the {@link Node} tree is fully initialised.
+	 * 
+	 * @param root
+	 *            Root {@link Node} of the tree being checked.
+	 * @param parent
+	 *            Current {@link Node} of tree being checked.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @return <code>true</code> if all {@link Node} instances within the tree
+	 *         are initialised. <code>false</code> if non-initialised
+	 *         {@link Node} instances within the tree, with issues reported to
+	 *         the {@link CompilerIssues}.
+	 */
+	private static boolean isNodeTreeInitialised(Node root, Node parent, CompilerIssues issues) {
+
+		// Determine if parent is initialised
+		if (!parent.isInitialised()) {
+
+			// Capture log of tree
+			StringWriter log = new StringWriter();
+			try {
+				logTreeStructure(root, log);
+			} catch (IOException ex) {
+				// Should not occur as writing to memory
+			}
+
+			// Log issue
+			issues.addIssue(parent, parent.getNodeType() + " not implemented\n\nTree = " + log.toString() + "\n\n");
+			return false;
+		}
+
+		// Ensure all child nodes are initialised
+		for (Node child : parent.getChildNodes()) {
+			if (!isNodeTreeInitialised(root, child, issues)) {
+				return false; // child in tree not initialised
+			}
+		}
+
+		// As here, all of tree is initialised
+		return true;
+	}
+
+	/**
+	 * Logs the {@link Node} tree structure to the {@link Writer}.
+	 * 
+	 * @param node
+	 *            Root {@link Node} of tree.
+	 * @param log
+	 *            {@link Writer}.
+	 * @throws IOException
+	 *             If fails to log.
+	 */
+	public static void logTreeStructure(Node node, Writer log) throws IOException {
+		log.append("{ \"name\": \"" + node.getNodeName() + "\"");
+		log.append(", \"type\": \"" + node.getNodeType() + "\"");
+		log.append(", \"initialised\": " + String.valueOf(node.isInitialised()));
+		Node[] children = node.getChildNodes();
+		if (children.length > 0) {
+			log.append(", \"children\": [ ");
+			boolean isFirst = true;
+			for (Node child : children) {
+				if (isFirst) {
+					isFirst = false;
+				} else {
+					log.append(", ");
+				}
+				logTreeStructure(child, log);
+			}
+			log.append(" ]");
+		}
+		log.append(" }");
 	}
 
 	/**

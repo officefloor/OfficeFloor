@@ -279,7 +279,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	@Override
 	public Node[] getChildNodes() {
-		return NodeUtil.getChildNodes();
+		return NodeUtil.getChildNodes(this.flows, this.teams, this.inputDependencies);
 	}
 
 	@Override
@@ -314,9 +314,38 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
-	public boolean hasManagedObjectSource() {
-		return (this.suppliedManagedObjectNode != null) || (this.state.managedObjectSource != null)
-				|| (!CompileUtil.isBlank(this.state.managedObjectSourceClassName));
+	public boolean sourceManagedObjectSource(TypeContext typeContext) {
+
+		// Load the managed object type
+		ManagedObjectType<?> managedObjectType = typeContext.getOrLoadManagedObjectType(this);
+		if (managedObjectType == null) {
+			return false;
+		}
+
+		// Initialise the flows
+		for (ManagedObjectFlowType<?> flowType : managedObjectType.getFlowTypes()) {
+			String flowName = flowType.getFlowName();
+			NodeUtil.getInitialisedNode(flowName, this.flows, this.context,
+					() -> this.context.createManagedObjectFlowNode(flowName, this), (flow) -> flow.initialise());
+		}
+
+		// Initialise the teams
+		for (ManagedObjectTeamType teamType : managedObjectType.getTeamTypes()) {
+			String teamName = teamType.getTeamName();
+			NodeUtil.getInitialisedNode(teamName, this.teams, this.context,
+					() -> this.context.createManagedObjectTeamNode(teamName, this), (team) -> team.initialise());
+		}
+
+		// Initialise the input dependencies
+		for (ManagedObjectDependencyType<?> dependencyType : managedObjectType.getDependencyTypes()) {
+			String dependencyName = dependencyType.getDependencyName();
+			NodeUtil.getInitialisedNode(dependencyName, this.inputDependencies, this.context,
+					() -> this.context.createManagedObjectDependencyNode(dependencyName, this),
+					(dependency) -> dependency.initialise());
+		}
+
+		// Successfully sourced
+		return true;
 	}
 
 	@Override
@@ -387,7 +416,10 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		}
 
 		// Ensure have the managed object source
-		if (!this.hasManagedObjectSource()) {
+		boolean hasManagedObjectSource = (this.suppliedManagedObjectNode != null)
+				|| (this.state.managedObjectSource != null)
+				|| (!CompileUtil.isBlank(this.state.managedObjectSourceClassName));
+		if (!hasManagedObjectSource) {
 			this.context.getCompilerIssues().addIssue(this,
 					"Null source for " + TYPE + " " + this.managedObjectSourceName);
 			return null; // must have source

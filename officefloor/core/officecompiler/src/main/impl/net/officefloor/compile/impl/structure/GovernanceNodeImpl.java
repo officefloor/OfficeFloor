@@ -148,8 +148,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 
 	@Override
 	public Node[] getChildNodes() {
-		// TODO implement getChildNodes
-		throw new UnsupportedOperationException("TODO implement getChildNodes");
+		return NodeUtil.getChildNodes();
 	}
 
 	@Override

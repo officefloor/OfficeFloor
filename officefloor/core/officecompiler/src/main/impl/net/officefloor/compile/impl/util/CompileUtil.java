@@ -376,7 +376,7 @@ public class CompileUtil {
 	 *         Otherwise, <code>false</code> with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	public static <N> boolean sourceTree(Map<String, N> nodesMap, Function<N, String> sortKeyExtractor,
+	public static <N> boolean source(Map<String, N> nodesMap, Function<N, String> sortKeyExtractor,
 			Predicate<N> sourcer) {
 		return nodesMap.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(sortKeyExtractor.apply(a), sortKeyExtractor.apply(b)))

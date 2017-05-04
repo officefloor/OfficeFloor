@@ -17,9 +17,11 @@
  */
 package net.officefloor.compile.integrate.office;
 
+import net.officefloor.compile.impl.structure.SectionInputNodeImpl;
+import net.officefloor.compile.impl.structure.SectionObjectNodeImpl;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
-import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -33,24 +35,38 @@ import net.officefloor.plugin.section.clazz.ClassSectionSource;
 public class EnsureOfficeSectionInitialisedTest extends AbstractCompileTestCase {
 
 	/**
+	 * Ensure the {@link OfficeSectionInput} is initialised.
+	 */
+	public void testEnsureOfficeSectionInputInitialised() {
+		this.doEnsureInitialised(
+				() -> this.issues.recordIssue("UNKNOWN", SectionInputNodeImpl.class, "Section Input not implemented"));
+	}
+
+	/**
 	 * Ensures the {@link OfficeSectionObject} is initialised.
 	 */
 	public void testEnsureOfficeSectionObjectInitialised() {
+		this.doEnsureInitialised(() -> this.issues.recordIssue("UNKNOWN", SectionObjectNodeImpl.class,
+				"Section Object not implemented\n\nTree = { \"name\": \"OFFICE\", \"type\": \"Office\", \"initialised\": true, \"children\": [ { \"name\": \"SECTION\", \"type\": \"Section\", \"initialised\": true, \"children\": [ { \"name\": \"function\", \"type\": \"Section Input\", \"initialised\": true }, { \"name\": \"UNKNOWN\", \"type\": \"Section Object\", \"initialised\": false }, { \"name\": \"function\", \"type\": \"Managed Function\", \"initialised\": true, \"children\": [ { \"name\": \"OBJECT\", \"type\": \"Function Object\", \"initialised\": true } ] }, { \"name\": \"OBJECT\", \"type\": \"Managed Object Source\", \"initialised\": true }, { \"name\": \"OBJECT\", \"type\": \"Managed Object\", \"initialised\": true } ] } ] }\n\n"));
+	}
+
+	/**
+	 * Undertakes ensuring initialised.
+	 * 
+	 * @param recorder
+	 *            {@link Runnable} to record issue.
+	 */
+	private void doEnsureInitialised(Runnable recorder) {
 
 		// Record loading section type
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
 
-		// Record issue as object not initialised
-		this.issues.recordIssue("OFFICE.SECTION", SectionObjectNode.class, "Object not implemented by Section");
+		// Record issue
+		recorder.run();
 
-		// Record building the OfficeFloor
-		this.record_init();
-		this.record_officeFloorBuilder_addOffice("OFFICE");
-		this.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION", CompileSectionClass.class, "function");
-
-		// Should not compile
+		// Should not compiler
 		this.compile(false);
 	}
 

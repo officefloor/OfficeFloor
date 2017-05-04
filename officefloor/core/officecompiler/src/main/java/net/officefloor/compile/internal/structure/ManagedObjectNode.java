@@ -53,6 +53,17 @@ public interface ManagedObjectNode extends DependentObjectNode, BoundManagedObje
 	void initialise(ManagedObjectScope managedObjectScope, ManagedObjectSourceNode managedObjectSourceNode);
 
 	/**
+	 * Sources the {@link ManagedObject}.
+	 * 
+	 * @param typeContext
+	 *            {@link TypeContext}.
+	 * @return <code>true</code> if successfully sourced the
+	 *         {@link ManagedObject}. <code>false</code> if failed to source,
+	 *         with issures reported to the {@link CompilerIssues}.
+	 */
+	boolean sourceManagedObject(TypeContext typeContext);
+
+	/**
 	 * Obtains the {@link ManagedObjectSourceNode} for this
 	 * {@link ManagedObjectNode}.
 	 * 

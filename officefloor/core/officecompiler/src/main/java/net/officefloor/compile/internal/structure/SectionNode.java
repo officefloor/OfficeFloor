@@ -64,21 +64,25 @@ public interface SectionNode
 	 * <p>
 	 * This will only source the top level {@link OfficeSection}.
 	 * 
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	boolean sourceSection();
+	boolean sourceSection(TypeContext typeContext);
 
 	/**
 	 * Sources this {@link SectionNode} and all its descendant {@link Node}
 	 * instances recursively.
 	 * 
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	boolean sourceSectionTree();
+	boolean sourceSectionTree(TypeContext typeContext);
 
 	/**
 	 * Loads the {@link SectionType}.

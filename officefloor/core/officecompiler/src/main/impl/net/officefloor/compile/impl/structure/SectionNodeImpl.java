@@ -325,7 +325,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	 */
 
 	@Override
-	public boolean sourceSection() {
+	public boolean sourceSection(TypeContext typeContext) {
 
 		// Ensure the section is initialised
 		if (!this.isInitialised()) {
@@ -390,17 +390,40 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
-	public boolean sourceSectionTree() {
+	public boolean sourceSectionTree(TypeContext typeContext) {
 
 		// Source this section
-		boolean isSourced = this.sourceSection();
+		boolean isSourced = this.sourceSection(typeContext);
+		if (!isSourced) {
+			return false;
+		}
+
+		// Ensure all functions are sourced
+		isSourced = CompileUtil.source(this.functionNodes, (function) -> function.getSectionFunctionName(),
+				(function) -> function.souceManagedFunction(typeContext));
+		if (!isSourced) {
+			return false;
+		}
+
+		// Ensure all managed object sources are source
+		isSourced = CompileUtil.source(this.managedObjectSourceNodes,
+				(managedObjectSource) -> managedObjectSource.getSectionManagedObjectSourceName(),
+				(managedObjectSource) -> managedObjectSource.sourceManagedObjectSource(typeContext));
+		if (!isSourced) {
+			return false;
+		}
+
+		// Ensure all managed objects are sourced
+		isSourced = CompileUtil.source(this.managedObjects,
+				(managedObject) -> managedObject.getSectionManagedObjectName(),
+				(managedObject) -> managedObject.sourceManagedObject(typeContext));
 		if (!isSourced) {
 			return false;
 		}
 
 		// Successful only if all sub sections are also sourced
-		return CompileUtil.sourceTree(this.subSections, (subSection) -> subSection.getOfficeSectionName(),
-				(subSection) -> subSection.sourceSectionTree());
+		return CompileUtil.source(this.subSections, (subSection) -> subSection.getOfficeSectionName(),
+				(subSection) -> subSection.sourceSectionTree(typeContext));
 	}
 
 	@Override

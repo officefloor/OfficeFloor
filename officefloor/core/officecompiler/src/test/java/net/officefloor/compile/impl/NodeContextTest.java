@@ -21,8 +21,6 @@ import static org.junit.Assert.assertArrayEquals;
 
 import java.util.function.Consumer;
 
-import org.easymock.AbstractMatcher;
-
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.structure.SuppliedManagedObjectNodeImpl;
@@ -359,8 +357,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertInitialise(node, (n) -> n.initialise("ExampleManagedObjectSource", null));
 
 		// Validate children
-		assertChildren(node, node.getManagedObjectFlow("FLOW"), node.getInputManagedObjectDependency("DEPENDENCY"),
-				node.addSectionManagedObject("MO", ManagedObjectScope.THREAD));
+		assertChildren(node, node.getManagedObjectFlow("FLOW"), node.getInputManagedObjectDependency("DEPENDENCY"));
 	}
 
 	/**
@@ -390,8 +387,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 
 		// Validate children
 		assertChildren(node, node.getManagedObjectFlow("FLOW"), node.getManagedObjectTeam("TEAM"),
-				node.getInputManagedObjectDependency("DEPENDENCY"),
-				node.addOfficeManagedObject("MO", ManagedObjectScope.THREAD));
+				node.getInputManagedObjectDependency("DEPENDENCY"));
 	}
 
 	/**
@@ -447,8 +443,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 
 		// Validate children
 		assertChildren(node, node.getManagedObjectFlow("FLOW"), node.getManagedObjectTeam("TEAM"),
-				node.getInputManagedObjectDependency("DEPENDENCY"),
-				node.addSectionManagedObject("MO", ManagedObjectScope.THREAD));
+				node.getInputManagedObjectDependency("DEPENDENCY"));
 	}
 
 	/**
@@ -641,7 +636,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 					public boolean matches(Object[] expected, Object[] actual) {
 						// Capture the supplied managed object
 						suppliedManagedObjectNode[0] = (SuppliedManagedObjectNode) actual[1];
-						
+
 						// Ensure match on type
 						return super.matches(expected, actual);
 					}
@@ -689,7 +684,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can create {@link FunctionObjectNode}.
 	 */
-	public void testCreateTaskObjectNode() {
+	public void testCreateFunctionObjectNode() {
 		FunctionObjectNode node = this.doTest(() -> this.context.createFunctionObjectNode("OBJECT", this.function));
 		assertNode(node, "OBJECT", "Function Object", null, this.function);
 		assertEquals("Incorrect function object name", "OBJECT", node.getFunctionObjectName());

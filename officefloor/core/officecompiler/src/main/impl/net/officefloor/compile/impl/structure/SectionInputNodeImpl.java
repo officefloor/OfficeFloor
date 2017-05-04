@@ -122,8 +122,7 @@ public class SectionInputNodeImpl implements SectionInputNode {
 
 	@Override
 	public Node[] getChildNodes() {
-		// TODO implement getChildNodes
-		throw new UnsupportedOperationException("TODO implement getChildNodes");
+		return NodeUtil.getChildNodes();
 	}
 
 	@Override

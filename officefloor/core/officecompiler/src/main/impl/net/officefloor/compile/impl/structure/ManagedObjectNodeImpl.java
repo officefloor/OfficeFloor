@@ -233,6 +233,28 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	}
 
 	@Override
+	public boolean sourceManagedObject(TypeContext typeContext) {
+
+		// Obtain the managed object type
+		ManagedObjectType<?> managedObjectType = typeContext
+				.getOrLoadManagedObjectType(this.state.managedObjectSourceNode);
+		if (managedObjectType == null) {
+			return false; // must have type
+		}
+
+		// Initialise the dependencies
+		for (ManagedObjectDependencyType<?> dependencyType : managedObjectType.getDependencyTypes()) {
+			String dependencyName = dependencyType.getDependencyName();
+			NodeUtil.getInitialisedNode(dependencyName, this.dependencies, this.context,
+					() -> this.context.createManagedObjectDependencyNode(dependencyName, this),
+					(dependency) -> dependency.initialise());
+		}
+
+		// Successfully sourced
+		return true;
+	}
+
+	@Override
 	public OfficeSectionManagedObjectType loadOfficeSectionManagedObjectType(TypeContext typeContext) {
 
 		// Obtain the managed object type
