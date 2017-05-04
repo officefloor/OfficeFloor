@@ -17,6 +17,8 @@
  */
 package net.officefloor.compile.integrate.managedfunction;
 
+import net.officefloor.compile.impl.structure.FunctionFlowNodeImpl;
+import net.officefloor.compile.impl.structure.FunctionObjectNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedFunctionNodeImpl;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
@@ -105,8 +107,8 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addTeam("TEAM", OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
 		this.record_officeBuilder_addFunction("SECTION", "FUNCTION").setResponsibleTeam("OFFICE_TEAM");
-		this.issues.recordIssue("FUNCTION", ManagedFunctionNodeImpl.class,
-				"Flow flow is not linked to a ManagedFunctionNode");
+		this.issues.recordIssue("flow", FunctionFlowNodeImpl.class,
+				"Function Flow flow is not linked to a ManagedFunctionNode");
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -307,8 +309,8 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addTeam("TEAM", OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
 		this.record_officeBuilder_addFunction("SECTION", "FUNCTION").setResponsibleTeam("OFFICE_TEAM");
-		this.issues.recordIssue("FUNCTION", ManagedFunctionNodeImpl.class,
-				"Object " + CompileManagedObject.class.getName() + " is not linked to a BoundManagedObjectNode");
+		this.issues.recordIssue(CompileManagedObject.class.getName(), FunctionObjectNodeImpl.class,
+				"Function Object " + CompileManagedObject.class.getName() + " is not linked to a DependentObjectNode");
 
 		// Compile the OfficeFloor
 		this.compile(true);
