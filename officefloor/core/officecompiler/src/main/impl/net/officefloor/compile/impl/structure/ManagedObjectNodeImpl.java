@@ -114,6 +114,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		/**
 		 * Containing {@link OfficeFloorNode}.
 		 */
+		@SuppressWarnings("unused")
 		private final OfficeFloorNode containingOfficeFloorNode;
 
 		/**

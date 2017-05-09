@@ -82,6 +82,20 @@ public interface OfficeObjectNode extends LinkObjectNode, OfficeObject {
 	GovernanceNode[] getGovernances();
 
 	/**
+	 * Obtains the type of the {@link OfficeObject}.
+	 * 
+	 * @return Type of the {@link OfficeObject}.
+	 */
+	String getOfficeObjectType();
+
+	/**
+	 * Obtains the type qualifier for the {@link OfficeObject}.
+	 * 
+	 * @return Type qualifier for the {@link OfficeObject}.
+	 */
+	String getTypeQualifier();
+
+	/**
 	 * Loads the {@link OfficeManagedObjectType} for this
 	 * {@link OfficeObjectNode}.
 	 * 

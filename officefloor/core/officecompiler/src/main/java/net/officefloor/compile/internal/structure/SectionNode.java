@@ -25,12 +25,14 @@ import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * Node within the hierarchy of {@link OfficeSection} instances.
@@ -194,6 +196,17 @@ public interface SectionNode
 	 *            {@link TypeContext}.
 	 */
 	void autoWireObjects(AutoWirer<LinkObjectNode> autoWirer, TypeContext typeContext);
+
+	/**
+	 * Auto-wires the {@link SectionFunction} instances to a possible
+	 * responsible {@link Team}.
+	 * 
+	 * @param autoWirer
+	 *            {@link AutoWirer}.
+	 * @param typeContext
+	 *            {@link TypeContext}.
+	 */
+	void autoWireTeams(AutoWirer<LinkTeamNode> autoWirer, TypeContext typeContext);
 
 	/**
 	 * Builds this {@link OfficeSection} for this {@link SectionNode}.

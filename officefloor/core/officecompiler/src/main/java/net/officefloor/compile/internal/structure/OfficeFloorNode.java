@@ -22,6 +22,7 @@ import net.officefloor.compile.officefloor.OfficeFloorType;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.type.TypeContext;
@@ -101,6 +102,18 @@ public interface OfficeFloorNode extends Node, PropertyConfigurable, ManagedObje
 	 *         {@link CompilerIssues}.
 	 */
 	boolean sourceOfficeFloorTree(TypeContext typeContext);
+
+	/**
+	 * Loads the {@link AutoWire} targets for the
+	 * {@link OfficeFloorManagedObject} instances.
+	 * 
+	 * @param autoWirer
+	 *            {@link AutoWirer} to be loaded with the
+	 *            {@link OfficeFloorManagedObject} targets.
+	 * @param typeContext
+	 *            {@link TypeContext}.
+	 */
+	void loadAutoWireObjectTargets(AutoWirer<LinkObjectNode> autoWirer, TypeContext typeContext);
 
 	/**
 	 * Loads the {@link OfficeFloorType}.

@@ -21,12 +21,16 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
+import net.officefloor.compile.internal.structure.LinkSynchronousNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
+import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * Utility class to work with links.
@@ -54,6 +58,239 @@ public class LinkUtil {
 	 * {@link LinkOfficeNode} {@link Traverser}.
 	 */
 	private static final Traverser<LinkOfficeNode> OFFICE_TRAVERSER = (office) -> office.getLinkedOfficeNode();
+
+	/**
+	 * Ensures both inputs are a {@link LinkFlowNode} and if so links them.
+	 *
+	 * @param linkSource
+	 *            Source {@link LinkFlowNode}.
+	 * @param linkTarget
+	 *            Target {@link LinkFlowNode}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @param node
+	 *            {@link Node} wishing to link the {@link Flow}.
+	 * @return <code>true</code> if linked.
+	 */
+	public static boolean linkFlow(Object linkSource, Object linkTarget, CompilerIssues issues, Node node) {
+
+		// Obtain the node
+		if (linkSource instanceof Node) {
+			node = (Node) linkSource;
+		}
+
+		// Ensure the link source is link flow node
+		if (!(linkSource instanceof LinkFlowNode)) {
+			issues.addIssue(node, "Invalid link source: " + linkSource + " ["
+					+ (linkSource == null ? null : linkSource.getClass().getName()) + "]");
+			return false; // can not link
+		}
+
+		// Ensure the link target is link flow node
+		if (!(linkTarget instanceof LinkFlowNode)) {
+			issues.addIssue(node, "Invalid link target: " + linkTarget + " ["
+					+ (linkTarget == null ? null : linkTarget.getClass().getName() + "]"));
+			return false; // can not link
+		}
+
+		// Link the nodes together
+		return ((LinkFlowNode) linkSource).linkFlowNode((LinkFlowNode) linkTarget);
+	}
+
+	/**
+	 * Ensures both inputs are a {@link LinkSynchronousNode} and if so links
+	 * them.
+	 * 
+	 * @param linkSource
+	 *            Source {@link LinkSynchronousNode}.
+	 * @param linkTarget
+	 *            Target {@link LinkSynchronousNode}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @param node
+	 *            {@link Node} wishing to link the {@link Flow}.
+	 * @return <code>true</code> if linked.
+	 */
+	@Deprecated // no synchronous OfficeFloor interaction (as always via queues)
+	public static boolean linkSynchronous(Object linkSource, Object linkTarget, CompilerIssues issues, Node node) {
+
+		// Obtain the node
+		if (linkSource instanceof Node) {
+			node = (Node) linkSource;
+		}
+
+		// Ensure the link source is link synchronous node
+		if (!(linkSource instanceof LinkSynchronousNode)) {
+			issues.addIssue(node, "Invalid link source: " + linkSource + " ["
+					+ (linkSource == null ? null : linkSource.getClass().getName()) + "]");
+			return false; // can not link
+		}
+
+		// Ensure the link target is link synchronous node
+		if (!(linkTarget instanceof LinkSynchronousNode)) {
+			issues.addIssue(node, "Invalid link target: " + linkTarget + " ["
+					+ (linkTarget == null ? null : linkTarget.getClass().getName() + "]"));
+			return false; // can not link
+		}
+
+		// Link the nodes together
+		return ((LinkSynchronousNode) linkSource).linkSynchronousNode((LinkSynchronousNode) linkTarget);
+	}
+
+	/**
+	 * Ensures both inputs are a {@link LinkObjectNode} and if so links them.
+	 *
+	 * @param linkSource
+	 *            Source {@link LinkObjectNode}.
+	 * @param linkTarget
+	 *            Target {@link LinkObjectNode}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @param node
+	 *            {@link Node} wishing to link the {@link Flow}.
+	 * @return <code>true</code> if linked.
+	 */
+	public static boolean linkObject(Object linkSource, Object linkTarget, CompilerIssues issues, Node node) {
+
+		// Obtain the node
+		if (linkSource instanceof Node) {
+			node = (Node) linkSource;
+		}
+
+		// Ensure the link source is link object node
+		if (!(linkSource instanceof LinkObjectNode)) {
+			issues.addIssue(node, "Invalid link source: " + linkSource + " ["
+					+ (linkSource == null ? null : linkSource.getClass().getName()) + "]");
+			return false; // can not link
+		}
+
+		// Ensure the link target is link object node
+		if (!(linkTarget instanceof LinkObjectNode)) {
+			issues.addIssue(node, "Invalid link target: " + linkTarget + " ["
+					+ (linkTarget == null ? null : linkTarget.getClass().getName() + "]"));
+			return false; // can not link
+		}
+
+		// Link the nodes together
+		return ((LinkObjectNode) linkSource).linkObjectNode((LinkObjectNode) linkTarget);
+	}
+
+	/**
+	 * Ensures both inputs are a {@link LinkTeamNode} and if so links them.
+	 *
+	 * @param linkSource
+	 *            Source {@link LinkTeamNode}.
+	 * @param linkTarget
+	 *            Target {@link LinkTeamNode}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @param node
+	 *            {@link Node} wishing to link the {@link Flow}.
+	 * @return <code>true</code> if linked.
+	 */
+	public static boolean linkTeam(Object linkSource, Object linkTarget, CompilerIssues issues, Node node) {
+
+		// Obtain the node
+		if (linkSource instanceof Node) {
+			node = (Node) linkSource;
+		}
+
+		// Ensure the link source is link team node
+		if (!(linkSource instanceof LinkTeamNode)) {
+			issues.addIssue(node, "Invalid link source: " + linkSource + " ["
+					+ (linkSource == null ? null : linkSource.getClass().getName()) + "]");
+			return false; // can not link
+		}
+
+		// Ensure the link target is link team node
+		if (!(linkTarget instanceof LinkTeamNode)) {
+			issues.addIssue(node, "Invalid link target: " + linkTarget + " ["
+					+ (linkTarget == null ? null : linkTarget.getClass().getName() + "]"));
+			return false; // can not link
+		}
+
+		// Link the nodes together
+		return ((LinkTeamNode) linkSource).linkTeamNode((LinkTeamNode) linkTarget);
+	}
+
+	/**
+	 * Ensures both inputs are a {@link LinkOfficeNode} and if so links them.
+	 *
+	 * @param linkSource
+	 *            Source {@link LinkOfficeNode}.
+	 * @param linkTarget
+	 *            Target {@link LinkOfficeNode}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @param node
+	 *            {@link Node} wishing to link the {@link Flow}.
+	 * @return <code>true</code> if linked.
+	 */
+	public static boolean linkOffice(Object linkSource, Object linkTarget, CompilerIssues issues, Node node) {
+
+		// Obtain the node
+		if (linkSource instanceof Node) {
+			node = (Node) linkSource;
+		}
+
+		// Ensure the link source is link office node
+		if (!(linkSource instanceof LinkOfficeNode)) {
+			issues.addIssue(node, "Invalid link source: " + linkSource + " ["
+					+ (linkSource == null ? null : linkSource.getClass().getName()) + "]");
+			return false; // can not link
+		}
+
+		// Ensure the link target is link office node
+		if (!(linkTarget instanceof LinkOfficeNode)) {
+			issues.addIssue(node, "Invalid link target: " + linkTarget + " ["
+					+ (linkTarget == null ? null : linkTarget.getClass().getName() + "]"));
+			return false; // can not link
+		}
+
+		// Link the nodes together
+		return ((LinkOfficeNode) linkSource).linkOfficeNode((LinkOfficeNode) linkTarget);
+	}
+
+	/**
+	 * Links the {@link ManagedObjectSourceNode} to the
+	 * {@link InputManagedObjectNode}.
+	 *
+	 * @param inputManagedObject
+	 *            {@link InputManagedObjectNode}.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSourceNode}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @param node
+	 *            {@link Node} wishing to link the {@link Flow}.
+	 * @return <code>true</code> if linked.
+	 */
+	public static boolean linkManagedObjectSourceInput(Object managedObjectSource, Object inputManagedObject,
+			CompilerIssues issues, Node node) {
+
+		// Obtain the node
+		if (managedObjectSource instanceof Node) {
+			node = (Node) managedObjectSource;
+		}
+
+		// Ensure is a managed object source
+		if (!(managedObjectSource instanceof ManagedObjectSourceNode)) {
+			issues.addIssue(node, "Invalid managed object source node: " + managedObjectSource + " ["
+					+ (managedObjectSource == null ? null : managedObjectSource.getClass().getName() + "]"));
+			return false; // can not link
+		}
+
+		// Ensure is an input managed object node
+		if (!(inputManagedObject instanceof InputManagedObjectNode)) {
+			issues.addIssue(node, "Invalid input managed object node: " + inputManagedObject + " ["
+					+ (inputManagedObject == null ? null : inputManagedObject.getClass().getName() + "]"));
+			return false; // can not link
+		}
+
+		// Link the managed object source to the input managed object
+		return ((ManagedObjectSourceNode) managedObjectSource)
+				.linkInputManagedObjectNode((InputManagedObjectNode) inputManagedObject);
+	}
 
 	/**
 	 * Finds the furtherest target link by the specified type.

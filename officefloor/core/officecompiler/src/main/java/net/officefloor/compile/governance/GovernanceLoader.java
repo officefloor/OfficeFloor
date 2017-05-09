@@ -71,4 +71,25 @@ public interface GovernanceLoader {
 	<I, F extends Enum<F>, GS extends GovernanceSource<I, F>> GovernanceType<I, F> loadGovernanceType(
 			Class<GS> governanceSourceClass, PropertyList properties);
 
+	/**
+	 * Loads and returns the {@link GovernanceType} from the
+	 * {@link GovernanceSource}.
+	 * 
+	 * @param <I>
+	 *            Extension interface type.
+	 * @param <F>
+	 *            Flow key type.
+	 * @param <GS>
+	 *            {@link GovernanceSource} type.
+	 * @param governanceSource
+	 *            {@link GovernanceSource}.
+	 * @param properties
+	 *            {@link PropertyList} containing the properties to source the
+	 *            {@link GovernanceType}.
+	 * @return {@link GovernanceType} or <code>null</code> if issues, which is
+	 *         reported to the {@link CompilerIssues}.
+	 */
+	<I, F extends Enum<F>, GS extends GovernanceSource<I, F>> GovernanceType<I, F> loadGovernanceType(
+			GS governanceSource, PropertyList properties);
+
 }

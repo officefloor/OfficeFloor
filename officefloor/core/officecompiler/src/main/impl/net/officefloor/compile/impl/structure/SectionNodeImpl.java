@@ -28,6 +28,7 @@ import net.officefloor.compile.impl.section.OfficeSectionTypeImpl;
 import net.officefloor.compile.impl.section.SectionSourceContextImpl;
 import net.officefloor.compile.impl.section.SectionTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.AutoWireLink;
@@ -36,6 +37,7 @@ import net.officefloor.compile.internal.structure.FunctionFlowNode;
 import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
+import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
@@ -105,7 +107,7 @@ import net.officefloor.frame.internal.structure.ThreadState;
  * 
  * @author Daniel Sagenschneider
  */
-public class SectionNodeImpl extends AbstractNode implements SectionNode {
+public class SectionNodeImpl implements SectionNode {
 
 	/**
 	 * Name of this {@link SubSection}.
@@ -630,9 +632,18 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 			AutoWireLink<LinkObjectNode>[] links = autoWirer.getAutoWireLinks(object,
 					new AutoWire(objectType.getTypeQualifier(), objectType.getObjectType()));
 			if (links.length == 1) {
-				this.linkObject(object, links[0].getTargetNode());
+				LinkUtil.linkObject(object, links[0].getTargetNode(), this.context.getCompilerIssues(), this);
 			}
 		});
+	}
+
+	@Override
+	public void autoWireTeams(AutoWirer<LinkTeamNode> autoWirer, TypeContext typeContext) {
+
+		// Associate responsibility for the functions
+		this.functionNodes.values()
+				.forEach((function) -> function.autoWireManagedFunctionResponsibility(autoWirer, typeContext));
+
 	}
 
 	@Override
@@ -778,22 +789,22 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	@Override
 	public void link(SectionInput sectionInput, SectionFunction task) {
-		this.linkFlow(sectionInput, task);
+		LinkUtil.linkFlow(sectionInput, task, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(SectionInput sectionInput, SubSectionInput subSectionInput) {
-		this.linkFlow(sectionInput, subSectionInput);
+		LinkUtil.linkFlow(sectionInput, subSectionInput, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(SectionInput sectionInput, SectionOutput sectionOutput) {
-		this.linkFlow(sectionInput, sectionOutput);
+		LinkUtil.linkFlow(sectionInput, sectionOutput, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(FunctionFlow taskFlow, SectionFunction task, boolean isSpawnThreadState) {
-		if (this.linkFlow(taskFlow, task)) {
+		if (LinkUtil.linkFlow(taskFlow, task, this.context.getCompilerIssues(), this)) {
 			// Linked so specify spawn thread state
 			this.loadSpawnThreadState(taskFlow, isSpawnThreadState);
 		}
@@ -801,7 +812,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	@Override
 	public void link(FunctionFlow taskFlow, SubSectionInput subSectionInput, boolean isSpawnThreadState) {
-		if (this.linkFlow(taskFlow, subSectionInput)) {
+		if (LinkUtil.linkFlow(taskFlow, subSectionInput, this.context.getCompilerIssues(), this)) {
 			// Linked so specify spawn thread state
 			this.loadSpawnThreadState(taskFlow, isSpawnThreadState);
 		}
@@ -809,7 +820,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	@Override
 	public void link(FunctionFlow taskFlow, SectionOutput sectionOutput, boolean isSpawnThreadState) {
-		if (this.linkFlow(taskFlow, sectionOutput)) {
+		if (LinkUtil.linkFlow(taskFlow, sectionOutput, this.context.getCompilerIssues(), this)) {
 			// Linked so specify spawn thread state
 			this.loadSpawnThreadState(taskFlow, isSpawnThreadState);
 		}
@@ -817,47 +828,47 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	@Override
 	public void link(SectionFunction task, SectionFunction nextTask) {
-		this.linkFlow(task, nextTask);
+		LinkUtil.linkFlow(task, nextTask, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(SectionFunction task, SubSectionInput subSectionInput) {
-		this.linkFlow(task, subSectionInput);
+		LinkUtil.linkFlow(task, subSectionInput, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(SectionFunction task, SectionOutput sectionOutput) {
-		this.linkFlow(task, sectionOutput);
+		LinkUtil.linkFlow(task, sectionOutput, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(SubSectionOutput subSectionOutput, SectionFunction task) {
-		this.linkFlow(subSectionOutput, task);
+		LinkUtil.linkFlow(subSectionOutput, task, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(SubSectionOutput subSectionOutput, SubSectionInput subSectionInput) {
-		this.linkFlow(subSectionOutput, subSectionInput);
+		LinkUtil.linkFlow(subSectionOutput, subSectionInput, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(SubSectionOutput subSectionOutput, SectionOutput sectionOutput) {
-		this.linkFlow(subSectionOutput, sectionOutput);
+		LinkUtil.linkFlow(subSectionOutput, sectionOutput, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(ManagedObjectFlow managedObjectFlow, SectionFunction task) {
-		this.linkFlow(managedObjectFlow, task);
+		LinkUtil.linkFlow(managedObjectFlow, task, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(ManagedObjectFlow managedObjectFlow, SubSectionInput subSectionInput) {
-		this.linkFlow(managedObjectFlow, subSectionInput);
+		LinkUtil.linkFlow(managedObjectFlow, subSectionInput, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(ManagedObjectFlow managedObjectFlow, SectionOutput sectionOutput) {
-		this.linkFlow(managedObjectFlow, sectionOutput);
+		LinkUtil.linkFlow(managedObjectFlow, sectionOutput, this.context.getCompilerIssues(), this);
 	}
 
 	/**
@@ -883,32 +894,32 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	@Override
 	public void link(FunctionObject taskObject, SectionObject sectionObject) {
-		this.linkObject(taskObject, sectionObject);
+		LinkUtil.linkObject(taskObject, sectionObject, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(SubSectionObject subSectionObject, SectionObject sectionObject) {
-		this.linkObject(subSectionObject, sectionObject);
+		LinkUtil.linkObject(subSectionObject, sectionObject, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(FunctionObject taskObject, SectionManagedObject sectionManagedObject) {
-		this.linkObject(taskObject, sectionManagedObject);
+		LinkUtil.linkObject(taskObject, sectionManagedObject, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(SubSectionObject subSectionObject, SectionManagedObject sectionManagedObject) {
-		this.linkObject(subSectionObject, sectionManagedObject);
+		LinkUtil.linkObject(subSectionObject, sectionManagedObject, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(ManagedObjectDependency dependency, SectionObject sectionObject) {
-		this.linkObject(dependency, sectionObject);
+		LinkUtil.linkObject(dependency, sectionObject, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(ManagedObjectDependency dependency, SectionManagedObject sectionManagedObject) {
-		this.linkObject(dependency, sectionManagedObject);
+		LinkUtil.linkObject(dependency, sectionManagedObject, this.context.getCompilerIssues(), this);
 	}
 
 	@Override

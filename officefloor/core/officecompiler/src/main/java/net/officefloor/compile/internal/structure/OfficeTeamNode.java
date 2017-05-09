@@ -19,6 +19,7 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.office.OfficeTeamType;
+import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.type.TypeContext;
 
@@ -38,6 +39,14 @@ public interface OfficeTeamNode extends LinkTeamNode, OfficeTeam {
 	 * Initialises the {@link OfficeTeamNode}.
 	 */
 	void initialise();
+
+	/**
+	 * Obtains the {@link TypeQualification} instances for the
+	 * {@link OfficeTeam}.
+	 * 
+	 * @return {@link TypeQualification} instances for the {@link OfficeTeam}.
+	 */
+	TypeQualification[] getTypeQualifications();
 
 	/**
 	 * Loads the {@link OfficeTeamType}.

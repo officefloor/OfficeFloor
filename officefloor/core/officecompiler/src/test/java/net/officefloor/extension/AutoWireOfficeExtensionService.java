@@ -35,10 +35,16 @@ public class AutoWireOfficeExtensionService implements OfficeExtensionService {
 	private static boolean isEnableAutoWireObjects = false;
 
 	/**
+	 * Indicates whether to auto-wire the teams.
+	 */
+	private static boolean isEnableAutoWireTeams = false;
+
+	/**
 	 * Resets the state for next test.
 	 */
 	public static void reset() {
 		isEnableAutoWireObjects = false;
+		isEnableAutoWireTeams = false;
 	}
 
 	/**
@@ -46,6 +52,13 @@ public class AutoWireOfficeExtensionService implements OfficeExtensionService {
 	 */
 	public static void enableAutoWireObjects() {
 		isEnableAutoWireObjects = true;
+	}
+
+	/**
+	 * Enable auto-wire of the teams.
+	 */
+	public static void enableAutoWireTeams() {
+		isEnableAutoWireTeams = true;
 	}
 
 	/*
@@ -59,7 +72,9 @@ public class AutoWireOfficeExtensionService implements OfficeExtensionService {
 		if (isEnableAutoWireObjects) {
 			officeArchitect.enableAutoWireObjects();
 		}
-
+		if (isEnableAutoWireTeams) {
+			officeArchitect.enableAutoWireTeams();
+		}
 	}
 
 }

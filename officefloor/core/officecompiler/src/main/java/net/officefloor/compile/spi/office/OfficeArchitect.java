@@ -26,6 +26,7 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * Architect to structure the {@link Office}.
@@ -38,6 +39,11 @@ public interface OfficeArchitect {
 	 * Flags to attempt to auto wire any non-configured object links.
 	 */
 	void enableAutoWireObjects();
+
+	/**
+	 * Flags to attempt to auto wire any non-configured {@link Team} links.
+	 */
+	void enableAutoWireTeams();
 
 	/**
 	 * Adds a {@link OfficeInput}.

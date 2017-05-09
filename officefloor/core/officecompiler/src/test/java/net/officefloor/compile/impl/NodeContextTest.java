@@ -258,7 +258,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 			assertEquals("Incorrect bound name", "OFFICE.SECTION.MO", mo.getBoundManagedObjectName());
 
 			// Validate default type
-			assertTypeQualifications(mo, null, String.class.getName());
+			assertTypeQualifications(mo.getTypeQualifications(new TypeContextImpl()), null, String.class.getName());
 
 			return mo;
 		});
@@ -266,7 +266,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 
 		// Validate type qualifications
 		node.addTypeQualification("QUALIFIER", "TYPE");
-		assertTypeQualifications(node, "QUALIFIER", "TYPE");
+		assertTypeQualifications(node.getTypeQualifications(new TypeContextImpl()), "QUALIFIER", "TYPE");
 
 		// Validate children
 		assertChildren(node, node.getManagedObjectDependency("DEPENDENCY"));
@@ -572,6 +572,9 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		OfficeTeamNode node = this.doTest(() -> this.context.createOfficeTeamNode("TEAM", this.office));
 		assertNode(node, "TEAM", "Office Team", null, this.office);
 		assertInitialise(node, (n) -> n.initialise());
+		assertTypeQualifications(node.getTypeQualifications());
+		node.addTypeQualification("QUALIFIED", "TYPE");
+		assertTypeQualifications(node.getTypeQualifications(), "QUALIFIED", "TYPE");
 	}
 
 	/**
@@ -748,17 +751,17 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	/**
 	 * Asserts the {@link TypeQualification} for the {@link ManagedObjectNode}.
 	 * 
-	 * @param managedObjectNode
-	 *            {@link ManagedObjectNode}.
+	 * @param typeQualifications
+	 *            {@link TypeQualification} instances.
 	 * @param qualifierTypePairs
 	 *            Pairings of expected qualifier and types.
 	 */
-	private static void assertTypeQualifications(ManagedObjectNode managedObjectNode, String... qualifierTypePairs) {
-		TypeQualification[] qualifications = managedObjectNode.getTypeQualifications(new TypeContextImpl());
-		assertEquals("Incorrect number of type qualifications", (qualifierTypePairs.length / 2), qualifications.length);
+	private static void assertTypeQualifications(TypeQualification[] typeQualifications, String... qualifierTypePairs) {
+		assertEquals("Incorrect number of type qualifications", (qualifierTypePairs.length / 2),
+				typeQualifications.length);
 		for (int i = 0; i < qualifierTypePairs.length; i += 2) {
 			int index = i / 2;
-			TypeQualification qualification = qualifications[index];
+			TypeQualification qualification = typeQualifications[index];
 			assertEquals("Incorrect qualification " + index, qualifierTypePairs[i], qualification.getQualifier());
 			assertEquals("Incorrect type " + index, qualifierTypePairs[i + 1], qualification.getType());
 		}

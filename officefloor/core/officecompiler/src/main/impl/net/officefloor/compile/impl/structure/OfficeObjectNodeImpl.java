@@ -186,6 +186,16 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 	}
 
 	@Override
+	public String getTypeQualifier() {
+		return this.typeQualifier;
+	}
+
+	@Override
+	public String getOfficeObjectType() {
+		return this.state.objectType;
+	}
+
+	@Override
 	public OfficeManagedObjectType loadOfficeManagedObjectType(TypeContext typeContext) {
 
 		// Ensure have name

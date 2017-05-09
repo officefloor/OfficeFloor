@@ -52,6 +52,11 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 	private final List<AutoWireNodeImpl> targets = new ArrayList<>();
 
 	/**
+	 * Outer scope {@link AutoWirer}.
+	 */
+	private final AutoWirerImpl<N> outerScope;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param context
@@ -60,8 +65,23 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 	 *            {@link CompilerIssues}.
 	 */
 	public AutoWirerImpl(SourceContext context, CompilerIssues issues) {
+		this(context, issues, null);
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param context
+	 *            {@link SourceContext}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @param outerScope
+	 *            Outer scope {@link AutoWirer}.
+	 */
+	private AutoWirerImpl(SourceContext context, CompilerIssues issues, AutoWirerImpl<N> outerScope) {
 		this.context = context;
 		this.issues = issues;
+		this.outerScope = outerScope;
 	}
 
 	/*
@@ -79,8 +99,18 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 	}
 
 	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public AutoWireLink<N>[] findAutoWireLinks(N sourceNode, AutoWire... sourceAutoWires) {
+		return this.sourceAutoWireLinks(false, sourceNode, sourceAutoWires);
+	}
+
+	@Override
 	public AutoWireLink<N>[] getAutoWireLinks(final N sourceNode, AutoWire... sourceAutoWires) {
+		return this.sourceAutoWireLinks(true, sourceNode, sourceAutoWires);
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private AutoWireLink<N>[] sourceAutoWireLinks(boolean isMustMatch, final N sourceNode,
+			AutoWire... sourceAutoWires) {
 
 		// Ensure have at least one auto-wire
 		if ((sourceAutoWires == null) || (sourceAutoWires.length == 0)) {
@@ -91,117 +121,134 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 		// Undertake the matching following order
 		for (int i = 0; i < 6; i++) {
 
-			// Match by qualifier (if available) and type
-			final int index = i;
-			AutoWireLink[] matches = this.targets.stream().map((target) -> {
+			// Search through the scopes
+			AutoWirerImpl<N> currentScope = this;
+			while (currentScope != null) {
 
-				// Determine if match
-				NEXT_AUTO_WIRE: for (AutoWire sourceAutoWire : sourceAutoWires) {
+				// Match by qualifier (if available) and type
+				final int index = i;
+				AutoWireLink[] matches = currentScope.targets.stream().map((target) -> {
 
-					// Obtain the auto-wire details
-					String sourceType = sourceAutoWire.getType();
-					String sourceQualifier = sourceAutoWire.getQualifier();
+					// Determine if match
+					NEXT_AUTO_WIRE: for (AutoWire sourceAutoWire : sourceAutoWires) {
 
-					// Determine if match target auto-wire
-					for (AutoWire targetAutoWire : target.autoWires) {
+						// Obtain the auto-wire details
+						String sourceType = sourceAutoWire.getType();
+						String sourceQualifier = sourceAutoWire.getQualifier();
 
-						// Must always match on type
-						if ((index % 2) == 0) {
-							// Match on exact type
-							if (!(sourceType.equals(targetAutoWire.getType()))) {
-								continue NEXT_AUTO_WIRE;
+						// Determine if match target auto-wire
+						for (AutoWire targetAutoWire : target.autoWires) {
+
+							// Must always match on type
+							if ((index % 2) == 0) {
+								// Match on exact type
+								if (!(sourceType.equals(targetAutoWire.getType()))) {
+									continue NEXT_AUTO_WIRE;
+								}
+
+							} else {
+								// Match on child type
+								Class<?> sourceClass = this.context.loadOptionalClass(sourceType);
+								Class<?> targetClass = this.context.loadOptionalClass(targetAutoWire.getType());
+								if ((sourceClass == null) || (targetClass == null)) {
+									continue NEXT_AUTO_WIRE; // must load to
+																// match
+								} else if (!sourceClass.isAssignableFrom(targetClass)) {
+									continue NEXT_AUTO_WIRE;
+								}
 							}
 
-						} else {
-							// Match on child type
-							Class<?> sourceClass = this.context.loadOptionalClass(sourceType);
-							Class<?> targetClass = this.context.loadOptionalClass(targetAutoWire.getType());
-							if ((sourceClass == null) || (targetClass == null)) {
-								continue NEXT_AUTO_WIRE; // must load to match
-							} else if (!sourceClass.isAssignableFrom(targetClass)) {
-								continue NEXT_AUTO_WIRE;
+							// Determine qualifier matching
+							switch (index) {
+							case 0:
+							case 1:
+								// Match with qualifier
+								if ((sourceQualifier != null)
+										&& (sourceQualifier.equals(targetAutoWire.getQualifier()))) {
+									return new AutoWireLinkImpl(sourceNode, sourceAutoWire, target, targetAutoWire);
+								}
+								break;
+
+							case 2:
+							case 3:
+								// Match only by type
+								if ((sourceQualifier == null) && (targetAutoWire.getQualifier() == null)) {
+									return new AutoWireLinkImpl(sourceNode, sourceAutoWire, target, targetAutoWire);
+								}
+								break;
+
+							case 4:
+							case 5:
+								// Match falling back to type
+								if (targetAutoWire.getQualifier() == null) {
+									return new AutoWireLinkImpl(sourceNode, sourceAutoWire, target, targetAutoWire);
+								}
+								break;
 							}
 						}
+					}
 
-						// Determine qualifier matching
-						switch (index) {
-						case 0:
-						case 1:
-							// Match with qualifier
-							if ((sourceQualifier != null) && (sourceQualifier.equals(targetAutoWire.getQualifier()))) {
-								return new AutoWireLinkImpl(sourceNode, sourceAutoWire, target, targetAutoWire);
-							}
-							break;
+					// As here, do not include
+					return null;
 
-						case 2:
-						case 3:
-							// Match only by type
-							if ((sourceQualifier == null) && (targetAutoWire.getQualifier() == null)) {
-								return new AutoWireLinkImpl(sourceNode, sourceAutoWire, target, targetAutoWire);
-							}
-							break;
+				}).filter((link) -> link != null).toArray(AutoWireLink[]::new);
+				switch (matches.length) {
+				case 0:
+					// No match, so attempt next try
+					break;
+				case 1:
+					// Found match
+					return matches;
+				default:
+					// Multiple matches, so create listing of auto-wires
+					AutoWire[] matchSourceAutoWires = Arrays.stream(matches).map((link) -> link.getSourceAutoWire())
+							.distinct().sorted().toArray(AutoWire[]::new);
+					AutoWire[] matchTargetAutoWires = Arrays.stream(matches).map((link) -> link.getTargetAutoWire())
+							.sorted().toArray(AutoWire[]::new);
 
-						case 4:
-						case 5:
-							// Match falling back to type
-							if (targetAutoWire.getQualifier() == null) {
-								return new AutoWireLinkImpl(sourceNode, sourceAutoWire, target, targetAutoWire);
-							}
-							break;
+					// Indicate issue regarding the matches
+					StringBuilder sourceMatches = new StringBuilder();
+					Arrays.stream(matchSourceAutoWires).forEach((autoWire) -> {
+						if (sourceMatches.length() != 0) {
+							sourceMatches.append(", ");
 						}
+						sourceMatches.append(autoWire.toString());
+					});
+					StringBuilder targetMatches = new StringBuilder();
+					Arrays.stream(matchTargetAutoWires).forEach((autoWire) -> {
+						if (targetMatches.length() != 0) {
+							targetMatches.append(", ");
+						}
+						targetMatches.append(autoWire.toString());
+					});
+					if (matchSourceAutoWires.length == 1) {
+						this.issues.addIssue(sourceNode, "Duplicate auto-wire targets (" + sourceMatches.toString()
+								+ " -> " + targetMatches.toString() + ").  Please qualify to avoid this issue.");
+					} else {
+						this.issues.addIssue(sourceNode, "Multiple auto-wires (" + sourceMatches.toString()
+								+ ") matching multiple targets (" + targetMatches.toString()
+								+ ").  Please qualify, reduce dependencies or remove auto-wire targets to avoid this issue.");
 					}
+
+					// Return the matches
+					return matches;
 				}
 
-				// As here, do not include
-				return null;
-
-			}).filter((link) -> link != null).toArray(AutoWireLink[]::new);
-			switch (matches.length) {
-			case 0:
-				// No match, so attempt next try
-				break;
-			case 1:
-				// Found match
-				return matches;
-			default:
-				// Multiple matches, so create listing of auto-wires
-				AutoWire[] matchSourceAutoWires = Arrays.stream(matches).map((link) -> link.getSourceAutoWire())
-						.distinct().sorted().toArray(AutoWire[]::new);
-				AutoWire[] matchTargetAutoWires = Arrays.stream(matches).map((link) -> link.getTargetAutoWire())
-						.sorted().toArray(AutoWire[]::new);
-
-				// Indicate issue regarding the matches
-				StringBuilder sourceMatches = new StringBuilder();
-				Arrays.stream(matchSourceAutoWires).forEach((autoWire) -> {
-					if (sourceMatches.length() != 0) {
-						sourceMatches.append(", ");
-					}
-					sourceMatches.append(autoWire.toString());
-				});
-				StringBuilder targetMatches = new StringBuilder();
-				Arrays.stream(matchTargetAutoWires).forEach((autoWire) -> {
-					if (targetMatches.length() != 0) {
-						targetMatches.append(", ");
-					}
-					targetMatches.append(autoWire.toString());
-				});
-				if (matchSourceAutoWires.length == 1) {
-					this.issues.addIssue(sourceNode, "Duplicate auto-wire targets (" + sourceMatches.toString() + " -> "
-							+ targetMatches.toString() + ").  Please qualify to avoid this issue.");
-				} else {
-					this.issues.addIssue(sourceNode, "Multiple auto-wires (" + sourceMatches.toString()
-							+ ") matching multiple targets (" + targetMatches.toString()
-							+ ").  Please qualify, reduce dependencies or remove auto-wire targets to avoid this issue.");
-				}
-
-				// Return the matches
-				return matches;
+				// Try outer scope
+				currentScope = currentScope.outerScope;
 			}
 		}
 
 		// As here no match
-		this.issues.addIssue(sourceNode, "No target found by auto-wiring");
+		if (isMustMatch) {
+			this.issues.addIssue(sourceNode, "No target found by auto-wiring");
+		}
 		return new AutoWireLink[0];
+	}
+
+	@Override
+	public AutoWirer<N> createScopeAutoWirer() {
+		return new AutoWirerImpl<>(this.context, this.issues, this);
 	}
 
 	/**

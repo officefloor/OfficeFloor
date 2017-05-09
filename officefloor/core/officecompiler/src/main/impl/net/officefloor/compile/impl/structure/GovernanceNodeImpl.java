@@ -170,15 +170,24 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public GovernanceType<?, ?> loadGovernanceType() {
 
-		// Obtain the governance source class
-		Class governanceSourceClass = this.context.getGovernanceSourceClass(this.state.governanceSourceClassName, this);
-		if (governanceSourceClass == null) {
-			return null; // must obtain source class
-		}
-
-		// Load and return the governance type
+		// Create the governance loader
 		GovernanceLoader loader = this.context.getGovernanceLoader(this);
-		return loader.loadGovernanceType(governanceSourceClass, this.properties);
+		if (this.state.governanceSource != null) {
+			// Load and return the governance type
+			return loader.loadGovernanceType(this.state.governanceSource, properties);
+
+		} else {
+
+			// Obtain the governance source class
+			Class governanceSourceClass = this.context.getGovernanceSourceClass(this.state.governanceSourceClassName,
+					this);
+			if (governanceSourceClass == null) {
+				return null; // must obtain source class
+			}
+
+			// Load and return the governance type
+			return loader.loadGovernanceType(governanceSourceClass, this.properties);
+		}
 	}
 
 	@Override

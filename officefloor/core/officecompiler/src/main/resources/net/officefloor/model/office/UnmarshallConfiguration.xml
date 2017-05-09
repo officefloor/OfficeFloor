@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <unmarshall node="office" class="net.officefloor.model.office.OfficeModel">
 
+	<!-- OFFICE ATTRIBUTES -->
+	<value method="setIsAutoWireObjects" node="office@auto-wire-objects" />
+	<value method="setIsAutoWireTeams" node="office@auto-wire-teams" />
+
 	<!-- EXTERNAL MANAGED OBJECTS -->
 	<object method="addExternalManagedObject" node="external-managed-object"
 		class="net.officefloor.model.office.ExternalManagedObjectModel">
@@ -77,6 +81,11 @@
 			class="net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel">
 			<value method="setOfficeManagedObjectSourceName" node="managed-object-source@name" />
 		</object>
+		<object method="addTypeQualification" node="type-qualification"
+			class="net.officefloor.model.office.TypeQualificationModel">
+			<value method="setQualifier" node="type-qualification@qualifier" />
+			<value method="setType" node="type-qualification@type" />
+		</object>
 		<object method="addAdministration" node="administer"
 			class="net.officefloor.model.office.OfficeManagedObjectToAdministrationModel">
 			<value method="setAdministrationName" node="administer@administration" />
@@ -107,6 +116,11 @@
 		<value method="setOfficeTeamName" node="team@name" />
 		<value method="setX" node="team@x" />
 		<value method="setY" node="team@y" />
+		<object method="addTypeQualification" node="type-qualification"
+			class="net.officefloor.model.office.TypeQualificationModel">
+			<value method="setQualifier" node="type-qualification@qualifier" />
+			<value method="setType" node="type-qualification@type" />
+		</object>
 	</object>
 
 	<!-- OFFICE ESCALATIONS -->

@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,12 +27,16 @@ import net.officefloor.compile.impl.office.OfficeFunctionTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.AdministrationNode;
+import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.internal.structure.AutoWireLink;
+import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.FunctionFlowNode;
 import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
 import net.officefloor.compile.internal.structure.FunctionObjectNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
+import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -310,6 +315,22 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 
 		// Successfully sourced
 		return true;
+	}
+
+	@Override
+	public void autoWireManagedFunctionResponsibility(AutoWirer<LinkTeamNode> autoWirer, TypeContext typeContext) {
+
+		// Create the listing of source auto wires
+		ManagedFunctionType<?, ?> functionType = this.loadManagedFunctionType(typeContext);
+		AutoWire[] sourceAutoWires = Arrays.stream(functionType.getObjectTypes())
+				.map((objectType) -> new AutoWire(objectType.getTypeQualifier(), objectType.getObjectType().getName()))
+				.toArray(AutoWire[]::new);
+
+		// Attempt to obtain the responsible team
+		AutoWireLink<LinkTeamNode>[] links = autoWirer.findAutoWireLinks(this.teamResponsible, sourceAutoWires);
+		if (links.length == 1) {
+			LinkUtil.linkTeam(this.teamResponsible, links[0].getTargetNode(), this.context.getCompilerIssues(), this);
+		}
 	}
 
 	@Override

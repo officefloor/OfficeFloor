@@ -62,4 +62,29 @@ public interface AutoWirer<N extends Node> {
 	 */
 	AutoWireLink<N>[] getAutoWireLinks(N sourceNode, AutoWire... sourceAutoWires);
 
+	/**
+	 * Selects the appropriate {@link AutoWireLink} instances, and does not flag
+	 * issue if no matching {@link AutoWireLink} is found.
+	 * 
+	 * @param sourceNode
+	 *            Source {@link Node} to link target.
+	 * @param sourceAutoWires
+	 *            Source {@link AutoWire} instances to match against target
+	 *            {@link AutoWire} instances.
+	 * @return Matching {@link AutoWireLink} instances.
+	 */
+	AutoWireLink<N>[] findAutoWireLinks(N sourceNode, AutoWire... sourceAutoWires);
+
+	/**
+	 * <p>
+	 * Creates an {@link AutoWirer} for a new scope that takes priority over
+	 * existing {@link AutoWire} targets.
+	 * <p>
+	 * Targets are first looked for in the returned scoped {@link AutoWirer}. If
+	 * no matching target is found, then this {@link AutoWire} is checked.
+	 * 
+	 * @return Scoped {@link AutoWirer}.
+	 */
+	AutoWirer<N> createScopeAutoWirer();
+
 }

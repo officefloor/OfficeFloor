@@ -22,6 +22,7 @@ import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.section.OfficeFunctionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
 import net.officefloor.compile.spi.office.OfficeSectionFunction;
+import net.officefloor.compile.spi.office.ResponsibleTeam;
 import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -67,6 +68,16 @@ public interface ManagedFunctionNode extends LinkFlowNode, SectionFunction, Offi
 	 *         with issues reported to the {@link CompilerIssues}.
 	 */
 	boolean souceManagedFunction(TypeContext typeContext);
+
+	/**
+	 * Auto wires the {@link ResponsibleTeam} for this {@link ManagedFunction}.
+	 * 
+	 * @param autoWirer
+	 *            {@link AutoWirer}.
+	 * @param typeContext
+	 *            {@link TypeContext}.
+	 */
+	void autoWireManagedFunctionResponsibility(AutoWirer<LinkTeamNode> autoWirer, TypeContext typeContext);
 
 	/**
 	 * Loads the {@link OfficeFunctionType}.

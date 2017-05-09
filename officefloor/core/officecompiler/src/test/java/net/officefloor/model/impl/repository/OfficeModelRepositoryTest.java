@@ -74,6 +74,7 @@ import net.officefloor.model.office.OfficeSubSectionModel;
 import net.officefloor.model.office.OfficeSubSectionToGovernanceModel;
 import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.office.PropertyModel;
+import net.officefloor.model.office.TypeQualificationModel;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
@@ -107,6 +108,11 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 		ModelRepository repository = new ModelRepositoryImpl();
 		OfficeModel office = new OfficeModel();
 		office = repository.retrieve(office, this.configurationItem);
+
+		// ----------------------------------------
+		// Validate the office attributes
+		// ----------------------------------------
+		assertProperties(new OfficeModel(true, true), office, "getIsAutoWireObjects", "getIsAutoWireTeams");
 
 		// ----------------------------------------
 		// Validate the external managed objects
@@ -160,9 +166,9 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 		assertList(new String[] { "getOfficeManagedObjectName", "getManagedObjectScope", "getX", "getY" },
 				office.getOfficeManagedObjects(),
 				new OfficeManagedObjectModel("MANAGED_OBJECT_ONE", "THREAD", null, null, null, null, null, null, null,
-						300, 301),
+						null, 300, 301),
 				new OfficeManagedObjectModel("MANAGED_OBJECT_TWO", "PROCESS", null, null, null, null, null, null, null,
-						310, 311));
+						null, 310, 311));
 		OfficeManagedObjectModel mo = office.getOfficeManagedObjects().get(0);
 		assertProperties(new OfficeManagedObjectToOfficeManagedObjectSourceModel("MANAGED_OBJECT_SOURCE"),
 				mo.getOfficeManagedObjectSource(), "getOfficeManagedObjectSourceName");
@@ -174,6 +180,9 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 				mo.getOfficeManagedObjectDependencies(),
 				new OfficeManagedObjectDependencyModel("DEPENDENCY_ONE", Connection.class.getName()),
 				new OfficeManagedObjectDependencyModel("DEPENDENCY_TWO", Connection.class.getName()));
+		assertList(new String[] { "getQualifier", "getType" }, mo.getTypeQualifications(),
+				new TypeQualificationModel("QUALIFIED", "java.sql.SpecificConnection"),
+				new TypeQualificationModel(null, "java.sql.GenericConnection"));
 		OfficeManagedObjectDependencyModel dependencyOne = mo.getOfficeManagedObjectDependencies().get(0);
 		assertProperties(new OfficeManagedObjectDependencyToOfficeManagedObjectModel("MANAGED_OBJECT_TWO"),
 				dependencyOne.getOfficeManagedObject(), "getOfficeManagedObjectName");
@@ -185,7 +194,11 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 		// Validate the teams
 		// ----------------------------------------
 		assertList(new String[] { "getOfficeTeamName", "getX", "getY" }, office.getOfficeTeams(),
-				new OfficeTeamModel("TEAM", null, null, null, null, 400, 401));
+				new OfficeTeamModel("TEAM", null, null, null, null, null, 400, 401));
+		OfficeTeamModel team = office.getOfficeTeams().get(0);
+		assertList(new String[] { "getQualifier", "getType" }, team.getTypeQualifications(),
+				new TypeQualificationModel("QUALIFIED", "java.sql.SpecificStatement"),
+				new TypeQualificationModel(null, "java.sql.GenericStatement"));
 
 		// ----------------------------------------
 		// Validate the escalations

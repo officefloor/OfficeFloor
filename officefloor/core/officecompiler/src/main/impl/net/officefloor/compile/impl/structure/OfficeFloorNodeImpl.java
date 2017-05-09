@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -24,8 +25,12 @@ import java.util.function.Function;
 import net.officefloor.compile.impl.officefloor.OfficeFloorSourceContextImpl;
 import net.officefloor.compile.impl.officefloor.OfficeFloorTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.impl.util.LoadTypeError;
+import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
+import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
@@ -77,7 +82,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorNodeImpl extends AbstractNode implements OfficeFloorNode {
+public class OfficeFloorNodeImpl implements OfficeFloorNode {
 
 	/**
 	 * {@link Class} name of the {@link OfficeFloorSource}.
@@ -296,47 +301,48 @@ public class OfficeFloorNodeImpl extends AbstractNode implements OfficeFloorNode
 	@Override
 	public void link(OfficeFloorManagedObjectSource managedObjectSource,
 			OfficeFloorInputManagedObject inputManagedObject) {
-		this.linkManagedObjectSourceInput(managedObjectSource, inputManagedObject);
+		LinkUtil.linkManagedObjectSourceInput(managedObjectSource, inputManagedObject, this.context.getCompilerIssues(),
+				this);
 	}
 
 	@Override
 	public void link(ManagedObjectTeam team, OfficeFloorTeam officeFloorTeam) {
-		this.linkTeam(team, officeFloorTeam);
+		LinkUtil.linkTeam(team, officeFloorTeam, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(ManagedObjectDependency dependency, OfficeFloorManagedObject managedObject) {
-		this.linkObject(dependency, managedObject);
+		LinkUtil.linkObject(dependency, managedObject, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(ManagedObjectDependency dependency, OfficeFloorInputManagedObject inputManagedObject) {
-		this.linkObject(dependency, inputManagedObject);
+		LinkUtil.linkObject(dependency, inputManagedObject, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(ManagedObjectFlow flow, DeployedOfficeInput input) {
-		this.linkFlow(flow, input);
+		LinkUtil.linkFlow(flow, input, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(ManagingOffice managingOffice, DeployedOffice office) {
-		this.linkOffice(managingOffice, office);
+		LinkUtil.linkOffice(managingOffice, office, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(OfficeTeam team, OfficeFloorTeam officeFloorTeam) {
-		this.linkTeam(team, officeFloorTeam);
+		LinkUtil.linkTeam(team, officeFloorTeam, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(OfficeObject requiredManagedObject, OfficeFloorManagedObject officeFloorManagedObject) {
-		this.linkObject(requiredManagedObject, officeFloorManagedObject);
+		LinkUtil.linkObject(requiredManagedObject, officeFloorManagedObject, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(OfficeObject officeObject, OfficeFloorInputManagedObject inputManagedObject) {
-		this.linkObject(officeObject, inputManagedObject);
+		LinkUtil.linkObject(officeObject, inputManagedObject, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
@@ -456,6 +462,19 @@ public class OfficeFloorNodeImpl extends AbstractNode implements OfficeFloorNode
 
 		// As here, successfully sourced
 		return true;
+	}
+
+	@Override
+	public void loadAutoWireObjectTargets(AutoWirer<LinkObjectNode> autoWirer, TypeContext typeContext) {
+		this.managedObjects.values().forEach((mo) -> {
+
+			// Create the auto-wires
+			AutoWire[] targetAutoWires = Arrays.stream(mo.getTypeQualifications(typeContext))
+					.map((type) -> new AutoWire(type.getQualifier(), type.getType())).toArray(AutoWire[]::new);
+
+			// Add the target
+			autoWirer.addAutoWireTarget(mo, targetAutoWires);
+		});
 	}
 
 	@Override

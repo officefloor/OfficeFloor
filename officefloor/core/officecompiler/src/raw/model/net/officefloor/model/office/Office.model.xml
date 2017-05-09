@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
+	<field type="boolean" name="is auto wire objects" />
+	<field type="boolean" name="is auto wire teams" />	
 	<list type="OfficeSectionModel" name="office section" />
 	<list type="OfficeTeamModel" name="office team" />
 	<list type="ExternalManagedObjectModel" name="external managed object" />

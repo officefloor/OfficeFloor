@@ -41,6 +41,7 @@ import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.LinkSynchronousNode;
+import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
@@ -99,6 +100,7 @@ import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.api.source.UnknownClassError;
 import net.officefloor.frame.api.source.UnknownPropertyError;
 import net.officefloor.frame.api.source.UnknownResourceError;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
 /**
@@ -106,7 +108,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
+public class OfficeNodeImpl implements OfficeNode {
 
 	/**
 	 * Name of this {@link DeployedOffice}.
@@ -234,6 +236,11 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	 * Indicates whether to {@link AutoWire} the objects.
 	 */
 	private boolean isAutoWireObjects = false;
+
+	/**
+	 * Indicates whether to {@link AutoWire} the {@link Team} instances.
+	 */
+	private boolean isAutoWireTeams = false;
 
 	/**
 	 * Initialise with all parameters.
@@ -469,8 +476,17 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		// Undertake auto-wire of objects
 		if (this.isAutoWireObjects) {
 
-			// Iterate over managed objects creating list of possible targets
-			final AutoWirer<LinkObjectNode> autoWirer = this.context.createAutoWirer(LinkObjectNode.class);
+			// Create the OfficeFloor auto wirier
+			final AutoWirer<LinkObjectNode> officeFloorAutoWirer = this.context.createAutoWirer(LinkObjectNode.class);
+			this.officeFloor.loadAutoWireObjectTargets(officeFloorAutoWirer, typeContext);
+
+			// Create the Office auto wirer
+			final AutoWirer<LinkObjectNode> officeAutoWirer = officeFloorAutoWirer.createScopeAutoWirer();
+			this.objects.values().forEach((object) -> officeAutoWirer.addAutoWireTarget(object,
+					new AutoWire(object.getTypeQualifier(), object.getOfficeObjectType())));
+
+			// Create the Office managed object auto wirer
+			final AutoWirer<LinkObjectNode> autoWirer = officeAutoWirer.createScopeAutoWirer();
 			this.managedObjects.values().forEach((mo) -> {
 
 				// Create the auto-wires
@@ -485,6 +501,27 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			this.sections.values().stream()
 					.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSectionName(), b.getOfficeSectionName()))
 					.forEach((section) -> section.autoWireObjects(autoWirer, typeContext));
+		}
+
+		// Undertake auto-wire of teams
+		if (this.isAutoWireTeams) {
+
+			// Create the Office team auto wirer
+			final AutoWirer<LinkTeamNode> autoWirer = this.context.createAutoWirer(LinkTeamNode.class);
+			this.teams.values().forEach((team) -> {
+
+				// Create the auto-wires
+				AutoWire[] targetAutoWires = Arrays.stream(team.getTypeQualifications())
+						.map((type) -> new AutoWire(type.getQualifier(), type.getType())).toArray(AutoWire[]::new);
+				if (targetAutoWires.length > 0) {
+					autoWirer.addAutoWireTarget(team, targetAutoWires);
+				}
+			});
+
+			// Iterate over sections (auto-wiring functions to teams)
+			this.sections.values().stream()
+					.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSectionName(), b.getOfficeSectionName()))
+					.forEach((section) -> section.autoWireTeams(autoWirer, typeContext));
 		}
 
 		// As here, successfully loaded the office
@@ -742,6 +779,11 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
+	public void enableAutoWireTeams() {
+		this.isAutoWireTeams = true;
+	}
+
+	@Override
 	public OfficeObject addOfficeObject(String officeManagedObjectName, String objectType) {
 		return NodeUtil.getInitialisedNode(officeManagedObjectName, this.objects, this.context,
 				() -> this.context.createOfficeObjectNode(officeManagedObjectName, this),
@@ -843,82 +885,82 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 	@Override
 	public void link(OfficeInput input, OfficeOutput output) {
-		this.linkSynchronous(input, output);
+		LinkUtil.linkSynchronous(input, output, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(OfficeInput input, OfficeSectionInput sectionInput) {
-		this.linkFlow(input, sectionInput);
+		LinkUtil.linkFlow(input, sectionInput, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(OfficeOutput output, OfficeInput input) {
-		this.linkSynchronous(output, input);
+		LinkUtil.linkSynchronous(output, input, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(OfficeSectionOutput sectionOutput, OfficeOutput output) {
-		this.linkFlow(sectionOutput, output);
+		LinkUtil.linkFlow(sectionOutput, output, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(OfficeSectionObject sectionObject, OfficeManagedObject managedObject) {
-		this.linkObject(sectionObject, managedObject);
+		LinkUtil.linkObject(sectionObject, managedObject, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(OfficeSectionObject sectionObject, OfficeObject managedObject) {
-		this.linkObject(sectionObject, managedObject);
+		LinkUtil.linkObject(sectionObject, managedObject, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(ManagedObjectDependency dependency, OfficeManagedObject managedObject) {
-		this.linkObject(dependency, managedObject);
+		LinkUtil.linkObject(dependency, managedObject, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(ManagedObjectDependency dependency, OfficeObject managedObject) {
-		this.linkObject(dependency, managedObject);
+		LinkUtil.linkObject(dependency, managedObject, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(ManagedObjectFlow flow, OfficeSectionInput input) {
-		this.linkFlow(flow, input);
+		LinkUtil.linkFlow(flow, input, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(OfficeSectionOutput output, OfficeSectionInput input) {
-		this.linkFlow(output, input);
+		LinkUtil.linkFlow(output, input, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(OfficeEscalation escalation, OfficeSectionInput input) {
-		this.linkFlow(escalation, input);
+		LinkUtil.linkFlow(escalation, input, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(ResponsibleTeam team, OfficeTeam officeTeam) {
-		this.linkTeam(team, officeTeam);
+		LinkUtil.linkTeam(team, officeTeam, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(ManagedObjectTeam team, OfficeTeam officeTeam) {
-		this.linkTeam(team, officeTeam);
+		LinkUtil.linkTeam(team, officeTeam, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(OfficeGovernance governance, OfficeTeam officeTeam) {
-		this.linkTeam(governance, officeTeam);
+		LinkUtil.linkTeam(governance, officeTeam, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(OfficeAdministration administrator, OfficeTeam officeTeam) {
-		this.linkTeam(administrator, officeTeam);
+		LinkUtil.linkTeam(administrator, officeTeam, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(OfficeStart start, OfficeSectionInput input) {
-		this.linkFlow(start, input);
+		LinkUtil.linkFlow(start, input, this.context.getCompilerIssues(), this);
 	}
 
 	@Override

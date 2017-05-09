@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import net.officefloor.autowire.impl.AutoWireTest;
@@ -187,9 +188,35 @@ public class AutoWirerTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure issue if no matching target.
+	 */
+	public void testNoIssueWhenNotFoundTarget() {
+		this.replayMockObjects();
+		AutoWireLink<Node>[] links = this.wirer.findAutoWireLinks(this.source, new AutoWire("NOT_MATCH"));
+		assertEquals("Should be no matching links", 0, links.length);
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensure issue if duplicate matching target.
 	 */
 	public void testIssueIfDuplicateMatchingTarget() {
+		this.doIssueIfDuplicateMatchingTarget(
+				(targetAutoWires) -> this.wirer.getAutoWireLinks(this.source, targetAutoWires));
+	}
+
+	/**
+	 * Ensure issue if duplicate found target.
+	 */
+	public void testIssueIfDuplicateFoundTarget() {
+		this.doIssueIfDuplicateMatchingTarget(
+				(targetAutoWires) -> this.wirer.findAutoWireLinks(this.source, targetAutoWires));
+	}
+
+	/**
+	 * Undertakes the test if duplicate matching target.
+	 */
+	private void doIssueIfDuplicateMatchingTarget(Function<AutoWire[], AutoWireLink<Node>[]> retriever) {
 		LinkObjectNode one = this.createMock(LinkObjectNode.class);
 		LinkObjectNode two = this.createMock(LinkObjectNode.class);
 		this.recordReturn(this.source, this.source.getNodeName(), "SOURCE");
@@ -198,7 +225,7 @@ public class AutoWirerTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		this.wirer.addAutoWireTarget(one, new AutoWire("TYPE"));
 		this.wirer.addAutoWireTarget(two, new AutoWire("TYPE"));
-		AutoWireLink<Node>[] links = this.wirer.getAutoWireLinks(this.source, new AutoWire("TYPE"));
+		AutoWireLink<Node>[] links = retriever.apply(new AutoWire[] { new AutoWire("TYPE") });
 		assertEquals("Should match multiple links", 2, links.length);
 		for (int i = 0; i < 2; i++) {
 			assertNull("Should be no source qualifier", links[i].getSourceAutoWire().getQualifier());
@@ -230,6 +257,23 @@ public class AutoWirerTest extends OfficeFrameTestCase {
 	 * Ensure issue if multiple {@link AutoWire} matches to multiple targets.
 	 */
 	public void testIssueIfMultipleMatchMultipleTargets() {
+		this.doIssueIfMultipleMatchMultipleTargets(
+				(targetAutoWires) -> this.wirer.getAutoWireLinks(this.source, targetAutoWires));
+	}
+
+	/**
+	 * Ensure issue if multiple {@link AutoWire} found to multiple targets.
+	 */
+	public void testIssueIfMultipleFoundMultipleTargets() {
+		this.doIssueIfMultipleMatchMultipleTargets(
+				(targetAutoWires) -> this.wirer.findAutoWireLinks(this.source, targetAutoWires));
+	}
+
+	/**
+	 * Undertakes the test if multiple {@link AutoWire} matches to multiple
+	 * targets.
+	 */
+	public void doIssueIfMultipleMatchMultipleTargets(Function<AutoWire[], AutoWireLink<Node>[]> retriever) {
 		LinkObjectNode one = this.createMock(LinkObjectNode.class);
 		LinkObjectNode two = this.createMock(LinkObjectNode.class);
 		this.recordReturn(this.source, this.source.getNodeName(), "SOURCE");
@@ -238,9 +282,52 @@ public class AutoWirerTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		this.wirer.addAutoWireTarget(one, new AutoWire("ONE"));
 		this.wirer.addAutoWireTarget(two, new AutoWire("TWO"));
-		AutoWireLink<Node>[] links = this.wirer.getAutoWireLinks(this.source, new AutoWire("UNMATCHED"),
-				new AutoWire("ONE"), new AutoWire("TWO"));
+		AutoWireLink<Node>[] links = retriever
+				.apply(new AutoWire[] { new AutoWire("UNMATCHED"), new AutoWire("ONE"), new AutoWire("TWO") });
 		assertEquals("Incorrect number of links", 2, links.length);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure able to find target in scope.
+	 */
+	public void testGetInScope() {
+		LinkObjectNode node = this.createMock(LinkObjectNode.class);
+		this.replayMockObjects();
+		AutoWire autoWire = new AutoWire("TYPE");
+		this.wirer.addAutoWireTarget(node, autoWire);
+		AutoWirer<Node> scopeWirer = this.wirer.createScopeAutoWirer();
+		scopeWirer.addAutoWireTarget(this.target, autoWire);
+		AutoWireLink<Node>[] links = scopeWirer.getAutoWireLinks(this.source, autoWire);
+		assertLinkMatch(links, autoWire, autoWire);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure able to find target in outer scope.
+	 */
+	public void testGetInOuterScope() {
+		LinkObjectNode node = this.createMock(LinkObjectNode.class);
+		this.replayMockObjects();
+		this.wirer.addAutoWireTarget(this.target, new AutoWire("TYPE"));
+		AutoWirer<Node> scopeWirer = this.wirer.createScopeAutoWirer();
+		scopeWirer.addAutoWireTarget(node, new AutoWire("NOT_MATCH"));
+		AutoWireLink<Node>[] links = scopeWirer.getAutoWireLinks(this.source, new AutoWire("TYPE"));
+		assertLinkMatch(links, new AutoWire("TYPE"), new AutoWire("TYPE"));
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure able to find better match in outer scope.
+	 */
+	public void testBetterMatchInOuterScope() {
+		LinkObjectNode node = this.createMock(LinkObjectNode.class);
+		this.replayMockObjects();
+		this.wirer.addAutoWireTarget(this.target, new AutoWire("QUALIFIED", "TYPE"));
+		AutoWirer<Node> scopeWirer = this.wirer.createScopeAutoWirer();
+		scopeWirer.addAutoWireTarget(node, new AutoWire("TYPE"));
+		AutoWireLink<Node>[] links = scopeWirer.getAutoWireLinks(this.source, new AutoWire("QUALIFIED", "TYPE"));
+		assertLinkMatch(links, new AutoWire("QUALIFIED", "TYPE"), new AutoWire("QUALIFIED", "TYPE"));
 		this.verifyMockObjects();
 	}
 

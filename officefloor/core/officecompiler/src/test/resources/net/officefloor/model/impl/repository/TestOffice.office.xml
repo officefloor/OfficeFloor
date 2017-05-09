@@ -1,4 +1,4 @@
-<office>
+<office auto-wire-objects="true" auto-wire-teams="true">
 
 	<external-managed-objects>
 		<external-managed-object name="EXTERNAL_MANAGED_OBJECT"
@@ -39,6 +39,9 @@
 			<managed-object-source name="MANAGED_OBJECT_SOURCE" />
 			<administer administration="ADMINISTRATION" order="1" />
 			<govern governance="GOVERNANCE" />
+			<type-qualification qualifier="QUALIFIED"
+				type="java.sql.SpecificConnection" />
+			<type-qualification type="java.sql.GenericConnection" />
 			<dependency name="DEPENDENCY_ONE" object-type="java.sql.Connection">
 				<managed-object name="MANAGED_OBJECT_TWO" />
 			</dependency>
@@ -53,7 +56,11 @@
 	</managed-objects>
 
 	<teams>
-		<team name="TEAM" x="400" y="401" />
+		<team name="TEAM" x="400" y="401">
+			<type-qualification qualifier="QUALIFIED"
+				type="java.sql.SpecificStatement" />
+			<type-qualification type="java.sql.GenericStatement" />
+		</team>
 	</teams>
 
 	<escalations>

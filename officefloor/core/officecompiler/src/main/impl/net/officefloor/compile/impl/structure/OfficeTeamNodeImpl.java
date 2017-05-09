@@ -17,15 +17,20 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.officefloor.compile.impl.office.OfficeTeamTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
+import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.office.OfficeTeamType;
+import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.type.TypeContext;
 
@@ -61,6 +66,11 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 	 */
 	private static class InitialisedState {
 	}
+
+	/**
+	 * {@link TypeQualification} instances for this {@link ManagedObjectNode}.
+	 */
+	private final List<TypeQualification> typeQualifications = new LinkedList<TypeQualification>();
 
 	/**
 	 * Instantiate.
@@ -126,9 +136,19 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 		return this.teamName;
 	}
 
+	@Override
+	public void addTypeQualification(String qualifier, String type) {
+		this.typeQualifications.add(new TypeQualificationImpl(qualifier, type));
+	}
+
 	/*
 	 * ==================== OfficeTeamNode =========================
 	 */
+
+	@Override
+	public TypeQualification[] getTypeQualifications() {
+		return this.typeQualifications.stream().toArray(TypeQualification[]::new);
+	}
 
 	@Override
 	public OfficeTeamType loadOfficeTeamType(TypeContext typeContext) {
