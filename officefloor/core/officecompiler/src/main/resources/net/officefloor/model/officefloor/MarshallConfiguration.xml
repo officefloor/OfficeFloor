@@ -2,6 +2,12 @@
 <marshall type="net.officefloor.model.officefloor.OfficeFloorModel"
 	element="office-floor">
 
+	<!-- OFFICE ATTRIBUTES -->
+	<attributes>
+		<attribute method="getIsAutoWireObjects" attribute="auto-wire-objects" />
+		<attribute method="getIsAutoWireTeams" attribute="auto-wire-teams" />
+	</attributes>
+
 	<!-- SUPPLIERS -->
 	<collection method="getOfficeFloorSuppliers" element="suppliers">
 		<item type="net.officefloor.model.officefloor.OfficeFloorSupplierModel"
@@ -161,6 +167,15 @@
 						attribute="name" />
 				</attributes>
 			</object>
+			<collection method="getTypeQualifications">
+				<item type="net.officefloor.model.officefloor.TypeQualificationModel"
+					element="type-qualification">
+					<attributes>
+						<attribute method="getQualifier" attribute="qualifier" />
+						<attribute method="getType" attribute="type" />
+					</attributes>
+				</item>
+			</collection>
 			<collection method="getOfficeFloorManagedObjectDependencies">
 				<item
 					type="net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel"
@@ -203,6 +218,15 @@
 					<attributes>
 						<attribute method="getName" attribute="name" />
 						<attribute method="getValue" attribute="value" />
+					</attributes>
+				</item>
+			</collection>
+			<collection method="getTypeQualifications">
+				<item type="net.officefloor.model.officefloor.TypeQualificationModel"
+					element="type-qualification">
+					<attributes>
+						<attribute method="getQualifier" attribute="qualifier" />
+						<attribute method="getType" attribute="type" />
 					</attributes>
 				</item>
 			</collection>

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
+	<field type="boolean" name="is auto wire objects" />
+	<field type="boolean" name="is auto wire teams" />
 	<list type="OfficeFloorSupplierModel" name="office floor supplier" />
 	<list type="OfficeFloorManagedObjectSourceModel" name="office floor managed object source" />
 	<list type="OfficeFloorInputManagedObjectModel" name="office floor input managed object" />

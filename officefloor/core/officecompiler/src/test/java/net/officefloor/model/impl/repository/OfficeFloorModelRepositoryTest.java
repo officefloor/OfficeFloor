@@ -52,6 +52,7 @@ import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.PropertyModel;
+import net.officefloor.model.officefloor.TypeQualificationModel;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
@@ -87,7 +88,12 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 		officeFloor = repository.retrieve(officeFloor, this.configurationItem);
 
 		// ---------------------------------------
-		// Validate the office floor suppliers
+		// Validate the OfficeFloor attributes
+		// ---------------------------------------
+		assertProperties(officeFloor, new OfficeFloorModel(true, true), "getIsAutoWireObjects", "getIsAutoWireTeams");
+
+		// ---------------------------------------
+		// Validate the OfficeFloor suppliers
 		// ---------------------------------------
 		assertList(new String[] { "getOfficeFloorSupplierName", "getSupplierSourceClassName", "getX", "getY" },
 				officeFloor.getOfficeFloorSuppliers(),
@@ -97,7 +103,7 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 				new PropertyModel("SUPPLIER_ONE", "VALUE_ONE"), new PropertyModel("SUPPLIER_TWO", "VALUE_TWO"));
 
 		// ----------------------------------------
-		// Validate the office floor managed object sources
+		// Validate the OfficeFloor managed object sources
 		// ----------------------------------------
 		assertList(
 				new String[] { "getOfficeFloorManagedObjectSourceName", "getManagedObjectSourceClassName",
@@ -125,7 +131,7 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 				"getAutoWireType");
 
 		// ----------------------------------------
-		// Validate the office floor input managed objects
+		// Validate the OfficeFloor input managed objects
 		// ----------------------------------------
 		assertList(new String[] { "getOfficeFloorInputManagedObjectName", "getObjectType", "getX", "getY" },
 				officeFloor.getOfficeFloorInputManagedObjects(), new OfficeFloorInputManagedObjectModel(
@@ -136,19 +142,24 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 				inputMo.getBoundOfficeFloorManagedObjectSource(), "getOfficeFloorManagedObjectSourceName");
 
 		// ----------------------------------------
-		// Validate the office floor managed objects
+		// Validate the OfficeFloor managed objects
 		// ----------------------------------------
 		assertList(new String[] { "getOfficeFloorManagedObjectName", "getManagedObjectScope", "getX", "getY" },
 				officeFloor.getOfficeFloorManagedObjects(),
-				new OfficeFloorManagedObjectModel("MANAGED_OBJECT_ONE", "THREAD", null, null, null, null, null, 300,
-						301),
-				new OfficeFloorManagedObjectModel("MANAGED_OBJECT_TWO", "PROCESS", null, null, null, null, null, 310,
-						311));
+				new OfficeFloorManagedObjectModel("MANAGED_OBJECT_ONE", "THREAD", null, null, null, null, null, null,
+						300, 301),
+				new OfficeFloorManagedObjectModel("MANAGED_OBJECT_TWO", "PROCESS", null, null, null, null, null, null,
+						310, 311));
 		OfficeFloorManagedObjectModel mo = officeFloor.getOfficeFloorManagedObjects().get(0);
 
 		// Link to managed object source
 		assertProperties(new OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel("MANAGED_OBJECT_SOURCE"),
 				mo.getOfficeFloorManagedObjectSource(), "getOfficeFloorManagedObjectSourceName");
+
+		// Type qualifications
+		assertList(new String[] { "getQualifier", "getType" }, mo.getTypeQualifications(),
+				new TypeQualificationModel("QUALIFIED", "java.sql.SpecificConnection"),
+				new TypeQualificationModel(null, "java.sql.GenericConnection"));
 
 		// Dependencies
 		assertList(new String[] { "getOfficeFloorManagedObjectDependencyName", "getDependencyType" },
@@ -164,14 +175,17 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 				dependencyTwo.getOfficeFloorInputManagedObject(), "getOfficeFloorInputManagedObjectName");
 
 		// ----------------------------------------
-		// Validate the office floor teams
+		// Validate the OfficeFloor teams
 		// ----------------------------------------
 		assertList(new String[] { "getOfficeFloorTeamName", "getTeamSourceClassName", "getX", "getY" },
 				officeFloor.getOfficeFloorTeams(),
-				new OfficeFloorTeamModel("TEAM", "net.example.ExampleTeamSource", null, null, null, 400, 401));
+				new OfficeFloorTeamModel("TEAM", "net.example.ExampleTeamSource", null, null, null, null, 400, 401));
 		OfficeFloorTeamModel team = officeFloor.getOfficeFloorTeams().get(0);
 		assertList(new String[] { "getName", "getValue" }, team.getProperties(),
 				new PropertyModel("TEAM_ONE", "VALUE_ONE"), new PropertyModel("TEAM_TWO", "VALUE_TWO"));
+		assertList(new String[] { "getQualifier", "getType" }, team.getTypeQualifications(),
+				new TypeQualificationModel("QUALIFIED", "java.sql.SpecificStatement"),
+				new TypeQualificationModel(null, "java.sql.GenericStatement"));
 
 		// ----------------------------------------
 		// Validate the deployed offices

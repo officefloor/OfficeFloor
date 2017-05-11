@@ -1,0 +1,54 @@
+<context>
+	<office-floor>
+		<teams>
+			<team name="OFFICEFLOOR_TEAM" source="ONE_PERSON" />
+		</teams>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office">
+				<team name="OFFICE_TEAM">
+					<office-floor-team name="OFFICEFLOOR_TEAM" />
+				</team>
+			</office>
+		</offices>
+	</office-floor>
+	<office>
+		<teams>
+			<team name="OFFICE_TEAM">
+				<type-qualification type="${testcase}$CompileManagedObject" />
+			</team>
+		</teams>
+		<managed-object-sources>
+			<managed-object-source name="MANAGED_OBJECT_SOURCE"
+				source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$CompileManagedObject" />
+				</properties>
+				<managing-office name="OFFICE" />
+			</managed-object-source>
+		</managed-object-sources>
+		<managed-objects>
+			<managed-object name="MANAGED_OBJECT" scope="THREAD">
+				<managed-object-source name="MANAGED_OBJECT_SOURCE" />
+				<administer administration="ADMINISTRATION" />
+			</managed-object>
+		</managed-objects>
+		<administrations>
+			<administration name="ADMINISTRATION" source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$CompileAdministration" />
+				</properties>
+			</administration>
+		</administrations>
+		<sections>
+			<section name="SECTION" source="CLASS"
+				location="${testcase}$NoDependencySectionClass">
+				<input name="function" />
+				<sub-section>
+					<function name="function">
+						<post-administer administration="ADMINISTRATION" />
+					</function>
+				</sub-section>
+			</section>
+		</sections>
+	</office>
+</context>

@@ -2,6 +2,10 @@
 <unmarshall node="office-floor"
 	class="net.officefloor.model.officefloor.OfficeFloorModel">
 
+	<!-- OFFICE ATTRIBUTES -->
+	<value method="setIsAutoWireObjects" node="office-floor@auto-wire-objects" />
+	<value method="setIsAutoWireTeams" node="office-floor@auto-wire-teams" />
+
 	<!-- SUPPLIERS -->
 	<object method="addOfficeFloorSupplier" node="supplier"
 		class="net.officefloor.model.officefloor.OfficeFloorSupplierModel">
@@ -100,6 +104,11 @@
 			class="net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel">
 			<value method="setOfficeFloorManagedObjectSourceName" node="managed-object-source@name" />
 		</object>
+		<object method="addTypeQualification" node="type-qualification"
+			class="net.officefloor.model.officefloor.TypeQualificationModel">
+			<value method="setQualifier" node="type-qualification@qualifier" />
+			<value method="setType" node="type-qualification@type" />
+		</object>
 		<object method="addOfficeFloorManagedObjectDependency" node="dependency"
 			class="net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel">
 			<value method="setOfficeFloorManagedObjectDependencyName" node="dependency@name" />
@@ -126,6 +135,11 @@
 			class="net.officefloor.model.officefloor.PropertyModel">
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
+		</object>
+		<object method="addTypeQualification" node="type-qualification"
+			class="net.officefloor.model.officefloor.TypeQualificationModel">
+			<value method="setQualifier" node="type-qualification@qualifier" />
+			<value method="setType" node="type-qualification@type" />
 		</object>
 	</object>
 

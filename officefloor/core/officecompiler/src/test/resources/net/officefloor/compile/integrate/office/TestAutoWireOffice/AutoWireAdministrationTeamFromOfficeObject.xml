@@ -36,15 +36,26 @@
 		</teams>
 		<external-managed-objects>
 			<external-managed-object name="OBJECT"
-				object-type="${testcase}$CompileManagedObject" object-scope="PROCESS" />
+				object-type="${testcase}$CompileManagedObject" object-scope="THREAD">
+				<administer administration="ADMINISTRATION" />
+			</external-managed-object>
 		</external-managed-objects>
+		<administrations>
+			<administration name="ADMINISTRATION" source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$CompileAdministration" />
+				</properties>
+			</administration>
+		</administrations>
 		<sections>
 			<section name="SECTION" source="CLASS"
-				location="${testcase}$CompileSectionClass">
+				location="${testcase}$NoDependencySectionClass">
 				<input name="function" />
-				<object name="${testcase}$CompileManagedObject" object-type="${testcase}$CompileManagedObject">
-					<external-managed-object name="OBJECT" />
-				</object>
+				<sub-section>
+					<function name="function">
+						<pre-administer administration="ADMINISTRATION" />
+					</function>
+				</sub-section>
 			</section>
 		</sections>
 	</office>

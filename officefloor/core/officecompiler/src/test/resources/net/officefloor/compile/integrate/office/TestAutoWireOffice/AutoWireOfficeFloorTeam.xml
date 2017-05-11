@@ -1,7 +1,9 @@
 <context>
 	<office-floor>
 		<teams>
-			<team name="OFFICEFLOOR_TEAM" source="ONE_PERSON" />
+			<team name="OFFICEFLOOR_TEAM" source="ONE_PERSON">
+				<type-qualification type="${testcase}$CompileManagedObject" />
+			</team>
 		</teams>
 		<managed-object-sources>
 			<managed-object-source name="MANAGED_OBJECT_SOURCE"
@@ -19,9 +21,6 @@
 		</managed-objects>
 		<offices>
 			<office name="OFFICE" source="OFFICE" location="office">
-				<team name="OFFICE_TEAM">
-					<office-floor-team name="OFFICEFLOOR_TEAM" />
-				</team>
 				<object name="OBJECT" object-type="${testcase}$CompileManagedObject">
 					<managed-object name="MANAGED_OBJECT" />
 				</object>
@@ -29,11 +28,6 @@
 		</offices>
 	</office-floor>
 	<office>
-		<teams>
-			<team name="OFFICE_TEAM">
-				<type-qualification type="${testcase}$CompileManagedObject" />
-			</team>
-		</teams>
 		<external-managed-objects>
 			<external-managed-object name="OBJECT"
 				object-type="${testcase}$CompileManagedObject" object-scope="PROCESS" />

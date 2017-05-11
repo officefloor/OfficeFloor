@@ -380,7 +380,9 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 			String governanceName, String teamName, Class<S> governanceSourceClass, Class<?> extensionInterface) {
 		GovernanceBuilder<F> governanceBuilder = this.record_officeBuilder_addGovernance(governanceName,
 				governanceSourceClass, extensionInterface);
-		governanceBuilder.setResponsibleTeam(teamName);
+		if (teamName != null) {
+			governanceBuilder.setResponsibleTeam(teamName);
+		}
 		return governanceBuilder;
 	}
 
@@ -526,12 +528,40 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 */
 	public ManagedFunctionBuilder<?, ?> record_officeBuilder_addSectionClassFunction(String officeName,
 			String sectionPath, Class<?> sectionClass, String functionName) {
+		return this.record_officeBuilder_addSectionClassFunction(officeName, sectionPath, sectionClass, functionName,
+				null);
+	}
+
+	/**
+	 * Convenience method for recording an {@link OfficeSection} added via
+	 * {@link ClassSectionSource} for a {@link Class} with a single
+	 * {@link Method}.
+	 * 
+	 * @param officeName
+	 *            Name of the {@link Office}.
+	 * @param sectionPath
+	 *            {@link OfficeSection} to {@link SubSection} path.
+	 * @param sectionClass
+	 *            {@link Class} for the {@link ClassSectionSource}.
+	 * @param functionName
+	 *            Name of the {@link Method}.
+	 * @param responsibleTeamName
+	 *            Responsible {@link Team} name. May be <code>null</code>.
+	 * @return {@link ManagedFunctionBuilder} for the {@link Method}.
+	 */
+	public ManagedFunctionBuilder<?, ?> record_officeBuilder_addSectionClassFunction(String officeName,
+			String sectionPath, Class<?> sectionClass, String functionName, String responsibleTeamName) {
 
 		// Obtain the qualified section object name
 		String qualifiedObjectName = officeName + "." + sectionPath + ".OBJECT";
 
 		// Record the function
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction(sectionPath, functionName);
+
+		// Record the responsible team
+		if (responsibleTeamName != null) {
+			function.setResponsibleTeam(responsibleTeamName);
+		}
 
 		// Record the section object
 		function.linkManagedObject(0, qualifiedObjectName, sectionClass);

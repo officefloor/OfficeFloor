@@ -17,6 +17,9 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.Node;
@@ -26,6 +29,7 @@ import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.team.TeamType;
@@ -87,6 +91,11 @@ public class TeamNodeImpl implements TeamNode {
 			this.teamSourceClassName = teamSourceClassName;
 		}
 	}
+
+	/**
+	 * {@link TypeQualification} instances for this {@link TeamNode}.
+	 */
+	private final List<TypeQualification> typeQualifications = new LinkedList<TypeQualification>();
 
 	/**
 	 * Initiate.
@@ -152,11 +161,6 @@ public class TeamNodeImpl implements TeamNode {
 	 */
 
 	@Override
-	public boolean hasTeamSource() {
-		return !CompileUtil.isBlank(this.state.teamSourceClassName);
-	}
-
-	@Override
 	public TeamType loadTeamType() {
 
 		// Obtain the loader
@@ -182,7 +186,7 @@ public class TeamNodeImpl implements TeamNode {
 		}
 
 		// Ensure have the team source
-		if (!this.hasTeamSource()) {
+		if (CompileUtil.isBlank(this.state.teamSourceClassName)) {
 			this.context.getCompilerIssues().addIssue(this, "Null source for " + TYPE + " " + teamName);
 			return null; // must have source
 		}
@@ -198,6 +202,11 @@ public class TeamNodeImpl implements TeamNode {
 
 		// Load and return the team source type
 		return loader.loadOfficeFloorTeamSourceType(this.teamName, teamSourceClass, this.propertyList);
+	}
+
+	@Override
+	public TypeQualification[] getTypeQualifications() {
+		return this.typeQualifications.stream().toArray(TypeQualification[]::new);
 	}
 
 	@Override
@@ -229,6 +238,11 @@ public class TeamNodeImpl implements TeamNode {
 	@Override
 	public void addProperty(String name, String value) {
 		this.propertyList.addProperty(name).setValue(value);
+	}
+
+	@Override
+	public void addTypeQualification(String qualifier, String type) {
+		this.typeQualifications.add(new TypeQualificationImpl(qualifier, type));
 	}
 
 	/*

@@ -1,4 +1,4 @@
-<office-floor>
+<office-floor auto-wire-objects="true" auto-wire-teams="true">
 	<suppliers>
 		<supplier name="SUPPLIER" source="net.example.ExampleSupplierSource"
 			x="000" y="001">
@@ -31,7 +31,8 @@
 		</managed-object-source>
 		<managed-object-source name="SUPPLIED_MANAGED_OBJECT_SOURCE"
 			object-type="net.orm.Session" x="110" y="111">
-			<supplier name="SUPPLIER" qualifier="QUALIFIER" type="net.orm.SpecificSession" />
+			<supplier name="SUPPLIER" qualifier="QUALIFIER"
+				type="net.orm.SpecificSession" />
 			<!-- Supplied only different as has no source attribute -->
 			<properties>
 				<property name="MO_ONE" value="VALUE_ONE" />
@@ -61,6 +62,9 @@
 		<managed-object name="MANAGED_OBJECT_ONE" scope="THREAD"
 			x="300" y="301">
 			<managed-object-source name="MANAGED_OBJECT_SOURCE" />
+			<type-qualification qualifier="QUALIFIED"
+				type="java.sql.SpecificConnection" />
+			<type-qualification type="java.sql.GenericConnection" />
 			<dependency name="DEPENDENCY_ONE" object-type="java.sql.Connection">
 				<managed-object name="MANAGED_OBJECT_TWO" />
 			</dependency>
@@ -80,6 +84,9 @@
 				<property name="TEAM_ONE" value="VALUE_ONE" />
 				<property name="TEAM_TWO" value="VALUE_TWO" />
 			</properties>
+			<type-qualification qualifier="QUALIFIED"
+				type="java.sql.SpecificStatement" />
+			<type-qualification type="java.sql.GenericStatement" />
 		</team>
 	</teams>
 	<offices>

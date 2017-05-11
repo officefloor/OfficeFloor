@@ -25,6 +25,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
+import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.manage.Office;
@@ -114,6 +115,21 @@ public interface OfficeFloorNode extends Node, PropertyConfigurable, ManagedObje
 	 *            {@link TypeContext}.
 	 */
 	void loadAutoWireObjectTargets(AutoWirer<LinkObjectNode> autoWirer, TypeContext typeContext);
+
+	/**
+	 * Loads the {@link AutoWire} targets for the {@link OfficeFloorTeam}
+	 * instances.
+	 * 
+	 * @param autoWirer
+	 *            {@link AutoWire} to be loaded with the {@link OfficeFloorTeam}
+	 *            targets.
+	 * @param officeTeamRegistry
+	 *            {@link OfficeTeamRegistry}.
+	 * @param typeContext
+	 *            {@link TypeContext}.
+	 */
+	void loadAutoWireTeamTargets(AutoWirer<LinkTeamNode> autoWirer, OfficeTeamRegistry officeTeamRegistry,
+			TypeContext typeContext);
 
 	/**
 	 * Loads the {@link OfficeFloorType}.

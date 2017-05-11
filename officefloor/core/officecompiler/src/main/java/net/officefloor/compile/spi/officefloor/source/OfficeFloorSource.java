@@ -73,8 +73,9 @@ public interface OfficeFloorSource {
 	 * @throws Exception
 	 *             If fails to initialise the {@link OfficeFloorSource}.
 	 */
-	void specifyConfigurationProperties(RequiredProperties requiredProperties,
-			OfficeFloorSourceContext context) throws Exception;
+	@Deprecated // provide property overrides rather than tags
+	void specifyConfigurationProperties(RequiredProperties requiredProperties, OfficeFloorSourceContext context)
+			throws Exception;
 
 	/**
 	 * Sources the {@link OfficeFloor} by deploying it via the input
@@ -92,7 +93,6 @@ public interface OfficeFloorSource {
 	 * @throws Exception
 	 *             If fails to source the {@link OfficeFloor}.
 	 */
-	void sourceOfficeFloor(OfficeFloorDeployer deployer,
-			OfficeFloorSourceContext context) throws Exception;
+	void sourceOfficeFloor(OfficeFloorDeployer deployer, OfficeFloorSourceContext context) throws Exception;
 
 }

@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,33 +15,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.office;
+package net.officefloor.compile.internal.structure;
 
-import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.office.OfficeTeam;
-import net.officefloor.frame.api.team.Team;
 
 /**
- * <code>Type definition</code> of a {@link Team} required by the
- * {@link OfficeType}.
+ * Factory for the creation of an {@link OfficeTeam}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeTeamType {
+public interface OfficeTeamRegistry {
 
 	/**
-	 * Obtains the name of the required {@link Team}.
+	 * Obtains the {@link OfficeTeamNode} instances.
 	 * 
-	 * @return Name of the required {@link Team}.
+	 * @return {@link OfficeTeamNode} instances.
 	 */
-	String getOfficeTeamName();
+	OfficeTeamNode[] getOfficeTeams();
 
 	/**
-	 * Obtains the {@link TypeQualification} instances for the
-	 * {@link OfficeTeam}.
+	 * <p>
+	 * Creates the {@link OfficeTeamNode}.
+	 * <p>
+	 * The name of the {@link OfficeTeamNode} may be adjusted to ensure
+	 * uniqueness.
 	 * 
-	 * @return {@link TypeQualification} instances for the {@link OfficeTeam}.
+	 * @param officeTeamName
+	 *            {@link OfficeTeam} name.
+	 * @return {@link OfficeTeamNode}.
 	 */
-	TypeQualification[] getTypeQualification();
+	OfficeTeamNode createOfficeTeam(String officeTeamName);
 
 }

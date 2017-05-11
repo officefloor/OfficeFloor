@@ -81,6 +81,7 @@ import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.PropertyModel;
+import net.officefloor.model.officefloor.TypeQualificationModel;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 
@@ -351,6 +352,11 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 			OfficeFloorManagedObject managedObject = officeFloorManagedObjects
 					.get(managedObjectModel.getOfficeFloorManagedObjectName());
 
+			// Load type qualifications
+			for (TypeQualificationModel qualification : managedObjectModel.getTypeQualifications()) {
+				managedObject.addTypeQualification(qualification.getQualifier(), qualification.getType());
+			}
+
 			// Link each dependency for the managed object
 			for (OfficeFloorManagedObjectDependencyModel dependencyModel : managedObjectModel
 					.getOfficeFloorManagedObjectDependencies()) {
@@ -403,6 +409,11 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 			OfficeFloorTeam team = deployer.addTeam(teamName, teamModel.getTeamSourceClassName());
 			for (PropertyModel property : teamModel.getProperties()) {
 				team.addProperty(property.getName(), property.getValue());
+			}
+
+			// Load the type qualifications
+			for (TypeQualificationModel qualification : teamModel.getTypeQualifications()) {
+				team.addTypeQualification(qualification.getQualifier(), qualification.getType());
 			}
 
 			// Register the team

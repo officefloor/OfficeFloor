@@ -48,6 +48,7 @@ import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeGovernance;
@@ -626,6 +627,30 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		assertEquals("Incorrect number of teams", 1, officeType.getOfficeTeamTypes().length);
 		OfficeTeamType team = officeType.getOfficeTeamTypes()[0];
 		assertEquals("Incorrect team name", "TEAM", team.getOfficeTeamName());
+		assertEquals("Should be no type qualifications", 0, team.getTypeQualification().length);
+	}
+
+	/**
+	 * Ensure obtain the {@link OfficeTeamType} with {@link TypeQualification}.
+	 */
+	public void testTeamTypeWithTypeQualification() {
+
+		// Load office type
+		OfficeType officeType = this.loadOfficeType(true, new Loader() {
+			@Override
+			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
+				office.addOfficeTeam("TEAM").addTypeQualification("QUALIFIED", "TYPE");
+			}
+		});
+
+		// Validate type
+		assertEquals("Incorrect number of teams", 1, officeType.getOfficeTeamTypes().length);
+		OfficeTeamType team = officeType.getOfficeTeamTypes()[0];
+		assertEquals("Incorrect team name", "TEAM", team.getOfficeTeamName());
+		TypeQualification[] qualifications = team.getTypeQualification();
+		assertEquals("Incorrect number of type qualifications", 1, qualifications.length);
+		assertEquals("Incorrect qualifier", "QUALIFIED", qualifications[0].getQualifier());
+		assertEquals("Incorrrect type", "TYPE", qualifications[0].getType());
 	}
 
 	/**

@@ -34,7 +34,8 @@ import net.officefloor.frame.api.profile.Profiler;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeNode extends LinkOfficeNode, ManagedObjectRegistry, OfficeArchitect, DeployedOffice {
+public interface OfficeNode
+		extends LinkOfficeNode, ManagedObjectRegistry, OfficeTeamRegistry, OfficeArchitect, DeployedOffice {
 
 	/**
 	 * {@link Node} type.

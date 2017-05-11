@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,33 +15,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.office;
+package net.officefloor.model.impl.officefloor;
 
-import net.officefloor.compile.section.TypeQualification;
-import net.officefloor.compile.spi.office.OfficeTeam;
-import net.officefloor.frame.api.team.Team;
+import net.officefloor.model.office.TypeQualificationModel;
+import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 
 /**
- * <code>Type definition</code> of a {@link Team} required by the
- * {@link OfficeType}.
+ * Refactors the {@link OfficeFloorTeamModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeTeamType {
+public class RefactorOfficeFloorTeamTest extends AbstractOfficeFloorChangesTestCase {
 
 	/**
-	 * Obtains the name of the required {@link Team}.
-	 * 
-	 * @return Name of the required {@link Team}.
+	 * Ensure can add {@link TypeQualificationModel}.
 	 */
-	String getOfficeTeamName();
+	public void testAddTypeQualification() {
+		fail("TODO implement");
+	}
 
 	/**
-	 * Obtains the {@link TypeQualification} instances for the
-	 * {@link OfficeTeam}.
-	 * 
-	 * @return {@link TypeQualification} instances for the {@link OfficeTeam}.
+	 * Ensure can remove {@link TypeQualificationModel}.
 	 */
-	TypeQualification[] getTypeQualification();
+	public void testRemoveTypeQualification() {
+		fail("TODO implement");
+	}
 
 }

@@ -23,7 +23,6 @@ import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
-import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.function.ManagedFunction;
 
 /**

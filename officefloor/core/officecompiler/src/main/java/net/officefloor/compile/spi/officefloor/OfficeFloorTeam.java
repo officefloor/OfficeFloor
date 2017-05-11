@@ -18,6 +18,7 @@
 package net.officefloor.compile.spi.officefloor;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
+import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.team.Team;
 
@@ -34,5 +35,19 @@ public interface OfficeFloorTeam extends PropertyConfigurable {
 	 * @return Name of this {@link OfficeFloorTeam}.
 	 */
 	String getOfficeFloorTeamName();
+
+	/**
+	 * <p>
+	 * Adds an {@link TypeQualification} for this {@link OfficeFloorTeam}.
+	 * <p>
+	 * This enables distinguishing {@link OfficeFloorTeam} instances to enable,
+	 * for example, dynamic {@link Team} assignment.
+	 * 
+	 * @param qualifier
+	 *            Qualifier. May be <code>null</code> if no qualification.
+	 * @param type
+	 *            Type (typically the fully qualified type).
+	 */
+	void addTypeQualification(String qualifier, String type);
 
 }

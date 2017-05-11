@@ -160,7 +160,7 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 		}
 
 		// Create and return type
-		return new OfficeTeamTypeImpl(this.teamName);
+		return new OfficeTeamTypeImpl(this.teamName, this.getTypeQualifications());
 	}
 
 	/*

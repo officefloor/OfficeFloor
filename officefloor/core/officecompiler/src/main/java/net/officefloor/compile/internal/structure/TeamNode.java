@@ -19,6 +19,7 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
+import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.team.TeamType;
 import net.officefloor.compile.type.TypeContext;
@@ -47,15 +48,6 @@ public interface TeamNode extends LinkTeamNode, OfficeFloorTeam {
 	void initialise(String teamSourceClassName);
 
 	/**
-	 * Indicates if have the {@link TeamSource} configured.
-	 * 
-	 * @return <code>true</code> if have the {@link TeamSource} configured.
-	 */
-	@Deprecated
-	// should be part of internal checks
-	boolean hasTeamSource();
-
-	/**
 	 * Loads the {@link TeamType} for the {@link TeamSource}.
 	 * 
 	 * @return {@link TeamType} or <code>null</code> with issues reported to the
@@ -71,8 +63,16 @@ public interface TeamNode extends LinkTeamNode, OfficeFloorTeam {
 	 * @return {@link OfficeFloorTeamSourceType} or <code>null</code> with
 	 *         issues reported to the {@link CompilerIssues}.
 	 */
-	OfficeFloorTeamSourceType loadOfficeFloorTeamSourceType(
-			TypeContext typeContext);
+	OfficeFloorTeamSourceType loadOfficeFloorTeamSourceType(TypeContext typeContext);
+
+	/**
+	 * Obtains the {@link TypeQualification} instances for the
+	 * {@link OfficeFloorTeam}.
+	 * 
+	 * @return {@link TypeQualification} instances for the
+	 *         {@link OfficeFloorTeam}.
+	 */
+	TypeQualification[] getTypeQualifications();
 
 	/**
 	 * Builds the {@link Team} for this {@link TeamNode}.

@@ -31,6 +31,7 @@ import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
+import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
@@ -38,6 +39,8 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeBindings;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
+import net.officefloor.compile.internal.structure.OfficeTeamNode;
+import net.officefloor.compile.internal.structure.OfficeTeamRegistry;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.TeamNode;
@@ -474,6 +477,38 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 
 			// Add the target
 			autoWirer.addAutoWireTarget(mo, targetAutoWires);
+		});
+	}
+
+	@Override
+	public void loadAutoWireTeamTargets(AutoWirer<LinkTeamNode> autoWirer, OfficeTeamRegistry officeTeamRegistry,
+			TypeContext typeContext) {
+		this.teams.values().forEach((team) -> {
+
+			// Create the auto-wires
+			AutoWire[] targetAutoWires = Arrays.stream(team.getTypeQualifications())
+					.map((type) -> new AutoWire(type.getQualifier(), type.getType())).toArray(AutoWire[]::new);
+
+			// Add the target
+			autoWirer.addAutoWireTarget(() -> {
+
+				// Determine if team already linked to office
+				for (OfficeTeamNode officeTeam : officeTeamRegistry.getOfficeTeams()) {
+					TeamNode linkedTeam = LinkUtil.findTarget(officeTeam, TeamNode.class,
+							this.context.getCompilerIssues());
+					if (linkedTeam == team) {
+						// Already linked team, so use
+						return officeTeam;
+					}
+				}
+
+				// As here, the team is not link to office (so link)
+				OfficeTeamNode officeTeam = officeTeamRegistry.createOfficeTeam(team.getOfficeFloorTeamName());
+				LinkUtil.linkTeamNode(officeTeam, team, this.context.getCompilerIssues(),
+						(link) -> officeTeam.linkTeamNode(link));
+				return officeTeam;
+
+			}, targetAutoWires);
 		});
 	}
 

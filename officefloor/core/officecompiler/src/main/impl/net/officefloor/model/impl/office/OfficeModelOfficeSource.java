@@ -111,6 +111,7 @@ import net.officefloor.model.office.OfficeSubSectionModel;
 import net.officefloor.model.office.OfficeSubSectionToGovernanceModel;
 import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.office.PropertyModel;
+import net.officefloor.model.office.TypeQualificationModel;
 
 /**
  * {@link OfficeModel} {@link OfficeSource}.
@@ -166,6 +167,11 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 			String teamName = teamModel.getOfficeTeamName();
 			OfficeTeam team = architect.addOfficeTeam(teamName);
 			teams.put(teamName, team);
+
+			// Load the type qualifications
+			for (TypeQualificationModel typeQualification : teamModel.getTypeQualifications()) {
+				team.addTypeQualification(typeQualification.getQualifier(), typeQualification.getType());
+			}
 		}
 
 		// Obtain the listing of governances

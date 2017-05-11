@@ -324,6 +324,31 @@ public class OfficeNodeImpl implements OfficeNode {
 	}
 
 	/*
+	 * ================== OfficeTeamRegistry ========================
+	 */
+
+	@Override
+	public OfficeTeamNode[] getOfficeTeams() {
+		return this.teams.values().stream().toArray(OfficeTeamNode[]::new);
+	}
+
+	@Override
+	public OfficeTeamNode createOfficeTeam(String officeTeamName) {
+
+		// Ensure have a unique Office team name
+		int suffix = 1;
+		String uniqueOfficeTeamName = officeTeamName;
+		while (this.teams.containsKey(uniqueOfficeTeamName)) {
+			uniqueOfficeTeamName = officeTeamName + "_" + String.valueOf(++suffix);
+		}
+
+		// Create and return the Office team
+		final String newOfficeTeamName = uniqueOfficeTeamName;
+		return NodeUtil.getInitialisedNode(newOfficeTeamName, this.teams, this.context,
+				() -> this.context.createOfficeTeamNode(newOfficeTeamName, this), (team) -> team.initialise());
+	}
+
+	/*
 	 * ================== OfficeNode ===================================
 	 */
 
@@ -506,8 +531,12 @@ public class OfficeNodeImpl implements OfficeNode {
 		// Undertake auto-wire of teams
 		if (this.isAutoWireTeams) {
 
+			// Create the OfficeFloor team auto wirer
+			final AutoWirer<LinkTeamNode> officeFloorAutoWirer = this.context.createAutoWirer(LinkTeamNode.class);
+			this.officeFloor.loadAutoWireTeamTargets(officeFloorAutoWirer, this, typeContext);
+
 			// Create the Office team auto wirer
-			final AutoWirer<LinkTeamNode> autoWirer = this.context.createAutoWirer(LinkTeamNode.class);
+			final AutoWirer<LinkTeamNode> autoWirer = officeFloorAutoWirer.createScopeAutoWirer();
 			this.teams.values().forEach((team) -> {
 
 				// Create the auto-wires
@@ -522,6 +551,10 @@ public class OfficeNodeImpl implements OfficeNode {
 			this.sections.values().stream()
 					.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSectionName(), b.getOfficeSectionName()))
 					.forEach((section) -> section.autoWireTeams(autoWirer, typeContext));
+			
+			// TODO auto wire the administrations
+			
+			// TODO auto wire the governances
 		}
 
 		// As here, successfully loaded the office
