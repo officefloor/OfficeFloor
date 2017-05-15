@@ -577,8 +577,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 	 */
 	private ManagedObjectTeamType[] getTeamsEnsuringHaveFunctionNames(OfficeConfiguration office) {
 
-		// Ensure all added functions are valid (and collect the set of team
-		// names)
+		// Ensure all added functions valid (and collect the set of team names)
 		Set<String> teamNames = new HashSet<String>();
 		for (ManagedFunctionConfiguration<?, ?> function : office.getManagedFunctionConfiguration()) {
 
@@ -589,15 +588,11 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 				return null; // must have function name
 			}
 
-			// Ensure have the team name
+			// Register the possible team
 			String teamName = function.getResponsibleTeamName();
-			if (CompileUtil.isBlank(teamName)) {
-				this.addIssue("Must specify team for function (function=" + functionName + ")");
-				return null; // must have team name
+			if (!CompileUtil.isBlank(teamName)) {
+				teamNames.add(teamName);
 			}
-
-			// Register the team
-			teamNames.add(teamName);
 		}
 
 		// Create the listing of teams sorted by name

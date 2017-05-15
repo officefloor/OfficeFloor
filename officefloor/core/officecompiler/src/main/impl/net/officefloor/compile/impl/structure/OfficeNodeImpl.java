@@ -525,7 +525,7 @@ public class OfficeNodeImpl implements OfficeNode {
 			// Iterate over sections (auto-wiring unlinked dependencies)
 			this.sections.values().stream()
 					.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSectionName(), b.getOfficeSectionName()))
-					.forEach((section) -> section.autoWireObjects(autoWirer, typeContext));
+					.forEachOrdered((section) -> section.autoWireObjects(autoWirer, typeContext));
 		}
 
 		// Undertake auto-wire of teams
@@ -550,11 +550,22 @@ public class OfficeNodeImpl implements OfficeNode {
 			// Iterate over sections (auto-wiring functions to teams)
 			this.sections.values().stream()
 					.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSectionName(), b.getOfficeSectionName()))
-					.forEach((section) -> section.autoWireTeams(autoWirer, typeContext));
-			
-			// TODO auto wire the administrations
-			
-			// TODO auto wire the governances
+					.forEachOrdered((section) -> section.autoWireTeams(autoWirer, typeContext));
+
+			// Auto-wire governances to teams
+			this.governances.values().stream()
+					.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeGovernanceName(), b.getOfficeGovernanceName()))
+					.forEachOrdered((governance) -> governance.autoWireTeam(autoWirer, typeContext));
+
+			// Auto-wire administrations to teams
+			this.administrators.values().stream().sorted(
+					(a, b) -> CompileUtil.sortCompare(a.getOfficeAdministrationName(), b.getOfficeAdministrationName()))
+					.forEachOrdered((administration) -> administration.autoWireTeam(autoWirer, typeContext));
+
+			// Auto-wire managed object source teams
+			this.managedObjectSources.values().stream().sorted(
+					(a, b) -> CompileUtil.sortCompare(a.getManagedObjectSourceName(), b.getManagedObjectSourceName()))
+					.forEachOrdered((mos) -> mos.autoWireTeams(autoWirer, typeContext));
 		}
 
 		// As here, successfully loaded the office

@@ -615,6 +615,8 @@ public class SectionNodeImpl implements SectionNode {
 
 	@Override
 	public void autoWireObjects(AutoWirer<LinkObjectNode> autoWirer, TypeContext typeContext) {
+		
+		// Auto-wire the objects
 		this.objects.values().forEach((object) -> {
 
 			// Ignore if already configured
@@ -644,6 +646,15 @@ public class SectionNodeImpl implements SectionNode {
 		this.functionNodes.values()
 				.forEach((function) -> function.autoWireManagedFunctionResponsibility(autoWirer, typeContext));
 
+		// Auto-wire managed object source teams
+		this.managedObjectSourceNodes.values().stream().sorted(
+				(a, b) -> CompileUtil.sortCompare(a.getManagedObjectSourceName(), b.getManagedObjectSourceName()))
+				.forEachOrdered((mos) -> mos.autoWireTeams(autoWirer, typeContext));
+
+		// Auto-wire the sub sections
+		this.subSections.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getSubSectionName(), b.getSubSectionName()))
+				.forEachOrdered((subSection) -> subSection.autoWireTeams(autoWirer, typeContext));
 	}
 
 	@Override

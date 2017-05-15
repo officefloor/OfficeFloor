@@ -19,19 +19,28 @@ package net.officefloor.compile.integrate.office;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
+import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.extension.AutoWireOfficeExtensionService;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
@@ -184,6 +193,39 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 	}
 
 	/**
+	 * Ensure can auto-wire the {@link Team} for the {@link SubSection}
+	 * {@link ManagedFunction}.
+	 */
+	public void testAutoWireSubSectionFunctionTeam() {
+
+		// Flag to enable auto-wiring of the teams
+		AutoWireOfficeExtensionService.enableAutoWireTeams();
+
+		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
+
+		// Record building the OfficeFloor
+		this.record_init();
+		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", OnePersonTeamSource.class);
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "OFFICEFLOOR_TEAM");
+		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
+				"class.name", CompileManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");
+		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
+
+		// Build the section (with auto-wire of team)
+		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addSectionClassFunction("OFFICE",
+				"SECTION.SUB_SECTION", CompileSectionClass.class, "function", "OFFICE_TEAM");
+		function.linkManagedObject(1, "MANAGED_OBJECT", CompileManagedObject.class);
+
+		// Compile the OfficeFloor
+		this.compile(true);
+	}
+
+	/**
 	 * Ensure auto-wire of {@link OfficeTeam} is optional.
 	 */
 	public void testNotAutoWireOfficeTeam() {
@@ -317,6 +359,9 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 	 */
 	public void testAutoWireGovernanceTeamFromOfficeObject() {
 
+		// Flag to enable auto-wiring of the teams
+		AutoWireOfficeExtensionService.enableAutoWireTeams();
+
 		// Record building the OfficeFloor (auto wiring governance team)
 		this.record_init();
 		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", OnePersonTeamSource.class);
@@ -340,6 +385,9 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 	 * {@link ManagedObject}.
 	 */
 	public void testAutoWireGovernanceTeamFromManagedObject() {
+
+		// Flag to enable auto-wiring of the teams
+		AutoWireOfficeExtensionService.enableAutoWireTeams();
 
 		// Record building the OfficeFloor (auto wiring governance team)
 		this.record_init();
@@ -365,6 +413,9 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 	 */
 	public void testAutoWireAdministrationTeamFromOfficeObject() {
 
+		// Flag to enable auto-wiring of the teams
+		AutoWireOfficeExtensionService.enableAutoWireTeams();
+
 		// Record loading section type
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
@@ -385,10 +436,12 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 				"function");
 		AdministrationBuilder<?, ?> administration = this.record_functionBuilder_preAdministration("ADMINISTRATION",
 				CompileManagedObject.class);
-		administration.administerManagedObject("MANAGED_OBJECT");
 
 		// Auto wire team
 		administration.setResponsibleTeam("OFFICE_TEAM");
+
+		// Administer the managed object
+		administration.administerManagedObject("MANAGED_OBJECT");
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -399,6 +452,9 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 	 * {@link ManagedObject}.
 	 */
 	public void testAutoWireAdministrationTeamFromManagedObject() {
+
+		// Flag to enable auto-wiring of the teams
+		AutoWireOfficeExtensionService.enableAutoWireTeams();
 
 		// Record loading section type
 		this.issues.recordCaptureIssues(true);
@@ -420,10 +476,45 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 				"function");
 		AdministrationBuilder<?, ?> administration = this.record_functionBuilder_postAdministration("ADMINISTRATION",
 				CompileManagedObject.class);
-		administration.administerManagedObject("OFFICE.MANAGED_OBJECT");
 
 		// Auto wire team
 		administration.setResponsibleTeam("OFFICE_TEAM");
+
+		// Administer the managed object
+		administration.administerManagedObject("OFFICE.MANAGED_OBJECT");
+
+		// Compile the OfficeFloor
+		this.compile(true);
+	}
+
+	/**
+	 * Ensure can auto-wire the {@link Team} for the
+	 * {@link ManagedFunctionSource} {@link ManagedFunction}.
+	 */
+	public void testAutoWireManagedObjectSourceFunctionTeam() {
+
+		// Flag to enable auto-wiring of the teams
+		AutoWireOfficeExtensionService.enableAutoWireTeams();
+
+		// Record building the OfficeFloor (auto wiring managed object function)
+		this.record_init();
+		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", OnePersonTeamSource.class);
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICEFLOOR_TEAM",
+				"OFFICEFLOOR_TEAM");
+		this.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENT_MANAGED_OBJECT_SOURCE",
+				ClassManagedObjectSource.class, 0, "class.name", CompileManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_officeFloorBuilder_addManagedObject("OFFICE.FUNCTION_MANAGED_OBJECT_SOURCE",
+				CompileFunctionManagedObjectSource.class, 0);
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource("OFFICE.MANAGED_OBJECT", "OFFICE.DEPENDENT_MANAGED_OBJECT_SOURCE");
+		this.record_officeBuilder_addThreadManagedObject("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT");
+		DependencyMappingBuilder inputMo = this
+				.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.FUNCTION_MANAGED_OBJECT_SOURCE");
+		inputMo.mapDependency(0, "OFFICE.MANAGED_OBJECT");
+
+		// Auto wire team
+		office.registerTeam("OFFICE.FUNCTION_MANAGED_OBJECT_SOURCE.MO_TEAM", "OFFICEFLOOR_TEAM");
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -454,6 +545,46 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 
 	public static class CompileAdministration {
 		public void administer(CompileManagedObject[] extensions) {
+		}
+	}
+
+	@TestSource
+	public static class CompileFunctionManagedObjectSource extends AbstractManagedObjectSource<None, Indexed>
+			implements ManagedObject, ManagedFunction<Indexed, None> {
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			// No properties required
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<None, Indexed> context) throws Exception {
+			context.setObjectClass(this.getClass());
+
+			// Add the dependency
+			context.addDependency(CompileManagedObject.class).setTypeQualifier("QUALIFIER");
+
+			// Add the function
+			context.getManagedObjectSourceContext().addManagedFunction("FUNCTION", () -> this)
+					.setResponsibleTeam("MO_TEAM");
+
+			// Add the recycle function
+			context.getManagedObjectSourceContext().getRecycleFunction(() -> this).setResponsibleTeam("MO_TEAM");
+		}
+
+		@Override
+		protected ManagedObject getManagedObject() throws Throwable {
+			return this;
+		}
+
+		@Override
+		public Object getObject() throws Throwable {
+			return this;
+		}
+
+		@Override
+		public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
+			return null;
 		}
 	}
 

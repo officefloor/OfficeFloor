@@ -17,9 +17,18 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
 import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.governance.GovernanceType;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
+import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.internal.structure.AutoWireLink;
+import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
@@ -29,6 +38,7 @@ import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.GovernerableManagedObject;
 import net.officefloor.compile.spi.office.OfficeGovernance;
@@ -101,6 +111,18 @@ public class GovernanceNodeImpl implements GovernanceNode {
 			this.governanceSource = governanceSource;
 		}
 	}
+
+	/**
+	 * {@link OfficeObjectNode} instances being governed by this
+	 * {@link Governance}.
+	 */
+	private final List<OfficeObjectNode> governedOfficeObjects = new LinkedList<>();
+
+	/**
+	 * {@link ManagedObjectNode} instances being governed by this
+	 * {@link Governance}.
+	 */
+	private final List<ManagedObjectNode> governedManagedObjects = new LinkedList<>();
 
 	/**
 	 * Initiate.
@@ -191,6 +213,37 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	}
 
 	@Override
+	public void autoWireTeam(AutoWirer<LinkTeamNode> autoWirer, TypeContext typeContext) {
+
+		// Ignore if already specified team
+		if (this.linkedTeamNode != null) {
+			return;
+		}
+
+		// Create the listing of source auto-wires
+		List<AutoWire> autoWires = new ArrayList<>();
+		this.governedOfficeObjects.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeObjectName(), b.getOfficeObjectName()))
+				.forEachOrdered((object) -> autoWires
+						.add(new AutoWire(object.getTypeQualifier(), object.getOfficeObjectType())));
+		this.governedManagedObjects.stream().sorted((a, b) -> CompileUtil
+				.sortCompare(a.getGovernerableManagedObjectName(), b.getGovernerableManagedObjectName()))
+				.forEachOrdered((managedObject) -> {
+					TypeQualification[] qualifications = managedObject.getTypeQualifications(typeContext);
+					Arrays.stream(qualifications).forEach((qualification) -> autoWires
+							.add(new AutoWire(qualification.getQualifier(), qualification.getType())));
+				});
+		AutoWire[] sourceAutoWires = autoWires.stream().toArray(AutoWire[]::new);
+
+		// Attempt to auto-wire this governance
+		AutoWireLink<LinkTeamNode>[] links = autoWirer.findAutoWireLinks(this, sourceAutoWires);
+		if (links.length == 1) {
+			LinkUtil.linkTeamNode(this, links[0].getTargetNode(), this.context.getCompilerIssues(),
+					(link) -> this.linkTeamNode(link));
+		}
+	}
+
+	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void buildGovernance(OfficeBuilder officeBuilder, TypeContext typeContext) {
 
@@ -234,11 +287,13 @@ public class GovernanceNodeImpl implements GovernanceNode {
 			// Register governance with the managed object node
 			ManagedObjectNode managedObjectNode = (ManagedObjectNode) managedObject;
 			managedObjectNode.addGovernance(this, this.officeNode);
+			this.governedManagedObjects.add(managedObjectNode);
 
 		} else if (managedObject instanceof OfficeObjectNode) {
 			// Register governance with the office object node
 			OfficeObjectNode officeObjectNode = (OfficeObjectNode) managedObject;
 			officeObjectNode.addGovernance(this);
+			this.governedOfficeObjects.add(officeObjectNode);
 
 		} else {
 			// Unknown governerable managed object node

@@ -33,6 +33,7 @@ import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * Node representing a {@link ManagedObjectSource}.
@@ -168,6 +169,17 @@ public interface ManagedObjectSourceNode extends Node, SectionManagedObjectSourc
 	 *         obtain it.
 	 */
 	InputManagedObjectNode getInputManagedObjectNode();
+
+	/**
+	 * Auto-wires the {@link Team} instances for this
+	 * {@link ManagedObjectSource}.
+	 * 
+	 * @param autoWirer
+	 *            {@link AutoWirer}.
+	 * @param typeContext
+	 *            {@link TypeContext}.
+	 */
+	void autoWireTeams(AutoWirer<LinkTeamNode> autoWirer, TypeContext typeContext);
 
 	/**
 	 * Builds {@link ManagedObjectSource} for this {@link ManagedObjectNode}.

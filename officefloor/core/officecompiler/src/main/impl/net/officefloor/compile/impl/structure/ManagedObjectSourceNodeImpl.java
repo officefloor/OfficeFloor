@@ -28,10 +28,14 @@ import net.officefloor.autowire.supplier.SuppliedManagedObjectTeam;
 import net.officefloor.compile.impl.section.OfficeSectionManagedObjectSourceTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
+import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.internal.structure.AutoWireLink;
+import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
+import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
@@ -499,6 +503,38 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
+	public void autoWireTeams(AutoWirer<LinkTeamNode> autoWirer, TypeContext typeContext) {
+
+		// Obtain the managed object type
+		ManagedObjectType<?> managedObjectType = typeContext.getOrLoadManagedObjectType(this);
+		if (managedObjectType == null) {
+			return; // must have managed object type
+		}
+
+		// Obtain the object type
+		String objectType = managedObjectType.getObjectClass().getName();
+
+		// Auto-wire the teams
+		for (ManagedObjectTeamType teamType : managedObjectType.getTeamTypes()) {
+
+			// Create the source auto-wire (type qualified by team name)
+			String teamName = teamType.getTeamName();
+			AutoWire sourceAutoWire = new AutoWire(teamName, objectType);
+
+			// Obtain the team
+			ManagedObjectTeamNode teamNode = NodeUtil.getNode(teamName, this.teams,
+					() -> this.context.createManagedObjectTeamNode(teamName, this));
+
+			// Attempt to auto-wire the team
+			AutoWireLink<LinkTeamNode>[] links = autoWirer.findAutoWireLinks(teamNode, sourceAutoWire);
+			if (links.length == 1) {
+				LinkUtil.linkTeamNode(teamNode, links[0].getTargetNode(), this.context.getCompilerIssues(),
+						(link) -> teamNode.linkTeamNode(link));
+			}
+		}
+	}
+
+	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void buildManagedObject(OfficeFloorBuilder builder, OfficeNode managingOffice, OfficeBuilder officeBuilder,
 			OfficeBindings officeBindings, TypeContext typeContext) {
@@ -726,9 +762,6 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				}
 
 			} else {
-
-				// TODO test office enhancing for managed object source
-
 				// Link flow from function to its function
 				officeBuilder.addOfficeEnhancer(new OfficeEnhancer() {
 					@Override

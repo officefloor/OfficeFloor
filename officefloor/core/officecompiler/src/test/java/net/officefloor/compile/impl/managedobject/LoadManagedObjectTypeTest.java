@@ -865,12 +865,11 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testAddFunctionWithoutTeam() {
 
-		// Record no team for function
+		// Record no team for function (use any team)
 		this.record_basicMetaData();
-		this.issues.recordIssue("Must specify team for function (function=FUNCTION)");
 
 		// Attempt to load
-		this.loadManagedObjectType(false, new Init<None>() {
+		this.loadManagedObjectType(true, new Init<None>() {
 			@Override
 			public void init(ManagedObjectSourceContext<None> context, InitUtil util) {
 				context.addManagedFunction("FUNCTION", util.getManagedFunctionFactory());
@@ -1000,8 +999,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Record basic meta-data
 		this.record_basicMetaData();
-		this.issues.recordIssue(
-				"Unknown function being linked (function=FUNCTION, flow=0, link function=LINK_FUNCTION)");
+		this.issues
+				.recordIssue("Unknown function being linked (function=FUNCTION, flow=0, link function=LINK_FUNCTION)");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<None>() {

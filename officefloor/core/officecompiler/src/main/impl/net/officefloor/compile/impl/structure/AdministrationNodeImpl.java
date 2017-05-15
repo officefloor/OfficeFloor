@@ -17,16 +17,23 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.compile.administration.AdministrationLoader;
 import net.officefloor.compile.administration.AdministrationType;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.AdministrationNode;
+import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.internal.structure.AutoWireLink;
+import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
+import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
@@ -36,6 +43,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.office.AdministerableManagedObject;
 import net.officefloor.compile.spi.office.OfficeAdministration;
+import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.build.AdministrationBuilder;
@@ -217,6 +225,46 @@ public class AdministrationNodeImpl implements AdministrationNode {
 		// Load and return the administration type
 		AdministrationLoader loader = this.context.getAdministrationLoader(this);
 		return loader.loadAdministrationType(administrationSourceClass, this.properties);
+	}
+
+	@Override
+	public void autoWireTeam(AutoWirer<LinkTeamNode> autoWirer, TypeContext typeContext) {
+
+		// Do not auto wire if already responsible team
+		if (this.linkedTeamNode != null) {
+			return;
+		}
+
+		// Load the source auto-wires
+		List<AutoWire> autoWires = new ArrayList<>();
+		this.administeredManagedObjects.stream().sorted((a, b) -> CompileUtil
+				.sortCompare(a.getAdministerableManagedObjectName(), b.getAdministerableManagedObjectName()))
+				.forEachOrdered((administerable) -> {
+					if (administerable instanceof ManagedObjectNode) {
+						ManagedObjectNode managedObject = (ManagedObjectNode) administerable;
+						Arrays.stream(managedObject.getTypeQualifications(typeContext))
+								.forEach((qualification) -> autoWires
+										.add(new AutoWire(qualification.getQualifier(), qualification.getType())));
+
+					} else if (administerable instanceof OfficeObjectNode) {
+						OfficeObjectNode officeObject = (OfficeObjectNode) administerable;
+						autoWires
+								.add(new AutoWire(officeObject.getTypeQualifier(), officeObject.getOfficeObjectType()));
+
+					} else {
+						// Unknown administerable object type
+						throw new IllegalStateException("Unknown " + AdministerableManagedObject.class.getSimpleName()
+								+ " type " + administerable.getClass().getName());
+					}
+				});
+		AutoWire[] sourceAutoWires = autoWires.stream().toArray(AutoWire[]::new);
+
+		// Determine if auto wire the team
+		AutoWireLink<LinkTeamNode>[] links = autoWirer.findAutoWireLinks(this, sourceAutoWires);
+		if (links.length == 1) {
+			LinkUtil.linkTeamNode(this, links[0].getTargetNode(), this.context.getCompilerIssues(),
+					(link) -> this.linkTeamNode(link));
+		}
 	}
 
 	@Override
