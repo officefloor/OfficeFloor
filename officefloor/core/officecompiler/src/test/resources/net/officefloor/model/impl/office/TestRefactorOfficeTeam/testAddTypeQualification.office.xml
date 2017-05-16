@@ -1,0 +1,8 @@
+<office>
+	<teams>
+		<team name="TEAM">
+			<type-qualification type="TYPE" />
+			<type-qualification qualifier="QUALIFIER" type="TYPE" />
+		</team>
+	</teams>
+</office>

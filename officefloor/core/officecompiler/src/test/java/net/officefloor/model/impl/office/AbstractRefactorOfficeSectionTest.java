@@ -245,7 +245,7 @@ public abstract class AbstractRefactorOfficeSectionTest extends
 			}
 		}
 
-		// Create the change to refactory the office section
+		// Create the change to refactor the office section
 		Change<OfficeSectionModel> change = this.operations
 				.refactorOfficeSection(this.sectionModel, this.sectionName,
 						this.sectionSourceClassName, this.sectionLocation,

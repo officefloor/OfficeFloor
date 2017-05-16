@@ -54,4 +54,21 @@ public interface OfficeSection extends OfficeSubSection, PropertyConfigurable {
 	 */
 	OfficeSectionObject getOfficeSectionObject(String objectName);
 
+	/**
+	 * <p>
+	 * Specifies an {@link OfficeSection} that this {@link OfficeSection} will
+	 * inherit its links from.
+	 * <p>
+	 * Typical example use would be creating an {@link OfficeSection} to render
+	 * a web page. For headers and footers, the various links do not want to
+	 * have to be configured for each {@link OfficeSection} page. This would
+	 * clutter the graphical configuration. Hence the main page can configure
+	 * these header and footer links, with all other pages inheriting the links
+	 * from the main page.
+	 * 
+	 * @param superSection
+	 *            Super {@link OfficeSection}.
+	 */
+	void setSuperOfficeSection(OfficeSection superSection);
+
 }

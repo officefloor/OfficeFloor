@@ -150,6 +150,30 @@ public interface OfficeChanges {
 	Change<OfficeTeamModel> removeOfficeTeam(OfficeTeamModel officeTeam);
 
 	/**
+	 * Adds {@link TypeQualificationModel} to the {@link OfficeTeamModel}.
+	 * 
+	 * @param officeTeam
+	 *            {@link OfficeTeamModel}.
+	 * @param qualifier
+	 *            Qualfiier. May be <code>null</code>.
+	 * @param type
+	 *            Type.
+	 * @return {@link Change} to add the {@link TypeQualificationModel}.
+	 */
+	Change<TypeQualificationModel> addOfficeTeamTypeQualification(OfficeTeamModel officeTeam, String qualifier,
+			String type);
+
+	/**
+	 * Removes the {@link TypeQualificationModel} from the
+	 * {@link OfficeTeamModel}.
+	 * 
+	 * @param typeQualification
+	 *            {@link TypeQualificationModel}.
+	 * @return {@link Change} to remove the {@link TypeQualificationModel}.
+	 */
+	Change<TypeQualificationModel> removeOfficeTeamTypeQualification(TypeQualificationModel typeQualification);
+
+	/**
 	 * Adds an {@link OfficeStartModel} to the {@link OfficeModel}.
 	 * 
 	 * @return {@link Change} to add the {@link OfficeStartModel}.

@@ -212,6 +212,7 @@ public interface OfficeArchitect {
 	 * @param output
 	 *            {@link OfficeOutput} to provide response.
 	 */
+	@Deprecated // integration via queues so no synchronous communication
 	void link(OfficeInput input, OfficeOutput output);
 
 	/**
@@ -234,6 +235,7 @@ public interface OfficeArchitect {
 	 * @param input
 	 *            {@link OfficeInput} to handle response.
 	 */
+	@Deprecated // integration via queues so no synchronous communication
 	void link(OfficeOutput output, OfficeInput input);
 
 	/**

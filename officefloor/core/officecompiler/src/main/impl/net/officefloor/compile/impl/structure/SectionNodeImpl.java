@@ -615,7 +615,7 @@ public class SectionNodeImpl implements SectionNode {
 
 	@Override
 	public void autoWireObjects(AutoWirer<LinkObjectNode> autoWirer, TypeContext typeContext) {
-		
+
 		// Auto-wire the objects
 		this.objects.values().forEach((object) -> {
 
@@ -965,6 +965,12 @@ public class SectionNodeImpl implements SectionNode {
 	@Override
 	public OfficeSectionObject getOfficeSectionObject(String objectName) {
 		return NodeUtil.getNode(objectName, this.objects, () -> this.context.createSectionObjectNode(objectName, this));
+	}
+
+	@Override
+	public void setSuperOfficeSection(OfficeSection superSection) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
 	}
 
 	@Override
