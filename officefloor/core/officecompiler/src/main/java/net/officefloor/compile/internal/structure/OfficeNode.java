@@ -79,6 +79,15 @@ public interface OfficeNode
 	boolean sourceOfficeTree(TypeContext typeContext);
 
 	/**
+	 * Obtain the qualified name.
+	 * 
+	 * @param simpleName
+	 *            Simple name to qualify with the {@link Office} name space.
+	 * @return {@link Office} qualified name.
+	 */
+	String getQualifiedName(String simpleName);
+
+	/**
 	 * Obtains the {@link OfficeFloorNode} containing this {@link OfficeNode}.
 	 * 
 	 * @return {@link OfficeFloorNode} containing this {@link OfficeNode}.

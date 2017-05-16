@@ -25,6 +25,7 @@ import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
@@ -48,9 +49,9 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements Office
 	private final String officeLocation;
 
 	/**
-	 * {@link Node} requiring the {@link Office}.
+	 * {@link OfficeNode}.
 	 */
-	private final Node node;
+	private final OfficeNode officeNode;
 
 	/**
 	 * {@link NodeContext}.
@@ -66,16 +67,16 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements Office
 	 *            Location of the {@link Office}.
 	 * @param propertyList
 	 *            {@link PropertyList}.
-	 * @param node
-	 *            {@link Node} requiring the {@link Office}.
+	 * @param officeNode
+	 *            {@link OfficeNode}.
 	 * @param nodeContext
 	 *            {@link NodeContext}.
 	 */
-	public OfficeSourceContextImpl(boolean isLoadingType, String officeLocation, PropertyList propertyList, Node node,
-			NodeContext nodeContext) {
+	public OfficeSourceContextImpl(boolean isLoadingType, String officeLocation, PropertyList propertyList,
+			OfficeNode officeNode, NodeContext nodeContext) {
 		super(isLoadingType, nodeContext.getRootSourceContext(), new PropertyListSourceProperties(propertyList));
 		this.officeLocation = officeLocation;
-		this.node = node;
+		this.officeNode = officeNode;
 		this.context = nodeContext;
 	}
 
@@ -101,15 +102,21 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements Office
 				() -> {
 
 					// Obtain the section source class
-					Class sectionSourceClass = this.context.getSectionSourceClass(sectionSourceClassName, this.node);
+					Class sectionSourceClass = this.context.getSectionSourceClass(sectionSourceClassName,
+							this.officeNode);
 					if (sectionSourceClass == null) {
 						return null;
 					}
 
+					// Obtain the overridden properties
+					String qualifiedSectionName = this.officeNode.getQualifiedName(sectionName);
+					PropertyList overriddenProperties = this.context.overrideProperties(this.officeNode,
+							qualifiedSectionName, properties);
+
 					// Load and return the section type
-					SectionLoader sectionLoader = this.context.getSectionLoader(this.node);
+					SectionLoader sectionLoader = this.context.getSectionLoader(this.officeNode);
 					return sectionLoader.loadOfficeSectionType(sectionName, sectionSourceClass, sectionLocation,
-							properties);
+							overriddenProperties);
 				});
 	}
 
@@ -121,13 +128,13 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements Office
 
 					// Obtain the managed object source class
 					Class managedObjectSourceClass = this.context
-							.getManagedObjectSourceClass(managedObjectSourceClassName, this.node);
+							.getManagedObjectSourceClass(managedObjectSourceClassName, this.officeNode);
 					if (managedObjectSourceClass == null) {
 						return null;
 					}
 
 					// Load and return the managed object type
-					ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(this.node);
+					ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(this.officeNode);
 					return managedObjectLoader.loadManagedObjectType(managedObjectSourceClass, properties);
 				});
 	}
@@ -140,13 +147,13 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements Office
 
 					// Obtain the governance source class
 					Class governanceSourceClass = this.context.getGovernanceSourceClass(governanceSourceClassName,
-							this.node);
+							this.officeNode);
 					if (governanceSourceClass == null) {
 						return null;
 					}
 
 					// Load and return the governance type
-					GovernanceLoader governanceLoader = this.context.getGovernanceLoader(this.node);
+					GovernanceLoader governanceLoader = this.context.getGovernanceLoader(this.officeNode);
 					return governanceLoader.loadGovernanceType(governanceSourceClass, properties);
 				});
 	}
@@ -160,13 +167,13 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements Office
 
 					// Obtain the administrator source class
 					Class administratorSourceClass = this.context
-							.getAdministrationSourceClass(administratorSourceClassName, this.node);
+							.getAdministrationSourceClass(administratorSourceClassName, this.officeNode);
 					if (administratorSourceClass == null) {
 						return null;
 					}
 
 					// Load and return the administrator type
-					AdministrationLoader administratorLoader = this.context.getAdministrationLoader(this.node);
+					AdministrationLoader administratorLoader = this.context.getAdministrationLoader(this.officeNode);
 					return administratorLoader.loadAdministrationType(administratorSourceClass, properties);
 				});
 	}

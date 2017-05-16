@@ -712,7 +712,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 
 		// Obtain the section qualified name
 		SectionNode subSectionNode = (SectionNode) subSection;
-		String qualifiedName = subSectionNode.getSectionQualifiedName("NAMESPACE");
+		String qualifiedName = subSectionNode.getQualifiedName("NAMESPACE");
 
 		// Validate qualified name
 		assertEquals("Invalid section qualified name", "SECTION.SUB_SECTION.NAMESPACE", qualifiedName);

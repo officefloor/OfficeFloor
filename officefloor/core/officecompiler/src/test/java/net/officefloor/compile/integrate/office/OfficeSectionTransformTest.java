@@ -123,7 +123,7 @@ public class OfficeSectionTransformTest extends OfficeFrameTestCase {
 	public void testOfficeSectionTransformation() throws Exception {
 
 		// Create the OfficeFloor
-		OfficeFloor officeFloor = CompileOffice.compileOffice((extender, context) -> {
+		OfficeFloor officeFloor = CompileOffice.compileAndOpenOffice((extender, context) -> {
 
 			// Add the transformer
 			extender.addOfficeSectionTransformer(new MockTransformSectionSource());
@@ -172,7 +172,7 @@ public class OfficeSectionTransformTest extends OfficeFrameTestCase {
 	public void testChainedOfficeSectionTransformation() throws Exception {
 
 		// Create the OfficeFloor
-		OfficeFloor officeFloor = CompileOffice.compileOffice((extender, context) -> {
+		OfficeFloor officeFloor = CompileOffice.compileAndOpenOffice((extender, context) -> {
 
 			// Add the multiple transformer
 			extender.addOfficeSectionTransformer(new MockTransformSectionSource());
@@ -195,7 +195,6 @@ public class OfficeSectionTransformTest extends OfficeFrameTestCase {
 					two.getOfficeSectionInput("MOCK_ENHANCED_INPUT"));
 			extender.link(two.getOfficeSectionOutput("MOCK_MOCK_next"),
 					one.getOfficeSectionInput("MOCK_ENHANCED_INPUT"));
-
 		});
 
 		try {
@@ -204,7 +203,7 @@ public class OfficeSectionTransformTest extends OfficeFrameTestCase {
 			final int NUMBER_OF_VALUES = 2;
 			List<String> values = new ArrayList<String>(NUMBER_OF_VALUES);
 			officeFloor.getOffice("OFFICE").getFunctionManager("ONE.MOCK_TRANSFORMED.MOCK_TRANSFORMED.inputTwo")
-					.invokeProcess(null, null);
+					.invokeProcess(values, null);
 
 			// Ensure appropriate functions triggered
 			assertEquals("Incorrect number of values", NUMBER_OF_VALUES, values.size());

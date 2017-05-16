@@ -50,6 +50,7 @@ import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
 import net.officefloor.compile.office.OfficeAvailableSectionInputType;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.OfficeFunctionType;
 import net.officefloor.compile.section.OfficeSectionInputType;
@@ -249,6 +250,15 @@ public class SectionNodeImpl implements SectionNode {
 		this.propertyList = this.context.createPropertyList();
 	}
 
+	/**
+	 * Obtains the overridden {@link PropertyList}.
+	 * 
+	 * @return Overridden {@link PropertyList}.
+	 */
+	private PropertyList getProperties() {
+		return this.context.overrideProperties(this, this.getQualifiedName(null), this.propertyList);
+	}
+
 	/*
 	 * ======================= Node =================================
 	 */
@@ -355,8 +365,8 @@ public class SectionNodeImpl implements SectionNode {
 		}
 
 		// Create the section source context
-		SectionSourceContext context = new SectionSourceContextImpl(true, this.state.sectionLocation, this.propertyList,
-				this, this.context);
+		SectionSourceContext context = new SectionSourceContextImpl(true, this.state.sectionLocation,
+				this.getProperties(), this, this.context);
 
 		try {
 			// Source the section type
@@ -598,10 +608,26 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	@Override
+	public String getQualifiedName(String simpleName) {
+
+		// Obtain the qualified name for this section
+		String qualifiedName = this.sectionName + (simpleName != null ? "." + simpleName : "");
+
+		// Recursively determine the qualified name
+		if (this.parentSection == null) {
+			// Top level section
+			return this.office.getQualifiedName(qualifiedName);
+		} else {
+			// Further parent sections
+			return this.parentSection.getQualifiedName(qualifiedName);
+		}
+	}
+
+	@Override
 	public String getSectionQualifiedName(String simpleName) {
 
 		// Obtain the qualified name for this section
-		String qualifiedName = this.sectionName + "." + simpleName;
+		String qualifiedName = this.sectionName + (simpleName != null ? "." + simpleName : "");
 
 		// Recursively determine the qualified name
 		if (this.parentSection == null) {
@@ -1008,6 +1034,42 @@ public class SectionNodeImpl implements SectionNode {
 
 		// Add the governance
 		this.governances.add(governanceNode);
+	}
+
+	/*
+	 * ================== OfficeSectionTransformerContext ==================
+	 */
+
+	@Override
+	public String getSectionSourceClassName() {
+		return this.state.sectionSourceClassName;
+	}
+
+	@Override
+	public String getSectionLocation() {
+		return this.state.sectionLocation;
+	}
+
+	@Override
+	public PropertyList getSectionProperties() {
+		return this.propertyList;
+	}
+
+	@Override
+	public PropertyList createPropertyList() {
+		return this.context.createPropertyList();
+	}
+
+	@Override
+	public void setTransformedOfficeSection(String sectionSourceClassName, String sectionLocation,
+			PropertyList sectionProperties) {
+
+		// Load the transformation
+		this.state = new InitialisedState(sectionSourceClassName, null, sectionLocation);
+		this.propertyList.clear();
+		for (Property property : sectionProperties) {
+			this.propertyList.addProperty(property.getName()).setValue(property.getValue());
+		}
 	}
 
 }

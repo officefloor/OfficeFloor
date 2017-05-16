@@ -29,8 +29,7 @@ public interface OfficeSectionTransformer {
 	 * 
 	 * @param context
 	 *            {@link OfficeSectionTransformerContext}.
-	 * @return Transformed {@link OfficeSection}.
 	 */
-	OfficeSection transformOfficeSection(OfficeSectionTransformerContext context);
+	void transformOfficeSection(OfficeSectionTransformerContext context);
 
 }

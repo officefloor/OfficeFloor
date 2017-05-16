@@ -43,8 +43,10 @@ public class CompileOffice implements OfficeExtensionService {
 	 *            {@link OfficeExtensionService} to configure the
 	 *            {@link Office}.
 	 * @return {@link OfficeFloor}.
+	 * @throws Exception
+	 *             If fails to compile the {@link OfficeFloor}.
 	 */
-	public static OfficeFloor compileOffice(OfficeExtensionService officeConfiguration) {
+	public static OfficeFloor compileOffice(OfficeExtensionService officeConfiguration) throws Exception {
 
 		// Create the compiler
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
@@ -53,14 +55,36 @@ public class CompileOffice implements OfficeExtensionService {
 		try {
 			extender = officeConfiguration;
 
-			// Compile the office
-			return compiler.compile(null);
+			// Compile and return the office
+			return compiler.compile("TEST");
 
 		} finally {
 			// Ensure the extender is cleared for other tests
 			extender = null;
 		}
 
+	}
+
+	/**
+	 * Compiles and opens the {@link Office}.
+	 * 
+	 * @param officeConfiguration
+	 *            {@link OfficeExtensionService} to configure the
+	 *            {@link Office}.
+	 * @return {@link OfficeFloor}.
+	 * @throws Exception
+	 *             If fails to compile and open the {@link OfficeFloor}.
+	 */
+	public static OfficeFloor compileAndOpenOffice(OfficeExtensionService officeConfiguration) throws Exception {
+
+		// Compile the OfficeFloor
+		OfficeFloor officeFloor = compileOffice(officeConfiguration);
+
+		// Open the OfficeFloor
+		officeFloor.openOfficeFloor();
+
+		// Return the OfficeFloor
+		return officeFloor;
 	}
 
 	/*

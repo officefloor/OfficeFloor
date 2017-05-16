@@ -19,11 +19,10 @@ package net.officefloor.compile.impl.section;
 
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionNode;
-import net.officefloor.compile.managedfunction.ManagedFunctionLoader;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.compile.managedfunction.ManagedFunctionLoader;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
@@ -46,9 +45,9 @@ public class SectionSourceContextImpl extends SourceContextImpl implements Secti
 	private final String sectionLocation;
 
 	/**
-	 * {@link Node} requiring the {@link OfficeSection}.
+	 * Parent {@link SectionNode}. May be <code>null</code>.
 	 */
-	private final Node node;
+	private final SectionNode parentSection;
 
 	/**
 	 * {@link NodeContext}.
@@ -64,16 +63,16 @@ public class SectionSourceContextImpl extends SourceContextImpl implements Secti
 	 *            Location of the {@link SectionNode}.
 	 * @param propertyList
 	 *            {@link PropertyList}.
-	 * @param node
-	 *            {@link Node} requiring the {@link OfficeSection}.
+	 * @param parentSection
+	 *            Parent {@link SectionNode}. May be <code>null</code>.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public SectionSourceContextImpl(boolean isLoadingType, String sectionLocation, PropertyList propertyList, Node node,
-			NodeContext context) {
+	public SectionSourceContextImpl(boolean isLoadingType, String sectionLocation, PropertyList propertyList,
+			SectionNode parentSection, NodeContext context) {
 		super(isLoadingType, context.getRootSourceContext(), new PropertyListSourceProperties(propertyList));
 		this.sectionLocation = sectionLocation;
-		this.node = node;
+		this.parentSection = parentSection;
 		this.context = context;
 	}
 
@@ -93,19 +92,21 @@ public class SectionSourceContextImpl extends SourceContextImpl implements Secti
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public FunctionNamespaceType loadManagedFunctionType(String workSourceClassName, PropertyList properties) {
-		return CompileUtil.loadType(FunctionNamespaceType.class, workSourceClassName, this.context.getCompilerIssues(),
-				() -> {
+	public FunctionNamespaceType loadManagedFunctionType(String managedFunctionSourceClassName,
+			PropertyList properties) {
+		return CompileUtil.loadType(FunctionNamespaceType.class, managedFunctionSourceClassName,
+				this.context.getCompilerIssues(), () -> {
 
 					// Obtain the managed function source class
-					Class managedFunctionSourceClass = this.context.getManagedFunctionSourceClass(workSourceClassName,
-							this.node);
+					Class managedFunctionSourceClass = this.context
+							.getManagedFunctionSourceClass(managedFunctionSourceClassName, this.parentSection);
 					if (managedFunctionSourceClass == null) {
 						return null;
 					}
 
 					// Load and return the function namespace type
-					ManagedFunctionLoader managedFunctionLoader = this.context.getManagedFunctionLoader(this.node);
+					ManagedFunctionLoader managedFunctionLoader = this.context
+							.getManagedFunctionLoader(this.parentSection);
 					return managedFunctionLoader.loadManagedFunctionType(managedFunctionSourceClass, properties);
 				});
 	}
@@ -118,13 +119,13 @@ public class SectionSourceContextImpl extends SourceContextImpl implements Secti
 
 					// Obtain the managed object source class
 					Class managedObjectSourceClass = this.context
-							.getManagedObjectSourceClass(managedObjectSourceClassName, this.node);
+							.getManagedObjectSourceClass(managedObjectSourceClassName, this.parentSection);
 					if (managedObjectSourceClass == null) {
 						return null;
 					}
 
 					// Load and return the managed object type
-					ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(this.node);
+					ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(this.parentSection);
 					return managedObjectLoader.loadManagedObjectType(managedObjectSourceClass, properties);
 				});
 
@@ -136,13 +137,13 @@ public class SectionSourceContextImpl extends SourceContextImpl implements Secti
 		return CompileUtil.loadType(SectionType.class, sectionSourceClassName, this.context.getCompilerIssues(), () -> {
 
 			// Obtain the section source class
-			Class sectionSourceClass = this.context.getSectionSourceClass(sectionSourceClassName, this.node);
+			Class sectionSourceClass = this.context.getSectionSourceClass(sectionSourceClassName, this.parentSection);
 			if (sectionSourceClass == null) {
 				return null;
 			}
 
 			// Load and return the section type
-			SectionLoader sectionLoader = this.context.getSectionLoader(this.node);
+			SectionLoader sectionLoader = this.context.getSectionLoader(this.parentSection);
 			return sectionLoader.loadSectionType(sectionSourceClass, location, properties);
 		});
 	}

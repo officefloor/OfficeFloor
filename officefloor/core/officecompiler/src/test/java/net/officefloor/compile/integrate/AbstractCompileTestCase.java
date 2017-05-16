@@ -67,6 +67,7 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
+import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
 import net.officefloor.model.impl.repository.xml.XmlConfigurationContext;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
@@ -773,6 +774,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 		// Create the compiler (overriding values to allow testing)
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.enhancedIssues);
+		compiler.setOfficeFloorSourceClass(OfficeFloorModelOfficeFloorSource.class);
 		compiler.setOfficeFrame(officeFrame);
 		compiler.addResources(resourceSource);
 		if (this.isOverrideProperties) {

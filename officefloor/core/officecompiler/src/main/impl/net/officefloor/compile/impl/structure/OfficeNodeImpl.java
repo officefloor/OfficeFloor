@@ -234,6 +234,11 @@ public class OfficeNodeImpl implements OfficeNode {
 	private final Map<String, OfficeStartNode> starts = new HashMap<String, OfficeStartNode>();
 
 	/**
+	 * {@link OfficeSectionTransformer} instances.
+	 */
+	private final List<OfficeSectionTransformer> officeSectionTransformers = new LinkedList<>();
+
+	/**
 	 * Indicates whether to {@link AutoWire} the objects.
 	 */
 	private boolean isAutoWireObjects = false;
@@ -354,6 +359,11 @@ public class OfficeNodeImpl implements OfficeNode {
 	 */
 
 	@Override
+	public String getQualifiedName(String simpleName) {
+		return this.officeName + "." + simpleName;
+	}
+
+	@Override
 	public OfficeFloorNode getOfficeFloorNode() {
 		return this.officeFloor;
 	}
@@ -442,6 +452,21 @@ public class OfficeNodeImpl implements OfficeNode {
 		return true;
 	}
 
+	/**
+	 * Transforms the {@link OfficeSection} instances.
+	 */
+	private void transformOfficeSections() {
+		this.sections.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSectionName(), b.getOfficeSectionName()))
+				.forEachOrdered((section) -> {
+
+					// Transform the section
+					for (OfficeSectionTransformer transformer : this.officeSectionTransformers) {
+						transformer.transformOfficeSection(section);
+					}
+				});
+	}
+
 	@Override
 	public boolean sourceOfficeWithTopLevelSections(TypeContext typeContext) {
 
@@ -450,6 +475,9 @@ public class OfficeNodeImpl implements OfficeNode {
 		if (!isSourced) {
 			return false;
 		}
+
+		// Transform the office sections
+		this.transformOfficeSections();
 
 		// Source the top level sections
 		isSourced = CompileUtil.source(this.sections, (section) -> section.getOfficeSectionName(),
@@ -471,6 +499,9 @@ public class OfficeNodeImpl implements OfficeNode {
 			return false;
 		}
 
+		// Transform the office sections
+		this.transformOfficeSections();
+
 		// Source the all section trees
 		isSourced = CompileUtil.source(this.sections, (section) -> section.getOfficeSectionName(),
 				(section) -> section.sourceSectionTree(typeContext));
@@ -478,7 +509,7 @@ public class OfficeNodeImpl implements OfficeNode {
 			return false; // must source all top level sections
 		}
 
-		// Ensure all managed object sources are source
+		// Ensure all managed object sources are sourced
 		isSourced = CompileUtil.source(this.managedObjectSources,
 				(managedObjectSource) -> managedObjectSource.getSectionManagedObjectSourceName(),
 				(managedObjectSource) -> managedObjectSource.sourceManagedObjectSource(typeContext));
@@ -738,9 +769,7 @@ public class OfficeNodeImpl implements OfficeNode {
 		// Build the sections of the office (in deterministic order)
 		this.sections.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSectionName(), b.getOfficeSectionName()))
-				.forEachOrdered((section) -> {
-					section.buildSection(officeBuilder, officeBindings, typeContext);
-				});
+				.forEachOrdered((section) -> section.buildSection(officeBuilder, officeBindings, typeContext));
 
 		// Build the list of escalations of the office
 		List<EscalationStruct> escalationStructs = new LinkedList<OfficeNodeImpl.EscalationStruct>();
@@ -790,7 +819,7 @@ public class OfficeNodeImpl implements OfficeNode {
 			}
 
 			// Build the escalation handling
-			String functionName = function.getFullyQualifiedFunctionName();
+			String functionName = function.getQualifiedFunctionName();
 			officeBuilder.addEscalation(escalation.type, functionName);
 		}
 
@@ -806,7 +835,7 @@ public class OfficeNodeImpl implements OfficeNode {
 					}
 
 					// Build the start-up trigger
-					String functionName = function.getFullyQualifiedFunctionName();
+					String functionName = function.getQualifiedFunctionName();
 					officeBuilder.addStartupFunction(functionName);
 				});
 
@@ -870,8 +899,7 @@ public class OfficeNodeImpl implements OfficeNode {
 
 	@Override
 	public void addOfficeSectionTransformer(OfficeSectionTransformer transformer) {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+		this.officeSectionTransformers.add(transformer);
 	}
 
 	@Override

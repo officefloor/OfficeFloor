@@ -137,14 +137,13 @@ import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
-import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
 
 /**
  * <p>
  * {@link OfficeFloorCompiler} implementation.
  * <p>
  * The default {@link OfficeFloorSource} is
- * {@link OfficeFloorModelOfficeFloorSource}.
+ * {@link ApplicationOfficeFloorSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -465,7 +464,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		// Create the OfficeFloor loader
 		OfficeFloorLoader officeFloorLoader = this.getOfficeFloorLoader();
 
-		// Compile, build and return the office floor
+		// Compile, build and return the OfficeFloor
 		if (this.officeFloorSource != null) {
 			// Load from supplied instance
 			return officeFloorLoader.loadOfficeFloor(this.officeFloorSource, officeFloorLocation, this.properties);
@@ -473,7 +472,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		} else {
 			// Obtain the OfficeFloor source class
 			Class<? extends OfficeFloorSource> officeFloorSourceClass = (this.officeFloorSourceClass != null
-					? this.officeFloorSourceClass : OfficeFloorModelOfficeFloorSource.class);
+					? this.officeFloorSourceClass : ApplicationOfficeFloorSource.class);
 
 			// Load from class
 			return officeFloorLoader.loadOfficeFloor(officeFloorSourceClass, officeFloorLocation, this.properties);

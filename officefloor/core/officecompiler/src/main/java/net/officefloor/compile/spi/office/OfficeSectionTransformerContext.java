@@ -28,20 +28,13 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 public interface OfficeSectionTransformerContext {
 
 	/**
-	 * Obtains the {@link OfficeSection} to transform.
-	 * 
-	 * @return {@link OfficeSection} to transform.
-	 */
-	OfficeSection getSection();
-
-	/**
-	 * Obtains the {@link SectionSource} {@link Class} of the
+	 * Obtains the {@link SectionSource} {@link Class} name of the
 	 * {@link OfficeSection} being transformed.
 	 * 
-	 * @return {@link SectionSource} {@link Class} of the {@link OfficeSection}
-	 *         being transformed.
+	 * @return {@link SectionSource} {@link Class} name of the
+	 *         {@link OfficeSection} being transformed.
 	 */
-	<S extends SectionSource> Class<S> getSectionSourceClass();
+	String getSectionSourceClassName();
 
 	/**
 	 * Obtains the location of the {@link OfficeSection} being transformed.
@@ -60,6 +53,13 @@ public interface OfficeSectionTransformerContext {
 	PropertyList getSectionProperties();
 
 	/**
+	 * Creates a new {@link PropertyList}.
+	 * 
+	 * @return New {@link PropertyList}.
+	 */
+	PropertyList createPropertyList();
+
+	/**
 	 * Creates an {@link OfficeSection}.
 	 * 
 	 * @param sectionName
@@ -68,8 +68,10 @@ public interface OfficeSectionTransformerContext {
 	 *            {@link SectionSource} {@link Class} name.
 	 * @param sectionLocation
 	 *            {@link SectionSource} location.
-	 * @return New {@link OfficeSection}.
+	 * @param sectionProperties
+	 *            {@link OfficeSection} {@link PropertyList}.
 	 */
-	OfficeSection createSection(String sectionName, String sectionSourceClassName, String sectionLocation);
+	void setTransformedOfficeSection(String sectionSourceClassName, String sectionLocation,
+			PropertyList sectionProperties);
 
 }

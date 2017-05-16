@@ -222,7 +222,7 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 	 */
 
 	@Override
-	public String getFullyQualifiedFunctionName() {
+	public String getQualifiedFunctionName() {
 		return this.state.namespaceNode.getSectionNode().getSectionQualifiedName(this.functionName);
 	}
 
@@ -344,7 +344,7 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 		}
 
 		// Obtain the name of the function
-		String qualifiedFunctionName = this.getFullyQualifiedFunctionName();
+		String qualifiedFunctionName = this.getQualifiedFunctionName();
 
 		// Obtain the office team for the function
 		OfficeTeamNode officeTeam = LinkUtil.findTarget(this.teamResponsible, OfficeTeamNode.class,
@@ -388,7 +388,7 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 			}
 
 			// Obtain configured details for linking
-			String linkedFunctionName = linkedFunction.getFullyQualifiedFunctionName();
+			String linkedFunctionName = linkedFunction.getQualifiedFunctionName();
 			boolean isSpawnThreadState = flowNode.isSpawnThreadState();
 
 			// Link the function
@@ -407,7 +407,7 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 			if (nextFunction != null) {
 
 				// Obtain next details for linking
-				String nextFunctionName = nextFunction.getFullyQualifiedFunctionName();
+				String nextFunctionName = nextFunction.getQualifiedFunctionName();
 				Class<?> argumentType = functionType.getReturnType();
 
 				// Link to next function
@@ -482,7 +482,7 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 					this.context.getCompilerIssues());
 			if (linkedFunction != null) {
 				// Obtain the configuration details for linking
-				String linkedFunctionName = linkedFunction.getFullyQualifiedFunctionName();
+				String linkedFunctionName = linkedFunction.getQualifiedFunctionName();
 
 				// Link to function
 				functionBuilder.addEscalation(escalationClass, linkedFunctionName);

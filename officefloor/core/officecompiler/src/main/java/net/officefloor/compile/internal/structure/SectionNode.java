@@ -23,6 +23,7 @@ import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionTransformerContext;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionFunction;
@@ -39,8 +40,8 @@ import net.officefloor.frame.api.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionNode
-		extends Node, ManagedObjectRegistry, ManagedFunctionRegistry, SectionDesigner, SubSection, OfficeSection {
+public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctionRegistry,
+		OfficeSectionTransformerContext, SectionDesigner, SubSection, OfficeSection {
 
 	/**
 	 * {@link Node} type.
@@ -178,12 +179,24 @@ public interface SectionNode
 	OfficeNode getOfficeNode();
 
 	/**
-	 * Obtain the {@link OfficeSection} qualified name.
+	 * Obtain the {@link OfficeSection} qualified name. This includes the
+	 * {@link Office} name.
 	 * 
 	 * @param simpleName
 	 *            Simple name to qualify with the {@link OfficeSection} name
 	 *            space.
 	 * @return {@link OfficeSection} qualified name.
+	 */
+	String getQualifiedName(String simpleName);
+
+	/**
+	 * Obtains the {@link SectionNode} qualified name within the
+	 * {@link OfficeNode}.
+	 * 
+	 * @param simpleName
+	 *            Simple name to qualify with the {@link SectionNode} name
+	 *            space.
+	 * @return {@link SectionNode} qualified name.
 	 */
 	String getSectionQualifiedName(String simpleName);
 

@@ -315,12 +315,11 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		// Obtain the name based on location
 		if (this.state.containingSectionNode != null) {
 			// Use name qualified with both office and section
-			return this.state.containingOfficeNode.getDeployedOfficeName() + "."
-					+ this.state.containingSectionNode.getSectionQualifiedName(this.managedObjectName);
+			return this.state.containingSectionNode.getQualifiedName(this.managedObjectName);
 
 		} else if (this.state.containingOfficeNode != null) {
 			// Use name qualified with office name
-			return this.state.containingOfficeNode.getDeployedOfficeName() + "." + this.managedObjectName;
+			return this.state.containingOfficeNode.getQualifiedName(this.managedObjectName);
 
 		} else {
 			// Use name unqualified

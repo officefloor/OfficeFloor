@@ -23,7 +23,6 @@ import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
-import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionTransformer;
 import net.officefloor.compile.spi.office.OfficeSectionTransformerContext;
 import net.officefloor.compile.spi.section.SectionDesigner;
@@ -219,25 +218,21 @@ public class TransformSectionSource extends AbstractSectionSource implements Off
 	 */
 
 	@Override
-	public OfficeSection transformOfficeSection(OfficeSectionTransformerContext context) {
+	public void transformOfficeSection(OfficeSectionTransformerContext context) {
 
-		// Obtain the section
-		OfficeSection section = context.getSection();
-
-		// Create the transformed section
-		OfficeSection transformedSection = context.createSection(section.getOfficeSectionName(),
-				this.getClass().getName(), null);
-		transformedSection.addProperty(PROPERTY_SECTION_SOURCE_CLASS_NAME, context.getSectionSourceClass().getName());
+		// Create the properties
+		PropertyList properties = context.createPropertyList();
+		properties.addProperty(PROPERTY_SECTION_SOURCE_CLASS_NAME).setValue(context.getSectionSourceClassName());
 		String location = context.getSectionLocation();
 		if (location != null) {
-			transformedSection.addProperty(PROPERTY_SECTION_LOCATION, location);
+			properties.addProperty(PROPERTY_SECTION_LOCATION).setValue(location);
 		}
 		for (Property property : context.getSectionProperties()) {
-			transformedSection.addProperty(PROPERTY_SECTION_PROPERTY_PREFIX + property.getName(), property.getValue());
+			properties.addProperty(PROPERTY_SECTION_PROPERTY_PREFIX + property.getName()).setValue(property.getValue());
 		}
 
-		// Return the transformed section
-		return transformedSection;
+		// Transform the section
+		context.setTransformedOfficeSection(this.getClass().getName(), null, properties);
 	}
 
 	/*

@@ -45,7 +45,7 @@ public interface ManagedFunctionNode extends LinkFlowNode, SectionFunction, Offi
 	 * 
 	 * @return Fully qualified name of this {@link ManagedFunction}.
 	 */
-	String getFullyQualifiedFunctionName();
+	String getQualifiedFunctionName();
 
 	/**
 	 * Initialises this {@link ManagedFunctionNode}.

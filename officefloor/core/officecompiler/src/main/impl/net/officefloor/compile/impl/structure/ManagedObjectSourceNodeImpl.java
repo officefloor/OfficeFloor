@@ -468,12 +468,11 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		// Obtain the name based on location
 		if (this.containingSectionNode != null) {
 			// Use name qualified with both office and section
-			return this.containingOfficeNode.getDeployedOfficeName() + "."
-					+ this.containingSectionNode.getSectionQualifiedName(this.managedObjectSourceName);
+			return this.containingSectionNode.getQualifiedName(this.managedObjectSourceName);
 
 		} else if (this.containingOfficeNode != null) {
 			// Use name qualified with office name
-			return this.containingOfficeNode.getDeployedOfficeName() + "." + this.managedObjectSourceName;
+			return this.containingOfficeNode.getQualifiedName(this.managedObjectSourceName);
 
 		} else {
 			// Use name unqualified
@@ -760,7 +759,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			}
 
 			// Obtain the details of function to link flow
-			final String functionName = functionNode.getFullyQualifiedFunctionName();
+			final String functionName = functionNode.getQualifiedFunctionName();
 
 			// Determine if flow from function
 			String flowFunctionName = flowType.getFunctionName();

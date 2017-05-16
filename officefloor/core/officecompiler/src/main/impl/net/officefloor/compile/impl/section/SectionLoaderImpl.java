@@ -176,7 +176,8 @@ public class SectionLoaderImpl implements SectionLoader {
 	public SectionType loadSectionType(SectionSource sectionSource, String sectionLocation, PropertyList propertyList) {
 
 		// Create the section node
-		SectionNode sectionNode = this.nodeContext.createSectionNode("Type", (OfficeNode) null);
+		OfficeNode officeNode = this.nodeContext.createOfficeNode("<office>", null);
+		SectionNode sectionNode = this.nodeContext.createSectionNode("Type", officeNode);
 		sectionNode.initialise(sectionSource.getClass().getName(), sectionSource, sectionLocation);
 		propertyList.configureProperties(sectionNode);
 
