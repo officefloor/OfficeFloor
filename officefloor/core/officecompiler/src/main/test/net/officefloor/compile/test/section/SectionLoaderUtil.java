@@ -120,7 +120,8 @@ public class SectionLoaderUtil {
 	public static SectionDesigner createSectionDesigner() {
 		OfficeFloorCompiler compiler = getOfficeFloorCompiler();
 		NodeContext context = (NodeContext) compiler;
-		return context.createSectionNode(SectionLoaderUtil.class.getSimpleName(), (OfficeNode) null);
+		OfficeNode office = context.createOfficeNode("<office>", null);
+		return context.createSectionNode(SectionLoaderUtil.class.getSimpleName(), office);
 	}
 
 	/**

@@ -17,10 +17,14 @@
  */
 package net.officefloor.compile.impl;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.impl.supplier.SupplierLoaderImpl;
@@ -112,6 +116,7 @@ import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.pool.ManagedObjectPoolLoader;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
@@ -169,6 +174,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	 * {@link OfficeFrame}.
 	 */
 	private OfficeFrame officeFrame = null;
+
+	/**
+	 * Directory containing the override {@link Property} files.
+	 */
+	private File overridePropertiesDirectory = null;
 
 	/**
 	 * {@link OfficeFloorSource} {@link Class}.
@@ -377,6 +387,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
+	public void setOverridePropertiesDirectory(File propertiesDirectory) {
+		this.overridePropertiesDirectory = propertiesDirectory;
+	}
+
+	@Override
 	public PropertyList createPropertyList() {
 		return new PropertyListImpl();
 	}
@@ -540,6 +555,42 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		if (this.escalationHandler != null) {
 			builder.setEscalationHandler(this.escalationHandler);
 		}
+	}
+
+	@Override
+	public PropertyList overrideProperties(Node node, String qualifiedName, PropertyList originalProperties) {
+
+		// Create a clone of the properties
+		PropertyList overrideProperties = this.createPropertyList();
+		for (Property property : originalProperties) {
+			overrideProperties.addProperty(property.getName(), property.getLabel()).setValue(property.getValue());
+		}
+
+		// Determine if override the properties
+		if (this.overridePropertiesDirectory != null) {
+
+			// Determine if override properties file
+			File propertiesFile = new File(this.overridePropertiesDirectory, qualifiedName + ".properties");
+			if (propertiesFile.exists()) {
+
+				// Load the properties
+				Properties properties = new Properties();
+				try {
+					properties.load(new FileReader(propertiesFile));
+				} catch (IOException ex) {
+					this.getCompilerIssues().addIssue(node, "Failed to override properties for " + qualifiedName, ex);
+				}
+
+				// Override the properties
+				for (String propertyName : properties.stringPropertyNames()) {
+					String propertyValue = properties.getProperty(propertyName);
+					overrideProperties.getOrAddProperty(propertyName).setValue(propertyValue);
+				}
+			}
+		}
+
+		// Return the properties
+		return overrideProperties;
 	}
 
 	@Override

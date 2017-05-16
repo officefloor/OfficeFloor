@@ -17,6 +17,8 @@
  */
 package net.officefloor.compile.integrate;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
@@ -88,6 +90,11 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	private final CompilerIssues enhancedIssues = this.enhanceIssues(this.issues);
 
 	/**
+	 * Indicates whether to override the {@link Property} instances.
+	 */
+	private boolean isOverrideProperties = false;
+
+	/**
 	 * {@link XmlConfigurationContext} for testing.
 	 */
 	private XmlConfigurationContext configurationContext = null;
@@ -118,6 +125,13 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 */
 	protected CompilerIssues enhanceIssues(CompilerIssues issues) {
 		return issues;
+	}
+
+	/**
+	 * Enables the {@link Property} overrides for compiling.
+	 */
+	protected void enableOverrideProperties() {
+		this.isOverrideProperties = true;
 	}
 
 	/**
@@ -761,6 +775,15 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(this.enhancedIssues);
 		compiler.setOfficeFrame(officeFrame);
 		compiler.addResources(resourceSource);
+		if (this.isOverrideProperties) {
+			try {
+				File propertiesDirectory = this.findFile("net/officefloor/properties");
+				compiler.setOverridePropertiesDirectory(propertiesDirectory);
+			} catch (FileNotFoundException ex) {
+				// Should not happen
+				throw fail(ex);
+			}
+		}
 
 		// Add the properties
 		for (int i = 0; i < propertyNameValues.length; i += 2) {

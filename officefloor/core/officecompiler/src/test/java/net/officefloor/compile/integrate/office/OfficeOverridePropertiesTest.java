@@ -20,9 +20,10 @@ package net.officefloor.compile.integrate.office;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.officefloor.DeployedOffice;
-import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
-import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
+import net.officefloor.compile.spi.office.OfficeAdministration;
+import net.officefloor.compile.spi.office.OfficeGovernance;
+import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.manage.Office;
 
 /**
@@ -34,24 +35,32 @@ import net.officefloor.frame.api.manage.Office;
 public class OfficeOverridePropertiesTest extends AbstractCompileTestCase {
 
 	/**
-	 * Ensure can override {@link Property} for the {@link DeployedOffice}.
+	 * Ensure can override {@link Property} for the {@link OfficeSection}.
 	 */
-	public void testOverrideOfficeProperty() {
+	public void testOverrideSectionProperty() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure can override {@link Property} for the {@link OfficeGovernance}.
+	 */
+	public void testOverrideGovernanceProperty() {
 		fail("TODO implement");
 	}
 
 	/**
 	 * Ensure can override {@link Property} for the
-	 * {@link OfficeFloorManagedObjectSource}.
+	 * {@link OfficeAdministration}.
 	 */
-	public void testOverrideManagedObjectSourceProperty() {
+	public void testOverrideAdministrationProperty() {
 		fail("TODO implement");
 	}
 
 	/**
-	 * Ensure can override {@link Property} for the {@link OfficeFloorTeam}.
+	 * Ensure can override {@link Property} for the
+	 * {@link OfficeManagedObjectSource}.
 	 */
-	public void testOverrideTeamProperty() {
+	public void testOverrideManagedObjectSourceProperty() {
 		fail("TODO implement");
 	}
 

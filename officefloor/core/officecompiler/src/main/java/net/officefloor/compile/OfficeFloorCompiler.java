@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
 import java.util.Map;
@@ -713,6 +714,18 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 *            {@link Profiler} for the {@link Office}.
 	 */
 	public abstract void addProfiler(String officeName, Profiler profiler);
+
+	/**
+	 * <p>
+	 * Specifies a directory containing override properties.
+	 * <p>
+	 * The files within the directory are properties files with the naming
+	 * convention: &lt;fully-qualified-name$gt;.properties
+	 * 
+	 * @param propertiesDirectory
+	 *            Directory containing the override properties.
+	 */
+	public abstract void setOverridePropertiesDirectory(File propertiesDirectory);
 
 	/**
 	 * Creates a new empty {@link PropertyList}.

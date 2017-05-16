@@ -80,6 +80,7 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
+import net.officefloor.compile.spi.office.OfficeSectionTransformer;
 import net.officefloor.compile.spi.office.OfficeStart;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.ResponsibleTeam;
@@ -865,6 +866,12 @@ public class OfficeNodeImpl implements OfficeNode {
 		return NodeUtil.getInitialisedNode(sectionName, this.sections, context,
 				() -> this.context.createSectionNode(sectionName, this),
 				(section) -> section.initialise(sectionSource.getClass().getName(), sectionSource, sectionLocation));
+	}
+
+	@Override
+	public void addOfficeSectionTransformer(OfficeSectionTransformer transformer) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
 	}
 
 	@Override

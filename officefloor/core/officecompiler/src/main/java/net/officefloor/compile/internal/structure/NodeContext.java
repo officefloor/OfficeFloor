@@ -94,6 +94,19 @@ public interface NodeContext {
 	PropertyList createPropertyList();
 
 	/**
+	 * Overrides the {@link PropertyList}.
+	 * 
+	 * @param node
+	 *            {@link Node} requiring the overridden {@link PropertyList}.
+	 * @param qualifiedName
+	 *            Qualified name.
+	 * @param originalProperties
+	 *            Original {@link PropertyList}.
+	 * @return Overridden {@link PropertyList}.
+	 */
+	PropertyList overrideProperties(Node node, String qualifiedName, PropertyList originalProperties);
+
+	/**
 	 * Creates a new {@link AutoWirer}.
 	 * 
 	 * @param <N>

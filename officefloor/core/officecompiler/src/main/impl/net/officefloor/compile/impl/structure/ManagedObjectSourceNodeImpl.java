@@ -254,6 +254,17 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		this.managingOffice = this.context.createManagingOfficeNode(this);
 	}
 
+	/**
+	 * Obtains the {@link PropertyList} for configuring this
+	 * {@link ManagedObjectSourceNode}.
+	 * 
+	 * @return {@link PropertyList} for configuring this
+	 *         {@link ManagedObjectSourceNode}.
+	 */
+	private PropertyList getPropertyList() {
+		return this.context.overrideProperties(this, this.getManagedObjectSourceName(), this.propertyList);
+	}
+
 	/*
 	 * =========================== Node ===================================
 	 */
@@ -371,7 +382,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			// Load the managed object type
 			if (this.state.managedObjectSource != null) {
 				// Load and return the managed object type from instance
-				return loader.loadManagedObjectType(this.state.managedObjectSource, this.propertyList);
+				return loader.loadManagedObjectType(this.state.managedObjectSource, this.getPropertyList());
 
 			} else {
 				// Obtain the managed object source class
@@ -382,7 +393,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				}
 
 				// Load and return the managed object type from class
-				return loader.loadManagedObjectType(managedObjectSourceClass, this.propertyList);
+				return loader.loadManagedObjectType(managedObjectSourceClass, this.getPropertyList());
 			}
 		}
 	}
@@ -436,7 +447,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		if (this.state.managedObjectSource != null) {
 			// Load and return the managed object type from instance
 			return loader.loadOfficeFloorManagedObjectSourceType(this.managedObjectSourceName,
-					this.state.managedObjectSource, this.propertyList);
+					this.state.managedObjectSource, this.getPropertyList());
 
 		} else {
 			// Obtain the managed object source class
@@ -448,7 +459,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 			// Load and return the managed object type from class
 			return loader.loadOfficeFloorManagedObjectSourceType(this.managedObjectSourceName, managedObjectSourceClass,
-					this.propertyList);
+					this.getPropertyList());
 		}
 	}
 
@@ -623,7 +634,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		}
 
 		// Add properties for Managed Object Source
-		for (Property property : this.propertyList) {
+		for (Property property : this.getPropertyList()) {
 			moBuilder.addProperty(property.getName(), property.getValue());
 		}
 

@@ -116,6 +116,15 @@ public interface OfficeArchitect {
 	OfficeSection addOfficeSection(String sectionName, SectionSource sectionSource, String sectionLocation);
 
 	/**
+	 * Adds an {@link OfficeSectionTransformer} to transform the
+	 * {@link OfficeSection} instances of the {@link Office}.
+	 * 
+	 * @param transformer
+	 *            {@link OfficeSectionTransformer}.
+	 */
+	void addOfficeSectionTransformer(OfficeSectionTransformer transformer);
+
+	/**
 	 * Adds a {@link OfficeManagedObjectSource}.
 	 * 
 	 * @param managedObjectSourceName

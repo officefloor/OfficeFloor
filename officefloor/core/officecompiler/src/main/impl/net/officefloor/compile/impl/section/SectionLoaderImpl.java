@@ -210,7 +210,8 @@ public class SectionLoaderImpl implements SectionLoader {
 			String sectionLocation, PropertyList propertyList) {
 
 		// Create the section node
-		SectionNode sectionNode = this.nodeContext.createSectionNode(sectionName, (OfficeNode) null);
+		OfficeNode officeNode = this.nodeContext.createOfficeNode("<office>", null);
+		SectionNode sectionNode = this.nodeContext.createSectionNode(sectionName, officeNode);
 		sectionNode.initialise(sectionSource.getClass().getName(), sectionSource, sectionLocation);
 		propertyList.configureProperties(sectionNode);
 

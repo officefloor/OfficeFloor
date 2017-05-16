@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.impl.adapt;
 
+import java.io.File;
 import java.lang.reflect.Method;
 
 import net.officefloor.autowire.spi.supplier.source.SupplierSource;
@@ -215,6 +216,11 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	@Override
 	public void addProfiler(String officeName, Profiler profiler) {
 		this.invokeMethod("addProfiler", new Object[] { officeName, profiler }, String.class, Profiler.class);
+	}
+
+	@Override
+	public void setOverridePropertiesDirectory(File propertiesDirectory) {
+		this.invokeMethod("setOverridePropertiesDirectory", new Object[] { propertiesDirectory }, File.class);
 	}
 
 	@Override
