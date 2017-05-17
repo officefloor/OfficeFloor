@@ -497,7 +497,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource impleme
 		}
 
 		// Load the office type
-		OfficeType officeType = context.loadOfficeType(this.officeSource, "auto-wire", context.createPropertyList());
+		OfficeType officeType = context.loadOfficeType(OFFICE_NAME, this.officeSource, "auto-wire",
+				context.createPropertyList());
 
 		// Load all handled office inputs
 		Set<AutoWire> handledInputs = new HashSet<AutoWire>();
@@ -1185,12 +1186,13 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource impleme
 					ManagedObjectSource<?, ?> singleton = new SingletonManagedObjectSource(this.rawObject);
 
 					// Obtain type from raw object
-					this.managedObjectType = context.loadManagedObjectType(singleton,
-							this.autoWireObject.getProperties());
+					this.managedObjectType = context.loadManagedObjectType(this.rawObject.getClass().getName(),
+							singleton, this.autoWireObject.getProperties());
 
 				} else {
 					// Obtain type from managed object
 					this.managedObjectType = context.loadManagedObjectType(
+							this.autoWireObject.getManagedObjectSourceClassName(),
 							this.autoWireObject.getManagedObjectSourceClassName(), this.autoWireObject.getProperties());
 				}
 
@@ -1617,7 +1619,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource impleme
 
 			// Load the supplier type
 			SupplierType supplier = context.loadSupplierType(this.autoWireSupplier.getSupplierSourceClassName(),
-					this.autoWireSupplier.getProperties());
+					this.autoWireSupplier.getSupplierSourceClassName(), this.autoWireSupplier.getProperties());
 
 			// Create an object instance for each supplied object
 			SuppliedManagedObjectType[] suppliedManagedObjects = supplier.getSuppliedManagedObjectTypes();

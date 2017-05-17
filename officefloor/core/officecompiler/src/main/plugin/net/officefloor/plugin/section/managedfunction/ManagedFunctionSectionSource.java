@@ -91,10 +91,12 @@ public class ManagedFunctionSectionSource extends AbstractSectionSource {
 		}
 
 		// Obtain the namespace type
-		FunctionNamespaceType namespaceType = context.loadManagedFunctionType(managedFunctionSourceName, properties);
+		String functionNamespace = "NAMESPACE";
+		FunctionNamespaceType namespaceType = context.loadManagedFunctionType(functionNamespace,
+				managedFunctionSourceName, properties);
 
 		// Add the namespace
-		SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace("NAMESPACE",
+		SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace(functionNamespace,
 				managedFunctionSourceName);
 		for (Property property : properties) {
 			namespace.addProperty(property.getName(), property.getValue());

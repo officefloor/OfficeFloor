@@ -21,8 +21,8 @@ import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.autowire.supplier.SupplierType;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeLoader;
@@ -39,8 +39,7 @@ import net.officefloor.frame.impl.construct.source.SourceContextImpl;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
-		OfficeFloorSourceContext {
+public class OfficeFloorSourceContextImpl extends SourceContextImpl implements OfficeFloorSourceContext {
 
 	/**
 	 * Location of the {@link OfficeFloor}.
@@ -48,9 +47,9 @@ public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
 	private final String officeFloorLocation;
 
 	/**
-	 * {@link Node} requiring the {@link OfficeFloor}.
+	 * {@link OfficeFloorNode}.
 	 */
-	private final Node node;
+	private final OfficeFloorNode officeFloorNode;
 
 	/**
 	 * {@link NodeContext}.
@@ -66,18 +65,16 @@ public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
 	 *            Location of the {@link OfficeFloor}.
 	 * @param propertyList
 	 *            {@link PropertyList}.
-	 * @param node
-	 *            {@link Node} requiring the {@link OfficeFloor}.
+	 * @param officeFloorNode
+	 *            {@link OfficeFloorNode}.
 	 * @param nodeContext
 	 *            {@link NodeContext}.
 	 */
-	public OfficeFloorSourceContextImpl(boolean isLoadingType,
-			String officeFloorLocation, PropertyList propertyList, Node node,
-			NodeContext nodeContext) {
-		super(isLoadingType, nodeContext.getRootSourceContext(),
-				new PropertyListSourceProperties(propertyList));
+	public OfficeFloorSourceContextImpl(boolean isLoadingType, String officeFloorLocation, PropertyList propertyList,
+			OfficeFloorNode officeFloorNode, NodeContext nodeContext) {
+		super(isLoadingType, nodeContext.getRootSourceContext(), new PropertyListSourceProperties(propertyList));
 		this.officeFloorLocation = officeFloorLocation;
-		this.node = node;
+		this.officeFloorNode = officeFloorNode;
 		this.context = nodeContext;
 	}
 
@@ -96,46 +93,42 @@ public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
 	}
 
 	@Override
-	@SuppressWarnings("rawtypes")
-	public ManagedObjectType<?> loadManagedObjectType(
-			ManagedObjectSource<?, ?> managedObjectSource,
-			PropertyList properties) {
-		return CompileUtil.loadType(ManagedObjectType.class,
-				managedObjectSource.getClass().getName(),
-				this.context.getCompilerIssues(),
-				() -> {
+	public ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceName,
+			ManagedObjectSource<?, ?> managedObjectSource, PropertyList properties) {
+		return CompileUtil.loadType(ManagedObjectType.class, managedObjectSource.getClass().getName(),
+				this.context.getCompilerIssues(), () -> {
+
+					// Obtain the override properties
+					PropertyList overrideProperties = this.context.overrideProperties(this.officeFloorNode,
+							managedObjectSourceName, properties);
 
 					// Load and return the managed object type
-				ManagedObjectLoader managedObjectLoader = this.context
-						.getManagedObjectLoader(this.node);
-				return managedObjectLoader.loadManagedObjectType(
-						managedObjectSource, properties);
-			});
+					ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(this.officeFloorNode);
+					return managedObjectLoader.loadManagedObjectType(managedObjectSource, overrideProperties);
+				});
 	}
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public ManagedObjectType<?> loadManagedObjectType(
+	public ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceName,
 			String managedObjectSourceClassName, PropertyList properties) {
-		return CompileUtil.loadType(
-				ManagedObjectType.class,
-				managedObjectSourceClassName,
-				this.context.getCompilerIssues(),
-				() -> {
+		return CompileUtil.loadType(ManagedObjectType.class, managedObjectSourceClassName,
+				this.context.getCompilerIssues(), () -> {
 
 					// Obtain the managed object source class
 					Class managedObjectSourceClass = this.context
-							.getManagedObjectSourceClass(
-									managedObjectSourceClassName, this.node);
+							.getManagedObjectSourceClass(managedObjectSourceClassName, this.officeFloorNode);
 					if (managedObjectSourceClass == null) {
 						return null;
 					}
 
+					// Obtain the override properties
+					PropertyList overrideProperties = this.context.overrideProperties(this.officeFloorNode,
+							managedObjectSourceName, properties);
+
 					// Load and return the managed object type
-					ManagedObjectLoader managedObjectLoader = this.context
-							.getManagedObjectLoader(this.node);
-					return managedObjectLoader.loadManagedObjectType(
-							managedObjectSourceClass, properties);
+					ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(this.officeFloorNode);
+					return managedObjectLoader.loadManagedObjectType(managedObjectSourceClass, overrideProperties);
 				});
 	}
 
@@ -143,8 +136,7 @@ public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
 	public boolean isInputManagedObject(ManagedObjectType<?> managedObjectType) {
 
 		// Obtain the managed object loader
-		ManagedObjectLoader managedObjectLoader = this.context
-				.getManagedObjectLoader(this.node);
+		ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(this.officeFloorNode);
 
 		// Return whether should be an input managed object
 		return managedObjectLoader.isInputManagedObject(managedObjectType);
@@ -152,68 +144,62 @@ public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public SupplierType loadSupplierType(String supplierSourceClassName,
-			PropertyList properties) {
-		return CompileUtil.loadType(
-				SupplierType.class,
-				supplierSourceClassName,
-				this.context.getCompilerIssues(),
+	public SupplierType loadSupplierType(String supplierName, String supplierSourceClassName, PropertyList properties) {
+		return CompileUtil.loadType(SupplierType.class, supplierSourceClassName, this.context.getCompilerIssues(),
 				() -> {
 
 					// Obtain the supplier source class
-					Class supplierSourceClass = this.context
-							.getSupplierSourceClass(supplierSourceClassName,
-									this.node);
+					Class supplierSourceClass = this.context.getSupplierSourceClass(supplierSourceClassName,
+							this.officeFloorNode);
 					if (supplierSourceClass == null) {
 						return null;
 					}
 
+					// Obtain the override properties
+					PropertyList overrideProperties = this.context.overrideProperties(this.officeFloorNode,
+							supplierName, properties);
+
 					// Load and return the supplier type
-					SupplierLoader supplierLoader = this.context
-							.getSupplierLoader(this.node);
-					return supplierLoader.loadSupplierType(supplierSourceClass,
-							properties);
+					SupplierLoader supplierLoader = this.context.getSupplierLoader(this.officeFloorNode);
+					return supplierLoader.loadSupplierType(supplierSourceClass, overrideProperties);
 				});
 	}
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public OfficeType loadOfficeType(String officeSourceClassName,
-			String location, PropertyList properties) {
-		return CompileUtil.loadType(OfficeType.class,
-				officeSourceClassName,
-				this.context.getCompilerIssues(),
-				() -> {
+	public OfficeType loadOfficeType(String officeName, String officeSourceClassName, String location,
+			PropertyList properties) {
+		return CompileUtil.loadType(OfficeType.class, officeSourceClassName, this.context.getCompilerIssues(), () -> {
 
-					// Obtain the office source class
-				Class officeSourceClass = this.context.getOfficeSourceClass(
-						officeSourceClassName, this.node);
-				if (officeSourceClass == null) {
-					return null;
-				}
+			// Obtain the office source class
+			Class officeSourceClass = this.context.getOfficeSourceClass(officeSourceClassName, this.officeFloorNode);
+			if (officeSourceClass == null) {
+				return null;
+			}
 
-				// Load and return the office type
-				OfficeLoader officeLoader = this.context
-						.getOfficeLoader(this.node);
-				return officeLoader.loadOfficeType(officeSourceClass, location,
-						properties);
-			});
+			// Obtain the override properties
+			PropertyList overrideProperties = this.context.overrideProperties(this.officeFloorNode, officeName,
+					properties);
+
+			// Load and return the office type
+			OfficeLoader officeLoader = this.context.getOfficeLoader(this.officeFloorNode);
+			return officeLoader.loadOfficeType(officeSourceClass, location, overrideProperties);
+		});
 	}
 
 	@Override
-	public OfficeType loadOfficeType(OfficeSource officeSource,
-			String location, PropertyList properties) {
-		return CompileUtil.loadType(
-				OfficeType.class,
-				officeSource.getClass().getName(),
-				this.context.getCompilerIssues(),
-				() -> {
+	public OfficeType loadOfficeType(String officeName, OfficeSource officeSource, String location,
+			PropertyList properties) {
+		return CompileUtil.loadType(OfficeType.class, officeSource.getClass().getName(),
+				this.context.getCompilerIssues(), () -> {
+
+					// Obtain the override properties
+					PropertyList overrideProperties = this.context.overrideProperties(this.officeFloorNode, officeName,
+							properties);
 
 					// Load and return the office type
-					OfficeLoader officeLoader = this.context
-							.getOfficeLoader(this.node);
-					return officeLoader.loadOfficeType(officeSource, location,
-							properties);
+					OfficeLoader officeLoader = this.context.getOfficeLoader(this.officeFloorNode);
+					return officeLoader.loadOfficeType(officeSource, location, overrideProperties);
 				});
 	}
 

@@ -270,7 +270,8 @@ public class TransformSectionSource extends AbstractSectionSource implements Off
 		}
 
 		// Obtain the section type
-		SectionType type = context.loadSectionType(sectionSourceClassName, sectionLocation, sectionProperties);
+		SectionType type = context.loadSectionType("TRANSFORM", sectionSourceClassName, sectionLocation,
+				sectionProperties);
 
 		// Add the section to transform
 		this.loadSubSection(sectionSourceClassName, sectionLocation, sectionProperties);

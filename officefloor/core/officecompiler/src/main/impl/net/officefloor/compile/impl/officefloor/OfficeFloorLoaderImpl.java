@@ -217,9 +217,11 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 	private PropertyList loadRequiredProperties(OfficeFloorSource officeFloorSource, final String officeFloorLocation,
 			PropertyList propertyList) {
 
-		// Create the office floor source context
+		// Create the OfficeFloor source context
 		OfficeFloorSourceContext sourceContext = new OfficeFloorSourceContextImpl(true, officeFloorLocation,
-				propertyList, this.node, this.nodeContext);
+				propertyList,
+				this.nodeContext.createOfficeFloorNode("<officefloor>", officeFloorSource, officeFloorLocation),
+				this.nodeContext);
 
 		// Create the required properties
 		final PropertyList requiredPropertyList = new PropertyListImpl();

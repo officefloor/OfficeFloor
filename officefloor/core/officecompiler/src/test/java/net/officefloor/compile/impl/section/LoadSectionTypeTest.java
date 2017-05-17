@@ -502,8 +502,8 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 				PropertyList properties = context.createPropertyList();
 				properties.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME)
 						.setValue(MockLoadFunctionNamespace.class.getName());
-				FunctionNamespaceType namespaceType = context
-						.loadManagedFunctionType(ClassManagedFunctionSource.class.getName(), properties);
+				FunctionNamespaceType namespaceType = context.loadManagedFunctionType("NAMESPACE",
+						ClassManagedFunctionSource.class.getName(), properties);
 
 				// Ensure correct namespace type
 				MockLoadFunctionNamespace.assertFunctionNamespaceType(namespaceType);
@@ -532,7 +532,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 
 				// Do not specify class causing failure to load type
 				PropertyList properties = context.createPropertyList();
-				context.loadManagedFunctionType(ClassManagedFunctionSource.class.getName(), properties);
+				context.loadManagedFunctionType("NAMESPACE", ClassManagedFunctionSource.class.getName(), properties);
 
 				// Should not reach this point
 				fail("Should not successfully load function namespace type");
@@ -557,8 +557,8 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 				PropertyList properties = context.createPropertyList();
 				properties.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME)
 						.setValue(MockLoadManagedObject.class.getName());
-				ManagedObjectType<?> managedObjectType = context
-						.loadManagedObjectType(ClassManagedObjectSource.class.getName(), properties);
+				ManagedObjectType<?> managedObjectType = context.loadManagedObjectType("NAMESPACE",
+						ClassManagedObjectSource.class.getName(), properties);
 
 				// Ensure correct managed object type
 				MockLoadManagedObject.assertManagedObjectType(managedObjectType);
@@ -584,7 +584,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 
 				// Do not specify class causing failure to load type
 				PropertyList properties = context.createPropertyList();
-				context.loadManagedObjectType(ClassManagedObjectSource.class.getName(), properties);
+				context.loadManagedObjectType("NAMESPACE", ClassManagedObjectSource.class.getName(), properties);
 
 				// Should not reach this point
 				fail("Should not successfully load managed object type");
@@ -608,7 +608,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 
 				// Load the sub section type
 				PropertyList properties = context.createPropertyList();
-				SectionType sectionType = context.loadSectionType(ClassSectionSource.class.getName(),
+				SectionType sectionType = context.loadSectionType("SECTION", ClassSectionSource.class.getName(),
 						MockLoadSection.class.getName(), properties);
 
 				// Ensure correct section type
@@ -636,7 +636,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 
 				// Do not specify class causing failure to load type
 				PropertyList properties = context.createPropertyList();
-				context.loadSectionType(FailSectionSource.class.getName(), "FailLocation", properties);
+				context.loadSectionType("SECTION", FailSectionSource.class.getName(), "FailLocation", properties);
 			}
 		});
 	}

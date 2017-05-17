@@ -49,21 +49,18 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class LoadOfficeFloorSourceContextTest extends
-		AbstractOfficeFloorTestCase {
+public class LoadOfficeFloorSourceContextTest extends AbstractOfficeFloorTestCase {
 
 	/**
 	 * Ensure issue if fail to instantiate the {@link OfficeFloorSource}.
 	 */
 	public void testFailInstantiate() {
 
-		final RuntimeException failure = new RuntimeException(
-				"instantiate failure");
+		final RuntimeException failure = new RuntimeException("instantiate failure");
 
 		// Record failure to instantiate
-		this.issues.recordIssue("Failed to instantiate "
-				+ MakerOfficeFloorSource.class.getName()
-				+ " by default constructor", failure);
+		this.issues.recordIssue(
+				"Failed to instantiate " + MakerOfficeFloorSource.class.getName() + " by default constructor", failure);
 
 		// Attempt to instantiate
 		MakerOfficeFloorSource.instantiateFailure = failure;
@@ -82,9 +79,8 @@ public class LoadOfficeFloorSourceContextTest extends
 		this.loadOfficeFloor(true, new OfficeFloorMaker() {
 			@Override
 			public void make(OfficeFloorMakerContext context) {
-				assertEquals("Incorrect office location",
-						OFFICE_FLOOR_LOCATION, context.getContext()
-								.getOfficeFloorLocation());
+				assertEquals("Incorrect office location", OFFICE_FLOOR_LOCATION,
+						context.getContext().getOfficeFloorLocation());
 			}
 		});
 	}
@@ -95,10 +91,8 @@ public class LoadOfficeFloorSourceContextTest extends
 	public void testMissingProperty() {
 
 		// Record missing property
-		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
-				OfficeFloorNodeImpl.class,
-				"Missing property 'missing' for OfficeFloorSource "
-						+ MakerOfficeFloorSource.class.getName());
+		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
+				"Missing property 'missing' for OfficeFloorSource " + MakerOfficeFloorSource.class.getName());
 
 		// Attempt to load office floor
 		this.loadOfficeFloor(false, new OfficeFloorMaker() {
@@ -122,31 +116,20 @@ public class LoadOfficeFloorSourceContextTest extends
 			@Override
 			public void make(OfficeFloorMakerContext makerContext) {
 				OfficeFloorSourceContext context = makerContext.getContext();
-				assertEquals("Ensure get defaulted property", "DEFAULT",
-						context.getProperty("missing", "DEFAULT"));
-				assertEquals("Ensure get property ONE", "1",
-						context.getProperty("ONE"));
-				assertEquals("Ensure get property TWO", "2",
-						context.getProperty("TWO"));
+				assertEquals("Ensure get defaulted property", "DEFAULT", context.getProperty("missing", "DEFAULT"));
+				assertEquals("Ensure get property ONE", "1", context.getProperty("ONE"));
+				assertEquals("Ensure get property TWO", "2", context.getProperty("TWO"));
 				String[] names = context.getPropertyNames();
-				assertEquals("Incorrect number of property names", 3,
-						names.length);
+				assertEquals("Incorrect number of property names", 3, names.length);
 				assertEquals("Incorrect property name 0", "ONE", names[0]);
 				assertEquals("Incorrect property name 1", "TWO", names[1]);
-				assertEquals("Incorrect identifier",
-						MakerOfficeFloorSource.MAKER_IDENTIFIER_PROPERTY_NAME,
-						names[2]);
+				assertEquals("Incorrect identifier", MakerOfficeFloorSource.MAKER_IDENTIFIER_PROPERTY_NAME, names[2]);
 				Properties properties = context.getProperties();
-				assertEquals("Incorrect number of properties", 3,
-						properties.size());
-				assertEquals("Incorrect property ONE", "1",
-						properties.get("ONE"));
-				assertEquals("Incorrect property TWO", "2",
-						properties.get("TWO"));
-				assertNotNull(
-						"Incorrect identifier",
-						properties
-								.get(MakerOfficeFloorSource.MAKER_IDENTIFIER_PROPERTY_NAME));
+				assertEquals("Incorrect number of properties", 3, properties.size());
+				assertEquals("Incorrect property ONE", "1", properties.get("ONE"));
+				assertEquals("Incorrect property TWO", "2", properties.get("TWO"));
+				assertNotNull("Incorrect identifier",
+						properties.get(MakerOfficeFloorSource.MAKER_IDENTIFIER_PROPERTY_NAME));
 			}
 		}, "ONE", "1", "TWO", "2");
 	}
@@ -157,10 +140,8 @@ public class LoadOfficeFloorSourceContextTest extends
 	public void testMissingClass() {
 
 		// Record missing class
-		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
-				OfficeFloorNodeImpl.class,
-				"Can not load class 'missing' for OfficeFloorSource "
-						+ MakerOfficeFloorSource.class.getName());
+		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
+				"Can not load class 'missing' for OfficeFloorSource " + MakerOfficeFloorSource.class.getName());
 
 		// Attempt to load office floor
 		this.loadOfficeFloor(false, new OfficeFloorMaker() {
@@ -177,10 +158,8 @@ public class LoadOfficeFloorSourceContextTest extends
 	public void testMissingResource() {
 
 		// Record missing resource
-		this.recordReturn(this.resourceSource,
-				this.resourceSource.sourceResource("missing"), null);
-		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
-				OfficeFloorNodeImpl.class,
+		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource("missing"), null);
+		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
 				"Can not obtain resource at location 'missing' for OfficeFloorSource "
 						+ MakerOfficeFloorSource.class.getName());
 
@@ -203,15 +182,13 @@ public class LoadOfficeFloorSourceContextTest extends
 
 		// Record obtaining the resource
 		this.record_initiateOfficeFloorBuilder();
-		this.recordReturn(this.resourceSource,
-				this.resourceSource.sourceResource(location), resource);
+		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource(location), resource);
 
 		// Obtain the configuration item
 		this.loadOfficeFloor(true, new OfficeFloorMaker() {
 			@Override
 			public void make(OfficeFloorMakerContext context) {
-				assertEquals("Incorrect configuation item", resource, context
-						.getContext().getResource(location));
+				assertEquals("Incorrect configuation item", resource, context.getContext().getResource(location));
 			}
 		});
 	}
@@ -228,8 +205,7 @@ public class LoadOfficeFloorSourceContextTest extends
 		this.loadOfficeFloor(true, new OfficeFloorMaker() {
 			@Override
 			public void make(OfficeFloorMakerContext context) {
-				assertEquals("Incorrect class loader",
-						LoadRequiredPropertiesTest.class.getClassLoader(),
+				assertEquals("Incorrect class loader", LoadRequiredPropertiesTest.class.getClassLoader(),
 						context.getContext().getClassLoader());
 			}
 		});
@@ -240,15 +216,13 @@ public class LoadOfficeFloorSourceContextTest extends
 	 */
 	public void testFailSourceOfficeFloor() {
 
-		final NullPointerException failure = new NullPointerException(
-				"Fail source office floor");
+		final NullPointerException failure = new NullPointerException("Fail source office floor");
 
 		// Record failure to source the office floor
 		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
-				OfficeFloorNodeImpl.class,
-				"Failed to source OfficeFloor from OfficeFloorSource (source="
-						+ MakerOfficeFloorSource.class.getName()
-						+ ", location=" + OFFICE_FLOOR_LOCATION + ")", failure);
+				OfficeFloorNodeImpl.class, "Failed to source OfficeFloor from OfficeFloorSource (source="
+						+ MakerOfficeFloorSource.class.getName() + ", location=" + OFFICE_FLOOR_LOCATION + ")",
+				failure);
 
 		// Attempt to load office floor
 		this.loadOfficeFloor(false, new OfficeFloorMaker() {
@@ -276,17 +250,13 @@ public class LoadOfficeFloorSourceContextTest extends
 
 				// Load the managed object type
 				PropertyList properties = ofsContext.createPropertyList();
-				properties.addProperty(
-						ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME)
+				properties.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME)
 						.setValue(MockLoadManagedObject.class.getName());
-				ManagedObjectType<?> managedObjectType = ofsContext
-						.loadManagedObjectType(
-								ClassManagedObjectSource.class.getName(),
-								properties);
+				ManagedObjectType<?> managedObjectType = ofsContext.loadManagedObjectType("MOS",
+						ClassManagedObjectSource.class.getName(), properties);
 
 				// Ensure correct managed object type
-				MockLoadManagedObject
-						.assertManagedObjectType(managedObjectType);
+				MockLoadManagedObject.assertManagedObjectType(managedObjectType);
 			}
 		});
 	}
@@ -298,12 +268,10 @@ public class LoadOfficeFloorSourceContextTest extends
 
 		// Ensure issue in not loading managed object type
 		CompilerIssue[] issues = this.issues.recordCaptureIssues(true);
-		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
-				OfficeFloorNodeImpl.class, "Missing property 'class.name'");
-		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
-				OfficeFloorNodeImpl.class,
-				"Failure loading ManagedObjectType from source "
-						+ ClassManagedObjectSource.class.getName(), issues);
+		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
+				"Missing property 'class.name'");
+		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
+				"Failure loading ManagedObjectType from source " + ClassManagedObjectSource.class.getName(), issues);
 
 		// Fail to load the managed object type
 		this.loadOfficeFloor(false, new OfficeFloorMaker() {
@@ -313,8 +281,7 @@ public class LoadOfficeFloorSourceContextTest extends
 
 				// Do not specify class causing failure to load type
 				PropertyList properties = ofsContext.createPropertyList();
-				ofsContext.loadManagedObjectType(
-						ClassManagedObjectSource.class.getName(), properties);
+				ofsContext.loadManagedObjectType("MOS", ClassManagedObjectSource.class.getName(), properties);
 
 				// Should not reach this point
 				fail("Should not successfully load managed object type");
@@ -340,16 +307,13 @@ public class LoadOfficeFloorSourceContextTest extends
 
 				// Load the managed object type
 				PropertyList properties = ofsContext.createPropertyList();
-				properties.addProperty(
-						ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME)
+				properties.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME)
 						.setValue(MockLoadManagedObject.class.getName());
-				ManagedObjectType<?> managedObjectType = ofsContext
-						.loadManagedObjectType(new ClassManagedObjectSource(),
-								properties);
+				ManagedObjectType<?> managedObjectType = ofsContext.loadManagedObjectType("MOS",
+						new ClassManagedObjectSource(), properties);
 
 				// Ensure correct managed object type
-				MockLoadManagedObject
-						.assertManagedObjectType(managedObjectType);
+				MockLoadManagedObject.assertManagedObjectType(managedObjectType);
 			}
 		});
 	}
@@ -362,12 +326,10 @@ public class LoadOfficeFloorSourceContextTest extends
 
 		// Ensure issue in not loading managed object type
 		CompilerIssue[] issues = this.issues.recordCaptureIssues(true);
-		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
-				OfficeFloorNodeImpl.class, "Missing property 'class.name'");
-		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
-				OfficeFloorNodeImpl.class,
-				"Failure loading ManagedObjectType from source "
-						+ ClassManagedObjectSource.class.getName(), issues);
+		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
+				"Missing property 'class.name'");
+		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
+				"Failure loading ManagedObjectType from source " + ClassManagedObjectSource.class.getName(), issues);
 
 		// Fail to load the managed object type
 		this.loadOfficeFloor(false, new OfficeFloorMaker() {
@@ -377,8 +339,7 @@ public class LoadOfficeFloorSourceContextTest extends
 
 				// Do not specify class causing failure to load type
 				PropertyList properties = ofsContext.createPropertyList();
-				ofsContext.loadManagedObjectType(
-						new ClassManagedObjectSource(), properties);
+				ofsContext.loadManagedObjectType("MOS", new ClassManagedObjectSource(), properties);
 
 				// Should not reach this point
 				fail("Should not successfully load managed object type");
@@ -392,15 +353,12 @@ public class LoadOfficeFloorSourceContextTest extends
 	 */
 	public void testCheckIfManagedObjectTypeIsInput() {
 
-		final ManagedObjectType<?> moType = this
-				.createMock(ManagedObjectType.class);
-		final ManagedObjectFlowType<?> flowType = this
-				.createMock(ManagedObjectFlowType.class);
+		final ManagedObjectType<?> moType = this.createMock(ManagedObjectType.class);
+		final ManagedObjectFlowType<?> flowType = this.createMock(ManagedObjectFlowType.class);
 
 		// Record as input managed object
 		this.record_initiateOfficeFloorBuilder();
-		this.recordReturn(moType, moType.getFlowTypes(),
-				new ManagedObjectFlowType<?>[] { flowType });
+		this.recordReturn(moType, moType.getFlowTypes(), new ManagedObjectFlowType<?>[] { flowType });
 
 		// Test
 		this.loadOfficeFloor(true, new OfficeFloorMaker() {
@@ -440,7 +398,7 @@ public class LoadOfficeFloorSourceContextTest extends
 				PropertyList properties = ofsContext.createPropertyList();
 				properties.addProperty(MockLoadSupplierSource.PROPERTY_TEST)
 						.setValue(MockLoadSupplierSource.PROPERTY_TEST);
-				SupplierType supplierType = ofsContext.loadSupplierType(
+				SupplierType supplierType = ofsContext.loadSupplierType("SUPPLIER",
 						MockLoadSupplierSource.class.getName(), properties);
 
 				// Ensure correct supplier type
@@ -456,14 +414,10 @@ public class LoadOfficeFloorSourceContextTest extends
 
 		// Ensure issue in not loading supplier type
 		CompilerIssue[] issues = this.issues.recordCaptureIssues(true);
-		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
-				OfficeFloorNodeImpl.class,
-				"Missing property 'TEST' for SupplierSource "
-						+ MockLoadSupplierSource.class.getName());
-		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
-				OfficeFloorNodeImpl.class,
-				"Failure loading SupplierType from source "
-						+ MockLoadSupplierSource.class.getName(), issues);
+		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
+				"Missing property 'TEST' for SupplierSource " + MockLoadSupplierSource.class.getName());
+		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
+				"Failure loading SupplierType from source " + MockLoadSupplierSource.class.getName(), issues);
 
 		// Fail to load the supplier type
 		this.loadOfficeFloor(false, new OfficeFloorMaker() {
@@ -473,8 +427,7 @@ public class LoadOfficeFloorSourceContextTest extends
 
 				// Do not specify property causing failure to load type
 				PropertyList properties = ofsContext.createPropertyList();
-				ofsContext.loadSupplierType(
-						MockLoadSupplierSource.class.getName(), properties);
+				ofsContext.loadSupplierType("SUPPLIER", MockLoadSupplierSource.class.getName(), properties);
 
 				// Should not reach this point
 				fail("Should not successfully load supplier type");
@@ -500,11 +453,9 @@ public class LoadOfficeFloorSourceContextTest extends
 
 				// Load the office type
 				PropertyList properties = ofsContext.createPropertyList();
-				properties.addProperty(MockLoadOfficeSource.PROPERTY_REQUIRED)
-						.setValue("provided");
-				OfficeType officeType = ofsContext.loadOfficeType(
-						MockLoadOfficeSource.class.getName(), "mock",
-						properties);
+				properties.addProperty(MockLoadOfficeSource.PROPERTY_REQUIRED).setValue("provided");
+				OfficeType officeType = ofsContext.loadOfficeType("OFFICE", MockLoadOfficeSource.class.getName(),
+						"mock", properties);
 
 				// Ensure correct office type
 				MockLoadOfficeSource.assertOfficeType(officeType);
@@ -520,12 +471,9 @@ public class LoadOfficeFloorSourceContextTest extends
 		// Ensure issue in not loading office type
 		CompilerIssue[] issues = this.issues.recordCaptureIssues(true);
 		this.issues.recordIssue("Type", OfficeNodeImpl.class,
-				"Missing property 'required.property' for OfficeSource "
-						+ MockLoadOfficeSource.class.getName());
-		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
-				OfficeFloorNodeImpl.class,
-				"Failure loading OfficeType from source "
-						+ MockLoadOfficeSource.class.getName(), issues);
+				"Missing property 'required.property' for OfficeSource " + MockLoadOfficeSource.class.getName());
+		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
+				"Failure loading OfficeType from source " + MockLoadOfficeSource.class.getName(), issues);
 
 		// Fail to load the office type
 		this.loadOfficeFloor(false, new OfficeFloorMaker() {
@@ -535,8 +483,7 @@ public class LoadOfficeFloorSourceContextTest extends
 
 				// Do not specify class causing failure to load type
 				PropertyList properties = ofsContext.createPropertyList();
-				ofsContext.loadOfficeType(MockLoadOfficeSource.class.getName(),
-						"mock", properties);
+				ofsContext.loadOfficeType("OFFICE", MockLoadOfficeSource.class.getName(), "mock", properties);
 
 				// Should not reach this point
 				fail("Should not successfully load office type");
@@ -563,10 +510,9 @@ public class LoadOfficeFloorSourceContextTest extends
 
 				// Load the office type
 				PropertyList properties = ofsContext.createPropertyList();
-				properties.addProperty(MockLoadOfficeSource.PROPERTY_REQUIRED)
-						.setValue("provided");
-				OfficeType officeType = ofsContext.loadOfficeType(
-						new MockLoadOfficeSource(), "mock", properties);
+				properties.addProperty(MockLoadOfficeSource.PROPERTY_REQUIRED).setValue("provided");
+				OfficeType officeType = ofsContext.loadOfficeType("OFFICE", new MockLoadOfficeSource(), "mock",
+						properties);
 
 				// Ensure correct office type
 				MockLoadOfficeSource.assertOfficeType(officeType);
@@ -583,12 +529,9 @@ public class LoadOfficeFloorSourceContextTest extends
 		// Ensure issue in not loading office type
 		CompilerIssue[] issues = this.issues.recordCaptureIssues(true);
 		this.issues.recordIssue("Type", OfficeNodeImpl.class,
-				"Missing property 'required.property' for OfficeSource "
-						+ MockLoadOfficeSource.class.getName());
-		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
-				OfficeFloorNodeImpl.class,
-				"Failure loading OfficeType from source "
-						+ MockLoadOfficeSource.class.getName(), issues);
+				"Missing property 'required.property' for OfficeSource " + MockLoadOfficeSource.class.getName());
+		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
+				"Failure loading OfficeType from source " + MockLoadOfficeSource.class.getName(), issues);
 
 		// Fail to load the office type
 		this.loadOfficeFloor(false, new OfficeFloorMaker() {
@@ -598,8 +541,7 @@ public class LoadOfficeFloorSourceContextTest extends
 
 				// Do not specify class causing failure to load type
 				PropertyList properties = ofsContext.createPropertyList();
-				ofsContext.loadOfficeType(new MockLoadOfficeSource(), "mock",
-						properties);
+				ofsContext.loadOfficeType("OFFICE", new MockLoadOfficeSource(), "mock", properties);
 
 				// Should not reach this point
 				fail("Should not successfully load office type");

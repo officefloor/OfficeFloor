@@ -683,7 +683,8 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 			// Properties for failed to source managed object handling
 			PropertyList failedToSourceProperties = context.createPropertyList();
-			failedToSourceProperties.addProperty(ManagedFunctionSectionSource.PROPERTY_PARAMETER_PREFIX + "Handle").setValue("1");
+			failedToSourceProperties.addProperty(ManagedFunctionSectionSource.PROPERTY_PARAMETER_PREFIX + "Handle")
+					.setValue("1");
 
 			// Link escalations to inputs
 			OfficeSectionInput[] escalationSectionInput = new OfficeSectionInput[this.escalations.size()];
@@ -714,8 +715,9 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 				architect.link(escalation, sectionInput);
 
 				// Provide property and section input for failed to source
-				failedToSourceProperties.addProperty(
-						AutoWireEscalationCauseRouteManagedFunctionSource.PROPERTY_PREFIX_ESCALATION_TYPE + String.valueOf(i))
+				failedToSourceProperties
+						.addProperty(AutoWireEscalationCauseRouteManagedFunctionSource.PROPERTY_PREFIX_ESCALATION_TYPE
+								+ String.valueOf(i))
 						.setValue(escalationTypeName);
 				escalationSectionInput[i] = sectionInput;
 			}
@@ -737,7 +739,8 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			}
 
 			// Obtain the extension interface for the governance
-			GovernanceType<?, ?> governanceType = context.loadGovernanceType(governanceSourceClassName, properties);
+			GovernanceType<?, ?> governanceType = context.loadGovernanceType(governance.getGovernanceName(),
+					governanceSourceClassName, properties);
 			if (governanceType == null) {
 				continue; // need extension interface from type
 			}

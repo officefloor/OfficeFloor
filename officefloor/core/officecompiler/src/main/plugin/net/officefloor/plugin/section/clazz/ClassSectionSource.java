@@ -281,11 +281,11 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 		}
 
 		// Sub section not registered, so create and register
+		String subSectionName = sectionInterfaceType.getSimpleName();
 		String subSectionSourceClassName = sectionAnnotation.source().getName();
 		String subSectionLocation = ("".equals(sectionAnnotation.location()))
 				? sectionAnnotation.locationClass().getName() : sectionAnnotation.location();
-		subSection = this.getDesigner().addSubSection(sectionInterfaceType.getSimpleName(), subSectionSourceClassName,
-				subSectionLocation);
+		subSection = this.getDesigner().addSubSection(subSectionName, subSectionSourceClassName, subSectionLocation);
 		PropertyList subSectionProperties = this.getContext().createPropertyList();
 		for (Property property : sectionAnnotation.properties()) {
 			String name = property.name();
@@ -314,8 +314,8 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 		}
 
 		// Load the section type
-		SectionType subSectionType = this.getContext().loadSectionType(subSectionSourceClassName, subSectionLocation,
-				subSectionProperties);
+		SectionType subSectionType = this.getContext().loadSectionType(subSectionName, subSectionSourceClassName,
+				subSectionLocation, subSectionProperties);
 
 		// Link objects of sub section
 		for (SectionObjectType subSectionObjectType : subSectionType.getSectionObjectTypes()) {
@@ -750,7 +750,8 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 			}
 
 			// Obtain the managed object
-			SectionManagedObject mo = this.getManagedObject(dependency.field.getType().getName());
+			String managedObjectName = dependency.field.getType().getName();
+			SectionManagedObject mo = this.getManagedObject(managedObjectName);
 
 			// Load the managed object type
 			PropertyList moProperties = context.createPropertyList();
@@ -758,7 +759,8 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 				String value = ("".equals(property.value()) ? property.valueClass().getName() : property.value());
 				moProperties.addProperty(property.name()).setValue(value);
 			}
-			ManagedObjectType<?> moType = context.loadManagedObjectType(annotation.source().getName(), moProperties);
+			ManagedObjectType<?> moType = context.loadManagedObjectType(managedObjectName,
+					annotation.source().getName(), moProperties);
 
 			// Link the dependencies for the managed object
 			for (ManagedObjectDependencyType<?> dependencyType : moType.getDependencyTypes()) {
@@ -797,14 +799,15 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 		}
 
 		// Load the namespace type for the class
+		String functionNamespace = "NAMESPACE";
 		PropertyList workProperties = context.createPropertyList();
 		workProperties.addProperty(SectionClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME)
 				.setValue(sectionClassName);
-		FunctionNamespaceType namespaceType = context
-				.loadManagedFunctionType(SectionClassManagedFunctionSource.class.getName(), workProperties);
+		FunctionNamespaceType namespaceType = context.loadManagedFunctionType(functionNamespace,
+				SectionClassManagedFunctionSource.class.getName(), workProperties);
 
 		// Add the namespace for the section class
-		SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace("NAMESPACE",
+		SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace(functionNamespace,
 				SectionClassManagedFunctionSource.class.getName());
 		namespace.addProperty(SectionClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, sectionClassName);
 

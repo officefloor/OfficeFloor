@@ -86,7 +86,9 @@ public interface OfficeSourceContext extends SourceContext {
 	 * This is to enable obtaining the type information for the
 	 * {@link ManagedObject} to allow reflective configuration by the
 	 * {@link OfficeSource}.
-	 * 
+	 *
+	 * @param managedObjectSourceName
+	 *            Name of the {@link ManagedObjectSource}.
 	 * @param managedObjectSourceClassName
 	 *            Name of the implementing {@link ManagedObjectSource} class.
 	 *            May also be an alias.
@@ -96,7 +98,8 @@ public interface OfficeSourceContext extends SourceContext {
 	 * @return {@link ManagedObjectType} or <code>null</code> if fails to load
 	 *         the {@link ManagedObjectType}.
 	 */
-	ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceClassName, PropertyList properties);
+	ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceName, String managedObjectSourceClassName,
+			PropertyList properties);
 
 	/**
 	 * <p>
@@ -106,6 +109,8 @@ public interface OfficeSourceContext extends SourceContext {
 	 * {@link Administration} to allow reflective configuration by the
 	 * {@link OfficeSource}.
 	 * 
+	 * @param administrationName
+	 *            Name of the {@link Administration}.
 	 * @param administrationSourceClassName
 	 *            Name of the implementing {@link AdministrationSource} class.
 	 *            May also be an alias.
@@ -115,7 +120,8 @@ public interface OfficeSourceContext extends SourceContext {
 	 * @return {@link AdministrationType} or <code>null</code> if fails to load
 	 *         the {@link AdministrationType}.
 	 */
-	AdministrationType<?, ?, ?> loadAdministrationType(String administrationSourceClassName, PropertyList properties);
+	AdministrationType<?, ?, ?> loadAdministrationType(String administrationName, String administrationSourceClassName,
+			PropertyList properties);
 
 	/**
 	 * <p>
@@ -125,6 +131,8 @@ public interface OfficeSourceContext extends SourceContext {
 	 * {@link Governance} to allow reflective configuration by the
 	 * {@link OfficeSource}.
 	 * 
+	 * @param governanceName
+	 *            Name of the {@link Governance}.
 	 * @param governanceSourceClassName
 	 *            Name of the implementing {@link GovernanceSource} class. May
 	 *            also be an alias.
@@ -134,6 +142,7 @@ public interface OfficeSourceContext extends SourceContext {
 	 * @return {@link GovernanceType} or <code>null</code> if fails to load the
 	 *         {@link GovernanceType}.
 	 */
-	GovernanceType<?, ?> loadGovernanceType(String governanceSourceClassName, PropertyList properties);
+	GovernanceType<?, ?> loadGovernanceType(String governanceName, String governanceSourceClassName,
+			PropertyList properties);
 
 }

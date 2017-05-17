@@ -698,8 +698,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 				PropertyList properties = context.createPropertyList();
 				properties.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME)
 						.setValue(MockLoadManagedObject.class.getName());
-				ManagedObjectType<?> managedObjectType = context
-						.loadManagedObjectType(ClassManagedObjectSource.class.getName(), properties);
+				ManagedObjectType<?> managedObjectType = context.loadManagedObjectType("MOS",
+						ClassManagedObjectSource.class.getName(), properties);
 
 				// Ensure correct managed object type
 				MockLoadManagedObject.assertManagedObjectType(managedObjectType);
@@ -725,7 +725,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 
 				// Do not specify class causing failure to load type
 				PropertyList properties = context.createPropertyList();
-				context.loadManagedObjectType(ClassManagedObjectSource.class.getName(), properties);
+				context.loadManagedObjectType("MOS", ClassManagedObjectSource.class.getName(), properties);
 
 				// Should not reach this point
 				fail("Should not successfully load managed object type");
@@ -750,8 +750,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 				PropertyList properties = context.createPropertyList();
 				properties.addProperty(ClassGovernanceSource.CLASS_NAME_PROPERTY_NAME)
 						.setValue(MockLoadGovernance.class.getName());
-				GovernanceType<?, ?> governanceType = context.loadGovernanceType(ClassGovernanceSource.class.getName(),
-						properties);
+				GovernanceType<?, ?> governanceType = context.loadGovernanceType("GOVERNANCE",
+						ClassGovernanceSource.class.getName(), properties);
 
 				// Ensure correct governance type
 				MockLoadGovernance.assertGovernanceType(governanceType);
@@ -777,7 +777,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 
 				// Do not specify class causing failure to load type
 				PropertyList properties = context.createPropertyList();
-				context.loadGovernanceType(ClassGovernanceSource.class.getName(), properties);
+				context.loadGovernanceType("GOVERNANCE", ClassGovernanceSource.class.getName(), properties);
 
 				// Should not reach this point
 				fail("Should not successfully load governance type");
@@ -802,8 +802,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 				PropertyList properties = context.createPropertyList();
 				properties.addProperty(ClassAdministrationSource.CLASS_NAME_PROPERTY_NAME)
 						.setValue(MockLoadAdministration.class.getName());
-				AdministrationType<?, ?, ?> administrationType = context
-						.loadAdministrationType(ClassAdministrationSource.class.getName(), properties);
+				AdministrationType<?, ?, ?> administrationType = context.loadAdministrationType("ADMINISTRATION",
+						ClassAdministrationSource.class.getName(), properties);
 
 				// Ensure correct administration type
 				MockLoadAdministration.assertAdministrationType(administrationType);
@@ -829,7 +829,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 
 				// Do not specify class causing failure to load type
 				PropertyList properties = context.createPropertyList();
-				context.loadAdministrationType(ClassAdministrationSource.class.getName(), properties);
+				context.loadAdministrationType("ADMINISTRATION", ClassAdministrationSource.class.getName(), properties);
 
 				// Should not reach this point
 				fail("Should not successfully load administration type");

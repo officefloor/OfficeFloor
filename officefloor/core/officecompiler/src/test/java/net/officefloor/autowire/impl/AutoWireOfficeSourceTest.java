@@ -2148,7 +2148,8 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 		// Load the governance type
 		GovernanceType<?, ?> governanceType = this.createMock(GovernanceType.class);
-		this.recordReturn(this.context, this.context.loadGovernanceType(GovernanceSource.class.getName(), properties),
+		this.recordReturn(this.context,
+				this.context.loadGovernanceType(governanceName, GovernanceSource.class.getName(), properties),
 				governanceType);
 		this.recordReturn(governanceType, governanceType.getExtensionInterface(), extensionInterface);
 

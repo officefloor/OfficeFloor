@@ -92,8 +92,8 @@ public class SectionSourceContextImpl extends SourceContextImpl implements Secti
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public FunctionNamespaceType loadManagedFunctionType(String managedFunctionSourceClassName,
-			PropertyList properties) {
+	public FunctionNamespaceType loadManagedFunctionType(String functionNamespace,
+			String managedFunctionSourceClassName, PropertyList properties) {
 		return CompileUtil.loadType(FunctionNamespaceType.class, managedFunctionSourceClassName,
 				this.context.getCompilerIssues(), () -> {
 
@@ -104,16 +104,22 @@ public class SectionSourceContextImpl extends SourceContextImpl implements Secti
 						return null;
 					}
 
+					// Load override properties
+					PropertyList overrideProperties = this.context.overrideProperties(this.parentSection,
+							this.parentSection.getQualifiedName(functionNamespace), properties);
+
 					// Load and return the function namespace type
 					ManagedFunctionLoader managedFunctionLoader = this.context
 							.getManagedFunctionLoader(this.parentSection);
-					return managedFunctionLoader.loadManagedFunctionType(managedFunctionSourceClass, properties);
+					return managedFunctionLoader.loadManagedFunctionType(managedFunctionSourceClass,
+							overrideProperties);
 				});
 	}
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceClassName, PropertyList properties) {
+	public ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceName,
+			String managedObjectSourceClassName, PropertyList properties) {
 		return CompileUtil.loadType(ManagedObjectType.class, managedObjectSourceClassName,
 				this.context.getCompilerIssues(), () -> {
 
@@ -124,16 +130,21 @@ public class SectionSourceContextImpl extends SourceContextImpl implements Secti
 						return null;
 					}
 
+					// Load override properties
+					PropertyList overrideProperties = this.context.overrideProperties(this.parentSection,
+							this.parentSection.getQualifiedName(managedObjectSourceName), properties);
+
 					// Load and return the managed object type
 					ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(this.parentSection);
-					return managedObjectLoader.loadManagedObjectType(managedObjectSourceClass, properties);
+					return managedObjectLoader.loadManagedObjectType(managedObjectSourceClass, overrideProperties);
 				});
 
 	}
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public SectionType loadSectionType(String sectionSourceClassName, String location, PropertyList properties) {
+	public SectionType loadSectionType(String sectionName, String sectionSourceClassName, String location,
+			PropertyList properties) {
 		return CompileUtil.loadType(SectionType.class, sectionSourceClassName, this.context.getCompilerIssues(), () -> {
 
 			// Obtain the section source class
@@ -142,9 +153,13 @@ public class SectionSourceContextImpl extends SourceContextImpl implements Secti
 				return null;
 			}
 
+			// Load override properties
+			PropertyList overrideProperties = this.context.overrideProperties(this.parentSection,
+					this.parentSection.getQualifiedName(sectionName), properties);
+
 			// Load and return the section type
 			SectionLoader sectionLoader = this.context.getSectionLoader(this.parentSection);
-			return sectionLoader.loadSectionType(sectionSourceClass, location, properties);
+			return sectionLoader.loadSectionType(sectionSourceClass, location, overrideProperties);
 		});
 	}
 
