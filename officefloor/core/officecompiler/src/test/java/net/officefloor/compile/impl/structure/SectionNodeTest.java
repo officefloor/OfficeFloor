@@ -712,10 +712,34 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 
 		// Obtain the section qualified name
 		SectionNode subSectionNode = (SectionNode) subSection;
-		String qualifiedName = subSectionNode.getQualifiedName("NAMESPACE");
+		String qualifiedName = subSectionNode.getSectionQualifiedName("NAMESPACE");
 
 		// Validate qualified name
 		assertEquals("Invalid section qualified name", "SECTION.SUB_SECTION.NAMESPACE", qualifiedName);
+	}
+
+	/**
+	 * Ensure able to get a {@link Office} qualified name.
+	 */
+	public void testQualifiedName() {
+
+		// Record obtaining the office qualified name
+		this.recordReturn(this.office, this.office.getQualifiedName("SECTION.SUB_SECTION.NAMESPACE"),
+				"OFFICE.SECTION.SUB_SECTION.NAMESPACE");
+		this.replayMockObjects();
+
+		// Create sub sections that provide qualified name
+		SubSection subSection = this.node.addSubSection("SUB_SECTION", NotUseSectionSource.class.getName(),
+				SECTION_LOCATION);
+
+		// Obtain the section qualified name
+		SectionNode subSectionNode = (SectionNode) subSection;
+		String qualifiedName = subSectionNode.getQualifiedName("NAMESPACE");
+
+		// Validate qualified name
+		assertEquals("Invalid section qualified name", "OFFICE.SECTION.SUB_SECTION.NAMESPACE", qualifiedName);
+
+		this.verifyMockObjects();
 	}
 
 	/**

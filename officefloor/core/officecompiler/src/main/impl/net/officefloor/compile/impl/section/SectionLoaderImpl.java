@@ -52,6 +52,11 @@ public class SectionLoaderImpl implements SectionLoader {
 	private final SectionNode parentSectionNode;
 
 	/**
+	 * {@link Node} requiring the {@link SectionLoader}.
+	 */
+	private final Node node;
+
+	/**
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext nodeContext;
@@ -71,15 +76,26 @@ public class SectionLoaderImpl implements SectionLoader {
 		this.officeNode = officeNode;
 		this.parentSectionNode = parentSectionNode;
 		this.nodeContext = nodeContext;
+
+		// Default to appropriate node
+		this.node = (this.parentSectionNode != null) ? this.parentSectionNode : this.officeNode;
 	}
 
 	/**
-	 * Obtains the {@link Node} requiring the {@link OfficeSection}.
+	 * Initiate.
 	 * 
-	 * @return {@link Node} requiring the {@link OfficeSection}.
+	 * @param node
+	 *            {@link Node} requiring the {@link SectionLoader}.
+	 * @param nodeContext
+	 *            {@link NodeContext}.
 	 */
-	private Node getNode() {
-		return (this.parentSectionNode != null) ? this.parentSectionNode : this.officeNode;
+	public SectionLoaderImpl(Node node, NodeContext nodeContext) {
+		this.node = node;
+		this.nodeContext = nodeContext;
+
+		// Provide defaults for creating the section node
+		this.officeNode = this.nodeContext.createOfficeNode("<office>", null);
+		this.parentSectionNode = null;
 	}
 
 	/**
@@ -117,7 +133,7 @@ public class SectionLoaderImpl implements SectionLoader {
 	public <S extends SectionSource> PropertyList loadSpecification(Class<S> sectionSourceClass) {
 
 		// Instantiate the section source
-		SectionSource sectionSource = CompileUtil.newInstance(sectionSourceClass, SectionSource.class, this.getNode(),
+		SectionSource sectionSource = CompileUtil.newInstance(sectionSourceClass, SectionSource.class, this.node,
 				this.nodeContext.getCompilerIssues());
 		if (sectionSource == null) {
 			return null; // failed to instantiate
@@ -208,7 +224,7 @@ public class SectionLoaderImpl implements SectionLoader {
 			PropertyList propertyList) {
 
 		// Instantiate the section source
-		SectionSource sectionSource = CompileUtil.newInstance(sectionSourceClass, SectionSource.class, this.getNode(),
+		SectionSource sectionSource = CompileUtil.newInstance(sectionSourceClass, SectionSource.class, this.node,
 				this.nodeContext.getCompilerIssues());
 		if (sectionSource == null) {
 			return null; // failed to instantiate
@@ -241,7 +257,7 @@ public class SectionLoaderImpl implements SectionLoader {
 			Class<S> sectionSourceClass, String sectionLocation, PropertyList propertyList) {
 
 		// Instantiate the section source
-		SectionSource sectionSource = CompileUtil.newInstance(sectionSourceClass, SectionSource.class, this.getNode(),
+		SectionSource sectionSource = CompileUtil.newInstance(sectionSourceClass, SectionSource.class, this.node,
 				this.nodeContext.getCompilerIssues());
 		if (sectionSource == null) {
 			return null; // failed to instantiate
@@ -277,7 +293,7 @@ public class SectionLoaderImpl implements SectionLoader {
 	 *            Description of the issue.
 	 */
 	private void addIssue(String issueDescription) {
-		this.nodeContext.getCompilerIssues().addIssue(this.getNode(), issueDescription);
+		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription);
 	}
 
 	/**
@@ -289,7 +305,7 @@ public class SectionLoaderImpl implements SectionLoader {
 	 *            Cause of the issue.
 	 */
 	private void addIssue(String issueDescription, Throwable cause) {
-		this.nodeContext.getCompilerIssues().addIssue(this.getNode(), issueDescription, cause);
+		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription, cause);
 	}
 
 }

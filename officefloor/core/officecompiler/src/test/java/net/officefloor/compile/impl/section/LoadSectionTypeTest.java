@@ -117,7 +117,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	public void testMissingProperty() {
 
 		// Record missing property
-		this.issues.recordIssue("Type", SectionNodeImpl.class,
+		this.issues.recordIssue("<type>", SectionNodeImpl.class,
 				"Missing property 'missing' for SectionSource " + MockSectionSource.class.getName());
 
 		// Attempt to load section type
@@ -159,7 +159,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	public void testMissingClass() {
 
 		// Record missing class
-		this.issues.recordIssue("Type", SectionNodeImpl.class,
+		this.issues.recordIssue("<type>", SectionNodeImpl.class,
 				"Can not load class 'missing' for SectionSource " + MockSectionSource.class.getName());
 
 		// Attempt to load section type
@@ -178,7 +178,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 
 		// Record missing resource
 		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource("missing"), null);
-		this.issues.recordIssue("Type", SectionNodeImpl.class,
+		this.issues.recordIssue("<type>", SectionNodeImpl.class,
 				"Can not obtain resource at location 'missing' for SectionSource " + MockSectionSource.class.getName());
 
 		// Attempt to load section type
@@ -233,7 +233,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		final NullPointerException failure = new NullPointerException("Fail source section type");
 
 		// Record failure to source the section type
-		this.issues.recordIssue("Type", SectionNodeImpl.class,
+		this.issues.recordIssue("<type>", SectionNodeImpl.class,
 				"Failed to source SectionType definition from SectionSource " + MockSectionSource.class.getName(),
 				failure);
 
@@ -518,10 +518,10 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 
 		// Ensure issue in not loading work type
 		CompilerIssue[] issues = this.issues.recordCaptureIssues(true);
-		this.issues.recordIssue("Type", SectionNodeImpl.class,
+		this.issues.recordIssue("<type>", SectionNodeImpl.class,
 				"Missing property 'class.name' for ManagedFunctionSource "
 						+ ClassManagedFunctionSource.class.getName());
-		this.issues.recordIssue("Type", SectionNodeImpl.class,
+		this.issues.recordIssue("<type>", SectionNodeImpl.class,
 				"Failure loading FunctionNamespaceType from source " + ClassManagedFunctionSource.class.getName(),
 				issues);
 
@@ -573,8 +573,8 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 
 		// Ensure issue in not loading managed object type
 		CompilerIssue[] issues = this.issues.recordCaptureIssues(true);
-		this.issues.recordIssue("Type", SectionNodeImpl.class, "Missing property 'class.name'");
-		this.issues.recordIssue("Type", SectionNodeImpl.class,
+		this.issues.recordIssue("<type>", SectionNodeImpl.class, "Missing property 'class.name'");
+		this.issues.recordIssue("<type>", SectionNodeImpl.class,
 				"Failure loading ManagedObjectType from source " + ClassManagedObjectSource.class.getName(), issues);
 
 		// Fail to load the managed object type
@@ -624,9 +624,9 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 
 		// Ensure issue in not loading managed object type
 		CompilerIssue[] issues = this.issues.recordCaptureIssues(true);
-		this.issues.recordIssue("Type", SectionNodeImpl.class,
+		this.issues.recordIssue("<type>", SectionNodeImpl.class,
 				"Missing property 'missing' for SectionSource " + FailSectionSource.class.getName());
-		this.issues.recordIssue("Type", SectionNodeImpl.class,
+		this.issues.recordIssue("<type>", SectionNodeImpl.class,
 				"Failure loading SectionType from source " + FailSectionSource.class.getName(), issues);
 
 		// Fail to load the managed object type

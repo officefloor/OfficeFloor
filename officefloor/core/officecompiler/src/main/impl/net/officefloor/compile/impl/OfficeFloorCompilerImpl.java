@@ -417,8 +417,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public SectionLoader getSectionLoader() {
-		OfficeNode officeNode = this.createOfficeNode("<office>", null);
-		return new SectionLoaderImpl(officeNode, null, this);
+		return new SectionLoaderImpl(this, this);
 	}
 
 	@Override

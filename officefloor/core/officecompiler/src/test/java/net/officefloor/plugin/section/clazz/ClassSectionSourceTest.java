@@ -403,11 +403,11 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 		// Record issue
 		CompilerIssue[] cause = issues.recordCaptureIssues(true);
-		issues.recordIssue("Type", SectionNodeImpl.class,
+		issues.recordIssue("<type>", SectionNodeImpl.class,
 				"Failed to source FunctionNamespaceType definition from ManagedFunctionSource "
 						+ SectionClassManagedFunctionSource.class.getName(),
 				new IllegalArgumentException("Method doInput parameter 0 has more than one Qualifier"));
-		issues.recordIssue("Type", SectionNodeImpl.class, "Failure loading FunctionNamespaceType from source "
+		issues.recordIssue("<type>", SectionNodeImpl.class, "Failure loading FunctionNamespaceType from source "
 				+ SectionClassManagedFunctionSource.class.getName(), cause);
 
 		// Create the expected section
@@ -516,7 +516,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(issues);
 
 		// Record issue
-		issues.recordIssue("Type", SectionNodeImpl.class, "Unable to obtain type qualifier for dependency connection",
+		issues.recordIssue("<type>", SectionNodeImpl.class, "Unable to obtain type qualifier for dependency connection",
 				new IllegalArgumentException("Dependency connection has more than one Qualifier"));
 
 		// Test
