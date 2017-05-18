@@ -192,11 +192,15 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public GovernanceType<?, ?> loadGovernanceType() {
 
+		// Load the override properties
+		PropertyList overrideProperties = this.context.overrideProperties(this,
+				this.officeNode.getQualifiedName(this.governanceName), this.properties);
+
 		// Create the governance loader
 		GovernanceLoader loader = this.context.getGovernanceLoader(this);
 		if (this.state.governanceSource != null) {
 			// Load and return the governance type
-			return loader.loadGovernanceType(this.state.governanceSource, properties);
+			return loader.loadGovernanceType(this.state.governanceSource, overrideProperties);
 
 		} else {
 
@@ -208,7 +212,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 			}
 
 			// Load and return the governance type
-			return loader.loadGovernanceType(governanceSourceClass, this.properties);
+			return loader.loadGovernanceType(governanceSourceClass, overrideProperties);
 		}
 	}
 

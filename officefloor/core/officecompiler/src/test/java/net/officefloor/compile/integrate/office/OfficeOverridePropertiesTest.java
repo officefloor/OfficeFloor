@@ -26,11 +26,14 @@ import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionFunctionNamespace;
-import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
+import net.officefloor.plugin.governance.clazz.Enforce;
+import net.officefloor.plugin.governance.clazz.Govern;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
@@ -67,7 +70,26 @@ public class OfficeOverridePropertiesTest extends AbstractCompileTestCase {
 	 * Ensure can override {@link Property} for the {@link OfficeGovernance}.
 	 */
 	public void testOverrideGovernanceProperties() {
-		fail("TODO implement");
+
+		// Enables override of properties
+		this.enableOverrideProperties();
+
+		// Record creating the section types
+		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
+
+		// Record the OfficeFloor
+		this.record_init();
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeBuilder_addGovernance("OVERRIDE_GOVERNANCE", ClassGovernanceSource.class,
+				CompileManagedObject.class);
+		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION",
+				CompileFunction.class, "function");
+		function.addGovernance("OVERRIDE_GOVERNANCE");
+
+		// Compile the OfficeFloor
+		this.compile(true);
 	}
 
 	/**
@@ -75,7 +97,23 @@ public class OfficeOverridePropertiesTest extends AbstractCompileTestCase {
 	 * {@link OfficeAdministration}.
 	 */
 	public void testOverrideAdministrationProperties() {
-		fail("TODO implement");
+
+		// Enables override of properties
+		this.enableOverrideProperties();
+
+		// Record creating the section types
+		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
+
+		// Record the OfficeFloor
+		this.record_init();
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION", CompileFunction.class, "function");
+		this.record_functionBuilder_preAdministration("OVERRIDE_ADMINISTRATION", CompileManagedObject.class);
+
+		// Compile the OfficeFloor
+		this.compile(true);
 	}
 
 	/**
@@ -102,9 +140,6 @@ public class OfficeOverridePropertiesTest extends AbstractCompileTestCase {
 	public static class CompileManagedObject {
 	}
 
-	/**
-	 * Test {@link SectionSource}.
-	 */
 	@TestSource
 	public static class TestSectionSource extends AbstractSectionSource {
 
@@ -129,6 +164,21 @@ public class OfficeOverridePropertiesTest extends AbstractCompileTestCase {
 
 	public static class CompileFunction {
 		public void function() {
+		}
+	}
+
+	public static class CompileAdministration {
+		public void administer(CompileManagedObject[] extensions) {
+		}
+	}
+
+	public static class CompileGovernance {
+		@Govern
+		public void govern(CompileManagedObject extensions) {
+		}
+
+		@Enforce
+		public void enforce() {
 		}
 	}
 }

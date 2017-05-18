@@ -222,9 +222,13 @@ public class AdministrationNodeImpl implements AdministrationNode {
 			return null; // must obtain source class
 		}
 
+		// Obtain the override properties
+		PropertyList overrideProperties = this.context.overrideProperties(this,
+				this.officeNode.getQualifiedName(this.administrationName), this.properties);
+
 		// Load and return the administration type
 		AdministrationLoader loader = this.context.getAdministrationLoader(this);
-		return loader.loadAdministrationType(administrationSourceClass, this.properties);
+		return loader.loadAdministrationType(administrationSourceClass, overrideProperties);
 	}
 
 	@Override

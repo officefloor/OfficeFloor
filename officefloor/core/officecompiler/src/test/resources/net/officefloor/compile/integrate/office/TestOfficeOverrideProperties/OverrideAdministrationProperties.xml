@@ -1,0 +1,25 @@
+<context>
+	<office-floor>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office>
+		<administrations>
+			<administration name="OVERRIDE_ADMINISTRATION" source="CLASS">
+				<properties>
+					<property name="class.name" value="to be overridden" />
+				</properties>
+			</administration>
+		</administrations>
+		<sections>
+			<section name="SECTION" source="CLASS" location="${testcase}$CompileFunction">
+				<sub-section>
+					<function name="function">
+						<pre-administer administration="OVERRIDE_ADMINISTRATION" />
+					</function>
+				</sub-section>
+			</section>
+		</sections>
+	</office>
+</context>

@@ -266,11 +266,21 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link SectionLoader}.
 	 * 
-	 * @param node
-	 *            {@link Node} requiring the {@link SectionLoader}.
+	 * @param officeNode
+	 *            {@link OfficeNode} requiring the {@link SectionLoader}.
 	 * @return {@link SectionLoader}.
 	 */
-	SectionLoader getSectionLoader(Node node);
+	SectionLoader getSectionLoader(OfficeNode officeNode);
+
+	/**
+	 * Obtains the {@link SectionLoader}.
+	 * 
+	 * @param parentSectionNode
+	 *            Parent {@link SectionNode} requiring the
+	 *            {@link SectionLoader}.
+	 * @return {@link SectionLoader}.
+	 */
+	SectionLoader getSectionLoader(SectionNode parentSectionNode);
 
 	/**
 	 * Creates the {@link SectionInputNode}.

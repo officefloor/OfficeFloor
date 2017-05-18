@@ -41,9 +41,15 @@ import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
 public class SectionLoaderImpl implements SectionLoader {
 
 	/**
-	 * {@link Node} requiring the {@link OfficeSection}.
+	 * {@link OfficeNode} containing the {@link OfficeSection}.
 	 */
-	private final Node node;
+	private final OfficeNode officeNode;
+
+	/**
+	 * Parent {@link SectionNode}. May be <code>null</code> if top level
+	 * {@link OfficeSection}.
+	 */
+	private final SectionNode parentSectionNode;
 
 	/**
 	 * {@link NodeContext}.
@@ -53,14 +59,54 @@ public class SectionLoaderImpl implements SectionLoader {
 	/**
 	 * Initiate.
 	 * 
-	 * @param node
-	 *            {@link Node} requiring the {@link OfficeSection}.
+	 * @param officeNode
+	 *            {@link OfficeNode} containing the {@link OfficeSection}.
+	 * @param parentSectionNode
+	 *            Parent {@link SectionNode}. May be <code>null</code> if top
+	 *            level {@link OfficeSection}.
 	 * @param nodeContext
 	 *            {@link NodeContext}.
 	 */
-	public SectionLoaderImpl(Node node, NodeContext nodeContext) {
-		this.node = node;
+	public SectionLoaderImpl(OfficeNode officeNode, SectionNode parentSectionNode, NodeContext nodeContext) {
+		this.officeNode = officeNode;
+		this.parentSectionNode = parentSectionNode;
 		this.nodeContext = nodeContext;
+	}
+
+	/**
+	 * Obtains the {@link Node} requiring the {@link OfficeSection}.
+	 * 
+	 * @return {@link Node} requiring the {@link OfficeSection}.
+	 */
+	private Node getNode() {
+		return (this.parentSectionNode != null) ? this.parentSectionNode : this.officeNode;
+	}
+
+	/**
+	 * Creates the {@link SectionNode} to load the {@link OfficeSectionType} or
+	 * {@link SectionType}.
+	 * 
+	 * @param sectionName
+	 *            Name of the {@link SectionNode}.
+	 * @param sectionSourceClassName
+	 *            {@link SectionSource} {@link Class} name.
+	 * @param sectionSource
+	 *            {@link SectionSource} instance. May be <code>null</code>.
+	 * @param sectionLocation
+	 *            Location of the {@link SectionNode}.
+	 * @return {@link SectionNode}.
+	 */
+	private SectionNode createSectionNode(String sectionName, String sectionSourceClassName,
+			SectionSource sectionSource, String sectionLocation) {
+
+		// Create the section node
+		SectionNode sectionNode = (this.parentSectionNode != null)
+				? this.nodeContext.createSectionNode(sectionName, this.parentSectionNode)
+				: this.nodeContext.createSectionNode(sectionName, this.officeNode);
+		sectionNode.initialise(sectionSourceClassName, sectionSource, sectionLocation);
+
+		// Return the section node
+		return sectionNode;
 	}
 
 	/*
@@ -71,7 +117,7 @@ public class SectionLoaderImpl implements SectionLoader {
 	public <S extends SectionSource> PropertyList loadSpecification(Class<S> sectionSourceClass) {
 
 		// Instantiate the section source
-		SectionSource sectionSource = CompileUtil.newInstance(sectionSourceClass, SectionSource.class, this.node,
+		SectionSource sectionSource = CompileUtil.newInstance(sectionSourceClass, SectionSource.class, this.getNode(),
 				this.nodeContext.getCompilerIssues());
 		if (sectionSource == null) {
 			return null; // failed to instantiate
@@ -162,7 +208,7 @@ public class SectionLoaderImpl implements SectionLoader {
 			PropertyList propertyList) {
 
 		// Instantiate the section source
-		SectionSource sectionSource = CompileUtil.newInstance(sectionSourceClass, SectionSource.class, this.node,
+		SectionSource sectionSource = CompileUtil.newInstance(sectionSourceClass, SectionSource.class, this.getNode(),
 				this.nodeContext.getCompilerIssues());
 		if (sectionSource == null) {
 			return null; // failed to instantiate
@@ -176,9 +222,8 @@ public class SectionLoaderImpl implements SectionLoader {
 	public SectionType loadSectionType(SectionSource sectionSource, String sectionLocation, PropertyList propertyList) {
 
 		// Create the section node
-		OfficeNode officeNode = this.nodeContext.createOfficeNode("<office>", null);
-		SectionNode sectionNode = this.nodeContext.createSectionNode("Type", officeNode);
-		sectionNode.initialise(sectionSource.getClass().getName(), sectionSource, sectionLocation);
+		SectionNode sectionNode = this.createSectionNode("<type>", sectionSource.getClass().getName(), sectionSource,
+				sectionLocation);
 		propertyList.configureProperties(sectionNode);
 
 		// Source the section
@@ -196,7 +241,7 @@ public class SectionLoaderImpl implements SectionLoader {
 			Class<S> sectionSourceClass, String sectionLocation, PropertyList propertyList) {
 
 		// Instantiate the section source
-		SectionSource sectionSource = CompileUtil.newInstance(sectionSourceClass, SectionSource.class, this.node,
+		SectionSource sectionSource = CompileUtil.newInstance(sectionSourceClass, SectionSource.class, this.getNode(),
 				this.nodeContext.getCompilerIssues());
 		if (sectionSource == null) {
 			return null; // failed to instantiate
@@ -211,9 +256,8 @@ public class SectionLoaderImpl implements SectionLoader {
 			String sectionLocation, PropertyList propertyList) {
 
 		// Create the section node
-		OfficeNode officeNode = this.nodeContext.createOfficeNode("<office>", null);
-		SectionNode sectionNode = this.nodeContext.createSectionNode(sectionName, officeNode);
-		sectionNode.initialise(sectionSource.getClass().getName(), sectionSource, sectionLocation);
+		SectionNode sectionNode = this.createSectionNode(sectionName, sectionSource.getClass().getName(), sectionSource,
+				sectionLocation);
 		propertyList.configureProperties(sectionNode);
 
 		// Source the section
@@ -233,7 +277,7 @@ public class SectionLoaderImpl implements SectionLoader {
 	 *            Description of the issue.
 	 */
 	private void addIssue(String issueDescription) {
-		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription);
+		this.nodeContext.getCompilerIssues().addIssue(this.getNode(), issueDescription);
 	}
 
 	/**
@@ -245,7 +289,7 @@ public class SectionLoaderImpl implements SectionLoader {
 	 *            Cause of the issue.
 	 */
 	private void addIssue(String issueDescription, Throwable cause) {
-		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription, cause);
+		this.nodeContext.getCompilerIssues().addIssue(this.getNode(), issueDescription, cause);
 	}
 
 }

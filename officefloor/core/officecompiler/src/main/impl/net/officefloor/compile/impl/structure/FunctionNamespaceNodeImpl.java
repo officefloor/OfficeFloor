@@ -198,9 +198,13 @@ public class FunctionNamespaceNodeImpl implements FunctionNamespaceNode {
 			return null; // must obtain managed function source class
 		}
 
+		// Obtain the override properties
+		PropertyList overrideProperties = this.context.overrideProperties(this,
+				this.section.getQualifiedName(this.namespaceName), this.propertyList);
+
 		// Load and return the managed function type
 		ManagedFunctionLoader managedFunctionLoader = this.context.getManagedFunctionLoader(this);
-		return managedFunctionLoader.loadManagedFunctionType(managedFunctionSourceClass, this.propertyList);
+		return managedFunctionLoader.loadManagedFunctionType(managedFunctionSourceClass, overrideProperties);
 	}
 
 }
