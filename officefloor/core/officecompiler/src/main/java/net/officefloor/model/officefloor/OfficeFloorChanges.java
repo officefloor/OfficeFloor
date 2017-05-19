@@ -77,9 +77,8 @@ public interface OfficeFloorChanges {
 	 *            {@link TeamType}.
 	 * @return {@link Change} to add the {@link OfficeFloorTeamModel}.
 	 */
-	Change<OfficeFloorTeamModel> addOfficeFloorTeam(String teamName,
-			String teamSourceClassName, PropertyList propertylist,
-			TeamType teamType);
+	Change<OfficeFloorTeamModel> addOfficeFloorTeam(String teamName, String teamSourceClassName,
+			PropertyList propertylist, TeamType teamType);
 
 	/**
 	 * Removes the {@link OfficeFloorTeamModel}.
@@ -88,8 +87,7 @@ public interface OfficeFloorChanges {
 	 *            {@link OfficeFloorTeamModel} to remove.
 	 * @return {@link Change} to remove the {@link OfficeFloorTeamModel}.
 	 */
-	Change<OfficeFloorTeamModel> removeOfficeFloorTeam(
-			OfficeFloorTeamModel officeFloorTeam);
+	Change<OfficeFloorTeamModel> removeOfficeFloorTeam(OfficeFloorTeamModel officeFloorTeam);
 
 	/**
 	 * Renames the {@link OfficeFloorTeamModel}.
@@ -100,8 +98,32 @@ public interface OfficeFloorChanges {
 	 *            New name for the {@link OfficeFloorTeamModel}.
 	 * @return {@link Change} to rename the {@link OfficeFloorTeamModel}.
 	 */
-	Change<OfficeFloorTeamModel> renameOfficeFloorTeam(
-			OfficeFloorTeamModel officeFloorTeam, String newOfficeFloorTeamName);
+	Change<OfficeFloorTeamModel> renameOfficeFloorTeam(OfficeFloorTeamModel officeFloorTeam,
+			String newOfficeFloorTeamName);
+
+	/**
+	 * Adds {@link TypeQualificationModel} to the {@link OfficeFloorTeamModel}.
+	 * 
+	 * @param officeFloorTeam
+	 *            {@link OfficeFloorTeamModel}.
+	 * @param qualifier
+	 *            Qualifier. May be <code>null</code>.
+	 * @param type
+	 *            Type.
+	 * @return {@link Change} to add the {@link TypeQualificationModel}.
+	 */
+	Change<TypeQualificationModel> addOfficeFloorTeamTypeQualification(OfficeFloorTeamModel officeFloorTeam,
+			String qualifier, String type);
+
+	/**
+	 * Removes the {@link TypeQualificationModel} from the
+	 * {@link OfficeFloorTeamModel}.
+	 * 
+	 * @param typeQualification
+	 *            {@link TypeQualificationModel}.
+	 * @return {@link Change} to remove the {@link TypeQualificationModel}.
+	 */
+	Change<TypeQualificationModel> removeOfficeFloorTeamTypeQualification(TypeQualificationModel typeQualification);
 
 	/**
 	 * Adds a {@link DeployedOfficeModel} to the {@link OfficeFloorModel}.
@@ -118,9 +140,8 @@ public interface OfficeFloorChanges {
 	 *            {@link OfficeType}.
 	 * @return {@link Change} to add the {@link DeployedOfficeModel}.
 	 */
-	Change<DeployedOfficeModel> addDeployedOffice(String officeName,
-			String officeSourceClassName, String officeLocation,
-			PropertyList propertyList, OfficeType officeType);
+	Change<DeployedOfficeModel> addDeployedOffice(String officeName, String officeSourceClassName,
+			String officeLocation, PropertyList propertyList, OfficeType officeType);
 
 	/**
 	 * Removes the {@link DeployedOfficeModel}.
@@ -129,8 +150,7 @@ public interface OfficeFloorChanges {
 	 *            {@link DeployedOfficeModel} to remove.
 	 * @return {@link Change} to remove the {@link DeployedOfficeModel}.
 	 */
-	Change<DeployedOfficeModel> removeDeployedOffice(
-			DeployedOfficeModel deployedOffice);
+	Change<DeployedOfficeModel> removeDeployedOffice(DeployedOfficeModel deployedOffice);
 
 	/**
 	 * Renames the {@link DeployedOfficeModel}.
@@ -141,8 +161,7 @@ public interface OfficeFloorChanges {
 	 *            New name for the {@link DeployedOfficeModel}.
 	 * @return {@link Change} to rename the {@link DeployedOfficeModel}.
 	 */
-	Change<DeployedOfficeModel> renameDeployedOffice(
-			DeployedOfficeModel deployedOffice, String newDeployedOfficeName);
+	Change<DeployedOfficeModel> renameDeployedOffice(DeployedOfficeModel deployedOffice, String newDeployedOfficeName);
 
 	/**
 	 * Refactors the {@link DeployedOfficeModel}.
@@ -172,12 +191,9 @@ public interface OfficeFloorChanges {
 	 *            {@link DeployedOfficeTeamModel} name.
 	 * @return {@link Change} to refactor the {@link DeployedOfficeModel}.
 	 */
-	Change<DeployedOfficeModel> refactorDeployedOffice(
-			DeployedOfficeModel deployedOffice, String officeName,
-			String officeSourceClassName, String officeLocation,
-			PropertyList properties, OfficeType officeType,
-			Map<String, String> objectNameMapping,
-			Map<String, String> inputNameMapping,
+	Change<DeployedOfficeModel> refactorDeployedOffice(DeployedOfficeModel deployedOffice, String officeName,
+			String officeSourceClassName, String officeLocation, PropertyList properties, OfficeType officeType,
+			Map<String, String> objectNameMapping, Map<String, String> inputNameMapping,
 			Map<String, String> teamNameMapping);
 
 	/**
@@ -197,10 +213,9 @@ public interface OfficeFloorChanges {
 	 * @return {@link Change} to add the
 	 *         {@link OfficeFloorManagedObjectSourceModel}.
 	 */
-	Change<OfficeFloorManagedObjectSourceModel> addOfficeFloorManagedObjectSource(
-			String managedObjectSourceName,
-			String managedObjectSourceClassName, PropertyList properties,
-			long timeout, ManagedObjectType<?> managedObjectType);
+	Change<OfficeFloorManagedObjectSourceModel> addOfficeFloorManagedObjectSource(String managedObjectSourceName,
+			String managedObjectSourceClassName, PropertyList properties, long timeout,
+			ManagedObjectType<?> managedObjectType);
 
 	/**
 	 * Removes the {@link OfficeFloorManagedObjectSourceModel}.
@@ -224,8 +239,7 @@ public interface OfficeFloorChanges {
 	 *         {@link OfficeFloorManagedObjectSourceModel}.
 	 */
 	Change<OfficeFloorManagedObjectSourceModel> renameOfficeFloorManagedObjectSource(
-			OfficeFloorManagedObjectSourceModel managedObjectSource,
-			String newManagedObjectSourceName);
+			OfficeFloorManagedObjectSourceModel managedObjectSource, String newManagedObjectSourceName);
 
 	/**
 	 * Adds an {@link OfficeFloorManagedObjectModel} for an
@@ -243,9 +257,8 @@ public interface OfficeFloorChanges {
 	 *            {@link ManagedObjectType}.
 	 * @return {@link Change} to add the {@link OfficeFloorManagedObjectModel}.
 	 */
-	Change<OfficeFloorManagedObjectModel> addOfficeFloorManagedObject(
-			String managedObjectName, ManagedObjectScope managedObjectScope,
-			OfficeFloorManagedObjectSourceModel managedObjectSource,
+	Change<OfficeFloorManagedObjectModel> addOfficeFloorManagedObject(String managedObjectName,
+			ManagedObjectScope managedObjectScope, OfficeFloorManagedObjectSourceModel managedObjectSource,
 			ManagedObjectType<?> managedObjectType);
 
 	/**
@@ -256,8 +269,7 @@ public interface OfficeFloorChanges {
 	 * @return {@link Change} to remove the
 	 *         {@link OfficeFloorManagedObjectModel}.
 	 */
-	Change<OfficeFloorManagedObjectModel> removeOfficeFloorManagedObject(
-			OfficeFloorManagedObjectModel managedObject);
+	Change<OfficeFloorManagedObjectModel> removeOfficeFloorManagedObject(OfficeFloorManagedObjectModel managedObject);
 
 	/**
 	 * Renames the {@link OfficeFloorManagedObjectModel}.
@@ -269,8 +281,7 @@ public interface OfficeFloorChanges {
 	 * @return {@link Change} to rename the
 	 *         {@link OfficeFloorManagedObjectModel}.
 	 */
-	Change<OfficeFloorManagedObjectModel> renameOfficeFloorManagedObject(
-			OfficeFloorManagedObjectModel managedObject,
+	Change<OfficeFloorManagedObjectModel> renameOfficeFloorManagedObject(OfficeFloorManagedObjectModel managedObject,
 			String newManagedObjectName);
 
 	/**
@@ -283,8 +294,7 @@ public interface OfficeFloorChanges {
 	 *            {@link OfficeFloorManagedObjectModel}.
 	 * @return {@link Change} to scope {@link OfficeFloorManagedObjectModel}.
 	 */
-	Change<OfficeFloorManagedObjectModel> rescopeOfficeFloorManagedObject(
-			OfficeFloorManagedObjectModel managedObject,
+	Change<OfficeFloorManagedObjectModel> rescopeOfficeFloorManagedObject(OfficeFloorManagedObjectModel managedObject,
 			ManagedObjectScope newManagedObjectScope);
 
 	/**
@@ -299,8 +309,7 @@ public interface OfficeFloorChanges {
 	 *         {@link OfficeFloorManagedObjectSourceToDeployedOfficeModel}.
 	 */
 	Change<OfficeFloorManagedObjectSourceToDeployedOfficeModel> linkOfficeFloorManagedObjectSourceToDeployedOffice(
-			OfficeFloorManagedObjectSourceModel officeFloorManagedObjectSource,
-			DeployedOfficeModel deployedOffice);
+			OfficeFloorManagedObjectSourceModel officeFloorManagedObjectSource, DeployedOfficeModel deployedOffice);
 
 	/**
 	 * Removes the {@link OfficeFloorManagedObjectSourceToDeployedOfficeModel}.
@@ -324,8 +333,8 @@ public interface OfficeFloorChanges {
 	 * @return {@link Change} to add the
 	 *         {@link OfficeFloorInputManagedObjectModel}.
 	 */
-	Change<OfficeFloorInputManagedObjectModel> addOfficeFloorInputManagedObject(
-			String inputManagedObjectName, String objectType);
+	Change<OfficeFloorInputManagedObjectModel> addOfficeFloorInputManagedObject(String inputManagedObjectName,
+			String objectType);
 
 	/**
 	 * Renames the {@link OfficeFloorInputManagedObjectModel}.
@@ -338,8 +347,7 @@ public interface OfficeFloorChanges {
 	 *         {@link OfficeFloorInputManagedObjectModel}.
 	 */
 	Change<OfficeFloorInputManagedObjectModel> renameOfficeFloorInputManagedObject(
-			OfficeFloorInputManagedObjectModel inputManagedObject,
-			String newInputManagedObjectName);
+			OfficeFloorInputManagedObjectModel inputManagedObject, String newInputManagedObjectName);
 
 	/**
 	 * Removes the {@link OfficeFloorInputManagedObjectModel}.
@@ -538,8 +546,7 @@ public interface OfficeFloorChanges {
 	 *         {@link DeployedOfficeObjectToOfficeFloorManagedObjectModel}.
 	 */
 	Change<DeployedOfficeObjectToOfficeFloorManagedObjectModel> linkDeployedOfficeObjectToOfficeFloorManagedObject(
-			DeployedOfficeObjectModel deployedOfficeObject,
-			OfficeFloorManagedObjectModel officeFloorManagedObject);
+			DeployedOfficeObjectModel deployedOfficeObject, OfficeFloorManagedObjectModel officeFloorManagedObject);
 
 	/**
 	 * Removes the {@link DeployedOfficeObjectToOfficeFloorManagedObjectModel}.
@@ -565,8 +572,7 @@ public interface OfficeFloorChanges {
 	 *         {@link DeployedOfficeObjectToOfficeFloorInputManagedObjectModel}.
 	 */
 	Change<DeployedOfficeObjectToOfficeFloorInputManagedObjectModel> linkDeployedOfficeObjectToOfficeFloorInputManagedObject(
-			DeployedOfficeObjectModel deployedOfficeObject,
-			OfficeFloorInputManagedObjectModel inputManagedObject);
+			DeployedOfficeObjectModel deployedOfficeObject, OfficeFloorInputManagedObjectModel inputManagedObject);
 
 	/**
 	 * Removes the
@@ -593,8 +599,7 @@ public interface OfficeFloorChanges {
 	 *         {@link DeployedOfficeTeamToOfficeFloorTeamModel}.
 	 */
 	Change<DeployedOfficeTeamToOfficeFloorTeamModel> linkDeployedOfficeTeamToOfficeFloorTeam(
-			DeployedOfficeTeamModel deployedOfficeTeam,
-			OfficeFloorTeamModel officeFloorTeam);
+			DeployedOfficeTeamModel deployedOfficeTeam, OfficeFloorTeamModel officeFloorTeam);
 
 	/**
 	 * Removes the {@link DeployedOfficeTeamToOfficeFloorTeamModel}.

@@ -1,0 +1,7 @@
+<office-floor>
+	<teams>
+		<team name="TEAM" source="ONE_PERSON">
+			<type-qualification type="TYPE" />
+		</team>
+	</teams>
+</office-floor>

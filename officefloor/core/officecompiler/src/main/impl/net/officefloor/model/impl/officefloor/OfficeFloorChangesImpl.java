@@ -43,6 +43,8 @@ import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.change.AbstractChange;
 import net.officefloor.model.impl.change.DisconnectChange;
+import net.officefloor.model.impl.change.NoChange;
+import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
@@ -68,6 +70,7 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorMa
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.PropertyModel;
+import net.officefloor.model.officefloor.TypeQualificationModel;
 
 /**
  * {@link OfficeFloorChanges} implementation.
@@ -883,6 +886,61 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 			@Override
 			public void revert() {
 				officeFloorTeam.setOfficeFloorTeamName(oldOfficeFloorTeamName);
+			}
+		};
+	}
+
+	@Override
+	public Change<TypeQualificationModel> addOfficeFloorTeamTypeQualification(OfficeFloorTeamModel officeFloorTeam,
+			String qualifier, String type) {
+
+		// Create the type qualification
+		final TypeQualificationModel typeQualification = new TypeQualificationModel(qualifier, type);
+
+		// Return change to add type qualification
+		return new AbstractChange<TypeQualificationModel>(typeQualification, "Add Team Type Qualification") {
+			@Override
+			public void apply() {
+				officeFloorTeam.addTypeQualification(typeQualification);
+			}
+
+			@Override
+			public void revert() {
+				officeFloorTeam.removeTypeQualification(typeQualification);
+			}
+		};
+	}
+
+	@Override
+	public Change<TypeQualificationModel> removeOfficeFloorTeamTypeQualification(
+			TypeQualificationModel typeQualification) {
+
+		// Find the team containing the type qualification
+		OfficeFloorTeamModel containingOfficeTeam = null;
+		for (OfficeFloorTeamModel team : this.officeFloor.getOfficeFloorTeams()) {
+			for (TypeQualificationModel check : team.getTypeQualifications()) {
+				if (check == typeQualification) {
+					containingOfficeTeam = team;
+				}
+			}
+		}
+		if (containingOfficeTeam == null) {
+			// Must find team containing type qualification
+			return new NoChange<TypeQualificationModel>(typeQualification, "Remove Team Type Qualification",
+					"Type Qualification not on Team in Office");
+		}
+
+		// Return change to remove type qualification
+		final OfficeFloorTeamModel officeTeam = containingOfficeTeam;
+		return new AbstractChange<TypeQualificationModel>(typeQualification, "Remove Team Type Qualification") {
+			@Override
+			public void apply() {
+				officeTeam.removeTypeQualification(typeQualification);
+			}
+
+			@Override
+			public void revert() {
+				officeTeam.addTypeQualification(typeQualification);
 			}
 		};
 	}
