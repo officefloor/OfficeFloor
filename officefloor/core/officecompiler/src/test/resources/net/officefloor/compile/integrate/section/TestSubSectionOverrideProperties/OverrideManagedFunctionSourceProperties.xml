@@ -1,0 +1,39 @@
+<context>
+	<office-floor>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office>
+		<sections>
+			<section name="SECTION" source="SECTION" location="parent-section" />
+		</sections>
+	</office>
+	<parent-section>
+		<section>
+			<section>
+				<sub-sections>
+					<sub-section name="SUB_SECTION" source="SECTION"
+						location="sub-section" />
+				</sub-sections>
+			</section>
+		</section>
+	</parent-section>
+	<sub-section>
+		<section>
+			<function-namespaces>
+				<function-namespace name="OVERRIDE_MANAGED_FUNCTION_SOURCE"
+					source="CLASS">
+					<properties>
+						<property name="class.name" value="to be overridden" />
+					</properties>
+					<managed-function name="function" />
+				</function-namespace>
+			</function-namespaces>
+			<functions>
+				<function name="function" function-namespace="OVERRIDE_MANAGED_FUNCTION_SOURCE"
+					managed-function="function" />
+			</functions>
+		</section>
+	</sub-section>
+</context>

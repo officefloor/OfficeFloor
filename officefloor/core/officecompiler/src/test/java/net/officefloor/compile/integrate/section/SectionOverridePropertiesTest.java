@@ -123,7 +123,7 @@ public class SectionOverridePropertiesTest extends AbstractCompileTestCase {
 
 		@Override
 		public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
-			assertEquals("Property should be overridden", "overridden", context.getProperty("value"));
+			assertEquals("Property should be overridden", "section", context.getProperty("value"));
 			assertEquals("Should have additional property", "another", context.getProperty("additional"));
 
 			// Provide function (to ensure is loaded)
