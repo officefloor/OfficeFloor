@@ -116,6 +116,15 @@ public class TeamNodeImpl implements TeamNode {
 		this.propertyList = this.context.createPropertyList();
 	}
 
+	/**
+	 * Obtains the {@link PropertyList}.
+	 * 
+	 * @return {@link PropertyList}.
+	 */
+	public PropertyList getProperties() {
+		return this.context.overrideProperties(this, this.teamName, this.propertyList);
+	}
+
 	/*
 	 * ========================= Node ======================================
 	 */
@@ -173,7 +182,7 @@ public class TeamNodeImpl implements TeamNode {
 		}
 
 		// Load and return the team type
-		return loader.loadTeamType(this.teamName, teamSourceClass, this.propertyList);
+		return loader.loadTeamType(this.teamName, teamSourceClass, this.getProperties());
 	}
 
 	@Override
@@ -201,7 +210,7 @@ public class TeamNodeImpl implements TeamNode {
 		}
 
 		// Load and return the team source type
-		return loader.loadOfficeFloorTeamSourceType(this.teamName, teamSourceClass, this.propertyList);
+		return loader.loadOfficeFloorTeamSourceType(this.teamName, teamSourceClass, this.getProperties());
 	}
 
 	@Override
@@ -221,7 +230,7 @@ public class TeamNodeImpl implements TeamNode {
 
 		// Build the team
 		TeamBuilder<?> teamBuilder = builder.addTeam(this.teamName, teamSourceClass);
-		for (Property property : this.propertyList) {
+		for (Property property : this.getProperties()) {
 			teamBuilder.addProperty(property.getName(), property.getValue());
 		}
 	}

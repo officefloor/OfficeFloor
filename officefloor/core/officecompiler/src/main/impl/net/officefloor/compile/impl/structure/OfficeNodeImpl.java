@@ -403,9 +403,12 @@ public class OfficeNodeImpl implements OfficeNode {
 			}
 		}
 
+		// Obtain the override properties
+		PropertyList overrideProperties = this.context.overrideProperties(this, this.officeName, this.properties);
+
 		// Create the office source context
-		OfficeSourceContextImpl context = new OfficeSourceContextImpl(false, this.state.officeLocation, properties,
-				this, this.context);
+		OfficeSourceContextImpl context = new OfficeSourceContextImpl(false, this.state.officeLocation,
+				overrideProperties, this, this.context);
 
 		// Obtain the extension services (ensuring all are available)
 		List<OfficeExtensionService> extensionServices = new ArrayList<>();

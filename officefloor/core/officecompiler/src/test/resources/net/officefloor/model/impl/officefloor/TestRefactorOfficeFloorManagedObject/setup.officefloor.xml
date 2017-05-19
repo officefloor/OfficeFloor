@@ -1,0 +1,7 @@
+<office-floor>
+	<managed-objects>
+		<managed-object name="TEAM">
+			<type-qualification type="TYPE" />
+		</managed-object>
+	</managed-objects>
+</office-floor>

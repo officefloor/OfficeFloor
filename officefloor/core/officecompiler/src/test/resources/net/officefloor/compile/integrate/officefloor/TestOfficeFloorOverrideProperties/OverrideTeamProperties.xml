@@ -1,0 +1,11 @@
+<context>
+	<office-floor>
+		<teams>
+			<team name="OVERRIDE_TEAM" source="${testcase}$TestTeamSource">
+				<properties>
+					<property name="value" value="to be overridden" />
+				</properties>
+			</team>
+		</teams>
+	</office-floor>
+</context>

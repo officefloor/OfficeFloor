@@ -44,7 +44,6 @@ import net.officefloor.compile.section.OfficeSectionOutputType;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
 import net.officefloor.compile.spi.office.OfficeSectionFunction;
-import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.change.Change;
@@ -1165,6 +1164,62 @@ public class OfficeChangesImpl implements OfficeChanges {
 			@Override
 			public void revert() {
 				managedObject.setManagedObjectScope(oldScope);
+			}
+		};
+	}
+
+	@Override
+	public Change<TypeQualificationModel> addOfficeManagedObjectTypeQualification(
+			OfficeManagedObjectModel officeManagedObject, String qualifier, String type) {
+
+		// Create the type qualification
+		final TypeQualificationModel typeQualification = new TypeQualificationModel(qualifier, type);
+
+		// Return change to add type qualification
+		return new AbstractChange<TypeQualificationModel>(typeQualification, "Add Managed Object Type Qualification") {
+			@Override
+			public void apply() {
+				officeManagedObject.addTypeQualification(typeQualification);
+			}
+
+			@Override
+			public void revert() {
+				officeManagedObject.removeTypeQualification(typeQualification);
+			}
+		};
+	}
+
+	@Override
+	public Change<TypeQualificationModel> removeOfficeManagedObjectTypeQualification(
+			TypeQualificationModel typeQualification) {
+
+		// Find the managed object containing the type qualification
+		OfficeManagedObjectModel containingOfficeManagedObject = null;
+		for (OfficeManagedObjectModel mo : this.office.getOfficeManagedObjects()) {
+			for (TypeQualificationModel check : mo.getTypeQualifications()) {
+				if (check == typeQualification) {
+					containingOfficeManagedObject = mo;
+				}
+			}
+		}
+		if (containingOfficeManagedObject == null) {
+			// Must find managed object containing type qualification
+			return new NoChange<TypeQualificationModel>(typeQualification, "Remove Managed Object Type Qualification",
+					"Type Qualification not on Managed Object in Office");
+		}
+
+		// Return change to remove type qualification
+		final OfficeManagedObjectModel officeManagedObject = containingOfficeManagedObject;
+		return new AbstractChange<TypeQualificationModel>(typeQualification,
+				"Remove Managed Object Type Qualification") {
+			@Override
+			public void apply() {
+				officeManagedObject.removeTypeQualification(typeQualification);
+			}
+
+			@Override
+			public void revert() {
+				officeManagedObject.addTypeQualification(typeQualification);
 			}
 		};
 	}

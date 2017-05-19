@@ -329,6 +329,31 @@ public interface OfficeChanges {
 			ManagedObjectScope newManagedObjectScope);
 
 	/**
+	 * Adds {@link TypeQualificationModel} to the
+	 * {@link OfficeManagedObjectModel}.
+	 * 
+	 * @param officeManagedObject
+	 *            {@link OfficeManagedObjectModel}.
+	 * @param qualifier
+	 *            Qualifier. May be <code>null</code>.
+	 * @param type
+	 *            Type.
+	 * @return {@link Change} to add the {@link TypeQualificationModel}.
+	 */
+	Change<TypeQualificationModel> addOfficeManagedObjectTypeQualification(OfficeManagedObjectModel officeManagedObject,
+			String qualifier, String type);
+
+	/**
+	 * Removes the {@link TypeQualificationModel} from the
+	 * {@link OfficeManagedObjectModel}.
+	 * 
+	 * @param typeQualification
+	 *            {@link TypeQualificationModel}.
+	 * @return {@link Change} to remove the {@link TypeQualificationModel}.
+	 */
+	Change<TypeQualificationModel> removeOfficeManagedObjectTypeQualification(TypeQualificationModel typeQualification);
+
+	/**
 	 * Adds an {@link AdministrationModel} to the {@link OfficeModel}.
 	 * 
 	 * @param administrationName

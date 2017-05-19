@@ -298,6 +298,32 @@ public interface OfficeFloorChanges {
 			ManagedObjectScope newManagedObjectScope);
 
 	/**
+	 * Adds {@link TypeQualificationModel} to the
+	 * {@link OfficeFloorManagedObjectModel}.
+	 * 
+	 * @param officeFloorManagedObject
+	 *            {@link OfficeFloorManagedObjectModel}.
+	 * @param qualifier
+	 *            Qualifier. May be <code>null</code>.
+	 * @param type
+	 *            Type.
+	 * @return {@link Change} to add the {@link TypeQualificationModel}.
+	 */
+	Change<TypeQualificationModel> addOfficeFloorManagedObjectTypeQualification(
+			OfficeFloorManagedObjectModel officeFloorManagedObject, String qualifier, String type);
+
+	/**
+	 * Removes the {@link TypeQualificationModel} from the
+	 * {@link OfficeFloorManagedObjectModel}.
+	 * 
+	 * @param typeQualification
+	 *            {@link TypeQualificationModel}.
+	 * @return {@link Change} to remove the {@link TypeQualificationModel}.
+	 */
+	Change<TypeQualificationModel> removeOfficeFloorManagedObjectTypeQualification(
+			TypeQualificationModel typeQualification);
+
+	/**
 	 * Links the {@link OfficeFloorManagedObjectSourceModel} to the
 	 * {@link DeployedOfficeModel}.
 	 * 
