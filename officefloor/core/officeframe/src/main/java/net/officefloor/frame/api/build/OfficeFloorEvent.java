@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,34 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.autowire;
+package net.officefloor.frame.api.build;
 
-import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
- * MBean for auto-wire {@link OfficeFloor}.
+ * {@link OfficeFloor} event.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AutoWireManagementMBean {
+public interface OfficeFloorEvent {
 
 	/**
-	 * Invokes the {@link ManagedFunction} on the {@link OfficeFloor}.
+	 * Obtains the {@link OfficeFloor}.
 	 * 
-	 * @param functionName
-	 *            Name of the {@link ManagedFunction}.
-	 * @throws Exception
-	 *             If fails to invoke the {@link ManagedFunction}.
+	 * @return {@link OfficeFloor}.
 	 */
-	void invokeFunction(String functionName) throws Exception;
-
-	/**
-	 * Closes the {@link OfficeFloor}.
-	 * 
-	 * @throws Exception
-	 *             If fails to close the {@link OfficeFloor}.
-	 */
-	void closeOfficeFloor() throws Exception;
+	OfficeFloor getOfficeFloor();
 
 }

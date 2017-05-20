@@ -26,6 +26,7 @@ import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuildException;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -119,6 +120,11 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	private EscalationHandler escalationHandler = null;
 
 	/**
+	 * {@link OfficeFloorListener} instances.
+	 */
+	private final List<OfficeFloorListener> listeners = new LinkedList<>();
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param officeFloorName
@@ -145,6 +151,11 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	@Override
 	public void addResources(ResourceSource resourceSource) {
 		this.resourceSources.add(resourceSource);
+	}
+
+	@Override
+	public void addOfficeFloorListener(OfficeFloorListener listener) {
+		this.listeners.add(listener);
 	}
 
 	@Override
@@ -210,7 +221,7 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 
 		// Obtain the office floor meta-data and return the office floor
 		OfficeFloorMetaData metaData = rawMetaData.getOfficeFloorMetaData();
-		return new OfficeFloorImpl(metaData);
+		return new OfficeFloorImpl(metaData, this.listeners.toArray(new OfficeFloorListener[this.listeners.size()]));
 	}
 
 	/*

@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,34 +15,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.autowire;
+package net.officefloor.frame.api.build;
 
-import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
- * MBean for auto-wire {@link OfficeFloor}.
+ * Listens to the open/close of the {@link OfficeFloor}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AutoWireManagementMBean {
+public interface OfficeFloorListener {
 
 	/**
-	 * Invokes the {@link ManagedFunction} on the {@link OfficeFloor}.
+	 * Notifies that the {@link OfficeFloor} has been opened.
 	 * 
-	 * @param functionName
-	 *            Name of the {@link ManagedFunction}.
+	 * @param event
+	 *            {@link OfficeFloorEvent}.
 	 * @throws Exception
-	 *             If fails to invoke the {@link ManagedFunction}.
+	 *             If fails to handle open listen logic.
 	 */
-	void invokeFunction(String functionName) throws Exception;
+	void officeFloorOpened(OfficeFloorEvent event) throws Exception;
 
 	/**
-	 * Closes the {@link OfficeFloor}.
+	 * Notifies that the {@link OfficeFloor} has been closed.
 	 * 
+	 * @param event
+	 *            {@link OfficeFloorEvent}.
 	 * @throws Exception
-	 *             If fails to close the {@link OfficeFloor}.
+	 *             If fails to handle close listen logic.
 	 */
-	void closeOfficeFloor() throws Exception;
+	void officeFloorClosed(OfficeFloorEvent event) throws Exception;
 
 }

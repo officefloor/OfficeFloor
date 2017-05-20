@@ -65,6 +65,14 @@ public interface OfficeFloorBuilder {
 	void addResources(ResourceSource resourceSource);
 
 	/**
+	 * Adds an {@link OfficeFloorListener}.
+	 * 
+	 * @param listener
+	 *            {@link OfficeFloorListener}.
+	 */
+	void addOfficeFloorListener(OfficeFloorListener listener);
+
+	/**
 	 * Adds a {@link ManagedObjectSource} to this {@link OfficeFloorBuilder}.
 	 * 
 	 * @param <O>

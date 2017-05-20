@@ -67,7 +67,10 @@ public interface AutoWireOfficeFloor {
 
 	/**
 	 * Closes the {@link OfficeFloor}.
+	 * 
+	 * @throws Exception
+	 *             If fails to close the {@link OfficeFloor}.
 	 */
-	void closeOfficeFloor();
+	void closeOfficeFloor() throws Exception;
 
 }

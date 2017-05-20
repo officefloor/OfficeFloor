@@ -17,8 +17,13 @@
  */
 package net.officefloor.compile.impl.mxbean;
 
-import javax.management.MXBean;
+import java.lang.management.ManagementFactory;
 
+import javax.management.MBeanServer;
+import javax.management.MXBean;
+import javax.management.ObjectName;
+
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -32,10 +37,41 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class OfficeFloorMXBeanTest extends OfficeFrameTestCase {
 
 	/**
+	 * Name value for the {@link OfficeFloor}.
+	 */
+	static final String MBEAN_NAME = "OfficeFloor";
+
+	/**
+	 * Obtains the {@link ObjectName} for the {@link OfficeFloor}.
+	 * 
+	 * @return {@link ObjectName} for the {@link OfficeFloor}.
+	 */
+	static ObjectName getObjectName() {
+		try {
+			return new ObjectName("officefloor:type=" + OfficeFloor.class.getName() + ",name=" + MBEAN_NAME + "*");
+		} catch (Exception ex) {
+			// This should never be the case
+			throw new Error(ex);
+		}
+	}
+
+	/**
 	 * Ensure registers {@link OfficeFloor} as an {@link MXBean}.
 	 */
-	public void testRegisterOfficeFloorAsMXBean() {
-		fail("TODO implement");
+	public void testRegisterOfficeFloorAsMXBean() throws Exception {
+
+		// Compile the OfficeFloor
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+		OfficeFloor officeFloor = compiler.compile(null);
+
+		// Ensure have name for OfficeFloor
+		ObjectName name = getObjectName();
+		assertNotNull("Must have object name", name);
+
+		// Ensure not registered yet as MXBean
+		MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+		assertFalse("Should not be registered, on just compiling", server.isRegistered(name));
+
 	}
 
 	/**

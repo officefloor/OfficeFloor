@@ -128,8 +128,11 @@ public class AutoWireManagement implements AutoWireManagementMBean {
 	/**
 	 * Convenience method to ensure all {@link AutoWireOfficeFloor} instances
 	 * are closed.
+	 * 
+	 * @throws Exception
+	 *             If fails to close the {@link OfficeFloor}.
 	 */
-	public static void closeAllOfficeFloors() {
+	public static void closeAllOfficeFloors() throws Exception {
 		for (AutoWireManagementMBean mbean : getAutoWireManagers()) {
 			mbean.closeOfficeFloor();
 		}
@@ -158,7 +161,7 @@ public class AutoWireManagement implements AutoWireManagementMBean {
 	}
 
 	@Override
-	public void closeOfficeFloor() {
+	public void closeOfficeFloor() throws Exception {
 		synchronized (AutoWireManagement.class) {
 
 			// Close the OfficeFloor

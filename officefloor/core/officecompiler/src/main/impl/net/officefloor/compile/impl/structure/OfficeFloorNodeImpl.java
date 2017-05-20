@@ -567,8 +567,12 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	@Override
 	public OfficeFloor deployOfficeFloor(OfficeFrame officeFrame, TypeContext typeContext) {
 
+		// Obtain the OfficeFloor name
+		String officeFloorName = (this.officeFloorLocation != null ? this.officeFloorLocation
+				: this.officeFloorSourceClassName);
+
 		// Obtain the OfficeFloor builder
-		OfficeFloorBuilder builder = officeFrame.createOfficeFloorBuilder(this.officeFloorLocation);
+		OfficeFloorBuilder builder = officeFrame.createOfficeFloorBuilder(officeFloorName);
 
 		// Initiate the OfficeFloor builder with compiler details
 		this.context.initiateOfficeFloorBuilder(builder);
@@ -653,7 +657,7 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 					bindings.buildInputManagedObjectIntoOffice(inputManagedObject);
 				});
 
-		// Return the built office floor
+		// Return the built OfficeFloor
 		return builder.buildOfficeFloor(new CompilerOfficeFloorIssues());
 	}
 

@@ -39,8 +39,11 @@ public interface OfficeFloor {
 	/**
 	 * Closes the OfficeFloor. This stops all {@link ManagedFunction} instances
 	 * executing within the {@link Office} instances and releases all resources.
+	 * 
+	 * @throws Exception
+	 *             If fails to close the {@link OfficeFloor}.
 	 */
-	void closeOfficeFloor();
+	void closeOfficeFloor() throws Exception;
 
 	/**
 	 * <p>

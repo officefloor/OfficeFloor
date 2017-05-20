@@ -100,7 +100,7 @@ public class AutoWireOfficeFloorImpl implements AutoWireOfficeFloor {
 	}
 
 	@Override
-	public void closeOfficeFloor() {
+	public void closeOfficeFloor() throws Exception {
 		this.administration.closeOfficeFloor();
 	}
 

@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import net.officefloor.frame.api.build.OfficeFloorEvent;
+import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.function.NameAwareManagedFunctionFactory;
 import net.officefloor.frame.api.function.OfficeAwareManagedFunctionFactory;
@@ -66,6 +68,11 @@ public class OfficeFloorImpl implements OfficeFloor {
 	private final OfficeFloorMetaData officeFloorMetaData;
 
 	/**
+	 * {@link OfficeFloorListener} instances.
+	 */
+	private final OfficeFloorListener[] listeners;
+
+	/**
 	 * {@link Office} instances by their name.
 	 */
 	private Map<String, Office> offices = null;
@@ -75,9 +82,12 @@ public class OfficeFloorImpl implements OfficeFloor {
 	 * 
 	 * @param officeFloorMetaData
 	 *            {@link OfficeFloorMetaData}.
+	 * @param listeners
+	 *            {@link OfficeFloorListener} instances.
 	 */
-	public OfficeFloorImpl(OfficeFloorMetaData officeFloorMetaData) {
+	public OfficeFloorImpl(OfficeFloorMetaData officeFloorMetaData, OfficeFloorListener[] listeners) {
 		this.officeFloorMetaData = officeFloorMetaData;
+		this.listeners = listeners;
 	}
 
 	/*
@@ -152,6 +162,16 @@ public class OfficeFloorImpl implements OfficeFloor {
 				officeMetaData.getFunctionLoop().delegateFunction(startupFunction);
 			}
 		}
+
+		// Notify the OfficeFloor is open
+		for (OfficeFloorListener listener : this.listeners) {
+			listener.officeFloorOpened(new OfficeFloorEvent() {
+				@Override
+				public OfficeFloor getOfficeFloor() {
+					return OfficeFloorImpl.this;
+				}
+			});
+		}
 	}
 
 	/**
@@ -182,7 +202,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 	}
 
 	@Override
-	public void closeOfficeFloor() {
+	public void closeOfficeFloor() throws Exception {
 
 		// Ensure open to be closed
 		if (this.offices == null) {
@@ -210,6 +230,16 @@ public class OfficeFloorImpl implements OfficeFloor {
 		} finally {
 			// Flag that no longer open
 			this.offices = null;
+
+			// Notify the OfficeFloor is closed
+			for (OfficeFloorListener listener : this.listeners) {
+				listener.officeFloorClosed(new OfficeFloorEvent() {
+					@Override
+					public OfficeFloor getOfficeFloor() {
+						return OfficeFloorImpl.this;
+					}
+				});
+			}
 		}
 	}
 
