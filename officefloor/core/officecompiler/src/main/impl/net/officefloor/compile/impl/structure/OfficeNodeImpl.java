@@ -57,6 +57,7 @@ import net.officefloor.compile.internal.structure.OfficeStartNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.TeamNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.office.OfficeInputType;
@@ -91,7 +92,6 @@ import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.source.SectionSource;
-import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
@@ -371,12 +371,12 @@ public class OfficeNodeImpl implements OfficeNode {
 	/**
 	 * Sources the {@link Office}.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return <true> to indicate sourced, otherwise <false> with issues
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	private boolean sourceOffice(TypeContext typeContext) {
+	private boolean sourceOffice(CompileContext compileContext) {
 
 		// Ensure the office is initialised
 		if (!this.isInitialised()) {
@@ -471,10 +471,10 @@ public class OfficeNodeImpl implements OfficeNode {
 	}
 
 	@Override
-	public boolean sourceOfficeWithTopLevelSections(TypeContext typeContext) {
+	public boolean sourceOfficeWithTopLevelSections(CompileContext compileContext) {
 
 		// Source the office
-		boolean isSourced = this.sourceOffice(typeContext);
+		boolean isSourced = this.sourceOffice(compileContext);
 		if (!isSourced) {
 			return false;
 		}
@@ -484,7 +484,7 @@ public class OfficeNodeImpl implements OfficeNode {
 
 		// Source the top level sections
 		isSourced = CompileUtil.source(this.sections, (section) -> section.getOfficeSectionName(),
-				(section) -> section.sourceSection(typeContext));
+				(section) -> section.sourceSection(compileContext));
 		if (!isSourced) {
 			return false; // must source all top level sections
 		}
@@ -494,10 +494,10 @@ public class OfficeNodeImpl implements OfficeNode {
 	}
 
 	@Override
-	public boolean sourceOfficeTree(TypeContext typeContext) {
+	public boolean sourceOfficeTree(CompileContext compileContext) {
 
 		// Source the office
-		boolean isSourced = this.sourceOffice(typeContext);
+		boolean isSourced = this.sourceOffice(compileContext);
 		if (!isSourced) {
 			return false;
 		}
@@ -507,7 +507,7 @@ public class OfficeNodeImpl implements OfficeNode {
 
 		// Source the all section trees
 		isSourced = CompileUtil.source(this.sections, (section) -> section.getOfficeSectionName(),
-				(section) -> section.sourceSectionTree(typeContext));
+				(section) -> section.sourceSectionTree(compileContext));
 		if (!isSourced) {
 			return false; // must source all top level sections
 		}
@@ -515,7 +515,7 @@ public class OfficeNodeImpl implements OfficeNode {
 		// Ensure all managed object sources are sourced
 		isSourced = CompileUtil.source(this.managedObjectSources,
 				(managedObjectSource) -> managedObjectSource.getSectionManagedObjectSourceName(),
-				(managedObjectSource) -> managedObjectSource.sourceManagedObjectSource(typeContext));
+				(managedObjectSource) -> managedObjectSource.sourceManagedObjectSource(compileContext));
 		if (!isSourced) {
 			return false;
 		}
@@ -523,7 +523,7 @@ public class OfficeNodeImpl implements OfficeNode {
 		// Ensure all managed objects are sourced
 		isSourced = CompileUtil.source(this.managedObjects,
 				(managedObject) -> managedObject.getSectionManagedObjectName(),
-				(managedObject) -> managedObject.sourceManagedObject(typeContext));
+				(managedObject) -> managedObject.sourceManagedObject(compileContext));
 		if (!isSourced) {
 			return false;
 		}
@@ -538,7 +538,7 @@ public class OfficeNodeImpl implements OfficeNode {
 
 			// Create the OfficeFloor auto wirier
 			final AutoWirer<LinkObjectNode> officeFloorAutoWirer = this.context.createAutoWirer(LinkObjectNode.class);
-			this.officeFloor.loadAutoWireObjectTargets(officeFloorAutoWirer, typeContext);
+			this.officeFloor.loadAutoWireObjectTargets(officeFloorAutoWirer, compileContext);
 
 			// Create the Office auto wirer
 			final AutoWirer<LinkObjectNode> officeAutoWirer = officeFloorAutoWirer.createScopeAutoWirer();
@@ -550,7 +550,7 @@ public class OfficeNodeImpl implements OfficeNode {
 			this.managedObjects.values().forEach((mo) -> {
 
 				// Create the auto-wires
-				AutoWire[] targetAutoWires = Arrays.stream(mo.getTypeQualifications(typeContext))
+				AutoWire[] targetAutoWires = Arrays.stream(mo.getTypeQualifications(compileContext))
 						.map((type) -> new AutoWire(type.getQualifier(), type.getType())).toArray(AutoWire[]::new);
 
 				// Add the target
@@ -560,7 +560,7 @@ public class OfficeNodeImpl implements OfficeNode {
 			// Iterate over sections (auto-wiring unlinked dependencies)
 			this.sections.values().stream()
 					.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSectionName(), b.getOfficeSectionName()))
-					.forEachOrdered((section) -> section.autoWireObjects(autoWirer, typeContext));
+					.forEachOrdered((section) -> section.autoWireObjects(autoWirer, compileContext));
 		}
 
 		// Undertake auto-wire of teams
@@ -568,7 +568,7 @@ public class OfficeNodeImpl implements OfficeNode {
 
 			// Create the OfficeFloor team auto wirer
 			final AutoWirer<LinkTeamNode> officeFloorAutoWirer = this.context.createAutoWirer(LinkTeamNode.class);
-			this.officeFloor.loadAutoWireTeamTargets(officeFloorAutoWirer, this, typeContext);
+			this.officeFloor.loadAutoWireTeamTargets(officeFloorAutoWirer, this, compileContext);
 
 			// Create the Office team auto wirer
 			final AutoWirer<LinkTeamNode> autoWirer = officeFloorAutoWirer.createScopeAutoWirer();
@@ -585,22 +585,22 @@ public class OfficeNodeImpl implements OfficeNode {
 			// Iterate over sections (auto-wiring functions to teams)
 			this.sections.values().stream()
 					.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSectionName(), b.getOfficeSectionName()))
-					.forEachOrdered((section) -> section.autoWireTeams(autoWirer, typeContext));
+					.forEachOrdered((section) -> section.autoWireTeams(autoWirer, compileContext));
 
 			// Auto-wire governances to teams
 			this.governances.values().stream()
 					.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeGovernanceName(), b.getOfficeGovernanceName()))
-					.forEachOrdered((governance) -> governance.autoWireTeam(autoWirer, typeContext));
+					.forEachOrdered((governance) -> governance.autoWireTeam(autoWirer, compileContext));
 
 			// Auto-wire administrations to teams
 			this.administrators.values().stream().sorted(
 					(a, b) -> CompileUtil.sortCompare(a.getOfficeAdministrationName(), b.getOfficeAdministrationName()))
-					.forEachOrdered((administration) -> administration.autoWireTeam(autoWirer, typeContext));
+					.forEachOrdered((administration) -> administration.autoWireTeam(autoWirer, compileContext));
 
 			// Auto-wire managed object source teams
 			this.managedObjectSources.values().stream().sorted(
 					(a, b) -> CompileUtil.sortCompare(a.getManagedObjectSourceName(), b.getManagedObjectSourceName()))
-					.forEachOrdered((mos) -> mos.autoWireTeams(autoWirer, typeContext));
+					.forEachOrdered((mos) -> mos.autoWireTeams(autoWirer, compileContext));
 		}
 
 		// As here, successfully loaded the office
@@ -608,7 +608,7 @@ public class OfficeNodeImpl implements OfficeNode {
 	}
 
 	@Override
-	public OfficeType loadOfficeType(TypeContext typeContext) {
+	public OfficeType loadOfficeType(CompileContext compileContext) {
 
 		// Copy the inputs into an array (in deterministic order)
 		OfficeInputNode[] inputs = this.inputs.values().stream()
@@ -653,7 +653,7 @@ public class OfficeNodeImpl implements OfficeNode {
 		// Create the listing of input types
 		OfficeInputType[] inputTypes = CompileUtil.loadTypes(
 				Arrays.asList(inputs).stream().filter((input) -> input != null), (input) -> input.getOfficeInputName(),
-				(input) -> input.loadOfficeInputType(typeContext), OfficeInputType[]::new);
+				(input) -> input.loadOfficeInputType(compileContext), OfficeInputType[]::new);
 		if (inputTypes == null) {
 			return null;
 		}
@@ -661,7 +661,7 @@ public class OfficeNodeImpl implements OfficeNode {
 		// Create the listing of output types
 		OfficeOutputType[] outputTypes = CompileUtil.loadTypes(
 				Arrays.asList(outputs).stream().filter((output) -> output != null),
-				(output) -> output.getOfficeOutputName(), (output) -> output.loadOfficeOutputType(typeContext),
+				(output) -> output.getOfficeOutputName(), (output) -> output.loadOfficeOutputType(compileContext),
 				OfficeOutputType[]::new);
 		if (outputTypes == null) {
 			return null;
@@ -669,7 +669,7 @@ public class OfficeNodeImpl implements OfficeNode {
 
 		// Create the listing of architect added object types
 		OfficeManagedObjectType[] moTypes = CompileUtil.loadTypes(this.objects,
-				(object) -> object.getOfficeObjectName(), (object) -> object.loadOfficeManagedObjectType(typeContext),
+				(object) -> object.getOfficeObjectName(), (object) -> object.loadOfficeManagedObjectType(compileContext),
 				OfficeManagedObjectType[]::new);
 		if (moTypes == null) {
 			return null;
@@ -677,7 +677,7 @@ public class OfficeNodeImpl implements OfficeNode {
 
 		// Copy architect added team types into an array
 		OfficeTeamType[] teamTypes = CompileUtil.loadTypes(this.teams, (team) -> team.getOfficeTeamName(),
-				(team) -> team.loadOfficeTeamType(typeContext), OfficeTeamType[]::new);
+				(team) -> team.loadOfficeTeamType(compileContext), OfficeTeamType[]::new);
 		if (teamTypes == null) {
 			return null;
 		}
@@ -685,7 +685,7 @@ public class OfficeNodeImpl implements OfficeNode {
 		// Create the listing of office section inputs
 		OfficeAvailableSectionInputType[][] sectionInputTypesArrays = CompileUtil.loadTypes(this.sections,
 				(section) -> section.getOfficeSectionName(),
-				(section) -> section.loadOfficeAvailableSectionInputTypes(typeContext),
+				(section) -> section.loadOfficeAvailableSectionInputTypes(compileContext),
 				OfficeAvailableSectionInputType[][]::new);
 		if (sectionInputTypesArrays == null) {
 			return null;
@@ -698,7 +698,7 @@ public class OfficeNodeImpl implements OfficeNode {
 	}
 
 	@Override
-	public OfficeBindings buildOffice(OfficeFloorBuilder builder, TypeContext typeContext, Profiler profiler) {
+	public OfficeBindings buildOffice(OfficeFloorBuilder builder, CompileContext compileContext, Profiler profiler) {
 
 		// Build this office
 		OfficeBuilder officeBuilder = builder.addOffice(this.officeName);
@@ -709,7 +709,7 @@ public class OfficeNodeImpl implements OfficeNode {
 		}
 
 		// Create the bindings for the office
-		OfficeBindings officeBindings = new OfficeBindingsImpl(this, officeBuilder, builder, typeContext);
+		OfficeBindings officeBindings = new OfficeBindingsImpl(this, officeBuilder, builder, compileContext);
 
 		// Register the teams for the office
 		this.teams.values().stream()
@@ -733,7 +733,7 @@ public class OfficeNodeImpl implements OfficeNode {
 		// Build the governance for the office (in deterministic order)
 		this.governances.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeGovernanceName(), b.getOfficeGovernanceName()))
-				.forEachOrdered((governance) -> governance.buildGovernance(officeBuilder, typeContext));
+				.forEachOrdered((governance) -> governance.buildGovernance(officeBuilder, compileContext));
 
 		// Load the office objects (in deterministic order)
 		this.objects.values().stream()
@@ -772,7 +772,7 @@ public class OfficeNodeImpl implements OfficeNode {
 		// Build the sections of the office (in deterministic order)
 		this.sections.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSectionName(), b.getOfficeSectionName()))
-				.forEachOrdered((section) -> section.buildSection(officeBuilder, officeBindings, typeContext));
+				.forEachOrdered((section) -> section.buildSection(officeBuilder, officeBindings, compileContext));
 
 		// Build the list of escalations of the office
 		List<EscalationStruct> escalationStructs = new LinkedList<OfficeNodeImpl.EscalationStruct>();

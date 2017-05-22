@@ -26,7 +26,8 @@ import org.junit.Assert;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.type.TypeContextImpl;
+import net.officefloor.compile.impl.structure.CompileContextImpl;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SectionNode;
@@ -201,11 +202,14 @@ public class SectionLoaderUtil {
 	public static <S extends SectionSource> void validateSectionType(SectionDesigner designer,
 			Class<S> sectionSourceClass, String sectionLocation, String... propertyNameValuePairs) {
 
+		// Compile Context
+		CompileContext compileContext = new CompileContextImpl(false);
+
 		// Cast to obtain expected section type
 		if (!(designer instanceof SectionNode)) {
 			Assert.fail("designer must be created from createSectionDesigner");
 		}
-		SectionType expectedSection = ((SectionNode) designer).loadSectionType(new TypeContextImpl());
+		SectionType expectedSection = ((SectionNode) designer).loadSectionType(compileContext);
 
 		// Load the actual section type
 		SectionType actualSection = loadSectionType(sectionSourceClass, sectionLocation, propertyNameValuePairs);
@@ -273,6 +277,9 @@ public class SectionLoaderUtil {
 	public static <S extends SectionSource> void validateOfficeSection(SectionDesigner designer,
 			Class<S> sectionSourceClass, String sectionLocation, String... propertyNameValuePairs) {
 
+		// Create the compile context
+		CompileContext compileContext = new CompileContextImpl(false);
+
 		// Cast to obtain expected section type
 		if (!(designer instanceof SectionNode)) {
 			Assert.fail("designer must be created from createSectionDesigner");
@@ -284,7 +291,7 @@ public class SectionLoaderUtil {
 			String value = propertyNameValuePairs[i + 1];
 			section.addProperty(name, value);
 		}
-		OfficeSectionType eSection = section.loadOfficeSectionType(new TypeContextImpl());
+		OfficeSectionType eSection = section.loadOfficeSectionType(compileContext);
 
 		// Load the actual section type
 		OfficeSectionType aSection = loadOfficeSectionType(SectionLoaderUtil.class.getSimpleName(), sectionSourceClass,

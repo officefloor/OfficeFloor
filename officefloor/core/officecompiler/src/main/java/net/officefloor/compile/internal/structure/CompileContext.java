@@ -15,15 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.type;
+package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.administration.AdministrationType;
 import net.officefloor.compile.governance.GovernanceType;
-import net.officefloor.compile.internal.structure.AdministrationNode;
-import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
-import net.officefloor.compile.internal.structure.GovernanceNode;
-import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
-import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
@@ -36,7 +31,7 @@ import net.officefloor.frame.internal.structure.Flow;
  *
  * @author Daniel Sagenschneider
  */
-public interface TypeContext {
+public interface CompileContext {
 
 	/**
 	 * Obtains the existing or loads the {@link ManagedObjectType} for the

@@ -35,13 +35,13 @@ import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeObject;
-import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.governance.Governance;
 
 /**
@@ -196,7 +196,7 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 	}
 
 	@Override
-	public OfficeManagedObjectType loadOfficeManagedObjectType(TypeContext typeContext) {
+	public OfficeManagedObjectType loadOfficeManagedObjectType(CompileContext compileContext) {
 
 		// Ensure have name
 		if (CompileUtil.isBlank(this.objectName)) {
@@ -218,7 +218,7 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 		for (AdministrationNode admin : this.administrators) {
 
 			// Attempt to obtain the administrator type
-			AdministrationType<?, ?, ?> adminType = typeContext.getOrLoadAdministrationType(admin);
+			AdministrationType<?, ?, ?> adminType = compileContext.getOrLoadAdministrationType(admin);
 			if (adminType == null) {
 				continue; // problem loading administrator type
 			}
@@ -232,7 +232,7 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 		for (GovernanceNode governance : this.governances) {
 
 			// Attempt to obtain the governance type
-			GovernanceType<?, ?> govType = typeContext.getOrLoadGovernanceType(governance);
+			GovernanceType<?, ?> govType = compileContext.getOrLoadGovernanceType(governance);
 			if (govType == null) {
 				continue; // problem loading governance type
 			}

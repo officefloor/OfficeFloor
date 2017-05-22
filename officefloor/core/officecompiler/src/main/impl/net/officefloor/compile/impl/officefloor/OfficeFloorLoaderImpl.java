@@ -17,11 +17,9 @@
  */
 package net.officefloor.compile.impl.officefloor;
 
-import java.util.Map;
-
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.type.TypeContextImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
@@ -34,10 +32,7 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceProperty;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceSpecification;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
-import net.officefloor.compile.type.TypeContext;
-import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.api.source.UnknownClassError;
 import net.officefloor.frame.api.source.UnknownPropertyError;
 import net.officefloor.frame.api.source.UnknownResourceError;
@@ -60,24 +55,16 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 	private final NodeContext nodeContext;
 
 	/**
-	 * Mapping of {@link Profiler} by their {@link Office} name.
-	 */
-	private final Map<String, Profiler> profilers;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param node
 	 *            {@link Node} requiring the {@link OfficeFloor}.
 	 * @param nodeContext
 	 *            {@link NodeContext}.
-	 * @param profilers
-	 *            Mapping of {@link Profiler} by their {@link Office} name.
 	 */
-	public OfficeFloorLoaderImpl(Node node, NodeContext nodeContext, Map<String, Profiler> profilers) {
+	public OfficeFloorLoaderImpl(Node node, NodeContext nodeContext) {
 		this.node = node;
 		this.nodeContext = nodeContext;
-		this.profilers = profilers;
 	}
 
 	/*
@@ -309,55 +296,20 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 			return null; // failed to instantiate
 		}
 
-		// Create the type context
-		TypeContext typeContext = new TypeContextImpl();
+		// Create the compile context
+		CompileContext compileContext = this.nodeContext.createCompileContext();
 
 		// Source the OfficeFloor
 		OfficeFloorNode node = this.nodeContext.createOfficeFloorNode(officeFloorSourceClass.getName(),
 				officeFloorSource, officeFloorLocation);
 		propertyList.configureProperties(node);
-		boolean isSourced = node.sourceOfficeFloor(typeContext);
+		boolean isSourced = node.sourceOfficeFloor(compileContext);
 		if (!isSourced) {
 			return null; // must be sourced
 		}
 
 		// Load and return the OfficeFloor type
-		return node.loadOfficeFloorType(typeContext);
-	}
-
-	@Override
-	public <OF extends OfficeFloorSource> OfficeFloor loadOfficeFloor(Class<OF> officeFloorSourceClass,
-			String officeFloorLocation, PropertyList propertyList) {
-
-		// Instantiate the OfficeFloor source
-		OfficeFloorSource officeFloorSource = CompileUtil.newInstance(officeFloorSourceClass, OfficeFloorSource.class,
-				this.node, this.nodeContext.getCompilerIssues());
-		if (officeFloorSource == null) {
-			return null; // failed to instantiate
-		}
-
-		// Load and return the OfficeFloor
-		return this.loadOfficeFloor(officeFloorSource, officeFloorLocation, propertyList);
-	}
-
-	@Override
-	public OfficeFloor loadOfficeFloor(OfficeFloorSource officeFloorSource, String officeFloorLocation,
-			PropertyList propertyList) {
-
-		// Create the type context
-		TypeContext typeContext = new TypeContextImpl();
-
-		// Source the OfficeFloor tree
-		OfficeFloorNode node = this.nodeContext.createOfficeFloorNode(officeFloorSource.getClass().getName(),
-				officeFloorSource, officeFloorLocation);
-		propertyList.configureProperties(node);
-		boolean isSourced = node.sourceOfficeFloorTree(typeContext);
-		if (!isSourced) {
-			return null; // must source tree
-		}
-
-		// Deploy and return the OfficeFloor
-		return node.deployOfficeFloor(this.nodeContext.getOfficeFrame(), typeContext);
+		return node.loadOfficeFloorType(compileContext);
 	}
 
 	/**

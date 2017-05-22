@@ -26,10 +26,10 @@ import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.spi.section.SubSectionInput;
-import net.officefloor.compile.type.TypeContext;
 
 /**
  * {@link SectionInputNode} node.
@@ -140,7 +140,7 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	 */
 
 	@Override
-	public SectionInputType loadSectionInputType(TypeContext typeContext) {
+	public SectionInputType loadSectionInputType(CompileContext compileContext) {
 
 		// Ensure have input name
 		if (CompileUtil.isBlank(this.inputName)) {
@@ -153,7 +153,7 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	}
 
 	@Override
-	public OfficeSectionInputType loadOfficeSectionInputType(TypeContext typeContext) {
+	public OfficeSectionInputType loadOfficeSectionInputType(CompileContext compileContext) {
 		return new OfficeSectionInputTypeImpl(this.inputName, this.state.parameterType);
 	}
 

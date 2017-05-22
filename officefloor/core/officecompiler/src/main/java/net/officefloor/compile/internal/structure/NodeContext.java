@@ -94,6 +94,13 @@ public interface NodeContext {
 	PropertyList createPropertyList();
 
 	/**
+	 * Creates the {@link CompileContext}.
+	 * 
+	 * @return {@link CompileContext}.
+	 */
+	CompileContext createCompileContext();
+
+	/**
 	 * Overrides the {@link PropertyList}.
 	 * 
 	 * @param node

@@ -26,12 +26,12 @@ import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.object.DependentObjectType;
 import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
-import net.officefloor.compile.type.TypeContext;
 
 /**
  * {@link ManagedObjectDependencyNode} implementation.
@@ -165,10 +165,10 @@ public class ManagedObjectDependencyNodeImpl implements ManagedObjectDependencyN
 	 */
 
 	@Override
-	public ObjectDependencyType loadObjectDependencyType(TypeContext typeContext) {
+	public ObjectDependencyType loadObjectDependencyType(CompileContext compileContext) {
 
 		// Obtain the managed object type
-		ManagedObjectType<?> managedObjectType = typeContext.getOrLoadManagedObjectType(this.managedObjectSource);
+		ManagedObjectType<?> managedObjectType = compileContext.getOrLoadManagedObjectType(this.managedObjectSource);
 		if (managedObjectType == null) {
 			return null; // must have type
 		}
@@ -198,7 +198,7 @@ public class ManagedObjectDependencyNodeImpl implements ManagedObjectDependencyN
 		}
 
 		// Obtain the dependent object type
-		DependentObjectType dependentObjectType = dependentObjectNode.loadDependentObjectType(typeContext);
+		DependentObjectType dependentObjectType = dependentObjectNode.loadDependentObjectType(compileContext);
 
 		// Create and return the dependency type
 		return new ObjectDependencyTypeImpl(this.dependencyName, dependencyType, typeQualifier, false,

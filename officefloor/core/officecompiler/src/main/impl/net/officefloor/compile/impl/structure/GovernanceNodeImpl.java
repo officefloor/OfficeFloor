@@ -37,12 +37,12 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.GovernerableManagedObject;
 import net.officefloor.compile.spi.office.OfficeGovernance;
-import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.governance.Governance;
@@ -217,7 +217,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	}
 
 	@Override
-	public void autoWireTeam(AutoWirer<LinkTeamNode> autoWirer, TypeContext typeContext) {
+	public void autoWireTeam(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext) {
 
 		// Ignore if already specified team
 		if (this.linkedTeamNode != null) {
@@ -233,7 +233,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 		this.governedManagedObjects.stream().sorted((a, b) -> CompileUtil
 				.sortCompare(a.getGovernerableManagedObjectName(), b.getGovernerableManagedObjectName()))
 				.forEachOrdered((managedObject) -> {
-					TypeQualification[] qualifications = managedObject.getTypeQualifications(typeContext);
+					TypeQualification[] qualifications = managedObject.getTypeQualifications(compileContext);
 					Arrays.stream(qualifications).forEach((qualification) -> autoWires
 							.add(new AutoWire(qualification.getQualifier(), qualification.getType())));
 				});
@@ -249,10 +249,10 @@ public class GovernanceNodeImpl implements GovernanceNode {
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void buildGovernance(OfficeBuilder officeBuilder, TypeContext typeContext) {
+	public void buildGovernance(OfficeBuilder officeBuilder, CompileContext compileContext) {
 
 		// Obtain the governance type
-		GovernanceType govType = typeContext.getOrLoadGovernanceType(this);
+		GovernanceType govType = compileContext.getOrLoadGovernanceType(this);
 		if (govType == null) {
 			return; // must obtain governance type
 		}

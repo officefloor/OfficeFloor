@@ -23,6 +23,7 @@ import net.officefloor.compile.internal.structure.DependentObjectNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.FunctionObjectNode;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
@@ -30,7 +31,6 @@ import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.object.DependentObjectType;
 import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.spi.section.FunctionObject;
-import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.function.ManagedFunction;
 
 /**
@@ -142,10 +142,10 @@ public class FunctionObjectNodeImpl implements FunctionObjectNode {
 	 */
 
 	@Override
-	public ObjectDependencyType loadObjectDependencyType(TypeContext typeContext) {
+	public ObjectDependencyType loadObjectDependencyType(CompileContext compileContext) {
 
 		// Obtain the function type
-		ManagedFunctionType<?, ?> functionType = this.functionNode.loadManagedFunctionType(typeContext);
+		ManagedFunctionType<?, ?> functionType = this.functionNode.loadManagedFunctionType(compileContext);
 		if (functionType == null) {
 			return null;
 		}
@@ -179,7 +179,7 @@ public class FunctionObjectNodeImpl implements FunctionObjectNode {
 			}
 
 			// Obtain the dependent object type
-			dependentObjectType = dependentObjectNode.loadDependentObjectType(typeContext);
+			dependentObjectType = dependentObjectNode.loadDependentObjectType(compileContext);
 			if (dependentObjectType == null) {
 				return null;
 			}

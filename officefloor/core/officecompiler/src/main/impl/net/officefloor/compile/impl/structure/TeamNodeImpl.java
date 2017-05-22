@@ -26,6 +26,7 @@ import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.TeamNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -33,7 +34,6 @@ import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.team.TeamType;
-import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.team.Team;
@@ -186,7 +186,7 @@ public class TeamNodeImpl implements TeamNode {
 	}
 
 	@Override
-	public OfficeFloorTeamSourceType loadOfficeFloorTeamSourceType(TypeContext typeContext) {
+	public OfficeFloorTeamSourceType loadOfficeFloorTeamSourceType(CompileContext compileContext) {
 
 		// Ensure have the team name
 		if (CompileUtil.isBlank(this.teamName)) {

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.impl.mxbean;
+package net.officefloor.compile.impl.mbean;
 
 import javax.management.MXBean;
 
@@ -28,7 +28,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * 
  * @author Daniel Sagenschneider
  */
-public class RegisterNodesAsMXBeansTest extends OfficeFrameTestCase {
+public class RegisterNodesAsMBeansTest extends OfficeFrameTestCase {
 
 	public void testRegisterOfficeFloorSource() {
 		fail("TODO implement");

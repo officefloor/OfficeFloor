@@ -20,7 +20,6 @@ package net.officefloor.compile.internal.structure;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.spi.section.FunctionObject;
-import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.function.ManagedFunction;
 
 /**
@@ -52,11 +51,11 @@ public interface FunctionObjectNode extends LinkObjectNode, FunctionObject {
 	/**
 	 * Loads the {@link ObjectDependencyType}.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return {@link ObjectDependencyType} or <code>null</code> with issue
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	ObjectDependencyType loadObjectDependencyType(TypeContext typeContext);
+	ObjectDependencyType loadObjectDependencyType(CompileContext compileContext);
 
 }

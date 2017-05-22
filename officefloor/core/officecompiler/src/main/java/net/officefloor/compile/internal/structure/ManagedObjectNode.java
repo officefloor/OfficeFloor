@@ -24,7 +24,6 @@ import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObject;
-import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
@@ -55,13 +54,13 @@ public interface ManagedObjectNode extends DependentObjectNode, BoundManagedObje
 	/**
 	 * Sources the {@link ManagedObject}.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced the
 	 *         {@link ManagedObject}. <code>false</code> if failed to source,
 	 *         with issures reported to the {@link CompilerIssues}.
 	 */
-	boolean sourceManagedObject(TypeContext typeContext);
+	boolean sourceManagedObject(CompileContext compileContext);
 
 	/**
 	 * Obtains the {@link ManagedObjectSourceNode} for this
@@ -76,21 +75,21 @@ public interface ManagedObjectNode extends DependentObjectNode, BoundManagedObje
 	 * Obtains the {@link TypeQualification} instances for the
 	 * {@link ManagedObject}.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return {@link TypeQualification} instances for the
 	 *         {@link ManagedObject}.
 	 */
-	TypeQualification[] getTypeQualifications(TypeContext typeContext);
+	TypeQualification[] getTypeQualifications(CompileContext compileContext);
 
 	/**
 	 * Loads the {@link OfficeSectionManagedObjectType}.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return {@link OfficeSectionManagedObjectType} or <code>null</code> with
 	 *         issues reported to the {@link CompilerIssues}.
 	 */
-	OfficeSectionManagedObjectType loadOfficeSectionManagedObjectType(TypeContext typeContext);
+	OfficeSectionManagedObjectType loadOfficeSectionManagedObjectType(CompileContext compileContext);
 
 }

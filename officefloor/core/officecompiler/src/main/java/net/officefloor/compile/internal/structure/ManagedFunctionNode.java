@@ -24,7 +24,6 @@ import net.officefloor.compile.section.OfficeSubSectionType;
 import net.officefloor.compile.spi.office.OfficeSectionFunction;
 import net.officefloor.compile.spi.office.ResponsibleTeam;
 import net.officefloor.compile.spi.section.SectionFunction;
-import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.function.ManagedFunction;
 
@@ -61,23 +60,23 @@ public interface ManagedFunctionNode extends LinkFlowNode, SectionFunction, Offi
 	/**
 	 * Sources the {@link ManagedFunction}.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced the
 	 *         {@link ManagedFunction}. <code>false</code> if failed to source
 	 *         with issues reported to the {@link CompilerIssues}.
 	 */
-	boolean souceManagedFunction(TypeContext typeContext);
+	boolean souceManagedFunction(CompileContext compileContext);
 
 	/**
 	 * Auto wires the {@link ResponsibleTeam} for this {@link ManagedFunction}.
 	 * 
 	 * @param autoWirer
 	 *            {@link AutoWirer}.
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 */
-	void autoWireManagedFunctionResponsibility(AutoWirer<LinkTeamNode> autoWirer, TypeContext typeContext);
+	void autoWireManagedFunctionResponsibility(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext);
 
 	/**
 	 * Loads the {@link OfficeFunctionType}.
@@ -85,12 +84,12 @@ public interface ManagedFunctionNode extends LinkFlowNode, SectionFunction, Offi
 	 * @param parentSubSectionType
 	 *            Containing {@link OfficeSubSectionType} to this
 	 *            {@link OfficeSectionFunction}.
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return {@link OfficeFunctionType} or <code>null</code> with issues
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	OfficeFunctionType loadOfficeFunctionType(OfficeSubSectionType parentSubSectionType, TypeContext typeContext);
+	OfficeFunctionType loadOfficeFunctionType(OfficeSubSectionType parentSubSectionType, CompileContext compileContext);
 
 	/**
 	 * Obtains the {@link FunctionNamespaceNode} containing this
@@ -105,22 +104,22 @@ public interface ManagedFunctionNode extends LinkFlowNode, SectionFunction, Offi
 	 * Loads the {@link ManagedFunctionType} for this
 	 * {@link ManagedFunctionNode}.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return {@link ManagedFunctionType} for this {@link ManagedFunctionNode}.
 	 *         May be <code>null</code> if can not determine
 	 *         {@link ManagedFunctionType}.
 	 */
-	ManagedFunctionType<?, ?> loadManagedFunctionType(TypeContext typeContext);
+	ManagedFunctionType<?, ?> loadManagedFunctionType(CompileContext compileContext);
 
 	/**
 	 * Builds the {@link ManagedFunction} for this {@link ManagedFunctionNode}.
 	 * 
 	 * @param officeBuilder
 	 *            {@link OfficeBuilder}.
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 */
-	void buildManagedFunction(OfficeBuilder officeBuilder, TypeContext typeContext);
+	void buildManagedFunction(OfficeBuilder officeBuilder, CompileContext compileContext);
 
 }

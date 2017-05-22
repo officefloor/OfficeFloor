@@ -775,6 +775,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.enhancedIssues);
 		compiler.setOfficeFloorSourceClass(OfficeFloorModelOfficeFloorSource.class);
+		compiler.setOfficeFloorLocation("office-floor");
 		compiler.setOfficeFrame(officeFrame);
 		compiler.addResources(resourceSource);
 		if (this.isOverrideProperties) {
@@ -795,7 +796,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 		}
 
 		// Compile the OfficeFloor
-		OfficeFloor loadedOfficeFloor = compiler.compile("office-floor");
+		OfficeFloor loadedOfficeFloor = compiler.compile("OfficeFloor");
 
 		// Verify the mocks
 		this.verifyMockObjects();

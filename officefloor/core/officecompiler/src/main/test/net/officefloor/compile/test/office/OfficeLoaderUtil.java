@@ -21,7 +21,8 @@ import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
-import net.officefloor.compile.impl.type.TypeContextImpl;
+import net.officefloor.compile.impl.structure.CompileContextImpl;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.office.OfficeInputType;
@@ -176,11 +177,14 @@ public class OfficeLoaderUtil {
 	public static <O extends OfficeSource> OfficeType validateOffice(OfficeArchitect architect,
 			Class<O> officeSourceClass, String officeLocation, String... propertyNameValuePairs) {
 
+		// Create the compile context
+		CompileContext compileContext = new CompileContextImpl(false);
+
 		// Cast to obtain expected office type
 		if (!(architect instanceof OfficeNode)) {
 			TestCase.fail("architect must be created from createOfficeArchitect");
 		}
-		OfficeType expectedOffice = ((OfficeNode) architect).loadOfficeType(new TypeContextImpl());
+		OfficeType expectedOffice = ((OfficeNode) architect).loadOfficeType(compileContext);
 
 		// Load the actual office type
 		OfficeType actualOffice = loadOfficeType(officeSourceClass, officeLocation, propertyNameValuePairs);

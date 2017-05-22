@@ -22,7 +22,6 @@ import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
 import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.team.TeamType;
-import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
@@ -58,12 +57,12 @@ public interface TeamNode extends LinkTeamNode, OfficeFloorTeam {
 	/**
 	 * Loads the {@link OfficeFloorTeamSourceType}.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return {@link OfficeFloorTeamSourceType} or <code>null</code> with
 	 *         issues reported to the {@link CompilerIssues}.
 	 */
-	OfficeFloorTeamSourceType loadOfficeFloorTeamSourceType(TypeContext typeContext);
+	OfficeFloorTeamSourceType loadOfficeFloorTeamSourceType(CompileContext compileContext);
 
 	/**
 	 * Obtains the {@link TypeQualification} instances for the

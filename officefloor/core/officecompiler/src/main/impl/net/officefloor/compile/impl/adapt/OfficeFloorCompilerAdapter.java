@@ -137,6 +137,11 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	}
 
 	@Override
+	public void setRegisterMBeans(boolean isRegister) {
+		this.invokeMethod("setRegisterMXBeans", new Object[] { isRegister }, boolean.class);
+	}
+
+	@Override
 	public void setCompilerIssues(CompilerIssues issues) {
 		this.invokeMethod("setCompilerIssues", new Object[] { issues }, CompilerIssues.class);
 	}
@@ -156,6 +161,11 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	@Override
 	public void setOfficeFloorSource(OfficeFloorSource officeFloorSource) {
 		this.invokeMethod("setOfficeFloorSource", new Object[] { officeFloorSource }, OfficeFloorSource.class);
+	}
+
+	@Override
+	public void setOfficeFloorLocation(String officeFloorLocation) {
+		this.invokeMethod("setOfficeFloorLocation", new String[] { officeFloorLocation }, String.class);
 	}
 
 	@Override
@@ -284,8 +294,8 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	}
 
 	@Override
-	public OfficeFloor compile(String officeFloorLocation) {
-		return (OfficeFloor) this.invokeMethod("compile", new Object[] { officeFloorLocation }, String.class);
+	public OfficeFloor compile(String officeFloorName) {
+		return (OfficeFloor) this.invokeMethod("compile", new Object[] { officeFloorName }, String.class);
 	}
 
 }

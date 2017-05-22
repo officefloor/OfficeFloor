@@ -44,6 +44,7 @@ import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.internal.structure.ResponsibleTeamNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
@@ -59,7 +60,6 @@ import net.officefloor.compile.spi.office.ResponsibleTeam;
 import net.officefloor.compile.spi.section.FunctionFlow;
 import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.SectionFunction;
-import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.function.ManagedFunction;
@@ -232,7 +232,7 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 	}
 
 	@Override
-	public ManagedFunctionType<?, ?> loadManagedFunctionType(TypeContext typeContext) {
+	public ManagedFunctionType<?, ?> loadManagedFunctionType(CompileContext compileContext) {
 
 		// Ensure initialised
 		if (this.state == null) {
@@ -241,7 +241,7 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 		}
 
 		// Obtain the namespace type
-		FunctionNamespaceType namespaceType = typeContext.getOrLoadFunctionNamespaceType(this.state.namespaceNode);
+		FunctionNamespaceType namespaceType = compileContext.getOrLoadFunctionNamespaceType(this.state.namespaceNode);
 		if (namespaceType == null) {
 			return null;
 		}
@@ -262,17 +262,17 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 
 	@Override
 	public OfficeFunctionType loadOfficeFunctionType(OfficeSubSectionType parentSubSectionType,
-			TypeContext typeContext) {
+			CompileContext compileContext) {
 
 		// Load the function type
-		ManagedFunctionType<?, ?> functionType = this.loadManagedFunctionType(typeContext);
+		ManagedFunctionType<?, ?> functionType = this.loadManagedFunctionType(compileContext);
 		if (functionType == null) {
 			return null;
 		}
 
 		// Load the object dependencies
 		ObjectDependencyType[] dependencies = CompileUtil.loadTypes(this.functionObjects,
-				(object) -> object.getFunctionObjectName(), (object) -> object.loadObjectDependencyType(typeContext),
+				(object) -> object.getFunctionObjectName(), (object) -> object.loadObjectDependencyType(compileContext),
 				ObjectDependencyType[]::new);
 		if (dependencies == null) {
 			return null;
@@ -283,10 +283,10 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 	}
 
 	@Override
-	public boolean souceManagedFunction(TypeContext typeContext) {
+	public boolean souceManagedFunction(CompileContext compileContext) {
 
 		// Obtain the type for this function
-		ManagedFunctionType<?, ?> functionType = this.loadManagedFunctionType(typeContext);
+		ManagedFunctionType<?, ?> functionType = this.loadManagedFunctionType(compileContext);
 		if (functionType == null) {
 			return false; // must have type
 		}
@@ -318,10 +318,10 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 	}
 
 	@Override
-	public void autoWireManagedFunctionResponsibility(AutoWirer<LinkTeamNode> autoWirer, TypeContext typeContext) {
+	public void autoWireManagedFunctionResponsibility(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext) {
 
 		// Create the listing of source auto wires
-		ManagedFunctionType<?, ?> functionType = this.loadManagedFunctionType(typeContext);
+		ManagedFunctionType<?, ?> functionType = this.loadManagedFunctionType(compileContext);
 		AutoWire[] sourceAutoWires = Arrays.stream(functionType.getObjectTypes())
 				.map((objectType) -> new AutoWire(objectType.getTypeQualifier(), objectType.getObjectType().getName()))
 				.toArray(AutoWire[]::new);
@@ -335,10 +335,10 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void buildManagedFunction(OfficeBuilder officeBuilder, TypeContext typeContext) {
+	public void buildManagedFunction(OfficeBuilder officeBuilder, CompileContext compileContext) {
 
 		// Obtain the type for this function
-		ManagedFunctionType<?, ?> functionType = this.loadManagedFunctionType(typeContext);
+		ManagedFunctionType<?, ?> functionType = this.loadManagedFunctionType(compileContext);
 		if (functionType == null) {
 			return; // must have type
 		}

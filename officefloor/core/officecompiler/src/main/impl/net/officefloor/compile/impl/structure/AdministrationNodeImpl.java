@@ -39,11 +39,11 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.office.AdministerableManagedObject;
 import net.officefloor.compile.spi.office.OfficeAdministration;
-import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.build.AdministrationBuilder;
@@ -232,7 +232,7 @@ public class AdministrationNodeImpl implements AdministrationNode {
 	}
 
 	@Override
-	public void autoWireTeam(AutoWirer<LinkTeamNode> autoWirer, TypeContext typeContext) {
+	public void autoWireTeam(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext) {
 
 		// Do not auto wire if already responsible team
 		if (this.linkedTeamNode != null) {
@@ -246,7 +246,7 @@ public class AdministrationNodeImpl implements AdministrationNode {
 				.forEachOrdered((administerable) -> {
 					if (administerable instanceof ManagedObjectNode) {
 						ManagedObjectNode managedObject = (ManagedObjectNode) administerable;
-						Arrays.stream(managedObject.getTypeQualifications(typeContext))
+						Arrays.stream(managedObject.getTypeQualifications(compileContext))
 								.forEach((qualification) -> autoWires
 										.add(new AutoWire(qualification.getQualifier(), qualification.getType())));
 

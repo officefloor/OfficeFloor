@@ -24,7 +24,6 @@ import java.util.function.Consumer;
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.structure.SuppliedManagedObjectNodeImpl;
-import net.officefloor.compile.impl.type.TypeContextImpl;
 import net.officefloor.compile.internal.structure.AdministrationNode;
 import net.officefloor.compile.internal.structure.EscalationNode;
 import net.officefloor.compile.internal.structure.FunctionFlowNode;
@@ -258,7 +257,8 @@ public class NodeContextTest extends OfficeFrameTestCase {
 			assertEquals("Incorrect bound name", "OFFICE.SECTION.MO", mo.getBoundManagedObjectName());
 
 			// Validate default type
-			assertTypeQualifications(mo.getTypeQualifications(new TypeContextImpl()), null, String.class.getName());
+			assertTypeQualifications(mo.getTypeQualifications(this.context.createCompileContext()), null,
+					String.class.getName());
 
 			return mo;
 		});
@@ -266,7 +266,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 
 		// Validate type qualifications
 		node.addTypeQualification("QUALIFIER", "TYPE");
-		assertTypeQualifications(node.getTypeQualifications(new TypeContextImpl()), "QUALIFIER", "TYPE");
+		assertTypeQualifications(node.getTypeQualifications(this.context.createCompileContext()), "QUALIFIER", "TYPE");
 
 		// Validate children
 		assertChildren(node, node.getManagedObjectDependency("DEPENDENCY"));

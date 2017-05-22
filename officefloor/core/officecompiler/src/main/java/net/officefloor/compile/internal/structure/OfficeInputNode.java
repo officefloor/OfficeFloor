@@ -19,7 +19,6 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.spi.office.OfficeInput;
-import net.officefloor.compile.type.TypeContext;
 
 /**
  * {@link OfficeInput} node.
@@ -44,11 +43,11 @@ public interface OfficeInputNode extends LinkFlowNode, LinkSynchronousNode, Offi
 	/**
 	 * Obtains the {@link OfficeInputType}.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return {@link OfficeInputType} or <code>null</code> if can not
 	 *         determine.
 	 */
-	OfficeInputType loadOfficeInputType(TypeContext typeContext);
+	OfficeInputType loadOfficeInputType(CompileContext compileContext);
 
 }

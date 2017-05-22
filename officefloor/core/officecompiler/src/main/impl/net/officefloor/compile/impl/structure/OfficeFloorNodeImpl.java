@@ -29,6 +29,7 @@ import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.AutoWirer;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
@@ -67,8 +68,6 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
-import net.officefloor.compile.type.TypeContext;
-import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.manage.Office;
@@ -372,13 +371,6 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	 */
 
 	@Override
-	public void addProfiler(String officeName, Profiler profiler) {
-		// TODO implement OfficeFloorNode.addProfiler
-		throw new UnsupportedOperationException("TODO implement OfficeFloorNode.addProfiler");
-
-	}
-
-	@Override
 	public OfficeFloorManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
 			SuppliedManagedObjectNode suppliedManagedObject) {
 		return NodeUtil.getInitialisedNode(managedObjectSourceName, this.managedObjectSources, this.context,
@@ -387,7 +379,7 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	}
 
 	@Override
-	public boolean sourceOfficeFloor(TypeContext typeContext) {
+	public boolean sourceOfficeFloor(CompileContext compileContext) {
 
 		// Determine if must instantiate
 		OfficeFloorSource source = this.officeFloorSource;
@@ -447,10 +439,10 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	}
 
 	@Override
-	public boolean sourceOfficeFloorTree(TypeContext typeContext) {
+	public boolean sourceOfficeFloorTree(CompileContext compileContext) {
 
 		// Source the OfficeFloor
-		boolean isSourced = this.sourceOfficeFloor(typeContext);
+		boolean isSourced = this.sourceOfficeFloor(compileContext);
 		if (!isSourced) {
 			return false;
 		}
@@ -458,7 +450,7 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 		// Source all the offices
 		isSourced = this.offices.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getDeployedOfficeName(), b.getDeployedOfficeName()))
-				.allMatch((office) -> office.sourceOfficeTree(typeContext));
+				.allMatch((office) -> office.sourceOfficeTree(compileContext));
 		if (!isSourced) {
 			return false;
 		}
@@ -468,11 +460,11 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	}
 
 	@Override
-	public void loadAutoWireObjectTargets(AutoWirer<LinkObjectNode> autoWirer, TypeContext typeContext) {
+	public void loadAutoWireObjectTargets(AutoWirer<LinkObjectNode> autoWirer, CompileContext compileContext) {
 		this.managedObjects.values().forEach((mo) -> {
 
 			// Create the auto-wires
-			AutoWire[] targetAutoWires = Arrays.stream(mo.getTypeQualifications(typeContext))
+			AutoWire[] targetAutoWires = Arrays.stream(mo.getTypeQualifications(compileContext))
 					.map((type) -> new AutoWire(type.getQualifier(), type.getType())).toArray(AutoWire[]::new);
 
 			// Add the target
@@ -482,7 +474,7 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 
 	@Override
 	public void loadAutoWireTeamTargets(AutoWirer<LinkTeamNode> autoWirer, OfficeTeamRegistry officeTeamRegistry,
-			TypeContext typeContext) {
+			CompileContext compileContext) {
 		this.teams.values().forEach((team) -> {
 
 			// Create the auto-wires
@@ -513,7 +505,7 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	}
 
 	@Override
-	public OfficeFloorType loadOfficeFloorType(TypeContext typeContext) {
+	public OfficeFloorType loadOfficeFloorType(CompileContext compileContext) {
 
 		// Obtain the OfficeFloor source class
 		Class<? extends OfficeFloorSource> officeFloorSourceClass = this.context
@@ -546,7 +538,7 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 		// Load the managed object source types (in deterministic order)
 		OfficeFloorManagedObjectSourceType[] managedObjectSourceTypes = CompileUtil.loadTypes(this.managedObjectSources,
 				(managedObjectSource) -> managedObjectSource.getOfficeFloorManagedObjectSourceName(),
-				(managedObjectSource) -> managedObjectSource.loadOfficeFloorManagedObjectSourceType(typeContext),
+				(managedObjectSource) -> managedObjectSource.loadOfficeFloorManagedObjectSourceType(compileContext),
 				OfficeFloorManagedObjectSourceType[]::new);
 		if (managedObjectSourceTypes == null) {
 			return null;
@@ -554,7 +546,7 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 
 		// Load the team sources (in deterministic order)
 		OfficeFloorTeamSourceType[] teamTypes = CompileUtil.loadTypes(this.teams,
-				(team) -> team.getOfficeFloorTeamName(), (team) -> team.loadOfficeFloorTeamSourceType(typeContext),
+				(team) -> team.getOfficeFloorTeamName(), (team) -> team.loadOfficeFloorTeamSourceType(compileContext),
 				OfficeFloorTeamSourceType[]::new);
 		if (teamTypes == null) {
 			return null;
@@ -565,14 +557,7 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	}
 
 	@Override
-	public OfficeFloor deployOfficeFloor(OfficeFrame officeFrame, TypeContext typeContext) {
-
-		// Obtain the OfficeFloor name
-		String officeFloorName = (this.officeFloorLocation != null ? this.officeFloorLocation
-				: this.officeFloorSourceClassName);
-
-		// Obtain the OfficeFloor builder
-		OfficeFloorBuilder builder = officeFrame.createOfficeFloorBuilder(officeFloorName);
+	public OfficeFloor deployOfficeFloor(OfficeFloorBuilder builder, CompileContext compileContext) {
 
 		// Initiate the OfficeFloor builder with compiler details
 		this.context.initiateOfficeFloorBuilder(builder);
@@ -593,7 +578,7 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 					Profiler profiler = this.profilers.get(officeName);
 
 					// Build the office
-					OfficeBindings bindings = office.buildOffice(builder, typeContext, profiler);
+					OfficeBindings bindings = office.buildOffice(builder, compileContext, profiler);
 
 					// Keep track of the offices
 					officeBindings.put(office, bindings);

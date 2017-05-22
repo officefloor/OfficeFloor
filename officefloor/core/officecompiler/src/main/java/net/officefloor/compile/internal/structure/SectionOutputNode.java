@@ -23,7 +23,6 @@ import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SubSectionOutput;
-import net.officefloor.compile.type.TypeContext;
 
 /**
  * {@link SectionOutput} node.
@@ -58,21 +57,21 @@ public interface SectionOutputNode extends LinkFlowNode, SectionOutput,
 	/**
 	 * Loads the {@link SectionOutputType}.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return {@link SectionOutputType} or <code>null</code> with issues
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	SectionOutputType loadSectionOutputType(TypeContext typeContext);
+	SectionOutputType loadSectionOutputType(CompileContext compileContext);
 
 	/**
 	 * Loads the {@link OfficeSectionOutputType}.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return {@link OfficeSectionOutputType} or <code>null</code> with issues
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	OfficeSectionOutputType loadOfficeSectionOutputType(TypeContext typeContext);
+	OfficeSectionOutputType loadOfficeSectionOutputType(CompileContext compileContext);
 
 }

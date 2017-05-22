@@ -29,10 +29,10 @@ import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.office.OfficeTeam;
-import net.officefloor.compile.type.TypeContext;
 
 /**
  * {@link OfficeTeamNode} implementation.
@@ -151,7 +151,7 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 	}
 
 	@Override
-	public OfficeTeamType loadOfficeTeamType(TypeContext typeContext) {
+	public OfficeTeamType loadOfficeTeamType(CompileContext compileContext) {
 
 		// Ensure have name
 		if (CompileUtil.isBlank(this.teamName)) {

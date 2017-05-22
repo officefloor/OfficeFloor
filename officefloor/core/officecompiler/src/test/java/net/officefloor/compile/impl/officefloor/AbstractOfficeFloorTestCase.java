@@ -19,7 +19,6 @@ package net.officefloor.compile.impl.officefloor;
 
 import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
@@ -208,15 +207,7 @@ public abstract class AbstractOfficeFloorTestCase extends AbstractStructureTestC
 					new TypeMatcher(OfficeFloorIssues.class));
 		}
 
-		// Create the property list
-		PropertyList propertyList = new PropertyListImpl();
-		for (int i = 0; i < propertyNameValuePairs.length; i += 2) {
-			String name = propertyNameValuePairs[i];
-			String value = propertyNameValuePairs[i + 1];
-			propertyList.addProperty(name).setValue(value);
-		}
-
-		// Create the office frame to return mock office floor builder
+		// Create the office frame to return mock OfficeFloor builder
 		OfficeFrame officeFrame = new OfficeFrame() {
 			@Override
 			public OfficeFloorBuilder createOfficeFloorBuilder(String officeFloorName) {
@@ -224,21 +215,32 @@ public abstract class AbstractOfficeFloorTestCase extends AbstractStructureTestC
 			}
 		};
 
-		// Register the office floor maker and add to property list
-		PropertyList registerProperties = MakerOfficeFloorSource.register(maker);
-		for (Property property : registerProperties) {
-			propertyList.addProperty(property.getName()).setValue(property.getValue());
-		}
-
-		// Create the office loader and load the office floor
+		// Create the compiler and load the OfficeFloor
 		this.replayMockObjects();
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+
+		// Configure the compiler
 		compiler.setCompilerIssues(this.enhancedIssues);
 		compiler.addResources(this.resourceSource);
 		compiler.setOfficeFrame(officeFrame);
-		OfficeFloorLoader officeFloorLoader = compiler.getOfficeFloorLoader();
-		OfficeFloor loadedOfficeFloor = officeFloorLoader.loadOfficeFloor(MakerOfficeFloorSource.class,
-				OFFICE_FLOOR_LOCATION, propertyList);
+
+		// Configure the OfficeFloor details
+		compiler.setOfficeFloorSourceClass(MakerOfficeFloorSource.class);
+		compiler.setOfficeFloorLocation(OFFICE_FLOOR_LOCATION);
+		for (int i = 0; i < propertyNameValuePairs.length; i += 2) {
+			String name = propertyNameValuePairs[i];
+			String value = propertyNameValuePairs[i + 1];
+			compiler.addProperty(name, value);
+		}
+
+		// Register the OfficeFloor maker and add properties
+		PropertyList registerProperties = MakerOfficeFloorSource.register(maker);
+		for (Property property : registerProperties) {
+			compiler.addProperty(property.getName(), property.getValue());
+		}
+
+		// Compile the OfficeFloor
+		OfficeFloor loadedOfficeFloor = compiler.compile("OfficeFloor");
 		this.verifyMockObjects();
 
 		// Ensure the correct loaded office floor

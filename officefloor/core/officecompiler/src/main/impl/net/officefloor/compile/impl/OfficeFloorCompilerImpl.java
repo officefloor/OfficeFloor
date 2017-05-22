@@ -46,6 +46,7 @@ import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.section.SectionLoaderImpl;
 import net.officefloor.compile.impl.structure.AdministrationNodeImpl;
 import net.officefloor.compile.impl.structure.AutoWirerImpl;
+import net.officefloor.compile.impl.structure.CompileContextImpl;
 import net.officefloor.compile.impl.structure.EscalationNodeImpl;
 import net.officefloor.compile.impl.structure.FunctionFlowNodeImpl;
 import net.officefloor.compile.impl.structure.FunctionNamespaceNodeImpl;
@@ -78,6 +79,7 @@ import net.officefloor.compile.impl.team.TeamLoaderImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.AdministrationNode;
 import net.officefloor.compile.internal.structure.AutoWirer;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.EscalationNode;
 import net.officefloor.compile.internal.structure.FunctionFlowNode;
 import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
@@ -180,6 +182,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	private File overridePropertiesDirectory = null;
 
 	/**
+	 * Indicates whether the MBeans should be registered.
+	 */
+	private boolean isRegisterMBeans = false;
+
+	/**
 	 * {@link OfficeFloorSource} {@link Class}.
 	 */
 	private Class<? extends OfficeFloorSource> officeFloorSourceClass = null;
@@ -188,6 +195,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	 * {@link OfficeFloorSource}.
 	 */
 	private OfficeFloorSource officeFloorSource = null;
+
+	/**
+	 * Location of the {@link OfficeFloor}.
+	 */
+	private String officeFloorLocation = null;
 
 	/**
 	 * {@link PropertyList}.
@@ -332,6 +344,16 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
+	public void setOfficeFloorLocation(String officeFloorLocation) {
+		this.officeFloorLocation = officeFloorLocation;
+	}
+
+	@Override
+	public void setRegisterMBeans(boolean isRegister) {
+		this.isRegisterMBeans = isRegister;
+	}
+
+	@Override
 	public void addProperty(String name, String value) {
 		this.properties.addProperty(name).setValue(value);
 	}
@@ -407,7 +429,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public OfficeFloorLoader getOfficeFloorLoader() {
-		return new OfficeFloorLoaderImpl(this, this, this.profilers);
+		return new OfficeFloorLoaderImpl(this, this);
 	}
 
 	@Override
@@ -456,27 +478,54 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
-	public OfficeFloor compile(String officeFloorLocation) {
+	public OfficeFloor compile(String officeFloorName) {
 
 		// Ensure aliases are added
 		this.ensureSourceAliasesAdded();
 
-		// Create the OfficeFloor loader
-		OfficeFloorLoader officeFloorLoader = this.getOfficeFloorLoader();
-
 		// Compile, build and return the OfficeFloor
+		OfficeFloorSource officeFloorSource;
 		if (this.officeFloorSource != null) {
-			// Load from supplied instance
-			return officeFloorLoader.loadOfficeFloor(this.officeFloorSource, officeFloorLocation, this.properties);
+			// Use the OfficeFloor source
+			officeFloorSource = this.officeFloorSource;
 
 		} else {
 			// Obtain the OfficeFloor source class
 			Class<? extends OfficeFloorSource> officeFloorSourceClass = (this.officeFloorSourceClass != null
 					? this.officeFloorSourceClass : ApplicationOfficeFloorSource.class);
 
-			// Load from class
-			return officeFloorLoader.loadOfficeFloor(officeFloorSourceClass, officeFloorLocation, this.properties);
+			// Instantiate the OfficeFloor source
+			officeFloorSource = CompileUtil.newInstance(officeFloorSourceClass, OfficeFloorSource.class, this,
+					this.getCompilerIssues());
+			if (officeFloorSource == null) {
+				return null; // failed to instantiate
+			}
 		}
+
+		// Create the compile context
+		CompileContextImpl compileContext = new CompileContextImpl(this.isRegisterMBeans);
+
+		// Source the OfficeFloor tree
+		OfficeFloorNode node = this.createOfficeFloorNode(officeFloorSource.getClass().getName(), officeFloorSource,
+				this.officeFloorLocation);
+		this.properties.configureProperties(node);
+		boolean isSourced = node.sourceOfficeFloorTree(compileContext);
+		if (!isSourced) {
+			return null; // must source tree
+		}
+
+		// Obtain the OfficeFloor builder
+		OfficeFrame officeFrame = this.getOfficeFrame();
+		OfficeFloorBuilder builder = officeFrame.createOfficeFloorBuilder(officeFloorName);
+
+		// Deploy the OfficeFloor
+		OfficeFloor officeFloor = node.deployOfficeFloor(builder, compileContext);
+		if (officeFloor == null) {
+			return null; // must compile OfficeFloor
+		}
+
+		// Return the OfficeFloor
+		return officeFloor;
 	}
 
 	/*
@@ -526,6 +575,12 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 		// Return the source context
 		return this.sourceContext;
+	}
+
+	@Override
+	public CompileContext createCompileContext() {
+		// Never register MBeans for types
+		return new CompileContextImpl(false);
 	}
 
 	@Override
@@ -602,7 +657,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public OfficeFloorLoader getOfficeFloorLoader(Node node) {
-		return new OfficeFloorLoaderImpl(node, this, this.profilers);
+		return new OfficeFloorLoaderImpl(node, this);
 	}
 
 	@Override

@@ -23,7 +23,6 @@ import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
-import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.Office;
@@ -59,24 +58,24 @@ public interface OfficeNode
 	 * Sources this {@link Office} along with its top level
 	 * {@link OfficeSection} instances into this {@link OfficeNode}.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	boolean sourceOfficeWithTopLevelSections(TypeContext typeContext);
+	boolean sourceOfficeWithTopLevelSections(CompileContext compileContext);
 
 	/**
 	 * Sources this {@link Office} and all descendant {@link Node} instances.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	boolean sourceOfficeTree(TypeContext typeContext);
+	boolean sourceOfficeTree(CompileContext compileContext);
 
 	/**
 	 * Obtain the qualified name.
@@ -97,24 +96,24 @@ public interface OfficeNode
 	/**
 	 * Loads the {@link OfficeType}.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return {@link OfficeType} or <code>null</code> if issue loading with
 	 *         issue reported to the {@link CompilerIssues}.
 	 */
-	OfficeType loadOfficeType(TypeContext typeContext);
+	OfficeType loadOfficeType(CompileContext compileContext);
 
 	/**
 	 * Builds the {@link Office} for this {@link OfficeNode}.
 	 * 
 	 * @param builder
 	 *            {@link OfficeFloorBuilder}.
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @param profiler
 	 *            Optional {@link Profiler}. May be <code>null</code>.
 	 * @return {@link OfficeBuilder} for the built {@link Office}.
 	 */
-	OfficeBindings buildOffice(OfficeFloorBuilder builder, TypeContext typeContext, Profiler profiler);
+	OfficeBindings buildOffice(OfficeFloorBuilder builder, CompileContext compileContext, Profiler profiler);
 
 }

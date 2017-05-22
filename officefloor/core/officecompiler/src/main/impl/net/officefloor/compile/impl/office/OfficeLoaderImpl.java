@@ -18,8 +18,8 @@
 package net.officefloor.compile.impl.office;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.type.TypeContextImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
@@ -29,7 +29,6 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceProperty;
 import net.officefloor.compile.spi.office.source.OfficeSourceSpecification;
-import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.manage.Office;
 
 /**
@@ -181,17 +180,17 @@ public class OfficeLoaderImpl implements OfficeLoader {
 		// Configure the office node
 		propertyList.configureProperties(officeNode);
 
-		// Create the type context
-		TypeContext typeContext = new TypeContextImpl();
+		// Create the compile context
+		CompileContext compileContext = this.nodeContext.createCompileContext();
 
 		// Source the office tree
-		boolean isSourced = officeNode.sourceOfficeWithTopLevelSections(typeContext);
+		boolean isSourced = officeNode.sourceOfficeWithTopLevelSections(compileContext);
 		if (!isSourced) {
 			return null; // must source office successfully
 		}
 
 		// Return the office type
-		return officeNode.loadOfficeType(typeContext);
+		return officeNode.loadOfficeType(compileContext);
 	}
 
 	/**

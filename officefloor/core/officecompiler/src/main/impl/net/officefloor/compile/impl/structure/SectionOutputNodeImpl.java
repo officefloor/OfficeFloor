@@ -26,9 +26,9 @@ import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.section.OfficeSectionOutputType;
 import net.officefloor.compile.section.SectionOutputType;
-import net.officefloor.compile.type.TypeContext;
 
 /**
  * {@link SectionOutputNode} implementation.
@@ -152,7 +152,7 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 	}
 
 	@Override
-	public SectionOutputType loadSectionOutputType(TypeContext typeContext) {
+	public SectionOutputType loadSectionOutputType(CompileContext compileContext) {
 
 		// Ensure have output name
 		if (CompileUtil.isBlank(this.outputName)) {
@@ -165,7 +165,7 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 	}
 
 	@Override
-	public OfficeSectionOutputType loadOfficeSectionOutputType(TypeContext typeContext) {
+	public OfficeSectionOutputType loadOfficeSectionOutputType(CompileContext compileContext) {
 		return new OfficeSectionOutputTypeImpl(this.outputName, this.state.argumentType, this.state.isEscalationOnly);
 	}
 

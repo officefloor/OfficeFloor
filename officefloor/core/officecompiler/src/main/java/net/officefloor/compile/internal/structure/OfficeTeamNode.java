@@ -21,7 +21,6 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.office.OfficeTeam;
-import net.officefloor.compile.type.TypeContext;
 
 /**
  * {@link OfficeTeam} node.
@@ -51,11 +50,11 @@ public interface OfficeTeamNode extends LinkTeamNode, OfficeTeam {
 	/**
 	 * Loads the {@link OfficeTeamType}.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return {@link OfficeTeamType} or <code>null</code> with issues reported
 	 *         to the {@link CompilerIssues}.
 	 */
-	OfficeTeamType loadOfficeTeamType(TypeContext typeContext);
+	OfficeTeamType loadOfficeTeamType(CompileContext compileContext);
 
 }

@@ -26,11 +26,8 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
-import net.officefloor.compile.type.TypeContext;
-import net.officefloor.frame.api.OfficeFrame;
-import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.profile.Profiler;
 
 /**
  * {@link OfficeFloor} node.
@@ -55,16 +52,6 @@ public interface OfficeFloorNode extends Node, PropertyConfigurable, ManagedObje
 	void initialise();
 
 	/**
-	 * Adds a {@link Profiler} for an {@link Office}.
-	 * 
-	 * @param officeName
-	 *            Name of the {@link Office} to profile.
-	 * @param profiler
-	 *            {@link Profiler}.
-	 */
-	void addProfiler(String officeName, Profiler profiler);
-
-	/**
 	 * Adds a {@link OfficeFloorManagedObjectSource} supplied from an
 	 * {@link OfficeFloorSupplier}.
 	 * 
@@ -84,25 +71,25 @@ public interface OfficeFloorNode extends Node, PropertyConfigurable, ManagedObje
 	 * <p>
 	 * This will only source the top level {@link OfficeSection}.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	boolean sourceOfficeFloor(TypeContext typeContext);
+	boolean sourceOfficeFloor(CompileContext compileContext);
 
 	/**
 	 * Sources this {@link OfficeFloorNode} and all its descendant {@link Node}
 	 * instances recursively.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	boolean sourceOfficeFloorTree(TypeContext typeContext);
+	boolean sourceOfficeFloorTree(CompileContext compileContext);
 
 	/**
 	 * Loads the {@link AutoWire} targets for the
@@ -111,10 +98,10 @@ public interface OfficeFloorNode extends Node, PropertyConfigurable, ManagedObje
 	 * @param autoWirer
 	 *            {@link AutoWirer} to be loaded with the
 	 *            {@link OfficeFloorManagedObject} targets.
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 */
-	void loadAutoWireObjectTargets(AutoWirer<LinkObjectNode> autoWirer, TypeContext typeContext);
+	void loadAutoWireObjectTargets(AutoWirer<LinkObjectNode> autoWirer, CompileContext compileContext);
 
 	/**
 	 * Loads the {@link AutoWire} targets for the {@link OfficeFloorTeam}
@@ -125,30 +112,31 @@ public interface OfficeFloorNode extends Node, PropertyConfigurable, ManagedObje
 	 *            targets.
 	 * @param officeTeamRegistry
 	 *            {@link OfficeTeamRegistry}.
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 */
 	void loadAutoWireTeamTargets(AutoWirer<LinkTeamNode> autoWirer, OfficeTeamRegistry officeTeamRegistry,
-			TypeContext typeContext);
+			CompileContext compileContext);
 
 	/**
 	 * Loads the {@link OfficeFloorType}.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return <code>true</code> if the {@link OfficeFloorType} was loaded.
 	 */
-	OfficeFloorType loadOfficeFloorType(TypeContext typeContext);
+	OfficeFloorType loadOfficeFloorType(CompileContext compileContext);
 
 	/**
 	 * Deploys the {@link OfficeFloor}.
 	 * 
-	 * @param officeFrame
-	 *            {@link OfficeFrame} to deploy the {@link OfficeFloor} within.
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param officeFloorBuilder
+	 *            {@link OfficeFloorBuilder} to build the deployed
+	 *            {@link OfficeFloor}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return {@link OfficeFloor}.
 	 */
-	OfficeFloor deployOfficeFloor(OfficeFrame officeFrame, TypeContext typeContext);
+	OfficeFloor deployOfficeFloor(OfficeFloorBuilder officeFloorBuilder, CompileContext compileContext);
 
 }

@@ -49,6 +49,7 @@ import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -92,7 +93,6 @@ import net.officefloor.compile.spi.section.SubSectionObject;
 import net.officefloor.compile.spi.section.SubSectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
-import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
@@ -337,7 +337,7 @@ public class SectionNodeImpl implements SectionNode {
 	 */
 
 	@Override
-	public boolean sourceSection(TypeContext typeContext) {
+	public boolean sourceSection(CompileContext compileContext) {
 
 		// Ensure the section is initialised
 		if (!this.isInitialised()) {
@@ -402,17 +402,17 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	@Override
-	public boolean sourceSectionTree(TypeContext typeContext) {
+	public boolean sourceSectionTree(CompileContext compileContext) {
 
 		// Source this section
-		boolean isSourced = this.sourceSection(typeContext);
+		boolean isSourced = this.sourceSection(compileContext);
 		if (!isSourced) {
 			return false;
 		}
 
 		// Ensure all functions are sourced
 		isSourced = CompileUtil.source(this.functionNodes, (function) -> function.getSectionFunctionName(),
-				(function) -> function.souceManagedFunction(typeContext));
+				(function) -> function.souceManagedFunction(compileContext));
 		if (!isSourced) {
 			return false;
 		}
@@ -420,7 +420,7 @@ public class SectionNodeImpl implements SectionNode {
 		// Ensure all managed object sources are source
 		isSourced = CompileUtil.source(this.managedObjectSourceNodes,
 				(managedObjectSource) -> managedObjectSource.getSectionManagedObjectSourceName(),
-				(managedObjectSource) -> managedObjectSource.sourceManagedObjectSource(typeContext));
+				(managedObjectSource) -> managedObjectSource.sourceManagedObjectSource(compileContext));
 		if (!isSourced) {
 			return false;
 		}
@@ -428,36 +428,36 @@ public class SectionNodeImpl implements SectionNode {
 		// Ensure all managed objects are sourced
 		isSourced = CompileUtil.source(this.managedObjects,
 				(managedObject) -> managedObject.getSectionManagedObjectName(),
-				(managedObject) -> managedObject.sourceManagedObject(typeContext));
+				(managedObject) -> managedObject.sourceManagedObject(compileContext));
 		if (!isSourced) {
 			return false;
 		}
 
 		// Successful only if all sub sections are also sourced
 		return CompileUtil.source(this.subSections, (subSection) -> subSection.getOfficeSectionName(),
-				(subSection) -> subSection.sourceSectionTree(typeContext));
+				(subSection) -> subSection.sourceSectionTree(compileContext));
 	}
 
 	@Override
-	public SectionType loadSectionType(TypeContext typeContext) {
+	public SectionType loadSectionType(CompileContext compileContext) {
 
 		// Obtain the listing of input types sorted by name
 		SectionInputType[] inputTypes = CompileUtil.loadTypes(this.inputs, (input) -> input.getSectionInputName(),
-				(input) -> input.loadSectionInputType(typeContext), SectionInputType[]::new);
+				(input) -> input.loadSectionInputType(compileContext), SectionInputType[]::new);
 		if (inputTypes == null) {
 			return null;
 		}
 
 		// Obtain the listing of output types sorted by name
 		SectionOutputType[] outputTypes = CompileUtil.loadTypes(this.outputs, (output) -> output.getSectionOutputName(),
-				(output) -> output.loadSectionOutputType(typeContext), SectionOutputType[]::new);
+				(output) -> output.loadSectionOutputType(compileContext), SectionOutputType[]::new);
 		if (outputTypes == null) {
 			return null;
 		}
 
 		// Obtain the listing of object types sorted by name
 		SectionObjectType[] objectTypes = CompileUtil.loadTypes(this.objects, (object) -> object.getSectionObjectName(),
-				(object) -> object.loadSectionObjectType(typeContext), SectionObjectType[]::new);
+				(object) -> object.loadSectionObjectType(compileContext), SectionObjectType[]::new);
 		if (objectTypes == null) {
 			return null;
 		}
@@ -467,17 +467,17 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	@Override
-	public OfficeSectionType loadOfficeSectionType(TypeContext typeContext) {
+	public OfficeSectionType loadOfficeSectionType(CompileContext compileContext) {
 
 		// Load the section type
-		SectionType sectionType = this.loadSectionType(typeContext);
+		SectionType sectionType = this.loadSectionType(compileContext);
 		if (sectionType == null) {
 			return null; // must load section type
 		}
 
 		// Obtain the section inputs
 		OfficeSectionInputType[] inputTypes = CompileUtil.loadTypes(this.inputs,
-				(input) -> input.getOfficeSectionInputName(), (input) -> input.loadOfficeSectionInputType(typeContext),
+				(input) -> input.getOfficeSectionInputName(), (input) -> input.loadOfficeSectionInputType(compileContext),
 				OfficeSectionInputType[]::new);
 		if (inputTypes == null) {
 			return null; // must load types
@@ -486,7 +486,7 @@ public class SectionNodeImpl implements SectionNode {
 		// Add the office context for the section outputs
 		OfficeSectionOutputType[] outputTypes = CompileUtil.loadTypes(this.outputs,
 				(output) -> output.getOfficeSectionOutputName(),
-				(output) -> output.loadOfficeSectionOutputType(typeContext), OfficeSectionOutputType[]::new);
+				(output) -> output.loadOfficeSectionOutputType(compileContext), OfficeSectionOutputType[]::new);
 		if (outputTypes == null) {
 			return null; // must load types
 		}
@@ -494,7 +494,7 @@ public class SectionNodeImpl implements SectionNode {
 		// Add the office context for the section objects
 		OfficeSectionObjectType[] objectTypes = CompileUtil.loadTypes(this.objects,
 				(object) -> object.getOfficeSectionObjectName(),
-				(object) -> object.loadOfficeSectionObjectType(typeContext), OfficeSectionObjectType[]::new);
+				(object) -> object.loadOfficeSectionObjectType(compileContext), OfficeSectionObjectType[]::new);
 		if (objectTypes == null) {
 			return null; // must load types
 		}
@@ -502,7 +502,7 @@ public class SectionNodeImpl implements SectionNode {
 		// Create the office section type
 		OfficeSectionTypeImpl officeSectionType = new OfficeSectionTypeImpl(this.sectionName, inputTypes, outputTypes,
 				objectTypes);
-		boolean isInitialised = this.initialiseSubSectionState(officeSectionType, null, typeContext);
+		boolean isInitialised = this.initialiseSubSectionState(officeSectionType, null, compileContext);
 		if (!isInitialised) {
 			return null; // must be initialised
 		}
@@ -512,12 +512,12 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	@Override
-	public OfficeSectionType loadOfficeSubSectionType(OfficeSubSectionType parentSectionType, TypeContext typeContext) {
+	public OfficeSectionType loadOfficeSubSectionType(OfficeSubSectionType parentSectionType, CompileContext compileContext) {
 
 		// Create the office section type
 		OfficeSectionTypeImpl officeSectionType = new OfficeSectionTypeImpl(this.sectionName,
 				new OfficeSectionInputType[] {}, new OfficeSectionOutputType[] {}, new OfficeSectionObjectType[] {});
-		boolean isInitialised = this.initialiseSubSectionState(officeSectionType, parentSectionType, typeContext);
+		boolean isInitialised = this.initialiseSubSectionState(officeSectionType, parentSectionType, compileContext);
 		if (!isInitialised) {
 			return null; // must be initialised
 		}
@@ -534,18 +534,18 @@ public class SectionNodeImpl implements SectionNode {
 	 *            {@link OfficeSectionTypeImpl}.
 	 * @param parentSectionType
 	 *            Parent {@link OfficeSubSectionType}.
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return <code>true</code> if initialised {@link OfficeSubSectionType}
 	 *         state.
 	 */
 	private boolean initialiseSubSectionState(OfficeSectionTypeImpl sectionType, OfficeSubSectionType parentSectionType,
-			TypeContext typeContext) {
+			CompileContext compileContext) {
 
 		// Load the sub sections
 		OfficeSubSectionType[] subSections = CompileUtil.loadTypes(this.subSections,
 				(subSection) -> subSection.getSubSectionName(),
-				(subSection) -> subSection.loadOfficeSubSectionType(sectionType, typeContext),
+				(subSection) -> subSection.loadOfficeSubSectionType(sectionType, compileContext),
 				OfficeSubSectionType[]::new);
 		if (subSections == null) {
 			return false;
@@ -554,7 +554,7 @@ public class SectionNodeImpl implements SectionNode {
 		// Load managed object types
 		OfficeSectionManagedObjectType[] managedObjectTypes = CompileUtil.loadTypes(this.managedObjects,
 				(mos) -> mos.getOfficeSectionManagedObjectName(),
-				(mos) -> mos.loadOfficeSectionManagedObjectType(typeContext), OfficeSectionManagedObjectType[]::new);
+				(mos) -> mos.loadOfficeSectionManagedObjectType(compileContext), OfficeSectionManagedObjectType[]::new);
 		if (managedObjectTypes == null) {
 			return false;
 		}
@@ -562,7 +562,7 @@ public class SectionNodeImpl implements SectionNode {
 		// Add the office context for the functions
 		OfficeFunctionType[] taskTypes = CompileUtil.loadTypes(this.functionNodes,
 				(function) -> function.getOfficeFunctionName(),
-				function -> function.loadOfficeFunctionType(sectionType, typeContext), OfficeFunctionType[]::new);
+				function -> function.loadOfficeFunctionType(sectionType, compileContext), OfficeFunctionType[]::new);
 		if (taskTypes == null) {
 			return false;
 		}
@@ -573,11 +573,11 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	@Override
-	public OfficeAvailableSectionInputType[] loadOfficeAvailableSectionInputTypes(TypeContext typeContext) {
+	public OfficeAvailableSectionInputType[] loadOfficeAvailableSectionInputTypes(CompileContext compileContext) {
 		return CompileUtil.loadTypes(this.inputs, (input) -> input.getOfficeSectionInputName(), (input) -> {
 
 			// Load the input type
-			OfficeSectionInputType inputType = input.loadOfficeSectionInputType(typeContext);
+			OfficeSectionInputType inputType = input.loadOfficeSectionInputType(compileContext);
 			if (inputType == null) {
 				return null;
 			}
@@ -640,7 +640,7 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	@Override
-	public void autoWireObjects(AutoWirer<LinkObjectNode> autoWirer, TypeContext typeContext) {
+	public void autoWireObjects(AutoWirer<LinkObjectNode> autoWirer, CompileContext compileContext) {
 
 		// Auto-wire the objects
 		this.objects.values().forEach((object) -> {
@@ -651,7 +651,7 @@ public class SectionNodeImpl implements SectionNode {
 			}
 
 			// Obtain the type
-			SectionObjectType objectType = object.loadSectionObjectType(typeContext);
+			SectionObjectType objectType = object.loadSectionObjectType(compileContext);
 			if (objectType == null) {
 				return; // must have type
 			}
@@ -666,25 +666,25 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	@Override
-	public void autoWireTeams(AutoWirer<LinkTeamNode> autoWirer, TypeContext typeContext) {
+	public void autoWireTeams(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext) {
 
 		// Associate responsibility for the functions
 		this.functionNodes.values()
-				.forEach((function) -> function.autoWireManagedFunctionResponsibility(autoWirer, typeContext));
+				.forEach((function) -> function.autoWireManagedFunctionResponsibility(autoWirer, compileContext));
 
 		// Auto-wire managed object source teams
 		this.managedObjectSourceNodes.values().stream().sorted(
 				(a, b) -> CompileUtil.sortCompare(a.getManagedObjectSourceName(), b.getManagedObjectSourceName()))
-				.forEachOrdered((mos) -> mos.autoWireTeams(autoWirer, typeContext));
+				.forEachOrdered((mos) -> mos.autoWireTeams(autoWirer, compileContext));
 
 		// Auto-wire the sub sections
 		this.subSections.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getSubSectionName(), b.getSubSectionName()))
-				.forEachOrdered((subSection) -> subSection.autoWireTeams(autoWirer, typeContext));
+				.forEachOrdered((subSection) -> subSection.autoWireTeams(autoWirer, compileContext));
 	}
 
 	@Override
-	public void buildSection(OfficeBuilder officeBuilder, OfficeBindings officeBindings, TypeContext typeContext) {
+	public void buildSection(OfficeBuilder officeBuilder, OfficeBindings officeBindings, CompileContext compileContext) {
 
 		// Build the functions (in deterministic order)
 		this.functionNodes.values().stream()
@@ -706,7 +706,7 @@ public class SectionNodeImpl implements SectionNode {
 		// Build the sub sections (in deterministic order)
 		this.subSections.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getSubSectionName(), b.getSubSectionName()))
-				.forEachOrdered((subSection) -> subSection.buildSection(officeBuilder, officeBindings, typeContext));
+				.forEachOrdered((subSection) -> subSection.buildSection(officeBuilder, officeBindings, compileContext));
 	}
 
 	@Override

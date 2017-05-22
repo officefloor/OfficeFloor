@@ -26,7 +26,7 @@ import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.OfficeBindings;
 import net.officefloor.compile.internal.structure.OfficeNode;
-import net.officefloor.compile.type.TypeContext;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 
@@ -53,9 +53,9 @@ public class OfficeBindingsImpl implements OfficeBindings {
 	private final OfficeFloorBuilder officeFloorBuilder;
 
 	/**
-	 * {@link TypeContext}.
+	 * {@link CompileContext}.
 	 */
-	private final TypeContext typeContext;
+	private final CompileContext compileContext;
 
 	/**
 	 * Built {@link ManagedObjectSourceNode} instances.
@@ -86,15 +86,15 @@ public class OfficeBindingsImpl implements OfficeBindings {
 	 *            {@link OfficeBuilder}.
 	 * @param officeFloorBuilder
 	 *            {@link OfficeFloorBuilder}.
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 */
 	public OfficeBindingsImpl(OfficeNode office, OfficeBuilder officeBuilder, OfficeFloorBuilder officeFloorBuilder,
-			TypeContext typeContext) {
+			CompileContext compileContext) {
 		this.office = office;
 		this.officeBuilder = officeBuilder;
 		this.officeFloorBuilder = officeFloorBuilder;
-		this.typeContext = typeContext;
+		this.compileContext = compileContext;
 	}
 
 	/*
@@ -107,7 +107,7 @@ public class OfficeBindingsImpl implements OfficeBindings {
 			return; // already built into office
 		}
 		managedObjectSourceNode.buildManagedObject(this.officeFloorBuilder, this.office, this.officeBuilder, this,
-				this.typeContext);
+				this.compileContext);
 		this.builtManagedObjectSources.add(managedObjectSourceNode);
 	}
 
@@ -124,7 +124,7 @@ public class OfficeBindingsImpl implements OfficeBindings {
 		if (this.builtManagedObjects.contains(managedObjectNode)) {
 			return; // already built into office
 		}
-		managedObjectNode.buildOfficeManagedObject(this.office, this.officeBuilder, this, this.typeContext);
+		managedObjectNode.buildOfficeManagedObject(this.office, this.officeBuilder, this, this.compileContext);
 		this.builtManagedObjects.add(managedObjectNode);
 	}
 
@@ -145,7 +145,7 @@ public class OfficeBindingsImpl implements OfficeBindings {
 		if (this.builtManagedFunctions.contains(managedFunctionNode)) {
 			return; // already built into office
 		}
-		managedFunctionNode.buildManagedFunction(this.officeBuilder, this.typeContext);
+		managedFunctionNode.buildManagedFunction(this.officeBuilder, this.compileContext);
 		this.builtManagedFunctions.add(managedFunctionNode);
 	}
 

@@ -21,7 +21,6 @@ import net.officefloor.compile.administration.AdministrationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.office.OfficeAdministration;
-import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.function.ManagedFunction;
@@ -67,10 +66,10 @@ public interface AdministrationNode extends LinkTeamNode, OfficeAdministration {
 	 * 
 	 * @param autoWirer
 	 *            {@link AutoWirer}.
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 */
-	void autoWireTeam(AutoWirer<LinkTeamNode> autoWirer, TypeContext typeContext);
+	void autoWireTeam(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext);
 
 	/**
 	 * Builds the pre {@link ManagedFunction} {@link Administration}.

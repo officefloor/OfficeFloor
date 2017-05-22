@@ -504,6 +504,14 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	public abstract void setOfficeFloorSource(OfficeFloorSource officeFloorSource);
 
 	/**
+	 * Specifies the location of the {@link OfficeFloor}.
+	 * 
+	 * @param officeFloorLocation
+	 *            Location of the {@link OfficeFloor}.
+	 */
+	public abstract void setOfficeFloorLocation(String officeFloorLocation);
+
+	/**
 	 * <p>
 	 * Allows providing an alias name for an {@link OfficeSource}.
 	 * <p>
@@ -720,12 +728,20 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * Specifies a directory containing override properties.
 	 * <p>
 	 * The files within the directory are properties files with the naming
-	 * convention: &lt;fully-qualified-name$gt;.properties
+	 * convention: &lt;fully-qualified-name&gt;.properties
 	 * 
 	 * @param propertiesDirectory
 	 *            Directory containing the override properties.
 	 */
 	public abstract void setOverridePropertiesDirectory(File propertiesDirectory);
+
+	/**
+	 * Flags to register the MXBeans.
+	 * 
+	 * @param isRegister
+	 *            <code>true</code> to register the MXBeans.
+	 */
+	public abstract void setRegisterMBeans(boolean isRegister);
 
 	/**
 	 * Creates a new empty {@link PropertyList}.
@@ -812,16 +828,13 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	public abstract TeamLoader getTeamLoader();
 
 	/**
-	 * <p>
 	 * Compiles and builds the {@link OfficeFloor}.
-	 * <p>
-	 * Use this method in preference to {@link OfficeFloorLoader}.
 	 * 
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor}.
+	 * @param officeFloorName
+	 *            Name of the {@link OfficeFloor}.
 	 * @return {@link OfficeFloor} or <code>null</code> if issues in compiling
 	 *         which are reported to the {@link CompilerIssues}.
 	 */
-	public abstract OfficeFloor compile(String officeFloorLocation);
+	public abstract OfficeFloor compile(String officeFloorName);
 
 }

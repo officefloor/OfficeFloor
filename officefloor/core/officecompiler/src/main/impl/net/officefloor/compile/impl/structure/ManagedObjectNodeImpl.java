@@ -37,6 +37,7 @@ import net.officefloor.compile.internal.structure.OfficeBindings;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SectionNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.object.DependentObjectType;
@@ -45,7 +46,6 @@ import net.officefloor.compile.section.OfficeSectionManagedObjectSourceType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectType;
 import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
-import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.governance.Governance;
@@ -213,14 +213,14 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	}
 
 	@Override
-	public TypeQualification[] getTypeQualifications(TypeContext typeContext) {
+	public TypeQualification[] getTypeQualifications(CompileContext compileContext) {
 
 		// Obtain the type qualifications
 		TypeQualification[] qualifications = this.typeQualifications.stream().toArray(TypeQualification[]::new);
 		if (qualifications.length == 0) {
 
 			// No qualifications, so use managed object type
-			ManagedObjectType<?> managedObjectType = typeContext
+			ManagedObjectType<?> managedObjectType = compileContext
 					.getOrLoadManagedObjectType(this.state.managedObjectSourceNode);
 			if (managedObjectType == null) {
 				return null; // must have type
@@ -234,10 +234,10 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	}
 
 	@Override
-	public boolean sourceManagedObject(TypeContext typeContext) {
+	public boolean sourceManagedObject(CompileContext compileContext) {
 
 		// Obtain the managed object type
-		ManagedObjectType<?> managedObjectType = typeContext
+		ManagedObjectType<?> managedObjectType = compileContext
 				.getOrLoadManagedObjectType(this.state.managedObjectSourceNode);
 		if (managedObjectType == null) {
 			return false; // must have type
@@ -256,17 +256,17 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	}
 
 	@Override
-	public OfficeSectionManagedObjectType loadOfficeSectionManagedObjectType(TypeContext typeContext) {
+	public OfficeSectionManagedObjectType loadOfficeSectionManagedObjectType(CompileContext compileContext) {
 
 		// Obtain the managed object type
-		ManagedObjectType<?> managedObjectType = typeContext
+		ManagedObjectType<?> managedObjectType = compileContext
 				.getOrLoadManagedObjectType(this.state.managedObjectSourceNode);
 		if (managedObjectType == null) {
 			return null; // must have type
 		}
 
 		// Create the type qualifications
-		TypeQualification[] qualifications = this.getTypeQualifications(typeContext);
+		TypeQualification[] qualifications = this.getTypeQualifications(compileContext);
 
 		// Obtain the extension interfaces
 		Class<?>[] extensionInterfaces = managedObjectType.getExtensionInterfaces();
@@ -274,14 +274,14 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		// Obtain the dependencies
 		ObjectDependencyType[] objectDependencyTypes = CompileUtil.loadTypes(this.dependencies,
 				(dependency) -> dependency.getManagedObjectDependencyName(),
-				(dependency) -> dependency.loadObjectDependencyType(typeContext), ObjectDependencyType[]::new);
+				(dependency) -> dependency.loadObjectDependencyType(compileContext), ObjectDependencyType[]::new);
 		if (objectDependencyTypes == null) {
 			return null;
 		}
 
 		// Load the managed object source type
 		OfficeSectionManagedObjectSourceType managedObjectSourceType = this.state.managedObjectSourceNode
-				.loadOfficeSectionManagedObjectSourceType(typeContext);
+				.loadOfficeSectionManagedObjectSourceType(compileContext);
 		if (managedObjectSourceType == null) {
 			return null;
 		}
@@ -296,8 +296,8 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	 */
 
 	@Override
-	public DependentObjectType loadDependentObjectType(TypeContext typeContext) {
-		return this.loadOfficeSectionManagedObjectType(typeContext);
+	public DependentObjectType loadDependentObjectType(CompileContext compileContext) {
+		return this.loadOfficeSectionManagedObjectType(compileContext);
 	}
 
 	/*
@@ -345,10 +345,10 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void buildOfficeManagedObject(OfficeNode office, OfficeBuilder officeBuilder, OfficeBindings officeBindings,
-			TypeContext typeContext) {
+			CompileContext compileContext) {
 
 		// Obtain the managed object type
-		ManagedObjectType<?> managedObjectType = typeContext
+		ManagedObjectType<?> managedObjectType = compileContext
 				.getOrLoadManagedObjectType(this.state.managedObjectSourceNode);
 		if (managedObjectType == null) {
 			return; // must have managed object type

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.impl.type;
+package net.officefloor.compile.impl.structure;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,43 +28,43 @@ import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.TeamNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.team.TeamType;
-import net.officefloor.compile.type.TypeContext;
 
 /**
- * {@link TypeContext} implementation.
+ * {@link CompileContext} implementation.
  *
  * @author Daniel Sagenschneider
  */
-public class TypeContextImpl implements TypeContext {
+public class CompileContextImpl implements CompileContext {
 
 	/**
 	 * {@link ManagedObjectType} by {@link ManagedObjectSourceNode} instances.
 	 */
-	private final Map<ManagedObjectSourceNode, TypeHolder<ManagedObjectType<?>>> managedObjectTypes = new HashMap<ManagedObjectSourceNode, TypeContextImpl.TypeHolder<ManagedObjectType<?>>>();
+	private final Map<ManagedObjectSourceNode, TypeHolder<ManagedObjectType<?>>> managedObjectTypes = new HashMap<ManagedObjectSourceNode, CompileContextImpl.TypeHolder<ManagedObjectType<?>>>();
 
 	/**
 	 * {@link FunctionNamespaceType} by {@link FunctionNamespaceNode} instances.
 	 */
-	private final Map<FunctionNamespaceNode, TypeHolder<FunctionNamespaceType>> namespaceTypes = new HashMap<FunctionNamespaceNode, TypeContextImpl.TypeHolder<FunctionNamespaceType>>();
+	private final Map<FunctionNamespaceNode, TypeHolder<FunctionNamespaceType>> namespaceTypes = new HashMap<FunctionNamespaceNode, CompileContextImpl.TypeHolder<FunctionNamespaceType>>();
 
 	/**
 	 * {@link TeamType} by {@link TeamNode} instances.
 	 */
-	private final Map<TeamNode, TypeHolder<TeamType>> teamTypes = new HashMap<TeamNode, TypeContextImpl.TypeHolder<TeamType>>();
+	private final Map<TeamNode, TypeHolder<TeamType>> teamTypes = new HashMap<TeamNode, CompileContextImpl.TypeHolder<TeamType>>();
 
 	/**
 	 * {@link AdministrationType} by {@link AdministrationNode} instances.
 	 */
-	private final Map<AdministrationNode, TypeHolder<AdministrationType<?, ?, ?>>> administrationTypes = new HashMap<AdministrationNode, TypeContextImpl.TypeHolder<AdministrationType<?, ?, ?>>>();
+	private final Map<AdministrationNode, TypeHolder<AdministrationType<?, ?, ?>>> administrationTypes = new HashMap<AdministrationNode, CompileContextImpl.TypeHolder<AdministrationType<?, ?, ?>>>();
 
 	/**
 	 * {@link GovernanceType} by {@link GovernanceNode} instances.
 	 */
-	private final Map<GovernanceNode, TypeHolder<GovernanceType<?, ?>>> governanceTypes = new HashMap<GovernanceNode, TypeContextImpl.TypeHolder<GovernanceType<?, ?>>>();
+	private final Map<GovernanceNode, TypeHolder<GovernanceType<?, ?>>> governanceTypes = new HashMap<GovernanceNode, CompileContextImpl.TypeHolder<GovernanceType<?, ?>>>();
 
 	/**
 	 * Gets or loads the type.
@@ -110,6 +110,16 @@ public class TypeContextImpl implements TypeContext {
 		public TypeHolder(T type) {
 			this.type = type;
 		}
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param isRegisterMBeans
+	 *            <code>true</code> to register the MBeans.
+	 */
+	public CompileContextImpl(boolean isRegisterMBeans) {
+
 	}
 
 	/*

@@ -73,7 +73,6 @@ public interface OfficeFloorSource {
 	 * @throws Exception
 	 *             If fails to initialise the {@link OfficeFloorSource}.
 	 */
-	@Deprecated // provide property overrides rather than tags
 	void specifyConfigurationProperties(RequiredProperties requiredProperties, OfficeFloorSourceContext context)
 			throws Exception;
 

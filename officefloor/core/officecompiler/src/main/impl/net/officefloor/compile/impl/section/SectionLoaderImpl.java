@@ -18,8 +18,8 @@
 package net.officefloor.compile.impl.section;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.type.TypeContextImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
@@ -242,14 +242,17 @@ public class SectionLoaderImpl implements SectionLoader {
 				sectionLocation);
 		propertyList.configureProperties(sectionNode);
 
+		// Create the compile context
+		CompileContext compileContext = this.nodeContext.createCompileContext();
+
 		// Source the section
-		boolean isSourced = sectionNode.sourceSection(new TypeContextImpl());
+		boolean isSourced = sectionNode.sourceSection(compileContext);
 		if (!isSourced) {
 			return null; // must source section successfully
 		}
 
 		// Return the section type
-		return sectionNode.loadSectionType(new TypeContextImpl());
+		return sectionNode.loadSectionType(compileContext);
 	}
 
 	@Override
@@ -276,14 +279,17 @@ public class SectionLoaderImpl implements SectionLoader {
 				sectionLocation);
 		propertyList.configureProperties(sectionNode);
 
+		// Create the compile context
+		CompileContext compileContext = this.nodeContext.createCompileContext();
+
 		// Source the section
-		boolean isSourced = sectionNode.sourceSectionTree(new TypeContextImpl());
+		boolean isSourced = sectionNode.sourceSectionTree(compileContext);
 		if (!isSourced) {
 			return null; // must source section successfully
 		}
 
 		// Return the office section type
-		return sectionNode.loadOfficeSectionType(new TypeContextImpl());
+		return sectionNode.loadOfficeSectionType(compileContext);
 	}
 
 	/**

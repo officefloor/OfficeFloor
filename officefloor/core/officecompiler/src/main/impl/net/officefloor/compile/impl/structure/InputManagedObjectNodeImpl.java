@@ -32,8 +32,8 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeBindings;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
-import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -175,7 +175,7 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 
 	@Override
 	public void buildOfficeManagedObject(OfficeNode office, OfficeBuilder officeBuilder, OfficeBindings officeBindings,
-			TypeContext typeContext) {
+			CompileContext compileContext) {
 
 		// Provide binding to managed object source if specified
 		if (this.boundManagedObjectSource != null) {

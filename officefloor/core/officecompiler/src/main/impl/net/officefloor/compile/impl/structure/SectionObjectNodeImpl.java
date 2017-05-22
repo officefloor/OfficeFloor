@@ -27,13 +27,13 @@ import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.object.DependentObjectType;
 import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.section.OfficeSectionObjectType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.section.SectionObject;
-import net.officefloor.compile.type.TypeContext;
 
 /**
  * {@link SectionObjectNode} implementation.
@@ -162,7 +162,7 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	}
 
 	@Override
-	public SectionObjectType loadSectionObjectType(TypeContext typeContext) {
+	public SectionObjectType loadSectionObjectType(CompileContext compileContext) {
 
 		// Ensure have name and type
 		if (CompileUtil.isBlank(this.objectName)) {
@@ -183,7 +183,7 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	}
 
 	@Override
-	public OfficeSectionObjectType loadOfficeSectionObjectType(TypeContext typeContext) {
+	public OfficeSectionObjectType loadOfficeSectionObjectType(CompileContext compileContext) {
 		return new OfficeSectionObjectTypeImpl(this.objectName, this.state.objectType, this.typeQualifier);
 	}
 
@@ -192,7 +192,7 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	 */
 
 	@Override
-	public DependentObjectType loadDependentObjectType(TypeContext typeContext) {
+	public DependentObjectType loadDependentObjectType(CompileContext compileContext) {
 		TypeQualification[] typeQualifications = new TypeQualification[] {
 				new TypeQualificationImpl(this.typeQualifier, this.state.objectType) };
 		return new DependentObjectTypeImpl(this.objectName, typeQualifications, new ObjectDependencyType[0]);

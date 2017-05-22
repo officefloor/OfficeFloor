@@ -18,11 +18,11 @@
 package net.officefloor.compile.impl.type;
 
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.managedobject.ManagedObjectType;
-import net.officefloor.compile.type.TypeContext;
 
 /**
- * Tests loading the {@link ManagedObjectType} from the {@link TypeContext}.
+ * Tests loading the {@link ManagedObjectType} from the {@link CompileContext}.
  *
  * @author Daniel Sagenschneider
  */
