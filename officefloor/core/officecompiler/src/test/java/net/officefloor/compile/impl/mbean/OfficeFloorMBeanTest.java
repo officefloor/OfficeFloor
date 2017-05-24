@@ -20,17 +20,21 @@ package net.officefloor.compile.impl.mbean;
 import java.lang.management.ManagementFactory;
 
 import javax.management.JMX;
+import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanInfo;
+import javax.management.MBeanOperationInfo;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 import javax.management.MXBean;
 import javax.management.ObjectName;
 
-import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.mbean.OfficeFloorMBean;
+import net.officefloor.extension.CompileOffice;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
 
 /**
  * Ensure register {@link OfficeFloor} as an MBean with ability to run
@@ -55,19 +59,16 @@ public class OfficeFloorMBeanTest extends OfficeFrameTestCase {
 	 */
 	private ObjectName objectName;
 
-	/**
-	 * Flag indicating if {@link ManagedFunction} has been invoked.
-	 */
-	private volatile boolean isFunctionInvoked = false;
-
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
 		// Compile the OfficeFloor
-		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
-		compiler.setRegisterMBeans(true);
-		this.officeFloor = compiler.compile(OFFICE_FLOOR_NAME);
+		CompileOffice compiler = new CompileOffice();
+		compiler.getOfficeFloorCompiler().setRegisterMBeans(true);
+		this.officeFloor = compiler.compileOffice((extender, context) -> {
+			extender.addOfficeSection("SECTION", ClassSectionSource.class.getName(), CompileSection.class.getName());
+		});
 
 		// Obtain the OfficeFloor ObjectName
 		this.objectName = new ObjectName(
@@ -105,9 +106,37 @@ public class OfficeFloorMBeanTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure correct {@link MBeanInfo}.
+	 */
+	public void testMBeanInfo() throws Exception {
+
+		// Open and register MBean
+		this.officeFloor.openOfficeFloor();
+
+		// Obtain the MBean info
+		MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+		MBeanInfo info = server.getMBeanInfo(this.objectName);
+
+		// Ensure correct attributes
+		MBeanAttributeInfo[] attributes = info.getAttributes();
+		assertEquals("Incorrect number of attributes", 1, attributes.length);
+		assertEquals("Incorrect attribute name", "OfficeNames", attributes[0].getName());
+
+		// Ensure correct operations
+		MBeanOperationInfo[] operations = info.getOperations();
+		assertEquals("Incorrect number of operations", 3, operations.length);
+		assertEquals("Incorrect first operation", "getManagedFunctionNames", operations[0].getName());
+		assertEquals("Incorrect second operation", "invokeFunction", operations[1].getName());
+		assertEquals("Incorrect third operation", "closeOfficeFloor", operations[2].getName());
+	}
+
+	/**
 	 * Ensure can list {@link Office} instances within the {@link OfficeFloor}.
 	 */
-	public void testListOffices() {
+	public void testListOffices() throws Exception {
+
+		// Open and register MBean
+		this.officeFloor.openOfficeFloor();
 
 		// Obtain the OfficeFloor MBean
 		MBeanServerConnection connection = ManagementFactory.getPlatformMBeanServer();
@@ -123,7 +152,10 @@ public class OfficeFloorMBeanTest extends OfficeFrameTestCase {
 	 * Ensure can list {@link ManagedFunction} instances within the
 	 * {@link OfficeFloor}.
 	 */
-	public void testListManagedFunctions() {
+	public void testListManagedFunctions() throws Exception {
+
+		// Open and register MBean
+		this.officeFloor.openOfficeFloor();
 
 		// Obtain the OfficeFloor MBean
 		MBeanServerConnection connection = ManagementFactory.getPlatformMBeanServer();
@@ -132,32 +164,41 @@ public class OfficeFloorMBeanTest extends OfficeFrameTestCase {
 		// Obtain the list of managed function names
 		String[] managedFunctionNames = mbean.getManagedFunctionNames("OFFICE");
 		assertEquals("Incorrect number of managed functions", 1, managedFunctionNames.length);
-		assertEquals("Incorrect managed function name", "function", managedFunctionNames[0]);
+		assertEquals("Incorrect managed function name", "SECTION.function", managedFunctionNames[0]);
 	}
 
 	/**
 	 * Ensure can invoke a {@link ManagedFunction}.
 	 */
-	public void testInvokeManagedFunction() {
+	public void testInvokeManagedFunction() throws Exception {
+
+		// Reset for testing
+		CompileSection.isFunctionInvoked = false;
+
+		// Open and register MBean
+		this.officeFloor.openOfficeFloor();
 
 		// Obtain the OfficeFloor MBean
 		MBeanServerConnection connection = ManagementFactory.getPlatformMBeanServer();
 		OfficeFloorMBean mbean = JMX.newMBeanProxy(connection, this.objectName, OfficeFloorMBean.class);
 
 		// Ensure not yet invoked function
-		assertFalse("Managed function should not yet be invoked", this.isFunctionInvoked);
+		assertFalse("Managed function should not yet be invoked", CompileSection.isFunctionInvoked);
 
 		// Invoke the function
-		mbean.invokeFunction("OFFICE", "function", "TEST");
+		mbean.invokeFunction("OFFICE", "SECTION.function", "TEST");
 
 		// Ensure the function is invoked
-		assertTrue("Managed function should be invoked", this.isFunctionInvoked);
+		assertTrue("Managed function should be invoked", CompileSection.isFunctionInvoked);
 	}
 
 	/**
 	 * Ensure able to close {@link OfficeFloor}.
 	 */
 	public void testCloseOfficeFloor() throws Exception {
+
+		// Open and register MBean
+		this.officeFloor.openOfficeFloor();
 
 		// Obtain the OfficeFloor MBean
 		MBeanServerConnection connection = ManagementFactory.getPlatformMBeanServer();
@@ -166,6 +207,15 @@ public class OfficeFloorMBeanTest extends OfficeFrameTestCase {
 		// Close the OfficeFloor (via MBean)
 		mbean.closeOfficeFloor();
 		assertFalse("OfficeFloor should no longer be registered", connection.isRegistered(this.objectName));
+	}
+
+	public static class CompileSection {
+
+		public static boolean isFunctionInvoked = false;
+
+		public void function() {
+			isFunctionInvoked = true;
+		}
 	}
 
 }

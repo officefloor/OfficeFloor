@@ -40,7 +40,7 @@ public abstract class AbstractTestTypeContext<N extends Node, T> extends OfficeF
 	/**
 	 * {@link CompileContext} to test.
 	 */
-	protected CompileContext context = new CompileContextImpl(false);
+	protected CompileContext context = new CompileContextImpl(null);
 
 	/**
 	 * Type of {@link Node} to create mocks.

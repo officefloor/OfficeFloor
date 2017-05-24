@@ -178,7 +178,7 @@ public class OfficeLoaderUtil {
 			Class<O> officeSourceClass, String officeLocation, String... propertyNameValuePairs) {
 
 		// Create the compile context
-		CompileContext compileContext = new CompileContextImpl(false);
+		CompileContext compileContext = new CompileContextImpl(null);
 
 		// Cast to obtain expected office type
 		if (!(architect instanceof OfficeNode)) {

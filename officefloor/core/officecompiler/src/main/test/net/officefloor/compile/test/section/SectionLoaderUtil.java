@@ -203,7 +203,7 @@ public class SectionLoaderUtil {
 			Class<S> sectionSourceClass, String sectionLocation, String... propertyNameValuePairs) {
 
 		// Compile Context
-		CompileContext compileContext = new CompileContextImpl(false);
+		CompileContext compileContext = new CompileContextImpl(null);
 
 		// Cast to obtain expected section type
 		if (!(designer instanceof SectionNode)) {
@@ -278,7 +278,7 @@ public class SectionLoaderUtil {
 			Class<S> sectionSourceClass, String sectionLocation, String... propertyNameValuePairs) {
 
 		// Create the compile context
-		CompileContext compileContext = new CompileContextImpl(false);
+		CompileContext compileContext = new CompileContextImpl(null);
 
 		// Cast to obtain expected section type
 		if (!(designer instanceof SectionNode)) {

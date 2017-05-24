@@ -39,6 +39,7 @@ import net.officefloor.compile.impl.governance.GovernanceLoaderImpl;
 import net.officefloor.compile.impl.issues.FailCompilerIssues;
 import net.officefloor.compile.impl.managedfunction.ManagedFunctionLoaderImpl;
 import net.officefloor.compile.impl.managedobject.ManagedObjectLoaderImpl;
+import net.officefloor.compile.impl.mxbean.OfficeFloorMBeanImpl;
 import net.officefloor.compile.impl.office.OfficeLoaderImpl;
 import net.officefloor.compile.impl.officefloor.OfficeFloorLoaderImpl;
 import net.officefloor.compile.impl.pool.ManagedObjectPoolLoaderImpl;
@@ -53,6 +54,7 @@ import net.officefloor.compile.impl.structure.FunctionNamespaceNodeImpl;
 import net.officefloor.compile.impl.structure.FunctionObjectNodeImpl;
 import net.officefloor.compile.impl.structure.GovernanceNodeImpl;
 import net.officefloor.compile.impl.structure.InputManagedObjectNodeImpl;
+import net.officefloor.compile.impl.structure.MBeanRegistratorImpl;
 import net.officefloor.compile.impl.structure.ManagedFunctionNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectDependencyNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectFlowNodeImpl;
@@ -502,8 +504,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 			}
 		}
 
+		// Create the MBean registrator
+		MBeanRegistratorImpl mbeanRegistrator = this.isRegisterMBeans ? new MBeanRegistratorImpl() : null;
+
 		// Create the compile context
-		CompileContextImpl compileContext = new CompileContextImpl(this.isRegisterMBeans);
+		CompileContextImpl compileContext = new CompileContextImpl(mbeanRegistrator);
 
 		// Source the OfficeFloor tree
 		OfficeFloorNode node = this.createOfficeFloorNode(officeFloorSource.getClass().getName(), officeFloorSource,
@@ -518,10 +523,21 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		OfficeFrame officeFrame = this.getOfficeFrame();
 		OfficeFloorBuilder builder = officeFrame.createOfficeFloorBuilder(officeFloorName);
 
+		// Register the possible MBeans
+		if (mbeanRegistrator != null) {
+			builder.addOfficeFloorListener(mbeanRegistrator);
+		}
+
 		// Deploy the OfficeFloor
 		OfficeFloor officeFloor = node.deployOfficeFloor(builder, compileContext);
 		if (officeFloor == null) {
 			return null; // must compile OfficeFloor
+		}
+
+		// Register the OfficeFloor MBean
+		if (mbeanRegistrator != null) {
+			mbeanRegistrator.registerPossibleMBean(OfficeFloor.class, officeFloorName,
+					new OfficeFloorMBeanImpl(officeFloor));
 		}
 
 		// Return the OfficeFloor
@@ -580,7 +596,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	@Override
 	public CompileContext createCompileContext() {
 		// Never register MBeans for types
-		return new CompileContextImpl(false);
+		return new CompileContextImpl(null);
 	}
 
 	@Override

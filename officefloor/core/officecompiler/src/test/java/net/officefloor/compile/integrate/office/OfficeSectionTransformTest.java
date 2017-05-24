@@ -123,7 +123,7 @@ public class OfficeSectionTransformTest extends OfficeFrameTestCase {
 	public void testOfficeSectionTransformation() throws Exception {
 
 		// Create the OfficeFloor
-		OfficeFloor officeFloor = CompileOffice.compileAndOpenOffice((extender, context) -> {
+		OfficeFloor officeFloor = new CompileOffice().compileAndOpenOffice((extender, context) -> {
 
 			// Add the transformer
 			extender.addOfficeSectionTransformer(new MockTransformSectionSource());
@@ -172,7 +172,7 @@ public class OfficeSectionTransformTest extends OfficeFrameTestCase {
 	public void testChainedOfficeSectionTransformation() throws Exception {
 
 		// Create the OfficeFloor
-		OfficeFloor officeFloor = CompileOffice.compileAndOpenOffice((extender, context) -> {
+		OfficeFloor officeFloor = new CompileOffice().compileAndOpenOffice((extender, context) -> {
 
 			// Add the multiple transformer
 			extender.addOfficeSectionTransformer(new MockTransformSectionSource());

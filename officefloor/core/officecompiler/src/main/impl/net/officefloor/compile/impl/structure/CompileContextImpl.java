@@ -24,12 +24,13 @@ import java.util.function.Function;
 import net.officefloor.compile.administration.AdministrationType;
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.internal.structure.AdministrationNode;
+import net.officefloor.compile.internal.structure.CompileContext;
+import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
+import net.officefloor.compile.internal.structure.MBeanRegistrator;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.TeamNode;
-import net.officefloor.compile.internal.structure.CompileContext;
-import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.team.TeamType;
@@ -40,6 +41,11 @@ import net.officefloor.compile.team.TeamType;
  * @author Daniel Sagenschneider
  */
 public class CompileContextImpl implements CompileContext {
+
+	/**
+	 * {@link MBeanRegistrator}.
+	 */
+	private MBeanRegistrator mbeanRegistrator;
 
 	/**
 	 * {@link ManagedObjectType} by {@link ManagedObjectSourceNode} instances.
@@ -115,16 +121,23 @@ public class CompileContextImpl implements CompileContext {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param isRegisterMBeans
-	 *            <code>true</code> to register the MBeans.
+	 * @param mbeanRegistrator
+	 *            {@link MBeanRegistrator}. May be <code>null</code>.
 	 */
-	public CompileContextImpl(boolean isRegisterMBeans) {
-
+	public CompileContextImpl(MBeanRegistrator mbeanRegistrator) {
+		this.mbeanRegistrator = mbeanRegistrator;
 	}
 
 	/*
-	 * ====================== TypeContext ============================
+	 * ====================== CompileContext ============================
 	 */
+
+	@Override
+	public <T, S extends T> void registerPossibleMBean(Class<T> type, String name, S mbean) {
+		if (this.mbeanRegistrator != null) {
+			this.mbeanRegistrator.registerPossibleMBean(type, name, mbean);
+		}
+	}
 
 	@Override
 	public ManagedObjectType<?> getOrLoadManagedObjectType(ManagedObjectSourceNode managedObjectSourceNode) {

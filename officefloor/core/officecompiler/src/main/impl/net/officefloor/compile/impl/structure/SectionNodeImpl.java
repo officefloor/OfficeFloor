@@ -33,6 +33,7 @@ import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.AutoWireLink;
 import net.officefloor.compile.internal.structure.AutoWirer;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.FunctionFlowNode;
 import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
@@ -49,7 +50,6 @@ import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
-import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -227,6 +227,11 @@ public class SectionNodeImpl implements SectionNode {
 	 * {@link SubSection} instances by their names.
 	 */
 	private final Map<String, SectionNode> subSections = new HashMap<String, SectionNode>();
+
+	/**
+	 * Super {@link SectionNode}.
+	 */
+	private SectionNode superSectionNode = null;
 
 	/**
 	 * Initialises this {@link SectionNode} with the basic information.
@@ -477,8 +482,8 @@ public class SectionNodeImpl implements SectionNode {
 
 		// Obtain the section inputs
 		OfficeSectionInputType[] inputTypes = CompileUtil.loadTypes(this.inputs,
-				(input) -> input.getOfficeSectionInputName(), (input) -> input.loadOfficeSectionInputType(compileContext),
-				OfficeSectionInputType[]::new);
+				(input) -> input.getOfficeSectionInputName(),
+				(input) -> input.loadOfficeSectionInputType(compileContext), OfficeSectionInputType[]::new);
 		if (inputTypes == null) {
 			return null; // must load types
 		}
@@ -512,7 +517,8 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	@Override
-	public OfficeSectionType loadOfficeSubSectionType(OfficeSubSectionType parentSectionType, CompileContext compileContext) {
+	public OfficeSectionType loadOfficeSubSectionType(OfficeSubSectionType parentSectionType,
+			CompileContext compileContext) {
 
 		// Create the office section type
 		OfficeSectionTypeImpl officeSectionType = new OfficeSectionTypeImpl(this.sectionName,
@@ -684,7 +690,8 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	@Override
-	public void buildSection(OfficeBuilder officeBuilder, OfficeBindings officeBindings, CompileContext compileContext) {
+	public void buildSection(OfficeBuilder officeBuilder, OfficeBindings officeBindings,
+			CompileContext compileContext) {
 
 		// Build the functions (in deterministic order)
 		this.functionNodes.values().stream()
@@ -995,8 +1002,7 @@ public class SectionNodeImpl implements SectionNode {
 
 	@Override
 	public void setSuperOfficeSection(OfficeSection superSection) {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+		this.superSectionNode = (SectionNode) superSection;
 	}
 
 	@Override

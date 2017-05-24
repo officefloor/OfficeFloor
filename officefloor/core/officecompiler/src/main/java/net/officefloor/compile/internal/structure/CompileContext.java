@@ -34,6 +34,18 @@ import net.officefloor.frame.internal.structure.Flow;
 public interface CompileContext {
 
 	/**
+	 * Registers a possible MBean.
+	 * 
+	 * @param type
+	 *            Type of MBean.
+	 * @param name
+	 *            Name of MBean.
+	 * @param mbean
+	 *            MBean.
+	 */
+	<T, S extends T> void registerPossibleMBean(Class<T> type, String name, S mbean);
+
+	/**
 	 * Obtains the existing or loads the {@link ManagedObjectType} for the
 	 * {@link ManagedObjectSourceNode}.
 	 * 

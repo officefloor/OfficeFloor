@@ -21,6 +21,7 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionService;
+import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -37,6 +38,28 @@ public class CompileOffice implements OfficeExtensionService {
 	private static OfficeExtensionService extender = null;
 
 	/**
+	 * {@link OfficeFloorCompiler}.
+	 */
+	private final OfficeFloorCompiler compiler;
+
+	/**
+	 * Instantiate.
+	 */
+	public CompileOffice() {
+		this.compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+		this.compiler.setCompilerIssues(new FailTestCompilerIssues());
+	}
+
+	/**
+	 * Obtains the {@link OfficeFloorCompiler}.
+	 * 
+	 * @return {@link OfficeFloorCompiler}.
+	 */
+	public OfficeFloorCompiler getOfficeFloorCompiler() {
+		return this.compiler;
+	}
+
+	/**
 	 * Compiles the {@link Office}.
 	 * 
 	 * @param officeConfiguration
@@ -46,17 +69,14 @@ public class CompileOffice implements OfficeExtensionService {
 	 * @throws Exception
 	 *             If fails to compile the {@link OfficeFloor}.
 	 */
-	public static OfficeFloor compileOffice(OfficeExtensionService officeConfiguration) throws Exception {
-
-		// Create the compiler
-		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+	public OfficeFloor compileOffice(OfficeExtensionService officeConfiguration) throws Exception {
 
 		// Compile the solution
 		try {
 			extender = officeConfiguration;
 
 			// Compile and return the office
-			return compiler.compile("TEST");
+			return this.compiler.compile("OfficeFloor");
 
 		} finally {
 			// Ensure the extender is cleared for other tests
@@ -75,10 +95,10 @@ public class CompileOffice implements OfficeExtensionService {
 	 * @throws Exception
 	 *             If fails to compile and open the {@link OfficeFloor}.
 	 */
-	public static OfficeFloor compileAndOpenOffice(OfficeExtensionService officeConfiguration) throws Exception {
+	public OfficeFloor compileAndOpenOffice(OfficeExtensionService officeConfiguration) throws Exception {
 
 		// Compile the OfficeFloor
-		OfficeFloor officeFloor = compileOffice(officeConfiguration);
+		OfficeFloor officeFloor = this.compileOffice(officeConfiguration);
 
 		// Open the OfficeFloor
 		officeFloor.openOfficeFloor();
