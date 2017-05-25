@@ -17,8 +17,11 @@
  */
 package net.officefloor.frame.util;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Consumer;
 
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.api.team.Team;
@@ -49,6 +52,11 @@ public class TeamSourceStandAlone {
 	 * {@link Thread} decorator. May be <code>null</code>.
 	 */
 	private Consumer<Thread> threadDecorator = null;
+
+	/**
+	 * {@link ThreadCompletionListener} instances.
+	 */
+	private final List<ThreadCompletionListener> threadCompletionListeners = new LinkedList<>();
 
 	/**
 	 * Default instantiation.
@@ -112,6 +120,16 @@ public class TeamSourceStandAlone {
 	}
 
 	/**
+	 * Adds a {@link ThreadCompletionListener}.
+	 * 
+	 * @param threadCompletionListener
+	 *            {@link ThreadCompletionListener}.
+	 */
+	public void addThreadCompletionListener(ThreadCompletionListener threadCompletionListener) {
+		this.threadCompletionListeners.add(threadCompletionListener);
+	}
+
+	/**
 	 * Returns a {@link Team} from the loaded {@link TeamSource}.
 	 * 
 	 * @param <TS>
@@ -133,7 +151,8 @@ public class TeamSourceStandAlone {
 
 		// Create team source context
 		SourceContext sourceContext = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader());
-		TeamSourceContext context = new TeamSourceContextImpl(false, teamName, this.threadDecorator, this.properties,
+		TeamSourceContext context = new TeamSourceContextImpl(false, teamName, this.threadDecorator,
+				this.threadCompletionListeners.toArray(new ThreadCompletionListener[0]), this.properties,
 				sourceContext);
 
 		// Return the created team

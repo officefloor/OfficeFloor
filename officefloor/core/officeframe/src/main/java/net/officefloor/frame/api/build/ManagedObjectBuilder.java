@@ -19,7 +19,7 @@ package net.officefloor.frame.api.build;
 
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
@@ -40,18 +40,22 @@ public interface ManagedObjectBuilder<F extends Enum<F>> {
 	void addProperty(String name, String value);
 
 	/**
-	 * Specifies the {@link ManagedObjectPool} for this {@link ManagedObject}.
+	 * Specifies the {@link ManagedObjectPoolFactory} for this
+	 * {@link ManagedObject}.
 	 *
-	 * @param pool
-	 *            {@link ManagedObjectPool} for this {@link ManagedObject}.
+	 * @param poolFactory
+	 *            {@link ManagedObjectPoolFactory} for this
+	 *            {@link ManagedObject}.
+	 * @return {@link ManagedObjectPoolBuilder}.
 	 */
-	void setManagedObjectPool(ManagedObjectPool pool);
+	ManagedObjectPoolBuilder setManagedObjectPool(ManagedObjectPoolFactory poolFactory);
 
 	/**
 	 * Specifies the timeout to:
 	 * <ol>
 	 * <li>to source the {@link ManagedObject}</li>
-	 * <li>have asynchronous operations on the {@link ManagedObject} complete</li>
+	 * <li>have asynchronous operations on the {@link ManagedObject}
+	 * complete</li>
 	 * </ol>
 	 *
 	 * @param timeout

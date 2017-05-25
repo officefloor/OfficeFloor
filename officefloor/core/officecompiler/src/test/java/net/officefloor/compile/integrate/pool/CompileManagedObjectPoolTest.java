@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,22 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.pool;
+package net.officefloor.compile.integrate.pool;
 
+import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 
 /**
- * <code>Type definition</code> of a {@link ManagedObjectPool}.
+ * Ensure can compile the {@link ManagedObjectPool}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectPoolType {
+public class CompileManagedObjectPoolTest extends AbstractCompileTestCase {
 
-	/**
-	 * Obtains the type of object being pooled.
-	 * 
-	 * @return Type of object being pooled.
-	 */
-	Class<?> getPooledObjectType();
+	public void testCompileManagedObjectPool() {
+		fail("TODO implement compiling managed object pool test");
+	}
 
 }

@@ -29,6 +29,9 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListenerFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
@@ -40,6 +43,7 @@ import net.officefloor.frame.api.source.UnknownResourceError;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedObjectPoolConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
@@ -72,8 +76,8 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static RawManagedObjectMetaDataFactory getFactory() {
-		return new RawManagedObjectMetaDataImpl(null, null, null, null, -1, null, null, false, false, false, false,
-				null, null);
+		return new RawManagedObjectMetaDataImpl(null, null, null, null, -1, null, null, null, false, false, false,
+				false, null, null);
 	}
 
 	/**
@@ -106,6 +110,11 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 	 * {@link ManagedObjectPool}.
 	 */
 	private final ManagedObjectPool managedObjectPool;
+
+	/**
+	 * {@link ThreadCompletionListener} instances.
+	 */
+	private final ThreadCompletionListener[] threadCompletionListeners;
 
 	/**
 	 * Type of the {@link Object} returned from the {@link ManagedObject}.
@@ -159,6 +168,8 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 	 *            Timeout for the {@link ManagedObjectSource}.
 	 * @param managedObjectPool
 	 *            {@link ManagedObjectPool}.
+	 * @param threadCompletionListeners
+	 *            {@link ThreadCompletionListener} instances.
 	 * @param objectType
 	 *            Type of the {@link Object} returned from the
 	 *            {@link ManagedObject}.
@@ -180,8 +191,9 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 			ManagedObjectSourceConfiguration<F, ?> managedObjectSourceConfiguration,
 			ManagedObjectSource<D, F> managedObjectSource,
 			ManagedObjectSourceMetaData<D, F> managedObjectSourceMetaData, long timeout,
-			ManagedObjectPool managedObjectPool, Class<?> objectType, boolean isProcessAware, boolean isNameAware,
-			boolean isAsynchronous, boolean isCoordinating, TeamManagement escalationResponsibleTeam,
+			ManagedObjectPool managedObjectPool, ThreadCompletionListener[] threadCompletionListeners,
+			Class<?> objectType, boolean isProcessAware, boolean isNameAware, boolean isAsynchronous,
+			boolean isCoordinating, TeamManagement escalationResponsibleTeam,
 			RawManagingOfficeMetaDataImpl<F> rawManagingOfficeMetaData) {
 		this.managedObjectName = managedObjectName;
 		this.managedObjectSourceConfiguration = managedObjectSourceConfiguration;
@@ -189,6 +201,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 		this.managedObjectSourceMetaData = managedObjectSourceMetaData;
 		this.timeout = timeout;
 		this.managedObjectPool = managedObjectPool;
+		this.threadCompletionListeners = threadCompletionListeners;
 		this.objectType = objectType;
 		this.isProcessAware = isProcessAware;
 		this.isNameAware = isNameAware;
@@ -350,8 +363,26 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 			}
 		}
 
-		// Obtain the managed object pool
-		ManagedObjectPool managedObjectPool = configuration.getManagedObjectPool();
+		// Obtain managed object pool and possible thread completion listeners
+		ManagedObjectPool managedObjectPool = null;
+		ThreadCompletionListener[] threadCompletionListeners = null;
+		ManagedObjectPoolConfiguration managedObjectPoolConfiguration = configuration
+				.getManagedObjectPoolConfiguration();
+		if (managedObjectPoolConfiguration != null) {
+
+			// Create the managed object pool for the managed object source
+			ManagedObjectPoolFactory poolFactory = managedObjectPoolConfiguration.getManagedObjectPoolFactory();
+			managedObjectPool = poolFactory.createManagedObjectPool(managedObjectSource);
+
+			// Create the thread completion listeners
+			ThreadCompletionListenerFactory[] threadCompletionListenerFactories = managedObjectPoolConfiguration
+					.getThreadCompletionListenerFactories();
+			threadCompletionListeners = new ThreadCompletionListener[threadCompletionListenerFactories.length];
+			for (int i = 0; i < threadCompletionListeners.length; i++) {
+				threadCompletionListeners[i] = threadCompletionListenerFactories[i]
+						.createThreadCompletionListener(managedObjectPool);
+			}
+		}
 
 		// Obtain the recycle function name
 		String recycleFunctionName = context.getRecycleFunctionName();
@@ -366,8 +397,9 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 		// Created raw managed object meta-data
 		RawManagedObjectMetaDataImpl<d, h> rawMoMetaData = new RawManagedObjectMetaDataImpl<d, h>(
 				managedObjectSourceName, configuration, managedObjectSource, metaData, timeout, managedObjectPool,
-				objectType, isManagedObjectProcessAware, isManagedObjectNameAware, isManagedObjectAsynchronous,
-				isManagedObjectCoordinating, escalationResponsibleTeam, rawManagingOfficeMetaData);
+				threadCompletionListeners, objectType, isManagedObjectProcessAware, isManagedObjectNameAware,
+				isManagedObjectAsynchronous, isManagedObjectCoordinating, escalationResponsibleTeam,
+				rawManagingOfficeMetaData);
 
 		// Make raw managed object available to the raw managing office
 		rawManagingOfficeMetaData.setRawManagedObjectMetaData(rawMoMetaData);
@@ -403,6 +435,11 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 	@Override
 	public ManagedObjectPool getManagedObjectPool() {
 		return this.managedObjectPool;
+	}
+
+	@Override
+	public ThreadCompletionListener[] getThreadCompletionListeners() {
+		return this.threadCompletionListeners;
 	}
 
 	@Override

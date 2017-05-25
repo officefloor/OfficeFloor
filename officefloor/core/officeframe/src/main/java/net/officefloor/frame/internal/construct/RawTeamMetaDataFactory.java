@@ -20,6 +20,7 @@ package net.officefloor.frame.internal.construct;
 import java.util.function.Consumer;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
@@ -46,6 +47,8 @@ public interface RawTeamMetaDataFactory {
 	 *            {@link SourceContext}.
 	 * @param threadLocalAwareExecutor
 	 *            {@link ThreadLocalAwareExecutor}.
+	 * @param threadCompletionListeners
+	 *            {@link ThreadCompletionListener} instances.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 * @return {@link RawTeamMetaData} or <code>null</code> if fails to
@@ -53,6 +56,7 @@ public interface RawTeamMetaDataFactory {
 	 */
 	<TS extends TeamSource> RawTeamMetaData constructRawTeamMetaData(TeamConfiguration<TS> configuration,
 			SourceContext sourceContext, Consumer<Thread> threadDecorator,
-			ThreadLocalAwareExecutor threadLocalAwareExecutor, OfficeFloorIssues issues);
+			ThreadLocalAwareExecutor threadLocalAwareExecutor, ThreadCompletionListener[] threadCompletionListeners,
+			OfficeFloorIssues issues);
 
 }

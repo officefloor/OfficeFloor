@@ -21,6 +21,7 @@ import java.util.function.Consumer;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.source.UnknownClassError;
@@ -58,6 +59,12 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	 */
 	@SuppressWarnings("unchecked")
 	private final Consumer<Thread> threadDecorator = this.createMock(Consumer.class);
+
+	/**
+	 * {@link ThreadCompletionListener} instances.
+	 */
+	private final ThreadCompletionListener[] threadCompletionListeners = new ThreadCompletionListener[] {
+			this.createMock(ThreadCompletionListener.class) };
 
 	/**
 	 * {@link SourceContext}.
@@ -474,7 +481,8 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 
 		// Attempt to construct
 		RawTeamMetaData metaData = RawTeamMetaDataImpl.getFactory().constructRawTeamMetaData(this.configuration,
-				this.sourceContext, this.threadDecorator, this.threadLocalAwareExecutor, this.issues);
+				this.sourceContext, this.threadDecorator, this.threadLocalAwareExecutor, this.threadCompletionListeners,
+				this.issues);
 
 		// Provide assertion on whether should be constructed
 		if (isExpectConstruction) {

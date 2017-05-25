@@ -27,6 +27,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.Team;
@@ -151,10 +152,10 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 			RawAdministrationMetaDataFactory rawBoundAdminFactory, RawOfficeMetaDataFactory rawOfficeFactory,
 			RawManagedFunctionMetaDataFactory rawTaskFactory) {
 
-		// Name of office floor for reporting issues
+		// Name of OfficeFloor for reporting issues
 		String officeFloorName = configuration.getOfficeFloorName();
 		if (ConstructUtil.isBlank(officeFloorName)) {
-			issues.addIssue(AssetType.OFFICE_FLOOR, "Unknown", "Name not provided for Office Floor");
+			issues.addIssue(AssetType.OFFICE_FLOOR, "Unknown", "Name not provided for OfficeFloor");
 
 			// Not that important to name the OfficeFloor, so provide default
 			officeFloorName = OfficeFloor.class.getSimpleName();
@@ -170,50 +171,11 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 			sourceContext = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader());
 		}
 
-		// Construct the teams
-		Map<String, RawTeamMetaData> teamRegistry = new HashMap<String, RawTeamMetaData>();
-		List<TeamManagement> teamListing = new LinkedList<TeamManagement>();
-
-		// Obtain the thread decorator
-		Consumer<Thread> threadDecorator = configuration.getThreadDecorator();
-
-		// Construct the configured teams
-		for (TeamConfiguration<?> teamConfiguration : configuration.getTeamConfiguration()) {
-
-			// Construct the raw team meta-data
-			RawTeamMetaData rawTeamMetaData = rawTeamFactory.constructRawTeamMetaData(teamConfiguration, sourceContext,
-					threadDecorator, threadLocalAwareExecutor, issues);
-			if (rawTeamMetaData == null) {
-				return null; // issue with team
-			}
-
-			// Obtain the team name
-			String teamName = rawTeamMetaData.getTeamName();
-			if (teamRegistry.containsKey(teamName)) {
-				issues.addIssue(AssetType.OFFICE_FLOOR, officeFloorName,
-						"Teams registered with the same name '" + teamName + "'");
-				continue; // maintain only first team
-			}
-
-			// Obtain the team
-			TeamManagement team = rawTeamMetaData.getTeamManagement();
-
-			// Register the team
-			teamRegistry.put(teamName, rawTeamMetaData);
-			teamListing.add(team);
-		}
-
-		// Construct the break chain team
-		TeamConfiguration<?> breakTeamConfiguration = configuration.getBreakChainTeamConfiguration();
-		RawTeamMetaData breakTeamMetaData = rawTeamFactory.constructRawTeamMetaData(breakTeamConfiguration,
-				sourceContext, threadDecorator, threadLocalAwareExecutor, issues);
-		TeamManagement breakChainTeamManagement = breakTeamMetaData.getTeamManagement();
-		teamListing.add(breakChainTeamManagement);
-
 		// Construct the managed object sources
 		Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry = new HashMap<String, RawManagedObjectMetaData<?, ?>>();
 		List<RawManagedObjectMetaData<?, ?>> mosListing = new LinkedList<RawManagedObjectMetaData<?, ?>>();
 		Map<String, List<RawManagingOfficeMetaData>> officeManagedObjects = new HashMap<String, List<RawManagingOfficeMetaData>>();
+		List<ThreadCompletionListener> threadCompletionListenerList = new LinkedList<>();
 		for (ManagedObjectSourceConfiguration mosConfiguration : configuration.getManagedObjectSourceConfiguration()) {
 
 			// Construct the managed object source
@@ -256,7 +218,59 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 				officeManagedObjects.put(managingOfficeName, officeManagingManagedObjects);
 			}
 			officeManagingManagedObjects.add(managingOfficeMetaData);
+
+			// Register the thread completion listeners
+			ThreadCompletionListener[] completionListeners = mosMetaData.getThreadCompletionListeners();
+			if (completionListeners != null) {
+				for (ThreadCompletionListener completionListener : completionListeners) {
+					threadCompletionListenerList.add(completionListener);
+				}
+			}
 		}
+
+		// Obtain the array of thread completion listeners
+		ThreadCompletionListener[] threadCompletionListeners = threadCompletionListenerList
+				.toArray(new ThreadCompletionListener[0]);
+
+		// Construct the teams
+		Map<String, RawTeamMetaData> teamRegistry = new HashMap<String, RawTeamMetaData>();
+		List<TeamManagement> teamListing = new LinkedList<TeamManagement>();
+
+		// Obtain the thread decorator
+		Consumer<Thread> threadDecorator = configuration.getThreadDecorator();
+
+		// Construct the configured teams
+		for (TeamConfiguration<?> teamConfiguration : configuration.getTeamConfiguration()) {
+
+			// Construct the raw team meta-data
+			RawTeamMetaData rawTeamMetaData = rawTeamFactory.constructRawTeamMetaData(teamConfiguration, sourceContext,
+					threadDecorator, threadLocalAwareExecutor, threadCompletionListeners, issues);
+			if (rawTeamMetaData == null) {
+				return null; // issue with team
+			}
+
+			// Obtain the team name
+			String teamName = rawTeamMetaData.getTeamName();
+			if (teamRegistry.containsKey(teamName)) {
+				issues.addIssue(AssetType.OFFICE_FLOOR, officeFloorName,
+						"Teams registered with the same name '" + teamName + "'");
+				continue; // maintain only first team
+			}
+
+			// Obtain the team
+			TeamManagement team = rawTeamMetaData.getTeamManagement();
+
+			// Register the team
+			teamRegistry.put(teamName, rawTeamMetaData);
+			teamListing.add(team);
+		}
+
+		// Construct the break chain team
+		TeamConfiguration<?> breakTeamConfiguration = configuration.getBreakChainTeamConfiguration();
+		RawTeamMetaData breakTeamMetaData = rawTeamFactory.constructRawTeamMetaData(breakTeamConfiguration,
+				sourceContext, threadDecorator, threadLocalAwareExecutor, threadCompletionListeners, issues);
+		TeamManagement breakChainTeamManagement = breakTeamMetaData.getTeamManagement();
+		teamListing.add(breakChainTeamManagement);
 
 		// Undertake OfficeFloor escalation on any team available
 		FunctionLoop officeFloorFunctionLoop = new FunctionLoopImpl(null);

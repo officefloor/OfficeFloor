@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,41 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.execute.officefloor;
+package net.officefloor.frame.api.managedobject.pool;
 
-import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
- * {@link ManagedObjectPoolContext} implementation.
+ * Factory for the creation a {@link ManagedObjectPool}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectPoolContextImpl implements ManagedObjectPoolContext {
+public interface ManagedObjectPoolFactory {
 
 	/**
-	 * {@link ManagedObjectSource}.
-	 */
-	private final ManagedObjectSource<?, ?> managedObjectSource;
-
-	/**
-	 * Initialise.
+	 * Creates a {@link ManagedObjectPool} for the {@link ManagedObjectSource}.
 	 * 
 	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource}.
+	 *            {@link ManagedObjectSource} to have its objects pooled.
+	 * @return {@link ManagedObjectPool}.
 	 */
-	public ManagedObjectPoolContextImpl(
-			ManagedObjectSource<?, ?> managedObjectSource) {
-		this.managedObjectSource = managedObjectSource;
-	}
-
-	/*
-	 * =================== ManagedObjectPoolContext =======================
-	 */
-
-	@Override
-	public ManagedObjectSource<?, ?> getManagedObjectSource() {
-		return this.managedObjectSource;
-	}
+	ManagedObjectPool createManagedObjectPool(ManagedObjectSource<?, ?> managedObjectSource);
 
 }

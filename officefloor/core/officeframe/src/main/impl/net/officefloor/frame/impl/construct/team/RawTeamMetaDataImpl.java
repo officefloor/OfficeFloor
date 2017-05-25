@@ -22,6 +22,7 @@ import java.util.function.Consumer;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.api.source.UnknownClassError;
@@ -93,7 +94,8 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory, RawTeamMetaD
 	@Override
 	public <TS extends TeamSource> RawTeamMetaData constructRawTeamMetaData(TeamConfiguration<TS> configuration,
 			SourceContext sourceContext, Consumer<Thread> threadDecorator,
-			ThreadLocalAwareExecutor threadLocalAwareExecutor, OfficeFloorIssues issues) {
+			ThreadLocalAwareExecutor threadLocalAwareExecutor, ThreadCompletionListener[] threadCompletionListeners,
+			OfficeFloorIssues issues) {
 
 		// Obtain the team name
 		String teamName = configuration.getTeamName();
@@ -121,8 +123,8 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory, RawTeamMetaD
 		try {
 			// Create the team source context
 			SourceProperties properties = configuration.getProperties();
-			TeamSourceContextImpl context = new TeamSourceContextImpl(false, teamName, threadDecorator, properties,
-					sourceContext);
+			TeamSourceContextImpl context = new TeamSourceContextImpl(false, teamName, threadDecorator,
+					threadCompletionListeners, properties, sourceContext);
 
 			// Create the team
 			team = teamSource.createTeam(context);

@@ -59,6 +59,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -1646,7 +1647,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param content
 	 *            Content for the file.
 	 * @param target
-	 *            Taret file.
+	 *            Target file.
 	 * @throws IOException
 	 *             If fails to create.
 	 */
@@ -1701,6 +1702,36 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	public void timeout(long startTime, int secondsToRun) {
 		if ((System.currentTimeMillis() - startTime) > (secondsToRun * 1000)) {
 			fail("TIME OUT after " + secondsToRun + " seconds");
+		}
+	}
+
+	/**
+	 * Waits for the check to be <code>true</code>.
+	 * 
+	 * @param check
+	 *            Check.
+	 */
+	public void waitForTrue(Supplier<Boolean> check) {
+		this.waitForTrue(check, 3);
+	}
+
+	/**
+	 * Waits for the check to be <code>true</code>.
+	 * 
+	 * @param check
+	 *            Check.
+	 * @param secondsToRun
+	 *            Seconds to wait before timing out.
+	 */
+	public void waitForTrue(Supplier<Boolean> check, int secondsToRun) {
+		long startTime = System.currentTimeMillis();
+		while (!check.get()) {
+			timeout(startTime, secondsToRun);
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException ex) {
+				fail("Sleep interrupted: " + ex.getMessage());
+			}
 		}
 	}
 

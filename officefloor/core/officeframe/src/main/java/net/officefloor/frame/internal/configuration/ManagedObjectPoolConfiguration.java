@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,22 +15,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.pool;
+package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListenerFactory;
 
 /**
- * <code>Type definition</code> of a {@link ManagedObjectPool}.
+ * Configuration for the {@link ManagedObjectPool}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectPoolType {
+public interface ManagedObjectPoolConfiguration {
 
 	/**
-	 * Obtains the type of object being pooled.
+	 * Obtains the {@link ManagedObjectPoolFactory}.
 	 * 
-	 * @return Type of object being pooled.
+	 * @return {@link ManagedObjectPoolFactory}.
 	 */
-	Class<?> getPooledObjectType();
+	ManagedObjectPoolFactory getManagedObjectPoolFactory();
+
+	/**
+	 * Obtains the {@link ThreadCompletionListenerFactory} instances.
+	 * 
+	 * @return {@link ThreadCompletionListenerFactory} instances.
+	 */
+	ThreadCompletionListenerFactory[] getThreadCompletionListenerFactories();
 
 }

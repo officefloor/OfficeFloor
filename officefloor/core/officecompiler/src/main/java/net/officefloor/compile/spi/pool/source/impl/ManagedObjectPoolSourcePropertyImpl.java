@@ -15,22 +15,52 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.pool;
+package net.officefloor.compile.spi.pool.source.impl;
 
-import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSourceProperty;
 
 /**
- * <code>Type definition</code> of a {@link ManagedObjectPool}.
+ * {@link ManagedObjectPoolSourceProperty} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectPoolType {
+public class ManagedObjectPoolSourcePropertyImpl implements ManagedObjectPoolSourceProperty {
 
 	/**
-	 * Obtains the type of object being pooled.
-	 * 
-	 * @return Type of object being pooled.
+	 * Label.
 	 */
-	Class<?> getPooledObjectType();
+	private final String label;
+
+	/**
+	 * Name.
+	 */
+	private final String name;
+
+	/**
+	 * Initialise.
+	 * 
+	 * @param name
+	 *            Name.
+	 * @param label
+	 *            Label.
+	 */
+	public ManagedObjectPoolSourcePropertyImpl(String name, String label) {
+		this.label = label;
+		this.name = name;
+	}
+
+	/*
+	 * ==================== ManagedObjectPoolSourceProperty ====================
+	 */
+
+	@Override
+	public String getName() {
+		return this.name;
+	}
+
+	@Override
+	public String getLabel() {
+		return this.label;
+	}
 
 }

@@ -36,6 +36,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
@@ -50,6 +51,7 @@ import net.officefloor.frame.api.source.UnknownClassError;
 import net.officefloor.frame.api.source.UnknownResourceError;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedObjectPoolConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
@@ -111,6 +113,17 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	private final ManagedObjectSourceMetaData<Indexed, FlowKey> metaData = this
 			.createMock(ManagedObjectSourceMetaData.class);
+
+	/**
+	 * {@link ManagedObjectPoolConfiguration}.
+	 */
+	private final ManagedObjectPoolConfiguration managedObjectPoolConfiguration = this
+			.createMock(ManagedObjectPoolConfiguration.class);
+
+	/**
+	 * {@link ManagedObjectPoolFactory}.
+	 */
+	private final ManagedObjectPoolFactory managedObjectPoolFactory = this.createMock(ManagedObjectPoolFactory.class);
 
 	/**
 	 * {@link ManagedObjectPool}.
@@ -892,7 +905,10 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 			this.recordReturn(this.managingOfficeConfiguration,
 					this.managingOfficeConfiguration.getInputManagedObjectConfiguration(), this.inputConfiguration);
 		}
-		this.recordReturn(this.configuration, this.configuration.getManagedObjectPool(), this.managedObjectPool);
+		this.recordReturn(this.configuration, this.configuration.getManagedObjectPoolConfiguration(),
+				this.managedObjectPoolConfiguration);
+		this.recordReturn(this.managedObjectPoolConfiguration,
+				this.managedObjectPoolConfiguration.getManagedObjectPoolFactory(), this.managedObjectPoolFactory);
 	}
 
 	/**

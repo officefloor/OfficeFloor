@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,23 +17,21 @@
  */
 package net.officefloor.frame.api.managedobject.pool;
 
-import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
-
 /**
- * Context for a {@link ManagedObjectPool}.
+ * Factory for the creation of the {@link ThreadCompletionListener}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectPoolContext {
+public interface ThreadCompletionListenerFactory {
 
 	/**
-	 * Obtains the {@link ManagedObjectSource} for the {@link ManagedObject}
-	 * instances being pooled.
+	 * Creates the {@link ThreadCompletionListener}.
 	 * 
-	 * @return {@link ManagedObjectSource} for the {@link ManagedObject}
-	 *         instances being pooled.
+	 * @param pool
+	 *            {@link ManagedObjectPool}.
+	 * @return {@link ThreadCompletionListener} for the
+	 *         {@link ManagedObjectPool}.
 	 */
-	ManagedObjectSource<?, ?> getManagedObjectSource();
+	ThreadCompletionListener createThreadCompletionListener(ManagedObjectPool pool);
 
 }

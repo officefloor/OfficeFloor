@@ -29,7 +29,6 @@ import net.officefloor.frame.api.function.OfficeAwareManagedFunctionFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.UnknownOfficeException;
-import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.impl.execute.office.OfficeImpl;
@@ -192,13 +191,6 @@ public class OfficeFloorImpl implements OfficeFloor {
 		ManagedObjectExecuteContext<F> executeContext = mosInstance.getManagedObjectExecuteContextFactory()
 				.createManagedObjectExecuteContext();
 		mos.start(executeContext);
-
-		// Determine if pooled
-		ManagedObjectPool pool = mosInstance.getManagedObjectPool();
-		if (pool != null) {
-			// Have pool, so start the pool
-			pool.init(new ManagedObjectPoolContextImpl(mos));
-		}
 	}
 
 	@Override

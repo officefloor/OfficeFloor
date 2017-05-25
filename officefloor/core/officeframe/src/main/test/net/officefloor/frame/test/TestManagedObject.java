@@ -40,7 +40,6 @@ import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
-import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolContext;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
@@ -245,7 +244,7 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 				new TestManagedObjectSource(), null);
 		this.managingOfficeBuilder = this.managedObjectBuilder.setManagingOffice(testCase.getOfficeName());
 		if (isPool) {
-			this.managedObjectBuilder.setManagedObjectPool(new TestManagedObjectPool());
+			this.managedObjectBuilder.setManagedObjectPool((mos) -> new TestManagedObjectPool(mos));
 		}
 	}
 
@@ -445,18 +444,27 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 	private class TestManagedObjectPool implements ManagedObjectPool {
 
 		/**
-		 * {@link ManagedObjectPoolContext}.
+		 * {@link ManagedObjectSource}.
 		 */
-		private ManagedObjectPoolContext context;
+		private ManagedObjectSource<?, ?> managedObjectSource;
 
-		@Override
-		public void init(ManagedObjectPoolContext context) throws Exception {
-			this.context = context;
+		/**
+		 * Instantiate.
+		 * 
+		 * @param managedObjectSource
+		 *            {@link ManagedObjectSource}.
+		 */
+		public TestManagedObjectPool(ManagedObjectSource<?, ?> managedObjectSource) {
+			this.managedObjectSource = managedObjectSource;
 		}
+
+		/*
+		 * ================ ManagedObjectPool ===================
+		 */
 
 		@Override
 		public void sourceManagedObject(final ManagedObjectUser user) {
-			this.context.getManagedObjectSource().sourceManagedObject(new ManagedObjectUser() {
+			this.managedObjectSource.sourceManagedObject(new ManagedObjectUser() {
 
 				@Override
 				public void setManagedObject(ManagedObject managedObject) {

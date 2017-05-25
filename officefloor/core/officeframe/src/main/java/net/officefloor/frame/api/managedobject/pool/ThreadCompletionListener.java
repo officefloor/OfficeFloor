@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,22 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.pool;
-
-import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+package net.officefloor.frame.api.managedobject.pool;
 
 /**
- * <code>Type definition</code> of a {@link ManagedObjectPool}.
+ * Listener on the completion of a {@link Thread}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectPoolType {
+public interface ThreadCompletionListener {
 
 	/**
-	 * Obtains the type of object being pooled.
-	 * 
-	 * @return Type of object being pooled.
+	 * Notifies that the {@link Thread} has completed.
 	 */
-	Class<?> getPooledObjectType();
+	void threadComplete();
 
 }

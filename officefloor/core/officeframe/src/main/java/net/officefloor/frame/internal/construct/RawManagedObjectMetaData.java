@@ -24,6 +24,8 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
@@ -69,11 +71,21 @@ public interface RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> 
 	ManagedObjectSourceMetaData<O, F> getManagedObjectSourceMetaData();
 
 	/**
-	 * Obtains the {@link ManagedObjectPool}.
+	 * Obtains the {@link ManagedObjectPoolFactory}.
 	 * 
-	 * @return {@link ManagedObjectPool} or <code>null</code> if not pooled.
+	 * @return {@link ManagedObjectPoolFactory} or <code>null</code> if not
+	 *         pooled.
 	 */
 	ManagedObjectPool getManagedObjectPool();
+
+	/**
+	 * Obtains the {@link ThreadCompletionListener} instances for the
+	 * {@link ManagedObject}.
+	 * 
+	 * @return {@link ThreadCompletionListener} instances for the
+	 *         {@link ManagedObject}.
+	 */
+	ThreadCompletionListener[] getThreadCompletionListeners();
 
 	/**
 	 * Obtains the type of {@link Object} returned from the

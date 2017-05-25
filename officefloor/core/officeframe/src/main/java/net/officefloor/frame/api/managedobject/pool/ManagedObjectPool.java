@@ -31,16 +31,6 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
 public interface ManagedObjectPool {
 
 	/**
-	 * Initiates this {@link ManagedObjectPool}.
-	 * 
-	 * @param context
-	 *            Context for this {@link ManagedObjectPool}.
-	 * @throws Exception
-	 *             If fails to initiate.
-	 */
-	void init(ManagedObjectPoolContext context) throws Exception;
-
-	/**
 	 * Sources the {@link ManagedObject} from this {@link ManagedObjectPool}.
 	 * 
 	 * @param user

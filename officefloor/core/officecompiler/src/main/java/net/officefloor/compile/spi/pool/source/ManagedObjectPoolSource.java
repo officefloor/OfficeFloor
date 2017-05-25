@@ -43,10 +43,12 @@ public interface ManagedObjectPoolSource {
 	 * 
 	 * @param context
 	 *            {@link ManagedObjectPoolSourceContext}.
+	 * @return {@link ManagedObjectPoolSourceMetaData} for the
+	 *         {@link ManagedObjectPool}.
 	 * @throws Exception
 	 *             If fails to configure the {@link ManagedObjectPoolSource}.
 	 */
-	void init(ManagedObjectPoolSourceContext context) throws Exception;
+	ManagedObjectPoolSourceMetaData init(ManagedObjectPoolSourceContext context) throws Exception;
 
 	/**
 	 * Creates the {@link ManagedObjectPool}.

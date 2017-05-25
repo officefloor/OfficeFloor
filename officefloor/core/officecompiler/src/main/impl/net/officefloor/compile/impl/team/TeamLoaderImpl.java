@@ -28,6 +28,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.team.TeamType;
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.source.UnknownClassError;
 import net.officefloor.frame.api.source.UnknownPropertyError;
 import net.officefloor.frame.api.source.UnknownResourceError;
@@ -170,7 +171,7 @@ public class TeamLoaderImpl implements TeamLoader {
 
 		// Attempt to create the team
 		try {
-			teamSource.createTeam(new TeamSourceContextImpl(true, teamName, null,
+			teamSource.createTeam(new TeamSourceContextImpl(true, teamName, null, new ThreadCompletionListener[0],
 					new PropertyListSourceProperties(propertyList), this.nodeContext.getRootSourceContext()));
 
 		} catch (UnknownPropertyError ex) {
