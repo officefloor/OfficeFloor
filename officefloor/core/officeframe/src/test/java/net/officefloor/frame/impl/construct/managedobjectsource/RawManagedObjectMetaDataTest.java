@@ -37,6 +37,8 @@ import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListenerFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
@@ -67,6 +69,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.test.match.TypeMatcher;
 
 /**
  * Tests the creation of a {@link RawManagedObjectMetaDataImpl}.
@@ -129,6 +132,17 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 * {@link ManagedObjectPool}.
 	 */
 	private final ManagedObjectPool managedObjectPool = this.createMock(ManagedObjectPool.class);
+
+	/**
+	 * {@link ThreadCompletionListenerFactory}.
+	 */
+	private final ThreadCompletionListenerFactory threadCompletionListenerFactory = this
+			.createMock(ThreadCompletionListenerFactory.class);
+
+	/**
+	 * {@link ThreadCompletionListener}.
+	 */
+	private final ThreadCompletionListener threadCompletionListener = this.createMock(ThreadCompletionListener.class);
 
 	/**
 	 * {@link ManagingOfficeConfiguration}.
@@ -674,6 +688,10 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				this.managedObjectSourceInstance);
 		assertEquals("Incorrect source meta-data", this.metaData, rawMetaData.getManagedObjectSourceMetaData());
 		assertEquals("Incorrect managed object pool", this.managedObjectPool, rawMetaData.getManagedObjectPool());
+		assertEquals("Incorrect number of thread completion listeners", 1,
+				rawMetaData.getThreadCompletionListeners().length);
+		assertEquals("Incorrect thread completion listener", this.threadCompletionListener,
+				rawMetaData.getThreadCompletionListeners()[0]);
 		assertEquals("Ensure round trip managing office details", rawMetaData,
 				rawMetaData.getRawManagingOfficeMetaData().getRawManagedObjectMetaData());
 
@@ -909,6 +927,14 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				this.managedObjectPoolConfiguration);
 		this.recordReturn(this.managedObjectPoolConfiguration,
 				this.managedObjectPoolConfiguration.getManagedObjectPoolFactory(), this.managedObjectPoolFactory);
+		this.recordReturn(this.managedObjectPoolFactory, this.managedObjectPoolFactory.createManagedObjectPool(null),
+				this.managedObjectPool, new TypeMatcher(ManagedObjectSource.class));
+		this.recordReturn(this.managedObjectPoolConfiguration,
+				this.managedObjectPoolConfiguration.getThreadCompletionListenerFactories(),
+				new ThreadCompletionListenerFactory[] { this.threadCompletionListenerFactory });
+		this.recordReturn(this.threadCompletionListenerFactory,
+				this.threadCompletionListenerFactory.createThreadCompletionListener(this.managedObjectPool),
+				this.threadCompletionListener);
 	}
 
 	/**
