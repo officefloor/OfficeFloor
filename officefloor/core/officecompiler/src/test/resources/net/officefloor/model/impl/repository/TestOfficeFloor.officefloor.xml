@@ -1,4 +1,5 @@
 <office-floor auto-wire-objects="true" auto-wire-teams="true">
+
 	<suppliers>
 		<supplier name="SUPPLIER" source="net.example.ExampleSupplierSource"
 			x="000" y="001">
@@ -8,6 +9,7 @@
 			</properties>
 		</supplier>
 	</suppliers>
+
 	<managed-object-sources>
 		<managed-object-source name="MANAGED_OBJECT_SOURCE"
 			source="net.example.ExampleManagedObjectSource" object-type="net.orm.Session"
@@ -52,12 +54,14 @@
 			</team>
 		</managed-object-source>
 	</managed-object-sources>
+
 	<input-managed-objects>
 		<input-managed-object name="INPUT_MANAGED_OBJECT"
 			object-type="net.orm.Session" x="200" y="201">
 			<bound-managed-object-source name="MANAGED_OBJECT_SOURCE" />
 		</input-managed-object>
 	</input-managed-objects>
+
 	<managed-objects>
 		<managed-object name="MANAGED_OBJECT_ONE" scope="THREAD"
 			x="300" y="301">
@@ -71,15 +75,27 @@
 			<dependency name="DEPENDENCY_TWO" object-type="net.orm.Session">
 				<input-managed-object name="INPUT_MANAGED_OBJECT" />
 			</dependency>
+			<managed-object-pool name="MANAGED_OBJECT_POOL" />
 		</managed-object>
 		<managed-object name="MANAGED_OBJECT_TWO" scope="PROCESS"
 			x="310" y="311">
 			<managed-object-source name="MANAGED_OBJECT_SOURCE" />
 		</managed-object>
 	</managed-objects>
+
+	<managed-object-pools>
+		<managed-object-pool name="MANAGED_OBJECT_POOL"
+			source="net.example.ExampleManagedObjectPoolSource" x="400" y="401">
+			<properties>
+				<property name="POOL_ONE" value="VALUE_ONE" />
+				<property name="POOL_TWO" value="VALUE_TWO" />
+			</properties>
+		</managed-object-pool>
+	</managed-object-pools>
+
 	<teams>
-		<team name="TEAM" source="net.example.ExampleTeamSource" x="400"
-			y="401">
+		<team name="TEAM" source="net.example.ExampleTeamSource" x="500"
+			y="501">
 			<properties>
 				<property name="TEAM_ONE" value="VALUE_ONE" />
 				<property name="TEAM_TWO" value="VALUE_TWO" />
@@ -89,9 +105,10 @@
 			<type-qualification type="java.sql.GenericStatement" />
 		</team>
 	</teams>
+
 	<offices>
 		<office name="OFFICE" source="net.example.ExampleOfficeSource"
-			location="OFFICE_LOCATION" x="400" y="401">
+			location="OFFICE_LOCATION" x="600" y="601">
 			<properties>
 				<property name="OFFICE_ONE" value="VALUE_ONE" />
 				<property name="OFFICE_TWO" value="VALUE_TWO" />
@@ -108,4 +125,5 @@
 			</team>
 		</office>
 	</offices>
+
 </office-floor>

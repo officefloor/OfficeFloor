@@ -18,6 +18,8 @@
 package net.officefloor.compile.pool;
 
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListenerFactory;
 
 /**
  * <code>Type definition</code> of a {@link ManagedObjectPool}.
@@ -32,5 +34,21 @@ public interface ManagedObjectPoolType {
 	 * @return Type of object being pooled.
 	 */
 	Class<?> getPooledObjectType();
+
+	/**
+	 * Obtains the {@link ManagedObjectPoolFactory} for the
+	 * {@link ManagedObjectPool}.
+	 * 
+	 * @return {@link ManagedObjectPoolFactory} for the
+	 *         {@link ManagedObjectPool}.
+	 */
+	ManagedObjectPoolFactory getManagedObjectPoolFactory();
+
+	/**
+	 * Obtains the {@link ThreadCompletionListenerFactory} instances.
+	 * 
+	 * @return {@link ThreadCompletionListenerFactory} instances.
+	 */
+	ThreadCompletionListenerFactory[] getThreadCompletionListenerFactories();
 
 }

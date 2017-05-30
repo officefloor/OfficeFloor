@@ -63,6 +63,7 @@ public interface GovernanceSource<I, F extends Enum<F>> {
 	 * 
 	 * @return Meta-data to describe this.
 	 */
+	@Deprecated // make return of init
 	GovernanceSourceMetaData<I, F> getMetaData();
 
 }

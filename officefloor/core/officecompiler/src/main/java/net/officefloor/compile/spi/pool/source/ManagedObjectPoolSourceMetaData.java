@@ -18,6 +18,9 @@
 package net.officefloor.compile.spi.pool.source;
 
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListenerFactory;
 
 /**
  * Meta-data regarding the {@link ManagedObjectPool}.
@@ -37,11 +40,19 @@ public interface ManagedObjectPoolSourceMetaData {
 	Class<?> getPooledObjectType();
 
 	/**
-	 * Obtains the {@link Thread} complete listener.
+	 * Obtains the {@link ManagedObjectPoolFactory}.
 	 * 
-	 * @return {@link Thread} complete listener. May be <code>null</code> if no
-	 *         listener.
+	 * @return {@link ManagedObjectPoolFactory}.
 	 */
-	Runnable getThreadCompleteListener();
+	ManagedObjectPoolFactory getManagedObjectPoolFactory();
+
+	/**
+	 * Obtains the {@link ThreadCompletionListenerFactory} instances.
+	 * 
+	 * @return {@link ThreadCompletionListenerFactory} instances. May be
+	 *         <code>null</code> if no {@link ThreadCompletionListener}
+	 *         instances.
+	 */
+	ThreadCompletionListenerFactory[] getThreadCompleteListenerFactories();
 
 }

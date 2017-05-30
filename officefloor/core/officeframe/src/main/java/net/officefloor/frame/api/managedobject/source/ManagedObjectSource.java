@@ -70,6 +70,7 @@ public interface ManagedObjectSource<O extends Enum<O>, F extends Enum<F>> {
 	 * 
 	 * @return Meta-data to describe this.
 	 */
+	@Deprecated // make return of init
 	ManagedObjectSourceMetaData<O, F> getMetaData();
 
 	/**

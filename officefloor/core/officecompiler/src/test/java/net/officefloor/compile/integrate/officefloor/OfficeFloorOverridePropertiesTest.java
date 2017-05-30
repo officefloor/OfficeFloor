@@ -27,6 +27,7 @@ import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
@@ -73,6 +74,26 @@ public class OfficeFloorOverridePropertiesTest extends AbstractCompileTestCase {
 				ClassManagedObjectSource.class, 0, "class.name", CompileManagedObject.class.getName(), "additional",
 				"another");
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+
+		// Compile the OfficeFloor
+		this.compile(true);
+	}
+
+	/**
+	 * Ensure can override the {@link ManagedObjectPool} properties.
+	 */
+	public void testOverrideManagedObjectPoolProperties() {
+
+		// Enables override of properties
+		this.enableOverrideProperties();
+
+		// Record the OfficeFloor
+		this.record_init();
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
+				"class.name", CompileManagedObject.class.getName(), "additional", "another");
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_managedObjectBuilder_setManagedObjectPool("POOL");
 
 		// Compile the OfficeFloor
 		this.compile(true);

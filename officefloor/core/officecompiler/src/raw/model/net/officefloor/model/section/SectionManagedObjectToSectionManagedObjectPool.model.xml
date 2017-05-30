@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="section managed object pool name" />
+	<field type="SectionManagedObjectModel" name="section managed object"
+		end-field="section managed object pool" />
+	<field type="SectionManagedObjectPoolModel" name="section managed object pool"
+		end-list="section managed object" />
+</model>

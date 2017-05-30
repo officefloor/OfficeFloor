@@ -29,7 +29,6 @@ import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSourceProperty;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSourceSpecification;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
-import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -348,13 +347,12 @@ public class LoadManagedObjectPoolSourceSpecificationTest extends OfficeFrameTes
 		}
 
 		@Override
-		public ManagedObjectPoolSourceMetaData init(ManagedObjectPoolSourceContext context) throws Exception {
+		public void init(ManagedObjectPoolSourceContext context) throws Exception {
 			fail("Should not be invoked for obtaining specification");
-			return null;
 		}
 
 		@Override
-		public ManagedObjectPool createManagedObjectPool() {
+		public ManagedObjectPoolSourceMetaData getMetaData() {
 			fail("Should not be invoked for obtaining specification");
 			return null;
 		}

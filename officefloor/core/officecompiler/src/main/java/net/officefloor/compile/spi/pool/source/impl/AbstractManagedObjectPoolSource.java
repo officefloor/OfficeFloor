@@ -25,6 +25,9 @@ import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSourceContext;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSourceMetaData;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSourceProperty;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSourceSpecification;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListenerFactory;
 
 /**
  * Abstract {@link ManagedObjectPoolSource}.
@@ -133,12 +136,14 @@ public abstract class AbstractManagedObjectPoolSource implements ManagedObjectPo
 	private MetaData metaData;
 
 	@Override
-	public ManagedObjectPoolSourceMetaData init(ManagedObjectPoolSourceContext context) throws Exception {
+	public void init(ManagedObjectPoolSourceContext context) throws Exception {
 		// Create and populate the meta-data
 		this.metaData = new MetaData(context);
 		this.loadMetaData(this.metaData);
+	}
 
-		// Return the meta-data
+	@Override
+	public ManagedObjectPoolSourceMetaData getMetaData() {
 		return this.metaData;
 	}
 
@@ -173,12 +178,21 @@ public abstract class AbstractManagedObjectPoolSource implements ManagedObjectPo
 		void setPooledObjectType(Class<?> pooledObjectType);
 
 		/**
-		 * Specifies the {@link Thread} complete listener.
+		 * Specifies the {@link ManagedObjectPoolFactory}.
 		 * 
-		 * @param threadCompleteListener
-		 *            {@link Thread} complete listener.
+		 * @param managedObjectPoolFactory
+		 *            {@link ManagedObjectPoolFactory}.
 		 */
-		void setThreadCompleteListener(Runnable threadCompleteListener);
+		void setManagedObjectPoolFactory(ManagedObjectPoolFactory managedObjectPoolFactory);
+
+		/**
+		 * Adds a {@link ThreadCompletionListener}.
+		 * 
+		 * @param threadCompletionListenerFactory
+		 *            {@link ThreadCompletionListenerFactory} for the
+		 *            {@link ThreadCompletionListener}.
+		 */
+		void addThreadCompleteListener(ThreadCompletionListenerFactory threadCompletionListenerFactory);
 	}
 
 	/**
@@ -197,9 +211,14 @@ public abstract class AbstractManagedObjectPoolSource implements ManagedObjectPo
 		private Class<?> pooledObjectType;
 
 		/**
-		 * {@link Thread} complete listener.
+		 * {@link ManagedObjectPoolFactory}.
 		 */
-		private Runnable threadCompleteListener;
+		private ManagedObjectPoolFactory managedObjectPoolFactory;
+
+		/**
+		 * {@link ThreadCompletionListenerFactory} instances.
+		 */
+		private final List<ThreadCompletionListenerFactory> threadCompletionListenerFactories = new LinkedList<>();
 
 		/**
 		 * Initiate.
@@ -226,8 +245,13 @@ public abstract class AbstractManagedObjectPoolSource implements ManagedObjectPo
 		}
 
 		@Override
-		public void setThreadCompleteListener(Runnable threadCompleteListener) {
-			this.threadCompleteListener = threadCompleteListener;
+		public void setManagedObjectPoolFactory(ManagedObjectPoolFactory managedObjectPoolFactory) {
+			this.managedObjectPoolFactory = managedObjectPoolFactory;
+		}
+
+		@Override
+		public void addThreadCompleteListener(ThreadCompletionListenerFactory threadCompletionListenerFactory) {
+			this.threadCompletionListenerFactories.add(threadCompletionListenerFactory);
 		}
 
 		/*
@@ -240,8 +264,13 @@ public abstract class AbstractManagedObjectPoolSource implements ManagedObjectPo
 		}
 
 		@Override
-		public Runnable getThreadCompleteListener() {
-			return this.threadCompleteListener;
+		public ManagedObjectPoolFactory getManagedObjectPoolFactory() {
+			return this.managedObjectPoolFactory;
+		}
+
+		@Override
+		public ThreadCompletionListenerFactory[] getThreadCompleteListenerFactories() {
+			return this.threadCompletionListenerFactories.toArray(new ThreadCompletionListenerFactory[0]);
 		}
 	}
 

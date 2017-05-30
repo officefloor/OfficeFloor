@@ -51,10 +51,12 @@ import net.officefloor.model.section.SectionManagedObjectDependencyModel;
 import net.officefloor.model.section.SectionManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.section.SectionManagedObjectDependencyToSectionManagedObjectModel;
 import net.officefloor.model.section.SectionManagedObjectModel;
+import net.officefloor.model.section.SectionManagedObjectPoolModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowToExternalFlowModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowToSubSectionInputModel;
 import net.officefloor.model.section.SectionManagedObjectSourceModel;
+import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectPoolModel;
 import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectSourceModel;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SubSectionInputModel;
@@ -132,11 +134,15 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------------
 		assertList(new String[] { "getSectionManagedObjectName", "getManagedObjectScope", "getX", "getY" },
 				section.getSectionManagedObjects(),
-				new SectionManagedObjectModel("MANAGED_OBJECT_ONE", "THREAD", null, null, null, null, null, 300, 301),
-				new SectionManagedObjectModel("MANAGED_OBJECT_TWO", "PROCESS", null, null, null, null, null, 310, 311));
+				new SectionManagedObjectModel("MANAGED_OBJECT_ONE", "THREAD", null, null, null, null, null, null, 300,
+						301),
+				new SectionManagedObjectModel("MANAGED_OBJECT_TWO", "PROCESS", null, null, null, null, null, null, 310,
+						311));
 		SectionManagedObjectModel mo = section.getSectionManagedObjects().get(0);
 		assertProperties(new SectionManagedObjectToSectionManagedObjectSourceModel("MANAGED_OBJECT_SOURCE"),
 				mo.getSectionManagedObjectSource(), "getSectionManagedObjectSourceName");
+		assertProperties(new SectionManagedObjectToSectionManagedObjectPoolModel("MANAGED_OBJECT_POOL"),
+				mo.getSectionManagedObjectPool(), "getSectionManagedObjectPoolName");
 		assertList(new String[] { "getSectionManagedObjectDependencyName", "getDependencyType" },
 				mo.getSectionManagedObjectDependencies(),
 				new SectionManagedObjectDependencyModel("DEPENDENCY_ONE", Object.class.getName()),
@@ -149,19 +155,29 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 				dependencyTwo.getSectionManagedObject(), "getSectionManagedObjectName");
 
 		// ----------------------------------------------
+		// Validate the managed object pools
+		// ----------------------------------------------
+		assertList(new String[] { "getSectionManagedObjectPoolName", "getManagedObjectPoolSourceClassName" },
+				section.getSectionManagedObjectPools(), new SectionManagedObjectPoolModel("MANAGED_OBJECT_POOL",
+						"net.example.ExampleManagedObjectPoolSource", null, null, 400, 401));
+		SectionManagedObjectPoolModel pool = section.getSectionManagedObjectPools().get(0);
+		assertList(new String[] { "getName", "getValue" }, pool.getProperties(),
+				new PropertyModel("POOL_ONE", "VALUE_ONE"), new PropertyModel("POOL_TWO", "VALUE_TWO"));
+
+		// ----------------------------------------------
 		// Validate the external flows
 		// ----------------------------------------------
 		assertList(new String[] { "getExternalFlowName", "getArgumentType", "getX", "getY" },
 				section.getExternalFlows(),
-				new ExternalFlowModel("FLOW", String.class.getName(), null, null, null, null, null, 400, 401),
-				new ExternalFlowModel("ESCALATION", "java.lang.Throwable", null, null, null, null, null, 410, 411));
+				new ExternalFlowModel("FLOW", String.class.getName(), null, null, null, null, null, 500, 501),
+				new ExternalFlowModel("ESCALATION", "java.lang.Throwable", null, null, null, null, null, 510, 511));
 
 		// ----------------------------------------
 		// Validate the Function Namespace
 		// ----------------------------------------
 		assertList(new String[] { "getFunctionNamespaceName", "getManagedFunctionSourceClassName", "getX", "getY" },
 				section.getFunctionNamespaces(), new FunctionNamespaceModel("function-namespace",
-						"net.example.ExampleManagedFunctionSource", null, null, 500, 501));
+						"net.example.ExampleManagedFunctionSource", null, null, 600, 601));
 		FunctionNamespaceModel namespace = section.getFunctionNamespaces().get(0);
 
 		// Validate properties of namespace
@@ -212,11 +228,11 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 		List<FunctionModel> functions = new LinkedList<FunctionModel>();
 		functions.add(new FunctionModel("functionOne", true, "namespace", "managedFunctionOne", "java.lang.Integer",
-				null, null, null, null, null, null, null, null, null, null, null, 600, 601));
+				null, null, null, null, null, null, null, null, null, null, null, 700, 701));
 		functions.add(new FunctionModel("functionTwo", false, "namespace", "managedFunctionTwo", null, null, null, null,
 				null, null, null, null, null, null, null, null, 610, 611));
 		functions.add(new FunctionModel("functionThree", false, "namespace", "managedFunctionThree",
-				"java.lang.Integer", null, null, null, null, null, null, null, null, null, null, null, 620, 621));
+				"java.lang.Integer", null, null, null, null, null, null, null, null, null, null, null, 720, 721));
 		functions.add(new FunctionModel("functionFour", false, "namespace", "managedFunctionFour", null, null, null,
 				null, null, null, null, null, null, null, null, null, 630, 631));
 		assertList(new String[] { "getFunctionName", "getFunctionNamespaceName", "getManagedFunctionName",
@@ -300,8 +316,8 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 		assertList(
 				new String[] { "getSubSectionName", "getSectionSourceClassName", "getSectionLocation", "getX", "getY" },
 				section.getSubSections(),
-				new SubSectionModel("SECTION_A", "DESK", "DESK_LOCATION", null, null, null, null, 700, 701),
-				new SubSectionModel("SECTION_B", "SECTION", "SECTION_LOCATION", null, null, null, null, 710, 711),
+				new SubSectionModel("SECTION_A", "DESK", "DESK_LOCATION", null, null, null, null, 800, 801),
+				new SubSectionModel("SECTION_B", "SECTION", "SECTION_LOCATION", null, null, null, null, 810, 811),
 				new SubSectionModel("SECTION_C", "net.example.ExampleSectionSource", "EXAMPLE_LOCATION", null, null,
 						null, null, 720, 721));
 		SubSectionModel subSectionA = section.getSubSections().get(0);

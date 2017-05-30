@@ -66,6 +66,7 @@ public interface AdministrationSource<E, F extends Enum<F>, G extends Enum<G>> {
 	 * 
 	 * @return Meta-data to describe this.
 	 */
+	@Deprecated // make return of init
 	AdministrationSourceMetaData<E, F, G> getMetaData();
 
 }

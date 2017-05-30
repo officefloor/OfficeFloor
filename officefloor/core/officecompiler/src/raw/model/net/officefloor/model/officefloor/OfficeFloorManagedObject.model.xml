@@ -4,6 +4,8 @@
 	<field type="String" name="managed object scope" />
 	<field type="OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel"
 		name="office floor managed object source" />
+	<field type="OfficeFloorManagedObjectToOfficeFloorManagedObjectPoolModel"
+		name="office floor managed object pool" />
 	<list type="TypeQualificationModel" name="type qualification" />
 	<list type="DeployedOfficeObjectToOfficeFloorManagedObjectModel"
 		name="deployed office object" />

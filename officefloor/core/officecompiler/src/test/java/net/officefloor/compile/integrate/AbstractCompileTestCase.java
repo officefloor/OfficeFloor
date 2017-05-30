@@ -22,6 +22,8 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.easymock.AbstractMatcher;
 
@@ -33,6 +35,7 @@ import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
+import net.officefloor.compile.spi.pool.source.impl.AbstractManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.extension.AutoWireOfficeExtensionService;
@@ -45,6 +48,7 @@ import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.api.build.ManagedObjectPoolBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
@@ -58,8 +62,13 @@ import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListenerFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.ResourceSource;
+import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
@@ -106,11 +115,21 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	protected final OfficeFloorBuilder officeFloorBuilder = this.createMock(OfficeFloorBuilder.class);
 
 	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+
+		// Reset the managed object pool source
+		TestManagedObjectPoolSource.reset();
+	}
+
+	@Override
 	protected void tearDown() throws Exception {
-		super.tearDown();
 
 		// Reset the extension services
 		AutoWireOfficeExtensionService.reset();
+
+		// Complete tear down
+		super.tearDown();
 	}
 
 	/**
@@ -263,6 +282,25 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 		this.recordReturn(this.managedObjectBuilder, this.managedObjectBuilder.setManagingOffice(officeName),
 				this.managingOfficeBuilder);
 		return this.managingOfficeBuilder;
+	}
+
+	/**
+	 * Records specifying the {@link ManagedObjectPool} for the
+	 * {@link ManagedObjectSource}.
+	 * 
+	 * @param managedObjectPoolId
+	 *            Identifier of the {@link ManagedObjectPool}.
+	 * @return {@link ManagedObjectPoolBuilder}.
+	 */
+	protected ManagedObjectPoolBuilder record_managedObjectBuilder_setManagedObjectPool(String managedObjectPoolId) {
+
+		// Obtain the managed object pool
+		TestManagedObjectPoolSource pool = TestManagedObjectPoolSource.getManagedObjectPoolSource(managedObjectPoolId);
+
+		// Record creating the managed object pool
+		ManagedObjectPoolBuilder poolBuilder = this.managedObjectBuilder.setManagedObjectPool(pool);
+		poolBuilder.addThreadCompletionListener(pool);
+		return poolBuilder;
 	}
 
 	/**
@@ -806,6 +844,62 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 			assertEquals("Incorrect built office floor", officeFloor, loadedOfficeFloor);
 		} else {
 			assertNull("Should not build the office floor", officeFloor);
+		}
+	}
+
+	@TestSource
+	public static class TestManagedObjectPoolSource extends AbstractManagedObjectPoolSource
+			implements ManagedObjectPoolFactory, ThreadCompletionListenerFactory {
+
+		public static final String PROPERTY_POOL_ID = "id";
+
+		private static Map<String, TestManagedObjectPoolSource> instances = new HashMap<>();
+
+		private static void reset() {
+			instances.clear();
+		}
+
+		private static TestManagedObjectPoolSource getManagedObjectPoolSource(String managedObjectPoolId) {
+			TestManagedObjectPoolSource instance = instances.get(managedObjectPoolId);
+			if (instance == null) {
+				instance = new TestManagedObjectPoolSource();
+				instances.put(managedObjectPoolId, instance);
+			}
+			return instance;
+		}
+
+		/*
+		 * ================= ManagedObjectPoolSource =================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			context.addProperty(PROPERTY_POOL_ID);
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext context) throws Exception {
+
+			// Register the source
+			String poolId = context.getManagedObjectPoolSourceContext().getProperty(PROPERTY_POOL_ID);
+			TestManagedObjectPoolSource pool = getManagedObjectPoolSource(poolId);
+
+			// Configure the source
+			context.setPooledObjectType(Object.class);
+			context.setManagedObjectPoolFactory(pool);
+			context.addThreadCompleteListener(pool);
+		}
+
+		@Override
+		public ThreadCompletionListener createThreadCompletionListener(ManagedObjectPool pool) {
+			fail("Should not create ManagedObjectPool in compiling");
+			return null;
+		}
+
+		@Override
+		public ManagedObjectPool createManagedObjectPool(ManagedObjectSource<?, ?> managedObjectSource) {
+			fail("Should not create ThreadCompletionListener in compiling");
+			return null;
 		}
 	}
 
