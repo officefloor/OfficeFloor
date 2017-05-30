@@ -23,6 +23,7 @@ import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.Flow;
@@ -129,6 +130,19 @@ public interface SectionDesigner {
 	 */
 	SectionManagedObjectSource addSectionManagedObjectSource(String managedObjectSourceName,
 			ManagedObjectSource<?, ?> managedObjectSource);
+
+	/**
+	 * Adds an {@link SectionManagedObjectPool}.
+	 * 
+	 * @param managedObjectPoolName
+	 *            Name of the {@link SectionManagedObjectPool}.
+	 * @param managedObjectPoolSourceClassName
+	 *            Fully qualified class name of the
+	 *            {@link ManagedObjectPoolSource}.
+	 * @return Added {@link SectionManagedObjectPool}.
+	 */
+	SectionManagedObjectPool addManagedObjectPool(String managedObjectPoolName,
+			String managedObjectPoolSourceClassName);
 
 	/**
 	 * Adds a {@link SubSection} to the {@link SectionNode} being built.
@@ -375,6 +389,17 @@ public interface SectionDesigner {
 	 *            {@link SectionManagedObject}.
 	 */
 	void link(SubSectionObject subSectionObject, SectionManagedObject sectionManagedObject);
+
+	/**
+	 * Links the {@link SectionManagedObject} to be pooled by the
+	 * {@link SectionManagedObjectPool}.
+	 * 
+	 * @param managedObject
+	 *            {@link SectionManagedObject}.
+	 * @param managedObjectPool
+	 *            {@link SectionManagedObjectPool}.
+	 */
+	void link(SectionManagedObject managedObject, SectionManagedObjectPool managedObjectPool);
 
 	/**
 	 * Links {@link ManagedObjectDependency} to be the {@link SectionObject}.

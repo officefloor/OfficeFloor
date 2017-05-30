@@ -20,6 +20,7 @@ package net.officefloor.compile.spi.office;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.source.OfficeSource;
+import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.source.SectionSource;
@@ -147,6 +148,18 @@ public interface OfficeArchitect {
 	 */
 	OfficeManagedObjectSource addOfficeManagedObjectSource(String managedObjectSourceName,
 			ManagedObjectSource<?, ?> managedObjectSource);
+
+	/**
+	 * Adds an {@link OfficeManagedObjectPool}.
+	 * 
+	 * @param managedObjectPoolName
+	 *            Name of the {@link OfficeManagedObjectPool}.
+	 * @param managedObjectPoolSourceClassName
+	 *            Fully qualified class name of the
+	 *            {@link ManagedObjectPoolSource}.
+	 * @return Added {@link OfficeManagedObjectPool}.
+	 */
+	OfficeManagedObjectPool addManagedObjectPool(String managedObjectPoolName, String managedObjectPoolSourceClassName);
 
 	/**
 	 * Adds a {@link OfficeGovernance}.
@@ -278,6 +291,17 @@ public interface OfficeArchitect {
 	 *            {@link OfficeObject}.
 	 */
 	void link(OfficeSectionObject sectionObject, OfficeObject managedObject);
+
+	/**
+	 * Links the {@link OfficeManagedObject} to be pooled by the
+	 * {@link OfficeManagedObjectPool}.
+	 * 
+	 * @param managedObject
+	 *            {@link OfficeManagedObject}.
+	 * @param managedObjectPool
+	 *            {@link OfficeManagedObjectPool}.
+	 */
+	void link(OfficeManagedObject managedObject, OfficeManagedObjectPool managedObjectPool);
 
 	/**
 	 * Links the {@link ManagedObjectDependency} to be the

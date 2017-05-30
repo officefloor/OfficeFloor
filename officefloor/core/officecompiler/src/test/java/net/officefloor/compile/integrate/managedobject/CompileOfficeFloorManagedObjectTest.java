@@ -46,6 +46,7 @@ import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
@@ -551,6 +552,14 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 
 		// Compile the OfficeFloor
 		this.compile(true);
+	}
+
+	/**
+	 * Tests to ensure can link {@link ManagedObject} with
+	 * {@link ManagedObjectPool}.
+	 */
+	public void testManagedObjectPooling() {
+		fail("TODO implement");
 	}
 
 	/**

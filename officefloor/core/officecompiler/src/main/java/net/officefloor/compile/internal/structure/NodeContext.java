@@ -585,6 +585,39 @@ public interface NodeContext {
 	ManagedObjectPoolLoader getManagedObjectPoolLoader(Node node);
 
 	/**
+	 * Creates the {@link ManagedObjectPoolNode}.
+	 * 
+	 * @param managedObjectPoolName
+	 *            Name of the {@link ManagedObjectPoolNode}.
+	 * @param officeFloorNode
+	 *            Parent {@link OfficeFloorNode}.
+	 * @return {@link ManagedObjectPoolNode}.
+	 */
+	ManagedObjectPoolNode createManagedObjectPoolNode(String managedObjectPoolName, OfficeFloorNode officeFloorNode);
+
+	/**
+	 * Creates the {@link ManagedObjectPoolNode}.
+	 * 
+	 * @param managedObjectPoolName
+	 *            Name of the {@link ManagedObjectPoolNode}.
+	 * @param officeNode
+	 *            Parent {@link OfficeNode}.
+	 * @return {@link ManagedObjectPoolNode}.
+	 */
+	ManagedObjectPoolNode createManagedObjectPoolNode(String managedObjectPoolName, OfficeNode officeNode);
+
+	/**
+	 * Creates the {@link ManagedObjectPoolNode}.
+	 * 
+	 * @param managedObjectPoolName
+	 *            Name of the {@link ManagedObjectPoolNode}.
+	 * @param sectionNode
+	 *            Parent {@link SectionNode}.
+	 * @return {@link ManagedObjectPoolNode}.
+	 */
+	ManagedObjectPoolNode createManagedObjectPoolNode(String managedObjectPoolName, SectionNode sectionNode);
+
+	/**
 	 * Obtains the {@link SupplierSource} class.
 	 * 
 	 * @param <S>

@@ -17,14 +17,13 @@
  */
 package net.officefloor.compile.spi.officefloor;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
+import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.manage.Office;
@@ -60,8 +59,8 @@ public interface OfficeFloorDeployer {
 	 *            Fully qualified class name of the {@link ManagedObjectSource}.
 	 * @return Added {@link OfficeFloorManagedObjectSource}.
 	 */
-	OfficeFloorManagedObjectSource addManagedObjectSource(
-			String managedObjectSourceName, String managedObjectSourceClassName);
+	OfficeFloorManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
+			String managedObjectSourceClassName);
 
 	/**
 	 * Adds an {@link OfficeFloorManagedObjectSource}.
@@ -72,8 +71,7 @@ public interface OfficeFloorDeployer {
 	 *            {@link ManagedObjectSource} instance to use.
 	 * @return Added {@link OfficeFloorManagedObjectSource}.
 	 */
-	OfficeFloorManagedObjectSource addManagedObjectSource(
-			String managedObjectSourceName,
+	OfficeFloorManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
 			ManagedObjectSource<?, ?> managedObjectSource);
 
 	/**
@@ -83,27 +81,31 @@ public interface OfficeFloorDeployer {
 	 *            Name of the {@link OfficeFloorInputManagedObject}.
 	 * @return Added {@link OfficeFloorInputManagedObject}.
 	 */
-	OfficeFloorInputManagedObject addInputManagedObject(
-			String inputManagedObjectName);
+	OfficeFloorInputManagedObject addInputManagedObject(String inputManagedObjectName);
 
 	/**
-	 * <p>
+	 * Adds an {@link OfficeFloorManagedObjectPool}.
+	 * 
+	 * @param managedObjectPoolName
+	 *            Name of the {@link OfficeFloorManagedObjectPool}.
+	 * @param managedObjectPoolSourceClassName
+	 *            Fully qualified class name of the
+	 *            {@link ManagedObjectPoolSource}.
+	 * @return Added {@link OfficeFloorManagedObjectPool}.
+	 */
+	OfficeFloorManagedObjectPool addManagedObjectPool(String managedObjectPoolName,
+			String managedObjectPoolSourceClassName);
+
+	/**
 	 * Adds an {@link OfficeFloorSupplier}.
-	 * <p>
-	 * Please note there is no {@link AutoWire} functionality and this is only
-	 * provided to allow {@link OfficeFloorSource} implementations to take
-	 * advantage of a {@link SupplierSource}.
 	 * 
 	 * @param supplierName
 	 *            Name of the {@link OfficeFloorSupplier}.
 	 * @param supplierSourceClassName
 	 *            Fully qualified class name of the {@link SupplierSource}.
 	 * @return {@link OfficeFloorSupplier}.
-	 * 
-	 * @see AutoWireApplication
 	 */
-	OfficeFloorSupplier addSupplier(String supplierName,
-			String supplierSourceClassName);
+	OfficeFloorSupplier addSupplier(String supplierName, String supplierSourceClassName);
 
 	/**
 	 * Adds a {@link DeployedOffice} to the {@link OfficeFloor}.
@@ -116,8 +118,7 @@ public interface OfficeFloorDeployer {
 	 *            Location of the {@link Office}.
 	 * @return {@link DeployedOffice}.
 	 */
-	DeployedOffice addDeployedOffice(String officeName,
-			String officeSourceClassName, String officeLocation);
+	DeployedOffice addDeployedOffice(String officeName, String officeSourceClassName, String officeLocation);
 
 	/**
 	 * Adds a {@link DeployedOffice} to the {@link OfficeFloor}.
@@ -130,8 +131,7 @@ public interface OfficeFloorDeployer {
 	 *            Location of the {@link Office}.
 	 * @return {@link DeployedOffice}.
 	 */
-	DeployedOffice addDeployedOffice(String officeName,
-			OfficeSource officeSource, String officeLocation);
+	DeployedOffice addDeployedOffice(String officeName, OfficeSource officeSource, String officeLocation);
 
 	/**
 	 * Links the {@link ManagedObjectTeam} to be the {@link OfficeFloorTeam}.
@@ -152,8 +152,18 @@ public interface OfficeFloorDeployer {
 	 * @param inputManagedObject
 	 *            {@link OfficeFloorInputManagedObject}.
 	 */
-	void link(OfficeFloorManagedObjectSource managedObjectSource,
-			OfficeFloorInputManagedObject inputManagedObject);
+	void link(OfficeFloorManagedObjectSource managedObjectSource, OfficeFloorInputManagedObject inputManagedObject);
+
+	/**
+	 * Links the {@link OfficeFloorManagedObject} to be pooled by the
+	 * {@link OfficeFloorManagedObjectPool}.
+	 * 
+	 * @param managedObject
+	 *            {@link OfficeFloorManagedObject}.
+	 * @param managedObjectPool
+	 *            {@link OfficeFloorManagedObjectPool}.
+	 */
+	void link(OfficeFloorManagedObject managedObject, OfficeFloorManagedObjectPool managedObjectPool);
 
 	/**
 	 * Links the {@link ManagedObjectDependency} to be the
@@ -164,8 +174,7 @@ public interface OfficeFloorDeployer {
 	 * @param managedObject
 	 *            {@link OfficeFloorManagedObject}.
 	 */
-	void link(ManagedObjectDependency dependency,
-			OfficeFloorManagedObject managedObject);
+	void link(ManagedObjectDependency dependency, OfficeFloorManagedObject managedObject);
 
 	/**
 	 * Links the {@link ManagedObjectDependency} to be the
@@ -176,8 +185,7 @@ public interface OfficeFloorDeployer {
 	 * @param inputManagedObject
 	 *            {@link OfficeFloorInputManagedObject}.
 	 */
-	void link(ManagedObjectDependency dependency,
-			OfficeFloorInputManagedObject inputManagedObject);
+	void link(ManagedObjectDependency dependency, OfficeFloorInputManagedObject inputManagedObject);
 
 	/**
 	 * Links the {@link ManagedObjectFlow} to be undertaken by the
@@ -231,8 +239,7 @@ public interface OfficeFloorDeployer {
 	 * @param inputManagedObject
 	 *            {@link OfficeFloorInputManagedObject}.
 	 */
-	void link(OfficeObject officeObject,
-			OfficeFloorInputManagedObject inputManagedObject);
+	void link(OfficeObject officeObject, OfficeFloorInputManagedObject inputManagedObject);
 
 	/**
 	 * <p>
