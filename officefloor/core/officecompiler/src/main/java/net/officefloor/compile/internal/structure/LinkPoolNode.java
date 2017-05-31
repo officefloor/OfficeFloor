@@ -18,32 +18,26 @@
 package net.officefloor.compile.internal.structure;
 
 /**
- * {@link LinkSynchronousNode} that can be linked to another
- * {@link LinkSynchronousNode}.
+ * {@link LinkPoolNode} that can be linked to another {@link LinkPoolNode}.
  * 
  * @author Daniel Sagenschneider
  */
-@Deprecated // external integration via queues (no synchronous)
-public interface LinkSynchronousNode {
+public interface LinkPoolNode extends Node {
 
 	/**
-	 * Links the input {@link LinkSynchronousNode} to this
-	 * {@link LinkSynchronousNode}.
+	 * Links the input {@link LinkPoolNode} to this {@link LinkPoolNode}.
 	 * 
 	 * @param node
-	 *            {@link LinkSynchronousNode} to link to this
-	 *            {@link LinkSynchronousNode}.
+	 *            {@link LinkPoolNode} to link to this {@link LinkPoolNode}.
 	 * @return <code>true</code> if linked.
 	 */
-	boolean linkSynchronousNode(LinkSynchronousNode node);
+	boolean linkPoolNode(LinkPoolNode node);
 
 	/**
-	 * Obtains the {@link LinkSynchronousNode} linked to this
-	 * {@link LinkSynchronousNode}.
+	 * Obtains the {@link LinkPoolNode} linked to this {@link LinkPoolNode}.
 	 * 
-	 * @return {@link LinkSynchronousNode} linked to this
-	 *         {@link LinkSynchronousNode}.
+	 * @return {@link LinkPoolNode} linked to this {@link LinkPoolNode}.
 	 */
-	LinkSynchronousNode getLinkedSynchronousNode();
+	LinkPoolNode getLinkedPoolNode();
 
 }

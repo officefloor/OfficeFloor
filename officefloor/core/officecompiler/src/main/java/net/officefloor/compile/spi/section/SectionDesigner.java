@@ -145,6 +145,18 @@ public interface SectionDesigner {
 			String managedObjectPoolSourceClassName);
 
 	/**
+	 * Adds a {@link SectionManagedObjectPool}.
+	 * 
+	 * @param managedObjectPoolName
+	 *            Name of the {@link SectionManagedObjectPool}.
+	 * @param managedObjectPoolSource
+	 *            {@link ManagedObjectPoolSource} instance to use.
+	 * @return {@link SectionManagedObjectPool}.
+	 */
+	SectionManagedObjectPool addManagedObjectPool(String managedObjectPoolName,
+			ManagedObjectPoolSource managedObjectPoolSource);
+
+	/**
 	 * Adds a {@link SubSection} to the {@link SectionNode} being built.
 	 * 
 	 * @param subSectionName

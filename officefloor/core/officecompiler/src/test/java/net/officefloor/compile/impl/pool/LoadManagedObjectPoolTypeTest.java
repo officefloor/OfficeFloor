@@ -106,8 +106,9 @@ public class LoadManagedObjectPoolTypeTest extends OfficeFrameTestCase {
 	public void testGetProperties() {
 
 		// Record basic meta-data
-		this.recordReturn(this.metaData, this.metaData.getManagedObjectPoolFactory(), this.factory);
 		this.recordReturn(this.metaData, this.metaData.getPooledObjectType(), Connection.class);
+		this.recordReturn(this.metaData, this.metaData.getManagedObjectPoolFactory(), this.factory);
+		this.recordReturn(this.metaData, this.metaData.getThreadCompleteListenerFactories(), null);
 
 		// Attempt to load
 		this.loadManagedObjectPoolType(true, new Init() {

@@ -35,7 +35,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
  * @author Daniel Sagenschneider
  */
 public interface ManagedObjectPoolNode
-		extends OfficeFloorManagedObjectPool, OfficeManagedObjectPool, SectionManagedObjectPool {
+		extends LinkPoolNode, OfficeFloorManagedObjectPool, OfficeManagedObjectPool, SectionManagedObjectPool {
 
 	/**
 	 * {@link Node} type.

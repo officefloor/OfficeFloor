@@ -17,8 +17,6 @@
  */
 package net.officefloor.compile.spi.pool.source;
 
-import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.SourceContext;
 
 /**
@@ -27,14 +25,4 @@ import net.officefloor.frame.api.source.SourceContext;
  * @author Daniel Sagenschneider
  */
 public interface ManagedObjectPoolSourceContext extends SourceContext {
-
-	/**
-	 * Obtains the {@link ManagedObjectSource} for the {@link ManagedObject}
-	 * instances being pooled.
-	 * 
-	 * @return {@link ManagedObjectSource} for the {@link ManagedObject}
-	 *         instances being pooled.
-	 */
-	ManagedObjectSource<?, ?> getManagedObjectSource();
-
 }

@@ -75,6 +75,7 @@ import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
+import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.FunctionFlow;
 import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
@@ -84,6 +85,7 @@ import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.compile.spi.section.SectionManagedObjectPool;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
@@ -802,6 +804,20 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	@Override
+	public SectionManagedObjectPool addManagedObjectPool(String managedObjectPoolName,
+			String managedObjectPoolSourceClassName) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
+	}
+
+	@Override
+	public SectionManagedObjectPool addManagedObjectPool(String managedObjectPoolName,
+			ManagedObjectPoolSource managedObjectPoolSource) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
+	}
+
+	@Override
 	public SectionFunctionNamespace addSectionFunctionNamespace(String namespaceName,
 			String managedFunctionSourceClassName) {
 		return NodeUtil.getInitialisedNode(namespaceName, this.namespaceNodes, this.context,
@@ -898,6 +914,12 @@ public class SectionNodeImpl implements SectionNode {
 	@Override
 	public void link(SubSectionOutput subSectionOutput, SectionOutput sectionOutput) {
 		LinkUtil.linkFlow(subSectionOutput, sectionOutput, this.context.getCompilerIssues(), this);
+	}
+
+	@Override
+	public void link(SectionManagedObject managedObject, SectionManagedObjectPool managedObjectPool) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
 	}
 
 	@Override

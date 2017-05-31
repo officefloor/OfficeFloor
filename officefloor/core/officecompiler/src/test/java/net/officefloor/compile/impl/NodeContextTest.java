@@ -35,6 +35,7 @@ import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
+import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.ManagedObjectTeamNode;
 import net.officefloor.compile.internal.structure.ManagingOfficeNode;
@@ -225,6 +226,59 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertNode(node, "FLOW", "Managed Object Source Flow", null, this.managedObjectSource);
 		assertEquals("Incorrect managed object flow name", "FLOW", node.getManagedObjectFlowName());
 		assertInitialise(node, (n) -> n.initialise());
+	}
+
+	/**
+	 * Ensure can create {@link ManagedObjectNode} within {@link SectionNode}.
+	 */
+	public void testCreateManagedObjectPoolNode_withinSection() {
+		this.recordReturn(this.section, this.section.getOfficeNode(), this.office);
+		this.recordReturn(this.office, this.office.getOfficeFloorNode(), this.officeFloor);
+		ManagedObjectPoolNode node = this.doTest(() -> this.context.createManagedObjectPoolNode("POOL", this.section));
+
+		// Ensure uninitialised that provides values
+		assertNode(node, "POOL", "Managed Object Pool", null, this.section);
+		assertEquals("Incorrect section name", "POOL", node.getSectionManagedObjectPoolName());
+		assertEquals("Incorrect office name", "POOL", node.getOfficeManagedObjectPoolName());
+		assertEquals("Incorrect OfficeFloor name", "POOL", node.getOfficeFloorManagedObjectPoolName());
+
+		// Initialise
+		assertInitialise(node, (n) -> n.initialise("ExampleManageObjectPoolSource", null));
+	}
+
+	/**
+	 * Ensure can create {@link ManagedObjectNode} within {@link OfficeNode}.
+	 */
+	public void testCreateManagedObjectPoolNode_withinOffice() {
+		this.recordReturn(this.office, this.office.getOfficeFloorNode(), this.officeFloor);
+		ManagedObjectPoolNode node = this.doTest(() -> this.context.createManagedObjectPoolNode("POOL", this.office));
+
+		// Ensure uninitialised that provides values
+		assertNode(node, "POOL", "Managed Object Pool", null, this.office);
+		assertEquals("Incorrect section name", "POOL", node.getSectionManagedObjectPoolName());
+		assertEquals("Incorrect office name", "POOL", node.getOfficeManagedObjectPoolName());
+		assertEquals("Incorrect OfficeFloor name", "POOL", node.getOfficeFloorManagedObjectPoolName());
+
+		// Initialise
+		assertInitialise(node, (n) -> n.initialise("ExampleManageObjectPoolSource", null));
+	}
+
+	/**
+	 * Ensure can create {@link ManagedObjectNode} within
+	 * {@link OfficeFloorNode}.
+	 */
+	public void testCreateManagedObjectPoolNode_withinOfficeFloor() {
+		ManagedObjectPoolNode node = this
+				.doTest(() -> this.context.createManagedObjectPoolNode("POOL", this.officeFloor));
+
+		// Ensure uninitialised that provides values
+		assertNode(node, "POOL", "Managed Object Pool", null, this.officeFloor);
+		assertEquals("Incorrect section name", "POOL", node.getSectionManagedObjectPoolName());
+		assertEquals("Incorrect office name", "POOL", node.getOfficeManagedObjectPoolName());
+		assertEquals("Incorrect OfficeFloor name", "POOL", node.getOfficeFloorManagedObjectPoolName());
+
+		// Initialise
+		assertInitialise(node, (n) -> n.initialise("ExampleManageObjectPoolSource", null));
 	}
 
 	/**

@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.FunctionFlow;
 import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
@@ -30,6 +31,7 @@ import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.compile.spi.section.SectionManagedObjectPool;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
@@ -177,6 +179,18 @@ public class TransformSectionDesigner implements SectionDesigner {
 	}
 
 	@Override
+	public SectionManagedObjectPool addManagedObjectPool(String managedObjectPoolName,
+			String managedObjectPoolSourceClassName) {
+		return this.delegate.addManagedObjectPool(managedObjectPoolName, managedObjectPoolSourceClassName);
+	}
+
+	@Override
+	public SectionManagedObjectPool addManagedObjectPool(String managedObjectPoolName,
+			ManagedObjectPoolSource managedObjectPoolSource) {
+		return this.delegate.addManagedObjectPool(managedObjectPoolName, managedObjectPoolSource);
+	}
+
+	@Override
 	public SubSection addSubSection(String subSectionName, String sectionSourceClassName, String location) {
 		return register(subSectionName, this.subSections,
 				this.delegate.addSubSection(subSectionName, sectionSourceClassName, location));
@@ -246,6 +260,11 @@ public class TransformSectionDesigner implements SectionDesigner {
 	@Override
 	public void link(SubSectionOutput subSectionOutput, SectionOutput sectionOutput) {
 		this.delegate.link(subSectionOutput, sectionOutput);
+	}
+
+	@Override
+	public void link(SectionManagedObject managedObject, SectionManagedObjectPool managedObjectPool) {
+		this.delegate.link(managedObject, managedObjectPool);
 	}
 
 	@Override

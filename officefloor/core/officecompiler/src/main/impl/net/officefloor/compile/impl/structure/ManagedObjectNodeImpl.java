@@ -28,6 +28,7 @@ import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
+import net.officefloor.compile.internal.structure.LinkPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
@@ -511,6 +512,22 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	@Override
 	public LinkObjectNode getLinkedObjectNode() {
 		return this.linkedObjectNode;
+	}
+
+	/*
+	 * =================== LinkPoolNode ======================================
+	 */
+
+	@Override
+	public boolean linkPoolNode(LinkPoolNode node) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
+	}
+
+	@Override
+	public LinkPoolNode getLinkedPoolNode() {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
 	}
 
 }

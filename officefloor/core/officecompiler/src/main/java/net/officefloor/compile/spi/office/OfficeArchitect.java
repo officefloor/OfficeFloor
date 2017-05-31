@@ -162,6 +162,18 @@ public interface OfficeArchitect {
 	OfficeManagedObjectPool addManagedObjectPool(String managedObjectPoolName, String managedObjectPoolSourceClassName);
 
 	/**
+	 * Adds an {@link OfficeManagedObjectPool}.
+	 * 
+	 * @param managedObjectPoolName
+	 *            Name of the {@link OfficeManagedObjectPool}.
+	 * @param managedObjectPoolSource
+	 *            {@link ManagedObjectPoolSource} instance to use.
+	 * @return {@link OfficeManagedObjectPool}.
+	 */
+	OfficeManagedObjectPool addManagedObjectPool(String managedObjectPoolName,
+			ManagedObjectPoolSource managedObjectPoolSource);
+
+	/**
 	 * Adds a {@link OfficeGovernance}.
 	 * 
 	 * @param governanceName

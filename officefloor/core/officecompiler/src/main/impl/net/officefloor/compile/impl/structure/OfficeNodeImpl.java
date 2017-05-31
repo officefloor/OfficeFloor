@@ -36,6 +36,7 @@ import net.officefloor.compile.internal.structure.AdministrationNode;
 import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.EscalationNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
@@ -57,7 +58,6 @@ import net.officefloor.compile.internal.structure.OfficeStartNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.TeamNode;
-import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.office.OfficeInputType;
@@ -74,6 +74,7 @@ import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeInput;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
+import net.officefloor.compile.spi.office.OfficeManagedObjectPool;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeOutput;
@@ -89,6 +90,7 @@ import net.officefloor.compile.spi.office.extension.OfficeExtensionService;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
+import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.source.SectionSource;
@@ -669,8 +671,8 @@ public class OfficeNodeImpl implements OfficeNode {
 
 		// Create the listing of architect added object types
 		OfficeManagedObjectType[] moTypes = CompileUtil.loadTypes(this.objects,
-				(object) -> object.getOfficeObjectName(), (object) -> object.loadOfficeManagedObjectType(compileContext),
-				OfficeManagedObjectType[]::new);
+				(object) -> object.getOfficeObjectName(),
+				(object) -> object.loadOfficeManagedObjectType(compileContext), OfficeManagedObjectType[]::new);
 		if (moTypes == null) {
 			return null;
 		}
@@ -923,6 +925,20 @@ public class OfficeNodeImpl implements OfficeNode {
 	}
 
 	@Override
+	public OfficeManagedObjectPool addManagedObjectPool(String managedObjectPoolName,
+			String managedObjectPoolSourceClassName) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
+	}
+
+	@Override
+	public OfficeManagedObjectPool addManagedObjectPool(String managedObjectPoolName,
+			ManagedObjectPoolSource managedObjectPoolSource) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
+	}
+
+	@Override
 	public OfficeGovernance addOfficeGovernance(String governanceName, String governanceSourceClassName) {
 		return NodeUtil.getInitialisedNode(governanceName, this.governances, this.context,
 				() -> this.context.createGovernanceNode(governanceName, this),
@@ -993,6 +1009,12 @@ public class OfficeNodeImpl implements OfficeNode {
 	@Override
 	public void link(OfficeSectionObject sectionObject, OfficeObject managedObject) {
 		LinkUtil.linkObject(sectionObject, managedObject, this.context.getCompilerIssues(), this);
+	}
+
+	@Override
+	public void link(OfficeManagedObject managedObject, OfficeManagedObjectPool managedObjectPool) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
 	}
 
 	@Override

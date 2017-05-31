@@ -97,6 +97,18 @@ public interface OfficeFloorDeployer {
 			String managedObjectPoolSourceClassName);
 
 	/**
+	 * Adds an {@link OfficeFloorManagedObjectPool}.
+	 * 
+	 * @param managedObjectPoolName
+	 *            Name of the {@link OfficeFloorManagedObjectPool}.
+	 * @param managedObjectPoolSource
+	 *            {@link ManagedObjectPoolSource} instance to use.
+	 * @return {@link OfficeFloorManagedObjectPool}.
+	 */
+	OfficeFloorManagedObjectPool addManagedObjectPool(String managedObjectPoolName,
+			ManagedObjectPoolSource managedObjectPoolSource);
+
+	/**
 	 * Adds an {@link OfficeFloorSupplier}.
 	 * 
 	 * @param supplierName

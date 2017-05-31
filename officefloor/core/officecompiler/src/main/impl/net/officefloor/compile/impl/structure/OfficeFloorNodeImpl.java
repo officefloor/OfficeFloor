@@ -61,11 +61,13 @@ import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectPool;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
+import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
@@ -274,6 +276,20 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	}
 
 	@Override
+	public OfficeFloorManagedObjectPool addManagedObjectPool(String managedObjectPoolName,
+			String managedObjectPoolSourceClassName) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
+	}
+
+	@Override
+	public OfficeFloorManagedObjectPool addManagedObjectPool(String managedObjectPoolName,
+			ManagedObjectPoolSource managedObjectPoolSource) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
+	}
+
+	@Override
 	public OfficeFloorSupplier addSupplier(String supplierName, String supplierSourceClassName) {
 		return NodeUtil.getInitialisedNode(supplierName, this.suppliers, this.context,
 				() -> this.context.createSupplierNode(supplierName, supplierSourceClassName, this),
@@ -305,6 +321,12 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 			OfficeFloorInputManagedObject inputManagedObject) {
 		LinkUtil.linkManagedObjectSourceInput(managedObjectSource, inputManagedObject, this.context.getCompilerIssues(),
 				this);
+	}
+
+	@Override
+	public void link(OfficeFloorManagedObject managedObject, OfficeFloorManagedObjectPool managedObjectPool) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
 	}
 
 	@Override

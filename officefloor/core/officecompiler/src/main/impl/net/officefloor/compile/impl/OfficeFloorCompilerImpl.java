@@ -59,6 +59,7 @@ import net.officefloor.compile.impl.structure.ManagedFunctionNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectDependencyNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectFlowNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectNodeImpl;
+import net.officefloor.compile.impl.structure.ManagedObjectPoolNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectTeamNodeImpl;
 import net.officefloor.compile.impl.structure.ManagingOfficeNodeImpl;
@@ -92,6 +93,7 @@ import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
+import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.ManagedObjectTeamNode;
 import net.officefloor.compile.internal.structure.ManagingOfficeNode;
@@ -868,6 +870,25 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	@Override
 	public ManagedObjectPoolLoader getManagedObjectPoolLoader(Node node) {
 		return new ManagedObjectPoolLoaderImpl(node, this);
+	}
+
+	@Override
+	public ManagedObjectPoolNode createManagedObjectPoolNode(String managedObjectPoolName,
+			OfficeFloorNode officeFloorNode) {
+		return new ManagedObjectPoolNodeImpl(managedObjectPoolName, null, null, officeFloorNode, this);
+	}
+
+	@Override
+	public ManagedObjectPoolNode createManagedObjectPoolNode(String managedObjectPoolName, OfficeNode officeNode) {
+		OfficeFloorNode officeFloorNode = officeNode.getOfficeFloorNode();
+		return new ManagedObjectPoolNodeImpl(managedObjectPoolName, null, officeNode, officeFloorNode, this);
+	}
+
+	@Override
+	public ManagedObjectPoolNode createManagedObjectPoolNode(String managedObjectPoolName, SectionNode sectionNode) {
+		OfficeNode officeNode = sectionNode.getOfficeNode();
+		OfficeFloorNode officeFloorNode = (officeNode == null ? null : officeNode.getOfficeFloorNode());
+		return new ManagedObjectPoolNodeImpl(managedObjectPoolName, sectionNode, officeNode, officeFloorNode, this);
 	}
 
 	@Override
