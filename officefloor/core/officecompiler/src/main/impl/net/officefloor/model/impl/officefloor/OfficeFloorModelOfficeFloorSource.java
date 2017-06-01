@@ -40,6 +40,7 @@ import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectPool;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
@@ -66,6 +67,7 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectPoolModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel;
@@ -76,6 +78,7 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOff
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectPoolModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorSupplierModel;
@@ -187,7 +190,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 			officeFloorSuppliers.put(supplierName, supplier);
 		}
 
-		// Add the office floor managed object sources, keeping registry of them
+		// Add the OfficeFloor managed object sources, keeping registry of them
 		Map<String, OfficeFloorManagedObjectSource> officeFloorManagedObjectSources = new HashMap<String, OfficeFloorManagedObjectSource>();
 		for (OfficeFloorManagedObjectSourceModel managedObjectSourceModel : officeFloor
 				.getOfficeFloorManagedObjectSources()) {
@@ -243,7 +246,24 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 			officeFloorManagedObjectSources.put(managedObjectSourceName, managedObjectSource);
 		}
 
-		// Add the office floor managed objects, keeping registry of them
+		// Add the OfficeFloor managed object pools, keeping registry of them
+		Map<String, OfficeFloorManagedObjectPool> officeFloorManagedObjectPools = new HashMap<>();
+		for (OfficeFloorManagedObjectPoolModel poolModel : officeFloor.getOfficeFloorManagedObjectPools()) {
+
+			// Add the managed object pool
+			String managedObjectPoolName = poolModel.getOfficeFloorManagedObjectPoolName();
+			String managedObjectPoolSourceClassName = poolModel.getManagedObjectPoolSourceClassName();
+			OfficeFloorManagedObjectPool pool = deployer.addManagedObjectPool(managedObjectPoolName,
+					managedObjectPoolSourceClassName);
+			officeFloorManagedObjectPools.put(managedObjectPoolName, pool);
+
+			// Add properties for the managed object source
+			for (PropertyModel property : poolModel.getProperties()) {
+				pool.addProperty(property.getName(), property.getValue());
+			}
+		}
+
+		// Add the OfficeFloor managed objects, keeping registry of them
 		Map<String, OfficeFloorManagedObject> officeFloorManagedObjects = new HashMap<String, OfficeFloorManagedObject>();
 		for (OfficeFloorManagedObjectModel managedObjectModel : officeFloor.getOfficeFloorManagedObjects()) {
 
@@ -271,9 +291,21 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 			OfficeFloorManagedObject managedObject = moSource.addOfficeFloorManagedObject(managedObjectName,
 					managedObjectScope);
 			officeFloorManagedObjects.put(managedObjectName, managedObject);
+
+			// Determine if pool the managed object
+			OfficeFloorManagedObjectToOfficeFloorManagedObjectPoolModel moToPool = managedObjectModel
+					.getOfficeFloorManagedObjectPool();
+			if (moToPool != null) {
+				OfficeFloorManagedObjectPoolModel poolModel = moToPool.getOfficeFloorManagedObjectPool();
+				if (poolModel != null) {
+					OfficeFloorManagedObjectPool pool = officeFloorManagedObjectPools
+							.get(poolModel.getOfficeFloorManagedObjectPoolName());
+					deployer.link(managedObject, pool);
+				}
+			}
 		}
 
-		// Add the office floor input managed objects, keeping registry of them
+		// Add the OfficeFloor input managed objects, keeping registry of them
 		Map<String, OfficeFloorInputManagedObject> officeFloorInputManagedObjects = new HashMap<String, OfficeFloorInputManagedObject>();
 		for (OfficeFloorInputManagedObjectModel inputManagedObjectModel : officeFloor
 				.getOfficeFloorInputManagedObjects()) {

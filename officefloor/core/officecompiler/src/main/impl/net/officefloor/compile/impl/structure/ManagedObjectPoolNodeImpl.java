@@ -27,6 +27,7 @@ import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.pool.ManagedObjectPoolType;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
@@ -66,6 +67,11 @@ public class ManagedObjectPoolNodeImpl implements ManagedObjectPoolNode {
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext context;
+
+	/**
+	 * {@link PropertyList} to configure the {@link ManagedObjectPoolSource}.
+	 */
+	private final PropertyList properties;
 
 	/**
 	 * {@link InitialisedState}.
@@ -126,6 +132,9 @@ public class ManagedObjectPoolNodeImpl implements ManagedObjectPoolNode {
 		this.containingOfficeNode = containingOfficeNode;
 		this.containingOfficeFloorNode = containingOfficeFloorNode;
 		this.context = context;
+
+		// Create the properties
+		this.properties = this.context.createPropertyList();
 	}
 
 	/*
@@ -202,8 +211,7 @@ public class ManagedObjectPoolNodeImpl implements ManagedObjectPoolNode {
 
 	@Override
 	public void addProperty(String name, String value) {
-		// TODO Auto-generated method stub
-
+		this.properties.addProperty(name).setValue(value);
 	}
 
 	/*
@@ -212,21 +220,21 @@ public class ManagedObjectPoolNodeImpl implements ManagedObjectPoolNode {
 
 	@Override
 	public boolean sourceManagedObjectPool(CompileContext compileContext) {
-		// TODO Auto-generated method stub
-		return false;
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement sourceManagedObjectPool");
 	}
 
 	@Override
 	public ManagedObjectPoolType loadManagedObjectPoolType() {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement loadManagedObjectPoolType");
 	}
 
 	@Override
 	public void buildManagedObjectPool(OfficeFloorBuilder builder, OfficeNode managingOffice,
 			OfficeBuilder managingOfficeBuilder, OfficeBindings officeBindings, CompileContext compileContext) {
-		// TODO Auto-generated method stub
-
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement buildManagedObjectPool");
 	}
 
 	/*
@@ -235,14 +243,14 @@ public class ManagedObjectPoolNodeImpl implements ManagedObjectPoolNode {
 
 	@Override
 	public boolean linkPoolNode(LinkPoolNode node) {
-		// TODO Auto-generated method stub
-		return false;
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement linkPoolNode");
 	}
 
 	@Override
 	public LinkPoolNode getLinkedPoolNode() {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement getLinkedPoolNode");
 	}
 
 }

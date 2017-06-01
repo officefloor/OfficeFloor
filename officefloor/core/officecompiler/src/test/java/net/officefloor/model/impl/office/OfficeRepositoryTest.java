@@ -52,6 +52,7 @@ import net.officefloor.model.office.OfficeManagedObjectDependencyModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectPoolModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceFlowModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceFlowToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceModel;
@@ -59,6 +60,7 @@ import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectToAdministrationModel;
 import net.officefloor.model.office.OfficeManagedObjectToGovernanceModel;
+import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectPoolModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRepository;
@@ -115,6 +117,9 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				Connection.class.getName());
 		OfficeManagedObjectModel mo = new OfficeManagedObjectModel("MANAGED_OBJECT", "THREAD");
 		office.addOfficeManagedObject(mo);
+		OfficeManagedObjectPoolModel pool = new OfficeManagedObjectPoolModel("POOL",
+				"net.example.ExampleManagedObjectPoolSource");
+		office.addOfficeManagedObjectPool(pool);
 		OfficeManagedObjectDependencyModel dependency = new OfficeManagedObjectDependencyModel("DEPENDENCY",
 				Connection.class.getName());
 		mo.addOfficeManagedObjectDependency(dependency);
@@ -166,6 +171,11 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		OfficeManagedObjectToOfficeManagedObjectSourceModel moToMos = new OfficeManagedObjectToOfficeManagedObjectSourceModel(
 				"MANAGED_OBJECT_SOURCE");
 		mo.setOfficeManagedObjectSource(moToMos);
+
+		// managed object -> managed object pool
+		OfficeManagedObjectToOfficeManagedObjectPoolModel moToPool = new OfficeManagedObjectToOfficeManagedObjectPoolModel(
+				"POOL");
+		mo.setOfficeManagedObjectPool(moToPool);
 
 		// mo flow -> section input
 		OfficeManagedObjectSourceFlowToOfficeSectionInputModel mosFlowToInput = new OfficeManagedObjectSourceFlowToOfficeSectionInputModel(
@@ -332,6 +342,10 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("managed object <- managed object source", mo, moToMos.getOfficeManagedObject());
 		assertEquals("managed object -> managed object source", mos, moToMos.getOfficeManagedObjectSource());
 
+		// Ensure managed object connected to its managed object pool
+		assertEquals("managed object <- managed object pool", mo, moToPool.getOfficeManagedObject());
+		assertEquals("managed object -> managed object pool", pool, moToPool.getOfficeManagedObjectPool());
+
 		// Ensure managed object source flow connected to section input
 		assertEquals("mos flow <- section input", moFlow, mosFlowToInput.getOfficeManagedObjectSourceFlow());
 		assertEquals("mos flow -> section input", targetInput, mosFlowToInput.getOfficeSectionInput());
@@ -460,6 +474,9 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		office.addExternalManagedObject(extMo);
 		OfficeManagedObjectModel mo = new OfficeManagedObjectModel("MANAGED_OBJECT", "THREAD");
 		office.addOfficeManagedObject(mo);
+		OfficeManagedObjectPoolModel pool = new OfficeManagedObjectPoolModel("POOL",
+				"net.example.ExampleManagedObjectPoolSource");
+		office.addOfficeManagedObjectPool(pool);
 		OfficeManagedObjectDependencyModel dependency = new OfficeManagedObjectDependencyModel("DEPENDENCY",
 				Connection.class.getName());
 		mo.addOfficeManagedObjectDependency(dependency);
@@ -513,6 +530,12 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		moToMos.setOfficeManagedObject(mo);
 		moToMos.setOfficeManagedObjectSource(mos);
 		moToMos.connect();
+
+		// managed object -> managed object pool
+		OfficeManagedObjectToOfficeManagedObjectPoolModel moToPool = new OfficeManagedObjectToOfficeManagedObjectPoolModel();
+		moToPool.setOfficeManagedObject(mo);
+		moToPool.setOfficeManagedObjectPool(pool);
+		moToPool.connect();
 
 		// managed object source flow -> section input
 		OfficeManagedObjectSourceFlowToOfficeSectionInputModel flowToInput = new OfficeManagedObjectSourceFlowToOfficeSectionInputModel();
@@ -701,6 +724,7 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		// Ensure the connections have links to enable retrieving
 		assertEquals("managed object - managed object source", "MANAGED_OBJECT_SOURCE",
 				moToMos.getOfficeManagedObjectSourceName());
+		assertEquals("managed object - managed object pool", "POOL", moToPool.getOfficeManagedObjectPoolName());
 		assertEquals("managed object source flow - input (section name)", "SECTION_TARGET",
 				flowToInput.getOfficeSectionName());
 		assertEquals("managed object source flow - input (input name)", "INPUT",

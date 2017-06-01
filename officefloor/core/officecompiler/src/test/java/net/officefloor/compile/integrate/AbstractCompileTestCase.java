@@ -298,7 +298,8 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 		TestManagedObjectPoolSource pool = TestManagedObjectPoolSource.getManagedObjectPoolSource(managedObjectPoolId);
 
 		// Record creating the managed object pool
-		ManagedObjectPoolBuilder poolBuilder = this.managedObjectBuilder.setManagedObjectPool(pool);
+		ManagedObjectPoolBuilder poolBuilder = this.createMock(ManagedObjectPoolBuilder.class);
+		this.recordReturn(this.managedObjectBuilder, this.managedObjectBuilder.setManagedObjectPool(pool), poolBuilder);
 		poolBuilder.addThreadCompletionListener(pool);
 		return poolBuilder;
 	}
@@ -757,6 +758,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 
 			// Add the tag replacements
 			this.configurationContext.addTag("testcase", this.getClass().getName());
+			this.configurationContext.addTag("POOL", TestManagedObjectPoolSource.class.getName());
 
 		} catch (Exception ex) {
 			// Wrap failure to not require tests to have to handle

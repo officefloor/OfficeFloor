@@ -48,11 +48,13 @@ import net.officefloor.model.section.SectionManagedObjectDependencyModel;
 import net.officefloor.model.section.SectionManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.section.SectionManagedObjectDependencyToSectionManagedObjectModel;
 import net.officefloor.model.section.SectionManagedObjectModel;
+import net.officefloor.model.section.SectionManagedObjectPoolModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowToExternalFlowModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowToFunctionModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowToSubSectionInputModel;
 import net.officefloor.model.section.SectionManagedObjectSourceModel;
+import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectPoolModel;
 import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectSourceModel;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SectionRepository;
@@ -110,6 +112,9 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		section.addExternalManagedObject(extMo);
 		SectionManagedObjectModel mo = new SectionManagedObjectModel("MANAGED_OBJECT", "THREAD");
 		section.addSectionManagedObject(mo);
+		SectionManagedObjectPoolModel pool = new SectionManagedObjectPoolModel("POOL",
+				"net.example.ExampleManagedObjectPoolSource");
+		section.addSectionManagedObjectPool(pool);
 		SectionManagedObjectDependencyModel dependency = new SectionManagedObjectDependencyModel("DEPENDENCY",
 				Object.class.getName());
 		mo.addSectionManagedObjectDependency(dependency);
@@ -134,6 +139,11 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		SectionManagedObjectToSectionManagedObjectSourceModel moToMos = new SectionManagedObjectToSectionManagedObjectSourceModel(
 				"MANAGED_OBJECT_SOURCE");
 		mo.setSectionManagedObjectSource(moToMos);
+
+		// managed object -> managed object pool
+		SectionManagedObjectToSectionManagedObjectPoolModel moToPool = new SectionManagedObjectToSectionManagedObjectPoolModel(
+				"POOL");
+		mo.setSectionManagedObjectPool(moToPool);
 
 		// dependency -> external managed object
 		SectionManagedObjectDependencyToExternalManagedObjectModel dependencyToExtMo = new SectionManagedObjectDependencyToExternalManagedObjectModel(
@@ -295,6 +305,10 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("mo -> mos", mos, moToMos.getSectionManagedObjectSource());
 		assertEquals("mo <- mos", mo, moToMos.getSectionManagedObject());
 
+		// Ensure managed object connected to its pool
+		assertEquals("mo -> pool", pool, moToPool.getSectionManagedObjectPool());
+		assertEquals("mo <- pool", mo, moToPool.getSectionManagedObject());
+
 		// Ensure dependency connected to external managed object
 		assertEquals("dependency <- external mo", dependency, dependencyToExtMo.getSectionManagedObjectDependency());
 		assertEquals("dependency -> managed object", extMo, dependencyToExtMo.getExternalManagedObject());
@@ -421,6 +435,9 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		section.addExternalManagedObject(extMo);
 		SectionManagedObjectModel mo = new SectionManagedObjectModel("MANAGED_OBJECT", "THREAD");
 		section.addSectionManagedObject(mo);
+		SectionManagedObjectPoolModel pool = new SectionManagedObjectPoolModel("POOL",
+				"net.example.ExampleManagedObjectPoolSource");
+		section.addSectionManagedObjectPool(pool);
 		SectionManagedObjectDependencyModel dependency = new SectionManagedObjectDependencyModel("DEPENDENCY",
 				Object.class.getName());
 		mo.addSectionManagedObjectDependency(dependency);
@@ -453,6 +470,12 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		moToMos.setSectionManagedObject(mo);
 		moToMos.setSectionManagedObjectSource(mos);
 		moToMos.connect();
+
+		// mo -> pool
+		SectionManagedObjectToSectionManagedObjectPoolModel moToPool = new SectionManagedObjectToSectionManagedObjectPoolModel();
+		moToPool.setSectionManagedObject(mo);
+		moToPool.setSectionManagedObjectPool(pool);
+		moToPool.connect();
 
 		// dependency -> extMo
 		SectionManagedObjectDependencyToExternalManagedObjectModel dependencyToExtMo = new SectionManagedObjectDependencyToExternalManagedObjectModel();
@@ -590,6 +613,7 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 
 		// Ensure the connections have links to enable retrieving
 		assertEquals("mo - mos", "MANAGED_OBJECT_SOURCE", moToMos.getSectionManagedObjectSourceName());
+		assertEquals("mo - pool", "POOL", moToPool.getSectionManagedObjectPoolName());
 		assertEquals("dependency - extMo", "EXTERNAL_MANAGED_OBJECT", dependencyToExtMo.getExternalManagedObjectName());
 		assertEquals("dependency - mo", "MANAGED_OBJECT", dependencyToMo.getSectionManagedObjectName());
 		assertEquals("mos flow - extFlow", "EXTERNAL_FLOW", mosFlowToExtFlow.getExternalFlowName());

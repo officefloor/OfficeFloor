@@ -167,6 +167,12 @@
 						attribute="name" />
 				</attributes>
 			</object>
+			<object method="getOfficeFloorManagedObjectPool" element="managed-object-pool">
+				<attributes>
+					<attribute method="getOfficeFloorManagedObjectPoolName"
+						attribute="name" />
+				</attributes>
+			</object>
 			<collection method="getTypeQualifications">
 				<item type="net.officefloor.model.officefloor.TypeQualificationModel"
 					element="type-qualification">
@@ -197,6 +203,32 @@
 								attribute="name" />
 						</attributes>
 					</object>
+				</item>
+			</collection>
+		</item>
+	</collection>
+
+	<!-- MANAGED OBJECT POOLS -->
+	<collection method="getOfficeFloorManagedObjectPools"
+		element="managed-object-pools">
+		<item
+			type="net.officefloor.model.officefloor.OfficeFloorManagedObjectPoolModel"
+			element="managed-object-pool">
+			<attributes>
+				<attribute method="getOfficeFloorManagedObjectPoolName"
+					attribute="name" />
+				<attribute method="getManagedObjectPoolSourceClassName"
+					attribute="source" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+			<collection method="getProperties" element="properties">
+				<item type="net.officefloor.model.officefloor.PropertyModel"
+					element="property">
+					<attributes>
+						<attribute method="getName" attribute="name" />
+						<attribute method="getValue" attribute="value" />
+					</attributes>
 				</item>
 			</collection>
 		</item>
