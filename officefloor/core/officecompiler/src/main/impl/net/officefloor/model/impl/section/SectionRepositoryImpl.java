@@ -47,11 +47,13 @@ import net.officefloor.model.section.SectionManagedObjectDependencyModel;
 import net.officefloor.model.section.SectionManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.section.SectionManagedObjectDependencyToSectionManagedObjectModel;
 import net.officefloor.model.section.SectionManagedObjectModel;
+import net.officefloor.model.section.SectionManagedObjectPoolModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowToExternalFlowModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowToFunctionModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowToSubSectionInputModel;
 import net.officefloor.model.section.SectionManagedObjectSourceModel;
+import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectPoolModel;
 import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectSourceModel;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SectionRepository;
@@ -374,6 +376,25 @@ public class SectionRepositoryImpl implements SectionRepository {
 			}
 		}
 
+		// Create the map of managed object pools
+		Map<String, SectionManagedObjectPoolModel> pools = new HashMap<>();
+		for (SectionManagedObjectPoolModel pool : section.getSectionManagedObjectPools()) {
+			pools.put(pool.getSectionManagedObjectPoolName(), pool);
+		}
+
+		// Connect the managed objects to their managed object pools
+		for (SectionManagedObjectModel mo : section.getSectionManagedObjects()) {
+			SectionManagedObjectToSectionManagedObjectPoolModel conn = mo.getSectionManagedObjectPool();
+			if (conn != null) {
+				SectionManagedObjectPoolModel pool = pools.get(conn.getSectionManagedObjectPoolName());
+				if (pool != null) {
+					conn.setSectionManagedObject(mo);
+					conn.setSectionManagedObjectPool(pool);
+					conn.connect();
+				}
+			}
+		}
+
 		// Create the map of external managed objects
 		Map<String, ExternalManagedObjectModel> externalMos = new HashMap<String, ExternalManagedObjectModel>();
 		for (ExternalManagedObjectModel externalMo : section.getExternalManagedObjects()) {
@@ -651,6 +672,13 @@ public class SectionRepositoryImpl implements SectionRepository {
 		for (SectionManagedObjectSourceModel mos : section.getSectionManagedObjectSources()) {
 			for (SectionManagedObjectToSectionManagedObjectSourceModel conn : mos.getSectionManagedObjects()) {
 				conn.setSectionManagedObjectSourceName(mos.getSectionManagedObjectSourceName());
+			}
+		}
+
+		// Specify managed objects to their managed object pools
+		for (SectionManagedObjectPoolModel pool : section.getSectionManagedObjectPools()) {
+			for (SectionManagedObjectToSectionManagedObjectPoolModel conn : pool.getSectionManagedObjects()) {
+				conn.setSectionManagedObjectPoolName(pool.getSectionManagedObjectPoolName());
 			}
 		}
 

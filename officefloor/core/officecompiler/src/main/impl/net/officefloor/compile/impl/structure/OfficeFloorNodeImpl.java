@@ -335,8 +335,7 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 
 	@Override
 	public void link(OfficeFloorManagedObject managedObject, OfficeFloorManagedObjectPool managedObjectPool) {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement link mo to pool");
+		LinkUtil.linkPool(managedObject, managedObjectPool, this.context.getCompilerIssues(), this);
 	}
 
 	@Override

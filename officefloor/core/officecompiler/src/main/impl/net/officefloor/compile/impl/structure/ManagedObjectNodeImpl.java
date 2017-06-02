@@ -26,6 +26,7 @@ import net.officefloor.compile.impl.section.OfficeSectionManagedObjectTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkPoolNode;
@@ -38,7 +39,6 @@ import net.officefloor.compile.internal.structure.OfficeBindings;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SectionNode;
-import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.object.DependentObjectType;
@@ -501,7 +501,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	/**
 	 * Linked {@link LinkObjectNode}.
 	 */
-	private LinkObjectNode linkedObjectNode;
+	private LinkObjectNode linkedObjectNode = null;
 
 	@Override
 	public boolean linkObjectNode(LinkObjectNode node) {
@@ -518,16 +518,20 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	 * =================== LinkPoolNode ======================================
 	 */
 
+	/**
+	 * Linked {@link LinkPoolNode}.
+	 */
+	private LinkPoolNode linkedPoolNode = null;
+
 	@Override
 	public boolean linkPoolNode(LinkPoolNode node) {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+		return LinkUtil.linkPoolNode(this, node, this.context.getCompilerIssues(),
+				(link) -> this.linkedPoolNode = link);
 	}
 
 	@Override
 	public LinkPoolNode getLinkedPoolNode() {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+		return this.linkedPoolNode;
 	}
 
 }

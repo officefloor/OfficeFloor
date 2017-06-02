@@ -51,6 +51,7 @@ import net.officefloor.model.office.OfficeManagedObjectDependencyModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectPoolModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceFlowModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceFlowToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceModel;
@@ -58,6 +59,7 @@ import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectToAdministrationModel;
 import net.officefloor.model.office.OfficeManagedObjectToGovernanceModel;
+import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectPoolModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRepository;
@@ -124,6 +126,12 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			managedObjects.put(managedObject.getOfficeManagedObjectName(), managedObject);
 		}
 
+		// Create the set of office managed object pools
+		Map<String, OfficeManagedObjectPoolModel> managedObjectPools = new HashMap<>();
+		for (OfficeManagedObjectPoolModel managedObjectPool : office.getOfficeManagedObjectPools()) {
+			managedObjectPools.put(managedObjectPool.getOfficeManagedObjectPoolName(), managedObjectPool);
+		}
+
 		// Create the set of external managed objects
 		Map<String, ExternalManagedObjectModel> extMos = new HashMap<String, ExternalManagedObjectModel>();
 		for (ExternalManagedObjectModel extMo : office.getExternalManagedObjects()) {
@@ -167,6 +175,20 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 				if (managedObjectSource != null) {
 					conn.setOfficeManagedObject(managedObject);
 					conn.setOfficeManagedObjectSource(managedObjectSource);
+					conn.connect();
+				}
+			}
+		}
+
+		// Connect the managed objects to their corresponding pools
+		for (OfficeManagedObjectModel managedObject : office.getOfficeManagedObjects()) {
+			OfficeManagedObjectToOfficeManagedObjectPoolModel conn = managedObject.getOfficeManagedObjectPool();
+			if (conn != null) {
+				OfficeManagedObjectPoolModel managedObjectPool = managedObjectPools
+						.get(conn.getOfficeManagedObjectPoolName());
+				if (managedObjectPool != null) {
+					conn.setOfficeManagedObject(managedObject);
+					conn.setOfficeManagedObjectPool(managedObjectPool);
 					conn.connect();
 				}
 			}
@@ -591,6 +613,13 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 		for (OfficeManagedObjectSourceModel mos : office.getOfficeManagedObjectSources()) {
 			for (OfficeManagedObjectToOfficeManagedObjectSourceModel conn : mos.getOfficeManagedObjects()) {
 				conn.setOfficeManagedObjectSourceName(mos.getOfficeManagedObjectSourceName());
+			}
+		}
+
+		// Specify managed objects to their corresponding pools
+		for (OfficeManagedObjectPoolModel pool : office.getOfficeManagedObjectPools()) {
+			for (OfficeManagedObjectToOfficeManagedObjectPoolModel conn : pool.getOfficeManagedObjects()) {
+				conn.setOfficeManagedObjectPoolName(pool.getOfficeManagedObjectPoolName());
 			}
 		}
 

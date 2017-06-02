@@ -359,6 +359,7 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		OfficeFloorManagedObjectToOfficeFloorManagedObjectPoolModel moToPool = new OfficeFloorManagedObjectToOfficeFloorManagedObjectPoolModel();
 		moToPool.setOfficeFloorManagedObject(officeFloorManagedObject);
 		moToPool.setOfficeFloorManagedObjectPool(officeFloorManagedObjectPool);
+		moToPool.connect();
 
 		// input managed object -> bound managed object source
 		OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel inputMoToBoundSource = new OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel();

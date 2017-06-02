@@ -25,11 +25,13 @@ import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
+import net.officefloor.compile.internal.structure.LinkPoolNode;
 import net.officefloor.compile.internal.structure.LinkSynchronousNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.internal.structure.Flow;
 
 /**
@@ -58,6 +60,11 @@ public class LinkUtil {
 	 * {@link LinkOfficeNode} {@link Traverser}.
 	 */
 	private static final Traverser<LinkOfficeNode> OFFICE_TRAVERSER = (office) -> office.getLinkedOfficeNode();
+
+	/**
+	 * {@link LinkPoolNode} {@link Traverser}.
+	 */
+	private static final Traverser<LinkPoolNode> POOL_TRAVERSER = (pool) -> pool.getLinkedPoolNode();
 
 	/**
 	 * Ensures both inputs are a {@link LinkFlowNode} and if so links them.
@@ -252,6 +259,44 @@ public class LinkUtil {
 	}
 
 	/**
+	 * Ensures both inputs are a {@link LinkPoolNode} and if so links them.
+	 * 
+	 * @param linkSource
+	 *            Source {@link LinkPoolNode}.
+	 * @param linkTarget
+	 *            Target {@link LinkPoolNode}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @param node
+	 *            {@link Node} wishing to link the {@link ManagedObjectPool}.
+	 * @return <code>true</code> if linked.
+	 */
+	public static boolean linkPool(Object linkSource, Object linkTarget, CompilerIssues issues, Node node) {
+
+		// Obtain the node
+		if (linkSource instanceof Node) {
+			node = (Node) linkSource;
+		}
+
+		// Ensure the link source is link pool node
+		if (!(linkSource instanceof LinkPoolNode)) {
+			issues.addIssue(node, "Invalid link source: " + linkSource + " ["
+					+ (linkSource == null ? null : linkSource.getClass().getName()) + "]");
+			return false; // can not link
+		}
+
+		// Ensure the link target is link pool node
+		if (!(linkTarget instanceof LinkPoolNode)) {
+			issues.addIssue(node, "Invalid link target: " + linkTarget + " ["
+					+ (linkTarget == null ? null : linkTarget.getClass().getName() + "]"));
+			return false; // can not link
+		}
+
+		// Link the nodes together
+		return ((LinkPoolNode) linkSource).linkPoolNode((LinkPoolNode) linkTarget);
+	}
+
+	/**
 	 * Links the {@link ManagedObjectSourceNode} to the
 	 * {@link InputManagedObjectNode}.
 	 *
@@ -422,6 +467,24 @@ public class LinkUtil {
 	}
 
 	/**
+	 * Finds the target by the specified type.
+	 * 
+	 * @param <T>
+	 *            Target type.
+	 * @param link
+	 *            Starting {@link LinkPoolNode}.
+	 * @param targetType
+	 *            Target {@link LinkPoolNode} type to retrieve.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @return Target {@link LinkPoolNode} or <code>null</code> if target not
+	 *         found.
+	 */
+	public static <T extends Node> T findTarget(LinkPoolNode link, Class<T> targetType, CompilerIssues issues) {
+		return retrieveTarget(link, POOL_TRAVERSER, targetType, false, issues, null).target;
+	}
+
+	/**
 	 * Links the {@link LinkFlowNode}.
 	 * 
 	 * @param node
@@ -499,6 +562,25 @@ public class LinkUtil {
 	public static boolean linkOfficeNode(LinkOfficeNode node, LinkOfficeNode linkNode, CompilerIssues issues,
 			Consumer<LinkOfficeNode> loader) {
 		return linkNode(node, linkNode, OFFICE_TRAVERSER, issues, loader);
+	}
+
+	/**
+	 * Links the {@link LinkPoolNode}.
+	 * 
+	 * @param node
+	 *            {@link LinkPoolNode} to have the link loaded.
+	 * @param linkNode
+	 *            Link {@link LinkPoolNode} to load.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @param loader
+	 *            {@link Consumer} to load the link on the {@link LinkPoolNode}.
+	 * @return <code>true</code> if successful, or <code>false</code> with issue
+	 *         reported to the {@link CompilerIssues}.
+	 */
+	public static boolean linkPoolNode(LinkPoolNode node, LinkPoolNode linkNode, CompilerIssues issues,
+			Consumer<LinkPoolNode> loader) {
+		return linkNode(node, linkNode, POOL_TRAVERSER, issues, loader);
 	}
 
 	/**

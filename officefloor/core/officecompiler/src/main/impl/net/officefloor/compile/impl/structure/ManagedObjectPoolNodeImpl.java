@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.LinkPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
@@ -241,16 +242,20 @@ public class ManagedObjectPoolNodeImpl implements ManagedObjectPoolNode {
 	 * ===================== LinkPoolNode =========================
 	 */
 
+	/**
+	 * {@link LinkPoolNode}.
+	 */
+	private LinkPoolNode linkedPoolNode = null;
+
 	@Override
 	public boolean linkPoolNode(LinkPoolNode node) {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement linkPoolNode");
+		return LinkUtil.linkPoolNode(this, node, this.context.getCompilerIssues(),
+				(link) -> this.linkedPoolNode = link);
 	}
 
 	@Override
 	public LinkPoolNode getLinkedPoolNode() {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement getLinkedPoolNode");
+		return this.linkedPoolNode;
 	}
 
 }

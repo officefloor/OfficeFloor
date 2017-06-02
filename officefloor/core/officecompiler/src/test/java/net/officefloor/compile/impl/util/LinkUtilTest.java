@@ -22,6 +22,7 @@ import java.util.function.Function;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
+import net.officefloor.compile.internal.structure.LinkPoolNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -93,6 +94,20 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 
 		// Obtain the target
 		TargetLinkNode retrieved = this.retrieveOfficeTarget(link);
+		assertSame("Incorrect target", target, retrieved);
+	}
+
+	/**
+	 * Ensures can traverse {@link LinkPoolNode} instances.
+	 */
+	public void testTraverseLinkPoolNodes() {
+
+		// Create the links
+		TargetLinkNode target = new TargetLinkNode("TARGET");
+		LinkNode link = new LinkNode("LINK", target);
+
+		// Obtain the target
+		TargetLinkNode retrieved = this.findPoolTarget(link);
 		assertSame("Incorrect target", target, retrieved);
 	}
 
@@ -492,9 +507,23 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Finds the {@link TargetLinkNode}.
+	 * 
+	 * @param link
+	 *            Starting {@link LinkPoolNode}.
+	 * @return {@link TargetLinkNode} or <code>null</code> if target not found.
+	 */
+	private TargetLinkNode findPoolTarget(LinkPoolNode link) {
+		this.replayMockObjects();
+		TargetLinkNode retrieved = LinkUtil.findTarget(link, TargetLinkNode.class, this.issues);
+		this.verifyMockObjects();
+		return retrieved;
+	}
+
+	/**
 	 * Link node for testing.
 	 */
-	private class LinkNode implements LinkFlowNode, LinkObjectNode, LinkTeamNode, LinkOfficeNode {
+	private class LinkNode implements LinkFlowNode, LinkObjectNode, LinkTeamNode, LinkOfficeNode, LinkPoolNode {
 
 		/**
 		 * Name of this {@link Node}.
@@ -646,6 +675,21 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		@Override
 		public boolean linkOfficeNode(LinkOfficeNode node) {
 			fail("Should not be linking, only following links");
+			return false;
+		}
+
+		/*
+		 * ================== LinkPoolNode ===============================
+		 */
+
+		@Override
+		public LinkPoolNode getLinkedPoolNode() {
+			return this.getLinkedNode();
+		}
+
+		@Override
+		public boolean linkPoolNode(LinkPoolNode node) {
+			fail("Should not be linking, only folling links");
 			return false;
 		}
 	}

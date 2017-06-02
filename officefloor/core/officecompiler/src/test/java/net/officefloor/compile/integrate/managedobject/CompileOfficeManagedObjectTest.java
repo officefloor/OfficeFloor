@@ -329,7 +329,21 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 	 * {@link ManagedObjectPool}.
 	 */
 	public void testManagedObjectPooling() {
-		fail("TODO implement");
+
+		// Record building the OfficeFloor
+		this.record_init();
+
+		// Register the managed object pool for managed object
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeFloorBuilder_addManagedObject("OFFICE.MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				0, "class.name", SimpleManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT_SOURCE");
+		this.record_officeBuilder_addProcessManagedObject("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT");
+		this.record_managedObjectBuilder_setManagedObjectPool("POOL");
+
+		// Compile the OfficeFloor
+		this.compile(true);
 	}
 
 	/**
