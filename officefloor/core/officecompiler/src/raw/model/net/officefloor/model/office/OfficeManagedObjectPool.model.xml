@@ -3,6 +3,6 @@
 	<field type="String" name="office managed object pool name" />
 	<field type="String" name="managed object pool source class name" />
 	<list type="PropertyModel" name="property" plural="properties" />
-	<list type="OfficeManagedObjectToOfficeManagedObjectPoolModel"
-		name="office managed object" />
+	<list type="OfficeManagedObjectSourceToOfficeManagedObjectPoolModel"
+		name="office managed object source" />
 </model>

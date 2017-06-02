@@ -4,8 +4,6 @@
 	<field type="String" name="managed object scope" />
 	<field type="OfficeManagedObjectToOfficeManagedObjectSourceModel"
 		name="office managed object source" />
-	<field type="OfficeManagedObjectToOfficeManagedObjectPoolModel"
-		name="office managed object pool" />
 	<list type="TypeQualificationModel" name="type qualification" />
 	<list type="OfficeManagedObjectToAdministrationModel" name="administration" />
 	<list type="OfficeManagedObjectToGovernanceModel" name="governance" />

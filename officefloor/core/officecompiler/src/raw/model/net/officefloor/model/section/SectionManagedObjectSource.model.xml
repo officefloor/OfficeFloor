@@ -4,6 +4,8 @@
 	<field type="String" name="managed object source class name" />
 	<field type="String" name="object type" />
 	<field type="String" name="timeout" />
+	<field type="SectionManagedObjectSourceToSectionManagedObjectPoolModel"
+		name="section managed object pool" />
 	<list type="PropertyModel" name="property" plural="properties" />
 	<list type="SectionManagedObjectToSectionManagedObjectSourceModel"
 		name="section managed object" />

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
 	<field type="String" name="office floor managed object pool name" />
-	<field type="OfficeFloorManagedObjectModel" name="office floor managed object"
+	<field type="OfficeFloorManagedObjectSourceModel" name="office floor managed object source"
 		end-field="office floor managed object pool" />
 	<field type="OfficeFloorManagedObjectPoolModel" name="office floor managed object pool"
-		end-list="office floor managed object" />
+		end-list="office floor managed object source" />
 </model>
