@@ -1,0 +1,26 @@
+<context>
+	<office-floor>
+		<managed-object-sources>
+			<managed-object-source name="MANAGED_OBJECT_SOURCE"
+				source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$CompileManagedObject" />
+				</properties>
+				<managing-office name="OFFICE" />
+				<managed-object-pool name="OVERRIDE_MANAGED_OBJECT_POOL" />
+			</managed-object-source>
+		</managed-object-sources>
+		<managed-object-pools>
+			<managed-object-pool name="OVERRIDE_MANAGED_OBJECT_POOL"
+				source="${testcase}$TestManagedObjectPoolSource">
+				<properties>
+					<property name="value" value="to be overriden" />
+				</properties>
+			</managed-object-pool>
+		</managed-object-pools>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office />
+</context>

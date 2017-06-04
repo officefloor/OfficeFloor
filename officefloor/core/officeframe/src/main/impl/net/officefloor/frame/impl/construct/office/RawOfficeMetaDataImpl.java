@@ -75,6 +75,7 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
+import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -561,10 +562,14 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 		OfficeManagerImpl officeManager = new OfficeManagerImpl(officeName, monitorOfficeInterval, assetManagers,
 				officeClockImpl, functionLoop, timer);
 
+		// Obtain the managed execution factory
+		ManagedExecutionFactory managedExecutionFactory = rawOfficeFloorMetaData.getManagedExecutionFactory();
+
 		// Load the office meta-data
 		OfficeMetaData officeMetaData = new OfficeMetaDataImpl(officeName, officeManager, officeClock, timer,
-				functionLoop, threadLocalAwareExecutor, functionMetaDatas.toArray(new ManagedFunctionMetaData[0]),
-				functionLocator, processMetaData, startupFunctions, profiler);
+				functionLoop, threadLocalAwareExecutor, managedExecutionFactory,
+				functionMetaDatas.toArray(new ManagedFunctionMetaData[0]), functionLocator, processMetaData,
+				startupFunctions, profiler);
 
 		// Create the factories
 		FlowMetaDataFactory flowMetaDataFactory = new FlowMetaDataFactoryImpl();

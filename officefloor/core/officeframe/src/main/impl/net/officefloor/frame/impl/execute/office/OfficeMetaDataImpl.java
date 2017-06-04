@@ -32,6 +32,7 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -104,6 +105,11 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	private final ThreadLocalAwareExecutor threadLocalAwareExecutor;
 
 	/**
+	 * {@link ManagedExecutionFactory}.
+	 */
+	private final ManagedExecutionFactory managedExecutionFactory;
+
+	/**
 	 * {@link Profiler}.
 	 */
 	private final Profiler profiler;
@@ -123,6 +129,8 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 *            {@link FunctionLoop}.
 	 * @param threadLocalAwareExecutor
 	 *            {@link ThreadLocalAwareExecutor}.
+	 * @param managedExecutionFactory
+	 *            {@link ManagedExecutionFactory}.
 	 * @param functionMetaDatas
 	 *            {@link ManagedFunctionMetaData} of the {@link ManagedFunction}
 	 *            that can be executed within the {@link Office}.
@@ -138,13 +146,15 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 */
 	public OfficeMetaDataImpl(String officeName, OfficeManager officeManager, OfficeClock officeClock, Timer timer,
 			FunctionLoop functionLoop, ThreadLocalAwareExecutor threadLocalAwareExecutor,
-			ManagedFunctionMetaData<?, ?>[] functionMetaDatas, ManagedFunctionLocator functionLocator,
-			ProcessMetaData processMetaData, OfficeStartupFunction[] startupFunctions, Profiler profiler) {
+			ManagedExecutionFactory managedExecutionFactory, ManagedFunctionMetaData<?, ?>[] functionMetaDatas,
+			ManagedFunctionLocator functionLocator, ProcessMetaData processMetaData,
+			OfficeStartupFunction[] startupFunctions, Profiler profiler) {
 		this.officeName = officeName;
 		this.officeClock = officeClock;
 		this.timer = timer;
 		this.functionLoop = functionLoop;
 		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
+		this.managedExecutionFactory = managedExecutionFactory;
 		this.officeManager = officeManager;
 		this.functionMetaDatas = functionMetaDatas;
 		this.functionLocator = functionLocator;
@@ -195,6 +205,11 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	@Override
 	public OfficeStartupFunction[] getStartupFunctions() {
 		return this.startupFunctions;
+	}
+
+	@Override
+	public ManagedExecutionFactory getManagedExecutionFactory() {
+		return this.managedExecutionFactory;
 	}
 
 	@Override

@@ -36,6 +36,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolContext;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListenerFactory;
@@ -928,7 +929,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.managedObjectPoolConfiguration,
 				this.managedObjectPoolConfiguration.getManagedObjectPoolFactory(), this.managedObjectPoolFactory);
 		this.recordReturn(this.managedObjectPoolFactory, this.managedObjectPoolFactory.createManagedObjectPool(null),
-				this.managedObjectPool, new TypeMatcher(ManagedObjectSource.class));
+				this.managedObjectPool, new TypeMatcher(ManagedObjectPoolContext.class));
 		this.recordReturn(this.managedObjectPoolConfiguration,
 				this.managedObjectPoolConfiguration.getThreadCompletionListenerFactories(),
 				new ThreadCompletionListenerFactory[] { this.threadCompletionListenerFactory });

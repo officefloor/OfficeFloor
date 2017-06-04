@@ -15,22 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.managedobject.pool;
+package net.officefloor.frame.internal.structure;
 
 /**
- * Factory for the creation a {@link ManagedObjectPool}.
+ * Factory for the {@link ManagedExecution}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectPoolFactory {
+public interface ManagedExecutionFactory {
 
 	/**
-	 * Creates a {@link ManagedObjectPool}.
+	 * Creates the {@link ManagedExecution}.
 	 * 
-	 * @param managedObjectPoolContext
-	 *            {@link ManagedObjectPoolContext}.
-	 * @return {@link ManagedObjectPool}.
+	 * @param execution
+	 *            {@link Execution}.
+	 * @return {@link ManagedExecution}.
 	 */
-	ManagedObjectPool createManagedObjectPool(ManagedObjectPoolContext managedObjectPoolContext);
+	<E extends Throwable> ManagedExecution<E> createManagedExecution(Execution<E> execution);
 
 }

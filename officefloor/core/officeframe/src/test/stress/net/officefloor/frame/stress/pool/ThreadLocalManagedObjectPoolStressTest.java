@@ -24,7 +24,7 @@ import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
@@ -58,13 +58,12 @@ public class ThreadLocalManagedObjectPoolStressTest extends AbstractStressTestCa
 		// Create the test object
 		ManagedObjectBuilder<?> object = this.constructManagedObject("MO", TestManagedObjectSource.class,
 				this.getOfficeName());
-		object.setManagedObjectPool((mos) -> new TestManagedObjectPool(mos));
+		object.setManagedObjectPool((poolContext) -> new TestManagedObjectPool(poolContext));
 
 		// Create the function
 		TestWork work = new TestWork(context);
 		ReflectiveFunctionBuilder function = this.constructFunction(work, "function");
 		function.buildFlow("first", null, true);
-		function.buildObject("MO", ManagedObjectScope.FUNCTION);
 		context.loadOtherTeam(function.getBuilder());
 
 		// Create the first function in another thread
@@ -96,7 +95,7 @@ public class ThreadLocalManagedObjectPoolStressTest extends AbstractStressTestCa
 			this.context = context;
 		}
 
-		public void function(ReflectiveFlow flow, ThreadObject object) {
+		public void function(ReflectiveFlow flow) {
 			while (!this.context.incrementIterationAndIsComplete()) {
 				flow.doFlow(null, (failure) -> {
 					assertNull("Should be no failure", failure);
@@ -156,12 +155,12 @@ public class ThreadLocalManagedObjectPoolStressTest extends AbstractStressTestCa
 
 	public static class TestManagedObjectPool implements ManagedObjectPool {
 
-		private final ManagedObjectSource<?, ?> managedObjectSource;
+		private final ManagedObjectPoolContext context;
 
 		private final ThreadLocal<ManagedObject> cachedManagedObject = new ThreadLocal<>();
 
-		public TestManagedObjectPool(ManagedObjectSource<?, ?> managedObjectSource) {
-			this.managedObjectSource = managedObjectSource;
+		public TestManagedObjectPool(ManagedObjectPoolContext context) {
+			this.context = context;
 		}
 
 		/*
@@ -170,6 +169,9 @@ public class ThreadLocalManagedObjectPoolStressTest extends AbstractStressTestCa
 
 		@Override
 		public void sourceManagedObject(ManagedObjectUser user) {
+
+			// Must be managed thread
+			assertTrue("Must be managed thread", this.context.isCurrentThreadManaged());
 
 			// Determine if cached on thread
 			ManagedObject cached = this.cachedManagedObject.get();
@@ -183,7 +185,7 @@ public class ThreadLocalManagedObjectPoolStressTest extends AbstractStressTestCa
 
 			} else {
 				// Source the managed object
-				this.managedObjectSource.sourceManagedObject(user);
+				this.context.getManagedObjectSource().sourceManagedObject(user);
 			}
 		}
 

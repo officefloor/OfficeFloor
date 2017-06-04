@@ -29,7 +29,9 @@ import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
-import net.officefloor.frame.impl.construct.team.TeamSourceContextImpl;
+import net.officefloor.frame.impl.execute.execution.ManagedExecutionFactoryImpl;
+import net.officefloor.frame.impl.execute.team.TeamSourceContextImpl;
+import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
 
 /**
  * Loads a {@link TeamSource} for stand-alone use.
@@ -151,9 +153,10 @@ public class TeamSourceStandAlone {
 
 		// Create team source context
 		SourceContext sourceContext = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader());
+		ManagedExecutionFactory managedExecutionFactory = new ManagedExecutionFactoryImpl(
+				this.threadCompletionListeners.toArray(new ThreadCompletionListener[0]));
 		TeamSourceContext context = new TeamSourceContextImpl(false, teamName, this.threadDecorator,
-				this.threadCompletionListeners.toArray(new ThreadCompletionListener[0]), this.properties,
-				sourceContext);
+				managedExecutionFactory, this.properties, sourceContext);
 
 		// Return the created team
 		return teamSource.createTeam(context);

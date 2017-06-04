@@ -244,7 +244,8 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 				new TestManagedObjectSource(), null);
 		this.managingOfficeBuilder = this.managedObjectBuilder.setManagingOffice(testCase.getOfficeName());
 		if (isPool) {
-			this.managedObjectBuilder.setManagedObjectPool((mos) -> new TestManagedObjectPool(mos));
+			this.managedObjectBuilder
+					.setManagedObjectPool((context) -> new TestManagedObjectPool(context.getManagedObjectSource()));
 		}
 	}
 

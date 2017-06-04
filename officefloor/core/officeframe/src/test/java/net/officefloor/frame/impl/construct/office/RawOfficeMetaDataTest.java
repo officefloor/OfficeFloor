@@ -74,6 +74,7 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
+import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -179,7 +180,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * {@link RawManagedFunctionMetaDataFactory}.
 	 */
-	private final RawManagedFunctionMetaDataFactory rawTaskMetaDataFactory = this
+	private final RawManagedFunctionMetaDataFactory rawManagedFunctionMetaDataFactory = this
 			.createMock(RawManagedFunctionMetaDataFactory.class);
 
 	/**
@@ -196,6 +197,11 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 * {@link TeamManagement} instances by their {@link Office} names.
 	 */
 	private Map<String, TeamManagement> officeTeams;
+
+	/**
+	 * {@link ManagedExecutionFactory}.
+	 */
+	private final ManagedExecutionFactory managedExecutionFactory = this.createMock(ManagedExecutionFactory.class);
 
 	/**
 	 * Ensure issue if no {@link Office} name.
@@ -232,6 +238,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 
 		this.replayMockObjects();
 		RawOfficeMetaData rawOfficeMetaData = this.constructRawOfficeMetaData(true);
@@ -256,6 +263,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 
 		this.replayMockObjects();
 		RawOfficeMetaData rawOfficeMetaData = this.constructRawOfficeMetaData(true);
@@ -324,6 +332,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -361,6 +370,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -399,6 +409,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -438,6 +449,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -556,6 +568,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -596,6 +609,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -624,6 +638,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -654,6 +669,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -686,6 +702,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -718,6 +735,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeEscalationHandler();
 		this.record_constructManagedObjectMetaData(processManagedObjects);
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -752,6 +770,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeEscalationHandler();
 		this.record_constructManagedObjectMetaData(processManagedObjects);
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -780,6 +799,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeEscalationHandler();
 		this.record_constructManagedObjectMetaData(processManagedObjects);
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -809,6 +829,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeEscalationHandler();
 		this.record_constructManagedObjectMetaData(processManagedObjects, "BOUND_MO");
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -855,6 +876,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			}
 		});
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -884,6 +906,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeEscalationHandler();
 		this.record_constructManagedObjectMetaData(threadManagedObjects, "BOUND_MO");
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -915,6 +938,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_constructManagedObjectMetaData(threadManagedObjects, "THREAD");
 		this.record_constructManagedObjectMetaData(processManagedObjects, "PROCESS");
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -957,6 +981,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeEscalationHandler();
 		this.record_constructManagedObjectMetaData(processManagedObjects);
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -996,6 +1021,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_governanceTasks();
 		this.record_constructManagedObjectMetaData(processManagedObjects);
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -1028,6 +1054,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_governanceTasks("GOVERNANCE_ONE", "GOVERNANCE_TWO");
 		this.record_constructManagedObjectMetaData(processManagedObjects);
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -1068,6 +1095,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -1093,6 +1121,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeEscalationHandler();
 		this.record_linkFunctions(rawFunctionMetaData);
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -1129,6 +1158,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_issue("No function name provided for Startup Function 0");
 		this.record_linkFunctions(rawFunctionMetaData);
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -1161,6 +1191,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				new ManagedFunctionReference[] { startupTaskReference });
 		this.record_noOfficeEscalationHandler();
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 		this.recordReturn(startupTaskReference, startupTaskReference.getFunctionName(), "TASK");
 		this.recordReturn(startupTaskReference, startupTaskReference.getArgumentType(), null);
 		this.recordReturn(taskMetaData, taskMetaData.getParameterType(), null);
@@ -1196,6 +1227,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
 		this.recordReturn(this.configuration, this.configuration.getProfiler(), profiler);
+		this.record_managedExecutionFactory();
 
 		// Test
 		this.replayMockObjects();
@@ -1226,6 +1258,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.rawOfficeFloorMetaData, this.rawOfficeFloorMetaData.getOfficeFloorEscalation(),
 				this.officeFloorEscalation);
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 		this.recordReturn(escalationConfiguration, escalationConfiguration.getTypeOfCause(), null);
 		this.record_issue("Type of cause not provided for office escalation 0");
 
@@ -1262,6 +1295,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(taskReference, taskReference.getFunctionName(), "TASK");
 		this.record_issue("Can not find function meta-data TASK for Office Escalation 0");
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -1294,6 +1328,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.rawOfficeFloorMetaData, this.rawOfficeFloorMetaData.getOfficeFloorEscalation(),
 				this.officeFloorEscalation);
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 		this.recordReturn(escalationConfiguration, escalationConfiguration.getTypeOfCause(), typeOfCause);
 		this.recordReturn(escalationConfiguration, escalationConfiguration.getManagedFunctionReference(),
 				escalationTaskReference);
@@ -1334,6 +1369,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
 		this.record_noProfiler();
+		this.record_managedExecutionFactory();
 		this.recordReturn(flowMetaData, flowMetaData.getInitialFunctionMetaData(), functionMetaData);
 		this.recordReturn(functionMetaData, functionMetaData.getPreAdministrationMetaData(),
 				new AdministrationMetaData[0]);
@@ -1736,6 +1772,14 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Records obtaining the {@link ManagedExecutionFactory}.
+	 */
+	private void record_managedExecutionFactory() {
+		this.recordReturn(this.rawOfficeFloorMetaData, this.rawOfficeFloorMetaData.getManagedExecutionFactory(),
+				this.managedExecutionFactory);
+	}
+
+	/**
 	 * Records construction of {@link ManagedFunctionMetaData} instances.
 	 * 
 	 * @param nameToRawFunctionMetaDatas
@@ -1764,9 +1808,9 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 					+ 1];
 
 			// Record constructing the raw managed function
-			this.recordReturn(this.rawTaskMetaDataFactory,
-					this.rawTaskMetaDataFactory.constructRawManagedFunctionMetaData(functionConfiguration, null, null,
-							this.rawBoundManagedObjectFactory, this.issues),
+			this.recordReturn(this.rawManagedFunctionMetaDataFactory,
+					this.rawManagedFunctionMetaDataFactory.constructRawManagedFunctionMetaData(functionConfiguration,
+							null, null, this.rawBoundManagedObjectFactory, this.issues),
 					rawFunctionMetaData, new AbstractMatcher() {
 						@Override
 						public boolean matches(Object[] e, Object[] a) {
@@ -1872,7 +1916,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Construct the meta-data
 		RawOfficeMetaData metaData = RawOfficeMetaDataImpl.getFactory().constructRawOfficeMetaData(this.configuration,
 				this.issues, officeMos, this.rawOfficeFloorMetaData, this.rawBoundManagedObjectFactory,
-				this.rawGovernanceFactory, this.rawBoundAdministratorFactory, this.rawTaskMetaDataFactory);
+				this.rawGovernanceFactory, this.rawBoundAdministratorFactory, this.rawManagedFunctionMetaDataFactory);
 		if (isExpectConstruct) {
 			assertNotNull("Meta-data should be constructed", metaData);
 		} else {

@@ -22,6 +22,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
@@ -57,6 +58,13 @@ public interface RawOfficeFloorMetaData {
 	 * @return {@link ThreadLocalAwareExecutor}.
 	 */
 	ThreadLocalAwareExecutor getThreadLocalAwareExecutor();
+
+	/**
+	 * Obtains the {@link ManagedExecutionFactory}.
+	 * 
+	 * @return {@link ManagedExecutionFactory}.
+	 */
+	ManagedExecutionFactory getManagedExecutionFactory();
 
 	/**
 	 * Obtains the {@link RawManagedObjectMetaData} for the

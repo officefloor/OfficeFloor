@@ -26,8 +26,11 @@ import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
+import net.officefloor.compile.spi.pool.source.impl.AbstractManagedObjectPoolSource;
+import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
@@ -84,16 +87,20 @@ public class OfficeFloorOverridePropertiesTest extends AbstractCompileTestCase {
 	 */
 	public void testOverrideManagedObjectPoolProperties() {
 
+		// Create the managed object pool factory
+		ManagedObjectPoolFactory poolFactory = this.createMock(ManagedObjectPoolFactory.class);
+		TestManagedObjectPoolSource.managedObjectPoolFactory = poolFactory;
+
 		// Enables override of properties
 		this.enableOverrideProperties();
 
 		// Record the OfficeFloor
 		this.record_init();
 		this.record_officeFloorBuilder_addOffice("OFFICE");
-		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
-				"class.name", CompileManagedObject.class.getName(), "additional", "another");
+		ManagedObjectBuilder<?> moBuilder = this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE",
+				ClassManagedObjectSource.class, 0, "class.name", CompileManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this.record_managedObjectBuilder_setManagedObjectPool("POOL");
+		this.recordReturn(moBuilder, moBuilder.setManagedObjectPool(poolFactory), null);
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -146,6 +153,27 @@ public class OfficeFloorOverridePropertiesTest extends AbstractCompileTestCase {
 		public Team createTeam(TeamSourceContext context) throws Exception {
 			fail("Should not be invoked");
 			return null;
+		}
+	}
+
+	@TestSource
+	public static class TestManagedObjectPoolSource extends AbstractManagedObjectPoolSource {
+
+		private static ManagedObjectPoolFactory managedObjectPoolFactory;
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			context.addProperty("value");
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext context) throws Exception {
+			assertEquals("Incorrect overridden value", "override",
+					context.getManagedObjectPoolSourceContext().getProperty("value"));
+			assertEquals("Incorrect additional value", "another",
+					context.getManagedObjectPoolSourceContext().getProperty("additional"));
+			context.setPooledObjectType(CompileManagedObject.class);
+			context.setManagedObjectPoolFactory(managedObjectPoolFactory);
 		}
 	}
 

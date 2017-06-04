@@ -22,7 +22,6 @@ import java.util.function.Consumer;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.api.source.UnknownClassError;
@@ -33,10 +32,12 @@ import net.officefloor.frame.api.team.ThreadLocalAwareTeam;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
+import net.officefloor.frame.impl.execute.team.TeamSourceContextImpl;
 import net.officefloor.frame.impl.execute.team.ThreadLocalAwareContextImpl;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
 import net.officefloor.frame.internal.construct.RawTeamMetaData;
 import net.officefloor.frame.internal.construct.RawTeamMetaDataFactory;
+import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 
@@ -94,7 +95,7 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory, RawTeamMetaD
 	@Override
 	public <TS extends TeamSource> RawTeamMetaData constructRawTeamMetaData(TeamConfiguration<TS> configuration,
 			SourceContext sourceContext, Consumer<Thread> threadDecorator,
-			ThreadLocalAwareExecutor threadLocalAwareExecutor, ThreadCompletionListener[] threadCompletionListeners,
+			ThreadLocalAwareExecutor threadLocalAwareExecutor, ManagedExecutionFactory managedExecutionFactory,
 			OfficeFloorIssues issues) {
 
 		// Obtain the team name
@@ -124,7 +125,7 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory, RawTeamMetaD
 			// Create the team source context
 			SourceProperties properties = configuration.getProperties();
 			TeamSourceContextImpl context = new TeamSourceContextImpl(false, teamName, threadDecorator,
-					threadCompletionListeners, properties, sourceContext);
+					managedExecutionFactory, properties, sourceContext);
 
 			// Create the team
 			team = teamSource.createTeam(context);

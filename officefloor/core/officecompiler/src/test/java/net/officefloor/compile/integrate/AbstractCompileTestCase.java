@@ -63,6 +63,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolContext;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListenerFactory;
@@ -899,7 +900,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public ManagedObjectPool createManagedObjectPool(ManagedObjectSource<?, ?> managedObjectSource) {
+		public ManagedObjectPool createManagedObjectPool(ManagedObjectPoolContext context) {
 			fail("Should not create ThreadCompletionListener in compiling");
 			return null;
 		}

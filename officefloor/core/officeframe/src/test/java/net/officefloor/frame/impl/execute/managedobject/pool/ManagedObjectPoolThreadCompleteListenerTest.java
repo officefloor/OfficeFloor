@@ -20,8 +20,8 @@ package net.officefloor.frame.impl.execute.managedobject.pool;
 import net.officefloor.frame.api.build.ManagedObjectPoolBuilder;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolContext;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.impl.spi.team.WorkerPerJobTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -44,7 +44,7 @@ public class ManagedObjectPoolThreadCompleteListenerTest extends AbstractOfficeC
 		// Create the test object
 		TestObject object = new TestObject("MO", this);
 		ManagedObjectPoolBuilder poolBuilder = object.managedObjectBuilder
-				.setManagedObjectPool((mos) -> new TestManagedObjectPool(mos));
+				.setManagedObjectPool((context) -> new TestManagedObjectPool(context));
 		poolBuilder.addThreadCompletionListener((pool) -> (ThreadCompletionListener) pool);
 
 		// Create worker per job team (allows thread to clean up)
@@ -72,12 +72,12 @@ public class ManagedObjectPoolThreadCompleteListenerTest extends AbstractOfficeC
 
 	public class TestManagedObjectPool implements ManagedObjectPool, ThreadCompletionListener {
 
-		private final ManagedObjectSource<?, ?> managedObjectSource;
+		private final ManagedObjectPoolContext context;
 
 		private final ThreadLocal<ManagedObject> cachedManagedObject = new ThreadLocal<>();
 
-		public TestManagedObjectPool(ManagedObjectSource<?, ?> managedObjectSource) {
-			this.managedObjectSource = managedObjectSource;
+		public TestManagedObjectPool(ManagedObjectPoolContext context) {
+			this.context = context;
 		}
 
 		/*
@@ -86,7 +86,8 @@ public class ManagedObjectPoolThreadCompleteListenerTest extends AbstractOfficeC
 
 		@Override
 		public void sourceManagedObject(ManagedObjectUser user) {
-			this.managedObjectSource.sourceManagedObject(user);
+			assertTrue("Should be managed thread", this.context.isCurrentThreadManaged());
+			this.context.getManagedObjectSource().sourceManagedObject(user);
 		}
 
 		@Override

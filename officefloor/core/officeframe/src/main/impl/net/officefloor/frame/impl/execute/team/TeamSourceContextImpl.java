@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.construct.team;
+package net.officefloor.frame.impl.execute.team;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -23,7 +23,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.api.team.Team;
@@ -31,6 +30,8 @@ import net.officefloor.frame.api.team.ThreadLocalAwareTeam;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
+import net.officefloor.frame.internal.structure.ManagedExecution;
+import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
 
 /**
  * {@link TeamSourceContext} implementation.
@@ -51,9 +52,9 @@ public class TeamSourceContextImpl extends SourceContextImpl implements TeamSour
 	private final Consumer<Thread> decorator;
 
 	/**
-	 * {@link ThreadCompletionListener} instances.
+	 * {@link ManagedExecutionFactory}.
 	 */
-	private final ThreadCompletionListener[] threadCompletionListeners;
+	private final ManagedExecutionFactory managedExecutionFactory;
 
 	/**
 	 * <p>
@@ -75,20 +76,19 @@ public class TeamSourceContextImpl extends SourceContextImpl implements TeamSour
 	 * @param decorator
 	 *            Decorator of the created {@link Thread} instances. May be
 	 *            <code>null</code>.
-	 * @param threadCompletionListeners
-	 *            {@link ThreadCompletionListener} instances.
+	 * @param managedExecutionFactory
+	 *            {@link ManagedExecutionFactory}.
 	 * @param properties
 	 *            {@link SourceProperties} to initialise the {@link TeamSource}.
 	 * @param sourceContext
 	 *            {@link SourceContext}.
 	 */
 	public TeamSourceContextImpl(boolean isLoadingType, String teamName, Consumer<Thread> decorator,
-			ThreadCompletionListener[] threadCompletionListeners, SourceProperties properties,
-			SourceContext sourceContext) {
+			ManagedExecutionFactory managedExecutionFactory, SourceProperties properties, SourceContext sourceContext) {
 		super(isLoadingType, sourceContext, properties);
 		this.teamName = teamName;
 		this.decorator = decorator;
-		this.threadCompletionListeners = threadCompletionListeners;
+		this.managedExecutionFactory = managedExecutionFactory;
 	}
 
 	/**
@@ -121,13 +121,13 @@ public class TeamSourceContextImpl extends SourceContextImpl implements TeamSour
 
 	@Override
 	public ThreadFactory getThreadFactory(int threadPriority) {
-		return new TeamThreadFactory(this.teamName, threadPriority, this.decorator, this.threadCompletionListeners);
+		return new TeamThreadFactory(this.teamName, threadPriority, this.decorator);
 	}
 
 	/**
 	 * {@link ThreadFactory} for the {@link Team}.
 	 */
-	private static class TeamThreadFactory implements ThreadFactory {
+	private class TeamThreadFactory implements ThreadFactory {
 
 		/**
 		 * {@link ThreadGroup}.
@@ -156,11 +156,6 @@ public class TeamSourceContextImpl extends SourceContextImpl implements TeamSour
 		private final Consumer<Thread> decorator;
 
 		/**
-		 * {@link ThreadCompletionListener} instances.
-		 */
-		private final ThreadCompletionListener[] threadCompletionListeners;
-
-		/**
 		 * Initiate.
 		 * 
 		 * @param teamName
@@ -171,14 +166,12 @@ public class TeamSourceContextImpl extends SourceContextImpl implements TeamSour
 		 *            Decorator of the created {@link Thread} instances. May be
 		 *            <code>null</code>.
 		 */
-		protected TeamThreadFactory(String teamName, int threadPriority, Consumer<Thread> decorator,
-				ThreadCompletionListener[] threadCompletionListeners) {
+		protected TeamThreadFactory(String teamName, int threadPriority, Consumer<Thread> decorator) {
 			SecurityManager s = System.getSecurityManager();
 			this.group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
 			this.threadNamePrefix = teamName + "-";
 			this.threadPriority = threadPriority;
 			this.decorator = decorator;
-			this.threadCompletionListeners = threadCompletionListeners;
 		}
 
 		/*
@@ -188,19 +181,14 @@ public class TeamSourceContextImpl extends SourceContextImpl implements TeamSour
 		@Override
 		public Thread newThread(final Runnable r) {
 
-			// Create and configure the thread
-			Thread thread = new Thread(this.group, () -> {
-				try {
-					// Undertake thread logic
-					r.run();
+			// Create the managed execution
+			ManagedExecution<RuntimeException> managedExecution = TeamSourceContextImpl.this.managedExecutionFactory
+					.createManagedExecution(() -> r.run());
 
-				} finally {
-					// Notify that thread is complete
-					for (int i = 0; i < this.threadCompletionListeners.length; i++) {
-						this.threadCompletionListeners[i].threadComplete();
-					}
-				}
-			}, this.threadNamePrefix + this.nextThreadIndex.getAndIncrement(), 0);
+			// Create and configure the thread
+			String threadName = this.threadNamePrefix + this.nextThreadIndex.getAndIncrement();
+			Runnable runnable = () -> managedExecution.execute();
+			Thread thread = new Thread(this.group, runnable, threadName, 0);
 			if (thread.isDaemon()) {
 				thread.setDaemon(false);
 			}

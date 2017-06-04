@@ -22,6 +22,7 @@ import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.ManagedExecution;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 
@@ -76,8 +77,16 @@ public class FunctionManagerImpl implements FunctionManager {
 
 	@Override
 	public void invokeProcess(Object parameter, FlowCallback callback) throws InvalidParameterTypeException {
-		// Invoke the process for the function
-		this.officeMetaData.invokeProcess(this.flowMetaData, parameter, 0, callback, null, null, null, -1);
+
+		// Create the managed execution
+		ManagedExecution<InvalidParameterTypeException> execution = this.officeMetaData.getManagedExecutionFactory()
+				.createManagedExecution(() -> {
+					// Invoke the process for the function
+					this.officeMetaData.invokeProcess(this.flowMetaData, parameter, 0, callback, null, null, null, -1);
+				});
+
+		// Execute
+		execution.execute();
 	}
 
 	/**

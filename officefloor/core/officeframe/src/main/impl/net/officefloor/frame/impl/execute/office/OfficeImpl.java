@@ -72,15 +72,14 @@ public class OfficeImpl implements Office {
 	public FunctionManager getFunctionManager(String functionName) throws UnknownFunctionException {
 
 		// Obtain the function meta-data for the function
-		for (ManagedFunctionMetaData<?, ?> functionMetaData : this.metaData.getManagedFunctionMetaData()) {
-			if (functionMetaData.getFunctionName().equals(functionName)) {
-				// Have function meta-data, so return function manager for it
-				return new FunctionManagerImpl(functionMetaData, this.metaData);
-			}
+		ManagedFunctionMetaData<?, ?> functionMetaData = this.metaData.getManagedFunctionLocator()
+				.getManagedFunctionMetaData(functionName);
+		if (functionMetaData == null) {
+			throw new UnknownFunctionException(functionName);
 		}
 
-		// Unknown function if at this point
-		throw new UnknownFunctionException(functionName);
+		// Have function meta-data, so return function manager for it
+		return new FunctionManagerImpl(functionMetaData, this.metaData);
 	}
 
 }

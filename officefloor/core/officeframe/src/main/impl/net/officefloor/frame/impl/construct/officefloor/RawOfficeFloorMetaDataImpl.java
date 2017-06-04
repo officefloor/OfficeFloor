@@ -34,6 +34,7 @@ import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.escalation.EscalationHandlerEscalationFlow;
+import net.officefloor.frame.impl.execute.execution.ManagedExecutionFactoryImpl;
 import net.officefloor.frame.impl.execute.job.FunctionLoopImpl;
 import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
 import net.officefloor.frame.impl.execute.officefloor.DefaultOfficeFloorEscalationHandler;
@@ -60,6 +61,7 @@ import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
@@ -79,7 +81,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 	 * @return {@link RawOfficeFloorMetaDataFactory}.
 	 */
 	public static RawOfficeFloorMetaDataFactory getFactory() {
-		return new RawOfficeFloorMetaDataImpl(null, null, null, null, null);
+		return new RawOfficeFloorMetaDataImpl(null, null, null, null, null, null);
 	}
 
 	/**
@@ -96,6 +98,11 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 	 * {@link ThreadLocalAwareExecutor}.
 	 */
 	private final ThreadLocalAwareExecutor threadLocalAwareExecutor;
+
+	/**
+	 * {@link ManagedExecutionFactory}.
+	 */
+	private final ManagedExecutionFactory managedExecutionFactory;
 
 	/**
 	 * Registry of {@link RawManagedObjectMetaData} by the
@@ -123,6 +130,8 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 	 *            chain.
 	 * @param threadLocalAwareExecutor
 	 *            {@link ThreadLocalAwareExecutor}.
+	 * @param managedExecutionFactory
+	 *            {@link ManagedExecutionFactory}.
 	 * @param mosRegistry
 	 *            Registry of {@link RawManagedObjectMetaData} by the
 	 *            {@link ManagedObjectSource} name.
@@ -131,10 +140,12 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 	 */
 	private RawOfficeFloorMetaDataImpl(Map<String, RawTeamMetaData> teamRegistry,
 			TeamManagement breakChainTeamManagement, ThreadLocalAwareExecutor threadLocalAwareExecutor,
-			Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry, EscalationFlow officeFloorEscalation) {
+			ManagedExecutionFactory managedExecutionFactory, Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry,
+			EscalationFlow officeFloorEscalation) {
 		this.teamRegistry = teamRegistry;
 		this.breakChainTeamManagement = breakChainTeamManagement;
 		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
+		this.managedExecutionFactory = managedExecutionFactory;
 		this.mosRegistry = mosRegistry;
 		this.officeFloorEscalation = officeFloorEscalation;
 	}
@@ -228,9 +239,10 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 			}
 		}
 
-		// Obtain the array of thread completion listeners
+		// Create the managed execution factory
 		ThreadCompletionListener[] threadCompletionListeners = threadCompletionListenerList
 				.toArray(new ThreadCompletionListener[0]);
+		ManagedExecutionFactory managedExecutionFactory = new ManagedExecutionFactoryImpl(threadCompletionListeners);
 
 		// Construct the teams
 		Map<String, RawTeamMetaData> teamRegistry = new HashMap<String, RawTeamMetaData>();
@@ -244,7 +256,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 
 			// Construct the raw team meta-data
 			RawTeamMetaData rawTeamMetaData = rawTeamFactory.constructRawTeamMetaData(teamConfiguration, sourceContext,
-					threadDecorator, threadLocalAwareExecutor, threadCompletionListeners, issues);
+					threadDecorator, threadLocalAwareExecutor, managedExecutionFactory, issues);
 			if (rawTeamMetaData == null) {
 				return null; // issue with team
 			}
@@ -268,14 +280,14 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 		// Construct the break chain team
 		TeamConfiguration<?> breakTeamConfiguration = configuration.getBreakChainTeamConfiguration();
 		RawTeamMetaData breakTeamMetaData = rawTeamFactory.constructRawTeamMetaData(breakTeamConfiguration,
-				sourceContext, threadDecorator, threadLocalAwareExecutor, threadCompletionListeners, issues);
+				sourceContext, threadDecorator, threadLocalAwareExecutor, managedExecutionFactory, issues);
 		TeamManagement breakChainTeamManagement = breakTeamMetaData.getTeamManagement();
 		teamListing.add(breakChainTeamManagement);
 
 		// Undertake OfficeFloor escalation on any team available
 		FunctionLoop officeFloorFunctionLoop = new FunctionLoopImpl(null);
 		OfficeMetaData officeFloorManagement = new OfficeMetaDataImpl("Management", null, null, null,
-				officeFloorFunctionLoop, null, null, null, null, null, null);
+				officeFloorFunctionLoop, null, null, null, null, null, null, null);
 
 		// Obtain the escalation handler for the OfficeFloor
 		EscalationHandler officeFloorEscalationHandler = configuration.getEscalationHandler();
@@ -288,7 +300,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 
 		// Create the raw office floor meta-data
 		RawOfficeFloorMetaDataImpl rawMetaData = new RawOfficeFloorMetaDataImpl(teamRegistry, breakChainTeamManagement,
-				threadLocalAwareExecutor, mosRegistry, officeFloorEscalation);
+				threadLocalAwareExecutor, managedExecutionFactory, mosRegistry, officeFloorEscalation);
 
 		// Construct the offices
 		List<OfficeMetaData> officeMetaDatas = new LinkedList<OfficeMetaData>();
@@ -371,6 +383,11 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 	@Override
 	public ThreadLocalAwareExecutor getThreadLocalAwareExecutor() {
 		return this.threadLocalAwareExecutor;
+	}
+
+	@Override
+	public ManagedExecutionFactory getManagedExecutionFactory() {
+		return this.managedExecutionFactory;
 	}
 
 	@Override

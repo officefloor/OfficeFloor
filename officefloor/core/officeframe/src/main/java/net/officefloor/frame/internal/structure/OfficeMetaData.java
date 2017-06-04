@@ -90,6 +90,13 @@ public interface OfficeMetaData {
 	OfficeStartupFunction[] getStartupFunctions();
 
 	/**
+	 * Obtains the {@link ManagedExecutionFactory} for this {@link Office}.
+	 * 
+	 * @return {@link ManagedExecutionFactory} for this {@link Office}.
+	 */
+	ManagedExecutionFactory getManagedExecutionFactory();
+
+	/**
 	 * Creates a new {@link ProcessState}.
 	 * 
 	 * @param flowMetaData

@@ -21,7 +21,6 @@ import java.util.function.Consumer;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.source.UnknownClassError;
@@ -34,6 +33,7 @@ import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
 import net.officefloor.frame.internal.construct.RawTeamMetaData;
+import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
 import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -61,10 +61,9 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	private final Consumer<Thread> threadDecorator = this.createMock(Consumer.class);
 
 	/**
-	 * {@link ThreadCompletionListener} instances.
+	 * {@link ManagedExecutionFactory}.
 	 */
-	private final ThreadCompletionListener[] threadCompletionListeners = new ThreadCompletionListener[] {
-			this.createMock(ThreadCompletionListener.class) };
+	private final ManagedExecutionFactory managedExecutionFactory = this.createMock(ManagedExecutionFactory.class);
 
 	/**
 	 * {@link SourceContext}.
@@ -481,7 +480,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 
 		// Attempt to construct
 		RawTeamMetaData metaData = RawTeamMetaDataImpl.getFactory().constructRawTeamMetaData(this.configuration,
-				this.sourceContext, this.threadDecorator, this.threadLocalAwareExecutor, this.threadCompletionListeners,
+				this.sourceContext, this.threadDecorator, this.threadLocalAwareExecutor, this.managedExecutionFactory,
 				this.issues);
 
 		// Provide assertion on whether should be constructed

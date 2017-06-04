@@ -17,20 +17,31 @@
  */
 package net.officefloor.frame.api.managedobject.pool;
 
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+
 /**
- * Factory for the creation a {@link ManagedObjectPool}.
+ * Context for the {@link ManagedObjectPool}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectPoolFactory {
+public interface ManagedObjectPoolContext {
 
 	/**
-	 * Creates a {@link ManagedObjectPool}.
+	 * {@link ManagedObjectSource} to have its {@link ManagedObject} instances
+	 * pooled.
 	 * 
-	 * @param managedObjectPoolContext
-	 *            {@link ManagedObjectPoolContext}.
-	 * @return {@link ManagedObjectPool}.
+	 * @return {@link ManagedObjectSource}.
 	 */
-	ManagedObjectPool createManagedObjectPool(ManagedObjectPoolContext managedObjectPoolContext);
+	ManagedObjectSource<?, ?> getManagedObjectSource();
+
+	/**
+	 * Indicates if the current {@link Thread} is managed. A managed
+	 * {@link Thread} will notify the {@link ThreadCompletionListener} instances
+	 * of its completion.
+	 * 
+	 * @return <code>true</code> if the current {@link Thread} is managed.
+	 */
+	boolean isCurrentThreadManaged();
 
 }

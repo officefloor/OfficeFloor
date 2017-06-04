@@ -61,6 +61,7 @@ import net.officefloor.frame.internal.construct.RawTeamMetaDataFactory;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
 import net.officefloor.frame.internal.structure.ManagedObjectExecuteContextFactory;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
@@ -92,9 +93,14 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	private final Consumer<Thread> threadDecorator = this.createMock(Consumer.class);
 
 	/**
-	 * {@link ThreadCompletionListener} instances.
+	 * {@link ManagedExecutionFactory}.
 	 */
-	private final ThreadCompletionListener[] threadCompletionListeners = new ThreadCompletionListener[] {};
+	private final ManagedExecutionFactory managedExecutionFactory = this.createMock(ManagedExecutionFactory.class);
+
+	/**
+	 * {@link ThreadCompletionListener}.
+	 */
+	private final ThreadCompletionListener threadCompletionListener = this.createMock(ThreadCompletionListener.class);
 
 	/**
 	 * {@link SourceContext}.
@@ -194,7 +200,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		RawTeamMetaData breakChainMetaData = this.createMock(RawTeamMetaData.class);
 		this.recordReturn(this.rawTeamFactory,
 				this.rawTeamFactory.constructRawTeamMetaData(breakChainConfiguration, null, this.threadDecorator,
-						this.threadLocalAwareExecutor, this.threadCompletionListeners, this.issues),
+						this.threadLocalAwareExecutor, this.managedExecutionFactory, this.issues),
 				breakChainMetaData, new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
@@ -232,8 +238,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 				new TeamConfiguration[] { teamConfiguration });
 		this.recordReturn(this.rawTeamFactory,
 				this.rawTeamFactory.constructRawTeamMetaData(teamConfiguration, this.sourceContext,
-						this.threadDecorator, this.threadLocalAwareExecutor, this.threadCompletionListeners,
-						this.issues),
+						this.threadDecorator, this.threadLocalAwareExecutor, this.managedExecutionFactory, this.issues),
 				null, this.constructTeamMatacher);
 
 		// Attempt to construct OfficeFloor
@@ -264,15 +269,13 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 				new TeamConfiguration[] { teamConfigurationOne, teamConfigurationTwo });
 		this.recordReturn(this.rawTeamFactory,
 				this.rawTeamFactory.constructRawTeamMetaData(teamConfigurationOne, this.sourceContext,
-						this.threadDecorator, this.threadLocalAwareExecutor, this.threadCompletionListeners,
-						this.issues),
+						this.threadDecorator, this.threadLocalAwareExecutor, this.managedExecutionFactory, this.issues),
 				rawTeamOne);
 		this.recordReturn(rawTeamOne, rawTeamOne.getTeamName(), DUPLICATE_TEAM_NAME);
 		this.recordReturn(rawTeamOne, rawTeamOne.getTeamManagement(), teamOne);
 		this.recordReturn(this.rawTeamFactory,
 				this.rawTeamFactory.constructRawTeamMetaData(teamConfigurationTwo, this.sourceContext,
-						this.threadDecorator, this.threadLocalAwareExecutor, this.threadCompletionListeners,
-						this.issues),
+						this.threadDecorator, this.threadLocalAwareExecutor, this.managedExecutionFactory, this.issues),
 				rawTeamTwo);
 		this.recordReturn(rawTeamTwo, rawTeamTwo.getTeamName(), DUPLICATE_TEAM_NAME);
 		this.record_issue("Teams registered with the same name '" + DUPLICATE_TEAM_NAME + "'");
@@ -341,8 +344,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 				new TeamConfiguration[] { teamConfiguration });
 		this.recordReturn(this.rawTeamFactory,
 				this.rawTeamFactory.constructRawTeamMetaData(teamConfiguration, this.sourceContext,
-						this.threadDecorator, this.threadLocalAwareExecutor, this.threadCompletionListeners,
-						this.issues),
+						this.threadDecorator, this.threadLocalAwareExecutor, this.managedExecutionFactory, this.issues),
 				rawTeamMetaData);
 		this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeamName(), TEAM_NAME);
 		this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeamManagement(), team);
@@ -433,7 +435,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 				this.sourceContext, this.issues, this.configuration), mosOne);
 		this.recordReturn(mosOne, mosOne.getManagedObjectName(), DUPLICATE_MANAGED_OBJECT_SOURCE_NAME);
 		this.recordReturn(mosOne, mosOne.getRawManagingOfficeMetaData(), rawOfficeMoMetaData);
-		this.recordReturn(mosOne, mosOne.getThreadCompletionListeners(), this.threadCompletionListeners);
+		this.recordReturn(mosOne, mosOne.getThreadCompletionListeners(),
+				new ThreadCompletionListener[] { this.threadCompletionListener });
 		this.recordReturn(rawOfficeMoMetaData, rawOfficeMoMetaData.getManagingOfficeName(), "OFFICE");
 		this.constructedManagedObjects.add(mosOne); // constructed later
 		this.recordReturn(this.rawMosFactory, this.rawMosFactory.constructRawManagedObjectMetaData(mosConfigurationTwo,
@@ -704,10 +707,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 				isMatch = isMatch && (expected[0] == actual[0]);
 			}
 
-			// thread completion listeners
-			ThreadCompletionListener[] expectedListeners = (ThreadCompletionListener[]) expected[4];
-			ThreadCompletionListener[] actualListeners = (ThreadCompletionListener[]) actual[4];
-			isMatch = isMatch && (expectedListeners.length == actualListeners.length);
+			// managed execution factory
+			isMatch = isMatch && (actual[4] instanceof ManagedExecutionFactory);
 
 			// Issues
 			isMatch = isMatch && (expected[5] == actual[5]);
@@ -751,7 +752,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 			// Record constructing the team
 			this.recordReturn(this.rawTeamFactory,
 					this.rawTeamFactory.constructRawTeamMetaData(teamConfiguration, this.sourceContext,
-							this.threadDecorator, this.threadLocalAwareExecutor, this.threadCompletionListeners,
+							this.threadDecorator, this.threadLocalAwareExecutor, this.managedExecutionFactory,
 							this.issues),
 					rawTeamMetaData, this.constructTeamMatacher);
 			this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeamName(), teamName);
@@ -777,8 +778,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		RawTeamMetaData breakChainMetaData = this.createMock(RawTeamMetaData.class);
 		this.recordReturn(this.rawTeamFactory,
 				this.rawTeamFactory.constructRawTeamMetaData(breakChainConfiguration, this.sourceContext,
-						this.threadDecorator, this.threadLocalAwareExecutor, this.threadCompletionListeners,
-						this.issues),
+						this.threadDecorator, this.threadLocalAwareExecutor, this.managedExecutionFactory, this.issues),
 				breakChainMetaData, this.constructTeamMatacher);
 		TeamManagement breakChainTeam = this.createMock(TeamManagement.class);
 		this.recordReturn(breakChainMetaData, breakChainMetaData.getTeamManagement(), breakChainTeam);
@@ -830,7 +830,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 			this.recordReturn(rawMoMetaData, rawMoMetaData.getRawManagingOfficeMetaData(), managingOffice);
 			this.recordReturn(managingOffice, managingOffice.getManagingOfficeName(), officeName);
 			this.recordReturn(rawMoMetaData, rawMoMetaData.getThreadCompletionListeners(),
-					this.threadCompletionListeners);
+					new ThreadCompletionListener[] { this.threadCompletionListener });
 
 			// Add the managed object for later construction
 			this.constructedManagedObjects.add(rawMoMetaData);

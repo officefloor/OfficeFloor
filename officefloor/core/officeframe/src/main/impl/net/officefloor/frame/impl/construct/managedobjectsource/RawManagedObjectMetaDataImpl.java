@@ -29,6 +29,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolContext;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListenerFactory;
@@ -42,6 +43,7 @@ import net.officefloor.frame.api.source.UnknownPropertyError;
 import net.officefloor.frame.api.source.UnknownResourceError;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
+import net.officefloor.frame.impl.execute.pool.ManagedObjectPoolContextImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectPoolConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
@@ -372,7 +374,8 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 
 			// Create the managed object pool for the managed object source
 			ManagedObjectPoolFactory poolFactory = managedObjectPoolConfiguration.getManagedObjectPoolFactory();
-			managedObjectPool = poolFactory.createManagedObjectPool(managedObjectSource);
+			ManagedObjectPoolContext poolContext = new ManagedObjectPoolContextImpl(managedObjectSource);
+			managedObjectPool = poolFactory.createManagedObjectPool(poolContext);
 
 			// Create the thread completion listeners
 			ThreadCompletionListenerFactory[] threadCompletionListenerFactories = managedObjectPoolConfiguration
