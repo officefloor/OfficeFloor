@@ -34,6 +34,7 @@ import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.compile.spi.section.SectionManagedObjectPool;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
@@ -70,10 +71,12 @@ import net.officefloor.model.section.SectionManagedObjectDependencyModel;
 import net.officefloor.model.section.SectionManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.section.SectionManagedObjectDependencyToSectionManagedObjectModel;
 import net.officefloor.model.section.SectionManagedObjectModel;
+import net.officefloor.model.section.SectionManagedObjectPoolModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowToExternalFlowModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowToSubSectionInputModel;
 import net.officefloor.model.section.SectionManagedObjectSourceModel;
+import net.officefloor.model.section.SectionManagedObjectSourceToSectionManagedObjectPoolModel;
 import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectSourceModel;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SubSectionInputModel;
@@ -164,6 +167,23 @@ public class SectionModelSectionSource extends AbstractSectionSource
 			sectionObjects.put(sectionObjectName, sectionObject);
 		}
 
+		// Add the managed object pools, keeping registry of them
+		Map<String, SectionManagedObjectPool> sectionManagedObjectPools = new HashMap<>();
+		for (SectionManagedObjectPoolModel poolModel : section.getSectionManagedObjectPools()) {
+
+			// Add the managed object pool
+			String managedObjectPoolName = poolModel.getSectionManagedObjectPoolName();
+			String managedObjectPoolSourceClassName = poolModel.getManagedObjectPoolSourceClassName();
+			SectionManagedObjectPool pool = designer.addManagedObjectPool(managedObjectPoolName,
+					managedObjectPoolSourceClassName);
+			sectionManagedObjectPools.put(managedObjectPoolName, pool);
+
+			// Add properties for the managed object source
+			for (PropertyModel property : poolModel.getProperties()) {
+				pool.addProperty(property.getName(), property.getValue());
+			}
+		}
+
 		// Add the managed object sources, keeping registry of them
 		Map<String, SectionManagedObjectSource> managedObjectSources = new HashMap<String, SectionManagedObjectSource>();
 		for (SectionManagedObjectSourceModel mosModel : section.getSectionManagedObjectSources()) {
@@ -189,6 +209,18 @@ public class SectionModelSectionSource extends AbstractSectionSource
 
 			// Register the managed object source
 			managedObjectSources.put(mosName, mos);
+
+			// Determine if pool the managed object
+			SectionManagedObjectSourceToSectionManagedObjectPoolModel mosToPool = mosModel
+					.getSectionManagedObjectPool();
+			if (mosToPool != null) {
+				SectionManagedObjectPoolModel poolModel = mosToPool.getSectionManagedObjectPool();
+				if (poolModel != null) {
+					SectionManagedObjectPool pool = sectionManagedObjectPools
+							.get(poolModel.getSectionManagedObjectPoolName());
+					designer.link(mos, pool);
+				}
+			}
 		}
 
 		// Add the managed objects, keeping registry of them

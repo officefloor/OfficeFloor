@@ -40,6 +40,7 @@ import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
+import net.officefloor.compile.spi.office.OfficeManagedObjectPool;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -85,11 +86,13 @@ import net.officefloor.model.office.OfficeManagedObjectDependencyModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectPoolModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceFlowModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceFlowToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeManagedObjectPoolModel;
 import net.officefloor.model.office.OfficeManagedObjectToAdministrationModel;
 import net.officefloor.model.office.OfficeManagedObjectToGovernanceModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
@@ -228,6 +231,23 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 			officeObjects.put(officeObjectName, officeObject);
 		}
 
+		// Add the managed object pools, keeping registry of them
+		Map<String, OfficeManagedObjectPool> officeManagedObjectPools = new HashMap<>();
+		for (OfficeManagedObjectPoolModel poolModel : office.getOfficeManagedObjectPools()) {
+
+			// Add the managed object pool
+			String managedObjectPoolName = poolModel.getOfficeManagedObjectPoolName();
+			String managedObjectPoolSourceClassName = poolModel.getManagedObjectPoolSourceClassName();
+			OfficeManagedObjectPool pool = architect.addManagedObjectPool(managedObjectPoolName,
+					managedObjectPoolSourceClassName);
+			officeManagedObjectPools.put(managedObjectPoolName, pool);
+
+			// Add properties for the managed object source
+			for (PropertyModel property : poolModel.getProperties()) {
+				pool.addProperty(property.getName(), property.getValue());
+			}
+		}
+
 		// Add the managed object sources, keeping registry of them
 		Map<String, OfficeManagedObjectSource> managedObjectSources = new HashMap<String, OfficeManagedObjectSource>();
 		for (OfficeManagedObjectSourceModel mosModel : office.getOfficeManagedObjectSources()) {
@@ -253,6 +273,17 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 
 			// Register the managed object source
 			managedObjectSources.put(mosName, mos);
+
+			// Determine if pool the managed object
+			OfficeManagedObjectSourceToOfficeManagedObjectPoolModel mosToPool = mosModel.getOfficeManagedObjectPool();
+			if (mosToPool != null) {
+				OfficeManagedObjectPoolModel poolModel = mosToPool.getOfficeManagedObjectPool();
+				if (poolModel != null) {
+					OfficeManagedObjectPool pool = officeManagedObjectPools
+							.get(poolModel.getOfficeManagedObjectPoolName());
+					architect.link(mos, pool);
+				}
+			}
 		}
 
 		// Add the managed objects, keeping registry of them

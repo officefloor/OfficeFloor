@@ -403,15 +403,15 @@ public interface SectionDesigner {
 	void link(SubSectionObject subSectionObject, SectionManagedObject sectionManagedObject);
 
 	/**
-	 * Links the {@link SectionManagedObject} to be pooled by the
+	 * Links the {@link SectionManagedObjectSource} to be pooled by the
 	 * {@link SectionManagedObjectPool}.
 	 * 
-	 * @param managedObject
-	 *            {@link SectionManagedObject}.
+	 * @param managedObjectSource
+	 *            {@link SectionManagedObjectSource}.
 	 * @param managedObjectPool
 	 *            {@link SectionManagedObjectPool}.
 	 */
-	void link(SectionManagedObject managedObject, SectionManagedObjectPool managedObjectPool);
+	void link(SectionManagedObjectSource managedObjectSource, SectionManagedObjectPool managedObjectPool);
 
 	/**
 	 * Links {@link ManagedObjectDependency} to be the {@link SectionObject}.

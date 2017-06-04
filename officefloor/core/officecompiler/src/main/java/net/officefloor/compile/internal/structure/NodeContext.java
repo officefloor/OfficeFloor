@@ -37,6 +37,7 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
+import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.frame.api.OfficeFrame;
@@ -574,6 +575,23 @@ public interface NodeContext {
 	 * @return {@link ManagedObjectSourceNode}.
 	 */
 	ManagedObjectSourceNode createManagedObjectSourceNode(String managedObjectSourceName, OfficeFloorNode officeFloor);
+
+	/**
+	 * Obtains the {@link ManagedObjectPoolSource} class.
+	 * 
+	 * @param <S>
+	 *            {@link ManagedObjectPoolSource} type.
+	 * @param managedObjectPoolSourceName
+	 *            {@link ManagedObjectPoolSource} class name or an alias to a
+	 *            {@link ManagedObjectPoolSource} class.
+	 * @param node
+	 *            {@link Node} for reporting issues.
+	 * @return {@link ManagedObjectPoolSource} class, or <code>null</code> with
+	 *         issues reported to the {@link CompilerIssues} of this
+	 *         {@link NodeContext}.
+	 */
+	<S extends ManagedObjectPoolSource> Class<S> getManagedObjectPoolSourceClass(String managedObjectPoolSourceName,
+			Node node);
 
 	/**
 	 * Obtains the {@link ManagedObjectPoolLoader}.

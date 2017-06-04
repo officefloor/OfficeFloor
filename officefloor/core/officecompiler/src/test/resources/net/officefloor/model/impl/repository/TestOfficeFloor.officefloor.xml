@@ -19,6 +19,7 @@
 				<property name="MO_TWO" value="VALUE_TWO" />
 			</properties>
 			<managing-office name="OFFICE" />
+			<managed-object-pool name="MANAGED_OBJECT_POOL" />
 			<input-managed-object name="INPUT_MANAGED_OBJECT" />
 			<input-dependency name="INPUT_DEPENDENCY"
 				object-type="java.sql.Connection">
@@ -75,7 +76,6 @@
 			<dependency name="DEPENDENCY_TWO" object-type="net.orm.Session">
 				<input-managed-object name="INPUT_MANAGED_OBJECT" />
 			</dependency>
-			<managed-object-pool name="MANAGED_OBJECT_POOL" />
 		</managed-object>
 		<managed-object name="MANAGED_OBJECT_TWO" scope="PROCESS"
 			x="310" y="311">

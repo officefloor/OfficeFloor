@@ -41,6 +41,7 @@ import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
+import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -201,6 +202,12 @@ public class SectionNodeImpl implements SectionNode {
 	 * {@link SectionManagedObjectSource} names.
 	 */
 	private final Map<String, ManagedObjectSourceNode> managedObjectSourceNodes = new HashMap<String, ManagedObjectSourceNode>();
+
+	/**
+	 * {@link ManagedObjectPoolNode} instances by thier
+	 * {@link SectionManagedObjectPool} names.
+	 */
+	private final Map<String, ManagedObjectPoolNode> managedObjectPoolNodes = new HashMap<>();
 
 	/**
 	 * {@link ManagedObjectNode} instances by their {@link SectionManagedObject}
@@ -806,15 +813,17 @@ public class SectionNodeImpl implements SectionNode {
 	@Override
 	public SectionManagedObjectPool addManagedObjectPool(String managedObjectPoolName,
 			String managedObjectPoolSourceClassName) {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+		return NodeUtil.getInitialisedNode(managedObjectPoolName, this.managedObjectPoolNodes, this.context,
+				() -> this.context.createManagedObjectPoolNode(managedObjectPoolName, this),
+				(pool) -> pool.initialise(managedObjectPoolSourceClassName, null));
 	}
 
 	@Override
 	public SectionManagedObjectPool addManagedObjectPool(String managedObjectPoolName,
 			ManagedObjectPoolSource managedObjectPoolSource) {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+		return NodeUtil.getInitialisedNode(managedObjectPoolName, this.managedObjectPoolNodes, this.context,
+				() -> this.context.createManagedObjectPoolNode(managedObjectPoolName, this),
+				(pool) -> pool.initialise(managedObjectPoolSource.getClass().getName(), managedObjectPoolSource));
 	}
 
 	@Override
@@ -917,9 +926,8 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	@Override
-	public void link(SectionManagedObject managedObject, SectionManagedObjectPool managedObjectPool) {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+	public void link(SectionManagedObjectSource managedObjectSource, SectionManagedObjectPool managedObjectPool) {
+		LinkUtil.linkPool(managedObjectSource, managedObjectPool, this.context.getCompilerIssues(), this);
 	}
 
 	@Override

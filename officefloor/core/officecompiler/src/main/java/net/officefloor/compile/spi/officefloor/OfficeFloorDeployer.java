@@ -167,15 +167,15 @@ public interface OfficeFloorDeployer {
 	void link(OfficeFloorManagedObjectSource managedObjectSource, OfficeFloorInputManagedObject inputManagedObject);
 
 	/**
-	 * Links the {@link OfficeFloorManagedObject} to be pooled by the
+	 * Links the {@link OfficeFloorManagedObjectSource} to be pooled by the
 	 * {@link OfficeFloorManagedObjectPool}.
 	 * 
-	 * @param managedObject
+	 * @param managedObjectSource
 	 *            {@link OfficeFloorManagedObject}.
 	 * @param managedObjectPool
 	 *            {@link OfficeFloorManagedObjectPool}.
 	 */
-	void link(OfficeFloorManagedObject managedObject, OfficeFloorManagedObjectPool managedObjectPool);
+	void link(OfficeFloorManagedObjectSource managedObjectSource, OfficeFloorManagedObjectPool managedObjectPool);
 
 	/**
 	 * Links the {@link ManagedObjectDependency} to be the

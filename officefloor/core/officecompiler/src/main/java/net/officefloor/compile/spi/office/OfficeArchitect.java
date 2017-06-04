@@ -305,15 +305,15 @@ public interface OfficeArchitect {
 	void link(OfficeSectionObject sectionObject, OfficeObject managedObject);
 
 	/**
-	 * Links the {@link OfficeManagedObject} to be pooled by the
+	 * Links the {@link OfficeManagedObjectSource} to be pooled by the
 	 * {@link OfficeManagedObjectPool}.
 	 * 
-	 * @param managedObject
-	 *            {@link OfficeManagedObject}.
+	 * @param managedObjectSource
+	 *            {@link OfficeManagedObjectSource}.
 	 * @param managedObjectPool
 	 *            {@link OfficeManagedObjectPool}.
 	 */
-	void link(OfficeManagedObject managedObject, OfficeManagedObjectPool managedObjectPool);
+	void link(OfficeManagedObjectSource managedObjectSource, OfficeManagedObjectPool managedObjectPool);
 
 	/**
 	 * Links the {@link ManagedObjectDependency} to be the

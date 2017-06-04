@@ -55,6 +55,12 @@
 					</attributes>
 				</item>
 			</collection>
+			<object method="getOfficeFloorManagedObjectPool" element="managed-object-pool">
+				<attributes>
+					<attribute method="getOfficeFloorManagedObjectPoolName"
+						attribute="name" />
+				</attributes>
+			</object>
 			<object method="getOfficeFloorSupplier" element="supplier">
 				<attributes>
 					<attribute method="getOfficeFloorSupplierName" attribute="name" />
@@ -164,12 +170,6 @@
 			<object method="getOfficeFloorManagedObjectSource" element="managed-object-source">
 				<attributes>
 					<attribute method="getOfficeFloorManagedObjectSourceName"
-						attribute="name" />
-				</attributes>
-			</object>
-			<object method="getOfficeFloorManagedObjectPool" element="managed-object-pool">
-				<attributes>
-					<attribute method="getOfficeFloorManagedObjectPoolName"
 						attribute="name" />
 				</attributes>
 			</object>

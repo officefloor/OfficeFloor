@@ -40,6 +40,7 @@ import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
+import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.frame.api.OfficeFrame;
@@ -196,6 +197,13 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 			String alias, Class<S> managedObjectSourceClass) {
 		this.invokeMethod("addManagedObjectSourceAlias", new Object[] { alias, managedObjectSourceClass }, String.class,
 				Class.class);
+	}
+
+	@Override
+	public <S extends ManagedObjectPoolSource> void addManagedObjectPoolSourceAlias(String alias,
+			Class<S> managedObjectPoolSourceClass) {
+		this.invokeMethod("addManagedObjectPoolSourceAlias", new Object[] { alias, managedObjectPoolSourceClass },
+				String.class, Class.class);
 	}
 
 	@Override

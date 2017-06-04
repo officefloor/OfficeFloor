@@ -45,6 +45,7 @@ import net.officefloor.compile.internal.structure.LinkSynchronousNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
+import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -207,6 +208,12 @@ public class OfficeNodeImpl implements OfficeNode {
 	 * {@link OfficeManagedObjectSource} name.
 	 */
 	private final Map<String, ManagedObjectSourceNode> managedObjectSources = new HashMap<String, ManagedObjectSourceNode>();
+
+	/**
+	 * {@link ManagedObjectPoolNode} instances by thier
+	 * {@link OfficeManagedObjectPool} name.
+	 */
+	private final Map<String, ManagedObjectPoolNode> managedObjectPools = new HashMap<>();
 
 	/**
 	 * {@link ManagedObjectNode} instances by their {@link OfficeManagedObject}
@@ -927,15 +934,17 @@ public class OfficeNodeImpl implements OfficeNode {
 	@Override
 	public OfficeManagedObjectPool addManagedObjectPool(String managedObjectPoolName,
 			String managedObjectPoolSourceClassName) {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+		return NodeUtil.getInitialisedNode(managedObjectPoolName, this.managedObjectPools, this.context,
+				() -> this.context.createManagedObjectPoolNode(managedObjectPoolName, this),
+				(pool) -> pool.initialise(managedObjectPoolSourceClassName, null));
 	}
 
 	@Override
 	public OfficeManagedObjectPool addManagedObjectPool(String managedObjectPoolName,
 			ManagedObjectPoolSource managedObjectPoolSource) {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+		return NodeUtil.getInitialisedNode(managedObjectPoolName, this.managedObjectPools, this.context,
+				() -> this.context.createManagedObjectPoolNode(managedObjectPoolName, this),
+				(pool) -> pool.initialise(managedObjectPoolSource.getClass().getName(), managedObjectPoolSource));
 	}
 
 	@Override
@@ -1012,9 +1021,8 @@ public class OfficeNodeImpl implements OfficeNode {
 	}
 
 	@Override
-	public void link(OfficeManagedObject managedObject, OfficeManagedObjectPool managedObjectPool) {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+	public void link(OfficeManagedObjectSource managedObjectSource, OfficeManagedObjectPool managedObjectPool) {
+		LinkUtil.linkPool(managedObjectSource, managedObjectPool, this.context.getCompilerIssues(), this);
 	}
 
 	@Override

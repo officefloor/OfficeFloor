@@ -23,17 +23,18 @@ import net.officefloor.compile.internal.structure.LinkPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
-import net.officefloor.compile.internal.structure.OfficeBindings;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SectionNode;
+import net.officefloor.compile.pool.ManagedObjectPoolLoader;
 import net.officefloor.compile.pool.ManagedObjectPoolType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
-import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.OfficeFloorBuilder;
+import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.api.build.ManagedObjectPoolBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListenerFactory;
 
 /**
  * {@link ManagedObjectPoolNode} implementation.
@@ -220,22 +221,44 @@ public class ManagedObjectPoolNodeImpl implements ManagedObjectPoolNode {
 	 */
 
 	@Override
-	public boolean sourceManagedObjectPool(CompileContext compileContext) {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement sourceManagedObjectPool");
-	}
-
-	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ManagedObjectPoolType loadManagedObjectPoolType() {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement loadManagedObjectPoolType");
+
+		// Obtain the managed object pool source class
+		Class managedObjectPoolSourceClass = this.context
+				.getManagedObjectPoolSourceClass(this.state.managedObjectPoolSourceClassName, this);
+		if (managedObjectPoolSourceClass == null) {
+			return null; // must obtain source class
+		}
+
+		// Obtain the override properties
+		String qualifiedName = (this.containingSectionNode != null
+				? this.containingSectionNode.getQualifiedName(this.managedObjectPoolName)
+				: (this.containingOfficeNode != null
+						? this.containingOfficeNode.getQualifiedName(this.managedObjectPoolName)
+						: this.managedObjectPoolName));
+		PropertyList overrideProperties = this.context.overrideProperties(this, qualifiedName, this.properties);
+
+		// Load and return the managed object pool type
+		ManagedObjectPoolLoader loader = this.context.getManagedObjectPoolLoader(this);
+		return loader.loadManagedObjectPoolType(managedObjectPoolSourceClass, overrideProperties);
 	}
 
 	@Override
-	public void buildManagedObjectPool(OfficeFloorBuilder builder, OfficeNode managingOffice,
-			OfficeBuilder managingOfficeBuilder, OfficeBindings officeBindings, CompileContext compileContext) {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement buildManagedObjectPool");
+	public void buildManagedObjectPool(ManagedObjectBuilder<?> builder, CompileContext compileContext) {
+
+		// Build the managed object pool type
+		ManagedObjectPoolType poolType = this.loadManagedObjectPoolType();
+		if (poolType == null) {
+			return; // must load pool type
+		}
+
+		// Build the managed object pool
+		ManagedObjectPoolBuilder poolBuilder = builder.setManagedObjectPool(poolType.getManagedObjectPoolFactory());
+		for (ThreadCompletionListenerFactory threadCompletionListenerFactoy : poolType
+				.getThreadCompletionListenerFactories()) {
+			poolBuilder.addThreadCompletionListener(threadCompletionListenerFactoy);
+		}
 	}
 
 	/*

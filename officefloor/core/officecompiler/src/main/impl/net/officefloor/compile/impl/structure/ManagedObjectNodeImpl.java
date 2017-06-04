@@ -29,7 +29,6 @@ import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
-import net.officefloor.compile.internal.structure.LinkPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
@@ -512,26 +511,6 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	@Override
 	public LinkObjectNode getLinkedObjectNode() {
 		return this.linkedObjectNode;
-	}
-
-	/*
-	 * =================== LinkPoolNode ======================================
-	 */
-
-	/**
-	 * Linked {@link LinkPoolNode}.
-	 */
-	private LinkPoolNode linkedPoolNode = null;
-
-	@Override
-	public boolean linkPoolNode(LinkPoolNode node) {
-		return LinkUtil.linkPoolNode(this, node, this.context.getCompilerIssues(),
-				(link) -> this.linkedPoolNode = link);
-	}
-
-	@Override
-	public LinkPoolNode getLinkedPoolNode() {
-		return this.linkedPoolNode;
 	}
 
 }

@@ -263,8 +263,8 @@ public class TransformSectionDesigner implements SectionDesigner {
 	}
 
 	@Override
-	public void link(SectionManagedObject managedObject, SectionManagedObjectPool managedObjectPool) {
-		this.delegate.link(managedObject, managedObjectPool);
+	public void link(SectionManagedObjectSource managedObjectSource, SectionManagedObjectPool managedObjectPool) {
+		this.delegate.link(managedObjectSource, managedObjectPool);
 	}
 
 	@Override

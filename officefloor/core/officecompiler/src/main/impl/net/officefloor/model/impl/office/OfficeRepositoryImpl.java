@@ -57,9 +57,9 @@ import net.officefloor.model.office.OfficeManagedObjectSourceFlowToOfficeSection
 import net.officefloor.model.office.OfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeManagedObjectPoolModel;
 import net.officefloor.model.office.OfficeManagedObjectToAdministrationModel;
 import net.officefloor.model.office.OfficeManagedObjectToGovernanceModel;
-import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectPoolModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRepository;
@@ -180,14 +180,15 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			}
 		}
 
-		// Connect the managed objects to their corresponding pools
-		for (OfficeManagedObjectModel managedObject : office.getOfficeManagedObjects()) {
-			OfficeManagedObjectToOfficeManagedObjectPoolModel conn = managedObject.getOfficeManagedObjectPool();
+		// Connect the managed object sources to their corresponding pools
+		for (OfficeManagedObjectSourceModel managedObjectSource : office.getOfficeManagedObjectSources()) {
+			OfficeManagedObjectSourceToOfficeManagedObjectPoolModel conn = managedObjectSource
+					.getOfficeManagedObjectPool();
 			if (conn != null) {
 				OfficeManagedObjectPoolModel managedObjectPool = managedObjectPools
 						.get(conn.getOfficeManagedObjectPoolName());
 				if (managedObjectPool != null) {
-					conn.setOfficeManagedObject(managedObject);
+					conn.setOfficeManagedObjectSource(managedObjectSource);
 					conn.setOfficeManagedObjectPool(managedObjectPool);
 					conn.connect();
 				}
@@ -616,9 +617,9 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			}
 		}
 
-		// Specify managed objects to their corresponding pools
+		// Specify managed object sources to their corresponding pools
 		for (OfficeManagedObjectPoolModel pool : office.getOfficeManagedObjectPools()) {
-			for (OfficeManagedObjectToOfficeManagedObjectPoolModel conn : pool.getOfficeManagedObjects()) {
+			for (OfficeManagedObjectSourceToOfficeManagedObjectPoolModel conn : pool.getOfficeManagedObjectSources()) {
 				conn.setOfficeManagedObjectPoolName(pool.getOfficeManagedObjectPoolName());
 			}
 		}

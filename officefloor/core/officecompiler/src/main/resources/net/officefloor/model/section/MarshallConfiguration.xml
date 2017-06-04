@@ -39,6 +39,12 @@
 					</attributes>
 				</item>
 			</collection>
+			<object method="getSectionManagedObjectPool" element="managed-object-pool">
+				<attributes>
+					<attribute method="getSectionManagedObjectPoolName"
+						attribute="name" />
+				</attributes>
+			</object>
 			<collection method="getSectionManagedObjectSourceFlows">
 				<item
 					type="net.officefloor.model.section.SectionManagedObjectSourceFlowModel"
@@ -101,6 +107,30 @@
 								attribute="name" />
 						</attributes>
 					</object>
+				</item>
+			</collection>
+		</item>
+	</collection>
+
+	<!-- MANAGED OBJECT POOLS -->
+	<collection method="getSectionManagedObjectPools" element="managed-object-pools">
+		<item type="net.officefloor.model.section.SectionManagedObjectPoolModel"
+			element="managed-object-pool">
+			<attributes>
+				<attribute method="getSectionManagedObjectPoolName"
+					attribute="name" />
+				<attribute method="getManagedObjectPoolSourceClassName"
+					attribute="source" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+			<collection method="getProperties" element="properties">
+				<item type="net.officefloor.model.section.PropertyModel"
+					element="property">
+					<attributes>
+						<attribute method="getName" attribute="name" />
+						<attribute method="getValue" attribute="value" />
+					</attributes>
 				</item>
 			</collection>
 		</item>

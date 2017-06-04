@@ -295,6 +295,9 @@ public class AdministrationNodeImpl implements AdministrationNode {
 
 		// Build the administration type
 		AdministrationType<?, ?, ?> adminType = this.loadAdministrationType();
+		if (adminType == null) {
+			return; // must load type
+		}
 
 		// Obtain the administration details
 		Class extension = adminType.getExtensionInterface();

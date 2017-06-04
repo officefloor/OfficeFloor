@@ -53,7 +53,7 @@ import net.officefloor.model.section.SectionManagedObjectSourceFlowToExternalFlo
 import net.officefloor.model.section.SectionManagedObjectSourceFlowToFunctionModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowToSubSectionInputModel;
 import net.officefloor.model.section.SectionManagedObjectSourceModel;
-import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectPoolModel;
+import net.officefloor.model.section.SectionManagedObjectSourceToSectionManagedObjectPoolModel;
 import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectSourceModel;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SectionRepository;
@@ -382,13 +382,13 @@ public class SectionRepositoryImpl implements SectionRepository {
 			pools.put(pool.getSectionManagedObjectPoolName(), pool);
 		}
 
-		// Connect the managed objects to their managed object pools
-		for (SectionManagedObjectModel mo : section.getSectionManagedObjects()) {
-			SectionManagedObjectToSectionManagedObjectPoolModel conn = mo.getSectionManagedObjectPool();
+		// Connect the managed object sources to their managed object pools
+		for (SectionManagedObjectSourceModel mos : section.getSectionManagedObjectSources()) {
+			SectionManagedObjectSourceToSectionManagedObjectPoolModel conn = mos.getSectionManagedObjectPool();
 			if (conn != null) {
 				SectionManagedObjectPoolModel pool = pools.get(conn.getSectionManagedObjectPoolName());
 				if (pool != null) {
-					conn.setSectionManagedObject(mo);
+					conn.setSectionManagedObjectSource(mos);
 					conn.setSectionManagedObjectPool(pool);
 					conn.connect();
 				}
@@ -677,7 +677,8 @@ public class SectionRepositoryImpl implements SectionRepository {
 
 		// Specify managed objects to their managed object pools
 		for (SectionManagedObjectPoolModel pool : section.getSectionManagedObjectPools()) {
-			for (SectionManagedObjectToSectionManagedObjectPoolModel conn : pool.getSectionManagedObjects()) {
+			for (SectionManagedObjectSourceToSectionManagedObjectPoolModel conn : pool
+					.getSectionManagedObjectSources()) {
 				conn.setSectionManagedObjectPoolName(pool.getSectionManagedObjectPoolName());
 			}
 		}

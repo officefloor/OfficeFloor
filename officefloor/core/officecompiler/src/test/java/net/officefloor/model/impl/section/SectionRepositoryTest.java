@@ -54,7 +54,7 @@ import net.officefloor.model.section.SectionManagedObjectSourceFlowToExternalFlo
 import net.officefloor.model.section.SectionManagedObjectSourceFlowToFunctionModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowToSubSectionInputModel;
 import net.officefloor.model.section.SectionManagedObjectSourceModel;
-import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectPoolModel;
+import net.officefloor.model.section.SectionManagedObjectSourceToSectionManagedObjectPoolModel;
 import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectSourceModel;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SectionRepository;
@@ -140,10 +140,10 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 				"MANAGED_OBJECT_SOURCE");
 		mo.setSectionManagedObjectSource(moToMos);
 
-		// managed object -> managed object pool
-		SectionManagedObjectToSectionManagedObjectPoolModel moToPool = new SectionManagedObjectToSectionManagedObjectPoolModel(
+		// managed object source -> managed object pool
+		SectionManagedObjectSourceToSectionManagedObjectPoolModel mosToPool = new SectionManagedObjectSourceToSectionManagedObjectPoolModel(
 				"POOL");
-		mo.setSectionManagedObjectPool(moToPool);
+		mos.setSectionManagedObjectPool(mosToPool);
 
 		// dependency -> external managed object
 		SectionManagedObjectDependencyToExternalManagedObjectModel dependencyToExtMo = new SectionManagedObjectDependencyToExternalManagedObjectModel(
@@ -305,9 +305,9 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("mo -> mos", mos, moToMos.getSectionManagedObjectSource());
 		assertEquals("mo <- mos", mo, moToMos.getSectionManagedObject());
 
-		// Ensure managed object connected to its pool
-		assertEquals("mo -> pool", pool, moToPool.getSectionManagedObjectPool());
-		assertEquals("mo <- pool", mo, moToPool.getSectionManagedObject());
+		// Ensure managed object source connected to its pool
+		assertEquals("mos -> pool", pool, mosToPool.getSectionManagedObjectPool());
+		assertEquals("mos <- pool", mos, mosToPool.getSectionManagedObjectSource());
 
 		// Ensure dependency connected to external managed object
 		assertEquals("dependency <- external mo", dependency, dependencyToExtMo.getSectionManagedObjectDependency());
@@ -471,11 +471,11 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		moToMos.setSectionManagedObjectSource(mos);
 		moToMos.connect();
 
-		// mo -> pool
-		SectionManagedObjectToSectionManagedObjectPoolModel moToPool = new SectionManagedObjectToSectionManagedObjectPoolModel();
-		moToPool.setSectionManagedObject(mo);
-		moToPool.setSectionManagedObjectPool(pool);
-		moToPool.connect();
+		// mos -> pool
+		SectionManagedObjectSourceToSectionManagedObjectPoolModel mosToPool = new SectionManagedObjectSourceToSectionManagedObjectPoolModel();
+		mosToPool.setSectionManagedObjectSource(mos);
+		mosToPool.setSectionManagedObjectPool(pool);
+		mosToPool.connect();
 
 		// dependency -> extMo
 		SectionManagedObjectDependencyToExternalManagedObjectModel dependencyToExtMo = new SectionManagedObjectDependencyToExternalManagedObjectModel();
@@ -613,7 +613,7 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 
 		// Ensure the connections have links to enable retrieving
 		assertEquals("mo - mos", "MANAGED_OBJECT_SOURCE", moToMos.getSectionManagedObjectSourceName());
-		assertEquals("mo - pool", "POOL", moToPool.getSectionManagedObjectPoolName());
+		assertEquals("mos - pool", "POOL", mosToPool.getSectionManagedObjectPoolName());
 		assertEquals("dependency - extMo", "EXTERNAL_MANAGED_OBJECT", dependencyToExtMo.getExternalManagedObjectName());
 		assertEquals("dependency - mo", "MANAGED_OBJECT", dependencyToMo.getSectionManagedObjectName());
 		assertEquals("mos flow - extFlow", "EXTERNAL_FLOW", mosFlowToExtFlow.getExternalFlowName());

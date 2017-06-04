@@ -35,10 +35,12 @@ import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
+import net.officefloor.compile.internal.structure.LinkPoolNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
+import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectRegistry;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.ManagedObjectTeamNode;
@@ -399,7 +401,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
-	public OfficeSectionManagedObjectSourceType loadOfficeSectionManagedObjectSourceType(CompileContext compileContext) {
+	public OfficeSectionManagedObjectSourceType loadOfficeSectionManagedObjectSourceType(
+			CompileContext compileContext) {
 
 		// Load the managed object type
 		ManagedObjectType<?> managedObjectType = compileContext.getOrLoadManagedObjectType(this);
@@ -818,6 +821,13 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			String officeTeamName = managedObjectSourceName + "." + teamName;
 			officeBuilder.registerTeam(officeTeamName, team.getOfficeFloorTeamName());
 		}
+
+		// Determine if pool the managed object
+		ManagedObjectPoolNode poolNode = LinkUtil.findTarget(this, ManagedObjectPoolNode.class,
+				this.context.getCompilerIssues());
+		if (poolNode != null) {
+			poolNode.buildManagedObjectPool(moBuilder, compileContext);
+		}
 	}
 
 	/*
@@ -918,6 +928,26 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	public OfficeFloorManagedObject addOfficeFloorManagedObject(String managedObjectName,
 			ManagedObjectScope managedObjectScope) {
 		return this.managedObjectRegistry.addManagedObjectNode(managedObjectName, managedObjectScope, this);
+	}
+
+	/*
+	 * =================== LinkPoolNode ======================================
+	 */
+
+	/**
+	 * Linked {@link LinkPoolNode}.
+	 */
+	private LinkPoolNode linkedPoolNode = null;
+
+	@Override
+	public boolean linkPoolNode(LinkPoolNode node) {
+		return LinkUtil.linkPoolNode(this, node, this.context.getCompilerIssues(),
+				(link) -> this.linkedPoolNode = link);
+	}
+
+	@Override
+	public LinkPoolNode getLinkedPoolNode() {
+		return this.linkedPoolNode;
 	}
 
 }

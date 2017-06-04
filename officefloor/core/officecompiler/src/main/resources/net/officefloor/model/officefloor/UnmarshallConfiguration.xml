@@ -34,6 +34,10 @@
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
+		<object method="setOfficeFloorManagedObjectPool" node="managed-object-pool"
+			class="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorManagedObjectPoolModel">
+			<value method="setOfficeFloorManagedObjectPoolName" node="managed-object-pool@name" />
+		</object>
 		<object method="setOfficeFloorSupplier" node="supplier"
 			class="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel">
 			<value method="setOfficeFloorSupplierName" node="supplier@name" />
@@ -104,10 +108,6 @@
 			class="net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel">
 			<value method="setOfficeFloorManagedObjectSourceName" node="managed-object-source@name" />
 		</object>
-		<object method="setOfficeFloorManagedObjectPool" node="managed-object-pool"
-			class="net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectPoolModel">
-			<value method="setOfficeFloorManagedObjectPoolName" node="managed-object-pool@name" />
-		</object>
 		<object method="addTypeQualification" node="type-qualification"
 			class="net.officefloor.model.officefloor.TypeQualificationModel">
 			<value method="setQualifier" node="type-qualification@qualifier" />
@@ -128,12 +128,13 @@
 		</object>
 	</object>
 
-
-	<!-- MANAGED OBJECTS -->
+	<!-- MANAGED OBJECT POOLS -->
 	<object method="addOfficeFloorManagedObjectPool" node="managed-object-pool"
 		class="net.officefloor.model.officefloor.OfficeFloorManagedObjectPoolModel">
 		<value method="setOfficeFloorManagedObjectPoolName" node="managed-object-pool@name" />
 		<value method="setManagedObjectPoolSourceClassName" node="managed-object-pool@source" />
+		<value method="setX" node="managed-object-pool@x" />
+		<value method="setY" node="managed-object-pool@y" />
 		<object method="addProperty" node="property"
 			class="net.officefloor.model.officefloor.PropertyModel">
 			<value method="setName" node="property@name" />

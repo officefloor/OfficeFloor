@@ -11,6 +11,7 @@
 				<properties>
 					<property name="class.name" value="${testcase}$SimpleManagedObject" />
 				</properties>
+				<managed-object-pool name="POOL" />
 			</managed-object-source>
 		</managed-object-sources>
 		<managed-objects>
@@ -21,7 +22,7 @@
 		<managed-object-pools>
 			<managed-object-pool name="POOL" source="${POOL}">
 				<properties>
-					<property name="POOL" value="POOL" />
+					<property name="id" value="POOL" />
 				</properties>
 			</managed-object-pool>
 		</managed-object-pools>

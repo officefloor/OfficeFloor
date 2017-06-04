@@ -19,6 +19,8 @@ package net.officefloor.model.impl.officefloor;
 
 import java.sql.Connection;
 
+import org.easymock.AbstractMatcher;
+
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel;
@@ -44,8 +46,8 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorManagedObjectPoolModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel;
-import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectPoolModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorRepository;
@@ -53,8 +55,6 @@ import net.officefloor.model.officefloor.OfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
-
-import org.easymock.AbstractMatcher;
 
 /**
  * Tests the {@link OfficeFloorRepository}.
@@ -125,10 +125,10 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				"MANAGED_OBJECT_SOURCE");
 		officeFloorManagedObject.setOfficeFloorManagedObjectSource(moToSource);
 
-		// OfficeFloor managed object -> OfficeFloor managed object pool
-		OfficeFloorManagedObjectToOfficeFloorManagedObjectPoolModel moToPool = new OfficeFloorManagedObjectToOfficeFloorManagedObjectPoolModel(
+		// OfficeFloor managed object source -> OfficeFloor managed object pool
+		OfficeFloorManagedObjectSourceToOfficeFloorManagedObjectPoolModel mosToPool = new OfficeFloorManagedObjectSourceToOfficeFloorManagedObjectPoolModel(
 				"POOL");
-		officeFloorManagedObject.setOfficeFloorManagedObjectPool(moToPool);
+		officeFloorManagedObjectSource.setOfficeFloorManagedObjectPool(mosToPool);
 
 		// input managed object -> bound managed object source
 		OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel inputMoToBoundSource = new OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel(
@@ -237,11 +237,11 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("OfficeFloor managed object -> OfficeFloor managed object source", officeFloorManagedObjectSource,
 				moToSource.getOfficeFloorManagedObjectSource());
 
-		// Ensure OfficeFloor managed object connected to its pool
-		assertEquals("OfficeFloor managed object <- OfficeFloor managed object pool", officeFloorManagedObject,
-				moToPool.getOfficeFloorManagedObject());
-		assertEquals("OfficeFloor managed object -> OfficeFloor managed object pool", officeFloorManagedObjectPool,
-				moToPool.getOfficeFloorManagedObjectPool());
+		// Ensure OfficeFloor managed object source connected to its pool
+		assertEquals("OfficeFloor managed object source <- OfficeFloor managed object pool",
+				officeFloorManagedObjectSource, mosToPool.getOfficeFloorManagedObjectSource());
+		assertEquals("OfficeFloor managed object source -> OfficeFloor managed object pool",
+				officeFloorManagedObjectPool, mosToPool.getOfficeFloorManagedObjectPool());
 
 		// Ensure input managed object connected to its bound source
 		assertEquals("input managed object <- bound managed object source", officeFloorInputManagedObject,
@@ -355,11 +355,11 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		moToSource.setOfficeFloorManagedObjectSource(officeFloorManagedObjectSource);
 		moToSource.connect();
 
-		// OfficeFloor managed object -> OfficeFloor managed object pool
-		OfficeFloorManagedObjectToOfficeFloorManagedObjectPoolModel moToPool = new OfficeFloorManagedObjectToOfficeFloorManagedObjectPoolModel();
-		moToPool.setOfficeFloorManagedObject(officeFloorManagedObject);
-		moToPool.setOfficeFloorManagedObjectPool(officeFloorManagedObjectPool);
-		moToPool.connect();
+		// OfficeFloor managed object source -> OfficeFloor managed object pool
+		OfficeFloorManagedObjectSourceToOfficeFloorManagedObjectPoolModel mosToPool = new OfficeFloorManagedObjectSourceToOfficeFloorManagedObjectPoolModel();
+		mosToPool.setOfficeFloorManagedObjectSource(officeFloorManagedObjectSource);
+		mosToPool.setOfficeFloorManagedObjectPool(officeFloorManagedObjectPool);
+		mosToPool.connect();
 
 		// input managed object -> bound managed object source
 		OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel inputMoToBoundSource = new OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel();
@@ -462,8 +462,8 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				mosToSupplier.getOfficeFloorSupplierName());
 		assertEquals("OfficeFloor managed object - OfficeFloor managed object source", "MANAGED_OBJECT_SOURCE",
 				moToSource.getOfficeFloorManagedObjectSourceName());
-		assertEquals("OfficeFloor managed object - OfficeFloor managed object pool", "POOL",
-				moToPool.getOfficeFloorManagedObjectPoolName());
+		assertEquals("OfficeFloor managed object source - OfficeFloor managed object pool", "POOL",
+				mosToPool.getOfficeFloorManagedObjectPoolName());
 		assertEquals("input managed object - bound managed object source", "MANAGED_OBJECT_SOURCE",
 				inputMoToBoundSource.getOfficeFloorManagedObjectSourceName());
 		assertEquals("dependency - managed object", "MO_DEPENDENCY", dependencyToMo.getOfficeFloorManagedObjectName());

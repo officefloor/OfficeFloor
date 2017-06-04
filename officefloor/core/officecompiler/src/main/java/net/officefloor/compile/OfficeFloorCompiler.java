@@ -47,6 +47,7 @@ import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
+import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.frame.api.OfficeFrame;
@@ -355,6 +356,13 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 					service.getManagedObjectSourceClass());
 		}
 
+		// Add the managed object pool source aliases from the class path
+		for (ManagedObjectPoolSourceService<?> service : ServiceLoader.load(ManagedObjectPoolSourceService.class,
+				this.getClassLoader())) {
+			this.addManagedObjectPoolSourceAlias(service.getManagedObjectPoolSourceAlias(),
+					service.getManagedObjectPoolSourceClass());
+		}
+
 		// Add the supplier source aliases from the class path
 		for (SupplierSourceService<?> service : ServiceLoader.load(SupplierSourceService.class,
 				this.getClassLoader())) {
@@ -608,6 +616,30 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 */
 	public abstract <D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> void addManagedObjectSourceAlias(
 			String alias, Class<S> managedObjectSourceClass);
+
+	/**
+	 * <p>
+	 * Allows providing an alias name for a {@link ManagedObjectPoolSource}.
+	 * <p>
+	 * This stops the configuration files from being littered with fully
+	 * qualified class names of the {@link ManagedObjectPoolSource} classes.
+	 * This is anticipated to allow flexibility as the functionality evolves so
+	 * that relocating/renaming classes does not require significant
+	 * configuration changes.
+	 * <p>
+	 * Typically this should not be used directly as the
+	 * {@link ManagedObjectSourceService} is the preferred means to provide
+	 * {@link ManagedObjectSource} aliases.
+	 * 
+	 * @param <S>
+	 *            {@link ManagedObjectPoolSource} type.
+	 * @param alias
+	 *            Alias name for the {@link ManagedObjectPoolSource}.
+	 * @param managedObjectPoolSourceClass
+	 *            {@link ManagedObjectPoolSource} {@link Class} for the alias.
+	 */
+	public abstract <S extends ManagedObjectPoolSource> void addManagedObjectPoolSourceAlias(String alias,
+			Class<S> managedObjectPoolSourceClass);
 
 	/**
 	 * <p>

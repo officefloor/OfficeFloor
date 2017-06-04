@@ -47,8 +47,8 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorManagedObjectPoolModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel;
-import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectPoolModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorSupplierModel;
@@ -113,15 +113,19 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 				officeFloor.getOfficeFloorManagedObjectSources(),
 				new OfficeFloorManagedObjectSourceModel("MANAGED_OBJECT_SOURCE",
 						"net.example.ExampleManagedObjectSource", "net.orm.Session", "10", null, null, null, null, null,
-						null, null, null, null, 100, 101),
+						null, null, null, null, null, 100, 101),
 				new OfficeFloorManagedObjectSourceModel("SUPPLIED_MANAGED_OBJECT_SOURCE", null, "net.orm.Session", null,
-						null, null, null, null, null, null, null, null, null, 110, 111));
+						null, null, null, null, null, null, null, null, null, null, 110, 111));
 		List<OfficeFloorManagedObjectSourceModel> moSources = officeFloor.getOfficeFloorManagedObjectSources();
 
 		// Validate the sourced managed object source
 		OfficeFloorManagedObjectSourceModel sourcedMoSource = moSources.get(0);
 		assertOfficeFloorManagedObjectSource(sourcedMoSource);
 		assertNull("Should not have supplier link as sourced", sourcedMoSource.getOfficeFloorSupplier());
+
+		// Validate linked to managed object pool
+		assertProperties(new OfficeFloorManagedObjectSourceToOfficeFloorManagedObjectPoolModel("MANAGED_OBJECT_POOL"),
+				sourcedMoSource.getOfficeFloorManagedObjectPool(), "getOfficeFloorManagedObjectPoolName");
 
 		// Validate the supplied managed object source
 		OfficeFloorManagedObjectSourceModel suppliedMoSource = moSources.get(1);
@@ -149,16 +153,14 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 		assertList(new String[] { "getOfficeFloorManagedObjectName", "getManagedObjectScope", "getX", "getY" },
 				officeFloor.getOfficeFloorManagedObjects(),
 				new OfficeFloorManagedObjectModel("MANAGED_OBJECT_ONE", "THREAD", null, null, null, null, null, null,
-						null, 300, 301),
+						300, 301),
 				new OfficeFloorManagedObjectModel("MANAGED_OBJECT_TWO", "PROCESS", null, null, null, null, null, null,
-						null, 310, 311));
+						310, 311));
 		OfficeFloorManagedObjectModel mo = officeFloor.getOfficeFloorManagedObjects().get(0);
 
-		// Link to managed object source and pool
+		// Link to managed object source
 		assertProperties(new OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel("MANAGED_OBJECT_SOURCE"),
 				mo.getOfficeFloorManagedObjectSource(), "getOfficeFloorManagedObjectSourceName");
-		assertProperties(new OfficeFloorManagedObjectToOfficeFloorManagedObjectPoolModel("MANAGED_OBJECT_POOL"),
-				mo.getOfficeFloorManagedObjectPool(), "getOfficeFloorManagedObjectPoolName");
 
 		// Type qualifications
 		assertList(new String[] { "getQualifier", "getType" }, mo.getTypeQualifications(),
@@ -181,7 +183,9 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------------
 		// Validate the OfficeFloor managed object pools
 		// ----------------------------------------------
-		assertList(new String[] { "getOfficeFloorManagedObjectPoolName", "getManagedObjectPoolSourceClassName" },
+		assertList(
+				new String[] { "getOfficeFloorManagedObjectPoolName", "getManagedObjectPoolSourceClassName", "getX",
+						"getY" },
 				officeFloor.getOfficeFloorManagedObjectPools(), new OfficeFloorManagedObjectPoolModel(
 						"MANAGED_OBJECT_POOL", "net.example.ExampleManagedObjectPoolSource", null, null, 400, 401));
 		OfficeFloorManagedObjectPoolModel pool = officeFloor.getOfficeFloorManagedObjectPools().get(0);

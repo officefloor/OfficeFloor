@@ -37,6 +37,10 @@
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
+		<object method="setOfficeManagedObjectPool" node="managed-object-pool"
+			class="net.officefloor.model.office.OfficeManagedObjectSourceToOfficeManagedObjectPoolModel">
+			<value method="setOfficeManagedObjectPoolName" node="managed-object-pool@name" />
+		</object>
 		<object method="addOfficeInputManagedObjectDependency" node="input-dependency"
 			class="net.officefloor.model.office.OfficeInputManagedObjectDependencyModel">
 			<value method="setOfficeInputManagedObjectDependencyName" node="input-dependency@name" />
@@ -107,6 +111,21 @@
 				class="net.officefloor.model.office.OfficeManagedObjectDependencyToOfficeManagedObjectModel">
 				<value method="setOfficeManagedObjectName" node="managed-object@name" />
 			</object>
+		</object>
+	</object>
+
+
+	<!-- MANAGED OBJECT POOLS -->
+	<object method="addOfficeManagedObjectPool" node="managed-object-pool"
+		class="net.officefloor.model.office.OfficeManagedObjectPoolModel">
+		<value method="setOfficeManagedObjectPoolName" node="managed-object-pool@name" />
+		<value method="setManagedObjectPoolSourceClassName" node="managed-object-pool@source" />
+		<value method="setX" node="managed-object-pool@x" />
+		<value method="setY" node="managed-object-pool@y" />
+		<object method="addProperty" node="property"
+			class="net.officefloor.model.office.PropertyModel">
+			<value method="setName" node="property@name" />
+			<value method="setValue" node="property@value" />
 		</object>
 	</object>
 

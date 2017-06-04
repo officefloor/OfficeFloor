@@ -56,7 +56,7 @@ import net.officefloor.model.section.SectionManagedObjectSourceFlowModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowToExternalFlowModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowToSubSectionInputModel;
 import net.officefloor.model.section.SectionManagedObjectSourceModel;
-import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectPoolModel;
+import net.officefloor.model.section.SectionManagedObjectSourceToSectionManagedObjectPoolModel;
 import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectSourceModel;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SubSectionInputModel;
@@ -113,11 +113,14 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 		assertList(
 				new String[] { "getSectionManagedObjectSourceName", "getManagedObjectSourceClassName", "getObjectType",
 						"getTimeout", "getX", "getY" },
-				section.getSectionManagedObjectSources(), new SectionManagedObjectSourceModel("MANAGED_OBJECT_SOURCE",
-						"net.example.ExampleManagedObjectSource", "net.orm.Session", "10", null, null, null, 200, 201));
+				section.getSectionManagedObjectSources(),
+				new SectionManagedObjectSourceModel("MANAGED_OBJECT_SOURCE", "net.example.ExampleManagedObjectSource",
+						"net.orm.Session", "10", null, null, null, null, 200, 201));
 		SectionManagedObjectSourceModel mos = section.getSectionManagedObjectSources().get(0);
 		assertList(new String[] { "getName", "getValue" }, mos.getProperties(),
 				new PropertyModel("MO_ONE", "VALUE_ONE"), new PropertyModel("MO_TWO", "VALUE_TWO"));
+		assertProperties(new SectionManagedObjectSourceToSectionManagedObjectPoolModel("MANAGED_OBJECT_POOL"),
+				mos.getSectionManagedObjectPool(), "getSectionManagedObjectPoolName");
 		assertList(new String[] { "getSectionManagedObjectSourceFlowName", "getArgumentType" },
 				mos.getSectionManagedObjectSourceFlows(),
 				new SectionManagedObjectSourceFlowModel("FLOW_ONE", String.class.getName()),
@@ -134,15 +137,11 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------------
 		assertList(new String[] { "getSectionManagedObjectName", "getManagedObjectScope", "getX", "getY" },
 				section.getSectionManagedObjects(),
-				new SectionManagedObjectModel("MANAGED_OBJECT_ONE", "THREAD", null, null, null, null, null, null, 300,
-						301),
-				new SectionManagedObjectModel("MANAGED_OBJECT_TWO", "PROCESS", null, null, null, null, null, null, 310,
-						311));
+				new SectionManagedObjectModel("MANAGED_OBJECT_ONE", "THREAD", null, null, null, null, null, 300, 301),
+				new SectionManagedObjectModel("MANAGED_OBJECT_TWO", "PROCESS", null, null, null, null, null, 310, 311));
 		SectionManagedObjectModel mo = section.getSectionManagedObjects().get(0);
 		assertProperties(new SectionManagedObjectToSectionManagedObjectSourceModel("MANAGED_OBJECT_SOURCE"),
 				mo.getSectionManagedObjectSource(), "getSectionManagedObjectSourceName");
-		assertProperties(new SectionManagedObjectToSectionManagedObjectPoolModel("MANAGED_OBJECT_POOL"),
-				mo.getSectionManagedObjectPool(), "getSectionManagedObjectPoolName");
 		assertList(new String[] { "getSectionManagedObjectDependencyName", "getDependencyType" },
 				mo.getSectionManagedObjectDependencies(),
 				new SectionManagedObjectDependencyModel("DEPENDENCY_ONE", Object.class.getName()),
@@ -157,7 +156,9 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------------
 		// Validate the managed object pools
 		// ----------------------------------------------
-		assertList(new String[] { "getSectionManagedObjectPoolName", "getManagedObjectPoolSourceClassName" },
+		assertList(
+				new String[] { "getSectionManagedObjectPoolName", "getManagedObjectPoolSourceClassName", "getX",
+						"getY" },
 				section.getSectionManagedObjectPools(), new SectionManagedObjectPoolModel("MANAGED_OBJECT_POOL",
 						"net.example.ExampleManagedObjectPoolSource", null, null, 400, 401));
 		SectionManagedObjectPoolModel pool = section.getSectionManagedObjectPools().get(0);
@@ -230,11 +231,11 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 		functions.add(new FunctionModel("functionOne", true, "namespace", "managedFunctionOne", "java.lang.Integer",
 				null, null, null, null, null, null, null, null, null, null, null, 700, 701));
 		functions.add(new FunctionModel("functionTwo", false, "namespace", "managedFunctionTwo", null, null, null, null,
-				null, null, null, null, null, null, null, null, 610, 611));
+				null, null, null, null, null, null, null, null, 710, 711));
 		functions.add(new FunctionModel("functionThree", false, "namespace", "managedFunctionThree",
 				"java.lang.Integer", null, null, null, null, null, null, null, null, null, null, null, 720, 721));
 		functions.add(new FunctionModel("functionFour", false, "namespace", "managedFunctionFour", null, null, null,
-				null, null, null, null, null, null, null, null, null, 630, 631));
+				null, null, null, null, null, null, null, null, null, 730, 731));
 		assertList(new String[] { "getFunctionName", "getFunctionNamespaceName", "getManagedFunctionName",
 				"getReturnType", "getX", "getY" }, section.getFunctions(), functions.toArray(new FunctionModel[0]));
 		FunctionModel functionOne = section.getFunctions().get(0);
@@ -319,7 +320,7 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 				new SubSectionModel("SECTION_A", "DESK", "DESK_LOCATION", null, null, null, null, 800, 801),
 				new SubSectionModel("SECTION_B", "SECTION", "SECTION_LOCATION", null, null, null, null, 810, 811),
 				new SubSectionModel("SECTION_C", "net.example.ExampleSectionSource", "EXAMPLE_LOCATION", null, null,
-						null, null, 720, 721));
+						null, null, 820, 821));
 		SubSectionModel subSectionA = section.getSubSections().get(0);
 		SubSectionModel subSectionB = section.getSubSections().get(1);
 		SubSectionModel subSectionC = section.getSubSections().get(2);

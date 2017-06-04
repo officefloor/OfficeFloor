@@ -24,6 +24,10 @@
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
+		<object method="setSectionManagedObjectPool" node="managed-object-pool"
+			class="net.officefloor.model.section.SectionManagedObjectSourceToSectionManagedObjectPoolModel">
+			<value method="setSectionManagedObjectPoolName" node="managed-object-pool@name" />
+		</object>
 		<object method="addSectionManagedObjectSourceFlow" node="flow"
 			class="net.officefloor.model.section.SectionManagedObjectSourceFlowModel">
 			<value method="setSectionManagedObjectSourceFlowName" node="flow@name" />
@@ -67,6 +71,20 @@
 				class="net.officefloor.model.section.SectionManagedObjectDependencyToSectionManagedObjectModel">
 				<value method="setSectionManagedObjectName" node="managed-object@name" />
 			</object>
+		</object>
+	</object>
+
+	<!-- MANAGED OBJECT POOLS -->
+	<object method="addSectionManagedObjectPool" node="managed-object-pool"
+		class="net.officefloor.model.section.SectionManagedObjectPoolModel">
+		<value method="setSectionManagedObjectPoolName" node="managed-object-pool@name" />
+		<value method="setManagedObjectPoolSourceClassName" node="managed-object-pool@source" />
+		<value method="setX" node="managed-object-pool@x" />
+		<value method="setY" node="managed-object-pool@y" />
+		<object method="addProperty" node="property"
+			class="net.officefloor.model.section.PropertyModel">
+			<value method="setName" node="property@name" />
+			<value method="setValue" node="property@value" />
 		</object>
 	</object>
 

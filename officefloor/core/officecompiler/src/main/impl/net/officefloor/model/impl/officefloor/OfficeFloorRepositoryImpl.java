@@ -44,8 +44,8 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorManagedObjectPoolModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel;
-import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectPoolModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorRepository;
@@ -135,14 +135,15 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 			pools.put(pool.getOfficeFloorManagedObjectPoolName(), pool);
 		}
 
-		// Connect the managed objects to their managed object sources
-		for (OfficeFloorManagedObjectModel managedObject : officeFloor.getOfficeFloorManagedObjects()) {
-			OfficeFloorManagedObjectToOfficeFloorManagedObjectPoolModel conn = managedObject
+		// Connect the managed object sources to their managed object sources
+		for (OfficeFloorManagedObjectSourceModel managedObjectSource : officeFloor
+				.getOfficeFloorManagedObjectSources()) {
+			OfficeFloorManagedObjectSourceToOfficeFloorManagedObjectPoolModel conn = managedObjectSource
 					.getOfficeFloorManagedObjectPool();
 			if (conn != null) {
 				OfficeFloorManagedObjectPoolModel pool = pools.get(conn.getOfficeFloorManagedObjectPoolName());
 				if (pool != null) {
-					conn.setOfficeFloorManagedObject(managedObject);
+					conn.setOfficeFloorManagedObjectSource(managedObjectSource);
 					conn.setOfficeFloorManagedObjectPool(pool);
 					conn.connect();
 				}
@@ -383,8 +384,8 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 
 		// Specify managed object pools for the managed objects
 		for (OfficeFloorManagedObjectPoolModel pool : officeFloor.getOfficeFloorManagedObjectPools()) {
-			for (OfficeFloorManagedObjectToOfficeFloorManagedObjectPoolModel conn : pool
-					.getOfficeFloorManagedObjects()) {
+			for (OfficeFloorManagedObjectSourceToOfficeFloorManagedObjectPoolModel conn : pool
+					.getOfficeFloorManagedObjectSources()) {
 				conn.setOfficeFloorManagedObjectPoolName(pool.getOfficeFloorManagedObjectPoolName());
 			}
 		}

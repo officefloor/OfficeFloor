@@ -334,8 +334,9 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	}
 
 	@Override
-	public void link(OfficeFloorManagedObject managedObject, OfficeFloorManagedObjectPool managedObjectPool) {
-		LinkUtil.linkPool(managedObject, managedObjectPool, this.context.getCompilerIssues(), this);
+	public void link(OfficeFloorManagedObjectSource managedObjectSource,
+			OfficeFloorManagedObjectPool managedObjectPool) {
+		LinkUtil.linkPool(managedObjectSource, managedObjectPool, this.context.getCompilerIssues(), this);
 	}
 
 	@Override

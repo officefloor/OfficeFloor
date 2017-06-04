@@ -58,9 +58,9 @@ import net.officefloor.model.office.OfficeManagedObjectSourceFlowToOfficeSection
 import net.officefloor.model.office.OfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeManagedObjectPoolModel;
 import net.officefloor.model.office.OfficeManagedObjectToAdministrationModel;
 import net.officefloor.model.office.OfficeManagedObjectToGovernanceModel;
-import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectPoolModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRepository;
@@ -172,10 +172,10 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				"MANAGED_OBJECT_SOURCE");
 		mo.setOfficeManagedObjectSource(moToMos);
 
-		// managed object -> managed object pool
-		OfficeManagedObjectToOfficeManagedObjectPoolModel moToPool = new OfficeManagedObjectToOfficeManagedObjectPoolModel(
+		// managed object source -> managed object pool
+		OfficeManagedObjectSourceToOfficeManagedObjectPoolModel mosToPool = new OfficeManagedObjectSourceToOfficeManagedObjectPoolModel(
 				"POOL");
-		mo.setOfficeManagedObjectPool(moToPool);
+		mos.setOfficeManagedObjectPool(mosToPool);
 
 		// mo flow -> section input
 		OfficeManagedObjectSourceFlowToOfficeSectionInputModel mosFlowToInput = new OfficeManagedObjectSourceFlowToOfficeSectionInputModel(
@@ -343,8 +343,8 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("managed object -> managed object source", mos, moToMos.getOfficeManagedObjectSource());
 
 		// Ensure managed object connected to its managed object pool
-		assertEquals("managed object <- managed object pool", mo, moToPool.getOfficeManagedObject());
-		assertEquals("managed object -> managed object pool", pool, moToPool.getOfficeManagedObjectPool());
+		assertEquals("managed object source <- managed object pool", mos, mosToPool.getOfficeManagedObjectSource());
+		assertEquals("managed object source -> managed object pool", pool, mosToPool.getOfficeManagedObjectPool());
 
 		// Ensure managed object source flow connected to section input
 		assertEquals("mos flow <- section input", moFlow, mosFlowToInput.getOfficeManagedObjectSourceFlow());
@@ -531,11 +531,11 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		moToMos.setOfficeManagedObjectSource(mos);
 		moToMos.connect();
 
-		// managed object -> managed object pool
-		OfficeManagedObjectToOfficeManagedObjectPoolModel moToPool = new OfficeManagedObjectToOfficeManagedObjectPoolModel();
-		moToPool.setOfficeManagedObject(mo);
-		moToPool.setOfficeManagedObjectPool(pool);
-		moToPool.connect();
+		// managed object source -> managed object pool
+		OfficeManagedObjectSourceToOfficeManagedObjectPoolModel mosToPool = new OfficeManagedObjectSourceToOfficeManagedObjectPoolModel();
+		mosToPool.setOfficeManagedObjectSource(mos);
+		mosToPool.setOfficeManagedObjectPool(pool);
+		mosToPool.connect();
 
 		// managed object source flow -> section input
 		OfficeManagedObjectSourceFlowToOfficeSectionInputModel flowToInput = new OfficeManagedObjectSourceFlowToOfficeSectionInputModel();
@@ -724,7 +724,7 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		// Ensure the connections have links to enable retrieving
 		assertEquals("managed object - managed object source", "MANAGED_OBJECT_SOURCE",
 				moToMos.getOfficeManagedObjectSourceName());
-		assertEquals("managed object - managed object pool", "POOL", moToPool.getOfficeManagedObjectPoolName());
+		assertEquals("managed object source - managed object pool", "POOL", mosToPool.getOfficeManagedObjectPoolName());
 		assertEquals("managed object source flow - input (section name)", "SECTION_TARGET",
 				flowToInput.getOfficeSectionName());
 		assertEquals("managed object source flow - input (input name)", "INPUT",

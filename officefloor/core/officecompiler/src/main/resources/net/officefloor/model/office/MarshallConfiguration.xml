@@ -64,6 +64,12 @@
 					</attributes>
 				</item>
 			</collection>
+			<object method="getOfficeManagedObjectPool" element="managed-object-pool">
+				<attributes>
+					<attribute method="getOfficeManagedObjectPoolName"
+						attribute="name" />
+				</attributes>
+			</object>
 			<collection method="getOfficeInputManagedObjectDependencies">
 				<item
 					type="net.officefloor.model.office.OfficeInputManagedObjectDependencyModel"
@@ -192,6 +198,31 @@
 			</collection>
 		</item>
 	</collection>
+
+	<!-- MANAGED OBJECT POOLS -->
+	<collection method="getOfficeManagedObjectPools" element="managed-object-pools">
+		<item type="net.officefloor.model.office.OfficeManagedObjectPoolModel"
+			element="managed-object-pool">
+			<attributes>
+				<attribute method="getOfficeManagedObjectPoolName"
+					attribute="name" />
+				<attribute method="getManagedObjectPoolSourceClassName"
+					attribute="source" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+			<collection method="getProperties" element="properties">
+				<item type="net.officefloor.model.office.PropertyModel"
+					element="property">
+					<attributes>
+						<attribute method="getName" attribute="name" />
+						<attribute method="getValue" attribute="value" />
+					</attributes>
+				</item>
+			</collection>
+		</item>
+	</collection>
+
 
 	<!-- OFFICE TEAMS -->
 	<collection method="getOfficeTeams" element="teams">

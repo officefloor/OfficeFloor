@@ -20,14 +20,11 @@ package net.officefloor.compile.internal.structure;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.pool.ManagedObjectPoolType;
 import net.officefloor.compile.spi.office.OfficeManagedObjectPool;
-import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectPool;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.SectionManagedObjectPool;
-import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.OfficeFloorBuilder;
+import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * Node representing instance use of a {@link ManagedObjectPool}.
@@ -54,17 +51,6 @@ public interface ManagedObjectPoolNode
 	void initialise(String managedObjectPoolSourceClassName, ManagedObjectPoolSource managedObjectPoolSource);
 
 	/**
-	 * Sources the {@link ManagedObjectPoolSource}.
-	 * 
-	 * @param compileContext
-	 *            {@link CompileContext}.
-	 * @return <code>true</code> if successfully sourced the
-	 *         {@link ManagedObjectPoolSource}. <code>false</code> if failed to
-	 *         source, with issues reported to the {@link CompilerIssues}.
-	 */
-	boolean sourceManagedObjectPool(CompileContext compileContext);
-
-	/**
 	 * Loads the {@link ManagedObjectPoolType}.
 	 * 
 	 * @return {@link ManagedObjectPoolType} or <code>null</code> if issue
@@ -75,19 +61,11 @@ public interface ManagedObjectPoolNode
 	/**
 	 * Builds {@link ManagedObjectPool} for this {@link ManagedObjectPoolNode}.
 	 *
-	 * @param builder
-	 *            {@link OfficeFloorBuilder}.
-	 * @param managingOffice
-	 *            {@link OfficeNode} of the {@link ManagingOffice} for this
-	 *            {@link ManagedObjectSource}.
-	 * @param managingOfficeBuilder
-	 *            {@link OfficeBuilder} for the {@link ManagingOffice}.
-	 * @param officeBindings
-	 *            {@link OfficeBindings}.
+	 * @param managedObjectBuilder
+	 *            {@link ManagedObjectBuilder}.
 	 * @param compileContext
 	 *            {@link CompileContext}.
 	 */
-	void buildManagedObjectPool(OfficeFloorBuilder builder, OfficeNode managingOffice,
-			OfficeBuilder managingOfficeBuilder, OfficeBindings officeBindings, CompileContext compileContext);
+	void buildManagedObjectPool(ManagedObjectBuilder<?> managedObjectBuilder, CompileContext compileContext);
 
 }

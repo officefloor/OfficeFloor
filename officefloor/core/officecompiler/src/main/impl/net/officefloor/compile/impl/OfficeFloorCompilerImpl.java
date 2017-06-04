@@ -130,6 +130,7 @@ import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
+import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.frame.api.OfficeFrame;
@@ -235,6 +236,12 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	 * {@link ManagedObjectSource} {@link Class} instances by their alias name.
 	 */
 	private final Map<String, Class<?>> managedObjectSourceAliases = new HashMap<String, Class<?>>();
+
+	/**
+	 * {@link ManagedObjectPoolSource} {@link Class} instances by their alias
+	 * name.
+	 */
+	private final Map<String, Class<?>> managedObjectPoolSourceAliases = new HashMap<>();
 
 	/**
 	 * {@link SupplierSource} {@link Class} instances by their alias name.
@@ -382,6 +389,13 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	public <D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> void addManagedObjectSourceAlias(
 			String alias, Class<S> managedObjectSourceClass) {
 		this.registerAlias(alias, managedObjectSourceClass, this.managedObjectSourceAliases, "managed object");
+	}
+
+	@Override
+	public <S extends ManagedObjectPoolSource> void addManagedObjectPoolSourceAlias(String alias,
+			Class<S> managedObjectPoolSourceClass) {
+		this.registerAlias(alias, managedObjectPoolSourceClass, this.managedObjectPoolSourceAliases,
+				"managed object pool");
 	}
 
 	@Override
@@ -865,6 +879,14 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	public ManagedObjectSourceNode createManagedObjectSourceNode(String managedObjectSourceName,
 			OfficeFloorNode officeFloor) {
 		return new ManagedObjectSourceNodeImpl(managedObjectSourceName, null, null, null, officeFloor, this);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <S extends ManagedObjectPoolSource> Class<S> getManagedObjectPoolSourceClass(
+			String managedObjectPoolSourceName, Node node) {
+		return (Class<S>) CompileUtil.obtainClass(managedObjectPoolSourceName, ManagedObjectPoolSource.class,
+				this.managedObjectPoolSourceAliases, this.getRootSourceContext(), node, this.getCompilerIssues());
 	}
 
 	@Override
