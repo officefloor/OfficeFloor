@@ -826,7 +826,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		ManagedObjectPoolNode poolNode = LinkUtil.findTarget(this, ManagedObjectPoolNode.class,
 				this.context.getCompilerIssues());
 		if (poolNode != null) {
-			poolNode.buildManagedObjectPool(moBuilder, compileContext);
+			poolNode.buildManagedObjectPool(moBuilder, managedObjectType, compileContext);
 		}
 	}
 

@@ -18,6 +18,7 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.pool.ManagedObjectPoolType;
 import net.officefloor.compile.spi.office.OfficeManagedObjectPool;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectPool;
@@ -25,6 +26,7 @@ import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.SectionManagedObjectPool;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * Node representing instance use of a {@link ManagedObjectPool}.
@@ -63,9 +65,13 @@ public interface ManagedObjectPoolNode
 	 *
 	 * @param managedObjectBuilder
 	 *            {@link ManagedObjectBuilder}.
+	 * @param managedObjectType
+	 *            {@link ManagedObjectType} of the {@link ManagedObjectSource}
+	 *            being pooled.
 	 * @param compileContext
 	 *            {@link CompileContext}.
 	 */
-	void buildManagedObjectPool(ManagedObjectBuilder<?> managedObjectBuilder, CompileContext compileContext);
+	void buildManagedObjectPool(ManagedObjectBuilder<?> managedObjectBuilder, ManagedObjectType<?> managedObjectType,
+			CompileContext compileContext);
 
 }

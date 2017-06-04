@@ -887,8 +887,16 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 			String poolId = context.getManagedObjectPoolSourceContext().getProperty(PROPERTY_POOL_ID);
 			TestManagedObjectPoolSource pool = getManagedObjectPoolSource(poolId);
 
+			// Obtain the pooled object type
+			String pooledObjectTypeName = context.getManagedObjectPoolSourceContext().getProperty("pooled.object.type",
+					null);
+			Class<?> pooledObjectType = Object.class;
+			if (pooledObjectTypeName != null) {
+				pooledObjectType = context.getManagedObjectPoolSourceContext().loadClass(pooledObjectTypeName);
+			}
+
 			// Configure the source
-			context.setPooledObjectType(Object.class);
+			context.setPooledObjectType(pooledObjectType);
 			context.setManagedObjectPoolFactory(pool);
 			context.addThreadCompleteListener(pool);
 		}

@@ -26,6 +26,7 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SectionNode;
+import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.pool.ManagedObjectPoolLoader;
 import net.officefloor.compile.pool.ManagedObjectPoolType;
 import net.officefloor.compile.properties.PropertyList;
@@ -245,12 +246,22 @@ public class ManagedObjectPoolNodeImpl implements ManagedObjectPoolNode {
 	}
 
 	@Override
-	public void buildManagedObjectPool(ManagedObjectBuilder<?> builder, CompileContext compileContext) {
+	public void buildManagedObjectPool(ManagedObjectBuilder<?> builder, ManagedObjectType<?> managedObjectType,
+			CompileContext compileContext) {
 
 		// Build the managed object pool type
 		ManagedObjectPoolType poolType = this.loadManagedObjectPoolType();
 		if (poolType == null) {
 			return; // must load pool type
+		}
+
+		// Ensure able to pool managed objects from managed object source
+		Class<?> pooledObjectType = poolType.getPooledObjectType();
+		Class<?> objectType = managedObjectType.getObjectClass();
+		if (!pooledObjectType.isAssignableFrom(objectType)) {
+			this.context.getCompilerIssues().addIssue(this, "Pooled object " + pooledObjectType.getName()
+					+ " must be super (or same) type for ManagedObjectSource object " + objectType.getName());
+			return; // must be able pool the object
 		}
 
 		// Build the managed object pool
