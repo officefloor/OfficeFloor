@@ -39,6 +39,7 @@ import net.officefloor.compile.spi.pool.source.impl.AbstractManagedObjectPoolSou
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.extension.AutoWireOfficeExtensionService;
+import net.officefloor.extension.AutoWireOfficeFloorExtensionService;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationFactory;
@@ -128,6 +129,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 
 		// Reset the extension services
 		AutoWireOfficeExtensionService.reset();
+		AutoWireOfficeFloorExtensionService.reset();
 
 		// Complete tear down
 		super.tearDown();

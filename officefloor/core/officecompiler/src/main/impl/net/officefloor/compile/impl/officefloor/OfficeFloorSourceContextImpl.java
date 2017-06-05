@@ -29,6 +29,7 @@ import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.source.OfficeSource;
+import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionContext;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -39,7 +40,8 @@ import net.officefloor.frame.impl.construct.source.SourceContextImpl;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorSourceContextImpl extends SourceContextImpl implements OfficeFloorSourceContext {
+public class OfficeFloorSourceContextImpl extends SourceContextImpl
+		implements OfficeFloorSourceContext, OfficeFloorExtensionContext {
 
 	/**
 	 * Location of the {@link OfficeFloor}.

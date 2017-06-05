@@ -675,7 +675,8 @@ public class SectionNodeImpl implements SectionNode {
 			AutoWireLink<LinkObjectNode>[] links = autoWirer.getAutoWireLinks(object,
 					new AutoWire(objectType.getTypeQualifier(), objectType.getObjectType()));
 			if (links.length == 1) {
-				LinkUtil.linkObject(object, links[0].getTargetNode(), this.context.getCompilerIssues(), this);
+				LinkUtil.linkAutoWireObjectNode(object, links[0].getTargetNode(), this.office,
+						this.context.getCompilerIssues(), (link) -> object.linkObjectNode(link));
 			}
 		});
 	}

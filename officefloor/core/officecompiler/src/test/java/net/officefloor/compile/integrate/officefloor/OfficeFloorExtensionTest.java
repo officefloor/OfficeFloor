@@ -15,75 +15,74 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.integrate.office;
+package net.officefloor.compile.integrate.officefloor;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
-import net.officefloor.compile.spi.office.extension.OfficeExtensionService;
+import net.officefloor.compile.spi.office.OfficeObject;
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
+import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSource;
-import net.officefloor.extension.CompileOffice;
+import net.officefloor.extension.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 
 /**
- * Tests the {@link OfficeExtensionService}.
+ * Tests the {@link OfficeFloorExtensionService}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeExtensionTest extends AbstractOfficeConstructTestCase {
+public class OfficeFloorExtensionTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Ensure able to extend the {@link Office}.
+	 * Ensure able to extend the {@link OfficeFloor}.
 	 */
-	public void testExtendOffice() throws Exception {
+	public void testExtendOfficeFloor() throws Exception {
 
 		// Reset for test
-		SourceFunction.isInvoked = false;
-		ExtendFunction.isInvoked = false;
+		TestWork.dependency = null;
 
-		// Compile the office with extension
-		CompileOffice compileOffice = new CompileOffice();
-		compileOffice.getOfficeFloorCompiler().setOfficeFloorSourceClass(TestOfficeFloorSource.class);
-		OfficeFloor officeFloor = compileOffice.compileAndOpenOffice((architect, context) -> {
+		// Compile the OfficeFloor with extension
+		CompileOfficeFloor compileOfficeFloor = new CompileOfficeFloor();
+		compileOfficeFloor.getOfficeFloorCompiler().setOfficeFloorSourceClass(TestOfficeFloorSource.class);
+		OfficeFloor officeFloor = compileOfficeFloor.compileAndOpenOfficeFloor((deployer, context) -> {
 
-			// Extend with managed function
-			architect.addOfficeSection("EXTEND", ClassSectionSource.class.getName(), ExtendFunction.class.getName());
+			// Add the managed object
+			OfficeFloorManagedObjectSource mos = deployer.addManagedObjectSource("MOS",
+					ClassManagedObjectSource.class.getName());
+			mos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, CompileManagedObject.class.getName());
+			mos.addOfficeFloorManagedObject("MO", ManagedObjectScope.THREAD);
+
+			// Auto-wire the object to the office
+			deployer.enableAutoWireObjects();
 		});
 
-		// Ensure able to invoke the functions from the Office
+		// Ensure able to invoke the function with the object from extension
 		Office office = officeFloor.getOffice("OFFICE");
-
-		// Ensure able to invoke function added by source
 		office.getFunctionManager("MAIN.function").invokeProcess(null, null);
-		assertTrue("Source function should be invoked", SourceFunction.isInvoked);
-
-		// Ensure able to invoke function added by extension
-		office.getFunctionManager("EXTEND.function").invokeProcess(null, null);
-		assertTrue("Extend function should be invoked", ExtendFunction.isInvoked);
+		assertNotNull("Should have loaded object from extension", TestWork.dependency);
 	}
 
-	public static class SourceFunction {
-
-		public static boolean isInvoked = false;
-
-		public void function() {
-			isInvoked = true;
-		}
+	public static class CompileManagedObject {
 	}
 
-	public static class ExtendFunction {
+	public static class TestWork {
 
-		public static boolean isInvoked = false;
+		public static CompileManagedObject dependency;
 
-		public void function() {
-			isInvoked = true;
+		public void function(CompileManagedObject object) {
+			dependency = object;
 		}
 	}
 
@@ -114,8 +113,12 @@ public class OfficeExtensionTest extends AbstractOfficeConstructTestCase {
 
 		@Override
 		public void sourceOffice(OfficeArchitect officeArchitect, OfficeSourceContext context) throws Exception {
-			officeArchitect.addOfficeSection("MAIN", ClassSectionSource.class.getName(),
-					SourceFunction.class.getName());
+			OfficeSection section = officeArchitect.addOfficeSection("MAIN", ClassSectionSource.class.getName(),
+					TestWork.class.getName());
+			OfficeSectionObject object = section.getOfficeSectionObject(CompileManagedObject.class.getName());
+			OfficeObject dependency = officeArchitect.addOfficeObject("DEPENDENCY",
+					CompileManagedObject.class.getName());
+			officeArchitect.link(object, dependency);
 		}
 	}
 

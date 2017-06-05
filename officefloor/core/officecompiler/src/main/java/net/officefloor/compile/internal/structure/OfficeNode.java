@@ -104,6 +104,26 @@ public interface OfficeNode
 	OfficeType loadOfficeType(CompileContext compileContext);
 
 	/**
+	 * Auto-wires the {@link OfficeObjectNode} instances that are unlinked.
+	 * 
+	 * @param autoWirer
+	 *            {@link AutoWirer}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 */
+	void autoWireObjects(AutoWirer<LinkObjectNode> autoWirer, CompileContext compileContext);
+
+	/**
+	 * Auto-wires the {@link OfficeTeamNode} instances that are unlinked.
+	 * 
+	 * @param autoWirer
+	 *            {@link AutoWirer}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 */
+	void autoWireTeams(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext);
+
+	/**
 	 * Builds the {@link Office} for this {@link OfficeNode}.
 	 * 
 	 * @param builder

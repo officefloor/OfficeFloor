@@ -40,6 +40,16 @@ import net.officefloor.frame.api.team.source.TeamSource;
 public interface OfficeFloorDeployer {
 
 	/**
+	 * Flags to attempt to auto wire any non-configured object links.
+	 */
+	void enableAutoWireObjects();
+
+	/**
+	 * Flags to attempt to auto wire any non-configured {@link Team} links.
+	 */
+	void enableAutoWireTeams();
+
+	/**
 	 * Adds a {@link Team}.
 	 * 
 	 * @param teamName

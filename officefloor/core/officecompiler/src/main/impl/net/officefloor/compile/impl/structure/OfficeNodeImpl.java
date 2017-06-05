@@ -34,6 +34,7 @@ import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.internal.structure.AdministrationNode;
 import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.internal.structure.AutoWireLink;
 import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.CompileContext;
@@ -545,7 +546,7 @@ public class OfficeNodeImpl implements OfficeNode {
 		// Undertake auto-wire of objects
 		if (this.isAutoWireObjects) {
 
-			// Create the OfficeFloor auto wirier
+			// Create the OfficeFloor auto wirer
 			final AutoWirer<LinkObjectNode> officeFloorAutoWirer = this.context.createAutoWirer(LinkObjectNode.class);
 			this.officeFloor.loadAutoWireObjectTargets(officeFloorAutoWirer, compileContext);
 
@@ -704,6 +705,56 @@ public class OfficeNodeImpl implements OfficeNode {
 
 		// Create and return the type
 		return new OfficeTypeImpl(inputTypes, outputTypes, teamTypes, moTypes, sectionInputTypes);
+	}
+
+	@Override
+	public void autoWireObjects(AutoWirer<LinkObjectNode> autoWirer, CompileContext compileContext) {
+
+		// Auto-wire the objects
+		this.objects.values().forEach((object) -> {
+
+			// Ignore if already configured
+			if (object.getLinkedObjectNode() != null) {
+				return;
+			}
+
+			// Obtain the qualifier and type for object
+			String typeQualifier = object.getTypeQualifier();
+			String objectType = object.getOfficeObjectType();
+
+			// Auto-wire the object
+			AutoWireLink<LinkObjectNode>[] links = autoWirer.getAutoWireLinks(object,
+					new AutoWire(typeQualifier, objectType));
+			if (links.length == 1) {
+				LinkUtil.linkAutoWireObjectNode(object, links[0].getTargetNode(), this,
+						this.context.getCompilerIssues(), (link) -> object.linkObjectNode(link));
+			}
+		});
+	}
+
+	@Override
+	public void autoWireTeams(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext) {
+
+		// Auto-wire team
+		this.teams.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeTeamName(), b.getOfficeTeamName()))
+				.forEachOrdered((team) -> {
+
+					// Ignore if already configured
+					if (team.getLinkedTeamNode() != null) {
+						return;
+					}
+
+					// Create the auto-wires
+					AutoWire[] sourceAutoWires = Arrays.stream(team.getTypeQualifications())
+							.map((type) -> new AutoWire(type.getQualifier(), type.getType())).toArray(AutoWire[]::new);
+
+					// Auto-wire the team
+					AutoWireLink<LinkTeamNode>[] links = autoWirer.getAutoWireLinks(team, sourceAutoWires);
+					if (links.length == 1) {
+						LinkUtil.linkTeam(team, links[0].getTargetNode(), this.context.getCompilerIssues(), this);
+					}
+				});
 	}
 
 	@Override

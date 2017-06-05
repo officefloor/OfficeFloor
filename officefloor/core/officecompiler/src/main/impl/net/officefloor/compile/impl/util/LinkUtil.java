@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
@@ -28,8 +29,10 @@ import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.LinkPoolNode;
 import net.officefloor.compile.internal.structure.LinkSynchronousNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
+import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
+import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.internal.structure.Flow;
@@ -522,6 +525,50 @@ public class LinkUtil {
 	public static boolean linkObjectNode(LinkObjectNode node, LinkObjectNode linkNode, CompilerIssues issues,
 			Consumer<LinkObjectNode> loader) {
 		return linkNode(node, linkNode, OBJECT_TRAVERSER, issues, loader);
+	}
+
+	/**
+	 * Links the {@link AutoWire} {@link LinkObjectNode}.
+	 * 
+	 * @param node
+	 *            {@link LinkObjectNode} to have the link loaded.
+	 * @param linkNode
+	 *            Link {@link LinkObjectNode} to load.
+	 * @param office
+	 *            {@link OfficeNode}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @param loader
+	 *            {@link Consumer} to load the link onto the
+	 *            {@link LinkObjectNode}.
+	 * @return <code>true</code> if successful, or <code>false</code> with issue
+	 *         reported to the {@link CompilerIssues}.
+	 */
+	public static boolean linkAutoWireObjectNode(LinkObjectNode node, LinkObjectNode linkNode, OfficeNode office,
+			CompilerIssues issues, Consumer<LinkObjectNode> loader) {
+
+		// Link the object node
+		boolean isLinked = linkObjectNode(node, linkNode, issues, loader);
+
+		// Link managed object source to office
+		if (isLinked) {
+
+			// Obtain possible managed object fulfilling object dependency
+			ManagedObjectNode managedObject = retrieveTarget(node, OBJECT_TRAVERSER, ManagedObjectNode.class, false,
+					issues, null).target;
+			if (managedObject != null) {
+
+				// Determine if managed object source is managed by an office
+				ManagedObjectSourceNode managedObjectSource = managedObject.getManagedObjectSourceNode();
+				if (managedObjectSource != null) {
+					managedObjectSource.autoWireToOffice(office, issues);
+				}
+			}
+
+		}
+
+		// Return whether linked
+		return isLinked;
 	}
 
 	/**

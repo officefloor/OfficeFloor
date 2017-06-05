@@ -19,14 +19,28 @@ package net.officefloor.compile.impl.util;
 
 import java.util.function.Function;
 
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.structure.ManagedObjectNodeImpl;
+import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
+import net.officefloor.compile.impl.structure.OfficeNodeImpl;
+import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.LinkPoolNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
+import net.officefloor.compile.internal.structure.ManagedObjectNode;
+import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
+import net.officefloor.compile.internal.structure.ManagingOfficeNode;
 import net.officefloor.compile.internal.structure.Node;
+import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeFloorNode;
+import net.officefloor.compile.internal.structure.OfficeNode;
+import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -434,6 +448,39 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 			fail("Should not link node");
 		});
 		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can {@link AutoWire} the {@link ManagedObjectNode} and ensure its
+	 * {@link ManagedObjectSourceNode} is managed by an {@link Office}.
+	 */
+	public void testAutoWireObjectNode() {
+
+		// Obtain the node context
+		NodeContext context = (NodeContext) OfficeFloorCompiler.newOfficeFloorCompiler(null);
+
+		// Create the office
+		OfficeFloorNode officeFloor = context.createOfficeFloorNode("net.example.ExampleOfficeFloorSource", null,
+				"location");
+		OfficeNode office = context.createOfficeNode("OFFICE", officeFloor);
+
+		// Create the source node
+		OfficeObjectNode node = context.createOfficeObjectNode("OBJECT", office);
+
+		// Create the managed object within the OfficeFloor
+		ManagedObjectSourceNode managedObjectSource = context.createManagedObjectSourceNode("MOS", officeFloor);
+		ManagedObjectNode managedObject = context.createManagedObjectNode("MO");
+		managedObject.initialise(ManagedObjectScope.THREAD, managedObjectSource);
+
+		// Link the auto-wire object
+		LinkUtil.linkAutoWireObjectNode(node, managedObject, office, this.issues, (link) -> node.linkObjectNode(link));
+
+		// Ensure the node is linked to the managed object
+		assertEquals("Node should be linked to managed object", managedObject, node.getLinkedObjectNode());
+
+		// Ensure the managed object source is also managed by the office
+		ManagingOfficeNode managingOffice = (ManagingOfficeNode) managedObjectSource.getManagingOffice();
+		assertEquals("Managed object source should be managed by office", office, managingOffice.getLinkedOfficeNode());
 	}
 
 	/**

@@ -17,9 +17,12 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.function.Function;
 
 import net.officefloor.compile.impl.officefloor.OfficeFloorSourceContextImpl;
@@ -66,8 +69,8 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectPool;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
+import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
-import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
@@ -80,6 +83,7 @@ import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.api.source.UnknownClassError;
 import net.officefloor.frame.api.source.UnknownPropertyError;
 import net.officefloor.frame.api.source.UnknownResourceError;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
 /**
@@ -170,6 +174,16 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	private final Map<String, OfficeNode> offices = new HashMap<String, OfficeNode>();
 
 	/**
+	 * Indicates whether to {@link AutoWire} the objects.
+	 */
+	private boolean isAutoWireObjects = false;
+
+	/**
+	 * Indicates whether to {@link AutoWire} the {@link Team} instances.
+	 */
+	private boolean isAutoWireTeams = false;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param officeFloorSourceClassName
@@ -257,6 +271,16 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	/*
 	 * ===================== OfficeFloorDeployer =============================
 	 */
+
+	@Override
+	public void enableAutoWireObjects() {
+		this.isAutoWireObjects = true;
+	}
+
+	@Override
+	public void enableAutoWireTeams() {
+		this.isAutoWireTeams = true;
+	}
 
 	@Override
 	public OfficeFloorManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
@@ -433,12 +457,24 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 		}
 
 		// Create the OfficeFloor source context
-		OfficeFloorSourceContext sourceContext = new OfficeFloorSourceContextImpl(false, this.officeFloorLocation,
+		OfficeFloorSourceContextImpl sourceContext = new OfficeFloorSourceContextImpl(false, this.officeFloorLocation,
 				this.properties, this, this.context);
+
+		// Obtain the extension services (ensuring all are available)
+		List<OfficeFloorExtensionService> extensionServices = new ArrayList<>();
+		for (OfficeFloorExtensionService extensionService : ServiceLoader.load(OfficeFloorExtensionService.class,
+				sourceContext.getClassLoader())) {
+			extensionServices.add(extensionService);
+		}
 
 		try {
 			// Source the OfficeFloor
 			source.sourceOfficeFloor(this, sourceContext);
+
+			// Extend the OfficeFloor
+			for (OfficeFloorExtensionService extensionService : extensionServices) {
+				extensionService.extendOfficeFloor(this, sourceContext);
+			}
 
 		} catch (UnknownPropertyError ex) {
 			this.addIssue("Missing property '" + ex.getUnknownPropertyName() + "' for "
@@ -485,6 +521,40 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 				.allMatch((office) -> office.sourceOfficeTree(compileContext));
 		if (!isSourced) {
 			return false;
+		}
+
+		// Undertake auto-wire of objects
+		if (this.isAutoWireObjects) {
+
+			// Create the auto wirer
+			final AutoWirer<LinkObjectNode> autoWirer = this.context.createAutoWirer(LinkObjectNode.class);
+			this.loadAutoWireObjectTargets(autoWirer, compileContext);
+
+			// Iterate over offices (auto-wiring unlinked dependencies)
+			this.offices.values().stream()
+					.sorted((a, b) -> CompileUtil.sortCompare(a.getDeployedOfficeName(), b.getDeployedOfficeName()))
+					.forEachOrdered((office) -> office.autoWireObjects(autoWirer, compileContext));
+		}
+
+		// Undertake auto-wire of teams
+		if (this.isAutoWireTeams) {
+
+			// Create the auto-wirer
+			final AutoWirer<LinkTeamNode> autoWirer = this.context.createAutoWirer(LinkTeamNode.class);
+			this.teams.values().forEach((team) -> {
+
+				// Create the target auto-wires
+				AutoWire[] targetAutoWires = Arrays.stream(team.getTypeQualifications())
+						.map((type) -> new AutoWire(type.getQualifier(), type.getType())).toArray(AutoWire[]::new);
+
+				// Add the target
+				autoWirer.addAutoWireTarget(team, targetAutoWires);
+			});
+
+			// Iterate over offices (auto-wiring teams)
+			this.offices.values().stream()
+					.sorted((a, b) -> CompileUtil.sortCompare(a.getDeployedOfficeName(), b.getDeployedOfficeName()))
+					.forEachOrdered((office) -> office.autoWireTeams(autoWirer, compileContext));
 		}
 
 		// As here, successfully sourced

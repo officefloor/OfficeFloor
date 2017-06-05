@@ -53,6 +53,7 @@ import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
 import net.officefloor.compile.internal.structure.TeamNode;
+import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
@@ -545,6 +546,19 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 						(link) -> teamNode.linkTeamNode(link));
 			}
 		}
+	}
+
+	@Override
+	public void autoWireToOffice(OfficeNode officeNode, CompilerIssues issues) {
+
+		// Determine if already managed by an office
+		if (this.managingOffice.getLinkedOfficeNode() != null) {
+			return; // already managed
+		}
+
+		// Not managed by office, so link to the office
+		LinkUtil.linkOfficeNode(this.managingOffice, officeNode, issues,
+				(link) -> this.managingOffice.linkOfficeNode(link));
 	}
 
 	@Override

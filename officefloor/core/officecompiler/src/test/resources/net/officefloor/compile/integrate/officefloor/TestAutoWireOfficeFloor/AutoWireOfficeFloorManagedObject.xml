@@ -1,0 +1,38 @@
+<context>
+	<office-floor>
+		<managed-object-sources>
+			<managed-object-source name="MANAGED_OBJECT_SOURCE"
+				source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$CompileManagedObject" />
+				</properties>
+				<!-- Must auto-wire the office -->
+			</managed-object-source>
+		</managed-object-sources>
+		<managed-objects>
+			<managed-object name="MANAGED_OBJECT" scope="THREAD">
+				<managed-object-source name="MANAGED_OBJECT_SOURCE" />
+			</managed-object>
+		</managed-objects>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office">
+				<object name="EXTERNAL_MANAGED_OBJECT" object-type="${testcase}$CompileManagedObject" />
+			</office>
+		</offices>
+	</office-floor>
+	<office>
+		<external-managed-objects>
+			<external-managed-object name="EXTERNAL_MANAGED_OBJECT"
+				object-type="${testcase}$CompileManagedObject" object-scope="PROCESS" />
+		</external-managed-objects>
+		<sections>
+			<section name="SECTION" source="CLASS"
+				location="${testcase}$CompileSectionClass">
+				<input name="function" />
+				<object name="${testcase}$CompileManagedObject" object-type="${testcase}$CompileManagedObject">
+					<external-managed-object name="EXTERNAL_MANAGED_OBJECT" />
+				</object>
+			</section>
+		</sections>
+	</office>
+</context>

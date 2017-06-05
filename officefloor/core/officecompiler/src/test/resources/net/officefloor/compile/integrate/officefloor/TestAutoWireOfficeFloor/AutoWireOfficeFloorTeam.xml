@@ -1,0 +1,31 @@
+<context>
+	<office-floor>
+		<teams>
+			<team name="OFFICEFLOOR_TEAM" source="ONE_PERSON">
+				<type-qualification type="${testcase}$CompileManagedObject" />
+			</team>
+		</teams>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office">
+				<team name="OFFICE_TEAM" />
+			</office>
+		</offices>
+	</office-floor>
+	<office>
+		<teams>
+			<team name="OFFICE_TEAM">
+				<type-qualification type="${testcase}$CompileManagedObject" />
+			</team>
+		</teams>
+		<sections>
+			<section name="SECTION" source="CLASS"
+				location="${testcase}$CompileSimpleSectionClass">
+				<input name="function" />
+				<responsibility name="RESPONSIBILITY">
+					<team name="OFFICE_TEAM" />
+					<object name="RESPONSIBILITY_OBJECT" />
+				</responsibility>
+			</section>
+		</sections>
+	</office>
+</context>
