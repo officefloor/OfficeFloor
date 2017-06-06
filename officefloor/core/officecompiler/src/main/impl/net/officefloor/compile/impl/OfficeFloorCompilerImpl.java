@@ -545,7 +545,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		}
 
 		// Deploy the OfficeFloor
-		OfficeFloor officeFloor = node.deployOfficeFloor(builder, compileContext);
+		OfficeFloor officeFloor = node.deployOfficeFloor(officeFloorName, builder, compileContext);
 		if (officeFloor == null) {
 			return null; // must compile OfficeFloor
 		}

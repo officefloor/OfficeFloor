@@ -130,6 +130,8 @@ public interface OfficeFloorNode extends Node, PropertyConfigurable, ManagedObje
 	/**
 	 * Deploys the {@link OfficeFloor}.
 	 * 
+	 * @param officeFloorName
+	 *            Name of the {@link OfficeFloor}.
 	 * @param officeFloorBuilder
 	 *            {@link OfficeFloorBuilder} to build the deployed
 	 *            {@link OfficeFloor}.
@@ -137,6 +139,7 @@ public interface OfficeFloorNode extends Node, PropertyConfigurable, ManagedObje
 	 *            {@link CompileContext}.
 	 * @return {@link OfficeFloor}.
 	 */
-	OfficeFloor deployOfficeFloor(OfficeFloorBuilder officeFloorBuilder, CompileContext compileContext);
+	OfficeFloor deployOfficeFloor(String officeFloorName, OfficeFloorBuilder officeFloorBuilder,
+			CompileContext compileContext);
 
 }

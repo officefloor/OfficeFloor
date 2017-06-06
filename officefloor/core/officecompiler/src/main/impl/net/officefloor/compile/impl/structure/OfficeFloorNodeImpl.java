@@ -659,10 +659,14 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	}
 
 	@Override
-	public OfficeFloor deployOfficeFloor(OfficeFloorBuilder builder, CompileContext compileContext) {
+	public OfficeFloor deployOfficeFloor(String officeFloorName, OfficeFloorBuilder builder,
+			CompileContext compileContext) {
 
 		// Initiate the OfficeFloor builder with compiler details
 		this.context.initiateOfficeFloorBuilder(builder);
+
+		// Register the OfficeFloor source for possible MBean
+		compileContext.registerPossibleMBean(OfficeFloorSource.class, officeFloorName, this.officeFloorSource);
 
 		// Build the teams (in deterministic order)
 		this.teams.values().stream()
