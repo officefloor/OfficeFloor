@@ -17,6 +17,8 @@
  */
 package net.officefloor.extension;
 
+import org.junit.Assert;
+
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
@@ -101,6 +103,7 @@ public class CompileOffice implements OfficeExtensionService {
 		OfficeFloor officeFloor = this.compileOffice(officeConfiguration);
 
 		// Open the OfficeFloor
+		Assert.assertNotNull("Should compile OfficeFloor", officeFloor);
 		officeFloor.openOfficeFloor();
 
 		// Return the OfficeFloor

@@ -18,7 +18,9 @@
 package net.officefloor.compile.impl.structure;
 
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -450,6 +452,77 @@ public class SectionNodeImpl implements SectionNode {
 		// Successful only if all sub sections are also sourced
 		return CompileUtil.source(this.subSections, (subSection) -> subSection.getOfficeSectionName(),
 				(subSection) -> subSection.sourceSectionTree(compileContext));
+	}
+
+	@Override
+	public boolean sourceInheritance(CompileContext compileContext) {
+
+		// Iterate over outputs linking via inheritance
+		boolean isValid[] = new boolean[] { true };
+		this.outputs.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getSectionOutputName(), b.getSectionOutputName()))
+				.forEachOrdered((output) -> {
+
+					// Determine if output already linked
+					if (output.getLinkedFlowNode() != null) {
+						return; // already linked
+					}
+
+					// Search the inheritance hierarchy for link
+					SectionNode searchSection = this;
+					boolean isCyclicInheritance = false;
+					Deque<SectionNode> inheritanceHierarchy = new LinkedList<SectionNode>();
+					do {
+
+						// Obtain link configuration from search section
+						SectionOutputNode parentSectionOutput = searchSection
+								.getSectionOutputNode(output.getSectionOutputName());
+						if ((parentSectionOutput != null) && (parentSectionOutput.getLinkedFlowNode() != null)) {
+							// Inherit the link
+							output.linkFlowNode(parentSectionOutput.getLinkedFlowNode());
+
+							// Link configured
+							return;
+						}
+
+						// Use super section in next iteration if no link
+						searchSection = searchSection.getSuperSection();
+
+						// Determine if cyclic inheritance
+						if (inheritanceHierarchy.contains(searchSection)) {
+							isCyclicInheritance = true;
+						}
+						inheritanceHierarchy.push(searchSection);
+
+					} while ((!isCyclicInheritance) && (searchSection != null));
+
+					// Provide issue if cyclic inheritance hierarchy
+					if (isCyclicInheritance) {
+						// Flag invalid
+						isValid[0] = false;
+
+						// Cyclic inheritance, so provide issue
+						StringBuilder hierarchyLog = new StringBuilder();
+						for (Iterator<SectionNode> iterator = inheritanceHierarchy.iterator(); iterator.hasNext();) {
+							hierarchyLog.append(iterator.next().getQualifiedName(null) + " : ");
+						}
+						this.context.getCompilerIssues().addIssue(this,
+								"Cyclic section inheritance hierarchy ( " + hierarchyLog.toString() + "... )");
+					}
+				});
+
+		// Return whether valid
+		return isValid[0];
+	}
+
+	@Override
+	public SectionNode getSuperSection() {
+		return this.superSectionNode;
+	}
+
+	@Override
+	public SectionOutputNode getSectionOutputNode(String outputName) {
+		return this.outputs.get(outputName);
 	}
 
 	@Override

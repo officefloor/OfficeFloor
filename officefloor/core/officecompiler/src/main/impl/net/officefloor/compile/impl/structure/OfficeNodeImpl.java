@@ -522,6 +522,13 @@ public class OfficeNodeImpl implements OfficeNode {
 			return false; // must source all top level sections
 		}
 
+		// Source inheritance of sections
+		isSourced = CompileUtil.source(this.sections, (section) -> section.getOfficeSectionName(),
+				(section) -> section.sourceInheritance(compileContext));
+		if (!isSourced) {
+			return false; // must be able to inherit
+		}
+
 		// Ensure all managed object sources are sourced
 		isSourced = CompileUtil.source(this.managedObjectSources,
 				(managedObjectSource) -> managedObjectSource.getSectionManagedObjectSourceName(),

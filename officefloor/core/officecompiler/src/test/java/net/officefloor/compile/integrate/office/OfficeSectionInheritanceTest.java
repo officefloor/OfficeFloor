@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.integrate.office;
 
+import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
@@ -112,8 +113,13 @@ public class OfficeSectionInheritanceTest extends AbstractCompileTestCase {
 		// Ensure issue if cyclic inheritance
 		MockCompilerIssues issues = new MockCompilerIssues(this);
 
+		// Record creating the sections
+		issues.recordCaptureIssues(false);
+		issues.recordCaptureIssues(false);
+
 		// Ensure issue if cyclic inheritance
-		this.issues.recordIssue("Cyclic section inheritance hierarchy ( CHILD, PARENT, CHILD, ...)");
+		issues.recordIssue("CHILD", SectionNodeImpl.class,
+				"Cyclic section inheritance hierarchy ( OFFICE.PARENT : OFFICE.CHILD : OFFICE.PARENT : ... )");
 
 		// Test
 		this.replayMockObjects();
@@ -123,7 +129,7 @@ public class OfficeSectionInheritanceTest extends AbstractCompileTestCase {
 		compiler.getOfficeFloorCompiler().setCompilerIssues(issues);
 
 		// Construct the Office
-		OfficeFloor officeFloor = compiler.compileAndOpenOffice((extender, context) -> {
+		OfficeFloor officeFloor = compiler.compileOffice((extender, context) -> {
 
 			// Create the parent section
 			OfficeSection parent = extender.addOfficeSection("PARENT", ClassSectionSource.class.getName(),
@@ -133,11 +139,9 @@ public class OfficeSectionInheritanceTest extends AbstractCompileTestCase {
 			OfficeSection child = extender.addOfficeSection("CHILD", ClassSectionSource.class.getName(),
 					CompileChild.class.getName());
 
-			// Ensure flows handled
-			OfficeSection handler = extender.addOfficeSection("HANDLER", ClassSectionSource.class.getName(),
-					CompileHandler.class.getName());
-			extender.link(parent.getOfficeSectionOutput("doFlow"), handler.getOfficeSectionInput("handler"));
-			extender.link(child.getOfficeSectionOutput("doFlow"), handler.getOfficeSectionInput("handler"));
+			// Flows not handled, so must search inheritance hierarchy
+			parent.getOfficeSectionOutput("doFlow");
+			child.getOfficeSectionOutput("doFlow");
 
 			// Create cyclic inheritance
 			child.setSuperOfficeSection(parent);

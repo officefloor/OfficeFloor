@@ -87,6 +87,34 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	boolean sourceSectionTree(CompileContext compileContext);
 
 	/**
+	 * Sources the inheritance of the {@link SectionNode}.
+	 * 
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 * @return <code>true</code> if successfully sourced. Otherwise
+	 *         <code>false</code> with issue reported to the
+	 *         {@link CompilerIssues}.
+	 */
+	boolean sourceInheritance(CompileContext compileContext);
+
+	/**
+	 * Obtains the parent {@link SectionNode} to this {@link SectionNode}.
+	 * 
+	 * @return Parent {@link SectionNode} to this {@link SectionNode}.
+	 */
+	SectionNode getSuperSection();
+
+	/**
+	 * Obtains the possible {@link SectionOutputNode}.
+	 * 
+	 * @param outputName
+	 *            Name of the {@link SectionOutputNode}.
+	 * @return {@link SectionOutputNode} or <code>null</code> if no
+	 *         {@link SectionOutputNode} by name on the {@link SectionNode}.
+	 */
+	SectionOutputNode getSectionOutputNode(String outputName);
+
+	/**
 	 * Loads the {@link SectionType}.
 	 * 
 	 * @param compileContext
@@ -120,7 +148,8 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	 * @return {@link OfficeSubSectionType} or <code>null</code> if issue
 	 *         loading with issue reported to the {@link CompilerIssues}.
 	 */
-	OfficeSubSectionType loadOfficeSubSectionType(OfficeSubSectionType parentSectionType, CompileContext compileContext);
+	OfficeSubSectionType loadOfficeSubSectionType(OfficeSubSectionType parentSectionType,
+			CompileContext compileContext);
 
 	/**
 	 * Loads the {@link OfficeAvailableSectionInputType} instances.
