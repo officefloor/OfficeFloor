@@ -106,17 +106,20 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory, RawTeamMetaD
 		}
 
 		// Obtain the team source
-		Class<TS> teamSourceClass = configuration.getTeamSourceClass();
-		if (teamSourceClass == null) {
-			issues.addIssue(AssetType.TEAM, teamName, "No TeamSource class provided");
-			return null; // can not carry on
-		}
-
-		// Instantiate the team source
-		TeamSource teamSource = ConstructUtil.newInstance(teamSourceClass, TeamSource.class,
-				"Team Source '" + teamName + "'", AssetType.TEAM, teamName, issues);
+		TS teamSource = configuration.getTeamSource();
 		if (teamSource == null) {
-			return null; // can not carry one
+			Class<TS> teamSourceClass = configuration.getTeamSourceClass();
+			if (teamSourceClass == null) {
+				issues.addIssue(AssetType.TEAM, teamName, "No TeamSource class provided");
+				return null; // can not carry on
+			}
+
+			// Instantiate the team source
+			teamSource = ConstructUtil.newInstance(teamSourceClass, TeamSource.class, "Team Source '" + teamName + "'",
+					AssetType.TEAM, teamName, issues);
+			if (teamSource == null) {
+				return null; // can not carry on
+			}
 		}
 
 		Team team;

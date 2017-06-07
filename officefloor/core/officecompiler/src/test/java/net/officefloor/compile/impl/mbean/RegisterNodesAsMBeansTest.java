@@ -19,21 +19,68 @@ package net.officefloor.compile.impl.mbean;
 
 import java.lang.management.ManagementFactory;
 
+import javax.management.Attribute;
+import javax.management.AttributeList;
+import javax.management.AttributeNotFoundException;
+import javax.management.DynamicMBean;
+import javax.management.InvalidAttributeValueException;
 import javax.management.JMX;
+import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanException;
+import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.MXBean;
 import javax.management.ObjectName;
+import javax.management.ReflectionException;
 
 import net.officefloor.compile.internal.structure.Node;
+import net.officefloor.compile.mbean.MBeanFactory;
+import net.officefloor.compile.spi.administration.source.AdministrationSource;
+import net.officefloor.compile.spi.administration.source.impl.AbstractAdministratorSource;
+import net.officefloor.compile.spi.governance.source.GovernanceSource;
+import net.officefloor.compile.spi.governance.source.impl.AbstractGovernanceSource;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.extension.OfficeExtensionService;
+import net.officefloor.compile.spi.office.source.OfficeSource;
+import net.officefloor.compile.spi.office.source.OfficeSourceContext;
+import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
+import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectPool;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
+import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSource;
+import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
+import net.officefloor.compile.spi.pool.source.impl.AbstractManagedObjectPoolSource;
+import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.compile.spi.section.source.SectionSourceContext;
+import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
+import net.officefloor.extension.CompileOffice;
 import net.officefloor.extension.CompileOfficeFloor;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolContext;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSourceContext;
+import net.officefloor.frame.api.team.source.impl.AbstractTeamSource;
+import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**
  * Ensure able to register the various {@link Node} instances as {@link MXBean}
@@ -47,24 +94,12 @@ public class RegisterNodesAsMBeansTest extends OfficeFrameTestCase {
 	 * Ensure able to register the {@link OfficeFloorSource} as an MBean.
 	 */
 	public void testRegisterOfficeFloorSource() throws Exception {
+		doTestInOfficeFloor(OfficeFloorSource.class, "OfficeFloor", null, (objectName) -> {
 
-		// Obtain the object name
-		ObjectName objectName = getObjectName(OfficeFloorSource.class, "OfficeFloor");
-
-		// Compile and open the OfficeFloor
-		CompileOfficeFloor compile = new CompileOfficeFloor();
-		compile.getOfficeFloorCompiler().setOfficeFloorSourceClass(TestOfficeFloorSource.class);
-		compile.getOfficeFloorCompiler().setRegisterMBeans(true);
-		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor((deployer, context) -> {
+			// Ensure able to obtain OfficeFloorSource MBean
+			TestOfficeFloorSourceMBean mbean = getMBean(objectName, TestOfficeFloorSourceMBean.class);
+			assertEquals("Incorrect Mbean value", "OfficeFloor Test", mbean.getOfficeFloorSourceMBeanValue());
 		});
-
-		// Ensure able to obtain OfficeFloorSource MBean
-		TestOfficeFloorSourceMBean mbean = getMBean(objectName, TestOfficeFloorSourceMBean.class);
-		assertEquals("Incorrect Mbean value", "OfficeFloor Test", mbean.getOfficeFloorSourceMBeanValue());
-
-		// Close the OfficeFloor (unregistering the MBeans)
-		officeFloor.closeOfficeFloor();
-		assertMBeanUnregistered(objectName);
 	}
 
 	public static interface TestOfficeFloorSourceMBean {
@@ -93,32 +128,509 @@ public class RegisterNodesAsMBeansTest extends OfficeFrameTestCase {
 		}
 	}
 
-	public void testRegisterManagedObjectSource() {
-		fail("TODO implement");
+	/**
+	 * Ensure can register {@link OfficeSource} as MBean.
+	 */
+	public void testRegisterOfficeSource() throws Exception {
+		doTestInOfficeFloor(OfficeSource.class, "OFFICE", (deployer, context) -> {
+			deployer.addDeployedOffice("OFFICE", TestOfficeSource.class.getName(), null);
+		}, (objectName) -> {
+
+			// Ensure able to obtain OfficeSource MBean
+			TestOfficeSourceMBean mbean = getMBean(objectName, TestOfficeSourceMBean.class);
+			assertEquals("Incorrect Mbean value", "Office Test", mbean.getTest());
+		});
 	}
 
-	public void testRegisterTeamSource() {
-		fail("TODO implement");
+	public static interface TestOfficeSourceMBean {
+		String getTest();
 	}
 
-	public void testRegisterOfficeSource() {
-		fail("TODO implement");
+	@TestSource
+	public static class TestOfficeSource extends AbstractOfficeSource implements DynamicMBean {
+
+		/*
+		 * =================== DynamicMBean ===========================
+		 */
+
+		@Override
+		public Object getAttribute(String attribute)
+				throws AttributeNotFoundException, MBeanException, ReflectionException {
+			assertEquals("Incorrect attribute", "test", attribute);
+			return "Office Test";
+		}
+
+		@Override
+		public void setAttribute(Attribute attribute)
+				throws AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException {
+		}
+
+		@Override
+		public AttributeList getAttributes(String[] attributes) {
+			return null;
+		}
+
+		@Override
+		public AttributeList setAttributes(AttributeList attributes) {
+			return null;
+		}
+
+		@Override
+		public Object invoke(String actionName, Object[] params, String[] signature)
+				throws MBeanException, ReflectionException {
+			return null;
+		}
+
+		@Override
+		public MBeanInfo getMBeanInfo() {
+			return new MBeanInfo(TestOfficeSource.class.getName(), "",
+					new MBeanAttributeInfo[] {
+							new MBeanAttributeInfo("test", String.class.getName(), "", true, false, false) },
+					null, null, null);
+		}
+
+		/*
+		 * ======================= OfficeSource =======================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		public void sourceOffice(OfficeArchitect officeArchitect, OfficeSourceContext context) throws Exception {
+		}
 	}
 
-	public void testRegisterAdministrationSource() {
-		fail("TODO implement");
+	/**
+	 * Ensure can register {@link ManagedObjectSource} as MBean.
+	 */
+	public void testRegisterManagedObjectSource() throws Exception {
+		doTestInOfficeFloor(ManagedObjectSource.class, "MANAGED_OBJECT_SOURCE", (deployer, context) -> {
+			OfficeFloorManagedObjectSource mos = deployer.addManagedObjectSource("MANAGED_OBJECT_SOURCE",
+					TestManagedObjectSource.class.getName());
+			DeployedOffice office = deployer.addDeployedOffice("OFFICE", TestOfficeSource.class.getName(), null);
+			deployer.link(mos.getManagingOffice(), office);
+		}, (objectName) -> {
+
+			// Ensure able to obtain ManagedObjectSource MBean
+			ManagedObjectSourceObjectMBean mbean = getMBean(objectName, ManagedObjectSourceObjectMBean.class);
+			assertEquals("Incorrect Mbean value", "ManagedObject Test", mbean.getMBeanValue());
+		});
 	}
 
-	public void testRegisterGovernanceSource() {
-		fail("TODO implement");
+	public static interface ManagedObjectSourceObjectMBean {
+		String getMBeanValue();
 	}
 
-	public void testRegisterSectionSource() {
-		fail("TODO implement");
+	public static class ManagedObjectSourceObject implements ManagedObjectSourceObjectMBean {
+
+		@Override
+		public String getMBeanValue() {
+			return "ManagedObject Test";
+		}
 	}
 
-	public void testRegisterManagedFunctionSource() {
-		fail("TODO implement");
+	@TestSource
+	public static class TestManagedObjectSource extends AbstractManagedObjectSource<None, None>
+			implements MBeanFactory {
+
+		/*
+		 * ================ MBeanFactory =======================
+		 */
+
+		@Override
+		public Object createMBean() {
+			return new ManagedObjectSourceObject();
+		}
+
+		/*
+		 * =============== ManagedObjectSource ===================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+			context.setObjectClass(Object.class);
+		}
+
+		@Override
+		protected ManagedObject getManagedObject() throws Throwable {
+			fail("Should not require managed object");
+			return null;
+		}
+	}
+
+	/**
+	 * Ensure can register {@link ManagedObjectPool} as MBean.
+	 */
+	public void testRegisterManagedObjectPool() throws Exception {
+		doTestInOfficeFloor(ManagedObjectPoolSource.class, "POOL", (deployer, context) -> {
+			OfficeFloorManagedObjectSource mos = deployer.addManagedObjectSource("MANAGED_OBJECT_SOURCE",
+					ClassManagedObjectSource.class.getName());
+			mos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, CompileManagedObject.class.getName());
+			DeployedOffice office = deployer.addDeployedOffice("OFFICE", TestOfficeSource.class.getName(), null);
+			deployer.link(mos.getManagingOffice(), office);
+			OfficeFloorManagedObjectPool pool = deployer.addManagedObjectPool("POOL",
+					TestManagedObjectPoolSource.class.getName());
+			deployer.link(mos, pool);
+		}, (objectName) -> {
+
+			// Ensure able to obtain ManagedObjectPoolSource MBean
+			TestManagedObjectPoolSourceMBean mbean = getMBean(objectName, TestManagedObjectPoolSourceMBean.class);
+			assertEquals("Incorrect Mbean value", 3, mbean.getPoolValue());
+		});
+	}
+
+	public static class CompileManagedObject {
+	}
+
+	public static interface TestManagedObjectPoolSourceMBean {
+		int getPoolValue();
+	}
+
+	@TestSource
+	public static class TestManagedObjectPoolSource extends AbstractManagedObjectPoolSource
+			implements TestManagedObjectPoolSourceMBean, ManagedObjectPoolFactory {
+
+		/*
+		 * ================= MBean =================================
+		 */
+
+		@Override
+		public int getPoolValue() {
+			return 3;
+		}
+
+		/*
+		 * ============== ManagedObjectPoolSource ===================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext context) throws Exception {
+			context.setPooledObjectType(Object.class);
+			context.setManagedObjectPoolFactory(this);
+		}
+
+		/*
+		 * ============== ManagedObjectPoolFactory ===================
+		 */
+
+		@Override
+		public ManagedObjectPool createManagedObjectPool(ManagedObjectPoolContext managedObjectPoolContext) {
+			return null;
+		}
+	}
+
+	/**
+	 * Ensure can register {@link TeamSource} as MBean.
+	 */
+	public void testRegisterTeamSource() throws Exception {
+		doTestInOfficeFloor(TeamSource.class, "TEAM", (deployer, context) -> {
+			deployer.addTeam("TEAM", TestTeamSource.class.getName());
+		}, (objectName) -> {
+
+			// Ensure able to obtain TeamSource MBean
+			TestTeamSourceMBean mbean = getMBean(objectName, TestTeamSourceMBean.class);
+			assertEquals("Incorrect Mbean value", 5, mbean.getTeamSize());
+		});
+	}
+
+	public static interface TestTeamSourceMBean {
+		long getTeamSize();
+	}
+
+	@TestSource
+	public static class TestTeamSource extends AbstractTeamSource implements TestTeamSourceMBean {
+
+		/*
+		 * ================ TestTeamSourceMBean =====================
+		 */
+
+		@Override
+		public long getTeamSize() {
+			return 5;
+		}
+
+		/*
+		 * ================ TeamSource ==============================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		public Team createTeam(TeamSourceContext context) throws Exception {
+			return new PassiveTeamSource().createTeam(context);
+		}
+	}
+
+	/**
+	 * Ensure can register {@link AdministrationSource} as MBean.
+	 */
+	public void testRegisterAdministrationSource() throws Exception {
+		doTestInOffice(AdministrationSource.class, "ADMINISTRATION", (architect, context) -> {
+			architect.addOfficeAdministration("ADMINISTRATION", TestAdministrationSource.class.getName());
+		}, (objectName) -> {
+
+			// Ensure able to obtain TeamSource MBean
+			TestAdministrationSourceMBean mbean = getMBean(objectName, TestAdministrationSourceMBean.class);
+			assertEquals("Incorrect Mbean value", "Administration Test", mbean.getAdministrationValue());
+		});
+	}
+
+	public static interface TestAdministrationSourceMBean {
+		String getAdministrationValue();
+	}
+
+	@TestSource
+	public static class TestAdministrationSource extends AbstractAdministratorSource<Object, None, None>
+			implements TestAdministrationSourceMBean {
+
+		/*
+		 * =============== TestAdministrationSourceMBean ============
+		 */
+
+		@Override
+		public String getAdministrationValue() {
+			return "Administration Test";
+		}
+
+		/*
+		 * =================== AdministrationSource ==================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<Object, None, None> context) throws Exception {
+		}
+	}
+
+	/**
+	 * Ensure can register {@link GovernanceSource} as MBean.
+	 */
+	public void testRegisterGovernanceSource() throws Exception {
+		doTestInOffice(GovernanceSource.class, "GOVERNANCE", (architect, context) -> {
+			architect.addOfficeGovernance("GOVERNANCE", TestGovernanceSource.class.getName());
+		}, (objectName) -> {
+
+			// Ensure able to obtain GovernanceSource MBean
+			TestGovernanceSourceMBean mbean = getMBean(objectName, TestGovernanceSourceMBean.class);
+			assertEquals("Incorrect Mbean value", "Governance Test", mbean.getGovernanceValue());
+		});
+	}
+
+	public static interface TestGovernanceSourceMBean {
+		String getGovernanceValue();
+	}
+
+	@TestSource
+	public static class TestGovernanceSource extends AbstractGovernanceSource<Object, None>
+			implements TestGovernanceSourceMBean {
+
+		/*
+		 * ================= TestGovernanceSourceMBean ==============
+		 */
+
+		@Override
+		public String getGovernanceValue() {
+			return "Governance Test";
+		}
+
+		/*
+		 * ====================== GovernanceSource ==================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<Object, None> context) throws Exception {
+		}
+	}
+
+	/**
+	 * Ensure can register {@link SectionSource} as MBean.
+	 */
+	public void testRegisterSectionSource() throws Exception {
+		doTestInOffice(SectionSource.class, "SECTION", (architect, context) -> {
+			architect.addOfficeSection("SECTION", TestSectionSource.class.getName(), null);
+		}, (objectName) -> {
+
+			// Ensure able to obtain SectionSource MBean
+			TestSectionSourceMBean mbean = getMBean(objectName, TestSectionSourceMBean.class);
+			assertEquals("Incorrect Mbean value", "Section Test", mbean.getSectionValue());
+		});
+	}
+
+	public static interface TestSectionSourceMBean {
+		String getSectionValue();
+	}
+
+	@TestSource
+	public static class TestSectionSource extends AbstractSectionSource implements TestSectionSourceMBean {
+
+		/*
+		 * ===================== TestSectionSourceMBean ==============
+		 */
+
+		@Override
+		public String getSectionValue() {
+			return "Section Test";
+		}
+
+		/*
+		 * ========================= SectionSource ===================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
+		}
+	}
+
+	/**
+	 * Ensure can register {@link ManagedFunctionSource} as MBean.
+	 */
+	public void testRegisterManagedFunctionSource() throws Exception {
+		doTestInOffice(ManagedFunctionSource.class, "SECTION.FUNCTION", (architect, context) -> {
+			architect.addOfficeSection("SECTION", TestFunctionSectionSource.class.getName(), null);
+		}, (objectName) -> {
+
+			// Ensure able to obtain SectionSource MBean
+			TestManagedFunctionSourceMBean mbean = getMBean(objectName, TestManagedFunctionSourceMBean.class);
+			assertEquals("Incorrect Mbean value", "Function Test", mbean.getFunctionValue());
+		});
+	}
+
+	public static interface TestManagedFunctionSourceMBean {
+		String getFunctionValue();
+	}
+
+	public static class TestFunctionSectionSource extends AbstractSectionSource {
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
+			designer.addSectionFunctionNamespace("FUNCTION", TestManagedFunctionSource.class.getName());
+		}
+	}
+
+	@TestSource
+	public static class TestManagedFunctionSource extends AbstractManagedFunctionSource
+			implements TestManagedFunctionSourceMBean {
+
+		@Override
+		public String getFunctionValue() {
+			return "Function Test";
+		}
+
+		/*
+		 * ================ TestManagedFunctionSourceMBean ============
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		public void sourceManagedFunctions(FunctionNamespaceBuilder functionNamespaceTypeBuilder,
+				ManagedFunctionSourceContext context) throws Exception {
+		}
+	}
+
+	/**
+	 * Undertakes the test.
+	 * 
+	 * @param type
+	 *            Type of MBean.
+	 * @param name
+	 *            Name of MBean.
+	 * @param extendOfficeFloor
+	 *            {@link OfficeFloorExtensionService}.
+	 * @param testLogic
+	 *            {@link TestLogic}.
+	 */
+	private static void doTestInOfficeFloor(Class<?> type, String name, OfficeFloorExtensionService extendOfficeFloor,
+			TestLogic testLogic) throws Exception {
+
+		// Obtain the object name
+		ObjectName objectName = getObjectName(type, name);
+
+		// Compile and open the OfficeFloor
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.getOfficeFloorCompiler().setOfficeFloorSourceClass(TestOfficeFloorSource.class);
+		compile.getOfficeFloorCompiler().setRegisterMBeans(true);
+		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor(extendOfficeFloor);
+
+		try {
+
+			// Execute the test logic
+			testLogic.execute(objectName);
+
+		} finally {
+			// Close the OfficeFloor (unregistering the MBeans)
+			officeFloor.closeOfficeFloor();
+			assertMBeanUnregistered(objectName);
+		}
+	}
+
+	/**
+	 * Undertakes the test.
+	 * 
+	 * @param type
+	 *            Type of MBean.
+	 * @param name
+	 *            Name of MBean.
+	 * @param extendOffice
+	 *            {@link OfficeExtensionService}.
+	 * @param testLogic
+	 *            {@link TestLogic}.
+	 */
+	private static void doTestInOffice(Class<?> type, String name, OfficeExtensionService extendOffice,
+			TestLogic testLogic) throws Exception {
+
+		// Obtain the object name
+		ObjectName objectName = getObjectName(type, name);
+
+		// Compile and open the Office
+		CompileOffice compile = new CompileOffice();
+		compile.getOfficeFloorCompiler().setOfficeFloorSourceClass(TestOfficeFloorSource.class);
+		compile.getOfficeFloorCompiler().setRegisterMBeans(true);
+		OfficeFloor officeFloor = compile.compileAndOpenOffice(extendOffice);
+
+		try {
+
+			// Execute the test logic
+			testLogic.execute(objectName);
+
+		} finally {
+			// Close the OfficeFloor (unregistering the MBeans)
+			officeFloor.closeOfficeFloor();
+			assertMBeanUnregistered(objectName);
+		}
+	}
+
+	public static interface TestLogic {
+		void execute(ObjectName objectName) throws Exception;
 	}
 
 	/**

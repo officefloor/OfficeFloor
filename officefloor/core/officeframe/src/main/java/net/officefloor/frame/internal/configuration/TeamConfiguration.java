@@ -36,6 +36,16 @@ public interface TeamConfiguration<TS extends TeamSource> {
 	String getTeamName();
 
 	/**
+	 * Obtains the {@link TeamSource} instance to use.
+	 * 
+	 * @return {@link TeamSource} instance to use. This may be
+	 *         <code>null</code> and therefore the
+	 *         {@link #getTeamSourceClass()} should be used to obtain
+	 *         the {@link TeamSource}.
+	 */
+	TS getTeamSource();
+	
+	/**
 	 * Obtains the {@link Class} of the {@link TeamSource}.
 	 * 
 	 * @return {@link Class} of the {@link TeamSource}.

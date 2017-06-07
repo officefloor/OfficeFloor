@@ -187,6 +187,14 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	}
 
 	@Override
+	public <TS extends TeamSource> TeamBuilder<TS> addTeam(String teamName, TS teamSource) {
+		// Create, register and return the builder
+		TeamBuilderImpl<TS> builder = new TeamBuilderImpl<>(teamName, teamSource);
+		this.teams.add(builder);
+		return builder;
+	}
+
+	@Override
 	public TeamConfiguration<?> getBreakChainTeamConfiguration() {
 		return this.breakChainTeam;
 	}

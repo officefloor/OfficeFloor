@@ -115,10 +115,23 @@ public interface OfficeFloorBuilder {
 	 * @param teamName
 	 *            Name to register the {@link Team} under.
 	 * @param teamSourceClass
-	 *            {@link TeamSource} to source the {@link Team}.
+	 *            {@link TeamSource} {@link Class} name to source the
+	 *            {@link Team}.
 	 * @return {@link TeamBuilder} to build the {@link Team}.
 	 */
 	<TS extends TeamSource> TeamBuilder<TS> addTeam(String teamName, Class<TS> teamSourceClass);
+
+	/**
+	 * Adds a {@link Team} which will execute {@link FunctionState} instances
+	 * within the {@link OfficeFloor}.
+	 * 
+	 * @param teamName
+	 *            Name to register the {@link Team} under.
+	 * @param teamSource
+	 *            {@link TeamSource} to source the {@link Team}.
+	 * @return {@link TeamBuilder} to build the {@link Team}.
+	 */
+	<TS extends TeamSource> TeamBuilder<TS> addTeam(String teamName, TS teamSource);
 
 	/**
 	 * <p>
