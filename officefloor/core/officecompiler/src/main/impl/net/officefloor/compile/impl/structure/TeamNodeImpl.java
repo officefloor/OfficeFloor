@@ -219,7 +219,7 @@ public class TeamNodeImpl implements TeamNode {
 	}
 
 	@Override
-	public void buildTeam(OfficeFloorBuilder builder) {
+	public void buildTeam(OfficeFloorBuilder builder, CompileContext compileContext) {
 
 		// Obtain the team source class
 		Class<? extends TeamSource> teamSourceClass = this.context.getTeamSourceClass(this.state.teamSourceClassName,
@@ -228,8 +228,18 @@ public class TeamNodeImpl implements TeamNode {
 			return; // must obtain team source class
 		}
 
+		// Instantiate the team source
+		TeamSource teamSource = CompileUtil.newInstance(teamSourceClass, TeamSource.class, this,
+				this.context.getCompilerIssues());
+		if (teamSource == null) {
+			return; // must obtain team source
+		}
+
+		// Possibly register team source as MBean
+		compileContext.registerPossibleMBean(TeamSource.class, this.teamName, teamSource);
+
 		// Build the team
-		TeamBuilder<?> teamBuilder = builder.addTeam(this.teamName, teamSourceClass);
+		TeamBuilder<?> teamBuilder = builder.addTeam(this.teamName, teamSource);
 		for (Property property : this.getProperties()) {
 			teamBuilder.addProperty(property.getName(), property.getValue());
 		}

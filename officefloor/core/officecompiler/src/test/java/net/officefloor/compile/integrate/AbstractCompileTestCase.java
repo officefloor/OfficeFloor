@@ -172,21 +172,37 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Flags if the matcher has been specified to add a {@link Team}.
+	 */
+	private boolean isMatcherSet_officeFloorBuilder_addTeam = false;
+
+	/**
 	 * Records adding a {@link Team} to the {@link OfficeFloorBuilder}.
 	 * 
 	 * @param teamName
 	 *            Name of the {@link Team}.
-	 * @param teamSourceClass
+	 * @param teamSource
 	 *            {@link TeamSource} class.
 	 * @param propertyNameValues
 	 *            {@link Property} name/value listing.
 	 * @return {@link TeamBuilder} for the added {@link Team}.
 	 */
 	@SuppressWarnings("unchecked")
-	protected <S extends TeamSource> TeamBuilder<S> record_officeFloorBuilder_addTeam(String teamName,
-			Class<S> teamSourceClass, String... propertyNameValues) {
+	protected <S extends TeamSource> TeamBuilder<S> record_officeFloorBuilder_addTeam(String teamName, S teamSource,
+			String... propertyNameValues) {
 		TeamBuilder<S> builder = this.createMock(TeamBuilder.class);
-		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder.addTeam(teamName, teamSourceClass), builder);
+		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder.addTeam(teamName, teamSource), builder);
+		if (!this.isMatcherSet_officeFloorBuilder_addTeam) {
+			this.control(this.officeFloorBuilder).setMatcher(new AbstractMatcher() {
+				@Override
+				public boolean matches(Object[] expected, Object[] actual) {
+					boolean isMatch = (expected[0].equals(actual[0]));
+					isMatch = isMatch && (expected[1].getClass().equals(actual[1].getClass()));
+					return isMatch;
+				}
+			});
+			this.isMatcherSet_officeFloorBuilder_addTeam = true;
+		}
 		for (int i = 0; i < propertyNameValues.length; i += 2) {
 			String name = propertyNameValues[i];
 			String value = propertyNameValues[i + 1];

@@ -86,6 +86,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
@@ -618,13 +619,24 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				String qualifiedTeamName = managedObjectSourceName + "-" + teamName;
 
 				// Obtain the team source class
-				Class teamSourceClass = this.context.getTeamSourceClass(suppliedTeam.getTeamSourceClassName(), this);
+				Class<? extends TeamSource> teamSourceClass = this.context
+						.getTeamSourceClass(suppliedTeam.getTeamSourceClassName(), this);
 				if (teamSourceClass == null) {
 					continue; // must have team source class
 				}
 
+				// Obtain the team source
+				TeamSource teamSource = CompileUtil.newInstance(teamSourceClass, TeamSource.class, this,
+						this.context.getCompilerIssues());
+				if (teamSource == null) {
+					continue; // must have team source
+				}
+
+				// Register team source as possible MBean
+				compileContext.registerPossibleMBean(TeamSource.class, qualifiedTeamName, teamSource);
+
 				// Build the supplied team
-				TeamBuilder<?> teamBuilder = builder.addTeam(qualifiedTeamName, teamSourceClass);
+				TeamBuilder<?> teamBuilder = builder.addTeam(qualifiedTeamName, teamSource);
 				for (Property property : suppliedTeam.getProperties()) {
 					teamBuilder.addProperty(property.getName(), property.getValue());
 				}

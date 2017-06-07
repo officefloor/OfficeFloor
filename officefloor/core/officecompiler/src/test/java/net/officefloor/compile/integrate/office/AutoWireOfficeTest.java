@@ -175,7 +175,7 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "OFFICEFLOOR_TEAM");
 		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", CompileManagedObject.class.getName());
@@ -208,7 +208,7 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "OFFICEFLOOR_TEAM");
 		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", CompileManagedObject.class.getName());
@@ -240,7 +240,7 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "OFFICEFLOOR_TEAM");
 
 		// Build the section (with auto-wire of team)
@@ -266,7 +266,7 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICEFLOOR_TEAM",
 				"OFFICEFLOOR_TEAM");
 		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
@@ -300,7 +300,7 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "OFFICEFLOOR_TEAM");
 		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", CompileManagedObject.class.getName());
@@ -333,8 +333,8 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("EXISTING_TEAM", OnePersonTeamSource.class);
-		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addTeam("EXISTING_TEAM", new OnePersonTeamSource());
+		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 		office.registerTeam("OFFICEFLOOR_TEAM", "EXISTING_TEAM");
 		office.registerTeam("OFFICEFLOOR_TEAM_2", "OFFICEFLOOR_TEAM");
@@ -364,7 +364,7 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor (auto wiring governance team)
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "OFFICEFLOOR_TEAM");
 		this.record_officeBuilder_addGovernance("GOVERNANCE", "OFFICE_TEAM", ClassGovernanceSource.class,
 				CompileManagedObject.class);
@@ -391,7 +391,7 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor (auto wiring governance team)
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "OFFICEFLOOR_TEAM");
 		this.record_officeBuilder_addGovernance("GOVERNANCE", "OFFICE_TEAM", ClassGovernanceSource.class,
 				CompileManagedObject.class);
@@ -423,7 +423,7 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "OFFICEFLOOR_TEAM");
 		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", CompileManagedObject.class.getName());
@@ -463,7 +463,7 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor (auto wiring administration team)
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "OFFICEFLOOR_TEAM");
 		this.record_officeFloorBuilder_addManagedObject("OFFICE.MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
 				0, "class.name", CompileManagedObject.class.getName());
@@ -498,7 +498,7 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor (auto wiring managed object function)
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICEFLOOR_TEAM",
 				"OFFICEFLOOR_TEAM");
 		this.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENT_MANAGED_OBJECT_SOURCE",

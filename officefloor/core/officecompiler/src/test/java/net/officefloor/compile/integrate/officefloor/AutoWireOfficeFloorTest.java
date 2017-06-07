@@ -85,7 +85,7 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor (with auto-wire of team)
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 
 		// Auto-wire the team

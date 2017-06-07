@@ -671,7 +671,7 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 		// Build the teams (in deterministic order)
 		this.teams.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeFloorTeamName(), b.getOfficeFloorTeamName()))
-				.forEachOrdered((team) -> team.buildTeam(builder));
+				.forEachOrdered((team) -> team.buildTeam(builder, compileContext));
 
 		// Build the offices (in deterministic order)
 		Map<OfficeNode, OfficeBindings> officeBindings = new HashMap<OfficeNode, OfficeBindings>();

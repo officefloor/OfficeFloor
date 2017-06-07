@@ -78,6 +78,9 @@ public interface TeamNode extends LinkTeamNode, OfficeFloorTeam {
 	 * 
 	 * @param builder
 	 *            {@link OfficeFloorBuilder}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 */
-	void buildTeam(OfficeFloorBuilder builder);
+	void buildTeam(OfficeFloorBuilder builder, CompileContext compileContext);
+
 }

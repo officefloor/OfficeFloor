@@ -116,7 +116,7 @@ public class OfficeFloorOverridePropertiesTest extends AbstractCompileTestCase {
 
 		// Record the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("OVERRIDE_TEAM", TestTeamSource.class, "value", "override", "additional",
+		this.record_officeFloorBuilder_addTeam("OVERRIDE_TEAM", new TestTeamSource(), "value", "override", "additional",
 				"another");
 
 		// Compile the OfficeFloor

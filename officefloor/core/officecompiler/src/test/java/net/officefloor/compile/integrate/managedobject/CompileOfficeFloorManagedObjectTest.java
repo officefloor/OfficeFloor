@@ -159,7 +159,7 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", mos, 10, "MO_NAME", "MO_VALUE");
 
 		// Record the supplied team
-		this.record_officeFloorBuilder_addTeam("MANAGED_OBJECT_SOURCE-team", OnePersonTeamSource.class,
+		this.record_officeFloorBuilder_addTeam("MANAGED_OBJECT_SOURCE-team", new OnePersonTeamSource(),
 				OnePersonTeamSource.MAX_WAIT_TIME_PROPERTY_NAME, "200");
 		this.record_officeBuilder_registerTeam("MANAGED_OBJECT_SOURCE-team", "MANAGED_OBJECT_SOURCE-team");
 
@@ -320,7 +320,7 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 		// Record building the OfficeFloor
 		this.record_init();
 
-		this.record_officeFloorBuilder_addTeam("TEAM", OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "INPUT");
 		function.setResponsibleTeam("OFFICE_TEAM");
@@ -374,7 +374,7 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "INPUT");
 		function.setResponsibleTeam("OFFICE_TEAM");
@@ -401,7 +401,7 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "INPUT");
 		function.setResponsibleTeam("OFFICE_TEAM");
@@ -430,7 +430,7 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 		this.record_init();
 
 		// Add the team and offices along with the function
-		this.record_officeFloorBuilder_addTeam("TEAM", OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
 		this.record_officeFloorBuilder_addOffice("MANAGING_OFFICE");
 		this.record_officeFloorBuilder_addOffice("OFFICE_WITH_FUNCTION", "OFFICE_TEAM", "TEAM");
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "INPUT");
@@ -474,7 +474,7 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", TeamManagedObject.class, 0);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
@@ -497,7 +497,7 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "INPUT");
 		function.setResponsibleTeam("OFFICE_TEAM");
@@ -531,7 +531,7 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 		this.record_init();
 
 		// Register the office with the namespace for the input process flow
-		this.record_officeFloorBuilder_addTeam("TEAM", OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "INPUT");
 		function.setResponsibleTeam("OFFICE_TEAM");
