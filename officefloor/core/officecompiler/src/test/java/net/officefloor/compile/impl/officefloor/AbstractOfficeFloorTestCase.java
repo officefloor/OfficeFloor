@@ -17,6 +17,8 @@
  */
 package net.officefloor.compile.impl.officefloor;
 
+import org.easymock.AbstractMatcher;
+
 import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
@@ -127,8 +129,15 @@ public abstract class AbstractOfficeFloorTestCase extends AbstractStructureTestC
 	 */
 	protected TeamBuilder<?> record_officefloor_addTeam(String teamName) {
 		TeamBuilder<?> teamBuilder = this.createMockTeamBuilder();
-		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder.addTeam(teamName, MakerTeamSource.class),
-				teamBuilder);
+		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder.addTeam(teamName, new MakerTeamSource()),
+				teamBuilder, new AbstractMatcher() {
+					@Override
+					public boolean matches(Object[] expected, Object[] actual) {
+						boolean isMatch = (expected[0].equals(actual[0]));
+						isMatch = isMatch && (expected[1].getClass().equals(actual[1].getClass()));
+						return isMatch;
+					}
+				});
 		teamBuilder.addProperty(MakerTeamSource.MAKER_IDENTIFIER_PROPERTY_NAME,
 				String.valueOf(this.makerTeamSourceIdentifier++));
 		return teamBuilder;
