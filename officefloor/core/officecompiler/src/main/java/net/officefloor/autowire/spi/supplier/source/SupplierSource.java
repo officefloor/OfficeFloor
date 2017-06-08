@@ -18,7 +18,6 @@
 package net.officefloor.autowire.spi.supplier.source;
 
 import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.autowire.supplier.SupplierType;
 import net.officefloor.plugin.section.clazz.ManagedObject;
 

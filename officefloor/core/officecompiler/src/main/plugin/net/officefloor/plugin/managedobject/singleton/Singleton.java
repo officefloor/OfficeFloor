@@ -15,24 +15,81 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.autowire.impl;
+package net.officefloor.plugin.managedobject.singleton;
 
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeManagedObject;
+import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
 /**
  * Provides a singleton object.
  * 
  * @author Daniel Sagenschneider
  */
-public class SingletonManagedObjectSource extends
-		AbstractManagedObjectSource<None, None> implements ManagedObject,
-		ExtensionInterfaceFactory<Object> {
+public class Singleton extends AbstractManagedObjectSource<None, None>
+		implements ManagedObject, ExtensionInterfaceFactory<Object> {
+
+	/**
+	 * Convenience method to load singleton {@link Object}.
+	 * 
+	 * @param architect
+	 *            {@link OfficeArchitect}.
+	 * @param singleton
+	 *            Singleton {@link Object}.
+	 * @param autoWires
+	 *            Optional {@link AutoWire} instances for the singleton.
+	 * @return {@link OfficeManagedObject} for the singleton.
+	 */
+	public static OfficeManagedObject load(OfficeArchitect architect, Object singleton, AutoWire... autoWires) {
+		return load(architect, null, singleton, autoWires);
+	}
+
+	/**
+	 * Convenience method to load singleton {@link Object}.
+	 * 
+	 * @param architect
+	 *            {@link OfficeArchitect}.
+	 * @param managedObjectName
+	 *            Name of {@link OfficeManagedObject}.
+	 * @param singleton
+	 *            Singleton {@link Object}.
+	 * @param autoWires
+	 *            Optional {@link AutoWire} instances for the singleton.
+	 * @return {@link OfficeManagedObject} for the singleton.
+	 */
+	public static OfficeManagedObject load(OfficeArchitect architect, String managedObjectName, Object singleton,
+			AutoWire... autoWires) {
+
+		// Ensure have a managed object name
+		if (managedObjectName == null) {
+			managedObjectName = singleton.getClass().getSimpleName();
+		}
+
+		// Load the managed object source
+		OfficeManagedObjectSource managedObjectSource = architect.addOfficeManagedObjectSource(managedObjectName,
+				new Singleton(singleton));
+
+		// Load the managed object
+		OfficeManagedObject managedObject = managedObjectSource.addOfficeManagedObject(managedObjectName,
+				ManagedObjectScope.PROCESS);
+
+		// Load auto wire information to managed object
+		for (AutoWire autoWire : autoWires) {
+			managedObject.addTypeQualification(autoWire.getQualifier(), autoWire.getType());
+		}
+
+		// Return the managed object
+		return managedObject;
+	}
 
 	/**
 	 * Singleton.
@@ -45,7 +102,7 @@ public class SingletonManagedObjectSource extends
 	 * @param object
 	 *            Singleton object.
 	 */
-	public SingletonManagedObjectSource(Object object) {
+	public Singleton(Object object) {
 		this.object = object;
 	}
 
@@ -60,8 +117,7 @@ public class SingletonManagedObjectSource extends
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	protected void loadMetaData(MetaDataContext<None, None> context)
-			throws Exception {
+	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
 
 		// Obtain the object type
 		Class<?> objectType = this.object.getClass();
@@ -97,7 +153,7 @@ public class SingletonManagedObjectSource extends
 
 	@Override
 	public Object createExtensionInterface(ManagedObject managedObject) {
-		return ((SingletonManagedObjectSource) managedObject).object;
+		return ((Singleton) managedObject).object;
 	}
 
 	/**
@@ -108,8 +164,7 @@ public class SingletonManagedObjectSource extends
 	 * @param interfaces
 	 *            Listing of interfaces to be loaded.
 	 */
-	private void loadAllExtensionInterfaces(Class<?> type,
-			List<Class<?>> interfaces) {
+	private void loadAllExtensionInterfaces(Class<?> type, List<Class<?>> interfaces) {
 
 		// Determine if already loaded type
 		if (interfaces.contains(type)) {

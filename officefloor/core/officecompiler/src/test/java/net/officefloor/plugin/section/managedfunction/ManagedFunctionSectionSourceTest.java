@@ -25,21 +25,22 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireOfficeFloor;
-import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
+import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
+import net.officefloor.extension.CompileOffice;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.managedfunction.clazz.Qualifier;
+import net.officefloor.plugin.managedobject.singleton.Singleton;
 
 /**
  * Tests the {@link ManagedFunctionSectionSource}.
@@ -76,12 +77,14 @@ public class ManagedFunctionSectionSourceTest extends OfficeFrameTestCase {
 		expected.addSectionOutput(SQLException.class.getName(), SQLException.class.getName(), true);
 
 		// Objects
-		SectionObject integerObject = expected.addSectionObject(Integer.class.getName(), Integer.class.getName());
+		SectionObject integerObject = expected.addSectionObject(
+				MockQualification.class.getName() + "-" + Integer.class.getName(), Integer.class.getName());
+		integerObject.setTypeQualifier(MockQualification.class.getName());
+		SectionObject connectionObject = expected.addSectionObject(Connection.class.getName(),
+				Connection.class.getName());
 		SectionObject qualifiedConnectionObject = expected.addSectionObject(
 				MockQualification.class.getName() + "-" + Connection.class.getName(), Connection.class.getName());
 		qualifiedConnectionObject.setTypeQualifier(MockQualification.class.getName());
-		SectionObject connectionObject = expected.addSectionObject(Connection.class.getName(),
-				Connection.class.getName());
 		SectionObject listObject = expected.addSectionObject(List.class.getName(), List.class.getName());
 
 		// Functions
@@ -90,13 +93,14 @@ public class ManagedFunctionSectionSourceTest extends OfficeFrameTestCase {
 		namespace.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, MockClass.class.getName());
 
 		SectionFunction functionOne = namespace.addSectionFunction("functionOne", "functionOne");
-		FunctionObject functionOneInteger = functionOne.getFunctionObject(Integer.class.getName());
-		expected.link(functionOneInteger, integerObject);
 		FunctionObject functionOneConnection = functionOne
 				.getFunctionObject(MockQualification.class.getName() + "-" + Connection.class.getName());
 		expected.link(functionOneConnection, qualifiedConnectionObject);
 
 		SectionFunction functionTwo = namespace.addSectionFunction("functionTwo", "functionTwo");
+		FunctionObject functionTwoInteger = functionTwo
+				.getFunctionObject(MockQualification.class.getName() + "-" + Integer.class.getName());
+		expected.link(functionTwoInteger, integerObject);
 		FunctionObject functionTwoConnection = functionTwo.getFunctionObject(Connection.class.getName());
 		expected.link(functionTwoConnection, connectionObject);
 		functionTwo.getFunctionObject(String.class.getName()).flagAsParameter();
@@ -108,7 +112,7 @@ public class ManagedFunctionSectionSourceTest extends OfficeFrameTestCase {
 		// Validate the type
 		SectionLoaderUtil.validateSection(expected, ManagedFunctionSectionSource.class,
 				ClassManagedFunctionSource.class.getName(),
-				ManagedFunctionSectionSource.PROPERTY_PARAMETER_PREFIX + "functionTwo", "2",
+				ManagedFunctionSectionSource.PROPERTY_PARAMETER_PREFIX + "functionTwo", "3",
 				ManagedFunctionSectionSource.PROPERTY_FUNCTIONS_NEXT_TO_OUTPUTS, "functionTwo , functionThree",
 				ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, MockClass.class.getName());
 	}
@@ -121,47 +125,46 @@ public class ManagedFunctionSectionSourceTest extends OfficeFrameTestCase {
 		final Connection connection = this.createMock(Connection.class);
 		final List<String> list = new LinkedList<String>();
 
-		AutoWireOfficeFloorSource autoWire = new AutoWireOfficeFloorSource();
-		autoWire.addObject(connection, new AutoWire(Connection.class),
-				new AutoWire(MockQualification.class, Connection.class));
-		autoWire.addObject(list, new AutoWire(List.class));
-		autoWire.addObject(new Integer(1), new AutoWire(Integer.class));
-
-		// Create section
-		AutoWireSection section = autoWire.addSection("SECTION", ManagedFunctionSectionSource.class.getName(),
-				ClassManagedFunctionSource.class.getName());
-		section.addProperty(ManagedFunctionSectionSource.PROPERTY_PARAMETER_PREFIX + "functionTwo", "2");
-		section.addProperty(ManagedFunctionSectionSource.PROPERTY_FUNCTIONS_NEXT_TO_OUTPUTS, "functionTwo");
-		section.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, MockClass.class.getName());
-
-		// Create handle section
-		AutoWireSection handle = autoWire.addSection("HANDLE", ManagedFunctionSectionSource.class.getName(),
-				ClassManagedFunctionSource.class.getName());
-		handle.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, MockFinishFunction.class.getName());
-
-		// Link flows
-		autoWire.link(section, "doFlow", handle, "function");
-		autoWire.link(section, "functionTwo", handle, "function");
-
 		// Open the section
-		AutoWireOfficeFloor officeFloor = autoWire.openOfficeFloor();
+		OfficeFloor officeFloor = new CompileOffice().compileAndOpenOffice((architect, context) -> {
+
+			architect.enableAutoWireObjects();
+
+			Singleton.load(architect, connection);
+			Singleton.load(architect, list);
+			Singleton.load(architect, "ONE", new Integer(1));
+			Singleton.load(architect, "TWO", new Integer(2), new AutoWire(MockQualification.class, Integer.class));
+
+			// Create section
+			OfficeSection section = architect.addOfficeSection("SECTION", ManagedFunctionSectionSource.class.getName(),
+					ClassManagedFunctionSource.class.getName());
+			section.addProperty(ManagedFunctionSectionSource.PROPERTY_PARAMETER_PREFIX + "functionTwo", "3");
+			section.addProperty(ManagedFunctionSectionSource.PROPERTY_FUNCTIONS_NEXT_TO_OUTPUTS, "functionTwo");
+			section.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, MockClass.class.getName());
+
+			// Create handle section
+			OfficeSection handle = architect.addOfficeSection("HANDLE", ManagedFunctionSectionSource.class.getName(),
+					ClassManagedFunctionSource.class.getName());
+			handle.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, MockFinishFunction.class.getName());
+
+			// Link flows
+			architect.link(section.getOfficeSectionOutput("doFlow"), handle.getOfficeSectionInput("function"));
+			architect.link(section.getOfficeSectionOutput("functionTwo"), handle.getOfficeSectionInput("function"));
+		});
+
 		try {
 
 			// Ensure appropriate state for running
-			synchronized (list) {
-				assertEquals("List should be empty before invoking function", 0, list.size());
-			}
+			assertEquals("List should be empty before invoking function", 0, list.size());
 
 			// Invoke the function
 			final String PARAMETER = "test";
-			officeFloor.invokeFunction("SECTION.functionTwo", PARAMETER, null);
+			officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.functionTwo").invokeProcess(PARAMETER, null);
 
 			// Ensure invoked as parameter should be in list
-			synchronized (list) {
-				assertEquals("Parameter not added to list", 2, list.size());
-				assertEquals("Incorrect parameter added to list", PARAMETER, list.get(0));
-				assertEquals("Should be flagged as finished in list", "Finished", list.get(1));
-			}
+			assertEquals("Parameter not added to list", 2, list.size());
+			assertEquals("Incorrect parameter added to list", PARAMETER + "2", list.get(0));
+			assertEquals("Should be flagged as finished in list", "Finished", list.get(1));
 
 		} finally {
 			// Ensure close
@@ -187,15 +190,14 @@ public class ManagedFunctionSectionSourceTest extends OfficeFrameTestCase {
 			void doFlow(Character parameter);
 		}
 
-		public Long functionOne(Integer value, @MockQualification Connection connection, Flows flows)
+		public Long functionOne(@MockQualification Connection connection, Flows flows)
 				throws IOException, SQLException {
 			return new Long(1);
 		}
 
-		public Byte functionTwo(Connection connection, String value, List<String> returnList) throws SQLException {
-			synchronized (returnList) {
-				returnList.add(value);
-			}
+		public Byte functionTwo(@MockQualification Integer number, Connection connection, String value,
+				List<String> returnList) throws SQLException {
+			returnList.add(value + number);
 			return new Byte((byte) 1);
 		}
 
@@ -208,9 +210,7 @@ public class ManagedFunctionSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockFinishFunction {
 		public void function(List<String> returnList) {
-			synchronized (returnList) {
-				returnList.add("Finished");
-			}
+			returnList.add("Finished");
 		}
 	}
 

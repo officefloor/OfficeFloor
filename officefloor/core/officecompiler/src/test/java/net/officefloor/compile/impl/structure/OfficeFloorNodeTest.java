@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.impl.SingletonManagedObjectSource;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
@@ -45,6 +44,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.impl.office.OfficeModelOfficeSource;
+import net.officefloor.plugin.managedobject.singleton.Singleton;
 
 /**
  * Tests the {@link OfficeFloorNode}.
@@ -171,11 +171,11 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		// Add two different managed object sources verifying details
 		this.replayMockObjects();
 		OfficeFloorManagedObjectSource moSource = this.node.addManagedObjectSource("MO",
-				new SingletonManagedObjectSource("TEST"));
+				new Singleton("TEST"));
 		assertNotNull("Must have managed object source", moSource);
 		assertEquals("Incorrect managed object source name", "MO", moSource.getOfficeFloorManagedObjectSourceName());
 		assertNotSame("Should obtain another managed object source", moSource,
-				this.node.addManagedObjectSource("ANOTHER", new SingletonManagedObjectSource("ANOTHER")));
+				this.node.addManagedObjectSource("ANOTHER", new Singleton("ANOTHER")));
 		this.verifyMockObjects();
 	}
 
@@ -191,9 +191,9 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		// Add the managed object twice
 		this.replayMockObjects();
 		OfficeFloorManagedObjectSource moSourceFirst = this.node.addManagedObjectSource("MO",
-				new SingletonManagedObjectSource("ONE"));
+				new Singleton("ONE"));
 		OfficeFloorManagedObjectSource moSourceSecond = this.node.addManagedObjectSource("MO",
-				new SingletonManagedObjectSource("TWO"));
+				new Singleton("TWO"));
 		this.verifyMockObjects();
 
 		// Should be the same managed object source

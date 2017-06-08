@@ -48,7 +48,17 @@ public class CompileOffice implements OfficeExtensionService {
 	 * Instantiate.
 	 */
 	public CompileOffice() {
-		this.compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+		this(OfficeFloorCompiler.newOfficeFloorCompiler(null));
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param officeFloorCompiler
+	 *            {@link OfficeFloorCompiler} to use.
+	 */
+	public CompileOffice(OfficeFloorCompiler officeFloorCompiler) {
+		this.compiler = officeFloorCompiler;
 		this.compiler.setCompilerIssues(new FailTestCompilerIssues());
 	}
 

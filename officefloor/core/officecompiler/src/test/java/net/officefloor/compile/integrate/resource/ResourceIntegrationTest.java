@@ -20,19 +20,17 @@ package net.officefloor.compile.integrate.resource;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireOfficeFloor;
-import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
-import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.extension.CompileOffice;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 
@@ -61,7 +59,7 @@ public class ResourceIntegrationTest extends OfficeFrameTestCase {
 		namespaceResource = null;
 
 		// Record (multiple times as loading managed object type)
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < 2; i++) {
 			this.recordReturn(resourceSource, resourceSource.sourceResource("REQUIRED RESOURCE"), resource);
 		}
 
@@ -69,21 +67,19 @@ public class ResourceIntegrationTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Configure OfficeFloor
-		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource(
-				OfficeFloorCompiler.newOfficeFloorCompiler(null));
-		source.addManagedObject(ClassLoaderManagedObjectSource.class.getName(), null, new AutoWire(ClassLoader.class));
-		source.addManagedObject(ResourceManagedObjectSource.class.getName(), null, new AutoWire(InputStream.class));
-		source.addSection("SECTION", ClassSectionSource.class.getName(), ResourceClass.class.getName());
-		source.assignDefaultTeam(PassiveTeamSource.class.getName());
-
-		// Configure for the OfficeFrame
-		source.getOfficeFloorCompiler().addResources(resourceSource);
-
-		// Start the OfficeFloor
-		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
+		CompileOffice compile = new CompileOffice();
+		compile.getOfficeFloorCompiler().addResources(resourceSource);
+		OfficeFloor officeFloor = compile.compileAndOpenOffice((architect, context) -> {
+			architect.enableAutoWireObjects();
+			architect.addOfficeManagedObjectSource("CLASS_LOADER", ClassLoaderManagedObjectSource.class.getName())
+					.addOfficeManagedObject("CLASS_LOADER", ManagedObjectScope.THREAD);
+			architect.addOfficeManagedObjectSource("RESOURCE", ResourceManagedObjectSource.class.getName())
+					.addOfficeManagedObject("RESOURCE", ManagedObjectScope.PROCESS);
+			architect.addOfficeSection("SECTION", ClassSectionSource.class.getName(), ResourceClass.class.getName());
+		});
 
 		// Invoke the function
-		officeFloor.invokeFunction("SECTION.function", null, null);
+		officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.function").invokeProcess(null, null);
 
 		// Ensure correct resources
 		assertSame("Incorrect resource", resource, namespaceResource);

@@ -56,6 +56,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.plugin.governance.clazz.Enforce;
 import net.officefloor.plugin.governance.clazz.Govern;
+import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
 
@@ -278,7 +279,7 @@ public class IntegrateSuppliedManagedObjectTest extends OfficeFrameTestCase {
 			assertEquals("Incorrect property value", "supplier.value", context.getProperty(PROPERTY_TEST));
 
 			// Supply the managed objects
-			context.addManagedObject(new SingletonManagedObjectSource(connection), null,
+			context.addManagedObject(new Singleton(connection), null,
 					new AutoWire(Connection.class));
 			AutoWireObject object = context.addManagedObject(inputManagedObject, inputWirer, new AutoWire(Queue.class));
 			object.addProperty(MockInputManagedObjectSource.PROPERTY_TEST, "mo.value");

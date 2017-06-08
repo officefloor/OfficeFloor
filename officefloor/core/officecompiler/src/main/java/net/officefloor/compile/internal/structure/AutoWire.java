@@ -17,6 +17,8 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import java.lang.annotation.Annotation;
+
 /**
  * Auto-wire.
  * 
@@ -55,6 +57,18 @@ public class AutoWire implements Comparable<AutoWire> {
 	 */
 	public AutoWire(String type) {
 		this(null, type);
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param qualifier
+	 *            Qualifier {@link Annotation}.
+	 * @param type
+	 *            Type.
+	 */
+	public AutoWire(Class<? extends Annotation> qualifier, Class<?> type) {
+		this(qualifier.getName(), type.getName());
 	}
 
 	/**

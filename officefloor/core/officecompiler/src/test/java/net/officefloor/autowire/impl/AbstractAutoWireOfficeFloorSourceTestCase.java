@@ -78,6 +78,7 @@ import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
+import net.officefloor.plugin.managedobject.singleton.Singleton;
 
 import org.easymock.AbstractMatcher;
 
@@ -814,7 +815,7 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends OfficeFr
 		// Record the managed object type
 		ManagedObjectType<?> managedObjectType = this.createMock(ManagedObjectType.class);
 		this.recordReturn(this.context, this.context.loadManagedObjectType(object.getClass().getName(),
-				new SingletonManagedObjectSource(object), null), managedObjectType);
+				new Singleton(object), null), managedObjectType);
 		if (!this.isRawObjectTypeMatcherSpecified) {
 			this.control(this.context).setMatcher(new AbstractMatcher() {
 				@Override
@@ -823,8 +824,8 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends OfficeFr
 					assertNotNull("Must have properties", actual[2]);
 
 					// Match if raw objects match
-					SingletonManagedObjectSource eMo = (SingletonManagedObjectSource) expected[1];
-					SingletonManagedObjectSource aMo = (SingletonManagedObjectSource) actual[1];
+					Singleton eMo = (Singleton) expected[1];
+					Singleton aMo = (Singleton) actual[1];
 					return eMo.getObject().equals(aMo.getObject());
 				}
 			});
@@ -915,14 +916,14 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends OfficeFr
 
 		// Record the managed object source
 		this.recordReturn(this.deployer, this.deployer.addManagedObjectSource(autoWire.getQualifiedType(),
-				new SingletonManagedObjectSource(dependency)), source);
+				new Singleton(dependency)), source);
 		if (!this.isRawObjectMatcherSpecified) {
 			this.control(this.deployer).setMatcher(new AbstractMatcher() {
 				@Override
 				public boolean matches(Object[] expected, Object[] actual) {
 					assertEquals("Incorrect name", expected[0], actual[0]);
-					SingletonManagedObjectSource eMo = (SingletonManagedObjectSource) expected[1];
-					SingletonManagedObjectSource aMo = (SingletonManagedObjectSource) actual[1];
+					Singleton eMo = (Singleton) expected[1];
+					Singleton aMo = (Singleton) actual[1];
 					assertEquals("Incorrect singleton object", eMo.getObject(), aMo.getObject());
 					return true;
 				}

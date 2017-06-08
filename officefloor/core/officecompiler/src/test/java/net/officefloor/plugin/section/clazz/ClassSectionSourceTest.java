@@ -25,15 +25,12 @@ import java.lang.annotation.Target;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireOfficeFloor;
-import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionFunction;
@@ -46,9 +43,11 @@ import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
+import net.officefloor.extension.CompileOffice;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -59,6 +58,7 @@ import net.officefloor.plugin.managedfunction.clazz.Qualifier;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObject;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
+import net.officefloor.plugin.managedobject.singleton.Singleton;
 
 /**
  * Tests the {@link ClassSectionSource}.
@@ -632,23 +632,27 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		final ReturnValue returnValue = new ReturnValue();
 
 		// Managed object internal, so must run to test
-		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
-		AutoWireSection section = source.addSection("test", MockChangeFunctionNameClassSectionSource.class.getName(),
-				MockChangeFunctionNameWithLinksSection.class.getName());
-		source.addObject(returnValue, new AutoWire(ReturnValue.class));
-		source.addObject(connection, new AutoWire(Connection.class));
-		source.link(section, "externalFlow", section, "finished");
+		OfficeFloor officeFloor = new CompileOffice().compileAndOpenOffice((architect, context) -> {
+			architect.enableAutoWireObjects();
+			OfficeSection section = architect.addOfficeSection("test",
+					MockChangeFunctionNameClassSectionSource.class.getName(),
+					MockChangeFunctionNameWithLinksSection.class.getName());
+			Singleton.load(architect, returnValue);
+			Singleton.load(architect, connection);
+			architect.link(section.getOfficeSectionOutput("externalFlow"), section.getOfficeSectionInput("finished"));
+		});
 
-		// Open OfficeFloor
-		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
 		try {
 
+			// Obtain the function
+			FunctionManager function = officeFloor.getOffice("OFFICE").getFunctionManager("test.doInput");
+
 			// Run invoking flow
-			officeFloor.invokeFunction("test.doInput", new Boolean(true), null);
+			function.invokeProcess(new Boolean(true), null);
 			assertEquals("Incorrect value on invoking flow", "doInput -> oldName(Flow) -> finished", returnValue.value);
 
 			// Run using next function
-			officeFloor.invokeFunction("test.doInput", null, null);
+			function.invokeProcess(null, null);
 			assertEquals("Incorrect value on next function", "doInput -> oldName(null) -> finished", returnValue.value);
 
 		} finally {
@@ -703,16 +707,16 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public void testManagedObject() throws Exception {
 
 		// Managed object internal, so must run to test
-		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
-		source.addSection("test", ClassSectionSource.class.getName(), MockManagedObjectSection.class.getName());
+		OfficeFloor officeFloor = new CompileOffice().compileAndOpenOffice((architect, context) -> {
+			architect.addOfficeSection("test", ClassSectionSource.class.getName(),
+					MockManagedObjectSection.class.getName());
+		});
 
-		// Open the OfficeFloor
-		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
 		try {
 
 			// Run to ensure obtained message
 			ReturnValue returnValue = new ReturnValue();
-			officeFloor.invokeFunction("test.doInput", returnValue, null);
+			officeFloor.getOffice("OFFICE").getFunctionManager("test.doInput").invokeProcess(returnValue, null);
 			assertEquals("Incorrect value from managed object", "test", returnValue.value);
 
 		} finally {
@@ -757,17 +761,16 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public void testManagedObjectWithDependency() throws Exception {
 
 		// Managed object internal, so must run to test
-		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
-		source.addSection("test", ClassSectionSource.class.getName(),
-				MockManagedObjectWithDependencySection.class.getName());
+		OfficeFloor officeFloor = new CompileOffice().compileAndOpenOffice((architect, context) -> {
+			architect.addOfficeSection("test", ClassSectionSource.class.getName(),
+					MockManagedObjectWithDependencySection.class.getName());
+		});
 
-		// Open OfficeFloor
-		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
 		try {
 
 			// Run to ensure obtained message
 			ReturnValue returnValue = new ReturnValue();
-			officeFloor.invokeFunction("test.doInput", returnValue, null);
+			officeFloor.getOffice("OFFICE").getFunctionManager("test.doInput").invokeProcess(returnValue, null);
 			assertEquals("Incorrect value from managed object", "test", returnValue.value);
 
 		} finally {
@@ -861,16 +864,16 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public void testInternalFlow() throws Exception {
 
 		// Triggering flows, so must run to test
-		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
-		source.addSection("test", ClassSectionSource.class.getName(), MockInternalFlowSection.class.getName());
+		OfficeFloor officeFloor = new CompileOffice().compileAndOpenOffice((architect, context) -> {
+			architect.addOfficeSection("test", ClassSectionSource.class.getName(),
+					MockInternalFlowSection.class.getName());
+		});
 
-		// Open OfficeFloor
-		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
 		try {
 
 			// Run to ensure obtained message
 			ReturnValue returnValue = new ReturnValue();
-			officeFloor.invokeFunction("test.doFirst", returnValue, null);
+			officeFloor.getOffice("OFFICE").getFunctionManager("test.doFirst").invokeProcess(returnValue, null);
 			assertEquals("Incorrect value from flow", "one-two-three", returnValue.value);
 
 		} finally {
@@ -914,17 +917,18 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public void testEscalationHandling() throws Exception {
 
 		// Triggering flows, so must run to test
-		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
 		ReturnValue returnValue = new ReturnValue();
-		source.addObject(returnValue, new AutoWire(ReturnValue.class));
-		source.addSection("test", ClassSectionSource.class.getName(), MockEscalationHandlingSection.class.getName());
+		OfficeFloor officeFloor = new CompileOffice().compileAndOpenOffice((architect, context) -> {
+			architect.enableAutoWireObjects();
+			Singleton.load(architect, returnValue);
+			architect.addOfficeSection("test", ClassSectionSource.class.getName(),
+					MockEscalationHandlingSection.class.getName());
+		});
 
-		// Open OfficeFloor
-		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
 		try {
 
 			// Run to ensure obtained message
-			officeFloor.invokeFunction("test.triggerEscalation", null, null);
+			officeFloor.getOffice("OFFICE").getFunctionManager("test.triggerEscalation").invokeProcess(null, null);
 			assertEquals("Incorrect value from handling escalation", "test", returnValue.value);
 
 		} finally {
@@ -956,23 +960,23 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		final IOException[] escalated = new IOException[1];
 
 		// Configure to handle escalation
-		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
-		source.addSection("test", ClassSectionSource.class.getName(),
-				MockAvoidCyclicEscalationHandling.class.getName());
-		source.getOfficeFloorCompiler().setEscalationHandler(new EscalationHandler() {
+		CompileOffice compile = new CompileOffice();
+		compile.getOfficeFloorCompiler().setEscalationHandler(new EscalationHandler() {
 			@Override
 			public void handleEscalation(Throwable escalation) throws Throwable {
 				escalated[0] = (IOException) escalation;
 			}
 		});
+		OfficeFloor officeFloor = compile.compileAndOpenOffice((architect, context) -> {
+			architect.addOfficeSection("test", ClassSectionSource.class.getName(),
+					MockAvoidCyclicEscalationHandling.class.getName());
+		});
 
-		// Open OfficeFloor
-		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
 		try {
 
 			// Run triggering escalation
 			final IOException escalation = new IOException("TEST");
-			officeFloor.invokeFunction("test.handleEscalation", escalation, null);
+			officeFloor.getOffice("OFFICE").getFunctionManager("test.handleEscalation").invokeProcess(escalation, null);
 
 			// Ensure not handling itself (escalated to OfficeFloor level)
 			assertEquals("Incorrect escalation", escalation, escalated[0]);
@@ -1000,17 +1004,18 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public void testSubSection() throws Exception {
 
 		// Triggering sub section, so must run to test
-		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
-		source.addSection("test", ClassSectionSource.class.getName(), MockInvokeSubSection.class.getName());
 		ReturnValue returnValue = new ReturnValue();
-		source.addObject(returnValue, new AutoWire(ReturnValue.class));
+		OfficeFloor officeFloor = new CompileOffice().compileAndOpenOffice((architect, context) -> {
+			architect.enableAutoWireObjects();
+			architect.addOfficeSection("test", ClassSectionSource.class.getName(),
+					MockInvokeSubSection.class.getName());
+			Singleton.load(architect, returnValue);
+		});
 
-		// Open OfficeFloor
-		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
 		try {
 
 			// Run to ensure obtained message
-			officeFloor.invokeFunction("test.doFirst", null, null);
+			officeFloor.getOffice("OFFICE").getFunctionManager("test.doFirst").invokeProcess(null, null);
 			assertEquals("Incorrect value from sub section", "sub section", returnValue.value);
 
 		} finally {

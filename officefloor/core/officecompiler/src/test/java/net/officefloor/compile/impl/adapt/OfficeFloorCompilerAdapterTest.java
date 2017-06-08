@@ -22,10 +22,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.function.Supplier;
 
-import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireManagement;
-import net.officefloor.autowire.AutoWireOfficeFloor;
-import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.autowire.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.autowire.spi.supplier.source.impl.AbstractSupplierSource;
@@ -39,17 +36,30 @@ import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.IssueCapture;
-import net.officefloor.compile.managedfunction.ManagedFunctionLoader;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.compile.managedfunction.ManagedFunctionLoader;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.compile.spi.office.source.OfficeSource;
+import net.officefloor.compile.spi.office.source.OfficeSourceContext;
+import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
+import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
+import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
+import net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSource;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.manage.FunctionManager;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -57,6 +67,7 @@ import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObject
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.impl.office.OfficeModelOfficeSource;
 import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
@@ -65,6 +76,7 @@ import net.officefloor.plugin.administration.clazz.ClassAdministrationSource;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
+import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
 
@@ -204,18 +216,34 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	public void testCompileAndRunOfficeFloor() throws Exception {
 
 		// Build OfficeFloor
-		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource(this.compiler);
-		source.assignDefaultTeam(PassiveTeamSource.class.getName());
-		source.addSection("TEST", ClassSectionSource.class.getName(), AdaptWork.class.getName());
-		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
+		this.compiler.setOfficeFloorSourceClass(OfficeLoaderOfficeFloorSource.class);
+		this.compiler.addProperty(OfficeLoaderOfficeFloorSource.PROPERTY_OFFICE_CLASS_NAME,
+				CompileAndRunOfficeSource.class.getName());
+		OfficeFloor officeFloor = this.compiler.compile("OfficeFloor");
+		officeFloor.openOfficeFloor();
 
 		// Invoke the function
 		File checkFile = File.createTempFile(this.getClass().getSimpleName(), "test");
-		officeFloor.invokeFunction("TEST.task", checkFile.getAbsolutePath(), null);
+		Office office = officeFloor.getOffice("OFFICE");
+		FunctionManager function = office.getFunctionManager("TEST.task");
+		function.invokeProcess(checkFile.getAbsolutePath(), null);
 
 		// Ensure the invoked task
 		String contents = this.getFileContents(checkFile);
 		assertEquals("Task should be invoked", "TASK INVOKED", contents);
+	}
+
+	@TestSource
+	public static class CompileAndRunOfficeSource extends AbstractOfficeSource {
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		public void sourceOffice(OfficeArchitect officeArchitect, OfficeSourceContext context) throws Exception {
+			officeArchitect.addOfficeSection("TEST", ClassSectionSource.class.getName(), AdaptWork.class.getName());
+		}
 	}
 
 	/**
@@ -248,20 +276,39 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	public void testManagedObject() throws Exception {
 
 		// Build OfficeFloor
-		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource(this.compiler);
-		source.assignDefaultTeam(PassiveTeamSource.class.getName());
-		source.addSection("TEST", ClassSectionSource.class.getName(), AdaptManagedObjectWork.class.getName());
-		source.addManagedObject(ClassManagedObjectSource.class.getName(), null, new AutoWire(AdaptManagedObject.class))
-				.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, AdaptManagedObjectImpl.class.getName());
-		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
+		this.compiler.setOfficeFloorSourceClass(OfficeLoaderOfficeFloorSource.class);
+		this.compiler.addProperty(OfficeLoaderOfficeFloorSource.PROPERTY_OFFICE_CLASS_NAME,
+				ManagedObjectOfficeSource.class.getName());
+		OfficeFloor officeFloor = this.compiler.compile("OfficeFloor");
+		officeFloor.openOfficeFloor();
 
 		// Invoke the function
 		File checkFile = File.createTempFile(this.getClass().getSimpleName(), "test");
-		officeFloor.invokeFunction("TEST.task", checkFile.getAbsolutePath(), null);
+		officeFloor.getOffice("OFFICE").getFunctionManager("TEST.task").invokeProcess(checkFile.getAbsolutePath(),
+				null);
 
 		// Ensure the invoked task
 		String contents = this.getFileContents(checkFile);
 		assertEquals("Task should be invoked", "MANAGED OBJECT INVOKED", contents);
+	}
+
+	@TestSource
+	public static class ManagedObjectOfficeSource extends AbstractOfficeSource {
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		public void sourceOffice(OfficeArchitect officeArchitect, OfficeSourceContext context) throws Exception {
+			officeArchitect.enableAutoWireObjects();
+			officeArchitect.addOfficeSection("TEST", ClassSectionSource.class.getName(),
+					AdaptManagedObjectWork.class.getName());
+			OfficeManagedObjectSource mos = officeArchitect.addOfficeManagedObjectSource("MOS",
+					ClassManagedObjectSource.class.getName());
+			mos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, AdaptManagedObjectImpl.class.getName());
+			mos.addOfficeManagedObject("MO", ManagedObjectScope.THREAD);
+		}
 	}
 
 	/**
@@ -272,20 +319,65 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		final AdaptManagedObjectImpl object = new AdaptManagedObjectImpl();
 
 		// Build OfficeFloor
-		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource(this.compiler);
-		source.assignDefaultTeam(PassiveTeamSource.class.getName());
-		source.addSection("TEST", ClassSectionSource.class.getName(), AdaptManagedObjectWork.class.getName());
-		source.addObject(object, new AutoWire(AdaptManagedObject.class));
-		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
+		this.compiler.setOfficeFloorSource(new ObjectOfficeFloorSource(object));
+		OfficeFloor officeFloor = this.compiler.compile("OfficeFloor");
+		officeFloor.openOfficeFloor();
 
 		// Invoke the function
 		File checkFile = File.createTempFile(this.getClass().getSimpleName(), "test");
-		officeFloor.invokeFunction("TEST.task", checkFile.getAbsolutePath(), null);
+		officeFloor.getOffice("OFFICE").getFunctionManager("TEST.task").invokeProcess(checkFile.getAbsolutePath(),
+				null);
 
 		// Ensure the invoked managed object
 		assertTrue("Managed Object should be flagged as invoked", object.isInvoked);
 		String contents = this.getFileContents(checkFile);
 		assertEquals("Managed Object should be invoked", "MANAGED OBJECT INVOKED", contents);
+	}
+
+	@TestSource
+	public static class ObjectOfficeFloorSource extends AbstractOfficeFloorSource {
+
+		private AdaptManagedObject object;
+
+		public ObjectOfficeFloorSource(AdaptManagedObject object) {
+			this.object = object;
+		}
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		public void specifyConfigurationProperties(RequiredProperties requiredProperties,
+				OfficeFloorSourceContext context) throws Exception {
+		}
+
+		@Override
+		public void sourceOfficeFloor(OfficeFloorDeployer deployer, OfficeFloorSourceContext context) throws Exception {
+			deployer.addDeployedOffice("OFFICE", new ObjectOfficeSource(this.object), null);
+		}
+	}
+
+	@TestSource
+	public static class ObjectOfficeSource extends AbstractOfficeSource {
+
+		private AdaptManagedObject object;
+
+		public ObjectOfficeSource(AdaptManagedObject object) {
+			this.object = object;
+		}
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		public void sourceOffice(OfficeArchitect officeArchitect, OfficeSourceContext context) throws Exception {
+			officeArchitect.enableAutoWireObjects();
+			officeArchitect.addOfficeSection("TEST", ClassSectionSource.class.getName(),
+					AdaptManagedObjectWork.class.getName());
+			Singleton.load(officeArchitect, this.object);
+		}
 	}
 
 	/**
@@ -586,6 +678,40 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		protected ManagedObject getManagedObject() throws Throwable {
 			fail("Should not be invoked");
 			return null;
+		}
+	}
+
+	/**
+	 * {@link OfficeFloorSource} to load {@link Office} in another
+	 * {@link ClassLoader}.
+	 */
+	@TestSource
+	public static class OfficeLoaderOfficeFloorSource extends AbstractOfficeFloorSource {
+
+		/**
+		 * Name of {@link Property} to obtain the {@link OfficeSource} class
+		 * name.
+		 */
+		public static final String PROPERTY_OFFICE_CLASS_NAME = "office.class.name";
+
+		/*
+		 * ===================== OfficeFloorSource =======================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			context.addProperty(PROPERTY_OFFICE_CLASS_NAME);
+		}
+
+		@Override
+		public void specifyConfigurationProperties(RequiredProperties requiredProperties,
+				OfficeFloorSourceContext context) throws Exception {
+		}
+
+		@Override
+		public void sourceOfficeFloor(OfficeFloorDeployer deployer, OfficeFloorSourceContext context) throws Exception {
+			String officeSourceClassName = context.getProperty(PROPERTY_OFFICE_CLASS_NAME);
+			deployer.addDeployedOffice("OFFICE", officeSourceClassName, null);
 		}
 	}
 

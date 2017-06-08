@@ -19,9 +19,9 @@ package net.officefloor.compile.integrate.profile;
 
 import java.util.List;
 
-import net.officefloor.autowire.AutoWireOfficeFloor;
-import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
+import net.officefloor.extension.CompileOffice;
 import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.profile.ProfiledManagedFunction;
 import net.officefloor.frame.api.profile.ProfiledProcessState;
 import net.officefloor.frame.api.profile.ProfiledThreadState;
@@ -42,21 +42,24 @@ public class ProfilerIntegrationTest extends OfficeFrameTestCase {
 	public void testConfigureProfiler() throws Exception {
 
 		// Configure OfficeFloor
-		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
-		source.addSection("SECTION", ClassSectionSource.class.getName(), ProfiledClass.class.getName());
+		CompileOffice compile = new CompileOffice();
 
 		// Configure the profiler
 		final ProfiledProcessState[] profiledProcess = new ProfiledProcessState[1];
-		source.setProfiler(new Profiler() {
+		compile.getOfficeFloorCompiler().addProfiler("OFFICE", new Profiler() {
 			@Override
 			public void profileProcessState(ProfiledProcessState process) {
 				profiledProcess[0] = process;
 			}
 		});
 
+		// Compile the Office
+		OfficeFloor officeFloor = compile.compileAndOpenOffice((architect, context) -> {
+			architect.addOfficeSection("SECTION", ClassSectionSource.class.getName(), ProfiledClass.class.getName());
+		});
+
 		// Invoke the function
-		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
-		officeFloor.invokeFunction("SECTION.function", null, null);
+		officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.function").invokeProcess(null, null);
 		officeFloor.closeOfficeFloor();
 
 		// Ensure profiled

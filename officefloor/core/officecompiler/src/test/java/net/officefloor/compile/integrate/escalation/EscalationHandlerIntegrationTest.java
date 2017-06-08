@@ -19,13 +19,12 @@ package net.officefloor.compile.integrate.escalation;
 
 import java.io.IOException;
 
-import net.officefloor.autowire.AutoWireApplication;
-import net.officefloor.autowire.AutoWireOfficeFloor;
-import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.extension.CompileOffice;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
@@ -44,21 +43,23 @@ public class EscalationHandlerIntegrationTest extends OfficeFrameTestCase {
 	 */
 	public void testHandleEscalation() throws Exception {
 
-		AutoWireApplication source = new AutoWireOfficeFloorSource();
+		// Create compiler
+		CompileOffice compile = new CompileOffice();
 
 		// Add escalation handler
 		MockEscalationHandler handler = new MockEscalationHandler();
-		source.getOfficeFloorCompiler().setEscalationHandler(handler);
-
-		// Add the failing service
-		source.addSection("FAILURE", ClassSectionSource.class.getName(), FailingService.class.getName());
+		compile.getOfficeFloorCompiler().setEscalationHandler(handler);
 
 		// Open OfficeFloor
-		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
+		OfficeFloor officeFloor = compile.compileAndOpenOffice((architect, context) -> {
+
+			// Add the failing service
+			architect.addOfficeSection("FAILURE", ClassSectionSource.class.getName(), FailingService.class.getName());
+		});
 
 		// Ensure handled escalation
 		IOException failure = new IOException("TEST");
-		officeFloor.invokeFunction("FAILURE.service", failure, null);
+		officeFloor.getOffice("OFFICE").getFunctionManager("FAILURE.service").invokeProcess(failure, null);
 		assertSame("Failure should be handled by overridden escalation handler", failure, handler.escalation);
 
 		// Close OfficeFloor
