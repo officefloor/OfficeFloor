@@ -32,6 +32,7 @@ import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.AutoWireLink;
 import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
@@ -54,7 +55,6 @@ import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
@@ -213,6 +213,12 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	private final Map<String, ManagedObjectDependencyNode> inputDependencies = new HashMap<String, ManagedObjectDependencyNode>();
 
 	/**
+	 * {@link ManagedObjectSource} used to source this
+	 * {@link ManagedObjectSourceNode}.
+	 */
+	private ManagedObjectSource<?, ?> usedManagedObjectSource = null;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param managedObjectSourceName
@@ -368,7 +374,6 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ManagedObjectType<?> loadManagedObjectType() {
 
 		// Determine if supplied
@@ -383,22 +388,30 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			// Create the loader to obtain the managed object type
 			ManagedObjectLoader loader = this.context.getManagedObjectLoader(this);
 
-			// Load the managed object type
-			if (this.state.managedObjectSource != null) {
-				// Load and return the managed object type from instance
-				return loader.loadManagedObjectType(this.state.managedObjectSource, this.getPropertyList());
+			// Obtain the managed object source
+			ManagedObjectSource<?, ?> managedObjectSource = this.state.managedObjectSource;
+			if (managedObjectSource == null) {
 
-			} else {
 				// Obtain the managed object source class
-				Class managedObjectSourceClass = this.context
+				Class<? extends ManagedObjectSource<?, ?>> managedObjectSourceClass = this.context
 						.getManagedObjectSourceClass(this.state.managedObjectSourceClassName, this);
 				if (managedObjectSourceClass == null) {
 					return null; // must have managed object source class
 				}
 
-				// Load and return the managed object type from class
-				return loader.loadManagedObjectType(managedObjectSourceClass, this.getPropertyList());
+				// Obtain the managed object source
+				managedObjectSource = CompileUtil.newInstance(managedObjectSourceClass, ManagedObjectSource.class, this,
+						this.context.getCompilerIssues());
+				if (managedObjectSource == null) {
+					return null; // must have managed object source
+				}
 			}
+
+			// Keep track of the managed object source
+			this.usedManagedObjectSource = managedObjectSource;
+
+			// Load and return the managed object type from class
+			return loader.loadManagedObjectType(managedObjectSource, this.getPropertyList());
 		}
 	}
 
@@ -575,6 +588,10 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		if (managedObjectType == null) {
 			return; // must have managed object type
 		}
+
+		// Register as possible MBean
+		compileContext.registerPossibleMBean(ManagedObjectSource.class, managedObjectSourceName,
+				this.usedManagedObjectSource);
 
 		// Ensure all the teams are made available
 		for (ManagedObjectTeamType teamType : managedObjectType.getTeamTypes()) {

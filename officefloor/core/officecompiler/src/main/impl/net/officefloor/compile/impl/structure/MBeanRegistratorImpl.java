@@ -26,6 +26,7 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
 import net.officefloor.compile.internal.structure.MBeanRegistrator;
+import net.officefloor.compile.mbean.MBeanFactory;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 
@@ -72,13 +73,19 @@ public class MBeanRegistratorImpl implements MBeanRegistrator, OfficeFloorListen
 			ObjectName name = new ObjectName(
 					"net.officefloor:type=" + possibleMBean.type.getName() + ",name=" + possibleMBean.name);
 
+			// Determine if MBean factory
+			Object mbean = possibleMBean.mbean;
+			if (mbean instanceof MBeanFactory) {
+				mbean = ((MBeanFactory) mbean).createMBean();
+			}
+
 			try {
 				// Attempt to register the MBean
-				server.registerMBean(possibleMBean.mbean, name);
+				server.registerMBean(mbean, name);
 
 				// MBean registered
 				this.registeredMBeans.add(name);
-				
+
 			} catch (NotCompliantMBeanException ex) {
 				// Ignore registering, as not an MBean
 			}

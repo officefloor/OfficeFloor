@@ -50,15 +50,26 @@ public interface OfficeFloorDeployer {
 	void enableAutoWireTeams();
 
 	/**
-	 * Adds a {@link Team}.
+	 * Adds a {@link OfficeFloorTeam}.
 	 * 
 	 * @param teamName
-	 *            Name of the {@link Team}.
+	 *            Name of the {@link OfficeFloorTeam}.
 	 * @param teamSourceClassName
 	 *            Fully qualified class name of the {@link TeamSource}.
 	 * @return Added {@link OfficeFloorTeam}.
 	 */
 	OfficeFloorTeam addTeam(String teamName, String teamSourceClassName);
+
+	/**
+	 * Adds a {@link OfficeFloorTeam}.
+	 * 
+	 * @param teamName
+	 *            Name of the {@link OfficeFloorTeam}.
+	 * @param teamSource
+	 *            {@link TeamSource}.
+	 * @return Added {@link OfficeFloorTeam}.
+	 */
+	OfficeFloorTeam addTeam(String teamName, TeamSource teamSource);
 
 	/**
 	 * Adds an {@link OfficeFloorManagedObjectSource}.

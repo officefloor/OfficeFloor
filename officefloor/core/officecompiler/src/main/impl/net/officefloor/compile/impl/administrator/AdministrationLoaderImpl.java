@@ -94,20 +94,28 @@ public class AdministrationLoaderImpl implements AdministrationLoader {
 			return null; // failed to instantiate
 		}
 
+		// Load and return specification
+		return this.loadSpecification(administrationSource);
+	}
+
+	@Override
+	public <E, F extends Enum<F>, G extends Enum<G>> PropertyList loadSpecification(
+			AdministrationSource<E, F, G> administrationSource) {
+
 		// Obtain the specification
 		AdministrationSourceSpecification specification;
 		try {
 			specification = administrationSource.getSpecification();
 		} catch (Throwable ex) {
 			this.addIssue("Failed to obtain " + AdministrationSourceSpecification.class.getSimpleName() + " from "
-					+ administrationSourceClass.getName(), ex);
+					+ administrationSource.getClass().getName(), ex);
 			return null; // failed to obtain
 		}
 
 		// Ensure have specification
 		if (specification == null) {
 			this.addIssue("No " + AdministrationSourceSpecification.class.getSimpleName() + " returned from "
-					+ administrationSourceClass.getName());
+					+ administrationSource.getClass().getName());
 			return null; // no specification obtained
 		}
 
@@ -118,7 +126,7 @@ public class AdministrationLoaderImpl implements AdministrationLoader {
 		} catch (Throwable ex) {
 			this.addIssue("Failed to obtain " + AdministrationSourceProperty.class.getSimpleName() + " instances from "
 					+ AdministrationSourceSpecification.class.getSimpleName() + " for "
-					+ administrationSourceClass.getName(), ex);
+					+ administrationSource.getClass().getName(), ex);
 			return null; // failed to obtain properties
 		}
 
@@ -132,7 +140,7 @@ public class AdministrationLoaderImpl implements AdministrationLoader {
 				if (adminProperty == null) {
 					this.addIssue(AdministrationSourceProperty.class.getSimpleName() + " " + i + " is null from "
 							+ AdministrationSourceSpecification.class.getSimpleName() + " for "
-							+ administrationSourceClass.getName());
+							+ administrationSource.getClass().getName());
 					return null; // must have complete property details
 				}
 
@@ -143,13 +151,13 @@ public class AdministrationLoaderImpl implements AdministrationLoader {
 				} catch (Throwable ex) {
 					this.addIssue("Failed to get name for " + AdministrationSourceProperty.class.getSimpleName() + " "
 							+ i + " from " + AdministrationSourceSpecification.class.getSimpleName() + " for "
-							+ administrationSourceClass.getName(), ex);
+							+ administrationSource.getClass().getName(), ex);
 					return null; // must have complete property details
 				}
 				if (CompileUtil.isBlank(name)) {
 					this.addIssue(AdministrationSourceProperty.class.getSimpleName() + " " + i
 							+ " provided blank name from " + AdministrationSourceSpecification.class.getSimpleName()
-							+ " for " + administrationSourceClass.getName());
+							+ " for " + administrationSource.getClass().getName());
 					return null; // must have complete property details
 				}
 
@@ -160,7 +168,7 @@ public class AdministrationLoaderImpl implements AdministrationLoader {
 				} catch (Throwable ex) {
 					this.addIssue("Failed to get label for " + AdministrationSourceProperty.class.getSimpleName() + " "
 							+ i + " (" + name + ") from " + AdministrationSourceSpecification.class.getSimpleName()
-							+ " for " + administrationSourceClass.getName(), ex);
+							+ " for " + administrationSource.getClass().getName(), ex);
 					return null; // must have complete property details
 				}
 
@@ -183,6 +191,15 @@ public class AdministrationLoaderImpl implements AdministrationLoader {
 		if (administratorSource == null) {
 			return null; // failed to instantiate
 		}
+
+		// Load and return type
+		return this.loadAdministrationType(administratorSource, propertyList);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <E, F extends Enum<F>, G extends Enum<G>> AdministrationType<E, F, G> loadAdministrationType(
+			AdministrationSource<E, F, G> administratorSource, PropertyList propertyList) {
 
 		// Obtain the source context
 		SourceContext sourceContext = this.nodeContext.getRootSourceContext();
@@ -390,14 +407,13 @@ public class AdministrationLoaderImpl implements AdministrationLoader {
 			}
 
 		} catch (Throwable ex) {
-			this.addIssue("Exception from " + administratorSourceClass.getName(), ex);
+			this.addIssue("Exception from " + administratorSource.getClass().getName(), ex);
 			return null; // must be successful with meta-data
 		}
 
 		// Return the administrator type
 		return new AdministrationTypeImpl<E, F, G>(administrationFactory, extensionInterface, flowKeyClass, flowTypes,
 				escalationTypes, governanceKeyClass, governanceTypes);
-
 	}
 
 	/**

@@ -31,6 +31,7 @@ import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.AutoWireLink;
 import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
@@ -39,7 +40,6 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
-import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.office.AdministerableManagedObject;
@@ -97,7 +97,6 @@ public class AdministrationNodeImpl implements AdministrationNode {
 		 * {@link AdministrationSource} instance to use. Should this be
 		 * specified it overrides the {@link Class}.
 		 */
-		@SuppressWarnings("unused")
 		private final AdministrationSource<?, ?, ?> administrationSource;
 
 		/**
@@ -120,6 +119,12 @@ public class AdministrationNodeImpl implements AdministrationNode {
 	 * Listing of {@link AdministerableManagedObject} instances to administer.
 	 */
 	private final List<AdministerableManagedObject> administeredManagedObjects = new LinkedList<AdministerableManagedObject>();
+
+	/**
+	 * {@link AdministrationSource} used to source this
+	 * {@link AdministrationNode}.
+	 */
+	private AdministrationSource<?, ?, ?> usedAdministrationSource = null;
 
 	/**
 	 * Initiate.
@@ -212,23 +217,37 @@ public class AdministrationNodeImpl implements AdministrationNode {
 	 */
 
 	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public AdministrationType<?, ?, ?> loadAdministrationType() {
-
-		// Obtain the administration source class
-		Class administrationSourceClass = this.context
-				.getAdministrationSourceClass(this.state.administrationSourceClassName, this);
-		if (administrationSourceClass == null) {
-			return null; // must obtain source class
-		}
 
 		// Obtain the override properties
 		PropertyList overrideProperties = this.context.overrideProperties(this,
 				this.officeNode.getQualifiedName(this.administrationName), this.properties);
 
+		// Obtain the administration source
+		AdministrationSource<?, ?, ?> administrationSource = this.state.administrationSource;
+		if (administrationSource == null) {
+
+			// Obtain the administration source class
+			Class<? extends AdministrationSource<?, ?, ?>> administrationSourceClass = this.context
+					.getAdministrationSourceClass(this.state.administrationSourceClassName, this);
+			if (administrationSourceClass == null) {
+				return null; // must obtain source class
+			}
+
+			// Obtain the administration source
+			administrationSource = CompileUtil.newInstance(administrationSourceClass, AdministrationSource.class, this,
+					this.context.getCompilerIssues());
+			if (administrationSource == null) {
+				return null; // must obtain source
+			}
+		}
+
+		// Keep track of the administration source
+		this.usedAdministrationSource = administrationSource;
+
 		// Load and return the administration type
 		AdministrationLoader loader = this.context.getAdministrationLoader(this);
-		return loader.loadAdministrationType(administrationSourceClass, overrideProperties);
+		return loader.loadAdministrationType(administrationSource, overrideProperties);
 	}
 
 	@Override
@@ -272,13 +291,15 @@ public class AdministrationNodeImpl implements AdministrationNode {
 	}
 
 	@Override
-	public void buildPreFunctionAdministration(ManagedFunctionBuilder<?, ?> functionBuilder) {
-		this.buildAdministration(true, functionBuilder);
+	public void buildPreFunctionAdministration(ManagedFunctionBuilder<?, ?> functionBuilder,
+			CompileContext compileContext) {
+		this.buildAdministration(true, functionBuilder, compileContext);
 	}
 
 	@Override
-	public void buildPostFunctionAdministration(ManagedFunctionBuilder<?, ?> functionBuilder) {
-		this.buildAdministration(false, functionBuilder);
+	public void buildPostFunctionAdministration(ManagedFunctionBuilder<?, ?> functionBuilder,
+			CompileContext compileContext) {
+		this.buildAdministration(false, functionBuilder, compileContext);
 	}
 
 	/**
@@ -291,13 +312,18 @@ public class AdministrationNodeImpl implements AdministrationNode {
 	 *            {@link ManagedFunctionBuilder}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void buildAdministration(boolean isPreNotPost, ManagedFunctionBuilder<?, ?> functionBuilder) {
+	private void buildAdministration(boolean isPreNotPost, ManagedFunctionBuilder<?, ?> functionBuilder,
+			CompileContext compileContext) {
 
 		// Build the administration type
 		AdministrationType<?, ?, ?> adminType = this.loadAdministrationType();
 		if (adminType == null) {
 			return; // must load type
 		}
+
+		// Register as possible MBean
+		String qualifiedName = this.officeNode.getQualifiedName(this.administrationName);
+		compileContext.registerPossibleMBean(AdministrationSource.class, qualifiedName, this.usedAdministrationSource);
 
 		// Obtain the administration details
 		Class extension = adminType.getExtensionInterface();

@@ -44,8 +44,19 @@ public interface TeamLoader {
 	 *         of the {@link TeamSourceSpecification} or <code>null</code> if
 	 *         issues, which are reported to the {@link CompilerIssues}.
 	 */
-	<TS extends TeamSource> PropertyList loadSpecification(
-			Class<TS> teamSourceClass);
+	<TS extends TeamSource> PropertyList loadSpecification(Class<TS> teamSourceClass);
+
+	/**
+	 * Loads and returns the {@link PropertyList} from the
+	 * {@link TeamSourceSpecification} for the {@link TeamSource}.
+	 * 
+	 * @param teamSource
+	 *            {@link TeamSource} instance.
+	 * @return {@link PropertyList} of the {@link TeamSourceProperty} instances
+	 *         of the {@link TeamSourceSpecification} or <code>null</code> if
+	 *         issues, which are reported to the {@link CompilerIssues}.
+	 */
+	PropertyList loadSpecification(TeamSource teamSource);
 
 	/**
 	 * Loads and returns the {@link TeamType} sourced from the
@@ -63,8 +74,24 @@ public interface TeamLoader {
 	 * @return {@link TeamType} or <code>null</code> if issues, which are
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	<TS extends TeamSource> TeamType loadTeamType(String teamName,
-			Class<TS> teamSourceClass, PropertyList propertyList);
+	<TS extends TeamSource> TeamType loadTeamType(String teamName, Class<TS> teamSourceClass,
+			PropertyList propertyList);
+
+	/**
+	 * Loads and returns the {@link TeamType} sourced from the
+	 * {@link TeamSource}.
+	 * 
+	 * @param teamName
+	 *            Name of the {@link Team}.
+	 * @param teamSource
+	 *            {@link TeamSource} instance.
+	 * @param propertyList
+	 *            {@link PropertyList} containing the properties to source the
+	 *            {@link TeamType}.
+	 * @return {@link TeamType} or <code>null</code> if issues, which are
+	 *         reported to the {@link CompilerIssues}.
+	 */
+	TeamType loadTeamType(String teamName, TeamSource teamSource, PropertyList propertyList);
 
 	/**
 	 * Loads and returns the {@link OfficeFloorTeamSourceType}.
@@ -80,8 +107,22 @@ public interface TeamLoader {
 	 * @return {@link OfficeFloorTeamSourceType} or <code>null</code> if issues,
 	 *         which are reported to the {@link CompilerIssues}.
 	 */
-	<TS extends TeamSource> OfficeFloorTeamSourceType loadOfficeFloorTeamSourceType(
-			String teamName, Class<TS> teamSourceClass,
+	<TS extends TeamSource> OfficeFloorTeamSourceType loadOfficeFloorTeamSourceType(String teamName,
+			Class<TS> teamSourceClass, PropertyList propertyList);
+
+	/**
+	 * Loads and returns the {@link OfficeFloorTeamSourceType}.
+	 * 
+	 * @param teamName
+	 *            Name of the {@link Team}.
+	 * @param teamSource
+	 *            {@link TeamSource} instance.
+	 * @param propertyList
+	 *            {@link PropertyList} for configuring the {@link TeamSource}.
+	 * @return {@link OfficeFloorTeamSourceType} or <code>null</code> if issues,
+	 *         which are reported to the {@link CompilerIssues}.
+	 */
+	OfficeFloorTeamSourceType loadOfficeFloorTeamSourceType(String teamName, TeamSource teamSource,
 			PropertyList propertyList);
 
 }

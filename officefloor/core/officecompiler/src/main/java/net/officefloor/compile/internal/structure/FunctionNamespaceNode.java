@@ -63,4 +63,12 @@ public interface FunctionNamespaceNode extends Node, SectionFunctionNamespace {
 	 */
 	FunctionNamespaceType loadFunctionNamespaceType();
 
+	/**
+	 * Registers the {@link ManagedFunctionSource} as a possible MBean.
+	 * 
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 */
+	void registerAsPossibleMbean(CompileContext compileContext);
+
 }

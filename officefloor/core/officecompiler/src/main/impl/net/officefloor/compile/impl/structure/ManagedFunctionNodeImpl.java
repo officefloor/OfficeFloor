@@ -318,7 +318,8 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 	}
 
 	@Override
-	public void autoWireManagedFunctionResponsibility(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext) {
+	public void autoWireManagedFunctionResponsibility(AutoWirer<LinkTeamNode> autoWirer,
+			CompileContext compileContext) {
 
 		// Create the listing of source auto wires
 		ManagedFunctionType<?, ?> functionType = this.loadManagedFunctionType(compileContext);
@@ -342,6 +343,9 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 		if (functionType == null) {
 			return; // must have type
 		}
+
+		// Ensure the managed function source possibly registered as MBean
+		this.state.namespaceNode.registerAsPossibleMbean(compileContext);
 
 		// Obtain the name of the function
 		String qualifiedFunctionName = this.getQualifiedFunctionName();
@@ -507,12 +511,12 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 
 		// Build the pre function administration
 		for (AdministrationNode preAdmin : this.preFunctionAdministration) {
-			preAdmin.buildPreFunctionAdministration(functionBuilder);
+			preAdmin.buildPreFunctionAdministration(functionBuilder, compileContext);
 		}
 
 		// Build the post function administration
 		for (AdministrationNode postAdmin : this.postFunctionAdministration) {
-			postAdmin.buildPostFunctionAdministration(functionBuilder);
+			postAdmin.buildPostFunctionAdministration(functionBuilder, compileContext);
 		}
 
 		// Build the governance (first inherited then specific for function)

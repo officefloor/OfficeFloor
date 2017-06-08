@@ -90,20 +90,27 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader {
 			return null; // failed to instantiate
 		}
 
+		// Load and return the specification
+		return this.loadSpecification(managedFunctionSource);
+	}
+
+	@Override
+	public PropertyList loadSpecification(ManagedFunctionSource managedFunctionSource) {
+
 		// Obtain the specification
 		ManagedFunctionSourceSpecification specification;
 		try {
 			specification = managedFunctionSource.getSpecification();
 		} catch (Throwable ex) {
 			this.addIssue("Failed to obtain " + ManagedFunctionSourceSpecification.class.getSimpleName() + " from "
-					+ managedFunctionSourceClass.getName(), ex);
+					+ managedFunctionSource.getClass().getName(), ex);
 			return null; // failed to obtain
 		}
 
 		// Ensure have specification
 		if (specification == null) {
 			this.addIssue("No " + ManagedFunctionSourceSpecification.class.getSimpleName() + " returned from "
-					+ managedFunctionSourceClass.getName());
+					+ managedFunctionSource.getClass().getName());
 			return null; // no specification obtained
 		}
 
@@ -114,7 +121,7 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader {
 		} catch (Throwable ex) {
 			this.addIssue("Failed to obtain " + ManagedFunctionSourceProperty.class.getSimpleName() + " instances from "
 					+ ManagedFunctionSourceSpecification.class.getSimpleName() + " for "
-					+ managedFunctionSourceClass.getName(), ex);
+					+ managedFunctionSource.getClass().getName(), ex);
 			return null; // failed to obtain properties
 		}
 
@@ -128,7 +135,7 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader {
 				if (namespaceProperty == null) {
 					this.addIssue(ManagedFunctionSourceProperty.class.getSimpleName() + " " + i + " is null from "
 							+ ManagedFunctionSourceSpecification.class.getSimpleName() + " for "
-							+ managedFunctionSourceClass.getName());
+							+ managedFunctionSource.getClass().getName());
 					return null; // must have complete property details
 				}
 
@@ -139,13 +146,13 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader {
 				} catch (Throwable ex) {
 					this.addIssue("Failed to get name for " + ManagedFunctionSourceProperty.class.getSimpleName() + " "
 							+ i + " from " + ManagedFunctionSourceSpecification.class.getSimpleName() + " for "
-							+ managedFunctionSourceClass.getName(), ex);
+							+ managedFunctionSource.getClass().getName(), ex);
 					return null; // must have complete property details
 				}
 				if (CompileUtil.isBlank(name)) {
 					this.addIssue(ManagedFunctionSourceProperty.class.getSimpleName() + " " + i
 							+ " provided blank name from " + ManagedFunctionSourceSpecification.class.getSimpleName()
-							+ " for " + managedFunctionSourceClass.getName());
+							+ " for " + managedFunctionSource.getClass().getName());
 					return null; // must have complete property details
 				}
 
@@ -156,7 +163,7 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader {
 				} catch (Throwable ex) {
 					this.addIssue("Failed to get label for " + ManagedFunctionSourceProperty.class.getSimpleName() + " "
 							+ i + " (" + name + ") from " + ManagedFunctionSourceSpecification.class.getSimpleName()
-							+ " for " + managedFunctionSourceClass.getName(), ex);
+							+ " for " + managedFunctionSource.getClass().getName(), ex);
 					return null; // must have complete property details
 				}
 
@@ -180,6 +187,14 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader {
 			return null; // failed to instantiate
 		}
 
+		// Load and return the type
+		return this.loadManagedFunctionType(managedFunctionSource, propertyList);
+	}
+
+	@Override
+	public FunctionNamespaceType loadManagedFunctionType(ManagedFunctionSource managedFunctionSource,
+			PropertyList propertyList) {
+
 		// Create the managed function source context
 		ManagedFunctionSourceContext context = new ManagedFunctionSourceContextImpl(true, propertyList,
 				this.nodeContext);
@@ -193,23 +208,22 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader {
 
 		} catch (UnknownPropertyError ex) {
 			this.addIssue("Missing property '" + ex.getUnknownPropertyName() + "' for "
-					+ ManagedFunctionSource.class.getSimpleName() + " " + managedFunctionSourceClass.getName());
+					+ ManagedFunctionSource.class.getSimpleName() + " " + managedFunctionSource.getClass().getName());
 			return null; // must have property
 
 		} catch (UnknownClassError ex) {
 			this.addIssue("Can not load class '" + ex.getUnknownClassName() + "' for "
-					+ ManagedFunctionSource.class.getSimpleName() + " " + managedFunctionSourceClass.getName());
+					+ ManagedFunctionSource.class.getSimpleName() + " " + managedFunctionSource.getClass().getName());
 			return null; // must have class
 
 		} catch (UnknownResourceError ex) {
 			this.addIssue("Can not obtain resource at location '" + ex.getUnknownResourceLocation() + "' for "
-					+ ManagedFunctionSource.class.getSimpleName() + " " + managedFunctionSourceClass.getName());
+					+ ManagedFunctionSource.class.getSimpleName() + " " + managedFunctionSource.getClass().getName());
 			return null; // must have resource
 
 		} catch (Throwable ex) {
-			this.addIssue(
-					"Failed to source " + FunctionNamespaceType.class.getSimpleName() + " definition from "
-							+ ManagedFunctionSource.class.getSimpleName() + " " + managedFunctionSourceClass.getName(),
+			this.addIssue("Failed to source " + FunctionNamespaceType.class.getSimpleName() + " definition from "
+					+ ManagedFunctionSource.class.getSimpleName() + " " + managedFunctionSource.getClass().getName(),
 					ex);
 			return null; // must be successful
 		}
@@ -218,21 +232,20 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader {
 		ManagedFunctionType<?, ?>[] functionTypes = namespaceType.getManagedFunctionTypes();
 		if (functionTypes.length == 0) {
 			this.addIssue("No " + ManagedFunctionType.class.getSimpleName() + " definitions provided by "
-					+ ManagedFunctionSource.class.getSimpleName() + " " + managedFunctionSourceClass.getName());
+					+ ManagedFunctionSource.class.getSimpleName() + " " + managedFunctionSource.getClass().getName());
 			return null; // must have complete type
 		}
 
 		// Determine if duplicate function names
-		if (this.isDuplicateNaming(functionTypes, (functionType) -> functionType.getFunctionName(),
-				"Two or more " + ManagedFunctionType.class.getSimpleName()
-						+ " definitions with the same name (${NAME}) provided by "
-						+ ManagedFunctionSource.class.getSimpleName() + " " + managedFunctionSourceClass.getName())) {
+		if (this.isDuplicateNaming(functionTypes, (functionType) -> functionType.getFunctionName(), "Two or more "
+				+ ManagedFunctionType.class.getSimpleName() + " definitions with the same name (${NAME}) provided by "
+				+ ManagedFunctionSource.class.getSimpleName() + " " + managedFunctionSource.getClass().getName())) {
 			return null; // must have valid type
 		}
 
 		// Ensure the function definitions are valid
 		for (int i = 0; i < functionTypes.length; i++) {
-			if (!this.isValidFunctionType(functionTypes[i], i, managedFunctionSourceClass)) {
+			if (!this.isValidFunctionType(functionTypes[i], i, managedFunctionSource.getClass())) {
 				return null; // must be completely valid type
 			}
 		}

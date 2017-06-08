@@ -76,15 +76,21 @@ public interface AdministrationNode extends LinkTeamNode, OfficeAdministration {
 	 * 
 	 * @param managedFunctionBuilder
 	 *            {@link ManagedFunctionBuilder}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 */
-	void buildPreFunctionAdministration(ManagedFunctionBuilder<?, ?> managedFunctionBuilder);
+	void buildPreFunctionAdministration(ManagedFunctionBuilder<?, ?> managedFunctionBuilder,
+			CompileContext compileContext);
 
 	/**
 	 * Builds the post {@link ManagedFunction} {@link Administration}.
 	 * 
 	 * @param managedFunctionBuilder
 	 *            {@link ManagedFunctionBuilder}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 */
-	void buildPostFunctionAdministration(ManagedFunctionBuilder<?, ?> managedFunctionBuilder);
+	void buildPostFunctionAdministration(ManagedFunctionBuilder<?, ?> managedFunctionBuilder,
+			CompileContext compileContext);
 
 }

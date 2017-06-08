@@ -17,6 +17,8 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionRegistry;
 import net.officefloor.compile.internal.structure.Node;
@@ -81,7 +83,6 @@ public class FunctionNamespaceNodeImpl implements FunctionNamespaceNode {
 		 * {@link ManagedFunctionSource} instance to use. If this is specified
 		 * it overrides using the {@link Class} name.
 		 */
-		@SuppressWarnings("unused")
 		private final ManagedFunctionSource managedFunctionSource;
 
 		/**
@@ -98,6 +99,11 @@ public class FunctionNamespaceNodeImpl implements FunctionNamespaceNode {
 			this.managedFunctionSource = managedFunctionSource;
 		}
 	}
+
+	/**
+	 * Used {@link ManagedFunctionSource}.
+	 */
+	private ManagedFunctionSource usedManagedFunctionSource = null;
 
 	/**
 	 * Instantiate.
@@ -192,11 +198,26 @@ public class FunctionNamespaceNodeImpl implements FunctionNamespaceNode {
 	public FunctionNamespaceType loadFunctionNamespaceType() {
 
 		// Obtain the managed function source class
-		Class<? extends ManagedFunctionSource> managedFunctionSourceClass = this.context
-				.getManagedFunctionSourceClass(this.state.managedFunctionSourceClassName, this);
-		if (managedFunctionSourceClass == null) {
-			return null; // must obtain managed function source class
+		ManagedFunctionSource managedFunctionSource = this.state.managedFunctionSource;
+		if (managedFunctionSource == null) {
+
+			// Load the managed function source class
+			Class<? extends ManagedFunctionSource> managedFunctionSourceClass = this.context
+					.getManagedFunctionSourceClass(this.state.managedFunctionSourceClassName, this);
+			if (managedFunctionSourceClass == null) {
+				return null; // must obtain managed function source class
+			}
+
+			// Load the managed function source
+			managedFunctionSource = CompileUtil.newInstance(managedFunctionSourceClass, ManagedFunctionSource.class,
+					this, this.context.getCompilerIssues());
+			if (managedFunctionSource == null) {
+				return null; // must obtain managed function source
+			}
 		}
+
+		// Keep track of the managed function source
+		this.usedManagedFunctionSource = managedFunctionSource;
 
 		// Obtain the override properties
 		PropertyList overrideProperties = this.context.overrideProperties(this,
@@ -204,7 +225,22 @@ public class FunctionNamespaceNodeImpl implements FunctionNamespaceNode {
 
 		// Load and return the managed function type
 		ManagedFunctionLoader managedFunctionLoader = this.context.getManagedFunctionLoader(this);
-		return managedFunctionLoader.loadManagedFunctionType(managedFunctionSourceClass, overrideProperties);
+		return managedFunctionLoader.loadManagedFunctionType(managedFunctionSource, overrideProperties);
+	}
+
+	@Override
+	public void registerAsPossibleMbean(CompileContext compileContext) {
+		// Register only once
+		if (this.usedManagedFunctionSource != null) {
+
+			// Register as possible MBean
+			String qualifiedName = this.section.getQualifiedName(this.namespaceName);
+			compileContext.registerPossibleMBean(ManagedFunctionSource.class, qualifiedName,
+					this.usedManagedFunctionSource);
+
+			// Clear, so only loaded once
+			this.usedManagedFunctionSource = null;
+		}
 	}
 
 }

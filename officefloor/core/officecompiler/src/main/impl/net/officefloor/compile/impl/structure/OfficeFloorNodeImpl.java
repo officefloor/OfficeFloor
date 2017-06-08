@@ -84,6 +84,7 @@ import net.officefloor.frame.api.source.UnknownClassError;
 import net.officefloor.frame.api.source.UnknownPropertyError;
 import net.officefloor.frame.api.source.UnknownResourceError;
 import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
 /**
@@ -333,7 +334,15 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	@Override
 	public OfficeFloorTeam addTeam(String teamName, String teamSourceClassName) {
 		return NodeUtil.getInitialisedNode(teamName, this.teams, this.context,
-				() -> this.context.createTeamNode(teamName, this), (team) -> team.initialise(teamSourceClassName));
+				() -> this.context.createTeamNode(teamName, this),
+				(team) -> team.initialise(teamSourceClassName, null));
+	}
+
+	@Override
+	public OfficeFloorTeam addTeam(String teamName, TeamSource teamSource) {
+		return NodeUtil.getInitialisedNode(teamName, this.teams, this.context,
+				() -> this.context.createTeamNode(teamName, this),
+				(team) -> team.initialise(teamSource.getClass().getName(), teamSource));
 	}
 
 	@Override

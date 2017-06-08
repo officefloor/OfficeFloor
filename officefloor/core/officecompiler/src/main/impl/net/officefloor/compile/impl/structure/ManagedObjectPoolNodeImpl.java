@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.LinkPoolNode;
@@ -113,6 +114,12 @@ public class ManagedObjectPoolNodeImpl implements ManagedObjectPoolNode {
 	}
 
 	/**
+	 * {@link ManagedObjectPoolSource} used to source this
+	 * {@link ManagedObjectPoolNode}.
+	 */
+	private ManagedObjectPoolSource usedManagedObjectPoolSource = null;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param managedObjectPoolName
@@ -138,6 +145,19 @@ public class ManagedObjectPoolNodeImpl implements ManagedObjectPoolNode {
 
 		// Create the properties
 		this.properties = this.context.createPropertyList();
+	}
+
+	/**
+	 * Obtains the qualified name for this {@link ManagedObjectPoolNode}.
+	 * 
+	 * @return Qualified name for this {@link ManagedObjectPoolNode}.
+	 */
+	private String getQualifiedManagedObjectPoolName() {
+		return (this.containingSectionNode != null
+				? this.containingSectionNode.getQualifiedName(this.managedObjectPoolName)
+				: (this.containingOfficeNode != null
+						? this.containingOfficeNode.getQualifiedName(this.managedObjectPoolName)
+						: this.managedObjectPoolName));
 	}
 
 	/*
@@ -222,27 +242,37 @@ public class ManagedObjectPoolNodeImpl implements ManagedObjectPoolNode {
 	 */
 
 	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ManagedObjectPoolType loadManagedObjectPoolType() {
 
-		// Obtain the managed object pool source class
-		Class managedObjectPoolSourceClass = this.context
-				.getManagedObjectPoolSourceClass(this.state.managedObjectPoolSourceClassName, this);
-		if (managedObjectPoolSourceClass == null) {
-			return null; // must obtain source class
+		// Obtain the override properties
+		String qualifiedName = this.getQualifiedManagedObjectPoolName();
+		PropertyList overrideProperties = this.context.overrideProperties(this, qualifiedName, this.properties);
+
+		// Obtain the managed object pool source
+		ManagedObjectPoolSource managedObjectPoolSource = this.state.managedObjectPoolSource;
+		if (managedObjectPoolSource == null) {
+
+			// Obtain the managed object pool source class
+			Class<? extends ManagedObjectPoolSource> managedObjectPoolSourceClass = this.context
+					.getManagedObjectPoolSourceClass(this.state.managedObjectPoolSourceClassName, this);
+			if (managedObjectPoolSourceClass == null) {
+				return null; // must obtain source class
+			}
+
+			// Obtain the managed object pool source
+			managedObjectPoolSource = CompileUtil.newInstance(managedObjectPoolSourceClass,
+					ManagedObjectPoolSource.class, this, this.context.getCompilerIssues());
+			if (managedObjectPoolSource == null) {
+				return null; // must obtain source
+			}
 		}
 
-		// Obtain the override properties
-		String qualifiedName = (this.containingSectionNode != null
-				? this.containingSectionNode.getQualifiedName(this.managedObjectPoolName)
-				: (this.containingOfficeNode != null
-						? this.containingOfficeNode.getQualifiedName(this.managedObjectPoolName)
-						: this.managedObjectPoolName));
-		PropertyList overrideProperties = this.context.overrideProperties(this, qualifiedName, this.properties);
+		// Keep track of managed object pool source
+		this.usedManagedObjectPoolSource = managedObjectPoolSource;
 
 		// Load and return the managed object pool type
 		ManagedObjectPoolLoader loader = this.context.getManagedObjectPoolLoader(this);
-		return loader.loadManagedObjectPoolType(managedObjectPoolSourceClass, overrideProperties);
+		return loader.loadManagedObjectPoolType(managedObjectPoolSource, overrideProperties);
 	}
 
 	@Override
@@ -254,6 +284,11 @@ public class ManagedObjectPoolNodeImpl implements ManagedObjectPoolNode {
 		if (poolType == null) {
 			return; // must load pool type
 		}
+
+		// Register as possible MBean
+		String qualifiedName = this.getQualifiedManagedObjectPoolName();
+		compileContext.registerPossibleMBean(ManagedObjectPoolSource.class, qualifiedName,
+				this.usedManagedObjectPoolSource);
 
 		// Ensure able to pool managed objects from managed object source
 		Class<?> pooledObjectType = poolType.getPooledObjectType();

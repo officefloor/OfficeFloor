@@ -29,6 +29,7 @@ import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.AutoWireLink;
 import net.officefloor.compile.internal.structure.AutoWirer;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
@@ -37,7 +38,6 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
-import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
@@ -125,6 +125,11 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	private final List<ManagedObjectNode> governedManagedObjects = new LinkedList<>();
 
 	/**
+	 * {@link GovernanceSource} used to source this {@link GovernanceNode}.
+	 */
+	private GovernanceSource<?, ?> usedGovernanceSource = null;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param governanceName
@@ -189,7 +194,6 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	 */
 
 	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public GovernanceType<?, ?> loadGovernanceType() {
 
 		// Load the override properties
@@ -198,22 +202,31 @@ public class GovernanceNodeImpl implements GovernanceNode {
 
 		// Create the governance loader
 		GovernanceLoader loader = this.context.getGovernanceLoader(this);
-		if (this.state.governanceSource != null) {
-			// Load and return the governance type
-			return loader.loadGovernanceType(this.state.governanceSource, overrideProperties);
 
-		} else {
+		// Obtain the goverannce source
+		GovernanceSource<?, ?> governanceSource = this.state.governanceSource;
+		if (governanceSource == null) {
 
 			// Obtain the governance source class
-			Class governanceSourceClass = this.context.getGovernanceSourceClass(this.state.governanceSourceClassName,
-					this);
+			Class<? extends GovernanceSource<?, ?>> governanceSourceClass = this.context
+					.getGovernanceSourceClass(this.state.governanceSourceClassName, this);
 			if (governanceSourceClass == null) {
 				return null; // must obtain source class
 			}
 
-			// Load and return the governance type
-			return loader.loadGovernanceType(governanceSourceClass, overrideProperties);
+			// Obtain the governance source
+			governanceSource = CompileUtil.newInstance(governanceSourceClass, GovernanceSource.class, this,
+					this.context.getCompilerIssues());
+			if (governanceSource == null) {
+				return null; // must obtain source
+			}
 		}
+
+		// Keep track of used governance source
+		this.usedGovernanceSource = governanceSource;
+
+		// Load and return the governance type
+		return loader.loadGovernanceType(governanceSource, overrideProperties);
 	}
 
 	@Override
@@ -256,6 +269,10 @@ public class GovernanceNodeImpl implements GovernanceNode {
 		if (govType == null) {
 			return; // must obtain governance type
 		}
+
+		// Register as possible MBean
+		String qualifiedName = this.officeNode.getQualifiedName(this.governanceName);
+		compileContext.registerPossibleMBean(GovernanceSource.class, qualifiedName, this.usedGovernanceSource);
 
 		// Build the governance
 		GovernanceBuilder govBuilder = officeBuilder.addGovernance(this.governanceName, govType.getExtensionInterface(),
@@ -300,7 +317,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 			this.governedOfficeObjects.add(officeObjectNode);
 
 		} else {
-			// Unknown governerable managed object node
+			// Unknown governable managed object node
 			this.context.getCompilerIssues().addIssue(this,
 					"Unknown " + GovernerableManagedObject.class.getSimpleName() + " node");
 		}

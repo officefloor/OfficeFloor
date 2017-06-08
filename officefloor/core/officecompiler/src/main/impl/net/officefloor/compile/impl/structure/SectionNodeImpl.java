@@ -245,6 +245,11 @@ public class SectionNodeImpl implements SectionNode {
 	private SectionNode superSectionNode = null;
 
 	/**
+	 * {@link SectionSource} used to source the {@link OfficeSection}.
+	 */
+	private SectionSource usedSectionSource = null;
+
+	/**
 	 * Initialises this {@link SectionNode} with the basic information.
 	 * 
 	 * @param sectionName
@@ -379,6 +384,9 @@ public class SectionNodeImpl implements SectionNode {
 				return false; // must have office source
 			}
 		}
+
+		// Keep track of the section source
+		this.usedSectionSource = source;
 
 		// Create the section source context
 		SectionSourceContext context = new SectionSourceContextImpl(true, this.state.sectionLocation,
@@ -775,6 +783,10 @@ public class SectionNodeImpl implements SectionNode {
 	@Override
 	public void buildSection(OfficeBuilder officeBuilder, OfficeBindings officeBindings,
 			CompileContext compileContext) {
+
+		// Register as possible MBean
+		String qualifiedName = this.getQualifiedName(null);
+		compileContext.registerPossibleMBean(SectionSource.class, qualifiedName, this.usedSectionSource);
 
 		// Build the functions (in deterministic order)
 		this.functionNodes.values().stream()

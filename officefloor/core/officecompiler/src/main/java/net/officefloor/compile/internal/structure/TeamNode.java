@@ -43,8 +43,11 @@ public interface TeamNode extends LinkTeamNode, OfficeFloorTeam {
 	 * 
 	 * @param teamSourceClassName
 	 *            Class name of the {@link TeamSource}.
+	 * @param teamSource
+	 *            Optional instantiated {@link TeamSource}. May be
+	 *            <code>null</code>.
 	 */
-	void initialise(String teamSourceClassName);
+	void initialise(String teamSourceClassName, TeamSource teamSource);
 
 	/**
 	 * Loads the {@link TeamType} for the {@link TeamSource}.

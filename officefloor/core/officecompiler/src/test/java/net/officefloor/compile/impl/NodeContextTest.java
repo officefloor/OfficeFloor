@@ -764,7 +764,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		TeamNode node = this.context.createTeamNode("TEAM", this.officeFloor);
 		assertNode(node, "TEAM", "Team", null, this.officeFloor);
 		assertEquals("TEAM", node.getOfficeFloorTeamName());
-		assertInitialise(node, (n) -> n.initialise("ExampleTeamSource"));
+		assertInitialise(node, (n) -> n.initialise("ExampleTeamSource", null));
 	}
 
 	/**

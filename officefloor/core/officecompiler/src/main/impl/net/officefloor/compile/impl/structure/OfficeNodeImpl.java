@@ -259,6 +259,11 @@ public class OfficeNodeImpl implements OfficeNode {
 	private boolean isAutoWireTeams = false;
 
 	/**
+	 * {@link OfficeSource} used to source this {@link OfficeNode}.
+	 */
+	private OfficeSource usedOfficeSource = null;
+
+	/**
 	 * Initialise with all parameters.
 	 * 
 	 * @param officeName
@@ -412,6 +417,9 @@ public class OfficeNodeImpl implements OfficeNode {
 				return false; // must have office source
 			}
 		}
+
+		// Keep track of the office source
+		this.usedOfficeSource = source;
 
 		// Obtain the override properties
 		PropertyList overrideProperties = this.context.overrideProperties(this, this.officeName, this.properties);
@@ -766,6 +774,9 @@ public class OfficeNodeImpl implements OfficeNode {
 
 	@Override
 	public OfficeBindings buildOffice(OfficeFloorBuilder builder, CompileContext compileContext, Profiler profiler) {
+
+		// Register as possible MBean
+		compileContext.registerPossibleMBean(OfficeSource.class, this.officeName, this.usedOfficeSource);
 
 		// Build this office
 		OfficeBuilder officeBuilder = builder.addOffice(this.officeName);
