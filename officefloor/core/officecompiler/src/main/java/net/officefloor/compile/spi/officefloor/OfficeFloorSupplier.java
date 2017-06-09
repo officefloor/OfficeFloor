@@ -17,8 +17,6 @@
  */
 package net.officefloor.compile.spi.officefloor;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.supplier.SuppliedManagedObjectType;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -42,13 +40,24 @@ public interface OfficeFloorSupplier extends PropertyConfigurable {
 	 * 
 	 * @param managedObjectSourceName
 	 *            Name of the {@link OfficeFloorManagedObjectSource}.
-	 * @param autoWire
-	 *            {@link AutoWire} to identify the
-	 *            {@link SuppliedManagedObjectType}. The {@link AutoWire} must
-	 *            match exactly.
+	 * @param type
+	 *            Type of object required from the {@link OfficeFloorSupplier}.
 	 * @return {@link OfficeFloorManagedObjectSource}.
 	 */
-	OfficeFloorManagedObjectSource addManagedObjectSource(
-			String managedObjectSourceName, AutoWire autoWire);
+	OfficeFloorManagedObjectSource addManagedObjectSource(String managedObjectSourceName, String type);
+
+	/**
+	 * Adds an {@link OfficeFloorManagedObjectSource}.
+	 * 
+	 * @param managedObjectSourceName
+	 *            Name of the {@link OfficeFloorManagedObjectSource}.
+	 * @param type
+	 *            Type of object required from the {@link OfficeFloorSupplier}.
+	 * @param qualifier
+	 *            Qualifier on the object type.
+	 * @return {@link OfficeFloorManagedObjectSource}.
+	 */
+	OfficeFloorManagedObjectSource addManagedObjectSource(String managedObjectSourceName, String type,
+			String qualifier);
 
 }

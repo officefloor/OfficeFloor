@@ -15,42 +15,42 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.internal.structure;
+package net.officefloor.compile.supplier;
 
-import net.officefloor.compile.supplier.SuppliedManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
- * Node for the supplied {@link ManagedObject}.
+ * <code>Type definition</code> of a dependency required by the Supplied
+ * {@link ManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SuppliedManagedObjectNode extends Node {
+public interface SuppliedManagedObjectDependencyType {
 
 	/**
-	 * {@link Node} type.
-	 */
-	String TYPE = "Supplied Managed Object";
-
-	/**
-	 * Initialises the {@link SuppliedManagedObjectNode}.
-	 */
-	void initialise();
-
-	/**
-	 * Loads the {@link SuppliedManagedObject}.
+	 * Obtains the name of the dependency.
 	 * 
-	 * @return {@link SuppliedManagedObject}. May be <code>null</code> if issue
-	 *         in loading the {@link SuppliedManagedObject}.
+	 * @return Name of the dependency.
 	 */
-	SuppliedManagedObject<?, ?> loadSuppliedManagedObject();
+	String getDependencyName();
 
 	/**
-	 * Obtains the {@link SupplierNode} containing this
-	 * {@link SuppliedManagedObject}.
+	 * Obtains the {@link Class} name that the dependent object must
+	 * extend/implement.
 	 * 
-	 * @return Parent {@link SupplierNode}.
+	 * @return Type of the dependency.
 	 */
-	SupplierNode getSupplierNode();
+	String getDependencyType();
+
+	/**
+	 * <p>
+	 * Obtains the qualifier on the type.
+	 * <p>
+	 * This is to enable qualifying the type of dependency required.
+	 * 
+	 * @return Qualifier on the type. May be <code>null</code> if not qualifying
+	 *         the type.
+	 */
+	String getTypeQualifier();
 
 }

@@ -19,13 +19,17 @@ package net.officefloor.compile.integrate.officefloor;
 
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
+import net.officefloor.compile.spi.section.ManagedObjectDependency;
+import net.officefloor.compile.supplier.SuppliedManagedObject;
 import net.officefloor.extension.AutoWireOfficeFloorExtensionService;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**
@@ -68,6 +72,75 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 
 		// Compile the OfficeFloor
 		this.compile(true);
+	}
+
+	/**
+	 * Ensure can auto-wire {@link ManagedObjectDependency} for an
+	 * {@link OfficeFloorManagedObject}.
+	 */
+	public void testAutoWireOfficeFloorManagedObjectDependency() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure can auto-wire an {@link OfficeFloorInputManagedObject}.
+	 */
+	public void testAutoWireOfficeFloorInputManagedObject() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure can auto-wire {@link ManagedObjectDependency} for an
+	 * {@link OfficeFloorInputManagedObject}.
+	 */
+	public void testAutoWireOfficeFloorInputManagedObjectDependency() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure issue if cyclic dependencies for {@link ManagedObjectDependency}
+	 * chain.
+	 */
+	public void testAutoWireOfficeFloorManagedObjectWithCyclicDependencies() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure can auto-wire {@link SuppliedManagedObject}.
+	 */
+	public void testAutoWireSuppliedManagedObject() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure can auto-wire {@link ManagedObjectDependency} for a
+	 * {@link SuppliedManagedObject}.
+	 */
+	public void testAutoWireSuppliedManagedObjectDependency() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure can connect {@link Flow} for {@link SuppliedManagedObject}.
+	 */
+	public void testLinkSuppliedManagedObjectFlow() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure can auto-wire {@link OfficeFloorTeam} for a
+	 * {@link SuppliedManagedObject}.
+	 */
+	public void testAutoWireSuppliedManagedObjectTeam() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure can load the {@link OfficeFloorTeam} for the
+	 * {@link SuppliedManagedObject}.
+	 */
+	public void testLoadSuppliedManagedObjectTeam() {
+		fail("TODO implement");
 	}
 
 	/**

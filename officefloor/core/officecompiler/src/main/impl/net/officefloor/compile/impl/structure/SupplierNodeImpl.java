@@ -20,10 +20,7 @@ package net.officefloor.compile.impl.structure;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.spi.supplier.source.SupplierSource;
-import net.officefloor.autowire.supplier.SupplierLoader;
-import net.officefloor.autowire.supplier.SupplyOrder;
+import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
@@ -32,6 +29,9 @@ import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
+import net.officefloor.compile.spi.supplier.source.SupplierSource;
+import net.officefloor.compile.supplier.SupplierLoader;
+import net.officefloor.compile.supplier.SupplyOrder;
 
 /**
  * {@link SupplierNode} implementation.
@@ -158,11 +158,17 @@ public class SupplierNodeImpl implements SupplierNode {
 	}
 
 	@Override
-	public OfficeFloorManagedObjectSource addManagedObjectSource(String managedObjectSourceName, AutoWire autoWire) {
+	public OfficeFloorManagedObjectSource addManagedObjectSource(String managedObjectSourceName, String type) {
+		return this.addManagedObjectSource(managedObjectSourceName, type, null);
+	}
+
+	@Override
+	public OfficeFloorManagedObjectSource addManagedObjectSource(String managedObjectSourceName, String type,
+			String qualifier) {
 
 		// Create the supplied managed object node
-		SuppliedManagedObjectNode suppliedManagedObjectNode = this.context.createSuppliedManagedObjectNode(autoWire,
-				this);
+		SuppliedManagedObjectNode suppliedManagedObjectNode = this.context
+				.createSuppliedManagedObjectNode(new AutoWire(qualifier, type), this);
 
 		// Register the supplied managed object
 		this.suppliedManagedObjects.add(suppliedManagedObjectNode);

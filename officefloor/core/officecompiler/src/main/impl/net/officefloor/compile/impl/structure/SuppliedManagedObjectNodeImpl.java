@@ -17,13 +17,13 @@
  */
 package net.officefloor.compile.impl.structure;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.supplier.SuppliedManagedObject;
-import net.officefloor.autowire.supplier.SupplyOrder;
+import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
+import net.officefloor.compile.supplier.SuppliedManagedObject;
+import net.officefloor.compile.supplier.SupplyOrder;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
@@ -82,7 +82,7 @@ public class SuppliedManagedObjectNodeImpl implements SuppliedManagedObjectNode 
 
 	@Override
 	public String getNodeName() {
-		return this.autoWire.getQualifiedType();
+		return this.autoWire.getQualifier();
 	}
 
 	@Override
@@ -146,8 +146,13 @@ public class SuppliedManagedObjectNodeImpl implements SuppliedManagedObjectNode 
 		 */
 
 		@Override
-		public AutoWire getAutoWire() {
-			return SuppliedManagedObjectNodeImpl.this.autoWire;
+		public String getType() {
+			return SuppliedManagedObjectNodeImpl.this.autoWire.getType();
+		}
+
+		@Override
+		public String getQualifier() {
+			return SuppliedManagedObjectNodeImpl.this.autoWire.getQualifier();
 		}
 
 		@Override

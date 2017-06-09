@@ -18,13 +18,13 @@
 package net.officefloor.compile.test.supplier;
 
 import junit.framework.TestCase;
-import net.officefloor.autowire.spi.supplier.source.SupplierSource;
-import net.officefloor.autowire.spi.supplier.source.SupplierSourceSpecification;
-import net.officefloor.autowire.supplier.SupplierType;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.supplier.source.SupplierSource;
+import net.officefloor.compile.spi.supplier.source.SupplierSourceSpecification;
+import net.officefloor.compile.supplier.SupplierType;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 

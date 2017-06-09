@@ -15,42 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.internal.structure;
+package net.officefloor.compile.supplier;
 
-import net.officefloor.compile.supplier.SuppliedManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.team.Team;
 
 /**
- * Node for the supplied {@link ManagedObject}.
+ * <code>Type definition</code> of a {@link Team} required by the Supplied
+ * {@link ManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SuppliedManagedObjectNode extends Node {
+public interface SuppliedManagedObjectTeamType {
 
 	/**
-	 * {@link Node} type.
-	 */
-	String TYPE = "Supplied Managed Object";
-
-	/**
-	 * Initialises the {@link SuppliedManagedObjectNode}.
-	 */
-	void initialise();
-
-	/**
-	 * Loads the {@link SuppliedManagedObject}.
+	 * Obtains the name to identify requirement of a {@link Team}.
 	 * 
-	 * @return {@link SuppliedManagedObject}. May be <code>null</code> if issue
-	 *         in loading the {@link SuppliedManagedObject}.
+	 * @return Name to identify requirement of a {@link Team}.
 	 */
-	SuppliedManagedObject<?, ?> loadSuppliedManagedObject();
-
-	/**
-	 * Obtains the {@link SupplierNode} containing this
-	 * {@link SuppliedManagedObject}.
-	 * 
-	 * @return Parent {@link SupplierNode}.
-	 */
-	SupplierNode getSupplierNode();
+	String getTeamName();
 
 }

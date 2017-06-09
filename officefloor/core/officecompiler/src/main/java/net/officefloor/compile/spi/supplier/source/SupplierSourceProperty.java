@@ -15,37 +15,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile;
-
-import java.util.ServiceLoader;
-
-import net.officefloor.compile.spi.supplier.source.SupplierSource;
+package net.officefloor.compile.spi.supplier.source;
 
 /**
- * <p>
- * {@link ServiceLoader} service to plug-in an {@link SupplierSource}
- * {@link Class} alias by including the extension {@link SupplierSource} jar on
- * the class path.
- * <p>
- * {@link OfficeFloorCompiler#addSupplierSourceAlias(String, Class)} will be
- * invoked for each found {@link SupplierSourceService}.
+ * Property of the {@link SupplierSourceSpecification}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SupplierSourceService<S extends SupplierSource> {
+public interface SupplierSourceProperty {
 
 	/**
-	 * Obtains the alias for the {@link SupplierSource} {@link Class}.
+	 * Obtains the name of the property.
 	 * 
-	 * @return Alias for the {@link SupplierSource} {@link Class}.
+	 * @return Name of the property.
 	 */
-	String getSupplierSourceAlias();
+	String getName();
 
 	/**
-	 * Obtains the {@link SupplierSource} {@link Class}.
+	 * Obtains the display name of the property. If this returns
+	 * <code>null</code> then the return value of {@link #getName()} is used.
 	 * 
-	 * @return {@link SupplierSource} {@link Class}.
+	 * @return Display name of property.
 	 */
-	Class<S> getSupplierSourceClass();
+	String getLabel();
 
 }

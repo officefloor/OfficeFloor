@@ -20,7 +20,6 @@ package net.officefloor.compile.impl.structure;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import net.officefloor.autowire.impl.AutoWireTest;
 import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.AutoWireLink;
 import net.officefloor.compile.internal.structure.AutoWirer;
@@ -42,7 +41,7 @@ public class AutoWirerTest extends OfficeFrameTestCase {
 	/**
 	 * {@link SourceContext}.
 	 */
-	private final SourceContext context = new SourceContextImpl(false, AutoWireTest.class.getClassLoader());
+	private final SourceContext context = new SourceContextImpl(false, AutoWirerTest.class.getClassLoader());
 
 	/**
 	 * Mock {@link CompilerIssues}.

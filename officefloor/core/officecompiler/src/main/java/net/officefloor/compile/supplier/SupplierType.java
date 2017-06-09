@@ -15,41 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.internal.structure;
-
-import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
-import net.officefloor.compile.supplier.SupplyOrder;
+package net.officefloor.compile.supplier;
 
 /**
- * Supplier {@link Node}.
+ * <code>Type definition</code> of a Supplier.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SupplierNode extends Node, OfficeFloorSupplier {
+public interface SupplierType {
 
 	/**
-	 * {@link Node} type.
-	 */
-	static String TYPE = "Supplier";
-
-	/**
-	 * Initialises the {@link SupplierNode}.
-	 */
-	void initialise();
-
-	/**
-	 * Fill {@link SupplyOrder} instances.
+	 * Obtains the possible {@link SuppliedManagedObjectType} instances from the
+	 * Supplier.
 	 * 
-	 * @param supplyOrders
-	 *            {@link SupplyOrder} instances to fill.
+	 * @return Possible {@link SuppliedManagedObjectType} instances from the
+	 *         Supplier.
 	 */
-	void fillSupplyOrders(SupplyOrder... supplyOrders);
-
-	/**
-	 * Obtains the parent {@link OfficeFloorNode}.
-	 * 
-	 * @return Parent {@link OfficeFloorNode}.
-	 */
-	OfficeFloorNode getOfficeFloorNode();
+	SuppliedManagedObjectType[] getSuppliedManagedObjectTypes();
 
 }

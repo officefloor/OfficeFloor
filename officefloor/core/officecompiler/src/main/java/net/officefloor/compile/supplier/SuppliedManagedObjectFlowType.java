@@ -15,42 +15,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.internal.structure;
+package net.officefloor.compile.supplier;
 
-import net.officefloor.compile.supplier.SuppliedManagedObject;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
- * Node for the supplied {@link ManagedObject}.
+ * <code>Type definition</code> of a flow instigated by the supplied
+ * {@link ManagedObject} or one of its {@link ManagedFunction} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SuppliedManagedObjectNode extends Node {
+public interface SuppliedManagedObjectFlowType {
 
 	/**
-	 * {@link Node} type.
-	 */
-	String TYPE = "Supplied Managed Object";
-
-	/**
-	 * Initialises the {@link SuppliedManagedObjectNode}.
-	 */
-	void initialise();
-
-	/**
-	 * Loads the {@link SuppliedManagedObject}.
+	 * Obtains the name of the {@link Flow}.
 	 * 
-	 * @return {@link SuppliedManagedObject}. May be <code>null</code> if issue
-	 *         in loading the {@link SuppliedManagedObject}.
+	 * @return Name of the {@link Flow}.
 	 */
-	SuppliedManagedObject<?, ?> loadSuppliedManagedObject();
+	String getFlowName();
 
 	/**
-	 * Obtains the {@link SupplierNode} containing this
-	 * {@link SuppliedManagedObject}.
+	 * Obtains the type of the argument passed to the {@link Flow}.
 	 * 
-	 * @return Parent {@link SupplierNode}.
+	 * @return Type of argument passed to the {@link Flow}. May be
+	 *         <code>null</code> to indicate no argument.
 	 */
-	SupplierNode getSupplierNode();
+	Class<?> getArgumentType();
 
 }

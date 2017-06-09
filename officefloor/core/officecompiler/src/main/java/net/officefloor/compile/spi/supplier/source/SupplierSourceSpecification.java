@@ -15,41 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.internal.structure;
+package net.officefloor.compile.spi.supplier.source;
 
-import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
-import net.officefloor.compile.supplier.SupplyOrder;
 
 /**
- * Supplier {@link Node}.
+ * Provides the specification of the Supplier to be loaded by the particular
+ * {@link SupplierSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SupplierNode extends Node, OfficeFloorSupplier {
+public interface SupplierSourceSpecification {
 
 	/**
-	 * {@link Node} type.
-	 */
-	static String TYPE = "Supplier";
-
-	/**
-	 * Initialises the {@link SupplierNode}.
-	 */
-	void initialise();
-
-	/**
-	 * Fill {@link SupplyOrder} instances.
+	 * Obtains the specification of the properties for the Supplier.
 	 * 
-	 * @param supplyOrders
-	 *            {@link SupplyOrder} instances to fill.
+	 * @return Property specification.
 	 */
-	void fillSupplyOrders(SupplyOrder... supplyOrders);
-
-	/**
-	 * Obtains the parent {@link OfficeFloorNode}.
-	 * 
-	 * @return Parent {@link OfficeFloorNode}.
-	 */
-	OfficeFloorNode getOfficeFloorNode();
+	SupplierSourceProperty[] getProperties();
 
 }

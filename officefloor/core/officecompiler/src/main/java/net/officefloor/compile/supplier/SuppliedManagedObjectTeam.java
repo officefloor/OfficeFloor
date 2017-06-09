@@ -15,42 +15,38 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.internal.structure;
+package net.officefloor.compile.supplier;
 
-import net.officefloor.compile.supplier.SuppliedManagedObject;
-import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
 
 /**
- * Node for the supplied {@link ManagedObject}.
+ * Supplied {@link Team} for the {@link SuppliedManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SuppliedManagedObjectNode extends Node {
+public interface SuppliedManagedObjectTeam {
 
 	/**
-	 * {@link Node} type.
-	 */
-	String TYPE = "Supplied Managed Object";
-
-	/**
-	 * Initialises the {@link SuppliedManagedObjectNode}.
-	 */
-	void initialise();
-
-	/**
-	 * Loads the {@link SuppliedManagedObject}.
+	 * Obtains the name of the {@link SuppliedManagedObjectTeam}.
 	 * 
-	 * @return {@link SuppliedManagedObject}. May be <code>null</code> if issue
-	 *         in loading the {@link SuppliedManagedObject}.
+	 * @return Name of the {@link SuppliedManagedObjectTeam}.
 	 */
-	SuppliedManagedObject<?, ?> loadSuppliedManagedObject();
+	String getTeamName();
 
 	/**
-	 * Obtains the {@link SupplierNode} containing this
-	 * {@link SuppliedManagedObject}.
+	 * Obtains the {@link TeamSource} {@link Class} name. May be an alias.
 	 * 
-	 * @return Parent {@link SupplierNode}.
+	 * @return {@link TeamSource} {@link Class} name.
 	 */
-	SupplierNode getSupplierNode();
+	String getTeamSourceClassName();
+
+	/**
+	 * Obtains the {@link PropertyList} to configure the {@link TeamSource}.
+	 * 
+	 * @return {@link PropertyList} to configure the {@link TeamSource}.
+	 */
+	PropertyList getProperties();
 
 }

@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import net.officefloor.autowire.AutoWireSectionTransformer;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionInputType;
@@ -32,6 +31,7 @@ import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionTransformer;
 import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionFunction;
@@ -118,7 +118,7 @@ public class OfficeSectionTransformTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can provide {@link AutoWireSectionTransformer} functionality.
+	 * Ensure can provide {@link OfficeSectionTransformer} functionality.
 	 */
 	public void testOfficeSectionTransformation() throws Exception {
 
@@ -166,7 +166,7 @@ public class OfficeSectionTransformTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can provide multiple {@link AutoWireSectionTransformer} instances
+	 * Ensure can provide multiple {@link OfficeSectionTransformer} instances
 	 * chained together.
 	 */
 	public void testChainedOfficeSectionTransformation() throws Exception {
@@ -440,7 +440,7 @@ public class OfficeSectionTransformTest extends OfficeFrameTestCase {
 
 	/**
 	 * Mock {@link Class} for {@link ClassSectionSource} to aid in testing
-	 * execution after {@link AutoWireSectionTransformer}.
+	 * execution after {@link OfficeSectionTransformer}.
 	 */
 	public static class MockSectionRunClass {
 

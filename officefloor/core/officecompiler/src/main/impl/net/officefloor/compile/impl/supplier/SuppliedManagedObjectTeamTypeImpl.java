@@ -15,41 +15,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.internal.structure;
+package net.officefloor.compile.impl.supplier;
 
-import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
-import net.officefloor.compile.supplier.SupplyOrder;
+import net.officefloor.compile.supplier.SuppliedManagedObjectTeamType;
+import net.officefloor.frame.api.team.Team;
 
 /**
- * Supplier {@link Node}.
+ * {@link SuppliedManagedObjectTeamType} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SupplierNode extends Node, OfficeFloorSupplier {
+public class SuppliedManagedObjectTeamTypeImpl implements
+		SuppliedManagedObjectTeamType {
 
 	/**
-	 * {@link Node} type.
+	 * {@link Team} name.
 	 */
-	static String TYPE = "Supplier";
+	private final String teamName;
 
 	/**
-	 * Initialises the {@link SupplierNode}.
-	 */
-	void initialise();
-
-	/**
-	 * Fill {@link SupplyOrder} instances.
+	 * Initiate.
 	 * 
-	 * @param supplyOrders
-	 *            {@link SupplyOrder} instances to fill.
+	 * @param teamName
+	 *            {@link Team} name.
 	 */
-	void fillSupplyOrders(SupplyOrder... supplyOrders);
+	public SuppliedManagedObjectTeamTypeImpl(String teamName) {
+		this.teamName = teamName;
+	}
 
-	/**
-	 * Obtains the parent {@link OfficeFloorNode}.
-	 * 
-	 * @return Parent {@link OfficeFloorNode}.
+	/*
+	 * ====================== SuppliedManagedObjectTeamType ================
 	 */
-	OfficeFloorNode getOfficeFloorNode();
+
+	@Override
+	public String getTeamName() {
+		return this.teamName;
+	}
 
 }

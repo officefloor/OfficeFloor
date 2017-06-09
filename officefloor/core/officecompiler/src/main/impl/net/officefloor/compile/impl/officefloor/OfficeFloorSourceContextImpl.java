@@ -17,8 +17,6 @@
  */
 package net.officefloor.compile.impl.officefloor;
 
-import net.officefloor.autowire.supplier.SupplierLoader;
-import net.officefloor.autowire.supplier.SupplierType;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -31,6 +29,8 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionContext;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
+import net.officefloor.compile.supplier.SupplierLoader;
+import net.officefloor.compile.supplier.SupplierType;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;

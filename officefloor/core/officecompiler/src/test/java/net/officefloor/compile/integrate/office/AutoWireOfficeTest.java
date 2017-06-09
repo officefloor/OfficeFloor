@@ -17,14 +17,17 @@
  */
 package net.officefloor.compile.integrate.office;
 
-import net.officefloor.autowire.AutoWire;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
+import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeObject;
+import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
+import net.officefloor.compile.spi.section.ManagedObjectDependency;
+import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.extension.AutoWireOfficeExtensionService;
 import net.officefloor.frame.api.administration.Administration;
@@ -158,6 +161,73 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 
 		// Compile the OfficeFloor
 		this.compile(true);
+	}
+
+	/**
+	 * Ensure can auto-wire {@link ManagedObjectDependency} for the
+	 * {@link OfficeManagedObject}.
+	 */
+	public void testAutoWireOfficeManagedObjectDependency() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure can auto-wire the {@link OfficeManagedObject} for
+	 * {@link Administration}.
+	 */
+	public void testAutoWireManagedObjectForAdministration() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure can auto-wire the {@link OfficeObject} for {@link Administration}.
+	 */
+	public void testAutoWireOfficeObjectForAdministration() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure can auto-wire the {@link OfficeSectionObject} for
+	 * {@link Administration}.
+	 */
+	public void testAutoWireSectionObjectForAdministration() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure can auto-wire the {@link OfficeTeam} for {@link Administration}.
+	 */
+	public void testAutoWireAdministrationTeam() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure can auto-wire the {@link OfficeManagedObject} for
+	 * {@link Governance}.
+	 */
+	public void testAutoWireManagedObjectForGovernance() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure can auto-wire the {@link OfficeObject} for {@link Governance}.
+	 */
+	public void testAutoWireOfficeObjectForGovernance() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure can auto-wire the {@link SectionObject} for {@link Governance}.
+	 */
+	public void testAutoWireSectionObjectForGovernance() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure can auto-wire the {@link OfficeTeam} for {@link Governance}.
+	 */
+	public void testAutoWireGovernanceTeam() {
+		fail("TODO implement");
 	}
 
 	/**
