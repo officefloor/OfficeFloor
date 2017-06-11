@@ -27,17 +27,15 @@ import net.officefloor.compile.managedobject.ManagedObjectType;
  * @author Daniel Sagenschneider
  */
 @SuppressWarnings("rawtypes")
-public class ManagedObjectTypeContextTest extends
-		AbstractTestTypeContext<ManagedObjectSourceNode, ManagedObjectType> {
+public class ManagedObjectTypeContextTest extends AbstractTestTypeContext<ManagedObjectSourceNode, ManagedObjectType> {
 
 	/**
 	 * Instantiate.
 	 */
 	public ManagedObjectTypeContextTest() {
 		super(ManagedObjectSourceNode.class, ManagedObjectType.class,
-				(node) -> (ManagedObjectType) node.loadManagedObjectType(), (
-						context, node) -> (ManagedObjectType) context
-						.getOrLoadManagedObjectType(node));
+				(context, node) -> (ManagedObjectType) node.loadManagedObjectType(context),
+				(context, node) -> (ManagedObjectType) context.getOrLoadManagedObjectType(node));
 	}
 
 }

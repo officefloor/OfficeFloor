@@ -21,10 +21,10 @@ import static org.junit.Assert.assertArrayEquals;
 
 import java.util.function.Consumer;
 
-import net.officefloor.autowire.AutoWire;
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.impl.structure.SuppliedManagedObjectNodeImpl;
+import net.officefloor.compile.impl.structure.SuppliedManagedObjectSourceNodeImpl;
 import net.officefloor.compile.internal.structure.AdministrationNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.EscalationNode;
 import net.officefloor.compile.internal.structure.FunctionFlowNode;
 import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
@@ -53,7 +53,7 @@ import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
-import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
+import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.managedobject.ManagedObjectType;
@@ -285,12 +285,13 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 * Ensure can create {@link ManagedObjectNode} within {@link SectionNode}.
 	 */
 	public void testCreateManagedObjectNode_withinSection() {
+		final CompileContext compileContext = this.context.createCompileContext();
 		this.recordReturn(this.managedObjectSource, this.managedObjectSource.getSectionNode(), this.section);
 		this.recordReturn(this.section, this.section.getOfficeNode(), this.office);
 		this.recordReturn(this.office, this.office.getOfficeFloorNode(), this.officeFloor);
 		this.recordReturn(this.section, this.section.getQualifiedName("MO"), "OFFICE.SECTION.MO");
 		ManagedObjectType<?> managedObjectType = this.createMock(ManagedObjectType.class);
-		this.recordReturn(this.managedObjectSource, this.managedObjectSource.loadManagedObjectType(),
+		this.recordReturn(this.managedObjectSource, this.managedObjectSource.loadManagedObjectType(compileContext),
 				managedObjectType);
 		this.recordReturn(managedObjectType, managedObjectType.getObjectClass(), String.class);
 		ManagedObjectNode node = this.doTest(() -> {
@@ -311,8 +312,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 			assertEquals("Incorrect bound name", "OFFICE.SECTION.MO", mo.getBoundManagedObjectName());
 
 			// Validate default type
-			assertTypeQualifications(mo.getTypeQualifications(this.context.createCompileContext()), null,
-					String.class.getName());
+			assertTypeQualifications(mo.getTypeQualifications(compileContext), null, String.class.getName());
 
 			return mo;
 		});
@@ -320,7 +320,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 
 		// Validate type qualifications
 		node.addTypeQualification("QUALIFIER", "TYPE");
-		assertTypeQualifications(node.getTypeQualifications(this.context.createCompileContext()), "QUALIFIER", "TYPE");
+		assertTypeQualifications(node.getTypeQualifications(compileContext), "QUALIFIER", "TYPE");
 
 		// Validate children
 		assertChildren(node, node.getManagedObjectDependency("DEPENDENCY"));
@@ -448,7 +448,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 * {@link SupplierNode}.
 	 */
 	public void testCreateManagedObjectSourceNode_fromSupplier() {
-		SuppliedManagedObjectNode suppliedManagedObject = this.createMock(SuppliedManagedObjectNode.class);
+		SuppliedManagedObjectSourceNode suppliedManagedObject = this.createMock(SuppliedManagedObjectSourceNode.class);
 		SupplierNode supplier = this.createMock(SupplierNode.class);
 		this.recordReturn(suppliedManagedObject, suppliedManagedObject.getSupplierNode(), supplier);
 		this.recordReturn(supplier, supplier.getOfficeFloorNode(), this.officeFloor);
@@ -670,14 +670,13 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can create {@link SuppliedManagedObjectNode}.
+	 * Ensure can create {@link SuppliedManagedObjectSourceNode}.
 	 */
 	public void testCreateSuppliedManagedObjectNode() {
-		AutoWire autoWire = new AutoWire("TYPE");
 		SupplierNode supplier = this.createMock(SupplierNode.class);
-		SuppliedManagedObjectNode node = this
-				.doTest(() -> this.context.createSuppliedManagedObjectNode(autoWire, supplier));
-		assertNode(node, autoWire.getQualifiedType(), "Supplied Managed Object", null, supplier);
+		SuppliedManagedObjectSourceNode node = this.doTest(
+				() -> this.context.createSuppliedManagedObjectNode("QUALIFIER", Object.class.getName(), supplier));
+		assertNode(node, "QUALIFIER-" + Object.class.getName(), "Supplied Managed Object Source", null, supplier);
 		assertInitialise(node, (n) -> n.initialise());
 	}
 
@@ -685,14 +684,15 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 * Ensure can create {@link SupplierNode}.
 	 */
 	public void testCreateSupplierNode() {
-		SuppliedManagedObjectNode[] suppliedManagedObjectNode = new SuppliedManagedObjectNode[] { null };
+		SuppliedManagedObjectSourceNode[] suppliedManagedObjectNode = new SuppliedManagedObjectSourceNode[] { null };
 		this.recordReturn(this.officeFloor,
-				this.officeFloor.addManagedObjectSource("MOS", new SuppliedManagedObjectNodeImpl(null, null, context)),
-				this.managedObjectSource, new TypeMatcher(String.class, SuppliedManagedObjectNodeImpl.class) {
+				this.officeFloor.addManagedObjectSource("MOS",
+						new SuppliedManagedObjectSourceNodeImpl(null, null, null, context)),
+				this.managedObjectSource, new TypeMatcher(String.class, SuppliedManagedObjectSourceNodeImpl.class) {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
 						// Capture the supplied managed object
-						suppliedManagedObjectNode[0] = (SuppliedManagedObjectNode) actual[1];
+						suppliedManagedObjectNode[0] = (SuppliedManagedObjectSourceNode) actual[1];
 
 						// Ensure match on type
 						return super.matches(expected, actual);
@@ -702,7 +702,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 			SupplierNode supplier = this.context.createSupplierNode("SUPPLIER", "ExampleSupplierSource",
 					this.officeFloor);
 			assertNode(supplier, "SUPPLIER", "Supplier", null, this.officeFloor);
-			supplier.addManagedObjectSource("MOS", new AutoWire("TYPE"));
+			supplier.addManagedObjectSource("MOS", "TYPE");
 			assertChildren(supplier, suppliedManagedObjectNode[0]);
 			return supplier;
 		});

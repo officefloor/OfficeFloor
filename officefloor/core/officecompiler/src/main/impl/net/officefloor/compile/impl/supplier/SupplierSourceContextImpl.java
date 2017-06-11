@@ -17,68 +17,24 @@
  */
 package net.officefloor.compile.impl.supplier;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Supplier;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireObject;
-import net.officefloor.autowire.AutoWireTeam;
-import net.officefloor.autowire.ManagedObjectSourceWirer;
-import net.officefloor.autowire.ManagedObjectSourceWirerContext;
-import net.officefloor.autowire.impl.AutoWirePropertiesImpl;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
-import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.impl.util.LoadTypeError;
-import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
-import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
-import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
-import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
-import net.officefloor.compile.managedobject.ManagedObjectFlowType;
-import net.officefloor.compile.managedobject.ManagedObjectLoader;
-import net.officefloor.compile.managedobject.ManagedObjectTeamType;
-import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.office.OfficeSectionInput;
-import net.officefloor.compile.spi.supplier.source.SupplierSource;
+import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
-import net.officefloor.compile.supplier.SuppliedManagedObject;
-import net.officefloor.compile.supplier.SuppliedManagedObjectDependencyType;
-import net.officefloor.compile.supplier.SuppliedManagedObjectFlowType;
-import net.officefloor.compile.supplier.SuppliedManagedObjectTeam;
-import net.officefloor.compile.supplier.SuppliedManagedObjectTeamType;
-import net.officefloor.compile.supplier.SuppliedManagedObjectType;
-import net.officefloor.compile.supplier.SupplierType;
-import net.officefloor.compile.supplier.SupplyOrder;
-import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.api.source.UnknownClassError;
-import net.officefloor.frame.api.source.UnknownPropertyError;
-import net.officefloor.frame.api.source.UnknownResourceError;
-import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
-import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
 /**
  * {@link SupplierSourceContext} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class SupplierSourceContextImpl extends SourceContextImpl implements
-		SupplierSourceContext {
-
-	/**
-	 * {@link Node} requiring the {@link Supplier}.
-	 */
-	private final Node node;
+public class SupplierSourceContextImpl extends SourceContextImpl implements SupplierSourceContext {
 
 	/**
 	 * {@link NodeContext}.
@@ -86,335 +42,32 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 	private final NodeContext context;
 
 	/**
-	 * {@link SuppliedAutoWireObject} instances.
+	 * {@link SuppliedManagedObjectSourceImpl} instances.
 	 */
-	private final List<SuppliedAutoWireObject> suppliedObjects = new LinkedList<SuppliedAutoWireObject>();
+	private final List<SuppliedManagedObjectSourceImpl> suppliedManagedObjectSources = new LinkedList<>();
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param isLoadingType
 	 *            Indicates if loading type.
-	 * @param node
-	 *            {@link Node}.
 	 * @param propertyList
 	 *            {@link PropertyList}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public SupplierSourceContextImpl(boolean isLoadingType, Node node,
-			PropertyList propertyList, NodeContext context) {
-		super(isLoadingType, context.getRootSourceContext(),
-				new PropertyListSourceProperties(propertyList));
-		this.node = node;
+	public SupplierSourceContextImpl(boolean isLoadingType, PropertyList propertyList, NodeContext context) {
+		super(isLoadingType, context.getRootSourceContext(), new PropertyListSourceProperties(propertyList));
 		this.context = context;
 	}
 
 	/**
-	 * Loads the {@link SupplierType} from the added {@link ManagedObject}
-	 * instances, along with filling {@link SupplyOrder} instances.
+	 * Obtains the {@link SuppliedManagedObjectSourceType} instances.
 	 * 
-	 * @param <S>
-	 *            {@link SupplierSource} type.
-	 * @param supplierSourceClass
-	 *            {@link SupplierSource} class.
-	 * @param propertyList
-	 *            {@link PropertyList}.
-	 * @param supplyOrders
-	 *            {@link SupplyOrder} instances.
-	 * @return {@link SupplierType}.
+	 * @return {@link SuppliedManagedObjectSourceType} instances.
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public <S extends SupplierSource> SupplierType loadSupplier(
-			Class<S> supplierSourceClass, PropertyList propertyList,
-			SupplyOrder... supplyOrders) {
-
-		// Ensure all supply orders have auto-wire specified
-		List<SupplyOrder> filteredSupplyOrders = new ArrayList<SupplyOrder>(
-				supplyOrders.length);
-		for (int i = 0; i < supplyOrders.length; i++) {
-			SupplyOrder supplyOrder = supplyOrders[i];
-
-			// Ensure has auto-wire
-			if (supplyOrder.getAutoWire() == null) {
-				this.addIssue(SupplyOrder.class.getSimpleName() + " " + i
-						+ " must have an " + AutoWire.class.getSimpleName());
-				continue; // do not include
-			}
-
-			// As here valid, so include
-			filteredSupplyOrders.add(supplyOrder);
-		}
-		supplyOrders = filteredSupplyOrders
-				.toArray(new SupplyOrder[filteredSupplyOrders.size()]);
-
-		// Instantiate the supplier source
-		S supplierSource = CompileUtil.newInstance(supplierSourceClass,
-				SupplierSource.class, this.node,
-				this.context.getCompilerIssues());
-		if (supplierSource == null) {
-			return null; // failed to instantiate
-		}
-
-		try {
-			// Source the supplier
-			supplierSource.supply(this);
-
-		} catch (UnknownPropertyError ex) {
-			this.addIssue("Missing property '" + ex.getUnknownPropertyName()
-					+ "' for " + SupplierSource.class.getSimpleName() + " "
-					+ supplierSourceClass.getName());
-			return null; // must have property
-
-		} catch (UnknownClassError ex) {
-			this.addIssue("Can not load class '" + ex.getUnknownClassName()
-					+ "' for " + SupplierSource.class.getSimpleName() + " "
-					+ supplierSourceClass.getName());
-			return null; // must have class
-
-		} catch (UnknownResourceError ex) {
-			this.addIssue("Can not obtain resource at location '"
-					+ ex.getUnknownResourceLocation() + "' for "
-					+ SupplierSource.class.getSimpleName() + " "
-					+ supplierSourceClass.getName());
-			return null; // must have resource
-
-		} catch (Throwable ex) {
-			this.addIssue(
-					"Failed to source " + SupplierType.class.getSimpleName()
-							+ " definition from "
-							+ SupplierSource.class.getSimpleName() + " "
-							+ supplierSourceClass.getName(), ex);
-			return null; // must be successful
-		}
-
-		// Load the supplied managed object types
-		int index = 0;
-		List<SuppliedManagedObjectType> managedObjects = new ArrayList<SuppliedManagedObjectType>(
-				this.suppliedObjects.size());
-		for (SuppliedAutoWireObject object : this.suppliedObjects) {
-
-			// Increment to identify the managed object
-			index++;
-
-			// Ensure have auto-wiring
-			if ((object.autoWiring == null) || (object.autoWiring.length == 0)) {
-				this.addIssue("Must provide auto-wiring for "
-						+ ManagedObject.class.getSimpleName() + " " + index);
-				continue; // can not load supplied managed object
-			}
-
-			// Obtain the name of the managed object
-			String managedObjectName = object.autoWiring[0].getQualifiedType();
-			String issueSuffix = " for " + ManagedObject.class.getSimpleName()
-					+ " " + managedObjectName;
-
-			// Ensure have managed object source
-			if (object.managedObjectSource == null) {
-				this.addIssue("Must provide a "
-						+ ManagedObjectSource.class.getSimpleName()
-						+ issueSuffix);
-				continue; // can not load supplied managed object
-			}
-
-			// Obtain the managed object loader
-			ManagedObjectSourceNode managedObjectSourceNode = this.context
-					.createManagedObjectSourceNode(managedObjectName,
-							(SuppliedManagedObjectNode) null);
-			ManagedObjectLoader managedObjectLoader = this.context
-					.getManagedObjectLoader(managedObjectSourceNode);
-
-			// Load the managed object type
-			ManagedObjectType moType;
-			try {
-				moType = CompileUtil.loadType(ManagedObjectType.class,
-						object.managedObjectSource.getClass().getName(),
-						this.context.getCompilerIssues(),
-						() -> managedObjectLoader.loadManagedObjectType(
-								object.managedObjectSource, object.properties));
-			} catch (LoadTypeError ex) {
-				ex.addLoadTypeIssue(this.node, this.context.getCompilerIssues());
-				continue;
-			}
-
-			// Determine if an input managed object
-			boolean isInput = managedObjectLoader.isInputManagedObject(moType);
-
-			// Wire in the configuration for the managed object
-			if (object.wirer != null) {
-				object.wirer.wire(object);
-			}
-
-			// Obtain the dependency types
-			List<SuppliedManagedObjectDependencyType> dependencies = new LinkedList<SuppliedManagedObjectDependencyType>();
-			for (ManagedObjectDependencyType<?> dependencyType : moType
-					.getDependencyTypes()) {
-
-				// Obtain the dependency name
-				String dependencyName = dependencyType.getDependencyName();
-
-				// Obtain the base supplied managed object dependency details
-				String type = dependencyType.getDependencyType().getName();
-				String qualifier = dependencyType.getTypeQualifier();
-
-				// Determine if overridden details
-				AutoWire overriddenAutoWire = object.dependencies
-						.remove(dependencyName);
-				if (overriddenAutoWire != null) {
-					type = overriddenAutoWire.getType();
-					qualifier = overriddenAutoWire.getQualifier();
-				}
-
-				// Add the supplied managed object dependency
-				dependencies.add(new SuppliedManagedObjectDependencyTypeImpl(
-						dependencyName, type, qualifier));
-			}
-			for (String dependencyName : object.dependencies.keySet()) {
-				// Unknown mapped dependency (as should be removed above)
-				this.addIssue("Wired dependency '" + dependencyName
-						+ "' not specified on "
-						+ ManagedObjectType.class.getSimpleName() + issueSuffix);
-			}
-
-			// Obtain the flow types
-			List<SuppliedManagedObjectFlowType> flows = new LinkedList<SuppliedManagedObjectFlowType>();
-			for (ManagedObjectFlowType<?> flowType : moType.getFlowTypes()) {
-
-				// Obtain the flow name
-				String flowName = flowType.getFlowName();
-
-				// Obtain the details of the flow
-				Class<?> argumentType = flowType.getArgumentType();
-
-				// Obtain mapping for flow
-				MappedFlow mappedFlow = object.flows.remove(flowName);
-				if (mappedFlow == null) {
-					this.addIssue("Flow '" + flowName + "' must be wired"
-							+ issueSuffix);
-					continue; // must have mapped flow
-				}
-				String sectionName = mappedFlow.sectionName;
-				String sectionInputName = mappedFlow.sectionInputName;
-
-				// Add the supplied managed object flow
-				flows.add(new SuppliedManagedObjectFlowTypeImpl(flowName,
-						sectionName, sectionInputName, argumentType));
-			}
-			for (String flowName : object.flows.keySet()) {
-				// Unknown mapped flow (as should be removed above)
-				this.addIssue("Wired flow '" + flowName + "' not specified on "
-						+ ManagedObjectType.class.getSimpleName() + issueSuffix);
-			}
-
-			// Obtain the supplied teams and required team types
-			List<SuppliedManagedObjectTeam> suppliedTeams = new LinkedList<SuppliedManagedObjectTeam>();
-			List<SuppliedManagedObjectTeamType> requiredTeams = new LinkedList<SuppliedManagedObjectTeamType>();
-			for (ManagedObjectTeamType teamType : moType.getTeamTypes()) {
-
-				// Obtain the team name
-				String teamName = teamType.getTeamName();
-
-				// Obtain the team mapping
-				AutoWire teamAutoWire = object.teams.remove(teamName);
-				if (teamAutoWire == null) {
-					// Not mapped, so should be supplied
-					SuppliedAutoWireTeam suppliedTeam = object.suppliedTeams
-							.remove(teamName);
-
-					// Ensure have wiring for team
-					if (suppliedTeam == null) {
-						this.addIssue("Team '" + teamName + "' must be wired"
-								+ issueSuffix);
-						continue; // must have wiring to include
-					}
-
-					// Add the supplied team
-					suppliedTeams.add(new SuppliedManagedObjectTeamImpl(
-							teamName, suppliedTeam.getTeamSourceClassName(),
-							suppliedTeam.getProperties()));
-
-					// Not include as already supplied
-					continue;
-				}
-
-				// Add the required team type
-				requiredTeams.add(new SuppliedManagedObjectTeamTypeImpl(
-						teamName, teamAutoWire));
-			}
-			Set<String> unknownTeamNames = new HashSet<String>();
-			unknownTeamNames.addAll(object.teams.keySet());
-			unknownTeamNames.addAll(object.suppliedTeams.keySet());
-			for (String teamName : unknownTeamNames) {
-				// Unknown mapped teams (as should be removed above)
-				this.addIssue("Wired team '" + teamName + "' not specified on "
-						+ ManagedObjectType.class.getSimpleName() + issueSuffix);
-			}
-
-			// Add the supplied managed object type
-			SuppliedManagedObjectDependencyType[] dependencyTypes = dependencies
-					.toArray(new SuppliedManagedObjectDependencyType[dependencies
-							.size()]);
-			SuppliedManagedObjectFlowType[] flowTypes = flows
-					.toArray(new SuppliedManagedObjectFlowType[flows.size()]);
-			SuppliedManagedObjectTeamType[] teamTypes = requiredTeams
-					.toArray(new SuppliedManagedObjectTeamType[requiredTeams
-							.size()]);
-			Class<?>[] extensionInterfaces = moType.getExtensionInterfaces();
-			managedObjects.add(new SuppliedManagedObjectTypeImpl(
-					object.autoWiring, isInput, dependencyTypes, flowTypes,
-					teamTypes, extensionInterfaces));
-
-			// Create the supplied managed object
-			SuppliedManagedObjectTeam[] teams = suppliedTeams
-					.toArray(new SuppliedManagedObjectTeam[suppliedTeams.size()]);
-			SuppliedManagedObject<?, ?> suppliedManagedObject = new SuppliedManagedObjectImpl(
-					moType, object.managedObjectSource, object.properties,
-					object.timeout, teams);
-
-			// Fill supply orders
-			NEXT_SUPPLY_ORDER: for (SupplyOrder supplyOrder : supplyOrders) {
-				AutoWire supplyAutoWire = supplyOrder.getAutoWire();
-				for (AutoWire objectAutoWire : object.getAutoWiring()) {
-					if (supplyAutoWire.equals(objectAutoWire)) {
-
-						// Matching auto-wire, so fill supply order
-						supplyOrder.fillOrder(suppliedManagedObject);
-
-						// Supply order filled, so move on to next supply order
-						continue NEXT_SUPPLY_ORDER;
-					}
-				}
-			}
-		}
-
-		// Return the supplier type
-		return new SupplierTypeImpl(
-				managedObjects
-						.toArray(new SuppliedManagedObjectType[managedObjects
-								.size()]));
-	}
-
-	/**
-	 * Adds an issue.
-	 * 
-	 * @param issueDescription
-	 *            Issue description.
-	 */
-	private void addIssue(String issueDescription) {
-		this.context.getCompilerIssues().addIssue(this.node, issueDescription);
-	}
-
-	/**
-	 * Adds an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of issue.
-	 */
-	private void addIssue(String issueDescription, Throwable cause) {
-		this.context.getCompilerIssues().addIssue(this.node, issueDescription,
-				cause);
+	public SuppliedManagedObjectSourceType[] getSuppliedManagedObjectSourceTypes() {
+		return this.suppliedManagedObjectSources.stream().toArray(SuppliedManagedObjectSourceType[]::new);
 	}
 
 	/*
@@ -422,28 +75,43 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 	 */
 
 	@Override
-	public <D extends Enum<D>, F extends Enum<F>> AutoWireObject addManagedObject(
-			ManagedObjectSource<D, F> managedObjectSource,
-			ManagedObjectSourceWirer wirer, AutoWire... autoWiring) {
+	public <D extends Enum<D>, F extends Enum<F>> SuppliedManagedObjectSource addManagedObjectSource(Class<?> type,
+			ManagedObjectSource<D, F> managedObjectSource) {
+		return this.addManagedObjectSource(null, type, managedObjectSource);
+	}
 
-		// Create the auto-wire object
+	@Override
+	public <D extends Enum<D>, F extends Enum<F>> SuppliedManagedObjectSource addManagedObjectSource(String qualifier,
+			Class<?> type, ManagedObjectSource<D, F> managedObjectSource) {
+
+		// Create the supplied managed object source
 		PropertyList properties = this.context.createPropertyList();
-		SuppliedAutoWireObject object = new SuppliedAutoWireObject(
-				managedObjectSource, properties, wirer, autoWiring,
-				this.context);
+		SuppliedManagedObjectSourceImpl supplied = new SuppliedManagedObjectSourceImpl(type, qualifier,
+				managedObjectSource, properties);
 
-		// Add the auto-wire object
-		this.suppliedObjects.add(object);
+		// Register the supplied managed object source
+		this.suppliedManagedObjectSources.add(supplied);
 
-		// Return the auto-wire object
-		return object;
+		// Return the managed object source for configuring
+		return supplied;
 	}
 
 	/**
-	 * Supplied {@link AutoWireObject}.
+	 * {@link SuppliedManagedObjectSource} implementation and corresponding
+	 * {@link SuppliedManagedObjectSourceType}.
 	 */
-	private static class SuppliedAutoWireObject extends AutoWirePropertiesImpl
-			implements AutoWireObject, ManagedObjectSourceWirerContext {
+	private static class SuppliedManagedObjectSourceImpl
+			implements SuppliedManagedObjectSource, SuppliedManagedObjectSourceType {
+
+		/**
+		 * Object type.
+		 */
+		private final Class<?> objectType;
+
+		/**
+		 * Qualifier. May be <code>null</code>.
+		 */
+		private final String qualifier;
 
 		/**
 		 * {@link ManagedObjectSource}.
@@ -456,227 +124,56 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 		private final PropertyList properties;
 
 		/**
-		 * {@link ManagedObjectSourceWirer}.
-		 */
-		private final ManagedObjectSourceWirer wirer;
-
-		/**
-		 * {@link AutoWire} instances.
-		 */
-		private final AutoWire[] autoWiring;
-
-		/**
-		 * Timeout.
-		 */
-		private long timeout = 0;
-
-		/**
-		 * Mapped dependencies.
-		 */
-		private final Map<String, AutoWire> dependencies = new HashMap<String, AutoWire>();
-
-		/**
-		 * Mapped flows.
-		 */
-		private final Map<String, MappedFlow> flows = new HashMap<String, MappedFlow>();
-
-		/**
-		 * Mapped {@link Team} instances.
-		 */
-		private final Map<String, AutoWire> teams = new HashMap<String, AutoWire>();
-
-		/**
-		 * {@link SuppliedAutoWireTeam} instances.
-		 */
-		private final Map<String, SuppliedAutoWireTeam> suppliedTeams = new HashMap<String, SuppliedAutoWireTeam>();
-
-		/**
-		 * {@link NodeContext}.
-		 */
-		private final NodeContext context;
-
-		/**
 		 * Initiate.
 		 * 
+		 * @param objectType
+		 *            Object type.
+		 * @param qualifier
+		 *            Qualifier. May be <code>null</code>.
 		 * @param managedObjectSource
 		 *            {@link ManagedObjectSource}.
 		 * @param properties
 		 *            {@link PropertyList}.
-		 * @param wirer
-		 *            {@link ManagedObjectSourceWirer}.
-		 * @param autoWiring
-		 *            {@link AutoWire} instances.
-		 * @param classLoader
-		 *            {@link ClassLoader}.
 		 */
-		public SuppliedAutoWireObject(
-				ManagedObjectSource<?, ?> managedObjectSource,
-				PropertyList properties, ManagedObjectSourceWirer wirer,
-				AutoWire[] autoWiring, NodeContext context) {
-			super(context.getRootSourceContext().getClassLoader(), properties);
+		public SuppliedManagedObjectSourceImpl(Class<?> objectType, String qualifier,
+				ManagedObjectSource<?, ?> managedObjectSource, PropertyList properties) {
+			this.objectType = objectType;
+			this.qualifier = qualifier;
 			this.managedObjectSource = managedObjectSource;
 			this.properties = properties;
-			this.wirer = wirer;
-			this.autoWiring = autoWiring;
-			this.context = context;
 		}
 
 		/*
-		 * ============================ AutoWireObject =======================
+		 * ===================== SuppliedManagedObjectSource ================
 		 */
 
 		@Override
-		public String getManagedObjectSourceClassName() {
-			return (this.managedObjectSource == null ? null
-					: this.managedObjectSource.getClass().getName());
-		}
-
-		@Override
-		public ManagedObjectSourceWirer getManagedObjectSourceWirer() {
-			return this.wirer;
-		}
-
-		@Override
-		public AutoWire[] getAutoWiring() {
-			return this.autoWiring;
-		}
-
-		@Override
-		public long getTimeout() {
-			return this.timeout;
-		}
-
-		@Override
-		public void setTimeout(long timeout) {
-			this.timeout = timeout;
+		public void addProperty(String name, String value) {
+			this.properties.addProperty(name).setValue(value);
 		}
 
 		/*
-		 * ======================= ManagedObjectSourceWirer ====================
+		 * =================== SuppliedManagedObjectSourceType ==============
 		 */
 
 		@Override
-		public void setManagedObjectScope(ManagedObjectScope managedobjectScope) {
-			// Scope not necessary to determine managed object type
+		public Class<?> getObjectType() {
+			return this.objectType;
 		}
 
 		@Override
-		public void mapDependency(String dependencyName, AutoWire autoWire) {
-			this.dependencies.put(dependencyName, autoWire);
+		public String getQualifier() {
+			return this.qualifier;
 		}
 
 		@Override
-		public void mapFlow(String managedObjectSourceFlowName,
-				String sectionName, String sectionInputName) {
-			this.flows.put(managedObjectSourceFlowName, new MappedFlow(
-					sectionName, sectionInputName));
+		public ManagedObjectSource<?, ?> getManagedObjectSource() {
+			return this.managedObjectSource;
 		}
 
 		@Override
-		public <S extends TeamSource> AutoWireTeam mapTeam(
-				String managedObjectSourceTeamName, String teamSourceClassName) {
-
-			// Create the supplied auto-wire team
-			PropertyList properties = this.context.createPropertyList();
-			SuppliedAutoWireTeam suppliedTeam = new SuppliedAutoWireTeam(
-					managedObjectSourceTeamName, teamSourceClassName,
-					properties, this.context);
-
-			// Register and return the supplied auto-wire team
-			this.suppliedTeams.put(managedObjectSourceTeamName, suppliedTeam);
-			return suppliedTeam;
-		}
-
-		@Override
-		public void mapTeam(String managedObjectSourceTeamName,
-				AutoWire autoWire) {
-			this.teams.put(managedObjectSourceTeamName, autoWire);
-		}
-	}
-
-	/**
-	 * Supplied {@link AutoWireTeam}.
-	 */
-	private static class SuppliedAutoWireTeam extends AutoWirePropertiesImpl
-			implements AutoWireTeam {
-
-		/**
-		 * {@link Team} name.
-		 */
-		private final String teamName;
-
-		/**
-		 * Name of the {@link TeamSource} {@link Class}.
-		 */
-		private final String teamSourceClassName;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param teamName
-		 *            {@link Team} name.
-		 * @param teamSourceClassName
-		 *            Name of the {@link TeamSource} {@link Class}.
-		 * @param properties
-		 *            {@link PropertyList}.
-		 * @param context
-		 *            {@link NodeContext}.
-		 */
-		public SuppliedAutoWireTeam(String teamName,
-				String teamSourceClassName, PropertyList properties,
-				NodeContext context) {
-			super(context.getRootSourceContext().getClassLoader(), properties);
-			this.teamName = teamName;
-			this.teamSourceClassName = teamSourceClassName;
-		}
-
-		/*
-		 * ====================== AutoWireTeam =============================
-		 */
-
-		@Override
-		public String getTeamName() {
-			return this.teamName;
-		}
-
-		@Override
-		public String getTeamSourceClassName() {
-			return this.teamSourceClassName;
-		}
-
-		@Override
-		public AutoWire[] getAutoWiring() {
-			// Only auto-wiring for supplied managed object team
-			return new AutoWire[0];
-		}
-	}
-
-	/**
-	 * Mapped flow.
-	 */
-	private static class MappedFlow {
-
-		/**
-		 * {@link OfficeSection} name.
-		 */
-		public final String sectionName;
-
-		/**
-		 * {@link OfficeSectionInput} name.
-		 */
-		public final String sectionInputName;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param sectionName
-		 *            {@link OfficeSection} name.
-		 * @param sectionInputName
-		 *            {@link OfficeSectionInput} name.
-		 */
-		public MappedFlow(String sectionName, String sectionInputName) {
-			this.sectionName = sectionName;
-			this.sectionInputName = sectionInputName;
+		public PropertyList getPropertyList() {
+			return this.properties;
 		}
 	}
 

@@ -22,7 +22,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.function.Supplier;
 
-import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.OfficeFloorCompilerRunnable;
 import net.officefloor.compile.TypeLoader;
@@ -114,11 +113,6 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 
 		// Obtain the type loader
 		this.typeLoader = this.compiler.getTypeLoader();
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-		AutoWireManagement.closeAllOfficeFloors();
 	}
 
 	/**

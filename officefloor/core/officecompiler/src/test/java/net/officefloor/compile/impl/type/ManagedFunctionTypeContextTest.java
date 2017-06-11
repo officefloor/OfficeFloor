@@ -22,7 +22,8 @@ import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 
 /**
- * Tests loading the {@link FunctionNamespaceType} from the {@link CompileContext}.
+ * Tests loading the {@link FunctionNamespaceType} from the
+ * {@link CompileContext}.
  *
  * @author Daniel Sagenschneider
  */
@@ -34,7 +35,7 @@ public class ManagedFunctionTypeContextTest
 	 */
 	public ManagedFunctionTypeContextTest() {
 		super(FunctionNamespaceNode.class, FunctionNamespaceType.class,
-				(node) -> (FunctionNamespaceType) node.loadFunctionNamespaceType(),
+				(context, node) -> (FunctionNamespaceType) node.loadFunctionNamespaceType(),
 				(context, node) -> (FunctionNamespaceType) context.getOrLoadFunctionNamespaceType(node));
 	}
 

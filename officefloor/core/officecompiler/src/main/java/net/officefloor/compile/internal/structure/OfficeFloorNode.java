@@ -58,12 +58,12 @@ public interface OfficeFloorNode extends Node, PropertyConfigurable, ManagedObje
 	 * @param managedObjectSourceName
 	 *            Name of the {@link OfficeFloorManagedObjectSource}.
 	 * @param suppliedManagedObject
-	 *            {@link SuppliedManagedObjectNode} to supply the
+	 *            {@link SuppliedManagedObjectSourceNode} to supply the
 	 *            {@link OfficeFloorManagedObjectSource}.
 	 * @return {@link OfficeFloorManagedObjectSource}.
 	 */
 	OfficeFloorManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
-			SuppliedManagedObjectNode suppliedManagedObject);
+			SuppliedManagedObjectSourceNode suppliedManagedObject);
 
 	/**
 	 * <p>

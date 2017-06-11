@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,24 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.supplier;
+package net.officefloor.compile.spi.supplier.source;
 
-import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.team.Team;
+import net.officefloor.compile.properties.PropertyConfigurable;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
- * <code>Type definition</code> of a {@link Team} required by the Supplied
- * {@link ManagedObject}.
+ * Supplied {@link ManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SuppliedManagedObjectTeamType {
-
-	/**
-	 * Obtains the name to identify requirement of a {@link Team}.
-	 * 
-	 * @return Name to identify requirement of a {@link Team}.
-	 */
-	String getTeamName();
-
+public interface SuppliedManagedObjectSource extends PropertyConfigurable {
 }

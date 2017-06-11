@@ -34,7 +34,7 @@ public class AdministrationTypeContextTest extends AbstractTestTypeContext<Admin
 	 */
 	public AdministrationTypeContextTest() {
 		super(AdministrationNode.class, AdministrationType.class,
-				(node) -> (AdministrationType) node.loadAdministrationType(),
+				(context, node) -> (AdministrationType) node.loadAdministrationType(),
 				(context, node) -> (AdministrationType) context.getOrLoadAdministrationType(node));
 	}
 

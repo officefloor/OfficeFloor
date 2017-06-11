@@ -72,10 +72,12 @@ public interface ManagedObjectSourceNode extends LinkPoolNode, SectionManagedObj
 	/**
 	 * Loads the {@link ManagedObjectType}.
 	 * 
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return {@link ManagedObjectType} or <code>null</code> if issue loading
 	 *         with issue reported to the {@link CompilerIssues}.
 	 */
-	ManagedObjectType<?> loadManagedObjectType();
+	ManagedObjectType<?> loadManagedObjectType(CompileContext compileContext);
 
 	/**
 	 * Loads the {@link OfficeSectionManagedObjectSourceType}.

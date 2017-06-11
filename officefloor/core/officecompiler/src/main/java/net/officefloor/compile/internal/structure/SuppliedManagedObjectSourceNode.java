@@ -17,7 +17,8 @@
  */
 package net.officefloor.compile.internal.structure;
 
-import net.officefloor.compile.supplier.SuppliedManagedObject;
+import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
+import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
@@ -25,29 +26,31 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SuppliedManagedObjectNode extends Node {
+public interface SuppliedManagedObjectSourceNode extends Node {
 
 	/**
 	 * {@link Node} type.
 	 */
-	String TYPE = "Supplied Managed Object";
+	String TYPE = "Supplied Managed Object Source";
 
 	/**
-	 * Initialises the {@link SuppliedManagedObjectNode}.
+	 * Initialises the {@link SuppliedManagedObjectSourceNode}.
 	 */
 	void initialise();
 
 	/**
-	 * Loads the {@link SuppliedManagedObject}.
+	 * Loads the {@link SuppliedManagedObjectSourceType}.
 	 * 
-	 * @return {@link SuppliedManagedObject}. May be <code>null</code> if issue
-	 *         in loading the {@link SuppliedManagedObject}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 * @return {@link SuppliedManagedObjectSourceType}. May be <code>null</code>
+	 *         if issue in loading the {@link SuppliedManagedObjectSourceType}.
 	 */
-	SuppliedManagedObject<?, ?> loadSuppliedManagedObject();
+	SuppliedManagedObjectSourceType loadSuppliedManagedObjectSourceType(CompileContext compileContext);
 
 	/**
 	 * Obtains the {@link SupplierNode} containing this
-	 * {@link SuppliedManagedObject}.
+	 * {@link SuppliedManagedObjectSource}.
 	 * 
 	 * @return Parent {@link SupplierNode}.
 	 */

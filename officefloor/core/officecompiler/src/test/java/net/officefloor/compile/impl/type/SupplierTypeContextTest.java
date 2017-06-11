@@ -15,41 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.impl.supplier;
+package net.officefloor.compile.impl.type;
 
-import net.officefloor.compile.supplier.SuppliedManagedObjectTeamType;
-import net.officefloor.frame.api.team.Team;
+import net.officefloor.compile.internal.structure.CompileContext;
+import net.officefloor.compile.internal.structure.SupplierNode;
+import net.officefloor.compile.supplier.SupplierType;
 
 /**
- * {@link SuppliedManagedObjectTeamType} implementation.
- * 
+ * Tests loading the {@link SupplierType} from the {@link CompileContext}.
+ *
  * @author Daniel Sagenschneider
  */
-public class SuppliedManagedObjectTeamTypeImpl implements
-		SuppliedManagedObjectTeamType {
+public class SupplierTypeContextTest extends AbstractTestTypeContext<SupplierNode, SupplierType> {
 
 	/**
-	 * {@link Team} name.
+	 * Instantiate.
 	 */
-	private final String teamName;
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param teamName
-	 *            {@link Team} name.
-	 */
-	public SuppliedManagedObjectTeamTypeImpl(String teamName) {
-		this.teamName = teamName;
-	}
-
-	/*
-	 * ====================== SuppliedManagedObjectTeamType ================
-	 */
-
-	@Override
-	public String getTeamName() {
-		return this.teamName;
+	public SupplierTypeContextTest() {
+		super(SupplierNode.class, SupplierType.class, (context, node) -> node.loadSupplierType(),
+				(context, node) -> context.getOrLoadSupplierType(node));
 	}
 
 }

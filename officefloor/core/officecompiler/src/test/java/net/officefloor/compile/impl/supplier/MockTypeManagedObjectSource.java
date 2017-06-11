@@ -22,18 +22,14 @@ import java.util.List;
 
 import org.junit.Assert;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.ManagedObjectSourceWirer;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
-import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
@@ -83,26 +79,12 @@ public class MockTypeManagedObjectSource extends AbstractManagedObjectSource<Ind
 	}
 
 	/**
-	 * Adds this {@link ManagedObjectSource} to the
-	 * {@link SupplierSourceContext}.
+	 * Obtains the object type.
 	 * 
-	 * @param context
-	 *            {@link SupplierSourceContext}.
-	 * @param wirer
-	 *            {@link ManagedObjectSourceWirer}. May be <code>null</code> if
-	 *            no wiring necessary.
+	 * @return Object type.
 	 */
-	public void addAsManagedObject(SupplierSourceContext context, ManagedObjectSourceWirer wirer) {
-		context.addManagedObject(this, wirer, this.getAutoWire());
-	}
-
-	/**
-	 * Obtains the {@link AutoWire} based on object type.
-	 * 
-	 * @return {@link AutoWire} based on object type.
-	 */
-	public AutoWire getAutoWire() {
-		return new AutoWire(this.objectType);
+	public Class<?> getObjectType() {
+		return this.objectType;
 	}
 
 	/**

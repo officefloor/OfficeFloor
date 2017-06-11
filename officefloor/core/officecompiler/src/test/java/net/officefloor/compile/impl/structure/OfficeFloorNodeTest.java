@@ -21,7 +21,6 @@ import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.autowire.AutoWire;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
@@ -170,8 +169,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 	public void testAddOfficeFloorManagedObjectSourceInstance() {
 		// Add two different managed object sources verifying details
 		this.replayMockObjects();
-		OfficeFloorManagedObjectSource moSource = this.node.addManagedObjectSource("MO",
-				new Singleton("TEST"));
+		OfficeFloorManagedObjectSource moSource = this.node.addManagedObjectSource("MO", new Singleton("TEST"));
 		assertNotNull("Must have managed object source", moSource);
 		assertEquals("Incorrect managed object source name", "MO", moSource.getOfficeFloorManagedObjectSourceName());
 		assertNotSame("Should obtain another managed object source", moSource,
@@ -190,10 +188,8 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 
 		// Add the managed object twice
 		this.replayMockObjects();
-		OfficeFloorManagedObjectSource moSourceFirst = this.node.addManagedObjectSource("MO",
-				new Singleton("ONE"));
-		OfficeFloorManagedObjectSource moSourceSecond = this.node.addManagedObjectSource("MO",
-				new Singleton("TWO"));
+		OfficeFloorManagedObjectSource moSourceFirst = this.node.addManagedObjectSource("MO", new Singleton("ONE"));
+		OfficeFloorManagedObjectSource moSourceSecond = this.node.addManagedObjectSource("MO", new Singleton("TWO"));
 		this.verifyMockObjects();
 
 		// Should be the same managed object source
@@ -327,12 +323,11 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		// Add two different supplied managed object sources verifying details
 		OfficeFloorSupplier supplier = this.addSupplier(this.node, "SUPPLIER", null);
 		this.replayMockObjects();
-		OfficeFloorManagedObjectSource mos = supplier.addManagedObjectSource("MO_SOURCE",
-				new AutoWire(Connection.class));
+		OfficeFloorManagedObjectSource mos = supplier.addManagedObjectSource("MO_SOURCE", Connection.class.getName());
 		assertNotNull("Must have managed object source", mos);
 		assertEquals("Incorrect managed object name", "MO_SOURCE", mos.getOfficeFloorManagedObjectSourceName());
 		assertNotSame("Should obtain another managed object source", mos,
-				supplier.addManagedObjectSource("ANOTHER", new AutoWire(Connection.class)));
+				supplier.addManagedObjectSource("ANOTHER", Connection.class.getName()));
 		this.verifyMockObjects();
 	}
 
@@ -351,9 +346,9 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		// Add the managed object twice
 		this.replayMockObjects();
 		OfficeFloorManagedObjectSource mosFirst = supplier.addManagedObjectSource("MO_SOURCE",
-				new AutoWire(Connection.class));
+				Connection.class.getName());
 		OfficeFloorManagedObjectSource mosSecond = supplier.addManagedObjectSource("MO_SOURCE",
-				new AutoWire(Connection.class));
+				Connection.class.getName());
 		this.verifyMockObjects();
 
 		// Should be the same managed object source
@@ -376,9 +371,9 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		// Add the managed object twice by different sources
 		this.replayMockObjects();
 		OfficeFloorManagedObjectSource moSourceFirst = supplierOne.addManagedObjectSource("MO_SOURCE",
-				new AutoWire(Connection.class));
+				Connection.class.getName());
 		OfficeFloorManagedObjectSource moSourceSecond = supplierTwo.addManagedObjectSource("MO_SOURCE",
-				new AutoWire(String.class));
+				String.class.getName());
 		this.verifyMockObjects();
 
 		// Should be the same managed object

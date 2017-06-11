@@ -46,7 +46,7 @@ import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.internal.structure.OfficeTeamRegistry;
-import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
+import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
@@ -437,7 +437,7 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 
 	@Override
 	public OfficeFloorManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
-			SuppliedManagedObjectNode suppliedManagedObject) {
+			SuppliedManagedObjectSourceNode suppliedManagedObject) {
 		return NodeUtil.getInitialisedNode(managedObjectSourceName, this.managedObjectSources, this.context,
 				() -> this.context.createManagedObjectSourceNode(managedObjectSourceName, suppliedManagedObject),
 				(managedObjectSource) -> managedObjectSource.initialise(null, null));

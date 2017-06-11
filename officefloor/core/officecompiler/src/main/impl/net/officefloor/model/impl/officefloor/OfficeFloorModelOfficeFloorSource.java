@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import net.officefloor.autowire.AutoWire;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.TripleKeyMap;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
@@ -234,8 +233,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 				String qualifier = mosToSupplier.getAutoWireQualifier();
 				qualifier = (CompileUtil.isBlank(qualifier) ? null : qualifier);
 				String type = mosToSupplier.getAutoWireType();
-				managedObjectSource = supplier.addManagedObjectSource(managedObjectSourceName,
-						new AutoWire(qualifier, type));
+				managedObjectSource = supplier.addManagedObjectSource(managedObjectSourceName, qualifier, type);
 
 			} else {
 				// Source the managed object source

@@ -558,11 +558,11 @@ public interface NodeContext {
 	 * @param managedObjectSourceName
 	 *            Name of the {@link ManagedObjectSourceNode}.
 	 * @param suppliedManagedObject
-	 *            Parent {@link SuppliedManagedObjectNode}.
+	 *            Parent {@link SuppliedManagedObjectSourceNode}.
 	 * @return {@link ManagedObjectSourceNode}.
 	 */
 	ManagedObjectSourceNode createManagedObjectSourceNode(String managedObjectSourceName,
-			SuppliedManagedObjectNode suppliedManagedObject);
+			SuppliedManagedObjectSourceNode suppliedManagedObject);
 
 	/**
 	 * Creates a {@link ManagedObjectSourceNode}.
@@ -660,16 +660,17 @@ public interface NodeContext {
 	SupplierLoader getSupplierLoader(Node node);
 
 	/**
-	 * Creates the {@link SuppliedManagedObjectNode}.
+	 * Creates the {@link SuppliedManagedObjectSourceNode}.
 	 * 
-	 * @param autoWire
-	 *            {@link AutoWire}.
+	 * @param qualifier
+	 *            Qualifier. May be <code>null</code> if no qualifier.
+	 * @param type
+	 *            Type.
 	 * @param supplier
 	 *            Parent {@link SupplierNode}.
-	 * @return {@link SuppliedManagedObjectNode}.
+	 * @return {@link SuppliedManagedObjectSourceNode}.
 	 */
-	@Deprecated // use type and qualifier rather than AutoWire as misleading
-	SuppliedManagedObjectNode createSuppliedManagedObjectNode(AutoWire autoWire, SupplierNode supplier);
+	SuppliedManagedObjectSourceNode createSuppliedManagedObjectNode(String qualifier, String type, SupplierNode supplier);
 
 	/**
 	 * Creates the {@link SupplierNode}.

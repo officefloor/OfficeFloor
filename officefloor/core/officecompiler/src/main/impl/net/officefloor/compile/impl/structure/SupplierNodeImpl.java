@@ -20,18 +20,17 @@ package net.officefloor.compile.impl.structure;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
-import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
+import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.supplier.SupplierLoader;
-import net.officefloor.compile.supplier.SupplyOrder;
+import net.officefloor.compile.supplier.SupplierType;
 
 /**
  * {@link SupplierNode} implementation.
@@ -61,9 +60,9 @@ public class SupplierNodeImpl implements SupplierNode {
 	private final PropertyList propertyList;
 
 	/**
-	 * {@link SuppliedManagedObjectNode} instances.
+	 * {@link SuppliedManagedObjectSourceNode} instances.
 	 */
-	private final List<SuppliedManagedObjectNode> suppliedManagedObjects = new LinkedList<SuppliedManagedObjectNode>();
+	private final List<SuppliedManagedObjectSourceNode> suppliedManagedObjects = new LinkedList<SuppliedManagedObjectSourceNode>();
 
 	/**
 	 * {@link NodeContext}.
@@ -167,8 +166,8 @@ public class SupplierNodeImpl implements SupplierNode {
 			String qualifier) {
 
 		// Create the supplied managed object node
-		SuppliedManagedObjectNode suppliedManagedObjectNode = this.context
-				.createSuppliedManagedObjectNode(new AutoWire(qualifier, type), this);
+		SuppliedManagedObjectSourceNode suppliedManagedObjectNode = this.context
+				.createSuppliedManagedObjectNode(qualifier, type, this);
 
 		// Register the supplied managed object
 		this.suppliedManagedObjects.add(suppliedManagedObjectNode);
@@ -187,18 +186,18 @@ public class SupplierNodeImpl implements SupplierNode {
 	}
 
 	@Override
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void fillSupplyOrders(SupplyOrder... supplyOrders) {
+	public SupplierType loadSupplierType() {
 
-		// Load the supplier source class
-		Class supplierSourceClass = this.context.getSupplierSourceClass(this.supplierSourceClassName, this);
+		// Obtain the supplier source class
+		Class<? extends SupplierSource> supplierSourceClass = this.context
+				.getSupplierSourceClass(this.supplierSourceClassName, this);
 		if (supplierSourceClass == null) {
-			return; // must have supplier source class
+			return null; // must obtain class
 		}
 
-		// Fill the supply orders
-		SupplierLoader supplierLoader = this.context.getSupplierLoader(this);
-		supplierLoader.fillSupplyOrders(supplierSourceClass, this.propertyList, supplyOrders);
+		// Load and return the type
+		SupplierLoader loader = this.context.getSupplierLoader(this);
+		return loader.loadSupplierType(supplierSourceClass, this.propertyList);
 	}
 
 }

@@ -18,25 +18,31 @@
 package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
-import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
+import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
-import net.officefloor.compile.supplier.SuppliedManagedObject;
-import net.officefloor.compile.supplier.SupplyOrder;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
+import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
+import net.officefloor.compile.supplier.SupplierType;
 
 /**
- * {@link SuppliedManagedObjectNodeImpl}.
+ * {@link SuppliedManagedObjectSourceNodeImpl}.
  * 
  * @author Daniel Sagenschneider
  */
-public class SuppliedManagedObjectNodeImpl implements SuppliedManagedObjectNode {
+public class SuppliedManagedObjectSourceNodeImpl implements SuppliedManagedObjectSourceNode {
 
 	/**
-	 * {@link AutoWire} to identify the supplied {@link ManagedObjectSource}.
+	 * Qualifier. May be <code>null</code>.
 	 */
-	private final AutoWire autoWire;
+	private final String qualifier;
+
+	/**
+	 * Type.
+	 */
+	private final String type;
 
 	/**
 	 * {@link SupplierNode}.
@@ -62,16 +68,19 @@ public class SuppliedManagedObjectNodeImpl implements SuppliedManagedObjectNode 
 	/**
 	 * Initiate.
 	 * 
-	 * @param autoWire
-	 *            {@link AutoWire} to identify the supplied
-	 *            {@link ManagedObjectSource}.
+	 * @param qualifier
+	 *            Qualifier. May be <code>null</code>.
+	 * @param type
+	 *            Type.
 	 * @param supplierNode
 	 *            {@link SupplierNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public SuppliedManagedObjectNodeImpl(AutoWire autoWire, SupplierNode supplierNode, NodeContext context) {
-		this.autoWire = autoWire;
+	public SuppliedManagedObjectSourceNodeImpl(String qualifier, String type, SupplierNode supplierNode,
+			NodeContext context) {
+		this.qualifier = qualifier;
+		this.type = type;
 		this.supplierNode = supplierNode;
 		this.context = context;
 	}
@@ -82,7 +91,7 @@ public class SuppliedManagedObjectNodeImpl implements SuppliedManagedObjectNode 
 
 	@Override
 	public String getNodeName() {
-		return this.autoWire.getQualifier();
+		return (this.qualifier != null ? this.qualifier + "-" : "") + this.type;
 	}
 
 	@Override
@@ -116,7 +125,7 @@ public class SuppliedManagedObjectNodeImpl implements SuppliedManagedObjectNode 
 	}
 
 	/*
-	 * ===================== SuppliedManagedObjectNode =================
+	 * ===================== SuppliedManagedObjectSourceNode =================
 	 */
 
 	@Override
@@ -125,41 +134,26 @@ public class SuppliedManagedObjectNodeImpl implements SuppliedManagedObjectNode 
 	}
 
 	@Override
-	public SuppliedManagedObject<?, ?> loadSuppliedManagedObject() {
-		SupplyOrderImpl order = new SupplyOrderImpl();
-		this.supplierNode.fillSupplyOrders(order);
-		return order.suppliedManagedObject;
-	}
+	public SuppliedManagedObjectSourceType loadSuppliedManagedObjectSourceType(CompileContext compileContext) {
 
-	/**
-	 * {@link SupplyOrder} implementation.
-	 */
-	private class SupplyOrderImpl implements SupplyOrder {
-
-		/**
-		 * {@link SuppliedManagedObject}.
-		 */
-		private SuppliedManagedObject<?, ?> suppliedManagedObject = null;
-
-		/*
-		 * =========================== SupplyOrder =========================
-		 */
-
-		@Override
-		public String getType() {
-			return SuppliedManagedObjectNodeImpl.this.autoWire.getType();
+		// Loads the supplier type
+		SupplierType supplierType = compileContext.getOrLoadSupplierType(this.supplierNode);
+		if (supplierType == null) {
+			return null; // must have type
 		}
 
-		@Override
-		public String getQualifier() {
-			return SuppliedManagedObjectNodeImpl.this.autoWire.getQualifier();
+		// Find the corresponding supplied managed object source
+		final AutoWire nodeAutoWire = new AutoWire(this.qualifier, this.type);
+		for (SuppliedManagedObjectSourceType type : supplierType.getSuppliedManagedObjectTypes()) {
+			if (nodeAutoWire.equals(new AutoWire(type.getQualifier(), type.getObjectType()))) {
+				return type; // found corresponding type
+			}
 		}
 
-		@Override
-		public <D extends Enum<D>, F extends Enum<F>> void fillOrder(
-				SuppliedManagedObject<D, F> suppliedManagedObject) {
-			this.suppliedManagedObject = suppliedManagedObject;
-		}
+		// As here, did not find type
+		this.context.getCompilerIssues().addIssue(this,
+				"No " + SuppliedManagedObjectSource.class.getSimpleName() + " for " + nodeAutoWire.toString());
+		return null;
 	}
 
 }

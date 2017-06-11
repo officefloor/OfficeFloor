@@ -25,12 +25,12 @@ package net.officefloor.compile.supplier;
 public interface SupplierType {
 
 	/**
-	 * Obtains the possible {@link SuppliedManagedObjectType} instances from the
-	 * Supplier.
+	 * Obtains the possible {@link SuppliedManagedObjectSourceType} instances from the
+	 * SupplierO.
 	 * 
-	 * @return Possible {@link SuppliedManagedObjectType} instances from the
+	 * @return Possible {@link SuppliedManagedObjectSourceType} instances from the
 	 *         Supplier.
 	 */
-	SuppliedManagedObjectType[] getSuppliedManagedObjectTypes();
+	SuppliedManagedObjectSourceType[] getSuppliedManagedObjectTypes();
 
 }

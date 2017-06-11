@@ -18,7 +18,7 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
-import net.officefloor.compile.supplier.SupplyOrder;
+import net.officefloor.compile.supplier.SupplierType;
 
 /**
  * Supplier {@link Node}.
@@ -38,18 +38,17 @@ public interface SupplierNode extends Node, OfficeFloorSupplier {
 	void initialise();
 
 	/**
-	 * Fill {@link SupplyOrder} instances.
-	 * 
-	 * @param supplyOrders
-	 *            {@link SupplyOrder} instances to fill.
-	 */
-	void fillSupplyOrders(SupplyOrder... supplyOrders);
-
-	/**
 	 * Obtains the parent {@link OfficeFloorNode}.
 	 * 
 	 * @return Parent {@link OfficeFloorNode}.
 	 */
 	OfficeFloorNode getOfficeFloorNode();
+
+	/**
+	 * Loads the {@link SupplierType}.
+	 * 
+	 * @return {@link SupplierType}.
+	 */
+	SupplierType loadSupplierType();
 
 }

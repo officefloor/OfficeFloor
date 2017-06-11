@@ -27,9 +27,14 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceProperty;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceSpecification;
+import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierLoader;
 import net.officefloor.compile.supplier.SupplierType;
-import net.officefloor.compile.supplier.SupplyOrder;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.source.UnknownClassError;
+import net.officefloor.frame.api.source.UnknownPropertyError;
+import net.officefloor.frame.api.source.UnknownResourceError;
 
 /**
  * {@link SupplierLoader} implementation.
@@ -66,12 +71,10 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	 */
 
 	@Override
-	public <S extends SupplierSource> PropertyList loadSpecification(
-			Class<S> supplierSourceClass) {
+	public <S extends SupplierSource> PropertyList loadSpecification(Class<S> supplierSourceClass) {
 
 		// Instantiate the supplier source
-		SupplierSource supplierSource = CompileUtil.newInstance(
-				supplierSourceClass, SupplierSource.class, this.node,
+		SupplierSource supplierSource = CompileUtil.newInstance(supplierSourceClass, SupplierSource.class, this.node,
 				this.nodeContext.getCompilerIssues());
 		if (supplierSource == null) {
 			return null; // failed to instantiate
@@ -82,17 +85,15 @@ public class SupplierLoaderImpl implements SupplierLoader {
 		try {
 			specification = supplierSource.getSpecification();
 		} catch (Throwable ex) {
-			this.addIssue("Failed to obtain "
-					+ SupplierSourceSpecification.class.getSimpleName()
-					+ " from " + supplierSourceClass.getName(), ex);
+			this.addIssue("Failed to obtain " + SupplierSourceSpecification.class.getSimpleName() + " from "
+					+ supplierSourceClass.getName(), ex);
 			return null; // failed to obtain
 		}
 
 		// Ensure have specification
 		if (specification == null) {
-			this.addIssue("No "
-					+ SupplierSourceSpecification.class.getSimpleName()
-					+ " returned from " + supplierSourceClass.getName());
+			this.addIssue("No " + SupplierSourceSpecification.class.getSimpleName() + " returned from "
+					+ supplierSourceClass.getName());
 			return null; // no specification obtained
 		}
 
@@ -101,12 +102,8 @@ public class SupplierLoaderImpl implements SupplierLoader {
 		try {
 			supplierProperties = specification.getProperties();
 		} catch (Throwable ex) {
-			this.addIssue(
-					"Failed to obtain "
-							+ SupplierSourceProperty.class.getSimpleName()
-							+ " instances from "
-							+ SupplierSourceSpecification.class.getSimpleName()
-							+ " for " + supplierSourceClass.getName(), ex);
+			this.addIssue("Failed to obtain " + SupplierSourceProperty.class.getSimpleName() + " instances from "
+					+ SupplierSourceSpecification.class.getSimpleName() + " for " + supplierSourceClass.getName(), ex);
 			return null; // failed to obtain properties
 		}
 
@@ -118,10 +115,9 @@ public class SupplierLoaderImpl implements SupplierLoader {
 
 				// Ensure have the supplier property
 				if (supplierProperty == null) {
-					this.addIssue(SupplierSourceProperty.class.getSimpleName()
-							+ " " + i + " is null from "
-							+ SupplierSourceSpecification.class.getSimpleName()
-							+ " for " + supplierSourceClass.getName());
+					this.addIssue(SupplierSourceProperty.class.getSimpleName() + " " + i + " is null from "
+							+ SupplierSourceSpecification.class.getSimpleName() + " for "
+							+ supplierSourceClass.getName());
 					return null; // must have complete property details
 				}
 
@@ -130,18 +126,15 @@ public class SupplierLoaderImpl implements SupplierLoader {
 				try {
 					name = supplierProperty.getName();
 				} catch (Throwable ex) {
-					this.addIssue("Failed to get name for "
-							+ SupplierSourceProperty.class.getSimpleName()
-							+ " " + i + " from "
-							+ SupplierSourceSpecification.class.getSimpleName()
-							+ " for " + supplierSourceClass.getName(), ex);
+					this.addIssue("Failed to get name for " + SupplierSourceProperty.class.getSimpleName() + " " + i
+							+ " from " + SupplierSourceSpecification.class.getSimpleName() + " for "
+							+ supplierSourceClass.getName(), ex);
 					return null; // must have complete property details
 				}
 				if (CompileUtil.isBlank(name)) {
-					this.addIssue(SupplierSourceProperty.class.getSimpleName()
-							+ " " + i + " provided blank name from "
-							+ SupplierSourceSpecification.class.getSimpleName()
-							+ " for " + supplierSourceClass.getName());
+					this.addIssue(SupplierSourceProperty.class.getSimpleName() + " " + i + " provided blank name from "
+							+ SupplierSourceSpecification.class.getSimpleName() + " for "
+							+ supplierSourceClass.getName());
 					return null; // must have complete property details
 				}
 
@@ -150,11 +143,9 @@ public class SupplierLoaderImpl implements SupplierLoader {
 				try {
 					label = supplierProperty.getLabel();
 				} catch (Throwable ex) {
-					this.addIssue("Failed to get label for "
-							+ SupplierSourceProperty.class.getSimpleName()
-							+ " " + i + " (" + name + ") from "
-							+ SupplierSourceSpecification.class.getSimpleName()
-							+ " for " + supplierSourceClass.getName(), ex);
+					this.addIssue("Failed to get label for " + SupplierSourceProperty.class.getSimpleName() + " " + i
+							+ " (" + name + ") from " + SupplierSourceSpecification.class.getSimpleName() + " for "
+							+ supplierSourceClass.getName(), ex);
 					return null; // must have complete property details
 				}
 
@@ -168,30 +159,74 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	}
 
 	@Override
-	public <S extends SupplierSource> SupplierType loadSupplierType(
-			Class<S> supplierSourceClass, PropertyList propertyList) {
+	public <S extends SupplierSource> SupplierType loadSupplierType(Class<S> supplierSourceClass,
+			PropertyList propertyList) {
+
+		// Instantiate the supplier source
+		S supplierSource = CompileUtil.newInstance(supplierSourceClass, SupplierSource.class, this.node,
+				this.nodeContext.getCompilerIssues());
+		if (supplierSource == null) {
+			return null; // failed to instantiate
+		}
 
 		// Create the supplier source context
-		SupplierSourceContextImpl supplierSourceContext = new SupplierSourceContextImpl(
-				true, this.node, propertyList, this.nodeContext);
+		SupplierSourceContextImpl sourceContext = new SupplierSourceContextImpl(true, propertyList, this.nodeContext);
 
-		// Load and return the supplier type
-		return supplierSourceContext.loadSupplier(supplierSourceClass,
-				propertyList);
-	}
+		try {
+			// Source the supplier
+			supplierSource.supply(sourceContext);
 
-	@Override
-	public <S extends SupplierSource> void fillSupplyOrders(
-			Class<S> supplierSourceClass, PropertyList propertyList,
-			SupplyOrder... supplyOrders) {
+		} catch (UnknownPropertyError ex) {
+			this.addIssue("Missing property '" + ex.getUnknownPropertyName() + "' for "
+					+ SupplierSource.class.getSimpleName() + " " + supplierSourceClass.getName());
+			return null; // must have property
 
-		// Create the supplier source context
-		SupplierSourceContextImpl supplierSourceContext = new SupplierSourceContextImpl(
-				true, this.node, propertyList, this.nodeContext);
+		} catch (UnknownClassError ex) {
+			this.addIssue("Can not load class '" + ex.getUnknownClassName() + "' for "
+					+ SupplierSource.class.getSimpleName() + " " + supplierSourceClass.getName());
+			return null; // must have class
 
-		// Fill the supply orders
-		supplierSourceContext.loadSupplier(supplierSourceClass, propertyList,
-				supplyOrders);
+		} catch (UnknownResourceError ex) {
+			this.addIssue("Can not obtain resource at location '" + ex.getUnknownResourceLocation() + "' for "
+					+ SupplierSource.class.getSimpleName() + " " + supplierSourceClass.getName());
+			return null; // must have resource
+
+		} catch (Throwable ex) {
+			this.addIssue("Failed to source " + SupplierType.class.getSimpleName() + " definition from "
+					+ SupplierSource.class.getSimpleName() + " " + supplierSourceClass.getName(), ex);
+			return null; // must be successful
+		}
+
+		// Validate the supplied managed object source types
+		int index = 0;
+		SuppliedManagedObjectSourceType[] managedObjectSourceTypes = sourceContext
+				.getSuppliedManagedObjectSourceTypes();
+		for (SuppliedManagedObjectSourceType managedObjectSourceType : managedObjectSourceTypes) {
+
+			// Increment to identify the managed object source
+			index++;
+
+			// Ensure have type
+			if (managedObjectSourceType.getObjectType() == null) {
+				this.addIssue("Must provide type for " + ManagedObject.class.getSimpleName() + " " + index);
+				return null; // can not load supplied managed object source
+			}
+
+			// Obtain the name of the managed object source
+			String qualifier = managedObjectSourceType.getQualifier();
+			String managedObjectSourceName = (qualifier != null ? qualifier + "-" : "")
+					+ managedObjectSourceType.getObjectType().getName();
+			String issueSuffix = " for " + ManagedObject.class.getSimpleName() + " " + managedObjectSourceName;
+
+			// Ensure have managed object source
+			if (managedObjectSourceType.getManagedObjectSource() == null) {
+				this.addIssue("Must provide a " + ManagedObjectSource.class.getSimpleName() + issueSuffix);
+				return null; // can not load supplied managed object source
+			}
+		}
+
+		// Return the supplier type
+		return new SupplierTypeImpl(managedObjectSourceTypes);
 	}
 
 	/**
@@ -201,8 +236,7 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	 *            Issue description.
 	 */
 	private void addIssue(String issueDescription) {
-		this.nodeContext.getCompilerIssues().addIssue(this.node,
-				issueDescription);
+		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription);
 	}
 
 	/**
@@ -214,8 +248,7 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	 *            Cause of issue.
 	 */
 	private void addIssue(String issueDescription, Throwable cause) {
-		this.nodeContext.getCompilerIssues().addIssue(this.node,
-				issueDescription, cause);
+		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription, cause);
 	}
 
 }

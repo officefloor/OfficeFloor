@@ -71,14 +71,13 @@ import net.officefloor.compile.impl.structure.SectionInputNodeImpl;
 import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.impl.structure.SectionObjectNodeImpl;
 import net.officefloor.compile.impl.structure.SectionOutputNodeImpl;
-import net.officefloor.compile.impl.structure.SuppliedManagedObjectNodeImpl;
+import net.officefloor.compile.impl.structure.SuppliedManagedObjectSourceNodeImpl;
 import net.officefloor.compile.impl.structure.SupplierNodeImpl;
 import net.officefloor.compile.impl.structure.TeamNodeImpl;
 import net.officefloor.compile.impl.supplier.SupplierLoaderImpl;
 import net.officefloor.compile.impl.team.TeamLoaderImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.AdministrationNode;
-import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.EscalationNode;
@@ -109,7 +108,7 @@ import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
-import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
+import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -868,7 +867,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public ManagedObjectSourceNode createManagedObjectSourceNode(String managedObjectSourceName,
-			SuppliedManagedObjectNode suppliedManagedObject) {
+			SuppliedManagedObjectSourceNode suppliedManagedObject) {
 		OfficeFloorNode officeFloor = (suppliedManagedObject == null ? null
 				: suppliedManagedObject.getSupplierNode().getOfficeFloorNode());
 		return new ManagedObjectSourceNodeImpl(managedObjectSourceName, null, null, suppliedManagedObject, officeFloor,
@@ -926,8 +925,9 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
-	public SuppliedManagedObjectNode createSuppliedManagedObjectNode(AutoWire autoWire, SupplierNode supplier) {
-		return new SuppliedManagedObjectNodeImpl(autoWire, supplier, this);
+	public SuppliedManagedObjectSourceNode createSuppliedManagedObjectNode(String qualifier, String type,
+			SupplierNode supplier) {
+		return new SuppliedManagedObjectSourceNodeImpl(qualifier, type, supplier, this);
 	}
 
 	@Override

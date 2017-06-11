@@ -17,57 +17,55 @@
  */
 package net.officefloor.compile.impl.supplier;
 
-import net.officefloor.compile.supplier.SuppliedManagedObjectDependencyType;
-import net.officefloor.compile.supplier.SuppliedManagedObjectFlowType;
-import net.officefloor.compile.supplier.SuppliedManagedObjectTeamType;
-import net.officefloor.compile.supplier.SuppliedManagedObjectType;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
- * {@link SuppliedManagedObjectType} implementation.
+ * {@link SuppliedManagedObjectSourceType} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class SuppliedManagedObjectTypeImpl implements SuppliedManagedObjectType {
+public class SuppliedManagedObjectTypeImpl implements SuppliedManagedObjectSourceType {
 
 	/**
-	 * {@link SuppliedManagedObjectDependencyType} instances.
+	 * Object type.
 	 */
-	private final SuppliedManagedObjectDependencyType[] dependencyTypes;
+	private final Class<?> objectType;
 
 	/**
-	 * {@link SuppliedManagedObjectFlowType} instances.
+	 * Qualifier. May be <code>null</code>.
 	 */
-	private final SuppliedManagedObjectFlowType[] flowTypes;
+	private final String qualifier;
 
 	/**
-	 * {@link SuppliedManagedObjectTeamType} instances.
+	 * {@link ManagedObjectSource}.
 	 */
-	private final SuppliedManagedObjectTeamType[] teamTypes;
+	private final ManagedObjectSource<?, ?> managedObjectSource;
 
 	/**
-	 * Extension interfaces.
+	 * {@link PropertyList}.
 	 */
-	private final Class<?>[] extensionInterfaces;
+	private final PropertyList properties;
 
 	/**
-	 * Initiate.
+	 * Instantiate.
 	 * 
-	 * @param dependencyTypes
-	 *            {@link SuppliedManagedObjectDependencyType} instances.
-	 * @param flowTypes
-	 *            {@link SuppliedManagedObjectFlowType} instances.
-	 * @param teamTypes
-	 *            {@link SuppliedManagedObjectTeamType} instances.
-	 * @param extensionInterfaces
-	 *            Extension interfaces.
+	 * @param objectType
+	 *            Object type.
+	 * @param qualifier
+	 *            Qualifier. May be <code>null</code>.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource}.
+	 * @param properties
+	 *            {@link PropertyList}.
 	 */
-	public SuppliedManagedObjectTypeImpl(SuppliedManagedObjectDependencyType[] dependencyTypes,
-			SuppliedManagedObjectFlowType[] flowTypes, SuppliedManagedObjectTeamType[] teamTypes,
-			Class<?>[] extensionInterfaces) {
-		this.dependencyTypes = dependencyTypes;
-		this.flowTypes = flowTypes;
-		this.teamTypes = teamTypes;
-		this.extensionInterfaces = extensionInterfaces;
+	public SuppliedManagedObjectTypeImpl(Class<?> objectType, String qualifier,
+			ManagedObjectSource<?, ?> managedObjectSource, PropertyList properties) {
+		this.objectType = objectType;
+		this.qualifier = qualifier;
+		this.managedObjectSource = managedObjectSource;
+		this.properties = properties;
 	}
 
 	/*
@@ -75,23 +73,23 @@ public class SuppliedManagedObjectTypeImpl implements SuppliedManagedObjectType 
 	 */
 
 	@Override
-	public SuppliedManagedObjectDependencyType[] getDependencyTypes() {
-		return this.dependencyTypes;
+	public Class<?> getObjectType() {
+		return this.objectType;
 	}
 
 	@Override
-	public SuppliedManagedObjectFlowType[] getFlowTypes() {
-		return this.flowTypes;
+	public String getQualifier() {
+		return this.qualifier;
 	}
 
 	@Override
-	public SuppliedManagedObjectTeamType[] getTeamTypes() {
-		return this.teamTypes;
+	public ManagedObjectSource<?, ?> getManagedObjectSource() {
+		return this.managedObjectSource;
 	}
 
 	@Override
-	public Class<?>[] getExtensionInterfaces() {
-		return this.extensionInterfaces;
+	public PropertyList getPropertyList() {
+		return this.properties;
 	}
 
 }

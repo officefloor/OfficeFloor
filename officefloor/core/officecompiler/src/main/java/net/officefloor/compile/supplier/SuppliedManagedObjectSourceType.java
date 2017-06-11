@@ -17,55 +17,48 @@
  */
 package net.officefloor.compile.supplier;
 
-import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.plugin.section.clazz.ManagedObject;
 
 /**
- * Supplied {@link ManagedObjectSource}.
+ * <code>Type definition</code> of a potentially supplied {@link ManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SuppliedManagedObject<D extends Enum<D>, F extends Enum<F>> {
+public interface SuppliedManagedObjectSourceType {
 
 	/**
-	 * Obtains the {@link ManagedObjectType} of this
+	 * Obtains the type of {@link Object} provided by the
 	 * {@link SuppliedManagedObject}.
 	 * 
-	 * @return {@link ManagedObjectType} of this {@link SuppliedManagedObject}.
-	 */
-	ManagedObjectType<D> getManagedObjectType();
-
-	/**
-	 * Obtains the {@link ManagedObjectSource} for this
-	 * {@link SuppliedManagedObject}.
-	 * 
-	 * @return {@link ManagedObjectSource} for this
+	 * @return Type of {@link Object} provided by the
 	 *         {@link SuppliedManagedObject}.
 	 */
-	ManagedObjectSource<D, F> getManagedObjectSource();
+	Class<?> getObjectType();
+
+	/**
+	 * Obtains the possible qualifier for the {@link SuppliedManagedObject}.
+	 * 
+	 * @return Qualifier for the {@link SuppliedManagedObject}. May be
+	 *         <code>null</code>.
+	 */
+	String getQualifier();
+
+	/**
+	 * Obtains the {@link ManagedObjectSource}.
+	 * 
+	 * @return {@link ManagedObjectSource}.
+	 */
+	ManagedObjectSource<?, ?> getManagedObjectSource();
 
 	/**
 	 * Obtains the {@link PropertyList} to configure the
-	 * {@link SuppliedManagedObject}.
+	 * {@link ManagedObjectSource}.
 	 * 
 	 * @return {@link PropertyList} to configure the
-	 *         {@link SuppliedManagedObject}.
+	 *         {@link ManagedObjectSource}.
 	 */
-	PropertyList getProperties();
-
-	/**
-	 * Obtains the timeout for the {@link ManagedObjectSource}.
-	 * 
-	 * @return Timeout for the {@link ManagedObjectSource}.
-	 */
-	long getTimeout();
-
-	/**
-	 * Obtains the {@link SuppliedManagedObjectTeam} instances.
-	 * 
-	 * @return {@link SuppliedManagedObjectTeam} instances.
-	 */
-	SuppliedManagedObjectTeam[] getSuppliedTeams();
+	PropertyList getPropertyList();
 
 }

@@ -30,9 +30,13 @@ import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.MBeanRegistrator;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
+import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
+import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
+import net.officefloor.compile.supplier.SupplierType;
 import net.officefloor.compile.team.TeamType;
 
 /**
@@ -50,27 +54,38 @@ public class CompileContextImpl implements CompileContext {
 	/**
 	 * {@link ManagedObjectType} by {@link ManagedObjectSourceNode} instances.
 	 */
-	private final Map<ManagedObjectSourceNode, TypeHolder<ManagedObjectType<?>>> managedObjectTypes = new HashMap<ManagedObjectSourceNode, CompileContextImpl.TypeHolder<ManagedObjectType<?>>>();
+	private final Map<ManagedObjectSourceNode, TypeHolder<ManagedObjectType<?>>> managedObjectTypes = new HashMap<>();
+
+	/**
+	 * {@link SuppliedManagedObjectSourceType} by
+	 * {@link SuppliedManagedObjectSourceNode} instances.
+	 */
+	private final Map<SuppliedManagedObjectSourceNode, TypeHolder<SuppliedManagedObjectSourceType>> suppliedManagedObjectSourceTypes = new HashMap<>();
+
+	/**
+	 * {@link SupplierType} by {@link SupplierNode} instances.
+	 */
+	private final Map<SupplierNode, TypeHolder<SupplierType>> supplierTypes = new HashMap<>();
 
 	/**
 	 * {@link FunctionNamespaceType} by {@link FunctionNamespaceNode} instances.
 	 */
-	private final Map<FunctionNamespaceNode, TypeHolder<FunctionNamespaceType>> namespaceTypes = new HashMap<FunctionNamespaceNode, CompileContextImpl.TypeHolder<FunctionNamespaceType>>();
+	private final Map<FunctionNamespaceNode, TypeHolder<FunctionNamespaceType>> namespaceTypes = new HashMap<>();
 
 	/**
 	 * {@link TeamType} by {@link TeamNode} instances.
 	 */
-	private final Map<TeamNode, TypeHolder<TeamType>> teamTypes = new HashMap<TeamNode, CompileContextImpl.TypeHolder<TeamType>>();
+	private final Map<TeamNode, TypeHolder<TeamType>> teamTypes = new HashMap<>();
 
 	/**
 	 * {@link AdministrationType} by {@link AdministrationNode} instances.
 	 */
-	private final Map<AdministrationNode, TypeHolder<AdministrationType<?, ?, ?>>> administrationTypes = new HashMap<AdministrationNode, CompileContextImpl.TypeHolder<AdministrationType<?, ?, ?>>>();
+	private final Map<AdministrationNode, TypeHolder<AdministrationType<?, ?, ?>>> administrationTypes = new HashMap<>();
 
 	/**
 	 * {@link GovernanceType} by {@link GovernanceNode} instances.
 	 */
-	private final Map<GovernanceNode, TypeHolder<GovernanceType<?, ?>>> governanceTypes = new HashMap<GovernanceNode, CompileContextImpl.TypeHolder<GovernanceType<?, ?>>>();
+	private final Map<GovernanceNode, TypeHolder<GovernanceType<?, ?>>> governanceTypes = new HashMap<>();
 
 	/**
 	 * Gets or loads the type.
@@ -141,12 +156,25 @@ public class CompileContextImpl implements CompileContext {
 
 	@Override
 	public ManagedObjectType<?> getOrLoadManagedObjectType(ManagedObjectSourceNode managedObjectSourceNode) {
-		return getOrLoadType(managedObjectSourceNode, this.managedObjectTypes, (node) -> node.loadManagedObjectType());
+		return getOrLoadType(managedObjectSourceNode, this.managedObjectTypes,
+				(node) -> node.loadManagedObjectType(this));
 	}
 
 	@Override
-	public FunctionNamespaceType getOrLoadFunctionNamespaceType(FunctionNamespaceNode workNode) {
-		return getOrLoadType(workNode, this.namespaceTypes, (node) -> node.loadFunctionNamespaceType());
+	public FunctionNamespaceType getOrLoadFunctionNamespaceType(FunctionNamespaceNode namespaceNode) {
+		return getOrLoadType(namespaceNode, this.namespaceTypes, (node) -> node.loadFunctionNamespaceType());
+	}
+
+	@Override
+	public SuppliedManagedObjectSourceType getOrLoadSuppliedManagedObjectSourceType(
+			SuppliedManagedObjectSourceNode suppliedManagedObjectSourceNode) {
+		return getOrLoadType(suppliedManagedObjectSourceNode, this.suppliedManagedObjectSourceTypes,
+				(node) -> node.loadSuppliedManagedObjectSourceType(this));
+	}
+
+	@Override
+	public SupplierType getOrLoadSupplierType(SupplierNode supplierNode) {
+		return getOrLoadType(supplierNode, this.supplierTypes, (node) -> node.loadSupplierType());
 	}
 
 	@Override

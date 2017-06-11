@@ -22,6 +22,8 @@ import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
+import net.officefloor.compile.supplier.SupplierType;
 import net.officefloor.compile.team.TeamType;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.internal.structure.Flow;
@@ -68,6 +70,30 @@ public interface CompileContext {
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	FunctionNamespaceType getOrLoadFunctionNamespaceType(FunctionNamespaceNode functionNamespaceNode);
+
+	/**
+	 * Obtains the existing or loads the {@link SuppliedManagedObjectSourceType}
+	 * for the {@link SuppliedManagedObjectSourceNode}.
+	 * 
+	 * @param suppliedManagedObjectSourceNode
+	 *            {@link SuppliedManagedObjectSourceNode} to obtain the
+	 *            {@link SuppliedManagedObjectSourceType}.
+	 * @return {@link SuppliedManagedObjectSourceType} or <code>null</code> with
+	 *         issue reported to the {@link CompilerIssues}.
+	 */
+	SuppliedManagedObjectSourceType getOrLoadSuppliedManagedObjectSourceType(
+			SuppliedManagedObjectSourceNode suppliedManagedObjectSourceNode);
+
+	/**
+	 * Obtains the existing or loads the {@link SupplierType} for the
+	 * {@link SupplierNode}.
+	 * 
+	 * @param supplierNode
+	 *            {@link SupplierNode} to obtain the {@link SupplierType}.
+	 * @return {@link SupplierType} or <code>null</code> with issue reported to
+	 *         the {@link CompilerIssues}.
+	 */
+	SupplierType getOrLoadSupplierType(SupplierNode supplierNode);
 
 	/**
 	 * Obtains the existing or loads the {@link TeamType} for the

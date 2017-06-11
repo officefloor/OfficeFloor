@@ -17,24 +17,26 @@
  */
 package net.officefloor.compile.impl.type;
 
-import net.officefloor.compile.governance.GovernanceType;
-import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.CompileContext;
+import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
+import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 
 /**
- * Tests loading the {@link GovernanceType} from the {@link CompileContext}.
+ * Tests loading the {@link SuppliedManagedObjectSourceType} from the
+ * {@link CompileContext}.
  *
  * @author Daniel Sagenschneider
  */
-@SuppressWarnings("rawtypes")
-public class GovernanceTypeContextTest extends AbstractTestTypeContext<GovernanceNode, GovernanceType> {
+public class SuppliedManagedObjectSourceTypeContextTest
+		extends AbstractTestTypeContext<SuppliedManagedObjectSourceNode, SuppliedManagedObjectSourceType> {
 
 	/**
 	 * Instantiate.
 	 */
-	public GovernanceTypeContextTest() {
-		super(GovernanceNode.class, GovernanceType.class, (context, node) -> (GovernanceType) node.loadGovernanceType(),
-				(context, node) -> (GovernanceType) context.getOrLoadGovernanceType(node));
+	public SuppliedManagedObjectSourceTypeContextTest() {
+		super(SuppliedManagedObjectSourceNode.class, SuppliedManagedObjectSourceType.class,
+				(context, node) -> node.loadSuppliedManagedObjectSourceType(context),
+				(context, node) -> context.getOrLoadSuppliedManagedObjectSourceType(node));
 	}
 
 }

@@ -23,7 +23,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
-import net.officefloor.compile.supplier.SuppliedManagedObject;
+import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
 import net.officefloor.extension.AutoWireOfficeFloorExtensionService;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -106,7 +106,7 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure can auto-wire {@link SuppliedManagedObject}.
+	 * Ensure can auto-wire {@link SuppliedManagedObjectSource}.
 	 */
 	public void testAutoWireSuppliedManagedObject() {
 		fail("TODO implement");
@@ -114,14 +114,14 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 
 	/**
 	 * Ensure can auto-wire {@link ManagedObjectDependency} for a
-	 * {@link SuppliedManagedObject}.
+	 * {@link SuppliedManagedObjectSource}.
 	 */
 	public void testAutoWireSuppliedManagedObjectDependency() {
 		fail("TODO implement");
 	}
 
 	/**
-	 * Ensure can connect {@link Flow} for {@link SuppliedManagedObject}.
+	 * Ensure can connect {@link Flow} for {@link SuppliedManagedObjectSource}.
 	 */
 	public void testLinkSuppliedManagedObjectFlow() {
 		fail("TODO implement");
@@ -129,7 +129,7 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 
 	/**
 	 * Ensure can auto-wire {@link OfficeFloorTeam} for a
-	 * {@link SuppliedManagedObject}.
+	 * {@link SuppliedManagedObjectSource}.
 	 */
 	public void testAutoWireSuppliedManagedObjectTeam() {
 		fail("TODO implement");
@@ -137,7 +137,7 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 
 	/**
 	 * Ensure can load the {@link OfficeFloorTeam} for the
-	 * {@link SuppliedManagedObject}.
+	 * {@link SuppliedManagedObjectSource}.
 	 */
 	public void testLoadSuppliedManagedObjectTeam() {
 		fail("TODO implement");

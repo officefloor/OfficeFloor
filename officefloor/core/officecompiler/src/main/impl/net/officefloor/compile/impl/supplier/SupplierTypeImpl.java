@@ -17,7 +17,7 @@
  */
 package net.officefloor.compile.impl.supplier;
 
-import net.officefloor.compile.supplier.SuppliedManagedObjectType;
+import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierType;
 
 /**
@@ -28,18 +28,18 @@ import net.officefloor.compile.supplier.SupplierType;
 public class SupplierTypeImpl implements SupplierType {
 
 	/**
-	 * {@link SuppliedManagedObjectType} instances.
+	 * {@link SuppliedManagedObjectSourceType} instances.
 	 */
-	private final SuppliedManagedObjectType[] suppliedManagedObjectTypes;
+	private final SuppliedManagedObjectSourceType[] suppliedManagedObjectTypes;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param suppliedManagedObjectTypes
-	 *            {@link SuppliedManagedObjectType} instances.
+	 *            {@link SuppliedManagedObjectSourceType} instances.
 	 */
 	public SupplierTypeImpl(
-			SuppliedManagedObjectType[] suppliedManagedObjectTypes) {
+			SuppliedManagedObjectSourceType[] suppliedManagedObjectTypes) {
 		this.suppliedManagedObjectTypes = suppliedManagedObjectTypes;
 	}
 
@@ -48,7 +48,7 @@ public class SupplierTypeImpl implements SupplierType {
 	 */
 
 	@Override
-	public SuppliedManagedObjectType[] getSuppliedManagedObjectTypes() {
+	public SuppliedManagedObjectSourceType[] getSuppliedManagedObjectTypes() {
 		return this.suppliedManagedObjectTypes;
 	}
 

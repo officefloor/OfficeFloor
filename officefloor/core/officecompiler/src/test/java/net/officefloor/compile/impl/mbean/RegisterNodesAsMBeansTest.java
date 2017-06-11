@@ -66,6 +66,7 @@ import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
+import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.extension.CompileOffice;
 import net.officefloor.extension.CompileOfficeFloor;
 import net.officefloor.frame.api.administration.Administration;
@@ -300,6 +301,13 @@ public class RegisterNodesAsMBeansTest extends OfficeFrameTestCase {
 			fail("Should not require managed object");
 			return null;
 		}
+	}
+
+	/**
+	 * Ensure can register {@link SupplierSource} as MBean.
+	 */
+	public void testRegisterSupplier() throws Exception {
+		fail("TODO implement");
 	}
 
 	/**

@@ -43,8 +43,7 @@ public interface SupplierLoader {
 	 *         <code>null</code> if issue, which is reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	<S extends SupplierSource> PropertyList loadSpecification(
-			Class<S> supplierSourceClass);
+	<S extends SupplierSource> PropertyList loadSpecification(Class<S> supplierSourceClass);
 
 	/**
 	 * Loads and returns {@link SupplierType} for the {@link SupplierSource}.
@@ -59,26 +58,6 @@ public interface SupplierLoader {
 	 * @return {@link SupplierType} or <code>null</code> if issues, which are
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	<S extends SupplierSource> SupplierType loadSupplierType(
-			Class<S> supplierSourceClass, PropertyList propertyList);
-
-	/**
-	 * Fills the {@link SupplyOrder} instances with a
-	 * {@link SuppliedManagedObject}.
-	 * 
-	 * @param <S>
-	 *            {@link SupplierSource} type.
-	 * @param supplierSourceClass
-	 *            Class of the {@link SupplierSource}.
-	 * @param propertyList
-	 *            {@link PropertyList} containing the properties to configure
-	 *            the {@link SupplierSource} to fill the {@link SupplyOrder}
-	 *            instances.
-	 * @param supplyOrders
-	 *            {@link SupplyOrder} instances to be filled.
-	 */
-	<S extends SupplierSource> void fillSupplyOrders(
-			Class<S> supplierSourceClass, PropertyList propertyList,
-			SupplyOrder... supplyOrders);
+	<S extends SupplierSource> SupplierType loadSupplierType(Class<S> supplierSourceClass, PropertyList propertyList);
 
 }

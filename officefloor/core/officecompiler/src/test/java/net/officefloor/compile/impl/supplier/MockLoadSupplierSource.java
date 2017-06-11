@@ -18,23 +18,22 @@
 package net.officefloor.compile.impl.supplier;
 
 import java.sql.Connection;
+import java.util.Map;
 
 import javax.transaction.xa.XAResource;
 
+import org.junit.Assert;
+
 import junit.framework.TestCase;
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.ManagedObjectSourceWirer;
-import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
-import net.officefloor.compile.supplier.SuppliedManagedObjectDependencyType;
-import net.officefloor.compile.supplier.SuppliedManagedObjectFlowType;
-import net.officefloor.compile.supplier.SuppliedManagedObjectTeamType;
-import net.officefloor.compile.supplier.SuppliedManagedObjectType;
+import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierType;
-import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * Mock {@link SupplierSource} that enables validating loading a
@@ -60,92 +59,45 @@ public class MockLoadSupplierSource extends AbstractSupplierSource {
 	public static void assertSupplierType(SupplierType supplierType) {
 
 		// Validate correct number of managed objects
-		SuppliedManagedObjectType[] moTypes = supplierType
-				.getSuppliedManagedObjectTypes();
-		TestCase.assertEquals("Incorrect number of managed objects", 2,
-				moTypes.length);
+		SuppliedManagedObjectSourceType[] moTypes = supplierType.getSuppliedManagedObjectTypes();
+		TestCase.assertEquals("Incorrect number of managed objects", 3, moTypes.length);
 
-		// Validate the complex managed object
-		SuppliedManagedObjectType complexMo = moTypes[0];
+		// Validate the types
+		assertSuppliedManagedObjectType(moTypes[0], null, String.class, 0);
+		assertSuppliedManagedObjectType(moTypes[1], "QUALIFIER", String.class, 0);
+		assertSuppliedManagedObjectType(moTypes[2], "COMPLEX", Object.class, 10, "PROPERTY", "VALUE");
+	}
 
-		// Validate the managed object auto-wiring
-		AutoWire[] complexAutoWiring = complexMo.getAutoWiring();
-		TestCase.assertEquals("Should have auto-wiring", 1,
-				complexAutoWiring.length);
-		TestCase.assertEquals("Incorrect auto-wire", new AutoWire("COMPLEX",
-				MockTypeManagedObjectSource.class.getName()),
-				complexAutoWiring[0]);
-
-		// Validate input managed object
-		TestCase.assertTrue("Should be input managed object",
-				complexMo.isInputManagedObject());
-
-		// Validate dependencies
-		SuppliedManagedObjectDependencyType[] dependencies = complexMo
-				.getDependencyTypes();
-		TestCase.assertEquals("Incorrect number of dependencies", 2,
-				dependencies.length);
-		SuppliedManagedObjectDependencyType dependency = dependencies[0];
-		TestCase.assertEquals("Incorrect dependency name", "dependency",
-				dependency.getDependencyName());
-		TestCase.assertEquals("Incorrect dependency type",
-				Connection.class.getName(), dependency.getDependencyType());
-		TestCase.assertEquals("Incorrect dependency qualifier", "QUALIFIER",
-				dependency.getTypeQualifier());
-		SuppliedManagedObjectDependencyType overridden = dependencies[1];
-		TestCase.assertEquals("Incorrect dependency name", "overridden",
-				overridden.getDependencyName());
-		TestCase.assertEquals("Incorrect dependency type",
-				String.class.getName(), overridden.getDependencyType());
-		TestCase.assertEquals("Incorrect dependency qualifier", "OVERRIDDEN",
-				overridden.getTypeQualifier());
-
-		// Validate flows
-		SuppliedManagedObjectFlowType[] flows = complexMo.getFlowTypes();
-		TestCase.assertEquals("Incorrect number of flows", 1, flows.length);
-		SuppliedManagedObjectFlowType flow = flows[0];
-		TestCase.assertEquals("Incorrect flow name", "flow", flow.getFlowName());
-		TestCase.assertEquals("Incorrect flow section", "SECTION",
-				flow.getSectionName());
-		TestCase.assertEquals("Incorrect flow section input", "INPUT",
-				flow.getSectionInputName());
-		TestCase.assertEquals("Incorrect flow argument", Integer.class,
-				flow.getArgumentType());
-
-		// Validate teams
-		SuppliedManagedObjectTeamType[] teams = complexMo.getTeamTypes();
-		TestCase.assertEquals("Incorrect number of teams", 1, teams.length);
-		SuppliedManagedObjectTeamType team = teams[0];
-		TestCase.assertEquals("Incorrect team name", "team", team.getTeamName());
-		TestCase.assertEquals("Incorrect team auto-wire", new AutoWire(
-				"SPECIFIC", Integer.class.getName()), team.getTeamAutoWire());
-
-		// Validate extension interfaces
-		Class<?>[] extensionInterfaces = complexMo.getExtensionInterfaces();
-		TestCase.assertEquals("Incorrect number of extension interfaces", 1,
-				extensionInterfaces.length);
-		Class<?> extensionInterface = extensionInterfaces[0];
-		TestCase.assertEquals("Incorrect extension interface",
-				XAResource.class, extensionInterface);
-
-		// Validate the simple managed object
-		SuppliedManagedObjectType simpleMo = moTypes[1];
-		AutoWire[] simpleAutoWiring = simpleMo.getAutoWiring();
-		TestCase.assertEquals("Should have auto-wiring", 1,
-				simpleAutoWiring.length);
-		TestCase.assertEquals("Incorrect auto-wire", new AutoWire("SIMPLE",
-				MockTypeManagedObjectSource.class.getName()),
-				simpleAutoWiring[0]);
-		TestCase.assertFalse("Should not be an input managed object",
-				simpleMo.isInputManagedObject());
-		TestCase.assertEquals("Should be no dependencies", 0,
-				simpleMo.getDependencyTypes().length);
-		TestCase.assertEquals("Should be no flows", 0,
-				simpleMo.getFlowTypes().length);
-		TestCase.assertEquals("Should be no teams", 0,
-				simpleMo.getTeamTypes().length);
-		TestCase.assertEquals("Should be no extension interfaces", 0,
-				simpleMo.getExtensionInterfaces().length);
+	/**
+	 * Asserts {@link SuppliedManagedObjectSourceType}.
+	 * 
+	 * @param moType
+	 *            {@link SuppliedManagedObjectSourceType}.
+	 * @param qualifier
+	 *            Expected qualifier.
+	 * @param objectType
+	 *            Expected object type.
+	 * @param timeout
+	 *            Expected timeout.
+	 * @param propertyNameValues
+	 *            Expected {@link Property} name/value pairs.
+	 */
+	private static void assertSuppliedManagedObjectType(SuppliedManagedObjectSourceType moType, String qualifier,
+			Class<?> objectType, long timeout, String... propertyNameValues) {
+		Assert.assertEquals("Incorrect qualifier", qualifier, moType.getQualifier());
+		Assert.assertEquals("Incorrect object type", String.class, moType.getObjectType());
+		ManagedObjectSource<?, ?> simpleMos = moType.getManagedObjectSource();
+		Assert.assertEquals("Incorrect managed object source", simpleMos, MockTypeManagedObjectSource.class);
+		MockTypeManagedObjectSource simpleTypeMos = (MockTypeManagedObjectSource) simpleMos;
+		Assert.assertEquals("Incorrect source object type", String.class, simpleTypeMos.getObjectType());
+		PropertyList properties = moType.getPropertyList();
+		Assert.assertEquals("Incorrect number of properties", propertyNameValues.length / 2,
+				properties.getProperties().size());
+		for (int i = 0; i < propertyNameValues.length; i += 2) {
+			String name = propertyNameValues[i];
+			String value = propertyNameValues[i + 1];
+			Assert.assertEquals("Incorrect property " + name, value, properties.getProperty(name).getValue());
+		}
 	}
 
 	/*
@@ -162,35 +114,26 @@ public class MockLoadSupplierSource extends AbstractSupplierSource {
 
 		// Ensure property available
 		String value = context.getProperty(PROPERTY_TEST);
-		TestCase.assertEquals("Property should be available", PROPERTY_TEST,
-				value);
+		TestCase.assertEquals("Property should be available", PROPERTY_TEST, value);
 
-		// Load the complex managed object
-		MockTypeManagedObjectSource complex = new MockTypeManagedObjectSource(
-				Object.class);
+		// Load the managed object source
+		MockTypeManagedObjectSource simple = new MockTypeManagedObjectSource(String.class);
+		context.addManagedObjectSource(Object.class, simple);
+
+		// Load the qualified managed object source
+		MockTypeManagedObjectSource qualified = new MockTypeManagedObjectSource(String.class);
+		context.addManagedObjectSource("QUALIFIED", Object.class, qualified);
+
+		// Load complex managed object source
+		MockTypeManagedObjectSource complex = new MockTypeManagedObjectSource(Map.class);
 		complex.addDependency("dependency", Connection.class, "QUALIFIER");
 		complex.addDependency("overridden", Object.class, null);
 		complex.addFlow("flow", Integer.class);
 		complex.addTeam("team");
 		complex.addTeam("provided");
 		complex.addExtensionInterface(XAResource.class);
-		context.addManagedObject(complex, new ManagedObjectSourceWirer() {
-			@Override
-			public void wire(ManagedObjectSourceWirerContext context) {
-				context.mapDependency("overridden", new AutoWire("OVERRIDDEN",
-						String.class.getName()));
-				context.mapFlow("flow", "SECTION", "INPUT");
-				context.mapTeam("team",
-						new AutoWire("SPECIFIC", Integer.class.getName()));
-				context.mapTeam("provided", PassiveTeamSource.class.getName());
-			}
-		}, new AutoWire("COMPLEX", MockTypeManagedObjectSource.class.getName()));
-
-		// Load the simple managed object
-		MockTypeManagedObjectSource simple = new MockTypeManagedObjectSource(
-				Object.class);
-		context.addManagedObject(simple, null, new AutoWire("SIMPLE",
-				MockTypeManagedObjectSource.class.getName()));
+		SuppliedManagedObjectSource mos = context.addManagedObjectSource("COMPLEX", Map.class, complex);
+		mos.addProperty("PROPERTY", "VALUE");
 	}
 
 }

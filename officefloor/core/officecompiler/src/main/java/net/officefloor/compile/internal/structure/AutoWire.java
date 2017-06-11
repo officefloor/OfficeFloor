@@ -72,13 +72,25 @@ public class AutoWire implements Comparable<AutoWire> {
 	}
 
 	/**
-	 * Instantiate with only type.
+	 * Instantiate.
 	 * 
+	 * @param qualifier
+	 *            Qualifier.
 	 * @param type
 	 *            Type.
 	 */
+	public AutoWire(String qualifier, Class<?> type) {
+		this(qualifier, type.getName());
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param type
+	 *            Type.s
+	 */
 	public AutoWire(Class<?> type) {
-		this(type.getName());
+		this(null, type.getName());
 	}
 
 	/**

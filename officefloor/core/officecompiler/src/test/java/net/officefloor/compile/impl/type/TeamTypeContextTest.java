@@ -26,16 +26,14 @@ import net.officefloor.compile.team.TeamType;
  *
  * @author Daniel Sagenschneider
  */
-public class TeamTypeContextTest extends
-		AbstractTestTypeContext<TeamNode, TeamType> {
+public class TeamTypeContextTest extends AbstractTestTypeContext<TeamNode, TeamType> {
 
 	/**
 	 * Instantiate.
 	 */
 	public TeamTypeContextTest() {
-		super(TeamNode.class, TeamType.class, (node) -> (TeamType) node
-				.loadTeamType(), (context, node) -> (TeamType) context
-				.getOrLoadTeamType(node));
+		super(TeamNode.class, TeamType.class, (context, node) -> (TeamType) node.loadTeamType(),
+				(context, node) -> (TeamType) context.getOrLoadTeamType(node));
 	}
 
 }

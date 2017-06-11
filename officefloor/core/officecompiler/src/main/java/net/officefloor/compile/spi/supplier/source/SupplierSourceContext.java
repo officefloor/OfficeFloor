@@ -35,15 +35,29 @@ public interface SupplierSourceContext extends SourceContext {
 	 *            Dependency type keys.
 	 * @param <F>
 	 *            {@link Flow} type keys.
-	 * @param qualifier
-	 *            Qualifier for the {@link ManagedObjectSource}. May be
-	 *            <code>null</code> for no qualification.
 	 * @param type
 	 *            Type of the {@link ManagedObjectSource}.
 	 * @param managedObjectSource
 	 *            {@link ManagedObjectSource}.
 	 */
-	<D extends Enum<D>, F extends Enum<F>> void addManagedObjectSource(String qualifier, Class<?> type,
+	<D extends Enum<D>, F extends Enum<F>> SuppliedManagedObjectSource addManagedObjectSource(Class<?> type,
 			ManagedObjectSource<D, F> managedObjectSource);
+
+	/**
+	 * Adds a potential {@link ManagedObjectSource} for dependency injection.
+	 * 
+	 * @param <D>
+	 *            Dependency type keys.
+	 * @param <F>
+	 *            {@link Flow} type keys.
+	 * @param qualifier
+	 *            Qualifier for the {@link ManagedObjectSource}.
+	 * @param type
+	 *            Type of the {@link ManagedObjectSource}.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource}.
+	 */
+	<D extends Enum<D>, F extends Enum<F>> SuppliedManagedObjectSource addManagedObjectSource(String qualifier,
+			Class<?> type, ManagedObjectSource<D, F> managedObjectSource);
 
 }
