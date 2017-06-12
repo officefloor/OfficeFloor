@@ -29,6 +29,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SubSection;
+import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
 import net.officefloor.extension.AutoWireOfficeExtensionService;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.AdministrationBuilder;
@@ -46,6 +47,7 @@ import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObject
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.plugin.governance.clazz.Enforce;
 import net.officefloor.plugin.governance.clazz.Govern;
@@ -227,6 +229,38 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 	 * Ensure can auto-wire the {@link OfficeTeam} for {@link Governance}.
 	 */
 	public void testAutoWireGovernanceTeam() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure can auto-wire {@link SuppliedManagedObjectSource}.
+	 */
+	public void testAutoWireSuppliedManagedObject() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure can auto-wire {@link ManagedObjectDependency} for a
+	 * {@link SuppliedManagedObjectSource}.
+	 */
+	public void testAutoWireSuppliedManagedObjectDependency() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure {@link SuppliedManagedObjectSource} requiring a {@link Flow} is
+	 * not available for auto-wiring. Must be manually added with {@link Flow}
+	 * configured.
+	 */
+	public void testSuppliedManagedObjectWithFlowNotAvailable() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure can auto-wire {@link OfficeFloorTeam} for a
+	 * {@link SuppliedManagedObjectSource}.
+	 */
+	public void testAutoWireSuppliedManagedObjectTeam() {
 		fail("TODO implement");
 	}
 

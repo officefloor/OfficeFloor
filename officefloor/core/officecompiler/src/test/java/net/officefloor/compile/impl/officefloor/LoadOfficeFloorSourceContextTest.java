@@ -384,10 +384,6 @@ public class LoadOfficeFloorSourceContextTest extends AbstractOfficeFloorTestCas
 		// Load supplier type
 		this.issues.recordCaptureIssues(false);
 
-		// Load the managed object types
-		this.issues.recordCaptureIssues(false);
-		this.issues.recordCaptureIssues(false);
-
 		// Test
 		this.loadOfficeFloor(true, new OfficeFloorMaker() {
 			@Override

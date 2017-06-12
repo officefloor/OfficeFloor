@@ -102,7 +102,7 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 	 * Tests compiling a supplied {@link ManagedObject} bound to
 	 * {@link ProcessState}.
 	 */
-	public void testSuppliedManagedObject() {
+	public void testSuppliedManagedObjectSource() {
 
 		// Setup to provide managed object source instance
 		MockSupplierSource.reset();
@@ -112,12 +112,10 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 		// Record building the OfficeFloor
 		this.record_init();
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
-		this.issues.recordCaptureIssues(false); // load managed object type
 		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");
 		this.recordReturn(office, office.addProcessManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT"), null);
 
 		// Record instance (as supplied)
-		this.issues.recordCaptureIssues(false); // load managed object type
 		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", mos, 0, "MO_NAME", "MO_VALUE");
 
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
@@ -405,6 +403,7 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", TeamManagedObject.class, 0);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_managingOfficeBuilder_setInputManagedObjectName("MANAGED_OBJECT_SOURCE");
+		// No issue, as will just be undertaken by any team
 
 		// Compile the OfficeFloor
 		this.compile(true);

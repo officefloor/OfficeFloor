@@ -121,9 +121,11 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure can connect {@link Flow} for {@link SuppliedManagedObjectSource}.
+	 * Ensure {@link SuppliedManagedObjectSource} requiring a {@link Flow} is
+	 * not available for auto-wiring. Must be manually added with {@link Flow}
+	 * configured.
 	 */
-	public void testLinkSuppliedManagedObjectFlow() {
+	public void testSuppliedManagedObjectWithFlowNotAvailable() {
 		fail("TODO implement");
 	}
 
@@ -132,14 +134,6 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 	 * {@link SuppliedManagedObjectSource}.
 	 */
 	public void testAutoWireSuppliedManagedObjectTeam() {
-		fail("TODO implement");
-	}
-
-	/**
-	 * Ensure can load the {@link OfficeFloorTeam} for the
-	 * {@link SuppliedManagedObjectSource}.
-	 */
-	public void testLoadSuppliedManagedObjectTeam() {
 		fail("TODO implement");
 	}
 

@@ -532,6 +532,22 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 			return false;
 		}
 
+		// Ensure all managed object sources are sourced
+		isSourced = CompileUtil.source(this.managedObjectSources,
+				(managedObjectSource) -> managedObjectSource.getSectionManagedObjectSourceName(),
+				(managedObjectSource) -> managedObjectSource.sourceManagedObjectSource(compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
+		// Ensure all managed objects are sourced
+		isSourced = CompileUtil.source(this.managedObjects,
+				(managedObject) -> managedObject.getSectionManagedObjectName(),
+				(managedObject) -> managedObject.sourceManagedObject(compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
 		// Undertake auto-wire of objects
 		if (this.isAutoWireObjects) {
 

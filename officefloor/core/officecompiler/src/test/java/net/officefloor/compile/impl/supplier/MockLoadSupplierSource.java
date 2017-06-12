@@ -63,9 +63,9 @@ public class MockLoadSupplierSource extends AbstractSupplierSource {
 		TestCase.assertEquals("Incorrect number of managed objects", 3, moTypes.length);
 
 		// Validate the types
-		assertSuppliedManagedObjectType(moTypes[0], null, String.class, 0);
-		assertSuppliedManagedObjectType(moTypes[1], "QUALIFIER", String.class, 0);
-		assertSuppliedManagedObjectType(moTypes[2], "COMPLEX", Object.class, 10, "PROPERTY", "VALUE");
+		assertSuppliedManagedObjectType(moTypes[0], null, Object.class, 0);
+		assertSuppliedManagedObjectType(moTypes[1], "QUALIFIED", Object.class, 0);
+		assertSuppliedManagedObjectType(moTypes[2], "COMPLEX", Map.class, 10, "PROPERTY", "VALUE");
 	}
 
 	/**
@@ -85,11 +85,11 @@ public class MockLoadSupplierSource extends AbstractSupplierSource {
 	private static void assertSuppliedManagedObjectType(SuppliedManagedObjectSourceType moType, String qualifier,
 			Class<?> objectType, long timeout, String... propertyNameValues) {
 		Assert.assertEquals("Incorrect qualifier", qualifier, moType.getQualifier());
-		Assert.assertEquals("Incorrect object type", String.class, moType.getObjectType());
+		Assert.assertEquals("Incorrect object type", objectType, moType.getObjectType());
 		ManagedObjectSource<?, ?> simpleMos = moType.getManagedObjectSource();
-		Assert.assertEquals("Incorrect managed object source", simpleMos, MockTypeManagedObjectSource.class);
+		Assert.assertEquals("Incorrect managed object source", MockTypeManagedObjectSource.class, simpleMos.getClass());
 		MockTypeManagedObjectSource simpleTypeMos = (MockTypeManagedObjectSource) simpleMos;
-		Assert.assertEquals("Incorrect source object type", String.class, simpleTypeMos.getObjectType());
+		Assert.assertEquals("Incorrect source object type", objectType, simpleTypeMos.getObjectType());
 		PropertyList properties = moType.getPropertyList();
 		Assert.assertEquals("Incorrect number of properties", propertyNameValues.length / 2,
 				properties.getProperties().size());
@@ -117,11 +117,11 @@ public class MockLoadSupplierSource extends AbstractSupplierSource {
 		TestCase.assertEquals("Property should be available", PROPERTY_TEST, value);
 
 		// Load the managed object source
-		MockTypeManagedObjectSource simple = new MockTypeManagedObjectSource(String.class);
+		MockTypeManagedObjectSource simple = new MockTypeManagedObjectSource(Object.class);
 		context.addManagedObjectSource(Object.class, simple);
 
 		// Load the qualified managed object source
-		MockTypeManagedObjectSource qualified = new MockTypeManagedObjectSource(String.class);
+		MockTypeManagedObjectSource qualified = new MockTypeManagedObjectSource(Object.class);
 		context.addManagedObjectSource("QUALIFIED", Object.class, qualified);
 
 		// Load complex managed object source

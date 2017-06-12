@@ -22,8 +22,6 @@ import java.util.Properties;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
-import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -217,7 +215,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue("Must provide type for ManagedObject 1");
 
 		// Attempt to load
-		this.loadEmptySupplierType(new Init() {
+		this.loadSupplierType(false, new Init() {
 			@Override
 			public void supply(SupplierSourceContext context) {
 				context.addManagedObjectSource(null, new ClassManagedObjectSource());
@@ -234,7 +232,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue("Must provide a ManagedObjectSource for ManagedObject " + Connection.class.getName());
 
 		// Attempt to load
-		this.loadEmptySupplierType(new Init() {
+		this.loadSupplierType(false, new Init() {
 			@Override
 			public void supply(SupplierSourceContext context) {
 				context.addManagedObjectSource(Connection.class, (ManagedObjectSource<None, None>) null);
@@ -243,36 +241,9 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if supplied {@link ManagedObject} can not have its type
-	 * loaded.
-	 */
-	public void testInvalidManagedObjectType() {
-
-		// Record invalid managed object type
-		CompilerIssue[] capturedIssues = this.issues.recordCaptureIssues(true);
-		this.issues.recordIssue(Connection.class.getName(), ManagedObjectSourceNodeImpl.class,
-				"Missing property 'class.name'");
-		this.issues.recordIssue(
-				"Failure loading ManagedObjectType from source " + ClassManagedObjectSource.class.getName(),
-				capturedIssues);
-
-		// Attempt to load
-		this.loadEmptySupplierType(new Init() {
-			@Override
-			public void supply(SupplierSourceContext context) {
-				// Load invalid managed object (missing property)
-				context.addManagedObjectSource(Connection.class, new ClassManagedObjectSource());
-			}
-		});
-	}
-
-	/**
 	 * Ensure can load simple {@link ManagedObject}.
 	 */
 	public void testSimpleManagedObject() {
-
-		// Record obtaining managed object type
-		this.issues.recordCaptureIssues(false);
 
 		// Load
 		SuppliedManagedObjectSourceType type = this.loadSuppliedManagedObjectType(new Init() {
@@ -298,10 +269,6 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testComplexManagedObject() {
 
-		// Record obtaining the two managed object types
-		this.issues.recordCaptureIssues(false);
-		this.issues.recordCaptureIssues(false);
-
 		// Load
 		SupplierType type = this.loadSupplierType(true, new Init() {
 			@Override
@@ -319,12 +286,6 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	 * maintained in {@link SupplierType}.
 	 */
 	public void testMultipleManagedObjects() {
-
-		// Record obtaining the managed object types
-		this.issues.recordCaptureIssues(false);
-		this.issues.recordCaptureIssues(false);
-		this.issues.recordCaptureIssues(false);
-		this.issues.recordCaptureIssues(false);
 
 		// Load the managed objects
 		SupplierType type = this.loadSupplierType(true, new Init() {
@@ -344,7 +305,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect first managed object", Object.class, types[0].getObjectType());
 		assertEquals("Incorrect second managed object", Connection.class, types[1].getObjectType());
 		assertEquals("Incorrect third managed object", SimpleManagedObject.class, types[2].getObjectType());
-		assertEquals("Incorrect fourth managed object", Object.class.getName(), types[3].getObjectType());
+		assertEquals("Incorrect fourth managed object", Object.class, types[3].getObjectType());
 		assertEquals("Incorrect fourth qualifier", "QUALIFIER", types[3].getQualifier());
 	}
 

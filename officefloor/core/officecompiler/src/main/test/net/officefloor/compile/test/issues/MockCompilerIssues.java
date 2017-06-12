@@ -74,8 +74,8 @@ public class MockCompilerIssues implements CompilerIssues {
 		this.mock.captureIssues();
 
 		// Provide the issues
-		this.capturedIssues = (isIssue ? new CompilerIssue[] { this.testCase
-				.createMock(CompilerIssue.class) } : new CompilerIssue[0]);
+		this.capturedIssues = (isIssue ? new CompilerIssue[] { this.testCase.createMock(CompilerIssue.class) }
+				: new CompilerIssue[0]);
 		return this.capturedIssues;
 	}
 
@@ -91,10 +91,9 @@ public class MockCompilerIssues implements CompilerIssues {
 	 * @param capturedIssues
 	 *            Captured {@link CompilerIssue} instances.
 	 */
-	public void recordIssue(String nodeName, Class<? extends Node> nodeClass,
-			String issueDescription, CompilerIssue... capturedIssues) {
-		this.mock.addIssue(nodeName, nodeClass, issueDescription,
-				new MockCompilerIssuesArray(capturedIssues));
+	public void recordIssue(String nodeName, Class<? extends Node> nodeClass, String issueDescription,
+			CompilerIssue... capturedIssues) {
+		this.mock.addIssue(nodeName, nodeClass, issueDescription, new MockCompilerIssuesArray(capturedIssues));
 	}
 
 	/**
@@ -109,10 +108,9 @@ public class MockCompilerIssues implements CompilerIssues {
 	 * @param cause
 	 *            Expected cause.
 	 */
-	public void recordIssue(String nodeName, Class<? extends Node> nodeClass,
-			String issueDescription, Throwable cause) {
-		this.mock.addIssue(nodeName, nodeClass, issueDescription,
-				new MockThrowable(cause));
+	public void recordIssue(String nodeName, Class<? extends Node> nodeClass, String issueDescription,
+			Throwable cause) {
+		this.mock.addIssue(nodeName, nodeClass, issueDescription, new MockThrowable(cause));
 	}
 
 	/**
@@ -123,10 +121,8 @@ public class MockCompilerIssues implements CompilerIssues {
 	 * @param capturedIssues
 	 *            Captured {@link CompilerIssue} instances.
 	 */
-	public void recordIssue(String issueDescription,
-			CompilerIssue... capturedIssues) {
-		this.recordIssue(OfficeFloorCompiler.TYPE,
-				OfficeFloorCompilerImpl.class, issueDescription, capturedIssues);
+	public void recordIssue(String issueDescription, CompilerIssue... capturedIssues) {
+		this.recordIssue(OfficeFloorCompiler.TYPE, OfficeFloorCompilerImpl.class, issueDescription, capturedIssues);
 	}
 
 	/**
@@ -138,8 +134,7 @@ public class MockCompilerIssues implements CompilerIssues {
 	 *            Expected cause.
 	 */
 	public void recordIssue(String issueDescription, Throwable cause) {
-		this.recordIssue(OfficeFloorCompiler.TYPE,
-				OfficeFloorCompilerImpl.class, issueDescription, cause);
+		this.recordIssue(OfficeFloorCompiler.TYPE, OfficeFloorCompilerImpl.class, issueDescription, cause);
 	}
 
 	/*
@@ -169,12 +164,10 @@ public class MockCompilerIssues implements CompilerIssues {
 	}
 
 	@Override
-	public void addIssue(Node node, String issueDescription,
-			CompilerIssue... causes) {
+	public void addIssue(Node node, String issueDescription, CompilerIssue... causes) {
 		String nodeName = node.getNodeName();
 		Class<? extends Node> nodeClass = node.getClass();
-		this.mock.addIssue(nodeName, nodeClass, issueDescription,
-				new MockCompilerIssuesArray(causes));
+		this.mock.addIssue(nodeName, nodeClass, issueDescription, new MockCompilerIssuesArray(causes));
 	}
 
 	@Override
@@ -182,14 +175,13 @@ public class MockCompilerIssues implements CompilerIssues {
 
 		// Determine if assertion failure
 		if (cause instanceof AssertionError) {
-			throw (AssertionFailedError) cause;
+			throw (AssertionError) cause;
 		}
 
 		// Undertake adding the issue
 		String nodeName = node.getNodeName();
 		Class<? extends Node> nodeClass = node.getClass();
-		this.mock.addIssue(nodeName, nodeClass, issueDescription,
-				new MockThrowable(cause));
+		this.mock.addIssue(nodeName, nodeClass, issueDescription, new MockThrowable(cause));
 	}
 
 	/**
@@ -214,8 +206,8 @@ public class MockCompilerIssues implements CompilerIssues {
 		 * @param capturedIssues
 		 *            {@link MockCompilerIssuesArray}.
 		 */
-		void addIssue(String nodeName, Class<? extends Node> nodeClass,
-				String issueDescription, MockCompilerIssuesArray capturedIssues);
+		void addIssue(String nodeName, Class<? extends Node> nodeClass, String issueDescription,
+				MockCompilerIssuesArray capturedIssues);
 
 		/**
 		 * Enable recording adding an issue for a particular type of node.
@@ -229,8 +221,8 @@ public class MockCompilerIssues implements CompilerIssues {
 		 * @param cause
 		 *            Expected cause.
 		 */
-		void addIssue(String nodeName, Class<? extends Node> nodeclClass,
-				String issuedDescription, MockThrowable cause);
+		void addIssue(String nodeName, Class<? extends Node> nodeclClass, String issuedDescription,
+				MockThrowable cause);
 	}
 
 	/**
@@ -284,8 +276,7 @@ public class MockCompilerIssues implements CompilerIssues {
 
 		@Override
 		public String toString() {
-			return CompilerIssue.class.getSimpleName() + "["
-					+ this.issues.length + "]";
+			return CompilerIssue.class.getSimpleName() + "[" + this.issues.length + "]";
 		}
 	}
 

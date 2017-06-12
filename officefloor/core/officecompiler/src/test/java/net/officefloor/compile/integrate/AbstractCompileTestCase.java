@@ -223,6 +223,11 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	private ManagingOfficeBuilder<?> managingOfficeBuilder = null;
 
 	/**
+	 * Flags if the matcher has been specified to add a {@link ManagedObject}.
+	 */
+	private boolean isMatcherSet_officeFloorBuilder_addManagedObject = false;
+
+	/**
 	 * Records adding a {@link ManagedObjectSource} to the
 	 * {@link OfficeFloorBuilder}.
 	 * 
@@ -242,18 +247,37 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	protected <D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> record_officeFloorBuilder_addManagedObject(
 			String managedObjectSourceName, Class<S> managedObjectSourceClass, long timeout,
 			String... propertyNameValues) {
+
+		// Instantiate managed object source
+		S managedObjectSource;
+		try {
+			managedObjectSource = managedObjectSourceClass.newInstance();
+		} catch (Exception ex) {
+			throw fail(ex);
+		}
+
+		// Record adding the managed object
 		this.managedObjectBuilder = this.createMock(ManagedObjectBuilder.class);
 		this.recordReturn(this.officeFloorBuilder,
-				this.officeFloorBuilder.addManagedObject(managedObjectSourceName, managedObjectSourceClass),
+				this.officeFloorBuilder.addManagedObject(managedObjectSourceName, managedObjectSource),
 				this.managedObjectBuilder);
+		if (!this.isMatcherSet_officeFloorBuilder_addManagedObject) {
+			this.control(this.officeFloorBuilder).setMatcher(new AbstractMatcher() {
+				@Override
+				public boolean matches(Object[] expected, Object[] actual) {
+					boolean isMatch = (expected[0].equals(actual[0]));
+					isMatch &= (expected[1].getClass().equals(actual[1].getClass()));
+					return isMatch;
+				}
+			});
+			this.isMatcherSet_officeFloorBuilder_addManagedObject = true;
+		}
 		for (int i = 0; i < propertyNameValues.length; i += 2) {
 			String name = propertyNameValues[i];
 			String value = propertyNameValues[i + 1];
 			this.managedObjectBuilder.addProperty(name, value);
 		}
-		if (timeout > 0) {
-			this.managedObjectBuilder.setTimeout(timeout);
-		}
+		this.managedObjectBuilder.setTimeout(timeout);
 		return this.managedObjectBuilder;
 	}
 
