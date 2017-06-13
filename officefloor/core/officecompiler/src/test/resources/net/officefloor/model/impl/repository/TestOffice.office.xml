@@ -1,5 +1,15 @@
 <office auto-wire-objects="true" auto-wire-teams="true">
 
+	<suppliers>
+		<supplier name="SUPPLIER" source="net.example.ExampleSupplierSource"
+			x="000" y="001">
+			<properties>
+				<property name="SUPPLIER_ONE" value="VALUE_ONE" />
+				<property name="SUPPLIER_TWO" value="VALUE_TWO" />
+			</properties>
+		</supplier>
+	</suppliers>
+
 	<external-managed-objects>
 		<external-managed-object name="EXTERNAL_MANAGED_OBJECT"
 			object-type="java.sql.Connection" object-scope="PROCESS" x="100" y="101">
@@ -30,6 +40,26 @@
 			</flow>
 			<team name="MO_TEAM">
 				<office-team name="TEAM" />
+			</team>
+		</managed-object-source>
+		<managed-object-source name="SUPPLIED_MANAGED_OBJECT_SOURCE"
+			object-type="net.orm.Session" x="210" y="211">
+			<supplier name="SUPPLIER" qualifier="QUALIFIER"
+				type="net.orm.SpecificSession" />
+			<!-- Supplied only different as has no source attribute -->
+			<properties>
+				<property name="MO_ONE" value="VALUE_ONE" />
+				<property name="MO_TWO" value="VALUE_TWO" />
+			</properties>
+			<input-dependency name="INPUT_DEPENDENCY"
+				object-type="java.sql.Connection">
+				<managed-object name="MANAGED_OBJECT_TWO" />
+			</input-dependency>
+			<flow name="FLOW" argument-type="java.lang.Integer">
+				<office-input office="OFFICE" section="SECTION" input="INPUT" />
+			</flow>
+			<team name="MO_TEAM">
+				<office-floor-team name="TEAM" />
 			</team>
 		</managed-object-source>
 	</managed-object-sources>

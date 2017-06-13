@@ -54,6 +54,7 @@ import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectPool;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
+import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
@@ -67,6 +68,8 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
+import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
+import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
 import net.officefloor.extension.CompileOffice;
 import net.officefloor.extension.CompileOfficeFloor;
 import net.officefloor.frame.api.administration.Administration;
@@ -307,7 +310,61 @@ public class RegisterNodesAsMBeansTest extends OfficeFrameTestCase {
 	 * Ensure can register {@link SupplierSource} as MBean.
 	 */
 	public void testRegisterSupplier() throws Exception {
-		fail("TODO implement");
+		TestSupplierSource supplierSource = new TestSupplierSource();
+		this.doTestInOfficeFloor(SupplierSource.class, "SUPPLIER", (deployer, context) -> {
+			OfficeFloorSupplier supplier = deployer.addSupplier("SUPPLIER", supplierSource);
+			OfficeFloorManagedObjectSource mos = supplier.addOfficeFloorManagedObjectSource("MOS", Object.class.getName());
+			DeployedOffice office = deployer.addDeployedOffice("OFFICE", TestOfficeSource.class.getName(), null);
+			deployer.link(mos.getManagingOffice(), office);
+		}, (objectName) -> {
+
+			// Ensure able to obtain SupplierSource MBean
+			TestSupplierSourceMBean mbean = getMBean(objectName, TestSupplierSourceMBean.class);
+			assertEquals("Incorrect Mbean value", "Supplier Test", mbean.getSupplierValue());
+
+			// Change value to ensure correct instance
+			supplierSource.mbeanValue = "Supplier changed";
+			assertEquals("Incorrect changed MBean value", "Supplier changed", mbean.getSupplierValue());
+
+			// Ensure able to obtain ManagedObjectSource MBean
+			ManagedObjectSourceObjectMBean mosMBean = getMBean(getObjectName(ManagedObjectSource.class, "MOS"),
+					ManagedObjectSourceObjectMBean.class);
+			assertEquals("Incorrect Managed Object Source MBean value", "ManagedObject Test", mosMBean.getMBeanValue());
+		});
+	}
+
+	public static interface TestSupplierSourceMBean {
+		String getSupplierValue();
+	}
+
+	@TestSource
+	public static class TestSupplierSource extends AbstractSupplierSource implements TestSupplierSourceMBean {
+
+		private String mbeanValue = "Supplier Test";
+
+		private TestManagedObjectSource managedObjectSource = new TestManagedObjectSource();
+
+		/*
+		 * ================== TestSupplierSourceMBean ===============
+		 */
+
+		@Override
+		public String getSupplierValue() {
+			return this.mbeanValue;
+		}
+
+		/*
+		 * ====================== SupplierSource ====================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		public void supply(SupplierSourceContext context) throws Exception {
+			context.addManagedObjectSource(Object.class, this.managedObjectSource);
+		}
 	}
 
 	/**

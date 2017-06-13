@@ -74,6 +74,7 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
+import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.manage.Office;
@@ -327,8 +328,15 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	@Override
 	public OfficeFloorSupplier addSupplier(String supplierName, String supplierSourceClassName) {
 		return NodeUtil.getInitialisedNode(supplierName, this.suppliers, this.context,
-				() -> this.context.createSupplierNode(supplierName, supplierSourceClassName, this),
-				(supplier) -> supplier.initialise());
+				() -> this.context.createSupplierNode(supplierName, this),
+				(supplier) -> supplier.initialise(supplierSourceClassName, null));
+	}
+
+	@Override
+	public OfficeFloorSupplier addSupplier(String supplierName, SupplierSource supplierSource) {
+		return NodeUtil.getInitialisedNode(supplierName, this.suppliers, this.context,
+				() -> this.context.createSupplierNode(supplierName, this),
+				(supplier) -> supplier.initialise(supplierSource.getClass().getName(), supplierSource));
 	}
 
 	@Override

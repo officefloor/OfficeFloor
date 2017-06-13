@@ -617,6 +617,11 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			compileContext.registerPossibleMBean(ManagedObjectSource.class, managedObjectSourceName,
 					managedObjectSource);
 
+			// Register supplier as possible MBean
+			if (this.suppliedManagedObjectNode != null) {
+				this.suppliedManagedObjectNode.getSupplierNode().registerAsPossibleMBean(compileContext);
+			}
+
 			// Build the managed object source from supplied managed object
 			ManagedObjectBuilder moBuilder = builder.addManagedObject(managedObjectSourceName, managedObjectSource);
 

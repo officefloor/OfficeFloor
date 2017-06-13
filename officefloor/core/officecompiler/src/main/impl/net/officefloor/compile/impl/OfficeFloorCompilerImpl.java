@@ -931,9 +931,14 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
-	public SupplierNode createSupplierNode(String supplierName, String supplierSourceClassName,
-			OfficeFloorNode officeFloor) {
-		return new SupplierNodeImpl(supplierName, supplierSourceClassName, officeFloor, this);
+	public SupplierNode createSupplierNode(String supplierName, OfficeFloorNode officeFloor) {
+		return new SupplierNodeImpl(supplierName, null, officeFloor, this);
+	}
+
+	@Override
+	public SupplierNode createSupplierNode(String supplierName, OfficeNode office) {
+		OfficeFloorNode officeFloor = office.getOfficeFloorNode();
+		return new SupplierNodeImpl(supplierName, office, officeFloor, this);
 	}
 
 	@Override

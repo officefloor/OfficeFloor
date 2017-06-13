@@ -44,7 +44,7 @@ public interface OfficeFloorSupplier extends PropertyConfigurable {
 	 *            Type of object required from the {@link OfficeFloorSupplier}.
 	 * @return {@link OfficeFloorManagedObjectSource}.
 	 */
-	OfficeFloorManagedObjectSource addManagedObjectSource(String managedObjectSourceName, String type);
+	OfficeFloorManagedObjectSource addOfficeFloorManagedObjectSource(String managedObjectSourceName, String type);
 
 	/**
 	 * Adds an {@link OfficeFloorManagedObjectSource}.
@@ -57,7 +57,7 @@ public interface OfficeFloorSupplier extends PropertyConfigurable {
 	 *            Qualifier on the object type.
 	 * @return {@link OfficeFloorManagedObjectSource}.
 	 */
-	OfficeFloorManagedObjectSource addManagedObjectSource(String managedObjectSourceName, String type,
+	OfficeFloorManagedObjectSource addOfficeFloorManagedObjectSource(String managedObjectSourceName, String type,
 			String qualifier);
 
 }

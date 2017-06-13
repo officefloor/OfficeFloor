@@ -17,12 +17,19 @@
  */
 package net.officefloor.compile.integrate.managedobject;
 
+import java.sql.Connection;
+
 import net.officefloor.compile.impl.structure.ManagedObjectDependencyNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectFlowNodeImpl;
+import net.officefloor.compile.impl.supplier.MockTypeManagedObjectSource;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
+import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
+import net.officefloor.compile.spi.supplier.source.SupplierSource;
+import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
+import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
@@ -86,6 +93,72 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 
 		// Compile the OfficeFloor
 		this.compile(true);
+	}
+
+	/**
+	 * Tests compiling a supplied {@link ManagedObject} bound to
+	 * {@link ProcessState}.
+	 */
+	public void testSuppliedManagedObjectSource() {
+
+		// Setup to provide managed object source instance
+		MockSupplierSource.reset();
+		final MockTypeManagedObjectSource mos = new MockTypeManagedObjectSource(Object.class);
+		MockSupplierSource.managedObjectSource = mos;
+
+		// Record building the OfficeFloor
+		this.record_init();
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");
+		this.recordReturn(office, office.addProcessManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT"), null);
+
+		// Record instance (as supplied)
+		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", mos, 0, "MO_NAME", "MO_VALUE");
+
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+
+		// Compile the OfficeFloor
+		this.compile(true);
+	}
+
+	/**
+	 * Mock {@link SupplierSource}.
+	 */
+	public static class MockSupplierSource extends AbstractSupplierSource {
+
+		/**
+		 * Resets for the next test.
+		 */
+		public static void reset() {
+			managedObjectSource = null;
+		}
+
+		/**
+		 * {@link ManagedObjectSource}.
+		 */
+		public static ManagedObjectSource<?, ?> managedObjectSource = null;
+
+		/*
+		 * ===================== SupplierSource ========================+
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			fail("Specification should not be required");
+		}
+
+		@Override
+		public void supply(SupplierSourceContext context) throws Exception {
+
+			// Ensure the property is available
+			String value = context.getProperty("SUPPLY_NAME");
+			assertEquals("Incorrect property value", "SUPPLY_VALUE", value);
+
+			// Supply the managed object source
+			SuppliedManagedObjectSource source = context.addManagedObjectSource("QUALIFIER", Connection.class,
+					managedObjectSource);
+			source.addProperty("MO_NAME", "MO_VALUE");
+		}
 	}
 
 	/**

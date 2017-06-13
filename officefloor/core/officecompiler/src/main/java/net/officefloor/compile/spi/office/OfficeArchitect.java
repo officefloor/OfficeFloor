@@ -20,10 +20,12 @@ package net.officefloor.compile.spi.office;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.source.OfficeSource;
+import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -172,6 +174,28 @@ public interface OfficeArchitect {
 	 */
 	OfficeManagedObjectPool addManagedObjectPool(String managedObjectPoolName,
 			ManagedObjectPoolSource managedObjectPoolSource);
+
+	/**
+	 * Adds an {@link OfficeSupplier}.
+	 * 
+	 * @param supplierName
+	 *            Name of the {@link OfficeSupplier}.
+	 * @param supplierSourceClassName
+	 *            Fully qualified class name of the {@link SupplierSource}.
+	 * @return {@link OfficeSupplier}.
+	 */
+	OfficeSupplier addSupplier(String supplierName, String supplierSourceClassName);
+
+	/**
+	 * Adds an {@link OfficeSupplier}.
+	 * 
+	 * @param supplierName
+	 *            Name of the {@link OfficeSupplier}.
+	 * @param supplierSource
+	 *            {@link SupplierSource} instance to use.
+	 * @return {@link OfficeFloorSupplier}.
+	 */
+	OfficeSupplier addSupplier(String supplierName, SupplierSource supplierSource);
 
 	/**
 	 * Adds a {@link OfficeGovernance}.

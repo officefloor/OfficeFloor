@@ -141,6 +141,17 @@ public interface OfficeFloorDeployer {
 	OfficeFloorSupplier addSupplier(String supplierName, String supplierSourceClassName);
 
 	/**
+	 * Adds an {@link OfficeFloorSupplier}.
+	 * 
+	 * @param supplierName
+	 *            Name of the {@link OfficeFloorSupplier}.
+	 * @param supplierSource
+	 *            {@link SupplierSource} instance to use.
+	 * @return {@link OfficeFloorSupplier}.
+	 */
+	OfficeFloorSupplier addSupplier(String supplierName, SupplierSource supplierSource);
+
+	/**
 	 * Adds a {@link DeployedOffice} to the {@link OfficeFloor}.
 	 * 
 	 * @param officeName

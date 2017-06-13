@@ -44,6 +44,7 @@ import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.SourceContext;
@@ -670,20 +671,30 @@ public interface NodeContext {
 	 *            Parent {@link SupplierNode}.
 	 * @return {@link SuppliedManagedObjectSourceNode}.
 	 */
-	SuppliedManagedObjectSourceNode createSuppliedManagedObjectNode(String qualifier, String type, SupplierNode supplier);
+	SuppliedManagedObjectSourceNode createSuppliedManagedObjectNode(String qualifier, String type,
+			SupplierNode supplier);
 
 	/**
 	 * Creates the {@link SupplierNode}.
 	 * 
 	 * @param supplierName
 	 *            Name of the {@link SupplierNode}.
-	 * @param supplierSourceClassName
-	 *            {@link Class} name of the {@link SupplierSource}.
 	 * @param officeFloor
 	 *            Parent {@link OfficeFloorNode}.
 	 * @return {@link SupplierNode}.
 	 */
-	SupplierNode createSupplierNode(String supplierName, String supplierSourceClassName, OfficeFloorNode officeFloor);
+	SupplierNode createSupplierNode(String supplierName, OfficeFloorNode officeFloor);
+
+	/**
+	 * Creates the {@link SupplierNode}.
+	 * 
+	 * @param supplierName
+	 *            Name of the {@link SupplierNode}.
+	 * @param office
+	 *            Parent {@link Office}.
+	 * @return {@link SupplierNode}.
+	 */
+	SupplierNode createSupplierNode(String supplierName, OfficeNode office);
 
 	/**
 	 * Obtains the {@link AdministrationSource} class.

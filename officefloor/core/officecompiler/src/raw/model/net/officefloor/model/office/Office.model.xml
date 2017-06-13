@@ -4,6 +4,7 @@
 	<field type="boolean" name="is auto wire teams" />
 	<list type="OfficeSectionModel" name="office section" />
 	<list type="OfficeTeamModel" name="office team" />
+	<list type="OfficeSupplierModel" name="office supplier" />
 	<list type="ExternalManagedObjectModel" name="external managed object" />
 	<list type="OfficeManagedObjectSourceModel" name="office managed object source" />
 	<list type="OfficeManagedObjectModel" name="office managed object" />

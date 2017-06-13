@@ -233,7 +233,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 				String qualifier = mosToSupplier.getAutoWireQualifier();
 				qualifier = (CompileUtil.isBlank(qualifier) ? null : qualifier);
 				String type = mosToSupplier.getAutoWireType();
-				managedObjectSource = supplier.addManagedObjectSource(managedObjectSourceName, type, qualifier);
+				managedObjectSource = supplier.addOfficeFloorManagedObjectSource(managedObjectSourceName, type, qualifier);
 
 			} else {
 				// Source the managed object source

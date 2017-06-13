@@ -59,6 +59,7 @@ import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
@@ -681,9 +682,9 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can create {@link SupplierNode}.
+	 * Ensure can create {@link SupplierNode} within {@link OfficeFloor}.
 	 */
-	public void testCreateSupplierNode() {
+	public void testCreateSupplierNode_withinOfficeFloor() {
 		SuppliedManagedObjectSourceNode[] suppliedManagedObjectNode = new SuppliedManagedObjectSourceNode[] { null };
 		this.recordReturn(this.officeFloor,
 				this.officeFloor.addManagedObjectSource("MOS",
@@ -699,16 +700,46 @@ public class NodeContextTest extends OfficeFrameTestCase {
 					}
 				});
 		SupplierNode node = this.doTest(() -> {
-			SupplierNode supplier = this.context.createSupplierNode("SUPPLIER", "ExampleSupplierSource",
-					this.officeFloor);
+			SupplierNode supplier = this.context.createSupplierNode("SUPPLIER", this.officeFloor);
 			assertNode(supplier, "SUPPLIER", "Supplier", null, this.officeFloor);
-			supplier.addManagedObjectSource("MOS", "TYPE");
+			supplier.addOfficeFloorManagedObjectSource("MOS", "TYPE");
 			assertChildren(supplier, suppliedManagedObjectNode[0]);
 			return supplier;
 		});
 
 		assertEquals("Incorrect supplier name", "SUPPLIER", node.getOfficeFloorSupplierName());
-		assertInitialise(node, (n) -> n.initialise());
+		assertInitialise(node, (n) -> n.initialise("ExampleSupplierSource", null));
+	}
+
+	/**
+	 * Ensure can create {@link SupplierNode} within {@link Office}.
+	 */
+	public void testCreateSupplierNode_withinOffice() {
+		this.recordReturn(this.office, this.office.getOfficeFloorNode(), this.officeFloor);
+		SuppliedManagedObjectSourceNode[] suppliedManagedObjectNode = new SuppliedManagedObjectSourceNode[] { null };
+		this.recordReturn(this.office,
+				this.office.addManagedObjectSource("MOS",
+						new SuppliedManagedObjectSourceNodeImpl(null, null, null, context)),
+				this.managedObjectSource, new TypeMatcher(String.class, SuppliedManagedObjectSourceNodeImpl.class) {
+					@Override
+					public boolean matches(Object[] expected, Object[] actual) {
+						// Capture the supplied managed object
+						suppliedManagedObjectNode[0] = (SuppliedManagedObjectSourceNode) actual[1];
+
+						// Ensure match on type
+						return super.matches(expected, actual);
+					}
+				});
+		SupplierNode node = this.doTest(() -> {
+			SupplierNode supplier = this.context.createSupplierNode("SUPPLIER", this.office);
+			assertNode(supplier, "SUPPLIER", "Supplier", null, this.office);
+			supplier.addOfficeManagedObjectSource("MOS", "TYPE");
+			assertChildren(supplier, suppliedManagedObjectNode[0]);
+			return supplier;
+		});
+
+		assertEquals("Incorrect supplier name", "SUPPLIER", node.getOfficeFloorSupplierName());
+		assertInitialise(node, (n) -> n.initialise("ExampleSupplierSource", null));
 	}
 
 	/**

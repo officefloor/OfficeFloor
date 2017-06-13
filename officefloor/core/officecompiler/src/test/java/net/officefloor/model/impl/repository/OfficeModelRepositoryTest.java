@@ -18,6 +18,7 @@
 package net.officefloor.model.impl.repository;
 
 import java.sql.Connection;
+import java.util.List;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
@@ -74,9 +75,11 @@ import net.officefloor.model.office.OfficeStartModel;
 import net.officefloor.model.office.OfficeStartToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSubSectionModel;
 import net.officefloor.model.office.OfficeSubSectionToGovernanceModel;
+import net.officefloor.model.office.OfficeSupplierModel;
 import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.office.PropertyModel;
 import net.officefloor.model.office.TypeQualificationModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
@@ -116,6 +119,16 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 		assertProperties(new OfficeModel(true, true), office, "getIsAutoWireObjects", "getIsAutoWireTeams");
 
+		// ---------------------------------------
+		// Validate the OfficeFloor suppliers
+		// ---------------------------------------
+		assertList(new String[] { "getOfficeSupplierName", "getSupplierSourceClassName", "getX", "getY" },
+				office.getOfficeSuppliers(),
+				new OfficeSupplierModel("SUPPLIER", "net.example.ExampleSupplierSource", null, null, 0, 1));
+		OfficeSupplierModel supplier = office.getOfficeSuppliers().get(0);
+		assertList(new String[] { "getName", "getValue" }, supplier.getProperties(),
+				new PropertyModel("SUPPLIER_ONE", "VALUE_ONE"), new PropertyModel("SUPPLIER_TWO", "VALUE_TWO"));
+
 		// ----------------------------------------
 		// Validate the external managed objects
 		// ----------------------------------------
@@ -136,33 +149,19 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 						"getTimeout", "getX", "getY" },
 				office.getOfficeManagedObjectSources(),
 				new OfficeManagedObjectSourceModel("MANAGED_OBJECT_SOURCE", "net.example.ExampleManagedObjectSource",
-						"net.orm.Session", "10", null, null, null, null, null, null, 200, 201));
-		OfficeManagedObjectSourceModel mos = office.getOfficeManagedObjectSources().get(0);
-		assertList(new String[] { "getName", "getValue" }, mos.getProperties(),
-				new PropertyModel("MO_ONE", "VALUE_ONE"), new PropertyModel("MO_TWO", "VALUE_TWO"));
-		assertProperties(new OfficeManagedObjectSourceToOfficeManagedObjectPoolModel("MANAGED_OBJECT_POOL"),
-				mos.getOfficeManagedObjectPool(), "getOfficeManagedObjectPoolName");
-		assertList(new String[] { "getOfficeInputManagedObjectDependencyName", "getDependencyType" },
-				mos.getOfficeInputManagedObjectDependencies(),
-				new OfficeInputManagedObjectDependencyModel("INPUT_DEPENDENCY_ONE", Connection.class.getName()),
-				new OfficeInputManagedObjectDependencyModel("INPUT_DEPENDENCY_TWO", Connection.class.getName()));
-		assertProperties(new OfficeInputManagedObjectDependencyToOfficeManagedObjectModel("MANAGED_OBJECT_TWO"),
-				mos.getOfficeInputManagedObjectDependencies().get(0).getOfficeManagedObject(),
-				"getOfficeManagedObjectName");
-		assertProperties(new OfficeInputManagedObjectDependencyToExternalManagedObjectModel("EXTERNAL_MANAGED_OBJECT"),
-				mos.getOfficeInputManagedObjectDependencies().get(1).getExternalManagedObject(),
-				"getExternalManagedObjectName");
-		assertList(new String[] { "getOfficeManagedObjectSourceFlowName", "getArgumentType" },
-				mos.getOfficeManagedObjectSourceFlows(),
-				new OfficeManagedObjectSourceFlowModel("FLOW", Integer.class.getName()));
-		OfficeManagedObjectSourceFlowModel flow = mos.getOfficeManagedObjectSourceFlows().get(0);
-		assertProperties(new OfficeManagedObjectSourceFlowToOfficeSectionInputModel("SECTION", "INPUT_A"),
-				flow.getOfficeSectionInput(), "getOfficeSectionName", "getOfficeSectionInputName");
-		assertList(new String[] { "getOfficeManagedObjectSourceTeamName" }, mos.getOfficeManagedObjectSourceTeams(),
-				new OfficeManagedObjectSourceTeamModel("MO_TEAM"));
-		OfficeManagedObjectSourceTeamModel moTeam = mos.getOfficeManagedObjectSourceTeams().get(0);
-		assertProperties(new OfficeManagedObjectSourceTeamToOfficeTeamModel("TEAM"), moTeam.getOfficeTeam(),
-				"getOfficeTeamName");
+						"net.orm.Session", "10", null, null, null, null, null, null, null, 200, 201),
+				new OfficeManagedObjectSourceModel("SUPPLIED_MANAGED_OBJECT_SOURCE", null, "net.orm.Session", "10",
+						null, null, null, null, null, null, null, 210, 211));
+		List<OfficeManagedObjectSourceModel> moSources = office.getOfficeManagedObjectSources();
+		assertOfficeManagedObjectSource(moSources.get(0));
+
+		// Validate the supplied managed object source
+		OfficeManagedObjectSourceModel suppliedMoSource = moSources.get(1);
+		assertOfficeManagedObjectSource(suppliedMoSource);
+		assertProperties(
+				new OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel("SUPPLIER", "QUALIFIER",
+						"net.orm.SpecificSession"),
+				suppliedMoSource.getOfficeSupplier(), "getOfficeSupplierName", "getQualifier", "getType");
 
 		// ----------------------------------------
 		// Validate the managed objects
@@ -354,6 +353,40 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 				new OfficeFunctionToGovernanceModel("GOVERNANCE"));
 		assertList(new String[] { "getOfficeSubSectionName" }, subSection.getOfficeSubSections(),
 				new OfficeSubSectionModel("SUB_SUB_SECTION"));
+	}
+
+	/**
+	 * Asserts the {@link OfficeManagedObjectSourceModel} is correct.
+	 * 
+	 * @param mos
+	 *            {@link OfficeManagedObjectSourceModel}.
+	 */
+	private static void assertOfficeManagedObjectSource(OfficeManagedObjectSourceModel mos) {
+		assertList(new String[] { "getName", "getValue" }, mos.getProperties(),
+				new PropertyModel("MO_ONE", "VALUE_ONE"), new PropertyModel("MO_TWO", "VALUE_TWO"));
+		assertProperties(new OfficeManagedObjectSourceToOfficeManagedObjectPoolModel("MANAGED_OBJECT_POOL"),
+				mos.getOfficeManagedObjectPool(), "getOfficeManagedObjectPoolName");
+		assertList(new String[] { "getOfficeInputManagedObjectDependencyName", "getDependencyType" },
+				mos.getOfficeInputManagedObjectDependencies(),
+				new OfficeInputManagedObjectDependencyModel("INPUT_DEPENDENCY_ONE", Connection.class.getName()),
+				new OfficeInputManagedObjectDependencyModel("INPUT_DEPENDENCY_TWO", Connection.class.getName()));
+		assertProperties(new OfficeInputManagedObjectDependencyToOfficeManagedObjectModel("MANAGED_OBJECT_TWO"),
+				mos.getOfficeInputManagedObjectDependencies().get(0).getOfficeManagedObject(),
+				"getOfficeManagedObjectName");
+		assertProperties(new OfficeInputManagedObjectDependencyToExternalManagedObjectModel("EXTERNAL_MANAGED_OBJECT"),
+				mos.getOfficeInputManagedObjectDependencies().get(1).getExternalManagedObject(),
+				"getExternalManagedObjectName");
+		assertList(new String[] { "getOfficeManagedObjectSourceFlowName", "getArgumentType" },
+				mos.getOfficeManagedObjectSourceFlows(),
+				new OfficeManagedObjectSourceFlowModel("FLOW", Integer.class.getName()));
+		OfficeManagedObjectSourceFlowModel flow = mos.getOfficeManagedObjectSourceFlows().get(0);
+		assertProperties(new OfficeManagedObjectSourceFlowToOfficeSectionInputModel("SECTION", "INPUT_A"),
+				flow.getOfficeSectionInput(), "getOfficeSectionName", "getOfficeSectionInputName");
+		assertList(new String[] { "getOfficeManagedObjectSourceTeamName" }, mos.getOfficeManagedObjectSourceTeams(),
+				new OfficeManagedObjectSourceTeamModel("MO_TEAM"));
+		OfficeManagedObjectSourceTeamModel moTeam = mos.getOfficeManagedObjectSourceTeams().get(0);
+		assertProperties(new OfficeManagedObjectSourceTeamToOfficeTeamModel("TEAM"), moTeam.getOfficeTeam(),
+				"getOfficeTeamName");
 	}
 
 	/**

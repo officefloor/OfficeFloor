@@ -46,6 +46,21 @@ public interface SupplierLoader {
 	<S extends SupplierSource> PropertyList loadSpecification(Class<S> supplierSourceClass);
 
 	/**
+	 * Loads and returns the {@link PropertyList} from the
+	 * {@link SupplierSourceSpecification} for the {@link SupplierSource}.
+	 * 
+	 * @param <S>
+	 *            {@link SupplierSource} type.
+	 * @param supplierSource
+	 *            {@link SupplierSource} instance.
+	 * @return {@link PropertyList} of the {@link SupplierSourceProperty}
+	 *         instances of the {@link SupplierSourceSpecification} or
+	 *         <code>null</code> if issue, which is reported to the
+	 *         {@link CompilerIssues}.
+	 */
+	PropertyList loadSpecification(SupplierSource supplierSource);
+
+	/**
 	 * Loads and returns {@link SupplierType} for the {@link SupplierSource}.
 	 * 
 	 * @param <S>
@@ -59,5 +74,20 @@ public interface SupplierLoader {
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	<S extends SupplierSource> SupplierType loadSupplierType(Class<S> supplierSourceClass, PropertyList propertyList);
+
+	/**
+	 * Loads and returns {@link SupplierType} for the {@link SupplierSource}.
+	 * 
+	 * @param <S>
+	 *            {@link SupplierSource} type.
+	 * @param supplierSource
+	 *            {@link SupplierSource} instance.
+	 * @param propertyList
+	 *            {@link PropertyList} containing the properties to source the
+	 *            {@link SupplierType}.
+	 * @return {@link SupplierType} or <code>null</code> if issues, which are
+	 *         reported to the {@link CompilerIssues}.
+	 */
+	SupplierType loadSupplierType(SupplierSource supplierSource, PropertyList propertyList);
 
 }

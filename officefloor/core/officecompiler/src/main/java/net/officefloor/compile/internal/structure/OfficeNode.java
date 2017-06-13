@@ -20,7 +20,9 @@ package net.officefloor.compile.internal.structure;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -53,6 +55,20 @@ public interface OfficeNode
 	 *            Location of the {@link Office}.
 	 */
 	void initialise(String officeSourceClassName, OfficeSource officeSource, String officeLocation);
+
+	/**
+	 * Adds a {@link OfficeManagedObjectSource} supplied from an
+	 * {@link OfficeSupplier}.
+	 * 
+	 * @param managedObjectSourceName
+	 *            Name of the {@link OfficeManagedObjectSource}.
+	 * @param suppliedManagedObject
+	 *            {@link SuppliedManagedObjectSourceNode} to supply the
+	 *            {@link OfficeManagedObjectSource}.
+	 * @return {@link OfficeManagedObjectSource}.
+	 */
+	OfficeManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
+			SuppliedManagedObjectSourceNode suppliedManagedObject);
 
 	/**
 	 * Sources this {@link Office} along with its top level

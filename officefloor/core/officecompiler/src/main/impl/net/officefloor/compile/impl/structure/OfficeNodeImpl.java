@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
+import java.util.function.Supplier;
 
 import net.officefloor.compile.impl.office.OfficeSourceContextImpl;
 import net.officefloor.compile.impl.office.OfficeTypeImpl;
@@ -59,6 +60,8 @@ import net.officefloor.compile.internal.structure.OfficeOutputNode;
 import net.officefloor.compile.internal.structure.OfficeStartNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.internal.structure.SectionNode;
+import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
+import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.office.OfficeAvailableSectionInputType;
@@ -86,6 +89,7 @@ import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeSectionTransformer;
 import net.officefloor.compile.spi.office.OfficeStart;
+import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.ResponsibleTeam;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionService;
@@ -96,6 +100,7 @@ import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
@@ -211,10 +216,15 @@ public class OfficeNodeImpl implements OfficeNode {
 	private final Map<String, ManagedObjectSourceNode> managedObjectSources = new HashMap<String, ManagedObjectSourceNode>();
 
 	/**
-	 * {@link ManagedObjectPoolNode} instances by thier
+	 * {@link ManagedObjectPoolNode} instances by their
 	 * {@link OfficeManagedObjectPool} name.
 	 */
 	private final Map<String, ManagedObjectPoolNode> managedObjectPools = new HashMap<>();
+
+	/**
+	 * {@link SupplierNode} instances by their {@link Supplier} name.
+	 */
+	private final Map<String, SupplierNode> suppliers = new HashMap<>();
 
 	/**
 	 * {@link ManagedObjectNode} instances by their {@link OfficeManagedObject}
@@ -381,6 +391,14 @@ public class OfficeNodeImpl implements OfficeNode {
 	@Override
 	public OfficeFloorNode getOfficeFloorNode() {
 		return this.officeFloor;
+	}
+
+	@Override
+	public OfficeManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
+			SuppliedManagedObjectSourceNode suppliedManagedObject) {
+		return NodeUtil.getInitialisedNode(managedObjectSourceName, this.managedObjectSources, this.context,
+				() -> this.context.createManagedObjectSourceNode(managedObjectSourceName, suppliedManagedObject),
+				(managedObjectSource) -> managedObjectSource.initialise(null, null));
 	}
 
 	/**
@@ -1014,6 +1032,20 @@ public class OfficeNodeImpl implements OfficeNode {
 		return NodeUtil.getInitialisedNode(managedObjectPoolName, this.managedObjectPools, this.context,
 				() -> this.context.createManagedObjectPoolNode(managedObjectPoolName, this),
 				(pool) -> pool.initialise(managedObjectPoolSource.getClass().getName(), managedObjectPoolSource));
+	}
+
+	@Override
+	public OfficeSupplier addSupplier(String supplierName, String supplierSourceClassName) {
+		return NodeUtil.getInitialisedNode(supplierName, this.suppliers, this.context,
+				() -> this.context.createSupplierNode(supplierName, this),
+				(supplier) -> supplier.initialise(supplierSourceClassName, null));
+	}
+
+	@Override
+	public OfficeSupplier addSupplier(String supplierName, SupplierSource supplierSource) {
+		return NodeUtil.getInitialisedNode(supplierName, this.suppliers, this.context,
+				() -> this.context.createSupplierNode(supplierName, this),
+				(supplier) -> supplier.initialise(supplierSource.getClass().getName(), supplierSource));
 	}
 
 	@Override

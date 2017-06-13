@@ -80,20 +80,27 @@ public class SupplierLoaderImpl implements SupplierLoader {
 			return null; // failed to instantiate
 		}
 
+		// Load and return specification
+		return this.loadSpecification(supplierSource);
+	}
+
+	@Override
+	public PropertyList loadSpecification(SupplierSource supplierSource) {
+
 		// Obtain the specification
 		SupplierSourceSpecification specification;
 		try {
 			specification = supplierSource.getSpecification();
 		} catch (Throwable ex) {
 			this.addIssue("Failed to obtain " + SupplierSourceSpecification.class.getSimpleName() + " from "
-					+ supplierSourceClass.getName(), ex);
+					+ supplierSource.getClass().getName(), ex);
 			return null; // failed to obtain
 		}
 
 		// Ensure have specification
 		if (specification == null) {
 			this.addIssue("No " + SupplierSourceSpecification.class.getSimpleName() + " returned from "
-					+ supplierSourceClass.getName());
+					+ supplierSource.getClass().getName());
 			return null; // no specification obtained
 		}
 
@@ -103,7 +110,8 @@ public class SupplierLoaderImpl implements SupplierLoader {
 			supplierProperties = specification.getProperties();
 		} catch (Throwable ex) {
 			this.addIssue("Failed to obtain " + SupplierSourceProperty.class.getSimpleName() + " instances from "
-					+ SupplierSourceSpecification.class.getSimpleName() + " for " + supplierSourceClass.getName(), ex);
+					+ SupplierSourceSpecification.class.getSimpleName() + " for " + supplierSource.getClass().getName(),
+					ex);
 			return null; // failed to obtain properties
 		}
 
@@ -117,7 +125,7 @@ public class SupplierLoaderImpl implements SupplierLoader {
 				if (supplierProperty == null) {
 					this.addIssue(SupplierSourceProperty.class.getSimpleName() + " " + i + " is null from "
 							+ SupplierSourceSpecification.class.getSimpleName() + " for "
-							+ supplierSourceClass.getName());
+							+ supplierSource.getClass().getName());
 					return null; // must have complete property details
 				}
 
@@ -128,13 +136,13 @@ public class SupplierLoaderImpl implements SupplierLoader {
 				} catch (Throwable ex) {
 					this.addIssue("Failed to get name for " + SupplierSourceProperty.class.getSimpleName() + " " + i
 							+ " from " + SupplierSourceSpecification.class.getSimpleName() + " for "
-							+ supplierSourceClass.getName(), ex);
+							+ supplierSource.getClass().getName(), ex);
 					return null; // must have complete property details
 				}
 				if (CompileUtil.isBlank(name)) {
 					this.addIssue(SupplierSourceProperty.class.getSimpleName() + " " + i + " provided blank name from "
 							+ SupplierSourceSpecification.class.getSimpleName() + " for "
-							+ supplierSourceClass.getName());
+							+ supplierSource.getClass().getName());
 					return null; // must have complete property details
 				}
 
@@ -145,7 +153,7 @@ public class SupplierLoaderImpl implements SupplierLoader {
 				} catch (Throwable ex) {
 					this.addIssue("Failed to get label for " + SupplierSourceProperty.class.getSimpleName() + " " + i
 							+ " (" + name + ") from " + SupplierSourceSpecification.class.getSimpleName() + " for "
-							+ supplierSourceClass.getName(), ex);
+							+ supplierSource.getClass().getName(), ex);
 					return null; // must have complete property details
 				}
 
@@ -169,6 +177,13 @@ public class SupplierLoaderImpl implements SupplierLoader {
 			return null; // failed to instantiate
 		}
 
+		// Load and return the type
+		return this.loadSupplierType(supplierSource, propertyList);
+	}
+
+	@Override
+	public SupplierType loadSupplierType(SupplierSource supplierSource, PropertyList propertyList) {
+
 		// Create the supplier source context
 		SupplierSourceContextImpl sourceContext = new SupplierSourceContextImpl(true, propertyList, this.nodeContext);
 
@@ -178,22 +193,22 @@ public class SupplierLoaderImpl implements SupplierLoader {
 
 		} catch (UnknownPropertyError ex) {
 			this.addIssue("Missing property '" + ex.getUnknownPropertyName() + "' for "
-					+ SupplierSource.class.getSimpleName() + " " + supplierSourceClass.getName());
+					+ SupplierSource.class.getSimpleName() + " " + supplierSource.getClass().getName());
 			return null; // must have property
 
 		} catch (UnknownClassError ex) {
 			this.addIssue("Can not load class '" + ex.getUnknownClassName() + "' for "
-					+ SupplierSource.class.getSimpleName() + " " + supplierSourceClass.getName());
+					+ SupplierSource.class.getSimpleName() + " " + supplierSource.getClass().getName());
 			return null; // must have class
 
 		} catch (UnknownResourceError ex) {
 			this.addIssue("Can not obtain resource at location '" + ex.getUnknownResourceLocation() + "' for "
-					+ SupplierSource.class.getSimpleName() + " " + supplierSourceClass.getName());
+					+ SupplierSource.class.getSimpleName() + " " + supplierSource.getClass().getName());
 			return null; // must have resource
 
 		} catch (Throwable ex) {
 			this.addIssue("Failed to source " + SupplierType.class.getSimpleName() + " definition from "
-					+ SupplierSource.class.getSimpleName() + " " + supplierSourceClass.getName(), ex);
+					+ SupplierSource.class.getSimpleName() + " " + supplierSource.getClass().getName(), ex);
 			return null; // must be successful
 		}
 

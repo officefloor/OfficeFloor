@@ -20,12 +20,16 @@ package net.officefloor.compile.impl.structure;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
+import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
@@ -45,9 +49,9 @@ public class SupplierNodeImpl implements SupplierNode {
 	private final String supplierName;
 
 	/**
-	 * {@link SupplierSource} {@link Class} name.
+	 * {@link OfficeNode}.
 	 */
-	private final String supplierSourceClassName;
+	private final OfficeNode officeNode;
 
 	/**
 	 * {@link OfficeFloorNode}.
@@ -78,24 +82,54 @@ public class SupplierNodeImpl implements SupplierNode {
 	 * Initialised state.
 	 */
 	private static class InitialisedState {
+
+		/**
+		 * {@link SupplierSource} {@link Class} name.
+		 */
+		private final String supplierSourceClassName;
+
+		/**
+		 * Optional instantiated {@link SupplierSource}. May be
+		 * <code>null</code>.
+		 */
+		private final SupplierSource supplierSource;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param supplierSourceClassName
+		 *            {@link SupplierSource} {@link Class} name.
+		 * @param supplierSource
+		 *            Optional instantiated {@link SupplierSource}. May be
+		 *            <code>null</code>.
+		 */
+		public InitialisedState(String supplierSourceClassName, SupplierSource supplierSource) {
+			this.supplierSourceClassName = supplierSourceClassName;
+			this.supplierSource = supplierSource;
+		}
 	}
+
+	/**
+	 * Used {@link SupplierSource}.
+	 */
+	private SupplierSource usedSupplierSource = null;
 
 	/**
 	 * Instantiate.
 	 * 
 	 * @param supplierName
 	 *            Name of the {@link OfficeFloorSupplier}.
-	 * @param supplierSourceClassName
-	 *            {@link SupplierSource} {@link Class} name.
+	 * @param officeNode
+	 *            {@link OfficeNode}.
 	 * @param officeFloorNode
 	 *            {@link OfficeFloorNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public SupplierNodeImpl(String supplierName, String supplierSourceClassName, OfficeFloorNode officeFloorNode,
+	public SupplierNodeImpl(String supplierName, OfficeNode officeNode, OfficeFloorNode officeFloorNode,
 			NodeContext context) {
 		this.supplierName = supplierName;
-		this.supplierSourceClassName = supplierSourceClassName;
+		this.officeNode = officeNode;
 		this.officeFloorNode = officeFloorNode;
 		this.context = context;
 
@@ -124,7 +158,7 @@ public class SupplierNodeImpl implements SupplierNode {
 
 	@Override
 	public Node getParentNode() {
-		return this.officeFloorNode;
+		return (this.officeNode != null ? this.officeNode : this.officeFloorNode);
 	}
 
 	@Override
@@ -138,8 +172,9 @@ public class SupplierNodeImpl implements SupplierNode {
 	}
 
 	@Override
-	public void initialise() {
-		this.state = NodeUtil.initialise(this, this.context, this.state, () -> new InitialisedState());
+	public void initialise(String supplierSourceClassName, SupplierSource supplierSource) {
+		this.state = NodeUtil.initialise(this, this.context, this.state,
+				() -> new InitialisedState(supplierSourceClassName, supplierSource));
 	}
 
 	/*
@@ -157,12 +192,13 @@ public class SupplierNodeImpl implements SupplierNode {
 	}
 
 	@Override
-	public OfficeFloorManagedObjectSource addManagedObjectSource(String managedObjectSourceName, String type) {
-		return this.addManagedObjectSource(managedObjectSourceName, type, null);
+	public OfficeFloorManagedObjectSource addOfficeFloorManagedObjectSource(String managedObjectSourceName,
+			String type) {
+		return this.addOfficeFloorManagedObjectSource(managedObjectSourceName, type, null);
 	}
 
 	@Override
-	public OfficeFloorManagedObjectSource addManagedObjectSource(String managedObjectSourceName, String type,
+	public OfficeFloorManagedObjectSource addOfficeFloorManagedObjectSource(String managedObjectSourceName, String type,
 			String qualifier) {
 
 		// Create the supplied managed object node
@@ -177,6 +213,35 @@ public class SupplierNodeImpl implements SupplierNode {
 	}
 
 	/*
+	 * ================== OfficeSupplier ========================
+	 */
+
+	@Override
+	public String getOfficeSupplierName() {
+		return this.supplierName;
+	}
+
+	@Override
+	public OfficeManagedObjectSource addOfficeManagedObjectSource(String managedObjectSourceName, String type) {
+		return this.addOfficeManagedObjectSource(managedObjectSourceName, type, null);
+	}
+
+	@Override
+	public OfficeManagedObjectSource addOfficeManagedObjectSource(String managedObjectSourceName, String type,
+			String qualifier) {
+
+		// Create the supplied managed object node
+		SuppliedManagedObjectSourceNode suppliedManagedObjectNode = this.context
+				.createSuppliedManagedObjectNode(qualifier, type, this);
+
+		// Register the supplied managed object
+		this.suppliedManagedObjects.add(suppliedManagedObjectNode);
+
+		// Add and return the managed object source
+		return this.officeNode.addManagedObjectSource(managedObjectSourceName, suppliedManagedObjectNode);
+	}
+
+	/*
 	 * =================== SupplierNode =========================
 	 */
 
@@ -188,16 +253,36 @@ public class SupplierNodeImpl implements SupplierNode {
 	@Override
 	public SupplierType loadSupplierType() {
 
-		// Obtain the supplier source class
-		Class<? extends SupplierSource> supplierSourceClass = this.context
-				.getSupplierSourceClass(this.supplierSourceClassName, this);
-		if (supplierSourceClass == null) {
-			return null; // must obtain class
+		// Obtain the supplier source
+		SupplierSource supplierSource = this.state.supplierSource;
+		if (supplierSource == null) {
+
+			// Obtain the supplier source class
+			Class<? extends SupplierSource> supplierSourceClass = this.context
+					.getSupplierSourceClass(this.state.supplierSourceClassName, this);
+			if (supplierSourceClass == null) {
+				return null; // must obtain class
+			}
+
+			// Load the supplier source
+			supplierSource = CompileUtil.newInstance(supplierSourceClass, SupplierSource.class, this,
+					this.context.getCompilerIssues());
+			if (supplierSource == null) {
+				return null; // must obtain supplier source
+			}
 		}
+
+		// Keep track of the used supplier source
+		this.usedSupplierSource = supplierSource;
 
 		// Load and return the type
 		SupplierLoader loader = this.context.getSupplierLoader(this);
-		return loader.loadSupplierType(supplierSourceClass, this.propertyList);
+		return loader.loadSupplierType(supplierSource, this.propertyList);
+	}
+
+	@Override
+	public void registerAsPossibleMBean(CompileContext compileContext) {
+		compileContext.registerPossibleMBean(SupplierSource.class, this.supplierName, this.usedSupplierSource);
 	}
 
 }

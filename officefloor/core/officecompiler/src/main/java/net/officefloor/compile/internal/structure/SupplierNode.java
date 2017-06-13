@@ -17,7 +17,9 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
+import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.supplier.SupplierType;
 
 /**
@@ -25,7 +27,7 @@ import net.officefloor.compile.supplier.SupplierType;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SupplierNode extends Node, OfficeFloorSupplier {
+public interface SupplierNode extends Node, OfficeFloorSupplier, OfficeSupplier {
 
 	/**
 	 * {@link Node} type.
@@ -34,8 +36,14 @@ public interface SupplierNode extends Node, OfficeFloorSupplier {
 
 	/**
 	 * Initialises the {@link SupplierNode}.
+	 * 
+	 * @param supplierSourceClassName
+	 *            {@link Class} name of the {@link SupplierSource}.
+	 * @param supplierSource
+	 *            Optional instantiated {@link SupplierSource}. May be
+	 *            <code>null</code>.
 	 */
-	void initialise();
+	void initialise(String supplierSourceClassName, SupplierSource supplierSource);
 
 	/**
 	 * Obtains the parent {@link OfficeFloorNode}.
@@ -43,6 +51,14 @@ public interface SupplierNode extends Node, OfficeFloorSupplier {
 	 * @return Parent {@link OfficeFloorNode}.
 	 */
 	OfficeFloorNode getOfficeFloorNode();
+
+	/**
+	 * Registers as a possible MBean.
+	 * 
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 */
+	void registerAsPossibleMBean(CompileContext compileContext);
 
 	/**
 	 * Loads the {@link SupplierType}.
