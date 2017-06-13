@@ -448,10 +448,11 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 * Ensure can create {@link ManagedObjectSourceNode} from
 	 * {@link SupplierNode}.
 	 */
-	public void testCreateManagedObjectSourceNode_fromSupplier() {
+	public void testCreateManagedObjectSourceNode_fromSupplier_withinOfficeFloor() {
 		SuppliedManagedObjectSourceNode suppliedManagedObject = this.createMock(SuppliedManagedObjectSourceNode.class);
 		SupplierNode supplier = this.createMock(SupplierNode.class);
 		this.recordReturn(suppliedManagedObject, suppliedManagedObject.getSupplierNode(), supplier);
+		this.recordReturn(supplier, supplier.getOfficeNode(), null);
 		this.recordReturn(supplier, supplier.getOfficeFloorNode(), this.officeFloor);
 		ManagedObjectSourceNode node = this.doTest(() -> {
 			ManagedObjectSourceNode mos = this.context.createManagedObjectSourceNode("MOS", suppliedManagedObject);
@@ -464,6 +465,36 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertSame("Incorrect containing OfficeFloor", this.officeFloor, node.getOfficeFloorNode());
 		assertNull("Should not have office name, as not contained in office", node.getOfficeManagedObjectSourceName());
 		assertNull("Should not have parent office, as not contained in office", node.getOfficeNode());
+		assertNull("Should not have office section name, as not contained in section",
+				node.getOfficeSectionManagedObjectSourceName());
+		assertNull("Should not have section name, as not contained in section",
+				node.getSectionManagedObjectSourceName());
+		assertNull("Should not have parent section, as not contained in section", node.getSectionNode());
+		assertInitialise(node, (n) -> n.initialise("ExampleManagedObjectSource", null));
+	}
+
+	/**
+	 * Ensure can create {@link ManagedObjectSourceNode} from
+	 * {@link SupplierNode}.
+	 */
+	public void testCreateManagedObjectSourceNode_fromSupplier_withinOffice() {
+		SuppliedManagedObjectSourceNode suppliedManagedObject = this.createMock(SuppliedManagedObjectSourceNode.class);
+		SupplierNode supplier = this.createMock(SupplierNode.class);
+		this.recordReturn(suppliedManagedObject, suppliedManagedObject.getSupplierNode(), supplier);
+		this.recordReturn(supplier, supplier.getOfficeNode(), this.office);
+		this.recordReturn(supplier, supplier.getOfficeFloorNode(), this.officeFloor);
+		this.recordReturn(this.office, this.office.getQualifiedName("MOS"), "OFFICE.MOS");
+		ManagedObjectSourceNode node = this.doTest(() -> {
+			ManagedObjectSourceNode mos = this.context.createManagedObjectSourceNode("MOS", suppliedManagedObject);
+			assertEquals("Incorrect managed object source name", "OFFICE.MOS", mos.getManagedObjectSourceName());
+			return mos;
+		});
+		assertNode(node, "MOS", "Managed Object Source", null, suppliedManagedObject);
+		assertEquals("Incorrect OfficeFloor managed object source name", "MOS",
+				node.getOfficeFloorManagedObjectSourceName());
+		assertSame("Incorrect containing OfficeFloor", this.officeFloor, node.getOfficeFloorNode());
+		assertEquals("Incorrect Office managed object source name", "MOS", node.getOfficeManagedObjectSourceName());
+		assertEquals("Incorrect containing Office", this.office, node.getOfficeNode());
 		assertNull("Should not have office section name, as not contained in section",
 				node.getOfficeSectionManagedObjectSourceName());
 		assertNull("Should not have section name, as not contained in section",

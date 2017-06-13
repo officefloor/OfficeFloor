@@ -8,6 +8,28 @@
 		<attribute method="getIsAutoWireTeams" attribute="auto-wire-teams" />
 	</attributes>
 
+	<!-- SUPPLIERS -->
+	<collection method="getOfficeSuppliers" element="suppliers">
+		<item type="net.officefloor.model.office.OfficeSupplierModel"
+			element="supplier">
+			<attributes>
+				<attribute method="getOfficeSupplierName" attribute="name" />
+				<attribute method="getSupplierSourceClassName" attribute="source" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+			<collection method="getProperties" element="properties">
+				<item type="net.officefloor.model.office.PropertyModel"
+					element="property">
+					<attributes>
+						<attribute method="getName" attribute="name" />
+						<attribute method="getValue" attribute="value" />
+					</attributes>
+				</item>
+			</collection>
+		</item>
+	</collection>
+
 	<!-- EXTERNAL MANAGED OBJECTS -->
 	<collection method="getExternalManagedObjects" element="external-managed-objects">
 		<item type="net.officefloor.model.office.ExternalManagedObjectModel"
@@ -68,6 +90,13 @@
 				<attributes>
 					<attribute method="getOfficeManagedObjectPoolName"
 						attribute="name" />
+				</attributes>
+			</object>
+			<object method="getOfficeSupplier" element="supplier">
+				<attributes>
+					<attribute method="getOfficeSupplierName" attribute="name" />
+					<attribute method="getType" attribute="type" />
+					<attribute method="getQualifier" attribute="qualifier" />
 				</attributes>
 			</object>
 			<collection method="getOfficeInputManagedObjectDependencies">

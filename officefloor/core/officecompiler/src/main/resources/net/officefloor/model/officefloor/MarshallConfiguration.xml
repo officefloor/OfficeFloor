@@ -64,8 +64,8 @@
 			<object method="getOfficeFloorSupplier" element="supplier">
 				<attributes>
 					<attribute method="getOfficeFloorSupplierName" attribute="name" />
-					<attribute method="getAutoWireType" attribute="type" />
-					<attribute method="getAutoWireQualifier" attribute="qualifier" />
+					<attribute method="getType" attribute="type" />
+					<attribute method="getQualifier" attribute="qualifier" />
 				</attributes>
 			</object>
 			<object method="getManagingOffice" element="managing-office">

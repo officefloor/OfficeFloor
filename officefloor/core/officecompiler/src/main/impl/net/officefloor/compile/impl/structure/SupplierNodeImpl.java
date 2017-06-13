@@ -246,6 +246,11 @@ public class SupplierNodeImpl implements SupplierNode {
 	 */
 
 	@Override
+	public OfficeNode getOfficeNode() {
+		return this.officeNode;
+	}
+
+	@Override
 	public OfficeFloorNode getOfficeFloorNode() {
 		return this.officeFloorNode;
 	}

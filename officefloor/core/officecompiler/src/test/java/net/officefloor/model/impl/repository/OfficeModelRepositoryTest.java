@@ -55,6 +55,7 @@ import net.officefloor.model.office.OfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeManagedObjectPoolModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeSupplierModel;
 import net.officefloor.model.office.OfficeManagedObjectToAdministrationModel;
 import net.officefloor.model.office.OfficeManagedObjectToGovernanceModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
@@ -79,7 +80,6 @@ import net.officefloor.model.office.OfficeSupplierModel;
 import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.office.PropertyModel;
 import net.officefloor.model.office.TypeQualificationModel;
-import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
@@ -150,17 +150,19 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 				office.getOfficeManagedObjectSources(),
 				new OfficeManagedObjectSourceModel("MANAGED_OBJECT_SOURCE", "net.example.ExampleManagedObjectSource",
 						"net.orm.Session", "10", null, null, null, null, null, null, null, 200, 201),
-				new OfficeManagedObjectSourceModel("SUPPLIED_MANAGED_OBJECT_SOURCE", null, "net.orm.Session", "10",
+				new OfficeManagedObjectSourceModel("SUPPLIED_MANAGED_OBJECT_SOURCE", null, "net.orm.Session", null,
 						null, null, null, null, null, null, null, 210, 211));
 		List<OfficeManagedObjectSourceModel> moSources = office.getOfficeManagedObjectSources();
-		assertOfficeManagedObjectSource(moSources.get(0));
+		OfficeManagedObjectSourceModel mos = moSources.get(0);
+		assertOfficeManagedObjectSource(mos);
+		assertProperties(new OfficeManagedObjectSourceToOfficeManagedObjectPoolModel("MANAGED_OBJECT_POOL"),
+				mos.getOfficeManagedObjectPool(), "getOfficeManagedObjectPoolName");
 
 		// Validate the supplied managed object source
 		OfficeManagedObjectSourceModel suppliedMoSource = moSources.get(1);
 		assertOfficeManagedObjectSource(suppliedMoSource);
 		assertProperties(
-				new OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel("SUPPLIER", "QUALIFIER",
-						"net.orm.SpecificSession"),
+				new OfficeManagedObjectSourceToOfficeSupplierModel("SUPPLIER", "QUALIFIER", "net.orm.SpecificSession"),
 				suppliedMoSource.getOfficeSupplier(), "getOfficeSupplierName", "getQualifier", "getType");
 
 		// ----------------------------------------
@@ -364,8 +366,6 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 	private static void assertOfficeManagedObjectSource(OfficeManagedObjectSourceModel mos) {
 		assertList(new String[] { "getName", "getValue" }, mos.getProperties(),
 				new PropertyModel("MO_ONE", "VALUE_ONE"), new PropertyModel("MO_TWO", "VALUE_TWO"));
-		assertProperties(new OfficeManagedObjectSourceToOfficeManagedObjectPoolModel("MANAGED_OBJECT_POOL"),
-				mos.getOfficeManagedObjectPool(), "getOfficeManagedObjectPoolName");
 		assertList(new String[] { "getOfficeInputManagedObjectDependencyName", "getDependencyType" },
 				mos.getOfficeInputManagedObjectDependencies(),
 				new OfficeInputManagedObjectDependencyModel("INPUT_DEPENDENCY_ONE", Connection.class.getName()),

@@ -133,8 +133,8 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 		assertProperties(
 				new OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel("SUPPLIER", "QUALIFIER",
 						"net.orm.SpecificSession"),
-				suppliedMoSource.getOfficeFloorSupplier(), "getOfficeFloorSupplierName", "getAutoWireQualifier",
-				"getAutoWireType");
+				suppliedMoSource.getOfficeFloorSupplier(), "getOfficeFloorSupplierName", "getQualifier",
+				"getType");
 
 		// ----------------------------------------
 		// Validate the OfficeFloor input managed objects

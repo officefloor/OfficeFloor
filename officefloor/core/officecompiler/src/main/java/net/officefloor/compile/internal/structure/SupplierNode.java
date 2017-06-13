@@ -21,6 +21,7 @@ import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.supplier.SupplierType;
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * Supplier {@link Node}.
@@ -44,6 +45,14 @@ public interface SupplierNode extends Node, OfficeFloorSupplier, OfficeSupplier 
 	 *            <code>null</code>.
 	 */
 	void initialise(String supplierSourceClassName, SupplierSource supplierSource);
+
+	/**
+	 * Obtains the parent {@link OfficeNode}.
+	 * 
+	 * @return Parent {@link OfficeNode} or <code>null</code> if configured at
+	 *         the {@link OfficeFloor} level.
+	 */
+	OfficeNode getOfficeNode();
 
 	/**
 	 * Obtains the parent {@link OfficeFloorNode}.

@@ -51,6 +51,7 @@ import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeStart;
 import net.officefloor.compile.spi.office.OfficeSubSection;
+import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
@@ -93,6 +94,7 @@ import net.officefloor.model.office.OfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeManagedObjectPoolModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeSupplierModel;
 import net.officefloor.model.office.OfficeManagedObjectToAdministrationModel;
 import net.officefloor.model.office.OfficeManagedObjectToGovernanceModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
@@ -112,6 +114,7 @@ import net.officefloor.model.office.OfficeStartModel;
 import net.officefloor.model.office.OfficeStartToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSubSectionModel;
 import net.officefloor.model.office.OfficeSubSectionToGovernanceModel;
+import net.officefloor.model.office.OfficeSupplierModel;
 import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.office.PropertyModel;
 import net.officefloor.model.office.TypeQualificationModel;
@@ -231,6 +234,21 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 			officeObjects.put(officeObjectName, officeObject);
 		}
 
+		// Add the Office suppliers, keeping registry of them
+		Map<String, OfficeSupplier> officeSuppliers = new HashMap<>();
+		for (OfficeSupplierModel supplierModel : office.getOfficeSuppliers()) {
+
+			// Add the Office supplier
+			String supplierName = supplierModel.getOfficeSupplierName();
+			OfficeSupplier supplier = architect.addSupplier(supplierName, supplierModel.getSupplierSourceClassName());
+			for (PropertyModel property : supplierModel.getProperties()) {
+				supplier.addProperty(property.getName(), property.getValue());
+			}
+
+			// Register the supplier
+			officeSuppliers.put(supplierName, supplier);
+		}
+
 		// Add the managed object pools, keeping registry of them
 		Map<String, OfficeManagedObjectPool> officeManagedObjectPools = new HashMap<>();
 		for (OfficeManagedObjectPoolModel poolModel : office.getOfficeManagedObjectPools()) {
@@ -252,10 +270,34 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 		Map<String, OfficeManagedObjectSource> managedObjectSources = new HashMap<String, OfficeManagedObjectSource>();
 		for (OfficeManagedObjectSourceModel mosModel : office.getOfficeManagedObjectSources()) {
 
-			// Add the managed object source
+			// Obtain the managed object source name
 			String mosName = mosModel.getOfficeManagedObjectSourceName();
-			OfficeManagedObjectSource mos = architect.addOfficeManagedObjectSource(mosName,
-					mosModel.getManagedObjectSourceClassName());
+
+			// Determine if supplied managed object source
+			OfficeManagedObjectSource mos;
+			OfficeManagedObjectSourceToOfficeSupplierModel mosToSupplier = mosModel.getOfficeSupplier();
+			if (mosToSupplier != null) {
+				// Supplied managed object source, so obtain its supplier
+				String supplierName = mosToSupplier.getOfficeSupplierName();
+				OfficeSupplier supplier = officeSuppliers.get(supplierName);
+				if (supplier == null) {
+					// Must have supplier
+					architect.addIssue("No supplier '" + supplierName + "' for managed object source " + mosName);
+					continue; // must have supplier to add managed object source
+				}
+
+				// Supply the managed object source
+				String qualifier = mosToSupplier.getQualifier();
+				qualifier = (CompileUtil.isBlank(qualifier) ? null : qualifier);
+				String type = mosToSupplier.getType();
+				mos = supplier.addOfficeManagedObjectSource(mosName, type, qualifier);
+
+			} else {
+				// Source the managed object source
+				mos = architect.addOfficeManagedObjectSource(mosName, mosModel.getManagedObjectSourceClassName());
+			}
+
+			// Add properties for the managed object source
 			for (PropertyModel property : mosModel.getProperties()) {
 				mos.addProperty(property.getName(), property.getValue());
 			}

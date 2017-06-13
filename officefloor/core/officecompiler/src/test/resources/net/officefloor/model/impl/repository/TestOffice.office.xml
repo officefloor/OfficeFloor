@@ -51,15 +51,19 @@
 				<property name="MO_ONE" value="VALUE_ONE" />
 				<property name="MO_TWO" value="VALUE_TWO" />
 			</properties>
-			<input-dependency name="INPUT_DEPENDENCY"
+			<input-dependency name="INPUT_DEPENDENCY_ONE"
 				object-type="java.sql.Connection">
 				<managed-object name="MANAGED_OBJECT_TWO" />
 			</input-dependency>
+			<input-dependency name="INPUT_DEPENDENCY_TWO"
+				object-type="java.sql.Connection">
+				<external-managed-object name="EXTERNAL_MANAGED_OBJECT" />
+			</input-dependency>
 			<flow name="FLOW" argument-type="java.lang.Integer">
-				<office-input office="OFFICE" section="SECTION" input="INPUT" />
+				<section-input section="SECTION" input="INPUT_A" />
 			</flow>
 			<team name="MO_TEAM">
-				<office-floor-team name="TEAM" />
+				<office-team name="TEAM" />
 			</team>
 		</managed-object-source>
 	</managed-object-sources>

@@ -41,8 +41,8 @@
 		<object method="setOfficeFloorSupplier" node="supplier"
 			class="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel">
 			<value method="setOfficeFloorSupplierName" node="supplier@name" />
-			<value method="setAutoWireType" node="supplier@type" />
-			<value method="setAutoWireQualifier" node="supplier@qualifier" />
+			<value method="setType" node="supplier@type" />
+			<value method="setQualifier" node="supplier@qualifier" />
 		</object>
 		<object method="setManagingOffice" node="managing-office"
 			class="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel">

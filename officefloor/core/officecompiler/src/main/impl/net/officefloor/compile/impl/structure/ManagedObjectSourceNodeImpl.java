@@ -371,8 +371,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	@Override
 	public Node getParentNode() {
 		return (this.containingSectionNode != null ? this.containingSectionNode
-				: (this.containingOfficeNode != null ? this.containingOfficeNode
-						: (this.suppliedManagedObjectNode != null ? this.suppliedManagedObjectNode
+				: (this.suppliedManagedObjectNode != null ? this.suppliedManagedObjectNode
+						: (this.containingOfficeNode != null ? this.containingOfficeNode
 								: this.containingOfficeFloorNode)));
 	}
 

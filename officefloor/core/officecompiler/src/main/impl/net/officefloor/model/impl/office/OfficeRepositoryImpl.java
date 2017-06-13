@@ -58,6 +58,7 @@ import net.officefloor.model.office.OfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeManagedObjectPoolModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeSupplierModel;
 import net.officefloor.model.office.OfficeManagedObjectToAdministrationModel;
 import net.officefloor.model.office.OfficeManagedObjectToGovernanceModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
@@ -78,6 +79,7 @@ import net.officefloor.model.office.OfficeStartModel;
 import net.officefloor.model.office.OfficeStartToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSubSectionModel;
 import net.officefloor.model.office.OfficeSubSectionToGovernanceModel;
+import net.officefloor.model.office.OfficeSupplierModel;
 import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
@@ -130,6 +132,12 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 		Map<String, OfficeManagedObjectPoolModel> managedObjectPools = new HashMap<>();
 		for (OfficeManagedObjectPoolModel managedObjectPool : office.getOfficeManagedObjectPools()) {
 			managedObjectPools.put(managedObjectPool.getOfficeManagedObjectPoolName(), managedObjectPool);
+		}
+
+		// Create the set of office suppliers
+		Map<String, OfficeSupplierModel> suppliers = new HashMap<>();
+		for (OfficeSupplierModel supplier : office.getOfficeSuppliers()) {
+			suppliers.put(supplier.getOfficeSupplierName(), supplier);
 		}
 
 		// Create the set of external managed objects
@@ -190,6 +198,19 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 				if (managedObjectPool != null) {
 					conn.setOfficeManagedObjectSource(managedObjectSource);
 					conn.setOfficeManagedObjectPool(managedObjectPool);
+					conn.connect();
+				}
+			}
+		}
+
+		// Connect the managed object sources to their corresponding suppliers
+		for (OfficeManagedObjectSourceModel managedObjectSource : office.getOfficeManagedObjectSources()) {
+			OfficeManagedObjectSourceToOfficeSupplierModel conn = managedObjectSource.getOfficeSupplier();
+			if (conn != null) {
+				OfficeSupplierModel supplier = suppliers.get(conn.getOfficeSupplierName());
+				if (supplier != null) {
+					conn.setOfficeManagedObjectSource(managedObjectSource);
+					conn.setOfficeSupplier(supplier);
 					conn.connect();
 				}
 			}
@@ -621,6 +642,13 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 		for (OfficeManagedObjectPoolModel pool : office.getOfficeManagedObjectPools()) {
 			for (OfficeManagedObjectSourceToOfficeManagedObjectPoolModel conn : pool.getOfficeManagedObjectSources()) {
 				conn.setOfficeManagedObjectPoolName(pool.getOfficeManagedObjectPoolName());
+			}
+		}
+
+		// Specify managed object sources to their corresponding suppliers
+		for (OfficeSupplierModel supplier : office.getOfficeSuppliers()) {
+			for (OfficeManagedObjectSourceToOfficeSupplierModel conn : supplier.getOfficeManagedObjectSources()) {
+				conn.setOfficeSupplierName(supplier.getOfficeSupplierName());
 			}
 		}
 

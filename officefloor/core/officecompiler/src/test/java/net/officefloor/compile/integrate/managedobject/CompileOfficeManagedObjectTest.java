@@ -109,11 +109,12 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 		// Record building the OfficeFloor
 		this.record_init();
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
-		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");
-		this.recordReturn(office, office.addProcessManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT"), null);
+		office.registerManagedObjectSource("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT_SOURCE");
+		this.recordReturn(office, office.addProcessManagedObject("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT"),
+				null);
 
 		// Record instance (as supplied)
-		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", mos, 0, "MO_NAME", "MO_VALUE");
+		this.record_officeFloorBuilder_addManagedObject("OFFICE.MANAGED_OBJECT_SOURCE", mos, 0, "MO_NAME", "MO_VALUE");
 
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 

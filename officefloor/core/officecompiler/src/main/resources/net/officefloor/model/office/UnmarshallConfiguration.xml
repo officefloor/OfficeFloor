@@ -5,6 +5,20 @@
 	<value method="setIsAutoWireObjects" node="office@auto-wire-objects" />
 	<value method="setIsAutoWireTeams" node="office@auto-wire-teams" />
 
+	<!-- SUPPLIERS -->
+	<object method="addOfficeSupplier" node="supplier"
+		class="net.officefloor.model.office.OfficeSupplierModel">
+		<value method="setOfficeSupplierName" node="supplier@name" />
+		<value method="setSupplierSourceClassName" node="supplier@source" />
+		<value method="setX" node="supplier@x" />
+		<value method="setY" node="supplier@y" />
+		<object method="addProperty" node="property"
+			class="net.officefloor.model.office.PropertyModel">
+			<value method="setName" node="property@name" />
+			<value method="setValue" node="property@value" />
+		</object>
+	</object>
+
 	<!-- EXTERNAL MANAGED OBJECTS -->
 	<object method="addExternalManagedObject" node="external-managed-object"
 		class="net.officefloor.model.office.ExternalManagedObjectModel">
@@ -40,6 +54,12 @@
 		<object method="setOfficeManagedObjectPool" node="managed-object-pool"
 			class="net.officefloor.model.office.OfficeManagedObjectSourceToOfficeManagedObjectPoolModel">
 			<value method="setOfficeManagedObjectPoolName" node="managed-object-pool@name" />
+		</object>
+		<object method="setOfficeSupplier" node="supplier"
+			class="net.officefloor.model.office.OfficeManagedObjectSourceToOfficeSupplierModel">
+			<value method="setOfficeSupplierName" node="supplier@name" />
+			<value method="setType" node="supplier@type" />
+			<value method="setQualifier" node="supplier@qualifier" />
 		</object>
 		<object method="addOfficeInputManagedObjectDependency" node="input-dependency"
 			class="net.officefloor.model.office.OfficeInputManagedObjectDependencyModel">
