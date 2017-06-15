@@ -508,21 +508,6 @@
 					</object>
 				</item>
 			</collection>
-			<collection method="getOfficeSectionResponsibilities">
-				<item
-					type="net.officefloor.model.office.OfficeSectionResponsibilityModel"
-					element="responsibility">
-					<attributes>
-						<attribute method="getOfficeSectionResponsibilityName"
-							attribute="name" />
-					</attributes>
-					<object method="getOfficeTeam" element="team">
-						<attributes>
-							<attribute method="getOfficeTeamName" attribute="name" />
-						</attributes>
-					</object>
-				</item>
-			</collection>
 			<object method="getOfficeSubSection" element="sub-section">
 				<collection method="getGovernances">
 					<item
@@ -568,6 +553,11 @@
 						<attributes>
 							<attribute method="getOfficeFunctionName" attribute="name" />
 						</attributes>
+						<object method="getOfficeTeam" element="team">
+							<attributes>
+								<attribute method="getOfficeTeamName" attribute="name" />
+							</attributes>
+						</object>
 						<collection method="getPreAdministrations">
 							<item
 								type="net.officefloor.model.office.OfficeFunctionToPreAdministrationModel"

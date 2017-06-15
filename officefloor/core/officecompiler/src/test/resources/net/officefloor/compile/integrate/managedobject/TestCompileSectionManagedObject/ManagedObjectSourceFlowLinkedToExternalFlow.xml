@@ -1,34 +1,18 @@
 <context>
 	<office-floor>
-		<teams>
-			<team name="TEAM" source="ONE_PERSON" />
-		</teams>
 		<offices>
-			<office name="OFFICE" source="OFFICE" location="office">
-				<team name="OFFICE_TEAM">
-					<office-floor-team name="TEAM" />
-				</team>
-			</office>
+			<office name="OFFICE" source="OFFICE" location="office" />
 		</offices>
 	</office-floor>
 	<office>
-		<teams>
-			<team name="OFFICE_TEAM" />
-		</teams>
 		<sections>
 			<section name="SECTION_ONE" source="SECTION" location="sectionOne">
 				<output name="EXTERNAL_FLOW">
 					<section-input section="SECTION_TWO" input="INPUT" />
 				</output>
-				<responsibility name="RESPONSIBILITY">
-					<team name="OFFICE_TEAM" />
-				</responsibility>
 			</section>
 			<section name="SECTION_TWO" source="SECTION" location="sectionTwo">
 				<input name="INPUT" />
-				<responsibility name="RESPONSIBILITY">
-					<team name="OFFICE_TEAM" />
-				</responsibility>
 			</section>
 		</sections>
 	</office>

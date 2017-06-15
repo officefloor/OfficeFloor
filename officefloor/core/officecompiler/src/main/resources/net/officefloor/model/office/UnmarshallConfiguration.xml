@@ -311,14 +311,6 @@
 				<value method="setOfficeManagedObjectName" node="managed-object@name" />
 			</object>
 		</object>
-		<object method="addOfficeSectionResponsibility" node="responsibility"
-			class="net.officefloor.model.office.OfficeSectionResponsibilityModel">
-			<value method="setOfficeSectionResponsibilityName" node="responsibility@name" />
-			<object method="setOfficeTeam" node="team"
-				class="net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel">
-				<value method="setOfficeTeamName" node="team@name" />
-			</object>
-		</object>
 		<object method="setOfficeSubSection" node="sub-section"
 			class="net.officefloor.model.office.OfficeSubSectionModel" id="SUB_SECTION">
 			<value method="setOfficeSubSectionName" node="sub-section@name" />
@@ -341,6 +333,10 @@
 			<object method="addOfficeFunction" node="function"
 				class="net.officefloor.model.office.OfficeFunctionModel">
 				<value method="setOfficeFunctionName" node="function@name" />
+				<object method="setOfficeTeam" node="team"
+					class="net.officefloor.model.office.OfficeFunctionToOfficeTeamModel">
+					<value method="setOfficeTeamName" node="team@name" />
+				</object>
 				<object method="addPreAdministration" node="pre-administer"
 					class="net.officefloor.model.office.OfficeFunctionToPreAdministrationModel">
 					<value method="setAdministrationName" node="pre-administer@administration" />

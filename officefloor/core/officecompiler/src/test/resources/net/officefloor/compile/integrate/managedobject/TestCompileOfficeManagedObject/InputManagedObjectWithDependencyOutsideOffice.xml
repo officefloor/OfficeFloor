@@ -14,17 +14,11 @@
 				<managed-object-source name="SIMPLE_SOURCE" />
 			</managed-object>
 		</managed-objects>
-		<teams>
-			<team name="TEAM" source="ONE_PERSON" />
-		</teams>
 		<offices>
 			<office name="OFFICE" source="OFFICE" location="office">
 				<object name="EXTERNAL_MANAGED_OBJECT">
 					<managed-object name="SIMPLE" />
 				</object>
-				<team name="OFFICE_TEAM">
-					<office-floor-team name="TEAM" />
-				</team>
 			</office>
 		</offices>
 	</office-floor>
@@ -47,15 +41,9 @@
 				</flow>
 			</managed-object-source>
 		</managed-object-sources>
-		<teams>
-			<team name="OFFICE_TEAM" />
-		</teams>
 		<sections>
 			<section name="SECTION" source="SECTION" location="section">
 				<input name="INPUT" />
-				<responsibility name="RESPONSIBILITY">
-					<team name="OFFICE_TEAM" />
-				</responsibility>
 			</section>
 		</sections>
 	</office>

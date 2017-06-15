@@ -31,15 +31,9 @@
 				<bound-managed-object-source name="MANAGED_OBJECT_SOURCE_A" />
 			</input-managed-object>
 		</input-managed-objects>
-		<teams>
-			<team name="TEAM" source="ONE_PERSON" />
-		</teams>
 		<offices>
 			<office name="OFFICE" source="OFFICE" location="office">
 				<input section="SECTION" input="INPUT" />
-				<team name="OFFICE_TEAM">
-					<office-floor-team name="TEAM" />
-				</team>
 				<object name="EXTERNAL_MANAGED_OBJECT">
 					<input-managed-object name="INPUT_MO" />
 				</object>
@@ -47,9 +41,6 @@
 		</offices>
 	</office-floor>
 	<office>
-		<teams>
-			<team name="OFFICE_TEAM" />
-		</teams>
 		<external-managed-objects>
 			<external-managed-object name="EXTERNAL_MANAGED_OBJECT"
 				object-type="${testcase}$SimpleManagedObject" object-scope="PROCESS">
@@ -61,15 +52,11 @@
 				<properties>
 					<property name="class.name" value="${testcase}$SimpleGovernance" />
 				</properties>
-				<team name="OFFICE_TEAM" />
 			</governance>
 		</governances>
 		<sections>
 			<section name="SECTION" source="SECTION" location="section">
 				<input name="INPUT" />
-				<responsibility name="RESPONSIBILITY">
-					<team name="OFFICE_TEAM" />
-				</responsibility>
 			</section>
 		</sections>
 	</office>

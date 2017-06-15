@@ -58,6 +58,7 @@ import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeFunctionModel;
+import net.officefloor.model.office.OfficeFunctionToOfficeTeamModel;
 import net.officefloor.model.office.OfficeFunctionToPostAdministrationModel;
 import net.officefloor.model.office.OfficeFunctionToPreAdministrationModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyModel;
@@ -79,8 +80,6 @@ import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectMo
 import net.officefloor.model.office.OfficeSectionObjectToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
-import net.officefloor.model.office.OfficeSectionResponsibilityModel;
-import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
 import net.officefloor.model.office.OfficeStartModel;
 import net.officefloor.model.office.OfficeStartToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSubSectionModel;
@@ -442,9 +441,6 @@ public class OfficeChangesImpl implements OfficeChanges {
 			section.addOfficeSectionObject(
 					new OfficeSectionObjectModel(objectType.getOfficeSectionObjectName(), objectType.getObjectType()));
 		}
-
-		// Add a responsibility for convenience
-		section.addOfficeSectionResponsibility(new OfficeSectionResponsibilityModel("Responsibility"));
 
 		// Return the change to add the section
 		return new AbstractChange<OfficeSectionModel>(section, "Add section") {
@@ -1517,91 +1513,6 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<OfficeSectionResponsibilityModel> addOfficeSectionResponsibility(final OfficeSectionModel section,
-			String officeSectionResponsibilityName) {
-
-		// TODO test this method (addOfficeSectionResponsibility)
-
-		// Create the office section responsibility
-		final OfficeSectionResponsibilityModel responsibility = new OfficeSectionResponsibilityModel(
-				officeSectionResponsibilityName);
-
-		// Return change to add office section responsibility
-		return new AbstractChange<OfficeSectionResponsibilityModel>(responsibility, "Add responsibility") {
-			@Override
-			public void apply() {
-				section.addOfficeSectionResponsibility(responsibility);
-			}
-
-			@Override
-			public void revert() {
-				section.removeOfficeSectionResponsibility(responsibility);
-			}
-		};
-	}
-
-	@Override
-	public Change<OfficeSectionResponsibilityModel> removeOfficeSectionResponsibility(
-			final OfficeSectionResponsibilityModel officeSectionResponsibility) {
-
-		// Find the office section containing the responsibility
-		OfficeSectionModel officeSection = null;
-		for (OfficeSectionModel section : this.office.getOfficeSections()) {
-			for (OfficeSectionResponsibilityModel check : section.getOfficeSectionResponsibilities()) {
-				if (check == officeSectionResponsibility) {
-					officeSection = section;
-				}
-			}
-		}
-		if (officeSection == null) {
-			// Must find section containing responsibility
-			return new NoChange<OfficeSectionResponsibilityModel>(officeSectionResponsibility, "Remove responsibility",
-					"Responsibility not in office");
-		}
-
-		// Return change to remove the responsibility
-		final OfficeSectionModel section = officeSection;
-		return new AbstractChange<OfficeSectionResponsibilityModel>(officeSectionResponsibility,
-				"Remove responsibility") {
-			@Override
-			public void apply() {
-				section.removeOfficeSectionResponsibility(officeSectionResponsibility);
-			}
-
-			@Override
-			public void revert() {
-				section.addOfficeSectionResponsibility(officeSectionResponsibility);
-			}
-		};
-	}
-
-	@Override
-	public Change<OfficeSectionResponsibilityModel> renameOfficeSectionResponsibility(
-			final OfficeSectionResponsibilityModel officeSectionResponsibility,
-			final String newOfficeSectionResponsibilityName) {
-
-		// TODO test this method (renameOfficeSectionResponsibility)
-
-		// Obtain the old name
-		final String oldOfficeSectionResponsibilityName = officeSectionResponsibility
-				.getOfficeSectionResponsibilityName();
-
-		// Return change to rename responsibility
-		return new AbstractChange<OfficeSectionResponsibilityModel>(officeSectionResponsibility,
-				"Rename responsibility to " + newOfficeSectionResponsibilityName) {
-			@Override
-			public void apply() {
-				officeSectionResponsibility.setOfficeSectionResponsibilityName(newOfficeSectionResponsibilityName);
-			}
-
-			@Override
-			public void revert() {
-				officeSectionResponsibility.setOfficeSectionResponsibilityName(oldOfficeSectionResponsibilityName);
-			}
-		};
-	}
-
-	@Override
 	public Change<OfficeSectionObjectToExternalManagedObjectModel> linkOfficeSectionObjectToExternalManagedObject(
 			OfficeSectionObjectModel officeSectionObject, ExternalManagedObjectModel externalManagedObject) {
 
@@ -1879,18 +1790,18 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<OfficeSectionResponsibilityToOfficeTeamModel> linkOfficeSectionResponsibilityToOfficeTeam(
-			OfficeSectionResponsibilityModel officeSectionResponsibility, OfficeTeamModel officeTeam) {
+	public Change<OfficeFunctionToOfficeTeamModel> linkOfficeFunctionToOfficeTeam(OfficeFunctionModel officeFunction,
+			OfficeTeamModel officeTeam) {
 
-		// TODO test this method (linkOfficeSectionResponsibilityToOfficeTeam)
+		// TODO test this method (linkOfficeFunctionToOfficeTeam)
 
 		// Create the connection
-		final OfficeSectionResponsibilityToOfficeTeamModel conn = new OfficeSectionResponsibilityToOfficeTeamModel();
-		conn.setOfficeSectionResponsibility(officeSectionResponsibility);
+		final OfficeFunctionToOfficeTeamModel conn = new OfficeFunctionToOfficeTeamModel();
+		conn.setOfficeFunction(officeFunction);
 		conn.setOfficeTeam(officeTeam);
 
 		// Return change to add the connection
-		return new AbstractChange<OfficeSectionResponsibilityToOfficeTeamModel>(conn, "Connect") {
+		return new AbstractChange<OfficeFunctionToOfficeTeamModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -1904,22 +1815,21 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<OfficeSectionResponsibilityToOfficeTeamModel> removeOfficeSectionResponsibilityToOfficeTeam(
-			final OfficeSectionResponsibilityToOfficeTeamModel officeSectionResponsibilityToOfficeTeam) {
+	public Change<OfficeFunctionToOfficeTeamModel> removeOfficeFunctionToOfficeTeam(
+			final OfficeFunctionToOfficeTeamModel officeFunctionToOfficeTeam) {
 
 		// TODO test this method (removeOfficeSectionResponsibilityToOfficeTeam)
 
 		// Return change to remove connection
-		return new AbstractChange<OfficeSectionResponsibilityToOfficeTeamModel>(officeSectionResponsibilityToOfficeTeam,
-				"Remove") {
+		return new AbstractChange<OfficeFunctionToOfficeTeamModel>(officeFunctionToOfficeTeam, "Remove") {
 			@Override
 			public void apply() {
-				officeSectionResponsibilityToOfficeTeam.remove();
+				officeFunctionToOfficeTeam.remove();
 			}
 
 			@Override
 			public void revert() {
-				officeSectionResponsibilityToOfficeTeam.connect();
+				officeFunctionToOfficeTeam.connect();
 			}
 		};
 	}

@@ -2,8 +2,7 @@
 <model>
 	<field type="String" name="office team name" />
 	<list type="TypeQualificationModel" name="type qualification" />
-	<list type="OfficeSectionResponsibilityToOfficeTeamModel" name="office section responsibility"
-		plural="office section responsibilities" />
+	<list type="OfficeFunctionToOfficeTeamModel" name="office function" />
 	<list type="OfficeManagedObjectSourceTeamToOfficeTeamModel" name="office managed object source team" />
 	<list type="AdministrationToOfficeTeamModel" name="administration" />
 	<list type="GovernanceToOfficeTeamModel" name="governance" />

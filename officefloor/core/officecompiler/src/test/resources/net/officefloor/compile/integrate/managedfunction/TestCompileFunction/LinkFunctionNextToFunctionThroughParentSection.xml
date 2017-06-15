@@ -1,37 +1,21 @@
 <context item-labels="true">
 	<office-floor>
 		<office-floor>
-			<teams>
-				<team name="TEAM" source="ONE_PERSON" />
-			</teams>
 			<offices>
-				<office name="OFFICE" source="OFFICE" location="office">
-					<team name="OFFICE_TEAM">
-						<office-floor-team name="TEAM" />
-					</team>
-				</office>
+				<office name="OFFICE" source="OFFICE" location="office" />
 			</offices>
 		</office-floor>
 	</office-floor>
 	<office>
 		<office>
-			<teams>
-				<team name="OFFICE_TEAM" />
-			</teams>
 			<sections>
 				<section name="SECTION_A" source="SECTION" location="parent-section">
 					<output name="SECTION_OUTPUT">
 						<section-input section="SECTION_B" input="INPUT" />
 					</output>
-					<responsibility name="RESPONSIBILITY">
-						<team name="OFFICE_TEAM" />
-					</responsibility>
 				</section>
 				<section name="SECTION_B" source="SECTION" location="section-two">
 					<input name="INPUT" />
-					<responsibility name="RESPONSIBILITY">
-						<team name="OFFICE_TEAM" />
-					</responsibility>
 				</section>
 			</sections>
 		</office>

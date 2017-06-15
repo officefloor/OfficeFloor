@@ -1,34 +1,19 @@
 <context>
 	<office-floor>
-		<teams>
-			<team name="TEAM" source="ONE_PERSON" />
-		</teams>
 		<offices>
-			<office name="OFFICE" source="OFFICE" location="office">
-				<team name="OFFICE_TEAM">
-					<office-floor-team name="TEAM" />
-				</team>
-			</office>
+			<office name="OFFICE" source="OFFICE" location="office" />
 		</offices>
 	</office-floor>
 	<office>
-		<teams>
-			<team name="OFFICE_TEAM" source="ONE_PERSON" />
-		</teams>
 		<administrations>
 			<administration name="ADMIN" source="CLASS">
 				<properties>
 					<property name="class.name" value="${testcase}$SimpleAdmin" />
 				</properties>
-				<team name="OFFICE_TEAM" />
-				<duty name="duty" />
 			</administration>
 		</administrations>
 		<sections>
 			<section name="SECTION" source="SECTION" location="section">
-				<responsibility name="RESPONSIBILITY">
-					<team name="OFFICE_TEAM" />
-				</responsibility>
 				<sub-section>
 					<function name="FUNCTION">
 						<post-administer administration="ADMIN" />

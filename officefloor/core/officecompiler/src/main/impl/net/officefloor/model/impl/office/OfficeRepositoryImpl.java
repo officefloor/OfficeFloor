@@ -23,6 +23,7 @@ import java.util.Map;
 import net.officefloor.compile.impl.util.DoubleKeyMap;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.model.office.AdministrationEscalationModel;
 import net.officefloor.model.office.AdministrationEscalationToOfficeSectionInputModel;
 import net.officefloor.model.office.AdministrationFlowModel;
@@ -42,6 +43,7 @@ import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeFunctionModel;
 import net.officefloor.model.office.OfficeFunctionToGovernanceModel;
+import net.officefloor.model.office.OfficeFunctionToOfficeTeamModel;
 import net.officefloor.model.office.OfficeFunctionToPostAdministrationModel;
 import net.officefloor.model.office.OfficeFunctionToPreAdministrationModel;
 import net.officefloor.model.office.OfficeInputManagedObjectDependencyModel;
@@ -73,8 +75,6 @@ import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectMo
 import net.officefloor.model.office.OfficeSectionObjectToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
-import net.officefloor.model.office.OfficeSectionResponsibilityModel;
-import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
 import net.officefloor.model.office.OfficeStartModel;
 import net.officefloor.model.office.OfficeStartToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSubSectionModel;
@@ -382,21 +382,6 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			}
 		}
 
-		// Connect the section responsibilities to the teams
-		for (OfficeSectionModel section : office.getOfficeSections()) {
-			for (OfficeSectionResponsibilityModel responsibility : section.getOfficeSectionResponsibilities()) {
-				OfficeSectionResponsibilityToOfficeTeamModel conn = responsibility.getOfficeTeam();
-				if (conn != null) {
-					OfficeTeamModel team = teams.get(conn.getOfficeTeamName());
-					if (team != null) {
-						conn.setOfficeSectionResponsibility(responsibility);
-						conn.setOfficeTeam(team);
-						conn.connect();
-					}
-				}
-			}
-		}
-
 		// Connect administration flow to section input
 		for (AdministrationModel admin : office.getAdministrations()) {
 			for (AdministrationFlowModel adminFlow : admin.getAdministrationFlows()) {
@@ -537,7 +522,7 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 
 		// Connect the sub sections
 		for (OfficeSectionModel section : office.getOfficeSections()) {
-			this.connectSubSections(section.getOfficeSubSection(), administrations, governances);
+			this.connectSubSections(section.getOfficeSubSection(), teams, administrations, governances);
 		}
 
 		// Return the office
@@ -549,6 +534,8 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 	 * 
 	 * @param subSection
 	 *            {@link OfficeSubSectionModel}.
+	 * @param teams
+	 *            Map of {@link OfficeTeamModel} instances by {@link Team} name.
 	 * @param administrations
 	 *            Map of {@link AdministrationModel} instances by
 	 *            {@link Administration} name.
@@ -556,8 +543,8 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 	 *            Map of {@link GovernanceModel} instances by {@link Governance}
 	 *            name.
 	 */
-	private void connectSubSections(OfficeSubSectionModel subSection, Map<String, AdministrationModel> administrations,
-			Map<String, GovernanceModel> governances) {
+	private void connectSubSections(OfficeSubSectionModel subSection, Map<String, OfficeTeamModel> teams,
+			Map<String, AdministrationModel> administrations, Map<String, GovernanceModel> governances) {
 
 		// Ensure have the sub section
 		if (subSection == null) {
@@ -571,6 +558,19 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 				conn.setOfficeSubSection(subSection);
 				conn.setGovernance(governance);
 				conn.connect();
+			}
+		}
+
+		// Connect the sub section responsibilities to the teams
+		for (OfficeFunctionModel function : subSection.getOfficeFunctions()) {
+			OfficeFunctionToOfficeTeamModel conn = function.getOfficeTeam();
+			if (conn != null) {
+				OfficeTeamModel team = teams.get(conn.getOfficeTeamName());
+				if (team != null) {
+					conn.setOfficeFunction(function);
+					conn.setOfficeTeam(team);
+					conn.connect();
+				}
 			}
 		}
 
@@ -624,7 +624,7 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 
 		// Connect task to duties for further sub sections
 		for (OfficeSubSectionModel subSubSection : subSection.getOfficeSubSections()) {
-			this.connectSubSections(subSubSection, administrations, governances);
+			this.connectSubSections(subSubSection, teams, administrations, governances);
 		}
 	}
 
@@ -718,6 +718,13 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 					conn.setOfficeSectionName(section.getOfficeSectionName());
 					conn.setOfficeSectionInputName(input.getOfficeSectionInputName());
 				}
+			}
+		}
+
+		// Specify office teams to office functions
+		for (OfficeTeamModel team : office.getOfficeTeams()) {
+			for (OfficeFunctionToOfficeTeamModel conn : team.getOfficeFunctions()) {
+				conn.setOfficeTeamName(team.getOfficeTeamName());
 			}
 		}
 
@@ -859,13 +866,6 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 		for (OfficeManagedObjectModel mo : office.getOfficeManagedObjects()) {
 			for (OfficeSectionObjectToOfficeManagedObjectModel conn : mo.getOfficeSectionObjects()) {
 				conn.setOfficeManagedObjectName(mo.getOfficeManagedObjectName());
-			}
-		}
-
-		// Specify section responsibility to team
-		for (OfficeTeamModel team : office.getOfficeTeams()) {
-			for (OfficeSectionResponsibilityToOfficeTeamModel conn : team.getOfficeSectionResponsibilities()) {
-				conn.setOfficeTeamName(team.getOfficeTeamName());
 			}
 		}
 

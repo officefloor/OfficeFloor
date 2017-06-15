@@ -181,16 +181,13 @@
 			<object name="OBJECT_TWO" object-type="net.orm.Session">
 				<managed-object name="MANAGED_OBJECT" />
 			</object>
-			<responsibility name="RESPONSIBILITY">
-				<team name="TEAM" />
-				<object name="RESPONSIBILITY_OBJECT" />
-			</responsibility>
 			<sub-section>
 				<section-managed-object name="SECTION_MANAGED_OBJECT">
 					<team name="MO_TEAM" />
 					<govern governance="GOVERNANCE" />
 				</section-managed-object>
 				<function name="FUNCTION">
+					<team name="TEAM" />
 					<pre-administer administration="ADMINISTRATION" />
 					<govern governance="GOVERNANCE" />
 				</function>
@@ -198,6 +195,7 @@
 				<sub-section name="SUB_SECTION">
 					<section-managed-object name="SUB_SECTION_MANAGED_OBJECT" />
 					<function name="SUB_SECTION_FUNCTION">
+						<team name="TEAM" />
 						<post-administer administration="ADMINISTRATION" />
 						<govern governance="GOVERNANCE" />
 					</function>

@@ -44,6 +44,7 @@ import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.managedfunction.clazz.ClassFunctionFactory;
@@ -69,6 +70,24 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
+
+		// Compile the OfficeFloor
+		this.compile(true);
+	}
+
+	/**
+	 * Tests compiling a {@link ManagedFunction} with a responsible
+	 * {@link Team}.
+	 */
+	public void testAssignFunctionTeam() {
+
+		// Record loading section type
+		this.issues.recordCaptureIssues(false);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
 		this.record_officeBuilder_addFunction("SECTION", "FUNCTION").setResponsibleTeam("OFFICE_TEAM");
@@ -87,9 +106,8 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
-		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
-		this.record_officeBuilder_addFunction("SECTION", "FUNCTION").setResponsibleTeam("OFFICE_TEAM");
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
 		this.record_functionBuilder_setDifferentiator(DifferentiatorManagedFunctionSource.DIFFERENTIATOR);
 
 		// Compile the OfficeFloor
@@ -106,9 +124,8 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
-		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
-		this.record_officeBuilder_addFunction("SECTION", "FUNCTION").setResponsibleTeam("OFFICE_TEAM");
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
 		this.issues.recordIssue("flow", FunctionFlowNodeImpl.class,
 				"Function Flow flow is not linked to a ManagedFunctionNode");
 
@@ -127,11 +144,9 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
-		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
+		this.record_officeFloorBuilder_addOffice("OFFICE");
 		ManagedFunctionBuilder<?, ?> functionOne = this.record_officeBuilder_addFunction("SECTION", "FUNCTION_A");
-		functionOne.setResponsibleTeam("OFFICE_TEAM");
-		this.record_officeBuilder_addFunction("SECTION", "FUNCTION_B").setResponsibleTeam("OFFICE_TEAM");
+		this.record_officeBuilder_addFunction("SECTION", "FUNCTION_B");
 		functionOne.linkFlow(0, "SECTION.FUNCTION_B", String.class, true);
 
 		// Compile the OfficeFloor
@@ -149,11 +164,9 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
-		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
+		this.record_officeFloorBuilder_addOffice("OFFICE");
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "FUNCTION_A");
-		function.setResponsibleTeam("OFFICE_TEAM");
-		this.record_officeBuilder_addFunction("SECTION", "FUNCTION_B").setResponsibleTeam("OFFICE_TEAM");
+		this.record_officeBuilder_addFunction("SECTION", "FUNCTION_B");
 		function.linkFlow(0, "SECTION.FUNCTION_B", String.class, false);
 
 		// Compile the OfficeFloor
@@ -171,12 +184,10 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
-		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
+		this.record_officeFloorBuilder_addOffice("OFFICE");
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION.SUB_SECTION_A",
 				"FUNCTION");
-		function.setResponsibleTeam("OFFICE_TEAM");
-		this.record_officeBuilder_addFunction("SECTION.SUB_SECTION_B", "INPUT").setResponsibleTeam("OFFICE_TEAM");
+		this.record_officeBuilder_addFunction("SECTION.SUB_SECTION_B", "INPUT");
 		function.linkFlow(0, "SECTION.SUB_SECTION_B.INPUT", String.class, true);
 
 		// Compile the OfficeFloor
@@ -195,11 +206,9 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
-		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
+		this.record_officeFloorBuilder_addOffice("OFFICE");
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION_A", "FUNCTION");
-		function.setResponsibleTeam("OFFICE_TEAM");
-		this.record_officeBuilder_addFunction("SECTION_B", "INPUT").setResponsibleTeam("OFFICE_TEAM");
+		this.record_officeBuilder_addFunction("SECTION_B", "INPUT");
 		function.linkFlow(0, "SECTION_B.INPUT", String.class, true);
 
 		// Compile the OfficeFloor
@@ -217,11 +226,9 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
-		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
+		this.record_officeFloorBuilder_addOffice("OFFICE");
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "FUNCTION_A");
-		function.setResponsibleTeam("OFFICE_TEAM");
-		this.record_officeBuilder_addFunction("SECTION", "FUNCTION_B").setResponsibleTeam("OFFICE_TEAM");
+		this.record_officeBuilder_addFunction("SECTION", "FUNCTION_B");
 		function.setNextFunction("SECTION.FUNCTION_B", Integer.class);
 
 		// Compile the OfficeFloor
@@ -240,11 +247,9 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
-		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
+		this.record_officeFloorBuilder_addOffice("OFFICE");
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION_A", "FUNCTION");
-		function.setResponsibleTeam("OFFICE_TEAM");
-		this.record_officeBuilder_addFunction("SECTION_B", "INPUT").setResponsibleTeam("OFFICE_TEAM");
+		this.record_officeBuilder_addFunction("SECTION_B", "INPUT");
 		function.setNextFunction("SECTION_B.INPUT", Integer.class);
 
 		// Compile the OfficeFloor
@@ -263,12 +268,10 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
-		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
+		this.record_officeFloorBuilder_addOffice("OFFICE");
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION_A.section-one",
 				"FUNCTION");
-		function.setResponsibleTeam("OFFICE_TEAM");
-		this.record_officeBuilder_addFunction("SECTION_B", "INPUT").setResponsibleTeam("OFFICE_TEAM");
+		this.record_officeBuilder_addFunction("SECTION_B", "INPUT");
 		function.setNextFunction("SECTION_B.INPUT", Integer.class);
 
 		// Compile the OfficeFloor
@@ -287,11 +290,9 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
-		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
+		this.record_officeFloorBuilder_addOffice("OFFICE");
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION_A", "FUNCTION");
-		function.setResponsibleTeam("OFFICE_TEAM");
-		this.record_officeBuilder_addFunction("SECTION_B.section-two", "INPUT").setResponsibleTeam("OFFICE_TEAM");
+		this.record_officeBuilder_addFunction("SECTION_B.section-two", "INPUT");
 		function.setNextFunction("SECTION_B.section-two.INPUT", Integer.class);
 
 		// Compile the OfficeFloor
@@ -327,10 +328,8 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
-		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
+		this.record_officeFloorBuilder_addOffice("OFFICE");
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
-		function.setResponsibleTeam("OFFICE_TEAM");
 		function.linkParameter(0, CompileManagedObject.class);
 
 		// Compile the OfficeFloor
@@ -348,12 +347,10 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");
 		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
-		function.setResponsibleTeam("OFFICE_TEAM");
 		function.linkManagedObject(0, "MANAGED_OBJECT", CompileManagedObject.class);
 		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", CompileManagedObject.class.getName());
@@ -374,11 +371,8 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
 		this.record_officeFloorBuilder_addOffice("OFFICE");
-		this.record_officeBuilder_registerTeam("OFFICE_TEAM", "TEAM");
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
-		function.setResponsibleTeam("OFFICE_TEAM");
 		function.linkManagedObject(0, "INPUT_MANAGED_OBJECT", InputManagedObject.class);
 		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", InputManagedObject.class.getName());
@@ -401,12 +395,10 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 		office.registerManagedObjectSource("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT_SOURCE");
 		this.record_officeBuilder_addThreadManagedObject("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT");
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
-		function.setResponsibleTeam("OFFICE_TEAM");
 		function.linkManagedObject(0, "OFFICE.MANAGED_OBJECT", CompileManagedObject.class);
 		this.record_officeFloorBuilder_addManagedObject("OFFICE.MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
 				0, "class.name", CompileManagedObject.class.getName());
@@ -427,8 +419,7 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 		office.registerManagedObjectSource("OFFICE.SECTION.MANAGED_OBJECT", "OFFICE.SECTION.MANAGED_OBJECT_SOURCE");
 		this.record_officeBuilder_addThreadManagedObject("OFFICE.SECTION.MANAGED_OBJECT",
 				"OFFICE.SECTION.MANAGED_OBJECT");
@@ -436,7 +427,6 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 				ClassManagedObjectSource.class, 0, "class.name", CompileManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION.SECTION", "FUNCTION");
-		function.setResponsibleTeam("OFFICE_TEAM");
 		function.linkManagedObject(0, "OFFICE.SECTION.MANAGED_OBJECT", CompileManagedObject.class);
 
 		// Compile the OfficeFloor
@@ -454,10 +444,8 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION.SECTION", "FUNCTION");
-		function.setResponsibleTeam("OFFICE_TEAM");
 		function.linkManagedObject(0, "OFFICE.SECTION.SECTION.MANAGED_OBJECT", CompileManagedObject.class);
 		office.registerManagedObjectSource("OFFICE.SECTION.SECTION.MANAGED_OBJECT",
 				"OFFICE.SECTION.SECTION.MANAGED_OBJECT_SOURCE");
@@ -482,12 +470,10 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");
 		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION.SECTION", "FUNCTION");
-		function.setResponsibleTeam("OFFICE_TEAM");
 		function.linkManagedObject(0, "MANAGED_OBJECT", CompileManagedObject.class);
 		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", CompileManagedObject.class.getName());
@@ -508,11 +494,9 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
-		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
+		this.record_officeFloorBuilder_addOffice("OFFICE");
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "FUNCTION_A");
-		function.setResponsibleTeam("OFFICE_TEAM");
-		this.record_officeBuilder_addFunction("SECTION", "FUNCTION_B").setResponsibleTeam("OFFICE_TEAM");
+		this.record_officeBuilder_addFunction("SECTION", "FUNCTION_B");
 		function.addEscalation(Exception.class, "SECTION.FUNCTION_B");
 
 		// Compile the OfficeFloor
@@ -531,11 +515,9 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
-		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
+		this.record_officeFloorBuilder_addOffice("OFFICE");
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION_A", "FUNCTION");
-		function.setResponsibleTeam("OFFICE_TEAM");
-		this.record_officeBuilder_addFunction("SECTION_B", "INPUT").setResponsibleTeam("OFFICE_TEAM");
+		this.record_officeBuilder_addFunction("SECTION_B", "INPUT");
 		function.addEscalation(Exception.class, "SECTION_B.INPUT");
 
 		// Compile the OfficeFloor
@@ -552,9 +534,8 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
-		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
-		this.record_officeBuilder_addFunction("SECTION", "FUNCTION").setResponsibleTeam("OFFICE_TEAM");
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
 		this.issues.recordIssue("FUNCTION", ManagedFunctionNodeImpl.class,
 				"Escalation " + Exception.class.getName() + " not handled by a Function nor propagated to the Office");
 
@@ -573,9 +554,8 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
-		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
-		this.record_officeBuilder_addFunction("SECTION", "FUNCTION").setResponsibleTeam("OFFICE_TEAM");
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -592,9 +572,8 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
-		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
-		this.record_officeBuilder_addFunction("SECTION", "INPUT").setResponsibleTeam("OFFICE_TEAM");
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeBuilder_addFunction("SECTION", "INPUT");
 		this.record_officeBuilder_addStartupFunction("SECTION.INPUT");
 
 		// Compile the OfficeFloor

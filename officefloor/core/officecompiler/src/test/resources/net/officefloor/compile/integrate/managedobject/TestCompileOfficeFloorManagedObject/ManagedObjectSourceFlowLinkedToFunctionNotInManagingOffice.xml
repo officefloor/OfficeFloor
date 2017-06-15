@@ -18,17 +18,11 @@
 			<input-managed-objects>
 				<input-managed-object name="INPUT_MO" />
 			</input-managed-objects>
-			<teams>
-				<team name="TEAM" source="ONE_PERSON" />
-			</teams>
 			<offices>
 				<office name="MANAGING_OFFICE" source="OFFICE" location="managing-office" />
 				<office name="OFFICE_WITH_FUNCTION" source="OFFICE"
 					location="office-with-function">
 					<input section="SECTION" input="INPUT" />
-					<team name="OFFICE_TEAM">
-						<office-floor-team name="TEAM" />
-					</team>
 				</office>
 			</offices>
 		</office-floor>
@@ -38,15 +32,9 @@
 	</managing-office>
 	<office-with-function>
 		<office>
-			<teams>
-				<team name="OFFICE_TEAM" />
-			</teams>
 			<sections>
 				<section name="SECTION" source="SECTION" location="section">
 					<input name="INPUT" />
-					<responsibility name="RESPONSIBILITY">
-						<team name="OFFICE_TEAM" />
-					</responsibility>
 				</section>
 			</sections>
 		</office>

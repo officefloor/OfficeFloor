@@ -19,7 +19,6 @@ package net.officefloor.model.impl.office;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -78,6 +77,7 @@ import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeFunctionModel;
 import net.officefloor.model.office.OfficeFunctionToGovernanceModel;
+import net.officefloor.model.office.OfficeFunctionToOfficeTeamModel;
 import net.officefloor.model.office.OfficeFunctionToPostAdministrationModel;
 import net.officefloor.model.office.OfficeFunctionToPreAdministrationModel;
 import net.officefloor.model.office.OfficeInputManagedObjectDependencyModel;
@@ -108,8 +108,6 @@ import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectMo
 import net.officefloor.model.office.OfficeSectionObjectToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
-import net.officefloor.model.office.OfficeSectionResponsibilityModel;
-import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
 import net.officefloor.model.office.OfficeStartModel;
 import net.officefloor.model.office.OfficeStartToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSubSectionModel;
@@ -486,45 +484,9 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 					sectionModel.getSectionSourceClassName(), sectionModel.getSectionLocation(), propertyList);
 			sectionTypes.put(sectionName, sectionType);
 
-			// Create the listing of responsibilities
-			List<Responsibility> responsibilities = new LinkedList<Responsibility>();
-			for (OfficeSectionResponsibilityModel responsibilityModel : sectionModel
-					.getOfficeSectionResponsibilities()) {
-
-				// Obtain the office team responsible
-				OfficeTeam officeTeam = null;
-				OfficeSectionResponsibilityToOfficeTeamModel conn = responsibilityModel.getOfficeTeam();
-				if (conn != null) {
-					OfficeTeamModel teamModel = conn.getOfficeTeam();
-					if (teamModel != null) {
-						String teamName = teamModel.getOfficeTeamName();
-						officeTeam = teams.get(teamName);
-					}
-				}
-				if (officeTeam == null) {
-					continue; // must have team responsible
-				}
-
-				// Add the responsibility
-				responsibilities.add(new Responsibility(officeTeam));
-			}
-
 			// Create the listing of all functions
 			List<OfficeSectionFunction> functions = new LinkedList<OfficeSectionFunction>();
 			this.loadOfficeFunctions(section, sectionType, functions);
-
-			// Assign teams their responsibilities
-			for (Responsibility responsibility : responsibilities) {
-				for (OfficeSectionFunction function : new ArrayList<OfficeSectionFunction>(functions)) {
-					if (responsibility.isResponsible(function)) {
-						// Assign the team responsible for function
-						architect.link(function.getResponsibleTeam(), responsibility.officeTeam);
-
-						// Remove task from listing as assigned its team
-						functions.remove(function);
-					}
-				}
-			}
 
 			// Obtain the governances of section
 			GovernanceModel[] governingGovernances = this.getGovernancesOverLocation(sectionModel.getX(),
@@ -733,7 +695,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 		}
 
 		// Add processor to link administration with functions
-		processors.addSubSectionProcessor(new FunctionsToAdministrationSubSectionProcessor(administrations));
+		processors.addSubSectionProcessor(new FunctionsToAdministrationSubSectionProcessor(teams, administrations));
 
 		// Create the listing of objects to be administered
 		Map<String, List<AdministeredManagedObject>> administration = new HashMap<String, List<AdministeredManagedObject>>();
@@ -1221,6 +1183,11 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 	private static class FunctionsToAdministrationSubSectionProcessor extends AbstractSubSectionProcessor {
 
 		/**
+		 * {@link OfficeTeam} by {@link OfficeTeam} name.
+		 */
+		private final Map<String, OfficeTeam> teams;
+
+		/**
 		 * {@link OfficeAdministration} by {@link OfficeAdministration} name.
 		 */
 		private final Map<String, OfficeAdministration> administrations;
@@ -1228,11 +1195,15 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 		/**
 		 * Initiate.
 		 * 
+		 * @param teams
+		 *            {@link OfficeTeam} by {@link OfficeTeam} name.
 		 * @param administrations
 		 *            {@link OfficeAdministration} by
 		 *            {@link OfficeAdministration} name.
 		 */
-		public FunctionsToAdministrationSubSectionProcessor(Map<String, OfficeAdministration> administrations) {
+		public FunctionsToAdministrationSubSectionProcessor(Map<String, OfficeTeam> teams,
+				Map<String, OfficeAdministration> administrations) {
+			this.teams = teams;
 			this.administrations = administrations;
 		}
 
@@ -1244,15 +1215,28 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 		public void processOfficeFunction(OfficeFunctionModel functionModel, OfficeSectionFunction function,
 				OfficeArchitect architect, String subSectionPath) {
 
+			// Obtain the function name
+			String functionName = function.getOfficeFunctionName();
+
+			// Link the possible team
+			OfficeFunctionToOfficeTeamModel teamConn = functionModel.getOfficeTeam();
+			if (teamConn != null) {
+				OfficeTeamModel teamModel = teamConn.getOfficeTeam();
+				if (teamModel != null) {
+					OfficeTeam team = this.teams.get(teamModel.getOfficeTeamName());
+					if (team != null) {
+						// Link the function to its responsible team
+						architect.link(function.getResponsibleTeam(), team);
+					}
+				}
+			}
+
 			// Determine if function is linked to administration
 			List<OfficeFunctionToPreAdministrationModel> preAdmin = functionModel.getPreAdministrations();
 			List<OfficeFunctionToPostAdministrationModel> postAdmin = functionModel.getPostAdministrations();
 			if ((preAdmin.size() == 0) && (postAdmin.size() == 0)) {
 				return; // no administration to link for function
 			}
-
-			// Obtain the function name
-			String functionName = function.getOfficeFunctionName();
 
 			// Link the pre administration
 			for (int i = 0; i < preAdmin.size(); i++) {
@@ -1379,41 +1363,6 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 					}
 				}
 			}
-		}
-	}
-
-	/**
-	 * Responsibility.
-	 */
-	private static class Responsibility {
-
-		/**
-		 * {@link OfficeTeam} responsible for this responsibility.
-		 */
-		public final OfficeTeam officeTeam;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param officeTeam
-		 *            {@link OfficeTeam} responsible for this responsibility.
-		 */
-		public Responsibility(OfficeTeam officeTeam) {
-			this.officeTeam = officeTeam;
-		}
-
-		/**
-		 * Indicates if {@link OfficeSectionFunction} is within this
-		 * responsibility.
-		 * 
-		 * @param task
-		 *            {@link OfficeSectionFunction}.
-		 * @return <code>true</code> if {@link OfficeSectionFunction} is within
-		 *         this responsibility.
-		 */
-		public boolean isResponsible(OfficeSectionFunction task) {
-			// TODO handle managed object matching for responsibility
-			return true; // TODO for now always responsible
 		}
 	}
 

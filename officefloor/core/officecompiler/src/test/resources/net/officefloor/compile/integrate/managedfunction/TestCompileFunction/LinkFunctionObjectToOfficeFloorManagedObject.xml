@@ -14,17 +14,11 @@
 				<managed-object-source name="MANAGED_OBJECT_SOURCE" />
 			</managed-object>
 		</managed-objects>
-		<teams>
-			<team name="TEAM" source="ONE_PERSON" />
-		</teams>
 		<offices>
 			<office name="OFFICE" source="OFFICE" location="office">
 				<object name="OFFICE_OBJECT">
 					<managed-object name="MANAGED_OBJECT" />
 				</object>
-				<team name="OFFICE_TEAM">
-					<office-floor-team name="TEAM" />
-				</team>
 			</office>
 		</offices>
 	</office-floor>
@@ -33,17 +27,11 @@
 			<external-managed-object name="OFFICE_OBJECT"
 				object-type="${testcase}$CompileManagedObject" />
 		</external-managed-objects>
-		<teams>
-			<team name="OFFICE_TEAM" />
-		</teams>
 		<sections>
 			<section name="SECTION" source="SECTION" location="section">
 				<object name="OBJECT">
 					<external-managed-object name="OFFICE_OBJECT" />
 				</object>
-				<responsibility name="RESPONSIBILITY">
-					<team name="OFFICE_TEAM" />
-				</responsibility>
 			</section>
 		</sections>
 	</office>

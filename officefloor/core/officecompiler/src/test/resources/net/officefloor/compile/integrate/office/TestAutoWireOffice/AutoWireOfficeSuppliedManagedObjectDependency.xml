@@ -1,0 +1,43 @@
+<context>
+	<office-floor>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office>
+		<suppliers>
+			<supplier name="SUPPLIER" source="${testcase}$CompileSupplierSource" />
+		</suppliers>
+		<managed-object-sources>
+			<managed-object-source name="SIMPLE_SOURCE"
+				source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$CompileManagedObject" />
+				</properties>
+			</managed-object-source>
+			<!-- Supply the managed object source -->
+			<!-- <managed-object-source name="${testcase}$DependencyManagedObject"> 
+				<supplier name="SUPPLIER" type="${testcase}$DependencyManagedObject" /> </managed-object-source> -->
+		</managed-object-sources>
+		<managed-objects>
+			<managed-object name="SIMPLE_OBJECT" scope="THREAD">
+				<managed-object-source name="SIMPLE_SOURCE" />
+			</managed-object>
+			<!-- Supply the managed object and auto-wire dependency -->
+			<!-- <managed-object name="${testcase}$DependencyManagedObject" scope="THREAD"> 
+				<managed-object-source name="${testcase}$DependencyManagedObject" /> <dependency 
+				name="dependency" object-type="${testcase}$CompileManagedObject"> <managed-object 
+				name="SIMPLE_OBJECT" /> </dependency> </managed-object> -->
+		</managed-objects>
+		<sections>
+			<section name="SECTION" source="CLASS"
+				location="${testcase}$DependencySectionClass">
+				<input name="function" />
+				<object name="${testcase}$DependencyManagedObject"
+					object-type="${testcase}$DependencyManagedObject">
+					<managed-object name="${testcase}$DependencyManagedObject" />
+				</object>
+			</section>
+		</sections>
+	</office>
+</context>

@@ -1,22 +1,33 @@
 <context>
 	<office-floor>
+		<teams>
+			<team name="TEAM" source="ONE_PERSON" />
+		</teams>
 		<offices>
-			<office name="OFFICE" source="OFFICE" location="office" />
+			<office name="OFFICE" source="OFFICE" location="office">
+				<team name="OFFICE_TEAM">
+					<office-floor-team name="TEAM" />
+				</team>
+			</office>
 		</offices>
 	</office-floor>
 	<office>
-		<governances>
-			<governance name="GOVERNANCE" source="CLASS">
+		<teams>
+			<team name="OFFICE_TEAM" source="ONE_PERSON" />
+		</teams>
+		<administrations>
+			<administration name="ADMIN" source="CLASS">
 				<properties>
-					<property name="class.name" value="${testcase}$SimpleGovernance" />
+					<property name="class.name" value="${testcase}$SimpleAdmin" />
 				</properties>
-			</governance>
-		</governances>
+				<team name="OFFICE_TEAM" />
+			</administration>
+		</administrations>
 		<sections>
 			<section name="SECTION" source="SECTION" location="section">
 				<sub-section>
 					<function name="FUNCTION">
-						<govern governance="GOVERNANCE" />
+						<post-administer administration="ADMIN" />
 					</function>
 				</sub-section>
 			</section>
@@ -28,12 +39,12 @@
 				<properties>
 					<property name="class.name" value="${testcase}$SimpleClass" />
 				</properties>
-				<managed-function name="simpleFunction" />
+				<managed-function name="function" />
 			</function-namespace>
 		</function-namespaces>
 		<functions>
 			<function name="FUNCTION" function-namespace="NAMESPACE"
-				managed-function="simpleFunction" />
+				managed-function="function" public="false" />
 		</functions>
 	</section>
 </context>

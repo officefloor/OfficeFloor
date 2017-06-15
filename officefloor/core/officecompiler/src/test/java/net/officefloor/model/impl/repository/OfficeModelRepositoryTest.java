@@ -39,6 +39,7 @@ import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeFunctionModel;
 import net.officefloor.model.office.OfficeFunctionToGovernanceModel;
+import net.officefloor.model.office.OfficeFunctionToOfficeTeamModel;
 import net.officefloor.model.office.OfficeFunctionToPostAdministrationModel;
 import net.officefloor.model.office.OfficeFunctionToPreAdministrationModel;
 import net.officefloor.model.office.OfficeInputManagedObjectDependencyModel;
@@ -70,8 +71,6 @@ import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectMo
 import net.officefloor.model.office.OfficeSectionObjectToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
-import net.officefloor.model.office.OfficeSectionResponsibilityModel;
-import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
 import net.officefloor.model.office.OfficeStartModel;
 import net.officefloor.model.office.OfficeStartToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSubSectionModel;
@@ -280,9 +279,9 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 						"getY" },
 				office.getOfficeSections(),
 				new OfficeSectionModel("SECTION", "net.example.ExampleSectionSource", "SECTION_LOCATION", null, null,
-						null, null, null, null, 1000, 1001),
+						null, null, null, 1000, 1001),
 				new OfficeSectionModel("SECTION_TARGET", "net.example.ExampleSectionSource", "SECTION_LOCATION", null,
-						null, null, null, null, null, 1010, 1011));
+						null, null, null, null, 1010, 1011));
 		OfficeSectionModel section = office.getOfficeSections().get(0);
 		assertList(new String[] { "getName", "getValue" }, section.getProperties(),
 				new PropertyModel("PROP_ONE", "VALUE_ONE"), new PropertyModel("PROP_TWO", "VALUE_TWO"));
@@ -312,13 +311,6 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 		assertProperties(new OfficeSectionObjectToOfficeManagedObjectModel("MANAGED_OBJECT"),
 				objectTwo.getOfficeManagedObject(), "getOfficeManagedObjectName");
 
-		// Responsibilities of section
-		assertList(new String[] { "getOfficeSectionResponsibilityName" }, section.getOfficeSectionResponsibilities(),
-				new OfficeSectionResponsibilityModel("RESPONSIBILITY"));
-		OfficeSectionResponsibilityModel responsibility = section.getOfficeSectionResponsibilities().get(0);
-		assertProperties(new OfficeSectionResponsibilityToOfficeTeamModel("TEAM"), responsibility.getOfficeTeam(),
-				"getOfficeTeamName");
-
 		// Sub section details for the top level office section
 		assertNotNull("Must have sub section of office section", section.getOfficeSubSection());
 		OfficeSubSectionModel officeSection = section.getOfficeSubSection();
@@ -335,6 +327,8 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 		assertList(new String[] { "getOfficeFunctionName" }, officeSection.getOfficeFunctions(),
 				new OfficeFunctionModel("FUNCTION"));
 		OfficeFunctionModel officeSectionFunction = officeSection.getOfficeFunctions().get(0);
+		assertProperties(new OfficeFunctionToOfficeTeamModel("TEAM"), officeSectionFunction.getOfficeTeam(),
+				"getOfficeTeamName");
 		assertList(new String[] { "getAdministrationName" }, officeSectionFunction.getPreAdministrations(),
 				new OfficeFunctionToPreAdministrationModel("ADMINISTRATION"));
 		assertList(new String[] { "getGovernanceName" }, officeSectionFunction.getGovernances(),
@@ -349,6 +343,8 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 		assertList(new String[] { "getOfficeFunctionName" }, subSection.getOfficeFunctions(),
 				new OfficeFunctionModel("SUB_SECTION_FUNCTION"));
 		OfficeFunctionModel subSectionFunction = subSection.getOfficeFunctions().get(0);
+		assertProperties(new OfficeFunctionToOfficeTeamModel("TEAM"), subSectionFunction.getOfficeTeam(),
+				"getOfficeTeamName");
 		assertList(new String[] { "getAdministrationName" }, subSectionFunction.getPostAdministrations(),
 				new OfficeFunctionToPostAdministrationModel("ADMINISTRATION"));
 		assertList(new String[] { "getGovernanceName" }, subSectionFunction.getGovernances(),

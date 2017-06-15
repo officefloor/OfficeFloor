@@ -43,6 +43,7 @@ import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeFunctionModel;
 import net.officefloor.model.office.OfficeFunctionToGovernanceModel;
+import net.officefloor.model.office.OfficeFunctionToOfficeTeamModel;
 import net.officefloor.model.office.OfficeFunctionToPostAdministrationModel;
 import net.officefloor.model.office.OfficeFunctionToPreAdministrationModel;
 import net.officefloor.model.office.OfficeInputManagedObjectDependencyModel;
@@ -74,8 +75,6 @@ import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectMo
 import net.officefloor.model.office.OfficeSectionObjectToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
-import net.officefloor.model.office.OfficeSectionResponsibilityModel;
-import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
 import net.officefloor.model.office.OfficeStartModel;
 import net.officefloor.model.office.OfficeStartToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSubSectionModel;
@@ -148,8 +147,6 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		office.addOfficeSection(section);
 		OfficeSectionObjectModel object = new OfficeSectionObjectModel("OBJECT", Connection.class.getName());
 		section.addOfficeSectionObject(object);
-		OfficeSectionResponsibilityModel responsibility = new OfficeSectionResponsibilityModel("RESPONSIBILITY");
-		section.addOfficeSectionResponsibility(responsibility);
 		AdministrationModel admin = new AdministrationModel("ADMINISTRATION",
 				"net.example.ExampleAdministrationSource");
 		office.addAdministration(admin);
@@ -243,11 +240,6 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				"SECTION_TARGET", "INPUT");
 		output.setOfficeSectionInput(outputToInput);
 
-		// section responsibility -> team
-		OfficeSectionResponsibilityToOfficeTeamModel respToTeam = new OfficeSectionResponsibilityToOfficeTeamModel(
-				"TEAM");
-		responsibility.setOfficeTeam(respToTeam);
-
 		// office function
 		OfficeSubSectionModel subSection = new OfficeSubSectionModel();
 		section.setOfficeSubSection(subSection);
@@ -255,6 +247,10 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		subSection.addOfficeSubSection(subSubSection);
 		OfficeFunctionModel officeFunction = new OfficeFunctionModel("FUNCTION");
 		subSubSection.addOfficeFunction(officeFunction);
+
+		// section function -> team
+		OfficeFunctionToOfficeTeamModel functionToTeam = new OfficeFunctionToOfficeTeamModel("TEAM");
+		officeFunction.setOfficeTeam(functionToTeam);
 
 		// office function -> pre administration
 		OfficeFunctionToPreAdministrationModel functionToPreAdmin = new OfficeFunctionToPreAdministrationModel(
@@ -405,10 +401,6 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("section object <- office managed object", object, objectToMo.getOfficeSectionObject());
 		assertEquals("section object -> office managed object", mo, objectToMo.getOfficeManagedObject());
 
-		// Ensure the responsibility team connected
-		assertEquals("section responsibility <- team", responsibility, respToTeam.getOfficeSectionResponsibility());
-		assertEquals("section responsibility -> team", team, respToTeam.getOfficeTeam());
-
 		// Ensure administration flow connected
 		assertEquals("administration flow -> section input", adminFlow, adminFlowToInput.getAdministrationFlow());
 		assertEquals("administration flow <- section input", targetInput, adminFlowToInput.getOfficeSectionInput());
@@ -418,6 +410,10 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				adminEscalationToInput.getAdministrationEscalation());
 		assertEquals("administration escalation <- section input", targetInput,
 				adminEscalationToInput.getOfficeSectionInput());
+
+		// Ensure the function connect to team
+		assertEquals("section function <- team", officeFunction, functionToTeam.getOfficeFunction());
+		assertEquals("section function -> team", team, functionToTeam.getOfficeTeam());
 
 		// Ensure the office function pre administration connected
 		assertEquals("function <- pre admin", officeFunction, functionToPreAdmin.getOfficeFunction());
@@ -515,8 +511,6 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		office.addOfficeSection(section);
 		OfficeSectionObjectModel object = new OfficeSectionObjectModel("OBJECT", Connection.class.getName());
 		section.addOfficeSectionObject(object);
-		OfficeSectionResponsibilityModel responsibility = new OfficeSectionResponsibilityModel("RESPONSIBILITY");
-		section.addOfficeSectionResponsibility(responsibility);
 		AdministrationModel admin = new AdministrationModel("ADMINISTRATION",
 				"net.example.ExampleAdministrationSource");
 		office.addAdministration(admin);
@@ -613,6 +607,12 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		subSection.addOfficeSubSection(subSubSection);
 		OfficeFunctionModel officeFunction = new OfficeFunctionModel("FUNCTION");
 		subSubSection.addOfficeFunction(officeFunction);
+
+		// office function -> team
+		OfficeFunctionToOfficeTeamModel functionToTeam = new OfficeFunctionToOfficeTeamModel();
+		functionToTeam.setOfficeFunction(officeFunction);
+		functionToTeam.setOfficeTeam(team);
+		functionToTeam.connect();
 
 		// office function -> pre administration
 		OfficeFunctionToPreAdministrationModel functionToPreAdmin = new OfficeFunctionToPreAdministrationModel();
@@ -728,12 +728,6 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		objectToMo.setOfficeManagedObject(mo);
 		objectToMo.connect();
 
-		// section responsibility -> team
-		OfficeSectionResponsibilityToOfficeTeamModel respToTeam = new OfficeSectionResponsibilityToOfficeTeamModel();
-		respToTeam.setOfficeSectionResponsibility(responsibility);
-		respToTeam.setOfficeTeam(team);
-		respToTeam.connect();
-
 		// Record storing the office
 		this.modelRepository.store(office, this.configurationItem);
 
@@ -763,6 +757,7 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("start - input (input name)", "INPUT", startToInput.getOfficeSectionInputName());
 		assertEquals("escalation - input (section name)", "SECTION_TARGET", escalationToInput.getOfficeSectionName());
 		assertEquals("escalation - input (input name", "INPUT", escalationToInput.getOfficeSectionInputName());
+		assertEquals("function - team", "TEAM", functionToTeam.getOfficeTeamName());
 		assertEquals("function - pre admin (administration name)", "ADMINISTRATION",
 				functionToPreAdmin.getAdministrationName());
 		assertEquals("function - post duty (administration name)", "ADMINISTRATION",
@@ -795,7 +790,6 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				objectToExtMo.getExternalManagedObjectName());
 		assertEquals("section object - office managed object", "MANAGED_OBJECT",
 				objectToMo.getOfficeManagedObjectName());
-		assertEquals("section responsibility - team", "TEAM", respToTeam.getOfficeTeamName());
 		assertEquals("section administration - team", "TEAM", adminToTeam.getOfficeTeamName());
 	}
 

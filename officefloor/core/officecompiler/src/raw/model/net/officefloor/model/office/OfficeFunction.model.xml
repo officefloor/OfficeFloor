@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
 	<field type="String" name="office function name" />
+	<field type="OfficeFunctionToOfficeTeamModel" name="office team" />
 	<list type="OfficeFunctionToPreAdministrationModel" name="pre administration" />
 	<list type="OfficeFunctionToPostAdministrationModel" name="post administration" />
 	<list type="OfficeFunctionToGovernanceModel" name="governance" />

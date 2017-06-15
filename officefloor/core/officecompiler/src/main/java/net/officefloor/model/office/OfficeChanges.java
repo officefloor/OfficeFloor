@@ -408,45 +408,6 @@ public interface OfficeChanges {
 	Change<OfficeEscalationModel> removeOfficeEscalation(OfficeEscalationModel officeEscalation);
 
 	/**
-	 * Adds a {@link OfficeSectionResponsibilityModel} to the
-	 * {@link OfficeSectionModel}.
-	 * 
-	 * @param section
-	 *            {@link OfficeSectionModel} to receive the added
-	 *            {@link OfficeSectionResponsibilityModel}.
-	 * @param officeSectionResponsibilityName
-	 *            Name of the {@link OfficeSectionResponsibilityModel}.
-	 * @return {@link Change} to add the
-	 *         {@link OfficeSectionResponsibilityModel}.
-	 */
-	Change<OfficeSectionResponsibilityModel> addOfficeSectionResponsibility(OfficeSectionModel section,
-			String officeSectionResponsibilityName);
-
-	/**
-	 * Removes the {@link OfficeSectionResponsibilityModel}.
-	 * 
-	 * @param officeSectionResponsibility
-	 *            {@link OfficeSectionResponsibilityModel} to remove.
-	 * @return {@link Change} to remove the
-	 *         {@link OfficeSectionResponsibilityModel}.
-	 */
-	Change<OfficeSectionResponsibilityModel> removeOfficeSectionResponsibility(
-			OfficeSectionResponsibilityModel officeSectionResponsibility);
-
-	/**
-	 * Rename the {@link OfficeSectionResponsibilityModel}.
-	 * 
-	 * @param officeSectionResponsibility
-	 *            {@link OfficeSectionResponsibilityModel} to rename.
-	 * @param newOfficeSectionResponsibilityName
-	 *            New name for the {@link OfficeSectionResponsibilityModel}.
-	 * @return {@link Change} to rename the
-	 *         {@link OfficeSectionResponsibilityModel}.
-	 */
-	Change<OfficeSectionResponsibilityModel> renameOfficeSectionResponsibility(
-			OfficeSectionResponsibilityModel officeSectionResponsibility, String newOfficeSectionResponsibilityName);
-
-	/**
 	 * Links the {@link OfficeSectionObjectModel} to the
 	 * {@link ExternalManagedObjectModel}.
 	 * 
@@ -608,32 +569,6 @@ public interface OfficeChanges {
 			OfficeSectionOutputToOfficeSectionInputModel officeSectionOutputToOfficeSectionInput);
 
 	/**
-	 * Links the {@link OfficeSectionResponsibilityModel} to the
-	 * {@link OfficeTeamModel}.
-	 * 
-	 * @param officeSectionResponsibility
-	 *            {@link OfficeSectionResponsibilityModel}.
-	 * @param officeTeam
-	 *            {@link OfficeTeamModel}.
-	 * @return {@link Change} to add the
-	 *         {@link OfficeSectionResponsibilityToOfficeTeamModel}.
-	 */
-	Change<OfficeSectionResponsibilityToOfficeTeamModel> linkOfficeSectionResponsibilityToOfficeTeam(
-			OfficeSectionResponsibilityModel officeSectionResponsibility, OfficeTeamModel officeTeam);
-
-	/**
-	 * Removes the {@link OfficeSectionResponsibilityToOfficeTeamModel}.
-	 * 
-	 * @param officeSectionResponsibilityToOfficeTeam
-	 *            {@link OfficeSectionResponsibilityToOfficeTeamModel} to
-	 *            remove.
-	 * @return {@link Change} to remove the
-	 *         {@link OfficeSectionResponsibilityToOfficeTeamModel}.
-	 */
-	Change<OfficeSectionResponsibilityToOfficeTeamModel> removeOfficeSectionResponsibilityToOfficeTeam(
-			OfficeSectionResponsibilityToOfficeTeamModel officeSectionResponsibilityToOfficeTeam);
-
-	/**
 	 * Links the {@link OfficeManagedObjectSourceTeamModel} to the
 	 * {@link OfficeTeamModel}.
 	 * 
@@ -732,6 +667,30 @@ public interface OfficeChanges {
 	 */
 	Change<OfficeManagedObjectToAdministrationModel> removeOfficeManagedObjectToAdministration(
 			OfficeManagedObjectToAdministrationModel managedObjectToAdministration);
+
+	/**
+	 * Links the {@link OfficeFunctionModel} to the {@link OfficeTeamModel}.
+	 * 
+	 * @param officeFunction
+	 *            {@link OfficeFunctionModel}.
+	 * @param officeTeam
+	 *            {@link OfficeTeamModel}.
+	 * @return {@link Change} to add the
+	 *         {@link OfficeFunctionToOfficeTeamModel}.
+	 */
+	Change<OfficeFunctionToOfficeTeamModel> linkOfficeFunctionToOfficeTeam(OfficeFunctionModel officeFunction,
+			OfficeTeamModel officeTeam);
+
+	/**
+	 * Removes the {@link OfficeFunctionToOfficeTeamModel}.
+	 * 
+	 * @param officeFunctionToOfficeTeam
+	 *            {@link OfficeFunctionToOfficeTeamModel} to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link OfficeFunctionToOfficeTeamModel}.
+	 */
+	Change<OfficeFunctionToOfficeTeamModel> removeOfficeFunctionToOfficeTeam(
+			OfficeFunctionToOfficeTeamModel officeFunctionToOfficeTeam);
 
 	/**
 	 * Links the {@link OfficeFunctionModel} to the {@link AdministrationModel}
