@@ -26,12 +26,10 @@ import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeObject;
-import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
-import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
@@ -427,7 +425,7 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 
 		// Should not supply managed object as requires flow configuration
 		this.issues.recordIssue("dependency", ManagedObjectDependencyNodeImpl.class,
-				"Managed Object Dependency dependency is not linked to a Bound");
+				"Managed Object Dependency dependency is not linked to a BoundManagedObjectNode");
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -438,52 +436,43 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 	 * {@link SuppliedManagedObjectSource}.
 	 */
 	public void testAutoWireSuppliedManagedObjectTeam() {
-		fail("TODO implement");
-	}
 
-	/**
-	 * Ensure can auto-wire the {@link OfficeManagedObject} for
-	 * {@link Administration}.
-	 */
-	public void testAutoWireManagedObjectForAdministration() {
-		fail("TODO implement");
-	}
+		// Flag to enable auto-wiring of the teams
+		AutoWireOfficeExtensionService.enableAutoWireTeams();
 
-	/**
-	 * Ensure can auto-wire the {@link OfficeObject} for {@link Administration}.
-	 */
-	public void testAutoWireOfficeObjectForAdministration() {
-		fail("TODO implement");
-	}
+		// Provide the supplied managed object
+		TeamManagedObjectSource mos = new TeamManagedObjectSource();
+		CompileSupplierSource.addSuppliedManagedObjectSource(TeamManagedObjectSource.class, mos);
 
-	/**
-	 * Ensure can auto-wire the {@link OfficeSectionObject} for
-	 * {@link Administration}.
-	 */
-	public void testAutoWireSectionObjectForAdministration() {
-		fail("TODO implement");
-	}
+		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
 
-	/**
-	 * Ensure can auto-wire the {@link OfficeManagedObject} for
-	 * {@link Governance}.
-	 */
-	public void testAutoWireManagedObjectForGovernance() {
-		fail("TODO implement");
-	}
+		// Record building the OfficeFloor (auto wiring team of managed object)
+		this.record_init();
+		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "OFFICEFLOOR_TEAM");
 
-	/**
-	 * Ensure can auto-wire the {@link OfficeObject} for {@link Governance}.
-	 */
-	public void testAutoWireOfficeObjectForGovernance() {
-		fail("TODO implement");
-	}
+		// Build the supplied managed object
+		this.record_officeFloorBuilder_addManagedObject("OFFICE.SUPPLIED_SOURCE", mos, 0);
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.SUPPLIED_SOURCE");
 
-	/**
-	 * Ensure can auto-wire the {@link SectionObject} for {@link Governance}.
-	 */
-	public void testAutoWireSectionObjectForGovernance() {
-		fail("TODO implement");
+		// Auto wire team
+		office.registerTeam("OFFICE.SUPPLIED_SOURCE.MO_TEAM", "OFFICEFLOOR_TEAM");
+
+		// Build remainder of supplied managed object
+		office.registerManagedObjectSource("OFFICE.SUPPLIED_OBJECT", "OFFICE.SUPPLIED_SOURCE");
+		this.record_officeBuilder_addThreadManagedObject("OFFICE.SUPPLIED_OBJECT", "OFFICE.SUPPLIED_OBJECT");
+
+		// Build the section (also auto-wire team due to dependency)
+		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION",
+				TeamSectionClass.class, "function", "OFFICE_TEAM");
+		function.linkManagedObject(1, "OFFICE.SUPPLIED_OBJECT", TeamManagedObjectSource.class);
+
+		// Compile the OfficeFloor
+		this.compile(true);
 	}
 
 	/**
@@ -905,6 +894,11 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		}
 	}
 
+	public static class TeamSectionClass {
+		public void function(TeamManagedObjectSource object) {
+		}
+	}
+
 	public static class NoDependencySectionClass {
 		public void function() {
 		}
@@ -1053,6 +1047,39 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		@Override
 		public Object getObject() throws Throwable {
 			return this;
+		}
+	}
+
+	@TestSource
+	public static class TeamManagedObjectSource extends AbstractManagedObjectSource<None, Indexed>
+			implements ManagedObject, ManagedFunction<None, None> {
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<None, Indexed> context) throws Exception {
+			context.setObjectClass(this.getClass());
+
+			// Require team
+			context.getManagedObjectSourceContext().addManagedFunction("FUNCTION", () -> this)
+					.setResponsibleTeam("MO_TEAM");
+		}
+
+		@Override
+		protected ManagedObject getManagedObject() throws Throwable {
+			return this;
+		}
+
+		@Override
+		public Object getObject() throws Throwable {
+			return this;
+		}
+
+		@Override
+		public Object execute(ManagedFunctionContext<None, None> context) throws Throwable {
+			return null;
 		}
 	}
 

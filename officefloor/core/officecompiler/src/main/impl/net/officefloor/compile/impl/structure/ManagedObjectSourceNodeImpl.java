@@ -566,13 +566,21 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		// Auto-wire the teams
 		for (ManagedObjectTeamType teamType : managedObjectType.getTeamTypes()) {
 
-			// Create the source auto-wire (type qualified by team name)
+			// Obtain the team name
 			String teamName = teamType.getTeamName();
-			AutoWire sourceAutoWire = new AutoWire(teamName, objectType);
 
 			// Obtain the team
 			ManagedObjectTeamNode teamNode = NodeUtil.getNode(teamName, this.teams,
 					() -> this.context.createManagedObjectTeamNode(teamName, this));
+
+			// Ensure the team is not already configured
+			if (teamNode.getLinkedTeamNode() != null) {
+				continue; // team already configured
+			}
+			
+			// Create the source auto-wire (type qualified by team name)
+			AutoWire sourceAutoWire = new AutoWire(teamName, objectType);
+
 
 			// Attempt to auto-wire the team
 			AutoWireLink<LinkTeamNode>[] links = autoWirer.findAutoWireLinks(teamNode, sourceAutoWire);
