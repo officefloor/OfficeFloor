@@ -6,26 +6,12 @@
 			</team>
 		</teams>
 		<offices>
-			<office name="OFFICE" source="OFFICE" location="office">
-				<team name="OFFICE_TEAM" />
+			<office name="OFFICE" source="${testcase}$CompileOfficeSource">
+				<team name="OFFICE_TEAM">
+					<!-- auto-wire the team -->
+					<!-- <office-floor-team name="OFFICEFLOOR_TEAM" /> -->
+				</team>
 			</office>
 		</offices>
 	</office-floor>
-	<office>
-		<teams>
-			<team name="OFFICE_TEAM">
-				<type-qualification type="${testcase}$CompileManagedObject" />
-			</team>
-		</teams>
-		<sections>
-			<section name="SECTION" source="CLASS"
-				location="${testcase}$CompileSimpleSectionClass">
-				<input name="function" />
-				<responsibility name="RESPONSIBILITY">
-					<team name="OFFICE_TEAM" />
-					<object name="RESPONSIBILITY_OBJECT" />
-				</responsibility>
-			</section>
-		</sections>
-	</office>
 </context>

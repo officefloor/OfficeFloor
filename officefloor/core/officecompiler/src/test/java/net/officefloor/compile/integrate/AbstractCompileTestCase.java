@@ -19,29 +19,21 @@ package net.officefloor.compile.integrate;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.easymock.AbstractMatcher;
 
 import junit.framework.TestCase;
+import net.officefloor.compile.AbstractModelCompilerTestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
-import net.officefloor.compile.spi.pool.source.impl.AbstractManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.SubSection;
-import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
-import net.officefloor.extension.AutoWireOfficeExtensionService;
-import net.officefloor.extension.AutoWireOfficeFloorExtensionService;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationFactory;
@@ -66,32 +58,25 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
-import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolContext;
-import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
-import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
-import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListenerFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.ResourceSource;
-import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
 import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
-import net.officefloor.model.impl.repository.xml.XmlConfigurationContext;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
 
 /**
- * Provides abstract functionality for testing integration of the
- * {@link OfficeFloorCompiler}.
+ * Provides abstract functionality for testing compiling the
+ * {@link OfficeFloor}.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
+public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestCase {
 
 	/**
 	 * {@link CompilerIssues}.
@@ -109,33 +94,9 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	private boolean isOverrideProperties = false;
 
 	/**
-	 * {@link XmlConfigurationContext} for testing.
-	 */
-	private XmlConfigurationContext configurationContext = null;
-
-	/**
 	 * {@link OfficeFloorBuilder}.
 	 */
 	protected final OfficeFloorBuilder officeFloorBuilder = this.createMock(OfficeFloorBuilder.class);
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-
-		// Reset the managed object pool source
-		TestManagedObjectPoolSource.reset();
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-
-		// Reset the extension services
-		AutoWireOfficeExtensionService.reset();
-		AutoWireOfficeFloorExtensionService.reset();
-
-		// Complete tear down
-		super.tearDown();
-	}
 
 	/**
 	 * <p>
@@ -777,47 +738,6 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Obtains the {@link ResourceSource} for test being run.
-	 * 
-	 * @return {@link ResourceSource} for test being run.
-	 */
-	protected ResourceSource getResourceSource() {
-
-		// Determine if already available
-		if (this.configurationContext != null) {
-			return this.configurationContext;
-		}
-
-		// Move the 'Test' to start of test case name
-		String testCaseName = this.getClass().getSimpleName();
-		testCaseName = "Test" + testCaseName.substring(0, (testCaseName.length() - "Test".length()));
-
-		// Remove the 'test' from the start of the test name
-		String testName = this.getName();
-		testName = testName.substring("test".length());
-
-		// Create the configuration context
-		String configFileName = testCaseName + "/" + testName + ".xml";
-		try {
-			this.configurationContext = new XmlConfigurationContext(this, configFileName);
-
-			// Add the tag replacements
-			this.configurationContext.addTag("testcase", this.getClass().getName());
-			this.configurationContext.addTag("POOL", TestManagedObjectPoolSource.class.getName());
-
-		} catch (Exception ex) {
-			// Wrap failure to not require tests to have to handle
-			StringWriter stackTrace = new StringWriter();
-			ex.printStackTrace(new PrintWriter(stackTrace));
-			fail("Failed to obtain configuration: " + configFileName + "\n" + stackTrace.toString());
-			return null; // fail should propagate exception
-		}
-
-		// Return the configuration context
-		return this.configurationContext;
-	}
-
-	/**
 	 * Compiles the {@link OfficeFloor} verifying correctly built into the
 	 * {@link OfficeFloorBuilder}.
 	 * 
@@ -891,70 +811,6 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 			assertEquals("Incorrect built office floor", officeFloor, loadedOfficeFloor);
 		} else {
 			assertNull("Should not build the office floor", officeFloor);
-		}
-	}
-
-	@TestSource
-	public static class TestManagedObjectPoolSource extends AbstractManagedObjectPoolSource
-			implements ManagedObjectPoolFactory, ThreadCompletionListenerFactory {
-
-		public static final String PROPERTY_POOL_ID = "id";
-
-		private static Map<String, TestManagedObjectPoolSource> instances = new HashMap<>();
-
-		private static void reset() {
-			instances.clear();
-		}
-
-		private static TestManagedObjectPoolSource getManagedObjectPoolSource(String managedObjectPoolId) {
-			TestManagedObjectPoolSource instance = instances.get(managedObjectPoolId);
-			if (instance == null) {
-				instance = new TestManagedObjectPoolSource();
-				instances.put(managedObjectPoolId, instance);
-			}
-			return instance;
-		}
-
-		/*
-		 * ================= ManagedObjectPoolSource =================
-		 */
-
-		@Override
-		protected void loadSpecification(SpecificationContext context) {
-			context.addProperty(PROPERTY_POOL_ID);
-		}
-
-		@Override
-		protected void loadMetaData(MetaDataContext context) throws Exception {
-
-			// Register the source
-			String poolId = context.getManagedObjectPoolSourceContext().getProperty(PROPERTY_POOL_ID);
-			TestManagedObjectPoolSource pool = getManagedObjectPoolSource(poolId);
-
-			// Obtain the pooled object type
-			String pooledObjectTypeName = context.getManagedObjectPoolSourceContext().getProperty("pooled.object.type",
-					null);
-			Class<?> pooledObjectType = Object.class;
-			if (pooledObjectTypeName != null) {
-				pooledObjectType = context.getManagedObjectPoolSourceContext().loadClass(pooledObjectTypeName);
-			}
-
-			// Configure the source
-			context.setPooledObjectType(pooledObjectType);
-			context.setManagedObjectPoolFactory(pool);
-			context.addThreadCompleteListener(pool);
-		}
-
-		@Override
-		public ThreadCompletionListener createThreadCompletionListener(ManagedObjectPool pool) {
-			fail("Should not create ManagedObjectPool in compiling");
-			return null;
-		}
-
-		@Override
-		public ManagedObjectPool createManagedObjectPool(ManagedObjectPoolContext context) {
-			fail("Should not create ThreadCompletionListener in compiling");
-			return null;
 		}
 	}
 

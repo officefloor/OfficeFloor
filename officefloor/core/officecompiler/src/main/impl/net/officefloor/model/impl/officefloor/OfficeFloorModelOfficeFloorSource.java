@@ -106,8 +106,6 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 	@Override
 	public void specifyConfigurationProperties(RequiredProperties requiredProperties, OfficeFloorSourceContext context)
 			throws Exception {
-		// TODO Implement
-		throw new UnsupportedOperationException("TODO implement OfficeFloorSource.specifyConfigurationProperties");
 	}
 
 	@Override

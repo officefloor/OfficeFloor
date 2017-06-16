@@ -1,0 +1,42 @@
+<context>
+	<office-floor>
+		<managed-object-sources>
+			<managed-object-source name="DEPENDENCY_SOURCE"
+				source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$DependencyManagedObject" />
+				</properties>
+				<managing-office name="OFFICE" />
+				<input-managed-object name="DEPENDENCY_OBJECT" />
+				<input-dependency name="dependency">
+					<!-- auto-wire the dependency -->
+					<managed-object name="SIMPLE_OBJECT" />
+				</input-dependency>
+			</managed-object-source>
+			<managed-object-source name="SIMPLE_SOURCE"
+				source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$CompileManagedObject" />
+				</properties>
+				<managing-office name="OFFICE" />
+			</managed-object-source>
+		</managed-object-sources>
+		<input-managed-objects>
+			<input-managed-object name="DEPENDENCY_OBJECT">
+				<bound-managed-object-source name="DEPENDENCY_SOURCE" />
+			</input-managed-object>
+		</input-managed-objects>
+		<managed-objects>
+			<managed-object name="SIMPLE_OBJECT" scope="PROCESS">
+				<managed-object-source name="SIMPLE_SOURCE" />
+			</managed-object>
+		</managed-objects>
+		<offices>
+			<office name="OFFICE" source="${testcase}$CompileOfficeSource">
+				<object name="OBJECT">
+					<input-managed-object name="DEPENDENCY_OBJECT" />
+				</object>
+			</office>
+		</offices>
+	</office-floor>
+</context>
