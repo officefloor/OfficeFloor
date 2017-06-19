@@ -1,0 +1,115 @@
+<context>
+	<office-floor>
+		<managed-object-sources>
+			<managed-object-source name="INPUT_SOURCE_ONE"
+				source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$InputManagedObject" />
+				</properties>
+				<managing-office name="OFFICE" />
+				<input-managed-object name="INPUT_OBJECT" />
+				<input-dependency name="dependency">
+					<managed-object name="SIMPLE_OBJECT_ONE" />
+				</input-dependency>
+				<flow name="doProcess">
+					<office-input office="OFFICE" section="INPUT_SECTION"
+						input="function" />
+				</flow>
+			</managed-object-source>
+			<managed-object-source name="SIMPLE_SOURCE_ONE"
+				source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$DependentOne" />
+				</properties>
+				<managing-office name="OFFICE" />
+			</managed-object-source>
+			<managed-object-source name="INPUT_SOURCE_TWO"
+				source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$InputManagedObject" />
+				</properties>
+				<managing-office name="OFFICE" />
+				<input-managed-object name="INPUT_OBJECT" />
+				<input-dependency name="dependency">
+					<managed-object name="SIMPLE_OBJECT_TWO" />
+				</input-dependency>
+				<flow name="doProcess">
+					<office-input office="OFFICE" section="INPUT_SECTION"
+						input="function" />
+				</flow>
+			</managed-object-source>
+			<managed-object-source name="SIMPLE_SOURCE_TWO"
+				source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$DependentTwo" />
+				</properties>
+				<managing-office name="OFFICE" />
+			</managed-object-source>
+		</managed-object-sources>
+		<managed-objects>
+			<managed-object name="OBJECT_ONE" scope="PROCESS">
+				<managed-object-source name="INPUT_SOURCE_ONE" />
+				<dependency name="dependency">
+					<managed-object name="SIMPLE_OBJECT_ONE" />
+				</dependency>
+			</managed-object>
+			<managed-object name="OBJECT_TWO" scope="PROCESS">
+				<managed-object-source name="INPUT_SOURCE_TWO" />
+				<dependency name="dependency">
+					<managed-object name="SIMPLE_OBJECT_TWO" />
+				</dependency>
+			</managed-object>
+			<managed-object name="SIMPLE_OBJECT_ONE" scope="PROCESS">
+				<managed-object-source name="SIMPLE_SOURCE_ONE" />
+			</managed-object>
+			<managed-object name="SIMPLE_OBJECT_TWO" scope="PROCESS">
+				<managed-object-source name="SIMPLE_SOURCE_TWO" />
+			</managed-object>
+		</managed-objects>
+		<input-managed-objects>
+			<input-managed-object name="INPUT_OBJECT">
+				<bound-managed-object-source name="INPUT_SOURCE_ONE" />
+			</input-managed-object>
+		</input-managed-objects>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office">
+				<input section="INPUT_SECTION" input="function" />
+				<object name="OBJECT_ONE">
+					<managed-object name="OBJECT_ONE" />
+				</object>
+				<object name="OBJECT_TWO">
+					<managed-object name="OBJECT_TWO" />
+				</object>
+				<object name="INPUT_OBJECT">
+					<input-managed-object name="INPUT_OBJECT" />
+				</object>
+			</office>
+		</offices>
+	</office-floor>
+	<office>
+		<external-managed-objects>
+			<external-managed-object name="OBJECT_ONE"
+				object-type="${testcase}$InputManagedObject" object-scope="PROCESS" />
+			<external-managed-object name="OBJECT_TWO"
+				object-type="${testcase}$InputManagedObject" object-scope="PROCESS" />
+			<external-managed-object name="INPUT_OBJECT"
+				object-type="${testcase}$InputManagedObject" object-scope="PROCESS" />
+		</external-managed-objects>
+		<section name="SECTION_ONE" source="CLASS" location="${testcase}$InputSection">
+			<object name="${testcase}$InputManagedObject" object-type="${testcase}$InputManagedObject">
+				<external-managed-object name="OBJECT_ONE" />
+			</object>
+		</section>
+		<section name="SECTION_TWO" source="CLASS" location="${testcase}$InputSection">
+			<object name="${testcase}$InputManagedObject" object-type="${testcase}$InputManagedObject">
+				<external-managed-object name="OBJECT_TWO" />
+			</object>
+		</section>
+		<section name="INPUT_SECTION" source="CLASS"
+			location="${testcase}$InputSection">
+			<object name="${testcase}$InputManagedObject" object-type="${testcase}$InputManagedObject">
+				<external-managed-object name="INPUT_OBJECT" />
+			</object>
+		</section>
+	</office>
+</context>

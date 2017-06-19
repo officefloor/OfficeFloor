@@ -511,7 +511,7 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 	/**
 	 * <p>
 	 * Retrieves the {@link ProcessStruct} instances for the
-	 * {@link ProcessInterface} {@link Field} instances ordered by:
+	 * {@link FlowInterface} {@link Field} instances ordered by:
 	 * <ol>
 	 * <li>field name</li>
 	 * <li>simple class name . field name</li>
@@ -523,7 +523,7 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 	 * Ordering is necessary to ensure similar indexes each time loaded.
 	 * 
 	 * @param clazz
-	 *            {@link Class} to interrogate for {@link ProcessInterface}
+	 *            {@link Class} to interrogate for {@link FlowInterface}
 	 *            {@link Field} instances.
 	 * @return Listing of {@link ProcessInterface} {@link Field} instances
 	 *         ordered by their names.
