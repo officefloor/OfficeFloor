@@ -18,13 +18,13 @@
 package net.officefloor.compile.impl.structure;
 
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.AutoWireLink;
 import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.Node;
+import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.source.SourceContext;
@@ -54,6 +54,11 @@ public class AutoWirerTest extends OfficeFrameTestCase {
 	private final AutoWirer<Node> wirer = new AutoWirerImpl<>(this.context, this.issues);
 
 	/**
+	 * {@link OfficeNode}.
+	 */
+	private final OfficeNode office = this.createMock(OfficeNode.class);
+
+	/**
 	 * Source {@link LinkObjectNode}.
 	 */
 	private final LinkObjectNode source = this.createMock(LinkObjectNode.class);
@@ -79,15 +84,15 @@ public class AutoWirerTest extends OfficeFrameTestCase {
 	 */
 	public void testNodeFactory() {
 		@SuppressWarnings("unchecked")
-		Supplier<LinkObjectNode> supplier = this.createMock(Supplier.class);
-		this.recordReturn(supplier, supplier.get(), this.target);
+		Function<OfficeNode, LinkObjectNode> factory = this.createMock(Function.class);
+		this.recordReturn(factory, factory.apply(this.office), this.target);
 		this.replayMockObjects();
-		this.wirer.addAutoWireTarget(supplier, new AutoWire("TYPE"));
+		this.wirer.addAutoWireTarget(factory, new AutoWire("TYPE"));
 		AutoWireLink<Node>[] links = this.wirer.getAutoWireLinks(this.source, new AutoWire("TYPE"));
 		for (int i = 0; i < 10; i++) {
 			AutoWireLink<Node> link = this.assertLinkMatch(links, new AutoWire("TYPE"), new AutoWire("TYPE"));
-			assertSame("Should be same node", this.target, link.getTargetNode());
-			assertSame("Should only create once", this.target, link.getTargetNode());
+			assertSame("Should be same node", this.target, link.getTargetNode(this.office));
+			assertSame("Should only create once", this.target, link.getTargetNode(this.office));
 		}
 		this.verifyMockObjects();
 	}
@@ -233,10 +238,10 @@ public class AutoWirerTest extends OfficeFrameTestCase {
 		}
 		assertNull("Should be no first target qualifier", links[0].getTargetAutoWire().getQualifier());
 		assertEquals("Incorrect first target type", "TYPE", links[0].getTargetAutoWire().getType());
-		assertSame("Incorrect first target node", one, links[0].getTargetNode());
+		assertSame("Incorrect first target node", one, links[0].getTargetNode(this.office));
 		assertNull("Should be no second target qualifier", links[1].getTargetAutoWire().getQualifier());
 		assertEquals("Incorrect second target type", "TYPE", links[1].getTargetAutoWire().getType());
-		assertSame("Incorrect second target node", two, links[1].getTargetNode());
+		assertSame("Incorrect second target node", two, links[1].getTargetNode(this.office));
 		this.verifyMockObjects();
 	}
 
@@ -352,7 +357,7 @@ public class AutoWirerTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect target qualifier", targetAutoWire.getQualifier(),
 				link.getTargetAutoWire().getQualifier());
 		assertEquals("Incorrect target type", targetAutoWire.getType(), link.getTargetAutoWire().getType());
-		assertSame("Incorrect target node", this.target, link.getTargetNode());
+		assertSame("Incorrect target node", this.target, link.getTargetNode(this.office));
 		return link;
 	}
 

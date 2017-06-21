@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,6 +26,9 @@ import java.util.Map;
 import net.officefloor.compile.impl.section.OfficeSectionManagedObjectTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
+import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.internal.structure.AutoWireLink;
+import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.GovernanceNode;
@@ -253,6 +257,49 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 		// Successfully sourced
 		return true;
+	}
+
+	@Override
+	public void autoWireDependencies(AutoWirer<LinkObjectNode> autoWirer, OfficeNode office,
+			CompileContext compileContext) {
+
+		// Obtain the managed object type
+		ManagedObjectType<?> managedObjectType = compileContext
+				.getOrLoadManagedObjectType(this.state.managedObjectSourceNode);
+		if (managedObjectType == null) {
+			return; // must have type
+		}
+
+		// Create the map of dependency types by names
+		Map<String, ManagedObjectDependencyType<?>> dependencyTypes = new HashMap<>();
+		Arrays.stream(managedObjectType.getDependencyTypes())
+				.forEach((dependencyType) -> dependencyTypes.put(dependencyType.getDependencyName(), dependencyType));
+
+		// Auto-wire dependencies
+		this.dependencies.values().stream().sorted((a, b) -> CompileUtil.sortCompare(a.getManagedObjectDependencyName(),
+				b.getManagedObjectDependencyName())).forEachOrdered((dependency) -> {
+
+					// Ignore if already configured
+					if (dependency.getLinkedObjectNode() != null) {
+						return;
+					}
+
+					// Obtain the dependency type
+					ManagedObjectDependencyType<?> dependencyType = dependencyTypes
+							.get(dependency.getManagedObjectDependencyName());
+					if (dependencyType == null) {
+						return; // must have type
+					}
+
+					// Auto-wire the dependency
+					AutoWireLink<LinkObjectNode>[] links = autoWirer.getAutoWireLinks(dependency,
+							new AutoWire(dependencyType.getTypeQualifier(), dependencyType.getDependencyType()));
+					if (links.length == 1) {
+						LinkUtil.linkAutoWireObjectNode(dependency, links[0].getTargetNode(office), office, autoWirer,
+								compileContext, this.context.getCompilerIssues(),
+								(link) -> dependency.linkObjectNode(link));
+					}
+				});
 	}
 
 	@Override

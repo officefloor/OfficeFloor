@@ -560,6 +560,10 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			return; // must have managed object type
 		}
 
+		// Obtain the managing office
+		OfficeNode managingOffice = (this.containingOfficeNode != null ? this.containingOfficeNode
+				: this.getManagingOfficeNode());
+
 		// Obtain the object type
 		String objectType = managedObjectType.getObjectClass().getName();
 
@@ -577,16 +581,15 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			if (teamNode.getLinkedTeamNode() != null) {
 				continue; // team already configured
 			}
-			
+
 			// Create the source auto-wire (type qualified by team name)
 			AutoWire sourceAutoWire = new AutoWire(teamName, objectType);
-
 
 			// Attempt to auto-wire the team
 			AutoWireLink<LinkTeamNode>[] links = autoWirer.findAutoWireLinks(teamNode, sourceAutoWire);
 			if (links.length == 1) {
-				LinkUtil.linkTeamNode(teamNode, links[0].getTargetNode(), this.context.getCompilerIssues(),
-						(link) -> teamNode.linkTeamNode(link));
+				LinkUtil.linkTeamNode(teamNode, links[0].getTargetNode(managingOffice),
+						this.context.getCompilerIssues(), (link) -> teamNode.linkTeamNode(link));
 			}
 		}
 	}

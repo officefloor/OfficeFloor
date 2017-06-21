@@ -20,12 +20,13 @@ package net.officefloor.compile.impl.structure;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.AutoWireLink;
 import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.Node;
+import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.frame.api.source.SourceContext;
 
@@ -94,7 +95,7 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 	}
 
 	@Override
-	public void addAutoWireTarget(Supplier<? extends N> targetNodeFactory, AutoWire... targetAutoWires) {
+	public void addAutoWireTarget(Function<OfficeNode, ? extends N> targetNodeFactory, AutoWire... targetAutoWires) {
 		this.targets.add(new AutoWireNodeImpl(targetAutoWires, targetNodeFactory));
 	}
 
@@ -264,7 +265,7 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 		/**
 		 * Factory to create the {@link Node}.
 		 */
-		private final Supplier<? extends N> nodeFactory;
+		private final Function<OfficeNode, ? extends N> nodeFactory;
 
 		/**
 		 * {@link Node}.
@@ -281,7 +282,7 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 		 */
 		private AutoWireNodeImpl(AutoWire[] autoWires, N node) {
 			this.autoWires = autoWires;
-			this.nodeFactory = () -> node;
+			this.nodeFactory = (office) -> node;
 			this.node = node;
 		}
 
@@ -293,7 +294,7 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 		 * @param nodeFactory
 		 *            Factory to create the {@link Node}.
 		 */
-		private AutoWireNodeImpl(AutoWire[] autoWires, Supplier<? extends N> nodeFactory) {
+		private AutoWireNodeImpl(AutoWire[] autoWires, Function<OfficeNode, ? extends N> nodeFactory) {
 			this.autoWires = autoWires;
 			this.nodeFactory = nodeFactory;
 		}
@@ -301,11 +302,13 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 		/**
 		 * Obtains the {@link Node}.
 		 * 
+		 * @param office
+		 *            {@link OfficeNode}.
 		 * @return {@link Node}.
 		 */
-		public N getNode() {
+		public N getNode(OfficeNode office) {
 			if (this.node == null) {
-				this.node = this.nodeFactory.get();
+				this.node = this.nodeFactory.apply(office);
 			}
 			return this.node;
 		}
@@ -372,15 +375,14 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 		}
 
 		@Override
-		public N getTargetNode() {
-			return this.targetNode.getNode();
+		public N getTargetNode(OfficeNode office) {
+			return this.targetNode.getNode(office);
 		}
 
 		@Override
 		public AutoWire getTargetAutoWire() {
 			return this.targetAutoWire;
 		}
-
 	}
 
 }

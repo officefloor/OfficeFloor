@@ -83,6 +83,18 @@ public interface ManagedObjectNode extends DependentObjectNode, BoundManagedObje
 	TypeQualification[] getTypeQualifications(CompileContext compileContext);
 
 	/**
+	 * Auto-wires the dependencies for the {@link ManagedObject}.
+	 * 
+	 * @param autoWirer
+	 *            {@link AutoWirer}.
+	 * @param office
+	 *            {@link OfficeNode} requiring the auto-wiring.
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 */
+	void autoWireDependencies(AutoWirer<LinkObjectNode> autoWirer, OfficeNode office, CompileContext compileContext);
+
+	/**
 	 * Loads the {@link OfficeSectionManagedObjectType}.
 	 * 
 	 * @param compileContext

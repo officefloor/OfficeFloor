@@ -532,14 +532,6 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 			return false;
 		}
 
-		// Source all the offices
-		isSourced = this.offices.values().stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(a.getDeployedOfficeName(), b.getDeployedOfficeName()))
-				.allMatch((office) -> office.sourceOfficeTree(compileContext));
-		if (!isSourced) {
-			return false;
-		}
-
 		// Ensure all managed object sources are sourced
 		isSourced = CompileUtil.source(this.managedObjectSources,
 				(managedObjectSource) -> managedObjectSource.getSectionManagedObjectSourceName(),
@@ -552,6 +544,14 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 		isSourced = CompileUtil.source(this.managedObjects,
 				(managedObject) -> managedObject.getSectionManagedObjectName(),
 				(managedObject) -> managedObject.sourceManagedObject(compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
+		// Source all the offices
+		isSourced = this.offices.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getDeployedOfficeName(), b.getDeployedOfficeName()))
+				.allMatch((office) -> office.sourceOfficeTree(compileContext));
 		if (!isSourced) {
 			return false;
 		}
@@ -595,7 +595,14 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	}
 
 	@Override
-	public void loadAutoWireObjectTargets(AutoWirer<LinkObjectNode> autoWirer, CompileContext compileContext) {
+	public AutoWirer<LinkObjectNode> loadAutoWireObjectTargets(AutoWirer<LinkObjectNode> autoWirer,
+			CompileContext compileContext) {
+
+		// Load the supplied managed objects
+		this.suppliers.values().stream().forEach((supplier) -> supplier.loadAutoWireObjects(autoWirer, compileContext));
+
+		// Load the managed objects
+		final AutoWirer<LinkObjectNode> managedObjectAutoWirer = autoWirer.createScopeAutoWirer();
 		this.managedObjects.values().forEach((mo) -> {
 
 			// Create the auto-wires
@@ -605,6 +612,9 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 			// Add the target
 			autoWirer.addAutoWireTarget(mo, targetAutoWires);
 		});
+
+		// Return the auto wirer
+		return managedObjectAutoWirer;
 	}
 
 	@Override
@@ -617,7 +627,7 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 					.map((type) -> new AutoWire(type.getQualifier(), type.getType())).toArray(AutoWire[]::new);
 
 			// Add the target
-			autoWirer.addAutoWireTarget(() -> {
+			autoWirer.addAutoWireTarget((office) -> {
 
 				// Determine if team already linked to office
 				for (OfficeTeamNode officeTeam : officeTeamRegistry.getOfficeTeams()) {

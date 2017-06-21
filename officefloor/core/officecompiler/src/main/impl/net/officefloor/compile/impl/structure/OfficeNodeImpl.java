@@ -581,15 +581,22 @@ public class OfficeNodeImpl implements OfficeNode {
 
 			// Create the OfficeFloor auto wirer
 			final AutoWirer<LinkObjectNode> officeFloorAutoWirer = this.context.createAutoWirer(LinkObjectNode.class);
-			this.officeFloor.loadAutoWireObjectTargets(officeFloorAutoWirer, compileContext);
+			final AutoWirer<LinkObjectNode> officeFloorContextAutoWirer = this.officeFloor
+					.loadAutoWireObjectTargets(officeFloorAutoWirer, compileContext);
 
-			// Create the Office auto wirer
-			final AutoWirer<LinkObjectNode> officeAutoWirer = officeFloorAutoWirer.createScopeAutoWirer();
-			this.objects.values().forEach((object) -> officeAutoWirer.addAutoWireTarget(object,
+			// Create the Office supplier auto wirer
+			final AutoWirer<LinkObjectNode> officeSupplierAutoWirer = officeFloorContextAutoWirer
+					.createScopeAutoWirer();
+			this.suppliers.values()
+					.forEach((supplier) -> supplier.loadAutoWireObjects(officeSupplierAutoWirer, compileContext));
+
+			// Create the Office objects auto wirer
+			final AutoWirer<LinkObjectNode> officeObjectsAutoWirer = officeSupplierAutoWirer.createScopeAutoWirer();
+			this.objects.values().forEach((object) -> officeObjectsAutoWirer.addAutoWireTarget(object,
 					new AutoWire(object.getTypeQualifier(), object.getOfficeObjectType())));
 
 			// Create the Office managed object auto wirer
-			final AutoWirer<LinkObjectNode> autoWirer = officeAutoWirer.createScopeAutoWirer();
+			final AutoWirer<LinkObjectNode> autoWirer = officeObjectsAutoWirer.createScopeAutoWirer();
 			this.managedObjects.values().forEach((mo) -> {
 
 				// Create the auto-wires
@@ -604,6 +611,12 @@ public class OfficeNodeImpl implements OfficeNode {
 			this.sections.values().stream()
 					.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSectionName(), b.getOfficeSectionName()))
 					.forEachOrdered((section) -> section.autoWireObjects(autoWirer, compileContext));
+
+			// Iterate over managed objects (auto-wiring unlinked dependencies)
+			this.managedObjects.values().stream().sorted(
+					(a, b) -> CompileUtil.sortCompare(a.getOfficeManagedObjectName(), b.getOfficeManagedObjectName()))
+					.forEachOrdered(
+							(managedObject) -> managedObject.autoWireDependencies(autoWirer, this, compileContext));
 		}
 
 		// Undertake auto-wire of teams
@@ -759,7 +772,7 @@ public class OfficeNodeImpl implements OfficeNode {
 			AutoWireLink<LinkObjectNode>[] links = autoWirer.getAutoWireLinks(object,
 					new AutoWire(typeQualifier, objectType));
 			if (links.length == 1) {
-				LinkUtil.linkAutoWireObjectNode(object, links[0].getTargetNode(), this,
+				LinkUtil.linkAutoWireObjectNode(object, links[0].getTargetNode(this), this, autoWirer, compileContext,
 						this.context.getCompilerIssues(), (link) -> object.linkObjectNode(link));
 			}
 		});
@@ -785,7 +798,7 @@ public class OfficeNodeImpl implements OfficeNode {
 					// Auto-wire the team
 					AutoWireLink<LinkTeamNode>[] links = autoWirer.getAutoWireLinks(team, sourceAutoWires);
 					if (links.length == 1) {
-						LinkUtil.linkTeam(team, links[0].getTargetNode(), this.context.getCompilerIssues(), this);
+						LinkUtil.linkTeam(team, links[0].getTargetNode(this), this.context.getCompilerIssues(), this);
 					}
 				});
 	}

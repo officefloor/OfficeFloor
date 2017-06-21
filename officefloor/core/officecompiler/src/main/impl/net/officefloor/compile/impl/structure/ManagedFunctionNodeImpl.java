@@ -31,6 +31,7 @@ import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.AutoWireLink;
 import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.FunctionFlowNode;
 import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
 import net.officefloor.compile.internal.structure.FunctionObjectNode;
@@ -40,11 +41,11 @@ import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.internal.structure.ResponsibleTeamNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
-import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
@@ -327,10 +328,14 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 				.map((objectType) -> new AutoWire(objectType.getTypeQualifier(), objectType.getObjectType().getName()))
 				.toArray(AutoWire[]::new);
 
+		// Obtain the office
+		OfficeNode office = this.state.namespaceNode.getSectionNode().getOfficeNode();
+
 		// Attempt to obtain the responsible team
 		AutoWireLink<LinkTeamNode>[] links = autoWirer.findAutoWireLinks(this.teamResponsible, sourceAutoWires);
 		if (links.length == 1) {
-			LinkUtil.linkTeam(this.teamResponsible, links[0].getTargetNode(), this.context.getCompilerIssues(), this);
+			LinkUtil.linkTeam(this.teamResponsible, links[0].getTargetNode(office), this.context.getCompilerIssues(),
+					this);
 		}
 	}
 

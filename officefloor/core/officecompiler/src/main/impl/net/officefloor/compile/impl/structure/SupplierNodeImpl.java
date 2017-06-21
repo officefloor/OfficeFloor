@@ -17,11 +17,17 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.CompileContext;
+import net.officefloor.compile.internal.structure.LinkObjectNode;
+import net.officefloor.compile.internal.structure.ManagedObjectNode;
+import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
@@ -35,6 +41,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.supplier.SupplierLoader;
 import net.officefloor.compile.supplier.SupplierType;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
 /**
  * {@link SupplierNode} implementation.
@@ -288,6 +295,66 @@ public class SupplierNodeImpl implements SupplierNode {
 	@Override
 	public void registerAsPossibleMBean(CompileContext compileContext) {
 		compileContext.registerPossibleMBean(SupplierSource.class, this.supplierName, this.usedSupplierSource);
+	}
+
+	@Override
+	public void loadAutoWireObjects(AutoWirer<LinkObjectNode> autoWirer, CompileContext compileContext) {
+
+		// Load the supplier type
+		SupplierType supplierType = compileContext.getOrLoadSupplierType(this);
+		if (supplierType == null) {
+			return; // must have type
+		}
+
+		// Load the supplied managed objects for auto-wiring
+		Arrays.stream(supplierType.getSuppliedManagedObjectTypes()).forEach((suppliedMosType) -> {
+
+			// Register the supplied managed object source
+			autoWirer.addAutoWireTarget((office) -> {
+
+				// Obtain the managed object name
+				String qualifier = suppliedMosType.getQualifier();
+				String type = suppliedMosType.getObjectType().getName();
+				String managedObjectName = (qualifier == null ? "" : qualifier + "-") + type;
+
+				// Determine if office supplier
+				ManagedObjectSourceNode mos;
+				ManagedObjectNode mo;
+				OfficeNode managingOffice;
+				if (this.officeNode != null) {
+
+					// Use the supplier bound office
+					managingOffice = this.officeNode;
+
+					// Register the office managed object source
+					mos = (ManagedObjectSourceNode) this.addOfficeManagedObjectSource(managedObjectName, type,
+							qualifier);
+
+					// Add the office managed object
+					mo = (ManagedObjectNode) mos.addOfficeManagedObject(managedObjectName, ManagedObjectScope.THREAD);
+
+				} else {
+					// Use the provided office
+					managingOffice = office;
+
+					// Register the OfficeFloor managed object source
+					mos = (ManagedObjectSourceNode) this.addOfficeFloorManagedObjectSource(managedObjectName, type,
+							qualifier);
+
+					// Add the OfficeFloor managed object
+					mo = (ManagedObjectNode) mos.addOfficeFloorManagedObject(managedObjectName,
+							ManagedObjectScope.THREAD);
+				}
+
+				// Source the managed object source and managed object
+				mos.sourceManagedObjectSource(compileContext);
+				mo.sourceManagedObject(compileContext);
+
+				// Return the managed object
+				return mo;
+
+			}, new AutoWire(suppliedMosType.getQualifier(), suppliedMosType.getObjectType()));
+		});
 	}
 
 }

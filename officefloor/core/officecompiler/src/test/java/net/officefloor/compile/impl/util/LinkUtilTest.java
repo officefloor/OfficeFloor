@@ -20,10 +20,9 @@ package net.officefloor.compile.impl.util;
 import java.util.function.Function;
 
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.impl.structure.ManagedObjectNodeImpl;
-import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
-import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.internal.structure.AutoWirer;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
@@ -38,6 +37,8 @@ import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
+import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -456,6 +457,12 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	 */
 	public void testAutoWireObjectNode() {
 
+		// Mocks
+		@SuppressWarnings("unchecked")
+		final AutoWirer<LinkObjectNode> autoWirer = this.createMock(AutoWirer.class);
+		final CompileContext compileContext = this.createMock(CompileContext.class);
+		final ManagedObjectType<?> managedObjectType = this.createMock(ManagedObjectType.class);
+
 		// Obtain the node context
 		NodeContext context = (NodeContext) OfficeFloorCompiler.newOfficeFloorCompiler(null);
 
@@ -472,8 +479,17 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		ManagedObjectNode managedObject = context.createManagedObjectNode("MO");
 		managedObject.initialise(ManagedObjectScope.THREAD, managedObjectSource);
 
+		// Record the auto-wiring
+		this.recordReturn(compileContext, compileContext.getOrLoadManagedObjectType(managedObjectSource),
+				managedObjectType);
+		this.recordReturn(managedObjectType, managedObjectType.getDependencyTypes(),
+				new ManagedObjectDependencyType[0]);
+
 		// Link the auto-wire object
-		LinkUtil.linkAutoWireObjectNode(node, managedObject, office, this.issues, (link) -> node.linkObjectNode(link));
+		this.replayMockObjects();
+		LinkUtil.linkAutoWireObjectNode(node, managedObject, office, autoWirer, compileContext, this.issues,
+				(link) -> node.linkObjectNode(link));
+		this.verifyMockObjects();
 
 		// Ensure the node is linked to the managed object
 		assertEquals("Node should be linked to managed object", managedObject, node.getLinkedObjectNode());

@@ -323,14 +323,6 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		Singleton mos = new Singleton(new CompileManagedObject());
 		CompileSupplierSource.addSuppliedManagedObjectSource(CompileManagedObject.class, mos);
 
-		// Should supply the dependency for auto-wiring
-		final String mosName = CompileManagedObject.class.getName();
-		final String moName = CompileManagedObject.class.getName();
-		office.registerManagedObjectSource(mosName, mosName);
-		this.record_officeFloorBuilder_addManagedObject(mosName, mos, 0);
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this.record_officeBuilder_addThreadManagedObject(moName, mosName);
-
 		// Build the Managed Object with dependency
 		office.registerManagedObjectSource("OFFICE.DEPENDENCY", "OFFICE.DEPENDENCY_SOURCE");
 		this.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENCY_SOURCE", ClassManagedObjectSource.class, 0,
@@ -338,6 +330,14 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		DependencyMappingBuilder dependency = this.record_officeBuilder_addProcessManagedObject("OFFICE.DEPENDENCY",
 				"OFFICE.DEPENDENCY");
+
+		// Should supply the dependency for auto-wiring
+		final String mosName = CompileManagedObject.class.getName();
+		final String moName = CompileManagedObject.class.getName();
+		office.registerManagedObjectSource(mosName, mosName);
+		this.record_officeFloorBuilder_addManagedObject(mosName, mos, 0);
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_officeBuilder_addThreadManagedObject(moName, mosName);
 
 		// Auto-wire the dependency
 		dependency.mapDependency(0, moName);

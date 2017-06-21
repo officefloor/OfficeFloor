@@ -17,7 +17,7 @@
  */
 package net.officefloor.compile.internal.structure;
 
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 /**
  * Auto wirer.
@@ -41,14 +41,16 @@ public interface AutoWirer<N extends Node> {
 	 * Adds an {@link AutoWire} target for selection.
 	 * 
 	 * @param targetNodeFactory
-	 *            {@link Supplier} to create the target {@link Node}. This
+	 *            {@link Function} to create the target {@link Node}. This
 	 *            enables dynamically adding the target {@link Node} only if it
-	 *            is selected for linking.
+	 *            is selected for linking. The {@link OfficeNode} is available
+	 *            to configure the {@link ManagingOfficeNode} for the
+	 *            {@link ManagedObjectSourceNode}.
 	 * @param targetAutoWires
 	 *            Target {@link AutoWire} instances supported by the
 	 *            {@link Node}.
 	 */
-	void addAutoWireTarget(Supplier<? extends N> targetNodeFactory, AutoWire... targetAutoWires);
+	void addAutoWireTarget(Function<OfficeNode, ? extends N> targetNodeFactory, AutoWire... targetAutoWires);
 
 	/**
 	 * Selects the appropriate {@link AutoWireLink} instances.

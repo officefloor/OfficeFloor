@@ -22,6 +22,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.internal.structure.AutoWirer;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
@@ -536,6 +538,10 @@ public class LinkUtil {
 	 *            Link {@link LinkObjectNode} to load.
 	 * @param office
 	 *            {@link OfficeNode}.
+	 * @param autoWirer
+	 *            {@link AutoWirer} to enable dependencies to be auto-wired.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @param issues
 	 *            {@link CompilerIssues}.
 	 * @param loader
@@ -545,7 +551,8 @@ public class LinkUtil {
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	public static boolean linkAutoWireObjectNode(LinkObjectNode node, LinkObjectNode linkNode, OfficeNode office,
-			CompilerIssues issues, Consumer<LinkObjectNode> loader) {
+			AutoWirer<LinkObjectNode> autoWirer, CompileContext compileContext, CompilerIssues issues,
+			Consumer<LinkObjectNode> loader) {
 
 		// Link the object node
 		boolean isLinked = linkObjectNode(node, linkNode, issues, loader);
@@ -564,7 +571,13 @@ public class LinkUtil {
 					managedObjectSource.autoWireToOffice(office, issues);
 				}
 			}
+		}
 
+		// Link dependencies of manage object
+		ManagedObjectNode managedObject = retrieveTarget(node, OBJECT_TRAVERSER, ManagedObjectNode.class, false, issues,
+				null).target;
+		if (managedObject != null) {
+			managedObject.autoWireDependencies(autoWirer, office, compileContext);
 		}
 
 		// Return whether linked

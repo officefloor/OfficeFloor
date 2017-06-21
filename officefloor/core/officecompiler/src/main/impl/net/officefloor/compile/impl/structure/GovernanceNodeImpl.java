@@ -255,7 +255,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 		// Attempt to auto-wire this governance
 		AutoWireLink<LinkTeamNode>[] links = autoWirer.findAutoWireLinks(this, sourceAutoWires);
 		if (links.length == 1) {
-			LinkUtil.linkTeamNode(this, links[0].getTargetNode(), this.context.getCompilerIssues(),
+			LinkUtil.linkTeamNode(this, links[0].getTargetNode(this.officeNode), this.context.getCompilerIssues(),
 					(link) -> this.linkTeamNode(link));
 		}
 	}

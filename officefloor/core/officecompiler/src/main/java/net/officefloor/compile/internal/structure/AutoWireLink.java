@@ -41,9 +41,11 @@ public interface AutoWireLink<N extends Node> {
 	/**
 	 * Obtains the target {@link Node}.
 	 * 
+	 * @param office
+	 *            {@link OfficeNode}.
 	 * @return Target {@link Node}.
 	 */
-	N getTargetNode();
+	N getTargetNode(OfficeNode office);
 
 	/**
 	 * Obtains the matching target {@link AutoWire}.

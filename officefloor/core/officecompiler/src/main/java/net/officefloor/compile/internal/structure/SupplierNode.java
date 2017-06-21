@@ -70,6 +70,17 @@ public interface SupplierNode extends Node, OfficeFloorSupplier, OfficeSupplier 
 	void registerAsPossibleMBean(CompileContext compileContext);
 
 	/**
+	 * Loads the {@link SuppliedManagedObjectSourceNode} instances as
+	 * {@link ManagedObjectNode} instances to the {@link AutoWirer}.
+	 * 
+	 * @param autoWirer
+	 *            {@link AutoWirer}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 */
+	void loadAutoWireObjects(AutoWirer<LinkObjectNode> autoWirer, CompileContext compileContext);
+
+	/**
 	 * Loads the {@link SupplierType}.
 	 * 
 	 * @return {@link SupplierType}.
