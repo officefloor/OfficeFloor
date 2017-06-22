@@ -34,6 +34,8 @@ import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
+import net.officefloor.compile.managedobject.ManagedObjectLoader;
+import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
@@ -309,6 +311,14 @@ public class SupplierNodeImpl implements SupplierNode {
 		// Load the supplied managed objects for auto-wiring
 		Arrays.stream(supplierType.getSuppliedManagedObjectTypes()).forEach((suppliedMosType) -> {
 
+			// Determine if flows for managed object
+			ManagedObjectLoader loader = this.context.getManagedObjectLoader(this);
+			ManagedObjectType<?> moType = loader.loadManagedObjectType(suppliedMosType.getManagedObjectSource(),
+					suppliedMosType.getPropertyList());
+			if ((moType.getFlowTypes().length > 0) || (moType.getTeamTypes().length > 0)) {
+				return; // can not auto-wire input managed object
+			}
+
 			// Register the supplied managed object source
 			autoWirer.addAutoWireTarget((office) -> {
 
@@ -320,12 +330,7 @@ public class SupplierNodeImpl implements SupplierNode {
 				// Determine if office supplier
 				ManagedObjectSourceNode mos;
 				ManagedObjectNode mo;
-				OfficeNode managingOffice;
 				if (this.officeNode != null) {
-
-					// Use the supplier bound office
-					managingOffice = this.officeNode;
-
 					// Register the office managed object source
 					mos = (ManagedObjectSourceNode) this.addOfficeManagedObjectSource(managedObjectName, type,
 							qualifier);
@@ -334,9 +339,6 @@ public class SupplierNodeImpl implements SupplierNode {
 					mo = (ManagedObjectNode) mos.addOfficeManagedObject(managedObjectName, ManagedObjectScope.THREAD);
 
 				} else {
-					// Use the provided office
-					managingOffice = office;
-
 					// Register the OfficeFloor managed object source
 					mos = (ManagedObjectSourceNode) this.addOfficeFloorManagedObjectSource(managedObjectName, type,
 							qualifier);
