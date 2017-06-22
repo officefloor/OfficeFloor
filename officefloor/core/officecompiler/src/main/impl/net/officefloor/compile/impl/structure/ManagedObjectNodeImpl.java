@@ -238,6 +238,13 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	}
 
 	@Override
+	public ManagedObjectDependencyNode[] getManagedObjectDepdendencies() {
+		return this.dependencies.values().stream().sorted((a, b) -> CompileUtil
+				.sortCompare(a.getManagedObjectDependencyName(), b.getManagedObjectDependencyName()))
+				.toArray(ManagedObjectDependencyNode[]::new);
+	}
+
+	@Override
 	public boolean sourceManagedObject(CompileContext compileContext) {
 
 		// Obtain the managed object type

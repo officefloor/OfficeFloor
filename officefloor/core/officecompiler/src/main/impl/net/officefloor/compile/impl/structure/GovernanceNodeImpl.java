@@ -17,10 +17,10 @@
  */
 package net.officefloor.compile.impl.structure;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.governance.GovernanceType;
@@ -39,7 +39,6 @@ import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.GovernerableManagedObject;
 import net.officefloor.compile.spi.office.OfficeGovernance;
@@ -238,18 +237,16 @@ public class GovernanceNodeImpl implements GovernanceNode {
 		}
 
 		// Create the listing of source auto-wires
-		List<AutoWire> autoWires = new ArrayList<>();
+		Set<AutoWire> autoWires = new HashSet<>();
 		this.governedOfficeObjects.stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeObjectName(), b.getOfficeObjectName()))
-				.forEachOrdered((object) -> autoWires
-						.add(new AutoWire(object.getTypeQualifier(), object.getOfficeObjectType())));
-		this.governedManagedObjects.stream().sorted((a, b) -> CompileUtil
-				.sortCompare(a.getGovernerableManagedObjectName(), b.getGovernerableManagedObjectName()))
-				.forEachOrdered((managedObject) -> {
-					TypeQualification[] qualifications = managedObject.getTypeQualifications(compileContext);
-					Arrays.stream(qualifications).forEach((qualification) -> autoWires
-							.add(new AutoWire(qualification.getQualifier(), qualification.getType())));
-				});
+				.forEachOrdered((object) -> LinkUtil.loadAllObjectAutoWires(object, autoWires, compileContext,
+						this.context.getCompilerIssues()));
+		this.governedManagedObjects.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getGovernerableManagedObjectName(),
+						b.getGovernerableManagedObjectName()))
+				.forEachOrdered((managedObject) -> LinkUtil.loadAllObjectAutoWires(managedObject, autoWires,
+						compileContext, this.context.getCompilerIssues()));
 		AutoWire[] sourceAutoWires = autoWires.stream().toArray(AutoWire[]::new);
 
 		// Attempt to auto-wire this governance

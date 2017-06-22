@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.impl.util;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -35,6 +36,7 @@ import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.OfficeNode;
+import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.internal.structure.Flow;
@@ -582,6 +584,97 @@ public class LinkUtil {
 
 		// Return whether linked
 		return isLinked;
+	}
+
+	/**
+	 * Loads the {@link AutoWire} instances for the {@link LinkObjectNode} along
+	 * with its dependency {@link AutoWire} instances and subsequent
+	 * (transitive) dependency {@link AutoWire} instances.
+	 * 
+	 * @param node
+	 *            {@link LinkObjectNode} to load transitive dependency
+	 *            {@link AutoWire} instances.
+	 * @param allAutoWires
+	 *            {@link Set} to be loaded with all the {@link AutoWire}
+	 *            instances.
+	 * @param compileContext
+	 *            {@link CompileContext}
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 */
+	public static void loadAllObjectAutoWires(LinkObjectNode node, Set<AutoWire> allAutoWires,
+			CompileContext compileContext, CompilerIssues issues) {
+		loadAllObjectAutoWires(node, allAutoWires, compileContext, issues, new HashSet<>());
+	}
+
+	/**
+	 * Loads the {@link AutoWire} instances.
+	 * 
+	 * @param node
+	 *            {@link LinkObjectNode} to load transitive dependency
+	 *            {@link AutoWire} instances.
+	 * @param allAutoWires
+	 *            {@link Set} to be loaded with all the {@link AutoWire}
+	 *            instances.
+	 * @param compileContext
+	 *            {@link CompileContext}
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @param traversedNodes
+	 *            {@link LinkObjectNode} instances already traversed to avoid
+	 *            cycles (causing infinite loops).
+	 */
+	private static void loadAllObjectAutoWires(LinkObjectNode node, Set<AutoWire> allAutoWires,
+			CompileContext compileContext, CompilerIssues issues, Set<Node> traversedNodes) {
+
+		// Determine if already traversed the node
+		if (traversedNodes.contains(node)) {
+			return; // break cycle
+		}
+		traversedNodes.add(node);
+
+		// Handling of managed object
+		Consumer<ManagedObjectNode> loadManagedObject = (managedObject) -> {
+			// Load auto wires for the managed object
+			Arrays.stream(managedObject.getTypeQualifications(compileContext))
+					.forEach((typeQualification) -> allAutoWires
+							.add(new AutoWire(typeQualification.getQualifier(), typeQualification.getType())));
+
+			// Load the dependency auto wires
+			Arrays.stream(managedObject.getManagedObjectDepdendencies())
+					.forEach((dependency) -> loadAllObjectAutoWires(dependency, allAutoWires, compileContext, issues,
+							traversedNodes));
+		};
+
+		// Handling of office object
+		Consumer<OfficeObjectNode> loadOfficeObject = (officeObject) -> allAutoWires
+				.add(new AutoWire(officeObject.getTypeQualifier(), officeObject.getOfficeObjectType()));
+
+		// Determine if managed object
+		if (node instanceof ManagedObjectNode) {
+			loadManagedObject.accept((ManagedObjectNode) node);
+
+		} else {
+
+			// Attempt to obtain the managed object
+			ManagedObjectNode managedObject = retrieveTarget(node, OBJECT_TRAVERSER, ManagedObjectNode.class, false,
+					issues, null).target;
+			if (managedObject != null) {
+				loadManagedObject.accept(managedObject);
+
+			} else {
+
+				// Attempt to load office object
+				OfficeObjectNode officeObject = retrieveTarget(node, OBJECT_TRAVERSER, OfficeObjectNode.class, false,
+						issues, null).target;
+				if (officeObject != null) {
+					loadOfficeObject.accept(officeObject);
+
+				} else if (node instanceof OfficeObjectNode) {
+					loadOfficeObject.accept((OfficeObjectNode) node);
+				}
+			}
+		}
 	}
 
 	/**

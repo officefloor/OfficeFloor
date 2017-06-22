@@ -83,6 +83,13 @@ public interface ManagedObjectNode extends DependentObjectNode, BoundManagedObje
 	TypeQualification[] getTypeQualifications(CompileContext compileContext);
 
 	/**
+	 * Obtains the {@link ManagedObjectDependencyNode} instances.
+	 * 
+	 * @return {@link ManagedObjectDependencyNode} instances.
+	 */
+	ManagedObjectDependencyNode[] getManagedObjectDepdendencies();
+
+	/**
 	 * Auto-wires the dependencies for the {@link ManagedObject}.
 	 * 
 	 * @param autoWirer

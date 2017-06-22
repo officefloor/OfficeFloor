@@ -17,6 +17,8 @@
  */
 package net.officefloor.compile.impl.util;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Function;
 
 import net.officefloor.compile.OfficeFloorCompiler;
@@ -43,6 +45,7 @@ import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**
  * Tests the {@link LinkUtil}.
@@ -500,6 +503,96 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can load all {@link AutoWire} instances for the
+	 * {@link LinkObjectNode}.
+	 */
+	public void testLoadAllObjectAutoWires() {
+
+		// Obtain the node context
+		NodeContext context = (NodeContext) OfficeFloorCompiler.newOfficeFloorCompiler(null);
+
+		// Compile context
+		final CompileContext compileContext = context.createCompileContext();
+
+		// Create the OfficeFloor and Office
+		OfficeFloorNode officeFloor = context.createOfficeFloorNode("net.example.ExampleOfficeFloorSource", null,
+				"location");
+		OfficeNode office = context.createOfficeNode("OFFICE", officeFloor);
+
+		// Create the direct dependency
+		ManagedObjectSourceNode directSource = context.createManagedObjectSourceNode("DIRECT_SOURCE", officeFloor);
+		directSource.initialise(ClassManagedObjectSource.class.getName(), null);
+		directSource.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, Object.class.getName());
+		ManagedObjectNode direct = (ManagedObjectNode) directSource.addOfficeFloorManagedObject("DIRECT",
+				ManagedObjectScope.PROCESS);
+		direct.addTypeQualification("DIRECT", Object.class.getName());
+
+		// Create the dependency
+		ManagedObjectSourceNode dependencySource = context.createManagedObjectSourceNode("DEPENDENCY_SOURCE",
+				officeFloor);
+		dependencySource.initialise(ClassManagedObjectSource.class.getName(), null);
+		dependencySource.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, Object.class.getName());
+		ManagedObjectNode dependency = (ManagedObjectNode) dependencySource.addOfficeFloorManagedObject("DEPENDENCY",
+				ManagedObjectScope.PROCESS);
+		dependency.addTypeQualification("DEPENDENCY", Object.class.getName());
+		((LinkObjectNode) direct.getManagedObjectDependency("dependency")).linkObjectNode(dependency);
+
+		// Create the transitive dependency
+		ManagedObjectSourceNode transitiveSource = context.createManagedObjectSourceNode("TRANSITIVE_SOURCE",
+				officeFloor);
+		transitiveSource.initialise(ClassManagedObjectSource.class.getName(), null);
+		transitiveSource.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, Object.class.getName());
+		ManagedObjectNode transitive = (ManagedObjectNode) transitiveSource.addOfficeFloorManagedObject("TRANSITIVE",
+				ManagedObjectScope.PROCESS);
+		transitive.addTypeQualification("TRANSITIVE", Object.class.getName());
+		((LinkObjectNode) dependency.getManagedObjectDependency("dependency")).linkObjectNode(transitive);
+
+		// Create the ignored Office Object (as linked to managed object)
+		OfficeObjectNode linkedOfficeObject = context.createOfficeObjectNode("IGNORED", office);
+		((LinkObjectNode) direct.getManagedObjectDependency("implemented")).linkObjectNode(linkedOfficeObject);
+		ManagedObjectSourceNode implementingSource = context.createManagedObjectSourceNode("IMPLEMENTING_SOURCE",
+				officeFloor);
+		implementingSource.initialise(ClassManagedObjectSource.class.getName(), null);
+		implementingSource.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, Object.class.getName());
+		ManagedObjectNode implementing = (ManagedObjectNode) implementingSource
+				.addOfficeFloorManagedObject("IMPLEMENTING", ManagedObjectScope.PROCESS);
+		implementing.addTypeQualification("OBJECT_DEPENDENCY", Object.class.getName());
+		linkedOfficeObject.linkObjectNode(implementing);
+
+		// Create the used Office Object (testing but will error compile)
+		OfficeObjectNode officeObject = context.createOfficeObjectNode("NOT_LINKED", office);
+		officeObject.initialise(Object.class.getName());
+		officeObject.setTypeQualifier("OFFICE_OBJECT");
+		((LinkObjectNode) direct.getManagedObjectDependency("object")).linkObjectNode(officeObject);
+
+		// Ensure handle cycle and not infinite loop
+		ManagedObjectSourceNode cycleSource = context.createManagedObjectSourceNode("CYCLE_SOURCE", officeFloor);
+		cycleSource.initialise(ClassManagedObjectSource.class.getName(), null);
+		cycleSource.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, Object.class.getName());
+		ManagedObjectNode cycle = (ManagedObjectNode) cycleSource.addOfficeFloorManagedObject("CYCLE",
+				ManagedObjectScope.PROCESS);
+		cycle.addTypeQualification("CYCLE", Object.class.getName());
+		((LinkObjectNode) direct.getManagedObjectDependency("cycle")).linkObjectNode(cycle);
+		((LinkObjectNode) cycle.getManagedObjectDependency("cycle")).linkObjectNode(direct);
+
+		// Load the auto wire objects
+		Set<AutoWire> allAutoWires = new HashSet<>();
+		this.replayMockObjects();
+		LinkUtil.loadAllObjectAutoWires(direct, allAutoWires, compileContext, issues);
+		this.verifyMockObjects();
+
+		// Ensure correct number of auto wires
+		assertEquals("Incorrect number of auto-wires", 6, allAutoWires.size());
+		assertTrue("No direct auto wire", allAutoWires.contains(new AutoWire("DIRECT", Object.class)));
+		assertTrue("No dependency auto wire", allAutoWires.contains(new AutoWire("DEPENDENCY", Object.class)));
+		assertTrue("No transitive auto wire", allAutoWires.contains(new AutoWire("TRANSITIVE", Object.class)));
+		assertTrue("No Office Object implementing auto wire",
+				allAutoWires.contains(new AutoWire("OBJECT_DEPENDENCY", Object.class)));
+		assertTrue("No OfficeObject auto wire", allAutoWires.contains(new AutoWire("OFFICE_OBJECT", Object.class)));
+		assertTrue("No cycle auto wire", allAutoWires.contains(new AutoWire("CYCLE", Object.class)));
+	}
+
+	/**
 	 * Retrieves the {@link TargetLinkNode}.
 	 * 
 	 * @param link
@@ -584,9 +677,9 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Link node for testing.
+	 * Abstract {@link Node} for testing.
 	 */
-	private class LinkNode implements LinkFlowNode, LinkObjectNode, LinkTeamNode, LinkOfficeNode, LinkPoolNode {
+	private class AbstractLinkNode<N extends Node> implements Node {
 
 		/**
 		 * Name of this {@link Node}.
@@ -596,7 +689,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		/**
 		 * Linked node.
 		 */
-		private LinkNode linkedNode;
+		private N linkedNode;
 
 		/**
 		 * Flags if this {@link LinkNode} will cause a cycle.
@@ -609,33 +702,33 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		 * @param nodeName
 		 *            Name of this {@link Node}.
 		 * @param linkedNode
-		 *            Linked node.
+		 *            Linked {@link Node}.
 		 */
-		public LinkNode(String nodeName, LinkNode linkedNode) {
+		public AbstractLinkNode(String nodeName, N linkedNode) {
 			this.nodeName = nodeName;
 			this.linkedNode = linkedNode;
 		}
 
 		/**
-		 * Links this {@link LinkNode} to the input {@link LinkNode}.
+		 * Links this {@link Node} to the input {@link Node}.
 		 * 
 		 * @param linkedNode
-		 *            Linked {@link LinkNode}.
+		 *            Linked {@link Node}.
 		 */
-		public void linkNode(LinkNode linkedNode) {
+		public void linkNode(N linkedNode) {
 			this.linkedNode = linkedNode;
 		}
 
 		/**
-		 * Obtains the linked {@link LinkNode} validating not in a cycle.
+		 * Obtains the linked {@link Node} validating not in a cycle.
 		 * 
-		 * @return Linked {@link LinkNode}.
+		 * @return Linked {@link Node}.
 		 */
-		private LinkNode getLinkedNode() {
+		protected N getLinkedNode() {
 
 			// Ensure not traverse if this link causes a cycle
 			if (this.isTraversed) {
-				fail("Should not traverse when in a cycle");
+				fail("Should only traverse once, otherwise in a cycle");
 			}
 
 			// Return the linked node
@@ -679,6 +772,25 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		public boolean isInitialised() {
 			fail("Should not require initialisation");
 			return false;
+		}
+	}
+
+	/**
+	 * Link {@link Node} for testing.
+	 */
+	private class LinkNode extends AbstractLinkNode<LinkNode>
+			implements LinkFlowNode, LinkObjectNode, LinkTeamNode, LinkOfficeNode, LinkPoolNode {
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param nodeName
+		 *            Name of this {@link Node}.
+		 * @param linkedNode
+		 *            Linked {@link Node}.
+		 */
+		public LinkNode(String nodeName, LinkNode linkedNode) {
+			super(nodeName, linkedNode);
 		}
 
 		/*

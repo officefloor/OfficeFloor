@@ -17,11 +17,12 @@
  */
 package net.officefloor.compile.impl.structure;
 
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.officefloor.compile.impl.office.OfficeFunctionTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
@@ -323,10 +324,10 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 			CompileContext compileContext) {
 
 		// Create the listing of source auto wires
-		ManagedFunctionType<?, ?> functionType = this.loadManagedFunctionType(compileContext);
-		AutoWire[] sourceAutoWires = Arrays.stream(functionType.getObjectTypes())
-				.map((objectType) -> new AutoWire(objectType.getTypeQualifier(), objectType.getObjectType().getName()))
-				.toArray(AutoWire[]::new);
+		Set<AutoWire> autoWires = new HashSet<>();
+		this.functionObjects.values().forEach((object) -> LinkUtil.loadAllObjectAutoWires(object, autoWires,
+				compileContext, this.context.getCompilerIssues()));
+		AutoWire[] sourceAutoWires = autoWires.stream().toArray(AutoWire[]::new);
 
 		// Obtain the office
 		OfficeNode office = this.state.namespaceNode.getSectionNode().getOfficeNode();

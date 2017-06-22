@@ -17,10 +17,10 @@
  */
 package net.officefloor.compile.impl.structure;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import net.officefloor.compile.administration.AdministrationLoader;
 import net.officefloor.compile.administration.AdministrationType;
@@ -34,7 +34,6 @@ import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
-import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
@@ -259,27 +258,12 @@ public class AdministrationNodeImpl implements AdministrationNode {
 		}
 
 		// Load the source auto-wires
-		List<AutoWire> autoWires = new ArrayList<>();
-		this.administeredManagedObjects.stream().sorted((a, b) -> CompileUtil
-				.sortCompare(a.getAdministerableManagedObjectName(), b.getAdministerableManagedObjectName()))
-				.forEachOrdered((administerable) -> {
-					if (administerable instanceof ManagedObjectNode) {
-						ManagedObjectNode managedObject = (ManagedObjectNode) administerable;
-						Arrays.stream(managedObject.getTypeQualifications(compileContext))
-								.forEach((qualification) -> autoWires
-										.add(new AutoWire(qualification.getQualifier(), qualification.getType())));
-
-					} else if (administerable instanceof OfficeObjectNode) {
-						OfficeObjectNode officeObject = (OfficeObjectNode) administerable;
-						autoWires
-								.add(new AutoWire(officeObject.getTypeQualifier(), officeObject.getOfficeObjectType()));
-
-					} else {
-						// Unknown administerable object type
-						throw new IllegalStateException("Unknown " + AdministerableManagedObject.class.getSimpleName()
-								+ " type " + administerable.getClass().getName());
-					}
-				});
+		Set<AutoWire> autoWires = new HashSet<>();
+		this.administeredManagedObjects.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getAdministerableManagedObjectName(),
+						b.getAdministerableManagedObjectName()))
+				.forEachOrdered((administerable) -> LinkUtil.loadAllObjectAutoWires((LinkObjectNode) administerable,
+						autoWires, compileContext, this.context.getCompilerIssues()));
 		AutoWire[] sourceAutoWires = autoWires.stream().toArray(AutoWire[]::new);
 
 		// Determine if auto wire the team
