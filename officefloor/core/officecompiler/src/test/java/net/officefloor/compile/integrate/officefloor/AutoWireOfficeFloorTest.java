@@ -20,6 +20,7 @@ package net.officefloor.compile.integrate.officefloor;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.compile.impl.structure.OfficeObjectNodeImpl;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
@@ -41,6 +42,7 @@ import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
+import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
 import net.officefloor.extension.AutoWireOfficeFloorExtensionService;
@@ -52,12 +54,16 @@ import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
+import net.officefloor.plugin.managedobject.singleton.Singleton;
 
 /**
  * Tests the {@link AutoWire} of the {@link OfficeFloor}.
@@ -70,7 +76,8 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 
-		// Reset the supplier
+		// Reset the Office and Supplier
+		CompileOfficeSource.reset();
 		CompileSupplierSource.reset();
 	}
 
@@ -203,14 +210,71 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 	 * chain.
 	 */
 	public void testAutoWireOfficeFloorManagedObjectWithCyclicDependencies() {
-		fail("TODO implement");
+
+		// Flag to enable auto-wiring of the objects
+		AutoWireOfficeFloorExtensionService.enableAutoWireObjects();
+
+		// Record building the OfficeFloor
+		this.record_init();
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+
+		// Build the Managed Object
+		this.record_officeFloorBuilder_addManagedObject("DEPENDENCY_ONE_SOURCE", ClassManagedObjectSource.class, 0,
+				"class.name", DependencyManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource("DEPENDENCY_ONE_OBJECT", "DEPENDENCY_ONE_SOURCE");
+		DependencyMappingBuilder one = this.record_officeBuilder_addThreadManagedObject("DEPENDENCY_ONE_OBJECT",
+				"DEPENDENCY_ONE_OBJECT");
+		one.mapDependency(0, "DEPENDENCY_TWO_OBJECT");
+
+		// Build the Managed Object
+		this.record_officeFloorBuilder_addManagedObject("DEPENDENCY_TWO_SOURCE", ClassManagedObjectSource.class, 0,
+				"class.name", CycleManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource("DEPENDENCY_TWO_OBJECT", "DEPENDENCY_TWO_SOURCE");
+		DependencyMappingBuilder two = this.record_officeBuilder_addThreadManagedObject("DEPENDENCY_TWO_OBJECT",
+				"DEPENDENCY_TWO_OBJECT");
+		two.mapDependency(0, "DEPENDENCY_ONE_OBJECT");
+
+		// Build the office
+		CompileOfficeSource.registerOffice(CycleManagedObject.class, "DEPENDENCY_ONE_OBJECT", null, this);
+
+		// Not link dependency, as cycle in dependencies
+		fail("Should provide warning of cyclic dependency");
+
+		// Compile the OfficeFloor
+		this.compile(true);
 	}
 
 	/**
 	 * Ensure can auto-wire {@link SuppliedManagedObjectSource}.
 	 */
 	public void testAutoWireSuppliedManagedObject() {
-		fail("TODO implement");
+
+		// Flag to enable auto-wiring of the objects
+		AutoWireOfficeFloorExtensionService.enableAutoWireObjects();
+
+		// Record building the OfficeFloor
+		this.record_init();
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+
+		// Register the supplied managed object source
+		Singleton mos = new Singleton(new CompileManagedObject());
+		CompileSupplierSource.addSuppliedManagedObjectSource(CompileManagedObject.class, mos);
+
+		// Should supply and auto-wire the dependency
+		final String mosName = CompileManagedObject.class.getName();
+		final String moName = CompileManagedObject.class.getName();
+		this.record_officeFloorBuilder_addManagedObject(mosName, mos, 0);
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource(mosName, mosName);
+		this.record_officeBuilder_addThreadManagedObject(moName, mosName);
+
+		// Build the office
+		CompileOfficeSource.registerOffice(DependencyManagedObject.class, moName, null, this);
+
+		// Compile the OfficeFloor
+		this.compile(true);
 	}
 
 	/**
@@ -218,24 +282,106 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 	 * {@link SuppliedManagedObjectSource}.
 	 */
 	public void testAutoWireSuppliedManagedObjectDependency() {
-		fail("TODO implement");
+
+		// Flag to enable auto-wiring of the objects
+		AutoWireOfficeFloorExtensionService.enableAutoWireObjects();
+
+		// Record building the OfficeFloor
+		this.record_init();
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+
+		// Register the supplied managed object source
+		Singleton mos = new Singleton(new CompileManagedObject());
+		CompileSupplierSource.addSuppliedManagedObjectSource(CompileManagedObject.class, mos);
+
+		// Build the Managed Object with dependency
+		office.registerManagedObjectSource("DEPENDENCY", "DEPENDENCY_SOURCE");
+		this.record_officeFloorBuilder_addManagedObject("DEPENDENCY_SOURCE", ClassManagedObjectSource.class, 0,
+				"class.name", DependencyManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		DependencyMappingBuilder dependency = this.record_officeBuilder_addProcessManagedObject("DEPENDENCY",
+				"DEPENDENCY");
+
+		// Should supply and auto-wire the dependency
+		final String mosName = CompileManagedObject.class.getName();
+		final String moName = CompileManagedObject.class.getName();
+		this.record_officeFloorBuilder_addManagedObject(mosName, mos, 0);
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource(mosName, mosName);
+		this.record_officeBuilder_addThreadManagedObject(moName, mosName);
+		dependency.mapDependency(0, moName);
+
+		// Build the office
+		CompileOfficeSource.registerOffice(DependencyManagedObject.class, "DEPENDENCY", null, this);
+
+		// Compile the OfficeFloor
+		this.compile(true);
 	}
 
 	/**
 	 * Ensure {@link SuppliedManagedObjectSource} requiring a {@link Flow} is
 	 * not available for auto-wiring. Must be manually added with {@link Flow}
 	 * configured.
+	 * <p>
+	 * Purpose of {@link SupplierSource} is integration with object dependency
+	 * injection libraries. These are not expected to support
+	 * continuation/thread injection.
 	 */
 	public void testSuppliedManagedObjectWithFlowNotAvailable() {
-		fail("TODO implement");
+
+		// Flag to enable auto-wiring of the objects
+		AutoWireOfficeFloorExtensionService.enableAutoWireObjects();
+
+		// Record building the OfficeFloor
+		this.record_init();
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+
+		// Register supplied managed object with flow
+		CompileSupplierSource.addSuppliedManagedObjectSource(CompileManagedObject.class, new FlowManagedObjectSource());
+
+		// Build the office
+		CompileOfficeSource.registerOffice(CompileManagedObject.class, "DEPENDENCY", null, this);
+
+		// Should not supply managed object as requires flow configuration
+		this.issues.recordIssue("OBJECT", OfficeObjectNodeImpl.class, "No target found by auto-wiring");
+		this.issues.recordIssue("OBJECT", OfficeObjectNodeImpl.class,
+				"Office Object OBJECT is not linked to a BoundManagedObjectNode");
+
+		// Compile the OfficeFloor
+		this.compile(true);
 	}
 
 	/**
-	 * Ensure can auto-wire {@link OfficeFloorTeam} for a
-	 * {@link SuppliedManagedObjectSource}.
+	 * Ensure {@link SuppliedManagedObjectSource} requiring a {@link Team} is
+	 * not available for auto-wiring. Must be manually added with {@link Team}
+	 * configured.
+	 * <p>
+	 * Purpose of {@link SupplierSource} is integration with object dependency
+	 * injection libraries. These are not expected to support
+	 * continuation/thread injection.
 	 */
-	public void testAutoWireSuppliedManagedObjectTeam() {
-		fail("TODO implement");
+	public void testSuppliedManagedObjectWithTeamNotAvailable() {
+
+		// Flag to enable auto-wiring of the objects
+		AutoWireOfficeFloorExtensionService.enableAutoWireObjects();
+
+		// Record building the OfficeFloor
+		this.record_init();
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+
+		// Register supplied managed object with team
+		CompileSupplierSource.addSuppliedManagedObjectSource(CompileManagedObject.class, new TeamManagedObjectSource());
+
+		// Build the office
+		CompileOfficeSource.registerOffice(CompileManagedObject.class, "DEPENDENCY", null, this);
+
+		// Should not supply managed object as requires flow configuration
+		this.issues.recordIssue("OBJECT", OfficeObjectNodeImpl.class, "No target found by auto-wiring");
+		this.issues.recordIssue("OBJECT", OfficeObjectNodeImpl.class,
+				"Office Object OBJECT is not linked to a BoundManagedObjectNode");
+
+		// Compile the OfficeFloor
+		this.compile(true);
 	}
 
 	/**
@@ -267,6 +413,11 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 	public static class DependencyManagedObject {
 		@Dependency
 		private CompileManagedObject dependency;
+	}
+
+	public static class CycleManagedObject extends CompileManagedObject {
+		@Dependency
+		private DependencyManagedObject dependency;
 	}
 
 	@TestSource
@@ -332,6 +483,14 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 
 		private static String officeTeamName = null;
 
+		private static boolean isBuild = true;
+
+		public static void reset() {
+			sectionSource = null;
+			officeTeamName = null;
+			isBuild = true;
+		}
+
 		public static void registerOffice(Class<?> dependencyType, String managedObjectName, String teamName,
 				AutoWireOfficeFloorTest testCase) {
 
@@ -339,8 +498,10 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 			sectionSource = new CompileSectionSource(dependencyType, managedObjectName);
 			officeTeamName = teamName;
 
-			// TODO REMOVE
-			// if (true) return;
+			// Determine if build (helps debugging)
+			if (!isBuild) {
+				return;
+			}
 
 			// Record adding the managed function
 			ManagedFunctionBuilder<?, ?> function = testCase.record_officeBuilder_addFunction("SECTION", "FUNCTION");
@@ -435,6 +596,65 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 
 		@Override
 		public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
+			return null;
+		}
+	}
+
+	@TestSource
+	public static class FlowManagedObjectSource extends AbstractManagedObjectSource<None, Indexed>
+			implements ManagedObject {
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<None, Indexed> context) throws Exception {
+			context.setObjectClass(this.getClass());
+
+			// Require flow
+			context.addFlow(String.class);
+		}
+
+		@Override
+		protected ManagedObject getManagedObject() throws Throwable {
+			return this;
+		}
+
+		@Override
+		public Object getObject() throws Throwable {
+			return this;
+		}
+	}
+
+	@TestSource
+	public static class TeamManagedObjectSource extends AbstractManagedObjectSource<None, Indexed>
+			implements ManagedObject, ManagedFunction<None, None> {
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<None, Indexed> context) throws Exception {
+			context.setObjectClass(this.getClass());
+
+			// Require team
+			context.getManagedObjectSourceContext().getRecycleFunction(() -> this).setResponsibleTeam("MO_TEAM");
+		}
+
+		@Override
+		protected ManagedObject getManagedObject() throws Throwable {
+			return this;
+		}
+
+		@Override
+		public Object getObject() throws Throwable {
+			return this;
+		}
+
+		@Override
+		public Object execute(ManagedFunctionContext<None, None> context) throws Throwable {
 			return null;
 		}
 	}

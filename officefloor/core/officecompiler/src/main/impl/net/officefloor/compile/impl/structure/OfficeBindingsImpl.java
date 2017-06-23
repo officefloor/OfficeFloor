@@ -103,12 +103,16 @@ public class OfficeBindingsImpl implements OfficeBindings {
 
 	@Override
 	public void buildManagedObjectSourceIntoOffice(ManagedObjectSourceNode managedObjectSourceNode) {
+
+		// Ensure not already built into Office
 		if (this.builtManagedObjectSources.contains(managedObjectSourceNode)) {
 			return; // already built into office
 		}
+		this.builtManagedObjectSources.add(managedObjectSourceNode);
+
+		// Build the managed object source into the office
 		managedObjectSourceNode.buildManagedObject(this.officeFloorBuilder, this.office, this.officeBuilder, this,
 				this.compileContext);
-		this.builtManagedObjectSources.add(managedObjectSourceNode);
 	}
 
 	@Override
@@ -120,33 +124,41 @@ public class OfficeBindingsImpl implements OfficeBindings {
 			this.buildManagedObjectSourceIntoOffice(managedObjectSourceNode);
 		}
 
-		// Build the managed object into the office
+		// Ensure not already built into Office
 		if (this.builtManagedObjects.contains(managedObjectNode)) {
 			return; // already built into office
 		}
-		managedObjectNode.buildOfficeManagedObject(this.office, this.officeBuilder, this, this.compileContext);
 		this.builtManagedObjects.add(managedObjectNode);
+
+		// Build the managed object into the office
+		managedObjectNode.buildOfficeManagedObject(this.office, this.officeBuilder, this, this.compileContext);
 	}
 
 	@Override
 	public void buildInputManagedObjectIntoOffice(InputManagedObjectNode inputManagedObjectNode) {
+
+		// Ensure not already built into Office
 		if (this.builtInputManagedObjects.contains(inputManagedObjectNode)) {
 			return; // already built into office
 		}
+		this.builtInputManagedObjects.add(inputManagedObjectNode);
+
+		// Build the Input managed object
 		this.officeBuilder.setBoundInputManagedObject(inputManagedObjectNode.getBoundManagedObjectName(),
 				inputManagedObjectNode.getBoundManagedObjectSourceNode().getManagedObjectSourceName());
-		this.builtInputManagedObjects.add(inputManagedObjectNode);
 	}
 
 	@Override
 	public void buildManagedFunctionIntoOffice(ManagedFunctionNode managedFunctionNode) {
-		
-		// Build the function into the office
+
+		// Ensure not already built into Office
 		if (this.builtManagedFunctions.contains(managedFunctionNode)) {
 			return; // already built into office
 		}
-		managedFunctionNode.buildManagedFunction(this.officeBuilder, this.compileContext);
 		this.builtManagedFunctions.add(managedFunctionNode);
+
+		// Build the function
+		managedFunctionNode.buildManagedFunction(this.officeBuilder, this.compileContext);
 	}
 
 }
