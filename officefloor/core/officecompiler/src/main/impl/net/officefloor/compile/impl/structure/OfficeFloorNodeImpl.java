@@ -560,13 +560,26 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 		if (this.isAutoWireObjects) {
 
 			// Create the auto wirer
-			final AutoWirer<LinkObjectNode> autoWirer = this.context.createAutoWirer(LinkObjectNode.class);
-			this.loadAutoWireObjectTargets(autoWirer, compileContext);
+			final AutoWirer<LinkObjectNode> officeFloorAutoWirer = this.context.createAutoWirer(LinkObjectNode.class);
+			final AutoWirer<LinkObjectNode> autoWirer = this.loadAutoWireObjectTargets(officeFloorAutoWirer,
+					compileContext);
 
 			// Iterate over offices (auto-wiring unlinked dependencies)
 			this.offices.values().stream()
 					.sorted((a, b) -> CompileUtil.sortCompare(a.getDeployedOfficeName(), b.getDeployedOfficeName()))
 					.forEachOrdered((office) -> office.autoWireObjects(autoWirer, compileContext));
+
+			// Iterate over managed objects (auto-wiring unlinked dependencies)
+			this.managedObjects.values().stream().sorted((a, b) -> CompileUtil
+					.sortCompare(a.getOfficeFloorManagedObjectName(), b.getOfficeFloorManagedObjectName()))
+					.forEachOrdered((managedObject) -> {
+						// Obtain the managing office for the managed object
+						ManagedObjectSourceNode managedObjectSource = managedObject.getManagedObjectSourceNode();
+						OfficeNode officeNode = managedObjectSource.getManagingOfficeNode();
+
+						// Load the dependencies for the managed object
+						managedObject.autoWireDependencies(autoWirer, officeNode, compileContext);
+					});
 		}
 
 		// Undertake auto-wire of teams
@@ -597,12 +610,19 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	@Override
 	public AutoWirer<LinkObjectNode> loadAutoWireObjectTargets(AutoWirer<LinkObjectNode> autoWirer,
 			CompileContext compileContext) {
+		
+		// Load the input managed objects (last to auto-wire)
+		this.inputManagedObjects.values().forEach((inputMo) -> {
+
+			
+		});
 
 		// Load the supplied managed objects
-		this.suppliers.values().stream().forEach((supplier) -> supplier.loadAutoWireObjects(autoWirer, compileContext));
+		final AutoWirer<LinkObjectNode> supplierAutoWirer = autoWirer.createScopeAutoWirer();
+		this.suppliers.values().stream().forEach((supplier) -> supplier.loadAutoWireObjects(supplierAutoWirer, compileContext));
 
 		// Load the managed objects
-		final AutoWirer<LinkObjectNode> managedObjectAutoWirer = autoWirer.createScopeAutoWirer();
+		final AutoWirer<LinkObjectNode> managedObjectAutoWirer = supplierAutoWirer.createScopeAutoWirer();
 		this.managedObjects.values().forEach((mo) -> {
 
 			// Create the auto-wires

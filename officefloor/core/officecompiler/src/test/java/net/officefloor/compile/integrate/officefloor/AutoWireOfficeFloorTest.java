@@ -239,9 +239,6 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		// Build the office
 		CompileOfficeSource.registerOffice(CycleManagedObject.class, "DEPENDENCY_ONE_OBJECT", null, this);
 
-		// Not link dependency, as cycle in dependencies
-		fail("Should provide warning of cyclic dependency");
-
 		// Compile the OfficeFloor
 		this.compile(true);
 	}
@@ -271,7 +268,7 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		this.record_officeBuilder_addThreadManagedObject(moName, mosName);
 
 		// Build the office
-		CompileOfficeSource.registerOffice(DependencyManagedObject.class, moName, null, this);
+		CompileOfficeSource.registerOffice(CompileManagedObject.class, moName, null, this);
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -339,13 +336,17 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		// Register supplied managed object with flow
 		CompileSupplierSource.addSuppliedManagedObjectSource(CompileManagedObject.class, new FlowManagedObjectSource());
 
-		// Build the office
-		CompileOfficeSource.registerOffice(CompileManagedObject.class, "DEPENDENCY", null, this);
-
 		// Should not supply managed object as requires flow configuration
 		this.issues.recordIssue("OBJECT", OfficeObjectNodeImpl.class, "No target found by auto-wiring");
 		this.issues.recordIssue("OBJECT", OfficeObjectNodeImpl.class,
 				"Office Object OBJECT is not linked to a BoundManagedObjectNode");
+		this.issues.recordIssue("OBJECT", OfficeObjectNodeImpl.class,
+				"Office Object OBJECT is not linked to a BoundManagedObjectNode");
+
+		// Build the office
+		CompileOfficeSource.isBuild = false;
+		CompileOfficeSource.registerOffice(CompileManagedObject.class, "OBJECT", null, this);
+		this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -372,13 +373,17 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		// Register supplied managed object with team
 		CompileSupplierSource.addSuppliedManagedObjectSource(CompileManagedObject.class, new TeamManagedObjectSource());
 
-		// Build the office
-		CompileOfficeSource.registerOffice(CompileManagedObject.class, "DEPENDENCY", null, this);
-
 		// Should not supply managed object as requires flow configuration
 		this.issues.recordIssue("OBJECT", OfficeObjectNodeImpl.class, "No target found by auto-wiring");
 		this.issues.recordIssue("OBJECT", OfficeObjectNodeImpl.class,
 				"Office Object OBJECT is not linked to a BoundManagedObjectNode");
+		this.issues.recordIssue("OBJECT", OfficeObjectNodeImpl.class,
+				"Office Object OBJECT is not linked to a BoundManagedObjectNode");
+
+		// Build the office
+		CompileOfficeSource.isBuild = false;
+		CompileOfficeSource.registerOffice(CompileManagedObject.class, "OBJECT", null, this);
+		this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
 
 		// Compile the OfficeFloor
 		this.compile(true);
