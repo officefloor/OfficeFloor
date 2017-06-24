@@ -60,6 +60,9 @@
 		<input-managed-object name="INPUT_MANAGED_OBJECT"
 			object-type="net.orm.Session" x="200" y="201">
 			<bound-managed-object-source name="MANAGED_OBJECT_SOURCE" />
+			<type-qualification qualifier="QUALIFIED"
+				type="java.http.InputRequest" />
+			<type-qualification type="java.http.GenericRequest" />
 		</input-managed-object>
 	</input-managed-objects>
 

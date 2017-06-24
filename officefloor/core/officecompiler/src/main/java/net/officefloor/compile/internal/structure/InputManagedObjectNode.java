@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -26,8 +27,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface InputManagedObjectNode extends LinkObjectNode,
-		BoundManagedObjectNode, OfficeFloorInputManagedObject {
+public interface InputManagedObjectNode extends LinkObjectNode, BoundManagedObjectNode, OfficeFloorInputManagedObject {
 
 	/**
 	 * {@link Node} type.
@@ -60,5 +60,16 @@ public interface InputManagedObjectNode extends LinkObjectNode,
 	 *         over this {@link InputManagedObjectNode}.
 	 */
 	GovernanceNode[] getGovernances(OfficeNode managingOffice);
+
+	/**
+	 * Obtains the {@link TypeQualification} instances for the
+	 * {@link InputManagedObjectNode}.
+	 * 
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 * @return {@link TypeQualification} instances for the
+	 *         {@link InputManagedObjectNode}.
+	 */
+	TypeQualification[] getTypeQualifications(CompileContext compileContext);
 
 }

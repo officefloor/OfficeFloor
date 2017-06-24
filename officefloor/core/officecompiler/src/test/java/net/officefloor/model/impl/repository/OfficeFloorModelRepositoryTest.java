@@ -133,19 +133,21 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 		assertProperties(
 				new OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel("SUPPLIER", "QUALIFIER",
 						"net.orm.SpecificSession"),
-				suppliedMoSource.getOfficeFloorSupplier(), "getOfficeFloorSupplierName", "getQualifier",
-				"getType");
+				suppliedMoSource.getOfficeFloorSupplier(), "getOfficeFloorSupplierName", "getQualifier", "getType");
 
 		// ----------------------------------------
 		// Validate the OfficeFloor input managed objects
 		// ----------------------------------------
 		assertList(new String[] { "getOfficeFloorInputManagedObjectName", "getObjectType", "getX", "getY" },
 				officeFloor.getOfficeFloorInputManagedObjects(), new OfficeFloorInputManagedObjectModel(
-						"INPUT_MANAGED_OBJECT", "net.orm.Session", null, null, null, null, 200, 201));
+						"INPUT_MANAGED_OBJECT", "net.orm.Session", null, null, null, null, null, 200, 201));
 		OfficeFloorInputManagedObjectModel inputMo = officeFloor.getOfficeFloorInputManagedObjects().get(0);
 		assertProperties(
 				new OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel("MANAGED_OBJECT_SOURCE"),
 				inputMo.getBoundOfficeFloorManagedObjectSource(), "getOfficeFloorManagedObjectSourceName");
+		assertList(new String[] { "getQualifier", "getType" }, inputMo.getTypeQualifications(),
+				new TypeQualificationModel("QUALIFIED", "java.http.InputRequest"),
+				new TypeQualificationModel(null, "java.http.GenericRequest"));
 
 		// ----------------------------------------
 		// Validate the OfficeFloor managed objects

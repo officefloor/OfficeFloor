@@ -145,6 +145,15 @@
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
+			<collection method="getTypeQualifications">
+				<item type="net.officefloor.model.officefloor.TypeQualificationModel"
+					element="type-qualification">
+					<attributes>
+						<attribute method="getQualifier" attribute="qualifier" />
+						<attribute method="getType" attribute="type" />
+					</attributes>
+				</item>
+			</collection>
 			<object method="getBoundOfficeFloorManagedObjectSource"
 				element="bound-managed-object-source">
 				<attributes>

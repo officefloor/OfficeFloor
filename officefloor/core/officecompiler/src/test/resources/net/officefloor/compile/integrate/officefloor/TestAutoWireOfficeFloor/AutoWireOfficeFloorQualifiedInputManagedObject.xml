@@ -1,0 +1,30 @@
+<context>
+	<office-floor>
+		<managed-object-sources>
+			<managed-object-source name="INPUT_SOURCE"
+				source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$CompileManagedObject" />
+				</properties>
+				<!-- Also auto-wire the office -->
+				<managing-office name="OFFICE" />
+				<input-managed-object name="INPUT_OBJECT" />
+			</managed-object-source>
+		</managed-object-sources>
+		<input-managed-objects>
+			<input-managed-object name="INPUT_OBJECT"
+				object-type="${testcase}$CompileManagedObject">
+				<bound-managed-object-source name="INPUT_SOURCE" />
+				<type-qualification type="${testcase}$DependencyManagedObject" />
+			</input-managed-object>
+		</input-managed-objects>
+		<offices>
+			<office name="OFFICE" source="${testcase}$CompileOfficeSource">
+				<object name="OBJECT">
+					<!-- auto-wire object -->
+					<!-- <input-managed-object name="INPUT_OBJECT" /> -->
+				</object>
+			</office>
+		</offices>
+	</office-floor>
+</context>

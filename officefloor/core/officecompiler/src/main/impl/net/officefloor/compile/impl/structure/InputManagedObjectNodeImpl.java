@@ -26,12 +26,15 @@ import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
+import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeBindings;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
+import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -74,6 +77,11 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	 * Bound {@link ManagedObjectSourceNode}.
 	 */
 	private ManagedObjectSourceNode boundManagedObjectSource = null;
+
+	/**
+	 * {@link TypeQualification} instances for this {@link ManagedObjectNode}.
+	 */
+	private final List<TypeQualification> typeQualifications = new LinkedList<TypeQualification>();
 
 	/**
 	 * Listing of {@link GovernanceNode} instances for the particular
@@ -194,6 +202,29 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 				: governances.toArray(new GovernanceNode[governances.size()]));
 	}
 
+	@Override
+	public TypeQualification[] getTypeQualifications(CompileContext compileContext) {
+
+		// Obtain the type qualifications
+		TypeQualification[] qualifications = this.typeQualifications.stream().toArray(TypeQualification[]::new);
+		if (qualifications.length == 0) {
+
+			// No qualifications, so use managed object type
+			if (this.boundManagedObjectSource != null) {
+				ManagedObjectType<?> managedObjectType = compileContext
+						.getOrLoadManagedObjectType(this.boundManagedObjectSource);
+				if (managedObjectType == null) {
+					return null; // must have type
+				}
+
+				// Use the managed object type
+				qualifications = new TypeQualification[] {
+						new TypeQualificationImpl(null, managedObjectType.getObjectClass().getName()) };
+			}
+		}
+		return qualifications;
+	}
+
 	/*
 	 * ================== OfficeFloorInputManagedObject =======================
 	 */
@@ -201,6 +232,11 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	@Override
 	public String getOfficeFloorInputManagedObjectName() {
 		return this.inputManagedObjectName;
+	}
+
+	@Override
+	public void addTypeQualification(String qualifier, String type) {
+		this.typeQualifications.add(new TypeQualificationImpl(qualifier, type));
 	}
 
 	@Override

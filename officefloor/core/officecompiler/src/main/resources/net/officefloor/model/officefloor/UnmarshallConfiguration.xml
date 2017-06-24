@@ -91,6 +91,11 @@
 		<value method="setObjectType" node="input-managed-object@object-type" />
 		<value method="setX" node="input-managed-object@x" />
 		<value method="setY" node="input-managed-object@y" />
+		<object method="addTypeQualification" node="type-qualification"
+			class="net.officefloor.model.officefloor.TypeQualificationModel">
+			<value method="setQualifier" node="type-qualification@qualifier" />
+			<value method="setType" node="type-qualification@type" />
+		</object>
 		<object method="setBoundOfficeFloorManagedObjectSource" node="bound-managed-object-source"
 			class="net.officefloor.model.officefloor.OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel">
 			<value method="setOfficeFloorManagedObjectSourceName" node="bound-managed-object-source@name" />

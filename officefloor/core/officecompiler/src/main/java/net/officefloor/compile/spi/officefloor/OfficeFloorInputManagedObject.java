@@ -17,8 +17,10 @@
  */
 package net.officefloor.compile.spi.officefloor;
 
+import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * Input {@link ManagedObject} on the {@link OfficeFloor}.
@@ -35,6 +37,21 @@ public interface OfficeFloorInputManagedObject {
 	String getOfficeFloorInputManagedObjectName();
 
 	/**
+	 * <p>
+	 * Adds an {@link TypeQualification} for this
+	 * {@link OfficeFloorInputManagedObject}.
+	 * <p>
+	 * This enables distinguishing {@link OfficeFloorInputManagedObject}
+	 * instances to enable, for example, dynamic {@link Team} assignment.
+	 * 
+	 * @param qualifier
+	 *            Qualifier. May be <code>null</code> if no qualification.
+	 * @param type
+	 *            Type (typically the fully qualified type).
+	 */
+	void addTypeQualification(String qualifier, String type);
+
+	/**
 	 * Specifies the bound {@link OfficeFloorManagedObjectSource} for this
 	 * {@link OfficeFloorInputManagedObject}.
 	 *
@@ -42,7 +59,6 @@ public interface OfficeFloorInputManagedObject {
 	 *            {@link OfficeFloorManagedObjectSource} to be bound should this
 	 *            not be input but required.
 	 */
-	void setBoundOfficeFloorManagedObjectSource(
-			OfficeFloorManagedObjectSource managedObjectSource);
+	void setBoundOfficeFloorManagedObjectSource(OfficeFloorManagedObjectSource managedObjectSource);
 
 }

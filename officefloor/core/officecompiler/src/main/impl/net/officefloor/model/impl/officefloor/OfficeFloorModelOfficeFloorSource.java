@@ -300,6 +300,11 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 			OfficeFloorManagedObject managedObject = moSource.addOfficeFloorManagedObject(managedObjectName,
 					managedObjectScope);
 			officeFloorManagedObjects.put(managedObjectName, managedObject);
+
+			// Load type qualifications
+			for (TypeQualificationModel qualification : managedObjectModel.getTypeQualifications()) {
+				managedObject.addTypeQualification(qualification.getQualifier(), qualification.getType());
+			}
 		}
 
 		// Add the OfficeFloor input managed objects, keeping registry of them
@@ -311,6 +316,11 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 			String inputManagedObjectName = inputManagedObjectModel.getOfficeFloorInputManagedObjectName();
 			OfficeFloorInputManagedObject inputManagedObject = deployer.addInputManagedObject(inputManagedObjectName);
 			officeFloorInputManagedObjects.put(inputManagedObjectName, inputManagedObject);
+
+			// Load type qualifications
+			for (TypeQualificationModel qualification : inputManagedObjectModel.getTypeQualifications()) {
+				inputManagedObject.addTypeQualification(qualification.getQualifier(), qualification.getType());
+			}
 
 			// Provide the binding to managed object source (if available)
 			OfficeFloorManagedObjectSource boundManagedObjectSource = null;
@@ -380,11 +390,6 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 			// Obtain the managed object
 			OfficeFloorManagedObject managedObject = officeFloorManagedObjects
 					.get(managedObjectModel.getOfficeFloorManagedObjectName());
-
-			// Load type qualifications
-			for (TypeQualificationModel qualification : managedObjectModel.getTypeQualifications()) {
-				managedObject.addTypeQualification(qualification.getQualifier(), qualification.getType());
-			}
 
 			// Link each dependency for the managed object
 			for (OfficeFloorManagedObjectDependencyModel dependencyModel : managedObjectModel

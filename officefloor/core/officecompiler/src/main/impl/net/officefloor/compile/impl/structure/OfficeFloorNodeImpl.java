@@ -610,16 +610,22 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	@Override
 	public AutoWirer<LinkObjectNode> loadAutoWireObjectTargets(AutoWirer<LinkObjectNode> autoWirer,
 			CompileContext compileContext) {
-		
+
 		// Load the input managed objects (last to auto-wire)
 		this.inputManagedObjects.values().forEach((inputMo) -> {
 
-			
+			// Create the auto-wires
+			AutoWire[] targetAutoWires = Arrays.stream(inputMo.getTypeQualifications(compileContext))
+					.map((type) -> new AutoWire(type.getQualifier(), type.getType())).toArray(AutoWire[]::new);
+
+			// Add the target
+			autoWirer.addAutoWireTarget(inputMo, targetAutoWires);
 		});
 
 		// Load the supplied managed objects
 		final AutoWirer<LinkObjectNode> supplierAutoWirer = autoWirer.createScopeAutoWirer();
-		this.suppliers.values().stream().forEach((supplier) -> supplier.loadAutoWireObjects(supplierAutoWirer, compileContext));
+		this.suppliers.values().stream()
+				.forEach((supplier) -> supplier.loadAutoWireObjects(supplierAutoWirer, compileContext));
 
 		// Load the managed objects
 		final AutoWirer<LinkObjectNode> managedObjectAutoWirer = supplierAutoWirer.createScopeAutoWirer();

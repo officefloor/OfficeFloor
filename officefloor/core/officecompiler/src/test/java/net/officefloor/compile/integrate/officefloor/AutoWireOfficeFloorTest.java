@@ -173,6 +173,31 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 	}
 
 	/**
+	 * Ensure can auto-wire a qualified {@link OfficeFloorInputManagedObject}.
+	 */
+	public void testAutoWireOfficeFloorQualifiedInputManagedObject() {
+
+		// Flag to enable auto-wiring of the objects
+		AutoWireOfficeFloorExtensionService.enableAutoWireObjects();
+
+		// Record building the OfficeFloor
+		this.record_init();
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+
+		// Build the Managed Object
+		this.record_officeFloorBuilder_addManagedObject("INPUT_SOURCE", ClassManagedObjectSource.class, 0, "class.name",
+				CompileManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.setBoundInputManagedObject("INPUT_OBJECT", "INPUT_SOURCE");
+
+		// Build the office
+		CompileOfficeSource.registerOffice(DependencyManagedObject.class, "INPUT_OBJECT", null, this);
+
+		// Compile the OfficeFloor
+		this.compile(true);
+	}
+
+	/**
 	 * Ensure can auto-wire {@link ManagedObjectDependency} for an
 	 * {@link OfficeFloorInputManagedObject}.
 	 */
