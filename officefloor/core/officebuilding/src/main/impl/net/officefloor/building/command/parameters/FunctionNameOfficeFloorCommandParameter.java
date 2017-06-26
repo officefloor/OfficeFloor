@@ -18,34 +18,33 @@
 package net.officefloor.building.command.parameters;
 
 import net.officefloor.building.command.OfficeFloorCommandParameter;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
 
 /**
- * {@link OfficeFloorCommandParameter} for the {@link Work} name.
+ * {@link OfficeFloorCommandParameter} for the {@link ManagedFunction} name.
  * 
  * @author Daniel Sagenschneider
  */
-public class WorkNameOfficeFloorCommandParameter extends
-		AbstractSingleValueOfficeFloorCommandParameter {
+public class FunctionNameOfficeFloorCommandParameter extends AbstractSingleValueOfficeFloorCommandParameter {
 
 	/**
-	 * Parameter name for the {@link Work} name.
+	 * Parameter name for the {@link ManagedFunction} name.
 	 */
-	public static final String PARAMETER_WORK_NAME = "work";
+	public static final String PARAMETER_FUNCTION_NAME = "function";
 
 	/**
 	 * Initiate.
 	 */
-	public WorkNameOfficeFloorCommandParameter() {
-		super(PARAMETER_WORK_NAME, "w", "Name of the Work");
+	public FunctionNameOfficeFloorCommandParameter() {
+		super(PARAMETER_FUNCTION_NAME, "f", "Name of the Function");
 	}
 
 	/**
-	 * Obtains the {@link Work} name.
+	 * Obtains the {@link ManagedFunction} name.
 	 * 
-	 * @return {@link Work} name.
+	 * @return {@link ManagedFunction} name.
 	 */
-	public String getWorkName() {
+	public String getFunctionName() {
 		return this.getValue();
 	}
 

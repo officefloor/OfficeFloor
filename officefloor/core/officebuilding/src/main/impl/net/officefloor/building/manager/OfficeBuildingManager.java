@@ -72,7 +72,7 @@ import net.officefloor.building.process.ProcessShell;
 import net.officefloor.building.process.ProcessShellMBean;
 import net.officefloor.building.process.ProcessStartListener;
 import net.officefloor.building.process.officefloor.OfficeFloorManager;
-import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
+import net.officefloor.compile.mbean.OfficeFloorMBean;
 import net.officefloor.console.OfficeBuilding;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -556,7 +556,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 
 	/**
 	 * <p>
-	 * Obtains the {@link OfficeFloorManagerMBean}.
+	 * Obtains the {@link OfficeFloorMBean}.
 	 * <p>
 	 * The <code>hostName</code> and <code>port</code> are of the
 	 * {@link OfficeBuilding} managing the {@link OfficeFloor} {@link Process}.
@@ -568,6 +568,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	 *            <code>null</code> indicates localhost.
 	 * @param port
 	 *            Port where the {@link OfficeBuilding} resides.
+	 * @param officeFloorName
+	 *            Name of the {@link OfficeFloor}.
 	 * @param trustStore
 	 *            {@link File} containing the trusted security keys.
 	 * @param trustStorePassword
@@ -576,18 +578,16 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	 *            User name to connect.
 	 * @param password
 	 *            Password to connect.
-	 * @param processNamespace
-	 *            Namespace of the {@link OfficeFloorManagerMBean}.
-	 * @return {@link OfficeFloorManagerMBean}.
+	 * @return {@link OfficeFloorBean}.
 	 * @throws Exception
-	 *             If fails to obtain {@link OfficeFloorManagerMBean}.
+	 *             If fails to obtain {@link OfficeFloorMBean}.
 	 */
-	public static OfficeFloorManagerMBean getOfficeFloorManager(String hostName, int port, String processNamespace,
+	public static OfficeFloorMBean getOfficeFloorManager(String hostName, int port, String officeFloorName,
 			File trustStore, String trustStorePassword, String userName, String password) throws Exception {
-		ObjectName objectName = ProcessManager.getLocalObjectName(processNamespace,
+		ObjectName objectName = ProcessManager.getLocalObjectName(officeFloorName,
 				OfficeFloorManager.getOfficeFloorManagerObjectName());
 		return getMBeanProxy(hostName, port, trustStore, trustStorePassword, userName, password, objectName,
-				OfficeFloorManagerMBean.class);
+				OfficeFloorMBean.class);
 	}
 
 	/**
@@ -890,14 +890,14 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 				}
 			}
 
-			// Obtain the process name
-			String processName = configuration.getProcessName();
-			if ((processName == null) || (processName.trim().length() == 0)) {
-				processName = "officefloor";
+			// Obtain the OfficeFloor name
+			String officeFloorName = configuration.getOfficeFloorName();
+			if ((officeFloorName == null) || (officeFloorName.trim().length() == 0)) {
+				officeFloorName = "OfficeFloor";
 			}
 
 			// Obtain the process work space location
-			String processWorkspaceFolderName = processName + this.getProcessInstanceIndex();
+			String processWorkspaceFolderName = officeFloorName + this.getProcessInstanceIndex();
 			final File processWorkspace = new File(this.workspace, processWorkspaceFolderName);
 
 			// Ensure clean up process
@@ -953,18 +953,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 								+ " is not allowing configured class path entries");
 					}
 
-					/*
-					 * Include the class path entries.
-					 * 
-					 * Class path entries are made available due to the
-					 * OfficeFloor maven plug-ins to include the project's class
-					 * path. These are already resolved class path entries from
-					 * the project's artifacts (so are NOT artifacts).
-					 * 
-					 * Note: adding these class path entries as artifacts causes
-					 * issues as it seems they contain pom.xml files that point
-					 * to potentially non-resolvable artifacts.
-					 */
+					// Include the class path entries
 					for (String configuredClassPathEntry : configuredClassPathEntries) {
 						commandContext.includeClassPathEntry(configuredClassPathEntry);
 					}
@@ -972,7 +961,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 
 				// Configure the process for the OfficeFloor
 				ProcessConfiguration processConfig = new ProcessConfiguration();
-				processConfig.setProcessName(processName);
+				processConfig.setProcessName(officeFloorName);
 				processConfig.setAdditionalClassPath(commandContext.getCommandClassPath());
 				processConfig.setMbeanServer(this.mbeanServer);
 
@@ -1039,11 +1028,10 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 
 				// Determine if invoking task
 				String officeName = configuration.getOfficeName();
-				String workName = configuration.getWorkName();
-				String taskName = configuration.getTaskName();
+				String functionName = configuration.getFunctionName();
 				String parameter = configuration.getParameter();
-				if (workName != null) {
-					officeFloorManager.invokeTask(officeName, workName, taskName, parameter);
+				if (functionName != null) {
+					officeFloorManager.addExecuteFunction(officeName, functionName, parameter);
 				}
 
 				// Open the OfficeFloor

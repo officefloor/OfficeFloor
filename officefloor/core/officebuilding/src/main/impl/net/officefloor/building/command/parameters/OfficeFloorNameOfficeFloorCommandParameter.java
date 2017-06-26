@@ -18,34 +18,33 @@
 package net.officefloor.building.command.parameters;
 
 import net.officefloor.building.command.OfficeFloorCommandParameter;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
- * {@link OfficeFloorCommandParameter} for the {@link ManagedFunction} name.
+ * {@link OfficeFloorCommandParameter} for the {@link Process} name.
  * 
  * @author Daniel Sagenschneider
  */
-public class TaskNameOfficeFloorCommandParameter extends
-		AbstractSingleValueOfficeFloorCommandParameter {
+public class OfficeFloorNameOfficeFloorCommandParameter extends AbstractSingleValueOfficeFloorCommandParameter {
 
 	/**
-	 * Parameter name for the {@link ManagedFunction} name.
+	 * Parameter name for the {@link OfficeFloor} name.
 	 */
-	public static final String PARAMETER_TASK_NAME = "task";
+	public static final String PARAMTER_OFFICEFLOOR_NAME = "officefloor_name";
 
 	/**
 	 * Initiate.
 	 */
-	public TaskNameOfficeFloorCommandParameter() {
-		super(PARAMETER_TASK_NAME, "t", "Name of the Task");
+	public OfficeFloorNameOfficeFloorCommandParameter() {
+		super(PARAMTER_OFFICEFLOOR_NAME, null, "OfficeFloor name. Default is OfficeFloor");
 	}
 
 	/**
-	 * Obtains the {@link ManagedFunction} name.
+	 * Obtains the {@link OfficeFloor} name.
 	 * 
-	 * @return {@link ManagedFunction} name.
+	 * @return {@link OfficeFloor} name.
 	 */
-	public String getTaskName() {
+	public String getOfficeFloorName() {
 		return this.getValue();
 	}
 

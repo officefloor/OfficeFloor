@@ -96,9 +96,9 @@ public class OfficeBuildingAdvancedDeployTabPanel extends AbstractOfficeBuilding
 		this.addAdvancedEntry(panelAdvancedStart, "OfficeFloor location", officeFloorLocation, constraint);
 
 		// Process name
-		final JTextField processName = new JTextField(30);
-		processName.setText(configuration.getProcessName());
-		this.addAdvancedEntry(panelAdvancedStart, "Process name", processName, constraint);
+		final JTextField officeFloorName = new JTextField(30);
+		officeFloorName.setText(configuration.getOfficeFloorName());
+		this.addAdvancedEntry(panelAdvancedStart, "OfficeFloor name", officeFloorName, constraint);
 
 		// Upload artifacts
 		final OfficeTablePanel uploadArtifacts = new OfficeTablePanel(true, true, "Upload Artifact");
@@ -134,18 +134,15 @@ public class OfficeBuildingAdvancedDeployTabPanel extends AbstractOfficeBuilding
 		JPanel panelOpenTask = new JPanel();
 		panelOpenTask.setLayout(new BoxLayout(panelOpenTask, BoxLayout.LINE_AXIS));
 		panelOpenTask.add(new Label("Office"));
-		final JTextField openTaskOfficeName = (JTextField) panelOpenTask.add(new JTextField(5));
-		openTaskOfficeName.setText(configuration.getOfficeName());
-		panelOpenTask.add(new Label("Work"));
-		final JTextField openTaskWorkName = (JTextField) panelOpenTask.add(new JTextField(5));
-		openTaskWorkName.setText(configuration.getWorkName());
-		panelOpenTask.add(new Label("Task"));
-		final JTextField openTaskTaskName = (JTextField) panelOpenTask.add(new JTextField(5));
-		openTaskTaskName.setText(configuration.getTaskName());
+		final JTextField openFunctionOfficeName = (JTextField) panelOpenTask.add(new JTextField(5));
+		openFunctionOfficeName.setText(configuration.getOfficeName());
+		panelOpenTask.add(new Label("Function"));
+		final JTextField openFunctionFunctionName = (JTextField) panelOpenTask.add(new JTextField(5));
+		openFunctionFunctionName.setText(configuration.getFunctionName());
 		panelOpenTask.add(new Label("Parameter"));
-		final JTextField openTaskParameter = (JTextField) panelOpenTask.add(new JTextField(5));
-		openTaskParameter.setText(configuration.getParameter());
-		this.addAdvancedEntry(panelAdvancedStart, "Open Task", panelOpenTask, constraint);
+		final JTextField openFunctionParameter = (JTextField) panelOpenTask.add(new JTextField(5));
+		openFunctionParameter.setText(configuration.getParameter());
+		this.addAdvancedEntry(panelAdvancedStart, "Open Function", panelOpenTask, constraint);
 
 		// Deploy button
 		JButton deployButton = new JButton(new OfficeAction<String>("deploy") {
@@ -164,10 +161,10 @@ public class OfficeBuildingAdvancedDeployTabPanel extends AbstractOfficeBuilding
 					configuration.setOfficeFloorSourceClassName(officeFloorSourceText);
 				}
 
-				// Load the process name
-				String processNameText = processName.getText();
-				if (!CompileUtil.isBlank(processNameText)) {
-					configuration.setProcessName(processNameText);
+				// Load the OfficeFloor name
+				String officeFloorNameText = officeFloorName.getText();
+				if (!CompileUtil.isBlank(officeFloorNameText)) {
+					configuration.setOfficeFloorName(officeFloorNameText);
 				}
 
 				// Load the upload artifacts
@@ -211,14 +208,12 @@ public class OfficeBuildingAdvancedDeployTabPanel extends AbstractOfficeBuilding
 					}
 				}
 
-				// Load open task
-				String officeNameText = openTaskOfficeName.getName();
-				String workNameText = openTaskWorkName.getName();
-				String taskNameText = openTaskTaskName.getName();
-				String parameterText = openTaskParameter.getName();
-				if ((!CompileUtil.isBlank(officeNameText)) && (!CompileUtil.isBlank(workNameText))
-						&& (!CompileUtil.isBlank(taskNameText))) {
-					configuration.setOpenTask(officeNameText, workNameText, taskNameText, parameterText);
+				// Load open function
+				String officeNameText = openFunctionOfficeName.getName();
+				String functionNameText = openFunctionFunctionName.getName();
+				String parameterText = openFunctionParameter.getName();
+				if ((!CompileUtil.isBlank(officeNameText)) && (!CompileUtil.isBlank(functionNameText))) {
+					configuration.setOpenFunction(officeNameText, functionNameText, parameterText);
 				}
 
 				// Return asynchronous action to open the OfficeFloor

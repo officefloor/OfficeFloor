@@ -22,7 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.building.process.officefloor.MockWork;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**

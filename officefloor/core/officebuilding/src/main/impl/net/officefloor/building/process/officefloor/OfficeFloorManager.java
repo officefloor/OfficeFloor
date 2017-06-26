@@ -30,24 +30,19 @@ import javax.management.ObjectName;
 
 import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.building.process.ManagedProcessContext;
-import net.officefloor.building.process.ProcessException;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.manage.ProcessFuture;
-import net.officefloor.frame.api.manage.FunctionManager;
-import net.officefloor.frame.api.manage.WorkManager;
 
 /**
  * {@link ManagedProcess} for an {@link OfficeFloor} {@link Process}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorManager implements ManagedProcess,
-		OfficeFloorManagerMBean {
+public class OfficeFloorManager implements ManagedProcess {
 
 	/**
 	 * {@link Serializable} version.
@@ -57,8 +52,7 @@ public class OfficeFloorManager implements ManagedProcess,
 	/**
 	 * {@link Logger}.
 	 */
-	private static final Logger LOGGER = Logger
-			.getLogger(OfficeFloorManager.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(OfficeFloorManager.class.getName());
 
 	/**
 	 * {@link ObjectName} for the {@link OfficeFloorManager}.
@@ -67,8 +61,7 @@ public class OfficeFloorManager implements ManagedProcess,
 
 	static {
 		try {
-			OFFICE_FLOOR_MANAGER_OBJECT_NAME = new ObjectName("officefloor",
-					"type", "OfficeFloor");
+			OFFICE_FLOOR_MANAGER_OBJECT_NAME = new ObjectName("officefloor", "type", "OfficeFloor");
 		} catch (MalformedObjectNameException ex) {
 			// This should never be the case
 		}
@@ -99,9 +92,9 @@ public class OfficeFloorManager implements ManagedProcess,
 	private final Properties officeFloorProperties;
 
 	/**
-	 * Listing of the {@link WorkState}.
+	 * Listing of the {@link FunctionProcessState}.
 	 */
-	private final List<WorkState> workStates = new LinkedList<WorkState>();
+	private final List<FunctionProcessState> functionProcessStates = new LinkedList<FunctionProcessState>();
 
 	/**
 	 * {@link ManagedProcessContext}.
@@ -112,12 +105,6 @@ public class OfficeFloorManager implements ManagedProcess,
 	 * {@link OfficeFloor} being managed within the {@link Process}.
 	 */
 	private transient OfficeFloor officeFloor = null;
-
-	/**
-	 * Flag indicating if the {@link OfficeFloor} is open and available to have
-	 * {@link ManagedFunction} instances invoked.
-	 */
-	private boolean isOpen = false;
 
 	/**
 	 * Initiate.
@@ -131,100 +118,25 @@ public class OfficeFloorManager implements ManagedProcess,
 	 * @param officeFloorProperties
 	 *            Properties for the {@link OfficeFloor}.
 	 */
-	public OfficeFloorManager(String officeFloorSourceClassName,
-			String officeFloorLocation, Properties officeFloorProperties) {
+	public OfficeFloorManager(String officeFloorSourceClassName, String officeFloorLocation,
+			Properties officeFloorProperties) {
 		this.officeFloorSourceClassName = officeFloorSourceClassName;
 		this.officeFloorLocation = officeFloorLocation;
 		this.officeFloorProperties = officeFloorProperties;
 	}
 
-	/*
-	 * ============= OfficeFloorManagedProcessMBean ===================
+	/**
+	 * Adds a {@link ManagedFunction} to be executed by the {@link OfficeFloor}.
+	 * 
+	 * @param officeName
+	 *            Name of the {@link Office}.
+	 * @param functionName
+	 *            Name of {@link ManagedFunction} within the {@link Office}.
+	 * @param parameter
+	 *            Parameter to the {@link ManagedFunction}.
 	 */
-
-	@Override
-	public String getOfficeFloorLocation() {
-		return this.officeFloorLocation;
-	}
-
-	@Override
-	public ListedTask[] listTasks() throws ProcessException {
-		try {
-
-			OfficeFloor officeFloor;
-			synchronized (this) {
-				officeFloor = this.officeFloor;
-
-				// Ensure open
-				if (!this.isOpen) {
-					throw new ProcessException("OfficeFloor not open");
-				}
-			}
-
-			// Create the listing of tasks
-			List<ListedTask> tasks = new LinkedList<>();
-			for (String officeName : officeFloor.getOfficeNames()) {
-
-				// List work of the office
-				Office office = officeFloor.getOffice(officeName);
-				for (String workName : office.getWorkNames()) {
-
-					// List tasks of work
-					WorkManager work = office.getWorkManager(workName);
-					for (String taskName : work.getTaskNames()) {
-
-						// Obtain parameter of task
-						FunctionManager task = work.getTaskManager(taskName);
-						Class<?> parameterType = task.getParameterType();
-						String parameterTypeName = parameterType == null ? null
-								: parameterType.getName();
-
-						// Add the listed task
-						tasks.add(new ListedTaskImpl(officeName, workName,
-								taskName, parameterTypeName));
-					}
-				}
-			}
-
-			// Return the listing of tasks
-			return tasks.toArray(new ListedTask[tasks.size()]);
-
-		} catch (Throwable ex) {
-			throw ProcessException.propagate(ex);
-		}
-	}
-
-	@Override
-	public void invokeTask(String officeName, String workName, String taskName,
-			String parameter) throws ProcessException {
-		try {
-
-			WorkState work = null;
-			OfficeFloor officeFloor;
-			synchronized (this) {
-				officeFloor = this.officeFloor;
-
-				// Determine if already opened the OfficeFloor
-				if (this.isOpen) {
-					// OfficeFloor running so invoke immediately
-					work = new WorkState(officeName, workName, taskName,
-							parameter);
-
-				} else {
-					// Register the work to be invoked inside the main
-					this.workStates.add(new WorkState(officeName, workName,
-							taskName, parameter));
-				}
-			}
-
-			// Invoke work if have (outside locks)
-			if (work != null) {
-				work.invoke(officeFloor);
-			}
-
-		} catch (Throwable ex) {
-			throw ProcessException.propagate(ex);
-		}
+	public void addExecuteFunction(String officeName, String functionName, Object parameter) {
+		this.functionProcessStates.add(new FunctionProcessState(officeName, functionName, parameter));
 	}
 
 	/*
@@ -239,8 +151,7 @@ public class OfficeFloorManager implements ManagedProcess,
 			this.context = context;
 
 			// Create the OfficeFloor compiler
-			OfficeFloorCompiler compiler = OfficeFloorCompiler
-					.newOfficeFloorCompiler(null);
+			OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 
 			// Add properties for the compiler
 			for (String name : this.officeFloorProperties.stringPropertyNames()) {
@@ -249,15 +160,15 @@ public class OfficeFloorManager implements ManagedProcess,
 			}
 			compiler.addSystemProperties();
 			compiler.addEnvProperties();
+			compiler.setRegisterMBeans(true);
+			compiler.setOfficeFloorLocation(this.officeFloorLocation);
 
 			// Determine if override the default OfficeFloorSource
-			if ((this.officeFloorSourceClassName != null)
-					&& (this.officeFloorSourceClassName.trim().length() > 0)) {
+			if ((this.officeFloorSourceClassName != null) && (this.officeFloorSourceClassName.trim().length() > 0)) {
 
 				// Load the OfficeFloorSource class
 				Class<? extends OfficeFloorSource> officeFloorSourceClass = (Class<? extends OfficeFloorSource>) compiler
-						.getClassLoader().loadClass(
-								this.officeFloorSourceClassName);
+						.getClassLoader().loadClass(this.officeFloorSourceClassName);
 
 				// Override the default OfficeFloorSource
 				compiler.setOfficeFloorSourceClass(officeFloorSourceClass);
@@ -277,7 +188,7 @@ public class OfficeFloorManager implements ManagedProcess,
 		ManagedProcessContext context;
 		OfficeFloor officeFloor = null;
 		try {
-			List<WorkState> workStates;
+			List<FunctionProcessState> functionProcessStates;
 			synchronized (this) {
 				context = this.context;
 				officeFloor = this.officeFloor;
@@ -285,19 +196,16 @@ public class OfficeFloorManager implements ManagedProcess,
 				// Open the OfficeFloor
 				this.officeFloor.openOfficeFloor();
 
-				// OfficeFloor now open
-				this.isOpen = true;
-
 				// Obtain thread safe list
-				workStates = new ArrayList<WorkState>(this.workStates);
+				functionProcessStates = new ArrayList<FunctionProcessState>(this.functionProcessStates);
 			}
 
 			// Ensure close OfficeFloor
 			try {
 
-				// Determine if initial work to run
-				if (workStates.size() == 0) {
-					// No work, so wait until triggered to stop
+				// Determine if initial function to run
+				if (functionProcessStates.size() == 0) {
+					// No function, so wait until triggered to stop
 					for (;;) {
 
 						// Determine if flagged to stop
@@ -312,25 +220,24 @@ public class OfficeFloorManager implements ManagedProcess,
 					}
 
 				} else {
-					// Invoke the work and stop once the work is complete
-					for (WorkState workState : workStates) {
-						workState.invoke(officeFloor);
+					// Invoke the functions and stop once they are complete
+					for (FunctionProcessState functionProcessState : functionProcessStates) {
+						functionProcessState.invoke(officeFloor);
 					}
 
-					// Wait for all work to complete
+					// Wait for all functions to complete
 					for (;;) {
 
-						// Check if all work complete
-						boolean isAllWorkComplete = true;
-						for (WorkState workState : workStates) {
-							if (!workState.isComplete()) {
-								isAllWorkComplete = false;
+						// Check if all functions complete
+						boolean isAllFunctionsComplete = true;
+						for (FunctionProcessState functionProcessState : functionProcessStates) {
+							if (!functionProcessState.isComplete()) {
+								isAllFunctionsComplete = false;
 							}
 						}
 
-						// Exit processing if work complete or flagged stop
-						if (isAllWorkComplete
-								|| (!context.continueProcessing())) {
+						// Exit processing if functions complete or flagged stop
+						if (isAllFunctionsComplete || (!context.continueProcessing())) {
 							return; // All work complete
 						}
 
@@ -344,12 +251,6 @@ public class OfficeFloorManager implements ManagedProcess,
 			} catch (Throwable ex) {
 				// Indicate failure
 				LOGGER.log(Level.WARNING, "Process had failure", ex);
-
-			} finally {
-				synchronized (this) {
-					// Closed
-					this.isOpen = false;
-				}
 			}
 
 		} finally {
@@ -359,10 +260,10 @@ public class OfficeFloorManager implements ManagedProcess,
 	}
 
 	/**
-	 * Maintains state of {@link Work} that is invoked on the
+	 * Maintains state of {@link ManagedFunction} that is invoked on the
 	 * {@link OfficeFloor}.
 	 */
-	private static class WorkState implements Serializable {
+	private static class FunctionProcessState implements Serializable {
 
 		/**
 		 * {@link Serializable} version.
@@ -370,89 +271,70 @@ public class OfficeFloorManager implements ManagedProcess,
 		private static final long serialVersionUID = 1L;
 
 		/**
-		 * Name of the {@link Office} containing the {@link Work}.
+		 * Name of the {@link Office} containing the {@link ManagedFunction}.
 		 */
 		private final String officeName;
 
 		/**
-		 * Name of the {@link Work}.
+		 * Name of the {@link ManagedFunction}.
 		 */
-		private final String workName;
+		private final String functionName;
 
 		/**
-		 * Name of the {@link ManagedFunction}. May be <code>null</code> to invoke initial
-		 * {@link ManagedFunction} of {@link Work}.
-		 */
-		private final String taskName;
-
-		/**
-		 * Parameter for the initial {@link ManagedFunction} of the {@link Work}.
+		 * Parameter for the {@link ManagedFunction}.
 		 */
 		private final Object parameter;
 
 		/**
-		 * {@link ProcessFuture} for invoking the {@link Work}.
+		 * Indicates if the {@link ManagedFunction} is completd.
 		 */
-		private transient ProcessFuture invokedProcessFuture = null;
+		private transient volatile boolean isComplete = false;
 
 		/**
 		 * Initiate.
 		 * 
 		 * @param officeName
-		 *            Name of the {@link Office} containing the {@link Work}.
-		 * @param workName
-		 *            Name of the {@link Work}.
-		 * @param taskName
-		 *            Name of the {@link ManagedFunction}. May be <code>null</code> to
-		 *            invoke initial {@link ManagedFunction} of {@link Work}.
+		 *            Name of the {@link Office} containing the
+		 *            {@link ManagedFunction}.
+		 * @param functionName
+		 *            Name of the {@link ManagedFunction}.
 		 * @param parameter
-		 *            Parameter for the initial {@link ManagedFunction}.
+		 *            Parameter for the {@link ManagedFunction}.
 		 */
-		public WorkState(String officeName, String workName, String taskName,
-				Object parameter) {
+		public FunctionProcessState(String officeName, String functionName, Object parameter) {
 			this.officeName = officeName;
-			this.workName = workName;
-			this.taskName = taskName;
+			this.functionName = functionName;
 			this.parameter = parameter;
 		}
 
 		/**
-		 * Invokes the {@link Work}.
+		 * Invokes the {@link ManagedFunction}.
 		 * 
 		 * @param officeFloor
-		 *            {@link OfficeFloor} to invoke the {@link Work} on.
+		 *            {@link OfficeFloor} to invoke the {@link ManagedFunction}
+		 *            on.
 		 * @throws Exception
-		 *             If fails to invoke the {@link Work}.
+		 *             If fails to invoke the {@link ManagedFunction}.
 		 */
 		public void invoke(OfficeFloor officeFloor) throws Exception {
 
-			// Obtain the work manager
-			WorkManager workManager = officeFloor.getOffice(this.officeName)
-					.getWorkManager(this.workName);
-			ProcessFuture invokedProcessFuture;
-			if (this.taskName == null) {
-				// Invoke initial task of work
-				invokedProcessFuture = workManager.invokeWork(this.parameter);
-			} else {
-				// Invoke the specific task
-				invokedProcessFuture = workManager
-						.getTaskManager(this.taskName).invokeTask(
-								this.parameter);
-			}
+			// Obtain the function manager
+			FunctionManager functionManager = officeFloor.getOffice(this.officeName)
+					.getFunctionManager(this.functionName);
 
-			// Set state
-			synchronized (this) {
-				this.invokedProcessFuture = invokedProcessFuture;
-			}
+			// Invoke the function (notifying when complete)
+			functionManager.invokeProcess(this.parameter, (exception) -> {
+				this.isComplete = true;
+			});
 		}
 
 		/**
-		 * Indicates if the invoked {@link Work} is complete.
+		 * Indicates if the invoked {@link ManagedFunction} is complete.
 		 * 
 		 * @return <code>true</code> if complete.
 		 */
-		public synchronized boolean isComplete() {
-			return this.invokedProcessFuture.isComplete();
+		public boolean isComplete() {
+			return this.isComplete;
 		}
 	}
 

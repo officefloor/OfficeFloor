@@ -22,21 +22,18 @@ import java.util.List;
 import java.util.Properties;
 
 import net.officefloor.building.command.parameters.ClassPathOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.FunctionNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.JvmOptionOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeFloorLocationOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.OfficeFloorNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeFloorSourceOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.ParameterOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.ProcessNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.PropertiesOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.TaskNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.UploadArtifactsOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.WorkNameOfficeFloorCommandParameter;
 import net.officefloor.building.manager.UploadArtifact;
-import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -64,9 +61,7 @@ public class CommandLineBuilder {
 	 *            {@link UploadArtifact} location.
 	 */
 	public void addUploadArtifact(String artifactLocation) {
-		this.addOption(
-				UploadArtifactsOfficeFloorCommandParameter.PARAMETER_UPLOAD_ARTIFACT_LOCATION,
-				artifactLocation);
+		this.addOption(UploadArtifactsOfficeFloorCommandParameter.PARAMETER_UPLOAD_ARTIFACT_LOCATION, artifactLocation);
 	}
 
 	/**
@@ -76,9 +71,7 @@ public class CommandLineBuilder {
 	 *            Class path entry.
 	 */
 	public void addClassPathEntry(String classPathEntry) {
-		this.addOption(
-				ClassPathOfficeFloorCommandParameter.PARAMETER_CLASS_PATH,
-				classPathEntry);
+		this.addOption(ClassPathOfficeFloorCommandParameter.PARAMETER_CLASS_PATH, classPathEntry);
 	}
 
 	/**
@@ -88,8 +81,7 @@ public class CommandLineBuilder {
 	 *            {@link OfficeFloorSource} class name.
 	 */
 	public void addOfficeFloorSource(String officeFloorSourceClassName) {
-		this.addOption(
-				OfficeFloorSourceOfficeFloorCommandParameter.PARAMETER_OFFICE_FLOOR_SOURCE,
+		this.addOption(OfficeFloorSourceOfficeFloorCommandParameter.PARAMETER_OFFICE_FLOOR_SOURCE,
 				officeFloorSourceClassName);
 	}
 
@@ -100,8 +92,7 @@ public class CommandLineBuilder {
 	 *            {@link OfficeFloor} location.
 	 */
 	public void addOfficeFloor(String officeFloorLocation) {
-		this.addOption(
-				OfficeFloorLocationOfficeFloorCommandParameter.PARAMETER_OFFICE_FLOOR_LOCATION,
+		this.addOption(OfficeFloorLocationOfficeFloorCommandParameter.PARAMETER_OFFICE_FLOOR_LOCATION,
 				officeFloorLocation);
 	}
 
@@ -115,22 +106,18 @@ public class CommandLineBuilder {
 	public void addOfficeFloorProperties(Properties properties) {
 		for (String name : properties.stringPropertyNames()) {
 			String value = properties.getProperty(name);
-			this.addOption(
-					PropertiesOfficeFloorCommandParameter.PARAMETER_PROPERTY,
-					name + "=" + value);
+			this.addOption(PropertiesOfficeFloorCommandParameter.PARAMETER_PROPERTY, name + "=" + value);
 		}
 	}
 
 	/**
-	 * Adds the {@link ManagedProcess} name.
+	 * Adds the {@link OfficeFloor} name.
 	 * 
-	 * @param processName
-	 *            {@link ManagedProcess} name.
+	 * @param officeFloorName
+	 *            {@link OfficeFloor} name.
 	 */
-	public void addProcessName(String processName) {
-		this.addOption(
-				ProcessNameOfficeFloorCommandParameter.PARAMTER_PROCESS_NAME,
-				processName);
+	public void addOfficeFloorName(String officeFloorName) {
+		this.addOption(OfficeFloorNameOfficeFloorCommandParameter.PARAMTER_OFFICEFLOOR_NAME, officeFloorName);
 	}
 
 	/**
@@ -140,9 +127,7 @@ public class CommandLineBuilder {
 	 *            JVM option.
 	 */
 	public void addJvmOption(String jvmOption) {
-		this.addOption(
-				JvmOptionOfficeFloorCommandParameter.PARAMETER_JVM_OPTION,
-				jvmOption);
+		this.addOption(JvmOptionOfficeFloorCommandParameter.PARAMETER_JVM_OPTION, jvmOption);
 	}
 
 	/**
@@ -150,26 +135,15 @@ public class CommandLineBuilder {
 	 * 
 	 * @param officeName
 	 *            {@link Office} name.
-	 * @param workName
-	 *            {@link Work} name.
-	 * @param taskName
-	 *            {@link ManagedFunction} name. May be <code>null</code> to use initial
-	 *            {@link ManagedFunction} of {@link Work}.
+	 * @param functionName
+	 *            Name of the {@link ManagedFunction} within the {@link Office}.
 	 * @param parameterValue
 	 *            Parameter value. May be <code>null</code>.
 	 */
-	public void addInvokeTask(String officeName, String workName,
-			String taskName, String parameterValue) {
-		this.addOption(
-				OfficeNameOfficeFloorCommandParameter.PARAMETER_OFFICE_NAME,
-				officeName);
-		this.addOption(WorkNameOfficeFloorCommandParameter.PARAMETER_WORK_NAME,
-				workName);
-		this.addOption(TaskNameOfficeFloorCommandParameter.PARAMETER_TASK_NAME,
-				taskName);
-		this.addOption(
-				ParameterOfficeFloorCommandParameter.PARAMETER_PARAMETER_VALUE,
-				parameterValue);
+	public void addInvokeFunction(String officeName, String functionName, String parameterValue) {
+		this.addOption(OfficeNameOfficeFloorCommandParameter.PARAMETER_OFFICE_NAME, officeName);
+		this.addOption(FunctionNameOfficeFloorCommandParameter.PARAMETER_FUNCTION_NAME, functionName);
+		this.addOption(ParameterOfficeFloorCommandParameter.PARAMETER_PARAMETER_VALUE, parameterValue);
 	}
 
 	/**

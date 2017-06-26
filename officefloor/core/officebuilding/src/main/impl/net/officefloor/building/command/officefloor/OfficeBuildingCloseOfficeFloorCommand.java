@@ -30,7 +30,7 @@ import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCo
 import net.officefloor.building.command.parameters.OfficeBuildingHostOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.PasswordOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.ProcessNameOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.OfficeFloorNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.StopMaxWaitTimeOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.UsernameOfficeFloorCommandParameter;
 import net.officefloor.building.manager.OfficeBuildingManager;
@@ -62,7 +62,7 @@ public class OfficeBuildingCloseOfficeFloorCommand implements
 	/**
 	 * {@link Process} name.
 	 */
-	private final ProcessNameOfficeFloorCommandParameter processName = new ProcessNameOfficeFloorCommandParameter();
+	private final OfficeFloorNameOfficeFloorCommandParameter processName = new OfficeFloorNameOfficeFloorCommandParameter();
 
 	/**
 	 * Trust store {@link File}.
@@ -135,7 +135,7 @@ public class OfficeBuildingCloseOfficeFloorCommand implements
 				.getOfficeBuildingHost();
 		int officeBuildingPort = this.officeBuildingPort
 				.getOfficeBuildingPort();
-		String processNamespace = this.processName.getProcessName();
+		String processNamespace = this.processName.getOfficeFloorName();
 		File trustStore = this.trustStore.getKeyStore();
 		String trustStorePassword = this.trustStorePassword
 				.getKeyStorePassword();

@@ -33,7 +33,7 @@ import net.officefloor.building.process.officefloor.MockOfficeFloorSource;
 import net.officefloor.building.process.officefloor.MockWork;
 import net.officefloor.building.util.OfficeBuildingTestUtil;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
