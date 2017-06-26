@@ -186,9 +186,10 @@ public class OfficeBuildingOpenOfficeFloorCommand implements OfficeFloorCommandF
 		String parameterValue = this.parameter.getParameterValue();
 
 		// Create the open OfficeFloor configuration
-		OpenOfficeFloorConfiguration configuration = new OpenOfficeFloorConfiguration(officeFloorLocation);
+		OpenOfficeFloorConfiguration configuration = new OpenOfficeFloorConfiguration();
 		configuration.setOfficeFloorName(officeFloorName);
 		configuration.setOfficeFloorSourceClassName(officeFloorSourceClassName);
+		configuration.setOfficeFloorLocation(officeFloorLocation);
 		for (String propertyName : officeFloorProperties.stringPropertyNames()) {
 			String propertyValue = officeFloorProperties.getProperty(propertyName);
 			configuration.addOfficeFloorProperty(propertyName, propertyValue);

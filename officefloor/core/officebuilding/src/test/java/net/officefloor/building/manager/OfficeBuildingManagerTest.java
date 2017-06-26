@@ -49,6 +49,7 @@ import net.officefloor.compile.mbean.OfficeFloorMBean;
 import net.officefloor.console.OfficeBuilding;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
 
 /**
  * Tests the {@link OfficeBuildingManager}.
@@ -212,8 +213,12 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 	public void testEnsureOfficeFloorOpens() throws Exception {
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.addSourceAliases();
-		OfficeFloor officeFloor = compiler.compile(this.getOfficeFloorLocation());
+		compiler.setOfficeFloorSourceClass(OfficeFloorModelOfficeFloorSource.class);
+		compiler.setOfficeFloorLocation(this.getOfficeFloorLocation());
+		OfficeFloor officeFloor = compiler.compile("OfficeFloor");
 		officeFloor.openOfficeFloor();
+		assertNotNull("Should have function",
+				officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.writeMessage"));
 		officeFloor.closeOfficeFloor();
 	}
 
@@ -225,8 +230,10 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 			@Override
 			public String openOfficeFloor(String processName, String officeFloorLocation,
 					OfficeBuildingManagerMBean buildingManager) throws Exception {
-				OpenOfficeFloorConfiguration config = new OpenOfficeFloorConfiguration(officeFloorLocation);
+				OpenOfficeFloorConfiguration config = new OpenOfficeFloorConfiguration();
 				config.setOfficeFloorName(processName);
+				config.setOfficeFloorSourceClassName(OfficeFloorModelOfficeFloorSource.class.getName());
+				config.setOfficeFloorLocation(officeFloorLocation);
 				config.addUploadArtifact(
 						new UploadArtifact(OfficeBuildingManagerTest.this.findFile("lib/MockCore.jar")));
 				return buildingManager.openOfficeFloor(config);
@@ -242,7 +249,8 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 			@Override
 			public String openOfficeFloor(String processName, String officeFloorLocation,
 					OfficeBuildingManagerMBean buildingManager) throws Exception {
-				return buildingManager.openOfficeFloor("--officefloor " + officeFloorLocation);
+				return buildingManager.openOfficeFloor("--officefloorsource "
+						+ OfficeFloorModelOfficeFloorSource.class.getName() + " --location " + officeFloorLocation);
 			}
 		});
 	}
@@ -358,8 +366,10 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 
 		// Open the OfficeFloor
 		String officeFloorLocation = this.getOfficeFloorLocation();
-		String processNamespace = buildingManager
-				.openOfficeFloor(new OpenOfficeFloorConfiguration(officeFloorLocation));
+		OpenOfficeFloorConfiguration openConfiguration = new OpenOfficeFloorConfiguration();
+		openConfiguration.setOfficeFloorSourceClassName(OfficeFloorModelOfficeFloorSource.class.getName());
+		openConfiguration.setOfficeFloorLocation(officeFloorLocation);
+		String processNamespace = buildingManager.openOfficeFloor(openConfiguration);
 
 		// Ensure OfficeFloor opened (obtaining local floor manager)
 		OfficeFloorMBean localFloorManager = OfficeBuildingManager.getOfficeFloorManager(null, this.port,
@@ -370,9 +380,8 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 		JMXConnector localConnector = connectToJmxAgent(
 				new JMXServiceURL(buildingManager.getOfficeBuildingJmxServiceUrl()), true);
 		MBeanServerConnection localMBeanServer = localConnector.getMBeanServerConnection();
-		ProcessShellMBean localProcessShell = JMX.newMBeanProxy(localMBeanServer,
-				ProcessManager.getLocalObjectName(processNamespace, ProcessShell.getProcessShellObjectName()),
-				ProcessShellMBean.class);
+		ProcessShellMBean localProcessShell = JMX.newMBeanProxy(localMBeanServer, ProcessManager.getLocalObjectName(
+				processNamespace, ProcessShell.getProcessShellObjectName(processNamespace)), ProcessShellMBean.class);
 
 		// Obtain the remote process JMX service URL
 		JMXServiceURL remoteServiceUrl = new JMXServiceURL(localProcessShell.getJmxConnectorServiceUrl());

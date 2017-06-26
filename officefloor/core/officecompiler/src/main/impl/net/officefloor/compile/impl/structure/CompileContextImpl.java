@@ -27,7 +27,7 @@ import net.officefloor.compile.internal.structure.AdministrationNode;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
-import net.officefloor.compile.internal.structure.MBeanRegistrator;
+import net.officefloor.compile.internal.structure.OfficeFloorMBeanRegistrator;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
@@ -47,9 +47,9 @@ import net.officefloor.compile.team.TeamType;
 public class CompileContextImpl implements CompileContext {
 
 	/**
-	 * {@link MBeanRegistrator}.
+	 * {@link OfficeFloorMBeanRegistrator}.
 	 */
-	private MBeanRegistrator mbeanRegistrator;
+	private OfficeFloorMBeanRegistrator officeFloorMBeanRegistrator;
 
 	/**
 	 * {@link ManagedObjectType} by {@link ManagedObjectSourceNode} instances.
@@ -136,11 +136,11 @@ public class CompileContextImpl implements CompileContext {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param mbeanRegistrator
-	 *            {@link MBeanRegistrator}. May be <code>null</code>.
+	 * @param officeFloorMBeanRegistrator
+	 *            {@link OfficeFloorMBeanRegistrator}. May be <code>null</code>.
 	 */
-	public CompileContextImpl(MBeanRegistrator mbeanRegistrator) {
-		this.mbeanRegistrator = mbeanRegistrator;
+	public CompileContextImpl(OfficeFloorMBeanRegistrator officeFloorMBeanRegistrator) {
+		this.officeFloorMBeanRegistrator = officeFloorMBeanRegistrator;
 	}
 
 	/*
@@ -149,8 +149,8 @@ public class CompileContextImpl implements CompileContext {
 
 	@Override
 	public <T, S extends T> void registerPossibleMBean(Class<T> type, String name, S mbean) {
-		if (this.mbeanRegistrator != null) {
-			this.mbeanRegistrator.registerPossibleMBean(type, name, mbean);
+		if (this.officeFloorMBeanRegistrator != null) {
+			this.officeFloorMBeanRegistrator.registerPossibleMBean(type, name, mbean);
 		}
 	}
 

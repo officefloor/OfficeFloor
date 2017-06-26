@@ -41,7 +41,7 @@ public class ProcessException extends Exception implements Serializable {
 	/**
 	 * Serial version number for {@link Serializable}.
 	 */
-	static final long serialVersionUID = 1487316913125229048L;
+	static final long serialVersionUID = 1L;
 
 	/**
 	 * Propagates the {@link ProcessException}.

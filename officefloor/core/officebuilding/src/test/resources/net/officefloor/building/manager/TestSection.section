@@ -1,0 +1,18 @@
+<section>
+    
+    <function-namespaces>
+        <function-namespace name="NAMESPACE" source="CLASS">
+            <properties>
+                <property name="class.name" value="net.officefloor.building.process.officefloor.MockWork"/>
+            </properties>
+            <managed-function name="writeMessage">
+                <managed-function-object name="java.lang.String" object-type="java.lang.String" parameter="true"/>
+            </managed-function>
+        </function-namespace>
+    </function-namespaces>
+    
+    <functions>
+        <function name="writeMessage" function-namespace="NAMESPACE" managed-function="writeMessage"/>
+    </functions>
+    
+</section>

@@ -91,16 +91,6 @@ public final class OpenOfficeFloorConfiguration implements Serializable {
 	private String parameter = null;
 
 	/**
-	 * Initiate.
-	 * 
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor}.
-	 */
-	public OpenOfficeFloorConfiguration(String officeFloorLocation) {
-		this.officeFloorLocation = officeFloorLocation;
-	}
-
-	/**
 	 * Obtains the name of the {@link OfficeFloor}.
 	 * 
 	 * @return Name of the {@link OfficeFloor}.

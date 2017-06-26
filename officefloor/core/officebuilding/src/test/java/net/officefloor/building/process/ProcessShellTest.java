@@ -96,8 +96,7 @@ public class ProcessShellTest extends TestCase {
 		output.writeBoolean(true); // process started
 		output.writeBoolean(true); // process initialised
 		output.flush();
-		InputStream fromParentPipe = new ByteArrayInputStream(
-				buffer.toByteArray());
+		InputStream fromParentPipe = new ByteArrayInputStream(buffer.toByteArray());
 
 		// Provide logger
 		ByteArrayOutputStream log = new ByteArrayOutputStream();
@@ -121,8 +120,7 @@ public class ProcessShellTest extends TestCase {
 		assertTrue("main() method should be inovked", isMainRun);
 
 		// Ensure correct process name
-		assertEquals("Incorrect process name space", PROCESS_NAMESPACE,
-				processNamespace);
+		assertEquals("Incorrect process name space", PROCESS_NAMESPACE, processNamespace);
 	}
 
 	/**
@@ -175,17 +173,15 @@ public class ProcessShellTest extends TestCase {
 		public void main() throws Throwable {
 
 			// Obtain the MBean Server
-			MBeanServer mbeanServer = ManagementFactory
-					.getPlatformMBeanServer();
+			MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
 
 			// Ensure the mock is registered
-			ObjectInstance mockInstance = mbeanServer
-					.getObjectInstance(this.mockObjectName);
+			ObjectInstance mockInstance = mbeanServer.getObjectInstance(this.mockObjectName);
 			assertNotNull("Must have mock MBean", mockInstance);
 
 			// Ensure the Process Shell is registered
 			ObjectInstance processShellInstance = mbeanServer
-					.getObjectInstance(ProcessShell.PROCESS_SHELL_OBJECT_NAME);
+					.getObjectInstance(ProcessShell.getProcessShellObjectName("Test"));
 			assertNotNull("Must have Process Shell MBean", processShellInstance);
 
 			// Ensure the process shell MBean registered with parent
@@ -238,37 +234,30 @@ public class ProcessShellTest extends TestCase {
 				Socket socket = this.serverSocket.accept();
 
 				// Read connection details from child process
-				ObjectInputStream input = new ObjectInputStream(
-						socket.getInputStream());
+				ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
 				Object[] connectionDetails = (Object[]) input.readObject();
-				assertEquals("Incorrect number of details", 3,
-						connectionDetails.length);
+				assertEquals("Incorrect number of details", 3, connectionDetails.length);
 
 				// Obtain the connection details
 				JMXServiceURL serviceUrl = (JMXServiceURL) connectionDetails[0];
 				String userName = (String) connectionDetails[1];
 				String password = (String) connectionDetails[2];
 				Map<String, Object> env = new HashMap<String, Object>();
-				env.put(JMXConnector.CREDENTIALS, new String[] { userName,
-						password });
+				env.put(JMXConnector.CREDENTIALS, new String[] { userName, password });
 
 				// Ensure require credentials to connect
 				try {
 					JMXConnectorFactory.connect(serviceUrl);
 					fail("Should not successfully connect");
 				} catch (SecurityException ex) {
-					assertEquals("Incorrect connect failure",
-							"Bad credentials", ex.getMessage());
+					assertEquals("Incorrect connect failure", "Bad credentials", ex.getMessage());
 				}
 
 				// Ensure can connect to child
-				JMXConnector connector = JMXConnectorFactory.connect(
-						serviceUrl, env);
-				MBeanServerConnection connection = connector
-						.getMBeanServerConnection();
+				JMXConnector connector = JMXConnectorFactory.connect(serviceUrl, env);
+				MBeanServerConnection connection = connector.getMBeanServerConnection();
 				String defaultDomain = connection.getDefaultDomain();
-				assertEquals("Incorrect default domain to validate connection",
-						"DefaultDomain", defaultDomain);
+				assertEquals("Incorrect default domain to validate connection", "DefaultDomain", defaultDomain);
 
 				// Child process has started
 				ProcessShellTest.isStarted = true;
@@ -277,8 +266,7 @@ public class ProcessShellTest extends TestCase {
 				for (;;) {
 					Object object = input.readObject();
 					MBeanRegistrationNotification notification = (MBeanRegistrationNotification) object;
-					if (ProcessShell.PROCESS_SHELL_OBJECT_NAME
-							.equals(notification.getMBeanName())) {
+					if (ProcessShell.getProcessShellObjectName("Test").equals(notification.getMBeanName())) {
 
 						// Flag registered
 						ProcessShellTest.isShellMBeanRegistered = true;

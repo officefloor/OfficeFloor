@@ -22,7 +22,7 @@ package net.officefloor.compile.internal.structure;
  * 
  * @author Daniel Sagenschneider
  */
-public interface MBeanRegistrator {
+public interface OfficeFloorMBeanRegistrator {
 
 	/**
 	 * Registers a possible MBean.

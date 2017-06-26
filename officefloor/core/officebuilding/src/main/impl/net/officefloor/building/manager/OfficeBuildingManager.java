@@ -512,7 +512,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	public static ProcessManagerMBean getProcessManager(String hostName, int port, String processNamespace,
 			File trustStore, String trustStorePassword, String userName, String password) throws Exception {
 		ObjectName objectName = ProcessManager.getLocalObjectName(processNamespace,
-				ProcessManager.getProcessManagerObjectName());
+				ProcessManager.getProcessManagerObjectName(processNamespace));
 		return getMBeanProxy(hostName, port, trustStore, trustStorePassword, userName, password, objectName,
 				ProcessManagerMBean.class);
 	}
@@ -549,7 +549,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	public static ProcessShellMBean getProcessShell(String hostName, int port, String processNamespace, File trustStore,
 			String trustStorePassword, String userName, String password) throws Exception {
 		ObjectName objectName = ProcessManager.getLocalObjectName(processNamespace,
-				ProcessShell.getProcessShellObjectName());
+				ProcessShell.getProcessShellObjectName(processNamespace));
 		return getMBeanProxy(hostName, port, trustStore, trustStorePassword, userName, password, objectName,
 				ProcessShellMBean.class);
 	}
@@ -585,7 +585,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	public static OfficeFloorMBean getOfficeFloorManager(String hostName, int port, String officeFloorName,
 			File trustStore, String trustStorePassword, String userName, String password) throws Exception {
 		ObjectName objectName = ProcessManager.getLocalObjectName(officeFloorName,
-				OfficeFloorManager.getOfficeFloorManagerObjectName());
+				OfficeFloorManager.getOfficeFloorManagerObjectName(officeFloorName));
 		return getMBeanProxy(hostName, port, trustStore, trustStorePassword, userName, password, objectName,
 				OfficeFloorMBean.class);
 	}

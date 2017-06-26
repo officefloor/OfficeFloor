@@ -50,7 +50,7 @@ import net.officefloor.compile.impl.structure.FunctionNamespaceNodeImpl;
 import net.officefloor.compile.impl.structure.FunctionObjectNodeImpl;
 import net.officefloor.compile.impl.structure.GovernanceNodeImpl;
 import net.officefloor.compile.impl.structure.InputManagedObjectNodeImpl;
-import net.officefloor.compile.impl.structure.MBeanRegistratorImpl;
+import net.officefloor.compile.impl.structure.OfficeFloorMBeanRegistratorImpl;
 import net.officefloor.compile.impl.structure.ManagedFunctionNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectDependencyNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectFlowNodeImpl;
@@ -125,6 +125,7 @@ import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.mbean.MBeanRegistrator;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
@@ -186,9 +187,9 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	private File overridePropertiesDirectory = null;
 
 	/**
-	 * Indicates whether the MBeans should be registered.
+	 * {@link MBeanRegistrator}.
 	 */
-	private boolean isRegisterMBeans = false;
+	private MBeanRegistrator mbeanRegistrator = null;
 
 	/**
 	 * {@link OfficeFloorSource} {@link Class}.
@@ -359,8 +360,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
-	public void setRegisterMBeans(boolean isRegister) {
-		this.isRegisterMBeans = isRegister;
+	public void setMBeanRegistrator(MBeanRegistrator mbeanRegistrator) {
+		this.mbeanRegistrator = mbeanRegistrator;
 	}
 
 	@Override
@@ -520,10 +521,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		}
 
 		// Create the MBean registrator
-		MBeanRegistratorImpl mbeanRegistrator = this.isRegisterMBeans ? new MBeanRegistratorImpl() : null;
+		OfficeFloorMBeanRegistratorImpl officeFloorMBeanRegistrator = (this.mbeanRegistrator != null)
+				? new OfficeFloorMBeanRegistratorImpl(this.mbeanRegistrator) : null;
 
 		// Create the compile context
-		CompileContextImpl compileContext = new CompileContextImpl(mbeanRegistrator);
+		CompileContextImpl compileContext = new CompileContextImpl(officeFloorMBeanRegistrator);
 
 		// Source the OfficeFloor tree
 		OfficeFloorNode node = this.createOfficeFloorNode(officeFloorSource.getClass().getName(), officeFloorSource,
@@ -539,8 +541,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		OfficeFloorBuilder builder = officeFrame.createOfficeFloorBuilder(officeFloorName);
 
 		// Register the possible MBeans
-		if (mbeanRegistrator != null) {
-			builder.addOfficeFloorListener(mbeanRegistrator);
+		if (officeFloorMBeanRegistrator != null) {
+			builder.addOfficeFloorListener(officeFloorMBeanRegistrator);
 		}
 
 		// Deploy the OfficeFloor
@@ -550,8 +552,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		}
 
 		// Register the OfficeFloor MBean
-		if (mbeanRegistrator != null) {
-			mbeanRegistrator.registerPossibleMBean(OfficeFloor.class, officeFloorName,
+		if (officeFloorMBeanRegistrator != null) {
+			officeFloorMBeanRegistrator.registerPossibleMBean(OfficeFloor.class, officeFloorName,
 					new OfficeFloorMBeanImpl(officeFloor));
 		}
 

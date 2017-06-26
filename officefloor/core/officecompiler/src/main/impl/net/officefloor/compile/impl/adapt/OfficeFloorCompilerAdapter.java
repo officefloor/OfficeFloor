@@ -36,6 +36,7 @@ import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.mbean.MBeanRegistrator;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
@@ -138,8 +139,8 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	}
 
 	@Override
-	public void setRegisterMBeans(boolean isRegister) {
-		this.invokeMethod("setRegisterMXBeans", new Object[] { isRegister }, boolean.class);
+	public void setMBeanRegistrator(MBeanRegistrator mbeanRegistrator) {
+		this.invokeMethod("setMBeanRegistrator", new Object[] { mbeanRegistrator }, MBeanRegistrator.class);
 	}
 
 	@Override

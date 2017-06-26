@@ -151,14 +151,18 @@ public class OfficeBuildingAdvancedDeployTabPanel extends AbstractOfficeBuilding
 
 				// Create the OfficeFloor configuration
 				// (Clean instance as defaults loaded to components)
-				String officeFloorLocationText = officeFloorLocation.getText();
-				final OpenOfficeFloorConfiguration configuration = new OpenOfficeFloorConfiguration(
-						officeFloorLocationText);
+				final OpenOfficeFloorConfiguration configuration = new OpenOfficeFloorConfiguration();
 
 				// Load the OfficeFloor Source
 				String officeFloorSourceText = officeFloorSource.getText();
 				if (!CompileUtil.isBlank(officeFloorSourceText)) {
 					configuration.setOfficeFloorSourceClassName(officeFloorSourceText);
+				}
+
+				// Load the OfficeFloor location
+				String officeFloorLocationText = officeFloorLocation.getText();
+				if (!CompileUtil.isBlank(officeFloorLocationText)) {
+					configuration.setOfficeFloorLocation(officeFloorLocationText);
 				}
 
 				// Load the OfficeFloor name

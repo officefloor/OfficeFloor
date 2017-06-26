@@ -31,6 +31,7 @@ import javax.management.ObjectName;
 import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.building.process.ManagedProcessContext;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.mbean.OfficeFloorMBean;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.FunctionManager;
@@ -55,25 +56,17 @@ public class OfficeFloorManager implements ManagedProcess {
 	private static final Logger LOGGER = Logger.getLogger(OfficeFloorManager.class.getName());
 
 	/**
-	 * {@link ObjectName} for the {@link OfficeFloorManager}.
-	 */
-	static ObjectName OFFICE_FLOOR_MANAGER_OBJECT_NAME;
-
-	static {
-		try {
-			OFFICE_FLOOR_MANAGER_OBJECT_NAME = new ObjectName("officefloor", "type", "OfficeFloor");
-		} catch (MalformedObjectNameException ex) {
-			// This should never be the case
-		}
-	}
-
-	/**
-	 * Obtains the {@link OfficeFloorManagerMBean} {@link ObjectName}.
+	 * Obtains the {@link OfficeFloorMBean} {@link ObjectName}.
 	 * 
-	 * @return {@link OfficeFloorManagerMBean} {@link ObjectName}.
+	 * @param officeFloorName
+	 *            Name of the {@link OfficeFloor}.
+	 * @return {@link OfficeFloorMBean} {@link ObjectName}.
+	 * @throws MalformedObjectNameException
+	 *             If fails to construct the {@link ObjectName}.
 	 */
-	public static ObjectName getOfficeFloorManagerObjectName() {
-		return OFFICE_FLOOR_MANAGER_OBJECT_NAME;
+	public static ObjectName getOfficeFloorManagerObjectName(String officeFloorName)
+			throws MalformedObjectNameException {
+		return new ObjectName("net.officefloor:type=" + OfficeFloor.class.getName() + ",name=" + officeFloorName);
 	}
 
 	/**
@@ -150,18 +143,12 @@ public class OfficeFloorManager implements ManagedProcess {
 		synchronized (this) {
 			this.context = context;
 
+			// Obtain the process name
+			String processName = context.getProcessNamespace();
+
 			// Create the OfficeFloor compiler
 			OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
-
-			// Add properties for the compiler
-			for (String name : this.officeFloorProperties.stringPropertyNames()) {
-				String value = this.officeFloorProperties.getProperty(name);
-				compiler.addProperty(name, value);
-			}
-			compiler.addSystemProperties();
-			compiler.addEnvProperties();
-			compiler.setRegisterMBeans(true);
-			compiler.setOfficeFloorLocation(this.officeFloorLocation);
+			compiler.setMBeanRegistrator((name, mbean) -> context.registerMBean(mbean, name));
 
 			// Determine if override the default OfficeFloorSource
 			if ((this.officeFloorSourceClassName != null) && (this.officeFloorSourceClassName.trim().length() > 0)) {
@@ -174,12 +161,20 @@ public class OfficeFloorManager implements ManagedProcess {
 				compiler.setOfficeFloorSourceClass(officeFloorSourceClass);
 			}
 
-			// Compile the OfficeFloor
-			this.officeFloor = compiler.compile(this.officeFloorLocation);
-		}
+			// Configure the location
+			compiler.setOfficeFloorLocation(this.officeFloorLocation);
 
-		// Register this MBean (outside lock)
-		context.registerMBean(this, OFFICE_FLOOR_MANAGER_OBJECT_NAME);
+			// Add properties for the compiler
+			compiler.addEnvProperties();
+			compiler.addSystemProperties();
+			for (String name : this.officeFloorProperties.stringPropertyNames()) {
+				String value = this.officeFloorProperties.getProperty(name);
+				compiler.addProperty(name, value);
+			}
+
+			// Compile the OfficeFloor
+			this.officeFloor = compiler.compile(processName);
+		}
 	}
 
 	@Override

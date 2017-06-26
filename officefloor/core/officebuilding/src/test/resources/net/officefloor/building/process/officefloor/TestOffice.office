@@ -5,11 +5,13 @@
     </teams>
     
     <sections>
-        <section name="SECTION" source="DESK"
-         location="net/officefloor/building/process/officefloor/TestDesk.desk">
-            <responsibility name="RESPONSIBILITY">
-                <team name="OFFICE_TEAM"/>
-            </responsibility>
+        <section name="SECTION" source="SECTION"
+         location="net/officefloor/building/process/officefloor/TestSection.section">
+         	<sub-section>
+         		<function name="writeMessage">
+         			<team name="OFFICE_TEAM" />
+         		</function>
+         	</sub-section>
         </section>
     </sections>
     

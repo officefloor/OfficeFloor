@@ -43,6 +43,7 @@ import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuild
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
+import net.officefloor.compile.spi.mbean.MBeanRegistrator;
 import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -313,7 +314,8 @@ public class RegisterNodesAsMBeansTest extends OfficeFrameTestCase {
 		TestSupplierSource supplierSource = new TestSupplierSource();
 		this.doTestInOfficeFloor(SupplierSource.class, "SUPPLIER", (deployer, context) -> {
 			OfficeFloorSupplier supplier = deployer.addSupplier("SUPPLIER", supplierSource);
-			OfficeFloorManagedObjectSource mos = supplier.addOfficeFloorManagedObjectSource("MOS", Object.class.getName());
+			OfficeFloorManagedObjectSource mos = supplier.addOfficeFloorManagedObjectSource("MOS",
+					Object.class.getName());
 			DeployedOffice office = deployer.addDeployedOffice("OFFICE", TestOfficeSource.class.getName(), null);
 			deployer.link(mos.getManagingOffice(), office);
 		}, (objectName) -> {
@@ -771,7 +773,7 @@ public class RegisterNodesAsMBeansTest extends OfficeFrameTestCase {
 		// Compile and open the OfficeFloor
 		CompileOfficeFloor compile = new CompileOfficeFloor();
 		compile.getOfficeFloorCompiler().setOfficeFloorSource(this.officeFloorSource);
-		compile.getOfficeFloorCompiler().setRegisterMBeans(true);
+		compile.getOfficeFloorCompiler().setMBeanRegistrator(MBeanRegistrator.getPlatformMBeanRegistrator());
 		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor(extendOfficeFloor);
 
 		try {
@@ -806,7 +808,7 @@ public class RegisterNodesAsMBeansTest extends OfficeFrameTestCase {
 
 		// Compile and open the Office
 		CompileOffice compile = new CompileOffice();
-		compile.getOfficeFloorCompiler().setRegisterMBeans(true);
+		compile.getOfficeFloorCompiler().setMBeanRegistrator(MBeanRegistrator.getPlatformMBeanRegistrator());
 		OfficeFloor officeFloor = compile.compileAndOpenOffice(extendOffice);
 
 		try {

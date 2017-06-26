@@ -83,8 +83,8 @@ public class OfficeFloorManagerTest extends OfficeFrameTestCase {
 
 		// Create the OfficeFloor managed process
 		File file = OfficeBuildingTestUtil.createTempFile(this);
-		OfficeFloorManager managedProcess = new OfficeFloorManager(null, this.getOfficeFloorLocation(),
-				this.getOfficeFloorProperties());
+		OfficeFloorManager managedProcess = new OfficeFloorManager(OfficeFloorModelOfficeFloorSource.class.getName(),
+				this.getOfficeFloorLocation(), this.getOfficeFloorProperties());
 		managedProcess.addExecuteFunction("OFFICE", "SECTION.writeMessage", file.getAbsolutePath());
 
 		// Run process ensuring it completes
@@ -126,8 +126,8 @@ public class OfficeFloorManagerTest extends OfficeFrameTestCase {
 
 		// Create the OfficeFloor managed process
 		File file = OfficeBuildingTestUtil.createTempFile(this);
-		OfficeFloorManager managedProcess = new OfficeFloorManager(null, this.getOfficeFloorLocation(),
-				this.getOfficeFloorProperties());
+		OfficeFloorManager managedProcess = new OfficeFloorManager(OfficeFloorModelOfficeFloorSource.class.getName(),
+				this.getOfficeFloorLocation(), this.getOfficeFloorProperties());
 
 		// Create process configuration
 		ProcessConfiguration configuration = new ProcessConfiguration();
@@ -138,7 +138,8 @@ public class OfficeFloorManagerTest extends OfficeFrameTestCase {
 		ProcessManager manager = ProcessManager.startProcess(managedProcess, configuration);
 
 		// Ensure the OfficeFloor managed process MBean registered
-		ObjectName mbeanName = manager.getLocalObjectName(OfficeFloorManager.OFFICE_FLOOR_MANAGER_OBJECT_NAME);
+		ObjectName mbeanName = manager
+				.getLocalObjectName(OfficeFloorManager.getOfficeFloorManagerObjectName(manager.getProcessName()));
 		assertTrue("OfficeFloor MBean must be registered", mbeanServer.isRegistered(mbeanName));
 
 		// Obtain the OfficeFloor MBean

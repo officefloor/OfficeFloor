@@ -29,6 +29,7 @@ import javax.management.MXBean;
 import javax.management.ObjectName;
 
 import net.officefloor.compile.mbean.OfficeFloorMBean;
+import net.officefloor.compile.spi.mbean.MBeanRegistrator;
 import net.officefloor.extension.CompileOffice;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
@@ -65,7 +66,7 @@ public class OfficeFloorMBeanTest extends OfficeFrameTestCase {
 
 		// Compile the OfficeFloor
 		CompileOffice compiler = new CompileOffice();
-		compiler.getOfficeFloorCompiler().setRegisterMBeans(true);
+		compiler.getOfficeFloorCompiler().setMBeanRegistrator(MBeanRegistrator.getPlatformMBeanRegistrator());
 		this.officeFloor = compiler.compileOffice((extender, context) -> {
 			extender.addOfficeSection("SECTION", ClassSectionSource.class.getName(), CompileSection.class.getName());
 		});

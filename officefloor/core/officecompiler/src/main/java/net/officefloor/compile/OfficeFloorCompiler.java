@@ -43,6 +43,7 @@ import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.mbean.MBeanRegistrator;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
@@ -768,12 +769,12 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	public abstract void setOverridePropertiesDirectory(File propertiesDirectory);
 
 	/**
-	 * Flags to register the MXBeans.
+	 * Specifies the {@link MBeanRegistrator}.
 	 * 
-	 * @param isRegister
-	 *            <code>true</code> to register the MXBeans.
+	 * @param mbeanRegistrator
+	 *            {@link MBeanRegistrator}.
 	 */
-	public abstract void setRegisterMBeans(boolean isRegister);
+	public abstract void setMBeanRegistrator(MBeanRegistrator mbeanRegistrator);
 
 	/**
 	 * Creates a new empty {@link PropertyList}.

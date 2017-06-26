@@ -25,17 +25,23 @@ import javax.management.MBeanServer;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
-import net.officefloor.compile.internal.structure.MBeanRegistrator;
+import net.officefloor.compile.internal.structure.OfficeFloorMBeanRegistrator;
 import net.officefloor.compile.mbean.MBeanFactory;
+import net.officefloor.compile.spi.mbean.MBeanRegistrator;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 
 /**
- * {@link MBeanRegistrator} instance.
+ * {@link OfficeFloorMBeanRegistrator} instance.
  * 
  * @author Daniel Sagenschneider
  */
-public class MBeanRegistratorImpl implements MBeanRegistrator, OfficeFloorListener {
+public class OfficeFloorMBeanRegistratorImpl implements OfficeFloorMBeanRegistrator, OfficeFloorListener {
+
+	/**
+	 * {@link MBeanRegistrator}.
+	 */
+	private final MBeanRegistrator mbeanRegistrator;
 
 	/**
 	 * {@link PossibleMBean} instances.
@@ -46,6 +52,16 @@ public class MBeanRegistratorImpl implements MBeanRegistrator, OfficeFloorListen
 	 * {@link ObjectName} instances of the registered MBeans.
 	 */
 	private final List<ObjectName> registeredMBeans = new ArrayList<>();
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param mbeanRegistrator
+	 *            {@link MBeanRegistrator}.
+	 */
+	public OfficeFloorMBeanRegistratorImpl(MBeanRegistrator mbeanRegistrator) {
+		this.mbeanRegistrator = mbeanRegistrator;
+	}
 
 	/*
 	 * ======================= MBeanRegistrator ======================
@@ -63,9 +79,6 @@ public class MBeanRegistratorImpl implements MBeanRegistrator, OfficeFloorListen
 	@Override
 	public void officeFloorOpened(OfficeFloorEvent event) throws Exception {
 
-		// Obtain the MBean server
-		MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-
 		// Attempt to register the MBeans
 		for (PossibleMBean possibleMBean : this.possibleMBeans) {
 
@@ -81,7 +94,7 @@ public class MBeanRegistratorImpl implements MBeanRegistrator, OfficeFloorListen
 
 			try {
 				// Attempt to register the MBean
-				server.registerMBean(mbean, name);
+				this.mbeanRegistrator.registerMBean(name, mbean);
 
 				// MBean registered
 				this.registeredMBeans.add(name);
