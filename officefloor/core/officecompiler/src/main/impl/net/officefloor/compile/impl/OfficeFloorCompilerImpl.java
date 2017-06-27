@@ -135,6 +135,7 @@ import net.officefloor.compile.supplier.SupplierLoader;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
+import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -190,6 +191,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	 * {@link MBeanRegistrator}.
 	 */
 	private MBeanRegistrator mbeanRegistrator = null;
+
+	/**
+	 * {@link OfficeFloorListener} instances.
+	 */
+	private final List<OfficeFloorListener> officeFloorListeners = new LinkedList<>();
 
 	/**
 	 * {@link OfficeFloorSource} {@link Class}.
@@ -431,6 +437,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
+	public void addOfficeFloorListener(OfficeFloorListener officeFloorListener) {
+		this.officeFloorListeners.add(officeFloorListener);
+	}
+
+	@Override
 	public PropertyList createPropertyList() {
 		return new PropertyListImpl();
 	}
@@ -543,6 +554,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		// Register the possible MBeans
 		if (officeFloorMBeanRegistrator != null) {
 			builder.addOfficeFloorListener(officeFloorMBeanRegistrator);
+		}
+		
+		// Add configured OfficeFloor listeners
+		for (OfficeFloorListener listener : this.officeFloorListeners) {
+			builder.addOfficeFloorListener(listener);
 		}
 
 		// Deploy the OfficeFloor

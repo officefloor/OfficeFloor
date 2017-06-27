@@ -53,6 +53,7 @@ import net.officefloor.compile.supplier.SupplierLoader;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
@@ -775,6 +776,14 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 *            {@link MBeanRegistrator}.
 	 */
 	public abstract void setMBeanRegistrator(MBeanRegistrator mbeanRegistrator);
+
+	/**
+	 * Adds an {@link OfficeFloorListener}.
+	 * 
+	 * @param officeFloorListener
+	 *            {@link OfficeFloorListener}.
+	 */
+	public abstract void addOfficeFloorListener(OfficeFloorListener officeFloorListener);
 
 	/**
 	 * Creates a new empty {@link PropertyList}.

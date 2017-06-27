@@ -45,6 +45,7 @@ import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.supplier.SupplierLoader;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -240,6 +241,11 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	@Override
 	public void setOverridePropertiesDirectory(File propertiesDirectory) {
 		this.invokeMethod("setOverridePropertiesDirectory", new Object[] { propertiesDirectory }, File.class);
+	}
+
+	@Override
+	public void addOfficeFloorListener(OfficeFloorListener officeFloorListener) {
+		this.invokeMethod("addOfficeFloorListener", new Object[] { officeFloorListener }, OfficeFloorListener.class);
 	}
 
 	@Override

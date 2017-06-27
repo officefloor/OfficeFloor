@@ -33,6 +33,8 @@ import net.officefloor.building.process.ManagedProcessContext;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.mbean.OfficeFloorMBean;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
+import net.officefloor.frame.api.build.OfficeFloorEvent;
+import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
@@ -43,7 +45,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorManager implements ManagedProcess {
+public class OfficeFloorManager implements ManagedProcess, OfficeFloorListener, OfficeFloorManagerMBean {
 
 	/**
 	 * {@link Serializable} version.
@@ -56,6 +58,21 @@ public class OfficeFloorManager implements ManagedProcess {
 	private static final Logger LOGGER = Logger.getLogger(OfficeFloorManager.class.getName());
 
 	/**
+	 * Obtains the {@link OfficeFloorManagerMBean} {@link ObjectName}.
+	 * 
+	 * @param officeFloorName
+	 *            Name of the {@link OfficeFloor}.
+	 * @return {@link OfficeFloorManagerMBean} {@link ObjectName}.
+	 * @throws MalformedObjectNameException
+	 *             If fails to construct the {@link ObjectName}.
+	 */
+	public static ObjectName getOfficeFloorManagerObjectName(String officeFloorName)
+			throws MalformedObjectNameException {
+		return new ObjectName(
+				"net.officefloor:type=" + OfficeFloorManager.class.getName() + ",name=" + officeFloorName);
+	}
+
+	/**
 	 * Obtains the {@link OfficeFloorMBean} {@link ObjectName}.
 	 * 
 	 * @param officeFloorName
@@ -64,8 +81,7 @@ public class OfficeFloorManager implements ManagedProcess {
 	 * @throws MalformedObjectNameException
 	 *             If fails to construct the {@link ObjectName}.
 	 */
-	public static ObjectName getOfficeFloorManagerObjectName(String officeFloorName)
-			throws MalformedObjectNameException {
+	public static ObjectName getOfficeFloorObjectName(String officeFloorName) throws MalformedObjectNameException {
 		return new ObjectName("net.officefloor:type=" + OfficeFloor.class.getName() + ",name=" + officeFloorName);
 	}
 
@@ -98,6 +114,16 @@ public class OfficeFloorManager implements ManagedProcess {
 	 * {@link OfficeFloor} being managed within the {@link Process}.
 	 */
 	private transient OfficeFloor officeFloor = null;
+
+	/**
+	 * Indicates whether the {@link OfficeFloor} is open.
+	 */
+	private transient volatile boolean isOfficeFloorOpen = false;
+
+	/**
+	 * Indicates that the {@link OfficeFloor} has been closed.
+	 */
+	private transient volatile boolean isOfficeFloorClosed = false;
 
 	/**
 	 * Initiate.
@@ -133,6 +159,53 @@ public class OfficeFloorManager implements ManagedProcess {
 	}
 
 	/*
+	 * ============== OfficeFloorManagerMBean ========================
+	 */
+
+	@Override
+	public boolean isOfficeFloorOpen() {
+		return this.isOfficeFloorOpen;
+	}
+
+	@Override
+	public void closeOfficeFloor() {
+		synchronized (this) {
+			try {
+
+				// Close the OfficeFloor
+				this.officeFloor.closeOfficeFloor();
+
+			} catch (Exception ex) {
+				// Indicate failure
+				LOGGER.log(Level.WARNING, "Failed to close OfficeFloor", ex);
+
+			} finally {
+				// Ensure flagged closed
+				this.isOfficeFloorClosed = true;
+			}
+		}
+	}
+
+	/*
+	 * ================ OfficeFloorListener ==========================
+	 */
+
+	@Override
+	public void officeFloorOpened(OfficeFloorEvent event) throws Exception {
+		// Not flag open, as ensuring OfficeFloor open successfully
+	}
+
+	@Override
+	public void officeFloorClosed(OfficeFloorEvent event) throws Exception {
+		this.isOfficeFloorClosed = true;
+
+		// Notify immediately that closed
+		synchronized (this) {
+			this.notify();
+		}
+	}
+
+	/*
 	 * =================== ManagedProcess ============================
 	 */
 
@@ -140,14 +213,20 @@ public class OfficeFloorManager implements ManagedProcess {
 	@SuppressWarnings("unchecked")
 	public void init(ManagedProcessContext context) throws Throwable {
 
+		// Obtain the process name
+		String processName = context.getProcessNamespace();
+
+		// Lock as MBeanServer may also change state
 		synchronized (this) {
 			this.context = context;
 
-			// Obtain the process name
-			String processName = context.getProcessNamespace();
-
 			// Create the OfficeFloor compiler
 			OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+
+			// Listen to state of OfficeFloor
+			compiler.addOfficeFloorListener(this);
+
+			// Register all MBeans with context
 			compiler.setMBeanRegistrator((name, mbean) -> context.registerMBean(mbean, name));
 
 			// Determine if override the default OfficeFloorSource
@@ -175,6 +254,9 @@ public class OfficeFloorManager implements ManagedProcess {
 			// Compile the OfficeFloor
 			this.officeFloor = compiler.compile(processName);
 		}
+
+		// Register as MBean
+		context.registerMBean(this, getOfficeFloorManagerObjectName(processName));
 	}
 
 	@Override
@@ -183,6 +265,8 @@ public class OfficeFloorManager implements ManagedProcess {
 		ManagedProcessContext context;
 		OfficeFloor officeFloor = null;
 		try {
+
+			// Lock to ensure MBeanServer does not close while opening
 			List<FunctionProcessState> functionProcessStates;
 			synchronized (this) {
 				context = this.context;
@@ -190,6 +274,9 @@ public class OfficeFloorManager implements ManagedProcess {
 
 				// Open the OfficeFloor
 				this.officeFloor.openOfficeFloor();
+
+				// Flag OfficeFloor open
+				this.isOfficeFloorOpen = true;
 
 				// Obtain thread safe list
 				functionProcessStates = new ArrayList<FunctionProcessState>(this.functionProcessStates);
@@ -201,7 +288,7 @@ public class OfficeFloorManager implements ManagedProcess {
 				// Determine if initial function to run
 				if (functionProcessStates.size() == 0) {
 					// No function, so wait until triggered to stop
-					for (;;) {
+					while (!this.isOfficeFloorClosed) {
 
 						// Determine if flagged to stop
 						if (!context.continueProcessing()) {
@@ -210,7 +297,7 @@ public class OfficeFloorManager implements ManagedProcess {
 
 						// Wait some time for trigger to stop
 						synchronized (this) {
-							this.wait(1000);
+							this.wait(10000);
 						}
 					}
 
@@ -226,7 +313,7 @@ public class OfficeFloorManager implements ManagedProcess {
 						// Check if all functions complete
 						boolean isAllFunctionsComplete = true;
 						for (FunctionProcessState functionProcessState : functionProcessStates) {
-							if (!functionProcessState.isComplete()) {
+							if (!functionProcessState.isComplete) {
 								isAllFunctionsComplete = false;
 							}
 						}
@@ -238,7 +325,7 @@ public class OfficeFloorManager implements ManagedProcess {
 
 						// Wait some time for work to complete
 						synchronized (this) {
-							this.wait(1000);
+							this.wait(10000);
 						}
 					}
 				}
@@ -258,7 +345,7 @@ public class OfficeFloorManager implements ManagedProcess {
 	 * Maintains state of {@link ManagedFunction} that is invoked on the
 	 * {@link OfficeFloor}.
 	 */
-	private static class FunctionProcessState implements Serializable {
+	private class FunctionProcessState implements Serializable {
 
 		/**
 		 * {@link Serializable} version.
@@ -320,16 +407,12 @@ public class OfficeFloorManager implements ManagedProcess {
 			// Invoke the function (notifying when complete)
 			functionManager.invokeProcess(this.parameter, (exception) -> {
 				this.isComplete = true;
-			});
-		}
 
-		/**
-		 * Indicates if the invoked {@link ManagedFunction} is complete.
-		 * 
-		 * @return <code>true</code> if complete.
-		 */
-		public boolean isComplete() {
-			return this.isComplete;
+				// Notify immediately that closed
+				synchronized (OfficeFloorManager.this) {
+					OfficeFloorManager.this.notify();
+				}
+			});
 		}
 	}
 

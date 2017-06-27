@@ -30,7 +30,9 @@ import junit.framework.TestCase;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.process.ProcessManagerMBean;
+import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
 import net.officefloor.console.OfficeBuilding;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -197,6 +199,34 @@ public class OfficeBuildingTestUtil {
 	}
 
 	/**
+	 * Waits until the {@link OfficeFloor} is open.
+	 * 
+	 * @param officeFloorManager
+	 *            {@link OfficeFloorManagerMBean}.
+	 * @param processManager
+	 *            {@link ProcessManagerMBean}.
+	 */
+	public static void waitUntilOfficeFloorOpens(OfficeFloorManagerMBean officeFloorManager,
+			ProcessManagerMBean processManager) throws Exception {
+
+		// Maximum run time (allow reasonable time to close)
+		final int MAX_RUN_TIME = 20000;
+
+		// Wait until process completes (or times out)
+		long maxFinishTime = System.currentTimeMillis() + MAX_RUN_TIME;
+		while (!officeFloorManager.isOfficeFloorOpen()) {
+			// Determine if taken too long
+			if (System.currentTimeMillis() > maxFinishTime) {
+				processManager.destroyProcess();
+				TestCase.fail("Took too long waiting for OfficeFloor to open");
+			}
+
+			// Wait some time to open
+			Thread.sleep(10);
+		}
+	}
+
+	/**
 	 * Waits until the {@link Process} is complete (or times out).
 	 * 
 	 * @param manager
@@ -221,7 +251,7 @@ public class OfficeBuildingTestUtil {
 			}
 
 			// Wait some time for further processing
-			Thread.sleep(100);
+			Thread.sleep(10);
 		}
 	}
 

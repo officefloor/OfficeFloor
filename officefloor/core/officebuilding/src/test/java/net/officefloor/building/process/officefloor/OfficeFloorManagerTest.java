@@ -45,6 +45,24 @@ import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
 public class OfficeFloorManagerTest extends OfficeFrameTestCase {
 
 	/**
+	 * {@link ProcessManager}.
+	 */
+	private ProcessManager processManager = null;
+
+	@Override
+	protected void tearDown() throws Exception {
+		
+		// Ensure stop the process
+		if (this.processManager != null) {
+			this.processManager.destroyProcess();
+			OfficeBuildingTestUtil.waitUntilProcessComplete(this.processManager, null);
+		}
+		
+		// Super tear down
+		super.tearDown();
+	}
+
+	/**
 	 * Ensures the {@link OfficeFloor} configuration is correct by running it.
 	 */
 	public void testEnsureOfficeFloorRuns() throws Exception {
@@ -88,8 +106,8 @@ public class OfficeFloorManagerTest extends OfficeFrameTestCase {
 		managedProcess.addExecuteFunction("OFFICE", "SECTION.writeMessage", file.getAbsolutePath());
 
 		// Run process ensuring it completes
-		ProcessManager manager = ProcessManager.startProcess(managedProcess, null);
-		OfficeBuildingTestUtil.waitUntilProcessComplete(manager, null);
+		this.processManager = ProcessManager.startProcess(managedProcess, null);
+		OfficeBuildingTestUtil.waitUntilProcessComplete(this.processManager, null);
 
 		// Validate content in file
 		OfficeBuildingTestUtil.validateFileContent("Expecting content written", MockWork.MESSAGE, file);
@@ -112,8 +130,7 @@ public class OfficeFloorManagerTest extends OfficeFrameTestCase {
 				file.getAbsolutePath(), properties);
 
 		// Start process (should be using alternate OfficeFloorSource)
-		ProcessManager manager = ProcessManager.startProcess(managedProcess, null);
-		manager.destroyProcess();
+		this.processManager = ProcessManager.startProcess(managedProcess, null);
 
 		// Validate content in file
 		OfficeBuildingTestUtil.validateFileContent("Expecting content written", MESSAGE, file);
@@ -135,22 +152,31 @@ public class OfficeFloorManagerTest extends OfficeFrameTestCase {
 		configuration.setMbeanServer(mbeanServer);
 
 		// Run the process
-		ProcessManager manager = ProcessManager.startProcess(managedProcess, configuration);
+		this.processManager = ProcessManager.startProcess(managedProcess, configuration);
 
 		// Ensure the OfficeFloor managed process MBean registered
-		ObjectName mbeanName = manager
-				.getLocalObjectName(OfficeFloorManager.getOfficeFloorManagerObjectName(manager.getProcessName()));
-		assertTrue("OfficeFloor MBean must be registered", mbeanServer.isRegistered(mbeanName));
+		ObjectName officeFloorManagerName = this.processManager.getLocalObjectName(
+				OfficeFloorManager.getOfficeFloorManagerObjectName(this.processManager.getProcessName()));
+		assertTrue("OfficeFloor Manager MBean must be registered", mbeanServer.isRegistered(officeFloorManagerName));
 
-		// Obtain the OfficeFloor MBean
-		OfficeFloorMBean mbean = JMX.newMBeanProxy(mbeanServer, mbeanName, OfficeFloorMBean.class);
+		// Obtain the OfficeFloor Manager MBean
+		OfficeFloorManagerMBean officeFloorManager = JMX.newMBeanProxy(mbeanServer, officeFloorManagerName,
+				OfficeFloorManagerMBean.class);
+		OfficeBuildingTestUtil.waitUntilOfficeFloorOpens(officeFloorManager, this.processManager);
 
-		// Invoke the function
-		mbean.invokeFunction("OFFICE", "SECTION.writeMessage", file.getAbsolutePath());
+		// As OfficeFloor is open, should have registered OfficeFloor MBean
+		ObjectName officeFloorName = this.processManager
+				.getLocalObjectName(OfficeFloorManager.getOfficeFloorObjectName(this.processManager.getProcessName()));
+		assertTrue("OfficeFloor MBean must be registered as OfficeFloor open",
+				mbeanServer.isRegistered(officeFloorName));
+
+		// Invoke the function within OfficeFloor
+		OfficeFloorMBean officeFloor = JMX.newMBeanProxy(mbeanServer, officeFloorName, OfficeFloorMBean.class);
+		officeFloor.invokeFunction("OFFICE", "SECTION.writeMessage", file.getAbsolutePath());
 
 		// Stop the managed process
-		manager.triggerStopProcess();
-		OfficeBuildingTestUtil.waitUntilProcessComplete(manager, null);
+		this.processManager.triggerStopProcess();
+		OfficeBuildingTestUtil.waitUntilProcessComplete(this.processManager, null);
 
 		// Validate content in file
 		OfficeBuildingTestUtil.validateFileContent("Expecting content written", MockWork.MESSAGE, file);
