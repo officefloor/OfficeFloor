@@ -51,6 +51,18 @@ public interface OfficeFloorMBean {
 	String[] getManagedFunctionNames(String officeName);
 
 	/**
+	 * Obtains the parameter type for the {@link ManagedFunction}.
+	 * 
+	 * @param officeName
+	 *            Name of the {@link Office}.
+	 * @param functionName
+	 *            Name of the {@link ManagedFunction}.
+	 * @return Parameter type for the {@link ManagedFunction}. May be
+	 *         <code>null</code> if no parameter for {@link ManagedFunction}.
+	 */
+	String getManagedFunctionParameterType(String officeName, String functionName);
+
+	/**
 	 * Invokes the {@link ManagedFunction}.
 	 * 
 	 * @param officeName

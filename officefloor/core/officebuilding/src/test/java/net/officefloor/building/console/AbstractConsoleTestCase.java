@@ -47,8 +47,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * 
  * @author Daniel Sagenschneider
  */
-public class AbstractConsoleTestCase extends OfficeFrameTestCase implements
-		FurtherDetails {
+public class AbstractConsoleTestCase extends OfficeFrameTestCase implements FurtherDetails {
 
 	/**
 	 * Data written to file to confirm the {@link ManagedProcess} is run.
@@ -163,10 +162,8 @@ public class AbstractConsoleTestCase extends OfficeFrameTestCase implements
 	 *            {@link OfficeFloorCommandParameter} names.
 	 * @return {@link MockCommand} as {@link OfficeFloorCommandFactory}.
 	 */
-	protected MockCommand createCommand(String commandName,
-			String... parameters) throws IOException {
-		return new MockCommand(commandName, new MockManagedProcess(), null,
-				parameters);
+	protected MockCommand createCommand(String commandName, String... parameters) throws IOException {
+		return new MockCommand(commandName, new MockManagedProcess(), null, parameters);
 	}
 
 	/**
@@ -178,8 +175,7 @@ public class AbstractConsoleTestCase extends OfficeFrameTestCase implements
 	 *            Wait file.
 	 */
 	protected static void setWaitFile(MockCommand command, File waitFile) {
-		MockManagedProcess process = (MockManagedProcess) command
-				.getManagedProcess();
+		MockManagedProcess process = (MockManagedProcess) command.getManagedProcess();
 		process.setWaitFile(waitFile);
 	}
 
@@ -196,10 +192,8 @@ public class AbstractConsoleTestCase extends OfficeFrameTestCase implements
 	 * @param resultFile
 	 *            Result file.
 	 */
-	protected static void setSystemPropertyCheck(MockCommand command,
-			String systemPropertyName, File resultFile) {
-		MockManagedProcess process = (MockManagedProcess) command
-				.getManagedProcess();
+	protected static void setSystemPropertyCheck(MockCommand command, String systemPropertyName, File resultFile) {
+		MockManagedProcess process = (MockManagedProcess) command.getManagedProcess();
 		process.setSystemPropertyCheck(systemPropertyName, resultFile);
 	}
 
@@ -211,8 +205,7 @@ public class AbstractConsoleTestCase extends OfficeFrameTestCase implements
 	 * @return <code>true</code> if is run.
 	 */
 	protected static boolean isRun(MockCommand command) throws IOException {
-		MockManagedProcess process = (MockManagedProcess) command
-				.getManagedProcess();
+		MockManagedProcess process = (MockManagedProcess) command.getManagedProcess();
 		return process.isRun();
 	}
 
@@ -250,8 +243,7 @@ public class AbstractConsoleTestCase extends OfficeFrameTestCase implements
 		 * Initiate.
 		 */
 		public MockManagedProcess() throws IOException {
-			this.runFilePath = File.createTempFile(
-					OfficeFloorConsoleTest.class.getSimpleName(), "test")
+			this.runFilePath = File.createTempFile(OfficeFloorConsoleTest.class.getSimpleName(), "test")
 					.getAbsolutePath();
 		}
 
@@ -273,11 +265,9 @@ public class AbstractConsoleTestCase extends OfficeFrameTestCase implements
 		 * @param resultFile
 		 *            Result file.
 		 */
-		public void setSystemPropertyCheck(String systemPropertyName,
-				File resultFile) {
+		public void setSystemPropertyCheck(String systemPropertyName, File resultFile) {
 			this.systemPropertyName = systemPropertyName;
-			this.systemPropertyValueResultFilePath = resultFile
-					.getAbsolutePath();
+			this.systemPropertyValueResultFilePath = resultFile.getAbsolutePath();
 		}
 
 		/**
@@ -312,8 +302,7 @@ public class AbstractConsoleTestCase extends OfficeFrameTestCase implements
 			if (this.waitFilePath != null) {
 
 				// Ensure the wait file exists
-				assertTrue("Wait file exists",
-						new File(this.waitFilePath).exists());
+				assertTrue("Wait file exists", new File(this.waitFilePath).exists());
 
 				// Wait for content in the wait file
 				long startTime = System.currentTimeMillis();
@@ -322,8 +311,7 @@ public class AbstractConsoleTestCase extends OfficeFrameTestCase implements
 
 					// Allow some time for waiting
 					Thread.sleep(10);
-					TestCase.assertTrue("Timed out waiting",
-							((System.currentTimeMillis() - startTime) < 5000));
+					TestCase.assertTrue("Timed out waiting", ((System.currentTimeMillis() - startTime) < 5000));
 
 					// Check if content to indicate finished waiting
 					if (new OfficeFrameTestCase() {
@@ -338,12 +326,10 @@ public class AbstractConsoleTestCase extends OfficeFrameTestCase implements
 			if (this.systemPropertyName != null) {
 
 				// Obtain the system property value
-				String systemPropertyValue = System.getProperty(
-						this.systemPropertyName, "");
+				String systemPropertyValue = System.getProperty(this.systemPropertyName, "");
 
 				// Write system property value to the result file
-				FileWriter writer = new FileWriter(
-						this.systemPropertyValueResultFilePath);
+				FileWriter writer = new FileWriter(this.systemPropertyValueResultFilePath);
 				writer.write(systemPropertyValue);
 				writer.close();
 			}
@@ -394,8 +380,7 @@ public class AbstractConsoleTestCase extends OfficeFrameTestCase implements
 	 * @param lines
 	 *            Lines of expected output.
 	 */
-	private void assertPipeContent(PrintStream console, BufferedReader pipe,
-			String[] lines) throws IOException {
+	private void assertPipeContent(PrintStream console, BufferedReader pipe, String[] lines) throws IOException {
 
 		// Create the expected output
 		final String EOLN = System.getProperty("line.separator");
@@ -405,8 +390,7 @@ public class AbstractConsoleTestCase extends OfficeFrameTestCase implements
 			// Remove right format spacing for test readability
 			final String TRAILING_SPACE = " ";
 			while (line.endsWith(TRAILING_SPACE)) {
-				line = line.substring(0,
-						(line.length() - TRAILING_SPACE.length()));
+				line = line.substring(0, (line.length() - TRAILING_SPACE.length()));
 			}
 
 			// Add expected line
@@ -434,7 +418,8 @@ public class AbstractConsoleTestCase extends OfficeFrameTestCase implements
 		}
 
 		// Validate output
-		assertEquals("Incorrect output", expected.toString(), actual.toString());
+		assertEquals("Incorrect output:\n======================\n" + actual.toString() + "\n======================\n",
+				expected.toString(), actual.toString());
 	}
 
 	/**
@@ -446,8 +431,7 @@ public class AbstractConsoleTestCase extends OfficeFrameTestCase implements
 	 *            Corresponding pipe for {@link PrintStream}.
 	 * @return Pipe content.
 	 */
-	private String getPipeContent(PrintStream console, BufferedReader pipe)
-			throws IOException {
+	private String getPipeContent(PrintStream console, BufferedReader pipe) throws IOException {
 
 		// Close console to enable end of stream
 		console.close();

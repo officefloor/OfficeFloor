@@ -256,23 +256,29 @@ public class OfficeBuildingListOfficeFloorCommand implements OfficeFloorCommandF
 				}
 
 			} else {
-				// List the tasks of the process name space
-				OfficeFloorMBean officeFloorManager = OfficeBuildingManager.getOfficeFloorManager(
-						this.officeBuildingHost, this.officeBuildingPort, this.officeFloorName,
-						new File(this.trustStoreLocation), this.trustStorePassword, this.userName, this.password);
+				// List the offices/functions of the OfficeFloor
+				OfficeFloorMBean officeFloor = OfficeBuildingManager.getOfficeFloor(this.officeBuildingHost,
+						this.officeBuildingPort, this.officeFloorName, new File(this.trustStoreLocation),
+						this.trustStorePassword, this.userName, this.password);
 
 				// Determine if list offices
 				if (this.officeName == null) {
-					String[] officeNames = officeFloorManager.getOfficeNames();
+					String[] officeNames = officeFloor.getOfficeNames();
 					for (String officeName : officeNames) {
 						output.append(officeName + "\n");
 					}
 
 				} else {
 					// List the functions of the office
-					String[] functionNames = officeFloorManager.getManagedFunctionNames(this.officeName);
+					String[] functionNames = officeFloor.getManagedFunctionNames(this.officeName);
 					for (String functionName : functionNames) {
-						output.append(functionName + "\n");
+
+						// Obtain the parameter type
+						String parameterType = officeFloor.getManagedFunctionParameterType(this.officeName,
+								functionName);
+
+						// Output the function details
+						output.append(functionName + (parameterType == null ? "()" : "(" + parameterType + ")") + "\n");
 					}
 				}
 			}

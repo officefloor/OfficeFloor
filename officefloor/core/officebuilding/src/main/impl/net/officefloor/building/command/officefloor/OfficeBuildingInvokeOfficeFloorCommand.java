@@ -268,8 +268,8 @@ public class OfficeBuildingInvokeOfficeFloorCommand implements OfficeFloorComman
 		@Override
 		public void main() throws Throwable {
 
-			// Obtain the OfficeFloor manager
-			OfficeFloorMBean officeFloorManager = OfficeBuildingManager.getOfficeFloorManager(this.officeBuildingHost,
+			// Obtain the OfficeFloor
+			OfficeFloorMBean officeFloorManager = OfficeBuildingManager.getOfficeFloor(this.officeBuildingHost,
 					this.officeBuildingPort, this.officeFloorName, new File(this.trustStoreLocation),
 					this.trustStorePassword, this.userName, this.password);
 

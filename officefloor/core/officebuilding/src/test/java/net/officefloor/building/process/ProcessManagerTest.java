@@ -40,6 +40,8 @@ import javax.management.MBeanServer;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 
+import org.junit.Assert;
+
 import net.officefloor.building.util.OfficeBuildingTestUtil;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -62,6 +64,101 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 	 */
 	public static void assertProcessStartOutput(String output, String expectedProcessOutput) throws IOException {
 		assertProcessStartOutput(output, false, null, null, expectedProcessOutput, null);
+	}
+
+	/**
+	 * Enable logging expected and actual lines.
+	 */
+	private static class LineAssertion {
+
+		/**
+		 * Expected lines.
+		 */
+		private final StringWriter eLog = new StringWriter();
+
+		/**
+		 * Actual lines.
+		 */
+		private final StringWriter aLog = new StringWriter();
+
+		/**
+		 * Obtains the message for assertions.
+		 * 
+		 * @param message
+		 *            Message.
+		 * @return Message with expected/actual details for easier debugging of
+		 *         issue.
+		 */
+		private String getMessage(String message) {
+			return message + "\n== EXPECTED ==:\n" + this.eLog.toString() + "\n== ACTUAL ==\n" + this.aLog.toString()
+					+ "\n===============\n";
+		}
+
+		/**
+		 * Asserts the line.
+		 * 
+		 * @param message
+		 *            Message.
+		 * @param expectedLine
+		 *            Expected line.
+		 * @param actualLine
+		 *            Actual line.
+		 */
+		public void assertLineEquals(String message, String expectedLine, String actualLine) {
+			this.eLog.append(expectedLine + "\n");
+			this.aLog.append(actualLine + "\n");
+			assertEquals(this.getMessage(message), expectedLine, actualLine);
+		}
+
+		/**
+		 * Asserts line match via regular expression.
+		 * 
+		 * @param message
+		 *            Message.
+		 * @param expectedLine
+		 *            Expected line regular expression.
+		 * @param actualLine
+		 *            Actual line.
+		 */
+		public void assertLineMatch(String message, String expectedLine, String actualLine) {
+			this.eLog.append(expectedLine + "\n");
+			this.aLog.append(actualLine + "\n");
+			assertTrue(this.getMessage(message), Pattern.matches("^" + expectedLine + "$", actualLine));
+		}
+
+		/**
+		 * Ensure not a blank line.
+		 * 
+		 * @param message
+		 *            message.
+		 * @param actualLine
+		 *            Actual line.
+		 */
+		public void assertNotBlankLine(String message, String actualLine) {
+			assertNotNull(this.getMessage(message), actualLine);
+		}
+
+		/**
+		 * Ensure no (extra) line.
+		 * 
+		 * @param message
+		 *            Message.
+		 * @param actualLine
+		 *            Actual line.
+		 */
+		public void assertNoLine(String message, String actualLine) {
+			assertNull(this.getMessage(message), actualLine);
+		}
+
+		/**
+		 * Fails the test.
+		 * 
+		 * @param message
+		 *            Message.
+		 */
+		public void fail(String message) {
+			Assert.fail(this.getMessage(message));
+		}
 	}
 
 	/**
@@ -89,13 +186,16 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 		// Enable reading the actual content
 		final BufferedReader actual = new BufferedReader(new StringReader(output));
 
+		// Track expected and actual for easier viewing differences
+		LineAssertion assertion = new LineAssertion();
+
 		// Ensure prefix output is as expected
 		if (expectedPrefixOutput != null) {
 			final BufferedReader expectedPrefix = new BufferedReader(new StringReader(expectedPrefixOutput));
 			for (String expectedLine = expectedPrefix.readLine(); expectedLine != null; expectedLine = expectedPrefix
 					.readLine()) {
 				String actualLine = actual.readLine();
-				assertEquals("Incorrect prefix line", expectedLine, actualLine);
+				assertion.assertLineEquals("Incorrect prefix line", expectedLine, actualLine);
 			}
 		}
 
@@ -113,8 +213,7 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 			String actualLine = actual.readLine();
 
 			// Validate the lines match
-			assertTrue("Incorrect output line.\n\tE: " + expectedLine + "\n\tA: " + actualLine,
-					Pattern.matches("^" + expectedLine + "$", actualLine));
+			assertion.assertLineMatch("Incorrect output line", expectedLine, actualLine);
 		}
 
 		// Expected matching output (with potential process startup)
@@ -142,7 +241,7 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 			if (actualLine == null) {
 				actualLine = actual.readLine();
 			}
-			assertNotNull("Expecting further output", actualLine);
+			assertion.assertNotBlankLine("Expecting further output", actualLine);
 
 			if ((expectedStartupOutputLine != null) && (actualLine.startsWith(expectedStartupOutputLine))) {
 				// Expected content
@@ -166,7 +265,7 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 
 			} else {
 				// Unknown content
-				fail("Incorrect output content.\n\tE: " + expectedStartupOutputLine + " E: "
+				assertion.fail("Incorrect output content.\n\tE: " + expectedStartupOutputLine + " E: "
 						+ expectedProcessStartupLine + " E: " + expectedProcessOutputLine + "\n\tA: " + actualLine);
 			}
 
@@ -175,7 +274,7 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 				actualLine = null;
 			}
 		}
-		assertNull("Additional unknown startup output: " + actualLine, actualLine);
+		assertion.assertNoLine("Additional unknown startup output", actualLine);
 
 		// Ensure suffix output is as expected
 		if (expectedSuffixOutput != null) {
@@ -183,13 +282,13 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 			for (String expectedLine = expectedSuffix.readLine(); expectedLine != null; expectedLine = expectedSuffix
 					.readLine()) {
 				actualLine = actual.readLine();
-				assertEquals("Incorrect suffix line", expectedLine, actualLine);
+				assertion.assertLineEquals("Incorrect suffix line", expectedLine, actualLine);
 			}
 		}
 
 		// Ensure at end of actual output
 		String possibleExtraLine = actual.readLine();
-		assertNull("Should be no further output: " + possibleExtraLine, possibleExtraLine);
+		assertion.assertNoLine("Should be no further output", possibleExtraLine);
 	}
 
 	/**

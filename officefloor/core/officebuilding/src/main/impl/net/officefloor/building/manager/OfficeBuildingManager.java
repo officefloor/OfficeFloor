@@ -72,6 +72,7 @@ import net.officefloor.building.process.ProcessShell;
 import net.officefloor.building.process.ProcessShellMBean;
 import net.officefloor.building.process.ProcessStartListener;
 import net.officefloor.building.process.officefloor.OfficeFloorManager;
+import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
 import net.officefloor.compile.mbean.OfficeFloorMBean;
 import net.officefloor.console.OfficeBuilding;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -556,6 +557,42 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 
 	/**
 	 * <p>
+	 * Obtains the {@link OfficeFloorManagerMBean}.
+	 * <p>
+	 * The <code>hostName</code> and <code>port</code> are of the
+	 * {@link OfficeBuilding} managing the {@link OfficeFloor} {@link Process}.
+	 * They are <i>not</i> of the specific {@link Process} containing the
+	 * {@link OfficeFloor}.
+	 * 
+	 * @param hostName
+	 *            Name of the host where the {@link OfficeBuilding} resides.
+	 *            <code>null</code> indicates localhost.
+	 * @param port
+	 *            Port where the {@link OfficeBuilding} resides.
+	 * @param officeFloorName
+	 *            Name of the {@link OfficeFloor}.
+	 * @param trustStore
+	 *            {@link File} containing the trusted security keys.
+	 * @param trustStorePassword
+	 *            Password to the trusted key store {@link File}.
+	 * @param userName
+	 *            User name to connect.
+	 * @param password
+	 *            Password to connect.
+	 * @return {@link OfficeFloorManagerMBean}.
+	 * @throws Exception
+	 *             If fails to obtain {@link OfficeFloorManagerMBean}.
+	 */
+	public static OfficeFloorManagerMBean getOfficeFloorManager(String hostName, int port, String officeFloorName,
+			File trustStore, String trustStorePassword, String userName, String password) throws Exception {
+		ObjectName objectName = ProcessManager.getLocalObjectName(officeFloorName,
+				OfficeFloorManager.getOfficeFloorManagerObjectName(officeFloorName));
+		return getMBeanProxy(hostName, port, trustStore, trustStorePassword, userName, password, objectName,
+				OfficeFloorManagerMBean.class);
+	}
+
+	/**
+	 * <p>
 	 * Obtains the {@link OfficeFloorMBean}.
 	 * <p>
 	 * The <code>hostName</code> and <code>port</code> are of the
@@ -578,14 +615,14 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	 *            User name to connect.
 	 * @param password
 	 *            Password to connect.
-	 * @return {@link OfficeFloorBean}.
+	 * @return {@link OfficeFloorMBean}.
 	 * @throws Exception
 	 *             If fails to obtain {@link OfficeFloorMBean}.
 	 */
-	public static OfficeFloorMBean getOfficeFloorManager(String hostName, int port, String officeFloorName,
-			File trustStore, String trustStorePassword, String userName, String password) throws Exception {
+	public static OfficeFloorMBean getOfficeFloor(String hostName, int port, String officeFloorName, File trustStore,
+			String trustStorePassword, String userName, String password) throws Exception {
 		ObjectName objectName = ProcessManager.getLocalObjectName(officeFloorName,
-				OfficeFloorManager.getOfficeFloorManagerObjectName(officeFloorName));
+				OfficeFloorManager.getOfficeFloorObjectName(officeFloorName));
 		return getMBeanProxy(hostName, port, trustStore, trustStorePassword, userName, password, objectName,
 				OfficeFloorMBean.class);
 	}
@@ -625,7 +662,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	 * <p>
 	 * Obtains the MBean proxy.
 	 * <p>
-	 * This a utility method to obtain an MBean from an existing Office
+	 * This is a utility method to obtain an MBean from an existing Office
 	 * Building.
 	 * 
 	 * @param <I>

@@ -36,7 +36,7 @@ public class OfficeFloorNameOfficeFloorCommandParameter extends AbstractSingleVa
 	 * Initiate.
 	 */
 	public OfficeFloorNameOfficeFloorCommandParameter() {
-		super(PARAMTER_OFFICEFLOOR_NAME, null, "OfficeFloor name. Default is OfficeFloor");
+		super(PARAMTER_OFFICEFLOOR_NAME, "n", "OfficeFloor name. Default is OfficeFloor");
 	}
 
 	/**

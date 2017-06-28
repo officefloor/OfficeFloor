@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.rmi.registry.Registry;
 
 import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
 
 import net.officefloor.console.OfficeBuilding;
 
@@ -64,6 +66,19 @@ public interface ProcessManagerMBean {
 	 *             {@link ProcessManagerMBean}.
 	 */
 	String getProcessNamespace() throws IOException;
+
+	/**
+	 * Obtains the local {@link ObjectName} for the remote MBean in the
+	 * {@link Process} being managed by this {@link ProcessManager}.
+	 * 
+	 * @param objectName
+	 *            {@link ObjectName} of the remote MBean.
+	 * @return Local {@link ObjectName} for the remote MBean in the
+	 *         {@link Process} being managed.
+	 * @throws MalformedObjectNameException
+	 *             If resulting local name is malformed.
+	 */
+	ObjectName getLocalObjectName(ObjectName objectName) throws MalformedObjectNameException;
 
 	/**
 	 * Obtains the host name that the {@link Process} is running on.

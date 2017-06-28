@@ -295,7 +295,7 @@ public class OfficeBuildingOpenOfficeFloorCommand implements OfficeFloorCommandF
 		// Generate the output suffix
 		StringBuilder outputSuffix = new StringBuilder();
 		if (functionName != null) {
-			outputSuffix.append(" for work (office=");
+			outputSuffix.append(" for function (office=");
 			outputSuffix.append(officeName);
 			outputSuffix.append(", function=");
 			outputSuffix.append(functionName);

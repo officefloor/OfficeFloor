@@ -36,6 +36,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.section.clazz.Parameter;
 
 /**
  * Ensure register {@link OfficeFloor} as an MBean with ability to run
@@ -164,8 +165,28 @@ public class OfficeFloorMBeanTest extends OfficeFrameTestCase {
 
 		// Obtain the list of managed function names
 		String[] managedFunctionNames = mbean.getManagedFunctionNames("OFFICE");
-		assertEquals("Incorrect number of managed functions", 1, managedFunctionNames.length);
-		assertEquals("Incorrect managed function name", "SECTION.function", managedFunctionNames[0]);
+		assertEquals("Incorrect number of managed functions", 2, managedFunctionNames.length);
+		assertEquals("Incorrect first managed function", "SECTION.function", managedFunctionNames[0]);
+		assertEquals("Incorrect second managed function", "SECTION.functionWithParameter", managedFunctionNames[1]);
+	}
+
+	/**
+	 * Ensure can obtain the parameter type for the {@link ManagedFunction}.
+	 */
+	public void testManagedFunctionParameterType() throws Exception {
+
+		// Open and register MBean
+		this.officeFloor.openOfficeFloor();
+
+		// Obtain the OfficeFloor MBean
+		MBeanServerConnection connection = ManagementFactory.getPlatformMBeanServer();
+		OfficeFloorMBean mbean = JMX.newMBeanProxy(connection, this.objectName, OfficeFloorMBean.class);
+
+		// Obtain the parameter types
+		assertNull("Function should not have parameter",
+				mbean.getManagedFunctionParameterType("OFFICE", "SECTION.function"));
+		assertEquals("Incorrect parameter type", String.class.getName(),
+				mbean.getManagedFunctionParameterType("OFFICE", "SECTION.functionWithParameter"));
 	}
 
 	/**
@@ -175,6 +196,7 @@ public class OfficeFloorMBeanTest extends OfficeFrameTestCase {
 
 		// Reset for testing
 		CompileSection.isFunctionInvoked = false;
+		CompileSection.invokedParameter = null;
 
 		// Open and register MBean
 		this.officeFloor.openOfficeFloor();
@@ -191,6 +213,32 @@ public class OfficeFloorMBeanTest extends OfficeFrameTestCase {
 
 		// Ensure the function is invoked
 		assertTrue("Managed function should be invoked", CompileSection.isFunctionInvoked);
+		assertNull("Should ignore parameter", CompileSection.invokedParameter);
+	}
+
+	/**
+	 * Ensure can invoke a {@link ManagedFunction} with a parameter.
+	 */
+	public void testInvokeManagedFunctionWithParameter() throws Exception {
+
+		// Reset for testing
+		CompileSection.invokedParameter = null;
+
+		// Open and register MBean
+		this.officeFloor.openOfficeFloor();
+
+		// Obtain the OfficeFloor MBean
+		MBeanServerConnection connection = ManagementFactory.getPlatformMBeanServer();
+		OfficeFloorMBean mbean = JMX.newMBeanProxy(connection, this.objectName, OfficeFloorMBean.class);
+
+		// Ensure not yet invoked function
+		assertNull("Managed function should not yet be invoked", CompileSection.invokedParameter);
+
+		// Invoke the function
+		mbean.invokeFunction("OFFICE", "SECTION.functionWithParameter", "TEST");
+
+		// Ensure the function is invoked with parameter
+		assertEquals("Managed function should be invoked with parameter", "TEST", CompileSection.invokedParameter);
 	}
 
 	/**
@@ -214,8 +262,14 @@ public class OfficeFloorMBeanTest extends OfficeFrameTestCase {
 
 		public static boolean isFunctionInvoked = false;
 
+		public static String invokedParameter = null;
+
 		public void function() {
 			isFunctionInvoked = true;
+		}
+
+		public void functionWithParameter(@Parameter String parameter) {
+			invokedParameter = parameter;
 		}
 	}
 

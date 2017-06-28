@@ -25,11 +25,14 @@ import java.lang.management.ManagementFactory;
 import java.util.Properties;
 
 import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
 
 import junit.framework.TestCase;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.process.ProcessManagerMBean;
+import net.officefloor.building.process.officefloor.OfficeFloorManager;
 import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
 import net.officefloor.console.OfficeBuilding;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -205,20 +208,38 @@ public class OfficeBuildingTestUtil {
 	 *            {@link OfficeFloorManagerMBean}.
 	 * @param processManager
 	 *            {@link ProcessManagerMBean}.
+	 * @param connection
+	 *            {@link MBeanServerConnection}.
 	 */
 	public static void waitUntilOfficeFloorOpens(OfficeFloorManagerMBean officeFloorManager,
-			ProcessManagerMBean processManager) throws Exception {
+			ProcessManagerMBean processManager, MBeanServerConnection connection) throws Exception {
 
 		// Maximum run time (allow reasonable time to close)
 		final int MAX_RUN_TIME = 20000;
 
-		// Wait until process completes (or times out)
+		// Obtain maximum finish time
 		long maxFinishTime = System.currentTimeMillis() + MAX_RUN_TIME;
+
+		// Wait until OfficeFloor opens
 		while (!officeFloorManager.isOfficeFloorOpen()) {
 			// Determine if taken too long
 			if (System.currentTimeMillis() > maxFinishTime) {
 				processManager.destroyProcess();
 				TestCase.fail("Took too long waiting for OfficeFloor to open");
+			}
+
+			// Wait some time to open
+			Thread.sleep(10);
+		}
+
+		// Local MBean instance is registered asynchronously (so must wait)
+		ObjectName officeFloorName = processManager
+				.getLocalObjectName(OfficeFloorManager.getOfficeFloorObjectName(processManager.getProcessName()));
+		while (!connection.isRegistered(officeFloorName)) {
+			// Determine if taken too long
+			if (System.currentTimeMillis() > maxFinishTime) {
+				processManager.destroyProcess();
+				TestCase.fail("Took too long waiting for OfficeFloor to register open");
 			}
 
 			// Wait some time to open

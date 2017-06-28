@@ -43,6 +43,7 @@ import net.officefloor.building.process.ProcessManagerMBean;
 import net.officefloor.building.process.ProcessShell;
 import net.officefloor.building.process.ProcessShellMBean;
 import net.officefloor.building.process.officefloor.MockWork;
+import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
 import net.officefloor.building.util.OfficeBuildingTestUtil;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.mbean.OfficeFloorMBean;
@@ -303,7 +304,7 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect process running", processNamespace, processNamespaces[0]);
 
 		// Ensure OfficeFloor opened (obtaining local floor manager)
-		OfficeFloorMBean localFloorManager = OfficeBuildingManager.getOfficeFloorManager(null, this.port,
+		OfficeFloorManagerMBean localFloorManager = OfficeBuildingManager.getOfficeFloorManager(null, this.port,
 				processNamespace, this.trustStore, this.trustStorePassword, this.username, this.password);
 
 		// Obtain the local Process Manager MBean
@@ -312,6 +313,12 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 
 		// Obtain the local Process Shell MBean
 		ProcessShellMBean localProcessShell = OfficeBuildingManager.getProcessShell(null, this.port, processNamespace,
+				this.trustStore, this.trustStorePassword, this.username, this.password);
+
+		// Wait for OfficeFloor to open to obtain OfficeFloor
+		OfficeBuildingTestUtil.waitUntilOfficeFloorOpens(localFloorManager, processManager,
+				ManagementFactory.getPlatformMBeanServer());
+		OfficeFloorMBean localOfficeFloor = OfficeBuildingManager.getOfficeFloor(null, this.port, processNamespace,
 				this.trustStore, this.trustStorePassword, this.username, this.password);
 
 		// Validate the process host and port
@@ -326,16 +333,16 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 		this.validateRemoteProcessRunning(remoteServiceUrl);
 
 		// Ensure the functions are available
-		String[] officeNames = localFloorManager.getOfficeNames();
+		String[] officeNames = localOfficeFloor.getOfficeNames();
 		assertEquals("Incorrect number of offices", 1, officeNames.length);
 		assertEquals("Incorrect office name", "OFFICE", officeNames[0]);
-		String[] functionNames = localFloorManager.getManagedFunctionNames("OFFICE");
+		String[] functionNames = localOfficeFloor.getManagedFunctionNames("OFFICE");
 		assertEquals("Incorrect number of functions", 1, functionNames.length);
 		assertEquals("Incorrect function name", "SECTION.writeMessage", functionNames[0]);
 
-		// Invoke the work
+		// Invoke the function
 		File file = OfficeBuildingTestUtil.createTempFile(this);
-		localFloorManager.invokeFunction("OFFICE", "SECTION.writeMessage", file.getAbsolutePath());
+		localOfficeFloor.invokeFunction("OFFICE", "SECTION.writeMessage", file.getAbsolutePath());
 
 		// Ensure work invoked (content in file)
 		OfficeBuildingTestUtil.validateFileContent("Work should be invoked", MockWork.MESSAGE, file);
@@ -372,7 +379,7 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 		String processNamespace = buildingManager.openOfficeFloor(openConfiguration);
 
 		// Ensure OfficeFloor opened (obtaining local floor manager)
-		OfficeFloorMBean localFloorManager = OfficeBuildingManager.getOfficeFloorManager(null, this.port,
+		OfficeFloorManagerMBean localFloorManager = OfficeBuildingManager.getOfficeFloorManager(null, this.port,
 				processNamespace, this.trustStore, this.trustStorePassword, this.username, this.password);
 		assertNotNull("Must have OfficeFloor manager", localFloorManager);
 

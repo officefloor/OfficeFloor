@@ -113,6 +113,15 @@ public class OfficeFloorMBeanImpl implements DynamicMBean {
 				throw new MBeanException(ex);
 			}
 
+		case "getManagedFunctionParameterType":
+			try {
+				Class<?> parameterType = this.officeFloor.getOffice((String) params[0])
+						.getFunctionManager((String) params[1]).getParameterType();
+				return parameterType != null ? parameterType.getName() : null;
+			} catch (UnknownOfficeException | UnknownFunctionException ex) {
+				throw new MBeanException(ex);
+			}
+
 		case "invokeFunction":
 			try {
 				this.officeFloor.getOffice((String) params[0]).getFunctionManager((String) params[1])

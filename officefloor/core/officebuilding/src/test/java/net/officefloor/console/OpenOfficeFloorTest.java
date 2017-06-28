@@ -24,6 +24,7 @@ import java.util.List;
 import net.officefloor.building.process.officefloor.MockWork;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
 
 /**
  * Tests opening the {@link OfficeFloor}.
@@ -40,9 +41,10 @@ public class OpenOfficeFloorTest extends AbstractConsoleMainTestCase {
 	}
 
 	/**
-	 * Ensure able to open the {@link OfficeFloor} and invoke a {@link ManagedFunction}.
+	 * Ensure able to open the {@link OfficeFloor} and invoke a
+	 * {@link ManagedFunction}.
 	 */
-	public void testOpenOfficeFloorAndInvokeTask() throws Throwable {
+	public void testOpenOfficeFloorAndInvokeFunction() throws Throwable {
 
 		final String PROCESS_NAME = this.getName();
 
@@ -52,16 +54,17 @@ public class OpenOfficeFloorTest extends AbstractConsoleMainTestCase {
 		// File
 		File tempFile = File.createTempFile(this.getName(), "txt");
 
-		// Run the OfficeFloor and invoke task
-		String openCommand = "--process_name " + PROCESS_NAME + " --office OFFICE" + " --work SECTION.WORK"
-				+ " --task writeMessage" + " --parameter " + tempFile.getAbsolutePath()
-				+ " --officefloor net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor"
+		// Run the OfficeFloor and invoke function
+		String openCommand = "--officefloor_name " + PROCESS_NAME + " --office OFFICE"
+				+ " --function SECTION.writeMessage" + " --parameter " + tempFile.getAbsolutePath()
+				+ " --officefloorsource " + OfficeFloorModelOfficeFloorSource.class.getName()
+				+ " --location net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor"
 				+ " --property team.name=TEAM";
 		this.doMain(openCommand);
-		out.add("Opening OfficeFloor within process name space '" + PROCESS_NAME
-				+ "' for work (office=OFFICE, work=SECTION.WORK, task=writeMessage, parameter="
+		out.add("Opening OfficeFloor '" + PROCESS_NAME
+				+ "' for function (office=OFFICE, function=SECTION.writeMessage, parameter="
 				+ tempFile.getAbsolutePath() + ")");
-		out.add("OfficeFloor within process name space '" + PROCESS_NAME + "' closed");
+		out.add("OfficeFloor '" + PROCESS_NAME + "' closed");
 
 		// Ensure message written to file
 		String fileContent = this.getFileContents(tempFile);
@@ -89,15 +92,14 @@ public class OpenOfficeFloorTest extends AbstractConsoleMainTestCase {
 				"                                                                 ",
 				"Options:                                                         ",
 				" -cp,--classpath <arg>            Raw entry to include on the class path",
+				" -f,--function <arg>              Name of the Function                  ",
 				" -h,--help                        This help message                     ",
+				" -l,--location <arg>              Location of the OfficeFloor           ",
+				" -n,--officefloor_name <arg>      OfficeFloor name. Default is OfficeFloor",
 				" -o,--office <arg>                Name of the Office                    ",
-				" -of,--officefloor <arg>          Location of the OfficeFloor           ",
-				" -ofs,--officefloorsource <arg>   OfficeFloorSource",
-				" --parameter <arg>                Parameter for the Task                ",
-				" --process_name <arg>             Process name space. Default is Process",
-				" --property <arg>                 Property for the OfficeFloor in the form of name=value",
-				" -t,--task <arg>                  Name of the Task                      ",
-				" -w,--work <arg>                  Name of the Work                      ");
+				" -ofs,--officefloorsource <arg>   OfficeFloorSource                     ",
+				" --parameter <arg>                Parameter for the Function            ",
+				" --property <arg>                 Property for the OfficeFloor in the form of name=value");
 	}
 
 }

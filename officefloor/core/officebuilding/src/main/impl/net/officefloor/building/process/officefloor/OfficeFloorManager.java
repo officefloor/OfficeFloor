@@ -18,7 +18,6 @@
 package net.officefloor.building.process.officefloor;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -35,6 +34,7 @@ import net.officefloor.compile.mbean.OfficeFloorMBean;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
@@ -164,7 +164,7 @@ public class OfficeFloorManager implements ManagedProcess, OfficeFloorListener, 
 
 	@Override
 	public boolean isOfficeFloorOpen() {
-		return this.isOfficeFloorOpen;
+		return this.isOfficeFloorOpen && (!this.isOfficeFloorClosed);
 	}
 
 	@Override
@@ -197,11 +197,13 @@ public class OfficeFloorManager implements ManagedProcess, OfficeFloorListener, 
 
 	@Override
 	public void officeFloorClosed(OfficeFloorEvent event) throws Exception {
+
+		// Flag OfficeFloor closed
 		this.isOfficeFloorClosed = true;
 
 		// Notify immediately that closed
 		synchronized (this) {
-			this.notify();
+			this.notifyAll();
 		}
 	}
 
@@ -262,14 +264,12 @@ public class OfficeFloorManager implements ManagedProcess, OfficeFloorListener, 
 	@Override
 	public void main() throws Throwable {
 
-		ManagedProcessContext context;
+		// Ensure close the OfficeFloor
 		OfficeFloor officeFloor = null;
 		try {
 
-			// Lock to ensure MBeanServer does not close while opening
-			List<FunctionProcessState> functionProcessStates;
+			// Lock to ensure MBeanServer not close while undertaking operations
 			synchronized (this) {
-				context = this.context;
 				officeFloor = this.officeFloor;
 
 				// Open the OfficeFloor
@@ -278,61 +278,61 @@ public class OfficeFloorManager implements ManagedProcess, OfficeFloorListener, 
 				// Flag OfficeFloor open
 				this.isOfficeFloorOpen = true;
 
-				// Obtain thread safe list
-				functionProcessStates = new ArrayList<FunctionProcessState>(this.functionProcessStates);
-			}
+				// Ensure close OfficeFloor
+				try {
 
-			// Ensure close OfficeFloor
-			try {
+					// Determine if initial function to run
+					if (this.functionProcessStates.size() == 0) {
+						// No function, so wait until triggered to stop
+						while (!this.isOfficeFloorClosed) {
 
-				// Determine if initial function to run
-				if (functionProcessStates.size() == 0) {
-					// No function, so wait until triggered to stop
-					while (!this.isOfficeFloorClosed) {
-
-						// Determine if flagged to stop
-						if (!context.continueProcessing()) {
-							return; // triggered to stop
-						}
-
-						// Wait some time for trigger to stop
-						synchronized (this) {
-							this.wait(10000);
-						}
-					}
-
-				} else {
-					// Invoke the functions and stop once they are complete
-					for (FunctionProcessState functionProcessState : functionProcessStates) {
-						functionProcessState.invoke(officeFloor);
-					}
-
-					// Wait for all functions to complete
-					for (;;) {
-
-						// Check if all functions complete
-						boolean isAllFunctionsComplete = true;
-						for (FunctionProcessState functionProcessState : functionProcessStates) {
-							if (!functionProcessState.isComplete) {
-								isAllFunctionsComplete = false;
+							// Determine if flagged to stop
+							if (!context.continueProcessing()) {
+								return; // triggered to stop
 							}
+
+							// Wait some time for trigger to stop
+							this.wait(1000);
 						}
 
-						// Exit processing if functions complete or flagged stop
-						if (isAllFunctionsComplete || (!context.continueProcessing())) {
-							return; // All work complete
+					} else {
+						// Invoke the functions and stop once they are complete
+						for (FunctionProcessState functionProcessState : this.functionProcessStates) {
+							functionProcessState.invoke(officeFloor);
 						}
 
-						// Wait some time for work to complete
-						synchronized (this) {
+						// Wait for all functions to complete
+						for (;;) {
+
+							// Check if all functions complete
+							boolean isAllFunctionsComplete = true;
+							for (FunctionProcessState functionProcessState : this.functionProcessStates) {
+
+								// Check if function complete
+								if (functionProcessState.result == null) {
+									// Function still executing
+									isAllFunctionsComplete = false;
+
+								} else if (functionProcessState.result.escalation != null) {
+									// Propagate the escalation
+									throw functionProcessState.result.escalation;
+								}
+							}
+
+							// Exit if functions complete or flagged stop
+							if (isAllFunctionsComplete || (!context.continueProcessing())) {
+								return; // All functions complete
+							}
+
+							// Wait some time for function to complete
 							this.wait(10000);
 						}
 					}
-				}
 
-			} catch (Throwable ex) {
-				// Indicate failure
-				LOGGER.log(Level.WARNING, "Process had failure", ex);
+				} catch (Throwable ex) {
+					// Indicate failure
+					LOGGER.log(Level.WARNING, "Process had failure", ex);
+				}
 			}
 
 		} finally {
@@ -368,9 +368,9 @@ public class OfficeFloorManager implements ManagedProcess, OfficeFloorListener, 
 		private final Object parameter;
 
 		/**
-		 * Indicates if the {@link ManagedFunction} is completd.
+		 * {@link FunctionResult}.
 		 */
-		private transient volatile boolean isComplete = false;
+		private transient FunctionResult result = null;
 
 		/**
 		 * Initiate.
@@ -406,13 +406,37 @@ public class OfficeFloorManager implements ManagedProcess, OfficeFloorListener, 
 
 			// Invoke the function (notifying when complete)
 			functionManager.invokeProcess(this.parameter, (exception) -> {
-				this.isComplete = true;
-
-				// Notify immediately that closed
 				synchronized (OfficeFloorManager.this) {
-					OfficeFloorManager.this.notify();
+
+					// Indicate function is complete
+					this.result = new FunctionResult(exception);
+
+					// Notify immediately that complete
+					OfficeFloorManager.this.notifyAll();
 				}
 			});
+		}
+	}
+
+	/**
+	 * Result of the {@link FunctionProcessState}.
+	 */
+	private static class FunctionResult {
+
+		/**
+		 * {@link Escalation}. May be <code>null</code> if successful.s
+		 */
+		private final Throwable escalation;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param escalation
+		 *            {@link Escalation}. May be <code>null</code> if
+		 *            successful.
+		 */
+		private FunctionResult(Throwable escalation) {
+			this.escalation = escalation;
 		}
 	}
 

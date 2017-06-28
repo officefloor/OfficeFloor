@@ -35,6 +35,7 @@ import net.officefloor.building.util.OfficeBuildingTestUtil;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
 
 /**
  * Test the {@link OfficeBuilding}.
@@ -152,8 +153,9 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 		assertFalse("MockCore.jar should not yet be uploaded", mockJar.exists());
 
 		// Open the OfficeFloor (via an uploaded artifact)
-		this.doSecureMain("--upload_artifact " + jarFilePath.getAbsolutePath()
-				+ " --officefloor net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor"
+		this.doSecureMain("--officefloor_name " + PROCESS_NAME + " --upload_artifact " + jarFilePath.getAbsolutePath()
+				+ " --officefloorsource " + OfficeFloorModelOfficeFloorSource.class.getName()
+				+ " --location net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor"
 				+ " --property team.name=TEAM" + " open");
 		String startupOutput = "OfficeFloor open under process name space '" + PROCESS_NAME + "'\n";
 
@@ -161,15 +163,19 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 		this.doSecureMain("list");
 		String processOutput = PROCESS_NAME + "\n";
 
-		// List the tasks for the OfficeFloor
-		this.doSecureMain("--process_name " + PROCESS_NAME + " list");
-		processOutput += "OFFICE SECTION.WORK writeMessage(java.lang.String)\n";
+		// List the offices for the OfficeFloor
+		this.doSecureMain("--officefloor_name " + PROCESS_NAME + " list");
+		processOutput += "OFFICE\n";
+
+		// List the functions for the OfficeFloor
+		this.doSecureMain("--officefloor_name " + PROCESS_NAME + " --office OFFICE list");
+		processOutput += "SECTION.writeMessage(java.lang.String)\n";
 
 		// Validate the MockCore.jar is available
 		assertTrue("MockCore.jar should be uploaded", mockJar.exists());
 
 		// Close the OfficeFloor
-		this.doSecureMain("--process_name " + PROCESS_NAME + " close");
+		this.doSecureMain("--officefloor_name " + PROCESS_NAME + " close");
 		String suffixOutput = "Closed\n";
 
 		// Validate the process work space cleaned up
@@ -186,10 +192,11 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 	}
 
 	/**
-	 * Ensure able to open the {@link OfficeFloor} invoking a {@link ManagedFunction} and
-	 * stops {@link Process} once {@link ManagedFunction} complete.
+	 * Ensure able to open the {@link OfficeFloor} invoking a
+	 * {@link ManagedFunction} and stops {@link Process} once
+	 * {@link ManagedFunction} complete.
 	 */
-	public void testOpenOfficeFloorInvokingTask() throws Throwable {
+	public void testOpenOfficeFloorInvokingFunction() throws Throwable {
 
 		final String PROCESS_NAME = this.getName();
 
@@ -203,13 +210,14 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 		// Open the OfficeFloor (via an Artifact).
 		// Use system property to specify office.
 		String openCommand = "--jvm_option -D" + MockWork.INCLUDE_SYSTEM_PROPERTY + "=SYS_PROP_TEST"
-				+ " --process_name " + PROCESS_NAME
-				+ " --officefloor net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor"
-				+ " --office OFFICE" + " --work SECTION.WORK" + " --task writeMessage" + " --parameter "
-				+ tempFile.getAbsolutePath() + " --property team.name=TEAM" + " open";
+				+ " --officefloor_name " + PROCESS_NAME + " --officefloorsource "
+				+ OfficeFloorModelOfficeFloorSource.class.getName()
+				+ " --location net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor"
+				+ " --office OFFICE" + " --function SECTION.writeMessage" + " --parameter " + tempFile.getAbsolutePath()
+				+ " --property team.name=TEAM" + " open";
 		this.doSecureMain(openCommand);
 		String startupOutput = "OfficeFloor open under process name space '" + PROCESS_NAME
-				+ "' for work (office=OFFICE, work=SECTION.WORK, task=writeMessage, parameter="
+				+ "' for function (office=OFFICE, function=SECTION.writeMessage, parameter="
 				+ tempFile.getAbsolutePath() + ")\n";
 
 		// Wait for OfficeFloor to complete
@@ -255,9 +263,9 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 		File tempFile = File.createTempFile(this.getName(), "txt");
 
 		// Run the OfficeFloor with alternate OfficeFloorSource
-		String openCommand = "--process_name " + PROCESS_NAME + " --officefloorsource "
-				+ MockOfficeFloorSource.class.getName() + " --officefloor " + tempFile.getAbsolutePath()
-				+ " --property " + MockOfficeFloorSource.PROPERTY_MESSAGE + "=" + MESSAGE + " open";
+		String openCommand = "--officefloor_name " + PROCESS_NAME + " --officefloorsource "
+				+ MockOfficeFloorSource.class.getName() + " --location " + tempFile.getAbsolutePath() + " --property "
+				+ MockOfficeFloorSource.PROPERTY_MESSAGE + "=" + MESSAGE + " open";
 		this.doSecureMain(openCommand);
 		String startupOutput = "OfficeFloor open under process name space '" + PROCESS_NAME + "'\n";
 
@@ -287,7 +295,7 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 
 		// Validate output Help
 		this.assertErr();
-		this.assertOut("                                                         ",
+		this.assertOut("                                                  ",
 				"usage: script [options] <commands>                       ",
 				"                                                         ",
 				"Commands:                                                ",
@@ -300,8 +308,8 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 				"       -ks,--key_store <arg>            Location of the key store file",
 				"       --office_building_host <arg>     OfficeBuilding Host. Default is localhost",
 				"       --office_building_port <arg>     Port for the OfficeBuilding. Default is 13778",
-				"       -p,--password <arg>              Password",
-				"       -u,--username <arg>              User name",
+				"       -p,--password <arg>              Password         ",
+				"       -u,--username <arg>              User name        ",
 				"       --workspace <arg>                Workspace for the OfficeBuilding",
 				"                                                         ",
 				"url : Obtains the URL for the OfficeBuilding             ",
@@ -311,55 +319,53 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 				"                                                         ",
 				"open : Opens an OfficeFloor within the OfficeBuilding",
 				"     Options:                                            ",
+				"      -f,--function <arg>              Name of the Function ",
 				"      --jvm_option <arg>               JVM option       ",
 				"      -kp,--key_store_password <arg>   Password to the key store file",
 				"      -ks,--key_store <arg>            Location of the key store file",
+				"      -l,--location <arg>              Location of the OfficeFloor",
+				"      -n,--officefloor_name <arg>      OfficeFloor name. Default is OfficeFloor",
 				"      -o,--office <arg>                Name of the Office",
-				"      -of,--officefloor <arg>          Location of the OfficeFloor",
 				"      --office_building_host <arg>     OfficeBuilding Host. Default is localhost",
 				"      --office_building_port <arg>     Port for the OfficeBuilding. Default is 13778",
 				"      -ofs,--officefloorsource <arg>   OfficeFloorSource",
 				"      -p,--password <arg>              Password",
-				"      --parameter <arg>                Parameter for the Task",
-				"      --process_name <arg>             Process name space. Default is Process",
+				"      --parameter <arg>                Parameter for the Function",
 				"      --property <arg>                 Property for the OfficeFloor in the form of name=value",
-				"      -t,--task <arg>                  Name of the Task ",
 				"      -u,--username <arg>              User name",
 				"      --upload_artifact <arg>          Artifact to be uploaded for inclusion on the class path",
-				"      -w,--work <arg>                  Name of the Work ",
 				"                                                         ",
 				"list : Lists details of the OfficeBuilding/OfficeFloor   ",
 				"     Options:                                            ",
 				"      -kp,--key_store_password <arg>   Password to the key store file",
 				"      -ks,--key_store <arg>            Location of the key store file",
+				"      -n,--officefloor_name <arg>      OfficeFloor name. Default is OfficeFloor",
+				"      -o,--office <arg>                Name of the Office",
 				"      --office_building_host <arg>     OfficeBuilding Host. Default is localhost",
 				"      --office_building_port <arg>     Port for the OfficeBuilding. Default is 13778",
-				"      -p,--password <arg>              Password",
-				"      --process_name <arg>             Process name space. Default is Process",
-				"      -u,--username <arg>              User name",
+				"      -p,--password <arg>              Password", "      -u,--username <arg>              User name",
 				"                                                         ",
 				"invoke : Invokes a Task within a running OfficeFloor     ",
 				"       Options:                                          ",
+				"        -f,--function <arg>              Name of the Function",
 				"        -kp,--key_store_password <arg>   Password to the key store file",
 				"        -ks,--key_store <arg>            Location of the key store file",
+				"        -n,--officefloor_name <arg>      OfficeFloor name. Default is OfficeFloor",
 				"        -o,--office <arg>                Name of the Office",
 				"        --office_building_host <arg>     OfficeBuilding Host. Default is localhost",
 				"        --office_building_port <arg>     Port for the OfficeBuilding. Default is 13778",
 				"        -p,--password <arg>              Password",
-				"        --parameter <arg>                Parameter for the Task",
-				"        --process_name <arg>             Process name space. Default is Process",
-				"        -t,--task <arg>                  Name of the Task",
+				"        --parameter <arg>                Parameter for the Function",
 				"        -u,--username <arg>              User name",
-				"        -w,--work <arg>                  Name of the Work",
 				"                                                         ",
 				"close : Closes an OfficeFloor within the OfficeBuilding  ",
 				"      Options:                                           ",
 				"       -kp,--key_store_password <arg>   Password to the key store file",
 				"       -ks,--key_store <arg>            Location of the key store file",
+				"       -n,--officefloor_name <arg>      OfficeFloor name. Default is OfficeFloor",
 				"       --office_building_host <arg>     OfficeBuilding Host. Default is localhost",
 				"       --office_building_port <arg>     Port for the OfficeBuilding. Default is 13778",
 				"       -p,--password <arg>              Password",
-				"       --process_name <arg>             Process name space. Default is Process",
 				"       --stop_max_wait_time <arg>       Maximum time in milliseconds to wait to stop. Default is 10000",
 				"       -u,--username <arg>              User name",
 				"                                                         ",

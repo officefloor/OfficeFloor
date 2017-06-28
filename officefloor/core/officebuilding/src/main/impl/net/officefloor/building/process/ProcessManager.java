@@ -695,21 +695,6 @@ public class ProcessManager implements ProcessManagerMBean {
 	}
 
 	/**
-	 * Obtains the local {@link ObjectName} for the remote MBean in the
-	 * {@link Process} being managed by this {@link ProcessManager}.
-	 * 
-	 * @param objectName
-	 *            {@link ObjectName} of the remote MBean.
-	 * @return Local {@link ObjectName} for the remote MBean in the
-	 *         {@link Process} being managed.
-	 * @throws MalformedObjectNameException
-	 *             If resulting local name is malformed.
-	 */
-	public ObjectName getLocalObjectName(ObjectName objectName) throws MalformedObjectNameException {
-		return getLocalObjectName(this.mbeanNamespace, objectName);
-	}
-
-	/**
 	 * Specifies the host and port of the {@link Registry} containing the
 	 * {@link MBeanServer} for the {@link Process} being managed.
 	 * 
@@ -865,6 +850,11 @@ public class ProcessManager implements ProcessManagerMBean {
 	@Override
 	public String getProcessNamespace() {
 		return this.mbeanNamespace;
+	}
+
+	@Override
+	public ObjectName getLocalObjectName(ObjectName objectName) throws MalformedObjectNameException {
+		return getLocalObjectName(this.mbeanNamespace, objectName);
 	}
 
 	@Override

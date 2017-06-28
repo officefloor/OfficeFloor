@@ -51,13 +51,13 @@ public class OfficeFloorManagerTest extends OfficeFrameTestCase {
 
 	@Override
 	protected void tearDown() throws Exception {
-		
+
 		// Ensure stop the process
 		if (this.processManager != null) {
 			this.processManager.destroyProcess();
 			OfficeBuildingTestUtil.waitUntilProcessComplete(this.processManager, null);
 		}
-		
+
 		// Super tear down
 		super.tearDown();
 	}
@@ -162,7 +162,7 @@ public class OfficeFloorManagerTest extends OfficeFrameTestCase {
 		// Obtain the OfficeFloor Manager MBean
 		OfficeFloorManagerMBean officeFloorManager = JMX.newMBeanProxy(mbeanServer, officeFloorManagerName,
 				OfficeFloorManagerMBean.class);
-		OfficeBuildingTestUtil.waitUntilOfficeFloorOpens(officeFloorManager, this.processManager);
+		OfficeBuildingTestUtil.waitUntilOfficeFloorOpens(officeFloorManager, this.processManager, mbeanServer);
 
 		// As OfficeFloor is open, should have registered OfficeFloor MBean
 		ObjectName officeFloorName = this.processManager
@@ -180,6 +180,41 @@ public class OfficeFloorManagerTest extends OfficeFrameTestCase {
 
 		// Validate content in file
 		OfficeBuildingTestUtil.validateFileContent("Expecting content written", MockWork.MESSAGE, file);
+	}
+
+	/**
+	 * Ensure listen to {@link OfficeFloor} for closing.
+	 */
+	public void testCloseViaOfficeFloor() throws Exception {
+
+		// Create the OfficeFloor managed process
+		OfficeFloorManager managedProcess = new OfficeFloorManager(OfficeFloorModelOfficeFloorSource.class.getName(),
+				this.getOfficeFloorLocation(), this.getOfficeFloorProperties());
+
+		// Create process configuration
+		ProcessConfiguration configuration = new ProcessConfiguration();
+		MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+		configuration.setMbeanServer(mbeanServer);
+
+		// Run the process
+		this.processManager = ProcessManager.startProcess(managedProcess, configuration);
+
+		// Obtain the OfficeFloor Manager MBean
+		ObjectName officeFloorManagerName = this.processManager.getLocalObjectName(
+				OfficeFloorManager.getOfficeFloorManagerObjectName(this.processManager.getProcessName()));
+		OfficeFloorManagerMBean officeFloorManager = JMX.newMBeanProxy(mbeanServer, officeFloorManagerName,
+				OfficeFloorManagerMBean.class);
+		OfficeBuildingTestUtil.waitUntilOfficeFloorOpens(officeFloorManager, this.processManager, mbeanServer);
+
+		// Obtain the OfficeFloor MBean
+		ObjectName officeFloorName = this.processManager
+				.getLocalObjectName(OfficeFloorManager.getOfficeFloorObjectName(this.processManager.getProcessName()));
+		OfficeFloorMBean officeFloor = JMX.newMBeanProxy(mbeanServer, officeFloorName, OfficeFloorMBean.class);
+
+		// Stop via the OfficeFloor (and wait until notifies process complete)
+		officeFloor.closeOfficeFloor();
+		OfficeBuildingTestUtil.waitUntilProcessComplete(this.processManager, null);
+		assertTrue("Process should be complete", this.processManager.isProcessComplete());
 	}
 
 	/**
