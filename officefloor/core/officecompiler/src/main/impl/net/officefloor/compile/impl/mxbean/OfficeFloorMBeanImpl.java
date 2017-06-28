@@ -157,6 +157,13 @@ public class OfficeFloorMBeanImpl implements DynamicMBean {
 				new MBeanParameterInfo[] {
 						new MBeanParameterInfo("officeName", String.class.getName(), "Name of the Office") },
 				String[].class.getName(), MBeanOperationInfo.INFO);
+		MBeanOperationInfo getManagedFunctionParameterType = new MBeanOperationInfo("getManagedFunctionParameterType",
+				"Obtains the parameter type for the function",
+				new MBeanParameterInfo[] {
+						new MBeanParameterInfo("officeName", String.class.getName(), "Name of the Office"),
+						new MBeanParameterInfo("managedFunctionName", String.class.getName(),
+								"Name of the managed function") },
+				String.class.getName(), MBeanOperationInfo.INFO);
 		MBeanOperationInfo invokeFunction = new MBeanOperationInfo("invokeFunction",
 				"Invokes a function within the OfficeFloor",
 				new MBeanParameterInfo[] {
@@ -171,7 +178,7 @@ public class OfficeFloorMBeanImpl implements DynamicMBean {
 		// Return the MBean Info
 		return new MBeanInfo(OfficeFloorMBeanImpl.class.getName(), "MBean to managed the OfficeFloor",
 				new MBeanAttributeInfo[] { officeNames }, new MBeanConstructorInfo[0],
-				new MBeanOperationInfo[] { getManagedFunctions, invokeFunction, closeOfficeFloor },
+				new MBeanOperationInfo[] { getManagedFunctions, getManagedFunctionParameterType, invokeFunction, closeOfficeFloor },
 				new MBeanNotificationInfo[0]);
 	}
 

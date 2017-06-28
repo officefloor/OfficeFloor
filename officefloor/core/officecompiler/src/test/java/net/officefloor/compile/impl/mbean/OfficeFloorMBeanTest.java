@@ -126,10 +126,11 @@ public class OfficeFloorMBeanTest extends OfficeFrameTestCase {
 
 		// Ensure correct operations
 		MBeanOperationInfo[] operations = info.getOperations();
-		assertEquals("Incorrect number of operations", 3, operations.length);
+		assertEquals("Incorrect number of operations", 4, operations.length);
 		assertEquals("Incorrect first operation", "getManagedFunctionNames", operations[0].getName());
-		assertEquals("Incorrect second operation", "invokeFunction", operations[1].getName());
-		assertEquals("Incorrect third operation", "closeOfficeFloor", operations[2].getName());
+		assertEquals("Incorrect first operation", "getManagedFunctionParameterType", operations[1].getName());
+		assertEquals("Incorrect second operation", "invokeFunction", operations[2].getName());
+		assertEquals("Incorrect third operation", "closeOfficeFloor", operations[3].getName());
 	}
 
 	/**
