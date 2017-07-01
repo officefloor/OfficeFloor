@@ -48,6 +48,7 @@ public class TcpServerTest extends AbstractTcpServerTestCase {
 		ManagedObjectBuilder<Indexed> serverSocketBuilder = this.constructManagedObject(managedObjectName,
 				TcpServerSocketManagedObjectSource.class, officeName);
 		serverSocketBuilder.addProperty(TcpServerSocketManagedObjectSource.PROPERTY_PORT, String.valueOf(port));
+		serverSocketBuilder.addProperty(TcpServerSocketManagedObjectSource.PROPERTY_SOCKET_LISTENER_COUNT, "1");
 		serverSocketBuilder.addProperty(TcpCommunicationProtocol.PROPERTY_MAXIMUM_IDLE_TIME, String.valueOf(1000));
 		serverSocketBuilder.setTimeout(3000);
 

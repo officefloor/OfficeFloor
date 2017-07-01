@@ -311,9 +311,6 @@ public abstract class AbstractTcpServerTestCase extends AbstractOfficeConstructT
 			outputStream.write(new byte[] { (byte) requestIndex });
 			outputStream.flush();
 
-			// Allow other processing
-			Thread.yield();
-
 			// Read a response (ends with 0 byte)
 			ByteArrayOutputStream response = new ByteArrayOutputStream();
 			for (int value; (value = inputStream.read()) != -1;) {

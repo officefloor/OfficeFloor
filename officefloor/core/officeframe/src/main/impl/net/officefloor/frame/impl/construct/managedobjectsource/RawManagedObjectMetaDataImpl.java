@@ -21,7 +21,6 @@ import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
@@ -61,7 +60,6 @@ import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.internal.structure.TeamManagement;
 
 /**
  * Raw {@link ManagedObjectMetaData}.
@@ -79,7 +77,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static RawManagedObjectMetaDataFactory getFactory() {
 		return new RawManagedObjectMetaDataImpl(null, null, null, null, -1, null, null, null, false, false, false,
-				false, null, null);
+				false, null);
 	}
 
 	/**
@@ -144,12 +142,6 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 	private final boolean isCoordinating;
 
 	/**
-	 * {@link TeamManagement} responsible for {@link Escalation} handling from
-	 * this {@link ManagedObject}.
-	 */
-	private final TeamManagement escalationResponsibleTeam;
-
-	/**
 	 * {@link RawManagingOfficeMetaData}.
 	 */
 	private final RawManagingOfficeMetaDataImpl<F> rawManagingOfficeMetaData;
@@ -183,9 +175,6 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 	 *            Flag indicating if {@link AsynchronousManagedObject}.
 	 * @param isCoordinating
 	 *            Flag indicating if {@link CoordinatingManagedObject}.
-	 * @param escalationResponsibleTeam
-	 *            {@link TeamManagement} responsible for {@link Escalation}
-	 *            handling from this {@link ManagedObject}.
 	 * @param rawManagingOfficeMetaData
 	 *            {@link RawManagingOfficeMetaData}.
 	 */
@@ -195,8 +184,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 			ManagedObjectSourceMetaData<D, F> managedObjectSourceMetaData, long timeout,
 			ManagedObjectPool managedObjectPool, ThreadCompletionListener[] threadCompletionListeners,
 			Class<?> objectType, boolean isProcessAware, boolean isNameAware, boolean isAsynchronous,
-			boolean isCoordinating, TeamManagement escalationResponsibleTeam,
-			RawManagingOfficeMetaDataImpl<F> rawManagingOfficeMetaData) {
+			boolean isCoordinating, RawManagingOfficeMetaDataImpl<F> rawManagingOfficeMetaData) {
 		this.managedObjectName = managedObjectName;
 		this.managedObjectSourceConfiguration = managedObjectSourceConfiguration;
 		this.managedObjectSource = managedObjectSource;
@@ -209,7 +197,6 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 		this.isNameAware = isNameAware;
 		this.isAsynchronous = isAsynchronous;
 		this.isCoordinating = isCoordinating;
-		this.escalationResponsibleTeam = escalationResponsibleTeam;
 		this.rawManagingOfficeMetaData = rawManagingOfficeMetaData;
 	}
 
@@ -279,9 +266,16 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 		// Obtain the managing office builder
 		ManagingOfficeBuilder<h> managingOfficeBuilder = managingOfficeConfiguration.getBuilder();
 
+		// Obtain the possible input configuration
+		InputManagedObjectConfiguration<?> inputConfiguration = managingOfficeConfiguration
+				.getInputManagedObjectConfiguration();
+		String inputBoundManagedObjectName = (inputConfiguration != null
+				? inputConfiguration.getBoundManagedObjectName() : null);
+
 		// Create the context for the managed object source
 		ManagedObjectSourceContextImpl<h> context = new ManagedObjectSourceContextImpl<h>(false,
-				managedObjectSourceName, properties, sourceContext, managingOfficeBuilder, officeBuilder);
+				managedObjectSourceName, inputBoundManagedObjectName, properties, sourceContext, managingOfficeBuilder,
+				officeBuilder);
 
 		try {
 			// Initialise the managed object source
@@ -354,10 +348,8 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 		ManagedObjectFlowMetaData<h>[] flowMetaDatas = metaData.getFlowMetaData();
 
 		// Requires input configuration if requires flows
-		InputManagedObjectConfiguration<?> inputConfiguration = null;
 		if (RawManagingOfficeMetaDataImpl.isRequireFlows(flowMetaDatas)) {
 			// Requires flows, so must have input configuration
-			inputConfiguration = managingOfficeConfiguration.getInputManagedObjectConfiguration();
 			if (inputConfiguration == null) {
 				issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
 						"Must provide Input configuration as Managed Object Source requires flows");
@@ -394,15 +386,11 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 		RawManagingOfficeMetaDataImpl<h> rawManagingOfficeMetaData = new RawManagingOfficeMetaDataImpl<h>(officeName,
 				recycleFunctionName, inputConfiguration, flowMetaDatas, managingOfficeConfiguration);
 
-		// TODO enable specifying a team responsible for handling escalations
-		TeamManagement escalationResponsibleTeam = null; // any team
-
 		// Created raw managed object meta-data
 		RawManagedObjectMetaDataImpl<d, h> rawMoMetaData = new RawManagedObjectMetaDataImpl<d, h>(
 				managedObjectSourceName, configuration, managedObjectSource, metaData, timeout, managedObjectPool,
 				threadCompletionListeners, objectType, isManagedObjectProcessAware, isManagedObjectNameAware,
-				isManagedObjectAsynchronous, isManagedObjectCoordinating, escalationResponsibleTeam,
-				rawManagingOfficeMetaData);
+				isManagedObjectAsynchronous, isManagedObjectCoordinating, rawManagingOfficeMetaData);
 
 		// Make raw managed object available to the raw managing office
 		rawManagingOfficeMetaData.setRawManagedObjectMetaData(rawMoMetaData);
@@ -448,11 +436,6 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 	@Override
 	public Class<?> getObjectType() {
 		return this.objectType;
-	}
-
-	@Override
-	public TeamManagement getEscalationResponsibleTeam() {
-		return this.escalationResponsibleTeam;
 	}
 
 	@Override

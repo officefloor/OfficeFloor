@@ -113,7 +113,8 @@ public class ManagedObjectSourceStandAlone {
 
 		// Initialise the managed object source
 		ManagedObjectSourceContextImpl sourceContext = new ManagedObjectSourceContextImpl(false,
-				STAND_ALONE_MANAGED_OBJECT_SOURCE_NAME, this.properties, context, managingOfficeBuilder, officeBuilder);
+				STAND_ALONE_MANAGED_OBJECT_SOURCE_NAME, null, this.properties, context, managingOfficeBuilder,
+				officeBuilder);
 		moSource.init(sourceContext);
 
 		// Return the initialised managed object source

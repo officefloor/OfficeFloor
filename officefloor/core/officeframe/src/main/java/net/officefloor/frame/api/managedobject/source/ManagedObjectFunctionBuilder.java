@@ -19,6 +19,7 @@ package net.officefloor.frame.api.managedobject.source;
 
 import net.officefloor.frame.api.build.FlowBuilder;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * Builds the {@link ManagedFunction} necessary for the
@@ -47,5 +48,21 @@ public interface ManagedObjectFunctionBuilder<O extends Enum<O>, F extends Enum<
 	 *            Type of the parameter.
 	 */
 	void linkParameter(int index, Class<?> parameterType);
+
+	/**
+	 * Links the {@link ManagedObject} input by the {@link ManagedObjectSource}.
+	 * 
+	 * @param key
+	 *            Key identifying the object.
+	 */
+	void linkManagedObject(O key);
+
+	/**
+	 * Links the {@link ManagedObject} input by the {@link ManagedObjectSource}.
+	 * 
+	 * @param index
+	 *            Index identifying the object.
+	 */
+	void linkManagedObject(int index);
 
 }

@@ -109,6 +109,8 @@ public class TcpCommunicationProtocol implements CommunicationProtocolSource, Co
 		// Provide the flow to process a new connection
 		this.newConnectionFlowIndex = configurationContext.addFlow(ServerTcpConnection.class).setLabel("NEW_CONNECTION")
 				.getIndex();
+		
+		configurationContext.getManagedObjectSourceContext().addManagedFunction("", null).
 
 		// Ensure connection is cleaned up when process finished
 		mosContext.getRecycleFunction(new CleanupFunction());

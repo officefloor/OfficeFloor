@@ -80,6 +80,13 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	public static final String PROPERTY_DEFAULT_CHARSET = "default.charset";
 
 	/**
+	 * Name of property to specify the number of {@link SocketListener}
+	 * instances. If not specified, will default to
+	 * {@link Runtime#availableProcessors()}.
+	 */
+	public static final String PROPERTY_SOCKET_LISTENER_COUNT = "socket.listener.count";
+
+	/**
 	 * Default {@link Charset} to use if one is not configured.
 	 */
 	public static final String DEFAULT_CHARSET = "UTF-8";
@@ -130,6 +137,8 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	 *            Instance of the
 	 *            {@link AbstractServerSocketManagedObjectSource} using the
 	 *            {@link ConnectionManager}.
+	 * @param numberOfSocketListeners
+	 *            Number of {@link SocketListener} instances.
 	 * @param heartBeatInterval
 	 *            Heart beat interval in milliseconds.
 	 * @param sendBufferSize
@@ -139,8 +148,8 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	 * @return {@link ConnectionManager}.
 	 */
 	private static synchronized ConnectionManager getConnectionManager(ManagedObjectSourceContext<Indexed> mosContext,
-			AbstractServerSocketManagedObjectSource instance, long heartBeatInterval, int sendBufferSize,
-			int receiveBufferSize) {
+			AbstractServerSocketManagedObjectSource instance, int numberOfSocketListeners, long heartBeatInterval,
+			int sendBufferSize, int receiveBufferSize) {
 
 		// Do nothing if just loading type
 		if (mosContext.isLoadingType()) {
@@ -149,9 +158,6 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 
 		// Lazy create the singleton connection manager
 		if (singletonConnectionManager == null) {
-
-			// Spread load if have multiple processors
-			int numberOfSocketListeners = Runtime.getRuntime().availableProcessors();
 
 			// Create the socket listeners
 			SocketListener[] socketListeners = new SocketListener[numberOfSocketListeners];
@@ -339,6 +345,10 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 		// Obtain the default charset
 		this.defaultCharset = getCharset(mosContext);
 
+		// Obtain the number of socket listeners
+		int numberOfSocketListeners = Integer.parseInt(mosContext.getProperty(PROPERTY_SOCKET_LISTENER_COUNT,
+				String.valueOf(Runtime.getRuntime().availableProcessors())));
+
 		// Obtain the server socket backlog
 		int serverSocketBackLog = 25000; // TODO make configurable
 
@@ -346,8 +356,8 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 		long heartBeatInterval = 10000; // TODO make configurable
 
 		// Obtain the connection manager
-		ConnectionManager connectionManager = getConnectionManager(mosContext, this, heartBeatInterval,
-				this.sendBufferSize, receiveBufferSize);
+		ConnectionManager connectionManager = getConnectionManager(mosContext, this, numberOfSocketListeners,
+				heartBeatInterval, this.sendBufferSize, receiveBufferSize);
 
 		// Create the communication protocol
 		this.communicationProtocol = this.communicationProtocolSource.createCommunicationProtocol(context, this);
@@ -358,6 +368,7 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 		ManagedObjectFunctionBuilder<None, ServerSockerAccepterFlows> accepterFunction = mosContext
 				.addManagedFunction("accepter", this.serverSocketAccepter);
 		accepterFunction.setResponsibleTeam("accepter");
+		accepterFunction.linkFlow(ServerSockerAccepterFlows.REPEAT, "accepter", null, false);
 
 		// Flag to start accepter on server start up
 		mosContext.addStartupFunction("accepter");

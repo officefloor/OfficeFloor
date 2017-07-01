@@ -19,7 +19,6 @@ package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -33,7 +32,6 @@ import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
-import net.officefloor.frame.internal.structure.TeamManagement;
 
 /**
  * Meta-data for a {@link ManagedObject}.
@@ -95,14 +93,6 @@ public interface RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> 
 	 *         {@link ManagedObject}.
 	 */
 	Class<?> getObjectType();
-
-	/**
-	 * Obtains the {@link TeamManagement} responsible for {@link Escalation}
-	 * handling by this {@link ManagedObject}.
-	 * 
-	 * @return {@link TeamManagement}.
-	 */
-	TeamManagement getEscalationResponsibleTeam();
 
 	/**
 	 * Obtains the {@link RawManagingOfficeMetaData} of the {@link Office}

@@ -50,6 +50,11 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	private final String managedObjectName;
 
 	/**
+	 * Bound name of {@link ManagedObject} if input.
+	 */
+	private final String inputBoundManagedObjectName;
+
+	/**
 	 * {@link ManagingOfficeBuilder}.
 	 */
 	private ManagingOfficeBuilder<F> managingOfficeBuilder;
@@ -73,6 +78,8 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	 *            Indicates if loading type.
 	 * @param managedObjectName
 	 *            Name of the {@link ManagedObject}.
+	 * @param inputBoundManagedObjectName
+	 *            Bound name of {@link ManagedObject} if input.
 	 * @param properties
 	 *            Properties.
 	 * @param sourceContext
@@ -83,10 +90,12 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	 *            {@link OfficeBuilder} for the office using the
 	 *            {@link ManagedObjectSource}.
 	 */
-	public ManagedObjectSourceContextImpl(boolean isLoadingType, String managedObjectName, SourceProperties properties,
-			SourceContext sourceContext, ManagingOfficeBuilder<F> managingOfficeBuilder, OfficeBuilder officeBuilder) {
+	public ManagedObjectSourceContextImpl(boolean isLoadingType, String managedObjectName,
+			String inputBoundManagedObjectName, SourceProperties properties, SourceContext sourceContext,
+			ManagingOfficeBuilder<F> managingOfficeBuilder, OfficeBuilder officeBuilder) {
 		super(isLoadingType, sourceContext, properties);
 		this.managedObjectName = managedObjectName;
+		this.inputBoundManagedObjectName = inputBoundManagedObjectName;
 		this.managingOfficeBuilder = managingOfficeBuilder;
 		this.officeBuilder = officeBuilder;
 	}
@@ -198,7 +207,7 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 		}
 
 		/*
-		 * ============== ManagedObjectTaskBuilder =====================
+		 * ============== ManagedObjectFunctionBuilder =====================
 		 */
 
 		@Override
@@ -209,6 +218,18 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 		@Override
 		public void linkParameter(int index, Class<?> parameterType) {
 			this.functionBuilder.linkParameter(index, parameterType);
+		}
+
+		@Override
+		public void linkManagedObject(o key) {
+			this.functionBuilder.linkManagedObject(key, ManagedObjectSourceContextImpl.this.inputBoundManagedObjectName,
+					Object.class);
+		}
+
+		@Override
+		public void linkManagedObject(int index) {
+			this.functionBuilder.linkManagedObject(index,
+					ManagedObjectSourceContextImpl.this.inputBoundManagedObjectName, Object.class);
 		}
 
 		@Override

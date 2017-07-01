@@ -22,6 +22,7 @@ import java.io.OutputStream;
 
 import javax.resource.spi.work.Work;
 
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
 
 /**
@@ -32,7 +33,7 @@ import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
 public class MessageFunction {
 
 	/**
-	 * Start time of creating this {@link Work}.
+	 * Start time of creating this {@link ManagedFunction}.
 	 */
 	private final long startTime = System.currentTimeMillis();
 

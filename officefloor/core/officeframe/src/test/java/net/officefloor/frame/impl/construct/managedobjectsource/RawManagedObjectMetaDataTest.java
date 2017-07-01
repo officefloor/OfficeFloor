@@ -154,7 +154,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * {@link InputManagedObjectConfiguration}.
 	 */
-	private final InputManagedObjectConfiguration<?> inputConfiguration = this
+	private InputManagedObjectConfiguration<?> inputConfiguration = this
 			.createMock(InputManagedObjectConfiguration.class);
 
 	/**
@@ -483,6 +483,9 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		ManagedObjectFlowMetaData<?> flowMetaData = this.createMock(ManagedObjectFlowMetaData.class);
 
+		// Clear the input configuration
+		this.inputConfiguration = null;
+
 		// Record no process bound name
 		this.record_initManagedObject();
 		this.recordReturn(this.metaData, this.metaData.getObjectClass(), Object.class);
@@ -490,8 +493,6 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration, this.configuration.getTimeout(), 0);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 				new ManagedObjectFlowMetaData[] { flowMetaData });
-		this.recordReturn(this.managingOfficeConfiguration,
-				this.managingOfficeConfiguration.getInputManagedObjectConfiguration(), null);
 		this.record_issue("Must provide Input configuration as Managed Object Source requires flows");
 
 		// Attempt to construct managed object
@@ -898,6 +899,13 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				new OfficeConfiguration[] { this.officeConfiguration });
 		this.recordReturn(this.officeConfiguration, this.officeConfiguration.getOfficeName(), managingOfficeName);
 		this.recordReturn(this.officeConfiguration, this.officeConfiguration.getBuilder(), this.officeBuilder);
+
+		// Record obtaining input configuration
+		this.recordReturn(this.managingOfficeConfiguration,
+				this.managingOfficeConfiguration.getInputManagedObjectConfiguration(), this.inputConfiguration);
+		if (this.inputConfiguration != null) {
+			this.recordReturn(this.inputConfiguration, this.inputConfiguration.getBoundManagedObjectName(), "INPUT");
+		}
 	}
 
 	/**
@@ -920,10 +928,6 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.metaData, this.metaData.getManagedObjectClass(), managedObjectClass);
 		this.recordReturn(this.configuration, this.configuration.getTimeout(), timeout);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), moFlowMetaData);
-		if (moFlowMetaData.length > 0) {
-			this.recordReturn(this.managingOfficeConfiguration,
-					this.managingOfficeConfiguration.getInputManagedObjectConfiguration(), this.inputConfiguration);
-		}
 		this.recordReturn(this.configuration, this.configuration.getManagedObjectPoolConfiguration(),
 				this.managedObjectPoolConfiguration);
 		this.recordReturn(this.managedObjectPoolConfiguration,
