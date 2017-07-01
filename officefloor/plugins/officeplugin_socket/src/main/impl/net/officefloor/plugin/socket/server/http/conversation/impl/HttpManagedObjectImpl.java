@@ -24,7 +24,7 @@ import java.nio.channels.ClosedChannelException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -39,7 +39,7 @@ import net.officefloor.plugin.socket.server.protocol.Connection;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpManagedObjectImpl implements HttpManagedObject, ServerHttpConnection, EscalationHandler {
+public class HttpManagedObjectImpl implements HttpManagedObject, ServerHttpConnection, FlowCallback {
 
 	/**
 	 * {@link Logger}.
@@ -129,7 +129,7 @@ public class HttpManagedObjectImpl implements HttpManagedObject, ServerHttpConne
 	}
 
 	@Override
-	public EscalationHandler getEscalationHandler() {
+	public FlowCallback getFlowCallback() {
 		return this;
 	}
 
@@ -217,15 +217,17 @@ public class HttpManagedObjectImpl implements HttpManagedObject, ServerHttpConne
 	}
 
 	/*
-	 * ================== EscalationHandler =============================
+	 * ================== FlowCallback =============================
 	 */
 
 	@Override
-	public void handleEscalation(Throwable escalation) throws Throwable {
+	public void run(Throwable escalation) throws Throwable {
 		try {
 
 			// Send failure on handling request
-			this.response.sendFailure(escalation);
+			if (escalation != null) {
+				this.response.sendFailure(escalation);
+			}
 
 		} catch (ClosedChannelException ex) {
 			// Can not send failure, as connection closed

@@ -25,7 +25,7 @@ import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
@@ -229,9 +229,9 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to provide failure from {@link EscalationHandler}.
+	 * Ensure able to provide failure from {@link FlowCallback}.
 	 */
-	public void testEscalationHandler() throws Throwable {
+	public void testCallback() throws Throwable {
 		final Throwable failure = new Throwable("Handle Failure");
 
 		// Add request
@@ -243,7 +243,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		response.getEntity().write("SUCCESSFUL CONTENT".getBytes());
 
 		// Handle failure in processing the request
-		mo.getEscalationHandler().handleEscalation(failure);
+		mo.getFlowCallback().run(failure);
 
 		// Ensure failure written as response
 		String message = failure.getClass().getSimpleName() + ": " + failure.getMessage();

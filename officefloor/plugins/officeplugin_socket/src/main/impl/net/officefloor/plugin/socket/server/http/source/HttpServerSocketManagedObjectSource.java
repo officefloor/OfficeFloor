@@ -18,9 +18,16 @@
 package net.officefloor.plugin.socket.server.http.source;
 
 import net.officefloor.compile.ManagedObjectSourceService;
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.officefloor.DeployedOffice;
+import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.protocol.HttpCommunicationProtocol;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
@@ -33,6 +40,49 @@ import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource
  */
 public class HttpServerSocketManagedObjectSource extends AbstractServerSocketManagedObjectSource
 		implements ManagedObjectSourceService<None, Indexed, HttpServerSocketManagedObjectSource> {
+
+	/**
+	 * Convenience method to configure the
+	 * {@link HttpServerSocketManagedObjectSource}.
+	 * 
+	 * @param deployer
+	 *            {@link OfficeFloorDeployer}.
+	 * @param port
+	 *            Port to listen for HTTP requests.
+	 * @param office
+	 *            {@link DeployedOffice}.
+	 * @param sectionName
+	 *            Name of the {@link OfficeSection} servicing the requests.
+	 * @param sectionInputName
+	 *            Name of the {@link OfficeSectionInput} on the
+	 *            {@link OfficeSection} servicing the requests.
+	 * @return {@link OfficeFloorInputManagedObject}.
+	 */
+	public static OfficeFloorInputManagedObject configure(OfficeFloorDeployer deployer, int port, DeployedOffice office,
+			String sectionName, String sectionInputName) {
+
+		// Add this managed object source
+		OfficeFloorManagedObjectSource mos = deployer.addManagedObjectSource("HTTP_SOURCE",
+				HttpServerSocketManagedObjectSource.class.getName());
+		mos.addProperty(PROPERTY_PORT, String.valueOf(port));
+
+		// Add teams for the managed object source
+		deployer.link(mos.getManagedObjectTeam("accepter"),
+				deployer.addTeam("ACCEPTER", ExecutorCachedTeamSource.class.getName()));
+		deployer.link(mos.getManagedObjectTeam("listener"),
+				deployer.addTeam("LISTENER", ExecutorCachedTeamSource.class.getName()));
+
+		// Handle servicing of requests
+		deployer.link(mos.getManagedObjectFlow("HANDLER"),
+				office.getDeployedOfficeInput(sectionName, sectionInputName));
+
+		// Create the input managed object
+		OfficeFloorInputManagedObject input = deployer.addInputManagedObject("HTTP");
+		deployer.link(mos, input);
+
+		// Return the input managed object
+		return input;
+	}
 
 	/*
 	 * ==================== ManagedObjectSourceService ====================

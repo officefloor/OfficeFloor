@@ -21,7 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -54,8 +54,7 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link HeartBeatContext}.
 	 */
-	private HeartBeatContext idleContext = this
-			.createMock(HeartBeatContext.class);
+	private HeartBeatContext idleContext = this.createMock(HeartBeatContext.class);
 
 	/**
 	 * Mock read data.
@@ -70,8 +69,7 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link HttpConversation}.
 	 */
-	private HttpConversation conversation = this
-			.createMock(HttpConversation.class);
+	private HttpConversation conversation = this.createMock(HttpConversation.class);
 
 	/**
 	 * Mock {@link HttpRequestParser}.
@@ -82,20 +80,17 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	 * Mock {@link ManagedObjectExecuteContext}.
 	 */
 	@SuppressWarnings("unchecked")
-	private ManagedObjectExecuteContext<Indexed> executeContext = this
-			.createMock(ManagedObjectExecuteContext.class);
+	private ManagedObjectExecuteContext<Indexed> executeContext = this.createMock(ManagedObjectExecuteContext.class);
 
 	/**
 	 * {@link HttpConnectionHandler} being tested.
 	 */
-	public HttpConnectionHandler handler = new HttpConnectionHandler(
-			this.communicationProtocol, this.conversation, this.parser,
-			CONNECTION_TIMEOUT);
+	public HttpConnectionHandler handler = new HttpConnectionHandler(this.communicationProtocol, this.conversation,
+			this.parser, CONNECTION_TIMEOUT);
 
 	@Override
 	protected void setUp() throws Exception {
-		this.communicationProtocol
-				.setManagedObjectExecuteContext(this.executeContext);
+		this.communicationProtocol.setManagedObjectExecuteContext(this.executeContext);
 	}
 
 	/**
@@ -109,29 +104,21 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 		final String httpVersion = "HTTP/1.1";
 		final List<HttpHeader> headers = new LinkedList<HttpHeader>();
 		final HttpEntity entity = this.createMock(HttpEntity.class);
-		final HttpManagedObjectImpl managedObject = new HttpManagedObjectImpl(
-				null);
+		final HttpManagedObjectImpl managedObject = new HttpManagedObjectImpl(null);
 
 		// Record actions
-		this.recordReturn(this.readContext, this.readContext.getTime(),
-				System.currentTimeMillis());
-		this.recordReturn(this.readContext, this.readContext.getData(),
-				this.readData);
-		this.recordReturn(this.parser, this.parser.parse(this.readData, 0),
-				true);
+		this.recordReturn(this.readContext, this.readContext.getTime(), System.currentTimeMillis());
+		this.recordReturn(this.readContext, this.readContext.getData(), this.readData);
+		this.recordReturn(this.parser, this.parser.parse(this.readData, 0), true);
 		this.recordReturn(this.parser, this.parser.getMethod(), method);
 		this.recordReturn(this.parser, this.parser.getRequestURI(), requestURI);
-		this.recordReturn(this.parser, this.parser.getHttpVersion(),
-				httpVersion);
+		this.recordReturn(this.parser, this.parser.getHttpVersion(), httpVersion);
 		this.recordReturn(this.parser, this.parser.getHeaders(), headers);
 		this.recordReturn(this.parser, this.parser.getEntity(), entity);
 		this.parser.reset();
-		this.recordReturn(this.conversation, this.conversation.addRequest(
-				method, requestURI, httpVersion, headers, entity),
-				managedObject);
-		this.recordReturn(this.executeContext, this.executeContext
-				.invokeProcess(0, managedObject, managedObject, 0,
-						managedObject), null);
+		this.recordReturn(this.conversation,
+				this.conversation.addRequest(method, requestURI, httpVersion, headers, entity), managedObject);
+		this.executeContext.invokeProcess(0, managedObject, managedObject, 0, managedObject.getFlowCallback());
 		this.recordReturn(this.parser, this.parser.nextByteToParseIndex(), -1);
 
 		// Replay mocks
@@ -150,14 +137,12 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	public void testParseFailure() throws Exception {
 
 		// Additional test objects
-		final HttpRequestParseException failure = new HttpRequestParseException(
-				HttpStatus.SC_BAD_REQUEST, "Parse Failure");
+		final HttpRequestParseException failure = new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
+				"Parse Failure");
 
 		// Record actions
-		this.recordReturn(this.readContext, this.readContext.getTime(),
-				System.currentTimeMillis());
-		this.recordReturn(this.readContext, this.readContext.getData(),
-				this.readData);
+		this.recordReturn(this.readContext, this.readContext.getTime(), System.currentTimeMillis());
+		this.recordReturn(this.readContext, this.readContext.getData(), this.readData);
 		this.parser.parse(this.readData, 0);
 		this.control(this.parser).setThrowable(failure);
 		this.conversation.parseFailure(failure, true);
@@ -211,13 +196,11 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 		final long START_TIME = System.currentTimeMillis();
 		final long FIRST_IDLE_TIME = START_TIME + CONNECTION_TIMEOUT - 1;
 		final long SECOND_IDLE_TIME = START_TIME + CONNECTION_TIMEOUT;
-		this.recordReturn(this.readContext, this.readContext.getTime(),
-				START_TIME);
+		this.recordReturn(this.readContext, this.readContext.getTime(), START_TIME);
 		this.recordReturn(this.readContext, this.readContext.getData(), data);
 		this.recordReturn(this.parser, this.parser.parse(data, 0), false);
 		this.recordReturn(this.parser, this.parser.nextByteToParseIndex(), -1);
-		this.recordReturn(this.idleContext, this.idleContext.getTime(),
-				FIRST_IDLE_TIME);
+		this.recordReturn(this.idleContext, this.idleContext.getTime(), FIRST_IDLE_TIME);
 		this.recordReturn(this.idleContext, this.idleContext, SECOND_IDLE_TIME);
 		this.conversation.closeConnection();
 
@@ -246,8 +229,7 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 		// Record actions
 		final long START_TIME = System.currentTimeMillis();
 		final long TIMEOUT_IDLE_TIME = START_TIME + CONNECTION_TIMEOUT;
-		this.recordReturn(this.idleContext, this.idleContext.getTime(),
-				START_TIME);
+		this.recordReturn(this.idleContext, this.idleContext.getTime(), START_TIME);
 		this.recordReturn(this.idleContext, this.idleContext, TIMEOUT_IDLE_TIME);
 		this.conversation.closeConnection();
 

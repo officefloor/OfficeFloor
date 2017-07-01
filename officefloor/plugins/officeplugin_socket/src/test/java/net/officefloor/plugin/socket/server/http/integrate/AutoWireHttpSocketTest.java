@@ -21,22 +21,19 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 
-import net.officefloor.autowire.AutoWireOfficeFloor;
-import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-
 /**
- * Ensure able to use {@link HttpServerSocketManagedObjectSource} with the
- * {@link AutoWireOfficeFloorSource}.
+ * Ensure able to use {@link HttpServerSocketManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -49,34 +46,25 @@ public class AutoWireHttpSocketTest extends OfficeFrameTestCase {
 
 		final int PORT = HttpTestUtil.getAvailablePort();
 		final CompileOfficeFloor compile = new CompileOfficeFloor();
-
-		// Add the section to handle the HTTP request
-		autoWire.addSection("TEST", ClassSectionSource.class.getName(),
-				MockSection.class.getName());
-
-		// Register the managed object source
-		HttpServerSocketManagedObjectSource.autoWire(autoWire, PORT, "TEST",
-				"handleRequest");
+		compile.officeFloor((context) -> HttpServerSocketManagedObjectSource.configure(context.getOfficeFloorDeployer(),
+				PORT, context.getDeployedOffice(), "TEST", "handleRequest"));
+		compile.office((context) -> context.addSection("TEST", MockSection.class));
 
 		// Open the OfficeFloor
-		AutoWireOfficeFloor officeFloor = autoWire.openOfficeFloor();
+		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor();
 		try {
 
-			try (CloseableHttpClient client = HttpTestUtil
-					.createHttpClient(false)) {
+			try (CloseableHttpClient client = HttpTestUtil.createHttpClient(false)) {
 
 				// Send request
 				HttpGet request = new HttpGet("http://localhost:" + PORT);
 				org.apache.http.HttpResponse response = client.execute(request);
 
 				// Ensure request successful
-				assertEquals("Request must be successful", 200, response
-						.getStatusLine().getStatusCode());
+				assertEquals("Request must be successful", 200, response.getStatusLine().getStatusCode());
 
 				// Ensure appropriate response
-				assertEquals("Incorrect response", "hello world",
-						HttpTestUtil.getEntityBody(response));
-
+				assertEquals("Incorrect response", "hello world", HttpTestUtil.getEntityBody(response));
 			}
 
 		} finally {
@@ -98,8 +86,7 @@ public class AutoWireHttpSocketTest extends OfficeFrameTestCase {
 		 * @param connection
 		 *            {@link ServerHttpConnection}.
 		 */
-		public void handleRequest(ServerHttpConnection connection)
-				throws IOException {
+		public void handleRequest(ServerHttpConnection connection) throws IOException {
 			HttpResponse response = connection.getHttpResponse();
 			Writer writer = new OutputStreamWriter(response.getEntity());
 			writer.write("hello world");

@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
-import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
@@ -54,8 +54,7 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 	 * Initiate the server name.
 	 */
 	public HttpCommunicationProtocolTest() throws IOException {
-		this.defaultServerName = this.getFileContents(this.findFile(
-				HttpCommunicationProtocol.class, "Server.txt"));
+		this.defaultServerName = this.getFileContents(this.findFile(HttpCommunicationProtocol.class, "Server.txt"));
 	}
 
 	/**
@@ -77,8 +76,7 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 		Properties properties = super.getCommunicationProtocolProperties();
 
 		// Mock the date
-		properties.setProperty(
-				HttpCommunicationProtocol.PROPERTY_HTTP_SERVER_CLOCK_SOURCE,
+		properties.setProperty(HttpCommunicationProtocol.PROPERTY_HTTP_SERVER_CLOCK_SOURCE,
 				MockHttpServerClock.class.getName());
 
 		// Return the properties
@@ -86,11 +84,9 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 	}
 
 	@Override
-	protected void handleInvokeProcess(Object parameter,
-			ManagedObject managedObject, EscalationHandler escalationHandler) {
+	protected void handleInvokeProcess(Object parameter, ManagedObject managedObject, FlowCallback callback) {
 		try {
-			this.serverHttpConnection = (ServerHttpConnection) managedObject
-					.getObject();
+			this.serverHttpConnection = (ServerHttpConnection) managedObject.getObject();
 		} catch (Throwable ex) {
 			throw fail(ex);
 		}
@@ -103,8 +99,7 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 	 */
 	public void testEnsureServerVersionTagReplaced() {
 		Pattern pattern = Pattern.compile("^WoOF (\\d)+.(\\d)+.(\\d)+$");
-		assertTrue("Should have version tag replaced ("
-				+ this.defaultServerName + ")",
+		assertTrue("Should have version tag replaced (" + this.defaultServerName + ")",
 				pattern.matcher(this.defaultServerName).matches());
 	}
 
@@ -143,8 +138,7 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 
 		// Validate received response
 		this.runServerSelect();
-		this.assertHttpResponse(200, "OK", "TEST", "Server",
-				this.defaultServerName, "Date", "[Mock Date]");
+		this.assertHttpResponse(200, "OK", "TEST", "Server", this.defaultServerName, "Date", "[Mock Date]");
 	}
 
 	/**
@@ -153,8 +147,7 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 	public void testHttpResponseDefaultCharset() throws Exception {
 
 		// Obtain the default charset
-		final Charset defaultCharset = AbstractServerSocketManagedObjectSource
-				.getCharset(null);
+		final Charset defaultCharset = AbstractServerSocketManagedObjectSource.getCharset(null);
 
 		// Obtain the HTTP response
 		HttpResponse response = this.getHttpResponse();
@@ -167,9 +160,8 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 
 		// Validate received response
 		this.runServerSelect();
-		this.assertHttpResponse(200, "OK", "TEST", "Server",
-				this.defaultServerName, "Date", "[Mock Date]", "Content-Type",
-				"text/plain; charset=" + defaultCharset.name());
+		this.assertHttpResponse(200, "OK", "TEST", "Server", this.defaultServerName, "Date", "[Mock Date]",
+				"Content-Type", "text/plain; charset=" + defaultCharset.name());
 	}
 
 	/**
@@ -188,9 +180,8 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 
 		// Validate received response
 		this.runServerSelect();
-		this.assertHttpResponse(200, "OK", "TEST", "Server",
-				this.defaultServerName, "Date", "[Mock Date]", "Content-Type",
-				"another/type");
+		this.assertHttpResponse(200, "OK", "TEST", "Server", this.defaultServerName, "Date", "[Mock Date]",
+				"Content-Type", "another/type");
 	}
 
 	/**
@@ -209,9 +200,8 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 
 		// Validate received response
 		this.runServerSelect();
-		this.assertHttpResponse(200, "OK", "TEST", "Server",
-				this.defaultServerName, "Date", "[Mock Date]", "Content-Type",
-				"s");
+		this.assertHttpResponse(200, "OK", "TEST", "Server", this.defaultServerName, "Date", "[Mock Date]",
+				"Content-Type", "s");
 	}
 
 	/**
@@ -243,8 +233,7 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 	 * @param headerNameValues
 	 *            {@link HttpHeader} name value pairs.
 	 */
-	private void writeHttpRequest(String method, String uri, String entity,
-			String... headerNameValues) {
+	private void writeHttpRequest(String method, String uri, String entity, String... headerNameValues) {
 
 		// Determine number of bytes to entity
 		int contentLength = 0;
@@ -290,16 +279,12 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 	 * @param expectedHeaderNameValues
 	 *            Expected header name value pairs.
 	 */
-	private void assertHttpRequest(String expectedMethod, String expectedUri,
-			String expectedEntity, String... expectedHeaderNameValues)
-			throws IOException {
-		assertNotNull("Should have received HTTP request",
-				this.serverHttpConnection);
-		assertHttpRequest(this.serverHttpConnection.getHttpRequest(),
-				expectedMethod, expectedUri, expectedEntity,
+	private void assertHttpRequest(String expectedMethod, String expectedUri, String expectedEntity,
+			String... expectedHeaderNameValues) throws IOException {
+		assertNotNull("Should have received HTTP request", this.serverHttpConnection);
+		assertHttpRequest(this.serverHttpConnection.getHttpRequest(), expectedMethod, expectedUri, expectedEntity,
 				expectedHeaderNameValues);
-		assertEquals("Incorrect connection HTTP method", expectedMethod,
-				this.serverHttpConnection.getHttpMethod());
+		assertEquals("Incorrect connection HTTP method", expectedMethod, this.serverHttpConnection.getHttpMethod());
 	}
 
 	/**
@@ -316,8 +301,7 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 	 * @param expectedHeaderNameValues
 	 *            Expected {@link HttpHeader} name/value pairs.
 	 */
-	private void assertHttpResponse(int expectedStatusCode,
-			String expectedStatusMessage, String expectedEntity,
+	private void assertHttpResponse(int expectedStatusCode, String expectedStatusMessage, String expectedEntity,
 			String... expectedHeaderNameValues) {
 
 		// Determine number of bytes to entity
@@ -329,8 +313,7 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 
 		// Create the HTTP request text
 		StringBuilder msg = new StringBuilder();
-		msg.append("HTTP/1.1 " + String.valueOf(expectedStatusCode) + " "
-				+ expectedStatusMessage + "\n");
+		msg.append("HTTP/1.1 " + String.valueOf(expectedStatusCode) + " " + expectedStatusMessage + "\n");
 		for (int i = 0; i < expectedHeaderNameValues.length; i += 2) {
 			String name = expectedHeaderNameValues[i];
 			String value = expectedHeaderNameValues[i + 1];
@@ -365,9 +348,8 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 	 * @param expectedHeaderNameValues
 	 *            Expected header name value pairs.
 	 */
-	private static void assertHttpRequest(HttpRequest request,
-			String expectedMethod, String expectedUri, String expectedEntity,
-			String... expectedHeaderNameValues) throws IOException {
+	private static void assertHttpRequest(HttpRequest request, String expectedMethod, String expectedUri,
+			String expectedEntity, String... expectedHeaderNameValues) throws IOException {
 
 		// Ensure correct details
 		assertEquals("Incorrect method", expectedMethod, request.getMethod());
@@ -384,14 +366,12 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 			// Add the expected content-length
 			byte[] entityBytes = UsAsciiUtil.convertToHttp(expectedEntity);
 			int contentLength = entityBytes.length;
-			expectedHeaders.add(new HttpHeaderImpl("Content-Length", String
-					.valueOf(contentLength)));
+			expectedHeaders.add(new HttpHeaderImpl("Content-Length", String.valueOf(contentLength)));
 		}
 
 		// Validate the headers
 		List<HttpHeader> actualHeaders = request.getHeaders();
-		assertEquals("Incorrect number of HTTP headers",
-				expectedHeaders.size(), actualHeaders.size());
+		assertEquals("Incorrect number of HTTP headers", expectedHeaders.size(), actualHeaders.size());
 		for (HttpHeader expectedHeader : expectedHeaders) {
 
 			// Find the corresponding actual header
@@ -402,18 +382,14 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 					break FOUND;
 				}
 			}
-			assertNotNull("HTTP header '" + expectedHeader.getName()
-					+ "' not found", actualHeader);
-			assertEquals(
-					"Incorrect value for HTTP header '"
-							+ expectedHeader.getName() + "'",
+			assertNotNull("HTTP header '" + expectedHeader.getName() + "' not found", actualHeader);
+			assertEquals("Incorrect value for HTTP header '" + expectedHeader.getName() + "'",
 					expectedHeader.getValue(), actualHeader.getValue());
 
 			// Remove the actual header (as matched)
 			actualHeaders.remove(actualHeader);
 		}
-		assertEquals("Should be no actual headers as all matched", 0,
-				actualHeaders.size());
+		assertEquals("Should be no actual headers as all matched", 0, actualHeaders.size());
 
 		// Ensure the entity is as expected
 		int available = request.getEntity().available();
@@ -428,8 +404,7 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 			// Obtain the entity content
 			byte[] actualEntity = new byte[available];
 			request.getEntity().read(actualEntity);
-			assertEquals("Incorrect entity content", expectedEntity,
-					UsAsciiUtil.convertToString(actualEntity));
+			assertEquals("Incorrect entity content", expectedEntity, UsAsciiUtil.convertToString(actualEntity));
 		}
 	}
 

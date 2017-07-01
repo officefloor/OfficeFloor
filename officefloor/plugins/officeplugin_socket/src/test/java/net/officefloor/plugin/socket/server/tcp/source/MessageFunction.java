@@ -20,8 +20,8 @@ package net.officefloor.plugin.socket.server.tcp.source;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.api.execute.Work;
+import javax.resource.spi.work.Work;
+
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
 
 /**
@@ -29,7 +29,7 @@ import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
  * 
  * @author Daniel Sagenschneider
  */
-public class MessageWork {
+public class MessageFunction {
 
 	/**
 	 * Start time of creating this {@link Work}.
@@ -41,18 +41,14 @@ public class MessageWork {
 	 * 
 	 * @param connection
 	 *            {@link ServerTcpConnection}.
-	 * @param taskContext
-	 *            {@link ManagedFunctionContext}.
 	 */
-	public void service(ServerTcpConnection connection,
-			ManagedFunctionContext<?, ?, ?> taskContext) throws Throwable {
+	public void service(ServerTcpConnection connection) throws Throwable {
 		try {
 
 			// Ensure not waiting too long
 			long waitTimeInSeconds = (System.currentTimeMillis() - this.startTime) / 1000;
 			if ((waitTimeInSeconds) > 20) {
-				throw new Exception("Waited too long for a message ("
-						+ waitTimeInSeconds + " seconds)");
+				throw new Exception("Waited too long for a message (" + waitTimeInSeconds + " seconds)");
 			}
 
 			// Obtain the index
@@ -65,7 +61,6 @@ public class MessageWork {
 			case 0:
 				// No message, wait for one to come
 				connection.waitOnClientData();
-				taskContext.setComplete(false);
 				return;
 			}
 
@@ -96,8 +91,6 @@ public class MessageWork {
 
 				// Invoke flow to process another message when arrives
 				connection.waitOnClientData();
-				taskContext.setComplete(false);
-
 				break;
 			}
 

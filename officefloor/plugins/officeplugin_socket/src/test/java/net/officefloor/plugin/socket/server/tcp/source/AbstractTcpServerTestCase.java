@@ -24,16 +24,13 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.text.DecimalFormat;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.MockTeamSource;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
 
@@ -42,8 +39,7 @@ import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractTcpServerTestCase extends
-		AbstractOfficeConstructTestCase {
+public abstract class AbstractTcpServerTestCase extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Formatter of millisecond time.
@@ -62,15 +58,11 @@ public abstract class AbstractTcpServerTestCase extends
 	 *            Port to bind to receive client connections.
 	 * @param managedObjectName
 	 *            Name to make the {@link ManagedObject} available under.
-	 * @param workName
-	 *            Name of {@link Work} to process the
-	 *            {@link ServerTcpConnection}.
-	 * @param taskName
+	 * @param functionName
 	 *            Name of {@link ManagedFunction} to process the
 	 *            {@link ServerTcpConnection}.
 	 */
-	protected abstract void registerManagedObjectSource(int port,
-			String managedObjectName, String workName, String taskName);
+	protected abstract void registerManagedObjectSource(int port, String managedObjectName, String functionName);
 
 	/**
 	 * Creates the client {@link Socket} connected to the
@@ -84,8 +76,7 @@ public abstract class AbstractTcpServerTestCase extends
 	 * @throws Exception
 	 *             If fails to create connected {@link Socket}.
 	 */
-	protected abstract Socket createClientSocket(InetAddress address, int port)
-			throws Exception;
+	protected abstract Socket createClientSocket(InetAddress address, int port) throws Exception;
 
 	/**
 	 * Helper method to register a {@link Team} for the
@@ -98,11 +89,9 @@ public abstract class AbstractTcpServerTestCase extends
 	 * @param team
 	 *            {@link Team} to register.
 	 */
-	protected void constructManagedObjectSourceTeam(String managedObjectName,
-			String managedObjectTeamName, Team team) {
+	protected void constructManagedObjectSourceTeam(String managedObjectName, String managedObjectTeamName, Team team) {
 		this.constructTeam(managedObjectTeamName, team);
-		this.getOfficeBuilder().registerTeam(
-				"of-" + managedObjectName + "." + managedObjectTeamName,
+		this.getOfficeBuilder().registerTeam("of-" + managedObjectName + "." + managedObjectTeamName,
 				"of-" + managedObjectTeamName);
 	}
 
@@ -122,21 +111,14 @@ public abstract class AbstractTcpServerTestCase extends
 
 		// Names to handle ServerTcpConnection
 		final String MO_NAME = "MO";
-		final String WORK_NAME = "servicer";
-		final String TASK_NAME = "service";
+		final String FUNCTION_NAME = "service";
 
-		// Register the work to process messages
-		ReflectiveWorkBuilder workBuilder = this.constructWork(
-				new MessageWork(), WORK_NAME, null);
-		ReflectiveTaskBuilder taskBuilder = workBuilder.buildTask(TASK_NAME,
-				"WORKER");
-		taskBuilder.buildObject(MO_NAME);
-		taskBuilder.buildTaskContext();
-		this.constructTeam("WORKER",
-				MockTeamSource.createOnePersonTeam("WORKER"));
+		// Register the function to process messages
+		ReflectiveFunctionBuilder functionBuilder = this.constructFunction(new MessageFunction(), FUNCTION_NAME);
+		functionBuilder.buildObject(MO_NAME);
 
 		// Register the managed object source to handle TCP connection
-		this.registerManagedObjectSource(PORT, MO_NAME, WORK_NAME, TASK_NAME);
+		this.registerManagedObjectSource(PORT, MO_NAME, FUNCTION_NAME);
 
 		// Create and open the Office Floor
 		OfficeFloor officeFloor = this.constructOfficeFloor();
@@ -181,11 +163,9 @@ public abstract class AbstractTcpServerTestCase extends
 		int totalCalls = CALLERS * REQUESTS;
 		long effectiveTimePerCall = (long) ((runTime / (double) totalCalls) * 1000);
 		System.out.println("=====================");
-		System.out.println(CALLERS + " callers made " + REQUESTS
-				+ " requests (total " + totalCalls + ") in " + runTime
+		System.out.println(CALLERS + " callers made " + REQUESTS + " requests (total " + totalCalls + ") in " + runTime
 				+ " milliseconds");
-		System.out.println("Effectively 1 call every " + effectiveTimePerCall
-				+ " microseconds");
+		System.out.println("Effectively 1 call every " + effectiveTimePerCall + " microseconds");
 		System.out.println("=====================");
 	}
 
@@ -199,8 +179,7 @@ public abstract class AbstractTcpServerTestCase extends
 	 * @param isLog
 	 *            Flag indicating whether to log details.
 	 */
-	private void doParallelRequests(int numberOfCallers,
-			final int numberOfRequestsPerCaller, final boolean isLog)
+	private void doParallelRequests(int numberOfCallers, final int numberOfRequestsPerCaller, final boolean isLog)
 			throws Throwable {
 
 		// Create the arrays for managing threads
@@ -229,8 +208,7 @@ public abstract class AbstractTcpServerTestCase extends
 						}
 
 						// Execute the requested number of calls
-						AbstractTcpServerTestCase.this.doRequests(
-								String.valueOf(callerIndex),
+						AbstractTcpServerTestCase.this.doRequests(String.valueOf(callerIndex),
 								numberOfRequestsPerCaller, isLog);
 
 					} catch (Throwable ex) {
@@ -283,14 +261,10 @@ public abstract class AbstractTcpServerTestCase extends
 			if (isLog) {
 				System.out.println("Completed:");
 				for (int i = 0; i < failures.length; i++) {
-					System.out.println("   "
-							+ i
+					System.out.println("   " + i
 							+ (failures[i] == null ? " successful"
-									: " failed: "
-											+ failures[i].getMessage()
-											+ " ["
-											+ failures[i].getClass()
-													.getSimpleName() + "]"));
+									: " failed: " + failures[i].getMessage() + " ["
+											+ failures[i].getClass().getSimpleName() + "]"));
 					if (failures[i] != null) {
 						failures[i].printStackTrace(System.out);
 					}
@@ -316,12 +290,10 @@ public abstract class AbstractTcpServerTestCase extends
 	 * @param isLog
 	 *            Flag indicating whether to log details.
 	 */
-	private void doRequests(String requesterId, int numberOfRequests,
-			boolean isLog) throws Exception {
+	private void doRequests(String requesterId, int numberOfRequests, boolean isLog) throws Exception {
 
 		// Open socket to Office
-		Socket socket = this.createClientSocket(InetAddress.getLocalHost(),
-				PORT);
+		Socket socket = this.createClientSocket(InetAddress.getLocalHost(), PORT);
 		socket.setSoTimeout(20000); // timeout reads
 
 		// Obtain the streams
@@ -353,16 +325,13 @@ public abstract class AbstractTcpServerTestCase extends
 			long endTime = System.nanoTime();
 			String responseText = new String(response.toByteArray());
 			if (isLog) {
-				System.out.println("Message [" + requesterId + ":" + i
-						+ "] processed in "
-						+ FORMATTER.format((endTime - startTime) / 1000000.0)
-						+ " milliseconds (returned response '" + responseText
-						+ "')");
+				System.out.println("Message [" + requesterId + ":" + i + "] processed in "
+						+ FORMATTER.format((endTime - startTime) / 1000000.0) + " milliseconds (returned response '"
+						+ responseText + "')");
 			}
 
 			// Ensure response correct
-			assertEquals("Incorrect response",
-					Messages.getMessage(requestIndex), responseText);
+			assertEquals("Incorrect response", Messages.getMessage(requestIndex), responseText);
 		}
 
 		// Send finished
@@ -376,8 +345,7 @@ public abstract class AbstractTcpServerTestCase extends
 		// Indicate time to close connection
 		long endTime = System.currentTimeMillis();
 		if (isLog) {
-			System.out.println("Message [-1] processed in "
-					+ (endTime - startTime) + " milliseconds");
+			System.out.println("Message [-1] processed in " + (endTime - startTime) + " milliseconds");
 		}
 	}
 

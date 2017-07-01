@@ -23,27 +23,29 @@ import java.io.Writer;
 
 import javax.net.ssl.SSLHandshakeException;
 
-import net.officefloor.autowire.AutoWireOfficeFloor;
-import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+
+import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
 
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-
 /**
- * Ensure able to use {@link HttpsServerSocketManagedObjectSource} with the
- * {@link AutoWireOfficeFloorSource}.
+ * Ensure able to use {@link HttpsServerSocketManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
 public class AutoWireHttpsSocketTest extends OfficeFrameTestCase {
+
+	/**
+	 * {@link CompileOfficeFloor}.
+	 */
+	private final CompileOfficeFloor compile = new CompileOfficeFloor();
 
 	/**
 	 * Port for the test.
@@ -62,8 +64,7 @@ public class AutoWireHttpsSocketTest extends OfficeFrameTestCase {
 		this.port = HttpTestUtil.getAvailablePort();
 
 		// Add the section to handle the HTTP request
-		this.autoWire.addSection("TEST", ClassSectionSource.class.getName(), MockSection.class.getName());
-
+		compile.office((context) -> context.addSection("TEST", MockSection.class));
 	}
 
 	@Override
@@ -80,10 +81,12 @@ public class AutoWireHttpsSocketTest extends OfficeFrameTestCase {
 	public void testNoMatchingCypherForHttpsServer() throws Exception {
 
 		// Register the managed object source
-		HttpsServerSocketManagedObjectSource.autoWire(this.autoWire, this.port, null, "TEST", "handleRequest");
+		this.compile.officeFloor(
+				(context) -> HttpsServerSocketManagedObjectSource.configure(context.getOfficeFloorDeployer(), this.port,
+						null, context.getDeployedOffice(), "TEST", "handleRequest"));
 
 		// Open the OfficeFloor
-		this.officeFloor = this.autoWire.openOfficeFloor();
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
 		// Use default SslContext which should not match on cypher
 		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
@@ -105,11 +108,12 @@ public class AutoWireHttpsSocketTest extends OfficeFrameTestCase {
 	public void testCallAutoWiredHttpsServer() throws Exception {
 
 		// Register the managed object source
-		HttpsServerSocketManagedObjectSource.autoWire(this.autoWire, this.port, HttpTestUtil.getSslEngineSourceClass(),
-				"TEST", "handleRequest");
+		this.compile.officeFloor(
+				(context) -> HttpsServerSocketManagedObjectSource.configure(context.getOfficeFloorDeployer(), this.port,
+						HttpTestUtil.getSslEngineSourceClass(), context.getDeployedOffice(), "TEST", "handleRequest"));
 
 		// Open the OfficeFloor
-		this.officeFloor = this.autoWire.openOfficeFloor();
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
 		// Send request (with OfficeFloor test SslContext)
 		try (CloseableHttpClient client = HttpTestUtil.createHttpClient(true)) {

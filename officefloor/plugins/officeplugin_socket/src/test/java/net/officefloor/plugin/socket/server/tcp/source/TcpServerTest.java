@@ -24,7 +24,7 @@ import java.net.Socket;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
-import net.officefloor.frame.test.MockTeamSource;
+import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.plugin.socket.server.tcp.protocol.TcpCommunicationProtocol;
 
 /**
@@ -39,47 +39,36 @@ public class TcpServerTest extends AbstractTcpServerTestCase {
 	 */
 
 	@Override
-	protected void registerManagedObjectSource(int port,
-			String managedObjectName, String workName, String taskName) {
+	protected void registerManagedObjectSource(int port, String managedObjectName, String functionName) {
 
 		// Obtain the office name and builder
 		String officeName = this.getOfficeName();
 
 		// Register the Server Socket Managed Object
-		ManagedObjectBuilder<Indexed> serverSocketBuilder = this
-				.constructManagedObject(managedObjectName,
-						TcpServerSocketManagedObjectSource.class);
-		serverSocketBuilder.addProperty(
-				TcpServerSocketManagedObjectSource.PROPERTY_PORT,
-				String.valueOf(port));
-		serverSocketBuilder.addProperty(
-				TcpCommunicationProtocol.PROPERTY_MAXIMUM_IDLE_TIME,
-				String.valueOf(1000));
+		ManagedObjectBuilder<Indexed> serverSocketBuilder = this.constructManagedObject(managedObjectName,
+				TcpServerSocketManagedObjectSource.class, officeName);
+		serverSocketBuilder.addProperty(TcpServerSocketManagedObjectSource.PROPERTY_PORT, String.valueOf(port));
+		serverSocketBuilder.addProperty(TcpCommunicationProtocol.PROPERTY_MAXIMUM_IDLE_TIME, String.valueOf(1000));
 		serverSocketBuilder.setTimeout(3000);
 
 		// Register the necessary teams for socket listening
 		this.constructManagedObjectSourceTeam(managedObjectName, "accepter",
-				MockTeamSource.createOnePersonTeam("accepter"));
+				new ExecutorCachedTeamSource().createTeam());
 		this.constructManagedObjectSourceTeam(managedObjectName, "listener",
-				MockTeamSource.createWorkerPerTaskTeam("listener"));
-		this.constructManagedObjectSourceTeam(managedObjectName, "cleanup",
-				MockTeamSource.createOnePersonTeam("cleanup"));
+				new ExecutorCachedTeamSource().createTeam());
 
 		// Have server socket managed by office
-		ManagingOfficeBuilder<Indexed> managingOfficeBuilder = serverSocketBuilder
-				.setManagingOffice(officeName);
+		ManagingOfficeBuilder<Indexed> managingOfficeBuilder = serverSocketBuilder.setManagingOffice(officeName);
 
-		// Hook in work of test
+		// Hook in function of test
 		managingOfficeBuilder.setInputManagedObjectName(managedObjectName);
-		managingOfficeBuilder.linkProcess(0, workName, taskName);
+		managingOfficeBuilder.linkProcess(0, functionName);
 	}
 
 	@Override
-	protected Socket createClientSocket(InetAddress address, int port)
-			throws Exception {
+	protected Socket createClientSocket(InetAddress address, int port) throws Exception {
 		Socket socket = new Socket();
-		socket.connect(new InetSocketAddress(InetAddress.getLocalHost(), port),
-				5000);
+		socket.connect(new InetSocketAddress(InetAddress.getLocalHost(), port), 5000);
 		return socket;
 	}
 

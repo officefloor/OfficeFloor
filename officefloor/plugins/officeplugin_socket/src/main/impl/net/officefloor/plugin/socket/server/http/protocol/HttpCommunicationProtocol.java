@@ -180,11 +180,7 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource, C
 
 		// Invoke processing of the HTTP managed object
 		this.executeContext.invokeProcess(this.requestHandlingFlowIndex, httpManagedObject.getServerHttpConnection(),
-				httpManagedObject, 0, (escalation) -> {
-					if (escalation != null) {
-						httpManagedObject.getEscalationHandler().handleEscalation(escalation);
-					}
-				});
+				httpManagedObject, 0, httpManagedObject.getFlowCallback());
 	}
 
 	/*

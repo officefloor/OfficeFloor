@@ -22,10 +22,9 @@ import java.nio.channels.ClosedChannelException;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
-import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
+import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 
@@ -34,7 +33,7 @@ import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public class CleanupTaskTest extends OfficeFrameTestCase {
+public class CleanupFunctionTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link CleanupManagedFunction}.
@@ -45,8 +44,7 @@ public class CleanupTaskTest extends OfficeFrameTestCase {
 	 * {@link ManagedFunctionContext}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final ManagedFunctionContext<Work, None, None> context = this
-			.createMock(ManagedFunctionContext.class);
+	private final ManagedFunctionContext<None, None> context = this.createMock(ManagedFunctionContext.class);
 
 	/**
 	 * {@link RecycleManagedObjectParameter}.
@@ -58,8 +56,7 @@ public class CleanupTaskTest extends OfficeFrameTestCase {
 	/**
 	 * {@link HttpManagedObject}.
 	 */
-	private final HttpManagedObject mo = this
-			.createMock(HttpManagedObject.class);
+	private final HttpManagedObject mo = this.createMock(HttpManagedObject.class);
 
 	/**
 	 * Ensure cleans up the {@link HttpManagedObject}.
@@ -69,12 +66,9 @@ public class CleanupTaskTest extends OfficeFrameTestCase {
 		final CleanupEscalation[] escalations = new CleanupEscalation[0];
 
 		// Record cleaning up
-		this.recordReturn(this.context, this.context.getObject(0),
-				this.parameter);
-		this.recordReturn(this.parameter, this.parameter.getManagedObject(),
-				this.mo);
-		this.recordReturn(this.parameter,
-				this.parameter.getCleanupEscalations(), escalations);
+		this.recordReturn(this.context, this.context.getObject(0), this.parameter);
+		this.recordReturn(this.parameter, this.parameter.getManagedObject(), this.mo);
+		this.recordReturn(this.parameter, this.parameter.getCleanupEscalations(), escalations);
 		this.mo.cleanup(escalations);
 
 		// Test
@@ -88,16 +82,12 @@ public class CleanupTaskTest extends OfficeFrameTestCase {
 	 */
 	public void testPreviousCleanupEscalation() throws IOException {
 
-		final CleanupEscalation[] escalations = new CleanupEscalation[] { this
-				.createMock(CleanupEscalation.class) };
+		final CleanupEscalation[] escalations = new CleanupEscalation[] { this.createMock(CleanupEscalation.class) };
 
 		// Record cleaning up
-		this.recordReturn(this.context, this.context.getObject(0),
-				this.parameter);
-		this.recordReturn(this.parameter, this.parameter.getManagedObject(),
-				this.mo);
-		this.recordReturn(this.parameter,
-				this.parameter.getCleanupEscalations(), escalations);
+		this.recordReturn(this.context, this.context.getObject(0), this.parameter);
+		this.recordReturn(this.parameter, this.parameter.getManagedObject(), this.mo);
+		this.recordReturn(this.parameter, this.parameter.getCleanupEscalations(), escalations);
 		this.mo.cleanup(escalations);
 
 		// Test
@@ -116,12 +106,9 @@ public class CleanupTaskTest extends OfficeFrameTestCase {
 		final CleanupEscalation[] escalations = new CleanupEscalation[0];
 
 		// Record connection already closed
-		this.recordReturn(this.context, this.context.getObject(0),
-				this.parameter);
-		this.recordReturn(this.parameter, this.parameter.getManagedObject(),
-				this.mo);
-		this.recordReturn(this.parameter,
-				this.parameter.getCleanupEscalations(), escalations);
+		this.recordReturn(this.context, this.context.getObject(0), this.parameter);
+		this.recordReturn(this.parameter, this.parameter.getManagedObject(), this.mo);
+		this.recordReturn(this.parameter, this.parameter.getCleanupEscalations(), escalations);
 		this.mo.cleanup(escalations);
 		this.control(this.mo).setThrowable(new ClosedChannelException());
 

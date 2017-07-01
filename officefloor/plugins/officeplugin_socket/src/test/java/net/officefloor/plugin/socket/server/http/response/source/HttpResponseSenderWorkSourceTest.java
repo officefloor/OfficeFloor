@@ -24,14 +24,15 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.nio.ByteBuffer;
 
+import org.easymock.AbstractMatcher;
+
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
-import net.officefloor.compile.test.work.WorkLoaderUtil;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.test.managedfunction.ManagedFunctionLoaderUtil;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -39,8 +40,6 @@ import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSen
 import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
 import net.officefloor.plugin.stream.WriteBufferReceiver;
 import net.officefloor.plugin.stream.impl.ServerOutputStreamImpl;
-
-import org.easymock.AbstractMatcher;
 
 /**
  * Tests the {@link HttpResponseSenderManagedFunctionSource}.
@@ -53,24 +52,21 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 	 * Validate specification.
 	 */
 	public void testSpecification() {
-		WorkLoaderUtil
-				.validateSpecification(HttpResponseSenderManagedFunctionSource.class);
+		ManagedFunctionLoaderUtil.validateSpecification(HttpResponseSenderManagedFunctionSource.class);
 	}
 
 	/**
 	 * Validate type.
 	 */
 	public void testType() {
-		HttpResponseSendFunction task = new HttpResponseSendFunction(-1, null);
-		FunctionNamespaceBuilder<Work> workTypeBuilder = WorkLoaderUtil
-				.createWorkTypeBuilder(task);
-		ManagedFunctionTypeBuilder<HttpResponseSendTaskDependencies, None> taskBuilder = workTypeBuilder
-				.addManagedFunctionType("SEND", task,
+		FunctionNamespaceBuilder functionTypeBuilder = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
+		ManagedFunctionTypeBuilder<HttpResponseSendTaskDependencies, None> functionBuilder = functionTypeBuilder
+				.addManagedFunctionType("SEND", new HttpResponseSendFunction(-1, null),
 						HttpResponseSendTaskDependencies.class, None.class);
-		taskBuilder.addObject(ServerHttpConnection.class).setKey(
-				HttpResponseSendTaskDependencies.SERVER_HTTP_CONNECTION);
-		taskBuilder.addEscalation(IOException.class);
-		WorkLoaderUtil.validateWorkType(workTypeBuilder,
+		functionBuilder.addObject(ServerHttpConnection.class)
+				.setKey(HttpResponseSendTaskDependencies.SERVER_HTTP_CONNECTION);
+		functionBuilder.addEscalation(IOException.class);
+		ManagedFunctionLoaderUtil.validateManagedFunctionType(functionTypeBuilder,
 				HttpResponseSenderManagedFunctionSource.class);
 	}
 
@@ -82,18 +78,14 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 
 		final int status = 204;
 
-		ManagedFunctionContext<Work, HttpResponseSendTaskDependencies, None> taskContext = this
+		ManagedFunctionContext<HttpResponseSendTaskDependencies, None> managedFunctionContext = this
 				.createMock(ManagedFunctionContext.class);
-		ServerHttpConnection connection = this
-				.createMock(ServerHttpConnection.class);
+		ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
 		HttpResponse response = this.createMock(HttpResponse.class);
 
 		// Record
-		this.recordReturn(
-				taskContext,
-				taskContext
-						.getObject(HttpResponseSendTaskDependencies.SERVER_HTTP_CONNECTION),
-				connection);
+		this.recordReturn(managedFunctionContext,
+				managedFunctionContext.getObject(HttpResponseSendTaskDependencies.SERVER_HTTP_CONNECTION), connection);
 		this.recordReturn(connection, connection.getHttpResponse(), response);
 		response.setStatus(status);
 		response.send();
@@ -101,16 +93,15 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 		// Test
 		this.replayMockObjects();
 
-		// Create the task
-		FunctionNamespaceType<Work> work = WorkLoaderUtil.loadWorkType(
+		// Create the function
+		FunctionNamespaceType namespace = ManagedFunctionLoaderUtil.loadManagedFunctionType(
 				HttpResponseSenderManagedFunctionSource.class,
-				HttpResponseSenderManagedFunctionSource.PROPERTY_HTTP_STATUS,
-				String.valueOf(status));
-		ManagedFunction task = work.getManagedFunctionTypes()[0].getManagedFunctionFactory().createManagedFunction(
-				work.getWorkFactory().createWork());
+				HttpResponseSenderManagedFunctionSource.PROPERTY_HTTP_STATUS, String.valueOf(status));
+		ManagedFunction function = namespace.getManagedFunctionTypes()[0].getManagedFunctionFactory()
+				.createManagedFunction();
 
-		// Execute the task
-		task.execute(taskContext);
+		// Execute the function
+		function.execute(managedFunctionContext);
 		this.verifyMockObjects();
 	}
 
@@ -122,59 +113,47 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 
 		final int status = 204;
 		final String testContentFileName = "TestContent.html";
-		final String testContentFilePath = this.getPackageRelativePath(this
-				.getClass()) + "/" + testContentFileName;
-		File testContentFile = this.findFile(this.getClass(),
-				"TestContent.html");
+		final String testContentFilePath = this.getPackageRelativePath(this.getClass()) + "/" + testContentFileName;
+		File testContentFile = this.findFile(this.getClass(), "TestContent.html");
 		String testContentFileContents = this.getFileContents(testContentFile);
 
-		ManagedFunctionContext<Work, HttpResponseSendTaskDependencies, None> taskContext = this
+		ManagedFunctionContext<HttpResponseSendTaskDependencies, None> managedFunctionContext = this
 				.createMock(ManagedFunctionContext.class);
-		ServerHttpConnection connection = this
-				.createMock(ServerHttpConnection.class);
+		ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
 		HttpResponse response = this.createMock(HttpResponse.class);
-		WriteBufferReceiver receiver = this
-				.createMock(WriteBufferReceiver.class);
+		WriteBufferReceiver receiver = this.createMock(WriteBufferReceiver.class);
 		final WriteBuffer writeBuffer = this.createMock(WriteBuffer.class);
 
 		// Record
-		this.recordReturn(
-				taskContext,
-				taskContext
-						.getObject(HttpResponseSendTaskDependencies.SERVER_HTTP_CONNECTION),
-				connection);
+		this.recordReturn(managedFunctionContext,
+				managedFunctionContext.getObject(HttpResponseSendTaskDependencies.SERVER_HTTP_CONNECTION), connection);
 		this.recordReturn(connection, connection.getHttpResponse(), response);
 		response.setStatus(status);
-		this.recordReturn(response, response.getEntity(),
-				new ServerOutputStreamImpl(receiver, 1024));
+		this.recordReturn(response, response.getEntity(), new ServerOutputStreamImpl(receiver, 1024));
 		this.recordReturn(receiver, receiver.getLock(), new Object());
 		final ByteBuffer[] entityContent = new ByteBuffer[1];
-		this.recordReturn(receiver, receiver.createWriteBuffer(null),
-				writeBuffer, new AbstractMatcher() {
-					@Override
-					public boolean matches(Object[] expected, Object[] actual) {
-						entityContent[0] = (ByteBuffer) actual[0];
-						return true;
-					}
-				});
+		this.recordReturn(receiver, receiver.createWriteBuffer(null), writeBuffer, new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				entityContent[0] = (ByteBuffer) actual[0];
+				return true;
+			}
+		});
 		response.send();
 
 		// Test
 		this.replayMockObjects();
 
-		// Create the task
-		FunctionNamespaceType<Work> work = WorkLoaderUtil
-				.loadWorkType(
-						HttpResponseSenderManagedFunctionSource.class,
-						HttpResponseSenderManagedFunctionSource.PROPERTY_HTTP_STATUS,
-						String.valueOf(status),
-						HttpResponseSenderManagedFunctionSource.PROPERTY_HTTP_RESPONSE_CONTENT_FILE,
-						testContentFilePath);
-		ManagedFunction task = work.getManagedFunctionTypes()[0].getManagedFunctionFactory().createManagedFunction(
-				work.getWorkFactory().createWork());
+		// Create the function
+		FunctionNamespaceType namespace = ManagedFunctionLoaderUtil.loadManagedFunctionType(
+				HttpResponseSenderManagedFunctionSource.class,
+				HttpResponseSenderManagedFunctionSource.PROPERTY_HTTP_STATUS, String.valueOf(status),
+				HttpResponseSenderManagedFunctionSource.PROPERTY_HTTP_RESPONSE_CONTENT_FILE, testContentFilePath);
+		ManagedFunction function = namespace.getManagedFunctionTypes()[0].getManagedFunctionFactory()
+				.createManagedFunction();
 
-		// Execute the task
-		task.execute(taskContext);
+		// Execute the function
+		function.execute(managedFunctionContext);
 		this.verifyMockObjects();
 
 		// Validate the entity contents
