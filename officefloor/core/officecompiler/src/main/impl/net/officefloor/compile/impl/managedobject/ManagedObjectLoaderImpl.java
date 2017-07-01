@@ -230,12 +230,13 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 
 		// Create the managed object source context to initialise
 		String officeName = null;
+		String boundInputManagedObjectName = null;
 		ManagingOfficeConfiguration<F> managingOffice = new ManagingOfficeBuilderImpl<F>(officeName);
 		OfficeConfiguration office = new OfficeBuilderImpl(officeName);
 		String namespaceName = null; // stops the name spacing
 		ManagedObjectSourceContext<F> sourceContext = new ManagedObjectSourceContextImpl<F>(true, namespaceName,
-				new PropertyListSourceProperties(propertyList), this.nodeContext.getRootSourceContext(),
-				managingOffice.getBuilder(), office.getBuilder());
+				boundInputManagedObjectName, new PropertyListSourceProperties(propertyList),
+				this.nodeContext.getRootSourceContext(), managingOffice.getBuilder(), office.getBuilder());
 
 		try {
 			// Initialise the managed object source
