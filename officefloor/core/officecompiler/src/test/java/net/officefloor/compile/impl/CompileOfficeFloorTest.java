@@ -50,21 +50,21 @@ public class CompileOfficeFloorTest extends OfficeFrameTestCase {
 
 		// Compile the OfficeFloor
 		CompileOfficeFloor compile = new CompileOfficeFloor();
-		compile.addOfficeFloorExtension((context) -> {
+		compile.officeFloor((context) -> {
 			// Add managed object (as auto-wire by default)
 			OfficeFloorManagedObjectSource mos = context.getOfficeFloorDeployer().addManagedObjectSource("MOS",
 					ClassManagedObjectSource.class.getName());
 			mos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, CompileManagedObject.class.getName());
 			mos.addOfficeFloorManagedObject("MO", ManagedObjectScope.PROCESS);
 		});
-		compile.addOfficeExtension((context) -> {
+		compile.office((context) -> {
 			// Add managed object (as auto-wire by default)
 			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("MOS",
 					ClassManagedObjectSource.class.getName());
 			mos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, DependencyManagedObject.class.getName());
 			mos.addOfficeManagedObject("MO", ManagedObjectScope.THREAD);
 		});
-		compile.addSectionExtension((context) -> {
+		compile.section((context) -> {
 			// Add managed function
 			SectionDesigner designer = context.getSectionDesigner();
 			SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace("NAMESPACE",
@@ -95,14 +95,14 @@ public class CompileOfficeFloorTest extends OfficeFrameTestCase {
 
 		// Compile the OfficeFloor
 		CompileOfficeFloor compile = new CompileOfficeFloor();
-		compile.addOfficeFloorExtension((context) -> {
+		compile.officeFloor((context) -> {
 			// Add managed object (as auto-wire by default)
 			OfficeFloorManagedObjectSource mos = context.getOfficeFloorDeployer().addManagedObjectSource("MOS",
 					ClassManagedObjectSource.class.getName());
 			mos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, CompileManagedObject.class.getName());
 			mos.addOfficeFloorManagedObject("MO", ManagedObjectScope.PROCESS);
 		});
-		compile.addOfficeExtension((context) -> {
+		compile.office((context) -> {
 			// Add managed object (as auto-wire by default)
 			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("MOS",
 					ClassManagedObjectSource.class.getName());
@@ -111,6 +111,33 @@ public class CompileOfficeFloorTest extends OfficeFrameTestCase {
 
 			// Override the office section
 			context.overrideSection(ClassSectionSource.class, CompileFunction.class.getName());
+		});
+		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor();
+
+		// Ensure can invoke function
+		FunctionManager function = officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.function");
+		function.invokeProcess(null, null);
+
+		// Ensure provided compile managed object
+		assertNotNull("Should have auto-wired dependency", CompileFunction.managedObject.dependency);
+	}
+
+	/**
+	 * Ensure can specify {@link Class} for {@link ClassSectionSource}.
+	 */
+	public void testClassSimplify() throws Exception {
+
+		// Reset for testing
+		CompileFunction.managedObject = null;
+
+		// Compile the OfficeFloor
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.officeFloor((context) -> {
+			context.addManagedObject("MO", CompileManagedObject.class, ManagedObjectScope.PROCESS);
+		});
+		compile.office((context) -> {
+			context.addManagedObject("MO", DependencyManagedObject.class, ManagedObjectScope.THREAD);
+			context.addSection("TEST", CompileFunction.class);
 		});
 		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor();
 

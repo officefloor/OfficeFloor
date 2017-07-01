@@ -18,10 +18,14 @@
 package net.officefloor.compile.test.officefloor;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
 
 /**
  * Context for compiling the {@link Office}.
@@ -43,6 +47,31 @@ public interface CompileOfficeContext {
 	 * @return {@link OfficeSourceContext}.
 	 */
 	OfficeSourceContext getOfficeSourceContext();
+
+	/**
+	 * Adds an {@link OfficeManagedObject} for {@link ClassManagedObjectSource}.
+	 * 
+	 * @param managedObjectName
+	 *            Name of the {@link OfficeManagedObject}.
+	 * @param managedObjectClass
+	 *            {@link Class} for the {@link ClassManagedObjectSource}.
+	 * @param scope
+	 *            {@link ManagedObjectScope}.
+	 * @return {@link OfficeManagedObject}.
+	 */
+	OfficeManagedObject addManagedObject(String managedObjectName, Class<?> managedObjectClass,
+			ManagedObjectScope scope);
+
+	/**
+	 * Adds an {@link OfficeSection} for {@link ClassSectionSource}.
+	 * 
+	 * @param sectionName
+	 *            Name of the {@link OfficeSection}.
+	 * @param sectionClass
+	 *            {@link Class} for the {@link ClassSectionSource}.
+	 * @return {@link OfficeSection}.
+	 */
+	OfficeSection addSection(String sectionName, Class<?> sectionClass);
 
 	/**
 	 * Obtains the {@link OfficeSection}.

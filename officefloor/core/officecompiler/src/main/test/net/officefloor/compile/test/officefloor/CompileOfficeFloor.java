@@ -22,12 +22,16 @@ import java.util.List;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeManagedObject;
+import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
@@ -39,6 +43,9 @@ import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
 
 /**
  * Provides easier compiling of {@link OfficeFloor} for testing.
@@ -94,7 +101,7 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 	 * @param extension
 	 *            {@link CompileOfficeFloorExtension}.
 	 */
-	public void addOfficeFloorExtension(CompileOfficeFloorExtension extension) {
+	public void officeFloor(CompileOfficeFloorExtension extension) {
 		this.officeFloorExtensions.add(extension);
 	}
 
@@ -104,7 +111,7 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 	 * @param extension
 	 *            {@link CompileOfficeExtension}.
 	 */
-	public void addOfficeExtension(CompileOfficeExtension extension) {
+	public void office(CompileOfficeExtension extension) {
 		this.officeExtensions.add(extension);
 	}
 
@@ -114,7 +121,7 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 	 * @param extension
 	 *            {@link CompileSectionExtension}.
 	 */
-	public void addSectionExtension(CompileSectionExtension extension) {
+	public void section(CompileSectionExtension extension) {
 		this.sectionExtensions.add(extension);
 	}
 
@@ -169,8 +176,12 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 	@Override
 	public void sourceOfficeFloor(OfficeFloorDeployer deployer, OfficeFloorSourceContext context) throws Exception {
 
-		// Add the default office
-		DeployedOffice deployedOffice = deployer.addDeployedOffice("OFFICE", new CompileOfficeSource(), null);
+		// Add the default office (if office configuration)
+		DeployedOffice office = null;
+		if (this.officeExtensions.size() > 0) {
+			office = deployer.addDeployedOffice("OFFICE", new CompileOfficeSource(), null);
+		}
+		final DeployedOffice deployedOffice = office;
 
 		// Run the extensions
 		for (CompileOfficeFloorExtension extension : this.officeFloorExtensions) {
@@ -189,6 +200,15 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 				@Override
 				public DeployedOffice getDeployedOffice() {
 					return deployedOffice;
+				}
+
+				@Override
+				public OfficeFloorManagedObject addManagedObject(String managedObjectName, Class<?> managedObjectClass,
+						ManagedObjectScope scope) {
+					OfficeFloorManagedObjectSource mos = deployer.addManagedObjectSource(managedObjectName + "_SOURCE",
+							ClassManagedObjectSource.class.getName());
+					mos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, managedObjectClass.getName());
+					return mos.addOfficeFloorManagedObject(managedObjectName, scope);
 				}
 			});
 		}
@@ -214,7 +234,9 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 		 */
 		private OfficeSection getSection(OfficeArchitect architect) {
 			if (this.section == null) {
-				this.section = architect.addOfficeSection("SECTION", new CompileSectionSource(), null);
+				if (CompileOfficeFloor.this.sectionExtensions.size() > 0) {
+					this.section = architect.addOfficeSection("SECTION", new CompileSectionSource(), null);
+				}
 			}
 			return this.section;
 		}
@@ -261,6 +283,22 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 					@Override
 					public OfficeArchitect getOfficeArchitect() {
 						return officeArchitect;
+					}
+
+					@Override
+					public OfficeManagedObject addManagedObject(String managedObjectName, Class<?> managedObjectClass,
+							ManagedObjectScope scope) {
+						OfficeManagedObjectSource mos = officeArchitect.addOfficeManagedObjectSource(
+								managedObjectName + "_SOURCE", ClassManagedObjectSource.class.getName());
+						mos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+								managedObjectClass.getName());
+						return mos.addOfficeManagedObject(managedObjectName, scope);
+					}
+
+					@Override
+					public OfficeSection addSection(String sectionName, Class<?> sectionClass) {
+						return officeArchitect.addOfficeSection("SECTION", ClassSectionSource.class.getName(),
+								sectionClass.getName());
 					}
 				});
 			}

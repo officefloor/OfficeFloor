@@ -23,6 +23,7 @@ import java.io.Writer;
 
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
+import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
@@ -47,7 +48,7 @@ public class AutoWireHttpSocketTest extends OfficeFrameTestCase {
 	public void testCallAutoWiredHttpServer() throws Exception {
 
 		final int PORT = HttpTestUtil.getAvailablePort();
-		final AutoWireOfficeFloorSource autoWire = new AutoWireOfficeFloorSource();
+		final CompileOfficeFloor compile = new CompileOfficeFloor();
 
 		// Add the section to handle the HTTP request
 		autoWire.addSection("TEST", ClassSectionSource.class.getName(),
