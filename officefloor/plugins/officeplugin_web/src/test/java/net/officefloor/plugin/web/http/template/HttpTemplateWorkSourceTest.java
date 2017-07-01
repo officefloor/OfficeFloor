@@ -602,7 +602,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Does the {@link ManagedFunction} on the {@link FunctionNamespaceType}.
 	 * 
-	 * @param taskName
+	 * @param functionName
 	 *            Name of {@link ManagedFunction} on {@link FunctionNamespaceType} to execute.
 	 * @param work
 	 *            {@link HttpTemplateWork}.

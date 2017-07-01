@@ -1,2 +1,2 @@
 net.officefloor.extension.AutoWireOfficeFloorExtensionService
-net.officefloor.extension.CompileOfficeFloor
+net.officefloor.extension.ExtendOfficeFloor

@@ -35,7 +35,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSendTask.HttpResponseSendTaskDependencies;
+import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSendFunction.HttpResponseSendTaskDependencies;
 import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
 import net.officefloor.plugin.stream.WriteBufferReceiver;
 import net.officefloor.plugin.stream.impl.ServerOutputStreamImpl;
@@ -43,7 +43,7 @@ import net.officefloor.plugin.stream.impl.ServerOutputStreamImpl;
 import org.easymock.AbstractMatcher;
 
 /**
- * Tests the {@link HttpResponseSenderWorkSource}.
+ * Tests the {@link HttpResponseSenderManagedFunctionSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -54,14 +54,14 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testSpecification() {
 		WorkLoaderUtil
-				.validateSpecification(HttpResponseSenderWorkSource.class);
+				.validateSpecification(HttpResponseSenderManagedFunctionSource.class);
 	}
 
 	/**
 	 * Validate type.
 	 */
 	public void testType() {
-		HttpResponseSendTask task = new HttpResponseSendTask(-1, null);
+		HttpResponseSendFunction task = new HttpResponseSendFunction(-1, null);
 		FunctionNamespaceBuilder<Work> workTypeBuilder = WorkLoaderUtil
 				.createWorkTypeBuilder(task);
 		ManagedFunctionTypeBuilder<HttpResponseSendTaskDependencies, None> taskBuilder = workTypeBuilder
@@ -71,7 +71,7 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 				HttpResponseSendTaskDependencies.SERVER_HTTP_CONNECTION);
 		taskBuilder.addEscalation(IOException.class);
 		WorkLoaderUtil.validateWorkType(workTypeBuilder,
-				HttpResponseSenderWorkSource.class);
+				HttpResponseSenderManagedFunctionSource.class);
 	}
 
 	/**
@@ -103,8 +103,8 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 
 		// Create the task
 		FunctionNamespaceType<Work> work = WorkLoaderUtil.loadWorkType(
-				HttpResponseSenderWorkSource.class,
-				HttpResponseSenderWorkSource.PROPERTY_HTTP_STATUS,
+				HttpResponseSenderManagedFunctionSource.class,
+				HttpResponseSenderManagedFunctionSource.PROPERTY_HTTP_STATUS,
 				String.valueOf(status));
 		ManagedFunction task = work.getManagedFunctionTypes()[0].getManagedFunctionFactory().createManagedFunction(
 				work.getWorkFactory().createWork());
@@ -165,10 +165,10 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 		// Create the task
 		FunctionNamespaceType<Work> work = WorkLoaderUtil
 				.loadWorkType(
-						HttpResponseSenderWorkSource.class,
-						HttpResponseSenderWorkSource.PROPERTY_HTTP_STATUS,
+						HttpResponseSenderManagedFunctionSource.class,
+						HttpResponseSenderManagedFunctionSource.PROPERTY_HTTP_STATUS,
 						String.valueOf(status),
-						HttpResponseSenderWorkSource.PROPERTY_HTTP_RESPONSE_CONTENT_FILE,
+						HttpResponseSenderManagedFunctionSource.PROPERTY_HTTP_RESPONSE_CONTENT_FILE,
 						testContentFilePath);
 		ManagedFunction task = work.getManagedFunctionTypes()[0].getManagedFunctionFactory().createManagedFunction(
 				work.getWorkFactory().createWork());

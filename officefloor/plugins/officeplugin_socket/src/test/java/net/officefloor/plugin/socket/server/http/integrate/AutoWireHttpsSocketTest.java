@@ -25,6 +25,7 @@ import javax.net.ssl.SSLHandshakeException;
 
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
@@ -50,14 +51,9 @@ public class AutoWireHttpsSocketTest extends OfficeFrameTestCase {
 	private int port;
 
 	/**
-	 * {@link AutoWireOfficeFloorSource}.
+	 * {@link OfficeFloor}.
 	 */
-	private final AutoWireOfficeFloorSource autoWire = new AutoWireOfficeFloorSource();
-
-	/**
-	 * {@link AutoWireOfficeFloor}.
-	 */
-	private AutoWireOfficeFloor officeFloor = null;
+	private OfficeFloor officeFloor = null;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -66,8 +62,7 @@ public class AutoWireHttpsSocketTest extends OfficeFrameTestCase {
 		this.port = HttpTestUtil.getAvailablePort();
 
 		// Add the section to handle the HTTP request
-		this.autoWire.addSection("TEST", ClassSectionSource.class.getName(),
-				MockSection.class.getName());
+		this.autoWire.addSection("TEST", ClassSectionSource.class.getName(), MockSection.class.getName());
 
 	}
 
@@ -85,8 +80,7 @@ public class AutoWireHttpsSocketTest extends OfficeFrameTestCase {
 	public void testNoMatchingCypherForHttpsServer() throws Exception {
 
 		// Register the managed object source
-		HttpsServerSocketManagedObjectSource.autoWire(this.autoWire, this.port,
-				null, "TEST", "handleRequest");
+		HttpsServerSocketManagedObjectSource.autoWire(this.autoWire, this.port, null, "TEST", "handleRequest");
 
 		// Open the OfficeFloor
 		this.officeFloor = this.autoWire.openOfficeFloor();
@@ -100,9 +94,7 @@ public class AutoWireHttpsSocketTest extends OfficeFrameTestCase {
 				fail("Should not be successful");
 
 			} catch (SSLHandshakeException ex) {
-				assertEquals("Incorrect cause",
-						"Remote host closed connection during handshake",
-						ex.getMessage());
+				assertEquals("Incorrect cause", "Remote host closed connection during handshake", ex.getMessage());
 			}
 		}
 	}
@@ -113,10 +105,8 @@ public class AutoWireHttpsSocketTest extends OfficeFrameTestCase {
 	public void testCallAutoWiredHttpsServer() throws Exception {
 
 		// Register the managed object source
-		HttpsServerSocketManagedObjectSource
-				.autoWire(this.autoWire, this.port,
-						HttpTestUtil.getSslEngineSourceClass(), "TEST",
-						"handleRequest");
+		HttpsServerSocketManagedObjectSource.autoWire(this.autoWire, this.port, HttpTestUtil.getSslEngineSourceClass(),
+				"TEST", "handleRequest");
 
 		// Open the OfficeFloor
 		this.officeFloor = this.autoWire.openOfficeFloor();
@@ -128,12 +118,10 @@ public class AutoWireHttpsSocketTest extends OfficeFrameTestCase {
 			org.apache.http.HttpResponse response = client.execute(request);
 
 			// Ensure request successful
-			assertEquals("Request must be successful", 200, response
-					.getStatusLine().getStatusCode());
+			assertEquals("Request must be successful", 200, response.getStatusLine().getStatusCode());
 
 			// Ensure appropriate response
-			assertEquals("Incorrect response", "hello world",
-					HttpTestUtil.getEntityBody(response));
+			assertEquals("Incorrect response", "hello world", HttpTestUtil.getEntityBody(response));
 		}
 	}
 
@@ -148,8 +136,7 @@ public class AutoWireHttpsSocketTest extends OfficeFrameTestCase {
 		 * @param connection
 		 *            {@link ServerHttpConnection}.
 		 */
-		public void handleRequest(ServerHttpConnection connection)
-				throws IOException {
+		public void handleRequest(ServerHttpConnection connection) throws IOException {
 			HttpResponse response = connection.getHttpResponse();
 			Writer writer = new OutputStreamWriter(response.getEntity());
 			writer.write("hello world");

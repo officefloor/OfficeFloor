@@ -26,12 +26,12 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
- * {@link OfficeFloorExtensionService} to configure the {@link OfficeFloor}
- * within tests.
+ * Provides convenience methods to compile an {@link OfficeFloor} with a single
+ * {@link Office}.
  * 
  * @author Daniel Sagenschneider
  */
-public class CompileOfficeFloor implements OfficeFloorExtensionService {
+public class ExtendOfficeFloor implements OfficeFloorExtensionService {
 
 	/**
 	 * {@link OfficeFloorExtensionService} logic.
@@ -46,7 +46,7 @@ public class CompileOfficeFloor implements OfficeFloorExtensionService {
 	/**
 	 * Instantiate.
 	 */
-	public CompileOfficeFloor() {
+	public ExtendOfficeFloor() {
 		this.compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		this.compiler.setCompilerIssues(new FailTestCompilerIssues());
 	}

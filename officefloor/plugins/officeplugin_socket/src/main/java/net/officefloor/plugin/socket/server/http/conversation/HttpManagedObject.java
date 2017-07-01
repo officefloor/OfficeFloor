@@ -20,8 +20,8 @@ package net.officefloor.plugin.socket.server.http.conversation;
 import java.io.IOException;
 
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 /**

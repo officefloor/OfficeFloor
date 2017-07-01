@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import net.officefloor.plugin.servlet.container.source.HttpServletWorkSource;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
+import net.officefloor.plugin.socket.server.http.server.HttpServicerFunction;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 import org.apache.http.HttpResponse;
@@ -47,7 +47,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 public class HttpServletIntegrateTest extends MockHttpServletServer {
 
 	@Override
-	public HttpServicerTask buildServlet(String servletContextName,
+	public HttpServicerFunction buildServlet(String servletContextName,
 			String httpName, String requestAttributesName, String sessionName,
 			String securityName) {
 		// Construct and return reference to HTTP Servlet

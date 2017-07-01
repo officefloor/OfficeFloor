@@ -30,7 +30,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
+import net.officefloor.plugin.socket.server.http.server.HttpServicerFunction;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 
 import org.apache.http.HttpResponse;
@@ -49,7 +49,7 @@ public class HttpSessionManagedObjectSourceTest extends MockHttpServer {
 	 */
 
 	@Override
-	public HttpServicerTask buildServicer(String managedObjectName,
+	public HttpServicerFunction buildServicer(String managedObjectName,
 			MockHttpServer server) throws Exception {
 
 		// Register the Http Session
@@ -72,7 +72,7 @@ public class HttpSessionManagedObjectSourceTest extends MockHttpServer {
 				MockTeamSource.createOnePersonTeam("SERVICER"));
 
 		// Return the servicer task
-		return new HttpServicerTask("Servicer", "service");
+		return new HttpServicerFunction("Servicer", "service");
 	}
 
 	/*

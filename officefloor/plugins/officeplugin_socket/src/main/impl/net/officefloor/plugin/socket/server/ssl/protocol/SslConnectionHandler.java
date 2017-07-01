@@ -38,7 +38,7 @@ import net.officefloor.plugin.socket.server.protocol.HeartBeatContext;
 import net.officefloor.plugin.socket.server.protocol.ReadContext;
 import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
 import net.officefloor.plugin.socket.server.protocol.WriteBufferEnum;
-import net.officefloor.plugin.socket.server.ssl.SslTaskExecutor;
+import net.officefloor.plugin.socket.server.ssl.SslFunctionExecutor;
 
 /**
  * SSL {@link ConnectionHandler}.
@@ -65,9 +65,9 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 	private final SSLEngine engine;
 
 	/**
-	 * {@link SslTaskExecutor}.
+	 * {@link SslFunctionExecutor}.
 	 */
-	private final SslTaskExecutor taskExecutor;
+	private final SslFunctionExecutor taskExecutor;
 
 	/**
 	 * Send buffer size.
@@ -112,14 +112,14 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 	 * @param engine
 	 *            {@link SSLEngine}.
 	 * @param taskExecutor
-	 *            {@link SslTaskExecutor}.
+	 *            {@link SslFunctionExecutor}.
 	 * @param sendBufferSize
 	 *            Send buffer size.
 	 * @param wrappedCommunicationProtocol
 	 *            Wrapped {@link CommunicationProtocol}.
 	 */
 	public SslConnectionHandler(Connection connection, SSLEngine engine,
-			SslTaskExecutor taskExecutor, int sendBufferSize,
+			SslFunctionExecutor taskExecutor, int sendBufferSize,
 			CommunicationProtocol wrappedCommunicationProtocol) {
 		this.engine = engine;
 		this.taskExecutor = taskExecutor;
@@ -181,7 +181,7 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 					// Trigger processing of the delegated task
 					Runnable delegatedTask = this.engine.getDelegatedTask();
 					this.task = new SslTask(delegatedTask);
-					this.taskExecutor.beginTask(this.task);
+					this.taskExecutor.beginRunnable(this.task);
 					return; // Must wait on task to complete
 
 				case NOT_HANDSHAKING:

@@ -17,8 +17,7 @@
  */
 package net.officefloor.plugin.socket.server.http.server;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 /**
@@ -27,29 +26,21 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
  *
  * @author Daniel Sagenschneider
  */
-public class HttpServicerTask {
-
-	/**
-	 * Name of the {@link Work}.
-	 */
-	public final String workName;
+public class HttpServicerFunction {
 
 	/**
 	 * Name of the {@link ManagedFunction}.
 	 */
-	public final String taskName;
+	public final String functionName;
 
 	/**
 	 * Initiate.
 	 *
-	 * @param workName
-	 *            Name of the {@link Work}.
-	 * @param taskName
+	 * @param functionName
 	 *            Name of the {@link ManagedFunction}.
 	 */
-	public HttpServicerTask(String workName, String taskName) {
-		this.workName = workName;
-		this.taskName = taskName;
+	public HttpServicerFunction(String functionName) {
+		this.functionName = functionName;
 	}
 
 }

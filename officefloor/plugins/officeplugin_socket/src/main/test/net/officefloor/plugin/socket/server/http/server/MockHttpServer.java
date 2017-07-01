@@ -22,24 +22,24 @@ import java.net.InetSocketAddress;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
+
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.ssl.protocol.SslCommunicationProtocol;
-
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * <p>
@@ -50,8 +50,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
-		implements HttpServicerBuilder {
+public abstract class MockHttpServer extends AbstractOfficeConstructTestCase implements HttpServicerBuilder {
 
 	/**
 	 * Port number to use for testing.
@@ -109,44 +108,35 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 		if (this.isSetupSecure) {
 			// Setup secure HTTP server
 			this.isServerSecure = true;
-			serverSocketBuilder = this.constructManagedObject(MO_NAME,
-					HttpsServerSocketManagedObjectSource.class);
-			this.constructManagedObjectSourceTeam(MO_NAME, "SSL_TASKS",
-					MockTeamSource.createOnePersonTeam("SSL_TASKS"));
-			serverSocketBuilder.addProperty(
-					SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE,
+			serverSocketBuilder = this.constructManagedObject(MO_NAME, HttpsServerSocketManagedObjectSource.class,
+					officeName);
+			this.constructManagedObjectSourceTeam(MO_NAME, "SSL_RUNNABLE", ExecutorCachedTeamSource.class);
+			serverSocketBuilder.addProperty(SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE,
 					HttpTestUtil.getSslEngineSourceClass().getName());
 		} else {
-			// Setup unsecure HTTP server
+			// Setup non-secure HTTP server
 			this.isServerSecure = false;
-			serverSocketBuilder = this.constructManagedObject(MO_NAME,
-					HttpServerSocketManagedObjectSource.class);
+			serverSocketBuilder = this.constructManagedObject(MO_NAME, HttpServerSocketManagedObjectSource.class,
+					officeName);
 		}
 
 		// Add common properties
-		serverSocketBuilder.addProperty(
-				HttpServerSocketManagedObjectSource.PROPERTY_PORT,
-				String.valueOf(this.port));
+		serverSocketBuilder.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_PORT, String.valueOf(this.port));
 		serverSocketBuilder.setTimeout(3000);
 
 		// Have server socket managed by office
-		ManagingOfficeBuilder<Indexed> managingOfficeBuilder = serverSocketBuilder
-				.setManagingOffice(officeName);
+		ManagingOfficeBuilder<Indexed> managingOfficeBuilder = serverSocketBuilder.setManagingOffice(officeName);
 		managingOfficeBuilder.setInputManagedObjectName(MO_NAME);
 
 		// Register the necessary teams for socket listening
-		this.constructManagedObjectSourceTeam(MO_NAME, "accepter",
-				MockTeamSource.createWorkerPerTaskTeam("accepter"));
-		this.constructManagedObjectSourceTeam(MO_NAME, "listener",
-				MockTeamSource.createWorkerPerTaskTeam("listener"));
-		this.constructManagedObjectSourceTeam(MO_NAME, "cleanup",
-				new PassiveTeam());
+		this.constructManagedObjectSourceTeam(MO_NAME, "accepter", ExecutorCachedTeamSource.class);
+		this.constructManagedObjectSourceTeam(MO_NAME, "listener", ExecutorCachedTeamSource.class);
 
-		// Register the task to service the HTTP requests
-		HttpServicerTask task = servicerBuilder.buildServicer(MO_NAME, this);
-		managingOfficeBuilder.linkProcess(0, task.workName, task.taskName);
+		// Register the function to service the HTTP requests
+		HttpServicerFunction function = servicerBuilder.buildServicer(MO_NAME, this);
+		managingOfficeBuilder.linkProcess(0, function.functionName);
 
-		// Create and open the Office Floor
+		// Create and open the OfficeFloor
 		OfficeFloor officeFloor = this.constructOfficeFloor();
 		officeFloor.openOfficeFloor();
 	}
@@ -159,14 +149,13 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 	 *            Name of the {@link ManagedObject}.
 	 * @param managedObjectTeamName
 	 *            Name of the {@link Team} for the {@link ManagedObjectSource}.
-	 * @param team
-	 *            {@link Team} to register.
+	 * @param teamSourceClass
+	 *            {@link TeamSource} {@link Class} to register.
 	 */
-	private void constructManagedObjectSourceTeam(String managedObjectName,
-			String managedObjectTeamName, Team team) {
-		this.constructTeam(managedObjectTeamName, team);
-		this.getOfficeBuilder().registerTeam(
-				"of-" + managedObjectName + "." + managedObjectTeamName,
+	private void constructManagedObjectSourceTeam(String managedObjectName, String managedObjectTeamName,
+			Class<? extends TeamSource> teamSourceClass) {
+		this.constructTeam(managedObjectTeamName, teamSourceClass);
+		this.getOfficeBuilder().registerTeam("of-" + managedObjectName + "." + managedObjectTeamName,
 				"of-" + managedObjectTeamName);
 	}
 
@@ -185,8 +174,7 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 	 * @return URL of the server.
 	 */
 	public String getServerUrl() {
-		return (this.isServerSecure() ? "https" : "http") + "://localhost:"
-				+ this.port;
+		return (this.isServerSecure() ? "https" : "http") + "://localhost:" + this.port;
 	}
 
 	/**
@@ -197,8 +185,7 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 	public HttpClient createHttpClient() {
 
 		// Create the HTTP client
-		CloseableHttpClient client = HttpTestUtil
-				.createHttpClient(this.isServerSecure);
+		CloseableHttpClient client = HttpTestUtil.createHttpClient(this.isServerSecure);
 
 		// Register the HTTP client for cleanup
 		this.httpClients.add(client);
@@ -214,8 +201,7 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 	 */
 	public InetSocketAddress getLocalAddress() {
 		try {
-			return new InetSocketAddress(InetAddress.getLocalHost()
-					.getHostAddress(), this.port);
+			return new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(), this.port);
 		} catch (Exception ex) {
 			throw fail(ex);
 		}
@@ -257,11 +243,9 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 	 */
 
 	@Override
-	public HttpServicerTask buildServicer(String managedObjectName,
-			MockHttpServer server) throws Exception {
+	public HttpServicerFunction buildServicer(String managedObjectName, MockHttpServer server) throws Exception {
 		// Must override if using as TestCase
-		fail("Must override " + HttpServicerBuilder.class.getSimpleName()
-				+ " test case implementation");
+		fail("Must override " + HttpServicerBuilder.class.getSimpleName() + " test case implementation");
 		return null;
 	}
 

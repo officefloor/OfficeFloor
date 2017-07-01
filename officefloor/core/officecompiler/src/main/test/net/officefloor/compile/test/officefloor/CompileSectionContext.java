@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,26 +15,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.jndi.work;
+package net.officefloor.compile.test.officefloor;
 
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.source.SectionSourceContext;
 
 /**
- * {@link ParameterFactory} for the JNDI {@link Work} Object.
+ * Context for the {@link CompileSectionExtension}.
  * 
  * @author Daniel Sagenschneider
  */
-public class JndiWorkParameterFactory implements ParameterFactory {
+public interface CompileSectionContext {
 
-	/*
-	 * ===================== ParameterFactory ======================
+	/**
+	 * Obtains the {@link SectionDesigner}.
+	 * 
+	 * @return {@link SectionDesigner}.
 	 */
+	SectionDesigner getSectionDesigner();
 
-	@Override
-	public Object createParameter(Object jndiWorkObject,
-			ManagedFunctionContext<?, ?, ?> context) throws Exception {
-		return jndiWorkObject;
-	}
+	/**
+	 * Obtains the {@link SectionSourceContext}.
+	 * 
+	 * @return {@link SectionSourceContext}.
+	 */
+	SectionSourceContext getSectionSourceContext();
 
 }

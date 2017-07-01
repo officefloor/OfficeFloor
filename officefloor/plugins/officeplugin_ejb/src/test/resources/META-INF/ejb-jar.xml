@@ -13,7 +13,7 @@
 			</env-entry>
 		</session>
 		<session>
-			<ejb-name>MissingWorkName</ejb-name>
+			<ejb-name>MissingFunctionName</ejb-name>
 			<ejb-class>net.officefloor.plugin.ejb.OfficeFloorEjb</ejb-class>
 			<env-entry>
 				<env-entry-name>officeFloorJndiName</env-entry-name>
@@ -36,8 +36,8 @@
 				<env-entry-value>OFFICE</env-entry-value>
 			</env-entry>
 			<env-entry>
-				<env-entry-name>workName</env-entry-name>
-				<env-entry-value>WORK</env-entry-value>
+				<env-entry-name>functionName</env-entry-name>
+				<env-entry-value>Section.function</env-entry-value>
 			</env-entry>
 		</session>
 	</enterprise-beans>

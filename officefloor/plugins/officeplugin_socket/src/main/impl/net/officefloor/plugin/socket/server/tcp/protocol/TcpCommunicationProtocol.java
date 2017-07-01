@@ -21,11 +21,11 @@ import java.net.ConnectException;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolContext;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
@@ -37,8 +37,7 @@ import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
  * 
  * @author Daniel Sagenschneider
  */
-public class TcpCommunicationProtocol implements CommunicationProtocolSource,
-		CommunicationProtocol {
+public class TcpCommunicationProtocol implements CommunicationProtocolSource, CommunicationProtocol {
 
 	/**
 	 * Property to obtain the maximum idle time before the {@link Connection} is
@@ -79,8 +78,7 @@ public class TcpCommunicationProtocol implements CommunicationProtocolSource,
 	 */
 	public void serviceConnection(TcpConnectionHandler connectionHandler) {
 		// Invokes the process to service the connection
-		this.executeContext.invokeProcess(this.newConnectionFlowIndex,
-				connectionHandler, connectionHandler, 0);
+		this.executeContext.invokeProcess(this.newConnectionFlowIndex, connectionHandler, connectionHandler, 0, null);
 	}
 
 	/*
@@ -93,16 +91,13 @@ public class TcpCommunicationProtocol implements CommunicationProtocolSource,
 	}
 
 	@Override
-	public CommunicationProtocol createCommunicationProtocol(
-			MetaDataContext<None, Indexed> configurationContext,
+	public CommunicationProtocol createCommunicationProtocol(MetaDataContext<None, Indexed> configurationContext,
 			CommunicationProtocolContext protocolContext) throws Exception {
-		ManagedObjectSourceContext<Indexed> mosContext = configurationContext
-				.getManagedObjectSourceContext();
+		ManagedObjectSourceContext<Indexed> mosContext = configurationContext.getManagedObjectSourceContext();
 
 		// Obtain the maximum idle time
-		this.maxIdleTime = Long.parseLong(mosContext.getProperty(
-				PROPERTY_MAXIMUM_IDLE_TIME,
-				String.valueOf(DEFAULT_MAXIMUM_IDLE_TIME)));
+		this.maxIdleTime = Long.parseLong(
+				mosContext.getProperty(PROPERTY_MAXIMUM_IDLE_TIME, String.valueOf(DEFAULT_MAXIMUM_IDLE_TIME)));
 
 		// Obtain the send buffer size
 		this.sendBufferSize = protocolContext.getSendBufferSize();
@@ -112,12 +107,11 @@ public class TcpCommunicationProtocol implements CommunicationProtocolSource,
 		configurationContext.setObjectClass(ServerTcpConnection.class);
 
 		// Provide the flow to process a new connection
-		this.newConnectionFlowIndex = configurationContext
-				.addFlow(ServerTcpConnection.class).setLabel("NEW_CONNECTION")
+		this.newConnectionFlowIndex = configurationContext.addFlow(ServerTcpConnection.class).setLabel("NEW_CONNECTION")
 				.getIndex();
 
 		// Ensure connection is cleaned up when process finished
-		new CleanupTask().registerAsRecycleTask(mosContext, "cleanup");
+		mosContext.getRecycleFunction(new CleanupFunction());
 
 		// Return this as the server socket handler
 		return this;
@@ -128,15 +122,13 @@ public class TcpCommunicationProtocol implements CommunicationProtocolSource,
 	 */
 
 	@Override
-	public void setManagedObjectExecuteContext(
-			ManagedObjectExecuteContext<Indexed> executeContext) {
+	public void setManagedObjectExecuteContext(ManagedObjectExecuteContext<Indexed> executeContext) {
 		this.executeContext = executeContext;
 	}
 
 	@Override
 	public TcpConnectionHandler createConnectionHandler(Connection connection) {
-		return new TcpConnectionHandler(this, connection, this.sendBufferSize,
-				this.maxIdleTime);
+		return new TcpConnectionHandler(this, connection, this.sendBufferSize, this.maxIdleTime);
 	}
 
 }

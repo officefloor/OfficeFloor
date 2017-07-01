@@ -18,38 +18,46 @@
 package net.officefloor.plugin.socket.server.ssl.protocol;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
 
 /**
  * {@link ManagedFunction} to execute the SSL tasks.
  *
  * @author Daniel Sagenschneider
  */
-public class SslTaskWork extends
-		AbstractSingleTask<SslTaskWork, SslTaskWork.SslTaskDependencies, None> {
+public class SslFunction implements ManagedFunctionFactory<SslFunction.SslTaskDependencies, None>,
+		ManagedFunction<SslFunction.SslTaskDependencies, None> {
 
 	/**
 	 * Key to the SSL task to run.
 	 */
 	public static enum SslTaskDependencies {
-		TASK
+		RUNNABLE
 	}
 
 	/*
-	 * ======================== AbstactSingleTask =====================
+	 * =============== ManagedFunctionFactory ==================
 	 */
 
 	@Override
-	public Object execute(
-			ManagedFunctionContext<SslTaskWork, SslTaskDependencies, None> context) {
+	public ManagedFunction<SslTaskDependencies, None> createManagedFunction() throws Throwable {
+		return this;
+	}
 
-		// Obtain the task
-		Object task = context.getObject(SslTaskDependencies.TASK);
+	/*
+	 * =================== ManagedFunction =====================
+	 */
 
-		// Run the task
-		Runnable runnable = (Runnable) task;
+	@Override
+	public Object execute(ManagedFunctionContext<SslTaskDependencies, None> context) {
+
+		// Obtain the runnable
+		Object object = context.getObject(SslTaskDependencies.RUNNABLE);
+		Runnable runnable = (Runnable) object;
+
+		// Execute the runnable
 		runnable.run();
 
 		// Task run (should be only task of process)

@@ -20,10 +20,11 @@ package net.officefloor.plugin.socket.server.tcp.protocol;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.managedobject.AsynchronousContext;
+import net.officefloor.frame.api.managedobject.AsynchronousOperation;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.spi.managedobject.AsynchronousListener;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.plugin.socket.server.impl.AbstractClientServerTestCase;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
 import net.officefloor.plugin.socket.server.protocol.Connection;
@@ -34,8 +35,7 @@ import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
  * 
  * @author Daniel Sagenschneider
  */
-public class TcpCommunicationProtocolTest extends AbstractClientServerTestCase
-		implements AsynchronousListener {
+public class TcpCommunicationProtocolTest extends AbstractClientServerTestCase implements AsynchronousContext {
 
 	/**
 	 * {@link ServerTcpConnection}.
@@ -66,25 +66,20 @@ public class TcpCommunicationProtocolTest extends AbstractClientServerTestCase
 	protected CommunicationProtocolSource getCommunicationProtocolSource() {
 		return new TcpCommunicationProtocol() {
 			@Override
-			public TcpConnectionHandler createConnectionHandler(
-					Connection connection) {
+			public TcpConnectionHandler createConnectionHandler(Connection connection) {
 				// Create connection handler and allow access by test
-				TcpConnectionHandler connectionHandler = super
-						.createConnectionHandler(connection);
+				TcpConnectionHandler connectionHandler = super.createConnectionHandler(connection);
 				TcpCommunicationProtocolTest.this.serverTcpConnection = connectionHandler;
 				TcpCommunicationProtocolTest.this.rawConnection = connection;
-				connectionHandler
-						.registerAsynchronousCompletionListener(TcpCommunicationProtocolTest.this);
+				connectionHandler.setAsynchronousContext(TcpCommunicationProtocolTest.this);
 				return connectionHandler;
 			}
 		};
 	}
 
 	@Override
-	protected void handleInvokeProcess(Object parameter,
-			ManagedObject managedObject, EscalationHandler escalationHandler) {
-		assertSame("Incorrect managed object", this.serverTcpConnection,
-				managedObject);
+	protected void handleInvokeProcess(Object parameter, ManagedObject managedObject, FlowCallback callback) {
+		assertSame("Incorrect managed object", this.serverTcpConnection, managedObject);
 		this.isProcessInvoked = true;
 	}
 
@@ -96,8 +91,7 @@ public class TcpCommunicationProtocolTest extends AbstractClientServerTestCase
 		this.writeDataFromClientToServer(TEXT);
 		this.runClientSelect();
 		this.runServerSelect();
-		assertTrue("Process should be invoked to service connection",
-				this.isProcessInvoked);
+		assertTrue("Process should be invoked to service connection", this.isProcessInvoked);
 		this.assertServerTcpConnectionRead(TEXT);
 	}
 
@@ -146,12 +140,9 @@ public class TcpCommunicationProtocolTest extends AbstractClientServerTestCase
 	public void testWaitOnClientData() throws IOException {
 
 		// No data so should wait
-		assertFalse("Initially should not be waiting",
-				this.isWithinAsynchronousOperation);
-		assertTrue("Should be waiting on client data",
-				this.serverTcpConnection.waitOnClientData());
-		assertTrue("Should be waiting on client data",
-				this.isWithinAsynchronousOperation);
+		assertFalse("Initially should not be waiting", this.isWithinAsynchronousOperation);
+		assertTrue("Should be waiting on client data", this.serverTcpConnection.waitOnClientData());
+		assertTrue("Should be waiting on client data", this.isWithinAsynchronousOperation);
 
 		// Provide some data
 		this.writeDataFromClientToServer("NOTIFY");
@@ -159,14 +150,11 @@ public class TcpCommunicationProtocolTest extends AbstractClientServerTestCase
 		this.runServerSelect();
 
 		// Should no longer be waiting
-		assertFalse("Should no long be waiting for client data",
-				this.isWithinAsynchronousOperation);
+		assertFalse("Should no long be waiting for client data", this.isWithinAsynchronousOperation);
 
 		// Attempting to wait while data is available should not trigger wait
-		assertFalse("Data available so should not wait on client data",
-				this.serverTcpConnection.waitOnClientData());
-		assertFalse("Should not be waiting as data available",
-				this.isWithinAsynchronousOperation);
+		assertFalse("Data available so should not wait on client data", this.serverTcpConnection.waitOnClientData());
+		assertFalse("Should not be waiting as data available", this.isWithinAsynchronousOperation);
 	}
 
 	/**
@@ -175,22 +163,20 @@ public class TcpCommunicationProtocolTest extends AbstractClientServerTestCase
 	 * @param text
 	 *            Expected text.
 	 */
-	protected void assertServerTcpConnectionRead(String text)
-			throws IOException {
+	protected void assertServerTcpConnectionRead(String text) throws IOException {
 
 		// Obtain the buffer to read data
 		byte[] buffer = new byte[text.getBytes().length];
 
 		// Read data from the connection
-		int bytesRead = this.serverTcpConnection.getInputStream().read(buffer,
-				0, buffer.length);
+		int bytesRead = this.serverTcpConnection.getInputStream().read(buffer, 0, buffer.length);
 
 		// Obtain text of bytes read
 		String actualText = new String(buffer, 0, bytesRead);
 
 		// Validate
-		assertEquals("Incorrect number of bytes read [expected: " + text
-				+ ", actual: " + actualText + "]", buffer.length, bytesRead);
+		assertEquals("Incorrect number of bytes read [expected: " + text + ", actual: " + actualText + "]",
+				buffer.length, bytesRead);
 		assertEquals("Incorrect bytes read", text, actualText);
 	}
 
@@ -212,16 +198,16 @@ public class TcpCommunicationProtocolTest extends AbstractClientServerTestCase
 	}
 
 	/*
-	 * ===================== AsynchronousListener =============================
+	 * ===================== AsynchronousContext =============================
 	 */
 
 	@Override
-	public void notifyStarted() {
+	public <T extends Throwable> void start(AsynchronousOperation<T> operation) {
 		this.isWithinAsynchronousOperation = true;
 	}
 
 	@Override
-	public void notifyComplete() {
+	public <T extends Throwable> void complete(AsynchronousOperation<T> operation) {
 		this.isWithinAsynchronousOperation = false;
 	}
 

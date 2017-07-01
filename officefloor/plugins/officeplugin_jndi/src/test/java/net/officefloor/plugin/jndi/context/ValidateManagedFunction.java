@@ -17,12 +17,10 @@
  */
 package net.officefloor.plugin.jndi.context;
 
-import javax.resource.spi.work.Work;
-
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.manage.WorkManager;
 
 /**
  * Invoked within {@link OfficeFloor} instance to ensure the {@link OfficeFloor}
@@ -30,13 +28,12 @@ import net.officefloor.frame.api.manage.WorkManager;
  * 
  * @author Daniel Sagenschneider
  */
-public class ValidateWork {
+public class ValidateManagedFunction {
 
 	/**
 	 * Name of package containing the {@link OfficeFloor} configuration.
 	 */
-	public static final String PACKAGE_NAME = ValidateWork.class.getPackage()
-			.getName();
+	public static final String PACKAGE_NAME = ValidateManagedFunction.class.getPackage().getName();
 
 	/**
 	 * Obtains the JNDI name for the {@link OfficeFloor} within the
@@ -62,57 +59,55 @@ public class ValidateWork {
 	}
 
 	/**
-	 * Obtains the {@link WorkManager} for this {@link Work} from the
-	 * {@link OfficeFloor}.
+	 * Obtains the {@link FunctionManager} for this {@link ManagedFunction} from
+	 * the {@link OfficeFloor}.
 	 * 
 	 * @param officeFloor
 	 *            {@link OfficeFloor}.
-	 * @return {@link WorkManager} for this {@link Work} from the
+	 * @return {@link FunctionManager} for this {@link ManagedFunction} from the
 	 *         {@link OfficeFloor}.
 	 * @throws Exception
-	 *             If fails to obtain the {@link WorkManager}.
+	 *             If fails to obtain the {@link FunctionManager}.
 	 */
-	public static WorkManager getWorkManager(OfficeFloor officeFloor)
-			throws Exception {
+	public static FunctionManager getFunctionManager(OfficeFloor officeFloor) throws Exception {
 
-		// Obtain the work manager
+		// Obtain the function manager
 		Office office = officeFloor.getOffice("OFFICE");
-		WorkManager workManager = office.getWorkManager("SECTION.WORK");
+		FunctionManager functionManager = office.getFunctionManager("SECTION.function");
 
-		// Return the work manager
-		return workManager;
+		// Return the function manager
+		return functionManager;
 	}
 
 	/**
-	 * Invokes this {@link Work} on the {@link OfficeFloor}.
+	 * Invokes this {@link ManagedFunction} on the {@link OfficeFloor}.
 	 * 
 	 * @param officeFloor
 	 *            {@link OfficeFloor}.
 	 * @param parameter
-	 *            Parameter for the {@link Work}.
+	 *            Parameter for the {@link ManagedFunction}.
 	 * @throws Exception
-	 *             If fails to invoke the {@link Work}.
+	 *             If fails to invoke the {@link ManagedFunction}.
 	 */
-	public static void invokeWork(OfficeFloor officeFloor, Object parameter)
-			throws Exception {
+	public static void invokeFunction(OfficeFloor officeFloor, Object parameter) throws Exception {
 
-		// Obtain the work manager
-		WorkManager workManager = getWorkManager(officeFloor);
+		// Obtain the function manager
+		FunctionManager functionManager = getFunctionManager(officeFloor);
 
 		// Invoke the work
-		workManager.invokeWork(parameter);
+		functionManager.invokeProcess(parameter, null);
 	}
 
 	/**
 	 * Flag indicating if this {@link ManagedFunction} was invoked.
 	 */
-	private static volatile boolean isTaskInvoked = false;
+	private static volatile boolean isFunctionInvoked = false;
 
 	/**
 	 * Resets state.
 	 */
 	public static void reset() {
-		isTaskInvoked = false;
+		isFunctionInvoked = false;
 	}
 
 	/**
@@ -120,16 +115,16 @@ public class ValidateWork {
 	 * 
 	 * @return <code>true</code> if the {@link ManagedFunction} was invoked.
 	 */
-	public static boolean isTaskInvoked() {
-		return isTaskInvoked;
+	public static boolean isFunctionInvoked() {
+		return isFunctionInvoked;
 	}
 
 	/**
-	 * Task to be executed.
+	 * Function to be executed.
 	 */
-	public void task() {
-		// Flag the task invoked
-		isTaskInvoked = true;
+	public void function() {
+		// Flag the function invoked
+		isFunctionInvoked = true;
 	}
 
 }

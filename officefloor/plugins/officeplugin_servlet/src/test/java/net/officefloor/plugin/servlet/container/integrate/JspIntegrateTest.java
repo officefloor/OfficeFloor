@@ -19,7 +19,7 @@ package net.officefloor.plugin.servlet.container.integrate;
 
 import net.officefloor.plugin.servlet.container.source.JspWorkSource;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
+import net.officefloor.plugin.socket.server.http.server.HttpServicerFunction;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -33,7 +33,7 @@ import org.apache.http.client.methods.HttpGet;
 public class JspIntegrateTest extends MockHttpServletServer {
 
 	@Override
-	public HttpServicerTask buildServlet(String servletContextName,
+	public HttpServicerFunction buildServlet(String servletContextName,
 			String httpName, String requestAttributesName, String sessionName,
 			String securityName) {
 		// Construct and return JSP task

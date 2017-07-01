@@ -25,15 +25,14 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.manage.ProcessFuture;
-import net.officefloor.frame.api.manage.WorkManager;
-import net.officefloor.frame.test.OfficeFrameTestCase;
-
 import org.apache.openejb.client.LocalInitialContextFactory;
 
 import com.sun.jndi.url.mock.mockURLContextFactory;
+
+import net.officefloor.frame.api.manage.FunctionManager;
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the {@link OfficeFloorEjb}.
@@ -46,8 +45,7 @@ public class OfficeFloorEjbTest extends OfficeFrameTestCase {
 	 * Ensure reports <code>officeFloorJndiName</code> configuration missing.
 	 */
 	public void testMissingOfficeFloorJndiName() throws Exception {
-		this.doMissingConfigurationTest("MissingOfficeFloorJndiNameLocal",
-				"officeFloorJndiName");
+		this.doMissingConfigurationTest("MissingOfficeFloorJndiNameLocal", "officeFloorJndiName");
 	}
 
 	/**
@@ -60,8 +58,8 @@ public class OfficeFloorEjbTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure reports <code>workName</code> configuration missing.
 	 */
-	public void testMissingWorkName() throws Exception {
-		this.doMissingConfigurationTest("MissingWorkNameLocal", "workName");
+	public void testMissingFunctionName() throws Exception {
+		this.doMissingConfigurationTest("MissingFunctionNameLocal", "functionName");
 	}
 
 	/**
@@ -72,17 +70,14 @@ public class OfficeFloorEjbTest extends OfficeFrameTestCase {
 	 * @param envEntryName
 	 *            env-entry-name.
 	 */
-	private void doMissingConfigurationTest(String jndiName, String envEntryName)
-			throws Exception {
+	private void doMissingConfigurationTest(String jndiName, String envEntryName) throws Exception {
 		try {
-			EjbOrchestrator orchestrator = (EjbOrchestrator) this
-					.lookup(jndiName);
+			EjbOrchestrator orchestrator = (EjbOrchestrator) this.lookup(jndiName);
 			orchestrator.orchestrate(null);
 		} catch (EJBException ex) {
 			Throwable cause = ex.getCause();
 			assertEquals("Incorrect missing configuration",
-					"env-entry for name '" + envEntryName
-							+ "' must be provided", cause.getMessage());
+					"env-entry for name '" + envEntryName + "' must be provided", cause.getMessage());
 		}
 	}
 
@@ -94,9 +89,7 @@ public class OfficeFloorEjbTest extends OfficeFrameTestCase {
 		final Context context = this.createMock(Context.class);
 		final OfficeFloor officeFloor = this.createMock(OfficeFloor.class);
 		final Office office = this.createMock(Office.class);
-		final WorkManager workManager = this.createMock(WorkManager.class);
-		final ProcessFuture processFuture = this
-				.createMock(ProcessFuture.class);
+		final FunctionManager functionManager = this.createMock(FunctionManager.class);
 		final Object parameter = "PARAMETER";
 
 		// Register the context
@@ -106,18 +99,14 @@ public class OfficeFloorEjbTest extends OfficeFrameTestCase {
 		// Record
 		this.recordReturn(context, context.lookup("mock:test"), officeFloor);
 		this.recordReturn(officeFloor, officeFloor.getOffice("OFFICE"), office);
-		this.recordReturn(office, office.getWorkManager("WORK"), workManager);
-		this.recordReturn(workManager, workManager.invokeWork(parameter),
-				processFuture);
-		this.recordReturn(processFuture, processFuture.isComplete(), true);
-		this.recordReturn(processFuture, processFuture.isComplete(), true);
+		this.recordReturn(office, office.getFunctionManager("SECTION.function"), functionManager);
+		functionManager.invokeProcess(parameter, null);
 
 		// Replay
 		this.replayMockObjects();
 
 		// Obtain the OfficeFloor EJB
-		EjbOrchestrator orchestrator = (EjbOrchestrator) this
-				.lookup("ConfiguredLocal");
+		EjbOrchestrator orchestrator = (EjbOrchestrator) this.lookup("ConfiguredLocal");
 
 		// Orchestrate the EJBs
 		orchestrator.orchestrate(parameter);
@@ -134,9 +123,7 @@ public class OfficeFloorEjbTest extends OfficeFrameTestCase {
 		final Context context = this.createMock(Context.class);
 		final OfficeFloor officeFloor = this.createMock(OfficeFloor.class);
 		final Office office = this.createMock(Office.class);
-		final WorkManager workManager = this.createMock(WorkManager.class);
-		final ProcessFuture processFuture = this
-				.createMock(ProcessFuture.class);
+		final FunctionManager functionManager = this.createMock(FunctionManager.class);
 		final String parameter = "PARAMETER";
 
 		// Register the context
@@ -146,25 +133,20 @@ public class OfficeFloorEjbTest extends OfficeFrameTestCase {
 		// Record
 		this.recordReturn(context, context.lookup("mock:test"), officeFloor);
 		this.recordReturn(officeFloor, officeFloor.getOffice("OFFICE"), office);
-		this.recordReturn(office, office.getWorkManager("WORK"), workManager);
-		this.recordReturn(workManager, workManager.invokeWork(parameter),
-				processFuture);
-		this.recordReturn(processFuture, processFuture.isComplete(), true);
-		this.recordReturn(processFuture, processFuture.isComplete(), true);
+		this.recordReturn(office, office.getFunctionManager("SECTION.function"), functionManager);
+		functionManager.invokeProcess(parameter, null);
 
 		// Replay
 		this.replayMockObjects();
 
 		// Obtain the OfficeFloor EJB
-		EjbOrchestratorRemote orchestrator = (EjbOrchestratorRemote) this
-				.lookup("ConfiguredRemote");
+		EjbOrchestratorRemote orchestrator = (EjbOrchestratorRemote) this.lookup("ConfiguredRemote");
 
 		// Orchestrate the EJBs
 		String returnValue = orchestrator.orchestrateRemotely(parameter);
 
 		// Ensure return value is parameter
-		assertEquals("Return value should be the parameter", parameter,
-				returnValue);
+		assertEquals("Return value should be the parameter", parameter, returnValue);
 
 		// Verify functionality
 		this.verifyMockObjects();
@@ -181,8 +163,7 @@ public class OfficeFloorEjbTest extends OfficeFrameTestCase {
 
 		// Create the initial context
 		Properties properties = new Properties();
-		properties.setProperty(Context.INITIAL_CONTEXT_FACTORY,
-				LocalInitialContextFactory.class.getName());
+		properties.setProperty(Context.INITIAL_CONTEXT_FACTORY, LocalInitialContextFactory.class.getName());
 		Context initialContext = new InitialContext(properties);
 
 		// Lookup and return the value

@@ -50,7 +50,7 @@ import net.officefloor.plugin.servlet.security.HttpServletSecurity;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
+import net.officefloor.plugin.socket.server.http.server.HttpServicerFunction;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.application.HttpRequestStateManagedObjectSource;
@@ -95,10 +95,10 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 	 *            Name of the {@link HttpSession}.
 	 * @param securityName
 	 *            Name of the {@link HttpSecurity}.
-	 * @return {@link HttpServicerTask} identifying the {@link ManagedFunction} to service
+	 * @return {@link HttpServicerFunction} identifying the {@link ManagedFunction} to service
 	 *         the {@link HttpRequest}.
 	 */
-	public abstract HttpServicerTask buildServlet(String servletContextName,
+	public abstract HttpServicerFunction buildServlet(String servletContextName,
 			String httpName, String requestAttributesName, String sessionName,
 			String securityName);
 
@@ -169,11 +169,11 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 	 *            {@link ManagedFunctionSource} class.
 	 * @param properties
 	 *            Properties for the {@link ManagedFunctionSource}.
-	 * @return {@link HttpServicerTask} for the constructed {@link HttpServlet}
+	 * @return {@link HttpServicerFunction} for the constructed {@link HttpServlet}
 	 *         {@link ManagedFunction}.
 	 */
 	@SuppressWarnings("unchecked")
-	protected HttpServicerTask constructHttpServlet(String workName,
+	protected HttpServicerFunction constructHttpServlet(String workName,
 			String servletContextName, String httpName,
 			String requestAttributesName, String sessionName,
 			String securityName,
@@ -181,7 +181,7 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 			String... properties) {
 
 		// Construct the reference
-		final HttpServicerTask reference = new HttpServicerTask(workName,
+		final HttpServicerFunction reference = new HttpServicerFunction(workName,
 				"service");
 
 		// Construct servicer (only once for test)
@@ -196,7 +196,7 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 				workSourceClass, properties);
 		this.constructWork(reference.workName, servlet.getWorkFactory());
 		ManagedFunctionBuilder<HttpServletTask, DependencyKeys, None> service = (ManagedFunctionBuilder<HttpServletTask, DependencyKeys, None>) this
-				.constructTask(reference.taskName,
+				.constructTask(reference.functionName,
 						servlet.getManagedFunctionTypes()[0].getManagedFunctionFactory(),
 						SERVICER_NAME);
 		service.setDifferentiator(servlet.getManagedFunctionTypes()[0].getDifferentiator());
@@ -222,7 +222,7 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 	 */
 
 	@Override
-	public HttpServicerTask buildServicer(String managedObjectName,
+	public HttpServicerFunction buildServicer(String managedObjectName,
 			MockHttpServer server) throws Exception {
 
 		final long TIMEOUT = 100000; // 100 seconds (for debugging)
@@ -331,15 +331,15 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 		this.constructTeam(TEAM_NAME, OnePersonTeamSource.class);
 
 		// Construct the HTTP Servlet task
-		HttpServicerTask task = this.buildServlet(SERVLET_CONTEXT_NAME,
+		HttpServicerFunction task = this.buildServlet(SERVLET_CONTEXT_NAME,
 				managedObjectName, REQUEST_ATTRIBUTES_NAME, HTTP_SESSION_NAME,
 				HTTP_SECURITY_NAME);
 
 		// Construct the invoker (due to parameter/argument difference)
-		HttpServicerTask invoker = new HttpServicerTask("INVOKER", "invoke");
+		HttpServicerFunction invoker = new HttpServicerFunction("INVOKER", "invoke");
 		this.constructWork(new Invoker(), invoker.workName, null)
-				.buildTask(invoker.taskName, TEAM_NAME)
-				.buildFlow(task.workName, task.taskName,
+				.buildTask(invoker.functionName, TEAM_NAME)
+				.buildFlow(task.workName, task.functionName,
 						FlowInstigationStrategyEnum.SEQUENTIAL, null);
 
 		// Return Invoker to invoke the HTTP Servlet

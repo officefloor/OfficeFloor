@@ -29,16 +29,15 @@ import javax.ejb.TransactionManagementType;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.resource.spi.work.Work;
 
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
-import net.officefloor.frame.api.manage.NoInitialTaskException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.manage.UnknownOfficeException;
-import net.officefloor.frame.api.manage.UnknownWorkException;
-import net.officefloor.frame.api.manage.WorkManager;
-import net.officefloor.frame.impl.spi.team.ProcessContextTeam;
 
 /**
  * <p>
@@ -65,8 +64,8 @@ import net.officefloor.frame.impl.spi.team.ProcessContextTeam;
  *                 &lt;env-entry-value&gt;[Name of Office]&lt;/env-entry-value&gt;
  *             &lt;/env-entry&gt;
  *             &lt;env-entry&gt;
- *                 &lt;env-entry-name&gt;workName&lt;/env-entry-name&gt;
- *                 &lt;env-entry-value&gt;[Name of Work]&lt;/env-entry-value&gt;
+ *                 &lt;env-entry-name&gt;functionName&lt;/env-entry-name&gt;
+ *                 &lt;env-entry-value&gt;[Name of function]&lt;/env-entry-value&gt;
  *             &lt;/env-entry&gt;
  *         &lt;/session&gt;
  *         ...
@@ -94,8 +93,7 @@ import net.officefloor.frame.impl.spi.team.ProcessContextTeam;
  * 
  * <pre>
  * &#064;Stateless
- * public class TypedOfficeFloorEjb extends OfficeFloorEjb implements
- * 		TypedEjbOrchestrator {
+ * public class TypedOfficeFloorEjb extends OfficeFloorEjb implements TypedEjbOrchestrator {
  * 	public void typedOrchestration(String parameter) throws NamingException {
  * 		this.orchestrate(parameter);
  * 	}
@@ -116,16 +114,15 @@ public class OfficeFloorEjb implements EjbOrchestrator, EjbOrchestratorRemote {
 	 *            {@link OfficeFloor} JNDI name.
 	 * @param officeName
 	 *            Name of the {@link Office} within the {@link OfficeFloor}.
-	 * @param workName
-	 *            Name of {@link Work} within the {@link Office}.
+	 * @param functionName
+	 *            Name of {@link ManagedFunction} within the {@link Office}.
 	 * @param parameter
 	 *            Parameter for the {@link Work}.
 	 * @throws NamingException
 	 *             If fails to instigate the orchestration.
 	 */
-	public static void doOrchestration(String officeFloorJndiName,
-			String officeName, String workName, Object parameter)
-			throws NamingException {
+	public static void doOrchestration(String officeFloorJndiName, String officeName, String functionName,
+			Object parameter) throws NamingException {
 
 		// Obtain the Initial Context
 		Context initialContext = new InitialContext();
@@ -133,33 +130,34 @@ public class OfficeFloorEjb implements EjbOrchestrator, EjbOrchestratorRemote {
 		// Lookup the OfficeFloor
 		Object object = initialContext.lookup(officeFloorJndiName);
 		if ((object == null) || (!(object instanceof OfficeFloor))) {
-			throw new NamingException("Lookup by jndi-name '"
-					+ officeFloorJndiName
-					+ "' did not find a "
+			throw new NamingException("Lookup by jndi-name '" + officeFloorJndiName + "' did not find a "
 					+ OfficeFloor.class.getSimpleName()
-					+ (object == null ? "" : " (Looked up " + object + " ["
-							+ object.getClass().getName() + "])"));
+					+ (object == null ? "" : " (Looked up " + object + " [" + object.getClass().getName() + "])"));
 		}
 		OfficeFloor officeFloor = (OfficeFloor) object;
 
 		try {
-			// Obtain the Work Manager
+			// Obtain the Function Manager
 			Office office = officeFloor.getOffice(officeName);
-			WorkManager workManager = office.getWorkManager(workName);
+			FunctionManager functionManager = office.getFunctionManager(functionName);
 
-			// Do the work
-			ProcessContextTeam.doWork(workManager, parameter);
+			// Undertake function (should re-use thread returning when done)
+			Throwable[] exception = new Throwable[] { null };
+			functionManager.invokeProcess(parameter, (escalation) -> {
+				exception[0] = escalation;
+			});
 
-		} catch (InterruptedException ex) {
-			return;
+			// Propagate possible failure
+			Throwable escalation = exception[0];
+			if (escalation != null) {
+				if (escalation instanceof NamingException) {
+					throw (NamingException) escalation;
+				} else {
+					throw new NamingException(escalation.getMessage());
+				}
+			}
 
-		} catch (UnknownOfficeException ex) {
-			throw new NamingException(ex.getMessage());
-		} catch (UnknownWorkException ex) {
-			throw new NamingException(ex.getMessage());
-		} catch (NoInitialTaskException ex) {
-			throw new NamingException(ex.getMessage());
-		} catch (InvalidParameterTypeException ex) {
+		} catch (UnknownOfficeException | UnknownFunctionException | InvalidParameterTypeException ex) {
 			throw new NamingException(ex.getMessage());
 		}
 	}
@@ -177,10 +175,10 @@ public class OfficeFloorEjb implements EjbOrchestrator, EjbOrchestratorRemote {
 	protected String officeName;
 
 	/**
-	 * Name of the {@link Work} to be invoked.
+	 * Name of the {@link ManagedFunction} to be invoked.
 	 */
-	@Resource(name = "workName")
-	protected String workName;
+	@Resource(name = "functionName")
+	protected String functionName;
 
 	/**
 	 * Validates the dependency injection of configuration available.
@@ -192,7 +190,7 @@ public class OfficeFloorEjb implements EjbOrchestrator, EjbOrchestratorRemote {
 	public void ejbCreate() throws EJBException {
 		assertNotBlank(this.officeFloorJndiName, "officeFloorJndiName");
 		assertNotBlank(this.officeName, "officeName");
-		assertNotBlank(this.workName, "workName");
+		assertNotBlank(this.functionName, "functionName");
 	}
 
 	/**
@@ -205,11 +203,9 @@ public class OfficeFloorEjb implements EjbOrchestrator, EjbOrchestratorRemote {
 	 * @throws EJBException
 	 *             If dependency is blank.
 	 */
-	private static void assertNotBlank(String dependency, String name)
-			throws EJBException {
+	private static void assertNotBlank(String dependency, String name) throws EJBException {
 		if ((dependency == null) || (dependency.trim().length() == 0)) {
-			throw new EJBException("env-entry for name '" + name
-					+ "' must be provided");
+			throw new EJBException("env-entry for name '" + name + "' must be provided");
 		}
 	}
 
@@ -233,8 +229,7 @@ public class OfficeFloorEjb implements EjbOrchestrator, EjbOrchestratorRemote {
 
 	@Override
 	public void orchestrate(Object parameter) throws NamingException {
-		doOrchestration(this.officeFloorJndiName, this.officeName,
-				this.workName, parameter);
+		doOrchestration(this.officeFloorJndiName, this.officeName, this.functionName, parameter);
 	}
 
 }

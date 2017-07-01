@@ -29,7 +29,7 @@ import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionSer
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSource;
-import net.officefloor.extension.CompileOfficeFloor;
+import net.officefloor.extension.ExtendOfficeFloor;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.source.TestSource;
@@ -54,9 +54,9 @@ public class OfficeFloorExtensionTest extends AbstractOfficeConstructTestCase {
 		TestWork.dependency = null;
 
 		// Compile the OfficeFloor with extension
-		CompileOfficeFloor compileOfficeFloor = new CompileOfficeFloor();
-		compileOfficeFloor.getOfficeFloorCompiler().setOfficeFloorSourceClass(TestOfficeFloorSource.class);
-		OfficeFloor officeFloor = compileOfficeFloor.compileAndOpenOfficeFloor((deployer, context) -> {
+		ExtendOfficeFloor extendOfficeFloor = new ExtendOfficeFloor();
+		extendOfficeFloor.getOfficeFloorCompiler().setOfficeFloorSourceClass(TestOfficeFloorSource.class);
+		OfficeFloor officeFloor = extendOfficeFloor.compileAndOpenOfficeFloor((deployer, context) -> {
 
 			// Add the managed object
 			OfficeFloorManagedObjectSource mos = deployer.addManagedObjectSource("MOS",

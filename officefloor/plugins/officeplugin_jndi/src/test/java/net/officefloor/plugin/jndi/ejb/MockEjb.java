@@ -22,7 +22,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.plugin.jndi.context.ValidateWork;
+import net.officefloor.plugin.jndi.context.ValidateManagedFunction;
 
 /**
  * Mock EJB.
@@ -43,15 +43,15 @@ public class MockEjb implements MockEjbLocal, MockEjbRemote {
 		Context initialContext = new InitialContext();
 
 		// Obtain the OfficeFloor
-		String jndiName = ValidateWork.getOfficeFloorJndiName(false);
+		String jndiName = ValidateManagedFunction.getOfficeFloorJndiName(false);
 		OfficeFloor officeFloor = (OfficeFloor) initialContext.lookup(jndiName);
 
 		// Invoke the Work
-		ValidateWork.reset();
-		ValidateWork.invokeWork(officeFloor, null);
+		ValidateManagedFunction.reset();
+		ValidateManagedFunction.invokeFunction(officeFloor, null);
 
 		// Return whether invoked
-		return ValidateWork.isTaskInvoked();
+		return ValidateManagedFunction.isFunctionInvoked();
 	}
 
 }

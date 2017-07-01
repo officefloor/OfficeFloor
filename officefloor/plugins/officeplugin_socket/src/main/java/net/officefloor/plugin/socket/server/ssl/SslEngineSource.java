@@ -19,7 +19,7 @@ package net.officefloor.plugin.socket.server.ssl;
 
 import javax.net.ssl.SSLEngine;
 
-import net.officefloor.frame.spi.source.SourceContext;
+import net.officefloor.frame.api.source.SourceContext;
 
 /**
  * Source for {@link SSLEngine} instances.

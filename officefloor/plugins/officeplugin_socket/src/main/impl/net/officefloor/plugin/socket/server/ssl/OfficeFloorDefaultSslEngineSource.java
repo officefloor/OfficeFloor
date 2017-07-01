@@ -30,7 +30,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.source.SourceContext;
+import net.officefloor.frame.api.source.SourceContext;
 
 /**
  * <p>
@@ -51,8 +51,7 @@ public class OfficeFloorDefaultSslEngineSource implements SslEngineSource {
 	/**
 	 * {@link Logger}.
 	 */
-	private static final Logger LOGGER = Logger
-			.getLogger(OfficeFloorDefaultSslEngineSource.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(OfficeFloorDefaultSslEngineSource.class.getName());
 
 	/**
 	 * Creates the {@link OfficeFloor} default server {@link SSLContext}.
@@ -63,15 +62,13 @@ public class OfficeFloorDefaultSslEngineSource implements SslEngineSource {
 	 * @throws Exception
 	 *             If fails to create the {@link SSLContext}.
 	 */
-	public static SSLContext createServerSslContext(String sslProtocol)
-			throws Exception {
+	public static SSLContext createServerSslContext(String sslProtocol) throws Exception {
 
 		// Obtain the key store
 		KeyStore keyStore = createOfficeFloorDefaultKeyStore();
 
 		// Create the Key Managers
-		KeyManagerFactory keyManagerFactory = KeyManagerFactory
-				.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+		KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 		keyManagerFactory.init(keyStore, "Changeit".toCharArray());
 		KeyManager[] keyManagers = keyManagerFactory.getKeyManagers();
 
@@ -92,8 +89,7 @@ public class OfficeFloorDefaultSslEngineSource implements SslEngineSource {
 	 * @throws Exception
 	 *             If fails to create the {@link SSLContext}.
 	 */
-	public static SSLContext createClientSslContext(String sslProtocol)
-			throws Exception {
+	public static SSLContext createClientSslContext(String sslProtocol) throws Exception {
 
 		// Obtain the key store
 		KeyStore keyStore = createOfficeFloorDefaultKeyStore();
@@ -121,8 +117,7 @@ public class OfficeFloorDefaultSslEngineSource implements SslEngineSource {
 	 * @throws Exception
 	 *             If fails to create the {@link SSLContext}.
 	 */
-	private static SSLContext createSslContext(String sslProtocol)
-			throws Exception {
+	private static SSLContext createSslContext(String sslProtocol) throws Exception {
 
 		// Determine if provided SSL protocol
 		if (sslProtocol != null) {
@@ -131,8 +126,7 @@ public class OfficeFloorDefaultSslEngineSource implements SslEngineSource {
 		}
 
 		// Try finding an available protocol from default protocols
-		String[] protocols = SSLContext.getDefault()
-				.getSupportedSSLParameters().getProtocols();
+		String[] protocols = SSLContext.getDefault().getSupportedSSLParameters().getProtocols();
 		if (protocols != null) {
 			for (String protocol : protocols) {
 				try {
@@ -158,16 +152,13 @@ public class OfficeFloorDefaultSslEngineSource implements SslEngineSource {
 	private static KeyStore createOfficeFloorDefaultKeyStore() throws Exception {
 
 		// Obtain the default key store content
-		String officeFloorDefaultKeysPath = OfficeFloorDefaultSslEngineSource.class
-				.getPackage().getName().replace('.', '/')
-				+ "/OfficeFloorDefault.jks";
-		InputStream officeFloorDefaultKeys = Thread.currentThread()
-				.getContextClassLoader()
+		String officeFloorDefaultKeysPath = OfficeFloorDefaultSslEngineSource.class.getPackage().getName().replace('.',
+				'/') + "/OfficeFloorDefault.jks";
+		InputStream officeFloorDefaultKeys = Thread.currentThread().getContextClassLoader()
 				.getResourceAsStream(officeFloorDefaultKeysPath);
 		if (officeFloorDefaultKeys == null) {
 			throw new IllegalStateException(
-					"Unable to locate default OfficeFloor key/trust store "
-							+ officeFloorDefaultKeysPath);
+					"Unable to locate default OfficeFloor key/trust store " + officeFloorDefaultKeysPath);
 		}
 
 		// Initialise with default key store
@@ -192,10 +183,8 @@ public class OfficeFloorDefaultSslEngineSource implements SslEngineSource {
 
 		// Indicate loading generic OfficeFloor key store
 		if ((!(context.isLoadingType())) && (LOGGER.isLoggable(Level.INFO))) {
-			LOGGER.log(
-					Level.INFO,
-					"Using default OfficeFloor Key Store. "
-							+ "This should only be used for testing and NEVER in production.");
+			LOGGER.log(Level.INFO, "Using default OfficeFloor Key Store. "
+					+ "This should only be used for testing and NEVER in production.");
 		}
 
 		// Obtain the SSL protocol

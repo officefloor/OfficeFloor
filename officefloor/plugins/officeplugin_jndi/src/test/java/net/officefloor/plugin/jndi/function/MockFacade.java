@@ -15,15 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.jndi.work;
+package net.officefloor.plugin.jndi.function;
 
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.plugin.xml.XmlUnmarshaller;
 
@@ -31,9 +30,8 @@ import net.officefloor.plugin.xml.XmlUnmarshaller;
  * <p>
  * Mock Facade.
  * <p>
- * To simplify using JNDI objects as {@link Work}, an facade can be optionally
- * used to simplify the JNDI object methods for configuring into
- * {@link OfficeFloor}.
+ * To simplify using JNDI objects, a facade can be optionally used to simplify
+ * the JNDI object methods for configuring into {@link OfficeFloor}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -52,8 +50,7 @@ public class MockFacade {
 	 * @param unmarshaller
 	 *            {@link XmlUnmarshaller}.
 	 */
-	public static void registerXmlUnmarshaller(Integer identifier,
-			XmlUnmarshaller unmarshaller) {
+	public static void registerXmlUnmarshaller(Integer identifier, XmlUnmarshaller unmarshaller) {
 		unmarshallerRegistry.put(identifier, unmarshaller);
 	}
 
@@ -82,7 +79,7 @@ public class MockFacade {
 	 *            as a {@link ManagedFunction}.
 	 */
 	public void simpleFacade(MockJndiObject object) {
-		object.simpleTask();
+		object.simpleFunction();
 	}
 
 	/**
@@ -99,14 +96,13 @@ public class MockFacade {
 	 * @throws Exception
 	 *             Test exception.
 	 */
-	public Date complexFacade(String xml, Integer identifer,
-			MockJndiObject object) throws Exception {
+	public Date complexFacade(String xml, Integer identifer, MockJndiObject object) throws Exception {
 
 		// Look up the XML unmarshaller
 		XmlUnmarshaller unmarshaller = unmarshallerRegistry.get(identifer);
 
-		// Invoke the complex task
-		Long value = object.complexTask(xml, unmarshaller);
+		// Invoke the complex function
+		Long value = object.complexFunction(xml, unmarshaller);
 
 		// Return value as date
 		return new Date(value.longValue());
@@ -121,8 +117,8 @@ public class MockFacade {
 	 *            Required {@link MockJndiObject} parameter type to be included
 	 *            as a {@link ManagedFunction}.
 	 */
-	public void complexTask(MockJndiObject object) {
-		// Only example of overriding task
+	public void complexFunction(MockJndiObject object) {
+		// Only example of overriding function
 	}
 
 }

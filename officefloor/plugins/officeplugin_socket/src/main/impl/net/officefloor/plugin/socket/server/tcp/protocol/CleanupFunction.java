@@ -20,9 +20,10 @@ package net.officefloor.plugin.socket.server.tcp.protocol;
 import java.io.OutputStream;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
 
 /**
@@ -30,20 +31,28 @@ import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
  * 
  * @author Daniel Sagenschneider
  */
-public class CleanupTask extends AbstractSingleTask<Work, None, None> {
+public class CleanupFunction implements ManagedFunctionFactory<None, None>, ManagedFunction<None, None> {
 
 	/*
-	 * ======================= Task ===================================
+	 * ================ ManagedFunctionFactory ====================
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<Work, None, None> context)
-			throws Throwable {
+	public ManagedFunction<None, None> createManagedFunction() throws Throwable {
+		return this;
+	}
+
+	/*
+	 * ==================== ManagedFunction =======================
+	 */
+
+	@Override
+	public Object execute(ManagedFunctionContext<None, None> context) throws Throwable {
 
 		// Flag to close the connection
-		TcpConnectionHandler connection = this
-				.getRecycleManagedObjectParameter(context,
-						TcpConnectionHandler.class).getManagedObject();
+		RecycleManagedObjectParameter<TcpConnectionHandler> parameter = RecycleManagedObjectParameter
+				.getRecycleManagedObjectParameter(context);
+		TcpConnectionHandler connection = parameter.getManagedObject();
 		OutputStream outputStream = connection.getOutputStream();
 		outputStream.close();
 

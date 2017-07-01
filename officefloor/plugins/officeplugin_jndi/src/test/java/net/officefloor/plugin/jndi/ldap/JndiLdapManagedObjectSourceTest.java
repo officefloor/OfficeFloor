@@ -23,7 +23,7 @@ import javax.naming.directory.DirContext;
 
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.plugin.jndi.dircontext.JndiDirContextManagedObjectSource;
@@ -40,8 +40,7 @@ public class JndiLdapManagedObjectSourceTest extends AbstractLdapTest {
 	 * Ensure correct specification.
 	 */
 	public void testSpecification() {
-		ManagedObjectLoaderUtil.validateSpecification(
-				JndiLdapManagedObjectSource.class, Context.PROVIDER_URL,
+		ManagedObjectLoaderUtil.validateSpecification(JndiLdapManagedObjectSource.class, Context.PROVIDER_URL,
 				"LDAP URL");
 	}
 
@@ -51,14 +50,12 @@ public class JndiLdapManagedObjectSourceTest extends AbstractLdapTest {
 	public void testType() {
 
 		// Create the expected type
-		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
-				.createManagedObjectTypeBuilder();
+		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(DirContext.class);
 
 		// Validate the type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type,
-				JndiDirContextManagedObjectSource.class, Context.PROVIDER_URL,
-				LDAP_DOMAIN);
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, JndiDirContextManagedObjectSource.class,
+				Context.PROVIDER_URL, LDAP_DOMAIN);
 	}
 
 	/**
@@ -72,8 +69,7 @@ public class JndiLdapManagedObjectSourceTest extends AbstractLdapTest {
 		// Obtain the JNDI Context Managed Object Source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
 		loader.addProperty(Context.PROVIDER_URL, LDAP_URL);
-		JndiLdapManagedObjectSource mos = loader
-				.loadManagedObjectSource(JndiLdapManagedObjectSource.class);
+		JndiLdapManagedObjectSource mos = loader.loadManagedObjectSource(JndiLdapManagedObjectSource.class);
 
 		// Obtain the Managed Object
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
@@ -83,8 +79,7 @@ public class JndiLdapManagedObjectSourceTest extends AbstractLdapTest {
 		Object object = mo.getObject();
 		assertNotNull("Must have DirContext", object);
 		assertTrue("Must be DirContext type", object instanceof DirContext);
-		assertTrue("Must be Synchronised DirContext",
-				object instanceof SynchronisedDirContext);
+		assertTrue("Must be Synchronised DirContext", object instanceof SynchronisedDirContext);
 
 		// Ensure can obtain the entry
 		DirContext context = (DirContext) object;
@@ -103,11 +98,8 @@ public class JndiLdapManagedObjectSourceTest extends AbstractLdapTest {
 		// Obtain the JNDI Context Managed Object Source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
 		loader.addProperty(Context.PROVIDER_URL, LDAP_URL);
-		loader.addProperty(
-				JndiLdapManagedObjectSource.PROPERTY_SUB_CONTEXT_NAME,
-				LDAP_DOMAIN);
-		JndiLdapManagedObjectSource mos = loader
-				.loadManagedObjectSource(JndiLdapManagedObjectSource.class);
+		loader.addProperty(JndiLdapManagedObjectSource.PROPERTY_SUB_CONTEXT_NAME, LDAP_DOMAIN);
+		JndiLdapManagedObjectSource mos = loader.loadManagedObjectSource(JndiLdapManagedObjectSource.class);
 
 		// Obtain the Managed Object
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
@@ -117,8 +109,7 @@ public class JndiLdapManagedObjectSourceTest extends AbstractLdapTest {
 		Object object = mo.getObject();
 		assertNotNull("Must have DirContext", object);
 		assertTrue("Must be DirContext type", object instanceof DirContext);
-		assertTrue("Must be Synchronised DirContext",
-				object instanceof SynchronisedDirContext);
+		assertTrue("Must be Synchronised DirContext", object instanceof SynchronisedDirContext);
 
 		// Ensure can obtain the entry
 		DirContext context = (DirContext) object;

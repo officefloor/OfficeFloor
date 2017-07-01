@@ -35,7 +35,7 @@ import net.officefloor.plugin.socket.server.http.request.config.RequestConfig;
 import net.officefloor.plugin.socket.server.http.request.config.ResponseConfig;
 import net.officefloor.plugin.socket.server.http.request.config.RunConfig;
 import net.officefloor.plugin.socket.server.http.server.HttpServicerBuilder;
-import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
+import net.officefloor.plugin.socket.server.http.server.HttpServicerFunction;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.xml.XmlUnmarshaller;
 import net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshallerFactory;
@@ -83,7 +83,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 			// Create the HTTP servicer builder
 			HttpServicerBuilder httpServicerBuilder = new HttpServicerBuilder() {
 				@Override
-				public HttpServicerTask buildServicer(String managedObjectName,
+				public HttpServicerFunction buildServicer(String managedObjectName,
 						MockHttpServer server) throws Exception {
 					// Register team to do the work
 					server.constructTeam("WORKER",
@@ -97,7 +97,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 					taskBuilder.buildObject(managedObjectName);
 
 					// Return the reference to the service task
-					return new HttpServicerTask("servicer", "service");
+					return new HttpServicerFunction("servicer", "service");
 				}
 			};
 

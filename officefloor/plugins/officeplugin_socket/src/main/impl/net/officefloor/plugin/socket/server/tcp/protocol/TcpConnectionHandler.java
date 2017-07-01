@@ -20,27 +20,27 @@ package net.officefloor.plugin.socket.server.tcp.protocol;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import net.officefloor.frame.spi.managedobject.AsynchronousListener;
-import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.AsynchronousContext;
+import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.protocol.ConnectionHandler;
 import net.officefloor.plugin.socket.server.protocol.HeartBeatContext;
 import net.officefloor.plugin.socket.server.protocol.ReadContext;
 import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
-import net.officefloor.plugin.stream.ServerOutputStream;
 import net.officefloor.plugin.stream.ServerInputStream;
+import net.officefloor.plugin.stream.ServerOutputStream;
 import net.officefloor.plugin.stream.WriteBufferReceiver;
-import net.officefloor.plugin.stream.impl.ServerOutputStreamImpl;
 import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
+import net.officefloor.plugin.stream.impl.ServerOutputStreamImpl;
 
 /**
  * TCP {@link ConnectionHandler}.
  * 
  * @author Daniel Sagenschneider
  */
-public class TcpConnectionHandler implements ConnectionHandler,
-		AsynchronousManagedObject, WriteBufferReceiver, ServerTcpConnection {
+public class TcpConnectionHandler
+		implements ConnectionHandler, AsynchronousManagedObject, WriteBufferReceiver, ServerTcpConnection {
 
 	/**
 	 * Value of {@link #idleSinceTimestamp} if the {@link Connection} is not
@@ -96,8 +96,8 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	 *            Maximum idle time for the {@link Connection} measured in
 	 *            milliseconds.
 	 */
-	public TcpConnectionHandler(TcpCommunicationProtocol protocol,
-			Connection connection, int sendBufferSize, long maxIdleTime) {
+	public TcpConnectionHandler(TcpCommunicationProtocol protocol, Connection connection, int sendBufferSize,
+			long maxIdleTime) {
 		this.protocol = protocol;
 		this.connection = connection;
 		this.maxIdleTime = maxIdleTime;
@@ -133,8 +133,8 @@ public class TcpConnectionHandler implements ConnectionHandler,
 
 				// Awake potential waiting process on client data
 				synchronized (this.getLock()) {
-					if (this.asynchronousListener != null) {
-						this.asynchronousListener.notifyComplete();
+					if (this.asynchronousContext != null) {
+						this.asynchronousContext.complete(null);
 					}
 				}
 			}
@@ -155,8 +155,8 @@ public class TcpConnectionHandler implements ConnectionHandler,
 			this.inputStream.inputData(data, 0, (data.length - 1), true);
 
 			// Notify potential waiting servicing
-			if (this.asynchronousListener != null) {
-				this.asynchronousListener.notifyComplete();
+			if (this.asynchronousContext != null) {
+				this.asynchronousContext.complete(null);
 			}
 		}
 
@@ -211,15 +211,14 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	 */
 
 	/**
-	 * {@link AsynchronousListener}.
+	 * {@link AsynchronousContext}.
 	 */
-	private AsynchronousListener asynchronousListener;
+	private AsynchronousContext asynchronousContext;
 
 	@Override
-	public void registerAsynchronousCompletionListener(
-			AsynchronousListener listener) {
+	public void setAsynchronousContext(AsynchronousContext context) {
 		synchronized (this.getLock()) {
-			this.asynchronousListener = listener;
+			this.asynchronousContext = context;
 		}
 	}
 
@@ -243,7 +242,7 @@ public class TcpConnectionHandler implements ConnectionHandler,
 			}
 
 			// Wait for data from client
-			this.asynchronousListener.notifyStarted();
+			this.asynchronousContext.start(null);
 			return true; // waiting on client data
 		}
 	}

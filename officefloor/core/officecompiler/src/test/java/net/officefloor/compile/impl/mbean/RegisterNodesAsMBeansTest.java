@@ -72,7 +72,7 @@ import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
 import net.officefloor.extension.CompileOffice;
-import net.officefloor.extension.CompileOfficeFloor;
+import net.officefloor.extension.ExtendOfficeFloor;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.build.None;
@@ -771,7 +771,7 @@ public class RegisterNodesAsMBeansTest extends OfficeFrameTestCase {
 		ObjectName objectName = getObjectName(type, name);
 
 		// Compile and open the OfficeFloor
-		CompileOfficeFloor compile = new CompileOfficeFloor();
+		ExtendOfficeFloor compile = new ExtendOfficeFloor();
 		compile.getOfficeFloorCompiler().setOfficeFloorSource(this.officeFloorSource);
 		compile.getOfficeFloorCompiler().setMBeanRegistrator(MBeanRegistrator.getPlatformMBeanRegistrator());
 		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor(extendOfficeFloor);

@@ -32,14 +32,13 @@ import java.util.Properties;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.api.manage.ProcessFuture;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
+import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
-import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.ConnectionManager;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
@@ -53,8 +52,7 @@ import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
-		implements CommunicationProtocolContext,
-		ManagedObjectExecuteContext<Indexed> {
+		implements CommunicationProtocolContext, ManagedObjectExecuteContext<Indexed> {
 
 	/**
 	 * Port for {@link ServerSocketAccepter}.
@@ -84,7 +82,7 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 	/**
 	 * {@link ManagedFunctionContext}.
 	 */
-	private final MockTaskContext taskContext = new MockTaskContext();
+	private final MockManagedFunctionContext<?, ?> managedFunctionContext = new MockManagedFunctionContext<Indexed, Indexed>();
 
 	/**
 	 * Client {@link SocketChannel}.
@@ -130,11 +128,10 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 	 *            Parameter.
 	 * @param managedObject
 	 *            {@link ManagedObject}.
-	 * @param escalationHandler
-	 *            {@link EscalationHandler}.
+	 * @param callback
+	 *            {@link FlowCallback}.
 	 */
-	protected abstract void handleInvokeProcess(Object parameter,
-			ManagedObject managedObject, EscalationHandler escalationHandler);
+	protected abstract void handleInvokeProcess(Object parameter, ManagedObject managedObject, FlowCallback callback);
 
 	@Override
 	protected void setUp() throws Exception {
@@ -152,42 +149,35 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 			this.readBuffer = ByteBuffer.allocate(receiveBufferSize);
 
 			// Create the server listener
-			this.listener = new SocketListener(this.sendBufferSize,
-					receiveBufferSize);
+			this.listener = new SocketListener(3000, this.sendBufferSize, receiveBufferSize);
 
 			// Create the connection manager
-			this.connectionManager = new ConnectionManagerImpl(3000,
-					this.listener);
+			this.connectionManager = new ConnectionManagerImpl(this.listener);
 
 			// Obtain the communication protocol source
-			CommunicationProtocolSource source = this
-					.getCommunicationProtocolSource();
+			CommunicationProtocolSource source = this.getCommunicationProtocolSource();
 
 			// Obtain the communication protocol properties
-			Properties protocolProperties = this
-					.getCommunicationProtocolProperties();
+			Properties protocolProperties = this.getCommunicationProtocolProperties();
 			String[] contextProperties = new String[protocolProperties.size() * 2];
 			int contextPropertyIndex = 0;
 			for (String propertyName : protocolProperties.stringPropertyNames()) {
-				String propertyValue = protocolProperties
-						.getProperty(propertyName);
+				String propertyValue = protocolProperties.getProperty(propertyName);
 				contextProperties[contextPropertyIndex++] = propertyName;
 				contextProperties[contextPropertyIndex++] = propertyValue;
 			}
 
 			// Create the managed object source context
 			MetaDataContext<None, Indexed> configurationContext = ManagedObjectLoaderUtil
-					.createMetaDataContext(None.class, Indexed.class,
-							contextProperties);
+					.createMetaDataContext(None.class, Indexed.class, contextProperties);
 
 			// Create the communication protocol
-			CommunicationProtocol protocol = source
-					.createCommunicationProtocol(configurationContext, this);
+			CommunicationProtocol protocol = source.createCommunicationProtocol(configurationContext, this);
 			protocol.setManagedObjectExecuteContext(this);
 
 			// Create the accepter
-			this.accepter = new ServerSocketAccepter(new InetSocketAddress(
-					this.port), protocol, this.connectionManager, 128);
+			this.accepter = new ServerSocketAccepter(new InetSocketAddress(this.port), protocol, this.connectionManager,
+					128);
 
 			// Start listening and accepting
 			this.connectionManager.openSocketSelectors();
@@ -206,25 +196,23 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 			this.clientSelector = Selector.open();
 
 			// Register connection with selector to start requesting
-			this.clientKey = clientChannel.register(this.clientSelector,
-					SelectionKey.OP_CONNECT);
+			this.clientKey = clientChannel.register(this.clientSelector, SelectionKey.OP_CONNECT);
 
 			// Run acceptance of connection
-			this.taskContext.execute(this.accepter);
+			this.managedFunctionContext.execute(this.accepter);
 
 			// Accept connection
 			this.clientSelector.select(100);
 
 			// Finish the connection
-			assertTrue("Should be read to connect",
-					this.clientKey.isConnectable());
+			assertTrue("Should be read to connect", this.clientKey.isConnectable());
 			this.clientChannel.finishConnect();
 
 			// Connection now waiting for operations
 			this.clientKey.interestOps(0);
 
 			// Server to create connection
-			this.taskContext.execute(this.listener);
+			this.managedFunctionContext.execute(this.listener);
 
 		} catch (Throwable ex) {
 			fail(ex);
@@ -239,8 +227,8 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 		try {
 			// Allow socket listener to close
 			do {
-				this.taskContext.execute(this.accepter);
-			} while (!this.taskContext.isComplete());
+				this.managedFunctionContext.execute(this.accepter);
+			} while (!this.managedFunctionContext.isComplete());
 		} catch (Throwable ex) {
 			fail(ex);
 		}
@@ -250,8 +238,8 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 		try {
 			// Allow socket listener to close
 			do {
-				this.taskContext.execute(this.listener);
-			} while (!this.taskContext.isComplete());
+				this.managedFunctionContext.execute(this.listener);
+			} while (!this.managedFunctionContext.isComplete());
 		} catch (Throwable ex) {
 			fail(ex);
 		}
@@ -300,8 +288,7 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 
 			// Write the data to the socket
 			int bytesWritten = this.clientChannel.write(ByteBuffer.wrap(data));
-			assertEquals("Not all bytes written from client to server",
-					data.length, bytesWritten);
+			assertEquals("Not all bytes written from client to server", data.length, bytesWritten);
 
 		} catch (Exception ex) {
 			fail(ex);
@@ -315,7 +302,7 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 
 		// Execute the listener
 		try {
-			this.taskContext.execute(this.listener);
+			this.managedFunctionContext.execute(this.listener);
 		} catch (Throwable ex) {
 			fail(ex);
 		}
@@ -355,13 +342,8 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 	 * Runs the heart beat for the {@link SocketListener}.
 	 */
 	protected void runServerHeartBeat() {
-
-		// Execute the connection manager for the heart beat
-		try {
-			this.taskContext.execute(this.connectionManager);
-		} catch (Throwable ex) {
-			fail(ex);
-		}
+		// TODO heart beat to be part of normal loop
+		fail("TODO implement running server heart beat");
 	}
 
 	/**
@@ -387,11 +369,9 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 		int bytesReceived = this.writeClientReceivedData(bytes);
 
 		// Ensure correct data received
-		assertEquals("Incorrect data received", new String(
-				expectedBytes == null ? new byte[0] : expectedBytes),
+		assertEquals("Incorrect data received", new String(expectedBytes == null ? new byte[0] : expectedBytes),
 				new String(bytes.toByteArray()));
-		assertEquals("Incorrect number of bytes", (expectedBytes == null ? -1
-				: expectedBytes.length), bytesReceived);
+		assertEquals("Incorrect number of bytes", (expectedBytes == null ? -1 : expectedBytes.length), bytesReceived);
 	}
 
 	/**
@@ -440,8 +420,7 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 
 	@Override
 	public Charset getDefaultCharset() {
-		return Charset
-				.forName(AbstractServerSocketManagedObjectSource.DEFAULT_CHARSET);
+		return Charset.forName(AbstractServerSocketManagedObjectSource.DEFAULT_CHARSET);
 	}
 
 	/*
@@ -449,33 +428,15 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 	 */
 
 	@Override
-	public ProcessFuture invokeProcess(Indexed key, Object parameter,
-			ManagedObject managedObject, long delay) {
-		this.handleInvokeProcess(parameter, managedObject, null);
-		return null;
+	public void invokeProcess(Indexed key, Object parameter, ManagedObject managedObject, long delay,
+			FlowCallback callback) throws IllegalArgumentException {
+		this.handleInvokeProcess(parameter, managedObject, callback);
 	}
 
 	@Override
-	public ProcessFuture invokeProcess(int flowIndex, Object parameter,
-			ManagedObject managedObject, long delay) {
-		this.handleInvokeProcess(parameter, managedObject, null);
-		return null;
-	}
-
-	@Override
-	public ProcessFuture invokeProcess(Indexed key, Object parameter,
-			ManagedObject managedObject, long delay,
-			EscalationHandler escalationHandler) {
-		this.handleInvokeProcess(parameter, managedObject, escalationHandler);
-		return null;
-	}
-
-	@Override
-	public ProcessFuture invokeProcess(int flowIndex, Object parameter,
-			ManagedObject managedObject, long delay,
-			EscalationHandler escalationHandler) {
-		this.handleInvokeProcess(parameter, managedObject, escalationHandler);
-		return null;
+	public void invokeProcess(int flowIndex, Object parameter, ManagedObject managedObject, long delay,
+			FlowCallback callback) throws IllegalArgumentException {
+		this.handleInvokeProcess(parameter, managedObject, callback);
 	}
 
 }

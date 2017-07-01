@@ -18,7 +18,7 @@
 package net.officefloor.plugin.socket.server.http.conversation.impl;
 
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
+import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 
 /**
  * Mock {@link CleanupEscalation}.
@@ -42,7 +42,7 @@ public class MockCleanupEscalation implements CleanupEscalation {
 	 * 
 	 * @param objectType
 	 *            Object type.
-	 * @param escalation
+	 * @param escalations
 	 *            {@link Escalation}.
 	 */
 	public MockCleanupEscalation(Class<?> objectType, Throwable escalation) {

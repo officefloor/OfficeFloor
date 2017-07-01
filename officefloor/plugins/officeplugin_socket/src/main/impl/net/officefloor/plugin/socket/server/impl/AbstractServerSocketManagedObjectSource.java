@@ -31,17 +31,16 @@ import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectFunctionBuilder;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.frame.spi.source.SourceProperties;
-import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.plugin.socket.server.ConnectionManager;
+import net.officefloor.plugin.socket.server.impl.ServerSocketAccepter.ServerSockerAccepterFlows;
+import net.officefloor.plugin.socket.server.impl.SocketListener.SocketListenerFlows;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolContext;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
@@ -52,9 +51,8 @@ import net.officefloor.plugin.socket.server.protocol.Connection;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractServerSocketManagedObjectSource extends
-		AbstractManagedObjectSource<None, Indexed> implements
-		CommunicationProtocolContext {
+public abstract class AbstractServerSocketManagedObjectSource extends AbstractManagedObjectSource<None, Indexed>
+		implements CommunicationProtocolContext {
 
 	/**
 	 * {@link Logger}.
@@ -107,8 +105,7 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 	public static Charset getCharset(SourceProperties properties) {
 
 		// Attempt to obtain configured charset
-		String charsetName = (properties == null) ? null : properties
-				.getProperty(PROPERTY_DEFAULT_CHARSET, null);
+		String charsetName = (properties == null) ? null : properties.getProperty(PROPERTY_DEFAULT_CHARSET, null);
 		if (charsetName != null) {
 			// Use the configured charset
 			return Charset.forName(charsetName);
@@ -141,26 +138,9 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 	 *            Receive buffer size.
 	 * @return {@link ConnectionManager}.
 	 */
-	@SuppressWarnings("rawtypes")
-	private static synchronized ConnectionManager getConnectionManager(
-			ManagedObjectSourceContext<Indexed> mosContext,
-			AbstractServerSocketManagedObjectSource instance,
-			long heartBeatInterval, int sendBufferSize, int receiveBufferSize) {
-
-		final String listenerTeamName = "listener";
-
-		// Provide dummy task for consistency of teams across all server sockets
-		AbstractSingleTask<Work, None, None> dummy = new AbstractSingleTask<Work, None, None>() {
-			@Override
-			public Object execute(ManagedFunctionContext<Work, None, None> context)
-					throws Throwable {
-				throw new IllegalStateException(
-						"Dummy auto-wire listener task should not be invoked");
-			}
-		};
-		mosContext.addWork("SetupAutoWireListener", dummy)
-				.addTask("SetupAutoWireListener", dummy)
-				.setTeam(listenerTeamName);
+	private static synchronized ConnectionManager getConnectionManager(ManagedObjectSourceContext<Indexed> mosContext,
+			AbstractServerSocketManagedObjectSource instance, long heartBeatInterval, int sendBufferSize,
+			int receiveBufferSize) {
 
 		// Do nothing if just loading type
 		if (mosContext.isLoadingType()) {
@@ -171,46 +151,32 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 		if (singletonConnectionManager == null) {
 
 			// Spread load if have multiple processors
-			int numberOfSocketListeners = Runtime.getRuntime()
-					.availableProcessors();
+			int numberOfSocketListeners = Runtime.getRuntime().availableProcessors();
 
 			// Create the socket listeners
 			SocketListener[] socketListeners = new SocketListener[numberOfSocketListeners];
 			for (int i = 0; i < socketListeners.length; i++) {
 
 				// Create the socket listener
-				SocketListener socketListener = new SocketListener(
-						sendBufferSize, receiveBufferSize);
+				SocketListener socketListener = new SocketListener(heartBeatInterval, sendBufferSize,
+						receiveBufferSize);
 
 				// Register the socket listener
 				socketListeners[i] = socketListener;
 
 				// Register the listening of connections
 				String listenerName = "listener-" + i;
-				ManagedObjectFunctionBuilder listenerTask = mosContext.addWork(
-						listenerName, socketListener).addTask(listenerName,
-						socketListener);
-				listenerTask.setTeam(listenerTeamName);
+				ManagedObjectFunctionBuilder<None, SocketListenerFlows> listenerFunction = mosContext
+						.addManagedFunction(listenerName, socketListener);
+				listenerFunction.setResponsibleTeam("listener");
+				listenerFunction.linkFlow(SocketListenerFlows.REPEAT, listenerName, null, false);
 
 				// Flag to start listener on server start up
-				mosContext.addStartupTask(listenerName, listenerName);
+				mosContext.addStartupFunction(listenerName);
 			}
 
 			// Create the connection manager
-			ConnectionManagerImpl connectionManager = new ConnectionManagerImpl(
-					heartBeatInterval, socketListeners);
-			singletonConnectionManager = connectionManager;
-
-			// Configure the connection manager for heart beat
-			String heartBeatName = "heartbeat";
-			ManagedObjectFunctionBuilder heartBeatTask = mosContext.addWork(
-					heartBeatName, connectionManager).addTask(heartBeatName,
-					connectionManager);
-			heartBeatTask.setTeam(listenerTeamName);
-
-			// Flag to start heart beat on server start up
-			mosContext.addStartupTask(heartBeatName, heartBeatName);
-
+			singletonConnectionManager = new ConnectionManagerImpl(socketListeners);
 		}
 
 		// Register the instance for use of the connection manager
@@ -227,8 +193,7 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 	 * @throws IOException
 	 *             If fails to open all the {@link Selector} instances.
 	 */
-	private static synchronized void openSocketListenerSelectors()
-			throws IOException {
+	private static synchronized void openSocketListenerSelectors() throws IOException {
 		// Should be created at this time
 		singletonConnectionManager.openSocketSelectors();
 	}
@@ -272,8 +237,7 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 	 * @throws IOException
 	 *             If fails to close the {@link ConnectionManager}.
 	 */
-	private static synchronized void releaseConnectionManager(
-			AbstractServerSocketManagedObjectSource instance)
+	private static synchronized void releaseConnectionManager(AbstractServerSocketManagedObjectSource instance)
 			throws IOException {
 
 		// Unregister from the connection manager
@@ -316,8 +280,7 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 	public AbstractServerSocketManagedObjectSource() {
 
 		// Create the communication protocol source
-		this.communicationProtocolSource = this
-				.createCommunicationProtocolSource();
+		this.communicationProtocolSource = this.createCommunicationProtocolSource();
 	}
 
 	/**
@@ -355,12 +318,10 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<None, Indexed> context)
-			throws Exception {
+	protected void loadMetaData(MetaDataContext<None, Indexed> context) throws Exception {
 
 		// Obtain the managed object source context
-		ManagedObjectSourceContext<Indexed> mosContext = context
-				.getManagedObjectSourceContext();
+		ManagedObjectSourceContext<Indexed> mosContext = context.getManagedObjectSourceContext();
 
 		// Create socket to obtain operating system details
 		Socket socket = new Socket();
@@ -370,11 +331,10 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 
 		// Obtain the configuration
 		int port = Integer.parseInt(mosContext.getProperty(PROPERTY_PORT));
-		this.sendBufferSize = Integer.parseInt(mosContext.getProperty(
-				PROPERTY_SEND_BUFFER_SIZE, String.valueOf(osSendBufferSize)));
-		int receiveBufferSize = Integer.parseInt(mosContext.getProperty(
-				PROPERTY_RECEIVE_BUFFER_SIZE,
-				String.valueOf(osReceiveBufferSize)));
+		this.sendBufferSize = Integer
+				.parseInt(mosContext.getProperty(PROPERTY_SEND_BUFFER_SIZE, String.valueOf(osSendBufferSize)));
+		int receiveBufferSize = Integer
+				.parseInt(mosContext.getProperty(PROPERTY_RECEIVE_BUFFER_SIZE, String.valueOf(osReceiveBufferSize)));
 
 		// Obtain the default charset
 		this.defaultCharset = getCharset(mosContext);
@@ -386,29 +346,25 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 		long heartBeatInterval = 10000; // TODO make configurable
 
 		// Obtain the connection manager
-		ConnectionManager connectionManager = getConnectionManager(mosContext,
-				this, heartBeatInterval, this.sendBufferSize, receiveBufferSize);
+		ConnectionManager connectionManager = getConnectionManager(mosContext, this, heartBeatInterval,
+				this.sendBufferSize, receiveBufferSize);
 
 		// Create the communication protocol
-		this.communicationProtocol = this.communicationProtocolSource
-				.createCommunicationProtocol(context, this);
+		this.communicationProtocol = this.communicationProtocolSource.createCommunicationProtocol(context, this);
 
 		// Register the accepter of connections
-		this.serverSocketAccepter = new ServerSocketAccepter(
-				new InetSocketAddress(port), this.communicationProtocol,
+		this.serverSocketAccepter = new ServerSocketAccepter(new InetSocketAddress(port), this.communicationProtocol,
 				connectionManager, serverSocketBackLog);
-		ManagedObjectFunctionBuilder<None, None> accepterTask = mosContext.addWork(
-				"accepter", this.serverSocketAccepter).addTask("accepter",
-				this.serverSocketAccepter);
-		accepterTask.setTeam("accepter");
+		ManagedObjectFunctionBuilder<None, ServerSockerAccepterFlows> accepterFunction = mosContext
+				.addManagedFunction("accepter", this.serverSocketAccepter);
+		accepterFunction.setResponsibleTeam("accepter");
 
 		// Flag to start accepter on server start up
-		mosContext.addStartupTask("accepter", "accepter");
+		mosContext.addStartupFunction("accepter");
 	}
 
 	@Override
-	public void start(ManagedObjectExecuteContext<Indexed> context)
-			throws Exception {
+	public void start(ManagedObjectExecuteContext<Indexed> context) throws Exception {
 
 		// Make the execute context available to the communication protocol
 		this.communicationProtocol.setManagedObjectExecuteContext(context);
@@ -422,9 +378,8 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-		// Should never be directly used by a task
-		throw new IllegalStateException("Can not source managed object from a "
-				+ this.getClass().getSimpleName());
+		// Should never be directly used by a function
+		throw new IllegalStateException("Can not source managed object from a " + this.getClass().getSimpleName());
 	}
 
 	@Override
@@ -448,8 +403,7 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 		} catch (IOException ex) {
 			// Shutting down so just log issue
 			if (LOGGER.isLoggable(Level.INFO)) {
-				LOGGER.log(Level.INFO, "Failed to release "
-						+ ConnectionManager.class.getSimpleName(), ex);
+				LOGGER.log(Level.INFO, "Failed to release " + ConnectionManager.class.getSimpleName(), ex);
 			}
 		}
 	}

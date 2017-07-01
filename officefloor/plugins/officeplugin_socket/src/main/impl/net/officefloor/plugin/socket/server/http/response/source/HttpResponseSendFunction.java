@@ -21,13 +21,12 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
@@ -36,9 +35,9 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpResponseSendTask
-		extends
-		AbstractSingleTask<Work, HttpResponseSendTask.HttpResponseSendTaskDependencies, None> {
+public class HttpResponseSendFunction
+		implements ManagedFunctionFactory<HttpResponseSendFunction.HttpResponseSendTaskDependencies, None>,
+		ManagedFunction<HttpResponseSendFunction.HttpResponseSendTaskDependencies, None> {
 
 	/**
 	 * Keys for the dependencies.
@@ -48,27 +47,27 @@ public class HttpResponseSendTask
 	}
 
 	/**
-	 * Adds the {@link ManagedFunctionType} information for {@link HttpResponseSendTask}.
+	 * Adds the {@link ManagedFunctionType} information for
+	 * {@link HttpResponseSendFunction}.
 	 * 
-	 * @param taskName
+	 * @param functionName
 	 *            {@link ManagedFunction} name.
-	 * @param taskFactory
-	 *            {@link HttpResponseSendTask}.
-	 * @param workTypeBuilder
+	 * @param functionFactory
+	 *            {@link HttpResponseSendFunction}.
+	 * @param functionTypeBuilder
 	 *            {@link FunctionNamespaceBuilder}.
 	 * @return {@link ManagedFunctionTypeBuilder} that added this
-	 *         {@link HttpResponseSendTask} type information.
+	 *         {@link HttpResponseSendFunction} type information.
 	 */
-	public static ManagedFunctionTypeBuilder<HttpResponseSendTaskDependencies, None> addTaskType(
-			String taskName, HttpResponseSendTask taskFactory,
-			FunctionNamespaceBuilder<Work> workTypeBuilder) {
-		ManagedFunctionTypeBuilder<HttpResponseSendTaskDependencies, None> task = workTypeBuilder
-				.addManagedFunctionType(taskName, taskFactory,
-						HttpResponseSendTaskDependencies.class, None.class);
-		task.addObject(ServerHttpConnection.class).setKey(
-				HttpResponseSendTaskDependencies.SERVER_HTTP_CONNECTION);
-		task.addEscalation(IOException.class);
-		return task;
+	public static ManagedFunctionTypeBuilder<HttpResponseSendTaskDependencies, None> addFunctionType(
+			String functionName, HttpResponseSendFunction functionFactory,
+			FunctionNamespaceBuilder functionTypeBuilder) {
+		ManagedFunctionTypeBuilder<HttpResponseSendTaskDependencies, None> function = functionTypeBuilder
+				.addManagedFunctionType(functionName, functionFactory, HttpResponseSendTaskDependencies.class,
+						None.class);
+		function.addObject(ServerHttpConnection.class).setKey(HttpResponseSendTaskDependencies.SERVER_HTTP_CONNECTION);
+		function.addEscalation(IOException.class);
+		return function;
 	}
 
 	/**
@@ -89,7 +88,7 @@ public class HttpResponseSendTask
 	 * @param content
 	 *            Content for {@link HttpResponse}. May be <code>null</code>.
 	 */
-	public HttpResponseSendTask(int status, byte[] content) {
+	public HttpResponseSendFunction(int status, byte[] content) {
 		this.status = status;
 		if (content == null) {
 			// No content
@@ -104,13 +103,20 @@ public class HttpResponseSendTask
 	}
 
 	/*
-	 * =========================== Task ================================
+	 * =================== ManagedFunctionFactory ==================
 	 */
 
 	@Override
-	public Object execute(
-			ManagedFunctionContext<Work, HttpResponseSendTaskDependencies, None> context)
-			throws IOException {
+	public ManagedFunction<HttpResponseSendTaskDependencies, None> createManagedFunction() throws Throwable {
+		return this;
+	}
+
+	/*
+	 * ====================== ManagedFunction ======================
+	 */
+
+	@Override
+	public Object execute(ManagedFunctionContext<HttpResponseSendTaskDependencies, None> context) throws IOException {
 
 		// Obtain the response
 		ServerHttpConnection connection = (ServerHttpConnection) context

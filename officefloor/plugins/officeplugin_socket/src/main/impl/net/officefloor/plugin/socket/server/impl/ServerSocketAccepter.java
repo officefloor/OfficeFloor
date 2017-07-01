@@ -28,8 +28,9 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.plugin.socket.server.ConnectionManager;
 import net.officefloor.plugin.socket.server.EstablishedConnection;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
@@ -40,8 +41,16 @@ import net.officefloor.plugin.socket.server.protocol.Connection;
  * 
  * @author Daniel Sagenschneider
  */
-public class ServerSocketAccepter extends
-		AbstractSingleTask<ServerSocketAccepter, None, None> {
+public class ServerSocketAccepter
+		implements ManagedFunctionFactory<None, ServerSocketAccepter.ServerSockerAccepterFlows>,
+		ManagedFunction<None, ServerSocketAccepter.ServerSockerAccepterFlows> {
+
+	/**
+	 * Flows for the {@link ServerSocketAccepter}.
+	 */
+	public static enum ServerSockerAccepterFlows {
+		REPEAT
+	}
 
 	/**
 	 * {@link CommunicationProtocol} for the {@link ServerSocket}.
@@ -92,10 +101,8 @@ public class ServerSocketAccepter extends
 	 * @throws IOException
 	 *             If fails to set up the {@link ServerSocket}.
 	 */
-	public ServerSocketAccepter(InetSocketAddress serverSocketAddress,
-			CommunicationProtocol communicationProtocol,
-			ConnectionManager connectionManager, int serverSocketBackLogSize)
-			throws IOException {
+	public ServerSocketAccepter(InetSocketAddress serverSocketAddress, CommunicationProtocol communicationProtocol,
+			ConnectionManager connectionManager, int serverSocketBackLogSize) throws IOException {
 		this.communicationProtocol = communicationProtocol;
 		this.connectionManager = connectionManager;
 		this.serverSocketAddress = serverSocketAddress;
@@ -151,60 +158,59 @@ public class ServerSocketAccepter extends
 	}
 
 	/*
-	 * ======================= Task ============================================
+	 * =================== ManagedFunctionFactory =============================
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<ServerSocketAccepter, None, None> context)
-			throws Exception {
+	public ManagedFunction<None, ServerSockerAccepterFlows> createManagedFunction() throws Throwable {
+		return this;
+	}
 
-		// Synchronized as may be called by differing threads
-		synchronized (this) {
+	/*
+	 * ======================= ManagedFunction ================================
+	 */
 
-			// Flag whether task complete
-			boolean isComplete = this.isComplete;
-			context.setComplete(isComplete);
+	@Override
+	public Object execute(ManagedFunctionContext<None, ServerSockerAccepterFlows> context) throws Exception {
 
-			// Do nothing if complete
-			if (isComplete) {
-				return null;
-			}
+		// Do nothing if complete
+		if (this.isComplete) {
+			return null;
+		}
 
-			// Wait some time for a connection (10 seconds)
-			this.selector.select(10000);
+		// Wait some time for a connection (10 seconds)
+		this.selector.select(10000);
 
-			// Obtain the selection key
-			for (Iterator<SelectionKey> iterator = this.selector.selectedKeys()
-					.iterator(); iterator.hasNext();) {
-				SelectionKey key = iterator.next();
-				iterator.remove();
+		// Obtain the selection key
+		for (Iterator<SelectionKey> iterator = this.selector.selectedKeys().iterator(); iterator.hasNext();) {
+			SelectionKey key = iterator.next();
+			iterator.remove();
 
-				// Check if accepting a connection
-				if (key.isAcceptable()) {
+			// Check if accepting a connection
+			if (key.isAcceptable()) {
 
-					// Obtain the socket channel
-					final SocketChannel socketChannel = this.channel.accept();
-					if (socketChannel != null) {
+				// Obtain the socket channel
+				final SocketChannel socketChannel = this.channel.accept();
+				if (socketChannel != null) {
 
-						// Flag socket as unblocking
-						socketChannel.configureBlocking(false);
+					// Flag socket as unblocking
+					socketChannel.configureBlocking(false);
 
-						// Configure the socket
-						Socket socket = socketChannel.socket();
-						socket.setTcpNoDelay(true);
+					// Configure the socket
+					Socket socket = socketChannel.socket();
+					socket.setTcpNoDelay(true);
 
-						// Create the established connection
-						EstablishedConnection connection = new EstablishedConnectionImpl(
-								socketChannel);
+					// Create the established connection
+					EstablishedConnection connection = new EstablishedConnectionImpl(socketChannel);
 
-						// Manage the connection
-						this.connectionManager.manageConnection(connection);
-					}
+					// Manage the connection
+					this.connectionManager.manageConnection(connection);
 				}
 			}
 		}
 
-		// No further tasks as should loop until shutdown
+		// Repeat until shutdown
+		context.doFlow(ServerSockerAccepterFlows.REPEAT, null, null);
 		return null;
 	}
 

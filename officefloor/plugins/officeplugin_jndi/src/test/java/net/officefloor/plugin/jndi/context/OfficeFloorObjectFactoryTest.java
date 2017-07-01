@@ -43,7 +43,7 @@ public class OfficeFloorObjectFactoryTest extends OfficeFrameTestCase {
 	public void testInstantiateOfficeFloorDirectly() throws Exception {
 
 		// Specify name of OfficeFloor
-		Name name = new CompositeName(ValidateWork
+		Name name = new CompositeName(ValidateManagedFunction
 				.getOfficeFloorJndiResourceName(true));
 
 		// Obtain the OfficeFloor
@@ -52,9 +52,9 @@ public class OfficeFloorObjectFactoryTest extends OfficeFrameTestCase {
 		assertNotNull("No OfficeFloor created", officeFloor);
 
 		// Invoke the work to ensure correct OfficeFloor
-		ValidateWork.reset();
-		ValidateWork.invokeWork(officeFloor, null);
-		assertTrue("Task should be invoked", ValidateWork.isTaskInvoked());
+		ValidateManagedFunction.reset();
+		ValidateManagedFunction.invokeFunction(officeFloor, null);
+		assertTrue("Task should be invoked", ValidateManagedFunction.isFunctionInvoked());
 	}
 
 	/**
@@ -65,7 +65,7 @@ public class OfficeFloorObjectFactoryTest extends OfficeFrameTestCase {
 	public void testInstantiateOfficeFloorIndirectly() throws Exception {
 
 		// Specify name of OfficeFloor
-		Name name = new CompositeName(ValidateWork
+		Name name = new CompositeName(ValidateManagedFunction
 				.getOfficeFloorJndiResourceName(false));
 
 		// Obtain the OfficeFloor
@@ -74,9 +74,9 @@ public class OfficeFloorObjectFactoryTest extends OfficeFrameTestCase {
 		assertNotNull("No OfficeFloor created", officeFloor);
 
 		// Invoke the work to ensure correct OfficeFloor
-		ValidateWork.reset();
-		ValidateWork.invokeWork(officeFloor, null);
-		assertTrue("Task should be invoked", ValidateWork.isTaskInvoked());
+		ValidateManagedFunction.reset();
+		ValidateManagedFunction.invokeFunction(officeFloor, null);
+		assertTrue("Task should be invoked", ValidateManagedFunction.isFunctionInvoked());
 	}
 
 	/**
@@ -85,14 +85,14 @@ public class OfficeFloorObjectFactoryTest extends OfficeFrameTestCase {
 	public void testInstantiateSameOfficeFloor() throws Exception {
 
 		// Obtain the OfficeFloor directly
-		Name directName = new CompositeName(ValidateWork
+		Name directName = new CompositeName(ValidateManagedFunction
 				.getOfficeFloorJndiResourceName(true));
 		OfficeFloor directOfficeFloor = (OfficeFloor) this.officeFloorOfficeFactory
 				.getObjectInstance(null, directName, null, null);
 		assertNotNull("No OfficeFloor created", directOfficeFloor);
 
 		// Obtain the OfficeFloor indirectly
-		Name indirectName = new CompositeName(ValidateWork
+		Name indirectName = new CompositeName(ValidateManagedFunction
 				.getOfficeFloorJndiResourceName(false));
 		OfficeFloor indirectOfficeFloor = (OfficeFloor) this.officeFloorOfficeFactory
 				.getObjectInstance(null, indirectName, null, null);

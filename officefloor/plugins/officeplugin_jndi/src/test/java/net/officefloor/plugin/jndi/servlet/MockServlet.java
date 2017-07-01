@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.plugin.jndi.context.ValidateWork;
+import net.officefloor.plugin.jndi.context.ValidateManagedFunction;
 
 /**
  * {@link Servlet} to test running an {@link OfficeFloor} via JNDI.
@@ -52,14 +52,14 @@ public class MockServlet extends HttpServlet {
 
 			// Obtain the OfficeFloor
 			OfficeFloor officeFloor = (OfficeFloor) initialContext
-					.lookup(ValidateWork.getOfficeFloorJndiName(false));
+					.lookup(ValidateManagedFunction.getOfficeFloorJndiName(false));
 
 			// Invoke the task
-			ValidateWork.reset();
-			ValidateWork.invokeWork(officeFloor, null);
+			ValidateManagedFunction.reset();
+			ValidateManagedFunction.invokeFunction(officeFloor, null);
 
 			// Obtain whether the task was invoked
-			isTaskInvoked = ValidateWork.isTaskInvoked();
+			isTaskInvoked = ValidateManagedFunction.isFunctionInvoked();
 
 		} catch (Exception ex) {
 			throw new ServletException(ex);

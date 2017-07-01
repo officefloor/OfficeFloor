@@ -31,7 +31,8 @@ import javax.net.ssl.SSLEngineResult.Status;
 import javax.net.ssl.SSLSession;
 
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.plugin.socket.server.impl.SimpleClientServerTest;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
 import net.officefloor.plugin.socket.server.ssl.OfficeFloorDefaultSslEngineSource;
@@ -56,8 +57,7 @@ public class SecureSimpleClientServerTest extends SimpleClientServerTest {
 		super.setUp();
 
 		// Create the client side of connection
-		SSLContext context = OfficeFloorDefaultSslEngineSource
-				.createClientSslContext(null);
+		SSLContext context = OfficeFloorDefaultSslEngineSource.createClientSslContext(null);
 		this.clientEngine = context.createSSLEngine("server", 443);
 		this.clientEngine.setUseClientMode(true);
 
@@ -106,19 +106,17 @@ public class SecureSimpleClientServerTest extends SimpleClientServerTest {
 	@Override
 	protected Properties getCommunicationProtocolProperties() {
 		Properties properties = new Properties();
-		properties.setProperty(
-				SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE,
+		properties.setProperty(SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE,
 				OfficeFloorDefaultSslEngineSource.class.getName());
 		return properties;
 	}
 
 	@Override
-	protected void handleInvokeProcess(Object parameter,
-			ManagedObject managedObject, EscalationHandler escalationHandler) {
+	protected void handleInvokeProcess(Object parameter, ManagedObject managedObject, FlowCallback callback) {
 
-		// Invoke the task for the server
-		Runnable task = (Runnable) parameter;
-		task.run();
+		// Invoke the runnable for the server
+		Runnable runnable = (Runnable) parameter;
+		runnable.run();
 	}
 
 	@Override
@@ -191,8 +189,7 @@ public class SecureSimpleClientServerTest extends SimpleClientServerTest {
 
 			// Handle handshake
 			boolean isWrap = false;
-			HandshakeStatus handshakeStatus = this.clientEngine
-					.getHandshakeStatus();
+			HandshakeStatus handshakeStatus = this.clientEngine.getHandshakeStatus();
 			switch (handshakeStatus) {
 
 			case NEED_UNWRAP:
@@ -226,8 +223,7 @@ public class SecureSimpleClientServerTest extends SimpleClientServerTest {
 				System.out.println("CLIENT: wrap");
 
 				// Create the plain data
-				ByteBuffer plainBuffer = ByteBuffer
-						.wrap(data == null ? new byte[0] : data);
+				ByteBuffer plainBuffer = ByteBuffer.wrap(data == null ? new byte[0] : data);
 
 				// Create buffer for cipher data
 				SSLSession session = this.clientEngine.getSession();
@@ -235,8 +231,7 @@ public class SecureSimpleClientServerTest extends SimpleClientServerTest {
 				ByteBuffer cipherBuffer = ByteBuffer.allocate(packetBufferSize);
 
 				// Wrap up the data
-				SSLEngineResult result = this.clientEngine.wrap(plainBuffer,
-						cipherBuffer);
+				SSLEngineResult result = this.clientEngine.wrap(plainBuffer, cipherBuffer);
 				Status status = result.getStatus();
 				switch (status) {
 				case CLOSED:
@@ -246,15 +241,13 @@ public class SecureSimpleClientServerTest extends SimpleClientServerTest {
 				default:
 					fail("Should have wrapped data: " + status);
 				}
-				assertEquals("Not all bytes consumed", (data == null ? 0
-						: data.length), result.bytesConsumed());
+				assertEquals("Not all bytes consumed", (data == null ? 0 : data.length), result.bytesConsumed());
 
 				// Write the data from client to server
 				cipherBuffer.flip();
 				byte[] cipherData = new byte[cipherBuffer.remaining()];
 				cipherBuffer.get(cipherData);
-				assertTrue("Must have data to send to server",
-						(cipherData.length > 0));
+				assertTrue("Must have data to send to server", (cipherData.length > 0));
 				super.writeDataFromClientToServer(cipherData);
 
 				// Flag that data sent to the server
@@ -287,8 +280,7 @@ public class SecureSimpleClientServerTest extends SimpleClientServerTest {
 
 			// Handle handshake
 			boolean isUnwrap = false;
-			HandshakeStatus handshakeStatus = this.clientEngine
-					.getHandshakeStatus();
+			HandshakeStatus handshakeStatus = this.clientEngine.getHandshakeStatus();
 			switch (handshakeStatus) {
 
 			case NEED_WRAP:
@@ -343,38 +335,29 @@ public class SecureSimpleClientServerTest extends SimpleClientServerTest {
 				}
 
 				// Include remaining cipher data
-				byte[] dataToUnwrap = new byte[this.remainingCipherBytes.length
-						+ cipherData.length];
-				System.arraycopy(this.remainingCipherBytes, 0, dataToUnwrap, 0,
-						this.remainingCipherBytes.length);
-				System.arraycopy(cipherData, 0, dataToUnwrap,
-						this.remainingCipherBytes.length, cipherData.length);
+				byte[] dataToUnwrap = new byte[this.remainingCipherBytes.length + cipherData.length];
+				System.arraycopy(this.remainingCipherBytes, 0, dataToUnwrap, 0, this.remainingCipherBytes.length);
+				System.arraycopy(cipherData, 0, dataToUnwrap, this.remainingCipherBytes.length, cipherData.length);
 
 				// Ensure consume all cipher data
 				int totalBytesConsumed = 0;
 				Status status = Status.OK;
 				boolean isRunOnce = true;
-				UNWRAP_DATA: while (isRunOnce
-						&& (totalBytesConsumed < dataToUnwrap.length)) {
+				UNWRAP_DATA: while (isRunOnce && (totalBytesConsumed < dataToUnwrap.length)) {
 					isRunOnce = false;
 
 					// Indicate progress
 					System.out.println("CLIENT: unwrap");
 
 					// Obtain the next buffer of cipher data
-					int bytesToConsume = Math.min(
-							(dataToUnwrap.length - totalBytesConsumed),
-							packetBufferSize);
-					ByteBuffer cipherBuffer = ByteBuffer.wrap(dataToUnwrap,
-							totalBytesConsumed, bytesToConsume);
+					int bytesToConsume = Math.min((dataToUnwrap.length - totalBytesConsumed), packetBufferSize);
+					ByteBuffer cipherBuffer = ByteBuffer.wrap(dataToUnwrap, totalBytesConsumed, bytesToConsume);
 
 					// Create buffer for plain data
-					ByteBuffer plainBuffer = ByteBuffer
-							.allocate(applicationBufferSize);
+					ByteBuffer plainBuffer = ByteBuffer.allocate(applicationBufferSize);
 
 					// Unwrap the cipher data
-					SSLEngineResult result = this.clientEngine.unwrap(
-							cipherBuffer, plainBuffer);
+					SSLEngineResult result = this.clientEngine.unwrap(cipherBuffer, plainBuffer);
 					status = result.getStatus();
 					switch (status) {
 					case BUFFER_UNDERFLOW:
@@ -410,10 +393,8 @@ public class SecureSimpleClientServerTest extends SimpleClientServerTest {
 					case NEED_UNWRAP:
 					case NOT_HANDSHAKING:
 						// Consume the bytes
-						assertTrue(
-								"Should have consumed bytes in unwrap [handshake "
-										+ this.clientEngine.getHandshakeStatus()
-										+ "]", (bytesConsumed > 0));
+						assertTrue("Should have consumed bytes in unwrap [handshake "
+								+ this.clientEngine.getHandshakeStatus() + "]", (bytesConsumed > 0));
 
 						// Obtain the data
 						plainBuffer.flip();
@@ -429,10 +410,8 @@ public class SecureSimpleClientServerTest extends SimpleClientServerTest {
 				}
 
 				// Keep track of remaining data
-				this.remainingCipherBytes = new byte[dataToUnwrap.length
-						- totalBytesConsumed];
-				System.arraycopy(dataToUnwrap, totalBytesConsumed,
-						this.remainingCipherBytes, 0,
+				this.remainingCipherBytes = new byte[dataToUnwrap.length - totalBytesConsumed];
+				System.arraycopy(dataToUnwrap, totalBytesConsumed, this.remainingCipherBytes, 0,
 						this.remainingCipherBytes.length);
 
 				// Determine if continue handshake

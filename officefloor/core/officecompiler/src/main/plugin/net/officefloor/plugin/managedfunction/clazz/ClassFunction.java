@@ -48,17 +48,17 @@ public class ClassFunction implements ManagedFunction<Indexed, Indexed> {
 	 */
 	public static Object invokeMethod(Object instance, Method method, Object[] parameters) throws Throwable {
 
-		// Invoke the task
+		// Invoke the function
 		try {
 			return method.invoke(instance, parameters);
 		} catch (InvocationTargetException ex) {
-			// Propagate failure of task
+			// Propagate failure of function
 			throw ex.getCause();
 		} catch (IllegalArgumentException ex) {
 
 			// Provide detail of illegal argument
 			StringBuilder message = new StringBuilder();
-			message.append("Task failure invoking ");
+			message.append("Function failure invoking ");
 			message.append(method.getName());
 			message.append("(");
 			boolean isFirst = true;
@@ -119,7 +119,8 @@ public class ClassFunction implements ManagedFunction<Indexed, Indexed> {
 	 * @param parameterFactories
 	 *            {@link ManagedFunctionParameterFactory} instances.
 	 */
-	public ClassFunction(Constructor<?> constructor, Method method, ManagedFunctionParameterFactory[] parameterFactories) {
+	public ClassFunction(Constructor<?> constructor, Method method,
+			ManagedFunctionParameterFactory[] parameterFactories) {
 		this.method = method;
 		this.constructor = constructor;
 		this.parameterFactories = parameterFactories;

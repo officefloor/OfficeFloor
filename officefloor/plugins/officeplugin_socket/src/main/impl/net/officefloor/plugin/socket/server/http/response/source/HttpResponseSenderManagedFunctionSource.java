@@ -22,11 +22,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
-import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
-import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 
 /**
@@ -34,7 +33,7 @@ import net.officefloor.plugin.socket.server.http.HttpResponse;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpResponseSenderWorkSource extends AbstractWorkSource<Work> {
+public class HttpResponseSenderManagedFunctionSource extends AbstractManagedFunctionSource {
 
 	/**
 	 * Property to obtain the HTTP status for the {@link HttpResponse}.
@@ -57,42 +56,33 @@ public class HttpResponseSenderWorkSource extends AbstractWorkSource<Work> {
 	}
 
 	@Override
-	public void sourceManagedFunctions(FunctionNamespaceBuilder<Work> workTypeBuilder,
+	public void sourceManagedFunctions(FunctionNamespaceBuilder functionTypeBuilder,
 			ManagedFunctionSourceContext context) throws Exception {
 
 		// Obtain the HTTP status (default negative to not set)
-		int httpStatus = Integer.parseInt(context.getProperty(
-				PROPERTY_HTTP_STATUS, String.valueOf(-1)));
+		int httpStatus = Integer.parseInt(context.getProperty(PROPERTY_HTTP_STATUS, String.valueOf(-1)));
 
 		// Obtain the HTTP response content (null to not set)
-		String httpResponseFile = context.getProperty(
-				PROPERTY_HTTP_RESPONSE_CONTENT_FILE, null);
+		String httpResponseFile = context.getProperty(PROPERTY_HTTP_RESPONSE_CONTENT_FILE, null);
 		byte[] httpResponseContent = null;
 		if (httpResponseFile != null) {
 			// Obtain the HTTP response content
-			InputStream httpResponseInputStream = context
-					.getOptionalResource(httpResponseFile);
+			InputStream httpResponseInputStream = context.getOptionalResource(httpResponseFile);
 			if (httpResponseInputStream == null) {
 				throw new FileNotFoundException(
-						"Can not find HTTP response file '" + httpResponseFile
-								+ "' on the class path");
+						"Can not find HTTP response file '" + httpResponseFile + "' on the class path");
 			}
 			ByteArrayOutputStream fileContent = new ByteArrayOutputStream();
-			for (int data = httpResponseInputStream.read(); data != -1; data = httpResponseInputStream
-					.read()) {
+			for (int data = httpResponseInputStream.read(); data != -1; data = httpResponseInputStream.read()) {
 				fileContent.write(data);
 			}
 			httpResponseContent = fileContent.toByteArray();
 		}
 
-		// Create the send task
-		HttpResponseSendTask task = new HttpResponseSendTask(httpStatus,
-				httpResponseContent);
+		// Create the send function
+		HttpResponseSendFunction function = new HttpResponseSendFunction(httpStatus, httpResponseContent);
 
-		// Load the work type information
-		workTypeBuilder.setWorkFactory(task);
-
-		// Load the send task type information
-		HttpResponseSendTask.addTaskType("SEND", task, workTypeBuilder);
+		// Load the send function type information
+		HttpResponseSendFunction.addFunctionType("SEND", function, functionTypeBuilder);
 	}
 }

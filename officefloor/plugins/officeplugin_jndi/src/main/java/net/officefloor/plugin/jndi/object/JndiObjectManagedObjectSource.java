@@ -20,12 +20,12 @@ package net.officefloor.plugin.jndi.object;
 import javax.naming.Context;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.ObjectRegistry;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
  * <p>
@@ -36,8 +36,7 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
  * @author Daniel Sagenschneider
  */
 public class JndiObjectManagedObjectSource
-		extends
-		AbstractManagedObjectSource<JndiObjectManagedObjectSource.JndiObjectDependency, None> {
+		extends AbstractManagedObjectSource<JndiObjectManagedObjectSource.JndiObjectDependency, None> {
 
 	/**
 	 * Name of property providing the JNDI name of the Object to return.
@@ -72,11 +71,8 @@ public class JndiObjectManagedObjectSource
 	}
 
 	@Override
-	protected void loadMetaData(
-			MetaDataContext<JndiObjectDependency, None> context)
-			throws Exception {
-		ManagedObjectSourceContext<None> mosContext = context
-				.getManagedObjectSourceContext();
+	protected void loadMetaData(MetaDataContext<JndiObjectDependency, None> context) throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Obtain the JNDI name
 		this.jndiName = mosContext.getProperty(PROPERTY_JNDI_NAME);
@@ -101,8 +97,7 @@ public class JndiObjectManagedObjectSource
 	/**
 	 * {@link ManagedObject} to return the JNDI Object.
 	 */
-	private class JndiObjectManagedObject implements
-			CoordinatingManagedObject<JndiObjectDependency> {
+	private class JndiObjectManagedObject implements CoordinatingManagedObject<JndiObjectDependency> {
 
 		/**
 		 * {@link Context} to obtain the Object from.
@@ -114,19 +109,16 @@ public class JndiObjectManagedObjectSource
 		 */
 
 		@Override
-		public void loadObjects(ObjectRegistry<JndiObjectDependency> registry)
-				throws Throwable {
+		public void loadObjects(ObjectRegistry<JndiObjectDependency> registry) throws Throwable {
 			// Obtain the Context
-			this.context = (Context) registry
-					.getObject(JndiObjectDependency.CONTEXT);
+			this.context = (Context) registry.getObject(JndiObjectDependency.CONTEXT);
 		}
 
 		@Override
 		public Object getObject() throws Throwable {
 
 			// Obtain the Object from JNDI Context
-			Object object = this.context
-					.lookup(JndiObjectManagedObjectSource.this.jndiName);
+			Object object = this.context.lookup(JndiObjectManagedObjectSource.this.jndiName);
 
 			// Return the Object
 			return object;

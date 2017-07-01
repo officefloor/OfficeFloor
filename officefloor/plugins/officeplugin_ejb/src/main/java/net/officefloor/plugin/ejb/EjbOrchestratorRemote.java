@@ -20,7 +20,7 @@ package net.officefloor.plugin.ejb;
 import javax.ejb.Remote;
 import javax.naming.NamingException;
 
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -37,7 +37,7 @@ public interface EjbOrchestratorRemote {
 	 * @param <P>
 	 *            Parameter type.
 	 * @param parameter
-	 *            Parameter for the initial {@link Work} of the
+	 *            Parameter for the {@link ManagedFunction} of the
 	 *            {@link OfficeFloor} initiating the orchestration of the EJBs.
 	 * @return As {@link Remote} invocations pass by value (serialised), the
 	 *         input parameter is returned to allow changes to the parameter to

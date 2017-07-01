@@ -19,8 +19,8 @@ package net.officefloor.plugin.socket.server.protocol;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
 
 /**
  * Provides implementation of a communication protocol.
@@ -48,8 +48,7 @@ public interface CommunicationProtocolSource {
 	 * @throws Exception
 	 *             If fails to create the {@link CommunicationProtocol}.
 	 */
-	CommunicationProtocol createCommunicationProtocol(
-			MetaDataContext<None, Indexed> configurationContext,
+	CommunicationProtocol createCommunicationProtocol(MetaDataContext<None, Indexed> configurationContext,
 			CommunicationProtocolContext protocolContext) throws Exception;
 
 }

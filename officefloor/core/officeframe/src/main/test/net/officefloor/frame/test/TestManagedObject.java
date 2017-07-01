@@ -413,9 +413,8 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 		public Object execute(ManagedFunctionContext<O, F> context) throws Throwable {
 
 			// Obtain the recycle parameter and managed object
-			@SuppressWarnings("unchecked")
-			RecycleManagedObjectParameter<TestManagedObject<O, F>> parameter = (RecycleManagedObjectParameter<TestManagedObject<O, F>>) context
-					.getObject(0);
+			RecycleManagedObjectParameter<TestManagedObject<O, F>> parameter = RecycleManagedObjectParameter
+					.getRecycleManagedObjectParameter(context);
 			TestManagedObject.this.recycledManagedObject = parameter.getManagedObject();
 
 			// Consume parameter

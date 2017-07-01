@@ -15,25 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.jndi.work;
+package net.officefloor.plugin.jndi.function;
 
-import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Work;
+import javax.naming.Context;
+import javax.naming.NamingException;
+import javax.resource.spi.work.Work;
 
 /**
- * {@link WorkFactory} for a JNDI Object.
+ * JNDI reference.
  * 
  * @author Daniel Sagenschneider
  */
-public class JndiWorkFactory implements WorkFactory<JndiWork> {
+public class JndiReference {
 
 	/**
-	 * JNDI name for the {@link Work} Object.
+	 * JNDI name of the Object.
 	 */
 	private final String jndiName;
 
 	/**
-	 * Facade {@link Class}.
+	 * Facade {@link Class}. May be <code>null</code>.
 	 */
 	private final Class<?> facadeClass;
 
@@ -41,22 +42,37 @@ public class JndiWorkFactory implements WorkFactory<JndiWork> {
 	 * Initiate.
 	 * 
 	 * @param jndiName
-	 *            JNDI name for the {@link Work} Object.
+	 *            JNDI name of the {@link Work} Object.
 	 * @param facadeClass
-	 *            Facade {@link Class}.
+	 *            Facade {@link Class}. May be <code>null</code>.
 	 */
-	public JndiWorkFactory(String jndiName, Class<?> facadeClass) {
+	public JndiReference(String jndiName, Class<?> facadeClass) {
 		this.jndiName = jndiName;
 		this.facadeClass = facadeClass;
 	}
 
-	/*
-	 * ====================== WorkFactory ============================
+	/**
+	 * Obtains the JNDI Object.
+	 * 
+	 * @param context
+	 *            {@link Context}.
+	 * @return JNDI Object.
+	 * @throws NamingException
+	 *             If fails to obtain the JNDI Object.
 	 */
+	public Object getJndiObject(Context context) throws NamingException {
+		return context.lookup(this.jndiName);
+	}
 
-	@Override
-	public JndiWork createWork() {
-		return new JndiWork(this.jndiName, this.facadeClass);
+	/**
+	 * Obtains the facade.
+	 * 
+	 * @return Facade.
+	 * @throws Exception
+	 *             If fails to create the Facade.
+	 */
+	public Object getFacade() throws Exception {
+		return this.facadeClass.newInstance();
 	}
 
 }

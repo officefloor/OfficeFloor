@@ -19,12 +19,12 @@ package net.officefloor.plugin.socket.server.tcp;
 
 import java.io.IOException;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.plugin.socket.server.protocol.Connection;
-import net.officefloor.plugin.stream.ServerOutputStream;
 import net.officefloor.plugin.stream.ServerInputStream;
+import net.officefloor.plugin.stream.ServerOutputStream;
 
 /**
  * TCP connection to be handled by the {@link OfficeFloor}.
@@ -34,8 +34,8 @@ import net.officefloor.plugin.stream.ServerInputStream;
 public interface ServerTcpConnection {
 
 	/**
-	 * Obtains the {@link ServerInputStream} that provides access to the data sent
-	 * from the client.
+	 * Obtains the {@link ServerInputStream} that provides access to the data
+	 * sent from the client.
 	 * 
 	 * @return {@link ServerInputStream}.
 	 */
@@ -43,11 +43,11 @@ public interface ServerTcpConnection {
 
 	/**
 	 * <p>
-	 * Flags for the {@link ManagedObject} to not execute another {@link ManagedFunction}
-	 * until further data is received from the client.
+	 * Flags for the {@link ManagedObject} to not execute another
+	 * {@link ManagedFunction} until further data is received from the client.
 	 * <p>
-	 * On calling this the next time a {@link ManagedFunction} is invoked using this
-	 * {@link ManagedObject}, data will be available from the
+	 * On calling this the next time a {@link ManagedFunction} is invoked using
+	 * this {@link ManagedObject}, data will be available from the
 	 * {@link ServerInputStream}.
 	 * 
 	 * @return <code>true</code> indicating if will wait on client data.

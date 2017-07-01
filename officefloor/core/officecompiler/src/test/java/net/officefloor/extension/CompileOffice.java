@@ -28,7 +28,12 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
+ * <p>
  * {@link OfficeExtensionService} to configure the {@link Office} within tests.
+ * <p>
+ * For this to operate within tests, the
+ * <code>src/test/resources/META-INF/services/net.officefloor.compile.spi.office.extension.OfficeExtensionService</code>
+ * must be configured with this class name.
  * 
  * @author Daniel Sagenschneider
  */

@@ -23,11 +23,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
-import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
-import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
+import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
@@ -38,26 +38,32 @@ import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public class CleanupTask extends AbstractSingleTask<Work, None, None> {
+public class CleanupManagedFunction implements ManagedFunctionFactory<None, None>, ManagedFunction<None, None> {
 
 	/**
 	 * {@link Logger}.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(CleanupTask.class
-			.getName());
+	private static final Logger LOGGER = Logger.getLogger(CleanupManagedFunction.class.getName());
 
 	/*
-	 * ======================= Task ===============================
+	 * ==================== ManagedFunctionFactory ===========================
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<Work, None, None> context)
-			throws IOException {
+	public ManagedFunction<None, None> createManagedFunction() throws Throwable {
+		return this;
+	}
+
+	/*
+	 * ======================= ManagedFunction ===============================
+	 */
+
+	@Override
+	public Object execute(ManagedFunctionContext<None, None> context) throws IOException {
 
 		// Obtain the recycle parameter
-		RecycleManagedObjectParameter<HttpManagedObject> parameter = this
-				.getRecycleManagedObjectParameter(context,
-						HttpManagedObject.class);
+		RecycleManagedObjectParameter<HttpManagedObject> parameter = RecycleManagedObjectParameter
+				.getRecycleManagedObjectParameter(context);
 
 		// Obtain the HTTP managed object
 		HttpManagedObject managedObject = parameter.getManagedObject();
@@ -72,9 +78,8 @@ public class CleanupTask extends AbstractSingleTask<Work, None, None> {
 		} catch (ClosedChannelException ex) {
 			// Connection closed. Must handle as recycle task in new process
 			if (LOGGER.isLoggable(Level.FINE)) {
-				LOGGER.log(Level.FINE, "Failed cleaning up "
-						+ HttpManagedObject.class.getSimpleName()
-						+ " as connection closed", ex);
+				LOGGER.log(Level.FINE,
+						"Failed cleaning up " + HttpManagedObject.class.getSimpleName() + " as connection closed", ex);
 			}
 		}
 

@@ -24,15 +24,14 @@ import java.util.TimeZone;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
 
 /**
  * {@link HttpServerClock} implementation.
  *
  * @author Daniel Sagenschneider
  */
-public class HttpServerClockImpl implements HttpServerClockSource,
-		HttpServerClock {
+public class HttpServerClockImpl implements HttpServerClockSource, HttpServerClock {
 
 	/**
 	 * Formatter for the date header value.
@@ -49,8 +48,7 @@ public class HttpServerClockImpl implements HttpServerClockSource,
 	 */
 	public HttpServerClockImpl() {
 		// Setup the date formatter at startup for performance
-		this.dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z",
-				Locale.US);
+		this.dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
 		this.dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 	}
 
@@ -59,9 +57,7 @@ public class HttpServerClockImpl implements HttpServerClockSource,
 	 */
 
 	@Override
-	public HttpServerClock createHttpServerClock(
-			MetaDataContext<None, Indexed> configurationContext)
-			throws Exception {
+	public HttpServerClock createHttpServerClock(MetaDataContext<None, Indexed> configurationContext) throws Exception {
 		return this;
 	}
 

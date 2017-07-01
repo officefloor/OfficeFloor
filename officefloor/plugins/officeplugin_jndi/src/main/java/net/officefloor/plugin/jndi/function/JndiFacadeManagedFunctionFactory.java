@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.jndi.work;
+package net.officefloor.plugin.jndi.function;
 
 import java.lang.reflect.Method;
 
@@ -23,18 +23,23 @@ import javax.naming.Context;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.plugin.work.clazz.ClassTask;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.plugin.managedfunction.clazz.ClassFunction;
 
 /**
- * {@link ManagedFunctionFactory} for the invoking the facade on the JNDI object.
+ * {@link ManagedFunctionFactory} for the invoking the facade on the JNDI
+ * object.
  * 
  * @author Daniel Sagenschneider
  */
-public class JndiFacadeTaskFactory implements
-		ManagedFunctionFactory<JndiWork, Indexed, None> {
+public class JndiFacadeManagedFunctionFactory implements ManagedFunctionFactory<Indexed, None> {
+
+	/**
+	 * {@link JndiReference}.
+	 */
+	private final JndiReference reference;
 
 	/**
 	 * {@link Method}.
@@ -54,6 +59,8 @@ public class JndiFacadeTaskFactory implements
 	/**
 	 * Initiate.
 	 * 
+	 * @param reference
+	 *            {@link JndiReference}.
 	 * @param method
 	 *            {@link Method}.
 	 * @param isStatic
@@ -61,59 +68,53 @@ public class JndiFacadeTaskFactory implements
 	 * @param parameterFactories
 	 *            {@link ParameterFactory} instances.
 	 */
-	public JndiFacadeTaskFactory(Method method, boolean isStatic,
+	public JndiFacadeManagedFunctionFactory(JndiReference reference, Method method, boolean isStatic,
 			ParameterFactory[] parameterFactories) {
+		this.reference = reference;
 		this.method = method;
 		this.isStatic = isStatic;
 		this.parameterFactories = parameterFactories;
 	}
 
 	/*
-	 * ======================= TaskFactory =========================
+	 * ======================= ManagedFunctionFactory =========================
 	 */
 
 	@Override
-	public ManagedFunction<JndiWork, Indexed, None> createManagedFunction(JndiWork work) {
-		return new JndiFacadeTask();
+	public ManagedFunction<Indexed, None> createManagedFunction() {
+		return new JndiFacadeManagedFunction();
 	}
 
 	/**
 	 * {@link ManagedFunction} to execute the facade on the JNDI object.
 	 */
-	private class JndiFacadeTask implements ManagedFunction<JndiWork, Indexed, None> {
+	private class JndiFacadeManagedFunction implements ManagedFunction<Indexed, None> {
 
 		/*
-		 * ======================= Task =============================
+		 * ======================= ManagedFunction =============================
 		 */
 
 		@Override
-		public Object execute(ManagedFunctionContext<JndiWork, Indexed, None> context)
-				throws Throwable {
+		public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
 
-			// Obtain the JNDI object and facade
+			// Obtain the JNDI object
 			Context jndiContext = (Context) context.getObject(0);
-			JndiWork work = context.getWork();
-			Object jndiObject;
-			Object facade;
-			synchronized (work) {
-				jndiObject = work.getJndiObject(jndiContext);
-				facade = work.getFacade();
-			}
+			Object object = JndiFacadeManagedFunctionFactory.this.reference.getJndiObject(jndiContext);
 
-			// Obtain the instance to invoke the method on
-			Object instance = (JndiFacadeTaskFactory.this.isStatic ? null
-					: facade);
+			// Obtain the facade instance to invoke the method on
+			Object facade = (JndiFacadeManagedFunctionFactory.this.isStatic ? null
+					: JndiFacadeManagedFunctionFactory.this.reference.getFacade());
 
 			// Create the listing of parameters
-			Object[] params = new Object[JndiFacadeTaskFactory.this.parameterFactories.length];
+			Object[] params = new Object[JndiFacadeManagedFunctionFactory.this.parameterFactories.length];
 			for (int i = 0; i < params.length; i++) {
-				params[i] = JndiFacadeTaskFactory.this.parameterFactories[i]
-						.createParameter(jndiObject, context);
+				params[i] = JndiFacadeManagedFunctionFactory.this.parameterFactories[i].createParameter(object,
+						context);
 			}
 
-			// Invoke the task
-			Object returnValue = ClassTask.invokeMethod(instance,
-					JndiFacadeTaskFactory.this.method, params);
+			// Invoke the function
+			Object returnValue = ClassFunction.invokeMethod(facade, JndiFacadeManagedFunctionFactory.this.method,
+					params);
 
 			// Return the value
 			return returnValue;

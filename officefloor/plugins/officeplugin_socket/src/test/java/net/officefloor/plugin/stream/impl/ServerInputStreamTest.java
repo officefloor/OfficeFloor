@@ -19,6 +19,7 @@ package net.officefloor.plugin.stream.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -44,8 +45,7 @@ public class ServerInputStreamTest extends OfficeFrameTestCase {
 	/**
 	 * {@link BrowseInputStream}.
 	 */
-	private final BrowseInputStream browse = this.stream
-			.createBrowseInputStream();
+	private final BrowseInputStream browse = this.stream.createBrowseInputStream();
 
 	/**
 	 * Ensure EOF.
@@ -106,8 +106,7 @@ public class ServerInputStreamTest extends OfficeFrameTestCase {
 		// Obtain another browse
 		assertEquals("Incorrect browse read value", 10, another.read());
 		assertEquals("Should be browse EOF", -1, another.read());
-		assertEquals("No further browse data available", -1,
-				another.available());
+		assertEquals("No further browse data available", -1, another.available());
 
 		// Read the only data
 		assertEquals("Incorrect read value", 10, this.stream.read());
@@ -115,11 +114,9 @@ public class ServerInputStreamTest extends OfficeFrameTestCase {
 		assertEquals("No further data available", -1, this.stream.available());
 
 		// Browse data should be available after read
-		assertEquals("Read value still available for browse", 10,
-				this.browse.read());
+		assertEquals("Read value still available for browse", 10, this.browse.read());
 		assertEquals("Should now be EOF for browse", -1, this.browse.read());
-		assertEquals("No further data available for browse", -1,
-				this.browse.available());
+		assertEquals("No further data available for browse", -1, this.browse.available());
 	}
 
 	/**
@@ -140,8 +137,7 @@ public class ServerInputStreamTest extends OfficeFrameTestCase {
 		// Browse the only bounded data
 		assertEquals("Incorrect browse read value", 2, this.browse.read());
 		assertEquals("Should be browse EOF", -1, this.browse.read());
-		assertEquals("No further browse data available", -1,
-				this.browse.available());
+		assertEquals("No further browse data available", -1, this.browse.available());
 	}
 
 	/**
@@ -153,8 +149,7 @@ public class ServerInputStreamTest extends OfficeFrameTestCase {
 		this.stream.inputData(new byte[] { 11 }, 0, 0, true);
 		this.stream.inputData(new byte[] { 22 }, 0, 0, false);
 		assertEquals("Data should be available", 2, this.stream.available());
-		assertEquals("Browse data should be available", 2,
-				this.browse.available());
+		assertEquals("Browse data should be available", 2, this.browse.available());
 
 		// Read the first datum
 		assertEquals("Incorrect first read", 11, this.stream.read());
@@ -184,9 +179,7 @@ public class ServerInputStreamTest extends OfficeFrameTestCase {
 			this.stream.inputData(null, 0, 0, false);
 			fail("Should not be successful");
 		} catch (IllegalStateException ex) {
-			assertEquals(
-					"Incorrect cause",
-					"May not input further data as flagged previously that no further data",
+			assertEquals("Incorrect cause", "May not input further data as flagged previously that no further data",
 					ex.getMessage());
 		}
 	}
@@ -200,8 +193,7 @@ public class ServerInputStreamTest extends OfficeFrameTestCase {
 			this.stream.exportState();
 			fail("Should not be successful");
 		} catch (NotAllDataAvailableException ex) {
-			assertEquals(
-					"Incorrect cause",
+			assertEquals("Incorrect cause",
 					"ServerInputStream has not finished receiving data.  Can not obtain complete state momento.",
 					ex.getMessage());
 		}
@@ -210,15 +202,13 @@ public class ServerInputStreamTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure only allow appropriate momento.
 	 */
-	public void testInvalidMomento() {
+	public void testInvalidMomento() throws Exception {
 
 		// Ensure fails if invalid momento
-		try {
-			new ServerInputStreamImpl(this, this.createMock(Serializable.class));
+		try (Closeable ignore = new ServerInputStreamImpl(this, this.createMock(Serializable.class))) {
 			fail("Should not be successful");
 		} catch (IllegalArgumentException ex) {
-			assertEquals("Incorrect cause",
-					"Invalid momento for ServerInputStream", ex.getMessage());
+			assertEquals("Incorrect cause", "Invalid momento for ServerInputStream", ex.getMessage());
 		}
 	}
 
@@ -242,8 +232,7 @@ public class ServerInputStreamTest extends OfficeFrameTestCase {
 		// Load the single input data
 		final String CONTENT = "TEST";
 		final byte[] CONTENT_BYTES = CONTENT.getBytes();
-		this.stream.inputData(CONTENT_BYTES, 0, (CONTENT_BYTES.length - 1),
-				false);
+		this.stream.inputData(CONTENT_BYTES, 0, (CONTENT_BYTES.length - 1), false);
 
 		// Ensure correct content
 		this.assertMomentoClonedStream(CONTENT);
@@ -257,8 +246,7 @@ public class ServerInputStreamTest extends OfficeFrameTestCase {
 		// Load multiple input data
 		for (String content : new String[] { "ONE_", "TWO_", "THREE_", "last" }) {
 			byte[] contentBytes = content.getBytes();
-			this.stream.inputData(contentBytes, 0, (contentBytes.length - 1),
-					(!("last".equals(content))));
+			this.stream.inputData(contentBytes, 0, (contentBytes.length - 1), (!("last".equals(content))));
 		}
 
 		// Ensure correct content
@@ -276,8 +264,7 @@ public class ServerInputStreamTest extends OfficeFrameTestCase {
 			for (int i = 0; i < contentBytes.length; i++) {
 				inputBytes[i + 2] = contentBytes[i];
 			}
-			this.stream.inputData(inputBytes, 2, (inputBytes.length - 3),
-					(!("last".equals(content))));
+			this.stream.inputData(inputBytes, 2, (inputBytes.length - 3), (!("last".equals(content))));
 		}
 
 		// Ensure correct content
@@ -303,33 +290,26 @@ public class ServerInputStreamTest extends OfficeFrameTestCase {
 			output.flush();
 
 			// Unserialise the momento
-			ByteArrayInputStream inputBuffer = new ByteArrayInputStream(
-					outputBuffer.toByteArray());
+			ByteArrayInputStream inputBuffer = new ByteArrayInputStream(outputBuffer.toByteArray());
 			ObjectInputStream input = new ObjectInputStream(inputBuffer);
-			Serializable unserialisedMomento = (Serializable) input
-					.readObject();
+			Serializable unserialisedMomento = (Serializable) input.readObject();
 
 			// Create new input stream from momento
-			ServerInputStream clonedStream = new ServerInputStreamImpl(this,
-					unserialisedMomento);
+			ServerInputStream clonedStream = new ServerInputStreamImpl(this, unserialisedMomento);
 
 			// Determine stream cloned correctly
 			if (expectedContent == null) {
 				// Should have no content (end of stream)
-				assertEquals("Should have no content", -1,
-						clonedStream.available());
+				assertEquals("Should have no content", -1, clonedStream.available());
 
 			} else {
 				// Ensure appropriate content is available
 				byte[] expectedBytes = expectedContent.getBytes();
-				assertEquals("Incorrect number of bytes available",
-						expectedBytes.length, clonedStream.available());
+				assertEquals("Incorrect number of bytes available", expectedBytes.length, clonedStream.available());
 				byte[] actualBytes = new byte[expectedBytes.length];
 				clonedStream.read(actualBytes);
-				assertEquals("Incorrect content", expectedContent, new String(
-						actualBytes));
-				assertEquals("Should now be end of stream", -1,
-						clonedStream.available());
+				assertEquals("Incorrect content", expectedContent, new String(actualBytes));
+				assertEquals("Should now be end of stream", -1, clonedStream.available());
 			}
 
 			// Close the cloned stream

@@ -39,8 +39,8 @@ import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSendTask.HttpResponseSendTaskDependencies;
-import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSenderWorkSource;
+import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSendFunction.HttpResponseSendTaskDependencies;
+import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSenderManagedFunctionSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.route.HttpRouteTask.HttpRouteTaskDependencies;
@@ -198,7 +198,7 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 
 		// Provide input to send HTTP response
 		SectionWork sendResponseWork = designer.addSectionWork("SEND",
-				HttpResponseSenderWorkSource.class.getName());
+				HttpResponseSenderManagedFunctionSource.class.getName());
 		SectionTask sendResponseTask = sendResponseWork.addSectionTask("SEND",
 				"SEND");
 		linkObject(sendResponseTask,

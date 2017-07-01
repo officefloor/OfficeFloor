@@ -17,20 +17,15 @@
  */
 package net.officefloor.plugin.socket.server.http.source;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireApplication;
-import net.officefloor.autowire.AutoWireObject;
-import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.autowire.ManagedObjectSourceWirer;
-import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.compile.ManagedObjectSourceService;
+import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
-import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeamSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.protocol.HttpCommunicationProtocol;
@@ -44,10 +39,8 @@ import net.officefloor.plugin.socket.server.ssl.protocol.SslCommunicationProtoco
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpsServerSocketManagedObjectSource extends
-		AbstractServerSocketManagedObjectSource
-		implements
-		ManagedObjectSourceService<None, Indexed, HttpsServerSocketManagedObjectSource> {
+public class HttpsServerSocketManagedObjectSource extends AbstractServerSocketManagedObjectSource
+		implements ManagedObjectSourceService<None, Indexed, HttpsServerSocketManagedObjectSource> {
 
 	/**
 	 * Convenience method to create the {@link ManagedObjectSourceWirer} for
@@ -105,7 +98,7 @@ public class HttpsServerSocketManagedObjectSource extends
 	 *            {@link AutoWireSection} servicing the requests.
 	 * @return {@link AutoWireObject}.
 	 */
-	public static AutoWireObject autoWire(AutoWireApplication source, int port,
+	public static String autoWire(OfficeArchitect architect, int port,
 			Class<? extends SslEngineSource> sslEngineSourceClass,
 			String sectionName, String sectionInputName) {
 

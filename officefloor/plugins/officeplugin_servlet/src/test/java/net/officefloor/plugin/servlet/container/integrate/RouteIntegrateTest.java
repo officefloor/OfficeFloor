@@ -40,7 +40,7 @@ import net.officefloor.plugin.servlet.route.ServletRouteTask.FlowKeys;
 import net.officefloor.plugin.servlet.route.source.ServletRouteWorkSource;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
+import net.officefloor.plugin.socket.server.http.server.HttpServicerFunction;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
@@ -57,7 +57,7 @@ public class RouteIntegrateTest extends MockHttpServletServer {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public HttpServicerTask buildServlet(String servletContextName,
+	public HttpServicerFunction buildServlet(String servletContextName,
 			String httpName, String requestAttributesName, String sessionName,
 			String securityName) {
 
@@ -79,12 +79,12 @@ public class RouteIntegrateTest extends MockHttpServletServer {
 		this.constructTeam("TEAM", OnePersonTeamSource.class);
 
 		// Construct the router
-		HttpServicerTask routerRef = new HttpServicerTask("ROUTE", "Route");
+		HttpServicerFunction routerRef = new HttpServicerFunction("ROUTE", "Route");
 		FunctionNamespaceType<ServletRouteTask> type = WorkLoaderUtil
 				.loadWorkType(ServletRouteWorkSource.class);
 		ManagedFunctionBuilder<ServletRouteTask, DependencyKeys, FlowKeys> task = (ManagedFunctionBuilder<ServletRouteTask, DependencyKeys, FlowKeys>) this
 				.constructWork(routerRef.workName, type.getWorkFactory())
-				.addManagedFunction(routerRef.taskName,
+				.addManagedFunction(routerRef.functionName,
 						type.getManagedFunctionTypes()[0].getManagedFunctionFactory());
 		task.setTeam("TEAM");
 		task.linkManagedObject(DependencyKeys.HTTP_CONNECTION, httpName,

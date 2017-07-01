@@ -25,10 +25,10 @@ import java.nio.charset.Charset;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -51,8 +51,7 @@ import net.officefloor.plugin.socket.server.protocol.Connection;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpCommunicationProtocol implements CommunicationProtocolSource,
-		CommunicationProtocol {
+public class HttpCommunicationProtocol implements CommunicationProtocolSource, CommunicationProtocol {
 
 	/**
 	 * Name of property to determine if send stack trace on failure.
@@ -177,13 +176,15 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource,
 	 * @param httpManagedObject
 	 *            {@link HttpManagedObject} for the {@link HttpRequest}.
 	 */
-	public void serviceHttpRequest(HttpConnectionHandler handler,
-			HttpManagedObject httpManagedObject) {
+	public void serviceHttpRequest(HttpConnectionHandler handler, HttpManagedObject httpManagedObject) {
 
 		// Invoke processing of the HTTP managed object
-		this.executeContext.invokeProcess(this.requestHandlingFlowIndex,
-				httpManagedObject.getServerHttpConnection(), httpManagedObject,
-				0, httpManagedObject.getEscalationHandler());
+		this.executeContext.invokeProcess(this.requestHandlingFlowIndex, httpManagedObject.getServerHttpConnection(),
+				httpManagedObject, 0, (escalation) -> {
+					if (escalation != null) {
+						httpManagedObject.getEscalationHandler().handleEscalation(escalation);
+					}
+				});
 	}
 
 	/*
@@ -196,51 +197,38 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource,
 	}
 
 	@Override
-	public CommunicationProtocol createCommunicationProtocol(
-			MetaDataContext<None, Indexed> configurationContext,
+	public CommunicationProtocol createCommunicationProtocol(MetaDataContext<None, Indexed> configurationContext,
 			CommunicationProtocolContext protocolContext) throws Exception {
-		ManagedObjectSourceContext<Indexed> mosContext = configurationContext
-				.getManagedObjectSourceContext();
+		ManagedObjectSourceContext<Indexed> mosContext = configurationContext.getManagedObjectSourceContext();
 
 		// Obtain properties
-		this.isSendStackTraceOnFailure = Boolean
-				.parseBoolean(mosContext.getProperty(
-						PROPERTY_IS_SEND_STACK_TRACE_ON_FAILURE,
-						String.valueOf(DEFAULT_VALUE_IS_SEND_STACK_TRACE_ON_FAILURE)));
-		this.maximumHttpRequestHeaders = Integer.parseInt(mosContext
-				.getProperty(PROPERTY_MAXIMUM_HTTP_REQUEST_HEADERS, String
-						.valueOf(DEFAULT_VALUE_MAXIMUM_HTTP_REQUEST_HEADERS)));
-		this.maximumRequestBodyLength = Long.parseLong(mosContext.getProperty(
-				PROPERTY_MAXIMUM_REQUEST_BODY_LENGTH,
+		this.isSendStackTraceOnFailure = Boolean.parseBoolean(mosContext.getProperty(
+				PROPERTY_IS_SEND_STACK_TRACE_ON_FAILURE, String.valueOf(DEFAULT_VALUE_IS_SEND_STACK_TRACE_ON_FAILURE)));
+		this.maximumHttpRequestHeaders = Integer.parseInt(mosContext.getProperty(PROPERTY_MAXIMUM_HTTP_REQUEST_HEADERS,
+				String.valueOf(DEFAULT_VALUE_MAXIMUM_HTTP_REQUEST_HEADERS)));
+		this.maximumRequestBodyLength = Long.parseLong(mosContext.getProperty(PROPERTY_MAXIMUM_REQUEST_BODY_LENGTH,
 				String.valueOf(DEFAULT_VALUE_MAXIMUM_REQUEST_BODY_LENGTH)));
-		this.connectionTimeout = Long.parseLong(mosContext.getProperty(
-				PROPERTY_CONNECTION_TIMEOUT,
-				String.valueOf(DEFAULT_VALUE_CONNECTION_TIMEOUT)));
-		this.maxTextPartLength = Integer.parseInt(mosContext.getProperty(
-				PROPERTY_MAXIMUM_TEXT_PART_LENGTH,
+		this.connectionTimeout = Long.parseLong(
+				mosContext.getProperty(PROPERTY_CONNECTION_TIMEOUT, String.valueOf(DEFAULT_VALUE_CONNECTION_TIMEOUT)));
+		this.maxTextPartLength = Integer.parseInt(mosContext.getProperty(PROPERTY_MAXIMUM_TEXT_PART_LENGTH,
 				String.valueOf(DEFAULT_VALUE_MAXIMUM_TEXT_PART_LENGTH)));
 
 		// Obtain the server name
 		InputStream serverNameInput = mosContext
-				.getResource(HttpCommunicationProtocol.class.getPackage()
-						.getName().replace('.', '/')
-						+ "/Server.txt");
+				.getResource(HttpCommunicationProtocol.class.getPackage().getName().replace('.', '/') + "/Server.txt");
 		Reader reader = new InputStreamReader(serverNameInput);
 		StringWriter serverName = new StringWriter();
-		for (int character = reader.read(); character != -1; character = reader
-				.read()) {
+		for (int character = reader.read(); character != -1; character = reader.read()) {
 			serverName.write(character);
 		}
 		this.serverName = serverName.toString();
 
 		// Obtain the HTTP server clock
-		String httpServerClockSourceClassName = mosContext.getProperty(
-				PROPERTY_HTTP_SERVER_CLOCK_SOURCE,
+		String httpServerClockSourceClassName = mosContext.getProperty(PROPERTY_HTTP_SERVER_CLOCK_SOURCE,
 				HttpServerClockImpl.class.getName());
 		HttpServerClockSource httpServerClockSource = (HttpServerClockSource) mosContext
 				.loadClass(httpServerClockSourceClassName).newInstance();
-		this.httpServerClock = httpServerClockSource
-				.createHttpServerClock(configurationContext);
+		this.httpServerClock = httpServerClockSource.createHttpServerClock(configurationContext);
 
 		// Obtain context details
 		this.sendBufferSize = protocolContext.getSendBufferSize();
@@ -251,12 +239,11 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource,
 		configurationContext.setObjectClass(ServerHttpConnection.class);
 
 		// Provide the flow to handle the HTTP request
-		this.requestHandlingFlowIndex = configurationContext
-				.addFlow(ServerHttpConnection.class)
+		this.requestHandlingFlowIndex = configurationContext.addFlow(ServerHttpConnection.class)
 				.setLabel("HANDLE_HTTP_REQUEST").getIndex();
 
 		// Ensure connection is cleaned up when process finished
-		new CleanupTask().registerAsRecycleTask(mosContext, "cleanup");
+		mosContext.getRecycleFunction(new CleanupManagedFunction());
 
 		// Return this as the server
 		return this;
@@ -267,21 +254,17 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource,
 	 */
 
 	@Override
-	public void setManagedObjectExecuteContext(
-			ManagedObjectExecuteContext<Indexed> executeContext) {
+	public void setManagedObjectExecuteContext(ManagedObjectExecuteContext<Indexed> executeContext) {
 		this.executeContext = executeContext;
 	}
 
 	@Override
 	public HttpConnectionHandler createConnectionHandler(Connection connection) {
-		HttpConversation conversation = new HttpConversationImpl(connection,
-				this.serverName, this.sendBufferSize, this.defaultCharset,
-				this.isSendStackTraceOnFailure, this.httpServerClock);
-		HttpRequestParser parser = new HttpRequestParserImpl(
-				this.maximumHttpRequestHeaders, this.maxTextPartLength,
+		HttpConversation conversation = new HttpConversationImpl(connection, this.serverName, this.sendBufferSize,
+				this.defaultCharset, this.isSendStackTraceOnFailure, this.httpServerClock);
+		HttpRequestParser parser = new HttpRequestParserImpl(this.maximumHttpRequestHeaders, this.maxTextPartLength,
 				this.maximumRequestBodyLength);
-		return new HttpConnectionHandler(this, conversation, parser,
-				this.connectionTimeout);
+		return new HttpConnectionHandler(this, conversation, parser, this.connectionTimeout);
 	}
 
 }

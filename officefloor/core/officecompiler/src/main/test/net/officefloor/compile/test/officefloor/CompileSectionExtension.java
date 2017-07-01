@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,25 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.jndi.work;
+package net.officefloor.compile.test.officefloor;
 
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
+import net.officefloor.compile.spi.office.OfficeSection;
 
 /**
- * {@link ParameterFactory} to return the {@link ManagedFunctionContext}.
+ * Extends the {@link OfficeSection}.
  * 
  * @author Daniel Sagenschneider
  */
-public class TaskContextParameterFactory implements ParameterFactory {
+public interface CompileSectionExtension {
 
-	/*
-	 * ================ ParameterFactory ==========================
+	/**
+	 * Extends the {@link OfficeSection}.
+	 * 
+	 * @param context
+	 *            {@link CompileSectionContext}.
 	 */
-
-	@Override
-	public Object createParameter(Object jndiWorkObject,
-			ManagedFunctionContext<?, ?, ?> context) throws Exception {
-		return context;
-	}
+	void extend(CompileSectionContext context);
 
 }

@@ -18,23 +18,23 @@
 package net.officefloor.plugin.socket.server.ssl;
 
 /**
- * Executor to execute the SSL task {@link Runnable} instances.
+ * Executor to execute the SSL {@link Runnable} instances.
  *
  * @author Daniel Sagenschneider
  */
-public interface SslTaskExecutor {
+public interface SslFunctionExecutor {
 
 	/**
 	 * <p>
-	 * Begins executing the SSL task.
+	 * Begins executing the SSL {@link Runnable}.
 	 * <p>
 	 * As this method likely passes the {@link Runnable} to another
 	 * {@link Thread} this method will generally return before the
 	 * {@link Runnable} is complete.
 	 *
-	 * @param task
-	 *            {@link Runnable} SSL task to complete.
+	 * @param runnable
+	 *            SSL {@link Runnable} to complete.
 	 */
-	void beginTask(Runnable task);
+	void beginRunnable(Runnable runnable);
 
 }

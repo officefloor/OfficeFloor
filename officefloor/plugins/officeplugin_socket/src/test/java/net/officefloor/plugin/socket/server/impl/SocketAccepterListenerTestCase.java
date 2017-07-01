@@ -22,11 +22,11 @@ import java.nio.ByteBuffer;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolContext;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
@@ -42,9 +42,8 @@ import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class SocketAccepterListenerTestCase extends
-		AbstractClientServerTestCase implements CommunicationProtocolSource,
-		CommunicationProtocol, ConnectionHandler {
+public abstract class SocketAccepterListenerTestCase extends AbstractClientServerTestCase
+		implements CommunicationProtocolSource, CommunicationProtocol, ConnectionHandler {
 
 	/**
 	 * {@link Connection}.
@@ -75,8 +74,7 @@ public abstract class SocketAccepterListenerTestCase extends
 	protected void writeDataFromServerToClient(byte[] data) throws IOException {
 
 		// Write the data
-		WriteBuffer buffer = this.connection.createWriteBuffer(data,
-				data.length);
+		WriteBuffer buffer = this.connection.createWriteBuffer(data, data.length);
 		this.connection.writeData(new WriteBuffer[] { buffer });
 	}
 
@@ -86,8 +84,7 @@ public abstract class SocketAccepterListenerTestCase extends
 	 * @param buffer
 	 *            Data to write to the client.
 	 */
-	protected void writeDataFromServerToClient(ByteBuffer buffer)
-			throws IOException {
+	protected void writeDataFromServerToClient(ByteBuffer buffer) throws IOException {
 
 		// Write the data
 		WriteBuffer writeBuffer = this.connection.createWriteBuffer(buffer);
@@ -109,10 +106,8 @@ public abstract class SocketAccepterListenerTestCase extends
 		this.runServerSelect();
 
 		// Obtain the data
-		String data = (this.readData == null) ? null
-				: new String(this.readData);
-		assertEquals("Incorrect data received by the server", expectedData,
-				data);
+		String data = (this.readData == null) ? null : new String(this.readData);
+		assertEquals("Incorrect data received by the server", expectedData, data);
 	}
 
 	/**
@@ -134,8 +129,7 @@ public abstract class SocketAccepterListenerTestCase extends
 	}
 
 	@Override
-	protected void handleInvokeProcess(Object parameter,
-			ManagedObject managedObject, EscalationHandler escalationHandler) {
+	protected void handleInvokeProcess(Object parameter, ManagedObject managedObject, FlowCallback callback) {
 		fail("Process should not be invoked");
 	}
 
@@ -149,8 +143,7 @@ public abstract class SocketAccepterListenerTestCase extends
 	}
 
 	@Override
-	public CommunicationProtocol createCommunicationProtocol(
-			MetaDataContext<None, Indexed> configurationContext,
+	public CommunicationProtocol createCommunicationProtocol(MetaDataContext<None, Indexed> configurationContext,
 			CommunicationProtocolContext protocolContext) throws Exception {
 		return this;
 	}
@@ -160,8 +153,7 @@ public abstract class SocketAccepterListenerTestCase extends
 	 */
 
 	@Override
-	public void setManagedObjectExecuteContext(
-			ManagedObjectExecuteContext<Indexed> executeContext) {
+	public void setManagedObjectExecuteContext(ManagedObjectExecuteContext<Indexed> executeContext) {
 		// Ignore as not used in this testing
 	}
 
@@ -183,8 +175,7 @@ public abstract class SocketAccepterListenerTestCase extends
 	@Override
 	public void handleHeartbeat(HeartBeatContext context) throws IOException {
 		// TODO implement ConnectionHandler.handleHeartbeat
-		throw new UnsupportedOperationException(
-				"TODO implement ConnectionHandler.handleHeartbeat");
+		throw new UnsupportedOperationException("TODO implement ConnectionHandler.handleHeartbeat");
 	}
 
 }

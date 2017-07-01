@@ -15,38 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.jndi.work;
+package net.officefloor.plugin.jndi.function;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.plugin.xml.XmlMarshallException;
-import net.officefloor.plugin.xml.XmlUnmarshaller;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 
 /**
- * <p>
- * Mock JNDI Object.
- * <p>
- * Typically this may be an EJB.
+ * {@link ParameterFactory} to return the {@link ManagedFunctionContext}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface MockJndiObject {
+public class ManagedFunctionContextParameterFactory implements ParameterFactory {
 
-	/**
-	 * Simple {@link ManagedFunction}.
+	/*
+	 * ================ ParameterFactory ==========================
 	 */
-	public void simpleTask();
 
-	/**
-	 * Complex {@link ManagedFunction}.
-	 * 
-	 * @param xml
-	 *            Test parameter.
-	 * @param unmarshaller
-	 *            {@link XmlUnmarshaller} for test {@link ManagedObject}.
-	 * @return Test return value.
-	 */
-	public long complexTask(String xml, XmlUnmarshaller unmarshaller)
-			throws XmlMarshallException;
+	@Override
+	public Object createParameter(Object jndiObject, ManagedFunctionContext<?, ?> context) throws Exception {
+		return context;
+	}
 
 }
