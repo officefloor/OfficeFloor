@@ -22,6 +22,7 @@ import java.net.ConnectException;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
@@ -31,6 +32,8 @@ import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolContex
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
 import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
+import net.officefloor.plugin.socket.server.tcp.protocol.ServiceFunction.ServiceFunctionFlows;
+import net.officefloor.plugin.socket.server.tcp.protocol.ServiceFunction.ServiceFunctionObjects;
 
 /**
  * TCP {@link CommunicationProtocolSource}.
@@ -106,11 +109,16 @@ public class TcpCommunicationProtocol implements CommunicationProtocolSource, Co
 		configurationContext.setManagedObjectClass(TcpConnectionHandler.class);
 		configurationContext.setObjectClass(ServerTcpConnection.class);
 
-		// Provide the flow to process a new connection
-		this.newConnectionFlowIndex = configurationContext.addFlow(ServerTcpConnection.class).setLabel("NEW_CONNECTION")
-				.getIndex();
-		
-		configurationContext.getManagedObjectSourceContext().addManagedFunction("", null).
+		// Provide the function to process a new connection
+		ManagedObjectFunctionBuilder<ServiceFunctionObjects, ServiceFunctionFlows> servicer = mosContext
+				.addManagedFunction("servicer", new ServiceFunction());
+		servicer.linkManagedObject(ServiceFunctionObjects.CONNECTION);
+		this.newConnectionFlowIndex = configurationContext.addFlow(ServerTcpConnection.class).getIndex();
+		mosContext.linkFlow(this.newConnectionFlowIndex, "servicer");
+
+		// Add flow
+		int serviceIndex = configurationContext.addFlow(ServerTcpConnection.class).getIndex();
+		servicer.linkFlow(ServiceFunctionFlows.SERVICE, serviceIndex);
 
 		// Ensure connection is cleaned up when process finished
 		mosContext.getRecycleFunction(new CleanupFunction());

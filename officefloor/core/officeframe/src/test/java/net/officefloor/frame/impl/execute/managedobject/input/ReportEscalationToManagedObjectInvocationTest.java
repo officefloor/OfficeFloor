@@ -94,7 +94,7 @@ public class ReportEscalationToManagedObjectInvocationTest extends AbstractOffic
 		socket.enhanceMetaData = (metaData) -> metaData.addFlow(TestObject.class);
 		this.bindManagedObject("SOCKET", ManagedObjectScope.PROCESS, null);
 		socket.managingOfficeBuilder.setInputManagedObjectName("SOCKET");
-		socket.managingOfficeBuilder.linkProcess(0, "task");
+		socket.managingOfficeBuilder.linkFlow(0, "task");
 
 		// Construct the mock entity manager
 		TestObject entityManager = new TestObject("ENTITY_MANAGER", this);

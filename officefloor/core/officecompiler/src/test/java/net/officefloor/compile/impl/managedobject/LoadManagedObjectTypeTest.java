@@ -1068,7 +1068,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 				ManagedObjectFunctionBuilder linkFunction = context.addManagedFunction("FUNCTION",
 						util.getManagedFunctionFactory());
 				linkFunction.setResponsibleTeam("TEAM");
-				linkFunction.linkFlow(0, null, Connection.class, false);
+				linkFunction.linkFlow(0, context.getFlow(0), Connection.class, false);
 			}
 		});
 
@@ -1098,7 +1098,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.loadManagedObjectType(false, new Init<OneKey>() {
 			@Override
 			public void init(ManagedObjectSourceContext<OneKey> context, InitUtil util) {
-				context.linkProcess(0, "FUNCTION");
+				context.getFlow(0).linkFunction("FUNCTION");
 			}
 		});
 	}
@@ -1120,7 +1120,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.loadManagedObjectType(false, new Init() {
 			@Override
 			public void init(ManagedObjectSourceContext context, InitUtil util) {
-				context.linkProcess(InvalidKey.INVALID, "FUNCTION");
+				context.getFlow(InvalidKey.INVALID).linkFunction("FUNCTION");
 			}
 		});
 	}
@@ -1141,7 +1141,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.loadManagedObjectType(false, new Init() {
 			@Override
 			public void init(ManagedObjectSourceContext context, InitUtil util) {
-				context.linkProcess(OneKey.KEY, "FUNCTION");
+				context.getFlow(OneKey.KEY).linkFunction("FUNCTION");
 			}
 		});
 	}
@@ -1160,8 +1160,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.loadManagedObjectType(false, new Init<Indexed>() {
 			@Override
 			public void init(ManagedObjectSourceContext<Indexed> context, InitUtil util) {
-				context.linkProcess(0, "LINKED");
-				context.linkProcess(1, "FUNCTION");
+				context.getFlow(0).linkFunction("LINKED");
+				context.getFlow(1).linkFunction("FUNCTION");
 
 				// Add the linked function
 				context.addManagedFunction("LINKED", util.getManagedFunctionFactory()).setResponsibleTeam("TEAM");
@@ -1182,7 +1182,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.loadManagedObjectType(false, new Init<OneKey>() {
 			@Override
 			public void init(ManagedObjectSourceContext<OneKey> context, InitUtil util) {
-				context.linkProcess(OneKey.KEY, null);
+				context.getFlow(OneKey.KEY).linkFunction(null);
 			}
 		});
 	}
@@ -1202,7 +1202,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.loadManagedObjectType(false, new Init<OneKey>() {
 			@Override
 			public void init(ManagedObjectSourceContext<OneKey> context, InitUtil util) {
-				context.linkProcess(OneKey.KEY, "FUNCTION");
+				context.getFlow(OneKey.KEY).linkFunction("FUNCTION");
 			}
 		});
 	}
@@ -1225,7 +1225,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 				context.addManagedFunction("FUNCTION", util.getManagedFunctionFactory()).setResponsibleTeam("TEAM");
 
 				// Link to function
-				context.linkProcess(0, "FUNCTION");
+				context.getFlow(0).linkFunction("FUNCTION");
 			}
 		});
 

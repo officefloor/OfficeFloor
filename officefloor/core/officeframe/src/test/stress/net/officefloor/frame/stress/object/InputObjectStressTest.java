@@ -56,7 +56,7 @@ public class InputObjectStressTest extends AbstractStressTestCase {
 		mo.setTimeout(1000);
 		ManagingOfficeBuilder<Indexed> managingOffice = mo.setManagingOffice(this.getOfficeName());
 		managingOffice.setInputManagedObjectName("MO");
-		managingOffice.linkProcess(0, "flow");
+		managingOffice.linkFlow(0, "flow");
 
 		// Construct the functions
 		TestWork work = new TestWork(context);

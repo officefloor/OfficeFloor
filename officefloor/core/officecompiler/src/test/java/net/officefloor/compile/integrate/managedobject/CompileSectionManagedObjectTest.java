@@ -212,7 +212,7 @@ public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
 				ClassManagedObjectSource.class, 0, "class.name", ProcessManagedObject.class.getName());
 		ManagingOfficeBuilder<?> managingOffice = this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.SECTION.MANAGED_OBJECT_SOURCE");
-		managingOffice.linkProcess(0, "SECTION.SECTION.INPUT");
+		managingOffice.linkFlow(0, "SECTION.SECTION.INPUT");
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -235,7 +235,7 @@ public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
 				ClassManagedObjectSource.class, 0, "class.name", ProcessManagedObject.class.getName());
 		ManagingOfficeBuilder<?> managingOffice = this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.SECTION_ONE.MANAGED_OBJECT_SOURCE");
-		managingOffice.linkProcess(0, "SECTION_TWO.INPUT");
+		managingOffice.linkFlow(0, "SECTION_TWO.INPUT");
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION_TWO", "INPUT");
 		function.linkParameter(0, Integer.class);
 

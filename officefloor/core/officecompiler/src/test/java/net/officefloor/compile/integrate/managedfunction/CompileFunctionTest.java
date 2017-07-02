@@ -378,7 +378,7 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 				"class.name", InputManagedObject.class.getName());
 		ManagingOfficeBuilder<?> managingOffice = this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MANAGED_OBJECT");
-		managingOffice.linkProcess(0, "SECTION.FUNCTION");
+		managingOffice.linkFlow(0, "SECTION.FUNCTION");
 
 		// Compile the OfficeFloor
 		this.compile(true);

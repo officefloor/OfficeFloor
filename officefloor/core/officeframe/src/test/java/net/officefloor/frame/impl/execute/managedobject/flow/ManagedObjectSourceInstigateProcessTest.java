@@ -80,7 +80,7 @@ public class ManagedObjectSourceInstigateProcessTest extends AbstractOfficeConst
 		ManagingOfficeBuilder<InputManagedObjectSource.Flows> managingOfficeBuilder = moBuilder
 				.setManagingOffice(officeName);
 		managingOfficeBuilder.setInputManagedObjectName("INPUT");
-		managingOfficeBuilder.linkProcess(InputManagedObjectSource.Flows.INPUT, "TASK");
+		managingOfficeBuilder.linkFlow(InputManagedObjectSource.Flows.INPUT, "TASK");
 
 		// Provide function for managed object source input
 		ManagedFunctionBuilder<Indexed, Indexed> functionBuilder = this.constructFunction("TASK", this.inputTask);

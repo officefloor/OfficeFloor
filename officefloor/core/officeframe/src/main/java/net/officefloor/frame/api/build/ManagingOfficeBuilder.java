@@ -54,7 +54,7 @@ public interface ManagingOfficeBuilder<F extends Enum<F>> {
 	 * @param functionName
 	 *            Name of the {@link ManagedFunction}.
 	 */
-	void linkProcess(F key, String functionName);
+	void linkFlow(F key, String functionName);
 
 	/**
 	 * Links the {@link Flow} for the {@link ManagedObjectSource} to a
@@ -66,6 +66,6 @@ public interface ManagingOfficeBuilder<F extends Enum<F>> {
 	 * @param functionName
 	 *            Name of the {@link ManagedFunction}.
 	 */
-	void linkProcess(int flowIndex, String functionName);
+	void linkFlow(int flowIndex, String functionName);
 
 }

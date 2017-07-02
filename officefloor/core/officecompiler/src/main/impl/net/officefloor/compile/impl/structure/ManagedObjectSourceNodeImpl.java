@@ -769,9 +769,9 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				if (CompileUtil.isBlank(flowFunctionName)) {
 					// Link flow directly from managed object source to function
 					if (flowKey != null) {
-						managingOfficeBuilder.linkProcess(flowKey, functionName);
+						managingOfficeBuilder.linkFlow(flowKey, functionName);
 					} else {
-						managingOfficeBuilder.linkProcess(flowIndex, functionName);
+						managingOfficeBuilder.linkFlow(flowIndex, functionName);
 					}
 
 				} else {

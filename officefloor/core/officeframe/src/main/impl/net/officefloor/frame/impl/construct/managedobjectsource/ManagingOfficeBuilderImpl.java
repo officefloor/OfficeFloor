@@ -82,12 +82,12 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>>
 	}
 
 	@Override
-	public void linkProcess(F key, String functionName) {
+	public void linkFlow(F key, String functionName) {
 		this.linkProcess(key.ordinal(), key, functionName);
 	}
 
 	@Override
-	public void linkProcess(int flowIndex, String functionName) {
+	public void linkFlow(int flowIndex, String functionName) {
 		this.linkProcess(flowIndex, null, functionName);
 	}
 

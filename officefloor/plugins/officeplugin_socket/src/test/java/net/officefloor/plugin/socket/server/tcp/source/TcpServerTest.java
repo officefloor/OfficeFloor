@@ -63,7 +63,7 @@ public class TcpServerTest extends AbstractTcpServerTestCase {
 
 		// Hook in function of test
 		managingOfficeBuilder.setInputManagedObjectName(managedObjectName);
-		managingOfficeBuilder.linkProcess(0, functionName);
+		managingOfficeBuilder.linkFlow(0, functionName);
 	}
 
 	@Override

@@ -266,7 +266,7 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 		office.registerManagedObjectSource("OFFICE.SIMPLE", "OFFICE.SIMPLE_SOURCE");
 		this.record_officeBuilder_addProcessManagedObject("OFFICE.SIMPLE", "OFFICE.SIMPLE");
 		inputDependencies.mapDependency(0, "OFFICE.SIMPLE");
-		inputMos.linkProcess(0, "SECTION.INPUT");
+		inputMos.linkFlow(0, "SECTION.INPUT");
 		this.record_officeFloorBuilder_addManagedObject("OFFICE.SIMPLE_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
@@ -303,7 +303,7 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 		DependencyMappingBuilder inputDependencies = this
 				.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.INPUT_SOURCE");
 		inputDependencies.mapDependency(0, "SIMPLE");
-		inputMos.linkProcess(0, "SECTION.INPUT");
+		inputMos.linkFlow(0, "SECTION.INPUT");
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "INPUT");
 		function.linkParameter(0, Integer.class);
 
@@ -349,7 +349,7 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 				0, "class.name", ProcessManagedObject.class.getName());
 		ManagingOfficeBuilder<?> managingOffice = this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.MANAGED_OBJECT_SOURCE");
-		managingOffice.linkProcess(0, "SECTION.INPUT");
+		managingOffice.linkFlow(0, "SECTION.INPUT");
 
 		// Compile the OfficeFloor
 		this.compile(true);

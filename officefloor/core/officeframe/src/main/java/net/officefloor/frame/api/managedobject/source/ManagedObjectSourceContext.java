@@ -33,35 +33,23 @@ import net.officefloor.frame.internal.structure.Flow;
 public interface ManagedObjectSourceContext<F extends Enum<F>> extends SourceContext {
 
 	/**
-	 * <p>
-	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction}
-	 * of the {@link Flow}.
-	 * <p>
-	 * The {@link ManagedFunction} must be registered by this
-	 * {@link ManagedObjectSource}.
+	 * Obtains the {@link ManagedObjectSourceFlow}.
 	 * 
 	 * @param key
 	 *            Key identifying {@link Flow} being invoked by the
 	 *            {@link ManagedObjectSource}.
-	 * @param functionName
-	 *            Name of {@link ManagedFunction}.
+	 * @return {@link ManagedObjectSourceFlow} for the key.
 	 */
-	void linkProcess(F key, String functionName);
+	ManagedObjectSourceFlow getFlow(F key);
 
 	/**
-	 * <p>
-	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction}
-	 * of the {@link Flow}.
-	 * <p>
-	 * The {@link ManagedFunction} must be registered by this
-	 * {@link ManagedObjectSource}.
+	 * Obtains the {@link ManagedObjectSourceFlow}.
 	 * 
 	 * @param flowIndex
 	 *            Index identifying the {@link Flow}.
-	 * @param functionName
-	 *            Name of {@link ManagedFunction}.
+	 * @return {@link ManagedObjectSourceFlow} for the index.
 	 */
-	void linkProcess(int flowIndex, String functionName);
+	ManagedObjectSourceFlow getFlow(int flowIndex);
 
 	/**
 	 * <p>

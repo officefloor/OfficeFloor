@@ -44,7 +44,7 @@ public class GovernInputManagedObjectTest extends AbstractOfficeConstructTestCas
 					(managedObject) -> (TestObject) managedObject);
 		};
 		object.managingOfficeBuilder.setInputManagedObjectName("MO").mapGovernance("GOVERNANCE");
-		object.managingOfficeBuilder.linkProcess(0, "task");
+		object.managingOfficeBuilder.linkFlow(0, "task");
 
 		// Construct the function
 		TestWork work = new TestWork();

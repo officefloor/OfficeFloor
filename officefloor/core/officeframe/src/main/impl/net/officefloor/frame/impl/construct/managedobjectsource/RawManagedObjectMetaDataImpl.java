@@ -266,15 +266,9 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 		// Obtain the managing office builder
 		ManagingOfficeBuilder<h> managingOfficeBuilder = managingOfficeConfiguration.getBuilder();
 
-		// Obtain the possible input configuration
-		InputManagedObjectConfiguration<?> inputConfiguration = managingOfficeConfiguration
-				.getInputManagedObjectConfiguration();
-		String inputBoundManagedObjectName = (inputConfiguration != null
-				? inputConfiguration.getBoundManagedObjectName() : null);
-
 		// Create the context for the managed object source
 		ManagedObjectSourceContextImpl<h> context = new ManagedObjectSourceContextImpl<h>(false,
-				managedObjectSourceName, inputBoundManagedObjectName, properties, sourceContext, managingOfficeBuilder,
+				managedObjectSourceName, managingOfficeConfiguration, properties, sourceContext, managingOfficeBuilder,
 				officeBuilder);
 
 		try {
@@ -348,8 +342,10 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 		ManagedObjectFlowMetaData<h>[] flowMetaDatas = metaData.getFlowMetaData();
 
 		// Requires input configuration if requires flows
+		InputManagedObjectConfiguration<?> inputConfiguration = null;
 		if (RawManagingOfficeMetaDataImpl.isRequireFlows(flowMetaDatas)) {
 			// Requires flows, so must have input configuration
+			inputConfiguration = managingOfficeConfiguration.getInputManagedObjectConfiguration();
 			if (inputConfiguration == null) {
 				issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
 						"Must provide Input configuration as Managed Object Source requires flows");

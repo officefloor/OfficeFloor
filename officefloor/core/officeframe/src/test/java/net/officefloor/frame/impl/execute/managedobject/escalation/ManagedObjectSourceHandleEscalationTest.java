@@ -50,7 +50,7 @@ public class ManagedObjectSourceHandleEscalationTest extends AbstractOfficeConst
 			metaData.addFlow(Exception.class);
 		};
 		object.managingOfficeBuilder.setInputManagedObjectName("MO");
-		object.managingOfficeBuilder.linkProcess(0, "escalate");
+		object.managingOfficeBuilder.linkFlow(0, "escalate");
 
 		// Construct functions
 		TestWork work = new TestWork();
@@ -88,7 +88,7 @@ public class ManagedObjectSourceHandleEscalationTest extends AbstractOfficeConst
 			metaData.addFlow(Exception.class);
 		};
 		object.managingOfficeBuilder.setInputManagedObjectName("MO");
-		object.managingOfficeBuilder.linkProcess(0, "escalate");
+		object.managingOfficeBuilder.linkFlow(0, "escalate");
 
 		// Construct functions
 		TestWork work = new TestWork();
@@ -121,7 +121,7 @@ public class ManagedObjectSourceHandleEscalationTest extends AbstractOfficeConst
 			metaData.addFlow(Exception.class);
 		};
 		object.managingOfficeBuilder.setInputManagedObjectName("MO");
-		object.managingOfficeBuilder.linkProcess(0, "escalate");
+		object.managingOfficeBuilder.linkFlow(0, "escalate");
 
 		// Construct the functions
 		TestWork work = new TestWork();
@@ -154,7 +154,7 @@ public class ManagedObjectSourceHandleEscalationTest extends AbstractOfficeConst
 			metaData.addFlow(Exception.class);
 		};
 		object.managingOfficeBuilder.setInputManagedObjectName("MO");
-		object.managingOfficeBuilder.linkProcess(0, "escalate");
+		object.managingOfficeBuilder.linkFlow(0, "escalate");
 
 		// Construct functions
 		TestWork work = new TestWork();
@@ -194,7 +194,7 @@ public class ManagedObjectSourceHandleEscalationTest extends AbstractOfficeConst
 			metaData.addFlow(Exception.class);
 		};
 		object.managingOfficeBuilder.setInputManagedObjectName("MO");
-		object.managingOfficeBuilder.linkProcess(0, "escalate");
+		object.managingOfficeBuilder.linkFlow(0, "escalate");
 
 		// Construct functions
 		TestWork work = new TestWork();
@@ -234,7 +234,7 @@ public class ManagedObjectSourceHandleEscalationTest extends AbstractOfficeConst
 			metaData.addFlow(Exception.class);
 		};
 		object.managingOfficeBuilder.setInputManagedObjectName("MO");
-		object.managingOfficeBuilder.linkProcess(0, "escalate");
+		object.managingOfficeBuilder.linkFlow(0, "escalate");
 
 		// Construct functions
 		TestWork work = new TestWork();
@@ -272,7 +272,7 @@ public class ManagedObjectSourceHandleEscalationTest extends AbstractOfficeConst
 			metaData.addFlow(Exception.class);
 		};
 		object.managingOfficeBuilder.setInputManagedObjectName("MO");
-		object.managingOfficeBuilder.linkProcess(0, "escalate");
+		object.managingOfficeBuilder.linkFlow(0, "escalate");
 
 		// Construct functions
 		TestWork work = new TestWork();

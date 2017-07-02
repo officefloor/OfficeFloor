@@ -367,14 +367,14 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements RawMana
 			// Obtain the argument type passed to the task
 			Class<?> argumentType = flowMetaData.getArgumentType();
 
-			// Create the task node reference for the task.
+			// Create the reference for the function.
 			// Override argument type as managed object knows better.
 			ManagedFunctionReference configurationFunctionReference = flowConfiguration.getManagedFunctionReference();
-			ManagedFunctionReference flowTaskReference = new ManagedFunctionReferenceImpl(
+			ManagedFunctionReference flowFunctionReference = new ManagedFunctionReferenceImpl(
 					configurationFunctionReference.getFunctionName(), argumentType);
 
 			// Obtain the function meta-data of flow meta-data
-			ManagedFunctionMetaData<?, ?> functionMetaData = ConstructUtil.getFunctionMetaData(flowTaskReference,
+			ManagedFunctionMetaData<?, ?> functionMetaData = ConstructUtil.getFunctionMetaData(flowFunctionReference,
 					functionLocator, issues, AssetType.MANAGED_OBJECT, managedObjectSourceName, flowLabel);
 			if (functionMetaData == null) {
 				return; // can not find function of flow

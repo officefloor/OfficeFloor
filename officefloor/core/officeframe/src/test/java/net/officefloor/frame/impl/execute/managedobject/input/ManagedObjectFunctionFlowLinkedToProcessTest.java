@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.execute.managedobject.input;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
@@ -26,40 +27,60 @@ import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**
- * Ensures the input {@link ManagedObject} is available to the
- * {@link ManagedFunction} instances invoked from the
+ * Ensure {@link ManagedFunction} added by {@link ManagedObjectSource} can have
+ * its {@link Flow} configured to {@link ProcessState} {@link Flow} for the
  * {@link ManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class InputManagedObjectAvailableToManagedObjectFunctionTest extends AbstractOfficeConstructTestCase {
+public class ManagedObjectFunctionFlowLinkedToProcessTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Ensure input {@link ManagedObject} is available to the
-	 * {@link ManagedFunction} instances invoked from the
-	 * {@link ManagedObjectSource}.
+	 * Ensure {@link ManagedFunction} added by {@link ManagedObjectSource} can
+	 * have its {@link Flow} configured to {@link ProcessState} {@link Flow} for
+	 * the {@link ManagedObjectSource}.
 	 */
-	public void testEnsureInputAvailbleToFunction() throws Exception {
+	public void testManagedObjectFunctionFlowLinkedToProcess() throws Exception {
+
+		// Rest for test
+		InputFunction.parameter = null;
+		MockFunction.value = null;
 
 		// Construct the OfficeFloor
 		InputFunction function = new InputFunction();
 		InputManagedObjectSource mos = new InputManagedObjectSource(function);
 		ManagedObjectBuilder<Indexed> mo = this.constructManagedObject("INPUT", mos, null);
-		mo.setManagingOffice(this.getOfficeName()).setInputManagedObjectName("INPUT");
+		ManagingOfficeBuilder<Indexed> managingOffice = mo.setManagingOffice(this.getOfficeName());
+		managingOffice.setInputManagedObjectName("INPUT");
+		managingOffice.linkFlow(1, "function");
+		this.constructFunction(new MockFunction(), "function").buildParameter();
 		OfficeFloor officeFloor = this.constructOfficeFloor();
 
 		// Input the managed object
 		officeFloor.openOfficeFloor();
 		mos.inputManagedObject();
 
-		// Ensure obtain access to input managed object
-		assertSame("Should have access to input managed object", mos, function.managedObject);
+		// Ensure functions are invoked with correct parameters
+		assertEquals("Incorrect input function", new Integer(10), InputFunction.parameter);
+		assertEquals("Incorrect function", "TEST", MockFunction.value);
+	}
+
+	public static class MockFunction {
+
+		private static String value;
+
+		public void function(String parameter) {
+			value = parameter;
+		}
 	}
 
 	public class InputManagedObjectSource extends AbstractManagedObjectSource<None, Indexed> implements ManagedObject {
@@ -73,7 +94,7 @@ public class InputManagedObjectAvailableToManagedObjectFunctionTest extends Abst
 		}
 
 		public void inputManagedObject() {
-			this.executeContext.invokeProcess(0, this, this, 0, null);
+			this.executeContext.invokeProcess(0, 10, this, 0, null);
 		}
 
 		/*
@@ -87,10 +108,14 @@ public class InputManagedObjectAvailableToManagedObjectFunctionTest extends Abst
 		@Override
 		protected void loadMetaData(MetaDataContext<None, Indexed> context) throws Exception {
 			context.setObjectClass(this.getClass());
-			context.addFlow(null);
+			context.addFlow(Integer.class);
+			context.addFlow(String.class);
 			ManagedObjectSourceContext<Indexed> mosContext = context.getManagedObjectSourceContext();
-			mosContext.addManagedFunction("function", this.function).linkManagedObject(0);
-			mosContext.getFlow(0).linkFunction("function");
+			mosContext.getFlow(0).linkFunction("inputFunction");
+			ManagedObjectFunctionBuilder<None, Indexed> function = mosContext.addManagedFunction("inputFunction",
+					this.function);
+			function.linkParameter(0, Integer.class);
+			function.linkFlow(0, mosContext.getFlow(1), String.class, false);
 		}
 
 		@Override
@@ -113,16 +138,16 @@ public class InputManagedObjectAvailableToManagedObjectFunctionTest extends Abst
 		}
 	}
 
-	public class InputFunction implements ManagedFunctionFactory<Indexed, None>, ManagedFunction<Indexed, None> {
+	public static class InputFunction implements ManagedFunctionFactory<None, Indexed>, ManagedFunction<None, Indexed> {
 
-		private InputManagedObjectSource managedObject = null;
+		private static Integer parameter;
 
 		/*
 		 * ================== ManagedFunctionFactory =========================
 		 */
 
 		@Override
-		public ManagedFunction<Indexed, None> createManagedFunction() throws Throwable {
+		public ManagedFunction<None, Indexed> createManagedFunction() throws Throwable {
 			return this;
 		}
 
@@ -131,8 +156,9 @@ public class InputManagedObjectAvailableToManagedObjectFunctionTest extends Abst
 		 */
 
 		@Override
-		public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
-			this.managedObject = (InputManagedObjectSource) context.getObject(0);
+		public Object execute(ManagedFunctionContext<None, Indexed> context) throws Throwable {
+			parameter = (Integer) context.getObject(0);
+			context.doFlow(0, "TEST", null);
 			return null;
 		}
 	}

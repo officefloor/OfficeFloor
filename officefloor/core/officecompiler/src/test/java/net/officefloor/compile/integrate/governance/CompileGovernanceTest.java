@@ -100,13 +100,13 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 		ManagingOfficeBuilder<?> mosA = this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		DependencyMappingBuilder mapperA = this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MO");
 		mapperA.mapGovernance("GOVERNANCE");
-		mosA.linkProcess(0, "SECTION.INPUT");
+		mosA.linkFlow(0, "SECTION.INPUT");
 		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE_B", ClassManagedObjectSource.class, 0,
 				"class.name", ProcessManagedObject.class.getName());
 		ManagingOfficeBuilder<?> mosB = this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		DependencyMappingBuilder mapperB = this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MO");
 		mapperB.mapGovernance("GOVERNANCE");
-		mosB.linkProcess(0, "SECTION.INPUT");
+		mosB.linkFlow(0, "SECTION.INPUT");
 
 		// Compile the OfficeFloor
 		this.compile(true);

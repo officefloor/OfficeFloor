@@ -26,10 +26,15 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceFlow;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
+import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedObjectFlowConfiguration;
+import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * Implementation of the {@link ManagedObjectSourceContext}.
@@ -50,9 +55,9 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	private final String managedObjectName;
 
 	/**
-	 * Bound name of {@link ManagedObject} if input.
+	 * {@link ManagingOfficeConfiguration}.
 	 */
-	private final String inputBoundManagedObjectName;
+	private final ManagingOfficeConfiguration<F> managingOfficeConfiguration;
 
 	/**
 	 * {@link ManagingOfficeBuilder}.
@@ -78,8 +83,8 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	 *            Indicates if loading type.
 	 * @param managedObjectName
 	 *            Name of the {@link ManagedObject}.
-	 * @param inputBoundManagedObjectName
-	 *            Bound name of {@link ManagedObject} if input.
+	 * @param managingOfficeConfiguration
+	 *            {@link ManagingOfficeConfiguration}.
 	 * @param properties
 	 *            Properties.
 	 * @param sourceContext
@@ -91,11 +96,11 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	 *            {@link ManagedObjectSource}.
 	 */
 	public ManagedObjectSourceContextImpl(boolean isLoadingType, String managedObjectName,
-			String inputBoundManagedObjectName, SourceProperties properties, SourceContext sourceContext,
-			ManagingOfficeBuilder<F> managingOfficeBuilder, OfficeBuilder officeBuilder) {
+			ManagingOfficeConfiguration<F> managingOfficeConfiguration, SourceProperties properties,
+			SourceContext sourceContext, ManagingOfficeBuilder<F> managingOfficeBuilder, OfficeBuilder officeBuilder) {
 		super(isLoadingType, sourceContext, properties);
 		this.managedObjectName = managedObjectName;
-		this.inputBoundManagedObjectName = inputBoundManagedObjectName;
+		this.managingOfficeConfiguration = managingOfficeConfiguration;
 		this.managingOfficeBuilder = managingOfficeBuilder;
 		this.officeBuilder = officeBuilder;
 	}
@@ -121,6 +126,17 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	 */
 	public String getRecycleFunctionName() {
 		return this.recycleFunctionName;
+	}
+
+	/**
+	 * Obtains the input bound {@link ManagedObject} name.
+	 * 
+	 * @return Input bound {@link ManagedObject} name.
+	 */
+	private String getInputBoundManagedObjectName() {
+		InputManagedObjectConfiguration<?> inputConfiguration = this.managingOfficeConfiguration
+				.getInputManagedObjectConfiguration();
+		return (inputConfiguration != null ? inputConfiguration.getBoundManagedObjectName() : null);
 	}
 
 	/*
@@ -164,13 +180,13 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	}
 
 	@Override
-	public void linkProcess(F key, String functionName) {
-		this.managingOfficeBuilder.linkProcess(key, this.getNamespacedName(functionName));
+	public ManagedObjectSourceFlow getFlow(F key) {
+		return new ManagedObjectSourceFlowImpl(key, key.ordinal());
 	}
 
 	@Override
-	public void linkProcess(int flowIndex, String functionName) {
-		this.managingOfficeBuilder.linkProcess(flowIndex, this.getNamespacedName(functionName));
+	public ManagedObjectSourceFlow getFlow(int flowIndex) {
+		return new ManagedObjectSourceFlowImpl(null, flowIndex);
 	}
 
 	/**
@@ -183,6 +199,83 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	 */
 	private String getNamespacedName(String name) {
 		return OfficeBuilderImpl.getNamespacedName(this.managedObjectName, name);
+	}
+
+	/**
+	 * {@link ManagedObjectSourceFlow} implementation.
+	 */
+	private class ManagedObjectSourceFlowImpl implements ManagedObjectSourceFlow {
+
+		/**
+		 * {@link Flow} key.
+		 */
+		private final F key;
+
+		/**
+		 * {@link Flow} index.
+		 */
+		private final int flowIndex;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param key
+		 *            {@link Flow} key.
+		 * @param flowIndex
+		 *            {@link Flow} index.
+		 */
+		public ManagedObjectSourceFlowImpl(F key, int flowIndex) {
+			this.key = key;
+			this.flowIndex = flowIndex;
+		}
+
+		/**
+		 * Obtains the linked {@link ManagedFunction} name for the
+		 * {@link ManagedObjectSourceFlow}.
+		 * 
+		 * @return Linked {@link ManagedFunction} name or <code>null</code>.
+		 */
+		private String getFlowLinkedFunctionName() {
+
+			// Search flows for matching linked function
+			ManagedObjectFlowConfiguration<F>[] flows = ManagedObjectSourceContextImpl.this.managingOfficeConfiguration
+					.getFlowConfiguration();
+			for (int flowIndex = 0; flowIndex < flows.length; flowIndex++) {
+				ManagedObjectFlowConfiguration<F> flow = flows[flowIndex];
+
+				// Determine if matching flow
+				if (this.key != null) {
+					if (this.key.equals(flow.getFlowKey())) {
+						// Matching key
+						return flow.getManagedFunctionReference().getFunctionName();
+					}
+
+				} else if (this.flowIndex == flowIndex) {
+					// Matching on index
+					return flow.getManagedFunctionReference().getFunctionName();
+				}
+			}
+
+			// As here, no matching flow
+			return null;
+		}
+
+		/*
+		 * =================== ManagedObjectSourceFlow =======================
+		 */
+
+		@Override
+		public void linkFunction(String functionName) {
+			String managedObjectSourceFunctionName = ManagedObjectSourceContextImpl.this
+					.getNamespacedName(functionName);
+			if (this.key != null) {
+				ManagedObjectSourceContextImpl.this.managingOfficeBuilder.linkFlow(this.key,
+						managedObjectSourceFunctionName);
+			} else {
+				ManagedObjectSourceContextImpl.this.managingOfficeBuilder.linkFlow(this.flowIndex,
+						managedObjectSourceFunctionName);
+			}
+		}
 	}
 
 	/**
@@ -222,14 +315,14 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 
 		@Override
 		public void linkManagedObject(o key) {
-			this.functionBuilder.linkManagedObject(key, ManagedObjectSourceContextImpl.this.inputBoundManagedObjectName,
-					Object.class);
+			this.functionBuilder.linkManagedObject(key,
+					ManagedObjectSourceContextImpl.this.getInputBoundManagedObjectName(), Object.class);
 		}
 
 		@Override
 		public void linkManagedObject(int index) {
 			this.functionBuilder.linkManagedObject(index,
-					ManagedObjectSourceContextImpl.this.inputBoundManagedObjectName, Object.class);
+					ManagedObjectSourceContextImpl.this.getInputBoundManagedObjectName(), Object.class);
 		}
 
 		@Override
@@ -260,6 +353,21 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 		public void addEscalation(Class<? extends Throwable> typeOfCause, String functionName) {
 			this.functionBuilder.addEscalation(typeOfCause,
 					ManagedObjectSourceContextImpl.this.getNamespacedName(functionName));
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public void linkFlow(f key, ManagedObjectSourceFlow flow, Class<?> argumentType, boolean isSpawnThreadState) {
+			String functionName = ((ManagedObjectSourceFlowImpl) flow).getFlowLinkedFunctionName();
+			this.functionBuilder.linkFlow(key, functionName, argumentType, isSpawnThreadState);
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public void linkFlow(int flowIndex, ManagedObjectSourceFlow flow, Class<?> argumentType,
+				boolean isSpawnThreadState) {
+			String functionName = ((ManagedObjectSourceFlowImpl) flow).getFlowLinkedFunctionName();
+			this.functionBuilder.linkFlow(flowIndex, functionName, argumentType, isSpawnThreadState);
 		}
 	}
 

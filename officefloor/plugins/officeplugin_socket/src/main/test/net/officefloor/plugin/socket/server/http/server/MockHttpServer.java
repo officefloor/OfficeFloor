@@ -134,7 +134,7 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase imp
 
 		// Register the function to service the HTTP requests
 		HttpServicerFunction function = servicerBuilder.buildServicer(MO_NAME, this);
-		managingOfficeBuilder.linkProcess(0, function.functionName);
+		managingOfficeBuilder.linkFlow(0, function.functionName);
 
 		// Create and open the OfficeFloor
 		OfficeFloor officeFloor = this.constructOfficeFloor();

@@ -136,7 +136,7 @@ public class SslCommunicationProtocol
 				.addManagedFunction("SSL_RUNNABLE_EXECUTOR", sslFunctionExecution);
 		function.linkParameter(SslTaskDependencies.RUNNABLE, Runnable.class);
 		function.setResponsibleTeam("SSL");
-		mosContext.linkProcess(this.sslTaskFlowIndex, "SSL_RUNNABLE_EXECUTOR");
+		mosContext.linkFlow(this.sslTaskFlowIndex, "SSL_RUNNABLE_EXECUTOR");
 
 		// Return this wrapping the server socket handler
 		return this;

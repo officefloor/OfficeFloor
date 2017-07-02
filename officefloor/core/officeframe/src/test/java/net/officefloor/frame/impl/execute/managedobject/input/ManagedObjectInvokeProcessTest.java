@@ -307,7 +307,7 @@ public class ManagedObjectInvokeProcessTest extends AbstractOfficeConstructTestC
 		// Only provide flow if outside
 		TestManagedObjectSource.isLoadFlow = isManagedObjectOutside;
 		if (isManagedObjectOutside) {
-			managingOfficeBuilder.linkProcess(Flows.FLOW, "externalEvent");
+			managingOfficeBuilder.linkFlow(Flows.FLOW, "externalEvent");
 		}
 
 		// Create and register the functions
