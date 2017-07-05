@@ -62,7 +62,7 @@ public class SecureTcpServerTest extends AbstractTcpServerTestCase {
 				new ExecutorCachedTeamSource().createTeam());
 		this.constructManagedObjectSourceTeam(managedObjectName, "listener",
 				new ExecutorCachedTeamSource().createTeam());
-		this.constructManagedObjectSourceTeam(managedObjectName, "SSL_TASKS",
+		this.constructManagedObjectSourceTeam(managedObjectName, "SSL",
 				new ExecutorCachedTeamSource().createTeam());
 
 		// Have server socket managed by office
@@ -70,7 +70,7 @@ public class SecureTcpServerTest extends AbstractTcpServerTestCase {
 
 		// Hook in function of test
 		managingOfficeBuilder.setInputManagedObjectName(managedObjectName);
-		managingOfficeBuilder.linkFlow(0, functionName);
+		managingOfficeBuilder.linkFlow(1, functionName);
 	}
 
 	@Override

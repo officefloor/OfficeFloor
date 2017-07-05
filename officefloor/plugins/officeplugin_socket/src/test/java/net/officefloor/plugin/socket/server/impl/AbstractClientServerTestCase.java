@@ -40,7 +40,7 @@ import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedO
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.ConnectionManager;
+import net.officefloor.plugin.socket.server.SocketManager;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolContext;
@@ -70,14 +70,9 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 	private SocketListener listener;
 
 	/**
-	 * {@link ConnectionManager}.
+	 * {@link SocketManager}.
 	 */
-	private ConnectionManagerImpl connectionManager;
-
-	/**
-	 * {@link ServerSocketAccepter}.
-	 */
-	private ServerSocketAccepter accepter;
+	private SocketManagerImpl socketManager;
 
 	/**
 	 * {@link ManagedFunctionContext}.
@@ -148,11 +143,11 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 			// Create the read buffer
 			this.readBuffer = ByteBuffer.allocate(receiveBufferSize);
 
-			// Create the server listener
-			this.listener = new SocketListener(3000, this.sendBufferSize, receiveBufferSize);
-
-			// Create the connection manager
-			this.connectionManager = new ConnectionManagerImpl(this.listener);
+			// Create the socket listener
+			SocketListener[] socketListeners = new SocketListener[1];
+			this.socketManager = new SocketManagerImpl(socketListeners);
+			this.listener = new SocketListener(socketManager, 3000, this.sendBufferSize, receiveBufferSize);
+			socketListeners[0] = this.listener;
 
 			// Obtain the communication protocol source
 			CommunicationProtocolSource source = this.getCommunicationProtocolSource();
@@ -173,15 +168,10 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 
 			// Create the communication protocol
 			CommunicationProtocol protocol = source.createCommunicationProtocol(configurationContext, this);
-			protocol.setManagedObjectExecuteContext(this);
-
-			// Create the accepter
-			this.accepter = new ServerSocketAccepter(new InetSocketAddress(this.port), protocol, this.connectionManager,
-					128);
 
 			// Start listening and accepting
-			this.connectionManager.openSocketSelectors();
-			this.accepter.bindToSocket();
+			this.socketManager.openSocketSelectors();
+			this.socketManager.bindServerSocket(this.port, 128, protocol, this);
 
 			// Trigger open of connection
 			this.clientChannel = SocketChannel.open();
@@ -199,7 +189,7 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 			this.clientKey = clientChannel.register(this.clientSelector, SelectionKey.OP_CONNECT);
 
 			// Run acceptance of connection
-			this.managedFunctionContext.execute(this.accepter);
+			this.managedFunctionContext.execute(this.listener);
 
 			// Accept connection
 			this.clientSelector.select(100);
@@ -222,19 +212,8 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 	@Override
 	protected void tearDown() throws Exception {
 
-		// Release accepter resources
-		this.accepter.unbindFromSocket();
-		try {
-			// Allow socket listener to close
-			do {
-				this.managedFunctionContext.execute(this.accepter);
-			} while (!this.managedFunctionContext.isComplete());
-		} catch (Throwable ex) {
-			fail(ex);
-		}
-
 		// Release connection resources
-		this.connectionManager.closeSocketSelectors();
+		this.socketManager.closeSocketSelectors();
 		try {
 			// Allow socket listener to close
 			do {
@@ -243,6 +222,7 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 		} catch (Throwable ex) {
 			fail(ex);
 		}
+		this.socketManager.waitForClose();
 
 		// Release client resources
 		this.clientChannel.close();

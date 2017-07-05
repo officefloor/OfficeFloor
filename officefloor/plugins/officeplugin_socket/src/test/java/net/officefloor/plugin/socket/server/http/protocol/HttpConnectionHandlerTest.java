@@ -62,11 +62,6 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	private byte[] readData = new byte[] { 1 };
 
 	/**
-	 * {@link HttpCommunicationProtocol}.
-	 */
-	private HttpCommunicationProtocol communicationProtocol = new HttpCommunicationProtocol();
-
-	/**
 	 * Mock {@link HttpConversation}.
 	 */
 	private HttpConversation conversation = this.createMock(HttpConversation.class);
@@ -85,13 +80,8 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	/**
 	 * {@link HttpConnectionHandler} being tested.
 	 */
-	public HttpConnectionHandler handler = new HttpConnectionHandler(this.communicationProtocol, this.conversation,
-			this.parser, CONNECTION_TIMEOUT);
-
-	@Override
-	protected void setUp() throws Exception {
-		this.communicationProtocol.setManagedObjectExecuteContext(this.executeContext);
-	}
+	public HttpConnectionHandler handler = new HttpConnectionHandler(this.conversation, this.parser, CONNECTION_TIMEOUT,
+			this.executeContext, 0);
 
 	/**
 	 * Ensures successful read of {@link HttpRequest}.

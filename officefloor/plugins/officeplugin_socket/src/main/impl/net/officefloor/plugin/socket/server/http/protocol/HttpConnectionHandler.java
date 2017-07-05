@@ -22,7 +22,11 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
 import net.officefloor.plugin.socket.server.http.conversation.HttpEntity;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
@@ -43,13 +47,7 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	/**
 	 * {@link Logger}.
 	 */
-	private static final Logger LOGGER = Logger
-			.getLogger(HttpConnectionHandler.class.getName());
-
-	/**
-	 * {@link HttpCommunicationProtocol}.
-	 */
-	private final HttpCommunicationProtocol communicationProtocol;
+	private static final Logger LOGGER = Logger.getLogger(HttpConnectionHandler.class.getName());
 
 	/**
 	 * {@link HttpConversation}.
@@ -67,6 +65,16 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	private final long connectionTimout;
 
 	/**
+	 * {@link ManagedObjectExecuteContext}.
+	 */
+	private final ManagedObjectExecuteContext<Indexed> executeContext;
+
+	/**
+	 * {@link Flow} index to handle processing {@link HttpRequest}.
+	 */
+	private final int requestHandlingFlowIndex;
+
+	/**
 	 * Time of last interaction. Will be set on the first read.
 	 */
 	private long lastInteractionTime = -1;
@@ -81,23 +89,24 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	/**
 	 * Initiate.
 	 * 
-	 * @param communicationProtocol
-	 *            {@link HttpCommunicationProtocol}.
 	 * @param conversation
 	 *            {@link HttpConversation}.
 	 * @param parser
 	 *            {@link HttpRequestParser}.
 	 * @param connectionTimeout
 	 *            {@link Connection} timeout in milliseconds.
+	 * @param executeContext
+	 *            {@link ManagedObjectExecuteContext}.
+	 * @param requestHandlingFlowIndex
+	 *            {@link Flow} index to handle processing {@link HttpRequest}.
 	 */
-	public HttpConnectionHandler(
-			HttpCommunicationProtocol communicationProtocol,
-			HttpConversation conversation, HttpRequestParser parser,
-			long connectionTimeout) {
-		this.communicationProtocol = communicationProtocol;
+	public HttpConnectionHandler(HttpConversation conversation, HttpRequestParser parser, long connectionTimeout,
+			ManagedObjectExecuteContext<Indexed> executeContext, int requestHandlingFlowIndex) {
 		this.conversation = conversation;
 		this.parser = parser;
 		this.connectionTimout = connectionTimeout;
+		this.executeContext = executeContext;
+		this.requestHandlingFlowIndex = requestHandlingFlowIndex;
 	}
 
 	/*
@@ -134,11 +143,10 @@ public class HttpConnectionHandler implements ConnectionHandler {
 					this.parser.reset(); // reset for next request
 
 					// Service the request
-					HttpManagedObject managedObject = this.conversation
-							.addRequest(method, requestURI, httpVersion,
-									headers, entity);
-					this.communicationProtocol.serviceHttpRequest(this,
-							managedObject);
+					HttpManagedObject managedObject = this.conversation.addRequest(method, requestURI, httpVersion,
+							headers, entity);
+					this.executeContext.invokeProcess(this.requestHandlingFlowIndex,
+							managedObject.getServerHttpConnection(), managedObject, 0, managedObject.getFlowCallback());
 				}
 
 				// Obtain the next start index
@@ -183,8 +191,7 @@ public class HttpConnectionHandler implements ConnectionHandler {
 				this.conversation.closeConnection();
 			} catch (IOException ex) {
 				if (LOGGER.isLoggable(Level.FINE)) {
-					LOGGER.log(Level.FINE, "Failed closing connection on idle",
-							ex);
+					LOGGER.log(Level.FINE, "Failed closing connection on idle", ex);
 				}
 			}
 		}

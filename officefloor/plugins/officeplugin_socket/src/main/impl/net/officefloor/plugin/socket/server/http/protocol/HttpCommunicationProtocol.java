@@ -29,6 +29,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -36,7 +37,6 @@ import net.officefloor.plugin.socket.server.http.clock.HttpServerClock;
 import net.officefloor.plugin.socket.server.http.clock.HttpServerClockImpl;
 import net.officefloor.plugin.socket.server.http.clock.HttpServerClockSource;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
-import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 import net.officefloor.plugin.socket.server.http.conversation.impl.HttpConversationImpl;
 import net.officefloor.plugin.socket.server.http.conversation.impl.HttpManagedObjectImpl;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
@@ -149,14 +149,9 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource, C
 	private String serverName;
 
 	/**
-	 * Flow index to handle processing {@link HttpRequest}.
+	 * {@link Flow} index to handle processing {@link HttpRequest}.
 	 */
 	private int requestHandlingFlowIndex;
-
-	/**
-	 * {@link ManagedObjectExecuteContext}.
-	 */
-	private ManagedObjectExecuteContext<Indexed> executeContext;
 
 	/**
 	 * Property name for the {@link HttpServerClockSource} class.
@@ -167,21 +162,6 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource, C
 	 * {@link HttpServerClock}.
 	 */
 	private HttpServerClock httpServerClock;
-
-	/**
-	 * Services the {@link HttpRequest}.
-	 * 
-	 * @param handler
-	 *            {@link HttpConnectionHandler}.
-	 * @param httpManagedObject
-	 *            {@link HttpManagedObject} for the {@link HttpRequest}.
-	 */
-	public void serviceHttpRequest(HttpConnectionHandler handler, HttpManagedObject httpManagedObject) {
-
-		// Invoke processing of the HTTP managed object
-		this.executeContext.invokeProcess(this.requestHandlingFlowIndex, httpManagedObject.getServerHttpConnection(),
-				httpManagedObject, 0, httpManagedObject.getFlowCallback());
-	}
 
 	/*
 	 * =================== CommunicationProtocolSource ======================
@@ -250,17 +230,14 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource, C
 	 */
 
 	@Override
-	public void setManagedObjectExecuteContext(ManagedObjectExecuteContext<Indexed> executeContext) {
-		this.executeContext = executeContext;
-	}
-
-	@Override
-	public HttpConnectionHandler createConnectionHandler(Connection connection) {
+	public HttpConnectionHandler createConnectionHandler(Connection connection,
+			ManagedObjectExecuteContext<Indexed> executeContext) {
 		HttpConversation conversation = new HttpConversationImpl(connection, this.serverName, this.sendBufferSize,
 				this.defaultCharset, this.isSendStackTraceOnFailure, this.httpServerClock);
 		HttpRequestParser parser = new HttpRequestParserImpl(this.maximumHttpRequestHeaders, this.maxTextPartLength,
 				this.maximumRequestBodyLength);
-		return new HttpConnectionHandler(this, conversation, parser, this.connectionTimeout);
+		return new HttpConnectionHandler(conversation, parser, this.connectionTimeout, executeContext,
+				this.requestHandlingFlowIndex);
 	}
 
 }

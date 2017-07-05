@@ -18,7 +18,6 @@
 package net.officefloor.plugin.socket.server.impl;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -38,8 +37,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.SourceProperties;
-import net.officefloor.plugin.socket.server.ConnectionManager;
-import net.officefloor.plugin.socket.server.impl.ServerSocketAccepter.ServerSockerAccepterFlows;
+import net.officefloor.plugin.socket.server.SocketManager;
 import net.officefloor.plugin.socket.server.impl.SocketListener.SocketListenerFlows;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolContext;
@@ -92,14 +90,14 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	public static final String DEFAULT_CHARSET = "UTF-8";
 
 	/**
-	 * Singleton {@link ConnectionManager} for all {@link Connection} instances.
+	 * Singleton {@link SocketManager} for all {@link Connection} instances.
 	 */
-	private static ConnectionManager singletonConnectionManager;
+	private static SocketManager singletonSocketManager;
 
 	/**
 	 * Registered {@link AbstractServerSocketManagedObjectSource} instances.
 	 */
-	private static Set<AbstractServerSocketManagedObjectSource> registeredServerSockets = new HashSet<AbstractServerSocketManagedObjectSource>();
+	private static Set<AbstractServerSocketManagedObjectSource> registeredServerSocketManagedObjectSources = new HashSet<AbstractServerSocketManagedObjectSource>();
 
 	/**
 	 * Obtains the {@link Charset}.
@@ -129,14 +127,14 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	}
 
 	/**
-	 * Obtains the {@link ConnectionManager}.
+	 * Obtains the {@link SocketManager}.
 	 * 
 	 * @param mosContext
 	 *            {@link ManagedObjectSourceContext}.
 	 * @param instance
 	 *            Instance of the
 	 *            {@link AbstractServerSocketManagedObjectSource} using the
-	 *            {@link ConnectionManager}.
+	 *            {@link SocketManager}.
 	 * @param numberOfSocketListeners
 	 *            Number of {@link SocketListener} instances.
 	 * @param heartBeatInterval
@@ -145,9 +143,9 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	 *            Send buffer size.
 	 * @param receiveBufferSize
 	 *            Receive buffer size.
-	 * @return {@link ConnectionManager}.
+	 * @return {@link SocketManager}.
 	 */
-	private static synchronized ConnectionManager getConnectionManager(ManagedObjectSourceContext<Indexed> mosContext,
+	private static synchronized SocketManager getSocketManager(ManagedObjectSourceContext<Indexed> mosContext,
 			AbstractServerSocketManagedObjectSource instance, int numberOfSocketListeners, long heartBeatInterval,
 			int sendBufferSize, int receiveBufferSize) {
 
@@ -156,16 +154,21 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 			return null;
 		}
 
-		// Lazy create the singleton connection manager
-		if (singletonConnectionManager == null) {
+		// Lazy create the singleton socket manager
+		if (singletonSocketManager == null) {
 
-			// Create the socket listeners
+			// Create the array of socket listeners
 			SocketListener[] socketListeners = new SocketListener[numberOfSocketListeners];
+
+			// Create the connection manager
+			singletonSocketManager = new SocketManagerImpl(socketListeners);
+
+			// Load the socket listeners
 			for (int i = 0; i < socketListeners.length; i++) {
 
 				// Create the socket listener
-				SocketListener socketListener = new SocketListener(heartBeatInterval, sendBufferSize,
-						receiveBufferSize);
+				SocketListener socketListener = new SocketListener(singletonSocketManager, receiveBufferSize,
+						sendBufferSize, heartBeatInterval);
 
 				// Register the socket listener
 				socketListeners[i] = socketListener;
@@ -180,90 +183,77 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 				// Flag to start listener on server start up
 				mosContext.addStartupFunction(listenerName);
 			}
-
-			// Create the connection manager
-			singletonConnectionManager = new ConnectionManagerImpl(socketListeners);
 		}
 
 		// Register the instance for use of the connection manager
-		registeredServerSockets.add(instance);
+		registeredServerSocketManagedObjectSources.add(instance);
 
 		// Return the singleton connection manager
-		return singletonConnectionManager;
-	}
-
-	/**
-	 * Opens the {@link Selector} instances for the {@link SocketListener}
-	 * instances.
-	 * 
-	 * @throws IOException
-	 *             If fails to open all the {@link Selector} instances.
-	 */
-	private static synchronized void openSocketListenerSelectors() throws IOException {
-		// Should be created at this time
-		singletonConnectionManager.openSocketSelectors();
+		return singletonSocketManager;
 	}
 
 	/**
 	 * <p>
-	 * Closes the possible open {@link ConnectionManager} and releases all
+	 * Closes the possible open {@link SocketManager} and releases all
 	 * {@link Selector} instances for the {@link SocketListener} instances.
 	 * <p>
 	 * Made public so that tests may use to close.
 	 * 
 	 * @throws IOException
-	 *             If fails to close the {@link ConnectionManager}.
+	 *             If fails to close the {@link SocketManager}.
 	 */
-	public static synchronized void closeConnectionManager() throws IOException {
+	public static synchronized void closeSocketManager() throws IOException {
 
 		// Clear all registered server sockets
-		registeredServerSockets.clear();
+		registeredServerSocketManagedObjectSources.clear();
 
 		// Determine if active connection manager
-		if (singletonConnectionManager != null) {
+		if (singletonSocketManager != null) {
 			// Close the socket listener selectors
-			singletonConnectionManager.closeSocketSelectors();
+			singletonSocketManager.closeSocketSelectors();
+
+			// Wait for close
+			singletonSocketManager.waitForClose();
 		}
 
 		// Close (release) the connection manager to create again
-		singletonConnectionManager = null;
+		singletonSocketManager = null;
 	}
 
 	/**
 	 * <p>
-	 * Releases the {@link ConnectionManager} for the
-	 * {@link AbstractServerSocketManagedObjectSource} instance.
+	 * Releases the {@link AbstractServerSocketManagedObjectSource} instance
+	 * from the {@link SocketManager}.
 	 * <p>
-	 * Once {@link ConnectionManager} is released for all
-	 * {@link AbstractServerSocketManagedObjectSource} instances it is itself
-	 * closed.
+	 * Once all {@link AbstractServerSocketManagedObjectSource} instances are
+	 * release, the {@link SocketManager} itself is sclosed.
 	 * 
 	 * @param instance
 	 *            {@link AbstractServerSocketManagedObjectSource}.
 	 * @throws IOException
-	 *             If fails to close the {@link ConnectionManager}.
+	 *             If fails to close the {@link SocketManager}.
 	 */
-	private static synchronized void releaseConnectionManager(AbstractServerSocketManagedObjectSource instance)
+	private static synchronized void releaseFromSocketManager(AbstractServerSocketManagedObjectSource instance)
 			throws IOException {
 
 		// Unregister from the connection manager
-		registeredServerSockets.remove(instance);
+		registeredServerSocketManagedObjectSources.remove(instance);
 
 		// Close connection manager if no further server sockets
-		if (registeredServerSockets.size() == 0) {
-			closeConnectionManager();
+		if (registeredServerSocketManagedObjectSources.size() == 0) {
+			closeSocketManager();
 		}
 	}
+
+	/**
+	 * Port.
+	 */
+	private int port;
 
 	/**
 	 * {@link CommunicationProtocolSource}.
 	 */
 	private final CommunicationProtocolSource communicationProtocolSource;
-
-	/**
-	 * {@link ServerSocketAccepter} that requires binding on starting.
-	 */
-	private ServerSocketAccepter serverSocketAccepter;
 
 	/**
 	 * Send buffer size.
@@ -274,6 +264,16 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	 * Default {@link Charset}.
 	 */
 	private Charset defaultCharset;
+
+	/**
+	 * {@link ServerSocketChannel} backlog size.
+	 */
+	private int serverSocketBackLogSize;
+
+	/**
+	 * {@link SocketManager}.
+	 */
+	private SocketManager socketManager;
 
 	/**
 	 * {@link CommunicationProtocol}.
@@ -336,7 +336,7 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 		socket.close();
 
 		// Obtain the configuration
-		int port = Integer.parseInt(mosContext.getProperty(PROPERTY_PORT));
+		this.port = Integer.parseInt(mosContext.getProperty(PROPERTY_PORT));
 		this.sendBufferSize = Integer
 				.parseInt(mosContext.getProperty(PROPERTY_SEND_BUFFER_SIZE, String.valueOf(osSendBufferSize)));
 		int receiveBufferSize = Integer
@@ -350,41 +350,28 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 				String.valueOf(Runtime.getRuntime().availableProcessors())));
 
 		// Obtain the server socket backlog
-		int serverSocketBackLog = 25000; // TODO make configurable
+		this.serverSocketBackLogSize = 25000; // TODO make configurable
 
 		// Obtain the heart beat interval
 		long heartBeatInterval = 10000; // TODO make configurable
 
 		// Obtain the connection manager
-		ConnectionManager connectionManager = getConnectionManager(mosContext, this, numberOfSocketListeners,
-				heartBeatInterval, this.sendBufferSize, receiveBufferSize);
+		this.socketManager = getSocketManager(mosContext, this, numberOfSocketListeners, heartBeatInterval,
+				this.sendBufferSize, receiveBufferSize);
 
 		// Create the communication protocol
 		this.communicationProtocol = this.communicationProtocolSource.createCommunicationProtocol(context, this);
-
-		// Register the accepter of connections
-		this.serverSocketAccepter = new ServerSocketAccepter(new InetSocketAddress(port), this.communicationProtocol,
-				connectionManager, serverSocketBackLog);
-		ManagedObjectFunctionBuilder<None, ServerSockerAccepterFlows> accepterFunction = mosContext
-				.addManagedFunction("accepter", this.serverSocketAccepter);
-		accepterFunction.setResponsibleTeam("accepter");
-		accepterFunction.linkFlow(ServerSockerAccepterFlows.REPEAT, "accepter", null, false);
-
-		// Flag to start accepter on server start up
-		mosContext.addStartupFunction("accepter");
 	}
 
 	@Override
 	public void start(ManagedObjectExecuteContext<Indexed> context) throws Exception {
 
-		// Make the execute context available to the communication protocol
-		this.communicationProtocol.setManagedObjectExecuteContext(context);
-
 		// Open selectors for socket listeners
-		openSocketListenerSelectors();
+		this.socketManager.openSocketSelectors();
 
-		// Bind to server socket to accept connections
-		this.serverSocketAccepter.bindToSocket();
+		// Bind server socket for this managed object
+		this.socketManager.bindServerSocket(this.port, this.serverSocketBackLogSize, this.communicationProtocol,
+				context);
 	}
 
 	@Override
@@ -396,25 +383,14 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	@Override
 	public void stop() {
 
-		// Unbind acceptor socket to listen for new connections
-		try {
-			this.serverSocketAccepter.unbindFromSocket();
-
-		} catch (IOException ex) {
-			// Shutting down so just log issue
-			if (LOGGER.isLoggable(Level.INFO)) {
-				LOGGER.log(Level.INFO, "Failed to unbind from Socket", ex);
-			}
-		}
-
 		// Release connection manager (closes socket listeners when appropriate)
 		try {
-			releaseConnectionManager(this);
+			releaseFromSocketManager(this);
 
 		} catch (IOException ex) {
 			// Shutting down so just log issue
 			if (LOGGER.isLoggable(Level.INFO)) {
-				LOGGER.log(Level.INFO, "Failed to release " + ConnectionManager.class.getSimpleName(), ex);
+				LOGGER.log(Level.INFO, "Failed to release " + SocketManager.class.getSimpleName(), ex);
 			}
 		}
 	}

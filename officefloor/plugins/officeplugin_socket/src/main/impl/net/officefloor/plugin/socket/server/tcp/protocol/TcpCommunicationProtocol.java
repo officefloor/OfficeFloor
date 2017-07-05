@@ -17,8 +17,6 @@
  */
 package net.officefloor.plugin.socket.server.tcp.protocol;
 
-import java.net.ConnectException;
-
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
@@ -26,7 +24,6 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuild
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
-import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolContext;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
@@ -68,22 +65,6 @@ public class TcpCommunicationProtocol implements CommunicationProtocolSource, Co
 	 */
 	private int newConnectionFlowIndex;
 
-	/**
-	 * {@link ManagedObjectExecuteContext}.
-	 */
-	private ManagedObjectExecuteContext<Indexed> executeContext;
-
-	/**
-	 * Triggers a {@link ProcessState} to service the {@link Connection}.
-	 * 
-	 * @param connectionHandler
-	 *            {@link TcpConnectionHandler} for the {@link ConnectException}.
-	 */
-	public void serviceConnection(TcpConnectionHandler connectionHandler) {
-		// Invokes the process to service the connection
-		this.executeContext.invokeProcess(this.newConnectionFlowIndex, connectionHandler, connectionHandler, 0, null);
-	}
-
 	/*
 	 * =================== CommunicationProtocolSource ========================
 	 */
@@ -114,11 +95,12 @@ public class TcpCommunicationProtocol implements CommunicationProtocolSource, Co
 				.addManagedFunction("servicer", new ServiceFunction());
 		servicer.linkManagedObject(ServiceFunctionObjects.CONNECTION);
 		this.newConnectionFlowIndex = configurationContext.addFlow(ServerTcpConnection.class).getIndex();
-		mosContext.linkFlow(this.newConnectionFlowIndex, "servicer");
+		mosContext.getFlow(this.newConnectionFlowIndex).linkFunction("servicer");
 
 		// Add flow
 		int serviceIndex = configurationContext.addFlow(ServerTcpConnection.class).getIndex();
-		servicer.linkFlow(ServiceFunctionFlows.SERVICE, serviceIndex);
+		servicer.linkFlow(ServiceFunctionFlows.SERVICE, mosContext.getFlow(serviceIndex), ServerTcpConnection.class,
+				false);
 
 		// Ensure connection is cleaned up when process finished
 		mosContext.getRecycleFunction(new CleanupFunction());
@@ -132,13 +114,10 @@ public class TcpCommunicationProtocol implements CommunicationProtocolSource, Co
 	 */
 
 	@Override
-	public void setManagedObjectExecuteContext(ManagedObjectExecuteContext<Indexed> executeContext) {
-		this.executeContext = executeContext;
-	}
-
-	@Override
-	public TcpConnectionHandler createConnectionHandler(Connection connection) {
-		return new TcpConnectionHandler(this, connection, this.sendBufferSize, this.maxIdleTime);
+	public TcpConnectionHandler createConnectionHandler(Connection connection,
+			ManagedObjectExecuteContext<Indexed> executeContext) {
+		return new TcpConnectionHandler(connection, this.sendBufferSize, this.maxIdleTime, executeContext,
+				this.newConnectionFlowIndex);
 	}
 
 }

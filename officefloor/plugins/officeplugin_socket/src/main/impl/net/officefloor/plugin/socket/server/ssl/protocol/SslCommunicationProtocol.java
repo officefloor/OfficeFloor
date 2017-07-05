@@ -35,7 +35,6 @@ import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolContex
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
 import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.ssl.SslEngineSource;
-import net.officefloor.plugin.socket.server.ssl.SslFunctionExecutor;
 import net.officefloor.plugin.socket.server.ssl.protocol.SslFunction.SslTaskDependencies;
 
 /**
@@ -44,8 +43,7 @@ import net.officefloor.plugin.socket.server.ssl.protocol.SslFunction.SslTaskDepe
  * 
  * @author Daniel Sagenschneider
  */
-public class SslCommunicationProtocol
-		implements CommunicationProtocolSource, CommunicationProtocol, SslFunctionExecutor {
+public class SslCommunicationProtocol implements CommunicationProtocolSource, CommunicationProtocol {
 
 	/**
 	 * Property to obtain the optional {@link SslEngineSource} to provide the
@@ -74,14 +72,9 @@ public class SslCommunicationProtocol
 	private int sendBufferSize;
 
 	/**
-	 * {@link ManagedObjectExecuteContext}.
+	 * Flow index to run the SSL {@link Runnable}.
 	 */
-	private ManagedObjectExecuteContext<Indexed> executeContext;
-
-	/**
-	 * Flow index to run the SSL tasks.
-	 */
-	private int sslTaskFlowIndex;
+	private int sslRunnableFlowIndex;
 
 	/**
 	 * Initiate.
@@ -130,13 +123,13 @@ public class SslCommunicationProtocol
 		this.sslEngineSource.init(mosContext);
 
 		// Create the flow to execute the SSL tasks
-		this.sslTaskFlowIndex = configurationContext.addFlow(Runnable.class).setLabel("SSL_RUNNABLE").getIndex();
+		this.sslRunnableFlowIndex = configurationContext.addFlow(Runnable.class).setLabel("SSL_RUNNABLE").getIndex();
 		SslFunction sslFunctionExecution = new SslFunction();
 		ManagedObjectFunctionBuilder<SslTaskDependencies, None> function = mosContext
 				.addManagedFunction("SSL_RUNNABLE_EXECUTOR", sslFunctionExecution);
 		function.linkParameter(SslTaskDependencies.RUNNABLE, Runnable.class);
 		function.setResponsibleTeam("SSL");
-		mosContext.linkFlow(this.sslTaskFlowIndex, "SSL_RUNNABLE_EXECUTOR");
+		mosContext.getFlow(this.sslRunnableFlowIndex).linkFunction("SSL_RUNNABLE_EXECUTOR");
 
 		// Return this wrapping the server socket handler
 		return this;
@@ -147,17 +140,8 @@ public class SslCommunicationProtocol
 	 */
 
 	@Override
-	public void setManagedObjectExecuteContext(ManagedObjectExecuteContext<Indexed> executeContext) {
-
-		// Store execution context for executing SSL tasks
-		this.executeContext = executeContext;
-
-		// Provide execution context to wrapped server
-		this.wrappedCommunicationProtocol.setManagedObjectExecuteContext(executeContext);
-	}
-
-	@Override
-	public SslConnectionHandler createConnectionHandler(Connection connection) {
+	public SslConnectionHandler createConnectionHandler(Connection connection,
+			ManagedObjectExecuteContext<Indexed> executeContext) {
 
 		// Obtain the remote connection details
 		InetSocketAddress remoteAddress = connection.getRemoteAddress();
@@ -169,21 +153,11 @@ public class SslCommunicationProtocol
 		engine.setUseClientMode(false); // Always in server mode
 
 		// Create the SSL connection wrapping the connection
-		SslConnectionHandler connectionHandler = new SslConnectionHandler(connection, engine, this, this.sendBufferSize,
-				this.wrappedCommunicationProtocol);
+		SslConnectionHandler connectionHandler = new SslConnectionHandler(connection, engine, this.sendBufferSize,
+				this.wrappedCommunicationProtocol, executeContext, this.sslRunnableFlowIndex);
 
 		// Return the SSL connection handler
 		return connectionHandler;
-	}
-
-	/*
-	 * ===================== SslFunctionExecutor =====================
-	 */
-
-	@Override
-	public void beginRunnable(Runnable runnable) {
-		// Invoke process to execute the runnable
-		this.executeContext.invokeProcess(this.sslTaskFlowIndex, runnable, null, 0, null);
 	}
 
 	/**

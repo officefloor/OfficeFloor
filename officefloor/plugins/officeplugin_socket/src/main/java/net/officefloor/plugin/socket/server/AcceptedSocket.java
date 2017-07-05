@@ -19,15 +19,17 @@ package net.officefloor.plugin.socket.server;
 
 import java.nio.channels.SocketChannel;
 
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.protocol.Connection;
 
 /**
- * {@link Connection} just established to become a {@link Connection}.
+ * {@link SocketChannel} just accepted to become a {@link Connection}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface EstablishedConnection {
+public interface AcceptedSocket {
 
 	/**
 	 * Obtains the {@link SocketChannel} just established.
@@ -42,5 +44,14 @@ public interface EstablishedConnection {
 	 * @return {@link CommunicationProtocol} for the {@link SocketChannel}.
 	 */
 	CommunicationProtocol getCommunicationProtocol();
+
+	/**
+	 * Obtains the {@link ManagedObjectExecuteContext} to handle the
+	 * {@link SocketChannel}.
+	 * 
+	 * @return {@link ManagedObjectExecuteContext} to handle the
+	 *         {@link SocketChannel}.
+	 */
+	ManagedObjectExecuteContext<Indexed> getManagedObjectExecuteContext();
 
 }

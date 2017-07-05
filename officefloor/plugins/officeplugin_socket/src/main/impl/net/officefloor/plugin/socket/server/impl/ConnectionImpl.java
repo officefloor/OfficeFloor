@@ -23,12 +23,14 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayDeque;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.plugin.socket.server.ManagedConnection;
 import net.officefloor.plugin.socket.server.WriteDataAction;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
@@ -42,14 +44,12 @@ import net.officefloor.plugin.socket.server.protocol.WriteBufferEnum;
  * 
  * @author Daniel Sagenschneider
  */
-public class ConnectionImpl implements Connection, ManagedConnection,
-		WriteDataAction {
+public class ConnectionImpl implements Connection, ManagedConnection, SelectionKeyAttachment, WriteDataAction {
 
 	/**
 	 * {@link Logger}.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(ConnectionImpl.class
-			.getName());
+	private static final Logger LOGGER = Logger.getLogger(ConnectionImpl.class.getName());
 
 	/**
 	 * {@link SelectionKey} for this {@link Connection}.
@@ -74,7 +74,7 @@ public class ConnectionImpl implements Connection, ManagedConnection,
 	/**
 	 * {@link Queue} of {@link WriteAction} instances.
 	 */
-	private final Queue<WriteAction> writeActions = new LinkedList<WriteAction>();
+	private final Queue<WriteAction> writeActions = new ArrayDeque<WriteAction>();
 
 	/**
 	 * Indicates if registered for write.
@@ -98,22 +98,21 @@ public class ConnectionImpl implements Connection, ManagedConnection,
 	 *            {@link SelectionKey} for this {@link Connection}.
 	 * @param socketChannel
 	 *            {@link SocketChannel} for this {@link Connection}.
-	 * @param communicationProtocol
-	 *            {@link CommunicationProtocol}.
 	 * @param socketListener
 	 *            {@link SocketListener}.
+	 * @param communicationProtocol
+	 *            {@link CommunicationProtocol}.
+	 * @param executeContext
+	 *            {@link ManagedObjectExecuteContext}.
 	 */
-	public ConnectionImpl(SelectionKey selectionKey,
-			SocketChannel socketChannel,
-			CommunicationProtocol communicationProtocol,
-			SocketListener socketListener) {
+	public ConnectionImpl(SelectionKey selectionKey, SocketChannel socketChannel, SocketListener socketListener,
+			CommunicationProtocol communicationProtocol, ManagedObjectExecuteContext<Indexed> executeContext) {
 		this.selectionKey = selectionKey;
 		this.socketChannel = socketChannel;
 		this.socketListener = socketListener;
 
 		// Create the connection handler for this connection
-		this.connectionHandler = communicationProtocol
-				.createConnectionHandler(this);
+		this.connectionHandler = communicationProtocol.createConnectionHandler(this, executeContext);
 	}
 
 	/*
@@ -151,8 +150,7 @@ public class ConnectionImpl implements Connection, ManagedConnection,
 
 				// Should not be writing data after terminating connection
 				if (LOGGER.isLoggable(Level.FINE)) {
-					LOGGER.log(Level.FINE,
-							"Attempting to write data after closing connection");
+					LOGGER.log(Level.FINE, "Attempting to write data after closing connection");
 				}
 
 				// Terminating so no further writes
@@ -170,8 +168,7 @@ public class ConnectionImpl implements Connection, ManagedConnection,
 	@Override
 	public InetSocketAddress getLocalAddress() {
 		Socket socket = this.socketChannel.socket();
-		return new InetSocketAddress(socket.getLocalAddress(),
-				socket.getLocalPort());
+		return new InetSocketAddress(socket.getLocalAddress(), socket.getLocalPort());
 	}
 
 	@Override
@@ -225,6 +222,15 @@ public class ConnectionImpl implements Connection, ManagedConnection,
 	}
 
 	/*
+	 * ================ SelectionKeyAttachment ================
+	 */
+
+	@Override
+	public ManagedConnection getManagedConnection() {
+		return this;
+	}
+
+	/*
 	 * ==================== ManagedConnection ============================
 	 * 
 	 * Only called by the SocketListener thread, so thread safe.
@@ -256,8 +262,7 @@ public class ConnectionImpl implements Connection, ManagedConnection,
 			try {
 
 				// Write the data for each queued write action
-				for (Iterator<WriteAction> iterator = this.writeActions
-						.iterator(); iterator.hasNext();) {
+				for (Iterator<WriteAction> iterator = this.writeActions.iterator(); iterator.hasNext();) {
 
 					// Undertake the current write action
 					WriteAction action = iterator.next();
@@ -362,8 +367,7 @@ public class ConnectionImpl implements Connection, ManagedConnection,
 			this.isPooled = new boolean[this.buffers.length];
 
 			// Populate the array of byte buffers to write
-			ByteBuffer currentBuffer = ConnectionImpl.this.socketListener
-					.getWriteBufferFromPool();
+			ByteBuffer currentBuffer = ConnectionImpl.this.socketListener.getWriteBufferFromPool();
 			for (int i = 0; i < writeBuffers.length; i++) {
 				WriteBuffer writeBuffer = writeBuffers[i];
 
@@ -396,8 +400,7 @@ public class ConnectionImpl implements Connection, ManagedConnection,
 							this.addBuffer(currentBuffer, true);
 
 							// Obtain new buffer for next write
-							currentBuffer = ConnectionImpl.this.socketListener
-									.getWriteBufferFromPool();
+							currentBuffer = ConnectionImpl.this.socketListener.getWriteBufferFromPool();
 						}
 					}
 					break;
@@ -410,8 +413,7 @@ public class ConnectionImpl implements Connection, ManagedConnection,
 						this.addBuffer(currentBuffer, true);
 
 						// Obtain the next current buffer
-						currentBuffer = ConnectionImpl.this.socketListener
-								.getWriteBufferFromPool();
+						currentBuffer = ConnectionImpl.this.socketListener.getWriteBufferFromPool();
 					}
 
 					// Include the cached buffer
@@ -419,9 +421,7 @@ public class ConnectionImpl implements Connection, ManagedConnection,
 					break;
 
 				default:
-					throw new IllegalStateException("Unknown "
-							+ WriteBuffer.class.getSimpleName() + " type: "
-							+ type);
+					throw new IllegalStateException("Unknown " + WriteBuffer.class.getSimpleName() + " type: " + type);
 				}
 			}
 
@@ -433,8 +433,7 @@ public class ConnectionImpl implements Connection, ManagedConnection,
 
 			} else {
 				// Return to current buffer to pool as not used
-				ConnectionImpl.this.socketListener
-						.returnWriteBufferToPool(currentBuffer);
+				ConnectionImpl.this.socketListener.returnWriteBufferToPool(currentBuffer);
 			}
 		}
 
@@ -449,12 +448,10 @@ public class ConnectionImpl implements Connection, ManagedConnection,
 		public boolean writeData() throws IOException {
 
 			// Write the data
-			SocketChannel socketChannel = ConnectionImpl.this
-					.getSocketChannel();
+			SocketChannel socketChannel = ConnectionImpl.this.getSocketChannel();
 			IOException failure = null;
 			try {
-				socketChannel.write(this.buffers, this.startIndex,
-						(this.nextIndex - this.startIndex));
+				socketChannel.write(this.buffers, this.startIndex, (this.nextIndex - this.startIndex));
 			} catch (IOException ex) {
 				failure = ex;
 			}
@@ -465,8 +462,7 @@ public class ConnectionImpl implements Connection, ManagedConnection,
 
 				// Buffer written or connection failure, return to pool
 				if (this.isPooled[this.startIndex]) {
-					ConnectionImpl.this.socketListener
-							.returnWriteBufferToPool(this.buffers[this.startIndex]);
+					ConnectionImpl.this.socketListener.returnWriteBufferToPool(this.buffers[this.startIndex]);
 				}
 
 				// Start writing from next buffer
@@ -491,8 +487,7 @@ public class ConnectionImpl implements Connection, ManagedConnection,
 			// Return all buffers to pool
 			for (int i = this.startIndex; i < this.nextIndex; i++) {
 				if (this.isPooled[i]) {
-					ConnectionImpl.this.socketListener
-							.returnWriteBufferToPool(this.buffers[i]);
+					ConnectionImpl.this.socketListener.returnWriteBufferToPool(this.buffers[i]);
 				}
 			}
 		}

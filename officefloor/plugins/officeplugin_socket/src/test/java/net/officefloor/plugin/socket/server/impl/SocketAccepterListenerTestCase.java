@@ -153,12 +153,8 @@ public abstract class SocketAccepterListenerTestCase extends AbstractClientServe
 	 */
 
 	@Override
-	public void setManagedObjectExecuteContext(ManagedObjectExecuteContext<Indexed> executeContext) {
-		// Ignore as not used in this testing
-	}
-
-	@Override
-	public ConnectionHandler createConnectionHandler(Connection connection) {
+	public ConnectionHandler createConnectionHandler(Connection connection,
+			ManagedObjectExecuteContext<Indexed> executeContext) {
 		this.connection = connection;
 		return this;
 	}

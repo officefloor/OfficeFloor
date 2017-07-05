@@ -20,8 +20,11 @@ package net.officefloor.plugin.socket.server.tcp.protocol;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.protocol.ConnectionHandler;
 import net.officefloor.plugin.socket.server.protocol.HeartBeatContext;
@@ -49,11 +52,6 @@ public class TcpConnectionHandler
 	private static final long NON_IDLE_SINCE_TIMESTAMP = -1;
 
 	/**
-	 * {@link TcpCommunicationProtocol}.
-	 */
-	private final TcpCommunicationProtocol protocol;
-
-	/**
 	 * {@link Connection}.
 	 */
 	private final Connection connection;
@@ -74,6 +72,16 @@ public class TcpConnectionHandler
 	private final ServerOutputStreamImpl outputStream;
 
 	/**
+	 * {@link ManagedObjectExecuteContext}.
+	 */
+	private final ManagedObjectExecuteContext<Indexed> executeContext;
+
+	/**
+	 * {@link Flow} index to handle the connection
+	 */
+	private final int newConnectionFlowIndex;
+
+	/**
 	 * Flag indicating if process started.
 	 */
 	private boolean isProcessStarted = false;
@@ -86,8 +94,6 @@ public class TcpConnectionHandler
 	/**
 	 * Initiate.
 	 * 
-	 * @param protocol
-	 *            {@link TcpCommunicationProtocol}.
 	 * @param connection
 	 *            {@link Connection}.
 	 * @param sendBufferSize
@@ -95,12 +101,17 @@ public class TcpConnectionHandler
 	 * @param maxIdleTime
 	 *            Maximum idle time for the {@link Connection} measured in
 	 *            milliseconds.
+	 * @param executeContext
+	 *            {@link ManagedObjectExecuteContext}.
+	 * @param newConnectionFlowIndex
+	 *            {@link Flow} index to handle the connection
 	 */
-	public TcpConnectionHandler(TcpCommunicationProtocol protocol, Connection connection, int sendBufferSize,
-			long maxIdleTime) {
-		this.protocol = protocol;
+	public TcpConnectionHandler(Connection connection, int sendBufferSize, long maxIdleTime,
+			ManagedObjectExecuteContext<Indexed> executeContext, int newConnectionFlowIndex) {
 		this.connection = connection;
 		this.maxIdleTime = maxIdleTime;
+		this.executeContext = executeContext;
+		this.newConnectionFlowIndex = newConnectionFlowIndex;
 
 		// Create the input stream
 		this.inputStream = new ServerInputStreamImpl(connection.getLock());
@@ -162,7 +173,7 @@ public class TcpConnectionHandler
 
 		// Only trigger servicing the connection once
 		if (!this.isProcessStarted) {
-			this.protocol.serviceConnection(this);
+			this.executeContext.invokeProcess(this.newConnectionFlowIndex, this, this, 0, null);
 			this.isProcessStarted = true;
 		}
 	}

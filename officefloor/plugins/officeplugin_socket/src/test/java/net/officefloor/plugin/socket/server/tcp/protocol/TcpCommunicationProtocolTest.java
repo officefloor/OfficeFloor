@@ -20,10 +20,12 @@ package net.officefloor.plugin.socket.server.tcp.protocol;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousOperation;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.plugin.socket.server.impl.AbstractClientServerTestCase;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
@@ -66,9 +68,10 @@ public class TcpCommunicationProtocolTest extends AbstractClientServerTestCase i
 	protected CommunicationProtocolSource getCommunicationProtocolSource() {
 		return new TcpCommunicationProtocol() {
 			@Override
-			public TcpConnectionHandler createConnectionHandler(Connection connection) {
+			public TcpConnectionHandler createConnectionHandler(Connection connection,
+					ManagedObjectExecuteContext<Indexed> executeContext) {
 				// Create connection handler and allow access by test
-				TcpConnectionHandler connectionHandler = super.createConnectionHandler(connection);
+				TcpConnectionHandler connectionHandler = super.createConnectionHandler(connection, executeContext);
 				TcpCommunicationProtocolTest.this.serverTcpConnection = connectionHandler;
 				TcpCommunicationProtocolTest.this.rawConnection = connection;
 				connectionHandler.setAsynchronousContext(TcpCommunicationProtocolTest.this);

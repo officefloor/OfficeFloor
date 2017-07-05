@@ -94,7 +94,7 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase imp
 		super.setUp();
 
 		// Ensure any previous is shutdown
-		AbstractServerSocketManagedObjectSource.closeConnectionManager();
+		AbstractServerSocketManagedObjectSource.closeSocketManager();
 
 		// Specify the port
 		this.port = HttpTestUtil.getAvailablePort();
@@ -110,7 +110,7 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase imp
 			this.isServerSecure = true;
 			serverSocketBuilder = this.constructManagedObject(MO_NAME, HttpsServerSocketManagedObjectSource.class,
 					officeName);
-			this.constructManagedObjectSourceTeam(MO_NAME, "SSL_RUNNABLE", ExecutorCachedTeamSource.class);
+			this.constructManagedObjectSourceTeam(MO_NAME, "SSL", ExecutorCachedTeamSource.class);
 			serverSocketBuilder.addProperty(SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE,
 					HttpTestUtil.getSslEngineSourceClass().getName());
 		} else {
