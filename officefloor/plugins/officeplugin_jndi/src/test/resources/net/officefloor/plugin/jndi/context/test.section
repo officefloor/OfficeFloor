@@ -3,12 +3,12 @@
         <function-namespace name="NAMESPACE" source="CLASS">
             <properties>
                 <property name="class.name"
-                 value="net.officefloor.plugin.jndi.context.ValidateFunction"/>
+                 value="net.officefloor.plugin.jndi.context.ValidateManagedFunction"/>
             </properties>
             <managed-function name="function"/>
         </function-namespace>
     </function-namespaces>
     <functions>
-        <function name="FUNCTION" function-namespace="NAMESPACE" managed-function="function"/>
-    </tasks>
+        <function name="function" function-namespace="NAMESPACE" managed-function="function"/>
+    </functions>
 </section>

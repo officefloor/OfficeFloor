@@ -42,13 +42,11 @@ public class EjbIntegrationTest extends TestCase {
 
 		// Create the initial context
 		Properties properties = new Properties();
-		properties.setProperty(Context.INITIAL_CONTEXT_FACTORY,
-				LocalInitialContextFactory.class.getName());
+		properties.setProperty(Context.INITIAL_CONTEXT_FACTORY, LocalInitialContextFactory.class.getName());
 		Context initialContext = new InitialContext(properties);
 
 		// Obtain the mock EJB
-		MockEjbRemote ejb = (MockEjbRemote) initialContext
-				.lookup(MockEjbRemote.class.getSimpleName());
+		MockEjbRemote ejb = (MockEjbRemote) initialContext.lookup(MockEjbRemote.class.getSimpleName());
 
 		// Run the OfficeFloor
 		boolean isTaskInvoked = ejb.runOfficeFloor();

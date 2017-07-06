@@ -44,7 +44,7 @@ public class ValidateManagedFunction {
 	 * @return JNDI resource name to the {@link OfficeFloor}.
 	 */
 	public static String getOfficeFloorJndiResourceName(boolean isDirect) {
-		return PACKAGE_NAME + "/" + (isDirect ? "direct" : "direct");
+		return PACKAGE_NAME + "/" + (isDirect ? "direct" : "indirect");
 	}
 
 	/**
