@@ -209,6 +209,18 @@ public class SocketListener implements ManagedFunctionFactory<None, SocketListen
 	}
 
 	/**
+	 * Enable waking up the {@link Selector}.
+	 * 
+	 * @throws IOException
+	 *             If fails to wake up the {@link Selector}.
+	 */
+	public synchronized void wakeupSelector() throws IOException {
+		if (this.selector != null) {
+			this.selector.wakeup();
+		}
+	}
+
+	/**
 	 * Close the {@link Selector} for this {@link SocketListener}.
 	 * 
 	 * @throws IOException

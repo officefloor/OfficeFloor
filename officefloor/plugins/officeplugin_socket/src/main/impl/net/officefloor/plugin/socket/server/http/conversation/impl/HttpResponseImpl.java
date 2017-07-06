@@ -300,14 +300,19 @@ public class HttpResponseImpl implements HttpResponse {
 	}
 
 	/**
-	 * Flags failure in processing the {@link HttpRequest}.
+	 * Handles possible {@link CleanupEscalation} instances.
 	 * 
 	 * @param cleanupEscalations
 	 *            {@link CleanupEscalation} instances.
 	 * @throws IOException
 	 *             If fails to send the failure response.
 	 */
-	void sendCleanupEscalations(CleanupEscalation[] cleanupEscalations) throws IOException {
+	void handleCleanupEscalations(CleanupEscalation[] cleanupEscalations) throws IOException {
+
+		// Determine if clean up escalations
+		if ((cleanupEscalations == null) || (cleanupEscalations.length == 0)) {
+			return; // no clean up escalations
+		}
 
 		// Lock as called from process completion handler
 		synchronized (this.connection.getLock()) {
@@ -323,20 +328,27 @@ public class HttpResponseImpl implements HttpResponse {
 
 			// Write the failure response
 			ServerWriter writer = this.getEntityWriter();
+			boolean isFirst = true;
 			for (CleanupEscalation cleanupEscalation : cleanupEscalations) {
 				Throwable escalation = cleanupEscalation.getEscalation();
 
+				// Provide separator
+				if (!isFirst) {
+					writer.write("\n");
+				}
+				isFirst = false;
+
 				// Write the escalation details to the response
 				String failMessage = "Cleanup of object type " + cleanupEscalation.getObjectType().getName() + ": "
-						+ escalation.getMessage() + " (" + escalation.getClass().getSimpleName() + ")\n";
+						+ escalation.getMessage() + " (" + escalation.getClass().getSimpleName() + ")";
 				writer.write(failMessage);
 				if (this.conversation.isSendStackTraceOnFailure()) {
 					// Provide the stack trace
-					writer.write("\n");
+					writer.write("\n\n");
 					PrintWriter stackTraceWriter = new PrintWriter(writer);
 					escalation.printStackTrace(stackTraceWriter);
 					stackTraceWriter.flush();
-					writer.write("\n\n\n");
+					writer.write("\n\n");
 				}
 			}
 

@@ -149,6 +149,9 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 			AbstractServerSocketManagedObjectSource instance, int numberOfSocketListeners, long heartBeatInterval,
 			int sendBufferSize, int receiveBufferSize) {
 
+		// Ensure consistent interface for teams
+		mosContext.addManagedFunction("consistency", () -> (context) -> null).setResponsibleTeam("listener");
+
 		// Do nothing if just loading type
 		if (mosContext.isLoadingType()) {
 			return null;

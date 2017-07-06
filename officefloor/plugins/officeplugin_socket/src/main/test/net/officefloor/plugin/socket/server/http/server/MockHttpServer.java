@@ -129,7 +129,6 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase imp
 		managingOfficeBuilder.setInputManagedObjectName(MO_NAME);
 
 		// Register the necessary teams for socket listening
-		this.constructManagedObjectSourceTeam(MO_NAME, "accepter", ExecutorCachedTeamSource.class);
 		this.constructManagedObjectSourceTeam(MO_NAME, "listener", ExecutorCachedTeamSource.class);
 
 		// Register the function to service the HTTP requests
@@ -182,7 +181,7 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase imp
 	 * 
 	 * @return {@link HttpClient} to connect to this {@link MockHttpServer}.
 	 */
-	public HttpClient createHttpClient() {
+	public CloseableHttpClient createHttpClient() {
 
 		// Create the HTTP client
 		CloseableHttpClient client = HttpTestUtil.createHttpClient(this.isServerSecure);

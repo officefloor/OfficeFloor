@@ -36,9 +36,9 @@ import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 public class CleanupFunctionTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link CleanupManagedFunction}.
+	 * {@link HttpCleanupManagedFunction}.
 	 */
-	private final CleanupManagedFunction task = new CleanupManagedFunction();
+	private final HttpCleanupManagedFunction task = new HttpCleanupManagedFunction();
 
 	/**
 	 * {@link ManagedFunctionContext}.

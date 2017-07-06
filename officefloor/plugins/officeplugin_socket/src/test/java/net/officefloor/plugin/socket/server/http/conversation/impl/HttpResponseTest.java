@@ -383,12 +383,12 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		entity.flush();
 
 		// Send clean up escalation failures
-		((HttpResponseImpl) response).sendCleanupEscalations(escalations);
+		((HttpResponseImpl) response).handleCleanupEscalations(escalations);
 		this.assertWireContent(
 				"HTTP/1.1 500 Internal Server Error\n" + "Server: TEST\nDate: [Mock Time]\n"
-						+ "Content-Type: text/plain; charset=" + DEFAULT_CHARSET.name() + "\nContent-Length: 77",
+						+ "Content-Type: text/plain; charset=" + DEFAULT_CHARSET.name() + "\nContent-Length: 76",
 				"Cleanup of object type " + escalations[0].getObjectType().getName() + ": Cleanup Escalation Test ("
-						+ escalations[0].getEscalation().getClass().getSimpleName() + ")\n",
+						+ escalations[0].getEscalation().getClass().getSimpleName() + ")",
 				DEFAULT_CHARSET);
 		assertTrue("Connection should be closed", this.isConnectionClosed);
 	}
@@ -410,14 +410,14 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		entity.flush();
 
 		// Send clean up escalation failures
-		((HttpResponseImpl) response).sendCleanupEscalations(escalations);
+		((HttpResponseImpl) response).handleCleanupEscalations(escalations);
 		this.assertWireContent(
 				"HTTP/1.1 500 Internal Server Error\n" + "Server: TEST\nDate: [Mock Time]\n"
-						+ "Content-Type: text/plain; charset=" + DEFAULT_CHARSET.name() + "\nContent-Length: 193",
+						+ "Content-Type: text/plain; charset=" + DEFAULT_CHARSET.name() + "\nContent-Length: 192",
 				"Cleanup of object type " + escalations[0].getObjectType().getName() + ": Cleanup Escalation One ("
 						+ escalations[0].getEscalation().getClass().getSimpleName() + ")\nCleanup of object type "
 						+ escalations[1].getObjectType().getName() + ": Cleanup Escalation Two ("
-						+ escalations[1].getEscalation().getClass().getSimpleName() + ")\n",
+						+ escalations[1].getEscalation().getClass().getSimpleName() + ")",
 				DEFAULT_CHARSET);
 		assertTrue("Connection should be closed", this.isConnectionClosed);
 	}
@@ -438,7 +438,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 
 		// Determine the expected content and its length
 		String content = "Cleanup of object type " + escalations[0].getObjectType().getName() + ": Test ("
-				+ escalation.getClass().getSimpleName() + ")\n\n" + stackTrace + "\n\n\n";
+				+ escalation.getClass().getSimpleName() + ")\n\n" + stackTrace + "\n\n";
 		int contentLength = content.getBytes(DEFAULT_CHARSET).length;
 
 		// Create conversation to send stack trace on failure
@@ -446,7 +446,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 
 		// Run test
 		HttpResponseImpl response = (HttpResponseImpl) this.createHttpResponse();
-		response.sendCleanupEscalations(escalations);
+		response.handleCleanupEscalations(escalations);
 		this.assertWireContent("HTTP/1.1 500 Internal Server Error\n" + "Server: TEST\nDate: [Mock Time]\n"
 				+ "Content-Type: text/plain; charset=" + DEFAULT_CHARSET.name() + "\nContent-Length: " + contentLength,
 				content, DEFAULT_CHARSET);

@@ -22,6 +22,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -127,14 +128,26 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensures that cleanup of the {@link HttpManagedObject} triggers the
-	 * response.
+	 * response if failure.
 	 */
 	public void testCleanupTriggerResponse() throws IOException {
 		HttpManagedObject mo = this.addRequest("GET", "/path", "HTTP/1.1", null);
 		HttpResponse response = mo.getServerHttpConnection().getHttpResponse();
 		writeUsAscii(response.getEntity(), "TEST");
-		mo.cleanup(new CleanupEscalation[0]);
-		this.assertWireData("HTTP/1.1 200 OK\nServer: TEST\nDate: [Mock time]\nContent-Length: 4\n\nTEST");
+		mo.cleanup(new CleanupEscalation[] { new CleanupEscalation() {
+			@Override
+			public Class<?> getObjectType() {
+				return Object.class;
+			}
+
+			@Override
+			public Throwable getEscalation() {
+				return new SQLException("test message");
+			}
+		} });
+		this.assertWireData("HTTP/1.1 500 Internal Server Error\n"
+				+ "Server: TEST\nDate: [Mock time]\nContent-Type: text/plain; charset=US-ASCII\nContent-Length: 68\n\n"
+				+ "Cleanup of object type java.lang.Object: test message (SQLException)");
 	}
 
 	/**

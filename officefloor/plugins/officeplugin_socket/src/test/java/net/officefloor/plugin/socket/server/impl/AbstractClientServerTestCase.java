@@ -282,6 +282,7 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 
 		// Execute the listener
 		try {
+			this.listener.wakeupSelector();
 			this.managedFunctionContext.execute(this.listener);
 		} catch (Throwable ex) {
 			fail(ex);

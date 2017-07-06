@@ -25,7 +25,6 @@ import javax.resource.spi.work.Work;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
@@ -66,7 +65,7 @@ public class HttpCleanupServerTest extends MockHttpServer {
 		RecycleEscalationManagedObjectSource.escalation = null;
 
 		// Undertake request
-		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
+		try (CloseableHttpClient client = this.createHttpClient()) {
 
 			// Create the request
 			HttpGet method = new HttpGet(this.getServerUrl() + "/path");
@@ -92,7 +91,7 @@ public class HttpCleanupServerTest extends MockHttpServer {
 		RecycleEscalationManagedObjectSource.escalation = escalation;
 
 		// Undertake request
-		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
+		try (CloseableHttpClient client = this.createHttpClient()) {
 
 			// Create the request
 			HttpGet method = new HttpGet(this.getServerUrl() + "/path");
@@ -106,7 +105,7 @@ public class HttpCleanupServerTest extends MockHttpServer {
 			String responseEntity = HttpTestUtil.getEntityBody(response);
 			StringWriter expectedEntity = new StringWriter();
 			expectedEntity.write("Cleanup of object type " + RecycleEscalationManagedObjectSource.class.getName()
-					+ ": TEST (" + escalation.getClass().getSimpleName() + ")\n");
+					+ ": TEST (" + escalation.getClass().getSimpleName() + ")");
 			assertEquals("Incorrect response entity", expectedEntity.toString(), responseEntity);
 		}
 	}
@@ -132,7 +131,7 @@ public class HttpCleanupServerTest extends MockHttpServer {
 		functionBuilder.buildObject("MO_ESCALATE");
 
 		// Return the reference to the service function
-		return new HttpServicerFunction("servicer");
+		return new HttpServicerFunction("service");
 	}
 
 	/**
@@ -166,8 +165,7 @@ public class HttpCleanupServerTest extends MockHttpServer {
 
 			// Provide recycle function
 			ManagedObjectSourceContext<None> mos = context.getManagedObjectSourceContext();
-			ManagedObjectFunctionBuilder<Indexed, None> recycleFunction = mos.getRecycleFunction(this);
-			recycleFunction.linkParameter(0, RecycleManagedObjectParameter.class);
+			mos.getRecycleFunction(this).linkParameter(0, RecycleManagedObjectParameter.class);
 		}
 
 		@Override
@@ -206,7 +204,7 @@ public class HttpCleanupServerTest extends MockHttpServer {
 				throw cleanupFailure;
 			}
 
-			// No further tasks
+			// No further functions
 			return null;
 		}
 	}

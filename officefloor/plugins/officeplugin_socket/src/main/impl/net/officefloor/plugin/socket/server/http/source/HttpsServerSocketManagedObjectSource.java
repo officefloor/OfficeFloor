@@ -82,7 +82,7 @@ public class HttpsServerSocketManagedObjectSource extends AbstractServerSocketMa
 		// Add teams for the managed object source
 		deployer.link(mos.getManagedObjectTeam("listener"),
 				deployer.addTeam("LISTENER", ExecutorCachedTeamSource.class.getName()));
-		deployer.link(mos.getManagedObjectTeam("ssl_runnable"),
+		deployer.link(mos.getManagedObjectTeam("SSL"),
 				deployer.addTeam("SSL_RUNNER", ExecutorCachedTeamSource.class.getName()));
 
 		// Handle servicing of requests

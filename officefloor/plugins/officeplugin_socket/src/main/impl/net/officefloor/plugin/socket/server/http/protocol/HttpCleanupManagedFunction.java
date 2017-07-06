@@ -38,12 +38,12 @@ import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public class CleanupManagedFunction implements ManagedFunctionFactory<None, None>, ManagedFunction<None, None> {
+public class HttpCleanupManagedFunction implements ManagedFunctionFactory<None, None>, ManagedFunction<None, None> {
 
 	/**
 	 * {@link Logger}.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(CleanupManagedFunction.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(HttpCleanupManagedFunction.class.getName());
 
 	/*
 	 * ==================== ManagedFunctionFactory ===========================

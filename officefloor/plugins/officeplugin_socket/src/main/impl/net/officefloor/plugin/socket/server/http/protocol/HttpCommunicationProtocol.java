@@ -25,6 +25,7 @@ import java.nio.charset.Charset;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
@@ -219,7 +220,8 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource, C
 				.setLabel("HANDLE_HTTP_REQUEST").getIndex();
 
 		// Ensure connection is cleaned up when process finished
-		mosContext.getRecycleFunction(new CleanupManagedFunction());
+		mosContext.getRecycleFunction(new HttpCleanupManagedFunction()).linkParameter(0,
+				RecycleManagedObjectParameter.class);
 
 		// Return this as the server
 		return this;

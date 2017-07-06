@@ -140,16 +140,8 @@ public class HttpManagedObjectImpl implements HttpManagedObject, ServerHttpConne
 
 	@Override
 	public void cleanup(CleanupEscalation[] cleanupEscalations) throws IOException {
-
-		// Determine if escalations
-		if ((cleanupEscalations != null) && (cleanupEscalations.length > 0)) {
-			// Report cleanup escalations
-			this.response.sendCleanupEscalations(cleanupEscalations);
-
-		} else {
-			// Ensure response is triggered for sending
-			this.response.send();
-		}
+		// Report cleanup escalations
+		this.response.handleCleanupEscalations(cleanupEscalations);
 	}
 
 	/*
@@ -227,6 +219,7 @@ public class HttpManagedObjectImpl implements HttpManagedObject, ServerHttpConne
 			// Send failure on handling request
 			if (escalation != null) {
 				this.response.sendFailure(escalation);
+				return;
 			}
 
 		} catch (ClosedChannelException ex) {
@@ -241,6 +234,9 @@ public class HttpManagedObjectImpl implements HttpManagedObject, ServerHttpConne
 				LOGGER.log(Level.INFO, "Unable to send HTTP failure message", ex);
 			}
 		}
+
+		// Send the response
+		this.response.send();
 	}
 
 	/**
