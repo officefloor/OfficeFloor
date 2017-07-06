@@ -64,6 +64,7 @@ import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * {@link ManagedObjectLoader} implementation.
@@ -320,32 +321,29 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 			return null; // must be successful with meta-data
 		}
 
+		// Ensure flows of functions are configured
+		if (!this.ensureFunctionFlowsLinked(office)) {
+			return null; // issue in flow configuration of functions
+		}
+
+		// Determine if input
+		boolean isInput = flowTypes.length > 0;
+
 		// Obtain the team types (ensuring functions have names)
 		ManagedObjectTeamType[] teamTypes = this.getTeamsEnsuringHaveFunctionNames(office);
 		if (teamTypes == null) {
 			return null; // issue getting team types
 		}
 
-		// Filter out linked processes already linked to tasks
+		// Filter out flows already linked to functions
 		ManagedObjectFlowType<F>[] unlinkedFlowTypes = this.filterLinkedProcesses(flowTypes, managingOffice, office);
 		if (unlinkedFlowTypes == null) {
 			return null; // issue in filter meta-data flow types
 		}
 
-		// Obtain the flows instigated by the tasks
-		ManagedObjectFlowType<?>[] taskFlows = this.getFunctionFlows(office);
-		if (taskFlows == null) {
-			return null; // issue getting task flow types
-		}
-
-		// Create the combined listing of flows
-		List<ManagedObjectFlowType<?>> moFlowTypes = new LinkedList<ManagedObjectFlowType<?>>();
-		moFlowTypes.addAll(Arrays.asList(unlinkedFlowTypes));
-		moFlowTypes.addAll(Arrays.asList(taskFlows));
-
 		// Create and return the managed object type
-		return new ManagedObjectTypeImpl<D>(objectType, dependencyTypes,
-				moFlowTypes.toArray(new ManagedObjectFlowType[0]), teamTypes, extensionInterfaces);
+		return new ManagedObjectTypeImpl<D>(objectType, isInput, dependencyTypes, unlinkedFlowTypes, teamTypes,
+				extensionInterfaces);
 	}
 
 	@Override
@@ -513,15 +511,16 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 	}
 
 	/**
-	 * Obtains the {@link ManagedObjectFlowType} instigated from the added
-	 * {@link ManagedFunction} instances.
+	 * Provides issue if the {@link Flow} of the {@link ManagedFunction}
+	 * instances added are not linked.
 	 * 
 	 * @param office
 	 *            {@link OfficeConfiguration}.
-	 * @return {@link ManagedObjectFlowType} instances.
+	 * @return <code>true</code> if all {@link Flow} instances of all the
+	 *         {@link ManagedFunction} instances are configured. Otherwise,
+	 *         <code>false</code> with issues reported.
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private ManagedObjectFlowType<?>[] getFunctionFlows(OfficeConfiguration office) {
+	private boolean ensureFunctionFlowsLinked(OfficeConfiguration office) {
 
 		// Obtain the flows instigated by the functions
 		List<ManagedObjectFlowType<?>> functionFlows = new LinkedList<ManagedObjectFlowType<?>>();
@@ -538,33 +537,22 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 				// Obtain linked task details
 				ManagedFunctionReference link = flow.getInitialFunction();
 				String linkFunctionName = (link == null ? null : link.getFunctionName());
-				Class<?> argumentType = (link == null ? null : link.getArgumentType());
 
-				// Determine if linked or required flow
-				if (CompileUtil.isBlank(linkFunctionName)) {
-
-					// Obtain the flow key and index
-					Enum<?> flowKey = flow.getKey();
-					int flowIndex = (flowKey == null ? i : flowKey.ordinal());
-
-					// Create and add the required flow
-					functionFlows.add(
-							new ManagedObjectFlowTypeImpl(functionName, flowIndex, argumentType, flowKey, flowName));
-
-				} else {
+				// Determine if linked to function
+				if (!CompileUtil.isBlank(linkFunctionName)) {
 
 					// Ensure the function is added
 					if (!this.isFunctionAdded(linkFunctionName, office)) {
 						this.addIssue("Unknown function being linked (" + flowLabel + ", link function="
 								+ linkFunctionName + ")");
-						return null; // must link to added function
+						return false; // invalid
 					}
 				}
 			}
 		}
 
-		// Return the required flows by functions
-		return functionFlows.toArray(new ManagedObjectFlowType[0]);
+		// As here, valid
+		return true;
 	}
 
 	/**

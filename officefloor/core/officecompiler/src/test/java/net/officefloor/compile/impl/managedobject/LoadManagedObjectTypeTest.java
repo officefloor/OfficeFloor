@@ -53,6 +53,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceSpecifi
 import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
@@ -869,12 +870,17 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.record_basicMetaData();
 
 		// Attempt to load
-		this.loadManagedObjectType(true, new Init<None>() {
+		ManagedObjectType<?> moType = this.loadManagedObjectType(true, new Init<None>() {
 			@Override
 			public void init(ManagedObjectSourceContext<None> context, InitUtil util) {
 				context.addManagedFunction("FUNCTION", util.getManagedFunctionFactory());
 			}
 		});
+
+		// Ensure only team added
+		assertFalse("Is input", moType.isInput());
+		assertEquals("Should have no flows", 0, moType.getFlowTypes().length);
+		assertEquals("Should have no teams", 0, moType.getTeamTypes().length);
 	}
 
 	/**
@@ -895,6 +901,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		});
 
 		// Ensure only team added
+		assertFalse("Is input", moType.isInput());
 		assertEquals("Should have no flows", 0, moType.getFlowTypes().length);
 		ManagedObjectTeamType[] teams = moType.getTeamTypes();
 		assertEquals("Incorrect number of teams", 1, teams.length);
@@ -919,6 +926,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		});
 
 		// Ensure only team added
+		assertFalse("Not input", moType.isInput());
 		assertEquals("Should have no flows", 0, moType.getFlowTypes().length);
 		ManagedObjectTeamType[] teams = moType.getTeamTypes();
 		assertEquals("Incorrect number of teams", 1, teams.length);
@@ -952,6 +960,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		});
 
 		// Ensure only team added
+		assertFalse("Is input", moType.isInput());
 		assertEquals("Should have no flows", 0, moType.getFlowTypes().length);
 		ManagedObjectTeamType[] teams = moType.getTeamTypes();
 		assertEquals("Incorrect number of teams", 1, teams.length);
@@ -984,6 +993,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		});
 
 		// Ensure only team added
+		assertFalse("Is input", moType.isInput());
 		assertEquals("Should have no flows", 0, moType.getFlowTypes().length);
 		ManagedObjectTeamType[] teams = moType.getTeamTypes();
 		assertEquals("Incorrect number of teams", 2, teams.length);
@@ -995,7 +1005,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	 * Ensures issue if an added {@link ManagedFunction} is linking an unknown
 	 * added {@link ManagedFunction}.
 	 */
-	public void testAddFunctionLinkingUnknownFlow() {
+	public void testAddFunctionLinkingUnknownFunction() {
 
 		// Record basic meta-data
 		this.record_basicMetaData();
@@ -1044,6 +1054,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		});
 
 		// Ensure only team added
+		assertFalse("Is input", moType.isInput());
 		assertEquals("Should have no flows", 0, moType.getFlowTypes().length);
 		ManagedObjectTeamType[] teams = moType.getTeamTypes();
 		assertEquals("Incorrect number of teams", 1, teams.length);
@@ -1057,30 +1068,51 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	public void testAddFunctionRequiringFlow() {
 
 		// Record basic meta-data
-		this.record_basicMetaData();
+		this.record_basicMetaData(OneKey.KEY);
 
 		// Attempt to load
-		ManagedObjectType<?> moType = this.loadManagedObjectType(true, new Init<None>() {
+		ManagedObjectType<?> moType = this.loadManagedObjectType(true, new Init<OneKey>() {
 			@Override
 			@SuppressWarnings({ "rawtypes", "unchecked" })
-			public void init(ManagedObjectSourceContext<None> context, InitUtil util) {
+			public void init(ManagedObjectSourceContext<OneKey> context, InitUtil util) {
 				// Add function that links to external function
 				ManagedObjectFunctionBuilder linkFunction = context.addManagedFunction("FUNCTION",
 						util.getManagedFunctionFactory());
 				linkFunction.setResponsibleTeam("TEAM");
-				linkFunction.linkFlow(0, context.getFlow(0), Connection.class, false);
+				linkFunction.linkFlow(0, context.getFlow(OneKey.KEY), Integer.class, false);
 			}
 		});
 
 		// Ensure Flow added
+		assertTrue("Is input", moType.isInput());
 		ManagedObjectFlowType<?>[] flows = moType.getFlowTypes();
 		assertEquals("Should have a flow", 1, flows.length);
 		ManagedObjectFlowType<?> flow = flows[0];
-		assertEquals("Incorrect function name", "FUNCTION", flow.getFunctionName());
-		assertEquals("Incorrect flow name", "0", flow.getFlowName());
+		assertEquals("Incorrect flow name", "KEY", flow.getFlowName());
 		assertEquals("Incorrect index", 0, flow.getIndex());
-		assertNull("Flow should not have key", flow.getKey());
-		assertEquals("Incorrect argument type", Connection.class, flow.getArgumentType());
+		assertEquals("Incorrect flow key", OneKey.KEY, flow.getKey());
+		assertEquals("Incorrect argument type", Integer.class, flow.getArgumentType());
+	}
+
+	/**
+	 * Ensure can have {@link Flow}.
+	 */
+	public void testHasFlow() {
+
+		// Record
+		this.record_basicMetaData(OneKey.KEY);
+		ManagedObjectType<?> moType = this.loadManagedObjectType(true, new Init<None>() {
+			@Override
+			public void init(ManagedObjectSourceContext<None> context, InitUtil util) {
+			}
+		});
+
+		// Ensure is input (but no flows/teams)
+		assertTrue("Is input", moType.isInput());
+		ManagedObjectFlowType<?>[] flowTypes = moType.getFlowTypes();
+		assertEquals("Should have no flows", 1, flowTypes.length);
+		assertEquals("Incorrect flow key", OneKey.KEY, flowTypes[0].getKey());
+		assertEquals("Should have no teams", 0, moType.getTeamTypes().length);
 	}
 
 	/**
@@ -1230,6 +1262,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		});
 
 		// Should only have team of function (as linked process hidden)
+		assertTrue("Is input", moType.isInput());
 		assertEquals("Should have not flows", 0, moType.getFlowTypes().length);
 		assertEquals("Incorrect number of teams", 1, moType.getTeamTypes().length);
 		assertEquals("Incorrect team", "TEAM", moType.getTeamTypes()[0].getTeamName());

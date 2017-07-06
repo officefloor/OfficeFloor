@@ -62,22 +62,24 @@ public class HttpServerSocketManagedObjectSource extends AbstractServerSocketMan
 			String sectionName, String sectionInputName) {
 
 		// Add this managed object source
-		OfficeFloorManagedObjectSource mos = deployer.addManagedObjectSource("HTTP_SOURCE",
+		OfficeFloorManagedObjectSource mos = deployer.addManagedObjectSource("HTTP_SOURCE_" + port,
 				HttpServerSocketManagedObjectSource.class.getName());
 		mos.addProperty(PROPERTY_PORT, String.valueOf(port));
 
+		// Managed by office
+		deployer.link(mos.getManagingOffice(), office);
+
 		// Add teams for the managed object source
-		deployer.link(mos.getManagedObjectTeam("accepter"),
-				deployer.addTeam("ACCEPTER", ExecutorCachedTeamSource.class.getName()));
 		deployer.link(mos.getManagedObjectTeam("listener"),
 				deployer.addTeam("LISTENER", ExecutorCachedTeamSource.class.getName()));
 
 		// Handle servicing of requests
-		deployer.link(mos.getManagedObjectFlow("HANDLER"),
+		deployer.link(mos.getManagedObjectFlow("HANDLE_HTTP_REQUEST"),
 				office.getDeployedOfficeInput(sectionName, sectionInputName));
 
 		// Create the input managed object
-		OfficeFloorInputManagedObject input = deployer.addInputManagedObject("HTTP");
+		OfficeFloorInputManagedObject input = deployer.addInputManagedObject("HTTP_" + port);
+		input.addTypeQualification(null, ServerHttpConnection.class.getName());
 		deployer.link(mos, input);
 
 		// Return the input managed object

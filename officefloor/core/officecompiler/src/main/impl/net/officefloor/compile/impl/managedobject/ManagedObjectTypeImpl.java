@@ -22,20 +22,25 @@ import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * {@link ManagedObjectType} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectTypeImpl<D extends Enum<D>> implements
-		ManagedObjectType<D> {
+public class ManagedObjectTypeImpl<D extends Enum<D>> implements ManagedObjectType<D> {
 
 	/**
 	 * {@link Class} of the {@link Object} returned from the
 	 * {@link ManagedObject}.
 	 */
 	private final Class<?> objectClass;
+
+	/**
+	 * Indicates if may trigger a {@link Flow}.
+	 */
+	private final boolean isInput;
 
 	/**
 	 * {@link ManagedObjectDependencyType} instances.
@@ -63,6 +68,8 @@ public class ManagedObjectTypeImpl<D extends Enum<D>> implements
 	 * @param objectClass
 	 *            {@link Class} of the {@link Object} returned from the
 	 *            {@link ManagedObject}.
+	 * @param isInput
+	 *            Indicates if may trigger a {@link Flow}.
 	 * @param dependencies
 	 *            {@link ManagedObjectDependencyType} instances.
 	 * @param flows
@@ -72,11 +79,10 @@ public class ManagedObjectTypeImpl<D extends Enum<D>> implements
 	 * @param extensionInterfaces
 	 *            Extension interfaces supported by the {@link ManagedObject}.
 	 */
-	public ManagedObjectTypeImpl(Class<?> objectClass,
-			ManagedObjectDependencyType<D>[] dependencies,
-			ManagedObjectFlowType<?>[] flows, ManagedObjectTeamType[] teams,
-			Class<?>[] extensionInterfaces) {
+	public ManagedObjectTypeImpl(Class<?> objectClass, boolean isInput, ManagedObjectDependencyType<D>[] dependencies,
+			ManagedObjectFlowType<?>[] flows, ManagedObjectTeamType[] teams, Class<?>[] extensionInterfaces) {
 		this.objectClass = objectClass;
+		this.isInput = isInput;
 		this.dependencies = dependencies;
 		this.flows = flows;
 		this.teams = teams;
@@ -90,6 +96,11 @@ public class ManagedObjectTypeImpl<D extends Enum<D>> implements
 	@Override
 	public Class<?> getObjectClass() {
 		return this.objectClass;
+	}
+
+	@Override
+	public boolean isInput() {
+		return this.isInput;
 	}
 
 	@Override

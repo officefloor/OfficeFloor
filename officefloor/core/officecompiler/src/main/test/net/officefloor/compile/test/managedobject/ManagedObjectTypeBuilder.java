@@ -24,7 +24,6 @@ import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
-import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.Flow;
@@ -46,6 +45,15 @@ public interface ManagedObjectTypeBuilder {
 	 *            {@link ManagedObject}.
 	 */
 	void setObjectClass(Class<?> objectClass);
+
+	/**
+	 * Flags the {@link ManagedObjectSource} as possibly being able to trigger a
+	 * {@link Flow}.
+	 * 
+	 * @param isInput
+	 *            <code>true</code> if can trigger a {@link Flow}.
+	 */
+	void setInput(boolean isInput);
 
 	/**
 	 * Adds a {@link ManagedObjectDependencyType}.
@@ -91,12 +99,8 @@ public interface ManagedObjectTypeBuilder {
 	 *            Index of the {@link ManagedObjectFlow}.
 	 * @param key
 	 *            Key identifying the {@link ManagedObjectFlow}.
-	 * @param functionName
-	 *            Name of {@link ManagedFunction} instigating the {@link Flow}
-	 *            or <code>null</code> if done directly by
-	 *            {@link ManagedObjectSource}.
 	 */
-	void addFlow(String name, Class<?> argumentType, int index, Enum<?> key, String functionName);
+	void addFlow(String name, Class<?> argumentType, int index, Enum<?> key);
 
 	/**
 	 * <p>
@@ -110,12 +114,8 @@ public interface ManagedObjectTypeBuilder {
 	 *            Key identifying the {@link ManagedObjectFlow}.
 	 * @param argumentType
 	 *            Type of argument passed from the {@link ManagedObjectFlow}.
-	 * @param functionName
-	 *            Name of {@link ManagedFunction} instigating the {@link Flow}
-	 *            or <code>null</code> if done directly by
-	 *            {@link ManagedObjectSource}.
 	 */
-	void addFlow(Enum<?> key, Class<?> argumentType, String functionName);
+	void addFlow(Enum<?> key, Class<?> argumentType);
 
 	/**
 	 * Adds a {@link ManagedObjectTeamType}.

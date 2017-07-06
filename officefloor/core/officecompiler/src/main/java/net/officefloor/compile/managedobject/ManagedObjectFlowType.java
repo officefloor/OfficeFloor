@@ -38,27 +38,6 @@ public interface ManagedObjectFlowType<F extends Enum<F>> {
 	String getFlowName();
 
 	/**
-	 * <p>
-	 * Obtains the name of the {@link ManagedFunction} instigating the
-	 * {@link Flow}. Should the {@link Flow} be instigated by the
-	 * {@link ManagedObjectSource} directly (rather than a
-	 * {@link ManagedFunction} it added) this will return <code>null</code>.
-	 * <p>
-	 * For clarity, this is not the name of the {@link ManagedFunction} to be
-	 * invoked by the {@link Flow} but rather the {@link ManagedFunction}
-	 * triggering the {@link Flow}. In other words, it is a {@link Flow}
-	 * invocation that requires to be defined for the
-	 * {@link ManagedObjectSource} as it is triggered from a
-	 * {@link ManagedFunction} added by the {@link ManagedObjectSource} and
-	 * handled by some {@link Office} {@link ManagedFunction}.
-	 * 
-	 * @return {@link ManagedFunction} name instigating {@link Flow} or
-	 *         <code>null</code> if instigated directly by
-	 *         {@link ManagedObjectSource}.
-	 */
-	String getFunctionName();
-
-	/**
 	 * Obtains the key identifying the {@link Flow}.
 	 * 
 	 * @return Key identifying the {@link Flow}.

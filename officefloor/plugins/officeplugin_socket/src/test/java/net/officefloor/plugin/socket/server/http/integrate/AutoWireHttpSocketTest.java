@@ -48,7 +48,10 @@ public class AutoWireHttpSocketTest extends OfficeFrameTestCase {
 		final CompileOfficeFloor compile = new CompileOfficeFloor();
 		compile.officeFloor((context) -> HttpServerSocketManagedObjectSource.configure(context.getOfficeFloorDeployer(),
 				PORT, context.getDeployedOffice(), "TEST", "handleRequest"));
-		compile.office((context) -> context.addSection("TEST", MockSection.class));
+		compile.office((context) -> {
+			context.getOfficeArchitect().enableAutoWireObjects();
+			context.addSection("TEST", MockSection.class);	
+		});
 
 		// Open the OfficeFloor
 		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor();

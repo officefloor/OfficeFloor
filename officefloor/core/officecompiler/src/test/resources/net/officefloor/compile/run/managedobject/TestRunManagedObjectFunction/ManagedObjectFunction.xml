@@ -1,0 +1,20 @@
+<context>
+	<office-floor>
+		<managed-object-sources>
+			<managed-object-source name="MO_SOURCE"
+				source="${testcase}$RunManagedObjectSource">
+				<managing-office name="OFFICE" />
+				<input-managed-object name="MANAGED_OBJECT" />
+			</managed-object-source>
+		</managed-object-sources>
+		<input-managed-objects>
+			<input-managed-object name="MANAGED_OBJECT">
+				<bound-managed-object-source name="MO_SOURCE" />
+			</input-managed-object>
+		</input-managed-objects>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office />
+</context>

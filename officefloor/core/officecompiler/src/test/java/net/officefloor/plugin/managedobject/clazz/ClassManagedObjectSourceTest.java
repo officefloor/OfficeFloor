@@ -69,14 +69,17 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		// Ensure correct object type
 		expected.setObjectClass(MockClass.class);
 
+		// Has input flow
+		expected.setInput(true);
+
 		// Dependencies
 		expected.addDependency("connection", Connection.class, null, 0, null);
 		expected.addDependency("qualifiedDependency", String.class, MockQualifier.class.getName(), 1, null);
 		expected.addDependency("unqualifiedDependency", String.class, null, 2, null);
 
 		// Processes
-		expected.addFlow("doProcess", null, 0, null, null);
-		expected.addFlow("parameterisedProcess", Integer.class, 1, null, null);
+		expected.addFlow("doProcess", null, 0, null);
+		expected.addFlow("parameterisedProcess", Integer.class, 1, null);
 
 		// Class should be the extension interface to allow administration
 		// (Allows implemented interfaces to also be extension interfaces)
@@ -99,17 +102,18 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		// Ensure correct object type
 		expected.setObjectClass(OverrideMockClass.class);
 
+		// Has input flow
+		expected.setInput(true);
+
 		// Dependencies
 		expected.addDependency("OverrideMockClass.connection", Integer.class, null, 0, null);
 		expected.addDependency("ParentMockClass.connection", Connection.class, null, 1, null);
 
 		// Processes
-		expected.addFlow(OverrideMockClass.class.getName() + ".processes.doProcess", null, 0, null, null);
-		expected.addFlow(OverrideMockClass.class.getName() + ".processes.parameterisedProcess", Integer.class, 1, null,
-				null);
-		expected.addFlow(ParentMockClass.class.getName() + ".processes.doProcess", null, 2, null, null);
-		expected.addFlow(ParentMockClass.class.getName() + ".processes.parameterisedProcess", Integer.class, 3, null,
-				null);
+		expected.addFlow(OverrideMockClass.class.getName() + ".processes.doProcess", null, 0, null);
+		expected.addFlow(OverrideMockClass.class.getName() + ".processes.parameterisedProcess", Integer.class, 1, null);
+		expected.addFlow(ParentMockClass.class.getName() + ".processes.doProcess", null, 2, null);
+		expected.addFlow(ParentMockClass.class.getName() + ".processes.parameterisedProcess", Integer.class, 3, null);
 
 		// Verify extension interface
 		expected.addExtensionInterface(OverrideMockClass.class);

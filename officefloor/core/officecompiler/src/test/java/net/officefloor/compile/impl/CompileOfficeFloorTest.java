@@ -142,7 +142,7 @@ public class CompileOfficeFloorTest extends OfficeFrameTestCase {
 		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor();
 
 		// Ensure can invoke function
-		FunctionManager function = officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.function");
+		FunctionManager function = officeFloor.getOffice("OFFICE").getFunctionManager("TEST.function");
 		function.invokeProcess(null, null);
 
 		// Ensure provided compile managed object

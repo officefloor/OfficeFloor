@@ -297,7 +297,7 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 
 					@Override
 					public OfficeSection addSection(String sectionName, Class<?> sectionClass) {
-						return officeArchitect.addOfficeSection("SECTION", ClassSectionSource.class.getName(),
+						return officeArchitect.addOfficeSection(sectionName, ClassSectionSource.class.getName(),
 								sectionClass.getName());
 					}
 				});

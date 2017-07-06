@@ -130,6 +130,9 @@ public class ManagedObjectLoaderUtil {
 		// Verify the types match
 		Assert.assertEquals("Incorrect object type", eType.getObjectClass(), aType.getObjectClass());
 
+		// Verify input
+		Assert.assertEquals("Incorrect flagging input", eType.isInput(), aType.isInput());
+
 		// Verify the dependencies
 		ManagedObjectDependencyType<M>[] eDependencies = eType.getDependencyTypes();
 		ManagedObjectDependencyType<M>[] aDependencies = aType.getDependencyTypes();
@@ -157,7 +160,6 @@ public class ManagedObjectLoaderUtil {
 			Assert.assertEquals("Incorrect name for flow " + i, eFlow.getFlowName(), aFlow.getFlowName());
 			Assert.assertEquals("Incorrect argument type for flow " + i, eFlow.getArgumentType(),
 					aFlow.getArgumentType());
-			Assert.assertEquals("Incorrect function for flow " + i, eFlow.getFunctionName(), aFlow.getFunctionName());
 			Assert.assertEquals("Incorrect index for flow " + i, eFlow.getIndex(), aFlow.getIndex());
 			Assert.assertEquals("Incorrect key for flow " + i, eFlow.getKey(), aFlow.getKey());
 		}
@@ -367,6 +369,11 @@ public class ManagedObjectLoaderUtil {
 		private Class<?> objectClass;
 
 		/**
+		 * Flags if input.
+		 */
+		private boolean isInput = false;
+
+		/**
 		 * {@link ManagedObjectDependencyType} instances.
 		 */
 		private final List<ManagedObjectDependencyType<?>> dependencies = new LinkedList<ManagedObjectDependencyType<?>>();
@@ -393,6 +400,11 @@ public class ManagedObjectLoaderUtil {
 		@Override
 		public Class<?> getObjectClass() {
 			return this.objectClass;
+		}
+
+		@Override
+		public void setInput(boolean isInput) {
+			this.isInput = isInput;
 		}
 
 		@Override
@@ -426,6 +438,11 @@ public class ManagedObjectLoaderUtil {
 		}
 
 		@Override
+		public boolean isInput() {
+			return this.isInput;
+		}
+
+		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public void addDependency(String name, Class<?> type, String typeQualifier, int index, Enum<?> key) {
 			this.dependencies.add(new ManagedObjectDependencyTypeImpl(index, type, typeQualifier, key, name));
@@ -438,13 +455,13 @@ public class ManagedObjectLoaderUtil {
 
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public void addFlow(String name, Class<?> argumentType, int index, Enum<?> key, String functionName) {
-			this.flows.add(new ManagedObjectFlowTypeImpl(functionName, index, argumentType, key, name));
+		public void addFlow(String name, Class<?> argumentType, int index, Enum<?> key) {
+			this.flows.add(new ManagedObjectFlowTypeImpl(index, argumentType, key, name));
 		}
 
 		@Override
-		public void addFlow(Enum<?> key, Class<?> argumentType, String functionName) {
-			this.addFlow(key.name(), argumentType, key.ordinal(), key, functionName);
+		public void addFlow(Enum<?> key, Class<?> argumentType) {
+			this.addFlow(key.name(), argumentType, key.ordinal(), key);
 		}
 
 		@Override

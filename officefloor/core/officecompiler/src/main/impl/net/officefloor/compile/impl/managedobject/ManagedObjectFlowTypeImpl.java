@@ -21,7 +21,6 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * {@link ManagedObjectFlowType} implementation.
@@ -34,12 +33,6 @@ public class ManagedObjectFlowTypeImpl<F extends Enum<F>> implements ManagedObje
 	 * Name describing this flow.
 	 */
 	private final String name;
-
-	/**
-	 * Name of {@link ManagedFunction} instigating the {@link Flow} or
-	 * <code>null</code> if done directly by {@link ManagedObjectSource}.
-	 */
-	private final String functionName;
 
 	/**
 	 * Index identifying this flow.
@@ -60,10 +53,6 @@ public class ManagedObjectFlowTypeImpl<F extends Enum<F>> implements ManagedObje
 	 * Initiate for a {@link ManagedObjectFlowType} invoked from a
 	 * {@link ManagedFunction} added by the {@link ManagedObjectSource}.
 	 * 
-	 * @param functionName
-	 *            Name of {@link ManagedFunction} instigating the {@link Flow}
-	 *            or <code>null</code> if done directly by
-	 *            {@link ManagedObjectSource}.
 	 * @param index
 	 *            Index identifying this flow.
 	 * @param argumentType
@@ -73,8 +62,7 @@ public class ManagedObjectFlowTypeImpl<F extends Enum<F>> implements ManagedObje
 	 * @param label
 	 *            Label describing this flow. May be <code>null</code>.
 	 */
-	public ManagedObjectFlowTypeImpl(String functionName, int index, Class<?> argumentType, F key, String label) {
-		this.functionName = functionName;
+	public ManagedObjectFlowTypeImpl(int index, Class<?> argumentType, F key, String label) {
 		this.index = index;
 		this.key = key;
 
@@ -91,23 +79,6 @@ public class ManagedObjectFlowTypeImpl<F extends Enum<F>> implements ManagedObje
 		}
 	}
 
-	/**
-	 * Initiate for a {@link ManagedObjectFlowType} invoked directly by the
-	 * {@link ManagedObjectSource}.
-	 * 
-	 * @param index
-	 *            Index identifying this flow.
-	 * @param argumentType
-	 *            Type of argument given to this flow. May be <code>null</code>.
-	 * @param key
-	 *            Key identifying this flow. May be <code>null</code>.
-	 * @param label
-	 *            Label describing this flow. May be <code>null</code>.
-	 */
-	public ManagedObjectFlowTypeImpl(int index, Class<?> argumentType, F key, String label) {
-		this(null, index, argumentType, key, label);
-	}
-
 	/*
 	 * ====================== ManagedObjectFlowType ============================
 	 */
@@ -115,11 +86,6 @@ public class ManagedObjectFlowTypeImpl<F extends Enum<F>> implements ManagedObje
 	@Override
 	public String getFlowName() {
 		return this.name;
-	}
-
-	@Override
-	public String getFunctionName() {
-		return this.functionName;
 	}
 
 	@Override

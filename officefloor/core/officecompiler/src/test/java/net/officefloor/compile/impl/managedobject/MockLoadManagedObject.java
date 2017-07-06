@@ -19,7 +19,8 @@ package net.officefloor.compile.impl.managedobject;
 
 import java.sql.Connection;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourcePropertyType;
@@ -61,37 +62,32 @@ public class MockLoadManagedObject {
 	 * @param managedObjectType
 	 *            {@link ManagedObjectType}
 	 */
-	public static void assertManagedObjectType(
-			ManagedObjectType<?> managedObjectType) {
+	public static void assertManagedObjectType(ManagedObjectType<?> managedObjectType) {
 
 		// Ensure correct object type
-		TestCase.assertEquals("Incorrect object type",
-				MockLoadManagedObject.class, managedObjectType.getObjectClass());
+		Assert.assertEquals("Incorrect object type", MockLoadManagedObject.class, managedObjectType.getObjectClass());
+
+		// Ensure input
+		Assert.assertTrue("Should be input", managedObjectType.isInput());
 
 		// Ensure correct dependencies
-		TestCase.assertEquals("Incorrect number of dependencies", 1,
-				managedObjectType.getDependencyTypes().length);
-		TestCase.assertEquals("Incorrect dependency", Connection.class,
+		Assert.assertEquals("Incorrect number of dependencies", 1, managedObjectType.getDependencyTypes().length);
+		Assert.assertEquals("Incorrect dependency", Connection.class,
 				managedObjectType.getDependencyTypes()[0].getDependencyType());
 
 		// Ensure correct flows
-		TestCase.assertEquals("Incorrect number of flows", 1,
-				managedObjectType.getFlowTypes().length);
+		Assert.assertEquals("Incorrect number of flows", 1, managedObjectType.getFlowTypes().length);
 		ManagedObjectFlowType<?> flowType = managedObjectType.getFlowTypes()[0];
-		TestCase.assertEquals("Incorrect flow name", "doProcess",
-				flowType.getFlowName());
-		TestCase.assertEquals("Incorrect flow argument type", Integer.class,
-				flowType.getArgumentType());
+		Assert.assertEquals("Incorrect flow name", "doProcess", flowType.getFlowName());
+		Assert.assertEquals("Incorrect flow argument type", Integer.class, flowType.getArgumentType());
 
 		// Ensure no teams
-		TestCase.assertEquals("Incorrect number of teams", 0,
-				managedObjectType.getTeamTypes().length);
+		Assert.assertEquals("Incorrect number of teams", 0, managedObjectType.getTeamTypes().length);
 
 		// Ensure correct extension interface
-		TestCase.assertEquals("Incorrect number of extension interfaces", 1,
+		Assert.assertEquals("Incorrect number of extension interfaces", 1,
 				managedObjectType.getExtensionInterfaces().length);
-		TestCase.assertEquals("Incorrect extension interface",
-				MockLoadManagedObject.class,
+		Assert.assertEquals("Incorrect extension interface", MockLoadManagedObject.class,
 				managedObjectType.getExtensionInterfaces()[0]);
 	}
 
@@ -103,28 +99,22 @@ public class MockLoadManagedObject {
 	 *            {@link OfficeFloorManagedObjectSourceType}.
 	 */
 	public static void assertOfficeFloorManagedObjectSourceType(
-			OfficeFloorManagedObjectSourceType managedObjectSourceType,
-			String managedObjectSourceName) {
+			OfficeFloorManagedObjectSourceType managedObjectSourceType, String managedObjectSourceName) {
 
 		// Ensure correct managed object source name
-		TestCase.assertEquals("Incorrect managed object source name",
-				managedObjectSourceName,
+		Assert.assertEquals("Incorrect managed object source name", managedObjectSourceName,
 				managedObjectSourceType.getOfficeFloorManagedObjectSourceName());
 
 		// Ensure correct properties
 		OfficeFloorManagedObjectSourcePropertyType[] properties = managedObjectSourceType
 				.getOfficeFloorManagedObjectSourcePropertyTypes();
-		TestCase.assertNotNull("Must have properties", properties);
-		TestCase.assertEquals("Incorrect number of properties", 1,
-				properties.length);
+		Assert.assertNotNull("Must have properties", properties);
+		Assert.assertEquals("Incorrect number of properties", 1, properties.length);
 		OfficeFloorManagedObjectSourcePropertyType property = properties[0];
-		TestCase.assertEquals("Incorrect property name",
-				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+		Assert.assertEquals("Incorrect property name", ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				property.getName());
-		TestCase.assertEquals("Incorrect property label", "Class",
-				property.getLabel());
-		TestCase.assertEquals("Incorrect property default value",
-				MockLoadManagedObject.class.getName(),
+		Assert.assertEquals("Incorrect property label", "Class", property.getLabel());
+		Assert.assertEquals("Incorrect property default value", MockLoadManagedObject.class.getName(),
 				property.getDefaultValue());
 	}
 

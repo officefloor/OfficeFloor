@@ -394,7 +394,6 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", TeamManagedObject.class, 0);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this.record_managingOfficeBuilder_setInputManagedObjectName("MANAGED_OBJECT_SOURCE");
 		// No issue, as will just be undertaken by any team
 
 		// Compile the OfficeFloor
@@ -413,7 +412,6 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", TeamManagedObject.class, 0);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this.record_managingOfficeBuilder_setInputManagedObjectName("MANAGED_OBJECT_SOURCE");
 		this.record_officeBuilder_registerTeam("MANAGED_OBJECT_SOURCE.MANAGED_OBJECT_SOURCE_TEAM", "TEAM");
 
 		// Compile the OfficeFloor

@@ -13,10 +13,6 @@
 		<managed-object-sources>
 			<managed-object-source name="FUNCTION_MANAGED_OBJECT_SOURCE"
 				source="${testcase}$CompileFunctionManagedObjectSource">
-				<input-dependency name="CompileManagedObject"
-					object-type="${testcase}$CompileManagedObject">
-					<managed-object name="MANAGED_OBJECT" />
-				</input-dependency>
 				<team name="MO_TEAM" />
 			</managed-object-source>
 			<managed-object-source name="DEPENDENT_MANAGED_OBJECT_SOURCE"

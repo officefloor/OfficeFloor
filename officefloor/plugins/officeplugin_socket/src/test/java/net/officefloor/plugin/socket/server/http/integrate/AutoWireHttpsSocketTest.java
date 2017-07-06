@@ -64,7 +64,7 @@ public class AutoWireHttpsSocketTest extends OfficeFrameTestCase {
 		this.port = HttpTestUtil.getAvailablePort();
 
 		// Add the section to handle the HTTP request
-		compile.office((context) -> context.addSection("TEST", MockSection.class));
+		this.compile.office((context) -> context.addSection("TEST", MockSection.class));
 	}
 
 	@Override

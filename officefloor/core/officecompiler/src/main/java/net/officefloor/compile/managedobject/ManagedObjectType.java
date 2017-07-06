@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.managedobject;
 
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.team.Team;
@@ -46,6 +47,19 @@ public interface ManagedObjectType<D extends Enum<D>> {
 	 *         dependencies for the {@link ManagedObject}.
 	 */
 	ManagedObjectDependencyType<D>[] getDependencyTypes();
+
+	/**
+	 * <p>
+	 * Indicates if the {@link ManagedObjectSource} may trigger a {@link Flow}.
+	 * <p>
+	 * Note that a {@link ManagedObjectSource} can provide no
+	 * {@link ManagedObjectFlowType} instances yet still be input (as
+	 * {@link ManagedObjectSource} provides the {@link ManagedFunction} for the
+	 * {@link Flow}).
+	 * 
+	 * @return <code>true</code> if input.
+	 */
+	boolean isInput();
 
 	/**
 	 * Obtains the {@link ManagedObjectFlowType} definitions of the {@link Flow}

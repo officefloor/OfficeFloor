@@ -875,14 +875,13 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addManagedObject("OFFICE.FUNCTION_MANAGED_OBJECT_SOURCE",
 				CompileFunctionManagedObjectSource.class, 0);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		office.registerManagedObjectSource("OFFICE.MANAGED_OBJECT", "OFFICE.DEPENDENT_MANAGED_OBJECT_SOURCE");
-		this.record_officeBuilder_addThreadManagedObject("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT");
-		DependencyMappingBuilder inputMo = this
-				.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.FUNCTION_MANAGED_OBJECT_SOURCE");
-		inputMo.mapDependency(0, "OFFICE.MANAGED_OBJECT");
 
 		// Auto wire team
 		office.registerTeam("OFFICE.FUNCTION_MANAGED_OBJECT_SOURCE.MO_TEAM", "OFFICEFLOOR_TEAM");
+
+		// Build remaining of managed object
+		office.registerManagedObjectSource("OFFICE.MANAGED_OBJECT", "OFFICE.DEPENDENT_MANAGED_OBJECT_SOURCE");
+		this.record_officeBuilder_addThreadManagedObject("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT");
 
 		// Compile the OfficeFloor
 		this.compile(true);

@@ -71,18 +71,14 @@ import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
-import net.officefloor.frame.api.build.FlowBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.OfficeEnhancer;
-import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
 /**
@@ -648,12 +644,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			ManagingOfficeBuilder managingOfficeBuilder = moBuilder
 					.setManagingOffice(managingOffice.getDeployedOfficeName());
 
-			// Obtain the flow types and team types
-			ManagedObjectFlowType<?>[] flowTypes = managedObjectType.getFlowTypes();
-			ManagedObjectTeamType[] teamTypes = managedObjectType.getTeamTypes();
-
 			// Provide process bound name if input managed object
-			if ((flowTypes.length > 0) || (teamTypes.length > 0)) {
+			if (managedObjectType.isInput()) {
 
 				// Ensure have Input ManagedObject name
 				String inputBoundManagedObjectName = null;
@@ -670,8 +662,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 							inputBoundManagedObjectName = this.inputManagedObjectNode.getBoundManagedObjectName();
 						}
 					} else {
-						// Never shared (tasks specific to Managed Object
-						// Source)
+						// Never shared (specific to Managed Object Source)
 						inputBoundManagedObjectName = managedObjectSourceName;
 					}
 				}
@@ -735,6 +726,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			}
 
 			// Link in the flows for the managed object source
+			ManagedObjectFlowType<?>[] flowTypes = managedObjectType.getFlowTypes();
 			for (final ManagedObjectFlowType<?> flowType : flowTypes) {
 
 				// Obtain the flow type details
@@ -764,42 +756,16 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				// Obtain the details of function to link flow
 				final String functionName = functionNode.getQualifiedFunctionName();
 
-				// Determine if flow from function
-				String flowFunctionName = flowType.getFunctionName();
-				if (CompileUtil.isBlank(flowFunctionName)) {
-					// Link flow directly from managed object source to function
-					if (flowKey != null) {
-						managingOfficeBuilder.linkFlow(flowKey, functionName);
-					} else {
-						managingOfficeBuilder.linkFlow(flowIndex, functionName);
-					}
-
+				// Link flow from managed object source to function
+				if (flowKey != null) {
+					managingOfficeBuilder.linkFlow(flowKey, functionName);
 				} else {
-					// Link flow from function to its function
-					officeBuilder.addOfficeEnhancer(new OfficeEnhancer() {
-						@Override
-						public void enhanceOffice(OfficeEnhancerContext context) {
-
-							// Obtain the flow builder for the function
-							String flowFunctionName = OfficeBuilderImpl.getNamespacedName(managedObjectSourceName,
-									flowType.getFunctionName());
-							FlowBuilder flowBuilder = context.getFlowBuilder(flowFunctionName);
-
-							// Link in the flow
-							Enum<?> flowKey = flowType.getKey();
-							Class<?> argumentType = flowType.getArgumentType();
-							if (flowKey != null) {
-								flowBuilder.linkFlow(flowKey, functionName, argumentType, false);
-							} else {
-								int flowIndex = flowType.getIndex();
-								flowBuilder.linkFlow(flowIndex, functionName, argumentType, false);
-							}
-						}
-					});
+					managingOfficeBuilder.linkFlow(flowIndex, functionName);
 				}
 			}
 
 			// Link in the teams for the managed object source
+			ManagedObjectTeamType[] teamTypes = managedObjectType.getTeamTypes();
 			for (ManagedObjectTeamType teamType : teamTypes) {
 
 				// Obtain the team type details

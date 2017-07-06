@@ -69,27 +69,29 @@ public class HttpsServerSocketManagedObjectSource extends AbstractServerSocketMa
 			String sectionInputName) {
 
 		// Add this managed object source
-		OfficeFloorManagedObjectSource mos = deployer.addManagedObjectSource("HTTPS_SOURCE",
+		OfficeFloorManagedObjectSource mos = deployer.addManagedObjectSource("HTTPS_SOURCE_" + port,
 				HttpsServerSocketManagedObjectSource.class.getName());
 		mos.addProperty(PROPERTY_PORT, String.valueOf(port));
 		if (sslEngineSourceClass != null) {
 			mos.addProperty(SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE, sslEngineSourceClass.getName());
 		}
 
+		// Managed by office
+		deployer.link(mos.getManagingOffice(), office);
+
 		// Add teams for the managed object source
-		deployer.link(mos.getManagedObjectTeam("accepter"),
-				deployer.addTeam("ACCEPTER", ExecutorCachedTeamSource.class.getName()));
 		deployer.link(mos.getManagedObjectTeam("listener"),
 				deployer.addTeam("LISTENER", ExecutorCachedTeamSource.class.getName()));
 		deployer.link(mos.getManagedObjectTeam("ssl_runnable"),
 				deployer.addTeam("SSL_RUNNER", ExecutorCachedTeamSource.class.getName()));
 
 		// Handle servicing of requests
-		deployer.link(mos.getManagedObjectFlow("HANDLER"),
+		deployer.link(mos.getManagedObjectFlow("HANDLE_HTTP_REQUEST"),
 				office.getDeployedOfficeInput(sectionName, sectionInputName));
 
 		// Create the input managed object
-		OfficeFloorInputManagedObject input = deployer.addInputManagedObject("HTTP");
+		OfficeFloorInputManagedObject input = deployer.addInputManagedObject("HTTP_" + port);
+		input.addTypeQualification(null, ServerHttpConnection.class.getName());
 		deployer.link(mos, input);
 
 		// Return the input managed object
@@ -135,16 +137,17 @@ public class HttpsServerSocketManagedObjectSource extends AbstractServerSocketMa
 			https.addProperty(SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE, sslEngineSourceClass.getName());
 		}
 
+		// Managed by office
+		deployer.link(http.getManagingOffice(), office);
+		deployer.link(https.getManagingOffice(), office);
+
 		// Add teams for the managed object source
-		OfficeFloorTeam accepter = deployer.addTeam("ACCEPTER", ExecutorCachedTeamSource.class.getName());
 		OfficeFloorTeam listener = deployer.addTeam("LISTENER", ExecutorCachedTeamSource.class.getName());
 
 		// Configure the HTTP teams
-		deployer.link(http.getManagedObjectTeam("accepter"), accepter);
 		deployer.link(http.getManagedObjectTeam("listener"), listener);
 
 		// Configure the HTTPS teams
-		deployer.link(https.getManagedObjectTeam("accepter"), accepter);
 		deployer.link(https.getManagedObjectTeam("listener"), listener);
 		deployer.link(https.getManagedObjectTeam("ssl_runnable"),
 				deployer.addTeam("SSL_RUNNER", ExecutorCachedTeamSource.class.getName()));
@@ -156,6 +159,7 @@ public class HttpsServerSocketManagedObjectSource extends AbstractServerSocketMa
 
 		// Create the input managed object
 		OfficeFloorInputManagedObject input = deployer.addInputManagedObject("HTTP");
+		input.addTypeQualification(null, ServerHttpConnection.class.getName());
 		deployer.link(http, input);
 		deployer.link(https, input);
 
