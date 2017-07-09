@@ -37,9 +37,8 @@ import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.plugin.socket.server.AcceptedSocket;
@@ -48,8 +47,6 @@ import net.officefloor.plugin.socket.server.SocketManager;
 import net.officefloor.plugin.socket.server.WriteDataAction;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.protocol.Connection;
-import net.officefloor.plugin.socket.server.protocol.ConnectionHandlerContext;
-import net.officefloor.plugin.socket.server.protocol.HeartBeatContext;
 import net.officefloor.plugin.socket.server.protocol.ReadContext;
 
 /**
@@ -57,8 +54,8 @@ import net.officefloor.plugin.socket.server.protocol.ReadContext;
  * 
  * @author Daniel Sagenschneider
  */
-public class SocketListener implements ManagedFunctionFactory<None, SocketListener.SocketListenerFlows>,
-		ManagedFunction<None, SocketListener.SocketListenerFlows>, ReadContext, HeartBeatContext {
+public class SocketListener extends StaticManagedFunction<None, SocketListener.SocketListenerFlows>
+		implements ReadContext {
 
 	/**
 	 * Flows for the {@link SocketListener}.
@@ -76,11 +73,6 @@ public class SocketListener implements ManagedFunctionFactory<None, SocketListen
 	 * {@link SocketManager}.
 	 */
 	private final SocketManager socketManager;
-
-	/**
-	 * Heart beat interval in milliseconds.
-	 */
-	private final long heartbeatInterval;
 
 	/**
 	 * Listing of bound {@link ServerSocketChannel} instances.
@@ -142,14 +134,10 @@ public class SocketListener implements ManagedFunctionFactory<None, SocketListen
 	 *            Receive buffer size.
 	 * @param sendBufferSize
 	 *            Send buffer size.
-	 * @param heartbeatInterval
-	 *            Heart beat interval.
 	 */
-	public SocketListener(SocketManager socketManager, int receiveBufferSize, int sendBufferSize,
-			long heartbeatInterval) {
+	public SocketListener(SocketManager socketManager, int receiveBufferSize, int sendBufferSize) {
 		this.socketManager = socketManager;
 		this.sendBufferSize = sendBufferSize;
-		this.heartbeatInterval = heartbeatInterval;
 
 		// Create the read buffer
 		this.readBuffer = ByteBuffer.allocateDirect(receiveBufferSize);
@@ -309,38 +297,6 @@ public class SocketListener implements ManagedFunctionFactory<None, SocketListen
 	}
 
 	/**
-	 * Undertakes a heart beat for this {@link SocketManager}.
-	 */
-	void doHeartBeat() {
-
-		// TODO make heart beat part of the socket listener loop
-
-		// Reset time (for optimising obtaining time in heart beats)
-		this.currentTime = -1;
-
-		// Provide heart beat to all connections
-		if (this.selector.isOpen()) {
-			for (SelectionKey selectionKey : this.selector.keys()) {
-
-				// Obtain the connection
-				SelectionKeyAttachment attachment = this.getSelectionKeyAttachment(selectionKey);
-				ManagedConnection connection = attachment.getManagedConnection();
-				if (connection != null) {
-
-					// Undertake the heart beat
-					try {
-						connection.getConnectionHandler().handleHeartbeat(this);
-					} catch (IOException ex) {
-						if (LOGGER.isLoggable(Level.FINE)) {
-							LOGGER.log(Level.FINE, "Failed heart beat for connection", ex);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	/**
 	 * Obtains a {@link ByteBuffer} for writing.
 	 * 
 	 * @return {@link ByteBuffer} for writing.
@@ -381,15 +337,6 @@ public class SocketListener implements ManagedFunctionFactory<None, SocketListen
 	 */
 	private SelectionKeyAttachment getSelectionKeyAttachment(SelectionKey selectionKey) {
 		return (SelectionKeyAttachment) selectionKey.attachment();
-	}
-
-	/*
-	 * ================== ManagedFunctionFactory ===================
-	 */
-
-	@Override
-	public ManagedFunction<None, SocketListenerFlows> createManagedFunction() throws Throwable {
-		return this;
 	}
 
 	/*
@@ -487,9 +434,6 @@ public class SocketListener implements ManagedFunctionFactory<None, SocketListen
 
 		// Listen on the socket
 		this.selector.select(1000); // 1 second
-
-		// Reset time (for optimising obtaining time in reads)
-		this.currentTime = -1;
 
 		// Obtain the all keys and selected keys
 		Set<SelectionKey> selectedKeys = this.selector.selectedKeys();
@@ -597,35 +541,13 @@ public class SocketListener implements ManagedFunctionFactory<None, SocketListen
 	}
 
 	/*
-	 * =============== ConnectionHandlerContext ===============================
-	 * Does not require thread-safety as only accessed by the same Thread.
-	 */
-
-	/**
-	 * Current time for {@link ConnectionHandlerContext}.
-	 */
-	private long currentTime = -1;
-
-	@Override
-	public long getTime() {
-
-		// Lazy obtain the time (cleared for each run)
-		if (this.currentTime == -1) {
-			this.currentTime = System.currentTimeMillis();
-		}
-
-		// Return the current time
-		return this.currentTime;
-	}
-
-	/*
 	 * ================== ReadContext =====================================
 	 * ReadContext does not require thread-safety as only accessed by the same
 	 * Thread.
 	 */
 
 	/**
-	 * Data just read for the {@link ConnectionHandlerContext}.
+	 * Data just read for the {@link ReadContext}.
 	 */
 	private byte[] readData;
 

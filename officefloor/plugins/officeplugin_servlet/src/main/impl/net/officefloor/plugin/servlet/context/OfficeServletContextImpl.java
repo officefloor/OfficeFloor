@@ -229,7 +229,7 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 	}
 
 	@Override
-	public ServletTaskReference mapPath(Office office, String path) {
+	public ServletFunctionReference mapPath(Office office, String path) {
 		// Obtain the context
 		OfficeContext context = this.getOfficeContext(office);
 
@@ -459,7 +459,7 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 	 * {@link Office} {@link HttpServletServicer}.
 	 */
 	private class OfficeServicer implements HttpServletServicer,
-			ServletTaskReference {
+			ServletFunctionReference {
 
 		/**
 		 * Name of {@link Work} for forwarding.
@@ -538,7 +538,7 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		}
 
 		@Override
-		public String getTaskName() {
+		public String getFunctionName() {
 			return this.taskName;
 		}
 	}

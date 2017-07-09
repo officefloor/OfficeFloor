@@ -22,8 +22,8 @@ package net.officefloor.plugin.jms;
 
 import javax.jms.Session;
 
-import net.officefloor.admin.transaction.Transaction;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.plugin.transaction.Transaction;
 
 /**
  * {@link ManagedObject} for a JMS {@link Session}.

@@ -1025,7 +1025,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		}
 
 		@Override
-		public SectionTask getTask(String taskName) {
+		public SectionTask getFunction(String taskName) {
 			return HttpTemplateSectionSource.this.getTaskByName(taskName);
 		}
 

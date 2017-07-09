@@ -33,7 +33,7 @@ import net.officefloor.plugin.web.http.session.HttpSession;
  * bound object, however only objects registered with this
  * {@link HttpRequestState} will be available across redirects.
  * <p>
- * Also this interface is used within the {@link WebAutoWireApplication} to
+ * Also this interface is used within the {@link WebArchitect} to
  * allow integration with a JEE Servlet container.
  * 
  * @author Daniel Sagenschneider

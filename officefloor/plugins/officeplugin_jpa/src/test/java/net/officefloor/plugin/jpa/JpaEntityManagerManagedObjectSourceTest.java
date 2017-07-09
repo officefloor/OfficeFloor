@@ -24,20 +24,17 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.TypedQuery;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireApplication;
-import net.officefloor.autowire.AutoWireObject;
-import net.officefloor.autowire.AutoWireOfficeFloor;
-import net.officefloor.autowire.ManagedObjectSourceWirer;
-import net.officefloor.autowire.ManagedObjectSourceWirerContext;
-import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
+import org.hsqldb.jdbcDriver;
+
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.section.clazz.Parameter;
-
-import org.hsqldb.jdbcDriver;
 
 /**
  * Tests the {@link JpaEntityManagerManagedObjectSource}.
@@ -45,18 +42,14 @@ import org.hsqldb.jdbcDriver;
  * @author Daniel Sagenschneider
  */
 // START SNIPPET: type
-public class JpaEntityManagerManagedObjectSourceTest extends
-		AbstractJpaTestCase {
+public class JpaEntityManagerManagedObjectSourceTest extends AbstractJpaTestCase {
 
 	/**
 	 * Validate the specification.
 	 */
 	public void testSpecification() {
-		ManagedObjectLoaderUtil
-				.validateSpecification(
-						JpaEntityManagerManagedObjectSource.class,
-						JpaEntityManagerManagedObjectSource.PROPERTY_PERSISTENCE_UNIT_NAME,
-						"Persistence Unit");
+		ManagedObjectLoaderUtil.validateSpecification(JpaEntityManagerManagedObjectSource.class,
+				JpaEntityManagerManagedObjectSource.PROPERTY_PERSISTENCE_UNIT_NAME, "Persistence Unit");
 	}
 
 	/**
@@ -65,23 +58,18 @@ public class JpaEntityManagerManagedObjectSourceTest extends
 	public void testType() {
 
 		// Create the expected type
-		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
-				.createManagedObjectTypeBuilder();
+		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(EntityManager.class);
 		type.addTeam(JpaEntityManagerManagedObjectSource.TEAM_CLOSE);
 		type.addExtensionInterface(EntityTransaction.class);
 
 		// Validate type
-		ManagedObjectLoaderUtil
-				.validateManagedObjectType(
-						type,
-						JpaEntityManagerManagedObjectSource.class,
-						JpaEntityManagerManagedObjectSource.PROPERTY_PERSISTENCE_UNIT_NAME,
-						"test");
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, JpaEntityManagerManagedObjectSource.class,
+				JpaEntityManagerManagedObjectSource.PROPERTY_PERSISTENCE_UNIT_NAME, "test");
 	}
-	
+
 	// END SNIPPET: type
-	
+
 	// START SNIPPET: tutorial
 
 	/**
@@ -91,40 +79,30 @@ public class JpaEntityManagerManagedObjectSourceTest extends
 
 		// Add entry to database
 		Statement statement = this.connection.createStatement();
-		statement
-				.execute("INSERT INTO MOCKENTITY (NAME, DESCRIPTION) VALUES ('test', 'mock read entry')");
+		statement.execute("INSERT INTO MOCKENTITY (NAME, DESCRIPTION) VALUES ('test', 'mock read entry')");
 		statement.close();
 
 		// Configure the application
-		AutoWireApplication app = new AutoWireOfficeFloorSource();
-		app.addSection("READ", ClassSectionSource.class.getName(),
-				ReadWork.class.getName());
-		AutoWireObject jpa = app.addManagedObject(
-				JpaEntityManagerManagedObjectSource.class.getName(),
-				new ManagedObjectSourceWirer() {
-					@Override
-					public void wire(ManagedObjectSourceWirerContext context) {
-						context.mapTeam(
-								JpaEntityManagerManagedObjectSource.TEAM_CLOSE,
-								new AutoWire(EntityManager.class));
-					}
-				}, new AutoWire(EntityManager.class));
-		jpa.addProperty(
-				JpaEntityManagerManagedObjectSource.PROPERTY_PERSISTENCE_UNIT_NAME,
-				"test");
-		jpa.addProperty("datanucleus.ConnectionDriverName",
-				jdbcDriver.class.getName());
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.office((context) -> {
+			OfficeArchitect architect = context.getOfficeArchitect();
+			OfficeManagedObjectSource mos = architect.addOfficeManagedObjectSource("JPA",
+					JpaEntityManagerManagedObjectSource.class.getName());
+			mos.addProperty(JpaEntityManagerManagedObjectSource.PROPERTY_PERSISTENCE_UNIT_NAME, "test");
+			mos.addProperty("datanucleus.ConnectionDriverName", jdbcDriver.class.getName());
+			mos.addOfficeManagedObject("JPA", ManagedObjectScope.THREAD);
+			context.addSection("READ", ReadWork.class);
+		});
 
-		// Invoke task to retrieve entity
-		AutoWireOfficeFloor officeFloor = app.openOfficeFloor();
+		// Invoke function to retrieve entity
+		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor();
 		Result result = new Result();
-		officeFloor.invokeTask("READ.WORK", "task", result);
+		officeFloor.getOffice("OFFICE").getFunctionManager("READ.function").invokeProcess(result, null);
 
 		// Validate the result
 		assertNotNull("Should have result", result.entity);
 		assertEquals("Incorrect name", "test", result.entity.getName());
-		assertEquals("Incorrect description", "mock read entry",
-				result.entity.getDescription());
+		assertEquals("Incorrect description", "mock read entry", result.entity.getDescription());
 	}
 
 	/**
@@ -135,14 +113,14 @@ public class JpaEntityManagerManagedObjectSourceTest extends
 	}
 
 	/**
-	 * Mock {@link Work} for test by similar name.
+	 * Mock {@link ManagedFunction} for test by similar name.
 	 */
 	public static class ReadWork {
 		public void task(@Parameter Result result, EntityManager entityManager) {
 
 			// Retrieve the entity
-			TypedQuery<MockEntity> query = entityManager.createQuery(
-					"SELECT M FROM MockEntity M WHERE M.name = 'test'", MockEntity.class);
+			TypedQuery<MockEntity> query = entityManager.createQuery("SELECT M FROM MockEntity M WHERE M.name = 'test'",
+					MockEntity.class);
 			MockEntity entity = query.getSingleResult();
 
 			// Specify the result
@@ -156,44 +134,34 @@ public class JpaEntityManagerManagedObjectSourceTest extends
 	public void testWrite() throws Exception {
 
 		// Configure the application
-		AutoWireApplication app = new AutoWireOfficeFloorSource();
-		app.addSection("WRITE", ClassSectionSource.class.getName(),
-				WriteWork.class.getName());
-		AutoWireObject jpa = app.addManagedObject(
-				JpaEntityManagerManagedObjectSource.class.getName(),
-				new ManagedObjectSourceWirer() {
-					@Override
-					public void wire(ManagedObjectSourceWirerContext context) {
-						context.mapTeam(
-								JpaEntityManagerManagedObjectSource.TEAM_CLOSE,
-								new AutoWire(EntityManager.class));
-					}
-				}, new AutoWire(EntityManager.class));
-		jpa.addProperty(
-				JpaEntityManagerManagedObjectSource.PROPERTY_PERSISTENCE_UNIT_NAME,
-				"test");
-		jpa.addProperty("datanucleus.ConnectionDriverName",
-				jdbcDriver.class.getName());
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.office((context) -> {
+			OfficeArchitect architect = context.getOfficeArchitect();
+			context.addSection("WRITE", WriteWork.class);
+			OfficeManagedObjectSource mos = architect.addOfficeManagedObjectSource("JPA",
+					JpaEntityManagerManagedObjectSource.class.getName());
+			mos.addProperty(JpaEntityManagerManagedObjectSource.PROPERTY_PERSISTENCE_UNIT_NAME, "test");
+			mos.addProperty("datanucleus.ConnectionDriverName", jdbcDriver.class.getName());
+			mos.addOfficeManagedObject("JPA", ManagedObjectScope.THREAD);
+		});
 
-		// Invoke task to retrieve entity
-		AutoWireOfficeFloor officeFloor = app.openOfficeFloor();
-		officeFloor.invokeTask("WRITE.WORK", "task", null);
+		// Invoke function to retrieve entity
+		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor();
+		officeFloor.getOffice("OFFICE").getFunctionManager("WRITE.function").invokeProcess(null, null);
 
 		// Validate the entry written to database
 		Statement statement = this.connection.createStatement();
-		ResultSet results = statement
-				.executeQuery("SELECT NAME, DESCRIPTION FROM MOCKENTITY");
+		ResultSet results = statement.executeQuery("SELECT NAME, DESCRIPTION FROM MOCKENTITY");
 		assertTrue("Should have entry", results.next());
 		assertEquals("Incorrect name", "write", results.getString("NAME"));
-		assertEquals("Incorrect description", "mock write entity",
-				results.getString("DESCRIPTION"));
+		assertEquals("Incorrect description", "mock write entity", results.getString("DESCRIPTION"));
 	}
 
 	/**
-	 * Mock {@link Work} for test by similar name.
+	 * Mock {@link ManagedFunction} for test by similar name.
 	 */
 	public static class WriteWork {
-		public void task(EntityManager entityManager) {
+		public void function(EntityManager entityManager) {
 
 			// Create entry to write to database
 			MockEntity entity = new MockEntity("write", "mock write entity");

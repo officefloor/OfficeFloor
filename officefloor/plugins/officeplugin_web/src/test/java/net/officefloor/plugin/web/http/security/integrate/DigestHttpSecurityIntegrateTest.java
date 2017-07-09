@@ -21,8 +21,8 @@ import org.apache.http.client.CredentialsProvider;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
-import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSection;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.HttpSecuritySection;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.security.scheme.DigestHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.store.CredentialStore;
 import net.officefloor.plugin.web.http.security.store.PasswordFileManagedObjectSource;
@@ -41,11 +41,11 @@ public class DigestHttpSecurityIntegrateTest extends
 	private static final String REALM = "TestRealm";
 
 	@Override
-	protected HttpSecurityAutoWireSection configureHttpSecurity(
-			WebAutoWireApplication application) throws Exception {
+	protected HttpSecuritySection configureHttpSecurity(
+			WebArchitect application) throws Exception {
 
 		// Configure the HTTP Security
-		HttpSecurityAutoWireSection security = application
+		HttpSecuritySection security = application
 				.setHttpSecurity(DigestHttpSecuritySource.class);
 		security.addProperty(DigestHttpSecuritySource.PROPERTY_REALM, REALM);
 		security.addProperty(DigestHttpSecuritySource.PROPERTY_PRIVATE_KEY,

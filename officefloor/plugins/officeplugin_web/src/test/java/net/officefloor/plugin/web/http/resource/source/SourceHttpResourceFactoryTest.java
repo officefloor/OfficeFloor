@@ -27,7 +27,7 @@ import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.resource.FileExtensionHttpFileDescriber;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpFileDescriber;
@@ -194,7 +194,7 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure defaults with
-	 * {@link WebAutoWireApplication#WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX} on
+	 * {@link WebArchitect#WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX} on
 	 * no configuration.
 	 */
 	public void testNoConfiguration() throws Exception {
@@ -364,8 +364,8 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 				this.context
 						.getProperty(
 								SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX,
-								WebAutoWireApplication.WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX),
-				(classpathPrefix == null ? WebAutoWireApplication.WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX
+								WebArchitect.WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX),
+				(classpathPrefix == null ? WebArchitect.WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX
 						: classpathPrefix));
 		this.recordReturn(this.context, this.context.getClassLoader(), Thread
 				.currentThread().getContextClassLoader());

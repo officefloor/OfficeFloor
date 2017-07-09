@@ -17,8 +17,8 @@
  */
 package net.officefloor.plugin.web.http.session;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 
 /**
  * Administration interface for the {@link HttpSession}.

@@ -20,8 +20,7 @@ package net.officefloor.plugin.servlet.context;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.plugin.servlet.mapping.ServicerMapper;
 
 /**
@@ -33,20 +32,13 @@ import net.officefloor.plugin.servlet.mapping.ServicerMapper;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ServletTaskReference {
-
-	/**
-	 * Obtains the {@link Work} name.
-	 * 
-	 * @return {@link Work} name.
-	 */
-	String getWorkName();
+public interface ServletFunctionReference {
 
 	/**
 	 * Obtains the {@link ManagedFunction} name.
 	 * 
 	 * @return {@link ManagedFunction} name.
 	 */
-	String getTaskName();
+	String getFunctionName();
 
 }

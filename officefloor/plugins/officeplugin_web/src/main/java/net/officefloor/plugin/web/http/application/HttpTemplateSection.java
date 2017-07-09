@@ -19,7 +19,7 @@ package net.officefloor.plugin.web.http.application;
 
 import java.util.Map;
 
-import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
@@ -29,7 +29,14 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExten
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpTemplateAutoWireSection extends AutoWireSection {
+public interface HttpTemplateSection {
+
+	/**
+	 * Obtains the underlying {@link OfficeSection}.
+	 * 
+	 * @return {@link OfficeSection}.
+	 */
+	OfficeSection getOfficeSection();
 
 	/**
 	 * Obtains the URI to the template.
@@ -98,14 +105,14 @@ public interface HttpTemplateAutoWireSection extends AutoWireSection {
 	 * Indicate whether a secure {@link ServerHttpConnection} is required for
 	 * the template. This applies to:
 	 * <ul>
-	 * <li>all links for the {@link HttpTemplateAutoWireSection}</li>
-	 * <li>rendering of the {@link HttpTemplateAutoWireSection} response (a
-	 * redirect will be triggered if not appropriately secure)</li>
+	 * <li>all links for the {@link HttpTemplateSection}</li>
+	 * <li>rendering of the {@link HttpTemplateSection} response (a redirect
+	 * will be triggered if not appropriately secure)</li>
 	 * </ul>
 	 * 
 	 * @param isSecure
-	 *            <code>true</code> should the {@link AutoWireSection} require a
-	 *            secure {@link ServerHttpConnection}.
+	 *            <code>true</code> should this require a secure
+	 *            {@link ServerHttpConnection}.
 	 */
 	void setTemplateSecure(boolean isSecure);
 
@@ -170,7 +177,7 @@ public interface HttpTemplateAutoWireSection extends AutoWireSection {
 
 	/**
 	 * Adds an {@link HttpTemplateSectionExtension} to this
-	 * {@link HttpTemplateAutoWireSection}.
+	 * {@link HttpTemplateSection}.
 	 * 
 	 * @param extensionClass
 	 *            Class of the {@link HttpTemplateSectionExtension}.

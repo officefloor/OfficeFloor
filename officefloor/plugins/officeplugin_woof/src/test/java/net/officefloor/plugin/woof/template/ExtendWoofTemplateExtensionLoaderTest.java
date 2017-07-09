@@ -22,13 +22,13 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.UnknownClassError;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.HttpTemplateSection;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.woof.template.impl.AbstractWoofTemplateExtensionSource;
 
 /**
  * Tests the {@link WoofTemplateExtensionLoader} extending the
- * {@link HttpTemplateAutoWireSection}.
+ * {@link HttpTemplateSection}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -46,16 +46,16 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 			.newPropertyList();
 
 	/**
-	 * {@link HttpTemplateAutoWireSection}.
+	 * {@link HttpTemplateSection}.
 	 */
-	private final HttpTemplateAutoWireSection template = this
-			.createMock(HttpTemplateAutoWireSection.class);
+	private final HttpTemplateSection template = this
+			.createMock(HttpTemplateSection.class);
 
 	/**
-	 * {@link WebAutoWireApplication}.
+	 * {@link WebArchitect}.
 	 */
-	private final WebAutoWireApplication application = this
-			.createMock(WebAutoWireApplication.class);
+	private final WebArchitect application = this
+			.createMock(WebArchitect.class);
 
 	/**
 	 * {@link SourceContext}.
@@ -97,7 +97,7 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure escalate appropriately if failure in extending the
-	 * {@link HttpTemplateAutoWireSection}.
+	 * {@link HttpTemplateSection}.
 	 */
 	public void testExtensionFailure() throws Exception {
 
@@ -126,7 +126,7 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can extend the {@link HttpTemplateAutoWireSection}.
+	 * Ensure can extend the {@link HttpTemplateSection}.
 	 */
 	public void testExtendTemplate() throws Exception {
 
@@ -150,7 +150,7 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Extends the {@link HttpTemplateAutoWireSection}.
+	 * Extends the {@link HttpTemplateSection}.
 	 * 
 	 * @param extensionSourceClassName
 	 *            {@link WoofTemplateExtensionSource} class name.

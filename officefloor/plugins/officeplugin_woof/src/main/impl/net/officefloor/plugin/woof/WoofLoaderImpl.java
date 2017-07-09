@@ -69,9 +69,9 @@ import net.officefloor.model.woof.WoofTemplateOutputToWoofResourceModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofTemplateModel;
 import net.officefloor.model.woof.WoofTemplateRedirectModel;
-import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSection;
-import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.HttpSecuritySection;
+import net.officefloor.plugin.web.http.application.HttpTemplateSection;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoader;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoaderImpl;
@@ -113,7 +113,7 @@ public class WoofLoaderImpl implements WoofLoader {
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void loadWoofConfiguration(ConfigurationItem woofConfiguration,
-			WebAutoWireApplication application, SourceContext sourceContext)
+			WebArchitect application, SourceContext sourceContext)
 			throws Exception {
 
 		// Load the WoOF model
@@ -180,7 +180,7 @@ public class WoofLoaderImpl implements WoofLoader {
 		WoofTemplateExtensionLoader extensionLoader = new WoofTemplateExtensionLoaderImpl();
 
 		// Configure the HTTP templates
-		Map<String, HttpTemplateAutoWireSection> templates = new HashMap<String, HttpTemplateAutoWireSection>();
+		Map<String, HttpTemplateSection> templates = new HashMap<String, HttpTemplateSection>();
 		for (WoofTemplateModel templateModel : woof.getWoofTemplates()) {
 
 			// Obtain template details
@@ -195,7 +195,7 @@ public class WoofLoaderImpl implements WoofLoader {
 					.loadClass(templateClassName);
 
 			// Configure the template
-			HttpTemplateAutoWireSection template = application.addHttpTemplate(
+			HttpTemplateSection template = application.addHttpTemplate(
 					uri, templatePath, templateLogicClass);
 
 			// Configure content type for template
@@ -308,7 +308,7 @@ public class WoofLoaderImpl implements WoofLoader {
 
 		// Configure the Access
 		WoofAccessModel accessModel = woof.getWoofAccess();
-		HttpSecurityAutoWireSection access = null;
+		HttpSecuritySection access = null;
 		if (accessModel != null) {
 
 			// Obtain the access details
@@ -333,12 +333,12 @@ public class WoofLoaderImpl implements WoofLoader {
 
 			// Obtain the auto-wire template
 			String templateName = templateModel.getWoofTemplateName();
-			HttpTemplateAutoWireSection template = templates.get(templateName);
+			HttpTemplateSection template = templates.get(templateName);
 
 			// Provide link configuration inheritance
 			String superTemplateName = templateModel.getSuperTemplate();
 			if (superTemplateName != null) {
-				HttpTemplateAutoWireSection superTemplate = templates
+				HttpTemplateSection superTemplate = templates
 						.get(superTemplateName);
 				template.setSuperSection(superTemplate);
 			}
@@ -381,7 +381,7 @@ public class WoofLoaderImpl implements WoofLoader {
 					WoofTemplateModel targetTemplateModel = templateLink
 							.getWoofTemplate();
 					if (targetTemplateModel != null) {
-						HttpTemplateAutoWireSection targetTemplate = templates
+						HttpTemplateSection targetTemplate = templates
 								.get(targetTemplateModel.getWoofTemplateName());
 						application.linkToHttpTemplate(template, outputName,
 								targetTemplate);
@@ -461,7 +461,7 @@ public class WoofLoaderImpl implements WoofLoader {
 					WoofTemplateModel targetTemplateModel = templateLink
 							.getWoofTemplate();
 					if (targetTemplateModel != null) {
-						HttpTemplateAutoWireSection targetTemplate = templates
+						HttpTemplateSection targetTemplate = templates
 								.get(targetTemplateModel.getWoofTemplateName());
 						application.linkToHttpTemplate(section, outputName,
 								targetTemplate);
@@ -537,7 +537,7 @@ public class WoofLoaderImpl implements WoofLoader {
 					WoofTemplateModel targetTemplateModel = templateLink
 							.getWoofTemplate();
 					if (targetTemplateModel != null) {
-						HttpTemplateAutoWireSection targetTemplate = templates
+						HttpTemplateSection targetTemplate = templates
 								.get(targetTemplateModel.getWoofTemplateName());
 						application.linkToHttpTemplate(access, outputName,
 								targetTemplate);
@@ -597,7 +597,7 @@ public class WoofLoaderImpl implements WoofLoader {
 				WoofTemplateModel targetTemplateModel = templateLink
 						.getWoofTemplate();
 				if (targetTemplateModel != null) {
-					HttpTemplateAutoWireSection targetTemplate = templates
+					HttpTemplateSection targetTemplate = templates
 							.get(targetTemplateModel.getWoofTemplateName());
 					application.linkEscalation(exceptionType, targetTemplate);
 				}
@@ -666,7 +666,7 @@ public class WoofLoaderImpl implements WoofLoader {
 					if (this.isWithinGovernanceArea(templateModel.getX(),
 							templateModel.getY(), area)) {
 						// Template within governance area so govern
-						HttpTemplateAutoWireSection template = templates
+						HttpTemplateSection template = templates
 								.get(templateModel.getWoofTemplateName());
 						governance.governSection(template);
 					}

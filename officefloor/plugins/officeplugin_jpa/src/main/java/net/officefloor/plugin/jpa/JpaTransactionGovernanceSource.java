@@ -21,18 +21,17 @@ import javax.persistence.EntityTransaction;
 
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.governance.source.impl.AbstractGovernanceSource;
-import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.governance.GovernanceFactory;
 
 /**
  * {@link GovernanceSource} to provide JPA {@link EntityTransaction} management.
  * 
  * @author Daniel Sagenschneider
  */
-public class JpaTransactionGovernanceSource extends
-		AbstractGovernanceSource<EntityTransaction, None> implements
-		GovernanceFactory<EntityTransaction, None> {
+public class JpaTransactionGovernanceSource extends AbstractGovernanceSource<EntityTransaction, None>
+		implements GovernanceFactory<EntityTransaction, None> {
 
 	/*
 	 * ===================== GovernanceSource =========================
@@ -44,8 +43,7 @@ public class JpaTransactionGovernanceSource extends
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<EntityTransaction, None> context)
-			throws Exception {
+	protected void loadMetaData(MetaDataContext<EntityTransaction, None> context) throws Exception {
 		// Provide the meta-data
 		context.setExtensionInterface(EntityTransaction.class);
 		context.setGovernanceFactory(this);
@@ -56,8 +54,7 @@ public class JpaTransactionGovernanceSource extends
 	 */
 
 	@Override
-	public Governance<EntityTransaction, None> createGovernance()
-			throws Throwable {
+	public Governance<EntityTransaction, None> createGovernance() throws Throwable {
 		return new JpaTransactionGovernance();
 	}
 

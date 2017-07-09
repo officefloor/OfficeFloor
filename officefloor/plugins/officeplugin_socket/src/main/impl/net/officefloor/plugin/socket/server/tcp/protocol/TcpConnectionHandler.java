@@ -27,7 +27,6 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.protocol.ConnectionHandler;
-import net.officefloor.plugin.socket.server.protocol.HeartBeatContext;
 import net.officefloor.plugin.socket.server.protocol.ReadContext;
 import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
@@ -46,20 +45,9 @@ public class TcpConnectionHandler
 		implements ConnectionHandler, AsynchronousManagedObject, WriteBufferReceiver, ServerTcpConnection {
 
 	/**
-	 * Value of {@link #idleSinceTimestamp} if the {@link Connection} is not
-	 * idle.
-	 */
-	private static final long NON_IDLE_SINCE_TIMESTAMP = -1;
-
-	/**
 	 * {@link Connection}.
 	 */
 	private final Connection connection;
-
-	/**
-	 * Maximum idle time for the {@link Connection} measured in milliseconds.
-	 */
-	private final long maxIdleTime;
 
 	/**
 	 * {@link ServerInputStream}.
@@ -87,29 +75,20 @@ public class TcpConnectionHandler
 	private boolean isProcessStarted = false;
 
 	/**
-	 * Time stamp that the {@link Connection} went idle.
-	 */
-	private long idleSinceTimestamp = NON_IDLE_SINCE_TIMESTAMP;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param connection
 	 *            {@link Connection}.
 	 * @param sendBufferSize
 	 *            Send buffer size.
-	 * @param maxIdleTime
-	 *            Maximum idle time for the {@link Connection} measured in
-	 *            milliseconds.
 	 * @param executeContext
 	 *            {@link ManagedObjectExecuteContext}.
 	 * @param newConnectionFlowIndex
 	 *            {@link Flow} index to handle the connection
 	 */
-	public TcpConnectionHandler(Connection connection, int sendBufferSize, long maxIdleTime,
+	public TcpConnectionHandler(Connection connection, int sendBufferSize,
 			ManagedObjectExecuteContext<Indexed> executeContext, int newConnectionFlowIndex) {
 		this.connection = connection;
-		this.maxIdleTime = maxIdleTime;
 		this.executeContext = executeContext;
 		this.newConnectionFlowIndex = newConnectionFlowIndex;
 
@@ -127,36 +106,7 @@ public class TcpConnectionHandler
 	 */
 
 	@Override
-	public void handleHeartbeat(HeartBeatContext context) throws IOException {
-
-		// Determine if have to handle connection idle too long
-		if (this.idleSinceTimestamp == NON_IDLE_SINCE_TIMESTAMP) {
-			// Connection has now become idle
-			this.idleSinceTimestamp = context.getTime();
-
-		} else {
-			// Connection already idle so determine if idle too long
-			long currentTime = context.getTime();
-			long idleTime = currentTime - this.idleSinceTimestamp;
-			if (idleTime > this.maxIdleTime) {
-				// Connection idle too long so close
-				this.connection.close();
-
-				// Awake potential waiting process on client data
-				synchronized (this.getLock()) {
-					if (this.asynchronousContext != null) {
-						this.asynchronousContext.complete(null);
-					}
-				}
-			}
-		}
-	}
-
-	@Override
 	public void handleRead(ReadContext context) throws IOException {
-
-		// Connection not idle
-		this.idleSinceTimestamp = NON_IDLE_SINCE_TIMESTAMP;
 
 		// Indicate data available from client
 		synchronized (this.getLock()) {
@@ -199,9 +149,6 @@ public class TcpConnectionHandler
 
 	@Override
 	public void writeData(WriteBuffer[] data) throws IOException {
-
-		// Connection not idle
-		this.idleSinceTimestamp = NON_IDLE_SINCE_TIMESTAMP;
 
 		// Write the data
 		this.connection.writeData(data);

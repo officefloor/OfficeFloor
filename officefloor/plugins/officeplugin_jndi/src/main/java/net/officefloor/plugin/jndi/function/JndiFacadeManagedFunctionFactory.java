@@ -23,9 +23,9 @@ import javax.naming.Context;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.plugin.managedfunction.clazz.ClassFunction;
 
 /**
@@ -34,7 +34,7 @@ import net.officefloor.plugin.managedfunction.clazz.ClassFunction;
  * 
  * @author Daniel Sagenschneider
  */
-public class JndiFacadeManagedFunctionFactory implements ManagedFunctionFactory<Indexed, None> {
+public class JndiFacadeManagedFunctionFactory extends StaticManagedFunction<Indexed, None> {
 
 	/**
 	 * {@link JndiReference}.
@@ -77,48 +77,30 @@ public class JndiFacadeManagedFunctionFactory implements ManagedFunctionFactory<
 	}
 
 	/*
-	 * ======================= ManagedFunctionFactory =========================
+	 * ======================= ManagedFunction =============================
 	 */
 
 	@Override
-	public ManagedFunction<Indexed, None> createManagedFunction() {
-		return new JndiFacadeManagedFunction();
-	}
+	public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
 
-	/**
-	 * {@link ManagedFunction} to execute the facade on the JNDI object.
-	 */
-	private class JndiFacadeManagedFunction implements ManagedFunction<Indexed, None> {
+		// Obtain the JNDI object
+		Context jndiContext = (Context) context.getObject(0);
+		Object object = this.reference.getJndiObject(jndiContext);
 
-		/*
-		 * ======================= ManagedFunction =============================
-		 */
+		// Obtain the facade instance to invoke the method on
+		Object facade = (this.isStatic ? null : this.reference.getFacade());
 
-		@Override
-		public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
-
-			// Obtain the JNDI object
-			Context jndiContext = (Context) context.getObject(0);
-			Object object = JndiFacadeManagedFunctionFactory.this.reference.getJndiObject(jndiContext);
-
-			// Obtain the facade instance to invoke the method on
-			Object facade = (JndiFacadeManagedFunctionFactory.this.isStatic ? null
-					: JndiFacadeManagedFunctionFactory.this.reference.getFacade());
-
-			// Create the listing of parameters
-			Object[] params = new Object[JndiFacadeManagedFunctionFactory.this.parameterFactories.length];
-			for (int i = 0; i < params.length; i++) {
-				params[i] = JndiFacadeManagedFunctionFactory.this.parameterFactories[i].createParameter(object,
-						context);
-			}
-
-			// Invoke the function
-			Object returnValue = ClassFunction.invokeMethod(facade, JndiFacadeManagedFunctionFactory.this.method,
-					params);
-
-			// Return the value
-			return returnValue;
+		// Create the listing of parameters
+		Object[] params = new Object[this.parameterFactories.length];
+		for (int i = 0; i < params.length; i++) {
+			params[i] = this.parameterFactories[i].createParameter(object, context);
 		}
+
+		// Invoke the function
+		Object returnValue = ClassFunction.invokeMethod(facade, this.method, params);
+
+		// Return the value
+		return returnValue;
 	}
 
 }

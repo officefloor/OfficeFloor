@@ -15,16 +15,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.web.http.application;
-
-import net.officefloor.compile.properties.PropertyConfigurable;
-import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
+package net.officefloor.plugin.transaction;
 
 /**
- * Allows configuring the {@link HttpTemplateSectionExtension} for the
- * {@link HttpTemplateSection}.
+ * Transaction to be administered.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpTemplateAutoWireSectionExtension extends PropertyConfigurable {
+public interface Transaction {
+
+	/**
+	 * Begins the transaction.
+	 * 
+	 * @throws Exception
+	 *             If fails to begin.
+	 */
+	void begin() throws Exception;
+
+	/**
+	 * Commit the transaction.
+	 * 
+	 * @throws Exception
+	 *             If fails to commit.
+	 */
+	void commit() throws Exception;
+
+	/**
+	 * Rolls back the transaction.
+	 * 
+	 * @throws Exception
+	 *             If fails to rollback.
+	 */
+	void rollback() throws Exception;
+
 }

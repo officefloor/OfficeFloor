@@ -29,7 +29,6 @@ import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.plugin.socket.server.ssl.OfficeFloorDefaultSslEngineSource;
 import net.officefloor.plugin.socket.server.ssl.protocol.SslCommunicationProtocol;
-import net.officefloor.plugin.socket.server.tcp.protocol.TcpCommunicationProtocol;
 
 /**
  * Tests the {@link SecureTcpServerSocketManagedObjectSource}.
@@ -52,7 +51,6 @@ public class SecureTcpServerTest extends AbstractTcpServerTestCase {
 		ManagedObjectBuilder<Indexed> serverSocketBuilder = this.constructManagedObject(managedObjectName,
 				SecureTcpServerSocketManagedObjectSource.class, officeName);
 		serverSocketBuilder.addProperty(TcpServerSocketManagedObjectSource.PROPERTY_PORT, String.valueOf(port));
-		serverSocketBuilder.addProperty(TcpCommunicationProtocol.PROPERTY_MAXIMUM_IDLE_TIME, String.valueOf(10000));
 		serverSocketBuilder.addProperty(SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE,
 				OfficeFloorDefaultSslEngineSource.class.getName());
 		serverSocketBuilder.setTimeout(10000);
@@ -62,8 +60,7 @@ public class SecureTcpServerTest extends AbstractTcpServerTestCase {
 				new ExecutorCachedTeamSource().createTeam());
 		this.constructManagedObjectSourceTeam(managedObjectName, "listener",
 				new ExecutorCachedTeamSource().createTeam());
-		this.constructManagedObjectSourceTeam(managedObjectName, "SSL",
-				new ExecutorCachedTeamSource().createTeam());
+		this.constructManagedObjectSourceTeam(managedObjectName, "SSL", new ExecutorCachedTeamSource().createTeam());
 
 		// Have server socket managed by office
 		ManagingOfficeBuilder<Indexed> managingOfficeBuilder = serverSocketBuilder.setManagingOffice(officeName);

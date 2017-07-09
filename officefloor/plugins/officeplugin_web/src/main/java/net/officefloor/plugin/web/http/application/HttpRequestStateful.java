@@ -23,13 +23,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
 /**
  * <p>
  * Annotated on the class of the parameters to the {@link HttpTemplate} logic
- * class to indicate it should be a {@link HttpRequestObjectManagedObjectSource}.
+ * class to indicate it should be a
+ * {@link HttpRequestObjectManagedObjectSource}.
  * <p>
  * This simplifies means to specifying
  * {@link HttpRequestObjectManagedObjectSource} instances by in-lining it with

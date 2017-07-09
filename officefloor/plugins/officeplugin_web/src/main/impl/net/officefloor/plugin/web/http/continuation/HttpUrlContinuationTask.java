@@ -18,27 +18,23 @@
 package net.officefloor.plugin.web.http.continuation;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 
 /**
  * HTTP URL continuation {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpUrlContinuationTask extends
-		AbstractSingleTask<HttpUrlContinuationTask, None, None> {
+public class HttpUrlContinuationTask implements ManagedFunction<None, None> {
 
 	/*
 	 * ==================== Task ========================
 	 */
 
 	@Override
-	public Object execute(
-			ManagedFunctionContext<HttpUrlContinuationTask, None, None> context)
-			throws Throwable {
-		// Does nothing as next task will service URL continuation
+	public Object execute(ManagedFunctionContext<None, None> context) throws Throwable {
+		// Does nothing as next function will service URL continuation
 		return null;
 	}
 

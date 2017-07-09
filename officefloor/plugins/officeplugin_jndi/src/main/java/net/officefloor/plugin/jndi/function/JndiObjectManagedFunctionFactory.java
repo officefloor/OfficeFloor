@@ -28,6 +28,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.plugin.managedfunction.clazz.ClassFunction;
 
 /**
@@ -36,7 +37,7 @@ import net.officefloor.plugin.managedfunction.clazz.ClassFunction;
  * 
  * @author Daniel Sagenschneider
  */
-public class JndiObjectManagedFunctionFactory implements ManagedFunctionFactory<Indexed, None> {
+public class JndiObjectManagedFunctionFactory extends StaticManagedFunction<Indexed, None> {
 
 	/**
 	 * {@link JndiReference}.
@@ -76,44 +77,27 @@ public class JndiObjectManagedFunctionFactory implements ManagedFunctionFactory<
 	}
 
 	/*
-	 * ================== ManagedFunctionFactory ==================
+	 * ====================== ManagedFunction ======================
 	 */
 
 	@Override
-	public ManagedFunction<Indexed, None> createManagedFunction() {
-		return new JndiObjectManagedFunction();
-	}
+	public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
 
-	/**
-	 * {@link ManagedFunction} to execute JNDI Object {@link Method}.
-	 */
-	private class JndiObjectManagedFunction implements ManagedFunction<Indexed, None> {
+		// Obtain the JNDI object
+		Context jndiContext = (Context) context.getObject(0);
+		Object object = this.reference.getJndiObject(jndiContext);
 
-		/*
-		 * ====================== ManagedFunction ======================
-		 */
-
-		@Override
-		public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
-
-			// Obtain the JNDI object
-			Context jndiContext = (Context) context.getObject(0);
-			Object object = JndiObjectManagedFunctionFactory.this.reference.getJndiObject(jndiContext);
-
-			// Create the listing of parameters
-			Object[] params = new Object[JndiObjectManagedFunctionFactory.this.parameterFactories.length];
-			for (int i = 0; i < params.length; i++) {
-				params[i] = JndiObjectManagedFunctionFactory.this.parameterFactories[i].createParameter(object,
-						context);
-			}
-
-			// Invoke the function
-			Object returnValue = ClassFunction.invokeMethod(object, JndiObjectManagedFunctionFactory.this.method,
-					params);
-
-			// Return the value
-			return returnValue;
+		// Create the listing of parameters
+		Object[] params = new Object[this.parameterFactories.length];
+		for (int i = 0; i < params.length; i++) {
+			params[i] = this.parameterFactories[i].createParameter(object, context);
 		}
+
+		// Invoke the function
+		Object returnValue = ClassFunction.invokeMethod(object, this.method, params);
+
+		// Return the value
+		return returnValue;
 	}
 
 }

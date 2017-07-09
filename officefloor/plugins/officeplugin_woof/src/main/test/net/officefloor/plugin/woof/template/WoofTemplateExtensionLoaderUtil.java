@@ -41,8 +41,8 @@ import net.officefloor.model.impl.repository.memory.MemoryConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.woof.WoofChangeIssues;
-import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.HttpTemplateSection;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 
 /**
  * Utility functions for testing a {@link WoofTemplateExtensionSource}
@@ -280,7 +280,7 @@ public class WoofTemplateExtensionLoaderUtil {
 	}
 
 	/**
-	 * Undertakes the extending of the {@link HttpTemplateAutoWireSection} by
+	 * Undertakes the extending of the {@link HttpTemplateSection} by
 	 * the {@link WoofTemplateExtensionSource}.
 	 * 
 	 * @param <S>
@@ -288,22 +288,22 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * @param extensionSourceClass
 	 *            {@link WoofTemplateExtensionSource} class.
 	 * @param template
-	 *            {@link HttpTemplateAutoWireSection}.
+	 *            {@link HttpTemplateSection}.
 	 * @param application
-	 *            {@link WebAutoWireApplication}.
+	 *            {@link WebArchitect}.
 	 * @param propertyNameValues
 	 *            {@link Property} name/value pairs.
 	 * @throws Exception
-	 *             If fails to extend {@link HttpTemplateAutoWireSection}.
+	 *             If fails to extend {@link HttpTemplateSection}.
 	 */
 	public static <S extends WoofTemplateExtensionSource> void extendTemplate(Class<S> extensionSourceClass,
-			HttpTemplateAutoWireSection template, WebAutoWireApplication application, String... propertyNameValues)
+			HttpTemplateSection template, WebArchitect application, String... propertyNameValues)
 			throws Exception {
 		extendTemplate(extensionSourceClass, template, application, null, null, propertyNameValues);
 	}
 
 	/**
-	 * Undertakes the extending of the {@link HttpTemplateAutoWireSection} by
+	 * Undertakes the extending of the {@link HttpTemplateSection} by
 	 * the {@link WoofTemplateExtensionSource}.
 	 * 
 	 * @param <S>
@@ -311,9 +311,9 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * @param extensionSourceClass
 	 *            {@link WoofTemplateExtensionSource} class.
 	 * @param template
-	 *            {@link HttpTemplateAutoWireSection}.
+	 *            {@link HttpTemplateSection}.
 	 * @param application
-	 *            {@link WebAutoWireApplication}.
+	 *            {@link WebArchitect}.
 	 * @param classLoader
 	 *            {@link ClassLoader}. May be <code>null</code>.
 	 * @param resourceSources
@@ -321,10 +321,10 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * @param propertyNameValues
 	 *            {@link Property} name/value pairs.
 	 * @throws Exception
-	 *             If fails to extend {@link HttpTemplateAutoWireSection}.
+	 *             If fails to extend {@link HttpTemplateSection}.
 	 */
 	public static <S extends WoofTemplateExtensionSource> void extendTemplate(Class<S> extensionSourceClass,
-			HttpTemplateAutoWireSection template, WebAutoWireApplication application, ClassLoader classLoader,
+			HttpTemplateSection template, WebArchitect application, ClassLoader classLoader,
 			ResourceSource[] resourceSources, String... propertyNameValues) throws Exception {
 
 		// Obtains the source context

@@ -23,6 +23,7 @@ import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionLogicImpl;
@@ -146,8 +147,7 @@ public class EscalationHandlerEscalationFlow implements EscalationFlow {
 	/**
 	 * {@link ManagedFunctionFactory} to execute the {@link EscalationHandler}.
 	 */
-	private static class EscalationHandlerManagedFunctionFactory
-			implements ManagedFunctionFactory<EscalationKey, None>, ManagedFunction<EscalationKey, None> {
+	private static class EscalationHandlerManagedFunctionFactory extends StaticManagedFunction<EscalationKey, None> {
 
 		/**
 		 * {@link EscalationHandler}.
@@ -162,15 +162,6 @@ public class EscalationHandlerEscalationFlow implements EscalationFlow {
 		 */
 		public EscalationHandlerManagedFunctionFactory(EscalationHandler escalationHandler) {
 			this.escalationHandler = escalationHandler;
-		}
-
-		/*
-		 * ================== ManagedFunctionFactory ==================
-		 */
-
-		@Override
-		public ManagedFunction<EscalationKey, None> createManagedFunction() {
-			return this;
 		}
 
 		/*

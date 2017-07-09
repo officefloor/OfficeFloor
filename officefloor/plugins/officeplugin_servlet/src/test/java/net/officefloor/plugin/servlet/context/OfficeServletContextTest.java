@@ -520,10 +520,10 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		ServletTaskReference reference = this.context.mapPath(this.office,
+		ServletFunctionReference reference = this.context.mapPath(this.office,
 				"/path");
 		assertEquals("Incorrect work", WORK_NAME, reference.getWorkName());
-		assertEquals("Incorrect task", TASK_NAME, reference.getTaskName());
+		assertEquals("Incorrect task", TASK_NAME, reference.getFunctionName());
 		this.verifyMockObjects();
 	}
 

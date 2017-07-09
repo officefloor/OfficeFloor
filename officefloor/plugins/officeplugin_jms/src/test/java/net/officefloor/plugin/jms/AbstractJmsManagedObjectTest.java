@@ -33,8 +33,7 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import junit.framework.TestCase;
-
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.plugin.jms.activemq.VmJmsAdminObjectFactory;
 
@@ -43,8 +42,7 @@ import net.officefloor.plugin.jms.activemq.VmJmsAdminObjectFactory;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractJmsManagedObjectTest extends
-		AbstractOfficeConstructTestCase {
+public abstract class AbstractJmsManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Connection.
@@ -77,13 +75,11 @@ public abstract class AbstractJmsManagedObjectTest extends
 		JmsAdminObjectFactory factory = new VmJmsAdminObjectFactory();
 
 		// Create the connection and start it
-		this.connection = (QueueConnection) factory.createConnectionFactory()
-				.createConnection();
+		this.connection = (QueueConnection) factory.createConnectionFactory().createConnection();
 		this.connection.start();
 
 		// Session
-		this.session = this.connection.createQueueSession(true,
-				Session.SESSION_TRANSACTED);
+		this.session = this.connection.createQueueSession(true, Session.SESSION_TRANSACTED);
 
 		// Destination
 		this.destination = (Queue) factory.createDestination();
@@ -231,8 +227,7 @@ public abstract class AbstractJmsManagedObjectTest extends
 		final TestObject OBJECT = new TestObject();
 		this.pushObject(OBJECT);
 		TestObject returnedObject = (TestObject) this.popObject(1000);
-		assertEquals("Incorrect return object", OBJECT.VALUE,
-				returnedObject.VALUE);
+		assertEquals("Incorrect return object", OBJECT.VALUE, returnedObject.VALUE);
 	}
 
 	/**

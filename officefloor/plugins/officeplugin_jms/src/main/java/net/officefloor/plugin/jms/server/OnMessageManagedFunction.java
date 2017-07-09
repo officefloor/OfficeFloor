@@ -19,28 +19,26 @@ package net.officefloor.plugin.jms.server;
 
 import javax.jms.Message;
 
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 
 /**
  * Handles obtaining the {@link Message}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OnMessageTask
-		extends
-		AbstractSingleTask<Work, OnMessageTask.OnMessageDependencies, OnMessageTask.OnMessageFlows> {
+public class OnMessageManagedFunction extends
+		StaticManagedFunction<OnMessageManagedFunction.OnMessageDependencies, OnMessageManagedFunction.OnMessageFlows> {
 
 	/**
-	 * Keys for the {@link OnMessageTask} dependencies.
+	 * Keys for the {@link OnMessageManagedFunction} dependencies.
 	 */
 	public enum OnMessageDependencies {
 		JMS_SERVER_MANAGED_OBJECT
 	}
 
 	/**
-	 * Keys for flow instigated by the {@link OnMessageTask} with the
+	 * Keys for flow instigated by the {@link OnMessageManagedFunction} with the
 	 * {@link Message} as argument.
 	 */
 	public enum OnMessageFlows {
@@ -48,13 +46,11 @@ public class OnMessageTask
 	}
 
 	/*
-	 * =========================== Task ================================
+	 * =========================== ManagedFunction ===========================
 	 */
 
 	@Override
-	public Object execute(
-			ManagedFunctionContext<Work, OnMessageDependencies, OnMessageFlows> context)
-			throws Exception {
+	public Object execute(ManagedFunctionContext<OnMessageDependencies, OnMessageFlows> context) throws Exception {
 
 		// Obtain the JMS Server Managed Object
 		JmsServerManagedObject mo = (JmsServerManagedObject) context
@@ -67,7 +63,7 @@ public class OnMessageTask
 		Message message = mo.getMessage();
 
 		// Process the message
-		context.doFlow(OnMessageFlows.ON_MESSAGE, message);
+		context.doFlow(OnMessageFlows.ON_MESSAGE, message, null);
 
 		// Not expected to have next task
 		return null;

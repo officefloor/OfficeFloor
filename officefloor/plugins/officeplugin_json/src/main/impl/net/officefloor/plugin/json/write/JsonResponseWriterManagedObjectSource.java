@@ -20,20 +20,20 @@ package net.officefloor.plugin.json.write;
 import java.io.IOException;
 import java.io.Writer;
 
-import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.ObjectRegistry;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.plugin.json.JsonResponseWriter;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-
 import com.fasterxml.jackson.core.JsonGenerator.Feature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+
+import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.plugin.json.JsonResponseWriter;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 /**
  * {@link ManagedObjectSource} for the {@link JsonResponseWriter}.
@@ -41,8 +41,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * @author Daniel Sagenschneider
  */
 public class JsonResponseWriterManagedObjectSource
-		extends
-		AbstractManagedObjectSource<JsonResponseWriterManagedObjectSource.Dependencies, None> {
+		extends AbstractManagedObjectSource<JsonResponseWriterManagedObjectSource.Dependencies, None> {
 
 	/**
 	 * Dependency keys.
@@ -66,22 +65,18 @@ public class JsonResponseWriterManagedObjectSource
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<Dependencies, None> context)
-			throws Exception {
+	protected void loadMetaData(MetaDataContext<Dependencies, None> context) throws Exception {
 
 		// Provide the meta-data
 		context.setObjectClass(JsonResponseWriter.class);
 		context.setManagedObjectClass(JsonResponseWriterManagedObject.class);
-		context.addDependency(Dependencies.SERVER_HTTP_CONNECTION,
-				ServerHttpConnection.class);
+		context.addDependency(Dependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class);
 	}
 
 	@Override
-	public void start(ManagedObjectExecuteContext<None> context)
-			throws Exception {
+	public void start(ManagedObjectExecuteContext<None> context) throws Exception {
 		// Create the object mapper (does not automatically send response)
-		this.mapper = new ObjectMapper()
-				.configure(Feature.AUTO_CLOSE_TARGET, false)
+		this.mapper = new ObjectMapper().configure(Feature.AUTO_CLOSE_TARGET, false)
 				.configure(Feature.FLUSH_PASSED_TO_STREAM, false)
 				.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 	}
@@ -94,8 +89,8 @@ public class JsonResponseWriterManagedObjectSource
 	/**
 	 * {@link ManagedObject} for the {@link JsonResponseWriter}.
 	 */
-	private class JsonResponseWriterManagedObject implements
-			CoordinatingManagedObject<Dependencies>, JsonResponseWriter {
+	private class JsonResponseWriterManagedObject
+			implements CoordinatingManagedObject<Dependencies>, JsonResponseWriter {
 
 		/**
 		 * {@link ServerHttpConnection}.
@@ -107,11 +102,9 @@ public class JsonResponseWriterManagedObjectSource
 		 */
 
 		@Override
-		public void loadObjects(ObjectRegistry<Dependencies> registry)
-				throws Throwable {
+		public void loadObjects(ObjectRegistry<Dependencies> registry) throws Throwable {
 			// Obtain the server HTTP connection
-			this.connection = (ServerHttpConnection) registry
-					.getObject(Dependencies.SERVER_HTTP_CONNECTION);
+			this.connection = (ServerHttpConnection) registry.getObject(Dependencies.SERVER_HTTP_CONNECTION);
 		}
 
 		@Override
@@ -134,8 +127,7 @@ public class JsonResponseWriterManagedObjectSource
 
 			// Send the JSON response
 			Writer responseWriter = response.getEntityWriter();
-			JsonResponseWriterManagedObjectSource.this.mapper.writeValue(
-					responseWriter, jsonObject);
+			JsonResponseWriterManagedObjectSource.this.mapper.writeValue(responseWriter, jsonObject);
 		}
 	}
 

@@ -25,7 +25,7 @@ import junit.framework.TestCase;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.woof.WoofApplicationExtensionService;
 import net.officefloor.plugin.woof.WoofApplicationExtensionServiceContext;
 import net.officefloor.plugin.work.clazz.FlowInterface;
@@ -51,7 +51,7 @@ public class MockWoofApplicationExtensionService implements
 				context.getProperty("INIT_NAME"));
 
 		// Configure the servicer
-		WebAutoWireApplication app = context.getWebApplication();
+		WebArchitect app = context.getWebApplication();
 		AutoWireSection servicer = app.addSection("CHAIN",
 				ClassSectionSource.class.getName(),
 				ChainServicer.class.getName());

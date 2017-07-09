@@ -28,6 +28,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.plugin.clazz.Sequence;
 import net.officefloor.plugin.managedfunction.clazz.ClassFunction;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
@@ -78,8 +79,7 @@ public class SectionClassManagedFunctionSource extends ClassManagedFunctionSourc
 	 * {@link ManagedFunctionFactory} for overriding
 	 * {@link ClassManagedFunctionSource} behaviour.
 	 */
-	public static class SectionManagedFunctionFactory
-			implements ManagedFunctionFactory<Indexed, Indexed>, ManagedFunction<Indexed, Indexed> {
+	public static class SectionManagedFunctionFactory extends StaticManagedFunction<Indexed, Indexed> {
 
 		/**
 		 * {@link Method} for the {@link ManagedFunction}.
@@ -92,8 +92,8 @@ public class SectionClassManagedFunctionSource extends ClassManagedFunctionSourc
 		private final boolean isStatic;
 
 		/**
-		 * {@link ManagedFunctionParameterFactory} instances for the parameters of the
-		 * {@link Method}.
+		 * {@link ManagedFunctionParameterFactory} instances for the parameters
+		 * of the {@link Method}.
 		 */
 		private final ManagedFunctionParameterFactory[] parameters;
 
@@ -105,10 +105,11 @@ public class SectionClassManagedFunctionSource extends ClassManagedFunctionSourc
 		 * @param isStatic
 		 *            Indicates if the {@link Method} is static.
 		 * @param parameters
-		 *            {@link ManagedFunctionParameterFactory} instances for the parameters of
-		 *            the {@link Method}.
+		 *            {@link ManagedFunctionParameterFactory} instances for the
+		 *            parameters of the {@link Method}.
 		 */
-		public SectionManagedFunctionFactory(Method method, boolean isStatic, ManagedFunctionParameterFactory[] parameters) {
+		public SectionManagedFunctionFactory(Method method, boolean isStatic,
+				ManagedFunctionParameterFactory[] parameters) {
 			this.method = method;
 			this.isStatic = isStatic;
 			this.parameters = parameters;
@@ -130,15 +131,6 @@ public class SectionClassManagedFunctionSource extends ClassManagedFunctionSourc
 		 */
 		public ManagedFunctionParameterFactory[] getParameterFactories() {
 			return this.parameters;
-		}
-
-		/*
-		 * ================= ManagedFunctionFactory ========================
-		 */
-
-		@Override
-		public ManagedFunction<Indexed, Indexed> createManagedFunction() {
-			return this;
 		}
 
 		/*

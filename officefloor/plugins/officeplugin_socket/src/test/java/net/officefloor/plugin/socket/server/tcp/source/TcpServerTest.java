@@ -25,7 +25,6 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
-import net.officefloor.plugin.socket.server.tcp.protocol.TcpCommunicationProtocol;
 
 /**
  * Tests the {@link TcpServerSocketManagedObjectSource}.
@@ -48,13 +47,9 @@ public class TcpServerTest extends AbstractTcpServerTestCase {
 		ManagedObjectBuilder<Indexed> serverSocketBuilder = this.constructManagedObject(managedObjectName,
 				TcpServerSocketManagedObjectSource.class, officeName);
 		serverSocketBuilder.addProperty(TcpServerSocketManagedObjectSource.PROPERTY_PORT, String.valueOf(port));
-		serverSocketBuilder.addProperty(TcpServerSocketManagedObjectSource.PROPERTY_SOCKET_LISTENER_COUNT, "1");
-		serverSocketBuilder.addProperty(TcpCommunicationProtocol.PROPERTY_MAXIMUM_IDLE_TIME, String.valueOf(1000));
 		serverSocketBuilder.setTimeout(3000);
 
 		// Register the necessary teams for socket listening
-		this.constructManagedObjectSourceTeam(managedObjectName, "accepter",
-				new ExecutorCachedTeamSource().createTeam());
 		this.constructManagedObjectSourceTeam(managedObjectName, "listener",
 				new ExecutorCachedTeamSource().createTeam());
 

@@ -19,8 +19,6 @@ package net.officefloor.plugin.socket.server.http.protocol;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
@@ -34,7 +32,6 @@ import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
 import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.protocol.ConnectionHandler;
-import net.officefloor.plugin.socket.server.protocol.HeartBeatContext;
 import net.officefloor.plugin.socket.server.protocol.ReadContext;
 
 /**
@@ -43,11 +40,6 @@ import net.officefloor.plugin.socket.server.protocol.ReadContext;
  * @author Daniel Sagenschneider
  */
 public class HttpConnectionHandler implements ConnectionHandler {
-
-	/**
-	 * {@link Logger}.
-	 */
-	private static final Logger LOGGER = Logger.getLogger(HttpConnectionHandler.class.getName());
 
 	/**
 	 * {@link HttpConversation}.
@@ -60,11 +52,6 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	private final HttpRequestParser parser;
 
 	/**
-	 * {@link Connection} timeout in milliseconds.
-	 */
-	private final long connectionTimout;
-
-	/**
 	 * {@link ManagedObjectExecuteContext}.
 	 */
 	private final ManagedObjectExecuteContext<Indexed> executeContext;
@@ -73,11 +60,6 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	 * {@link Flow} index to handle processing {@link HttpRequest}.
 	 */
 	private final int requestHandlingFlowIndex;
-
-	/**
-	 * Time of last interaction. Will be set on the first read.
-	 */
-	private long lastInteractionTime = -1;
 
 	/**
 	 * Flag indicating if {@link HttpRequestParseException} on processing input.
@@ -93,18 +75,15 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	 *            {@link HttpConversation}.
 	 * @param parser
 	 *            {@link HttpRequestParser}.
-	 * @param connectionTimeout
-	 *            {@link Connection} timeout in milliseconds.
 	 * @param executeContext
 	 *            {@link ManagedObjectExecuteContext}.
 	 * @param requestHandlingFlowIndex
 	 *            {@link Flow} index to handle processing {@link HttpRequest}.
 	 */
-	public HttpConnectionHandler(HttpConversation conversation, HttpRequestParser parser, long connectionTimeout,
+	public HttpConnectionHandler(HttpConversation conversation, HttpRequestParser parser,
 			ManagedObjectExecuteContext<Indexed> executeContext, int requestHandlingFlowIndex) {
 		this.conversation = conversation;
 		this.parser = parser;
-		this.connectionTimout = connectionTimeout;
 		this.executeContext = executeContext;
 		this.requestHandlingFlowIndex = requestHandlingFlowIndex;
 	}
@@ -122,9 +101,6 @@ public class HttpConnectionHandler implements ConnectionHandler {
 			if (this.isParseFailure) {
 				return;
 			}
-
-			// New last interaction time
-			this.lastInteractionTime = context.getTime();
 
 			// Loop as may have more than one request on read
 			byte[] readData = context.getData();
@@ -166,34 +142,6 @@ public class HttpConnectionHandler implements ConnectionHandler {
 
 			// Propagate failure
 			throw ex;
-		}
-	}
-
-	@Override
-	public void handleHeartbeat(HeartBeatContext context) {
-
-		// May not have received data from client on creating connection
-		if (this.lastInteractionTime == -1) {
-			// Allow for time out of connection if no data
-			this.lastInteractionTime = context.getTime();
-			return;
-		}
-
-		// Obtain the current time
-		long currentTime = context.getTime();
-
-		// Determine time idle
-		long timeIdle = currentTime - this.lastInteractionTime;
-
-		// Close connection if idle too long
-		if (timeIdle >= this.connectionTimout) {
-			try {
-				this.conversation.closeConnection();
-			} catch (IOException ex) {
-				if (LOGGER.isLoggable(Level.FINE)) {
-					LOGGER.log(Level.FINE, "Failed closing connection on idle", ex);
-				}
-			}
 		}
 	}
 

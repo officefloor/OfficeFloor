@@ -33,8 +33,8 @@ import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.woof.WoofChangeIssues;
 import net.officefloor.model.woof.WoofTemplateExtensionChangeContextImpl;
 import net.officefloor.model.woof.WoofTemplateExtensionModel;
-import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.HttpTemplateSection;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 
 /**
  * {@link WoofTemplateExtensionLoader} implementation.
@@ -249,7 +249,7 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 		 * Initiate.
 		 * 
 		 * @param templateUri
-		 *            {@link HttpTemplateAutoWireSection} URI.
+		 *            {@link HttpTemplateSection} URI.
 		 * @param woofTemplateExtensionSourceClassName
 		 *            {@link WoofTemplateExtensionSource} class name.
 		 * @param delegate
@@ -325,7 +325,7 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 
 	@Override
 	public void extendTemplate(String extensionSourceClassName, PropertyList properties,
-			HttpTemplateAutoWireSection template, WebAutoWireApplication application, SourceContext sourceContext)
+			HttpTemplateSection template, WebArchitect application, SourceContext sourceContext)
 			throws WoofTemplateExtensionException {
 
 		// Create the context for the extension source
@@ -356,29 +356,29 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 			implements WoofTemplateExtensionSourceContext {
 
 		/**
-		 * {@link HttpTemplateAutoWireSection}.
+		 * {@link HttpTemplateSection}.
 		 */
-		private final HttpTemplateAutoWireSection template;
+		private final HttpTemplateSection template;
 
 		/**
-		 * {@link WebAutoWireApplication}.
+		 * {@link WebArchitect}.
 		 */
-		private final WebAutoWireApplication application;
+		private final WebArchitect application;
 
 		/**
 		 * Initiate.
 		 * 
 		 * @param template
-		 *            {@link HttpTemplateAutoWireSection}.
+		 *            {@link HttpTemplateSection}.
 		 * @param application
-		 *            {@link WebAutoWireApplication}.
+		 *            {@link WebArchitect}.
 		 * @param properties
 		 *            {@link PropertyList}.
 		 * @param classLoader
 		 *            {@link ClassLoader}.
 		 */
-		public WoofTemplateExtensionServiceContextImpl(HttpTemplateAutoWireSection template,
-				WebAutoWireApplication application, PropertyList properties, SourceContext sourceContext) {
+		public WoofTemplateExtensionServiceContextImpl(HttpTemplateSection template,
+				WebArchitect application, PropertyList properties, SourceContext sourceContext) {
 			super(sourceContext.isLoadingType(), sourceContext, new PropertyListSourceProperties(properties));
 			this.template = template;
 			this.application = application;
@@ -389,12 +389,12 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 		 */
 
 		@Override
-		public HttpTemplateAutoWireSection getTemplate() {
+		public HttpTemplateSection getTemplate() {
 			return this.template;
 		}
 
 		@Override
-		public WebAutoWireApplication getWebApplication() {
+		public WebArchitect getWebApplication() {
 			return this.application;
 		}
 	}

@@ -30,7 +30,7 @@ import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.woof.WoofRepositoryImpl;
 import net.officefloor.plugin.servlet.OfficeFloorServlet;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.woof.WoofLoader;
 import net.officefloor.plugin.woof.WoofLoaderImpl;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
@@ -103,7 +103,7 @@ public class WoofServlet extends OfficeFloorServlet {
 	}
 
 	@Override
-	public boolean configure(WebAutoWireApplication application,
+	public boolean configure(WebArchitect application,
 			ServletContext servletContext) throws Exception {
 
 		// Create the configuration context

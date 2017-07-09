@@ -26,18 +26,19 @@ import javax.jms.Destination;
 import javax.jms.Session;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
  * JMS {@link ManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class JmsManagedObjectSource extends
-		AbstractManagedObjectSource<None, None> {
+public class JmsManagedObjectSource extends AbstractManagedObjectSource<None, None> {
 
 	/**
 	 * Connection Factory for the JMS connection.
@@ -63,8 +64,7 @@ public class JmsManagedObjectSource extends
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<None, None> context)
-			throws Exception {
+	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
 
 		// Specify types
 		context.setObjectClass(TextMessageProducer.class);
@@ -72,20 +72,17 @@ public class JmsManagedObjectSource extends
 
 		// Obtain the JMS admin object factory
 		JmsAdminObjectFactory jmsAdminObjectFactory = JmsUtil
-				.getJmsAdminObjectFactory(context
-						.getManagedObjectSourceContext());
+				.getJmsAdminObjectFactory(context.getManagedObjectSourceContext());
 
 		// Obtain the connection factory
-		this.connectionFactory = jmsAdminObjectFactory
-				.createConnectionFactory();
+		this.connectionFactory = jmsAdminObjectFactory.createConnectionFactory();
 
 		// Obtain the destination
 		this.destination = jmsAdminObjectFactory.createDestination();
 	}
 
 	@Override
-	public void start(ManagedObjectExecuteContext<None> context)
-			throws Exception {
+	public void start(ManagedObjectExecuteContext<None> context) throws Exception {
 		// Start the connection
 		this.connection = this.connectionFactory.createConnection();
 		this.connection.start();
@@ -94,12 +91,10 @@ public class JmsManagedObjectSource extends
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
 		// Create the session
-		Session session = this.connection.createSession(true,
-				Session.SESSION_TRANSACTED);
+		Session session = this.connection.createSession(true, Session.SESSION_TRANSACTED);
 
 		// Create the producer
-		TextMessageProducer producer = new TextMessageProducerImpl(session,
-				this.destination);
+		TextMessageProducer producer = new TextMessageProducerImpl(session, this.destination);
 
 		// Return the JMS managed object
 		return new JmsManagedObject(session, producer);

@@ -36,7 +36,7 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExten
  * @author Daniel Sagenschneider
  */
 public class HttpTemplateAutoWireSectionImpl extends AutoWireSectionImpl
-		implements HttpTemplateAutoWireSection {
+		implements HttpTemplateSection {
 
 	/**
 	 * Logic class for the template.

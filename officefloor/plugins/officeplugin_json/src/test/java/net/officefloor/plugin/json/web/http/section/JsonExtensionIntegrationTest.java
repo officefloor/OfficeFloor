@@ -25,8 +25,8 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.json.HttpJson;
 import net.officefloor.plugin.json.JsonResponseWriter;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.HttpTemplateSection;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
@@ -36,7 +36,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 
 /**
- * Validates the extension of {@link HttpTemplateAutoWireSection} via JSON.
+ * Validates the extension of {@link HttpTemplateSection} via JSON.
  * 
  * @author Daniel Sagenschneider
  */
@@ -48,12 +48,12 @@ public class JsonExtensionIntegrationTest extends OfficeFrameTestCase {
 	public void testJsonExtensionIntegration() throws Exception {
 
 		// Create the application
-		WebAutoWireApplication application = new HttpServerAutoWireOfficeFloorSource();
+		WebArchitect application = new HttpServerAutoWireOfficeFloorSource();
 
 		// Add the template
 		String templatePath = this.getFileLocation(this.getClass(),
 				"template.ofp");
-		HttpTemplateAutoWireSection template = application.addHttpTemplate(
+		HttpTemplateSection template = application.addHttpTemplate(
 				"/test", templatePath, MockTemplateLogic.class);
 
 		// Extend the template

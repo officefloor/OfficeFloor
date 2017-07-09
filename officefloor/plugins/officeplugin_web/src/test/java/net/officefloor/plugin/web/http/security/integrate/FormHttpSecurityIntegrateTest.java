@@ -25,8 +25,8 @@ import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSection;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.HttpSecuritySection;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.security.HttpCredentials;
 import net.officefloor.plugin.web.http.security.scheme.FormHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.scheme.HttpCredentialsImpl;
@@ -42,11 +42,11 @@ public class FormHttpSecurityIntegrateTest extends
 		AbstractHttpSecurityIntegrateTestCase {
 
 	@Override
-	protected HttpSecurityAutoWireSection configureHttpSecurity(
-			WebAutoWireApplication application) throws Exception {
+	protected HttpSecuritySection configureHttpSecurity(
+			WebArchitect application) throws Exception {
 
 		// Configure the HTTP Security
-		HttpSecurityAutoWireSection security = application
+		HttpSecuritySection security = application
 				.setHttpSecurity(FormHttpSecuritySource.class);
 		security.addProperty(FormHttpSecuritySource.PROPERTY_REALM, "TestRealm");
 

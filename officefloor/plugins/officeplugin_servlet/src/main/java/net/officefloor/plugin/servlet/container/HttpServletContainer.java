@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.servlet.security.HttpServletSecurity;
@@ -53,9 +53,9 @@ public interface HttpServletContainer {
 	 * @param security
 	 *            {@link HttpServletSecurity}. May be <code>null</code> if
 	 *            anonymous {@link HttpRequest}.
-	 * @param taskContext
-	 *            {@link ManagedFunctionContext} to allow access to {@link OfficeFloor}
-	 *            capabilities.
+	 * @param functionContext
+	 *            {@link ManagedFunctionContext} to allow access to
+	 *            {@link OfficeFloor} capabilities.
 	 * @param mapping
 	 *            {@link ServicerMapping} that mapped the {@link HttpRequest} to
 	 *            the {@link HttpServlet}. May be <code>null</code> if not
@@ -65,9 +65,8 @@ public interface HttpServletContainer {
 	 * @throws IOException
 	 *             As per {@link HttpServlet} API.
 	 */
-	void service(ServerHttpConnection connection, HttpRequestState attributes,
-			HttpSession session, HttpServletSecurity security,
-			ManagedFunctionContext<?, ?, ?> taskContext, ServicerMapping mapping)
+	void service(ServerHttpConnection connection, HttpRequestState attributes, HttpSession session,
+			HttpServletSecurity security, ManagedFunctionContext<?, ?> functionContext, ServicerMapping mapping)
 			throws ServletException, IOException;
 
 	/**
@@ -82,7 +81,6 @@ public interface HttpServletContainer {
 	 * @throws IOException
 	 *             As per {@link HttpServlet} API.
 	 */
-	void include(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException;
+	void include(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException;
 
 }

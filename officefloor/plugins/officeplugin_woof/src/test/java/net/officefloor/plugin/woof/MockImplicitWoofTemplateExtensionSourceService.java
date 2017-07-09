@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.Deque;
 import java.util.LinkedList;
 
-import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
+import net.officefloor.plugin.web.http.application.HttpTemplateSection;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSourceContext;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSourceService;
@@ -43,7 +43,7 @@ public class MockImplicitWoofTemplateExtensionSourceService extends
 	 * Resets for testing loading implicit {@link WoofTemplateExtensionSource}.
 	 * 
 	 * @param templateUris
-	 *            URIs of the {@link HttpTemplateAutoWireSection} instances
+	 *            URIs of the {@link HttpTemplateSection} instances
 	 *            being extended.
 	 */
 	public static void reset(String... templateUris) {
@@ -52,7 +52,7 @@ public class MockImplicitWoofTemplateExtensionSourceService extends
 	}
 
 	/**
-	 * Expected {@link HttpTemplateAutoWireSection} URIs.
+	 * Expected {@link HttpTemplateSection} URIs.
 	 */
 	private static Deque<String> templateUris = null;
 
@@ -84,7 +84,7 @@ public class MockImplicitWoofTemplateExtensionSourceService extends
 			throws Exception {
 
 		// Obtain the template URI
-		HttpTemplateAutoWireSection template = context.getTemplate();
+		HttpTemplateSection template = context.getTemplate();
 		String uri = template.getTemplateUri();
 
 		// Ensure expecting the template

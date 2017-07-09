@@ -53,7 +53,7 @@ import net.officefloor.plugin.objects.AutoWireObjectsLoaderContext;
 import net.officefloor.plugin.objects.AutoWireObjectsLoaderImpl;
 import net.officefloor.plugin.teams.AutoWireTeamsLoader;
 import net.officefloor.plugin.teams.AutoWireTeamsLoaderImpl;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireApplication;
@@ -331,7 +331,7 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource i
 	 * {@link WoofApplicationExtensionService} instances.
 	 * 
 	 * @param application
-	 *            {@link WebAutoWireApplication}.
+	 *            {@link WebArchitect}.
 	 * @param properties
 	 *            {@link SourceProperties}.
 	 * @param classLoader
@@ -341,7 +341,7 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource i
 	 * @throws Exception
 	 *             If fails to load the extension functionality.
 	 */
-	public static void loadWebApplicationExtensions(WebAutoWireApplication application, SourceProperties properties,
+	public static void loadWebApplicationExtensions(WebArchitect application, SourceProperties properties,
 			ClassLoader classLoader, ResourceSource... resourceSources) throws Exception {
 
 		// Create the WoOF application extension context
@@ -607,21 +607,21 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource i
 			implements WoofApplicationExtensionServiceContext {
 
 		/**
-		 * {@link WebAutoWireApplication}.
+		 * {@link WebArchitect}.
 		 */
-		private final WebAutoWireApplication application;
+		private final WebArchitect application;
 
 		/**
 		 * Initiate.
 		 * 
 		 * @param application
-		 *            {@link WebAutoWireApplication}.
+		 *            {@link WebArchitect}.
 		 * @param sourceContext
 		 *            {@link SourceContext}.
 		 * @param properties
 		 *            {@link SourceProperties}.
 		 */
-		public WoofApplicationExtensionServiceContextImpl(WebAutoWireApplication application,
+		public WoofApplicationExtensionServiceContextImpl(WebArchitect application,
 				SourceContext sourceContext, SourceProperties properties) {
 			super(false, sourceContext, properties);
 			this.application = application;
@@ -632,7 +632,7 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource i
 		 */
 
 		@Override
-		public WebAutoWireApplication getWebApplication() {
+		public WebArchitect getWebApplication() {
 			return this.application;
 		}
 	}

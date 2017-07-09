@@ -19,17 +19,16 @@ package net.officefloor.plugin.jms.server;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
-import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.StaticManagedFunction;
+import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 
 /**
  * Recycles the {@link JmsServerManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */
-public class RecycleJmsServerTask extends
-		AbstractSingleTask<RecycleJmsServerTask, Indexed, None> {
+public class RecycleJmsServerManagedFunction extends StaticManagedFunction<Indexed, None> {
 
 	/**
 	 * {@link JmsServerManagedObjectSource}.
@@ -42,23 +41,20 @@ public class RecycleJmsServerTask extends
 	 * @param source
 	 *            {@link JmsServerManagedObjectSource}.
 	 */
-	public RecycleJmsServerTask(JmsServerManagedObjectSource source) {
+	public RecycleJmsServerManagedFunction(JmsServerManagedObjectSource source) {
 		this.source = source;
 	}
 
 	/*
-	 * ===================== Task ===========================================
+	 * ===================== ManagedFunction ===============================
 	 */
 
 	@Override
-	public Object execute(
-			ManagedFunctionContext<RecycleJmsServerTask, Indexed, None> context)
-			throws Exception {
+	public Object execute(ManagedFunctionContext<Indexed, None> context) throws Exception {
 
 		// Obtain the recycle parameter
-		RecycleManagedObjectParameter<JmsServerManagedObject> recycleParameter = this
-				.getRecycleManagedObjectParameter(context,
-						JmsServerManagedObject.class);
+		RecycleManagedObjectParameter<JmsServerManagedObject> recycleParameter = RecycleManagedObjectParameter
+				.getRecycleManagedObjectParameter(context);
 
 		// Obtain the JMS Server Managed Object
 		JmsServerManagedObject mo = recycleParameter.getManagedObject();
@@ -70,7 +66,7 @@ public class RecycleJmsServerTask extends
 		// Note: not returned to pool as initiated by source
 		this.source.returnJmsServerManagedObject(mo);
 
-		// No further tasks
+		// No further functions
 		return null;
 	}
 

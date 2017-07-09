@@ -20,8 +20,6 @@ package net.officefloor.plugin.socket.server.tcp.source;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import javax.resource.spi.work.Work;
-
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
 

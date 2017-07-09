@@ -68,12 +68,11 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialWorkS
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
 /**
- * {@link AutoWireOfficeFloorSource} providing web application functionality.
+ * {@link WebArchitect} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class WebApplicationAutoWireOfficeFloorSource extends AutoWireOfficeFloorSource
-		implements WebAutoWireApplication {
+public class WebApplicationAutoWireOfficeFloorSource implements WebArchitect {
 
 	/**
 	 * Obtains the {@link HttpTemplate} section name from the
@@ -117,9 +116,9 @@ public class WebApplicationAutoWireOfficeFloorSource extends AutoWireOfficeFloor
 	};
 
 	/**
-	 * {@link HttpTemplateAutoWireSection} instances.
+	 * {@link HttpTemplateSection} instances.
 	 */
-	private final List<HttpTemplateAutoWireSection> httpTemplates = new LinkedList<HttpTemplateAutoWireSection>();
+	private final List<HttpTemplateSection> httpTemplates = new LinkedList<HttpTemplateSection>();
 
 	/**
 	 * Default {@link HttpTemplate} URI suffix.
@@ -127,9 +126,9 @@ public class WebApplicationAutoWireOfficeFloorSource extends AutoWireOfficeFloor
 	private String defaultTemplateUriSuffix = null;
 
 	/**
-	 * {@link HttpSecurityAutoWireSection} instance.
+	 * {@link HttpSecuritySection} instance.
 	 */
-	private HttpSecurityAutoWireSection security = null;
+	private HttpSecuritySection security = null;
 
 	/**
 	 * {@link HttpUrlContinuationSectionSource} to provide the
@@ -184,10 +183,10 @@ public class WebApplicationAutoWireOfficeFloorSource extends AutoWireOfficeFloor
 	 * Obtains the {@link HttpTemplate} URI suffix.
 	 * 
 	 * @param template
-	 *            {@link HttpTemplateAutoWireSection}.
+	 *            {@link HttpTemplateSection}.
 	 * @return {@link HttpTemplate} URI suffix.
 	 */
-	private String getTemplateUriSuffix(HttpTemplateAutoWireSection template) {
+	private String getTemplateUriSuffix(HttpTemplateSection template) {
 
 		// Obtain the template URI Suffix
 		String templateUriSuffix = template.getTemplateUriSuffix();
@@ -204,7 +203,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends AutoWireOfficeFloor
 	 */
 
 	@Override
-	public HttpTemplateAutoWireSection addHttpTemplate(String templateUri, String templateFilePath,
+	public HttpTemplateSection addHttpTemplate(String templateUri, String templateFilePath,
 			final Class<?> templateLogicClass) {
 
 		// Obtain canonical template URI path
@@ -215,7 +214,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends AutoWireOfficeFloor
 		}
 
 		// Ensure URI is not already registered
-		for (HttpTemplateAutoWireSection template : this.httpTemplates) {
+		for (HttpTemplateSection template : this.httpTemplates) {
 			if (templateUri.equals(template.getTemplateUri())) {
 				throw new IllegalStateException("HTTP Template already added for URI '" + templateUri + "'");
 			}
@@ -226,10 +225,10 @@ public class WebApplicationAutoWireOfficeFloorSource extends AutoWireOfficeFloor
 
 		// Add the HTTP template section
 		final String uriPath = templateUri;
-		HttpTemplateAutoWireSection template = this.addSection(sectionName, HttpTemplateSectionSource.class.getName(),
-				templateFilePath, new AutoWireSectionFactory<HttpTemplateAutoWireSection>() {
+		HttpTemplateSection template = this.addSection(sectionName, HttpTemplateSectionSource.class.getName(),
+				templateFilePath, new AutoWireSectionFactory<HttpTemplateSection>() {
 					@Override
-					public HttpTemplateAutoWireSection createAutoWireSection(AutoWireSection seed) {
+					public HttpTemplateSection createAutoWireSection(AutoWireSection seed) {
 						// Create and return the template
 						return new HttpTemplateAutoWireSectionImpl(
 								WebApplicationAutoWireOfficeFloorSource.this.getOfficeFloorCompiler(), seed,
@@ -286,7 +285,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends AutoWireOfficeFloor
 	}
 
 	@Override
-	public HttpSecurityAutoWireSection setHttpSecurity(
+	public HttpSecuritySection setHttpSecurity(
 			final Class<? extends HttpSecuritySource<?, ?, ?, ?>> httpSecuritySourceClass) {
 
 		// Ensure security not already been specified
@@ -295,10 +294,10 @@ public class WebApplicationAutoWireOfficeFloorSource extends AutoWireOfficeFloor
 		}
 
 		// Add the HTTP Security
-		HttpSecurityAutoWireSection security = this.addSection("SECURITY", HttpSecuritySectionSource.class.getName(),
-				null, new AutoWireSectionFactory<HttpSecurityAutoWireSection>() {
+		HttpSecuritySection security = this.addSection("SECURITY", HttpSecuritySectionSource.class.getName(), null,
+				new AutoWireSectionFactory<HttpSecuritySection>() {
 					@Override
-					public HttpSecurityAutoWireSection createAutoWireSection(AutoWireSection seed) {
+					public HttpSecuritySection createAutoWireSection(AutoWireSection seed) {
 						// Create and return the template
 						return new HttpSecurityAutoWireSectionImpl(
 								WebApplicationAutoWireOfficeFloorSource.this.getOfficeFloorCompiler(), seed,
@@ -314,7 +313,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends AutoWireOfficeFloor
 	}
 
 	@Override
-	public HttpSecurityAutoWireSection getHttpSecurity() {
+	public HttpSecuritySection getHttpSecurity() {
 		return this.security;
 	}
 
@@ -426,7 +425,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends AutoWireOfficeFloor
 	}
 
 	@Override
-	public void linkToHttpTemplate(AutoWireSection section, String outputName, HttpTemplateAutoWireSection template) {
+	public void linkToHttpTemplate(AutoWireSection section, String outputName, HttpTemplateSection template) {
 		this.link(section, outputName, template, HttpTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
 	}
 
@@ -436,7 +435,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends AutoWireOfficeFloor
 	}
 
 	@Override
-	public void linkEscalation(Class<? extends Throwable> escalation, HttpTemplateAutoWireSection template) {
+	public void linkEscalation(Class<? extends Throwable> escalation, HttpTemplateSection template) {
 		this.linkEscalation(escalation, template, HttpTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
 	}
 
@@ -462,7 +461,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends AutoWireOfficeFloor
 		List<String> uris = new LinkedList<String>();
 
 		// Determine if root template to include
-		for (HttpTemplateAutoWireSection template : this.httpTemplates) {
+		for (HttpTemplateSection template : this.httpTemplates) {
 			String templateUri = template.getTemplateUri();
 			if ("/".equals(templateUri)) {
 				uris.add(templateUri);
@@ -615,7 +614,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends AutoWireOfficeFloor
 		}
 
 		// Additional template configuration
-		for (HttpTemplateAutoWireSection httpTemplate : this.httpTemplates) {
+		for (HttpTemplateSection httpTemplate : this.httpTemplates) {
 
 			// Determine the template inheritance hierarchy
 			Deque<AutoWireSection> inheritanceHierarchy = new LinkedList<AutoWireSection>();
@@ -646,16 +645,16 @@ public class WebApplicationAutoWireOfficeFloorSource extends AutoWireOfficeFloor
 			}
 
 			// Obtain inheritance hierarchy of templates (including current)
-			Deque<HttpTemplateAutoWireSection> templateInheritanceHierarchy = new LinkedList<HttpTemplateAutoWireSection>();
+			Deque<HttpTemplateSection> templateInheritanceHierarchy = new LinkedList<HttpTemplateSection>();
 			StringBuilder inheritedTemplates = new StringBuilder();
 			boolean isFirstParentTemplate = true;
 			for (AutoWireSection parentSection : inheritanceHierarchy) {
 
 				// Ignore if not template
-				if (!(parentSection instanceof HttpTemplateAutoWireSection)) {
+				if (!(parentSection instanceof HttpTemplateSection)) {
 					continue;
 				}
-				HttpTemplateAutoWireSection parentTemplate = (HttpTemplateAutoWireSection) parentSection;
+				HttpTemplateSection parentTemplate = (HttpTemplateSection) parentSection;
 
 				// Include the template in inheritance hierarchy
 				templateInheritanceHierarchy.add(parentTemplate);
@@ -733,7 +732,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends AutoWireOfficeFloor
 
 			// Secure the specific template links (following inheritance)
 			Set<String> configuredLinks = new HashSet<String>();
-			for (HttpTemplateAutoWireSection currentTemplate : templateInheritanceHierarchy) {
+			for (HttpTemplateSection currentTemplate : templateInheritanceHierarchy) {
 
 				// Provide the links for the current template
 				Map<String, Boolean> secureLinks = currentTemplate.getSecureLinks();

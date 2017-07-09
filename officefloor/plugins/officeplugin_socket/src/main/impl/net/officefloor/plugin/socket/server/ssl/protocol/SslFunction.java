@@ -20,30 +20,20 @@ package net.officefloor.plugin.socket.server.ssl.protocol;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 
 /**
  * {@link ManagedFunction} to execute the SSL tasks.
  *
  * @author Daniel Sagenschneider
  */
-public class SslFunction implements ManagedFunctionFactory<SslFunction.SslTaskDependencies, None>,
-		ManagedFunction<SslFunction.SslTaskDependencies, None> {
+public class SslFunction extends StaticManagedFunction<SslFunction.SslTaskDependencies, None> {
 
 	/**
 	 * Key to the SSL task to run.
 	 */
 	public static enum SslTaskDependencies {
 		RUNNABLE
-	}
-
-	/*
-	 * =============== ManagedFunctionFactory ==================
-	 */
-
-	@Override
-	public ManagedFunction<SslTaskDependencies, None> createManagedFunction() throws Throwable {
-		return this;
 	}
 
 	/*

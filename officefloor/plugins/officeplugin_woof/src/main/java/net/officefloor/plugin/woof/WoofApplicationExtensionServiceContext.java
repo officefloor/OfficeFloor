@@ -18,7 +18,7 @@
 package net.officefloor.plugin.woof;
 
 import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 
 /**
  * Context for the {@link WoofApplicationExtensionService}.
@@ -28,10 +28,10 @@ import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 public interface WoofApplicationExtensionServiceContext extends SourceContext {
 
 	/**
-	 * Obtains the {@link WebAutoWireApplication} to extend.
+	 * Obtains the {@link WebArchitect} to extend.
 	 * 
-	 * @return {@link WebAutoWireApplication} to extend.
+	 * @return {@link WebArchitect} to extend.
 	 */
-	WebAutoWireApplication getWebApplication();
+	WebArchitect getWebApplication();
 
 }

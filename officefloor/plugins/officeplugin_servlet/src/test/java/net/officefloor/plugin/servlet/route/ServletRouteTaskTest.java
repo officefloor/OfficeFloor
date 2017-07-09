@@ -23,7 +23,7 @@ import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
-import net.officefloor.plugin.servlet.context.ServletTaskReference;
+import net.officefloor.plugin.servlet.context.ServletFunctionReference;
 import net.officefloor.plugin.servlet.route.ServletRouteTask.DependencyKeys;
 import net.officefloor.plugin.servlet.route.ServletRouteTask.FlowKeys;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -71,10 +71,10 @@ public class ServletRouteTaskTest extends OfficeFrameTestCase {
 			.createMock(OfficeServletContext.class);
 
 	/**
-	 * {@link ServletTaskReference}.
+	 * {@link ServletFunctionReference}.
 	 */
-	private final ServletTaskReference reference = this
-			.createMock(ServletTaskReference.class);
+	private final ServletFunctionReference reference = this
+			.createMock(ServletFunctionReference.class);
 
 	@Override
 	protected void setUp() throws Exception {
@@ -104,7 +104,7 @@ public class ServletRouteTaskTest extends OfficeFrameTestCase {
 				.mapPath(this.office, PATH), this.reference);
 		this.recordReturn(this.reference, this.reference.getWorkName(),
 				WORK_NAME);
-		this.recordReturn(this.reference, this.reference.getTaskName(),
+		this.recordReturn(this.reference, this.reference.getFunctionName(),
 				TASK_NAME);
 		this.taskContext.doFlow(WORK_NAME, TASK_NAME, null);
 

@@ -32,7 +32,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.resource.HttpDirectory;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpFileDescriber;
@@ -190,7 +190,7 @@ public class SourceHttpResourceFactory implements HttpResourceFactory {
 				PROPERTY_RESOURCE_DIRECTORIES, null);
 		String classPathPrefix = context.getProperty(
 				PROPERTY_CLASS_PATH_PREFIX,
-				WebAutoWireApplication.WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX);
+				WebArchitect.WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX);
 		ClassLoader classLoader = context.getClassLoader();
 		boolean isDirect = Boolean.parseBoolean(context.getProperty(
 				PROPERTY_DIRECT_STATIC_CONTENT, String.valueOf(Boolean.TRUE)));

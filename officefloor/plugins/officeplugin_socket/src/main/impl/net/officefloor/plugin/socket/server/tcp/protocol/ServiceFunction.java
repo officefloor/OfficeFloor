@@ -20,7 +20,7 @@ package net.officefloor.plugin.socket.server.tcp.protocol;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
 
@@ -30,8 +30,7 @@ import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
  * @author Daniel Sagenschneider
  */
 public class ServiceFunction
-		implements ManagedFunctionFactory<ServiceFunction.ServiceFunctionObjects, ServiceFunction.ServiceFunctionFlows>,
-		ManagedFunction<ServiceFunction.ServiceFunctionObjects, ServiceFunction.ServiceFunctionFlows> {
+		extends StaticManagedFunction<ServiceFunction.ServiceFunctionObjects, ServiceFunction.ServiceFunctionFlows> {
 
 	/**
 	 * {@link Flow} keys for the {@link ServiceFunction}.
@@ -45,15 +44,6 @@ public class ServiceFunction
 	 */
 	public static enum ServiceFunctionObjects {
 		CONNECTION
-	}
-
-	/*
-	 * =================== ManagedFunctionFactory ===================
-	 */
-
-	@Override
-	public ManagedFunction<ServiceFunctionObjects, ServiceFunctionFlows> createManagedFunction() throws Throwable {
-		return this;
 	}
 
 	/*

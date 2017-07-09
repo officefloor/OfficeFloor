@@ -29,8 +29,8 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
-import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSection;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.HttpSecuritySection;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.security.HttpAuthentication;
 import net.officefloor.plugin.web.http.security.HttpCredentials;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
@@ -84,13 +84,13 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends
 		super.setUp();
 
 		// Configure the application
-		WebAutoWireApplication source = new HttpServerAutoWireOfficeFloorSource(
+		WebArchitect source = new HttpServerAutoWireOfficeFloorSource(
 				PORT);
 
 		// Configure the HTTP Security
 		assertNull("Should not have HTTP Security configured",
 				source.getHttpSecurity());
-		HttpSecurityAutoWireSection security = this
+		HttpSecuritySection security = this
 				.configureHttpSecurity(source);
 
 		// Add servicing methods
@@ -109,14 +109,14 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends
 	}
 
 	/**
-	 * Configures the {@link HttpSecurityAutoWireSection}.
+	 * Configures the {@link HttpSecuritySection}.
 	 * 
 	 * @param application
-	 *            {@link WebAutoWireApplication}.
-	 * @return Confgured {@link HttpSecurityAutoWireSection}.
+	 *            {@link WebArchitect}.
+	 * @return Confgured {@link HttpSecuritySection}.
 	 */
-	protected abstract HttpSecurityAutoWireSection configureHttpSecurity(
-			WebAutoWireApplication application) throws Exception;
+	protected abstract HttpSecuritySection configureHttpSecurity(
+			WebArchitect application) throws Exception;
 
 	@Override
 	protected void tearDown() throws Exception {

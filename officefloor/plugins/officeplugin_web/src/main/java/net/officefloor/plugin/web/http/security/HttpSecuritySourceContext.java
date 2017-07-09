@@ -17,7 +17,7 @@
  */
 package net.officefloor.plugin.web.http.security;
 
-import net.officefloor.frame.spi.source.SourceContext;
+import net.officefloor.frame.api.source.SourceContext;
 
 /**
  * Context for the {@link HttpSecuritySource}.

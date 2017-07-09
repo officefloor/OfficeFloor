@@ -17,7 +17,7 @@
  */
 package net.officefloor.plugin.web.http.application;
 
-import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 
 /**
@@ -25,7 +25,14 @@ import net.officefloor.plugin.web.http.security.HttpSecuritySource;
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpSecurityAutoWireSection extends AutoWireSection {
+public interface HttpSecuritySection {
+
+	/**
+	 * Obtains the underlying {@link OfficeSection}.
+	 * 
+	 * @return {@link OfficeSection}.
+	 */
+	OfficeSection getOfficeSection();
 
 	/**
 	 * Obtains the {@link Class} of the {@link HttpSecuritySource}.

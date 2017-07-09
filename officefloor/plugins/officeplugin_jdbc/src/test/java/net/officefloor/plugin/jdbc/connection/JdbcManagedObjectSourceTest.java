@@ -26,29 +26,24 @@ import javax.sql.PooledConnection;
 
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.manage.WorkManager;
-import net.officefloor.frame.impl.spi.pool.PassiveManagedObjectPool;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
+import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
 import net.officefloor.plugin.jdbc.ConnectionValidator;
-import net.officefloor.plugin.jdbc.connection.JdbcManagedObject;
-import net.officefloor.plugin.jdbc.connection.JdbcManagedObjectSource;
 
 /**
  * Tests the {@link JdbcManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class JdbcManagedObjectSourceTest extends
-		AbstractOfficeConstructTestCase {
+public class JdbcManagedObjectSourceTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * {@link PooledConnection}.
 	 */
-	private PooledConnection pooledConnection = this
-			.createMock(PooledConnection.class);
+	private PooledConnection pooledConnection = this.createMock(PooledConnection.class);
 
 	/**
 	 * {@link Connection}.
@@ -67,13 +62,11 @@ public class JdbcManagedObjectSourceTest extends
 		MockConnectionPoolDataSource.setPooledConnection(this.pooledConnection);
 
 		// Configure the JDBC managed object
-		ManagedObjectBuilder<None> moBuilder = this.constructManagedObject(
-				"JDBC", JdbcManagedObjectSource.class, officeName);
-		moBuilder.setManagedObjectPool(new PassiveManagedObjectPool(1));
-		moBuilder
-				.addProperty(
-						JdbcManagedObjectSource.CONNECTION_POOL_DATA_SOURCE_CLASS_PROPERTY,
-						MockConnectionPoolDataSource.class.getName());
+		ManagedObjectBuilder<None> moBuilder = this.constructManagedObject("JDBC", JdbcManagedObjectSource.class,
+				officeName);
+		this.getOfficeBuilder().addProcessManagedObject("JDBC", "JDBC");
+		moBuilder.addProperty(JdbcManagedObjectSource.CONNECTION_POOL_DATA_SOURCE_CLASS_PROPERTY,
+				MockConnectionPoolDataSource.class.getName());
 		moBuilder.addProperty("driver", Driver.class.getName());
 		moBuilder.addProperty("url", "server:10000");
 		moBuilder.addProperty("serverName", "server");
@@ -83,33 +76,28 @@ public class JdbcManagedObjectSourceTest extends
 		moBuilder.addProperty("password", "not telling");
 		moBuilder.addProperty("loginTimeout", "15");
 
-		// Construct the task to validate the connection
+		// Construct the function to validate the connection
 		final List<Connection> connections = new LinkedList<Connection>();
-		JdbcTask task = new JdbcTask(new ConnectionValidator() {
+		JdbcManagedFunction function = new JdbcManagedFunction(new ConnectionValidator() {
 			@Override
-			public void validateConnection(Connection connection)
-					throws Throwable {
+			public void validateConnection(Connection connection) throws Throwable {
 				// Record the connection being used
 				connections.add(connection);
 			}
 		});
-		String workName = task.construct(this.getOfficeBuilder(), null, "JDBC",
-				"TEAM");
+		String functionName = function.construct(this.getOfficeBuilder(), null, "JDBC", "TEAM");
 
 		// Configure the necessary Teams
-		this.constructTeam("TEAM", new PassiveTeam());
-		this.constructTeam("of-JDBC.jdbc.recycle", new PassiveTeam());
+		this.constructTeam("TEAM", PassiveTeamSource.createPassiveTeam());
+		this.constructTeam("of-JDBC.jdbc.recycle", PassiveTeamSource.createPassiveTeam());
 
 		// Record actions on mocks
 		this.pooledConnection.close();
 		this.pooledConnection.addConnectionEventListener(null);
-		this.control(this.pooledConnection).setMatcher(
-				new TypeMatcher(JdbcManagedObject.class));
-		this.recordReturn(this.pooledConnection,
-				this.pooledConnection.getConnection(), this.connection);
+		this.control(this.pooledConnection).setMatcher(new TypeMatcher(JdbcManagedObject.class));
+		this.recordReturn(this.pooledConnection, this.pooledConnection.getConnection(), this.connection);
 		this.connection.close();
-		this.recordReturn(this.pooledConnection,
-				this.pooledConnection.getConnection(), this.connection);
+		this.recordReturn(this.pooledConnection, this.pooledConnection.getConnection(), this.connection);
 		this.connection.close();
 
 		// Replay mocks
@@ -120,30 +108,24 @@ public class JdbcManagedObjectSourceTest extends
 		officeFloor.openOfficeFloor();
 
 		// Verify properties were loaded onto connection pool data source
-		MockConnectionPoolDataSource dataSource = MockConnectionPoolDataSource
-				.getInstance();
-		assertEquals("Incorrect driver", Driver.class.getName(),
-				dataSource.getDriver());
+		MockConnectionPoolDataSource dataSource = MockConnectionPoolDataSource.getInstance();
+		assertEquals("Incorrect driver", Driver.class.getName(), dataSource.getDriver());
 		assertEquals("Incorrect url", "server:10000", dataSource.getUrl());
 		assertEquals("Incorrect server", "server", dataSource.getServerName());
 		assertEquals("Incorrect port", 10000, dataSource.getPort());
-		assertEquals("Incorrect database", "database",
-				dataSource.getDatabaseName());
+		assertEquals("Incorrect database", "database", dataSource.getDatabaseName());
 		assertEquals("Incorrect username", "user", dataSource.getUsername());
-		assertEquals("Incorrect password", "not telling",
-				dataSource.getPassword());
-		assertEquals("Incorrect login timeout", 15,
-				dataSource.getLoginTimeout());
+		assertEquals("Incorrect password", "not telling", dataSource.getPassword());
+		assertEquals("Incorrect login timeout", 15, dataSource.getLoginTimeout());
 
-		// Obtain the work manager with task to use the connection
-		WorkManager workManager = officeFloor.getOffice(officeName)
-				.getWorkManager(workName);
+		// Obtain the function manager with function to use the connection
+		FunctionManager functionManager = officeFloor.getOffice(officeName).getFunctionManager(functionName);
 
-		// Invoke work to use the connection
-		workManager.invokeWork(null);
+		// Invoke function to use the connection
+		functionManager.invokeProcess(null, null);
 
-		// Invoke work to re-use the connection
-		workManager.invokeWork(null);
+		// Invoke function to re-use the connection
+		functionManager.invokeProcess(null, null);
 
 		// Close the Office Floor
 		officeFloor.closeOfficeFloor();
@@ -153,10 +135,8 @@ public class JdbcManagedObjectSourceTest extends
 
 		// Verify task invoked twice with connection
 		assertEquals("Incorrect times task invoked", 2, connections.size());
-		assertEquals("Incorrect first connection", this.connection,
-				connections.get(0));
-		assertEquals("Incorrect second connection", this.connection,
-				connections.get(1));
+		assertEquals("Incorrect first connection", this.connection, connections.get(0));
+		assertEquals("Incorrect second connection", this.connection, connections.get(1));
 	}
 
 }

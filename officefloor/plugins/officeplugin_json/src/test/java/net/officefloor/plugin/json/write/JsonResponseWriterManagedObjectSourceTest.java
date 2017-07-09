@@ -31,7 +31,7 @@ import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
@@ -105,7 +105,7 @@ public class JsonResponseWriterManagedObjectSourceTest extends
 			String expectedJsonEntity) throws Exception {
 
 		// Start the application
-		WebAutoWireApplication app = new HttpServerAutoWireOfficeFloorSource();
+		WebArchitect app = new HttpServerAutoWireOfficeFloorSource();
 		AutoWireSection servicer = app
 				.addSection("SECTION", ClassSectionSource.class.getName(),
 						MockService.class.getName());

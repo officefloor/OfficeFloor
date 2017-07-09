@@ -18,30 +18,27 @@
 package net.officefloor.plugin.jdbc.connection;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
-import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.StaticManagedFunction;
+import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 
 /**
  * Recycles the {@link JdbcManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */
-public class RecycleJdbcTask extends
-		AbstractSingleTask<RecycleJdbcTask, Indexed, Indexed> {
+public class RecycleJdbcManagedFunction extends StaticManagedFunction<Indexed, Indexed> {
 
 	/*
-	 * ===================== Task =============================================
+	 * ===================== ManagedFunction ==============================
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<RecycleJdbcTask, Indexed, Indexed> context)
-			throws Exception {
+	public Object execute(ManagedFunctionContext<Indexed, Indexed> context) throws Exception {
 
 		// Obtain the recycle parameter
-		RecycleManagedObjectParameter<JdbcManagedObject> recycleParameter = this
-				.getRecycleManagedObjectParameter(context,
-						JdbcManagedObject.class);
+		RecycleManagedObjectParameter<JdbcManagedObject> recycleParameter = RecycleManagedObjectParameter
+				.getRecycleManagedObjectParameter(context);
 
 		// Obtain the JDBC managed object
 		JdbcManagedObject mo = recycleParameter.getManagedObject();

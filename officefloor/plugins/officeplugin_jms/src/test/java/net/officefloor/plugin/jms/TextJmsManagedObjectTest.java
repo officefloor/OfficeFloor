@@ -17,12 +17,12 @@
  */
 package net.officefloor.plugin.jms;
 
-import net.officefloor.admin.transaction.Transaction;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.plugin.jms.activemq.VmJmsAdminObjectFactory;
+import net.officefloor.plugin.transaction.Transaction;
 
 /**
  * Tests sending text messages.
@@ -40,14 +40,11 @@ public class TextJmsManagedObjectTest extends AbstractJmsManagedObjectTest {
 
 		// Create the JMS managed object source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
-		loader.addProperty(JmsUtil.JMS_ADMIN_OBJECT_FACTORY_CLASS_PROPERTY,
-				VmJmsAdminObjectFactory.class.getName());
-		ManagedObjectSource<?, ?> moSource = loader
-				.loadManagedObjectSource(JmsManagedObjectSource.class);
+		loader.addProperty(JmsUtil.JMS_ADMIN_OBJECT_FACTORY_CLASS_PROPERTY, VmJmsAdminObjectFactory.class.getName());
+		ManagedObjectSource<?, ?> moSource = loader.loadManagedObjectSource(JmsManagedObjectSource.class);
 
 		// Create the JMS managed object
-		ManagedObject mo = new ManagedObjectUserStandAlone()
-				.sourceManagedObject(moSource);
+		ManagedObject mo = new ManagedObjectUserStandAlone().sourceManagedObject(moSource);
 
 		// Obtain the producer
 		TextMessageProducer producer = (TextMessageProducer) mo.getObject();

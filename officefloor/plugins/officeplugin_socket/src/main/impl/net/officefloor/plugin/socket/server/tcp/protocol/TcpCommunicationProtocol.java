@@ -40,22 +40,6 @@ import net.officefloor.plugin.socket.server.tcp.protocol.ServiceFunction.Service
 public class TcpCommunicationProtocol implements CommunicationProtocolSource, CommunicationProtocol {
 
 	/**
-	 * Property to obtain the maximum idle time before the {@link Connection} is
-	 * closed.
-	 */
-	public static final String PROPERTY_MAXIMUM_IDLE_TIME = "max.idle.time";
-
-	/**
-	 * Default time before an idle {@link Connection} is closed.
-	 */
-	public static final int DEFAULT_MAXIMUM_IDLE_TIME = 60;
-
-	/**
-	 * Maximum idle time before the {@link Connection} is closed.
-	 */
-	private long maxIdleTime;
-
-	/**
 	 * Send buffer size.
 	 */
 	private int sendBufferSize;
@@ -71,17 +55,12 @@ public class TcpCommunicationProtocol implements CommunicationProtocolSource, Co
 
 	@Override
 	public void loadSpecification(SpecificationContext context) {
-		context.addProperty(PROPERTY_MAXIMUM_IDLE_TIME);
 	}
 
 	@Override
 	public CommunicationProtocol createCommunicationProtocol(MetaDataContext<None, Indexed> configurationContext,
 			CommunicationProtocolContext protocolContext) throws Exception {
 		ManagedObjectSourceContext<Indexed> mosContext = configurationContext.getManagedObjectSourceContext();
-
-		// Obtain the maximum idle time
-		this.maxIdleTime = Long.parseLong(
-				mosContext.getProperty(PROPERTY_MAXIMUM_IDLE_TIME, String.valueOf(DEFAULT_MAXIMUM_IDLE_TIME)));
 
 		// Obtain the send buffer size
 		this.sendBufferSize = protocolContext.getSendBufferSize();
@@ -116,8 +95,7 @@ public class TcpCommunicationProtocol implements CommunicationProtocolSource, Co
 	@Override
 	public TcpConnectionHandler createConnectionHandler(Connection connection,
 			ManagedObjectExecuteContext<Indexed> executeContext) {
-		return new TcpConnectionHandler(connection, this.sendBufferSize, this.maxIdleTime, executeContext,
-				this.newConnectionFlowIndex);
+		return new TcpConnectionHandler(connection, this.sendBufferSize, executeContext, this.newConnectionFlowIndex);
 	}
 
 }

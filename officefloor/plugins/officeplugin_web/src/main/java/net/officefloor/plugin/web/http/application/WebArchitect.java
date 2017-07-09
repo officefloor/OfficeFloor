@@ -17,9 +17,8 @@
  */
 package net.officefloor.plugin.web.http.application;
 
-import net.officefloor.autowire.AutoWireApplication;
-import net.officefloor.autowire.AutoWireObject;
-import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
@@ -31,11 +30,11 @@ import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
 /**
- * Web {@link AutoWireApplication}.
+ * Web configuration extensions for the {@link OfficeArchitect}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WebAutoWireApplication extends AutoWireApplication {
+public interface WebArchitect {
 
 	/**
 	 * Name of the {@link OfficeSection} that handles the {@link HttpRequest}
@@ -66,10 +65,9 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	 *            Class providing the logic for the template. May be
 	 *            <code>null</code> if template does not require logic (e.g.
 	 *            static page with links).
-	 * @return {@link HttpTemplateAutoWireSection} to allow linking flows.
+	 * @return {@link HttpTemplateSection} to allow linking flows.
 	 */
-	HttpTemplateAutoWireSection addHttpTemplate(String templateUri,
-			String templateFilePath, Class<?> templateLogicClass);
+	HttpTemplateSection addHttpTemplate(String templateUri, String templateFilePath, Class<?> templateLogicClass);
 
 	/**
 	 * Specifies the default URI suffix for the {@link HttpTemplate} URI path
@@ -81,23 +79,13 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	void setDefaultHttpTemplateUriSuffix(String uriSuffix);
 
 	/**
-	 * Specifies the {@link HttpSecuritySource} for this
-	 * {@link WebAutoWireApplication}.
+	 * Adds a {@link HttpSecuritySource} for this {@link WebArchitect}.
 	 * 
 	 * @param httpSecuritySourceClass
 	 *            {@link HttpSecuritySource} {@link Class}.
-	 * @return {@link HttpSecurityAutoWireSection}.
+	 * @return {@link HttpSecuritySection}.
 	 */
-	HttpSecurityAutoWireSection setHttpSecurity(
-			Class<? extends HttpSecuritySource<?, ?, ?, ?>> httpSecuritySourceClass);
-
-	/**
-	 * Obtains the configured {@link HttpSecurityAutoWireSection}.
-	 * 
-	 * @return Configured {@link HttpSecurityAutoWireSection} or
-	 *         <code>null</code> if no {@link HttpSecuritySource} is configured.
-	 */
-	HttpSecurityAutoWireSection getHttpSecurity();
+	HttpSecuritySection addHttpSecurity(Class<? extends HttpSecuritySource<?, ?, ?, ?>> httpSecuritySourceClass);
 
 	/**
 	 * Adds an object to be lazily created and stored within the
@@ -108,10 +96,9 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	 * @param bindName
 	 *            Name to bind the object within the
 	 *            {@link HttpApplicationState}.
-	 * @return {@link AutoWireObject}.
+	 * @return {@link OfficeManagedObject}.
 	 */
-	AutoWireObject addHttpApplicationObject(Class<?> objectClass,
-			String bindName);
+	OfficeManagedObject addHttpApplicationObject(Class<?> objectClass, String bindName);
 
 	/**
 	 * <p>
@@ -122,9 +109,9 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	 * 
 	 * @param objectClass
 	 *            Class of the object.
-	 * @return {@link AutoWireObject}.
+	 * @return {@link OfficeManagedObject}.
 	 */
-	AutoWireObject addHttpApplicationObject(Class<?> objectClass);
+	OfficeManagedObject addHttpApplicationObject(Class<?> objectClass);
 
 	/**
 	 * Adds an object to be lazily created and stored within the
@@ -134,9 +121,9 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	 *            Class of the object.
 	 * @param bindName
 	 *            Name to bind the object within the {@link HttpSession}.
-	 * @return {@link AutoWireObject}.
+	 * @return {@link OfficeManagedObject}.
 	 */
-	AutoWireObject addHttpSessionObject(Class<?> objectClass, String bindName);
+	OfficeManagedObject addHttpSessionObject(Class<?> objectClass, String bindName);
 
 	/**
 	 * <p>
@@ -147,9 +134,9 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	 * 
 	 * @param objectClass
 	 *            Class of the object.
-	 * @return {@link AutoWireObject}.
+	 * @return {@link OfficeManagedObject}.
 	 */
-	AutoWireObject addHttpSessionObject(Class<?> objectClass);
+	OfficeManagedObject addHttpSessionObject(Class<?> objectClass);
 
 	/**
 	 * Adds an object to be lazily created and stored within the
@@ -162,10 +149,9 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	 *            objects.
 	 * @param bindName
 	 *            Name to bind the object within the {@link HttpRequestState}.
-	 * @return {@link AutoWireObject}.
+	 * @return {@link OfficeManagedObject}.
 	 */
-	AutoWireObject addHttpRequestObject(Class<?> objectClass,
-			boolean isLoadParameters, String bindName);
+	OfficeManagedObject addHttpRequestObject(Class<?> objectClass, boolean isLoadParameters, String bindName);
 
 	/**
 	 * <p>
@@ -179,10 +165,9 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	 * @param isLoadParameters
 	 *            Indicates whether to load the HTTP parameters to instantiated
 	 *            objects.
-	 * @return {@link AutoWireObject}.
+	 * @return {@link OfficeManagedObject}.
 	 */
-	AutoWireObject addHttpRequestObject(Class<?> objectClass,
-			boolean isLoadParameters);
+	OfficeManagedObject addHttpRequestObject(Class<?> objectClass, boolean isLoadParameters);
 
 	/**
 	 * Links a URI to an {@link OfficeSectionInput}.
@@ -190,20 +175,20 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	 * @param uri
 	 *            URI to be linked.
 	 * @param section
-	 *            {@link AutoWireSection} servicing the URI.
+	 *            {@link OfficeSection} servicing the URI.
 	 * @param inputName
 	 *            Name of the {@link OfficeSectionInput} servicing the URI.
 	 * @return {@link HttpUriLink} to configure handling the URI.
 	 */
-	HttpUriLink linkUri(String uri, AutoWireSection section, String inputName);
+	HttpUriLink linkUri(String uri, OfficeSection section, String inputName);
 
 	/**
 	 * <p>
 	 * Obtains the linked URIs.
 	 * <p>
-	 * {@link HttpTemplateAutoWireSection} URIs are not included in this list.
-	 * To determine if the {@link HttpTemplateAutoWireSection} is serviced (e.g.
-	 * for embedding with a JEE server for Servlet mapping) use the template URI
+	 * {@link HttpTemplateSection} URIs are not included in this list. To
+	 * determine if the {@link HttpTemplateSection} is serviced (e.g. for
+	 * embedding with a JEE server for Servlet mapping) use the template URI
 	 * suffix.
 	 * 
 	 * @return Linked URIs.
@@ -214,14 +199,13 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	 * Links the {@link OfficeSectionOutput} to render the {@link HttpTemplate}.
 	 * 
 	 * @param section
-	 *            {@link AutoWireSection}.
+	 *            {@link OfficeSection}.
 	 * @param outputName
 	 *            Name of the {@link OfficeSectionOutput}.
 	 * @param template
-	 *            {@link HttpTemplateAutoWireSection}.
+	 *            {@link HttpTemplateSection}.
 	 */
-	void linkToHttpTemplate(AutoWireSection section, String outputName,
-			HttpTemplateAutoWireSection template);
+	void linkToHttpTemplate(OfficeSection section, String outputName, HttpTemplateSection template);
 
 	/**
 	 * <p>
@@ -230,26 +214,24 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	 * The meaning of resource path is specific to implementation.
 	 * 
 	 * @param section
-	 *            {@link AutoWireSection}.
+	 *            {@link OfficeSection}.
 	 * @param outputName
 	 *            Name of the {@link OfficeSectionOutput}.
 	 * @param resourcePath
 	 *            Resource path.
 	 */
-	void linkToResource(AutoWireSection section, String outputName,
-			String resourcePath);
+	void linkToResource(OfficeSection section, String outputName, String resourcePath);
 
 	/**
 	 * Links the {@link Escalation} to be handled by the
-	 * {@link HttpTemplateAutoWireSection}.
+	 * {@link HttpTemplateSection}.
 	 * 
 	 * @param escalation
 	 *            {@link Escalation}.
 	 * @param template
-	 *            {@link HttpTemplateAutoWireSection}.
+	 *            {@link HttpTemplateSection}.
 	 */
-	void linkEscalation(Class<? extends Throwable> escalation,
-			HttpTemplateAutoWireSection template);
+	void linkEscalation(Class<? extends Throwable> escalation, HttpTemplateSection template);
 
 	/**
 	 * Links the {@link Escalation} to be handled by the resource.
@@ -259,33 +241,32 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	 * @param resourcePath
 	 *            Resource path.
 	 */
-	void linkEscalation(Class<? extends Throwable> escalation,
-			String resourcePath);
+	void linkEscalation(Class<? extends Throwable> escalation, String resourcePath);
 
 	/**
 	 * Links {@link OfficeSectionOutput} to sending the {@link HttpResponse}.
 	 * 
 	 * @param section
-	 *            {@link AutoWireSection}.
+	 *            {@link OfficeSection}.
 	 * @param outputName
 	 *            Name of the {@link OfficeSectionOutput}.
 	 */
-	void linkToSendResponse(AutoWireSection section, String outputName);
+	void linkToSendResponse(OfficeSection section, String outputName);
 
 	/**
 	 * <p>
 	 * Chains a {@link OfficeSectionInput} to the end of the servicing chain to
 	 * handle a {@link HttpRequest}.
 	 * <p>
-	 * The {@link WebAutoWireApplication} functionality is always the first in
-	 * the chain to attempt to service the {@link HttpRequest}.
+	 * The {@link WebArchitect} functionality is always the first in the chain
+	 * to attempt to service the {@link HttpRequest}.
 	 * <p>
 	 * Typically the last in the chain is servicing the {@link HttpRequest} by
 	 * sending a static resource by matching URI to resource name - and if no
 	 * resource found, a not found error.
 	 * 
 	 * @param section
-	 *            {@link AutoWireSection}.
+	 *            {@link OfficeSection}.
 	 * @param inputName
 	 *            Name of the {@link OfficeSectionInput}.
 	 * @param notHandledOutputName
@@ -294,7 +275,6 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	 *            if handles all {@link HttpRequest} instances (any services
 	 *            chained after this will therefore not be used).
 	 */
-	void chainServicer(AutoWireSection section, String inputName,
-			String notHandledOutputName);
+	void chainServicer(OfficeSection section, String inputName, String notHandledOutputName);
 
 }

@@ -21,7 +21,7 @@ import java.security.Principal;
 
 import javax.servlet.http.HttpServlet;
 
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.security.HttpAuthenticationRequiredException;
 
 /**
@@ -31,7 +31,7 @@ import net.officefloor.plugin.web.http.security.HttpAuthenticationRequiredExcept
  * As {@link HttpServlet} always requires depending on HTTP Security, this
  * interface is provided to differentiate the {@link HttpServlet} so that
  * authentication is not always required. This enables mixing
- * {@link HttpServlet} security with {@link WebAutoWireApplication} security
+ * {@link HttpServlet} security with {@link WebArchitect} security
  * (i.e. not escalate {@link HttpAuthenticationRequiredException} and just
  * provide <code>null</code> instance).
  * 

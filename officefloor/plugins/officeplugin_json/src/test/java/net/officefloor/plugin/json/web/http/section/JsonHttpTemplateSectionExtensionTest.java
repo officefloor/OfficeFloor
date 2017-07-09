@@ -28,9 +28,9 @@ import net.officefloor.plugin.json.JsonResponseWriter;
 import net.officefloor.plugin.json.read.JsonRequestReaderManagedObjectSource;
 import net.officefloor.plugin.json.write.JsonResponseWriterManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
+import net.officefloor.plugin.web.http.application.HttpTemplateSection;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtensionContext;
 
 import org.easymock.AbstractMatcher;
@@ -43,16 +43,16 @@ import org.easymock.AbstractMatcher;
 public class JsonHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link HttpTemplateAutoWireSection}.
+	 * {@link HttpTemplateSection}.
 	 */
-	private final HttpTemplateAutoWireSection template = this
-			.createMock(HttpTemplateAutoWireSection.class);
+	private final HttpTemplateSection template = this
+			.createMock(HttpTemplateSection.class);
 
 	/**
-	 * {@link WebAutoWireApplication}.
+	 * {@link WebArchitect}.
 	 */
-	public final WebAutoWireApplication application = this
-			.createMock(WebAutoWireApplication.class);
+	public final WebArchitect application = this
+			.createMock(WebArchitect.class);
 
 	/**
 	 * {@link HttpTemplateSectionExtensionContext}.
@@ -61,7 +61,7 @@ public class JsonHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 			.createMock(HttpTemplateSectionExtensionContext.class);
 
 	/**
-	 * Ensure not extend {@link HttpTemplateAutoWireSection} as no logic class.
+	 * Ensure not extend {@link HttpTemplateSection} as no logic class.
 	 */
 	public void testNoLogicClass() throws Exception {
 		this.recordGetTemplateLogicClass(null);
@@ -69,7 +69,7 @@ public class JsonHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure not extend {@link HttpTemplateAutoWireSection} if no JSON inline
+	 * Ensure not extend {@link HttpTemplateSection} if no JSON inline
 	 * configuration.
 	 */
 	public void testNoJson() throws Exception {
@@ -237,10 +237,10 @@ public class JsonHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records obtaining the {@link HttpTemplateAutoWireSection} logic class.
+	 * Records obtaining the {@link HttpTemplateSection} logic class.
 	 * 
 	 * @param logicClass
-	 *            {@link HttpTemplateAutoWireSection} logic class.
+	 *            {@link HttpTemplateSection} logic class.
 	 */
 	private void recordGetTemplateLogicClass(Class<?> logicClass) {
 		this.recordReturn(this.template, this.template.getTemplateLogicClass(),
@@ -284,7 +284,7 @@ public class JsonHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Undertakes the extending of the {@link HttpTemplateAutoWireSection}.
+	 * Undertakes the extending of the {@link HttpTemplateSection}.
 	 */
 	private void doExtend(String... jsonAjaxMethods) throws Exception {
 

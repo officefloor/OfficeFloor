@@ -28,7 +28,7 @@ import net.officefloor.plugin.web.http.security.HttpSecuritySource;
  * @author Daniel Sagenschneider
  */
 public class HttpSecurityAutoWireSectionImpl extends AutoWireSectionImpl
-		implements HttpSecurityAutoWireSection {
+		implements HttpSecuritySection {
 
 	/**
 	 * Default timeout is 10 seconds.

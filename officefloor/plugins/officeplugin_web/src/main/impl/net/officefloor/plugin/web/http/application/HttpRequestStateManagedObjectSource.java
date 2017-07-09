@@ -26,17 +26,18 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ProcessAwareContext;
+import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
  * {@link ManagedObjectSource} for the {@link HttpRequestState}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpRequestStateManagedObjectSource extends
-		AbstractManagedObjectSource<None, None> {
+public class HttpRequestStateManagedObjectSource extends AbstractManagedObjectSource<None, None> {
 
 	/*
 	 * =================== ManagedObjectSource ==========================
@@ -48,8 +49,7 @@ public class HttpRequestStateManagedObjectSource extends
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<None, None> context)
-			throws Exception {
+	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
 		context.setObjectClass(HttpRequestState.class);
 	}
 
@@ -61,8 +61,12 @@ public class HttpRequestStateManagedObjectSource extends
 	/**
 	 * {@link ManagedObject} for the {@link HttpRequestState}.
 	 */
-	private static class HttpRequestStateManagedObject implements
-			ManagedObject, HttpRequestState {
+	private static class HttpRequestStateManagedObject implements ProcessAwareManagedObject, HttpRequestState {
+
+		/**
+		 * {@link ProcessAwareContext}.
+		 */
+		private ProcessAwareContext context;
 
 		/**
 		 * Attributes.
@@ -74,6 +78,11 @@ public class HttpRequestStateManagedObjectSource extends
 		 */
 
 		@Override
+		public void setProcessAwareContext(ProcessAwareContext context) {
+			this.context = context;
+		}
+
+		@Override
 		public Object getObject() throws Throwable {
 			return this;
 		}
@@ -83,52 +92,56 @@ public class HttpRequestStateManagedObjectSource extends
 		 */
 
 		@Override
-		public synchronized Serializable getAttribute(String name) {
-			return this.attributes.get(name);
+		public Serializable getAttribute(String name) {
+			return this.context.run(() -> this.attributes.get(name));
 		}
 
 		@Override
-		public synchronized Iterator<String> getAttributeNames() {
-			// Create copy of names (stops concurrency issues)
-			List<String> names = new ArrayList<String>(this.attributes.keySet());
-			return names.iterator();
+		public Iterator<String> getAttributeNames() {
+			return this.context.run(() -> {
+				// Create copy of names (stops concurrency issues)
+				List<String> names = new ArrayList<String>(this.attributes.keySet());
+				return names.iterator();
+			});
 		}
 
 		@Override
-		public synchronized void setAttribute(String name, Serializable object) {
-			this.attributes.put(name, object);
+		public void setAttribute(String name, Serializable object) {
+			this.context.run(() -> this.attributes.put(name, object));
 		}
 
 		@Override
-		public synchronized void removeAttribute(String name) {
-			this.attributes.remove(name);
+		public void removeAttribute(String name) {
+			this.context.run(() -> this.attributes.remove(name));
 		}
 
 		@Override
-		public synchronized Serializable exportState() throws IOException {
+		public Serializable exportState() throws IOException {
+			return this.context.run(() -> {
 
-			// Create the momento state
-			Map<String, Serializable> momentoAttributes = new HashMap<String, Serializable>(
-					this.attributes);
+				// Create the momento state
+				Map<String, Serializable> momentoAttributes = new HashMap<String, Serializable>(this.attributes);
 
-			// Create and return the momento
-			return new StateMomento(momentoAttributes);
+				// Create and return the momento
+				return new StateMomento(momentoAttributes);
+			});
 		}
 
 		@Override
-		public synchronized void importState(Serializable momento)
-				throws IOException, IllegalArgumentException {
+		public void importState(Serializable momento) throws IOException, IllegalArgumentException {
+			this.context.run(() -> {
+				// Ensure valid state momento
+				if (!(momento instanceof StateMomento)) {
+					throw new IllegalArgumentException("Invalid momento for " + HttpRequestState.class.getSimpleName());
+				}
+				StateMomento state = (StateMomento) momento;
 
-			// Ensure valid state momento
-			if (!(momento instanceof StateMomento)) {
-				throw new IllegalArgumentException("Invalid momento for "
-						+ HttpRequestState.class.getSimpleName());
-			}
-			StateMomento state = (StateMomento) momento;
+				// Load the state
+				this.attributes = new HashMap<String, Serializable>(state.attributes);
 
-			// Load the state
-			this.attributes = new HashMap<String, Serializable>(
-					state.attributes);
+				// Void return
+				return null;
+			});
 		}
 	}
 

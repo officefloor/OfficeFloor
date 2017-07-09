@@ -25,8 +25,8 @@ import net.officefloor.model.change.Change;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.woof.WoofChangeIssues;
 import net.officefloor.model.woof.WoofTemplateModel;
-import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.HttpTemplateSection;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 
 /**
  * Loads the extension from the {@link WoofTemplateExtensionSource}.
@@ -90,7 +90,7 @@ public interface WoofTemplateExtensionLoader {
 			SourceContext sourceContext, WoofChangeIssues issues);
 
 	/**
-	 * Extends the {@link HttpTemplateAutoWireSection} with the
+	 * Extends the {@link HttpTemplateSection} with the
 	 * {@link WoofTemplateExtensionSource}.
 	 * 
 	 * @param extensionSourceClassName
@@ -99,17 +99,17 @@ public interface WoofTemplateExtensionLoader {
 	 *            {@link PropertyList} to configure the
 	 *            {@link WoofTemplateExtensionSource}.
 	 * @param template
-	 *            {@link HttpTemplateAutoWireSection} to be extended.
+	 *            {@link HttpTemplateSection} to be extended.
 	 * @param application
-	 *            {@link WebAutoWireApplication}.
+	 *            {@link WebArchitect}.
 	 * @param sourceContext
 	 *            {@link SourceContext}.
 	 * @throws WoofTemplateExtensionException
-	 *             If fails to extend the {@link HttpTemplateAutoWireSection}.
+	 *             If fails to extend the {@link HttpTemplateSection}.
 	 */
 	void extendTemplate(String extensionSourceClassName,
-			PropertyList properties, HttpTemplateAutoWireSection template,
-			WebAutoWireApplication application, SourceContext sourceContext)
+			PropertyList properties, HttpTemplateSection template,
+			WebArchitect application, SourceContext sourceContext)
 			throws WoofTemplateExtensionException;
 
 }

@@ -20,7 +20,7 @@ package net.officefloor.plugin.jpa;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * {@link ManagedObject} for the JPA {@link EntityManager}.

@@ -174,7 +174,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 		final String templatePath = this.getClassPath("NoLogicTemplate.ofp");
 
 		// Add HTTP template with no logic class
-		HttpTemplateAutoWireSection template = this.source.addHttpTemplate("template", templatePath, null);
+		HttpTemplateSection template = this.source.addHttpTemplate("template", templatePath, null);
 		template.setTemplateSecure(isSecure);
 		this.source.linkToResource(template, "link", "resource.html");
 		this.source.openOfficeFloor();
@@ -210,7 +210,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 		final String templatePath = this.getClassPath("template.ofp");
 
 		// Add HTTP template (with URL)
-		HttpTemplateAutoWireSection section = this.source.addHttpTemplate("uri", templatePath, MockTemplateLogic.class);
+		HttpTemplateSection section = this.source.addHttpTemplate("uri", templatePath, MockTemplateLogic.class);
 		section.setTemplateSecure(isSecure);
 		this.source.openOfficeFloor();
 
@@ -241,7 +241,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 		String contentType = "text/plain; one=1; charset=" + charset.name() + "; another";
 
 		// Add HTTP template with Content-Type
-		HttpTemplateAutoWireSection section = this.source.addHttpTemplate("uri", "PUBLIC/resource.html", null);
+		HttpTemplateSection section = this.source.addHttpTemplate("uri", "PUBLIC/resource.html", null);
 		section.setTemplateContentType(contentType);
 		this.source.openOfficeFloor();
 
@@ -260,7 +260,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 	public void testTemplateContentTypeWithDefaultCharset() throws Exception {
 
 		// Add HTTP template with Content-Type
-		HttpTemplateAutoWireSection section = this.source.addHttpTemplate("uri", "PUBLIC/resource.html", null);
+		HttpTemplateSection section = this.source.addHttpTemplate("uri", "PUBLIC/resource.html", null);
 		section.setTemplateContentType("text/plain");
 		this.source.openOfficeFloor();
 
@@ -280,7 +280,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 	public void testTemplateNonTextContentType() throws Exception {
 
 		// Add HTTP template with Content-Type
-		HttpTemplateAutoWireSection section = this.source.addHttpTemplate("uri", "PUBLIC/resource.html", null);
+		HttpTemplateSection section = this.source.addHttpTemplate("uri", "PUBLIC/resource.html", null);
 		section.setTemplateContentType("x-test/non-text");
 		this.source.openOfficeFloor();
 
@@ -321,7 +321,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 
 		// Add the template
 		final String templatePath = this.getClassPath("template.ofp");
-		HttpTemplateAutoWireSection template = this.source.addHttpTemplate("uri", templatePath,
+		HttpTemplateSection template = this.source.addHttpTemplate("uri", templatePath,
 				MockTemplateLogic.class);
 
 		// Ensure able to provide appropriate render redirect HTTP methods
@@ -403,7 +403,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 		final String templatePath = this.getClassPath("template.ofp");
 
 		// Add HTTP template (with URL)
-		HttpTemplateAutoWireSection section = this.source.addHttpTemplate("/", templatePath, MockTemplateLogic.class);
+		HttpTemplateSection section = this.source.addHttpTemplate("/", templatePath, MockTemplateLogic.class);
 		section.setTemplateSecure(isSecure);
 		this.source.openOfficeFloor();
 
@@ -528,7 +528,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 		final String SUBMIT_URI = "/uri-submit";
 
 		// Add HTTP template
-		HttpTemplateAutoWireSection template = this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"),
+		HttpTemplateSection template = this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"),
 				MockTemplateLogic.class);
 		template.setTemplateSecure(true);
 		template.setLinkSecure("submit", false);
@@ -548,16 +548,16 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 	public void testInheritTemplate() throws Exception {
 
 		// Add link target template
-		HttpTemplateAutoWireSection target = this.source.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
+		HttpTemplateSection target = this.source.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
 				MockTemplateLogic.class);
 
 		// Add parent template
-		HttpTemplateAutoWireSection parent = this.source.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"),
+		HttpTemplateSection parent = this.source.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"),
 				null);
 		this.source.linkToHttpTemplate(parent, "submit", target);
 
 		// Add child template (inheriting content and links)
-		HttpTemplateAutoWireSection child = this.source.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
+		HttpTemplateSection child = this.source.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
 		child.setSuperSection(parent);
 
 		// Open OfficeFloor
@@ -576,20 +576,20 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 	public void testInheritTemplateHierarchy() throws Exception {
 
 		// Add link target template
-		HttpTemplateAutoWireSection target = this.source.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
+		HttpTemplateSection target = this.source.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
 				MockTemplateLogic.class);
 
 		// Add parent template
-		HttpTemplateAutoWireSection parent = this.source.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"),
+		HttpTemplateSection parent = this.source.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"),
 				null);
 		this.source.linkToHttpTemplate(parent, "submit", target);
 
 		// Add child template (inheriting content and links)
-		HttpTemplateAutoWireSection child = this.source.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
+		HttpTemplateSection child = this.source.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
 		child.setSuperSection(parent);
 
 		// Add grand child template (override the link)
-		HttpTemplateAutoWireSection grandChild = this.source.addHttpTemplate("/grandchild",
+		HttpTemplateSection grandChild = this.source.addHttpTemplate("/grandchild",
 				this.getClassPath("GrandChild.ofp"), null);
 		grandChild.setSuperSection(child);
 
@@ -606,7 +606,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 	public void testTemplateInheritSectionLinkConfiguration() throws Exception {
 
 		// Add link target template
-		HttpTemplateAutoWireSection target = this.source.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
+		HttpTemplateSection target = this.source.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
 				MockTemplateLogic.class);
 
 		// Add grand parent section
@@ -615,12 +615,12 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 		this.source.linkToHttpTemplate(grandParent, "submit", target);
 
 		// Add parent template (inheriting link configuration)
-		HttpTemplateAutoWireSection parent = this.source.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"),
+		HttpTemplateSection parent = this.source.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"),
 				null);
 		parent.setSuperSection(grandParent);
 
 		// Add child template (inheriting content and links)
-		HttpTemplateAutoWireSection child = this.source.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
+		HttpTemplateSection child = this.source.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
 		child.setSuperSection(parent);
 
 		// Open OfficeFloor
@@ -648,22 +648,22 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 	public void testInheritTemplateLinkSecure() throws Exception {
 
 		// Add link target template
-		HttpTemplateAutoWireSection target = this.source.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
+		HttpTemplateSection target = this.source.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
 				MockTemplateLogic.class);
 
 		// Add parent template
-		HttpTemplateAutoWireSection parent = this.source.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"),
+		HttpTemplateSection parent = this.source.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"),
 				null);
 		parent.setLinkSecure("submit", false);
 		this.source.linkToHttpTemplate(parent, "submit", target);
 
 		// Add child template (inheriting content and links)
-		HttpTemplateAutoWireSection child = this.source.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
+		HttpTemplateSection child = this.source.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
 		parent.setLinkSecure("submit", true); // overrides parent
 		child.setSuperSection(parent);
 
 		// Add child template (inheriting content and links)
-		HttpTemplateAutoWireSection grandChild = this.source.addHttpTemplate("/grandchild",
+		HttpTemplateSection grandChild = this.source.addHttpTemplate("/grandchild",
 				this.getClassPath("LinkChild.ofp"), null);
 		grandChild.setSuperSection(child);
 
@@ -686,21 +686,21 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 	public void testNotInheritMissingTemplateLinkSecure() throws Exception {
 
 		// Add link target template
-		HttpTemplateAutoWireSection target = this.source.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
+		HttpTemplateSection target = this.source.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
 				MockTemplateLogic.class);
 
 		// Add parent template
-		HttpTemplateAutoWireSection parent = this.source.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"),
+		HttpTemplateSection parent = this.source.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"),
 				null);
 		parent.setLinkSecure("submit", true);
 		this.source.linkToHttpTemplate(parent, "submit", target);
 
 		// Add child template (inheriting content and links)
-		HttpTemplateAutoWireSection child = this.source.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
+		HttpTemplateSection child = this.source.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
 		child.setSuperSection(parent);
 
 		// Add grand child template (override the link)
-		HttpTemplateAutoWireSection grandChild = this.source.addHttpTemplate("/grandchild",
+		HttpTemplateSection grandChild = this.source.addHttpTemplate("/grandchild",
 				this.getClassPath("GrandChild.ofp"), null);
 		grandChild.setSuperSection(child);
 
@@ -733,16 +733,16 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 		this.replayMockObjects();
 
 		// Add link target template
-		HttpTemplateAutoWireSection target = this.source.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
+		HttpTemplateSection target = this.source.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
 				MockTemplateLogic.class);
 
 		// Add parent template
-		HttpTemplateAutoWireSection parent = this.source.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"),
+		HttpTemplateSection parent = this.source.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"),
 				null);
 		this.source.linkToHttpTemplate(parent, "submit", target);
 
 		// Add child template (inheriting content and links)
-		HttpTemplateAutoWireSection child = this.source.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
+		HttpTemplateSection child = this.source.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
 		child.setSuperSection(parent);
 
 		// Cyclic inheritance hierarchy
@@ -828,7 +828,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 		final String LINK_URI = "/uri-submit" + SUFFIX;
 
 		// Add HTTP template
-		HttpTemplateAutoWireSection template = this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"),
+		HttpTemplateSection template = this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"),
 				MockTemplateLogic.class);
 		template.setTemplateUriSuffix(SUFFIX);
 		this.source.openOfficeFloor();
@@ -852,7 +852,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 		this.source.setDefaultHttpTemplateUriSuffix(".suffix");
 
 		// Add HTTP template
-		HttpTemplateAutoWireSection template = this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"),
+		HttpTemplateSection template = this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"),
 				MockTemplateLogic.class);
 		template.setTemplateUriSuffix(".override");
 		this.source.openOfficeFloor();
@@ -870,7 +870,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 	public void testLinkedUris() {
 
 		// Add HTTP template (not root so should not be included)
-		HttpTemplateAutoWireSection template = this.source.addHttpTemplate("template",
+		HttpTemplateSection template = this.source.addHttpTemplate("template",
 				this.getClassPath("template.ofp"), MockTemplateLogic.class);
 
 		// Provide URI link
@@ -905,7 +905,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 	public void testTemplateExtension() throws Exception {
 
 		// Add HTTP template
-		HttpTemplateAutoWireSection template = this.source.addHttpTemplate("template",
+		HttpTemplateSection template = this.source.addHttpTemplate("template",
 				this.getClassPath("Extension.ofp"), MockExtensionTemplateLogic.class);
 
 		// Add template extension
@@ -983,7 +983,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 		AutoWireSection section = this.source.addSection("SECTION", ClassSectionSource.class.getName(),
 				MockLinkHttpTemplate.class.getName());
 		this.source.linkUri("test", section, "service");
-		HttpTemplateAutoWireSection template = this.source.addHttpTemplate("template",
+		HttpTemplateSection template = this.source.addHttpTemplate("template",
 				this.getClassPath("template.ofp"), MockTemplateLogic.class);
 		this.source.linkToHttpTemplate(section, "http-template", template);
 		this.source.openOfficeFloor();
@@ -998,7 +998,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 	public void testInheritLinkToHttpTemplate() throws Exception {
 
 		// Add the template
-		HttpTemplateAutoWireSection template = this.source.addHttpTemplate("template",
+		HttpTemplateSection template = this.source.addHttpTemplate("template",
 				this.getClassPath("template.ofp"), MockTemplateLogic.class);
 
 		// Add parent linking to resource
@@ -1080,7 +1080,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 
 	/**
 	 * Ensure able to link {@link Escalation} to
-	 * {@link HttpTemplateAutoWireSection}.
+	 * {@link HttpTemplateSection}.
 	 */
 	public void testLinkEscalationToTemplate() throws Exception {
 
@@ -1088,7 +1088,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 		AutoWireSection failingSection = this.source.addSection("FAILING", ClassSectionSource.class.getName(),
 				FailingSection.class.getName());
 		this.source.linkUri("test", failingSection, "task");
-		HttpTemplateAutoWireSection template = this.source.addHttpTemplate("handler", this.getClassPath("template.ofp"),
+		HttpTemplateSection template = this.source.addHttpTemplate("handler", this.getClassPath("template.ofp"),
 				MockTemplateLogic.class);
 		this.source.linkEscalation(SQLException.class, template);
 		this.source.openOfficeFloor();

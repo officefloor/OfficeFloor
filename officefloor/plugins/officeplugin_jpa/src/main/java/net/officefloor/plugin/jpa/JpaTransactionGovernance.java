@@ -20,16 +20,15 @@ package net.officefloor.plugin.jpa;
 import javax.persistence.EntityTransaction;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.governance.GovernanceContext;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.governance.GovernanceContext;
 
 /**
  * {@link Governance} for JPA transaction.
  * 
  * @author Daniel Sagenschneider
  */
-public class JpaTransactionGovernance implements
-		Governance<EntityTransaction, None> {
+public class JpaTransactionGovernance implements Governance<EntityTransaction, None> {
 
 	/**
 	 * {@link EntityTransaction} under {@link Governance}.
@@ -41,27 +40,24 @@ public class JpaTransactionGovernance implements
 	 */
 
 	@Override
-	public void governManagedObject(EntityTransaction extensionInterface,
-			GovernanceContext<None> context) throws Throwable {
+	public void governManagedObject(EntityTransaction extensionInterface, GovernanceContext<None> context)
+			throws Throwable {
 
 		// Not implementing two-phase commits, so can only have one transaction
 		if (this.transaction != null) {
-			throw new IllegalStateException(this.getClass().getSimpleName()
-					+ " may only managed one "
-					+ EntityTransaction.class.getSimpleName()
-					+ " as does not support two-phase commits");
+			throw new IllegalStateException(this.getClass().getSimpleName() + " may only managed one "
+					+ EntityTransaction.class.getSimpleName() + " as does not support two-phase commits");
 		}
 
 		// Register the transaction
 		this.transaction = extensionInterface;
-		
+
 		// Begin the transaction
 		this.transaction.begin();
 	}
 
 	@Override
-	public void enforceGovernance(GovernanceContext<None> context)
-			throws Throwable {
+	public void enforceGovernance(GovernanceContext<None> context) throws Throwable {
 
 		// Commit the transaction
 		if (this.transaction != null) {
@@ -73,8 +69,7 @@ public class JpaTransactionGovernance implements
 	}
 
 	@Override
-	public void disregardGovernance(GovernanceContext<None> context)
-			throws Throwable {
+	public void disregardGovernance(GovernanceContext<None> context) throws Throwable {
 
 		// Rollback the transaction
 		if (this.transaction != null) {

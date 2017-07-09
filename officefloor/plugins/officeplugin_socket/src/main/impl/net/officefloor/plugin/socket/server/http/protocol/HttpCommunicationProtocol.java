@@ -104,21 +104,6 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource, C
 	private long maximumRequestBodyLength;
 
 	/**
-	 * Property name for the connection timeout.
-	 */
-	public static final String PROPERTY_CONNECTION_TIMEOUT = "connection.timeout";
-
-	/**
-	 * Default value for property {@link #PROPERTY_CONNECTION_TIMEOUT}.
-	 */
-	public static final long DEFAULT_VALUE_CONNECTION_TIMEOUT = 5 * 60 * 1000;
-
-	/**
-	 * Timeout of the {@link Connection} in milliseconds.
-	 */
-	private long connectionTimeout;
-
-	/**
 	 * Property name for the maximum length of a text part for the
 	 * {@link HttpRequest}.
 	 */
@@ -185,8 +170,6 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource, C
 				String.valueOf(DEFAULT_VALUE_MAXIMUM_HTTP_REQUEST_HEADERS)));
 		this.maximumRequestBodyLength = Long.parseLong(mosContext.getProperty(PROPERTY_MAXIMUM_REQUEST_BODY_LENGTH,
 				String.valueOf(DEFAULT_VALUE_MAXIMUM_REQUEST_BODY_LENGTH)));
-		this.connectionTimeout = Long.parseLong(
-				mosContext.getProperty(PROPERTY_CONNECTION_TIMEOUT, String.valueOf(DEFAULT_VALUE_CONNECTION_TIMEOUT)));
 		this.maxTextPartLength = Integer.parseInt(mosContext.getProperty(PROPERTY_MAXIMUM_TEXT_PART_LENGTH,
 				String.valueOf(DEFAULT_VALUE_MAXIMUM_TEXT_PART_LENGTH)));
 
@@ -238,8 +221,7 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource, C
 				this.defaultCharset, this.isSendStackTraceOnFailure, this.httpServerClock);
 		HttpRequestParser parser = new HttpRequestParserImpl(this.maximumHttpRequestHeaders, this.maxTextPartLength,
 				this.maximumRequestBodyLength);
-		return new HttpConnectionHandler(conversation, parser, this.connectionTimeout, executeContext,
-				this.requestHandlingFlowIndex);
+		return new HttpConnectionHandler(conversation, parser, executeContext, this.requestHandlingFlowIndex);
 	}
 
 }

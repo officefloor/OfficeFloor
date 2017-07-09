@@ -20,19 +20,15 @@ package net.officefloor.plugin.jdbc.connection;
 import java.sql.Connection;
 
 import junit.framework.TestCase;
-
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.ManagedFunctionBuilder;
-import net.officefloor.frame.api.build.WorkBuilder;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.StaticManagedFunction;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.plugin.jdbc.ConnectionValidator;
-import net.officefloor.plugin.jdbc.connection.JdbcManagedObjectSource;
 
 /**
  * {@link ManagedFunction} providing testing of a {@link Connection} from a
@@ -40,7 +36,7 @@ import net.officefloor.plugin.jdbc.connection.JdbcManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class JdbcTask extends AbstractSingleTask<Work, Indexed, None> {
+public class JdbcManagedFunction extends StaticManagedFunction<Indexed, None> {
 
 	/**
 	 * {@link ConnectionValidator}.
@@ -53,53 +49,48 @@ public class JdbcTask extends AbstractSingleTask<Work, Indexed, None> {
 	 * @param validator
 	 *            {@link ConnectionValidator}.
 	 */
-	public JdbcTask(ConnectionValidator validator) {
+	public JdbcManagedFunction(ConnectionValidator validator) {
 		this.validator = validator;
 	}
 
 	/**
-	 * Constructs the {@link TestTask}.
+	 * Constructs the {@link JdbcManagedFunction}.
 	 * 
 	 * @param officeBuilder
 	 *            {@link OfficeBuilder} to construct against.
 	 * @param namePrefix
-	 *            Prefix for {@link Work} and {@link ManagedFunction} names.
+	 *            Prefix for {@link ManagedFunction} name.
 	 * @param jdbcMoName
 	 *            Name of the {@link JdbcManagedObjectSource}.
 	 * @param teamName
 	 *            Name of the {@link Team}.
-	 * @return Name of {@link Work} it is registered under so may be invoked.
+	 * @return Name of {@link ManagedFunction} it is registered under so may be
+	 *         invoked.
 	 */
-	public String construct(OfficeBuilder officeBuilder, String namePrefix,
-			String jdbcMoName, String teamName) throws Exception {
+	public String construct(OfficeBuilder officeBuilder, String namePrefix, String jdbcMoName, String teamName)
+			throws Exception {
 
 		// Ensure have a name prefix
 		namePrefix = (namePrefix == null ? "" : namePrefix);
 
-		// Create the work name
-		String workName = namePrefix + "Work";
+		// Create the function name
+		String functionName = namePrefix + "Function";
 
-		// Configure the Work
-		WorkBuilder<Work> workBuilder = this.registerWork(workName,
-				officeBuilder);
-		workBuilder.addWorkManagedObject("mo", jdbcMoName);
-
-		// Configure the Task
-		ManagedFunctionBuilder<Work, Indexed, None> taskBuilder = this.registerTask(
-				"Task", teamName, workBuilder);
-		taskBuilder.linkManagedObject(0, "mo", Connection.class);
+		// Configure the function
+		ManagedFunctionBuilder<Indexed, None> functionBuilder = officeBuilder.addManagedFunction(functionName, this);
+		functionBuilder.linkManagedObject(0, jdbcMoName, Connection.class);
+		functionBuilder.setResponsibleTeam(teamName);
 
 		// Return the work name
-		return workName;
+		return functionName;
 	}
 
 	/*
-	 * =================== AbstractSingleTask =========================
+	 * =================== ManagedFunction =========================
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<Work, Indexed, None> context)
-			throws Throwable {
+	public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
 
 		// Obtain the Connection
 		Connection connection = (Connection) context.getObject(0);

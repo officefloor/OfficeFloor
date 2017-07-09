@@ -70,7 +70,7 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 
 	/**
 	 * Prefix on the {@link SectionOutput} name for the registered
-	 * {@link HttpTemplateAutoWireSection} to allow linking flow.
+	 * {@link HttpTemplateSection} to allow linking flow.
 	 */
 	public static final String ROUTE_TO_HTTP_TEMPLATE_OUTPUT_URI_PREFIX = "Template_";
 

@@ -22,7 +22,7 @@ import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
@@ -113,18 +113,9 @@ public class InputManagedObjectAvailableToManagedObjectFunctionTest extends Abst
 		}
 	}
 
-	public class InputFunction implements ManagedFunctionFactory<Indexed, None>, ManagedFunction<Indexed, None> {
+	public class InputFunction extends StaticManagedFunction<Indexed, None> {
 
 		private InputManagedObjectSource managedObject = null;
-
-		/*
-		 * ================== ManagedFunctionFactory =========================
-		 */
-
-		@Override
-		public ManagedFunction<Indexed, None> createManagedFunction() throws Throwable {
-			return this;
-		}
 
 		/*
 		 * ===================== ManagedFunction ==============================

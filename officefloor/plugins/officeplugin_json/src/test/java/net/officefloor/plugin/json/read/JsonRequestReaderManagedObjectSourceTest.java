@@ -27,30 +27,30 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.easymock.AbstractMatcher;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireObject;
-import net.officefloor.autowire.AutoWireOfficeFloor;
-import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.plugin.json.read.JsonRequestReaderManagedObjectSource.Dependencies;
-import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
+import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
-import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 
 /**
  * Tests the {@link JsonRequestReaderManagedObjectSource}.
@@ -252,15 +252,22 @@ public class JsonRequestReaderManagedObjectSourceTest extends OfficeFrameTestCas
 			boolean isExpectedEmpty, String... expectedArrayValues) throws Exception {
 
 		// Start the application
-		WebAutoWireApplication app = new HttpServerAutoWireOfficeFloorSource();
-		AutoWireSection servicer = app.addSection("SECTION", ClassSectionSource.class.getName(),
-				MockService.class.getName());
-		app.linkUri("service", servicer, "service");
-		AutoWireObject json = app.addManagedObject(JsonRequestReaderManagedObjectSource.class.getName(), null,
-				new AutoWire(MockJsonObject.class));
-		json.addProperty(JsonRequestReaderManagedObjectSource.PROPERTY_JSON_OBJECT_CLASS,
-				MockJsonObject.class.getName());
-		AutoWireOfficeFloor officeFloor = app.openOfficeFloor();
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.officeFloor((context) -> {
+			HttpServerSocketManagedObjectSource.configure(context.getOfficeFloorDeployer(), 7878,
+					context.getDeployedOffice(), "SECTION", "service");
+		});
+		compile.office((context) -> {
+			OfficeArchitect architect = context.getOfficeArchitect();
+			OfficeSection servicer = context.addSection("SECTION", MockService.class);
+			linkUri("service", servicer, "service");
+			OfficeManagedObjectSource mos = architect.addOfficeManagedObjectSource("JSON",
+					JsonRequestReaderManagedObjectSource.class.getName());
+			mos.addProperty(JsonRequestReaderManagedObjectSource.PROPERTY_JSON_OBJECT_CLASS,
+					MockJsonObject.class.getName());
+			mos.addOfficeManagedObject("JSON", ManagedObjectScope.THREAD);
+		});
+		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor();
 		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
 
 			// Reset service to obtain the JSON object
@@ -318,7 +325,7 @@ public class JsonRequestReaderManagedObjectSourceTest extends OfficeFrameTestCas
 
 		private static volatile MockJsonObject object = null;
 
-		@NextTask("same")
+		@NextFunction("same")
 		public void service(MockJsonObject object, ServerHttpConnection connection) throws IOException {
 
 			// Specify the object to check same on another request task

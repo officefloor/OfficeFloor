@@ -37,7 +37,6 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.protocol.ConnectionHandler;
-import net.officefloor.plugin.socket.server.protocol.HeartBeatContext;
 import net.officefloor.plugin.socket.server.protocol.ReadContext;
 import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
 import net.officefloor.plugin.socket.server.protocol.WriteBufferEnum;
@@ -48,7 +47,7 @@ import net.officefloor.plugin.socket.server.ssl.SslFunctionExecutor;
  * 
  * @author Daniel Sagenschneider
  */
-public class SslConnectionHandler implements ConnectionHandler, SslFunctionExecutor, ReadContext, HeartBeatContext {
+public class SslConnectionHandler implements ConnectionHandler, SslFunctionExecutor, ReadContext {
 
 	/**
 	 * {@link Logger}.
@@ -519,21 +518,9 @@ public class SslConnectionHandler implements ConnectionHandler, SslFunctionExecu
 		}
 	}
 
-	@Override
-	public void handleHeartbeat(HeartBeatContext context) throws IOException {
-
-		// Allow wrapped connection handler to handle heart beat
-		this.wrappedConnectionHandler.handleHeartbeat(context);
-	}
-
 	/*
-	 * =============== HeartBeatContext & ReadContext ======================
+	 * ========================== ReadContext ================================
 	 */
-
-	@Override
-	public long getTime() {
-		return System.currentTimeMillis();
-	}
 
 	/**
 	 * {@link ReadContext} data.

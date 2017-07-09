@@ -33,13 +33,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
 /**
  * <p>
  * {@link HttpServlet} to service {@link HttpServletRequest} instances via
- * {@link WebAutoWireApplication}.
+ * {@link WebArchitect}.
  * <p>
  * To use this class:
  * <ol>
@@ -88,11 +88,11 @@ public abstract class OfficeFloorServlet extends HttpServlet implements
 	public abstract String getTemplateUriSuffix();
 
 	/**
-	 * Provides configuration of the {@link WebAutoWireApplication} for this
+	 * Provides configuration of the {@link WebArchitect} for this
 	 * {@link OfficeFloorServlet}.
 	 * 
 	 * @param application
-	 *            {@link WebAutoWireApplication}.
+	 *            {@link WebArchitect}.
 	 * @param servletContext
 	 *            {@link ServletContext}.
 	 * @return <code>true</code> to load the {@link OfficeFloorServlet}.
@@ -100,7 +100,7 @@ public abstract class OfficeFloorServlet extends HttpServlet implements
 	 * @throws Exception
 	 *             If fails to configure.
 	 */
-	public abstract boolean configure(WebAutoWireApplication application,
+	public abstract boolean configure(WebArchitect application,
 			ServletContext servletContext) throws Exception;
 
 	/**

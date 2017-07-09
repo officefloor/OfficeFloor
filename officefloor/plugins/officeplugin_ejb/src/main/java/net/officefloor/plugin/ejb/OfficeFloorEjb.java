@@ -179,6 +179,9 @@ public class OfficeFloorEjb implements EjbOrchestrator, EjbOrchestratorRemote {
 	 */
 	@Resource(name = "functionName")
 	protected String functionName;
+	
+	public OfficeFloorEjb() {
+	}
 
 	/**
 	 * Validates the dependency injection of configuration available.

@@ -30,7 +30,7 @@ import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
@@ -402,12 +402,7 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 	/**
 	 * Recycles the {@link ManagedObject}.
 	 */
-	public class TestRecycle implements ManagedFunctionFactory<O, F>, ManagedFunction<O, F> {
-
-		@Override
-		public ManagedFunction<O, F> createManagedFunction() {
-			return this;
-		}
+	public class TestRecycle extends StaticManagedFunction<O, F> {
 
 		@Override
 		public Object execute(ManagedFunctionContext<O, F> context) throws Throwable {

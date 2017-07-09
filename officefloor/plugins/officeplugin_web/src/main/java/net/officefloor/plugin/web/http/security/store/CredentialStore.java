@@ -20,7 +20,7 @@ package net.officefloor.plugin.web.http.security.store;
 import java.io.IOException;
 
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 
 /**

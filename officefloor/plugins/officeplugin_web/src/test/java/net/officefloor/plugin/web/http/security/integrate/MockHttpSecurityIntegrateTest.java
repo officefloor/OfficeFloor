@@ -19,8 +19,8 @@ package net.officefloor.plugin.web.http.security.integrate;
 
 import org.apache.http.client.CredentialsProvider;
 
-import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSection;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.HttpSecuritySection;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.security.scheme.MockHttpSecuritySource;
 
 /**
@@ -32,11 +32,11 @@ public class MockHttpSecurityIntegrateTest extends
 		AbstractHttpSecurityIntegrateTestCase {
 
 	@Override
-	protected HttpSecurityAutoWireSection configureHttpSecurity(
-			WebAutoWireApplication application) throws Exception {
+	protected HttpSecuritySection configureHttpSecurity(
+			WebArchitect application) throws Exception {
 
 		// Configure the HTTP Security
-		HttpSecurityAutoWireSection security = application
+		HttpSecuritySection security = application
 				.setHttpSecurity(MockHttpSecuritySource.class);
 
 		// Return the HTTP Security

@@ -20,9 +20,8 @@ package net.officefloor.plugin.socket.server.tcp.protocol;
 import java.io.OutputStream;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
 
@@ -31,16 +30,7 @@ import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
  * 
  * @author Daniel Sagenschneider
  */
-public class CleanupFunction implements ManagedFunctionFactory<None, None>, ManagedFunction<None, None> {
-
-	/*
-	 * ================ ManagedFunctionFactory ====================
-	 */
-
-	@Override
-	public ManagedFunction<None, None> createManagedFunction() throws Throwable {
-		return this;
-	}
+public class CleanupFunction extends StaticManagedFunction<None, None> {
 
 	/*
 	 * ==================== ManagedFunction =======================

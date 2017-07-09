@@ -19,8 +19,8 @@ package net.officefloor.plugin.web.http.security;
 
 import java.io.IOException;
 
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.team.Job;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
@@ -104,8 +104,7 @@ public interface HttpSecuritySource<S, C, D extends Enum<D>, F extends Enum<F>> 
 	 * @throws IOException
 	 *             If failure in communicating to necessary security services.
 	 */
-	void authenticate(HttpAuthenticateContext<S, C, D> context)
-			throws IOException;
+	void authenticate(HttpAuthenticateContext<S, C, D> context) throws IOException;
 
 	/**
 	 * Triggers the authentication challenge to the client.

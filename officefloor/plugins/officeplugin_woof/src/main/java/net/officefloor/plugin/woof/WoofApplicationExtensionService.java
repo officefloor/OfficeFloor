@@ -19,24 +19,24 @@ package net.officefloor.plugin.woof;
 
 import java.util.ServiceLoader;
 
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 
 /**
  * {@link ServiceLoader} service that enables extending functionality over and
  * above the {@link WoofLoader} by directly configuring the
- * {@link WebAutoWireApplication}.
+ * {@link WebArchitect}.
  * 
  * @author Daniel Sagenschneider
  */
 public interface WoofApplicationExtensionService {
 
 	/**
-	 * Extends the {@link WebAutoWireApplication}.
+	 * Extends the {@link WebArchitect}.
 	 * 
 	 * @param context
 	 *            {@link WoofApplicationExtensionServiceContext}.
 	 * @throws Exception
-	 *             If fails to extend the {@link WebAutoWireApplication}.
+	 *             If fails to extend the {@link WebArchitect}.
 	 */
 	void extendApplication(WoofApplicationExtensionServiceContext context)
 			throws Exception;

@@ -17,11 +17,11 @@
  */
 package net.officefloor.plugin.web.http.application;
 
-import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 /**
- * Allows configuring the HTTP URI link for a {@link WebAutoWireApplication}.
+ * Allows configuring the HTTP URI link for a {@link WebArchitect}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -35,16 +35,16 @@ public interface HttpUriLink {
 	String getApplicationUriPath();
 
 	/**
-	 * Obtains the {@link AutoWireSection} handling the URI.
+	 * Obtains the {@link OfficeSection} handling the URI.
 	 * 
-	 * @return {@link AutoWireSection} handling the URI.
+	 * @return {@link OfficeSection} handling the URI.
 	 */
-	AutoWireSection getAutoWireSection();
+	OfficeSection getAutoWireSection();
 
 	/**
-	 * Obtains the input name of the {@link AutoWireSection} handling the URI.
+	 * Obtains the input name of the {@link OfficeSection} handling the URI.
 	 * 
-	 * @return Input name of the {@link AutoWireSection} handling the URI.
+	 * @return Input name of the {@link OfficeSection} handling the URI.
 	 */
 	String getAutoWireSectionInputName();
 

@@ -38,7 +38,7 @@ import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
@@ -121,7 +121,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can extend the {@link WebAutoWireApplication}.
+	 * Ensure can extend the {@link WebArchitect}.
 	 */
 	public void testWebApplicationExtension() throws Exception {
 

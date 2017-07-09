@@ -30,7 +30,6 @@ import javax.net.ssl.SSLEngineResult.HandshakeStatus;
 import javax.net.ssl.SSLEngineResult.Status;
 import javax.net.ssl.SSLSession;
 
-import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.plugin.socket.server.impl.SimpleClientServerTest;

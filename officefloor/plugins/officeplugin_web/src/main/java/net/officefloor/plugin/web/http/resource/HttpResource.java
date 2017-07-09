@@ -19,7 +19,7 @@ package net.officefloor.plugin.web.http.resource;
 
 import java.io.Serializable;
 
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 
 /**

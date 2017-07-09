@@ -20,10 +20,10 @@ package net.officefloor.plugin.jpa;
 import javax.persistence.EntityManager;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
-import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.StaticManagedFunction;
+import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 
 /**
  * {@link ManagedFunction} to close the {@link EntityManager}.
@@ -31,35 +31,32 @@ import net.officefloor.frame.util.AbstractSingleTask;
  * @author Daniel Sagenschneider
  */
 // START SNIPPET: tutorial
-public class CloseEntityManagerTask
-		extends
-		AbstractSingleTask<CloseEntityManagerTask, CloseEntityManagerTask.CloseEntityManagerDependencies, None> {
+public class CloseEntityManagerManagedFunction
+		extends StaticManagedFunction<CloseEntityManagerManagedFunction.CloseEntityManagerDependencies, None> {
 
 	/**
-	 * Recycle {@link ManagedFunction} dependencies to close the {@link EntityManager}.
+	 * Recycle {@link ManagedFunction} dependencies to close the
+	 * {@link EntityManager}.
 	 */
 	public static enum CloseEntityManagerDependencies {
 		MANAGED_OBJECT
 	}
 
 	/*
-	 * ============================ Task ==========================
+	 * ========================= ManagedFunction =======================
 	 */
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Object execute(
-			ManagedFunctionContext<CloseEntityManagerTask, CloseEntityManagerDependencies, None> context)
-			throws Throwable {
+	public Object execute(ManagedFunctionContext<CloseEntityManagerDependencies, None> context) throws Throwable {
 
 		// Obtain the recycle parameter
 		RecycleManagedObjectParameter<JpaEntityManagerManagedObject> parameter = (RecycleManagedObjectParameter<JpaEntityManagerManagedObject>) context
 				.getObject(CloseEntityManagerDependencies.MANAGED_OBJECT);
 
 		// Obtain the managed object
-		JpaEntityManagerManagedObject managedObject = parameter
-				.getManagedObject();
-		
+		JpaEntityManagerManagedObject managedObject = parameter.getManagedObject();
+
 		// Close the Entity Manager
 		managedObject.closeEntityManager();
 

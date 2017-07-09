@@ -18,13 +18,13 @@
 package net.officefloor.plugin.web.http.application;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.NameAwareManagedObject;
-import net.officefloor.frame.spi.managedobject.ObjectRegistry;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
  * {@link ManagedObjectSource} to cache creation of an {@link Object} within the
@@ -33,8 +33,7 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
  * @author Daniel Sagenschneider
  */
 public class HttpApplicationObjectManagedObjectSource
-		extends
-		AbstractManagedObjectSource<HttpApplicationObjectManagedObjectSource.Dependencies, None> {
+		extends AbstractManagedObjectSource<HttpApplicationObjectManagedObjectSource.Dependencies, None> {
 
 	/**
 	 * Dependency keys for the {@link HttpApplicationObjectManagedObject}.
@@ -74,10 +73,8 @@ public class HttpApplicationObjectManagedObjectSource
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<Dependencies, None> context)
-			throws Exception {
-		ManagedObjectSourceContext<None> mosContext = context
-				.getManagedObjectSourceContext();
+	protected void loadMetaData(MetaDataContext<Dependencies, None> context) throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Obtain the class
 		String className = mosContext.getProperty(PROPERTY_CLASS_NAME);
@@ -89,22 +86,20 @@ public class HttpApplicationObjectManagedObjectSource
 		// Specify the meta-data
 		context.setObjectClass(this.objectClass);
 		context.setManagedObjectClass(HttpApplicationObjectManagedObject.class);
-		context.addDependency(Dependencies.HTTP_APPLICATION_STATE,
-				HttpApplicationState.class);
+		context.addDependency(Dependencies.HTTP_APPLICATION_STATE, HttpApplicationState.class);
 	}
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-		return new HttpApplicationObjectManagedObject(this.objectClass,
-				this.bindName);
+		return new HttpApplicationObjectManagedObject(this.objectClass, this.bindName);
 	}
 
 	/**
 	 * {@link ManagedObject} to retrieve the object from the
 	 * {@link HttpApplicationState}.
 	 */
-	public static class HttpApplicationObjectManagedObject implements
-			NameAwareManagedObject, CoordinatingManagedObject<Dependencies> {
+	public static class HttpApplicationObjectManagedObject
+			implements NameAwareManagedObject, CoordinatingManagedObject<Dependencies> {
 
 		/**
 		 * Class of the object.
@@ -136,8 +131,7 @@ public class HttpApplicationObjectManagedObjectSource
 		 *            Specific name to bind the object into the
 		 *            {@link HttpApplicationState}.
 		 */
-		public HttpApplicationObjectManagedObject(Class<?> objectClass,
-				String bindName) {
+		public HttpApplicationObjectManagedObject(Class<?> objectClass, String bindName) {
 			this.objectClass = objectClass;
 			this.bindName = bindName;
 		}
@@ -149,17 +143,14 @@ public class HttpApplicationObjectManagedObjectSource
 		@Override
 		public void setBoundManagedObjectName(String boundManagedObjectName) {
 			// Use bind name in preference to managed object name
-			this.boundName = (this.bindName != null ? this.bindName
-					: boundManagedObjectName);
+			this.boundName = (this.bindName != null ? this.bindName : boundManagedObjectName);
 		}
 
 		@Override
-		public void loadObjects(ObjectRegistry<Dependencies> registry)
-				throws Throwable {
+		public void loadObjects(ObjectRegistry<Dependencies> registry) throws Throwable {
 
 			// Obtain the HTTP application state
-			HttpApplicationState state = (HttpApplicationState) registry
-					.getObject(Dependencies.HTTP_APPLICATION_STATE);
+			HttpApplicationState state = (HttpApplicationState) registry.getObject(Dependencies.HTTP_APPLICATION_STATE);
 
 			// Lazy obtain the object
 			this.object = state.getAttribute(this.boundName);

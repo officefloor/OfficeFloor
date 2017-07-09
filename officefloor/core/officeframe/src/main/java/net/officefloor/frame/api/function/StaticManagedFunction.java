@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,16 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.web.http.application;
-
-import net.officefloor.compile.properties.PropertyConfigurable;
-import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
+package net.officefloor.frame.api.function;
 
 /**
- * Allows configuring the {@link HttpTemplateSectionExtension} for the
- * {@link HttpTemplateSection}.
+ * Static {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpTemplateAutoWireSectionExtension extends PropertyConfigurable {
+public abstract class StaticManagedFunction<O extends Enum<O>, F extends Enum<F>>
+		implements ManagedFunctionFactory<O, F>, ManagedFunction<O, F> {
+
+	/*
+	 * ==================== ManagedFunctionFactory =====================
+	 */
+
+	@Override
+	public final ManagedFunction<O, F> createManagedFunction() throws Throwable {
+		return this;
+	}
+
 }

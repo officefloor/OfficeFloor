@@ -22,10 +22,10 @@ import java.util.Properties;
 import javax.sql.DataSource;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.jdbc.util.ReflectionUtil;
 
 /**
@@ -33,8 +33,7 @@ import net.officefloor.plugin.jdbc.util.ReflectionUtil;
  * 
  * @author Daniel Sagenschneider
  */
-public class DataSourceManagedObjectSource extends
-		AbstractManagedObjectSource<None, None> implements ManagedObject {
+public class DataSourceManagedObjectSource extends AbstractManagedObjectSource<None, None> implements ManagedObject {
 
 	/**
 	 * Property name of the {@link DataSource} class name.
@@ -52,25 +51,21 @@ public class DataSourceManagedObjectSource extends
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(PROPERTY_DATA_SOURCE_CLASS_NAME, DataSource.class
-				.getSimpleName());
+		context.addProperty(PROPERTY_DATA_SOURCE_CLASS_NAME, DataSource.class.getSimpleName());
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<None, None> context)
-			throws Exception {
-		ManagedObjectSourceContext<None> mosContext = context
-				.getManagedObjectSourceContext();
+	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Obtain the DataSource class name
-		String dataSourceClassName = mosContext
-				.getProperty(PROPERTY_DATA_SOURCE_CLASS_NAME);
+		String dataSourceClassName = mosContext.getProperty(PROPERTY_DATA_SOURCE_CLASS_NAME);
 
 		// Initiate the DataSource
 		ClassLoader classLoader = mosContext.getClassLoader();
 		Properties properties = mosContext.getProperties();
-		this.dataSource = ReflectionUtil.createInitialisedBean(
-				dataSourceClassName, classLoader, DataSource.class, properties);
+		this.dataSource = ReflectionUtil.createInitialisedBean(dataSourceClassName, classLoader, DataSource.class,
+				properties);
 
 		// Specify types
 		context.setObjectClass(DataSource.class);

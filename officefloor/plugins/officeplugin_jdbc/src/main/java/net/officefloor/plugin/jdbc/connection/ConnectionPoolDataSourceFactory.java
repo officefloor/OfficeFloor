@@ -19,7 +19,7 @@ package net.officefloor.plugin.jdbc.connection;
 
 import javax.sql.ConnectionPoolDataSource;
 
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 
 /**
  * Factory for the creation of a {@link ConnectionPoolDataSource}.

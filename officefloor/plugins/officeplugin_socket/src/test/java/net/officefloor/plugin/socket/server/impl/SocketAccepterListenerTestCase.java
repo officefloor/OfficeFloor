@@ -32,7 +32,6 @@ import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolContex
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
 import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.protocol.ConnectionHandler;
-import net.officefloor.plugin.socket.server.protocol.HeartBeatContext;
 import net.officefloor.plugin.socket.server.protocol.ReadContext;
 import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
 
@@ -166,12 +165,6 @@ public abstract class SocketAccepterListenerTestCase extends AbstractClientServe
 	@Override
 	public void handleRead(ReadContext context) throws IOException {
 		this.readData = context.getData();
-	}
-
-	@Override
-	public void handleHeartbeat(HeartBeatContext context) throws IOException {
-		// TODO implement ConnectionHandler.handleHeartbeat
-		throw new UnsupportedOperationException("TODO implement ConnectionHandler.handleHeartbeat");
 	}
 
 }

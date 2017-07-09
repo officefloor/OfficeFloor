@@ -29,7 +29,7 @@ import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.Flow;
@@ -41,8 +41,7 @@ import net.officefloor.frame.internal.structure.ThreadState;
  * 
  * @author Daniel Sagenschneider
  */
-public class ReflectiveFunctionBuilder
-		implements ManagedFunctionFactory<Indexed, Indexed>, ManagedFunction<Indexed, Indexed> {
+public class ReflectiveFunctionBuilder extends StaticManagedFunction<Indexed, Indexed> {
 
 	/**
 	 * {@link AbstractOfficeConstructTestCase}.
@@ -293,15 +292,6 @@ public class ReflectiveFunctionBuilder
 		ReflectiveAdministrationBuilder builder = new ReflectiveAdministrationBuilder((Class) this.object.getClass(),
 				this.object, methodName, isPreNotPost, this.functionBuilder, this.testCase);
 		return builder;
-	}
-
-	/*
-	 * ======================== ManagedFunctionFactory ========================
-	 */
-
-	@Override
-	public ManagedFunction<Indexed, Indexed> createManagedFunction() {
-		return this;
 	}
 
 	/*

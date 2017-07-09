@@ -25,7 +25,7 @@ import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
-import net.officefloor.plugin.servlet.context.ServletTaskReference;
+import net.officefloor.plugin.servlet.context.ServletFunctionReference;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
@@ -88,7 +88,7 @@ public class ServletRouteTask
 				.getObject(DependencyKeys.OFFICE_SERVLET_CONTEXT);
 
 		// Obtain the servlet task to service the task
-		ServletTaskReference reference = officeServletContext.mapPath(
+		ServletFunctionReference reference = officeServletContext.mapPath(
 				this.office, path);
 		if (reference == null) {
 			// No servlet to service path, therefore unhandled
@@ -97,7 +97,7 @@ public class ServletRouteTask
 		}
 
 		// Have servlet handle the request
-		context.doFlow(reference.getWorkName(), reference.getTaskName(), null);
+		context.doFlow(reference.getWorkName(), reference.getFunctionName(), null);
 		return null;
 	}
 

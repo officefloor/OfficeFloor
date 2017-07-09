@@ -31,7 +31,7 @@ import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpParameters;
 import net.officefloor.plugin.web.http.application.HttpRequestObjectManagedObjectSource;
-import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
+import net.officefloor.plugin.web.http.application.HttpTemplateSection;
 import net.officefloor.plugin.web.http.application.HttpUriLink;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.route.HttpRouteTask;
@@ -204,7 +204,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 
 	/**
 	 * Undertakes test for secure settings of a
-	 * {@link HttpTemplateAutoWireSection}.
+	 * {@link HttpTemplateSection}.
 	 */
 	private void doSecureTemplateTest(boolean isTemplateSecure,
 			Boolean isLinkSecure, String requestUrl, String redirectUrl,
@@ -216,7 +216,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 						: "secure.ofp"));
 
 		// Configure the template
-		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
+		HttpTemplateSection template = this.source.addHttpTemplate(
 				"template", templateLocation,
 				(isEncapsulateLinkWithinBean ? BeanTemplateLogic.class
 						: TemplateLogic.class));

@@ -23,9 +23,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -38,21 +37,12 @@ import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpCleanupManagedFunction implements ManagedFunctionFactory<None, None>, ManagedFunction<None, None> {
+public class HttpCleanupManagedFunction extends StaticManagedFunction<None, None> {
 
 	/**
 	 * {@link Logger}.
 	 */
 	private static final Logger LOGGER = Logger.getLogger(HttpCleanupManagedFunction.class.getName());
-
-	/*
-	 * ==================== ManagedFunctionFactory ===========================
-	 */
-
-	@Override
-	public ManagedFunction<None, None> createManagedFunction() throws Throwable {
-		return this;
-	}
 
 	/*
 	 * ======================= ManagedFunction ===============================

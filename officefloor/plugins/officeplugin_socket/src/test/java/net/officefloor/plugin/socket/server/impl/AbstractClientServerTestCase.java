@@ -146,7 +146,7 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 			// Create the socket listener
 			SocketListener[] socketListeners = new SocketListener[1];
 			this.socketManager = new SocketManagerImpl(socketListeners);
-			this.listener = new SocketListener(socketManager, 3000, this.sendBufferSize, receiveBufferSize);
+			this.listener = new SocketListener(socketManager, this.sendBufferSize, receiveBufferSize);
 			socketListeners[0] = this.listener;
 
 			// Obtain the communication protocol source

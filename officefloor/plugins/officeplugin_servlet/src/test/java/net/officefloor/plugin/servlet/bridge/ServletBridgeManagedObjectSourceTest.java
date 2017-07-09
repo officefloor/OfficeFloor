@@ -56,13 +56,9 @@ public class ServletBridgeManagedObjectSourceTest extends OfficeFrameTestCase {
 	 * Ensure the dependency annotation type names are correct.
 	 */
 	public void testDependencyAnnotationTypeNames() {
-		assertEquals(
-				"Incorrect Resource",
-				Resource.class.getName(),
+		assertEquals("Incorrect Resource", Resource.class.getName(),
 				ServletBridgeManagedObjectSource.DEPENDENCY_ANNOTATION_TYPE_NAMES[0]);
-		assertEquals(
-				"Incorrect EJB",
-				EJB.class.getName(),
+		assertEquals("Incorrect EJB", EJB.class.getName(),
 				ServletBridgeManagedObjectSource.DEPENDENCY_ANNOTATION_TYPE_NAMES[1]);
 	}
 
@@ -70,10 +66,8 @@ public class ServletBridgeManagedObjectSourceTest extends OfficeFrameTestCase {
 	 * Validate specification.
 	 */
 	public void testSpecification() {
-		ManagedObjectLoaderUtil.validateSpecification(
-				ServletBridgeManagedObjectSource.class,
-				ServletBridgeManagedObjectSource.PROPERTY_INSTANCE_IDENTIFIER,
-				"Instance",
+		ManagedObjectLoaderUtil.validateSpecification(ServletBridgeManagedObjectSource.class,
+				ServletBridgeManagedObjectSource.PROPERTY_INSTANCE_IDENTIFIER, "Instance",
 				ServletBridgeManagedObjectSource.PROPERTY_USE_ASYNC, "Async");
 	}
 
@@ -83,17 +77,14 @@ public class ServletBridgeManagedObjectSourceTest extends OfficeFrameTestCase {
 	public void testTypeNoAsync() {
 
 		// Create expected type
-		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
-				.createManagedObjectTypeBuilder();
+		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(ServletBridge.class);
 		type.addFlow(FlowKeys.SERVICE, null, null, null);
 
 		// Validate type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type,
-				ServletBridgeManagedObjectSource.class,
-				ServletBridgeManagedObjectSource.PROPERTY_INSTANCE_IDENTIFIER,
-				"1", ServletBridgeManagedObjectSource.PROPERTY_USE_ASYNC,
-				"false");
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, ServletBridgeManagedObjectSource.class,
+				ServletBridgeManagedObjectSource.PROPERTY_INSTANCE_IDENTIFIER, "1",
+				ServletBridgeManagedObjectSource.PROPERTY_USE_ASYNC, "false");
 	}
 
 	/**
@@ -102,18 +93,15 @@ public class ServletBridgeManagedObjectSourceTest extends OfficeFrameTestCase {
 	public void testTypeUsingAsync() {
 
 		// Create expected type
-		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
-				.createManagedObjectTypeBuilder();
+		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(ServletBridge.class);
 		type.addFlow(FlowKeys.SERVICE, null, null, null);
 		type.addTeam("COMPLETE");
 
 		// Validate type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type,
-				ServletBridgeManagedObjectSource.class,
-				ServletBridgeManagedObjectSource.PROPERTY_INSTANCE_IDENTIFIER,
-				"1", ServletBridgeManagedObjectSource.PROPERTY_USE_ASYNC,
-				"true");
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, ServletBridgeManagedObjectSource.class,
+				ServletBridgeManagedObjectSource.PROPERTY_INSTANCE_IDENTIFIER, "1",
+				ServletBridgeManagedObjectSource.PROPERTY_USE_ASYNC, "true");
 	}
 
 	/**
@@ -122,13 +110,10 @@ public class ServletBridgeManagedObjectSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testServiceWithDependencies() throws Exception {
 
-		final HttpServletRequest request = this
-				.createMock(HttpServletRequest.class);
-		final HttpServletResponse response = this
-				.createMock(HttpServletResponse.class);
-		final ServletContext servletContext = this
-				.createMock(ServletContext.class);
-		
+		final HttpServletRequest request = this.createMock(HttpServletRequest.class);
+		final HttpServletResponse response = this.createMock(HttpServletResponse.class);
+		final ServletContext servletContext = this.createMock(ServletContext.class);
+
 		// Create the servlet
 		MockDependencyHttpServlet servlet = new MockDependencyHttpServlet();
 		servlet.dependency = this.createMock(ServletDependency.class);
@@ -139,13 +124,11 @@ public class ServletBridgeManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Configure the OfficeFloor
 		AutoWireOfficeFloorSource autoWire = new AutoWireOfficeFloorSource();
-		autoWire.addSection("SECTION", ClassSectionSource.class.getName(),
-				SectionClass.class.getName());
+		autoWire.addSection("SECTION", ClassSectionSource.class.getName(), SectionClass.class.getName());
 
 		// Create the servicer for servicing
 		ServletServiceBridger<MockDependencyHttpServlet> servicer = ServletBridgeManagedObjectSource
-				.createServletServiceBridger(MockDependencyHttpServlet.class,
-						autoWire, "SECTION", "service");
+				.createServletServiceBridger(MockDependencyHttpServlet.class, autoWire, "SECTION", "service");
 
 		// Ensure appropriate object types and subsequently not async
 		assertFalse("Should not be async", servicer.isUseAsyncContext());
@@ -154,14 +137,11 @@ public class ServletBridgeManagedObjectSourceTest extends OfficeFrameTestCase {
 		Arrays.sort(objectTypes, new Comparator<Class<?>>() {
 			@Override
 			public int compare(Class<?> a, Class<?> b) {
-				return String.CASE_INSENSITIVE_ORDER.compare(a.getName(),
-						b.getName());
+				return String.CASE_INSENSITIVE_ORDER.compare(a.getName(), b.getName());
 			}
 		});
-		assertEquals("Incorrect resource dependency type",
-				ServletDependency.class, objectTypes[0]);
-		assertEquals("Incorrect ejb dependency type", ServletEjbLocal.class,
-				objectTypes[1]);
+		assertEquals("Incorrect resource dependency type", ServletDependency.class, objectTypes[0]);
+		assertEquals("Incorrect ejb dependency type", ServletEjbLocal.class, objectTypes[1]);
 
 		// Open the OfficeFloor
 		AutoWireOfficeFloor officefloor = autoWire.openOfficeFloor();
@@ -171,35 +151,27 @@ public class ServletBridgeManagedObjectSourceTest extends OfficeFrameTestCase {
 			servicer.service(servlet, request, response, servletContext);
 
 			// Ensure completed servicing
-			assertNotNull("Ensure servlet bridge provided",
-					SectionClass.servletBridge);
+			assertNotNull("Ensure servlet bridge provided", SectionClass.servletBridge);
 
 			// Ensure correct request, response and context
-			assertSame("Incorrect request", request,
-					SectionClass.servletBridge.getRequest());
-			assertSame("Incorrect response", response,
-					SectionClass.servletBridge.getResponse());
-			assertSame("Incorrect servlet context", servletContext,
-					SectionClass.servletBridge.getServletContext());
+			assertSame("Incorrect request", request, SectionClass.servletBridge.getRequest());
+			assertSame("Incorrect response", response, SectionClass.servletBridge.getResponse());
+			assertSame("Incorrect servlet context", servletContext, SectionClass.servletBridge.getServletContext());
 
 			// Should not have async context
-			assertNull("Should not have Async Context",
-					SectionClass.servletBridge.getAsyncContext());
+			assertNull("Should not have Async Context", SectionClass.servletBridge.getAsyncContext());
 
 			// Ensure obtain dependency injection on Servlet
-			ServletDependency servletDependency = SectionClass.servletBridge
-					.getObject(ServletDependency.class);
-			assertSame("Must obtain dependency", servlet.dependency,
-					servletDependency);
-			ServletEjbLocal servletEjb = SectionClass.servletBridge
-					.getObject(ServletEjbLocal.class);
+			ServletDependency servletDependency = SectionClass.servletBridge.getObject(ServletDependency.class);
+			assertSame("Must obtain dependency", servlet.dependency, servletDependency);
+			ServletEjbLocal servletEjb = SectionClass.servletBridge.getObject(ServletEjbLocal.class);
 			assertSame("Must obtain EJB", servlet.ejb, servletEjb);
 
 		} finally {
 			// Ensure close
 			officefloor.closeOfficeFloor();
 		}
-		
+
 		// Verify
 		this.verifyMockObjects();
 	}
@@ -234,38 +206,32 @@ public class ServletBridgeManagedObjectSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testServiceAsync() throws Exception {
 
-		final HttpServletRequest request = this
-				.createMock(HttpServletRequest.class);
-		final HttpServletResponse response = this
-				.createMock(HttpServletResponse.class);
-		final ServletContext servletContext = this
-				.createMock(ServletContext.class);
+		final HttpServletRequest request = this.createMock(HttpServletRequest.class);
+		final HttpServletResponse response = this.createMock(HttpServletResponse.class);
+		final ServletContext servletContext = this.createMock(ServletContext.class);
 		final AsyncContext asyncContext = this.createMock(AsyncContext.class);
-		
+
 		// Record async interaction
 		this.recordReturn(request, request.startAsync(), asyncContext);
 		asyncContext.complete();
 
 		// Test
 		this.replayMockObjects();
-		
+
 		// Create the filter
 		MockAsyncFilter filter = new MockAsyncFilter();
 
 		// Configure the OfficeFloor
 		AutoWireOfficeFloorSource autoWire = new AutoWireOfficeFloorSource();
-		autoWire.addSection("SECTION", ClassSectionSource.class.getName(),
-				SectionClass.class.getName());
+		autoWire.addSection("SECTION", ClassSectionSource.class.getName(), SectionClass.class.getName());
 
 		// Create the servicer for servicing
 		ServletServiceBridger<MockAsyncFilter> servicer = ServletBridgeManagedObjectSource
-				.createServletServiceBridger(MockAsyncFilter.class, autoWire,
-						"SECTION", "service");
+				.createServletServiceBridger(MockAsyncFilter.class, autoWire, "SECTION", "service");
 
 		// Ensure can use async as no object types
 		assertTrue("Should be using async", servicer.isUseAsyncContext());
-		assertEquals("Should be no object types", 0,
-				servicer.getObjectTypes().length);
+		assertEquals("Should be no object types", 0, servicer.getObjectTypes().length);
 
 		// Open the OfficeFloor
 		AutoWireOfficeFloor officefloor = autoWire.openOfficeFloor();
@@ -275,26 +241,21 @@ public class ServletBridgeManagedObjectSourceTest extends OfficeFrameTestCase {
 			servicer.service(filter, request, response, servletContext);
 
 			// Ensure completed servicing
-			assertNotNull("Ensure servlet bridge provided",
-					SectionClass.servletBridge);
+			assertNotNull("Ensure servlet bridge provided", SectionClass.servletBridge);
 
 			// Ensure correct request, response and context
-			assertSame("Incorrect request", request,
-					SectionClass.servletBridge.getRequest());
-			assertSame("Incorrect response", response,
-					SectionClass.servletBridge.getResponse());
-			assertSame("Incorrect servlet context", servletContext,
-					SectionClass.servletBridge.getServletContext());
+			assertSame("Incorrect request", request, SectionClass.servletBridge.getRequest());
+			assertSame("Incorrect response", response, SectionClass.servletBridge.getResponse());
+			assertSame("Incorrect servlet context", servletContext, SectionClass.servletBridge.getServletContext());
 
 			// Ensure async context is available
-			assertSame("Incorrect Async Context", asyncContext,
-					SectionClass.servletBridge.getAsyncContext());
+			assertSame("Incorrect Async Context", asyncContext, SectionClass.servletBridge.getAsyncContext());
 
 		} finally {
 			// Ensure close
 			officefloor.closeOfficeFloor();
 		}
-		
+
 		// Verify
 		this.verifyMockObjects();
 	}
@@ -310,8 +271,8 @@ public class ServletBridgeManagedObjectSourceTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void doFilter(ServletRequest arg0, ServletResponse arg1,
-				FilterChain arg2) throws IOException, ServletException {
+		public void doFilter(ServletRequest arg0, ServletResponse arg1, FilterChain arg2)
+				throws IOException, ServletException {
 			fail("Should not be invoked");
 		}
 

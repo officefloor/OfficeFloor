@@ -137,8 +137,6 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	 *            {@link SocketManager}.
 	 * @param numberOfSocketListeners
 	 *            Number of {@link SocketListener} instances.
-	 * @param heartBeatInterval
-	 *            Heart beat interval in milliseconds.
 	 * @param sendBufferSize
 	 *            Send buffer size.
 	 * @param receiveBufferSize
@@ -146,8 +144,8 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	 * @return {@link SocketManager}.
 	 */
 	private static synchronized SocketManager getSocketManager(ManagedObjectSourceContext<Indexed> mosContext,
-			AbstractServerSocketManagedObjectSource instance, int numberOfSocketListeners, long heartBeatInterval,
-			int sendBufferSize, int receiveBufferSize) {
+			AbstractServerSocketManagedObjectSource instance, int numberOfSocketListeners, int sendBufferSize,
+			int receiveBufferSize) {
 
 		// Ensure consistent interface for teams
 		mosContext.addManagedFunction("consistency", () -> (context) -> null).setResponsibleTeam("listener");
@@ -171,7 +169,7 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 
 				// Create the socket listener
 				SocketListener socketListener = new SocketListener(singletonSocketManager, receiveBufferSize,
-						sendBufferSize, heartBeatInterval);
+						sendBufferSize);
 
 				// Register the socket listener
 				socketListeners[i] = socketListener;
@@ -355,12 +353,9 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 		// Obtain the server socket backlog
 		this.serverSocketBackLogSize = 25000; // TODO make configurable
 
-		// Obtain the heart beat interval
-		long heartBeatInterval = 10000; // TODO make configurable
-
 		// Obtain the connection manager
-		this.socketManager = getSocketManager(mosContext, this, numberOfSocketListeners, heartBeatInterval,
-				this.sendBufferSize, receiveBufferSize);
+		this.socketManager = getSocketManager(mosContext, this, numberOfSocketListeners, this.sendBufferSize,
+				receiveBufferSize);
 
 		// Create the communication protocol
 		this.communicationProtocol = this.communicationProtocolSource.createCommunicationProtocol(context, this);

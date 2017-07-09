@@ -35,10 +35,10 @@ import net.officefloor.model.woof.WoofRepositoryImpl;
 import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSection;
-import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
+import net.officefloor.plugin.web.http.application.HttpSecuritySection;
+import net.officefloor.plugin.web.http.application.HttpTemplateSection;
 import net.officefloor.plugin.web.http.application.HttpUriLink;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.security.HttpSecuritySectionSource;
 import net.officefloor.plugin.web.http.security.scheme.MockHttpSecuritySource;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionException;
@@ -67,10 +67,10 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 			new WoofRepositoryImpl(new ModelRepositoryImpl()));
 
 	/**
-	 * Mock {@link WebAutoWireApplication}.
+	 * Mock {@link WebArchitect}.
 	 */
-	private final WebAutoWireApplication app = this
-			.createMock(WebAutoWireApplication.class);
+	private final WebArchitect app = this
+			.createMock(WebArchitect.class);
 
 	/**
 	 * Mock {@link SourceContext}.
@@ -106,19 +106,19 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can load configuration to {@link WebAutoWireApplication}.
+	 * Ensure can load configuration to {@link WebArchitect}.
 	 */
 	public void testLoading() throws Exception {
 
-		final HttpTemplateAutoWireSection templateA = this
-				.createMock(HttpTemplateAutoWireSection.class);
-		final HttpTemplateAutoWireSection templateB = this
-				.createMock(HttpTemplateAutoWireSection.class);
+		final HttpTemplateSection templateA = this
+				.createMock(HttpTemplateSection.class);
+		final HttpTemplateSection templateB = this
+				.createMock(HttpTemplateSection.class);
 		final AutoWireSection sectionA = this.createMock(AutoWireSection.class);
 		final HttpUriLink link = this.createMock(HttpUriLink.class);
 		final AutoWireSection sectionB = this.createMock(AutoWireSection.class);
-		final HttpSecurityAutoWireSection security = this
-				.createMock(HttpSecurityAutoWireSection.class);
+		final HttpSecuritySection security = this
+				.createMock(HttpSecuritySection.class);
 		final AutoWireGovernance governanceA = this
 				.createMock(AutoWireGovernance.class);
 		final AutoWireGovernance governanceB = this
@@ -220,21 +220,21 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testInheritance() throws Exception {
 
-		final HttpTemplateAutoWireSection parentTemplate = this
-				.createMock(HttpTemplateAutoWireSection.class);
-		final HttpTemplateAutoWireSection childTemplate = this
-				.createMock(HttpTemplateAutoWireSection.class);
-		final HttpTemplateAutoWireSection grandChildTemplate = this
-				.createMock(HttpTemplateAutoWireSection.class);
-		final HttpTemplateAutoWireSection templateOne = this
-				.createMock(HttpTemplateAutoWireSection.class);
-		final HttpTemplateAutoWireSection templateTwo = this
-				.createMock(HttpTemplateAutoWireSection.class);
-		final HttpTemplateAutoWireSection templateThree = this
-				.createMock(HttpTemplateAutoWireSection.class);
+		final HttpTemplateSection parentTemplate = this
+				.createMock(HttpTemplateSection.class);
+		final HttpTemplateSection childTemplate = this
+				.createMock(HttpTemplateSection.class);
+		final HttpTemplateSection grandChildTemplate = this
+				.createMock(HttpTemplateSection.class);
+		final HttpTemplateSection templateOne = this
+				.createMock(HttpTemplateSection.class);
+		final HttpTemplateSection templateTwo = this
+				.createMock(HttpTemplateSection.class);
+		final HttpTemplateSection templateThree = this
+				.createMock(HttpTemplateSection.class);
 		final AutoWireSection section = this.createMock(AutoWireSection.class);
-		final HttpSecurityAutoWireSection security = this
-				.createMock(HttpSecurityAutoWireSection.class);
+		final HttpSecuritySection security = this
+				.createMock(HttpSecuritySection.class);
 
 		// Record initiating from source context
 		this.recordInitateFromSourceContext();
@@ -329,8 +329,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testExplicitTemplateExtension() throws Exception {
 
-		final HttpTemplateAutoWireSection template = this
-				.createMock(HttpTemplateAutoWireSection.class);
+		final HttpTemplateSection template = this
+				.createMock(HttpTemplateSection.class);
 
 		// Record initiating from source context
 		this.recordInitateFromSourceContext();
@@ -381,8 +381,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testUnknownTemplateExtension() throws Exception {
 
-		final HttpTemplateAutoWireSection template = this
-				.createMock(HttpTemplateAutoWireSection.class);
+		final HttpTemplateSection template = this
+				.createMock(HttpTemplateSection.class);
 
 		// Record initiating from source context
 		this.recordInitateFromSourceContext();
@@ -482,15 +482,15 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records implicit {@link WoofTemplateExtensionSource} on the
-	 * {@link HttpTemplateAutoWireSection}.
+	 * {@link HttpTemplateSection}.
 	 * 
 	 * @param template
-	 *            {@link HttpTemplateAutoWireSection}.
+	 *            {@link HttpTemplateSection}.
 	 * @param templateUri
 	 *            URI.
 	 */
 	private void recordImplicitTemplateExtensions(
-			HttpTemplateAutoWireSection template, String templateUri) {
+			HttpTemplateSection template, String templateUri) {
 
 		// Record the template extension
 		this.recordTemplateExtension(MockImplicitWoofTemplateExtensionSourceService.class);

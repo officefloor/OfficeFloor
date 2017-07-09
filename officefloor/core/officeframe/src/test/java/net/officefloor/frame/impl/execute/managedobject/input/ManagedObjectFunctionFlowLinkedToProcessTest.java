@@ -23,7 +23,7 @@ import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
@@ -138,18 +138,9 @@ public class ManagedObjectFunctionFlowLinkedToProcessTest extends AbstractOffice
 		}
 	}
 
-	public static class InputFunction implements ManagedFunctionFactory<None, Indexed>, ManagedFunction<None, Indexed> {
+	public static class InputFunction extends StaticManagedFunction<None, Indexed> {
 
 		private static Integer parameter;
-
-		/*
-		 * ================== ManagedFunctionFactory =========================
-		 */
-
-		@Override
-		public ManagedFunction<None, Indexed> createManagedFunction() throws Throwable {
-			return this;
-		}
 
 		/*
 		 * ===================== ManagedFunction ==============================

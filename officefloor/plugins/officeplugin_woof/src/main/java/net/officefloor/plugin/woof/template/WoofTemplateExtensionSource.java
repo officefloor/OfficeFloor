@@ -20,7 +20,7 @@ package net.officefloor.plugin.woof.template;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.change.Conflict;
 import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
+import net.officefloor.plugin.web.http.application.HttpTemplateSection;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
 
 /**
@@ -47,7 +47,7 @@ public interface WoofTemplateExtensionSource {
 	 * <p>
 	 * This is only invoked by the WoOF editor to enable managing configuration
 	 * for the {@link WoofTemplateExtensionSource}. It is not used during
-	 * extension of the {@link HttpTemplateAutoWireSection}.
+	 * extension of the {@link HttpTemplateSection}.
 	 * <p>
 	 * This method is to create a potential {@link Change} to the configuration
 	 * necessary for the {@link WoofTemplateExtensionSource}. Should no
@@ -75,12 +75,12 @@ public interface WoofTemplateExtensionSource {
 			WoofTemplateExtensionChangeContext context);
 
 	/**
-	 * Extends the {@link HttpTemplateAutoWireSection}.
+	 * Extends the {@link HttpTemplateSection}.
 	 * 
 	 * @param context
 	 *            {@link WoofTemplateExtensionSourceContext}.
 	 * @throws Exception
-	 *             If fails to extend the {@link HttpTemplateAutoWireSection}.
+	 *             If fails to extend the {@link HttpTemplateSection}.
 	 */
 	void extendTemplate(WoofTemplateExtensionSourceContext context)
 			throws Exception;

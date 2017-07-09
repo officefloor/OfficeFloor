@@ -19,8 +19,8 @@ package net.officefloor.plugin.web.http.security.integrate;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
-import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSection;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.HttpSecuritySection;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.security.HttpAuthenticationRequiredException;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource;
@@ -40,8 +40,8 @@ public class OverrideHttpSecurityIntegrateTest extends
 		AbstractHttpSecurityIntegrateTestCase {
 
 	@Override
-	protected HttpSecurityAutoWireSection configureHttpSecurity(
-			WebAutoWireApplication application) throws Exception {
+	protected HttpSecuritySection configureHttpSecurity(
+			WebArchitect application) throws Exception {
 
 		// Override the HTTP Security
 		AutoWireObject object = application.addManagedObject(
@@ -56,7 +56,7 @@ public class OverrideHttpSecurityIntegrateTest extends
 				String.valueOf(false));
 
 		// Configure the HTTP Security
-		HttpSecurityAutoWireSection security = application
+		HttpSecuritySection security = application
 				.setHttpSecurity(MockHttpSecuritySource.class);
 
 		// Return the HTTP Security

@@ -23,7 +23,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
