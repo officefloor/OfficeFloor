@@ -17,18 +17,15 @@
  */
 package net.officefloor.plugin.web.http.application;
 
-import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.autowire.impl.AutoWireSectionImpl;
-import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 
 /**
- * Allows wiring the flows of the {@link HttpSecuritySource}.
+ * {@link HttpSecuritySource} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSecurityAutoWireSectionImpl extends AutoWireSectionImpl
-		implements HttpSecuritySection {
+public class HttpSecuritySectionImpl implements HttpSecuritySection {
 
 	/**
 	 * Default timeout is 10 seconds.
@@ -41,6 +38,11 @@ public class HttpSecurityAutoWireSectionImpl extends AutoWireSectionImpl
 	private final Class<? extends HttpSecuritySource<?, ?, ?, ?>> httpSecuritySourceClass;
 
 	/**
+	 * {@link OfficeSection}.
+	 */
+	private final OfficeSection section;
+
+	/**
 	 * Initiate with default timeout.
 	 */
 	private long securityTimeout = DEFAULT_HTTP_SECURITY_TIMEOUT;
@@ -48,24 +50,25 @@ public class HttpSecurityAutoWireSectionImpl extends AutoWireSectionImpl
 	/**
 	 * Initiate.
 	 * 
-	 * @param compiler
-	 *            {@link OfficeFloorCompiler}.
 	 * @param section
-	 *            {@link AutoWireSection}.
+	 *            {@link OfficeSection}.
 	 * @param httpSecuritySourceClass
 	 *            {@link HttpSecuritySource} class.
 	 */
-	public HttpSecurityAutoWireSectionImpl(
-			OfficeFloorCompiler compiler,
-			AutoWireSection section,
+	public HttpSecuritySectionImpl(OfficeSection section,
 			Class<? extends HttpSecuritySource<?, ?, ?, ?>> httpSecuritySourceClass) {
-		super(compiler, section);
+		this.section = section;
 		this.httpSecuritySourceClass = httpSecuritySourceClass;
 	}
 
 	/*
 	 * ====================== HttpSecurityAutoWireSection =====================
 	 */
+
+	@Override
+	public OfficeSection getOfficeSection() {
+		return this.section;
+	}
 
 	@Override
 	public Class<? extends HttpSecuritySource<?, ?, ?, ?>> getHttpSecuritySourceClass() {

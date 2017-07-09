@@ -40,12 +40,12 @@ import net.officefloor.plugin.web.http.continuation.DuplicateHttpUrlContinuation
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiator;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.IncorrectHttpRequestContextPathException;
-import net.officefloor.plugin.web.http.route.HttpRouteTask.HttpRouteTaskDependencies;
-import net.officefloor.plugin.web.http.route.HttpRouteTask.HttpRouteTaskFlows;
+import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteTaskDependencies;
+import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteTaskFlows;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
- * Tests the {@link HttpRouteTask}.
+ * Tests the {@link HttpRouteFunction}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -92,7 +92,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 			test.recordReturn(
 					response,
 					response.addHeader("Location", redirectUrl
-							+ HttpRouteTask.REDIRECT_URI_SUFFIX), header);
+							+ HttpRouteFunction.REDIRECT_URI_SUFFIX), header);
 
 		} catch (Exception ex) {
 			throw fail(ex);
@@ -165,7 +165,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		HttpRouteTask task = this.createHttpRouteTask();
+		HttpRouteFunction task = this.createHttpRouteTask();
 		task.execute(this.context);
 		this.verifyMockObjects();
 	}
@@ -263,7 +263,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	 * Ensure services redirected {@link HttpRequest}.
 	 */
 	public void testServiceRedirectedRequest() throws Throwable {
-		this.doRouteTest("/redirect" + HttpRouteTask.REDIRECT_URI_SUFFIX,
+		this.doRouteTest("/redirect" + HttpRouteFunction.REDIRECT_URI_SUFFIX,
 				"redirect", true, "redirect", "/redirect", Boolean.TRUE);
 	}
 
@@ -295,7 +295,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 			.createMock(HttpRequestState.class);
 
 	/**
-	 * {@link HttpRouteTask}.
+	 * {@link HttpRouteFunction}.
 	 */
 	private final HttpSession session = this.createMock(HttpSession.class);
 
@@ -303,7 +303,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	 * {@link ManagedFunctionContext}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final ManagedFunctionContext<HttpRouteTask, HttpRouteTaskDependencies, HttpRouteTaskFlows> context = this
+	private final ManagedFunctionContext<HttpRouteFunction, HttpRouteTaskDependencies, HttpRouteTaskFlows> context = this
 			.createMock(ManagedFunctionContext.class);
 
 	/**
@@ -375,7 +375,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Create task and undertake initial request
-		HttpRouteTask task = this.createHttpRouteTask();
+		HttpRouteFunction task = this.createHttpRouteTask();
 		task.execute(this.context);
 
 		// Undertake request for redirect (if necessary)
@@ -429,7 +429,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 				this.request);
 		this.recordReturn(this.request, this.request.getRequestURI(),
 				requestUri);
-		if (requestUri.endsWith(HttpRouteTask.REDIRECT_URI_SUFFIX)) {
+		if (requestUri.endsWith(HttpRouteFunction.REDIRECT_URI_SUFFIX)) {
 			// Record servicing redirected request
 			HttpUrlContinuationTest.recordReinstateRequest(true,
 					"_OfficeFloorRedirectedRequest_", this.connection,
@@ -443,27 +443,27 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Creates the {@link HttpRouteTask}.
+	 * Creates the {@link HttpRouteFunction}.
 	 * 
-	 * @return {@link HttpRouteTask}.
+	 * @return {@link HttpRouteFunction}.
 	 */
-	private HttpRouteTask createHttpRouteTask() throws Exception {
+	private HttpRouteFunction createHttpRouteTask() throws Exception {
 
 		// Load the work source and create the task
-		FunctionNamespaceType<HttpRouteTask> workType = WorkLoaderUtil
+		FunctionNamespaceType<HttpRouteFunction> workType = WorkLoaderUtil
 				.loadWorkType(HttpRouteWorkSource.class);
-		ManagedFunctionType<HttpRouteTask, ?, ?> taskType = workType.getManagedFunctionTypes()[0];
-		HttpRouteTask workFactory = workType.getWorkFactory().createWork();
+		ManagedFunctionType<HttpRouteFunction, ?, ?> taskType = workType.getManagedFunctionTypes()[0];
+		HttpRouteFunction workFactory = workType.getWorkFactory().createWork();
 
 		// Make Office aware
 		workFactory.setOffice(this.office);
 
 		// Create the task
-		ManagedFunction<HttpRouteTask, ?, ?> task = taskType.getManagedFunctionFactory().createManagedFunction(
+		ManagedFunction<HttpRouteFunction, ?, ?> task = taskType.getManagedFunctionFactory().createManagedFunction(
 				workFactory);
 
 		// Return the task
-		return (HttpRouteTask) task;
+		return (HttpRouteFunction) task;
 	}
 
 	/**

@@ -58,7 +58,7 @@ import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManaged
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
-import net.officefloor.plugin.web.http.route.HttpRouteTask;
+import net.officefloor.plugin.web.http.route.HttpRouteFunction;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
@@ -219,7 +219,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 		assertEquals("Incorrect section source", HttpTemplateSectionSource.class.getName(),
 				section.getSectionSourceClassName());
 		assertEquals("Incorrect section location", this.getClassPath("template.ofp"), templatePath);
-		assertEquals("Incorrect template path", templatePath, section.getTemplatePath());
+		assertEquals("Incorrect template path", templatePath, section.getTemplateLocation());
 		assertEquals("Incorrect template URI", "/uri", section.getTemplateUri());
 
 		// Ensure template available
@@ -344,7 +344,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 		// Ensure appropriately redirects
 		String url = "http://" + HOST_NAME + ":" + this.port + "/uri";
 		HttpUriRequest request = new HttpConfiguredRequest(method, url);
-		String redirectUrl = "/uri" + HttpRouteTask.REDIRECT_URI_SUFFIX;
+		String redirectUrl = "/uri" + HttpRouteFunction.REDIRECT_URI_SUFFIX;
 		this.assertHttpRequest(request, redirectUrl, 200, "/uri-submit");
 	}
 
@@ -412,7 +412,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 		assertEquals("Incorrect section source", HttpTemplateSectionSource.class.getName(),
 				section.getSectionSourceClassName());
 		assertEquals("Incorrect section location", this.getClassPath("template.ofp"), templatePath);
-		assertEquals("Incorrect template path", templatePath, section.getTemplatePath());
+		assertEquals("Incorrect template path", templatePath, section.getTemplateLocation());
 		assertEquals("Incorrect template URI", "/", section.getTemplateUri());
 
 		// Ensure template available at default root
@@ -537,7 +537,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 		// Ensure submit on task for template is correct
 		String requestUrl = "http://" + HOST_NAME + ":" + this.port + SUBMIT_URI;
 		String redirectUrl = "https://" + HOST_NAME + ":" + this.securePort + "/uri"
-				+ HttpRouteTask.REDIRECT_URI_SUFFIX;
+				+ HttpRouteFunction.REDIRECT_URI_SUFFIX;
 		String linkUrl = "http://" + HOST_NAME + ":" + this.port + SUBMIT_URI;
 		this.assertHttpRequest(new HttpGet(requestUrl), redirectUrl, 200, "submitted" + linkUrl);
 	}
@@ -1679,7 +1679,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 		// Provide redirect URL if expecting to redirect
 		String redirectUrl = null;
 		if (isRedirect) {
-			redirectUrl = "https://" + HOST_NAME + ":" + this.securePort + uri + HttpRouteTask.REDIRECT_URI_SUFFIX;
+			redirectUrl = "https://" + HOST_NAME + ":" + this.securePort + uri + HttpRouteFunction.REDIRECT_URI_SUFFIX;
 		}
 
 		// Assert HTTP request

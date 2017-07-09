@@ -45,7 +45,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.plugin.section.clazz.ManagedObject;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationSectionSource;
-import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationWorkSource;
+import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationManagedFunctionSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
@@ -62,9 +62,9 @@ import net.officefloor.plugin.web.http.security.type.HttpSecurityLoader;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityLoaderImpl;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 import net.officefloor.plugin.web.http.session.object.HttpSessionObjectManagedObjectSource;
-import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
+import net.officefloor.plugin.web.http.template.HttpTemplateManagedFunctionSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
-import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialWorkSource;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialManagedFunctionSource;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
 /**
@@ -208,7 +208,7 @@ public class WebApplicationAutoWireOfficeFloorSource implements WebArchitect {
 
 		// Obtain canonical template URI path
 		try {
-			templateUri = HttpUrlContinuationWorkSource.getApplicationUriPath(templateUri);
+			templateUri = HttpUrlContinuationManagedFunctionSource.getApplicationUriPath(templateUri);
 		} catch (InvalidHttpRequestUriException ex) {
 			// Use the template URI as is
 		}
@@ -230,7 +230,7 @@ public class WebApplicationAutoWireOfficeFloorSource implements WebArchitect {
 					@Override
 					public HttpTemplateSection createAutoWireSection(AutoWireSection seed) {
 						// Create and return the template
-						return new HttpTemplateAutoWireSectionImpl(
+						return new HttpTemplateSectionImpl(
 								WebApplicationAutoWireOfficeFloorSource.this.getOfficeFloorCompiler(), seed,
 								templateLogicClass, uriPath);
 					}
@@ -299,7 +299,7 @@ public class WebApplicationAutoWireOfficeFloorSource implements WebArchitect {
 					@Override
 					public HttpSecuritySection createAutoWireSection(AutoWireSection seed) {
 						// Create and return the template
-						return new HttpSecurityAutoWireSectionImpl(
+						return new HttpSecuritySectionImpl(
 								WebApplicationAutoWireOfficeFloorSource.this.getOfficeFloorCompiler(), seed,
 								httpSecuritySourceClass);
 					}
@@ -474,7 +474,7 @@ public class WebApplicationAutoWireOfficeFloorSource implements WebArchitect {
 			// Obtain the URI path
 			String uriPath = link.getApplicationUriPath();
 			try {
-				uriPath = HttpUrlContinuationWorkSource.getApplicationUriPath(uriPath);
+				uriPath = HttpUrlContinuationManagedFunctionSource.getApplicationUriPath(uriPath);
 			} catch (InvalidHttpRequestUriException ex) {
 				// Do nothing and keep URI path as is
 			}
@@ -664,7 +664,7 @@ public class WebApplicationAutoWireOfficeFloorSource implements WebArchitect {
 					inheritedTemplates.append(", ");
 				}
 				isFirstParentTemplate = false;
-				inheritedTemplates.append(parentTemplate.getTemplatePath());
+				inheritedTemplates.append(parentTemplate.getTemplateLocation());
 			}
 			templateInheritanceHierarchy.push(httpTemplate);
 
@@ -724,11 +724,11 @@ public class WebApplicationAutoWireOfficeFloorSource implements WebArchitect {
 			String templateUri = httpTemplate.getTemplateUri();
 			httpTemplate.addProperty(HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI, templateUri);
 			if (templateUriSuffix != null) {
-				httpTemplate.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX, templateUriSuffix);
+				httpTemplate.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX, templateUriSuffix);
 			}
 
 			// Secure the template
-			httpTemplate.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE, String.valueOf(isTemplateSecure));
+			httpTemplate.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE, String.valueOf(isTemplateSecure));
 
 			// Secure the specific template links (following inheritance)
 			Set<String> configuredLinks = new HashSet<String>();
@@ -748,7 +748,7 @@ public class WebApplicationAutoWireOfficeFloorSource implements WebArchitect {
 					Boolean isLinkSecure = secureLinks.get(link);
 
 					// Configure the link secure for the template
-					httpTemplate.addProperty(HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX + link,
+					httpTemplate.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + link,
 							String.valueOf(isLinkSecure));
 				}
 			}
@@ -769,7 +769,7 @@ public class WebApplicationAutoWireOfficeFloorSource implements WebArchitect {
 				}
 
 				// Configure the property for render redirect HTTP methods
-				httpTemplate.addProperty(HttpTemplateInitialWorkSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
+				httpTemplate.addProperty(HttpTemplateInitialManagedFunctionSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
 						renderRedirectHttpMethodValue.toString());
 			}
 

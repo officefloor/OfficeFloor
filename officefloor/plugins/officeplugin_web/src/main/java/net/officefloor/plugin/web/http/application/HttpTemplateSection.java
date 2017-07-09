@@ -46,18 +46,18 @@ public interface HttpTemplateSection {
 	String getTemplateUri();
 
 	/**
-	 * Obtains path to the template file.
-	 * 
-	 * @return Path to the template file.
-	 */
-	String getTemplatePath();
-
-	/**
 	 * Obtains the logic class for the template.
 	 * 
 	 * @return Logic class for the template.
 	 */
 	Class<?> getTemplateLogicClass();
+
+	/**
+	 * Obtains path to the template file.
+	 * 
+	 * @return Path to the template file.
+	 */
+	String getTemplateLocation();
 
 	/**
 	 * <p>

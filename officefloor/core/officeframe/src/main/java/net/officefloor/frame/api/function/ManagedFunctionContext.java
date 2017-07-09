@@ -92,7 +92,7 @@ public interface ManagedFunctionContext<O extends Enum<O>, F extends Enum<F>> ex
 	 *             Should the parameter be an invalid type for the
 	 *             {@link ManagedFunction}.
 	 */
-	void doFlow(String functionkName, Object parameter, FlowCallback callback)
+	void doFlow(String functionName, Object parameter, FlowCallback callback)
 			throws UnknownFunctionException, InvalidParameterTypeException;
 
 }

@@ -30,8 +30,8 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
-import net.officefloor.plugin.web.http.route.HttpRouteTask.HttpRouteTaskDependencies;
-import net.officefloor.plugin.web.http.route.HttpRouteTask.HttpRouteTaskFlows;
+import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteTaskDependencies;
+import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteTaskFlows;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
 
@@ -55,11 +55,11 @@ public class HttpRouteWorkSourceTest extends OfficeFrameTestCase {
 	public void testType() {
 
 		// Create the expected type
-		HttpRouteTask factory = new HttpRouteTask();
-		FunctionNamespaceBuilder<HttpRouteTask> type = WorkLoaderUtil
+		HttpRouteFunction factory = new HttpRouteFunction();
+		FunctionNamespaceBuilder<HttpRouteFunction> type = WorkLoaderUtil
 				.createWorkTypeBuilder(factory);
 		ManagedFunctionTypeBuilder<HttpRouteTaskDependencies, HttpRouteTaskFlows> task = type
-				.addManagedFunctionType(HttpRouteWorkSource.TASK_NAME, factory,
+				.addManagedFunctionType(HttpRouteWorkSource.FUNCTION_NAME, factory,
 						HttpRouteTaskDependencies.class,
 						HttpRouteTaskFlows.class);
 		task.addObject(ServerHttpConnection.class).setKey(

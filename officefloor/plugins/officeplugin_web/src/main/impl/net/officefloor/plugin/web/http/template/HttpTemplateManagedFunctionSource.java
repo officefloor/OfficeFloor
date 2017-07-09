@@ -26,16 +26,16 @@ import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.compile.WorkSourceService;
+import net.officefloor.compile.ManagedFunctionSourceService;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
-import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
-import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
-import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationWorkSource;
+import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationManagedFunctionSource;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.template.parse.BeanHttpTemplateSectionContent;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
@@ -50,9 +50,8 @@ import net.officefloor.plugin.web.http.template.parse.PropertyHttpTemplateSectio
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpTemplateWorkSource extends
-		AbstractWorkSource<HttpTemplateWork> implements
-		WorkSourceService<HttpTemplateWork, HttpTemplateWorkSource> {
+public class HttpTemplateManagedFunctionSource extends AbstractManagedFunctionSource
+		implements ManagedFunctionSourceService<HttpTemplateManagedFunctionSource> {
 
 	/**
 	 * Property to specify the {@link HttpTemplate} file.
@@ -91,7 +90,7 @@ public class HttpTemplateWorkSource extends
 	 * Property prefix to obtain whether a specific link requires a secure
 	 * {@link ServerHttpConnection}.
 	 */
-	public static final String PROPERTY_LINK_SECURE_PREFIX = HttpTemplateTask.PROPERTY_LINK_SECURE_PREFIX;
+	public static final String PROPERTY_LINK_SECURE_PREFIX = HttpTemplateFunction.PROPERTY_LINK_SECURE_PREFIX;
 
 	/**
 	 * Property to specify the {@link Charset} for outputting the template.
@@ -101,7 +100,7 @@ public class HttpTemplateWorkSource extends
 	/**
 	 * Property prefix to obtain the bean for the {@link HttpTemplateSection}.
 	 */
-	public static final String PROPERTY_BEAN_PREFIX = HttpTemplateTask.PROPERTY_BEAN_PREFIX;
+	public static final String PROPERTY_BEAN_PREFIX = HttpTemplateFunction.PROPERTY_BEAN_PREFIX;
 
 	/**
 	 * Obtains the {@link HttpTemplate}.
@@ -113,8 +112,7 @@ public class HttpTemplateWorkSource extends
 	 * @throws IOException
 	 *             If fails to obtain the {@link HttpTemplate}.
 	 */
-	public static HttpTemplate getHttpTemplate(SourceContext context)
-			throws IOException {
+	public static HttpTemplate getHttpTemplate(SourceContext context) throws IOException {
 
 		// Obtain the template content
 		Reader content = getHttpTemplateContent(context);
@@ -139,12 +137,10 @@ public class HttpTemplateWorkSource extends
 	 * @throws IOException
 	 *             If fails to obtain the raw {@link HttpTemplate} content.
 	 */
-	public static Reader getHttpTemplateContent(SourceContext context)
-			throws IOException {
+	public static Reader getHttpTemplateContent(SourceContext context) throws IOException {
 
 		// Determine if content provided by property
-		String templateContent = context.getProperty(PROPERTY_TEMPLATE_CONTENT,
-				null);
+		String templateContent = context.getProperty(PROPERTY_TEMPLATE_CONTENT, null);
 		if (templateContent != null) {
 			// Provided template content
 			return new StringReader(templateContent);
@@ -152,8 +148,7 @@ public class HttpTemplateWorkSource extends
 
 		// Not in property, so obtain details from file
 		String templateFilePath = context.getProperty(PROPERTY_TEMPLATE_FILE);
-		String templateFileCharsetName = context.getProperty(
-				PROPERTY_TEMPLATE_FILE_CHARSET, null);
+		String templateFileCharsetName = context.getProperty(PROPERTY_TEMPLATE_FILE_CHARSET, null);
 		Charset templateFileCharset = null;
 		if (templateFileCharsetName != null) {
 			templateFileCharset = Charset.forName(templateFileCharsetName);
@@ -163,9 +158,8 @@ public class HttpTemplateWorkSource extends
 		InputStream configuration = context.getResource(templateFilePath);
 
 		// Return the reader to the template content
-		return (templateFileCharset == null ? new InputStreamReader(
-				configuration) : new InputStreamReader(configuration,
-				templateFileCharset));
+		return (templateFileCharset == null ? new InputStreamReader(configuration)
+				: new InputStreamReader(configuration, templateFileCharset));
 	}
 
 	/**
@@ -177,12 +171,10 @@ public class HttpTemplateWorkSource extends
 	 * @throws IOException
 	 *             If fails to obtain the {@link HttpTemplate}.
 	 */
-	public static HttpTemplate getHttpTemplate(Reader templateContent)
-			throws IOException {
+	public static HttpTemplate getHttpTemplate(Reader templateContent) throws IOException {
 
 		// Parse the template
-		HttpTemplate template = new HttpTemplateParserImpl(templateContent)
-				.parse();
+		HttpTemplate template = new HttpTemplateParserImpl(templateContent).parse();
 
 		// Return the template
 		return template;
@@ -196,8 +188,7 @@ public class HttpTemplateWorkSource extends
 	 * @return <code>true</code> if the {@link HttpTemplateSection} requires a
 	 *         bean.
 	 */
-	public static boolean isHttpTemplateSectionRequireBean(
-			HttpTemplateSection section) {
+	public static boolean isHttpTemplateSectionRequireBean(HttpTemplateSection section) {
 
 		// Determine if contains reference content
 		for (HttpTemplateSectionContent content : section.getContent()) {
@@ -221,8 +212,8 @@ public class HttpTemplateWorkSource extends
 	 * @throws InvalidHttpRequestUriException
 	 *             Should the configured {@link HttpTemplate} path be invalid.
 	 */
-	public static String getHttpTemplateUrlContinuationPath(
-			SourceProperties properties) throws InvalidHttpRequestUriException {
+	public static String getHttpTemplateUrlContinuationPath(SourceProperties properties)
+			throws InvalidHttpRequestUriException {
 
 		// Obtain the URI path and URI suffix for the template
 		String templateUriPath = properties.getProperty(PROPERTY_TEMPLATE_URI);
@@ -230,13 +221,11 @@ public class HttpTemplateWorkSource extends
 		// Provide suffix only if NOT root template
 		String templateUriSuffix = "";
 		if (!("/".equals(templateUriPath))) {
-			templateUriSuffix = properties.getProperty(
-					PROPERTY_TEMPLATE_URI_SUFFIX, "");
+			templateUriSuffix = properties.getProperty(PROPERTY_TEMPLATE_URI_SUFFIX, "");
 		}
 
 		// Return path ready for HTTP URL continuation
-		return HttpUrlContinuationWorkSource
-				.getApplicationUriPath(templateUriPath + templateUriSuffix);
+		return HttpUrlContinuationManagedFunctionSource.getApplicationUriPath(templateUriPath + templateUriSuffix);
 	}
 
 	/**
@@ -253,15 +242,12 @@ public class HttpTemplateWorkSource extends
 	 * @throws InvalidHttpRequestUriException
 	 *             Should the resulting URI be invalid.
 	 */
-	public static String getHttpTemplateLinkUrlContinuationPath(
-			String templateUriPath, String linkName, String templateUriSuffix)
-			throws InvalidHttpRequestUriException {
+	public static String getHttpTemplateLinkUrlContinuationPath(String templateUriPath, String linkName,
+			String templateUriSuffix) throws InvalidHttpRequestUriException {
 
 		// Create the link URI path
-		String linkUriPath = templateUriPath + "-" + linkName
-				+ (templateUriSuffix == null ? "" : templateUriSuffix);
-		linkUriPath = HttpUrlContinuationWorkSource
-				.getApplicationUriPath(linkUriPath);
+		String linkUriPath = templateUriPath + "-" + linkName + (templateUriSuffix == null ? "" : templateUriSuffix);
+		linkUriPath = HttpUrlContinuationManagedFunctionSource.getApplicationUriPath(linkUriPath);
 
 		// Return the link URI path
 		return linkUriPath;
@@ -277,8 +263,8 @@ public class HttpTemplateWorkSource extends
 	public static boolean isHttpTemplateSecure(SourceProperties properties) {
 
 		// Determine if template is secure
-		boolean isTemplateSecure = Boolean.valueOf(properties.getProperty(
-				PROPERTY_TEMPLATE_SECURE, String.valueOf(false)));
+		boolean isTemplateSecure = Boolean
+				.valueOf(properties.getProperty(PROPERTY_TEMPLATE_SECURE, String.valueOf(false)));
 
 		// Return whether secure
 		return isTemplateSecure;
@@ -312,8 +298,7 @@ public class HttpTemplateWorkSource extends
 	 * @param linkNames
 	 *            {@link List} to receive the unique link names.
 	 */
-	private static void loadLinkNames(HttpTemplateSectionContent[] contents,
-			List<String> linkNames) {
+	private static void loadLinkNames(HttpTemplateSectionContent[] contents, List<String> linkNames) {
 
 		// Interrogate contents for links
 		for (HttpTemplateSectionContent content : contents) {
@@ -340,17 +325,17 @@ public class HttpTemplateWorkSource extends
 	}
 
 	/*
-	 * ====================== WorkSourceService ===========================
+	 * ================== ManagedFunctionSourceService ==================
 	 */
 
 	@Override
-	public String getWorkSourceAlias() {
+	public String getManagedFunctionSourceAlias() {
 		return "HTTP_TEMPLATE";
 	}
 
 	@Override
-	public Class<HttpTemplateWorkSource> getWorkSourceClass() {
-		return HttpTemplateWorkSource.class;
+	public Class<HttpTemplateManagedFunctionSource> getManagedFunctionSourceClass() {
+		return HttpTemplateManagedFunctionSource.class;
 	}
 
 	/*
@@ -364,34 +349,28 @@ public class HttpTemplateWorkSource extends
 	}
 
 	@Override
-	public void sourceManagedFunctions(FunctionNamespaceBuilder<HttpTemplateWork> workTypeBuilder,
+	public void sourceManagedFunctions(FunctionNamespaceBuilder namespaceTypeBuilder,
 			ManagedFunctionSourceContext context) throws Exception {
 
 		// Obtain the template
 		HttpTemplate template = getHttpTemplate(context);
 
 		// Obtain the details of the template
-		Charset charset = AbstractServerSocketManagedObjectSource
-				.getCharset(context);
+		Charset charset = AbstractServerSocketManagedObjectSource.getCharset(context);
 
 		// Obtain the URI path and URI suffix for the template
 		String templateUriPath = context.getProperty(PROPERTY_TEMPLATE_URI);
-		String templateUriSuffix = context.getProperty(
-				PROPERTY_TEMPLATE_URI_SUFFIX, null);
+		String templateUriSuffix = context.getProperty(PROPERTY_TEMPLATE_URI_SUFFIX, null);
 
 		// Obtain whether the template is secure
 		boolean isTemplateSecure = isHttpTemplateSecure(context);
 
-		// Define the work factory
-		workTypeBuilder.setWorkFactory(new HttpTemplateWork());
-
-		// Define the tasks
+		// Define the functions
 		for (HttpTemplateSection section : template.getSections()) {
 
-			// Load the task to write the section
-			HttpTemplateTask.loadTaskType(section, charset, templateUriPath,
-					templateUriSuffix, isTemplateSecure, workTypeBuilder,
-					context);
+			// Load the function to write the section
+			HttpTemplateFunction.loadFunctionType(section, charset, templateUriPath, templateUriSuffix,
+					isTemplateSecure, namespaceTypeBuilder, context);
 		}
 	}
 

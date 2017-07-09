@@ -19,23 +19,22 @@ package net.officefloor.plugin.web.http.route;
 
 import java.io.IOException;
 
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
-import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
-import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiator;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
-import net.officefloor.plugin.web.http.route.HttpRouteTask.HttpRouteTaskDependencies;
-import net.officefloor.plugin.web.http.route.HttpRouteTask.HttpRouteTaskFlows;
+import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteTaskDependencies;
+import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteTaskFlows;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
 
@@ -50,12 +49,12 @@ import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpRouteWorkSource extends AbstractWorkSource<HttpRouteTask> {
+public class HttpRouteWorkSource extends AbstractManagedFunctionSource {
 
 	/**
-	 * Name of the {@link HttpRouteTask}.
+	 * Name of the {@link HttpRouteFunction}.
 	 */
-	public static final String TASK_NAME = "route";
+	public static final String FUNCTION_NAME = "route";
 
 	/*
 	 * ==================== WorkSource ==========================
@@ -67,33 +66,23 @@ public class HttpRouteWorkSource extends AbstractWorkSource<HttpRouteTask> {
 	}
 
 	@Override
-	public void sourceManagedFunctions(FunctionNamespaceBuilder<HttpRouteTask> workTypeBuilder,
+	public void sourceManagedFunctions(FunctionNamespaceBuilder namespaceTypeBuilder,
 			ManagedFunctionSourceContext context) throws Exception {
 
-		// Configure the work factory
-		HttpRouteTask factory = new HttpRouteTask();
-		workTypeBuilder.setWorkFactory(factory);
-
-		// Configure the task
-		ManagedFunctionTypeBuilder<HttpRouteTaskDependencies, HttpRouteTaskFlows> task = workTypeBuilder
-				.addManagedFunctionType(TASK_NAME, factory,
-						HttpRouteTaskDependencies.class,
+		// Configure the function
+		ManagedFunctionTypeBuilder<HttpRouteTaskDependencies, HttpRouteTaskFlows> function = namespaceTypeBuilder
+				.addManagedFunctionType(FUNCTION_NAME, new HttpRouteFunction(), HttpRouteTaskDependencies.class,
 						HttpRouteTaskFlows.class);
-		task.addObject(ServerHttpConnection.class).setKey(
-				HttpRouteTaskDependencies.SERVER_HTTP_CONNECTION);
-		task.addObject(HttpApplicationLocation.class).setKey(
-				HttpRouteTaskDependencies.HTTP_APPLICATION_LOCATION);
-		task.addObject(HttpRequestState.class).setKey(
-				HttpRouteTaskDependencies.REQUEST_STATE);
-		task.addObject(HttpSession.class).setKey(
-				HttpRouteTaskDependencies.HTTP_SESSION);
-		task.addFlow().setKey(HttpRouteTaskFlows.NOT_HANDLED);
-		task.addEscalation(InvalidHttpRequestUriException.class);
-		task.addEscalation(HttpRequestTokeniseException.class);
-		task.addEscalation(IOException.class);
-		task.addEscalation(UnknownWorkException.class);
-		task.addEscalation(UnknownFunctionException.class);
-		task.addEscalation(InvalidParameterTypeException.class);
+		function.addObject(ServerHttpConnection.class).setKey(HttpRouteTaskDependencies.SERVER_HTTP_CONNECTION);
+		function.addObject(HttpApplicationLocation.class).setKey(HttpRouteTaskDependencies.HTTP_APPLICATION_LOCATION);
+		function.addObject(HttpRequestState.class).setKey(HttpRouteTaskDependencies.REQUEST_STATE);
+		function.addObject(HttpSession.class).setKey(HttpRouteTaskDependencies.HTTP_SESSION);
+		function.addFlow().setKey(HttpRouteTaskFlows.NOT_HANDLED);
+		function.addEscalation(InvalidHttpRequestUriException.class);
+		function.addEscalation(HttpRequestTokeniseException.class);
+		function.addEscalation(IOException.class);
+		function.addEscalation(UnknownFunctionException.class);
+		function.addEscalation(InvalidParameterTypeException.class);
 	}
 
 }

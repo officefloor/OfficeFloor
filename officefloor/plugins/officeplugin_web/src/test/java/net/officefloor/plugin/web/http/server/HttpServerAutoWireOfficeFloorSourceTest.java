@@ -38,7 +38,7 @@ import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.application.HttpRequestStateful;
 import net.officefloor.plugin.web.http.application.HttpSessionStateful;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
-import net.officefloor.plugin.web.http.resource.source.HttpFileSenderWorkSource;
+import net.officefloor.plugin.web.http.resource.source.HttpFileSenderManagedFunctionSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 import org.apache.http.HttpResponse;
@@ -68,7 +68,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	/**
 	 * Default not found file path.
 	 */
-	private final String DEFAULT_NOT_FOUND_PATH = HttpFileSenderWorkSource.DEFAULT_NOT_FOUND_FILE_PATH;
+	private final String DEFAULT_NOT_FOUND_PATH = HttpFileSenderManagedFunctionSource.DEFAULT_NOT_FOUND_FILE_PATH;
 
 	/**
 	 * {@link HttpClient}.

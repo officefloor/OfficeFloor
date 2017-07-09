@@ -21,21 +21,19 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.spi.section.FunctionFlow;
+import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
-import net.officefloor.compile.spi.section.SectionTask;
-import net.officefloor.compile.spi.section.SectionWork;
-import net.officefloor.compile.spi.section.TaskFlow;
-import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
-import net.officefloor.frame.api.manage.UnknownWorkException;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -43,8 +41,8 @@ import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSen
 import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSenderManagedFunctionSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
-import net.officefloor.plugin.web.http.route.HttpRouteTask.HttpRouteTaskDependencies;
-import net.officefloor.plugin.web.http.route.HttpRouteTask.HttpRouteTaskFlows;
+import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteTaskDependencies;
+import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteTaskFlows;
 import net.officefloor.plugin.web.http.route.HttpRouteWorkSource;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
@@ -80,10 +78,10 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 	public static final String PROPERTY_LINK_SERVICE_TASK_NAME_PREFIX = "link.service.task.name.prefix";
 
 	/**
-	 * Links the {@link TaskObject} to the {@link SectionObject}.
+	 * Links the {@link FunctionObject} to the {@link SectionObject}.
 	 * 
-	 * @param task
-	 *            {@link SectionTask}.
+	 * @param function
+	 *            {@link SectionFunction}.
 	 * @param objectName
 	 *            Name of the object.
 	 * @param objectType
@@ -93,28 +91,26 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 	 * @param objects
 	 *            Registry of the {@link SectionObject} by type of object.
 	 */
-	static void linkObject(SectionTask task, String objectName,
-			Class<?> objectType, SectionDesigner designer,
+	static void linkObject(SectionFunction function, String objectName, Class<?> objectType, SectionDesigner designer,
 			Map<Class<?>, SectionObject> objects) {
 
 		// Obtain the section object
 		SectionObject sectionObject = objects.get(objectType);
 		if (sectionObject == null) {
-			sectionObject = designer.addSectionObject(objectType.getName(),
-					objectType.getName());
+			sectionObject = designer.addSectionObject(objectType.getName(), objectType.getName());
 			objects.put(objectType, sectionObject);
 		}
 
-		// Link task object to section object
-		TaskObject taskObject = task.getTaskObject(objectName);
-		designer.link(taskObject, sectionObject);
+		// Link function object to section object
+		FunctionObject functionObject = function.getFunctionObject(objectName);
+		designer.link(functionObject, sectionObject);
 	}
 
 	/**
 	 * Links an escalation to an {@link SectionOutput}.
 	 * 
-	 * @param task
-	 *            {@link SectionTask}.
+	 * @param function
+	 *            {@link SectionFunction}.
 	 * @param exception
 	 *            Type of escalation.
 	 * @param designer
@@ -122,22 +118,19 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 	 * @param escalations
 	 *            Registry of the {@link SectionOutput} by type of escalation.
 	 */
-	static <E extends Throwable> void linkEscalation(SectionTask task,
-			Class<E> exception, SectionDesigner designer,
-			Map<Class<?>, SectionOutput> escalations) {
+	static <E extends Throwable> void linkEscalation(SectionFunction function, Class<E> exception,
+			SectionDesigner designer, Map<Class<?>, SectionOutput> escalations) {
 
 		// Obtain the section output
 		SectionOutput output = escalations.get(exception);
 		if (output == null) {
-			output = designer.addSectionOutput(exception.getName(),
-					exception.getName(), true);
+			output = designer.addSectionOutput(exception.getName(), exception.getName(), true);
 			escalations.put(exception, output);
 		}
 
-		// Link task escalation to output
-		TaskFlow escalation = task.getTaskEscalation(exception.getName());
-		designer.link(escalation, output,
-				FlowInstigationStrategyEnum.SEQUENTIAL);
+		// Link function escalation to output
+		FunctionFlow escalation = function.getFunctionEscalation(exception.getName());
+		designer.link(escalation, output, false);
 	}
 
 	/*
@@ -150,65 +143,46 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 	}
 
 	@Override
-	public void sourceSection(SectionDesigner designer,
-			SectionSourceContext context) throws Exception {
+	public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
 
 		final Map<Class<?>, SectionObject> objects = new HashMap<Class<?>, SectionObject>();
 		final Map<Class<?>, SectionOutput> escalations = new HashMap<Class<?>, SectionOutput>();
 
-		// Add the Route task
-		SectionWork routeWork = designer.addSectionWork("ROUTE",
+		// Add the Route function
+		SectionFunctionNamespace routeNamespace = designer.addSectionFunctionNamespace("ROUTE",
 				HttpRouteWorkSource.class.getName());
-		SectionTask routeTask = routeWork.addSectionTask("ROUTE",
-				HttpRouteWorkSource.TASK_NAME);
-		linkObject(routeTask,
-				HttpRouteTaskDependencies.SERVER_HTTP_CONNECTION.name(),
-				ServerHttpConnection.class, designer, objects);
-		linkObject(routeTask,
-				HttpRouteTaskDependencies.HTTP_APPLICATION_LOCATION.name(),
+		SectionFunction routeFunction = routeNamespace.addSectionFunction("ROUTE", HttpRouteWorkSource.FUNCTION_NAME);
+		linkObject(routeFunction, HttpRouteTaskDependencies.SERVER_HTTP_CONNECTION.name(), ServerHttpConnection.class,
+				designer, objects);
+		linkObject(routeFunction, HttpRouteTaskDependencies.HTTP_APPLICATION_LOCATION.name(),
 				HttpApplicationLocation.class, designer, objects);
-		linkObject(routeTask, HttpRouteTaskDependencies.REQUEST_STATE.name(),
-				HttpRequestState.class, designer, objects);
-		linkObject(routeTask, HttpRouteTaskDependencies.HTTP_SESSION.name(),
-				HttpSession.class, designer, objects);
-		linkEscalation(routeTask, InvalidHttpRequestUriException.class,
-				designer, escalations);
-		linkEscalation(routeTask, HttpRequestTokeniseException.class, designer,
-				escalations);
-		linkEscalation(routeTask, IOException.class, designer, escalations);
-		linkEscalation(routeTask, UnknownWorkException.class, designer,
-				escalations);
-		linkEscalation(routeTask, UnknownFunctionException.class, designer,
-				escalations);
-		linkEscalation(routeTask, InvalidParameterTypeException.class,
-				designer, escalations);
+		linkObject(routeFunction, HttpRouteTaskDependencies.REQUEST_STATE.name(), HttpRequestState.class, designer,
+				objects);
+		linkObject(routeFunction, HttpRouteTaskDependencies.HTTP_SESSION.name(), HttpSession.class, designer, objects);
+		linkEscalation(routeFunction, InvalidHttpRequestUriException.class, designer, escalations);
+		linkEscalation(routeFunction, HttpRequestTokeniseException.class, designer, escalations);
+		linkEscalation(routeFunction, IOException.class, designer, escalations);
+		linkEscalation(routeFunction, UnknownFunctionException.class, designer, escalations);
+		linkEscalation(routeFunction, InvalidParameterTypeException.class, designer, escalations);
 
-		// Link handling input to route task
-		SectionInput input = designer.addSectionInput(
-				HttpServerAutoWireOfficeFloorSource.HANDLER_INPUT_NAME, null);
-		designer.link(input, routeTask);
+		// Link handling input to route function
+		SectionInput input = designer.addSectionInput(HttpServerAutoWireOfficeFloorSource.HANDLER_INPUT_NAME, null);
+		designer.link(input, routeFunction);
 
 		// Send to non-handled requests to not handled output
-		TaskFlow unhandledServiceFlow = routeTask
-				.getTaskFlow(HttpRouteTaskFlows.NOT_HANDLED.name());
-		SectionOutput unhandledRequestOutput = designer.addSectionOutput(
-				UNHANDLED_REQUEST_OUTPUT_NAME, null, false);
-		designer.link(unhandledServiceFlow, unhandledRequestOutput,
-				FlowInstigationStrategyEnum.SEQUENTIAL);
+		FunctionFlow unhandledServiceFlow = routeFunction.getFunctionFlow(HttpRouteTaskFlows.NOT_HANDLED.name());
+		SectionOutput unhandledRequestOutput = designer.addSectionOutput(UNHANDLED_REQUEST_OUTPUT_NAME, null, false);
+		designer.link(unhandledServiceFlow, unhandledRequestOutput, false);
 
 		// Provide input to send HTTP response
-		SectionWork sendResponseWork = designer.addSectionWork("SEND",
+		SectionFunctionNamespace sendResponseNamespace = designer.addSectionFunctionNamespace("SEND",
 				HttpResponseSenderManagedFunctionSource.class.getName());
-		SectionTask sendResponseTask = sendResponseWork.addSectionTask("SEND",
-				"SEND");
-		linkObject(sendResponseTask,
-				HttpResponseSendTaskDependencies.SERVER_HTTP_CONNECTION.name(),
+		SectionFunction sendResponseFunction = sendResponseNamespace.addSectionFunction("SEND", "SEND");
+		linkObject(sendResponseFunction, HttpResponseSendTaskDependencies.SERVER_HTTP_CONNECTION.name(),
 				ServerHttpConnection.class, designer, objects);
-		linkEscalation(sendResponseTask, IOException.class, designer,
-				escalations);
-		SectionInput sendResponseInput = designer.addSectionInput(
-				SEND_RESPONSE_INPUT_NAME, null);
-		designer.link(sendResponseInput, sendResponseTask);
+		linkEscalation(sendResponseFunction, IOException.class, designer, escalations);
+		SectionInput sendResponseInput = designer.addSectionInput(SEND_RESPONSE_INPUT_NAME, null);
+		designer.link(sendResponseInput, sendResponseFunction);
 	}
 
 }

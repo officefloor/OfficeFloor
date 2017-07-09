@@ -19,16 +19,16 @@ package net.officefloor.plugin.web.http.template.section;
 
 import java.lang.reflect.Array;
 
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
-import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
-import net.officefloor.compile.spi.section.TaskFlow;
-import net.officefloor.compile.spi.section.TaskObject;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
+import net.officefloor.compile.spi.section.FunctionFlow;
+import net.officefloor.compile.spi.section.FunctionObject;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
 /**
@@ -37,9 +37,7 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpTemplateArrayIteratorWorkSource
-		extends
-		AbstractWorkSource<HttpTemplateArrayIteratorWorkSource.HttpTemplateArrayIteratorTask> {
+public class HttpTemplateArrayIteratorManagedFunctionSource extends AbstractManagedFunctionSource {
 
 	/**
 	 * Name of property for the array component type.
@@ -49,20 +47,20 @@ public class HttpTemplateArrayIteratorWorkSource
 	/**
 	 * Name of the {@link ManagedFunction}.
 	 */
-	public static final String TASK_NAME = "iterate";
+	public static final String FUNCTION_NAME = "iterate";
 
 	/**
-	 * Name of the {@link TaskObject} providing array.
+	 * Name of the {@link FunctionObject} providing array.
 	 */
 	public static final String OBJECT_NAME = DependencyKeys.ARRAY.name();
 
 	/**
-	 * Name of the {@link TaskFlow} for rendering.
+	 * Name of the {@link FunctionFlow} for rendering.
 	 */
 	public static final String FLOW_NAME = FlowKeys.RENDER_ELEMENT.name();
 
 	/*
-	 * ============================== WorkSource ===============================
+	 * ====================== ManagedFunctionSource ======================
 	 */
 
 	@Override
@@ -71,41 +69,35 @@ public class HttpTemplateArrayIteratorWorkSource
 	}
 
 	@Override
-	public void sourceManagedFunctions(
-			FunctionNamespaceBuilder<HttpTemplateArrayIteratorTask> workTypeBuilder,
+	public void sourceManagedFunctions(FunctionNamespaceBuilder namespaceTypeBuilder,
 			ManagedFunctionSourceContext context) throws Exception {
 
 		// Obtain the component type name
 		String componentTypeName = context.getProperty("component.type.name");
-		Class<?> componentType = context.loadClass(
-				componentTypeName);
+		Class<?> componentType = context.loadClass(componentTypeName);
 		Class<?> arrayType = Array.newInstance(componentType, 0).getClass();
 
-		// Create the task
-		HttpTemplateArrayIteratorTask task = new HttpTemplateArrayIteratorTask();
+		// Create the function
+		HttpTemplateArrayIteratorFunction function = new HttpTemplateArrayIteratorFunction();
 
-		// Specify work factory
-		workTypeBuilder.setWorkFactory(task);
-
-		// Specify the task
-		ManagedFunctionTypeBuilder<DependencyKeys, FlowKeys> taskBuilder = workTypeBuilder
-				.addManagedFunctionType(TASK_NAME, task, DependencyKeys.class,
-						FlowKeys.class);
-		taskBuilder.addObject(arrayType).setKey(DependencyKeys.ARRAY);
-		ManagedFunctionFlowTypeBuilder<FlowKeys> flow = taskBuilder.addFlow();
+		// Specify the function
+		ManagedFunctionTypeBuilder<DependencyKeys, FlowKeys> functionBuilder = namespaceTypeBuilder
+				.addManagedFunctionType(FUNCTION_NAME, function, DependencyKeys.class, FlowKeys.class);
+		functionBuilder.addObject(arrayType).setKey(DependencyKeys.ARRAY);
+		ManagedFunctionFlowTypeBuilder<FlowKeys> flow = functionBuilder.addFlow();
 		flow.setKey(FlowKeys.RENDER_ELEMENT);
 		flow.setArgumentType(componentType);
 	}
 
 	/**
-	 * {@link HttpTemplateArrayIteratorWorkSource} dependency keys.
+	 * {@link HttpTemplateArrayIteratorManagedFunctionSource} dependency keys.
 	 */
 	public static enum DependencyKeys {
 		ARRAY
 	}
 
 	/**
-	 * {@link HttpTemplateArrayIteratorWorkSource} flow keys.
+	 * {@link HttpTemplateArrayIteratorManagedFunctionSource} flow keys.
 	 */
 	public static enum FlowKeys {
 		RENDER_ELEMENT
@@ -114,17 +106,14 @@ public class HttpTemplateArrayIteratorWorkSource
 	/**
 	 * {@link ManagedFunction} implementation.
 	 */
-	public static class HttpTemplateArrayIteratorTask
-			extends
-			AbstractSingleTask<HttpTemplateArrayIteratorTask, DependencyKeys, FlowKeys> {
+	public static class HttpTemplateArrayIteratorFunction extends StaticManagedFunction<DependencyKeys, FlowKeys> {
 
 		/*
-		 * ============================ Task ==================================
+		 * ======================== ManagedFunction ========================
 		 */
 
 		@Override
-		public Object execute(
-				ManagedFunctionContext<HttpTemplateArrayIteratorTask, DependencyKeys, FlowKeys> context) {
+		public Object execute(ManagedFunctionContext<DependencyKeys, FlowKeys> context) {
 
 			// Obtain the array
 			Object[] array = (Object[]) context.getObject(DependencyKeys.ARRAY);
@@ -134,7 +123,7 @@ public class HttpTemplateArrayIteratorWorkSource
 
 			// Iterate over the array rendering the elements
 			for (Object element : array) {
-				context.doFlow(FlowKeys.RENDER_ELEMENT, element);
+				context.doFlow(FlowKeys.RENDER_ELEMENT, element, null);
 			}
 
 			// No argument for next task

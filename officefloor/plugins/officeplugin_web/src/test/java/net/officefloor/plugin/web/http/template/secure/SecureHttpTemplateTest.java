@@ -34,7 +34,7 @@ import net.officefloor.plugin.web.http.application.HttpRequestObjectManagedObjec
 import net.officefloor.plugin.web.http.application.HttpTemplateSection;
 import net.officefloor.plugin.web.http.application.HttpUriLink;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
-import net.officefloor.plugin.web.http.route.HttpRouteTask;
+import net.officefloor.plugin.web.http.route.HttpRouteFunction;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
@@ -250,7 +250,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 		// Determine if redirecting
 		if (redirectUrl != null) {
 			// Ensure have prefix on redirect URL
-			redirectUrl = redirectUrl + HttpRouteTask.REDIRECT_URI_SUFFIX;
+			redirectUrl = redirectUrl + HttpRouteFunction.REDIRECT_URI_SUFFIX;
 
 			// Ensure redirect to appropriately secure URL
 			assertEquals("Should be redirect", 303, response.getStatusLine()
@@ -316,7 +316,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	 */
 	public void testSecureUriRedirect() throws Exception {
 		this.doSecureUriTest(true, NON_SECURE_URL_PREFIX + "/uri",
-				SECURE_URL_PREFIX + "/uri" + HttpRouteTask.REDIRECT_URI_SUFFIX);
+				SECURE_URL_PREFIX + "/uri" + HttpRouteFunction.REDIRECT_URI_SUFFIX);
 	}
 
 	/**
@@ -332,7 +332,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	public void testInsecureUriRedirect() throws Exception {
 		this.doSecureUriTest(false, SECURE_URL_PREFIX + "/uri",
 				NON_SECURE_URL_PREFIX + "/uri"
-						+ HttpRouteTask.REDIRECT_URI_SUFFIX);
+						+ HttpRouteFunction.REDIRECT_URI_SUFFIX);
 	}
 
 	/**

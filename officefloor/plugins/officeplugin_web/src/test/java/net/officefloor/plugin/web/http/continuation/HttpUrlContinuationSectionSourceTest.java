@@ -37,7 +37,7 @@ import net.officefloor.plugin.web.http.application.HttpRequestStateManagedObject
 import net.officefloor.plugin.web.http.application.HttpUriLink;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
-import net.officefloor.plugin.web.http.route.HttpRouteTask;
+import net.officefloor.plugin.web.http.route.HttpRouteFunction;
 import net.officefloor.plugin.web.http.route.HttpRouteWorkSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
@@ -78,15 +78,15 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 		type.addSubSection("TRANSFORMED", ClassSectionSource.class.getName(), MockSectionTypeClass.class.getName());
 
 		// Provide the transformations for URL continuations
-		SectionWork pathWork = type.addSectionWork("path", HttpUrlContinuationWorkSource.class.getName());
-		pathWork.addProperty(HttpUrlContinuationWorkSource.PROPERTY_URI_PATH, "/");
-		pathWork.addSectionTask("path", HttpUrlContinuationWorkSource.TASK_NAME);
-		SectionWork uriWork = type.addSectionWork("uri", HttpUrlContinuationWorkSource.class.getName());
-		uriWork.addProperty(HttpUrlContinuationWorkSource.PROPERTY_URI_PATH, "/");
-		uriWork.addSectionTask("uri", HttpUrlContinuationWorkSource.TASK_NAME);
-		SectionWork rootWork = type.addSectionWork("_root_", HttpUrlContinuationWorkSource.class.getName());
-		rootWork.addProperty(HttpUrlContinuationWorkSource.PROPERTY_URI_PATH, "/");
-		rootWork.addSectionTask("_root_", HttpUrlContinuationWorkSource.TASK_NAME);
+		SectionWork pathWork = type.addSectionWork("path", HttpUrlContinuationManagedFunctionSource.class.getName());
+		pathWork.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH, "/");
+		pathWork.addSectionTask("path", HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
+		SectionWork uriWork = type.addSectionWork("uri", HttpUrlContinuationManagedFunctionSource.class.getName());
+		uriWork.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH, "/");
+		uriWork.addSectionTask("uri", HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
+		SectionWork rootWork = type.addSectionWork("_root_", HttpUrlContinuationManagedFunctionSource.class.getName());
+		rootWork.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH, "/");
+		rootWork.addSectionTask("_root_", HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
 
 		// Validate the type
 		SectionLoaderUtil.validateSection(type, HttpUrlContinuationSectionSource.class, (String) null,
@@ -124,9 +124,9 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 				MockSectionRunClass.class.getName());
 
 		// Provide remaining configuration
-		HttpServerSocketManagedObjectSource.autoWire(source, 7878, "ROUTE", HttpRouteWorkSource.TASK_NAME);
+		HttpServerSocketManagedObjectSource.autoWire(source, 7878, "ROUTE", HttpRouteWorkSource.FUNCTION_NAME);
 		HttpsServerSocketManagedObjectSource.autoWire(source, 7979, HttpTestUtil.getSslEngineSourceClass(), "ROUTE",
-				HttpRouteWorkSource.TASK_NAME);
+				HttpRouteWorkSource.FUNCTION_NAME);
 		AutoWireSection route = source.addSection("ROUTE", WorkSectionSource.class.getName(),
 				HttpRouteWorkSource.class.getName());
 		source.link(route, "NOT_HANDLED", section, "notHandled");
@@ -172,10 +172,10 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 		String urlRedirect;
 		if (isSecure) {
 			urlInitial = NON_SECURE_URL;
-			urlRedirect = SECURE_URL + HttpRouteTask.REDIRECT_URI_SUFFIX;
+			urlRedirect = SECURE_URL + HttpRouteFunction.REDIRECT_URI_SUFFIX;
 		} else {
 			urlInitial = SECURE_URL;
-			urlRedirect = NON_SECURE_URL + HttpRouteTask.REDIRECT_URI_SUFFIX;
+			urlRedirect = NON_SECURE_URL + HttpRouteFunction.REDIRECT_URI_SUFFIX;
 		}
 
 		// Start application

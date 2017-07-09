@@ -19,9 +19,9 @@ package net.officefloor.plugin.web.http.resource.source;
 
 import java.io.IOException;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
@@ -35,16 +35,16 @@ import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.NotExistHttpResource;
 
 /**
- * {@link ManagedFunction} to locate a {@link HttpFile} via a {@link HttpResourceFactory}.
+ * {@link ManagedFunction} to locate a {@link HttpFile} via a
+ * {@link HttpResourceFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpFileFactoryTask<F extends Enum<F>>
-		extends
-		AbstractSingleTask<HttpFileFactoryTask<F>, HttpFileFactoryTask.DependencyKeys, F> {
+public class HttpFileFactoryFunction<F extends Enum<F>>
+		extends StaticManagedFunction<HttpFileFactoryFunction.DependencyKeys, F> {
 
 	/**
-	 * Dependency keys for the {@link HttpFileFactoryTask}.
+	 * Dependency keys for the {@link HttpFileFactoryFunction}.
 	 */
 	public enum DependencyKeys {
 		SERVER_HTTP_CONNECTION, HTTP_APPLICATION_LOCATION
@@ -68,19 +68,18 @@ public class HttpFileFactoryTask<F extends Enum<F>>
 	 * @param httpFileCreationListener
 	 *            {@link HttpResourceCreationListener}.
 	 */
-	public HttpFileFactoryTask(HttpResourceFactory httpResourceFactory,
+	public HttpFileFactoryFunction(HttpResourceFactory httpResourceFactory,
 			HttpResourceCreationListener<F> httpFileCreationListener) {
 		this.httpResourceFactory = httpResourceFactory;
 		this.httpFileCreationListener = httpFileCreationListener;
 	}
 
 	/*
-	 * =========================== Task =====================================
+	 * =========================== ManagedFunction ===========================
 	 */
 
 	@Override
-	public Object execute(
-			ManagedFunctionContext<HttpFileFactoryTask<F>, DependencyKeys, F> context)
+	public Object execute(ManagedFunctionContext<DependencyKeys, F> context)
 			throws IOException, InvalidHttpRequestUriException {
 
 		// Obtain the HTTP request
@@ -98,8 +97,7 @@ public class HttpFileFactoryTask<F extends Enum<F>>
 			// Obtain the file path
 			HttpApplicationLocation location = (HttpApplicationLocation) context
 					.getObject(DependencyKeys.HTTP_APPLICATION_LOCATION);
-			String filePath = location
-					.transformToApplicationCanonicalPath(requestUriPath);
+			String filePath = location.transformToApplicationCanonicalPath(requestUriPath);
 
 			// Create the HTTP resource for the request
 			resource = this.httpResourceFactory.createHttpResource(filePath);
@@ -110,8 +108,7 @@ public class HttpFileFactoryTask<F extends Enum<F>>
 				HttpFile defaultFile = directory.getDefaultFile();
 
 				// Provide resource based on default file existing
-				resource = (defaultFile != null ? defaultFile
-						: new NotExistHttpResource(resource.getPath()));
+				resource = (defaultFile != null ? defaultFile : new NotExistHttpResource(resource.getPath()));
 			}
 
 		} catch (IncorrectHttpRequestContextPathException ex) {
@@ -119,8 +116,7 @@ public class HttpFileFactoryTask<F extends Enum<F>>
 		}
 
 		// Notify the HTTP resource created
-		this.httpFileCreationListener.httpResourceCreated(resource, connection,
-				context);
+		this.httpFileCreationListener.httpResourceCreated(resource, connection, context);
 
 		// Return the HTTP resource
 		return resource;

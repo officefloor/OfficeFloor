@@ -33,11 +33,11 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.conversation.impl.HttpRequestImpl;
 import net.officefloor.plugin.web.http.parameters.HttpParametersException;
 import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderDependencies;
-import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderWorkSource;
-import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderWorkSource.HttpParametersLoaderTask;
+import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderManagedFunctionSource;
+import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderManagedFunctionSource.HttpParametersLoaderFunction;
 
 /**
- * Tests the {@link HttpParametersLoaderWorkSource}.
+ * Tests the {@link HttpParametersLoaderManagedFunctionSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -48,17 +48,17 @@ public class HttpParametersLoaderWorkSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testSpecification() {
 		WorkLoaderUtil.validateSpecification(
-				HttpParametersLoaderWorkSource.class,
-				HttpParametersLoaderWorkSource.PROPERTY_TYPE_NAME,
-				HttpParametersLoaderWorkSource.PROPERTY_TYPE_NAME);
+				HttpParametersLoaderManagedFunctionSource.class,
+				HttpParametersLoaderManagedFunctionSource.PROPERTY_TYPE_NAME,
+				HttpParametersLoaderManagedFunctionSource.PROPERTY_TYPE_NAME);
 	}
 
 	/**
 	 * Validates the type.
 	 */
 	public void testType() {
-		HttpParametersLoaderTask task = new HttpParametersLoaderWorkSource().new HttpParametersLoaderTask();
-		FunctionNamespaceBuilder<HttpParametersLoaderTask> workBuilder = WorkLoaderUtil
+		HttpParametersLoaderFunction task = new HttpParametersLoaderManagedFunctionSource().new HttpParametersLoaderFunction();
+		FunctionNamespaceBuilder<HttpParametersLoaderFunction> workBuilder = WorkLoaderUtil
 				.createWorkTypeBuilder(task);
 		ManagedFunctionTypeBuilder<HttpParametersLoaderDependencies, None> taskBuilder = workBuilder
 				.addManagedFunctionType("LOADER", task,
@@ -71,8 +71,8 @@ public class HttpParametersLoaderWorkSourceTest extends OfficeFrameTestCase {
 		taskBuilder.addEscalation(IOException.class);
 		taskBuilder.addEscalation(HttpParametersException.class);
 		WorkLoaderUtil.validateWorkType(workBuilder,
-				HttpParametersLoaderWorkSource.class,
-				HttpParametersLoaderWorkSource.PROPERTY_TYPE_NAME,
+				HttpParametersLoaderManagedFunctionSource.class,
+				HttpParametersLoaderManagedFunctionSource.PROPERTY_TYPE_NAME,
 				MockType.class.getName());
 	}
 
@@ -102,11 +102,11 @@ public class HttpParametersLoaderWorkSourceTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		FunctionNamespaceType<HttpParametersLoaderTask> workType = WorkLoaderUtil
-				.loadWorkType(HttpParametersLoaderWorkSource.class,
-						HttpParametersLoaderWorkSource.PROPERTY_TYPE_NAME,
+		FunctionNamespaceType<HttpParametersLoaderFunction> workType = WorkLoaderUtil
+				.loadWorkType(HttpParametersLoaderManagedFunctionSource.class,
+						HttpParametersLoaderManagedFunctionSource.PROPERTY_TYPE_NAME,
 						MockType.class.getName());
-		ManagedFunction<HttpParametersLoaderTask, ?, ?> task = workType.getManagedFunctionTypes()[0]
+		ManagedFunction<HttpParametersLoaderFunction, ?, ?> task = workType.getManagedFunctionTypes()[0]
 				.getManagedFunctionFactory().createManagedFunction(
 						workType.getWorkFactory().createWork());
 		Object result = task.execute(taskContext);

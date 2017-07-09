@@ -20,34 +20,34 @@ package net.officefloor.plugin.web.http.template.section;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
-import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiatorImpl;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
+import net.officefloor.plugin.web.http.template.HttpTemplateManagedFunctionSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
-import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialTask.Dependencies;
-import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialTask.Flows;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialFunction.Dependencies;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialFunction.Flows;
 
 /**
- * {@link ManagedFunctionSource} to provide the {@link HttpTemplateInitialTask}.
+ * {@link ManagedFunctionSource} to provide the
+ * {@link HttpTemplateInitialFunction}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpTemplateInitialWorkSource extends
-		AbstractWorkSource<HttpTemplateInitialTask> {
+public class HttpTemplateInitialManagedFunctionSource extends AbstractManagedFunctionSource {
 
 	/**
 	 * Property name for the {@link HttpTemplate} URI path.
 	 */
-	public static final String PROPERTY_TEMPLATE_URI = HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI;
+	public static final String PROPERTY_TEMPLATE_URI = HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI;
 
 	/**
 	 * Property name for a comma separated list of HTTP methods that will
@@ -66,12 +66,12 @@ public class HttpTemplateInitialWorkSource extends
 	public static final String PROPERTY_CHARSET = AbstractServerSocketManagedObjectSource.PROPERTY_DEFAULT_CHARSET;
 
 	/**
-	 * Name of the {@link HttpTemplateInitialTask}.
+	 * Name of the {@link HttpTemplateInitialFunction}.
 	 */
-	public static final String TASK_NAME = "TASK";
+	public static final String FUNCTION_NAME = "FUNCTION";
 
 	/*
-	 * ======================= WorkSource ==========================
+	 * ======================= ManagedFunctionSource ==========================
 	 */
 
 	@Override
@@ -80,16 +80,14 @@ public class HttpTemplateInitialWorkSource extends
 	}
 
 	@Override
-	public void sourceManagedFunctions(
-			FunctionNamespaceBuilder<HttpTemplateInitialTask> workTypeBuilder,
+	public void sourceManagedFunctions(FunctionNamespaceBuilder namespaceTypeBuilder,
 			ManagedFunctionSourceContext context) throws Exception {
 
 		// Obtain the template URI path
-		String templateUriPath = HttpTemplateWorkSource
-				.getHttpTemplateUrlContinuationPath(context);
+		String templateUriPath = HttpTemplateManagedFunctionSource.getHttpTemplateUrlContinuationPath(context);
 
 		// Determine if the template is secure
-		boolean isSecure = HttpTemplateWorkSource.isHttpTemplateSecure(context);
+		boolean isSecure = HttpTemplateManagedFunctionSource.isHttpTemplateSecure(context);
 
 		/*
 		 * Only trigger redirect if not secure. If sent on secure connection but
@@ -100,42 +98,33 @@ public class HttpTemplateInitialWorkSource extends
 
 		// Obtain the listing of render redirect HTTP methods
 		String[] renderRedirectHttpMethods = null;
-		String renderRedirectProperty = context.getProperty(
-				PROPERTY_RENDER_REDIRECT_HTTP_METHODS, null);
+		String renderRedirectProperty = context.getProperty(PROPERTY_RENDER_REDIRECT_HTTP_METHODS, null);
 		if (renderRedirectProperty != null) {
 			// Obtain the render redirect HTTP methods
 			renderRedirectHttpMethods = renderRedirectProperty.split(",");
 			for (int i = 0; i < renderRedirectHttpMethods.length; i++) {
-				renderRedirectHttpMethods[i] = renderRedirectHttpMethods[i]
-						.trim();
+				renderRedirectHttpMethods[i] = renderRedirectHttpMethods[i].trim();
 			}
 		}
 
 		// Obtain the content type and charset
 		String contentType = context.getProperty(PROPERTY_CONTENT_TYPE, null);
-		Charset charset = AbstractServerSocketManagedObjectSource
-				.getCharset(context);
+		Charset charset = AbstractServerSocketManagedObjectSource.getCharset(context);
 
-		// Create the HTTP Template initial task
-		HttpTemplateInitialTask factory = new HttpTemplateInitialTask(
-				templateUriPath, isSecure, renderRedirectHttpMethods,
-				contentType, charset);
+		// Create the HTTP Template initial function
+		HttpTemplateInitialFunction factory = new HttpTemplateInitialFunction(templateUriPath, isSecure,
+				renderRedirectHttpMethods, contentType, charset);
 
-		// Configure the task
-		workTypeBuilder.setWorkFactory(factory);
-		ManagedFunctionTypeBuilder<Dependencies, Flows> task = workTypeBuilder
-				.addManagedFunctionType("TASK", factory, Dependencies.class, Flows.class);
-		task.addObject(ServerHttpConnection.class).setKey(
-				Dependencies.SERVER_HTTP_CONNECTION);
-		task.addObject(HttpApplicationLocation.class).setKey(
-				Dependencies.HTTP_APPLICATION_LOCATION);
-		task.addObject(HttpRequestState.class).setKey(
-				Dependencies.REQUEST_STATE);
-		task.addObject(HttpSession.class).setKey(Dependencies.HTTP_SESSION);
-		task.addFlow().setKey(Flows.RENDER);
-		task.addEscalation(IOException.class);
-		task.setDifferentiator(new HttpUrlContinuationDifferentiatorImpl(
-				templateUriPath, isRequireSecure));
+		// Configure the function
+		ManagedFunctionTypeBuilder<Dependencies, Flows> function = namespaceTypeBuilder.addManagedFunctionType("TASK",
+				factory, Dependencies.class, Flows.class);
+		function.addObject(ServerHttpConnection.class).setKey(Dependencies.SERVER_HTTP_CONNECTION);
+		function.addObject(HttpApplicationLocation.class).setKey(Dependencies.HTTP_APPLICATION_LOCATION);
+		function.addObject(HttpRequestState.class).setKey(Dependencies.REQUEST_STATE);
+		function.addObject(HttpSession.class).setKey(Dependencies.HTTP_SESSION);
+		function.addFlow().setKey(Flows.RENDER);
+		function.addEscalation(IOException.class);
+		function.setDifferentiator(new HttpUrlContinuationDifferentiatorImpl(templateUriPath, isRequireSecure));
 	}
 
 }

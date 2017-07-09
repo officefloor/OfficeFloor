@@ -26,15 +26,15 @@ import java.util.List;
 import java.util.Set;
 
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.spi.source.SourceProperties;
-import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.StaticManagedFunction;
+import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.stream.ServerWriter;
@@ -55,8 +55,7 @@ import net.officefloor.plugin.web.http.template.parse.StaticHttpTemplateSectionC
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpTemplateTask extends
-		AbstractSingleTask<HttpTemplateWork, Indexed, None> {
+public class HttpTemplateFunction extends StaticManagedFunction<Indexed, None> {
 
 	/**
 	 * Property prefix to obtain the bean for the {@link HttpTemplateSection}.
@@ -69,7 +68,8 @@ public class HttpTemplateTask extends
 	public static final String PROPERTY_LINK_SECURE_PREFIX = "link.secure.";
 
 	/**
-	 * Loads the {@link ManagedFunctionType} to write the {@link HttpTemplateSection}.
+	 * Loads the {@link ManagedFunctionType} to write the
+	 * {@link HttpTemplateSection}.
 	 * 
 	 * @param section
 	 *            {@link HttpTemplateSection}.
@@ -82,19 +82,17 @@ public class HttpTemplateTask extends
 	 *            <code>null</code> for no suffix.
 	 * @param isTemplateSecure
 	 *            Indicates if the template is to be secure.
-	 * @param workTypeBuilder
+	 * @param namespaceTypeBuilder
 	 *            {@link FunctionNamespaceBuilder}.
 	 * @param context
 	 *            {@link ManagedFunctionSourceContext}.
-	 * @return Listing of {@link ManagedFunction} names to handle {@link HttpTemplate} link
-	 *         requests.
+	 * @return Listing of {@link ManagedFunction} names to handle
+	 *         {@link HttpTemplate} link requests.
 	 * @throws Exception
 	 *             If fails to prepare the template.
 	 */
-	public static String[] loadTaskType(HttpTemplateSection section,
-			Charset charset, String templateUriPath, String templateUriSuffix,
-			boolean isTemplateSecure,
-			FunctionNamespaceBuilder<HttpTemplateWork> workTypeBuilder,
+	public static String[] loadFunctionType(HttpTemplateSection section, Charset charset, String templateUriPath,
+			String templateUriSuffix, boolean isTemplateSecure, FunctionNamespaceBuilder namespaceTypeBuilder,
 			ManagedFunctionSourceContext context) throws Exception {
 
 		// Obtain the section and task name
@@ -107,26 +105,21 @@ public class HttpTemplateTask extends
 		Class<?> beanClass = getBeanClass(sectionAndTaskName, false, context);
 
 		// Create the content writers for the section
-		SectionWriterStruct writerStruct = createHttpTemplateWriters(
-				section.getContent(), beanClass, sectionAndTaskName,
-				linkTaskNames, charset, templateUriPath, templateUriSuffix,
-				isTemplateSecure, context);
+		SectionWriterStruct writerStruct = createHttpTemplateWriters(section.getContent(), beanClass,
+				sectionAndTaskName, linkTaskNames, charset, templateUriPath, templateUriSuffix, isTemplateSecure,
+				context);
 
 		// Determine if bean
 		boolean isBean = (writerStruct.beanClass != null);
 
-		// Create the task factory
-		HttpTemplateTask task = new HttpTemplateTask(writerStruct.writers,
-				isBean, charset);
+		// Create the function factory
+		HttpTemplateFunction function = new HttpTemplateFunction(writerStruct.writers, isBean, charset);
 
 		// Define the task to write the section
-		ManagedFunctionTypeBuilder<Indexed, None> taskBuilder = workTypeBuilder
-				.addManagedFunctionType(sectionAndTaskName, task, Indexed.class,
-						None.class);
-		taskBuilder.addObject(ServerHttpConnection.class).setLabel(
-				"SERVER_HTTP_CONNECTION");
-		taskBuilder.addObject(HttpApplicationLocation.class).setLabel(
-				"HTTP_APPLICATION_LOCATION");
+		ManagedFunctionTypeBuilder<Indexed, None> taskBuilder = namespaceTypeBuilder
+				.addManagedFunctionType(sectionAndTaskName, function, Indexed.class, None.class);
+		taskBuilder.addObject(ServerHttpConnection.class).setLabel("SERVER_HTTP_CONNECTION");
+		taskBuilder.addObject(HttpApplicationLocation.class).setLabel("HTTP_APPLICATION_LOCATION");
 		if (isBean) {
 			taskBuilder.addObject(writerStruct.beanClass).setLabel("OBJECT");
 		}
@@ -147,13 +140,11 @@ public class HttpTemplateTask extends
 	 *            {@link SourceProperties}.
 	 * @return <code>true</code> should the link be secure.
 	 */
-	public static boolean isLinkSecure(String linkName,
-			boolean isTemplateSecure, SourceProperties properties) {
+	public static boolean isLinkSecure(String linkName, boolean isTemplateSecure, SourceProperties properties) {
 
 		// Determine if the link should be secure
-		boolean isLinkSecure = Boolean.parseBoolean(properties.getProperty(
-				PROPERTY_LINK_SECURE_PREFIX + linkName,
-				String.valueOf(isTemplateSecure)));
+		boolean isLinkSecure = Boolean.parseBoolean(
+				properties.getProperty(PROPERTY_LINK_SECURE_PREFIX + linkName, String.valueOf(isTemplateSecure)));
 
 		// Return whether secure
 		return isLinkSecure;
@@ -182,8 +173,7 @@ public class HttpTemplateTask extends
 		 * @param beanClass
 		 *            Bean class.
 		 */
-		public SectionWriterStruct(HttpTemplateWriter[] writers,
-				Class<?> beanClass) {
+		public SectionWriterStruct(HttpTemplateWriter[] writers, Class<?> beanClass) {
 			this.writers = writers;
 			this.beanClass = beanClass;
 		}
@@ -215,12 +205,10 @@ public class HttpTemplateTask extends
 	 * @throws Exception
 	 *             If fails to create the {@link SectionWriterStruct}.
 	 */
-	private static SectionWriterStruct createHttpTemplateWriters(
-			HttpTemplateSectionContent[] contents, Class<?> beanClass,
-			String sectionAndTaskName, Set<String> linkTaskNames,
-			Charset charset, String templateUriPath, String templateUriSuffix,
-			boolean isTemplateSecure, ManagedFunctionSourceContext context)
-			throws Exception {
+	private static SectionWriterStruct createHttpTemplateWriters(HttpTemplateSectionContent[] contents,
+			Class<?> beanClass, String sectionAndTaskName, Set<String> linkTaskNames, Charset charset,
+			String templateUriPath, String templateUriSuffix, boolean isTemplateSecure,
+			ManagedFunctionSourceContext context) throws Exception {
 
 		// Create the content writers for the section
 		List<HttpTemplateWriter> contentWriterList = new LinkedList<HttpTemplateWriter>();
@@ -231,8 +219,7 @@ public class HttpTemplateTask extends
 			if (content instanceof StaticHttpTemplateSectionContent) {
 				// Add the static template writer
 				StaticHttpTemplateSectionContent staticContent = (StaticHttpTemplateSectionContent) content;
-				contentWriterList.add(new StaticHttpTemplateWriter(
-						staticContent, charset));
+				contentWriterList.add(new StaticHttpTemplateWriter(staticContent, charset));
 
 			} else if (content instanceof BeanHttpTemplateSectionContent) {
 				// Add the bean template writer
@@ -250,12 +237,10 @@ public class HttpTemplateTask extends
 
 				// Obtain the bean method
 				String beanPropertyName = beanContent.getPropertyName();
-				Method beanMethod = valueRetriever
-						.getTypeMethod(beanPropertyName);
+				Method beanMethod = valueRetriever.getTypeMethod(beanPropertyName);
 				if (beanMethod == null) {
-					throw new Exception("Bean '" + beanPropertyName
-							+ "' can not be sourced from bean type "
-							+ beanClass.getName());
+					throw new Exception(
+							"Bean '" + beanPropertyName + "' can not be sourced from bean type " + beanClass.getName());
 				}
 
 				// Determine if an array of beans
@@ -267,14 +252,12 @@ public class HttpTemplateTask extends
 				}
 
 				// Obtain the writers for the bean
-				SectionWriterStruct beanStruct = createHttpTemplateWriters(
-						beanContent.getContent(), beanType, null,
-						linkTaskNames, charset, templateUriPath,
-						templateUriSuffix, isTemplateSecure, context);
+				SectionWriterStruct beanStruct = createHttpTemplateWriters(beanContent.getContent(), beanType, null,
+						linkTaskNames, charset, templateUriPath, templateUriSuffix, isTemplateSecure, context);
 
 				// Add the content writer
-				contentWriterList.add(new BeanHttpTemplateWriter(beanContent,
-						valueRetriever, isArray, beanStruct.writers));
+				contentWriterList
+						.add(new BeanHttpTemplateWriter(beanContent, valueRetriever, isArray, beanStruct.writers));
 
 			} else if (content instanceof PropertyHttpTemplateSectionContent) {
 				// Add the property template writer
@@ -291,8 +274,7 @@ public class HttpTemplateTask extends
 				}
 
 				// Add the content writer
-				contentWriterList.add(new PropertyHttpTemplateWriter(
-						propertyContent, valueRetriever, beanClass));
+				contentWriterList.add(new PropertyHttpTemplateWriter(propertyContent, valueRetriever, beanClass));
 
 			} else if (content instanceof LinkHttpTemplateSectionContent) {
 				// Add the link template writer
@@ -300,27 +282,24 @@ public class HttpTemplateTask extends
 
 				// Determine if the link is to be secure
 				String linkName = linkContent.getName();
-				boolean isLinkSecure = isLinkSecure(linkName, isTemplateSecure,
-						context);
+				boolean isLinkSecure = isLinkSecure(linkName, isTemplateSecure, context);
 
 				// Add the content writer
-				contentWriterList.add(new LinkHttpTemplateWriter(linkContent,
-						templateUriPath, templateUriSuffix, isLinkSecure));
+				contentWriterList
+						.add(new LinkHttpTemplateWriter(linkContent, templateUriPath, templateUriSuffix, isLinkSecure));
 
 				// Track the link tasks
 				linkTaskNames.add(linkName);
 
 			} else {
 				// Unknown content
-				throw new IllegalStateException("Unknown content type '"
-						+ content.getClass().getName());
+				throw new IllegalStateException("Unknown content type '" + content.getClass().getName());
 			}
 		}
 
 		// Return the HTTP Template writers
-		return new SectionWriterStruct(
-				contentWriterList.toArray(new HttpTemplateWriter[contentWriterList
-						.size()]), beanClass);
+		return new SectionWriterStruct(contentWriterList.toArray(new HttpTemplateWriter[contentWriterList.size()]),
+				beanClass);
 	}
 
 	/**
@@ -332,12 +311,11 @@ public class HttpTemplateTask extends
 	 *            {@link ManagedFunctionSourceContext}.
 	 * @return Bean {@link Class}.
 	 */
-	private static Class<?> getBeanClass(String sectionAndTaskName,
-			boolean isRequired, ManagedFunctionSourceContext context) {
+	private static Class<?> getBeanClass(String sectionAndTaskName, boolean isRequired,
+			ManagedFunctionSourceContext context) {
 
 		// Obtain the bean class name
-		String beanClassPropertyName = PROPERTY_BEAN_PREFIX
-				+ sectionAndTaskName;
+		String beanClassPropertyName = PROPERTY_BEAN_PREFIX + sectionAndTaskName;
 		String beanClassName;
 		if (isRequired) {
 			// Must provide bean class name
@@ -369,8 +347,7 @@ public class HttpTemplateTask extends
 	 *             If fails to create the {@link ValueRetriever}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private static ValueRetriever<Object> createValueRetriever(
-			Class<?> beanClass) throws Exception {
+	private static ValueRetriever<Object> createValueRetriever(Class<?> beanClass) throws Exception {
 
 		// Obtain the value retriever
 		ValueRetrieverSource source = new ValueRetrieverSourceImpl();
@@ -406,20 +383,18 @@ public class HttpTemplateTask extends
 	 * @param charset
 	 *            Default {@link Charset} for the template.
 	 */
-	public HttpTemplateTask(HttpTemplateWriter[] contentWriters,
-			boolean isBean, Charset charset) {
+	public HttpTemplateFunction(HttpTemplateWriter[] contentWriters, boolean isBean, Charset charset) {
 		this.contentWriters = contentWriters;
 		this.isBean = isBean;
 		this.defaultCharset = charset;
 	}
 
 	/*
-	 * ======================= Task ================================
+	 * ======================= ManagedFunction ================================
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<HttpTemplateWork, Indexed, None> context)
-			throws IOException {
+	public Object execute(ManagedFunctionContext<Indexed, None> context) throws IOException {
 
 		// Obtain the bean dependency
 		Object bean;
@@ -438,18 +413,15 @@ public class HttpTemplateTask extends
 		}
 
 		// Obtain the dependencies
-		ServerHttpConnection connection = (ServerHttpConnection) context
-				.getObject(0);
-		HttpApplicationLocation location = (HttpApplicationLocation) context
-				.getObject(1);
+		ServerHttpConnection connection = (ServerHttpConnection) context.getObject(0);
+		HttpApplicationLocation location = (HttpApplicationLocation) context.getObject(1);
 
 		// Obtain the writer
 		HttpResponse response = connection.getHttpResponse();
 		ServerWriter writer = response.getEntityWriter();
 
 		// Determine if using default charset
-		boolean isDefaultCharset = (this.defaultCharset.name().equals(response
-				.getContentCharset().name()));
+		boolean isDefaultCharset = (this.defaultCharset.name().equals(response.getContentCharset().name()));
 
 		// Write the contents
 		for (HttpTemplateWriter contentWriter : this.contentWriters) {

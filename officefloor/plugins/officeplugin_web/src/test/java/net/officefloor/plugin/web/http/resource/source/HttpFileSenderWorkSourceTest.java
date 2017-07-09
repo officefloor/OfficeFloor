@@ -40,10 +40,10 @@ import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpResource;
-import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryTask.DependencyKeys;
+import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.DependencyKeys;
 
 /**
- * Tests the {@link HttpFileSenderWorkSource}.
+ * Tests the {@link HttpFileSenderManagedFunctionSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -53,7 +53,7 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 	 * Mock {@link ManagedFunctionContext}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final ManagedFunctionContext<HttpFileFactoryTask<None>, DependencyKeys, None> taskContext = this
+	private final ManagedFunctionContext<HttpFileFactoryFunction<None>, DependencyKeys, None> taskContext = this
 			.createMock(ManagedFunctionContext.class);
 
 	/**
@@ -87,7 +87,7 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 	 * Validates the specification.
 	 */
 	public void testSpecification() {
-		WorkLoaderUtil.validateSpecification(HttpFileSenderWorkSource.class);
+		WorkLoaderUtil.validateSpecification(HttpFileSenderManagedFunctionSource.class);
 	}
 
 	/**
@@ -96,9 +96,9 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 	public void testType() {
 
 		// Provide work type
-		HttpFileFactoryTask<None> task = new HttpFileFactoryTask<None>(null,
+		HttpFileFactoryFunction<None> task = new HttpFileFactoryFunction<None>(null,
 				null);
-		FunctionNamespaceBuilder<HttpFileFactoryTask<None>> workBuilder = WorkLoaderUtil
+		FunctionNamespaceBuilder<HttpFileFactoryFunction<None>> workBuilder = WorkLoaderUtil
 				.createWorkTypeBuilder(task);
 
 		// Provide task type
@@ -115,7 +115,7 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 		WorkLoaderUtil
 				.validateWorkType(
 						workBuilder,
-						HttpFileSenderWorkSource.class,
+						HttpFileSenderManagedFunctionSource.class,
 						SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX,
 						this.getClass().getPackage().getName(),
 						SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES,
@@ -134,7 +134,7 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Load work and obtain the task
-		ManagedFunction<HttpFileFactoryTask<None>, DependencyKeys, None> task = this
+		ManagedFunction<HttpFileFactoryFunction<None>, DependencyKeys, None> task = this
 				.loadWorkAndObtainTask();
 
 		// Execute the task to send the HTTP file
@@ -160,7 +160,7 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Load work and obtain the task
-		ManagedFunction<HttpFileFactoryTask<None>, DependencyKeys, None> task = this
+		ManagedFunction<HttpFileFactoryFunction<None>, DependencyKeys, None> task = this
 				.loadWorkAndObtainTask();
 
 		// Execute the task to send the HTTP file
@@ -186,9 +186,9 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Load work and obtain the task
-		ManagedFunction<HttpFileFactoryTask<None>, DependencyKeys, None> task = this
+		ManagedFunction<HttpFileFactoryFunction<None>, DependencyKeys, None> task = this
 				.loadWorkAndObtainTask(
-						HttpFileSenderWorkSource.PROPERTY_NOT_FOUND_FILE_PATH,
+						HttpFileSenderManagedFunctionSource.PROPERTY_NOT_FOUND_FILE_PATH,
 						"OverrideFileNotFound.html");
 
 		// Execute the task to send the HTTP file
@@ -214,9 +214,9 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Load work and obtain the task
-		ManagedFunction<HttpFileFactoryTask<None>, DependencyKeys, None> task = this
+		ManagedFunction<HttpFileFactoryFunction<None>, DependencyKeys, None> task = this
 				.loadWorkAndObtainTask(
-						HttpFileSenderWorkSource.PROPERTY_NOT_FOUND_FILE_PATH,
+						HttpFileSenderManagedFunctionSource.PROPERTY_NOT_FOUND_FILE_PATH,
 						"non-canonical/../OverrideFileNotFound.html");
 
 		// Execute the task to send the HTTP file
@@ -237,7 +237,7 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 	 * @return {@link ManagedFunction} to execute.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private final ManagedFunction<HttpFileFactoryTask<None>, DependencyKeys, None> loadWorkAndObtainTask(
+	private final ManagedFunction<HttpFileFactoryFunction<None>, DependencyKeys, None> loadWorkAndObtainTask(
 			String... additionalParameterNameValues) {
 
 		// Create the listing of parameters
@@ -253,8 +253,8 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 		}
 
 		// Load the work type
-		FunctionNamespaceType<HttpFileFactoryTask<None>> workType = WorkLoaderUtil
-				.loadWorkType((Class) HttpFileSenderWorkSource.class,
+		FunctionNamespaceType<HttpFileFactoryFunction<None>> workType = WorkLoaderUtil
+				.loadWorkType((Class) HttpFileSenderManagedFunctionSource.class,
 						parameters.toArray(new String[parameters.size()]));
 
 		// Create the task

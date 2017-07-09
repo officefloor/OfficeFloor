@@ -56,7 +56,7 @@ import net.officefloor.plugin.web.http.template.parse.PropertyHttpTemplateSectio
 import net.officefloor.plugin.web.http.template.parse.StaticHttpTemplateSectionContentImpl;
 
 /**
- * Tests the {@link HttpTemplateWorkSource}.
+ * Tests the {@link HttpTemplateManagedFunctionSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -83,8 +83,8 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 	 * Verifies the specification.
 	 */
 	public void testSpecification() {
-		WorkLoaderUtil.validateSpecification(HttpTemplateWorkSource.class,
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE, "Template", HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI,
+		WorkLoaderUtil.validateSpecification(HttpTemplateManagedFunctionSource.class,
+				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE, "Template", HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI,
 				"URI Path");
 	}
 
@@ -98,7 +98,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		FunctionNamespaceBuilder<HttpTemplateWork> work = WorkLoaderUtil.createWorkTypeBuilder(workFactory);
 
 		// Create the task factory
-		HttpTemplateTask httpTemplateTaskFactory = new HttpTemplateTask(null, false, Charset.defaultCharset());
+		HttpTemplateFunction httpTemplateTaskFactory = new HttpTemplateFunction(null, false, Charset.defaultCharset());
 
 		// 'template' task
 		ManagedFunctionTypeBuilder<Indexed, None> template = work.addManagedFunctionType("template", httpTemplateTaskFactory, Indexed.class,
@@ -147,7 +147,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		tail.addEscalation(IOException.class);
 
 		// Verify the work type
-		WorkLoaderUtil.validateWorkType(work, HttpTemplateWorkSource.class,
+		WorkLoaderUtil.validateWorkType(work, HttpTemplateManagedFunctionSource.class,
 				this.getProperties(this.templatePath, "uri"));
 	}
 
@@ -159,7 +159,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 		// Record failure due to missing bean
-		issues.recordIssue("Missing property 'bean.template' for WorkSource " + HttpTemplateWorkSource.class.getName());
+		issues.recordIssue("Missing property 'bean.template' for WorkSource " + HttpTemplateManagedFunctionSource.class.getName());
 
 		// Create and initiate the compiler
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
@@ -167,12 +167,12 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Do not provide bean for template section
 		PropertyList propertyList = OfficeFloorCompiler.newPropertyList();
-		propertyList.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE).setValue(this.missingTemplateFilePath);
-		propertyList.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI).setValue("uri");
+		propertyList.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE).setValue(this.missingTemplateFilePath);
+		propertyList.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI).setValue("uri");
 
 		// Test loading ensuring indicates failure
 		this.replayMockObjects();
-		compiler.getWorkLoader().loadFunctionNamespaceType(HttpTemplateWorkSource.class, propertyList);
+		compiler.getWorkLoader().loadFunctionNamespaceType(HttpTemplateManagedFunctionSource.class, propertyList);
 		this.verifyMockObjects();
 	}
 
@@ -186,7 +186,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		// Record failure due to missing bean
 		final String message = "Property 'MissingProperty' can not be sourced from bean type " + Object.class.getName();
 		issues.recordIssue(
-				"Failed to source WorkType definition from WorkSource " + HttpTemplateWorkSource.class.getName(),
+				"Failed to source WorkType definition from WorkSource " + HttpTemplateManagedFunctionSource.class.getName(),
 				new Exception(message));
 
 		// Create and initiate the compiler
@@ -195,13 +195,13 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Provide bean that does not have the required property
 		PropertyList propertyList = OfficeFloorCompiler.newPropertyList();
-		propertyList.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE).setValue(this.missingTemplateFilePath);
-		propertyList.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI).setValue("uri");
+		propertyList.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE).setValue(this.missingTemplateFilePath);
+		propertyList.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI).setValue("uri");
 		propertyList.addProperty("bean.template").setValue(Object.class.getName());
 
 		// Test loading ensuring indicates failure
 		this.replayMockObjects();
-		compiler.getWorkLoader().loadFunctionNamespaceType(HttpTemplateWorkSource.class, propertyList);
+		compiler.getWorkLoader().loadFunctionNamespaceType(HttpTemplateManagedFunctionSource.class, propertyList);
 		this.verifyMockObjects();
 	}
 
@@ -252,13 +252,13 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		if (isTemplateSecure) {
 			// Secure template with non-secure link
 			additionalProperties
-					.addAll(Arrays.asList(HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE, String.valueOf(true)));
+					.addAll(Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE, String.valueOf(true)));
 			additionalProperties.addAll(
-					Arrays.asList(HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX + "beans", String.valueOf(false)));
+					Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "beans", String.valueOf(false)));
 		} else {
 			// Default non-secure template with secure link
 			additionalProperties.addAll(
-					Arrays.asList(HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX + "submit", String.valueOf(true)));
+					Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "submit", String.valueOf(true)));
 		}
 
 		// Specify the template URI suffix
@@ -268,11 +268,11 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		} else {
 			// Provide property for template URI suffix
 			additionalProperties
-					.addAll(Arrays.asList(HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX, templateUriSuffix));
+					.addAll(Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX, templateUriSuffix));
 		}
 
 		// Load the work type
-		FunctionNamespaceType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(HttpTemplateWorkSource.class,
+		FunctionNamespaceType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(HttpTemplateManagedFunctionSource.class,
 				this.getProperties(this.templatePath, "uri",
 						additionalProperties.toArray(new String[additionalProperties.size()])));
 
@@ -404,7 +404,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		});
 
 		// Load the work type
-		FunctionNamespaceType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(HttpTemplateWorkSource.class, compiler,
+		FunctionNamespaceType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(HttpTemplateManagedFunctionSource.class, compiler,
 				this.getProperties(this.templatePath, "uri"));
 
 		// Create the work and provide name
@@ -441,7 +441,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		MockHttpResponse httpResponse = new MockHttpResponse();
 
 		// Load the work type
-		FunctionNamespaceType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(HttpTemplateWorkSource.class,
+		FunctionNamespaceType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(HttpTemplateManagedFunctionSource.class,
 				this.getProperties(this.rootTemplatePath, "/"));
 
 		// Create as root template
@@ -483,20 +483,20 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		HttpTemplateSection staticSection = new HttpTemplateSectionImpl("STATIC", "STATIC CONTENT#{LINK}",
 				new HttpTemplateSectionContent[] { new StaticHttpTemplateSectionContentImpl("STATIC CONTENT"),
 						new LinkHttpTemplateSectionContentImpl("LINK") });
-		assertFalse("Should not require bean", HttpTemplateWorkSource.isHttpTemplateSectionRequireBean(staticSection));
+		assertFalse("Should not require bean", HttpTemplateManagedFunctionSource.isHttpTemplateSectionRequireBean(staticSection));
 
 		// Ensure require bean on property
 		HttpTemplateSection propertySection = new HttpTemplateSectionImpl("PROPERTY", "${Property}",
 				new HttpTemplateSectionContent[] { new PropertyHttpTemplateSectionContentImpl("Property") });
 		assertTrue("Require bean if have property in section",
-				HttpTemplateWorkSource.isHttpTemplateSectionRequireBean(propertySection));
+				HttpTemplateManagedFunctionSource.isHttpTemplateSectionRequireBean(propertySection));
 
 		// Ensure require bean on bean
 		HttpTemplateSection beanSection = new HttpTemplateSectionImpl("BEAN", "${Bean $}",
 				new HttpTemplateSectionContent[] {
 						new BeanHttpTemplateSectionContentImpl("Bean", new HttpTemplateSectionContent[0]) });
 		assertTrue("Require bean if have bean in section",
-				HttpTemplateWorkSource.isHttpTemplateSectionRequireBean(beanSection));
+				HttpTemplateManagedFunctionSource.isHttpTemplateSectionRequireBean(beanSection));
 	}
 
 	/**
@@ -506,14 +506,14 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Obtain without suffix
 		SourcePropertiesImpl properties = new SourcePropertiesImpl();
-		properties.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI, "configured/../non/../canoncial/../path");
+		properties.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI, "configured/../non/../canoncial/../path");
 		assertEquals("Incorrect path without suffix", "/path",
-				HttpTemplateWorkSource.getHttpTemplateUrlContinuationPath(properties));
+				HttpTemplateManagedFunctionSource.getHttpTemplateUrlContinuationPath(properties));
 
 		// Obtain with suffix
-		properties.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX, ".suffix");
+		properties.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX, ".suffix");
 		assertEquals("Incorrect path with suffix", "/path.suffix",
-				HttpTemplateWorkSource.getHttpTemplateUrlContinuationPath(properties));
+				HttpTemplateManagedFunctionSource.getHttpTemplateUrlContinuationPath(properties));
 	}
 
 	/**
@@ -524,14 +524,14 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Obtain without suffix
 		SourcePropertiesImpl properties = new SourcePropertiesImpl();
-		properties.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI, "/");
+		properties.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI, "/");
 		assertEquals("Incorrect path without suffix", "/",
-				HttpTemplateWorkSource.getHttpTemplateUrlContinuationPath(properties));
+				HttpTemplateManagedFunctionSource.getHttpTemplateUrlContinuationPath(properties));
 
 		// Obtain with suffix (should not include suffix)
-		properties.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX, ".suffix");
+		properties.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX, ".suffix");
 		assertEquals("Incorrect path with suffix", "/",
-				HttpTemplateWorkSource.getHttpTemplateUrlContinuationPath(properties));
+				HttpTemplateManagedFunctionSource.getHttpTemplateUrlContinuationPath(properties));
 	}
 
 	/**
@@ -541,12 +541,12 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 	public void testHttpTemplateLinkUrlContinuationPath() throws Exception {
 
 		// Obtain without suffix
-		assertEquals("Incorrect link path without suffix", "/path-link", HttpTemplateWorkSource
+		assertEquals("Incorrect link path without suffix", "/path-link", HttpTemplateManagedFunctionSource
 				.getHttpTemplateLinkUrlContinuationPath("configured/../non/../canonical/../path", "link", null));
 
 		// Obtain with suffix
 		assertEquals("Incorrect link path with suffix", "/path-link.suffix",
-				HttpTemplateWorkSource.getHttpTemplateLinkUrlContinuationPath("/path", "link", ".suffix"));
+				HttpTemplateManagedFunctionSource.getHttpTemplateLinkUrlContinuationPath("/path", "link", ".suffix"));
 	}
 
 	/**
@@ -556,11 +556,11 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Ensure by default not secure
 		SourcePropertiesImpl properties = new SourcePropertiesImpl();
-		assertFalse("Should default to not be secure", HttpTemplateWorkSource.isHttpTemplateSecure(properties));
+		assertFalse("Should default to not be secure", HttpTemplateManagedFunctionSource.isHttpTemplateSecure(properties));
 
 		// Ensure secure when configured secure
-		properties.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE, String.valueOf(true));
-		assertTrue("Should be secure", HttpTemplateWorkSource.isHttpTemplateSecure(properties));
+		properties.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE, String.valueOf(true));
+		assertTrue("Should be secure", HttpTemplateManagedFunctionSource.isHttpTemplateSecure(properties));
 	}
 
 	/**
@@ -589,7 +589,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 										new LinkHttpTemplateSectionContentImpl("SUB_BEAN_LINK") }) }) });
 
 		// Obtain the links
-		String[] links = HttpTemplateWorkSource.getHttpTemplateLinkNames(
+		String[] links = HttpTemplateManagedFunctionSource.getHttpTemplateLinkNames(
 				new HttpTemplateImpl(new HttpTemplateSection[] { noBeanSection, beanSection }));
 
 		// Validate correct links
@@ -653,18 +653,18 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		List<String> properties = new LinkedList<String>();
 
 		// Provide the template details
-		properties.addAll(Arrays.asList(HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE, templatePath));
-		properties.addAll(Arrays.asList(HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI, templateUri));
+		properties.addAll(Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE, templatePath));
+		properties.addAll(Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI, templateUri));
 
 		// Provide the beans
 		properties.addAll(
-				Arrays.asList(HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX + "template", TemplateBean.class.getName()));
+				Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "template", TemplateBean.class.getName()));
 		properties.addAll(
-				Arrays.asList(HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX + "BeanTree", BeanTreeBean.class.getName()));
+				Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "BeanTree", BeanTreeBean.class.getName()));
 		properties.addAll(
-				Arrays.asList(HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX + "NullBean", Object.class.getName()));
+				Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "NullBean", Object.class.getName()));
 		properties.addAll(
-				Arrays.asList(HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX + "List", TableRowBean.class.getName()));
+				Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "List", TableRowBean.class.getName()));
 
 		// Provide the additional property values
 		for (int i = 0; i < additionalPropertyNameValuePairs.length; i += 2) {

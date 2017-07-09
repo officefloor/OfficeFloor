@@ -19,26 +19,25 @@ package net.officefloor.plugin.web.http.resource.file;
 
 import java.io.IOException;
 
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
-import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.resource.HttpFile;
-import net.officefloor.plugin.web.http.resource.file.HttpFileWriterTask.HttpFileWriterTaskDependencies;
+import net.officefloor.plugin.web.http.resource.file.HttpFileWriterFunction.HttpFileWriterTaskDependencies;
 
 /**
  * {@link ManagedFunctionSource} that sends a {@link HttpFile}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpFileWriterWorkSource extends
-		AbstractWorkSource<HttpFileWriterTask> {
+public class HttpFileWriterManagedFunctionSource extends AbstractManagedFunctionSource {
 
 	/*
-	 * ======================== AbstractWorkSource =====================
+	 * ================ AbstractManagedFunctionSource =====================
 	 */
 
 	@Override
@@ -47,23 +46,15 @@ public class HttpFileWriterWorkSource extends
 	}
 
 	@Override
-	public void sourceManagedFunctions(FunctionNamespaceBuilder<HttpFileWriterTask> workTypeBuilder,
+	public void sourceManagedFunctions(FunctionNamespaceBuilder namespaceTypeBuilder,
 			ManagedFunctionSourceContext context) throws Exception {
 
-		// Create the factory
-		HttpFileWriterTask factory = new HttpFileWriterTask();
-
-		// Specify the work factory
-		workTypeBuilder.setWorkFactory(factory);
-
-		// Add the task
-		ManagedFunctionTypeBuilder<HttpFileWriterTaskDependencies, None> task = workTypeBuilder
-				.addManagedFunctionType("WriteFileToResponse", factory,
+		// Add the function
+		ManagedFunctionTypeBuilder<HttpFileWriterTaskDependencies, None> task = namespaceTypeBuilder
+				.addManagedFunctionType("WriteFileToResponse", new HttpFileWriterFunction(),
 						HttpFileWriterTaskDependencies.class, None.class);
-		task.addObject(HttpFile.class).setKey(
-				HttpFileWriterTaskDependencies.HTTP_FILE);
-		task.addObject(ServerHttpConnection.class).setKey(
-				HttpFileWriterTaskDependencies.SERVER_HTTP_CONNECTION);
+		task.addObject(HttpFile.class).setKey(HttpFileWriterTaskDependencies.HTTP_FILE);
+		task.addObject(ServerHttpConnection.class).setKey(HttpFileWriterTaskDependencies.SERVER_HTTP_CONNECTION);
 		task.addEscalation(IOException.class);
 	}
 

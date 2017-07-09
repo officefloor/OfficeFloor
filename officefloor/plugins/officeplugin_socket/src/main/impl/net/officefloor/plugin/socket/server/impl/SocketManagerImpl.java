@@ -110,7 +110,7 @@ public class SocketManagerImpl implements SocketManager {
 				(prev, increment) -> (prev + increment) % this.socketListeners.length);
 
 		// Register connection with socket listener
-		this.socketListeners[next].registerEstablishedConnection(connection);
+		this.socketListeners[next].registerAcceptedConnection(connection);
 	}
 
 	@Override

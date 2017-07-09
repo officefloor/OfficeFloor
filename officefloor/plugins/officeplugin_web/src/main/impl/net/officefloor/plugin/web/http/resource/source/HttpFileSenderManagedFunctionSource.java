@@ -20,14 +20,14 @@ package net.officefloor.plugin.web.http.resource.source;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
-import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
@@ -41,7 +41,7 @@ import net.officefloor.plugin.web.http.resource.HttpResource;
 import net.officefloor.plugin.web.http.resource.HttpResourceCreationListener;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.classpath.ClasspathHttpResourceFactory;
-import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryTask.DependencyKeys;
+import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.DependencyKeys;
 
 /**
  * <p>
@@ -58,8 +58,7 @@ import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryTask.Depen
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpFileSenderWorkSource extends
-		AbstractWorkSource<HttpFileFactoryTask<None>> {
+public class HttpFileSenderManagedFunctionSource extends AbstractManagedFunctionSource {
 
 	/**
 	 * Property to obtain the path to the file containing the &quot;not
@@ -70,7 +69,7 @@ public class HttpFileSenderWorkSource extends
 	/**
 	 * Name of the {@link ManagedFunction} to send the {@link HttpFile}.
 	 */
-	public static final String TASK_NAME = "SendFile";
+	public static final String FUNCTION_NAME = "SendFile";
 
 	/**
 	 * Name of the default not found file.
@@ -80,14 +79,14 @@ public class HttpFileSenderWorkSource extends
 	/**
 	 * Prefix for the default not found file.
 	 */
-	private static final String DEFAULT_NOT_FOUND_PREFIX = HttpFileSenderWorkSource.class
-			.getPackage().getName().replace('.', '/');
+	private static final String DEFAULT_NOT_FOUND_PREFIX = HttpFileSenderManagedFunctionSource.class.getPackage()
+			.getName().replace('.', '/');
 
 	/**
 	 * Path on the class path to the default not found file.
 	 */
-	public static final String DEFAULT_NOT_FOUND_FILE_PATH = DEFAULT_NOT_FOUND_PREFIX
-			+ "/" + DEFAULT_NOT_FOUND_FILE_NAME;
+	public static final String DEFAULT_NOT_FOUND_FILE_PATH = DEFAULT_NOT_FOUND_PREFIX + "/"
+			+ DEFAULT_NOT_FOUND_FILE_NAME;
 
 	/*
 	 * ============================ WorkSource ================================
@@ -99,20 +98,17 @@ public class HttpFileSenderWorkSource extends
 	}
 
 	@Override
-	public void sourceManagedFunctions(
-			FunctionNamespaceBuilder<HttpFileFactoryTask<None>> workTypeBuilder,
+	public void sourceManagedFunctions(FunctionNamespaceBuilder namespaceTypeBuilder,
 			ManagedFunctionSourceContext context) throws Exception {
 
 		// Obtain the properties
-		String notFoundContentPath = context.getProperty(
-				PROPERTY_NOT_FOUND_FILE_PATH, null);
+		String notFoundContentPath = context.getProperty(PROPERTY_NOT_FOUND_FILE_PATH, null);
 
 		// Obtain the class loader
 		ClassLoader classLoader = context.getClassLoader();
 
 		// Create the HTTP resource factory
-		HttpResourceFactory httpResourceFactory = SourceHttpResourceFactory
-				.createHttpResourceFactory(context);
+		HttpResourceFactory httpResourceFactory = SourceHttpResourceFactory.createHttpResourceFactory(context);
 
 		// Add the file extension HTTP file describer by file extension
 		FileExtensionHttpFileDescriber describer = new FileExtensionHttpFileDescriber();
@@ -125,9 +121,8 @@ public class HttpFileSenderWorkSource extends
 		if (notFoundContentPath == null) {
 			// Use default file not found content
 			notFoundContentPath = DEFAULT_NOT_FOUND_FILE_NAME;
-			notFoundResourceFactory = ClasspathHttpResourceFactory
-					.getHttpResourceFactory(DEFAULT_NOT_FOUND_PREFIX,
-							classLoader, notFoundContentPath);
+			notFoundResourceFactory = ClasspathHttpResourceFactory.getHttpResourceFactory(DEFAULT_NOT_FOUND_PREFIX,
+					classLoader, notFoundContentPath);
 			notFoundResourceFactory.addHttpFileDescriber(describer);
 
 		} else {
@@ -139,34 +134,27 @@ public class HttpFileSenderWorkSource extends
 		if (!notFoundContentPath.startsWith("/")) {
 			notFoundContentPath = "/" + notFoundContentPath;
 		}
-		notFoundContentPath = HttpApplicationLocationMangedObject
-				.transformToCanonicalPath(notFoundContentPath);
+		notFoundContentPath = HttpApplicationLocationMangedObject.transformToCanonicalPath(notFoundContentPath);
 
 		// Obtain the file not found content
-		HttpResource notFoundResource = notFoundResourceFactory
-				.createHttpResource(notFoundContentPath);
-		if ((!notFoundResource.isExist())
-				|| (!(notFoundResource instanceof HttpFile))) {
+		HttpResource notFoundResource = notFoundResourceFactory.createHttpResource(notFoundContentPath);
+		if ((!notFoundResource.isExist()) || (!(notFoundResource instanceof HttpFile))) {
 			// Must have file not found content
-			throw new FileNotFoundException(
-					"Can not obtain file not found content: "
-							+ notFoundContentPath);
+			throw new FileNotFoundException("Can not obtain file not found content: " + notFoundContentPath);
 		}
 		final HttpFile fileNotFoundContent = (HttpFile) notFoundResource;
 
 		// Create the HTTP file creation listener
 		HttpResourceCreationListener<None> httpFileCreationListener = new HttpResourceCreationListener<None>() {
 			@Override
-			public void httpResourceCreated(HttpResource httpResource,
-					ServerHttpConnection connection,
-					ManagedFunctionContext<?, ?, None> context) throws IOException {
+			public void httpResourceCreated(HttpResource httpResource, ServerHttpConnection connection,
+					ManagedFunctionContext<?, None> context) throws IOException {
 
 				// Obtain the response to write
 				HttpResponse response = connection.getHttpResponse();
 
 				// Determine if HTTP file exists
-				if ((httpResource.isExist())
-						&& (httpResource instanceof HttpFile)) {
+				if ((httpResource.isExist()) && (httpResource instanceof HttpFile)) {
 					HttpFile httpFile = (HttpFile) httpResource;
 
 					// Send the HTTP File
@@ -177,8 +165,7 @@ public class HttpFileSenderWorkSource extends
 
 				} else {
 					// File not found so write file not found content
-					AbstractHttpFile.writeHttpFile(fileNotFoundContent,
-							response);
+					AbstractHttpFile.writeHttpFile(fileNotFoundContent, response);
 
 					// Specify not found status
 					response.setStatus(HttpStatus.SC_NOT_FOUND);
@@ -189,22 +176,17 @@ public class HttpFileSenderWorkSource extends
 			}
 		};
 
-		// Create the HTTP file factory task
-		HttpFileFactoryTask<None> task = new HttpFileFactoryTask<None>(
-				httpResourceFactory, httpFileCreationListener);
-
-		// Load the type information of the work
-		workTypeBuilder.setWorkFactory(task);
+		// Create the HTTP file factory function
+		HttpFileFactoryFunction<None> function = new HttpFileFactoryFunction<None>(httpResourceFactory,
+				httpFileCreationListener);
 
 		// Load the task to send the HTTP file
-		ManagedFunctionTypeBuilder<DependencyKeys, None> taskTypeBuilder = workTypeBuilder
-				.addManagedFunctionType(TASK_NAME, task, DependencyKeys.class, None.class);
-		taskTypeBuilder.addObject(ServerHttpConnection.class).setKey(
-				DependencyKeys.SERVER_HTTP_CONNECTION);
-		taskTypeBuilder.addObject(HttpApplicationLocation.class).setKey(
-				DependencyKeys.HTTP_APPLICATION_LOCATION);
-		taskTypeBuilder.addEscalation(IOException.class);
-		taskTypeBuilder.addEscalation(InvalidHttpRequestUriException.class);
+		ManagedFunctionTypeBuilder<DependencyKeys, None> functionTypeBuilder = namespaceTypeBuilder
+				.addManagedFunctionType(FUNCTION_NAME, function, DependencyKeys.class, None.class);
+		functionTypeBuilder.addObject(ServerHttpConnection.class).setKey(DependencyKeys.SERVER_HTTP_CONNECTION);
+		functionTypeBuilder.addObject(HttpApplicationLocation.class).setKey(DependencyKeys.HTTP_APPLICATION_LOCATION);
+		functionTypeBuilder.addEscalation(IOException.class);
+		functionTypeBuilder.addEscalation(InvalidHttpRequestUriException.class);
 	}
 
 }

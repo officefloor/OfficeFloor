@@ -20,16 +20,17 @@ package net.officefloor.plugin.web.http.continuation;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 
 /**
  * HTTP URL continuation {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpUrlContinuationTask implements ManagedFunction<None, None> {
+public class HttpUrlContinuationFunction extends StaticManagedFunction<None, None> {
 
 	/*
-	 * ==================== Task ========================
+	 * ==================== ManagedFunction ========================
 	 */
 
 	@Override

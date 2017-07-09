@@ -25,7 +25,7 @@ import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
+import net.officefloor.plugin.web.http.template.HttpTemplateManagedFunctionSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
 import org.apache.http.HttpResponse;
@@ -34,7 +34,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
- * Ensure integration of {@link HttpTemplateWorkSource} and
+ * Ensure integration of {@link HttpTemplateManagedFunctionSource} and
  * {@link HttpTemplateRouteWorkSource}.
  * 
  * @author Daniel Sagenschneider

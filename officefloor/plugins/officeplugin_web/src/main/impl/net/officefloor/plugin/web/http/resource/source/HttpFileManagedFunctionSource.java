@@ -20,15 +20,15 @@ package net.officefloor.plugin.web.http.resource.source;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
-import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationMangedObject;
@@ -39,15 +39,15 @@ import net.officefloor.plugin.web.http.resource.HttpResource;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
 
 /**
- * {@link ManagedFunctionSource} for always sending a particular {@link HttpFile}.
+ * {@link ManagedFunctionSource} for always sending a particular
+ * {@link HttpFile}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpFileWorkSource extends
-		AbstractWorkSource<HttpFileWorkSource.SendHttpFileTask> {
+public class HttpFileManagedFunctionSource extends AbstractManagedFunctionSource {
 
 	/**
-	 * Dependency keys for the {@link HttpFileFactoryTask}.
+	 * Dependency keys for the {@link HttpFileFactoryFunction}.
 	 */
 	public static enum DependencyKeys {
 		SERVER_HTTP_CONNECTION
@@ -73,15 +73,14 @@ public class HttpFileWorkSource extends
 	}
 
 	@Override
-	public void sourceManagedFunctions(FunctionNamespaceBuilder<SendHttpFileTask> workTypeBuilder,
+	public void sourceManagedFunctions(FunctionNamespaceBuilder namespaceTypeBuilder,
 			ManagedFunctionSourceContext context) throws Exception {
 
 		// Obtain the properties
 		String resourcePath = context.getProperty(PROPERTY_RESOURCE_PATH);
 
 		// Create the class path HTTP resource factory
-		HttpResourceFactory httpResourceFactory = SourceHttpResourceFactory
-				.createHttpResourceFactory(context);
+		HttpResourceFactory httpResourceFactory = SourceHttpResourceFactory.createHttpResourceFactory(context);
 
 		// Add the file extension HTTP file describer by file extension
 		FileExtensionHttpFileDescriber describer = new FileExtensionHttpFileDescriber();
@@ -93,36 +92,29 @@ public class HttpFileWorkSource extends
 		if (!(resourcePath.startsWith("/"))) {
 			resourcePath = "/" + resourcePath;
 		}
-		resourcePath = HttpApplicationLocationMangedObject
-				.transformToCanonicalPath(resourcePath);
+		resourcePath = HttpApplicationLocationMangedObject.transformToCanonicalPath(resourcePath);
 
 		// Obtain the HTTP file
-		HttpResource resource = httpResourceFactory
-				.createHttpResource(resourcePath);
+		HttpResource resource = httpResourceFactory.createHttpResource(resourcePath);
 		if (!(resource instanceof HttpFile)) {
-			throw new FileNotFoundException("Can not find resource '"
-					+ resourcePath + "'");
+			throw new FileNotFoundException("Can not find resource '" + resourcePath + "'");
 		}
 		HttpFile file = (HttpFile) resource;
 
-		// Create the factory for the task
-		SendHttpFileTask factory = new SendHttpFileTask(file);
+		// Create the factory for the function
+		SendHttpFileFunction factory = new SendHttpFileFunction(file);
 
-		// Register the task information
-		workTypeBuilder.setWorkFactory(factory);
-		ManagedFunctionTypeBuilder<DependencyKeys, None> task = workTypeBuilder
-				.addManagedFunctionType(TASK_HTTP_FILE, factory, DependencyKeys.class,
-						None.class);
-		task.addObject(ServerHttpConnection.class).setKey(
-				DependencyKeys.SERVER_HTTP_CONNECTION);
-		task.addEscalation(IOException.class);
+		// Register the function
+		ManagedFunctionTypeBuilder<DependencyKeys, None> function = namespaceTypeBuilder
+				.addManagedFunctionType(TASK_HTTP_FILE, factory, DependencyKeys.class, None.class);
+		function.addObject(ServerHttpConnection.class).setKey(DependencyKeys.SERVER_HTTP_CONNECTION);
+		function.addEscalation(IOException.class);
 	}
 
 	/**
 	 * {@link ManagedFunction} to send the {@link HttpFile}.
 	 */
-	public static class SendHttpFileTask extends
-			AbstractSingleTask<SendHttpFileTask, DependencyKeys, None> {
+	public static class SendHttpFileFunction extends StaticManagedFunction<DependencyKeys, None> {
 
 		/**
 		 * {@link HttpFile}.
@@ -135,18 +127,16 @@ public class HttpFileWorkSource extends
 		 * @param file
 		 *            {@link HttpFile}.
 		 */
-		public SendHttpFileTask(HttpFile file) {
+		public SendHttpFileFunction(HttpFile file) {
 			this.file = file;
 		}
 
 		/*
-		 * ========================= Task =================================
+		 * ========================= ManagedFunction =========================
 		 */
 
 		@Override
-		public Object execute(
-				ManagedFunctionContext<SendHttpFileTask, DependencyKeys, None> context)
-				throws IOException {
+		public Object execute(ManagedFunctionContext<DependencyKeys, None> context) throws IOException {
 
 			// Obtain the response
 			ServerHttpConnection connection = (ServerHttpConnection) context

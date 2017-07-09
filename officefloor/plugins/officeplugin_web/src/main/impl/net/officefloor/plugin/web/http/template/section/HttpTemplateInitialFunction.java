@@ -22,35 +22,34 @@ import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
-import net.officefloor.plugin.web.http.route.HttpRouteTask;
+import net.officefloor.plugin.web.http.route.HttpRouteFunction;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
 /**
- * Initial {@link ManagedFunction} to ensure appropriate conditions for rendering the
- * {@link HttpTemplate}.
+ * Initial {@link ManagedFunction} to ensure appropriate conditions for
+ * rendering the {@link HttpTemplate}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpTemplateInitialTask
-		extends
-		AbstractSingleTask<HttpTemplateInitialTask, HttpTemplateInitialTask.Dependencies, HttpTemplateInitialTask.Flows> {
+public class HttpTemplateInitialFunction
+		extends StaticManagedFunction<HttpTemplateInitialFunction.Dependencies, HttpTemplateInitialFunction.Flows> {
 
 	/**
-	 * Keys for the {@link HttpTemplateInitialTask} dependencies.
+	 * Keys for the {@link HttpTemplateInitialFunction} dependencies.
 	 */
 	public static enum Dependencies {
 		SERVER_HTTP_CONNECTION, HTTP_APPLICATION_LOCATION, REQUEST_STATE, HTTP_SESSION
 	}
 
 	/**
-	 * Keys for the {@link HttpTemplateInitialTask} flows.
+	 * Keys for the {@link HttpTemplateInitialFunction} flows.
 	 */
 	public static enum Flows {
 		RENDER
@@ -60,8 +59,7 @@ public class HttpTemplateInitialTask
 	 * Default HTTP methods to redirect before rendering the
 	 * {@link HttpTemplate}.
 	 */
-	public static final String[] DEFAULT_RENDER_REDIRECT_HTTP_METHODS = new String[] {
-			"POST", "PUT" };
+	public static final String[] DEFAULT_RENDER_REDIRECT_HTTP_METHODS = new String[] { "POST", "PUT" };
 
 	/**
 	 * URI path for the {@link HttpTemplate}.
@@ -105,9 +103,8 @@ public class HttpTemplateInitialTask
 	 * @param charset
 	 *            {@link Charset} for {@link HttpTemplate}.
 	 */
-	public HttpTemplateInitialTask(String templateUriPath,
-			boolean isRequireSecure, String[] renderRedirectHttpMethods,
-			String contentType, Charset charset) {
+	public HttpTemplateInitialFunction(String templateUriPath, boolean isRequireSecure,
+			String[] renderRedirectHttpMethods, String contentType, Charset charset) {
 		this.templateUriPath = templateUriPath;
 		this.isRequireSecure = isRequireSecure;
 		this.contentType = contentType;
@@ -123,23 +120,18 @@ public class HttpTemplateInitialTask
 	}
 
 	/*
-	 * ======================= Task ===============================
+	 * ======================= ManagedFunction ===============================
 	 */
 
 	@Override
-	public Object execute(
-			ManagedFunctionContext<HttpTemplateInitialTask, Dependencies, Flows> context)
-			throws IOException {
+	public Object execute(ManagedFunctionContext<Dependencies, Flows> context) throws IOException {
 
 		// Obtain the dependencies
-		ServerHttpConnection connection = (ServerHttpConnection) context
-				.getObject(Dependencies.SERVER_HTTP_CONNECTION);
+		ServerHttpConnection connection = (ServerHttpConnection) context.getObject(Dependencies.SERVER_HTTP_CONNECTION);
 		HttpApplicationLocation location = (HttpApplicationLocation) context
 				.getObject(Dependencies.HTTP_APPLICATION_LOCATION);
-		HttpRequestState requestState = (HttpRequestState) context
-				.getObject(Dependencies.REQUEST_STATE);
-		HttpSession session = (HttpSession) context
-				.getObject(Dependencies.HTTP_SESSION);
+		HttpRequestState requestState = (HttpRequestState) context.getObject(Dependencies.REQUEST_STATE);
+		HttpSession session = (HttpSession) context.getObject(Dependencies.HTTP_SESSION);
 
 		// Flag indicating if redirect is required
 		boolean isRedirectRequired = false;
@@ -175,20 +167,18 @@ public class HttpTemplateInitialTask
 
 		// Undertake the redirect
 		if (isRedirectRequired) {
-			HttpRouteTask.doRedirect(this.templateUriPath,
-					this.isRequireSecure, connection, location, requestState,
+			HttpRouteFunction.doRedirect(this.templateUriPath, this.isRequireSecure, connection, location, requestState,
 					session);
 			return null; // redirected, do not render template
 		}
 
 		// Configure the response
 		if (this.contentType != null) {
-			connection.getHttpResponse().setContentType(this.contentType,
-					this.charset);
+			connection.getHttpResponse().setContentType(this.contentType, this.charset);
 		}
 
 		// Render the template
-		context.doFlow(Flows.RENDER, null);
+		context.doFlow(Flows.RENDER, null, null);
 		return null;
 	}
 

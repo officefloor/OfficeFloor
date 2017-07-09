@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayDeque;
@@ -305,8 +306,12 @@ public class ConnectionImpl implements Connection, ManagedConnection, SelectionK
 			this.isTerminateAfterWrites = true;
 
 			// Terminate connection
-			this.socketChannel.close();
-			this.selectionKey.cancel();
+			try {
+				this.socketChannel.close();
+				this.selectionKey.cancel();
+			} catch (ClosedChannelException ex) {
+				// Already closed
+			}
 
 			// Return all buffers to pool and clear any writes
 			for (WriteAction action : this.writeActions) {

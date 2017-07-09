@@ -40,12 +40,12 @@ import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferent
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.route.HttpRouteTaskTest;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
-import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialTask.Dependencies;
-import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialTask.Flows;
+import net.officefloor.plugin.web.http.template.HttpTemplateManagedFunctionSource;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialFunction.Dependencies;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialFunction.Flows;
 
 /**
- * Tests the {@link HttpTemplateInitialWorkSource}.
+ * Tests the {@link HttpTemplateInitialManagedFunctionSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -56,8 +56,8 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testSpecification() {
 		WorkLoaderUtil
-				.validateSpecification(HttpTemplateInitialWorkSource.class,
-						HttpTemplateInitialWorkSource.PROPERTY_TEMPLATE_URI,
+				.validateSpecification(HttpTemplateInitialManagedFunctionSource.class,
+						HttpTemplateInitialManagedFunctionSource.PROPERTY_TEMPLATE_URI,
 						"URI Path");
 	}
 
@@ -122,11 +122,11 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 			String uriSuffix, String expectedUrlContinuationPath) {
 
 		// Factory
-		HttpTemplateInitialTask factory = new HttpTemplateInitialTask(null,
+		HttpTemplateInitialFunction factory = new HttpTemplateInitialFunction(null,
 				false, null, null, null);
 
 		// Create the expected type
-		FunctionNamespaceBuilder<HttpTemplateInitialTask> type = WorkLoaderUtil
+		FunctionNamespaceBuilder<HttpTemplateInitialFunction> type = WorkLoaderUtil
 				.createWorkTypeBuilder(factory);
 
 		// Initial task
@@ -147,26 +147,26 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 		// Create the listing of properties
 		List<String> properties = new ArrayList<String>(6);
 		properties.addAll(Arrays.asList(
-				HttpTemplateInitialWorkSource.PROPERTY_TEMPLATE_URI,
+				HttpTemplateInitialManagedFunctionSource.PROPERTY_TEMPLATE_URI,
 				configuredUriPath));
 		if (isConfiguredSecure != null) {
 			properties.addAll(Arrays.asList(
-					HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
+					HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE,
 					String.valueOf(isConfiguredSecure)));
 		}
 		if (uriSuffix != null) {
 			properties.addAll(Arrays.asList(
-					HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX,
+					HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX,
 					uriSuffix));
 		}
 
 		// Validate type (must also convert
-		FunctionNamespaceType<HttpTemplateInitialTask> work = WorkLoaderUtil
-				.validateWorkType(type, HttpTemplateInitialWorkSource.class,
+		FunctionNamespaceType<HttpTemplateInitialFunction> work = WorkLoaderUtil
+				.validateWorkType(type, HttpTemplateInitialManagedFunctionSource.class,
 						properties.toArray(new String[properties.size()]));
 
 		// Ensure correct URI path
-		ManagedFunctionType<HttpTemplateInitialTask, ?, ?> task = work.getManagedFunctionTypes()[0];
+		ManagedFunctionType<HttpTemplateInitialFunction, ?, ?> task = work.getManagedFunctionTypes()[0];
 		HttpUrlContinuationDifferentiator differentiator = (HttpUrlContinuationDifferentiator) task
 				.getDifferentiator();
 		assertEquals("Incorrect URI path", expectedUrlContinuationPath,
@@ -284,33 +284,33 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 			// Create the task
 			List<String> properties = new ArrayList<String>(6);
 			properties.addAll(Arrays.asList(
-					HttpTemplateInitialWorkSource.PROPERTY_TEMPLATE_URI,
+					HttpTemplateInitialManagedFunctionSource.PROPERTY_TEMPLATE_URI,
 					(redirectUriPath == null ? "/path" : redirectUriPath)));
 			if (isRequireSecure) {
 				properties.addAll(Arrays.asList(
-						HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
+						HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE,
 						String.valueOf(isRequireSecure)));
 			}
 			if (redirectMethods != null) {
 				properties
 						.addAll(Arrays
-								.asList(HttpTemplateInitialWorkSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
+								.asList(HttpTemplateInitialManagedFunctionSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
 										redirectMethods));
 			}
 			if (contentType != null) {
 				properties.addAll(Arrays.asList(
-						HttpTemplateInitialWorkSource.PROPERTY_CONTENT_TYPE,
+						HttpTemplateInitialManagedFunctionSource.PROPERTY_CONTENT_TYPE,
 						contentType));
 			}
 			if (charset != null) {
 				properties.addAll(Arrays.asList(
-						HttpTemplateInitialWorkSource.PROPERTY_CHARSET,
+						HttpTemplateInitialManagedFunctionSource.PROPERTY_CHARSET,
 						charset.name()));
 			}
-			FunctionNamespaceType<HttpTemplateInitialTask> work = WorkLoaderUtil
-					.loadWorkType(HttpTemplateInitialWorkSource.class,
+			FunctionNamespaceType<HttpTemplateInitialFunction> work = WorkLoaderUtil
+					.loadWorkType(HttpTemplateInitialManagedFunctionSource.class,
 							properties.toArray(new String[properties.size()]));
-			ManagedFunction<HttpTemplateInitialTask, ?, ?> task = work.getManagedFunctionTypes()[0]
+			ManagedFunction<HttpTemplateInitialFunction, ?, ?> task = work.getManagedFunctionTypes()[0]
 					.getManagedFunctionFactory().createManagedFunction(
 							work.getWorkFactory().createWork());
 

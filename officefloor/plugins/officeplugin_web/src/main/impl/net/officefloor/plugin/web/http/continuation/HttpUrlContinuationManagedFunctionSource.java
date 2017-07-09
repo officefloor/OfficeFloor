@@ -19,10 +19,10 @@ package net.officefloor.plugin.web.http.continuation;
 
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
-import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
-import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationMangedObject;
@@ -33,8 +33,7 @@ import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpUrlContinuationWorkSource extends
-		AbstractWorkSource<HttpUrlContinuationTask> {
+public class HttpUrlContinuationManagedFunctionSource extends AbstractManagedFunctionSource {
 
 	/**
 	 * Name of {@link Property} specifying the URI path for the HTTP URL
@@ -51,7 +50,7 @@ public class HttpUrlContinuationWorkSource extends
 	/**
 	 * Name of the {@link ManagedFunctionType}.
 	 */
-	public static final String TASK_NAME = "CONTINUATION";
+	public static final String FUNCTION_NAME = "CONTINUATION";
 
 	/**
 	 * Obtains the application URI path from the configured URI path.
@@ -62,23 +61,20 @@ public class HttpUrlContinuationWorkSource extends
 	 * @throws InvalidHttpRequestUriException
 	 *             If configured URI path is invalid.
 	 */
-	public static String getApplicationUriPath(String configuredUriPath)
-			throws InvalidHttpRequestUriException {
+	public static String getApplicationUriPath(String configuredUriPath) throws InvalidHttpRequestUriException {
 
 		// Ensure the configure URI path is absolute
-		String applicationUriPath = (configuredUriPath.startsWith("/") ? configuredUriPath
-				: "/" + configuredUriPath);
+		String applicationUriPath = (configuredUriPath.startsWith("/") ? configuredUriPath : "/" + configuredUriPath);
 
 		// Ensure is canonical
-		applicationUriPath = HttpApplicationLocationMangedObject
-				.transformToCanonicalPath(applicationUriPath);
+		applicationUriPath = HttpApplicationLocationMangedObject.transformToCanonicalPath(applicationUriPath);
 
 		// Return the Application URI path
 		return applicationUriPath;
 	}
 
 	/*
-	 * ====================== WorkSource ===========================
+	 * ====================== ManagedFunctionSource ===========================
 	 */
 
 	@Override
@@ -87,8 +83,7 @@ public class HttpUrlContinuationWorkSource extends
 	}
 
 	@Override
-	public void sourceManagedFunctions(
-			FunctionNamespaceBuilder<HttpUrlContinuationTask> workTypeBuilder,
+	public void sourceManagedFunctions(FunctionNamespaceBuilder namespaceTypeBuilder,
 			ManagedFunctionSourceContext context) throws Exception {
 
 		// Obtain the application URI path (for use)
@@ -97,19 +92,17 @@ public class HttpUrlContinuationWorkSource extends
 
 		// Determine if secure
 		String isSecureText = context.getProperty(PROPERTY_SECURE, null);
-		Boolean isSecure = (isSecureText == null ? null : Boolean
-				.valueOf(isSecureText));
+		Boolean isSecure = (isSecureText == null ? null : Boolean.valueOf(isSecureText));
 
 		// Create the differentiator
-		HttpUrlContinuationDifferentiator differentiator = new HttpUrlContinuationDifferentiatorImpl(
-				applicationUriPath, isSecure);
+		HttpUrlContinuationDifferentiator differentiator = new HttpUrlContinuationDifferentiatorImpl(applicationUriPath,
+				isSecure);
 
 		// Create the factory
-		HttpUrlContinuationTask factory = new HttpUrlContinuationTask();
+		HttpUrlContinuationFunction factory = new HttpUrlContinuationFunction();
 
-		// Configure the work and task
-		workTypeBuilder.setWorkFactory(factory);
-		workTypeBuilder.addManagedFunctionType(TASK_NAME, factory, None.class, None.class)
+		// Configure the function
+		namespaceTypeBuilder.addManagedFunctionType(FUNCTION_NAME, factory, None.class, None.class)
 				.setDifferentiator(differentiator);
 	}
 }

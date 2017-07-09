@@ -21,15 +21,15 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
-import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.parameters.HttpParametersException;
@@ -37,14 +37,12 @@ import net.officefloor.plugin.web.http.parameters.HttpParametersLoader;
 import net.officefloor.plugin.web.http.parameters.HttpParametersLoaderImpl;
 
 /**
- * {@link ManagedFunctionSource} to load the {@link HttpRequest} parameters onto a
- * dependency Object.
+ * {@link ManagedFunctionSource} to load the {@link HttpRequest} parameters onto
+ * a dependency Object.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpParametersLoaderWorkSource
-		extends
-		AbstractWorkSource<HttpParametersLoaderWorkSource.HttpParametersLoaderTask> {
+public class HttpParametersLoaderManagedFunctionSource extends AbstractManagedFunctionSource {
 
 	/**
 	 * Property to obtain the fully qualified type name of the Object to have
@@ -80,8 +78,7 @@ public class HttpParametersLoaderWorkSource
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void sourceManagedFunctions(
-			FunctionNamespaceBuilder<HttpParametersLoaderTask> workTypeBuilder,
+	public void sourceManagedFunctions(FunctionNamespaceBuilder namespaceTypeBuilder,
 			ManagedFunctionSourceContext context) throws Exception {
 
 		// Obtain the type
@@ -89,8 +86,8 @@ public class HttpParametersLoaderWorkSource
 		Class<?> type = context.loadClass(typeName);
 
 		// Obtain whether case insensitive (true by default)
-		boolean isCaseInsensitive = Boolean.parseBoolean(context.getProperty(
-				PROPERTY_CASE_INSENSITIVE, Boolean.toString(true)));
+		boolean isCaseInsensitive = Boolean
+				.parseBoolean(context.getProperty(PROPERTY_CASE_INSENSITIVE, Boolean.toString(true)));
 
 		// Create the alias mappings
 		Map<String, String> aliasMappings = new HashMap<String, String>();
@@ -112,52 +109,40 @@ public class HttpParametersLoaderWorkSource
 		// Initialise the loader
 		this.loader.init(type, aliasMappings, isCaseInsensitive, null);
 
-		// Create the task to load the HTTP parameters
-		HttpParametersLoaderTask task = new HttpParametersLoaderTask();
-
-		// Build the work
-		workTypeBuilder.setWorkFactory(task);
-
-		// Build the task
-		ManagedFunctionTypeBuilder<HttpParametersLoaderDependencies, None> taskBuilder = workTypeBuilder
-				.addManagedFunctionType("LOADER", task,
+		// Build the function
+		ManagedFunctionTypeBuilder<HttpParametersLoaderDependencies, None> functionBuilder = namespaceTypeBuilder
+				.addManagedFunctionType("LOADER", new HttpParametersLoaderFunction(),
 						HttpParametersLoaderDependencies.class, None.class);
-		taskBuilder.addObject(ServerHttpConnection.class).setKey(
-				HttpParametersLoaderDependencies.SERVER_HTTP_CONNECTION);
-		taskBuilder.addObject(type).setKey(
-				HttpParametersLoaderDependencies.OBJECT);
-		taskBuilder.setReturnType(type);
-		taskBuilder.addEscalation(IOException.class);
-		taskBuilder.addEscalation(HttpParametersException.class);
+		functionBuilder.addObject(ServerHttpConnection.class)
+				.setKey(HttpParametersLoaderDependencies.SERVER_HTTP_CONNECTION);
+		functionBuilder.addObject(type).setKey(HttpParametersLoaderDependencies.OBJECT);
+		functionBuilder.setReturnType(type);
+		functionBuilder.addEscalation(IOException.class);
+		functionBuilder.addEscalation(HttpParametersException.class);
 	}
 
 	/**
-	 * {@link ManagedFunction} to load the {@link HttpRequest} parameters onto a dependency
-	 * Object.
+	 * {@link ManagedFunction} to load the {@link HttpRequest} parameters onto a
+	 * dependency Object.
 	 */
-	public class HttpParametersLoaderTask
-			extends
-			AbstractSingleTask<HttpParametersLoaderTask, HttpParametersLoaderDependencies, None> {
+	public class HttpParametersLoaderFunction extends StaticManagedFunction<HttpParametersLoaderDependencies, None> {
 
 		/*
-		 * =========================== Task ===============================
+		 * ======================== ManagedFunction ==========================
 		 */
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public Object execute(
-				ManagedFunctionContext<HttpParametersLoaderTask, HttpParametersLoaderDependencies, None> context)
+		public Object execute(ManagedFunctionContext<HttpParametersLoaderDependencies, None> context)
 				throws IOException, HttpParametersException {
 
 			// Obtain the dependencies
 			ServerHttpConnection connection = (ServerHttpConnection) context
 					.getObject(HttpParametersLoaderDependencies.SERVER_HTTP_CONNECTION);
-			Object object = context
-					.getObject(HttpParametersLoaderDependencies.OBJECT);
+			Object object = context.getObject(HttpParametersLoaderDependencies.OBJECT);
 
 			// Load the parameters onto the object
-			HttpParametersLoaderWorkSource.this.loader.loadParameters(
-					connection.getHttpRequest(), object);
+			HttpParametersLoaderManagedFunctionSource.this.loader.loadParameters(connection.getHttpRequest(), object);
 
 			// Return the object
 			return object;

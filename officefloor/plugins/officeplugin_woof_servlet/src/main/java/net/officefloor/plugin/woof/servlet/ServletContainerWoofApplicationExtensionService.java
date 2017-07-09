@@ -40,7 +40,7 @@ import net.officefloor.plugin.servlet.security.HttpServletSecurityManagedObjectS
 import net.officefloor.plugin.servlet.webxml.InvalidServletConfigurationException;
 import net.officefloor.plugin.servlet.webxml.WebXmlSectionSource;
 import net.officefloor.plugin.web.http.application.HttpSecuritySection;
-import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSectionImpl;
+import net.officefloor.plugin.web.http.application.HttpSecuritySectionImpl;
 import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.woof.WoofApplicationExtensionService;
 import net.officefloor.plugin.woof.WoofApplicationExtensionServiceContext;
@@ -144,7 +144,7 @@ public class ServletContainerWoofApplicationExtensionService implements
 			HttpSecuritySection security = application
 					.getHttpSecurity();
 			long timeout = (security != null ? security.getSecurityTimeout()
-					: HttpSecurityAutoWireSectionImpl.DEFAULT_HTTP_SECURITY_TIMEOUT);
+					: HttpSecuritySectionImpl.DEFAULT_HTTP_SECURITY_TIMEOUT);
 			httpServletSecurityObject.setTimeout(timeout);
 		}
 

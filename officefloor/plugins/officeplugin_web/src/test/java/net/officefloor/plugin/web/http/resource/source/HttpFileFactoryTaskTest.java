@@ -31,11 +31,11 @@ import net.officefloor.plugin.web.http.resource.HttpResource;
 import net.officefloor.plugin.web.http.resource.HttpResourceCreationListener;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.NotExistHttpResource;
-import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryTask;
-import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryTask.DependencyKeys;
+import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction;
+import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.DependencyKeys;
 
 /**
- * Tests the {@link HttpFileFactoryTask}.
+ * Tests the {@link HttpFileFactoryFunction}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -51,7 +51,7 @@ public class HttpFileFactoryTaskTest extends OfficeFrameTestCase {
 	 * Mock {@link ManagedFunctionContext}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final ManagedFunctionContext<HttpFileFactoryTask<Indexed>, DependencyKeys, Indexed> taskContext = this
+	private final ManagedFunctionContext<HttpFileFactoryFunction<Indexed>, DependencyKeys, Indexed> taskContext = this
 			.createMock(ManagedFunctionContext.class);
 
 	/**
@@ -181,7 +181,7 @@ public class HttpFileFactoryTaskTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		HttpFileFactoryTask<Indexed> task = new HttpFileFactoryTask<Indexed>(
+		HttpFileFactoryFunction<Indexed> task = new HttpFileFactoryFunction<Indexed>(
 				this.factory, this.creationListener);
 		HttpResource resource = (HttpResource) task.execute(this.taskContext);
 		this.verifyMockObjects();

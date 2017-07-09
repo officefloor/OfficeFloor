@@ -22,11 +22,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
-import net.officefloor.compile.spi.section.SectionTask;
-import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
@@ -34,8 +34,8 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.HttpFile;
-import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryTask.DependencyKeys;
-import net.officefloor.plugin.web.http.resource.source.HttpFileSenderWorkSource;
+import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.DependencyKeys;
+import net.officefloor.plugin.web.http.resource.source.HttpFileSenderManagedFunctionSource;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 
 /**
@@ -67,38 +67,32 @@ public class HttpFileSenderSectionSource extends AbstractSectionSource {
 	}
 
 	@Override
-	public void sourceSection(SectionDesigner designer,
-			SectionSourceContext context) throws Exception {
+	public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
 
 		final Map<Class<?>, SectionObject> objects = new HashMap<Class<?>, SectionObject>();
 		final Map<Class<?>, SectionOutput> escalations = new HashMap<Class<?>, SectionOutput>();
 
 		// Add file sender
-		SectionWork sendFileWork = designer.addSectionWork("FILE",
-				HttpFileSenderWorkSource.class.getName());
-		SourceHttpResourceFactory.copyProperties(context, sendFileWork);
-		SectionTask sendFileTask = sendFileWork.addSectionTask(
-				HttpFileSenderWorkSource.TASK_NAME,
-				HttpFileSenderWorkSource.TASK_NAME);
-		WebApplicationSectionSource.linkObject(sendFileTask,
-				DependencyKeys.SERVER_HTTP_CONNECTION.name(),
+		SectionFunctionNamespace sendFileNamespace = designer.addSectionFunctionNamespace("FILE",
+				HttpFileSenderManagedFunctionSource.class.getName());
+		SourceHttpResourceFactory.copyProperties(context, sendFileNamespace);
+		SectionFunction sendFileFunction = sendFileNamespace.addSectionFunction(HttpFileSenderManagedFunctionSource.FUNCTION_NAME,
+				HttpFileSenderManagedFunctionSource.FUNCTION_NAME);
+		WebApplicationSectionSource.linkObject(sendFileFunction, DependencyKeys.SERVER_HTTP_CONNECTION.name(),
 				ServerHttpConnection.class, designer, objects);
-		WebApplicationSectionSource.linkObject(sendFileTask,
-				DependencyKeys.HTTP_APPLICATION_LOCATION.name(),
+		WebApplicationSectionSource.linkObject(sendFileFunction, DependencyKeys.HTTP_APPLICATION_LOCATION.name(),
 				HttpApplicationLocation.class, designer, objects);
-		WebApplicationSectionSource.linkEscalation(sendFileTask,
-				IOException.class, designer, escalations);
-		WebApplicationSectionSource.linkEscalation(sendFileTask,
-				InvalidHttpRequestUriException.class, designer, escalations);
+		WebApplicationSectionSource.linkEscalation(sendFileFunction, IOException.class, designer, escalations);
+		WebApplicationSectionSource.linkEscalation(sendFileFunction, InvalidHttpRequestUriException.class, designer,
+				escalations);
 
 		// Provide input to service
 		SectionInput input = designer.addSectionInput(SERVICE_INPUT_NAME, null);
-		designer.link(input, sendFileTask);
+		designer.link(input, sendFileFunction);
 
 		// Provide output once file written
-		SectionOutput output = designer.addSectionOutput(FILE_SENT_OUTPUT_NAME,
-				null, false);
-		designer.link(sendFileTask, output);
+		SectionOutput output = designer.addSectionOutput(FILE_SENT_OUTPUT_NAME, null, false);
+		designer.link(sendFileFunction, output);
 	}
 
 }

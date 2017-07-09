@@ -23,20 +23,20 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.autowire.impl.AutoWirePropertiesImpl;
-import net.officefloor.autowire.impl.AutoWireSectionImpl;
-import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
 
 /**
- * Allows wiring the flows of the {@link HttpTemplate}.
+ * {@link HttpTemplateSection} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpTemplateAutoWireSectionImpl extends AutoWireSectionImpl
-		implements HttpTemplateSection {
+public class HttpTemplateSectionImpl implements HttpTemplateSection {
+
+	/**
+	 * {@link OfficeSection}.
+	 */
+	private final OfficeSection section;
 
 	/**
 	 * Logic class for the template.
@@ -44,15 +44,15 @@ public class HttpTemplateAutoWireSectionImpl extends AutoWireSectionImpl
 	private final Class<?> templateLogicClass;
 
 	/**
+	 * Location of the template.
+	 */
+	private final String templateLocation;
+
+	/**
 	 * URI to the template. May be <code>null</code> if not publicly exposed
 	 * template.
 	 */
 	private final String templateUri;
-
-	/**
-	 * {@link OfficeFloorCompiler}.
-	 */
-	private final OfficeFloorCompiler compiler;
 
 	/**
 	 * URI suffix for the template.
@@ -88,37 +88,41 @@ public class HttpTemplateAutoWireSectionImpl extends AutoWireSectionImpl
 	/**
 	 * Initiate.
 	 * 
-	 * @param compiler
-	 *            {@link OfficeFloorCompiler}.
 	 * @param section
-	 *            {@link AutoWireSection}.
+	 *            {@link OfficeSection}.
 	 * @param templateLogicClass
 	 *            Logic class for the template.
+	 * @param templateLocation
+	 *            Location of the template.
 	 * @param templateUri
 	 *            URI to the template. May be <code>null</code> if not publicly
 	 *            exposed template.
 	 */
-	public HttpTemplateAutoWireSectionImpl(OfficeFloorCompiler compiler,
-			AutoWireSection section, Class<?> templateLogicClass,
+	public HttpTemplateSectionImpl(OfficeSection section, Class<?> templateLogicClass, String templateLocation,
 			String templateUri) {
-		super(compiler, section);
+		this.section = section;
 		this.templateLogicClass = templateLogicClass;
+		this.templateLocation = templateLocation;
 		this.templateUri = templateUri;
-		this.compiler = compiler;
 	}
 
 	/*
-	 * ====================== HttpTemplateAutoWireSection =====================
+	 * ====================== HttpTemplateSection =====================
 	 */
 
 	@Override
-	public String getTemplatePath() {
-		return this.getSectionLocation();
+	public OfficeSection getOfficeSection() {
+		return this.section;
 	}
 
 	@Override
 	public Class<?> getTemplateLogicClass() {
 		return this.templateLogicClass;
+	}
+
+	@Override
+	public String getTemplateLocation() {
+		return this.templateLocation;
 	}
 
 	@Override
@@ -173,23 +177,19 @@ public class HttpTemplateAutoWireSectionImpl extends AutoWireSectionImpl
 
 	@Override
 	public String[] getRenderRedirectHttpMethods() {
-		return this.renderRedirectHttpMethods
-				.toArray(new String[this.renderRedirectHttpMethods.size()]);
+		return this.renderRedirectHttpMethods.toArray(new String[this.renderRedirectHttpMethods.size()]);
 	}
 
 	@Override
 	public HttpTemplateAutoWireSectionExtension addTemplateExtension(
 			Class<? extends HttpTemplateSectionExtension> extensionClass) {
-		return new HttpTemplateAutoWireSectionExtensionImpl(
-				this.nextExtensionIndex++, extensionClass, this.compiler);
+		return new HttpTemplateAutoWireSectionExtensionImpl(this.nextExtensionIndex++, extensionClass);
 	}
 
 	/**
 	 * {@link HttpTemplateAutoWireSectionExtension} implementation.
 	 */
-	private class HttpTemplateAutoWireSectionExtensionImpl extends
-			AutoWirePropertiesImpl implements
-			HttpTemplateAutoWireSectionExtension {
+	private class HttpTemplateAutoWireSectionExtensionImpl implements HttpTemplateAutoWireSectionExtension {
 
 		/**
 		 * Index of this extension.
@@ -203,18 +203,14 @@ public class HttpTemplateAutoWireSectionImpl extends AutoWireSectionImpl
 		 *            Index of this extension.
 		 * @param extensionClass
 		 *            Extension class.
-		 * @param compiler
-		 *            {@link OfficeFloorCompiler}.
 		 */
 		public HttpTemplateAutoWireSectionExtensionImpl(int extensionIndex,
-				Class<? extends HttpTemplateSectionExtension> extensionClass,
-				OfficeFloorCompiler compiler) {
-			super(compiler, compiler.createPropertyList());
+				Class<? extends HttpTemplateSectionExtension> extensionClass) {
 			this.extensionIndex = extensionIndex;
 
 			// Add property for the extension class
-			HttpTemplateAutoWireSectionImpl.this.addProperty("extension."
-					+ this.extensionIndex, extensionClass.getName());
+			HttpTemplateSectionImpl.this.section.addProperty("extension." + this.extensionIndex,
+					extensionClass.getName());
 		}
 
 		/*
@@ -225,11 +221,7 @@ public class HttpTemplateAutoWireSectionImpl extends AutoWireSectionImpl
 		public void addProperty(String name, String value) {
 
 			// Add extension property to section
-			HttpTemplateAutoWireSectionImpl.this.addProperty("extension."
-					+ this.extensionIndex + "." + name, value);
-
-			// Continue to add to parent for extension specific properties
-			super.addProperty(name, value);
+			HttpTemplateSectionImpl.this.section.addProperty("extension." + this.extensionIndex + "." + name, value);
 		}
 	}
 

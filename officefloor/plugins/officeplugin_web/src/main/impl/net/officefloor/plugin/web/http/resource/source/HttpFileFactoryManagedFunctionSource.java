@@ -19,13 +19,13 @@ package net.officefloor.plugin.web.http.resource.source;
 
 import java.io.IOException;
 
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
-import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
@@ -34,19 +34,17 @@ import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpResource;
 import net.officefloor.plugin.web.http.resource.HttpResourceCreationListener;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
-import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryTask.DependencyKeys;
+import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.DependencyKeys;
 
 /**
  * {@link ManagedFunctionSource} to locate a {@link HttpFile} on the class path.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpFileFactoryWorkSource
-		extends
-		AbstractWorkSource<HttpFileFactoryTask<HttpFileFactoryWorkSource.HttpFileFactoryTaskFlows>> {
+public class HttpFileFactoryManagedFunctionSource extends AbstractManagedFunctionSource {
 
 	/**
-	 * Enum of flows for the {@link HttpFileFactoryTask}.
+	 * Enum of flows for the {@link HttpFileFactoryFunction}.
 	 */
 	public static enum HttpFileFactoryTaskFlows {
 		HTTP_FILE_NOT_FOUND
@@ -62,13 +60,11 @@ public class HttpFileFactoryWorkSource
 	}
 
 	@Override
-	public void sourceManagedFunctions(
-			FunctionNamespaceBuilder<HttpFileFactoryTask<HttpFileFactoryTaskFlows>> workTypeBuilder,
+	public void sourceManagedFunctions(FunctionNamespaceBuilder namespaceTypeBuilder,
 			ManagedFunctionSourceContext context) throws Exception {
 
 		// Create the class path HTTP file factory
-		HttpResourceFactory httpFileFactory = SourceHttpResourceFactory
-				.createHttpResourceFactory(context);
+		HttpResourceFactory httpFileFactory = SourceHttpResourceFactory.createHttpResourceFactory(context);
 
 		// Add the file extension HTTP file describer by file extension
 		FileExtensionHttpFileDescriber describer = new FileExtensionHttpFileDescriber();
@@ -79,41 +75,31 @@ public class HttpFileFactoryWorkSource
 		// Create the handler for file not found
 		HttpResourceCreationListener<HttpFileFactoryTaskFlows> fileNotFoundHandler = new HttpResourceCreationListener<HttpFileFactoryTaskFlows>() {
 			@Override
-			public void httpResourceCreated(HttpResource httpResource,
-					ServerHttpConnection connection,
-					ManagedFunctionContext<?, ?, HttpFileFactoryTaskFlows> context)
-					throws IOException {
+			public void httpResourceCreated(HttpResource httpResource, ServerHttpConnection connection,
+					ManagedFunctionContext<?, HttpFileFactoryTaskFlows> context) throws IOException {
 				// Determine if the file exists
 				if (!httpResource.isExist()) {
 					// Invoke flow indicating file not found
-					context.doFlow(
-							HttpFileFactoryTaskFlows.HTTP_FILE_NOT_FOUND, null);
+					context.doFlow(HttpFileFactoryTaskFlows.HTTP_FILE_NOT_FOUND, null, null);
 				}
 			}
 		};
 
-		// Create the HTTP file factory task
-		HttpFileFactoryTask<HttpFileFactoryTaskFlows> task = new HttpFileFactoryTask<HttpFileFactoryTaskFlows>(
+		// Create the HTTP file factory function
+		HttpFileFactoryFunction<HttpFileFactoryTaskFlows> function = new HttpFileFactoryFunction<HttpFileFactoryTaskFlows>(
 				httpFileFactory, fileNotFoundHandler);
 
-		// Load the type information of the work
-		workTypeBuilder.setWorkFactory(task);
-
 		// Load the task to create the HTTP file
-		ManagedFunctionTypeBuilder<DependencyKeys, HttpFileFactoryTaskFlows> taskTypeBuilder = workTypeBuilder
-				.addManagedFunctionType("FindFile", task, DependencyKeys.class,
-						HttpFileFactoryTaskFlows.class);
-		taskTypeBuilder.addObject(ServerHttpConnection.class).setKey(
-				DependencyKeys.SERVER_HTTP_CONNECTION);
-		taskTypeBuilder.addObject(HttpApplicationLocation.class).setKey(
-				DependencyKeys.HTTP_APPLICATION_LOCATION);
-		ManagedFunctionFlowTypeBuilder<HttpFileFactoryTaskFlows> flowTypeBuilder = taskTypeBuilder
-				.addFlow();
+		ManagedFunctionTypeBuilder<DependencyKeys, HttpFileFactoryTaskFlows> functionTypeBuilder = namespaceTypeBuilder
+				.addManagedFunctionType("FindFile", function, DependencyKeys.class, HttpFileFactoryTaskFlows.class);
+		functionTypeBuilder.addObject(ServerHttpConnection.class).setKey(DependencyKeys.SERVER_HTTP_CONNECTION);
+		functionTypeBuilder.addObject(HttpApplicationLocation.class).setKey(DependencyKeys.HTTP_APPLICATION_LOCATION);
+		ManagedFunctionFlowTypeBuilder<HttpFileFactoryTaskFlows> flowTypeBuilder = functionTypeBuilder.addFlow();
 		flowTypeBuilder.setKey(HttpFileFactoryTaskFlows.HTTP_FILE_NOT_FOUND);
 		flowTypeBuilder.setArgumentType(HttpFile.class);
-		taskTypeBuilder.setReturnType(HttpFile.class);
-		taskTypeBuilder.addEscalation(IOException.class);
-		taskTypeBuilder.addEscalation(InvalidHttpRequestUriException.class);
+		functionTypeBuilder.setReturnType(HttpFile.class);
+		functionTypeBuilder.addEscalation(IOException.class);
+		functionTypeBuilder.addEscalation(InvalidHttpRequestUriException.class);
 	}
 
 }

@@ -36,8 +36,8 @@ import net.officefloor.plugin.web.http.resource.AbstractHttpResourceFactoryTestC
 import net.officefloor.plugin.web.http.resource.HttpDirectory;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpResource;
-import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryTask.DependencyKeys;
-import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryWorkSource.HttpFileFactoryTaskFlows;
+import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.DependencyKeys;
+import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryManagedFunctionSource.HttpFileFactoryTaskFlows;
 
 /**
  * Tests the {@link ClasspathHttpFileFactoryWorkSource}.
@@ -56,7 +56,7 @@ public class HttpFileFactoryWorkSourceTest extends OfficeFrameTestCase {
 	 * Validates the specification.
 	 */
 	public void testSpecification() {
-		WorkLoaderUtil.validateSpecification(HttpFileFactoryWorkSource.class);
+		WorkLoaderUtil.validateSpecification(HttpFileFactoryManagedFunctionSource.class);
 	}
 
 	/**
@@ -66,12 +66,12 @@ public class HttpFileFactoryWorkSourceTest extends OfficeFrameTestCase {
 	public void testType() {
 
 		// Provide work type
-		HttpFileFactoryTask task = new HttpFileFactoryTask(null, null);
-		FunctionNamespaceBuilder<HttpFileFactoryTask> workBuilder = WorkLoaderUtil
+		HttpFileFactoryFunction task = new HttpFileFactoryFunction(null, null);
+		FunctionNamespaceBuilder<HttpFileFactoryFunction> workBuilder = WorkLoaderUtil
 				.createWorkTypeBuilder(task);
 
 		// Provide task type
-		ManagedFunctionTypeBuilder<DependencyKeys, HttpFileFactoryWorkSource.HttpFileFactoryTaskFlows> taskBuilder = workBuilder
+		ManagedFunctionTypeBuilder<DependencyKeys, HttpFileFactoryManagedFunctionSource.HttpFileFactoryTaskFlows> taskBuilder = workBuilder
 				.addManagedFunctionType("FindFile", task, DependencyKeys.class,
 						HttpFileFactoryTaskFlows.class);
 		taskBuilder.addObject(ServerHttpConnection.class).setKey(
@@ -88,7 +88,7 @@ public class HttpFileFactoryWorkSourceTest extends OfficeFrameTestCase {
 
 		// Validate
 		WorkLoaderUtil.validateWorkType(workBuilder,
-				HttpFileFactoryWorkSource.class);
+				HttpFileFactoryManagedFunctionSource.class);
 	}
 
 	/**
@@ -97,7 +97,7 @@ public class HttpFileFactoryWorkSourceTest extends OfficeFrameTestCase {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testCreateHttpFile() throws Throwable {
 
-		ManagedFunctionContext<HttpFileFactoryTask, DependencyKeys, HttpFileFactoryTaskFlows> taskContext = this
+		ManagedFunctionContext<HttpFileFactoryFunction, DependencyKeys, HttpFileFactoryTaskFlows> taskContext = this
 				.createMock(ManagedFunctionContext.class);
 		ServerHttpConnection connection = this
 				.createMock(ServerHttpConnection.class);
@@ -123,9 +123,9 @@ public class HttpFileFactoryWorkSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Load the work type
-		FunctionNamespaceType<HttpFileFactoryTask> workType = WorkLoaderUtil
+		FunctionNamespaceType<HttpFileFactoryFunction> workType = WorkLoaderUtil
 				.loadWorkType(
-						(Class) HttpFileFactoryWorkSource.class,
+						(Class) HttpFileFactoryManagedFunctionSource.class,
 						SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX,
 						this.getClass().getPackage().getName(),
 						SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES,
@@ -152,7 +152,7 @@ public class HttpFileFactoryWorkSourceTest extends OfficeFrameTestCase {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testDefaultHttpFile() throws Throwable {
 
-		ManagedFunctionContext<HttpFileFactoryTask, DependencyKeys, HttpFileFactoryTaskFlows> taskContext = this
+		ManagedFunctionContext<HttpFileFactoryFunction, DependencyKeys, HttpFileFactoryTaskFlows> taskContext = this
 				.createMock(ManagedFunctionContext.class);
 		ServerHttpConnection connection = this
 				.createMock(ServerHttpConnection.class);
@@ -177,8 +177,8 @@ public class HttpFileFactoryWorkSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Load the work type
-		FunctionNamespaceType<HttpFileFactoryTask> workType = WorkLoaderUtil.loadWorkType(
-				(Class) HttpFileFactoryWorkSource.class,
+		FunctionNamespaceType<HttpFileFactoryFunction> workType = WorkLoaderUtil.loadWorkType(
+				(Class) HttpFileFactoryManagedFunctionSource.class,
 				SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX, this
 						.getClass().getPackage().getName());
 
@@ -202,7 +202,7 @@ public class HttpFileFactoryWorkSourceTest extends OfficeFrameTestCase {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testHttpFileNotFound() throws Throwable {
 
-		ManagedFunctionContext<HttpFileFactoryTask, DependencyKeys, HttpFileFactoryTaskFlows> taskContext = this
+		ManagedFunctionContext<HttpFileFactoryFunction, DependencyKeys, HttpFileFactoryTaskFlows> taskContext = this
 				.createMock(ManagedFunctionContext.class);
 		ServerHttpConnection connection = this
 				.createMock(ServerHttpConnection.class);
@@ -232,8 +232,8 @@ public class HttpFileFactoryWorkSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Load the work type
-		FunctionNamespaceType<HttpFileFactoryTask> workType = WorkLoaderUtil.loadWorkType(
-				(Class) HttpFileFactoryWorkSource.class,
+		FunctionNamespaceType<HttpFileFactoryFunction> workType = WorkLoaderUtil.loadWorkType(
+				(Class) HttpFileFactoryManagedFunctionSource.class,
 				SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX,
 				AbstractHttpResourceFactoryTestCase.class.getPackage()
 						.getName());

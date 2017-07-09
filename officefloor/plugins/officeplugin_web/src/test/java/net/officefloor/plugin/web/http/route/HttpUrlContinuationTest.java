@@ -221,7 +221,7 @@ public class HttpUrlContinuationTest extends OfficeFrameTestCase {
 		HttpUrlContinuation continuation = new HttpUrlContinuation("WORK",
 				"TASK", Boolean.TRUE);
 		assertEquals("Incorrect work", "WORK", continuation.getWorkName());
-		assertEquals("Incorrect task", "TASK", continuation.getTaskName());
+		assertEquals("Incorrect task", "TASK", continuation.getFunctionName());
 		assertTrue("Should be secure", continuation.isSecure().booleanValue());
 
 		// Ensure secure may be null

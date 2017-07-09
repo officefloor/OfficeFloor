@@ -49,11 +49,11 @@ import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.application.HttpRequestStateManagedObjectSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
-import net.officefloor.plugin.web.http.route.HttpRouteTask;
+import net.officefloor.plugin.web.http.route.HttpRouteFunction;
 import net.officefloor.plugin.web.http.route.HttpRouteWorkSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
-import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
+import net.officefloor.plugin.web.http.template.HttpTemplateManagedFunctionSource;
 import net.officefloor.plugin.web.http.template.NotRenderTemplateAfter;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.PostRedirectGetLogic.Parameters;
@@ -246,7 +246,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Start the server
 		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX, ".suffix");
+				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX, ".suffix");
 
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("/uri.suffix", false);
@@ -263,9 +263,9 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Start the server
 		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
+				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE,
 				String.valueOf(true),
-				HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX + "submit",
+				HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "submit",
 				String.valueOf(false));
 
 		// Ensure correct rendering of template
@@ -273,7 +273,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		assertEquals("Should trigger redirect", 303, response.getStatusLine()
 				.getStatusCode());
 		assertEquals("Incorrect redirect URL", "https://" + HOST_NAME + ":"
-				+ this.httpsPort + "/uri" + HttpRouteTask.REDIRECT_URI_SUFFIX,
+				+ this.httpsPort + "/uri" + HttpRouteFunction.REDIRECT_URI_SUFFIX,
 				response.getFirstHeader("Location").getValue());
 	}
 
@@ -286,7 +286,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Start the server
 		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX + "submit",
+				HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "submit",
 				String.valueOf(true));
 
 		// Ensure correct rendering of template
@@ -304,7 +304,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Start the server
 		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
+				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE,
 				String.valueOf(true));
 
 		// Ensure correct rendering of template
@@ -321,7 +321,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Start the server
 		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX + "submit",
+				HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "submit",
 				String.valueOf(true));
 
 		// Ensure correct rendering of template
@@ -338,9 +338,9 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Start the server
 		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
+				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE,
 				String.valueOf(true),
-				HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX
+				HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX
 						+ "nonMethodLink", String.valueOf(false));
 
 		// Ensure correct rendering of template
@@ -375,7 +375,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		this.doPostRedirectGetPatternTest(
 				request,
 				"TEST /uri-post",
-				HttpTemplateInitialWorkSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
+				HttpTemplateInitialManagedFunctionSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
 				request.getMethod());
 	}
 
@@ -490,7 +490,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 					.getStatusCode());
 			String redirectUrl = response.getFirstHeader("Location").getValue();
 			assertEquals("Incorrect redirect URL", "/uri"
-					+ HttpRouteTask.REDIRECT_URI_SUFFIX, redirectUrl);
+					+ HttpRouteFunction.REDIRECT_URI_SUFFIX, redirectUrl);
 			response.getEntity().getContent().close();
 
 			// Undertake the GET (as triggered by redirect)
@@ -551,7 +551,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Start the server
 		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX, ".suffix");
+				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX, ".suffix");
 
 		// Ensure correctly renders template on submit not invoking flow
 		String response = this.doHttpRequest("/uri-submit.suffix", false);

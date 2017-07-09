@@ -164,17 +164,17 @@ public class HttpUrlContinuationSectionSource extends TransformSectionSource {
 
 				// Add the URL continuation
 				SectionWork work = designer.addSectionWork(taskName,
-						HttpUrlContinuationWorkSource.class.getName());
+						HttpUrlContinuationManagedFunctionSource.class.getName());
 				work.addProperty(
-						HttpUrlContinuationWorkSource.PROPERTY_URI_PATH,
+						HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH,
 						uriPath);
 				if (isSecure != null) {
 					work.addProperty(
-							HttpUrlContinuationWorkSource.PROPERTY_SECURE,
+							HttpUrlContinuationManagedFunctionSource.PROPERTY_SECURE,
 							String.valueOf(isSecure));
 				}
 				SectionTask task = work.addSectionTask(taskName,
-						HttpUrlContinuationWorkSource.TASK_NAME);
+						HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
 
 				// Obtain the input to service the URL continuation
 				SubSectionInput servicingInput = subSection

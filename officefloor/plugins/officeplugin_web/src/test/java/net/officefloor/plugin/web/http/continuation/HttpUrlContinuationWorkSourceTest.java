@@ -32,7 +32,7 @@ import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Tests the {@link HttpUrlContinuationWorkSource}.
+ * Tests the {@link HttpUrlContinuationManagedFunctionSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -43,8 +43,8 @@ public class HttpUrlContinuationWorkSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testSpecification() {
 		WorkLoaderUtil.validateSpecification(
-				HttpUrlContinuationWorkSource.class,
-				HttpUrlContinuationWorkSource.PROPERTY_URI_PATH, "URI Path");
+				HttpUrlContinuationManagedFunctionSource.class,
+				HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH, "URI Path");
 	}
 
 	/**
@@ -96,12 +96,12 @@ public class HttpUrlContinuationWorkSourceTest extends OfficeFrameTestCase {
 			Boolean isSecure) {
 
 		// Create the expected type
-		HttpUrlContinuationTask factory = new HttpUrlContinuationTask();
-		FunctionNamespaceBuilder<HttpUrlContinuationTask> type = WorkLoaderUtil
+		HttpUrlContinuationFunction factory = new HttpUrlContinuationFunction();
+		FunctionNamespaceBuilder<HttpUrlContinuationFunction> type = WorkLoaderUtil
 				.createWorkTypeBuilder(factory);
 
 		ManagedFunctionTypeBuilder<None, None> taskType = type.addManagedFunctionType(
-				HttpUrlContinuationWorkSource.TASK_NAME, factory, None.class,
+				HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME, factory, None.class,
 				None.class);
 		taskType.setDifferentiator(new HttpUrlContinuationDifferentiatorImpl(
 				expectedUriPath, isSecure));
@@ -109,21 +109,21 @@ public class HttpUrlContinuationWorkSourceTest extends OfficeFrameTestCase {
 		// Create the properties
 		List<String> properties = new ArrayList<String>(4);
 		properties.addAll(Arrays.asList(
-				HttpUrlContinuationWorkSource.PROPERTY_URI_PATH,
+				HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH,
 				configuredUriPath));
 		if (isSecure != null) {
 			properties.addAll(Arrays.asList(
-					HttpUrlContinuationWorkSource.PROPERTY_SECURE,
+					HttpUrlContinuationManagedFunctionSource.PROPERTY_SECURE,
 					String.valueOf(isSecure)));
 		}
 
 		// Validate type
-		FunctionNamespaceType<HttpUrlContinuationTask> work = WorkLoaderUtil
-				.validateWorkType(type, HttpUrlContinuationWorkSource.class,
+		FunctionNamespaceType<HttpUrlContinuationFunction> work = WorkLoaderUtil
+				.validateWorkType(type, HttpUrlContinuationManagedFunctionSource.class,
 						properties.toArray(new String[properties.size()]));
 
 		// Validate the URL continuation
-		ManagedFunctionType<HttpUrlContinuationTask, ?, ?> task = work.getManagedFunctionTypes()[0];
+		ManagedFunctionType<HttpUrlContinuationFunction, ?, ?> task = work.getManagedFunctionTypes()[0];
 		HttpUrlContinuationDifferentiator urlContinuation = (HttpUrlContinuationDifferentiator) task
 				.getDifferentiator();
 		assertEquals("Incorrect URI path on URL continuation", expectedUriPath,
@@ -133,7 +133,7 @@ public class HttpUrlContinuationWorkSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can execute the {@link HttpUrlContinuationTask}.
+	 * Ensure can execute the {@link HttpUrlContinuationFunction}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testTask() throws Throwable {
@@ -141,10 +141,10 @@ public class HttpUrlContinuationWorkSourceTest extends OfficeFrameTestCase {
 		final ManagedFunctionContext context = this.createMock(ManagedFunctionContext.class);
 
 		// Load the Task
-		FunctionNamespaceType<HttpUrlContinuationTask> type = WorkLoaderUtil.loadWorkType(
-				HttpUrlContinuationWorkSource.class,
-				HttpUrlContinuationWorkSource.PROPERTY_URI_PATH, "uri");
-		ManagedFunction<HttpUrlContinuationTask, ?, ?> task = type.getManagedFunctionTypes()[0]
+		FunctionNamespaceType<HttpUrlContinuationFunction> type = WorkLoaderUtil.loadWorkType(
+				HttpUrlContinuationManagedFunctionSource.class,
+				HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH, "uri");
+		ManagedFunction<HttpUrlContinuationFunction, ?, ?> task = type.getManagedFunctionTypes()[0]
 				.getManagedFunctionFactory()
 				.createManagedFunction(type.getWorkFactory().createWork());
 

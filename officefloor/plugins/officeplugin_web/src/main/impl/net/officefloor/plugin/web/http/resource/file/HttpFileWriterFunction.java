@@ -20,22 +20,22 @@ package net.officefloor.plugin.web.http.resource.file;
 import java.io.IOException;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.resource.AbstractHttpFile;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 
 /**
- * {@link ManagedFunctionFactory} to write a {@link HttpFile} to the {@link HttpResponse}.
+ * {@link ManagedFunctionFactory} to write a {@link HttpFile} to the
+ * {@link HttpResponse}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpFileWriterTask
-		extends
-		AbstractSingleTask<HttpFileWriterTask, HttpFileWriterTask.HttpFileWriterTaskDependencies, None> {
+public class HttpFileWriterFunction
+		extends StaticManagedFunction<HttpFileWriterFunction.HttpFileWriterTaskDependencies, None> {
 
 	/**
 	 * Keys for the dependencies.
@@ -45,17 +45,14 @@ public class HttpFileWriterTask
 	}
 
 	/*
-	 * ===================== Task ========================================
+	 * ===================== ManagedFunction =============================
 	 */
 
 	@Override
-	public Object execute(
-			ManagedFunctionContext<HttpFileWriterTask, HttpFileWriterTaskDependencies, None> context)
-			throws IOException {
+	public Object execute(ManagedFunctionContext<HttpFileWriterTaskDependencies, None> context) throws IOException {
 
 		// Obtain the dependencies
-		HttpFile httpFile = (HttpFile) context
-				.getObject(HttpFileWriterTaskDependencies.HTTP_FILE);
+		HttpFile httpFile = (HttpFile) context.getObject(HttpFileWriterTaskDependencies.HTTP_FILE);
 		ServerHttpConnection connection = (ServerHttpConnection) context
 				.getObject(HttpFileWriterTaskDependencies.SERVER_HTTP_CONNECTION);
 
