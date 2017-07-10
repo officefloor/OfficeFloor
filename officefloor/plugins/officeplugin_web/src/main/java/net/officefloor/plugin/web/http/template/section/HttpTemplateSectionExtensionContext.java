@@ -17,8 +17,8 @@
  */
 package net.officefloor.plugin.web.http.template.section;
 
-import net.officefloor.compile.impl.mbean.RegisterNodesAsMBeansTest.SectionFunction;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;

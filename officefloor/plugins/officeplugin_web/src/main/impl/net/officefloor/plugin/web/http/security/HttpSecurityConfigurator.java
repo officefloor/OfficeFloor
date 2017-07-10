@@ -22,14 +22,14 @@ import java.util.Map;
 
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 
 /**
  * Provides means to configure the {@link HttpSecurity}
- * {@link ManagedObjectSource}, {@link ManagedFunctionSource} and {@link SectionSource}
- * instances.
+ * {@link ManagedObjectSource}, {@link ManagedFunctionSource} and
+ * {@link SectionSource} instances.
  * 
  * @author Daniel Sagenschneider
  */
@@ -63,15 +63,13 @@ public class HttpSecurityConfigurator {
 	 * @return Key to retrieve the {@link HttpSecuritySource}.
 	 */
 	public static synchronized <S, C, D extends Enum<D>, F extends Enum<F>> String registerHttpSecuritySource(
-			HttpSecuritySource<S, C, D, F> httpSecuritySource,
-			HttpSecurityType<S, C, D, F> httpSecurityType) {
+			HttpSecuritySource<S, C, D, F> httpSecuritySource, HttpSecurityType<S, C, D, F> httpSecurityType) {
 
 		// Obtain the key
 		String key = String.valueOf(nextKeyIndex++);
 
 		// Register the source
-		configurations.put(key, new HttpSecurityConfiguration<S, C, D, F>(
-				httpSecuritySource, httpSecurityType));
+		configurations.put(key, new HttpSecurityConfiguration<S, C, D, F>(httpSecuritySource, httpSecurityType));
 
 		// Return the key
 		return key;
@@ -86,8 +84,7 @@ public class HttpSecurityConfigurator {
 	 * @return Registered {@link HttpSecurityConfiguration}. May be
 	 *         <code>null</code> if unknown key.
 	 */
-	public static synchronized HttpSecurityConfiguration<?, ?, ?, ?> getHttpSecuritySource(
-			String key) {
+	public static synchronized HttpSecurityConfiguration<?, ?, ?, ?> getHttpSecuritySource(String key) {
 		return configurations.get(key);
 	}
 

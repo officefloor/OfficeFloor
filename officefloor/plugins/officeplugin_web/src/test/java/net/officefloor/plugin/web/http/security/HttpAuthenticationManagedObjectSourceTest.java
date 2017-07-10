@@ -96,7 +96,7 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 		type.addDependency(Dependencies.SERVER_HTTP_CONNECTION,
 				ServerHttpConnection.class, null);
 		type.addDependency(Dependencies.HTTP_SESSION, HttpSession.class, null);
-		type.addFlow(Flows.AUTHENTICATE, TaskAuthenticateContext.class, null,
+		type.addFlow(Flows.AUTHENTICATE, FunctionAuthenticateContext.class, null,
 				null);
 		type.addFlow(Flows.LOGOUT, TaskLogoutContext.class, null, null);
 
@@ -686,7 +686,7 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 							ManagedObject managedObject) throws Throwable {
 
 						// Ensure context is correct
-						TaskAuthenticateContext<HttpSecurity, HttpCredentials> context = (TaskAuthenticateContext<HttpSecurity, HttpCredentials>) parameter;
+						FunctionAuthenticateContext<HttpSecurity, HttpCredentials> context = (FunctionAuthenticateContext<HttpSecurity, HttpCredentials>) parameter;
 						assertSame(
 								"Incorrect connection",
 								HttpAuthenticationManagedObjectSourceTest.this.connection,
@@ -757,7 +757,7 @@ public class HttpAuthenticationManagedObjectSourceTest extends
 									throws Throwable {
 
 								// Ensure context is correct
-								TaskAuthenticateContext<HttpSecurity, HttpCredentials> context = (TaskAuthenticateContext<HttpSecurity, HttpCredentials>) parameter;
+								FunctionAuthenticateContext<HttpSecurity, HttpCredentials> context = (FunctionAuthenticateContext<HttpSecurity, HttpCredentials>) parameter;
 								assertSame(
 										"Incorrect connection",
 										HttpAuthenticationManagedObjectSourceTest.this.connection,

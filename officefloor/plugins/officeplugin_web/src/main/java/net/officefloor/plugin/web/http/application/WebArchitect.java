@@ -59,7 +59,7 @@ public interface WebArchitect {
 	 * 
 	 * @param templateUri
 	 *            URI path for the template.
-	 * @param templateFilePath
+	 * @param templateLocation
 	 *            Path to the template file.
 	 * @param templateLogicClass
 	 *            Class providing the logic for the template. May be
@@ -67,7 +67,7 @@ public interface WebArchitect {
 	 *            static page with links).
 	 * @return {@link HttpTemplateSection} to allow linking flows.
 	 */
-	HttpTemplateSection addHttpTemplate(String templateUri, String templateFilePath, Class<?> templateLogicClass);
+	HttpTemplateSection addHttpTemplate(String templateUri, String templateLocation, Class<?> templateLogicClass);
 
 	/**
 	 * Specifies the default URI suffix for the {@link HttpTemplate} URI path
@@ -80,12 +80,15 @@ public interface WebArchitect {
 
 	/**
 	 * Adds a {@link HttpSecuritySource} for this {@link WebArchitect}.
-	 * 
+	 *
+	 * @param securityName
+	 *            Name of the {@link HttpSecuritySource}.
 	 * @param httpSecuritySourceClass
 	 *            {@link HttpSecuritySource} {@link Class}.
 	 * @return {@link HttpSecuritySection}.
 	 */
-	HttpSecuritySection addHttpSecurity(Class<? extends HttpSecuritySource<?, ?, ?, ?>> httpSecuritySourceClass);
+	HttpSecuritySection addHttpSecurity(String securityName,
+			Class<? extends HttpSecuritySource<?, ?, ?, ?>> httpSecuritySourceClass);
 
 	/**
 	 * Adds an object to be lazily created and stored within the
@@ -276,5 +279,11 @@ public interface WebArchitect {
 	 *            chained after this will therefore not be used).
 	 */
 	void chainServicer(OfficeSection section, String inputName, String notHandledOutputName);
+
+	/**
+	 * Informs the {@link OfficeArchitect} of the web architect. This is to be
+	 * invoked once all web architecture is configured.
+	 */
+	void informOfficeArchitect();
 
 }

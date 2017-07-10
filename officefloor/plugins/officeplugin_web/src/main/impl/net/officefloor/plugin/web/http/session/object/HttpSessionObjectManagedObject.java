@@ -19,10 +19,10 @@ package net.officefloor.plugin.web.http.session.object;
 
 import java.io.Serializable;
 
-import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.NameAwareManagedObject;
-import net.officefloor.frame.spi.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
@@ -31,8 +31,8 @@ import net.officefloor.plugin.web.http.session.HttpSession;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSessionObjectManagedObject implements NameAwareManagedObject,
-		CoordinatingManagedObject<HttpSessionObjectManagedObject.Dependencies> {
+public class HttpSessionObjectManagedObject
+		implements NameAwareManagedObject, CoordinatingManagedObject<HttpSessionObjectManagedObject.Dependencies> {
 
 	/**
 	 * Dependency keys for the {@link HttpSessionObjectManagedObject}.
@@ -81,17 +81,14 @@ public class HttpSessionObjectManagedObject implements NameAwareManagedObject,
 	@Override
 	public void setBoundManagedObjectName(String boundManagedObjectName) {
 		// Use bind name in preference to managed object name
-		this.boundName = (this.bindName != null ? this.bindName
-				: boundManagedObjectName);
+		this.boundName = (this.bindName != null ? this.bindName : boundManagedObjectName);
 	}
 
 	@Override
-	public void loadObjects(ObjectRegistry<Dependencies> registry)
-			throws Throwable {
+	public void loadObjects(ObjectRegistry<Dependencies> registry) throws Throwable {
 
 		// Obtain the HTTP session
-		HttpSession httpSession = (HttpSession) registry
-				.getObject(Dependencies.HTTP_SESSION);
+		HttpSession httpSession = (HttpSession) registry.getObject(Dependencies.HTTP_SESSION);
 
 		// Lazy obtain the object
 		this.object = httpSession.getAttribute(this.boundName);

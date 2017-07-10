@@ -18,19 +18,19 @@
 package net.officefloor.plugin.web.http.security.type;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectDependencyMetaData;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceProperty;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceSpecification;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectFlowMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 import net.officefloor.plugin.web.http.security.HttpSecurityDependencyMetaData;
 import net.officefloor.plugin.web.http.security.HttpSecurityFlowMetaData;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
@@ -44,8 +44,7 @@ import net.officefloor.plugin.web.http.security.HttpSecuritySourceSpecification;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>>
-		implements ManagedObjectSource<D, Indexed> {
+public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>> implements ManagedObjectSource<D, Indexed> {
 
 	/**
 	 * Undertakes the operation for the {@link HttpSecuritySource}.
@@ -64,8 +63,7 @@ public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>>
 	 *            {@link Runnable} containing the operation to undertake.
 	 */
 	public static <S, C, D extends Enum<D>, F extends Enum<F>> void doOperation(
-			HttpSecuritySource<S, C, D, F> httpSecuritySource,
-			Runnable operation) {
+			HttpSecuritySource<S, C, D, F> httpSecuritySource, Runnable operation) {
 
 		// Make safe given that using static field
 		synchronized (HttpSecurityManagedObjectAdapterSource.class) {
@@ -100,16 +98,13 @@ public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>>
 	 *             If not being loaded within operation context.
 	 */
 	@SuppressWarnings("unchecked")
-	public HttpSecurityManagedObjectAdapterSource()
-			throws IllegalStateException {
+	public HttpSecurityManagedObjectAdapterSource() throws IllegalStateException {
 		synchronized (HttpSecurityManagedObjectAdapterSource.class) {
 
 			// Ensure with operation context
 			if (operationInstance == null) {
-				throw new IllegalStateException(
-						"Must be within "
-								+ HttpSecurityManagedObjectAdapterSource.class
-										.getSimpleName() + " operation context");
+				throw new IllegalStateException("Must be within "
+						+ HttpSecurityManagedObjectAdapterSource.class.getSimpleName() + " operation context");
 			}
 
 			// Specify the HTTP security source
@@ -123,8 +118,7 @@ public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>>
 	 * @param httpSecuritySource
 	 *            {@link HttpSecuritySource}.
 	 */
-	public HttpSecurityManagedObjectAdapterSource(
-			HttpSecuritySource<?, ?, D, ?> httpSecuritySource) {
+	public HttpSecurityManagedObjectAdapterSource(HttpSecuritySource<?, ?, D, ?> httpSecuritySource) {
 		this.securitySource = httpSecuritySource;
 	}
 
@@ -134,70 +128,55 @@ public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>>
 
 	@Override
 	public ManagedObjectSourceSpecification getSpecification() {
-		return AdaptFactory
-				.adaptObject(
-						this.securitySource.getSpecification(),
-						new AdaptFactory<ManagedObjectSourceSpecification, HttpSecuritySourceSpecification>() {
-							@Override
-							public ManagedObjectSourceSpecification createAdaptedObject(
-									HttpSecuritySourceSpecification delegate) {
-								return new HttpSecurityManagedObjectSourceSpecification(
-										delegate);
-							}
-						});
+		return AdaptFactory.adaptObject(this.securitySource.getSpecification(),
+				new AdaptFactory<ManagedObjectSourceSpecification, HttpSecuritySourceSpecification>() {
+					@Override
+					public ManagedObjectSourceSpecification createAdaptedObject(
+							HttpSecuritySourceSpecification delegate) {
+						return new HttpSecurityManagedObjectSourceSpecification(delegate);
+					}
+				});
 	}
 
 	@Override
-	public void init(ManagedObjectSourceContext<Indexed> context)
-			throws Exception {
-		this.securitySource
-				.init(new ManagedObjectHttpSecuritySourceContext<Indexed>(true,
-						context));
+	public void init(ManagedObjectSourceContext<Indexed> context) throws Exception {
+		this.securitySource.init(new ManagedObjectHttpSecuritySourceContext<Indexed>(true, context));
 	}
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ManagedObjectSourceMetaData<D, Indexed> getMetaData() {
-		return AdaptFactory
-				.adaptObject(
-						this.securitySource.getMetaData(),
-						new AdaptFactory<ManagedObjectSourceMetaData, HttpSecuritySourceMetaData>() {
-							@Override
-							public ManagedObjectSourceMetaData createAdaptedObject(
-									HttpSecuritySourceMetaData delegate) {
-								return new HttpSecurityManagedObjectSourceMetaData(
-										delegate);
-							}
-						});
+		return AdaptFactory.adaptObject(this.securitySource.getMetaData(),
+				new AdaptFactory<ManagedObjectSourceMetaData, HttpSecuritySourceMetaData>() {
+					@Override
+					public ManagedObjectSourceMetaData createAdaptedObject(HttpSecuritySourceMetaData delegate) {
+						return new HttpSecurityManagedObjectSourceMetaData(delegate);
+					}
+				});
 	}
 
 	@Override
-	public void start(ManagedObjectExecuteContext<Indexed> context)
-			throws Exception {
-		throw new IllegalStateException(this.getClass().getName()
-				+ " should only be used for loading the "
+	public void start(ManagedObjectExecuteContext<Indexed> context) throws Exception {
+		throw new IllegalStateException(this.getClass().getName() + " should only be used for loading the "
 				+ HttpSecurityType.class.getSimpleName());
 	}
 
 	@Override
 	public void sourceManagedObject(ManagedObjectUser user) {
-		throw new IllegalStateException(this.getClass().getName()
-				+ " should only be used for loading the "
+		throw new IllegalStateException(this.getClass().getName() + " should only be used for loading the "
 				+ HttpSecurityType.class.getSimpleName());
 	}
 
 	@Override
 	public void stop() {
-		throw new IllegalStateException(this.getClass().getName()
-				+ " should only be used for loading the "
+		throw new IllegalStateException(this.getClass().getName() + " should only be used for loading the "
 				+ HttpSecurityType.class.getSimpleName());
 	}
 
 	/**
 	 * {@link HttpSecuritySource} {@link ManagedObjectSourceSpecification}.
 	 */
-	private static class HttpSecurityManagedObjectSourceSpecification implements
-			ManagedObjectSourceSpecification {
+	private static class HttpSecurityManagedObjectSourceSpecification implements ManagedObjectSourceSpecification {
 
 		/**
 		 * {@link HttpSecuritySourceSpecification}.
@@ -210,8 +189,7 @@ public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>>
 		 * @param specification
 		 *            {@link HttpSecuritySourceSpecification}.
 		 */
-		public HttpSecurityManagedObjectSourceSpecification(
-				HttpSecuritySourceSpecification specification) {
+		public HttpSecurityManagedObjectSourceSpecification(HttpSecuritySourceSpecification specification) {
 			this.specification = specification;
 		}
 
@@ -221,26 +199,20 @@ public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>>
 
 		@Override
 		public ManagedObjectSourceProperty[] getProperties() {
-			return AdaptFactory
-					.adaptArray(
-							this.specification.getProperties(),
-							ManagedObjectSourceProperty.class,
-							new AdaptFactory<ManagedObjectSourceProperty, HttpSecuritySourceProperty>() {
-								@Override
-								public ManagedObjectSourceProperty createAdaptedObject(
-										HttpSecuritySourceProperty delegate) {
-									return new HttpSecurityManagedObjectSourceProperty(
-											delegate);
-								}
-							});
+			return AdaptFactory.adaptArray(this.specification.getProperties(), ManagedObjectSourceProperty.class,
+					new AdaptFactory<ManagedObjectSourceProperty, HttpSecuritySourceProperty>() {
+						@Override
+						public ManagedObjectSourceProperty createAdaptedObject(HttpSecuritySourceProperty delegate) {
+							return new HttpSecurityManagedObjectSourceProperty(delegate);
+						}
+					});
 		}
 	}
 
 	/**
 	 * {@link HttpSecuritySource} {@link ManagedObjectSourceProperty}.
 	 */
-	private static class HttpSecurityManagedObjectSourceProperty implements
-			ManagedObjectSourceProperty {
+	private static class HttpSecurityManagedObjectSourceProperty implements ManagedObjectSourceProperty {
 
 		/**
 		 * {@link HttpSecuritySourceProperty}.
@@ -253,8 +225,7 @@ public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>>
 		 * @param property
 		 *            {@link HttpSecuritySourceProperty}.
 		 */
-		public HttpSecurityManagedObjectSourceProperty(
-				HttpSecuritySourceProperty property) {
+		public HttpSecurityManagedObjectSourceProperty(HttpSecuritySourceProperty property) {
 			this.property = property;
 		}
 
@@ -277,8 +248,8 @@ public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>>
 	 * {@link HttpSecuritySourceContext} adapting the
 	 * {@link ManagedObjectSourceContext}.
 	 */
-	private static class ManagedObjectHttpSecuritySourceContext<F extends Enum<F>>
-			extends SourceContextImpl implements HttpSecuritySourceContext {
+	private static class ManagedObjectHttpSecuritySourceContext<F extends Enum<F>> extends SourceContextImpl
+			implements HttpSecuritySourceContext {
 
 		/**
 		 * Initiate.
@@ -288,8 +259,7 @@ public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>>
 		 * @param context
 		 *            {@link ManagedObjectSourceContext}.
 		 */
-		public ManagedObjectHttpSecuritySourceContext(boolean isLoadingType,
-				ManagedObjectSourceContext<F> context) {
+		public ManagedObjectHttpSecuritySourceContext(boolean isLoadingType, ManagedObjectSourceContext<F> context) {
 			super(isLoadingType, context, context);
 		}
 	}
@@ -311,8 +281,7 @@ public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>>
 		 * @param metaData
 		 *            {@link HttpSecuritySourceMetaData}.
 		 */
-		public HttpSecurityManagedObjectSourceMetaData(
-				HttpSecuritySourceMetaData<?, ?, D, ?> metaData) {
+		public HttpSecurityManagedObjectSourceMetaData(HttpSecuritySourceMetaData<?, ?, D, ?> metaData) {
 			this.metaData = metaData;
 		}
 
@@ -333,35 +302,26 @@ public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>>
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public ManagedObjectDependencyMetaData<D>[] getDependencyMetaData() {
-			return AdaptFactory
-					.adaptArray(
-							this.metaData.getDependencyMetaData(),
-							ManagedObjectDependencyMetaData.class,
-							new AdaptFactory<ManagedObjectDependencyMetaData, HttpSecurityDependencyMetaData>() {
-								@Override
-								public ManagedObjectDependencyMetaData createAdaptedObject(
-										HttpSecurityDependencyMetaData delegate) {
-									return new HttpSecurityManagedObjectDependencyMetaData<D>(
-											delegate);
-								}
-							});
+			return AdaptFactory.adaptArray(this.metaData.getDependencyMetaData(), ManagedObjectDependencyMetaData.class,
+					new AdaptFactory<ManagedObjectDependencyMetaData, HttpSecurityDependencyMetaData>() {
+						@Override
+						public ManagedObjectDependencyMetaData createAdaptedObject(
+								HttpSecurityDependencyMetaData delegate) {
+							return new HttpSecurityManagedObjectDependencyMetaData<D>(delegate);
+						}
+					});
 		}
 
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public ManagedObjectFlowMetaData<F>[] getFlowMetaData() {
-			return AdaptFactory
-					.adaptArray(
-							this.metaData.getFlowMetaData(),
-							ManagedObjectFlowMetaData.class,
-							new AdaptFactory<ManagedObjectFlowMetaData, HttpSecurityFlowMetaData>() {
-								@Override
-								public ManagedObjectFlowMetaData<F> createAdaptedObject(
-										HttpSecurityFlowMetaData delegate) {
-									return new HttpSecurityManagedObjectFlowMetaData<F>(
-											delegate);
-								}
-							});
+			return AdaptFactory.adaptArray(this.metaData.getFlowMetaData(), ManagedObjectFlowMetaData.class,
+					new AdaptFactory<ManagedObjectFlowMetaData, HttpSecurityFlowMetaData>() {
+						@Override
+						public ManagedObjectFlowMetaData<F> createAdaptedObject(HttpSecurityFlowMetaData delegate) {
+							return new HttpSecurityManagedObjectFlowMetaData<F>(delegate);
+						}
+					});
 		}
 
 		@Override
@@ -388,8 +348,7 @@ public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>>
 		 * @param flow
 		 *            {@link HttpSecurityFlowMetaData}.
 		 */
-		public HttpSecurityManagedObjectFlowMetaData(
-				HttpSecurityFlowMetaData<F> flow) {
+		public HttpSecurityManagedObjectFlowMetaData(HttpSecurityFlowMetaData<F> flow) {
 			this.flow = flow;
 		}
 
@@ -430,8 +389,7 @@ public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>>
 		 * @param dependency
 		 *            {@link HttpSecurityDependencyMetaData}.
 		 */
-		public HttpSecurityManagedObjectDependencyMetaData(
-				HttpSecurityDependencyMetaData<D> dependency) {
+		public HttpSecurityManagedObjectDependencyMetaData(HttpSecurityDependencyMetaData<D> dependency) {
 			this.dependency = dependency;
 		}
 

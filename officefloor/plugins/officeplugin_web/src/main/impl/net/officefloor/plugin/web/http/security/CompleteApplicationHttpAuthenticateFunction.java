@@ -17,24 +17,22 @@
  */
 package net.officefloor.plugin.web.http.security;
 
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.route.HttpUrlContinuation;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
- * {@link ManagedFunction} and {@link ManagedFunctionFactory} for completing authentication with
- * application specific credentials.
+ * {@link ManagedFunctionFactory} for completing authentication with application
+ * specific credentials.
  * 
  * @author Daniel Sagenschneider
  */
-public class CompleteApplicationHttpAuthenticateTask
-		implements
-		ManagedFunctionFactory<HttpSecurityWork, CompleteApplicationHttpAuthenticateTask.Dependencies, CompleteApplicationHttpAuthenticateTask.Flows>,
-		ManagedFunction<HttpSecurityWork, CompleteApplicationHttpAuthenticateTask.Dependencies, CompleteApplicationHttpAuthenticateTask.Flows> {
+public class CompleteApplicationHttpAuthenticateFunction extends
+		StaticManagedFunction<CompleteApplicationHttpAuthenticateFunction.Dependencies, CompleteApplicationHttpAuthenticateFunction.Flows> {
 
 	/**
 	 * Dependency keys.
@@ -51,28 +49,15 @@ public class CompleteApplicationHttpAuthenticateTask
 	}
 
 	/*
-	 * ====================== TaskFactory ==========================
-	 */
-
-	@Override
-	public ManagedFunction<HttpSecurityWork, Dependencies, Flows> createManagedFunction(
-			HttpSecurityWork work) {
-		return this;
-	}
-
-	/*
-	 * ========================= Task =============================
+	 * ========================= ManagedFunction =============================
 	 */
 
 	@Override
 	@SuppressWarnings("rawtypes")
-	public Object execute(
-			ManagedFunctionContext<HttpSecurityWork, Dependencies, Flows> context)
-			throws Throwable {
+	public Object execute(ManagedFunctionContext<Dependencies, Flows> context) throws Throwable {
 
 		// Obtain the HTTP authentication to check on authentication
-		HttpAuthentication authentication = (HttpAuthentication) context
-				.getObject(Dependencies.HTTP_AUTHENTICATION);
+		HttpAuthentication authentication = (HttpAuthentication) context.getObject(Dependencies.HTTP_AUTHENTICATION);
 
 		// Determine if security obtained from application authentication
 		Object security;
@@ -80,7 +65,7 @@ public class CompleteApplicationHttpAuthenticateTask
 			security = authentication.getHttpSecurity();
 		} catch (Throwable ex) {
 			// Handle the failure
-			context.doFlow(Flows.FAILURE, ex);
+			context.doFlow(Flows.FAILURE, ex, null);
 			return null; // failed to authenticate
 		}
 
@@ -92,21 +77,16 @@ public class CompleteApplicationHttpAuthenticateTask
 		}
 
 		// Reinstate the request for servicing before authentication required
-		ServerHttpConnection connection = (ServerHttpConnection) context
-				.getObject(Dependencies.SERVER_HTTP_CONNECTION);
-		HttpSession session = (HttpSession) context
-				.getObject(Dependencies.HTTP_SESSION);
-		HttpRequestState requestState = (HttpRequestState) context
-				.getObject(Dependencies.REQUEST_STATE);
+		ServerHttpConnection connection = (ServerHttpConnection) context.getObject(Dependencies.SERVER_HTTP_CONNECTION);
+		HttpSession session = (HttpSession) context.getObject(Dependencies.HTTP_SESSION);
+		HttpRequestState requestState = (HttpRequestState) context.getObject(Dependencies.REQUEST_STATE);
 		boolean isReinstated = HttpUrlContinuation.reinstateRequest(
-				HttpSecurityWork.ATTRIBUTE_CHALLENGE_REQUEST_MOMENTO,
-				connection, requestState, session);
+				HttpChallengeFunction.ATTRIBUTE_CHALLENGE_REQUEST_MOMENTO, connection, requestState, session);
 
 		// Determine if reinstated request
 		if (!isReinstated) {
 			// Failure as must reinstate request
-			context.doFlow(Flows.FAILURE,
-					new HttpAuthenticationContinuationException());
+			context.doFlow(Flows.FAILURE, new HttpAuthenticationContinuationException(), null);
 			return null; // continuation failure
 		}
 

@@ -39,14 +39,14 @@ public interface HttpUriLink {
 	 * 
 	 * @return {@link OfficeSection} handling the URI.
 	 */
-	OfficeSection getAutoWireSection();
+	OfficeSection getOfficeSection();
 
 	/**
 	 * Obtains the input name of the {@link OfficeSection} handling the URI.
 	 * 
 	 * @return Input name of the {@link OfficeSection} handling the URI.
 	 */
-	String getAutoWireSectionInputName();
+	String getOfficeSectionInputName();
 
 	/**
 	 * <p>

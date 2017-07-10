@@ -19,10 +19,10 @@ package net.officefloor.plugin.web.http.session.attribute;
 
 import java.io.Serializable;
 
-import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.NameAwareManagedObject;
-import net.officefloor.frame.spi.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.attribute.HttpSessionAttributeManagedObjectSource.HttpSessionAttributeDependencies;
 
@@ -31,10 +31,8 @@ import net.officefloor.plugin.web.http.session.attribute.HttpSessionAttributeMan
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSessionAttributeManagedObject implements
-		NameAwareManagedObject,
-		CoordinatingManagedObject<HttpSessionAttributeDependencies>,
-		HttpSessionAttribute<Serializable> {
+public class HttpSessionAttributeManagedObject implements NameAwareManagedObject,
+		CoordinatingManagedObject<HttpSessionAttributeDependencies>, HttpSessionAttribute<Serializable> {
 
 	/**
 	 * Bound name to register the Object with the {@link HttpSession}.
@@ -60,13 +58,10 @@ public class HttpSessionAttributeManagedObject implements
 	 */
 
 	@Override
-	public void loadObjects(
-			ObjectRegistry<HttpSessionAttributeDependencies> registry)
-			throws Throwable {
+	public void loadObjects(ObjectRegistry<HttpSessionAttributeDependencies> registry) throws Throwable {
 
 		// Obtain the HTTP Session
-		this.httpSession = (HttpSession) registry
-				.getObject(HttpSessionAttributeDependencies.HTTP_SESSION);
+		this.httpSession = (HttpSession) registry.getObject(HttpSessionAttributeDependencies.HTTP_SESSION);
 	}
 
 	/*

@@ -19,9 +19,10 @@ package net.officefloor.plugin.web.http.security;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
@@ -30,41 +31,41 @@ import net.officefloor.plugin.web.http.session.HttpSession;
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectHttpLogoutTask implements
-		ManagedFunction<HttpSecurityWork, Indexed, None>,
-		ManagedFunctionFactory<HttpSecurityWork, Indexed, None> {
+public class ManagedObjectHttpLogoutFunction extends StaticManagedFunction<Indexed, None> {
+
+	/**
+	 * {@link HttpSecuritySource}.
+	 */
+	private final HttpSecuritySource<?, ?, ?, ?> httpSecuritySource;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param httpSecuritySource
+	 *            {@link HttpSecuritySource}.
+	 */
+	public ManagedObjectHttpLogoutFunction(HttpSecuritySource<?, ?, ?, ?> httpSecuritySource) {
+		this.httpSecuritySource = httpSecuritySource;
+	}
 
 	/*
-	 * =================== HttpChallengeTask ======================
+	 * =================== ManagedFunction ======================
 	 */
 
 	@Override
-	public ManagedFunction<HttpSecurityWork, Indexed, None> createManagedFunction(
-			HttpSecurityWork work) {
-		return this;
-	}
-
-	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public Object execute(ManagedFunctionContext<HttpSecurityWork, Indexed, None> context)
-			throws Throwable {
+	public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
 
 		// Obtain the dependencies
-		TaskLogoutContext logoutContext = (TaskLogoutContext) context
-				.getObject(0);
+		TaskLogoutContext logoutContext = (TaskLogoutContext) context.getObject(0);
 		HttpLogoutRequest request = logoutContext.getHttpLogoutRequest();
 		ServerHttpConnection connection = logoutContext.getConnection();
 		HttpSession session = logoutContext.getSession();
 
-		// Obtain the HTTP Security Source
-		HttpSecuritySource<?, ?, ?, ?> httpSecuritySource = context.getWork()
-				.getHttpSecuritySource();
-
 		// Logout
-		HttpLogoutContextImpl httpLogoutContext = new HttpLogoutContextImpl(
-				connection, session, context);
+		HttpLogoutContextImpl httpLogoutContext = new HttpLogoutContextImpl(connection, session, context);
 		try {
-			httpSecuritySource.logout(httpLogoutContext);
+			this.httpSecuritySource.logout(httpLogoutContext);
 
 			// Notify of successful logout
 			if (request != null) {
@@ -85,8 +86,7 @@ public class ManagedObjectHttpLogoutTask implements
 	/**
 	 * {@link HttpLogoutContext} implementation.
 	 */
-	private static class HttpLogoutContextImpl<D extends Enum<D>> implements
-			HttpLogoutContext<D> {
+	private static class HttpLogoutContextImpl<D extends Enum<D>> implements HttpLogoutContext<D> {
 
 		/**
 		 * {@link ServerHttpConnection}.
@@ -101,7 +101,7 @@ public class ManagedObjectHttpLogoutTask implements
 		/**
 		 * {@link ManagedFunctionContext}.
 		 */
-		private final ManagedFunctionContext<HttpSecurityWork, Indexed, None> context;
+		private final ManagedFunctionContext<Indexed, None> context;
 
 		/**
 		 * Initiate.
@@ -113,9 +113,8 @@ public class ManagedObjectHttpLogoutTask implements
 		 * @param context
 		 *            {@link ManagedFunctionContext}.
 		 */
-		public HttpLogoutContextImpl(ServerHttpConnection connection,
-				HttpSession session,
-				ManagedFunctionContext<HttpSecurityWork, Indexed, None> context) {
+		public HttpLogoutContextImpl(ServerHttpConnection connection, HttpSession session,
+				ManagedFunctionContext<Indexed, None> context) {
 			this.connection = connection;
 			this.session = session;
 			this.context = context;

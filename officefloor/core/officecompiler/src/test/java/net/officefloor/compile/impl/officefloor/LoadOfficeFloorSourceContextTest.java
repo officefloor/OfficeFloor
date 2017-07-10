@@ -28,13 +28,11 @@ import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.impl.supplier.MockLoadSupplierSource;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.issues.CompilerIssue;
-import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.source.OfficeSource;
-import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
@@ -343,32 +341,6 @@ public class LoadOfficeFloorSourceContextTest extends AbstractOfficeFloorTestCas
 
 				// Should not reach this point
 				fail("Should not successfully load managed object type");
-			}
-		});
-	}
-
-	/**
-	 * Ensure able to determine if {@link ManagedObjectType} should be
-	 * configured as an {@link OfficeFloorInputManagedObject}.
-	 */
-	public void testCheckIfManagedObjectTypeIsInput() {
-
-		final ManagedObjectType<?> moType = this.createMock(ManagedObjectType.class);
-		final ManagedObjectFlowType<?> flowType = this.createMock(ManagedObjectFlowType.class);
-
-		// Record as input managed object
-		this.record_initiateOfficeFloorBuilder();
-		this.recordReturn(moType, moType.getFlowTypes(), new ManagedObjectFlowType<?>[] { flowType });
-
-		// Test
-		this.loadOfficeFloor(true, new OfficeFloorMaker() {
-			@Override
-			public void make(OfficeFloorMakerContext context) {
-				OfficeFloorSourceContext ofsContext = context.getContext();
-
-				// Determine if input managed object
-				boolean isInput = ofsContext.isInputManagedObject(moType);
-				assertTrue("Should be input managed object", isInput);
 			}
 		});
 	}

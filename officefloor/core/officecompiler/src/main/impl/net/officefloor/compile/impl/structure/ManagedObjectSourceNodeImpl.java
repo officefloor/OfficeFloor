@@ -655,15 +655,9 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 					inputBoundManagedObjectName = managedObjectSourceName;
 
 				} else {
-					// Determine if require configuring as Input Managed Object
-					if (loader.isInputManagedObject(managedObjectType)) {
-						// Must configure as Input Managed Object (as shared)
-						if (this.inputManagedObjectNode != null) {
-							inputBoundManagedObjectName = this.inputManagedObjectNode.getBoundManagedObjectName();
-						}
-					} else {
-						// Never shared (specific to Managed Object Source)
-						inputBoundManagedObjectName = managedObjectSourceName;
+					// Must configure as Input Managed Object (as shared)
+					if (this.inputManagedObjectNode != null) {
+						inputBoundManagedObjectName = this.inputManagedObjectNode.getBoundManagedObjectName();
 					}
 				}
 

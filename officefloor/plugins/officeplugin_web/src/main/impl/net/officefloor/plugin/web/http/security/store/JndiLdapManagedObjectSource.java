@@ -20,13 +20,12 @@ package net.officefloor.plugin.web.http.security.store;
 import javax.naming.directory.DirContext;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.ObjectRegistry;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.plugin.web.http.security.store.CredentialStore;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
  * {@link ManagedObjectSource} for the {@link JndiLdapCredentialStore}.
@@ -34,8 +33,7 @@ import net.officefloor.plugin.web.http.security.store.CredentialStore;
  * @author Daniel Sagenschneider
  */
 public class JndiLdapManagedObjectSource
-		extends
-		AbstractManagedObjectSource<JndiLdapManagedObjectSource.DependencyKeys, None> {
+		extends AbstractManagedObjectSource<JndiLdapManagedObjectSource.DependencyKeys, None> {
 
 	/**
 	 * Name of property for the algorithm.
@@ -81,24 +79,18 @@ public class JndiLdapManagedObjectSource
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
 		context.addProperty(PROPERTY_ALGORITHM, "Algorithm");
-		context.addProperty(PROPERTY_ENTRY_SEARCH_BASE_DN,
-				"Entry Search Base Dn");
-		context.addProperty(PROPERTY_ROLES_SEARCH_BASE_DN,
-				"Roles Search Base Dn");
+		context.addProperty(PROPERTY_ENTRY_SEARCH_BASE_DN, "Entry Search Base Dn");
+		context.addProperty(PROPERTY_ROLES_SEARCH_BASE_DN, "Roles Search Base Dn");
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<DependencyKeys, None> context)
-			throws Exception {
-		ManagedObjectSourceContext<None> mosContext = context
-				.getManagedObjectSourceContext();
+	protected void loadMetaData(MetaDataContext<DependencyKeys, None> context) throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Obtain the properties
 		this.algorithm = mosContext.getProperty(PROPERTY_ALGORITHM);
-		this.entrySearchBaseDn = mosContext
-				.getProperty(PROPERTY_ENTRY_SEARCH_BASE_DN);
-		this.rolesSearchBaseDn = mosContext
-				.getProperty(PROPERTY_ROLES_SEARCH_BASE_DN);
+		this.entrySearchBaseDn = mosContext.getProperty(PROPERTY_ENTRY_SEARCH_BASE_DN);
+		this.rolesSearchBaseDn = mosContext.getProperty(PROPERTY_ROLES_SEARCH_BASE_DN);
 
 		// Add dependency on DirContext
 		context.addDependency(DependencyKeys.DIR_CONTEXT, DirContext.class);
@@ -116,8 +108,7 @@ public class JndiLdapManagedObjectSource
 	/**
 	 * {@link ManagedObject} for JNDI LDAP {@link CredentialStore}.
 	 */
-	private class JndiLdapManagedObject implements
-			CoordinatingManagedObject<DependencyKeys> {
+	private class JndiLdapManagedObject implements CoordinatingManagedObject<DependencyKeys> {
 
 		/**
 		 * {@link CredentialStore}.
@@ -129,16 +120,13 @@ public class JndiLdapManagedObjectSource
 		 */
 
 		@Override
-		public void loadObjects(ObjectRegistry<DependencyKeys> registry)
-				throws Throwable {
+		public void loadObjects(ObjectRegistry<DependencyKeys> registry) throws Throwable {
 
 			// Obtain the DirContext for access to LDAP via JNDI
-			DirContext context = (DirContext) registry
-					.getObject(DependencyKeys.DIR_CONTEXT);
+			DirContext context = (DirContext) registry.getObject(DependencyKeys.DIR_CONTEXT);
 
 			// Create the JNDI LDAP Credential Store
-			this.store = new JndiLdapCredentialStore(
-					JndiLdapManagedObjectSource.this.algorithm, context,
+			this.store = new JndiLdapCredentialStore(JndiLdapManagedObjectSource.this.algorithm, context,
 					JndiLdapManagedObjectSource.this.entrySearchBaseDn,
 					JndiLdapManagedObjectSource.this.rolesSearchBaseDn);
 		}

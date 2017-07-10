@@ -44,7 +44,7 @@ import net.officefloor.plugin.web.http.session.HttpSession;
 import org.easymock.AbstractMatcher;
 
 /**
- * Tests the {@link HttpSecurityWorkSource}.
+ * Tests the {@link HttpSecurityManagedFunctionSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -63,11 +63,11 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 	private final ManagedFunctionContext taskContext = this.createMock(ManagedFunctionContext.class);
 
 	/**
-	 * {@link TaskAuthenticateContext}.
+	 * {@link FunctionAuthenticateContext}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final TaskAuthenticateContext<HttpSecurity, HttpCredentials> authenticateContext = this
-			.createMock(TaskAuthenticateContext.class);
+	private final FunctionAuthenticateContext<HttpSecurity, HttpCredentials> authenticateContext = this
+			.createMock(FunctionAuthenticateContext.class);
 
 	/**
 	 * {@link HttpCredentials}.
@@ -114,8 +114,8 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 	 * Validate specification.
 	 */
 	public void testSpecification() {
-		WorkLoaderUtil.validateSpecification(HttpSecurityWorkSource.class,
-				HttpSecurityWorkSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY,
+		WorkLoaderUtil.validateSpecification(HttpSecurityManagedFunctionSource.class,
+				HttpSecurityManagedFunctionSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY,
 				"HTTP Security Source Key");
 	}
 
@@ -137,16 +137,16 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 		// Managed Object Authentication task
 		ManagedFunctionTypeBuilder<Indexed, None> moAuthenticateTask = type.addManagedFunctionType(
 				"MANAGED_OBJECT_AUTHENTICATE",
-				new ManagedObjectHttpAuthenticateTask(), Indexed.class,
+				new ManagedObjectHttpAuthenticateFunction(), Indexed.class,
 				None.class);
-		moAuthenticateTask.addObject(TaskAuthenticateContext.class).setLabel(
+		moAuthenticateTask.addObject(FunctionAuthenticateContext.class).setLabel(
 				"TASK_AUTHENTICATE_CONTEXT");
 		moAuthenticateTask.addObject(CredentialStore.class).setLabel(
 				"DEPENDENCY_CREDENTIAL_STORE");
 
 		// Managed Object Logout task
 		ManagedFunctionTypeBuilder<Indexed, None> moLogoutTask = type.addManagedFunctionType(
-				"MANAGED_OBJECT_LOGOUT", new ManagedObjectHttpLogoutTask(),
+				"MANAGED_OBJECT_LOGOUT", new ManagedObjectHttpLogoutFunction(),
 				Indexed.class, None.class);
 		moLogoutTask.addObject(TaskLogoutContext.class).setLabel(
 				"TASK_LOGOUT_CONTEXT");
@@ -155,7 +155,7 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 
 		// Challenge task
 		ManagedFunctionTypeBuilder<Indexed, Indexed> challengeTask = type.addManagedFunctionType(
-				"CHALLENGE", new HttpChallengeTask(), Indexed.class,
+				"CHALLENGE", new HttpChallengeFunction(), Indexed.class,
 				Indexed.class);
 		challengeTask.addObject(HttpAuthenticationRequiredException.class)
 				.setLabel("HTTP_AUTHENTICATION_REQUIRED_EXCEPTION");
@@ -176,52 +176,52 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 		challengeLoginFlow.setLabel("FLOW_FORM_LOGIN_PAGE");
 
 		// Start Application Authentication task
-		ManagedFunctionTypeBuilder<StartApplicationHttpAuthenticateTask.Dependencies, StartApplicationHttpAuthenticateTask.Flows> startTask = type
+		ManagedFunctionTypeBuilder<StartApplicationHttpAuthenticateFunction.Dependencies, StartApplicationHttpAuthenticateFunction.Flows> startTask = type
 				.addManagedFunctionType(
 						"START_APPLICATION_AUTHENTICATE",
-						new StartApplicationHttpAuthenticateTask(),
-						StartApplicationHttpAuthenticateTask.Dependencies.class,
-						StartApplicationHttpAuthenticateTask.Flows.class);
+						new StartApplicationHttpAuthenticateFunction(),
+						StartApplicationHttpAuthenticateFunction.Dependencies.class,
+						StartApplicationHttpAuthenticateFunction.Flows.class);
 		startTask.addObject(HttpCredentials.class).setKey(
-				StartApplicationHttpAuthenticateTask.Dependencies.CREDENTIALS);
+				StartApplicationHttpAuthenticateFunction.Dependencies.CREDENTIALS);
 		startTask
 				.addObject(HttpAuthentication.class)
-				.setKey(StartApplicationHttpAuthenticateTask.Dependencies.HTTP_AUTHENTICATION);
-		ManagedFunctionFlowTypeBuilder<StartApplicationHttpAuthenticateTask.Flows> startFailureFlow = startTask
+				.setKey(StartApplicationHttpAuthenticateFunction.Dependencies.HTTP_AUTHENTICATION);
+		ManagedFunctionFlowTypeBuilder<StartApplicationHttpAuthenticateFunction.Flows> startFailureFlow = startTask
 				.addFlow();
 		startFailureFlow
-				.setKey(StartApplicationHttpAuthenticateTask.Flows.FAILURE);
+				.setKey(StartApplicationHttpAuthenticateFunction.Flows.FAILURE);
 		startFailureFlow.setArgumentType(Throwable.class);
 
 		// Complete Application Authentication Task
-		ManagedFunctionTypeBuilder<CompleteApplicationHttpAuthenticateTask.Dependencies, CompleteApplicationHttpAuthenticateTask.Flows> completeTask = type
+		ManagedFunctionTypeBuilder<CompleteApplicationHttpAuthenticateFunction.Dependencies, CompleteApplicationHttpAuthenticateFunction.Flows> completeTask = type
 				.addManagedFunctionType(
 						"COMPLETE_APPLICATION_AUTHENTICATE",
-						new CompleteApplicationHttpAuthenticateTask(),
-						CompleteApplicationHttpAuthenticateTask.Dependencies.class,
-						CompleteApplicationHttpAuthenticateTask.Flows.class);
+						new CompleteApplicationHttpAuthenticateFunction(),
+						CompleteApplicationHttpAuthenticateFunction.Dependencies.class,
+						CompleteApplicationHttpAuthenticateFunction.Flows.class);
 		completeTask
 				.addObject(HttpAuthentication.class)
-				.setKey(CompleteApplicationHttpAuthenticateTask.Dependencies.HTTP_AUTHENTICATION);
+				.setKey(CompleteApplicationHttpAuthenticateFunction.Dependencies.HTTP_AUTHENTICATION);
 		completeTask
 				.addObject(ServerHttpConnection.class)
-				.setKey(CompleteApplicationHttpAuthenticateTask.Dependencies.SERVER_HTTP_CONNECTION);
+				.setKey(CompleteApplicationHttpAuthenticateFunction.Dependencies.SERVER_HTTP_CONNECTION);
 		completeTask
 				.addObject(HttpSession.class)
-				.setKey(CompleteApplicationHttpAuthenticateTask.Dependencies.HTTP_SESSION);
+				.setKey(CompleteApplicationHttpAuthenticateFunction.Dependencies.HTTP_SESSION);
 		completeTask
 				.addObject(HttpRequestState.class)
-				.setKey(CompleteApplicationHttpAuthenticateTask.Dependencies.REQUEST_STATE);
-		ManagedFunctionFlowTypeBuilder<CompleteApplicationHttpAuthenticateTask.Flows> completeFailureFlow = completeTask
+				.setKey(CompleteApplicationHttpAuthenticateFunction.Dependencies.REQUEST_STATE);
+		ManagedFunctionFlowTypeBuilder<CompleteApplicationHttpAuthenticateFunction.Flows> completeFailureFlow = completeTask
 				.addFlow();
 		completeFailureFlow
-				.setKey(CompleteApplicationHttpAuthenticateTask.Flows.FAILURE);
+				.setKey(CompleteApplicationHttpAuthenticateFunction.Flows.FAILURE);
 		completeFailureFlow.setArgumentType(Throwable.class);
 
 		// Validate type
 		FunctionNamespaceType<HttpSecurityWork> work = WorkLoaderUtil.validateWorkType(type,
-				HttpSecurityWorkSource.class,
-				HttpSecurityWorkSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY, key);
+				HttpSecurityManagedFunctionSource.class,
+				HttpSecurityManagedFunctionSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY, key);
 		assertSame("Incorrect HTTP Security Source", this.source, work
 				.getWorkFactory().createWork().getHttpSecuritySource());
 	}
@@ -290,7 +290,7 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records obtaining dependencies from the {@link TaskAuthenticateContext}
+	 * Records obtaining dependencies from the {@link FunctionAuthenticateContext}
 	 * and {@link ManagedFunctionContext}.
 	 */
 	private void recordManagedObjectAuthenticationDependencies() {
@@ -478,12 +478,12 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(
 				this.taskContext,
 				this.taskContext
-						.getObject(StartApplicationHttpAuthenticateTask.Dependencies.CREDENTIALS),
+						.getObject(StartApplicationHttpAuthenticateFunction.Dependencies.CREDENTIALS),
 				credentials);
 		this.recordReturn(
 				this.taskContext,
 				this.taskContext
-						.getObject(StartApplicationHttpAuthenticateTask.Dependencies.HTTP_AUTHENTICATION),
+						.getObject(StartApplicationHttpAuthenticateFunction.Dependencies.HTTP_AUTHENTICATION),
 				this.authentication);
 
 		// Record starting authentication
@@ -504,7 +504,7 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 			// Record failure
 			this.control(this.authentication).setThrowable(failure);
 			this.recordReturn(this.taskContext, this.taskContext
-					.doFlow(StartApplicationHttpAuthenticateTask.Flows.FAILURE,
+					.doFlow(StartApplicationHttpAuthenticateFunction.Flows.FAILURE,
 							failure), future);
 		}
 
@@ -579,7 +579,7 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(
 				this.taskContext,
 				this.taskContext
-						.getObject(CompleteApplicationHttpAuthenticateTask.Dependencies.HTTP_AUTHENTICATION),
+						.getObject(CompleteApplicationHttpAuthenticateFunction.Dependencies.HTTP_AUTHENTICATION),
 				this.authentication);
 
 		// Record obtaining security
@@ -588,7 +588,7 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 			this.authentication.getHttpSecurity();
 			this.control(this.authentication).setThrowable(failure);
 			this.recordReturn(this.taskContext, this.taskContext.doFlow(
-					CompleteApplicationHttpAuthenticateTask.Flows.FAILURE,
+					CompleteApplicationHttpAuthenticateFunction.Flows.FAILURE,
 					failure), future);
 
 		} else {
@@ -603,17 +603,17 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 				this.recordReturn(
 						this.taskContext,
 						this.taskContext
-								.getObject(CompleteApplicationHttpAuthenticateTask.Dependencies.SERVER_HTTP_CONNECTION),
+								.getObject(CompleteApplicationHttpAuthenticateFunction.Dependencies.SERVER_HTTP_CONNECTION),
 						this.connection);
 				this.recordReturn(
 						this.taskContext,
 						this.taskContext
-								.getObject(CompleteApplicationHttpAuthenticateTask.Dependencies.HTTP_SESSION),
+								.getObject(CompleteApplicationHttpAuthenticateFunction.Dependencies.HTTP_SESSION),
 						this.session);
 				this.recordReturn(
 						this.taskContext,
 						this.taskContext
-								.getObject(CompleteApplicationHttpAuthenticateTask.Dependencies.REQUEST_STATE),
+								.getObject(CompleteApplicationHttpAuthenticateFunction.Dependencies.REQUEST_STATE),
 						this.requestState);
 				HttpUrlContinuationTest.recordReinstateRequest(
 						isRequestReinstated,
@@ -623,11 +623,11 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 					this.recordReturn(
 							this.taskContext,
 							this.taskContext
-									.doFlow(CompleteApplicationHttpAuthenticateTask.Flows.FAILURE,
+									.doFlow(CompleteApplicationHttpAuthenticateFunction.Flows.FAILURE,
 											null),
 							future,
 							new TypeMatcher(
-									CompleteApplicationHttpAuthenticateTask.Flows.class,
+									CompleteApplicationHttpAuthenticateFunction.Flows.class,
 									HttpAuthenticationContinuationException.class));
 				}
 			}
@@ -768,8 +768,8 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 
 		// Load the work type
 		FunctionNamespaceType<HttpSecurityWork> work = WorkLoaderUtil.loadWorkType(
-				HttpSecurityWorkSource.class,
-				HttpSecurityWorkSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY, key);
+				HttpSecurityManagedFunctionSource.class,
+				HttpSecurityManagedFunctionSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY, key);
 
 		// Find the task type
 		ManagedFunctionType<HttpSecurityWork, ?, ?> task = null;

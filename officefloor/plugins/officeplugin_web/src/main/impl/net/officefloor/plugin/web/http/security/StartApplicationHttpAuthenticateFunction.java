@@ -17,20 +17,19 @@
  */
 package net.officefloor.plugin.web.http.security;
 
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 
 /**
- * {@link ManagedFunction} and {@link ManagedFunctionFactory} for triggering authentication with
- * application specific credentials.
+ * {@link ManagedFunction} and {@link ManagedFunctionFactory} for triggering
+ * authentication with application specific credentials.
  * 
  * @author Daniel Sagenschneider
  */
-public class StartApplicationHttpAuthenticateTask
-		implements
-		ManagedFunctionFactory<HttpSecurityWork, StartApplicationHttpAuthenticateTask.Dependencies, StartApplicationHttpAuthenticateTask.Flows>,
-		ManagedFunction<HttpSecurityWork, StartApplicationHttpAuthenticateTask.Dependencies, StartApplicationHttpAuthenticateTask.Flows> {
+public class StartApplicationHttpAuthenticateFunction extends
+		StaticManagedFunction<StartApplicationHttpAuthenticateFunction.Dependencies, StartApplicationHttpAuthenticateFunction.Flows> {
 
 	/**
 	 * Dependency keys.
@@ -47,37 +46,23 @@ public class StartApplicationHttpAuthenticateTask
 	}
 
 	/*
-	 * ====================== TaskFactory ==========================
-	 */
-
-	@Override
-	public ManagedFunction<HttpSecurityWork, Dependencies, Flows> createManagedFunction(
-			HttpSecurityWork work) {
-		return this;
-	}
-
-	/*
-	 * ========================= Task =============================
+	 * ====================== ManagedFunction =============================
 	 */
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public Object execute(
-			ManagedFunctionContext<HttpSecurityWork, Dependencies, Flows> context)
-			throws Throwable {
+	public Object execute(ManagedFunctionContext<Dependencies, Flows> context) throws Throwable {
 
 		// Obtain the dependencies
 		Object credentials = context.getObject(Dependencies.CREDENTIALS);
-		HttpAuthentication authentication = (HttpAuthentication) context
-				.getObject(Dependencies.HTTP_AUTHENTICATION);
+		HttpAuthentication authentication = (HttpAuthentication) context.getObject(Dependencies.HTTP_AUTHENTICATION);
 
 		// Trigger authentication
 		try {
-			authentication.authenticate(new HttpAuthenticateRequestImpl(
-					credentials));
+			authentication.authenticate(new HttpAuthenticateRequestImpl(credentials));
 		} catch (Throwable ex) {
 			// Trigger failure
-			context.doFlow(Flows.FAILURE, ex);
+			context.doFlow(Flows.FAILURE, ex, null);
 		}
 
 		// No further tasks
@@ -87,8 +72,7 @@ public class StartApplicationHttpAuthenticateTask
 	/**
 	 * {@link HttpAuthenticateRequest} implementation.
 	 */
-	private static class HttpAuthenticateRequestImpl<C> implements
-			HttpAuthenticateRequest<C> {
+	private static class HttpAuthenticateRequestImpl<C> implements HttpAuthenticateRequest<C> {
 
 		/**
 		 * Credentials.

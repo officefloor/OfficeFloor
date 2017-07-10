@@ -148,8 +148,8 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 			link.setUriSecure(isSecure);
 		}
 		assertEquals("Incorrect URI", "uri", link.getApplicationUriPath());
-		assertSame("Incorrect Section", section, link.getAutoWireSection());
-		assertEquals("Incorrect Section Input", "service", link.getAutoWireSectionInputName());
+		assertSame("Incorrect Section", section, link.getOfficeSection());
+		assertEquals("Incorrect Section Input", "service", link.getOfficeSectionInputName());
 
 		// Ensure return listing of all registered URI paths
 		HttpUriLink[] registeredUriLinks = transformer.getRegisteredHttpUriLinks();

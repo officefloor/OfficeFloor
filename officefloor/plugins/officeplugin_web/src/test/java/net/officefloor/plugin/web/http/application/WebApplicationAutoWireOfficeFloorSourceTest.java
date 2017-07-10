@@ -68,7 +68,7 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSourc
 import net.officefloor.plugin.work.clazz.FlowInterface;
 
 /**
- * Tests the {@link WebApplicationAutoWireOfficeFloorSource}.
+ * Tests the {@link WebArchitectEmployer}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -90,9 +90,9 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 	private static final String HOST_NAME = HttpApplicationLocationManagedObjectSource.getDefaultHostName();
 
 	/**
-	 * {@link WebApplicationAutoWireOfficeFloorSource} to be tested.
+	 * {@link WebArchitectEmployer} to be tested.
 	 */
-	private final WebApplicationAutoWireOfficeFloorSource source = new WebApplicationAutoWireOfficeFloorSource();
+	private final WebArchitectEmployer source = new WebArchitectEmployer();
 
 	/**
 	 * {@link CloseableHttpClient}.
@@ -117,16 +117,16 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 		this.source.getOfficeFloorCompiler().addProperty(HttpApplicationLocationManagedObjectSource.PROPERTY_HTTP_PORT,
 				String.valueOf(this.port));
 		HttpServerSocketManagedObjectSource.autoWire(this.source, this.port,
-				WebApplicationAutoWireOfficeFloorSource.HANDLER_SECTION_NAME,
-				WebApplicationAutoWireOfficeFloorSource.HANDLER_INPUT_NAME);
+				WebArchitectEmployer.HANDLER_SECTION_NAME,
+				WebArchitectEmployer.HANDLER_INPUT_NAME);
 
 		// Configure the secure port
 		this.securePort = HttpTestUtil.getAvailablePort();
 		this.source.getOfficeFloorCompiler().addProperty(HttpApplicationLocationManagedObjectSource.PROPERTY_HTTPS_PORT,
 				String.valueOf(this.securePort));
 		HttpsServerSocketManagedObjectSource.autoWire(this.source, this.securePort,
-				HttpTestUtil.getSslEngineSourceClass(), WebApplicationAutoWireOfficeFloorSource.HANDLER_SECTION_NAME,
-				WebApplicationAutoWireOfficeFloorSource.HANDLER_INPUT_NAME);
+				HttpTestUtil.getSslEngineSourceClass(), WebArchitectEmployer.HANDLER_SECTION_NAME,
+				WebArchitectEmployer.HANDLER_INPUT_NAME);
 
 		// Configure the HTTP Request State and HTTP Session
 		this.source.addManagedObject(HttpRequestStateManagedObjectSource.class.getName(), processScopeWirer,
@@ -726,7 +726,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTest
 				"Template /parent has a cyclic inheritance hierarchy ( child : parent : child : ... )");
 		issues.recordIssue("OfficeFloor", OfficeFloorNodeImpl.class,
 				"Failed to source OfficeFloor from OfficeFloorSource (source="
-						+ WebApplicationAutoWireOfficeFloorSource.class.getName() + ", location=auto-wire)",
+						+ WebArchitectEmployer.class.getName() + ", location=auto-wire)",
 				exception);
 
 		// Test

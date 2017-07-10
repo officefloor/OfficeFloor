@@ -18,11 +18,10 @@
 package net.officefloor.plugin.web.http.session.attribute;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.session.attribute.HttpSessionAttribute;
 
 /**
  * {@link ManagedObjectSource} to obtain an {@link HttpSessionAttribute} for an
@@ -30,8 +29,7 @@ import net.officefloor.plugin.web.http.session.attribute.HttpSessionAttribute;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSessionAttributeManagedObjectSource
-		extends
+public class HttpSessionAttributeManagedObjectSource extends
 		AbstractManagedObjectSource<HttpSessionAttributeManagedObjectSource.HttpSessionAttributeDependencies, None> {
 
 	/**
@@ -51,15 +49,12 @@ public class HttpSessionAttributeManagedObjectSource
 	}
 
 	@Override
-	protected void loadMetaData(
-			MetaDataContext<HttpSessionAttributeDependencies, None> context)
-			throws Exception {
+	protected void loadMetaData(MetaDataContext<HttpSessionAttributeDependencies, None> context) throws Exception {
 
 		// Load the meta-data
 		context.setManagedObjectClass(HttpSessionAttributeManagedObject.class);
 		context.setObjectClass(HttpSessionAttribute.class);
-		context.addDependency(HttpSessionAttributeDependencies.HTTP_SESSION,
-				HttpSession.class);
+		context.addDependency(HttpSessionAttributeDependencies.HTTP_SESSION, HttpSession.class);
 	}
 
 	@Override

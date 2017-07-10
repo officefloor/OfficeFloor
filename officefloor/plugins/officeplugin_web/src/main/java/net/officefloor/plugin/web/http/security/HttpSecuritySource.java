@@ -19,7 +19,7 @@ package net.officefloor.plugin.web.http.security;
 
 import java.io.IOException;
 
-import net.officefloor.frame.api.team.Job;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.web.http.session.HttpSession;
@@ -81,7 +81,7 @@ public interface HttpSecuritySource<S, C, D extends Enum<D>, F extends Enum<F>> 
 	 * As authentication will likely require communication with external
 	 * services (LDAP store, database, etc), this method allows checking whether
 	 * enough information is available to undertake the authentication. The
-	 * purpose is to avoid the {@link Job} depending on
+	 * purpose is to avoid the {@link ManagedFunction} depending on
 	 * {@link HttpAuthentication} and inherit the dependencies of authentication
 	 * subsequently causing execution by the authentication {@link Team} -
 	 * especially as the majority of {@link HttpRequest} servicing will have the

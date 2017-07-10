@@ -30,9 +30,13 @@ import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.SectionLoader;
+import net.officefloor.compile.spi.administration.source.AdministrationSource;
+import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
+import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 
 /**
@@ -119,6 +123,23 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements Office
 	}
 
 	@Override
+	public OfficeSectionType loadOfficeSectionType(String sectionName, SectionSource sectionSource,
+			String sectionLocation, PropertyList properties) {
+		return CompileUtil.loadType(OfficeSectionType.class, sectionSource.getClass().getName(),
+				this.context.getCompilerIssues(), () -> {
+
+					// Obtain the overridden properties
+					PropertyList overriddenProperties = this.context.overrideProperties(this.officeNode,
+							this.officeNode.getQualifiedName(sectionName), properties);
+
+					// Load and return the section type
+					SectionLoader sectionLoader = this.context.getSectionLoader(this.officeNode);
+					return sectionLoader.loadOfficeSectionType(sectionName, sectionSource, sectionLocation,
+							overriddenProperties);
+				});
+	}
+
+	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceName,
 			String managedObjectSourceClassName, PropertyList properties) {
@@ -139,6 +160,22 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements Office
 					// Load and return the managed object type
 					ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(this.officeNode);
 					return managedObjectLoader.loadManagedObjectType(managedObjectSourceClass, overriddenProperties);
+				});
+	}
+
+	@Override
+	public ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceName,
+			ManagedObjectSource<?, ?> managedObjectSource, PropertyList properties) {
+		return CompileUtil.loadType(ManagedObjectType.class, managedObjectSource.getClass().getName(),
+				this.context.getCompilerIssues(), () -> {
+
+					// Obtain the overridden properties
+					PropertyList overriddenProperties = this.context.overrideProperties(this.officeNode,
+							this.officeNode.getQualifiedName(managedObjectSourceName), properties);
+
+					// Load and return the managed object type
+					ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(this.officeNode);
+					return managedObjectLoader.loadManagedObjectType(managedObjectSource, overriddenProperties);
 				});
 	}
 
@@ -167,15 +204,31 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements Office
 	}
 
 	@Override
+	public GovernanceType<?, ?> loadGovernanceType(String governanceName, GovernanceSource<?, ?> governanceSource,
+			PropertyList properties) {
+		return CompileUtil.loadType(GovernanceType.class, governanceSource.getClass().getName(),
+				this.context.getCompilerIssues(), () -> {
+
+					// Obtain the overridden properties
+					PropertyList overriddenProperties = this.context.overrideProperties(this.officeNode,
+							this.officeNode.getQualifiedName(governanceName), properties);
+
+					// Load and return the governance type
+					GovernanceLoader governanceLoader = this.context.getGovernanceLoader(this.officeNode);
+					return governanceLoader.loadGovernanceType(governanceSource, overriddenProperties);
+				});
+	}
+
+	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public AdministrationType<?, ?, ?> loadAdministrationType(String administrationName,
-			String administratorSourceClassName, PropertyList properties) {
-		return CompileUtil.loadType(AdministrationType.class, administratorSourceClassName,
+			String administrationSourceClassName, PropertyList properties) {
+		return CompileUtil.loadType(AdministrationType.class, administrationSourceClassName,
 				this.context.getCompilerIssues(), () -> {
 
 					// Obtain the administrator source class
 					Class administratorSourceClass = this.context
-							.getAdministrationSourceClass(administratorSourceClassName, this.officeNode);
+							.getAdministrationSourceClass(administrationSourceClassName, this.officeNode);
 					if (administratorSourceClass == null) {
 						return null;
 					}
@@ -187,6 +240,22 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements Office
 					// Load and return the administrator type
 					AdministrationLoader administratorLoader = this.context.getAdministrationLoader(this.officeNode);
 					return administratorLoader.loadAdministrationType(administratorSourceClass, overriddenProperties);
+				});
+	}
+
+	@Override
+	public AdministrationType<?, ?, ?> loadAdministrationType(String administrationName,
+			AdministrationSource<?, ?, ?> administrationSource, PropertyList properties) {
+		return CompileUtil.loadType(AdministrationType.class, administrationSource.getClass().getName(),
+				this.context.getCompilerIssues(), () -> {
+
+					// Obtain the overridden properties
+					PropertyList overriddenProperties = this.context.overrideProperties(this.officeNode,
+							this.officeNode.getQualifiedName(administrationName), properties);
+
+					// Load and return the administration type
+					AdministrationLoader administrationLoader = this.context.getAdministrationLoader(this.officeNode);
+					return administrationLoader.loadAdministrationType(administrationSource, overriddenProperties);
 				});
 	}
 

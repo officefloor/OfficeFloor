@@ -18,65 +18,67 @@
 package net.officefloor.plugin.web.http.security;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.route.HttpUrlContinuation;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
- * {@link ManagedFunction} and {@link ManagedFunctionFactory} to challenge the client.
+ * {@link ManagedFunctionFactory} to challenge the client.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpChallengeTask implements
-		ManagedFunction<HttpSecurityWork, Indexed, Indexed>,
-		ManagedFunctionFactory<HttpSecurityWork, Indexed, Indexed> {
+public class HttpChallengeFunction extends StaticManagedFunction<Indexed, Indexed> {
+
+	/**
+	 * {@link HttpSession} attribute for the challenge request state.
+	 */
+	public static final String ATTRIBUTE_CHALLENGE_REQUEST_MOMENTO = "CHALLENGE_REQUEST_MOMENTO";
+
+	/**
+	 * {@link HttpSecuritySource}.
+	 */
+	private final HttpSecuritySource<?, ?, ?, ?> httpSecuritySource;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param httpSecuritySource
+	 *            {@link HttpSecuritySource}.
+	 */
+	public HttpChallengeFunction(HttpSecuritySource<?, ?, ?, ?> httpSecuritySource) {
+		this.httpSecuritySource = httpSecuritySource;
+	}
 
 	/*
-	 * =================== HttpChallengeTask ======================
+	 * =================== ManagedFunction ======================
 	 */
 
 	@Override
-	public ManagedFunction<HttpSecurityWork, Indexed, Indexed> createManagedFunction(
-			HttpSecurityWork work) {
-		return this;
-	}
-
-	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public Object execute(ManagedFunctionContext<HttpSecurityWork, Indexed, Indexed> context)
-			throws Throwable {
+	public Object execute(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
 
 		// Obtain the dependencies
-		HttpAuthenticationRequiredException exception = (HttpAuthenticationRequiredException) context
-				.getObject(0);
-		ServerHttpConnection connection = (ServerHttpConnection) context
-				.getObject(1);
+		HttpAuthenticationRequiredException exception = (HttpAuthenticationRequiredException) context.getObject(0);
+		ServerHttpConnection connection = (ServerHttpConnection) context.getObject(1);
 		HttpSession session = (HttpSession) context.getObject(2);
 		HttpRequestState requestState = (HttpRequestState) context.getObject(3);
 
 		// Save the request (if required)
 		if (exception.isSaveRequest()) {
-			HttpUrlContinuation.saveRequest(
-					HttpSecurityWork.ATTRIBUTE_CHALLENGE_REQUEST_MOMENTO,
-					connection, requestState, session);
+			HttpUrlContinuation.saveRequest(ATTRIBUTE_CHALLENGE_REQUEST_MOMENTO, connection, requestState, session);
 		}
 
-		// Obtain the HTTP Security Source
-		HttpSecuritySource<?, ?, ?, ?> httpSecuritySource = context.getWork()
-				.getHttpSecuritySource();
-
 		// Undertake challenge
-		HttpChallengeContextImpl challengeContext = new HttpChallengeContextImpl(
-				connection, session, context);
+		HttpChallengeContextImpl challengeContext = new HttpChallengeContextImpl(connection, session, context);
 		try {
-			httpSecuritySource.challenge(challengeContext);
+			this.httpSecuritySource.challenge(challengeContext);
 		} catch (Throwable ex) {
 			// Allow handling of the failure
-			context.doFlow(0, ex);
+			context.doFlow(0, ex, null);
 		}
 
 		// No further tasks
@@ -102,7 +104,7 @@ public class HttpChallengeTask implements
 		/**
 		 * {@link ManagedFunctionContext}.
 		 */
-		private final ManagedFunctionContext<HttpSecurityWork, Indexed, Indexed> context;
+		private final ManagedFunctionContext<Indexed, Indexed> context;
 
 		/**
 		 * Initiate.
@@ -114,9 +116,8 @@ public class HttpChallengeTask implements
 		 * @param context
 		 *            {@link ManagedFunctionContext}.
 		 */
-		public HttpChallengeContextImpl(ServerHttpConnection connection,
-				HttpSession session,
-				ManagedFunctionContext<HttpSecurityWork, Indexed, Indexed> context) {
+		public HttpChallengeContextImpl(ServerHttpConnection connection, HttpSession session,
+				ManagedFunctionContext<Indexed, Indexed> context) {
 			this.connection = connection;
 			this.session = session;
 			this.context = context;
@@ -147,7 +148,7 @@ public class HttpChallengeTask implements
 		public void doFlow(F key) {
 			// Obtain the index (offset by challenge flows)
 			int index = key.ordinal() + 1;
-			this.context.doFlow(index, null);
+			this.context.doFlow(index, null, null);
 		}
 	}
 

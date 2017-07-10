@@ -18,11 +18,11 @@
 package net.officefloor.plugin.web.http.security;
 
 import net.officefloor.compile.properties.Property;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
@@ -31,8 +31,7 @@ import net.officefloor.plugin.web.http.session.HttpSession;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpAuthenticationManagedObjectSource
-		extends
+public class HttpAuthenticationManagedObjectSource extends
 		AbstractManagedObjectSource<HttpAuthenticationManagedObjectSource.Dependencies, HttpAuthenticationManagedObjectSource.Flows> {
 
 	/**
@@ -72,42 +71,35 @@ public class HttpAuthenticationManagedObjectSource
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(PROPERTY_HTTP_SECURITY_SOURCE_KEY,
-				"HTTP Security Source Key");
+		context.addProperty(PROPERTY_HTTP_SECURITY_SOURCE_KEY, "HTTP Security Source Key");
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<Dependencies, Flows> context)
-			throws Exception {
-		ManagedObjectSourceContext<Flows> mosContext = context
-				.getManagedObjectSourceContext();
+	protected void loadMetaData(MetaDataContext<Dependencies, Flows> context) throws Exception {
+		ManagedObjectSourceContext<Flows> mosContext = context.getManagedObjectSourceContext();
 
 		// Retrieve the HTTP Security Source
 		String key = mosContext.getProperty(PROPERTY_HTTP_SECURITY_SOURCE_KEY);
-		this.httpSecuritySource = HttpSecurityConfigurator
-				.getHttpSecuritySource(key).getHttpSecuritySource();
+		this.httpSecuritySource = HttpSecurityConfigurator.getHttpSecuritySource(key).getHttpSecuritySource();
 
 		// Provide the meta-data
 		context.setObjectClass(HttpAuthentication.class);
 		context.setManagedObjectClass(HttpAuthenticationManagedObject.class);
-		context.addDependency(Dependencies.SERVER_HTTP_CONNECTION,
-				ServerHttpConnection.class);
+		context.addDependency(Dependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class);
 		context.addDependency(Dependencies.HTTP_SESSION, HttpSession.class);
-		context.addFlow(Flows.AUTHENTICATE, TaskAuthenticateContext.class);
+		context.addFlow(Flows.AUTHENTICATE, FunctionAuthenticateContext.class);
 		context.addFlow(Flows.LOGOUT, TaskLogoutContext.class);
 	}
 
 	@Override
-	public void start(ManagedObjectExecuteContext<Flows> context)
-			throws Exception {
+	public void start(ManagedObjectExecuteContext<Flows> context) throws Exception {
 		this.executeContext = context;
 	}
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected ManagedObject getManagedObject() throws Throwable {
-		return new HttpAuthenticationManagedObject(this.httpSecuritySource,
-				this.executeContext);
+		return new HttpAuthenticationManagedObject(this.httpSecuritySource, this.executeContext);
 	}
 
 }

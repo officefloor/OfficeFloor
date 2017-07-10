@@ -28,6 +28,13 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 public interface OfficeSectionTransformerContext {
 
 	/**
+	 * Obtains the name of the {@link OfficeSection}.
+	 * 
+	 * @return Name of the {@link OfficeSection}.
+	 */
+	String getOfficeSectionName();
+
+	/**
 	 * Obtains the {@link SectionSource} {@link Class} name of the
 	 * {@link OfficeSection} being transformed.
 	 * 

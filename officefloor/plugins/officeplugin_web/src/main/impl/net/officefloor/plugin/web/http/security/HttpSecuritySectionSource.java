@@ -19,17 +19,16 @@ package net.officefloor.plugin.web.http.security;
 
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.spi.section.FunctionFlow;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
-import net.officefloor.compile.spi.section.SectionTask;
-import net.officefloor.compile.spi.section.SectionWork;
-import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityDependencyType;
@@ -95,7 +94,7 @@ public class HttpSecuritySectionSource extends AbstractSectionSource {
 		HttpSecurityType<?, ?, ?, ?> securityType = configuration.getHttpSecurityType();
 
 		// Obtain the credentials type
-		Class<?> credentialsType = HttpSecurityWorkSource.getCredentialsClass(securityType);
+		Class<?> credentialsType = HttpSecurityManagedFunctionSource.getCredentialsClass(securityType);
 
 		// Create the dependent objects
 		SectionObject serverHttpConnection = designer.addSectionObject("SERVER_HTTP_CONNECTION",
@@ -117,24 +116,26 @@ public class HttpSecuritySectionSource extends AbstractSectionSource {
 		// Create the failure flow
 		SectionOutput failureOutput = designer.addSectionOutput(OUTPUT_FAILURE, Throwable.class.getName(), true);
 
-		// Configure the HTTP Security Work Source
-		SectionWork work = designer.addSectionWork("HttpSecuritySource", HttpSecurityWorkSource.class.getName());
-		work.addProperty(HttpSecurityWorkSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY, key);
+		// Configure the HTTP Security Managed Function Source
+		SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace("HttpSecuritySource",
+				HttpSecurityManagedFunctionSource.class.getName());
+		namespace.addProperty(HttpSecurityManagedFunctionSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY, key);
 
 		// Configure the challenge handling
-		SectionTask challengeTask = work.addSectionTask(HttpSecurityWorkSource.TASK_CHALLENGE,
-				HttpSecurityWorkSource.TASK_CHALLENGE);
-		challengeTask.getTaskObject("HTTP_AUTHENTICATION_REQUIRED_EXCEPTION").flagAsParameter();
-		designer.link(challengeTask.getTaskObject("SERVER_HTTP_CONNECTION"), serverHttpConnection);
-		designer.link(challengeTask.getTaskObject("HTTP_SESSION"), httpSession);
-		designer.link(challengeTask.getTaskObject("HTTP_REQUEST_STATE"), httpRequestState);
+		SectionFunction challengeFunction = namespace.addSectionFunction(
+				HttpSecurityManagedFunctionSource.FUNCTION_CHALLENGE,
+				HttpSecurityManagedFunctionSource.FUNCTION_CHALLENGE);
+		challengeFunction.getFunctionObject("HTTP_AUTHENTICATION_REQUIRED_EXCEPTION").flagAsParameter();
+		designer.link(challengeFunction.getFunctionObject("SERVER_HTTP_CONNECTION"), serverHttpConnection);
+		designer.link(challengeFunction.getFunctionObject("HTTP_SESSION"), httpSession);
+		designer.link(challengeFunction.getFunctionObject("HTTP_REQUEST_STATE"), httpRequestState);
 		for (SectionObject dependency : dependencyObjects) {
-			designer.link(challengeTask.getTaskObject(dependency.getSectionObjectName()), dependency);
+			designer.link(challengeFunction.getFunctionObject(dependency.getSectionObjectName()), dependency);
 		}
-		designer.link(challengeTask.getTaskFlow("FAILURE"), failureOutput, FlowInstigationStrategyEnum.SEQUENTIAL);
+		designer.link(challengeFunction.getFunctionFlow("FAILURE"), failureOutput, false);
 		for (HttpSecurityFlowType<?> flowType : securityType.getFlowTypes()) {
 			String flowName = flowType.getFlowName();
-			TaskFlow taskFlow = challengeTask.getTaskFlow("FLOW_" + flowName);
+			FunctionFlow functionFlow = challengeFunction.getFunctionFlow("FLOW_" + flowName);
 			SectionOutput sectionOutput;
 			if (OUTPUT_FAILURE.equals(flowName)) {
 				// Determine if map to existing failure output
@@ -143,69 +144,77 @@ public class HttpSecuritySectionSource extends AbstractSectionSource {
 				// Create output for the flow
 				sectionOutput = designer.addSectionOutput(flowName, flowType.getArgumentType().getName(), false);
 			}
-			designer.link(taskFlow, sectionOutput, FlowInstigationStrategyEnum.SEQUENTIAL);
+			designer.link(functionFlow, sectionOutput, false);
 		}
 
 		// Configure the managed object authentication
-		SectionTask moAuthTask = work.addSectionTask(HttpSecurityWorkSource.TASK_MANAGED_OBJECT_AUTHENTICATE,
-				HttpSecurityWorkSource.TASK_MANAGED_OBJECT_AUTHENTICATE);
-		moAuthTask.getTaskObject("TASK_AUTHENTICATE_CONTEXT").flagAsParameter();
+		SectionFunction moAuthFunction = namespace.addSectionFunction(
+				HttpSecurityManagedFunctionSource.FUNCTION_MANAGED_OBJECT_AUTHENTICATE,
+				HttpSecurityManagedFunctionSource.FUNCTION_MANAGED_OBJECT_AUTHENTICATE);
+		moAuthFunction.getFunctionObject("TASK_AUTHENTICATE_CONTEXT").flagAsParameter();
 		for (SectionObject dependency : dependencyObjects) {
-			designer.link(moAuthTask.getTaskObject(dependency.getSectionObjectName()), dependency);
+			designer.link(moAuthFunction.getFunctionObject(dependency.getSectionObjectName()), dependency);
 		}
 
 		// Configure the managed object logout
-		SectionTask moLogoutTask = work.addSectionTask(HttpSecurityWorkSource.TASK_MANAGED_OBJECT_LOGOUT,
-				HttpSecurityWorkSource.TASK_MANAGED_OBJECT_LOGOUT);
-		moLogoutTask.getTaskObject("TASK_LOGOUT_CONTEXT").flagAsParameter();
+		SectionFunction moLogoutFunction = namespace.addSectionFunction(
+				HttpSecurityManagedFunctionSource.FUNCTION_MANAGED_OBJECT_LOGOUT,
+				HttpSecurityManagedFunctionSource.FUNCTION_MANAGED_OBJECT_LOGOUT);
+		moLogoutFunction.getFunctionObject("TASK_LOGOUT_CONTEXT").flagAsParameter();
 		for (SectionObject dependency : dependencyObjects) {
-			designer.link(moLogoutTask.getTaskObject(dependency.getSectionObjectName()), dependency);
+			designer.link(moLogoutFunction.getFunctionObject(dependency.getSectionObjectName()), dependency);
 		}
 
 		// Configure the application authentication start
-		SectionTask startAuthTask = work.addSectionTask(HttpSecurityWorkSource.TASK_START_APPLICATION_AUTHENTICATE,
-				HttpSecurityWorkSource.TASK_START_APPLICATION_AUTHENTICATE);
-		startAuthTask.getTaskObject(StartApplicationHttpAuthenticateTask.Dependencies.CREDENTIALS.name())
+		SectionFunction startAuthFunction = namespace.addSectionFunction(
+				HttpSecurityManagedFunctionSource.FUNCTION_START_APPLICATION_AUTHENTICATE,
+				HttpSecurityManagedFunctionSource.FUNCTION_START_APPLICATION_AUTHENTICATE);
+		startAuthFunction.getFunctionObject(StartApplicationHttpAuthenticateFunction.Dependencies.CREDENTIALS.name())
 				.flagAsParameter();
 		designer.link(
-				startAuthTask
-						.getTaskObject(StartApplicationHttpAuthenticateTask.Dependencies.HTTP_AUTHENTICATION.name()),
+				startAuthFunction.getFunctionObject(
+						StartApplicationHttpAuthenticateFunction.Dependencies.HTTP_AUTHENTICATION.name()),
 				httpAuthentication);
-		designer.link(startAuthTask.getTaskFlow(StartApplicationHttpAuthenticateTask.Flows.FAILURE.name()),
-				failureOutput, FlowInstigationStrategyEnum.SEQUENTIAL);
+		designer.link(startAuthFunction.getFunctionFlow(StartApplicationHttpAuthenticateFunction.Flows.FAILURE.name()),
+				failureOutput, false);
 
 		// Configure the application authentication completion
-		SectionTask completeAuthTask = work.addSectionTask(
-				HttpSecurityWorkSource.TASK_COMPLETE_APPLICATION_AUTHENTICATE,
-				HttpSecurityWorkSource.TASK_COMPLETE_APPLICATION_AUTHENTICATE);
+		SectionFunction completeAuthFunction = namespace.addSectionFunction(
+				HttpSecurityManagedFunctionSource.FUNCTION_COMPLETE_APPLICATION_AUTHENTICATE,
+				HttpSecurityManagedFunctionSource.FUNCTION_COMPLETE_APPLICATION_AUTHENTICATE);
 		designer.link(
-				completeAuthTask
-						.getTaskObject(CompleteApplicationHttpAuthenticateTask.Dependencies.HTTP_AUTHENTICATION.name()),
+				completeAuthFunction.getFunctionObject(
+						CompleteApplicationHttpAuthenticateFunction.Dependencies.HTTP_AUTHENTICATION.name()),
 				httpAuthentication);
 		designer.link(
-				completeAuthTask.getTaskObject(
-						CompleteApplicationHttpAuthenticateTask.Dependencies.SERVER_HTTP_CONNECTION.name()),
+				completeAuthFunction.getFunctionObject(
+						CompleteApplicationHttpAuthenticateFunction.Dependencies.SERVER_HTTP_CONNECTION.name()),
 				serverHttpConnection);
-		designer.link(completeAuthTask
-				.getTaskObject(CompleteApplicationHttpAuthenticateTask.Dependencies.HTTP_SESSION.name()), httpSession);
-		designer.link(completeAuthTask.getTaskObject(
-				CompleteApplicationHttpAuthenticateTask.Dependencies.REQUEST_STATE.name()), httpRequestState);
-		designer.link(completeAuthTask.getTaskFlow(CompleteApplicationHttpAuthenticateTask.Flows.FAILURE.name()),
-				failureOutput, FlowInstigationStrategyEnum.SEQUENTIAL);
+		designer.link(completeAuthFunction.getFunctionObject(
+				CompleteApplicationHttpAuthenticateFunction.Dependencies.HTTP_SESSION.name()), httpSession);
+		designer.link(
+				completeAuthFunction.getFunctionObject(
+						CompleteApplicationHttpAuthenticateFunction.Dependencies.REQUEST_STATE.name()),
+				httpRequestState);
+		designer.link(
+				completeAuthFunction.getFunctionFlow(CompleteApplicationHttpAuthenticateFunction.Flows.FAILURE.name()),
+				failureOutput, false);
 
 		// Link completion for started authentication
-		designer.link(startAuthTask, completeAuthTask);
+		designer.link(startAuthFunction, completeAuthFunction);
 
 		// Link re-continue for completed authentication
-		designer.link(completeAuthTask, designer.addSectionOutput(OUTPUT_RECONTINUE, null, false));
+		designer.link(completeAuthFunction, designer.addSectionOutput(OUTPUT_RECONTINUE, null, false));
 
 		// Link inputs
 		designer.link(designer.addSectionInput(INPUT_CHALLENGE, HttpAuthenticationRequiredException.class.getName()),
-				challengeTask);
-		designer.link(designer.addSectionInput(INPUT_AUTHENTICATE, credentialsType.getName()), startAuthTask);
-		designer.link(designer.addSectionInput("ManagedObjectAuthenticate", TaskAuthenticateContext.class.getName()),
-				moAuthTask);
-		designer.link(designer.addSectionInput("ManagedObjectLogout", HttpLogoutRequest.class.getName()), moLogoutTask);
+				challengeFunction);
+		designer.link(designer.addSectionInput(INPUT_AUTHENTICATE, credentialsType.getName()), startAuthFunction);
+		designer.link(
+				designer.addSectionInput("ManagedObjectAuthenticate", FunctionAuthenticateContext.class.getName()),
+				moAuthFunction);
+		designer.link(designer.addSectionInput("ManagedObjectLogout", HttpLogoutRequest.class.getName()),
+				moLogoutFunction);
 	}
 
 }

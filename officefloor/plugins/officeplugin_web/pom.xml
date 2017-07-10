@@ -29,6 +29,7 @@
 							<sources>
 								<source>src/main/impl</source>
 								<source>src/main/test</source>
+								<source>target/generated-sources/javacc</source>
 							</sources>
 						</configuration>
 					</execution>

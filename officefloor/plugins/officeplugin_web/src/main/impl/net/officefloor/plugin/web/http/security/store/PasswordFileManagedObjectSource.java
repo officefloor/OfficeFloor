@@ -20,11 +20,10 @@ package net.officefloor.plugin.web.http.security.store;
 import java.io.File;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.plugin.web.http.security.store.CredentialStore;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
  * {@link ManagedObjectSource} for a {@link PasswordFile}
@@ -32,8 +31,7 @@ import net.officefloor.plugin.web.http.security.store.CredentialStore;
  * 
  * @author Daniel Sagenschneider
  */
-public class PasswordFileManagedObjectSource extends
-		AbstractManagedObjectSource<None, None> implements ManagedObject {
+public class PasswordFileManagedObjectSource extends AbstractManagedObjectSource<None, None> implements ManagedObject {
 
 	/**
 	 * Name of property identifying the path to the {@link PasswordFile}.
@@ -55,17 +53,14 @@ public class PasswordFileManagedObjectSource extends
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<None, None> context)
-			throws Exception {
-		ManagedObjectSourceContext<None> mosContext = context
-				.getManagedObjectSourceContext();
+	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Obtain the password file path
 		String path = mosContext.getProperty(PROPERTY_PASSWORD_FILE_PATH);
 
 		// Create the password file credential store
-		PasswordFile file = PasswordFileCredentialStore
-				.loadPasswordFile(new File(path));
+		PasswordFile file = PasswordFileCredentialStore.loadPasswordFile(new File(path));
 		this.credentialStore = new PasswordFileCredentialStore(file);
 
 		// Specify meta-data

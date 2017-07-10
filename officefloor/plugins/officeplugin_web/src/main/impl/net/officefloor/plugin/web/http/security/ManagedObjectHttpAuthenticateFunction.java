@@ -19,9 +19,10 @@ package net.officefloor.plugin.web.http.security;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
@@ -31,43 +32,40 @@ import net.officefloor.plugin.web.http.session.HttpSession;
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectHttpAuthenticateTask implements
-		ManagedFunction<HttpSecurityWork, Indexed, None>,
-		ManagedFunctionFactory<HttpSecurityWork, Indexed, None> {
+public class ManagedObjectHttpAuthenticateFunction extends StaticManagedFunction<Indexed, None> {
 
-	/*
-	 * ==================== TaskFactory ============================
+	/**
+	 * {@link HttpSecuritySource}
 	 */
+	private HttpSecuritySource<?, ?, ?, ?> httpSecuritySource;
 
-	@Override
-	public ManagedFunction<HttpSecurityWork, Indexed, None> createManagedFunction(
-			HttpSecurityWork work) {
-		return this;
+	/**
+	 * Instantiate.
+	 * 
+	 * @param httpSecuritySource
+	 *            {@link HttpSecuritySource}.
+	 */
+	public ManagedObjectHttpAuthenticateFunction(HttpSecuritySource<?, ?, ?, ?> httpSecuritySource) {
+		this.httpSecuritySource = httpSecuritySource;
 	}
 
 	/*
-	 * ======================= Task ================================
+	 * ======================= ManagedFunction ================================
 	 */
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public Object execute(ManagedFunctionContext<HttpSecurityWork, Indexed, None> context)
-			throws Throwable {
+	public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
 
-		// Obtain the HTTP Security Source
-		HttpSecuritySource<?, ?, ?, ?> httpSecuritySource = context.getWork()
-				.getHttpSecuritySource();
-
-		// Obtain the task authenticate context
-		TaskAuthenticateContext taskAuthenticateContext = (TaskAuthenticateContext) context
-				.getObject(0);
+		// Obtain the function authenticate context
+		FunctionAuthenticateContext functionAuthenticateContext = (FunctionAuthenticateContext) context.getObject(0);
 
 		// Undertake authentication
-		HttpAuthenticateContextImpl authenticateContext = new HttpAuthenticateContextImpl(
-				taskAuthenticateContext, context);
+		HttpAuthenticateContextImpl authenticateContext = new HttpAuthenticateContextImpl(functionAuthenticateContext,
+				context);
 		Throwable failure = null;
 		try {
-			httpSecuritySource.authenticate(authenticateContext);
+			this.httpSecuritySource.authenticate(authenticateContext);
 		} catch (Throwable ex) {
 			failure = ex;
 		}
@@ -75,11 +73,10 @@ public class ManagedObjectHttpAuthenticateTask implements
 		// Provide the results of authentication
 		if (failure != null) {
 			// Notify of failure in authentication
-			taskAuthenticateContext.setFailure(failure);
+			functionAuthenticateContext.setFailure(failure);
 		} else {
 			// Notify if obtained security from authentication
-			taskAuthenticateContext
-					.setHttpSecurity(authenticateContext.security);
+			functionAuthenticateContext.setHttpSecurity(authenticateContext.security);
 		}
 
 		// No further tasks
@@ -93,14 +90,14 @@ public class ManagedObjectHttpAuthenticateTask implements
 			implements HttpAuthenticateContext<S, C, D> {
 
 		/**
-		 * {@link TaskAuthenticateContext}.
+		 * {@link FunctionAuthenticateContext}.
 		 */
-		private final TaskAuthenticateContext<S, C> taskAuthenticateContext;
+		private final FunctionAuthenticateContext<S, C> functionAuthenticateContext;
 
 		/**
 		 * {@link ManagedFunctionContext}.
 		 */
-		private final ManagedFunctionContext<HttpSecurityWork, Indexed, None> taskContext;
+		private final ManagedFunctionContext<Indexed, None> functionContext;
 
 		/**
 		 * Security.
@@ -110,16 +107,15 @@ public class ManagedObjectHttpAuthenticateTask implements
 		/**
 		 * Initiate.
 		 * 
-		 * @param taskAuthenticateContext
-		 *            {@link TaskAuthenticateContext}.
-		 * @param taskContext
+		 * @param functionAuthenticateContext
+		 *            {@link FunctionAuthenticateContext}.
+		 * @param functionContext
 		 *            {@link ManagedFunctionContext}.
 		 */
-		public HttpAuthenticateContextImpl(
-				TaskAuthenticateContext<S, C> taskAuthenticateContext,
-				ManagedFunctionContext<HttpSecurityWork, Indexed, None> taskContext) {
-			this.taskAuthenticateContext = taskAuthenticateContext;
-			this.taskContext = taskContext;
+		public HttpAuthenticateContextImpl(FunctionAuthenticateContext<S, C> functionAuthenticateContext,
+				ManagedFunctionContext<Indexed, None> functionContext) {
+			this.functionAuthenticateContext = functionAuthenticateContext;
+			this.functionContext = functionContext;
 		}
 
 		/*
@@ -128,24 +124,24 @@ public class ManagedObjectHttpAuthenticateTask implements
 
 		@Override
 		public C getCredentials() {
-			return this.taskAuthenticateContext.getCredentials();
+			return this.functionAuthenticateContext.getCredentials();
 		}
 
 		@Override
 		public ServerHttpConnection getConnection() {
-			return this.taskAuthenticateContext.getConnection();
+			return this.functionAuthenticateContext.getConnection();
 		}
 
 		@Override
 		public HttpSession getSession() {
-			return this.taskAuthenticateContext.getSession();
+			return this.functionAuthenticateContext.getSession();
 		}
 
 		@Override
 		public Object getObject(D key) {
 			// Obtain the relative index (offset for task authenticate context)
 			int index = key.ordinal() + 1;
-			return this.taskContext.getObject(index);
+			return this.functionContext.getObject(index);
 		}
 
 		@Override

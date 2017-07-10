@@ -25,9 +25,9 @@ import java.util.Set;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.security.scheme.MockHttpSecuritySource;
@@ -46,9 +46,8 @@ import net.officefloor.plugin.web.http.security.scheme.MockHttpSecuritySource;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockCredentialStoreManagedObjectSource extends
-		AbstractManagedObjectSource<None, None> implements ManagedObject,
-		CredentialStore {
+public class MockCredentialStoreManagedObjectSource extends AbstractManagedObjectSource<None, None>
+		implements ManagedObject, CredentialStore {
 
 	/**
 	 * Name of the {@link Property} for the algorithm.
@@ -70,10 +69,8 @@ public class MockCredentialStoreManagedObjectSource extends
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<None, None> context)
-			throws Exception {
-		ManagedObjectSourceContext<None> mosContext = context
-				.getManagedObjectSourceContext();
+	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Obtain the algorithm
 		this.algorithm = mosContext.getProperty(PROPERTY_ALGORITHM, null);
@@ -106,8 +103,7 @@ public class MockCredentialStoreManagedObjectSource extends
 	}
 
 	@Override
-	public CredentialEntry retrieveCredentialEntry(String userId, String realm)
-			throws IOException {
+	public CredentialEntry retrieveCredentialEntry(String userId, String realm) throws IOException {
 
 		// Create the password
 		byte[] password = userId.getBytes(HttpRequestParserImpl.US_ASCII);
@@ -125,8 +121,7 @@ public class MockCredentialStoreManagedObjectSource extends
 		}
 
 		// Create and return the credential entry
-		return new MockCredentialEntry(password, new HashSet<String>(
-				Arrays.asList(roles)));
+		return new MockCredentialEntry(password, new HashSet<String>(Arrays.asList(roles)));
 	}
 
 	/**

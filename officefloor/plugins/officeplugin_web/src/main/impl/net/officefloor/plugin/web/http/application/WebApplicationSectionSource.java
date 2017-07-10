@@ -75,7 +75,7 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 	/**
 	 * Prefix on the {@link ManagedFunction} name to service links.
 	 */
-	public static final String PROPERTY_LINK_SERVICE_TASK_NAME_PREFIX = "link.service.task.name.prefix";
+	public static final String PROPERTY_LINK_SERVICE_FUNCTION_NAME_PREFIX = "link.service.task.name.prefix";
 
 	/**
 	 * Links the {@link FunctionObject} to the {@link SectionObject}.

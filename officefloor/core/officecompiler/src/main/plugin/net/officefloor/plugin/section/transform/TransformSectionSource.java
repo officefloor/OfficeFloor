@@ -231,8 +231,24 @@ public class TransformSectionSource extends AbstractSectionSource implements Off
 			properties.addProperty(PROPERTY_SECTION_PROPERTY_PREFIX + property.getName()).setValue(property.getValue());
 		}
 
+		// Load additional properties
+		this.configureProperties(context, properties);
+
 		// Transform the section
 		context.setTransformedOfficeSection(this.getClass().getName(), null, properties);
+	}
+
+	/**
+	 * Enables overriding to configure additional {@link Property} instances.
+	 * 
+	 * @param context
+	 *            {@link OfficeSectionTransformerContext}.
+	 * @param properties
+	 *            {@link PropertyList} to load additional {@link Property}
+	 *            instances.
+	 */
+	protected void configureProperties(OfficeSectionTransformerContext context, PropertyList properties) {
+		// No additional properties
 	}
 
 	/*
