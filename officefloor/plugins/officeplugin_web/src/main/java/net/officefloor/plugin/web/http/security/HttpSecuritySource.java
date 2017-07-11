@@ -71,6 +71,7 @@ public interface HttpSecuritySource<S, C, D extends Enum<D>, F extends Enum<F>> 
 	 * 
 	 * @return Meta-data to describe this.
 	 */
+	@Deprecated // return from init method
 	HttpSecuritySourceMetaData<S, C, D, F> getMetaData();
 
 	/**

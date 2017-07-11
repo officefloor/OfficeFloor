@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.section.FunctionFlow;
 import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.SectionDesigner;
@@ -44,7 +45,6 @@ import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteTaskDependencies;
 import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteTaskFlows;
 import net.officefloor.plugin.web.http.route.HttpRouteWorkSource;
-import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
 
@@ -54,6 +54,12 @@ import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
  * @author Daniel Sagenschneider
  */
 public class WebApplicationSectionSource extends AbstractSectionSource {
+
+	/**
+	 * Property name for the {@link OfficeSectionInput} to service
+	 * {@link ServerHttpConnection} instances.
+	 */
+	public static final String PROPERTY_SERVICE_INPUT_NAME = "service.input";
 
 	/**
 	 * Name of the {@link SectionOutput} for servicing non-handled
@@ -139,7 +145,7 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		// No specification required
+		context.addProperty(PROPERTY_SERVICE_INPUT_NAME, "Service input");
 	}
 
 	@Override
@@ -147,6 +153,9 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 
 		final Map<Class<?>, SectionObject> objects = new HashMap<Class<?>, SectionObject>();
 		final Map<Class<?>, SectionOutput> escalations = new HashMap<Class<?>, SectionOutput>();
+
+		// Obtain the service input name
+		String serviceInputName = context.getProperty(PROPERTY_SERVICE_INPUT_NAME);
 
 		// Add the Route function
 		SectionFunctionNamespace routeNamespace = designer.addSectionFunctionNamespace("ROUTE",
@@ -165,8 +174,8 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 		linkEscalation(routeFunction, UnknownFunctionException.class, designer, escalations);
 		linkEscalation(routeFunction, InvalidParameterTypeException.class, designer, escalations);
 
-		// Link handling input to route function
-		SectionInput input = designer.addSectionInput(HttpServerAutoWireOfficeFloorSource.HANDLER_INPUT_NAME, null);
+		// Link service input to route function
+		SectionInput input = designer.addSectionInput(serviceInputName, null);
 		designer.link(input, routeFunction);
 
 		// Send to non-handled requests to not handled output

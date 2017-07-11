@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.web.http.application;
 
+import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 
@@ -25,7 +26,7 @@ import net.officefloor.plugin.web.http.security.HttpSecuritySource;
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpSecuritySection {
+public interface HttpSecuritySection extends PropertyConfigurable {
 
 	/**
 	 * Obtains the underlying {@link OfficeSection}.
@@ -33,20 +34,6 @@ public interface HttpSecuritySection {
 	 * @return {@link OfficeSection}.
 	 */
 	OfficeSection getOfficeSection();
-
-	/**
-	 * Obtains the {@link Class} of the {@link HttpSecuritySource}.
-	 * 
-	 * @return {@link Class} of the {@link HttpSecuritySource}.
-	 */
-	Class<? extends HttpSecuritySource<?, ?, ?, ?>> getHttpSecuritySourceClass();
-
-	/**
-	 * Obtains the time in milliseconds before timing out authentication.
-	 * 
-	 * @return Time in milliseconds before timing out authentication.
-	 */
-	long getSecurityTimeout();
 
 	/**
 	 * Specifies the time in milliseconds before timing out authentication.

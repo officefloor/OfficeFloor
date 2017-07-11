@@ -17,8 +17,6 @@
  */
 package net.officefloor.plugin.web.http.application;
 
-import java.util.Map;
-
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
@@ -39,27 +37,6 @@ public interface HttpTemplateSection {
 	OfficeSection getOfficeSection();
 
 	/**
-	 * Obtains the URI to the template.
-	 * 
-	 * @return URI to the template.
-	 */
-	String getTemplateUri();
-
-	/**
-	 * Obtains the logic class for the template.
-	 * 
-	 * @return Logic class for the template.
-	 */
-	Class<?> getTemplateLogicClass();
-
-	/**
-	 * Obtains path to the template file.
-	 * 
-	 * @return Path to the template file.
-	 */
-	String getTemplateLocation();
-
-	/**
 	 * <p>
 	 * Specifies the template URI suffix.
 	 * <p>
@@ -73,14 +50,6 @@ public interface HttpTemplateSection {
 	void setTemplateUriSuffix(String uriSuffix);
 
 	/**
-	 * Obtains the template URI suffix.
-	 * 
-	 * @return Template URI suffix. May be <code>null</code> to not have a URI
-	 *         suffix.
-	 */
-	String getTemplateUriSuffix();
-
-	/**
 	 * <p>
 	 * Specifies the Content-Type for the template.
 	 * <p>
@@ -91,14 +60,6 @@ public interface HttpTemplateSection {
 	 *            Content-Type for the template.
 	 */
 	void setTemplateContentType(String contentType);
-
-	/**
-	 * Obtains the Content-Type for the template.
-	 * 
-	 * @return Content-Type for the template. May be <code>null</code> to use
-	 *         the default encoding.
-	 */
-	String getTemplateContentType();
 
 	/**
 	 * <p>
@@ -115,15 +76,6 @@ public interface HttpTemplateSection {
 	 *            {@link ServerHttpConnection}.
 	 */
 	void setTemplateSecure(boolean isSecure);
-
-	/**
-	 * Indicates whether a secure {@link ServerHttpConnection} is required for
-	 * the template.
-	 * 
-	 * @return <code>true</code> if a secure {@link ServerHttpConnection} is
-	 *         required for the template.
-	 */
-	boolean isTemplateSecure();
 
 	/**
 	 * <p>
@@ -144,19 +96,6 @@ public interface HttpTemplateSection {
 
 	/**
 	 * <p>
-	 * Obtains an immutable {@link Map} providing the overriding configuration
-	 * of whether a link requires a secure {@link ServerHttpConnection}.
-	 * <p>
-	 * Links not contained in the returned {@link Map} will default secure to
-	 * that of the template.
-	 * 
-	 * @return Immutable {@link Map} of link to whether if requires a secure
-	 *         {@link ServerHttpConnection}.
-	 */
-	Map<String, Boolean> getSecureLinks();
-
-	/**
-	 * <p>
 	 * Adds a HTTP method that will cause a redirect on rendering this
 	 * {@link HttpTemplate}.
 	 * <p>
@@ -169,11 +108,12 @@ public interface HttpTemplateSection {
 	void addRenderRedirectHttpMethod(String renderRedirectHttpMethod);
 
 	/**
-	 * Obtains the configured render redirect HTTP methods.
+	 * Specifies the parent {@link HttpTemplateSection} to inherit from.
 	 * 
-	 * @return Configured render redirect HTTP methods.
+	 * @param httpTemplateSection
+	 *            Parent {@link HttpTemplateSection}.
 	 */
-	String[] getRenderRedirectHttpMethods();
+	void setSuperHttpTemplate(HttpTemplateSection httpTemplateSection);
 
 	/**
 	 * Adds an {@link HttpTemplateSectionExtension} to this

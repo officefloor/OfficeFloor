@@ -26,10 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.officefloor.autowire.AutoWireObject;
-import net.officefloor.autowire.ManagedObjectSourceWirer;
-import net.officefloor.autowire.ManagedObjectSourceWirerContext;
-import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
@@ -48,17 +45,13 @@ import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedOb
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 import net.officefloor.plugin.web.http.security.AnonymousHttpAuthenticationManagedObjectSource;
-import net.officefloor.plugin.web.http.security.HttpAuthentication;
 import net.officefloor.plugin.web.http.security.HttpAuthenticationManagedObjectSource;
 import net.officefloor.plugin.web.http.security.HttpAuthenticationRequiredException;
-import net.officefloor.plugin.web.http.security.HttpSecurityConfigurator;
 import net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource;
-import net.officefloor.plugin.web.http.security.HttpSecuritySectionSource;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityLoader;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityLoaderImpl;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
-import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
 import net.officefloor.plugin.web.http.session.object.HttpSessionObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.template.HttpTemplateManagedFunctionSource;
@@ -130,7 +123,7 @@ public class WebArchitectEmployer implements WebArchitect {
 	/**
 	 * {@link HttpTemplateSection} instances.
 	 */
-	private final List<HttpTemplateSection> httpTemplates = new LinkedList<HttpTemplateSection>();
+	private final List<HttpTemplateSectionImpl> httpTemplates = new LinkedList<>();
 
 	/**
 	 * Default {@link HttpTemplate} URI suffix.
@@ -161,7 +154,7 @@ public class WebArchitectEmployer implements WebArchitect {
 	/**
 	 * {@link HttpSecuritySection} instances.
 	 */
-	private final List<HttpSecuritySection> httpSecurities = new LinkedList<>();
+	private final List<HttpSecuritySectionImpl<?, ?, ?, ?>> httpSecurities = new LinkedList<>();
 
 	/**
 	 * {@link ResourceLink} instances.
@@ -203,10 +196,10 @@ public class WebArchitectEmployer implements WebArchitect {
 	 * Obtains the {@link HttpTemplate} URI suffix.
 	 * 
 	 * @param template
-	 *            {@link HttpTemplateSection}.
+	 *            {@link HttpTemplateSectionImpl}.
 	 * @return {@link HttpTemplate} URI suffix.
 	 */
-	private String getTemplateUriSuffix(HttpTemplateSection template) {
+	private String getTemplateUriSuffix(HttpTemplateSectionImpl template) {
 
 		// Obtain the template URI Suffix
 		String templateUriSuffix = template.getTemplateUriSuffix();
@@ -247,7 +240,7 @@ public class WebArchitectEmployer implements WebArchitect {
 		}
 
 		// Ensure URI is not already registered
-		for (HttpTemplateSection template : this.httpTemplates) {
+		for (HttpTemplateSectionImpl template : this.httpTemplates) {
 			if (templateUri.equals(template.getTemplateUri())) {
 				throw new IllegalStateException("HTTP Template already added for URI '" + templateUri + "'");
 			}
@@ -263,8 +256,8 @@ public class WebArchitectEmployer implements WebArchitect {
 			section.addProperty(HttpTemplateSectionSource.PROPERTY_CLASS_NAME, templateLogicClass.getName());
 		}
 
-		// Register the HTTP template
-		HttpTemplateSection template = new HttpTemplateSectionImpl(section, templateLogicClass, templateLocation,
+		// Create and register the HTTP template
+		HttpTemplateSectionImpl template = new HttpTemplateSectionImpl(section, templateLogicClass, templateLocation,
 				templateUri);
 		this.httpTemplates.add(template);
 
@@ -314,12 +307,23 @@ public class WebArchitectEmployer implements WebArchitect {
 	public HttpSecuritySection addHttpSecurity(String securityName,
 			final Class<? extends HttpSecuritySource<?, ?, ?, ?>> httpSecuritySourceClass) {
 
-		// Add the HTTP Security section
-		OfficeSection httpSecuritySection = this.officeArchitect.addOfficeSection(securityName,
-				HttpSecuritySectionSource.class.getName(), null);
+		// Instantiate the HTTP security source
+		HttpSecuritySource<?, ?, ?, ?> httpSecuritySource;
+		try {
+			httpSecuritySource = (HttpSecuritySource<?, ?, ?, ?>) this.officeSourceContext
+					.loadClass(httpSecuritySourceClass.getName()).newInstance();
+		} catch (IllegalAccessException | InstantiationException ex) {
+			// Must be able to instantiate instance
+			throw new LoadTypeError(HttpSecuritySource.class, httpSecuritySourceClass.getName(), null);
+		}
 
-		// Create and return the HTTP security
-		return new HttpSecuritySectionImpl(httpSecuritySection, httpSecuritySourceClass);
+		// Create and register the HTTP security
+		HttpSecuritySectionImpl<?, ?, ?, ?> httpSecurity = new HttpSecuritySectionImpl<>(this.officeArchitect,
+				securityName, httpSecuritySource, this.officeSourceContext.createPropertyList());
+		this.httpSecurities.add(httpSecurity);
+
+		// Return the HTTP security
+		return httpSecurity;
 	}
 
 	@Override
@@ -461,7 +465,7 @@ public class WebArchitectEmployer implements WebArchitect {
 		List<String> uris = new LinkedList<String>();
 
 		// Determine if root template to include
-		for (HttpTemplateSection template : this.httpTemplates) {
+		for (HttpTemplateSectionImpl template : this.httpTemplates) {
 			String templateUri = template.getTemplateUri();
 			if ("/".equals(templateUri)) {
 				uris.add(templateUri);
@@ -488,18 +492,26 @@ public class WebArchitectEmployer implements WebArchitect {
 	}
 
 	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void informOfficeArchitect() {
 
+		// Auto wire the objects
+		this.officeArchitect.enableAutoWireObjects();
+
 		// Configure HTTP Session (allowing 10 seconds to retrieve session)
-		this.httpSession = this.addManagedObject(HttpSessionManagedObjectSource.class.getName(), processScopeWirer,
-				new AutoWire(HttpSession.class));
-		this.httpSession.setTimeout(10 * 1000);
+		OfficeManagedObjectSource httpSessionMos = this.officeArchitect.addOfficeManagedObjectSource("HTTP_SESSION",
+				HttpSessionManagedObjectSource.class.getName());
+		httpSessionMos.setTimeout(10 * 1000); // TODO make configurable
+		httpSessionMos.addOfficeManagedObject("HTTP_SESSION", ManagedObjectScope.PROCESS);
 
 		// Configure the HTTP Application and Request States
-		this.addManagedObject(HttpApplicationStateManagedObjectSource.class.getName(), processScopeWirer,
-				new AutoWire(HttpApplicationState.class));
-		this.addManagedObject(HttpRequestStateManagedObjectSource.class.getName(), processScopeWirer,
-				new AutoWire(HttpRequestState.class));
+		this.officeArchitect
+				.addOfficeManagedObjectSource("HTTP_APPLICATION_STATE",
+						HttpApplicationStateManagedObjectSource.class.getName())
+				.addOfficeManagedObject("HTTP_APPLICATION_STATE", ManagedObjectScope.PROCESS);
+		this.officeArchitect
+				.addOfficeManagedObjectSource("HTTP_REQUEST_STATE", HttpRequestStateManagedObjectSource.class.getName())
+				.addOfficeManagedObject("HTTP_REQUEST_STATE", ManagedObjectScope.PROCESS);
 
 		// Add the HTTP section
 		OfficeSection httpSection = this.officeArchitect.addOfficeSection(HANDLER_SECTION_NAME,
@@ -511,8 +523,7 @@ public class WebArchitectEmployer implements WebArchitect {
 		OfficeManagedObjectSource locationMos = this.officeArchitect.addOfficeManagedObjectSource(
 				HttpApplicationLocation.class.getName(), HttpApplicationLocationManagedObjectSource.class.getName());
 		HttpApplicationLocationManagedObjectSource.copyProperties(officeSourceContext, locationMos);
-		OfficeManagedObject location = locationMos.addOfficeManagedObject(HttpApplicationLocation.class.getName(),
-				ManagedObjectScope.PROCESS);
+		locationMos.addOfficeManagedObject(HttpApplicationLocation.class.getName(), ManagedObjectScope.PROCESS);
 
 		// Load the HTTP security
 		if (this.httpSecurities.size() == 0) {
@@ -525,63 +536,52 @@ public class WebArchitectEmployer implements WebArchitect {
 
 		} else {
 			// Configure the securities
-			for (HttpSecuritySection httpSecurity : this.httpSecurities) {
+			OfficeEscalation authenticationRequiredEscalation = null;
+			for (HttpSecuritySectionImpl<?, ?, ?, ?> httpSecurity : this.httpSecurities) {
 
 				// Configure the security
-				Class<? extends HttpSecuritySource<?, ?, ?, ?>> httpSecuritySourceClass = httpSecurity
-						.getHttpSecuritySourceClass();
+				String securityName = httpSecurity.getOfficeSection().getOfficeSectionName();
 				long securityTimeout = httpSecurity.getSecurityTimeout();
 
-				// Load the HTTP security source
-				HttpSecuritySource<?, ?, ?, ?> httpSecuritySource = (HttpSecuritySource<?, ?, ?, ?>) this.officeSourceContext
-						.loadClass(httpSecuritySourceClass.getName()).newInstance();
-
 				// Load the type (which also initialises the source)
-				HttpSecurityLoader securityLoader = new HttpSecurityLoaderImpl(this.officeSourceContext,
-						httpSecurity.getOfficeSection().getOfficeSectionName());
-				HttpSecurityType httpSecurityType = securityLoader.loadHttpSecurityType(httpSecuritySource,
-						httpSecurity.getProperties());
+				HttpSecurityLoader securityLoader = new HttpSecurityLoaderImpl(this.officeSourceContext, securityName);
+				HttpSecurityType<?, ?, ?, ?> httpSecurityType = securityLoader
+						.loadHttpSecurityType(httpSecurity.getHttpSecuritySource(), httpSecurity.getProperties());
+
+				// Load the security type
+				httpSecurity.setHttpSecurityType((HttpSecurityType) httpSecurityType);
 
 				// Obtain the security class
 				Class<?> securityClass = httpSecurityType.getSecurityClass();
 
-				// Register the HTTP security
-				String key = HttpSecurityConfigurator.registerHttpSecuritySource(httpSecuritySource, httpSecurityType);
-				httpSecurity.getOfficeSection().addProperty(HttpSecuritySectionSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY,
-						key);
-
-				// Provide automated flow linking
-				this.linkEscalation(HttpAuthenticationRequiredException.class, httpSecurity.getOfficeSection(),
-						"Challenge");
+				// Provide flow linking
+				if (authenticationRequiredEscalation == null) {
+					authenticationRequiredEscalation = this.officeArchitect
+							.addOfficeEscalation(HttpAuthenticationRequiredException.class.getName());
+				}
+				this.officeArchitect.link(authenticationRequiredEscalation,
+						httpSecurity.getOfficeSection().getOfficeSectionInput("Challenge"));
 				this.officeArchitect.link(httpSecurity.getOfficeSection().getOfficeSectionOutput("Recontinue"),
 						httpSection.getOfficeSectionInput(HANDLER_INPUT_NAME));
 
 				// Add the HTTP Authentication Managed Object
-				AutoWireObject httpAuthentication = this.addManagedObject(
-						HttpAuthenticationManagedObjectSource.class.getName(), new ManagedObjectSourceWirer() {
-							@Override
-							public void wire(ManagedObjectSourceWirerContext context) {
-								context.setManagedObjectScope(ManagedObjectScope.PROCESS);
-								context.mapFlow("AUTHENTICATE", WebArchitectEmployer.this.security.getSectionName(),
-										"ManagedObjectAuthenticate");
-								context.mapFlow("LOGOUT", WebArchitectEmployer.this.security.getSectionName(),
-										"ManagedObjectLogout");
-							}
-						}, new AutoWire(HttpAuthentication.class));
-				httpAuthentication.setTimeout(securityTimeout);
-				httpAuthentication.addProperty(HttpAuthenticationManagedObjectSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY,
-						key);
+				OfficeManagedObjectSource httpAuthenticationMos = this.officeArchitect.addOfficeManagedObjectSource(
+						securityName, new HttpAuthenticationManagedObjectSource(httpSecurity));
+				httpAuthenticationMos.setTimeout(securityTimeout);
+				this.officeArchitect.link(httpAuthenticationMos.getManagedObjectFlow("AUTHENTICATE"),
+						httpSecurity.getOfficeSection().getOfficeSectionInput("ManagedObjectAuthenticate"));
+				this.officeArchitect.link(httpAuthenticationMos.getManagedObjectFlow("LOGOUT"),
+						httpSecurity.getOfficeSection().getOfficeSectionInput("ManagedObjectLogout"));
+				httpAuthenticationMos.addOfficeManagedObject(securityName, ManagedObjectScope.PROCESS);
 
-				// Determine if HTTP Security already configured
-				AutoWire httpSecurityAutoWire = new AutoWire(securityClass);
-				if (!(this.isObjectAvailable(httpSecurityAutoWire))) {
-					// Add the HTTP Security Managed Object
-					AutoWireObject httpSecurity = this.addManagedObject(HttpSecurityManagedObjectSource.class.getName(),
-							processScopeWirer, httpSecurityAutoWire);
-					httpSecurity.setTimeout(securityTimeout);
-					httpSecurity.addProperty(HttpSecurityManagedObjectSource.PROPERTY_HTTP_SECURITY_TYPE,
-							securityClass.getName());
-				}
+				// Add the HTTP Security Managed Object
+				String httpSecurityName = securityName + "Security";
+				OfficeManagedObjectSource httpSecurityMos = this.officeArchitect
+						.addOfficeManagedObjectSource(httpSecurityName, new HttpSecurityManagedObjectSource());
+				httpSecurityMos.setTimeout(securityTimeout);
+				httpSecurityMos.addProperty(HttpSecurityManagedObjectSource.PROPERTY_HTTP_SECURITY_TYPE,
+						securityClass.getName());
+				httpSecurityMos.addOfficeManagedObject(httpSecurityName, ManagedObjectScope.PROCESS);
 			}
 		}
 
@@ -605,58 +605,60 @@ public class WebArchitectEmployer implements WebArchitect {
 		if (previousChainedOutput != null) {
 
 			// Create the filer sender servicer
-			OfficeSection nonHandledServicer = this.addSection("NON_HANDLED_SERVICER",
+			OfficeSection nonHandledServicer = this.officeArchitect.addOfficeSection("NON_HANDLED_SERVICER",
 					HttpFileSenderSectionSource.class.getName(), null);
-			SourceHttpResourceFactory.copyProperties(context, nonHandledServicer);
+			SourceHttpResourceFactory.copyProperties(this.officeSourceContext, nonHandledServicer);
 			this.linkToSendResponse(nonHandledServicer, HttpFileSenderSectionSource.FILE_SENT_OUTPUT_NAME);
 
 			// Link into the chain
-			this.link(previousChainedSection, previousChainedOutput, nonHandledServicer,
-					HttpFileSenderSectionSource.SERVICE_INPUT_NAME);
+			this.officeArchitect.link(previousChainedSection.getOfficeSectionOutput(previousChainedOutput),
+					nonHandledServicer.getOfficeSectionInput(HttpFileSenderSectionSource.SERVICE_INPUT_NAME));
 		}
 
 		// Additional template configuration
-		for (HttpTemplateSection httpTemplate : this.httpTemplates) {
+		NEXT_HTTP_TEMPLATE: for (HttpTemplateSectionImpl httpTemplate : this.httpTemplates) {
 
 			// Determine the template inheritance hierarchy
-			Deque<OfficeSection> inheritanceHierarchy = new LinkedList<OfficeSection>();
-			OfficeSection parent = httpTemplate.getSuperSection();
+			Deque<HttpTemplateSectionImpl> inheritanceHierarchy = new LinkedList<>();
+			HttpTemplateSection parent = httpTemplate.getSuperHttpTemplate();
 			boolean isCyclicInheritance = false;
-			while ((parent != null) && (!isCyclicInheritance)) {
+			INHERITANCE: while ((parent != null) && (!isCyclicInheritance)) {
+
+				// Issue if not template
+				if (!(parent instanceof HttpTemplateSectionImpl)) {
+					this.officeArchitect.addIssue(parent.getOfficeSection().getOfficeSectionName()
+							+ " must be configured via " + WebArchitect.class.getSimpleName());
+					break INHERITANCE;
+				}
+				HttpTemplateSectionImpl parentTemplate = (HttpTemplateSectionImpl) parent;
 
 				// Determine if cyclic inheritance
-				if (inheritanceHierarchy.contains(parent)) {
+				if (inheritanceHierarchy.contains(parentTemplate)) {
 					isCyclicInheritance = true;
 				}
 
 				// Add the parent and set up for next iteration
-				inheritanceHierarchy.push(parent);
-				parent = parent.getSuperSection();
+				inheritanceHierarchy.push(parentTemplate);
+				parent = parentTemplate.getSuperHttpTemplate();
 			}
 			if (isCyclicInheritance) {
 				// Provide issue of cyclic inheritance
 				StringBuilder logCycle = new StringBuilder();
 				logCycle.append("Template " + httpTemplate.getTemplateUri() + " has a cyclic inheritance hierarchy ( ");
-				for (OfficeSection section : inheritanceHierarchy) {
-					logCycle.append(section.getSectionName() + " : ");
+				for (HttpTemplateSection section : inheritanceHierarchy) {
+					logCycle.append(section.getOfficeSection().getOfficeSectionName() + " : ");
 				}
 				logCycle.append("... )");
 				String logCycleMessage = logCycle.toString();
-				deployer.addIssue(logCycleMessage);
-				throw new CyclicInheritanceException(logCycleMessage);
+				this.officeArchitect.addIssue(logCycleMessage);
+				continue NEXT_HTTP_TEMPLATE;
 			}
 
 			// Obtain inheritance hierarchy of templates (including current)
-			Deque<HttpTemplateSection> templateInheritanceHierarchy = new LinkedList<HttpTemplateSection>();
+			Deque<HttpTemplateSectionImpl> templateInheritanceHierarchy = new LinkedList<>();
 			StringBuilder inheritedTemplates = new StringBuilder();
 			boolean isFirstParentTemplate = true;
-			for (OfficeSection parentSection : inheritanceHierarchy) {
-
-				// Ignore if not template
-				if (!(parentSection instanceof HttpTemplateSection)) {
-					continue;
-				}
-				HttpTemplateSection parentTemplate = (HttpTemplateSection) parentSection;
+			for (HttpTemplateSectionImpl parentTemplate : inheritanceHierarchy) {
 
 				// Include the template in inheritance hierarchy
 				templateInheritanceHierarchy.add(parentTemplate);
@@ -738,15 +740,15 @@ public class WebArchitectEmployer implements WebArchitect {
 
 			// Secure the specific template links (following inheritance)
 			Set<String> configuredLinks = new HashSet<String>();
-			for (HttpTemplateSection currentTemplate : templateInheritanceHierarchy) {
+			for (HttpTemplateSectionImpl currentTemplate : templateInheritanceHierarchy) {
 
 				// Provide the links for the current template
 				Map<String, Boolean> secureLinks = currentTemplate.getSecureLinks();
-				for (String link : secureLinks.keySet()) {
+				NEXT_LINK: for (String link : secureLinks.keySet()) {
 
 					// Ignore if already configured link (by child)
 					if (configuredLinks.contains(link)) {
-						continue;
+						continue NEXT_LINK;
 					}
 					configuredLinks.add(link);
 
@@ -781,31 +783,32 @@ public class WebArchitectEmployer implements WebArchitect {
 						renderRedirectHttpMethodValue.toString());
 			}
 
-			// Link completion of template rendering (if not already linked)
-			if (!this.isLinked(httpTemplate, HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME)) {
-				// Not linked, so link to sending HTTP response
-				this.linkToSendResponse(httpTemplate, HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME);
-			}
+			// Link completion of template rendering
+			this.linkToSendResponse(httpTemplate.getOfficeSection(),
+					HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME);
 		}
 
 		// Link to resources
 		if ((this.resourceLinks.size() > 0) || (this.escalationResources.size() > 0)) {
 
 			// Create section to send resources
-			OfficeSection section = this.addSection("RESOURCES", HttpFileSectionSource.class.getName(),
-					WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX);
-			SourceHttpResourceFactory.copyProperties(context, section);
+			OfficeSection section = this.officeArchitect.addOfficeSection("RESOURCES",
+					HttpFileSectionSource.class.getName(), WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX);
+			SourceHttpResourceFactory.copyProperties(this.officeSourceContext, section);
 
 			// Link section outputs to the resources
 			for (ResourceLink resourceLink : this.resourceLinks) {
-				this.link(resourceLink.section, resourceLink.outputName, section, resourceLink.resourcePath);
+				this.officeArchitect.link(resourceLink.section.getOfficeSectionOutput(resourceLink.outputName),
+						section.getOfficeSectionInput(resourceLink.resourcePath));
 				section.addProperty(HttpFileSectionSource.PROPERTY_RESOURCE_PREFIX + resourceLink.resourcePath,
 						resourceLink.resourcePath);
 			}
 
 			// Link escalations to the resources
 			for (EscalationResource escalation : this.escalationResources) {
-				this.linkEscalation(escalation.escalationType, section, escalation.resourcePath);
+				OfficeEscalation officeEscalation = this.officeArchitect
+						.addOfficeEscalation(escalation.escalationType.getName());
+				this.officeArchitect.link(officeEscalation, section.getOfficeSectionInput(escalation.resourcePath));
 				section.addProperty(HttpFileSectionSource.PROPERTY_RESOURCE_PREFIX + escalation.resourcePath,
 						escalation.resourcePath);
 			}
@@ -813,7 +816,8 @@ public class WebArchitectEmployer implements WebArchitect {
 
 		// Link sending the response
 		for (SendLink link : this.sendLinks) {
-			this.link(link.section, link.outputName, httpSection, WebApplicationSectionSource.SEND_RESPONSE_INPUT_NAME);
+			this.officeArchitect.link(link.section.getOfficeSectionOutput(link.outputName),
+					httpSection.getOfficeSectionInput(WebApplicationSectionSource.SEND_RESPONSE_INPUT_NAME));
 		}
 	}
 

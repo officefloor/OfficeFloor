@@ -17,15 +17,21 @@
  */
 package net.officefloor.plugin.web.http.application;
 
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.plugin.web.http.security.HttpSecurityConfiguration;
+import net.officefloor.plugin.web.http.security.HttpSecuritySectionSource;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
+import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 
 /**
  * {@link HttpSecuritySource} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSecuritySectionImpl implements HttpSecuritySection {
+public class HttpSecuritySectionImpl<S, C, D extends Enum<D>, F extends Enum<F>>
+		implements HttpSecuritySection, HttpSecurityConfiguration<S, C, D, F> {
 
 	/**
 	 * Default timeout is 10 seconds.
@@ -33,14 +39,19 @@ public class HttpSecuritySectionImpl implements HttpSecuritySection {
 	public static final long DEFAULT_HTTP_SECURITY_TIMEOUT = 10 * 1000;
 
 	/**
-	 * {@link Class} of the {@link HttpSecuritySource}.
-	 */
-	private final Class<? extends HttpSecuritySource<?, ?, ?, ?>> httpSecuritySourceClass;
-
-	/**
 	 * {@link OfficeSection}.
 	 */
 	private final OfficeSection section;
+
+	/**
+	 * {@link HttpSecuritySource}.
+	 */
+	private final HttpSecuritySource<S, C, D, F> httpSecuritySource;
+
+	/**
+	 * {@link PropertyList} to configure the {@link HttpSecuritySource}.
+	 */
+	private final PropertyList properties;
 
 	/**
 	 * Initiate with default timeout.
@@ -48,21 +59,63 @@ public class HttpSecuritySectionImpl implements HttpSecuritySection {
 	private long securityTimeout = DEFAULT_HTTP_SECURITY_TIMEOUT;
 
 	/**
+	 * {@link HttpSecurityType}.
+	 */
+	private HttpSecurityType<S, C, D, F> httpSecurityType;
+
+	/**
 	 * Initiate.
 	 * 
-	 * @param section
-	 *            {@link OfficeSection}.
-	 * @param httpSecuritySourceClass
-	 *            {@link HttpSecuritySource} class.
+	 * @param architect
+	 *            {@link OfficeArchitect}.
+	 * @param securityName
+	 *            Name of the {@link HttpSecuritySection}.
+	 * @param httpSecuritySource
+	 *            {@link HttpSecuritySource} instance.
+	 * @param properties
+	 *            {@link PropertyList} to configure the
+	 *            {@link HttpSecuritySource}.
 	 */
-	public HttpSecuritySectionImpl(OfficeSection section,
-			Class<? extends HttpSecuritySource<?, ?, ?, ?>> httpSecuritySourceClass) {
-		this.section = section;
-		this.httpSecuritySourceClass = httpSecuritySourceClass;
+	public HttpSecuritySectionImpl(OfficeArchitect architect, String securityName,
+			HttpSecuritySource<S, C, D, F> httpSecuritySource, PropertyList properties) {
+		this.httpSecuritySource = httpSecuritySource;
+		this.properties = properties;
+
+		// Create the section
+		this.section = architect.addOfficeSection(securityName, new HttpSecuritySectionSource(this), null);
+	}
+
+	/**
+	 * Obtains the {@link PropertyList} to configure the
+	 * {@link HttpSecuritySource}.
+	 * 
+	 * @return {@link PropertyList} to configure the {@link HttpSecuritySource}.
+	 */
+	PropertyList getProperties() {
+		return this.properties;
+	}
+
+	/**
+	 * Obtains the time in milliseconds before timing out authentication.
+	 * 
+	 * @return Time in milliseconds before timing out authentication.
+	 */
+	long getSecurityTimeout() {
+		return this.securityTimeout;
+	}
+
+	/**
+	 * Specifies the {@link HttpSecurityType}.
+	 * 
+	 * @param httpSecurityType
+	 *            {@link HttpSecurityType}.
+	 */
+	void setHttpSecurityType(HttpSecurityType<S, C, D, F> httpSecurityType) {
+		this.httpSecurityType = httpSecurityType;
 	}
 
 	/*
-	 * ====================== HttpSecurityAutoWireSection =====================
+	 * ====================== HttpSecuritySection =====================
 	 */
 
 	@Override
@@ -71,18 +124,31 @@ public class HttpSecuritySectionImpl implements HttpSecuritySection {
 	}
 
 	@Override
-	public Class<? extends HttpSecuritySource<?, ?, ?, ?>> getHttpSecuritySourceClass() {
-		return this.httpSecuritySourceClass;
-	}
-
-	@Override
-	public long getSecurityTimeout() {
-		return this.securityTimeout;
-	}
-
-	@Override
 	public void setSecurityTimeout(long timeout) {
 		this.securityTimeout = timeout;
+	}
+
+	/*
+	 * ====================== PropertyConfigurable ====================
+	 */
+
+	@Override
+	public void addProperty(String name, String value) {
+		this.properties.addProperty(name).setValue(value);
+	}
+
+	/*
+	 * ==================== HttpSecurityConfiguration =================
+	 */
+
+	@Override
+	public HttpSecuritySource<S, C, D, F> getHttpSecuritySource() {
+		return this.httpSecuritySource;
+	}
+
+	@Override
+	public HttpSecurityType<S, C, D, F> getHttpSecurityType() {
+		return this.httpSecurityType;
 	}
 
 }

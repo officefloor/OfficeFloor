@@ -17,9 +17,6 @@
  */
 package net.officefloor.plugin.web.http.security.type;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 
 /**
@@ -64,8 +61,7 @@ public interface HttpSecurityTypeBuilder {
 	 * @param key
 	 *            Key identifying the {@link HttpSecurityDependencyType}.
 	 */
-	void addDependency(String name, Class<?> type, String typeQualifier,
-			int index, Enum<?> key);
+	void addDependency(String name, Class<?> type, String typeQualifier, int index, Enum<?> key);
 
 	/**
 	 * <p>
@@ -95,17 +91,8 @@ public interface HttpSecurityTypeBuilder {
 	 *            Index of the {@link HttpSecurityFlowType}.
 	 * @param key
 	 *            Key identifying the {@link HttpSecurityFlowType}.
-	 * @param workName
-	 *            Name of {@link Work} instigating the {@link Flow} or
-	 *            <code>null</code> if done directly by
-	 *            {@link HttpSecuritySource}.
-	 * @param taskName
-	 *            Name of {@link ManagedFunction} instigating the {@link Flow} or
-	 *            <code>null</code> if done directly by
-	 *            {@link HttpSecuritySource}.
 	 */
-	void addFlow(String name, Class<?> argumentType, int index, Enum<?> key,
-			String workName, String taskName);
+	void addFlow(String name, Class<?> argumentType, int index, Enum<?> key);
 
 	/**
 	 * <p>
@@ -119,16 +106,7 @@ public interface HttpSecurityTypeBuilder {
 	 *            Key identifying the {@link HttpSecurityFlowType}.
 	 * @param argumentType
 	 *            Type of argument passed to the {@link HttpSecurityFlowType}.
-	 * @param workName
-	 *            Name of {@link Work} instigating the {@link Flow} or
-	 *            <code>null</code> if done directly by
-	 *            {@link HttpSecuritySource}.
-	 * @param taskName
-	 *            Name of {@link ManagedFunction} instigating the {@link Flow} or
-	 *            <code>null</code> if done directly by
-	 *            {@link HttpSecuritySource}.
 	 */
-	void addFlow(Enum<?> key, Class<?> argumentType, String workName,
-			String taskName);
+	void addFlow(Enum<?> key, Class<?> argumentType);
 
 }

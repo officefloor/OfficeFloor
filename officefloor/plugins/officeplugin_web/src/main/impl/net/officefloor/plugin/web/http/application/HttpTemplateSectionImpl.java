@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
 
 /**
@@ -81,6 +82,11 @@ public class HttpTemplateSectionImpl implements HttpTemplateSection {
 	private final List<String> renderRedirectHttpMethods = new LinkedList<String>();
 
 	/**
+	 * Parent {@link HttpTemplateSection}.
+	 */
+	private HttpTemplateSection superHttpTemplate = null;
+
+	/**
 	 * Index of the next extension.
 	 */
 	private int nextExtensionIndex = 1;
@@ -106,6 +112,97 @@ public class HttpTemplateSectionImpl implements HttpTemplateSection {
 		this.templateUri = templateUri;
 	}
 
+	/**
+	 * Obtains the URI to the template.
+	 * 
+	 * @return URI to the template.
+	 */
+	String getTemplateUri() {
+		return this.templateUri;
+	}
+
+	/**
+	 * Obtains the logic class for the template.
+	 * 
+	 * @return Logic class for the template.
+	 */
+	Class<?> getTemplateLogicClass() {
+		return this.templateLogicClass;
+	}
+
+	/**
+	 * Obtains path to the template file.
+	 * 
+	 * @return Path to the template file.
+	 */
+	String getTemplateLocation() {
+		return this.templateLocation;
+	}
+
+	/**
+	 * Obtains the template URI suffix.
+	 * 
+	 * @return Template URI suffix. May be <code>null</code> to not have a URI
+	 *         suffix.
+	 */
+	String getTemplateUriSuffix() {
+		return this.templateUriSuffix;
+	}
+
+	/**
+	 * Obtains the Content-Type for the template.
+	 * 
+	 * @return Content-Type for the template. May be <code>null</code> to use
+	 *         the default encoding.
+	 */
+	String getTemplateContentType() {
+		return this.contentType;
+	}
+
+	/**
+	 * Indicates whether a secure {@link ServerHttpConnection} is required for
+	 * the template.
+	 * 
+	 * @return <code>true</code> if a secure {@link ServerHttpConnection} is
+	 *         required for the template.
+	 */
+	boolean isTemplateSecure() {
+		return this.isTemplateSecure;
+	}
+
+	/**
+	 * <p>
+	 * Obtains an immutable {@link Map} providing the overriding configuration
+	 * of whether a link requires a secure {@link ServerHttpConnection}.
+	 * <p>
+	 * Links not contained in the returned {@link Map} will default secure to
+	 * that of the template.
+	 * 
+	 * @return Immutable {@link Map} of link to whether if requires a secure
+	 *         {@link ServerHttpConnection}.
+	 */
+	Map<String, Boolean> getSecureLinks() {
+		return Collections.unmodifiableMap(this.secureLinks);
+	}
+
+	/**
+	 * Obtains the configured render redirect HTTP methods.
+	 * 
+	 * @return Configured render redirect HTTP methods.
+	 */
+	String[] getRenderRedirectHttpMethods() {
+		return this.renderRedirectHttpMethods.toArray(new String[this.renderRedirectHttpMethods.size()]);
+	}
+
+	/**
+	 * Obtains the parent {@link HttpTemplateSection}.
+	 * 
+	 * @return Parent {@link HttpTemplateSection}.
+	 */
+	HttpTemplateSection getSuperHttpTemplate() {
+		return this.superHttpTemplate;
+	}
+
 	/*
 	 * ====================== HttpTemplateSection =====================
 	 */
@@ -116,28 +213,8 @@ public class HttpTemplateSectionImpl implements HttpTemplateSection {
 	}
 
 	@Override
-	public Class<?> getTemplateLogicClass() {
-		return this.templateLogicClass;
-	}
-
-	@Override
-	public String getTemplateLocation() {
-		return this.templateLocation;
-	}
-
-	@Override
-	public String getTemplateUri() {
-		return this.templateUri;
-	}
-
-	@Override
 	public void setTemplateUriSuffix(String uriSuffix) {
 		this.templateUriSuffix = uriSuffix;
-	}
-
-	@Override
-	public String getTemplateUriSuffix() {
-		return this.templateUriSuffix;
 	}
 
 	@Override
@@ -146,18 +223,8 @@ public class HttpTemplateSectionImpl implements HttpTemplateSection {
 	}
 
 	@Override
-	public String getTemplateContentType() {
-		return this.contentType;
-	}
-
-	@Override
 	public void setTemplateSecure(boolean isSecure) {
 		this.isTemplateSecure = isSecure;
-	}
-
-	@Override
-	public boolean isTemplateSecure() {
-		return this.isTemplateSecure;
 	}
 
 	@Override
@@ -166,18 +233,16 @@ public class HttpTemplateSectionImpl implements HttpTemplateSection {
 	}
 
 	@Override
-	public Map<String, Boolean> getSecureLinks() {
-		return Collections.unmodifiableMap(this.secureLinks);
-	}
-
-	@Override
 	public void addRenderRedirectHttpMethod(String renderRedirectHttpMethod) {
 		this.renderRedirectHttpMethods.add(renderRedirectHttpMethod);
 	}
 
 	@Override
-	public String[] getRenderRedirectHttpMethods() {
-		return this.renderRedirectHttpMethods.toArray(new String[this.renderRedirectHttpMethods.size()]);
+	public void setSuperHttpTemplate(HttpTemplateSection httpTemplateSection) {
+		this.superHttpTemplate = httpTemplateSection;
+
+		// Configure as super section also
+		this.section.setSuperOfficeSection(httpTemplateSection.getOfficeSection());
 	}
 
 	@Override

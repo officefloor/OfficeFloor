@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
@@ -62,12 +61,6 @@ public class HttpSecurityManagedFunctionSource extends AbstractManagedFunctionSo
 	}
 
 	/**
-	 * Name of {@link Property} providing the key to the
-	 * {@link HttpSecuritySource} from the {@link HttpSecurityConfigurator}.
-	 */
-	public static final String PROPERTY_HTTP_SECURITY_SOURCE_KEY = HttpAuthenticationManagedObjectSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY;
-
-	/**
 	 * Name of the {@link HttpChallengeFunction}.
 	 */
 	public static final String FUNCTION_CHALLENGE = "CHALLENGE";
@@ -92,28 +85,38 @@ public class HttpSecurityManagedFunctionSource extends AbstractManagedFunctionSo
 	 */
 	public static final String FUNCTION_COMPLETE_APPLICATION_AUTHENTICATE = "COMPLETE_APPLICATION_AUTHENTICATE";
 
+	/**
+	 * {@link HttpSecurityConfiguration}.
+	 */
+	private final HttpSecurityConfiguration<?, ?, ?, ?> httpSecurityConfiguration;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param httpSecurityConfiguration
+	 *            {@link HttpSecurityConfiguration}.
+	 */
+	public HttpSecurityManagedFunctionSource(HttpSecurityConfiguration<?, ?, ?, ?> httpSecurityConfiguration) {
+		this.httpSecurityConfiguration = httpSecurityConfiguration;
+	}
+
 	/*
 	 * =================== WorkSource ===============================
 	 */
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(PROPERTY_HTTP_SECURITY_SOURCE_KEY, "HTTP Security Source Key");
 	}
 
 	@Override
 	public void sourceManagedFunctions(FunctionNamespaceBuilder namespaceTypeBuilder,
 			ManagedFunctionSourceContext context) throws Exception {
 
-		// Retrieve the HTTP Security configuration
-		String key = context.getProperty(PROPERTY_HTTP_SECURITY_SOURCE_KEY);
-		HttpSecurityConfiguration<?, ?, ?, ?> configuration = HttpSecurityConfigurator.getHttpSecuritySource(key);
-
 		// Obtain the HTTP security source
-		HttpSecuritySource<?, ?, ?, ?> httpSecuritySource = configuration.getHttpSecuritySource();
+		HttpSecuritySource<?, ?, ?, ?> httpSecuritySource = this.httpSecurityConfiguration.getHttpSecuritySource();
 
 		// Obtain the HTTP Security Type
-		HttpSecurityType<?, ?, ?, ?> httpSecurityType = configuration.getHttpSecurityType();
+		HttpSecurityType<?, ?, ?, ?> httpSecurityType = this.httpSecurityConfiguration.getHttpSecurityType();
 
 		// Obtain the credentials type
 		Class<?> credentialsType = getCredentialsClass(httpSecurityType);

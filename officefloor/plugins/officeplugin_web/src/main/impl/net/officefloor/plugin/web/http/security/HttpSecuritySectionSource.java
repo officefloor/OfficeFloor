@@ -17,8 +17,6 @@
  */
 package net.officefloor.plugin.web.http.security;
 
-import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.section.FunctionFlow;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionFunction;
@@ -44,12 +42,6 @@ import net.officefloor.plugin.web.http.session.HttpSession;
 public class HttpSecuritySectionSource extends AbstractSectionSource {
 
 	/**
-	 * Name of {@link Property} providing the key to the
-	 * {@link HttpSecuritySource} from the {@link HttpSecurityConfigurator}.
-	 */
-	public static final String PROPERTY_HTTP_SECURITY_SOURCE_KEY = HttpAuthenticationManagedObjectSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY;
-
-	/**
 	 * Name of the {@link SectionInput} for challenging.
 	 */
 	public static final String INPUT_CHALLENGE = "Challenge";
@@ -71,6 +63,21 @@ public class HttpSecuritySectionSource extends AbstractSectionSource {
 	 */
 	public static final String OUTPUT_RECONTINUE = "Recontinue";
 
+	/**
+	 * {@link HttpSecurityConfiguration}.
+	 */
+	private final HttpSecurityConfiguration<?, ?, ?, ?> httpSecurityConfiguration;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param httpSecurityConfiguration
+	 *            {@link HttpSecurityConfiguration}.
+	 */
+	public HttpSecuritySectionSource(HttpSecurityConfiguration<?, ?, ?, ?> httpSecurityConfiguration) {
+		this.httpSecurityConfiguration = httpSecurityConfiguration;
+	}
+
 	/*
 	 * ===================== SectionSource ===============================
 	 */
@@ -83,15 +90,8 @@ public class HttpSecuritySectionSource extends AbstractSectionSource {
 	@Override
 	public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
 
-		// Retrieve the HTTP Security configuration
-		String key = context.getSectionLocation();
-		if (CompileUtil.isBlank(key)) {
-			key = context.getProperty(PROPERTY_HTTP_SECURITY_SOURCE_KEY);
-		}
-		HttpSecurityConfiguration<?, ?, ?, ?> configuration = HttpSecurityConfigurator.getHttpSecuritySource(key);
-
 		// Obtain the HTTP Security Type
-		HttpSecurityType<?, ?, ?, ?> securityType = configuration.getHttpSecurityType();
+		HttpSecurityType<?, ?, ?, ?> securityType = this.httpSecurityConfiguration.getHttpSecurityType();
 
 		// Obtain the credentials type
 		Class<?> credentialsType = HttpSecurityManagedFunctionSource.getCredentialsClass(securityType);
@@ -118,8 +118,7 @@ public class HttpSecuritySectionSource extends AbstractSectionSource {
 
 		// Configure the HTTP Security Managed Function Source
 		SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace("HttpSecuritySource",
-				HttpSecurityManagedFunctionSource.class.getName());
-		namespace.addProperty(HttpSecurityManagedFunctionSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY, key);
+				new HttpSecurityManagedFunctionSource(this.httpSecurityConfiguration));
 
 		// Configure the challenge handling
 		SectionFunction challengeFunction = namespace.addSectionFunction(
@@ -151,7 +150,7 @@ public class HttpSecuritySectionSource extends AbstractSectionSource {
 		SectionFunction moAuthFunction = namespace.addSectionFunction(
 				HttpSecurityManagedFunctionSource.FUNCTION_MANAGED_OBJECT_AUTHENTICATE,
 				HttpSecurityManagedFunctionSource.FUNCTION_MANAGED_OBJECT_AUTHENTICATE);
-		moAuthFunction.getFunctionObject("TASK_AUTHENTICATE_CONTEXT").flagAsParameter();
+		moAuthFunction.getFunctionObject("FUNCTION_AUTHENTICATE_CONTEXT").flagAsParameter();
 		for (SectionObject dependency : dependencyObjects) {
 			designer.link(moAuthFunction.getFunctionObject(dependency.getSectionObjectName()), dependency);
 		}
@@ -160,7 +159,7 @@ public class HttpSecuritySectionSource extends AbstractSectionSource {
 		SectionFunction moLogoutFunction = namespace.addSectionFunction(
 				HttpSecurityManagedFunctionSource.FUNCTION_MANAGED_OBJECT_LOGOUT,
 				HttpSecurityManagedFunctionSource.FUNCTION_MANAGED_OBJECT_LOGOUT);
-		moLogoutFunction.getFunctionObject("TASK_LOGOUT_CONTEXT").flagAsParameter();
+		moLogoutFunction.getFunctionObject("FUNCTION_LOGOUT_CONTEXT").flagAsParameter();
 		for (SectionObject dependency : dependencyObjects) {
 			designer.link(moLogoutFunction.getFunctionObject(dependency.getSectionObjectName()), dependency);
 		}

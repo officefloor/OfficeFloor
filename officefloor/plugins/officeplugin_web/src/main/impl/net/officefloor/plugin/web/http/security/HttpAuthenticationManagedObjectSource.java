@@ -17,11 +17,9 @@
  */
 package net.officefloor.plugin.web.http.security;
 
-import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.session.HttpSession;
@@ -49,12 +47,6 @@ public class HttpAuthenticationManagedObjectSource extends
 	}
 
 	/**
-	 * Name of {@link Property} providing the key to the
-	 * {@link HttpSecuritySource} from the {@link HttpSecurityConfigurator}.
-	 */
-	public static final String PROPERTY_HTTP_SECURITY_SOURCE_KEY = "http.security.source.key";
-
-	/**
 	 * {@link HttpSecuritySource}.
 	 */
 	@SuppressWarnings("rawtypes")
@@ -65,22 +57,34 @@ public class HttpAuthenticationManagedObjectSource extends
 	 */
 	private ManagedObjectExecuteContext<Flows> executeContext;
 
+	/**
+	 * {@link HttpSecurityConfiguration}.
+	 */
+	private final HttpSecurityConfiguration<?, ?, ?, ?> httpSecurityConfiguration;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param httpSecurityConfiguration
+	 *            {@link HttpSecurityConfiguration}.
+	 */
+	public HttpAuthenticationManagedObjectSource(HttpSecurityConfiguration<?, ?, ?, ?> httpSecurityConfiguration) {
+		this.httpSecurityConfiguration = httpSecurityConfiguration;
+	}
+
 	/*
 	 * ====================== ManagedObjectSource =========================
 	 */
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(PROPERTY_HTTP_SECURITY_SOURCE_KEY, "HTTP Security Source Key");
 	}
 
 	@Override
 	protected void loadMetaData(MetaDataContext<Dependencies, Flows> context) throws Exception {
-		ManagedObjectSourceContext<Flows> mosContext = context.getManagedObjectSourceContext();
 
 		// Retrieve the HTTP Security Source
-		String key = mosContext.getProperty(PROPERTY_HTTP_SECURITY_SOURCE_KEY);
-		this.httpSecuritySource = HttpSecurityConfigurator.getHttpSecuritySource(key).getHttpSecuritySource();
+		this.httpSecuritySource = this.httpSecurityConfiguration.getHttpSecuritySource();
 
 		// Provide the meta-data
 		context.setObjectClass(HttpAuthentication.class);
