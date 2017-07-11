@@ -21,7 +21,7 @@ import java.util.Iterator;
 
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
@@ -31,16 +31,14 @@ import net.officefloor.frame.util.ManagedObjectUserStandAlone;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpApplicationStateManagedObjectSourceTest extends
-		OfficeFrameTestCase {
+public class HttpApplicationStateManagedObjectSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Validate specification.
 	 */
 	public void testSpecification() {
 		// Should require no properties
-		ManagedObjectLoaderUtil
-				.validateSpecification(HttpApplicationStateManagedObjectSource.class);
+		ManagedObjectLoaderUtil.validateSpecification(HttpApplicationStateManagedObjectSource.class);
 	}
 
 	/**
@@ -49,13 +47,11 @@ public class HttpApplicationStateManagedObjectSourceTest extends
 	public void testType() {
 
 		// Create expected type
-		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
-				.createManagedObjectTypeBuilder();
+		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(HttpApplicationState.class);
 
 		// Validate type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type,
-				HttpApplicationStateManagedObjectSource.class);
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, HttpApplicationStateManagedObjectSource.class);
 	}
 
 	/**
@@ -74,26 +70,22 @@ public class HttpApplicationStateManagedObjectSourceTest extends
 
 		// Ensure correct object
 		Object object = mo.getObject();
-		assertTrue("Incorrect object type",
-				object instanceof HttpApplicationState);
+		assertTrue("Incorrect object type", object instanceof HttpApplicationState);
 		HttpApplicationState state = (HttpApplicationState) object;
 
 		// Set, get, name attributes
 		final String NAME = "name";
 		final Object ATTRIBUTE = "ATTRIBUTE";
 		state.setAttribute(NAME, ATTRIBUTE);
-		assertEquals("Must obtain attribute", ATTRIBUTE,
-				state.getAttribute(NAME));
+		assertEquals("Must obtain attribute", ATTRIBUTE, state.getAttribute(NAME));
 		Iterator<String> names = state.getAttributeNames();
 		assertTrue("Expect name", names.hasNext());
 		assertEquals("Incorrect name", NAME, names.next());
 		assertFalse("Expect only one name", names.hasNext());
 
 		// Source another managed object as should be same state
-		HttpApplicationState another = (HttpApplicationState) user
-				.sourceManagedObject(source).getObject();
-		assertEquals("Should be same state", ATTRIBUTE,
-				another.getAttribute(NAME));
+		HttpApplicationState another = (HttpApplicationState) user.sourceManagedObject(source).getObject();
+		assertEquals("Should be same state", ATTRIBUTE, another.getAttribute(NAME));
 
 		// Ensure can remove attribute
 		state.removeAttribute(NAME);
