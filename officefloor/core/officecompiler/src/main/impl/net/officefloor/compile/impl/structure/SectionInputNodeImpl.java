@@ -29,6 +29,7 @@ import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.SectionInputType;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SubSectionInput;
 
 /**
@@ -178,6 +179,11 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	/*
 	 * ===================== OfficeSectionInput =====================
 	 */
+
+	@Override
+	public OfficeSection getOfficeSection() {
+		return this.section;
+	}
 
 	@Override
 	public String getOfficeSectionInputName() {

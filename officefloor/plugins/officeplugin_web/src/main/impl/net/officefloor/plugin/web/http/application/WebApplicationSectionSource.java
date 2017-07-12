@@ -44,7 +44,7 @@ import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteTaskDependencies;
 import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteTaskFlows;
-import net.officefloor.plugin.web.http.route.HttpRouteWorkSource;
+import net.officefloor.plugin.web.http.route.HttpRouteManagedFunctionSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
 
@@ -159,8 +159,8 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 
 		// Add the Route function
 		SectionFunctionNamespace routeNamespace = designer.addSectionFunctionNamespace("ROUTE",
-				HttpRouteWorkSource.class.getName());
-		SectionFunction routeFunction = routeNamespace.addSectionFunction("ROUTE", HttpRouteWorkSource.FUNCTION_NAME);
+				HttpRouteManagedFunctionSource.class.getName());
+		SectionFunction routeFunction = routeNamespace.addSectionFunction("ROUTE", HttpRouteManagedFunctionSource.FUNCTION_NAME);
 		linkObject(routeFunction, HttpRouteTaskDependencies.SERVER_HTTP_CONNECTION.name(), ServerHttpConnection.class,
 				designer, objects);
 		linkObject(routeFunction, HttpRouteTaskDependencies.HTTP_APPLICATION_LOCATION.name(),

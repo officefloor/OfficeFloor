@@ -17,20 +17,26 @@
  */
 package net.officefloor.plugin.web.http.continuation;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireApplication;
-import net.officefloor.autowire.AutoWireOfficeFloor;
-import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SectionDesigner;
-import net.officefloor.compile.spi.section.SectionWork;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
+import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.section.work.WorkSectionSource;
+import net.officefloor.plugin.section.managedfunction.ManagedFunctionSectionSource;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.application.HttpRequestStateManagedObjectSource;
@@ -38,15 +44,9 @@ import net.officefloor.plugin.web.http.application.HttpUriLink;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.route.HttpRouteFunction;
-import net.officefloor.plugin.web.http.route.HttpRouteWorkSource;
+import net.officefloor.plugin.web.http.route.HttpRouteManagedFunctionSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
-import net.officefloor.plugin.work.clazz.FlowInterface;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 
 /**
  * Tests the {@link HttpUrlContinuationSectionSource}.
@@ -78,15 +78,18 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 		type.addSubSection("TRANSFORMED", ClassSectionSource.class.getName(), MockSectionTypeClass.class.getName());
 
 		// Provide the transformations for URL continuations
-		SectionWork pathWork = type.addSectionWork("path", HttpUrlContinuationManagedFunctionSource.class.getName());
-		pathWork.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH, "/");
-		pathWork.addSectionTask("path", HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
-		SectionWork uriWork = type.addSectionWork("uri", HttpUrlContinuationManagedFunctionSource.class.getName());
-		uriWork.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH, "/");
-		uriWork.addSectionTask("uri", HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
-		SectionWork rootWork = type.addSectionWork("_root_", HttpUrlContinuationManagedFunctionSource.class.getName());
-		rootWork.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH, "/");
-		rootWork.addSectionTask("_root_", HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
+		SectionFunctionNamespace pathNamespace = type.addSectionFunctionNamespace("path",
+				HttpUrlContinuationManagedFunctionSource.class.getName());
+		pathNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH, "/");
+		pathNamespace.addSectionFunction("path", HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
+		SectionFunctionNamespace uriNamespace = type.addSectionFunctionNamespace("uri",
+				HttpUrlContinuationManagedFunctionSource.class.getName());
+		uriNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH, "/");
+		uriNamespace.addSectionFunction("uri", HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
+		SectionFunctionNamespace rootNamespace = type.addSectionFunctionNamespace("_root_",
+				HttpUrlContinuationManagedFunctionSource.class.getName());
+		rootNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH, "/");
+		rootNamespace.addSectionFunction("_root_", HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
 
 		// Validate the type
 		SectionLoaderUtil.validateSection(type, HttpUrlContinuationSectionSource.class, (String) null,
@@ -116,45 +119,49 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public void doServiceTest(boolean isSecure) throws Exception {
 
-		// Create and configure application
-		AutoWireApplication source = new AutoWireOfficeFloorSource();
+		CompileOfficeFloor compiler = new CompileOfficeFloor();
+		compiler.officeFloor((context) -> {
+			HttpsServerSocketManagedObjectSource.configure(context.getOfficeFloorDeployer(), 7878, 7979,
+					HttpTestUtil.getSslEngineSourceClass(), context.getDeployedOffice(), "ROUTE",
+					HttpRouteManagedFunctionSource.FUNCTION_NAME);
+		});
+		compiler.office((context) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
 
-		// Add the servicer
-		AutoWireSection section = source.addSection("SECTION", ClassSectionSource.class.getName(),
-				MockSectionRunClass.class.getName());
+			// Add the servicer
+			OfficeSection section = context.addSection("SECTION", MockSectionRunClass.class);
 
-		// Provide remaining configuration
-		HttpServerSocketManagedObjectSource.autoWire(source, 7878, "ROUTE", HttpRouteWorkSource.FUNCTION_NAME);
-		HttpsServerSocketManagedObjectSource.autoWire(source, 7979, HttpTestUtil.getSslEngineSourceClass(), "ROUTE",
-				HttpRouteWorkSource.FUNCTION_NAME);
-		AutoWireSection route = source.addSection("ROUTE", WorkSectionSource.class.getName(),
-				HttpRouteWorkSource.class.getName());
-		source.link(route, "NOT_HANDLED", section, "notHandled");
-		source.addManagedObject(HttpApplicationLocationManagedObjectSource.class.getName(), null,
-				new AutoWire(HttpApplicationLocation.class));
-		source.addManagedObject(HttpRequestStateManagedObjectSource.class.getName(), null,
-				new AutoWire(HttpRequestState.class));
-		source.addManagedObject(HttpSessionManagedObjectSource.class.getName(), null, new AutoWire(HttpSession.class))
-				.setTimeout(1000);
+			// Provide remaining configuration
+			OfficeSection route = office.addOfficeSection("ROUTE", ManagedFunctionSectionSource.class.getName(),
+					HttpRouteManagedFunctionSource.class.getName());
+			office.link(route.getOfficeSectionOutput("NOT_HANDLED"), section.getOfficeSectionInput("notHandled"));
+			office.addOfficeManagedObjectSource(HttpApplicationLocation.class.getSimpleName(),
+					HttpApplicationLocationManagedObjectSource.class.getName())
+					.addOfficeManagedObject(HttpApplicationLocation.class.getSimpleName(), ManagedObjectScope.PROCESS);
+			office.addOfficeManagedObjectSource(HttpRequestState.class.getSimpleName(),
+					HttpRequestStateManagedObjectSource.class.getName())
+					.addOfficeManagedObject(HttpRequestState.class.getSimpleName(), ManagedObjectScope.PROCESS);
+			OfficeManagedObjectSource sessionMos = office.addOfficeManagedObjectSource(
+					HttpSession.class.getSimpleName(), HttpSessionManagedObjectSource.class.getName());
+			sessionMos.setTimeout(1000);
+			sessionMos.addOfficeManagedObject(HttpSession.class.getSimpleName(), ManagedObjectScope.PROCESS);
 
-		// Add the transformer
-		HttpUrlContinuationSectionSource transformer = new HttpUrlContinuationSectionSource();
-		source.addSectionTransformer(transformer);
+			// Add the transformer
+			HttpUrlContinuationSectionSource transformer = new HttpUrlContinuationSectionSource();
+			office.addOfficeSectionTransformer(transformer);
 
-		// Map in the URI
-		HttpUriLink link = transformer.linkUri("uri", section, "service");
-		if (isSecure) {
-			// Flag to be secure (default is non-secure)
-			link.setUriSecure(isSecure);
-		}
-		assertEquals("Incorrect URI", "uri", link.getApplicationUriPath());
-		assertSame("Incorrect Section", section, link.getOfficeSection());
-		assertEquals("Incorrect Section Input", "service", link.getOfficeSectionInputName());
+			// Map in the URI
+			HttpUriLink link = transformer.linkUri("uri", section.getOfficeSectionInput("service"));
+			if (isSecure) {
+				// Flag to be secure (default is non-secure)
+				link.setUriSecure(isSecure);
+			}
 
-		// Ensure return listing of all registered URI paths
-		HttpUriLink[] registeredUriLinks = transformer.getRegisteredHttpUriLinks();
-		assertEquals("Incorrect number of registered URI links", 1, registeredUriLinks.length);
-		assertSame("Incorrect URI link", link, registeredUriLinks[0]);
+			// Ensure return listing of all registered URI paths
+			String[] registeredUris = transformer.getRegisteredHttpUris();
+			assertEquals("Incorrect number of registered URI links", 1, registeredUris.length);
+			assertSame("Incorrect URI link", "uri", registeredUris[0]);
+		});
 
 		// Create the client (without redirect)
 		HttpClientBuilder builder = HttpClientBuilder.create();
@@ -179,7 +186,7 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 		}
 
 		// Start application
-		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
+		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
 		try {
 
 			// Ensure redirect if not appropriately secure

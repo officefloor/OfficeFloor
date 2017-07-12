@@ -36,7 +36,7 @@ import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
 
 /**
- * Tests the {@link HttpRouteWorkSource}.
+ * Tests the {@link HttpRouteManagedFunctionSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -46,7 +46,7 @@ public class HttpRouteWorkSourceTest extends OfficeFrameTestCase {
 	 * Ensure correct specification.
 	 */
 	public void testSpecification() {
-		WorkLoaderUtil.validateSpecification(HttpRouteWorkSource.class);
+		WorkLoaderUtil.validateSpecification(HttpRouteManagedFunctionSource.class);
 	}
 
 	/**
@@ -59,7 +59,7 @@ public class HttpRouteWorkSourceTest extends OfficeFrameTestCase {
 		FunctionNamespaceBuilder<HttpRouteFunction> type = WorkLoaderUtil
 				.createWorkTypeBuilder(factory);
 		ManagedFunctionTypeBuilder<HttpRouteTaskDependencies, HttpRouteTaskFlows> task = type
-				.addManagedFunctionType(HttpRouteWorkSource.FUNCTION_NAME, factory,
+				.addManagedFunctionType(HttpRouteManagedFunctionSource.FUNCTION_NAME, factory,
 						HttpRouteTaskDependencies.class,
 						HttpRouteTaskFlows.class);
 		task.addObject(ServerHttpConnection.class).setKey(
@@ -79,7 +79,7 @@ public class HttpRouteWorkSourceTest extends OfficeFrameTestCase {
 		task.addEscalation(InvalidParameterTypeException.class);
 
 		// Validate the expected type
-		WorkLoaderUtil.validateWorkType(type, HttpRouteWorkSource.class);
+		WorkLoaderUtil.validateWorkType(type, HttpRouteManagedFunctionSource.class);
 	}
 
 }

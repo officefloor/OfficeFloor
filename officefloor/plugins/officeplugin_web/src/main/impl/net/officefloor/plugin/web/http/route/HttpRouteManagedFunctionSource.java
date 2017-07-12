@@ -49,7 +49,7 @@ import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpRouteWorkSource extends AbstractManagedFunctionSource {
+public class HttpRouteManagedFunctionSource extends AbstractManagedFunctionSource {
 
 	/**
 	 * Name of the {@link HttpRouteFunction}.

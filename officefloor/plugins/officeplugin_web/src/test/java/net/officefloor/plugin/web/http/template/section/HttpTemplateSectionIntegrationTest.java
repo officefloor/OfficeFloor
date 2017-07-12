@@ -50,7 +50,7 @@ import net.officefloor.plugin.web.http.application.HttpRequestStateManagedObject
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.route.HttpRouteFunction;
-import net.officefloor.plugin.web.http.route.HttpRouteWorkSource;
+import net.officefloor.plugin.web.http.route.HttpRouteManagedFunctionSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
 import net.officefloor.plugin.web.http.template.HttpTemplateManagedFunctionSource;
@@ -1264,7 +1264,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Provide HTTP router for testing
 		AutoWireSection templateRouteSection = this.source.addSection("ROUTE",
 				WorkSectionSource.class.getName(),
-				HttpRouteWorkSource.class.getName());
+				HttpRouteManagedFunctionSource.class.getName());
 
 		// Provide unknown URL continuation for not handled requests
 		AutoWireSection unknownUrlContinuationSection = this.source.addSection(

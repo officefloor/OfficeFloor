@@ -33,6 +33,7 @@ import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.section.OfficeSectionObjectType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.TypeQualification;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SectionObject;
 
 /**
@@ -219,6 +220,11 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	/*
 	 * ==================== OfficeSectionObject =========================
 	 */
+
+	@Override
+	public OfficeSection getOfficeSection() {
+		return this.section;
+	}
 
 	@Override
 	public String getOfficeSectionObjectName() {

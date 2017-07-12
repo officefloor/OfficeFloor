@@ -29,6 +29,7 @@ import net.officefloor.compile.internal.structure.SectionOutputNode;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.section.OfficeSectionOutputType;
 import net.officefloor.compile.section.SectionOutputType;
+import net.officefloor.compile.spi.office.OfficeSection;
 
 /**
  * {@link SectionOutputNode} implementation.
@@ -190,6 +191,11 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 	/*
 	 * =================== OfficeSectionOutput ======================
 	 */
+
+	@Override
+	public OfficeSection getOfficeSection() {
+		return this.section;
+	}
 
 	@Override
 	public String getOfficeSectionOutputName() {

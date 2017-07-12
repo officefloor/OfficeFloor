@@ -25,6 +25,14 @@ package net.officefloor.compile.spi.office;
 public interface OfficeSectionInput {
 
 	/**
+	 * Obtains the {@link OfficeSection} containing this
+	 * {@link OfficeSectionInput}.
+	 * 
+	 * @return {@link OfficeSection} containing this {@link OfficeSectionInput}.
+	 */
+	OfficeSection getOfficeSection();
+
+	/**
 	 * Obtains the name of this {@link OfficeSectionInput}.
 	 * 
 	 * @return Name of this {@link OfficeSectionInput}.

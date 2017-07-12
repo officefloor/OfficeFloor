@@ -451,7 +451,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 
 		// Load the work source and create the task
 		FunctionNamespaceType<HttpRouteFunction> workType = WorkLoaderUtil
-				.loadWorkType(HttpRouteWorkSource.class);
+				.loadWorkType(HttpRouteManagedFunctionSource.class);
 		ManagedFunctionType<HttpRouteFunction, ?, ?> taskType = workType.getManagedFunctionTypes()[0];
 		HttpRouteFunction workFactory = workType.getWorkFactory().createWork();
 

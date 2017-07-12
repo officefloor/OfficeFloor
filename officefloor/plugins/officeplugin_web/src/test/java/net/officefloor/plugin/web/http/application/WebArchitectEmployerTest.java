@@ -33,41 +33,30 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireManagement;
-import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.autowire.ManagedObjectSourceWirer;
-import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
-import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.section.clazz.ManagedObject;
-import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 import net.officefloor.plugin.web.http.route.HttpRouteFunction;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtensionContext;
-import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
+import net.officefloor.plugin.web.http.test.CompileWebExtension;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
-import net.officefloor.plugin.work.clazz.FlowInterface;
 
 /**
  * Tests the {@link WebArchitectEmployer}.
@@ -84,7 +73,7 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	/**
 	 * {@link WebCompileOfficeFloor}.
 	 */
-	private WebCompileOfficeFloor compile = new WebCompileOfficeFloor();
+	private WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
 
 	/**
 	 * {@link OfficeFloor}.
@@ -112,7 +101,7 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 		// Configure the server
 		this.port = HttpTestUtil.getAvailablePort();
 		this.securePort = HttpTestUtil.getAvailablePort();
-		this.compile.officeFloor((context) -> {
+		this.compiler.officeFloor((context) -> {
 			HttpsServerSocketManagedObjectSource.configure(context.getOfficeFloorDeployer(), this.port, this.securePort,
 					HttpTestUtil.getSslEngineSourceClass(), context.getDeployedOffice(), "SECTION", "INPUT");
 		});
@@ -138,6 +127,50 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Configures and compiles the {@link OfficeFloor}.
+	 * 
+	 * @param extension
+	 *            {@link FacadeWebExtension}.
+	 * @return Compiled and open {@link OfficeFloor}.
+	 * @throws Exception
+	 *             If fails to open the {@link OfficeFloor}.
+	 */
+	private OfficeFloor open(FacadeWebExtension extension) throws Exception {
+		this.compiler.web((context) -> extension.extend(context.getWebArchitect()));
+		this.officeFloor = this.compiler.compileAndOpenOfficeFloor();
+		return this.officeFloor;
+	}
+
+	/**
+	 * Facade {@link CompileWebExtension}.
+	 */
+	private static interface FacadeWebExtension {
+
+		/**
+		 * Facade to provide only the {@link WebArchitect}.
+		 * 
+		 * @param architect
+		 *            {@link WebArchitect}.
+		 */
+		void extend(WebArchitect architect);
+	}
+
+	/**
+	 * Configures and compiles the {@link OfficeFloor}.
+	 * 
+	 * @param extension
+	 *            {@link CompileWebExtension}.
+	 * @return Compiled and open {@link OfficeFloor}.
+	 * @throws Exception
+	 *             If fails to open the {@link OfficeFloor}.
+	 */
+	private OfficeFloor openWithContext(CompileWebExtension extension) throws Exception {
+		this.compiler.web(extension);
+		this.officeFloor = this.compiler.compileAndOpenOfficeFloor();
+		return this.officeFloor;
+	}
+
+	/**
 	 * Ensure able to auto-wire template with no logic class.
 	 */
 	public void testTemplateWithNoLogicClass() throws Exception {
@@ -158,15 +191,12 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 
 		final String templatePath = this.getClassPath("NoLogicTemplate.ofp");
 
-		this.compile.web((context) -> {
-			WebArchitect architect = context.getWebArchitect();
-
+		this.open((web) -> {
 			// Add HTTP template with no logic class
-			HttpTemplateSection template = architect.addHttpTemplate("template", templatePath, null);
+			HttpTemplateSection template = web.addHttpTemplate("template", templatePath, null);
 			template.setTemplateSecure(isSecure);
-			architect.linkToResource(template.getOfficeSection(), "link", "resource.html");
+			web.linkToResource(template.getOfficeSection().getOfficeSectionOutput("link"), "resource.html");
 		});
-		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
 		// Ensure template available
 		this.assertHttpRequest("/template", isSecure, 200, "/template-link");
@@ -198,18 +228,11 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 
 		final String templatePath = this.getClassPath("template.ofp");
 
-		// Add HTTP template (with URL)
-		HttpTemplateSection section = this.source.addHttpTemplate("uri", templatePath, MockTemplateLogic.class);
-		section.setTemplateSecure(isSecure);
-		this.source.openOfficeFloor();
-
-		// Ensure correct section details
-		assertEquals("Incorrect section name", "uri", section.getSectionName());
-		assertEquals("Incorrect section source", HttpTemplateSectionSource.class.getName(),
-				section.getSectionSourceClassName());
-		assertEquals("Incorrect section location", this.getClassPath("template.ofp"), templatePath);
-		assertEquals("Incorrect template path", templatePath, section.getTemplateLocation());
-		assertEquals("Incorrect template URI", "/uri", section.getTemplateUri());
+		this.open((web) -> {
+			// Add HTTP template (with URL)
+			HttpTemplateSection section = web.addHttpTemplate("uri", templatePath, MockTemplateLogic.class);
+			section.setTemplateSecure(isSecure);
+		});
 
 		// Ensure template available
 		this.assertHttpRequest("/uri", isSecure, 200, SUBMIT_URI);
@@ -229,13 +252,11 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 		// Create the content type
 		String contentType = "text/plain; one=1; charset=" + charset.name() + "; another";
 
-		// Add HTTP template with Content-Type
-		HttpTemplateSection section = this.source.addHttpTemplate("uri", "PUBLIC/resource.html", null);
-		section.setTemplateContentType(contentType);
-		this.source.openOfficeFloor();
-
-		// Ensure correct Content-Type
-		assertEquals("Incorrect Content-Type", contentType, section.getTemplateContentType());
+		this.open((web) -> {
+			// Add HTTP template with Content-Type
+			HttpTemplateSection section = web.addHttpTemplate("uri", "PUBLIC/resource.html", null);
+			section.setTemplateContentType(contentType);
+		});
 
 		// Ensure template correct (charset appended as handled specifically)
 		HttpResponse response = this.assertHttpRequest("/uri", 200, "RESOURCE");
@@ -248,13 +269,11 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 */
 	public void testTemplateContentTypeWithDefaultCharset() throws Exception {
 
-		// Add HTTP template with Content-Type
-		HttpTemplateSection section = this.source.addHttpTemplate("uri", "PUBLIC/resource.html", null);
-		section.setTemplateContentType("text/plain");
-		this.source.openOfficeFloor();
-
-		// Ensure correct Content-Type
-		assertEquals("Incorrect Content-Type", "text/plain", section.getTemplateContentType());
+		this.open((web) -> {
+			// Add HTTP template with Content-Type
+			HttpTemplateSection section = web.addHttpTemplate("uri", "PUBLIC/resource.html", null);
+			section.setTemplateContentType("text/plain");
+		});
 
 		// Ensure template correct
 		HttpResponse response = this.assertHttpRequest("/uri", 200, "RESOURCE");
@@ -268,13 +287,11 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 */
 	public void testTemplateNonTextContentType() throws Exception {
 
-		// Add HTTP template with Content-Type
-		HttpTemplateSection section = this.source.addHttpTemplate("uri", "PUBLIC/resource.html", null);
-		section.setTemplateContentType("x-test/non-text");
-		this.source.openOfficeFloor();
-
-		// Ensure correct Content-Type
-		assertEquals("Incorrect Content-Type", "x-test/non-text", section.getTemplateContentType());
+		this.open((web) -> {
+			// Add HTTP template with Content-Type
+			HttpTemplateSection section = web.addHttpTemplate("uri", "PUBLIC/resource.html", null);
+			section.setTemplateContentType("x-test/non-text");
+		});
 
 		// Ensure template correct
 		HttpResponse response = this.assertHttpRequest("/uri", 200, "RESOURCE");
@@ -308,26 +325,16 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 */
 	public void doRenderRedirectTest(String method, String... renderRedirectHttpMethods) throws Exception {
 
-		// Add the template
-		final String templatePath = this.getClassPath("template.ofp");
-		HttpTemplateSection template = this.source.addHttpTemplate("uri", templatePath, MockTemplateLogic.class);
+		this.open((web) -> {
+			// Add the template
+			final String templatePath = this.getClassPath("template.ofp");
+			HttpTemplateSection template = web.addHttpTemplate("uri", templatePath, MockTemplateLogic.class);
 
-		// Ensure able to provide appropriate render redirect HTTP methods
-		for (String renderRedirectHttpMethod : renderRedirectHttpMethods) {
-			template.addRenderRedirectHttpMethod(renderRedirectHttpMethod);
-		}
-
-		// Ensure correctly provided
-		String[] configuredMethods = template.getRenderRedirectHttpMethods();
-		assertEquals("Incorrect number of render redirect HTTP methods", renderRedirectHttpMethods.length,
-				configuredMethods.length);
-		for (int i = 0; i < renderRedirectHttpMethods.length; i++) {
-			assertEquals("Incorrect render redirect HTTP method " + i, renderRedirectHttpMethods[i],
-					configuredMethods[i]);
-		}
-
-		// Open
-		this.source.openOfficeFloor();
+			// Ensure able to provide appropriate render redirect HTTP methods
+			for (String renderRedirectHttpMethod : renderRedirectHttpMethods) {
+				template.addRenderRedirectHttpMethod(renderRedirectHttpMethod);
+			}
+		});
 
 		// Ensure appropriately redirects
 		String url = "http://" + HOST_NAME + ":" + this.port + "/uri";
@@ -390,18 +397,11 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 
 		final String templatePath = this.getClassPath("template.ofp");
 
-		// Add HTTP template (with URL)
-		HttpTemplateSection section = this.source.addHttpTemplate("/", templatePath, MockTemplateLogic.class);
-		section.setTemplateSecure(isSecure);
-		this.source.openOfficeFloor();
-
-		// Ensure correct section details
-		assertEquals("Incorrect section name", "_root_", section.getSectionName());
-		assertEquals("Incorrect section source", HttpTemplateSectionSource.class.getName(),
-				section.getSectionSourceClassName());
-		assertEquals("Incorrect section location", this.getClassPath("template.ofp"), templatePath);
-		assertEquals("Incorrect template path", templatePath, section.getTemplateLocation());
-		assertEquals("Incorrect template URI", "/", section.getTemplateUri());
+		this.open((web) -> {
+			// Add HTTP template (with URL)
+			HttpTemplateSection section = web.addHttpTemplate("/", templatePath, MockTemplateLogic.class);
+			section.setTemplateSecure(isSecure);
+		});
 
 		// Ensure template available at default root
 		this.assertHttpRequest("/", isSecure, 200, SUBMIT_URI);
@@ -421,7 +421,7 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 		 * @param connection
 		 *            {@link ServerHttpConnection}.
 		 */
-		@NextTask("doNothing")
+		@NextFunction("doNothing")
 		public void submit(ServerHttpConnection connection) throws IOException {
 			WebArchitectEmployerTest.writeResponse("submitted", connection);
 		}
@@ -440,26 +440,28 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 
 		final String TEMPLATE_URI = "template";
 
-		// Add HTTP template
-		this.source.addHttpTemplate(TEMPLATE_URI, this.getClassPath("template.ofp"), MockTemplateLogic.class);
+		this.open((web) -> {
+			// Add HTTP template
+			web.addHttpTemplate(TEMPLATE_URI, this.getClassPath("template.ofp"), MockTemplateLogic.class);
 
-		// Ensure indicates template already registered for URI
-		try {
-			this.source.addHttpTemplate(TEMPLATE_URI, this.getClassPath("template.ofp"), MockTemplateLogic.class);
-			fail("Should not successfully add template for duplicate URI");
-		} catch (IllegalStateException ex) {
-			assertEquals("Incorrect cause", "HTTP Template already added for URI '/" + TEMPLATE_URI + "'",
-					ex.getMessage());
-		}
+			// Ensure indicates template already registered for URI
+			try {
+				web.addHttpTemplate(TEMPLATE_URI, this.getClassPath("template.ofp"), MockTemplateLogic.class);
+				fail("Should not successfully add template for duplicate URI");
+			} catch (IllegalStateException ex) {
+				assertEquals("Incorrect cause", "HTTP Template already added for URI '/" + TEMPLATE_URI + "'",
+						ex.getMessage());
+			}
 
-		// Ensure indicates template already registered for canonical URI
-		try {
-			this.source.addHttpTemplate("/" + TEMPLATE_URI, this.getClassPath("template.ofp"), MockTemplateLogic.class);
-			fail("Should not successfully add template for duplicate URI");
-		} catch (IllegalStateException ex) {
-			assertEquals("Incorrect cause", "HTTP Template already added for URI '/" + TEMPLATE_URI + "'",
-					ex.getMessage());
-		}
+			// Ensure indicates template already registered for canonical URI
+			try {
+				web.addHttpTemplate("/" + TEMPLATE_URI, this.getClassPath("template.ofp"), MockTemplateLogic.class);
+				fail("Should not successfully add template for duplicate URI");
+			} catch (IllegalStateException ex) {
+				assertEquals("Incorrect cause", "HTTP Template already added for URI '/" + TEMPLATE_URI + "'",
+						ex.getMessage());
+			}
+		});
 	}
 
 	/**
@@ -483,10 +485,11 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 
 		final String SUBMIT_URI = "/uri-submit";
 
-		// Add HTTP template
-		this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"), MockTemplateLogic.class)
-				.setTemplateSecure(isSecure);
-		this.source.openOfficeFloor();
+		this.open((web) -> {
+			// Add HTTP template
+			web.addHttpTemplate("uri", this.getClassPath("template.ofp"), MockTemplateLogic.class)
+					.setTemplateSecure(isSecure);
+		});
 
 		// Ensure submit on task for template is correct
 		this.assertHttpRequest(SUBMIT_URI, isSecure, 200, "submitted" + SUBMIT_URI);
@@ -499,10 +502,11 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 
 		final String SUBMIT_URI = "/uri-submit";
 
-		// Add HTTP template
-		this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"), MockTemplateLogic.class)
-				.setLinkSecure("submit", true);
-		this.source.openOfficeFloor();
+		this.open((web) -> {
+			// Add HTTP template
+			web.addHttpTemplate("uri", this.getClassPath("template.ofp"), MockTemplateLogic.class)
+					.setLinkSecure("submit", true);
+		});
 
 		// Ensure submit on task for template is correct
 		this.assertHttpRequest(SUBMIT_URI, true, 200, "submitted" + SUBMIT_URI);
@@ -515,12 +519,13 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 
 		final String SUBMIT_URI = "/uri-submit";
 
-		// Add HTTP template
-		HttpTemplateSection template = this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"),
-				MockTemplateLogic.class);
-		template.setTemplateSecure(true);
-		template.setLinkSecure("submit", false);
-		this.source.openOfficeFloor();
+		this.open((web) -> {
+			// Add HTTP template
+			HttpTemplateSection template = web.addHttpTemplate("uri", this.getClassPath("template.ofp"),
+					MockTemplateLogic.class);
+			template.setTemplateSecure(true);
+			template.setLinkSecure("submit", false);
+		});
 
 		// Ensure submit on task for template is correct
 		String requestUrl = "http://" + HOST_NAME + ":" + this.port + SUBMIT_URI;
@@ -535,20 +540,19 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 */
 	public void testInheritTemplate() throws Exception {
 
-		// Add link target template
-		HttpTemplateSection target = this.source.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
-				MockTemplateLogic.class);
+		this.open((web) -> {
+			// Add link target template
+			HttpTemplateSection target = web.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
+					MockTemplateLogic.class);
 
-		// Add parent template
-		HttpTemplateSection parent = this.source.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"), null);
-		this.source.linkToHttpTemplate(parent, "submit", target);
+			// Add parent template
+			HttpTemplateSection parent = web.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"), null);
+			web.linkToHttpTemplate(parent.getOfficeSection().getOfficeSectionOutput("submit"), target);
 
-		// Add child template (inheriting content and links)
-		HttpTemplateSection child = this.source.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
-		child.setSuperSection(parent);
-
-		// Open OfficeFloor
-		this.source.openOfficeFloor();
+			// Add child template (inheriting content and links)
+			HttpTemplateSection child = web.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
+			child.setSuperHttpTemplate(parent);
+		});
 
 		// Ensure child inherits content
 		this.assertHttpRequest("/child", 200, "Parent CHILD introduced /child-submit");
@@ -562,25 +566,24 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 */
 	public void testInheritTemplateHierarchy() throws Exception {
 
-		// Add link target template
-		HttpTemplateSection target = this.source.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
-				MockTemplateLogic.class);
+		this.open((web) -> {
+			// Add link target template
+			HttpTemplateSection target = web.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
+					MockTemplateLogic.class);
 
-		// Add parent template
-		HttpTemplateSection parent = this.source.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"), null);
-		this.source.linkToHttpTemplate(parent, "submit", target);
+			// Add parent template
+			HttpTemplateSection parent = web.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"), null);
+			web.linkToHttpTemplate(parent.getOfficeSection().getOfficeSectionOutput("submit"), target);
 
-		// Add child template (inheriting content and links)
-		HttpTemplateSection child = this.source.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
-		child.setSuperSection(parent);
+			// Add child template (inheriting content and links)
+			HttpTemplateSection child = web.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
+			child.setSuperHttpTemplate(parent);
 
-		// Add grand child template (override the link)
-		HttpTemplateSection grandChild = this.source.addHttpTemplate("/grandchild", this.getClassPath("GrandChild.ofp"),
-				null);
-		grandChild.setSuperSection(child);
-
-		// Open OfficeFloor
-		this.source.openOfficeFloor();
+			// Add grand child template (override the link)
+			HttpTemplateSection grandChild = web.addHttpTemplate("/grandchild", this.getClassPath("GrandChild.ofp"),
+					null);
+			grandChild.setSuperHttpTemplate(child);
+		});
 
 		// Ensure grand child overrides section with link (no need to inherit)
 		this.assertHttpRequest("/grandchild", 200, "Grandchild CHILD introduced Overridden");
@@ -591,25 +594,25 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 */
 	public void testTemplateInheritSectionLinkConfiguration() throws Exception {
 
-		// Add link target template
-		HttpTemplateSection target = this.source.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
-				MockTemplateLogic.class);
+		this.openWithContext((context) -> {
+			WebArchitect web = context.getWebArchitect();
 
-		// Add grand parent section
-		AutoWireSection grandParent = this.source.addSection("GRAND_PARENT", ClassSectionSource.class.getName(),
-				GrandParentSection.class.getName());
-		this.source.linkToHttpTemplate(grandParent, "submit", target);
+			// Add link target template
+			HttpTemplateSection target = web.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
+					MockTemplateLogic.class);
 
-		// Add parent template (inheriting link configuration)
-		HttpTemplateSection parent = this.source.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"), null);
-		parent.setSuperSection(grandParent);
+			// Add grand parent section
+			OfficeSection grandParent = context.addSection("GRAND_PARENT", GrandParentSection.class);
+			web.linkToHttpTemplate(grandParent.getOfficeSectionOutput("submit"), target);
 
-		// Add child template (inheriting content and links)
-		HttpTemplateSection child = this.source.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
-		child.setSuperSection(parent);
+			// Add parent template (inheriting link configuration)
+			HttpTemplateSection parent = web.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"), null);
+			parent.getOfficeSection().setSuperOfficeSection(grandParent);
 
-		// Open OfficeFloor
-		this.source.openOfficeFloor();
+			// Add child template (inheriting content and links)
+			HttpTemplateSection child = web.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
+			child.setSuperHttpTemplate(parent);
+		});
 
 		// Ensure child inherits content
 		this.assertHttpRequest("/child", 200, "Parent CHILD introduced /child-submit");
@@ -622,7 +625,7 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 * Parent section.
 	 */
 	public static class GrandParentSection {
-		@NextTask("submit")
+		@NextFunction("submit")
 		public void input() {
 		}
 	}
@@ -632,27 +635,26 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 */
 	public void testInheritTemplateLinkSecure() throws Exception {
 
-		// Add link target template
-		HttpTemplateSection target = this.source.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
-				MockTemplateLogic.class);
+		this.open((web) -> {
+			// Add link target template
+			HttpTemplateSection target = web.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
+					MockTemplateLogic.class);
 
-		// Add parent template
-		HttpTemplateSection parent = this.source.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"), null);
-		parent.setLinkSecure("submit", false);
-		this.source.linkToHttpTemplate(parent, "submit", target);
+			// Add parent template
+			HttpTemplateSection parent = web.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"), null);
+			parent.setLinkSecure("submit", false);
+			web.linkToHttpTemplate(parent.getOfficeSection().getOfficeSectionOutput("submit"), target);
 
-		// Add child template (inheriting content and links)
-		HttpTemplateSection child = this.source.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
-		parent.setLinkSecure("submit", true); // overrides parent
-		child.setSuperSection(parent);
+			// Add child template (inheriting content and links)
+			HttpTemplateSection child = web.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
+			parent.setLinkSecure("submit", true); // overrides parent
+			child.setSuperHttpTemplate(parent);
 
-		// Add child template (inheriting content and links)
-		HttpTemplateSection grandChild = this.source.addHttpTemplate("/grandchild", this.getClassPath("LinkChild.ofp"),
-				null);
-		grandChild.setSuperSection(child);
-
-		// Open OfficeFloor
-		this.source.openOfficeFloor();
+			// Add child template (inheriting content and links)
+			HttpTemplateSection grandChild = web.addHttpTemplate("/grandchild", this.getClassPath("LinkChild.ofp"),
+					null);
+			grandChild.setSuperHttpTemplate(child);
+		});
 
 		// Ensure child inherits link secure
 		this.assertHttpRequest("/grandchild", 200,
@@ -669,26 +671,25 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 */
 	public void testNotInheritMissingTemplateLinkSecure() throws Exception {
 
-		// Add link target template
-		HttpTemplateSection target = this.source.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
-				MockTemplateLogic.class);
+		this.open((web) -> {
+			// Add link target template
+			HttpTemplateSection target = web.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
+					MockTemplateLogic.class);
 
-		// Add parent template
-		HttpTemplateSection parent = this.source.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"), null);
-		parent.setLinkSecure("submit", true);
-		this.source.linkToHttpTemplate(parent, "submit", target);
+			// Add parent template
+			HttpTemplateSection parent = web.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"), null);
+			parent.setLinkSecure("submit", true);
+			web.linkToHttpTemplate(parent.getOfficeSection().getOfficeSectionOutput("submit"), target);
 
-		// Add child template (inheriting content and links)
-		HttpTemplateSection child = this.source.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
-		child.setSuperSection(parent);
+			// Add child template (inheriting content and links)
+			HttpTemplateSection child = web.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
+			child.setSuperHttpTemplate(parent);
 
-		// Add grand child template (override the link)
-		HttpTemplateSection grandChild = this.source.addHttpTemplate("/grandchild", this.getClassPath("GrandChild.ofp"),
-				null);
-		grandChild.setSuperSection(child);
-
-		// Open OfficeFloor
-		this.source.openOfficeFloor();
+			// Add grand child template (override the link)
+			HttpTemplateSection grandChild = web.addHttpTemplate("/grandchild", this.getClassPath("GrandChild.ofp"),
+					null);
+			grandChild.setSuperHttpTemplate(child);
+		});
 
 		// Ensure grand child overrides section with link (no need to inherit)
 		this.assertHttpRequest("/grandchild", 200, "Grandchild CHILD introduced Overridden");
@@ -699,39 +700,36 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 */
 	public void testCyclicTemplateInheritanceHierarchy() throws Exception {
 
-		final CyclicInheritanceException exception = new CyclicInheritanceException(
-				"Template /parent has a cyclic inheritance hierarchy ( child : parent : child : ... )");
-
 		// Record issue of cyclic inheritance hierarchy
 		final MockCompilerIssues issues = new MockCompilerIssues(this);
-		this.source.getOfficeFloorCompiler().setCompilerIssues(issues);
+		this.compiler.getOfficeFloorCompiler().setCompilerIssues(issues);
 		issues.recordIssue("OfficeFloor", OfficeFloorNodeImpl.class,
 				"Template /parent has a cyclic inheritance hierarchy ( child : parent : child : ... )");
-		issues.recordIssue("OfficeFloor", OfficeFloorNodeImpl.class,
-				"Failed to source OfficeFloor from OfficeFloorSource (source=" + WebArchitectEmployer.class.getName()
-						+ ", location=auto-wire)",
-				exception);
 
 		// Test
 		this.replayMockObjects();
 
-		// Add link target template
-		HttpTemplateSection target = this.source.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
-				MockTemplateLogic.class);
+		this.compiler.web((context) -> {
+			WebArchitect web = context.getWebArchitect();
 
-		// Add parent template
-		HttpTemplateSection parent = this.source.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"), null);
-		this.source.linkToHttpTemplate(parent, "submit", target);
+			// Add link target template
+			HttpTemplateSection target = web.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
+					MockTemplateLogic.class);
 
-		// Add child template (inheriting content and links)
-		HttpTemplateSection child = this.source.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
-		child.setSuperSection(parent);
+			// Add parent template
+			HttpTemplateSection parent = web.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"), null);
+			web.linkToHttpTemplate(parent.getOfficeSection().getOfficeSectionOutput("submit"), target);
 
-		// Cyclic inheritance hierarchy
-		parent.setSuperSection(child);
+			// Add child template (inheriting content and links)
+			HttpTemplateSection child = web.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
+			child.setSuperHttpTemplate(parent);
+
+			// Cyclic inheritance hierarchy
+			parent.setSuperHttpTemplate(child);
+		});
 
 		// Open OfficeFloor (manually to use mock compiler issues)
-		OfficeFloor officeFloor = this.source.getOfficeFloorCompiler().compile("auto-wire");
+		OfficeFloor officeFloor = this.compiler.compileOfficeFloor();
 		assertNull("Should not have loaded the OfficeFloor", officeFloor);
 
 		// Ensure report cyclic inheritance hierarchy
@@ -747,10 +745,11 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 		final String TEMPLATE_URI = "/uri" + SUFFIX;
 		final String LINK_URI = "/uri-submit" + SUFFIX;
 
-		// Add HTTP template with default template URI suffix
-		this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"), MockTemplateLogic.class);
-		this.source.setDefaultHttpTemplateUriSuffix(SUFFIX);
-		this.source.openOfficeFloor();
+		this.open((web) -> {
+			// Add HTTP template with default template URI suffix
+			web.addHttpTemplate("uri", this.getClassPath("template.ofp"), MockTemplateLogic.class);
+			web.setDefaultHttpTemplateUriSuffix(SUFFIX);
+		});
 
 		// Ensure service template URI with suffix
 		this.assertHttpRequest(TEMPLATE_URI, 200, LINK_URI);
@@ -768,10 +767,11 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 		final String TEMPLATE_URI = "/";
 		final String LINK_URI = "/-submit" + SUFFIX;
 
-		// Add root HTTP template with default template URI suffix
-		this.source.addHttpTemplate("/", this.getClassPath("template.ofp"), MockTemplateLogic.class);
-		this.source.setDefaultHttpTemplateUriSuffix(SUFFIX);
-		this.source.openOfficeFloor();
+		this.open((web) -> {
+			// Add root HTTP template with default template URI suffix
+			web.addHttpTemplate("/", this.getClassPath("template.ofp"), MockTemplateLogic.class);
+			web.setDefaultHttpTemplateUriSuffix(SUFFIX);
+		});
 
 		// Ensure service template URI with suffix
 		this.assertHttpRequest(TEMPLATE_URI, 200, LINK_URI);
@@ -788,10 +788,11 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 		final String TEMPLATE_URI = "/uri";
 		final String LINK_URI = "/uri-submit";
 
-		// Add HTTP template with default template URI suffix
-		this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"), MockTemplateLogic.class);
-		this.source.setDefaultHttpTemplateUriSuffix(null);
-		this.source.openOfficeFloor();
+		this.open((web) -> {
+			// Add HTTP template with default template URI suffix
+			web.addHttpTemplate("uri", this.getClassPath("template.ofp"), MockTemplateLogic.class);
+			web.setDefaultHttpTemplateUriSuffix(null);
+		});
 
 		// Ensure service template URI with suffix
 		this.assertHttpRequest(TEMPLATE_URI, 200, LINK_URI);
@@ -809,11 +810,12 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 		final String TEMPLATE_URI = "/uri" + SUFFIX;
 		final String LINK_URI = "/uri-submit" + SUFFIX;
 
-		// Add HTTP template
-		HttpTemplateSection template = this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"),
-				MockTemplateLogic.class);
-		template.setTemplateUriSuffix(SUFFIX);
-		this.source.openOfficeFloor();
+		this.open((web) -> {
+			// Add HTTP template
+			HttpTemplateSection template = web.addHttpTemplate("uri", this.getClassPath("template.ofp"),
+					MockTemplateLogic.class);
+			template.setTemplateUriSuffix(SUFFIX);
+		});
 
 		// Ensure service template URI with suffix
 		this.assertHttpRequest(TEMPLATE_URI, 200, LINK_URI);
@@ -830,14 +832,15 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 		final String TEMPLATE_URI = "/uri.override";
 		final String LINK_URI = "/uri-submit.override";
 
-		// Provide default template URI suffix
-		this.source.setDefaultHttpTemplateUriSuffix(".suffix");
+		this.open((web) -> {
+			// Provide default template URI suffix
+			web.setDefaultHttpTemplateUriSuffix(".suffix");
 
-		// Add HTTP template
-		HttpTemplateSection template = this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"),
-				MockTemplateLogic.class);
-		template.setTemplateUriSuffix(".override");
-		this.source.openOfficeFloor();
+			// Add HTTP template
+			HttpTemplateSection template = web.addHttpTemplate("uri", this.getClassPath("template.ofp"),
+					MockTemplateLogic.class);
+			template.setTemplateUriSuffix(".override");
+		});
 
 		// Ensure service template URI with suffix
 		this.assertHttpRequest(TEMPLATE_URI, 200, LINK_URI);
@@ -849,21 +852,23 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure appropriate linked URIs.
 	 */
-	public void testLinkedUris() {
+	public void testLinkedUris() throws Exception {
 
-		// Add HTTP template (not root so should not be included)
-		HttpTemplateSection template = this.source.addHttpTemplate("template", this.getClassPath("template.ofp"),
-				MockTemplateLogic.class);
+		this.open((web) -> {
+			// Add HTTP template (not root so should not be included)
+			HttpTemplateSection template = web.addHttpTemplate("template", this.getClassPath("template.ofp"),
+					MockTemplateLogic.class);
 
-		// Provide URI link
-		this.source.linkUri("uri", template, HttpTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
+			// Provide URI link
+			web.linkUri("uri", template);
 
-		// Validate URIs
-		assertUris(this.source.getURIs(), "/uri");
+			// Validate URIs
+			assertUris(web.getURIs(), "/uri");
 
-		// Validate with root HTTP template
-		this.source.addHttpTemplate("/", this.getClassPath("template.ofp"), MockTemplateLogic.class);
-		assertUris(this.source.getURIs(), "/", "/uri");
+			// Validate with root HTTP template
+			web.addHttpTemplate("/", this.getClassPath("template.ofp"), MockTemplateLogic.class);
+			assertUris(web.getURIs(), "/", "/uri");
+		});
 	}
 
 	/**
@@ -886,17 +891,16 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 */
 	public void testTemplateExtension() throws Exception {
 
-		// Add HTTP template
-		HttpTemplateSection template = this.source.addHttpTemplate("template", this.getClassPath("Extension.ofp"),
-				MockExtensionTemplateLogic.class);
+		this.open((web) -> {
+			// Add HTTP template
+			HttpTemplateSection template = web.addHttpTemplate("template", this.getClassPath("Extension.ofp"),
+					MockExtensionTemplateLogic.class);
 
-		// Add template extension
-		HttpTemplateAutoWireSectionExtension extension = template
-				.addTemplateExtension(MockHttpTemplateSectionExtension.class);
-		extension.addProperty("name", "value");
-
-		// Open
-		this.source.openOfficeFloor();
+			// Add template extension
+			HttpTemplateAutoWireSectionExtension extension = template
+					.addTemplateExtension(MockHttpTemplateSectionExtension.class);
+			extension.addProperty("name", "value");
+		});
 
 		// Ensure extend the template
 		this.assertHttpRequest("/template", 200, "extended");
@@ -946,11 +950,13 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 */
 	public void doLinkUriToSectionInputTest(boolean isSecure) throws Exception {
 
-		// Add section for handling request
-		AutoWireSection section = this.source.addSection("SECTION", ClassSectionSource.class.getName(),
-				MockTemplateLogic.class.getName());
-		this.source.linkUri("test", section, "submit").setUriSecure(isSecure);
-		this.source.openOfficeFloor();
+		this.openWithContext((context) -> {
+			WebArchitect web = context.getWebArchitect();
+
+			// Add section for handling request
+			OfficeSection section = context.addSection("SECTION", MockTemplateLogic.class);
+			web.linkUri("test", section.getOfficeSectionInput("submit")).setUriSecure(isSecure);
+		});
 
 		// Ensure can send to URI
 		this.assertHttpRequest("/test", isSecure, 200, "submitted");
@@ -961,14 +967,16 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 */
 	public void testLinkToHttpTemplate() throws Exception {
 
-		// Add linking to HTTP template
-		AutoWireSection section = this.source.addSection("SECTION", ClassSectionSource.class.getName(),
-				MockLinkHttpTemplate.class.getName());
-		this.source.linkUri("test", section, "service");
-		HttpTemplateSection template = this.source.addHttpTemplate("template", this.getClassPath("template.ofp"),
-				MockTemplateLogic.class);
-		this.source.linkToHttpTemplate(section, "http-template", template);
-		this.source.openOfficeFloor();
+		this.openWithContext((context) -> {
+			WebArchitect web = context.getWebArchitect();
+
+			// Add linking to HTTP template
+			OfficeSection section = context.addSection("SECTION", MockLinkHttpTemplate.class);
+			web.linkUri("test", section.getOfficeSectionInput("service"));
+			HttpTemplateSection template = web.addHttpTemplate("template", this.getClassPath("template.ofp"),
+					MockTemplateLogic.class);
+			web.linkToHttpTemplate(section.getOfficeSectionOutput("http-template"), template);
+		});
 
 		// Ensure link to the HTTP template
 		this.assertHttpRequest("/test", 200, "LINK to /template-submit");
@@ -979,23 +987,22 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 */
 	public void testInheritLinkToHttpTemplate() throws Exception {
 
-		// Add the template
-		HttpTemplateSection template = this.source.addHttpTemplate("template", this.getClassPath("template.ofp"),
-				MockTemplateLogic.class);
+		this.openWithContext((context) -> {
+			WebArchitect web = context.getWebArchitect();
 
-		// Add parent linking to resource
-		AutoWireSection parent = this.source.addSection("PARENT", ClassSectionSource.class.getName(),
-				MockLinkHttpTemplate.class.getName());
-		this.source.linkToHttpTemplate(parent, "http-template", template);
+			// Add the template
+			HttpTemplateSection template = web.addHttpTemplate("template", this.getClassPath("template.ofp"),
+					MockTemplateLogic.class);
 
-		// Add child inheriting link configuration
-		AutoWireSection child = this.source.addSection("CHILD", ClassSectionSource.class.getName(),
-				MockLinkHttpTemplate.class.getName());
-		this.source.linkUri("test", child, "service");
-		child.setSuperSection(parent);
+			// Add parent linking to resource
+			OfficeSection parent = context.addSection("PARENT", MockLinkHttpTemplate.class);
+			web.linkToHttpTemplate(parent.getOfficeSectionOutput("http-template"), template);
 
-		// Open OfficeFloor
-		this.source.openOfficeFloor();
+			// Add child inheriting link configuration
+			OfficeSection child = context.addSection("CHILD", MockLinkHttpTemplate.class);
+			web.linkUri("test", child.getOfficeSectionInput("service"));
+			child.setSuperOfficeSection(parent);
+		});
 
 		// Ensure link to the HTTP template
 		this.assertHttpRequest("/test", 200, "LINK to /template-submit");
@@ -1005,7 +1012,7 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 * Provides mock functionality to link to a HTTP template.
 	 */
 	public static class MockLinkHttpTemplate {
-		@NextTask("http-template")
+		@NextFunction("http-template")
 		public void service(ServerHttpConnection connection) throws IOException {
 			WebArchitectEmployerTest.writeResponse("LINK to ", connection);
 		}
@@ -1016,12 +1023,14 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 */
 	public void testLinkToResource() throws Exception {
 
-		// Add linking to resource
-		AutoWireSection section = this.source.addSection("SECTION", ClassSectionSource.class.getName(),
-				MockLinkResource.class.getName());
-		this.source.linkUri("test", section, "service");
-		this.source.linkToResource(section, "resource", "resource.html");
-		this.source.openOfficeFloor();
+		this.openWithContext((context) -> {
+			WebArchitect web = context.getWebArchitect();
+
+			// Add linking to resource
+			OfficeSection section = context.addSection("SECTION", MockLinkResource.class);
+			web.linkUri("test", section.getOfficeSectionInput("service"));
+			web.linkToResource(section.getOfficeSectionOutput("resource"), "resource.html");
+		});
 
 		// Ensure provide the resource
 		this.assertHttpRequest("/test", 200, "RESOURCE");
@@ -1032,19 +1041,18 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 */
 	public void testInheritLinkToResource() throws Exception {
 
-		// Add parent linking to resource
-		AutoWireSection parent = this.source.addSection("PARENT", ClassSectionSource.class.getName(),
-				MockLinkResource.class.getName());
-		this.source.linkToResource(parent, "resource", "resource.html");
+		this.openWithContext((context) -> {
+			WebArchitect web = context.getWebArchitect();
 
-		// Add child inheriting link configuration
-		AutoWireSection child = this.source.addSection("CHILD", ClassSectionSource.class.getName(),
-				MockLinkResource.class.getName());
-		this.source.linkUri("test", child, "service");
-		child.setSuperSection(parent);
+			// Add parent linking to resource
+			OfficeSection parent = context.addSection("PARENT", MockLinkResource.class);
+			web.linkToResource(parent.getOfficeSectionOutput("resource"), "resource.html");
 
-		// Open OfficeFloor
-		this.source.openOfficeFloor();
+			// Add child inheriting link configuration
+			OfficeSection child = context.addSection("CHILD", MockLinkResource.class);
+			web.linkUri("test", child.getOfficeSectionInput("service"));
+			child.setSuperOfficeSection(parent);
+		});
 
 		// Ensure provide the resource
 		this.assertHttpRequest("/test", 200, "RESOURCE");
@@ -1054,7 +1062,7 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 * Provides mock functionality to link to a resource.
 	 */
 	public static class MockLinkResource {
-		@NextTask("resource")
+		@NextFunction("resource")
 		public void service(ServerHttpConnection connection) throws IOException {
 			WebArchitectEmployerTest.writeResponse("LINK to ", connection);
 		}
@@ -1065,14 +1073,16 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 */
 	public void testLinkEscalationToTemplate() throws Exception {
 
-		// Add escalation to template
-		AutoWireSection failingSection = this.source.addSection("FAILING", ClassSectionSource.class.getName(),
-				FailingSection.class.getName());
-		this.source.linkUri("test", failingSection, "task");
-		HttpTemplateSection template = this.source.addHttpTemplate("handler", this.getClassPath("template.ofp"),
-				MockTemplateLogic.class);
-		this.source.linkEscalation(SQLException.class, template);
-		this.source.openOfficeFloor();
+		this.openWithContext((context) -> {
+			WebArchitect web = context.getWebArchitect();
+
+			// Add escalation to template
+			OfficeSection failingSection = context.addSection("FAILING", FailingSection.class);
+			web.linkUri("test", failingSection.getOfficeSectionInput("task"));
+			HttpTemplateSection template = web.addHttpTemplate("handler", this.getClassPath("template.ofp"),
+					MockTemplateLogic.class);
+			web.linkEscalation(SQLException.class, template);
+		});
 
 		// Ensure link escalation to template
 		this.assertHttpRequest("/test", 200, "Escalated to /handler-submit");
@@ -1093,12 +1103,14 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 */
 	public void testLinkEscalationToResource() throws Exception {
 
-		// Add escalation to resource
-		AutoWireSection failingSection = this.source.addSection("FAILING", ClassSectionSource.class.getName(),
-				FailingSection.class.getName());
-		this.source.linkUri("test", failingSection, "task");
-		this.source.linkEscalation(SQLException.class, "resource.html");
-		this.source.openOfficeFloor();
+		this.openWithContext((context) -> {
+			WebArchitect web = context.getWebArchitect();
+
+			// Add escalation to resource
+			OfficeSection failingSection = context.addSection("FAILING", FailingSection.class);
+			web.linkUri("test", failingSection.getOfficeSectionInput("task"));
+			web.linkEscalation(SQLException.class, "resource.html");
+		});
 
 		// Ensure link escalation to resource
 		this.assertHttpRequest("/test", 200, "RESOURCE");
@@ -1109,22 +1121,14 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 */
 	public void testHttpSessionObject() throws Exception {
 
-		// Provide HTTP Session
-		this.source
-				.addManagedObject(HttpSessionManagedObjectSource.class.getName(), null, new AutoWire(HttpSession.class))
-				.setTimeout(10 * 1000);
+		this.open((web) -> {
+			// Add two templates to ensure object available to both
+			web.addHttpTemplate("one", this.getClassPath("StatefulObject.ofp"), MockHttpSessionObjectTemplate.class);
+			web.addHttpTemplate("two", this.getClassPath("StatefulObject.ofp"), MockHttpSessionObjectTemplate.class);
 
-		// Add two templates to ensure object available to both
-		this.source.addHttpTemplate("one", this.getClassPath("StatefulObject.ofp"),
-				MockHttpSessionObjectTemplate.class);
-		this.source.addHttpTemplate("two", this.getClassPath("StatefulObject.ofp"),
-				MockHttpSessionObjectTemplate.class);
-
-		// Add the HTTP Session object
-		this.source.addHttpSessionObject(MockHttpSessionObject.class);
-
-		// Start the HTTP Server
-		this.source.openOfficeFloor();
+			// Add the HTTP Session object
+			web.addHttpSessionObject(MockHttpSessionObject.class);
+		});
 
 		// Ensure state maintained across requests
 		this.assertHttpRequest("/one", 200, "1");
@@ -1163,21 +1167,15 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 */
 	public void testHttpSessionStatefulAnnotation() throws Exception {
 
-		// Provide HTTP Session
-		this.source
-				.addManagedObject(HttpSessionManagedObjectSource.class.getName(), null, new AutoWire(HttpSession.class))
-				.setTimeout(10 * 1000);
+		this.open((web) -> {
+			// Add two templates with annotations for HttpSessionStateful
+			web.addHttpTemplate("one", this.getClassPath("StatefulObject.ofp"),
+					MockAnnotatedHttpSessionStatefulTemplate.class);
+			web.addHttpTemplate("two", this.getClassPath("StatefulObject.ofp"),
+					MockAnnotatedHttpSessionStatefulTemplate.class);
 
-		// Add two templates with annotations for HttpSessionStateful
-		this.source.addHttpTemplate("one", this.getClassPath("StatefulObject.ofp"),
-				MockAnnotatedHttpSessionStatefulTemplate.class);
-		this.source.addHttpTemplate("two", this.getClassPath("StatefulObject.ofp"),
-				MockAnnotatedHttpSessionStatefulTemplate.class);
-
-		// HTTP Session Object should be detected and added
-
-		// Start the HTTP Server
-		this.source.openOfficeFloor();
+			// HTTP Session Object should be detected and added
+		});
 
 		// Ensure state maintained across requests
 		this.assertHttpRequest("/one", 200, "1");
@@ -1218,19 +1216,13 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 */
 	public void testHttpSessionStatefulAnnotationOverridingBoundName() throws Exception {
 
-		// Provide HTTP Session
-		this.source
-				.addManagedObject(HttpSessionManagedObjectSource.class.getName(), null, new AutoWire(HttpSession.class))
-				.setTimeout(10 * 1000);
+		this.open((web) -> {
+			// Add the template
+			web.addHttpTemplate("template", this.getClassPath("StatefulObject.ofp"),
+					MockAnnotatedOverriddenBindNameHttpSessionStatefulTemplate.class);
 
-		// Add the template
-		this.source.addHttpTemplate("template", this.getClassPath("StatefulObject.ofp"),
-				MockAnnotatedOverriddenBindNameHttpSessionStatefulTemplate.class);
-
-		// HTTP Session object should be detected and added
-
-		// Start the HTTP Server
-		this.source.openOfficeFloor();
+			// HTTP Session object should be detected and added
+		});
 
 		// Ensure same object (test within template logic)
 		this.assertHttpRequest("/template", 200, "1");
@@ -1270,18 +1262,13 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 
 		final String URI = "/template-submit";
 
-		// Provide HTTP Request State
-		this.source.addManagedObject(HttpRequestStateManagedObjectSource.class.getName(), null,
-				new AutoWire(HttpRequestState.class));
+		this.open((web) -> {
+			// Add the template
+			web.addHttpTemplate("template", this.getClassPath("HttpStateObject.ofp"),
+					MockHttpRequestStateTemplate.class);
 
-		// Add the template
-		this.source.addHttpTemplate("template", this.getClassPath("HttpStateObject.ofp"),
-				MockHttpRequestStateTemplate.class);
-
-		// HTTP request object should be detected and added
-
-		// Start the HTTP Server
-		this.source.openOfficeFloor();
+			// HTTP request object should be detected and added
+		});
 
 		// Ensure same object (test within template logic)
 		this.assertHttpRequest(URI, 200, "maintained state-" + URI);
@@ -1326,15 +1313,14 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 */
 	public void testRequestObjectLoadingParameters() throws Exception {
 
-		// Add the template to use parameters object
-		this.source.addHttpTemplate("template", this.getClassPath("ParametersObject.ofp"),
-				MockHttpParametersObjectTemplate.class);
+		this.open((web) -> {
+			// Add the template to use parameters object
+			web.addHttpTemplate("template", this.getClassPath("ParametersObject.ofp"),
+					MockHttpParametersObjectTemplate.class);
 
-		// Add the HTTP Request Object to load parameters
-		this.source.addHttpRequestObject(MockHttpParametersObject.class, true);
-
-		// Start the HTTP Server
-		this.source.openOfficeFloor();
+			// Add the HTTP Request Object to load parameters
+			web.addHttpRequestObject(MockHttpParametersObject.class, true);
+		});
 
 		// Ensure provide HTTP parameters
 		this.assertHttpRequest("/template?text=VALUE", 200, "VALUE");
@@ -1370,12 +1356,11 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 */
 	public void testAnnotatedHttpParameters() throws Exception {
 
-		// Add the template to use parameters object
-		this.source.addHttpTemplate("template", this.getClassPath("ParametersObject.ofp"),
-				MockAnnotatedHttpParametersTemplate.class);
-
-		// Start the HTTP Server
-		this.source.openOfficeFloor();
+		this.open((web) -> {
+			// Add the template to use parameters object
+			web.addHttpTemplate("template", this.getClassPath("ParametersObject.ofp"),
+					MockAnnotatedHttpParametersTemplate.class);
+		});
 
 		// Ensure provide HTTP parameters
 		this.assertHttpRequest("/template?text=VALUE", 200, "VALUE");
@@ -1414,18 +1399,13 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 
 		final String URI = "/template-submit";
 
-		// Provide HTTP Application State
-		this.source.addManagedObject(HttpApplicationStateManagedObjectSource.class.getName(), processScopeWirer,
-				new AutoWire(HttpApplicationState.class));
+		this.open((web) -> {
+			// Add the template
+			web.addHttpTemplate("template", this.getClassPath("HttpStateObject.ofp"),
+					MockHttpApplicationStateTemplate.class);
 
-		// Add the template
-		this.source.addHttpTemplate("template", this.getClassPath("HttpStateObject.ofp"),
-				MockHttpApplicationStateTemplate.class);
-
-		// HTTP application state object should be detected and added
-
-		// Start the HTTP Server
-		this.source.openOfficeFloor();
+			// HTTP application state object should be detected and added
+		});
 
 		// Ensure same object (test within template logic)
 		this.assertHttpRequest(URI, 200, "maintained state-" + URI);
@@ -1475,12 +1455,12 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 		File warDirectory = this.findFile(this.getClass(), "template.ofp").getParentFile();
 
 		// Add configuration
-		OfficeFloorCompiler compiler = this.source.getOfficeFloorCompiler();
+		OfficeFloorCompiler compiler = this.compiler.getOfficeFloorCompiler();
 		compiler.addProperty(SourceHttpResourceFactory.PROPERTY_RESOURCE_DIRECTORIES, warDirectory.getAbsolutePath());
 		compiler.addProperty(SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES, "resource.html");
 
 		// Start the HTTP Server
-		this.source.openOfficeFloor();
+		this.officeFloor = this.compiler.compileAndOpenOfficeFloor();
 
 		// Ensure class path resources are available
 		this.assertHttpRequest("/resource.html", 200, "RESOURCE");
@@ -1509,13 +1489,13 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 		writer.close();
 
 		// Add configuration
-		OfficeFloorCompiler compiler = this.source.getOfficeFloorCompiler();
+		OfficeFloorCompiler compiler = this.compiler.getOfficeFloorCompiler();
 		compiler.addProperty(SourceHttpResourceFactory.PROPERTY_RESOURCE_DIRECTORIES, warDirectory.getAbsolutePath());
 		compiler.addProperty(SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES, "test.html");
 		compiler.addProperty(SourceHttpResourceFactory.PROPERTY_DIRECT_STATIC_CONTENT, String.valueOf(false));
 
 		// Start the HTTP Server
-		this.source.openOfficeFloor();
+		this.officeFloor = this.compiler.compileAndOpenOfficeFloor();
 
 		// Ensure obtain resource
 		this.assertHttpRequest("/test.html", 200, this.getName());
@@ -1536,13 +1516,13 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 */
 	public void testChainServicer() throws Exception {
 
-		// Add section to override servicing
-		AutoWireSection section = this.source.addSection("SECTION", ClassSectionSource.class.getName(),
-				MockChainedServicer.class.getName());
-		this.source.chainServicer(section, "service", "notHandled");
+		this.openWithContext((context) -> {
+			WebArchitect web = context.getWebArchitect();
 
-		// Start the HTTP Server
-		this.source.openOfficeFloor();
+			// Add section to override servicing
+			OfficeSection section = context.addSection("SECTION", MockChainedServicer.class);
+			web.chainServicer(section.getOfficeSectionInput("service"), section.getOfficeSectionOutput("notHandled"));
+		});
 
 		// Ensure chained servicer services request
 		MockChainedServicer.isServiced = false;
@@ -1592,18 +1572,17 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 	 */
 	public void testChainLastServicer() throws Exception {
 
-		// Add section to override servicing
-		AutoWireSection section = this.source.addSection("SECTION", ClassSectionSource.class.getName(),
-				MockLastChainServicer.class.getName());
-		this.source.chainServicer(section, "service", null);
+		this.openWithContext((context) -> {
+			WebArchitect web = context.getWebArchitect();
 
-		// Add another in chain (which should be ignored with log warning)
-		AutoWireSection ignore = this.source.addSection("ANOTHER", ClassSectionSource.class.getName(),
-				MockChainedServicer.class.getName());
-		this.source.chainServicer(ignore, "service", "notHandled");
+			// Add section to override servicing
+			OfficeSection section = context.addSection("SECTION", MockLastChainServicer.class);
+			web.chainServicer(section.getOfficeSectionInput("service"), null);
 
-		// Start the HTTP Server
-		this.source.openOfficeFloor();
+			// Add another in chain (which should be ignored with log warning)
+			OfficeSection ignore = context.addSection("ANOTHER", MockChainedServicer.class);
+			web.chainServicer(ignore.getOfficeSectionInput("service"), ignore.getOfficeSectionOutput("notHandled"));
+		});
 
 		// Ensure override non-routed servicing
 		MockChainedServicer.isServiced = false;

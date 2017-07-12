@@ -32,8 +32,9 @@ import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
-import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.ManagedFunction;
@@ -421,19 +422,25 @@ public class WebArchitectEmployer implements WebArchitect {
 	}
 
 	@Override
-	public HttpUriLink linkUri(String uri, OfficeSection section, String inputName) {
-		return this.urlContinuations.linkUri(uri, section, inputName);
+	public HttpUriLink linkUri(String uri, OfficeSectionInput sectionInput) {
+		return this.urlContinuations.linkUri(uri, sectionInput);
 	}
 
 	@Override
-	public void linkToHttpTemplate(OfficeSection section, String outputName, HttpTemplateSection template) {
-		this.officeArchitect.link(section.getOfficeSectionOutput(outputName), template.getOfficeSection()
+	public HttpUriLink linkUri(String uri, HttpTemplateSection template) {
+		return this.linkUri(uri, template.getOfficeSection()
 				.getOfficeSectionInput(HttpTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME));
 	}
 
 	@Override
-	public void linkToResource(OfficeSection section, String outputName, String resourcePath) {
-		this.resourceLinks.add(new ResourceLink(section, outputName, resourcePath));
+	public void linkToHttpTemplate(OfficeSectionOutput sectionOutput, HttpTemplateSection template) {
+		this.officeArchitect.link(sectionOutput, template.getOfficeSection()
+				.getOfficeSectionInput(HttpTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME));
+	}
+
+	@Override
+	public void linkToResource(OfficeSectionOutput sectionOutput, String resourcePath) {
+		this.resourceLinks.add(new ResourceLink(sectionOutput, resourcePath));
 	}
 
 	@Override
@@ -449,13 +456,13 @@ public class WebArchitectEmployer implements WebArchitect {
 	}
 
 	@Override
-	public void linkToSendResponse(OfficeSection section, String outputName) {
-		this.sendLinks.add(new SendLink(section, outputName));
+	public void linkToSendResponse(OfficeSectionOutput sectionOutput) {
+		this.sendLinks.add(new SendLink(sectionOutput));
 	}
 
 	@Override
-	public void chainServicer(OfficeSection section, String inputName, String notHandledOutputName) {
-		this.chainedServicers.add(new ChainedServicer(section, inputName, notHandledOutputName));
+	public void chainServicer(OfficeSectionInput sectionInput, OfficeSectionOutput notHandledOutput) {
+		this.chainedServicers.add(new ChainedServicer(sectionInput, notHandledOutput));
 	}
 
 	@Override
@@ -473,18 +480,17 @@ public class WebArchitectEmployer implements WebArchitect {
 		}
 
 		// Add the linked URIs
-		for (HttpUriLink link : this.urlContinuations.getRegisteredHttpUriLinks()) {
+		for (String uri : this.urlContinuations.getRegisteredHttpUris()) {
 
 			// Obtain the URI path
-			String uriPath = link.getApplicationUriPath();
 			try {
-				uriPath = HttpUrlContinuationManagedFunctionSource.getApplicationUriPath(uriPath);
+				uri = HttpUrlContinuationManagedFunctionSource.getApplicationUriPath(uri);
 			} catch (InvalidHttpRequestUriException ex) {
 				// Do nothing and keep URI path as is
 			}
 
 			// Add the URI path
-			uris.add(uriPath);
+			uris.add(uri);
 		}
 
 		// Return the URIs
@@ -586,19 +592,17 @@ public class WebArchitectEmployer implements WebArchitect {
 		}
 
 		// Chain the servicers
-		OfficeSection previousChainedSection = httpSection;
-		String previousChainedOutput = WebApplicationSectionSource.UNHANDLED_REQUEST_OUTPUT_NAME;
+		OfficeSectionOutput previousChainedOutput = httpSection
+				.getOfficeSectionOutput(WebApplicationSectionSource.UNHANDLED_REQUEST_OUTPUT_NAME);
 		for (ChainedServicer chainedServicer : this.chainedServicers) {
 
 			// Link the chained servicer (if previous chained output)
 			if (previousChainedOutput != null) {
-				this.officeArchitect.link(previousChainedSection.getOfficeSectionOutput(previousChainedOutput),
-						chainedServicer.section.getOfficeSectionInput(chainedServicer.inputName));
+				this.officeArchitect.link(previousChainedOutput, chainedServicer.sectionInput);
 			}
 
 			// Configure for next in chain
-			previousChainedSection = chainedServicer.section;
-			previousChainedOutput = chainedServicer.notHandledOutputName;
+			previousChainedOutput = chainedServicer.notHandledOutput;
 		}
 
 		// End chain with file sender servicer (if previous chained output)
@@ -608,10 +612,11 @@ public class WebArchitectEmployer implements WebArchitect {
 			OfficeSection nonHandledServicer = this.officeArchitect.addOfficeSection("NON_HANDLED_SERVICER",
 					HttpFileSenderSectionSource.class.getName(), null);
 			SourceHttpResourceFactory.copyProperties(this.officeSourceContext, nonHandledServicer);
-			this.linkToSendResponse(nonHandledServicer, HttpFileSenderSectionSource.FILE_SENT_OUTPUT_NAME);
+			this.linkToSendResponse(
+					nonHandledServicer.getOfficeSectionOutput(HttpFileSenderSectionSource.FILE_SENT_OUTPUT_NAME));
 
 			// Link into the chain
-			this.officeArchitect.link(previousChainedSection.getOfficeSectionOutput(previousChainedOutput),
+			this.officeArchitect.link(previousChainedOutput,
 					nonHandledServicer.getOfficeSectionInput(HttpFileSenderSectionSource.SERVICE_INPUT_NAME));
 		}
 
@@ -784,8 +789,8 @@ public class WebArchitectEmployer implements WebArchitect {
 			}
 
 			// Link completion of template rendering
-			this.linkToSendResponse(httpTemplate.getOfficeSection(),
-					HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME);
+			this.linkToSendResponse(httpTemplate.getOfficeSection()
+					.getOfficeSectionOutput(HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME));
 		}
 
 		// Link to resources
@@ -798,7 +803,7 @@ public class WebArchitectEmployer implements WebArchitect {
 
 			// Link section outputs to the resources
 			for (ResourceLink resourceLink : this.resourceLinks) {
-				this.officeArchitect.link(resourceLink.section.getOfficeSectionOutput(resourceLink.outputName),
+				this.officeArchitect.link(resourceLink.sectionOutput,
 						section.getOfficeSectionInput(resourceLink.resourcePath));
 				section.addProperty(HttpFileSectionSource.PROPERTY_RESOURCE_PREFIX + resourceLink.resourcePath,
 						resourceLink.resourcePath);
@@ -816,7 +821,7 @@ public class WebArchitectEmployer implements WebArchitect {
 
 		// Link sending the response
 		for (SendLink link : this.sendLinks) {
-			this.officeArchitect.link(link.section.getOfficeSectionOutput(link.outputName),
+			this.officeArchitect.link(link.sectionOutput,
 					httpSection.getOfficeSectionInput(WebApplicationSectionSource.SEND_RESPONSE_INPUT_NAME));
 		}
 	}
@@ -827,14 +832,9 @@ public class WebArchitectEmployer implements WebArchitect {
 	private static class ResourceLink {
 
 		/**
-		 * {@link OfficeSection}.
+		 * {@link OfficeSectionOutput}.
 		 */
-		public final OfficeSection section;
-
-		/**
-		 * Name of the {@link SectionOutput}.
-		 */
-		public final String outputName;
+		public final OfficeSectionOutput sectionOutput;
 
 		/**
 		 * Resource path.
@@ -851,9 +851,8 @@ public class WebArchitectEmployer implements WebArchitect {
 		 * @param resourcePath
 		 *            Resource path.
 		 */
-		public ResourceLink(OfficeSection section, String outputName, String resourcePath) {
-			this.section = section;
-			this.outputName = outputName;
+		public ResourceLink(OfficeSectionOutput sectionOutput, String resourcePath) {
+			this.sectionOutput = sectionOutput;
 			this.resourcePath = resourcePath;
 		}
 	}
@@ -893,26 +892,18 @@ public class WebArchitectEmployer implements WebArchitect {
 	private static class SendLink {
 
 		/**
-		 * {@link OfficeSection}.
+		 * {@link OfficeSectionOutput}.
 		 */
-		public final OfficeSection section;
-
-		/**
-		 * Name of the {@link SectionOutput}.
-		 */
-		public final String outputName;
+		public final OfficeSectionOutput sectionOutput;
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param section
-		 *            {@link OfficeSection}.
-		 * @param outputName
-		 *            Name of the {@link SectionOutput}.
+		 * @param sectionOutput
+		 *            {@link OfficeSectionOutput}.
 		 */
-		public SendLink(OfficeSection section, String outputName) {
-			this.section = section;
-			this.outputName = outputName;
+		public SendLink(OfficeSectionOutput sectionOutput) {
+			this.sectionOutput = sectionOutput;
 		}
 	}
 
@@ -922,35 +913,26 @@ public class WebArchitectEmployer implements WebArchitect {
 	private static class ChainedServicer {
 
 		/**
-		 * {@link OfficeSection}.
+		 * {@link OfficeSectionInput}.
 		 */
-		public final OfficeSection section;
+		public final OfficeSectionInput sectionInput;
 
 		/**
-		 * Name of the {@link SectionInput}.
+		 * Name of the {@link SectionOutput}. May be <code>null</code>.
 		 */
-		public final String inputName;
-
-		/**
-		 * Name of the {@link SectionOutput}.
-		 */
-		public final String notHandledOutputName;
+		public final OfficeSectionOutput notHandledOutput;
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param section
-		 *            {@link OfficeSection}.
-		 * @param inputName
-		 *            Name of the {@link SectionInput}.
-		 * @param notHandledOutputName
-		 *            Name of the {@link SectionOutput}. May be
-		 *            <code>null</code>.
+		 * @param sectionInput
+		 *            {@link OfficeSectionInput}.
+		 * @param notHandledOutput
+		 *            {@link SectionOutput}. May be <code>null</code>.
 		 */
-		public ChainedServicer(OfficeSection section, String inputName, String notHandledOutputName) {
-			this.section = section;
-			this.inputName = inputName;
-			this.notHandledOutputName = notHandledOutputName;
+		public ChainedServicer(OfficeSectionInput sectionInput, OfficeSectionOutput notHandledOutput) {
+			this.sectionInput = sectionInput;
+			this.notHandledOutput = notHandledOutput;
 		}
 	}
 

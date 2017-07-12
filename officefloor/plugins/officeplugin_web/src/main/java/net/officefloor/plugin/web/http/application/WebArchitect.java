@@ -177,13 +177,22 @@ public interface WebArchitect {
 	 * 
 	 * @param uri
 	 *            URI to be linked.
-	 * @param section
-	 *            {@link OfficeSection} servicing the URI.
-	 * @param inputName
-	 *            Name of the {@link OfficeSectionInput} servicing the URI.
+	 * @param sectionInput
+	 *            {@link OfficeSectionInput} servicing the URI.
 	 * @return {@link HttpUriLink} to configure handling the URI.
 	 */
-	HttpUriLink linkUri(String uri, OfficeSection section, String inputName);
+	HttpUriLink linkUri(String uri, OfficeSectionInput sectionInput);
+
+	/**
+	 * Links a URI to a {@link HttpTemplateSection}.
+	 * 
+	 * @param uri
+	 *            URI to be linked.
+	 * @param template
+	 *            {@link HttpTemplateSection}.
+	 * @return {@link HttpUriLink} to configure handling the URI.
+	 */
+	HttpUriLink linkUri(String uri, HttpTemplateSection template);
 
 	/**
 	 * <p>
@@ -201,14 +210,12 @@ public interface WebArchitect {
 	/**
 	 * Links the {@link OfficeSectionOutput} to render the {@link HttpTemplate}.
 	 * 
-	 * @param section
-	 *            {@link OfficeSection}.
-	 * @param outputName
-	 *            Name of the {@link OfficeSectionOutput}.
+	 * @param sectionOutput
+	 *            {@link OfficeSectionOutput}.
 	 * @param template
 	 *            {@link HttpTemplateSection}.
 	 */
-	void linkToHttpTemplate(OfficeSection section, String outputName, HttpTemplateSection template);
+	void linkToHttpTemplate(OfficeSectionOutput sectionOutput, HttpTemplateSection template);
 
 	/**
 	 * <p>
@@ -216,14 +223,12 @@ public interface WebArchitect {
 	 * <p>
 	 * The meaning of resource path is specific to implementation.
 	 * 
-	 * @param section
-	 *            {@link OfficeSection}.
-	 * @param outputName
-	 *            Name of the {@link OfficeSectionOutput}.
+	 * @param sectionOutput
+	 *            {@link OfficeSectionOutput}.
 	 * @param resourcePath
 	 *            Resource path.
 	 */
-	void linkToResource(OfficeSection section, String outputName, String resourcePath);
+	void linkToResource(OfficeSectionOutput sectionOutput, String resourcePath);
 
 	/**
 	 * Links the {@link Escalation} to be handled by the
@@ -249,12 +254,10 @@ public interface WebArchitect {
 	/**
 	 * Links {@link OfficeSectionOutput} to sending the {@link HttpResponse}.
 	 * 
-	 * @param section
-	 *            {@link OfficeSection}.
-	 * @param outputName
-	 *            Name of the {@link OfficeSectionOutput}.
+	 * @param sectionOutput
+	 *            {@link OfficeSectionOutput}.
 	 */
-	void linkToSendResponse(OfficeSection section, String outputName);
+	void linkToSendResponse(OfficeSectionOutput sectionOutput);
 
 	/**
 	 * <p>
@@ -268,17 +271,15 @@ public interface WebArchitect {
 	 * sending a static resource by matching URI to resource name - and if no
 	 * resource found, a not found error.
 	 * 
-	 * @param section
-	 *            {@link OfficeSection}.
-	 * @param inputName
-	 *            Name of the {@link OfficeSectionInput}.
-	 * @param notHandledOutputName
-	 *            Name of the {@link OfficeSectionOutput} should this servicer
-	 *            not handle the {@link HttpRequest}. May be <code>null</code>
-	 *            if handles all {@link HttpRequest} instances (any services
-	 *            chained after this will therefore not be used).
+	 * @param sectionInput
+	 *            {@link OfficeSectionInput} to handle the {@link HttpRequest}.
+	 * @param notHandledOutput
+	 *            {@link OfficeSectionOutput} should this servicer not handle
+	 *            the {@link HttpRequest}. May be <code>null</code> if handles
+	 *            all {@link HttpRequest} instances (any services chained after
+	 *            this will therefore not be used).
 	 */
-	void chainServicer(OfficeSection section, String inputName, String notHandledOutputName);
+	void chainServicer(OfficeSectionInput sectionInput, OfficeSectionOutput notHandledOutput);
 
 	/**
 	 * Informs the {@link OfficeArchitect} of the web architect. This is to be

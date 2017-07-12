@@ -22,7 +22,6 @@ import java.util.List;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionTransformer;
 import net.officefloor.compile.spi.office.OfficeSectionTransformerContext;
@@ -65,16 +64,14 @@ public class HttpUrlContinuationSectionSource extends TransformSectionSource {
 	 * 
 	 * @param uri
 	 *            URI to be linked.
-	 * @param section
-	 *            {@link OfficeSection} servicing the URI.
-	 * @param inputName
-	 *            Name of the {@link OfficeSectionInput} servicing the URI.
+	 * @param sectionInput
+	 *            {@link OfficeSectionInput} servicing the URI.
 	 * @return {@link HttpUriLink} to configure handling the URI.
 	 */
-	public HttpUriLink linkUri(String uri, OfficeSection section, String inputName) {
+	public HttpUriLink linkUri(String uri, OfficeSectionInput sectionInput) {
 
 		// Create and register the link
-		UriLink link = new UriLink(uri, section, inputName);
+		UriLink link = new UriLink(uri, sectionInput);
 		this.uriLinks.add(link);
 
 		// Return the link
@@ -82,12 +79,12 @@ public class HttpUrlContinuationSectionSource extends TransformSectionSource {
 	}
 
 	/**
-	 * Obtains the registered {@link HttpUriLink} instances.
+	 * Obtains the registered HTTP URIs.
 	 * 
-	 * @return Registered {@link HttpUriLink} instances.
+	 * @return Registered HTTP URIs.
 	 */
-	public HttpUriLink[] getRegisteredHttpUriLinks() {
-		return this.uriLinks.toArray(new HttpUriLink[this.uriLinks.size()]);
+	public String[] getRegisteredHttpUris() {
+		return this.uriLinks.stream().map((link) -> link.applicationUriPath).toArray(String[]::new);
 	}
 
 	/*
@@ -104,12 +101,13 @@ public class HttpUrlContinuationSectionSource extends TransformSectionSource {
 		for (UriLink link : this.uriLinks) {
 
 			// Ignore if link not for section
-			if (!(sectionName.equals(link.section.getOfficeSectionName()))) {
+			if (!(sectionName.equals(link.sectionInput.getOfficeSection().getOfficeSectionName()))) {
 				continue; // link not for section
 			}
 
 			// Add properties for the link
-			properties.addProperty(PROPERTY_URL_LINK_PREFIX + link.applicationUriPath, link.inputName);
+			properties.addProperty(PROPERTY_URL_LINK_PREFIX + link.applicationUriPath,
+					link.sectionInput.getOfficeSectionInputName());
 			properties.addProperty(PROPERTY_URL_SECURE_PREFIX + link.applicationUriPath, String.valueOf(link.isSecure));
 		}
 	}
@@ -179,57 +177,34 @@ public class HttpUrlContinuationSectionSource extends TransformSectionSource {
 		/**
 		 * Application URI path.
 		 */
-		public final String applicationUriPath;
+		private final String applicationUriPath;
 
 		/**
-		 * {@link OfficeSection} to handle the URI.
+		 * {@link OfficeSectionInput} to handle the URI.
 		 */
-		public final OfficeSection section;
-
-		/**
-		 * Name {@link SectionInput} to handle the URI.
-		 */
-		public final String inputName;
+		private final OfficeSectionInput sectionInput;
 
 		/**
 		 * Indicates if requires secure {@link ServerHttpConnection}.
 		 */
-		public boolean isSecure = false;
+		private boolean isSecure = false;
 
 		/**
 		 * Initiate.
 		 * 
 		 * @param applicationUriPath
 		 *            Application URI path.
-		 * @param section
-		 *            {@link OfficeSection} to handle the URI.
-		 * @param inputName
-		 *            Name {@link SectionInput} to handle the URI.
+		 * @param sectionInput
+		 *            {@link OfficeSectionInput} to handle the URI.
 		 */
-		public UriLink(String applicationUriPath, OfficeSection section, String inputName) {
+		public UriLink(String applicationUriPath, OfficeSectionInput sectionInput) {
 			this.applicationUriPath = applicationUriPath;
-			this.section = section;
-			this.inputName = inputName;
+			this.sectionInput = sectionInput;
 		}
 
 		/*
 		 * ===================== HttpUriLink ===========================
 		 */
-
-		@Override
-		public String getApplicationUriPath() {
-			return this.applicationUriPath;
-		}
-
-		@Override
-		public OfficeSection getOfficeSection() {
-			return this.section;
-		}
-
-		@Override
-		public String getOfficeSectionInputName() {
-			return this.inputName;
-		}
 
 		@Override
 		public void setUriSecure(boolean isSecure) {

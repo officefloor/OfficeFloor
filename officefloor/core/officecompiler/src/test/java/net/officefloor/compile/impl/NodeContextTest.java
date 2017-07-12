@@ -672,6 +672,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 			return input;
 		});
 		assertNode(node, "INPUT", "Section Input", null, this.section);
+		assertEquals("Incorrect section", this.section, node.getOfficeSection());
 		assertEquals("Incorrect deployed input name", "INPUT", node.getDeployedOfficeInputName());
 		assertEquals("Incorrect section input name", "INPUT", node.getOfficeSectionInputName());
 		assertInitialise(node, (n) -> n.initialise("java.lang.Short"));
@@ -683,6 +684,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	public void testCreateSectionObjectNode() {
 		SectionObjectNode node = this.doTest(() -> this.context.createSectionObjectNode("OBJECT", this.section));
 		assertNode(node, "OBJECT", "Section Object", null, this.section);
+		assertEquals("Incorrect section", this.section, node.getOfficeSection());
 		assertEquals("Incorrect office section object name", "OBJECT", node.getOfficeSectionObjectName());
 		assertEquals("Incorrect section object name", "OBJECT", node.getSectionObjectName());
 		assertEquals("Incorrect sub section object name", "OBJECT", node.getSubSectionObjectName());
@@ -695,6 +697,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	public void testCreateSectionOutputNode() {
 		SectionOutputNode node = this.doTest(() -> this.context.createSectionOutputNode("OUTPUT", this.section));
 		assertNode(node, "OUTPUT", "Section Output", null, this.section);
+		assertEquals("Incorrect section", this.section, node.getOfficeSection());
 		assertEquals("Incorrect office section output name", "OUTPUT", node.getOfficeSectionOutputName());
 		assertEquals("Incorrect section output name", "OUTPUT", node.getSectionOutputName());
 		assertEquals("Incorrect sub section output name", "OUTPUT", node.getSubSectionOutputName());

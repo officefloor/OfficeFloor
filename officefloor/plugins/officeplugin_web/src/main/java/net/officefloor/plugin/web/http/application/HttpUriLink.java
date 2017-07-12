@@ -17,7 +17,6 @@
  */
 package net.officefloor.plugin.web.http.application;
 
-import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 /**
@@ -26,27 +25,6 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
  * @author Daniel Sagenschneider
  */
 public interface HttpUriLink {
-
-	/**
-	 * Obtains the application URI path.
-	 * 
-	 * @return application URI path.
-	 */
-	String getApplicationUriPath();
-
-	/**
-	 * Obtains the {@link OfficeSection} handling the URI.
-	 * 
-	 * @return {@link OfficeSection} handling the URI.
-	 */
-	OfficeSection getOfficeSection();
-
-	/**
-	 * Obtains the input name of the {@link OfficeSection} handling the URI.
-	 * 
-	 * @return Input name of the {@link OfficeSection} handling the URI.
-	 */
-	String getOfficeSectionInputName();
 
 	/**
 	 * <p>
