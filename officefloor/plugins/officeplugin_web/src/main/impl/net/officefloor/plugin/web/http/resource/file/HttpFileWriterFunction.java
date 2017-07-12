@@ -35,12 +35,12 @@ import net.officefloor.plugin.web.http.resource.HttpFile;
  * @author Daniel Sagenschneider
  */
 public class HttpFileWriterFunction
-		extends StaticManagedFunction<HttpFileWriterFunction.HttpFileWriterTaskDependencies, None> {
+		extends StaticManagedFunction<HttpFileWriterFunction.HttpFileWriterFunctionDependencies, None> {
 
 	/**
 	 * Keys for the dependencies.
 	 */
-	public static enum HttpFileWriterTaskDependencies {
+	public static enum HttpFileWriterFunctionDependencies {
 		HTTP_FILE, SERVER_HTTP_CONNECTION
 	}
 
@@ -49,12 +49,12 @@ public class HttpFileWriterFunction
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<HttpFileWriterTaskDependencies, None> context) throws IOException {
+	public Object execute(ManagedFunctionContext<HttpFileWriterFunctionDependencies, None> context) throws IOException {
 
 		// Obtain the dependencies
-		HttpFile httpFile = (HttpFile) context.getObject(HttpFileWriterTaskDependencies.HTTP_FILE);
+		HttpFile httpFile = (HttpFile) context.getObject(HttpFileWriterFunctionDependencies.HTTP_FILE);
 		ServerHttpConnection connection = (ServerHttpConnection) context
-				.getObject(HttpFileWriterTaskDependencies.SERVER_HTTP_CONNECTION);
+				.getObject(HttpFileWriterFunctionDependencies.SERVER_HTTP_CONNECTION);
 
 		// Write the file
 		AbstractHttpFile.writeHttpFile(httpFile, connection.getHttpResponse());

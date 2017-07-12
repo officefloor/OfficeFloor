@@ -27,7 +27,7 @@ import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFu
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.resource.HttpFile;
-import net.officefloor.plugin.web.http.resource.file.HttpFileWriterFunction.HttpFileWriterTaskDependencies;
+import net.officefloor.plugin.web.http.resource.file.HttpFileWriterFunction.HttpFileWriterFunctionDependencies;
 
 /**
  * {@link ManagedFunctionSource} that sends a {@link HttpFile}.
@@ -50,11 +50,11 @@ public class HttpFileWriterManagedFunctionSource extends AbstractManagedFunction
 			ManagedFunctionSourceContext context) throws Exception {
 
 		// Add the function
-		ManagedFunctionTypeBuilder<HttpFileWriterTaskDependencies, None> task = namespaceTypeBuilder
+		ManagedFunctionTypeBuilder<HttpFileWriterFunctionDependencies, None> task = namespaceTypeBuilder
 				.addManagedFunctionType("WriteFileToResponse", new HttpFileWriterFunction(),
-						HttpFileWriterTaskDependencies.class, None.class);
-		task.addObject(HttpFile.class).setKey(HttpFileWriterTaskDependencies.HTTP_FILE);
-		task.addObject(ServerHttpConnection.class).setKey(HttpFileWriterTaskDependencies.SERVER_HTTP_CONNECTION);
+						HttpFileWriterFunctionDependencies.class, None.class);
+		task.addObject(HttpFile.class).setKey(HttpFileWriterFunctionDependencies.HTTP_FILE);
+		task.addObject(ServerHttpConnection.class).setKey(HttpFileWriterFunctionDependencies.SERVER_HTTP_CONNECTION);
 		task.addEscalation(IOException.class);
 	}
 

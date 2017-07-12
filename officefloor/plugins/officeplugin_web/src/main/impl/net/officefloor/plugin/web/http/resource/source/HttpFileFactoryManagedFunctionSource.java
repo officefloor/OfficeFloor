@@ -46,7 +46,7 @@ public class HttpFileFactoryManagedFunctionSource extends AbstractManagedFunctio
 	/**
 	 * Enum of flows for the {@link HttpFileFactoryFunction}.
 	 */
-	public static enum HttpFileFactoryTaskFlows {
+	public static enum HttpFileFactoryFunctionFlows {
 		HTTP_FILE_NOT_FOUND
 	}
 
@@ -73,29 +73,29 @@ public class HttpFileFactoryManagedFunctionSource extends AbstractManagedFunctio
 		httpFileFactory.addHttpFileDescriber(describer);
 
 		// Create the handler for file not found
-		HttpResourceCreationListener<HttpFileFactoryTaskFlows> fileNotFoundHandler = new HttpResourceCreationListener<HttpFileFactoryTaskFlows>() {
+		HttpResourceCreationListener<HttpFileFactoryFunctionFlows> fileNotFoundHandler = new HttpResourceCreationListener<HttpFileFactoryFunctionFlows>() {
 			@Override
 			public void httpResourceCreated(HttpResource httpResource, ServerHttpConnection connection,
-					ManagedFunctionContext<?, HttpFileFactoryTaskFlows> context) throws IOException {
+					ManagedFunctionContext<?, HttpFileFactoryFunctionFlows> context) throws IOException {
 				// Determine if the file exists
 				if (!httpResource.isExist()) {
 					// Invoke flow indicating file not found
-					context.doFlow(HttpFileFactoryTaskFlows.HTTP_FILE_NOT_FOUND, null, null);
+					context.doFlow(HttpFileFactoryFunctionFlows.HTTP_FILE_NOT_FOUND, null, null);
 				}
 			}
 		};
 
 		// Create the HTTP file factory function
-		HttpFileFactoryFunction<HttpFileFactoryTaskFlows> function = new HttpFileFactoryFunction<HttpFileFactoryTaskFlows>(
+		HttpFileFactoryFunction<HttpFileFactoryFunctionFlows> function = new HttpFileFactoryFunction<HttpFileFactoryFunctionFlows>(
 				httpFileFactory, fileNotFoundHandler);
 
 		// Load the task to create the HTTP file
-		ManagedFunctionTypeBuilder<DependencyKeys, HttpFileFactoryTaskFlows> functionTypeBuilder = namespaceTypeBuilder
-				.addManagedFunctionType("FindFile", function, DependencyKeys.class, HttpFileFactoryTaskFlows.class);
+		ManagedFunctionTypeBuilder<DependencyKeys, HttpFileFactoryFunctionFlows> functionTypeBuilder = namespaceTypeBuilder
+				.addManagedFunctionType("FindFile", function, DependencyKeys.class, HttpFileFactoryFunctionFlows.class);
 		functionTypeBuilder.addObject(ServerHttpConnection.class).setKey(DependencyKeys.SERVER_HTTP_CONNECTION);
 		functionTypeBuilder.addObject(HttpApplicationLocation.class).setKey(DependencyKeys.HTTP_APPLICATION_LOCATION);
-		ManagedFunctionFlowTypeBuilder<HttpFileFactoryTaskFlows> flowTypeBuilder = functionTypeBuilder.addFlow();
-		flowTypeBuilder.setKey(HttpFileFactoryTaskFlows.HTTP_FILE_NOT_FOUND);
+		ManagedFunctionFlowTypeBuilder<HttpFileFactoryFunctionFlows> flowTypeBuilder = functionTypeBuilder.addFlow();
+		flowTypeBuilder.setKey(HttpFileFactoryFunctionFlows.HTTP_FILE_NOT_FOUND);
 		flowTypeBuilder.setArgumentType(HttpFile.class);
 		functionTypeBuilder.setReturnType(HttpFile.class);
 		functionTypeBuilder.addEscalation(IOException.class);

@@ -21,14 +21,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
-import net.officefloor.compile.test.work.WorkLoaderUtil;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.test.managedfunction.ManagedFunctionLoaderUtil;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -36,14 +36,13 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpUrlContinuationWorkSourceTest extends OfficeFrameTestCase {
+public class HttpUrlContinuationManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Validate specification.
 	 */
 	public void testSpecification() {
-		WorkLoaderUtil.validateSpecification(
-				HttpUrlContinuationManagedFunctionSource.class,
+		ManagedFunctionLoaderUtil.validateSpecification(HttpUrlContinuationManagedFunctionSource.class,
 				HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH, "URI Path");
 	}
 
@@ -92,65 +91,54 @@ public class HttpUrlContinuationWorkSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Validate type.
 	 */
-	public void doTypeTest(String configuredUriPath, String expectedUriPath,
-			Boolean isSecure) {
+	public void doTypeTest(String configuredUriPath, String expectedUriPath, Boolean isSecure) {
 
 		// Create the expected type
+		FunctionNamespaceBuilder type = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
 		HttpUrlContinuationFunction factory = new HttpUrlContinuationFunction();
-		FunctionNamespaceBuilder<HttpUrlContinuationFunction> type = WorkLoaderUtil
-				.createWorkTypeBuilder(factory);
-
-		ManagedFunctionTypeBuilder<None, None> taskType = type.addManagedFunctionType(
-				HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME, factory, None.class,
-				None.class);
-		taskType.setDifferentiator(new HttpUrlContinuationDifferentiatorImpl(
-				expectedUriPath, isSecure));
+		ManagedFunctionTypeBuilder<None, None> functionType = type.addManagedFunctionType(
+				HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME, factory, None.class, None.class);
+		functionType.setDifferentiator(new HttpUrlContinuationDifferentiatorImpl(expectedUriPath, isSecure));
 
 		// Create the properties
 		List<String> properties = new ArrayList<String>(4);
-		properties.addAll(Arrays.asList(
-				HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH,
-				configuredUriPath));
+		properties.addAll(Arrays.asList(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH, configuredUriPath));
 		if (isSecure != null) {
-			properties.addAll(Arrays.asList(
-					HttpUrlContinuationManagedFunctionSource.PROPERTY_SECURE,
-					String.valueOf(isSecure)));
+			properties.addAll(
+					Arrays.asList(HttpUrlContinuationManagedFunctionSource.PROPERTY_SECURE, String.valueOf(isSecure)));
 		}
 
 		// Validate type
-		FunctionNamespaceType<HttpUrlContinuationFunction> work = WorkLoaderUtil
-				.validateWorkType(type, HttpUrlContinuationManagedFunctionSource.class,
-						properties.toArray(new String[properties.size()]));
+		FunctionNamespaceType namespace = ManagedFunctionLoaderUtil.validateManagedFunctionType(type,
+				HttpUrlContinuationManagedFunctionSource.class, properties.toArray(new String[properties.size()]));
 
 		// Validate the URL continuation
-		ManagedFunctionType<HttpUrlContinuationFunction, ?, ?> task = work.getManagedFunctionTypes()[0];
-		HttpUrlContinuationDifferentiator urlContinuation = (HttpUrlContinuationDifferentiator) task
+		ManagedFunctionType<?, ?> function = namespace.getManagedFunctionTypes()[0];
+		HttpUrlContinuationDifferentiator urlContinuation = (HttpUrlContinuationDifferentiator) function
 				.getDifferentiator();
 		assertEquals("Incorrect URI path on URL continuation", expectedUriPath,
 				urlContinuation.getApplicationUriPath());
-		assertEquals("Incorrect secure flag for URL continuation", isSecure,
-				urlContinuation.isSecure());
+		assertEquals("Incorrect secure flag for URL continuation", isSecure, urlContinuation.isSecure());
 	}
 
 	/**
 	 * Ensure can execute the {@link HttpUrlContinuationFunction}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void testTask() throws Throwable {
+	public void testFunction() throws Throwable {
 
 		final ManagedFunctionContext context = this.createMock(ManagedFunctionContext.class);
 
 		// Load the Task
-		FunctionNamespaceType<HttpUrlContinuationFunction> type = WorkLoaderUtil.loadWorkType(
+		FunctionNamespaceType type = ManagedFunctionLoaderUtil.loadManagedFunctionType(
 				HttpUrlContinuationManagedFunctionSource.class,
 				HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH, "uri");
-		ManagedFunction<HttpUrlContinuationFunction, ?, ?> task = type.getManagedFunctionTypes()[0]
-				.getManagedFunctionFactory()
-				.createManagedFunction(type.getWorkFactory().createWork());
+		ManagedFunction<?, ?> function = type.getManagedFunctionTypes()[0].getManagedFunctionFactory()
+				.createManagedFunction();
 
-		// Execute the task (should do nothing as always link by next)
+		// Execute the function (should do nothing as always link by next)
 		this.replayMockObjects();
-		task.execute(context);
+		function.execute(context);
 		this.verifyMockObjects();
 	}
 

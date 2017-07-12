@@ -30,8 +30,8 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
-import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteTaskDependencies;
-import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteTaskFlows;
+import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteFunctionDependencies;
+import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteFunctionFlows;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
 
@@ -58,19 +58,19 @@ public class HttpRouteWorkSourceTest extends OfficeFrameTestCase {
 		HttpRouteFunction factory = new HttpRouteFunction();
 		FunctionNamespaceBuilder<HttpRouteFunction> type = WorkLoaderUtil
 				.createWorkTypeBuilder(factory);
-		ManagedFunctionTypeBuilder<HttpRouteTaskDependencies, HttpRouteTaskFlows> task = type
+		ManagedFunctionTypeBuilder<HttpRouteFunctionDependencies, HttpRouteFunctionFlows> task = type
 				.addManagedFunctionType(HttpRouteManagedFunctionSource.FUNCTION_NAME, factory,
-						HttpRouteTaskDependencies.class,
-						HttpRouteTaskFlows.class);
+						HttpRouteFunctionDependencies.class,
+						HttpRouteFunctionFlows.class);
 		task.addObject(ServerHttpConnection.class).setKey(
-				HttpRouteTaskDependencies.SERVER_HTTP_CONNECTION);
+				HttpRouteFunctionDependencies.SERVER_HTTP_CONNECTION);
 		task.addObject(HttpApplicationLocation.class).setKey(
-				HttpRouteTaskDependencies.HTTP_APPLICATION_LOCATION);
+				HttpRouteFunctionDependencies.HTTP_APPLICATION_LOCATION);
 		task.addObject(HttpRequestState.class).setKey(
-				HttpRouteTaskDependencies.REQUEST_STATE);
+				HttpRouteFunctionDependencies.REQUEST_STATE);
 		task.addObject(HttpSession.class).setKey(
-				HttpRouteTaskDependencies.HTTP_SESSION);
-		task.addFlow().setKey(HttpRouteTaskFlows.NOT_HANDLED);
+				HttpRouteFunctionDependencies.HTTP_SESSION);
+		task.addFlow().setKey(HttpRouteFunctionFlows.NOT_HANDLED);
 		task.addEscalation(InvalidHttpRequestUriException.class);
 		task.addEscalation(HttpRequestTokeniseException.class);
 		task.addEscalation(IOException.class);

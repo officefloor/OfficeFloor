@@ -33,8 +33,8 @@ import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiator;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
-import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteTaskDependencies;
-import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteTaskFlows;
+import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteFunctionDependencies;
+import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteFunctionFlows;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
 
@@ -70,14 +70,14 @@ public class HttpRouteManagedFunctionSource extends AbstractManagedFunctionSourc
 			ManagedFunctionSourceContext context) throws Exception {
 
 		// Configure the function
-		ManagedFunctionTypeBuilder<HttpRouteTaskDependencies, HttpRouteTaskFlows> function = namespaceTypeBuilder
-				.addManagedFunctionType(FUNCTION_NAME, new HttpRouteFunction(), HttpRouteTaskDependencies.class,
-						HttpRouteTaskFlows.class);
-		function.addObject(ServerHttpConnection.class).setKey(HttpRouteTaskDependencies.SERVER_HTTP_CONNECTION);
-		function.addObject(HttpApplicationLocation.class).setKey(HttpRouteTaskDependencies.HTTP_APPLICATION_LOCATION);
-		function.addObject(HttpRequestState.class).setKey(HttpRouteTaskDependencies.REQUEST_STATE);
-		function.addObject(HttpSession.class).setKey(HttpRouteTaskDependencies.HTTP_SESSION);
-		function.addFlow().setKey(HttpRouteTaskFlows.NOT_HANDLED);
+		ManagedFunctionTypeBuilder<HttpRouteFunctionDependencies, HttpRouteFunctionFlows> function = namespaceTypeBuilder
+				.addManagedFunctionType(FUNCTION_NAME, new HttpRouteFunction(), HttpRouteFunctionDependencies.class,
+						HttpRouteFunctionFlows.class);
+		function.addObject(ServerHttpConnection.class).setKey(HttpRouteFunctionDependencies.SERVER_HTTP_CONNECTION);
+		function.addObject(HttpApplicationLocation.class).setKey(HttpRouteFunctionDependencies.HTTP_APPLICATION_LOCATION);
+		function.addObject(HttpRequestState.class).setKey(HttpRouteFunctionDependencies.REQUEST_STATE);
+		function.addObject(HttpSession.class).setKey(HttpRouteFunctionDependencies.HTTP_SESSION);
+		function.addFlow().setKey(HttpRouteFunctionFlows.NOT_HANDLED);
 		function.addEscalation(InvalidHttpRequestUriException.class);
 		function.addEscalation(HttpRequestTokeniseException.class);
 		function.addEscalation(IOException.class);

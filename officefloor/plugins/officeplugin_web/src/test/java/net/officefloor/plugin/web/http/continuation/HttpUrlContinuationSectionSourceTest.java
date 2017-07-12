@@ -37,7 +37,6 @@ import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.managedfunction.ManagedFunctionSectionSource;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.application.HttpRequestStateManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpUriLink;
@@ -121,8 +120,7 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
 		compiler.officeFloor((context) -> {
-			HttpsServerSocketManagedObjectSource.configure(context.getOfficeFloorDeployer(), 7878, 7979,
-					HttpTestUtil.getSslEngineSourceClass(), context.getDeployedOffice(), "ROUTE",
+			HttpTestUtil.configureTestHttpServer(context, 7878, 7979, "ROUTE",
 					HttpRouteManagedFunctionSource.FUNCTION_NAME);
 		});
 		compiler.office((context) -> {

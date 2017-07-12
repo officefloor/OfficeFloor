@@ -52,10 +52,10 @@ import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniserImpl;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpRouteFunction
-		extends StaticManagedFunction<HttpRouteFunction.HttpRouteTaskDependencies, HttpRouteFunction.HttpRouteTaskFlows>
+public class HttpRouteFunction extends
+		StaticManagedFunction<HttpRouteFunction.HttpRouteFunctionDependencies, HttpRouteFunction.HttpRouteFunctionFlows>
 		implements
-		OfficeAwareManagedFunctionFactory<HttpRouteFunction.HttpRouteTaskDependencies, HttpRouteFunction.HttpRouteTaskFlows> {
+		OfficeAwareManagedFunctionFactory<HttpRouteFunction.HttpRouteFunctionDependencies, HttpRouteFunction.HttpRouteFunctionFlows> {
 
 	/**
 	 * <p>
@@ -99,14 +99,14 @@ public class HttpRouteFunction
 	/**
 	 * Dependencies for the {@link HttpRouteFunction}.
 	 */
-	public static enum HttpRouteTaskDependencies {
+	public static enum HttpRouteFunctionDependencies {
 		SERVER_HTTP_CONNECTION, HTTP_APPLICATION_LOCATION, REQUEST_STATE, HTTP_SESSION
 	}
 
 	/**
 	 * Flows for the {@link HttpRouteFunction}.
 	 */
-	public static enum HttpRouteTaskFlows {
+	public static enum HttpRouteFunctionFlows {
 		NOT_HANDLED
 	}
 
@@ -139,10 +139,10 @@ public class HttpRouteFunction
 
 		// Interrogate the Office for secure URI paths
 		for (String functionName : office.getFunctionNames()) {
-			FunctionManager task = office.getFunctionManager(functionName);
+			FunctionManager function = office.getFunctionManager(functionName);
 
 			// Determine if secure URI differentiator
-			Object differentiator = task.getDifferentiator();
+			Object differentiator = function.getDifferentiator();
 			if (differentiator instanceof HttpUrlContinuationDifferentiator) {
 				HttpUrlContinuationDifferentiator urlContinuationDifferentiator = (HttpUrlContinuationDifferentiator) differentiator;
 
@@ -180,17 +180,18 @@ public class HttpRouteFunction
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<HttpRouteTaskDependencies, HttpRouteTaskFlows> context)
+	public Object execute(ManagedFunctionContext<HttpRouteFunctionDependencies, HttpRouteFunctionFlows> context)
 			throws InvalidHttpRequestUriException, HttpRequestTokeniseException, IOException, UnknownFunctionException,
 			InvalidParameterTypeException {
 
 		// Obtain the dependencies
 		ServerHttpConnection connection = (ServerHttpConnection) context
-				.getObject(HttpRouteTaskDependencies.SERVER_HTTP_CONNECTION);
+				.getObject(HttpRouteFunctionDependencies.SERVER_HTTP_CONNECTION);
 		HttpApplicationLocation location = (HttpApplicationLocation) context
-				.getObject(HttpRouteTaskDependencies.HTTP_APPLICATION_LOCATION);
-		HttpRequestState requestState = (HttpRequestState) context.getObject(HttpRouteTaskDependencies.REQUEST_STATE);
-		HttpSession session = (HttpSession) context.getObject(HttpRouteTaskDependencies.HTTP_SESSION);
+				.getObject(HttpRouteFunctionDependencies.HTTP_APPLICATION_LOCATION);
+		HttpRequestState requestState = (HttpRequestState) context
+				.getObject(HttpRouteFunctionDependencies.REQUEST_STATE);
+		HttpSession session = (HttpSession) context.getObject(HttpRouteFunctionDependencies.HTTP_SESSION);
 
 		// Determine if redirect
 		String path = connection.getHttpRequest().getRequestURI();
@@ -204,7 +205,7 @@ public class HttpRouteFunction
 			path = location.transformToApplicationCanonicalPath(path);
 		} catch (IncorrectHttpRequestContextPathException ex) {
 			// Missing context path, so not handled
-			context.doFlow(HttpRouteTaskFlows.NOT_HANDLED, null, null);
+			context.doFlow(HttpRouteFunctionFlows.NOT_HANDLED, null, null);
 			return null;
 		}
 
@@ -220,7 +221,7 @@ public class HttpRouteFunction
 		HttpUrlContinuation continuation = this.urlContinuations.get(path);
 		if (continuation == null) {
 			// Not handled request
-			context.doFlow(HttpRouteTaskFlows.NOT_HANDLED, null, null);
+			context.doFlow(HttpRouteFunctionFlows.NOT_HANDLED, null, null);
 			return null;
 		}
 

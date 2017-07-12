@@ -40,8 +40,8 @@ import net.officefloor.plugin.web.http.continuation.DuplicateHttpUrlContinuation
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiator;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.IncorrectHttpRequestContextPathException;
-import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteTaskDependencies;
-import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteTaskFlows;
+import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteFunctionDependencies;
+import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteFunctionFlows;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
@@ -161,7 +161,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 				new IncorrectHttpRequestContextPathException(
 						HttpStatus.SC_NOT_FOUND, "Must have context path"));
 		this.recordReturn(this.context,
-				this.context.doFlow(HttpRouteTaskFlows.NOT_HANDLED, null), null);
+				this.context.doFlow(HttpRouteFunctionFlows.NOT_HANDLED, null), null);
 
 		// Test
 		this.replayMockObjects();
@@ -303,7 +303,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	 * {@link ManagedFunctionContext}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final ManagedFunctionContext<HttpRouteFunction, HttpRouteTaskDependencies, HttpRouteTaskFlows> context = this
+	private final ManagedFunctionContext<HttpRouteFunction, HttpRouteFunctionDependencies, HttpRouteFunctionFlows> context = this
 			.createMock(ManagedFunctionContext.class);
 
 	/**
@@ -367,7 +367,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 		} else {
 			// Not handled URI path
 			this.recordReturn(this.context,
-					this.context.doFlow(HttpRouteTaskFlows.NOT_HANDLED, null),
+					this.context.doFlow(HttpRouteFunctionFlows.NOT_HANDLED, null),
 					flowFuture);
 		}
 
@@ -392,19 +392,19 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	 */
 	private void recordDependencies() {
 		this.recordReturn(this.context, this.context
-				.getObject(HttpRouteTaskDependencies.SERVER_HTTP_CONNECTION),
+				.getObject(HttpRouteFunctionDependencies.SERVER_HTTP_CONNECTION),
 				this.connection);
 		this.recordReturn(
 				this.context,
 				this.context
-						.getObject(HttpRouteTaskDependencies.HTTP_APPLICATION_LOCATION),
+						.getObject(HttpRouteFunctionDependencies.HTTP_APPLICATION_LOCATION),
 				this.location);
 		this.recordReturn(
 				this.context,
-				this.context.getObject(HttpRouteTaskDependencies.REQUEST_STATE),
+				this.context.getObject(HttpRouteFunctionDependencies.REQUEST_STATE),
 				this.requestState);
 		this.recordReturn(this.context,
-				this.context.getObject(HttpRouteTaskDependencies.HTTP_SESSION),
+				this.context.getObject(HttpRouteFunctionDependencies.HTTP_SESSION),
 				this.session);
 	}
 

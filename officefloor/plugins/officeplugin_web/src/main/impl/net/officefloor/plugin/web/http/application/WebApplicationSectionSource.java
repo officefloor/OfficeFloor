@@ -42,8 +42,8 @@ import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSen
 import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSenderManagedFunctionSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
-import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteTaskDependencies;
-import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteTaskFlows;
+import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteFunctionDependencies;
+import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteFunctionFlows;
 import net.officefloor.plugin.web.http.route.HttpRouteManagedFunctionSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
@@ -161,13 +161,13 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 		SectionFunctionNamespace routeNamespace = designer.addSectionFunctionNamespace("ROUTE",
 				HttpRouteManagedFunctionSource.class.getName());
 		SectionFunction routeFunction = routeNamespace.addSectionFunction("ROUTE", HttpRouteManagedFunctionSource.FUNCTION_NAME);
-		linkObject(routeFunction, HttpRouteTaskDependencies.SERVER_HTTP_CONNECTION.name(), ServerHttpConnection.class,
+		linkObject(routeFunction, HttpRouteFunctionDependencies.SERVER_HTTP_CONNECTION.name(), ServerHttpConnection.class,
 				designer, objects);
-		linkObject(routeFunction, HttpRouteTaskDependencies.HTTP_APPLICATION_LOCATION.name(),
+		linkObject(routeFunction, HttpRouteFunctionDependencies.HTTP_APPLICATION_LOCATION.name(),
 				HttpApplicationLocation.class, designer, objects);
-		linkObject(routeFunction, HttpRouteTaskDependencies.REQUEST_STATE.name(), HttpRequestState.class, designer,
+		linkObject(routeFunction, HttpRouteFunctionDependencies.REQUEST_STATE.name(), HttpRequestState.class, designer,
 				objects);
-		linkObject(routeFunction, HttpRouteTaskDependencies.HTTP_SESSION.name(), HttpSession.class, designer, objects);
+		linkObject(routeFunction, HttpRouteFunctionDependencies.HTTP_SESSION.name(), HttpSession.class, designer, objects);
 		linkEscalation(routeFunction, InvalidHttpRequestUriException.class, designer, escalations);
 		linkEscalation(routeFunction, HttpRequestTokeniseException.class, designer, escalations);
 		linkEscalation(routeFunction, IOException.class, designer, escalations);
@@ -179,7 +179,7 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 		designer.link(input, routeFunction);
 
 		// Send to non-handled requests to not handled output
-		FunctionFlow unhandledServiceFlow = routeFunction.getFunctionFlow(HttpRouteTaskFlows.NOT_HANDLED.name());
+		FunctionFlow unhandledServiceFlow = routeFunction.getFunctionFlow(HttpRouteFunctionFlows.NOT_HANDLED.name());
 		SectionOutput unhandledRequestOutput = designer.addSectionOutput(UNHANDLED_REQUEST_OUTPUT_NAME, null, false);
 		designer.link(unhandledServiceFlow, unhandledRequestOutput, false);
 

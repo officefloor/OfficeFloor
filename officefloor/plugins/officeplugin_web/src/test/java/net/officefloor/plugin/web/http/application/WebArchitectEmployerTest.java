@@ -46,7 +46,6 @@ import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
@@ -102,8 +101,7 @@ public class WebArchitectEmployerTest extends OfficeFrameTestCase {
 		this.port = HttpTestUtil.getAvailablePort();
 		this.securePort = HttpTestUtil.getAvailablePort();
 		this.compiler.officeFloor((context) -> {
-			HttpsServerSocketManagedObjectSource.configure(context.getOfficeFloorDeployer(), this.port, this.securePort,
-					HttpTestUtil.getSslEngineSourceClass(), context.getDeployedOffice(), "SECTION", "INPUT");
+			HttpTestUtil.configureTestHttpServer(context, this.port, this.securePort, "SECTION", "INPUT");
 		});
 
 		// Configure the client (to not redirect)

@@ -28,16 +28,6 @@ import java.util.List;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 
-import net.officefloor.plugin.socket.server.http.conversation.HttpEntity;
-import net.officefloor.plugin.socket.server.http.conversation.impl.HttpEntityImpl;
-import net.officefloor.plugin.socket.server.http.conversation.impl.HttpRequestImpl;
-import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
-import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
-import net.officefloor.plugin.socket.server.ssl.OfficeFloorDefaultSslEngineSource;
-import net.officefloor.plugin.socket.server.ssl.SslEngineSource;
-import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
-
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -54,6 +44,22 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
+
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
+import net.officefloor.compile.test.officefloor.CompileOfficeFloorContext;
+import net.officefloor.plugin.socket.server.http.conversation.HttpEntity;
+import net.officefloor.plugin.socket.server.http.conversation.impl.HttpEntityImpl;
+import net.officefloor.plugin.socket.server.http.conversation.impl.HttpRequestImpl;
+import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
+import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
+import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
+import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
+import net.officefloor.plugin.socket.server.ssl.OfficeFloorDefaultSslEngineSource;
+import net.officefloor.plugin.socket.server.ssl.SslEngineSource;
+import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
 
 /**
  * Utility class aiding in testing HTTP functionality.
@@ -76,6 +82,52 @@ public class HttpTestUtil {
 		int port = portStart;
 		portStart++; // increment port for next test
 		return port;
+	}
+
+	/**
+	 * Convenience method to configure {@link CompileOfficeFloorContext} with a
+	 * test HTTP server.
+	 * 
+	 * @param context
+	 *            {@link CompileOfficeFloorContext}.
+	 * @param httpPort
+	 *            Port to listen for HTTP requests.
+	 * @param httpsPort
+	 *            Port to listen for HTTPS requests.
+	 * @param sectionName
+	 *            Name of the {@link OfficeSection} servicing the requests.
+	 * @param sectionInputName
+	 *            Name of the {@link OfficeSectionInput} on the
+	 *            {@link OfficeSection} servicing the requests.
+	 * @return {@link OfficeFloorInputManagedObject}.
+	 */
+	public static OfficeFloorInputManagedObject configureTestHttpServer(CompileOfficeFloorContext context, int port,
+			String sectionName, String sectionInputName) {
+		return HttpServerSocketManagedObjectSource.configure(context.getOfficeFloorDeployer(), port,
+				context.getDeployedOffice(), sectionName, sectionInputName);
+	}
+
+	/**
+	 * Convenience method to configure {@link CompileOfficeFloorContext} with a
+	 * test HTTP server.
+	 * 
+	 * @param context
+	 *            {@link CompileOfficeFloorContext}.
+	 * @param httpPort
+	 *            Port to listen for HTTP requests.
+	 * @param httpsPort
+	 *            Port to listen for HTTPS requests.
+	 * @param sectionName
+	 *            Name of the {@link OfficeSection} servicing the requests.
+	 * @param sectionInputName
+	 *            Name of the {@link OfficeSectionInput} on the
+	 *            {@link OfficeSection} servicing the requests.
+	 * @return {@link OfficeFloorInputManagedObject}.
+	 */
+	public static OfficeFloorInputManagedObject configureTestHttpServer(CompileOfficeFloorContext context, int port,
+			int httpsPort, String sectionName, String sectionInputName) {
+		return HttpsServerSocketManagedObjectSource.configure(context.getOfficeFloorDeployer(), port, httpsPort,
+				getSslEngineSourceClass(), context.getDeployedOffice(), sectionName, sectionInputName);
 	}
 
 	/**

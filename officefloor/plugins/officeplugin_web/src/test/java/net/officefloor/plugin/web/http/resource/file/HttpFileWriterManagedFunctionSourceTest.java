@@ -22,12 +22,12 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
-import net.officefloor.compile.test.work.WorkLoaderUtil;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.test.managedfunction.ManagedFunctionLoaderUtil;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
@@ -35,38 +35,34 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
 import net.officefloor.plugin.stream.impl.MockServerOutputStream;
 import net.officefloor.plugin.web.http.resource.HttpFile;
-import net.officefloor.plugin.web.http.resource.file.HttpFileWriterFunction.HttpFileWriterTaskDependencies;
+import net.officefloor.plugin.web.http.resource.file.HttpFileWriterFunction.HttpFileWriterFunctionDependencies;
 
 /**
  * Tests the {@link HttpFileWriterManagedFunctionSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpFileWriterWorkSourceTest extends OfficeFrameTestCase {
+public class HttpFileWriterManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Validates the specification.
 	 */
 	public void testSpecification() {
-		WorkLoaderUtil.validateSpecification(HttpFileWriterManagedFunctionSource.class);
+		ManagedFunctionLoaderUtil.validateSpecification(HttpFileWriterManagedFunctionSource.class);
 	}
 
 	/**
 	 * Validates the type.
 	 */
 	public void testType() {
-		HttpFileWriterFunction factory = new HttpFileWriterFunction();
-		FunctionNamespaceBuilder<HttpFileWriterFunction> work = WorkLoaderUtil
-				.createWorkTypeBuilder(factory);
-		ManagedFunctionTypeBuilder<HttpFileWriterTaskDependencies, None> file = work
-				.addManagedFunctionType("WriteFileToResponse", factory,
-						HttpFileWriterTaskDependencies.class, None.class);
-		file.addObject(HttpFile.class).setKey(
-				HttpFileWriterTaskDependencies.HTTP_FILE);
-		file.addObject(ServerHttpConnection.class).setKey(
-				HttpFileWriterTaskDependencies.SERVER_HTTP_CONNECTION);
+		HttpFileWriterFunction function = new HttpFileWriterFunction();
+		FunctionNamespaceBuilder namespace = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
+		ManagedFunctionTypeBuilder<HttpFileWriterFunctionDependencies, None> file = namespace.addManagedFunctionType(
+				"WriteFileToResponse", function, HttpFileWriterFunctionDependencies.class, None.class);
+		file.addObject(HttpFile.class).setKey(HttpFileWriterFunctionDependencies.HTTP_FILE);
+		file.addObject(ServerHttpConnection.class).setKey(HttpFileWriterFunctionDependencies.SERVER_HTTP_CONNECTION);
 		file.addEscalation(IOException.class);
-		WorkLoaderUtil.validateWorkType(work, HttpFileWriterManagedFunctionSource.class);
+		ManagedFunctionLoaderUtil.validateManagedFunctionType(namespace, HttpFileWriterManagedFunctionSource.class);
 	}
 
 	/**
@@ -79,57 +75,47 @@ public class HttpFileWriterWorkSourceTest extends OfficeFrameTestCase {
 		final String contentType = "text/plain";
 		final Charset charset = UsAsciiUtil.US_ASCII;
 
-		ManagedFunctionContext<HttpFileWriterFunction, HttpFileWriterTaskDependencies, None> taskContext = this
+		ManagedFunctionContext<HttpFileWriterFunctionDependencies, None> functionContext = this
 				.createMock(ManagedFunctionContext.class);
 		HttpFile httpFile = this.createMock(HttpFile.class);
-		ServerHttpConnection connection = this
-				.createMock(ServerHttpConnection.class);
+		ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
 		HttpResponse response = this.createMock(HttpResponse.class);
 		HttpHeader header = this.createMock(HttpHeader.class);
 		ByteBuffer contents = ByteBuffer.wrap("TEST".getBytes());
 		MockServerOutputStream entity = new MockServerOutputStream();
 
 		// Record
-		this.recordReturn(
-				taskContext,
-				taskContext.getObject(HttpFileWriterTaskDependencies.HTTP_FILE),
+		this.recordReturn(functionContext, functionContext.getObject(HttpFileWriterFunctionDependencies.HTTP_FILE),
 				httpFile);
-		this.recordReturn(
-				taskContext,
-				taskContext
-						.getObject(HttpFileWriterTaskDependencies.SERVER_HTTP_CONNECTION),
-				connection);
+		this.recordReturn(functionContext,
+				functionContext.getObject(HttpFileWriterFunctionDependencies.SERVER_HTTP_CONNECTION), connection);
 		this.recordReturn(connection, connection.getHttpResponse(), response);
 		response.reset();
-		this.recordReturn(httpFile, httpFile.getContentEncoding(),
-				contentEncoding);
-		this.recordReturn(response,
-				response.addHeader("Content-Encoding", contentEncoding), header);
+		this.recordReturn(httpFile, httpFile.getContentEncoding(), contentEncoding);
+		this.recordReturn(response, response.addHeader("Content-Encoding", contentEncoding), header);
 		this.recordReturn(httpFile, httpFile.getContentType(), contentType);
 		this.recordReturn(httpFile, httpFile.getCharset(), charset);
 		response.setContentType(contentType, charset);
 		this.recordReturn(httpFile, httpFile.getContents(), contents);
-		this.recordReturn(response, response.getEntityWriter(),
-				entity.getServerWriter());
+		this.recordReturn(response, response.getEntityWriter(), entity.getServerWriter());
 
 		// Test
 		this.replayMockObjects();
 
-		// Create the task
-		FunctionNamespaceType<HttpFileWriterFunction> work = WorkLoaderUtil
-				.loadWorkType(HttpFileWriterManagedFunctionSource.class);
-		ManagedFunction task = work.getManagedFunctionTypes()[0].getManagedFunctionFactory().createManagedFunction(
-				work.getWorkFactory().createWork());
+		// Create the function
+		FunctionNamespaceType namespace = ManagedFunctionLoaderUtil
+				.loadManagedFunctionType(HttpFileWriterManagedFunctionSource.class);
+		ManagedFunction function = namespace.getManagedFunctionTypes()[0].getManagedFunctionFactory()
+				.createManagedFunction();
 
-		// Execute the task
-		assertNull(task.execute(taskContext));
+		// Execute the function
+		assertNull(function.execute(functionContext));
 
 		this.verifyMockObjects();
 
 		// Validate the entity content
 		entity.flush();
-		assertEquals("Incorrect entity content", "TEST",
-				new String(entity.getWrittenBytes()));
+		assertEquals("Incorrect entity content", "TEST", new String(entity.getWrittenBytes()));
 	}
 
 }
