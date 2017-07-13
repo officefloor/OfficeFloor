@@ -24,13 +24,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
-import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
-import net.officefloor.compile.test.work.WorkLoaderUtil;
+import net.officefloor.compile.test.managedfunction.ManagedFunctionLoaderUtil;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
@@ -47,20 +47,19 @@ import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.D
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
+public class HttpFileSenderManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Mock {@link ManagedFunctionContext}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final ManagedFunctionContext<HttpFileFactoryFunction<None>, DependencyKeys, None> taskContext = this
+	private final ManagedFunctionContext<DependencyKeys, None> functionContext = this
 			.createMock(ManagedFunctionContext.class);
 
 	/**
 	 * Mock {@link ServerHttpConnection}.
 	 */
-	private final ServerHttpConnection connection = this
-			.createMock(ServerHttpConnection.class);
+	private final ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
 
 	/**
 	 * Mock {@link HttpRequest}.
@@ -70,8 +69,7 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link HttpApplicationLocation}.
 	 */
-	private final HttpApplicationLocation location = this
-			.createMock(HttpApplicationLocation.class);
+	private final HttpApplicationLocation location = this.createMock(HttpApplicationLocation.class);
 
 	/**
 	 * Mock {@link HttpResponse}.
@@ -87,7 +85,7 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 	 * Validates the specification.
 	 */
 	public void testSpecification() {
-		WorkLoaderUtil.validateSpecification(HttpFileSenderManagedFunctionSource.class);
+		ManagedFunctionLoaderUtil.validateSpecification(HttpFileSenderManagedFunctionSource.class);
 	}
 
 	/**
@@ -96,30 +94,21 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 	public void testType() {
 
 		// Provide work type
-		HttpFileFactoryFunction<None> task = new HttpFileFactoryFunction<None>(null,
-				null);
-		FunctionNamespaceBuilder<HttpFileFactoryFunction<None>> workBuilder = WorkLoaderUtil
-				.createWorkTypeBuilder(task);
+		FunctionNamespaceBuilder workBuilder = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
 
-		// Provide task type
-		ManagedFunctionTypeBuilder<DependencyKeys, None> taskBuilder = workBuilder
-				.addManagedFunctionType("SendFile", task, DependencyKeys.class, None.class);
-		taskBuilder.addObject(ServerHttpConnection.class).setKey(
-				DependencyKeys.SERVER_HTTP_CONNECTION);
-		taskBuilder.addObject(HttpApplicationLocation.class).setKey(
-				DependencyKeys.HTTP_APPLICATION_LOCATION);
-		taskBuilder.addEscalation(IOException.class);
-		taskBuilder.addEscalation(InvalidHttpRequestUriException.class);
+		// Provide function type
+		HttpFileFactoryFunction<None> function = new HttpFileFactoryFunction<None>(null, null);
+		ManagedFunctionTypeBuilder<DependencyKeys, None> functionBuilder = workBuilder
+				.addManagedFunctionType("SendFile", function, DependencyKeys.class, None.class);
+		functionBuilder.addObject(ServerHttpConnection.class).setKey(DependencyKeys.SERVER_HTTP_CONNECTION);
+		functionBuilder.addObject(HttpApplicationLocation.class).setKey(DependencyKeys.HTTP_APPLICATION_LOCATION);
+		functionBuilder.addEscalation(IOException.class);
+		functionBuilder.addEscalation(InvalidHttpRequestUriException.class);
 
 		// Validate
-		WorkLoaderUtil
-				.validateWorkType(
-						workBuilder,
-						HttpFileSenderManagedFunctionSource.class,
-						SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX,
-						this.getClass().getPackage().getName(),
-						SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES,
-						"index.html");
+		ManagedFunctionLoaderUtil.validateManagedFunctionType(workBuilder, HttpFileSenderManagedFunctionSource.class,
+				SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX, this.getClass().getPackage().getName(),
+				SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES, "index.html");
 	}
 
 	/**
@@ -133,12 +122,11 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 		// Test
 		this.replayMockObjects();
 
-		// Load work and obtain the task
-		ManagedFunction<HttpFileFactoryFunction<None>, DependencyKeys, None> task = this
-				.loadWorkAndObtainTask();
+		// Load the function
+		ManagedFunction<DependencyKeys, None> function = this.loadAndObtainFunction();
 
 		// Execute the task to send the HTTP file
-		Object result = task.execute(this.taskContext);
+		Object result = function.execute(this.functionContext);
 		assertNotNull("Ensure have HTTP file returned", result);
 		HttpFile httpFile = (HttpFile) result;
 		assertTrue("HTTP file should exist", httpFile.isExist());
@@ -159,12 +147,11 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 		// Test
 		this.replayMockObjects();
 
-		// Load work and obtain the task
-		ManagedFunction<HttpFileFactoryFunction<None>, DependencyKeys, None> task = this
-				.loadWorkAndObtainTask();
+		// Load the function
+		ManagedFunction<DependencyKeys, None> function = this.loadAndObtainFunction();
 
 		// Execute the task to send the HTTP file
-		Object result = task.execute(this.taskContext);
+		Object result = function.execute(this.functionContext);
 		assertNotNull("Ensure have HTTP resource returned", result);
 		HttpResource httpResource = (HttpResource) result;
 		assertFalse("HTTP resource should be missing", httpResource.isExist());
@@ -185,14 +172,12 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 		// Test
 		this.replayMockObjects();
 
-		// Load work and obtain the task
-		ManagedFunction<HttpFileFactoryFunction<None>, DependencyKeys, None> task = this
-				.loadWorkAndObtainTask(
-						HttpFileSenderManagedFunctionSource.PROPERTY_NOT_FOUND_FILE_PATH,
-						"OverrideFileNotFound.html");
+		// Load the function
+		ManagedFunction<DependencyKeys, None> function = this.loadAndObtainFunction(
+				HttpFileSenderManagedFunctionSource.PROPERTY_NOT_FOUND_FILE_PATH, "OverrideFileNotFound.html");
 
 		// Execute the task to send the HTTP file
-		Object result = task.execute(this.taskContext);
+		Object result = function.execute(this.functionContext);
 		assertNotNull("Ensure have HTTP resource returned", result);
 		HttpResource httpResource = (HttpResource) result;
 		assertFalse("HTTP resource should be missing", httpResource.isExist());
@@ -213,14 +198,13 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 		// Test
 		this.replayMockObjects();
 
-		// Load work and obtain the task
-		ManagedFunction<HttpFileFactoryFunction<None>, DependencyKeys, None> task = this
-				.loadWorkAndObtainTask(
-						HttpFileSenderManagedFunctionSource.PROPERTY_NOT_FOUND_FILE_PATH,
-						"non-canonical/../OverrideFileNotFound.html");
+		// Load the function
+		ManagedFunction<DependencyKeys, None> function = this.loadAndObtainFunction(
+				HttpFileSenderManagedFunctionSource.PROPERTY_NOT_FOUND_FILE_PATH,
+				"non-canonical/../OverrideFileNotFound.html");
 
 		// Execute the task to send the HTTP file
-		Object result = task.execute(this.taskContext);
+		Object result = function.execute(this.functionContext);
 		assertNotNull("Ensure have HTTP resource returned", result);
 		HttpResource httpResource = (HttpResource) result;
 		assertFalse("HTTP resource should be missing", httpResource.isExist());
@@ -230,39 +214,37 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Loads the {@link ManagedFunctionSource} and returns a created {@link ManagedFunction}.
+	 * Loads the {@link ManagedFunctionSource} and returns a created
+	 * {@link ManagedFunction}.
 	 * 
 	 * @param additionalParameterNameValues
-	 *            Addition parmaeter name/value pairs.
+	 *            Addition parameter name/value pairs.
 	 * @return {@link ManagedFunction} to execute.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private final ManagedFunction<HttpFileFactoryFunction<None>, DependencyKeys, None> loadWorkAndObtainTask(
-			String... additionalParameterNameValues) {
+	private final ManagedFunction<DependencyKeys, None> loadAndObtainFunction(String... additionalParameterNameValues)
+			throws Throwable {
 
 		// Create the listing of parameters
-		List<String> parameters = new ArrayList<String>(
-				4 + (additionalParameterNameValues.length / 2));
+		List<String> parameters = new ArrayList<String>(4 + (additionalParameterNameValues.length / 2));
 		parameters.add(SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX);
 		parameters.add(this.getClass().getPackage().getName());
-		parameters
-				.add(SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES);
+		parameters.add(SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES);
 		parameters.add("index.html");
 		for (String parameterNameValue : additionalParameterNameValues) {
 			parameters.add(parameterNameValue);
 		}
 
-		// Load the work type
-		FunctionNamespaceType<HttpFileFactoryFunction<None>> workType = WorkLoaderUtil
-				.loadWorkType((Class) HttpFileSenderManagedFunctionSource.class,
-						parameters.toArray(new String[parameters.size()]));
+		// Load the namespace type
+		FunctionNamespaceType namespaceType = ManagedFunctionLoaderUtil.loadManagedFunctionType(
+				(Class) HttpFileSenderManagedFunctionSource.class, parameters.toArray(new String[parameters.size()]));
 
-		// Create the task
-		ManagedFunction task = workType.getManagedFunctionTypes()[0].getManagedFunctionFactory().createManagedFunction(
-				workType.getWorkFactory().createWork());
+		// Create the function
+		ManagedFunction function = namespaceType.getManagedFunctionTypes()[0].getManagedFunctionFactory()
+				.createManagedFunction();
 
 		// Return the task
-		return task;
+		return function;
 	}
 
 	/**
@@ -274,24 +256,18 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 	 *            Status.
 	 */
 	private void recordSendFile(String uri, int status) throws Exception {
-		this.recordReturn(this.taskContext, this.taskContext
-				.getObject(DependencyKeys.SERVER_HTTP_CONNECTION),
+		this.recordReturn(this.functionContext, this.functionContext.getObject(DependencyKeys.SERVER_HTTP_CONNECTION),
 				this.connection);
-		this.recordReturn(this.connection, this.connection.getHttpRequest(),
-				this.request);
+		this.recordReturn(this.connection, this.connection.getHttpRequest(), this.request);
 		this.recordReturn(this.request, this.request.getRequestURI(), uri);
-		this.recordReturn(this.taskContext, this.taskContext
-				.getObject(DependencyKeys.HTTP_APPLICATION_LOCATION),
-				this.location);
-		this.recordReturn(this.location,
-				this.location.transformToApplicationCanonicalPath(uri), uri);
-		this.recordReturn(this.connection, this.connection.getHttpResponse(),
-				this.response);
+		this.recordReturn(this.functionContext,
+				this.functionContext.getObject(DependencyKeys.HTTP_APPLICATION_LOCATION), this.location);
+		this.recordReturn(this.location, this.location.transformToApplicationCanonicalPath(uri), uri);
+		this.recordReturn(this.connection, this.connection.getHttpResponse(), this.response);
 		this.response.reset();
 		Charset charset = Charset.defaultCharset();
 		this.response.setContentType("text/html", charset);
-		this.recordReturn(this.response, this.response.getEntityWriter(),
-				this.entity.getServerWriter());
+		this.recordReturn(this.response, this.response.getEntityWriter(), this.entity.getServerWriter());
 		this.response.setStatus(status);
 		this.response.send();
 	}
@@ -308,8 +284,7 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 		// Validate the file content
 		File file = this.findFile(this.getClass(), fileName);
 		String fileContents = this.getFileContents(file);
-		assertEquals("Incorrect file content", fileContents, new String(
-				this.entity.getWrittenBytes()));
+		assertEquals("Incorrect file content", fileContents, new String(this.entity.getWrittenBytes()));
 	}
 
 }

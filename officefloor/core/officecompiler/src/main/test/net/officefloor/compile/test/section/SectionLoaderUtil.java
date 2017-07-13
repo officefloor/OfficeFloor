@@ -192,6 +192,32 @@ public class SectionLoaderUtil {
 	 * @param designer
 	 *            {@link SectionDesigner} containing the expected
 	 *            {@link SectionType}.
+	 * @param sectionSource
+	 *            {@link SectionSource} instance being tested.
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSection}.
+	 * @param propertyNameValuePairs
+	 *            Listing of {@link Property} name/value pairs.
+	 */
+	public static void validateSectionType(SectionDesigner designer, SectionSource sectionSource,
+			String sectionLocation, String... propertyNameValuePairs) {
+
+		// Load the actual section type
+		SectionType actualSection = loadSectionType(sectionSource, sectionLocation, propertyNameValuePairs);
+
+		// Validate the section type
+		validateSectionType(designer, actualSection);
+	}
+
+	/**
+	 * Convenience method that validates the loaded {@link SectionType} against
+	 * expected {@link SectionType} from the {@link SectionDesigner}.
+	 * 
+	 * @param <S>
+	 *            {@link SectionSource} type.
+	 * @param designer
+	 *            {@link SectionDesigner} containing the expected
+	 *            {@link SectionType}.
 	 * @param sectionSourceClass
 	 *            Class of the {@link SectionSource} being tested.
 	 * @param sectionLocation
@@ -202,6 +228,24 @@ public class SectionLoaderUtil {
 	public static <S extends SectionSource> void validateSectionType(SectionDesigner designer,
 			Class<S> sectionSourceClass, String sectionLocation, String... propertyNameValuePairs) {
 
+		// Load the actual section type
+		SectionType actualSection = loadSectionType(sectionSourceClass, sectionLocation, propertyNameValuePairs);
+
+		// Validate the section type
+		validateSectionType(designer, actualSection);
+	}
+
+	/**
+	 * Validates the {@link SectionType}.
+	 * 
+	 * @param designer
+	 *            {@link SectionDesigner} containing the expected
+	 *            {@link SectionType}.
+	 * @param actualSection
+	 *            Actual {@link SectionType} to validate.
+	 */
+	private static void validateSectionType(SectionDesigner designer, SectionType actualSection) {
+
 		// Compile Context
 		CompileContext compileContext = new CompileContextImpl(null);
 
@@ -210,9 +254,6 @@ public class SectionLoaderUtil {
 			Assert.fail("designer must be created from createSectionDesigner");
 		}
 		SectionType expectedSection = ((SectionNode) designer).loadSectionType(compileContext);
-
-		// Load the actual section type
-		SectionType actualSection = loadSectionType(sectionSourceClass, sectionLocation, propertyNameValuePairs);
 
 		// Validate section inputs are as expected
 		SectionInputType[] eInputs = expectedSection.getSectionInputTypes();
@@ -554,6 +595,25 @@ public class SectionLoaderUtil {
 
 		// Load and return the section type
 		return getOfficeFloorCompiler().getSectionLoader().loadSectionType(sectionSourceClass, sectionLocation,
+				new PropertyListImpl(propertyNameValuePairs));
+	}
+
+	/**
+	 * Convenience method to load the {@link SectionType}.
+	 * 
+	 * @param sectionSource
+	 *            {@link SectionSource} instance.
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSection}.
+	 * @param propertyNameValuePairs
+	 *            Listing of {@link Property} name/value pairs.
+	 * @return {@link SectionType}.
+	 */
+	public static SectionType loadSectionType(SectionSource sectionSource, String sectionLocation,
+			String... propertyNameValuePairs) {
+
+		// Load and return the section type
+		return getOfficeFloorCompiler().getSectionLoader().loadSectionType(sectionSource, sectionLocation,
 				new PropertyListImpl(propertyNameValuePairs));
 	}
 

@@ -204,6 +204,15 @@ public class HttpTemplateSectionImpl implements HttpTemplateSection {
 	}
 
 	/*
+	 * ===================== PropertyConfigurable =====================
+	 */
+
+	@Override
+	public void addProperty(String name, String value) {
+		this.section.addProperty(name, value);
+	}
+
+	/*
 	 * ====================== HttpTemplateSection =====================
 	 */
 

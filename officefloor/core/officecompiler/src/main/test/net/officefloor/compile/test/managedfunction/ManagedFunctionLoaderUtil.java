@@ -70,6 +70,31 @@ public class ManagedFunctionLoaderUtil {
 	}
 
 	/**
+	 * Validates the {@link ManagedFunctionSourceSpecification} for the
+	 * {@link ManagedFunctionSource}.
+	 * 
+	 * @param managedFunctionSource
+	 *            {@link ManagedFunctionSource} instance.
+	 * @param propertyNameLabels
+	 *            Listing of name/label pairs for the {@link Property}
+	 *            instances.
+	 * @return Loaded {@link PropertyList}.
+	 */
+	public static PropertyList validateSpecification(ManagedFunctionSource managedFunctionSource,
+			String... propertyNameLabels) {
+
+		// Load the specification
+		PropertyList propertyList = getOfficeFloorCompiler(null).getManagedFunctionLoader()
+				.loadSpecification(managedFunctionSource);
+
+		// Verify the properties
+		PropertyListUtil.validatePropertyNameLabels(propertyList, propertyNameLabels);
+
+		// Return the property list
+		return propertyList;
+	}
+
+	/**
 	 * Creates the {@link FunctionNamespaceBuilder} to create the expected
 	 * {@link FunctionNamespaceType}.
 	 * 
@@ -114,7 +139,7 @@ public class ManagedFunctionLoaderUtil {
 	 * @param expectedFunctionNamespaceType
 	 *            {@link FunctionNamespaceBuilder} that has had the expected
 	 *            {@link FunctionNamespaceType} built against it.
-	 * @param workSourceClass
+	 * @param managedFunctionSourceClass
 	 *            {@link ManagedFunctionSource} class.
 	 * @param compiler
 	 *            {@link OfficeFloorCompiler}. May be <code>null</code>.
@@ -127,15 +152,64 @@ public class ManagedFunctionLoaderUtil {
 			FunctionNamespaceBuilder expectedFunctionNamespaceType, Class<S> managedFunctionSourceClass,
 			OfficeFloorCompiler compiler, String... propertyNameValues) {
 
+		// Load the actual namespace
+		FunctionNamespaceType aNamespace = loadManagedFunctionType(managedFunctionSourceClass, compiler,
+				propertyNameValues);
+
+		// Validate the namespace
+		return validateManagedFunctionType(expectedFunctionNamespaceType, aNamespace);
+	}
+
+	/**
+	 * Convenience method that validates the {@link FunctionNamespaceType}
+	 * loaded from the input {@link ManagedFunctionSource} against the expected
+	 * {@link FunctionNamespaceType} from the {@link FunctionNamespaceBuilder}.
+	 * 
+	 * @param <S>
+	 *            {@link ManagedFunctionSource} type.
+	 * @param expectedFunctionNamespaceType
+	 *            {@link FunctionNamespaceBuilder} that has had the expected
+	 *            {@link FunctionNamespaceType} built against it.
+	 * @param managedFunctionSource
+	 *            {@link ManagedFunctionSource} instance.
+	 * @param propertyNameValues
+	 *            Listing of name/value pairs that comprise the properties for
+	 *            the {@link ManagedFunctionSource}.
+	 * @return Loaded {@link FunctionNamespaceType}.
+	 */
+	public static FunctionNamespaceType validateManagedFunctionType(
+			FunctionNamespaceBuilder expectedFunctionNamespaceType, ManagedFunctionSource managedFunctionSource,
+			String... propertyNameValues) {
+
+		// Load the actual namespace
+		FunctionNamespaceType aNamespace = loadManagedFunctionType(managedFunctionSource, propertyNameValues);
+
+		// Validate the namespace
+		return validateManagedFunctionType(expectedFunctionNamespaceType, aNamespace);
+	}
+
+	/**
+	 * Convenience method that validates the {@link FunctionNamespaceType}
+	 * loaded from the input {@link ManagedFunctionSource} against the expected
+	 * {@link FunctionNamespaceType} from the {@link FunctionNamespaceBuilder}.
+	 * 
+	 * @param expectedFunctionNamespaceType
+	 *            {@link FunctionNamespaceBuilder} that has had the expected
+	 *            {@link FunctionNamespaceType} built against it.
+	 * @param aNamespace
+	 *            Actual {@link FunctionNamespaceType}.
+	 * @return Loaded {@link FunctionNamespaceType}.
+	 */
+	private static FunctionNamespaceType validateManagedFunctionType(
+			FunctionNamespaceBuilder expectedFunctionNamespaceType, FunctionNamespaceType aNamespace) {
+
 		// Cast to obtain expected managed function type
 		if (!(expectedFunctionNamespaceType instanceof FunctionNamespaceType)) {
 			Assert.fail("expectedFunctionNamespaceType must be created from createManagedFunctionTypeBuilder");
 		}
 		FunctionNamespaceType eNamespace = (FunctionNamespaceType) expectedFunctionNamespaceType;
 
-		// Load the actual namespace type
-		FunctionNamespaceType aNamespace = loadManagedFunctionType(managedFunctionSourceClass, compiler,
-				propertyNameValues);
+		// Ensure have the actual namespace type
 		Assert.assertNotNull("Failed to load FunctionNamespaceType", aNamespace);
 
 		// Verify the namespace type
@@ -275,18 +349,28 @@ public class ManagedFunctionLoaderUtil {
 	 */
 	public static <S extends ManagedFunctionSource> FunctionNamespaceType loadManagedFunctionType(
 			Class<S> managedFunctionSourceClass, OfficeFloorCompiler compiler, String... propertyNameValues) {
-
-		// Create the property list
-		PropertyList propertyList = new PropertyListImpl();
-		for (int i = 0; i < propertyNameValues.length; i += 2) {
-			String name = propertyNameValues[i];
-			String value = propertyNameValues[i + 1];
-			propertyList.addProperty(name).setValue(value);
-		}
-
 		// Return the loaded namespace type
 		return getOfficeFloorCompiler(compiler).getManagedFunctionLoader()
-				.loadManagedFunctionType(managedFunctionSourceClass, propertyList);
+				.loadManagedFunctionType(managedFunctionSourceClass, new PropertyListImpl(propertyNameValues));
+	}
+
+	/**
+	 * Convenience method that loads the {@link FunctionNamespaceType} by
+	 * obtaining the {@link ClassLoader} from the {@link ManagedFunctionSource}
+	 * class.
+	 * 
+	 * @param managedFunctionSource
+	 *            {@link ManagedFunctionSource} instance.
+	 * @param propertyNameValues
+	 *            Listing of name/value pairs that comprise the properties for
+	 *            the {@link ManagedFunctionSource}.
+	 * @return Loaded {@link FunctionNamespaceType}.
+	 */
+	public static FunctionNamespaceType loadManagedFunctionType(ManagedFunctionSource managedFunctionSource,
+			String... propertyNameValues) {
+		// Return the loaded namespace type
+		return getOfficeFloorCompiler(null).getManagedFunctionLoader().loadManagedFunctionType(managedFunctionSource,
+				new PropertyListImpl(propertyNameValues));
 	}
 
 	/**

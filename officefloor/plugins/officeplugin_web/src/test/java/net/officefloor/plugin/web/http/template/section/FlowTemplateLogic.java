@@ -22,11 +22,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniserImpl;
-import net.officefloor.plugin.work.clazz.FlowInterface;
 
 /**
  * Provides logic for the flow template.
@@ -55,13 +55,11 @@ public class FlowTemplateLogic {
 		void end();
 	}
 
-	public void getTemplate(FlowsToAllTasks flows,
-			ServerHttpConnection connection) throws Exception {
+	public void getTemplate(FlowsToAllTasks flows, ServerHttpConnection connection) throws Exception {
 		this.doFlow("getTemplate", flows, connection);
 	}
 
-	public FlowTemplateLogic getOne(FlowsToAllTasks flows,
-			ServerHttpConnection connection) throws Exception {
+	public FlowTemplateLogic getOne(FlowsToAllTasks flows, ServerHttpConnection connection) throws Exception {
 		this.doFlow("getOne", flows, connection);
 		return this;
 	}
@@ -70,17 +68,15 @@ public class FlowTemplateLogic {
 		return "1";
 	}
 
-	public void getTwo(FlowsToAllTasks flows, ServerHttpConnection connection)
-			throws Exception {
+	public void getTwo(FlowsToAllTasks flows, ServerHttpConnection connection) throws Exception {
 		this.doFlow("getTwo", flows, connection);
 	}
 
-	public void getEnd(FlowsToAllTasks flows, ServerHttpConnection connection)
-			throws Exception {
+	public void getEnd(FlowsToAllTasks flows, ServerHttpConnection connection) throws Exception {
 		this.doFlow("getEnd", flows, connection);
 	}
 
-	@NextTask("doExternalFlow")
+	@NextFunction("doExternalFlow")
 	public void link() {
 	}
 
@@ -101,8 +97,7 @@ public class FlowTemplateLogic {
 	 * @throws Exception
 	 *             If fails to do the flow.
 	 */
-	private void doFlow(String methodName, FlowsToAllTasks flows,
-			ServerHttpConnection connection) throws Exception {
+	private void doFlow(String methodName, FlowsToAllTasks flows, ServerHttpConnection connection) throws Exception {
 
 		// Determine if already invoked flow for method (stops infinite loop)
 		if (this.invokedFlows.contains(methodName)) {
@@ -111,8 +106,7 @@ public class FlowTemplateLogic {
 
 		// Obtain the target flow
 		HttpRequest request = connection.getHttpRequest();
-		Map<String, String> parameters = HttpRequestTokeniserImpl
-				.extractParameters(request);
+		Map<String, String> parameters = HttpRequestTokeniserImpl.extractParameters(request);
 		String targetFlow = parameters.get(methodName);
 
 		// Do nothing if no configured flow

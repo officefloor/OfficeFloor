@@ -122,14 +122,13 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 	 *            Dependency key.
 	 * @param <H>
 	 *            Flow key.
-	 * @param <MS>
-	 *            {@link ManagedObjectSource} type.
 	 * @param managedObjectSource
 	 *            {@link ManagedObjectSource}.
 	 * @return {@link PropertyList} specification or <code>null</code> if issue.
 	 */
-	private <D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> PropertyList loadSpecification(
-			MS managedObjectSource) {
+	@Override
+	public <D extends Enum<D>, H extends Enum<H>> PropertyList loadSpecification(
+			ManagedObjectSource<D, H> managedObjectSource) {
 
 		// Obtain the specification
 		ManagedObjectSourceSpecification specification;

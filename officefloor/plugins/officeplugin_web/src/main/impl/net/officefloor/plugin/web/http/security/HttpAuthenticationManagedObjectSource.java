@@ -92,7 +92,7 @@ public class HttpAuthenticationManagedObjectSource extends
 		context.addDependency(Dependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class);
 		context.addDependency(Dependencies.HTTP_SESSION, HttpSession.class);
 		context.addFlow(Flows.AUTHENTICATE, FunctionAuthenticateContext.class);
-		context.addFlow(Flows.LOGOUT, TaskLogoutContext.class);
+		context.addFlow(Flows.LOGOUT, FunctionLogoutContext.class);
 	}
 
 	@Override

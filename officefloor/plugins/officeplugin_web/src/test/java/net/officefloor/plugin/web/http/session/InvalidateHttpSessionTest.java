@@ -17,18 +17,12 @@
  */
 package net.officefloor.plugin.web.http.session;
 
-import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.session.HttpSessionAdministration;
-import net.officefloor.plugin.web.http.session.HttpSessionManagedObject;
-import net.officefloor.plugin.web.http.session.InvalidatedHttpSessionException;
-
 /**
  * Tests invalidating the {@link HttpSession}.
  *
  * @author Daniel Sagenschneider
  */
-public class InvalidateHttpSessionTest extends
-		AbstractHttpSessionManagedObjectTestCase {
+public class InvalidateHttpSessionTest extends AbstractHttpSessionManagedObjectTestCase {
 
 	/**
 	 * Instantiated Session Id value.
@@ -72,8 +66,7 @@ public class InvalidateHttpSessionTest extends
 
 		// Invalidate
 		this.replayMockObjects();
-		HttpSessionAdministration admin = this
-				.createHttpSessionAdministration();
+		HttpSessionAdministration admin = this.createHttpSessionAdministration();
 		admin.invalidate(false);
 		this.verifyFunctionality(admin, false);
 	}
@@ -88,14 +81,12 @@ public class InvalidateHttpSessionTest extends
 		this.record_instantiate();
 		this.record_invalidate_sessionInvalidated();
 		this.record_generate_setSessionId(NEW_SESSION_ID);
-		this.record_create_sessionCreated(NEW_CREATION_TIME, EXPIRE_TIME,
-				newAttributes());
+		this.record_create_sessionCreated(NEW_CREATION_TIME, EXPIRE_TIME, newAttributes());
 		this.record_cookie_addSessionId(true, NEW_SESSION_ID, EXPIRE_TIME);
 
 		// Invalidate
 		this.replayMockObjects();
-		HttpSessionAdministration admin = this
-				.createHttpSessionAdministration();
+		HttpSessionAdministration admin = this.createHttpSessionAdministration();
 		admin.invalidate(true);
 		this.verifyFunctionality(admin, true);
 	}
@@ -108,17 +99,15 @@ public class InvalidateHttpSessionTest extends
 		// Record
 		this.record_instantiate();
 		this.record_delay(); // invalidating session
-		this.asynchronousListener.notifyStarted();
+		this.asynchronousContext.start(null);
 		this.record_generate_setSessionId(NEW_SESSION_ID);
-		this.record_create_sessionCreated(NEW_CREATION_TIME, EXPIRE_TIME,
-				newAttributes());
+		this.record_create_sessionCreated(NEW_CREATION_TIME, EXPIRE_TIME, newAttributes());
 		this.record_cookie_addSessionId(true, NEW_SESSION_ID, EXPIRE_TIME);
-		this.asynchronousListener.notifyComplete();
+		this.asynchronousContext.complete(null);
 
 		// Invalidate
 		this.replayMockObjects();
-		HttpSessionAdministration admin = this
-				.createHttpSessionAdministration();
+		HttpSessionAdministration admin = this.createHttpSessionAdministration();
 		admin.invalidate(true);
 		assertFalse("Delay invalidating", admin.isOperationComplete());
 		this.ensureHttpSessionInvalidated(null);
@@ -139,8 +128,7 @@ public class InvalidateHttpSessionTest extends
 
 		// Invalidate
 		this.replayMockObjects();
-		HttpSessionAdministration admin = this
-				.createHttpSessionAdministration();
+		HttpSessionAdministration admin = this.createHttpSessionAdministration();
 		try {
 			admin.invalidate(true);
 		} catch (Exception ex) {
@@ -159,13 +147,12 @@ public class InvalidateHttpSessionTest extends
 		// Record
 		this.record_instantiate();
 		this.record_delay(); // invalidating
-		this.asynchronousListener.notifyStarted();
-		this.asynchronousListener.notifyComplete();
+		this.asynchronousContext.start(null);
+		this.asynchronousContext.complete(null);
 
 		// Invalidate
 		this.replayMockObjects();
-		HttpSessionAdministration admin = this
-				.createHttpSessionAdministration();
+		HttpSessionAdministration admin = this.createHttpSessionAdministration();
 		admin.invalidate(true);
 		assertFalse("Delay invalidating", admin.isOperationComplete());
 		this.ensureHttpSessionInvalidated(null);
@@ -178,8 +165,7 @@ public class InvalidateHttpSessionTest extends
 	 */
 	private void record_instantiate() {
 		this.record_sessionIdCookie(SESSION_ID);
-		this.record_retrieve_sessionRetrieved(CREATION_TIME, EXPIRE_TIME,
-				newAttributes());
+		this.record_retrieve_sessionRetrieved(CREATION_TIME, EXPIRE_TIME, newAttributes());
 		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
 	}
 
@@ -188,8 +174,7 @@ public class InvalidateHttpSessionTest extends
 	 *
 	 * @return {@link HttpSessionAdministration}.
 	 */
-	private HttpSessionAdministration createHttpSessionAdministration()
-			throws Throwable {
+	private HttpSessionAdministration createHttpSessionAdministration() throws Throwable {
 		HttpSessionManagedObject mo = this.createHttpSessionManagedObject();
 		this.startCoordination(mo);
 		this.httpSession = (HttpSession) mo.getObject();
@@ -206,8 +191,7 @@ public class InvalidateHttpSessionTest extends
 	 *            Flag indicating if expected to create a new
 	 *            {@link HttpSession}.
 	 */
-	private void verifyFunctionality(HttpSessionAdministration admin,
-			boolean isCreateNew) throws Throwable {
+	private void verifyFunctionality(HttpSessionAdministration admin, boolean isCreateNew) throws Throwable {
 		// Verify the mocks and operations
 		this.verifyOperations();
 
@@ -217,8 +201,7 @@ public class InvalidateHttpSessionTest extends
 		// Handle whether should create a new HTTP session
 		if (isCreateNew) {
 			// Ensure created new HTTP session
-			assertHttpSession(NEW_SESSION_ID, NEW_CREATION_TIME, isCreateNew,
-					this.httpSession);
+			assertHttpSession(NEW_SESSION_ID, NEW_CREATION_TIME, isCreateNew, this.httpSession);
 		} else {
 			// Ensure HTTP session invalidated (without cause)
 			this.ensureHttpSessionInvalidated(null);
@@ -233,8 +216,7 @@ public class InvalidateHttpSessionTest extends
 	 * @param failure
 	 *            Expected failure.
 	 */
-	private void verifyFailure(HttpSessionAdministration admin,
-			Throwable failure) {
+	private void verifyFailure(HttpSessionAdministration admin, Throwable failure) {
 		// Verify the mocks and operations
 		this.verifyOperations();
 
@@ -323,14 +305,12 @@ public class InvalidateHttpSessionTest extends
 	 * @param failure
 	 *            Potential failure in invalidating. May be <code>null</code>.
 	 */
-	private void ensureHttpSessionInvalidated(HttpSessionInvocation invocation,
-			Throwable failure) {
+	private void ensureHttpSessionInvalidated(HttpSessionInvocation invocation, Throwable failure) {
 		try {
 			invocation.invoke(this.httpSession);
 			fail("Should be invalid HTTP session");
 		} catch (InvalidatedHttpSessionException ex) {
-			assertSame("Incorrect cause of invalidating failure", failure, ex
-					.getCause());
+			assertSame("Incorrect cause of invalidating failure", failure, ex.getCause());
 		}
 	}
 

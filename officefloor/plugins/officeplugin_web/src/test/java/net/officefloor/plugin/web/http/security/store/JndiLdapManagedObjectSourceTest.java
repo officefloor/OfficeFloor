@@ -24,13 +24,10 @@ import javax.naming.directory.SearchResult;
 
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
-import net.officefloor.plugin.web.http.security.store.CredentialEntry;
-import net.officefloor.plugin.web.http.security.store.CredentialStore;
-import net.officefloor.plugin.web.http.security.store.JndiLdapManagedObjectSource;
 import net.officefloor.plugin.web.http.security.store.JndiLdapManagedObjectSource.DependencyKeys;
 
 /**
@@ -44,13 +41,10 @@ public class JndiLdapManagedObjectSourceTest extends OfficeFrameTestCase {
 	 * Ensure correct specification.
 	 */
 	public void testSpecification() {
-		ManagedObjectLoaderUtil.validateSpecification(
-				JndiLdapManagedObjectSource.class,
+		ManagedObjectLoaderUtil.validateSpecification(JndiLdapManagedObjectSource.class,
 				JndiLdapManagedObjectSource.PROPERTY_ALGORITHM, "Algorithm",
-				JndiLdapManagedObjectSource.PROPERTY_ENTRY_SEARCH_BASE_DN,
-				"Entry Search Base Dn",
-				JndiLdapManagedObjectSource.PROPERTY_ROLES_SEARCH_BASE_DN,
-				"Roles Search Base Dn");
+				JndiLdapManagedObjectSource.PROPERTY_ENTRY_SEARCH_BASE_DN, "Entry Search Base Dn",
+				JndiLdapManagedObjectSource.PROPERTY_ROLES_SEARCH_BASE_DN, "Roles Search Base Dn");
 	}
 
 	/**
@@ -59,19 +53,15 @@ public class JndiLdapManagedObjectSourceTest extends OfficeFrameTestCase {
 	public void testType() {
 
 		// Create the expected type
-		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
-				.createManagedObjectTypeBuilder();
+		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(CredentialStore.class);
 		type.addDependency(DependencyKeys.DIR_CONTEXT, DirContext.class, null);
 
 		// Validate type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type,
-				JndiLdapManagedObjectSource.class,
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, JndiLdapManagedObjectSource.class,
 				JndiLdapManagedObjectSource.PROPERTY_ALGORITHM, "MD5",
-				JndiLdapManagedObjectSource.PROPERTY_ENTRY_SEARCH_BASE_DN,
-				"ou=People,dc=officefloor,dc=net",
-				JndiLdapManagedObjectSource.PROPERTY_ROLES_SEARCH_BASE_DN,
-				"ou=Groups,dc=officefloor,dc=net");
+				JndiLdapManagedObjectSource.PROPERTY_ENTRY_SEARCH_BASE_DN, "ou=People,dc=officefloor,dc=net",
+				JndiLdapManagedObjectSource.PROPERTY_ROLES_SEARCH_BASE_DN, "ou=Groups,dc=officefloor,dc=net");
 	}
 
 	/**
@@ -82,20 +72,16 @@ public class JndiLdapManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Mocks
 		DirContext context = this.createMock(DirContext.class);
-		final NamingEnumeration<SearchResult> searchResults = this
-				.createMock(NamingEnumeration.class);
+		final NamingEnumeration<SearchResult> searchResults = this.createMock(NamingEnumeration.class);
 		final Attributes attributes = this.createMock(Attributes.class);
 
 		// Objects
-		final SearchResult searchResult = new SearchResult("uid=daniel", null,
-				attributes);
-		searchResult
-				.setNameInNamespace("uid=daniel,ou=People,dc=officefloor,dc=net");
+		final SearchResult searchResult = new SearchResult("uid=daniel", null, attributes);
+		searchResult.setNameInNamespace("uid=daniel,ou=People,dc=officefloor,dc=net");
 
 		// Record
-		this.recordReturn(context, context.search(
-				"ou=People,dc=officefloor,dc=net",
-				"(&(objectClass=inetOrgPerson)(uid=daniel))", null),
+		this.recordReturn(context,
+				context.search("ou=People,dc=officefloor,dc=net", "(&(objectClass=inetOrgPerson)(uid=daniel))", null),
 				searchResults);
 		this.recordReturn(searchResults, searchResults.hasMore(), true);
 		this.recordReturn(searchResults, searchResults.next(), searchResult);
@@ -105,16 +91,12 @@ public class JndiLdapManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Load the managed object source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
-		loader.addProperty(JndiLdapManagedObjectSource.PROPERTY_ALGORITHM,
-				"MD5");
-		loader.addProperty(
-				JndiLdapManagedObjectSource.PROPERTY_ENTRY_SEARCH_BASE_DN,
+		loader.addProperty(JndiLdapManagedObjectSource.PROPERTY_ALGORITHM, "MD5");
+		loader.addProperty(JndiLdapManagedObjectSource.PROPERTY_ENTRY_SEARCH_BASE_DN,
 				"ou=People,dc=officefloor,dc=net");
-		loader.addProperty(
-				JndiLdapManagedObjectSource.PROPERTY_ROLES_SEARCH_BASE_DN,
+		loader.addProperty(JndiLdapManagedObjectSource.PROPERTY_ROLES_SEARCH_BASE_DN,
 				"ou=Groups,dc=officefloor,dc=net");
-		JndiLdapManagedObjectSource source = loader
-				.loadManagedObjectSource(JndiLdapManagedObjectSource.class);
+		JndiLdapManagedObjectSource source = loader.loadManagedObjectSource(JndiLdapManagedObjectSource.class);
 
 		// Source the managed object
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
@@ -123,13 +105,11 @@ public class JndiLdapManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Obtain the object
 		Object object = managedObject.getObject();
-		assertTrue("Object must be of type " + CredentialStore.class,
-				object instanceof CredentialStore);
+		assertTrue("Object must be of type " + CredentialStore.class, object instanceof CredentialStore);
 		CredentialStore store = (CredentialStore) object;
 
 		// Ensure working by obtaining entry
-		CredentialEntry entry = store
-				.retrieveCredentialEntry("daniel", "realm");
+		CredentialEntry entry = store.retrieveCredentialEntry("daniel", "realm");
 		assertNotNull("Expect to obtain entry", entry);
 
 		// Verify functionality

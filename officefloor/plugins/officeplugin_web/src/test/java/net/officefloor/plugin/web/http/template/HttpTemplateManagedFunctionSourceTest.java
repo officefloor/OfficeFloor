@@ -26,20 +26,20 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
-import net.officefloor.compile.test.work.WorkLoaderUtil;
+import net.officefloor.compile.test.managedfunction.ManagedFunctionLoaderUtil;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
-import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
@@ -60,7 +60,7 @@ import net.officefloor.plugin.web.http.template.parse.StaticHttpTemplateSectionC
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
+public class HttpTemplateManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Path to template for missing items to check errors.
@@ -83,9 +83,9 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 	 * Verifies the specification.
 	 */
 	public void testSpecification() {
-		WorkLoaderUtil.validateSpecification(HttpTemplateManagedFunctionSource.class,
-				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE, "Template", HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI,
-				"URI Path");
+		ManagedFunctionLoaderUtil.validateSpecification(HttpTemplateManagedFunctionSource.class,
+				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE, "Template",
+				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI, "URI Path");
 	}
 
 	/**
@@ -93,61 +93,61 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testType() throws Exception {
 
-		// Create the expected work
-		HttpTemplateWork workFactory = new HttpTemplateWork();
-		FunctionNamespaceBuilder<HttpTemplateWork> work = WorkLoaderUtil.createWorkTypeBuilder(workFactory);
+		// Create the expected namespace
+		FunctionNamespaceBuilder namespace = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
 
-		// Create the task factory
-		HttpTemplateFunction httpTemplateTaskFactory = new HttpTemplateFunction(null, false, Charset.defaultCharset());
+		// Create the function factory
+		HttpTemplateFunction httpTemplateFunctionFactory = new HttpTemplateFunction(null, false,
+				Charset.defaultCharset());
 
-		// 'template' task
-		ManagedFunctionTypeBuilder<Indexed, None> template = work.addManagedFunctionType("template", httpTemplateTaskFactory, Indexed.class,
-				None.class);
+		// 'template' function
+		ManagedFunctionTypeBuilder<Indexed, None> template = namespace.addManagedFunctionType("template",
+				httpTemplateFunctionFactory, Indexed.class, None.class);
 		template.addObject(ServerHttpConnection.class).setLabel("SERVER_HTTP_CONNECTION");
 		template.addObject(HttpApplicationLocation.class).setLabel("HTTP_APPLICATION_LOCATION");
 		template.addObject(TemplateBean.class).setLabel("OBJECT");
 		template.addEscalation(IOException.class);
 
-		// 'BeanTree' task
-		ManagedFunctionTypeBuilder<Indexed, None> beanTree = work.addManagedFunctionType("BeanTree", httpTemplateTaskFactory, Indexed.class,
-				None.class);
+		// 'BeanTree' function
+		ManagedFunctionTypeBuilder<Indexed, None> beanTree = namespace.addManagedFunctionType("BeanTree",
+				httpTemplateFunctionFactory, Indexed.class, None.class);
 		beanTree.addObject(ServerHttpConnection.class).setLabel("SERVER_HTTP_CONNECTION");
 		beanTree.addObject(HttpApplicationLocation.class).setLabel("HTTP_APPLICATION_LOCATION");
 		beanTree.addObject(BeanTreeBean.class).setLabel("OBJECT");
 		beanTree.addEscalation(IOException.class);
 
-		// 'NullBean' task
-		ManagedFunctionTypeBuilder<Indexed, None> nullBean = work.addManagedFunctionType("NullBean", httpTemplateTaskFactory, Indexed.class,
-				None.class);
+		// 'NullBean' function
+		ManagedFunctionTypeBuilder<Indexed, None> nullBean = namespace.addManagedFunctionType("NullBean",
+				httpTemplateFunctionFactory, Indexed.class, None.class);
 		nullBean.addObject(ServerHttpConnection.class).setLabel("SERVER_HTTP_CONNECTION");
 		nullBean.addObject(HttpApplicationLocation.class).setLabel("HTTP_APPLICATION_LOCATION");
 		nullBean.addObject(Object.class).setLabel("OBJECT");
 		nullBean.addEscalation(IOException.class);
 
-		// 'NoBean' task
-		ManagedFunctionTypeBuilder<Indexed, None> noBean = work.addManagedFunctionType("NoBean", httpTemplateTaskFactory, Indexed.class,
-				None.class);
+		// 'NoBean' function
+		ManagedFunctionTypeBuilder<Indexed, None> noBean = namespace.addManagedFunctionType("NoBean",
+				httpTemplateFunctionFactory, Indexed.class, None.class);
 		noBean.addObject(ServerHttpConnection.class).setLabel("SERVER_HTTP_CONNECTION");
 		noBean.addObject(HttpApplicationLocation.class).setLabel("HTTP_APPLICATION_LOCATION");
 		noBean.addEscalation(IOException.class);
 
-		// 'List' task
-		ManagedFunctionTypeBuilder<Indexed, None> list = work.addManagedFunctionType("List", httpTemplateTaskFactory, Indexed.class,
-				None.class);
+		// 'List' function
+		ManagedFunctionTypeBuilder<Indexed, None> list = namespace.addManagedFunctionType("List",
+				httpTemplateFunctionFactory, Indexed.class, None.class);
 		list.addObject(ServerHttpConnection.class).setLabel("SERVER_HTTP_CONNECTION");
 		list.addObject(HttpApplicationLocation.class).setLabel("HTTP_APPLICATION_LOCATION");
 		list.addObject(TableRowBean.class).setLabel("OBJECT");
 		list.addEscalation(IOException.class);
 
-		// 'Tail' task
-		ManagedFunctionTypeBuilder<Indexed, None> tail = work.addManagedFunctionType("Tail", httpTemplateTaskFactory, Indexed.class,
-				None.class);
+		// 'Tail' function
+		ManagedFunctionTypeBuilder<Indexed, None> tail = namespace.addManagedFunctionType("Tail",
+				httpTemplateFunctionFactory, Indexed.class, None.class);
 		tail.addObject(ServerHttpConnection.class).setLabel("SERVER_HTTP_CONNECTION");
 		tail.addObject(HttpApplicationLocation.class).setLabel("HTTP_APPLICATION_LOCATION");
 		tail.addEscalation(IOException.class);
 
-		// Verify the work type
-		WorkLoaderUtil.validateWorkType(work, HttpTemplateManagedFunctionSource.class,
+		// Verify the managed function type
+		ManagedFunctionLoaderUtil.validateManagedFunctionType(namespace, HttpTemplateManagedFunctionSource.class,
 				this.getProperties(this.templatePath, "uri"));
 	}
 
@@ -159,7 +159,8 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 		// Record failure due to missing bean
-		issues.recordIssue("Missing property 'bean.template' for WorkSource " + HttpTemplateManagedFunctionSource.class.getName());
+		issues.recordIssue(
+				"Missing property 'bean.template' for WorkSource " + HttpTemplateManagedFunctionSource.class.getName());
 
 		// Create and initiate the compiler
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
@@ -167,12 +168,14 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Do not provide bean for template section
 		PropertyList propertyList = OfficeFloorCompiler.newPropertyList();
-		propertyList.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE).setValue(this.missingTemplateFilePath);
+		propertyList.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE)
+				.setValue(this.missingTemplateFilePath);
 		propertyList.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI).setValue("uri");
 
 		// Test loading ensuring indicates failure
 		this.replayMockObjects();
-		compiler.getWorkLoader().loadFunctionNamespaceType(HttpTemplateManagedFunctionSource.class, propertyList);
+		compiler.getManagedFunctionLoader().loadManagedFunctionType(HttpTemplateManagedFunctionSource.class,
+				propertyList);
 		this.verifyMockObjects();
 	}
 
@@ -185,9 +188,8 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Record failure due to missing bean
 		final String message = "Property 'MissingProperty' can not be sourced from bean type " + Object.class.getName();
-		issues.recordIssue(
-				"Failed to source WorkType definition from WorkSource " + HttpTemplateManagedFunctionSource.class.getName(),
-				new Exception(message));
+		issues.recordIssue("Failed to source WorkType definition from WorkSource "
+				+ HttpTemplateManagedFunctionSource.class.getName(), new Exception(message));
 
 		// Create and initiate the compiler
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
@@ -195,13 +197,15 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Provide bean that does not have the required property
 		PropertyList propertyList = OfficeFloorCompiler.newPropertyList();
-		propertyList.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE).setValue(this.missingTemplateFilePath);
+		propertyList.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE)
+				.setValue(this.missingTemplateFilePath);
 		propertyList.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI).setValue("uri");
 		propertyList.addProperty("bean.template").setValue(Object.class.getName());
 
 		// Test loading ensuring indicates failure
 		this.replayMockObjects();
-		compiler.getWorkLoader().loadFunctionNamespaceType(HttpTemplateManagedFunctionSource.class, propertyList);
+		compiler.getManagedFunctionLoader().loadManagedFunctionType(HttpTemplateManagedFunctionSource.class,
+				propertyList);
 		this.verifyMockObjects();
 	}
 
@@ -236,11 +240,11 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Tests running the template to generate response.
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings("rawtypes")
 	public void doTemplateTest(boolean isTemplateSecure, String templateUriSuffix) throws Throwable {
 
 		// Create the mock objects
-		ManagedFunctionContext taskContext = this.createMock(ManagedFunctionContext.class);
+		ManagedFunctionContext functionContext = this.createMock(ManagedFunctionContext.class);
 		ServerHttpConnection httpConnection = this.createMock(ServerHttpConnection.class);
 		HttpApplicationLocation location = this.createMock(HttpApplicationLocation.class);
 
@@ -251,14 +255,14 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		List<String> additionalProperties = new LinkedList<String>();
 		if (isTemplateSecure) {
 			// Secure template with non-secure link
-			additionalProperties
-					.addAll(Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE, String.valueOf(true)));
 			additionalProperties.addAll(
-					Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "beans", String.valueOf(false)));
+					Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE, String.valueOf(true)));
+			additionalProperties.addAll(Arrays.asList(
+					HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "beans", String.valueOf(false)));
 		} else {
 			// Default non-secure template with secure link
-			additionalProperties.addAll(
-					Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "submit", String.valueOf(true)));
+			additionalProperties.addAll(Arrays.asList(
+					HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "submit", String.valueOf(true)));
 		}
 
 		// Specify the template URI suffix
@@ -267,17 +271,14 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 			templateUriSuffix = "";
 		} else {
 			// Provide property for template URI suffix
-			additionalProperties
-					.addAll(Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX, templateUriSuffix));
+			additionalProperties.addAll(
+					Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX, templateUriSuffix));
 		}
 
-		// Load the work type
-		FunctionNamespaceType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(HttpTemplateManagedFunctionSource.class,
-				this.getProperties(this.templatePath, "uri",
-						additionalProperties.toArray(new String[additionalProperties.size()])));
-
-		// Create the work and provide name
-		HttpTemplateWork work = workType.getWorkFactory().createWork();
+		// Load the namespace type
+		FunctionNamespaceType namespace = ManagedFunctionLoaderUtil
+				.loadManagedFunctionType(HttpTemplateManagedFunctionSource.class, this.getProperties(this.templatePath,
+						"uri", additionalProperties.toArray(new String[additionalProperties.size()])));
 
 		// Record actions for each task:
 		// - 'template'
@@ -301,15 +302,15 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 			// Record obtaining the bean for appropriate sections
 			Object bean = beans[i];
 			if ((bean != null) || (i == NULL_BEAN_INDEX)) {
-				this.recordReturn(taskContext, taskContext.getObject(2), bean);
+				this.recordReturn(functionContext, functionContext.getObject(2), bean);
 				if (i == NULL_BEAN_INDEX) {
 					continue NEXT_BEAN; // Null bean, no content
 				}
 			}
 
 			// Obtain the remaining dependencies
-			this.recordReturn(taskContext, taskContext.getObject(0), httpConnection);
-			this.recordReturn(taskContext, taskContext.getObject(1), location);
+			this.recordReturn(functionContext, functionContext.getObject(0), httpConnection);
+			this.recordReturn(functionContext, functionContext.getObject(1), location);
 
 			// Obtain the HTTP response
 			this.recordReturn(httpConnection, httpConnection.getHttpResponse(), httpResponse);
@@ -332,24 +333,24 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		// Replay mocks
 		this.replayMockObjects();
 
-		// Execute the 'template' task
-		this.doTask("template", work, workType, taskContext);
+		// Execute the 'template' function
+		this.doFunction("template", namespace, functionContext);
 
-		// Execute the 'BeanTree' task
-		this.doTask("BeanTree", work, workType, taskContext);
+		// Execute the 'BeanTree' function
+		this.doFunction("BeanTree", namespace, functionContext);
 
-		// Execute the 'NullBean' task
-		this.doTask("NullBean", work, workType, taskContext);
+		// Execute the 'NullBean' function
+		this.doFunction("NullBean", namespace, functionContext);
 
-		// Execute the 'NoBean' task
-		this.doTask("NoBean", work, workType, taskContext);
+		// Execute the 'NoBean' function
+		this.doFunction("NoBean", namespace, functionContext);
 
-		// Execute the 'List' task (for table and its child)
-		this.doTask("List", work, workType, taskContext); // table row bean
-		this.doTask("List", work, workType, taskContext); // child row bean
+		// Execute the 'List' function (for table and its child)
+		this.doFunction("List", namespace, functionContext); // table row bean
+		this.doFunction("List", namespace, functionContext); // child row bean
 
 		// Execute the 'Tail' task
-		this.doTask("Tail", work, workType, taskContext);
+		this.doFunction("Tail", namespace, functionContext);
 
 		// Verify mocks
 		this.verifyMockObjects();
@@ -369,11 +370,11 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 	 * Ensure able to use {@link ResourceSource} to load the
 	 * {@link HttpTemplate}.
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings("rawtypes")
 	public void testLoadWithResourceSource() throws Throwable {
 
 		// Create the mock objects
-		ManagedFunctionContext taskContext = this.createMock(ManagedFunctionContext.class);
+		ManagedFunctionContext functionContext = this.createMock(ManagedFunctionContext.class);
 		ServerHttpConnection httpConnection = this.createMock(ServerHttpConnection.class);
 		MockHttpResponse httpResponse = new MockHttpResponse();
 		HttpApplicationLocation location = this.createMock(HttpApplicationLocation.class);
@@ -398,27 +399,25 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 			@Override
 			public InputStream sourceResource(String location) {
 				// Ensure appropriate template path
-				assertEquals("Incorrect template path", HttpTemplateWorkSourceTest.this.templatePath, location);
+				assertEquals("Incorrect template path", HttpTemplateManagedFunctionSourceTest.this.templatePath,
+						location);
 				return templateInput;
 			}
 		});
 
-		// Load the work type
-		FunctionNamespaceType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(HttpTemplateManagedFunctionSource.class, compiler,
-				this.getProperties(this.templatePath, "uri"));
-
-		// Create the work and provide name
-		HttpTemplateWork work = workType.getWorkFactory().createWork();
+		// Load the namespace type
+		FunctionNamespaceType namespaceType = ManagedFunctionLoaderUtil.loadManagedFunctionType(
+				HttpTemplateManagedFunctionSource.class, compiler, this.getProperties(this.templatePath, "uri"));
 
 		// Record undertaking task to use raw content
-		this.recordReturn(taskContext, taskContext.getObject(2), new TemplateBean("TEST"));
-		this.recordReturn(taskContext, taskContext.getObject(0), httpConnection);
-		this.recordReturn(taskContext, taskContext.getObject(1), location);
+		this.recordReturn(functionContext, functionContext.getObject(2), new TemplateBean("TEST"));
+		this.recordReturn(functionContext, functionContext.getObject(0), httpConnection);
+		this.recordReturn(functionContext, functionContext.getObject(1), location);
 		this.recordReturn(httpConnection, httpConnection.getHttpResponse(), httpResponse);
 
 		// Test
 		this.replayMockObjects();
-		this.doTask("template", work, workType, taskContext);
+		this.doFunction("template", namespaceType, functionContext);
 		this.verifyMockObjects();
 
 		// Ensure raw HTTP template content
@@ -429,36 +428,33 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Tests the root template.
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings("rawtypes")
 	public void testRootTemplate() throws Throwable {
 
 		// Create the mock objects
-		ManagedFunctionContext taskContext = this.createMock(ManagedFunctionContext.class);
+		ManagedFunctionContext functionContext = this.createMock(ManagedFunctionContext.class);
 		ServerHttpConnection httpConnection = this.createMock(ServerHttpConnection.class);
 		HttpApplicationLocation location = this.createMock(HttpApplicationLocation.class);
 
 		// Create the HTTP response to record output
 		MockHttpResponse httpResponse = new MockHttpResponse();
 
-		// Load the work type
-		FunctionNamespaceType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(HttpTemplateManagedFunctionSource.class,
-				this.getProperties(this.rootTemplatePath, "/"));
-
-		// Create as root template
-		HttpTemplateWork work = workType.getWorkFactory().createWork();
+		// Load the namespace type
+		FunctionNamespaceType namespaceType = ManagedFunctionLoaderUtil.loadManagedFunctionType(
+				HttpTemplateManagedFunctionSource.class, this.getProperties(this.rootTemplatePath, "/"));
 
 		// Record
-		this.recordReturn(taskContext, taskContext.getObject(2), new TemplateBean("TEST"));
-		this.recordReturn(taskContext, taskContext.getObject(0), httpConnection);
-		this.recordReturn(taskContext, taskContext.getObject(1), location);
+		this.recordReturn(functionContext, functionContext.getObject(2), new TemplateBean("TEST"));
+		this.recordReturn(functionContext, functionContext.getObject(0), httpConnection);
+		this.recordReturn(functionContext, functionContext.getObject(1), location);
 		this.recordReturn(httpConnection, httpConnection.getHttpResponse(), httpResponse);
 		this.recordReturn(location, location.transformToClientPath("/-something", false), "/-something");
 
 		// Test
 		this.replayMockObjects();
 
-		// Execute the 'template' task
-		this.doTask("template", work, workType, taskContext);
+		// Execute the 'template' function
+		this.doFunction("template", namespaceType, functionContext);
 
 		// Verify mocks
 		this.verifyMockObjects();
@@ -483,7 +479,8 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		HttpTemplateSection staticSection = new HttpTemplateSectionImpl("STATIC", "STATIC CONTENT#{LINK}",
 				new HttpTemplateSectionContent[] { new StaticHttpTemplateSectionContentImpl("STATIC CONTENT"),
 						new LinkHttpTemplateSectionContentImpl("LINK") });
-		assertFalse("Should not require bean", HttpTemplateManagedFunctionSource.isHttpTemplateSectionRequireBean(staticSection));
+		assertFalse("Should not require bean",
+				HttpTemplateManagedFunctionSource.isHttpTemplateSectionRequireBean(staticSection));
 
 		// Ensure require bean on property
 		HttpTemplateSection propertySection = new HttpTemplateSectionImpl("PROPERTY", "${Property}",
@@ -506,7 +503,8 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Obtain without suffix
 		SourcePropertiesImpl properties = new SourcePropertiesImpl();
-		properties.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI, "configured/../non/../canoncial/../path");
+		properties.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI,
+				"configured/../non/../canoncial/../path");
 		assertEquals("Incorrect path without suffix", "/path",
 				HttpTemplateManagedFunctionSource.getHttpTemplateUrlContinuationPath(properties));
 
@@ -556,7 +554,8 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Ensure by default not secure
 		SourcePropertiesImpl properties = new SourcePropertiesImpl();
-		assertFalse("Should default to not be secure", HttpTemplateManagedFunctionSource.isHttpTemplateSecure(properties));
+		assertFalse("Should default to not be secure",
+				HttpTemplateManagedFunctionSource.isHttpTemplateSecure(properties));
 
 		// Ensure secure when configured secure
 		properties.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE, String.valueOf(true));
@@ -603,37 +602,37 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 	 * Does the {@link ManagedFunction} on the {@link FunctionNamespaceType}.
 	 * 
 	 * @param functionName
-	 *            Name of {@link ManagedFunction} on {@link FunctionNamespaceType} to execute.
-	 * @param work
-	 *            {@link HttpTemplateWork}.
-	 * @param workType
+	 *            Name of {@link ManagedFunction} on
+	 *            {@link FunctionNamespaceType} to execute.
+	 * @param namespaceType
 	 *            {@link FunctionNamespaceType}.
-	 * @param taskContext
+	 * @param functionContext
 	 *            {@link ManagedFunctionContext}.
 	 * @throws Throwable
 	 *             If fails.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void doTask(String taskName, HttpTemplateWork work, FunctionNamespaceType<HttpTemplateWork> workType,
-			ManagedFunctionContext<HttpTemplateWork, ?, ?> taskContext) throws Throwable {
+	private void doFunction(String functionName, FunctionNamespaceType namespaceType,
+			ManagedFunctionContext<?, ?> functionContext) throws Throwable {
 
-		// Obtain the index of the task
-		int taskIndex = -1;
-		ManagedFunctionType<?, ?, ?>[] taskTypes = workType.getManagedFunctionTypes();
-		for (int i = 0; i < taskTypes.length; i++) {
-			if (taskName.equals(taskTypes[i].getFunctionName())) {
-				taskIndex = i;
+		// Obtain the index of the function
+		int functionIndex = -1;
+		ManagedFunctionType<?, ?>[] functionTypes = namespaceType.getManagedFunctionTypes();
+		for (int i = 0; i < functionTypes.length; i++) {
+			if (functionName.equals(functionTypes[i].getFunctionName())) {
+				functionIndex = i;
 			}
 		}
-		if (taskIndex == -1) {
-			fail("Could not find task '" + taskName + "'");
+		if (functionIndex == -1) {
+			fail("Could not find task '" + functionName + "'");
 		}
 
-		// Create the task
-		ManagedFunction task = workType.getManagedFunctionTypes()[taskIndex].getManagedFunctionFactory().createManagedFunction(work);
+		// Create the function
+		ManagedFunction function = namespaceType.getManagedFunctionTypes()[functionIndex].getManagedFunctionFactory()
+				.createManagedFunction();
 
-		// Execute the task
-		task.execute(taskContext);
+		// Execute the function
+		function.execute(functionContext);
 	}
 
 	/**
@@ -657,14 +656,14 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		properties.addAll(Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI, templateUri));
 
 		// Provide the beans
-		properties.addAll(
-				Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "template", TemplateBean.class.getName()));
-		properties.addAll(
-				Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "BeanTree", BeanTreeBean.class.getName()));
-		properties.addAll(
-				Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "NullBean", Object.class.getName()));
-		properties.addAll(
-				Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "List", TableRowBean.class.getName()));
+		properties.addAll(Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "template",
+				TemplateBean.class.getName()));
+		properties.addAll(Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "BeanTree",
+				BeanTreeBean.class.getName()));
+		properties.addAll(Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "NullBean",
+				Object.class.getName()));
+		properties.addAll(Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "List",
+				TableRowBean.class.getName()));
 
 		// Provide the additional property values
 		for (int i = 0; i < additionalPropertyNameValuePairs.length; i += 2) {

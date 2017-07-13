@@ -19,19 +19,19 @@ package net.officefloor.plugin.web.http.template.integrate;
 
 import java.util.Properties;
 
-import junit.framework.TestCase;
-import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.test.issues.FailTestCompilerIssues;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.web.http.template.HttpTemplateManagedFunctionSource;
-import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
+
+import junit.framework.TestCase;
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.test.issues.FailTestCompilerIssues;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+import net.officefloor.plugin.web.http.template.HttpTemplateManagedFunctionSource;
+import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
 /**
  * Ensure integration of {@link HttpTemplateManagedFunctionSource} and
@@ -55,13 +55,11 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 	protected void setUp() throws Exception {
 
 		// Obtain location of configuration
-		String officeFloorConfiguration = this.getClass().getPackage()
-				.getName().replace('.', '/')
+		String officeFloorConfiguration = this.getClass().getPackage().getName().replace('.', '/')
 				+ "/Configuration.officefloor";
 
 		// Compile the OfficeFloor
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.addSourceAliases();
 		compiler.setCompilerIssues(new FailTestCompilerIssues());
 		this.officeFloor = compiler.compile(officeFloorConfiguration);
@@ -91,20 +89,17 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 
 		// Request the initial page (PageOne)
 		Properties initialPage = this.doRequest("/PageTwo-link", this.client);
-		assertEquals("Incorrect initial page", "One",
-				initialPage.getProperty("page"));
+		assertEquals("Incorrect initial page", "One", initialPage.getProperty("page"));
 
 		// Follow link to get second page
 		String secondPageLink = initialPage.getProperty("link");
 		Properties secondPage = this.doRequest(secondPageLink, this.client);
-		assertEquals("Incorrect second page", "Two",
-				secondPage.getProperty("page"));
+		assertEquals("Incorrect second page", "Two", secondPage.getProperty("page"));
 
 		// Follow link to get first page
 		String firstPageLink = secondPage.getProperty("link");
 		Properties firstPage = this.doRequest(firstPageLink, this.client);
-		assertEquals("Incorrect first page", "One",
-				firstPage.getProperty("page"));
+		assertEquals("Incorrect first page", "One", firstPage.getProperty("page"));
 	}
 
 	/**
@@ -115,8 +110,7 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 
 		// Root page link
 		Properties linkedPage = this.doRequest("/-link", this.client);
-		assertEquals("Incorrect root page link", "One",
-				linkedPage.getProperty("page"));
+		assertEquals("Incorrect root page link", "One", linkedPage.getProperty("page"));
 	}
 
 	/**
@@ -125,8 +119,7 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 	public void testRouteCanonicalPath() throws Exception {
 
 		// Request the initial page with non-canonical path
-		Properties initialPage = this.doRequest(
-				"/non-canonical-path/../PageTwo-link/", this.client);
+		Properties initialPage = this.doRequest("/non-canonical-path/../PageTwo-link/", this.client);
 		assertEquals("Incorrect page", "One", initialPage.getProperty("page"));
 	}
 
@@ -139,8 +132,7 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 	 *            {@link HttpClient}.
 	 * @return Properties of the returned page.
 	 */
-	private Properties doRequest(String uriPath, HttpClient client)
-			throws Exception {
+	private Properties doRequest(String uriPath, HttpClient client) throws Exception {
 
 		// Do the request
 		HttpGet method = new HttpGet("http://localhost:10101" + uriPath);

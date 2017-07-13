@@ -26,8 +26,7 @@ import net.officefloor.plugin.web.http.session.spi.HttpSessionStore;
  *
  * @author Daniel Sagenschneider
  */
-public class RetrieveHttpSessionTest extends
-		AbstractHttpSessionManagedObjectTestCase {
+public class RetrieveHttpSessionTest extends AbstractHttpSessionManagedObjectTestCase {
 
 	/**
 	 * Session Id value.
@@ -51,8 +50,7 @@ public class RetrieveHttpSessionTest extends
 
 		// Record retrieving HTTP session
 		this.record_sessionIdCookie(SESSION_ID);
-		this.record_retrieve_sessionRetrieved(CREATION_TIME, EXPIRE_TIME,
-				newAttributes());
+		this.record_retrieve_sessionRetrieved(CREATION_TIME, EXPIRE_TIME, newAttributes());
 		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
 
 		// Load the managed object
@@ -71,16 +69,15 @@ public class RetrieveHttpSessionTest extends
 		// Record retrieving HTTP session
 		this.record_sessionIdCookie(SESSION_ID);
 		this.record_delay(); // retrieving from store
-		this.asynchronousListener.notifyStarted();
+		this.asynchronousContext.start(null);
 		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
-		this.asynchronousListener.notifyComplete();
+		this.asynchronousContext.complete(null);
 
 		// Load the managed object
 		this.replayMockObjects();
 		HttpSessionManagedObject mo = this.createHttpSessionManagedObject();
 		this.startCoordination(mo);
-		this.retrieveOperation.sessionRetrieved(CREATION_TIME, EXPIRE_TIME,
-				newAttributes());
+		this.retrieveOperation.sessionRetrieved(CREATION_TIME, EXPIRE_TIME, newAttributes());
 		this.verifyFunctionality(mo, false);
 	}
 
@@ -88,8 +85,7 @@ public class RetrieveHttpSessionTest extends
 	 * Ensure able to handle immediate failure to retrieve {@link HttpSession}
 	 * from the {@link HttpSessionStore}.
 	 */
-	public void testImmediateFailureToRetrieveSessionFromStore()
-			throws Throwable {
+	public void testImmediateFailureToRetrieveSessionFromStore() throws Throwable {
 
 		final Exception failure = new Exception("Retrieve Session failure");
 
@@ -115,8 +111,8 @@ public class RetrieveHttpSessionTest extends
 		// Record retrieving HTTP session
 		this.record_sessionIdCookie(SESSION_ID);
 		this.record_delay(); // failing to retrieve
-		this.asynchronousListener.notifyStarted();
-		this.asynchronousListener.notifyComplete();
+		this.asynchronousContext.start(null);
+		this.asynchronousContext.complete(null);
 
 		// Load the managed object
 		this.replayMockObjects();
@@ -135,8 +131,7 @@ public class RetrieveHttpSessionTest extends
 		this.record_sessionIdCookie("Not available Session Id");
 		this.record_retrieve_sessionNotAvailable();
 		this.record_generate_setSessionId(SESSION_ID);
-		this.record_create_sessionCreated(CREATION_TIME, EXPIRE_TIME,
-				newAttributes());
+		this.record_create_sessionCreated(CREATION_TIME, EXPIRE_TIME, newAttributes());
 		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
 
 		// Load the managed object
@@ -154,12 +149,11 @@ public class RetrieveHttpSessionTest extends
 		// Record retrieving HTTP session
 		this.record_sessionIdCookie("Not available Session Id");
 		this.record_delay(); // session not available
-		this.asynchronousListener.notifyStarted();
+		this.asynchronousContext.start(null);
 		this.record_generate_setSessionId(SESSION_ID);
-		this.record_create_sessionCreated(CREATION_TIME, EXPIRE_TIME,
-				newAttributes());
+		this.record_create_sessionCreated(CREATION_TIME, EXPIRE_TIME, newAttributes());
 		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
-		this.asynchronousListener.notifyComplete();
+		this.asynchronousContext.complete(null);
 
 		// Load the managed object
 		this.replayMockObjects();
@@ -177,8 +171,7 @@ public class RetrieveHttpSessionTest extends
 	 * @param isNew
 	 *            Flag indicating if {@link HttpSession} is new.
 	 */
-	private void verifyFunctionality(HttpSessionManagedObject mo, boolean isNew)
-			throws Throwable {
+	private void verifyFunctionality(HttpSessionManagedObject mo, boolean isNew) throws Throwable {
 
 		// Verify the mocks and operations
 		this.verifyOperations();

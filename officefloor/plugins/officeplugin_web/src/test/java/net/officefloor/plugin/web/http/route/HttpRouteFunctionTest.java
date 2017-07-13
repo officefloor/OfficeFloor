@@ -20,15 +20,15 @@ package net.officefloor.plugin.web.http.route;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
-import net.officefloor.compile.test.work.WorkLoaderUtil;
-import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.api.manage.Office;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.test.managedfunction.ManagedFunctionLoaderUtil;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.OfficeAwareManagedFunctionFactory;
 import net.officefloor.frame.api.manage.FunctionManager;
-import net.officefloor.frame.api.manage.WorkManager;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -49,7 +49,7 @@ import net.officefloor.plugin.web.http.session.HttpSession;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpRouteTaskTest extends OfficeFrameTestCase {
+public class HttpRouteFunctionTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records undertaking a redirect.
@@ -69,9 +69,8 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	 * @param test
 	 *            {@link OfficeFrameTestCase}.
 	 */
-	public static void recordDoRedirect(String uriPath, boolean isSecure,
-			ServerHttpConnection connection, HttpRequestState requestState,
-			HttpSession session, HttpApplicationLocation location,
+	public static void recordDoRedirect(String uriPath, boolean isSecure, ServerHttpConnection connection,
+			HttpRequestState requestState, HttpSession session, HttpApplicationLocation location,
 			OfficeFrameTestCase test) {
 		try {
 
@@ -80,19 +79,13 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 			final HttpHeader header = test.createMock(HttpHeader.class);
 
 			// Record the redirect
-			test.recordReturn(location,
-					location.transformToClientPath(uriPath, isSecure),
-					redirectUrl);
-			HttpUrlContinuationTest.recordSaveRequest(
-					"_OfficeFloorRedirectedRequest_", connection, requestState,
+			test.recordReturn(location, location.transformToClientPath(uriPath, isSecure), redirectUrl);
+			HttpUrlContinuationTest.recordSaveRequest("_OfficeFloorRedirectedRequest_", connection, requestState,
 					session, test);
-			test.recordReturn(connection, connection.getHttpResponse(),
-					response);
+			test.recordReturn(connection, connection.getHttpResponse(), response);
 			response.setStatus(303); // Status = See other
-			test.recordReturn(
-					response,
-					response.addHeader("Location", redirectUrl
-							+ HttpRouteFunction.REDIRECT_URI_SUFFIX), header);
+			test.recordReturn(response,
+					response.addHeader("Location", redirectUrl + HttpRouteFunction.REDIRECT_URI_SUFFIX), header);
 
 		} catch (Exception ex) {
 			throw fail(ex);
@@ -102,21 +95,18 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if duplicate URI path within the {@link Office}.
 	 */
-	public void testDuplicateUri() throws Exception {
+	public void testDuplicateUri() throws Throwable {
 
 		// Record duplicate URI paths
-		this.recordUrlContinuations("ONE", "/same/path", null, "TWO",
-				"/same/path", null);
+		this.recordUrlContinuations("ONE", "/same/path", null, "TWO", "/same/path", null);
 
 		// Test
 		this.replayMockObjects();
 		try {
-			this.createHttpRouteTask();
+			this.createHttpRouteFunction();
 			fail("Should not be successful");
 		} catch (DuplicateHttpUrlContinuationException ex) {
-			assertEquals(
-					"Incorrect cause",
-					"HTTP URL continuation path '/same/path' used for more than one Task",
+			assertEquals("Incorrect cause", "HTTP URL continuation path '/same/path' used for more than one Task",
 					ex.getMessage());
 		}
 		this.verifyMockObjects();
@@ -125,21 +115,18 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if duplicate resolved URI path within the {@link Office}.
 	 */
-	public void testDuplicateResolvedUri() throws Exception {
+	public void testDuplicateResolvedUri() throws Throwable {
 
 		// Record duplicate URI paths
-		this.recordUrlContinuations("ONE", "same/path", null, "TWO",
-				"/same/../same/path", null);
+		this.recordUrlContinuations("ONE", "same/path", null, "TWO", "/same/../same/path", null);
 
 		// Test
 		this.replayMockObjects();
 		try {
-			this.createHttpRouteTask();
+			this.createHttpRouteFunction();
 			fail("Should not be successful");
 		} catch (DuplicateHttpUrlContinuationException ex) {
-			assertEquals(
-					"Incorrect cause",
-					"HTTP URL continuation path '/same/path' used for more than one Task",
+			assertEquals("Incorrect cause", "HTTP URL continuation path '/same/path' used for more than one Task",
 					ex.getMessage());
 		}
 		this.verifyMockObjects();
@@ -148,24 +135,21 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure not handled if missing required context path.
 	 */
-	public void testNotHandledIfMissingContextPath() throws Exception {
+	public void testNotHandledIfMissingContextPath() throws Throwable {
 
 		// Record missing context path
 		this.recordUrlContinuations("ONE", "/path", null);
 		this.recordDependencies();
-		this.recordReturn(this.connection, this.connection.getHttpRequest(),
-				this.request);
+		this.recordReturn(this.connection, this.connection.getHttpRequest(), this.request);
 		this.recordReturn(this.request, this.request.getRequestURI(), "/path");
 		this.location.transformToApplicationCanonicalPath("/path");
 		this.control(this.location).setThrowable(
-				new IncorrectHttpRequestContextPathException(
-						HttpStatus.SC_NOT_FOUND, "Must have context path"));
-		this.recordReturn(this.context,
-				this.context.doFlow(HttpRouteFunctionFlows.NOT_HANDLED, null), null);
+				new IncorrectHttpRequestContextPathException(HttpStatus.SC_NOT_FOUND, "Must have context path"));
+		this.context.doFlow(HttpRouteFunctionFlows.NOT_HANDLED, null, null);
 
 		// Test
 		this.replayMockObjects();
-		HttpRouteFunction task = this.createHttpRouteTask();
+		HttpRouteFunction task = this.createHttpRouteFunction();
 		task.execute(this.context);
 		this.verifyMockObjects();
 	}
@@ -174,8 +158,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	 * Ensure invokes unhandled flow on unhandled {@link HttpRequest}.
 	 */
 	public void testUnhandledNonSecureRequest() throws Throwable {
-		this.doRouteTest("/unhandled", null, false, "task", "/unused",
-				Boolean.TRUE);
+		this.doRouteTest("/unhandled", null, false, "task", "/unused", Boolean.TRUE);
 	}
 
 	/**
@@ -230,8 +213,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	 * canonical path.
 	 */
 	public void testCanonicalPath() throws Throwable {
-		this.doRouteTest("/path", "task", false, "task", "/ignore/../path/",
-				null);
+		this.doRouteTest("/path", "task", false, "task", "/ignore/../path/", null);
 	}
 
 	/**
@@ -246,8 +228,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	 * {@link ServerHttpConnection}.
 	 */
 	public void testRedirectAsNotSecure() throws Throwable {
-		this.doRouteTest("/redirect", "redirect", false, "redirect",
-				"/redirect", Boolean.TRUE);
+		this.doRouteTest("/redirect", "redirect", false, "redirect", "/redirect", Boolean.TRUE);
 	}
 
 	/**
@@ -255,16 +236,15 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	 * {@link ServerHttpConnection}.
 	 */
 	public void testRedirectAsSecure() throws Throwable {
-		this.doRouteTest("/redirect", "redirect", true, "redirect",
-				"/redirect", Boolean.FALSE);
+		this.doRouteTest("/redirect", "redirect", true, "redirect", "/redirect", Boolean.FALSE);
 	}
 
 	/**
 	 * Ensure services redirected {@link HttpRequest}.
 	 */
 	public void testServiceRedirectedRequest() throws Throwable {
-		this.doRouteTest("/redirect" + HttpRouteFunction.REDIRECT_URI_SUFFIX,
-				"redirect", true, "redirect", "/redirect", Boolean.TRUE);
+		this.doRouteTest("/redirect" + HttpRouteFunction.REDIRECT_URI_SUFFIX, "redirect", true, "redirect", "/redirect",
+				Boolean.TRUE);
 	}
 
 	/*
@@ -279,20 +259,17 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	/**
 	 * {@link ServerHttpConnection}.
 	 */
-	private final ServerHttpConnection connection = this
-			.createMock(ServerHttpConnection.class);
+	private final ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
 
 	/**
 	 * {@link HttpApplicationLocation}.
 	 */
-	private final HttpApplicationLocation location = this
-			.createMock(HttpApplicationLocation.class);
+	private final HttpApplicationLocation location = this.createMock(HttpApplicationLocation.class);
 
 	/**
 	 * {@link HttpRequestState}.
 	 */
-	private final HttpRequestState requestState = this
-			.createMock(HttpRequestState.class);
+	private final HttpRequestState requestState = this.createMock(HttpRequestState.class);
 
 	/**
 	 * {@link HttpRouteFunction}.
@@ -303,7 +280,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	 * {@link ManagedFunctionContext}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final ManagedFunctionContext<HttpRouteFunction, HttpRouteFunctionDependencies, HttpRouteFunctionFlows> context = this
+	private final ManagedFunctionContext<HttpRouteFunctionDependencies, HttpRouteFunctionFlows> context = this
 			.createMock(ManagedFunctionContext.class);
 
 	/**
@@ -319,12 +296,8 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure routing of {@link HttpRequest}.
 	 */
-	private void doRouteTest(String uriPath, String expectedTaskName,
-			boolean isConnectionSecure,
-			Object... taskNameThenUriPathThenIsSecureGroupings)
-			throws Throwable {
-
-		final FlowFuture flowFuture = this.createMock(FlowFuture.class);
+	private void doRouteTest(String uriPath, String expectedTaskName, boolean isConnectionSecure,
+			Object... taskNameThenUriPathThenIsSecureGroupings) throws Throwable {
 
 		// Record the office URL continuations
 		this.recordUrlContinuations(taskNameThenUriPathThenIsSecureGroupings);
@@ -333,8 +306,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 		UrlServicer urlServicer = null;
 		if (expectedTaskName != null) {
 			urlServicer = this.urlServicers.get(expectedTaskName);
-			assertNotNull("Unknown expected task '" + expectedTaskName + "'",
-					urlServicer);
+			assertNotNull("Unknown expected task '" + expectedTaskName + "'", urlServicer);
 		}
 
 		// Record initial servicing
@@ -345,20 +317,17 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 		if (urlServicer != null) {
 
 			// Determine if require redirect (as not appropriately secure)
-			if ((urlServicer.isSecure != null)
-					&& (urlServicer.isSecure.booleanValue() != isConnectionSecure)) {
+			if ((urlServicer.isSecure != null) && (urlServicer.isSecure.booleanValue() != isConnectionSecure)) {
 
 				// Require redirect
 				isRequireRedirect = true;
 
 				// Record the redirect
-				recordDoRedirect(uriPath, urlServicer.isSecure.booleanValue(),
-						this.connection, this.requestState, this.session,
-						this.location, this);
+				recordDoRedirect(uriPath, urlServicer.isSecure.booleanValue(), this.connection, this.requestState,
+						this.session, this.location, this);
 
 				// Record initial servicing of redirect
-				this.recordInitialServicing(uriPath,
-						urlServicer.isSecure.booleanValue());
+				this.recordInitialServicing(uriPath, urlServicer.isSecure.booleanValue());
 			}
 
 			// Record servicing the request
@@ -366,16 +335,14 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 
 		} else {
 			// Not handled URI path
-			this.recordReturn(this.context,
-					this.context.doFlow(HttpRouteFunctionFlows.NOT_HANDLED, null),
-					flowFuture);
+			this.context.doFlow(HttpRouteFunctionFlows.NOT_HANDLED, null, null);
 		}
 
 		// Test
 		this.replayMockObjects();
 
 		// Create task and undertake initial request
-		HttpRouteFunction task = this.createHttpRouteTask();
+		HttpRouteFunction task = this.createHttpRouteFunction();
 		task.execute(this.context);
 
 		// Undertake request for redirect (if necessary)
@@ -391,20 +358,13 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	 * Records obtaining the dependencies.
 	 */
 	private void recordDependencies() {
-		this.recordReturn(this.context, this.context
-				.getObject(HttpRouteFunctionDependencies.SERVER_HTTP_CONNECTION),
+		this.recordReturn(this.context, this.context.getObject(HttpRouteFunctionDependencies.SERVER_HTTP_CONNECTION),
 				this.connection);
-		this.recordReturn(
-				this.context,
-				this.context
-						.getObject(HttpRouteFunctionDependencies.HTTP_APPLICATION_LOCATION),
+		this.recordReturn(this.context, this.context.getObject(HttpRouteFunctionDependencies.HTTP_APPLICATION_LOCATION),
 				this.location);
-		this.recordReturn(
-				this.context,
-				this.context.getObject(HttpRouteFunctionDependencies.REQUEST_STATE),
+		this.recordReturn(this.context, this.context.getObject(HttpRouteFunctionDependencies.REQUEST_STATE),
 				this.requestState);
-		this.recordReturn(this.context,
-				this.context.getObject(HttpRouteFunctionDependencies.HTTP_SESSION),
+		this.recordReturn(this.context, this.context.getObject(HttpRouteFunctionDependencies.HTTP_SESSION),
 				this.session);
 	}
 
@@ -416,8 +376,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	 * @param isConnectionSecure
 	 *            Indicates whether the {@link ServerHttpConnection} is secure.
 	 */
-	private void recordInitialServicing(String uriPath,
-			boolean isConnectionSecure) throws Exception {
+	private void recordInitialServicing(String uriPath, boolean isConnectionSecure) throws Exception {
 
 		final String requestUri = "/context" + uriPath;
 
@@ -425,21 +384,15 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 		this.recordDependencies();
 
 		// Record servicing request
-		this.recordReturn(this.connection, this.connection.getHttpRequest(),
-				this.request);
-		this.recordReturn(this.request, this.request.getRequestURI(),
-				requestUri);
+		this.recordReturn(this.connection, this.connection.getHttpRequest(), this.request);
+		this.recordReturn(this.request, this.request.getRequestURI(), requestUri);
 		if (requestUri.endsWith(HttpRouteFunction.REDIRECT_URI_SUFFIX)) {
 			// Record servicing redirected request
-			HttpUrlContinuationTest.recordReinstateRequest(true,
-					"_OfficeFloorRedirectedRequest_", this.connection,
+			HttpUrlContinuationTest.recordReinstateRequest(true, "_OfficeFloorRedirectedRequest_", this.connection,
 					this.requestState, this.session, this);
 		}
-		this.recordReturn(this.location,
-				this.location.transformToApplicationCanonicalPath(requestUri),
-				uriPath);
-		this.recordReturn(this.connection, this.connection.isSecure(),
-				isConnectionSecure);
+		this.recordReturn(this.location, this.location.transformToApplicationCanonicalPath(requestUri), uriPath);
+		this.recordReturn(this.connection, this.connection.isSecure(), isConnectionSecure);
 	}
 
 	/**
@@ -447,29 +400,29 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	 * 
 	 * @return {@link HttpRouteFunction}.
 	 */
-	private HttpRouteFunction createHttpRouteTask() throws Exception {
+	private HttpRouteFunction createHttpRouteFunction() throws Throwable {
 
-		// Load the work source and create the task
-		FunctionNamespaceType<HttpRouteFunction> workType = WorkLoaderUtil
-				.loadWorkType(HttpRouteManagedFunctionSource.class);
-		ManagedFunctionType<HttpRouteFunction, ?, ?> taskType = workType.getManagedFunctionTypes()[0];
-		HttpRouteFunction workFactory = workType.getWorkFactory().createWork();
+		// Load the managed function source and create the function
+		FunctionNamespaceType namespaceType = ManagedFunctionLoaderUtil
+				.loadManagedFunctionType(HttpRouteManagedFunctionSource.class);
+		ManagedFunctionType<?, ?> functionType = namespaceType.getManagedFunctionTypes()[0];
 
 		// Make Office aware
-		workFactory.setOffice(this.office);
+		ManagedFunctionFactory<?, ?> factory = functionType.getManagedFunctionFactory();
+		assertTrue("Should be Office aware", factory instanceof OfficeAwareManagedFunctionFactory);
+		((OfficeAwareManagedFunctionFactory<?, ?>) factory).setOffice(office);
 
-		// Create the task
-		ManagedFunction<HttpRouteFunction, ?, ?> task = taskType.getManagedFunctionFactory().createManagedFunction(
-				workFactory);
+		// Create the function
+		ManagedFunction<?, ?> function = factory.createManagedFunction();
 
 		// Return the task
-		return (HttpRouteFunction) task;
+		return (HttpRouteFunction) function;
 	}
 
 	/**
 	 * Records the URL continuation {@link FunctionManager} configuration.
 	 * 
-	 * @param taskNameThenUriPathThenIsSecureGroupings
+	 * @param functionNameThenUriPathThenIsSecureGroupings
 	 *            Listing of the following sequence grouping of values:
 	 *            <ol>
 	 *            <li>{@link ManagedFunction} name</li>
@@ -477,84 +430,68 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	 *            <li>Is Secure flag</li>
 	 *            </ol>
 	 */
-	private void recordUrlContinuations(
-			Object... taskNameThenUriPathThenIsSecureGroupings)
-			throws Exception {
+	private void recordUrlContinuations(Object... functionNameThenUriPathThenIsSecureGroupings) throws Exception {
 
 		// Create the listing of URL servicers
-		int urlServicerCount = (taskNameThenUriPathThenIsSecureGroupings.length / 3);
-		String[] taskNames = new String[urlServicerCount];
+		int urlServicerCount = (functionNameThenUriPathThenIsSecureGroupings.length / 3);
+		String[] functionNames = new String[urlServicerCount];
 		UrlServicer[] urlServicerList = new UrlServicer[urlServicerCount];
 
 		// Create and register the URL servicers
-		for (int i = 0; i < taskNameThenUriPathThenIsSecureGroupings.length; i += 3) {
+		for (int i = 0; i < functionNameThenUriPathThenIsSecureGroupings.length; i += 3) {
 
 			// Obtain the details for the current grouping
-			String taskName = (String) taskNameThenUriPathThenIsSecureGroupings[i];
-			String applicationUriPath = (String) taskNameThenUriPathThenIsSecureGroupings[i + 1];
-			Boolean isSecure = (Boolean) taskNameThenUriPathThenIsSecureGroupings[i + 2];
+			String functionName = (String) functionNameThenUriPathThenIsSecureGroupings[i];
+			String applicationUriPath = (String) functionNameThenUriPathThenIsSecureGroupings[i + 1];
+			Boolean isSecure = (Boolean) functionNameThenUriPathThenIsSecureGroupings[i + 2];
 
 			// Create the URL Servicer
-			FunctionManager taskManager = this.createMock(FunctionManager.class);
-			UrlServicer urlServicer = new UrlServicer(taskManager,
-					applicationUriPath, isSecure);
+			FunctionManager functionManager = this.createMock(FunctionManager.class);
+			UrlServicer urlServicer = new UrlServicer(functionManager, applicationUriPath, isSecure);
 
 			// Load the details for recording
 			int index = i / 3;
-			taskNames[index] = taskName;
+			functionNames[index] = functionName;
 			urlServicerList[index] = urlServicer;
 
 			// Register the URL servicer
-			this.urlServicers.put(taskName, urlServicer);
+			this.urlServicers.put(functionName, urlServicer);
 		}
 
-		// Record the office work (using same work name as task name)
-		this.recordReturn(this.office, this.office.getWorkNames(), taskNames);
-
 		// Record the office URL continuations
-		for (int i = 0; i < taskNames.length; i++) {
-			String taskName = taskNames[i];
+		for (int i = 0; i < functionNames.length; i++) {
+			String functionName = functionNames[i];
 			UrlServicer urlServicer = urlServicerList[i];
 
-			// Record the work
-			WorkManager workManager = this.createMock(WorkManager.class);
-			this.recordReturn(this.office,
-					this.office.getWorkManager(taskName), workManager);
+			// Record the function
+			FunctionManager functionManager = this.createMock(FunctionManager.class);
+			this.recordReturn(this.office, this.office.getFunctionManager(functionName), functionManager);
 
 			// Record the task list
-			final String NON_URL_CONTINUATION_TASK_NAME = "NonUrlContinuation";
-			final String OTHER_DIFFERENTIATOR_TASK_NAME = "OtherDifferentiator";
-			this.recordReturn(workManager, workManager.getTaskNames(),
-					new String[] { NON_URL_CONTINUATION_TASK_NAME,
-							OTHER_DIFFERENTIATOR_TASK_NAME, taskName });
+			final String NON_URL_CONTINUATION_FUNCTION_NAME = "NonUrlContinuation";
+			final String OTHER_DIFFERENTIATOR_FUNCTION_NAME = "OtherDifferentiator";
+			this.recordReturn(functionManager, this.office.getFunctionNames(), new String[] {
+					NON_URL_CONTINUATION_FUNCTION_NAME, OTHER_DIFFERENTIATOR_FUNCTION_NAME, functionName });
 
 			// Record the non URL continuation task
 			FunctionManager taskManager = this.createMock(FunctionManager.class);
-			this.recordReturn(workManager,
-					workManager.getTaskManager(NON_URL_CONTINUATION_TASK_NAME),
+			this.recordReturn(functionManager, this.office.getFunctionManager(NON_URL_CONTINUATION_FUNCTION_NAME),
 					taskManager);
-			this.recordReturn(taskManager, taskManager.getDifferentiator(),
-					null);
+			this.recordReturn(taskManager, taskManager.getDifferentiator(), null);
 
 			// Record the other differentiator task
-			this.recordReturn(workManager,
-					workManager.getTaskManager(OTHER_DIFFERENTIATOR_TASK_NAME),
+			this.recordReturn(functionManager, this.office.getFunctionManager(OTHER_DIFFERENTIATOR_FUNCTION_NAME),
 					taskManager);
-			this.recordReturn(taskManager, taskManager.getDifferentiator(),
-					"NotUrlContinuation");
+			this.recordReturn(taskManager, taskManager.getDifferentiator(), "NotUrlContinuation");
 
 			// Record the URL continuation
 			HttpUrlContinuationDifferentiator urlContinuation = this
 					.createMock(HttpUrlContinuationDifferentiator.class);
-			this.recordReturn(workManager,
-					workManager.getTaskManager(taskName),
-					urlServicer.taskManager);
-			this.recordReturn(urlServicer.taskManager,
-					urlServicer.taskManager.getDifferentiator(),
+			this.recordReturn(functionManager, this.office.getFunctionManager(functionName),
+					urlServicer.functionManager);
+			this.recordReturn(urlServicer.functionManager, urlServicer.functionManager.getDifferentiator(),
 					urlContinuation);
-			this.recordReturn(urlContinuation,
-					urlContinuation.getApplicationUriPath(),
-					urlServicer.applicationUriPath);
+			this.recordReturn(urlContinuation, urlContinuation.getApplicationUriPath(), urlServicer.applicationUriPath);
 			urlContinuation.isSecure();
 			this.control(urlContinuation).setReturnValue(urlServicer.isSecure);
 		}
@@ -568,7 +505,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 		/**
 		 * {@link FunctionManager}.
 		 */
-		public final FunctionManager taskManager;
+		public final FunctionManager functionManager;
 
 		/**
 		 * Application URI path.
@@ -590,9 +527,8 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 		 * @param isSecure
 		 *            Indicates if secure.
 		 */
-		public UrlServicer(FunctionManager taskManager, String applicationUriPath,
-				Boolean isSecure) {
-			this.taskManager = taskManager;
+		public UrlServicer(FunctionManager taskManager, String applicationUriPath, Boolean isSecure) {
+			this.functionManager = taskManager;
 			this.applicationUriPath = applicationUriPath;
 			this.isSecure = isSecure;
 		}

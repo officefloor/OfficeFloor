@@ -149,7 +149,7 @@ public class MockServerOutputStream implements WriteBufferReceiver {
 	 */
 
 	@Override
-	public Object getLock() {
+	public Object getWriteLock() {
 		return this;
 	}
 

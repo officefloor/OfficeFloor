@@ -19,7 +19,7 @@ package net.officefloor.plugin.web.http.template.section;
 
 import java.io.Serializable;
 
-import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.web.http.application.HttpSessionStateful;
 
 /**
@@ -76,7 +76,7 @@ public class StatefulObjectLogic {
 	/**
 	 * Required from test setup.
 	 */
-	@NextTask("doExternalFlow")
+	@NextFunction("doExternalFlow")
 	public void required() {
 	}
 

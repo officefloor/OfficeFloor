@@ -30,7 +30,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.TestSource;
+import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
 import net.officefloor.plugin.web.http.security.HttpChallengeContext;
@@ -60,8 +60,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	/**
 	 * {@link HttpSecuritySourceMetaData}.
 	 */
-	private final HttpSecuritySourceMetaData<?, ?, ?, ?> metaData = this
-			.createMock(HttpSecuritySourceMetaData.class);
+	private final HttpSecuritySourceMetaData<?, ?, ?, ?> metaData = this.createMock(HttpSecuritySourceMetaData.class);
 
 	@Override
 	protected void setUp() throws Exception {
@@ -97,19 +96,13 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		this.loadHttpSecurityType(true, new Init() {
 			@Override
 			public void init(HttpSecuritySourceContext context) {
-				assertEquals("Ensure get defaulted property", "DEFAULT",
-						context.getProperty("missing", "DEFAULT"));
-				assertEquals("Ensure get property ONE", "1",
-						context.getProperty("ONE"));
-				assertEquals("Ensure get property TWO", "2",
-						context.getProperty("TWO"));
+				assertEquals("Ensure get defaulted property", "DEFAULT", context.getProperty("missing", "DEFAULT"));
+				assertEquals("Ensure get property ONE", "1", context.getProperty("ONE"));
+				assertEquals("Ensure get property TWO", "2", context.getProperty("TWO"));
 				Properties properties = context.getProperties();
-				assertEquals("Incorrect number of properties", 2,
-						properties.size());
-				assertEquals("Incorrect property ONE", "1",
-						properties.get("ONE"));
-				assertEquals("Incorrect property TWO", "2",
-						properties.get("TWO"));
+				assertEquals("Incorrect number of properties", 2, properties.size());
+				assertEquals("Incorrect property ONE", "1", properties.get("ONE"));
+				assertEquals("Incorrect property TWO", "2", properties.get("TWO"));
 			}
 		}, "ONE", "1", "TWO", "2");
 	}
@@ -157,17 +150,15 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		this.record_basicMetaData();
 
 		// Obtain path
-		final String objectPath = Object.class.getName().replace('.', '/')
-				+ ".class";
+		final String objectPath = Object.class.getName().replace('.', '/') + ".class";
 
 		// Attempt to load
 		this.loadHttpSecurityType(true, new Init() {
 			@Override
 			public void init(HttpSecuritySourceContext context) {
 				assertEquals("Incorrect resource locator",
-						LoadHttpSecurityTypeTest.class.getClassLoader()
-								.getResource(objectPath), context
-								.getClassLoader().getResource(objectPath));
+						LoadHttpSecurityTypeTest.class.getClassLoader().getResource(objectPath),
+						context.getClassLoader().getResource(objectPath));
 			}
 		});
 	}
@@ -177,8 +168,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testFailInitHttpSecuritySource() {
 
-		final NullPointerException failure = new NullPointerException(
-				"Fail init HttpSecuritySource");
+		final NullPointerException failure = new NullPointerException("Fail init HttpSecuritySource");
 
 		// Record failure to init the HTTP security Source
 		this.record_issue("Failed to init", failure);
@@ -262,8 +252,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testNoDependencyType() {
 
-		final HttpSecurityDependencyMetaData<?> dependency = this
-				.createMock(HttpSecurityDependencyMetaData.class);
+		final HttpSecurityDependencyMetaData<?> dependency = this.createMock(HttpSecurityDependencyMetaData.class);
 
 		// Record no dependency type
 		this.record_securityClass();
@@ -283,27 +272,21 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testInvalidDependencyKey() {
 
-		final HttpSecurityDependencyMetaData<?> dependencyOne = this
-				.createMock(HttpSecurityDependencyMetaData.class);
-		final HttpSecurityDependencyMetaData<?> dependencyTwo = this
-				.createMock(HttpSecurityDependencyMetaData.class);
+		final HttpSecurityDependencyMetaData<?> dependencyOne = this.createMock(HttpSecurityDependencyMetaData.class);
+		final HttpSecurityDependencyMetaData<?> dependencyTwo = this.createMock(HttpSecurityDependencyMetaData.class);
 
 		// Record missing dependency key
 		this.record_securityClass();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
-				new HttpSecurityDependencyMetaData[] { dependencyOne,
-						dependencyTwo });
+				new HttpSecurityDependencyMetaData[] { dependencyOne, dependencyTwo });
 		this.recordReturn(dependencyOne, dependencyOne.getLabel(), null);
 		this.recordReturn(dependencyOne, dependencyOne.getKey(), TwoKey.ONE);
-		this.recordReturn(dependencyOne, dependencyOne.getType(),
-				Connection.class);
+		this.recordReturn(dependencyOne, dependencyOne.getType(), Connection.class);
 		this.recordReturn(dependencyOne, dependencyOne.getTypeQualifier(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getLabel(), null);
-		this.recordReturn(dependencyTwo, dependencyTwo.getKey(),
-				InvalidKey.INVALID);
-		this.record_issue("Dependencies identified by different key types ("
-				+ TwoKey.class.getName() + ", " + InvalidKey.class.getName()
-				+ ")");
+		this.recordReturn(dependencyTwo, dependencyTwo.getKey(), InvalidKey.INVALID);
+		this.record_issue("Dependencies identified by different key types (" + TwoKey.class.getName() + ", "
+				+ InvalidKey.class.getName() + ")");
 
 		// Attempt to load
 		this.loadHttpSecurityType(false, null);
@@ -314,20 +297,16 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testDependencyMixingKeyAndIndexes() {
 
-		final HttpSecurityDependencyMetaData<?> dependencyOne = this
-				.createMock(HttpSecurityDependencyMetaData.class);
-		final HttpSecurityDependencyMetaData<?> dependencyTwo = this
-				.createMock(HttpSecurityDependencyMetaData.class);
+		final HttpSecurityDependencyMetaData<?> dependencyOne = this.createMock(HttpSecurityDependencyMetaData.class);
+		final HttpSecurityDependencyMetaData<?> dependencyTwo = this.createMock(HttpSecurityDependencyMetaData.class);
 
 		// Record missing dependency key
 		this.record_securityClass();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
-				new HttpSecurityDependencyMetaData[] { dependencyOne,
-						dependencyTwo });
+				new HttpSecurityDependencyMetaData[] { dependencyOne, dependencyTwo });
 		this.recordReturn(dependencyOne, dependencyOne.getLabel(), null);
 		this.recordReturn(dependencyOne, dependencyOne.getKey(), TwoKey.ONE);
-		this.recordReturn(dependencyOne, dependencyOne.getType(),
-				Connection.class);
+		this.recordReturn(dependencyOne, dependencyOne.getType(), Connection.class);
 		this.recordReturn(dependencyOne, dependencyOne.getTypeQualifier(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getLabel(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getKey(), null);
@@ -342,27 +321,22 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testDuplicateDependencyKey() {
 
-		final HttpSecurityDependencyMetaData<?> dependencyOne = this
-				.createMock(HttpSecurityDependencyMetaData.class);
-		final HttpSecurityDependencyMetaData<?> dependencyTwo = this
-				.createMock(HttpSecurityDependencyMetaData.class);
+		final HttpSecurityDependencyMetaData<?> dependencyOne = this.createMock(HttpSecurityDependencyMetaData.class);
+		final HttpSecurityDependencyMetaData<?> dependencyTwo = this.createMock(HttpSecurityDependencyMetaData.class);
 
 		// Record missing dependency key
 		this.record_securityClass();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
-				new HttpSecurityDependencyMetaData[] { dependencyOne,
-						dependencyTwo });
+				new HttpSecurityDependencyMetaData[] { dependencyOne, dependencyTwo });
 		this.recordReturn(dependencyOne, dependencyOne.getLabel(), null);
 		this.recordReturn(dependencyOne, dependencyOne.getKey(), TwoKey.ONE);
-		this.recordReturn(dependencyOne, dependencyOne.getType(),
-				Connection.class);
+		this.recordReturn(dependencyOne, dependencyOne.getType(), Connection.class);
 		this.recordReturn(dependencyOne, dependencyOne.getTypeQualifier(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getLabel(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getKey(), TwoKey.ONE);
 		this.recordReturn(dependencyTwo, dependencyTwo.getType(), String.class);
 		this.recordReturn(dependencyTwo, dependencyTwo.getTypeQualifier(), null);
-		this.record_issue("Must have exactly one dependency per key (key="
-				+ TwoKey.ONE + ")");
+		this.record_issue("Must have exactly one dependency per key (key=" + TwoKey.ONE + ")");
 
 		// Attempt to load
 		this.loadHttpSecurityType(false, null);
@@ -373,8 +347,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testNotAllDependencyKeys() {
 
-		final HttpSecurityDependencyMetaData<?> dependency = this
-				.createMock(HttpSecurityDependencyMetaData.class);
+		final HttpSecurityDependencyMetaData<?> dependency = this.createMock(HttpSecurityDependencyMetaData.class);
 
 		// Record not all dependency keys
 		this.record_securityClass();
@@ -384,8 +357,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(dependency, dependency.getKey(), TwoKey.ONE);
 		this.recordReturn(dependency, dependency.getType(), Connection.class);
 		this.recordReturn(dependency, dependency.getTypeQualifier(), null);
-		this.record_issue("Missing dependency meta-data (keys=" + TwoKey.TWO
-				+ ")");
+		this.record_issue("Missing dependency meta-data (keys=" + TwoKey.TWO + ")");
 
 		// Attempt to load
 		this.loadHttpSecurityType(false, null);
@@ -399,10 +371,8 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 
 		// Record no flow type
 		this.record_securityClass();
-		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
-				null);
-		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
-				new HttpSecurityFlowMetaData[] { null });
+		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
+		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), new HttpSecurityFlowMetaData[] { null });
 		this.record_issue("Null ManagedObjectFlowMetaData for flow 0");
 
 		// Attempt to load
@@ -414,15 +384,12 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testDefaultFlowArgumentType() {
 
-		final HttpSecurityFlowMetaData<?> flowDefaulted = this
-				.createMock(HttpSecurityFlowMetaData.class);
-		final HttpSecurityFlowMetaData<?> flowProvided = this
-				.createMock(HttpSecurityFlowMetaData.class);
+		final HttpSecurityFlowMetaData<?> flowDefaulted = this.createMock(HttpSecurityFlowMetaData.class);
+		final HttpSecurityFlowMetaData<?> flowProvided = this.createMock(HttpSecurityFlowMetaData.class);
 
 		// Record no flow argument type
 		this.record_securityClass();
-		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
-				null);
+		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 				new HttpSecurityFlowMetaData[] { flowDefaulted, flowProvided });
 		this.recordReturn(flowDefaulted, flowDefaulted.getLabel(), "DEFAULTED");
@@ -430,27 +397,21 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(flowDefaulted, flowDefaulted.getArgumentType(), null);
 		this.recordReturn(flowProvided, flowProvided.getLabel(), null);
 		this.recordReturn(flowProvided, flowProvided.getKey(), null);
-		this.recordReturn(flowProvided, flowProvided.getArgumentType(),
-				Connection.class);
+		this.recordReturn(flowProvided, flowProvided.getArgumentType(), Connection.class);
 		this.record_credentialsClass();
 
 		// Attempt to load
-		HttpSecurityType<?, ?, ?, ?> securityType = this.loadHttpSecurityType(
-				true, null);
+		HttpSecurityType<?, ?, ?, ?> securityType = this.loadHttpSecurityType(true, null);
 
 		// Validate argument types of flows
 		HttpSecurityFlowType<?>[] flowTypes = securityType.getFlowTypes();
 		assertEquals("Incorrect number of flows", 2, flowTypes.length);
 		HttpSecurityFlowType<?> defaulted = flowTypes[0];
-		assertEquals("Incorrect name for defaulted argument flow", "DEFAULTED",
-				defaulted.getFlowName());
-		assertEquals("Incorrect defaulted argument type", Void.class,
-				defaulted.getArgumentType());
+		assertEquals("Incorrect name for defaulted argument flow", "DEFAULTED", defaulted.getFlowName());
+		assertEquals("Incorrect defaulted argument type", Void.class, defaulted.getArgumentType());
 		HttpSecurityFlowType<?> provided = flowTypes[1];
-		assertEquals("Incorrect name for provided argument flow", "1",
-				provided.getFlowName());
-		assertEquals("Incorrect provided argument type", Connection.class,
-				provided.getArgumentType());
+		assertEquals("Incorrect name for provided argument flow", "1", provided.getFlowName());
+		assertEquals("Incorrect provided argument type", Connection.class, provided.getArgumentType());
 	}
 
 	/**
@@ -458,15 +419,12 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testInvalidFlowKey() {
 
-		final HttpSecurityFlowMetaData<?> flowOne = this
-				.createMock(HttpSecurityFlowMetaData.class);
-		final HttpSecurityFlowMetaData<?> flowTwo = this
-				.createMock(HttpSecurityFlowMetaData.class);
+		final HttpSecurityFlowMetaData<?> flowOne = this.createMock(HttpSecurityFlowMetaData.class);
+		final HttpSecurityFlowMetaData<?> flowTwo = this.createMock(HttpSecurityFlowMetaData.class);
 
 		// Record missing flow key
 		this.record_securityClass();
-		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
-				null);
+		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 				new HttpSecurityFlowMetaData[] { flowOne, flowTwo });
 		this.recordReturn(flowOne, flowOne.getLabel(), null);
@@ -474,9 +432,8 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(flowOne, flowOne.getArgumentType(), Connection.class);
 		this.recordReturn(flowTwo, flowTwo.getLabel(), null);
 		this.recordReturn(flowTwo, flowTwo.getKey(), InvalidKey.INVALID);
-		this.record_issue("Meta-data flows identified by different key types ("
-				+ TwoKey.class.getName() + ", " + InvalidKey.class.getName()
-				+ ")");
+		this.record_issue("Meta-data flows identified by different key types (" + TwoKey.class.getName() + ", "
+				+ InvalidKey.class.getName() + ")");
 
 		// Attempt to load
 		this.loadHttpSecurityType(false, null);
@@ -487,15 +444,12 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testFlowMixingKeyAndIndexes() {
 
-		final HttpSecurityFlowMetaData<?> flowOne = this
-				.createMock(HttpSecurityFlowMetaData.class);
-		final HttpSecurityFlowMetaData<?> flowTwo = this
-				.createMock(HttpSecurityFlowMetaData.class);
+		final HttpSecurityFlowMetaData<?> flowOne = this.createMock(HttpSecurityFlowMetaData.class);
+		final HttpSecurityFlowMetaData<?> flowTwo = this.createMock(HttpSecurityFlowMetaData.class);
 
 		// Record missing flow key
 		this.record_securityClass();
-		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
-				null);
+		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 				new HttpSecurityFlowMetaData[] { flowOne, flowTwo });
 		this.recordReturn(flowOne, flowOne.getLabel(), null);
@@ -514,15 +468,12 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testDuplicateFlowKey() {
 
-		final HttpSecurityFlowMetaData<?> flowOne = this
-				.createMock(HttpSecurityFlowMetaData.class);
-		final HttpSecurityFlowMetaData<?> flowTwo = this
-				.createMock(HttpSecurityFlowMetaData.class);
+		final HttpSecurityFlowMetaData<?> flowOne = this.createMock(HttpSecurityFlowMetaData.class);
+		final HttpSecurityFlowMetaData<?> flowTwo = this.createMock(HttpSecurityFlowMetaData.class);
 
 		// Record missing flow key
 		this.record_securityClass();
-		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
-				null);
+		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 				new HttpSecurityFlowMetaData[] { flowOne, flowTwo });
 		this.recordReturn(flowOne, flowOne.getLabel(), null);
@@ -531,8 +482,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(flowTwo, flowTwo.getLabel(), null);
 		this.recordReturn(flowTwo, flowTwo.getKey(), TwoKey.ONE);
 		this.recordReturn(flowTwo, flowTwo.getArgumentType(), String.class);
-		this.record_issue("Must have exactly one flow per key (key="
-				+ TwoKey.ONE + ")");
+		this.record_issue("Must have exactly one flow per key (key=" + TwoKey.ONE + ")");
 
 		// Attempt to load
 		this.loadHttpSecurityType(false, null);
@@ -543,15 +493,12 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testNotAllFlowKeys() {
 
-		final HttpSecurityFlowMetaData<?> flow = this
-				.createMock(HttpSecurityFlowMetaData.class);
+		final HttpSecurityFlowMetaData<?> flow = this.createMock(HttpSecurityFlowMetaData.class);
 
 		// Record not all flow keys
 		this.record_securityClass();
-		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
-				null);
-		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
-				new HttpSecurityFlowMetaData[] { flow });
+		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
+		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), new HttpSecurityFlowMetaData[] { flow });
 		this.recordReturn(flow, flow.getLabel(), null);
 		this.recordReturn(flow, flow.getKey(), TwoKey.ONE);
 		this.recordReturn(flow, flow.getArgumentType(), Connection.class);
@@ -567,29 +514,22 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testKeyedDependenciesAndFlows() {
 
-		final HttpSecurityDependencyMetaData<?> dependencyOne = this
-				.createMock(HttpSecurityDependencyMetaData.class);
-		final HttpSecurityDependencyMetaData<?> dependencyTwo = this
-				.createMock(HttpSecurityDependencyMetaData.class);
-		final HttpSecurityFlowMetaData<?> flowOne = this
-				.createMock(HttpSecurityFlowMetaData.class);
-		final HttpSecurityFlowMetaData<?> flowTwo = this
-				.createMock(HttpSecurityFlowMetaData.class);
+		final HttpSecurityDependencyMetaData<?> dependencyOne = this.createMock(HttpSecurityDependencyMetaData.class);
+		final HttpSecurityDependencyMetaData<?> dependencyTwo = this.createMock(HttpSecurityDependencyMetaData.class);
+		final HttpSecurityFlowMetaData<?> flowOne = this.createMock(HttpSecurityFlowMetaData.class);
+		final HttpSecurityFlowMetaData<?> flowTwo = this.createMock(HttpSecurityFlowMetaData.class);
 
 		// Record keyed dependencies and flows
 		this.record_securityClass();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
-				new HttpSecurityDependencyMetaData[] { dependencyOne,
-						dependencyTwo });
+				new HttpSecurityDependencyMetaData[] { dependencyOne, dependencyTwo });
 		this.recordReturn(dependencyOne, dependencyOne.getLabel(), null);
 		this.recordReturn(dependencyOne, dependencyOne.getKey(), TwoKey.TWO); // order
 		this.recordReturn(dependencyOne, dependencyOne.getType(), Integer.class);
-		this.recordReturn(dependencyOne, dependencyOne.getTypeQualifier(),
-				"QUALIFIED");
+		this.recordReturn(dependencyOne, dependencyOne.getTypeQualifier(), "QUALIFIED");
 		this.recordReturn(dependencyTwo, dependencyTwo.getLabel(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getKey(), TwoKey.ONE); // order
-		this.recordReturn(dependencyTwo, dependencyTwo.getType(),
-				Connection.class);
+		this.recordReturn(dependencyTwo, dependencyTwo.getType(), Connection.class);
 		this.recordReturn(dependencyTwo, dependencyTwo.getTypeQualifier(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 				new HttpSecurityFlowMetaData[] { flowOne, flowTwo });
@@ -602,56 +542,38 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		this.record_credentialsClass();
 
 		// Attempt to load
-		HttpSecurityType<?, ?, ?, ?> securityType = this.loadHttpSecurityType(
-				true, null);
+		HttpSecurityType<?, ?, ?, ?> securityType = this.loadHttpSecurityType(true, null);
 
 		// Validate dependencies ordered and correct values
-		HttpSecurityDependencyType<?>[] dependencyTypes = securityType
-				.getDependencyTypes();
-		assertEquals("Incorrect number of dependencies", 2,
-				dependencyTypes.length);
+		HttpSecurityDependencyType<?>[] dependencyTypes = securityType.getDependencyTypes();
+		assertEquals("Incorrect number of dependencies", 2, dependencyTypes.length);
 		HttpSecurityDependencyType<?> dependencyTypeOne = dependencyTypes[0];
-		assertEquals("Keys should be ordered", TwoKey.ONE,
-				dependencyTypeOne.getKey());
-		assertEquals("Incorrect first dependency index", TwoKey.ONE.ordinal(),
-				dependencyTypeOne.getIndex());
-		assertEquals("Incorrect first dependency name", TwoKey.ONE.toString(),
-				dependencyTypeOne.getDependencyName());
-		assertEquals("Incorrect first dependency type", Connection.class,
-				dependencyTypeOne.getDependencyType());
-		assertNull("First dependency type should not be qualified",
-				dependencyTypeOne.getTypeQualifier());
+		assertEquals("Keys should be ordered", TwoKey.ONE, dependencyTypeOne.getKey());
+		assertEquals("Incorrect first dependency index", TwoKey.ONE.ordinal(), dependencyTypeOne.getIndex());
+		assertEquals("Incorrect first dependency name", TwoKey.ONE.toString(), dependencyTypeOne.getDependencyName());
+		assertEquals("Incorrect first dependency type", Connection.class, dependencyTypeOne.getDependencyType());
+		assertNull("First dependency type should not be qualified", dependencyTypeOne.getTypeQualifier());
 		HttpSecurityDependencyType<?> dependencyTypeTwo = dependencyTypes[1];
-		assertEquals("Keys should be ordered", TwoKey.TWO,
-				dependencyTypeTwo.getKey());
-		assertEquals("Incorrect second dependency index", TwoKey.TWO.ordinal(),
-				dependencyTypeTwo.getIndex());
-		assertEquals("Incorrect second dependency name", TwoKey.TWO.toString(),
-				dependencyTypeTwo.getDependencyName());
-		assertEquals("Incorrect second dependency type", Integer.class,
-				dependencyTypeTwo.getDependencyType());
-		assertEquals("Incorrect second dependency type qualification",
-				"QUALIFIED", dependencyTypeTwo.getTypeQualifier());
+		assertEquals("Keys should be ordered", TwoKey.TWO, dependencyTypeTwo.getKey());
+		assertEquals("Incorrect second dependency index", TwoKey.TWO.ordinal(), dependencyTypeTwo.getIndex());
+		assertEquals("Incorrect second dependency name", TwoKey.TWO.toString(), dependencyTypeTwo.getDependencyName());
+		assertEquals("Incorrect second dependency type", Integer.class, dependencyTypeTwo.getDependencyType());
+		assertEquals("Incorrect second dependency type qualification", "QUALIFIED",
+				dependencyTypeTwo.getTypeQualifier());
 
 		// Validate flows ordered and correct values
 		HttpSecurityFlowType<?>[] flowTypes = securityType.getFlowTypes();
 		assertEquals("Incorrect number of dependencies", 2, flowTypes.length);
 		HttpSecurityFlowType<?> flowTypeOne = flowTypes[0];
 		assertEquals("Keys should be ordered", TwoKey.ONE, flowTypeOne.getKey());
-		assertEquals("Incorrect first flow index", TwoKey.ONE.ordinal(),
-				flowTypeOne.getIndex());
-		assertEquals("Incorrect first flow name", TwoKey.ONE.toString(),
-				flowTypeOne.getFlowName());
-		assertEquals("Incorrect first flow argument type", String.class,
-				flowTypeOne.getArgumentType());
+		assertEquals("Incorrect first flow index", TwoKey.ONE.ordinal(), flowTypeOne.getIndex());
+		assertEquals("Incorrect first flow name", TwoKey.ONE.toString(), flowTypeOne.getFlowName());
+		assertEquals("Incorrect first flow argument type", String.class, flowTypeOne.getArgumentType());
 		HttpSecurityFlowType<?> flowTypeTwo = flowTypes[1];
 		assertEquals("Keys should be ordered", TwoKey.TWO, flowTypeTwo.getKey());
-		assertEquals("Incorrect second flow index", TwoKey.TWO.ordinal(),
-				flowTypeTwo.getIndex());
-		assertEquals("Incorrect second flow name", TwoKey.TWO.toString(),
-				flowTypeTwo.getFlowName());
-		assertEquals("Incorrect second flow argument type", Long.class,
-				flowTypeTwo.getArgumentType());
+		assertEquals("Incorrect second flow index", TwoKey.TWO.ordinal(), flowTypeTwo.getIndex());
+		assertEquals("Incorrect second flow name", TwoKey.TWO.toString(), flowTypeTwo.getFlowName());
+		assertEquals("Incorrect second flow argument type", Long.class, flowTypeTwo.getArgumentType());
 	}
 
 	/**
@@ -660,29 +582,22 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testIndexedDependenciesAndFlows() {
 
-		final HttpSecurityDependencyMetaData<?> dependencyOne = this
-				.createMock(HttpSecurityDependencyMetaData.class);
-		final HttpSecurityDependencyMetaData<?> dependencyTwo = this
-				.createMock(HttpSecurityDependencyMetaData.class);
-		final HttpSecurityFlowMetaData<?> flowOne = this
-				.createMock(HttpSecurityFlowMetaData.class);
-		final HttpSecurityFlowMetaData<?> flowTwo = this
-				.createMock(HttpSecurityFlowMetaData.class);
+		final HttpSecurityDependencyMetaData<?> dependencyOne = this.createMock(HttpSecurityDependencyMetaData.class);
+		final HttpSecurityDependencyMetaData<?> dependencyTwo = this.createMock(HttpSecurityDependencyMetaData.class);
+		final HttpSecurityFlowMetaData<?> flowOne = this.createMock(HttpSecurityFlowMetaData.class);
+		final HttpSecurityFlowMetaData<?> flowTwo = this.createMock(HttpSecurityFlowMetaData.class);
 
 		// Record keyed dependencies and flows
 		this.record_securityClass();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
-				new HttpSecurityDependencyMetaData[] { dependencyOne,
-						dependencyTwo });
+				new HttpSecurityDependencyMetaData[] { dependencyOne, dependencyTwo });
 		this.recordReturn(dependencyOne, dependencyOne.getLabel(), null);
 		this.recordReturn(dependencyOne, dependencyOne.getKey(), null);
 		this.recordReturn(dependencyOne, dependencyOne.getType(), Integer.class);
-		this.recordReturn(dependencyOne, dependencyOne.getTypeQualifier(),
-				"QUALIFIED");
+		this.recordReturn(dependencyOne, dependencyOne.getTypeQualifier(), "QUALIFIED");
 		this.recordReturn(dependencyTwo, dependencyTwo.getLabel(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getKey(), null);
-		this.recordReturn(dependencyTwo, dependencyTwo.getType(),
-				Connection.class);
+		this.recordReturn(dependencyTwo, dependencyTwo.getType(), Connection.class);
 		this.recordReturn(dependencyTwo, dependencyTwo.getTypeQualifier(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 				new HttpSecurityFlowMetaData[] { flowOne, flowTwo });
@@ -695,36 +610,26 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		this.record_credentialsClass();
 
 		// Attempt to load
-		HttpSecurityType<?, ?, ?, ?> securityType = this.loadHttpSecurityType(
-				true, null);
+		HttpSecurityType<?, ?, ?, ?> securityType = this.loadHttpSecurityType(true, null);
 
 		// Validate dependencies
-		HttpSecurityDependencyType<?>[] dependencyTypes = securityType
-				.getDependencyTypes();
-		assertEquals("Incorrect number of dependencies", 2,
-				dependencyTypes.length);
+		HttpSecurityDependencyType<?>[] dependencyTypes = securityType.getDependencyTypes();
+		assertEquals("Incorrect number of dependencies", 2, dependencyTypes.length);
 		HttpSecurityDependencyType<?> dependencyTypeOne = dependencyTypes[0];
-		assertEquals("Incorrect first dependency index", 0,
-				dependencyTypeOne.getIndex());
+		assertEquals("Incorrect first dependency index", 0, dependencyTypeOne.getIndex());
 		assertNull("Should be no dependency key", dependencyTypeOne.getKey());
-		assertEquals("Incorrect first dependency name",
-				Integer.class.getSimpleName(),
+		assertEquals("Incorrect first dependency name", Integer.class.getSimpleName(),
 				dependencyTypeOne.getDependencyName());
-		assertEquals("Incorrect first dependency type", Integer.class,
-				dependencyTypeOne.getDependencyType());
-		assertEquals("Incorrect first dependency type qualification",
-				"QUALIFIED", dependencyTypeOne.getTypeQualifier());
+		assertEquals("Incorrect first dependency type", Integer.class, dependencyTypeOne.getDependencyType());
+		assertEquals("Incorrect first dependency type qualification", "QUALIFIED",
+				dependencyTypeOne.getTypeQualifier());
 		HttpSecurityDependencyType<?> dependencyTypeTwo = dependencyTypes[1];
-		assertEquals("Incorrect second dependency index", 1,
-				dependencyTypeTwo.getIndex());
+		assertEquals("Incorrect second dependency index", 1, dependencyTypeTwo.getIndex());
 		assertNull("Should be no dependency key", dependencyTypeTwo.getKey());
-		assertEquals("Incorrect second dependency name",
-				Connection.class.getSimpleName(),
+		assertEquals("Incorrect second dependency name", Connection.class.getSimpleName(),
 				dependencyTypeTwo.getDependencyName());
-		assertEquals("Incorrect second dependency type", Connection.class,
-				dependencyTypeTwo.getDependencyType());
-		assertNull("Second dependency should not be qualified",
-				dependencyTypeTwo.getTypeQualifier());
+		assertEquals("Incorrect second dependency type", Connection.class, dependencyTypeTwo.getDependencyType());
+		assertNull("Second dependency should not be qualified", dependencyTypeTwo.getTypeQualifier());
 
 		// Validate flows
 		HttpSecurityFlowType<?>[] flowTypes = securityType.getFlowTypes();
@@ -732,17 +637,13 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		HttpSecurityFlowType<?> flowTypeOne = flowTypes[0];
 		assertEquals("Incorrect first flow index", 0, flowTypeOne.getIndex());
 		assertNull("Should be no flow key", flowTypeOne.getKey());
-		assertEquals("Incorrect first flow name", "0",
-				flowTypeOne.getFlowName());
-		assertEquals("Incorrect first flow argument type", Long.class,
-				flowTypeOne.getArgumentType());
+		assertEquals("Incorrect first flow name", "0", flowTypeOne.getFlowName());
+		assertEquals("Incorrect first flow argument type", Long.class, flowTypeOne.getArgumentType());
 		HttpSecurityFlowType<?> flowTypeTwo = flowTypes[1];
 		assertEquals("Incorrect second flow index", 1, flowTypeTwo.getIndex());
 		assertNull("Should be no dependency key", flowTypeTwo.getKey());
-		assertEquals("Incorrect second flow name", "1",
-				flowTypeTwo.getFlowName());
-		assertEquals("Incorrect second flow argument type", String.class,
-				flowTypeTwo.getArgumentType());
+		assertEquals("Incorrect second flow name", "1", flowTypeTwo.getFlowName());
+		assertEquals("Incorrect second flow argument type", String.class, flowTypeTwo.getArgumentType());
 	}
 
 	/**
@@ -752,14 +653,11 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		this.record_basicMetaData();
 
 		// Load the security type
-		HttpSecurityType<?, ?, ?, ?> securityType = this.loadHttpSecurityType(
-				true, null);
+		HttpSecurityType<?, ?, ?, ?> securityType = this.loadHttpSecurityType(true, null);
 
 		// Ensure correct security and credentials
-		assertEquals("Incorrect security type", HttpSecurity.class,
-				securityType.getSecurityClass());
-		assertEquals("Incorrect credentials type", HttpCredentials.class,
-				securityType.getCredentialsClass());
+		assertEquals("Incorrect security type", HttpSecurity.class, securityType.getSecurityClass());
+		assertEquals("Incorrect credentials type", HttpCredentials.class, securityType.getCredentialsClass());
 	}
 
 	/**
@@ -768,21 +666,16 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testNullCredentials() {
 		this.record_securityClass();
-		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
-				null);
+		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), null);
-		this.recordReturn(this.metaData, this.metaData.getCredentialsClass(),
-				null);
+		this.recordReturn(this.metaData, this.metaData.getCredentialsClass(), null);
 
 		// Load the security type
-		HttpSecurityType<?, ?, ?, ?> securityType = this.loadHttpSecurityType(
-				true, null);
+		HttpSecurityType<?, ?, ?, ?> securityType = this.loadHttpSecurityType(true, null);
 
 		// Ensure correct security and no credentials
-		assertEquals("Incorrect security type", HttpSecurity.class,
-				securityType.getSecurityClass());
-		assertNull("Should be no credentials required",
-				securityType.getCredentialsClass());
+		assertEquals("Incorrect security type", HttpSecurity.class, securityType.getSecurityClass());
+		assertNull("Should be no credentials required", securityType.getCredentialsClass());
 	}
 
 	/**
@@ -804,8 +697,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 * {@link HttpSecuritySourceMetaData}.
 	 */
 	private void record_securityClass() {
-		this.recordReturn(this.metaData, this.metaData.getSecurityClass(),
-				HttpSecurity.class);
+		this.recordReturn(this.metaData, this.metaData.getSecurityClass(), HttpSecurity.class);
 	}
 
 	/**
@@ -813,8 +705,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 * {@link HttpSecuritySourceMetaData}.
 	 */
 	private void record_credentialsClass() {
-		this.recordReturn(this.metaData, this.metaData.getCredentialsClass(),
-				HttpCredentials.class);
+		this.recordReturn(this.metaData, this.metaData.getCredentialsClass(), HttpCredentials.class);
 	}
 
 	/**
@@ -830,32 +721,26 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		this.record_securityClass();
 
 		// Return no dependencies
-		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
-				null);
+		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
 
 		// Record the flows
 		if (flowKeys.length == 0) {
 			// Record no flows
-			this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
-					null);
+			this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), null);
 		} else {
 			// Create the meta-data for each flow
 			HttpSecurityFlowMetaData<?>[] flowMetaDatas = new HttpSecurityFlowMetaData[flowKeys.length];
 			for (int i = 0; i < flowMetaDatas.length; i++) {
-				flowMetaDatas[i] = this
-						.createMock(HttpSecurityFlowMetaData.class);
+				flowMetaDatas[i] = this.createMock(HttpSecurityFlowMetaData.class);
 			}
 
 			// Record the flow meta-data
-			this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
-					flowMetaDatas);
+			this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), flowMetaDatas);
 			for (int i = 0; i < flowMetaDatas.length; i++) {
 				HttpSecurityFlowMetaData<?> flowMetaData = flowMetaDatas[i];
 				this.recordReturn(flowMetaData, flowMetaData.getLabel(), null);
-				this.recordReturn(flowMetaData, flowMetaData.getKey(),
-						flowKeys[i]);
-				this.recordReturn(flowMetaData, flowMetaData.getArgumentType(),
-						Integer.class);
+				this.recordReturn(flowMetaData, flowMetaData.getKey(), flowKeys[i]);
+				this.recordReturn(flowMetaData, flowMetaData.getArgumentType(), Integer.class);
 			}
 		}
 
@@ -889,7 +774,8 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 * Loads the {@link HttpSecurityType}.
 	 * 
 	 * @param isExpectedToLoad
-	 *            Flag indicating if expecting to load the {@link FunctionNamespaceType}.
+	 *            Flag indicating if expecting to load the
+	 *            {@link FunctionNamespaceType}.
 	 * @param init
 	 *            {@link Init}.
 	 * @param propertyNameValuePairs
@@ -897,8 +783,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 * @return Loaded {@link HttpSecurityType}.
 	 */
 	@SuppressWarnings("rawtypes")
-	public HttpSecurityType<?, ?, ?, ?> loadHttpSecurityType(
-			boolean isExpectedToLoad, Init init,
+	public HttpSecurityType<?, ?, ?, ?> loadHttpSecurityType(boolean isExpectedToLoad, Init init,
 			String... propertyNameValuePairs) {
 
 		// Replay mock objects
@@ -913,24 +798,19 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		}
 
 		// Create the HTTP security loader and load the HTTP security type
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
-		ManagedObjectLoader managedObjectLoader = compiler
-				.getManagedObjectLoader();
-		HttpSecurityLoader securityLoader = new HttpSecurityLoaderImpl(
-				managedObjectLoader);
+		ManagedObjectLoader managedObjectLoader = compiler.getManagedObjectLoader();
+		HttpSecurityLoader securityLoader = new HttpSecurityLoaderImpl(managedObjectLoader);
 		MockHttpSecuritySource.init = init;
-		HttpSecurityType securityType = securityLoader.loadHttpSecurityType(
-				new MockHttpSecuritySource(), propertyList);
+		HttpSecurityType securityType = securityLoader.loadHttpSecurityType(new MockHttpSecuritySource(), propertyList);
 
 		// Verify the mock objects
 		this.verifyMockObjects();
 
 		// Ensure if should be loaded
 		if (isExpectedToLoad) {
-			assertNotNull("Expected to load the HTTP security type",
-					securityType);
+			assertNotNull("Expected to load the HTTP security type", securityType);
 		} else {
 			assertNull("Should not load the HTTP security type", securityType);
 		}
@@ -960,8 +840,8 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 */
 	@TestSource
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static class MockHttpSecuritySource implements
-			HttpSecuritySource<HttpSecurity, HttpCredentials, None, None> {
+	public static class MockHttpSecuritySource
+			implements HttpSecuritySource<HttpSecurity, HttpCredentials, None, None> {
 
 		/**
 		 * Failure to instantiate an instance.
@@ -1039,21 +919,18 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public boolean ratify(
-				HttpRatifyContext<HttpSecurity, HttpCredentials> context) {
+		public boolean ratify(HttpRatifyContext<HttpSecurity, HttpCredentials> context) {
 			fail("Should not be invoked for loading type");
 			return false;
 		}
 
 		@Override
-		public void authenticate(
-				HttpAuthenticateContext<HttpSecurity, HttpCredentials, None> context) {
+		public void authenticate(HttpAuthenticateContext<HttpSecurity, HttpCredentials, None> context) {
 			fail("Should not be invoked for loading type");
 		}
 
 		@Override
-		public void challenge(HttpChallengeContext<None, None> context)
-				throws IOException {
+		public void challenge(HttpChallengeContext<None, None> context) throws IOException {
 			fail("Should not be invoked for loading type");
 		}
 

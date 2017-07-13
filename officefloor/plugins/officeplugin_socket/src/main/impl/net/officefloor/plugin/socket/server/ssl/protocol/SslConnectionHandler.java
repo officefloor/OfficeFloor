@@ -450,7 +450,7 @@ public class SslConnectionHandler implements ConnectionHandler, SslFunctionExecu
 	 */
 	void writeData(WriteBuffer[] data) {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Queue the data
 			for (WriteBuffer buffer : data) {
@@ -467,7 +467,7 @@ public class SslConnectionHandler implements ConnectionHandler, SslFunctionExecu
 	 */
 	void triggerClose() {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Flag to close
 			this.isClosing = true;
@@ -484,7 +484,7 @@ public class SslConnectionHandler implements ConnectionHandler, SslFunctionExecu
 	 */
 	boolean isClosing() {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Indicate if closing or closed
 			return this.isClosing;
@@ -508,7 +508,7 @@ public class SslConnectionHandler implements ConnectionHandler, SslFunctionExecu
 	@Override
 	public void handleRead(ReadContext context) throws IOException {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Queue the data
 			this.readData.add(context.getData());
@@ -564,13 +564,13 @@ public class SslConnectionHandler implements ConnectionHandler, SslFunctionExecu
 
 			} catch (Throwable ex) {
 				// Flag failure in running task
-				synchronized (SslConnectionHandler.this.connection.getLock()) {
+				synchronized (SslConnectionHandler.this.connection.getWriteLock()) {
 					SslConnectionHandler.this.failure = new IOException("SSL delegated runnable failed", ex);
 				}
 
 			} finally {
 				// Flag task complete and trigger further processing
-				synchronized (SslConnectionHandler.this.connection.getLock()) {
+				synchronized (SslConnectionHandler.this.connection.getWriteLock()) {
 					SslConnectionHandler.this.sslRunnable = null;
 					SslConnectionHandler.this.process();
 				}

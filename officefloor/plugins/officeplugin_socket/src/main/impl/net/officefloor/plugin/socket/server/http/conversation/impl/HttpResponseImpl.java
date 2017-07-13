@@ -224,7 +224,7 @@ public class HttpResponseImpl implements HttpResponse {
 	 */
 	Serializable exportState() throws DataWrittenException, IOException {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Prepare state for momento
 			List<HttpHeader> httpHeaders = new ArrayList<HttpHeader>(this.headers);
@@ -261,7 +261,7 @@ public class HttpResponseImpl implements HttpResponse {
 	void sendFailure(Throwable failure) throws IOException {
 
 		// Lock as called from Escalation Handler
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Clear the response to write the failure
 			this.resetUnsafe();
@@ -315,7 +315,7 @@ public class HttpResponseImpl implements HttpResponse {
 		}
 
 		// Lock as called from process completion handler
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Clear the response to write the failure
 			this.resetUnsafe();
@@ -442,7 +442,7 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public void setVersion(String version) {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Specify the version
 			this.version = version;
@@ -452,7 +452,7 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public String getVersion() {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Return the version
 			return this.version;
@@ -472,7 +472,7 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public int getStatus() {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Return the current status
 			return this.status;
@@ -482,7 +482,7 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public void setStatus(int status, String statusMessage) {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Specify the status
 			this.status = status;
@@ -493,7 +493,7 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public String getStatusMessage() {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Return the current status message
 			return this.statusMessage;
@@ -503,7 +503,7 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public void reset() throws IOException {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Reset the response
 			this.resetUnsafe();
@@ -525,7 +525,7 @@ public class HttpResponseImpl implements HttpResponse {
 		HttpHeader header = new HttpHeaderImpl(name, value);
 
 		// Add the header
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 			this.headers.add(header);
 		}
 
@@ -536,7 +536,7 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public HttpHeader getHeader(String name) {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Search for the first header by the name
 			for (HttpHeader header : this.headers) {
@@ -554,23 +554,17 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public HttpHeader[] getHeaders() {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
-			// Create the array of headers
-			HttpHeader[] headers;
-			synchronized (this.connection.getLock()) {
-				headers = this.headers.toArray(new HttpHeader[0]);
-			}
-
-			// Return the headers
-			return headers;
+			// Create and return the array of headers
+			return this.headers.toArray(new HttpHeader[0]);
 		}
 	}
 
 	@Override
 	public void removeHeader(HttpHeader header) {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Remove the header
 			this.headers.remove(header);
@@ -580,7 +574,7 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public void removeHeaders(String name) {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Remove all headers by name
 			for (Iterator<HttpHeader> iterator = this.headers.iterator(); iterator.hasNext();) {
@@ -596,7 +590,7 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public ServerOutputStream getEntity() throws IOException {
 
-		synchronized (this.receiver.getLock()) {
+		synchronized (this.receiver.getWriteLock()) {
 
 			// Ensure not using writer
 			if (this.entityWriter != null) {
@@ -614,7 +608,7 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public void setContentType(String contentType, Charset charset) throws IOException {
 
-		synchronized (this.receiver.getLock()) {
+		synchronized (this.receiver.getWriteLock()) {
 
 			// Ensure not using entity writer
 			if (this.entityWriter != null) {
@@ -632,7 +626,7 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public String getContentType() {
 
-		synchronized (this.receiver.getLock()) {
+		synchronized (this.receiver.getWriteLock()) {
 
 			// Return the content type
 			return this.getContentTypeThreadUnsafe();
@@ -642,7 +636,7 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public Charset getContentCharset() {
 
-		synchronized (this.receiver.getLock()) {
+		synchronized (this.receiver.getWriteLock()) {
 
 			// Return the charset
 			return this.charset;
@@ -669,7 +663,7 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public ServerWriter getEntityWriter() throws IOException {
 
-		synchronized (this.receiver.getLock()) {
+		synchronized (this.receiver.getWriteLock()) {
 
 			// Ensure not using output stream
 			if (this.isOutputStream) {
@@ -695,13 +689,13 @@ public class HttpResponseImpl implements HttpResponse {
 	 * Loads the {@link ServerWriter}.
 	 */
 	private void loadEntityWriterThreadUnsafe() {
-		this.entityWriter = new ServerWriter(this.entity, this.charset, this.receiver.getLock());
+		this.entityWriter = new ServerWriter(this.entity, this.charset, this.receiver.getWriteLock());
 	}
 
 	@Override
 	public void send() throws IOException {
 
-		synchronized (this.receiver.getLock()) {
+		synchronized (this.receiver.getWriteLock()) {
 
 			// Close the entity which triggers sending response
 			if (this.entityWriter != null) {
@@ -771,8 +765,8 @@ public class HttpResponseImpl implements HttpResponse {
 		 */
 
 		@Override
-		public Object getLock() {
-			return HttpResponseImpl.this.connection.getLock();
+		public Object getWriteLock() {
+			return HttpResponseImpl.this.connection.getWriteLock();
 		}
 
 		@Override

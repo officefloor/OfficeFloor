@@ -20,24 +20,22 @@ package net.officefloor.plugin.web.http.security.integrate;
 import org.apache.http.client.CredentialsProvider;
 
 import net.officefloor.plugin.web.http.application.HttpSecuritySection;
-import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.security.scheme.MockHttpSecuritySource;
+import net.officefloor.plugin.web.http.test.CompileWebContext;
 
 /**
  * Integrate tests the {@link MockHttpSecuritySource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockHttpSecurityIntegrateTest extends
-		AbstractHttpSecurityIntegrateTestCase {
+public class MockHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrateTestCase {
 
 	@Override
-	protected HttpSecuritySection configureHttpSecurity(
-			WebArchitect application) throws Exception {
+	protected HttpSecuritySection configureHttpSecurity(CompileWebContext context) {
 
 		// Configure the HTTP Security
-		HttpSecuritySection security = application
-				.setHttpSecurity(MockHttpSecuritySource.class);
+		HttpSecuritySection security = context.getWebArchitect().addHttpSecurity("SECURITY",
+				MockHttpSecuritySource.class);
 
 		// Return the HTTP Security
 		return security;
@@ -62,8 +60,7 @@ public class MockHttpSecurityIntegrateTest extends
 	public void testLogout() throws Exception {
 
 		// Authenticate with credentials
-		CredentialsProvider provider = this.useCredentials("Test", null,
-				"daniel", "daniel");
+		CredentialsProvider provider = this.useCredentials("Test", null, "daniel", "daniel");
 		this.doRequest("service", 200, "Serviced for daniel");
 
 		// Clear login details

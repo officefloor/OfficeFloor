@@ -21,29 +21,29 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireObject;
-import net.officefloor.autowire.AutoWireOfficeFloor;
-import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.web.http.application.HttpParameters;
-import net.officefloor.plugin.web.http.application.HttpRequestObjectManagedObjectSource;
-import net.officefloor.plugin.web.http.application.HttpTemplateSection;
-import net.officefloor.plugin.web.http.application.HttpUriLink;
-import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
-import net.officefloor.plugin.web.http.route.HttpRouteFunction;
-import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
-import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+
+import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.application.HttpParameters;
+import net.officefloor.plugin.web.http.application.HttpRequestObjectManagedObjectSource;
+import net.officefloor.plugin.web.http.application.HttpTemplateSection;
+import net.officefloor.plugin.web.http.application.HttpUriLink;
+import net.officefloor.plugin.web.http.application.WebArchitect;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
+import net.officefloor.plugin.web.http.route.HttpRouteFunction;
+import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
+import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
 
 /**
  * Ensures secure functionality of {@link HttpTemplate}.
@@ -53,28 +53,26 @@ import org.apache.http.impl.client.HttpClientBuilder;
 public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link HttpServerAutoWireOfficeFloorSource}.
+	 * {@link WebCompileOfficeFloor}.
 	 */
-	private final HttpServerAutoWireOfficeFloorSource source = new HttpServerAutoWireOfficeFloorSource();
+	private final WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
 
 	/**
 	 * Non-secure URL prefix.
 	 */
 	private final String NON_SECURE_URL_PREFIX = "http://"
-			+ HttpApplicationLocationManagedObjectSource.getDefaultHostName()
-			+ ":7878";
+			+ HttpApplicationLocationManagedObjectSource.getDefaultHostName() + ":7878";
 
 	/**
 	 * Secure URL prefix.
 	 */
 	private final String SECURE_URL_PREFIX = "https://"
-			+ HttpApplicationLocationManagedObjectSource.getDefaultHostName()
-			+ ":7979";
+			+ HttpApplicationLocationManagedObjectSource.getDefaultHostName() + ":7979";
 
 	/**
-	 * {@link AutoWireOfficeFloor}.
+	 * {@link OfficeFloor}.
 	 */
-	private AutoWireOfficeFloor officeFloor;
+	private OfficeFloor officeFloor;
 
 	/**
 	 * {@link CloseableHttpClient}.
@@ -88,6 +86,11 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 		HttpTestUtil.configureHttps(builder);
 		HttpTestUtil.configureNoRedirects(builder);
 		this.client = builder.build();
+
+		// Configure the HTTP server
+		this.compiler.officeFloor((context) -> {
+			HttpTestUtil.configureTestHttpServer(context, 7878, 7979, "ROUTE", "route");
+		});
 	}
 
 	@Override
@@ -110,142 +113,129 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	 * Ensure template triggers a redirect if not secure.
 	 */
 	public void testSecureTemplateRedirect() throws Exception {
-		this.doSecureTemplateTest(true, null, NON_SECURE_URL_PREFIX
-				+ "/template", SECURE_URL_PREFIX + "/template", false);
+		this.doSecureTemplateTest(true, null, NON_SECURE_URL_PREFIX + "/template", SECURE_URL_PREFIX + "/template",
+				false);
 	}
 
 	/**
 	 * Ensure service request if appropriately secure.
 	 */
 	public void testSecureTemplateService() throws Exception {
-		this.doSecureTemplateTest(true, null, SECURE_URL_PREFIX + "/template",
-				null, false);
+		this.doSecureTemplateTest(true, null, SECURE_URL_PREFIX + "/template", null, false);
 	}
 
 	/**
 	 * Ensure template triggers a redirect if secure.
 	 */
 	public void testInsecureTemplateServiceSecureAnyway() throws Exception {
-		this.doSecureTemplateTest(false, null, SECURE_URL_PREFIX + "/template",
-				null, false);
+		this.doSecureTemplateTest(false, null, SECURE_URL_PREFIX + "/template", null, false);
 	}
 
 	/**
 	 * Ensure service request if appropriately insecure.
 	 */
 	public void testInsecureTemplateService() throws Exception {
-		this.doSecureTemplateTest(false, null, NON_SECURE_URL_PREFIX
-				+ "/template", null, false);
+		this.doSecureTemplateTest(false, null, NON_SECURE_URL_PREFIX + "/template", null, false);
 	}
 
 	/**
 	 * Ensure link triggers a redirect if not secure.
 	 */
 	public void testSecureLinkRedirect() throws Exception {
-		this.doSecureTemplateTest(false, true, NON_SECURE_URL_PREFIX
-				+ "/template-LINK", SECURE_URL_PREFIX + "/template-LINK", false);
+		this.doSecureTemplateTest(false, true, NON_SECURE_URL_PREFIX + "/template-LINK",
+				SECURE_URL_PREFIX + "/template-LINK", false);
 	}
 
 	/**
 	 * Ensure service request if appropriately secure.
 	 */
 	public void testSecureLinkService() throws Exception {
-		this.doSecureTemplateTest(false, true, SECURE_URL_PREFIX
-				+ "/template-LINK", null, false);
+		this.doSecureTemplateTest(false, true, SECURE_URL_PREFIX + "/template-LINK", null, false);
 	}
 
 	/**
 	 * Ensure services non-secure link even though on secure connection.
 	 */
 	public void testInsecureLinkServiceSecureAnyway() throws Exception {
-		this.doSecureTemplateTest(true, false, SECURE_URL_PREFIX
-				+ "/template-LINK", null, false);
+		this.doSecureTemplateTest(true, false, SECURE_URL_PREFIX + "/template-LINK", null, false);
 	}
 
 	/**
 	 * Ensure service request if appropriately insecure.
 	 */
 	public void testInsecureLinkWithSecureRendering() throws Exception {
-		this.doSecureTemplateTest(true, false, NON_SECURE_URL_PREFIX
-				+ "/template-LINK", SECURE_URL_PREFIX + "/template", false);
+		this.doSecureTemplateTest(true, false, NON_SECURE_URL_PREFIX + "/template-LINK",
+				SECURE_URL_PREFIX + "/template", false);
 	}
 
 	/**
 	 * Ensure link triggers a redirect if not secure.
 	 */
 	public void testBeanSecureLinkRedirect() throws Exception {
-		this.doSecureTemplateTest(false, true, NON_SECURE_URL_PREFIX
-				+ "/template-LINK", SECURE_URL_PREFIX + "/template-LINK", true);
+		this.doSecureTemplateTest(false, true, NON_SECURE_URL_PREFIX + "/template-LINK",
+				SECURE_URL_PREFIX + "/template-LINK", true);
 	}
 
 	/**
 	 * Ensure service request if appropriately secure.
 	 */
 	public void testBeanSecureLinkService() throws Exception {
-		this.doSecureTemplateTest(false, true, SECURE_URL_PREFIX
-				+ "/template-LINK", null, true);
+		this.doSecureTemplateTest(false, true, SECURE_URL_PREFIX + "/template-LINK", null, true);
 	}
 
 	/**
 	 * Ensure services non-secure link even though on secure connection.
 	 */
 	public void testBeanInsecureLinkServiceSecureAnyway() throws Exception {
-		this.doSecureTemplateTest(true, false, SECURE_URL_PREFIX
-				+ "/template-LINK", null, true);
+		this.doSecureTemplateTest(true, false, SECURE_URL_PREFIX + "/template-LINK", null, true);
 	}
 
 	/**
 	 * Ensure service request if appropriately insecure.
 	 */
 	public void testBeanInsecureLinkWithSecureRendering() throws Exception {
-		this.doSecureTemplateTest(true, false, NON_SECURE_URL_PREFIX
-				+ "/template-LINK", SECURE_URL_PREFIX + "/template", true);
+		this.doSecureTemplateTest(true, false, NON_SECURE_URL_PREFIX + "/template-LINK",
+				SECURE_URL_PREFIX + "/template", true);
 	}
 
 	/**
-	 * Undertakes test for secure settings of a
-	 * {@link HttpTemplateSection}.
+	 * Undertakes test for secure settings of a {@link HttpTemplateSection}.
 	 */
-	private void doSecureTemplateTest(boolean isTemplateSecure,
-			Boolean isLinkSecure, String requestUrl, String redirectUrl,
-			boolean isEncapsulateLinkWithinBean) throws Exception {
+	private void doSecureTemplateTest(boolean isTemplateSecure, Boolean isLinkSecure, String requestUrl,
+			String redirectUrl, boolean isEncapsulateLinkWithinBean) throws Exception {
 
-		// Obtain the template location
-		String templateLocation = this.getFileLocation(this.getClass(),
-				(isEncapsulateLinkWithinBean ? "SecureBeanLink.ofp"
-						: "secure.ofp"));
+		// Configure the application
+		this.compiler.web((context) -> {
+			// Obtain the template location
+			String templateLocation = this.getFileLocation(this.getClass(),
+					(isEncapsulateLinkWithinBean ? "SecureBeanLink.ofp" : "secure.ofp"));
 
-		// Configure the template
-		HttpTemplateSection template = this.source.addHttpTemplate(
-				"template", templateLocation,
-				(isEncapsulateLinkWithinBean ? BeanTemplateLogic.class
-						: TemplateLogic.class));
-		template.setTemplateSecure(isTemplateSecure);
-		if (isLinkSecure != null) {
-			template.setLinkSecure("LINK", isLinkSecure.booleanValue());
-		}
+			// Configure the template
+			HttpTemplateSection template = context.getWebArchitect().addHttpTemplate("template", templateLocation,
+					(isEncapsulateLinkWithinBean ? BeanTemplateLogic.class : TemplateLogic.class));
+			template.setTemplateSecure(isTemplateSecure);
+			if (isLinkSecure != null) {
+				template.setLinkSecure("LINK", isLinkSecure.booleanValue());
+			}
+		});
 
 		// Start the server
-		this.officeFloor = this.source.openOfficeFloor();
+		this.officeFloor = this.compiler.compileAndOpenOfficeFloor();
 
 		// Test
-		HttpResponse response = this.client.execute(new HttpGet(requestUrl
-				+ "?name=Daniel&id=1"));
+		HttpResponse response = this.client.execute(new HttpGet(requestUrl + "?name=Daniel&id=1"));
 
 		// Determine the expected entity of serviced request
 		String linkUri = "/template-LINK";
-		if ((!isTemplateSecure) && (isLinkSecure == null)
-				&& (requestUrl.startsWith(SECURE_URL_PREFIX))) {
+		if ((!isTemplateSecure) && (isLinkSecure == null) && (requestUrl.startsWith(SECURE_URL_PREFIX))) {
 			// Prefix non-configured non-secure template links
 			linkUri = NON_SECURE_URL_PREFIX + linkUri;
 
-		} else if (isTemplateSecure
-				&& ((isLinkSecure != null) && (!isLinkSecure))) {
+		} else if (isTemplateSecure && ((isLinkSecure != null) && (!isLinkSecure))) {
 			// Prefix non-secure links for secure template
 			linkUri = NON_SECURE_URL_PREFIX + linkUri;
 		}
-		String expectedEntity = (isLinkSecure != null ? "link-" : "")
-				+ "SECURE - Daniel(1) - " + linkUri;
+		String expectedEntity = (isLinkSecure != null ? "link-" : "") + "SECURE - Daniel(1) - " + linkUri;
 
 		// Determine if redirecting
 		if (redirectUrl != null) {
@@ -253,10 +243,8 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 			redirectUrl = redirectUrl + HttpRouteFunction.REDIRECT_URI_SUFFIX;
 
 			// Ensure redirect to appropriately secure URL
-			assertEquals("Should be redirect", 303, response.getStatusLine()
-					.getStatusCode());
-			assertEquals("Incorrect redirect URL", redirectUrl, response
-					.getFirstHeader("Location").getValue());
+			assertEquals("Should be redirect", 303, response.getStatusLine().getStatusCode());
+			assertEquals("Incorrect redirect URL", redirectUrl, response.getFirstHeader("Location").getValue());
 
 			// Complete request to do next request
 			response.getEntity().getContent().close();
@@ -266,14 +254,12 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 		}
 
 		// Ensure service request as appropriately secure
-		assertEquals("Should be successful", 200, response.getStatusLine()
-				.getStatusCode());
+		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
 
 		// Ensure correct content
 		ByteArrayOutputStream actualEntity = new ByteArrayOutputStream();
 		response.getEntity().writeTo(actualEntity);
-		assertEquals("Incorrect template response", expectedEntity, new String(
-				actualEntity.toByteArray()));
+		assertEquals("Incorrect template response", expectedEntity, new String(actualEntity.toByteArray()));
 	}
 
 	/**
@@ -331,8 +317,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	 */
 	public void testInsecureUriRedirect() throws Exception {
 		this.doSecureUriTest(false, SECURE_URL_PREFIX + "/uri",
-				NON_SECURE_URL_PREFIX + "/uri"
-						+ HttpRouteFunction.REDIRECT_URI_SUFFIX);
+				NON_SECURE_URL_PREFIX + "/uri" + HttpRouteFunction.REDIRECT_URI_SUFFIX);
 	}
 
 	/**
@@ -345,29 +330,29 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	/**
 	 * Undertakes test for secure settings of a {@link HttpUriLink}.
 	 */
-	private void doSecureUriTest(boolean isUriSecure, String requestUrl,
-			String redirectUrl) throws Exception {
+	private void doSecureUriTest(boolean isUriSecure, String requestUrl, String redirectUrl) throws Exception {
 
-		// Configure the section for URI
-		AutoWireSection section = this.source.addSection("TEST",
-				ClassSectionSource.class.getName(), UriLogic.class.getName());
-		HttpUriLink uriLink = this.source.linkUri("uri", section, "service");
-		uriLink.setUriSecure(isUriSecure);
+		// Configure the application
+		this.compiler.web((context) -> {
+			WebArchitect web = context.getWebArchitect();
 
-		// Add HTTP parameters (as not loaded by template)
-		AutoWireObject parameters = this.source.addManagedObject(
-				HttpRequestObjectManagedObjectSource.class.getName(), null,
-				new AutoWire(Parameters.class));
-		parameters.addProperty(
-				HttpRequestObjectManagedObjectSource.PROPERTY_CLASS_NAME,
-				Parameters.class.getName());
-		parameters
-				.addProperty(
-						HttpRequestObjectManagedObjectSource.PROPERTY_IS_LOAD_HTTP_PARAMETERS,
-						String.valueOf(true));
+			// Configure the section for URI
+			OfficeSection section = context.addSection("TEST", UriLogic.class);
+			HttpUriLink uriLink = web.linkUri("uri", section.getOfficeSectionInput("service"));
+			uriLink.setUriSecure(isUriSecure);
+
+			// Add HTTP parameters (as not loaded by template)
+			OfficeManagedObjectSource parametersMos = context.getOfficeArchitect()
+					.addOfficeManagedObjectSource("PARAMETERS", HttpRequestObjectManagedObjectSource.class.getName());
+			parametersMos.addProperty(HttpRequestObjectManagedObjectSource.PROPERTY_CLASS_NAME,
+					Parameters.class.getName());
+			parametersMos.addProperty(HttpRequestObjectManagedObjectSource.PROPERTY_IS_LOAD_HTTP_PARAMETERS,
+					String.valueOf(true));
+			parametersMos.addOfficeManagedObject("PARAMETERS", ManagedObjectScope.PROCESS);
+		});
 
 		// Start the server
-		this.officeFloor = this.source.openOfficeFloor();
+		this.officeFloor = this.compiler.compileAndOpenOfficeFloor();
 
 		// Test (with parameters and entity)
 		HttpPost post = new HttpPost(requestUrl + "?name=Daniel");
@@ -377,10 +362,8 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 		// Determine if redirecting
 		if (redirectUrl != null) {
 			// Ensure redirect to appropriately secure connection
-			assertEquals("Should be redirect", 303, response.getStatusLine()
-					.getStatusCode());
-			assertEquals("Incorrect redirect URL", redirectUrl, response
-					.getFirstHeader("Location").getValue());
+			assertEquals("Should be redirect", 303, response.getStatusLine().getStatusCode());
+			assertEquals("Incorrect redirect URL", redirectUrl, response.getFirstHeader("Location").getValue());
 			response.getEntity().getContent().close();
 
 			// Undertake redirect to ensure parameters and entity are maintained
@@ -388,27 +371,21 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 		}
 
 		// Ensure service request as appropriately secure
-		assertEquals("Should be successful", 200, response.getStatusLine()
-				.getStatusCode());
+		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
 
 		// Ensure correct content
 		ByteArrayOutputStream actualEntity = new ByteArrayOutputStream();
 		response.getEntity().writeTo(actualEntity);
-		assertEquals("Incorrect template response", "SECURE - Daniel(1)",
-				new String(actualEntity.toByteArray()));
+		assertEquals("Incorrect template response", "SECURE - Daniel(1)", new String(actualEntity.toByteArray()));
 	}
 
 	/**
 	 * Logic for servicing the URI.
 	 */
 	public static class UriLogic {
-		public void service(ServerHttpConnection connection,
-				Parameters parameters) throws IOException {
-			connection
-					.getHttpResponse()
-					.getEntityWriter()
-					.write("SECURE - " + parameters.getName() + "("
-							+ parameters.getId() + ")");
+		public void service(ServerHttpConnection connection, Parameters parameters) throws IOException {
+			connection.getHttpResponse().getEntityWriter()
+					.write("SECURE - " + parameters.getName() + "(" + parameters.getId() + ")");
 		}
 	}
 

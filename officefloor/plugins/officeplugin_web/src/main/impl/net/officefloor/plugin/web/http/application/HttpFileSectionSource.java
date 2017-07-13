@@ -88,7 +88,7 @@ public class HttpFileSectionSource extends AbstractSectionSource {
 				SourceHttpResourceFactory.copyProperties(context, namespace);
 				namespace.addProperty(HttpFileManagedFunctionSource.PROPERTY_RESOURCE_PATH, resourcePath);
 				SectionFunction function = namespace.addSectionFunction(resourcePath,
-						HttpFileManagedFunctionSource.TASK_HTTP_FILE);
+						HttpFileManagedFunctionSource.FUNCTION_HTTP_FILE);
 
 				// Link Server HTTP Connection
 				FunctionObject serverHttpConnectionObject = function

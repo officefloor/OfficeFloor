@@ -24,8 +24,8 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.resource.FileExtensionHttpFileDescriber;
@@ -58,30 +58,18 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testCopyNoProperties() {
 
-		final SourceProperties properties = this
-				.createMock(SourceProperties.class);
-		final PropertyConfigurable target = this
-				.createMock(PropertyConfigurable.class);
+		final SourceProperties properties = this.createMock(SourceProperties.class);
+		final PropertyConfigurable target = this.createMock(PropertyConfigurable.class);
 
 		// Record no properties
-		this.recordReturn(properties, properties.getProperty(
-				SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX, null),
-				null);
-		this.recordReturn(properties, properties.getProperty(
-				SourceHttpResourceFactory.PROPERTY_RESOURCE_DIRECTORIES, null),
-				null);
-		this.recordReturn(
-				properties,
-				properties
-						.getProperty(
-								SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES,
-								null), null);
-		this.recordReturn(
-				properties,
-				properties
-						.getProperty(
-								SourceHttpResourceFactory.PROPERTY_DIRECT_STATIC_CONTENT,
-								null), null);
+		this.recordReturn(properties,
+				properties.getProperty(SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX, null), null);
+		this.recordReturn(properties,
+				properties.getProperty(SourceHttpResourceFactory.PROPERTY_RESOURCE_DIRECTORIES, null), null);
+		this.recordReturn(properties,
+				properties.getProperty(SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES, null), null);
+		this.recordReturn(properties,
+				properties.getProperty(SourceHttpResourceFactory.PROPERTY_DIRECT_STATIC_CONTENT, null), null);
 
 		// Test no properties
 		this.replayMockObjects();
@@ -94,42 +82,24 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testCopyProperties() {
 
-		final SourceProperties properties = this
-				.createMock(SourceProperties.class);
-		final PropertyConfigurable target = this
-				.createMock(PropertyConfigurable.class);
+		final SourceProperties properties = this.createMock(SourceProperties.class);
+		final PropertyConfigurable target = this.createMock(PropertyConfigurable.class);
 
 		// Record properties
-		this.recordReturn(properties, properties.getProperty(
-				SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX, null),
-				"CLASSPATH");
-		target.addProperty(
-				SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX,
-				"CLASSPATH");
-		this.recordReturn(properties, properties.getProperty(
-				SourceHttpResourceFactory.PROPERTY_RESOURCE_DIRECTORIES, null),
-				"WAR_DIRECTORY");
-		target.addProperty(
-				SourceHttpResourceFactory.PROPERTY_RESOURCE_DIRECTORIES,
-				"WAR_DIRECTORY");
-		this.recordReturn(
-				properties,
-				properties
-						.getProperty(
-								SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES,
-								null), "DEFAULT_FILE");
-		target.addProperty(
-				SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES,
+		this.recordReturn(properties,
+				properties.getProperty(SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX, null), "CLASSPATH");
+		target.addProperty(SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX, "CLASSPATH");
+		this.recordReturn(properties,
+				properties.getProperty(SourceHttpResourceFactory.PROPERTY_RESOURCE_DIRECTORIES, null), "WAR_DIRECTORY");
+		target.addProperty(SourceHttpResourceFactory.PROPERTY_RESOURCE_DIRECTORIES, "WAR_DIRECTORY");
+		this.recordReturn(properties,
+				properties.getProperty(SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES, null),
 				"DEFAULT_FILE");
-		this.recordReturn(
-				properties,
-				properties
-						.getProperty(
-								SourceHttpResourceFactory.PROPERTY_DIRECT_STATIC_CONTENT,
-								null), "DIRECT_CONTENT");
-		target.addProperty(
-				SourceHttpResourceFactory.PROPERTY_DIRECT_STATIC_CONTENT,
+		target.addProperty(SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES, "DEFAULT_FILE");
+		this.recordReturn(properties,
+				properties.getProperty(SourceHttpResourceFactory.PROPERTY_DIRECT_STATIC_CONTENT, null),
 				"DIRECT_CONTENT");
+		target.addProperty(SourceHttpResourceFactory.PROPERTY_DIRECT_STATIC_CONTENT, "DIRECT_CONTENT");
 
 		// Test no properties
 		this.replayMockObjects();
@@ -142,19 +112,16 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testLoadNoProperties() {
 
-		final PropertyConfigurable target = this
-				.createMock(PropertyConfigurable.class);
+		final PropertyConfigurable target = this.createMock(PropertyConfigurable.class);
 
 		// Test
 		this.replayMockObjects();
 
 		// Null for no configuration
-		SourceHttpResourceFactory
-				.loadProperties(null, null, null, null, target);
+		SourceHttpResourceFactory.loadProperties(null, null, null, null, target);
 
 		// Empty values for no configuration
-		SourceHttpResourceFactory.loadProperties("", new File[0],
-				new String[0], null, target);
+		SourceHttpResourceFactory.loadProperties("", new File[0], new String[0], null, target);
 
 		this.verifyMockObjects();
 	}
@@ -164,38 +131,29 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testLoadProperties() throws Exception {
 
-		final PropertyConfigurable target = this
-				.createMock(PropertyConfigurable.class);
+		final PropertyConfigurable target = this.createMock(PropertyConfigurable.class);
 
-		File dirOne = this.findFile(this.getClass(), "index.html")
-				.getParentFile();
+		File dirOne = this.findFile(this.getClass(), "index.html").getParentFile();
 		File dirTwo = this.findFile("PUBLIC/resource.html").getParentFile();
 
 		// Record properties
-		target.addProperty(
-				SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX, "PREFIX");
-		target.addProperty(
-				SourceHttpResourceFactory.PROPERTY_RESOURCE_DIRECTORIES,
+		target.addProperty(SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX, "PREFIX");
+		target.addProperty(SourceHttpResourceFactory.PROPERTY_RESOURCE_DIRECTORIES,
 				dirOne.getAbsolutePath() + ";" + dirTwo.getAbsolutePath());
-		target.addProperty(
-				SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES,
-				"another.html;test.html");
-		target.addProperty(
-				SourceHttpResourceFactory.PROPERTY_DIRECT_STATIC_CONTENT,
-				"false");
+		target.addProperty(SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES, "another.html;test.html");
+		target.addProperty(SourceHttpResourceFactory.PROPERTY_DIRECT_STATIC_CONTENT, "false");
 
 		// Test
 		this.replayMockObjects();
-		SourceHttpResourceFactory.loadProperties("PREFIX", new File[] { dirOne,
-				dirTwo }, new String[] { "another.html", "test.html" },
-				Boolean.FALSE, target);
+		SourceHttpResourceFactory.loadProperties("PREFIX", new File[] { dirOne, dirTwo },
+				new String[] { "another.html", "test.html" }, Boolean.FALSE, target);
 		this.verifyMockObjects();
 	}
 
 	/**
 	 * Ensure defaults with
-	 * {@link WebArchitect#WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX} on
-	 * no configuration.
+	 * {@link WebArchitect#WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX} on no
+	 * configuration.
 	 */
 	public void testNoConfiguration() throws Exception {
 		this.createSourceHttpResourceFactory(null, null, true);
@@ -217,10 +175,8 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 	 * Ensure able to obtain {@link HttpFile} from WAR configuration.
 	 */
 	public void testWarHttpFile() throws IOException {
-		File warDirectory = this.findFile(this.getClass(), "index.html")
-				.getParentFile();
-		this.createSourceHttpResourceFactory(warDirectory.getAbsolutePath(),
-				null, true);
+		File warDirectory = this.findFile(this.getClass(), "index.html").getParentFile();
+		this.createSourceHttpResourceFactory(warDirectory.getAbsolutePath(), null, true);
 		this.doCreateHttpResourceTest("OverrideFileNotFound.html", true);
 		this.doCreateHttpResourceTest("unknown.html", false);
 	}
@@ -234,22 +190,14 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 	 * directory and other for generated content such as GWT).
 	 */
 	public void testMultipleWarDirectories() throws IOException {
-		File warDirOne = this.findFile(this.getClass(), "index.html")
-				.getParentFile().getParentFile();
-		File warDirTwo = this.findFile(this.getClass(), "index.html")
-				.getParentFile();
-		this.createSourceHttpResourceFactory(warDirOne.getAbsolutePath() + ";"
-				+ warDirTwo.getAbsolutePath(), null, true);
-		HttpResource resourceOne = this.doCreateHttpResourceTest("index.html",
+		File warDirOne = this.findFile(this.getClass(), "index.html").getParentFile().getParentFile();
+		File warDirTwo = this.findFile(this.getClass(), "index.html").getParentFile();
+		this.createSourceHttpResourceFactory(warDirOne.getAbsolutePath() + ";" + warDirTwo.getAbsolutePath(), null,
 				true);
-		assertHttpFileContents(
-				"Should obtain index.html from first war directory",
-				"Test file", resourceOne);
-		HttpResource resourceTwo = this.doCreateHttpResourceTest(
-				"OverrideFileNotFound.html", true);
-		assertHttpFileContents(
-				"Should be able to get file from second war directory",
-				"File not found", resourceTwo);
+		HttpResource resourceOne = this.doCreateHttpResourceTest("index.html", true);
+		assertHttpFileContents("Should obtain index.html from first war directory", "Test file", resourceOne);
+		HttpResource resourceTwo = this.doCreateHttpResourceTest("OverrideFileNotFound.html", true);
+		assertHttpFileContents("Should be able to get file from second war directory", "File not found", resourceTwo);
 	}
 
 	/**
@@ -257,12 +205,9 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testWarDirectoryNotExist() throws IOException {
 		try {
-			this.createSourceHttpResourceFactory("not existing war directory",
-					null, false);
+			this.createSourceHttpResourceFactory("not existing war directory", null, false);
 		} catch (FileNotFoundException ex) {
-			assertEquals("Incorrect cause",
-					"Can not find WAR directory 'not existing war directory'",
-					ex.getMessage());
+			assertEquals("Incorrect cause", "Can not find WAR directory 'not existing war directory'", ex.getMessage());
 		}
 	}
 
@@ -270,15 +215,11 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 	 * Ensure WAR look up is used as priority over class path lookup.
 	 */
 	public void testWarBeforeClasspath() throws IOException {
-		File warDirectory = this.findFile(this.getClass(), "index.html")
-				.getParentFile();
-		this.createSourceHttpResourceFactory(warDirectory.getAbsolutePath(),
-				null, true);
-		HttpResource resource = this.doCreateHttpResourceTest("index.html",
-				true);
-		assertHttpFileContents(
-				"Should obtain index.html from war directory rather than PUBLIC",
-				"Hello World", resource);
+		File warDirectory = this.findFile(this.getClass(), "index.html").getParentFile();
+		this.createSourceHttpResourceFactory(warDirectory.getAbsolutePath(), null, true);
+		HttpResource resource = this.doCreateHttpResourceTest("index.html", true);
+		assertHttpFileContents("Should obtain index.html from war directory rather than PUBLIC", "Hello World",
+				resource);
 	}
 
 	/**
@@ -287,14 +228,12 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testDirectHttpFile() throws IOException {
 		this.createSourceHttpResourceFactory(null, null, true);
-		HttpResource resource = this.doCreateHttpResourceTest("index.html",
-				true);
+		HttpResource resource = this.doCreateHttpResourceTest("index.html", true);
 		HttpFile file = (HttpFile) resource;
 		ByteBuffer contents = file.getContents();
 		assertTrue("Should be direct buffer", contents.isDirect());
 		assertTrue("Should be read-only", contents.isReadOnly());
-		assertHttpFileContents("Should be able to retrieve direct content",
-				"test", resource);
+		assertHttpFileContents("Should be able to retrieve direct content", "test", resource);
 	}
 
 	/**
@@ -302,14 +241,12 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testNonDirectHttpFile() throws IOException {
 		this.createSourceHttpResourceFactory(null, null, false);
-		HttpResource resource = this.doCreateHttpResourceTest("index.html",
-				true);
+		HttpResource resource = this.doCreateHttpResourceTest("index.html", true);
 		HttpFile file = (HttpFile) resource;
 		ByteBuffer contents = file.getContents();
 		assertFalse("Should NOT be direct buffer", contents.isDirect());
 		assertTrue("Should however still be read-only", contents.isReadOnly());
-		assertHttpFileContents("Should be able to retrieve non-direct content",
-				"test", resource);
+		assertHttpFileContents("Should be able to retrieve non-direct content", "test", resource);
 	}
 
 	/**
@@ -325,17 +262,13 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 		this.factory.addHttpFileDescriber(fileDescriber);
 
 		// Obtain the HTTP file with description
-		HttpResource resource = this.doCreateHttpResourceTest("index.html",
-				true);
+		HttpResource resource = this.doCreateHttpResourceTest("index.html", true);
 		HttpFile file = (HttpFile) resource;
 
 		// Validate description
-		assertEquals("Should not have Content-Encoding", "",
-				file.getContentEncoding());
-		assertEquals("Incorrect Content-Type", "text/html",
-				file.getContentType());
-		assertEquals("Incorrect Charset", Charset.defaultCharset(),
-				file.getCharset());
+		assertEquals("Should not have Content-Encoding", "", file.getContentEncoding());
+		assertEquals("Incorrect Content-Type", "text/html", file.getContentType());
+		assertEquals("Incorrect Charset", Charset.defaultCharset(), file.getCharset());
 	}
 
 	/**
@@ -348,42 +281,32 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 	 * @param isDirect
 	 *            Flag indicating if direct {@link ByteBuffer} for performance.
 	 */
-	private void createSourceHttpResourceFactory(String warDirectory,
-			String classpathPrefix, boolean isDirect) throws IOException {
-		
+	private void createSourceHttpResourceFactory(String warDirectory, String classpathPrefix, boolean isDirect)
+			throws IOException {
+
 		// Clear the factories
 		ClasspathHttpResourceFactory.clearHttpResourceFactories();
 		WarHttpResourceFactory.clearHttpResourceFactories();
 
 		// Record the creation
-		this.recordReturn(this.context, this.context.getProperty(
-				SourceHttpResourceFactory.PROPERTY_RESOURCE_DIRECTORIES, null),
-				warDirectory);
-		this.recordReturn(
-				this.context,
-				this.context
-						.getProperty(
-								SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX,
-								WebArchitect.WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX),
-				(classpathPrefix == null ? WebArchitect.WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX
-						: classpathPrefix));
-		this.recordReturn(this.context, this.context.getClassLoader(), Thread
-				.currentThread().getContextClassLoader());
-		this.recordReturn(this.context, this.context.getProperty(
-				SourceHttpResourceFactory.PROPERTY_DIRECT_STATIC_CONTENT,
-				String.valueOf(Boolean.TRUE.booleanValue())), String
-				.valueOf(isDirect));
-		this.recordReturn(
-				this.context,
-				this.context
-						.getProperty(
-								SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES,
-								"index.html"), "default.html");
+		this.recordReturn(this.context,
+				this.context.getProperty(SourceHttpResourceFactory.PROPERTY_RESOURCE_DIRECTORIES, null), warDirectory);
+		this.recordReturn(this.context,
+				this.context.getProperty(SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX,
+						WebArchitect.WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX),
+				(classpathPrefix == null ? WebArchitect.WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX : classpathPrefix));
+		this.recordReturn(this.context, this.context.getClassLoader(), Thread.currentThread().getContextClassLoader());
+		this.recordReturn(this.context,
+				this.context.getProperty(SourceHttpResourceFactory.PROPERTY_DIRECT_STATIC_CONTENT,
+						String.valueOf(Boolean.TRUE.booleanValue())),
+				String.valueOf(isDirect));
+		this.recordReturn(this.context,
+				this.context.getProperty(SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES, "index.html"),
+				"default.html");
 
 		// Create the factory
 		this.replayMockObjects();
-		this.factory = SourceHttpResourceFactory
-				.createHttpResourceFactory(this.context);
+		this.factory = SourceHttpResourceFactory.createHttpResourceFactory(this.context);
 		this.verifyMockObjects();
 	}
 
@@ -394,8 +317,7 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 	 *            Request URI path.
 	 * @return {@link HttpResource}.
 	 */
-	private HttpResource doCreateHttpResourceTest(String requestUriPath,
-			boolean isExpectingExists) {
+	private HttpResource doCreateHttpResourceTest(String requestUriPath, boolean isExpectingExists) {
 		try {
 			// Ensure leading slash to request URI path
 			if (!(requestUriPath.startsWith("/"))) {
@@ -403,10 +325,8 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 			}
 
 			// Obtain the resource
-			HttpResource resource = this.factory
-					.createHttpResource(requestUriPath);
-			assertEquals("Incorrectly existing", isExpectingExists,
-					resource.isExist());
+			HttpResource resource = this.factory.createHttpResource(requestUriPath);
+			assertEquals("Incorrectly existing", isExpectingExists, resource.isExist());
 			return resource;
 		} catch (Exception ex) {
 			throw fail(ex);
@@ -423,15 +343,13 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 	 * @param resource
 	 *            {@link HttpResource} for {@link HttpFile}.
 	 */
-	private static void assertHttpFileContents(String message,
-			String expectedToken, HttpResource resource) {
+	private static void assertHttpFileContents(String message, String expectedToken, HttpResource resource) {
 		assertTrue("Resource should be HttpFile", resource instanceof HttpFile);
 		HttpFile file = (HttpFile) resource;
 		ByteBuffer buffer = file.getContents().duplicate();
 		byte[] data = new byte[buffer.remaining()];
 		buffer.get(data);
 		String contents = new String(data);
-		assertTrue(message + "\n\n" + contents,
-				contents.contains(expectedToken));
+		assertTrue(message + "\n\n" + contents, contents.contains(expectedToken));
 	}
 }

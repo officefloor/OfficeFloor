@@ -57,7 +57,7 @@ public class ManagedObjectHttpLogoutFunction extends StaticManagedFunction<Index
 	public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
 
 		// Obtain the dependencies
-		TaskLogoutContext logoutContext = (TaskLogoutContext) context.getObject(0);
+		FunctionLogoutContext logoutContext = (FunctionLogoutContext) context.getObject(0);
 		HttpLogoutRequest request = logoutContext.getHttpLogoutRequest();
 		ServerHttpConnection connection = logoutContext.getConnection();
 		HttpSession session = logoutContext.getSession();

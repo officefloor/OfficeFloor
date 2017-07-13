@@ -93,7 +93,7 @@ public class TcpConnectionHandler
 		this.newConnectionFlowIndex = newConnectionFlowIndex;
 
 		// Create the input stream
-		this.inputStream = new ServerInputStreamImpl(connection.getLock());
+		this.inputStream = new ServerInputStreamImpl(connection.getWriteLock());
 
 		// Create the output stream
 		this.outputStream = new ServerOutputStreamImpl(this, sendBufferSize);
@@ -109,7 +109,7 @@ public class TcpConnectionHandler
 	public void handleRead(ReadContext context) throws IOException {
 
 		// Indicate data available from client
-		synchronized (this.getLock()) {
+		synchronized (this.getWriteLock()) {
 
 			// Write the data
 			byte[] data = context.getData();
@@ -133,8 +133,8 @@ public class TcpConnectionHandler
 	 */
 
 	@Override
-	public Object getLock() {
-		return this.connection.getLock();
+	public Object getWriteLock() {
+		return this.connection.getWriteLock();
 	}
 
 	@Override
@@ -175,7 +175,7 @@ public class TcpConnectionHandler
 
 	@Override
 	public void setAsynchronousContext(AsynchronousContext context) {
-		synchronized (this.getLock()) {
+		synchronized (this.getWriteLock()) {
 			this.asynchronousContext = context;
 		}
 	}
@@ -191,7 +191,7 @@ public class TcpConnectionHandler
 
 	@Override
 	public boolean waitOnClientData() throws IOException {
-		synchronized (this.getLock()) {
+		synchronized (this.getWriteLock()) {
 
 			// Determine if data available to read
 			if (this.inputStream.available() > 0) {

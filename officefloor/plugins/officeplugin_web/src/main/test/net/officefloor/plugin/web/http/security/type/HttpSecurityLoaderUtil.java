@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.web.http.security.type;
 
+import org.junit.Assert;
+
 import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
@@ -27,6 +29,7 @@ import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.plugin.web.http.security.HttpSecurityConfiguration;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.security.HttpSecuritySourceSpecification;
 
@@ -204,7 +207,7 @@ public class HttpSecurityLoaderUtil {
 		try {
 			httpSecuritySource = httpSecuritySourceClass.newInstance();
 		} catch (Exception ex) {
-			TestCase.fail("Failed to create instance of " + httpSecuritySourceClass.getName() + ": " + ex.getMessage()
+			Assert.fail("Failed to create instance of " + httpSecuritySourceClass.getName() + ": " + ex.getMessage()
 					+ " [" + ex.getClass().getName() + "]");
 		}
 
@@ -247,6 +250,44 @@ public class HttpSecurityLoaderUtil {
 
 		// Return the HTTP security type
 		return securityType;
+	}
+
+	/**
+	 * Loads the {@link HttpSecurityConfiguration}.
+	 * 
+	 * @param <S>
+	 *            Security type.
+	 * @param <C>
+	 *            Credentials type.
+	 * @param <D>
+	 *            Dependency keys type.
+	 * @param <F>
+	 *            {@link Flow} keys type.
+	 * @param httpSecuritySource
+	 *            {@link HttpSecuritySource}.
+	 * @param propertyNameValues
+	 *            {@link Property} name/value pairs.
+	 * @return {@link HttpSecurityConfiguration}.
+	 */
+	public static <S, C, D extends Enum<D>, F extends Enum<F>> HttpSecurityConfiguration<S, C, D, F> loadHttpSecurityConfiguration(
+			final HttpSecuritySource<S, C, D, F> httpSecuritySource, String... propertyNameValues) {
+
+		// Load the HTTP security type
+		final HttpSecurityType<S, C, D, F> securityType = loadHttpSecurityType(httpSecuritySource, propertyNameValues);
+
+		// Create and return the HTTP security configuration
+		return new HttpSecurityConfiguration<S, C, D, F>() {
+
+			@Override
+			public HttpSecuritySource<S, C, D, F> getHttpSecuritySource() {
+				return httpSecuritySource;
+			}
+
+			@Override
+			public HttpSecurityType<S, C, D, F> getHttpSecurityType() {
+				return securityType;
+			}
+		};
 	}
 
 	/**

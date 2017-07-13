@@ -22,12 +22,12 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
-import net.officefloor.compile.test.work.WorkLoaderUtil;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.test.managedfunction.ManagedFunctionLoaderUtil;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -41,20 +41,19 @@ import net.officefloor.plugin.web.http.resource.source.HttpFileManagedFunctionSo
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpFileWorkSourceTest extends OfficeFrameTestCase {
+public class HttpFileManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Mock {@link ManagedFunctionContext}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final ManagedFunctionContext<HttpFileFactoryFunction<None>, DependencyKeys, None> taskContext = this
+	private final ManagedFunctionContext<DependencyKeys, None> functionContext = this
 			.createMock(ManagedFunctionContext.class);
 
 	/**
 	 * Mock {@link ServerHttpConnection}.
 	 */
-	private final ServerHttpConnection connection = this
-			.createMock(ServerHttpConnection.class);
+	private final ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
 
 	/**
 	 * Mock {@link HttpResponse}.
@@ -70,7 +69,7 @@ public class HttpFileWorkSourceTest extends OfficeFrameTestCase {
 	 * Validate specification.
 	 */
 	public void testSpecification() {
-		WorkLoaderUtil.validateSpecification(HttpFileManagedFunctionSource.class,
+		ManagedFunctionLoaderUtil.validateSpecification(HttpFileManagedFunctionSource.class,
 				HttpFileManagedFunctionSource.PROPERTY_RESOURCE_PATH, "Resource Path");
 	}
 
@@ -80,21 +79,16 @@ public class HttpFileWorkSourceTest extends OfficeFrameTestCase {
 	public void testType() {
 
 		// Create expected type
-		FunctionNamespaceBuilder<SendHttpFileFunction> type = WorkLoaderUtil
-				.createWorkTypeBuilder(null);
+		FunctionNamespaceBuilder type = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
 		SendHttpFileFunction factory = new SendHttpFileFunction(null);
-		type.setWorkFactory(factory);
-		ManagedFunctionTypeBuilder<DependencyKeys, None> task = type.addManagedFunctionType(
-				HttpFileManagedFunctionSource.TASK_HTTP_FILE, factory,
-				DependencyKeys.class, None.class);
-		task.addObject(ServerHttpConnection.class).setKey(
-				DependencyKeys.SERVER_HTTP_CONNECTION);
-		task.addEscalation(IOException.class);
+		ManagedFunctionTypeBuilder<DependencyKeys, None> function = type.addManagedFunctionType(
+				HttpFileManagedFunctionSource.FUNCTION_HTTP_FILE, factory, DependencyKeys.class, None.class);
+		function.addObject(ServerHttpConnection.class).setKey(DependencyKeys.SERVER_HTTP_CONNECTION);
+		function.addEscalation(IOException.class);
 
 		// Validate type
-		WorkLoaderUtil.validateWorkType(type, HttpFileManagedFunctionSource.class,
-				SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX, this
-						.getClass().getPackage().getName(),
+		ManagedFunctionLoaderUtil.validateManagedFunctionType(type, HttpFileManagedFunctionSource.class,
+				SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX, this.getClass().getPackage().getName(),
 				HttpFileManagedFunctionSource.PROPERTY_RESOURCE_PATH, "index.html");
 	}
 
@@ -116,41 +110,36 @@ public class HttpFileWorkSourceTest extends OfficeFrameTestCase {
 	 * Ensures that sends the {@link HttpFile}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void doSendHttpFileTest(String fileName, String configuredFilePath)
-			throws Throwable {
+	public void doSendHttpFileTest(String fileName, String configuredFilePath) throws Throwable {
 
 		// Read in the expected file content
 		File file = this.findFile(this.getClass(), fileName);
 		String fileContents = this.getFileContents(file);
 
 		// Record obtaining body to send HTTP file
-		this.recordReturn(this.taskContext, this.taskContext
-				.getObject(DependencyKeys.SERVER_HTTP_CONNECTION),
+		this.recordReturn(this.functionContext, this.functionContext.getObject(DependencyKeys.SERVER_HTTP_CONNECTION),
 				this.connection);
-		this.recordReturn(this.connection, this.connection.getHttpResponse(),
-				this.response);
+		this.recordReturn(this.connection, this.connection.getHttpResponse(), this.response);
 		this.response.reset();
 		Charset charset = Charset.defaultCharset();
 		this.response.setContentType("text/html", charset);
-		this.recordReturn(this.response, this.response.getEntityWriter(),
-				this.entity.getServerWriter());
+		this.recordReturn(this.response, this.response.getEntityWriter(), this.entity.getServerWriter());
 
 		// Test
 		this.replayMockObjects();
 
-		// Load the work type
-		FunctionNamespaceType<SendHttpFileFunction> workType = WorkLoaderUtil.loadWorkType(
-				HttpFileManagedFunctionSource.class,
-				SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX, this
-						.getClass().getPackage().getName(),
-				HttpFileManagedFunctionSource.PROPERTY_RESOURCE_PATH, configuredFilePath);
+		// Load the namespace type
+		FunctionNamespaceType namespaceType = ManagedFunctionLoaderUtil.loadManagedFunctionType(
+				HttpFileManagedFunctionSource.class, SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX,
+				this.getClass().getPackage().getName(), HttpFileManagedFunctionSource.PROPERTY_RESOURCE_PATH,
+				configuredFilePath);
 
-		// Create the task
-		ManagedFunction task = workType.getManagedFunctionTypes()[0].getManagedFunctionFactory().createManagedFunction(
-				workType.getWorkFactory().createWork());
+		// Create the function
+		ManagedFunction function = namespaceType.getManagedFunctionTypes()[0].getManagedFunctionFactory()
+				.createManagedFunction();
 
-		// Execute the task to send the HTTP file
-		Object result = task.execute(this.taskContext);
+		// Execute the function to send the HTTP file
+		Object result = function.execute(this.functionContext);
 		assertNull("File should be sent and no return value", result);
 
 		// Verify
@@ -158,8 +147,7 @@ public class HttpFileWorkSourceTest extends OfficeFrameTestCase {
 
 		// Verify the file contents
 		this.entity.getServerOutputStream().flush();
-		assertEquals("Incorrect file content", fileContents, new String(
-				this.entity.getWrittenBytes()));
+		assertEquals("Incorrect file content", fileContents, new String(this.entity.getWrittenBytes()));
 	}
 
 }

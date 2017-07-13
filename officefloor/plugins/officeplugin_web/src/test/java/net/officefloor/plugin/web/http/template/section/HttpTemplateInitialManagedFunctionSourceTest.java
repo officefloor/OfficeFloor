@@ -23,14 +23,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
-import net.officefloor.compile.test.work.WorkLoaderUtil;
-import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.test.managedfunction.ManagedFunctionLoaderUtil;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -38,7 +37,7 @@ import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiator;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiatorImpl;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
-import net.officefloor.plugin.web.http.route.HttpRouteTaskTest;
+import net.officefloor.plugin.web.http.route.HttpRouteFunctionTest;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.template.HttpTemplateManagedFunctionSource;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialFunction.Dependencies;
@@ -49,16 +48,14 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialFunct
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
+public class HttpTemplateInitialManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Validate specification.
 	 */
 	public void testSpecification() {
-		WorkLoaderUtil
-				.validateSpecification(HttpTemplateInitialManagedFunctionSource.class,
-						HttpTemplateInitialManagedFunctionSource.PROPERTY_TEMPLATE_URI,
-						"URI Path");
+		ManagedFunctionLoaderUtil.validateSpecification(HttpTemplateInitialManagedFunctionSource.class,
+				HttpTemplateInitialManagedFunctionSource.PROPERTY_TEMPLATE_URI, "URI Path");
 	}
 
 	/**
@@ -86,8 +83,7 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 	 * Validates uses canonical path for URL continuation.
 	 */
 	public void testNonCanonicalPathType() {
-		this.doTypeTest(null, null, "configured/../non/../canoncial/../path",
-				null, "/path");
+		this.doTypeTest(null, null, "configured/../non/../canoncial/../path", null, "/path");
 	}
 
 	/**
@@ -117,62 +113,49 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 	 * @param isSecure
 	 *            Whether template should be secure.
 	 */
-	private void doTypeTest(Boolean isConfiguredSecure,
-			Boolean isUrlContinuationSecure, String configuredUriPath,
+	private void doTypeTest(Boolean isConfiguredSecure, Boolean isUrlContinuationSecure, String configuredUriPath,
 			String uriSuffix, String expectedUrlContinuationPath) {
 
 		// Factory
-		HttpTemplateInitialFunction factory = new HttpTemplateInitialFunction(null,
-				false, null, null, null);
+		HttpTemplateInitialFunction factory = new HttpTemplateInitialFunction(null, false, null, null, null);
 
 		// Create the expected type
-		FunctionNamespaceBuilder<HttpTemplateInitialFunction> type = WorkLoaderUtil
-				.createWorkTypeBuilder(factory);
+		FunctionNamespaceBuilder type = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
 
 		// Initial task
-		ManagedFunctionTypeBuilder<Dependencies, Flows> initial = type.addManagedFunctionType("TASK",
-				factory, Dependencies.class, Flows.class);
-		initial.addObject(ServerHttpConnection.class).setKey(
-				Dependencies.SERVER_HTTP_CONNECTION);
-		initial.addObject(HttpApplicationLocation.class).setKey(
-				Dependencies.HTTP_APPLICATION_LOCATION);
-		initial.addObject(HttpRequestState.class).setKey(
-				Dependencies.REQUEST_STATE);
+		ManagedFunctionTypeBuilder<Dependencies, Flows> initial = type.addManagedFunctionType("TASK", factory,
+				Dependencies.class, Flows.class);
+		initial.addObject(ServerHttpConnection.class).setKey(Dependencies.SERVER_HTTP_CONNECTION);
+		initial.addObject(HttpApplicationLocation.class).setKey(Dependencies.HTTP_APPLICATION_LOCATION);
+		initial.addObject(HttpRequestState.class).setKey(Dependencies.REQUEST_STATE);
 		initial.addObject(HttpSession.class).setKey(Dependencies.HTTP_SESSION);
 		initial.addFlow().setKey(Flows.RENDER);
 		initial.addEscalation(IOException.class);
-		initial.setDifferentiator(new HttpUrlContinuationDifferentiatorImpl(
-				expectedUrlContinuationPath, isUrlContinuationSecure));
+		initial.setDifferentiator(
+				new HttpUrlContinuationDifferentiatorImpl(expectedUrlContinuationPath, isUrlContinuationSecure));
 
 		// Create the listing of properties
 		List<String> properties = new ArrayList<String>(6);
-		properties.addAll(Arrays.asList(
-				HttpTemplateInitialManagedFunctionSource.PROPERTY_TEMPLATE_URI,
-				configuredUriPath));
+		properties.addAll(
+				Arrays.asList(HttpTemplateInitialManagedFunctionSource.PROPERTY_TEMPLATE_URI, configuredUriPath));
 		if (isConfiguredSecure != null) {
-			properties.addAll(Arrays.asList(
-					HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE,
+			properties.addAll(Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE,
 					String.valueOf(isConfiguredSecure)));
 		}
 		if (uriSuffix != null) {
-			properties.addAll(Arrays.asList(
-					HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX,
-					uriSuffix));
+			properties.addAll(Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX, uriSuffix));
 		}
 
 		// Validate type (must also convert
-		FunctionNamespaceType<HttpTemplateInitialFunction> work = WorkLoaderUtil
-				.validateWorkType(type, HttpTemplateInitialManagedFunctionSource.class,
-						properties.toArray(new String[properties.size()]));
+		FunctionNamespaceType namespace = ManagedFunctionLoaderUtil.validateManagedFunctionType(type,
+				HttpTemplateInitialManagedFunctionSource.class, properties.toArray(new String[properties.size()]));
 
 		// Ensure correct URI path
-		ManagedFunctionType<HttpTemplateInitialFunction, ?, ?> task = work.getManagedFunctionTypes()[0];
-		HttpUrlContinuationDifferentiator differentiator = (HttpUrlContinuationDifferentiator) task
+		ManagedFunctionType<?, ?> function = namespace.getManagedFunctionTypes()[0];
+		HttpUrlContinuationDifferentiator differentiator = (HttpUrlContinuationDifferentiator) function
 				.getDifferentiator();
-		assertEquals("Incorrect URI path", expectedUrlContinuationPath,
-				differentiator.getApplicationUriPath());
-		assertEquals("Incorrectly indentified as secure",
-				isUrlContinuationSecure, differentiator.isSecure());
+		assertEquals("Incorrect URI path", expectedUrlContinuationPath, differentiator.getApplicationUriPath());
+		assertEquals("Incorrectly indentified as secure", isUrlContinuationSecure, differentiator.isSecure());
 	}
 
 	/**
@@ -241,8 +224,7 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 	 * work.
 	 */
 	public void testAlternateRedirect() {
-		this.doServiceTest(false, false, "OTHER", "POST, OTHER", "/redirect",
-				null, null);
+		this.doServiceTest(false, false, "OTHER", "POST, OTHER", "/redirect", null, null);
 	}
 
 	/**
@@ -250,117 +232,92 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 	 * work.
 	 */
 	public void testAlternateRedirectCaseInsensitive() {
-		this.doServiceTest(false, false, "other", "Post, Other", "/redirect",
-				null, null);
+		this.doServiceTest(false, false, "other", "Post, Other", "/redirect", null, null);
 	}
 
 	/**
 	 * Ensure able to specify the Content-Type and {@link Charset}.
 	 */
 	public void testContentTypeAndCharset() {
-		this.doServiceTest(false, false, "GET", null, null, "text/plain",
-				Charset.defaultCharset());
+		this.doServiceTest(false, false, "GET", null, null, "text/plain", Charset.defaultCharset());
 	}
 
 	/**
 	 * Undertake service test.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void doServiceTest(boolean isRequireSecure,
-			boolean isConnectionSecure, String method, String redirectMethods,
-			String redirectUriPath, String contentType, Charset charset) {
+	public void doServiceTest(boolean isRequireSecure, boolean isConnectionSecure, String method,
+			String redirectMethods, String redirectUriPath, String contentType, Charset charset) {
 		try {
 
 			final ManagedFunctionContext context = this.createMock(ManagedFunctionContext.class);
-			final ServerHttpConnection connection = this
-					.createMock(ServerHttpConnection.class);
-			final HttpRequestState requestState = this
-					.createMock(HttpRequestState.class);
+			final ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
+			final HttpRequestState requestState = this.createMock(HttpRequestState.class);
 			final HttpSession session = this.createMock(HttpSession.class);
-			final HttpApplicationLocation location = this
-					.createMock(HttpApplicationLocation.class);
-			final FlowFuture flowFuture = this.createMock(FlowFuture.class);
+			final HttpApplicationLocation location = this.createMock(HttpApplicationLocation.class);
 
 			// Create the task
 			List<String> properties = new ArrayList<String>(6);
-			properties.addAll(Arrays.asList(
-					HttpTemplateInitialManagedFunctionSource.PROPERTY_TEMPLATE_URI,
+			properties.addAll(Arrays.asList(HttpTemplateInitialManagedFunctionSource.PROPERTY_TEMPLATE_URI,
 					(redirectUriPath == null ? "/path" : redirectUriPath)));
 			if (isRequireSecure) {
-				properties.addAll(Arrays.asList(
-						HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE,
+				properties.addAll(Arrays.asList(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE,
 						String.valueOf(isRequireSecure)));
 			}
 			if (redirectMethods != null) {
-				properties
-						.addAll(Arrays
-								.asList(HttpTemplateInitialManagedFunctionSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
-										redirectMethods));
+				properties.addAll(
+						Arrays.asList(HttpTemplateInitialManagedFunctionSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
+								redirectMethods));
 			}
 			if (contentType != null) {
-				properties.addAll(Arrays.asList(
-						HttpTemplateInitialManagedFunctionSource.PROPERTY_CONTENT_TYPE,
-						contentType));
+				properties.addAll(
+						Arrays.asList(HttpTemplateInitialManagedFunctionSource.PROPERTY_CONTENT_TYPE, contentType));
 			}
 			if (charset != null) {
-				properties.addAll(Arrays.asList(
-						HttpTemplateInitialManagedFunctionSource.PROPERTY_CHARSET,
-						charset.name()));
+				properties.addAll(
+						Arrays.asList(HttpTemplateInitialManagedFunctionSource.PROPERTY_CHARSET, charset.name()));
 			}
-			FunctionNamespaceType<HttpTemplateInitialFunction> work = WorkLoaderUtil
-					.loadWorkType(HttpTemplateInitialManagedFunctionSource.class,
-							properties.toArray(new String[properties.size()]));
-			ManagedFunction<HttpTemplateInitialFunction, ?, ?> task = work.getManagedFunctionTypes()[0]
-					.getManagedFunctionFactory().createManagedFunction(
-							work.getWorkFactory().createWork());
+			FunctionNamespaceType namespace = ManagedFunctionLoaderUtil.loadManagedFunctionType(
+					HttpTemplateInitialManagedFunctionSource.class, properties.toArray(new String[properties.size()]));
+			ManagedFunction<?, ?> function = namespace.getManagedFunctionTypes()[0].getManagedFunctionFactory()
+					.createManagedFunction();
 
 			// Record obtaining the dependencies
-			this.recordReturn(context,
-					context.getObject(Dependencies.SERVER_HTTP_CONNECTION),
-					connection);
-			this.recordReturn(context,
-					context.getObject(Dependencies.HTTP_APPLICATION_LOCATION),
-					location);
-			this.recordReturn(context,
-					context.getObject(Dependencies.REQUEST_STATE), requestState);
-			this.recordReturn(context,
-					context.getObject(Dependencies.HTTP_SESSION), session);
+			this.recordReturn(context, context.getObject(Dependencies.SERVER_HTTP_CONNECTION), connection);
+			this.recordReturn(context, context.getObject(Dependencies.HTTP_APPLICATION_LOCATION), location);
+			this.recordReturn(context, context.getObject(Dependencies.REQUEST_STATE), requestState);
+			this.recordReturn(context, context.getObject(Dependencies.HTTP_SESSION), session);
 
 			// Record determining if secure connection
 			if (isRequireSecure) {
-				this.recordReturn(connection, connection.isSecure(),
-						isConnectionSecure);
+				this.recordReturn(connection, connection.isSecure(), isConnectionSecure);
 			}
 
 			// Record determining method for POST, redirect, GET pattern
 			if (method != null) {
-				this.recordReturn(connection, connection.getHttpMethod(),
-						method);
+				this.recordReturn(connection, connection.getHttpMethod(), method);
 			}
 
 			// Record redirect or render
 			if (redirectUriPath != null) {
 				// Record necessary redirect
-				HttpRouteTaskTest.recordDoRedirect(redirectUriPath,
-						isRequireSecure, connection, requestState, session,
-						location, this);
+				HttpRouteFunctionTest.recordDoRedirect(redirectUriPath, isRequireSecure, connection, requestState,
+						session, location, this);
 			} else {
 				// Record triggering the render
-				this.recordReturn(context, context.doFlow(Flows.RENDER, null),
-						flowFuture);
+				context.doFlow(Flows.RENDER, null, null);
 			}
 
 			// Record content type and charset
 			final HttpResponse response = this.createMock(HttpResponse.class);
 			if (contentType != null) {
-				this.recordReturn(connection, connection.getHttpResponse(),
-						response);
+				this.recordReturn(connection, connection.getHttpResponse(), response);
 				response.setContentType(contentType, charset);
 			}
 
 			// Test
 			this.replayMockObjects();
-			task.execute(context);
+			function.execute(context);
 			this.verifyMockObjects();
 
 		} catch (Throwable ex) {

@@ -15,38 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.web.http.security;
+package net.officefloor.plugin.web.http.template.section;
 
-import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.plugin.section.clazz.NextFunction;
 
 /**
- * {@link ManagedFunction} logout context.
+ * Logic containing {@link NextFunction} on section method.
  * 
  * @author Daniel Sagenschneider
  */
-public interface TaskLogoutContext {
+public class NextFunctionErrorLogic {
 
 	/**
-	 * Obtains the {@link ServerHttpConnection} to be secured.
+	 * Section method with disallowed {@link NextFunction}.
 	 * 
-	 * @return {@link ServerHttpConnection}.
+	 * @return Should not be called as invalid to have {@link NextFunction}
+	 *         annotation.
 	 */
-	ServerHttpConnection getConnection();
-
-	/**
-	 * Obtains the {@link HttpSession}.
-	 * 
-	 * @return {@link HttpSession}.
-	 */
-	HttpSession getSession();
-
-	/**
-	 * Obtains the {@link HttpLogoutRequest}.
-	 * 
-	 * @return {@link HttpLogoutRequest}.
-	 */
-	HttpLogoutRequest getHttpLogoutRequest();
+	@NextFunction("NotAllowed")
+	public Object getSection() {
+		return null;
+	}
 
 }

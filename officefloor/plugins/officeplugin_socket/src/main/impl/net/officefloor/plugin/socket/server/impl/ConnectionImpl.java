@@ -121,7 +121,7 @@ public class ConnectionImpl implements Connection, ManagedConnection, SelectionK
 	 */
 
 	@Override
-	public Object getLock() {
+	public Object getWriteLock() {
 		return this;
 	}
 
@@ -144,7 +144,7 @@ public class ConnectionImpl implements Connection, ManagedConnection, SelectionK
 	@Override
 	public void writeData(WriteBuffer[] data) throws IOException {
 
-		synchronized (this.getLock()) {
+		synchronized (this.getWriteLock()) {
 
 			// Ignore write action if terminating
 			if (this.isTerminateAfterWrites) {
@@ -181,7 +181,7 @@ public class ConnectionImpl implements Connection, ManagedConnection, SelectionK
 	@Override
 	public void close() throws IOException {
 
-		synchronized (this.getLock()) {
+		synchronized (this.getWriteLock()) {
 
 			// Indicate closed
 			this.isClosed = true;
@@ -255,7 +255,7 @@ public class ConnectionImpl implements Connection, ManagedConnection, SelectionK
 	@Override
 	public boolean processWriteQueue() throws IOException {
 
-		synchronized (this.getLock()) {
+		synchronized (this.getWriteLock()) {
 
 			// No longer registered for write
 			this.isRegisteredForWrite = false;
@@ -299,7 +299,7 @@ public class ConnectionImpl implements Connection, ManagedConnection, SelectionK
 	@Override
 	public void terminate() throws IOException {
 
-		synchronized (this.getLock()) {
+		synchronized (this.getWriteLock()) {
 
 			// Ensure flagged as closed and terminated
 			this.isClosed = true;

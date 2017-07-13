@@ -53,6 +53,25 @@ public interface ManagedObjectLoader {
 			Class<MS> managedObjectSourceClass);
 
 	/**
+	 * Loads and returns the {@link PropertyList} from the
+	 * {@link ManagedObjectSourceSpecification} for the
+	 * {@link ManagedObjectSource}.
+	 * 
+	 * @param <D>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            Flow key type.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource} instance.
+	 * @return {@link PropertyList} of the {@link ManagedObjectSourceProperty}
+	 *         instances of the {@link ManagedObjectSourceSpecification} or
+	 *         <code>null</code> if issue, which is reported to the
+	 *         {@link CompilerIssues}.
+	 */
+	<D extends Enum<D>, F extends Enum<F>> PropertyList loadSpecification(
+			ManagedObjectSource<D, F> managedObjectSource);
+
+	/**
 	 * Loads and returns the {@link ManagedObjectType} for the
 	 * {@link ManagedObjectSource}.
 	 * 

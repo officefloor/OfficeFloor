@@ -91,7 +91,7 @@ public class ServletServerOutputStream extends ServerOutputStreamImpl {
 		 */
 
 		@Override
-		public Object getLock() {
+		public Object getWriteLock() {
 			return this.outputStream;
 		}
 

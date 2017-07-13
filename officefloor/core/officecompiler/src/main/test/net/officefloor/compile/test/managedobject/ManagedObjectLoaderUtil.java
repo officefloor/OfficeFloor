@@ -59,6 +59,35 @@ public class ManagedObjectLoaderUtil {
 	 *            Dependency keys type.
 	 * @param <F>
 	 *            {@link Flow} keys type.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource} class.
+	 * @param propertyNameLabels
+	 *            Listing of name/label pairs for the {@link Property}
+	 *            instances.
+	 * @return Loaded {@link PropertyList}.
+	 */
+	public static <M extends Enum<M>, F extends Enum<F>> PropertyList validateSpecification(
+			ManagedObjectSource<M, F> managedObjectSource, String... propertyNameLabels) {
+
+		// Load the specification
+		PropertyList propertyList = getOfficeFloorCompiler(null).getManagedObjectLoader()
+				.loadSpecification(managedObjectSource);
+
+		// Verify the properties
+		PropertyListUtil.validatePropertyNameLabels(propertyList, propertyNameLabels);
+
+		// Return the property list
+		return propertyList;
+	}
+
+	/**
+	 * Validates the {@link ManagedObjectSourceSpecification} for the
+	 * {@link ManagedObjectSource}.
+	 * 
+	 * @param <M>
+	 *            Dependency keys type.
+	 * @param <F>
+	 *            {@link Flow} keys type.
 	 * @param <S>
 	 *            {@link ManagedObjectSource} type.
 	 * @param managedObjectSourceClass
@@ -113,19 +142,68 @@ public class ManagedObjectLoaderUtil {
 	 * @return {@link ManagedObjectType} loaded from the
 	 *         {@link ManagedObjectSource}.
 	 */
-	@SuppressWarnings("unchecked")
 	public static <M extends Enum<M>, F extends Enum<F>, S extends ManagedObjectSource<M, F>> ManagedObjectType<M> validateManagedObjectType(
 			ManagedObjectTypeBuilder expectedManagedObjectType, Class<S> managedObjectSourceClass,
 			String... propertyNameValues) {
+
+		// Load the managed object type
+		ManagedObjectType<M> aType = loadManagedObjectType(managedObjectSourceClass, propertyNameValues);
+
+		// Validate the type
+		return validateManagedObjectType(expectedManagedObjectType, aType);
+	}
+
+	/**
+	 * Validates the {@link ManagedObjectType} contained in the
+	 * {@link ManagedObjectTypeBuilder} against the {@link ManagedObjectType}
+	 * loaded from the {@link ManagedObjectSource}.
+	 * 
+	 * @param <M>
+	 *            Dependency keys type.
+	 * @param <F>
+	 *            {@link Flow} keys type.
+	 * @param <S>
+	 *            {@link ManagedObjectSource} type.
+	 * @param expectedManagedObjectType
+	 *            Expected {@link ManagedObjectType}.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource} instance.
+	 * @param propertyNameValues
+	 *            Property values to configure the {@link ManagedObjectSource}.
+	 * @return {@link ManagedObjectType} loaded from the
+	 *         {@link ManagedObjectSource}.
+	 */
+	public static <M extends Enum<M>, F extends Enum<F>> ManagedObjectType<M> validateManagedObjectType(
+			ManagedObjectTypeBuilder expectedManagedObjectType, ManagedObjectSource<M, F> managedObjectSource,
+			String... propertyNameValues) {
+
+		// Load the managed object type
+		ManagedObjectType<M> aType = loadManagedObjectType(managedObjectSource, propertyNameValues);
+
+		// Validate the type
+		return validateManagedObjectType(expectedManagedObjectType, aType);
+	}
+
+	/**
+	 * Validates the {@link ManagedObjectType}.
+	 * 
+	 * @param expectedManagedObjectType
+	 *            Expected {@link ManagedObjectType}.
+	 * @param aType
+	 *            Actual {@link ManagedObjectType}.
+	 * @return {@link ManagedObjectType} loaded from the
+	 *         {@link ManagedObjectSource}.
+	 */
+	private static <M extends Enum<M>, F extends Enum<F>> ManagedObjectType<M> validateManagedObjectType(
+			ManagedObjectTypeBuilder expectedManagedObjectType, ManagedObjectType<M> aType) {
 
 		// Cast to obtain expected managed object type
 		if (!(expectedManagedObjectType instanceof ManagedObjectType)) {
 			Assert.fail("builder must be created from createManagedObjectTypeBuilder");
 		}
-		ManagedObjectType<M> eType = (ManagedObjectType<M>) expectedManagedObjectType;
 
-		// Load the managed object type
-		ManagedObjectType<M> aType = loadManagedObjectType(managedObjectSourceClass, propertyNameValues);
+		@SuppressWarnings("unchecked")
+		ManagedObjectType<M> eType = (ManagedObjectType<M>) expectedManagedObjectType;
 
 		// Verify the types match
 		Assert.assertEquals("Incorrect object type", eType.getObjectClass(), aType.getObjectClass());
@@ -236,6 +314,27 @@ public class ManagedObjectLoaderUtil {
 		// Load and return the managed object type
 		return getOfficeFloorCompiler(classLoader).getManagedObjectLoader()
 				.loadManagedObjectType(managedObjectSourceClass, new PropertyListImpl(propertyNameValues));
+	}
+
+	/**
+	 * Loads the {@link ManagedObjectType} from the {@link ManagedObjectSource}.
+	 * 
+	 * @param <M>
+	 *            Dependency keys type.
+	 * @param <F>
+	 *            {@link Flow} keys type.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource} instance.
+	 * @param propertyNameValues
+	 *            {@link Property} name/value listing.
+	 * @return {@link ManagedObjectType}.
+	 */
+	public static <M extends Enum<M>, F extends Enum<F>> ManagedObjectType<M> loadManagedObjectType(
+			ManagedObjectSource<M, F> managedObjectSource, String... propertyNameValues) {
+
+		// Load and return the managed object type
+		return getOfficeFloorCompiler(null).getManagedObjectLoader().loadManagedObjectType(managedObjectSource,
+				new PropertyListImpl(propertyNameValues));
 	}
 
 	/**

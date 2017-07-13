@@ -61,7 +61,7 @@ public class HttpFileManagedFunctionSource extends AbstractManagedFunctionSource
 	/**
 	 * {@link ManagedFunction} name for writing the {@link HttpFile}.
 	 */
-	public static final String TASK_HTTP_FILE = "file";
+	public static final String FUNCTION_HTTP_FILE = "file";
 
 	/*
 	 * ========================== WorkSource ================================
@@ -106,7 +106,7 @@ public class HttpFileManagedFunctionSource extends AbstractManagedFunctionSource
 
 		// Register the function
 		ManagedFunctionTypeBuilder<DependencyKeys, None> function = namespaceTypeBuilder
-				.addManagedFunctionType(TASK_HTTP_FILE, factory, DependencyKeys.class, None.class);
+				.addManagedFunctionType(FUNCTION_HTTP_FILE, factory, DependencyKeys.class, None.class);
 		function.addObject(ServerHttpConnection.class).setKey(DependencyKeys.SERVER_HTTP_CONNECTION);
 		function.addEscalation(IOException.class);
 	}

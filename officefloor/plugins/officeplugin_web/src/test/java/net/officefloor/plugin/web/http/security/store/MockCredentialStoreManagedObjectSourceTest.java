@@ -22,7 +22,7 @@ import java.util.Set;
 
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
@@ -34,15 +34,13 @@ import net.officefloor.plugin.web.http.security.scheme.DigestHttpSecuritySource;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockCredentialStoreManagedObjectSourceTest extends
-		OfficeFrameTestCase {
+public class MockCredentialStoreManagedObjectSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure correct specification.
 	 */
 	public void testSpecification() {
-		ManagedObjectLoaderUtil
-				.validateSpecification(MockCredentialStoreManagedObjectSource.class);
+		ManagedObjectLoaderUtil.validateSpecification(MockCredentialStoreManagedObjectSource.class);
 	}
 
 	/**
@@ -51,13 +49,11 @@ public class MockCredentialStoreManagedObjectSourceTest extends
 	public void testType() throws Exception {
 
 		// Create expected type
-		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
-				.createManagedObjectTypeBuilder();
+		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(CredentialStore.class);
 
 		// Validate type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type,
-				MockCredentialStoreManagedObjectSource.class);
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, MockCredentialStoreManagedObjectSource.class);
 	}
 
 	/**
@@ -76,24 +72,22 @@ public class MockCredentialStoreManagedObjectSourceTest extends
 
 		// Ensure appropriate credential store
 		Object object = managedObject.getObject();
-		assertTrue("Object should be " + CredentialStore.class.getSimpleName(),
-				object instanceof CredentialStore);
+		assertTrue("Object should be " + CredentialStore.class.getSimpleName(), object instanceof CredentialStore);
 		CredentialStore store = (CredentialStore) object;
 		assertNull("Should be no algorithm", store.getAlgorithm());
 
 		// Ensure handle single role
 		CredentialEntry entry = store.retrieveCredentialEntry("daniel", null);
 		assertEquals("Incorrect credentials", "daniel",
-				new String(entry.retrieveCredentials(),
-						HttpRequestParserImpl.US_ASCII));
+				new String(entry.retrieveCredentials(), HttpRequestParserImpl.US_ASCII));
 		Set<String> roles = entry.retrieveRoles();
 		assertEquals("Incorrect number of roles", 1, roles.size());
 		assertTrue("Incorrect role", roles.contains("daniel"));
 
 		// Ensure handle multiple roles
 		entry = store.retrieveCredentialEntry("daniel, founder", null);
-		assertEquals("Incorrect credentials", "daniel, founder", new String(
-				entry.retrieveCredentials(), HttpRequestParserImpl.US_ASCII));
+		assertEquals("Incorrect credentials", "daniel, founder",
+				new String(entry.retrieveCredentials(), HttpRequestParserImpl.US_ASCII));
 		roles = entry.retrieveRoles();
 		assertEquals("Incorrect number of roles", 2, roles.size());
 		assertTrue("Must have role daniel", roles.contains("daniel"));
@@ -108,9 +102,7 @@ public class MockCredentialStoreManagedObjectSourceTest extends
 
 		// Load the managed object source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
-		loader.addProperty(
-				MockCredentialStoreManagedObjectSource.PROPERTY_ALGORITHM,
-				"MD5");
+		loader.addProperty(MockCredentialStoreManagedObjectSource.PROPERTY_ALGORITHM, "MD5");
 		MockCredentialStoreManagedObjectSource source = loader
 				.loadManagedObjectSource(MockCredentialStoreManagedObjectSource.class);
 
@@ -120,24 +112,20 @@ public class MockCredentialStoreManagedObjectSourceTest extends
 
 		// Ensure appropriate credential store
 		Object object = managedObject.getObject();
-		assertTrue("Object should be " + CredentialStore.class.getSimpleName(),
-				object instanceof CredentialStore);
+		assertTrue("Object should be " + CredentialStore.class.getSimpleName(), object instanceof CredentialStore);
 		CredentialStore store = (CredentialStore) object;
 		assertEquals("Incorrect algorithm", "MD5", store.getAlgorithm());
 
 		// Determine the encrypted password
 		MessageDigest digest = CredentialStoreUtil.createDigest("MD5");
-		byte[] expectedPassword = digest.digest("daniel"
-				.getBytes(HttpRequestParserImpl.US_ASCII));
+		byte[] expectedPassword = digest.digest("daniel".getBytes(HttpRequestParserImpl.US_ASCII));
 
 		// Ensure provide password encrypted with algorithm
 		CredentialEntry entry = store.retrieveCredentialEntry("daniel", null);
 		byte[] actualPassword = entry.retrieveCredentials();
-		assertEquals("Incorrect number of bytes for password",
-				expectedPassword.length, actualPassword.length);
+		assertEquals("Incorrect number of bytes for password", expectedPassword.length, actualPassword.length);
 		for (int i = 0; i < expectedPassword.length; i++) {
-			assertEquals("Incorrect password", expectedPassword[i],
-					actualPassword[i]);
+			assertEquals("Incorrect password", expectedPassword[i], actualPassword[i]);
 		}
 		Set<String> roles = entry.retrieveRoles();
 		assertEquals("Incorrect number of roles", 1, roles.size());

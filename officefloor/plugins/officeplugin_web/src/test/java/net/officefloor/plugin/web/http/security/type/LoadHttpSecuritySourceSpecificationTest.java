@@ -27,7 +27,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.TestSource;
+import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
 import net.officefloor.plugin.web.http.security.HttpChallengeContext;
@@ -46,8 +46,7 @@ import net.officefloor.plugin.web.http.security.HttpSecuritySourceSpecification;
  * 
  * @author Daniel Sagenschneider
  */
-public class LoadHttpSecuritySourceSpecificationTest extends
-		OfficeFrameTestCase {
+public class LoadHttpSecuritySourceSpecificationTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link CompilerIssues}.
@@ -74,10 +73,8 @@ public class LoadHttpSecuritySourceSpecificationTest extends
 		final Error failure = new Error("specification failure");
 
 		// Record failure to instantiate
-		this.record_issue(
-				"Failed to obtain ManagedObjectSourceSpecification from "
-						+ HttpSecurityManagedObjectAdapterSource.class
-								.getName(), failure);
+		this.record_issue("Failed to obtain ManagedObjectSourceSpecification from "
+				+ HttpSecurityManagedObjectAdapterSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		MockHttpSecuritySource.specificationFailure = failure;
@@ -108,16 +105,14 @@ public class LoadHttpSecuritySourceSpecificationTest extends
 	 */
 	public void testFailGetHttpSecuritySourceProperties() {
 
-		final NullPointerException failure = new NullPointerException(
-				"Fail to get HTTP security source properties");
+		final NullPointerException failure = new NullPointerException("Fail to get HTTP security source properties");
 
 		// Record null properties
-		this.control(this.specification).expectAndThrow(
-				this.specification.getProperties(), failure);
+		this.control(this.specification).expectAndThrow(this.specification.getProperties(), failure);
 		this.record_issue(
 				"Failed to obtain ManagedObjectSourceProperty instances from ManagedObjectSourceSpecification for "
-						+ HttpSecurityManagedObjectAdapterSource.class
-								.getName(), failure);
+						+ HttpSecurityManagedObjectAdapterSource.class.getName(),
+				failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -132,8 +127,7 @@ public class LoadHttpSecuritySourceSpecificationTest extends
 	public void testNullHttpSecuritySourcePropertiesArray() {
 
 		// Record null properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(), null);
+		this.recordReturn(this.specification, this.specification.getProperties(), null);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -148,8 +142,7 @@ public class LoadHttpSecuritySourceSpecificationTest extends
 	public void testNullHttpSecuritySourcePropertyElement() {
 
 		// Record null properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new HttpSecuritySourceProperty[] { null });
 		this.record_issue("ManagedObjectSourceProperty 0 is null from ManagedObjectSourceSpecification for "
 				+ HttpSecurityManagedObjectAdapterSource.class.getName());
@@ -166,12 +159,10 @@ public class LoadHttpSecuritySourceSpecificationTest extends
 	 */
 	public void testNullHttpSecuritySourcePropertyName() {
 
-		final HttpSecuritySourceProperty property = this
-				.createMock(HttpSecuritySourceProperty.class);
+		final HttpSecuritySourceProperty property = this.createMock(HttpSecuritySourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new HttpSecuritySourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
 		this.record_issue("ManagedObjectSourceProperty 0 provided blank name from ManagedObjectSourceSpecification for "
@@ -189,20 +180,17 @@ public class LoadHttpSecuritySourceSpecificationTest extends
 	 */
 	public void testFailGetHttpSecuritySourcePropertyName() {
 
-		final RuntimeException failure = new RuntimeException(
-				"Failed to get property name");
-		final HttpSecuritySourceProperty property = this
-				.createMock(HttpSecuritySourceProperty.class);
+		final RuntimeException failure = new RuntimeException("Failed to get property name");
+		final HttpSecuritySourceProperty property = this.createMock(HttpSecuritySourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new HttpSecuritySourceProperty[] { property });
 		this.control(property).expectAndThrow(property.getName(), failure);
 		this.record_issue(
 				"Failed to get name for ManagedObjectSourceProperty 0 from ManagedObjectSourceSpecification for "
-						+ HttpSecurityManagedObjectAdapterSource.class
-								.getName(), failure);
+						+ HttpSecurityManagedObjectAdapterSource.class.getName(),
+				failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -216,21 +204,18 @@ public class LoadHttpSecuritySourceSpecificationTest extends
 	 */
 	public void testFailGetHttpSecuritySourcePropertyLabel() {
 
-		final RuntimeException failure = new RuntimeException(
-				"Failed to get property label");
-		final HttpSecuritySourceProperty property = this
-				.createMock(HttpSecuritySourceProperty.class);
+		final RuntimeException failure = new RuntimeException("Failed to get property label");
+		final HttpSecuritySourceProperty property = this.createMock(HttpSecuritySourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new HttpSecuritySourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
 		this.control(property).expectAndThrow(property.getLabel(), failure);
 		this.record_issue(
 				"Failed to get label for ManagedObjectSourceProperty 0 (NAME) from ManagedObjectSourceSpecification for "
-						+ HttpSecurityManagedObjectAdapterSource.class
-								.getName(), failure);
+						+ HttpSecurityManagedObjectAdapterSource.class.getName(),
+				failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -243,24 +228,16 @@ public class LoadHttpSecuritySourceSpecificationTest extends
 	 */
 	public void testLoadHttpSecuritySourceSpecification() {
 
-		final HttpSecuritySourceProperty propertyWithLabel = this
-				.createMock(HttpSecuritySourceProperty.class);
-		final HttpSecuritySourceProperty propertyWithoutLabel = this
-				.createMock(HttpSecuritySourceProperty.class);
+		final HttpSecuritySourceProperty propertyWithLabel = this.createMock(HttpSecuritySourceProperty.class);
+		final HttpSecuritySourceProperty propertyWithoutLabel = this.createMock(HttpSecuritySourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
-				new HttpSecuritySourceProperty[] { propertyWithLabel,
-						propertyWithoutLabel });
-		this.recordReturn(propertyWithLabel, propertyWithLabel.getName(),
-				"NAME");
-		this.recordReturn(propertyWithLabel, propertyWithLabel.getLabel(),
-				"LABEL");
-		this.recordReturn(propertyWithoutLabel, propertyWithoutLabel.getName(),
-				"NO LABEL");
-		this.recordReturn(propertyWithoutLabel,
-				propertyWithoutLabel.getLabel(), null);
+		this.recordReturn(this.specification, this.specification.getProperties(),
+				new HttpSecuritySourceProperty[] { propertyWithLabel, propertyWithoutLabel });
+		this.recordReturn(propertyWithLabel, propertyWithLabel.getName(), "NAME");
+		this.recordReturn(propertyWithLabel, propertyWithLabel.getLabel(), "LABEL");
+		this.recordReturn(propertyWithoutLabel, propertyWithoutLabel.getName(), "NO LABEL");
+		this.recordReturn(propertyWithoutLabel, propertyWithoutLabel.getLabel(), null);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -299,27 +276,21 @@ public class LoadHttpSecuritySourceSpecificationTest extends
 	 * @param propertyNames
 	 *            Expected {@link Property} names for being returned.
 	 */
-	private void loadSpecification(boolean isExpectToLoad,
-			String... propertyNameLabelPairs) {
+	private void loadSpecification(boolean isExpectToLoad, String... propertyNameLabelPairs) {
 
 		// Load the HTTP security specification specification
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
-		ManagedObjectLoader managedObjectLoader = compiler
-				.getManagedObjectLoader();
-		HttpSecurityLoader httpSecurityLoader = new HttpSecurityLoaderImpl(
-				managedObjectLoader);
-		PropertyList propertyList = httpSecurityLoader
-				.loadSpecification(new MockHttpSecuritySource());
+		ManagedObjectLoader managedObjectLoader = compiler.getManagedObjectLoader();
+		HttpSecurityLoader httpSecurityLoader = new HttpSecurityLoaderImpl(managedObjectLoader);
+		PropertyList propertyList = httpSecurityLoader.loadSpecification(new MockHttpSecuritySource());
 
 		// Determine if expected to load
 		if (isExpectToLoad) {
 			assertNotNull("Expected to load specification", propertyList);
 
 			// Ensure the properties are as expected
-			PropertyListUtil.validatePropertyNameLabels(propertyList,
-					propertyNameLabelPairs);
+			PropertyListUtil.validatePropertyNameLabels(propertyList, propertyNameLabelPairs);
 
 		} else {
 			assertNull("Should not load specification", propertyList);
@@ -330,8 +301,8 @@ public class LoadHttpSecuritySourceSpecificationTest extends
 	 * Mock {@link HttpSecuritySource} for testing.
 	 */
 	@TestSource
-	public static class MockHttpSecuritySource implements
-			HttpSecuritySource<HttpSecurity, HttpCredentials, None, None> {
+	public static class MockHttpSecuritySource
+			implements HttpSecuritySource<HttpSecurity, HttpCredentials, None, None> {
 
 		/**
 		 * Failure to obtain the {@link HttpSecuritySourceSpecification}.
@@ -381,21 +352,18 @@ public class LoadHttpSecuritySourceSpecificationTest extends
 		}
 
 		@Override
-		public boolean ratify(
-				HttpRatifyContext<HttpSecurity, HttpCredentials> context) {
+		public boolean ratify(HttpRatifyContext<HttpSecurity, HttpCredentials> context) {
 			fail("Should not be invoked for obtaining specification");
 			return false;
 		}
 
 		@Override
-		public void authenticate(
-				HttpAuthenticateContext<HttpSecurity, HttpCredentials, None> context) {
+		public void authenticate(HttpAuthenticateContext<HttpSecurity, HttpCredentials, None> context) {
 			fail("Should not be invoked for obtaining specification");
 		}
 
 		@Override
-		public void challenge(HttpChallengeContext<None, None> context)
-				throws IOException {
+		public void challenge(HttpChallengeContext<None, None> context) throws IOException {
 			fail("Should not be invoked for obtaining specification");
 		}
 

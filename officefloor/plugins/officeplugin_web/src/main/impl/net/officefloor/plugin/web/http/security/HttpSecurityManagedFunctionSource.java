@@ -155,7 +155,7 @@ public class HttpSecurityManagedFunctionSource extends AbstractManagedFunctionSo
 		ManagedFunctionTypeBuilder<Indexed, None> logout = namespaceTypeBuilder.addManagedFunctionType(
 				FUNCTION_MANAGED_OBJECT_LOGOUT, new ManagedObjectHttpLogoutFunction(httpSecuritySource), Indexed.class,
 				None.class);
-		logout.addObject(TaskLogoutContext.class).setLabel("TASK_LOGOUT_CONTEXT");
+		logout.addObject(FunctionLogoutContext.class).setLabel("TASK_LOGOUT_CONTEXT");
 		for (HttpSecurityDependencyType<?> dependencyType : dependencyTypes) {
 			logout.addObject(dependencyType.getDependencyType())
 					.setLabel("DEPENDENCY_" + dependencyType.getDependencyName());

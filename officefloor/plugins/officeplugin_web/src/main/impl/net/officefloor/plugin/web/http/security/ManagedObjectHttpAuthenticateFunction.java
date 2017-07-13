@@ -37,7 +37,7 @@ public class ManagedObjectHttpAuthenticateFunction extends StaticManagedFunction
 	/**
 	 * {@link HttpSecuritySource}
 	 */
-	private HttpSecuritySource<?, ?, ?, ?> httpSecuritySource;
+	private final HttpSecuritySource<?, ?, ?, ?> httpSecuritySource;
 
 	/**
 	 * Instantiate.

@@ -17,8 +17,6 @@
  */
 package net.officefloor.plugin.web.http.session;
 
-import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.session.HttpSessionManagedObject;
 import net.officefloor.plugin.web.http.session.spi.HttpSessionStore;
 
 /**
@@ -26,8 +24,7 @@ import net.officefloor.plugin.web.http.session.spi.HttpSessionStore;
  * 
  * @author Daniel Sagenschneider
  */
-public class CreateHttpSessionTest extends
-		AbstractHttpSessionManagedObjectTestCase {
+public class CreateHttpSessionTest extends AbstractHttpSessionManagedObjectTestCase {
 
 	/**
 	 * Session Id value.
@@ -52,8 +49,7 @@ public class CreateHttpSessionTest extends
 		// Record creating HTTP session
 		this.record_sessionIdCookie(null);
 		this.record_generate_setSessionId(SESSION_ID);
-		this.record_create_sessionCreated(CREATION_TIME, EXPIRE_TIME,
-				newAttributes());
+		this.record_create_sessionCreated(CREATION_TIME, EXPIRE_TIME, newAttributes());
 		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
 
 		// Load the managed object
@@ -72,11 +68,10 @@ public class CreateHttpSessionTest extends
 		// Record creating HTTP session
 		this.record_sessionIdCookie(null);
 		this.record_delay(); // creating session id
-		this.asynchronousListener.notifyStarted();
-		this.record_create_sessionCreated(CREATION_TIME, EXPIRE_TIME,
-				newAttributes());
+		this.asynchronousContext.start(null);
+		this.record_create_sessionCreated(CREATION_TIME, EXPIRE_TIME, newAttributes());
 		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
-		this.asynchronousListener.notifyComplete();
+		this.asynchronousContext.complete(null);
 
 		// Load the managed object
 		this.replayMockObjects();
@@ -96,16 +91,15 @@ public class CreateHttpSessionTest extends
 		this.record_sessionIdCookie(null);
 		this.record_generate_setSessionId(SESSION_ID);
 		this.record_delay(); // creating within store
-		this.asynchronousListener.notifyStarted();
+		this.asynchronousContext.start(null);
 		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
-		this.asynchronousListener.notifyComplete();
+		this.asynchronousContext.complete(null);
 
 		// Load the managed object
 		this.replayMockObjects();
 		HttpSessionManagedObject mo = this.createHttpSessionManagedObject();
 		this.startCoordination(mo);
-		this.createOperation.sessionCreated(CREATION_TIME, EXPIRE_TIME,
-				newAttributes());
+		this.createOperation.sessionCreated(CREATION_TIME, EXPIRE_TIME, newAttributes());
 		this.verifyFunctionality(mo);
 	}
 
@@ -114,24 +108,22 @@ public class CreateHttpSessionTest extends
 	 * the SessionId and creating the {@link HttpSession} within the
 	 * {@link HttpSessionStore}.
 	 */
-	public void testDeplayInBothSessionIdGenerationAndCreationWithinStore()
-			throws Throwable {
+	public void testDeplayInBothSessionIdGenerationAndCreationWithinStore() throws Throwable {
 
 		// Record creating HTTP session
 		this.record_sessionIdCookie(null);
 		this.record_delay(); // creating session id
-		this.asynchronousListener.notifyStarted();
+		this.asynchronousContext.start(null);
 		this.record_delay(); // creating within store
 		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
-		this.asynchronousListener.notifyComplete();
+		this.asynchronousContext.complete(null);
 
 		// Load the managed object
 		this.replayMockObjects();
 		HttpSessionManagedObject mo = this.createHttpSessionManagedObject();
 		this.startCoordination(mo);
 		this.freshHttpSession.setSessionId(SESSION_ID);
-		this.createOperation.sessionCreated(CREATION_TIME, EXPIRE_TIME,
-				newAttributes());
+		this.createOperation.sessionCreated(CREATION_TIME, EXPIRE_TIME, newAttributes());
 		this.verifyFunctionality(mo);
 	}
 
@@ -163,8 +155,8 @@ public class CreateHttpSessionTest extends
 		// Record creating HTTP session
 		this.record_sessionIdCookie(null);
 		this.record_delay(); // creating session id
-		this.asynchronousListener.notifyStarted();
-		this.asynchronousListener.notifyComplete();
+		this.asynchronousContext.start(null);
+		this.asynchronousContext.complete(null);
 
 		// Load the managed object
 		this.replayMockObjects();
@@ -178,8 +170,7 @@ public class CreateHttpSessionTest extends
 	 * Ensure able to handle immediate failure to create {@link HttpSession}
 	 * within the {@link HttpSessionStore}.
 	 */
-	public void testImmediateFailureToCreateSessionWithinStore()
-			throws Throwable {
+	public void testImmediateFailureToCreateSessionWithinStore() throws Throwable {
 
 		final Exception failure = new Exception("Create Session failure");
 
@@ -207,8 +198,8 @@ public class CreateHttpSessionTest extends
 		this.record_sessionIdCookie(null);
 		this.record_generate_setSessionId(SESSION_ID);
 		this.record_delay(); // creating within store
-		this.asynchronousListener.notifyStarted();
-		this.asynchronousListener.notifyComplete();
+		this.asynchronousContext.start(null);
+		this.asynchronousContext.complete(null);
 
 		// Load the managed object
 		this.replayMockObjects();
@@ -228,8 +219,7 @@ public class CreateHttpSessionTest extends
 		this.record_generate_setSessionId("SESSION_ID_COLLISION");
 		this.record_create_sessionIdCollision();
 		this.record_generate_setSessionId(SESSION_ID);
-		this.record_create_sessionCreated(CREATION_TIME, EXPIRE_TIME,
-				newAttributes());
+		this.record_create_sessionCreated(CREATION_TIME, EXPIRE_TIME, newAttributes());
 		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
 
 		// Load the managed object
@@ -248,12 +238,11 @@ public class CreateHttpSessionTest extends
 		this.record_sessionIdCookie(null);
 		this.record_generate_setSessionId("SESSION_ID_COLLISION");
 		this.record_delay(); // detecting collision
-		this.asynchronousListener.notifyStarted();
+		this.asynchronousContext.start(null);
 		this.record_generate_setSessionId(SESSION_ID);
-		this.record_create_sessionCreated(CREATION_TIME, EXPIRE_TIME,
-				newAttributes());
+		this.record_create_sessionCreated(CREATION_TIME, EXPIRE_TIME, newAttributes());
 		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
-		this.asynchronousListener.notifyComplete();
+		this.asynchronousContext.complete(null);
 
 		// Load the managed object
 		this.replayMockObjects();
@@ -269,8 +258,7 @@ public class CreateHttpSessionTest extends
 	 * @param mo
 	 *            {@link HttpSessionManagedObject} to verify.
 	 */
-	private void verifyFunctionality(HttpSessionManagedObject mo)
-			throws Throwable {
+	private void verifyFunctionality(HttpSessionManagedObject mo) throws Throwable {
 
 		// Verify the operations
 		this.verifyOperations();
@@ -278,8 +266,7 @@ public class CreateHttpSessionTest extends
 		// Verify new Http Session
 		HttpSession session = (HttpSession) mo.getObject();
 		assertHttpSession(SESSION_ID, CREATION_TIME, true, session);
-		assertEquals("Incorrect Token name", SESSION_ID_COOKIE_NAME,
-				session.getTokenName());
+		assertEquals("Incorrect Token name", SESSION_ID_COOKIE_NAME, session.getTokenName());
 	}
 
 	/**

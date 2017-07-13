@@ -17,14 +17,13 @@
  */
 package net.officefloor.plugin.web.http.security.integrate;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireObject;
+import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpSecuritySection;
-import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.security.AnonymousHttpAuthenticationManagedObjectSource;
 import net.officefloor.plugin.web.http.security.HttpAuthentication;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource;
+import net.officefloor.plugin.web.http.test.CompileWebContext;
 
 /**
  * Enables overriding the {@link HttpSecurityManagedObjectSource} and use the
@@ -33,23 +32,17 @@ import net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class AnonymousHttpSecurityIntegrateTest extends
-		AbstractHttpSecurityIntegrateTestCase {
+public class AnonymousHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrateTestCase {
 
 	@Override
-	protected HttpSecuritySection configureHttpSecurity(
-			WebArchitect application) throws Exception {
+	protected HttpSecuritySection configureHttpSecurity(CompileWebContext context) {
 
 		// Override the HTTP Security
-		AutoWireObject object = application.addManagedObject(
-				HttpSecurityManagedObjectSource.class.getName(), null,
-				new AutoWire(HttpSecurity.class));
+		OfficeManagedObjectSource object = context.getOfficeArchitect().addOfficeManagedObjectSource("SECURITY",
+				new HttpSecurityManagedObjectSource());
 		object.setTimeout(1000);
-		object.addProperty(
-				HttpSecurityManagedObjectSource.PROPERTY_HTTP_SECURITY_TYPE,
-				HttpSecurity.class.getName());
-		object.addProperty(
-				HttpSecurityManagedObjectSource.PROPERTY_IS_ESCALATE_AUTHENTICATION_REQUIRED,
+		object.addProperty(HttpSecurityManagedObjectSource.PROPERTY_HTTP_SECURITY_TYPE, HttpSecurity.class.getName());
+		object.addProperty(HttpSecurityManagedObjectSource.PROPERTY_IS_ESCALATE_AUTHENTICATION_REQUIRED,
 				String.valueOf(false));
 
 		// No HTTP security configured

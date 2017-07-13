@@ -19,21 +19,19 @@ package net.officefloor.plugin.web.http.security.integrate;
 
 import org.apache.http.client.CredentialsProvider;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireObject;
+import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.web.http.application.HttpSecuritySection;
-import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.security.scheme.DigestHttpSecuritySource;
-import net.officefloor.plugin.web.http.security.store.CredentialStore;
 import net.officefloor.plugin.web.http.security.store.PasswordFileManagedObjectSource;
+import net.officefloor.plugin.web.http.test.CompileWebContext;
 
 /**
  * Integrate the {@link DigestHttpSecuritySource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class DigestHttpSecurityIntegrateTest extends
-		AbstractHttpSecurityIntegrateTestCase {
+public class DigestHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrateTestCase {
 
 	/**
 	 * Realm.
@@ -41,25 +39,27 @@ public class DigestHttpSecurityIntegrateTest extends
 	private static final String REALM = "TestRealm";
 
 	@Override
-	protected HttpSecuritySection configureHttpSecurity(
-			WebArchitect application) throws Exception {
+	protected HttpSecuritySection configureHttpSecurity(CompileWebContext context) {
 
 		// Configure the HTTP Security
-		HttpSecuritySection security = application
-				.setHttpSecurity(DigestHttpSecuritySource.class);
+		HttpSecuritySection security = context.getWebArchitect().addHttpSecurity("SECURITY",
+				DigestHttpSecuritySource.class);
 		security.addProperty(DigestHttpSecuritySource.PROPERTY_REALM, REALM);
-		security.addProperty(DigestHttpSecuritySource.PROPERTY_PRIVATE_KEY,
-				"PrivateKey");
+		security.addProperty(DigestHttpSecuritySource.PROPERTY_PRIVATE_KEY, "PrivateKey");
+
+		// Obtain the password file
+		String passwordFilePath;
+		try {
+			passwordFilePath = this.findFile(this.getClass(), "digest-password-file.txt").getAbsolutePath();
+		} catch (Exception ex) {
+			throw fail(ex);
+		}
 
 		// Password File Credential Store
-		String passwordFilePath = this.findFile(this.getClass(),
-				"digest-password-file.txt").getAbsolutePath();
-		AutoWireObject passwordFile = application.addManagedObject(
-				PasswordFileManagedObjectSource.class.getName(), null,
-				new AutoWire(CredentialStore.class));
-		passwordFile.addProperty(
-				PasswordFileManagedObjectSource.PROPERTY_PASSWORD_FILE_PATH,
-				passwordFilePath);
+		OfficeManagedObjectSource passwordFileMos = context.getOfficeArchitect()
+				.addOfficeManagedObjectSource("CREDENTIAL_STORE", PasswordFileManagedObjectSource.class.getName());
+		passwordFileMos.addProperty(PasswordFileManagedObjectSource.PROPERTY_PASSWORD_FILE_PATH, passwordFilePath);
+		passwordFileMos.addOfficeManagedObject("CREDENTIAL_STORE", ManagedObjectScope.PROCESS);
 
 		// Return the HTTP Security
 		return security;
@@ -84,8 +84,7 @@ public class DigestHttpSecurityIntegrateTest extends
 	public void testLogout() throws Exception {
 
 		// Authenticate with credentials
-		CredentialsProvider provider = this.useCredentials(REALM, "Digest",
-				"daniel", "password");
+		CredentialsProvider provider = this.useCredentials(REALM, "Digest", "daniel", "password");
 		this.doRequest("service", 200, "Serviced for daniel");
 
 		// Clear login details

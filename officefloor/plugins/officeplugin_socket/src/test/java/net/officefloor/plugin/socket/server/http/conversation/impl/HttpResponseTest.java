@@ -775,7 +775,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 	}
 
 	@Override
-	public Object getLock() {
+	public Object getWriteLock() {
 		return this;
 	}
 

@@ -20,50 +20,49 @@ package net.officefloor.plugin.web.http.security.integrate;
 import java.io.IOException;
 import java.io.Serializable;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpSecuritySection;
 import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.security.HttpCredentials;
 import net.officefloor.plugin.web.http.security.scheme.FormHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.scheme.HttpCredentialsImpl;
-import net.officefloor.plugin.web.http.security.store.CredentialStore;
 import net.officefloor.plugin.web.http.security.store.MockCredentialStoreManagedObjectSource;
+import net.officefloor.plugin.web.http.test.CompileWebContext;
 
 /**
  * Integrate the {@link FormHttpSecuritySource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class FormHttpSecurityIntegrateTest extends
-		AbstractHttpSecurityIntegrateTestCase {
+public class FormHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrateTestCase {
 
 	@Override
-	protected HttpSecuritySection configureHttpSecurity(
-			WebArchitect application) throws Exception {
+	protected HttpSecuritySection configureHttpSecurity(CompileWebContext context) {
+		WebArchitect web = context.getWebArchitect();
+		OfficeArchitect office = context.getOfficeArchitect();
 
 		// Configure the HTTP Security
-		HttpSecuritySection security = application
-				.setHttpSecurity(FormHttpSecuritySource.class);
+		HttpSecuritySection security = web.addHttpSecurity("SECURITY", FormHttpSecuritySource.class);
 		security.addProperty(FormHttpSecuritySource.PROPERTY_REALM, "TestRealm");
 
 		// Provide the form login page
-		AutoWireSection form = application.addSection("FORM",
-				ClassSectionSource.class.getName(), LoginPage.class.getName());
-		application.link(security, "FORM_LOGIN_PAGE", form, "form");
-		application.linkUri("login", form, "login");
-		application.link(form, "authenticate", security, "Authenticate");
+		OfficeSection form = context.addSection("FORM", LoginPage.class);
+		office.link(security.getOfficeSection().getOfficeSectionOutput("FORM_LOGIN_PAGE"),
+				form.getOfficeSectionInput("form"));
+		web.linkUri("login", form.getOfficeSectionInput("login"));
+		office.link(form.getOfficeSectionOutput("authenticate"),
+				security.getOfficeSection().getOfficeSectionInput("Authenticate"));
 
 		// Provide parameters for login form
-		application.addHttpRequestObject(LoginForm.class, true);
+		web.addHttpRequestObject(LoginForm.class, true);
 
 		// Mock Credential Store
-		application.addManagedObject(
-				MockCredentialStoreManagedObjectSource.class.getName(), null,
-				new AutoWire(CredentialStore.class));
+		office.addOfficeManagedObjectSource("CREDENTIAL_STORE", MockCredentialStoreManagedObjectSource.class.getName())
+				.addOfficeManagedObject("CREDENTIAL_STORE", ManagedObjectScope.PROCESS);
 
 		// Return the HTTP Security
 		return security;
@@ -96,7 +95,7 @@ public class FormHttpSecurityIntegrateTest extends
 			connection.getHttpResponse().getEntityWriter().write("LOGIN");
 		}
 
-		@NextTask("authenticate")
+		@NextFunction("authenticate")
 		public HttpCredentials login(LoginForm form) {
 			return new HttpCredentialsImpl(form.username, form.password);
 		}
@@ -111,8 +110,7 @@ public class FormHttpSecurityIntegrateTest extends
 		this.doRequest("service", 200, "LOGIN");
 
 		// Send back login credentials and get service page
-		this.doRequest("login?username=daniel&password=daniel", 200,
-				"Serviced for daniel");
+		this.doRequest("login?username=daniel&password=daniel", 200, "Serviced for daniel");
 	}
 
 	/**
@@ -129,8 +127,7 @@ public class FormHttpSecurityIntegrateTest extends
 		this.doRequest("login?password=daniel", 200, "LOGIN");
 
 		// Now log in
-		this.doRequest("login?username=daniel&password=daniel", 200,
-				"Serviced for daniel");
+		this.doRequest("login?username=daniel&password=daniel", 200, "Serviced for daniel");
 	}
 
 	/**
@@ -142,8 +139,7 @@ public class FormHttpSecurityIntegrateTest extends
 		this.doRequest("service", 200, "LOGIN");
 
 		// Send back login credentials and get service page
-		this.doRequest("login?username=daniel&password=daniel", 200,
-				"Serviced for daniel");
+		this.doRequest("login?username=daniel&password=daniel", 200, "Serviced for daniel");
 
 		// Request again to ensure stay logged in
 		this.doRequest("service", 200, "Serviced for daniel");

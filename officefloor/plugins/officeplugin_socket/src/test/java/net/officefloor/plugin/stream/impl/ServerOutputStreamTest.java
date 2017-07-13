@@ -367,7 +367,7 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements Write
 	 */
 
 	@Override
-	public Object getLock() {
+	public Object getWriteLock() {
 		return this;
 	}
 

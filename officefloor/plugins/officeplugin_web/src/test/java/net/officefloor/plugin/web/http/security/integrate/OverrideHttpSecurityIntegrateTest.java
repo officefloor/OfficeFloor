@@ -17,14 +17,13 @@
  */
 package net.officefloor.plugin.web.http.security.integrate;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireObject;
+import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpSecuritySection;
-import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.security.HttpAuthenticationRequiredException;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource;
 import net.officefloor.plugin.web.http.security.scheme.MockHttpSecuritySource;
+import net.officefloor.plugin.web.http.test.CompileWebContext;
 
 /**
  * <p>
@@ -36,28 +35,22 @@ import net.officefloor.plugin.web.http.security.scheme.MockHttpSecuritySource;
  * 
  * @author Daniel Sagenschneider
  */
-public class OverrideHttpSecurityIntegrateTest extends
-		AbstractHttpSecurityIntegrateTestCase {
+public class OverrideHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrateTestCase {
 
 	@Override
-	protected HttpSecuritySection configureHttpSecurity(
-			WebArchitect application) throws Exception {
+	protected HttpSecuritySection configureHttpSecurity(CompileWebContext context) {
 
 		// Override the HTTP Security
-		AutoWireObject object = application.addManagedObject(
-				HttpSecurityManagedObjectSource.class.getName(), null,
-				new AutoWire(HttpSecurity.class));
-		object.setTimeout(1000);
-		object.addProperty(
-				HttpSecurityManagedObjectSource.PROPERTY_HTTP_SECURITY_TYPE,
-				HttpSecurity.class.getName());
-		object.addProperty(
-				HttpSecurityManagedObjectSource.PROPERTY_IS_ESCALATE_AUTHENTICATION_REQUIRED,
+		OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("SECURITY",
+				HttpSecurityManagedObjectSource.class.getName());
+		mos.setTimeout(1000);
+		mos.addProperty(HttpSecurityManagedObjectSource.PROPERTY_HTTP_SECURITY_TYPE, HttpSecurity.class.getName());
+		mos.addProperty(HttpSecurityManagedObjectSource.PROPERTY_IS_ESCALATE_AUTHENTICATION_REQUIRED,
 				String.valueOf(false));
 
 		// Configure the HTTP Security
-		HttpSecuritySection security = application
-				.setHttpSecurity(MockHttpSecuritySource.class);
+		HttpSecuritySection security = context.getWebArchitect().addHttpSecurity("SECURITY",
+				MockHttpSecuritySource.class);
 
 		// Return the HTTP Security
 		return security;

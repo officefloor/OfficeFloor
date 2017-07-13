@@ -22,10 +22,11 @@ import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.section.clazz.ManagedObject;
-import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.section.clazz.Property;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -34,7 +35,6 @@ import net.officefloor.plugin.web.http.template.NotRenderTemplateAfter;
 import net.officefloor.plugin.web.http.template.UnescapedHtml;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniserImpl;
-import net.officefloor.plugin.work.clazz.FlowInterface;
 
 /**
  * Provides logic for the template.
@@ -152,7 +152,7 @@ public class TemplateLogic {
 	 * @throws IOException
 	 *             Escalation.
 	 */
-	@NextTask("doExternalFlow")
+	@NextFunction("doExternalFlow")
 	public String nextTask(ServerHttpConnection connection) throws IOException {
 
 		// Indicate next task
@@ -174,15 +174,13 @@ public class TemplateLogic {
 	 * @throws IOException
 	 *             Escalation.
 	 */
-	public void submit(ServerHttpConnection connection, SubmitFlow flow)
-			throws SQLException, IOException {
+	public void submit(ServerHttpConnection connection, SubmitFlow flow) throws SQLException, IOException {
 
 		// Indicate submit
 		connection.getHttpResponse().getEntityWriter().write("<submit />");
 
 		// Obtain whether to invoke flow
-		String doFlowValue = HttpRequestTokeniserImpl.extractParameters(
-				connection.getHttpRequest()).get("doFlow");
+		String doFlowValue = HttpRequestTokeniserImpl.extractParameters(connection.getHttpRequest()).get("doFlow");
 		if ("true".equals(doFlowValue)) {
 			// Trigger flow
 			flow.doInternalFlow(new Integer(1));
@@ -225,10 +223,9 @@ public class TemplateLogic {
 	 * @throws IOException
 	 *             Escalation.
 	 */
-	@NextTask("doExternalFlow")
-	public String doInternalFlow(@Parameter Integer parameter,
-			Connection sqlConnection, ServerHttpConnection httpConnection)
-			throws IOException {
+	@NextFunction("doExternalFlow")
+	public String doInternalFlow(@Parameter Integer parameter, Connection sqlConnection,
+			ServerHttpConnection httpConnection) throws IOException {
 
 		// Indicate internal flow with its parameter
 		Writer writer = httpConnection.getHttpResponse().getEntityWriter();
@@ -244,10 +241,8 @@ public class TemplateLogic {
 	 * Flags to not render the {@link HttpTemplate} afterwards.
 	 */
 	@NotRenderTemplateAfter
-	public void notRenderTemplateAfter(ServerHttpConnection connection)
-			throws IOException {
-		connection.getHttpResponse().getEntityWriter()
-				.write("NOT_RENDER_TEMPLATE_AFTER");
+	public void notRenderTemplateAfter(ServerHttpConnection connection) throws IOException {
+		connection.getHttpResponse().getEntityWriter().write("NOT_RENDER_TEMPLATE_AFTER");
 	}
 
 	/**

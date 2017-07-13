@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.web.http.application;
 
+import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
@@ -27,7 +28,7 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExten
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpTemplateSection {
+public interface HttpTemplateSection extends PropertyConfigurable {
 
 	/**
 	 * Obtains the underlying {@link OfficeSection}.

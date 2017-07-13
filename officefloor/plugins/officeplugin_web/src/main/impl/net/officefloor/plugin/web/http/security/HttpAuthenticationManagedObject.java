@@ -342,9 +342,9 @@ public class HttpAuthenticationManagedObject<S, C>
 	}
 
 	/**
-	 * {@link TaskLogoutContext} implementation.
+	 * {@link FunctionLogoutContext} implementation.
 	 */
-	private static class TaskLogoutContextImpl implements TaskLogoutContext {
+	private static class TaskLogoutContextImpl implements FunctionLogoutContext {
 
 		/**
 		 * {@link HttpLogoutRequest}.

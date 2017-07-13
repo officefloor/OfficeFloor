@@ -20,22 +20,21 @@ package net.officefloor.plugin.web.http.session;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.test.MockTeamSource;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.HttpServicerFunction;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * Tests the {@link HttpSessionManagedObjectSource}.
@@ -49,30 +48,24 @@ public class HttpSessionManagedObjectSourceTest extends MockHttpServer {
 	 */
 
 	@Override
-	public HttpServicerFunction buildServicer(String managedObjectName,
-			MockHttpServer server) throws Exception {
+	public HttpServicerFunction buildServicer(String managedObjectName, MockHttpServer server) throws Exception {
 
 		// Register the Http Session
-		ManagedObjectBuilder<Indexed> session = server.constructManagedObject(
-				"HTTP_SESSION", HttpSessionManagedObjectSource.class,
-				this.getOfficeName());
+		ManagedObjectBuilder<Indexed> session = server.constructManagedObject("HTTP_SESSION",
+				HttpSessionManagedObjectSource.class, this.getOfficeName());
 		session.setTimeout(1000);
 
 		// Register the servicer
-		ReflectiveWorkBuilder work = server.constructWork(new Servicer(),
-				"Servicer", null);
-		ReflectiveTaskBuilder task = work.buildTask("service", "SERVICER");
-		task.buildObject(managedObjectName);
-		DependencyMappingBuilder sessionDependencies = task.buildObject(
-				"HTTP_SESSION", ManagedObjectScope.PROCESS);
+		ReflectiveFunctionBuilder function = server.constructFunction(new Servicer(), "Servicer");
+		function.buildObject(managedObjectName);
+		DependencyMappingBuilder sessionDependencies = function.buildObject("HTTP_SESSION", ManagedObjectScope.PROCESS);
 		sessionDependencies.mapDependency(0, managedObjectName);
 
 		// Register team for servicer
-		server.constructTeam("SERVICER",
-				MockTeamSource.createOnePersonTeam("SERVICER"));
+		server.constructTeam("SERVICER", OnePersonTeamSource.class);
 
-		// Return the servicer task
-		return new HttpServicerFunction("Servicer", "service");
+		// Return the servicer function
+		return new HttpServicerFunction("service");
 	}
 
 	/*
@@ -97,8 +90,7 @@ public class HttpSessionManagedObjectSourceTest extends MockHttpServer {
 
 				// Ensure results match and call index remembered by Session
 				assertEquals("Call should be successful", 200, status);
-				assertEquals("Incorrect call index", String.valueOf(i),
-						callIndex);
+				assertEquals("Incorrect call index", String.valueOf(i), callIndex);
 			}
 		}
 	}
@@ -116,15 +108,13 @@ public class HttpSessionManagedObjectSourceTest extends MockHttpServer {
 		 * @param session
 		 *            {@link HttpSession}.
 		 */
-		public void service(ServerHttpConnection connection, HttpSession session)
-				throws IOException {
+		public void service(ServerHttpConnection connection, HttpSession session) throws IOException {
 
 			// Obtain the current call index
 			Integer callIndex = (Integer) session.getAttribute("CALL_INDEX");
 
 			// Increment the call index and store for next call
-			callIndex = new Integer(callIndex == null ? 0
-					: (callIndex.intValue() + 1));
+			callIndex = new Integer(callIndex == null ? 0 : (callIndex.intValue() + 1));
 			session.setAttribute("CALL_INDEX", callIndex);
 
 			// Return the call index

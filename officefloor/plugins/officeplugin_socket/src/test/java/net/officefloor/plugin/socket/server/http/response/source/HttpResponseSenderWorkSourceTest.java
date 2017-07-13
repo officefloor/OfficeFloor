@@ -130,7 +130,7 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(connection, connection.getHttpResponse(), response);
 		response.setStatus(status);
 		this.recordReturn(response, response.getEntity(), new ServerOutputStreamImpl(receiver, 1024));
-		this.recordReturn(receiver, receiver.getLock(), new Object());
+		this.recordReturn(receiver, receiver.getWriteLock(), new Object());
 		final ByteBuffer[] entityContent = new ByteBuffer[1];
 		this.recordReturn(receiver, receiver.createWriteBuffer(null), writeBuffer, new AbstractMatcher() {
 			@Override
