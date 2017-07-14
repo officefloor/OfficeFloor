@@ -19,40 +19,36 @@ package net.officefloor.plugin.json.write;
 
 import java.io.IOException;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireOfficeFloor;
-import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
-import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
-import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.json.JsonResponseWriter;
-import net.officefloor.plugin.json.write.JsonResponseWriterManagedObjectSource.Dependencies;
-import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
-import net.officefloor.plugin.web.http.application.WebArchitect;
-import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
+
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
+import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.json.JsonResponseWriter;
+import net.officefloor.plugin.json.write.JsonResponseWriterManagedObjectSource.Dependencies;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
+import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
 
 /**
  * Tests the {@link JsonResponseWriterManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class JsonResponseWriterManagedObjectSourceTest extends
-		OfficeFrameTestCase {
+public class JsonResponseWriterManagedObjectSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Validate specification.
 	 */
 	public void testSpecification() {
-		ManagedObjectLoaderUtil
-				.validateSpecification(JsonResponseWriterManagedObjectSource.class);
+		ManagedObjectLoaderUtil.validateSpecification(JsonResponseWriterManagedObjectSource.class);
 	}
 
 	/**
@@ -61,15 +57,12 @@ public class JsonResponseWriterManagedObjectSourceTest extends
 	public void testType() {
 
 		// Create the expected type
-		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
-				.createManagedObjectTypeBuilder();
+		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(JsonResponseWriter.class);
-		type.addDependency(Dependencies.SERVER_HTTP_CONNECTION,
-				ServerHttpConnection.class, null);
+		type.addDependency(Dependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class, null);
 
 		// Validate type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type,
-				JsonResponseWriterManagedObjectSource.class);
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, JsonResponseWriterManagedObjectSource.class);
 	}
 
 	/**
@@ -83,8 +76,7 @@ public class JsonResponseWriterManagedObjectSourceTest extends
 	 * Validate <code>null</code> null values for JSON object properties.
 	 */
 	public void testNullValues() throws Exception {
-		this.doWriteObjectTest(new MockJsonObject(null, null, null,
-				(String[]) null),
+		this.doWriteObjectTest(new MockJsonObject(null, null, null, (String[]) null),
 				"{\"name\":null,\"array\":null,\"subObject\":null,\"empty\":null}");
 	}
 
@@ -93,27 +85,29 @@ public class JsonResponseWriterManagedObjectSourceTest extends
 	 */
 	public void testValues() throws Exception {
 		this.doWriteObjectTest(
-				new MockJsonObject("Daniel", new MockJsonSubObject("SUB"),
-						new Object(), "ONE", "two", "Three"),
+				new MockJsonObject("Daniel", new MockJsonSubObject("SUB"), new Object(), "ONE", "two", "Three"),
 				"{\"name\":\"Daniel\",\"array\":[\"ONE\",\"two\",\"Three\"],\"subObject\":{\"text\":\"SUB\"},\"empty\":{}}");
 	}
 
 	/**
 	 * Undertakes writing a JSON object to the response.
 	 */
-	private void doWriteObjectTest(MockJsonObject jsonObject,
-			String expectedJsonEntity) throws Exception {
+	private void doWriteObjectTest(MockJsonObject jsonObject, String expectedJsonEntity) throws Exception {
 
 		// Start the application
-		WebArchitect app = new HttpServerAutoWireOfficeFloorSource();
-		AutoWireSection servicer = app
-				.addSection("SECTION", ClassSectionSource.class.getName(),
-						MockService.class.getName());
-		app.linkUri("service", servicer, "service");
-		app.addManagedObject(
-				JsonResponseWriterManagedObjectSource.class.getName(), null,
-				new AutoWire(JsonResponseWriter.class));
-		AutoWireOfficeFloor officeFloor = app.openOfficeFloor();
+		WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
+		compiler.officeFloor((context) -> {
+			HttpTestUtil.configureTestHttpServer(context, 7878, "ROUTE", "route");
+		});
+		compiler.web((context) -> {
+			OfficeSection servicer = context.addSection("SECTION", MockService.class);
+			context.getWebArchitect().linkUri("service", servicer.getOfficeSectionInput("service"));
+			context.getOfficeArchitect()
+					.addOfficeManagedObjectSource("JSON_RESPONSE",
+							JsonResponseWriterManagedObjectSource.class.getName())
+					.addOfficeManagedObject("JSON_RESPONSE", ManagedObjectScope.PROCESS);
+		});
+		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
 		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
 
 			// Specify the JSON object
@@ -122,15 +116,11 @@ public class JsonResponseWriterManagedObjectSourceTest extends
 			// Undertake request to obtain the object
 			HttpGet request = new HttpGet("http://localhost:7878/service");
 			HttpResponse response = client.execute(request);
-			assertEquals("Incorrect response entity", expectedJsonEntity,
-					EntityUtils.toString(response.getEntity()));
-			assertEquals("Request should be successful", 200, response
-					.getStatusLine().getStatusCode());
+			assertEquals("Incorrect response entity", expectedJsonEntity, EntityUtils.toString(response.getEntity()));
+			assertEquals("Request should be successful", 200, response.getStatusLine().getStatusCode());
 			assertEquals("Must specify content type",
-					"application/json; charset="
-							+ AbstractServerSocketManagedObjectSource
-									.getCharset(null).name(), response
-							.getFirstHeader("Content-Type").getValue());
+					"application/json; charset=" + AbstractServerSocketManagedObjectSource.getCharset(null).name(),
+					response.getFirstHeader("Content-Type").getValue());
 
 		} finally {
 			// Ensure stop server (client already closed)
@@ -163,8 +153,7 @@ public class JsonResponseWriterManagedObjectSourceTest extends
 
 		private final Object empty;
 
-		public MockJsonObject(String name, MockJsonSubObject subObject,
-				Object empty, String... arrayValues) {
+		public MockJsonObject(String name, MockJsonSubObject subObject, Object empty, String... arrayValues) {
 			this.name = name;
 			this.array = arrayValues;
 			this.subObject = subObject;

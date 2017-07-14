@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.spi.office;
 
+import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**

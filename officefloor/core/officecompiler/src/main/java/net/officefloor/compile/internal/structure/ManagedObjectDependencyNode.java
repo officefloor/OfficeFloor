@@ -19,7 +19,7 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.object.ObjectDependencyType;
-import net.officefloor.compile.spi.section.ManagedObjectDependency;
+import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 
 /**
  * {@link ManagedObjectDependency} node.

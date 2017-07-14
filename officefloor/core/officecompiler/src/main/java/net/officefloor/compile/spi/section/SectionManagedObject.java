@@ -20,6 +20,7 @@ package net.officefloor.compile.spi.section;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.section.TypeQualification;
+import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.team.Team;
 

@@ -32,7 +32,7 @@
 	</templates>
 
 	<sections>
-		<section name="SECTION_A" source="DESK" location="DESK_LOCATION"
+		<section name="SECTION_A" source="SECTION" location="SECTION_LOCATION"
 			x="400" y="401">
 			<property name="name.one" value="value.one" />
 			<property name="name.two" value="value.two" />
@@ -58,22 +58,26 @@
 		</section>
 	</sections>
 
-	<access source="net.example.HttpSecuritySource" timeout="2000"
-		x="500" y="501">
-		<property name="name.first" value="value.first" />
-		<property name="name.second" value="value.second" />
-		<input name="Authenticate" parameter-type="net.example.HttpCredentials" />
-		<output name="OUTPUT_ONE" argument-type="java.lang.String">
-			<input section="SECTION_B" input="INPUT_1" />
-		</output>
-		<output name="OUTPUT_TWO">
-			<template name="TEMPLATE_A" />
-		</output>
-		<output name="OUTPUT_THREE">
-			<resource name="RESOURCE" />
-		</output>
-		<output name="OUTPUT_FOUR" />
-	</access>
+	<accesses>
+		<access name="SECURITY_A" source="net.example.HttpSecuritySource"
+			timeout="2000" x="500" y="501">
+			<property name="name.first" value="value.first" />
+			<property name="name.second" value="value.second" />
+			<input name="Authenticate" parameter-type="net.example.HttpCredentials" />
+			<output name="OUTPUT_ONE" argument-type="java.lang.String">
+				<input section="SECTION_B" input="INPUT_1" />
+			</output>
+			<output name="OUTPUT_TWO">
+				<template name="TEMPLATE_A" />
+			</output>
+			<output name="OUTPUT_THREE">
+				<resource name="RESOURCE" />
+			</output>
+			<output name="OUTPUT_FOUR" />
+		</access>
+		<access name="SECURITY_B" source="net.example.HttpSecuritySource"
+			timeout="2000" x="510" y="511" />
+	</accesses>
 
 	<governances>
 		<governance name="GOVERNANCE" source="net.example.ExampleGovernanceSource"

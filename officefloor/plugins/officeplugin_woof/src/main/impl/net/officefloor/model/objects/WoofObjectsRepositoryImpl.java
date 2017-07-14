@@ -17,17 +17,17 @@
  */
 package net.officefloor.model.objects;
 
-import net.officefloor.model.objects.AutoWireObjectsModel;
-import net.officefloor.model.objects.AutoWireObjectsRepository;
+import net.officefloor.model.objects.WoofObjectsModel;
+import net.officefloor.model.objects.WoofObjectsRepository;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
 /**
- * {@link AutoWireObjectsRepository} implementation.
+ * {@link WoofObjectsRepository} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class AutoWireObjectsRepositoryImpl implements AutoWireObjectsRepository {
+public class WoofObjectsRepositoryImpl implements WoofObjectsRepository {
 
 	/**
 	 * {@link ModelRepository}.
@@ -40,7 +40,7 @@ public class AutoWireObjectsRepositoryImpl implements AutoWireObjectsRepository 
 	 * @param modelRepository
 	 *            {@link ModelRepository}.
 	 */
-	public AutoWireObjectsRepositoryImpl(ModelRepository modelRepository) {
+	public WoofObjectsRepositoryImpl(ModelRepository modelRepository) {
 		this.modelRepository = modelRepository;
 	}
 
@@ -49,14 +49,14 @@ public class AutoWireObjectsRepositoryImpl implements AutoWireObjectsRepository 
 	 */
 
 	@Override
-	public AutoWireObjectsModel retrieveAutoWireObjects(
+	public WoofObjectsModel retrieveAutoWireObjects(
 			ConfigurationItem configuration) throws Exception {
-		return this.modelRepository.retrieve(new AutoWireObjectsModel(),
+		return this.modelRepository.retrieve(new WoofObjectsModel(),
 				configuration);
 	}
 
 	@Override
-	public void storeAutoWireObjects(AutoWireObjectsModel objects,
+	public void storeAutoWireObjects(WoofObjectsModel objects,
 			ConfigurationItem configuration) throws Exception {
 		this.modelRepository.store(objects, configuration);
 	}

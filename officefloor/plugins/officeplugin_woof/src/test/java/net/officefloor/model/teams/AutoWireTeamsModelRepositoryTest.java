@@ -28,7 +28,7 @@ import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
 /**
- * Tests the marshaling/unmarshaling of the {@link AutoWireTeamsModel} via the
+ * Tests the marshaling/unmarshaling of the {@link WoofTeamsModel} via the
  * {@link ModelRepository}.
  * 
  * @author Daniel Sagenschneider
@@ -36,7 +36,7 @@ import net.officefloor.model.repository.ModelRepository;
 public class AutoWireTeamsModelRepositoryTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link ConfigurationItem} containing the {@link AutoWireTeamsModel}.
+	 * {@link ConfigurationItem} containing the {@link WoofTeamsModel}.
 	 */
 	private ConfigurationItem configurationItem;
 
@@ -48,24 +48,24 @@ public class AutoWireTeamsModelRepositoryTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure retrieve the {@link AutoWireTeamsModel}.
+	 * Ensure retrieve the {@link WoofTeamsModel}.
 	 */
 	public void testRetrieveTeams() throws Exception {
 
 		// Load the Teams
 		ModelRepository repository = new ModelRepositoryImpl();
-		AutoWireTeamsModel teams = new AutoWireTeamsModel();
+		WoofTeamsModel teams = new WoofTeamsModel();
 		teams = repository.retrieve(teams, this.configurationItem);
 
 		// ----------------------------------------
 		// Validate the teams
 		// ----------------------------------------
 		assertList(new String[] { "getTeamSourceClassName", "getQualifier",
-				"getType" }, teams.getAutoWireTeams(), new AutoWireTeamModel(
+				"getType" }, teams.getAutoWireTeams(), new WoofTeamModel(
 				"net.example.ExampleTeamSource", null, null),
-				new AutoWireTeamModel("PASSIVE", "QUALIFIED",
+				new WoofTeamModel("PASSIVE", "QUALIFIED",
 						"net.example.Type"));
-		AutoWireTeamModel team = teams.getAutoWireTeams().get(0);
+		WoofTeamModel team = teams.getAutoWireTeams().get(0);
 
 		// Validate the properties
 		assertProperties(new PropertyModel("NAME_ONE", "VALUE_ONE"),
@@ -75,8 +75,8 @@ public class AutoWireTeamsModelRepositoryTest extends OfficeFrameTestCase {
 
 		// Validate the auto-wiring
 		assertList(new String[] { "getQualifier", "getType" },
-				team.getAutoWiring(), new AutoWireModel("QUALIFIED_ONE",
-						"TYPE_ONE"), new AutoWireModel("QUALIFIED_TWO",
+				team.getAutoWiring(), new TypeQualificationModel("QUALIFIED_ONE",
+						"TYPE_ONE"), new TypeQualificationModel("QUALIFIED_TWO",
 						"TYPE_TWO"));
 	}
 
@@ -123,13 +123,13 @@ public class AutoWireTeamsModelRepositoryTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure able to round trip storing and retrieving the
-	 * {@link AutoWireTeamsModel}.
+	 * {@link WoofTeamsModel}.
 	 */
 	public void testRoundTripStoreRetrieveTeams() throws Exception {
 
 		// Load the teams
 		ModelRepository repository = new ModelRepositoryImpl();
-		AutoWireTeamsModel teams = new AutoWireTeamsModel();
+		WoofTeamsModel teams = new WoofTeamsModel();
 		teams = repository.retrieve(teams, this.configurationItem);
 
 		// Store the teams
@@ -137,7 +137,7 @@ public class AutoWireTeamsModelRepositoryTest extends OfficeFrameTestCase {
 		repository.store(teams, contents);
 
 		// Reload the teams
-		AutoWireTeamsModel reloadedTeams = new AutoWireTeamsModel();
+		WoofTeamsModel reloadedTeams = new WoofTeamsModel();
 		reloadedTeams = repository.retrieve(reloadedTeams, contents);
 
 		// Validate round trip

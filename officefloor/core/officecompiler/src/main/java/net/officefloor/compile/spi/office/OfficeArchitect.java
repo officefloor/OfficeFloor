@@ -19,11 +19,12 @@ package net.officefloor.compile.spi.office;
 
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
+import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
+import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
+import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
-import net.officefloor.compile.spi.section.ManagedObjectDependency;
-import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.frame.api.escalate.Escalation;
@@ -117,6 +118,15 @@ public interface OfficeArchitect {
 	 * @return Added {@link OfficeSection}.
 	 */
 	OfficeSection addOfficeSection(String sectionName, SectionSource sectionSource, String sectionLocation);
+
+	/**
+	 * Obtains the {@link OfficeSection}.
+	 * 
+	 * @param sectionName
+	 *            Name of the {@link OfficeSection}.
+	 * @return {@link OfficeSection}.
+	 */
+	OfficeSection getOfficeSection(String sectionName);
 
 	/**
 	 * Adds an {@link OfficeSectionTransformer} to transform the

@@ -17,7 +17,7 @@
  */
 package net.officefloor.compile.internal.structure;
 
-import net.officefloor.compile.spi.section.ManagedObjectFlow;
+import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 
 /**
  * {@link ManagedObjectFlow} node.

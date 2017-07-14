@@ -29,13 +29,11 @@ import org.easymock.AbstractMatcher;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
-import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -51,6 +49,7 @@ import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImp
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
+import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
 
 /**
  * Tests the {@link JsonRequestReaderManagedObjectSource}.
@@ -252,16 +251,15 @@ public class JsonRequestReaderManagedObjectSourceTest extends OfficeFrameTestCas
 			boolean isExpectedEmpty, String... expectedArrayValues) throws Exception {
 
 		// Start the application
-		CompileOfficeFloor compile = new CompileOfficeFloor();
+		WebCompileOfficeFloor compile = new WebCompileOfficeFloor();
 		compile.officeFloor((context) -> {
 			HttpServerSocketManagedObjectSource.configure(context.getOfficeFloorDeployer(), 7878,
 					context.getDeployedOffice(), "SECTION", "service");
 		});
-		compile.office((context) -> {
-			OfficeArchitect architect = context.getOfficeArchitect();
+		compile.web((context) -> {
 			OfficeSection servicer = context.addSection("SECTION", MockService.class);
-			linkUri("service", servicer, "service");
-			OfficeManagedObjectSource mos = architect.addOfficeManagedObjectSource("JSON",
+			context.getWebArchitect().linkUri("service", servicer.getOfficeSectionInput("service"));
+			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("JSON",
 					JsonRequestReaderManagedObjectSource.class.getName());
 			mos.addProperty(JsonRequestReaderManagedObjectSource.PROPERTY_JSON_OBJECT_CLASS,
 					MockJsonObject.class.getName());

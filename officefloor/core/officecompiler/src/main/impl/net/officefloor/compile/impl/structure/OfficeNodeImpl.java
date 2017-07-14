@@ -73,7 +73,9 @@ import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
-import net.officefloor.compile.spi.office.ManagedObjectTeam;
+import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
+import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
+import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeGovernance;
@@ -97,8 +99,6 @@ import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
-import net.officefloor.compile.spi.section.ManagedObjectDependency;
-import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -1007,6 +1007,11 @@ public class OfficeNodeImpl implements OfficeNode {
 		return NodeUtil.getInitialisedNode(sectionName, this.sections, context,
 				() -> this.context.createSectionNode(sectionName, this),
 				(section) -> section.initialise(sectionSource.getClass().getName(), sectionSource, sectionLocation));
+	}
+
+	@Override
+	public OfficeSection getOfficeSection(String sectionName) {
+		return NodeUtil.getNode(sectionName, this.sections, () -> this.context.createSectionNode(sectionName, this));
 	}
 
 	@Override

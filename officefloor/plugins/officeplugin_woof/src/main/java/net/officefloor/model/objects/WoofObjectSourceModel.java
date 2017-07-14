@@ -15,29 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.objects;
-
-import net.officefloor.autowire.AutoWireApplication;
-import net.officefloor.model.objects.AutoWireObjectsModel;
+package net.officefloor.model.objects;
 
 /**
- * Loads the {@link AutoWireObjectsModel} configuration to the
- * {@link AutoWireApplication}.
- * 
+ * Marker interface to distinguish sources of objects. 
+ *
  * @author Daniel Sagenschneider
  */
-public interface AutoWireObjectsLoader {
-
-	/**
-	 * Loads the {@link AutoWireObjectsModel} configuration to the
-	 * {@link AutoWireApplication}.
-	 * 
-	 * @param context
-	 *            {@link AutoWireObjectsLoaderContext}.
-	 * @throws Exception
-	 *             If fails to load the configuration.
-	 */
-	void loadAutoWireObjectsConfiguration(AutoWireObjectsLoaderContext context)
-			throws Exception;
-
+public interface WoofObjectSourceModel {
 }

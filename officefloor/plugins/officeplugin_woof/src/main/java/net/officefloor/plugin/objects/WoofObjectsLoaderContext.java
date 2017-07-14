@@ -17,15 +17,16 @@
  */
 package net.officefloor.plugin.objects;
 
-import net.officefloor.autowire.AutoWireApplication;
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.model.repository.ConfigurationItem;
 
 /**
- * Context for the {@link AutoWireObjectsLoader}.
+ * Context for the {@link WoofObjectsLoader}.
  *
  * @author Daniel Sagenschneider
  */
-public interface AutoWireObjectsLoaderContext {
+public interface WoofObjectsLoaderContext {
 
 	/**
 	 * Obtains the {@link ConfigurationItem} containing the configuration of the
@@ -37,23 +38,17 @@ public interface AutoWireObjectsLoaderContext {
 	ConfigurationItem getConfiguration();
 
 	/**
-	 * Obtains the {@link AutoWireApplication} to be configured with the
-	 * objects.
+	 * Obtains the {@link OfficeArchitect} to be configured with the objects.
 	 * 
-	 * @return {@link AutoWireApplication} to be configured with the objects.
+	 * @return {@link OfficeArchitect} to be configured with the objects.
 	 */
-	AutoWireApplication getAutoWireApplication();
+	OfficeArchitect getOfficeArchitect();
 
 	/**
-	 * <p>
-	 * This is available to report invalid configuration but continue to deploy
-	 * the remaining object instances.
+	 * Obtains the {@link OfficeExtensionContext}.
 	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @throws Exception
-	 *             If needs to propagate the issue.
+	 * @return {@link OfficeExtensionContext}.
 	 */
-	void addIssue(String issueDescription) throws Exception;
+	OfficeExtensionContext getOfficeExtensionContext();
 
 }

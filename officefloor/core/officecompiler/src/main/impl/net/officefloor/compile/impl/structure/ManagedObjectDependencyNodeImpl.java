@@ -31,7 +31,7 @@ import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.object.DependentObjectType;
 import net.officefloor.compile.object.ObjectDependencyType;
-import net.officefloor.compile.spi.section.ManagedObjectDependency;
+import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 
 /**
  * {@link ManagedObjectDependencyNode} implementation.
@@ -158,6 +158,18 @@ public class ManagedObjectDependencyNodeImpl implements ManagedObjectDependencyN
 	@Override
 	public String getManagedObjectDependencyName() {
 		return this.dependencyName;
+	}
+
+	@Override
+	public void setOverrideQualifier(String qualifier) {
+		// TODO implement setOverrideQualifier
+		throw new UnsupportedOperationException("TODO implement setOverrideQualifier");
+	}
+
+	@Override
+	public void setSpecificType(String type) {
+		// TODO implement setSpecificType
+		throw new UnsupportedOperationException("TODO implement setSpecificType");
 	}
 
 	/**

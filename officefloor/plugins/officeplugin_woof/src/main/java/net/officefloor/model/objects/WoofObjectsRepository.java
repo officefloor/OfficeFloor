@@ -15,44 +15,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.model.teams;
+package net.officefloor.model.objects;
 
-import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.model.repository.ConfigurationItem;
 
 /**
- * Repository for obtaining the {@link AutoWireTeamsModel} for auto-wiring into
- * an {@link AutoWireApplication}.
+ * Repository for obtaining the {@link WoofObjectsModel} for auto-wiring.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AutoWireTeamsRepository {
+public interface WoofObjectsRepository {
 
 	/**
-	 * Retrieves the {@link AutoWireTeamsModel} from the
+	 * Retrieves the {@link WoofObjectsModel} from the
 	 * {@link ConfigurationItem}.
 	 * 
 	 * @param configuration
 	 *            {@link ConfigurationItem}.
-	 * @return {@link AutoWireTeamsModel}.
+	 * @return {@link WoofObjectsModel}.
 	 * @throws Exception
-	 *             If fails to retrieve the {@link AutoWireTeamsModel}.
+	 *             If fails to retrieve the {@link WoofObjectsModel}.
 	 */
-	AutoWireTeamsModel retrieveAutoWireTeams(ConfigurationItem configuration)
-			throws Exception;
+	WoofObjectsModel retrieveAutoWireObjects(ConfigurationItem configuration) throws Exception;
 
 	/**
-	 * Stores the {@link AutoWireTeamsModel} within the
+	 * Stores the {@link WoofObjectsModel} within the
 	 * {@link ConfigurationItem}.
 	 * 
-	 * @param teams
-	 *            {@link AutoWireTeamsModel}.
+	 * @param objects
+	 *            {@link WoofObjectsModel}.
 	 * @param configuration
 	 *            {@link ConfigurationItem}.
 	 * @throws Exception
-	 *             If fails to store the {@link AutoWireTeamsModel}.
+	 *             If fails to store the {@link WoofObjectsModel}.
 	 */
-	void storeAutoWireTeams(AutoWireTeamsModel teams,
-			ConfigurationItem configuration) throws Exception;
+	void storeAutoWireObjects(WoofObjectsModel objects, ConfigurationItem configuration) throws Exception;
 
 }

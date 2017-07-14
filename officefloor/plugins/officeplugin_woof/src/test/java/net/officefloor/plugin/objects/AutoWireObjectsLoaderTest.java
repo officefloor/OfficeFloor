@@ -31,13 +31,13 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
-import net.officefloor.model.objects.AutoWireObjectsRepositoryImpl;
+import net.officefloor.model.objects.WoofObjectsRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**
- * Tests the {@link AutoWireObjectsLoader}.
+ * Tests the {@link WoofObjectsLoader}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -49,10 +49,10 @@ public class AutoWireObjectsLoaderTest extends OfficeFrameTestCase {
 	private final OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 
 	/**
-	 * {@link AutoWireObjectsLoader} to test.
+	 * {@link WoofObjectsLoader} to test.
 	 */
-	private final AutoWireObjectsLoader loader = new AutoWireObjectsLoaderImpl(
-			new AutoWireObjectsRepositoryImpl(new ModelRepositoryImpl()));
+	private final WoofObjectsLoader loader = new WoofObjectsLoaderImpl(
+			new WoofObjectsRepositoryImpl(new ModelRepositoryImpl()));
 
 	/**
 	 * Mock {@link AutoWireApplication}.
@@ -60,9 +60,9 @@ public class AutoWireObjectsLoaderTest extends OfficeFrameTestCase {
 	private final AutoWireApplication app = this.createMock(AutoWireApplication.class);
 
 	/**
-	 * Mock {@link AutoWireObjectsLoaderContext}.
+	 * Mock {@link WoofObjectsLoaderContext}.
 	 */
-	private final AutoWireObjectsLoaderContext loaderContext = this.createMock(AutoWireObjectsLoaderContext.class);
+	private final WoofObjectsLoaderContext loaderContext = this.createMock(WoofObjectsLoaderContext.class);
 
 	/**
 	 * {@link ManagedObjectSourceWirerContext}.
@@ -254,7 +254,7 @@ public class AutoWireObjectsLoaderTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records initialising the {@link AutoWireObjectsLoader}.
+	 * Records initialising the {@link WoofObjectsLoader}.
 	 * 
 	 * @param fileName
 	 *            File name for {@link ConfigurationItem}.r
@@ -269,7 +269,7 @@ public class AutoWireObjectsLoaderTest extends OfficeFrameTestCase {
 		this.recordReturn(this.loaderContext, this.loaderContext.getConfiguration(), configuration);
 
 		// Obtain the application
-		this.recordReturn(this.loaderContext, this.loaderContext.getAutoWireApplication(), this.app);
+		this.recordReturn(this.loaderContext, this.loaderContext.getOfficeArchitect(), this.app);
 	}
 
 }

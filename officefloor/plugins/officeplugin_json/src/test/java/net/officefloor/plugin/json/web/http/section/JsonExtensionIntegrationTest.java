@@ -20,20 +20,19 @@ package net.officefloor.plugin.json.web.http.section;
 import java.io.IOException;
 import java.io.Serializable;
 
-import net.officefloor.autowire.AutoWireOfficeFloor;
-import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.json.HttpJson;
-import net.officefloor.plugin.json.JsonResponseWriter;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.web.http.application.HttpTemplateSection;
-import net.officefloor.plugin.web.http.application.WebArchitect;
-import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
+
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.json.HttpJson;
+import net.officefloor.plugin.json.JsonResponseWriter;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+import net.officefloor.plugin.web.http.application.HttpTemplateSection;
+import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
 
 /**
  * Validates the extension of {@link HttpTemplateSection} via JSON.
@@ -47,30 +46,32 @@ public class JsonExtensionIntegrationTest extends OfficeFrameTestCase {
 	 */
 	public void testJsonExtensionIntegration() throws Exception {
 
-		// Create the application
-		WebArchitect application = new HttpServerAutoWireOfficeFloorSource();
+		// Configure the HTTP server
+		WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
+		compiler.officeFloor((context) -> {
+			HttpTestUtil.configureTestHttpServer(context, 7878, "ROUTE", "route");
+		});
+		compiler.web((context) -> {
 
-		// Add the template
-		String templatePath = this.getFileLocation(this.getClass(),
-				"template.ofp");
-		HttpTemplateSection template = application.addHttpTemplate(
-				"/test", templatePath, MockTemplateLogic.class);
+			// Add the template
+			String templatePath = this.getFileLocation(this.getClass(), "template.ofp");
+			HttpTemplateSection template = context.getWebArchitect().addHttpTemplate("/test", templatePath,
+					MockTemplateLogic.class);
 
-		// Extend the template
-		JsonHttpTemplateSectionExtension.extendTemplate(template, application);
+			// Extend the template
+			template.addTemplateExtension(JsonHttpTemplateSectionExtension.class);
+		});
 
 		// Start application
-		AutoWireOfficeFloor officeFloor = application.openOfficeFloor();
+		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
 		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
 
 			// Ensure handles JSON object and JSON writer appropriately
 			HttpPost request = new HttpPost("http://localhost:7878/test-ajax");
 			request.setEntity(new StringEntity("{\"value\":\"REQUEST\"}"));
 			HttpResponse response = client.execute(request);
-			assertEquals("Should be successful", 200, response.getStatusLine()
-					.getStatusCode());
-			assertEquals("Incorrect response", "{\"value\":\"RESPONSE\"}",
-					EntityUtils.toString(response.getEntity()));
+			assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
+			assertEquals("Incorrect response", "{\"value\":\"RESPONSE\"}", EntityUtils.toString(response.getEntity()));
 
 		} finally {
 			// Ensure stop server (client already closed)
@@ -100,8 +101,7 @@ public class JsonExtensionIntegrationTest extends OfficeFrameTestCase {
 	 */
 	public static class MockTemplateLogic {
 
-		public void ajax(MockJsonObject object, JsonResponseWriter writer)
-				throws IOException {
+		public void ajax(MockJsonObject object, JsonResponseWriter writer) throws IOException {
 
 			// Ensure correct object
 			assertEquals("Incorrect value", "REQUEST", object.getValue());

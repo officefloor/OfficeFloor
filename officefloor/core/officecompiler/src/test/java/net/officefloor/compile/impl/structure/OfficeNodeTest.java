@@ -21,7 +21,9 @@ import java.sql.Connection;
 
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
-import net.officefloor.compile.spi.office.ManagedObjectTeam;
+import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
+import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
+import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeEscalation;
@@ -45,8 +47,6 @@ import net.officefloor.compile.spi.office.ResponsibleTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
-import net.officefloor.compile.spi.section.ManagedObjectDependency;
-import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.frame.api.administration.AdministrationFactory;
@@ -294,8 +294,24 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		OfficeSection section = this.node.addOfficeSection("SECTION", new SectionModelSectionSource(), "location");
 		assertNotNull("Must have section", section);
 		assertEquals("Incorrect section name", "SECTION", section.getOfficeSectionName());
+		assertSame("Should be the same section", section, this.node.getOfficeSection("SECTION"));
 		assertNotSame("Should obtain another section", section,
 				this.node.addOfficeSection("ANOTHER", new SectionModelSectionSource(), "location"));
+		assertSame("Should still be the same section", section, this.node.getOfficeSection("SECTION"));
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Tests initialising the {@link OfficeSection} after obtaining.
+	 */
+	public void testInitialiseSectionAfterwards() {
+		this.replayMockObjects();
+		OfficeSection section = this.node.getOfficeSection("SECTION");
+		assertNotNull("Should have section", section);
+		assertEquals("Incorrect section name", "SECTION", section.getOfficeSectionName());
+		assertSame("Should be same section on initialising", section,
+				this.node.addOfficeSection("SECTION", new SectionModelSectionSource(), "location"));
+		assertSame("Should still be the same section", section, this.node.getOfficeSection("SECTION"));
 		this.verifyMockObjects();
 	}
 

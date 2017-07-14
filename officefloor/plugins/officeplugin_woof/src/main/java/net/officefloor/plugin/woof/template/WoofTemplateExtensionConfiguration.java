@@ -17,7 +17,7 @@
  */
 package net.officefloor.plugin.woof.template;
 
-import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.model.woof.WoofTemplateExtension;
 import net.officefloor.model.woof.WoofTemplateModel;
 

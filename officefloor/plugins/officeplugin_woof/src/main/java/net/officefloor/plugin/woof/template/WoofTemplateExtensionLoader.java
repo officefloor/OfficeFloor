@@ -19,8 +19,8 @@ package net.officefloor.plugin.woof.template;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.woof.WoofChangeIssues;
@@ -53,8 +53,8 @@ public interface WoofTemplateExtensionLoader {
 	 *         <code>null</code> if issue, which is reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	PropertyList loadSpecification(String woofTemplateExtensionSourceClassName,
-			ClassLoader classLoader, CompilerIssues issues);
+	PropertyList loadSpecification(String woofTemplateExtensionSourceClassName, ClassLoader classLoader,
+			CompilerIssues issues);
 
 	/**
 	 * Refactors the {@link WoofTemplateExtensionSource} for the
@@ -82,12 +82,9 @@ public interface WoofTemplateExtensionLoader {
 	 *         {@link WoofTemplateExtensionSource} for the
 	 *         {@link WoofTemplateModel}.
 	 */
-	Change<?> refactorTemplateExtension(
-			String woofTemplateExtensionSourceClassName, String oldUri,
-			SourceProperties oldProperties, String newUri,
-			SourceProperties newProperties,
-			ConfigurationContext configurationContext,
-			SourceContext sourceContext, WoofChangeIssues issues);
+	Change<?> refactorTemplateExtension(String woofTemplateExtensionSourceClassName, String oldUri,
+			SourceProperties oldProperties, String newUri, SourceProperties newProperties,
+			ConfigurationContext configurationContext, SourceContext sourceContext, WoofChangeIssues issues);
 
 	/**
 	 * Extends the {@link HttpTemplateSection} with the
@@ -107,9 +104,7 @@ public interface WoofTemplateExtensionLoader {
 	 * @throws WoofTemplateExtensionException
 	 *             If fails to extend the {@link HttpTemplateSection}.
 	 */
-	void extendTemplate(String extensionSourceClassName,
-			PropertyList properties, HttpTemplateSection template,
-			WebArchitect application, SourceContext sourceContext)
-			throws WoofTemplateExtensionException;
+	void extendTemplate(String extensionSourceClassName, PropertyList properties, HttpTemplateSection template,
+			WebArchitect application, SourceContext sourceContext) throws WoofTemplateExtensionException;
 
 }

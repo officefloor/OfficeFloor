@@ -17,7 +17,7 @@
  */
 package net.officefloor.plugin.woof;
 
-import net.officefloor.frame.spi.source.SourceContext;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.plugin.web.http.application.WebArchitect;
 
 /**

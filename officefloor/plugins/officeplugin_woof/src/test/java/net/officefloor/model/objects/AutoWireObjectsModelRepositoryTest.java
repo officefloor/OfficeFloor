@@ -28,7 +28,7 @@ import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
 /**
- * Tests the marshaling/unmarshaling of the {@link AutoWireObjectsModel} via the
+ * Tests the marshaling/unmarshaling of the {@link WoofObjectsModel} via the
  * {@link ModelRepository}.
  * 
  * @author Daniel Sagenschneider
@@ -36,7 +36,7 @@ import net.officefloor.model.repository.ModelRepository;
 public class AutoWireObjectsModelRepositoryTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link ConfigurationItem} containing the {@link AutoWireObjectsModel}.
+	 * {@link ConfigurationItem} containing the {@link WoofObjectsModel}.
 	 */
 	private ConfigurationItem configurationItem;
 
@@ -48,19 +48,19 @@ public class AutoWireObjectsModelRepositoryTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure retrieve the {@link AutoWireObjectsModel}.
+	 * Ensure retrieve the {@link WoofObjectsModel}.
 	 */
 	public void testRetrieveObjects() throws Exception {
 
 		// Load the Objects
 		ModelRepository repository = new ModelRepositoryImpl();
-		AutoWireObjectsModel objects = new AutoWireObjectsModel();
+		WoofObjectsModel objects = new WoofObjectsModel();
 		objects = repository.retrieve(objects, this.configurationItem);
 
 		// ----------------------------------------
 		// Validate the objects
 		// ----------------------------------------
-		List<AutoWireObjectSourceModel> objectSources = objects
+		List<WoofObjectSourceModel> objectSources = objects
 				.getAutoWireObjectSources();
 		assertEquals("Incorrect number of auto-wire object sources", 5,
 				objectSources.size());
@@ -71,9 +71,9 @@ public class AutoWireObjectsModelRepositoryTest extends OfficeFrameTestCase {
 				"getQualifier", "getType", "getScope" };
 
 		// Validate the first object source (managed object)
-		AutoWireManagedObjectModel moOne = assertType(
-				AutoWireManagedObjectModel.class, objectSources.get(0));
-		assertProperties(new AutoWireManagedObjectModel(
+		WoofManagedObjectModel moOne = assertType(
+				WoofManagedObjectModel.class, objectSources.get(0));
+		assertProperties(new WoofManagedObjectModel(
 				"net.example.ExampleManagedObjectSourceA", null, 10, null,
 				null, "thread"), moOne, MANAGED_OBJECT_METHODS);
 		assertProperties(new PropertyModel("MO_ONE", "VALUE_ONE"),
@@ -81,23 +81,23 @@ public class AutoWireObjectsModelRepositoryTest extends OfficeFrameTestCase {
 				new PropertyModel("MO_TWO", "VALUE_TWO"),
 				moOne.getPropertySources());
 		assertList(new String[] { "getQualifier", "getType" },
-				moOne.getAutoWiring(), new AutoWireModel("QUALIFIED",
-						"net.orm.Session"), new AutoWireModel(null,
+				moOne.getAutoWiring(), new TypeQualificationModel("QUALIFIED",
+						"net.orm.Session"), new TypeQualificationModel(null,
 						"net.orm.SessionLocal"));
 		assertList(new String[] { "getName", "getSection", "getInput" },
-				moOne.getFlows(), new AutoWireFlowModel("FLOW", "SECTION",
+				moOne.getFlows(), new WoofFlowModel("FLOW", "SECTION",
 						"INPUT"));
 		assertList(new String[] { "getName", "getQualifier", "getType" },
-				moOne.getTeams(), new AutoWireTeamModel("TEAM", "QUALIFIER",
+				moOne.getTeams(), new WoofTeamModel("TEAM", "QUALIFIER",
 						"net.example.Type"));
 		assertList(new String[] { "getName", "getQualifier", "getType" },
-				moOne.getDependencies(), new AutoWireDependencyModel(
+				moOne.getDependencies(), new WoofDependencyModel(
 						"DEPENDENCY", "QUALIFIER", "net.example.Dependency"));
 
 		// Validate the second object source (supplier)
-		AutoWireSupplierModel supplierOne = assertType(
-				AutoWireSupplierModel.class, objectSources.get(1));
-		assertProperties(new AutoWireSupplierModel(
+		WoofSupplierModel supplierOne = assertType(
+				WoofSupplierModel.class, objectSources.get(1));
+		assertProperties(new WoofSupplierModel(
 				"net.example.ExampleSupplierSourceA"), supplierOne,
 				"getSupplierSourceClassName");
 		assertProperties(new PropertyModel("SUPPLIER_A", "VALUE_A"),
@@ -107,23 +107,23 @@ public class AutoWireObjectsModelRepositoryTest extends OfficeFrameTestCase {
 
 		// Validate the third object source (managed object shortcut entry)
 		assertProperties(
-				new AutoWireManagedObjectModel(
+				new WoofManagedObjectModel(
 						"net.example.ExampleManagedObjectSourceB", null, 0,
 						"QUALIFIER", "net.example.Type", "process"),
-				assertType(AutoWireManagedObjectModel.class,
+				assertType(WoofManagedObjectModel.class,
 						objectSources.get(2)), MANAGED_OBJECT_METHODS);
 
 		// Validate the fourth object source (supplier)
-		assertProperties(new AutoWireSupplierModel(
+		assertProperties(new WoofSupplierModel(
 				"net.example.ExampleSupplierSourceB"),
-				assertType(AutoWireSupplierModel.class, objectSources.get(3)),
+				assertType(WoofSupplierModel.class, objectSources.get(3)),
 				"getSupplierSourceClassName");
 
 		// Validate the fifth object source (managed object class/POJO shortcut)
 		assertProperties(
-				new AutoWireManagedObjectModel(null,
+				new WoofManagedObjectModel(null,
 						"net.example.ExampleClass", 0, null, null, null),
-				assertType(AutoWireManagedObjectModel.class,
+				assertType(WoofManagedObjectModel.class,
 						objectSources.get(4)), MANAGED_OBJECT_METHODS);
 	}
 
@@ -170,13 +170,13 @@ public class AutoWireObjectsModelRepositoryTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure able to round trip storing and retrieving the
-	 * {@link AutoWireObjectsModel}.
+	 * {@link WoofObjectsModel}.
 	 */
 	public void testRoundTripStoreRetrieveObjects() throws Exception {
 
 		// Load the objects
 		ModelRepository repository = new ModelRepositoryImpl();
-		AutoWireObjectsModel objects = new AutoWireObjectsModel();
+		WoofObjectsModel objects = new WoofObjectsModel();
 		objects = repository.retrieve(objects, this.configurationItem);
 
 		// Store the objects
@@ -184,7 +184,7 @@ public class AutoWireObjectsModelRepositoryTest extends OfficeFrameTestCase {
 		repository.store(objects, contents);
 
 		// Reload the objects
-		AutoWireObjectsModel reloadedObjects = new AutoWireObjectsModel();
+		WoofObjectsModel reloadedObjects = new WoofObjectsModel();
 		reloadedObjects = repository.retrieve(reloadedObjects, contents);
 
 		// Validate round trip

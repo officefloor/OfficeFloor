@@ -17,8 +17,8 @@
  */
 package net.officefloor.model.woof;
 
+import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
-import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.model.repository.ConfigurationContext;
 
 /**
@@ -26,8 +26,7 @@ import net.officefloor.model.repository.ConfigurationContext;
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofTemplateChangeContextImpl extends SourceContextImpl implements
-		WoofTemplateChangeContext {
+public class WoofTemplateChangeContextImpl extends SourceContextImpl implements WoofTemplateChangeContext {
 
 	/**
 	 * {@link ConfigurationContext}.
@@ -53,9 +52,8 @@ public class WoofTemplateChangeContextImpl extends SourceContextImpl implements
 	 * @param resourceSources
 	 *            {@link ResourceSource} instances.
 	 */
-	public WoofTemplateChangeContextImpl(boolean isLoadingType,
-			ClassLoader classLoader, ConfigurationContext configurationContext,
-			WoofChangeIssues issues, ResourceSource... resourceSources) {
+	public WoofTemplateChangeContextImpl(boolean isLoadingType, ClassLoader classLoader,
+			ConfigurationContext configurationContext, WoofChangeIssues issues, ResourceSource... resourceSources) {
 		super(isLoadingType, classLoader, resourceSources);
 		this.configurationContext = configurationContext;
 		this.issues = issues;

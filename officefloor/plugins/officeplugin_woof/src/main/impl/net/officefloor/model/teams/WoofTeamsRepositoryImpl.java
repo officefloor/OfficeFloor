@@ -21,11 +21,11 @@ import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
 /**
- * {@link AutoWireTeamsRepository} implementation.
+ * {@link WoofTeamsRepository} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class AutoWireTeamsRepositoryImpl implements AutoWireTeamsRepository {
+public class WoofTeamsRepositoryImpl implements WoofTeamsRepository {
 
 	/**
 	 * {@link ModelRepository}.
@@ -38,7 +38,7 @@ public class AutoWireTeamsRepositoryImpl implements AutoWireTeamsRepository {
 	 * @param modelRepository
 	 *            {@link ModelRepository}.
 	 */
-	public AutoWireTeamsRepositoryImpl(ModelRepository modelRepository) {
+	public WoofTeamsRepositoryImpl(ModelRepository modelRepository) {
 		this.modelRepository = modelRepository;
 	}
 
@@ -47,14 +47,14 @@ public class AutoWireTeamsRepositoryImpl implements AutoWireTeamsRepository {
 	 */
 
 	@Override
-	public AutoWireTeamsModel retrieveAutoWireTeams(
+	public WoofTeamsModel retrieveAutoWireTeams(
 			ConfigurationItem configuration) throws Exception {
-		return this.modelRepository.retrieve(new AutoWireTeamsModel(),
+		return this.modelRepository.retrieve(new WoofTeamsModel(),
 				configuration);
 	}
 
 	@Override
-	public void storeAutoWireTeams(AutoWireTeamsModel teams,
+	public void storeAutoWireTeams(WoofTeamsModel teams,
 			ConfigurationItem configuration) throws Exception {
 		this.modelRepository.store(teams, configuration);
 	}

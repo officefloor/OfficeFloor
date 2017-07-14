@@ -32,7 +32,6 @@ public interface HttpTemplateSectionExtension {
 	 * @throws Exception
 	 *             If fails to extend the template.
 	 */
-	void extendTemplate(HttpTemplateSectionExtensionContext context)
-			throws Exception;
+	void extendTemplate(HttpTemplateSectionExtensionContext context) throws Exception;
 
 }

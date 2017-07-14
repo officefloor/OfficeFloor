@@ -15,12 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.model.objects;
+package net.officefloor.plugin.teams;
+
+import net.officefloor.model.teams.WoofTeamsModel;
 
 /**
- * Marker interface to distinguish sources of objects. 
- *
+ * Loads the {@link WoofTeamsModel} configuration.
+ * 
  * @author Daniel Sagenschneider
  */
-public interface AutoWireObjectSourceModel {
+public interface WoofTeamsLoader {
+
+	/**
+	 * Loads the {@link WoofTeamsModel} configuration.
+	 * 
+	 * @param context
+	 *            {@link WoofTeamsLoaderContext}.
+	 * @throws Exception
+	 *             If fails to load the configuration.
+	 */
+	void loadAutoWireTeamsConfiguration(WoofTeamsLoaderContext context) throws Exception;
+
 }

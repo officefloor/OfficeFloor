@@ -24,9 +24,9 @@ import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.change.NoChange;
 import net.officefloor.model.repository.ConfigurationContext;
@@ -324,9 +324,8 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 	}
 
 	@Override
-	public void extendTemplate(String extensionSourceClassName, PropertyList properties,
-			HttpTemplateSection template, WebArchitect application, SourceContext sourceContext)
-			throws WoofTemplateExtensionException {
+	public void extendTemplate(String extensionSourceClassName, PropertyList properties, HttpTemplateSection template,
+			WebArchitect application, SourceContext sourceContext) throws WoofTemplateExtensionException {
 
 		// Create the context for the extension source
 		WoofTemplateExtensionSourceContext extensionSourceContext = new WoofTemplateExtensionServiceContextImpl(
@@ -377,8 +376,8 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 		 * @param classLoader
 		 *            {@link ClassLoader}.
 		 */
-		public WoofTemplateExtensionServiceContextImpl(HttpTemplateSection template,
-				WebArchitect application, PropertyList properties, SourceContext sourceContext) {
+		public WoofTemplateExtensionServiceContextImpl(HttpTemplateSection template, WebArchitect application,
+				PropertyList properties, SourceContext sourceContext) {
 			super(sourceContext.isLoadingType(), sourceContext, new PropertyListSourceProperties(properties));
 			this.template = template;
 			this.application = application;

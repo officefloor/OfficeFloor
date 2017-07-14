@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
+	<field type="String" name="access name" />
 	<field type="String" name="http security source class name" />
 	<field type="long" name="timeout" />
 	<list type="PropertyModel" name="property" plural="properties" />

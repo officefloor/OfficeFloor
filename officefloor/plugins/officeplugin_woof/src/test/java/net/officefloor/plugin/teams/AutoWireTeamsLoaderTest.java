@@ -28,10 +28,10 @@ import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
-import net.officefloor.model.teams.AutoWireTeamsRepositoryImpl;
+import net.officefloor.model.teams.WoofTeamsRepositoryImpl;
 
 /**
- * Tests the {@link AutoWireTeamsLoader}.
+ * Tests the {@link WoofTeamsLoader}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -44,10 +44,10 @@ public class AutoWireTeamsLoaderTest extends OfficeFrameTestCase {
 			.newOfficeFloorCompiler(null);
 
 	/**
-	 * {@link AutoWireTeamsLoader} to test.
+	 * {@link WoofTeamsLoader} to test.
 	 */
-	private final AutoWireTeamsLoader loader = new AutoWireTeamsLoaderImpl(
-			new AutoWireTeamsRepositoryImpl(new ModelRepositoryImpl()));
+	private final WoofTeamsLoader loader = new WoofTeamsLoaderImpl(
+			new WoofTeamsRepositoryImpl(new ModelRepositoryImpl()));
 
 	/**
 	 * Mock {@link AutoWireApplication}.

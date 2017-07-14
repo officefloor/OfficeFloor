@@ -23,7 +23,7 @@ import java.util.List;
 import org.junit.Assert;
 
 import net.officefloor.compile.managedobject.ManagedObjectType;
-import net.officefloor.compile.spi.office.ManagedObjectTeam;
+import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;

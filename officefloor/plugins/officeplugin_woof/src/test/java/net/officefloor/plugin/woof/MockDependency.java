@@ -17,10 +17,10 @@
  */
 package net.officefloor.plugin.woof;
 
-import net.officefloor.plugin.objects.AutoWireObjectsLoader;
+import net.officefloor.plugin.objects.WoofObjectsLoader;
 
 /**
- * Mock dependency for integration testing of {@link AutoWireObjectsLoader}.
+ * Mock dependency for integration testing of {@link WoofObjectsLoader}.
  * 
  * @author Daniel Sagenschneider
  */

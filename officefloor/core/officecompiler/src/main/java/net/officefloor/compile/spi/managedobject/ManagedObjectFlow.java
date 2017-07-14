@@ -15,38 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.woof;
+package net.officefloor.compile.spi.managedobject;
 
-import java.io.File;
-
-import net.officefloor.compile.properties.PropertyConfigurable;
-import net.officefloor.frame.spi.source.ResourceSource;
+import net.officefloor.compile.spi.section.SectionManagedObject;
 
 /**
- * WoOF item that is configurable with context details.
+ * Flow for a {@link SectionManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WoofContextConfigurable extends PropertyConfigurable {
+public interface ManagedObjectFlow {
 
 	/**
-	 * <p>
-	 * Provides location of the <code>webapp</code> directory.
-	 * <p>
-	 * Note that this may not be called if the <code>webapp</code> directory is
-	 * not available.
+	 * Obtains the name of this {@link ManagedObjectFlow}.
 	 * 
-	 * @param webappDirectory
-	 *            Location of the <code>webapp</code> directory.
+	 * @return Name of this {@link ManagedObjectFlow}.
 	 */
-	void setWebAppDirectory(File webappDirectory);
-
-	/**
-	 * Adds a {@link ResourceSource}.
-	 * 
-	 * @param resourceSource
-	 *            {@link ResourceSource}.
-	 */
-	void addResources(ResourceSource resourceSource);
-
+	String getManagedObjectFlowName();
 }

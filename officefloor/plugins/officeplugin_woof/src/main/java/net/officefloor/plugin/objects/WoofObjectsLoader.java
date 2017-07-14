@@ -15,33 +15,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.teams;
+package net.officefloor.plugin.objects;
 
-import net.officefloor.autowire.AutoWireApplication;
-import net.officefloor.model.repository.ConfigurationItem;
-import net.officefloor.model.teams.AutoWireTeamsModel;
+import net.officefloor.compile.spi.supplier.source.SupplierSource;
+import net.officefloor.model.objects.WoofObjectsModel;
 
 /**
- * Loads the {@link AutoWireTeamsModel} configuration to the
- * {@link AutoWireApplication}.
+ * Loads the {@link WoofObjectsModel} and configures the
+ * {@link SupplierSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AutoWireTeamsLoader {
+public interface WoofObjectsLoader {
 
 	/**
-	 * Loads the {@link AutoWireTeamsModel} configuration to the
-	 * {@link AutoWireApplication}.
+	 * Loads the {@link WoofObjectsModel} configuration and configures the
+	 * {@link SupplierSource}.
 	 * 
-	 * @param teamsConfiguration
-	 *            {@link ConfigurationItem} containing the
-	 *            {@link AutoWireTeamsModel} configuration.
-	 * @param application
-	 *            {@link AutoWireApplication}.
+	 * @param context
+	 *            {@link WoofObjectsLoaderContext}.
 	 * @throws Exception
 	 *             If fails to load the configuration.
 	 */
-	void loadAutoWireTeamsConfiguration(ConfigurationItem teamsConfiguration,
-			AutoWireApplication application) throws Exception;
+	void loadAutoWireObjectsConfiguration(WoofObjectsLoaderContext context) throws Exception;
 
 }

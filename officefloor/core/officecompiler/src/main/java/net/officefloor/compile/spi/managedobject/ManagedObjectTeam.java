@@ -15,8 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.spi.office;
+package net.officefloor.compile.spi.managedobject;
 
+import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.frame.api.team.Team;
 
 /**
