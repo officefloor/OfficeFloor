@@ -35,7 +35,6 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.configuration.impl.ConfigurationContextImpl;
 import net.officefloor.configuration.impl.ConfigurationContextImpl.ConfigurationSource;
 import net.officefloor.frame.api.source.SourceProperties;
-import net.officefloor.frame.api.source.UnknownResourceError;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -118,8 +117,10 @@ public class ConfigurationContextTest extends OfficeFrameTestCase {
 		try {
 			this.verify(false, null);
 			fail("Should not be successful");
-		} catch (UnknownResourceError ex) {
-			assertEquals("Incorrect resource", LOCATION, ex.getUnknownResourceLocation());
+		} catch (ConfigurationError ex) {
+			assertEquals("Incorrect resource", LOCATION, ex.getConfigurationLocation());
+			assertNull("Should be no tag", ex.getNonconfiguredTagName());
+			assertNull("Should not have cause", ex.getCause());
 		}
 	}
 

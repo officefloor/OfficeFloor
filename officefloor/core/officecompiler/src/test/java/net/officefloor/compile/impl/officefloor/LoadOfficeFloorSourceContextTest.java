@@ -18,7 +18,10 @@
 package net.officefloor.compile.impl.officefloor;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.Properties;
 
 import net.officefloor.compile.impl.managedobject.MockLoadManagedObject;
@@ -37,6 +40,7 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.supplier.SupplierType;
+import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
@@ -187,6 +191,118 @@ public class LoadOfficeFloorSourceContextTest extends AbstractOfficeFloorTestCas
 			@Override
 			public void make(OfficeFloorMakerContext context) {
 				assertEquals("Incorrect configuation item", resource, context.getContext().getResource(location));
+			}
+		});
+	}
+
+	/**
+	 * Ensure issue if missing {@link ConfigurationItem}.
+	 */
+	public void testMissingConfigurationItem() {
+
+		// Record missing configuration item
+		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource("missing"), null);
+		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
+				"Can not obtain ConfigurationItem at location 'missing'");
+
+		// Attempt to load office floor
+		this.loadOfficeFloor(false, new OfficeFloorMaker() {
+			@Override
+			public void make(OfficeFloorMakerContext context) {
+				context.getContext().getConfigurationItem("missing", null);
+			}
+		});
+	}
+
+	/**
+	 * Ensure issue if missing {@link Property} for {@link ConfigurationItem}.
+	 */
+	public void testMissingPropertyForConfigurationItem() {
+
+		// Record missing resource
+		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource("configuration"),
+				new ByteArrayInputStream("${missing}".getBytes()));
+		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
+				"Can not obtain ConfigurationItem at location 'configuration' as missing property 'missing'");
+
+		// Attempt to load office floor
+		this.loadOfficeFloor(false, new OfficeFloorMaker() {
+			@Override
+			public void make(OfficeFloorMakerContext context) {
+				context.getContext().getConfigurationItem("configuration", null);
+			}
+		});
+	}
+
+	/**
+	 * Ensure able to obtain a {@link ConfigurationItem}.
+	 */
+	public void testGetConfigurationItem() throws Exception {
+
+		final String location = "LOCATION";
+		final InputStream resource = new ByteArrayInputStream("content".getBytes());
+
+		// Record obtaining the configuration item
+		this.record_initiateOfficeFloorBuilder();
+		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource(location), resource);
+
+		// Obtain the configuration item
+		this.loadOfficeFloor(true, new OfficeFloorMaker() {
+			@Override
+			public void make(OfficeFloorMakerContext context) {
+				Reader configuration = context.getContext().getConfigurationItem(location, null).getReader();
+				assertContents(new StringReader("content"), configuration);
+			}
+		});
+	}
+
+	/**
+	 * Ensure able to tag replace {@link ConfigurationItem}.
+	 */
+	public void testTagReplaceConfigurationItem() throws Exception {
+
+		final String location = "LOCATION";
+		final InputStream resource = new ByteArrayInputStream("${tag}".getBytes());
+
+		// Record obtaining the configuration item
+		this.record_initiateOfficeFloorBuilder();
+		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource(location), resource);
+
+		// Obtain the configuration item
+		this.loadOfficeFloor(true, new OfficeFloorMaker() {
+			@Override
+			public void make(OfficeFloorMakerContext context) {
+				Reader configuration = context.getContext().getConfigurationItem(location, null).getReader();
+				assertContents(new StringReader("replace"), configuration);
+			}
+		}, "tag", "replace");
+	}
+
+	/**
+	 * Ensure handle {@link ConfigurationItem} failure.
+	 */
+	public void testConfigurationItemFailure() throws Exception {
+
+		final String location = "LOCATION";
+		final IOException failure = new IOException("TEST");
+		final InputStream resource = new InputStream() {
+			@Override
+			public int read() throws IOException {
+				throw failure;
+			}
+		};
+
+		// Record obtaining the configuration item
+		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource(location), resource);
+		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
+				"Failed to obtain ConfigurationItem at location 'LOCATION': TEST", failure);
+
+		// Obtain the configuration item
+		this.loadOfficeFloor(false, new OfficeFloorMaker() {
+			@Override
+			public void make(OfficeFloorMakerContext context) throws IOException {
+				context.getContext().getConfigurationItem(location, null);
+				fail("Should not be successful");
 			}
 		});
 	}

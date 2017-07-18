@@ -75,6 +75,7 @@ import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionSer
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
+import net.officefloor.configuration.ConfigurationError;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.manage.Office;
@@ -507,6 +508,10 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 			this.addIssue("Can not obtain resource at location '" + ex.getUnknownResourceLocation() + "' for "
 					+ OfficeFloorSource.class.getSimpleName() + " " + source.getClass().getName());
 			return false; // must have resource
+
+		} catch (ConfigurationError ex) {
+			ex.addConfigurationIssue(this, this.context.getCompilerIssues());
+			return false; // must have configuration
 
 		} catch (LoadTypeError ex) {
 			ex.addLoadTypeIssue(this, this.context.getCompilerIssues());

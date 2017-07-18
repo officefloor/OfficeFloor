@@ -854,19 +854,21 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 *            Expected content.
 	 * @param actual
 	 *            Actual content.
-	 * @throws IOException
-	 *             If fails to read contents.
 	 */
-	public static void assertContents(Reader expected, Reader actual) throws IOException {
-		BufferedReader expectedReader = new BufferedReader(expected);
-		BufferedReader actualReader = new BufferedReader(actual);
-		String expectedLine;
-		String actualLine;
-		int lineNumber = 1;
-		while ((actualLine = actualReader.readLine()) != null) {
-			expectedLine = expectedReader.readLine();
-			assertEquals("Incorrect line " + lineNumber, expectedLine, actualLine);
-			lineNumber++;
+	public static void assertContents(Reader expected, Reader actual) {
+		try {
+			BufferedReader expectedReader = new BufferedReader(expected);
+			BufferedReader actualReader = new BufferedReader(actual);
+			String expectedLine;
+			String actualLine;
+			int lineNumber = 1;
+			while ((actualLine = actualReader.readLine()) != null) {
+				expectedLine = expectedReader.readLine();
+				assertEquals("Incorrect line " + lineNumber, expectedLine, actualLine);
+				lineNumber++;
+			}
+		} catch (IOException ex) {
+			throw fail(ex);
 		}
 	}
 

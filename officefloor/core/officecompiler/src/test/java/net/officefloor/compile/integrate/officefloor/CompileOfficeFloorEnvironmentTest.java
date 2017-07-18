@@ -41,14 +41,11 @@ public class CompileOfficeFloorEnvironmentTest extends AbstractCompileTestCase {
 	public void testMissingTag() {
 
 		// Record issue if tag not provided as property
-		this.record_init();
-		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
-				OfficeFloorNodeImpl.class,
-				"Property 'missing.tag' must be specified");
-		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
+				"Can not obtain ConfigurationItem at location 'office-floor' as missing property 'missing.tag'");
 
-		// Missing properties only an issue
-		this.compile(true);
+		// Missing properties
+		this.compile(false);
 	}
 
 	/**
@@ -57,14 +54,11 @@ public class CompileOfficeFloorEnvironmentTest extends AbstractCompileTestCase {
 	public void testWarnOnceOnMissingTagRepeated() {
 
 		// Record issue if tag not provided as property
-		this.record_init();
-		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
-				OfficeFloorNodeImpl.class,
-				"Property 'repeated' must be specified");
-		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
+				"Can not obtain ConfigurationItem at location 'office-floor' as missing property 'repeated'");
 
-		// Missing properties only an issue
-		this.compile(true);
+		// Missing property
+		this.compile(false);
 	}
 
 	/**
@@ -73,17 +67,11 @@ public class CompileOfficeFloorEnvironmentTest extends AbstractCompileTestCase {
 	public void testMultipleMissingTags() {
 
 		// Record issue for each missing unique tag
-		this.record_init();
-		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
-				OfficeFloorNodeImpl.class,
-				"Property 'tag.one' must be specified");
-		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
-				OfficeFloorNodeImpl.class,
-				"Property 'tag.two' must be specified");
-		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
+				"Can not obtain ConfigurationItem at location 'office-floor' as missing property 'tag.one'");
 
-		// Missing properties only an issue
-		this.compile(true);
+		// Missing properties
+		this.compile(false);
 	}
 
 	/**
@@ -92,14 +80,11 @@ public class CompileOfficeFloorEnvironmentTest extends AbstractCompileTestCase {
 	public void testPartialSetOfTagsProvided() {
 
 		// Record loading with tags provided
-		this.record_init();
-		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
-				OfficeFloorNodeImpl.class,
-				"Property 'not.provided' must be specified");
-		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
+				"Can not obtain ConfigurationItem at location 'office-floor' as missing property 'not.provided'");
 
-		// Missing properties only an issue
-		this.compile(true, "provided", "tag available");
+		// Missing properties
+		this.compile(false, "provided", "tag available");
 	}
 
 	/**

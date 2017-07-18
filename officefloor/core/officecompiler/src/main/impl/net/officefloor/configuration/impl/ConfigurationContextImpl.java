@@ -34,7 +34,6 @@ import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.configuration.ConfigurationError;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.frame.api.source.SourceProperties;
-import net.officefloor.frame.api.source.UnknownResourceError;
 
 /**
  * Abstract {@link ConfigurationContext}.
@@ -130,7 +129,7 @@ public class ConfigurationContextImpl implements ConfigurationContext {
 		// Obtain the configuration item
 		ConfigurationItem item = this.getOptionalConfigurationItem(location, overrideProperties);
 		if (item == null) {
-			throw new UnknownResourceError("Can not find " + ConfigurationItem.class.getSimpleName(), location);
+			throw new ConfigurationError(location);
 		}
 
 		// Return the item

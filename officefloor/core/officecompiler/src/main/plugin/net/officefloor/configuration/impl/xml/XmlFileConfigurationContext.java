@@ -154,9 +154,7 @@ public class XmlFileConfigurationContext extends ConfigurationContextImpl
 	@Override
 	public InputStream sourceResource(String location) {
 		try {
-			this.ensureParsedIntoConfigurationItems();
-			ConfigurationItem item = this.getConfigurationItem(location, null);
-			return (item == null ? null : item.getInputStream());
+			return this.getConfigurationSource().getConfigurationInputStream(location);
 		} catch (Exception ex) {
 			return null; // failed to obtain resource
 		}
