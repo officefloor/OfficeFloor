@@ -17,7 +17,7 @@
  */
 package net.officefloor.model.woof;
 
-import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.configuration.ConfigurationItem;
 
 /**
  * Repository for obtaining the WoOF (Web on OfficeFloor) model.

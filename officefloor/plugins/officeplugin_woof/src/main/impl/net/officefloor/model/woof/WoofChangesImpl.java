@@ -35,6 +35,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.model.ConnectionModel;
@@ -43,12 +44,11 @@ import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.change.AbstractChange;
 import net.officefloor.model.impl.change.AggregateChange;
 import net.officefloor.model.impl.change.NoChange;
-import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.plugin.web.http.security.HttpSecuritySectionSource;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityFlowType;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
+import net.officefloor.plugin.woof.WoofOfficeExtensionService;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoader;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoaderImpl;
 
@@ -344,7 +344,7 @@ public class WoofChangesImpl implements WoofChanges {
 			List<WoofTemplateModel> templates) {
 
 		// Name based on template URI
-		String templateName = WoofOfficeFloorSource.getTemplateSectionName(uri);
+		String templateName = WoofOfficeExtensionService.getTemplateSectionName(uri);
 
 		// Obtain the unique template name
 		templateName = getUniqueName(templateName, template, templates, TEMPLATE_NAME_EXTRACTOR);
@@ -1787,11 +1787,11 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofAccessModel> setAccess(String httpSecuritySourceClassName, long timeout, PropertyList properties,
-			HttpSecurityType<?, ?, ?, ?> httpSecurityType) {
+	public Change<WoofAccessModel> addAccess(String accessName, String httpSecuritySourceClassName, long timeout,
+			PropertyList properties, HttpSecurityType<?, ?, ?, ?> httpSecurityType) {
 
 		// Create the action
-		final WoofAccessModel woofAccess = new WoofAccessModel(httpSecuritySourceClassName, timeout);
+		final WoofAccessModel woofAccess = new WoofAccessModel(accessName, httpSecuritySourceClassName, timeout);
 
 		// Add the properties (if available)
 		if (properties != null) {
@@ -1825,44 +1825,24 @@ public class WoofChangesImpl implements WoofChanges {
 		// Sort the inputs/outputs
 		sortAccessInputOutputs(woofAccess);
 
-		// Create change to set access
-		Change<WoofAccessModel> change = new AbstractChange<WoofAccessModel>(woofAccess, "Set Access") {
+		// Create and return change to set access
+		return new AbstractChange<WoofAccessModel>(woofAccess, "Set Access") {
 			@Override
 			public void apply() {
-				WoofChangesImpl.this.model.setWoofAccess(woofAccess);
+				WoofChangesImpl.this.model.addWoofAccess(woofAccess);
 			}
 
 			@Override
 			public void revert() {
-				WoofChangesImpl.this.model.setWoofAccess(null);
+				WoofChangesImpl.this.model.removeWoofAccess(null);
 			}
 		};
-
-		// Remove access if already specified
-		WoofAccessModel existingAccess = this.model.getWoofAccess();
-		if (existingAccess != null) {
-			// Create change to remove access
-			Change<WoofAccessModel> removeChange = this.removeAccess(existingAccess);
-
-			// Provide aggregate change to remove and set
-			change = new AggregateChange<WoofAccessModel>(woofAccess, "Set Access", removeChange, change);
-		}
-
-		// Return the change
-		return change;
 	}
 
 	@Override
-	public Change<WoofAccessModel> refactorAccess(final WoofAccessModel access,
+	public Change<WoofAccessModel> refactorAccess(final WoofAccessModel access, String accessName,
 			final String httpSecuritySourceClassName, final long timeout, final PropertyList properties,
 			HttpSecurityType<?, ?, ?, ?> httpSecurityType, Map<String, String> accessOutputNameMapping) {
-
-		// Ensure access to remove
-		if (access != this.model.getWoofAccess()) {
-			// Access model not in model
-			return new NoChange<WoofAccessModel>(access, "Refactor access",
-					"Access " + access.getHttpSecuritySourceClassName() + " is not in WoOF model");
-		}
 
 		// Create change to sort outputs
 		Change<WoofAccessModel> sortChange = new AbstractChange<WoofAccessModel>(access, "Sort outputs") {
@@ -2194,13 +2174,6 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofAccessModel> removeAccess(final WoofAccessModel access) {
 
-		// Ensure access to remove
-		if (access != this.model.getWoofAccess()) {
-			// Access model not in model
-			return new NoChange<WoofAccessModel>(access, "Remove access " + access.getHttpSecuritySourceClassName(),
-					"Access " + access.getHttpSecuritySourceClassName() + " is not in WoOF model");
-		}
-
 		// Return change to remove access
 		return new AbstractChange<WoofAccessModel>(access, "Remove access " + access.getHttpSecuritySourceClassName()) {
 
@@ -2226,13 +2199,13 @@ public class WoofChangesImpl implements WoofChanges {
 				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 				// Remove the access
-				WoofChangesImpl.this.model.setWoofAccess(null);
+				WoofChangesImpl.this.model.removeWoofAccess(access);
 			}
 
 			@Override
 			public void revert() {
 				// Add back the access
-				WoofChangesImpl.this.model.setWoofAccess(access);
+				WoofChangesImpl.this.model.addWoofAccess(access);
 				reconnectConnections(this.connections);
 				sortAccessInputOutputs(access);
 			}

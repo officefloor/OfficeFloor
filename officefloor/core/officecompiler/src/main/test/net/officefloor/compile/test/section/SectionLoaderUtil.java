@@ -17,8 +17,6 @@
  */
 package net.officefloor.compile.test.section;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 
@@ -55,8 +53,7 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
-import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
-import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationContext;
 
 /**
  * Utility class for testing a {@link SectionSource}.
@@ -552,47 +549,6 @@ public class SectionLoaderUtil {
 	public static <S extends SectionSource> SectionType loadSectionType(Class<S> sectionSourceClass,
 			String sectionLocation, String... propertyNameValuePairs) {
 
-		// Obtain the class loader
-		ClassLoader classLoader = sectionSourceClass.getClassLoader();
-		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(classLoader);
-
-		try {
-			// Load and return the section type
-			return loadSectionType(sectionSourceClass, sectionLocation, configurationContext, classLoader,
-					propertyNameValuePairs);
-
-		} catch (Exception ex) {
-			// Propagate as test case failure for tests not needing to handle
-			StringWriter stackTrace = new StringWriter();
-			ex.printStackTrace(new PrintWriter(stackTrace));
-			Assert.fail(stackTrace.toString());
-			return null; // fail will propagate failure
-		}
-	}
-
-	/**
-	 * Loads the {@link SectionType}.
-	 *
-	 * @param <S>
-	 *            {@link SectionSource} type.
-	 * @param sectionSourceClass
-	 *            Class of the {@link SectionSource}.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection}.
-	 * @param configurationContext
-	 *            {@link ConfigurationContext}.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
-	 * @param propertyNameValuePairs
-	 *            Listing of {@link Property} name/value pairs.
-	 * @return {@link SectionType}.
-	 * @throws Exception
-	 *             If fails to load the {@link SectionType}.
-	 */
-	public static <S extends SectionSource> SectionType loadSectionType(Class<S> sectionSourceClass,
-			String sectionLocation, ConfigurationContext configurationContext, ClassLoader classLoader,
-			String... propertyNameValuePairs) throws Exception {
-
 		// Load and return the section type
 		return getOfficeFloorCompiler().getSectionLoader().loadSectionType(sectionSourceClass, sectionLocation,
 				new PropertyListImpl(propertyNameValuePairs));
@@ -636,38 +592,6 @@ public class SectionLoaderUtil {
 	 */
 	public static <S extends SectionSource> OfficeSectionType loadOfficeSectionType(String sectionName,
 			Class<S> sectionSourceClass, String sectionLocation, String... propertyNameValuePairs) {
-
-		// Obtain the class loader
-		ClassLoader classLoader = sectionSourceClass.getClassLoader();
-		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(classLoader);
-
-		// Load and return the office section
-		return loadOfficeSection(sectionName, sectionSourceClass, sectionLocation, configurationContext, classLoader,
-				propertyNameValuePairs);
-	}
-
-	/**
-	 * Loads the {@link OfficeSectionType}.
-	 * 
-	 * @param <S>
-	 *            {@link SectionSource} type.
-	 * @param sectionName
-	 *            Name of the {@link OfficeSection}.
-	 * @param sectionSourceClass
-	 *            Class of the {@link SectionSource}.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection}.
-	 * @param configurationContext
-	 *            {@link ConfigurationContext}.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
-	 * @param propertyNameValuePairs
-	 *            Listing of {@link Property} name/value pairs.
-	 * @return {@link OfficeSectionType}.
-	 */
-	public static <S extends SectionSource> OfficeSectionType loadOfficeSection(String sectionName,
-			Class<S> sectionSourceClass, String sectionLocation, ConfigurationContext configurationContext,
-			ClassLoader classLoader, String... propertyNameValuePairs) {
 
 		// Load and return the office section
 		return getOfficeFloorCompiler().getSectionLoader().loadOfficeSectionType(sectionName, sectionSourceClass,

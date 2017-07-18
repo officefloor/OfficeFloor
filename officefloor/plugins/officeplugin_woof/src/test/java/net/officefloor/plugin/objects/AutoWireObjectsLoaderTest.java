@@ -26,14 +26,14 @@ import net.officefloor.autowire.AutoWireSupplier;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
 import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.configuration.ConfigurationContext;
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
-import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.model.objects.WoofObjectsRepositoryImpl;
-import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**

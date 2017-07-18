@@ -19,10 +19,10 @@ package net.officefloor.plugin.woof.template;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.woof.WoofChangeIssues;
 import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.plugin.web.http.application.HttpTemplateSection;

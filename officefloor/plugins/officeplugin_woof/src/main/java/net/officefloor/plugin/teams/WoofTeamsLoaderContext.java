@@ -19,7 +19,7 @@ package net.officefloor.plugin.teams;
 
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionContext;
-import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.plugin.objects.WoofObjectsLoader;
 
 /**

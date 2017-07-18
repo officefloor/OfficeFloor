@@ -17,9 +17,9 @@
  */
 package net.officefloor.model.woof;
 
+import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
 import org.easymock.AbstractMatcher;

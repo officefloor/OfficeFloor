@@ -19,7 +19,7 @@ package net.officefloor.plugin.objects;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
-import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.configuration.ConfigurationItem;
 
 /**
  * Context for the {@link WoofObjectsLoader}.

@@ -17,13 +17,16 @@
  */
 package net.officefloor.model.impl.repository;
 
+import java.io.File;
 import java.sql.Connection;
 import java.util.List;
 
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.WritableConfigurationItem;
+import net.officefloor.configuration.impl.filesystem.FileSystemConfigurationContext;
+import net.officefloor.configuration.impl.memory.MemoryConfigurationContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
-import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationItem;
-import net.officefloor.model.impl.repository.memory.MemoryConfigurationItem;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
@@ -55,7 +58,6 @@ import net.officefloor.model.officefloor.OfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.PropertyModel;
 import net.officefloor.model.officefloor.TypeQualificationModel;
-import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
 /**
@@ -75,8 +77,8 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 
 		// Specify location of the configuration
-		this.configurationItem = new FileSystemConfigurationItem(
-				this.findFile(this.getClass(), "TestOfficeFloor.officefloor.xml"), null);
+		File configurationFile = this.findFile(this.getClass(), "TestOfficeFloor.officefloor.xml");
+		this.configurationItem = FileSystemConfigurationContext.createWritableConfigurationItem(configurationFile);
 	}
 
 	/**
@@ -87,7 +89,7 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 		// Load the Office Floor
 		ModelRepository repository = new ModelRepositoryImpl();
 		OfficeFloorModel officeFloor = new OfficeFloorModel();
-		officeFloor = repository.retrieve(officeFloor, this.configurationItem);
+		repository.retrieve(officeFloor, this.configurationItem);
 
 		// ---------------------------------------
 		// Validate the OfficeFloor attributes
@@ -298,15 +300,15 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 		// Load the Office Floor
 		ModelRepository repository = new ModelRepositoryImpl();
 		OfficeFloorModel officeFloor = new OfficeFloorModel();
-		officeFloor = repository.retrieve(officeFloor, this.configurationItem);
+		repository.retrieve(officeFloor, this.configurationItem);
 
-		// Store the Office Floor
-		MemoryConfigurationItem contents = new MemoryConfigurationItem();
-		repository.store(officeFloor, contents);
+		// Store the OfficeFloor
+		WritableConfigurationItem configuration = MemoryConfigurationContext.createWritableConfigurationItem("test");
+		repository.store(officeFloor, configuration);
 
 		// Reload the Office Floor
 		OfficeFloorModel reloadedOfficeFloor = new OfficeFloorModel();
-		reloadedOfficeFloor = repository.retrieve(reloadedOfficeFloor, contents);
+		repository.retrieve(reloadedOfficeFloor, configuration);
 
 		// Validate round trip
 		assertGraph(officeFloor, reloadedOfficeFloor, RemoveConnectionsAction.REMOVE_CONNECTIONS_METHOD_NAME);

@@ -17,7 +17,10 @@
  */
 package net.officefloor.model.officefloor;
 
-import net.officefloor.model.repository.ConfigurationItem;
+import java.io.IOException;
+
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.WritableConfigurationItem;
 
 /**
  * Repository of the {@link OfficeFloorModel} instances.
@@ -27,18 +30,18 @@ import net.officefloor.model.repository.ConfigurationItem;
 public interface OfficeFloorRepository {
 
 	/**
-	 * Retrieves the {@link OfficeFloorModel} from the {@link ConfigurationItem}
-	 * .
+	 * Retrieves the {@link OfficeFloorModel} from {@link ConfigurationItem}.
 	 * 
+	 * @param officeFloor
+	 *            {@link OfficeFloorModel}.
 	 * @param configuration
 	 *            {@link ConfigurationItem} containing the
 	 *            {@link OfficeFloorModel}.
 	 * @return {@link OfficeFloorModel}.
-	 * @throws Exception
+	 * @throws IOException
 	 *             If fails to retrieve the {@link OfficeFloorModel}.
 	 */
-	OfficeFloorModel retrieveOfficeFloor(ConfigurationItem configuration)
-			throws Exception;
+	void retrieveOfficeFloor(OfficeFloorModel officeFloor, ConfigurationItem configuration) throws IOException;
 
 	/**
 	 * Stores the {@link OfficeFloorModel} into the {@link ConfigurationItem}.
@@ -46,12 +49,11 @@ public interface OfficeFloorRepository {
 	 * @param officeFloor
 	 *            {@link OfficeFloorModel}.
 	 * @param configuration
-	 *            {@link ConfigurationItem} to contain the
+	 *            {@link WritableConfigurationItem} to contain the
 	 *            {@link OfficeFloorModel}.
-	 * @throws Exception
+	 * @throws IOException
 	 *             If fails to store the {@link OfficeFloorModel}.
 	 */
-	void storeOfficeFloor(OfficeFloorModel officeFloor,
-			ConfigurationItem configuration) throws Exception;
+	void storeOfficeFloor(OfficeFloorModel officeFloor, WritableConfigurationItem configuration) throws IOException;
 
 }

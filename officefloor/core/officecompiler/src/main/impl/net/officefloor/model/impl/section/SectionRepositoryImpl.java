@@ -21,7 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.compile.impl.util.DoubleKeyMap;
-import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.ExternalManagedObjectModel;
@@ -94,10 +95,10 @@ public class SectionRepositoryImpl implements SectionRepository {
 	 */
 
 	@Override
-	public SectionModel retrieveSection(ConfigurationItem configuration) throws Exception {
+	public void retrieveSection(SectionModel section, ConfigurationItem configuration) throws Exception {
 
 		// Load the section from the configuration
-		SectionModel section = this.modelRepository.retrieve(new SectionModel(), configuration);
+		this.modelRepository.retrieve(section, configuration);
 
 		// Create the set of functions
 		Map<String, FunctionModel> functions = new HashMap<String, FunctionModel>();
@@ -524,13 +525,10 @@ public class SectionRepositoryImpl implements SectionRepository {
 				}
 			}
 		}
-
-		// Return the section
-		return section;
 	}
 
 	@Override
-	public void storeSection(SectionModel section, ConfigurationItem configuration) throws Exception {
+	public void storeSection(SectionModel section, WritableConfigurationItem configuration) throws Exception {
 
 		// Specify function flow to function
 		for (FunctionModel function : section.getFunctions()) {

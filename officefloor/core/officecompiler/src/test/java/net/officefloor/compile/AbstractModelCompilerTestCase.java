@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.compile.spi.pool.source.impl.AbstractManagedObjectPoolSource;
+import net.officefloor.configuration.impl.xml.XmlFileConfigurationContext;
 import net.officefloor.extension.AutoWireOfficeExtensionService;
 import net.officefloor.extension.AutoWireOfficeFloorExtensionService;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
@@ -33,7 +34,6 @@ import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListenerFact
 import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.model.impl.repository.xml.XmlConfigurationContext;
 
 /**
  * Provides abstract functionality for testing integration of the
@@ -44,9 +44,9 @@ import net.officefloor.model.impl.repository.xml.XmlConfigurationContext;
 public abstract class AbstractModelCompilerTestCase extends OfficeFrameTestCase {
 
 	/**
-	 * {@link XmlConfigurationContext} for testing.
+	 * {@link XmlFileConfigurationContext} for testing.
 	 */
-	private XmlConfigurationContext configurationContext = null;
+	private XmlFileConfigurationContext configurationContext = null;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -90,11 +90,11 @@ public abstract class AbstractModelCompilerTestCase extends OfficeFrameTestCase 
 		// Create the configuration context
 		String configFileName = testCaseName + "/" + testName + ".xml";
 		try {
-			this.configurationContext = new XmlConfigurationContext(this, configFileName);
+			this.configurationContext = new XmlFileConfigurationContext(this, configFileName);
 
 			// Add the tag replacements
-			this.configurationContext.addTag("testcase", this.getClass().getName());
-			this.configurationContext.addTag("POOL", TestManagedObjectPoolSource.class.getName());
+			this.configurationContext.addProperty("testcase", this.getClass().getName());
+			this.configurationContext.addProperty("POOL", TestManagedObjectPoolSource.class.getName());
 
 		} catch (Exception ex) {
 			// Wrap failure to not require tests to have to handle

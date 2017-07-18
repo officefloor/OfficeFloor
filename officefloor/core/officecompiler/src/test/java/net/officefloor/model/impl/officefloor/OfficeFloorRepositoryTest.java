@@ -21,6 +21,7 @@ import java.sql.Connection;
 
 import org.easymock.AbstractMatcher;
 
+import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel;
@@ -53,7 +54,6 @@ import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorRepository;
 import net.officefloor.model.officefloor.OfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
-import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
 /**
@@ -69,9 +69,9 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 	private final ModelRepository modelRepository = this.createMock(ModelRepository.class);
 
 	/**
-	 * {@link ConfigurationItem}.
+	 * {@link WritableConfigurationItem}.
 	 */
-	private final ConfigurationItem configurationItem = this.createMock(ConfigurationItem.class);
+	private final WritableConfigurationItem configurationItem = this.createMock(WritableConfigurationItem.class);
 
 	/**
 	 * {@link OfficeFloorRepository} to be tested.
@@ -208,22 +208,21 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		officeTeam.setOfficeFloorTeam(officeTeamToFloorTeam);
 
 		// Record retrieving the office
-		this.recordReturn(this.modelRepository, this.modelRepository.retrieve(null, this.configurationItem),
-				officeFloor, new AbstractMatcher() {
-					@Override
-					public boolean matches(Object[] expected, Object[] actual) {
-						assertTrue("Must be office model", actual[0] instanceof OfficeFloorModel);
-						assertEquals("Incorrect configuration item", OfficeFloorRepositoryTest.this.configurationItem,
-								actual[1]);
-						return true;
-					}
-				});
+		this.modelRepository.retrieve(null, this.configurationItem);
+		this.control(this.modelRepository).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				assertTrue("Must be office model", actual[0] instanceof OfficeFloorModel);
+				assertEquals("Incorrect configuration item", OfficeFloorRepositoryTest.this.configurationItem,
+						actual[1]);
+				return true;
+			}
+		});
 
 		// Retrieve the OfficeFloor
 		this.replayMockObjects();
-		OfficeFloorModel retrievedOfficeFloor = this.officeRepository.retrieveOfficeFloor(this.configurationItem);
+		this.officeRepository.retrieveOfficeFloor(officeFloor, this.configurationItem);
 		this.verifyMockObjects();
-		assertEquals("Incorrect office", officeFloor, retrievedOfficeFloor);
 
 		// Ensure OfficeFloor managed object source connected to its supplier
 		assertEquals("OfficeFloor managed object source <- OfficeFloor supplier", officeFloorManagedObjectSource,

@@ -35,16 +35,17 @@ import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.configuration.impl.ConfigurationSourceContextImpl;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 
 /**
  * {@link OfficeSourceContext} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeSourceContextImpl extends SourceContextImpl implements OfficeSourceContext, OfficeExtensionContext {
+public class OfficeSourceContextImpl extends ConfigurationSourceContextImpl
+		implements OfficeSourceContext, OfficeExtensionContext {
 
 	/**
 	 * Location of the {@link Office}.

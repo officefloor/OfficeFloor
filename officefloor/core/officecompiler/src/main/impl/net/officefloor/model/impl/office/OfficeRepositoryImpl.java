@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.compile.impl.util.DoubleKeyMap;
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.team.Team;
@@ -81,7 +83,6 @@ import net.officefloor.model.office.OfficeSubSectionModel;
 import net.officefloor.model.office.OfficeSubSectionToGovernanceModel;
 import net.officefloor.model.office.OfficeSupplierModel;
 import net.officefloor.model.office.OfficeTeamModel;
-import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
 /**
@@ -111,10 +112,10 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 	 */
 
 	@Override
-	public OfficeModel retrieveOffice(ConfigurationItem configuration) throws Exception {
+	public void retrieveOffice(OfficeModel office, ConfigurationItem configuration) throws Exception {
 
 		// Load the office from the configuration
-		OfficeModel office = this.modelRepository.retrieve(new OfficeModel(), configuration);
+		this.modelRepository.retrieve(office, configuration);
 
 		// Create the set of managed object sources
 		Map<String, OfficeManagedObjectSourceModel> managedObjectSources = new HashMap<String, OfficeManagedObjectSourceModel>();
@@ -524,9 +525,6 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 		for (OfficeSectionModel section : office.getOfficeSections()) {
 			this.connectSubSections(section.getOfficeSubSection(), teams, administrations, governances);
 		}
-
-		// Return the office
-		return office;
 	}
 
 	/**
@@ -629,7 +627,7 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 	}
 
 	@Override
-	public void storeOffice(OfficeModel office, ConfigurationItem configuration) throws Exception {
+	public void storeOffice(OfficeModel office, WritableConfigurationItem configuration) throws Exception {
 
 		// Specify managed objects to their corresponding sources
 		for (OfficeManagedObjectSourceModel mos : office.getOfficeManagedObjectSources()) {

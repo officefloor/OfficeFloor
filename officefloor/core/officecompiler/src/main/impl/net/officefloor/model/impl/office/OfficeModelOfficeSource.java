@@ -17,8 +17,6 @@
  */
 package net.officefloor.model.impl.office;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -57,13 +55,13 @@ import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
+import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
-import net.officefloor.model.impl.repository.inputstream.InputStreamConfigurationItem;
 import net.officefloor.model.office.AdministrationModel;
 import net.officefloor.model.office.AdministrationToOfficeTeamModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
@@ -151,16 +149,10 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 	@Override
 	public void sourceOffice(OfficeArchitect architect, OfficeSourceContext context) throws Exception {
 
-		// Obtain the configuration to the section
-		InputStream configuration = context.getResource(context.getOfficeLocation());
-		if (configuration == null) {
-			// Must have configuration
-			throw new FileNotFoundException("Can not find office '" + context.getOfficeLocation() + "'");
-		}
-
 		// Retrieve the office model
-		OfficeModel office = new OfficeRepositoryImpl(new ModelRepositoryImpl())
-				.retrieveOffice(new InputStreamConfigurationItem(configuration));
+		ConfigurationItem configuration = context.getConfigurationItem(context.getOfficeLocation(), null);
+		OfficeModel office = new OfficeModel();
+		new OfficeRepositoryImpl(new ModelRepositoryImpl()).retrieveOffice(office, configuration);
 
 		// Create aggregate processor to add sub section processing
 		AggregateSubSectionProcessor processors = new AggregateSubSectionProcessor();

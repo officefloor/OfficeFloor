@@ -23,11 +23,11 @@ import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.autowire.AutoWireTeam;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.configuration.ConfigurationContext;
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
-import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
-import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.teams.WoofTeamsRepositoryImpl;
 
 /**

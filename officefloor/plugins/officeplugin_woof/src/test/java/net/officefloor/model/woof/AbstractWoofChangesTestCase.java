@@ -25,11 +25,11 @@ import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.configuration.ConfigurationContext;
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationContext;
+import net.officefloor.configuration.impl.memory.MemoryConfigurationItem;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
-import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
-import net.officefloor.model.impl.repository.memory.MemoryConfigurationItem;
-import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.test.changes.AbstractChangesTestCase;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityDependencyType;
@@ -132,14 +132,14 @@ public abstract class AbstractWoofChangesTestCase extends
 			ConfigurationItem expectedConfig = new MemoryConfigurationItem();
 			new WoofRepositoryImpl(new ModelRepositoryImpl()).storeWoOF(
 					expected, expectedConfig);
-			this.printMessage(expectedConfig.getConfiguration());
+			this.printMessage(expectedConfig.getReader());
 
 			// Provide details of actual model
 			this.printMessage("------------------- ACTUAL -------------------");
 			ConfigurationItem actualConfig = new MemoryConfigurationItem();
 			new WoofRepositoryImpl(new ModelRepositoryImpl()).storeWoOF(actual,
 					actualConfig);
-			this.printMessage(actualConfig.getConfiguration());
+			this.printMessage(actualConfig.getReader());
 			this.printMessage("================ END COMPARE =================");
 		}
 

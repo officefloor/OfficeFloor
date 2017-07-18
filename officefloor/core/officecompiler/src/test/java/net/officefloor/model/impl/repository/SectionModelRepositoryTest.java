@@ -17,15 +17,17 @@
  */
 package net.officefloor.model.impl.repository;
 
+import java.io.File;
 import java.sql.Connection;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.WritableConfigurationItem;
+import net.officefloor.configuration.impl.filesystem.FileSystemConfigurationContext;
+import net.officefloor.configuration.impl.memory.MemoryConfigurationContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
-import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationItem;
-import net.officefloor.model.impl.repository.memory.MemoryConfigurationItem;
-import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.ExternalManagedObjectModel;
@@ -86,8 +88,8 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 
 		// Specify location of the configuration
-		this.configurationItem = new FileSystemConfigurationItem(
-				this.findFile(this.getClass(), "TestSection.section.xml"), null);
+		File configurationFile = this.findFile(this.getClass(), "TestSection.section.xml");
+		this.configurationItem = FileSystemConfigurationContext.createWritableConfigurationItem(configurationFile);
 	}
 
 	/**
@@ -98,7 +100,7 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 		// Load the section
 		ModelRepository repository = new ModelRepositoryImpl();
 		SectionModel section = new SectionModel();
-		section = repository.retrieve(section, this.configurationItem);
+		repository.retrieve(section, this.configurationItem);
 
 		// ----------------------------------------------
 		// Validate the external managed objects
@@ -394,15 +396,15 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 		// Load the section
 		ModelRepository repository = new ModelRepositoryImpl();
 		SectionModel section = new SectionModel();
-		section = repository.retrieve(section, this.configurationItem);
+		repository.retrieve(section, this.configurationItem);
 
 		// Store the Section
-		MemoryConfigurationItem contents = new MemoryConfigurationItem();
+		WritableConfigurationItem contents = MemoryConfigurationContext.createWritableConfigurationItem("test");
 		repository.store(section, contents);
 
 		// Reload the Section
 		SectionModel reloadedSection = new SectionModel();
-		reloadedSection = repository.retrieve(reloadedSection, contents);
+		repository.retrieve(reloadedSection, contents);
 
 		// Validate round trip
 		assertGraph(section, reloadedSection, RemoveConnectionsAction.REMOVE_CONNECTIONS_METHOD_NAME);

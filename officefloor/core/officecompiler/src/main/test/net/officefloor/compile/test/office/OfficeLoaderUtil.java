@@ -20,15 +20,15 @@ package net.officefloor.compile.test.office;
 import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.impl.structure.CompileContextImpl;
+import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
+import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeOutputType;
-import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.Property;
@@ -39,9 +39,8 @@ import net.officefloor.compile.spi.office.source.OfficeSourceSpecification;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
+import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
-import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * Utility class for testing an {@link OfficeSource}.
@@ -301,35 +300,6 @@ public class OfficeLoaderUtil {
 	 */
 	public static <O extends OfficeSource> OfficeType loadOfficeType(Class<O> officeSourceClass, String officeLocation,
 			String... propertyNameValuePairs) {
-
-		// Obtain the class loader and configuration context
-		ClassLoader classLoader = officeSourceClass.getClassLoader();
-		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(classLoader);
-
-		// Return the loaded office type
-		return loadOfficeType(officeSourceClass, officeLocation, configurationContext, classLoader,
-				propertyNameValuePairs);
-	}
-
-	/**
-	 * Loads the {@link OfficeType}.
-	 * 
-	 * @param <O>
-	 *            {@link OfficeSource} type.
-	 * @param officeSourceClass
-	 *            {@link OfficeSource} class.
-	 * @param officeLocation
-	 *            Location of the {@link Office}.
-	 * @param configurationContext
-	 *            {@link ConfigurationContext}.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
-	 * @param propertyNameValuePairs
-	 *            {@link Property} name/value listing.
-	 * @return {@link OfficeType}.
-	 */
-	public static <O extends OfficeSource> OfficeType loadOfficeType(Class<O> officeSourceClass, String officeLocation,
-			ConfigurationContext configurationContext, ClassLoader classLoader, String... propertyNameValuePairs) {
 
 		// Return the loaded office type
 		return getOfficeFloorCompiler().getOfficeLoader().loadOfficeType(officeSourceClass, officeLocation,

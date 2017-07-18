@@ -31,10 +31,10 @@ import net.officefloor.compile.spi.office.OfficeInput;
 import net.officefloor.compile.spi.office.OfficeOutput;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorModel;
-import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.test.changes.AbstractChangesTestCase;
 
 /**
@@ -67,7 +67,9 @@ public abstract class AbstractOfficeFloorChangesTestCase
 
 	@Override
 	protected OfficeFloorModel retrieveModel(ConfigurationItem configurationItem) throws Exception {
-		return new OfficeFloorRepositoryImpl(new ModelRepositoryImpl()).retrieveOfficeFloor(configurationItem);
+		OfficeFloorModel officeFloor = new OfficeFloorModel();
+		new OfficeFloorRepositoryImpl(new ModelRepositoryImpl()).retrieveOfficeFloor(officeFloor, configurationItem);
+		return officeFloor;
 	}
 
 	@Override

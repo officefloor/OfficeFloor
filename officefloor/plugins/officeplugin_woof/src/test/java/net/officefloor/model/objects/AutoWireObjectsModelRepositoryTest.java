@@ -19,12 +19,12 @@ package net.officefloor.model.objects;
 
 import java.util.List;
 
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.impl.filesystem.FileSystemConfigurationItem;
+import net.officefloor.configuration.impl.memory.MemoryConfigurationItem;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
-import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationItem;
-import net.officefloor.model.impl.repository.memory.MemoryConfigurationItem;
-import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
 /**

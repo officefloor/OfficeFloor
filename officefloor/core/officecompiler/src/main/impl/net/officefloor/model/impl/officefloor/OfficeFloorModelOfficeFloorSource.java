@@ -17,17 +17,8 @@
  */
 package net.officefloor.model.impl.officefloor;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringWriter;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
 
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.TripleKeyMap;
@@ -49,9 +40,9 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSource;
+import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
-import net.officefloor.model.impl.repository.inputstream.InputStreamConfigurationItem;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
@@ -84,8 +75,6 @@ import net.officefloor.model.officefloor.OfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.PropertyModel;
 import net.officefloor.model.officefloor.TypeQualificationModel;
-import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.model.repository.ConfigurationItem;
 
 /**
  * {@link OfficeFloorModel} {@link OfficeFloorSource}.
@@ -111,65 +100,10 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 	@Override
 	public void sourceOfficeFloor(OfficeFloorDeployer deployer, OfficeFloorSourceContext context) throws Exception {
 
-		// Obtain the configuration to the section
-		InputStream configuration = context.getResource(context.getOfficeFloorLocation());
-		if (configuration == null) {
-			// Must have configuration
-			throw new FileNotFoundException("Can not find OfficeFloor '" + context.getOfficeFloorLocation() + "'");
-		}
-
-		// Read in the configuration
-		Reader reader = new InputStreamReader(configuration);
-		StringWriter configurationBuffer = new StringWriter();
-		for (int value = reader.read(); value != -1; value = reader.read()) {
-			configurationBuffer.write(value);
-		}
-		String config = configurationBuffer.toString();
-
-		// Replace the tags
-		Properties properties = context.getProperties();
-		for (String name : properties.stringPropertyNames()) {
-			String tag = "${" + name + "}";
-			String value = properties.getProperty(name);
-			config = config.replace(tag, value);
-		}
-
-		// Ensure all tags are replaced
-		int tagStart = -1;
-		int tagEnd = -1;
-		Set<String> warnedTagNames = new HashSet<String>();
-		do {
-			// Increment tag start past previous tag
-			tagStart++;
-
-			// Search for another tag
-			tagStart = config.indexOf("${", tagStart);
-			if (tagStart >= 0) {
-				tagEnd = config.indexOf("}", tagStart);
-				if (tagEnd >= 0) {
-					// Obtain the missing tag name
-					String tagName = config.substring(tagStart + "${".length(), tagEnd);
-
-					// Only warn once about a missing tag
-					if (!warnedTagNames.contains(tagName)) {
-
-						// Provide warning of missing tag
-						deployer.addIssue("Property '" + tagName + "' must be specified");
-
-						// Now warned of missing tag
-						warnedTagNames.add(tagName);
-					}
-				}
-			}
-		} while ((tagStart >= 0) && (tagEnd >= 0));
-
-		// Utilised the tag replaced configuration
-		ConfigurationItem configurationItem = new TagReplacedOfficeFloorConfigurationItem(config,
-				new InputStreamConfigurationItem(configuration));
-
 		// Retrieve the OfficeFloor model
-		OfficeFloorModel officeFloor = new OfficeFloorRepositoryImpl(new ModelRepositoryImpl())
-				.retrieveOfficeFloor(configurationItem);
+		ConfigurationItem configuration = context.getConfigurationItem(context.getOfficeFloorLocation(), null);
+		OfficeFloorModel officeFloor = new OfficeFloorModel();
+		new OfficeFloorRepositoryImpl(new ModelRepositoryImpl()).retrieveOfficeFloor(officeFloor, configuration);
 
 		// Add the OfficeFloor suppliers, keeping registry of them
 		Map<String, OfficeFloorSupplier> officeFloorSuppliers = new HashMap<String, OfficeFloorSupplier>();
@@ -691,59 +625,6 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 		deployer.addIssue(
 				"Unknown managed object scope " + managedObjectScope + " for managed object " + managedObjectName);
 		return null;
-	}
-
-	/**
-	 * Tag replaced {@link ConfigurationItem}.
-	 */
-	private class TagReplacedOfficeFloorConfigurationItem implements ConfigurationItem {
-
-		/**
-		 * Tag replaced configuration.
-		 */
-		private final String configuration;
-
-		/**
-		 * Delegate {@link ConfigurationItem}.
-		 */
-		private final ConfigurationItem delegate;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param configuration
-		 *            Tag replaced configuration.
-		 * @param delegate
-		 *            Delegate {@link ConfigurationItem}.
-		 */
-		public TagReplacedOfficeFloorConfigurationItem(String configuration, ConfigurationItem delegate) {
-			this.configuration = configuration;
-			this.delegate = delegate;
-		}
-
-		/*
-		 * ======================== ConfigurationItem =====================
-		 */
-
-		@Override
-		public ConfigurationContext getContext() {
-			return this.delegate.getContext();
-		}
-
-		@Override
-		public String getLocation() {
-			return this.delegate.getLocation();
-		}
-
-		@Override
-		public InputStream getConfiguration() throws Exception {
-			return new ByteArrayInputStream(this.configuration.getBytes());
-		}
-
-		@Override
-		public void setConfiguration(InputStream configuration) throws Exception {
-			this.delegate.setConfiguration(configuration);
-		}
 	}
 
 }

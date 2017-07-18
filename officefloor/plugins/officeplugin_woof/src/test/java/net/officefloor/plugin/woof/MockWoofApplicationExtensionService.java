@@ -30,19 +30,19 @@ import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.work.clazz.FlowInterface;
 
 /**
- * Mock {@link WoofApplicationExtensionService} for testing.
+ * Mock {@link WoofExtensionService} for testing.
  * 
  * @author Daniel Sagenschneider
  */
 public class MockWoofApplicationExtensionService implements
-		WoofApplicationExtensionService {
+		WoofExtensionService {
 
 	/*
 	 * =================== WoofApplicationExtensionService ================
 	 */
 
 	@Override
-	public void extendApplication(WoofApplicationExtensionServiceContext context)
+	public void extend(WoofExtensionServiceContext context)
 			throws Exception {
 
 		// Validate property
@@ -63,7 +63,7 @@ public class MockWoofApplicationExtensionService implements
 				this.getResourceContent(context, "WEB-INF/web.xml"));
 
 		// Configure the servicer
-		WebArchitect app = context.getWebApplication();
+		WebArchitect app = context.getWebArchitect();
 		AutoWireSection servicer = app.addSection("CHAIN",
 				ClassSectionSource.class.getName(),
 				ChainServicer.class.getName());
@@ -76,13 +76,13 @@ public class MockWoofApplicationExtensionService implements
 	 * Obtains the content of the resource.
 	 * 
 	 * @param context
-	 *            {@link WoofApplicationExtensionServiceContext}.
+	 *            {@link WoofExtensionServiceContext}.
 	 * @param resourcePath
 	 *            Path to the resource.
 	 * @return Content of the resource.
 	 */
 	private String getResourceContent(
-			WoofApplicationExtensionServiceContext context, String resourcePath)
+			WoofExtensionServiceContext context, String resourcePath)
 			throws IOException {
 
 		// Obtain the resource content

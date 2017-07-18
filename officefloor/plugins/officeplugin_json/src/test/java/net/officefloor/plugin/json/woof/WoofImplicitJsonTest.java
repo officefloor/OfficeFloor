@@ -28,7 +28,7 @@ import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.woof.WoofLoader;
 import net.officefloor.plugin.woof.WoofLoaderImpl;
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
+import net.officefloor.plugin.woof.WoofOfficeExtensionService;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -54,7 +54,7 @@ public class WoofImplicitJsonTest extends OfficeFrameTestCase {
 	private LoggerAssertion loaderLoggerAssertion;
 
 	/**
-	 * {@link LoggerAssertion} for the {@link WoofOfficeFloorSource}.
+	 * {@link LoggerAssertion} for the {@link WoofOfficeExtensionService}.
 	 */
 	private LoggerAssertion sourceLoggerAssertion;
 
@@ -65,7 +65,7 @@ public class WoofImplicitJsonTest extends OfficeFrameTestCase {
 		this.loaderLoggerAssertion = LoggerAssertion
 				.setupLoggerAssertion(WoofLoaderImpl.class.getName());
 		this.sourceLoggerAssertion = LoggerAssertion
-				.setupLoggerAssertion(WoofOfficeFloorSource.class.getName());
+				.setupLoggerAssertion(WoofOfficeExtensionService.class.getName());
 	}
 
 	@Override
@@ -77,7 +77,7 @@ public class WoofImplicitJsonTest extends OfficeFrameTestCase {
 			try {
 				this.client.close();
 			} finally {
-				WoofOfficeFloorSource.stop();
+				WoofOfficeExtensionService.stop();
 			}
 
 		} finally {
@@ -97,8 +97,8 @@ public class WoofImplicitJsonTest extends OfficeFrameTestCase {
 				this.getClass(), "/JsonTemplate.woof");
 
 		// Run the application with no logic template
-		WoofOfficeFloorSource.start(
-				WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+		WoofOfficeExtensionService.start(
+				WoofOfficeExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				jsonTemplateConfigurationLocation);
 
 		// Test

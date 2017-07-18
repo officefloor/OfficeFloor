@@ -19,7 +19,9 @@ package net.officefloor.plugin.woof;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
-import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.plugin.objects.WoofObjectsLoader;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 
 /**
  * Context for the {@link WoofObjectsLoader}.
@@ -29,18 +31,23 @@ import net.officefloor.model.repository.ConfigurationItem;
 public interface WoofLoaderContext {
 
 	/**
-	 * Obtains the {@link ConfigurationItem} containing the configuration of the
-	 * objects.
+	 * Obtains the {@link ConfigurationItem} containing the configuration.
 	 * 
-	 * @return {@link ConfigurationItem} containing the configuration of the
-	 *         objects.
+	 * @return {@link ConfigurationItem} containing the configuration.
 	 */
 	ConfigurationItem getConfiguration();
 
 	/**
-	 * Obtains the {@link OfficeArchitect} to be configured with the objects.
+	 * Obtains the {@link WebArchitect}.
 	 * 
-	 * @return {@link OfficeArchitect} to be configured with the objects.
+	 * @return {@link WebArchitect}.
+	 */
+	WebArchitect getWebArchitect();
+
+	/**
+	 * Obtains the {@link OfficeArchitect}.
+	 * 
+	 * @return {@link OfficeArchitect}.
 	 */
 	OfficeArchitect getOfficeArchitect();
 

@@ -17,8 +17,6 @@
  */
 package net.officefloor.model.impl.section;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,9 +43,9 @@ import net.officefloor.compile.spi.section.SubSectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
+import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
-import net.officefloor.model.impl.repository.inputstream.InputStreamConfigurationItem;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.ExternalManagedObjectModel;
 import net.officefloor.model.section.FunctionEscalationModel;
@@ -122,16 +120,10 @@ public class SectionModelSectionSource extends AbstractSectionSource
 	@Override
 	public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
 
-		// Obtain the configuration to the section
-		InputStream configuration = context.getResource(context.getSectionLocation());
-		if (configuration == null) {
-			// Must have configuration
-			throw new FileNotFoundException("Can not find section '" + context.getSectionLocation() + "'");
-		}
-
 		// Retrieve the section model
-		SectionModel section = new SectionRepositoryImpl(new ModelRepositoryImpl())
-				.retrieveSection(new InputStreamConfigurationItem(configuration));
+		ConfigurationItem configuration = context.getConfigurationItem(context.getSectionLocation(), null);
+		SectionModel section = new SectionModel();
+		new SectionRepositoryImpl(new ModelRepositoryImpl()).retrieveSection(section, configuration);
 
 		// Add the external flows as outputs from the section, keeping registry
 		Map<String, SectionOutput> sectionOutputs = new HashMap<String, SectionOutput>();

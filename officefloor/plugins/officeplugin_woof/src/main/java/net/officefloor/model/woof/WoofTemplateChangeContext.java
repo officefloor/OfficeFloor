@@ -17,9 +17,9 @@
  */
 package net.officefloor.model.woof;
 
+import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * Context for changing a {@link WoofTemplateModel}.

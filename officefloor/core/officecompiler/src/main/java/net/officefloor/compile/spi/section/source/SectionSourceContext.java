@@ -24,6 +24,7 @@ import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SubSection;
+import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.SourceContext;
@@ -33,7 +34,7 @@ import net.officefloor.frame.api.source.SourceContext;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionSourceContext extends SourceContext {
+public interface SectionSourceContext extends SourceContext, ConfigurationContext {
 
 	/**
 	 * <p>

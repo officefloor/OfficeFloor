@@ -21,9 +21,9 @@ import java.sql.Connection;
 
 import org.easymock.AbstractMatcher;
 
+import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.ExternalManagedObjectModel;
@@ -81,9 +81,9 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 	private final ModelRepository modelRepository = this.createMock(ModelRepository.class);
 
 	/**
-	 * {@link ConfigurationItem}.
+	 * {@link WritableConfigurationItem}.
 	 */
-	private final ConfigurationItem configurationItem = this.createMock(ConfigurationItem.class);
+	private final WritableConfigurationItem configurationItem = this.createMock(WritableConfigurationItem.class);
 
 	/**
 	 * {@link SectionRepository} to be tested.
@@ -284,22 +284,20 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		functionEscalation_function.setFunction(escalationToFunction);
 
 		// Record retrieving the section
-		this.recordReturn(this.modelRepository, this.modelRepository.retrieve(null, this.configurationItem), section,
-				new AbstractMatcher() {
-					@Override
-					public boolean matches(Object[] expected, Object[] actual) {
-						assertTrue("Must be section model", actual[0] instanceof SectionModel);
-						assertEquals("Incorrect configuration item", SectionRepositoryTest.this.configurationItem,
-								actual[1]);
-						return true;
-					}
-				});
+		this.modelRepository.retrieve(null, this.configurationItem);
+		this.control(this.modelRepository).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				assertTrue("Must be section model", actual[0] instanceof SectionModel);
+				assertEquals("Incorrect configuration item", SectionRepositoryTest.this.configurationItem, actual[1]);
+				return true;
+			}
+		});
 
 		// Retrieve the section
 		this.replayMockObjects();
-		SectionModel retrievedSection = this.sectionRepository.retrieveSection(this.configurationItem);
+		this.sectionRepository.retrieveSection(section, this.configurationItem);
 		this.verifyMockObjects();
-		assertEquals("Incorrect section", section, retrievedSection);
 
 		// Ensure managed object connected to its source
 		assertEquals("mo -> mos", mos, moToMos.getSectionManagedObjectSource());

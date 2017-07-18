@@ -44,7 +44,7 @@ import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSourc
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
 /**
- * Tests the {@link WoofOfficeFloorSource}.
+ * Tests the {@link WoofOfficeExtensionService}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -61,7 +61,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	private LoggerAssertion loaderLoggerAssertion;
 
 	/**
-	 * {@link LoggerAssertion} for the {@link WoofOfficeFloorSource}.
+	 * {@link LoggerAssertion} for the {@link WoofOfficeExtensionService}.
 	 */
 	private LoggerAssertion sourceLoggerAssertion;
 
@@ -73,7 +73,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Create the logger assertions
 		this.loaderLoggerAssertion = LoggerAssertion.setupLoggerAssertion(WoofLoaderImpl.class.getName());
-		this.sourceLoggerAssertion = LoggerAssertion.setupLoggerAssertion(WoofOfficeFloorSource.class.getName());
+		this.sourceLoggerAssertion = LoggerAssertion.setupLoggerAssertion(WoofOfficeExtensionService.class.getName());
 
 		// Clear implicit template extension
 		MockImplicitWoofTemplateExtensionSourceService.reset();
@@ -90,7 +90,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 			try {
 				this.client.close();
 			} finally {
-				WoofOfficeFloorSource.stop();
+				WoofOfficeExtensionService.stop();
 			}
 		} finally {
 			// Disconnect from loggers
@@ -105,7 +105,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	public void testConvenienceConstants() {
 		assertEquals("Incorrect convenience HTTP port property name",
 				HttpApplicationLocationManagedObjectSource.PROPERTY_HTTP_PORT,
-				WoofOfficeFloorSource.PROPERTY_HTTP_PORT);
+				WoofOfficeExtensionService.PROPERTY_HTTP_PORT);
 	}
 
 	/**
@@ -114,7 +114,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	public void testDefaultApplicationConfiguration() throws Exception {
 
 		// Run the application with default configuration
-		WoofOfficeFloorSource.start();
+		WoofOfficeExtensionService.start();
 
 		// Test
 		this.doTestRequest("/test");
@@ -126,7 +126,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	public void testWebApplicationExtension() throws Exception {
 
 		// Run the application (extended by MockWoofApplicationExtensionService)
-		WoofOfficeFloorSource.start();
+		WoofOfficeExtensionService.start();
 
 		// Validate log not loading unknown extension
 		LogRecord[] records = this.sourceLoggerAssertion.getLogRecords();
@@ -136,7 +136,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 		}
 		assertEquals("Incorrect number of records:\n" + messages.toString(), 1, records.length);
 		LogRecord record = records[0];
-		assertEquals("Incorrect unknown extension log record", WoofApplicationExtensionService.class.getName()
+		assertEquals("Incorrect unknown extension log record", WoofExtensionService.class.getName()
 				+ ": Provider woof.application.extension.not.available.Service not found", record.getMessage());
 
 		// Test that loaded servicer
@@ -160,13 +160,13 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 		}
 
 		// Run the application
-		WoofOfficeFloorSource.start();
+		WoofOfficeExtensionService.start();
 
 		// Should now be running
 		this.doTestRequest("/test");
 
 		// Stop the application
-		WoofOfficeFloorSource.stop();
+		WoofOfficeExtensionService.stop();
 
 		// Should not successfully connect
 		CloseableHttpClient refreshedClient = HttpTestUtil.createHttpClient();
@@ -205,7 +205,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 				+ "/NoLogicTemplate.woof";
 
 		// Run the application with no logic template
-		WoofOfficeFloorSource.start(WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+		WoofOfficeExtensionService.start(WoofOfficeExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				noLogicTemplateConfigurationLocation);
 
 		// Test
@@ -222,7 +222,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 		String alternateConfigurationLocation = this.getPackageRelativePath(this.getClass()) + "/commandline.woof";
 
 		// Run the application with properties for alternate configuration
-		WoofOfficeFloorSource.main(WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+		WoofOfficeExtensionService.main(WoofOfficeExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				alternateConfigurationLocation);
 
 		// Test
@@ -239,7 +239,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 		String alternateConfigurationLocation = this.getPackageRelativePath(this.getClass()) + "/commandline.woof";
 
 		// Run the application with properties for alternate configuration
-		WoofOfficeFloorSource.main("-" + WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+		WoofOfficeExtensionService.main("-" + WoofOfficeExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				alternateConfigurationLocation, "only.property.name.to.have.blank.value");
 
 		// Test
@@ -260,7 +260,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 		String alternateConfigurationLocation = this.getPackageRelativePath(this.getClass()) + "/webapp.woof";
 
 		// Run the application for woof resource
-		WoofOfficeFloorSource.main("-" + WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+		WoofOfficeExtensionService.main("-" + WoofOfficeExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				alternateConfigurationLocation);
 
 		// Test
@@ -283,7 +283,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 		String alternateConfigurationLocation = this.getPackageRelativePath(this.getClass()) + "/webapp.woof";
 
 		// Run the application for woof resource
-		WoofOfficeFloorSource.main("-" + WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+		WoofOfficeExtensionService.main("-" + WoofOfficeExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				alternateConfigurationLocation);
 
 		// Test
@@ -305,7 +305,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 		String alternateConfigurationLocation = this.getPackageRelativePath(this.getClass()) + "/webapp.woof";
 
 		// Run the application for woof resource
-		WoofOfficeFloorSource.main("-" + WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+		WoofOfficeExtensionService.main("-" + WoofOfficeExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				alternateConfigurationLocation);
 
 		// Test
@@ -333,7 +333,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		try {
 			// Run the application for woof resource
-			WoofOfficeFloorSource.main("-" + WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+			WoofOfficeExtensionService.main("-" + WoofOfficeExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 					alternateConfigurationLocation);
 			fail("Should not successfully find resource and therefore should not start");
 
@@ -351,10 +351,10 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Provides additional configuration to {@link WoofOfficeFloorSource} for
+	 * Provides additional configuration to {@link WoofOfficeExtensionService} for
 	 * testing.
 	 */
-	private static class MockWoofMain extends WoofOfficeFloorSource {
+	private static class MockWoofMain extends WoofOfficeExtensionService {
 
 		/**
 		 * Main for running.
@@ -381,7 +381,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Sends request to test {@link WoofOfficeFloorSource} running.
+	 * Sends request to test {@link WoofOfficeExtensionService} running.
 	 * 
 	 * @param uri
 	 *            URI.
@@ -397,7 +397,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Does the request to test the running {@link WoofOfficeFloorSource}.
+	 * Does the request to test the running {@link WoofOfficeExtensionService}.
 	 * 
 	 * @param uri
 	 *            URI.

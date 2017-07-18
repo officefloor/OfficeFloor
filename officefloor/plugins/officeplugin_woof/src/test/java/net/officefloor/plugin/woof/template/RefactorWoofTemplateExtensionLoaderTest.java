@@ -18,6 +18,7 @@
 package net.officefloor.plugin.woof.template;
 
 import net.officefloor.compile.properties.Property;
+import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
@@ -27,7 +28,6 @@ import net.officefloor.model.change.Change;
 import net.officefloor.model.change.Conflict;
 import net.officefloor.model.impl.change.AbstractChange;
 import net.officefloor.model.impl.change.NoChange;
-import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.woof.WoofChangeIssues;
 import net.officefloor.model.woof.WoofTemplateExtensionModel;
 import net.officefloor.plugin.woof.template.impl.AbstractWoofTemplateExtensionSource;

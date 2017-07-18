@@ -17,21 +17,36 @@
  */
 package net.officefloor.plugin.woof;
 
-import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.plugin.web.http.application.WebArchitect;
 
 /**
- * Context for the {@link WoofApplicationExtensionService}.
+ * Context for the {@link WoofExtensionService}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WoofApplicationExtensionServiceContext extends SourceContext {
+public interface WoofExtensionServiceContext {
 
 	/**
-	 * Obtains the {@link WebArchitect} to extend.
+	 * Obtains the {@link WebArchitect}.
 	 * 
-	 * @return {@link WebArchitect} to extend.
+	 * @return {@link WebArchitect}.
 	 */
-	WebArchitect getWebApplication();
+	WebArchitect getWebArchitect();
+
+	/**
+	 * Obtains the {@link OfficeArchitect}.
+	 * 
+	 * @return {@link OfficeArchitect}.
+	 */
+	OfficeArchitect getOfficeArchitect();
+
+	/**
+	 * Obtains the {@link OfficeExtensionContext}.
+	 * 
+	 * @return {@link OfficeExtensionContext}.
+	 */
+	OfficeExtensionContext getOfficeExtensionContext();
 
 }

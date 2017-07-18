@@ -17,11 +17,11 @@
  */
 package net.officefloor.model.woof;
 
+import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
-import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionChangeContext;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionConfiguration;
 

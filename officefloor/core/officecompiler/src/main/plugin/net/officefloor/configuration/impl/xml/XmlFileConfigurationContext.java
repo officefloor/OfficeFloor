@@ -15,9 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.model.impl.repository.xml;
+package net.officefloor.configuration.impl.xml;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -28,43 +31,40 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-
-import junit.framework.TestCase;
-import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.frame.api.source.ResourceSource;
-import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.model.repository.ConfigurationItem;
-import net.officefloor.model.repository.ReadOnlyConfigurationException;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import junit.framework.TestCase;
+import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.properties.PropertyConfigurable;
+import net.officefloor.configuration.ConfigurationContext;
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.impl.ConfigurationContextImpl;
+import net.officefloor.frame.api.source.ResourceSource;
+
 /**
  * <p>
  * {@link ConfigurationContext} obtaining {@link ConfigurationItem} instances
- * from a single XML file.
+ * from a single XML {@link File}.
  * <p>
  * This reduces the number of files required for unit testing.
  * 
  * @author Daniel Sagenschneider
  */
-public class XmlConfigurationContext implements ConfigurationContext,
-		ResourceSource {
+public class XmlFileConfigurationContext extends ConfigurationContextImpl
+		implements PropertyConfigurable, ResourceSource {
 
 	/**
-	 * Location of this {@link XmlConfigurationContext}.
+	 * XML text instances for {@link ConfigurationItem} instances of this
+	 * {@link XmlFileConfigurationContext}.
 	 */
-	private final String location;
-
-	/**
-	 * {@link ConfigurationItem} instances for this
-	 * {@link XmlConfigurationContext}.
-	 */
-	private final Map<String, ConfigurationItem> items = new HashMap<String, ConfigurationItem>();
+	private final Map<String, String> items = new HashMap<>();
 
 	/**
 	 * XML raw text before parsing into the {@link ConfigurationItem} instances.
@@ -83,20 +83,16 @@ public class XmlConfigurationContext implements ConfigurationContext,
 	 * @throws Exception
 	 *             If fails to initialise.
 	 */
-	public XmlConfigurationContext(Object offsetObject, String singleXmlFileName)
-			throws Exception {
+	public XmlFileConfigurationContext(Object offsetObject, String singleXmlFileName) throws Exception {
+		super(null, null);
 
 		// Obtain the location of the XML file
-		this.location = offsetObject.getClass().getPackage().getName()
-				.replace('.', '/')
-				+ "/" + singleXmlFileName;
+		String location = offsetObject.getClass().getPackage().getName().replace('.', '/') + "/" + singleXmlFileName;
 
 		// Obtain the raw XML text from the resource
-		InputStream inputStream = offsetObject.getClass().getClassLoader()
-				.getResourceAsStream(this.location);
+		InputStream inputStream = offsetObject.getClass().getClassLoader().getResourceAsStream(location);
 		if (inputStream == null) {
-			throw new FileNotFoundException("Can not find XML resource: "
-					+ this.location);
+			throw new FileNotFoundException("Can not find XML resource: " + location);
 		}
 		StringWriter writer = new StringWriter();
 		Reader reader = new InputStreamReader(inputStream);
@@ -107,36 +103,13 @@ public class XmlConfigurationContext implements ConfigurationContext,
 	}
 
 	/**
-	 * Adds tag replacement of the raw XML text before it is parsed and divided
-	 * into {@link ConfigurationItem} instances.
-	 * 
-	 * @param tagName
-	 *            Name of the tag. This will replace <code>${tagName}</code>
-	 *            text with the tag replace value.
-	 * @param tagReplaceValue
-	 *            Value to replace the tag with.
-	 */
-	public void addTag(String tagName, String tagReplaceValue) {
-
-		// Ensure not attempted to obtain configuration item
-		if (this.xmlText == null) {
-			throw new IllegalStateException(
-					"Can not replace tags after using context methods");
-		}
-
-		// Do the tag replacement
-		this.xmlText = this.xmlText.replace("${" + tagName + "}",
-				tagReplaceValue);
-	}
-
-	/**
 	 * Ensures the XML text has been parsed into {@link ConfigurationItem}
 	 * instances.
 	 * 
 	 * @throws Exception
 	 *             If fails to parse.
 	 */
-	private void ensureParsedIntoConfigurationItems() throws Exception {
+	private void ensureParsedIntoConfigurationItems() throws IOException {
 
 		// Determine if parsed
 		if (this.xmlText == null) {
@@ -144,15 +117,34 @@ public class XmlConfigurationContext implements ConfigurationContext,
 		}
 
 		// Create the input source for the XML text
-		InputSource inputSource = new InputSource(
-				new StringReader(this.xmlText));
+		InputSource inputSource = new InputSource(new StringReader(this.xmlText));
 
-		// Parse the contents
-		SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
-		saxParser.parse(inputSource, new XmlConfigurationHandler());
+		try {
+			// Parse the contents
+			SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
+			saxParser.parse(inputSource, new XmlConfigurationHandler());
+		} catch (SAXException | ParserConfigurationException ex) {
+			throw new IOException(ex);
+		}
 
 		// Flag that now parsed
 		this.xmlText = null;
+	}
+
+	/*
+	 * ===================== PropertyConfigurable ========================
+	 */
+
+	@Override
+	public void addProperty(String name, String value) {
+
+		// Ensure not attempted to obtain configuration item
+		if (this.xmlText == null) {
+			throw new IllegalStateException("Can not replace tags after using context methods");
+		}
+
+		// Do the tag replacement
+		this.xmlText = this.xmlText.replace("${" + name + "}", value);
 	}
 
 	/*
@@ -162,8 +154,9 @@ public class XmlConfigurationContext implements ConfigurationContext,
 	@Override
 	public InputStream sourceResource(String location) {
 		try {
-			ConfigurationItem item = this.getConfigurationItem(location);
-			return (item == null ? null : item.getConfiguration());
+			this.ensureParsedIntoConfigurationItems();
+			ConfigurationItem item = this.getConfigurationItem(location, null);
+			return (item == null ? null : item.getInputStream());
 		} catch (Exception ex) {
 			return null; // failed to obtain resource
 		}
@@ -174,38 +167,12 @@ public class XmlConfigurationContext implements ConfigurationContext,
 	 */
 
 	@Override
-	public String getLocation() {
-		return this.location;
-	}
-
-	@Override
-	public ConfigurationItem getConfigurationItem(String relativeLocation)
-			throws Exception {
-		this.ensureParsedIntoConfigurationItems();
-		return this.items.get(relativeLocation);
-	}
-
-	@Override
-	public boolean isReadOnly() {
-		return true;
-	}
-
-	@Override
-	public ConfigurationItem createConfigurationItem(String relativeLocation,
-			InputStream configuration) throws Exception {
-		throw new ReadOnlyConfigurationException("Can not create "
-				+ ConfigurationItem.class.getSimpleName()
-				+ " instances within a "
-				+ XmlConfigurationContext.class.getSimpleName());
-	}
-
-	@Override
-	public void deleteConfigurationItem(String relativeLocation)
-			throws Exception, ReadOnlyConfigurationException {
-		throw new ReadOnlyConfigurationException("Can not delete "
-				+ ConfigurationItem.class.getSimpleName()
-				+ " instances within a "
-				+ XmlConfigurationContext.class.getSimpleName());
+	protected ConfigurationSource getConfigurationSource() {
+		return (location) -> {
+			this.ensureParsedIntoConfigurationItems();
+			String xmlText = this.items.get(location);
+			return (xmlText == null ? null : new ByteArrayInputStream(xmlText.getBytes()));
+		};
 	}
 
 	/**
@@ -238,16 +205,14 @@ public class XmlConfigurationContext implements ConfigurationContext,
 		 */
 
 		@Override
-		public void startElement(String uri, String localName, String name,
-				Attributes attributes) throws SAXException {
+		public void startElement(String uri, String localName, String name, Attributes attributes) throws SAXException {
 
 			// Determine if the root element
 			if (this.elementStack == null) {
 				// Determine if using labels for locations (default is false)
 				String isLabelsValue = attributes.getValue("item-labels");
-				this.isLabels = Boolean.parseBoolean(CompileUtil
-						.isBlank(isLabelsValue) ? Boolean.FALSE.toString()
-						: isLabelsValue);
+				this.isLabels = Boolean
+						.parseBoolean(CompileUtil.isBlank(isLabelsValue) ? Boolean.FALSE.toString() : isLabelsValue);
 
 				// Specify element stack and ignore root element
 				this.elementStack = new LinkedList<String>();
@@ -283,8 +248,7 @@ public class XmlConfigurationContext implements ConfigurationContext,
 		}
 
 		@Override
-		public void characters(char[] ch, int start, int length)
-				throws SAXException {
+		public void characters(char[] ch, int start, int length) throws SAXException {
 			// Write the characters to configuration
 			if (this.configuration != null) {
 				this.configuration.append(ch, start, length);
@@ -292,15 +256,13 @@ public class XmlConfigurationContext implements ConfigurationContext,
 		}
 
 		@Override
-		public void ignorableWhitespace(char[] ch, int start, int length)
-				throws SAXException {
+		public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
 			// Do not ignore white spacing
 			this.characters(ch, start, length);
 		}
 
 		@Override
-		public void endElement(String uri, String localName, String name)
-				throws SAXException {
+		public void endElement(String uri, String localName, String name) throws SAXException {
 
 			// Determine if reading in configuration
 			if (this.elementStack.isEmpty()) {
@@ -322,9 +284,7 @@ public class XmlConfigurationContext implements ConfigurationContext,
 				this.configuration = null;
 
 				// Add the configuration item
-				XmlConfigurationContext.this.items.put(this.location,
-						new XmlConfigurationItem(this.location, xmlText,
-								XmlConfigurationContext.this));
+				XmlFileConfigurationContext.this.items.put(this.location, xmlText);
 			}
 		}
 	}

@@ -17,7 +17,7 @@
  */
 package net.officefloor.model.teams;
 
-import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
 /**

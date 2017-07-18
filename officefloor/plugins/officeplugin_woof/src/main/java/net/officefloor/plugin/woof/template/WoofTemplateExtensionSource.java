@@ -17,9 +17,9 @@
  */
 package net.officefloor.plugin.woof.template;
 
+import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.change.Conflict;
-import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.plugin.web.http.application.HttpTemplateSection;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
 

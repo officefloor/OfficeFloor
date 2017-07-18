@@ -17,9 +17,9 @@
  */
 package net.officefloor.model.objects;
 
+import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.model.objects.WoofObjectsModel;
 import net.officefloor.model.objects.WoofObjectsRepository;
-import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
 /**

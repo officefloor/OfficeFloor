@@ -17,10 +17,13 @@
  */
 package net.officefloor.model.impl.officefloor;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.compile.impl.util.TripleKeyMap;
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
@@ -51,7 +54,6 @@ import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorRepository;
 import net.officefloor.model.officefloor.OfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
-import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
 /**
@@ -81,10 +83,10 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 	 */
 
 	@Override
-	public OfficeFloorModel retrieveOfficeFloor(ConfigurationItem configuration) throws Exception {
+	public void retrieveOfficeFloor(OfficeFloorModel officeFloor, ConfigurationItem configuration) throws IOException {
 
 		// Load the OfficeFloor from configuration
-		OfficeFloorModel officeFloor = this.modelRepository.retrieve(new OfficeFloorModel(), configuration);
+		this.modelRepository.retrieve(officeFloor, configuration);
 
 		// Create the set of OfficeFloor suppliers
 		Map<String, OfficeFloorSupplierModel> suppliers = new HashMap<String, OfficeFloorSupplierModel>();
@@ -358,13 +360,11 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 				}
 			}
 		}
-
-		// Return the OfficeFloor
-		return officeFloor;
 	}
 
 	@Override
-	public void storeOfficeFloor(OfficeFloorModel officeFloor, ConfigurationItem configuration) throws Exception {
+	public void storeOfficeFloor(OfficeFloorModel officeFloor, WritableConfigurationItem configuration)
+			throws IOException {
 
 		// Specify the suppliers for the managed object sources
 		for (OfficeFloorSupplierModel supplier : officeFloor.getOfficeFloorSuppliers()) {

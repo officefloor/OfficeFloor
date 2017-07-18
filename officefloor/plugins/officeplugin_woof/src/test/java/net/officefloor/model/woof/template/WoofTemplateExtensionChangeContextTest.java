@@ -24,14 +24,14 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 
+import net.officefloor.configuration.ConfigurationContext;
+import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
-import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.woof.WoofChangeIssues;
 import net.officefloor.model.woof.WoofTemplateExtension;
 import net.officefloor.model.woof.WoofTemplateExtensionChangeContextImpl;
@@ -115,7 +115,7 @@ public class WoofTemplateExtensionChangeContextTest extends OfficeFrameTestCase 
 				.getConfigurationItem(
 						packageLocation
 								+ "/WoofTemplateExtensionChangeContextResource.txt")
-				.getConfiguration());
+				.getReader());
 
 		// Validate the configurations
 		assertConfiguration(context.getOldConfiguration(), "oldUri", "OLD",

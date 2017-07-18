@@ -23,6 +23,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.supplier.SupplierType;
+import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -34,7 +35,7 @@ import net.officefloor.frame.api.source.SourceContext;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorSourceContext extends SourceContext {
+public interface OfficeFloorSourceContext extends SourceContext, ConfigurationContext {
 
 	/**
 	 * <p>

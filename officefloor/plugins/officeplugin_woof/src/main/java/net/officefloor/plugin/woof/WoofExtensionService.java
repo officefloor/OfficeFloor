@@ -15,23 +15,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.model.repository;
+package net.officefloor.plugin.woof;
+
+import java.util.ServiceLoader;
+
+import net.officefloor.plugin.web.http.application.WebArchitect;
 
 /**
- * Indicates that the {@link ConfigurationContext} is read-only.
+ * {@link ServiceLoader} service that enables extending functionality over and
+ * above the {@link WoofLoader} by directly configuring the
+ * {@link WebArchitect}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ReadOnlyConfigurationException extends Exception {
+public interface WoofExtensionService {
 
 	/**
-	 * Initiate.
+	 * Extends the {@link WebArchitect}.
 	 * 
-	 * @param message
-	 *            Reason.
+	 * @param context
+	 *            {@link WoofExtensionServiceContext}.
+	 * @throws Exception
+	 *             If fails to extend the {@link WebArchitect}.
 	 */
-	public ReadOnlyConfigurationException(String message) {
-		super(message);
-	}
+	void extend(WoofExtensionServiceContext context) throws Exception;
 
 }

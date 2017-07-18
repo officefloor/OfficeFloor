@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.compile.impl.util.DoubleKeyMap;
-import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
 /**

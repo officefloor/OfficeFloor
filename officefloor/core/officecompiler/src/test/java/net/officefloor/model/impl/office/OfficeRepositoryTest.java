@@ -22,6 +22,7 @@ import java.sql.Connection;
 
 import org.easymock.AbstractMatcher;
 
+import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.office.AdministrationEscalationModel;
@@ -81,7 +82,6 @@ import net.officefloor.model.office.OfficeSubSectionModel;
 import net.officefloor.model.office.OfficeSubSectionToGovernanceModel;
 import net.officefloor.model.office.OfficeSupplierModel;
 import net.officefloor.model.office.OfficeTeamModel;
-import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
 /**
@@ -97,9 +97,9 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 	private final ModelRepository modelRepository = this.createMock(ModelRepository.class);
 
 	/**
-	 * {@link ConfigurationItem}.
+	 * {@link WritableConfigurationItem}.
 	 */
-	private final ConfigurationItem configurationItem = this.createMock(ConfigurationItem.class);
+	private final WritableConfigurationItem configurationItem = this.createMock(WritableConfigurationItem.class);
 
 	/**
 	 * {@link OfficeRepository} to be tested.
@@ -326,22 +326,20 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		governance.setOfficeTeam(govToTeam);
 
 		// Record retrieving the office
-		this.recordReturn(this.modelRepository, this.modelRepository.retrieve(null, this.configurationItem), office,
-				new AbstractMatcher() {
-					@Override
-					public boolean matches(Object[] expected, Object[] actual) {
-						assertTrue("Must be office model", actual[0] instanceof OfficeModel);
-						assertEquals("Incorrect configuration item", OfficeRepositoryTest.this.configurationItem,
-								actual[1]);
-						return true;
-					}
-				});
+		this.modelRepository.retrieve(null, this.configurationItem);
+		this.control(this.modelRepository).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				assertTrue("Must be office model", actual[0] instanceof OfficeModel);
+				assertEquals("Incorrect configuration item", OfficeRepositoryTest.this.configurationItem, actual[1]);
+				return true;
+			}
+		});
 
 		// Retrieve the office
 		this.replayMockObjects();
-		OfficeModel retrievedOffice = this.officeRepository.retrieveOffice(this.configurationItem);
+		this.officeRepository.retrieveOffice(office, this.configurationItem);
 		this.verifyMockObjects();
-		assertEquals("Incorrect office", office, retrievedOffice);
 
 		// Ensure managed object connected to its managed object source
 		assertEquals("managed object <- managed object source", mo, moToMos.getOfficeManagedObject());

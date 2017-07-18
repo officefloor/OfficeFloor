@@ -19,8 +19,8 @@ package net.officefloor.compile.spi.officefloor.source;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.model.repository.ConfigurationItem;
 
 /**
  * Sources the {@link OfficeFloor}.

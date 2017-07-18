@@ -17,13 +17,16 @@
  */
 package net.officefloor.model.impl.repository;
 
+import java.io.File;
 import java.sql.Connection;
 import java.util.List;
 
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.WritableConfigurationItem;
+import net.officefloor.configuration.impl.filesystem.FileSystemConfigurationContext;
+import net.officefloor.configuration.impl.memory.MemoryConfigurationContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
-import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationItem;
-import net.officefloor.model.impl.repository.memory.MemoryConfigurationItem;
 import net.officefloor.model.office.AdministrationEscalationModel;
 import net.officefloor.model.office.AdministrationFlowModel;
 import net.officefloor.model.office.AdministrationModel;
@@ -79,7 +82,6 @@ import net.officefloor.model.office.OfficeSupplierModel;
 import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.office.PropertyModel;
 import net.officefloor.model.office.TypeQualificationModel;
-import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
 /**
@@ -99,8 +101,8 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 
 		// Specify location of the configuration
-		this.configurationItem = new FileSystemConfigurationItem(
-				this.findFile(this.getClass(), "TestOffice.office.xml"), null);
+		File configurationFile = this.findFile(this.getClass(), "TestOffice.office.xml");
+		this.configurationItem = FileSystemConfigurationContext.createWritableConfigurationItem(configurationFile);
 	}
 
 	/**
@@ -111,7 +113,7 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 		// Load the Office
 		ModelRepository repository = new ModelRepositoryImpl();
 		OfficeModel office = new OfficeModel();
-		office = repository.retrieve(office, this.configurationItem);
+		repository.retrieve(office, this.configurationItem);
 
 		// ----------------------------------------
 		// Validate the office attributes
@@ -393,15 +395,15 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 		// Load the Office
 		ModelRepository repository = new ModelRepositoryImpl();
 		OfficeModel office = new OfficeModel();
-		office = repository.retrieve(office, this.configurationItem);
+		repository.retrieve(office, this.configurationItem);
 
 		// Store the Office
-		MemoryConfigurationItem contents = new MemoryConfigurationItem();
-		repository.store(office, contents);
+		WritableConfigurationItem configuration = MemoryConfigurationContext.createWritableConfigurationItem("test");
+		repository.store(office, configuration);
 
 		// Reload the Office
 		OfficeModel reloadedOffice = new OfficeModel();
-		reloadedOffice = repository.retrieve(reloadedOffice, contents);
+		repository.retrieve(reloadedOffice, configuration);
 
 		// Validate round trip
 		assertGraph(office, reloadedOffice, RemoveConnectionsAction.REMOVE_CONNECTIONS_METHOD_NAME);

@@ -17,7 +17,7 @@
  */
 package net.officefloor.model.teams;
 
-import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.configuration.ConfigurationItem;
 
 /**
  * Repository for obtaining the {@link WoofTeamsModel} for auto-wiring.

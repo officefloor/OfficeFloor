@@ -32,6 +32,7 @@ import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSupplier;
+import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.objects.WoofDependencyModel;
 import net.officefloor.model.objects.WoofFlowModel;
@@ -44,7 +45,6 @@ import net.officefloor.model.objects.WoofSupplierModel;
 import net.officefloor.model.objects.PropertyFileModel;
 import net.officefloor.model.objects.PropertyModel;
 import net.officefloor.model.objects.PropertySourceModel;
-import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ManagedObject;
 

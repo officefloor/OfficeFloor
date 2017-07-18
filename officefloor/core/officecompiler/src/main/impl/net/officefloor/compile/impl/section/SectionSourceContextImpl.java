@@ -30,14 +30,14 @@ import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
-import net.officefloor.frame.impl.construct.source.SourceContextImpl;
+import net.officefloor.configuration.impl.ConfigurationSourceContextImpl;
 
 /**
  * {@link SectionSourceContext} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class SectionSourceContextImpl extends SourceContextImpl implements SectionSourceContext {
+public class SectionSourceContextImpl extends ConfigurationSourceContextImpl implements SectionSourceContext {
 
 	/**
 	 * Location of the {@link OfficeSection}.

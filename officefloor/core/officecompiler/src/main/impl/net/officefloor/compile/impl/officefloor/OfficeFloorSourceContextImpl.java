@@ -31,16 +31,16 @@ import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionCon
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.supplier.SupplierLoader;
 import net.officefloor.compile.supplier.SupplierType;
+import net.officefloor.configuration.impl.ConfigurationSourceContextImpl;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 
 /**
  * {@link OfficeFloorSourceContext} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorSourceContextImpl extends SourceContextImpl
+public class OfficeFloorSourceContextImpl extends ConfigurationSourceContextImpl
 		implements OfficeFloorSourceContext, OfficeFloorExtensionContext {
 
 	/**

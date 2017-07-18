@@ -36,8 +36,10 @@ public class PropertyListSourceProperties extends SourcePropertiesImpl {
 	 *            {@link PropertyList}.
 	 */
 	public PropertyListSourceProperties(PropertyList properties) {
-		for (Property property : properties) {
-			this.addProperty(property.getName(), property.getValue());
+		if (properties != null) {
+			for (Property property : properties) {
+				this.addProperty(property.getName(), property.getValue());
+			}
 		}
 	}
 

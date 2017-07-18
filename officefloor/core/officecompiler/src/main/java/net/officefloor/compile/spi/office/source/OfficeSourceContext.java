@@ -27,6 +27,7 @@ import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
@@ -39,7 +40,7 @@ import net.officefloor.frame.api.source.SourceContext;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeSourceContext extends SourceContext {
+public interface OfficeSourceContext extends SourceContext, ConfigurationContext {
 
 	/**
 	 * <p>

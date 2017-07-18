@@ -30,16 +30,16 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
+import net.officefloor.configuration.ConfigurationContext;
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.impl.memory.MemoryConfigurationContext;
+import net.officefloor.frame.api.source.ResourceSource;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
-import net.officefloor.frame.spi.source.ResourceSource;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.impl.repository.memory.MemoryConfigurationContext;
-import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.woof.WoofChangeIssues;
 import net.officefloor.plugin.web.http.application.HttpTemplateSection;
 import net.officefloor.plugin.web.http.application.WebArchitect;
@@ -236,7 +236,7 @@ public class WoofTemplateExtensionLoaderUtil {
 		Assert.assertNotNull("Should have configuration item for location " + location, item);
 
 		// Load the content of the configuration item
-		Reader reader = new InputStreamReader(item.getConfiguration());
+		Reader reader = new InputStreamReader(item.getReader());
 		StringWriter buffer = new StringWriter();
 		for (int character = reader.read(); character != -1; character = reader.read()) {
 			buffer.write(character);
@@ -280,8 +280,8 @@ public class WoofTemplateExtensionLoaderUtil {
 	}
 
 	/**
-	 * Undertakes the extending of the {@link HttpTemplateSection} by
-	 * the {@link WoofTemplateExtensionSource}.
+	 * Undertakes the extending of the {@link HttpTemplateSection} by the
+	 * {@link WoofTemplateExtensionSource}.
 	 * 
 	 * @param <S>
 	 *            {@link WoofTemplateExtensionSource} type.
@@ -297,14 +297,13 @@ public class WoofTemplateExtensionLoaderUtil {
 	 *             If fails to extend {@link HttpTemplateSection}.
 	 */
 	public static <S extends WoofTemplateExtensionSource> void extendTemplate(Class<S> extensionSourceClass,
-			HttpTemplateSection template, WebArchitect application, String... propertyNameValues)
-			throws Exception {
+			HttpTemplateSection template, WebArchitect application, String... propertyNameValues) throws Exception {
 		extendTemplate(extensionSourceClass, template, application, null, null, propertyNameValues);
 	}
 
 	/**
-	 * Undertakes the extending of the {@link HttpTemplateSection} by
-	 * the {@link WoofTemplateExtensionSource}.
+	 * Undertakes the extending of the {@link HttpTemplateSection} by the
+	 * {@link WoofTemplateExtensionSource}.
 	 * 
 	 * @param <S>
 	 *            {@link WoofTemplateExtensionSource} type.

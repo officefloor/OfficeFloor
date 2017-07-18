@@ -17,9 +17,9 @@
  */
 package net.officefloor.model.woof;
 
+import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
-import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * {@link WoofTemplateChangeContext} implementation.
