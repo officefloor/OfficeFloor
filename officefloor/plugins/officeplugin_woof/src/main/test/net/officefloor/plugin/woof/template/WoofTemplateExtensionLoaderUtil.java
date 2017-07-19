@@ -17,7 +17,6 @@
  */
 package net.officefloor.plugin.woof.template;
 
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 
@@ -224,7 +223,7 @@ public class WoofTemplateExtensionLoaderUtil {
 			throws Exception {
 
 		// Obtain the configuration item
-		ConfigurationItem item = context.getConfigurationItem(location);
+		ConfigurationItem item = context.getConfigurationItem(location, null);
 
 		// Determine if expecting the configuration item
 		if (content == null) {
@@ -236,7 +235,7 @@ public class WoofTemplateExtensionLoaderUtil {
 		Assert.assertNotNull("Should have configuration item for location " + location, item);
 
 		// Load the content of the configuration item
-		Reader reader = new InputStreamReader(item.getReader());
+		Reader reader = item.getReader();
 		StringWriter buffer = new StringWriter();
 		for (int character = reader.read(); character != -1; character = reader.read()) {
 			buffer.write(character);
