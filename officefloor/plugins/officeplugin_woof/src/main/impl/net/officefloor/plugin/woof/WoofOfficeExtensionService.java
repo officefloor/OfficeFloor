@@ -233,36 +233,6 @@ public class WoofOfficeExtensionService implements OfficeFloorExtensionService, 
 	}
 
 	/**
-	 * Retrieves the optional {@link ConfigurationItem}.
-	 * 
-	 * @param configurationLocation
-	 *            Location of the {@link ConfigurationItem}.
-	 * @param configurationContext
-	 *            {@link ConfigurationContext}.
-	 * @param defaultLocation
-	 *            Default location of the {@link ConfigurationItem}.
-	 * @return {@link ConfigurationItem} or <code>null</code> if not able to
-	 *         find.
-	 * @throws Exception
-	 *             If fails to retrieve the {@link ConfigurationItem}.
-	 */
-	private static ConfigurationItem retrieveOptionalConfiguration(String configurationLocation,
-			ConfigurationContext configurationContext, String defaultLocation) throws Exception {
-
-		// Retrieve the configuration
-		ConfigurationItem configuration = configurationContext.getConfigurationItem(configurationLocation);
-		if (configuration == null) {
-			// Attempt to load via '.xml' suffix if default location
-			if (defaultLocation.equals(configurationLocation)) {
-				configuration = configurationContext.getConfigurationItem(defaultLocation + ".xml");
-			}
-		}
-
-		// Return the configuration
-		return configuration;
-	}
-
-	/**
 	 * WoOF application {@link ResourceSource} instances.
 	 */
 	private final List<ResourceSource> applicationResourceSources = new LinkedList<ResourceSource>();
@@ -317,22 +287,17 @@ public class WoofOfficeExtensionService implements OfficeFloorExtensionService, 
 	public void extendOfficeFloor(OfficeFloorDeployer officeFloorDeployer, OfficeFloorExtensionContext context)
 			throws Exception {
 
-		// Obtain the configuration context
-		ClassLoader classLoader = context.getClassLoader();
-		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(classLoader);
-
 		// Load the optional configuration to the application
 		String teamsLocation = context.getProperty(PROPERTY_TEAMS_CONFIGURATION_LOCATION,
 				DEFAULT_TEAMS_CONFIGURATION_LOCATION);
 
 		// Load the optional teams configuration to the application
-		ConfigurationItem teamsConfiguration = retrieveOptionalConfiguration(teamsLocation, configurationContext,
-				DEFAULT_TEAMS_CONFIGURATION_LOCATION);
+		ConfigurationItem teamsConfiguration = context.getOptionalConfigurationItem(teamsLocation, null);
 		if (teamsConfiguration != null) {
 			// Load the teams configuration
 			WoofTeamsLoader teamsLoader = new WoofTeamsLoaderImpl(
 					new WoofTeamsRepositoryImpl(new ModelRepositoryImpl()));
-			teamsLoader.loadAutoWireTeamsConfiguration(new WoofTeamsLoaderContext() {
+			teamsLoader.loadWoofTeamsConfiguration(new WoofTeamsLoaderContext() {
 
 				@Override
 				public OfficeFloorExtensionContext getOfficeFloorExtensionContext() {
@@ -365,14 +330,10 @@ public class WoofOfficeExtensionService implements OfficeFloorExtensionService, 
 		// Provide default WoOF template suffix
 		web.setDefaultHttpTemplateUriSuffix(WOOF_TEMPLATE_URI_SUFFIX);
 
-		// Obtain the configuration context
-		ClassLoader classLoader = context.getClassLoader();
-		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(classLoader);
-
 		// Obtain the woof configuration (ensuring exists)
 		String woofLocation = context.getProperty(PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				DEFAULT_WOOF_CONFIGUARTION_LOCATION);
-		ConfigurationItem woofConfiguration = configurationContext.getConfigurationItem(woofLocation);
+		ConfigurationItem woofConfiguration = context.getConfigurationItem(woofLocation, null);
 		if (woofConfiguration == null) {
 			officeArchitect.addIssue("Can not find WoOF configuration file '" + woofLocation + "'");
 			return; // must have WoOF configuration
@@ -405,14 +366,13 @@ public class WoofOfficeExtensionService implements OfficeFloorExtensionService, 
 		// Load the optional objects configuration to the application
 		String objectsLocation = context.getProperty(PROPERTY_OBJECTS_CONFIGURATION_LOCATION,
 				DEFAULT_OBJECTS_CONFIGURATION_LOCATION);
-		final ConfigurationItem objectsConfiguration = retrieveOptionalConfiguration(objectsLocation,
-				configurationContext, DEFAULT_OBJECTS_CONFIGURATION_LOCATION);
+		final ConfigurationItem objectsConfiguration = context.getConfigurationItem(objectsLocation, null);
 		if (objectsConfiguration != null) {
 
 			// Load the objects configuration
 			WoofObjectsLoader objectsLoader = new WoofObjectsLoaderImpl(
 					new WoofObjectsRepositoryImpl(new ModelRepositoryImpl()));
-			objectsLoader.loadAutoWireObjectsConfiguration(new WoofObjectsLoaderContext() {
+			objectsLoader.loadWoofObjectsConfiguration(new WoofObjectsLoaderContext() {
 
 				@Override
 				public OfficeExtensionContext getOfficeExtensionContext() {
@@ -432,6 +392,7 @@ public class WoofOfficeExtensionService implements OfficeFloorExtensionService, 
 		}
 
 		// Load the woof extensions
+		ClassLoader classLoader = context.getClassLoader();
 		ServiceLoader<WoofExtensionService> extensionServiceLoader = ServiceLoader.load(WoofExtensionService.class,
 				classLoader);
 		Iterator<WoofExtensionService> extensionIterator = extensionServiceLoader.iterator();

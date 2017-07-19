@@ -899,15 +899,12 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void init(HttpSecuritySourceContext context) throws Exception {
+		public HttpSecuritySourceMetaData init(HttpSecuritySourceContext context) throws Exception {
+
 			// Run the init if available
 			if (init != null) {
 				init.init(context);
 			}
-		}
-
-		@Override
-		public HttpSecuritySourceMetaData getMetaData() {
 
 			// Throw meta-data failure
 			if (metaDataFailure != null) {

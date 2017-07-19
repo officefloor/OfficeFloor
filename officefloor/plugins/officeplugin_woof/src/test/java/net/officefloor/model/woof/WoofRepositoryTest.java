@@ -179,7 +179,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		// Retrieve the WoOF
 		this.replayMockObjects();
 		WoofModel retrievedWoof = this.woofRepository
-				.retrieveWoOF(this.configurationItem);
+				.retrieveWoof(this.configurationItem);
 		this.verifyMockObjects();
 		assertEquals("Incorrect WoOF", woof, retrievedWoof);
 
@@ -406,7 +406,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 
 		// Store the WoOF
 		this.replayMockObjects();
-		this.woofRepository.storeWoOF(woof, this.configurationItem);
+		this.woofRepository.storeWoof(woof, this.configurationItem);
 		this.verifyMockObjects();
 
 		// Ensure the connections have links to enable retrieving

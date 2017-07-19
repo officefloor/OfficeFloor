@@ -34,6 +34,6 @@ public interface WoofTeamsLoader {
 	 * @throws Exception
 	 *             If fails to load the configuration.
 	 */
-	void loadAutoWireTeamsConfiguration(WoofTeamsLoaderContext context) throws Exception;
+	void loadWoofTeamsConfiguration(WoofTeamsLoaderContext context) throws Exception;
 
 }

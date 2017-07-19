@@ -125,12 +125,8 @@ public class HttpSecurityTypeRunnableTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void init(HttpSecuritySourceContext context) throws Exception {
-			// Do nothing
-		}
-
-		@Override
-		public HttpSecuritySourceMetaData<Object, Object, Indexed, Indexed> getMetaData() {
+		public HttpSecuritySourceMetaData<Object, Object, Indexed, Indexed> init(HttpSecuritySourceContext context)
+				throws Exception {
 			// No meta-data causing type load failure
 			return null;
 		}

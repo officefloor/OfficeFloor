@@ -110,7 +110,8 @@ public class WoofLoaderImpl implements WoofLoader {
 	public void loadWoofConfiguration(WoofLoaderContext context) throws Exception {
 
 		// Load the WoOF model
-		WoofModel woof = this.repository.retrieveWoOF(context.getConfiguration());
+		WoofModel woof = new WoofModel();
+		this.repository.retrieveWoof(woof, context.getConfiguration());
 
 		// Obtain the office and web architect
 		OfficeArchitect office = context.getOfficeArchitect();

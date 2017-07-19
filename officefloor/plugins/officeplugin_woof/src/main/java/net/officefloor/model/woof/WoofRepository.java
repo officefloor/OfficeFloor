@@ -18,6 +18,7 @@
 package net.officefloor.model.woof;
 
 import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.WritableConfigurationItem;
 
 /**
  * Repository for obtaining the WoOF (Web on OfficeFloor) model.
@@ -29,25 +30,26 @@ public interface WoofRepository {
 	/**
 	 * Retrieves the {@link WoofModel} from the {@link ConfigurationItem}.
 	 * 
-	 * @param configuration
-	 *            {@link ConfigurationItem}.
-	 * @return {@link WoofModel}.
-	 * @throws Exception
-	 *             If fails to retrieve the {@link WoofModel}.
-	 */
-	WoofModel retrieveWoOF(ConfigurationItem configuration) throws Exception;
-
-	/**
-	 * Stores the {@link WoofModel} within the {@link ConfigurationItem}.
-	 * 
 	 * @param woof
 	 *            {@link WoofModel}.
 	 * @param configuration
 	 *            {@link ConfigurationItem}.
 	 * @throws Exception
+	 *             If fails to retrieve the {@link WoofModel}.
+	 */
+	void retrieveWoof(WoofModel woof, ConfigurationItem configuration) throws Exception;
+
+	/**
+	 * Stores the {@link WoofModel} within the
+	 * {@link WritableConfigurationItem}.
+	 * 
+	 * @param woof
+	 *            {@link WoofModel}.
+	 * @param configuration
+	 *            {@link WritableConfigurationItem}.
+	 * @throws Exception
 	 *             If fails to store the {@link WoofModel}.
 	 */
-	void storeWoOF(WoofModel woof, ConfigurationItem configuration)
-			throws Exception;
+	void storeWoof(WoofModel woof, WritableConfigurationItem configuration) throws Exception;
 
 }

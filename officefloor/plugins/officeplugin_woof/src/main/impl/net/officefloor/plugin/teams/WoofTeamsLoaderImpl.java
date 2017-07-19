@@ -60,10 +60,11 @@ public class WoofTeamsLoaderImpl implements WoofTeamsLoader {
 	 */
 
 	@Override
-	public void loadAutoWireTeamsConfiguration(WoofTeamsLoaderContext context) throws Exception {
+	public void loadWoofTeamsConfiguration(WoofTeamsLoaderContext context) throws Exception {
 
 		// Load the teams model
-		WoofTeamsModel teams = this.repository.retrieveAutoWireTeams(context.getConfiguration());
+		WoofTeamsModel teams = new WoofTeamsModel();
+		this.repository.retrieveWoofTeams(teams, context.getConfiguration());
 
 		// Configure the teams
 		for (WoofTeamModel teamModel : teams.getWoofTeams()) {

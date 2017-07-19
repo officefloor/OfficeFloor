@@ -71,17 +71,18 @@ public class WoofObjectsLoaderImpl implements WoofObjectsLoader {
 	}
 
 	/*
-	 * ======================= AutoWireObjectsLoader ===========================
+	 * ======================= WoofObjectsLoader ===========================
 	 */
 
 	@Override
-	public void loadAutoWireObjectsConfiguration(WoofObjectsLoaderContext context) throws Exception {
+	public void loadWoofObjectsConfiguration(WoofObjectsLoaderContext context) throws Exception {
 
 		// Obtain the details
 		ConfigurationItem objectsConfiguration = context.getConfiguration();
 
 		// Load the objects model
-		WoofObjectsModel objects = this.repository.retrieveAutoWireObjects(objectsConfiguration);
+		WoofObjectsModel objects = new WoofObjectsModel();
+		this.repository.retrieveWoofObjects(objects, objectsConfiguration);
 
 		// Configure the objects
 		for (WoofObjectSourceModel objectSource : objects.getWoofObjectSources()) {
@@ -89,11 +90,11 @@ public class WoofObjectsLoaderImpl implements WoofObjectsLoader {
 			// Load based on object source type
 			if (objectSource instanceof WoofManagedObjectModel) {
 				// Load the managed object
-				this.loadAutoWireManagedObject((WoofManagedObjectModel) objectSource, context);
+				this.loadWoofManagedObject((WoofManagedObjectModel) objectSource, context);
 
 			} else if (objectSource instanceof WoofSupplierModel) {
 				// Load the supplier
-				this.loadAutoWireSupplier((WoofSupplierModel) objectSource, context);
+				this.loadWoofSupplier((WoofSupplierModel) objectSource, context);
 
 			} else {
 				// Unknown object source
@@ -113,7 +114,7 @@ public class WoofObjectsLoaderImpl implements WoofObjectsLoader {
 	 * @throws Exception
 	 *             If fails to load {@link ManagedObject}.
 	 */
-	private void loadAutoWireManagedObject(final WoofManagedObjectModel managedObject, WoofObjectsLoaderContext context)
+	private void loadWoofManagedObject(final WoofManagedObjectModel managedObject, WoofObjectsLoaderContext context)
 			throws Exception {
 
 		// Obtain the Office Architect
@@ -212,7 +213,7 @@ public class WoofObjectsLoaderImpl implements WoofObjectsLoader {
 	 * @throws IOException
 	 *             If failure loading {@link Property}.
 	 */
-	private void loadAutoWireSupplier(WoofSupplierModel supplierModel, WoofObjectsLoaderContext context)
+	private void loadWoofSupplier(WoofSupplierModel supplierModel, WoofObjectsLoaderContext context)
 			throws IOException {
 
 		// Obtain the supplier details

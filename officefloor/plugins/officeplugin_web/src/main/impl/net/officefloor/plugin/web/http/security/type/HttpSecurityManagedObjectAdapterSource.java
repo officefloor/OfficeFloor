@@ -91,6 +91,11 @@ public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>> implement
 	private final HttpSecuritySource<?, ?, D, ?> securitySource;
 
 	/**
+	 * {@link HttpSecuritySourceMetaData}.
+	 */
+	private HttpSecuritySourceMetaData<?, ?, D, ?> securitySourceMetaData;
+
+	/**
 	 * Should only be used within
 	 * {@link #doOperation(HttpSecuritySource, Runnable)}.
 	 * 
@@ -122,6 +127,15 @@ public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>> implement
 		this.securitySource = httpSecuritySource;
 	}
 
+	/**
+	 * Obtains the {@link HttpSecuritySourceMetaData}.
+	 * 
+	 * @return {@link HttpSecuritySourceMetaData}.
+	 */
+	public HttpSecuritySourceMetaData<?, ?, D, ?> getHttpSecuritySourceMetaData() {
+		return this.securitySourceMetaData;
+	}
+
 	/*
 	 * ==================== ManagedObjectSource ========================
 	 */
@@ -139,14 +153,15 @@ public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>> implement
 	}
 
 	@Override
-	public void init(ManagedObjectSourceContext<Indexed> context) throws Exception {
-		this.securitySource.init(new ManagedObjectHttpSecuritySourceContext<Indexed>(true, context));
-	}
-
-	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public ManagedObjectSourceMetaData<D, Indexed> getMetaData() {
-		return AdaptFactory.adaptObject(this.securitySource.getMetaData(),
+	public ManagedObjectSourceMetaData<D, Indexed> init(ManagedObjectSourceContext<Indexed> context) throws Exception {
+
+		// Initialise
+		this.securitySourceMetaData = this.securitySource
+				.init(new ManagedObjectHttpSecuritySourceContext<Indexed>(true, context));
+
+		// Obtain the security source
+		return AdaptFactory.adaptObject(this.securitySourceMetaData,
 				new AdaptFactory<ManagedObjectSourceMetaData, HttpSecuritySourceMetaData>() {
 					@Override
 					public ManagedObjectSourceMetaData createAdaptedObject(HttpSecuritySourceMetaData delegate) {

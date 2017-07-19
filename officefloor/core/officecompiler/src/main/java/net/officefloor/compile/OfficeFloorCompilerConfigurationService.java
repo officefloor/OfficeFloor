@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,27 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.objects;
+package net.officefloor.compile;
 
-import net.officefloor.compile.spi.supplier.source.SupplierSource;
-import net.officefloor.model.objects.WoofObjectsModel;
+import java.util.ServiceLoader;
 
 /**
- * Loads the {@link WoofObjectsModel} and configures the {@link SupplierSource}.
+ * {@link ServiceLoader} service to enable configuring the
+ * {@link OfficeFloorCompiler}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WoofObjectsLoader {
+public interface OfficeFloorCompilerConfigurationService {
 
 	/**
-	 * Loads the {@link WoofObjectsModel} configuration and configures the
-	 * {@link SupplierSource}.
+	 * Enables configuring the {@link OfficeFloorCompiler}.
 	 * 
-	 * @param context
-	 *            {@link WoofObjectsLoaderContext}.
+	 * @param compiler
+	 *            {@link OfficeFloorCompiler}.
 	 * @throws Exception
-	 *             If fails to load the configuration.
+	 *             If fails to configured the {@link OfficeFloorCompiler}.
 	 */
-	void loadWoofObjectsConfiguration(WoofObjectsLoaderContext context) throws Exception;
+	void configure(OfficeFloorCompiler compiler) throws Exception;
 
 }

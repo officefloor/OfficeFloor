@@ -341,12 +341,8 @@ public class LoadHttpSecuritySourceSpecificationTest extends OfficeFrameTestCase
 		}
 
 		@Override
-		public void init(HttpSecuritySourceContext context) throws Exception {
-			fail("Should not be invoked for obtaining specification");
-		}
-
-		@Override
-		public HttpSecuritySourceMetaData<HttpSecurity, HttpCredentials, None, None> getMetaData() {
+		public HttpSecuritySourceMetaData<HttpSecurity, HttpCredentials, None, None> init(
+				HttpSecuritySourceContext context) throws Exception {
 			fail("Should not be invoked for obtaining specification");
 			return null;
 		}

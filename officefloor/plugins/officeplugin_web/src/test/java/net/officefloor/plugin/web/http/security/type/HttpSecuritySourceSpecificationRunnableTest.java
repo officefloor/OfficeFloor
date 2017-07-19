@@ -126,12 +126,8 @@ public class HttpSecuritySourceSpecificationRunnableTest extends OfficeFrameTest
 		}
 
 		@Override
-		public void init(HttpSecuritySourceContext context) throws Exception {
-			fail("Should not be required for loading specification");
-		}
-
-		@Override
-		public HttpSecuritySourceMetaData<HttpSecurity, HttpCredentials, None, None> getMetaData() {
+		public HttpSecuritySourceMetaData<HttpSecurity, HttpCredentials, None, None> init(
+				HttpSecuritySourceContext context) throws Exception {
 			fail("Should not be required for loading specification");
 			return null;
 		}

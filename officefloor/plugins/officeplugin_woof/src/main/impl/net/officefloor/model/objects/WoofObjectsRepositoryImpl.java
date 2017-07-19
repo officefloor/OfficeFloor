@@ -18,8 +18,7 @@
 package net.officefloor.model.objects;
 
 import net.officefloor.configuration.ConfigurationItem;
-import net.officefloor.model.objects.WoofObjectsModel;
-import net.officefloor.model.objects.WoofObjectsRepository;
+import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
 /**
@@ -45,19 +44,16 @@ public class WoofObjectsRepositoryImpl implements WoofObjectsRepository {
 	}
 
 	/*
-	 * ================== AutoWireObjectsRepository ====================
+	 * ================== WoofObjectsRepository ====================
 	 */
 
 	@Override
-	public WoofObjectsModel retrieveAutoWireObjects(
-			ConfigurationItem configuration) throws Exception {
-		return this.modelRepository.retrieve(new WoofObjectsModel(),
-				configuration);
+	public void retrieveWoofObjects(WoofObjectsModel objects, ConfigurationItem configuration) throws Exception {
+		this.modelRepository.retrieve(objects, configuration);
 	}
 
 	@Override
-	public void storeAutoWireObjects(WoofObjectsModel objects,
-			ConfigurationItem configuration) throws Exception {
+	public void storeWoofObjects(WoofObjectsModel objects, WritableConfigurationItem configuration) throws Exception {
 		this.modelRepository.store(objects, configuration);
 	}
 

@@ -97,8 +97,7 @@ public abstract class AbstractHttpSecuritySource<S, C, D extends Enum<D>, F exte
 	/**
 	 * Specification for this {@link HttpSecuritySource}.
 	 */
-	private class Specification implements SpecificationContext,
-			HttpSecuritySourceSpecification {
+	private class Specification implements SpecificationContext, HttpSecuritySourceSpecification {
 
 		/**
 		 * Properties for the specification.
@@ -116,8 +115,7 @@ public abstract class AbstractHttpSecuritySource<S, C, D extends Enum<D>, F exte
 
 		@Override
 		public void addProperty(String name, String label) {
-			this.properties
-					.add(new HttpSecuritySourcePropertyImpl(name, label));
+			this.properties.add(new HttpSecuritySourcePropertyImpl(name, label));
 		}
 
 		@Override
@@ -135,19 +133,15 @@ public abstract class AbstractHttpSecuritySource<S, C, D extends Enum<D>, F exte
 		}
 	}
 
-	/**
-	 * {@link HttpSecuritySourceMetaData}.
-	 */
-	private MetaData metaData = null;
-
 	@Override
-	public void init(HttpSecuritySourceContext context) throws Exception {
+	public HttpSecuritySourceMetaData<S, C, D, F> init(HttpSecuritySourceContext context) throws Exception {
 
 		// Create the meta-data
-		this.metaData = new MetaData(context);
+		MetaData metaData = new MetaData(context);
+		this.loadMetaData(metaData);
 
-		// Initialise the meta-data
-		this.loadMetaData(this.metaData);
+		// Return the meta-data
+		return metaData;
 	}
 
 	/**
@@ -158,8 +152,7 @@ public abstract class AbstractHttpSecuritySource<S, C, D extends Enum<D>, F exte
 	 * @throws Exception
 	 *             If fails to load the meta-data.
 	 */
-	protected abstract void loadMetaData(MetaDataContext<S, C, D, F> context)
-			throws Exception;
+	protected abstract void loadMetaData(MetaDataContext<S, C, D, F> context) throws Exception;
 
 	/**
 	 * Context for the {@link HttpSecuritySource#getMetaData()}.
@@ -224,8 +217,8 @@ public abstract class AbstractHttpSecuritySource<S, C, D extends Enum<D>, F exte
 		Labeller addFlow(F key, Class<?> argumentType);
 
 		/**
-		 * Adds a required {@link Flow} identified by an index into the
-		 * order the {@link Flow} was added.
+		 * Adds a required {@link Flow} identified by an index into the order
+		 * the {@link Flow} was added.
 		 * 
 		 * @param argumentType
 		 *            Type of argument passed to the {@link Flow}.
@@ -253,8 +246,7 @@ public abstract class AbstractHttpSecuritySource<S, C, D extends Enum<D>, F exte
 	}
 
 	/**
-	 * Provides the ability to label the required dependency or
-	 * {@link Flow}.
+	 * Provides the ability to label the required dependency or {@link Flow}.
 	 */
 	public static interface Labeller {
 
@@ -278,8 +270,7 @@ public abstract class AbstractHttpSecuritySource<S, C, D extends Enum<D>, F exte
 	/**
 	 * Meta-data for the {@link HttpSecuritySource}.
 	 */
-	private class MetaData implements MetaDataContext<S, C, D, F>,
-			HttpSecuritySourceMetaData<S, C, D, F> {
+	private class MetaData implements MetaDataContext<S, C, D, F>, HttpSecuritySourceMetaData<S, C, D, F> {
 
 		/**
 		 * {@link HttpSecuritySourceContext}.
@@ -344,8 +335,7 @@ public abstract class AbstractHttpSecuritySource<S, C, D extends Enum<D>, F exte
 		@Override
 		public DependencyLabeller addDependency(Class<?> dependencyType) {
 			// Indexed, so use next index (size will increase with indexing)
-			return this.addDependency(this.dependencies.size(), null,
-					dependencyType);
+			return this.addDependency(this.dependencies.size(), null, dependencyType);
 		}
 
 		/**
@@ -359,12 +349,11 @@ public abstract class AbstractHttpSecuritySource<S, C, D extends Enum<D>, F exte
 		 *            Type of dependency.
 		 * @return {@link Labeller} for the dependency.
 		 */
-		private DependencyLabeller addDependency(final int index, D key,
-				Class<?> dependencyType) {
+		private DependencyLabeller addDependency(final int index, D key, Class<?> dependencyType) {
 
 			// Create the dependency meta-data
-			final HttpSecurityDependencyMetaDataImpl<D> dependency = new HttpSecurityDependencyMetaDataImpl<D>(
-					key, dependencyType);
+			final HttpSecurityDependencyMetaDataImpl<D> dependency = new HttpSecurityDependencyMetaDataImpl<D>(key,
+					dependencyType);
 
 			// Register the dependency at the index
 			this.dependencies.put(new Integer(index), dependency);
@@ -416,8 +405,7 @@ public abstract class AbstractHttpSecuritySource<S, C, D extends Enum<D>, F exte
 		private Labeller addFlow(final int index, F key, Class<?> argumentType) {
 
 			// Create the flow meta-data
-			final HttpSecurityFlowMetaDataImpl<F> flow = new HttpSecurityFlowMetaDataImpl<F>(
-					key, argumentType);
+			final HttpSecurityFlowMetaDataImpl<F> flow = new HttpSecurityFlowMetaDataImpl<F>(key, argumentType);
 
 			// Register the flow at the index
 			this.flows.put(new Integer(index), flow);
@@ -453,20 +441,13 @@ public abstract class AbstractHttpSecuritySource<S, C, D extends Enum<D>, F exte
 
 		@Override
 		public HttpSecurityDependencyMetaData<D>[] getDependencyMetaData() {
-			return ConstructUtil.toArray(this.dependencies,
-					new HttpSecurityDependencyMetaData[0]);
+			return ConstructUtil.toArray(this.dependencies, new HttpSecurityDependencyMetaData[0]);
 		}
 
 		@Override
 		public HttpSecurityFlowMetaData<F>[] getFlowMetaData() {
-			return ConstructUtil.toArray(this.flows,
-					new HttpSecurityFlowMetaData[0]);
+			return ConstructUtil.toArray(this.flows, new HttpSecurityFlowMetaData[0]);
 		}
-	}
-
-	@Override
-	public HttpSecuritySourceMetaData<S, C, D, F> getMetaData() {
-		return this.metaData;
 	}
 
 }

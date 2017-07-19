@@ -117,15 +117,19 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 	public <S, C, D extends Enum<D>, F extends Enum<F>> HttpSecurityType<S, C, D, F> loadHttpSecurityType(
 			HttpSecuritySource<S, C, D, F> httpSecuritySource, PropertyList propertyList) {
 
+		// Create the adaptation over the security source
+		HttpSecurityManagedObjectAdapterSource<D> adapter = new HttpSecurityManagedObjectAdapterSource<D>(
+				httpSecuritySource);
+
 		// Load the managed object type
-		ManagedObjectType<D> moType = this.loader
-				.loadManagedObjectType(new HttpSecurityManagedObjectAdapterSource<D>(httpSecuritySource), propertyList);
+		ManagedObjectType<D> moType = this.loader.loadManagedObjectType(adapter, propertyList);
 		if (moType == null) {
 			return null; // failed to obtain type
 		}
 
 		// Obtain the credentials type
-		Class<C> credentialsType = httpSecuritySource.getMetaData().getCredentialsClass();
+		@SuppressWarnings("unchecked")
+		Class<C> credentialsType = (Class<C>) adapter.getHttpSecuritySourceMetaData().getCredentialsClass();
 
 		// Return the adapted type
 		return new ManagedObjectHttpSecurityType<S, C, D, F>(moType, credentialsType);

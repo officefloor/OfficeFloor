@@ -22,6 +22,7 @@ import java.util.Map;
 
 import net.officefloor.compile.impl.util.DoubleKeyMap;
 import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
 /**
@@ -51,10 +52,10 @@ public class WoofRepositoryImpl implements WoofRepository {
 	 */
 
 	@Override
-	public WoofModel retrieveWoOF(ConfigurationItem configuration) throws Exception {
+	public void retrieveWoof(WoofModel woof, ConfigurationItem configuration) throws Exception {
 
 		// Load the WoOF from the configuration
-		WoofModel woof = this.modelRepository.retrieve(new WoofModel(), configuration);
+		this.modelRepository.retrieve(woof, configuration);
 
 		// Create the set of Section Inputs
 		DoubleKeyMap<String, String, WoofSectionInputModel> sectionInputs = new DoubleKeyMap<String, String, WoofSectionInputModel>();
@@ -281,13 +282,10 @@ public class WoofRepositoryImpl implements WoofRepository {
 				}
 			}
 		}
-
-		// Return the WoOF
-		return woof;
 	}
 
 	@Override
-	public void storeWoOF(WoofModel woof, ConfigurationItem configuration) throws Exception {
+	public void storeWoof(WoofModel woof, WritableConfigurationItem configuration) throws Exception {
 
 		// Specify section inputs
 		for (WoofSectionModel section : woof.getWoofSections()) {

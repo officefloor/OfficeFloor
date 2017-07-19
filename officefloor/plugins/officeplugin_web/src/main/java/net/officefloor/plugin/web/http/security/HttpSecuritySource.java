@@ -48,31 +48,16 @@ public interface HttpSecuritySource<S, C, D extends Enum<D>, F extends Enum<F>> 
 	HttpSecuritySourceSpecification getSpecification();
 
 	/**
-	 * Called only once after the {@link HttpSecuritySource} is instantiated.
+	 * Initialises the {@link HttpSecuritySource}.
 	 * 
 	 * @param context
 	 *            {@link HttpSecuritySourceContext} to use in initialising.
+	 * @return Meta-data to describe this.
 	 * @throws Exception
 	 *             Should the {@link HttpSecuritySource} fail to configure
 	 *             itself from the input properties.
 	 */
-	void init(HttpSecuritySourceContext context) throws Exception;
-
-	/**
-	 * <p>
-	 * Obtains the meta-data to describe this.
-	 * <p>
-	 * This is called after the {@link #init(HttpSecuritySourceContext)} method
-	 * and therefore may use the configuration.
-	 * <p>
-	 * This should always return non-null. If there is a problem due to
-	 * incorrect configuration, the {@link #init(HttpSecuritySourceContext)}
-	 * should indicate this via an exception.
-	 * 
-	 * @return Meta-data to describe this.
-	 */
-	@Deprecated // return from init method
-	HttpSecuritySourceMetaData<S, C, D, F> getMetaData();
+	HttpSecuritySourceMetaData<S, C, D, F> init(HttpSecuritySourceContext context) throws Exception;
 
 	/**
 	 * <p>

@@ -25,8 +25,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.ServiceLoader;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.OfficeFloorCompilerConfigurationService;
 import net.officefloor.compile.TypeLoader;
 import net.officefloor.compile.administration.AdministrationLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
@@ -512,6 +514,19 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		// Ensure aliases are added
 		this.ensureSourceAliasesAdded();
 
+		// Configure this compiler
+		ServiceLoader<OfficeFloorCompilerConfigurationService> serviceLoader = ServiceLoader
+				.load(OfficeFloorCompilerConfigurationService.class, this.getClassLoader());
+		for (OfficeFloorCompilerConfigurationService configurationService : serviceLoader) {
+			try {
+				configurationService.configure(this);
+			} catch (Exception ex) {
+				this.getCompilerIssues().addIssue(this, configurationService.getClass().getName()
+						+ " failed to configure " + OfficeFloorCompiler.class.getSimpleName(), ex);
+				return null; // failed to configure compiler
+			}
+		}
+
 		// Compile, build and return the OfficeFloor
 		OfficeFloorSource officeFloorSource;
 		if (this.officeFloorSource != null) {
@@ -555,7 +570,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		if (officeFloorMBeanRegistrator != null) {
 			builder.addOfficeFloorListener(officeFloorMBeanRegistrator);
 		}
-		
+
 		// Add configured OfficeFloor listeners
 		for (OfficeFloorListener listener : this.officeFloorListeners) {
 			builder.addOfficeFloorListener(listener);

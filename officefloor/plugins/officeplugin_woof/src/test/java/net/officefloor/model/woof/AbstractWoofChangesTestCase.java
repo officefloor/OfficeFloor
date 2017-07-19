@@ -109,7 +109,7 @@ public abstract class AbstractWoofChangesTestCase extends
 	protected WoofModel retrieveModel(ConfigurationItem configurationItem)
 			throws Exception {
 		return new WoofRepositoryImpl(new ModelRepositoryImpl())
-				.retrieveWoOF(configurationItem);
+				.retrieveWoof(configurationItem);
 	}
 
 	@Override
@@ -130,14 +130,14 @@ public abstract class AbstractWoofChangesTestCase extends
 			// Provide details of expected model
 			this.printMessage("------------------ EXPECTED ------------------");
 			ConfigurationItem expectedConfig = new MemoryConfigurationItem();
-			new WoofRepositoryImpl(new ModelRepositoryImpl()).storeWoOF(
+			new WoofRepositoryImpl(new ModelRepositoryImpl()).storeWoof(
 					expected, expectedConfig);
 			this.printMessage(expectedConfig.getReader());
 
 			// Provide details of actual model
 			this.printMessage("------------------- ACTUAL -------------------");
 			ConfigurationItem actualConfig = new MemoryConfigurationItem();
-			new WoofRepositoryImpl(new ModelRepositoryImpl()).storeWoOF(actual,
+			new WoofRepositoryImpl(new ModelRepositoryImpl()).storeWoof(actual,
 					actualConfig);
 			this.printMessage(actualConfig.getReader());
 			this.printMessage("================ END COMPARE =================");

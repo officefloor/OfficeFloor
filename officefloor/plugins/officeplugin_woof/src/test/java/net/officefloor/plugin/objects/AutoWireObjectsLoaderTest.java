@@ -143,7 +143,7 @@ public class AutoWireObjectsLoaderTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		this.loader.loadAutoWireObjectsConfiguration(this.loaderContext);
+		this.loader.loadWoofObjectsConfiguration(this.loaderContext);
 		this.verifyMockObjects();
 	}
 
@@ -205,7 +205,7 @@ public class AutoWireObjectsLoaderTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		this.loader.loadAutoWireObjectsConfiguration(this.loaderContext);
+		this.loader.loadWoofObjectsConfiguration(this.loaderContext);
 		this.verifyMockObjects();
 	}
 
@@ -249,7 +249,7 @@ public class AutoWireObjectsLoaderTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		this.loader.loadAutoWireObjectsConfiguration(this.loaderContext);
+		this.loader.loadWoofObjectsConfiguration(this.loaderContext);
 		this.verifyMockObjects();
 	}
 
