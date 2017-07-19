@@ -519,7 +519,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 				.load(OfficeFloorCompilerConfigurationService.class, this.getClassLoader());
 		for (OfficeFloorCompilerConfigurationService configurationService : serviceLoader) {
 			try {
-				configurationService.configure(this);
+				configurationService.configureOfficeFloorCompiler(this);
 			} catch (Exception ex) {
 				this.getCompilerIssues().addIssue(this, configurationService.getClass().getName()
 						+ " failed to configure " + OfficeFloorCompiler.class.getSimpleName(), ex);

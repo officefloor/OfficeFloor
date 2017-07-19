@@ -35,6 +35,6 @@ public interface OfficeFloorCompilerConfigurationService {
 	 * @throws Exception
 	 *             If fails to configured the {@link OfficeFloorCompiler}.
 	 */
-	void configure(OfficeFloorCompiler compiler) throws Exception;
+	void configureOfficeFloorCompiler(OfficeFloorCompiler compiler) throws Exception;
 
 }

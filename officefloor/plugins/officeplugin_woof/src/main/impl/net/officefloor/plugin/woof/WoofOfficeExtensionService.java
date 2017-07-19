@@ -22,33 +22,20 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import net.officefloor.autowire.AutoWireApplication;
-import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.OfficeFloorCompilerConfigurationService;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionService;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionContext;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
-import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
-import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.configuration.ConfigurationItem;
-import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.source.ResourceSource;
-import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.frame.api.source.SourceProperties;
-import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.objects.WoofObjectsRepositoryImpl;
 import net.officefloor.model.teams.WoofTeamsRepositoryImpl;
@@ -62,10 +49,6 @@ import net.officefloor.plugin.teams.WoofTeamsLoaderContext;
 import net.officefloor.plugin.teams.WoofTeamsLoaderImpl;
 import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.application.WebArchitectEmployer;
-import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
-import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
-import net.officefloor.plugin.web.http.server.HttpServerAutoWireApplication;
-import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
 /**
@@ -74,7 +57,8 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofOfficeExtensionService implements OfficeFloorExtensionService, OfficeExtensionService {
+public class WoofOfficeExtensionService
+		implements OfficeFloorCompilerConfigurationService, OfficeFloorExtensionService, OfficeExtensionService {
 
 	/**
 	 * Property for the location of the WoOF configuration for the application.
@@ -117,76 +101,29 @@ public class WoofOfficeExtensionService implements OfficeFloorExtensionService, 
 	 */
 	public static final String WOOF_TEMPLATE_URI_SUFFIX = ".woof";
 
-	/**
-	 * Loads the web application resources for WoOF within a Maven project.
-	 * 
-	 * @param context
-	 *            {@link OfficeFloorExtensionContext.
-	 * @param projectDirectory
-	 *            Maven project directory.
+	/*
+	 * =========== OfficeFloorCompilerConfigurationService =============
 	 */
-	public static void loadWebResourcesFromMavenProject(OfficeFloorExtensionContext context, File projectDirectory) {
+
+	@Override
+	public void configureOfficeFloorCompiler(OfficeFloorCompiler compiler) throws Exception {
+
+		// Obtain the current directory
+		File currentDirectory = new File(".");
 
 		// Determine if running within maven project
-		if (!(new File(projectDirectory, "pom.xml").exists())) {
+		if (!(new File(currentDirectory, "pom.xml").exists())) {
 			return; // must be a maven project
 		}
 
 		// Obtain the web app directory
-		File webAppDir;
-		String webAppLocation = context.getProperty(PROPERTY_WEBAPP_LOCATION);
-		if (webAppLocation != null) {
-			// Specified by system property
-			webAppDir = new File(webAppLocation);
-
-		} else {
-			// Not configured so derive from default location
-			webAppDir = new File(projectDirectory, WEBAPP_PATH);
-		}
-
-		// Within maven project, so include webapp WoOF resources
+		File webAppDir = new File(currentDirectory, WEBAPP_PATH);
 		if (!(webAppDir.exists())) {
 			return; // not include
 		}
 
-		// Load the web resources
-		loadWebResources(contextConfigurable, webAppDir, new File[] { webAppDir });
-	}
-
-	/**
-	 * Loads the web application resources for WoOF within a Maven project.
-	 * 
-	 * @param contextConfigurable
-	 *            {@link WoofContextConfigurable}.
-	 * @param webAppDir
-	 *            <code>webapp</code> directory.
-	 * @param resourceDirectories
-	 *            Directories to source public resources.
-	 */
-	public static void loadWebResources(final WoofContextConfigurable contextConfigurable, final File webAppDir,
-			File... resourceDirectories) {
-
-		// Ensure have web app directory
-		if (webAppDir == null) {
-			LOGGER.warning("No web app directory provided so not including web resources");
-			return; // must have web app directory
-		}
-
-		// Ensure the WEB-INF/web.xml file exists
-		if (!(new File(webAppDir, WEBXML_FILE_PATH).exists())) {
-			LOGGER.warning("Not including webapp content as " + WEBXML_FILE_PATH + " not found within "
-					+ webAppDir.getAbsolutePath());
-			return; // not include
-		}
-
-		// Configure the webapp directory
-		contextConfigurable.setWebAppDirectory(webAppDir);
-
-		// Configure resource directories
-		SourceHttpResourceFactory.loadProperties(null, resourceDirectories, null, Boolean.FALSE, contextConfigurable);
-
 		// Make WoOF resources available
-		contextConfigurable.addResources(new ResourceSource() {
+		compiler.addResources(new ResourceSource() {
 			@Override
 			public InputStream sourceResource(String location) {
 
@@ -203,59 +140,22 @@ public class WoofOfficeExtensionService implements OfficeFloorExtensionService, 
 						return new FileInputStream(resource);
 					}
 				} catch (IOException ex) {
-					// Indicate unable to obtain resource
+					// Failed to obtain content so no resource
+					return null;
 				}
 
 				// Not found within webapp directory
 				return null;
 			}
 		});
-	}
-
-	/**
-	 * Loads extension functionality from the {@link WoofExtensionService}
-	 * instances.
-	 * 
-	 * @param webARchitect
-	 *            {@link WebArchitect}.
-	 * @param properties
-	 *            {@link SourceProperties}.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
-	 * @param resourceSources
-	 *            {@link ResourceSource} instances.
-	 * @throws Exception
-	 *             If fails to load the extension functionality.
-	 */
-	public static void loadWebApplicationExtensions(WebArchitect webARchitect, SourceProperties properties,
-			ClassLoader classLoader, ResourceSource... resourceSources) throws Exception {
-
-	}
-
-	/**
-	 * WoOF application {@link ResourceSource} instances.
-	 */
-	private final List<ResourceSource> applicationResourceSources = new LinkedList<ResourceSource>();
-
-	/*
-	 * ======================= WoofContextConfigurable =========================
-	 */
-
-	@Override
-	public void addProperty(String name, String value) {
-		this.getOfficeFloorCompiler().addProperty(name, value);
-	}
-
-	@Override
-	public void setWebAppDirectory(final File webappDirectory) {
 
 		// Include all webapp directory resources for application extension
-		this.applicationResourceSources.add(new ResourceSource() {
+		compiler.addResources(new ResourceSource() {
 			@Override
 			public InputStream sourceResource(String location) {
 
 				// Determine if resource exists
-				File resource = new File(webappDirectory, location);
+				File resource = new File(webAppDir, location);
 				if (!(resource.exists())) {
 					return null; // resource not exist
 				}
@@ -265,13 +165,6 @@ public class WoofOfficeExtensionService implements OfficeFloorExtensionService, 
 					return new FileInputStream(resource);
 
 				} catch (IOException ex) {
-
-					// Log failure to source resource
-					if (LOGGER.isLoggable(Level.WARNING)) {
-						LOGGER.log(Level.WARNING, "Failed to source resource " + location + " from webapp directory "
-								+ webappDirectory.getAbsolutePath(), ex);
-					}
-
 					// Failed to obtain content so no resource
 					return null;
 				}

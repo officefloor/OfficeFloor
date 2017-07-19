@@ -137,7 +137,7 @@ public class OfficeFloorCompilerConfigurationServiceTest extends OfficeFrameTest
 	 */
 
 	@Override
-	public void configure(OfficeFloorCompiler compiler) throws Exception {
+	public void configureOfficeFloorCompiler(OfficeFloorCompiler compiler) throws Exception {
 		if (isAddListener) {
 
 			// Flag that configured

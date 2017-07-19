@@ -48,7 +48,6 @@ import net.officefloor.plugin.web.http.security.HttpSecuritySectionSource;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityFlowType;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
-import net.officefloor.plugin.woof.WoofOfficeExtensionService;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoader;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoaderImpl;
 
@@ -343,11 +342,8 @@ public class WoofChangesImpl implements WoofChanges {
 	private static String getTemplateName(String templatePath, String uri, WoofTemplateModel template,
 			List<WoofTemplateModel> templates) {
 
-		// Name based on template URI
-		String templateName = WoofOfficeExtensionService.getTemplateSectionName(uri);
-
 		// Obtain the unique template name
-		templateName = getUniqueName(templateName, template, templates, TEMPLATE_NAME_EXTRACTOR);
+		String templateName = getUniqueName(uri, template, templates, TEMPLATE_NAME_EXTRACTOR);
 
 		// Return the template name
 		return templateName;
