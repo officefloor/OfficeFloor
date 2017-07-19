@@ -98,6 +98,7 @@ import net.officefloor.compile.spi.section.SubSectionObject;
 import net.officefloor.compile.spi.section.SubSectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
+import net.officefloor.configuration.ConfigurationError;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
@@ -410,6 +411,10 @@ public class SectionNodeImpl implements SectionNode {
 			this.addIssue("Can not obtain resource at location '" + ex.getUnknownResourceLocation() + "' for "
 					+ SectionSource.class.getSimpleName() + " " + source.getClass().getName());
 			return false; // must have resource
+
+		} catch (ConfigurationError ex) {
+			ex.addConfigurationIssue(this, this.context.getCompilerIssues());
+			return false; // must have configuration
 
 		} catch (LoadTypeError ex) {
 			ex.addLoadTypeIssue(this, this.context.getCompilerIssues());

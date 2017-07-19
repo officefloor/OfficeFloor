@@ -18,7 +18,10 @@
 package net.officefloor.compile.impl.section;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.sql.Connection;
 import java.util.Properties;
 
@@ -49,6 +52,7 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
+import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -206,6 +210,116 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 			@Override
 			public void sourceSection(SectionDesigner section, SectionSourceContext context) throws Exception {
 				assertSame("Incorrect resource", resource, context.getResource(location));
+			}
+		});
+	}
+
+	/**
+	 * Ensure issue if missing {@link ConfigurationItem}.
+	 */
+	public void testMissingConfigurationItem() {
+
+		// Record missing configuration item
+		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource("missing"), null);
+		this.issues.recordIssue("<type>", SectionNodeImpl.class,
+				"Can not obtain ConfigurationItem at location 'missing'");
+
+		// Attempt to load section
+		this.loadSectionType(false, new Loader() {
+			@Override
+			public void sourceSection(SectionDesigner section, SectionSourceContext context) throws Exception {
+				context.getConfigurationItem("missing", null);
+			}
+		});
+	}
+
+	/**
+	 * Ensure issue if missing {@link Property} for {@link ConfigurationItem}.
+	 */
+	public void testMissingPropertyForConfigurationItem() {
+
+		// Record missing resource
+		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource("configuration"),
+				new ByteArrayInputStream("${missing}".getBytes()));
+		this.issues.recordIssue("<type>", SectionNodeImpl.class,
+				"Can not obtain ConfigurationItem at location 'configuration' as missing property 'missing'");
+
+		// Attempt to load section
+		this.loadSectionType(false, new Loader() {
+			@Override
+			public void sourceSection(SectionDesigner section, SectionSourceContext context) throws Exception {
+				context.getConfigurationItem("configuration", null);
+			}
+		});
+	}
+
+	/**
+	 * Ensure able to obtain a {@link ConfigurationItem}.
+	 */
+	public void testGetConfigurationItem() throws Exception {
+
+		final String location = "LOCATION";
+		final InputStream resource = new ByteArrayInputStream("content".getBytes());
+
+		// Record obtaining the configuration item
+		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource(location), resource);
+
+		// Obtain the configuration item
+		this.loadSectionType(true, new Loader() {
+			@Override
+			public void sourceSection(SectionDesigner section, SectionSourceContext context) throws Exception {
+				Reader configuration = context.getConfigurationItem(location, null).getReader();
+				assertContents(new StringReader("content"), configuration);
+			}
+		});
+	}
+
+	/**
+	 * Ensure able to tag replace {@link ConfigurationItem}.
+	 */
+	public void testTagReplaceConfigurationItem() throws Exception {
+
+		final String location = "LOCATION";
+		final InputStream resource = new ByteArrayInputStream("${tag}".getBytes());
+
+		// Record obtaining the configuration item
+		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource(location), resource);
+
+		// Obtain the configuration item
+		this.loadSectionType(true, new Loader() {
+			@Override
+			public void sourceSection(SectionDesigner section, SectionSourceContext context) throws Exception {
+				Reader configuration = context.getConfigurationItem(location, null).getReader();
+				assertContents(new StringReader("replace"), configuration);
+			}
+		}, "tag", "replace");
+	}
+
+	/**
+	 * Ensure handle {@link ConfigurationItem} failure.
+	 */
+	public void testConfigurationItemFailure() throws Exception {
+
+		final String location = "LOCATION";
+		final IOException failure = new IOException("TEST");
+		final InputStream resource = new InputStream() {
+			@Override
+			public int read() throws IOException {
+				throw failure;
+			}
+		};
+
+		// Record obtaining the configuration item
+		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource(location), resource);
+		this.issues.recordIssue("<type>", SectionNodeImpl.class,
+				"Failed to obtain ConfigurationItem at location 'LOCATION': TEST", failure);
+
+		// Obtain the configuration item
+		this.loadSectionType(false, new Loader() {
+			@Override
+			public void sourceSection(SectionDesigner section, SectionSourceContext context) throws Exception {
+				context.getConfigurationItem(location, null);
+				fail("Should not be successful");
 			}
 		});
 	}

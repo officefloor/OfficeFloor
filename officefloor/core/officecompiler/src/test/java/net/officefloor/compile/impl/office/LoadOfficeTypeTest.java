@@ -18,7 +18,10 @@
 package net.officefloor.compile.impl.office;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.sql.Connection;
 import java.util.Properties;
 
@@ -32,11 +35,13 @@ import net.officefloor.compile.impl.governance.MockLoadGovernance;
 import net.officefloor.compile.impl.managedobject.MockLoadManagedObject;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
+import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeInputNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeObjectNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeOutputNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeTeamNodeImpl;
+import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeAvailableSectionInputType;
@@ -63,6 +68,7 @@ import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.OfficeSourceSpecification;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
+import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.source.TestSource;
@@ -251,6 +257,115 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 			@Override
 			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
 				assertSame("Incorrect resource", resource, context.getResource(location));
+			}
+		});
+	}
+
+	/**
+	 * Ensure issue if missing {@link ConfigurationItem}.
+	 */
+	public void testMissingConfigurationItem() {
+
+		// Record missing configuration item
+		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource("missing"), null);
+		this.issues.recordIssue("Type", OfficeNodeImpl.class, "Can not obtain ConfigurationItem at location 'missing'");
+
+		// Attempt to load office
+		this.loadOfficeType(false, new Loader() {
+			@Override
+			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
+				context.getConfigurationItem("missing", null);
+			}
+		});
+	}
+
+	/**
+	 * Ensure issue if missing {@link Property} for {@link ConfigurationItem}.
+	 */
+	public void testMissingPropertyForConfigurationItem() {
+
+		// Record missing resource
+		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource("configuration"),
+				new ByteArrayInputStream("${missing}".getBytes()));
+		this.issues.recordIssue("Type", OfficeNodeImpl.class,
+				"Can not obtain ConfigurationItem at location 'configuration' as missing property 'missing'");
+
+		// Attempt to load office
+		this.loadOfficeType(false, new Loader() {
+			@Override
+			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
+				context.getConfigurationItem("configuration", null);
+			}
+		});
+	}
+
+	/**
+	 * Ensure able to obtain a {@link ConfigurationItem}.
+	 */
+	public void testGetConfigurationItem() throws Exception {
+
+		final String location = "LOCATION";
+		final InputStream resource = new ByteArrayInputStream("content".getBytes());
+
+		// Record obtaining the configuration item
+		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource(location), resource);
+
+		// Obtain the configuration item
+		this.loadOfficeType(true, new Loader() {
+			@Override
+			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
+				Reader configuration = context.getConfigurationItem(location, null).getReader();
+				assertContents(new StringReader("content"), configuration);
+			}
+		});
+	}
+
+	/**
+	 * Ensure able to tag replace {@link ConfigurationItem}.
+	 */
+	public void testTagReplaceConfigurationItem() throws Exception {
+
+		final String location = "LOCATION";
+		final InputStream resource = new ByteArrayInputStream("${tag}".getBytes());
+
+		// Record obtaining the configuration item
+		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource(location), resource);
+
+		// Obtain the configuration item
+		this.loadOfficeType(true, new Loader() {
+			@Override
+			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
+				Reader configuration = context.getConfigurationItem(location, null).getReader();
+				assertContents(new StringReader("replace"), configuration);
+			}
+		}, "tag", "replace");
+	}
+
+	/**
+	 * Ensure handle {@link ConfigurationItem} failure.
+	 */
+	public void testConfigurationItemFailure() throws Exception {
+
+		final String location = "LOCATION";
+		final IOException failure = new IOException("TEST");
+		final InputStream resource = new InputStream() {
+			@Override
+			public int read() throws IOException {
+				throw failure;
+			}
+		};
+
+		// Record obtaining the configuration item
+		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource(location), resource);
+		this.issues.recordIssue("Type", OfficeNodeImpl.class,
+				"Failed to obtain ConfigurationItem at location 'LOCATION': TEST", failure);
+
+		// Obtain the configuration item
+		this.loadOfficeType(false, new Loader() {
+			@Override
+			public void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception {
+				context.getConfigurationItem(location, null);
+				fail("Should not be successful");
 			}
 		});
 	}
