@@ -152,12 +152,6 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 			.createMock(ManagingOfficeConfiguration.class);
 
 	/**
-	 * {@link InputManagedObjectConfiguration}.
-	 */
-	private final InputManagedObjectConfiguration<?> inputConfiguration = this
-			.createMock(InputManagedObjectConfiguration.class);
-
-	/**
 	 * {@link ManagingOfficeBuilder}.
 	 */
 	private final ManagingOfficeBuilder<?> managingOfficeBuilder = this.createMock(ManagingOfficeBuilder.class);
@@ -1082,7 +1076,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void init(ManagedObjectSourceContext context) throws Exception {
+		public ManagedObjectSourceMetaData init(ManagedObjectSourceContext context) throws Exception {
 
 			// Obtain the required property
 			if (requiredPropertyName != null) {
@@ -1139,10 +1133,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 			if (initFailure != null) {
 				throw initFailure;
 			}
-		}
 
-		@Override
-		public ManagedObjectSourceMetaData getMetaData() {
+			// Return the meta-data
 			return metaData;
 		}
 

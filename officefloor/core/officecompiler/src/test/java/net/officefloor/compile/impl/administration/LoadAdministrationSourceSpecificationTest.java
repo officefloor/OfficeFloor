@@ -331,8 +331,7 @@ public class LoadAdministrationSourceSpecificationTest extends OfficeFrameTestCa
 		}
 
 		/*
-		 * ================ AdministrationSource
-		 * ================================
+		 * ================ AdministrationSource ================
 		 */
 
 		@Override
@@ -347,12 +346,8 @@ public class LoadAdministrationSourceSpecificationTest extends OfficeFrameTestCa
 		}
 
 		@Override
-		public void init(AdministrationSourceContext context) throws Exception {
-			fail("Should not be invoked for obtaining specification");
-		}
-
-		@Override
-		public AdministrationSourceMetaData<Object, None, None> getMetaData() {
+		public AdministrationSourceMetaData<Object, None, None> init(AdministrationSourceContext context)
+				throws Exception {
 			fail("Should not be invoked for obtaining specification");
 			return null;
 		}

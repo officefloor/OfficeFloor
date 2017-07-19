@@ -237,9 +237,11 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 				managingOffice, new PropertyListSourceProperties(propertyList), this.nodeContext.getRootSourceContext(),
 				managingOffice.getBuilder(), office.getBuilder());
 
+		// Initialise the managed object source and obtain meta-data
+		ManagedObjectSourceMetaData<D, F> metaData;
 		try {
 			// Initialise the managed object source
-			managedObjectSource.init(sourceContext);
+			metaData = managedObjectSource.init(sourceContext);
 
 		} catch (UnknownPropertyError ex) {
 			this.addIssue("Missing property '" + ex.getUnknownPropertyName() + "'");
@@ -258,14 +260,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 			return null; // must initialise
 		}
 
-		// Obtain the meta-data
-		ManagedObjectSourceMetaData<D, F> metaData;
-		try {
-			metaData = managedObjectSource.getMetaData();
-		} catch (Throwable ex) {
-			this.addIssue("Failed to get " + ManagedObjectSourceMetaData.class.getSimpleName(), ex);
-			return null; // must have meta-data
-		}
+		// Ensure have meta-data
 		if (metaData == null) {
 			this.addIssue("Returned null " + ManagedObjectSourceMetaData.class.getSimpleName());
 			return null; // must have meta-data

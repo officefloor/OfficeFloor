@@ -208,9 +208,11 @@ public class AdministrationLoaderImpl implements AdministrationLoader {
 		SourceProperties properties = new PropertyListSourceProperties(propertyList);
 		AdministrationSourceContext context = new AdministrationSourceContextImpl(true, properties, sourceContext);
 
+		// Initialise the administration source and obtain the meta-data
+		AdministrationSourceMetaData<E, F, G> metaData;
 		try {
 			// Initialise the administrator source
-			administratorSource.init(context);
+			metaData = administratorSource.init(context);
 
 		} catch (UnknownPropertyError ex) {
 			this.addIssue("Missing property '" + ex.getUnknownPropertyName() + "'");
@@ -229,14 +231,7 @@ public class AdministrationLoaderImpl implements AdministrationLoader {
 			return null; // must initialise
 		}
 
-		// Ensure handle issues obtaining meta-data
-		AdministrationSourceMetaData<E, F, G> metaData;
-		try {
-			metaData = administratorSource.getMetaData();
-		} catch (Throwable ex) {
-			this.addIssue("Failed to get " + AdministrationSourceMetaData.class.getSimpleName(), ex);
-			return null; // must successfully get meta-data
-		}
+		// Ensure have meta-data
 		if (metaData == null) {
 			this.addIssue("Returned null " + AdministrationSourceMetaData.class.getSimpleName());
 			return null; // must have meta-data

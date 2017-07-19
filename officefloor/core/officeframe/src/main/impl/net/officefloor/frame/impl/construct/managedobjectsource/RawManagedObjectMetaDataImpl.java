@@ -271,9 +271,11 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 				managedObjectSourceName, managingOfficeConfiguration, properties, sourceContext, managingOfficeBuilder,
 				officeBuilder);
 
+		// Initialise the managed object source and obtain meta-data
+		ManagedObjectSourceMetaData<d, h> metaData;
 		try {
 			// Initialise the managed object source
-			managedObjectSource.init(context);
+			metaData = managedObjectSource.init(context);
 
 		} catch (UnknownPropertyError ex) {
 			issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
@@ -299,8 +301,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 		// Flag initialising over
 		context.flagInitOver();
 
-		// Obtain the meta-data
-		ManagedObjectSourceMetaData<d, h> metaData = managedObjectSource.getMetaData();
+		// Ensure have meta-data
 		if (metaData == null) {
 			issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName, "Must provide meta-data");
 			return null; // can not carry on

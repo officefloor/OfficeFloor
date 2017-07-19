@@ -1435,12 +1435,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		}
 
 		@Override
-		public void init(ManagedObjectSourceContext<Indexed> context) throws Exception {
-			fail("Should not use ManagedObjectSource");
-		}
-
-		@Override
-		public ManagedObjectSourceMetaData<Indexed, Indexed> getMetaData() {
+		public ManagedObjectSourceMetaData<Indexed, Indexed> init(ManagedObjectSourceContext<Indexed> context)
+				throws Exception {
 			fail("Should not use ManagedObjectSource");
 			return null;
 		}

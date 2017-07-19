@@ -43,8 +43,7 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
  *
  * @author Daniel Sagenschneider
  */
-public class LoadOfficeFloorManagedObjectSourceTypeTest extends
-		OfficeFrameTestCase {
+public class LoadOfficeFloorManagedObjectSourceTypeTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure can load via {@link ClassManagedObjectSource} {@link Class}.
@@ -58,27 +57,22 @@ public class LoadOfficeFloorManagedObjectSourceTypeTest extends
 		final String MANAGED_OBJECT_SOURCE_NAME = "MOS";
 
 		// Configure test
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(new FailTestCompilerIssues());
 
 		// Configure to load simple class
 		PropertyList properties = compiler.createPropertyList();
-		properties.addProperty(
-				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME).setValue(
-				MockLoadManagedObject.class.getName());
+		properties.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME)
+				.setValue(MockLoadManagedObject.class.getName());
 
 		// Obtain node context
 		NodeContext nodeContext = (NodeContext) compiler;
 
 		// Load the OfficeFloor managed object source type
 		ManagedObjectLoader moLoader = nodeContext.getManagedObjectLoader(node);
-		OfficeFloorManagedObjectSourceType mosType = moLoader
-				.loadOfficeFloorManagedObjectSourceType(
-						MANAGED_OBJECT_SOURCE_NAME,
-						ClassManagedObjectSource.class, properties);
-		MockLoadManagedObject.assertOfficeFloorManagedObjectSourceType(mosType,
-				MANAGED_OBJECT_SOURCE_NAME);
+		OfficeFloorManagedObjectSourceType mosType = moLoader.loadOfficeFloorManagedObjectSourceType(
+				MANAGED_OBJECT_SOURCE_NAME, ClassManagedObjectSource.class, properties);
+		MockLoadManagedObject.assertOfficeFloorManagedObjectSourceType(mosType, MANAGED_OBJECT_SOURCE_NAME);
 	}
 
 	/**
@@ -93,27 +87,22 @@ public class LoadOfficeFloorManagedObjectSourceTypeTest extends
 		final String MANAGED_OBJECT_SOURCE_NAME = "MOS";
 
 		// Configure test
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(new FailTestCompilerIssues());
 
 		// Configure to load simple class
 		PropertyList properties = compiler.createPropertyList();
-		properties.addProperty(
-				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME).setValue(
-				MockLoadManagedObject.class.getName());
+		properties.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME)
+				.setValue(MockLoadManagedObject.class.getName());
 
 		// Obtain node context
 		NodeContext nodeContext = (NodeContext) compiler;
 
 		// Load the OfficeFloor managed object source type
 		ManagedObjectLoader moLoader = nodeContext.getManagedObjectLoader(node);
-		OfficeFloorManagedObjectSourceType mosType = moLoader
-				.loadOfficeFloorManagedObjectSourceType(
-						MANAGED_OBJECT_SOURCE_NAME,
-						new ClassManagedObjectSource(), properties);
-		MockLoadManagedObject.assertOfficeFloorManagedObjectSourceType(mosType,
-				MANAGED_OBJECT_SOURCE_NAME);
+		OfficeFloorManagedObjectSourceType mosType = moLoader.loadOfficeFloorManagedObjectSourceType(
+				MANAGED_OBJECT_SOURCE_NAME, new ClassManagedObjectSource(), properties);
+		MockLoadManagedObject.assertOfficeFloorManagedObjectSourceType(mosType, MANAGED_OBJECT_SOURCE_NAME);
 	}
 
 	/**
@@ -129,8 +118,8 @@ public class LoadOfficeFloorManagedObjectSourceTypeTest extends
 		// Record failure to instantiate
 		this.recordReturn(node, node.getNodeName(), "mos");
 		issues.recordIssue("mos", node.getClass(),
-				"Failed to obtain ManagedObjectSourceSpecification from "
-						+ MockManagedObjectSource.class.getName(), failure);
+				"Failed to obtain ManagedObjectSourceSpecification from " + MockManagedObjectSource.class.getName(),
+				failure);
 
 		// Attempt to obtain specification
 		MockManagedObjectSource.reset();
@@ -138,8 +127,7 @@ public class LoadOfficeFloorManagedObjectSourceTypeTest extends
 		this.replayMockObjects();
 
 		// Configure test
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(issues);
 
 		// Obtain node context
@@ -147,10 +135,8 @@ public class LoadOfficeFloorManagedObjectSourceTypeTest extends
 
 		// Load the OfficeFloor managed object source type
 		ManagedObjectLoader moLoader = nodeContext.getManagedObjectLoader(node);
-		OfficeFloorManagedObjectSourceType mosType = moLoader
-				.loadOfficeFloorManagedObjectSourceType("mos",
-						MockManagedObjectSource.class,
-						compiler.createPropertyList());
+		OfficeFloorManagedObjectSourceType mosType = moLoader.loadOfficeFloorManagedObjectSourceType("mos",
+				MockManagedObjectSource.class, compiler.createPropertyList());
 
 		// Ensure not loaded
 		TestCase.assertNull("Should not load type", mosType);
@@ -162,8 +148,7 @@ public class LoadOfficeFloorManagedObjectSourceTypeTest extends
 	 * Mock {@link ManagedObjectSource} for testing.
 	 */
 	@TestSource
-	public static class MockManagedObjectSource implements
-			ManagedObjectSource<None, None> {
+	public static class MockManagedObjectSource implements ManagedObjectSource<None, None> {
 
 		/**
 		 * Failure to obtain the {@link ManagedObjectSourceSpecification}.
@@ -188,20 +173,13 @@ public class LoadOfficeFloorManagedObjectSourceTypeTest extends
 		}
 
 		@Override
-		public void init(ManagedObjectSourceContext<None> context)
-				throws Exception {
-			fail("Should not be invoked for obtaining specification");
-		}
-
-		@Override
-		public ManagedObjectSourceMetaData<None, None> getMetaData() {
+		public ManagedObjectSourceMetaData<None, None> init(ManagedObjectSourceContext<None> context) throws Exception {
 			fail("Should not be invoked for obtaining specification");
 			return null;
 		}
 
 		@Override
-		public void start(ManagedObjectExecuteContext<None> context)
-				throws Exception {
+		public void start(ManagedObjectExecuteContext<None> context) throws Exception {
 			fail("Should not be invoked for obtaining specification");
 		}
 

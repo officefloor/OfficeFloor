@@ -198,9 +198,11 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 		SourceProperties sourceProperties = new PropertyListSourceProperties(properties);
 		GovernanceSourceContextImpl context = new GovernanceSourceContextImpl(true, sourceContext, sourceProperties);
 
+		// Initialise the governance source and obtain the meta-data
+		GovernanceSourceMetaData<I, F> metaData;
 		try {
 			// Initialise the governance source
-			governanceSource.init(context);
+			metaData = governanceSource.init(context);
 
 		} catch (UnknownPropertyError ex) {
 			this.addIssue("Property '" + ex.getUnknownPropertyName() + "' must be specified");
@@ -219,14 +221,7 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 			return null; // can not carry on
 		}
 
-		// Obtain the meta-data
-		GovernanceSourceMetaData<I, F> metaData;
-		try {
-			metaData = governanceSource.getMetaData();
-		} catch (Throwable ex) {
-			this.addIssue("Failed to get " + GovernanceSourceMetaData.class.getSimpleName(), ex);
-			return null; // must have meta-data
-		}
+		// Ensure have meta-data
 		if (metaData == null) {
 			this.addIssue("Must provide meta-data");
 			return null; // can not carry on

@@ -47,31 +47,16 @@ public interface ManagedObjectSource<O extends Enum<O>, F extends Enum<F>> {
 	ManagedObjectSourceSpecification getSpecification();
 
 	/**
-	 * Called only once after the {@link ManagedObjectSource} is instantiated.
+	 * Initialises the {@link ManagedObjectSource}.
 	 * 
 	 * @param context
 	 *            {@link ManagedObjectSourceContext} to use in initialising.
+	 * @return Meta-data to describe this.
 	 * @throws Exception
 	 *             Should the {@link ManagedObjectSource} fail to configure
 	 *             itself from the input properties.
 	 */
-	void init(ManagedObjectSourceContext<F> context) throws Exception;
-
-	/**
-	 * <p>
-	 * Obtains the meta-data to describe this.
-	 * <p>
-	 * This is called after the {@link #init(ManagedObjectSourceContext)} method
-	 * and therefore may use the configuration.
-	 * <p>
-	 * This should always return non-null. If there is a problem due to
-	 * incorrect configuration, the {@link #init(ManagedObjectSourceContext)}
-	 * should indicate this via an exception.
-	 * 
-	 * @return Meta-data to describe this.
-	 */
-	@Deprecated // make return of init
-	ManagedObjectSourceMetaData<O, F> getMetaData();
+	ManagedObjectSourceMetaData<O, F> init(ManagedObjectSourceContext<F> context) throws Exception;
 
 	/**
 	 * <p>

@@ -135,16 +135,15 @@ public abstract class AbstractAdministratorSource<E, F extends Enum<F>, G extend
 		}
 	}
 
-	/**
-	 * {@link MetaData}.
-	 */
-	private MetaData metaData;
-
 	@Override
-	public void init(AdministrationSourceContext context) throws Exception {
+	public AdministrationSourceMetaData<E, F, G> init(AdministrationSourceContext context) throws Exception {
+
 		// Create and populate the meta-data
-		this.metaData = new MetaData(context);
-		this.loadMetaData(this.metaData);
+		MetaData metaData = new MetaData(context);
+		this.loadMetaData(metaData);
+
+		// Return the meta-data
+		return metaData;
 	}
 
 	/**
@@ -594,12 +593,6 @@ public abstract class AbstractAdministratorSource<E, F extends Enum<F>, G extend
 		public String getLabel() {
 			return this.label;
 		}
-	}
-
-	@Override
-	public AdministrationSourceMetaData<E, F, G> getMetaData() {
-		// Return the meta data
-		return this.metaData;
 	}
 
 }

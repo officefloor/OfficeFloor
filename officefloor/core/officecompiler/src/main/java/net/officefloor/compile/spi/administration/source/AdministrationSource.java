@@ -42,31 +42,16 @@ public interface AdministrationSource<E, F extends Enum<F>, G extends Enum<G>> {
 	AdministrationSourceSpecification getSpecification();
 
 	/**
-	 * Called only once after the {@link AdministrationSource} is instantiated.
+	 * Initialises the {@link AdministrationSource}.
 	 * 
 	 * @param context
 	 *            {@link AdministrationSourceContext} to initialise this
 	 *            instance of the {@link AdministrationSource}.
+	 * @return Meta-data to describe this.
 	 * @throws Exception
 	 *             Should the {@link AdministrationSource} fail to configure
 	 *             itself from the input properties.
 	 */
-	void init(AdministrationSourceContext context) throws Exception;
-
-	/**
-	 * <p>
-	 * Obtains the meta-data to describe this.
-	 * <p>
-	 * This is called after the {@link #init(AdministrationSourceContext)}
-	 * method and therefore may use the configuration.
-	 * <p>
-	 * This should always return non-null. If there is a problem due to
-	 * incorrect configuration, the {@link #init(AdministrationSourceContext)}
-	 * should indicate this via an exception.
-	 * 
-	 * @return Meta-data to describe this.
-	 */
-	@Deprecated // make return of init
-	AdministrationSourceMetaData<E, F, G> getMetaData();
+	AdministrationSourceMetaData<E, F, G> init(AdministrationSourceContext context) throws Exception;
 
 }

@@ -139,19 +139,17 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		}
 	}
 
-	/**
-	 * {@link ManagedObjectSourceMetaData}.
-	 */
-	private MetaData metaData = null;
-
 	@Override
-	public void init(ManagedObjectSourceContext<F> context) throws Exception {
+	public ManagedObjectSourceMetaData<O, F> init(ManagedObjectSourceContext<F> context) throws Exception {
 
 		// Create the meta-data
-		this.metaData = new MetaData(context);
+		MetaData metaData = new MetaData(context);
 
 		// Initialise the meta-data
-		this.loadMetaData(this.metaData);
+		this.loadMetaData(metaData);
+
+		// Return the meta-data
+		return metaData;
 	}
 
 	/**
@@ -490,11 +488,6 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		public ManagedObjectExtensionInterfaceMetaData<?>[] getExtensionInterfacesMetaData() {
 			return this.externsionInterfaces.toArray(new ManagedObjectExtensionInterfaceMetaData[0]);
 		}
-	}
-
-	@Override
-	public ManagedObjectSourceMetaData<O, F> getMetaData() {
-		return this.metaData;
 	}
 
 	@Override

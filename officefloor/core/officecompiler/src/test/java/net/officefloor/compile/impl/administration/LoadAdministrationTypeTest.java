@@ -220,7 +220,7 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 		final Error failure = new Error("Obtain meta-data failure");
 
 		// Record failure to obtain the meta-data
-		this.issues.recordIssue("Failed to get AdministrationSourceMetaData", failure);
+		this.issues.recordIssue("Failed to init", failure);
 
 		// Attempt to load
 		MockAdministrationSource.metaDataFailure = failure;
@@ -900,15 +900,12 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void init(AdministrationSourceContext context) throws Exception {
+		public AdministrationSourceMetaData init(AdministrationSourceContext context) throws Exception {
+
 			// Run the init if available
 			if (init != null) {
 				init.init(context);
 			}
-		}
-
-		@Override
-		public AdministrationSourceMetaData getMetaData() {
 
 			// Throw meta-data failure
 			if (metaDataFailure != null) {

@@ -36,8 +36,7 @@ import net.officefloor.frame.internal.structure.Flow;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractGovernanceSource<I, F extends Enum<F>> implements
-		GovernanceSource<I, F> {
+public abstract class AbstractGovernanceSource<I, F extends Enum<F>> implements GovernanceSource<I, F> {
 
 	/*
 	 * ======================= GovernanceSource =========================
@@ -96,8 +95,7 @@ public abstract class AbstractGovernanceSource<I, F extends Enum<F>> implements
 	/**
 	 * Specification for this {@link GovernanceSource}.
 	 */
-	private class Specification implements SpecificationContext,
-			GovernanceSourceSpecification {
+	private class Specification implements SpecificationContext, GovernanceSourceSpecification {
 
 		/**
 		 * Properties for the specification.
@@ -133,16 +131,15 @@ public abstract class AbstractGovernanceSource<I, F extends Enum<F>> implements
 		}
 	}
 
-	/**
-	 * {@link MetaData}.
-	 */
-	private MetaData metaData;
-
 	@Override
-	public void init(GovernanceSourceContext context) throws Exception {
+	public GovernanceSourceMetaData<I, F> init(GovernanceSourceContext context) throws Exception {
+
 		// Create and populate the meta-data
-		this.metaData = new MetaData(context);
-		this.loadMetaData(this.metaData);
+		MetaData metaData = new MetaData(context);
+		this.loadMetaData(metaData);
+
+		// Return the meta-data
+		return metaData;
 	}
 
 	/**
@@ -153,8 +150,7 @@ public abstract class AbstractGovernanceSource<I, F extends Enum<F>> implements
 	 * @throws Exception
 	 *             If fails to load the meta-data.
 	 */
-	protected abstract void loadMetaData(MetaDataContext<I, F> context)
-			throws Exception;
+	protected abstract void loadMetaData(MetaDataContext<I, F> context) throws Exception;
 
 	/**
 	 * Provides the ability to label the {@link Flow}.
@@ -196,8 +192,7 @@ public abstract class AbstractGovernanceSource<I, F extends Enum<F>> implements
 		 * @param governanceFactory
 		 *            {@link GovernanceFactory}.
 		 */
-		void setGovernanceFactory(
-				GovernanceFactory<? extends I, F> governanceFactory);
+		void setGovernanceFactory(GovernanceFactory<? extends I, F> governanceFactory);
 
 		/**
 		 * Specifies the extension interface.
@@ -219,8 +214,8 @@ public abstract class AbstractGovernanceSource<I, F extends Enum<F>> implements
 		Labeller addFlow(F key, Class<?> argumentType);
 
 		/**
-		 * Adds a required {@link Flow} identified by an index into the
-		 * order the {@link Flow} was added.
+		 * Adds a required {@link Flow} identified by an index into the order
+		 * the {@link Flow} was added.
 		 * 
 		 * @param argumentType
 		 *            Type of argument passed to the {@link Flow}.
@@ -240,8 +235,7 @@ public abstract class AbstractGovernanceSource<I, F extends Enum<F>> implements
 	/**
 	 * Meta-data of the {@link GovernanceSource}.
 	 */
-	private class MetaData implements MetaDataContext<I, F>,
-			GovernanceSourceMetaData<I, F> {
+	private class MetaData implements MetaDataContext<I, F>, GovernanceSourceMetaData<I, F> {
 
 		/**
 		 * {@link GovernanceSourceContext}.
@@ -288,8 +282,7 @@ public abstract class AbstractGovernanceSource<I, F extends Enum<F>> implements
 		}
 
 		@Override
-		public void setGovernanceFactory(
-				GovernanceFactory<? extends I, F> governanceFactory) {
+		public void setGovernanceFactory(GovernanceFactory<? extends I, F> governanceFactory) {
 			this.governanceFactory = governanceFactory;
 		}
 
@@ -300,16 +293,14 @@ public abstract class AbstractGovernanceSource<I, F extends Enum<F>> implements
 
 		@Override
 		public Labeller addFlow(F key, Class<?> argumentType) {
-			FlowMetaData<F> flow = new FlowMetaData<F>(key, argumentType,
-					key.ordinal());
+			FlowMetaData<F> flow = new FlowMetaData<F>(key, argumentType, key.ordinal());
 			this.flows.add(flow);
 			return flow;
 		}
 
 		@Override
 		public Labeller addFlow(Class<?> argumentType) {
-			FlowMetaData<Indexed> flow = new FlowMetaData<Indexed>(null,
-					argumentType, this.flows.size());
+			FlowMetaData<Indexed> flow = new FlowMetaData<Indexed>(null, argumentType, this.flows.size());
 			this.flows.add(flow);
 			return flow;
 		}
@@ -336,22 +327,19 @@ public abstract class AbstractGovernanceSource<I, F extends Enum<F>> implements
 		@Override
 		@SuppressWarnings("unchecked")
 		public GovernanceFlowMetaData<F>[] getFlowMetaData() {
-			return this.flows.toArray(new GovernanceFlowMetaData[this.flows
-					.size()]);
+			return this.flows.toArray(new GovernanceFlowMetaData[this.flows.size()]);
 		}
 
 		@Override
 		public Class<?>[] getEscalationTypes() {
-			return this.escalationTypes
-					.toArray(new Class<?>[this.escalationTypes.size()]);
+			return this.escalationTypes.toArray(new Class<?>[this.escalationTypes.size()]);
 		}
 	}
 
 	/**
 	 * {@link GovernanceFlowMetaData} implementation.
 	 */
-	private static class FlowMetaData<F extends Enum<F>> implements Labeller,
-			GovernanceFlowMetaData<F> {
+	private static class FlowMetaData<F extends Enum<F>> implements Labeller, GovernanceFlowMetaData<F> {
 
 		/**
 		 * Key identifying this {@link Flow}.
@@ -422,12 +410,6 @@ public abstract class AbstractGovernanceSource<I, F extends Enum<F>> implements
 		public String getLabel() {
 			return this.label;
 		}
-	}
-
-	@Override
-	public GovernanceSourceMetaData<I, F> getMetaData() {
-		// Return the meta-data
-		return this.metaData;
 	}
 
 }

@@ -286,7 +286,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		final Error failure = new Error("Obtain meta-data failure");
 
 		// Record failure to obtain the meta-data
-		this.issues.recordIssue("Failed to get ManagedObjectSourceMetaData", failure);
+		this.issues.recordIssue("Failed to init", failure);
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<None>() {
@@ -1486,15 +1486,12 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void init(ManagedObjectSourceContext context) throws Exception {
+		public ManagedObjectSourceMetaData init(ManagedObjectSourceContext context) throws Exception {
+
 			// Run the init if available
 			if (init != null) {
 				init.init(context, initUtil);
 			}
-		}
-
-		@Override
-		public ManagedObjectSourceMetaData getMetaData() {
 
 			// Throw meta-data failure
 			if (metaDataFailure != null) {
