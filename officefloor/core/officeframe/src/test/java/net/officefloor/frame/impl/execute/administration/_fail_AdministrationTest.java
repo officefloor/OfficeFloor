@@ -115,7 +115,6 @@ public class _fail_AdministrationTest extends AbstractOfficeConstructTestCase {
 		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
 		task.setNextFunction("complete");
 		this.constructFunction(work, "complete");
-		this.constructFunction(work, "handle").buildParameter();
 
 		// Construct the administration
 		task.postAdminister("postTask");

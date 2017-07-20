@@ -20,6 +20,7 @@ package net.officefloor.frame.impl.execute.flow;
 import java.lang.reflect.Array;
 
 import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -33,9 +34,9 @@ import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
-import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.FunctionLogic;
 import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.LinkedListSet;
@@ -75,6 +76,16 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	 * {@link ThreadState} that this {@link Flow} is bound.
 	 */
 	private final ThreadState threadState;
+
+	/**
+	 * Possible {@link Escalation} from this {@link Flow}.
+	 */
+	private Throwable flowEscalation = null;
+
+	/**
+	 * Indicates if this {@link Flow} has been completed.
+	 */
+	private boolean isFlowComplete = false;
 
 	/**
 	 * Initiate.
@@ -279,46 +290,84 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	}
 
 	@Override
-	public FunctionState handleEscalation(Throwable escalation) {
+	public FunctionState managedFunctionComplete(FunctionState function, Throwable functionEscalation) {
 
-		// Cancel this flow
-		FunctionState cleanUpFunctions = this.cancel();
+		// Handle completion
+		FunctionState completionFunctions = null;
 
-		// Attempt handling by flow completion
-		if (this.completion != null) {
-			// Handle by flow completion
-			return Promise.then(cleanUpFunctions, this.completion.complete(escalation));
+		// Handle escalation
+		if (functionEscalation != null) {
 
-		} else {
-			// No flow completion, so handle by thread state
-			// (Thread will handle clean up of flows)
-			return this.threadState.handleEscalation(escalation);
+			// Cancel this flow as escalation
+			completionFunctions = this.cancel();
+
+			// Determine if already an escalation for this flow
+			if (this.flowEscalation == null) {
+				// Escalation for this flow
+				this.flowEscalation = functionEscalation;
+
+			} else {
+				// Let thread state handle additional escalations
+				completionFunctions = Promise.then(completionFunctions,
+						this.threadState.handleEscalation(functionEscalation));
+			}
 		}
-	}
 
-	@Override
-	public FunctionState managedFunctionComplete(FunctionState function, boolean isCancel) {
-
-		// Remove function from active function listing
+		// Determine if flow complete
 		if (this.activeFunctions.removeEntry(function)) {
 
-			// Determine if flow completion
-			FunctionState flowCompletion = null;
-			if (!isCancel && (this.completion != null)) {
-				flowCompletion = this.completion.complete(null);
+			// Notify of flow completion
+			Throwable threadEscalation;
+			if (this.completion != null) {
+				completionFunctions = Promise.then(completionFunctions, this.completion.complete(this.flowEscalation));
+				threadEscalation = null; // as handle by completion
+			} else {
+				// Escalate to thread escalation
+				threadEscalation = this.flowEscalation;
 			}
+			final Throwable finalThreadEscalation = threadEscalation;
 
-			// Last active function so flow is now complete
-			return Promise.then(flowCompletion, this.threadState.flowComplete(this, isCancel));
+			// Include flow complete clean up
+			completionFunctions = Promise.then(completionFunctions, new FlowOperation() {
+				@Override
+				public FunctionState execute(FunctionStateContext context) throws Throwable {
+
+					// Easy access to flow
+					FlowImpl flow = FlowImpl.this;
+
+					// Do nothing if flow is complete
+					if (flow.isFlowComplete) {
+						return null;
+					}
+
+					// Flow is now considered complete
+					flow.isFlowComplete = true;
+
+					// Complete the flow
+					return flow.threadState.flowComplete(flow, finalThreadEscalation);
+				}
+			});
 		}
 
-		// Flow still active
-		return null;
+		// Provide clean up for managed function (and possibly flow)
+		return completionFunctions;
 	}
 
 	@Override
 	public ThreadState getThreadState() {
 		return this.threadState;
+	}
+
+	/**
+	 * Abstract {@link FunctionState} operation for the {@link Flow}.
+	 */
+	private abstract class FlowOperation extends AbstractLinkedListSetEntry<FunctionState, Flow>
+			implements FunctionState {
+
+		@Override
+		public ThreadState getThreadState() {
+			return FlowImpl.this.threadState;
+		}
 	}
 
 	/**
@@ -393,7 +442,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 
 		@Override
 		public FunctionState handleEscalation(Throwable escalation) {
-			return FlowImpl.this.handleEscalation(escalation);
+			return FlowImpl.this.threadState.handleEscalation(escalation);
 		}
 	}
 

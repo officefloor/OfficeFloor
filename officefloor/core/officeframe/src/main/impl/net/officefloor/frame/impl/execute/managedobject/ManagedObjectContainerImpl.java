@@ -289,13 +289,13 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		}
 
 		// Load the managed object
-		return new LoadManagedObjectJobNode(managedFunction);
+		return new LoadManagedObjectOperation(managedFunction);
 	}
 
 	/**
 	 * Loads the {@link ManagedObject}.
 	 */
-	private class LoadManagedObjectJobNode extends ManagedObjectOperation {
+	private class LoadManagedObjectOperation extends ManagedObjectOperation {
 
 		/**
 		 * Requesting {@link ManagedFunctionContainer}.
@@ -309,7 +309,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		 *            {@link ManagedFunctionContainer} requesting the
 		 *            {@link ManagedObject} to be loaded.
 		 */
-		public LoadManagedObjectJobNode(ManagedFunctionContainer managedFunction) {
+		public LoadManagedObjectOperation(ManagedFunctionContainer managedFunction) {
 			this.managedFunction = managedFunction;
 		}
 
@@ -516,8 +516,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 					governanceFunctions = Promise.then(governanceFunctions, registeredGovernance);
 				}
 
-				// Flag that will be governed after governance functions
-				// complete
+				// Flag governed after governance functions complete
 				container.containerState = ManagedObjectContainerState.GOVERNED;
 
 				// Undertake governance registrations
@@ -789,7 +788,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 				return null;
 			}
 
-			// Createfunction for asynchronous opertion
+			// Create function for the asynchronous operation
 			return threadContext.createFunction((flow) -> {
 				operation.run();
 				return null;

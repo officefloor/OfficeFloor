@@ -169,7 +169,7 @@ public class ThreadStateHandleEscalationTest extends AbstractOfficeConstructTest
 		String log = this.captureLoggerOutput(() -> function.invokeProcess(escalation, null));
 
 		// Ensure escalation handled by OfficeFloor escalation handler
-		assertTrue("Incorrect escalation logging", log.contains(escalation.getMessage()));
+		assertTrue("Incorrect escalation logging:" + escalation.getMessage(), log.contains(escalation.getMessage()));
 	}
 
 	/**

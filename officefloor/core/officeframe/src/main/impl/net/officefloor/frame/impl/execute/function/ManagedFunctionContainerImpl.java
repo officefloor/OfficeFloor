@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.function;
 
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
@@ -474,8 +475,8 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 				this.isSequentialFunctionInvoked = true;
 			}
 
-			// Complete this function (flags state complete)
-			FunctionState completeFunction = this.complete(false);
+			// Complete this function (no escalation as successful)
+			FunctionState completeFunction = this.complete(null);
 			if (completeFunction != null) {
 				return Promise.then(completeFunction, this);
 			}
@@ -494,34 +495,89 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	}
 
 	@Override
-	public FunctionState cancel() {
-		// Complete immediately (does clean up)
-		return this.complete(true);
+	public FunctionState handleEscalation(Throwable escalation) {
+
+		// Escalation from this node, so clean up down stream functions
+		FunctionState handleFunctions = this.cancel(false);
+
+		switch (this.containerState) {
+		case COMPLETED:
+			// Handle by thread as this function is complete
+			handleFunctions = this.flow.getThreadState().handleEscalation(escalation);
+			break;
+
+		default:
+			// Function failure
+			this.containerState = ManagedFunctionState.FAILED;
+
+			// Obtain the escalation flow from this function
+			EscalationFlow escalationFlow = this.functionLogicMetaData.getEscalationProcedure()
+					.getEscalation(escalation);
+			if (escalationFlow != null) {
+				// Escalation handled by this functions escalation procedure
+				ThreadState threadState = this.flow.getThreadState();
+				Flow parallelFlow = threadState.createFlow(null);
+				FunctionState escalationFunction = parallelFlow.createManagedFunction(escalation,
+						escalationFlow.getManagedFunctionMetaData(), false, this.parallelOwner);
+
+				// Complete this flow (handling escalating)
+				handleFunctions = Promise.then(handleFunctions, this.complete(null));
+				handleFunctions = Promise.then(handleFunctions, escalationFunction);
+
+			} else {
+				// Escalate to flow
+				handleFunctions = Promise.then(handleFunctions, this.complete(escalation));
+			}
+		}
+
+		// Return handling of escalation
+		return handleFunctions;
 	}
 
 	@Override
-	public FunctionState handleEscalation(Throwable escalation) {
+	public FunctionState cancel() {
+		return this.cancel(true);
+	}
 
-		// Function failure
-		this.containerState = ManagedFunctionState.FAILED;
+	/**
+	 * Cancels all downstream {@link FunctionState} instances.
+	 * 
+	 * @param isCancelThisFunctionState
+	 *            <code>true</code> to cancel this {@link FunctionState}.
+	 * @return {@link FunctionState} to cancel the downstream
+	 *         {@link FunctionState} instances.
+	 */
+	private FunctionState cancel(boolean isCancelThisFunctionState) {
+		return new ManagedFunctionOperation() {
+			@Override
+			public FunctionState execute(FunctionStateContext context) throws Throwable {
 
-		// Escalation from this node, so nothing further
-		FunctionState clearFunctions = this.clear();
+				// Easy access to container
+				final ManagedFunctionContainerImpl<M> container = ManagedFunctionContainerImpl.this;
 
-		// Obtain the escalation flow from this function
-		EscalationFlow escalationFlow = this.functionLogicMetaData.getEscalationProcedure().getEscalation(escalation);
-		if (escalationFlow != null) {
-			// Escalation handled by this function
-			ThreadState threadState = this.flow.getThreadState();
-			Flow parallelFlow = threadState.createFlow(null);
-			FunctionState escalationFunction = parallelFlow.createManagedFunction(escalation,
-					escalationFlow.getManagedFunctionMetaData(), false, this.parallelOwner);
-			return Promise.then(clearFunctions, escalationFunction);
-		}
+				// Create string of clean up functions
+				FunctionState cleanUpFunctions = null;
 
-		// Not handled by this function, so escalate to flow
-		// (Flow will handle clean up of functions)
-		return this.flow.handleEscalation(escalation);
+				// Clear all the parallel functions from this node
+				if (container.parallelFunction != null) {
+					cleanUpFunctions = Promise.then(container.parallelFunction.cancel(true), cleanUpFunctions);
+				}
+
+				// Clear all the sequential functions from this node
+				if (container.sequentialFunction != null) {
+					cleanUpFunctions = Promise.then(container.sequentialFunction.cancel(true), cleanUpFunctions);
+				}
+
+				// Clean up this function state (if required to do so)
+				if (isCancelThisFunctionState) {
+					cleanUpFunctions = Promise.then(cleanUpFunctions, container.complete(null));
+				}
+
+				// Return clean up functions
+				return cleanUpFunctions;
+			}
+		};
+
 	}
 
 	/**
@@ -532,19 +588,19 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	private FunctionState getParallelFunctionToExecute() {
 
 		// Determine furthest parallel node
-		ManagedFunctionContainerImpl<?> currentTask = this;
-		ManagedFunctionContainerImpl<?> nextTask = null;
-		while ((nextTask = currentTask.parallelFunction) != null) {
-			currentTask = nextTask;
+		ManagedFunctionContainerImpl<?> currentFunction = this;
+		ManagedFunctionContainerImpl<?> nextFunction = null;
+		while ((nextFunction = currentFunction.parallelFunction) != null) {
+			currentFunction = nextFunction;
 		}
 
-		// Determine if a parallel task
-		if (currentTask == this) {
-			// No parallel task
+		// Determine if a parallel function
+		if (currentFunction == this) {
+			// No parallel function
 			return null;
 		} else {
-			// Return the furthest parallel task
-			return currentTask;
+			// Return the furthest parallel function
+			return currentFunction;
 		}
 	}
 
@@ -821,56 +877,18 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	}
 
 	/**
-	 * Clears this {@link FunctionState}.
-	 */
-	private final FunctionState clear() {
-		return new ManagedFunctionOperation() {
-			@Override
-			public FunctionState execute(FunctionStateContext context) throws Throwable {
-
-				// Easy access to container
-				final ManagedFunctionContainerImpl<M> container = ManagedFunctionContainerImpl.this;
-
-				// Create string of clean up functions
-				FunctionState cleanUpFunctions = null;
-
-				// Clear all the parallel functions from this node
-				if (container.parallelFunction != null) {
-					cleanUpFunctions = Promise.then(container.parallelFunction.clear(), cleanUpFunctions);
-				}
-
-				// Clear all the sequential functions from this node
-				if (container.sequentialFunction != null) {
-					cleanUpFunctions = Promise.then(container.sequentialFunction.clear(), cleanUpFunctions);
-				}
-
-				// Clear this function (complete due to cancel)
-				return Promise.then(cleanUpFunctions, container.complete(true));
-			}
-		};
-	}
-
-	/**
 	 * Completes this {@link FunctionState}.
 	 * 
-	 * @param isCancel
-	 *            Flags whether completed due to cancel.
+	 * @param functionEscalation
+	 *            Possible {@link Escalation} from this {@link FunctionState}.
 	 */
-	private FunctionState complete(final boolean isCancel) {
+	private FunctionState complete(Throwable functionEscalation) {
 		return new ManagedFunctionOperation() {
 			@Override
 			public FunctionState execute(FunctionStateContext context) throws Throwable {
 
 				// Easy access to container
 				final ManagedFunctionContainerImpl<M> container = ManagedFunctionContainerImpl.this;
-
-				// Do nothing if already complete
-				if (container.containerState == ManagedFunctionState.COMPLETED) {
-					return null;
-				}
-
-				// Complete the function
-				container.containerState = ManagedFunctionState.COMPLETED;
 
 				// Attempt to clean up the managed objects
 				FunctionState cleanUpFunctions = null;
@@ -879,7 +897,22 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 				}
 
 				// Complete this function
-				return Promise.then(cleanUpFunctions, container.flow.managedFunctionComplete(container, isCancel));
+				return Promise.then(cleanUpFunctions, new ManagedFunctionOperation() {
+					@Override
+					public FunctionState execute(FunctionStateContext context) throws Throwable {
+
+						// Do nothing if already complete
+						if (container.containerState == ManagedFunctionState.COMPLETED) {
+							return null;
+						}
+
+						// Function now complete
+						container.containerState = ManagedFunctionState.COMPLETED;
+
+						// Flag function complete
+						return container.flow.managedFunctionComplete(container, functionEscalation);
+					}
+				});
 			}
 		};
 	}
@@ -888,11 +921,6 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	 * Cleans up the {@link ManagedObject} instances.
 	 */
 	FunctionState cleanUpManagedObjects() {
-
-		// Ensure function is complete
-		if (this.containerState != ManagedFunctionState.COMPLETED) {
-			return null;
-		}
 
 		// Ensure there is no interest in the managed objects
 		if (this.boundManagedObjects.isInterest()) {

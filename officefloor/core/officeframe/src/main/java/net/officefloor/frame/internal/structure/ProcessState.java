@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 
@@ -60,22 +61,28 @@ public interface ProcessState {
 	 *            {@link ThreadState}.
 	 * @param parameter
 	 *            Parameter for the initial {@link ManagedFunction}.
-	 * @param callback
+	 * @param completion
 	 *            Optional {@link FlowCompletion} to be notified of completion
 	 *            of the spawned {@link ThreadState}.
+	 * @param isEscalationHandlingThreadState
+	 *            Indicates whether the {@link ThreadState} is for
+	 *            {@link Escalation} handling.
 	 * @return {@link FunctionState} to spawn the {@link ThreadState}.
 	 */
 	FunctionState spawnThreadState(ManagedFunctionMetaData<?, ?> managedFunctionMetaData, Object parameter,
-			FlowCompletion completion);
+			FlowCompletion completion, boolean isEscalationHandlingThreadState);
 
 	/**
 	 * Flags that the input {@link ThreadState} has complete.
 	 * 
 	 * @param thread
 	 *            {@link ThreadState} that has completed.
+	 * @param threadCompletion
+	 *            Optional {@link FunctionState} for the completion of
+	 *            the{@link ThreadState}. May be <code>null</code>.
 	 * @return {@link FunctionState} to complete the {@link ThreadState}.
 	 */
-	FunctionState threadComplete(ThreadState thread);
+	FunctionState threadComplete(ThreadState thread, FunctionState threadCompletion);
 
 	/**
 	 * Obtains the {@link FunctionLoop} for the {@link ProcessState}.

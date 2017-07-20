@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.process;
 
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.profile.Profiler;
@@ -29,9 +30,9 @@ import net.officefloor.frame.impl.execute.profile.ProcessProfilerImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
-import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
@@ -100,6 +101,13 @@ public class ProcessStateImpl implements ProcessState {
 	 * {@link ProcessProfiler}.
 	 */
 	private final ProcessProfiler processProfiler;
+
+	/**
+	 * Main {@link ThreadState} {@link FlowCompletion}. Already created as
+	 * {@link FunctionState} containing the possible {@link ThreadState}
+	 * {@link Escalation}.
+	 */
+	private FunctionState mainThreadCompletion = null;
 
 	/**
 	 * Initiate.
@@ -206,7 +214,7 @@ public class ProcessStateImpl implements ProcessState {
 
 	@Override
 	public FunctionState spawnThreadState(ManagedFunctionMetaData<?, ?> managedFunctionMetaData, Object parameter,
-			FlowCompletion completion) {
+			FlowCompletion completion, boolean isEscalationHandlingThreadState) {
 		return new ProcessOperation() {
 
 			@Override
@@ -222,7 +230,7 @@ public class ProcessStateImpl implements ProcessState {
 
 				// Create the spawned thread state
 				ThreadState threadState = new ThreadStateImpl(process.processMetaData.getThreadMetaData(), completion,
-						process, process.processProfiler);
+						isEscalationHandlingThreadState, process, process.processProfiler);
 
 				// Register as active thread
 				process.activeThreads.addEntry(threadState);
@@ -246,8 +254,17 @@ public class ProcessStateImpl implements ProcessState {
 	}
 
 	@Override
-	public FunctionState threadComplete(ThreadState thread) {
-		return new ProcessOperation() {
+	public FunctionState threadComplete(ThreadState thread, FunctionState threadCompletion) {
+
+		// Delay main thread completion until process completes
+		if (thread == this.mainThreadState) {
+			// Main thread completion becomes process completion
+			this.mainThreadCompletion = threadCompletion;
+			threadCompletion = null; // undertaken on process completion
+		}
+
+		// Handle thread completion
+		return Promise.then(threadCompletion, new ProcessOperation() {
 
 			@Override
 			public String toString() {
@@ -300,6 +317,11 @@ public class ProcessStateImpl implements ProcessState {
 								process.processProfiler.processStateCompleted();
 							}
 
+							// Invoke process callback (if specified)
+							if (process.mainThreadCompletion != null) {
+								return process.mainThreadCompletion;
+							}
+
 							// Nothing further for process
 							return null;
 						}
@@ -309,7 +331,7 @@ public class ProcessStateImpl implements ProcessState {
 				// No further processing to complete thread
 				return null;
 			}
-		};
+		});
 	}
 
 	@Override

@@ -80,7 +80,7 @@ public class OfficeManagerProcessState implements ProcessState {
 
 		// Create the main thread state
 		// Note: purpose of this to enable synchronising changes to office
-		this.mainThreadState = new ThreadStateImpl(this.threadMetaData, (FlowCompletion) null, this, null);
+		this.mainThreadState = new ThreadStateImpl(this.threadMetaData, (FlowCompletion) null, false, this, null);
 	}
 
 	/*
@@ -99,12 +99,12 @@ public class OfficeManagerProcessState implements ProcessState {
 
 	@Override
 	public FunctionState spawnThreadState(ManagedFunctionMetaData<?, ?> managedFunctionMetaData, Object parameter,
-			FlowCompletion completion) {
+			FlowCompletion completion, boolean isEscalationHandlingThreadState) {
 		throw new IllegalStateException(this.getClass().getSimpleName() + " should not be be spawning threads");
 	}
 
 	@Override
-	public FunctionState threadComplete(ThreadState thread) {
+	public FunctionState threadComplete(ThreadState thread, FunctionState threadCompletion) {
 		throw new IllegalStateException(this.getClass().getSimpleName() + " should not be be completing threads");
 	}
 

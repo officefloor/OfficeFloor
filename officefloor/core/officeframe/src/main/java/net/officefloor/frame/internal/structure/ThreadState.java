@@ -127,11 +127,12 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	 * 
 	 * @param flow
 	 *            {@link Flow} that has completed.
-	 * @param isCancel
-	 *            Flags whether completing due to cancel.
+	 * @param flowEscalation
+	 *            Possible {@link Escalation} from the {@link Flow}. May be
+	 *            <code>null</code>.
 	 * @return Optional {@link FunctionState} to complete the {@link Flow}.
 	 */
-	FunctionState flowComplete(Flow flow, boolean isCancel);
+	FunctionState flowComplete(Flow flow, Throwable flowEscalation);
 
 	/**
 	 * Obtains the {@link ProcessState} of the process containing this

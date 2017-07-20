@@ -75,7 +75,7 @@ public class ReportEscalationToManagedObjectInvocationTest extends AbstractOffic
 	}
 
 	/**
-	 * Typical use of this feature is to notify the {@link SocketChannel}
+	 * "real-world" use of this feature is to notify the {@link SocketChannel}
 	 * {@link ManagedObject} of failure to commit changes by the Entity Manager
 	 * close on recycle (i.e. applying changes within request to database
 	 * {@link Connection}).

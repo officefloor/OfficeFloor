@@ -79,12 +79,13 @@ public interface Flow extends LinkedListSetEntry<Flow, ThreadState> {
 	 * 
 	 * @param function
 	 *            {@link FunctionState} that has completed.
-	 * @param isCancel
-	 *            Flags whether completing due to cancel.
+	 * @param functionEscalation
+	 *            Possible {@link Escalation} from the {@link FunctionState}.
+	 *            May be <code>null</code>.
 	 * @return Optional {@link FunctionState} to handle completion of the
 	 *         {@link FunctionState}.
 	 */
-	FunctionState managedFunctionComplete(FunctionState function, boolean isCancel);
+	FunctionState managedFunctionComplete(FunctionState function, Throwable functionEscalation);
 
 	/**
 	 * Cancels this {@link Flow}.
@@ -92,16 +93,6 @@ public interface Flow extends LinkedListSetEntry<Flow, ThreadState> {
 	 * @return {@link FunctionState} to clean up this {@link Flow}.
 	 */
 	FunctionState cancel();
-
-	/**
-	 * Handles the {@link Escalation} from a {@link FunctionState} of this
-	 * {@link Flow}.
-	 * 
-	 * @param escalation
-	 *            {@link Escalation}.
-	 * @return {@link FunctionState} to handle the {@link Escalation}.
-	 */
-	FunctionState handleEscalation(Throwable escalation);
 
 	/**
 	 * Obtains the {@link ThreadState} containing this {@link Flow}.

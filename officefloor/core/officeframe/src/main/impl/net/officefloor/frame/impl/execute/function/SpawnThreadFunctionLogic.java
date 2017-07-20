@@ -105,7 +105,7 @@ public class SpawnThreadFunctionLogic implements FunctionLogic {
 
 		// Create thread to execute asynchronously
 		FunctionState spawnFunction = processState.spawnThreadState(initialFunctionMetaData, this.parameter,
-				this.completion);
+				this.completion, false);
 
 		// Return the function to spawn the thread state
 		return spawnFunction;
