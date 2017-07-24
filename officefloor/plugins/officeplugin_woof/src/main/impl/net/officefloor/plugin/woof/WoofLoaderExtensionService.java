@@ -57,7 +57,7 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofOfficeExtensionService
+public class WoofLoaderExtensionService
 		implements OfficeFloorCompilerConfigurationService, OfficeFloorExtensionService, OfficeExtensionService {
 
 	/**
@@ -325,7 +325,7 @@ public class WoofOfficeExtensionService
 
 			} catch (Throwable ex) {
 				// Issue with service
-				officeArchitect.addIssue(WoofExtensionService.class.getSimpleName() + " "
+				officeArchitect.addIssue(WoofLoaderExtensionService.class.getSimpleName() + " "
 						+ extensionService.getClass().getName() + " configuration failure: " + ex.getMessage(), ex);
 			}
 		}

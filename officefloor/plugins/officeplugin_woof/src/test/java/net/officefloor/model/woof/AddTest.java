@@ -46,28 +46,21 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	public void testAddTemplate() {
 
 		// Create the section type
-		SectionType section = this
-				.constructSectionType(new SectionTypeConstructor() {
-					@Override
-					public void construct(SectionTypeContext context) {
-						context.addSectionInput("renderTemplate", null);
-						context.addSectionOutput(
-								HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME,
-								null, false);
-						context.addSectionOutput("OUTPUT_1", Integer.class,
-								false);
-						context.addSectionOutput("OUTPUT_2", null, false);
-						context.addSectionOutput("NOT_INCLUDE_ESCALTION",
-								IOException.class, true);
-						context.addSectionObject("IGNORE_OBJECT",
-								DataSource.class, null);
-					}
-				});
+		SectionType section = this.constructSectionType(new SectionTypeConstructor() {
+			@Override
+			public void construct(SectionTypeContext context) {
+				context.addSectionInput("renderTemplate", null);
+				context.addSectionOutput(HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME, null, false);
+				context.addSectionOutput("OUTPUT_1", Integer.class, false);
+				context.addSectionOutput("OUTPUT_2", null, false);
+				context.addSectionOutput("NOT_INCLUDE_ESCALTION", IOException.class, true);
+				context.addSectionObject("IGNORE_OBJECT", DataSource.class, null);
+			}
+		});
 
 		// Add the template
-		Change<WoofTemplateModel> change = this.operations.addTemplate("uri",
-				"example/Template.ofp", "net.example.LogicClass", section,
-				null, null, false, null, null, false, null,
+		Change<WoofTemplateModel> change = this.operations.addTemplate("uri", "example/Template.ofp",
+				"net.example.LogicClass", section, null, null, false, null, null, false, null,
 				this.getWoofTemplateChangeContext());
 		change.getTarget().setX(100);
 		change.getTarget().setY(101);
@@ -88,22 +81,18 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	public void testAddTemplateWithContentType() {
 
 		// Create the section type
-		SectionType section = this
-				.constructSectionType(new SectionTypeConstructor() {
-					@Override
-					public void construct(SectionTypeContext context) {
-						context.addSectionInput("renderTemplate", null);
-						context.addSectionOutput(
-								HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME,
-								null, false);
-					}
-				});
+		SectionType section = this.constructSectionType(new SectionTypeConstructor() {
+			@Override
+			public void construct(SectionTypeContext context) {
+				context.addSectionInput("renderTemplate", null);
+				context.addSectionOutput(HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME, null, false);
+			}
+		});
 
 		// Add the template
-		Change<WoofTemplateModel> change = this.operations.addTemplate("uri",
-				"example/Template.ofp", "net.example.LogicClass", section,
-				null, "text/html; charset=UTF-16", false, null, null, false,
-				null, this.getWoofTemplateChangeContext());
+		Change<WoofTemplateModel> change = this.operations.addTemplate("uri", "example/Template.ofp",
+				"net.example.LogicClass", section, null, "text/html; charset=UTF-16", false, null, null, false, null,
+				this.getWoofTemplateChangeContext());
 		change.getTarget().setX(100);
 		change.getTarget().setY(101);
 
@@ -122,28 +111,21 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	public void testAddTemplateWithContinueRendering() {
 
 		// Create the section type
-		SectionType section = this
-				.constructSectionType(new SectionTypeConstructor() {
-					@Override
-					public void construct(SectionTypeContext context) {
-						context.addSectionInput("renderTemplate", null);
-						context.addSectionOutput(
-								HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME,
-								null, false);
-						context.addSectionOutput("OUTPUT_1", Integer.class,
-								false);
-						context.addSectionOutput("OUTPUT_2", null, false);
-						context.addSectionOutput("NOT_INCLUDE_ESCALTION",
-								IOException.class, true);
-						context.addSectionObject("IGNORE_OBJECT",
-								DataSource.class, null);
-					}
-				});
+		SectionType section = this.constructSectionType(new SectionTypeConstructor() {
+			@Override
+			public void construct(SectionTypeContext context) {
+				context.addSectionInput("renderTemplate", null);
+				context.addSectionOutput(HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME, null, false);
+				context.addSectionOutput("OUTPUT_1", Integer.class, false);
+				context.addSectionOutput("OUTPUT_2", null, false);
+				context.addSectionOutput("NOT_INCLUDE_ESCALTION", IOException.class, true);
+				context.addSectionObject("IGNORE_OBJECT", DataSource.class, null);
+			}
+		});
 
 		// Add the template
-		Change<WoofTemplateModel> change = this.operations.addTemplate("uri",
-				"example/Template.ofp", "net.example.LogicClass", section,
-				null, null, false, null, null, true, null,
+		Change<WoofTemplateModel> change = this.operations.addTemplate("uri", "example/Template.ofp",
+				"net.example.LogicClass", section, null, null, false, null, null, true, null,
 				this.getWoofTemplateChangeContext());
 		change.getTarget().setX(100);
 		change.getTarget().setY(101);
@@ -163,17 +145,15 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	public void testAddRootTemplate() {
 
 		// Create the section type
-		SectionType section = this
-				.constructSectionType(new SectionTypeConstructor() {
-					@Override
-					public void construct(SectionTypeContext context) {
-					}
-				});
+		SectionType section = this.constructSectionType(new SectionTypeConstructor() {
+			@Override
+			public void construct(SectionTypeContext context) {
+			}
+		});
 
 		// Add the root template
-		Change<WoofTemplateModel> change = this.operations.addTemplate("/",
-				"root.ofp", null, section, null, null, false, null, null,
-				false, null, this.getWoofTemplateChangeContext());
+		Change<WoofTemplateModel> change = this.operations.addTemplate("/", "root.ofp", null, section, null, null,
+				false, null, null, false, null, this.getWoofTemplateChangeContext());
 
 		// Validate change
 		this.assertChange(change, null, "Add Template", true);
@@ -185,22 +165,19 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	public void testAddSecureLinkRedirectConfiguredTemplate() {
 
 		// Create the section type
-		SectionType section = this
-				.constructSectionType(new SectionTypeConstructor() {
-					@Override
-					public void construct(SectionTypeContext context) {
-					}
-				});
+		SectionType section = this.constructSectionType(new SectionTypeConstructor() {
+			@Override
+			public void construct(SectionTypeContext context) {
+			}
+		});
 
 		// Add the template
 		Map<String, Boolean> secureLinks = new HashMap<String, Boolean>();
 		secureLinks.put("LINK_1", Boolean.TRUE);
 		secureLinks.put("LINK_2", Boolean.FALSE);
-		Change<WoofTemplateModel> change = this.operations.addTemplate(
-				"Template", "example/Template.ofp", "net.example.LogicClass",
-				section, null, null, true, secureLinks, new String[] { "POST",
-						"PUT", "OTHER" }, true, null,
-				this.getWoofTemplateChangeContext());
+		Change<WoofTemplateModel> change = this.operations.addTemplate("Template", "example/Template.ofp",
+				"net.example.LogicClass", section, null, null, true, secureLinks,
+				new String[] { "POST", "PUT", "OTHER" }, true, null, this.getWoofTemplateChangeContext());
 
 		// Validate change
 		this.assertChange(change, null, "Add Template", true);
@@ -212,27 +189,23 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	public void testAddMultipleTemplates() {
 
 		// Create the section type
-		SectionType section = this
-				.constructSectionType(new SectionTypeConstructor() {
-					@Override
-					public void construct(SectionTypeContext context) {
-					}
-				});
+		SectionType section = this.constructSectionType(new SectionTypeConstructor() {
+			@Override
+			public void construct(SectionTypeContext context) {
+			}
+		});
 
 		// Add the first template
-		this.operations.addTemplate("Template", "example/Template.ofp",
-				"Class1", section, null, null, false, null, null, false, null,
-				this.getWoofTemplateChangeContext()).apply();
+		this.operations.addTemplate("Template", "example/Template.ofp", "Class1", section, null, null, false, null,
+				null, false, null, this.getWoofTemplateChangeContext()).apply();
 
 		// Add twice
-		this.operations.addTemplate("Template", "example/Template.ofp",
-				"Class2", section, null, null, false, null, null, false, null,
-				this.getWoofTemplateChangeContext()).apply();
+		this.operations.addTemplate("Template", "example/Template.ofp", "Class2", section, null, null, false, null,
+				null, false, null, this.getWoofTemplateChangeContext()).apply();
 
 		// Add again with absolute URI
-		this.operations.addTemplate("/Template", "example/Template.ofp",
-				"Class3", section, null, null, false, null, null, false, null,
-				this.getWoofTemplateChangeContext()).apply();
+		this.operations.addTemplate("/Template", "example/Template.ofp", "Class3", section, null, null, false, null,
+				null, false, null, this.getWoofTemplateChangeContext()).apply();
 
 		// Ensure appropriately added templates
 		this.validateModel();
@@ -247,19 +220,15 @@ public class AddTest extends AbstractWoofChangesTestCase {
 
 		// Register the extension test details
 		Change<?> extensionChange = this.createMock(Change.class);
-		MockChangeWoofTemplateExtensionSource.reset(extensionChange, null,
-				null, TEMPLATE_URI, new String[] { "ONE", "A", "TWO", "B" },
-				this.getWoofTemplateChangeContext());
+		MockChangeWoofTemplateExtensionSource.reset(extensionChange, null, null, TEMPLATE_URI,
+				new String[] { "ONE", "A", "TWO", "B" }, this.getWoofTemplateChangeContext());
 
 		// Create the extensions
 		WoofTemplateExtension[] extensions = new WoofTemplateExtension[] {
-				new WoofTemplateExtensionImpl(
-						MockNoChangeWoofTemplateExtensionSource.class.getName(),
+				new WoofTemplateExtensionImpl(MockNoChangeWoofTemplateExtensionSource.class.getName(),
 						new WoofTemplateExtensionPropertyImpl("name", "value")),
-				new WoofTemplateExtensionImpl(
-						MockNoChangeWoofTemplateExtensionSource.class.getName()),
-				new WoofTemplateExtensionImpl(
-						MockChangeWoofTemplateExtensionSource.class.getName(),
+				new WoofTemplateExtensionImpl(MockNoChangeWoofTemplateExtensionSource.class.getName()),
+				new WoofTemplateExtensionImpl(MockChangeWoofTemplateExtensionSource.class.getName(),
 						new WoofTemplateExtensionPropertyImpl("ONE", "A"),
 						new WoofTemplateExtensionPropertyImpl("TWO", "B")) };
 
@@ -267,20 +236,18 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		extensionChange.apply();
 
 		// Create the section type
-		SectionType section = this
-				.constructSectionType(new SectionTypeConstructor() {
-					@Override
-					public void construct(SectionTypeContext context) {
-					}
-				});
+		SectionType section = this.constructSectionType(new SectionTypeConstructor() {
+			@Override
+			public void construct(SectionTypeContext context) {
+			}
+		});
 
 		// Test
 		this.replayMockObjects();
 
 		// Add the template with extensions
-		Change<?> addChange = this.operations.addTemplate(TEMPLATE_URI,
-				"example/Template.ofp", "net.example.LogicClass", section,
-				null, null, false, null, null, false, extensions,
+		Change<?> addChange = this.operations.addTemplate(TEMPLATE_URI, "example/Template.ofp",
+				"net.example.LogicClass", section, null, null, false, null, null, false, extensions,
 				this.getWoofTemplateChangeContext());
 		addChange.apply();
 
@@ -297,23 +264,19 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	public void testAddSection() {
 
 		// Create the section type
-		SectionType section = this
-				.constructSectionType(new SectionTypeConstructor() {
-					@Override
-					public void construct(SectionTypeContext context) {
-						context.addSectionInput("INPUT_A", Integer.class);
-						context.addSectionInput("INPUT_B", Long.class);
-						context.addSectionInput("INPUT_C", null);
-						context.addSectionInput("INPUT_D", null);
-						context.addSectionOutput("OUTPUT_1", String.class,
-								false);
-						context.addSectionOutput("OUTPUT_2", null, false);
-						context.addSectionOutput("NOT_INCLUDE_ESCALTION",
-								IOException.class, true);
-						context.addSectionObject("IGNORE_OBJECT",
-								DataSource.class, null);
-					}
-				});
+		SectionType section = this.constructSectionType(new SectionTypeConstructor() {
+			@Override
+			public void construct(SectionTypeContext context) {
+				context.addSectionInput("INPUT_A", Integer.class);
+				context.addSectionInput("INPUT_B", Long.class);
+				context.addSectionInput("INPUT_C", null);
+				context.addSectionInput("INPUT_D", null);
+				context.addSectionOutput("OUTPUT_1", String.class, false);
+				context.addSectionOutput("OUTPUT_2", null, false);
+				context.addSectionOutput("NOT_INCLUDE_ESCALTION", IOException.class, true);
+				context.addSectionObject("IGNORE_OBJECT", DataSource.class, null);
+			}
+		});
 
 		// Create the properties
 		PropertyList properties = OfficeFloorCompiler.newPropertyList();
@@ -326,9 +289,8 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		inputToUri.put("INPUT_C", "uriC");
 
 		// Add the section
-		Change<WoofSectionModel> change = this.operations.addSection("SECTION",
-				"net.example.ExampleSectionSource", "SECTION_LOCATION",
-				properties, section, inputToUri);
+		Change<WoofSectionModel> change = this.operations.addSection("SECTION", "net.example.ExampleSectionSource",
+				"SECTION_LOCATION", properties, section, inputToUri);
 		change.getTarget().setX(100);
 		change.getTarget().setY(101);
 
@@ -347,18 +309,15 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	public void testAddMultipleSections() {
 
 		// Create the section type
-		SectionType section = this
-				.constructSectionType(new SectionTypeConstructor() {
-					@Override
-					public void construct(SectionTypeContext context) {
-					}
-				});
+		SectionType section = this.constructSectionType(new SectionTypeConstructor() {
+			@Override
+			public void construct(SectionTypeContext context) {
+			}
+		});
 
 		// Add the sections
-		this.operations.addSection("SECTION", "Section1", "Location1", null,
-				section, null).apply();
-		this.operations.addSection("SECTION", "Section2", "Location2", null,
-				section, null).apply();
+		this.operations.addSection("SECTION", "Section1", "Location1", null, section, null).apply();
+		this.operations.addSection("SECTION", "Section2", "Location2", null, section, null).apply();
 
 		// Ensure appropriately added sections
 		this.validateModel();
@@ -370,22 +329,19 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	public void testSetAccess() {
 
 		// Create the HTTP Security type
-		HttpSecurityType<?, ?, ?, ?> httpSecurityType = this
-				.constructHttpSecurityType(HttpCredentials.class,
-						new HttpSecurityTypeConstructor() {
-							@Override
-							public void construct(
-									HttpSecurityTypeContext context) {
+		HttpSecurityType<?, ?, ?, ?> httpSecurityType = this.constructHttpSecurityType(HttpCredentials.class,
+				new HttpSecurityTypeConstructor() {
+					@Override
+					public void construct(HttpSecurityTypeContext context) {
 
-								// Should be auto-wired (not in configuration)
-								context.addDependency("DEPENDENCY",
-										String.class, "qualifier", null);
+						// Should be auto-wired (not in configuration)
+						context.addDependency("DEPENDENCY", String.class, "qualifier", null);
 
-								// Include flows
-								context.addFlow("OUTPUT_1", String.class, null);
-								context.addFlow("OUTPUT_2", null, null);
-							}
-						});
+						// Include flows
+						context.addFlow("OUTPUT_1", String.class, null);
+						context.addFlow("OUTPUT_2", null, null);
+					}
+				});
 
 		// Create the properties
 		PropertyList properties = OfficeFloorCompiler.newPropertyList();
@@ -393,9 +349,8 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		properties.addProperty("name.two").setValue("value.two");
 
 		// Specify the access
-		Change<WoofAccessModel> change = this.operations.setAccess(
-				"net.example.HttpSecuritySource", 2000, properties,
-				httpSecurityType);
+		Change<WoofAccessModel> change = this.operations.addAccess("test", "net.example.HttpSecuritySource", 2000,
+				properties, httpSecurityType);
 		change.getTarget().setX(100);
 		change.getTarget().setY(101);
 
@@ -404,7 +359,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 
 		// Ensure appropriately specified access
 		change.apply();
-		WoofAccessModel woofAccess = this.model.getWoofAccess();
+		WoofAccessModel woofAccess = this.model.getWoofAccesses().get(0);
 		assertSame("Incorrect access", woofAccess, change.getTarget());
 	}
 
@@ -415,15 +370,13 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	public void testSetAccessWithNoApplicationBehaviour() {
 
 		// Create the HTTP Security type
-		HttpSecurityType<?, ?, ?, ?> httpSecurityType = this
-				.constructHttpSecurityType(HttpCredentials.class,
-						new HttpSecurityTypeConstructor() {
-							@Override
-							public void construct(
-									HttpSecurityTypeContext context) {
-								// Nothing required of application
-							}
-						});
+		HttpSecurityType<?, ?, ?, ?> httpSecurityType = this.constructHttpSecurityType(HttpCredentials.class,
+				new HttpSecurityTypeConstructor() {
+					@Override
+					public void construct(HttpSecurityTypeContext context) {
+						// Nothing required of application
+					}
+				});
 
 		// Create the properties
 		PropertyList properties = OfficeFloorCompiler.newPropertyList();
@@ -431,9 +384,8 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		properties.addProperty("name.b").setValue("value.b");
 
 		// Specify the access
-		Change<WoofAccessModel> change = this.operations.setAccess(
-				"net.other.HttpSecuritySource", 3000, properties,
-				httpSecurityType);
+		Change<WoofAccessModel> change = this.operations.addAccess("test", "net.other.HttpSecuritySource", 3000,
+				properties, httpSecurityType);
 		change.getTarget().setX(100);
 		change.getTarget().setY(101);
 
@@ -442,7 +394,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 
 		// Ensure appropriately specified access
 		change.apply();
-		WoofAccessModel woofAccess = this.model.getWoofAccess();
+		WoofAccessModel woofAccess = this.model.getWoofAccesses().get(0);
 		assertSame("Incorrect access", woofAccess, change.getTarget());
 	}
 
@@ -452,8 +404,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	public void testAddGovernance() {
 
 		// Create the governance type
-		final GovernanceType<?, ?> governanceType = this
-				.createMock(GovernanceType.class);
+		final GovernanceType<?, ?> governanceType = this.createMock(GovernanceType.class);
 		this.replayMockObjects();
 
 		// Create the properties
@@ -462,9 +413,8 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		properties.addProperty("name.two").setValue("value.two");
 
 		// Validate add governance
-		Change<WoofGovernanceModel> change = this.operations.addGovernance(
-				"GOVERNANCE", "net.example.ExampleGovernanceSource",
-				properties, governanceType);
+		Change<WoofGovernanceModel> change = this.operations.addGovernance("GOVERNANCE",
+				"net.example.ExampleGovernanceSource", properties, governanceType);
 		change.getTarget().setX(100);
 		change.getTarget().setY(101);
 
@@ -487,20 +437,17 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	public void testAddMultipleGovernances() {
 
 		// Create the governance type
-		final GovernanceType<?, ?> governanceType = this
-				.createMock(GovernanceType.class);
+		final GovernanceType<?, ?> governanceType = this.createMock(GovernanceType.class);
 		this.replayMockObjects();
 
 		// Create the properties
 		PropertyList properties = OfficeFloorCompiler.newPropertyList();
 
 		// Add the governances
-		this.operations.addGovernance("GOVERNANCE",
-				"net.example.ExampleGovernanceSource", properties,
-				governanceType).apply();
-		this.operations.addGovernance("GOVERNANCE",
-				"net.example.ExampleGovernanceSource", properties,
-				governanceType).apply();
+		this.operations.addGovernance("GOVERNANCE", "net.example.ExampleGovernanceSource", properties, governanceType)
+				.apply();
+		this.operations.addGovernance("GOVERNANCE", "net.example.ExampleGovernanceSource", properties, governanceType)
+				.apply();
 
 		// Validate appropriately added governances
 		this.validateModel();
@@ -512,8 +459,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	public void testAddResource() {
 
 		// Validate add resource
-		Change<WoofResourceModel> change = this.operations
-				.addResource("index.html");
+		Change<WoofResourceModel> change = this.operations.addResource("index.html");
 		change.getTarget().setX(100);
 		change.getTarget().setY(101);
 
@@ -546,8 +492,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	public void testAddException() {
 
 		// Validate add exception
-		Change<WoofExceptionModel> change = this.operations
-				.addException(Exception.class.getName());
+		Change<WoofExceptionModel> change = this.operations.addException(Exception.class.getName());
 		change.getTarget().setX(100);
 		change.getTarget().setY(101);
 
@@ -568,8 +513,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 
 		// Add the exceptions
 		for (int i = 0; i <= 2; i++) {
-			Change<WoofExceptionModel> change = this.operations
-					.addException(SQLException.class.getName());
+			Change<WoofExceptionModel> change = this.operations.addException(SQLException.class.getName());
 			change.getTarget().setX(i);
 			change.getTarget().setY(i);
 			change.apply();

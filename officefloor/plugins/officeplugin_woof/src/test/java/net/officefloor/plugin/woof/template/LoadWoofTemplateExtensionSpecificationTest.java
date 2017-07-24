@@ -22,7 +22,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
-import net.officefloor.frame.spi.TestSource;
+import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.change.Change;
 import net.officefloor.plugin.woof.template.impl.AbstractWoofTemplateExtensionSource;

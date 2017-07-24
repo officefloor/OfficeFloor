@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.woof.template;
 
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.plugin.web.http.application.HttpTemplateSection;
 import net.officefloor.plugin.web.http.application.WebArchitect;
@@ -26,7 +28,14 @@ import net.officefloor.plugin.web.http.application.WebArchitect;
  * 
  * @author Daniel Sagenschneider
  */
-public interface WoofTemplateExtensionSourceContext extends SourceContext {
+public interface WoofTemplateExtensionSourceContext extends SourceContext, ConfigurationContext {
+
+	/**
+	 * Obtains the URL path to the {@link HttpTemplateSection}.
+	 * 
+	 * @return URL path to the {@link HttpTemplateSection}.
+	 */
+	String getTemplatePath();
 
 	/**
 	 * Obtains the {@link HttpTemplateSection} being extended.
@@ -42,5 +51,13 @@ public interface WoofTemplateExtensionSourceContext extends SourceContext {
 	 * @return {@link WebArchitect}.
 	 */
 	WebArchitect getWebApplication();
+
+	/**
+	 * Obtains the {@link OfficeArchitect} that the {@link HttpTemplateSection}
+	 * has been added.
+	 * 
+	 * @return {@link OfficeArchitect}.
+	 */
+	OfficeArchitect getOfficeArchitect();
 
 }

@@ -22,7 +22,7 @@ import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.plugin.web.http.application.WebArchitect;
 
 /**
- * Context for the {@link WoofExtensionService}.
+ * Context for the {@link WoofLoaderExtensionService}.
  * 
  * @author Daniel Sagenschneider
  */

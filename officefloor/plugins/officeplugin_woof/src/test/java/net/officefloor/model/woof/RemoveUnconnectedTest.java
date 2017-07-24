@@ -33,13 +33,11 @@ public class RemoveUnconnectedTest extends AbstractWoofChangesTestCase {
 
 		// Register the extension test details
 		Change<?> extensionChange = this.createMock(Change.class);
-		MockChangeWoofTemplateExtensionSource.reset(extensionChange,
-				"template", new String[] { "ONE", "A", "TWO", "B" }, null,
-				null, this.getWoofTemplateChangeContext());
+		MockChangeWoofTemplateExtensionSource.reset(extensionChange, "template",
+				new String[] { "ONE", "A", "TWO", "B" }, null, null, this.getWoofTemplateChangeContext());
 
 		// Record extension change
-		MockChangeWoofTemplateExtensionSource.recordAssertChange(
-				extensionChange, this);
+		MockChangeWoofTemplateExtensionSource.recordAssertChange(extensionChange, this);
 
 		// Obtain the template to remove
 		WoofTemplateModel template = this.model.getWoofTemplates().get(0);
@@ -48,8 +46,8 @@ public class RemoveUnconnectedTest extends AbstractWoofChangesTestCase {
 		this.replayMockObjects();
 
 		// Remove the template
-		Change<WoofTemplateModel> change = this.operations.removeTemplate(
-				template, this.getWoofTemplateChangeContext());
+		Change<WoofTemplateModel> change = this.operations.removeTemplate(template,
+				this.getWoofTemplateChangeContext());
 
 		// Validate change
 		this.assertChange(change, template, "Remove template TEMPLATE", true);
@@ -67,8 +65,7 @@ public class RemoveUnconnectedTest extends AbstractWoofChangesTestCase {
 		WoofSectionModel section = this.model.getWoofSections().get(0);
 
 		// Remove the section
-		Change<WoofSectionModel> change = this.operations
-				.removeSection(section);
+		Change<WoofSectionModel> change = this.operations.removeSection(section);
 		this.assertChange(change, section, "Remove section SECTION", true);
 	}
 
@@ -78,12 +75,11 @@ public class RemoveUnconnectedTest extends AbstractWoofChangesTestCase {
 	public void testRemoveAccess() {
 
 		// Obtain the access to remove
-		WoofAccessModel access = this.model.getWoofAccess();
+		WoofAccessModel access = this.model.getWoofAccesses().get(0);
 
 		// Remove the access
 		Change<WoofAccessModel> change = this.operations.removeAccess(access);
-		this.assertChange(change, access,
-				"Remove access net.example.HttpSecuritySource", true);
+		this.assertChange(change, access, "Remove access net.example.HttpSecuritySource", true);
 	}
 
 	/**
@@ -95,10 +91,8 @@ public class RemoveUnconnectedTest extends AbstractWoofChangesTestCase {
 		WoofGovernanceModel governance = this.model.getWoofGovernances().get(0);
 
 		// Remove the governance
-		Change<WoofGovernanceModel> change = this.operations
-				.removeGovernance(governance);
-		this.assertChange(change, governance, "Remove governance GOVERNANCE",
-				true);
+		Change<WoofGovernanceModel> change = this.operations.removeGovernance(governance);
+		this.assertChange(change, governance, "Remove governance GOVERNANCE", true);
 	}
 
 	/**
@@ -110,8 +104,7 @@ public class RemoveUnconnectedTest extends AbstractWoofChangesTestCase {
 		WoofResourceModel resource = this.model.getWoofResources().get(0);
 
 		// Remove the resource
-		Change<WoofResourceModel> change = this.operations
-				.removeResource(resource);
+		Change<WoofResourceModel> change = this.operations.removeResource(resource);
 		this.assertChange(change, resource, "Remove resource RESOURCE", true);
 	}
 
@@ -124,10 +117,8 @@ public class RemoveUnconnectedTest extends AbstractWoofChangesTestCase {
 		WoofExceptionModel exception = this.model.getWoofExceptions().get(0);
 
 		// Remove the exception
-		Change<WoofExceptionModel> change = this.operations
-				.removeException(exception);
-		this.assertChange(change, exception,
-				"Remove exception java.lang.Exception", true);
+		Change<WoofExceptionModel> change = this.operations.removeException(exception);
+		this.assertChange(change, exception, "Remove exception java.lang.Exception", true);
 	}
 
 	/**

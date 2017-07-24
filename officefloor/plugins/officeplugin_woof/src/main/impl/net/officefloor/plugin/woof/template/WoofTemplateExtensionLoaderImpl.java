@@ -24,7 +24,9 @@ import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.configuration.ConfigurationContext;
+import net.officefloor.configuration.impl.ConfigurationSourceContextImpl;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
@@ -324,12 +326,13 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 	}
 
 	@Override
-	public void extendTemplate(String extensionSourceClassName, PropertyList properties, HttpTemplateSection template,
-			WebArchitect application, SourceContext sourceContext) throws WoofTemplateExtensionException {
+	public void extendTemplate(String extensionSourceClassName, PropertyList properties, String templatePath, HttpTemplateSection template,
+			OfficeArchitect officeArchitect, WebArchitect webArchitect, SourceContext sourceContext)
+			throws WoofTemplateExtensionException {
 
 		// Create the context for the extension source
-		WoofTemplateExtensionSourceContext extensionSourceContext = new WoofTemplateExtensionServiceContextImpl(
-				template, application, properties, sourceContext);
+		WoofTemplateExtensionSourceContext extensionSourceContext = new WoofTemplateExtensionServiceContextImpl(templatePath,
+				template, officeArchitect, webArchitect, properties, sourceContext);
 
 		// Load the extension
 		try {
@@ -351,8 +354,13 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 	/**
 	 * {@link WoofTemplateExtensionSourceContext} implementation.
 	 */
-	private static class WoofTemplateExtensionServiceContextImpl extends SourceContextImpl
+	private static class WoofTemplateExtensionServiceContextImpl extends ConfigurationSourceContextImpl
 			implements WoofTemplateExtensionSourceContext {
+
+		/**
+		 * URL path to the {@link HttpTemplateSection}.
+		 */
+		private final String templatePath;
 
 		/**
 		 * {@link HttpTemplateSection}.
@@ -360,27 +368,39 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 		private final HttpTemplateSection template;
 
 		/**
+		 * {@link OfficeArchitect}.
+		 */
+		private final OfficeArchitect officeArchitect;
+
+		/**
 		 * {@link WebArchitect}.
 		 */
-		private final WebArchitect application;
+		private final WebArchitect webArchitect;
 
 		/**
 		 * Initiate.
 		 * 
+		 * @param templatePath
+		 *            URL path to the {@link HttpTemplateSection}.
 		 * @param template
 		 *            {@link HttpTemplateSection}.
-		 * @param application
+		 * @param officeArchitect
+		 *            {@link OfficeArchitect}.
+		 * @param webArchitect
 		 *            {@link WebArchitect}.
 		 * @param properties
 		 *            {@link PropertyList}.
 		 * @param classLoader
 		 *            {@link ClassLoader}.
 		 */
-		public WoofTemplateExtensionServiceContextImpl(HttpTemplateSection template, WebArchitect application,
-				PropertyList properties, SourceContext sourceContext) {
+		public WoofTemplateExtensionServiceContextImpl(String templatePath, HttpTemplateSection template,
+				OfficeArchitect officeArchitect, WebArchitect webArchitect, PropertyList properties,
+				SourceContext sourceContext) {
 			super(sourceContext.isLoadingType(), sourceContext, new PropertyListSourceProperties(properties));
+			this.templatePath = templatePath;
 			this.template = template;
-			this.application = application;
+			this.officeArchitect = officeArchitect;
+			this.webArchitect = webArchitect;
 		}
 
 		/*
@@ -388,13 +408,23 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 		 */
 
 		@Override
+		public String getTemplatePath() {
+			return this.templatePath;
+		}
+
+		@Override
 		public HttpTemplateSection getTemplate() {
 			return this.template;
 		}
 
 		@Override
+		public OfficeArchitect getOfficeArchitect() {
+			return this.officeArchitect;
+		}
+
+		@Override
 		public WebArchitect getWebApplication() {
-			return this.application;
+			return this.webArchitect;
 		}
 	}
 

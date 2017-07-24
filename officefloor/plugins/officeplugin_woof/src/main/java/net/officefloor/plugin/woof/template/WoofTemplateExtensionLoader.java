@@ -19,6 +19,7 @@ package net.officefloor.plugin.woof.template;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
@@ -95,16 +96,21 @@ public interface WoofTemplateExtensionLoader {
 	 * @param properties
 	 *            {@link PropertyList} to configure the
 	 *            {@link WoofTemplateExtensionSource}.
+	 * @param templatePath
+	 *            URL path to the {@link HttpTemplateSection}.
 	 * @param template
 	 *            {@link HttpTemplateSection} to be extended.
-	 * @param application
+	 * @param officeArchitect
+	 *            {@link OfficeArchitect}.
+	 * @param webArchitect
 	 *            {@link WebArchitect}.
 	 * @param sourceContext
 	 *            {@link SourceContext}.
 	 * @throws WoofTemplateExtensionException
 	 *             If fails to extend the {@link HttpTemplateSection}.
 	 */
-	void extendTemplate(String extensionSourceClassName, PropertyList properties, HttpTemplateSection template,
-			WebArchitect application, SourceContext sourceContext) throws WoofTemplateExtensionException;
+	void extendTemplate(String extensionSourceClassName, PropertyList properties, String templatePath,
+			HttpTemplateSection template, OfficeArchitect officeArchitect, WebArchitect webArchitect,
+			SourceContext sourceContext) throws WoofTemplateExtensionException;
 
 }

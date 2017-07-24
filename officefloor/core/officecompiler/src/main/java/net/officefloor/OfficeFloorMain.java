@@ -15,8 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile;
+package net.officefloor;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.spi.mbean.MBeanRegistrator;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
@@ -37,7 +38,7 @@ public class OfficeFloorMain {
 	 * @throws Exception
 	 *             If fails to compile and open.
 	 */
-	public static void main(String[] args) throws Exception {
+	public static void main(String... args) throws Exception {
 
 		// Create the compiler
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);

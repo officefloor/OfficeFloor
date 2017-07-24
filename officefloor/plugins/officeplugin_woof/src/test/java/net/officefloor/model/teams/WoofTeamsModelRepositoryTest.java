@@ -20,8 +20,9 @@ package net.officefloor.model.teams;
 import java.util.List;
 
 import net.officefloor.configuration.ConfigurationItem;
-import net.officefloor.configuration.impl.filesystem.FileSystemConfigurationItem;
-import net.officefloor.configuration.impl.memory.MemoryConfigurationItem;
+import net.officefloor.configuration.WritableConfigurationItem;
+import net.officefloor.configuration.impl.filesystem.FileSystemConfigurationContext;
+import net.officefloor.configuration.impl.memory.MemoryConfigurationContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
@@ -33,7 +34,7 @@ import net.officefloor.model.repository.ModelRepository;
  * 
  * @author Daniel Sagenschneider
  */
-public class AutoWireTeamsModelRepositoryTest extends OfficeFrameTestCase {
+public class WoofTeamsModelRepositoryTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link ConfigurationItem} containing the {@link WoofTeamsModel}.
@@ -43,8 +44,8 @@ public class AutoWireTeamsModelRepositoryTest extends OfficeFrameTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		// Specify location of the configuration
-		this.configurationItem = new FileSystemConfigurationItem(this.findFile(
-				this.getClass(), "Teams.teams.xml"), null);
+		this.configurationItem = FileSystemConfigurationContext
+				.createWritableConfigurationItem(this.findFile(this.getClass(), "Teams.teams.xml"));
 	}
 
 	/**
@@ -55,29 +56,24 @@ public class AutoWireTeamsModelRepositoryTest extends OfficeFrameTestCase {
 		// Load the Teams
 		ModelRepository repository = new ModelRepositoryImpl();
 		WoofTeamsModel teams = new WoofTeamsModel();
-		teams = repository.retrieve(teams, this.configurationItem);
+		repository.retrieve(teams, this.configurationItem);
 
 		// ----------------------------------------
 		// Validate the teams
 		// ----------------------------------------
-		assertList(new String[] { "getTeamSourceClassName", "getQualifier",
-				"getType" }, teams.getAutoWireTeams(), new WoofTeamModel(
-				"net.example.ExampleTeamSource", null, null),
-				new WoofTeamModel("PASSIVE", "QUALIFIED",
-						"net.example.Type"));
-		WoofTeamModel team = teams.getAutoWireTeams().get(0);
+		assertList(new String[] { "getTeamSourceClassName", "getQualifier", "getType" }, teams.getWoofTeams(),
+				new WoofTeamModel("net.example.ExampleTeamSource", null, null),
+				new WoofTeamModel("PASSIVE", "QUALIFIED", "net.example.Type"));
+		WoofTeamModel team = teams.getWoofTeams().get(0);
 
 		// Validate the properties
-		assertProperties(new PropertyModel("NAME_ONE", "VALUE_ONE"),
-				new PropertyFileModel("example/team.properties"),
-				new PropertyModel("NAME_TWO", "VALUE_TWO"),
-				team.getPropertySources());
+		assertProperties(new PropertyModel("NAME_ONE", "VALUE_ONE"), new PropertyFileModel("example/team.properties"),
+				new PropertyModel("NAME_TWO", "VALUE_TWO"), team.getPropertySources());
 
 		// Validate the auto-wiring
-		assertList(new String[] { "getQualifier", "getType" },
-				team.getAutoWiring(), new TypeQualificationModel("QUALIFIED_ONE",
-						"TYPE_ONE"), new TypeQualificationModel("QUALIFIED_TWO",
-						"TYPE_TWO"));
+		assertList(new String[] { "getQualifier", "getType" }, team.getTypeQualifications(),
+				new TypeQualificationModel("QUALIFIED_ONE", "TYPE_ONE"),
+				new TypeQualificationModel("QUALIFIED_TWO", "TYPE_TWO"));
 	}
 
 	/**
@@ -107,18 +103,12 @@ public class AutoWireTeamsModelRepositoryTest extends OfficeFrameTestCase {
 	 * @param actual
 	 *            Actual {@link PropertySourceModel} instances.
 	 */
-	private static void assertProperties(PropertyModel propertyOne,
-			PropertyFileModel propertyFile, PropertyModel propertyTwo,
-			List<PropertySourceModel> actual) {
+	private static void assertProperties(PropertyModel propertyOne, PropertyFileModel propertyFile,
+			PropertyModel propertyTwo, List<PropertySourceModel> actual) {
 		assertEquals("Incorrect number of property sources", 3, actual.size());
-		assertProperties(propertyOne,
-				assertType(PropertyModel.class, actual.get(0)), "getName",
-				"getValue");
-		assertProperties(propertyFile,
-				assertType(PropertyFileModel.class, actual.get(1)), "getPath");
-		assertProperties(propertyTwo,
-				assertType(PropertyModel.class, actual.get(2)), "getName",
-				"getValue");
+		assertProperties(propertyOne, assertType(PropertyModel.class, actual.get(0)), "getName", "getValue");
+		assertProperties(propertyFile, assertType(PropertyFileModel.class, actual.get(1)), "getPath");
+		assertProperties(propertyTwo, assertType(PropertyModel.class, actual.get(2)), "getName", "getValue");
 	}
 
 	/**
@@ -130,19 +120,18 @@ public class AutoWireTeamsModelRepositoryTest extends OfficeFrameTestCase {
 		// Load the teams
 		ModelRepository repository = new ModelRepositoryImpl();
 		WoofTeamsModel teams = new WoofTeamsModel();
-		teams = repository.retrieve(teams, this.configurationItem);
+		repository.retrieve(teams, this.configurationItem);
 
 		// Store the teams
-		MemoryConfigurationItem contents = new MemoryConfigurationItem();
+		WritableConfigurationItem contents = MemoryConfigurationContext.createWritableConfigurationItem("test");
 		repository.store(teams, contents);
 
 		// Reload the teams
 		WoofTeamsModel reloadedTeams = new WoofTeamsModel();
-		reloadedTeams = repository.retrieve(reloadedTeams, contents);
+		repository.retrieve(reloadedTeams, contents);
 
 		// Validate round trip
-		assertGraph(teams, reloadedTeams,
-				RemoveConnectionsAction.REMOVE_CONNECTIONS_METHOD_NAME);
+		assertGraph(teams, reloadedTeams, RemoveConnectionsAction.REMOVE_CONNECTIONS_METHOD_NAME);
 	}
 
 }

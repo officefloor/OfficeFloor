@@ -23,53 +23,53 @@ import java.io.InputStream;
 import java.io.Writer;
 
 import junit.framework.TestCase;
-import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.WebArchitect;
-import net.officefloor.plugin.work.clazz.FlowInterface;
 
 /**
- * Mock {@link WoofExtensionService} for testing.
+ * Mock {@link WoofLoaderExtensionService} for testing.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockWoofApplicationExtensionService implements
-		WoofExtensionService {
+public class MockWoofExtensionService implements WoofExtensionService {
 
 	/*
-	 * =================== WoofApplicationExtensionService ================
+	 * =================== WoofExtensionService ================
 	 */
 
 	@Override
-	public void extend(WoofExtensionServiceContext context)
-			throws Exception {
+	public void extend(WoofExtensionServiceContext context) throws Exception {
+
+		// Obtain the extension context
+		OfficeExtensionContext extensionContext = context.getOfficeExtensionContext();
 
 		// Validate property
-		TestCase.assertEquals("Incorrect property", "VALUE",
-				context.getProperty("CHAIN.TEST"));
+		TestCase.assertEquals("Incorrect property", "VALUE", extensionContext.getProperty("CHAIN.TEST"));
 
 		// Validate class loader
-		TestCase.assertNotNull("Must have class loader",
-				context.getClassLoader());
+		TestCase.assertNotNull("Must have class loader", extensionContext.getClassLoader());
 
 		// Validate resource
 		TestCase.assertEquals("Incorrect resource text", "EXTENSION",
-				this.getResourceContent(context,
-						"ApplicationExtension.woof.config"));
+				this.getResourceContent(context, "ApplicationExtension.woof.config"));
 
 		// Validate the webapp directory
 		TestCase.assertEquals("Incorrect webapp access", "<web-app />",
 				this.getResourceContent(context, "WEB-INF/web.xml"));
 
 		// Configure the servicer
-		WebArchitect app = context.getWebArchitect();
-		AutoWireSection servicer = app.addSection("CHAIN",
-				ClassSectionSource.class.getName(),
+		OfficeArchitect office = context.getOfficeArchitect();
+		OfficeSection servicer = office.addOfficeSection("CHAIN", ClassSectionSource.class.getName(),
 				ChainServicer.class.getName());
 
 		// Chain in the servicer
-		app.chainServicer(servicer, "service", "notHandled");
+		WebArchitect web = context.getWebArchitect();
+		web.chainServicer(servicer.getOfficeSectionInput("service"), servicer.getOfficeSectionOutput("notHandled"));
 	}
 
 	/**
@@ -81,12 +81,10 @@ public class MockWoofApplicationExtensionService implements
 	 *            Path to the resource.
 	 * @return Content of the resource.
 	 */
-	private String getResourceContent(
-			WoofExtensionServiceContext context, String resourcePath)
-			throws IOException {
+	private String getResourceContent(WoofExtensionServiceContext context, String resourcePath) throws IOException {
 
 		// Obtain the resource content
-		InputStream resource = context.getResource(resourcePath);
+		InputStream resource = context.getOfficeExtensionContext().getResource(resourcePath);
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		for (int value = resource.read(); value != -1; value = resource.read()) {
 			buffer.write(value);
@@ -107,8 +105,7 @@ public class MockWoofApplicationExtensionService implements
 			void notHandled();
 		}
 
-		public void service(ServerHttpConnection connection, Flows flows)
-				throws IOException {
+		public void service(ServerHttpConnection connection, Flows flows) throws IOException {
 			if ("/chain".equals(connection.getHttpRequest().getRequestURI())) {
 				// Provide chained response
 				Writer writer = connection.getHttpResponse().getEntityWriter();

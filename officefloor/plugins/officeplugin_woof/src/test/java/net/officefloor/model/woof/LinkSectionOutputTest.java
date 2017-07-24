@@ -60,13 +60,12 @@ public class LinkSectionOutputTest extends AbstractWoofChangesTestCase {
 	private void doLinkToTemplate(int sectionIndex) {
 
 		// Obtain the items to link
-		WoofSectionOutputModel sectionOutput = this.model.getWoofSections()
-				.get(sectionIndex).getOutputs().get(0);
+		WoofSectionOutputModel sectionOutput = this.model.getWoofSections().get(sectionIndex).getOutputs().get(0);
 		WoofTemplateModel template = this.model.getWoofTemplates().get(1);
 
 		// Link the section output to template
-		Change<WoofSectionOutputToWoofTemplateModel> change = this.operations
-				.linkSectionOutputToTemplate(sectionOutput, template);
+		Change<WoofSectionOutputToWoofTemplateModel> change = this.operations.linkSectionOutputToTemplate(sectionOutput,
+				template);
 
 		// Validate change
 		this.assertChange(change, null, "Link Section Output to Template", true);
@@ -78,16 +77,14 @@ public class LinkSectionOutputTest extends AbstractWoofChangesTestCase {
 	public void testRemoveToTemplateLink() {
 
 		// Obtain the link to remove
-		WoofSectionOutputToWoofTemplateModel link = this.model
-				.getWoofSections().get(B).getOutputs().get(0).getWoofTemplate();
+		WoofSectionOutputToWoofTemplateModel link = this.model.getWoofSections().get(B).getOutputs().get(0)
+				.getWoofTemplate();
 
 		// Remove the link
-		Change<WoofSectionOutputToWoofTemplateModel> change = this.operations
-				.removeSectionOuputToTemplate(link);
+		Change<WoofSectionOutputToWoofTemplateModel> change = this.operations.removeSectionOuputToTemplate(link);
 
 		// Validate change
-		this.assertChange(change, null, "Remove Section Output to Template",
-				true);
+		this.assertChange(change, null, "Remove Section Output to Template", true);
 	}
 
 	/**
@@ -114,18 +111,15 @@ public class LinkSectionOutputTest extends AbstractWoofChangesTestCase {
 	private void doLinkToSectionInput(int sectionIndex) {
 
 		// Obtain the items to link
-		WoofSectionOutputModel sectionOutput = this.model.getWoofSections()
-				.get(sectionIndex).getOutputs().get(0);
-		WoofSectionInputModel sectionInput = this.model.getWoofSections()
-				.get(B).getInputs().get(0);
+		WoofSectionOutputModel sectionOutput = this.model.getWoofSections().get(sectionIndex).getOutputs().get(0);
+		WoofSectionInputModel sectionInput = this.model.getWoofSections().get(B).getInputs().get(0);
 
 		// Link the template output to section input
 		Change<WoofSectionOutputToWoofSectionInputModel> change = this.operations
 				.linkSectionOutputToSectionInput(sectionOutput, sectionInput);
 
 		// Validate change
-		this.assertChange(change, null, "Link Section Output to Section Input",
-				true);
+		this.assertChange(change, null, "Link Section Output to Section Input", true);
 	}
 
 	/**
@@ -134,8 +128,7 @@ public class LinkSectionOutputTest extends AbstractWoofChangesTestCase {
 	public void testRemoveToSectionInput() {
 
 		// Obtain the link to remove
-		WoofSectionOutputToWoofSectionInputModel link = this.model
-				.getWoofSections().get(B).getOutputs().get(0)
+		WoofSectionOutputToWoofSectionInputModel link = this.model.getWoofSections().get(B).getOutputs().get(0)
 				.getWoofSectionInput();
 
 		// Remove the link
@@ -143,8 +136,7 @@ public class LinkSectionOutputTest extends AbstractWoofChangesTestCase {
 				.removeSectionOuputToSectionInput(link);
 
 		// Validate change
-		this.assertChange(change, null,
-				"Remove Section Output to Section Input", true);
+		this.assertChange(change, null, "Remove Section Output to Section Input", true);
 	}
 
 	/**
@@ -171,18 +163,15 @@ public class LinkSectionOutputTest extends AbstractWoofChangesTestCase {
 	private void doLinkToAccessInput(int sectionIndex) {
 
 		// Obtain the items to link
-		WoofSectionOutputModel sectionOutput = this.model.getWoofSections()
-				.get(sectionIndex).getOutputs().get(0);
-		WoofAccessInputModel accessInput = this.model.getWoofAccess()
-				.getInputs().get(1);
+		WoofSectionOutputModel sectionOutput = this.model.getWoofSections().get(sectionIndex).getOutputs().get(0);
+		WoofAccessInputModel accessInput = this.model.getWoofAccesses().get(0).getInputs().get(1);
 
 		// Link the section output to access input
 		Change<WoofSectionOutputToWoofAccessInputModel> change = this.operations
 				.linkSectionOutputToAccessInput(sectionOutput, accessInput);
 
 		// Validate change
-		this.assertChange(change, null, "Link Section Output to Access Input",
-				true);
+		this.assertChange(change, null, "Link Section Output to Access Input", true);
 	}
 
 	/**
@@ -191,17 +180,14 @@ public class LinkSectionOutputTest extends AbstractWoofChangesTestCase {
 	public void testRemoveToAccessInput() {
 
 		// Obtain the link to remove
-		WoofSectionOutputToWoofAccessInputModel link = this.model
-				.getWoofSections().get(B).getOutputs().get(0)
+		WoofSectionOutputToWoofAccessInputModel link = this.model.getWoofSections().get(B).getOutputs().get(0)
 				.getWoofAccessInput();
 
 		// Remove the link
-		Change<WoofSectionOutputToWoofAccessInputModel> change = this.operations
-				.removeSectionOuputToAccessInput(link);
+		Change<WoofSectionOutputToWoofAccessInputModel> change = this.operations.removeSectionOuputToAccessInput(link);
 
 		// Validate change
-		this.assertChange(change, null,
-				"Remove Section Output to Access Input", true);
+		this.assertChange(change, null, "Remove Section Output to Access Input", true);
 	}
 
 	/**
@@ -228,13 +214,12 @@ public class LinkSectionOutputTest extends AbstractWoofChangesTestCase {
 	private void doLinkToResource(int sectionIndex) {
 
 		// Obtain the items to link
-		WoofSectionOutputModel sectionOutput = this.model.getWoofSections()
-				.get(sectionIndex).getOutputs().get(0);
+		WoofSectionOutputModel sectionOutput = this.model.getWoofSections().get(sectionIndex).getOutputs().get(0);
 		WoofResourceModel resource = this.model.getWoofResources().get(1);
 
 		// Link the template output to resource
-		Change<WoofSectionOutputToWoofResourceModel> change = this.operations
-				.linkSectionOutputToResource(sectionOutput, resource);
+		Change<WoofSectionOutputToWoofResourceModel> change = this.operations.linkSectionOutputToResource(sectionOutput,
+				resource);
 
 		// Validate change
 		this.assertChange(change, null, "Link Section Output to Resource", true);
@@ -246,16 +231,14 @@ public class LinkSectionOutputTest extends AbstractWoofChangesTestCase {
 	public void testRemoveToResource() {
 
 		// Obtain the link to remove
-		WoofSectionOutputToWoofResourceModel link = this.model
-				.getWoofSections().get(B).getOutputs().get(0).getWoofResource();
+		WoofSectionOutputToWoofResourceModel link = this.model.getWoofSections().get(B).getOutputs().get(0)
+				.getWoofResource();
 
 		// Remove the link
-		Change<WoofSectionOutputToWoofResourceModel> change = this.operations
-				.removeSectionOuputToResource(link);
+		Change<WoofSectionOutputToWoofResourceModel> change = this.operations.removeSectionOuputToResource(link);
 
 		// Validate change
-		this.assertChange(change, null, "Remove Section Output to Resource",
-				true);
+		this.assertChange(change, null, "Remove Section Output to Resource", true);
 	}
 
 }

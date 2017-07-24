@@ -224,7 +224,8 @@ public class WoofLoaderImpl implements WoofLoader {
 				}
 
 				// Load the extension
-				extensionLoader.extendTemplate(extensionSourceClassName, properties, template, web, extensionContext);
+				extensionLoader.extendTemplate(extensionSourceClassName, properties, uri, template, office, web,
+						extensionContext);
 			}
 
 			// Include implicit extensions (in deterministic order)
@@ -239,7 +240,7 @@ public class WoofLoaderImpl implements WoofLoader {
 
 				// Extend the template with implicit extension
 				extensionLoader.extendTemplate(implicitExtensionSourceClassName, OfficeFloorCompiler.newPropertyList(),
-						template, web, extensionContext);
+						uri, template, office, web, extensionContext);
 			}
 		}
 

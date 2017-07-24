@@ -20,6 +20,8 @@ package net.officefloor.plugin.json.woof;
 import java.io.IOException;
 import java.io.Serializable;
 
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.LoggerAssertion;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.json.HttpJson;
@@ -28,7 +30,7 @@ import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.woof.WoofLoader;
 import net.officefloor.plugin.woof.WoofLoaderImpl;
-import net.officefloor.plugin.woof.WoofOfficeExtensionService;
+import net.officefloor.plugin.woof.WoofLoaderExtensionService;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -49,12 +51,17 @@ public class WoofImplicitJsonTest extends OfficeFrameTestCase {
 	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
 
 	/**
+	 * {@link OfficeFloor}.
+	 */
+	private OfficeFloor officeFloor;
+
+	/**
 	 * {@link LoggerAssertion} for the {@link WoofLoader}.
 	 */
 	private LoggerAssertion loaderLoggerAssertion;
 
 	/**
-	 * {@link LoggerAssertion} for the {@link WoofOfficeExtensionService}.
+	 * {@link LoggerAssertion} for the {@link WoofLoaderExtensionService}.
 	 */
 	private LoggerAssertion sourceLoggerAssertion;
 
@@ -62,10 +69,8 @@ public class WoofImplicitJsonTest extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 
 		// Create the logger assertions
-		this.loaderLoggerAssertion = LoggerAssertion
-				.setupLoggerAssertion(WoofLoaderImpl.class.getName());
-		this.sourceLoggerAssertion = LoggerAssertion
-				.setupLoggerAssertion(WoofOfficeExtensionService.class.getName());
+		this.loaderLoggerAssertion = LoggerAssertion.setupLoggerAssertion(WoofLoaderImpl.class.getName());
+		this.sourceLoggerAssertion = LoggerAssertion.setupLoggerAssertion(WoofLoaderExtensionService.class.getName());
 	}
 
 	@Override
@@ -77,7 +82,9 @@ public class WoofImplicitJsonTest extends OfficeFrameTestCase {
 			try {
 				this.client.close();
 			} finally {
-				WoofOfficeExtensionService.stop();
+				if (this.officeFloor != null) {
+					this.officeFloor.closeOfficeFloor();
+				}
 			}
 
 		} finally {
@@ -93,27 +100,24 @@ public class WoofImplicitJsonTest extends OfficeFrameTestCase {
 	public void testImplicitJsonTemplateExtensionSource() throws Exception {
 
 		// Obtain JSON WoOF configuration
-		String jsonTemplateConfigurationLocation = this.getFileLocation(
-				this.getClass(), "/JsonTemplate.woof");
+		String jsonTemplateConfigurationLocation = this.getFileLocation(this.getClass(), "/JsonTemplate.woof");
 
 		// Run the application with no logic template
-		WoofOfficeExtensionService.start(
-				WoofOfficeExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+		compiler.addProperty(WoofLoaderExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				jsonTemplateConfigurationLocation);
+		this.officeFloor = compiler.compile("OfficeFloor");
+		this.officeFloor.openOfficeFloor();
 
 		// Test
-		HttpPost request = new HttpPost(
-				"http://localhost:7878/template-link.woof");
+		HttpPost request = new HttpPost("http://localhost:7878/template-link.woof");
 		request.setEntity(new StringEntity("{\"value\":\"REQUEST\"}"));
 		HttpResponse response = this.client.execute(request);
-		assertEquals("Should be successful", 200, response.getStatusLine()
-				.getStatusCode());
-		assertEquals("Must specify content type", "application/json; charset="
-				+ AbstractServerSocketManagedObjectSource.getCharset(null)
-						.name(), response.getFirstHeader("Content-Type")
-				.getValue());
-		assertEquals("Incorrect response", "{\"value\":\"RESPONSE\"}",
-				EntityUtils.toString(response.getEntity()));
+		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
+		assertEquals("Must specify content type",
+				"application/json; charset=" + AbstractServerSocketManagedObjectSource.getCharset(null).name(),
+				response.getFirstHeader("Content-Type").getValue());
+		assertEquals("Incorrect response", "{\"value\":\"RESPONSE\"}", EntityUtils.toString(response.getEntity()));
 	}
 
 	/**
@@ -138,12 +142,10 @@ public class WoofImplicitJsonTest extends OfficeFrameTestCase {
 	 */
 	public static class TemplateLogic {
 
-		public void link(JsonObject request, JsonResponseWriter writer)
-				throws IOException {
+		public void link(JsonObject request, JsonResponseWriter writer) throws IOException {
 
 			// Ensure correct request
-			assertEquals("Incorrect JSON request", "REQUEST",
-					request.getValue());
+			assertEquals("Incorrect JSON request", "REQUEST", request.getValue());
 
 			// Provide the response
 			JsonObject response = new JsonObject();

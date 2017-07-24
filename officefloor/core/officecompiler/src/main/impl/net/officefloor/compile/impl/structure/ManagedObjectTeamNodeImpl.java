@@ -141,6 +141,13 @@ public class ManagedObjectTeamNodeImpl implements ManagedObjectTeamNode {
 		return this.teamName;
 	}
 
+	@Override
+	public void addTypeQualification(String qualifier, String type) {
+		// TODO implement
+		// ManagedObjectTeamNode.addTypeQualification
+		throw new UnsupportedOperationException("TODO implement ManagedObjectTeamNode.addTypeQualification");
+	}
+
 	/*
 	 * ================== LinkTeamNode ============================
 	 */

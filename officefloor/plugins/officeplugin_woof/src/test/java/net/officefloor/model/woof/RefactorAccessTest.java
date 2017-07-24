@@ -49,7 +49,7 @@ public class RefactorAccessTest extends AbstractWoofChangesTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		this.access = this.model.getWoofAccess();
+		this.access = this.model.getWoofAccesses().get(0);
 	}
 
 	/**
@@ -65,19 +65,16 @@ public class RefactorAccessTest extends AbstractWoofChangesTestCase {
 	public void testNoChange() {
 
 		// Create the security type
-		HttpSecurityType<?, ?, ?, ?> securityType = this
-				.constructHttpSecurityType(HttpCredentials.class,
-						new HttpSecurityTypeConstructor() {
-							@Override
-							public void construct(
-									HttpSecurityTypeContext context) {
-								context.addFlow("OUTPUT_A", Integer.class, null);
-								context.addFlow("OUTPUT_B", String.class, null);
-								context.addFlow("OUTPUT_C", null, null);
-								context.addDependency("IGNORE_OBJECT",
-										DataSource.class, null, null);
-							}
-						});
+		HttpSecurityType<?, ?, ?, ?> securityType = this.constructHttpSecurityType(HttpCredentials.class,
+				new HttpSecurityTypeConstructor() {
+					@Override
+					public void construct(HttpSecurityTypeContext context) {
+						context.addFlow("OUTPUT_A", Integer.class, null);
+						context.addFlow("OUTPUT_B", String.class, null);
+						context.addFlow("OUTPUT_C", null, null);
+						context.addDependency("IGNORE_OBJECT", DataSource.class, null, null);
+					}
+				});
 
 		// Create the properties
 		PropertyList properties = OfficeFloorCompiler.newPropertyList();
@@ -88,14 +85,12 @@ public class RefactorAccessTest extends AbstractWoofChangesTestCase {
 		this.accessOutputNameMapping.put("OUTPUT_A", "OUTPUT_A");
 		this.accessOutputNameMapping.put("OUTPUT_B", "OUTPUT_B");
 		this.accessOutputNameMapping.put("OUTPUT_C", "OUTPUT_C");
-		this.accessOutputNameMapping.put(
-				HttpSecuritySectionSource.OUTPUT_FAILURE,
+		this.accessOutputNameMapping.put(HttpSecuritySectionSource.OUTPUT_FAILURE,
 				HttpSecuritySectionSource.OUTPUT_FAILURE);
 
 		// Refactor the access with same details
-		Change<WoofAccessModel> change = this.operations.refactorAccess(
-				this.access, "net.example.HttpSecuritySource", 4000,
-				properties, securityType, this.accessOutputNameMapping);
+		Change<WoofAccessModel> change = this.operations.refactorAccess(this.access, "test",
+				"net.example.HttpSecuritySource", 4000, properties, securityType, this.accessOutputNameMapping);
 
 		// Validate change
 		this.assertChange(change, null, "Refactor Access", true);
@@ -107,19 +102,16 @@ public class RefactorAccessTest extends AbstractWoofChangesTestCase {
 	public void testChange() {
 
 		// Create the security type
-		HttpSecurityType<?, ?, ?, ?> securityType = this
-				.constructHttpSecurityType(String.class,
-						new HttpSecurityTypeConstructor() {
-							@Override
-							public void construct(
-									HttpSecurityTypeContext context) {
-								context.addFlow("OUTPUT_A", Integer.class, null);
-								context.addFlow("OUTPUT_B", String.class, null);
-								context.addFlow("OUTPUT_C", null, null);
-								context.addDependency("IGNORE_OBJECT",
-										DataSource.class, null, null);
-							}
-						});
+		HttpSecurityType<?, ?, ?, ?> securityType = this.constructHttpSecurityType(String.class,
+				new HttpSecurityTypeConstructor() {
+					@Override
+					public void construct(HttpSecurityTypeContext context) {
+						context.addFlow("OUTPUT_A", Integer.class, null);
+						context.addFlow("OUTPUT_B", String.class, null);
+						context.addFlow("OUTPUT_C", null, null);
+						context.addDependency("IGNORE_OBJECT", DataSource.class, null, null);
+					}
+				});
 
 		// Create the properties
 		PropertyList properties = OfficeFloorCompiler.newPropertyList();
@@ -132,9 +124,8 @@ public class RefactorAccessTest extends AbstractWoofChangesTestCase {
 		this.accessOutputNameMapping.put("OUTPUT_A", "OUTPUT_C");
 
 		// Refactor the section with same details
-		Change<WoofAccessModel> change = this.operations.refactorAccess(
-				this.access, "net.change.ChangeSecuritySource", 5000,
-				properties, securityType, this.accessOutputNameMapping);
+		Change<WoofAccessModel> change = this.operations.refactorAccess(this.access, "test",
+				"net.change.ChangeSecuritySource", 5000, properties, securityType, this.accessOutputNameMapping);
 
 		// Validate change
 		this.assertChange(change, null, "Refactor Access", true);
@@ -147,20 +138,17 @@ public class RefactorAccessTest extends AbstractWoofChangesTestCase {
 	public void testRemoveDetails() {
 
 		// Create the security type
-		HttpSecurityType<?, ?, ?, ?> securityType = this
-				.constructHttpSecurityType(HttpCredentials.class,
-						new HttpSecurityTypeConstructor() {
-							@Override
-							public void construct(
-									HttpSecurityTypeContext context) {
-								// No flows
-							}
-						});
+		HttpSecurityType<?, ?, ?, ?> securityType = this.constructHttpSecurityType(HttpCredentials.class,
+				new HttpSecurityTypeConstructor() {
+					@Override
+					public void construct(HttpSecurityTypeContext context) {
+						// No flows
+					}
+				});
 
 		// Refactor the access removing details
-		Change<WoofAccessModel> change = this.operations.refactorAccess(
-				this.access, "net.example.RemoveSecuritySource", 4000, null,
-				securityType, null);
+		Change<WoofAccessModel> change = this.operations.refactorAccess(this.access, "test",
+				"net.example.RemoveSecuritySource", 4000, null, securityType, null);
 
 		// Validate change
 		this.assertChange(change, null, "Refactor Access", true);
@@ -173,19 +161,16 @@ public class RefactorAccessTest extends AbstractWoofChangesTestCase {
 	public void testAddDetails() {
 
 		// Create the security type
-		HttpSecurityType<?, ?, ?, ?> securityType = this
-				.constructHttpSecurityType(String.class,
-						new HttpSecurityTypeConstructor() {
-							@Override
-							public void construct(
-									HttpSecurityTypeContext context) {
-								context.addFlow("OUTPUT_A", Integer.class, null);
-								context.addFlow("OUTPUT_B", String.class, null);
-								context.addFlow("OUTPUT_C", null, null);
-								context.addDependency("IGNORE_OBJECT",
-										DataSource.class, null, null);
-							}
-						});
+		HttpSecurityType<?, ?, ?, ?> securityType = this.constructHttpSecurityType(String.class,
+				new HttpSecurityTypeConstructor() {
+					@Override
+					public void construct(HttpSecurityTypeContext context) {
+						context.addFlow("OUTPUT_A", Integer.class, null);
+						context.addFlow("OUTPUT_B", String.class, null);
+						context.addFlow("OUTPUT_C", null, null);
+						context.addDependency("IGNORE_OBJECT", DataSource.class, null, null);
+					}
+				});
 
 		// Create the properties
 		PropertyList properties = OfficeFloorCompiler.newPropertyList();
@@ -193,9 +178,8 @@ public class RefactorAccessTest extends AbstractWoofChangesTestCase {
 		properties.addProperty("name.two").setValue("value.two");
 
 		// Refactor the access with added details
-		Change<WoofAccessModel> change = this.operations.refactorAccess(
-				this.access, "net.example.AddSecuritySource", 5000, properties,
-				securityType, this.accessOutputNameMapping);
+		Change<WoofAccessModel> change = this.operations.refactorAccess(this.access, "test",
+				"net.example.AddSecuritySource", 5000, properties, securityType, this.accessOutputNameMapping);
 
 		// Validate change
 		this.assertChange(change, null, "Refactor Access", true);

@@ -19,8 +19,9 @@ package net.officefloor.plugin.woof.template;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.source.UnknownClassError;
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.source.UnknownClassError;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.application.HttpTemplateSection;
 import net.officefloor.plugin.web.http.application.WebArchitect;
@@ -42,26 +43,27 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * {@link PropertyList}.
 	 */
-	private final PropertyList properties = OfficeFloorCompiler
-			.newPropertyList();
+	private final PropertyList properties = OfficeFloorCompiler.newPropertyList();
 
 	/**
 	 * {@link HttpTemplateSection}.
 	 */
-	private final HttpTemplateSection template = this
-			.createMock(HttpTemplateSection.class);
+	private final HttpTemplateSection template = this.createMock(HttpTemplateSection.class);
+
+	/**
+	 * {@link OfficeArchitect}.
+	 */
+	private final OfficeArchitect officeArchitet = this.createMock(OfficeArchitect.class);
 
 	/**
 	 * {@link WebArchitect}.
 	 */
-	private final WebArchitect application = this
-			.createMock(WebArchitect.class);
+	private final WebArchitect webArchitect = this.createMock(WebArchitect.class);
 
 	/**
 	 * {@link SourceContext}.
 	 */
-	private final SourceContext sourceContext = this
-			.createMock(SourceContext.class);
+	private final SourceContext sourceContext = this.createMock(SourceContext.class);
 
 	@Override
 	protected void setUp() throws Exception {
@@ -78,8 +80,7 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 		UnknownClassError error = new UnknownClassError("Unknown", "UNKNOWN");
 
 		// Record fail to instantiate
-		this.recordReturn(this.sourceContext,
-				this.sourceContext.isLoadingType(), false);
+		this.recordReturn(this.sourceContext, this.sourceContext.isLoadingType(), false);
 		this.sourceContext.loadClass("UNKNOWN");
 		this.control(this.sourceContext).setThrowable(error);
 
@@ -88,9 +89,7 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 			this.extendTemplate("UNKNOWN");
 			fail("Should not be successful");
 		} catch (WoofTemplateExtensionException ex) {
-			assertEquals("Incorrect exception",
-					"Failed loading Template Extension UNKNOWN. Unknown",
-					ex.getMessage());
+			assertEquals("Incorrect exception", "Failed loading Template Extension UNKNOWN. Unknown", ex.getMessage());
 			assertSame("Incorrect cause", error, ex.getCause());
 		}
 	}
@@ -104,10 +103,9 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 		final Exception failure = new Exception("TEST");
 
 		// Record initiate
+		this.recordReturn(this.sourceContext, this.sourceContext.isLoadingType(), false);
 		this.recordReturn(this.sourceContext,
-				this.sourceContext.isLoadingType(), false);
-		this.recordReturn(this.sourceContext, this.sourceContext
-				.loadClass(MockWoofTemplateExtensionSource.class.getName()),
+				this.sourceContext.loadClass(MockWoofTemplateExtensionSource.class.getName()),
 				MockWoofTemplateExtensionSource.class);
 
 		// Flag to throw exception
@@ -118,9 +116,8 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 			this.extendTemplate(MockWoofTemplateExtensionSource.class.getName());
 		} catch (WoofTemplateExtensionException ex) {
 			assertEquals("Incorrect exception",
-					"Failed loading Template Extension "
-							+ MockWoofTemplateExtensionSource.class.getName()
-							+ ". TEST", ex.getMessage());
+					"Failed loading Template Extension " + MockWoofTemplateExtensionSource.class.getName() + ". TEST",
+					ex.getMessage());
 			assertSame("Incorrect cause", failure, ex.getCause());
 		}
 	}
@@ -131,19 +128,16 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 	public void testExtendTemplate() throws Exception {
 
 		// Record initiate
+		this.recordReturn(this.sourceContext, this.sourceContext.isLoadingType(), false);
 		this.recordReturn(this.sourceContext,
-				this.sourceContext.isLoadingType(), false);
-		this.recordReturn(this.sourceContext, this.sourceContext
-				.loadClass(MockWoofTemplateExtensionSource.class.getName()),
+				this.sourceContext.loadClass(MockWoofTemplateExtensionSource.class.getName()),
 				MockWoofTemplateExtensionSource.class);
 
 		// Add the property
 		this.properties.addProperty("NAME").setValue("VALUE");
 
 		// Record actions on mock objects to ensure correctly available
-		this.recordReturn(this.template, this.template.getTemplateUri(), "URI");
-		this.recordReturn(this.application, this.application.getURIs(),
-				new String[] { "URI" });
+		this.recordReturn(this.webArchitect, this.webArchitect.getURIs(), new String[] { "URI" });
 
 		// Test
 		this.extendTemplate(MockWoofTemplateExtensionSource.class.getName());
@@ -155,19 +149,17 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 	 * @param extensionSourceClassName
 	 *            {@link WoofTemplateExtensionSource} class name.
 	 */
-	private void extendTemplate(String extensionSourceClassName)
-			throws Exception {
+	private void extendTemplate(String extensionSourceClassName) throws Exception {
 		this.replayMockObjects();
-		this.loader.extendTemplate(extensionSourceClassName, this.properties,
-				this.template, this.application, this.sourceContext);
+		this.loader.extendTemplate(extensionSourceClassName, this.properties, "URI", this.template, this.officeArchitet,
+				this.webArchitect, this.sourceContext);
 		this.verifyMockObjects();
 	}
 
 	/**
 	 * Mock {@link WoofTemplateExtensionSource}.
 	 */
-	public static class MockWoofTemplateExtensionSource extends
-			AbstractWoofTemplateExtensionSource {
+	public static class MockWoofTemplateExtensionSource extends AbstractWoofTemplateExtensionSource {
 
 		/**
 		 * Failure.
@@ -194,8 +186,7 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void extendTemplate(WoofTemplateExtensionSourceContext context)
-				throws Exception {
+		public void extendTemplate(WoofTemplateExtensionSourceContext context) throws Exception {
 
 			// Provide failure if specified
 			if (failure != null) {
@@ -203,14 +194,11 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 			}
 
 			// Ensure property is defined
-			assertEquals("Incorrect property value", "VALUE",
-					context.getProperty("NAME"));
-			assertNull("Should not have non-defined property",
-					context.getProperty("NOT DEFINED", null));
+			assertEquals("Incorrect property value", "VALUE", context.getProperty("NAME"));
+			assertNull("Should not have non-defined property", context.getProperty("NOT DEFINED", null));
 
 			// Ensure correct details
-			assertEquals("Incorrect template URI", "URI", context.getTemplate()
-					.getTemplateUri());
+			assertEquals("Incorrect template URI", "URI", context.getTemplatePath());
 			String[] uris = context.getWebApplication().getURIs();
 			assertEquals("Incorrect number of application URIs", 1, uris.length);
 			assertEquals("Incorrect application URI", "URI", uris[0]);
