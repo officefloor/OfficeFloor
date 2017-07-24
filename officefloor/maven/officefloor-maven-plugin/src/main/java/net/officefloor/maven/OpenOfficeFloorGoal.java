@@ -50,7 +50,7 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 	/**
 	 * Default process name.
 	 */
-	public static final String DEFAULT_PROCESS_NAME = "officefloor-maven-plugin";
+	public static final String DEFAULT_OFFICE_FLOOR_NAME = "officefloor-maven-plugin";
 
 	/**
 	 * Creates the {@link OpenOfficeFloorGoal} with the required parameters.
@@ -70,7 +70,7 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 	public static OpenOfficeFloorGoal createOfficeFloorGoal(String defaultProcessName, MavenProject project,
 			List<Artifact> pluginDependencies, String officeFloorLocation, Log log) {
 		OpenOfficeFloorGoal goal = new OpenOfficeFloorGoal();
-		goal.defaultProcessName = defaultProcessName;
+		goal.defaultOfficeFloorName = defaultProcessName;
 		goal.project = project;
 		goal.pluginDependencies = pluginDependencies;
 		goal.officeFloorLocation = officeFloorLocation;
@@ -81,7 +81,7 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 	/**
 	 * Default process name.
 	 */
-	private String defaultProcessName = DEFAULT_PROCESS_NAME;
+	private String defaultOfficeFloorName = DEFAULT_OFFICE_FLOOR_NAME;
 
 	/**
 	 * {@link MavenProject}.
@@ -134,19 +134,19 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 	}
 
 	/**
-	 * Process name to open the {@link OfficeFloor} within. s
+	 * Process name to open the {@link OfficeFloor} within.
 	 */
-	@Parameter(property = "processName")
-	private String processName;
+	@Parameter(property = "officeFloorName")
+	private String officeFloorName;
 
 	/**
-	 * Specifies the process name.
+	 * Specifies the {@link OfficeFloor} name.
 	 * 
-	 * @param processName
-	 *            Process name.
+	 * @param officeFloorName
+	 *            {@link OfficeFloor} name.
 	 */
-	public void setProcessName(String processName) {
-		this.processName = processName;
+	public void setOfficeFloorName(String officeFloorName) {
+		this.officeFloorName = officeFloorName;
 	}
 
 	/**
@@ -195,7 +195,7 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 				this.officeFloorLocation);
 
 		// Ensure default non-required values
-		this.processName = defaultValue(this.processName, this.defaultProcessName);
+		this.officeFloorName = defaultValue(this.officeFloorName, this.defaultOfficeFloorName);
 
 		// Obtain the OfficeBuilding manager
 		OfficeBuildingManagerMBean officeBuildingManager;
@@ -208,9 +208,10 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 		}
 
 		// Create the open OfficeFloor configuration
-		OpenOfficeFloorConfiguration configuration = new OpenOfficeFloorConfiguration(this.officeFloorLocation);
+		OpenOfficeFloorConfiguration configuration = new OpenOfficeFloorConfiguration();
 		configuration.setOfficeFloorSourceClassName(this.officeFloorSource);
-		configuration.setProcessName(this.processName);
+		configuration.setOfficeFloorLocation(this.officeFloorLocation);
+		configuration.setOfficeFloorName(this.officeFloorName);
 
 		// Provide JVM options (if specified)
 		if (this.jvmOptions != null) {
@@ -238,7 +239,7 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 		// Indicate the configuration
 		Log log = this.getLog();
 		log.debug(OfficeFloorSource.class.getSimpleName() + " configuration:");
-		log.debug("\tProcess name = " + configuration.getProcessName());
+		log.debug("\t" + OfficeFloor.class.getSimpleName() + " name = " + configuration.getOfficeFloorName());
 		log.debug("\t" + OfficeFloorSource.class.getSimpleName() + " class = "
 				+ configuration.getOfficeFloorSourceClassName());
 		log.debug("\t" + OfficeFloorSource.class.getSimpleName() + " location = "
@@ -260,8 +261,8 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 		for (String jvmOption : configuration.getJvmOptions()) {
 			log.debug("\t\t" + jvmOption);
 		}
-		log.debug("\tInitial task = " + configuration.getOfficeName() + " " + configuration.getWorkName() + "."
-				+ configuration.getTaskName() + "(" + configuration.getParameter() + ")");
+		log.debug("\tFunction = " + configuration.getOfficeName() + " " + configuration.getFunctionName() + "("
+				+ configuration.getParameter() + ")");
 
 		// Open the OfficeFloor
 		String processNameSpace;
