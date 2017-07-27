@@ -40,8 +40,7 @@ import org.eclipse.swt.widgets.Label;
  * @author Daniel Sagenschneider
  */
 public class TreeXmlUnmarshallerManagedObjectSourceExtension
-		implements
-		ManagedObjectSourceExtension<None, None, TreeXmlUnmarshallerManagedObjectSource> {
+		implements ManagedObjectSourceExtension<None, None, TreeXmlUnmarshallerManagedObjectSource> {
 
 	/*
 	 * ================ ManagedObjectSourceExtension =========================
@@ -58,37 +57,30 @@ public class TreeXmlUnmarshallerManagedObjectSourceExtension
 	}
 
 	@Override
-	public void createControl(Composite page,
-			final ManagedObjectSourceExtensionContext context) {
+	public void createControl(Composite page, final ManagedObjectSourceExtensionContext context) {
 
 		// Specify layout
 		page.setLayout(new GridLayout(2, false));
 
 		// Obtain the configuration property
-		Property property = context
-				.getPropertyList()
-				.getProperty(
-						TreeXmlUnmarshallerManagedObjectSource.CONFIGURATION_PROPERTY_NAME);
+		Property property = context.getPropertyList()
+				.getProperty(TreeXmlUnmarshallerManagedObjectSource.CONFIGURATION_PROPERTY_NAME);
 		if (property == null) {
-			property = context
-					.getPropertyList()
-					.addProperty(
-							TreeXmlUnmarshallerManagedObjectSource.CONFIGURATION_PROPERTY_NAME);
+			property = context.getPropertyList()
+					.addProperty(TreeXmlUnmarshallerManagedObjectSource.CONFIGURATION_PROPERTY_NAME);
 		}
 		final Property configurationProperty = property;
 
 		// Provide listing of class names
 		new Label(page, SWT.NONE).setText("Configuration: ");
 		InputHandler<String> fileName = new InputHandler<String>(page,
-				new ClasspathFileInput(context.getProject(), page.getShell()),
-				new InputListener() {
+				new ClasspathFileInput(context.getProject(), page.getShell()), new InputListener() {
 
 					@Override
 					public void notifyValueChanged(Object value) {
 
 						// Obtain the resource location on class path
-						String resourceLocation = (value == null ? null : value
-								.toString());
+						String resourceLocation = (value == null ? null : value.toString());
 
 						// Inform of change of resource
 						configurationProperty.setValue(resourceLocation);
@@ -100,8 +92,7 @@ public class TreeXmlUnmarshallerManagedObjectSourceExtension
 						context.setErrorMessage(message);
 					}
 				});
-		fileName.getControl().setLayoutData(
-				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+		fileName.getControl().setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 	}
 
 	@Override

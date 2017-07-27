@@ -25,7 +25,7 @@ import net.officefloor.compile.properties.Property;
  * @author Daniel Sagenschneider
  */
 public interface PropertyValueChangeEvent {
-	
+
 	/**
 	 * Obtains the {@link Property} that had the value change.
 	 * 

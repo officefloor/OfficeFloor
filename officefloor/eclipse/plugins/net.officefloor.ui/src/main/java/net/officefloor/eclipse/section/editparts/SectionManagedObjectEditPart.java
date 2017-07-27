@@ -20,6 +20,9 @@ package net.officefloor.eclipse.section.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.gef.EditPart;
+
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
@@ -33,16 +36,12 @@ import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.SectionManagedObjectModel;
 import net.officefloor.model.section.SectionManagedObjectModel.SectionManagedObjectEvent;
 
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.gef.EditPart;
-
 /**
  * {@link EditPart} for the {@link SectionManagedObjectModel}.
  *
  * @author Daniel Sagenschneider
  */
-public class SectionManagedObjectEditPart
-		extends
+public class SectionManagedObjectEditPart extends
 		AbstractOfficeFloorEditPart<SectionManagedObjectModel, SectionManagedObjectEvent, SectionManagedObjectFigure>
 		implements SectionManagedObjectFigureContext {
 
@@ -52,56 +51,44 @@ public class SectionManagedObjectEditPart
 
 	@Override
 	protected SectionManagedObjectFigure createOfficeFloorFigure() {
-		return OfficeFloorPlugin.getSkin().getSectionFigureFactory()
-				.createSectionManagedObjectFigure(this);
+		return OfficeFloorPlugin.getSkin().getSectionFigureFactory().createSectionManagedObjectFigure(this);
 	}
 
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
-		childModels.addAll(this.getCastedModel()
-				.getSectionManagedObjectDependencies());
+		childModels.addAll(this.getCastedModel().getSectionManagedObjectDependencies());
 	}
 
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		EclipseUtil.addToList(models, this.getCastedModel()
-				.getSectionManagedObjectSource());
+		EclipseUtil.addToList(models, this.getCastedModel().getSectionManagedObjectSource());
 	}
 
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getSubSectionObjects());
-		models
-				.addAll(this.getCastedModel()
-						.getDependentSectionManagedObjects());
+		models.addAll(this.getCastedModel().getDependentSectionManagedObjects());
 	}
 
 	@Override
-	protected void populateOfficeFloorDirectEditPolicy(
-			OfficeFloorDirectEditPolicy<SectionManagedObjectModel> policy) {
-		policy
-				.allowDirectEdit(new DirectEditAdapter<SectionChanges, SectionManagedObjectModel>() {
-					@Override
-					public String getInitialValue() {
-						return SectionManagedObjectEditPart.this
-								.getCastedModel().getSectionManagedObjectName();
-					}
+	protected void populateOfficeFloorDirectEditPolicy(OfficeFloorDirectEditPolicy<SectionManagedObjectModel> policy) {
+		policy.allowDirectEdit(new DirectEditAdapter<SectionChanges, SectionManagedObjectModel>() {
+			@Override
+			public String getInitialValue() {
+				return SectionManagedObjectEditPart.this.getCastedModel().getSectionManagedObjectName();
+			}
 
-					@Override
-					public IFigure getLocationFigure() {
-						return SectionManagedObjectEditPart.this
-								.getOfficeFloorFigure()
-								.getSectionManagedObjectNameFigure();
-					}
+			@Override
+			public IFigure getLocationFigure() {
+				return SectionManagedObjectEditPart.this.getOfficeFloorFigure().getSectionManagedObjectNameFigure();
+			}
 
-					@Override
-					public Change<SectionManagedObjectModel> createChange(
-							SectionChanges changes,
-							SectionManagedObjectModel target, String newValue) {
-						return changes.renameSectionManagedObject(target,
-								newValue);
-					}
-				});
+			@Override
+			public Change<SectionManagedObjectModel> createChange(SectionChanges changes,
+					SectionManagedObjectModel target, String newValue) {
+				return changes.renameSectionManagedObject(target, newValue);
+			}
+		});
 	}
 
 	@Override
@@ -110,16 +97,14 @@ public class SectionManagedObjectEditPart
 	}
 
 	@Override
-	protected void handlePropertyChange(SectionManagedObjectEvent property,
-			PropertyChangeEvent evt) {
+	protected void handlePropertyChange(SectionManagedObjectEvent property, PropertyChangeEvent evt) {
 		switch (property) {
 		case CHANGE_SECTION_MANAGED_OBJECT_NAME:
-			this.getOfficeFloorFigure().setSectionManagedObjectName(
-					this.getCastedModel().getSectionManagedObjectName());
+			this.getOfficeFloorFigure()
+					.setSectionManagedObjectName(this.getCastedModel().getSectionManagedObjectName());
 			break;
 		case CHANGE_MANAGED_OBJECT_SCOPE:
-			this.getOfficeFloorFigure().setManagedObjectScope(
-					this.getManagedObjectScope());
+			this.getOfficeFloorFigure().setManagedObjectScope(this.getManagedObjectScope());
 			break;
 		case ADD_SECTION_MANAGED_OBJECT_DEPENDENCY:
 		case REMOVE_SECTION_MANAGED_OBJECT_DEPENDENCY:
@@ -154,8 +139,8 @@ public class SectionManagedObjectEditPart
 			return ManagedObjectScope.PROCESS;
 		} else if (SectionChanges.THREAD_MANAGED_OBJECT_SCOPE.equals(scopeName)) {
 			return ManagedObjectScope.THREAD;
-		} else if (SectionChanges.WORK_MANAGED_OBJECT_SCOPE.equals(scopeName)) {
-			return ManagedObjectScope.WORK;
+		} else if (SectionChanges.FUNCTION_MANAGED_OBJECT_SCOPE.equals(scopeName)) {
+			return ManagedObjectScope.FUNCTION;
 		} else {
 			// Unknown scope
 			return null;

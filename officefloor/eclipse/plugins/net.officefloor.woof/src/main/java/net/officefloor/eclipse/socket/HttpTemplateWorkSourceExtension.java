@@ -27,14 +27,14 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
 import net.officefloor.eclipse.common.dialog.input.impl.BeanListInput;
+import net.officefloor.eclipse.extension.managedfunctionsource.FunctionDocumentationContext;
+import net.officefloor.eclipse.extension.managedfunctionsource.ManagedFunctionSourceExtension;
+import net.officefloor.eclipse.extension.managedfunctionsource.ManagedFunctionSourceExtensionContext;
 import net.officefloor.eclipse.extension.open.ExtensionOpener;
 import net.officefloor.eclipse.extension.open.ExtensionOpenerContext;
 import net.officefloor.eclipse.extension.util.PropertyValueChangeEvent;
 import net.officefloor.eclipse.extension.util.PropertyValueChangeListener;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
-import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
-import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
-import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.spi.source.SourceContext;
@@ -51,7 +51,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
 /**
- * {@link WorkSourceExtension} for the {@link HttpTemplateWorkSource}.
+ * {@link ManagedFunctionSourceExtension} for the {@link HttpTemplateWorkSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -73,7 +73,7 @@ public class HttpTemplateWorkSourceExtension
 
 	@Override
 	public void createControl(Composite page,
-			final WorkSourceExtensionContext context) {
+			final ManagedFunctionSourceExtensionContext context) {
 
 		// Provide listing of section names to bean types
 		final BeanListInput<SectionToBeanTypeMapping> input = new BeanListInput<SectionToBeanTypeMapping>(
@@ -138,13 +138,13 @@ public class HttpTemplateWorkSourceExtension
 	 * @param input
 	 *            {@link SectionToBeanTypeMapping}.
 	 * @param context
-	 *            {@link WorkSourceExtensionContext}.
+	 *            {@link ManagedFunctionSourceExtensionContext}.
 	 * @throws IOException
 	 *             If fails to reset.
 	 */
 	private static void resetSectionToBeanTypeMappings(
 			BeanListInput<SectionToBeanTypeMapping> input,
-			WorkSourceExtensionContext context) throws IOException {
+			ManagedFunctionSourceExtensionContext context) throws IOException {
 
 		// Clear the beans from input
 		input.clearBeans();
@@ -202,11 +202,11 @@ public class HttpTemplateWorkSourceExtension
 	 * @param input
 	 *            {@Link BeanListInput} containing the mappings.
 	 * @param context
-	 *            {@link WorkSourceExtensionContext}.
+	 *            {@link ManagedFunctionSourceExtensionContext}.
 	 */
 	private static void loadSectionToBeanTypeMappings(
 			BeanListInput<SectionToBeanTypeMapping> input,
-			WorkSourceExtensionContext context) {
+			ManagedFunctionSourceExtensionContext context) {
 
 		// Add the initial section to bean type properties
 		for (Property property : context.getPropertyList()) {
@@ -225,7 +225,7 @@ public class HttpTemplateWorkSourceExtension
 	}
 
 	@Override
-	public String getSuggestedWorkName(PropertyList properties) {
+	public String getSuggestedFunctionNamespaceName(PropertyList properties) {
 		// Obtain the template name
 		String templateName = properties.getProperty(
 				HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE).getValue();
@@ -240,11 +240,11 @@ public class HttpTemplateWorkSourceExtension
 	}
 
 	@Override
-	public String getTaskDocumentation(TaskDocumentationContext context)
+	public String getFunctionDocumentation(FunctionDocumentationContext context)
 			throws Throwable {
 
 		// Obtain the task name as the section name
-		String sectionName = context.getTaskName();
+		String sectionName = context.getManagedFunctionName();
 
 		// Obtain the property template file
 		String templateName = context.getPropertyList()

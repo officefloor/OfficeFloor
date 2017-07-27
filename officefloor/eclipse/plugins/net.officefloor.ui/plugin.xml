@@ -100,7 +100,7 @@
 	</extension>
 	<extension point="net.officefloor.ui.worksources">
 		<worksource
-			class="net.officefloor.eclipse.extension.worksource.clazz.ClassWorkSourceExtension">
+			class="net.officefloor.eclipse.extension.managedfunctionsource.clazz.ClassManagedFunctionSourceExtension">
 		</worksource>
 	</extension>
 	<extension point="net.officefloor.ui.managedobjectsources">
@@ -121,7 +121,7 @@
 	</extension>
 	<extension point="net.officefloor.ui.administratorsources">
 		<administratorsource
-			class="net.officefloor.eclipse.extension.administratorsource.clazz.ClassAdministratorSourceExtension" />
+			class="net.officefloor.eclipse.extension.administrationsource.clazz.ClassAdministratorSourceExtension" />
 	</extension>
  <extension
        point="net.officefloor.ui.governancesources">
@@ -163,7 +163,7 @@
  <extension
        point="net.officefloor.ui.teamsources">
     <teamsource
-          class="net.officefloor.eclipse.extension.teamsource.teams.WorkerPerTaskTeamSourceExtension">
+          class="net.officefloor.eclipse.extension.teamsource.teams.WorkerPerJobTeamSourceExtension">
     </teamsource>
  </extension>
 	<extension point="org.eclipse.jdt.core.classpathContainerInitializer">
@@ -175,7 +175,7 @@
  <extension
        point="net.officefloor.ui.teamsources">
     <teamsource
-          class="net.officefloor.eclipse.extension.teamsource.teams.ProcessContextTeamSourceExtension">
+          class="net.officefloor.eclipse.extension.teamsource.teams.ThreadLocalAwareTeamSourceExtension">
     </teamsource>
  </extension>
 </plugin>

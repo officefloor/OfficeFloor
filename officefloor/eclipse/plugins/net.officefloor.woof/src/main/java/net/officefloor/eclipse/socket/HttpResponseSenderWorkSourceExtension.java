@@ -17,10 +17,10 @@
  */
 package net.officefloor.eclipse.socket;
 
+import net.officefloor.eclipse.extension.managedfunctionsource.FunctionDocumentationContext;
+import net.officefloor.eclipse.extension.managedfunctionsource.ManagedFunctionSourceExtension;
+import net.officefloor.eclipse.extension.managedfunctionsource.ManagedFunctionSourceExtensionContext;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
-import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
-import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
-import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSenderWorkSource;
@@ -28,7 +28,7 @@ import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSen
 import org.eclipse.swt.widgets.Composite;
 
 /**
- * {@link WorkSourceExtension} for the {@link HttpResponseSenderWorkSource}.
+ * {@link ManagedFunctionSourceExtension} for the {@link HttpResponseSenderWorkSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -47,7 +47,7 @@ public class HttpResponseSenderWorkSourceExtension extends
 	 */
 
 	@Override
-	public void createControl(Composite page, WorkSourceExtensionContext context) {
+	public void createControl(Composite page, ManagedFunctionSourceExtensionContext context) {
 
 		// Provide properties
 		SourceExtensionUtil.loadPropertyLayout(page);
@@ -62,7 +62,7 @@ public class HttpResponseSenderWorkSourceExtension extends
 	}
 
 	@Override
-	public String getTaskDocumentation(TaskDocumentationContext context)
+	public String getFunctionDocumentation(FunctionDocumentationContext context)
 			throws Throwable {
 
 		// Should only be the one task

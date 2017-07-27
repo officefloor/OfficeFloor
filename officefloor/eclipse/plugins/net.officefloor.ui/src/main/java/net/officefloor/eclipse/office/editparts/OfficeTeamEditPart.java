@@ -39,43 +39,37 @@ import org.eclipse.gef.EditPart;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeTeamEditPart
-		extends
-		AbstractOfficeFloorEditPart<OfficeTeamModel, OfficeTeamEvent, OfficeTeamFigure>
+public class OfficeTeamEditPart extends AbstractOfficeFloorEditPart<OfficeTeamModel, OfficeTeamEvent, OfficeTeamFigure>
 		implements OfficeTeamFigureContext {
 
 	@Override
 	protected OfficeTeamFigure createOfficeFloorFigure() {
-		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
-				.createOfficeTeamFigure(this);
+		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory().createOfficeTeamFigure(this);
 	}
 
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
-		models.addAll(this.getCastedModel().getOfficeSectionResponsibilities());
+		models.addAll(this.getCastedModel().getOfficeFunctions());
 		models.addAll(this.getCastedModel().getOfficeManagedObjectSourceTeams());
-		models.addAll(this.getCastedModel().getAdministrators());
+		models.addAll(this.getCastedModel().getAdministrations());
 	}
 
 	@Override
-	protected void populateOfficeFloorDirectEditPolicy(
-			OfficeFloorDirectEditPolicy<OfficeTeamModel> policy) {
+	protected void populateOfficeFloorDirectEditPolicy(OfficeFloorDirectEditPolicy<OfficeTeamModel> policy) {
 		policy.allowDirectEdit(new DirectEditAdapter<OfficeChanges, OfficeTeamModel>() {
 			@Override
 			public String getInitialValue() {
-				return OfficeTeamEditPart.this.getCastedModel()
-						.getOfficeTeamName();
+				return OfficeTeamEditPart.this.getCastedModel().getOfficeTeamName();
 			}
 
 			@Override
 			public IFigure getLocationFigure() {
-				return OfficeTeamEditPart.this.getOfficeFloorFigure()
-						.getOfficeTeamNameFigure();
+				return OfficeTeamEditPart.this.getOfficeFloorFigure().getOfficeTeamNameFigure();
 			}
 
 			@Override
-			public Change<OfficeTeamModel> createChange(OfficeChanges changes,
-					OfficeTeamModel target, String newValue) {
+			public Change<OfficeTeamModel> createChange(OfficeChanges changes, OfficeTeamModel target,
+					String newValue) {
 				return changes.renameOfficeTeam(target, newValue);
 			}
 		});
@@ -87,25 +81,19 @@ public class OfficeTeamEditPart
 	}
 
 	@Override
-	protected void handlePropertyChange(OfficeTeamEvent property,
-			PropertyChangeEvent evt) {
+	protected void handlePropertyChange(OfficeTeamEvent property, PropertyChangeEvent evt) {
 		switch (property) {
-		case ADD_OFFICE_GOVERNANCE:
-		case REMOVE_OFFICE_GOVERNANCE:
-			// TODO add governance configuration
-			break;
 
 		case CHANGE_OFFICE_TEAM_NAME:
-			this.getOfficeFloorFigure().setOfficeTeamName(
-					this.getCastedModel().getOfficeTeamName());
+			this.getOfficeFloorFigure().setOfficeTeamName(this.getCastedModel().getOfficeTeamName());
 			break;
 
-		case ADD_OFFICE_SECTION_RESPONSIBILITY:
-		case REMOVE_OFFICE_SECTION_RESPONSIBILITY:
+		case ADD_OFFICE_FUNCTION:
+		case REMOVE_OFFICE_FUNCTION:
 		case ADD_OFFICE_MANAGED_OBJECT_SOURCE_TEAM:
 		case REMOVE_OFFICE_MANAGED_OBJECT_SOURCE_TEAM:
-		case ADD_ADMINISTRATOR:
-		case REMOVE_ADMINISTRATOR:
+		case ADD_ADMINISTRATION:
+		case REMOVE_ADMINISTRATION:
 			this.refreshTargetConnections();
 			break;
 		}

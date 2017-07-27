@@ -17,8 +17,8 @@
  */
 package net.officefloor.eclipse.skin.standard.desk;
 
-import net.officefloor.eclipse.skin.desk.WorkFigure;
-import net.officefloor.eclipse.skin.desk.WorkFigureContext;
+import net.officefloor.eclipse.skin.section.FunctionNamespaceFigure;
+import net.officefloor.eclipse.skin.section.FunctionNamespaceFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
@@ -43,12 +43,12 @@ import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 
 /**
- * Standard {@link WorkFigure}.
+ * Standard {@link FunctionNamespaceFigure}.
  *
  * @author Daniel Sagenschneider
  */
 public class StandardWorkFigure extends AbstractOfficeFloorFigure implements
-		WorkFigure {
+		FunctionNamespaceFigure {
 
 	/**
 	 * {@link Label} containing the {@link Work} name.
@@ -59,9 +59,9 @@ public class StandardWorkFigure extends AbstractOfficeFloorFigure implements
 	 * Initiate.
 	 *
 	 * @param context
-	 *            {@link WorkFigureContext}.
+	 *            {@link FunctionNamespaceFigureContext}.
 	 */
-	public StandardWorkFigure(WorkFigureContext context) {
+	public StandardWorkFigure(FunctionNamespaceFigureContext context) {
 
 		// Create the figure
 		Figure figure = new Figure();
@@ -76,7 +76,7 @@ public class StandardWorkFigure extends AbstractOfficeFloorFigure implements
 		figure.add(workFigure);
 
 		// Name of work
-		this.workName = new Label(context.getWorkName());
+		this.workName = new Label(context.getFunctionNamespaceName());
 		this.workName.setBorder(new MarginBorder(2, 5, 2, 2));
 		workFigure.add(this.workName);
 
@@ -114,12 +114,12 @@ public class StandardWorkFigure extends AbstractOfficeFloorFigure implements
 	 */
 
 	@Override
-	public void setWorkName(String workName) {
+	public void setFunctionNamespaceName(String workName) {
 		this.workName.setText(workName);
 	}
 
 	@Override
-	public IFigure getWorkNameFigure() {
+	public IFigure getFunctionNamespaceNameFigure() {
 		return this.workName;
 	}
 

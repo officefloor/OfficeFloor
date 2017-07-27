@@ -17,8 +17,8 @@
  */
 package net.officefloor.eclipse.skin.standard.desk;
 
-import net.officefloor.eclipse.skin.desk.WorkTaskFigure;
-import net.officefloor.eclipse.skin.desk.WorkTaskFigureContext;
+import net.officefloor.eclipse.skin.section.ManagedFunctionFigure;
+import net.officefloor.eclipse.skin.section.ManagedFunctionFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
@@ -33,12 +33,12 @@ import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.draw2d.geometry.Insets;
 
 /**
- * Standard {@link WorkTaskFigure}.
+ * Standard {@link ManagedFunctionFigure}.
  * 
  * @author Daniel Sagenschneider
  */
 public class StandardWorkTaskFigure extends AbstractOfficeFloorFigure implements
-		WorkTaskFigure {
+		ManagedFunctionFigure {
 
 	/**
 	 * Name of the {@link WorkTaskModel}.
@@ -49,9 +49,9 @@ public class StandardWorkTaskFigure extends AbstractOfficeFloorFigure implements
 	 * Initiate.
 	 * 
 	 * @param context
-	 *            {@link WorkTaskFigureContext}.
+	 *            {@link ManagedFunctionFigureContext}.
 	 */
-	public StandardWorkTaskFigure(WorkTaskFigureContext context) {
+	public StandardWorkTaskFigure(ManagedFunctionFigureContext context) {
 
 		// Create the figure
 		Figure figure = new Figure();
@@ -59,7 +59,7 @@ public class StandardWorkTaskFigure extends AbstractOfficeFloorFigure implements
 
 		// Task name
 		LabelConnectorFigure nameFigure = new LabelConnectorFigure(
-				context.getWorkTaskName(), ConnectorDirection.EAST,
+				context.getManagedFunctionName(), ConnectorDirection.EAST,
 				StandardOfficeFloorColours.BLACK());
 		this.workTaskName = nameFigure.getLabel();
 		this.registerConnectionAnchor(WorkTaskToTaskModel.class,
@@ -82,7 +82,7 @@ public class StandardWorkTaskFigure extends AbstractOfficeFloorFigure implements
 	 */
 
 	@Override
-	public void setWorkTaskName(String workTaskName) {
+	public void setManagedFunctionName(String workTaskName) {
 		this.workTaskName.setText(workTaskName);
 	}
 

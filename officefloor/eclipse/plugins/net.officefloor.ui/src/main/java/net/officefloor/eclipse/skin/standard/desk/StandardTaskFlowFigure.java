@@ -17,8 +17,8 @@
  */
 package net.officefloor.eclipse.skin.standard.desk;
 
-import net.officefloor.eclipse.skin.desk.TaskFlowFigure;
-import net.officefloor.eclipse.skin.desk.TaskFlowFigureContext;
+import net.officefloor.eclipse.skin.section.FunctionFlowFigure;
+import net.officefloor.eclipse.skin.section.FunctionFlowFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
@@ -31,12 +31,12 @@ import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Label;
 
 /**
- * Standard {@link TaskFlowFigure}.
+ * Standard {@link FunctionFlowFigure}.
  * 
  * @author Daniel Sagenschneider
  */
 public class StandardTaskFlowFigure extends AbstractOfficeFloorFigure implements
-		TaskFlowFigure {
+		FunctionFlowFigure {
 
 	/**
 	 * {@link TaskFlowModel} name.
@@ -47,11 +47,11 @@ public class StandardTaskFlowFigure extends AbstractOfficeFloorFigure implements
 	 * Initiate.
 	 * 
 	 * @param context
-	 *            {@link TaskFlowFigureContext}.
+	 *            {@link FunctionFlowFigureContext}.
 	 */
-	public StandardTaskFlowFigure(TaskFlowFigureContext context) {
+	public StandardTaskFlowFigure(FunctionFlowFigureContext context) {
 		LabelConnectorFigure connector = new LabelConnectorFigure(
-				context.getTaskFlowName(), ConnectorDirection.EAST,
+				context.getFunctionFlowName(), ConnectorDirection.EAST,
 				StandardOfficeFloorColours.BLACK());
 		this.taskFlowName = connector.getLabel();
 
@@ -68,7 +68,7 @@ public class StandardTaskFlowFigure extends AbstractOfficeFloorFigure implements
 	 */
 
 	@Override
-	public void setTaskFlowName(String taskFlowName) {
+	public void setFunctionFlowName(String taskFlowName) {
 		this.taskFlowName.setText(taskFlowName);
 	}
 

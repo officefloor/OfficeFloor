@@ -20,12 +20,12 @@ package net.officefloor.eclipse.office.models;
 import net.officefloor.model.office.OfficeTaskModel;
 
 /**
- * Post {@link AbstractTaskAdministrationJoinPointModel}.
+ * Post {@link AbstractFunctionAdministrationJoinPointModel}.
  * 
  * @author Daniel Sagenschneider
  */
 public class PostTaskAdministrationJointPointModel extends
-		AbstractTaskAdministrationJoinPointModel {
+		AbstractFunctionAdministrationJoinPointModel {
 
 	/**
 	 * Initiate.

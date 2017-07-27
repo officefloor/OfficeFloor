@@ -40,8 +40,7 @@ public interface OfficeSourceExtension<S extends OfficeSource> {
 	/**
 	 * Extension ID.
 	 */
-	public static final String EXTENSION_ID = ExtensionUtil
-			.getExtensionId("officesources");
+	public static final String EXTENSION_ID = ExtensionUtil.getExtensionId("officesources");
 
 	/**
 	 * Obtains the class of the {@link OfficeSource} being enriched in its

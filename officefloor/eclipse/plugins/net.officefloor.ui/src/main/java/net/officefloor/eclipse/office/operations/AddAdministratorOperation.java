@@ -18,8 +18,8 @@
 package net.officefloor.eclipse.office.operations;
 
 import net.officefloor.eclipse.office.editparts.OfficeEditPart;
-import net.officefloor.eclipse.wizard.administratorsource.AdministratorInstance;
-import net.officefloor.eclipse.wizard.administratorsource.AdministratorSourceWizard;
+import net.officefloor.eclipse.wizard.administrationsource.AdministratorInstance;
+import net.officefloor.eclipse.wizard.administrationsource.AdministratorSourceWizard;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.OfficeChanges;

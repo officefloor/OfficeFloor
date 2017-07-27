@@ -31,7 +31,7 @@ import net.officefloor.eclipse.common.editpolicies.layout.ChildEditPolicyFactory
 import net.officefloor.eclipse.common.editpolicies.layout.ConstraintChangeFactory;
 import net.officefloor.eclipse.common.editpolicies.layout.DeleteChangeFactory;
 import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
-import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
+import net.officefloor.eclipse.configuration.project.ProjectConfigurationContext;
 import net.officefloor.eclipse.woof.editparts.WoofAccessEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofAccessInputEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofAccessOutputEditPart;

@@ -17,7 +17,7 @@
  */
 package net.officefloor.eclipse.skin.office;
 
-import net.officefloor.eclipse.office.models.AbstractTaskAdministrationJoinPointModel;
+import net.officefloor.eclipse.office.models.AbstractFunctionAdministrationJoinPointModel;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.AdministratorToOfficeTeamModel;
@@ -139,11 +139,11 @@ public interface OfficeFigureFactory {
 	 * Creates the {@link OfficeFloorFigure} for the {@link AdministratorModel}.
 	 * 
 	 * @param context
-	 *            {@link AdministratorFigureContext}.
+	 *            {@link AdministrationFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	AdministratorFigure createAdministratorFigure(
-			AdministratorFigureContext context);
+	AdministrationFigure createAdministratorFigure(
+			AdministrationFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link DutyModel}.
@@ -263,14 +263,14 @@ public interface OfficeFigureFactory {
 	 * Creates the {@link OfficeFloorFigure} for the {@link OfficeTaskModel}.
 	 * 
 	 * @param context
-	 *            {@link OfficeTaskFigureContext}.
+	 *            {@link OfficeFunctionFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeTaskFigure createOfficeTaskFigure(OfficeTaskFigureContext context);
+	OfficeFunctionFigure createOfficeTaskFigure(OfficeFunctionFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
-	 * {@link AbstractTaskAdministrationJoinPointModel}.
+	 * {@link AbstractFunctionAdministrationJoinPointModel}.
 	 * 
 	 * @return {@link OfficeFloorFigure}.
 	 */

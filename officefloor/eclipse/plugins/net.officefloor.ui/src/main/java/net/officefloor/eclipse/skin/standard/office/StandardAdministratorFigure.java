@@ -17,8 +17,8 @@
  */
 package net.officefloor.eclipse.skin.standard.office;
 
-import net.officefloor.eclipse.skin.office.AdministratorFigure;
-import net.officefloor.eclipse.skin.office.AdministratorFigureContext;
+import net.officefloor.eclipse.skin.office.AdministrationFigure;
+import net.officefloor.eclipse.skin.office.AdministrationFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
@@ -39,12 +39,12 @@ import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.swt.SWT;
 
 /**
- * Standard {@link AdministratorFigure}.
+ * Standard {@link AdministrationFigure}.
  *
  * @author Daniel Sagenschneider
  */
 public class StandardAdministratorFigure extends AbstractOfficeFloorFigure
-		implements AdministratorFigure {
+		implements AdministrationFigure {
 
 	/**
 	 * {@link Label} containing the {@link AdministratorModel} name.
@@ -55,9 +55,9 @@ public class StandardAdministratorFigure extends AbstractOfficeFloorFigure
 	 * Initiate.
 	 *
 	 * @param context
-	 *            {@link AdministratorFigureContext}.
+	 *            {@link AdministrationFigureContext}.
 	 */
-	public StandardAdministratorFigure(AdministratorFigureContext context) {
+	public StandardAdministratorFigure(AdministrationFigureContext context) {
 
 		// Figure
 		Figure figure = new Figure();
@@ -80,7 +80,7 @@ public class StandardAdministratorFigure extends AbstractOfficeFloorFigure
 
 		// Create the administrator container
 		RoundedContainerFigure administrator = new RoundedContainerFigure(
-				context.getAdministratorName(), StandardOfficeFloorColours
+				context.getAdministrationName(), StandardOfficeFloorColours
 						.ADMINISTRATOR(), 20, false);
 		figure.add(administrator);
 		this.administratorName = administrator.getContainerName();
@@ -108,12 +108,12 @@ public class StandardAdministratorFigure extends AbstractOfficeFloorFigure
 	 */
 
 	@Override
-	public void setAdministratorName(String administratorName) {
+	public void setAdministrationName(String administratorName) {
 		this.administratorName.setText(administratorName);
 	}
 
 	@Override
-	public IFigure getAdministratorNameFigure() {
+	public IFigure getAdministrationNameFigure() {
 		return this.administratorName;
 	}
 

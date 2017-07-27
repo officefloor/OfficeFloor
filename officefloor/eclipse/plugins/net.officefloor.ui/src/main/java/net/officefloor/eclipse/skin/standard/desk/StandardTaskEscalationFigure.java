@@ -17,8 +17,8 @@
  */
 package net.officefloor.eclipse.skin.standard.desk;
 
-import net.officefloor.eclipse.skin.desk.TaskEscalationFigure;
-import net.officefloor.eclipse.skin.desk.TaskEscalationFigureContext;
+import net.officefloor.eclipse.skin.section.FunctionEscalationFigure;
+import net.officefloor.eclipse.skin.section.FunctionEscalationFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
@@ -27,21 +27,21 @@ import net.officefloor.model.desk.TaskEscalationToExternalFlowModel;
 import net.officefloor.model.desk.TaskEscalationToTaskModel;
 
 /**
- * Standard {@link TaskEscalationFigure}.
+ * Standard {@link FunctionEscalationFigure}.
  *
  * @author Daniel Sagenschneider
  */
 public class StandardTaskEscalationFigure extends AbstractOfficeFloorFigure
-		implements TaskEscalationFigure {
+		implements FunctionEscalationFigure {
 
 	/**
 	 * Initiate.
 	 *
 	 * @param context
-	 *            {@link TaskEscalationFigureContext}.
+	 *            {@link FunctionEscalationFigureContext}.
 	 */
 	public StandardTaskEscalationFigure(
-			TaskEscalationFigureContext context) {
+			FunctionEscalationFigureContext context) {
 
 		// Obtain simple name of escalation
 		String escalationType = context.getEscalationType();

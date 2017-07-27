@@ -29,6 +29,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Shell;
 
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.editpolicies.connection.ConnectionChangeFactory;
@@ -40,7 +42,6 @@ import net.officefloor.model.conform.ExistingItemModel;
 import net.officefloor.model.conform.ExistingItemToTargetItemModel;
 import net.officefloor.model.conform.TargetItemModel;
 import net.officefloor.model.impl.change.AbstractChange;
-import net.officefloor.model.repository.ConfigurationItem;
 
 /**
  * {@link AbstractOfficeFloorEditor} for a {@link Dialog} {@link Control}.
@@ -88,8 +89,7 @@ public class ConformEditor extends AbstractOfficeFloorEditor<Model, Object> {
 	 * @param editPartType
 	 *            {@link EditPart} type.
 	 */
-	public void mapModelToEditPart(Class<?> modelType,
-			Class<? extends EditPart> editPartType) {
+	public void mapModelToEditPart(Class<?> modelType, Class<? extends EditPart> editPartType) {
 		this.modelToEditPartMap.put(modelType, editPartType);
 	}
 
@@ -117,25 +117,19 @@ public class ConformEditor extends AbstractOfficeFloorEditor<Model, Object> {
 	}
 
 	@Override
-	protected void populateEditPartTypes(
-			Map<Class<?>, Class<? extends EditPart>> map) {
+	protected void populateEditPartTypes(Map<Class<?>, Class<? extends EditPart>> map) {
 		// Keep reference to allow population
 		this.modelToEditPartMap = map;
 	}
 
 	@Override
-	protected void populateGraphicalEditPolicy(
-			OfficeFloorGraphicalNodeEditPolicy policy) {
+	protected void populateGraphicalEditPolicy(OfficeFloorGraphicalNodeEditPolicy policy) {
 
 		// Connect existing item to target item
-		policy.addConnection(
-				ExistingItemModel.class,
-				TargetItemModel.class,
+		policy.addConnection(ExistingItemModel.class, TargetItemModel.class,
 				new ConnectionChangeFactory<ExistingItemModel, TargetItemModel>() {
 					@Override
-					public Change<?> createChange(
-							final ExistingItemModel source,
-							final TargetItemModel target,
+					public Change<?> createChange(final ExistingItemModel source, final TargetItemModel target,
 							CreateConnectionRequest request) {
 
 						// Determine if target item is inheriting
@@ -144,12 +138,10 @@ public class ConformEditor extends AbstractOfficeFloorEditor<Model, Object> {
 						}
 
 						// Create the connection
-						final ExistingItemToTargetItemModel conn = new ExistingItemToTargetItemModel(
-								source, target);
+						final ExistingItemToTargetItemModel conn = new ExistingItemToTargetItemModel(source, target);
 
 						// Return change to connect source to target
-						return new AbstractChange<ExistingItemToTargetItemModel>(
-								conn, "Connect") {
+						return new AbstractChange<ExistingItemToTargetItemModel>(conn, "Connect") {
 							@Override
 							public void apply() {
 
@@ -187,16 +179,14 @@ public class ConformEditor extends AbstractOfficeFloorEditor<Model, Object> {
 	}
 
 	@Override
-	protected Model retrieveModel(ConfigurationItem configuration)
-			throws Exception {
-		// Not used
+	protected Model retrieveModel(ConfigurationItem configuration) throws Exception {
+		// Transient for refactoring another model
 		return null;
 	}
 
 	@Override
-	protected void storeModel(Model model, ConfigurationItem configuration)
-			throws Exception {
-		// Not used
+	protected void storeModel(Model model, WritableConfigurationItem configuration) throws Exception {
+		// Transient for refactoring another model
 	}
 
 }

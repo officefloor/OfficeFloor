@@ -62,7 +62,7 @@ public class FileSystemConfigurationContext extends AbstractWritableConfiguratio
 			// Obtain the configuration
 			return new FileInputStream(new File(rootDir, location));
 
-		}, (location, configuration) -> {
+		}, (location, isCreate, configuration) -> {
 
 			// Write the configuration
 			File file = new File(rootDir, location);

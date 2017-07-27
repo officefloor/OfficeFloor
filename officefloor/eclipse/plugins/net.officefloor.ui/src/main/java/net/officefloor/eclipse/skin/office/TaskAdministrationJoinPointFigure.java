@@ -17,12 +17,12 @@
  */
 package net.officefloor.eclipse.skin.office;
 
-import net.officefloor.eclipse.office.models.AbstractTaskAdministrationJoinPointModel;
+import net.officefloor.eclipse.office.models.AbstractFunctionAdministrationJoinPointModel;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 
 /**
  * {@link OfficeFloorFigure} for the
- * {@link AbstractTaskAdministrationJoinPointModel}.
+ * {@link AbstractFunctionAdministrationJoinPointModel}.
  * 
  * @author Daniel Sagenschneider
  */

@@ -18,10 +18,10 @@
 package net.officefloor.eclipse.socket;
 
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.eclipse.extension.managedfunctionsource.FunctionDocumentationContext;
+import net.officefloor.eclipse.extension.managedfunctionsource.ManagedFunctionSourceExtension;
+import net.officefloor.eclipse.extension.managedfunctionsource.ManagedFunctionSourceExtensionContext;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
-import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
-import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
-import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderWorkSource;
 import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderWorkSource.HttpParametersLoaderTask;
@@ -29,7 +29,7 @@ import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderWor
 import org.eclipse.swt.widgets.Composite;
 
 /**
- * {@link WorkSourceExtension} for the {@link HttpParametersLoaderWorkSource}.
+ * {@link ManagedFunctionSourceExtension} for the {@link HttpParametersLoaderWorkSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -49,12 +49,12 @@ public class HttpParametersLoaderWorkSourceExtension
 	 */
 
 	@Override
-	public Class<HttpParametersLoaderWorkSource> getWorkSourceClass() {
+	public Class<HttpParametersLoaderWorkSource> getManagedFunctionSourceClass() {
 		return HttpParametersLoaderWorkSource.class;
 	}
 
 	@Override
-	public void createControl(Composite page, WorkSourceExtensionContext context) {
+	public void createControl(Composite page, ManagedFunctionSourceExtensionContext context) {
 
 		// Properties
 		SourceExtensionUtil.loadPropertyLayout(page);
@@ -68,7 +68,7 @@ public class HttpParametersLoaderWorkSourceExtension
 	}
 
 	@Override
-	public String getSuggestedWorkName(PropertyList properties) {
+	public String getSuggestedFunctionNamespaceName(PropertyList properties) {
 
 		// Obtain the bean type
 		String beanTypeName = properties.getProperty(
@@ -84,7 +84,7 @@ public class HttpParametersLoaderWorkSourceExtension
 	}
 
 	@Override
-	public String getTaskDocumentation(TaskDocumentationContext context)
+	public String getFunctionDocumentation(FunctionDocumentationContext context)
 			throws Throwable {
 
 		// Should always have the one task

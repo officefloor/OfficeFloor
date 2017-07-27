@@ -17,8 +17,8 @@
  */
 package net.officefloor.eclipse.skin.standard.office;
 
-import net.officefloor.eclipse.skin.office.OfficeTaskFigure;
-import net.officefloor.eclipse.skin.office.OfficeTaskFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeFunctionFigure;
+import net.officefloor.eclipse.skin.office.OfficeFunctionFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.model.office.OfficeTaskModel;
@@ -27,12 +27,12 @@ import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Label;
 
 /**
- * Standard {@link OfficeTaskFigure}.
+ * Standard {@link OfficeFunctionFigure}.
  * 
  * @author Daniel Sagenschneider
  */
 public class StandardOfficeTaskFigure extends AbstractOfficeFloorFigure
-		implements OfficeTaskFigure {
+		implements OfficeFunctionFigure {
 
 	/**
 	 * {@link OfficeTaskModel} name.
@@ -43,9 +43,9 @@ public class StandardOfficeTaskFigure extends AbstractOfficeFloorFigure
 	 * Initiate.
 	 * 
 	 * @param context
-	 *            {@link OfficeTaskFigureContext}.
+	 *            {@link OfficeFunctionFigureContext}.
 	 */
-	public StandardOfficeTaskFigure(OfficeTaskFigureContext context) {
+	public StandardOfficeTaskFigure(OfficeFunctionFigureContext context) {
 
 		// Create the figure
 		Figure figure = new Figure();
@@ -53,7 +53,7 @@ public class StandardOfficeTaskFigure extends AbstractOfficeFloorFigure
 		figure.setLayoutManager(figureLayout);
 
 		// Create the task name
-		this.taskName = new Label(context.getOfficeTaskName());
+		this.taskName = new Label(context.getOfficeFunctionName());
 		figure.add(this.taskName);
 
 		// Create the container for child connectors

@@ -49,12 +49,14 @@ public class AbstractWritableConfigurationContext extends ConfigurationContextIm
 		 * 
 		 * @param location
 		 *            Location of the {@link ConfigurationItem}.
+		 * @param isCreate
+		 *            Indicates if creating the {@link ConfigurationItem}.
 		 * @param configuration
 		 *            Content for the {@link ConfigurationItem}.
 		 * @throws IOException
 		 *             If fails to write the {@link ConfigurationItem}.
 		 */
-		void writeConfiguration(String location, InputStream configuration) throws IOException;
+		void writeConfiguration(String location, boolean isCreate, InputStream configuration) throws IOException;
 	}
 
 	/**
@@ -163,7 +165,7 @@ public class AbstractWritableConfigurationContext extends ConfigurationContextIm
 			throws IOException {
 
 		// Write the configuration
-		this.configurationWriter.writeConfiguration(location, configuration);
+		this.configurationWriter.writeConfiguration(location, true, configuration);
 
 		// Create the configuration item
 		return (WritableConfigurationItem) this.getConfigurationItem(location, null);
@@ -238,7 +240,7 @@ public class AbstractWritableConfigurationContext extends ConfigurationContextIm
 			this.configurationItem = null;
 
 			// Change configuration
-			AbstractWritableConfigurationContext.this.configurationWriter.writeConfiguration(this.location,
+			AbstractWritableConfigurationContext.this.configurationWriter.writeConfiguration(this.location, false,
 					configuration);
 		}
 

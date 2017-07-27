@@ -29,34 +29,34 @@ import net.officefloor.eclipse.skin.desk.DeskManagedObjectSourceFigureContext;
 import net.officefloor.eclipse.skin.desk.DeskManagedObjectSourceFlowFigure;
 import net.officefloor.eclipse.skin.desk.DeskManagedObjectSourceFlowFigureContext;
 import net.officefloor.eclipse.skin.desk.DeskManagedObjectSourceFlowToExternalFlowFigureContext;
-import net.officefloor.eclipse.skin.desk.DeskManagedObjectSourceFlowToTaskFigureContext;
 import net.officefloor.eclipse.skin.desk.DeskManagedObjectToDeskManagedObjectSourceFigureContext;
 import net.officefloor.eclipse.skin.desk.ExternalFlowFigure;
 import net.officefloor.eclipse.skin.desk.ExternalFlowFigureContext;
 import net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigure;
 import net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigureContext;
-import net.officefloor.eclipse.skin.desk.TaskEscalationFigure;
-import net.officefloor.eclipse.skin.desk.TaskEscalationFigureContext;
-import net.officefloor.eclipse.skin.desk.TaskEscalationToExternalFlowFigureContext;
-import net.officefloor.eclipse.skin.desk.TaskEscalationToTaskFigureContext;
-import net.officefloor.eclipse.skin.desk.TaskFigure;
-import net.officefloor.eclipse.skin.desk.TaskFigureContext;
-import net.officefloor.eclipse.skin.desk.TaskFlowFigure;
-import net.officefloor.eclipse.skin.desk.TaskFlowFigureContext;
-import net.officefloor.eclipse.skin.desk.TaskFlowToExternalFlowFigureContext;
-import net.officefloor.eclipse.skin.desk.TaskFlowToTaskFigureContext;
-import net.officefloor.eclipse.skin.desk.TaskToNextExternalFlowFigureContext;
-import net.officefloor.eclipse.skin.desk.TaskToNextTaskFigureContext;
-import net.officefloor.eclipse.skin.desk.WorkFigure;
-import net.officefloor.eclipse.skin.desk.WorkFigureContext;
-import net.officefloor.eclipse.skin.desk.WorkTaskFigure;
-import net.officefloor.eclipse.skin.desk.WorkTaskFigureContext;
-import net.officefloor.eclipse.skin.desk.WorkTaskObjectFigure;
-import net.officefloor.eclipse.skin.desk.WorkTaskObjectFigureContext;
-import net.officefloor.eclipse.skin.desk.WorkTaskObjectToDeskManagedObjectFigureContext;
-import net.officefloor.eclipse.skin.desk.WorkTaskObjectToExternalManagedObjectFigureContext;
-import net.officefloor.eclipse.skin.desk.WorkTaskToTaskFigureContext;
 import net.officefloor.eclipse.skin.desk.WorkToInitialTaskFigureContext;
+import net.officefloor.eclipse.skin.section.FunctionEscalationFigure;
+import net.officefloor.eclipse.skin.section.FunctionEscalationFigureContext;
+import net.officefloor.eclipse.skin.section.FunctionEscalationToExternalFlowFigureContext;
+import net.officefloor.eclipse.skin.section.FunctionEscalationToFunctionFigureContext;
+import net.officefloor.eclipse.skin.section.FunctionFigure;
+import net.officefloor.eclipse.skin.section.FunctionFigureContext;
+import net.officefloor.eclipse.skin.section.FunctionFlowFigure;
+import net.officefloor.eclipse.skin.section.FunctionFlowFigureContext;
+import net.officefloor.eclipse.skin.section.FunctionFlowToExternalFlowFigureContext;
+import net.officefloor.eclipse.skin.section.FunctionFlowToFunctionFigureContext;
+import net.officefloor.eclipse.skin.section.FunctionNamespaceFigure;
+import net.officefloor.eclipse.skin.section.FunctionNamespaceFigureContext;
+import net.officefloor.eclipse.skin.section.FunctionToNextExternalFlowFigureContext;
+import net.officefloor.eclipse.skin.section.FunctionToNextFunctionFigureContext;
+import net.officefloor.eclipse.skin.section.ManagedFunctionFigure;
+import net.officefloor.eclipse.skin.section.ManagedFunctionFigureContext;
+import net.officefloor.eclipse.skin.section.ManagedFunctionObjectFigure;
+import net.officefloor.eclipse.skin.section.ManagedFunctionObjectFigureContext;
+import net.officefloor.eclipse.skin.section.ManagedFunctionObjectToExternalManagedObjectFigureContext;
+import net.officefloor.eclipse.skin.section.ManagedFunctionObjectToSectionManagedObjectFigureContext;
+import net.officefloor.eclipse.skin.section.ManagedFunctionToFunctionFigureContext;
+import net.officefloor.eclipse.skin.section.SectionManagedObjectSourceFlowToFunctionFigureContext;
 import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
@@ -115,19 +115,19 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	 */
 
 	@Override
-	public WorkFigure createWorkFigure(WorkFigureContext context) {
+	public FunctionNamespaceFigure createWorkFigure(FunctionNamespaceFigureContext context) {
 		return new StandardWorkFigure(context);
 	}
 
 	@Override
-	public WorkTaskFigure createWorkTaskFigure(
-			final WorkTaskFigureContext context) {
+	public ManagedFunctionFigure createWorkTaskFigure(
+			final ManagedFunctionFigureContext context) {
 		return new StandardWorkTaskFigure(context);
 	}
 
 	@Override
-	public WorkTaskObjectFigure createWorkTaskObjectFigure(
-			final WorkTaskObjectFigureContext context) {
+	public ManagedFunctionObjectFigure createWorkTaskObjectFigure(
+			final ManagedFunctionObjectFigureContext context) {
 		return new StandardWorkTaskObjectFigure(context);
 	}
 
@@ -144,18 +144,18 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	}
 
 	@Override
-	public TaskFigure createTaskFigure(final TaskFigureContext context) {
+	public FunctionFigure createTaskFigure(final FunctionFigureContext context) {
 		return new StandardTaskFigure(context);
 	}
 
 	@Override
-	public TaskEscalationFigure createTaskEscalationFigure(
-			TaskEscalationFigureContext context) {
+	public FunctionEscalationFigure createTaskEscalationFigure(
+			FunctionEscalationFigureContext context) {
 		return new StandardTaskEscalationFigure(context);
 	}
 
 	@Override
-	public TaskFlowFigure createTaskFlowFigure(TaskFlowFigureContext context) {
+	public FunctionFlowFigure createTaskFlowFigure(FunctionFlowFigureContext context) {
 		return new StandardTaskFlowFigure(context);
 	}
 
@@ -185,60 +185,60 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 
 	@Override
 	public void decorateWorkTaskToTaskFigure(PolylineConnection figure,
-			WorkTaskToTaskFigureContext context) {
+			ManagedFunctionToFunctionFigureContext context) {
 		figure.setForegroundColor(StandardOfficeFloorColours.LINK_LINE());
 	}
 
 	@Override
 	public void decorateWorkTaskObjectToExternalManagedObjectFigure(
 			PolylineConnection figure,
-			WorkTaskObjectToExternalManagedObjectFigureContext context) {
+			ManagedFunctionObjectToExternalManagedObjectFigureContext context) {
 		// Leave as default line
 	}
 
 	@Override
 	public void decorateWorkTaskObjectToDeskManagedObjectFigure(
 			PolylineConnection figure,
-			WorkTaskObjectToDeskManagedObjectFigureContext context) {
+			ManagedFunctionObjectToSectionManagedObjectFigureContext context) {
 		// Leave as default line
 	}
 
 	@Override
 	public void decorateTaskFlowToTaskFigure(PolylineConnection figure,
-			TaskFlowToTaskFigureContext context) {
+			FunctionFlowToFunctionFigureContext context) {
 		this.decorateInstigationStrategy(figure, context
 				.getFlowInstigationStrategy());
 	}
 
 	@Override
 	public void decorateTaskFlowToExternalFlowFigure(PolylineConnection figure,
-			TaskFlowToExternalFlowFigureContext context) {
+			FunctionFlowToExternalFlowFigureContext context) {
 		this.decorateInstigationStrategy(figure, context
 				.getFlowInstigationStrategy());
 	}
 
 	@Override
 	public void decorateTaskToNextTaskFigure(PolylineConnection figure,
-			TaskToNextTaskFigureContext context) {
+			FunctionToNextFunctionFigureContext context) {
 		figure.setTargetDecoration(new PolylineDecoration());
 	}
 
 	@Override
 	public void decorateTaskToNextExternalFlowFigure(PolylineConnection figure,
-			TaskToNextExternalFlowFigureContext context) {
+			FunctionToNextExternalFlowFigureContext context) {
 		figure.setTargetDecoration(new PolylineDecoration());
 	}
 
 	@Override
 	public void decorateTaskEscalationToTaskFigure(PolylineConnection figure,
-			TaskEscalationToTaskFigureContext context) {
+			FunctionEscalationToFunctionFigureContext context) {
 		figure.setTargetDecoration(new PolylineDecoration());
 	}
 
 	@Override
 	public void decorateTaskEscalationToExternalFlowFigure(
 			PolylineConnection figure,
-			TaskEscalationToExternalFlowFigureContext context) {
+			FunctionEscalationToExternalFlowFigureContext context) {
 		figure.setTargetDecoration(new PolylineDecoration());
 	}
 
@@ -266,7 +266,7 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	@Override
 	public void decorateDeskManagedObjectSourceFlowToTaskFigure(
 			PolylineConnection figure,
-			DeskManagedObjectSourceFlowToTaskFigureContext context) {
+			SectionManagedObjectSourceFlowToFunctionFigureContext context) {
 		figure.setTargetDecoration(new PolylineDecoration());
 	}
 

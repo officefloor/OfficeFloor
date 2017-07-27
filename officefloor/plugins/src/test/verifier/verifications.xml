@@ -8,10 +8,6 @@
 		
 		<!-- Ensure all the modules inheriting latest -->
 		<file>
-			<location>officeplugin_base/pom.xml</location>
-			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
-		</file>
-		<file>
 			<location>officeplugin_bayeux/pom.xml</location>
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>

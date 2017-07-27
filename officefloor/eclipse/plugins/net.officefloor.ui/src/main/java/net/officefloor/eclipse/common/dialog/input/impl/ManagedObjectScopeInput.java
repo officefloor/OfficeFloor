@@ -38,16 +38,14 @@ public class ManagedObjectScopeInput implements Input<List>, ValueTranslator {
 	/**
 	 * Listing of the {@link ManagedObjectScope} names.
 	 */
-	private static final String[] scopeNames = new String[] { "Process",
-			"Thread", "Work" };
+	private static final String[] scopeNames = new String[] { "Process", "Thread", "Work" };
 
 	/**
 	 * Listing of {@link ManagedObjectScope} instances that correspond to the
 	 * names.
 	 */
-	private static final ManagedObjectScope[] scopes = new ManagedObjectScope[] {
-			ManagedObjectScope.PROCESS, ManagedObjectScope.THREAD,
-			ManagedObjectScope.WORK };
+	private static final ManagedObjectScope[] scopes = new ManagedObjectScope[] { ManagedObjectScope.PROCESS,
+			ManagedObjectScope.THREAD, ManagedObjectScope.FUNCTION };
 
 	/*
 	 * ======================== Input ======================================
@@ -57,8 +55,7 @@ public class ManagedObjectScopeInput implements Input<List>, ValueTranslator {
 	public List buildControl(final InputContext context) {
 
 		// Create the list containing the scopes
-		final List scopeList = new List(context.getParent(), SWT.SINGLE
-				| SWT.BORDER);
+		final List scopeList = new List(context.getParent(), SWT.SINGLE | SWT.BORDER);
 		for (String scopeName : scopeNames) {
 			scopeList.add(scopeName);
 		}
@@ -73,7 +70,7 @@ public class ManagedObjectScopeInput implements Input<List>, ValueTranslator {
 			case THREAD:
 				scopeList.setSelection(1);
 				break;
-			case WORK:
+			case FUNCTION:
 				scopeList.setSelection(2);
 				break;
 			}
@@ -84,8 +81,7 @@ public class ManagedObjectScopeInput implements Input<List>, ValueTranslator {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				// Obtain the value
-				Object value = ManagedObjectScopeInput.this.getValue(scopeList,
-						context);
+				Object value = ManagedObjectScopeInput.this.getValue(scopeList, context);
 
 				// Indicate value changes
 				context.notifyValueChanged(value);
@@ -124,8 +120,7 @@ public class ManagedObjectScopeInput implements Input<List>, ValueTranslator {
 			return inputValue;
 		} else {
 			// Invalid value
-			throw new InvalidValueException("Unknown value type: "
-					+ inputValue.getClass().getName());
+			throw new InvalidValueException("Unknown value type: " + inputValue.getClass().getName());
 		}
 	}
 

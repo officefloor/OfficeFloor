@@ -47,7 +47,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.ide.IDE;
 
 import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
-import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
+import net.officefloor.eclipse.configuration.project.ProjectConfigurationContext;
 
 /**
  * Utility methods for working with class path.

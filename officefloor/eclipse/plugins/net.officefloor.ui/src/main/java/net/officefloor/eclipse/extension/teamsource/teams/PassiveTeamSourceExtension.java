@@ -31,8 +31,7 @@ import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
  *
  * @author Daniel Sagenschneider
  */
-public class PassiveTeamSourceExtension implements
-		TeamSourceExtension<PassiveTeamSource> {
+public class PassiveTeamSourceExtension implements TeamSourceExtension<PassiveTeamSource> {
 
 	/*
 	 * ================= TeamSourceExtension ============================
@@ -51,8 +50,7 @@ public class PassiveTeamSourceExtension implements
 	@Override
 	public void createControl(Composite page, TeamSourceExtensionContext context) {
 		page.setLayout(new GridLayout());
-		new Label(page, SWT.NONE).setText("No properties required for "
-				+ PassiveTeamSource.class.getSimpleName());
+		new Label(page, SWT.NONE).setText("No properties required for " + PassiveTeamSource.class.getSimpleName());
 	}
 
 }

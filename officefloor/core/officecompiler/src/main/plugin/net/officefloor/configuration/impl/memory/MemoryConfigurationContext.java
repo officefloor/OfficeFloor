@@ -64,7 +64,7 @@ public class MemoryConfigurationContext extends AbstractWritableConfigurationCon
 			byte[] content = this.items.get(location);
 			return (content == null ? null : new ByteArrayInputStream(content));
 
-		}, (location, configuration) -> {
+		}, (location, isCreate, configuration) -> {
 
 			// Obtain the configuration data
 			ByteArrayOutputStream buffer = new ByteArrayOutputStream();

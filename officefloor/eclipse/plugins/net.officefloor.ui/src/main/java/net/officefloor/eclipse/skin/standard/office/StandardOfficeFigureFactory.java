@@ -20,8 +20,8 @@ package net.officefloor.eclipse.skin.standard.office;
 import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.draw2d.PolylineDecoration;
 
-import net.officefloor.eclipse.skin.office.AdministratorFigure;
-import net.officefloor.eclipse.skin.office.AdministratorFigureContext;
+import net.officefloor.eclipse.skin.office.AdministrationFigure;
+import net.officefloor.eclipse.skin.office.AdministrationFigureContext;
 import net.officefloor.eclipse.skin.office.AdministratorToOfficeTeamFigureContext;
 import net.officefloor.eclipse.skin.office.DutyFigure;
 import net.officefloor.eclipse.skin.office.DutyFigureContext;
@@ -73,8 +73,8 @@ import net.officefloor.eclipse.skin.office.OfficeTaskToPreDutyFigureContext;
 import net.officefloor.eclipse.skin.office.OfficeTeamFigure;
 import net.officefloor.eclipse.skin.office.OfficeTeamFigureContext;
 import net.officefloor.eclipse.skin.office.TaskAdministrationJoinPointFigure;
-import net.officefloor.eclipse.skin.office.OfficeTaskFigure;
-import net.officefloor.eclipse.skin.office.OfficeTaskFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeFunctionFigure;
+import net.officefloor.eclipse.skin.office.OfficeFunctionFigureContext;
 import net.officefloor.eclipse.skin.office.OfficeFigureFactory;
 import net.officefloor.eclipse.skin.office.OfficeSectionFigure;
 import net.officefloor.eclipse.skin.office.OfficeSectionFigureContext;
@@ -124,8 +124,8 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 	}
 
 	@Override
-	public AdministratorFigure createAdministratorFigure(
-			AdministratorFigureContext context) {
+	public AdministrationFigure createAdministratorFigure(
+			AdministrationFigureContext context) {
 		return new StandardAdministratorFigure(context);
 	}
 
@@ -189,8 +189,8 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 	}
 
 	@Override
-	public OfficeTaskFigure createOfficeTaskFigure(
-			OfficeTaskFigureContext context) {
+	public OfficeFunctionFigure createOfficeTaskFigure(
+			OfficeFunctionFigureContext context) {
 		return new StandardOfficeTaskFigure(context);
 	}
 

@@ -17,10 +17,10 @@
  */
 package net.officefloor.eclipse.socket;
 
+import net.officefloor.eclipse.extension.managedfunctionsource.FunctionDocumentationContext;
+import net.officefloor.eclipse.extension.managedfunctionsource.ManagedFunctionSourceExtension;
+import net.officefloor.eclipse.extension.managedfunctionsource.ManagedFunctionSourceExtensionContext;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
-import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
-import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
-import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
 import net.officefloor.plugin.web.http.route.HttpRouteTask;
 import net.officefloor.plugin.web.http.route.HttpRouteWorkSource;
 
@@ -29,7 +29,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 /**
- * {@link WorkSourceExtension} for the {@link HttpRouteWorkSource}.
+ * {@link ManagedFunctionSourceExtension} for the {@link HttpRouteWorkSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -49,7 +49,7 @@ public class HttpRouteWorkSourceExtension extends
 
 	@Override
 	public void createControl(Composite page,
-			final WorkSourceExtensionContext context) {
+			final ManagedFunctionSourceExtensionContext context) {
 
 		// Properties
 		SourceExtensionUtil.loadPropertyLayout(page);
@@ -58,7 +58,7 @@ public class HttpRouteWorkSourceExtension extends
 	}
 
 	@Override
-	public String getTaskDocumentation(TaskDocumentationContext context)
+	public String getFunctionDocumentation(FunctionDocumentationContext context)
 			throws Throwable {
 
 		// Should only be the one task

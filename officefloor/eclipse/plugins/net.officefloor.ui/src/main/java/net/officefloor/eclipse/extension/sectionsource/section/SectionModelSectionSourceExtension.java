@@ -31,8 +31,7 @@ import org.eclipse.swt.widgets.Label;
  * 
  * @author Daniel Sagenschneider
  */
-public class SectionModelSectionSourceExtension implements
-		SectionSourceExtension<SectionModelSectionSource> {
+public class SectionModelSectionSourceExtension implements SectionSourceExtension<SectionModelSectionSource> {
 
 	/*
 	 * ==================== SectionSourceExtension ====================
@@ -49,8 +48,7 @@ public class SectionModelSectionSourceExtension implements
 	}
 
 	@Override
-	public void createControl(Composite page,
-			SectionSourceExtensionContext context) {
+	public void createControl(Composite page, SectionSourceExtensionContext context) {
 		page.setLayout(new FillLayout());
 		new Label(page, SWT.NONE).setText("No properties required for Section");
 	}

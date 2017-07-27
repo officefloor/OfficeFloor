@@ -22,22 +22,21 @@ import org.eclipse.core.resources.IProject;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.TypeLoader;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.section.source.SectionSource;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.model.Model;
-import net.officefloor.model.desk.DeskManagedObjectSourceModel;
-import net.officefloor.model.desk.PropertyModel;
-import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.section.FunctionNamespaceModel;
+import net.officefloor.model.section.PropertyModel;
 import net.officefloor.model.section.SectionManagedObjectSourceModel;
 
 /**
@@ -48,18 +47,21 @@ import net.officefloor.model.section.SectionManagedObjectSourceModel;
 public class ModelUtil {
 
 	/**
-	 * Obtains the {@link WorkType} for the {@link WorkModel}.
+	 * Obtains the {@link FunctionNamespaceType} for the
+	 * {@link FunctionNamespaceModel}.
 	 * 
-	 * @param workModel
-	 *            {@link WorkModel}.
+	 * @param namespaceModel
+	 *            {@link FunctionNamespaceModel}.
 	 * @param editor
 	 *            {@link AbstractOfficeFloorEditor} requiring the
-	 *            {@link WorkType}.
-	 * @return {@link WorkType} or <code>null</code> if issue obtaining it.
+	 *            {@link FunctionNamespaceType}.
+	 * @return {@link FunctionNamespaceType} or <code>null</code> if issue
+	 *         obtaining it.
 	 */
-	public static WorkType<?> getWorkType(WorkModel workModel, AbstractOfficeFloorEditor<?, ?> editor) {
+	public static FunctionNamespaceType getFunctionNamespaceType(FunctionNamespaceModel namespaceModel,
+			AbstractOfficeFloorEditor<?, ?> editor) {
 
-		// Obtain the office floor compiler
+		// Obtain the OfficeFloor compiler
 		OfficeFloorCompiler compiler = OfficeFloorPlugin.getDefault().createCompiler(editor);
 
 		// Obtain the type loader
@@ -67,13 +69,14 @@ public class ModelUtil {
 
 		// Obtain the properties
 		PropertyList properties = compiler.createPropertyList();
-		for (PropertyModel property : workModel.getProperties()) {
+		for (PropertyModel property : namespaceModel.getProperties()) {
 			properties.addProperty(property.getName()).setValue(property.getValue());
 		}
 
-		// Load and return the work type
-		WorkType<?> workType = typeLoader.loadWorkType(workModel.getWorkSourceClassName(), properties);
-		return workType;
+		// Load and return the namespace type
+		FunctionNamespaceType namespaceType = typeLoader
+				.loadManagedFunctionType(namespaceModel.getManagedFunctionSourceClassName(), properties);
+		return namespaceType;
 	}
 
 	/**
@@ -162,37 +165,6 @@ public class ModelUtil {
 		// Obtain the properties
 		PropertyList properties = compiler.createPropertyList();
 		for (net.officefloor.model.section.PropertyModel property : managedObjectSource.getProperties()) {
-			properties.addProperty(property.getName()).setValue(property.getValue());
-		}
-
-		// Load and return the managed object type
-		return getManagedObjectType(managedObjectSourceClassName, properties, compiler, editor);
-	}
-
-	/**
-	 * Obtains the {@link ManagedObjectType} for the
-	 * {@link DeskManagedObjectSourceModel}.
-	 * 
-	 * @param managedObjectSource
-	 *            {@link DeskManagedObjectSourceModel}.
-	 * @param editor
-	 *            {@link AbstractOfficeFloorEditor} requiring the
-	 *            {@link ManagedObjectType}.
-	 * @return {@link ManagedObjectType} or <code>null</code> if issue obtaining
-	 *         it.
-	 */
-	public static ManagedObjectType<?> getManagedObjectType(DeskManagedObjectSourceModel managedObjectSource,
-			AbstractOfficeFloorEditor<?, ?> editor) {
-
-		// Obtain the office floor compiler
-		OfficeFloorCompiler compiler = OfficeFloorPlugin.getDefault().createCompiler(editor);
-
-		// Obtain the class name
-		String managedObjectSourceClassName = managedObjectSource.getManagedObjectSourceClassName();
-
-		// Obtain the properties
-		PropertyList properties = compiler.createPropertyList();
-		for (net.officefloor.model.desk.PropertyModel property : managedObjectSource.getProperties()) {
 			properties.addProperty(property.getName()).setValue(property.getValue());
 		}
 

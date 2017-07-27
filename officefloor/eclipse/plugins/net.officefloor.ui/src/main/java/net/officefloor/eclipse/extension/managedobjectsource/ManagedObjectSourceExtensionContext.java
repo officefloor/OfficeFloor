@@ -17,13 +17,13 @@
  */
 package net.officefloor.eclipse.extension.managedobjectsource;
 
+import org.eclipse.core.resources.IProject;
+
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
-
-import org.eclipse.core.resources.IProject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceSpecification;
 
 /**
  * Context for the {@link ManagedObjectSourceExtension}.

@@ -35,8 +35,7 @@ import org.eclipse.gef.EditPart;
  * @author Daniel Sagenschneider
  */
 public class OfficeSectionInputEditPart
-		extends
-		AbstractOfficeFloorEditPart<OfficeSectionInputModel, OfficeSectionInputEvent, OfficeSectionInputFigure>
+		extends AbstractOfficeFloorEditPart<OfficeSectionInputModel, OfficeSectionInputEvent, OfficeSectionInputFigure>
 		implements OfficeSectionInputFigureContext {
 
 	/*
@@ -45,8 +44,7 @@ public class OfficeSectionInputEditPart
 
 	@Override
 	protected OfficeSectionInputFigure createOfficeFloorFigure() {
-		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
-				.createOfficeSectionInputFigure(this);
+		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory().createOfficeSectionInputFigure(this);
 	}
 
 	@Override
@@ -63,12 +61,10 @@ public class OfficeSectionInputEditPart
 	}
 
 	@Override
-	protected void handlePropertyChange(OfficeSectionInputEvent property,
-			PropertyChangeEvent evt) {
+	protected void handlePropertyChange(OfficeSectionInputEvent property, PropertyChangeEvent evt) {
 		switch (property) {
 		case CHANGE_OFFICE_SECTION_INPUT_NAME:
-			this.getOfficeFloorFigure().setOfficeSectionInputName(
-					this.getOfficeSectionInputName());
+			this.getOfficeFloorFigure().setOfficeSectionInputName(this.getOfficeSectionInputName());
 			break;
 
 		case ADD_OFFICE_SECTION_OUTPUT:

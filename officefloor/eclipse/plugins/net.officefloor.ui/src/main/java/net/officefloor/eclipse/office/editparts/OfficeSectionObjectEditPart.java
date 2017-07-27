@@ -35,8 +35,7 @@ import org.eclipse.gef.EditPart;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeSectionObjectEditPart
-		extends
+public class OfficeSectionObjectEditPart extends
 		AbstractOfficeFloorEditPart<OfficeSectionObjectModel, OfficeSectionObjectEvent, OfficeSectionObjectFigure>
 		implements OfficeSectionObjectFigureContext {
 
@@ -46,16 +45,13 @@ public class OfficeSectionObjectEditPart
 
 	@Override
 	protected OfficeSectionObjectFigure createOfficeFloorFigure() {
-		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
-				.createOfficeSectionObjectFigure(this);
+		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory().createOfficeSectionObjectFigure(this);
 	}
 
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		EclipseUtil.addToList(models, this.getCastedModel()
-				.getExternalManagedObject());
-		EclipseUtil.addToList(models, this.getCastedModel()
-				.getOfficeManagedObject());
+		EclipseUtil.addToList(models, this.getCastedModel().getExternalManagedObject());
+		EclipseUtil.addToList(models, this.getCastedModel().getOfficeManagedObject());
 	}
 
 	@Override
@@ -64,12 +60,10 @@ public class OfficeSectionObjectEditPart
 	}
 
 	@Override
-	protected void handlePropertyChange(OfficeSectionObjectEvent property,
-			PropertyChangeEvent evt) {
+	protected void handlePropertyChange(OfficeSectionObjectEvent property, PropertyChangeEvent evt) {
 		switch (property) {
 		case CHANGE_OFFICE_SECTION_OBJECT_NAME:
-			this.getOfficeFloorFigure().setOfficeSectionObjectName(
-					this.getOfficeSectionObjectName());
+			this.getOfficeFloorFigure().setOfficeSectionObjectName(this.getOfficeSectionObjectName());
 			break;
 
 		case CHANGE_EXTERNAL_MANAGED_OBJECT:

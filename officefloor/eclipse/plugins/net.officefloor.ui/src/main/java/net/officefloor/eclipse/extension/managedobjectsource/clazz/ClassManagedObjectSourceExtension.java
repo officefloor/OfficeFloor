@@ -39,9 +39,8 @@ import org.eclipse.swt.widgets.Composite;
  * @author Daniel Sagenschneider
  */
 public class ClassManagedObjectSourceExtension
-		implements
-		ManagedObjectSourceExtension<Indexed, Indexed, ClassManagedObjectSource>,
-		ExtensionClasspathProvider, ExtensionOpener {
+		implements ManagedObjectSourceExtension<Indexed, Indexed, ClassManagedObjectSource>, ExtensionClasspathProvider,
+		ExtensionOpener {
 
 	/*
 	 * ================ ManagedObjectSourceExtension =========================
@@ -58,13 +57,11 @@ public class ClassManagedObjectSourceExtension
 	}
 
 	@Override
-	public void createControl(Composite page,
-			final ManagedObjectSourceExtensionContext context) {
+	public void createControl(Composite page, final ManagedObjectSourceExtensionContext context) {
 
 		// Provide property for class name
 		SourceExtensionUtil.loadPropertyLayout(page);
-		SourceExtensionUtil.createPropertyClass("Class",
-				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, page,
+		SourceExtensionUtil.createPropertyClass("Class", ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, page,
 				context, null);
 	}
 
@@ -72,8 +69,7 @@ public class ClassManagedObjectSourceExtension
 	public String getSuggestedManagedObjectSourceName(PropertyList properties) {
 
 		// Obtain the class name property
-		Property classNameProperty = properties
-				.getProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME);
+		Property classNameProperty = properties.getProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME);
 		if (classNameProperty == null) {
 			// No suggestion as no class name
 			return null;
@@ -99,8 +95,7 @@ public class ClassManagedObjectSourceExtension
 
 	@Override
 	public ClasspathProvision[] getClasspathProvisions() {
-		return new ClasspathProvision[] { new TypeClasspathProvision(
-				ClassManagedObjectSource.class) };
+		return new ClasspathProvision[] { new TypeClasspathProvision(ClassManagedObjectSource.class) };
 	}
 
 	/*
@@ -111,8 +106,8 @@ public class ClassManagedObjectSourceExtension
 	public void openSource(ExtensionOpenerContext context) throws Exception {
 
 		// Obtain the name of the class
-		String className = context.getPropertyList().getPropertyValue(
-				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, null);
+		String className = context.getPropertyList().getPropertyValue(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				null);
 
 		// Ensure have class name
 		if (EclipseUtil.isBlank(className)) {

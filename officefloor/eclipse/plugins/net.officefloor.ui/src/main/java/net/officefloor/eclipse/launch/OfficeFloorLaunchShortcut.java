@@ -17,8 +17,6 @@
  */
 package net.officefloor.eclipse.launch;
 
-import net.officefloor.frame.api.manage.OfficeFloor;
-
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -29,16 +27,14 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.ILaunchShortcut;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorPart;
+
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * {@link ILaunchShortcut} for the {@link OfficeFloor}.
@@ -74,31 +70,13 @@ public class OfficeFloorLaunchShortcut implements ILaunchShortcut {
 			IAdaptable adaptable = (IAdaptable) item;
 
 			// Obtain as resource
-			IResource resource = (IResource) adaptable
-					.getAdapter(IResource.class);
+			IResource resource = (IResource) adaptable.getAdapter(IResource.class);
 			if (resource == null) {
 				return;
 			}
 
-			// Obtain the office floor launch path
-			String officeFloorLaunchPath;
-			IJavaElement javaElement = JavaCore.create(resource.getParent());
-			if (javaElement instanceof IPackageFragment) {
-				// Contained within a package
-				IPackageFragment packageFragment = (IPackageFragment) javaElement;
-				officeFloorLaunchPath = packageFragment.getElementName()
-						.replace('.', '/') + "/" + resource.getName();
-			} else if (javaElement instanceof IPackageFragmentRoot) {
-				// Contained in the default package (no package)
-				officeFloorLaunchPath = resource.getName();
-			} else {
-				// Unknown container of resource
-				return;
-			}
-
 			// Obtain the Launch Manager
-			ILaunchManager launchManager = DebugPlugin.getDefault()
-					.getLaunchManager();
+			ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
 
 			// Create launch configuration type
 			ILaunchConfigurationType launchConfigType = launchManager
@@ -112,8 +90,7 @@ public class OfficeFloorLaunchShortcut implements ILaunchShortcut {
 				resourceName = resourceName.replace("." + extension, "");
 			}
 			ILaunchConfiguration launchConfig = null;
-			for (ILaunchConfiguration existingConfig : launchManager
-					.getLaunchConfigurations(launchConfigType)) {
+			for (ILaunchConfiguration existingConfig : launchManager.getLaunchConfigurations(launchConfigType)) {
 				if (resourceName.equalsIgnoreCase(existingConfig.getName())) {
 					launchConfig = existingConfig;
 				}
@@ -122,17 +99,12 @@ public class OfficeFloorLaunchShortcut implements ILaunchShortcut {
 			// Create launch configuration if not one existing by same name
 			if (launchConfig == null) {
 				// Ensure unique configuration name for launch
-				String uniqueConfigName = launchManager
-						.generateLaunchConfigurationName(resourceName);
+				String uniqueConfigName = launchManager.generateLaunchConfigurationName(resourceName);
 
 				// Create launch configuration (include project for defaults)
-				ILaunchConfigurationWorkingCopy launchConfigWorkingCopy = launchConfigType
-						.newInstance(null, uniqueConfigName);
-				launchConfigWorkingCopy.setAttribute(
-						OfficeFloorLauncher.ATTR_OFFICE_FLOOR_FILE,
-						officeFloorLaunchPath);
-				launchConfigWorkingCopy.setAttribute(
-						IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
+				ILaunchConfigurationWorkingCopy launchConfigWorkingCopy = launchConfigType.newInstance(null,
+						uniqueConfigName);
+				launchConfigWorkingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
 						resource.getProject().getName());
 				launchConfig = launchConfigWorkingCopy.doSave();
 			}
@@ -142,14 +114,12 @@ public class OfficeFloorLaunchShortcut implements ILaunchShortcut {
 
 		} catch (CoreException ex) {
 			// Display error in launching
-			ErrorDialog.openError(null, "Error launching", "Failed to launch",
-					ex.getStatus());
+			ErrorDialog.openError(null, "Error launching", "Failed to launch", ex.getStatus());
 		}
 	}
 
 	@Override
 	public void launch(IEditorPart editor, String mode) {
-		MessageDialog.openError(editor.getEditorSite().getShell(), "Error",
-				"Should not run from editor");
+		MessageDialog.openError(editor.getEditorSite().getShell(), "Error", "Should not run from editor");
 	}
 }

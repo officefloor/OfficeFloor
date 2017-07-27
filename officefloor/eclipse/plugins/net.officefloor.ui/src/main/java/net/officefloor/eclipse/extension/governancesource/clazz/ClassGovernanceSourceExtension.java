@@ -37,8 +37,7 @@ import org.eclipse.swt.widgets.Composite;
  * @author Daniel Sagenschneider
  */
 public class ClassGovernanceSourceExtension implements
-		GovernanceSourceExtension<Object, Indexed, ClassGovernanceSource>,
-		ExtensionClasspathProvider, ExtensionOpener {
+		GovernanceSourceExtension<Object, Indexed, ClassGovernanceSource>, ExtensionClasspathProvider, ExtensionOpener {
 
 	/*
 	 * ================ GovernanceSourceExtension =========================
@@ -55,13 +54,11 @@ public class ClassGovernanceSourceExtension implements
 	}
 
 	@Override
-	public void createControl(Composite page,
-			final GovernanceSourceExtensionContext context) {
+	public void createControl(Composite page, final GovernanceSourceExtensionContext context) {
 
 		// Provide property for class name
 		SourceExtensionUtil.loadPropertyLayout(page);
-		SourceExtensionUtil.createPropertyClass("Class",
-				ClassGovernanceSource.CLASS_NAME_PROPERTY_NAME, page, context,
+		SourceExtensionUtil.createPropertyClass("Class", ClassGovernanceSource.CLASS_NAME_PROPERTY_NAME, page, context,
 				null);
 	}
 
@@ -71,8 +68,7 @@ public class ClassGovernanceSourceExtension implements
 
 	@Override
 	public ClasspathProvision[] getClasspathProvisions() {
-		return new ClasspathProvision[] { new TypeClasspathProvision(
-				ClassGovernanceSource.class) };
+		return new ClasspathProvision[] { new TypeClasspathProvision(ClassGovernanceSource.class) };
 	}
 
 	/*
@@ -83,8 +79,8 @@ public class ClassGovernanceSourceExtension implements
 	public void openSource(ExtensionOpenerContext context) throws Exception {
 
 		// Obtain the name of the class
-		String className = context.getPropertyList().getPropertyValue(
-				ClassGovernanceSource.CLASS_NAME_PROPERTY_NAME, null);
+		String className = context.getPropertyList().getPropertyValue(ClassGovernanceSource.CLASS_NAME_PROPERTY_NAME,
+				null);
 
 		// Ensure have class name
 		if (EclipseUtil.isBlank(className)) {

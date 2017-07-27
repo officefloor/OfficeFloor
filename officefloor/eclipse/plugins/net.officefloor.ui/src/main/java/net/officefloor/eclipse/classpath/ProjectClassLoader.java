@@ -18,24 +18,26 @@
 package net.officefloor.eclipse.classpath;
 
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
-import net.officefloor.eclipse.util.LogUtil;
-import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
-import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.model.repository.ConfigurationItem;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.ui.IEditorPart;
+
+import net.officefloor.configuration.ConfigurationContext;
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationContext;
+import net.officefloor.eclipse.OfficeFloorPlugin;
+import net.officefloor.eclipse.configuration.project.ProjectConfigurationContext;
+import net.officefloor.eclipse.util.LogUtil;
 
 /**
  * {@link java.lang.ClassLoader} to load classes from a
@@ -48,8 +50,7 @@ public class ProjectClassLoader extends URLClassLoader {
 	/**
 	 * Default {@link ClassLoader}.
 	 */
-	public static final ClassLoader DEFAULT_CLASS_LOADER = OfficeFloorPlugin.class
-			.getClassLoader();
+	public static final ClassLoader DEFAULT_CLASS_LOADER = OfficeFloorPlugin.class.getClassLoader();
 
 	/**
 	 * {@link ConfigurationContext}.
@@ -66,8 +67,7 @@ public class ProjectClassLoader extends URLClassLoader {
 	 *            Path to {@link ConfigurationItem}.
 	 * @return {@link ConfigurationItem} or <code>null</code> if not found.
 	 */
-	public static ConfigurationItem findConfigurationItem(
-			IEditorPart editorPart, String path) {
+	public static ConfigurationItem findConfigurationItem(IEditorPart editorPart, String path) {
 
 		// Create the class loader
 		ProjectClassLoader classLoader = create(editorPart);
@@ -87,8 +87,7 @@ public class ProjectClassLoader extends URLClassLoader {
 	public static ProjectClassLoader create(IEditorPart editorPart) {
 
 		// Obtain the project
-		IProject project = ProjectConfigurationContext.getProject(editorPart
-				.getEditorInput());
+		IProject project = ProjectConfigurationContext.getProject(editorPart.getEditorInput());
 
 		// Return the class loader
 		return create(project);
@@ -115,8 +114,7 @@ public class ProjectClassLoader extends URLClassLoader {
 	 *            Parent {@link ClassLoader}.
 	 * @return {@link ProjectClassLoader}.
 	 */
-	public static ProjectClassLoader create(IProject project,
-			ClassLoader parentClassLoader) {
+	public static ProjectClassLoader create(IProject project, ClassLoader parentClassLoader) {
 
 		// Compute the Project's class path
 		String[] computedClassPath;
@@ -125,8 +123,7 @@ public class ProjectClassLoader extends URLClassLoader {
 			IJavaProject javaProject = JavaCore.create(project);
 
 			// Obtain the class path
-			computedClassPath = JavaRuntime
-					.computeDefaultRuntimeClassPath(javaProject);
+			computedClassPath = JavaRuntime.computeDefaultRuntimeClassPath(javaProject);
 
 		} catch (Throwable ex) {
 			LogUtil.logError("Failed to compute class path for project", ex);
@@ -146,8 +143,7 @@ public class ProjectClassLoader extends URLClassLoader {
 	 *            Parent {@link ClassLoader}.
 	 * @return {@link ProjectClassLoader}.
 	 */
-	public static ProjectClassLoader create(String[] classpath,
-			ClassLoader parentClassLoader) {
+	public static ProjectClassLoader create(String[] classpath, ClassLoader parentClassLoader) {
 
 		// Create the list of URLs
 		List<URL> urls = new ArrayList<URL>();
@@ -164,8 +160,7 @@ public class ProjectClassLoader extends URLClassLoader {
 		}
 
 		// Return the created class loader
-		return new ProjectClassLoader(urls.toArray(new URL[urls.size()]),
-				parentClassLoader);
+		return new ProjectClassLoader(urls.toArray(new URL[urls.size()]), parentClassLoader);
 	}
 
 	/**
@@ -179,7 +174,7 @@ public class ProjectClassLoader extends URLClassLoader {
 	 */
 	private ProjectClassLoader(URL[] urls, ClassLoader parent) {
 		super(urls, parent);
-		this.configurationContext = new ClassLoaderConfigurationContext(this);
+		this.configurationContext = new ClassLoaderConfigurationContext(this, null);
 	}
 
 	/**
@@ -213,8 +208,7 @@ public class ProjectClassLoader extends URLClassLoader {
 	 *            .
 	 * @return {@link ConfigurationItem} or <code>null</code> if not found.
 	 */
-	private ConfigurationItem findConfigurationItem(String path,
-			ConfigurationContext context) {
+	private ConfigurationItem findConfigurationItem(String path, ConfigurationContext context) {
 
 		// Obtain contents of resource at path
 		InputStream resource = this.getResourceAsStream(path);
@@ -224,7 +218,7 @@ public class ProjectClassLoader extends URLClassLoader {
 		}
 
 		// Create and return the Configuration Item
-		return new InputStreamConfigurationItem(path, context, resource);
+		return new InputStreamConfigurationItem(resource);
 	}
 
 	/**
@@ -244,8 +238,7 @@ public class ProjectClassLoader extends URLClassLoader {
 			}
 		} catch (MalformedURLException ex) {
 			// Indicate error in adding URL
-			LogUtil.logError("Failed to create URL from path '" + path
-					+ "' as " + ex.getMessage(), ex);
+			LogUtil.logError("Failed to create URL from path '" + path + "' as " + ex.getMessage(), ex);
 			return null;
 		}
 	}
@@ -253,18 +246,7 @@ public class ProjectClassLoader extends URLClassLoader {
 	/**
 	 * {@link ConfigurationItem} for the {@link InputStream} of the resource.
 	 */
-	private static class InputStreamConfigurationItem implements
-			ConfigurationItem {
-
-		/**
-		 * Location to the resource.
-		 */
-		private final String location;
-
-		/**
-		 * {@link ConfigurationContext}.
-		 */
-		private final ConfigurationContext context;
+	private static class InputStreamConfigurationItem implements ConfigurationItem {
 
 		/**
 		 * {@link InputStream} to the resource.
@@ -274,17 +256,10 @@ public class ProjectClassLoader extends URLClassLoader {
 		/**
 		 * Initiate.
 		 * 
-		 * @param path
-		 *            Path to the resource.
-		 * @param context
-		 *            {@link ConfigurationContext}.
 		 * @param resource
 		 *            {@link InputStream} to the resource.
 		 */
-		public InputStreamConfigurationItem(String location,
-				ConfigurationContext context, InputStream resource) {
-			this.location = location;
-			this.context = context;
+		public InputStreamConfigurationItem(InputStream resource) {
 			this.resource = resource;
 		}
 
@@ -293,25 +268,13 @@ public class ProjectClassLoader extends URLClassLoader {
 		 */
 
 		@Override
-		public String getLocation() {
-			return this.location;
-		}
-
-		@Override
-		public ConfigurationContext getContext() {
-			return this.context;
-		}
-
-		@Override
-		public InputStream getConfiguration() throws Exception {
+		public InputStream getInputStream() {
 			return this.resource;
 		}
 
 		@Override
-		public void setConfiguration(InputStream configuration)
-				throws Exception {
-			throw new UnsupportedOperationException(
-					"Classpath resource may not be overridden");
+		public Reader getReader() {
+			return new InputStreamReader(this.resource);
 		}
 	}
 

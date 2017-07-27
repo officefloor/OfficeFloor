@@ -22,12 +22,12 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
+import net.officefloor.eclipse.extension.managedfunctionsource.FunctionDocumentationContext;
+import net.officefloor.eclipse.extension.managedfunctionsource.ManagedFunctionSourceExtension;
+import net.officefloor.eclipse.extension.managedfunctionsource.ManagedFunctionSourceExtensionContext;
 import net.officefloor.eclipse.extension.open.ExtensionOpener;
 import net.officefloor.eclipse.extension.open.ExtensionOpenerContext;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
-import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
-import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
-import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.plugin.jndi.work.JndiWork;
 import net.officefloor.plugin.jndi.work.JndiWorkSource;
@@ -35,12 +35,12 @@ import net.officefloor.plugin.jndi.work.JndiWorkSource;
 import org.eclipse.swt.widgets.Composite;
 
 /**
- * {@link WorkSourceExtension} for the {@link JndiWorkSource}.
+ * {@link ManagedFunctionSourceExtension} for the {@link JndiWorkSource}.
  * 
  * @author Daniel Sagenschneider
  */
 public class JndiWorkSourceExtension implements
-		WorkSourceExtension<JndiWork, JndiWorkSource>,
+		ManagedFunctionSourceExtension<JndiWork, JndiWorkSource>,
 		ExtensionClasspathProvider, ExtensionOpener {
 
 	/*
@@ -48,17 +48,17 @@ public class JndiWorkSourceExtension implements
 	 */
 
 	@Override
-	public Class<JndiWorkSource> getWorkSourceClass() {
+	public Class<JndiWorkSource> getManagedFunctionSourceClass() {
 		return JndiWorkSource.class;
 	}
 
 	@Override
-	public String getWorkSourceLabel() {
+	public String getManagedFunctionSourceLabel() {
 		return "JNDI Work";
 	}
 
 	@Override
-	public void createControl(Composite page, WorkSourceExtensionContext context) {
+	public void createControl(Composite page, ManagedFunctionSourceExtensionContext context) {
 		SourceExtensionUtil.loadPropertyLayout(page);
 
 		// Add the JNDI Name
@@ -75,16 +75,16 @@ public class JndiWorkSourceExtension implements
 	}
 
 	@Override
-	public String getSuggestedWorkName(PropertyList properties) {
+	public String getSuggestedFunctionNamespaceName(PropertyList properties) {
 		return this.getSimpleTypeName(JndiWorkSource.PROPERTY_WORK_TYPE,
 				properties);
 	}
 
 	@Override
-	public String getTaskDocumentation(TaskDocumentationContext context)
+	public String getFunctionDocumentation(FunctionDocumentationContext context)
 			throws Throwable {
 
-		String methodName = context.getTaskName();
+		String methodName = context.getManagedFunctionName();
 		PropertyList properties = context.getPropertyList();
 
 		// Obtain the JNDI name

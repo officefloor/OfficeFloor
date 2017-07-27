@@ -22,7 +22,7 @@ import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
-import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
+import net.officefloor.eclipse.extension.managedfunctionsource.ManagedFunctionSourceExtension;
 import net.officefloor.frame.api.execute.Work;
 
 /**
@@ -31,7 +31,7 @@ import net.officefloor.frame.api.execute.Work;
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractSocketWorkSourceExtension<W extends Work, S extends WorkSource<W>>
-		implements WorkSourceExtension<W, S>, ExtensionClasspathProvider {
+		implements ManagedFunctionSourceExtension<W, S>, ExtensionClasspathProvider {
 
 	/**
 	 * {@link WorkSource} class.
@@ -72,19 +72,19 @@ public abstract class AbstractSocketWorkSourceExtension<W extends Work, S extend
 	 */
 
 	@Override
-	public Class<S> getWorkSourceClass() {
+	public Class<S> getManagedFunctionSourceClass() {
 		return this.workSourceClass;
 	}
 
 	@Override
-	public String getWorkSourceLabel() {
+	public String getManagedFunctionSourceLabel() {
 		return this.workSourceLabel;
 	}
 
 	@Override
-	public String getSuggestedWorkName(PropertyList properties) {
+	public String getSuggestedFunctionNamespaceName(PropertyList properties) {
 		// Obtain the suggested work name from label
-		String suggestedWorkName = this.getWorkSourceLabel();
+		String suggestedWorkName = this.getManagedFunctionSourceLabel();
 		suggestedWorkName.replace(" ", ""); // remove spacing
 		return suggestedWorkName;
 	}

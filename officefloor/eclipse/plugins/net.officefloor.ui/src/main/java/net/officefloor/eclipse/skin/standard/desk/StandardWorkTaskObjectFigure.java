@@ -17,8 +17,8 @@
  */
 package net.officefloor.eclipse.skin.standard.desk;
 
-import net.officefloor.eclipse.skin.desk.WorkTaskObjectFigure;
-import net.officefloor.eclipse.skin.desk.WorkTaskObjectFigureContext;
+import net.officefloor.eclipse.skin.section.ManagedFunctionObjectFigure;
+import net.officefloor.eclipse.skin.section.ManagedFunctionObjectFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
@@ -30,12 +30,12 @@ import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Figure;
 
 /**
- * {@link WorkTaskObjectFigure} implementation.
+ * {@link ManagedFunctionObjectFigure} implementation.
  * 
  * @author Daniel Sagenschneider
  */
 public class StandardWorkTaskObjectFigure extends AbstractOfficeFloorFigure
-		implements WorkTaskObjectFigure {
+		implements ManagedFunctionObjectFigure {
 
 	/**
 	 * {@link Figure} allowing to specify if a parameter.
@@ -46,9 +46,9 @@ public class StandardWorkTaskObjectFigure extends AbstractOfficeFloorFigure
 	 * Initiate.
 	 * 
 	 * @param context
-	 *            {@link WorkTaskObjectFigureContext}.
+	 *            {@link ManagedFunctionObjectFigureContext}.
 	 */
-	public StandardWorkTaskObjectFigure(WorkTaskObjectFigureContext context) {
+	public StandardWorkTaskObjectFigure(ManagedFunctionObjectFigureContext context) {
 
 		// Obtain the name
 		String objectName = this.getWorkTaskObjectName(context);
@@ -76,10 +76,10 @@ public class StandardWorkTaskObjectFigure extends AbstractOfficeFloorFigure
 	 *            Type name.
 	 * @return Short type name.
 	 */
-	private String getWorkTaskObjectName(WorkTaskObjectFigureContext context) {
+	private String getWorkTaskObjectName(ManagedFunctionObjectFigureContext context) {
 
 		// Determine if have name (not a number)
-		String name = context.getWorkTaskObjectName();
+		String name = context.getManagedFunctionObjectName();
 		if ((name != null) && (name.trim().length() > 0)) {
 			try {
 				Integer.parseInt(name);
@@ -106,7 +106,7 @@ public class StandardWorkTaskObjectFigure extends AbstractOfficeFloorFigure
 	 */
 
 	@Override
-	public void setWorkTaskObjectName(WorkTaskObjectFigureContext context) {
+	public void setWorkTaskObjectName(ManagedFunctionObjectFigureContext context) {
 		String objectName = this.getWorkTaskObjectName(context);
 		this.parameterFigure.getLabel().setText(objectName);
 	}

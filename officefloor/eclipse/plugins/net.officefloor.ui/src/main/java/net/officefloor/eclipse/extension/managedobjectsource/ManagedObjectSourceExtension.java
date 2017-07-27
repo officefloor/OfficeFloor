@@ -17,14 +17,14 @@
  */
 package net.officefloor.eclipse.extension.managedobjectsource;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.eclipse.extension.open.ExtensionOpener;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * Interface for extension to provide enriched {@link ManagedObjectSource}
@@ -40,8 +40,7 @@ public interface ManagedObjectSourceExtension<D extends Enum<D>, F extends Enum<
 	/**
 	 * Extension ID.
 	 */
-	public static final String EXTENSION_ID = ExtensionUtil
-			.getExtensionId("managedobjectsources");
+	public static final String EXTENSION_ID = ExtensionUtil.getExtensionId("managedobjectsources");
 
 	/**
 	 * Obtains the class of the {@link ManagedObjectSource} being enriched in
@@ -70,8 +69,7 @@ public interface ManagedObjectSourceExtension<D extends Enum<D>, F extends Enum<
 	 * @param context
 	 *            {@link ManagedObjectSourceExtensionContext}.
 	 */
-	void createControl(Composite page,
-			ManagedObjectSourceExtensionContext context);
+	void createControl(Composite page, ManagedObjectSourceExtensionContext context);
 
 	/**
 	 * Obtains the suggested name of the {@link ManagedObjectSource}.

@@ -24,13 +24,14 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 import org.eclipse.ui.IEditorPart;
 
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.editpolicies.connection.ConnectionChangeFactory;
 import net.officefloor.eclipse.common.editpolicies.connection.OfficeFloorGraphicalNodeEditPolicy;
-import net.officefloor.eclipse.common.editpolicies.layout.DeleteChangeFactory;
 import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
-import net.officefloor.eclipse.office.editparts.AdministratorEditPart;
+import net.officefloor.eclipse.office.editparts.AdministrationEditPart;
 import net.officefloor.eclipse.office.editparts.AdministratorToOfficeTeamEditPart;
 import net.officefloor.eclipse.office.editparts.DutyEditPart;
 import net.officefloor.eclipse.office.editparts.ExternalManagedObjectEditPart;
@@ -63,37 +64,42 @@ import net.officefloor.eclipse.office.editparts.OfficeSectionResponsibilityEditP
 import net.officefloor.eclipse.office.editparts.OfficeSectionResponsibilityToOfficeTeamEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeStartEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeSubSectionEditPart;
-import net.officefloor.eclipse.office.editparts.OfficeTaskEditPart;
+import net.officefloor.eclipse.office.editparts.OfficeFunctionEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeTaskToPostDutyEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeTaskToPreDutyEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeTeamEditPart;
 import net.officefloor.eclipse.office.editparts.TaskAdministrationJoinPointEditPart;
 import net.officefloor.eclipse.office.models.PostTaskAdministrationJointPointModel;
-import net.officefloor.eclipse.office.models.PreTaskAdministrationJointPointModel;
+import net.officefloor.eclipse.office.models.PreFunctionAdministrationJointPointModel;
 import net.officefloor.eclipse.office.operations.AddAdministratorOperation;
 import net.officefloor.eclipse.office.operations.AddExternalManagedObjectOperation;
 import net.officefloor.eclipse.office.operations.AddOfficeEscalationOperation;
 import net.officefloor.eclipse.office.operations.AddOfficeManagedObjectOperation;
 import net.officefloor.eclipse.office.operations.AddOfficeManagedObjectSourceOperation;
 import net.officefloor.eclipse.office.operations.AddOfficeSectionOperation;
-import net.officefloor.eclipse.office.operations.AddOfficeSectionResponsibilityOperation;
 import net.officefloor.eclipse.office.operations.AddOfficeStartOperation;
 import net.officefloor.eclipse.office.operations.AddOfficeTeamOperation;
 import net.officefloor.eclipse.office.operations.RefactorOfficeSectionChangeOperation;
-import net.officefloor.eclipse.wizard.officetask.OfficeTaskInstance;
-import net.officefloor.eclipse.wizard.officetask.OfficeTaskWizard;
+import net.officefloor.eclipse.wizard.officefunction.OfficeTaskInstance;
+import net.officefloor.eclipse.wizard.officefunction.OfficeTaskWizard;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.office.OfficeChangesImpl;
 import net.officefloor.model.impl.office.OfficeRepositoryImpl;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
+import net.officefloor.model.office.AdministrationModel;
+import net.officefloor.model.office.AdministrationToOfficeTeamModel;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.AdministratorToOfficeTeamModel;
 import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
+import net.officefloor.model.office.ExternalManagedObjectToAdministrationModel;
 import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
 import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
+import net.officefloor.model.office.OfficeFunctionModel;
+import net.officefloor.model.office.OfficeFunctionToPostAdministrationModel;
+import net.officefloor.model.office.OfficeFunctionToPreAdministrationModel;
 import net.officefloor.model.office.OfficeInputManagedObjectDependencyModel;
 import net.officefloor.model.office.OfficeInputManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeInputManagedObjectDependencyToOfficeManagedObjectModel;
@@ -106,6 +112,7 @@ import net.officefloor.model.office.OfficeManagedObjectSourceFlowToOfficeSection
 import net.officefloor.model.office.OfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
+import net.officefloor.model.office.OfficeManagedObjectToAdministrationModel;
 import net.officefloor.model.office.OfficeManagedObjectToAdministratorModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeModel;
@@ -125,7 +132,6 @@ import net.officefloor.model.office.OfficeTaskModel;
 import net.officefloor.model.office.OfficeTaskToPostDutyModel;
 import net.officefloor.model.office.OfficeTaskToPreDutyModel;
 import net.officefloor.model.office.OfficeTeamModel;
-import net.officefloor.model.repository.ConfigurationItem;
 
 /**
  * Editor for the {@link OfficeModel}.
@@ -141,11 +147,13 @@ public class OfficeEditor extends AbstractOfficeFloorEditor<OfficeModel, OfficeC
 
 	@Override
 	protected OfficeModel retrieveModel(ConfigurationItem configuration) throws Exception {
-		return new OfficeRepositoryImpl(new ModelRepositoryImpl()).retrieveOffice(configuration);
+		OfficeModel office = new OfficeModel();
+		new OfficeRepositoryImpl(new ModelRepositoryImpl()).retrieveOffice(office, configuration);
+		return office;
 	}
 
 	@Override
-	protected void storeModel(OfficeModel model, ConfigurationItem configuration) throws Exception {
+	protected void storeModel(OfficeModel model, WritableConfigurationItem configuration) throws Exception {
 		new OfficeRepositoryImpl(new ModelRepositoryImpl()).storeOffice(model, configuration);
 	}
 
@@ -159,8 +167,7 @@ public class OfficeEditor extends AbstractOfficeFloorEditor<OfficeModel, OfficeC
 
 		// Entities
 		map.put(OfficeModel.class, OfficeEditPart.class);
-		map.put(AdministratorModel.class, AdministratorEditPart.class);
-		map.put(DutyModel.class, DutyEditPart.class);
+		map.put(AdministrationModel.class, AdministrationEditPart.class);
 		map.put(OfficeTeamModel.class, OfficeTeamEditPart.class);
 		map.put(OfficeEscalationModel.class, OfficeEscalationEditPart.class);
 		map.put(ExternalManagedObjectModel.class, ExternalManagedObjectEditPart.class);
@@ -169,10 +176,9 @@ public class OfficeEditor extends AbstractOfficeFloorEditor<OfficeModel, OfficeC
 		map.put(OfficeSectionInputModel.class, OfficeSectionInputEditPart.class);
 		map.put(OfficeSectionOutputModel.class, OfficeSectionOutputEditPart.class);
 		map.put(OfficeSectionObjectModel.class, OfficeSectionObjectEditPart.class);
-		map.put(OfficeSectionResponsibilityModel.class, OfficeSectionResponsibilityEditPart.class);
 		map.put(OfficeSubSectionModel.class, OfficeSubSectionEditPart.class);
-		map.put(OfficeTaskModel.class, OfficeTaskEditPart.class);
-		map.put(PreTaskAdministrationJointPointModel.class, TaskAdministrationJoinPointEditPart.class);
+		map.put(OfficeFunctionModel.class, OfficeFunctionEditPart.class);
+		map.put(PreFunctionAdministrationJointPointModel.class, TaskAdministrationJoinPointEditPart.class);
 		map.put(PostTaskAdministrationJointPointModel.class, TaskAdministrationJoinPointEditPart.class);
 		map.put(OfficeManagedObjectSourceModel.class, OfficeManagedObjectSourceEditPart.class);
 		map.put(OfficeManagedObjectSourceFlowModel.class, OfficeManagedObjectSourceFlowEditPart.class);
@@ -213,235 +219,25 @@ public class OfficeEditor extends AbstractOfficeFloorEditor<OfficeModel, OfficeC
 	}
 
 	@Override
-	protected void populateLayoutEditPolicy(OfficeFloorLayoutEditPolicy policy) {
+	protected void populateOperations(List<Operation> list) {
 
-		// Allow deleting the office section
-		policy.addDelete(OfficeSectionModel.class, new DeleteChangeFactory<OfficeSectionModel>() {
-			@Override
-			public Change<OfficeSectionModel> createChange(OfficeSectionModel target) {
-				return OfficeEditor.this.getModelChanges().removeOfficeSection(target);
-			}
-		});
+		// Obtain the office changes
+		OfficeChanges officeChanges = this.getModelChanges();
 
-		// Allow deleting the office team
-		policy.addDelete(OfficeTeamModel.class, new DeleteChangeFactory<OfficeTeamModel>() {
-			@Override
-			public Change<OfficeTeamModel> createChange(OfficeTeamModel target) {
-				return OfficeEditor.this.getModelChanges().removeOfficeTeam(target);
-			}
-		});
+		// Add model operations
+		list.add(new AddOfficeSectionOperation(officeChanges));
+		list.add(new AddOfficeTeamOperation(officeChanges));
+		list.add(new AddExternalManagedObjectOperation(officeChanges));
+		list.add(new AddOfficeManagedObjectSourceOperation(officeChanges));
+		list.add(new AddAdministratorOperation(officeChanges));
+		list.add(new AddOfficeEscalationOperation(officeChanges));
+		list.add(new AddOfficeStartOperation(officeChanges));
 
-		// Allow deleting the office start
-		policy.addDelete(OfficeStartModel.class, new DeleteChangeFactory<OfficeStartModel>() {
-			@Override
-			public Change<OfficeStartModel> createChange(OfficeStartModel target) {
-				return OfficeEditor.this.getModelChanges().removeOfficeStart(target);
-			}
-		});
+		// Add managed object from managed object source
+		list.add(new AddOfficeManagedObjectOperation(officeChanges));
 
-		// Allow deleting the external managed object
-		policy.addDelete(ExternalManagedObjectModel.class, new DeleteChangeFactory<ExternalManagedObjectModel>() {
-			@Override
-			public Change<ExternalManagedObjectModel> createChange(ExternalManagedObjectModel target) {
-				return OfficeEditor.this.getModelChanges().removeExternalManagedObject(target);
-			}
-		});
-
-		// Allow deleting the managed object source
-		policy.addDelete(OfficeManagedObjectSourceModel.class,
-				new DeleteChangeFactory<OfficeManagedObjectSourceModel>() {
-					@Override
-					public Change<OfficeManagedObjectSourceModel> createChange(OfficeManagedObjectSourceModel target) {
-						return OfficeEditor.this.getModelChanges().removeOfficeManagedObjectSource(target);
-					}
-				});
-
-		// Allow deleting the managed object
-		policy.addDelete(OfficeManagedObjectModel.class, new DeleteChangeFactory<OfficeManagedObjectModel>() {
-			@Override
-			public Change<OfficeManagedObjectModel> createChange(OfficeManagedObjectModel target) {
-				return OfficeEditor.this.getModelChanges().removeOfficeManagedObject(target);
-			}
-		});
-
-		// Allow deleting the administrator
-		policy.addDelete(AdministratorModel.class, new DeleteChangeFactory<AdministratorModel>() {
-			@Override
-			public Change<AdministratorModel> createChange(AdministratorModel target) {
-				return OfficeEditor.this.getModelChanges().removeAdministrator(target);
-			}
-		});
-
-		// Allow deleting the office escalation
-		policy.addDelete(OfficeEscalationModel.class, new DeleteChangeFactory<OfficeEscalationModel>() {
-			@Override
-			public Change<OfficeEscalationModel> createChange(OfficeEscalationModel target) {
-				return OfficeEditor.this.getModelChanges().removeOfficeEscalation(target);
-			}
-		});
-
-		// Allow deleting the office section responsibility
-		policy.addDelete(OfficeSectionResponsibilityModel.class,
-				new DeleteChangeFactory<OfficeSectionResponsibilityModel>() {
-					@Override
-					public Change<OfficeSectionResponsibilityModel> createChange(
-							OfficeSectionResponsibilityModel target) {
-						return OfficeEditor.this.getModelChanges().removeOfficeSectionResponsibility(target);
-					}
-				});
-
-		// Allow deleting office section object to external managed object
-		policy.addDelete(OfficeSectionObjectToExternalManagedObjectModel.class,
-				new DeleteChangeFactory<OfficeSectionObjectToExternalManagedObjectModel>() {
-					@Override
-					public Change<OfficeSectionObjectToExternalManagedObjectModel> createChange(
-							OfficeSectionObjectToExternalManagedObjectModel target) {
-						return OfficeEditor.this.getModelChanges()
-								.removeOfficeSectionObjectToExternalManagedObject(target);
-					}
-				});
-
-		// Allow deleting office section object to managed object
-		policy.addDelete(OfficeSectionObjectToOfficeManagedObjectModel.class,
-				new DeleteChangeFactory<OfficeSectionObjectToOfficeManagedObjectModel>() {
-					@Override
-					public Change<OfficeSectionObjectToOfficeManagedObjectModel> createChange(
-							OfficeSectionObjectToOfficeManagedObjectModel target) {
-						return OfficeEditor.this.getModelChanges()
-								.removeOfficeSectionObjectToOfficeManagedObject(target);
-					}
-				});
-
-		// Allow deleting dependency to managed object
-		policy.addDelete(OfficeManagedObjectDependencyToOfficeManagedObjectModel.class,
-				new DeleteChangeFactory<OfficeManagedObjectDependencyToOfficeManagedObjectModel>() {
-					@Override
-					public Change<OfficeManagedObjectDependencyToOfficeManagedObjectModel> createChange(
-							OfficeManagedObjectDependencyToOfficeManagedObjectModel target) {
-						return OfficeEditor.this.getModelChanges()
-								.removeOfficeManagedObjectDependencyToOfficeManagedObject(target);
-					}
-				});
-
-		// Allow deleting dependency to external managed object
-		policy.addDelete(OfficeManagedObjectDependencyToExternalManagedObjectModel.class,
-				new DeleteChangeFactory<OfficeManagedObjectDependencyToExternalManagedObjectModel>() {
-					@Override
-					public Change<OfficeManagedObjectDependencyToExternalManagedObjectModel> createChange(
-							OfficeManagedObjectDependencyToExternalManagedObjectModel target) {
-						return OfficeEditor.this.getModelChanges()
-								.removeOfficeManagedObjectDependencyToExternalManagedObject(target);
-					}
-				});
-
-		// Allow deleting managed object source flow to office section input
-		policy.addDelete(OfficeManagedObjectSourceFlowToOfficeSectionInputModel.class,
-				new DeleteChangeFactory<OfficeManagedObjectSourceFlowToOfficeSectionInputModel>() {
-					@Override
-					public Change<OfficeManagedObjectSourceFlowToOfficeSectionInputModel> createChange(
-							OfficeManagedObjectSourceFlowToOfficeSectionInputModel target) {
-						return OfficeEditor.this.getModelChanges()
-								.removeOfficeManagedObjectSourceFlowToOfficeSectionInput(target);
-					}
-				});
-
-		// Allow deleting office section output to office section input
-		policy.addDelete(OfficeSectionOutputToOfficeSectionInputModel.class,
-				new DeleteChangeFactory<OfficeSectionOutputToOfficeSectionInputModel>() {
-					@Override
-					public Change<OfficeSectionOutputToOfficeSectionInputModel> createChange(
-							OfficeSectionOutputToOfficeSectionInputModel target) {
-						return OfficeEditor.this.getModelChanges()
-								.removeOfficeSectionOutputToOfficeSectionInput(target);
-					}
-				});
-
-		// Allow deleting office section responsibility to office team
-		policy.addDelete(OfficeSectionResponsibilityToOfficeTeamModel.class,
-				new DeleteChangeFactory<OfficeSectionResponsibilityToOfficeTeamModel>() {
-					@Override
-					public Change<OfficeSectionResponsibilityToOfficeTeamModel> createChange(
-							OfficeSectionResponsibilityToOfficeTeamModel target) {
-						return OfficeEditor.this.getModelChanges()
-								.removeOfficeSectionResponsibilityToOfficeTeam(target);
-					}
-				});
-
-		// Allow deleting office managed object source team to office team
-		policy.addDelete(OfficeManagedObjectSourceTeamToOfficeTeamModel.class,
-				new DeleteChangeFactory<OfficeManagedObjectSourceTeamToOfficeTeamModel>() {
-					@Override
-					public Change<OfficeManagedObjectSourceTeamToOfficeTeamModel> createChange(
-							OfficeManagedObjectSourceTeamToOfficeTeamModel target) {
-						return OfficeEditor.this.getModelChanges()
-								.removeOfficeManagedObjectSourceTeamToOfficeTeam(target);
-					}
-				});
-
-		// Allow deleting administrator to team
-		policy.addDelete(AdministratorToOfficeTeamModel.class,
-				new DeleteChangeFactory<AdministratorToOfficeTeamModel>() {
-					@Override
-					public Change<AdministratorToOfficeTeamModel> createChange(AdministratorToOfficeTeamModel target) {
-						return OfficeEditor.this.getModelChanges().removeAdministratorToOfficeTeam(target);
-					}
-				});
-
-		// Allow deleting external managed object to administrator
-		policy.addDelete(ExternalManagedObjectToAdministratorModel.class,
-				new DeleteChangeFactory<ExternalManagedObjectToAdministratorModel>() {
-					@Override
-					public Change<ExternalManagedObjectToAdministratorModel> createChange(
-							ExternalManagedObjectToAdministratorModel target) {
-						return OfficeEditor.this.getModelChanges().removeExternalManagedObjectToAdministrator(target);
-					}
-				});
-
-		// Allow deleting managed object to administrator
-		policy.addDelete(OfficeManagedObjectToAdministratorModel.class,
-				new DeleteChangeFactory<OfficeManagedObjectToAdministratorModel>() {
-					@Override
-					public Change<OfficeManagedObjectToAdministratorModel> createChange(
-							OfficeManagedObjectToAdministratorModel target) {
-						return OfficeEditor.this.getModelChanges().removeOfficeManagedObjectToAdministrator(target);
-					}
-				});
-
-		// Allow deleting task to pre duty
-		policy.addDelete(OfficeTaskToPreDutyModel.class, new DeleteChangeFactory<OfficeTaskToPreDutyModel>() {
-			@Override
-			public Change<OfficeTaskToPreDutyModel> createChange(OfficeTaskToPreDutyModel target) {
-				return OfficeEditor.this.getModelChanges().removeOfficeTaskToPreDuty(target);
-			}
-		});
-
-		// Allow deleting task to post duty
-		policy.addDelete(OfficeTaskToPostDutyModel.class, new DeleteChangeFactory<OfficeTaskToPostDutyModel>() {
-			@Override
-			public Change<OfficeTaskToPostDutyModel> createChange(OfficeTaskToPostDutyModel target) {
-				return OfficeEditor.this.getModelChanges().removeOfficeTaskToPostDuty(target);
-			}
-		});
-
-		// Allow deleting escalation to input
-		policy.addDelete(OfficeEscalationToOfficeSectionInputModel.class,
-				new DeleteChangeFactory<OfficeEscalationToOfficeSectionInputModel>() {
-					@Override
-					public Change<OfficeEscalationToOfficeSectionInputModel> createChange(
-							OfficeEscalationToOfficeSectionInputModel target) {
-						return OfficeEditor.this.getModelChanges().removeOfficeEscalationToOfficeSectionInput(target);
-					}
-				});
-
-		// Allow deleting start to input
-		policy.addDelete(OfficeStartToOfficeSectionInputModel.class,
-				new DeleteChangeFactory<OfficeStartToOfficeSectionInputModel>() {
-					@Override
-					public Change<OfficeStartToOfficeSectionInputModel> createChange(
-							OfficeStartToOfficeSectionInputModel target) {
-						return OfficeEditor.this.getModelChanges().removeOfficeStartToOfficeSectionInput(target);
-					}
-				});
+		// Office section operations
+		list.add(new RefactorOfficeSectionChangeOperation(officeChanges));
 	}
 
 	@Override
@@ -616,26 +412,99 @@ public class OfficeEditor extends AbstractOfficeFloorEditor<OfficeModel, OfficeC
 	}
 
 	@Override
-	protected void populateOperations(List<Operation> list) {
+	protected void populateLayoutEditPolicy(OfficeFloorLayoutEditPolicy policy) {
 
-		// Obtain the office changes
-		OfficeChanges officeChanges = this.getModelChanges();
+		// Allow deleting the office section
+		policy.addDelete(OfficeSectionModel.class, (target) -> this.getModelChanges().removeOfficeSection(target));
 
-		// Add model operations
-		list.add(new AddOfficeSectionOperation(officeChanges));
-		list.add(new AddOfficeTeamOperation(officeChanges));
-		list.add(new AddExternalManagedObjectOperation(officeChanges));
-		list.add(new AddOfficeManagedObjectSourceOperation(officeChanges));
-		list.add(new AddAdministratorOperation(officeChanges));
-		list.add(new AddOfficeEscalationOperation(officeChanges));
-		list.add(new AddOfficeStartOperation(officeChanges));
+		// Allow deleting the office team
+		policy.addDelete(OfficeTeamModel.class, (target) -> this.getModelChanges().removeOfficeTeam(target));
 
-		// Add managed object from managed object source
-		list.add(new AddOfficeManagedObjectOperation(officeChanges));
+		// Allow deleting the office start
+		policy.addDelete(OfficeStartModel.class, (target) -> this.getModelChanges().removeOfficeStart(target));
 
-		// Office section operations
-		list.add(new RefactorOfficeSectionChangeOperation(officeChanges));
-		list.add(new AddOfficeSectionResponsibilityOperation(officeChanges));
+		// Allow deleting the external managed object
+		policy.addDelete(ExternalManagedObjectModel.class,
+				(target) -> this.getModelChanges().removeExternalManagedObject(target));
+
+		// Allow deleting the managed object source
+		policy.addDelete(OfficeManagedObjectSourceModel.class,
+				(target) -> this.getModelChanges().removeOfficeManagedObjectSource(target));
+
+		// Allow deleting the managed object
+		policy.addDelete(OfficeManagedObjectModel.class,
+				(target) -> this.getModelChanges().removeOfficeManagedObject(target));
+
+		// Allow deleting the administrator
+		policy.addDelete(AdministrationModel.class, (target) -> this.getModelChanges().removeAdministration(target));
+
+		// Allow deleting the office escalation
+		policy.addDelete(OfficeEscalationModel.class,
+				(target) -> this.getModelChanges().removeOfficeEscalation(target));
+
+		// Allow deleting the office section responsibility
+		policy.addDelete(OfficeFunctionModel.class,
+				(target) -> this.getModelChanges().removeOfficeSectionResponsibility(target));
+
+		// Allow deleting office section object to external managed object
+		policy.addDelete(OfficeSectionObjectToExternalManagedObjectModel.class,
+				(target) -> this.getModelChanges().removeOfficeSectionObjectToExternalManagedObject(target));
+
+		// Allow deleting office section object to managed object
+		policy.addDelete(OfficeSectionObjectToOfficeManagedObjectModel.class,
+				(target) -> this.getModelChanges().removeOfficeSectionObjectToOfficeManagedObject(target));
+
+		// Allow deleting dependency to managed object
+		policy.addDelete(OfficeManagedObjectDependencyToOfficeManagedObjectModel.class,
+				(target) -> this.getModelChanges().removeOfficeManagedObjectDependencyToOfficeManagedObject(target));
+
+		// Allow deleting dependency to external managed object
+		policy.addDelete(OfficeManagedObjectDependencyToExternalManagedObjectModel.class,
+				(target) -> this.getModelChanges().removeOfficeManagedObjectDependencyToExternalManagedObject(target));
+
+		// Allow deleting managed object source flow to office section input
+		policy.addDelete(OfficeManagedObjectSourceFlowToOfficeSectionInputModel.class,
+				(target) -> this.getModelChanges().removeOfficeManagedObjectSourceFlowToOfficeSectionInput(target));
+
+		// Allow deleting office section output to office section input
+		policy.addDelete(OfficeSectionOutputToOfficeSectionInputModel.class,
+				(target) -> this.getModelChanges().removeOfficeSectionOutputToOfficeSectionInput(target));
+
+		// Allow deleting office section responsibility to office team
+		policy.addDelete(OfficeSectionResponsibilityToOfficeTeamModel.class,
+				(target) -> this.getModelChanges().removeOfficeSectionResponsibilityToOfficeTeam(target));
+
+		// Allow deleting office managed object source team to office team
+		policy.addDelete(OfficeManagedObjectSourceTeamToOfficeTeamModel.class,
+				(target) -> this.getModelChanges().removeOfficeManagedObjectSourceTeamToOfficeTeam(target));
+
+		// Allow deleting administrator to team
+		policy.addDelete(AdministrationToOfficeTeamModel.class,
+				(target) -> this.getModelChanges().removeAdministrationToOfficeTeam(target));
+
+		// Allow deleting external managed object to administrator
+		policy.addDelete(ExternalManagedObjectToAdministrationModel.class,
+				(target) -> this.getModelChanges().removeExternalManagedObjectToAdministration(target));
+
+		// Allow deleting managed object to administration
+		policy.addDelete(OfficeManagedObjectToAdministrationModel.class,
+				(target) -> this.getModelChanges().removeOfficeManagedObjectToAdministration(target));
+
+		// Allow deleting function to pre administration
+		policy.addDelete(OfficeFunctionToPreAdministrationModel.class,
+				(target) -> this.getModelChanges().removeOfficeFunctionToPreAdministration(target));
+
+		// Allow deleting function to post adminitration
+		policy.addDelete(OfficeFunctionToPostAdministrationModel.class,
+				(target) -> this.getModelChanges().removeOfficeFunctionToPostAdministration(target));
+
+		// Allow deleting escalation to input
+		policy.addDelete(OfficeEscalationToOfficeSectionInputModel.class,
+				(target) -> this.getModelChanges().removeOfficeEscalationToOfficeSectionInput(target));
+
+		// Allow deleting start to input
+		policy.addDelete(OfficeStartToOfficeSectionInputModel.class,
+				(target) -> this.getModelChanges().removeOfficeStartToOfficeSectionInput(target));
 	}
 
 }

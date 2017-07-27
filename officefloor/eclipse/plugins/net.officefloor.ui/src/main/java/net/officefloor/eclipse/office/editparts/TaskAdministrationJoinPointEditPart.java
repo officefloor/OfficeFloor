@@ -22,20 +22,20 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.office.models.AbstractTaskAdministrationJoinPointModel;
-import net.officefloor.eclipse.office.models.TaskAdministrationJoinPointEvent;
+import net.officefloor.eclipse.office.models.AbstractFunctionAdministrationJoinPointModel;
+import net.officefloor.eclipse.office.models.FunctionAdministrationJoinPointEvent;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 
 import org.eclipse.gef.EditPart;
 
 /**
- * {@link EditPart} for {@link AbstractTaskAdministrationJoinPointModel}.
+ * {@link EditPart} for {@link AbstractFunctionAdministrationJoinPointModel}.
  * 
  * @author Daniel Sagenschneider
  */
 public class TaskAdministrationJoinPointEditPart
 		extends
-		AbstractOfficeFloorEditPart<AbstractTaskAdministrationJoinPointModel, TaskAdministrationJoinPointEvent, OfficeFloorFigure> {
+		AbstractOfficeFloorEditPart<AbstractFunctionAdministrationJoinPointModel, FunctionAdministrationJoinPointEvent, OfficeFloorFigure> {
 
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
@@ -46,22 +46,22 @@ public class TaskAdministrationJoinPointEditPart
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
 		if (this.getCastedModel().isPreRatherThanPost()) {
-			models.addAll(this.getCastedModel().getTask().getPreDuties());
+			models.addAll(this.getCastedModel().getFunction().getPreDuties());
 		} else {
-			models.addAll(this.getCastedModel().getTask().getPostDuties());
+			models.addAll(this.getCastedModel().getFunction().getPostDuties());
 		}
 	}
 
 	@Override
-	protected Class<TaskAdministrationJoinPointEvent> getPropertyChangeEventType() {
-		return TaskAdministrationJoinPointEvent.class;
+	protected Class<FunctionAdministrationJoinPointEvent> getPropertyChangeEventType() {
+		return FunctionAdministrationJoinPointEvent.class;
 	}
 
 	@Override
 	protected void handlePropertyChange(
-			TaskAdministrationJoinPointEvent property, PropertyChangeEvent evt) {
+			FunctionAdministrationJoinPointEvent property, PropertyChangeEvent evt) {
 		switch (property) {
-		case CHANGE_DUTIES:
+		case CHANGE_ADMINISTRATION:
 			TaskAdministrationJoinPointEditPart.this.refreshSourceConnections();
 			break;
 		}

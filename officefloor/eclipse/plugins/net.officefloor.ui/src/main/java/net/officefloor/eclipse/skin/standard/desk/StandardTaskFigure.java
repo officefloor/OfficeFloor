@@ -17,8 +17,8 @@
  */
 package net.officefloor.eclipse.skin.standard.desk;
 
-import net.officefloor.eclipse.skin.desk.TaskFigure;
-import net.officefloor.eclipse.skin.desk.TaskFigureContext;
+import net.officefloor.eclipse.skin.section.FunctionFigure;
+import net.officefloor.eclipse.skin.section.FunctionFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
@@ -48,7 +48,7 @@ import org.eclipse.swt.SWT;
  * @author Daniel Sagenschneider
  */
 public class StandardTaskFigure extends AbstractOfficeFloorFigure implements
-		TaskFigure {
+		FunctionFigure {
 
 	/**
 	 * Flow item {@link Figure}.
@@ -59,9 +59,9 @@ public class StandardTaskFigure extends AbstractOfficeFloorFigure implements
 	 * Initiate.
 	 * 
 	 * @param context
-	 *            {@link TaskFigureContext}.
+	 *            {@link FunctionFigureContext}.
 	 */
-	public StandardTaskFigure(final TaskFigureContext context) {
+	public StandardTaskFigure(final FunctionFigureContext context) {
 
 		// Create the figure
 		Figure figure = new Figure();
@@ -100,10 +100,10 @@ public class StandardTaskFigure extends AbstractOfficeFloorFigure implements
 
 		// Provide tool tip for task
 		flowItemAndTaskLink.setToolTip(new ToolTipFigure(context
-				.getTaskDocumentation()));
+				.getFunctionDocumentation()));
 
 		// Create the flow item container
-		this.flowItem = new RoundedContainerFigure(context.getTaskName(),
+		this.flowItem = new RoundedContainerFigure(context.getFunctionName(),
 				StandardOfficeFloorColours.TASK(), 20, true);
 		flowItemAndTaskLink.add(this.flowItem);
 
@@ -148,7 +148,7 @@ public class StandardTaskFigure extends AbstractOfficeFloorFigure implements
 	 */
 
 	@Override
-	public void setTaskName(String taskName) {
+	public void setFunctionName(String taskName) {
 		this.flowItem.getContainerName().setText(taskName);
 	}
 
@@ -158,7 +158,7 @@ public class StandardTaskFigure extends AbstractOfficeFloorFigure implements
 	}
 
 	@Override
-	public IFigure getTaskNameFigure() {
+	public IFigure getFunctionNameFigure() {
 		return this.flowItem.getContainerName();
 	}
 
