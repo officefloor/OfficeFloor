@@ -79,7 +79,7 @@ public interface ManagedFunctionContext<O extends Enum<O>, F extends Enum<F>> ex
 	 * {@link OfficeAwareManagedFunctionFactory}.
 	 * 
 	 * @param functionName
-	 *            Name of {@link ManagedFunction} within the {@link Work}.
+	 *            Name of {@link ManagedFunction} within the {@link Office}.
 	 * @param parameter
 	 *            Parameter to the task. May be <code>null</code>.
 	 * @param callback
