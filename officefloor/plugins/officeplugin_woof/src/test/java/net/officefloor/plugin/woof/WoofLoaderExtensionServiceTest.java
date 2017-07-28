@@ -218,7 +218,7 @@ public class WoofLoaderExtensionServiceTest extends OfficeFrameTestCase {
 		String alternateConfigurationLocation = this.getPackageRelativePath(this.getClass()) + "/commandline.woof";
 
 		// Run the application with properties for alternate configuration
-		OfficeFloorMain.main(WoofLoaderExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+		OfficeFloorMain.open(WoofLoaderExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				alternateConfigurationLocation);
 
 		// Test
@@ -239,7 +239,7 @@ public class WoofLoaderExtensionServiceTest extends OfficeFrameTestCase {
 
 		// Run the application with properties for alternate configuration
 		this.isCloseOfficeFloorViaMbeans = true;
-		OfficeFloorMain.main("-" + WoofLoaderExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+		OfficeFloorMain.open("-" + WoofLoaderExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				alternateConfigurationLocation, "only.property.name.to.have.blank.value");
 
 		// Test
@@ -261,7 +261,7 @@ public class WoofLoaderExtensionServiceTest extends OfficeFrameTestCase {
 
 		// Run the application for woof resource
 		this.isCloseOfficeFloorViaMbeans = true;
-		OfficeFloorMain.main("-" + WoofLoaderExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+		OfficeFloorMain.open("-" + WoofLoaderExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				alternateConfigurationLocation);
 
 		// Test
@@ -285,7 +285,7 @@ public class WoofLoaderExtensionServiceTest extends OfficeFrameTestCase {
 
 		// Run the application for woof resource
 		this.isCloseOfficeFloorViaMbeans = true;
-		OfficeFloorMain.main("-" + WoofLoaderExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+		OfficeFloorMain.open("-" + WoofLoaderExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				alternateConfigurationLocation);
 
 		// Test
@@ -308,7 +308,7 @@ public class WoofLoaderExtensionServiceTest extends OfficeFrameTestCase {
 
 		// Run the application for woof resource
 		this.isCloseOfficeFloorViaMbeans = true;
-		OfficeFloorMain.main("-" + WoofLoaderExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+		OfficeFloorMain.open("-" + WoofLoaderExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				alternateConfigurationLocation);
 
 		// Test
@@ -337,15 +337,17 @@ public class WoofLoaderExtensionServiceTest extends OfficeFrameTestCase {
 		try {
 			// Run the application for woof resource
 			this.isCloseOfficeFloorViaMbeans = true;
-			OfficeFloorMain.main("-" + WoofLoaderExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+			OfficeFloorMain.open("-" + WoofLoaderExtensionService.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 					alternateConfigurationLocation);
 			fail("Should not successfully find resource and therefore should not start");
 
-		} catch (CompileException ex) {
+		} catch (Error ex) {
+			CompileException exception = (CompileException) ex.getCause();
+
 			// Should not start due to unknown resource
 			assertEquals("Should not load office",
 					"Failure loading OfficeType from source " + OfficeSource.class.getName(), ex.getMessage());
-			DefaultCompilerIssue issue = ex.getCompilerIssue();
+			DefaultCompilerIssue issue = exception.getCompilerIssue();
 			DefaultCompilerIssue officeSectionLoadIssue = (DefaultCompilerIssue) issue.getCauses()[0];
 			DefaultCompilerIssue sectionLoadIssue = (DefaultCompilerIssue) officeSectionLoadIssue.getCauses()[0];
 			DefaultCompilerIssue missingResourceIssue = (DefaultCompilerIssue) sectionLoadIssue.getCauses()[0];

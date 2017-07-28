@@ -126,8 +126,12 @@ public class OfficeFloorMain {
 	 * Note previously open {@link OfficeFloor} instance by this method will be
 	 * closed. Hence, avoids tests re-using the a previous {@link OfficeFloor}
 	 * instance.
+	 * 
+	 * @param args
+	 *            Optional command line arguments. Enables testing running from
+	 *            command line.
 	 */
-	public synchronized static void open() {
+	public synchronized static void open(String... args) {
 
 		// Ensure closed
 		close();

@@ -5,7 +5,7 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.net.URL;
 
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
+import net.officefloor.OfficeFloorMain;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -20,7 +20,7 @@ public class RunApplicationTest {
 	@Before
 	public void runApplication() throws Exception {
 		// Start the application
-		WoofOfficeFloorSource.start();
+		OfficeFloorMain.open();
 	}
 
 	@Test
@@ -43,7 +43,7 @@ public class RunApplicationTest {
 	@After
 	public void stopApplication() throws Exception {
 		// Stop the application
-		WoofOfficeFloorSource.stop();
+		OfficeFloorMain.close();
 	}
 
 }

@@ -2,7 +2,7 @@ package net.officefloor.test.form;
 
 import java.io.Serializable;
 import net.officefloor.plugin.web.http.application.HttpParameters;
-import net.officefloor.plugin.work.clazz.FlowInterface;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 
 /**
  * Logic for the <code>form.woof.html</code>.
