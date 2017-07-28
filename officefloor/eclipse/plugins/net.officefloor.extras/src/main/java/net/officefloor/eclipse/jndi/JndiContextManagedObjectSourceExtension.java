@@ -17,22 +17,19 @@
  */
 package net.officefloor.eclipse.jndi;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.common.dialog.input.InputAdapter;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.impl.PropertyListInput;
-import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
-import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
-import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.jndi.context.JndiContextManagedObjectSource;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
 
 /**
  * {@link ManagedObjectSourceExtension} for the
@@ -41,9 +38,7 @@ import org.eclipse.swt.widgets.Composite;
  * @author Daniel Sagenschneider
  */
 public class JndiContextManagedObjectSourceExtension
-		implements
-		ManagedObjectSourceExtension<None, None, JndiContextManagedObjectSource>,
-		ExtensionClasspathProvider {
+		implements ManagedObjectSourceExtension<None, None, JndiContextManagedObjectSource> {
 
 	/*
 	 * ===================== ManagedObjectSourceExtension =====================
@@ -60,8 +55,7 @@ public class JndiContextManagedObjectSourceExtension
 	}
 
 	@Override
-	public void createControl(Composite page,
-			final ManagedObjectSourceExtensionContext context) {
+	public void createControl(Composite page, final ManagedObjectSourceExtensionContext context) {
 
 		// Obtain the properties
 		PropertyList properties = context.getPropertyList();
@@ -75,43 +69,28 @@ public class JndiContextManagedObjectSourceExtension
 
 		// Add the Sub Context Name
 		SourceExtensionUtil.createPropertyText("Sub-context JNDI name",
-				JndiContextManagedObjectSource.PROPERTY_SUB_CONTEXT_NAME,
-				"java:comp/env", subContextPanel, context, null);
+				JndiContextManagedObjectSource.PROPERTY_SUB_CONTEXT_NAME, "java:comp/env", subContextPanel, context,
+				null);
 
 		// Add checkbox to validate Context
-		SourceExtensionUtil.createPropertyCheckbox("Validate",
-				JndiContextManagedObjectSource.PROPERTY_VALIDATE, false,
+		SourceExtensionUtil.createPropertyCheckbox("Validate", JndiContextManagedObjectSource.PROPERTY_VALIDATE, false,
 				"true", "false", subContextPanel, context, null);
 
 		// Input for the properties
-		final PropertyListInput propertiesInput = new PropertyListInput(
-				properties);
-		propertiesInput
-				.hideProperty(JndiContextManagedObjectSource.PROPERTY_SUB_CONTEXT_NAME);
-		propertiesInput
-				.hideProperty(JndiContextManagedObjectSource.PROPERTY_VALIDATE);
-		new InputHandler<PropertyList>(page, propertiesInput,
-				new InputAdapter() {
-					@Override
-					public void notifyValueChanged(Object value) {
-						context.notifyPropertiesChanged();
-					}
-				});
+		final PropertyListInput propertiesInput = new PropertyListInput(properties);
+		propertiesInput.hideProperty(JndiContextManagedObjectSource.PROPERTY_SUB_CONTEXT_NAME);
+		propertiesInput.hideProperty(JndiContextManagedObjectSource.PROPERTY_VALIDATE);
+		new InputHandler<PropertyList>(page, propertiesInput, new InputAdapter() {
+			@Override
+			public void notifyValueChanged(Object value) {
+				context.notifyPropertiesChanged();
+			}
+		});
 	}
 
 	@Override
 	public String getSuggestedManagedObjectSourceName(PropertyList properties) {
 		return "Context";
-	}
-
-	/*
-	 * ==================== ExtensionClasspathProvider ======================
-	 */
-
-	@Override
-	public ClasspathProvision[] getClasspathProvisions() {
-		return new ClasspathProvision[] { new TypeClasspathProvision(
-				JndiContextManagedObjectSource.class) };
 	}
 
 }

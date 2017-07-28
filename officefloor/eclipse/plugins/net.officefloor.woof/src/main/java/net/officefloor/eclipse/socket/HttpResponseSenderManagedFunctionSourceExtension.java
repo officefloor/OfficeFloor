@@ -17,29 +17,29 @@
  */
 package net.officefloor.eclipse.socket;
 
+import org.eclipse.swt.widgets.Composite;
+
 import net.officefloor.eclipse.extension.managedfunctionsource.FunctionDocumentationContext;
 import net.officefloor.eclipse.extension.managedfunctionsource.ManagedFunctionSourceExtension;
 import net.officefloor.eclipse.extension.managedfunctionsource.ManagedFunctionSourceExtensionContext;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSenderWorkSource;
-
-import org.eclipse.swt.widgets.Composite;
+import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSenderManagedFunctionSource;
 
 /**
- * {@link ManagedFunctionSourceExtension} for the {@link HttpResponseSenderWorkSource}.
+ * {@link ManagedFunctionSourceExtension} for the
+ * {@link HttpResponseSenderManagedFunctionSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpResponseSenderWorkSourceExtension extends
-		AbstractSocketWorkSourceExtension<Work, HttpResponseSenderWorkSource> {
+public class HttpResponseSenderManagedFunctionSourceExtension
+		extends AbstractSocketManagedFunctionSourceExtension<HttpResponseSenderManagedFunctionSource> {
 
 	/**
 	 * Initiate.
 	 */
-	public HttpResponseSenderWorkSourceExtension() {
-		super(HttpResponseSenderWorkSource.class, "Http Response Sender");
+	public HttpResponseSenderManagedFunctionSourceExtension() {
+		super(HttpResponseSenderManagedFunctionSource.class, "Http Response Sender");
 	}
 
 	/*
@@ -52,29 +52,22 @@ public class HttpResponseSenderWorkSourceExtension extends
 		// Provide properties
 		SourceExtensionUtil.loadPropertyLayout(page);
 		SourceExtensionUtil.createPropertyText("HTTP Status",
-				HttpResponseSenderWorkSource.PROPERTY_HTTP_STATUS, "200", page,
-				context, null);
-		SourceExtensionUtil
-				.createPropertyText(
-						"HTTP Content File",
-						HttpResponseSenderWorkSource.PROPERTY_HTTP_RESPONSE_CONTENT_FILE,
-						"", page, context, null);
+				HttpResponseSenderManagedFunctionSource.PROPERTY_HTTP_STATUS, "200", page, context, null);
+		SourceExtensionUtil.createPropertyText("HTTP Content File",
+				HttpResponseSenderManagedFunctionSource.PROPERTY_HTTP_RESPONSE_CONTENT_FILE, "", page, context, null);
 	}
 
 	@Override
-	public String getFunctionDocumentation(FunctionDocumentationContext context)
-			throws Throwable {
+	public String getFunctionDocumentation(FunctionDocumentationContext context) throws Throwable {
 
-		// Should only be the one task
+		// Should only be the one function
 
 		// Obtain the status
-		String status = context.getPropertyList().getPropertyValue(
-				HttpResponseSenderWorkSource.PROPERTY_HTTP_STATUS,
-				"<not specified>");
+		String status = context.getPropertyList()
+				.getPropertyValue(HttpResponseSenderManagedFunctionSource.PROPERTY_HTTP_STATUS, "<not specified>");
 
 		// Provide documentation
-		return "Send the " + HttpResponse.class.getSimpleName()
-				+ " to the client with status " + status;
+		return "Send the " + HttpResponse.class.getSimpleName() + " to the client with status " + status;
 	}
 
 }

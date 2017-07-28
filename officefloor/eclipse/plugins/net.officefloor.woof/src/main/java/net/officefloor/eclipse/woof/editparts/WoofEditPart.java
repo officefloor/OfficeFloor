@@ -19,12 +19,11 @@ package net.officefloor.eclipse.woof.editparts;
 
 import java.util.List;
 
+import org.eclipse.gef.EditPart;
+
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
-import net.officefloor.model.woof.WoofAccessModel;
 import net.officefloor.model.woof.WoofGovernanceModel;
 import net.officefloor.model.woof.WoofModel;
-
-import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link WoofModel}.
@@ -48,10 +47,7 @@ public class WoofEditPart extends AbstractOfficeFloorDiagramEditPart<WoofModel> 
 		// Add remaining models
 		childModels.addAll(woof.getWoofTemplates());
 		childModels.addAll(woof.getWoofSections());
-		WoofAccessModel access = woof.getWoofAccess();
-		if (access != null) {
-			childModels.add(access);
-		}
+		childModels.addAll(woof.getWoofAccesses());
 		childModels.addAll(woof.getWoofResources());
 		childModels.addAll(woof.getWoofExceptions());
 		childModels.addAll(woof.getWoofStarts());

@@ -269,7 +269,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 	 */
 	private void ensureOfficeFloorOpen() throws IllegalStateException {
 		if (this.offices == null) {
-			throw new IllegalStateException("Must open the Office Floor before obtaining Offices");
+			throw new IllegalStateException("Must open the OfficeFloor before obtaining Offices");
 		}
 	}
 

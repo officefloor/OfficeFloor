@@ -17,13 +17,13 @@
  */
 package net.officefloor.tutorial.navigatehttpserver;
 
-import junit.framework.TestCase;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
+
+import junit.framework.TestCase;
+import net.officefloor.OfficeFloorMain;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 
 /**
  * Tests the {@link NavigateHttpServer}.
@@ -38,7 +38,7 @@ public class NavigateHttpServerTest extends TestCase {
 	public void testNavigate() throws Exception {
 
 		// Start server
-		WoofOfficeFloorSource.start();
+		OfficeFloorMain.open();
 
 		// Request template one
 		this.doRequest("http://localhost:7878/one.woof");
@@ -52,8 +52,7 @@ public class NavigateHttpServerTest extends TestCase {
 
 	private void doRequest(String url) throws Exception {
 		HttpResponse response = this.client.execute(new HttpGet(url));
-		assertEquals("Request should be successful", 200, response
-				.getStatusLine().getStatusCode());
+		assertEquals("Request should be successful", 200, response.getStatusLine().getStatusCode());
 		response.getEntity().writeTo(System.out);
 	}
 
@@ -62,7 +61,7 @@ public class NavigateHttpServerTest extends TestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		this.client.close();
-		WoofOfficeFloorSource.stop();
+		OfficeFloorMain.close();
 	}
 
 }

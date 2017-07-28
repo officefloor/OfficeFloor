@@ -17,22 +17,20 @@
  */
 package net.officefloor.eclipse.extension.access;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.ExtensionUtil;
-import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.eclipse.extension.open.ExtensionOpener;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
-
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 
 /**
  * Interface for extension to provide enriched {@link HttpSecuritySource} usage.
  * 
  * @author Daniel Sagenschneider
  * 
- * @see ExtensionClasspathProvider
  * @see ExtensionOpener
  */
 @SuppressWarnings("rawtypes")
@@ -41,8 +39,7 @@ public interface HttpSecuritySourceExtension<S extends HttpSecuritySource> {
 	/**
 	 * Extension ID.
 	 */
-	public static final String EXTENSION_ID = ExtensionUtil
-			.getExtensionId("httpsecuritysources");
+	public static final String EXTENSION_ID = ExtensionUtil.getExtensionId("httpsecuritysources");
 
 	/**
 	 * Obtains the class of the {@link HttpSecuritySource} being enriched in its
@@ -75,7 +72,6 @@ public interface HttpSecuritySourceExtension<S extends HttpSecuritySource> {
 	 * @param context
 	 *            {@link HttpSecuritySourceExtensionContext}.
 	 */
-	void createControl(Composite page,
-			HttpSecuritySourceExtensionContext context);
+	void createControl(Composite page, HttpSecuritySourceExtensionContext context);
 
 }

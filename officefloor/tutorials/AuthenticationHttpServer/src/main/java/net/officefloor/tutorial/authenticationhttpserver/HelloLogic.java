@@ -17,11 +17,11 @@
  */
 package net.officefloor.tutorial.authenticationhttpserver;
 
-import net.officefloor.plugin.section.clazz.NextTask;
+import lombok.Data;
+import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.web.http.security.HttpAuthentication;
 import net.officefloor.plugin.web.http.security.HttpCredentials;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
-import lombok.Data;
 
 /**
  * Logic for <code>hello</code> page.
@@ -43,9 +43,8 @@ public class HelloLogic {
 		return new TemplateData(username);
 	}
 
-	@NextTask("LoggedOut")
-	public void logout(
-			HttpAuthentication<HttpSecurity, HttpCredentials> authentication) {
+	@NextFunction("LoggedOut")
+	public void logout(HttpAuthentication<HttpSecurity, HttpCredentials> authentication) {
 		authentication.logout(null);
 	}
 

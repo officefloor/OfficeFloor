@@ -27,8 +27,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jdt.core.IType;
@@ -72,17 +70,16 @@ import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.eclipse.util.JavaUtil;
 import net.officefloor.eclipse.util.LogUtil;
-import net.officefloor.frame.spi.source.ResourceSource;
+import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.model.woof.WoofTemplateInheritance;
 import net.officefloor.model.woof.WoofTemplateLinkModel;
 import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
+import net.officefloor.plugin.web.http.template.HttpTemplateManagedFunctionSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
-import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialWorkSource;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialManagedFunctionSource;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
-import net.officefloor.plugin.woof.WoofContextConfigurable;
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
+import net.officefloor.plugin.woof.WoofLoaderExtensionService;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
 
 /**
@@ -327,31 +324,12 @@ public class HttpTemplateWizardPage extends WizardPage implements SectionSourceE
 		this.compiler = OfficeFloorCompiler.newOfficeFloorCompiler(this.classLoader);
 		this.compiler.setCompilerIssues(this.issues);
 
-		// Provide configuration of WoOF context
-		final List<ResourceSource> resourceSources = new LinkedList<ResourceSource>();
-		WoofContextConfigurable configurable = new WoofContextConfigurable() {
-
-			@Override
-			public void addProperty(String name, String value) {
-				HttpTemplateWizardPage.this.compiler.addProperty(name, value);
-			}
-
-			@Override
-			public void setWebAppDirectory(File webAppDir) {
-				// Do nothing
-			}
-
-			@Override
-			public void addResources(ResourceSource resourceSource) {
-				HttpTemplateWizardPage.this.compiler.addResources(resourceSource);
-				resourceSources.add(resourceSource);
-			}
-		};
-		this.resourceSources = resourceSources.toArray(new ResourceSource[resourceSources.size()]);
-
 		// Load access to web resources
 		File projectDir = project.getLocation().toFile();
-		WoofOfficeFloorSource.loadWebResourcesFromMavenProject(configurable, projectDir);
+		WoofLoaderExtensionService.configureOfficeFloorCompiler(projectDir, this.compiler);
+
+		// Provide access to web resources
+		this.resourceSources = WoofLoaderExtensionService.createResourceSources(projectDir);
 
 		// Obtain the section loader
 		this.sectionLoader = this.compiler.getSectionLoader();
@@ -433,10 +411,11 @@ public class HttpTemplateWizardPage extends WizardPage implements SectionSourceE
 		this.inheritedTemplatePaths = this.addProperty(HttpTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES,
 				initialInheritedTemplatePaths);
 		this.contentType = this.addProperty(HttpTemplateSectionSource.PROPERTY_CONTENT_TYPE, initialContentType);
-		this.isTemplateSecure = this.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
+		this.isTemplateSecure = this.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE,
 				initialIsTemplateSecure);
 		this.renderRedirectHttpMethods = this.addProperty(
-				HttpTemplateInitialWorkSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS, initialRenderRedirectHttpMethods);
+				HttpTemplateInitialManagedFunctionSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
+				initialRenderRedirectHttpMethods);
 		this.isContinueRendering = this.addProperty(PROPERTY_IS_CONTINUE_RENDERING, initialIsContinueRendering);
 
 		// Obtain the map of HTTP template extension source instances
@@ -631,18 +610,6 @@ public class HttpTemplateWizardPage extends WizardPage implements SectionSourceE
 			initialSuperTemplateName = getTextValue(this.superTemplateName.getValue());
 		}
 
-		// Determine if valid src/main/webapp directory
-		IFolder webappDirectory = this.project.getFolder(WoofOfficeFloorSource.WEBAPP_PATH);
-		IFile webXmlFile = webappDirectory.getFile(WoofOfficeFloorSource.WEBXML_FILE_PATH);
-		if ((webappDirectory != null && webappDirectory.exists()) && (!(webXmlFile.exists()))) {
-			// Invalid webapp directory
-			new Label(page, SWT.NONE);
-			Label webappInvalid = new Label(page, SWT.NONE);
-			webappInvalid.setForeground(ColorConstants.red);
-			webappInvalid.setText("WARNING: " + WoofOfficeFloorSource.WEBAPP_PATH + " resources unavailable as missing "
-					+ WoofOfficeFloorSource.WEBXML_FILE_PATH);
-		}
-
 		// Provide means to specify URI path
 		SourceExtensionUtil.createPropertyText("URI path", HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI, null, page,
 				this, null);
@@ -681,8 +648,9 @@ public class HttpTemplateWizardPage extends WizardPage implements SectionSourceE
 				page, this, null);
 
 		// Provide means to specify if secure
-		SourceExtensionUtil.createPropertyCheckbox("Template secure", HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
-				false, String.valueOf(true), String.valueOf(false), page, this, null);
+		SourceExtensionUtil.createPropertyCheckbox("Template secure",
+				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE, false, String.valueOf(true),
+				String.valueOf(false), page, this, null);
 
 		// Provide means to configure the links
 		new Label(page, SWT.NONE).setText("Links secure: ");
@@ -713,7 +681,7 @@ public class HttpTemplateWizardPage extends WizardPage implements SectionSourceE
 
 		// Provide means to specify render redirect HTTP methods
 		SourceExtensionUtil.createPropertyText("Render Redirect HTTP methods",
-				HttpTemplateInitialWorkSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS, null, page, this, null);
+				HttpTemplateInitialManagedFunctionSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS, null, page, this, null);
 
 		// Provide means to specify if may continue rendering
 		SourceExtensionUtil.createPropertyCheckbox("Continue Rendering", PROPERTY_IS_CONTINUE_RENDERING, false,

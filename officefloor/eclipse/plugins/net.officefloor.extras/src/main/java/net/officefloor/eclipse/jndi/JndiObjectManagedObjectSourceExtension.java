@@ -17,11 +17,10 @@
  */
 package net.officefloor.eclipse.jndi;
 
+import org.eclipse.swt.widgets.Composite;
+
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
-import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
-import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
 import net.officefloor.eclipse.extension.open.ExtensionOpener;
@@ -32,18 +31,14 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.jndi.object.JndiObjectManagedObjectSource;
 import net.officefloor.plugin.jndi.object.JndiObjectManagedObjectSource.JndiObjectDependency;
 
-import org.eclipse.swt.widgets.Composite;
-
 /**
  * {@link ManagedObjectSourceExtension} for the
  * {@link JndiObjectManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class JndiObjectManagedObjectSourceExtension
-		implements
-		ManagedObjectSourceExtension<JndiObjectDependency, None, JndiObjectManagedObjectSource>,
-		ExtensionClasspathProvider, ExtensionOpener {
+public class JndiObjectManagedObjectSourceExtension implements
+		ManagedObjectSourceExtension<JndiObjectDependency, None, JndiObjectManagedObjectSource>, ExtensionOpener {
 
 	/*
 	 * ====================== ManagedObjectSourceExtension =====================
@@ -60,20 +55,17 @@ public class JndiObjectManagedObjectSourceExtension
 	}
 
 	@Override
-	public void createControl(Composite page,
-			ManagedObjectSourceExtensionContext context) {
+	public void createControl(Composite page, ManagedObjectSourceExtensionContext context) {
 
 		// Specify layout
 		SourceExtensionUtil.loadPropertyLayout(page);
 
 		// Provide JNDI name
-		SourceExtensionUtil.createPropertyText("JNDI Name",
-				JndiObjectManagedObjectSource.PROPERTY_JNDI_NAME, null, page,
-				context, null);
+		SourceExtensionUtil.createPropertyText("JNDI Name", JndiObjectManagedObjectSource.PROPERTY_JNDI_NAME, null,
+				page, context, null);
 
 		// Provide object type
-		SourceExtensionUtil.createPropertyClass("Object Type",
-				JndiObjectManagedObjectSource.PROPERTY_OBJECT_TYPE, page,
+		SourceExtensionUtil.createPropertyClass("Object Type", JndiObjectManagedObjectSource.PROPERTY_OBJECT_TYPE, page,
 				context, null);
 	}
 
@@ -81,8 +73,7 @@ public class JndiObjectManagedObjectSourceExtension
 	public String getSuggestedManagedObjectSourceName(PropertyList properties) {
 
 		// Obtain the object type property
-		Property objectTypeProperty = properties
-				.getProperty(JndiObjectManagedObjectSource.PROPERTY_OBJECT_TYPE);
+		Property objectTypeProperty = properties.getProperty(JndiObjectManagedObjectSource.PROPERTY_OBJECT_TYPE);
 		if (objectTypeProperty == null) {
 			// No suggestion as no object type
 			return null;
@@ -103,16 +94,6 @@ public class JndiObjectManagedObjectSourceExtension
 	}
 
 	/*
-	 * ======================= ExtensionClasspathProvider ======================
-	 */
-
-	@Override
-	public ClasspathProvision[] getClasspathProvisions() {
-		return new ClasspathProvision[] { new TypeClasspathProvision(
-				JndiObjectManagedObjectSource.class) };
-	}
-
-	/*
 	 * ========================= ExtensionOpener ==============================
 	 */
 
@@ -120,8 +101,8 @@ public class JndiObjectManagedObjectSourceExtension
 	public void openSource(ExtensionOpenerContext context) throws Exception {
 
 		// Obtain the name of the object type
-		String objectTypeName = context.getPropertyList().getPropertyValue(
-				JndiObjectManagedObjectSource.PROPERTY_OBJECT_TYPE, null);
+		String objectTypeName = context.getPropertyList()
+				.getPropertyValue(JndiObjectManagedObjectSource.PROPERTY_OBJECT_TYPE, null);
 
 		// Ensure have object type
 		if (EclipseUtil.isBlank(objectTypeName)) {

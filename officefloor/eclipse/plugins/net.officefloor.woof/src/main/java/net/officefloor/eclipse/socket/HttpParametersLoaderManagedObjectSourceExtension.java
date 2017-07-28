@@ -17,16 +17,16 @@
  */
 package net.officefloor.eclipse.socket;
 
+import org.eclipse.swt.widgets.Composite;
+
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderDependencies;
+import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderManagedFunctionSource;
 import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderManagedObjectSource;
-import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderWorkSource;
-
-import org.eclipse.swt.widgets.Composite;
 
 /**
  * {@link ManagedObjectSourceExtension} for the
@@ -34,8 +34,7 @@ import org.eclipse.swt.widgets.Composite;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpParametersLoaderManagedObjectSourceExtension
-		implements
+public class HttpParametersLoaderManagedObjectSourceExtension implements
 		ManagedObjectSourceExtension<HttpParametersLoaderDependencies, None, HttpParametersLoaderManagedObjectSource> {
 
 	/*
@@ -53,28 +52,23 @@ public class HttpParametersLoaderManagedObjectSourceExtension
 	}
 
 	@Override
-	public void createControl(Composite page,
-			ManagedObjectSourceExtensionContext context) {
+	public void createControl(Composite page, ManagedObjectSourceExtensionContext context) {
 
 		// Properties
 		SourceExtensionUtil.loadPropertyLayout(page);
-		SourceExtensionUtil.createPropertyClass("Bean type",
-				HttpParametersLoaderManagedObjectSource.PROPERTY_TYPE_NAME,
+		SourceExtensionUtil.createPropertyClass("Bean type", HttpParametersLoaderManagedObjectSource.PROPERTY_TYPE_NAME,
 				page, context, null);
-		SourceExtensionUtil
-				.createPropertyCheckbox(
-						"Case sensitive names",
-						HttpParametersLoaderManagedObjectSource.PROPERTY_CASE_INSENSITIVE,
-						true, Boolean.TRUE.toString(),
-						Boolean.FALSE.toString(), page, context, null);
+		SourceExtensionUtil.createPropertyCheckbox("Case sensitive names",
+				HttpParametersLoaderManagedObjectSource.PROPERTY_CASE_INSENSITIVE, true, Boolean.TRUE.toString(),
+				Boolean.FALSE.toString(), page, context, null);
 	}
 
 	@Override
 	public String getSuggestedManagedObjectSourceName(PropertyList properties) {
 
 		// Obtain the bean type
-		String beanTypeName = properties.getProperty(
-				HttpParametersLoaderWorkSource.PROPERTY_TYPE_NAME).getValue();
+		String beanTypeName = properties.getProperty(HttpParametersLoaderManagedFunctionSource.PROPERTY_TYPE_NAME)
+				.getValue();
 		int simpleNameIndex = beanTypeName.lastIndexOf('.');
 		if (simpleNameIndex >= 0) {
 			// Strip to simple name (+1 to ignore '.')

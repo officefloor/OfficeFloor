@@ -870,6 +870,19 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	public abstract TeamLoader getTeamLoader();
 
 	/**
+	 * <p>
+	 * Runs the {@link OfficeFloorCompilerConfigurationService} instances to
+	 * configure this {@link OfficeFloorCompiler}.
+	 * <p>
+	 * This is always run before a compile. However, may not be run for loaders.
+	 * This allows running if just loading types.
+	 * 
+	 * @return <code>true</code> if configured. <code>false</code> with issue
+	 *         reported to the {@link CompilerIssues}.
+	 */
+	public abstract boolean configureOfficeFloorCompiler();
+
+	/**
 	 * Compiles and builds the {@link OfficeFloor}.
 	 * 
 	 * @param officeFloorName

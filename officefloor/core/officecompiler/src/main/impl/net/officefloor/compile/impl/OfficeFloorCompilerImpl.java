@@ -52,7 +52,6 @@ import net.officefloor.compile.impl.structure.FunctionNamespaceNodeImpl;
 import net.officefloor.compile.impl.structure.FunctionObjectNodeImpl;
 import net.officefloor.compile.impl.structure.GovernanceNodeImpl;
 import net.officefloor.compile.impl.structure.InputManagedObjectNodeImpl;
-import net.officefloor.compile.impl.structure.OfficeFloorMBeanRegistratorImpl;
 import net.officefloor.compile.impl.structure.ManagedFunctionNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectDependencyNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectFlowNodeImpl;
@@ -61,6 +60,7 @@ import net.officefloor.compile.impl.structure.ManagedObjectPoolNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectTeamNodeImpl;
 import net.officefloor.compile.impl.structure.ManagingOfficeNodeImpl;
+import net.officefloor.compile.impl.structure.OfficeFloorMBeanRegistratorImpl;
 import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeInputNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
@@ -280,6 +280,12 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	 * Flag indicating if the source aliases have been added.
 	 */
 	private boolean isSourceAliasesAdded = false;
+
+	/**
+	 * Flag indicating if this {@link OfficeFloorCompiler} has been configured
+	 * with the {@link OfficeFloorCompilerConfigurationService} instances.
+	 */
+	private boolean isCompilerConfigured = false;
 
 	/**
 	 * Ensures that the source aliases have been added.
@@ -509,12 +515,9 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
-	public OfficeFloor compile(String officeFloorName) {
+	public boolean configureOfficeFloorCompiler() {
 
-		// Ensure aliases are added
-		this.ensureSourceAliasesAdded();
-
-		// Configure this compiler
+		// Configure this OfficeFloor compiler
 		ServiceLoader<OfficeFloorCompilerConfigurationService> serviceLoader = ServiceLoader
 				.load(OfficeFloorCompilerConfigurationService.class, this.getClassLoader());
 		for (OfficeFloorCompilerConfigurationService configurationService : serviceLoader) {
@@ -523,8 +526,26 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 			} catch (Exception ex) {
 				this.getCompilerIssues().addIssue(this, configurationService.getClass().getName()
 						+ " failed to configure " + OfficeFloorCompiler.class.getSimpleName(), ex);
-				return null; // failed to configure compiler
+				return false; // failed to configure compiler
 			}
+		}
+
+		// As here successfully configure this OfficeFloor compiler
+		return true;
+	}
+
+	@Override
+	public OfficeFloor compile(String officeFloorName) {
+
+		// Ensure aliases are added
+		this.ensureSourceAliasesAdded();
+
+		// Ensure compiler is configured
+		if (!this.isCompilerConfigured) {
+			if (!this.configureOfficeFloorCompiler()) {
+				return null; // must configure
+			}
+			this.isCompilerConfigured = true;
 		}
 
 		// Compile, build and return the OfficeFloor

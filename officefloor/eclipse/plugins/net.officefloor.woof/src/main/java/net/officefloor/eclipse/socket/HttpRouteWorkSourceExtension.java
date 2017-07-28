@@ -17,30 +17,30 @@
  */
 package net.officefloor.eclipse.socket;
 
-import net.officefloor.eclipse.extension.managedfunctionsource.FunctionDocumentationContext;
-import net.officefloor.eclipse.extension.managedfunctionsource.ManagedFunctionSourceExtension;
-import net.officefloor.eclipse.extension.managedfunctionsource.ManagedFunctionSourceExtensionContext;
-import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
-import net.officefloor.plugin.web.http.route.HttpRouteTask;
-import net.officefloor.plugin.web.http.route.HttpRouteWorkSource;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import net.officefloor.eclipse.extension.managedfunctionsource.FunctionDocumentationContext;
+import net.officefloor.eclipse.extension.managedfunctionsource.ManagedFunctionSourceExtension;
+import net.officefloor.eclipse.extension.managedfunctionsource.ManagedFunctionSourceExtensionContext;
+import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
+import net.officefloor.plugin.web.http.route.HttpRouteManagedFunctionSource;
+
 /**
- * {@link ManagedFunctionSourceExtension} for the {@link HttpRouteWorkSource}.
+ * {@link ManagedFunctionSourceExtension} for the
+ * {@link HttpRouteManagedFunctionSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpRouteWorkSourceExtension extends
-		AbstractSocketWorkSourceExtension<HttpRouteTask, HttpRouteWorkSource> {
+public class HttpRouteWorkSourceExtension
+		extends AbstractSocketManagedFunctionSourceExtension<HttpRouteManagedFunctionSource> {
 
 	/**
 	 * Initiate.
 	 */
 	public HttpRouteWorkSourceExtension() {
-		super(HttpRouteWorkSource.class, "Http Route");
+		super(HttpRouteManagedFunctionSource.class, "Http Route");
 	}
 
 	/*
@@ -48,20 +48,17 @@ public class HttpRouteWorkSourceExtension extends
 	 */
 
 	@Override
-	public void createControl(Composite page,
-			final ManagedFunctionSourceExtensionContext context) {
+	public void createControl(Composite page, final ManagedFunctionSourceExtensionContext context) {
 
 		// Properties
 		SourceExtensionUtil.loadPropertyLayout(page);
-		new Label(page, SWT.NONE)
-				.setText("Dynamically configured from Office meta-data");
+		new Label(page, SWT.NONE).setText("Dynamically configured from Office meta-data");
 	}
 
 	@Override
-	public String getFunctionDocumentation(FunctionDocumentationContext context)
-			throws Throwable {
+	public String getFunctionDocumentation(FunctionDocumentationContext context) throws Throwable {
 
-		// Should only be the one task
+		// Should only be the one function
 
 		// Create the routing list as documentation
 		return "Route HTTP requests";

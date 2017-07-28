@@ -34,8 +34,7 @@ import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
  * 
  * @author Daniel Sagenschneider
  */
-public class RefactorAccessOperation extends
-		AbstractWoofChangeOperation<WoofAccessEditPart> {
+public class RefactorAccessOperation extends AbstractWoofChangeOperation<WoofAccessEditPart> {
 
 	/**
 	 * Initiate.
@@ -58,25 +57,23 @@ public class RefactorAccessOperation extends
 		WoofAccessModel access = context.getEditPart().getCastedModel();
 
 		// Obtain the refactored access instance
-		AccessInstance instance = HttpSecuritySourceWizard.getAccessInstance(
-				context.getEditPart(), new AccessInstance(access));
+		AccessInstance instance = HttpSecuritySourceWizard.getAccessInstance(context.getEditPart(),
+				new AccessInstance(access));
 		if (instance == null) {
 			return null; // must have access
 		}
 
 		// Obtain section details
-		String httpSecuritySourceClassName = instance
-				.getHttpSecuritySourceClassName();
+		String accessName = instance.getAccessName();
+		String httpSecuritySourceClassName = instance.getHttpSecuritySourceClassName();
 		long authenticationTimeout = instance.getAuthenticationTimeout();
 		PropertyList properties = instance.getPropertylist();
-		HttpSecurityType<?, ?, ?, ?> httpSecurityType = instance
-				.getHttpSecurityType();
+		HttpSecurityType<?, ?, ?, ?> httpSecurityType = instance.getHttpSecurityType();
 		Map<String, String> outputNameMapping = instance.getOutputNameMapping();
 
 		// Create change to refactor access
-		Change<WoofAccessModel> change = changes.refactorAccess(access,
-				httpSecuritySourceClassName, authenticationTimeout, properties,
-				httpSecurityType, outputNameMapping);
+		Change<WoofAccessModel> change = changes.refactorAccess(access, accessName, httpSecuritySourceClassName,
+				authenticationTimeout, properties, httpSecurityType, outputNameMapping);
 
 		// Position section
 		context.positionModel(change.getTarget());

@@ -18,6 +18,7 @@
 package net.officefloor;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.issues.FailCompilerIssues;
 import net.officefloor.compile.spi.mbean.MBeanRegistrator;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
@@ -109,6 +110,151 @@ public class OfficeFloorMain {
 
 			// Notify that closed
 			this.notify();
+		}
+	}
+
+	/**
+	 * Active {@link OfficeFloor}.
+	 */
+	private static OfficeFloorThread activeOfficeFloor = null;
+
+	/**
+	 * <p>
+	 * Convenience method to open a singleton {@link OfficeFloor} for embedded
+	 * use. This is typically for unit testing.
+	 * <p>
+	 * Note previously open {@link OfficeFloor} instance by this method will be
+	 * closed. Hence, avoids tests re-using the a previous {@link OfficeFloor}
+	 * instance.
+	 */
+	public synchronized static void open() {
+
+		// Ensure closed
+		close();
+
+		// Create the compiler
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+
+		// Handle listening on close of OfficeFloor
+		MainOfficeFloorListener closeListener = new MainOfficeFloorListener();
+		compiler.addOfficeFloorListener(closeListener);
+
+		// Propagate failure to compile OfficeFloor
+		compiler.setCompilerIssues(new FailCompilerIssues());
+
+		// Compile the OfficeFloor
+		OfficeFloor officeFloor = compiler.compile("OfficeFloor");
+
+		// Open the OfficeFloor on a thread (in case of thread local aware team)
+		activeOfficeFloor = new OfficeFloorThread(officeFloor, closeListener);
+		activeOfficeFloor.start();
+
+		// Wait until started
+		synchronized (activeOfficeFloor) {
+
+			// Determine if must wait for open
+			if (activeOfficeFloor.openResult == null) {
+				try {
+					activeOfficeFloor.wait();
+				} catch (InterruptedException ex) {
+					// Flag failure in wait
+					activeOfficeFloor.openResult = ex;
+				}
+			}
+
+			// Determine if failed to open OfficeFloor
+			if (activeOfficeFloor.openResult instanceof Throwable) {
+
+				// Clear the active OfficeFloor as failed to open
+				activeOfficeFloor = null;
+
+				// Propagate failure
+				throw new Error("Failed to open OfficeFloor", (Throwable) activeOfficeFloor.openResult);
+			}
+		}
+	}
+
+	/**
+	 * Closes the singleton embedded {@link OfficeFloor}.
+	 */
+	public synchronized static void close() {
+
+		// Do nothing if no active OfficeFloor
+		if (activeOfficeFloor == null) {
+			return;
+		}
+
+		try {
+			// Close the OfficeFloor
+			activeOfficeFloor.officeFloor.closeOfficeFloor();
+
+			// Wait for OfficeFloor to close
+			activeOfficeFloor.closeListener.waitForClose();
+
+			// No further active OfficeFloor
+			activeOfficeFloor = null;
+
+		} catch (Exception ex) {
+			// Propagate failure to close
+			throw new Error("Failed to close OfficeFloor", ex);
+		}
+	}
+
+	/**
+	 * {@link Thread} to run the {@link OfficeFloor}.
+	 */
+	private static class OfficeFloorThread extends Thread {
+
+		/**
+		 * {@link OfficeFloor}.
+		 */
+		private final OfficeFloor officeFloor;
+
+		/**
+		 * {@link MainOfficeFloorListener} to wait on close of
+		 * {@link OfficeFloor}.
+		 */
+		private final MainOfficeFloorListener closeListener;
+
+		/**
+		 * Result of opening the {@link OfficeFloor}.
+		 */
+		private Object openResult = null;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param officeFloor
+		 *            {@link OfficeFloor}.
+		 * @param closeListener
+		 *            {@link MainOfficeFloorListener}.
+		 */
+		public OfficeFloorThread(OfficeFloor officeFloor, MainOfficeFloorListener closeListener) {
+			this.officeFloor = officeFloor;
+			this.closeListener = closeListener;
+		}
+
+		/*
+		 * ================== Runnable ==========================
+		 */
+
+		@Override
+		public synchronized void run() {
+			try {
+				// Open the OfficeFloor
+				this.officeFloor.openOfficeFloor();
+
+				// Open successful
+				this.openResult = Boolean.TRUE;
+
+			} catch (Throwable ex) {
+				// Flag failure opening OfficeFloor
+				this.openResult = ex;
+
+			} finally {
+				// Notify started
+				this.notify();
+			}
 		}
 	}
 

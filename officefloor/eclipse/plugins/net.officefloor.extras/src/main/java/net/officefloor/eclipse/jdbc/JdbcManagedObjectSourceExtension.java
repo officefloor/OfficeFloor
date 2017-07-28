@@ -17,16 +17,33 @@
  */
 package net.officefloor.eclipse.jdbc;
 
+import java.util.Comparator;
+import java.util.Properties;
+
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.PooledConnection;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
-import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
+import net.officefloor.eclipse.classpath.ClasspathUtil;
+import net.officefloor.eclipse.common.dialog.input.InputAdapter;
+import net.officefloor.eclipse.common.dialog.input.InputHandler;
+import net.officefloor.eclipse.common.dialog.input.impl.PropertyListInput;
+import net.officefloor.eclipse.common.dialog.input.impl.SubTypeSelectionInput;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.jdbc.connection.JdbcManagedObjectSource;
+import net.officefloor.plugin.jdbc.util.ReflectionUtil;
+import net.officefloor.plugin.jdbc.util.Setter;
 
 /**
  * JDBC {@link ManagedObjectSourceExtension}.
@@ -34,7 +51,7 @@ import net.officefloor.plugin.jdbc.connection.JdbcManagedObjectSource;
  * @author Daniel Sagenschneider
  */
 public class JdbcManagedObjectSourceExtension
-		implements ManagedObjectSourceExtension<None, None, JdbcManagedObjectSource>, ExtensionClasspathProvider {
+		implements ManagedObjectSourceExtension<None, None, JdbcManagedObjectSource> {
 
 	/**
 	 * Sort the properties.
@@ -225,15 +242,6 @@ public class JdbcManagedObjectSourceExtension
 	@Override
 	public String getSuggestedManagedObjectSourceName(PropertyList properties) {
 		return "JDBC";
-	}
-
-	/*
-	 * ================ ExtensionClasspathProvider ====================
-	 */
-
-	@Override
-	public ClasspathProvision[] getClasspathProvisions() {
-		return new ClasspathProvision[] { new TypeClasspathProvision(JdbcManagedObjectSource.class) };
 	}
 
 }

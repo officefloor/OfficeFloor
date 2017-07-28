@@ -17,31 +17,30 @@
  */
 package net.officefloor.eclipse.socket;
 
+import org.eclipse.swt.widgets.Composite;
+
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.managedfunctionsource.FunctionDocumentationContext;
 import net.officefloor.eclipse.extension.managedfunctionsource.ManagedFunctionSourceExtension;
 import net.officefloor.eclipse.extension.managedfunctionsource.ManagedFunctionSourceExtensionContext;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderWorkSource;
-import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderWorkSource.HttpParametersLoaderTask;
-
-import org.eclipse.swt.widgets.Composite;
+import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderManagedFunctionSource;
 
 /**
- * {@link ManagedFunctionSourceExtension} for the {@link HttpParametersLoaderWorkSource}.
+ * {@link ManagedFunctionSourceExtension} for the
+ * {@link HttpParametersLoaderManagedFunctionSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpParametersLoaderWorkSourceExtension
-		extends
-		AbstractSocketWorkSourceExtension<HttpParametersLoaderTask, HttpParametersLoaderWorkSource> {
+public class HttpParametersLoaderManagedFunctionSourceExtension
+		extends AbstractSocketManagedFunctionSourceExtension<HttpParametersLoaderManagedFunctionSource> {
 
 	/**
 	 * Initiate.
 	 */
-	public HttpParametersLoaderWorkSourceExtension() {
-		super(HttpParametersLoaderWorkSource.class, "Http Parameters Loader");
+	public HttpParametersLoaderManagedFunctionSourceExtension() {
+		super(HttpParametersLoaderManagedFunctionSource.class, "Http Parameters Loader");
 	}
 
 	/*
@@ -49,8 +48,8 @@ public class HttpParametersLoaderWorkSourceExtension
 	 */
 
 	@Override
-	public Class<HttpParametersLoaderWorkSource> getManagedFunctionSourceClass() {
-		return HttpParametersLoaderWorkSource.class;
+	public Class<HttpParametersLoaderManagedFunctionSource> getManagedFunctionSourceClass() {
+		return HttpParametersLoaderManagedFunctionSource.class;
 	}
 
 	@Override
@@ -59,20 +58,18 @@ public class HttpParametersLoaderWorkSourceExtension
 		// Properties
 		SourceExtensionUtil.loadPropertyLayout(page);
 		SourceExtensionUtil.createPropertyClass("Bean type",
-				HttpParametersLoaderWorkSource.PROPERTY_TYPE_NAME, page,
-				context, null);
+				HttpParametersLoaderManagedFunctionSource.PROPERTY_TYPE_NAME, page, context, null);
 		SourceExtensionUtil.createPropertyCheckbox("Case sensitive names",
-				HttpParametersLoaderWorkSource.PROPERTY_CASE_INSENSITIVE, true,
-				Boolean.TRUE.toString(), Boolean.FALSE.toString(), page,
-				context, null);
+				HttpParametersLoaderManagedFunctionSource.PROPERTY_CASE_INSENSITIVE, true, Boolean.TRUE.toString(),
+				Boolean.FALSE.toString(), page, context, null);
 	}
 
 	@Override
 	public String getSuggestedFunctionNamespaceName(PropertyList properties) {
 
 		// Obtain the bean type
-		String beanTypeName = properties.getProperty(
-				HttpParametersLoaderWorkSource.PROPERTY_TYPE_NAME).getValue();
+		String beanTypeName = properties.getProperty(HttpParametersLoaderManagedFunctionSource.PROPERTY_TYPE_NAME)
+				.getValue();
 		int simpleNameIndex = beanTypeName.lastIndexOf('.');
 		if (simpleNameIndex >= 0) {
 			// Strip to simple name (+1 to ignore '.')
@@ -84,19 +81,16 @@ public class HttpParametersLoaderWorkSourceExtension
 	}
 
 	@Override
-	public String getFunctionDocumentation(FunctionDocumentationContext context)
-			throws Throwable {
+	public String getFunctionDocumentation(FunctionDocumentationContext context) throws Throwable {
 
-		// Should always have the one task
+		// Should always have the one function
 
 		// Obtain the object type
 		String objectType = context.getPropertyList().getPropertyValue(
-				HttpParametersLoaderWorkSource.PROPERTY_TYPE_NAME,
-				"<object type not specified>");
+				HttpParametersLoaderManagedFunctionSource.PROPERTY_TYPE_NAME, "<object type not specified>");
 
 		// Return documentation
-		return "Loads HTTP parameter values of the "
-				+ HttpRequest.class.getSimpleName() + " onto the object ("
+		return "Loads HTTP parameter values of the " + HttpRequest.class.getSimpleName() + " onto the object ("
 				+ objectType + ") via the corresponding setXxx(...) methods.";
 	}
 

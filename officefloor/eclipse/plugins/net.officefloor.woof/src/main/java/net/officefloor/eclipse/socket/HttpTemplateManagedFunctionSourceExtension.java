@@ -21,6 +21,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -36,44 +41,36 @@ import net.officefloor.eclipse.extension.util.PropertyValueChangeEvent;
 import net.officefloor.eclipse.extension.util.PropertyValueChangeListener;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.eclipse.util.EclipseUtil;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.source.UnknownResourceError;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.source.UnknownResourceError;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.web.http.template.HttpTemplateWork;
-import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
+import net.officefloor.plugin.web.http.template.HttpTemplateManagedFunctionSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-
 /**
- * {@link ManagedFunctionSourceExtension} for the {@link HttpTemplateWorkSource}.
+ * {@link ManagedFunctionSourceExtension} for the
+ * {@link HttpTemplateManagedFunctionSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpTemplateWorkSourceExtension
-		extends
-		AbstractSocketWorkSourceExtension<HttpTemplateWork, HttpTemplateWorkSource>
-		implements ExtensionOpener {
+public class HttpTemplateManagedFunctionSourceExtension extends
+		AbstractSocketManagedFunctionSourceExtension<HttpTemplateManagedFunctionSource> implements ExtensionOpener {
 
 	/**
 	 * Initiate.
 	 */
-	public HttpTemplateWorkSourceExtension() {
-		super(HttpTemplateWorkSource.class, "Http Template");
+	public HttpTemplateManagedFunctionSourceExtension() {
+		super(HttpTemplateManagedFunctionSource.class, "Http Template");
 	}
 
 	/*
-	 * ================== WorkSourceExtension =================================
+	 * ================== ManagedFunctionSourceExtension ==================
 	 */
 
 	@Override
-	public void createControl(Composite page,
-			final ManagedFunctionSourceExtensionContext context) {
+	public void createControl(Composite page, final ManagedFunctionSourceExtensionContext context) {
 
 		// Provide listing of section names to bean types
 		final BeanListInput<SectionToBeanTypeMapping> input = new BeanListInput<SectionToBeanTypeMapping>(
@@ -87,53 +84,45 @@ public class HttpTemplateWorkSourceExtension
 		// Provide means to specify template file
 		page.setLayout(new GridLayout(1, false));
 		Composite template = new Composite(page, SWT.NONE);
-		template.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
-				false));
+		template.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 		SourceExtensionUtil.loadPropertyLayout(template);
-		SourceExtensionUtil.createPropertyResource("Template",
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE, template,
-				context, new PropertyValueChangeListener() {
+		SourceExtensionUtil.createPropertyResource("Template", HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE,
+				template, context, new PropertyValueChangeListener() {
 					@Override
-					public void propertyValueChanged(
-							PropertyValueChangeEvent event) {
+					public void propertyValueChanged(PropertyValueChangeEvent event) {
 						try {
 							// Reset section to bean properties
-							HttpTemplateWorkSourceExtension
-									.resetSectionToBeanTypeMappings(input,
-											context);
+							HttpTemplateManagedFunctionSourceExtension.resetSectionToBeanTypeMappings(input, context);
 						} catch (IOException ex) {
 							// Provide detail of failure
-							context.setErrorMessage(ex.getMessage() + " ["
-									+ ex.getClass().getName() + "]");
+							context.setErrorMessage(ex.getMessage() + " [" + ex.getClass().getName() + "]");
 						}
 					}
 				});
 
 		// Provide means to specify template URI
-		SourceExtensionUtil.createPropertyText("URI Path",
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI, null, template,
-				context, null);
+		SourceExtensionUtil.createPropertyText("URI Path", HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI,
+				null, template, context, null);
 
 		// Add control to alter properties
-		new InputHandler<List<SectionToBeanTypeMapping>>(page, input,
-				new InputListener() {
-					@Override
-					public void notifyValueChanged(Object value) {
-						// Notify of change
-						context.notifyPropertiesChanged();
-					}
+		new InputHandler<List<SectionToBeanTypeMapping>>(page, input, new InputListener() {
+			@Override
+			public void notifyValueChanged(Object value) {
+				// Notify of change
+				context.notifyPropertiesChanged();
+			}
 
-					@Override
-					public void notifyValueInvalid(String message) {
-						context.setErrorMessage(message);
-					}
-				});
+			@Override
+			public void notifyValueInvalid(String message) {
+				context.setErrorMessage(message);
+			}
+		});
 	}
 
 	/**
 	 * Resets the {@link SectionToBeanTypeMapping} instances and associated
 	 * {@link Property} instances to be for the
-	 * {@link HttpTemplateWorkSource#PROPERTY_TEMPLATE_FILE}.
+	 * {@link HttpTemplateManagedFunctionSource#PROPERTY_TEMPLATE_FILE}.
 	 * 
 	 * @param input
 	 *            {@link SectionToBeanTypeMapping}.
@@ -142,8 +131,7 @@ public class HttpTemplateWorkSourceExtension
 	 * @throws IOException
 	 *             If fails to reset.
 	 */
-	private static void resetSectionToBeanTypeMappings(
-			BeanListInput<SectionToBeanTypeMapping> input,
+	private static void resetSectionToBeanTypeMappings(BeanListInput<SectionToBeanTypeMapping> input,
 			ManagedFunctionSourceExtensionContext context) throws IOException {
 
 		// Clear the beans from input
@@ -152,9 +140,7 @@ public class HttpTemplateWorkSourceExtension
 		// Remove the section to bean type mapping properties
 		PropertyList properties = context.getPropertyList();
 		for (String name : properties.getPropertyNames()) {
-			if ((name == null)
-					|| (!name
-							.startsWith(HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX))) {
+			if ((name == null) || (!name.startsWith(HttpTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX))) {
 				continue; // not a mapping property
 			}
 
@@ -163,15 +149,13 @@ public class HttpTemplateWorkSourceExtension
 		}
 
 		// Create the source context
-		SourceContext sourceContext = new SourceContextImpl(true,
-				context.getClassLoader());
-		sourceContext = new SourceContextImpl(true, sourceContext,
-				new PropertyListSourceProperties(properties));
+		SourceContext sourceContext = new SourceContextImpl(true, context.getClassLoader());
+		sourceContext = new SourceContextImpl(true, sourceContext, new PropertyListSourceProperties(properties));
 
 		// Obtain the template file
 		HttpTemplate template;
 		try {
-			template = HttpTemplateWorkSource.getHttpTemplate(sourceContext);
+			template = HttpTemplateManagedFunctionSource.getHttpTemplate(sourceContext);
 		} catch (UnknownResourceError ex) {
 			// No file so no properties
 			return;
@@ -181,14 +165,12 @@ public class HttpTemplateWorkSourceExtension
 		for (HttpTemplateSection section : template.getSections()) {
 
 			// Only include section if requires bean
-			if (!HttpTemplateWorkSource
-					.isHttpTemplateSectionRequireBean(section)) {
+			if (!HttpTemplateManagedFunctionSource.isHttpTemplateSectionRequireBean(section)) {
 				continue; // ignore as does not require bean
 			}
 
 			// Add the property for the bean type
-			String propertyName = HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX
-					+ section.getSectionName();
+			String propertyName = HttpTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + section.getSectionName();
 			properties.addProperty(propertyName);
 		}
 
@@ -204,20 +186,16 @@ public class HttpTemplateWorkSourceExtension
 	 * @param context
 	 *            {@link ManagedFunctionSourceExtensionContext}.
 	 */
-	private static void loadSectionToBeanTypeMappings(
-			BeanListInput<SectionToBeanTypeMapping> input,
+	private static void loadSectionToBeanTypeMappings(BeanListInput<SectionToBeanTypeMapping> input,
 			ManagedFunctionSourceExtensionContext context) {
 
 		// Add the initial section to bean type properties
 		for (Property property : context.getPropertyList()) {
 			String name = property.getName();
-			if ((name == null)
-					|| (!name
-							.startsWith(HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX))) {
+			if ((name == null) || (!name.startsWith(HttpTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX))) {
 				continue; // not a mapping property
 			}
-			name = name.substring(HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX
-					.length());
+			name = name.substring(HttpTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX.length());
 
 			// Add the initial mappings
 			input.addBean(new SectionToBeanTypeMapping(property, name));
@@ -227,8 +205,8 @@ public class HttpTemplateWorkSourceExtension
 	@Override
 	public String getSuggestedFunctionNamespaceName(PropertyList properties) {
 		// Obtain the template name
-		String templateName = properties.getProperty(
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE).getValue();
+		String templateName = properties.getProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE)
+				.getValue();
 		int simpleNameIndex = templateName.lastIndexOf('/');
 		if (simpleNameIndex >= 0) {
 			// Strip to simple name (+1 to ignore '.')
@@ -240,21 +218,17 @@ public class HttpTemplateWorkSourceExtension
 	}
 
 	@Override
-	public String getFunctionDocumentation(FunctionDocumentationContext context)
-			throws Throwable {
+	public String getFunctionDocumentation(FunctionDocumentationContext context) throws Throwable {
 
 		// Obtain the task name as the section name
 		String sectionName = context.getManagedFunctionName();
 
 		// Obtain the property template file
 		String templateName = context.getPropertyList()
-				.getPropertyValue(
-						HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE,
-						"<not specified");
+				.getPropertyValue(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE, "<not specified");
 
 		// Provide documentation
-		return "Writes section " + sectionName + " of template file "
-				+ templateName + " to the "
+		return "Writes section " + sectionName + " of template file " + templateName + " to the "
 				+ HttpResponse.class.getSimpleName();
 	}
 
@@ -325,8 +299,8 @@ public class HttpTemplateWorkSourceExtension
 	public void openSource(ExtensionOpenerContext context) throws Exception {
 
 		// Obtain the location of the template
-		String location = context.getPropertyList().getPropertyValue(
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE, null);
+		String location = context.getPropertyList()
+				.getPropertyValue(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE, null);
 
 		// Ensure have the template location
 		if (EclipseUtil.isBlank(location)) {

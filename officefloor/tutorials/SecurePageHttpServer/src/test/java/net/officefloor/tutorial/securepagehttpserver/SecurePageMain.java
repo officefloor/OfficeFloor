@@ -20,7 +20,7 @@ package net.officefloor.tutorial.securepagehttpserver;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
+import net.officefloor.OfficeFloorMain;
 
 /**
  * Main to run application.
@@ -38,7 +38,7 @@ public class SecurePageMain {
 	public static void main(String... args) throws Exception {
 
 		// Run
-		WoofOfficeFloorSource.start(args);
+		OfficeFloorMain.open();
 		try {
 
 			// Enter return to quit
@@ -47,7 +47,7 @@ public class SecurePageMain {
 
 		} finally {
 			// Stop
-			WoofOfficeFloorSource.stop();
+			OfficeFloorMain.close();
 		}
 	}
 

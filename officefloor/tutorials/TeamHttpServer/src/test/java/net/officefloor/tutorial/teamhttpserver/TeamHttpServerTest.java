@@ -23,14 +23,14 @@ import java.sql.ResultSet;
 
 import javax.sql.DataSource;
 
-import junit.framework.TestCase;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.hsqldb.jdbc.jdbcDataSource;
+
+import junit.framework.TestCase;
+import net.officefloor.OfficeFloorMain;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 
 /**
  * Tests the {@link TeamHttpServer}.
@@ -57,8 +57,8 @@ public class TeamHttpServerTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		// Start the database and HTTP Server
-		WoofOfficeFloorSource.start();
-		
+		OfficeFloorMain.open();
+
 		// Request page to allow time for database setup
 		this.doRequest("http://localhost:7878/example.woof");
 	}
@@ -72,11 +72,11 @@ public class TeamHttpServerTest extends TestCase {
 		} finally {
 			try {
 				// Stop HTTP Server
-				WoofOfficeFloorSource.stop();
+				OfficeFloorMain.close();
 			} finally {
 				// Stop database for new instance each test
-				DriverManager.getConnection(DATABASE_URL, DATABASE_USER, "")
-						.createStatement().execute("SHUTDOWN IMMEDIATELY");
+				DriverManager.getConnection(DATABASE_URL, DATABASE_USER, "").createStatement()
+						.execute("SHUTDOWN IMMEDIATELY");
 			}
 		}
 	}
@@ -97,11 +97,10 @@ public class TeamHttpServerTest extends TestCase {
 
 		// Ensure can get initial row
 		Thread.sleep(100); // allow time for database setup
-		ResultSet resultSet = connection.createStatement().executeQuery(
-				"SELECT CODE FROM LETTER_CODE WHERE LETTER = 'A'");
+		ResultSet resultSet = connection.createStatement()
+				.executeQuery("SELECT CODE FROM LETTER_CODE WHERE LETTER = 'A'");
 		assertTrue("Ensure have result", resultSet.next());
-		assertEquals("Incorrect code for letter", "Y",
-				resultSet.getString("CODE"));
+		assertEquals("Incorrect code for letter", "Y", resultSet.getString("CODE"));
 		assertFalse("Ensure no further results", resultSet.next());
 		resultSet.close();
 	}
@@ -125,8 +124,7 @@ public class TeamHttpServerTest extends TestCase {
 	private void doRequest(String url) throws Exception {
 		HttpResponse response = this.client.execute(new HttpGet(url));
 		response.getEntity().writeTo(System.out);
-		assertEquals("Request should be successful", 200, response
-				.getStatusLine().getStatusCode());
+		assertEquals("Request should be successful", 200, response.getStatusLine().getStatusCode());
 	}
 	// END SNIPPET: test
 

@@ -19,7 +19,6 @@ package net.officefloor.plugin.jndi.function;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
-import javax.resource.spi.work.Work;
 
 /**
  * JNDI reference.
@@ -42,7 +41,7 @@ public class JndiReference {
 	 * Initiate.
 	 * 
 	 * @param jndiName
-	 *            JNDI name of the {@link Work} Object.
+	 *            JNDI name of the Object.
 	 * @param facadeClass
 	 *            Facade {@link Class}. May be <code>null</code>.
 	 */

@@ -19,14 +19,14 @@ package net.officefloor.tutorial.authenticationhttpserver;
 
 import java.io.IOException;
 
-import junit.framework.TestCase;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
+
+import junit.framework.TestCase;
+import net.officefloor.OfficeFloorMain;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 
 /**
  * Tests the Secure Link.
@@ -38,8 +38,7 @@ public class AuthenticationHttpServerTest extends TestCase {
 	/**
 	 * {@link CloseableHttpClient}.
 	 */
-	private final CloseableHttpClient client = HttpTestUtil
-			.createHttpClient(true);
+	private final CloseableHttpClient client = HttpTestUtil.createHttpClient(true);
 
 	@Override
 	protected void tearDown() throws Exception {
@@ -47,7 +46,7 @@ public class AuthenticationHttpServerTest extends TestCase {
 		try {
 			this.client.close();
 		} finally {
-			WoofOfficeFloorSource.stop();
+			OfficeFloorMain.close();
 		}
 	}
 
@@ -55,19 +54,16 @@ public class AuthenticationHttpServerTest extends TestCase {
 	public void testLogin() throws Exception {
 
 		// Start the server
-		WoofOfficeFloorSource.start();
+		OfficeFloorMain.open();
 
 		// Ensure require login to get to page
-		String loginPage = this
-				.doHttpRequest("http://localhost:7878/hello.woof");
-		assertTrue("Ensure login page",
-				loginPage.contains("<title>Login</title>"));
+		String loginPage = this.doHttpRequest("http://localhost:7878/hello.woof");
+		assertTrue("Ensure login page", loginPage.contains("<title>Login</title>"));
 
 		// Login
 		String helloPage = this
 				.doHttpRequest("https://localhost:7979/login-login.woof?username=Daniel&password=Daniel");
-		assertTrue("Ensure hello page with login",
-				helloPage.contains("<p>Hi Daniel</p>"));
+		assertTrue("Ensure hello page with login", helloPage.contains("<p>Hi Daniel</p>"));
 	}
 
 	public void testLogout() throws Exception {
@@ -76,16 +72,12 @@ public class AuthenticationHttpServerTest extends TestCase {
 		this.testLogin();
 
 		// Logout
-		String logoutPage = this
-				.doHttpRequest("http://localhost:7878/hello-logout.woof");
-		assertTrue("Ensure logout page",
-				logoutPage.contains("<title>Logout</title>"));
+		String logoutPage = this.doHttpRequest("http://localhost:7878/hello-logout.woof");
+		assertTrue("Ensure logout page", logoutPage.contains("<title>Logout</title>"));
 
 		// Attempt to go back to page (but require login)
-		String loginPage = this
-				.doHttpRequest("http://localhost:7878/hello.woof");
-		assertTrue("Ensure login page",
-				loginPage.contains("<title>Login</title>"));
+		String loginPage = this.doHttpRequest("http://localhost:7878/hello.woof");
+		assertTrue("Ensure login page", loginPage.contains("<title>Login</title>"));
 	}
 
 	private String doHttpRequest(String url) throws IOException {

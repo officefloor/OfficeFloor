@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.officefloor</groupId>
 		<artifactId>officefloor</artifactId>
-		<version>2.18.0</version>
+		<version>3.0.0</version>
 	</parent>
 	<groupId>net.officefloor.plugin</groupId>
 	<artifactId>plugins</artifactId>
@@ -13,8 +13,11 @@
 	<name>Plugins</name>
 	<description>Plug-ins OfficeFloor to provide specific functionality</description>
 	<modules>
+		<module>officeplugin_bayeux</module>
+		<module>officeplugin_ejb</module>
 		<module>officeplugin_jdbc</module>
 		<module>officeplugin_jms</module>
+		<module>officeplugin_jndi</module>
 		<module>officeplugin_jpa</module>
 		<module>officeplugin_json</module>
 		<module>officeplugin_socket</module>
@@ -22,9 +25,6 @@
 		<module>officeplugin_woof</module>
 
 <!-- TODO: fix up to v3.0 of OfficeFloor 
-		<module>officeplugin_bayeux</module>
-		<module>officeplugin_ejb</module>
-		<module>officeplugin_jndi</module>
 		<module>officeplugin_servlet</module>
 		<module>officeplugin_war</module>
 		<module>officeplugin_woof_servlet</module>

@@ -309,6 +309,11 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	}
 
 	@Override
+	public boolean configureOfficeFloorCompiler() {
+		return (boolean) this.invokeMethod("configureOfficeFloorCompiler", null);
+	}
+
+	@Override
 	public OfficeFloor compile(String officeFloorName) {
 		return (OfficeFloor) this.invokeMethod("compile", new Object[] { officeFloorName }, String.class);
 	}

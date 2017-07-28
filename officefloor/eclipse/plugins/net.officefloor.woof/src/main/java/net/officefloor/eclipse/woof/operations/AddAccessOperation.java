@@ -28,12 +28,11 @@ import net.officefloor.model.woof.WoofChanges;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 
 /**
- * {@link Operation} to specify the {@link WoofAccessModel}.
+ * {@link Operation} to add {@link WoofAccessModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class SetAccessOperation extends
-		AbstractWoofChangeOperation<WoofEditPart> {
+public class AddAccessOperation extends AbstractWoofChangeOperation<WoofEditPart> {
 
 	/**
 	 * Initiate.
@@ -41,8 +40,8 @@ public class SetAccessOperation extends
 	 * @param woofChanges
 	 *            {@link WoofChanges}.
 	 */
-	public SetAccessOperation(WoofChanges woofChanges) {
-		super("Set access", WoofEditPart.class, woofChanges);
+	public AddAccessOperation(WoofChanges woofChanges) {
+		super("Add access", WoofEditPart.class, woofChanges);
 	}
 
 	/*
@@ -53,24 +52,21 @@ public class SetAccessOperation extends
 	protected Change<?> getChange(WoofChanges changes, Context context) {
 
 		// Obtain the access instance
-		AccessInstance instance = HttpSecuritySourceWizard.getAccessInstance(
-				context.getEditPart(), null);
+		AccessInstance instance = HttpSecuritySourceWizard.getAccessInstance(context.getEditPart(), null);
 		if (instance == null) {
 			return null; // must have access
 		}
 
 		// Obtain access details
-		String httpSecuritySourceClassName = instance
-				.getHttpSecuritySourceClassName();
+		String accessName = instance.getAccessName();
+		String httpSecuritySourceClassName = instance.getHttpSecuritySourceClassName();
 		long authenticationTimeout = instance.getAuthenticationTimeout();
 		PropertyList properties = instance.getPropertylist();
-		HttpSecurityType<?, ?, ?, ?> httpSecurityType = instance
-				.getHttpSecurityType();
+		HttpSecurityType<?, ?, ?, ?> httpSecurityType = instance.getHttpSecurityType();
 
 		// Create the change to specify access
-		Change<WoofAccessModel> change = changes.setAccess(
-				httpSecuritySourceClassName, authenticationTimeout, properties,
-				httpSecurityType);
+		Change<WoofAccessModel> change = changes.addAccess(accessName, httpSecuritySourceClassName, authenticationTimeout,
+				properties, httpSecurityType);
 
 		// Position access
 		context.positionModel(change.getTarget());

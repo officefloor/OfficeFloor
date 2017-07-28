@@ -17,13 +17,13 @@
  */
 package net.officefloor.tutorial.dynamichttpserver;
 
-import junit.framework.TestCase;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
+
+import junit.framework.TestCase;
+import net.officefloor.OfficeFloorMain;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 
 /**
  * Tests the {@link DynamicHttpServer}.
@@ -47,16 +47,14 @@ public class DynamicHttpServerTest extends TestCase {
 	public void testDynamicPage() throws Exception {
 
 		// Start server
-		WoofOfficeFloorSource.start();
+		OfficeFloorMain.open();
 
 		// Send request for dynamic page
 		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
-			HttpResponse response = client.execute(new HttpGet(
-					"http://localhost:7878/example.woof"));
+			HttpResponse response = client.execute(new HttpGet("http://localhost:7878/example.woof"));
 
 			// Ensure request is successful
-			assertEquals("Request should be successful", 200, response
-					.getStatusLine().getStatusCode());
+			assertEquals("Request should be successful", 200, response.getStatusLine().getStatusCode());
 
 			// Indicate response
 			response.getEntity().writeTo(System.out);
@@ -66,7 +64,7 @@ public class DynamicHttpServerTest extends TestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		// Stop server
-		WoofOfficeFloorSource.stop();
+		OfficeFloorMain.close();
 	}
 
 }

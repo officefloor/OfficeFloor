@@ -23,7 +23,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
-import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.section.clazz.NextFunction;
 
 /**
  * Logic for the users page.
@@ -41,15 +41,14 @@ public class UsersLogic {
 		List<User> list = query.getResultList();
 		List<UserProperties> users = new ArrayList<UserProperties>();
 		for (User user : list) {
-			users.add(new UserProperties(user.getUserName(), user.getPerson()
-					.getFullName()));
+			users.add(new UserProperties(user.getUserName(), user.getPerson().getFullName()));
 		}
 
 		// Return the users
 		return users.toArray(new UserProperties[list.size()]);
 	}
 
-	@NextTask("createUser")
+	@NextFunction("createUser")
 	public UserProperties create(UserProperties user) {
 		return user;
 	}

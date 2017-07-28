@@ -17,10 +17,10 @@
  */
 package net.officefloor.eclipse.skin.woof;
 
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.model.woof.WoofGovernanceModel;
-
 import org.eclipse.draw2d.IFigure;
+
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.model.woof.WoofGovernanceModel;
 
 /**
  * Context for the {@link WoofGovernanceModel} {@link IFigure}.

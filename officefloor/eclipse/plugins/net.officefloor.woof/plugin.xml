@@ -19,41 +19,35 @@
 			name="WoOF Editor" />
 	</extension>
  <extension
-       point="net.officefloor.ui.extensionclasspathproviders">
-    <extension-classpath-provider
-          class="net.officefloor.eclipse.woof.WoofExtensionClasspathProvider">
-    </extension-classpath-provider>
- </extension>
- <extension
        point="net.officefloor.ui.sectionsources">
     <sectionsource
           class="net.officefloor.eclipse.web.HttpTemplateSectionSourceExtension">
     </sectionsource>
  </extension>
-	<extension point="net.officefloor.ui.worksources">
-		<worksource
+	<extension point="net.officefloor.ui.managedfunctionsources">
+		<managedfunctionsource
 			class="net.officefloor.eclipse.socket.HttpRouteWorkSourceExtension" />
 	</extension>
-	<extension point="net.officefloor.ui.worksources">
-		<worksource
-			class="net.officefloor.eclipse.socket.HttpFileFactoryWorkSourceExtension" />
+	<extension point="net.officefloor.ui.managedfunctionsources">
+		<managedfunctionsource
+			class="net.officefloor.eclipse.socket.HttpFileFactoryManagedFunctionSourceExtension" />
 	</extension>
-	<extension point="net.officefloor.ui.worksources">
-		<worksource
-			class="net.officefloor.eclipse.socket.HttpFileSenderWorkSourceExtension" />
+	<extension point="net.officefloor.ui.managedfunctionsources">
+		<managedfunctionsource
+			class="net.officefloor.eclipse.socket.HttpFileSenderManagedFunctionSourceExtension" />
 	</extension>
-	<extension point="net.officefloor.ui.worksources">
-		<worksource
-			class="net.officefloor.eclipse.socket.HttpParametersLoaderWorkSourceExtension" />
+	<extension point="net.officefloor.ui.managedfunctionsources">
+		<managedfunctionsource
+			class="net.officefloor.eclipse.socket.HttpParametersLoaderManagedFunctionSourceExtension" />
 	</extension>
-	<extension point="net.officefloor.ui.worksources">
-		<worksource
-			class="net.officefloor.eclipse.socket.HttpTemplateWorkSourceExtension" />
+	<extension point="net.officefloor.ui.managedfunctionsources">
+		<managedfunctionsource
+			class="net.officefloor.eclipse.socket.HttpTemplateManagedFunctionSourceExtension" />
 	</extension>
-	<extension point="net.officefloor.ui.worksources">
-		<worksource
-			class="net.officefloor.eclipse.socket.HttpResponseSenderWorkSourceExtension">
-		</worksource>
+	<extension point="net.officefloor.ui.managedfunctionsources">
+		<managedfunctionsource
+			class="net.officefloor.eclipse.socket.HttpResponseSenderManagedFunctionSourceExtension">
+		</managedfunctionsource>
 	</extension>
 	<extension point="net.officefloor.ui.managedobjectsources">
 		<managedobjectsource

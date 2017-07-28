@@ -23,14 +23,14 @@ import java.sql.ResultSet;
 
 import javax.sql.DataSource;
 
-import junit.framework.TestCase;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.hsqldb.jdbc.jdbcDataSource;
+
+import junit.framework.TestCase;
+import net.officefloor.OfficeFloorMain;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 
 /**
  * Tests the {@link DatabaseHttpServer}.
@@ -52,7 +52,7 @@ public class DatabaseHttpServerTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		// Start the database and HTTP Server
-		WoofOfficeFloorSource.start();
+		OfficeFloorMain.open();
 	}
 
 	@Override
@@ -62,11 +62,10 @@ public class DatabaseHttpServerTest extends TestCase {
 		this.client.close();
 
 		// Stop HTTP Server
-		WoofOfficeFloorSource.stop();
+		OfficeFloorMain.close();
 
 		// Stop database for new instance each test
-		DriverManager.getConnection(DATABASE_URL, DATABASE_USER, "")
-				.createStatement().execute("SHUTDOWN IMMEDIATELY");
+		DriverManager.getConnection(DATABASE_URL, DATABASE_USER, "").createStatement().execute("SHUTDOWN IMMEDIATELY");
 	}
 
 	/**
@@ -84,12 +83,10 @@ public class DatabaseHttpServerTest extends TestCase {
 		Connection connection = dataSource.getConnection();
 
 		// Ensure can get initial row
-		ResultSet resultSet = connection.createStatement().executeQuery(
-				"SELECT * FROM EXAMPLE");
+		ResultSet resultSet = connection.createStatement().executeQuery("SELECT * FROM EXAMPLE");
 		assertTrue("Ensure have result", resultSet.next());
 		assertEquals("Incorrect name", "WoOF", resultSet.getString("NAME"));
-		assertEquals("Incorrect description", "Web on OfficeFloor",
-				resultSet.getString("DESCRIPTION"));
+		assertEquals("Incorrect description", "Web on OfficeFloor", resultSet.getString("DESCRIPTION"));
 		assertFalse("Ensure no further results", resultSet.next());
 		resultSet.close();
 	}
@@ -114,8 +111,7 @@ public class DatabaseHttpServerTest extends TestCase {
 
 	private void doRequest(String url) throws Exception {
 		HttpResponse response = this.client.execute(new HttpGet(url));
-		assertEquals("Request should be successful", 200, response
-				.getStatusLine().getStatusCode());
+		assertEquals("Request should be successful", 200, response.getStatusLine().getStatusCode());
 		response.getEntity().writeTo(System.out);
 	}
 	// END SNIPPET: test

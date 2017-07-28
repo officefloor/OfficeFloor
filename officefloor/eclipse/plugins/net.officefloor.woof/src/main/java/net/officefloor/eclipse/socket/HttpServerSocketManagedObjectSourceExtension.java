@@ -17,18 +17,15 @@
  */
 package net.officefloor.eclipse.socket;
 
+import org.eclipse.swt.widgets.Composite;
+
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
-import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
-import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
-
-import org.eclipse.swt.widgets.Composite;
 
 /**
  * {@link ManagedObjectSourceExtension} for the
@@ -37,9 +34,7 @@ import org.eclipse.swt.widgets.Composite;
  * @author Daniel Sagenschneider
  */
 public class HttpServerSocketManagedObjectSourceExtension
-		implements
-		ManagedObjectSourceExtension<None, Indexed, HttpServerSocketManagedObjectSource>,
-		ExtensionClasspathProvider {
+		implements ManagedObjectSourceExtension<None, Indexed, HttpServerSocketManagedObjectSource> {
 
 	/*
 	 * ================= ManagedObjectSourceExtension ========================
@@ -56,39 +51,23 @@ public class HttpServerSocketManagedObjectSourceExtension
 	}
 
 	@Override
-	public void createControl(Composite page,
-			ManagedObjectSourceExtensionContext context) {
+	public void createControl(Composite page, ManagedObjectSourceExtensionContext context) {
 
 		// Specify layout of page
 		SourceExtensionUtil.loadPropertyLayout(page);
 
 		// Provide the properties
-		SourceExtensionUtil.createPropertyText("Port",
-				HttpServerSocketManagedObjectSource.PROPERTY_PORT, "80", page,
+		SourceExtensionUtil.createPropertyText("Port", HttpServerSocketManagedObjectSource.PROPERTY_PORT, "80", page,
 				context, null);
 		SourceExtensionUtil.createPropertyText("Send buffer size",
-				HttpServerSocketManagedObjectSource.PROPERTY_SEND_BUFFER_SIZE,
-				"8192", page, context, null);
-		SourceExtensionUtil
-				.createPropertyText(
-						"Receive buffer size",
-						HttpServerSocketManagedObjectSource.PROPERTY_RECEIVE_BUFFER_SIZE,
-						"8192", page, context, null);
+				HttpServerSocketManagedObjectSource.PROPERTY_SEND_BUFFER_SIZE, "8192", page, context, null);
+		SourceExtensionUtil.createPropertyText("Receive buffer size",
+				HttpServerSocketManagedObjectSource.PROPERTY_RECEIVE_BUFFER_SIZE, "8192", page, context, null);
 	}
 
 	@Override
 	public String getSuggestedManagedObjectSourceName(PropertyList properties) {
 		return "HTTP";
-	}
-
-	/*
-	 * ========================== ExtensionClasspathProvider =================
-	 */
-
-	@Override
-	public ClasspathProvision[] getClasspathProvisions() {
-		return new ClasspathProvision[] { new TypeClasspathProvision(
-				HttpServerSocketManagedObjectSource.class) };
 	}
 
 }

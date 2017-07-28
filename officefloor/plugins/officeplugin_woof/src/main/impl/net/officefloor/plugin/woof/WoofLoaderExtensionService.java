@@ -101,29 +101,32 @@ public class WoofLoaderExtensionService
 	 */
 	public static final String WOOF_TEMPLATE_URI_SUFFIX = ".woof";
 
-	/*
-	 * =========== OfficeFloorCompilerConfigurationService =============
+	/**
+	 * Creates the {@link ResourceSource} instances for the
+	 * <code>src/main/web/<code> resources.
+	 * 
+	 * @param projectDirectory
+	 *            Directory of the project.
+	 * @return {@link ResourceSource} instances.
 	 */
-
-	@Override
-	public void configureOfficeFloorCompiler(OfficeFloorCompiler compiler) throws Exception {
-
-		// Obtain the current directory
-		File currentDirectory = new File(".");
+	public static ResourceSource[] createResourceSources(File projectDirectory) {
 
 		// Determine if running within maven project
-		if (!(new File(currentDirectory, "pom.xml").exists())) {
-			return; // must be a maven project
+		if (!(new File(projectDirectory, "pom.xml").exists())) {
+			return new ResourceSource[0]; // must be a maven project
 		}
 
 		// Obtain the web app directory
-		File webAppDir = new File(currentDirectory, WEBAPP_PATH);
+		File webAppDir = new File(projectDirectory, WEBAPP_PATH);
 		if (!(webAppDir.exists())) {
-			return; // not include
+			return new ResourceSource[0]; // not include
 		}
 
+		// Create listing of sources
+		ResourceSource[] sources = new ResourceSource[2];
+
 		// Make WoOF resources available
-		compiler.addResources(new ResourceSource() {
+		sources[0] = new ResourceSource() {
 			@Override
 			public InputStream sourceResource(String location) {
 
@@ -147,10 +150,10 @@ public class WoofLoaderExtensionService
 				// Not found within webapp directory
 				return null;
 			}
-		});
+		};
 
 		// Include all webapp directory resources for application extension
-		compiler.addResources(new ResourceSource() {
+		sources[1] = new ResourceSource() {
 			@Override
 			public InputStream sourceResource(String location) {
 
@@ -169,7 +172,41 @@ public class WoofLoaderExtensionService
 					return null;
 				}
 			}
-		});
+		};
+
+		// Return the sources
+		return sources;
+	}
+
+	/**
+	 * Configures the {@link OfficeFloorCompiler} for <code>src/main/web/</code>
+	 * resources.
+	 * 
+	 * @param projectDirectory
+	 *            Directory of the project.
+	 * @param compiler
+	 *            {@link OfficeFloorCompiler}.
+	 */
+	public static void configureOfficeFloorCompiler(File projectDirectory, OfficeFloorCompiler compiler) {
+
+		// Load the resource sources
+		for (ResourceSource source : createResourceSources(projectDirectory)) {
+			compiler.addResources(source);
+		}
+	}
+
+	/*
+	 * =========== OfficeFloorCompilerConfigurationService =============
+	 */
+
+	@Override
+	public void configureOfficeFloorCompiler(OfficeFloorCompiler compiler) throws Exception {
+
+		// Obtain the current directory
+		File currentDirectory = new File(".");
+
+		// Configure the compiler
+		configureOfficeFloorCompiler(currentDirectory, compiler);
 	}
 
 	/*

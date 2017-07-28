@@ -18,67 +18,53 @@
 package net.officefloor.eclipse.socket;
 
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
-import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
-import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.eclipse.extension.managedfunctionsource.ManagedFunctionSourceExtension;
-import net.officefloor.frame.api.execute.Work;
 
 /**
  * Provides abstract functionality for a source extension.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractSocketWorkSourceExtension<W extends Work, S extends WorkSource<W>>
-		implements ManagedFunctionSourceExtension<W, S>, ExtensionClasspathProvider {
+public abstract class AbstractSocketManagedFunctionSourceExtension<S extends ManagedFunctionSource>
+		implements ManagedFunctionSourceExtension<S> {
 
 	/**
-	 * {@link WorkSource} class.
+	 * {@link ManagedFunctionSource} class.
 	 */
-	private final Class<S> workSourceClass;
+	private final Class<S> managedFunctionSourceClass;
 
 	/**
-	 * Label for the {@link WorkSource}.
+	 * Label for the {@link ManagedFunctionSource}.
 	 */
-	private final String workSourceLabel;
+	private final String managedFunctionSourceLabel;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param workSourceClass
-	 *            {@link WorkSource} class.
-	 * @param workSourceLabel
-	 *            Label for the {@link WorkSource}.
+	 * @param managedFunctionSourceClass
+	 *            {@link ManagedFunctionSource} class.
+	 * @param managedFunctionSourceLabel
+	 *            Label for the {@link ManagedFunctionSource}.
 	 */
-	public AbstractSocketWorkSourceExtension(Class<S> workSourceClass,
-			String workSourceLabel) {
-		this.workSourceClass = workSourceClass;
-		this.workSourceLabel = workSourceLabel;
+	public AbstractSocketManagedFunctionSourceExtension(Class<S> managedFunctionSourceClass,
+			String managedFunctionSourceLabel) {
+		this.managedFunctionSourceClass = managedFunctionSourceClass;
+		this.managedFunctionSourceLabel = managedFunctionSourceLabel;
 	}
 
 	/*
-	 * ===================== ExtensionClasspathProvider ======================
-	 */
-
-	@Override
-	public ClasspathProvision[] getClasspathProvisions() {
-		return new ClasspathProvision[] { new TypeClasspathProvision(
-				this.workSourceClass) };
-	}
-
-	/*
-	 * ===================== WorkSourceExtension =============================
+	 * =================== ManagedFunctionSourceExtension ===================
 	 */
 
 	@Override
 	public Class<S> getManagedFunctionSourceClass() {
-		return this.workSourceClass;
+		return this.managedFunctionSourceClass;
 	}
 
 	@Override
 	public String getManagedFunctionSourceLabel() {
-		return this.workSourceLabel;
+		return this.managedFunctionSourceLabel;
 	}
 
 	@Override

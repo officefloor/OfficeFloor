@@ -28,14 +28,14 @@ import javax.persistence.Persistence;
 import javax.persistence.Query;
 import javax.sql.DataSource;
 
-import junit.framework.TestCase;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.hsqldb.jdbc.jdbcDataSource;
+
+import junit.framework.TestCase;
+import net.officefloor.OfficeFloorMain;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 
 /**
  * Tests the Transaction HTTP Server.
@@ -62,7 +62,7 @@ public class TransactionHttpServerTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		// Start the database and HTTP Server
-		WoofOfficeFloorSource.start();
+		OfficeFloorMain.open();
 	}
 
 	@Override
@@ -73,11 +73,11 @@ public class TransactionHttpServerTest extends TestCase {
 		} finally {
 			try {
 				// Stop HTTP Server
-				WoofOfficeFloorSource.stop();
+				OfficeFloorMain.close();
 			} finally {
 				// Stop database for new instance each test
-				DriverManager.getConnection(DATABASE_URL, DATABASE_USER, "")
-						.createStatement().execute("SHUTDOWN IMMEDIATELY");
+				DriverManager.getConnection(DATABASE_URL, DATABASE_USER, "").createStatement()
+						.execute("SHUTDOWN IMMEDIATELY");
 			}
 		}
 	}
@@ -97,11 +97,9 @@ public class TransactionHttpServerTest extends TestCase {
 		Connection connection = dataSource.getConnection();
 
 		// Ensure can get initial row
-		ResultSet resultSet = connection.createStatement().executeQuery(
-				"SELECT FULLNAME FROM PERSON");
+		ResultSet resultSet = connection.createStatement().executeQuery("SELECT FULLNAME FROM PERSON");
 		assertTrue("Ensure have result", resultSet.next());
-		assertEquals("Incorrect setup name", "Daniel Sagenschneider",
-				resultSet.getString("FULLNAME"));
+		assertEquals("Incorrect setup name", "Daniel Sagenschneider", resultSet.getString("FULLNAME"));
 		assertFalse("Ensure no further results", resultSet.next());
 		resultSet.close();
 	}
@@ -115,8 +113,7 @@ public class TransactionHttpServerTest extends TestCase {
 		this.doRequest("http://localhost:7878/users.woof");
 
 		// Obtain entity manager
-		EntityManagerFactory factory = Persistence
-				.createEntityManagerFactory("example");
+		EntityManagerFactory factory = Persistence.createEntityManagerFactory("example");
 		EntityManager manager = factory.createEntityManager();
 
 		// Ensure can obtain user and person
@@ -124,8 +121,7 @@ public class TransactionHttpServerTest extends TestCase {
 		User user = (User) query.getSingleResult();
 		assertEquals("Incorrect user name", "daniel", user.getUserName());
 		Person person = user.getPerson();
-		assertEquals("Incorrect person name", "Daniel Sagenschneider",
-				person.getFullName());
+		assertEquals("Incorrect person name", "Daniel Sagenschneider", person.getFullName());
 
 		// Ensure persist user and person
 		User newUser = new User();
@@ -139,11 +135,9 @@ public class TransactionHttpServerTest extends TestCase {
 		// Ensure user and person persisted
 		manager = factory.createEntityManager();
 		User retrievedUser = manager.find(User.class, newUser.getId());
-		assertEquals("Incorrect retrieved user name", "test",
-				retrievedUser.getUserName());
+		assertEquals("Incorrect retrieved user name", "test", retrievedUser.getUserName());
 		Person retrievedPerson = retrievedUser.getPerson();
-		assertEquals("Incorrect retrieved full name", "TEST",
-				retrievedPerson.getFullName());
+		assertEquals("Incorrect retrieved full name", "TEST", retrievedPerson.getFullName());
 
 		// Close persistence
 		factory.close();
@@ -165,18 +159,14 @@ public class TransactionHttpServerTest extends TestCase {
 		this.doRequest("http://localhost:7878/users-create.woof?username=joe");
 
 		// Validate melanie added
-		EntityManager manager = Persistence.createEntityManagerFactory(
-				"example").createEntityManager();
-		User melanie = (User) manager.createQuery(
-				"SELECT U FROM User U WHERE U.userName = 'melanie'")
+		EntityManager manager = Persistence.createEntityManagerFactory("example").createEntityManager();
+		User melanie = (User) manager.createQuery("SELECT U FROM User U WHERE U.userName = 'melanie'")
 				.getSingleResult();
-		assertEquals("Melanie created", "Melanie Sagenschneider", melanie
-				.getPerson().getFullName());
+		assertEquals("Melanie created", "Melanie Sagenschneider", melanie.getPerson().getFullName());
 
 		// Validate joe not added
 		try {
-			manager.createQuery("SELECT U FROM User U WHERE U.userName = 'joe'")
-					.getSingleResult();
+			manager.createQuery("SELECT U FROM User U WHERE U.userName = 'joe'").getSingleResult();
 			fail("Should not find Joe");
 		} catch (NoResultException ex) {
 		}
@@ -184,8 +174,7 @@ public class TransactionHttpServerTest extends TestCase {
 
 	private void doRequest(String url) throws Exception {
 		HttpResponse response = this.client.execute(new HttpGet(url));
-		assertEquals("Request should be successful", 200, response
-				.getStatusLine().getStatusCode());
+		assertEquals("Request should be successful", 200, response.getStatusLine().getStatusCode());
 		response.getEntity().writeTo(System.out);
 	}
 	// END SNIPPET: test

@@ -19,13 +19,13 @@ package net.officefloor.tutorial.rawhttpserver;
 
 import java.io.ByteArrayOutputStream;
 
-import junit.framework.TestCase;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
+
+import junit.framework.TestCase;
+import net.officefloor.OfficeFloorMain;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 
 /**
  * Tests the web application is returning correctly.
@@ -40,17 +40,15 @@ public class RawHttpServerTest extends TestCase {
 	public void testRawHtml() throws Exception {
 
 		// Start server
-		WoofOfficeFloorSource.start();
+		OfficeFloorMain.open();
 
 		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
 
 			// Send request for dynamic page
-			HttpResponse response = client.execute(new HttpGet(
-					"http://localhost:7878/example.woof"));
+			HttpResponse response = client.execute(new HttpGet("http://localhost:7878/example.woof"));
 
 			// Ensure request is successful
-			assertEquals("Request should be successful", 200, response
-					.getStatusLine().getStatusCode());
+			assertEquals("Request should be successful", 200, response.getStatusLine().getStatusCode());
 
 			// Indicate response
 			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -58,15 +56,14 @@ public class RawHttpServerTest extends TestCase {
 			String responseText = new String(buffer.toByteArray());
 
 			// Ensure raw html rendered to page
-			assertTrue("Should have raw HTML rendered",
-					responseText.contains("Web on OfficeFloor (WoOF)"));
+			assertTrue("Should have raw HTML rendered", responseText.contains("Web on OfficeFloor (WoOF)"));
 		}
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
 		// Stop server
-		WoofOfficeFloorSource.stop();
+		OfficeFloorMain.close();
 	}
 
 }

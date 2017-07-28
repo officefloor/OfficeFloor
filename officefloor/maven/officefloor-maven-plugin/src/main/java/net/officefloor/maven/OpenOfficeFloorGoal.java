@@ -114,7 +114,7 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 	/**
 	 * Path to the {@link OfficeFloor} configuration.
 	 */
-	@Parameter(required = true, property = "officeFloorLocation")
+	@Parameter(property = "officeFloorLocation")
 	private String officeFloorLocation;
 
 	/**
@@ -191,8 +191,6 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 		ensureNotNull("Must have project", this.project);
 		ensureNotNull("Must have plug-in dependencies", this.pluginDependencies);
 		ensureNotNull("Port not configured for the " + OfficeBuilding.class.getSimpleName(), this.port);
-		ensureNotNull(OfficeFloor.class.getSimpleName() + " configuration location not specified",
-				this.officeFloorLocation);
 
 		// Ensure default non-required values
 		this.officeFloorName = defaultValue(this.officeFloorName, this.defaultOfficeFloorName);

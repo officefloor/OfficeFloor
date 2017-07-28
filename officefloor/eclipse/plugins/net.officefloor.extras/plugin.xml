@@ -20,10 +20,10 @@
       </managedobjectsource>
    </extension>
    <extension
-         point="net.officefloor.ui.worksources">
-      <worksource
-            class="net.officefloor.eclipse.jndi.JndiWorkSourceExtension">
-      </worksource>
+         point="net.officefloor.ui.managedfunctionsources">
+      <managedfunctionsource
+            class="net.officefloor.eclipse.jndi.JndiManagedFunctionSourceExtension">
+      </managedfunctionsource>
    </extension>
    <!-- START SNIPPET: tutorial -->
    <extension

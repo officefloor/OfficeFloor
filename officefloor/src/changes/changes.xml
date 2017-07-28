@@ -5,7 +5,7 @@
 		<release version="2.19.0" date="in SCM" description="Improved performance of OfficeFrame through reduced locks">
 			<action type="add" dev="sagenschneider">Improved performance of OfficeFrame through reduced locks</action>
 		</release>
-		<release version="2.18.0" date="2016-12-10" description="Improved compiler that types everything">
+		<release version="3.0.0" date="2016-12-10" description="Improved compiler that types everything">
 			<action type="add" dev="sagenschneider">Improved compiler that types everything</action>
 		</release>
 		<release version="2.17.0" date="2015-10-18" description="Template content type">

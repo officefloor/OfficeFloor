@@ -23,15 +23,15 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 
-import junit.framework.TestCase;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
-
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
+
+import junit.framework.TestCase;
+import net.officefloor.OfficeFloorMain;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 
 /**
  * Ensure appropriately inherit content.
@@ -47,7 +47,7 @@ public class InheritHttpServerTest extends TestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		WoofOfficeFloorSource.start();
+		OfficeFloorMain.open();
 	}
 
 	@Override
@@ -57,7 +57,7 @@ public class InheritHttpServerTest extends TestCase {
 			this.client.close();
 		} finally {
 			// Stop the server
-			WoofOfficeFloorSource.stop();
+			OfficeFloorMain.close();
 		}
 	}
 
@@ -91,33 +91,26 @@ public class InheritHttpServerTest extends TestCase {
 	 * @param fileNameContainingExpectedContent
 	 *            Name of file containing the expected content.
 	 */
-	private void doTest(String url, String fileNameContainingExpectedContent)
-			throws IOException {
+	private void doTest(String url, String fileNameContainingExpectedContent) throws IOException {
 
 		// Undertake the request
-		HttpResponse response = this.client.execute(new HttpGet(
-				"http://localhost:7878/" + url));
-		assertEquals("Incorrect response status for URL " + url, 200, response
-				.getStatusLine().getStatusCode());
+		HttpResponse response = this.client.execute(new HttpGet("http://localhost:7878/" + url));
+		assertEquals("Incorrect response status for URL " + url, 200, response.getStatusLine().getStatusCode());
 		String content = EntityUtils.toString(response.getEntity());
 
 		// Obtain the expected content
-		InputStream contentInputStream = Thread.currentThread()
-				.getContextClassLoader()
+		InputStream contentInputStream = Thread.currentThread().getContextClassLoader()
 				.getResourceAsStream(fileNameContainingExpectedContent);
-		assertNotNull("Can not find file " + fileNameContainingExpectedContent,
-				contentInputStream);
+		assertNotNull("Can not find file " + fileNameContainingExpectedContent, contentInputStream);
 		Reader reader = new InputStreamReader(contentInputStream);
 		StringWriter expected = new StringWriter();
-		for (int character = reader.read(); character != -1; character = reader
-				.read()) {
+		for (int character = reader.read(); character != -1; character = reader.read()) {
 			expected.append((char) character);
 		}
 		reader.close();
 
 		// Ensure the context is as expected
-		assertEquals("Incorrect content for URL " + url, expected.toString(),
-				content);
+		assertEquals("Incorrect content for URL " + url, expected.toString(), content);
 	}
 
 }

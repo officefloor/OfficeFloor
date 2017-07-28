@@ -23,7 +23,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.naming.Context;
-import javax.resource.spi.work.Work;
 
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
@@ -48,7 +47,7 @@ public class JndiManagedFunctionSource extends AbstractManagedFunctionSource {
 
 	/**
 	 * Name of property containing the JNDI name of the Object that is to be the
-	 * functionality of the {@link Work}.
+	 * functionality of the {@link ManagedFunction}.
 	 */
 	public static final String PROPERTY_JNDI_NAME = "jndi.name";
 
@@ -91,7 +90,7 @@ public class JndiManagedFunctionSource extends AbstractManagedFunctionSource {
 	public static final String PROPERTY_FACADE_CLASS = "facade.class";
 
 	/*
-	 * ====================== WorkSource =============================
+	 * ===================== ManagedFunctionSource =====================
 	 */
 
 	@Override
@@ -141,7 +140,7 @@ public class JndiManagedFunctionSource extends AbstractManagedFunctionSource {
 			}
 		}
 
-		// Obtain the listing of tasks from the methods of the work type
+		// Obtain listing of functions from the methods of the namespace type
 		for (Method method : objectType.getMethods()) {
 
 			// Potentially register the method
@@ -186,21 +185,20 @@ public class JndiManagedFunctionSource extends AbstractManagedFunctionSource {
 	/**
 	 * Registers the {@link ManagedFunction}.
 	 * 
-	 * @param workTypeBuilder
+	 * @param namespaceTypeBuilder
 	 *            {@link FunctionNamespaceBuilder}.
 	 * @param method
 	 *            {@link Method} to potentially create the
 	 *            {@link ManagedFunction} from.
-	 * @param workType
-	 *            Type of JNDI {@link Work} object. May be <code>null</code> but
-	 *            if provided must be one of the parameter types of the
-	 *            {@link Method}.
+	 * @param objectType
+	 *            Type of JNDI object. May be <code>null</code> but if provided
+	 *            must be one of the parameter types of the {@link Method}.
 	 * @param manufacturer
 	 *            {@link ManagedFunctionFactoryManufacturer}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void registerMethodAsPotentialFunction(FunctionNamespaceBuilder workTypeBuilder, Method method,
-			Class<?> workType, ManagedFunctionFactoryManufacturer manufacturer) {
+	private void registerMethodAsPotentialFunction(FunctionNamespaceBuilder namespaceTypeBuilder, Method method,
+			Class<?> objectType, ManagedFunctionFactoryManufacturer manufacturer) {
 
 		// Ignore non-public methods
 		if (!Modifier.isPublic(method.getModifiers())) {
@@ -216,17 +214,17 @@ public class JndiManagedFunctionSource extends AbstractManagedFunctionSource {
 		String methodName = method.getName();
 		Class<?>[] paramTypes = method.getParameterTypes();
 
-		// Determine if include based on work type provided
-		if (workType != null) {
-			boolean hasWorkTypeParameter = false;
+		// Determine if include based on object type provided
+		if (objectType != null) {
+			boolean hasObjectTypeParameter = false;
 			for (Class<?> paramType : paramTypes) {
 				// (qualified name match due to class loader issues)
-				if (workType.equals(paramType) || (workType.getName().equals(paramType.getName()))) {
-					hasWorkTypeParameter = true;
+				if (objectType.equals(paramType) || (objectType.getName().equals(paramType.getName()))) {
+					hasObjectTypeParameter = true;
 				}
 			}
-			if (!hasWorkTypeParameter) {
-				// Does not have work type so do not include method
+			if (!hasObjectTypeParameter) {
+				// Does not have object type so do not include method
 				return;
 			}
 		}
@@ -245,8 +243,8 @@ public class JndiManagedFunctionSource extends AbstractManagedFunctionSource {
 		}
 
 		// Include method as task in type definition
-		ManagedFunctionTypeBuilder<Indexed, None> taskTypeBuilder = workTypeBuilder.addManagedFunctionType(methodName,
-				taskFactory, Indexed.class, None.class);
+		ManagedFunctionTypeBuilder<Indexed, None> taskTypeBuilder = namespaceTypeBuilder
+				.addManagedFunctionType(methodName, taskFactory, Indexed.class, None.class);
 
 		// Define the return type (it not void)
 		Class<?> returnType = method.getReturnType();
@@ -270,11 +268,11 @@ public class JndiManagedFunctionSource extends AbstractManagedFunctionSource {
 				continue;
 			}
 
-			// Determine if work type.
+			// Determine if object type.
 			// (qualified name match due to class loader issues)
-			if (workType != null) {
-				if (workType.equals(paramType) || (workType.getName().equals(paramType.getName()))) {
-					// Parameter is the work type.
+			if (objectType != null) {
+				if (objectType.equals(paramType) || (objectType.getName().equals(paramType.getName()))) {
+					// Parameter is the object type.
 					parameters[i] = new JndiObjectParameterFactory();
 					continue;
 				}

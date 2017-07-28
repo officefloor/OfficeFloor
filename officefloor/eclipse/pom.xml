@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.officefloor</groupId>
 		<artifactId>officefloor</artifactId>
-		<version>2.18.0</version>
+		<version>3.0.0</version>
 	</parent>
 	<groupId>net.officefloor.eclipse</groupId>
 	<artifactId>eclipse</artifactId>
@@ -36,15 +36,7 @@
 	<build>
 		<plugins>
 			<plugin>
-				<!-- All projects are PDEs -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-eclipse-plugin</artifactId>
-				<configuration>
-					<pde>true</pde>
-				</configuration>
-			</plugin>
-			<plugin>
-				<!-- Make linked dependencies (via maven-eclipse-plugin) available -->
+				<!-- Make linked dependencies available -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
@@ -57,8 +49,8 @@
 						<configuration>
 							<includeScope>runtime</includeScope>
 							<outputDirectory>${basedir}</outputDirectory>
-							<overWriteReleases>false</overWriteReleases>
-							<overWriteSnapshots>false</overWriteSnapshots>
+							<overWriteReleases>true</overWriteReleases>
+							<overWriteSnapshots>true</overWriteSnapshots>
 							<overWriteIfNewer>true</overWriteIfNewer>
 						</configuration>
 					</execution>
