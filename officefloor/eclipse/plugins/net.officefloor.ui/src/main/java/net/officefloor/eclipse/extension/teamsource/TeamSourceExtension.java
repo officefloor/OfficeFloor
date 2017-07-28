@@ -17,29 +17,25 @@
  */
 package net.officefloor.eclipse.extension.teamsource;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.ExtensionUtil;
-import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
-import net.officefloor.frame.spi.team.source.TeamSource;
-
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
+import net.officefloor.frame.api.team.source.TeamSource;
 
 /**
  * Interface for extension to provide enriched {@link TeamSource} usage.
  * 
  * @author Daniel Sagenschneider
- * 
- * @see ExtensionClasspathProvider
  */
 public interface TeamSourceExtension<S extends TeamSource> {
 
 	/**
 	 * Extension ID.
 	 */
-	public static final String EXTENSION_ID = ExtensionUtil
-			.getExtensionId("teamsources");
+	public static final String EXTENSION_ID = ExtensionUtil.getExtensionId("teamsources");
 
 	/**
 	 * Obtains the class of the {@link TeamSource} being enriched in its usage.

@@ -17,61 +17,66 @@
  */
 package net.officefloor.compile.integrate;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.lang.reflect.Method;
+
+import org.easymock.AbstractMatcher;
 
 import junit.framework.TestCase;
+import net.officefloor.compile.AbstractModelCompilerTestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
+import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.OfficeFrame;
-import net.officefloor.frame.api.build.AdministratorBuilder;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.AdministrationFactory;
+import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.GovernanceBuilder;
-import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.api.build.ManagedObjectPoolBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.TeamBuilder;
-import net.officefloor.frame.api.build.WorkBuilder;
-import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.source.ResourceSource;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.source.ResourceSource;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
-import net.officefloor.model.impl.repository.xml.XmlConfigurationContext;
-
-import org.easymock.AbstractMatcher;
+import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
 
 /**
- * Provides abstract functionality for testing integration of the
- * {@link OfficeFloorCompiler}.
+ * Provides abstract functionality for testing compiling the
+ * {@link OfficeFloor}.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
+public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestCase {
 
 	/**
 	 * {@link CompilerIssues}.
@@ -81,19 +86,17 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	/**
 	 * Enhances {@link CompilerIssues}.
 	 */
-	private final CompilerIssues enhancedIssues = this
-			.enhanceIssues(this.issues);
+	private final CompilerIssues enhancedIssues = this.enhanceIssues(this.issues);
 
 	/**
-	 * {@link XmlConfigurationContext} for testing.
+	 * Indicates whether to override the {@link Property} instances.
 	 */
-	private XmlConfigurationContext configurationContext = null;
+	private boolean isOverrideProperties = false;
 
 	/**
 	 * {@link OfficeFloorBuilder}.
 	 */
-	protected final OfficeFloorBuilder officeFloorBuilder = this
-			.createMock(OfficeFloorBuilder.class);
+	protected final OfficeFloorBuilder officeFloorBuilder = this.createMock(OfficeFloorBuilder.class);
 
 	/**
 	 * <p>
@@ -111,14 +114,20 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Enables the {@link Property} overrides for compiling.
+	 */
+	protected void enableOverrideProperties() {
+		this.isOverrideProperties = true;
+	}
+
+	/**
 	 * Records initialising the {@link OfficeFloorBuilder}.
 	 * 
 	 * @param resourceSources
 	 *            {@link ResourceSource} instances.
 	 */
 	protected void record_init(ResourceSource... resourceSources) {
-		this.officeFloorBuilder.setClassLoader(Thread.currentThread()
-				.getContextClassLoader());
+		this.officeFloorBuilder.setClassLoader(Thread.currentThread().getContextClassLoader());
 		for (ResourceSource resourceSource : resourceSources) {
 			this.officeFloorBuilder.addResources(resourceSource);
 		}
@@ -126,24 +135,37 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Flags if the matcher has been specified to add a {@link Team}.
+	 */
+	private boolean isMatcherSet_officeFloorBuilder_addTeam = false;
+
+	/**
 	 * Records adding a {@link Team} to the {@link OfficeFloorBuilder}.
 	 * 
 	 * @param teamName
 	 *            Name of the {@link Team}.
-	 * @param teamSourceClass
+	 * @param teamSource
 	 *            {@link TeamSource} class.
 	 * @param propertyNameValues
 	 *            {@link Property} name/value listing.
 	 * @return {@link TeamBuilder} for the added {@link Team}.
 	 */
 	@SuppressWarnings("unchecked")
-	protected <S extends TeamSource> TeamBuilder<S> record_officeFloorBuilder_addTeam(
-			String teamName, Class<S> teamSourceClass,
+	protected <S extends TeamSource> TeamBuilder<S> record_officeFloorBuilder_addTeam(String teamName, S teamSource,
 			String... propertyNameValues) {
 		TeamBuilder<S> builder = this.createMock(TeamBuilder.class);
-		this.recordReturn(this.officeFloorBuilder,
-				this.officeFloorBuilder.addTeam(teamName, teamSourceClass),
-				builder);
+		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder.addTeam(teamName, teamSource), builder);
+		if (!this.isMatcherSet_officeFloorBuilder_addTeam) {
+			this.control(this.officeFloorBuilder).setMatcher(new AbstractMatcher() {
+				@Override
+				public boolean matches(Object[] expected, Object[] actual) {
+					boolean isMatch = (expected[0].equals(actual[0]));
+					isMatch = isMatch && (expected[1].getClass().equals(actual[1].getClass()));
+					return isMatch;
+				}
+			});
+			this.isMatcherSet_officeFloorBuilder_addTeam = true;
+		}
 		for (int i = 0; i < propertyNameValues.length; i += 2) {
 			String name = propertyNameValues[i];
 			String value = propertyNameValues[i + 1];
@@ -164,6 +186,11 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	private ManagingOfficeBuilder<?> managingOfficeBuilder = null;
 
 	/**
+	 * Flags if the matcher has been specified to add a {@link ManagedObject}.
+	 */
+	private boolean isMatcherSet_officeFloorBuilder_addManagedObject = false;
+
+	/**
 	 * Records adding a {@link ManagedObjectSource} to the
 	 * {@link OfficeFloorBuilder}.
 	 * 
@@ -175,25 +202,45 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 *            Timeout of the {@link ManagedObject}.
 	 * @param propertyNameValues
 	 *            {@link Property} name/value listing.
-	 * @param {@link ManagedObjectBuilder} for the added
-	 *        {@link ManagedObjectSource}.
+	 * @param {@link
+	 * 			ManagedObjectBuilder} for the added
+	 *            {@link ManagedObjectSource}.
 	 */
 	@SuppressWarnings("unchecked")
 	protected <D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> record_officeFloorBuilder_addManagedObject(
-			String managedObjectSourceName, Class<S> managedObjectSourceClass,
-			long timeout, String... propertyNameValues) {
+			String managedObjectSourceName, Class<S> managedObjectSourceClass, long timeout,
+			String... propertyNameValues) {
+
+		// Instantiate managed object source
+		S managedObjectSource;
+		try {
+			managedObjectSource = managedObjectSourceClass.newInstance();
+		} catch (Exception ex) {
+			throw fail(ex);
+		}
+
+		// Record adding the managed object
 		this.managedObjectBuilder = this.createMock(ManagedObjectBuilder.class);
-		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder
-				.addManagedObject(managedObjectSourceName,
-						managedObjectSourceClass), this.managedObjectBuilder);
+		this.recordReturn(this.officeFloorBuilder,
+				this.officeFloorBuilder.addManagedObject(managedObjectSourceName, managedObjectSource),
+				this.managedObjectBuilder);
+		if (!this.isMatcherSet_officeFloorBuilder_addManagedObject) {
+			this.control(this.officeFloorBuilder).setMatcher(new AbstractMatcher() {
+				@Override
+				public boolean matches(Object[] expected, Object[] actual) {
+					boolean isMatch = (expected[0].equals(actual[0]));
+					isMatch &= (expected[1].getClass().equals(actual[1].getClass()));
+					return isMatch;
+				}
+			});
+			this.isMatcherSet_officeFloorBuilder_addManagedObject = true;
+		}
 		for (int i = 0; i < propertyNameValues.length; i += 2) {
 			String name = propertyNameValues[i];
 			String value = propertyNameValues[i + 1];
 			this.managedObjectBuilder.addProperty(name, value);
 		}
-		if (timeout > 0) {
-			this.managedObjectBuilder.setTimeout(timeout);
-		}
+		this.managedObjectBuilder.setTimeout(timeout);
 		return this.managedObjectBuilder;
 	}
 
@@ -209,17 +256,16 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 *            Timeout of the {@link ManagedObject}.
 	 * @param propertyNameValues
 	 *            {@link Property} name/value listing.
-	 * @param {@link ManagedObjectBuilder} for the added
-	 *        {@link ManagedObjectSource}.
+	 * @param {@link
+	 * 			ManagedObjectBuilder} for the added
+	 *            {@link ManagedObjectSource}.
 	 */
 	@SuppressWarnings("unchecked")
 	protected <D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> record_officeFloorBuilder_addManagedObject(
-			String managedObjectSourceName, S managedObjectSource,
-			long timeout, String... propertyNameValues) {
+			String managedObjectSourceName, S managedObjectSource, long timeout, String... propertyNameValues) {
 		this.managedObjectBuilder = this.createMock(ManagedObjectBuilder.class);
 		this.recordReturn(this.officeFloorBuilder,
-				this.officeFloorBuilder.addManagedObject(
-						managedObjectSourceName, managedObjectSource),
+				this.officeFloorBuilder.addManagedObject(managedObjectSourceName, managedObjectSource),
 				this.managedObjectBuilder);
 		for (int i = 0; i < propertyNameValues.length; i += 2) {
 			String name = propertyNameValues[i];
@@ -237,14 +283,31 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 *            Name of the {@link ManagingOffice}.
 	 * @return {@link ManagingOfficeBuilder}.
 	 */
-	protected ManagingOfficeBuilder<?> record_managedObjectBuilder_setManagingOffice(
-			String officeName) {
-		this.managingOfficeBuilder = this
-				.createMock(ManagingOfficeBuilder.class);
-		this.recordReturn(this.managedObjectBuilder,
-				this.managedObjectBuilder.setManagingOffice(officeName),
+	protected ManagingOfficeBuilder<?> record_managedObjectBuilder_setManagingOffice(String officeName) {
+		this.managingOfficeBuilder = this.createMock(ManagingOfficeBuilder.class);
+		this.recordReturn(this.managedObjectBuilder, this.managedObjectBuilder.setManagingOffice(officeName),
 				this.managingOfficeBuilder);
 		return this.managingOfficeBuilder;
+	}
+
+	/**
+	 * Records specifying the {@link ManagedObjectPool} for the
+	 * {@link ManagedObjectSource}.
+	 * 
+	 * @param managedObjectPoolId
+	 *            Identifier of the {@link ManagedObjectPool}.
+	 * @return {@link ManagedObjectPoolBuilder}.
+	 */
+	protected ManagedObjectPoolBuilder record_managedObjectBuilder_setManagedObjectPool(String managedObjectPoolId) {
+
+		// Obtain the managed object pool
+		TestManagedObjectPoolSource pool = TestManagedObjectPoolSource.getManagedObjectPoolSource(managedObjectPoolId);
+
+		// Record creating the managed object pool
+		ManagedObjectPoolBuilder poolBuilder = this.createMock(ManagedObjectPoolBuilder.class);
+		this.recordReturn(this.managedObjectBuilder, this.managedObjectBuilder.setManagedObjectPool(pool), poolBuilder);
+		poolBuilder.addThreadCompletionListener(pool);
+		return poolBuilder;
 	}
 
 	/**
@@ -257,12 +320,9 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 */
 	protected DependencyMappingBuilder record_managingOfficeBuilder_setInputManagedObjectName(
 			String inputManagedObjectName) {
-		DependencyMappingBuilder dependencyMapper = this
-				.createMock(DependencyMappingBuilder.class);
+		DependencyMappingBuilder dependencyMapper = this.createMock(DependencyMappingBuilder.class);
 		this.recordReturn(this.managingOfficeBuilder,
-				this.managingOfficeBuilder
-						.setInputManagedObjectName(inputManagedObjectName),
-				dependencyMapper);
+				this.managingOfficeBuilder.setInputManagedObjectName(inputManagedObjectName), dependencyMapper);
 		return dependencyMapper;
 	}
 
@@ -278,17 +338,14 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 *            Name of the {@link Office}.
 	 * @return Added {@link OfficeBuilder}.
 	 */
-	protected OfficeBuilder record_officeFloorBuilder_addOffice(
-			String officeName) {
+	protected OfficeBuilder record_officeFloorBuilder_addOffice(String officeName) {
 
 		// Record adding the office
 		this.officeBuilder = this.createMock(OfficeBuilder.class);
-		this.recordReturn(this.officeFloorBuilder,
-				this.officeFloorBuilder.addOffice(officeName),
-				this.officeBuilder);
+		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder.addOffice(officeName), this.officeBuilder);
 
-		// Reset add work matcher as new mock office builder
-		this.isMatcherSet_officeBuilder_addWork = false;
+		// Reset add function matcher as new mock office builder
+		this.isMatcherSet_officeBuilder_addFunction = false;
 
 		// Return the office builder
 		return this.officeBuilder;
@@ -303,13 +360,11 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 * @param officeManagedObjectName
 	 *            {@link Office} registered {@link ManagedObject} name.
 	 */
-	protected DependencyMappingBuilder record_officeBuilder_addProcessManagedObject(
-			String processManagedObjectName, String officeManagedObjectName) {
-		DependencyMappingBuilder builder = this
-				.createMock(DependencyMappingBuilder.class);
-		this.recordReturn(this.officeBuilder, this.officeBuilder
-				.addProcessManagedObject(processManagedObjectName,
-						officeManagedObjectName), builder);
+	protected DependencyMappingBuilder record_officeBuilder_addProcessManagedObject(String processManagedObjectName,
+			String officeManagedObjectName) {
+		DependencyMappingBuilder builder = this.createMock(DependencyMappingBuilder.class);
+		this.recordReturn(this.officeBuilder,
+				this.officeBuilder.addProcessManagedObject(processManagedObjectName, officeManagedObjectName), builder);
 		return builder;
 	}
 
@@ -322,13 +377,11 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 * @param officeManagedObjectName
 	 *            {@link Office} registered {@link ManagedObject} name.
 	 */
-	protected DependencyMappingBuilder record_officeBuilder_addThreadManagedObject(
-			String threadManagedObjectName, String officeManagedObjectName) {
-		DependencyMappingBuilder builder = this
-				.createMock(DependencyMappingBuilder.class);
-		this.recordReturn(this.officeBuilder, this.officeBuilder
-				.addThreadManagedObject(threadManagedObjectName,
-						officeManagedObjectName), builder);
+	protected DependencyMappingBuilder record_officeBuilder_addThreadManagedObject(String threadManagedObjectName,
+			String officeManagedObjectName) {
+		DependencyMappingBuilder builder = this.createMock(DependencyMappingBuilder.class);
+		this.recordReturn(this.officeBuilder,
+				this.officeBuilder.addThreadManagedObject(threadManagedObjectName, officeManagedObjectName), builder);
 		return builder;
 	}
 
@@ -349,24 +402,20 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 * @return {@link GovernanceBuilder} for the added {@link GovernanceSource}.
 	 */
 	@SuppressWarnings("unchecked")
-	protected <I, F extends Enum<F>, S extends GovernanceSource<I, F>> GovernanceBuilder<F> record_officeBuilder_addGovernance(
-			String governanceName, Class<S> governanceSourceClass,
-			Class<?> extensionInterface) {
-		GovernanceBuilder<F> governanceBuilder = this
-				.createMock(GovernanceBuilder.class);
-		this.recordReturn(this.officeBuilder, this.officeBuilder.addGovernance(
-				governanceName, (GovernanceFactory<I, F>) null,
-				(Class<I>) extensionInterface), governanceBuilder);
+	protected <E, F extends Enum<F>, S extends GovernanceSource<E, F>> GovernanceBuilder<F> record_officeBuilder_addGovernance(
+			String governanceName, Class<S> governanceSourceClass, Class<?> extensionInterface) {
+		GovernanceBuilder<F> governanceBuilder = this.createMock(GovernanceBuilder.class);
+		this.recordReturn(this.officeBuilder, this.officeBuilder.addGovernance(governanceName,
+				(Class<E>) extensionInterface, (GovernanceFactory<E, F>) null), governanceBuilder);
 		if (!this.isMatcherSet_officeBuilder_addGovernance) {
 			this.control(this.officeBuilder).setMatcher(new AbstractMatcher() {
 				@Override
 				public boolean matches(Object[] expected, Object[] actual) {
 					// Ensure have governance factory
-					assertNotNull("Must have governance factory", actual[1]);
+					assertNotNull("Must have governance factory", actual[2]);
 
 					// Match if name and extension interface same
-					return this.argumentMatches(expected[0], actual[0])
-							&& this.argumentMatches(expected[2], actual[2]);
+					return this.argumentMatches(expected[0], actual[0]) && this.argumentMatches(expected[1], actual[1]);
 				}
 			});
 			this.isMatcherSet_officeBuilder_addGovernance = true;
@@ -387,68 +436,14 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 *            Extension interface.
 	 * @return {@link GovernanceBuilder} for the added {@link GovernanceSource}.
 	 */
-	protected <I, F extends Enum<F>, S extends GovernanceSource<I, F>> GovernanceBuilder<F> record_officeBuilder_addGovernance(
-			String governanceName, String teamName,
-			Class<S> governanceSourceClass, Class<?> extensionInterface) {
-		GovernanceBuilder<F> governanceBuilder = this
-				.record_officeBuilder_addGovernance(governanceName,
-						governanceSourceClass, extensionInterface);
-		governanceBuilder.setTeam(teamName);
-		return governanceBuilder;
-	}
-
-	/**
-	 * Records adding a {@link ThreadState} bound {@link Administrator}.
-	 * 
-	 * @param administratorName
-	 *            Name of the {@link Administrator}.
-	 * @param administratorSourceClass
-	 *            {@link AdministratorSource} class.
-	 * @param propertyNameValues
-	 *            {@link Property} name/value listing.
-	 * @return {@link AdministratorBuilder} for the added {@link Administrator}.
-	 */
-	@SuppressWarnings("unchecked")
-	protected <I, A extends Enum<A>, S extends AdministratorSource<I, A>> AdministratorBuilder<A> record_officeBuilder_addThreadAdministrator(
-			String administratorName, Class<S> administratorSourceClass,
-			String... propertyNameValues) {
-		final AdministratorBuilder<A> admin = this
-				.createMock(AdministratorBuilder.class);
-		this.recordReturn(this.officeBuilder, this.officeBuilder
-				.addThreadAdministrator(administratorName,
-						administratorSourceClass), admin);
-		for (int i = 0; i < propertyNameValues.length; i += 2) {
-			String name = propertyNameValues[i];
-			String value = propertyNameValues[i + 1];
-			admin.addProperty(name, value);
+	protected <E, F extends Enum<F>, S extends GovernanceSource<E, F>> GovernanceBuilder<F> record_officeBuilder_addGovernance(
+			String governanceName, String teamName, Class<S> governanceSourceClass, Class<?> extensionInterface) {
+		GovernanceBuilder<F> governanceBuilder = this.record_officeBuilder_addGovernance(governanceName,
+				governanceSourceClass, extensionInterface);
+		if (teamName != null) {
+			governanceBuilder.setResponsibleTeam(teamName);
 		}
-		return admin;
-	}
-
-	/**
-	 * Convenience method to record adding a {@link ThreadState} bound
-	 * {@link Administrator} and specifying {@link Team} responsible for the
-	 * administration.
-	 * 
-	 * @param administratorName
-	 *            Name of the {@link Administrator}.
-	 * @param officeTeamName
-	 *            {@link Office} {@link Team} name responsible for
-	 *            administration.
-	 * @param administratorSourceClass
-	 *            {@link AdministratorSource} class.
-	 * @param propertyNameValues
-	 *            {@link Property} name/value listing.
-	 * @return {@link AdministratorBuilder} for the added {@link Administrator}.
-	 */
-	protected <I, A extends Enum<A>, S extends AdministratorSource<I, A>> AdministratorBuilder<A> record_officeBuilder_addThreadAdministrator(
-			String administratorName, String officeTeamName,
-			Class<S> administratorSourceClass, String... propertyNameValues) {
-		AdministratorBuilder<A> builder = this
-				.record_officeBuilder_addThreadAdministrator(administratorName,
-						administratorSourceClass, propertyNameValues);
-		builder.setTeam(officeTeamName);
-		return builder;
+		return governanceBuilder;
 	}
 
 	/**
@@ -456,15 +451,11 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @param typeOfCause
 	 *            Type of cause handled by {@link EscalationProcedure}.
-	 * @param workName
-	 *            Name of {@link Work} to handle {@link Escalation}.
-	 * @param taskName
-	 *            Name of {@link Task} within {@link Work} to handle
-	 *            {@link Escalation}.
+	 * @param functionName
+	 *            Name of {@link ManagedFunction} to handle {@link Escalation}.
 	 */
-	protected <E extends Throwable> void record_officeBuilder_addEscalation(
-			Class<E> typeOfCause, String workName, String taskName) {
-		this.officeBuilder.addEscalation(typeOfCause, workName, taskName);
+	protected <E extends Throwable> void record_officeBuilder_addEscalation(Class<E> typeOfCause, String functionName) {
+		this.officeBuilder.addEscalation(typeOfCause, functionName);
 	}
 
 	/**
@@ -475,8 +466,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 * @param officeFloorTeamName
 	 *            {@link OfficeFloor} {@link Team} name.
 	 */
-	protected void record_officeBuilder_registerTeam(String officeTeamName,
-			String officeFloorTeamName) {
+	protected void record_officeBuilder_registerTeam(String officeTeamName, String officeFloorTeamName) {
 		this.officeBuilder.registerTeam(officeTeamName, officeFloorTeamName);
 	}
 
@@ -492,197 +482,259 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 *            {@link OfficeFloor} {@link Team} name.
 	 * @return Added {@link OfficeBuilder}.
 	 */
-	protected OfficeBuilder record_officeFloorBuilder_addOffice(
-			String officeName, String officeTeamName, String officeFloorTeamName) {
+	protected OfficeBuilder record_officeFloorBuilder_addOffice(String officeName, String officeTeamName,
+			String officeFloorTeamName) {
 		this.record_officeFloorBuilder_addOffice(officeName);
-		this.record_officeBuilder_registerTeam(officeTeamName,
-				officeFloorTeamName);
+		this.record_officeBuilder_registerTeam(officeTeamName, officeFloorTeamName);
 		return this.officeBuilder;
 	}
 
 	/**
-	 * Records adding a start-up {@link Task} to the {@link OfficeBuilder}.
+	 * Records adding a start-up {@link ManagedFunction} to the
+	 * {@link OfficeBuilder}.
 	 * 
-	 * @param workName
-	 *            Name of {@link Work} for the start-up {@link Task}.
-	 * @param taskName
-	 *            Name of start-up {@link Task}.
+	 * @param functionName
+	 *            Name of start-up {@link ManagedFunction}.
 	 */
-	protected void record_officeBuilder_addStartupTask(String workName,
-			String taskName) {
-		this.officeBuilder.addStartupTask(workName, taskName);
+	protected void record_officeBuilder_addStartupFunction(String functionName) {
+		this.officeBuilder.addStartupFunction(functionName);
 	}
 
 	/**
-	 * Current {@link WorkBuilder}.
+	 * Current {@link ManagedFunctionBuilder}.
 	 */
-	private WorkBuilder<Work> workBuilder = null;
+	private ManagedFunctionBuilder<?, ?> functionBuilder;
 
 	/**
-	 * Flags if the matcher has been specified to add a {@link Work}.
-	 */
-	private boolean isMatcherSet_officeBuilder_addWork = false;
-
-	/**
-	 * Records adding a {@link WorkBuilder}.
+	 * Records adding a {@link ManagedFunctionBuilder}.
 	 * 
-	 * @param workName
-	 *            Name of the {@link Work}.
-	 * @return Added {@link WorkBuilder}.
+	 * @param namespace
+	 *            Namespace.
+	 * @param functionName
+	 *            Name of the {@link ManagedFunction}.
+	 * @return Added {@link ManagedFunctionBuilder}.
 	 */
-	@SuppressWarnings("unchecked")
-	protected WorkBuilder<Work> record_officeBuilder_addWork(String workName) {
+	protected ManagedFunctionBuilder<?, ?> record_officeBuilder_addFunction(String namespace, String functionName) {
+		return this.record_officeBuilder_addFunction(namespace, functionName, null);
+	}
 
-		// Record adding the work
-		this.workBuilder = this.createMock(WorkBuilder.class);
-		WorkFactory<Work> workFactory = null;
+	/**
+	 * Flags if the matcher has been specified to add a {@link ManagedFunction}.
+	 */
+	private boolean isMatcherSet_officeBuilder_addFunction = false;
+
+	/**
+	 * Convenience method for recording adding a {@link ManagedFunctionBuilder}
+	 * and specifying the {@link Team} for the {@link ManagedFunction}.
+	 * 
+	 * @param namespace
+	 *            Namespace.
+	 * @param functionName
+	 *            Name of the {@link ManagedFunction}.
+	 * @param officeTeamName
+	 *            {@link Office} {@link Team} name.
+	 * @return Added {@link ManagedFunctionBuilder}.
+	 */
+	protected ManagedFunctionBuilder<?, ?> record_officeBuilder_addFunction(String namespace, String functionName,
+			String officeTeamName) {
+
+		// Create the qualified function name
+		String qualifiedFunctionName = namespace + "." + functionName;
+
+		// Record adding the function
+		this.functionBuilder = this.createMock(ManagedFunctionBuilder.class);
+		ManagedFunctionFactory<Indexed, Indexed> functionFactory = null;
 		this.recordReturn(this.officeBuilder,
-				this.officeBuilder.addWork(workName, workFactory),
-				this.workBuilder);
-		if (!this.isMatcherSet_officeBuilder_addWork) {
+				this.officeBuilder.addManagedFunction(qualifiedFunctionName, functionFactory), this.functionBuilder);
+		if (!this.isMatcherSet_officeBuilder_addFunction) {
 			this.control(this.officeBuilder).setMatcher(new AbstractMatcher() {
 				@Override
 				public boolean matches(Object[] expected, Object[] actual) {
-					assertNotNull("Must have work factory", actual[1]);
-					// Match based on work name
-					return expected[0].equals(actual[0]);
-				}
-			});
-			this.isMatcherSet_officeBuilder_addWork = true;
-		}
-
-		// Reset add task matcher as new mock work builder
-		this.isMatcherSet_workBuilder_addTask = false;
-
-		// Return the work builder
-		return this.workBuilder;
-	}
-
-	/**
-	 * Current {@link TaskBuilder}.
-	 */
-	private TaskBuilder<Work, ?, ?> taskBuilder;
-
-	/**
-	 * Records adding a {@link TaskBuilder}.
-	 * 
-	 * @param taskName
-	 *            Name of the {@link Task}.
-	 * @return Added {@link TaskBuilder}.
-	 */
-	protected TaskBuilder<Work, ?, ?> record_workBuilder_addTask(String taskName) {
-		return this.record_workBuilder_addTask(taskName, null);
-	}
-
-	/**
-	 * Flags if the matcher has been specified to add a {@link Task}.
-	 */
-	private boolean isMatcherSet_workBuilder_addTask = false;
-
-	/**
-	 * Convenience method for recording adding a {@link TaskBuilder} and
-	 * specifying the {@link Team} for the {@link Task}.
-	 * 
-	 * @param taskName
-	 *            Name of the {@link Task}.
-	 * @param officeTeamName
-	 *            {@link Office} {@link Team} name.
-	 * @return Added {@link TaskBuilder}.
-	 */
-	@SuppressWarnings("unchecked")
-	protected TaskBuilder<Work, ?, ?> record_workBuilder_addTask(
-			String taskName, String officeTeamName) {
-
-		// Record adding the task
-		this.taskBuilder = this.createMock(TaskBuilder.class);
-		TaskFactory<Work, Indexed, Indexed> taskFactory = null;
-		this.recordReturn(this.workBuilder,
-				this.workBuilder.addTask(taskName, taskFactory),
-				this.taskBuilder);
-		if (!this.isMatcherSet_workBuilder_addTask) {
-			this.control(this.workBuilder).setMatcher(new AbstractMatcher() {
-				@Override
-				public boolean matches(Object[] expected, Object[] actual) {
 					assertNotNull("Must have task factory", actual[1]);
-					// Match based on task name
+					// Match based on function name
 					return expected[0].equals(actual[0]);
 				}
 			});
-			this.isMatcherSet_workBuilder_addTask = true;
+			this.isMatcherSet_officeBuilder_addFunction = true;
 		}
 
 		// Determine if record specifying the team responsible for task
 		if (officeTeamName != null) {
-			this.taskBuilder.setTeam(officeTeamName);
+			this.functionBuilder.setResponsibleTeam(officeTeamName);
 		}
 
+		// Reset administration for new function
+		this.isMatcherSet_functionBuilder_preAdministration = false;
+		this.isMatcherSet_functionBuilder_postAdministration = false;
+
 		// Return the task builder
-		return this.taskBuilder;
+		return this.functionBuilder;
 	}
 
 	/**
-	 * Specifies the {@link Team} for the {@link Task}.
+	 * Convenience method for recording an {@link OfficeSection} added via
+	 * {@link ClassSectionSource} for a {@link Class} with a single
+	 * {@link Method}.
+	 * 
+	 * @param officeName
+	 *            Name of the {@link Office}.
+	 * @param sectionPath
+	 *            {@link OfficeSection} to {@link SubSection} path.
+	 * @param sectionClass
+	 *            {@link Class} for the {@link ClassSectionSource}.
+	 * @param functionName
+	 *            Name of the {@link Method}.
+	 * @return {@link ManagedFunctionBuilder} for the {@link Method}.
+	 */
+	public ManagedFunctionBuilder<?, ?> record_officeBuilder_addSectionClassFunction(String officeName,
+			String sectionPath, Class<?> sectionClass, String functionName) {
+		return this.record_officeBuilder_addSectionClassFunction(officeName, sectionPath, sectionClass, functionName,
+				null);
+	}
+
+	/**
+	 * Convenience method for recording an {@link OfficeSection} added via
+	 * {@link ClassSectionSource} for a {@link Class} with a single
+	 * {@link Method}.
+	 * 
+	 * @param officeName
+	 *            Name of the {@link Office}.
+	 * @param sectionPath
+	 *            {@link OfficeSection} to {@link SubSection} path.
+	 * @param sectionClass
+	 *            {@link Class} for the {@link ClassSectionSource}.
+	 * @param functionName
+	 *            Name of the {@link Method}.
+	 * @param responsibleTeamName
+	 *            Responsible {@link Team} name. May be <code>null</code>.
+	 * @return {@link ManagedFunctionBuilder} for the {@link Method}.
+	 */
+	public ManagedFunctionBuilder<?, ?> record_officeBuilder_addSectionClassFunction(String officeName,
+			String sectionPath, Class<?> sectionClass, String functionName, String responsibleTeamName) {
+
+		// Obtain the qualified section object name
+		String qualifiedObjectName = officeName + "." + sectionPath + ".OBJECT";
+
+		// Record the function
+		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction(sectionPath, functionName);
+
+		// Record the responsible team
+		if (responsibleTeamName != null) {
+			function.setResponsibleTeam(responsibleTeamName);
+		}
+
+		// Record the section object
+		function.linkManagedObject(0, qualifiedObjectName, sectionClass);
+		this.record_officeFloorBuilder_addManagedObject(qualifiedObjectName, SectionClassManagedObjectSource.class, 0,
+				SectionClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, sectionClass.getName());
+		this.record_managedObjectBuilder_setManagingOffice(officeName);
+		this.officeBuilder.registerManagedObjectSource(qualifiedObjectName, qualifiedObjectName);
+		this.record_officeBuilder_addThreadManagedObject(qualifiedObjectName, qualifiedObjectName);
+
+		// Return the function
+		return function;
+	}
+
+	/**
+	 * Specifies the {@link Team} for the {@link ManagedFunction}.
 	 * 
 	 * @param officeTeamName
 	 *            {@link Office} {@link Team} name.
 	 */
-	protected void record_taskBuilder_setTeam(String officeTeamName) {
-		this.taskBuilder.setTeam(officeTeamName);
+	protected void record_functionBuilder_setResponsibleTeam(String officeTeamName) {
+		this.functionBuilder.setResponsibleTeam(officeTeamName);
 	}
 
 	/**
-	 * Specifies the Differentiator for the {@link Task}.
+	 * Specifies the Differentiator for the {@link ManagedFunction}.
 	 * 
 	 * @param differentiator
 	 *            Differentiator.
 	 */
-	protected void record_taskBuilder_setDifferentiator(Object differentiator) {
-		this.taskBuilder.setDifferentiator(differentiator);
+	protected void record_functionBuilder_setDifferentiator(Object differentiator) {
+		this.functionBuilder.setDifferentiator(differentiator);
 	}
 
 	/**
-	 * Obtains the {@link ResourceSource} for test being run.
-	 * 
-	 * @return {@link ResourceSource} for test being run.
+	 * Flags if the matcher has been specified to add pre
+	 * {@link Administration}.
 	 */
-	protected ResourceSource getResourceSource() {
+	private boolean isMatcherSet_functionBuilder_preAdministration = false;
 
-		// Determine if already available
-		if (this.configurationContext != null) {
-			return this.configurationContext;
+	/**
+	 * Records adding pre {@link Administration}.
+	 * 
+	 * @param administrationName
+	 *            Name of the {@link Administration}.
+	 * @param extensionInterface
+	 *            Extension interface.
+	 * @return {@link AdministrationBuilder} for the added
+	 *         {@link Administration}.
+	 */
+	@SuppressWarnings("unchecked")
+	protected <E, F extends Enum<F>, G extends Enum<G>, S extends AdministrationSource<E, F, G>> AdministrationBuilder<F, G> record_functionBuilder_preAdministration(
+			String administrationName, Class<E> extensionInterface) {
+
+		// Record adding pre-administration
+		final AdministrationBuilder<F, G> admin = this.createMock(AdministrationBuilder.class);
+		AdministrationFactory<E, F, G> adminFactory = null;
+		this.recordReturn(this.functionBuilder,
+				this.functionBuilder.preAdminister(administrationName, extensionInterface, adminFactory), admin);
+		if (!this.isMatcherSet_functionBuilder_preAdministration) {
+			this.control(this.functionBuilder).setMatcher(new AbstractMatcher() {
+				@Override
+				public boolean matches(Object[] expected, Object[] actual) {
+					assertNotNull("Must have administration factory", actual[2]);
+					// Match based on name and extension interface
+					return expected[0].equals(actual[0]) && expected[1].equals(actual[1]);
+				}
+			});
+			this.isMatcherSet_functionBuilder_preAdministration = true;
 		}
 
-		// Move the 'Test' to start of test case name
-		String testCaseName = this.getClass().getSimpleName();
-		testCaseName = "Test"
-				+ testCaseName.substring(0,
-						(testCaseName.length() - "Test".length()));
+		// Return the admin builder
+		return admin;
+	}
 
-		// Remove the 'test' from the start of the test name
-		String testName = this.getName();
-		testName = testName.substring("test".length());
+	/**
+	 * Flags if the matcher has been specified to add post
+	 * {@link Administration}.
+	 */
+	private boolean isMatcherSet_functionBuilder_postAdministration = false;
 
-		// Create the configuration context
-		String configFileName = testCaseName + "/" + testName + ".xml";
-		try {
-			this.configurationContext = new XmlConfigurationContext(this,
-					configFileName);
+	/**
+	 * Records adding post {@link Administration}.
+	 * 
+	 * @param administrationName
+	 *            Name of the {@link Administration}.
+	 * @param extensionInterface
+	 *            Extension interface.
+	 * @return {@link AdministrationBuilder} for the added
+	 *         {@link Administration}.
+	 */
+	@SuppressWarnings("unchecked")
+	protected <E, F extends Enum<F>, G extends Enum<G>, S extends AdministrationSource<E, F, G>> AdministrationBuilder<F, G> record_functionBuilder_postAdministration(
+			String administrationName, Class<E> extensionInterface) {
 
-			// Add the tag replacements
-			this.configurationContext.addTag("testcase", this.getClass()
-					.getName());
-
-		} catch (Exception ex) {
-			// Wrap failure to not require tests to have to handle
-			StringWriter stackTrace = new StringWriter();
-			ex.printStackTrace(new PrintWriter(stackTrace));
-			fail("Failed to obtain configuration: " + configFileName + "\n"
-					+ stackTrace.toString());
-			return null; // fail should propagate exception
+		// Record adding post-administration
+		final AdministrationBuilder<F, G> admin = this.createMock(AdministrationBuilder.class);
+		AdministrationFactory<E, F, G> adminFactory = null;
+		this.recordReturn(this.functionBuilder,
+				this.functionBuilder.postAdminister(administrationName, extensionInterface, adminFactory), admin);
+		if (!this.isMatcherSet_functionBuilder_postAdministration) {
+			this.control(this.functionBuilder).setMatcher(new AbstractMatcher() {
+				@Override
+				public boolean matches(Object[] expected, Object[] actual) {
+					assertNotNull("Must have administration factory", actual[2]);
+					// Match based on name and extension interface
+					return expected[0].equals(actual[0]) && expected[1].equals(actual[1]);
+				}
+			});
+			this.isMatcherSet_functionBuilder_postAdministration = true;
 		}
 
-		// Return the configuration context
-		return this.configurationContext;
+		// Return the admin builder
+		return admin;
 	}
 
 	/**
@@ -706,9 +758,8 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 			officeFloor = this.createMock(OfficeFloor.class);
 
 			// Record successfully building the OfficeFloor
-			this.recordReturn(this.officeFloorBuilder,
-					this.officeFloorBuilder.buildOfficeFloor(null),
-					officeFloor, new TypeMatcher(OfficeFloorIssues.class));
+			this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder.buildOfficeFloor(null), officeFloor,
+					new TypeMatcher(OfficeFloorIssues.class));
 		}
 
 		// Replay the mocks
@@ -717,8 +768,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 		// Create the office frame to return the mock OfficeFloor builder
 		OfficeFrame officeFrame = new OfficeFrame() {
 			@Override
-			public OfficeFloorBuilder createOfficeFloorBuilder(
-					String officeFloorName) {
+			public OfficeFloorBuilder createOfficeFloorBuilder(String officeFloorName) {
 				return AbstractCompileTestCase.this.officeFloorBuilder;
 			}
 		};
@@ -727,11 +777,21 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 		ResourceSource resourceSource = this.getResourceSource();
 
 		// Create the compiler (overriding values to allow testing)
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.enhancedIssues);
+		compiler.setOfficeFloorSourceClass(OfficeFloorModelOfficeFloorSource.class);
+		compiler.setOfficeFloorLocation("office-floor");
 		compiler.setOfficeFrame(officeFrame);
 		compiler.addResources(resourceSource);
+		if (this.isOverrideProperties) {
+			try {
+				File propertiesDirectory = this.findFile("net/officefloor/properties");
+				compiler.setOverridePropertiesDirectory(propertiesDirectory);
+			} catch (FileNotFoundException ex) {
+				// Should not happen
+				throw fail(ex);
+			}
+		}
 
 		// Add the properties
 		for (int i = 0; i < propertyNameValues.length; i += 2) {
@@ -741,15 +801,14 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 		}
 
 		// Compile the OfficeFloor
-		OfficeFloor loadedOfficeFloor = compiler.compile("office-floor");
+		OfficeFloor loadedOfficeFloor = compiler.compile("OfficeFloor");
 
 		// Verify the mocks
 		this.verifyMockObjects();
 
 		// Ensure the correct loaded office floor
 		if (isExpectBuild) {
-			assertEquals("Incorrect built office floor", officeFloor,
-					loadedOfficeFloor);
+			assertEquals("Incorrect built office floor", officeFloor, loadedOfficeFloor);
 		} else {
 			assertNull("Should not build the office floor", officeFloor);
 		}

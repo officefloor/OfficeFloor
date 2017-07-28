@@ -19,13 +19,13 @@ package net.officefloor.model.woof;
 
 import java.util.Set;
 
-import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
 /**
  * Provides inheritance information regarding a {@link WoofTemplateModel} being
- * a super {@link AutoWireSection}.
+ * a super {@link OfficeSection}.
  * 
  * @author Daniel Sagenschneider
  */

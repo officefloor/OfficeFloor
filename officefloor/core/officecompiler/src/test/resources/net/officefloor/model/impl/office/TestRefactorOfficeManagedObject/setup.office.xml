@@ -1,0 +1,7 @@
+<office>
+	<managed-objects>
+		<managed-object name="MO">
+			<type-qualification type="TYPE" />
+		</managed-object>
+	</managed-objects>
+</office>

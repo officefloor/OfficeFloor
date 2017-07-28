@@ -28,7 +28,7 @@ import javax.persistence.Persistence;
 
 import org.hsqldb.jdbcDriver;
 
-import net.officefloor.autowire.AutoWireManagement;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -48,31 +48,35 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 */
 	private EntityManagerFactory factory;
 
+	/**
+	 * {@link OfficeFloor}.
+	 */
+	protected OfficeFloor officeFloor;
+
 	@Override
 	protected void setUp() throws Exception {
 
 		// Create the database
 		Class.forName(jdbcDriver.class.getName());
-		this.connection = DriverManager.getConnection("jdbc:hsqldb:mem:test",
-				"sa", "");
+		this.connection = DriverManager.getConnection("jdbc:hsqldb:mem:test", "sa", "");
 		Statement statement = this.connection.createStatement();
-		statement
-				.execute("CREATE TABLE MOCKENTITY ( ID IDENTITY PRIMARY KEY, NAME VARCHAR(20) NOT NULL, DESCRIPTION VARCHAR(256) )");
+		statement.execute(
+				"CREATE TABLE MOCKENTITY ( ID IDENTITY PRIMARY KEY, NAME VARCHAR(20) NOT NULL, DESCRIPTION VARCHAR(256) )");
 		statement.close();
 
 		// Create the entity manager factory
 		Properties properties = new Properties();
-		properties.put("datanucleus.ConnectionDriverName",
-				jdbcDriver.class.getName());
-		this.factory = Persistence.createEntityManagerFactory("test",
-				properties);
+		properties.put("datanucleus.ConnectionDriverName", jdbcDriver.class.getName());
+		this.factory = Persistence.createEntityManagerFactory("test", properties);
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
 
-		// Close any OfficeFloor instances
-		AutoWireManagement.closeAllOfficeFloors();
+		// Close OfficeFloor
+		if (this.officeFloor != null) {
+			this.officeFloor.closeOfficeFloor();
+		}
 
 		try {
 			// Stop factory

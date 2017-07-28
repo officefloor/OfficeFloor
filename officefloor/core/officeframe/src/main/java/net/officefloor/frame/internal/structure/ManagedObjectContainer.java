@@ -17,13 +17,11 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.JobContext;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
+import java.util.List;
+
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * Container managing a {@link ManagedObject}.
@@ -33,164 +31,90 @@ import net.officefloor.frame.spi.team.TeamIdentifier;
 public interface ManagedObjectContainer {
 
 	/**
-	 * Triggers loading the {@link ManagedObject}.
+	 * Obtains the {@link ThreadState} responsible for changes to this
+	 * {@link ManagedObjectContainer}.
 	 * 
-	 * @param jobContext
-	 *            {@link JobContext}.
-	 * @param jobNode
-	 *            {@link JobNode} requesting the {@link ManagedObject} to be
-	 *            loaded.
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
-	 *            activate.
-	 * @param currentTeam
-	 *            {@link TeamIdentifier} of the current {@link Team} loading the
+	 * @return {@link ThreadState} responsible for changes to this
+	 *         {@link ManagedObjectContainer}.
+	 */
+	ThreadState getResponsibleThreadState();
+
+	/**
+	 * Creates a {@link FunctionState} to load the {@link ManagedObject}.
+	 * 
+	 * @param managedFunctionContainer
+	 *            {@link ManagedFunctionContainer} requiring the
 	 *            {@link ManagedObject}.
-	 * @param context
-	 *            {@link ContainerContext}.
+	 * @return Optional {@link FunctionState} to load the {@link ManagedObject}.
+	 *         Should this return </code>null</code>, the
+	 *         {@link ManagedFunctionContainer} should not then be executed, as
+	 *         it is expecting to wait. This will return the
+	 *         {@link ManagedFunctionContainer} when the {@link ManagedObject}
+	 *         is loaded.
 	 */
-	void loadManagedObject(JobContext jobContext, JobNode jobNode,
-			JobNodeActivateSet activateSet, TeamIdentifier currentTeam,
-			ContainerContext context);
+	FunctionState loadManagedObject(ManagedFunctionContainer managedFunctionContainer);
 
 	/**
-	 * Provides any active {@link Governance} over the {@link ManagedObject}.
+	 * <p>
+	 * Creates a {@link FunctionState} to check if the {@link ManagedObject}
+	 * contained within this {@link ManagedObjectContainer} is ready.
+	 * <p>
+	 * Should the {@link ManagedObject} not be ready, then will latch to wait
+	 * for the {@link ManagedObject} to be ready.
 	 * 
-	 * @param <W>
-	 *            {@link Work} type.
-	 * @param workContainer
-	 *            {@link WorkContainer} to possibly source the
-	 *            {@link Governance}.
-	 * @param jobContext
-	 *            {@link JobContext}.
-	 * @param jobNode
-	 *            {@link JobNode} requesting {@link Governance} for the
-	 *            {@link ManagedObject}.
-	 * @param activateSet
-	 *            {@link JobNodeActivatableSet} to add {@link JobNode} instances
-	 *            to activate.
-	 * @param context
-	 *            {@link ContainerContext}.
-	 * @return <code>true</code> if {@link Governance} is in place for the
-	 *         {@link ManagedObject} and may move onto the next
-	 *         {@link ManagedObject}.
+	 * @param check
+	 *            {@link ManagedObjectReadyCheck}.
+	 * @return {@link FunctionState} to check if the {@link ManagedObject}
+	 *         contained within this {@link ManagedObjectContainer} is ready.
 	 */
-	<W extends Work> boolean governManagedObject(
-			WorkContainer<W> workContainer, JobContext jobContext,
-			JobNode jobNode, JobNodeActivateSet activateSet,
-			ContainerContext context);
+	FunctionState checkReady(ManagedObjectReadyCheck check);
 
 	/**
-	 * Allows this {@link ManagedObject} to coordinate with the other
-	 * {@link ManagedObject} instances. Also handles completion of loading the
-	 * {@link ManagedObject} and obtaining the {@link Object}.
+	 * <p>
+	 * Extracts the {@link ManagedObject} extension from the
+	 * {@link ManagedObject} contained in this {@link ManagedObjectContainer}.
+	 * <p>
+	 * Should the {@link ManagedObject} not be loaded, then no
+	 * {@link ManagedObject} extension will be loaded.
 	 * 
-	 * @param <W>
-	 *            {@link Work} type.
-	 * @param workContainer
-	 *            {@link WorkContainer} to source the other
-	 *            {@link ManagedObject} instances.
-	 * @param jobContext
-	 *            {@link JobContext}.
-	 * @param jobNode
-	 *            {@link JobNode} requesting the {@link ManagedObject} to
-	 *            coordinate.
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
-	 *            activate.
-	 * @param context
-	 *            {@link ContainerContext}.
-	 * @return <code>true</code> if coordination is in place for the
-	 *         {@link ManagedObject} and may move onto the next
-	 *         {@link ManagedObject}.
+	 * @param extractor
+	 *            {@link ManagedObjectExtensionExtractor}.
+	 * @param managedObjectExtensions
+	 *            {@link List} to load the {@link ManagedObject} extension.
+	 * @param extensionIndex
+	 *            Index within the {@link ManagedObject} extensions array to
+	 *            load the extension.
+	 * @param responsibleTeam
+	 *            {@link TeamManagement} responsible for extracting the
+	 *            extension. May be <code>null</code> to use any {@link Team}.
+	 * @return {@link FunctionState} to load the {@link ManagedObject}
+	 *         extension.
 	 */
-	<W extends Work> boolean coordinateManagedObject(
-			WorkContainer<W> workContainer, JobContext jobContext,
-			JobNode jobNode, JobNodeActivateSet activateSet,
-			ContainerContext context);
-
-	/**
-	 * Indicates if the {@link ManagedObject} is ready. This is to ensure the
-	 * {@link ManagedObject} is not currently involved within an asynchronous
-	 * operation (in other words the {@link AsynchronousManagedObject} completed
-	 * execution and ready for another operation).
-	 *
-	 * @param <W>
-	 *            {@link Work} type.
-	 * @param workContainer
-	 *            {@link WorkContainer} to source the other
-	 *            {@link ManagedObject} instances. This may be required should
-	 *            coordination be necessary to make the {@link ManagedObject}
-	 *            ready.
-	 * @param jobContext
-	 *            {@link JobContext}.
-	 * @param jobNode
-	 *            {@link JobNode} requiring the {@link ManagedObject} to be
-	 *            ready.
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
-	 *            activate.
-	 * @param context
-	 *            {@link ContainerContext}.
-	 * @return <code>true</code> if the {@link ManagedObject} is ready,
-	 *         otherwise <code>false</code> indicating that waiting on a
-	 *         {@link ManagedObject}.
-	 */
-	<W extends Work> boolean isManagedObjectReady(
-			WorkContainer<W> workContainer, JobContext jobContext,
-			JobNode jobNode, JobNodeActivateSet activateSet,
-			ContainerContext context);
+	<E> FunctionState extractExtension(ManagedObjectExtensionExtractor<E> extractor, E[] managedObjectExtensions,
+			int extensionIndex, TeamManagement responsibleTeam);
 
 	/**
 	 * Obtains the object being managed by the {@link ManagedObject}.
 	 * 
-	 * @param threadState
-	 *            {@link ThreadState} of thread requiring the object.
 	 * @return Object being managed by the {@link ManagedObject}.
 	 */
-	Object getObject(ThreadState threadState);
+	Object getObject();
 
 	/**
-	 * Extracts the extension interface from the {@link ManagedObject} within
-	 * this {@link ManagedObjectContainer}.
+	 * Unregisters the {@link ManagedObject} from {@link Governance}.
 	 * 
-	 * @param <I>
-	 *            Extension interface type.
-	 * @param extractor
-	 *            {@link ExtensionInterfaceExtractor} to extract the extension
-	 *            interface from the {@link ManagedObject}.
-	 * @return Extracted extension interface.
+	 * @param governanceIndex
+	 *            Index of the {@link Governance}.
+	 * @return {@link FunctionState} to unregister the {@link ManagedObject}
+	 *         from {@link Governance}.
 	 */
-	<I extends Object> I extractExtensionInterface(
-			ExtensionInterfaceExtractor<I> extractor);
+	FunctionState unregisterGovernance(int governanceIndex);
 
 	/**
-	 * Unregisters this {@link ManagedObject} from {@link Governance}.
+	 * Creates a {@link FunctionState} to unload the {@link ManagedObject}.
 	 * 
-	 * @param governance
-	 *            {@link ActiveGovernance}.
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet}.
-	 * @param currentTeam
-	 *            {@link TeamIdentifier} of the current {@link Team}
-	 *            unregistering the {@link ManagedObject} from
-	 *            {@link Governance}.
+	 * @return {@link FunctionState} to unload the {@link ManagedObject}.
 	 */
-	void unregisterManagedObjectFromGovernance(
-			ActiveGovernance<?, ?> governance, JobNodeActivateSet activateSet,
-			TeamIdentifier currentTeam);
-
-	/**
-	 * Unloads the {@link ManagedObject}.
-	 * 
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
-	 *            activate.
-	 * @param currentTeam
-	 *            {@link TeamIdentifier} of the current {@link Team} unloading
-	 *            the {@link ManagedObject}.
-	 */
-	void unloadManagedObject(JobNodeActivateSet activateSet,
-			TeamIdentifier currentTeam);
+	FunctionState unloadManagedObject();
 
 }

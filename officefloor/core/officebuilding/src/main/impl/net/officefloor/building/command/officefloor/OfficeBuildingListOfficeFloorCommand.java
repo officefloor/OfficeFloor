@@ -29,16 +29,17 @@ import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandPar
 import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingHostOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.OfficeFloorNameOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.OfficeNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.PasswordOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.ProcessNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.UsernameOfficeFloorCommandParameter;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.building.process.ManagedProcessContext;
-import net.officefloor.building.process.officefloor.ListedTask;
-import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
+import net.officefloor.compile.mbean.OfficeFloorMBean;
 import net.officefloor.console.OfficeBuilding;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -47,8 +48,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeBuildingListOfficeFloorCommand implements
-		OfficeFloorCommandFactory, OfficeFloorCommand {
+public class OfficeBuildingListOfficeFloorCommand implements OfficeFloorCommandFactory, OfficeFloorCommand {
 
 	/**
 	 * {@link OfficeBuilding} host.
@@ -61,9 +61,9 @@ public class OfficeBuildingListOfficeFloorCommand implements
 	private final OfficeBuildingPortOfficeFloorCommandParameter officeBuildingPort = new OfficeBuildingPortOfficeFloorCommandParameter();
 
 	/**
-	 * {@link Process} name.
+	 * {@link OfficeFloor} name.
 	 */
-	private final ProcessNameOfficeFloorCommandParameter processName = new ProcessNameOfficeFloorCommandParameter();
+	private final OfficeFloorNameOfficeFloorCommandParameter officeFloorName = new OfficeFloorNameOfficeFloorCommandParameter();
 
 	/**
 	 * Trust store {@link File}.
@@ -84,6 +84,11 @@ public class OfficeBuildingListOfficeFloorCommand implements
 	 * Password.
 	 */
 	private final PasswordOfficeFloorCommandParameter password = new PasswordOfficeFloorCommandParameter();
+
+	/**
+	 * {@link Office} name.
+	 */
+	private final OfficeNameOfficeFloorCommandParameter officeName = new OfficeNameOfficeFloorCommandParameter();
 
 	/*
 	 * ======================= OfficeFloorCommandFactory ===================
@@ -110,36 +115,32 @@ public class OfficeBuildingListOfficeFloorCommand implements
 
 	@Override
 	public OfficeFloorCommandParameter[] getParameters() {
-		return new OfficeFloorCommandParameter[] { this.officeBuildingHost,
-				this.officeBuildingPort, this.processName, this.trustStore,
-				this.trustStorePassword, this.userName, this.password };
+		return new OfficeFloorCommandParameter[] { this.officeBuildingHost, this.officeBuildingPort,
+				this.officeFloorName, this.trustStore, this.trustStorePassword, this.userName, this.password,
+				this.officeName };
 	}
 
 	@Override
-	public void initialiseEnvironment(OfficeFloorCommandContext context)
-			throws Exception {
+	public void initialiseEnvironment(OfficeFloorCommandContext context) throws Exception {
 		// Nothing to initialise
 	}
 
 	@Override
-	public ManagedProcess createManagedProcess(
-			OfficeFloorCommandEnvironment environment) throws Exception {
+	public ManagedProcess createManagedProcess(OfficeFloorCommandEnvironment environment) throws Exception {
 
 		// Obtain details
-		String officeBuildingHost = this.officeBuildingHost
-				.getOfficeBuildingHost();
-		int officeBuildingPort = this.officeBuildingPort
-				.getOfficeBuildingPort();
-		String processName = this.processName.getProcessName();
+		String officeBuildingHost = this.officeBuildingHost.getOfficeBuildingHost();
+		int officeBuildingPort = this.officeBuildingPort.getOfficeBuildingPort();
+		String officeFloorName = this.officeFloorName.getOfficeFloorName();
 		File trustStore = this.trustStore.getKeyStore();
-		String trustStorePassword = this.trustStorePassword
-				.getKeyStorePassword();
+		String trustStorePassword = this.trustStorePassword.getKeyStorePassword();
 		String userName = this.userName.getUserName();
 		String password = this.password.getPassword();
+		String officeName = this.officeName.getOfficeName();
 
 		// Return the list managed process
-		return new ListManagedProcess(officeBuildingHost, officeBuildingPort,
-				processName, trustStore, trustStorePassword, userName, password);
+		return new ListManagedProcess(officeBuildingHost, officeBuildingPort, officeFloorName, trustStore,
+				trustStorePassword, userName, password, officeName);
 	}
 
 	/**
@@ -164,9 +165,9 @@ public class OfficeBuildingListOfficeFloorCommand implements
 		private final int officeBuildingPort;
 
 		/**
-		 * {@link Process} namespace.
+		 * {@link OfficeFloor} name.
 		 */
-		private final String processNamespace;
+		private final String officeFloorName;
 
 		/**
 		 * Location of the trust store {@link File}.
@@ -189,14 +190,19 @@ public class OfficeBuildingListOfficeFloorCommand implements
 		private final String password;
 
 		/**
+		 * {@link Office} name.
+		 */
+		private final String officeName;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param officeBuildingHost
 		 *            {@link OfficeBuilding} host.
 		 * @param officeBuildingPort
 		 *            {@link OfficeBuilding} port.
-		 * @param processNamespace
-		 *            {@link Process} namespace.
+		 * @param officeFloorName
+		 *            {@link OfficeFloor} name.
 		 * @param trustStore
 		 *            Trust store {@link File}.
 		 * @param trustStorePassword
@@ -205,18 +211,19 @@ public class OfficeBuildingListOfficeFloorCommand implements
 		 *            User name to connect.
 		 * @param password
 		 *            Password to connect.
+		 * @param officeName
+		 *            Name of the {@link Office}. May be <code>null</code>.
 		 */
-		public ListManagedProcess(String officeBuildingHost,
-				int officeBuildingPort, String processNamespace,
-				File trustStore, String trustStorePassword, String userName,
-				String password) {
+		public ListManagedProcess(String officeBuildingHost, int officeBuildingPort, String officeFloorName,
+				File trustStore, String trustStorePassword, String userName, String password, String officeName) {
 			this.officeBuildingHost = officeBuildingHost;
 			this.officeBuildingPort = officeBuildingPort;
-			this.processNamespace = processNamespace;
+			this.officeFloorName = officeFloorName;
 			this.trustStoreLocation = trustStore.getAbsolutePath();
 			this.trustStorePassword = trustStorePassword;
 			this.userName = userName;
 			this.password = password;
+			this.officeName = officeName;
 		}
 
 		/*
@@ -234,17 +241,13 @@ public class OfficeBuildingListOfficeFloorCommand implements
 			// Capture output
 			StringBuilder output = new StringBuilder();
 
-			// Handle based on whether looking at particular process
-			if (this.processNamespace == null) {
+			// Handle based on whether looking at particular OfficeFloor
+			if (this.officeFloorName == null) {
 				// List the processes
-				OfficeBuildingManagerMBean officeBuildingManager = OfficeBuildingManager
-						.getOfficeBuildingManager(this.officeBuildingHost,
-								this.officeBuildingPort, new File(
-										this.trustStoreLocation),
-								this.trustStorePassword, this.userName,
-								this.password);
-				String[] processNamespaces = officeBuildingManager
-						.listProcessNamespaces();
+				OfficeBuildingManagerMBean officeBuildingManager = OfficeBuildingManager.getOfficeBuildingManager(
+						this.officeBuildingHost, this.officeBuildingPort, new File(this.trustStoreLocation),
+						this.trustStorePassword, this.userName, this.password);
+				String[] processNamespaces = officeBuildingManager.listProcessNamespaces();
 
 				// Format the output
 				for (String processNamespace : processNamespaces) {
@@ -253,23 +256,30 @@ public class OfficeBuildingListOfficeFloorCommand implements
 				}
 
 			} else {
-				// List the tasks of the process name space
-				OfficeFloorManagerMBean officeFloorManager = OfficeBuildingManager
-						.getOfficeFloorManager(this.officeBuildingHost,
-								this.officeBuildingPort, this.processNamespace,
-								new File(this.trustStoreLocation),
-								this.trustStorePassword, this.userName,
-								this.password);
-				ListedTask[] listedTasks = officeFloorManager.listTasks();
+				// List the offices/functions of the OfficeFloor
+				OfficeFloorMBean officeFloor = OfficeBuildingManager.getOfficeFloor(this.officeBuildingHost,
+						this.officeBuildingPort, this.officeFloorName, new File(this.trustStoreLocation),
+						this.trustStorePassword, this.userName, this.password);
 
-				// Format the output
-				for (ListedTask listedTask : listedTasks) {
-					String parameterType = listedTask.getParameterType();
-					output.append(listedTask.getOfficeName() + " "
-							+ listedTask.getWorkName() + " "
-							+ listedTask.getTaskName() + "("
-							+ (parameterType == null ? "" : parameterType)
-							+ ")\n");
+				// Determine if list offices
+				if (this.officeName == null) {
+					String[] officeNames = officeFloor.getOfficeNames();
+					for (String officeName : officeNames) {
+						output.append(officeName + "\n");
+					}
+
+				} else {
+					// List the functions of the office
+					String[] functionNames = officeFloor.getManagedFunctionNames(this.officeName);
+					for (String functionName : functionNames) {
+
+						// Obtain the parameter type
+						String parameterType = officeFloor.getManagedFunctionParameterType(this.officeName,
+								functionName);
+
+						// Output the function details
+						output.append(functionName + (parameterType == null ? "()" : "(" + parameterType + ")") + "\n");
+					}
 				}
 			}
 

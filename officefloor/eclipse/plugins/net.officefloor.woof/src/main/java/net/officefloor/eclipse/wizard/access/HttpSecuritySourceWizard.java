@@ -25,10 +25,10 @@ import java.util.Map;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.configuration.project.ProjectConfigurationContext;
 import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.extension.WoofExtensionUtil;
 import net.officefloor.eclipse.extension.access.HttpSecuritySourceExtension;
-import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
 import net.officefloor.eclipse.util.JavaUtil;
 import net.officefloor.eclipse.util.LogUtil;
 import net.officefloor.eclipse.wizard.WizardUtil;
@@ -46,8 +46,7 @@ import org.eclipse.jface.wizard.Wizard;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSecuritySourceWizard extends Wizard implements
-		HttpSecuritySourceInstanceContext {
+public class HttpSecuritySourceWizard extends Wizard implements HttpSecuritySourceInstanceContext {
 
 	/**
 	 * Facade method to obtain the {@link AccessInstance}.
@@ -60,17 +59,14 @@ public class HttpSecuritySourceWizard extends Wizard implements
 	 *            creating new {@link AccessInstance}.
 	 * @return {@link AccessInstance} or <code>null</code> if cancelled.
 	 */
-	public static AccessInstance getAccessInstance(
-			AbstractOfficeFloorEditPart<?, ?, ?> editPart,
+	public static AccessInstance getAccessInstance(AbstractOfficeFloorEditPart<?, ?, ?> editPart,
 			AccessInstance accessInstance) {
 
 		// Obtain the project
-		IProject project = ProjectConfigurationContext.getProject(editPart
-				.getEditor().getEditorInput());
+		IProject project = ProjectConfigurationContext.getProject(editPart.getEditor().getEditorInput());
 
 		// Create and run the wizard
-		HttpSecuritySourceWizard wizard = new HttpSecuritySourceWizard(project,
-				accessInstance);
+		HttpSecuritySourceWizard wizard = new HttpSecuritySourceWizard(project, accessInstance);
 		if (WizardUtil.runWizard(wizard, editPart)) {
 			// Successful so return the access instance
 			return wizard.getAccessInstance();
@@ -93,9 +89,8 @@ public class HttpSecuritySourceWizard extends Wizard implements
 	 * @return Mapping of {@link HttpSecuritySource} class name to its
 	 *         {@link HttpSecuritySourceInstance}.
 	 */
-	public static Map<String, HttpSecuritySourceInstance> createHttpSecuritySourceInstanceMap(
-			ClassLoader classLoader, IProject project,
-			HttpSecuritySourceInstanceContext context) {
+	public static Map<String, HttpSecuritySourceInstance> createHttpSecuritySourceInstanceMap(ClassLoader classLoader,
+			IProject project, HttpSecuritySourceInstanceContext context) {
 
 		// Obtain HTTP Security source instances (by class name for unique set)
 		Map<String, HttpSecuritySourceInstance> httpSecuritySourceInstances = new HashMap<String, HttpSecuritySourceInstance>();
@@ -103,38 +98,30 @@ public class HttpSecuritySourceWizard extends Wizard implements
 		// Obtain from project class path
 		try {
 			// Obtain the types on the class path
-			IType[] types = JavaUtil.getSubTypes(project,
-					HttpSecuritySource.class.getName());
+			IType[] types = JavaUtil.getSubTypes(project, HttpSecuritySource.class.getName());
 			for (IType type : types) {
 				String className = type.getFullyQualifiedName();
 				if (ExtensionUtil.isIgnoreSource(className, classLoader)) {
 					continue; // ignore source
 				}
 				httpSecuritySourceInstances.put(className,
-						new HttpSecuritySourceInstance(className, null,
-								classLoader, project, context));
+						new HttpSecuritySourceInstance(className, null, classLoader, project, context));
 			}
 		} catch (Throwable ex) {
-			LogUtil.logError(
-					"Failed to obtain java types from project class path", ex);
+			LogUtil.logError("Failed to obtain java types from project class path", ex);
 		}
 
 		// Obtain via extension point second to override
 		for (HttpSecuritySourceExtension<?> httpSecuritySourceExtension : WoofExtensionUtil
 				.createHttpSecuritySourceExtensionList()) {
 			try {
-				Class<?> httpSecuritySourceClass = httpSecuritySourceExtension
-						.getHttpSecuritySourceClass();
-				String httpSecuritySourceClassName = httpSecuritySourceClass
-						.getName();
-				httpSecuritySourceInstances.put(httpSecuritySourceClassName,
-						new HttpSecuritySourceInstance(
-								httpSecuritySourceClassName,
-								httpSecuritySourceExtension, classLoader,
-								project, context));
+				Class<?> httpSecuritySourceClass = httpSecuritySourceExtension.getHttpSecuritySourceClass();
+				String httpSecuritySourceClassName = httpSecuritySourceClass.getName();
+				httpSecuritySourceInstances.put(httpSecuritySourceClassName, new HttpSecuritySourceInstance(
+						httpSecuritySourceClassName, httpSecuritySourceExtension, classLoader, project, context));
 			} catch (Throwable ex) {
-				LogUtil.logError("Failed to create source instance for "
-						+ httpSecuritySourceExtension.getClass().getName(), ex);
+				LogUtil.logError(
+						"Failed to create source instance for " + httpSecuritySourceExtension.getClass().getName(), ex);
 			}
 		}
 
@@ -192,8 +179,7 @@ public class HttpSecuritySourceWizard extends Wizard implements
 	 *            {@link AccessInstance} to be edited, or <code>null</code> to
 	 *            create a new {@link AccessInstance}.
 	 */
-	public HttpSecuritySourceWizard(IProject project,
-			AccessInstance accessInstance) {
+	public HttpSecuritySourceWizard(IProject project, AccessInstance accessInstance) {
 
 		// Obtain the class loader for the project
 		ProjectClassLoader classLoader = ProjectClassLoader.create(project);
@@ -203,25 +189,20 @@ public class HttpSecuritySourceWizard extends Wizard implements
 				classLoader, project, this);
 
 		// Obtain the listing of HTTP Security source instances (in order)
-		HttpSecuritySourceInstance[] httpSecuritySourceInstanceListing = httpSecuritySourceInstanceMap
-				.values().toArray(new HttpSecuritySourceInstance[0]);
-		Arrays.sort(httpSecuritySourceInstanceListing,
-				new Comparator<HttpSecuritySourceInstance>() {
-					@Override
-					public int compare(HttpSecuritySourceInstance a,
-							HttpSecuritySourceInstance b) {
-						return a.getHttpSecuritySourceClassName().compareTo(
-								b.getHttpSecuritySourceClassName());
-					}
-				});
+		HttpSecuritySourceInstance[] httpSecuritySourceInstanceListing = httpSecuritySourceInstanceMap.values()
+				.toArray(new HttpSecuritySourceInstance[0]);
+		Arrays.sort(httpSecuritySourceInstanceListing, new Comparator<HttpSecuritySourceInstance>() {
+			@Override
+			public int compare(HttpSecuritySourceInstance a, HttpSecuritySourceInstance b) {
+				return a.getHttpSecuritySourceClassName().compareTo(b.getHttpSecuritySourceClassName());
+			}
+		});
 
 		// Create the pages
-		this.listingPage = new HttpSecuritySourceListingWizardPage(
-				httpSecuritySourceInstanceListing, accessInstance);
+		this.listingPage = new HttpSecuritySourceListingWizardPage(httpSecuritySourceInstanceListing, accessInstance);
 		for (HttpSecuritySourceInstance httpSecuritySourceInstance : httpSecuritySourceInstanceListing) {
 			this.propertiesPages.put(httpSecuritySourceInstance,
-					new HttpSecuritySourcePropertiesWizardPage(this,
-							httpSecuritySourceInstance));
+					new HttpSecuritySourcePropertiesWizardPage(this, httpSecuritySourceInstance));
 		}
 
 		// Determine if require creating refactor pages
@@ -230,14 +211,10 @@ public class HttpSecuritySourceWizard extends Wizard implements
 			this.accessAlignPage = new AccessAlignWizardPage(accessInstance);
 
 			// Load access instance for matching HTTP Security source instance
-			String httpSecuritySourceClassName = accessInstance
-					.getHttpSecuritySourceClassName();
+			String httpSecuritySourceClassName = accessInstance.getHttpSecuritySourceClassName();
 			for (HttpSecuritySourceInstance httpSecuritySourceInstance : httpSecuritySourceInstanceListing) {
-				if (httpSecuritySourceClassName
-						.equals(httpSecuritySourceInstance
-								.getHttpSecuritySourceClassName())) {
-					httpSecuritySourceInstance
-							.loadAccessInstance(accessInstance);
+				if (httpSecuritySourceClassName.equals(httpSecuritySourceInstance.getHttpSecuritySourceClassName())) {
+					httpSecuritySourceInstance.loadAccessInstance(accessInstance);
 				}
 			}
 
@@ -265,8 +242,7 @@ public class HttpSecuritySourceWizard extends Wizard implements
 		this.addPage(this.listingPage);
 		if (this.propertiesPages.size() > 0) {
 			// Load the first properties page
-			this.addPage(this.propertiesPages.values().toArray(
-					new IWizardPage[0])[0]);
+			this.addPage(this.propertiesPages.values().toArray(new IWizardPage[0])[0]);
 		}
 
 		// Add refactor pages
@@ -280,10 +256,8 @@ public class HttpSecuritySourceWizard extends Wizard implements
 		// Handle based on current page
 		if (page == this.listingPage) {
 			// Listing page, so obtain properties page based on selection
-			this.selectedHttpSecuritySourceInstance = this.listingPage
-					.getSelectedHttpSecuritySourceInstance();
-			this.currentPropertiesPage = this.propertiesPages
-					.get(this.selectedHttpSecuritySourceInstance);
+			this.selectedHttpSecuritySourceInstance = this.listingPage.getSelectedHttpSecuritySourceInstance();
+			this.currentPropertiesPage = this.propertiesPages.get(this.selectedHttpSecuritySourceInstance);
 
 			// Obtain properties
 			this.currentPropertiesPage.activatePage();
@@ -294,8 +268,7 @@ public class HttpSecuritySourceWizard extends Wizard implements
 			// Determine if refactoring
 			if (this.accessAlignPage != null) {
 				// Refactoring access
-				this.accessAlignPage
-						.loadHttpSecuritySourceInstance(this.selectedHttpSecuritySourceInstance);
+				this.accessAlignPage.loadHttpSecuritySourceInstance(this.selectedHttpSecuritySourceInstance);
 				return this.accessAlignPage;
 			}
 
@@ -332,14 +305,11 @@ public class HttpSecuritySourceWizard extends Wizard implements
 	public boolean performFinish() {
 
 		// Obtain the details of the access instance
-		String httpSecuritySourceClassName = this.selectedHttpSecuritySourceInstance
-				.getHttpSecuritySourceClassName();
-		long authenticationTimeout = this.selectedHttpSecuritySourceInstance
-				.getAuthenticationTimeout();
-		PropertyList propertyList = this.selectedHttpSecuritySourceInstance
-				.getPropertyList();
-		HttpSecurityType<?, ?, ?, ?> httpSecurityType = this.selectedHttpSecuritySourceInstance
-				.getHttpSecurityType();
+		String accessName = this.listingPage.getAccessName();
+		String httpSecuritySourceClassName = this.selectedHttpSecuritySourceInstance.getHttpSecuritySourceClassName();
+		long authenticationTimeout = this.selectedHttpSecuritySourceInstance.getAuthenticationTimeout();
+		PropertyList propertyList = this.selectedHttpSecuritySourceInstance.getPropertyList();
+		HttpSecurityType<?, ?, ?, ?> httpSecurityType = this.selectedHttpSecuritySourceInstance.getHttpSecurityType();
 
 		// Obtain the mappings
 		Map<String, String> inputNameMapping = null;
@@ -354,9 +324,8 @@ public class HttpSecuritySourceWizard extends Wizard implements
 		propertyList.normalise();
 
 		// Specify the access instance
-		this.accessInstance = new AccessInstance(httpSecuritySourceClassName,
-				authenticationTimeout, propertyList, httpSecurityType,
-				inputNameMapping, outputNameMapping);
+		this.accessInstance = new AccessInstance(accessName, httpSecuritySourceClassName, authenticationTimeout,
+				propertyList, httpSecurityType, inputNameMapping, outputNameMapping);
 
 		// Finished
 		return true;
@@ -383,8 +352,7 @@ public class HttpSecuritySourceWizard extends Wizard implements
 	@Override
 	public void setHttpSecurityTypeLoaded(boolean isHttpSecurityTypeLoaded) {
 		if (this.currentPropertiesPage != null) {
-			this.currentPropertiesPage
-					.setPageComplete(isHttpSecurityTypeLoaded);
+			this.currentPropertiesPage.setPageComplete(isHttpSecurityTypeLoaded);
 		}
 	}
 

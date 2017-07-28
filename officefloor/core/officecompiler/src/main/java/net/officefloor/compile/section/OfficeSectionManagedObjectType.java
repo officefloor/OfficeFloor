@@ -22,7 +22,7 @@ import net.officefloor.compile.object.DependentObjectType;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * <code>Type definition</code> for an {@link Office}

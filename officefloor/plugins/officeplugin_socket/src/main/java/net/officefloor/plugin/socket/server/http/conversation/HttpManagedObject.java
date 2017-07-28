@@ -19,9 +19,9 @@ package net.officefloor.plugin.socket.server.http.conversation;
 
 import java.io.IOException;
 
-import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 /**
@@ -39,11 +39,11 @@ public interface HttpManagedObject extends ManagedObject {
 	ServerHttpConnection getServerHttpConnection();
 
 	/**
-	 * Obtains the {@link EscalationHandler}.
+	 * Obtains the {@link FlowCallback} for handling completion of servicing.
 	 *
-	 * @return {@link EscalationHandler}.
+	 * @return {@link FlowCallback} for handling completion of servicing.
 	 */
-	EscalationHandler getEscalationHandler();
+	FlowCallback getFlowCallback();
 
 	/**
 	 * Cleans up this {@link HttpManagedObject}.

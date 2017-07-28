@@ -54,9 +54,9 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
 
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
-import net.officefloor.frame.api.manage.UnknownTaskException;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.plugin.servlet.security.HttpServletSecurity;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
@@ -161,9 +161,9 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	private final Locale defaultLocale;
 
 	/**
-	 * {@link TaskContext}.
+	 * {@link ManagedFunctionContext}.
 	 */
-	private final TaskContext<?, ?, ?> taskContext;
+	private final ManagedFunctionContext<?, ?, ?> taskContext;
 
 	/**
 	 * Request URI.
@@ -229,7 +229,7 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	 * @param defaultLocale
 	 *            Default {@link Locale} if not specified.
 	 * @param taskContext
-	 *            {@link TaskContext}.
+	 *            {@link ManagedFunctionContext}.
 	 * @throws IOException
 	 *             If fails to read data from the {@link HttpRequest}.
 	 * @throws HttpRequestTokeniseException
@@ -239,7 +239,7 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 			HttpRequestState requestAttributes, HttpServletSecurity security,
 			String sessionIdIdentifierName, HttpSession session,
 			ServletContext servletContext, Locale defaultLocale,
-			TaskContext<?, ?, ?> taskContext) throws IOException,
+			ManagedFunctionContext<?, ?, ?> taskContext) throws IOException,
 			HttpRequestTokeniseException {
 
 		// Initiate state
@@ -347,7 +347,7 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 
 		} catch (UnknownWorkException ex) {
 			throw new ServletException(ex);
-		} catch (UnknownTaskException ex) {
+		} catch (UnknownFunctionException ex) {
 			throw new ServletException(ex);
 		} catch (InvalidParameterTypeException ex) {
 			throw new ServletException(ex);

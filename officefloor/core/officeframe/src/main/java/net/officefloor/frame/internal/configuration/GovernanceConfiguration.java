@@ -17,19 +17,16 @@
  */
 package net.officefloor.frame.internal.configuration;
 
-import net.officefloor.frame.api.build.GovernanceFactory;
-import net.officefloor.frame.internal.structure.GovernanceActivity;
-import net.officefloor.frame.internal.structure.JobSequence;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.governance.GovernanceFactory;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * Configuration for the {@link Governance}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface GovernanceConfiguration<I, F extends Enum<F>> {
+public interface GovernanceConfiguration<E, F extends Enum<F>> extends FunctionConfiguration<F> {
 
 	/**
 	 * Obtains the name of the {@link Governance}.
@@ -43,7 +40,7 @@ public interface GovernanceConfiguration<I, F extends Enum<F>> {
 	 * 
 	 * @return {@link GovernanceFactory}.
 	 */
-	GovernanceFactory<? super I, F> getGovernanceFactory();
+	GovernanceFactory<? super E, F> getGovernanceFactory();
 
 	/**
 	 * Obtains the extension interface type for {@link ManagedObject} to provide
@@ -52,31 +49,6 @@ public interface GovernanceConfiguration<I, F extends Enum<F>> {
 	 * @return Extension interface type for {@link ManagedObject} to provide to
 	 *         enable {@link Governance}.
 	 */
-	Class<I> getExtensionInterface();
-
-	/**
-	 * Obtains the name of the {@link Team} to execute the
-	 * {@link GovernanceActivity} instances for {@link Governance}.
-	 * 
-	 * @return Name of {@link Team}.
-	 */
-	String getTeamName();
-
-	/**
-	 * Obtains the configuration of the {@link JobSequence} instances for this
-	 * {@link Governance}.
-	 * 
-	 * @return Configuration of {@link JobSequence} instances for this
-	 *         {@link Governance}.
-	 */
-	GovernanceFlowConfiguration<F>[] getFlowConfiguration();
-
-	/**
-	 * Obtains the {@link GovernanceEscalationConfiguration} instances in
-	 * escalation order. Index 0 being first, index 1 second and so forth.
-	 * 
-	 * @return {@link GovernanceEscalationConfiguration} instances.
-	 */
-	GovernanceEscalationConfiguration[] getEscalations();
+	Class<E> getExtensionInterface();
 
 }

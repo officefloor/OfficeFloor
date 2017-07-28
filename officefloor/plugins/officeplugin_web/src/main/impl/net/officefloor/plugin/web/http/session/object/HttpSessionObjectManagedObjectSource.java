@@ -20,10 +20,10 @@ package net.officefloor.plugin.web.http.session.object;
 import java.io.Serializable;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.object.HttpSessionObjectManagedObject.Dependencies;
 
@@ -33,8 +33,7 @@ import net.officefloor.plugin.web.http.session.object.HttpSessionObjectManagedOb
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSessionObjectManagedObjectSource extends
-		AbstractManagedObjectSource<Dependencies, None> {
+public class HttpSessionObjectManagedObjectSource extends AbstractManagedObjectSource<Dependencies, None> {
 
 	/**
 	 * Name of property containing the class name.
@@ -67,10 +66,8 @@ public class HttpSessionObjectManagedObjectSource extends
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<Dependencies, None> context)
-			throws Exception {
-		ManagedObjectSourceContext<None> mosContext = context
-				.getManagedObjectSourceContext();
+	protected void loadMetaData(MetaDataContext<Dependencies, None> context) throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Obtain the class
 		String className = mosContext.getProperty(PROPERTY_CLASS_NAME);
@@ -78,9 +75,8 @@ public class HttpSessionObjectManagedObjectSource extends
 
 		// Object must be serializable
 		if (!(Serializable.class.isAssignableFrom(this.objectClass))) {
-			throw new Exception(HttpSession.class.getSimpleName() + " object "
-					+ this.objectClass.getName() + " must be "
-					+ Serializable.class.getSimpleName());
+			throw new Exception(HttpSession.class.getSimpleName() + " object " + this.objectClass.getName()
+					+ " must be " + Serializable.class.getSimpleName());
 		}
 
 		// Obtain the overridden bind name
@@ -94,8 +90,7 @@ public class HttpSessionObjectManagedObjectSource extends
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-		return new HttpSessionObjectManagedObject(this.objectClass,
-				this.bindName);
+		return new HttpSessionObjectManagedObject(this.objectClass, this.bindName);
 	}
 
 }

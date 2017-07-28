@@ -20,7 +20,7 @@ package net.officefloor.compile.impl.managedobject;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourcePropertyType;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourceType;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link OfficeFloorManagedObjectSourceType} implementation.

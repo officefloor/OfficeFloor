@@ -20,7 +20,7 @@ package net.officefloor.compile.section;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * <code>Type definition</code> of an {@link Office}

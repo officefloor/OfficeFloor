@@ -17,11 +17,11 @@
  */
 package net.officefloor.compile.spi.office;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 
 /**
- * Start-up trigger for a {@link Task} within the {@link Office}.
+ * Start-up trigger for a {@link ManagedFunction} within the {@link Office}.
  * 
  * @author Daniel Sagenschneider
  */

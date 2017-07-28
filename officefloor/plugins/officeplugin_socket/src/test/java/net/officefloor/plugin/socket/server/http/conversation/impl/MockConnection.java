@@ -70,7 +70,7 @@ public class MockConnection implements Connection {
 	 */
 
 	@Override
-	public Object getLock() {
+	public Object getWriteLock() {
 		return this.wire;
 	}
 

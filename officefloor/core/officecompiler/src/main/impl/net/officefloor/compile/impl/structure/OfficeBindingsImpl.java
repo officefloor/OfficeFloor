@@ -17,23 +17,18 @@
  */
 package net.officefloor.compile.impl.structure;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
+import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.OfficeBindings;
 import net.officefloor.compile.internal.structure.OfficeNode;
-import net.officefloor.compile.internal.structure.TaskNode;
-import net.officefloor.compile.internal.structure.WorkNode;
-import net.officefloor.compile.type.TypeContext;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
-import net.officefloor.frame.api.build.WorkBuilder;
-import net.officefloor.frame.api.manage.Office;
 
 /**
  * {@link OfficeBindings} implementation.
@@ -58,9 +53,9 @@ public class OfficeBindingsImpl implements OfficeBindings {
 	private final OfficeFloorBuilder officeFloorBuilder;
 
 	/**
-	 * {@link TypeContext}.
+	 * {@link CompileContext}.
 	 */
-	private final TypeContext typeContext;
+	private final CompileContext compileContext;
 
 	/**
 	 * Built {@link ManagedObjectSourceNode} instances.
@@ -78,14 +73,9 @@ public class OfficeBindingsImpl implements OfficeBindings {
 	private final Set<InputManagedObjectNode> builtInputManagedObjects = new HashSet<InputManagedObjectNode>();
 
 	/**
-	 * {@link WorkBuilder} instances by their {@link WorkNode}.
+	 * Built {@link ManagedFunctionNode} instances.
 	 */
-	private final Map<WorkNode, WorkBuilder<?>> workBuilders = new HashMap<WorkNode, WorkBuilder<?>>();
-
-	/**
-	 * Built {@link TaskNode} instances.
-	 */
-	private final Set<TaskNode> builtTasks = new HashSet<TaskNode>();
+	private final Set<ManagedFunctionNode> builtManagedFunctions = new HashSet<ManagedFunctionNode>();
 
 	/**
 	 * Instantiates.
@@ -96,32 +86,15 @@ public class OfficeBindingsImpl implements OfficeBindings {
 	 *            {@link OfficeBuilder}.
 	 * @param officeFloorBuilder
 	 *            {@link OfficeFloorBuilder}.
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 */
-	public OfficeBindingsImpl(OfficeNode office, OfficeBuilder officeBuilder,
-			OfficeFloorBuilder officeFloorBuilder, TypeContext typeContext) {
+	public OfficeBindingsImpl(OfficeNode office, OfficeBuilder officeBuilder, OfficeFloorBuilder officeFloorBuilder,
+			CompileContext compileContext) {
 		this.office = office;
 		this.officeBuilder = officeBuilder;
 		this.officeFloorBuilder = officeFloorBuilder;
-		this.typeContext = typeContext;
-	}
-
-	/**
-	 * Builds the {@link WorkNode} into the {@link Office}.
-	 * 
-	 * @param workNode
-	 *            {@link WorkNode}.
-	 * @return {@link WorkBuilder} for the {@link WorkNode}.
-	 */
-	private WorkBuilder<?> buildWorkIntoOffice(WorkNode workNode) {
-		WorkBuilder<?> workBuilder = this.workBuilders.get(workNode);
-		if (workBuilder == null) {
-			workBuilder = workNode.buildWork(this.officeBuilder,
-					this.typeContext);
-			this.workBuilders.put(workNode, workBuilder);
-		}
-		return workBuilder;
+		this.compileContext = compileContext;
 	}
 
 	/*
@@ -129,66 +102,63 @@ public class OfficeBindingsImpl implements OfficeBindings {
 	 */
 
 	@Override
-	public void buildManagedObjectSourceIntoOffice(
-			ManagedObjectSourceNode managedObjectSourceNode) {
+	public void buildManagedObjectSourceIntoOffice(ManagedObjectSourceNode managedObjectSourceNode) {
+
+		// Ensure not already built into Office
 		if (this.builtManagedObjectSources.contains(managedObjectSourceNode)) {
 			return; // already built into office
 		}
-		managedObjectSourceNode.buildManagedObject(this.officeFloorBuilder,
-				this.office, this.officeBuilder, this, this.typeContext);
 		this.builtManagedObjectSources.add(managedObjectSourceNode);
+
+		// Build the managed object source into the office
+		managedObjectSourceNode.buildManagedObject(this.officeFloorBuilder, this.office, this.officeBuilder, this,
+				this.compileContext);
 	}
 
 	@Override
-	public void buildManagedObjectIntoOffice(
-			BoundManagedObjectNode managedObjectNode) {
+	public void buildManagedObjectIntoOffice(BoundManagedObjectNode managedObjectNode) {
 
 		// Ensure the managed object source is built into the office
-		ManagedObjectSourceNode managedObjectSourceNode = managedObjectNode
-				.getManagedObjectSourceNode();
+		ManagedObjectSourceNode managedObjectSourceNode = managedObjectNode.getManagedObjectSourceNode();
 		if (managedObjectSourceNode != null) {
 			this.buildManagedObjectSourceIntoOffice(managedObjectSourceNode);
 		}
 
-		// Build the managed object into the office
+		// Ensure not already built into Office
 		if (this.builtManagedObjects.contains(managedObjectNode)) {
 			return; // already built into office
 		}
-		managedObjectNode.buildOfficeManagedObject(this.office,
-				this.officeBuilder, this, this.typeContext);
 		this.builtManagedObjects.add(managedObjectNode);
+
+		// Build the managed object into the office
+		managedObjectNode.buildOfficeManagedObject(this.office, this.officeBuilder, this, this.compileContext);
 	}
 
 	@Override
-	public void buildInputManagedObjectIntoOffice(
-			InputManagedObjectNode inputManagedObjectNode) {
+	public void buildInputManagedObjectIntoOffice(InputManagedObjectNode inputManagedObjectNode) {
+
+		// Ensure not already built into Office
 		if (this.builtInputManagedObjects.contains(inputManagedObjectNode)) {
 			return; // already built into office
 		}
-		this.officeBuilder
-				.setBoundInputManagedObject(inputManagedObjectNode
-						.getBoundManagedObjectName(), inputManagedObjectNode
-						.getBoundManagedObjectSourceNode()
-						.getManagedObjectSourceName());
 		this.builtInputManagedObjects.add(inputManagedObjectNode);
+
+		// Build the Input managed object
+		this.officeBuilder.setBoundInputManagedObject(inputManagedObjectNode.getBoundManagedObjectName(),
+				inputManagedObjectNode.getBoundManagedObjectSourceNode().getManagedObjectSourceName());
 	}
 
 	@Override
-	public void buildTaskIntoOffice(TaskNode taskNode) {
+	public void buildManagedFunctionIntoOffice(ManagedFunctionNode managedFunctionNode) {
 
-		// Ensure the work is built
-		WorkBuilder<?> workBuilder = this.buildWorkIntoOffice(taskNode
-				.getWorkNode());
-		if (workBuilder == null) {
-			return; // must have the work
-		}
-
-		// Build the task into the office
-		if (this.builtTasks.contains(taskNode)) {
+		// Ensure not already built into Office
+		if (this.builtManagedFunctions.contains(managedFunctionNode)) {
 			return; // already built into office
 		}
-		taskNode.buildTask(workBuilder, this.typeContext);
-		this.builtTasks.add(taskNode);
+		this.builtManagedFunctions.add(managedFunctionNode);
+
+		// Build the function
+		managedFunctionNode.buildManagedFunction(this.officeBuilder, this.compileContext);
 	}
 
 }

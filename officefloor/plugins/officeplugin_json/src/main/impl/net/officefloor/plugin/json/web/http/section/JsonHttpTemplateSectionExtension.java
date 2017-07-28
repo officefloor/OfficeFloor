@@ -23,15 +23,13 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireObject;
+import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionManagedObjectSource;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.json.HttpJson;
 import net.officefloor.plugin.json.JsonResponseWriter;
 import net.officefloor.plugin.json.read.JsonRequestReaderManagedObjectSource;
 import net.officefloor.plugin.json.write.JsonResponseWriterManagedObjectSource;
-import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
-import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtensionContext;
 
@@ -40,33 +38,17 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExten
  * 
  * @author Daniel Sagenschneider
  */
-public class JsonHttpTemplateSectionExtension implements
-		HttpTemplateSectionExtension {
+public class JsonHttpTemplateSectionExtension implements HttpTemplateSectionExtension {
 
-	/**
-	 * Comma separate list of {@link Method} names having an
-	 * {@link JsonResponseWriter} parameter.
+	/*
+	 * ================= HttpTemplateSectionExtension ===================
 	 */
-	public static final String PROPERTY_JSON_AJAX_METHOD_NAMES = "json.ajax.method.names";
 
-	/**
-	 * Extends the {@link HttpTemplateAutoWireSection} by:
-	 * <ul>
-	 * <li>providing the necessary {@link JsonRequestReaderManagedObjectSource}
-	 * instances</li>
-	 * <li>adding this as a {@link HttpTemplateSectionExtension}.
-	 * </ul>
-	 * 
-	 * @param template
-	 *            {@link HttpTemplateAutoWireSection}.
-	 * @param application
-	 *            {@link WebAutoWireApplication}.
-	 */
-	public static void extendTemplate(HttpTemplateAutoWireSection template,
-			WebAutoWireApplication application) {
+	@Override
+	public void extendTemplate(HttpTemplateSectionExtensionContext context) throws Exception {
 
 		// Obtain the template logic class
-		Class<?> logicClass = template.getTemplateLogicClass();
+		Class<?> logicClass = context.getTemplateClass();
 		if (logicClass == null) {
 			return; // No logic class, no JSON functionality
 		}
@@ -76,10 +58,12 @@ public class JsonHttpTemplateSectionExtension implements
 		Arrays.sort(methods, new Comparator<Method>() {
 			@Override
 			public int compare(Method a, Method b) {
-				return String.CASE_INSENSITIVE_ORDER.compare(a.getName(),
-						b.getName());
+				return String.CASE_INSENSITIVE_ORDER.compare(a.getName(), b.getName());
 			}
 		});
+
+		// Obtain the section designer
+		SectionDesigner designer = context.getSectionDesigner();
 
 		// Iterate over the methods adding necessary JSON functionality
 		Set<String> jsonResponseWriterMethods = new HashSet<String>();
@@ -89,41 +73,32 @@ public class JsonHttpTemplateSectionExtension implements
 			for (Class<?> parameterType : method.getParameterTypes()) {
 
 				// Determine if have HttpJson parameter
-				HttpJson annotation = parameterType
-						.getAnnotation(HttpJson.class);
+				HttpJson annotation = parameterType.getAnnotation(HttpJson.class);
 				if (annotation != null) {
 
-					// Include JSON reader for parameter type
-					AutoWire readAutoWire = new AutoWire(parameterType);
-					if (!(application.isObjectAvailable(readAutoWire))) {
+					// Add the JSON request reader for parameter type
+					SectionManagedObjectSource readObjectMos = designer.addSectionManagedObjectSource(
+							parameterType.getName(), JsonRequestReaderManagedObjectSource.class.getName());
+					readObjectMos.addProperty(JsonRequestReaderManagedObjectSource.PROPERTY_JSON_OBJECT_CLASS,
+							parameterType.getName());
+					readObjectMos.addSectionManagedObject(parameterType.getName(), ManagedObjectScope.PROCESS);
 
-						// Add the JSON request reader for parameter type
-						AutoWireObject readObject = application
-								.addManagedObject(
-										JsonRequestReaderManagedObjectSource.class
-												.getName(), null, readAutoWire);
-						readObject
-								.addProperty(
-										JsonRequestReaderManagedObjectSource.PROPERTY_JSON_OBJECT_CLASS,
-										parameterType.getName());
+					// Providing binding name if specified
+					String bindName = annotation.value();
+					if ((bindName != null) && (bindName.length() > 0)) {
+						readObjectMos.addProperty(JsonRequestReaderManagedObjectSource.PROPERTY_BIND_NAME, bindName);
 
-						// Providing binding name if specified
-						String bindName = annotation.value();
-						if ((bindName != null) && (bindName.length() > 0)) {
-							readObject
-									.addProperty(
-											JsonRequestReaderManagedObjectSource.PROPERTY_BIND_NAME,
-											bindName);
-						}
 					}
 				}
 
 				// Determine if parameter is JsonResponseWriter
-				if (parameterType.getName().equals(
-						JsonResponseWriter.class.getName())) {
+				if (parameterType.getName().equals(JsonResponseWriter.class.getName())) {
 
 					// Include the method
 					jsonResponseWriterMethods.add(method.getName());
+
+					// Flag as non-render template method
+					context.flagAsNonRenderTemplateMethod(method.getName());
 				}
 			}
 		}
@@ -131,50 +106,9 @@ public class JsonHttpTemplateSectionExtension implements
 		// Determine if include JsonResponseWriter
 		if (jsonResponseWriterMethods.size() > 0) {
 
-			// Include the JsonResponseWriter (if not already added)
-			AutoWire writeAutoWire = new AutoWire(JsonResponseWriter.class);
-			if (!(application.isObjectAvailable(writeAutoWire))) {
-				application.addManagedObject(
-						JsonResponseWriterManagedObjectSource.class.getName(),
-						null, writeAutoWire);
-			}
-
-			// Extend HTTP template for JsonResponseWriter methods
-			HttpTemplateAutoWireSectionExtension extension = template
-					.addTemplateExtension(JsonHttpTemplateSectionExtension.class);
-
-			// Provide listing of method names (in deterministic order)
-			String[] methodNames = jsonResponseWriterMethods
-					.toArray(new String[jsonResponseWriterMethods.size()]);
-			Arrays.sort(methodNames);
-			StringBuilder methodNamesValue = new StringBuilder();
-			boolean isFirst = true;
-			for (String methodName : methodNames) {
-				if (!isFirst) {
-					methodNamesValue.append(",");
-				}
-				isFirst = false;
-				methodNamesValue.append(methodName);
-			}
-			extension.addProperty(PROPERTY_JSON_AJAX_METHOD_NAMES,
-					methodNamesValue.toString());
-		}
-	}
-
-	/*
-	 * ================= HttpTemplateSectionExtension ===================
-	 */
-
-	@Override
-	public void extendTemplate(HttpTemplateSectionExtensionContext context)
-			throws Exception {
-
-		// Flag non render methods
-		String methodNamesValue = context
-				.getProperty(PROPERTY_JSON_AJAX_METHOD_NAMES);
-		for (String methodName : methodNamesValue.split(",")) {
-			methodName = methodName.trim();
-			context.flagAsNonRenderTemplateMethod(methodName);
+			// Include the JsonResponseWriter
+			designer.addSectionManagedObjectSource("JSON_WRITER",
+					JsonResponseWriterManagedObjectSource.class.getName());
 		}
 	}
 

@@ -20,28 +20,22 @@ package net.officefloor.plugin.jms.server;
 import javax.jms.Message;
 import javax.jms.TextMessage;
 
-import net.officefloor.admin.transaction.TransactionAdministratorSource;
-import net.officefloor.admin.transaction.TransactionDutiesEnum;
-import net.officefloor.frame.api.build.AdministratorBuilder;
-import net.officefloor.frame.api.build.FlowNodeBuilder;
+import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.OfficeEnhancer;
-import net.officefloor.frame.api.build.OfficeEnhancerContext;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.execute.TaskContext;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
-import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.jms.AbstractJmsManagedObjectTest;
 import net.officefloor.plugin.jms.JmsUtil;
 import net.officefloor.plugin.jms.activemq.VmJmsAdminObjectFactory;
 import net.officefloor.plugin.jms.server.JmsServerManagedObjectSource.JmsServerFlows;
-import net.officefloor.plugin.jms.server.OnMessageTask.OnMessageFlows;
+import net.officefloor.plugin.transaction.Transaction;
+import net.officefloor.plugin.transaction.TransactionGovernanceSource;
 
 /**
  * Tests sending text messages.
@@ -70,66 +64,44 @@ public class JmsServerManagedObjectTest extends AbstractJmsManagedObjectTest {
 		OfficeBuilder officeBuilder = this.getOfficeBuilder();
 
 		// Configure the JMS Server Managed Object
-		ManagedObjectBuilder<JmsServerFlows> moBuilder = this
-				.constructManagedObject("JMS_SERVER",
-						JmsServerManagedObjectSource.class, officeName);
-		moBuilder.addProperty(JmsUtil.JMS_ADMIN_OBJECT_FACTORY_CLASS_PROPERTY,
-				VmJmsAdminObjectFactory.class.getName());
-		moBuilder.addProperty(
-				JmsServerManagedObjectSource.JMS_MAX_SERVER_SESSIONS, "10");
+		ManagedObjectBuilder<JmsServerFlows> moBuilder = this.constructManagedObject("JMS_SERVER",
+				JmsServerManagedObjectSource.class, null);
+		moBuilder.addProperty(JmsUtil.JMS_ADMIN_OBJECT_FACTORY_CLASS_PROPERTY, VmJmsAdminObjectFactory.class.getName());
+		moBuilder.addProperty(JmsServerManagedObjectSource.JMS_MAX_SERVER_SESSIONS, "10");
+		ManagingOfficeBuilder<JmsServerFlows> managingOffice = moBuilder.setManagingOffice(officeName);
+		managingOffice.linkFlow(JmsServerFlows.SERVICE_MESSAGE, "function");
+		managingOffice.setInputManagedObjectName("JMS").mapGovernance("TRANSACTION");
 
-		// Configure the administrator to commit
-		AdministratorBuilder<TransactionDutiesEnum> adminBuilder = this
-				.constructAdministrator("TRANSACTION",
-						TransactionAdministratorSource.class, "JMS_TEAM");
-		adminBuilder.administerManagedObject("JMS_SERVER");
-		adminBuilder.addDuty(TransactionDutiesEnum.COMMIT.name());
+		// Configure the governance to commit
+		GovernanceBuilder<None> governBuilder = this.getOfficeBuilder().addGovernance("TRANSACTION", Transaction.class,
+				new TransactionGovernanceSource());
+		governBuilder.setResponsibleTeam("JMS_TEAM");
 
-		// Create the process message task
-		AbstractSingleTask<Work, Indexed, None> processTask = new AbstractSingleTask<Work, Indexed, None>() {
-			@Override
-			public Object doTask(TaskContext<Work, Indexed, None> context)
-					throws Exception {
+		// Create the process message function factory
+		ManagedFunctionFactory<Indexed, None> processFunction = () -> (context) -> {
 
-				// Set text of message
-				TextMessage message = (TextMessage) context.getObject(0);
-				JmsServerManagedObjectTest.this.msg = message.getText();
+			// Set text of message
+			TextMessage message = (TextMessage) context.getObject(0);
+			JmsServerManagedObjectTest.this.msg = message.getText();
 
-				// Output message contents
-				System.out.println("Processing msg: "
-						+ JmsServerManagedObjectTest.this.msg);
+			// Output message contents
+			System.out.println("Processing msg: " + JmsServerManagedObjectTest.this.msg);
 
-				// Wake up test case
-				synchronized (this) {
-					isWait = false;
-					this.notify();
-				}
-
-				// No further tasks
-				return null;
+			// Wake up test case
+			synchronized (this) {
+				isWait = false;
+				this.notify();
 			}
+
+			// No further functions
+			return null;
 		};
 
-		// Configure the process message task
-		TaskBuilder<Work, Indexed, None> taskBuilder = processTask
-				.registerTask("work", "task", "PROCESS_TEAM", officeBuilder);
-		taskBuilder.linkParameter(0, Message.class);
-		taskBuilder.linkPostTaskAdministration("TRANSACTION",
-				TransactionDutiesEnum.COMMIT);
-
-		// Obtain the on message task to link it to task processing result
-		this.getOfficeBuilder().addOfficeEnhancer(new OfficeEnhancer() {
-			@Override
-			@SuppressWarnings({ "unchecked", "rawtypes" })
-			public void enhanceOffice(OfficeEnhancerContext context) {
-				// Link JMS on message flow to process message task
-				FlowNodeBuilder flowNodeBuilder = context.getFlowNodeBuilder(
-						"of-JMS_SERVER", "server", "onmessage");
-				flowNodeBuilder.linkFlow(OnMessageFlows.ON_MESSAGE, "work",
-						"task", FlowInstigationStrategyEnum.SEQUENTIAL,
-						Message.class);
-			}
-		});
+		// Configure the process message function
+		ManagedFunctionBuilder<Indexed, None> functionBuilder = this.constructFunction("function", processFunction);
+		functionBuilder.linkParameter(0, Message.class);
+		functionBuilder.setResponsibleTeam("PROCESS_TEAM");
+		functionBuilder.addGovernance("TRANSACTION");
 
 		// Configure the teams
 		officeBuilder.registerTeam("of-JMS_SERVER.team", "of-JMS_TEAM");
@@ -145,7 +117,7 @@ public class JmsServerManagedObjectTest extends AbstractJmsManagedObjectTest {
 		for (int i = 0; i <= 1000; i++) {
 
 			// Publish the message
-			synchronized (processTask) {
+			synchronized (processFunction) {
 				this.isWait = true;
 			}
 			String msgText = TEST_MSG_PREFIX + i;
@@ -153,13 +125,13 @@ public class JmsServerManagedObjectTest extends AbstractJmsManagedObjectTest {
 
 			// Wait for message to be processed
 			long startTime = System.currentTimeMillis();
-			synchronized (processTask) {
+			synchronized (processFunction) {
 				while (this.isWait) {
 					validateNoTopLevelEscalation();
 					if ((System.currentTimeMillis() - startTime) > 2000) {
 						fail("Likely threading issue as waiting too long");
 					}
-					processTask.wait(100);
+					processFunction.wait(100);
 				}
 			}
 
@@ -167,7 +139,7 @@ public class JmsServerManagedObjectTest extends AbstractJmsManagedObjectTest {
 			assertEquals("Incorrect message", msgText, this.msg);
 		}
 
-		// Close the Office
+		// Close the OfficeFloor
 		officeFloor.closeOfficeFloor();
 
 		// Flag test complete

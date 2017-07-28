@@ -19,24 +19,23 @@ package net.officefloor.plugin.web.http.route;
 
 import java.io.IOException;
 
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.test.work.WorkLoaderUtil;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.test.managedfunction.ManagedFunctionLoaderUtil;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
-import net.officefloor.frame.api.manage.UnknownTaskException;
-import net.officefloor.frame.api.manage.UnknownWorkException;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
-import net.officefloor.plugin.web.http.route.HttpRouteTask.HttpRouteTaskDependencies;
-import net.officefloor.plugin.web.http.route.HttpRouteTask.HttpRouteTaskFlows;
+import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteFunctionDependencies;
+import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteFunctionFlows;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
 
 /**
- * Tests the {@link HttpRouteWorkSource}.
+ * Tests the {@link HttpRouteManagedFunctionSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -46,7 +45,7 @@ public class HttpRouteWorkSourceTest extends OfficeFrameTestCase {
 	 * Ensure correct specification.
 	 */
 	public void testSpecification() {
-		WorkLoaderUtil.validateSpecification(HttpRouteWorkSource.class);
+		ManagedFunctionLoaderUtil.validateSpecification(HttpRouteManagedFunctionSource.class);
 	}
 
 	/**
@@ -55,31 +54,25 @@ public class HttpRouteWorkSourceTest extends OfficeFrameTestCase {
 	public void testType() {
 
 		// Create the expected type
-		HttpRouteTask factory = new HttpRouteTask();
-		WorkTypeBuilder<HttpRouteTask> type = WorkLoaderUtil
-				.createWorkTypeBuilder(factory);
-		TaskTypeBuilder<HttpRouteTaskDependencies, HttpRouteTaskFlows> task = type
-				.addTaskType(HttpRouteWorkSource.TASK_NAME, factory,
-						HttpRouteTaskDependencies.class,
-						HttpRouteTaskFlows.class);
-		task.addObject(ServerHttpConnection.class).setKey(
-				HttpRouteTaskDependencies.SERVER_HTTP_CONNECTION);
-		task.addObject(HttpApplicationLocation.class).setKey(
-				HttpRouteTaskDependencies.HTTP_APPLICATION_LOCATION);
-		task.addObject(HttpRequestState.class).setKey(
-				HttpRouteTaskDependencies.REQUEST_STATE);
-		task.addObject(HttpSession.class).setKey(
-				HttpRouteTaskDependencies.HTTP_SESSION);
-		task.addFlow().setKey(HttpRouteTaskFlows.NOT_HANDLED);
-		task.addEscalation(InvalidHttpRequestUriException.class);
-		task.addEscalation(HttpRequestTokeniseException.class);
-		task.addEscalation(IOException.class);
-		task.addEscalation(UnknownWorkException.class);
-		task.addEscalation(UnknownTaskException.class);
-		task.addEscalation(InvalidParameterTypeException.class);
+		FunctionNamespaceBuilder type = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
+		HttpRouteFunction factory = new HttpRouteFunction();
+		ManagedFunctionTypeBuilder<HttpRouteFunctionDependencies, HttpRouteFunctionFlows> function = type
+				.addManagedFunctionType(HttpRouteManagedFunctionSource.FUNCTION_NAME, factory,
+						HttpRouteFunctionDependencies.class, HttpRouteFunctionFlows.class);
+		function.addObject(ServerHttpConnection.class).setKey(HttpRouteFunctionDependencies.SERVER_HTTP_CONNECTION);
+		function.addObject(HttpApplicationLocation.class)
+				.setKey(HttpRouteFunctionDependencies.HTTP_APPLICATION_LOCATION);
+		function.addObject(HttpRequestState.class).setKey(HttpRouteFunctionDependencies.REQUEST_STATE);
+		function.addObject(HttpSession.class).setKey(HttpRouteFunctionDependencies.HTTP_SESSION);
+		function.addFlow().setKey(HttpRouteFunctionFlows.NOT_HANDLED);
+		function.addEscalation(InvalidHttpRequestUriException.class);
+		function.addEscalation(HttpRequestTokeniseException.class);
+		function.addEscalation(IOException.class);
+		function.addEscalation(UnknownFunctionException.class);
+		function.addEscalation(InvalidParameterTypeException.class);
 
 		// Validate the expected type
-		WorkLoaderUtil.validateWorkType(type, HttpRouteWorkSource.class);
+		ManagedFunctionLoaderUtil.validateManagedFunctionType(type, HttpRouteManagedFunctionSource.class);
 	}
 
 }

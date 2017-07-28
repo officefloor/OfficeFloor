@@ -17,9 +17,6 @@
  */
 package net.officefloor.model.impl.office;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -28,55 +25,59 @@ import java.util.Map;
 
 import net.officefloor.compile.OfficeSourceService;
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.impl.util.DoubleKeyMap;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.OfficeFunctionType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectType;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
-import net.officefloor.compile.section.OfficeTaskType;
+import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
+import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
+import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.AdministerableManagedObject;
-import net.officefloor.compile.spi.office.ManagedObjectTeam;
-import net.officefloor.compile.spi.office.OfficeAdministrator;
+import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeArchitect;
-import net.officefloor.compile.spi.office.OfficeDuty;
 import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
+import net.officefloor.compile.spi.office.OfficeManagedObjectPool;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionFunction;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeStart;
 import net.officefloor.compile.spi.office.OfficeSubSection;
-import net.officefloor.compile.spi.office.OfficeSectionTask;
+import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
-import net.officefloor.compile.spi.section.ManagedObjectDependency;
-import net.officefloor.compile.spi.section.ManagedObjectFlow;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
-import net.officefloor.model.impl.repository.inputstream.InputStreamConfigurationItem;
-import net.officefloor.model.office.AdministratorModel;
-import net.officefloor.model.office.AdministratorToOfficeTeamModel;
-import net.officefloor.model.office.DutyModel;
+import net.officefloor.model.office.AdministrationModel;
+import net.officefloor.model.office.AdministrationToOfficeTeamModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
-import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
-import net.officefloor.model.office.ExternalManagedObjectToOfficeGovernanceModel;
+import net.officefloor.model.office.ExternalManagedObjectToAdministrationModel;
+import net.officefloor.model.office.ExternalManagedObjectToGovernanceModel;
+import net.officefloor.model.office.GovernanceAreaModel;
+import net.officefloor.model.office.GovernanceModel;
+import net.officefloor.model.office.GovernanceToOfficeTeamModel;
 import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
-import net.officefloor.model.office.OfficeGovernanceAreaModel;
-import net.officefloor.model.office.OfficeGovernanceModel;
-import net.officefloor.model.office.OfficeGovernanceToOfficeTeamModel;
+import net.officefloor.model.office.OfficeFunctionModel;
+import net.officefloor.model.office.OfficeFunctionToGovernanceModel;
+import net.officefloor.model.office.OfficeFunctionToOfficeTeamModel;
+import net.officefloor.model.office.OfficeFunctionToPostAdministrationModel;
+import net.officefloor.model.office.OfficeFunctionToPreAdministrationModel;
 import net.officefloor.model.office.OfficeInputManagedObjectDependencyModel;
 import net.officefloor.model.office.OfficeInputManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeInputManagedObjectDependencyToOfficeManagedObjectModel;
@@ -84,44 +85,43 @@ import net.officefloor.model.office.OfficeManagedObjectDependencyModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectPoolModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceFlowModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceFlowToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
-import net.officefloor.model.office.OfficeManagedObjectToAdministratorModel;
-import net.officefloor.model.office.OfficeManagedObjectToOfficeGovernanceModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeManagedObjectPoolModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeSupplierModel;
+import net.officefloor.model.office.OfficeManagedObjectToAdministrationModel;
+import net.officefloor.model.office.OfficeManagedObjectToGovernanceModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionManagedObjectModel;
-import net.officefloor.model.office.OfficeSectionManagedObjectToOfficeGovernanceModel;
+import net.officefloor.model.office.OfficeSectionManagedObjectToGovernanceModel;
 import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.office.OfficeSectionObjectModel;
 import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeSectionObjectToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
-import net.officefloor.model.office.OfficeSectionResponsibilityModel;
-import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
 import net.officefloor.model.office.OfficeStartModel;
 import net.officefloor.model.office.OfficeStartToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSubSectionModel;
-import net.officefloor.model.office.OfficeSubSectionToOfficeGovernanceModel;
-import net.officefloor.model.office.OfficeTaskModel;
-import net.officefloor.model.office.OfficeTaskToOfficeGovernanceModel;
-import net.officefloor.model.office.OfficeTaskToPostDutyModel;
-import net.officefloor.model.office.OfficeTaskToPreDutyModel;
+import net.officefloor.model.office.OfficeSubSectionToGovernanceModel;
+import net.officefloor.model.office.OfficeSupplierModel;
 import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.office.PropertyModel;
+import net.officefloor.model.office.TypeQualificationModel;
 
 /**
  * {@link OfficeModel} {@link OfficeSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeModelOfficeSource extends AbstractOfficeSource implements
-		OfficeSourceService<OfficeModelOfficeSource> {
+public class OfficeModelOfficeSource extends AbstractOfficeSource
+		implements OfficeSourceService<OfficeModelOfficeSource> {
 
 	/*
 	 * ====================== OfficeSourceService ==============================
@@ -147,21 +147,12 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 	}
 
 	@Override
-	public void sourceOffice(OfficeArchitect architect,
-			OfficeSourceContext context) throws Exception {
-
-		// Obtain the configuration to the section
-		InputStream configuration = context.getResource(context
-				.getOfficeLocation());
-		if (configuration == null) {
-			// Must have configuration
-			throw new FileNotFoundException("Can not find office '"
-					+ context.getOfficeLocation() + "'");
-		}
+	public void sourceOffice(OfficeArchitect architect, OfficeSourceContext context) throws Exception {
 
 		// Retrieve the office model
-		OfficeModel office = new OfficeRepositoryImpl(new ModelRepositoryImpl())
-				.retrieveOffice(new InputStreamConfigurationItem(configuration));
+		ConfigurationItem configuration = context.getConfigurationItem(context.getOfficeLocation(), null);
+		OfficeModel office = new OfficeModel();
+		new OfficeRepositoryImpl(new ModelRepositoryImpl()).retrieveOffice(office, configuration);
 
 		// Create aggregate processor to add sub section processing
 		AggregateSubSectionProcessor processors = new AggregateSubSectionProcessor();
@@ -172,23 +163,27 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			String teamName = teamModel.getOfficeTeamName();
 			OfficeTeam team = architect.addOfficeTeam(teamName);
 			teams.put(teamName, team);
+
+			// Load the type qualifications
+			for (TypeQualificationModel typeQualification : teamModel.getTypeQualifications()) {
+				team.addTypeQualification(typeQualification.getQualifier(), typeQualification.getType());
+			}
 		}
 
 		// Obtain the listing of governances
 		Map<String, OfficeGovernance> governances = new HashMap<String, OfficeGovernance>();
-		for (OfficeGovernanceModel govModel : office.getOfficeGovernances()) {
+		for (GovernanceModel govModel : office.getGovernances()) {
 
 			// Add the governance
-			String governanceName = govModel.getOfficeGovernanceName();
-			OfficeGovernance governance = architect.addOfficeGovernance(
-					governanceName, govModel.getGovernanceSourceClassName());
+			String governanceName = govModel.getGovernanceName();
+			OfficeGovernance governance = architect.addOfficeGovernance(governanceName,
+					govModel.getGovernanceSourceClassName());
 			for (PropertyModel property : govModel.getProperties()) {
 				governance.addProperty(property.getName(), property.getValue());
 			}
 
 			// Provide team responsible for governance
-			OfficeGovernanceToOfficeTeamModel govToTeam = govModel
-					.getOfficeTeam();
+			GovernanceToOfficeTeamModel govToTeam = govModel.getOfficeTeam();
 			if (govToTeam != null) {
 				OfficeTeamModel teamModel = govToTeam.getOfficeTeam();
 				if (teamModel != null) {
@@ -204,26 +199,21 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		}
 
 		// Add governance processing for sub sections
-		processors.addSubSectionProcessor(new GovernanceSubSectionProcessor(
-				governances));
+		processors.addSubSectionProcessor(new GovernanceSubSectionProcessor(governances));
 
 		// Add the external managed objects, keeping registry of them
 		Map<String, OfficeObject> officeObjects = new HashMap<String, OfficeObject>();
-		for (ExternalManagedObjectModel object : office
-				.getExternalManagedObjects()) {
+		for (ExternalManagedObjectModel object : office.getExternalManagedObjects()) {
 
 			// Create the office object
 			String officeObjectName = object.getExternalManagedObjectName();
-			OfficeObject officeObject = architect.addOfficeObject(
-					officeObjectName, object.getObjectType());
+			OfficeObject officeObject = architect.addOfficeObject(officeObjectName, object.getObjectType());
 
 			// Provide governance over managed object
-			for (ExternalManagedObjectToOfficeGovernanceModel moToGov : object
-					.getOfficeGovernances()) {
-				OfficeGovernanceModel govModel = moToGov.getOfficeGovernance();
+			for (ExternalManagedObjectToGovernanceModel moToGov : object.getGovernances()) {
+				GovernanceModel govModel = moToGov.getGovernance();
 				if (govModel != null) {
-					OfficeGovernance governance = governances.get(govModel
-							.getOfficeGovernanceName());
+					OfficeGovernance governance = governances.get(govModel.getGovernanceName());
 					if (governance != null) {
 						governance.governManagedObject(officeObject);
 					}
@@ -234,16 +224,70 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			officeObjects.put(officeObjectName, officeObject);
 		}
 
+		// Add the Office suppliers, keeping registry of them
+		Map<String, OfficeSupplier> officeSuppliers = new HashMap<>();
+		for (OfficeSupplierModel supplierModel : office.getOfficeSuppliers()) {
+
+			// Add the Office supplier
+			String supplierName = supplierModel.getOfficeSupplierName();
+			OfficeSupplier supplier = architect.addSupplier(supplierName, supplierModel.getSupplierSourceClassName());
+			for (PropertyModel property : supplierModel.getProperties()) {
+				supplier.addProperty(property.getName(), property.getValue());
+			}
+
+			// Register the supplier
+			officeSuppliers.put(supplierName, supplier);
+		}
+
+		// Add the managed object pools, keeping registry of them
+		Map<String, OfficeManagedObjectPool> officeManagedObjectPools = new HashMap<>();
+		for (OfficeManagedObjectPoolModel poolModel : office.getOfficeManagedObjectPools()) {
+
+			// Add the managed object pool
+			String managedObjectPoolName = poolModel.getOfficeManagedObjectPoolName();
+			String managedObjectPoolSourceClassName = poolModel.getManagedObjectPoolSourceClassName();
+			OfficeManagedObjectPool pool = architect.addManagedObjectPool(managedObjectPoolName,
+					managedObjectPoolSourceClassName);
+			officeManagedObjectPools.put(managedObjectPoolName, pool);
+
+			// Add properties for the managed object source
+			for (PropertyModel property : poolModel.getProperties()) {
+				pool.addProperty(property.getName(), property.getValue());
+			}
+		}
+
 		// Add the managed object sources, keeping registry of them
 		Map<String, OfficeManagedObjectSource> managedObjectSources = new HashMap<String, OfficeManagedObjectSource>();
-		for (OfficeManagedObjectSourceModel mosModel : office
-				.getOfficeManagedObjectSources()) {
+		for (OfficeManagedObjectSourceModel mosModel : office.getOfficeManagedObjectSources()) {
 
-			// Add the managed object source
+			// Obtain the managed object source name
 			String mosName = mosModel.getOfficeManagedObjectSourceName();
-			OfficeManagedObjectSource mos = architect
-					.addOfficeManagedObjectSource(mosName,
-							mosModel.getManagedObjectSourceClassName());
+
+			// Determine if supplied managed object source
+			OfficeManagedObjectSource mos;
+			OfficeManagedObjectSourceToOfficeSupplierModel mosToSupplier = mosModel.getOfficeSupplier();
+			if (mosToSupplier != null) {
+				// Supplied managed object source, so obtain its supplier
+				String supplierName = mosToSupplier.getOfficeSupplierName();
+				OfficeSupplier supplier = officeSuppliers.get(supplierName);
+				if (supplier == null) {
+					// Must have supplier
+					architect.addIssue("No supplier '" + supplierName + "' for managed object source " + mosName);
+					continue; // must have supplier to add managed object source
+				}
+
+				// Supply the managed object source
+				String qualifier = mosToSupplier.getQualifier();
+				qualifier = (CompileUtil.isBlank(qualifier) ? null : qualifier);
+				String type = mosToSupplier.getType();
+				mos = supplier.addOfficeManagedObjectSource(mosName, type, qualifier);
+
+			} else {
+				// Source the managed object source
+				mos = architect.addOfficeManagedObjectSource(mosName, mosModel.getManagedObjectSourceClassName());
+			}
+
+			// Add properties for the managed object source
 			for (PropertyModel property : mosModel.getProperties()) {
 				mos.addProperty(property.getName(), property.getValue());
 			}
@@ -254,36 +298,42 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 				try {
 					mos.setTimeout(Long.valueOf(timeoutValue));
 				} catch (NumberFormatException ex) {
-					architect.addIssue("Invalid timeout value: " + timeoutValue
-							+ " for managed object source " + mosName);
+					architect.addIssue(
+							"Invalid timeout value: " + timeoutValue + " for managed object source " + mosName);
 				}
 			}
 
 			// Register the managed object source
 			managedObjectSources.put(mosName, mos);
+
+			// Determine if pool the managed object
+			OfficeManagedObjectSourceToOfficeManagedObjectPoolModel mosToPool = mosModel.getOfficeManagedObjectPool();
+			if (mosToPool != null) {
+				OfficeManagedObjectPoolModel poolModel = mosToPool.getOfficeManagedObjectPool();
+				if (poolModel != null) {
+					OfficeManagedObjectPool pool = officeManagedObjectPools
+							.get(poolModel.getOfficeManagedObjectPoolName());
+					architect.link(mos, pool);
+				}
+			}
 		}
 
 		// Add the managed objects, keeping registry of them
 		Map<String, OfficeManagedObject> managedObjects = new HashMap<String, OfficeManagedObject>();
-		for (OfficeManagedObjectModel moModel : office
-				.getOfficeManagedObjects()) {
+		for (OfficeManagedObjectModel moModel : office.getOfficeManagedObjects()) {
 
 			// Obtain the managed object details
 			String managedObjectName = moModel.getOfficeManagedObjectName();
-			ManagedObjectScope managedObjectScope = this.getManagedObjectScope(
-					moModel.getManagedObjectScope(), architect,
-					managedObjectName);
+			ManagedObjectScope managedObjectScope = this.getManagedObjectScope(moModel.getManagedObjectScope(),
+					architect, managedObjectName);
 
 			// Obtain the managed object source for the managed object
 			OfficeManagedObjectSource moSource = null;
-			OfficeManagedObjectToOfficeManagedObjectSourceModel moToSource = moModel
-					.getOfficeManagedObjectSource();
+			OfficeManagedObjectToOfficeManagedObjectSourceModel moToSource = moModel.getOfficeManagedObjectSource();
 			if (moToSource != null) {
-				OfficeManagedObjectSourceModel moSourceModel = moToSource
-						.getOfficeManagedObjectSource();
+				OfficeManagedObjectSourceModel moSourceModel = moToSource.getOfficeManagedObjectSource();
 				if (moSourceModel != null) {
-					moSource = managedObjectSources.get(moSourceModel
-							.getOfficeManagedObjectSourceName());
+					moSource = managedObjectSources.get(moSourceModel.getOfficeManagedObjectSourceName());
 				}
 			}
 			if (moSource == null) {
@@ -291,18 +341,14 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			}
 
 			// Add the managed object and also register it
-			OfficeManagedObject managedObject = moSource
-					.addOfficeManagedObject(managedObjectName,
-							managedObjectScope);
+			OfficeManagedObject managedObject = moSource.addOfficeManagedObject(managedObjectName, managedObjectScope);
 			managedObjects.put(managedObjectName, managedObject);
 
 			// Provide governance over managed object
-			for (OfficeManagedObjectToOfficeGovernanceModel moToGov : moModel
-					.getOfficeGovernances()) {
-				OfficeGovernanceModel govModel = moToGov.getOfficeGovernance();
+			for (OfficeManagedObjectToGovernanceModel moToGov : moModel.getGovernances()) {
+				GovernanceModel govModel = moToGov.getGovernance();
 				if (govModel != null) {
-					OfficeGovernance governance = governances.get(govModel
-							.getOfficeGovernanceName());
+					OfficeGovernance governance = governances.get(govModel.getGovernanceName());
 					if (governance != null) {
 						governance.governManagedObject(managedObject);
 					}
@@ -311,35 +357,29 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		}
 
 		// Link the managed object dependencies
-		for (OfficeManagedObjectModel moModel : office
-				.getOfficeManagedObjects()) {
+		for (OfficeManagedObjectModel moModel : office.getOfficeManagedObjects()) {
 
 			// Obtain the managed object
-			OfficeManagedObject managedObject = managedObjects.get(moModel
-					.getOfficeManagedObjectName());
+			OfficeManagedObject managedObject = managedObjects.get(moModel.getOfficeManagedObjectName());
 			if (managedObject == null) {
 				continue; // should always have
 			}
 
 			// Link the dependencies
-			for (OfficeManagedObjectDependencyModel dependencyModel : moModel
-					.getOfficeManagedObjectDependencies()) {
+			for (OfficeManagedObjectDependencyModel dependencyModel : moModel.getOfficeManagedObjectDependencies()) {
 
 				// Obtain the dependency
 				ManagedObjectDependency dependency = managedObject
-						.getManagedObjectDependency(dependencyModel
-								.getOfficeManagedObjectDependencyName());
+						.getManagedObjectDependency(dependencyModel.getOfficeManagedObjectDependencyName());
 
 				// Determine if linked to managed object
 				OfficeManagedObject linkedManagedObject = null;
 				OfficeManagedObjectDependencyToOfficeManagedObjectModel dependencyToMo = dependencyModel
 						.getOfficeManagedObject();
 				if (dependencyToMo != null) {
-					OfficeManagedObjectModel linkedMoModel = dependencyToMo
-							.getOfficeManagedObject();
+					OfficeManagedObjectModel linkedMoModel = dependencyToMo.getOfficeManagedObject();
 					if (linkedMoModel != null) {
-						linkedManagedObject = managedObjects.get(linkedMoModel
-								.getOfficeManagedObjectName());
+						linkedManagedObject = managedObjects.get(linkedMoModel.getOfficeManagedObjectName());
 					}
 				}
 				if (linkedManagedObject != null) {
@@ -352,11 +392,9 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 				OfficeManagedObjectDependencyToExternalManagedObjectModel dependencyToExtMo = dependencyModel
 						.getExternalManagedObject();
 				if (dependencyToExtMo != null) {
-					ExternalManagedObjectModel linkedExtMoModel = dependencyToExtMo
-							.getExternalManagedObject();
+					ExternalManagedObjectModel linkedExtMoModel = dependencyToExtMo.getExternalManagedObject();
 					if (linkedExtMoModel != null) {
-						linkedObject = officeObjects.get(linkedExtMoModel
-								.getExternalManagedObjectName());
+						linkedObject = officeObjects.get(linkedExtMoModel.getExternalManagedObjectName());
 					}
 				}
 				if (linkedObject != null) {
@@ -367,12 +405,10 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		}
 
 		// Link the input managed object dependencies
-		for (OfficeManagedObjectSourceModel mosModel : office
-				.getOfficeManagedObjectSources()) {
+		for (OfficeManagedObjectSourceModel mosModel : office.getOfficeManagedObjectSources()) {
 
 			// Obtain the managed object source
-			OfficeManagedObjectSource mos = managedObjectSources.get(mosModel
-					.getOfficeManagedObjectSourceName());
+			OfficeManagedObjectSource mos = managedObjectSources.get(mosModel.getOfficeManagedObjectSourceName());
 			if (mos == null) {
 				continue; // should always have
 			}
@@ -383,19 +419,16 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 
 				// Obtain the input dependency
 				ManagedObjectDependency dependency = mos
-						.getInputManagedObjectDependency(dependencyModel
-								.getOfficeInputManagedObjectDependencyName());
+						.getInputManagedObjectDependency(dependencyModel.getOfficeInputManagedObjectDependencyName());
 
 				// Determine if linked to managed object
 				OfficeManagedObject linkedManagedObject = null;
 				OfficeInputManagedObjectDependencyToOfficeManagedObjectModel dependencyToMo = dependencyModel
 						.getOfficeManagedObject();
 				if (dependencyToMo != null) {
-					OfficeManagedObjectModel linkedMoModel = dependencyToMo
-							.getOfficeManagedObject();
+					OfficeManagedObjectModel linkedMoModel = dependencyToMo.getOfficeManagedObject();
 					if (linkedMoModel != null) {
-						linkedManagedObject = managedObjects.get(linkedMoModel
-								.getOfficeManagedObjectName());
+						linkedManagedObject = managedObjects.get(linkedMoModel.getOfficeManagedObjectName());
 					}
 				}
 				if (linkedManagedObject != null) {
@@ -408,11 +441,9 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 				OfficeInputManagedObjectDependencyToExternalManagedObjectModel dependencyToExtMo = dependencyModel
 						.getExternalManagedObject();
 				if (dependencyToExtMo != null) {
-					ExternalManagedObjectModel linkedExtMoModel = dependencyToExtMo
-							.getExternalManagedObject();
+					ExternalManagedObjectModel linkedExtMoModel = dependencyToExtMo.getExternalManagedObject();
 					if (linkedExtMoModel != null) {
-						linkedObject = officeObjects.get(linkedExtMoModel
-								.getExternalManagedObjectName());
+						linkedObject = officeObjects.get(linkedExtMoModel.getExternalManagedObjectName());
 					}
 				}
 				if (linkedObject != null) {
@@ -430,74 +461,31 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			// Create the property list to add the section
 			PropertyList propertyList = context.createPropertyList();
 			for (PropertyModel property : sectionModel.getProperties()) {
-				propertyList.addProperty(property.getName()).setValue(
-						property.getValue());
+				propertyList.addProperty(property.getName()).setValue(property.getValue());
 			}
 
 			// Add the section (register for later)
 			String sectionName = sectionModel.getOfficeSectionName();
-			OfficeSection section = architect.addOfficeSection(sectionName,
-					sectionModel.getSectionSourceClassName(),
+			OfficeSection section = architect.addOfficeSection(sectionName, sectionModel.getSectionSourceClassName(),
 					sectionModel.getSectionLocation());
 			propertyList.configureProperties(section);
 			sections.put(sectionName, section);
 
 			// Obtain the section type (register for later)
-			OfficeSectionType sectionType = context.loadOfficeSectionType(
-					sectionName, sectionModel.getSectionSourceClassName(),
-					sectionModel.getSectionLocation(), propertyList);
+			OfficeSectionType sectionType = context.loadOfficeSectionType(sectionName,
+					sectionModel.getSectionSourceClassName(), sectionModel.getSectionLocation(), propertyList);
 			sectionTypes.put(sectionName, sectionType);
 
-			// Create the listing of responsibilities
-			List<Responsibility> responsibilities = new LinkedList<Responsibility>();
-			for (OfficeSectionResponsibilityModel responsibilityModel : sectionModel
-					.getOfficeSectionResponsibilities()) {
-
-				// Obtain the office team responsible
-				OfficeTeam officeTeam = null;
-				OfficeSectionResponsibilityToOfficeTeamModel conn = responsibilityModel
-						.getOfficeTeam();
-				if (conn != null) {
-					OfficeTeamModel teamModel = conn.getOfficeTeam();
-					if (teamModel != null) {
-						String teamName = teamModel.getOfficeTeamName();
-						officeTeam = teams.get(teamName);
-					}
-				}
-				if (officeTeam == null) {
-					continue; // must have team responsible
-				}
-
-				// Add the responsibility
-				responsibilities.add(new Responsibility(officeTeam));
-			}
-
-			// Create the listing of all tasks
-			List<OfficeSectionTask> tasks = new LinkedList<OfficeSectionTask>();
-			this.loadOfficeTasks(section, sectionType, tasks);
-
-			// Assign teams their responsibilities
-			for (Responsibility responsibility : responsibilities) {
-				for (OfficeSectionTask task : new ArrayList<OfficeSectionTask>(tasks)) {
-					if (responsibility.isResponsible(task)) {
-						// Assign the team responsible for task
-						architect.link(task.getTeamResponsible(),
-								responsibility.officeTeam);
-
-						// Remove task from listing as assigned its team
-						tasks.remove(task);
-					}
-				}
-			}
+			// Create the listing of all functions
+			List<OfficeSectionFunction> functions = new LinkedList<OfficeSectionFunction>();
+			this.loadOfficeFunctions(section, sectionType, functions);
 
 			// Obtain the governances of section
-			OfficeGovernanceModel[] governingGovernances = this
-					.getOfficeGovernancesOverLocation(sectionModel.getX(),
-							sectionModel.getY(), office.getOfficeGovernances());
-			for (OfficeGovernanceModel govModel : governingGovernances) {
+			GovernanceModel[] governingGovernances = this.getGovernancesOverLocation(sectionModel.getX(),
+					sectionModel.getY(), office.getGovernances());
+			for (GovernanceModel govModel : governingGovernances) {
 				// Obtain the governance to govern the section
-				OfficeGovernance governance = governances.get(govModel
-						.getOfficeGovernanceName());
+				OfficeGovernance governance = governances.get(govModel.getGovernanceName());
 				if (governance != null) {
 					// Add the governance to the section
 					section.addGovernance(governance);
@@ -514,15 +502,11 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 
 			// Obtain the flow to trigger on start-up
 			OfficeSectionInput officeSectionInput = null;
-			OfficeStartToOfficeSectionInputModel connToInput = startModel
-					.getOfficeSectionInput();
+			OfficeStartToOfficeSectionInputModel connToInput = startModel.getOfficeSectionInput();
 			if (connToInput != null) {
-				OfficeSection section = sections.get(connToInput
-						.getOfficeSectionName());
+				OfficeSection section = sections.get(connToInput.getOfficeSectionName());
 				if (section != null) {
-					officeSectionInput = section
-							.getOfficeSectionInput(connToInput
-									.getOfficeSectionInputName());
+					officeSectionInput = section.getOfficeSectionInput(connToInput.getOfficeSectionInputName());
 				}
 			}
 			if (officeSectionInput != null) {
@@ -539,24 +523,18 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			OfficeSection section = sections.get(sectionName);
 
 			// Link the objects to office objects
-			for (OfficeSectionObjectModel objectModel : sectionModel
-					.getOfficeSectionObjects()) {
+			for (OfficeSectionObjectModel objectModel : sectionModel.getOfficeSectionObjects()) {
 
 				// Obtain the object
-				OfficeSectionObject object = section
-						.getOfficeSectionObject(objectModel
-								.getOfficeSectionObjectName());
+				OfficeSectionObject object = section.getOfficeSectionObject(objectModel.getOfficeSectionObjectName());
 
 				// Determine if link object to office object
 				OfficeObject officeObject = null;
-				OfficeSectionObjectToExternalManagedObjectModel connToExtMo = objectModel
-						.getExternalManagedObject();
+				OfficeSectionObjectToExternalManagedObjectModel connToExtMo = objectModel.getExternalManagedObject();
 				if (connToExtMo != null) {
-					ExternalManagedObjectModel extMo = connToExtMo
-							.getExternalManagedObject();
+					ExternalManagedObjectModel extMo = connToExtMo.getExternalManagedObject();
 					if (extMo != null) {
-						officeObject = officeObjects.get(extMo
-								.getExternalManagedObjectName());
+						officeObject = officeObjects.get(extMo.getExternalManagedObjectName());
 					}
 				}
 				if (officeObject != null) {
@@ -566,14 +544,11 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 
 				// Determine if link object to office managed object
 				OfficeManagedObject officeMo = null;
-				OfficeSectionObjectToOfficeManagedObjectModel connToMo = objectModel
-						.getOfficeManagedObject();
+				OfficeSectionObjectToOfficeManagedObjectModel connToMo = objectModel.getOfficeManagedObject();
 				if (connToMo != null) {
-					OfficeManagedObjectModel mo = connToMo
-							.getOfficeManagedObject();
+					OfficeManagedObjectModel mo = connToMo.getOfficeManagedObject();
 					if (mo != null) {
-						officeMo = managedObjects.get(mo
-								.getOfficeManagedObjectName());
+						officeMo = managedObjects.get(mo.getOfficeManagedObjectName());
 					}
 				}
 				if (officeMo != null) {
@@ -583,32 +558,22 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			}
 
 			// Link the outputs to the inputs
-			for (OfficeSectionOutputModel outputModel : sectionModel
-					.getOfficeSectionOutputs()) {
+			for (OfficeSectionOutputModel outputModel : sectionModel.getOfficeSectionOutputs()) {
 
 				// Obtain the output
-				OfficeSectionOutput output = section
-						.getOfficeSectionOutput(outputModel
-								.getOfficeSectionOutputName());
+				OfficeSectionOutput output = section.getOfficeSectionOutput(outputModel.getOfficeSectionOutputName());
 
 				// Obtain the input
 				OfficeSectionInput input = null;
-				OfficeSectionOutputToOfficeSectionInputModel conn = outputModel
-						.getOfficeSectionInput();
+				OfficeSectionOutputToOfficeSectionInputModel conn = outputModel.getOfficeSectionInput();
 				if (conn != null) {
-					OfficeSectionInputModel inputModel = conn
-							.getOfficeSectionInput();
+					OfficeSectionInputModel inputModel = conn.getOfficeSectionInput();
 					if (inputModel != null) {
-						OfficeSectionModel inputSectionModel = this
-								.getOfficeSectionForInput(office, inputModel);
+						OfficeSectionModel inputSectionModel = this.getOfficeSectionForInput(office, inputModel);
 						if (inputSectionModel != null) {
-							OfficeSection inputSection = sections
-									.get(inputSectionModel
-											.getOfficeSectionName());
+							OfficeSection inputSection = sections.get(inputSectionModel.getOfficeSectionName());
 							if (inputSection != null) {
-								input = inputSection
-										.getOfficeSectionInput(inputModel
-												.getOfficeSectionInputName());
+								input = inputSection.getOfficeSectionInput(inputModel.getOfficeSectionInputName());
 							}
 						}
 					}
@@ -623,43 +588,33 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		}
 
 		// Link managed object source flows to section inputs
-		for (OfficeManagedObjectSourceModel mosModel : office
-				.getOfficeManagedObjectSources()) {
+		for (OfficeManagedObjectSourceModel mosModel : office.getOfficeManagedObjectSources()) {
 
 			// Obtain the managed object source
-			OfficeManagedObjectSource mos = managedObjectSources.get(mosModel
-					.getOfficeManagedObjectSourceName());
+			OfficeManagedObjectSource mos = managedObjectSources.get(mosModel.getOfficeManagedObjectSourceName());
 			if (mos == null) {
 				continue; // should always have managed object source
 			}
 
 			// Link managed object source flow to section input
-			for (OfficeManagedObjectSourceFlowModel mosFlowModel : mosModel
-					.getOfficeManagedObjectSourceFlows()) {
+			for (OfficeManagedObjectSourceFlowModel mosFlowModel : mosModel.getOfficeManagedObjectSourceFlows()) {
 
 				// Obtain the managed object source flow
 				ManagedObjectFlow mosFlow = mos
-						.getManagedObjectFlow(mosFlowModel
-								.getOfficeManagedObjectSourceFlowName());
+						.getManagedObjectFlow(mosFlowModel.getOfficeManagedObjectSourceFlowName());
 
 				// Link to section input
 				OfficeSectionInput sectionInput = null;
-				OfficeManagedObjectSourceFlowToOfficeSectionInputModel conn = mosFlowModel
-						.getOfficeSectionInput();
+				OfficeManagedObjectSourceFlowToOfficeSectionInputModel conn = mosFlowModel.getOfficeSectionInput();
 				if (conn != null) {
-					OfficeSectionInputModel sectionInputModel = conn
-							.getOfficeSectionInput();
+					OfficeSectionInputModel sectionInputModel = conn.getOfficeSectionInput();
 					if (sectionInputModel != null) {
-						OfficeSectionModel sectionModel = this
-								.getOfficeSectionForInput(office,
-										sectionInputModel);
+						OfficeSectionModel sectionModel = this.getOfficeSectionForInput(office, sectionInputModel);
 						if (sectionModel != null) {
-							OfficeSection inputSection = sections
-									.get(sectionModel.getOfficeSectionName());
+							OfficeSection inputSection = sections.get(sectionModel.getOfficeSectionName());
 							if (inputSection != null) {
 								sectionInput = inputSection
-										.getOfficeSectionInput(sectionInputModel
-												.getOfficeSectionInputName());
+										.getOfficeSectionInput(sectionInputModel.getOfficeSectionInputName());
 							}
 						}
 					}
@@ -672,29 +627,24 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		}
 
 		// Link managed object source teams to office teams
-		for (OfficeManagedObjectSourceModel mosModel : office
-				.getOfficeManagedObjectSources()) {
+		for (OfficeManagedObjectSourceModel mosModel : office.getOfficeManagedObjectSources()) {
 
 			// Obtain the managed object source
-			OfficeManagedObjectSource mos = managedObjectSources.get(mosModel
-					.getOfficeManagedObjectSourceName());
+			OfficeManagedObjectSource mos = managedObjectSources.get(mosModel.getOfficeManagedObjectSourceName());
 			if (mos == null) {
 				continue; // should always have managed object source
 			}
 
 			// Link managed object source teams to office team
-			for (OfficeManagedObjectSourceTeamModel mosTeamModel : mosModel
-					.getOfficeManagedObjectSourceTeams()) {
+			for (OfficeManagedObjectSourceTeamModel mosTeamModel : mosModel.getOfficeManagedObjectSourceTeams()) {
 
 				// Obtain the managed object source team
 				ManagedObjectTeam mosTeam = mos
-						.getManagedObjectTeam(mosTeamModel
-								.getOfficeManagedObjectSourceTeamName());
+						.getManagedObjectTeam(mosTeamModel.getOfficeManagedObjectSourceTeamName());
 
 				// Link managed object source team to office team
 				OfficeTeam officeTeam = null;
-				OfficeManagedObjectSourceTeamToOfficeTeamModel conn = mosTeamModel
-						.getOfficeTeam();
+				OfficeManagedObjectSourceTeamToOfficeTeamModel conn = mosTeamModel.getOfficeTeam();
 				if (conn != null) {
 					OfficeTeamModel teamModel = conn.getOfficeTeam();
 					if (teamModel != null) {
@@ -708,25 +658,22 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			}
 		}
 
-		// Add the administrators (keeping registry of administrators, duties)
-		Map<String, OfficeAdministrator> administrators = new HashMap<String, OfficeAdministrator>();
-		Map<DutyModel, AdministratorModel> dutyAdmins = new HashMap<DutyModel, AdministratorModel>();
-		DoubleKeyMap<String, String, OfficeDuty> duties = new DoubleKeyMap<String, String, OfficeDuty>();
-		for (AdministratorModel adminModel : office.getOfficeAdministrators()) {
+		// Add the administration (keeping registry of administration)
+		Map<String, OfficeAdministration> administrations = new HashMap<String, OfficeAdministration>();
+		for (AdministrationModel adminModel : office.getAdministrations()) {
 
-			// Add the administrator and register it
-			String adminName = adminModel.getAdministratorName();
-			OfficeAdministrator admin = architect.addOfficeAdministrator(
-					adminName, adminModel.getAdministratorSourceClassName());
+			// Add the administration and register it
+			String adminName = adminModel.getAdministrationName();
+			OfficeAdministration admin = architect.addOfficeAdministration(adminName,
+					adminModel.getAdministrationSourceClassName());
 			for (PropertyModel property : adminModel.getProperties()) {
 				admin.addProperty(property.getName(), property.getValue());
 			}
-			administrators.put(adminName, admin);
+			administrations.put(adminName, admin);
 
 			// Obtain the office team responsible for this administration
 			OfficeTeam officeTeam = null;
-			AdministratorToOfficeTeamModel adminToTeam = adminModel
-					.getOfficeTeam();
+			AdministrationToOfficeTeamModel adminToTeam = adminModel.getOfficeTeam();
 			if (adminToTeam != null) {
 				OfficeTeamModel teamModel = adminToTeam.getOfficeTeam();
 				if (teamModel != null) {
@@ -737,87 +684,61 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 				// Assign the team responsible for administration
 				architect.link(admin, officeTeam);
 			}
-
-			// Add the duties for the administrator (register also)
-			for (DutyModel dutyModel : adminModel.getDuties()) {
-
-				// Add the duty and register it
-				String dutyName = dutyModel.getDutyName();
-				OfficeDuty duty = admin.getDuty(dutyName);
-				duties.put(adminName, dutyName, duty);
-
-				// Keep registry of duties to their administrators
-				dutyAdmins.put(dutyModel, adminModel);
-			}
 		}
 
-		// Add processor to link duties with tasks
-		processors.addSubSectionProcessor(new TasksToDutiesSubSectionProcessor(
-				dutyAdmins, duties));
+		// Add processor to link administration with functions
+		processors.addSubSectionProcessor(new FunctionsToAdministrationSubSectionProcessor(teams, administrations));
 
 		// Create the listing of objects to be administered
 		Map<String, List<AdministeredManagedObject>> administration = new HashMap<String, List<AdministeredManagedObject>>();
-		for (ExternalManagedObjectModel extMo : office
-				.getExternalManagedObjects()) {
+		for (ExternalManagedObjectModel extMo : office.getExternalManagedObjects()) {
 
 			// Obtain the office object
-			OfficeObject officeObject = officeObjects.get(extMo
-					.getExternalManagedObjectName());
+			OfficeObject officeObject = officeObjects.get(extMo.getExternalManagedObjectName());
 
 			// Add the object for administration
-			for (ExternalManagedObjectToAdministratorModel extMoToAdmin : extMo
-					.getAdministrators()) {
-				AdministratorModel adminModel = extMoToAdmin.getAdministrator();
+			for (ExternalManagedObjectToAdministrationModel extMoToAdmin : extMo.getAdministrations()) {
+				AdministrationModel adminModel = extMoToAdmin.getAdministration();
 				if (adminModel != null) {
-					String administratorName = adminModel
-							.getAdministratorName();
-					List<AdministeredManagedObject> list = administration
-							.get(administratorName);
+					String administrationName = adminModel.getAdministrationName();
+					List<AdministeredManagedObject> list = administration.get(administrationName);
 					if (list == null) {
 						list = new LinkedList<AdministeredManagedObject>();
-						administration.put(administratorName, list);
+						administration.put(administrationName, list);
 					}
-					list.add(new AdministeredManagedObject(extMoToAdmin
-							.getOrder(), officeObject));
+					list.add(new AdministeredManagedObject(extMoToAdmin.getOrder(), officeObject));
 				}
 			}
 		}
-		for (OfficeManagedObjectModel moModel : office
-				.getOfficeManagedObjects()) {
+		for (OfficeManagedObjectModel moModel : office.getOfficeManagedObjects()) {
 
 			// Obtain the office managed object
-			OfficeManagedObject mo = managedObjects.get(moModel
-					.getOfficeManagedObjectName());
+			OfficeManagedObject mo = managedObjects.get(moModel.getOfficeManagedObjectName());
 
 			// Add the managed object for administration
-			for (OfficeManagedObjectToAdministratorModel moToAdmin : moModel
-					.getAdministrators()) {
-				AdministratorModel adminModel = moToAdmin.getAdministrator();
+			for (OfficeManagedObjectToAdministrationModel moToAdmin : moModel.getAdministrations()) {
+				AdministrationModel adminModel = moToAdmin.getAdministration();
 				if (adminModel != null) {
-					String administratorName = adminModel
-							.getAdministratorName();
-					List<AdministeredManagedObject> list = administration
-							.get(administratorName);
+					String administrationName = adminModel.getAdministrationName();
+					List<AdministeredManagedObject> list = administration.get(administrationName);
 					if (list == null) {
 						list = new LinkedList<AdministeredManagedObject>();
-						administration.put(administratorName, list);
+						administration.put(administrationName, list);
 					}
-					list.add(new AdministeredManagedObject(
-							moToAdmin.getOrder(), mo));
+					list.add(new AdministeredManagedObject(moToAdmin.getOrder(), mo));
 				}
 			}
 		}
 
 		// Administer the managed objects
-		for (AdministratorModel adminModel : office.getOfficeAdministrators()) {
+		for (AdministrationModel adminModel : office.getAdministrations()) {
 
-			// Obtain the administrator
-			String administratorName = adminModel.getAdministratorName();
-			OfficeAdministrator admin = administrators.get(administratorName);
+			// Obtain the administration
+			String administrationName = adminModel.getAdministrationName();
+			OfficeAdministration admin = administrations.get(administrationName);
 
 			// Obtain the objects to administer
-			List<AdministeredManagedObject> administeredManagedObjects = administration
-					.get(administratorName);
+			List<AdministeredManagedObject> administeredManagedObjects = administration.get(administrationName);
 			if (administeredManagedObjects == null) {
 				continue; // no managed objects to administer
 			}
@@ -832,31 +753,24 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		}
 
 		// Handle escalations
-		for (OfficeEscalationModel escalationModel : office
-				.getOfficeEscalations()) {
+		for (OfficeEscalationModel escalationModel : office.getOfficeEscalations()) {
 
 			// Obtain the escalation
 			String escalationType = escalationModel.getEscalationType();
-			OfficeEscalation escalation = architect
-					.addOfficeEscalation(escalationType);
+			OfficeEscalation escalation = architect.addOfficeEscalation(escalationType);
 
 			// Link to section input for handling
 			OfficeSectionInput sectionInput = null;
-			OfficeEscalationToOfficeSectionInputModel conn = escalationModel
-					.getOfficeSectionInput();
+			OfficeEscalationToOfficeSectionInputModel conn = escalationModel.getOfficeSectionInput();
 			if (conn != null) {
-				OfficeSectionInputModel sectionInputModel = conn
-						.getOfficeSectionInput();
+				OfficeSectionInputModel sectionInputModel = conn.getOfficeSectionInput();
 				if (sectionInputModel != null) {
-					OfficeSectionModel sectionModel = this
-							.getOfficeSectionForInput(office, sectionInputModel);
+					OfficeSectionModel sectionModel = this.getOfficeSectionForInput(office, sectionInputModel);
 					if (sectionModel != null) {
-						OfficeSection inputSection = sections.get(sectionModel
-								.getOfficeSectionName());
+						OfficeSection inputSection = sections.get(sectionModel.getOfficeSectionName());
 						if (inputSection != null) {
 							sectionInput = inputSection
-									.getOfficeSectionInput(sectionInputModel
-											.getOfficeSectionInputName());
+									.getOfficeSectionInput(sectionInputModel.getOfficeSectionInputName());
 						}
 					}
 				}
@@ -874,17 +788,16 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			String sectionName = sectionModel.getOfficeSectionName();
 			OfficeSection section = sections.get(sectionName);
 			OfficeSectionType sectionType = sectionTypes.get(sectionName);
-			OfficeSubSectionModel subSectionModel = sectionModel
-					.getOfficeSubSection();
+			OfficeSubSectionModel subSectionModel = sectionModel.getOfficeSubSection();
 
 			// Process the section and its sub sections
-			this.processSubSections(sectionName, section, sectionType,
-					subSectionModel, sectionModel, processors, architect);
+			this.processSubSections(sectionName, section, sectionType, subSectionModel, sectionModel, processors,
+					architect);
 		}
 	}
 
 	/**
-	 * Obtains the {@link OfficeGovernanceModel} instances that provide
+	 * Obtains the {@link GovernanceModel} instances that provide
 	 * {@link Governance} over the particular location.
 	 * 
 	 * @param x
@@ -892,21 +805,19 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 	 * @param y
 	 *            Y co-ordinate of location.
 	 * @param governances
-	 *            {@link OfficeGovernanceModel} instances.
-	 * @return {@link OfficeGovernanceModel} instances that provide
-	 *         {@link Governance} over the particular location. May be empty
-	 *         array if no {@link Governance} for location.
+	 *            {@link GovernanceModel} instances.
+	 * @return {@link GovernanceModel} instances that provide {@link Governance}
+	 *         over the particular location. May be empty array if no
+	 *         {@link Governance} for location.
 	 */
-	private OfficeGovernanceModel[] getOfficeGovernancesOverLocation(int x,
-			int y, List<OfficeGovernanceModel> governances) {
+	private GovernanceModel[] getGovernancesOverLocation(int x, int y, List<GovernanceModel> governances) {
 
 		// Create listing of governances for the location
-		List<OfficeGovernanceModel> governing = new LinkedList<OfficeGovernanceModel>();
+		List<GovernanceModel> governing = new LinkedList<GovernanceModel>();
 
 		// Add governances that cover the location
-		for (OfficeGovernanceModel governance : governances) {
-			for (OfficeGovernanceAreaModel area : governance
-					.getOfficeGovernanceAreas()) {
+		for (GovernanceModel governance : governances) {
+			for (GovernanceAreaModel area : governance.getGovernanceAreas()) {
 
 				// Calculate points for area
 				int leftX = area.getX();
@@ -927,8 +838,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 				}
 
 				// Determine if governance covers the location
-				if (((leftX <= x) && (x <= rightX))
-						&& ((topY <= y) && (y <= bottomY))) {
+				if (((leftX <= x) && (x <= rightX)) && ((topY <= y) && (y <= bottomY))) {
 					// Governance is governing the location
 					governing.add(governance);
 				}
@@ -936,7 +846,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		}
 
 		// Return the listing of governing governances for the location
-		return governing.toArray(new OfficeGovernanceModel[governing.size()]);
+		return governing.toArray(new GovernanceModel[governing.size()]);
 	}
 
 	/**
@@ -952,24 +862,21 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 	 * @return {@link ManagedObjectScope} or <code>null</code> with issue
 	 *         reported to the {@link OfficeArchitect}.
 	 */
-	private ManagedObjectScope getManagedObjectScope(String managedObjectScope,
-			OfficeArchitect architect, String managedObjectName) {
+	private ManagedObjectScope getManagedObjectScope(String managedObjectScope, OfficeArchitect architect,
+			String managedObjectName) {
 
 		// Obtain the managed object scope
-		if (OfficeChanges.PROCESS_MANAGED_OBJECT_SCOPE
-				.equals(managedObjectScope)) {
+		if (OfficeChanges.PROCESS_MANAGED_OBJECT_SCOPE.equals(managedObjectScope)) {
 			return ManagedObjectScope.PROCESS;
-		} else if (OfficeChanges.THREAD_MANAGED_OBJECT_SCOPE
-				.equals(managedObjectScope)) {
+		} else if (OfficeChanges.THREAD_MANAGED_OBJECT_SCOPE.equals(managedObjectScope)) {
 			return ManagedObjectScope.THREAD;
-		} else if (OfficeChanges.WORK_MANAGED_OBJECT_SCOPE
-				.equals(managedObjectScope)) {
-			return ManagedObjectScope.WORK;
+		} else if (OfficeChanges.FUNCTION_MANAGED_OBJECT_SCOPE.equals(managedObjectScope)) {
+			return ManagedObjectScope.FUNCTION;
 		}
 
 		// Unknown scope if at this point
-		architect.addIssue("Unknown managed object scope " + managedObjectScope
-				+ " for managed object " + managedObjectName);
+		architect.addIssue(
+				"Unknown managed object scope " + managedObjectScope + " for managed object " + managedObjectName);
 		return null;
 	}
 
@@ -984,13 +891,11 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 	 * @return {@link OfficeSectionModel} containing the
 	 *         {@link OfficeSectionInput}.
 	 */
-	private OfficeSectionModel getOfficeSectionForInput(OfficeModel office,
-			OfficeSectionInputModel input) {
+	private OfficeSectionModel getOfficeSectionForInput(OfficeModel office, OfficeSectionInputModel input) {
 
 		// Find and return the office section for the input
 		for (OfficeSectionModel section : office.getOfficeSections()) {
-			for (OfficeSectionInputModel check : section
-					.getOfficeSectionInputs()) {
+			for (OfficeSectionInputModel check : section.getOfficeSectionInputs()) {
 				if (check == input) {
 					// Found the input so subsequently return section
 					return section;
@@ -1003,39 +908,37 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 	}
 
 	/**
-	 * Loads the {@link OfficeSectionTask} instances for the {@link OfficeSubSection}
-	 * and its {@link OfficeSubSection} instances.
+	 * Loads the {@link OfficeSectionFunction} instances for the
+	 * {@link OfficeSubSection} and its {@link OfficeSubSection} instances.
 	 * 
 	 * @param section
 	 *            {@link OfficeSubSection}.
 	 * @param sectionType
 	 *            {@link OfficeSubSectionType}.
-	 * @param tasks
+	 * @param functions
 	 *            Listing to be populated with the {@link OfficeSubSectionType}
-	 *            {@link OfficeSectionTask} instances.
+	 *            {@link OfficeSectionFunction} instances.
 	 */
-	private void loadOfficeTasks(OfficeSubSection section,
-			OfficeSubSectionType sectionType, List<OfficeSectionTask> tasks) {
+	private void loadOfficeFunctions(OfficeSubSection section, OfficeSubSectionType sectionType,
+			List<OfficeSectionFunction> functions) {
 
 		// Ensure have section
 		if (sectionType == null) {
 			return;
 		}
 
-		// Add the section office tasks
-		for (OfficeTaskType taskType : sectionType.getOfficeTaskTypes()) {
-			String taskName = taskType.getOfficeTaskName();
-			OfficeSectionTask task = section.getOfficeSectionTask(taskName);
-			tasks.add(task);
+		// Add the section office functions
+		for (OfficeFunctionType functionType : sectionType.getOfficeFunctionTypes()) {
+			String functionName = functionType.getOfficeFunctionName();
+			OfficeSectionFunction function = section.getOfficeSectionFunction(functionName);
+			functions.add(function);
 		}
 
-		// Recursively add the sub section office tasks
-		for (OfficeSubSectionType subSectionType : sectionType
-				.getOfficeSubSectionTypes()) {
+		// Recursively add the sub section office functions
+		for (OfficeSubSectionType subSectionType : sectionType.getOfficeSubSectionTypes()) {
 			String subSectionName = subSectionType.getOfficeSectionName();
-			OfficeSubSection subSection = section
-					.getOfficeSubSection(subSectionName);
-			this.loadOfficeTasks(subSection, subSectionType, tasks);
+			OfficeSubSection subSection = section.getOfficeSubSection(subSectionName);
+			this.loadOfficeFunctions(subSection, subSectionType, functions);
 		}
 	}
 
@@ -1059,11 +962,9 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 	 * @param architect
 	 *            {@link OfficeArchitect}.
 	 */
-	private void processSubSections(String subSectionPath,
-			OfficeSubSection subSection, OfficeSubSectionType subSectionType,
-			OfficeSubSectionModel subSectionModel,
-			OfficeSectionModel sectionModel, SubSectionProcessor processor,
-			OfficeArchitect architect) {
+	private void processSubSections(String subSectionPath, OfficeSubSection subSection,
+			OfficeSubSectionType subSectionType, OfficeSubSectionModel subSectionModel, OfficeSectionModel sectionModel,
+			SubSectionProcessor processor, OfficeArchitect architect) {
 
 		// Ensure have sub section model
 		if (subSectionModel == null) {
@@ -1071,80 +972,60 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		}
 
 		// Process the sub section
-		processor.processSubSection(subSectionModel, subSection, architect,
-				subSectionPath);
+		processor.processSubSection(subSectionModel, subSection, architect, subSectionPath);
 
 		// Process managed objects for the current sub section
-		for (OfficeSectionManagedObjectModel managedObjectModel : subSectionModel
-				.getOfficeSectionManagedObjects()) {
+		for (OfficeSectionManagedObjectModel managedObjectModel : subSectionModel.getOfficeSectionManagedObjects()) {
 
 			// Obtain the corresponding office section managed object
-			String managedObjectName = managedObjectModel
-					.getOfficeSectionManagedObjectName();
+			String managedObjectName = managedObjectModel.getOfficeSectionManagedObjectName();
 			OfficeSectionManagedObject managedObject = null;
 			for (OfficeSectionManagedObjectType checkManagedObjectType : subSectionType
 					.getOfficeSectionManagedObjectTypes()) {
-				if (managedObjectName.equals(checkManagedObjectType
-						.getOfficeSectionManagedObjectName())) {
+				if (managedObjectName.equals(checkManagedObjectType.getOfficeSectionManagedObjectName())) {
 
 					// Obtain the managed object
-					managedObject = subSection
-							.getOfficeSectionManagedObject(managedObjectName);
+					managedObject = subSection.getOfficeSectionManagedObject(managedObjectName);
 				}
 			}
 			if (managedObject == null) {
-				architect
-						.addIssue("Office model is out of sync with sections. Can not find managed object '"
-								+ managedObjectName
-								+ "' ["
-								+ subSectionPath
-								+ "]");
+				architect.addIssue("Office model is out of sync with sections. Can not find managed object '"
+						+ managedObjectName + "' [" + subSectionPath + "]");
 				continue; // must have managed object
 			}
 
 			// Process the managed object
-			processor.processManagedObject(managedObjectModel, managedObject,
-					architect, subSectionPath);
+			processor.processManagedObject(managedObjectModel, managedObject, architect, subSectionPath);
 		}
 
-		// Process tasks for the current sub section
-		for (OfficeTaskModel taskModel : subSectionModel.getOfficeTasks()) {
+		// Process functions for the current sub section
+		for (OfficeFunctionModel functionModel : subSectionModel.getOfficeFunctions()) {
 
-			// Obtain the corresponding office task
-			String taskName = taskModel.getOfficeTaskName();
-			OfficeSectionTask task = subSection.getOfficeSectionTask(taskName);
+			// Obtain the corresponding office function
+			String functionName = functionModel.getOfficeFunctionName();
+			OfficeSectionFunction function = subSection.getOfficeSectionFunction(functionName);
 
-			// Process the office task
-			processor.processOfficeTask(taskModel, task, architect,
-					subSectionPath);
+			// Process the office function
+			processor.processOfficeFunction(functionModel, function, architect, subSectionPath);
 		}
 
 		// Recurse into the sub sections
-		for (OfficeSubSectionModel subSubSectionModel : subSectionModel
-				.getOfficeSubSections()) {
+		for (OfficeSubSectionModel subSubSectionModel : subSectionModel.getOfficeSubSections()) {
 
 			// Obtain the corresponding sub section
-			String subSubSectionName = subSubSectionModel
-					.getOfficeSubSectionName();
-			OfficeSubSection subSubSection = subSection
-					.getOfficeSubSection(subSubSectionName);
+			String subSubSectionName = subSubSectionModel.getOfficeSubSectionName();
+			OfficeSubSection subSubSection = subSection.getOfficeSubSection(subSubSectionName);
 
 			// Obtain the sub section type
 			OfficeSubSectionType subSubSectionType = null;
-			for (OfficeSubSectionType checkSubSectionType : subSectionType
-					.getOfficeSubSectionTypes()) {
-				if (subSubSectionName.equals(checkSubSectionType
-						.getOfficeSectionName())) {
+			for (OfficeSubSectionType checkSubSectionType : subSectionType.getOfficeSubSectionTypes()) {
+				if (subSubSectionName.equals(checkSubSectionType.getOfficeSectionName())) {
 					subSubSectionType = checkSubSectionType;
 				}
 			}
 			if (subSubSectionType == null) {
-				architect
-						.addIssue("Office model is out of sync with sections. Can not find sub section '"
-								+ subSubSectionName
-								+ "' ["
-								+ subSectionPath
-								+ "]");
+				architect.addIssue("Office model is out of sync with sections. Can not find sub section '"
+						+ subSubSectionName + "' [" + subSectionPath + "]");
 				continue; // must have sub section
 			}
 
@@ -1153,9 +1034,8 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 					: subSectionPath + "/" + subSubSectionName;
 
 			// Recursively process the sub sections
-			this.processSubSections(subSubSectionPath, subSubSection,
-					subSubSectionType, subSubSectionModel, sectionModel,
-					processor, architect);
+			this.processSubSections(subSubSectionPath, subSubSection, subSubSectionType, subSubSectionModel,
+					sectionModel, processor, architect);
 		}
 	}
 
@@ -1176,9 +1056,8 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		 * @param subSectionPath
 		 *            Path to the {@link OfficeSubSection}.
 		 */
-		void processSubSection(OfficeSubSectionModel subSectionModel,
-				OfficeSubSection subSection, OfficeArchitect architect,
-				String subSectionPath);
+		void processSubSection(OfficeSubSectionModel subSectionModel, OfficeSubSection subSection,
+				OfficeArchitect architect, String subSectionPath);
 
 		/**
 		 * Processes the {@link OfficeSectionManagedObject}.
@@ -1192,56 +1071,49 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		 * @param subSectionPath
 		 *            Path to the {@link OfficeSubSection}.
 		 */
-		void processManagedObject(
-				OfficeSectionManagedObjectModel managedObjectModel,
-				OfficeSectionManagedObject managedObject,
-				OfficeArchitect architect, String subSectionPath);
+		void processManagedObject(OfficeSectionManagedObjectModel managedObjectModel,
+				OfficeSectionManagedObject managedObject, OfficeArchitect architect, String subSectionPath);
 
 		/**
-		 * Processes the {@link OfficeSectionTask}.
+		 * Processes the {@link OfficeSectionFunction}.
 		 * 
-		 * @param taskModel
-		 *            {@link OfficeTaskModel}.
-		 * @param task
-		 *            {@link OfficeSectionTask}.
+		 * @param functionModel
+		 *            {@link OfficeFunctionModel}.
+		 * @param function
+		 *            {@link OfficeSectionFunction}.
 		 * @param architect
 		 *            {@link OfficeArchitect}.
 		 * @param subSectionPath
 		 *            Path to the {@link OfficeSubSection}.
 		 */
-		void processOfficeTask(OfficeTaskModel taskModel, OfficeSectionTask task,
+		void processOfficeFunction(OfficeFunctionModel functionModel, OfficeSectionFunction function,
 				OfficeArchitect architect, String subSectionPath);
 	}
 
 	/**
 	 * {@link SubSectionProcessor} implementation that by default does nothing.
 	 */
-	private static abstract class AbstractSubSectionProcessor implements
-			SubSectionProcessor {
+	private static abstract class AbstractSubSectionProcessor implements SubSectionProcessor {
 
 		/*
 		 * ==================== SubSectionProcessor ====================
 		 */
 
 		@Override
-		public void processSubSection(OfficeSubSectionModel subSectionModel,
-				OfficeSubSection subSection, OfficeArchitect architect,
-				String subSectionPath) {
-			// Override to provide processing
-		}
-
-		@Override
-		public void processManagedObject(
-				OfficeSectionManagedObjectModel managedObjectModel,
-				OfficeSectionManagedObject managedObject,
+		public void processSubSection(OfficeSubSectionModel subSectionModel, OfficeSubSection subSection,
 				OfficeArchitect architect, String subSectionPath) {
 			// Override to provide processing
 		}
 
 		@Override
-		public void processOfficeTask(OfficeTaskModel taskModel,
-				OfficeSectionTask task, OfficeArchitect architect,
-				String subSectionPath) {
+		public void processManagedObject(OfficeSectionManagedObjectModel managedObjectModel,
+				OfficeSectionManagedObject managedObject, OfficeArchitect architect, String subSectionPath) {
+			// Override to provide processing
+		}
+
+		@Override
+		public void processOfficeFunction(OfficeFunctionModel taskModel, OfficeSectionFunction function,
+				OfficeArchitect architect, String subSectionPath) {
 			// Override to provide processing
 		}
 	}
@@ -1250,8 +1122,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 	 * {@link SubSectionProcessor} to process multiple
 	 * {@link SubSectionProcessor} instances.
 	 */
-	private static class AggregateSubSectionProcessor implements
-			SubSectionProcessor {
+	private static class AggregateSubSectionProcessor implements SubSectionProcessor {
 
 		/**
 		 * {@link SubSectionProcessor} instances.
@@ -1273,69 +1144,59 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		 */
 
 		@Override
-		public void processSubSection(OfficeSubSectionModel subSectionModel,
-				OfficeSubSection subSection, OfficeArchitect architect,
-				String subSectionPath) {
-			for (SubSectionProcessor processor : this.processors) {
-				processor.processSubSection(subSectionModel, subSection,
-						architect, subSectionPath);
-			}
-		}
-
-		@Override
-		public void processManagedObject(
-				OfficeSectionManagedObjectModel managedObjectModel,
-				OfficeSectionManagedObject managedObject,
+		public void processSubSection(OfficeSubSectionModel subSectionModel, OfficeSubSection subSection,
 				OfficeArchitect architect, String subSectionPath) {
 			for (SubSectionProcessor processor : this.processors) {
-				processor.processManagedObject(managedObjectModel,
-						managedObject, architect, subSectionPath);
+				processor.processSubSection(subSectionModel, subSection, architect, subSectionPath);
 			}
 		}
 
 		@Override
-		public void processOfficeTask(OfficeTaskModel taskModel,
-				OfficeSectionTask task, OfficeArchitect architect,
-				String subSectionPath) {
+		public void processManagedObject(OfficeSectionManagedObjectModel managedObjectModel,
+				OfficeSectionManagedObject managedObject, OfficeArchitect architect, String subSectionPath) {
 			for (SubSectionProcessor processor : this.processors) {
-				processor.processOfficeTask(taskModel, task, architect,
-						subSectionPath);
+				processor.processManagedObject(managedObjectModel, managedObject, architect, subSectionPath);
+			}
+		}
+
+		@Override
+		public void processOfficeFunction(OfficeFunctionModel functionModel, OfficeSectionFunction function,
+				OfficeArchitect architect, String subSectionPath) {
+			for (SubSectionProcessor processor : this.processors) {
+				processor.processOfficeFunction(functionModel, function, architect, subSectionPath);
 			}
 		}
 	}
 
 	/**
-	 * {@link SubSectionProcessor} to link {@link Duty} instances to the
-	 * {@link Task} instances.
+	 * {@link SubSectionProcessor} to link {@link Administration} instances to
+	 * the {@link ManagedFunction} instances.
 	 */
-	private static class TasksToDutiesSubSectionProcessor extends
-			AbstractSubSectionProcessor {
+	private static class FunctionsToAdministrationSubSectionProcessor extends AbstractSubSectionProcessor {
 
 		/**
-		 * {@link AdministratorModel} for the {@link DutyModel}.
+		 * {@link OfficeTeam} by {@link OfficeTeam} name.
 		 */
-		private final Map<DutyModel, AdministratorModel> dutyAdministrators;
+		private final Map<String, OfficeTeam> teams;
 
 		/**
-		 * {@link OfficeDuty} by {@link OfficeAdministrator} name then
-		 * {@link OfficeDuty} name.
+		 * {@link OfficeAdministration} by {@link OfficeAdministration} name.
 		 */
-		private final DoubleKeyMap<String, String, OfficeDuty> duties;
+		private final Map<String, OfficeAdministration> administrations;
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param dutyAdministrators
-		 *            {@link AdministratorModel} for the {@link DutyModel}.
-		 * @param duties
-		 *            {@link OfficeDuty} by {@link OfficeAdministrator} name
-		 *            then {@link OfficeDuty} name.
+		 * @param teams
+		 *            {@link OfficeTeam} by {@link OfficeTeam} name.
+		 * @param administrations
+		 *            {@link OfficeAdministration} by
+		 *            {@link OfficeAdministration} name.
 		 */
-		public TasksToDutiesSubSectionProcessor(
-				Map<DutyModel, AdministratorModel> dutyAdministrators,
-				DoubleKeyMap<String, String, OfficeDuty> duties) {
-			this.dutyAdministrators = dutyAdministrators;
-			this.duties = duties;
+		public FunctionsToAdministrationSubSectionProcessor(Map<String, OfficeTeam> teams,
+				Map<String, OfficeAdministration> administrations) {
+			this.teams = teams;
+			this.administrations = administrations;
 		}
 
 		/*
@@ -1343,73 +1204,70 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		 */
 
 		@Override
-		public void processOfficeTask(OfficeTaskModel taskModel,
-				OfficeSectionTask task, OfficeArchitect architect,
-				String subSectionPath) {
+		public void processOfficeFunction(OfficeFunctionModel functionModel, OfficeSectionFunction function,
+				OfficeArchitect architect, String subSectionPath) {
 
-			// Determine if task is linked to duties
-			List<OfficeTaskToPreDutyModel> preDuties = taskModel.getPreDuties();
-			List<OfficeTaskToPostDutyModel> postDuties = taskModel
-					.getPostDuties();
-			if ((preDuties.size() == 0) && (postDuties.size() == 0)) {
-				return; // no duties to link for task
-			}
+			// Obtain the function name
+			String functionName = function.getOfficeFunctionName();
 
-			// Obtain the task name
-			String taskName = task.getOfficeTaskName();
-
-			// Link the pre task duties
-			for (int i = 0; i < preDuties.size(); i++) {
-				OfficeTaskToPreDutyModel conn = preDuties.get(i);
-
-				// Obtain the pre task duty
-				OfficeDuty preTaskDuty = null;
-				DutyModel dutyModel = conn.getDuty();
-				if (dutyModel != null) {
-					AdministratorModel adminModel = this.dutyAdministrators
-							.get(dutyModel);
-					if (adminModel != null) {
-						preTaskDuty = duties.get(
-								adminModel.getAdministratorName(),
-								dutyModel.getDutyName());
+			// Link the possible team
+			OfficeFunctionToOfficeTeamModel teamConn = functionModel.getOfficeTeam();
+			if (teamConn != null) {
+				OfficeTeamModel teamModel = teamConn.getOfficeTeam();
+				if (teamModel != null) {
+					OfficeTeam team = this.teams.get(teamModel.getOfficeTeamName());
+					if (team != null) {
+						// Link the function to its responsible team
+						architect.link(function.getResponsibleTeam(), team);
 					}
 				}
-				if (preTaskDuty == null) {
-					architect.addIssue("Can not find pre duty " + i
-							+ " for task '" + taskName + "' [" + subSectionPath
-							+ "]");
-					continue; // must have duty
-				}
-
-				// Add the pre task duty
-				task.addPreTaskDuty(preTaskDuty);
 			}
 
-			// Link the post task duties
-			for (int i = 0; i < postDuties.size(); i++) {
-				OfficeTaskToPostDutyModel conn = postDuties.get(i);
+			// Determine if function is linked to administration
+			List<OfficeFunctionToPreAdministrationModel> preAdmin = functionModel.getPreAdministrations();
+			List<OfficeFunctionToPostAdministrationModel> postAdmin = functionModel.getPostAdministrations();
+			if ((preAdmin.size() == 0) && (postAdmin.size() == 0)) {
+				return; // no administration to link for function
+			}
 
-				// Obtain the post task duty
-				OfficeDuty postTaskDuty = null;
-				DutyModel dutyModel = conn.getDuty();
-				if (dutyModel != null) {
-					AdministratorModel adminModel = dutyAdministrators
-							.get(dutyModel);
-					if (adminModel != null) {
-						postTaskDuty = duties.get(
-								adminModel.getAdministratorName(),
-								dutyModel.getDutyName());
-					}
+			// Link the pre administration
+			for (int i = 0; i < preAdmin.size(); i++) {
+				OfficeFunctionToPreAdministrationModel conn = preAdmin.get(i);
+
+				// Obtain the pre administration
+				OfficeAdministration preAdministration = null;
+				AdministrationModel adminModel = conn.getAdministration();
+				if (adminModel != null) {
+					preAdministration = this.administrations.get(adminModel.getAdministrationName());
 				}
-				if (postTaskDuty == null) {
-					architect.addIssue("Can not find post duty " + i
-							+ " for task '" + taskName + "' [" + subSectionPath
-							+ "]");
-					continue; // must have duty
+				if (preAdministration == null) {
+					architect.addIssue("Can not find pre administration " + i + " for function '" + functionName + "' ["
+							+ subSectionPath + "]");
+					continue; // must have admin
 				}
 
-				// Add the post task duty
-				task.addPostTaskDuty(postTaskDuty);
+				// Add the pre administration
+				function.addPreAdministration(preAdministration);
+			}
+
+			// Link the post administration
+			for (int i = 0; i < postAdmin.size(); i++) {
+				OfficeFunctionToPostAdministrationModel conn = postAdmin.get(i);
+
+				// Obtain the post administration
+				OfficeAdministration postAdministration = null;
+				AdministrationModel adminModel = conn.getAdministration();
+				if (adminModel != null) {
+					postAdministration = this.administrations.get(adminModel.getAdministrationName());
+				}
+				if (postAdministration == null) {
+					architect.addIssue("Can not find post administration " + i + " for function '" + functionName
+							+ "' [" + subSectionPath + "]");
+					continue; // must have admin
+				}
+
+				// Add the post administration
+				function.addPostAdministration(postAdministration);
 			}
 		}
 	}
@@ -1418,11 +1276,10 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 	 * {@link SubSectionProcessor} to provide {@link Governance} to the
 	 * {@link OfficeSubSection} instances.
 	 */
-	private static class GovernanceSubSectionProcessor extends
-			AbstractSubSectionProcessor {
+	private static class GovernanceSubSectionProcessor extends AbstractSubSectionProcessor {
 
 		/**
-		 * {@link OfficeGovernance} instances by their name.
+		 * {@link Governance} instances by their name.
 		 */
 		private final Map<String, OfficeGovernance> governances;
 
@@ -1430,10 +1287,9 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		 * Initiate.
 		 * 
 		 * @param governances
-		 *            {@link OfficeGovernance} instances by their name.
+		 *            {@link Governance} instances by their name.
 		 */
-		public GovernanceSubSectionProcessor(
-				Map<String, OfficeGovernance> governances) {
+		public GovernanceSubSectionProcessor(Map<String, OfficeGovernance> governances) {
 			this.governances = governances;
 		}
 
@@ -1442,19 +1298,16 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		 */
 
 		@Override
-		public void processSubSection(OfficeSubSectionModel subSectionModel,
-				OfficeSubSection subSection, OfficeArchitect architect,
-				String subSectionPath) {
+		public void processSubSection(OfficeSubSectionModel subSectionModel, OfficeSubSection subSection,
+				OfficeArchitect architect, String subSectionPath) {
 
 			// Link the governances
-			for (OfficeSubSectionToOfficeGovernanceModel conn : subSectionModel
-					.getOfficeGovernances()) {
-				OfficeGovernanceModel govModel = conn.getOfficeGovernance();
+			for (OfficeSubSectionToGovernanceModel conn : subSectionModel.getGovernances()) {
+				GovernanceModel govModel = conn.getGovernance();
 				if (govModel != null) {
 
 					// Obtain the governance
-					OfficeGovernance governance = this.governances.get(govModel
-							.getOfficeGovernanceName());
+					OfficeGovernance governance = this.governances.get(govModel.getGovernanceName());
 					if (governance != null) {
 
 						// Provide governance over the sub section
@@ -1465,20 +1318,16 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		}
 
 		@Override
-		public void processManagedObject(
-				OfficeSectionManagedObjectModel managedObjectModel,
-				OfficeSectionManagedObject managedObject,
-				OfficeArchitect architect, String subSectionPath) {
+		public void processManagedObject(OfficeSectionManagedObjectModel managedObjectModel,
+				OfficeSectionManagedObject managedObject, OfficeArchitect architect, String subSectionPath) {
 
 			// Link the governances
-			for (OfficeSectionManagedObjectToOfficeGovernanceModel conn : managedObjectModel
-					.getOfficeGovernances()) {
-				OfficeGovernanceModel govModel = conn.getOfficeGovernance();
+			for (OfficeSectionManagedObjectToGovernanceModel conn : managedObjectModel.getGovernances()) {
+				GovernanceModel govModel = conn.getGovernance();
 				if (govModel != null) {
 
 					// Obtain the governance
-					OfficeGovernance governance = this.governances.get(govModel
-							.getOfficeGovernanceName());
+					OfficeGovernance governance = this.governances.get(govModel.getGovernanceName());
 					if (governance != null) {
 
 						// Provide governance over the managed object
@@ -1489,23 +1338,20 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		}
 
 		@Override
-		public void processOfficeTask(OfficeTaskModel taskModel,
-				OfficeSectionTask task, OfficeArchitect architect,
-				String subSectionPath) {
+		public void processOfficeFunction(OfficeFunctionModel functionModel, OfficeSectionFunction function,
+				OfficeArchitect architect, String subSectionPath) {
 
 			// Link the governances
-			for (OfficeTaskToOfficeGovernanceModel conn : taskModel
-					.getOfficeGovernances()) {
-				OfficeGovernanceModel govModel = conn.getOfficeGovernance();
+			for (OfficeFunctionToGovernanceModel conn : functionModel.getGovernances()) {
+				GovernanceModel govModel = conn.getGovernance();
 				if (govModel != null) {
 
 					// Obtain the governance
-					OfficeGovernance governance = this.governances.get(govModel
-							.getOfficeGovernanceName());
+					OfficeGovernance governance = this.governances.get(govModel.getGovernanceName());
 					if (governance != null) {
 
-						// Provide governance of the task
-						task.addGovernance(governance);
+						// Provide governance of the function
+						function.addGovernance(governance);
 					}
 				}
 			}
@@ -1513,44 +1359,9 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 	}
 
 	/**
-	 * Responsibility.
-	 */
-	private static class Responsibility {
-
-		/**
-		 * {@link OfficeTeam} responsible for this responsibility.
-		 */
-		public final OfficeTeam officeTeam;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param officeTeam
-		 *            {@link OfficeTeam} responsible for this responsibility.
-		 */
-		public Responsibility(OfficeTeam officeTeam) {
-			this.officeTeam = officeTeam;
-		}
-
-		/**
-		 * Indicates if {@link OfficeSectionTask} is within this responsibility.
-		 * 
-		 * @param task
-		 *            {@link OfficeSectionTask}.
-		 * @return <code>true</code> if {@link OfficeSectionTask} is within this
-		 *         responsibility.
-		 */
-		public boolean isResponsible(OfficeSectionTask task) {
-			// TODO handle managed object matching for responsibility
-			return true; // TODO for now always responsible
-		}
-	}
-
-	/**
 	 * {@link ManagedObject} to be administered.
 	 */
-	private static class AdministeredManagedObject implements
-			Comparable<AdministeredManagedObject> {
+	private static class AdministeredManagedObject implements Comparable<AdministeredManagedObject> {
 
 		/**
 		 * Position in the order that the objects are administered.
@@ -1570,8 +1381,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		 * @param managedObject
 		 *            {@link AdministerableManagedObject}.
 		 */
-		public AdministeredManagedObject(String order,
-				AdministerableManagedObject managedObject) {
+		public AdministeredManagedObject(String order, AdministerableManagedObject managedObject) {
 			this.order = order;
 			this.managedObject = managedObject;
 		}

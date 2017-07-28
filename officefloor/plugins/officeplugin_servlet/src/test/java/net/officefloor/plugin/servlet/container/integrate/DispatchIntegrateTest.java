@@ -31,7 +31,7 @@ import org.apache.http.client.methods.HttpGet;
 
 import net.officefloor.plugin.servlet.container.source.HttpServletWorkSource;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
+import net.officefloor.plugin.socket.server.http.server.HttpServicerFunction;
 
 /**
  * Integrate test of {@link RequestDispatcher}.
@@ -41,12 +41,12 @@ import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
 public class DispatchIntegrateTest extends MockHttpServletServer {
 
 	@Override
-	public HttpServicerTask buildServlet(String servletContextName,
+	public HttpServicerFunction buildServlet(String servletContextName,
 			String httpName, String requestAttributesName, String sessionName,
 			String securityName) {
 
 		// Construct HTTP Servlet to handle request
-		HttpServicerTask reference = this.constructHttpServlet("DISPATCH",
+		HttpServicerFunction reference = this.constructHttpServlet("DISPATCH",
 				servletContextName, httpName, requestAttributesName,
 				sessionName, securityName, HttpServletWorkSource.class,
 				HttpServletWorkSource.PROPERTY_SERVLET_NAME, "Dispatch",

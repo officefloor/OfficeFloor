@@ -19,7 +19,7 @@ package net.officefloor.plugin.socket.server.http.clock;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
 
 /**
  * Sources the {@link HttpServerClock}.
@@ -37,8 +37,6 @@ public interface HttpServerClockSource {
 	 * @throws Exception
 	 *             If fails to source the {@link HttpServerClock}.
 	 */
-	HttpServerClock createHttpServerClock(
-			MetaDataContext<None, Indexed> configurationContext)
-			throws Exception;
+	HttpServerClock createHttpServerClock(MetaDataContext<None, Indexed> configurationContext) throws Exception;
 
 }

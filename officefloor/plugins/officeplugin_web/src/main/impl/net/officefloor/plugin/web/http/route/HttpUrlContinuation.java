@@ -20,8 +20,7 @@ package net.officefloor.plugin.web.http.route;
 import java.io.IOException;
 import java.io.Serializable;
 
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
@@ -49,15 +48,13 @@ public class HttpUrlContinuation {
 	 * @throws IOException
 	 *             If fails to save the request state.
 	 */
-	public static void saveRequest(String attributeKey,
-			ServerHttpConnection connection, HttpRequestState requestState,
+	public static void saveRequest(String attributeKey, ServerHttpConnection connection, HttpRequestState requestState,
 			HttpSession session) throws IOException {
 
 		// Obtain the request state momento
 		Serializable connectionMomento = connection.exportState();
 		Serializable requestStateMomento = requestState.exportState();
-		RequestStateMomento redirectMomento = new RequestStateMomento(
-				connectionMomento, requestStateMomento);
+		RequestStateMomento redirectMomento = new RequestStateMomento(connectionMomento, requestStateMomento);
 
 		// Store the request state momento
 		session.setAttribute(attributeKey, redirectMomento);
@@ -80,13 +77,11 @@ public class HttpUrlContinuation {
 	 * @throws IOException
 	 *             If fails to reinstate the request.
 	 */
-	public static boolean reinstateRequest(String attributeKey,
-			ServerHttpConnection connection, HttpRequestState requestState,
-			HttpSession session) throws IOException {
+	public static boolean reinstateRequest(String attributeKey, ServerHttpConnection connection,
+			HttpRequestState requestState, HttpSession session) throws IOException {
 
 		// Obtain the request state momento
-		RequestStateMomento requestMomento = (RequestStateMomento) session
-				.getAttribute(attributeKey);
+		RequestStateMomento requestMomento = (RequestStateMomento) session.getAttribute(attributeKey);
 
 		// Attempt to reinstate request
 		boolean isReinstated = false;
@@ -104,14 +99,9 @@ public class HttpUrlContinuation {
 	}
 
 	/**
-	 * Name of the {@link Work}.
+	 * Name of the {@link ManagedFunction}.
 	 */
-	private final String workName;
-
-	/**
-	 * Name of the {@link Task}.
-	 */
-	private final String taskName;
+	private final String functionName;
 
 	/**
 	 * Indicates if secure. May be <code>null</code> to indicate service either
@@ -122,38 +112,25 @@ public class HttpUrlContinuation {
 	/**
 	 * Initiate.
 	 * 
-	 * @param workName
-	 *            Name of the {@link Work}.
-	 * @param taskName
-	 *            Name of the {@link Task}.
+	 * @param functionName
+	 *            Name of the {@link ManagedFunction}.
 	 * @param isSecure
 	 *            Indicates if secure. May be <code>null</code> to indicate
 	 *            service either way.
 	 */
-	public HttpUrlContinuation(String workName, String taskName,
-			Boolean isSecure) {
-		this.workName = workName;
-		this.taskName = taskName;
+	public HttpUrlContinuation(String functionName, Boolean isSecure) {
+		this.functionName = functionName;
 		this.isSecure = isSecure;
 	}
 
 	/**
-	 * Obtains the name of the {@link Work} to service the URL continuation.
+	 * Obtains the name of the {@link ManagedFunction} to service the URL
+	 * continuation.
 	 * 
-	 * @return {@link Work} name.
+	 * @return {@link ManagedFunction} name.
 	 */
-	public String getWorkName() {
-		return this.workName;
-	}
-
-	/**
-	 * Obtains the name of the {@link Task} on the {@link Work} to service the
-	 * URL continuation.
-	 * 
-	 * @return {@link Task} name.
-	 */
-	public String getTaskName() {
-		return this.taskName;
+	public String getFunctionName() {
+		return this.functionName;
 	}
 
 	/**
@@ -191,8 +168,7 @@ public class HttpUrlContinuation {
 		 * @param requestStateMomento
 		 *            {@link HttpRequestState} momento.
 		 */
-		public RequestStateMomento(Serializable connectionMomento,
-				Serializable requestStateMomento) {
+		public RequestStateMomento(Serializable connectionMomento, Serializable requestStateMomento) {
 			this.connectionMomento = connectionMomento;
 			this.requestStateMomento = requestStateMomento;
 		}

@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Text;
 
 import net.officefloor.eclipse.util.EclipseUtil;
+import net.officefloor.model.woof.WoofAccessModel;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 
 /**
@@ -70,6 +71,11 @@ public class HttpSecuritySourceListingWizardPage extends WizardPage {
 	private HttpSecuritySourceInstance selectedInstance = null;
 
 	/**
+	 * Name of the {@link WoofAccessModel}.
+	 */
+	private Text accessNameText;
+
+	/**
 	 * {@link Text} of the authentication timeout.
 	 */
 	private Text authenticationTimeoutText;
@@ -100,6 +106,15 @@ public class HttpSecuritySourceListingWizardPage extends WizardPage {
 	}
 
 	/**
+	 * Obtains the name of the {@link WoofAccessModel}.
+	 * 
+	 * @return Name of the {@link WoofAccessModel}.
+	 */
+	public String getAccessName() {
+		return this.accessNameText.getText();
+	}
+
+	/**
 	 * Obtains the selected {@link HttpSecuritySourceInstance}.
 	 * 
 	 * @return Selected {@link HttpSecuritySourceInstance} or <code>null</code>
@@ -120,10 +135,12 @@ public class HttpSecuritySourceListingWizardPage extends WizardPage {
 		page.setLayout(new GridLayout(1, true));
 
 		// Obtain the initial values
+		String initialAccessName = "";
 		long initialAuthenticationTimeout = 3000;
 		int initialSectionSourceIndex = -1;
 		if (this.accessInstance != null) {
 			// Have access instance, so provide initial source details
+			initialAccessName = this.accessInstance.getAccessName();
 			initialAuthenticationTimeout = this.accessInstance.getAuthenticationTimeout();
 			String httpSecuritySourceClassName = this.accessInstance.getHttpSecuritySourceClassName();
 			for (int i = 0; i < this.httpSecuritySourceInstances.length; i++) {
@@ -133,6 +150,23 @@ public class HttpSecuritySourceListingWizardPage extends WizardPage {
 				}
 			}
 		}
+
+		// Add means to specify access name timeout
+		Composite nameComposite = new Composite(page, SWT.NONE);
+		nameComposite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+		nameComposite.setLayout(new GridLayout(2, false));
+		Label nameLabel = new Label(nameComposite, SWT.NONE);
+		nameLabel.setText("Name: ");
+		this.accessNameText = new Text(nameComposite, SWT.BORDER);
+		this.accessNameText.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+		this.accessNameText.setText(String.valueOf(initialAccessName));
+		this.accessNameText.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				// Flag the name changed
+				HttpSecuritySourceListingWizardPage.this.handleChange();
+			}
+		});
 
 		// Add listing of HTTP Security sources
 		this.list = new List(page, SWT.SINGLE | SWT.BORDER);
@@ -158,7 +192,7 @@ public class HttpSecuritySourceListingWizardPage extends WizardPage {
 		this.authenticationTimeoutText.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
-				// Flag the name changed
+				// Flag the time out changed
 				HttpSecuritySourceListingWizardPage.this.handleChange();
 			}
 		});
@@ -182,6 +216,14 @@ public class HttpSecuritySourceListingWizardPage extends WizardPage {
 
 		// Reset to no selection
 		this.selectedInstance = null;
+
+		// Ensure have name
+		String accessName = this.accessNameText.getText();
+		if (EclipseUtil.isBlank(accessName)) {
+			this.setErrorMessage("Must specify name");
+			this.setPageComplete(false);
+			return;
+		}
 
 		// Determine if HTTP Security source selected
 		int selectionIndex = this.list.getSelectionIndex();

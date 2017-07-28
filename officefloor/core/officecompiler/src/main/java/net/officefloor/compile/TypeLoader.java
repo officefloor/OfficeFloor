@@ -17,12 +17,12 @@
  */
 package net.officefloor.compile;
 
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.work.WorkType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * <p>
@@ -39,15 +39,15 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 public interface TypeLoader {
 
 	/**
-	 * Loads the {@link WorkType}.
+	 * Loads the {@link FunctionNamespaceType}.
 	 * 
-	 * @param workSourceClassName
-	 *            {@link WorkSource} class name.
+	 * @param managedFunctionSourceClassName
+	 *            {@link ManagedFunctionSource} class name.
 	 * @param properties
 	 *            {@link PropertyList}.
-	 * @return {@link WorkType}.
+	 * @return {@link FunctionNamespaceType}.
 	 */
-	WorkType<?> loadWorkType(String workSourceClassName, PropertyList properties);
+	FunctionNamespaceType loadManagedFunctionType(String managedFunctionSourceClassName, PropertyList properties);
 
 	/**
 	 * Loads the {@link ManagedObjectType}.
@@ -58,7 +58,6 @@ public interface TypeLoader {
 	 *            {@link PropertyList}.
 	 * @return {@link ManagedObjectType}.
 	 */
-	ManagedObjectType<?> loadManagedObjectType(
-			String managedObjectSourceClassName, PropertyList properties);
+	ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceClassName, PropertyList properties);
 
 }

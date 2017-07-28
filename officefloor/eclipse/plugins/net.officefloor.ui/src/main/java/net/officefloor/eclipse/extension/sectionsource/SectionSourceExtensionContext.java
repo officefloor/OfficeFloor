@@ -50,7 +50,8 @@ public interface SectionSourceExtensionContext {
 	 * The {@link PropertyList} may be in any state:
 	 * <ol>
 	 * <li>no value {@link PropertyList} populated from the
-	 * {@link SectionSourceSpecification} (creating a {@link OfficeSection})</li>
+	 * {@link SectionSourceSpecification} (creating a
+	 * {@link OfficeSection})</li>
 	 * <li>any changed state based on editing of the {@link OfficeSection}
 	 * (editing {@link OfficeSection})</li>
 	 * </ol>

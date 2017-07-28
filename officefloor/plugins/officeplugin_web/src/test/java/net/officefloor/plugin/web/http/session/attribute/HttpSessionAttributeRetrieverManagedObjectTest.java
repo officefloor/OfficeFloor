@@ -19,7 +19,7 @@ package net.officefloor.plugin.web.http.session.attribute;
 
 import java.io.Serializable;
 
-import net.officefloor.frame.spi.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.attribute.HttpSessionAttributeRetrieverManagedObjectSource.HttpSessionAttributeRetrieverDependencies;
@@ -29,8 +29,7 @@ import net.officefloor.plugin.web.http.session.attribute.HttpSessionAttributeRet
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSessionAttributeRetrieverManagedObjectTest extends
-		OfficeFrameTestCase {
+public class HttpSessionAttributeRetrieverManagedObjectTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link HttpSessionAttributeRetrieverManagedObject} to test.
@@ -48,8 +47,7 @@ public class HttpSessionAttributeRetrieverManagedObjectTest extends
 	 * Mock {@link HttpSessionAttribute}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final HttpSessionAttribute<Serializable> sessionObject = this
-			.createMock(HttpSessionAttribute.class);
+	private final HttpSessionAttribute<Serializable> sessionObject = this.createMock(HttpSessionAttribute.class);
 
 	/**
 	 * Ensure able to obtain the object from the {@link HttpSessionAttribute}.
@@ -59,13 +57,10 @@ public class HttpSessionAttributeRetrieverManagedObjectTest extends
 		final Object availableObject = "Available Object";
 
 		// Record retrieving the managed object
-		this.recordReturn(
-				this.objectRegistry,
-				this.objectRegistry
-						.getObject(HttpSessionAttributeRetrieverDependencies.HTTP_SESSION_OBJECT),
+		this.recordReturn(this.objectRegistry,
+				this.objectRegistry.getObject(HttpSessionAttributeRetrieverDependencies.HTTP_SESSION_OBJECT),
 				this.sessionObject);
-		this.recordReturn(this.sessionObject,
-				this.sessionObject.getSessionObject(), availableObject);
+		this.recordReturn(this.sessionObject, this.sessionObject.getSessionObject(), availableObject);
 
 		// Test
 		this.replayMockObjects();
@@ -85,13 +80,10 @@ public class HttpSessionAttributeRetrieverManagedObjectTest extends
 	public void testNoObjectAvailableToRetrieve() throws Throwable {
 
 		// Record retrieving the managed object
-		this.recordReturn(
-				this.objectRegistry,
-				this.objectRegistry
-						.getObject(HttpSessionAttributeRetrieverDependencies.HTTP_SESSION_OBJECT),
+		this.recordReturn(this.objectRegistry,
+				this.objectRegistry.getObject(HttpSessionAttributeRetrieverDependencies.HTTP_SESSION_OBJECT),
 				this.sessionObject);
-		this.recordReturn(this.sessionObject,
-				this.sessionObject.getSessionObject(), null);
+		this.recordReturn(this.sessionObject, this.sessionObject.getSessionObject(), null);
 
 		// Test
 		this.replayMockObjects();

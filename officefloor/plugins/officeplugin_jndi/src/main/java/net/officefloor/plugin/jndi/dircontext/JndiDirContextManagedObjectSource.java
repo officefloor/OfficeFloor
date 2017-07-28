@@ -24,18 +24,17 @@ import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
  * {@link ManagedObjectSource} for a JNDI {@link DirContext}.
  * 
  * @author Daniel Sagenschneider
  */
-public class JndiDirContextManagedObjectSource extends
-		AbstractManagedObjectSource<None, None> {
+public class JndiDirContextManagedObjectSource extends AbstractManagedObjectSource<None, None> {
 
 	/**
 	 * Property to specifying the sub {@link DirContext} to return. May be
@@ -67,8 +66,7 @@ public class JndiDirContextManagedObjectSource extends
 	 * @throws Exception
 	 *             If fails to obtain the {@link Properties}.
 	 */
-	protected Properties getProperties(ManagedObjectSourceContext<None> context)
-			throws Exception {
+	protected Properties getProperties(ManagedObjectSourceContext<None> context) throws Exception {
 		return context.getProperties();
 	}
 
@@ -82,17 +80,14 @@ public class JndiDirContextManagedObjectSource extends
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<None, None> context)
-			throws Exception {
-		ManagedObjectSourceContext<None> mosContext = context
-				.getManagedObjectSourceContext();
+	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Obtain the properties for the directory context
 		this.properties = this.getProperties(mosContext);
 
 		// Obtain the sub context name
-		this.subContextName = mosContext.getProperty(PROPERTY_SUB_CONTEXT_NAME,
-				null);
+		this.subContextName = mosContext.getProperty(PROPERTY_SUB_CONTEXT_NAME, null);
 
 		// Load the meta-data
 		context.setObjectClass(DirContext.class);
@@ -110,8 +105,7 @@ public class JndiDirContextManagedObjectSource extends
 		}
 
 		// Create the managed object
-		return new JndiDirContextManagedObject(new SynchronisedDirContext(
-				context));
+		return new JndiDirContextManagedObject(new SynchronisedDirContext(context));
 	}
 
 	/**

@@ -1,0 +1,70 @@
+<context item-labels="true">
+	<office-floor>
+		<office-floor>
+			<offices>
+				<office name="OFFICE" source="OFFICE" location="office" />
+			</offices>
+		</office-floor>
+	</office-floor>
+	<office>
+		<office>
+			<governances>
+				<governance name="GOVERNANCE" source="CLASS">
+					<properties>
+						<property name="class.name" value="${testcase}$SimpleGovernance" />
+					</properties>
+					<governance-area x="20" y="20" height="60" width="60" />
+				</governance>
+			</governances>
+			<sections>
+				<section name="GOVERNED_SECTION" source="SECTION" location="section"
+					x="40" y="40" />
+				<section name="NON_GOVERNED_SECTION" source="SECTION"
+					location="non-governed-section" x="100" y="100" />
+			</sections>
+		</office>
+	</office>
+	<section>
+		<section>
+			<section>
+				<sub-sections>
+					<sub-section name="GOVERNED_SECTION" source="SECTION"
+						location="governed-section">
+					</sub-section>
+				</sub-sections>
+			</section>
+		</section>
+	</section>
+	<governed-section>
+		<section>
+			<works>
+				<function-namespace name="NAMESPACE" source="CLASS">
+					<properties>
+						<property name="class.name" value="${testcase}$SimpleClass" />
+					</properties>
+					<managed-function name="simpleFunction" />
+				</function-namespace>
+			</works>
+			<functions>
+				<function name="FUNCTION" function-namespace="NAMESPACE"
+					managed-function="simpleFunction" />
+			</functions>
+		</section>
+	</governed-section>
+	<non-governed-section>
+		<section>
+			<function-namespaces>
+				<function-namespace name="NAMESPACE" source="CLASS">
+					<properties>
+						<property name="class.name" value="${testcase}$SimpleClass" />
+					</properties>
+					<managed-function name="simpleFunction" />
+				</function-namespace>
+			</function-namespaces>
+			<functions>
+				<function name="FUNCTION" function-namespace="NAMESPACE"
+					managed-function="simpleFunction" />
+			</functions>
+		</section>
+	</non-governed-section>
+</context>

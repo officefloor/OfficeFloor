@@ -17,9 +17,9 @@
  */
 package net.officefloor.frame.internal.configuration;
 
-import net.officefloor.frame.spi.source.SourceProperties;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.frame.api.source.SourceProperties;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
 
 /**
  * Configuration of a {@link Team}.
@@ -35,6 +35,16 @@ public interface TeamConfiguration<TS extends TeamSource> {
 	 */
 	String getTeamName();
 
+	/**
+	 * Obtains the {@link TeamSource} instance to use.
+	 * 
+	 * @return {@link TeamSource} instance to use. This may be
+	 *         <code>null</code> and therefore the
+	 *         {@link #getTeamSourceClass()} should be used to obtain
+	 *         the {@link TeamSource}.
+	 */
+	TS getTeamSource();
+	
 	/**
 	 * Obtains the {@link Class} of the {@link TeamSource}.
 	 * 

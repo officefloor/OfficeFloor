@@ -19,18 +19,18 @@ package net.officefloor.plugin.servlet.route;
 
 import javax.servlet.Servlet;
 
-import net.officefloor.frame.api.build.OfficeAwareWorkFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.build.OfficeAwareManagedFunctionFactory;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
-import net.officefloor.plugin.servlet.context.ServletTaskReference;
+import net.officefloor.plugin.servlet.context.ServletFunctionReference;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 /**
- * {@link Task} for routing {@link HttpRequest} to be serviced by a
+ * {@link ManagedFunction} for routing {@link HttpRequest} to be serviced by a
  * {@link Servlet}.
  * 
  * @author Daniel Sagenschneider
@@ -38,7 +38,7 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 public class ServletRouteTask
 		extends
 		AbstractSingleTask<ServletRouteTask, ServletRouteTask.DependencyKeys, ServletRouteTask.FlowKeys>
-		implements OfficeAwareWorkFactory<ServletRouteTask> {
+		implements OfficeAwareManagedFunctionFactory<ServletRouteTask> {
 
 	/**
 	 * Dependency keys.
@@ -73,8 +73,8 @@ public class ServletRouteTask
 	 */
 
 	@Override
-	public Object doTask(
-			TaskContext<ServletRouteTask, DependencyKeys, FlowKeys> context)
+	public Object execute(
+			ManagedFunctionContext<ServletRouteTask, DependencyKeys, FlowKeys> context)
 			throws Exception {
 
 		// Obtain the path being requested
@@ -88,7 +88,7 @@ public class ServletRouteTask
 				.getObject(DependencyKeys.OFFICE_SERVLET_CONTEXT);
 
 		// Obtain the servlet task to service the task
-		ServletTaskReference reference = officeServletContext.mapPath(
+		ServletFunctionReference reference = officeServletContext.mapPath(
 				this.office, path);
 		if (reference == null) {
 			// No servlet to service path, therefore unhandled
@@ -97,7 +97,7 @@ public class ServletRouteTask
 		}
 
 		// Have servlet handle the request
-		context.doFlow(reference.getWorkName(), reference.getTaskName(), null);
+		context.doFlow(reference.getWorkName(), reference.getFunctionName(), null);
 		return null;
 	}
 

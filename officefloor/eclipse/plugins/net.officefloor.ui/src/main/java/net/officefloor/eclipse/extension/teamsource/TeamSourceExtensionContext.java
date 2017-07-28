@@ -17,14 +17,14 @@
  */
 package net.officefloor.eclipse.extension.teamsource;
 
+import org.eclipse.core.resources.IProject;
+
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.team.TeamType;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
-
-import org.eclipse.core.resources.IProject;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSourceSpecification;
 
 /**
  * Context for the {@link TeamSourceExtension}.

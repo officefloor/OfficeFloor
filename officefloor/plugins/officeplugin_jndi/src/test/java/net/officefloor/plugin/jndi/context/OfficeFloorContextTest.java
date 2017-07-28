@@ -40,7 +40,7 @@ public class OfficeFloorContextTest extends OfficeFrameTestCase {
 		Context context = new InitialContext();
 
 		// Specify name of OfficeFloor
-		String name = ValidateWork.getOfficeFloorJndiName(true);
+		String name = ValidateManagedFunction.getOfficeFloorJndiName(true);
 
 		// Obtain the OfficeFloor
 		Object object = context.lookup(name);
@@ -49,9 +49,9 @@ public class OfficeFloorContextTest extends OfficeFrameTestCase {
 		OfficeFloor officeFloor = (OfficeFloor) object;
 
 		// Invoke the work to ensure correct OfficeFloor
-		ValidateWork.reset();
-		ValidateWork.invokeWork(officeFloor, null);
-		assertTrue("Task should be invoked", ValidateWork.isTaskInvoked());
+		ValidateManagedFunction.reset();
+		ValidateManagedFunction.invokeFunction(officeFloor, null);
+		assertTrue("Task should be invoked", ValidateManagedFunction.isFunctionInvoked());
 	}
 
 	/**
@@ -65,7 +65,7 @@ public class OfficeFloorContextTest extends OfficeFrameTestCase {
 		Context context = new InitialContext();
 
 		// Specify name of OfficeFloor
-		String name = ValidateWork.getOfficeFloorJndiName(false);
+		String name = ValidateManagedFunction.getOfficeFloorJndiName(false);
 
 		// Obtain the OfficeFloor
 		Object object = context.lookup(name);
@@ -74,9 +74,9 @@ public class OfficeFloorContextTest extends OfficeFrameTestCase {
 		OfficeFloor officeFloor = (OfficeFloor) object;
 
 		// Invoke the work to ensure correct OfficeFloor
-		ValidateWork.reset();
-		ValidateWork.invokeWork(officeFloor, null);
-		assertTrue("Task should be invoked", ValidateWork.isTaskInvoked());
+		ValidateManagedFunction.reset();
+		ValidateManagedFunction.invokeFunction(officeFloor, null);
+		assertTrue("Task should be invoked", ValidateManagedFunction.isFunctionInvoked());
 	}
 
 	/**
@@ -88,13 +88,13 @@ public class OfficeFloorContextTest extends OfficeFrameTestCase {
 		Context context = new InitialContext();
 
 		// Obtain the OfficeFloor directly
-		String directName = ValidateWork.getOfficeFloorJndiName(true);
+		String directName = ValidateManagedFunction.getOfficeFloorJndiName(true);
 		OfficeFloor directOfficeFloor = (OfficeFloor) context
 				.lookup(directName);
 		assertNotNull("Did not obtain directly", directOfficeFloor);
 
 		// Obtain the OfficeFloor indirectly
-		String indirectName = ValidateWork.getOfficeFloorJndiName(false);
+		String indirectName = ValidateManagedFunction.getOfficeFloorJndiName(false);
 		OfficeFloor indirectOfficeFloor = (OfficeFloor) context
 				.lookup(indirectName);
 		assertNotNull("Did not obtain indirectly", indirectOfficeFloor);

@@ -6,6 +6,34 @@
 
   There are various {{{./plugin-info.html}Goals}} available for working with OfficeFloor via maven.
 
+Running OfficeFloor
+
+  To run OfficeFloor use the following configuration:
+  
++--------------
+	<build>
+		<plugins>
+			...
+			<plugin>
+				<groupId>${projectGroupId}</groupId>
+				<artifactId>${projectArtifactId}</artifactId>
+				<version>${projectVersion}</version>
+				<executions>
+					<execution>
+						<id>run-OfficeFloor</id>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			...
+		</plugins>
+	</build>
+
++--------------
+
+
 Integration testing of OfficeFloor
 
   To run OfficeFloor for integration tests use the following configuration:

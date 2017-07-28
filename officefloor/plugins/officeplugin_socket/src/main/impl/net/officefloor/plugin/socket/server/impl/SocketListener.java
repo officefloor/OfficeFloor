@@ -18,12 +18,18 @@
 package net.officefloor.plugin.socket.server.impl;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.CancelledKeyException;
+import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -32,21 +38,16 @@ import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
-import net.officefloor.frame.api.manage.InvalidParameterTypeException;
-import net.officefloor.frame.api.manage.UnknownTaskException;
-import net.officefloor.frame.api.manage.UnknownWorkException;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.util.AbstractSingleTask;
-import net.officefloor.plugin.socket.server.ConnectionManager;
-import net.officefloor.plugin.socket.server.EstablishedConnection;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.StaticManagedFunction;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.plugin.socket.server.AcceptedSocket;
 import net.officefloor.plugin.socket.server.ManagedConnection;
+import net.officefloor.plugin.socket.server.SocketManager;
 import net.officefloor.plugin.socket.server.WriteDataAction;
+import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.protocol.Connection;
-import net.officefloor.plugin.socket.server.protocol.ConnectionHandlerContext;
-import net.officefloor.plugin.socket.server.protocol.HeartBeatContext;
 import net.officefloor.plugin.socket.server.protocol.ReadContext;
 
 /**
@@ -54,20 +55,35 @@ import net.officefloor.plugin.socket.server.protocol.ReadContext;
  * 
  * @author Daniel Sagenschneider
  */
-public class SocketListener extends
-		AbstractSingleTask<SocketListener, None, Indexed> implements
-		ReadContext, HeartBeatContext {
+public class SocketListener extends StaticManagedFunction<None, SocketListener.SocketListenerFlows>
+		implements ReadContext {
+
+	/**
+	 * Flows for the {@link SocketListener}.
+	 */
+	public static enum SocketListenerFlows {
+		REPEAT
+	}
 
 	/**
 	 * {@link Logger}.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(SocketListener.class
-			.getName());
+	private static final Logger LOGGER = Logger.getLogger(SocketListener.class.getName());
 
 	/**
-	 * {@link Queue} of {@link EstablishedConnection} instances.
+	 * {@link SocketManager}.
 	 */
-	private final Queue<EstablishedConnection> establishedConnections = new ConcurrentLinkedQueue<EstablishedConnection>();
+	private final SocketManager socketManager;
+
+	/**
+	 * Listing of bound {@link ServerSocketChannel} instances.
+	 */
+	private final List<ServerSocketChannel> boundServerSocketChannels = new LinkedList<>();
+
+	/**
+	 * {@link Queue} of {@link AcceptedSocket} instances.
+	 */
+	private final Queue<AcceptedSocket> acceptedSockets = new ConcurrentLinkedQueue<AcceptedSocket>();
 
 	/**
 	 * {@link ByteBuffer} to use for reading content.
@@ -106,14 +122,22 @@ public class SocketListener extends
 	private volatile boolean isStopListening = false;
 
 	/**
+	 * Flags indicated that shutdown.
+	 */
+	private boolean isShutdown = false;
+
+	/**
 	 * Initiate.
 	 * 
-	 * @param sendBufferSize
-	 *            Send buffer size.
+	 * @param socketManager
+	 *            {@link SocketManager}.
 	 * @param receiveBufferSize
 	 *            Receive buffer size.
+	 * @param sendBufferSize
+	 *            Send buffer size.
 	 */
-	public SocketListener(int sendBufferSize, int receiveBufferSize) {
+	public SocketListener(SocketManager socketManager, int receiveBufferSize, int sendBufferSize) {
+		this.socketManager = socketManager;
 		this.sendBufferSize = sendBufferSize;
 
 		// Create the read buffer
@@ -126,48 +150,137 @@ public class SocketListener extends
 	 * @throws IOException
 	 *             If fails to open the {@link Selector}.
 	 */
-	void openSelector() throws IOException {
+	synchronized void openSelector() throws IOException {
+
+		// Do nothing if shutdown
+		if (this.isShutdown) {
+			return;
+		}
+
 		// Open the selector
 		this.selector = Selector.open();
 	}
 
 	/**
-	 * Close the {@link Selector} for this {@link SocketListener}.
+	 * Opens and binds the {@link ServerSocketChannel}.
+	 * 
+	 * @param serverSocketAddress
+	 *            {@link InetSocketAddress} to listen for connections.
+	 * @param communicationProtocol
+	 *            {@link CommunicationProtocol} for the {@link ServerSocket}.
+	 * @param serverSocketBackLogSize
+	 *            {@link ServerSocketChannel} back log size.
+	 * @param executeContext
+	 *            {@link ManagedObjectExecuteContext}.
+	 * @throws IOException
+	 *             {@link IOException}.
 	 */
-	void closeSelector() {
+	synchronized void bindServerSocket(InetSocketAddress serverSocketAddress, int serverSocketBackLogSize,
+			CommunicationProtocol communicationProtocol, ManagedObjectExecuteContext<Indexed> executeContext)
+			throws IOException {
 
-		// Flag to stop listening
-		this.isStopListening = true;
+		// Do not bind if shutdown
+		if (this.isShutdown) {
+			return;
+		}
 
-		// Wake up the selector (to close out)
-		this.selector.wakeup();
+		// Bind to the socket to start listening
+		ServerSocketChannel channel = ServerSocketChannel.open();
+		channel.configureBlocking(false);
+		ServerSocket socket = channel.socket();
+		socket.setReuseAddress(true);
+		socket.bind(serverSocketAddress, serverSocketBackLogSize);
+		this.boundServerSocketChannels.add(channel);
 
-		// Run task until complete (which closes connections and selector)
-		try {
-			CloseSelectorTaskContext context = new CloseSelectorTaskContext();
-			while (!(context.isComplete())) {
-				this.doTask(context);
-			}
-		} catch (Exception ex) {
-			if (LOGGER.isLoggable(Level.WARNING)) {
-				LOGGER.log(Level.WARNING, "Failed to close Selector", ex);
-			}
+		// Register the channel with the selector
+		channel.register(this.selector, SelectionKey.OP_ACCEPT,
+				new ServerSocketAttachment(channel, communicationProtocol, executeContext));
+	}
+
+	/**
+	 * Enable waking up the {@link Selector}.
+	 * 
+	 * @throws IOException
+	 *             If fails to wake up the {@link Selector}.
+	 */
+	public synchronized void wakeupSelector() throws IOException {
+		if (this.selector != null) {
+			this.selector.wakeup();
 		}
 	}
 
 	/**
-	 * Registers a {@link EstablishedConnection} with this
-	 * {@link SocketListener}.
+	 * Close the {@link Selector} for this {@link SocketListener}.
+	 * 
+	 * @throws IOException
+	 *             If fails to close {@link Selector} and any
+	 *             {@link ServerSocketChannel} instances.
+	 */
+	synchronized void closeSelector() throws IOException {
+
+		// Flag to stop listening
+		this.isStopListening = true;
+
+		// Determine if selector closed by another thread
+		if (!this.selector.isOpen()) {
+			// Selector already closed, so ready for shutdown
+			this.isShutdown = true;
+			this.notify();
+			return; // shutdown
+		}
+
+		try {
+			// Close the selector
+			this.selector.close();
+		} catch (IOException ex) {
+			if (LOGGER.isLoggable(Level.WARNING)) {
+				LOGGER.log(Level.WARNING, "Failed to close selector", ex);
+			}
+		}
+
+		// Unbind the server sockets
+		for (ServerSocketChannel channel : this.boundServerSocketChannels) {
+			channel.socket().close();
+		}
+	}
+
+	/**
+	 * Waits for shutdown of the {@link SocketListener}.
+	 * 
+	 * @throws IOException
+	 *             If fails to shut down.
+	 */
+	synchronized void waitForShutdown() throws IOException {
+
+		// Determine if started
+		if (this.selector == null) {
+			this.isShutdown = true;
+			return;
+		}
+
+		// Wait for shut down of this listener
+		try {
+			do {
+				this.wait(100);
+			} while (!this.isShutdown);
+		} catch (InterruptedException ex) {
+			// Consider shutdown
+			this.isShutdown = true;
+		}
+	}
+
+	/**
+	 * Registers a {@link AcceptedSocket} with this {@link SocketListener}.
 	 * 
 	 * @param connection
-	 *            {@link EstablishedConnection}.
+	 *            {@link AcceptedSocket}.
 	 * @throws IOException
-	 *             If fails to register the {@link EstablishedConnection}.
+	 *             If fails to register the {@link AcceptedSocket}.
 	 */
-	void registerEstablishedConnection(EstablishedConnection connection) {
+	void registerAcceptedConnection(AcceptedSocket connection) {
 
 		// Add to the queue
-		this.establishedConnections.add(connection);
+		this.acceptedSockets.add(connection);
 
 		// Wake up selector to start listening to connection
 		this.selector.wakeup();
@@ -187,40 +300,6 @@ public class SocketListener extends
 
 		// Wake up selector to start writing data
 		this.selector.wakeup();
-	}
-
-	/**
-	 * Undertakes a heart beat for this {@link ConnectionManager}.
-	 */
-	void doHeartBeat() {
-
-		synchronized (this) {
-
-			// TODO register this as an action?
-
-			// Reset time (for optimising obtaining time in heart beats)
-			this.currentTime = -1;
-
-			// Provide heart beat to all connections
-			if (this.selector.isOpen()) {
-				for (SelectionKey selectionKey : this.selector.keys()) {
-
-					// Obtain the connection
-					ManagedConnection connection = this
-							.getManagedConnection(selectionKey);
-
-					// Undertake the heart beat
-					try {
-						connection.getConnectionHandler().handleHeartbeat(this);
-					} catch (IOException ex) {
-						if (LOGGER.isLoggable(Level.FINE)) {
-							LOGGER.log(Level.FINE,
-									"Failed heart beat for connection", ex);
-						}
-					}
-				}
-			}
-		}
 	}
 
 	/**
@@ -256,142 +335,118 @@ public class SocketListener extends
 	}
 
 	/**
-	 * Obtains the {@link ManagedConnection} for the {@link SelectionKey}.
+	 * Obtains the {@link SelectionKeyAttachment} for the {@link SelectionKey}.
 	 * 
 	 * @param selectionKey
 	 *            {@link SelectionKey}.
-	 * @return {@link ManagedConnection}.
+	 * @return {@link SelectionKeyAttachment}.
 	 */
-	private ManagedConnection getManagedConnection(SelectionKey selectionKey) {
-		return (ManagedConnection) selectionKey.attachment();
+	private SelectionKeyAttachment getSelectionKeyAttachment(SelectionKey selectionKey) {
+		return (SelectionKeyAttachment) selectionKey.attachment();
 	}
 
 	/*
-	 * ====================== Task =======================================
+	 * ====================== ManagedFunction ======================
 	 */
 
 	@Override
-	public Object doTask(TaskContext<SocketListener, None, Indexed> context)
-			throws Exception {
+	public Object execute(ManagedFunctionContext<None, SocketListenerFlows> context) throws Throwable {
+		try {
 
-		// Synchronising as may be invoked by differing threads
-		synchronized (this) {
+			// Start listening on the established connections
+			AcceptedSocket establishedConnection;
+			while ((establishedConnection = this.acceptedSockets.poll()) != null) {
 
-			// Flag to loop forever (or until told to stop listening)
-			context.setComplete(false);
+				// Obtains the socket channel
+				SocketChannel socketChannel = establishedConnection.getSocketChannel();
 
-			// Greedily service requests
-			// This avoids overheads of obtaining/releasing locks when busy
-			boolean isServicingRequests;
-			do {
+				// Register connection with selector
+				SelectionKey selectionKey = socketChannel.register(this.selector, SelectionKey.OP_READ);
 
-				// Start listening on the established connections.
-				// Use size to only do currently added.
-				int establishedConnectionCount = this.establishedConnections
-						.size();
-				EstablishedConnection establishedConnection;
-				while ((establishedConnectionCount-- > 0)
-						&& ((establishedConnection = this.establishedConnections
-								.poll()) != null)) {
+				// Create the connection
+				ManagedConnection connection = new ConnectionImpl(selectionKey, socketChannel, this,
+						establishedConnection.getCommunicationProtocol(),
+						establishedConnection.getManagedObjectExecuteContext());
 
-					// Obtains the socket channel
-					SocketChannel socketChannel = establishedConnection
-							.getSocketChannel();
+				// Associate connection to its selection key
+				selectionKey.attach(connection);
+			}
 
-					// Register connection with selector
-					SelectionKey selectionKey = socketChannel.register(
-							this.selector, SelectionKey.OP_READ);
+			// Undertake the write actions
+			WriteDataAction action;
+			while ((action = this.writeActions.poll()) != null) {
 
-					// Create the connection
-					ManagedConnection connection = new ConnectionImpl(
-							selectionKey, socketChannel,
-							establishedConnection.getCommunicationProtocol(),
-							this);
+				// Obtain the connection
+				ManagedConnection connection = action.getConnection();
 
-					// Associate connection to its selection key
-					selectionKey.attach(connection);
+				// Undertake queued writes on connection
+				if (!(connection.processWriteQueue())) {
+					// Take interest in write (socket buffer clearing)
+					connection.getSelectionKey().interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
 				}
+			}
 
-				// Undertake the the connection actions.
-				// Use size to only do currently added.
-				int actionCount = this.writeActions.size();
-				WriteDataAction action;
-				while ((actionCount-- > 0)
-						&& ((action = this.writeActions.poll()) != null)) {
-
-					// Obtain the connection
-					ManagedConnection connection = action.getConnection();
-
-					// Undertake queued writes on connection
-					if (!(connection.processWriteQueue())) {
-						// Take interest in write (socket buffer clearing)
-						connection.getSelectionKey().interestOps(
-								SelectionKey.OP_READ | SelectionKey.OP_WRITE);
-					}
-				}
-
-				// Determine if stop listening
-				if (this.isStopListening) {
-
-					// Determine if selector closed by another thread
-					if (!this.selector.isOpen()) {
-						// Selector already closed, so ready for shutdown
-						context.setComplete(true);
-						return null; // shutdown
-					}
-
-					// Terminate all connections
-					Set<SelectionKey> allKeys = this.selector.keys();
-
-					// Determine if connections to notify (need another select)
-					if (allKeys.size() == 0) {
-						try {
-							// Close the selector
-							this.selector.close();
-						} catch (IOException ex) {
-							if (LOGGER.isLoggable(Level.WARNING)) {
-								LOGGER.log(Level.WARNING,
-										"Failed to close selector", ex);
-							}
-						}
-
-						// May complete as no further connections
-						context.setComplete(true);
-						return null; // shutdown
-
-					} else {
-						// Force remaining connections to close
-						for (SelectionKey key : allKeys) {
-							this.getManagedConnection(key).terminate();
-						}
-					}
-				}
+			// Handle selector being closed
+			try {
 
 				// Listen on the socket
-				this.selector.select(1000); // 1 second
+				int selectedCount = this.selector.select(1000); // 1 second
 
-				// Reset time (for optimising obtaining time in reads)
-				this.currentTime = -1;
+				// Determine if shutting down
+				if (selectedCount == 0) {
+					if (this.isStopListening) {
+						synchronized (this) {
+							this.isShutdown = true;
+							this.notify();
+							return null;
+						}
+					}
+				}
 
-				// Obtain the all keys and selected keys
+				// Obtain the selected keys
 				Set<SelectionKey> selectedKeys = this.selector.selectedKeys();
 
 				// Service the selected keys
-				isServicingRequests = false;
 				NEXT_KEY: for (SelectionKey selectedKey : selectedKeys) {
 
-					// Within loop, so servicing requests
-					isServicingRequests = true;
+					// Obtain the ready operations
+					int readyOps = selectedKey.readyOps();
+
+					// Check if accepting a connection
+					if ((readyOps & SelectionKey.OP_ACCEPT) != 0) {
+
+						// Obtain the socket channel
+						ServerSocketAttachment attachment = (ServerSocketAttachment) selectedKey.attachment();
+						final SocketChannel socketChannel = attachment.channel.accept();
+						if (socketChannel != null) {
+
+							// Flag socket as unblocking
+							socketChannel.configureBlocking(false);
+
+							// Configure the socket
+							Socket socket = socketChannel.socket();
+							socket.setTcpNoDelay(true);
+
+							// Manage the established socket
+							this.socketManager.manageSocket(new AcceptedSocketImpl(socketChannel,
+									attachment.communicationProtocol, attachment.executeContext));
+						}
+
+						// Accepted the connection
+						continue NEXT_KEY;
+					}
 
 					// Obtain the connection details
-					ManagedConnection connection = this
-							.getManagedConnection(selectedKey);
+					SelectionKeyAttachment attachment = this.getSelectionKeyAttachment(selectedKey);
+					ManagedConnection connection = attachment.getManagedConnection();
+					if (connection == null) {
+						continue NEXT_KEY;
+					}
 					SocketChannel socketChannel = connection.getSocketChannel();
-
 					try {
 
 						// Determine if read content
-						if (selectedKey.isReadable()) {
+						if ((readyOps & SelectionKey.OP_READ) != 0) {
 
 							// Keep reading data until empty socket buffer
 							boolean isFurtherDataToRead = true;
@@ -420,19 +475,17 @@ public class SocketListener extends
 								buffer.flip();
 								this.readData = new byte[bytesRead];
 								buffer.get(this.readData);
-								connection.getConnectionHandler().handleRead(
-										this);
+								connection.getConnectionHandler().handleRead(this);
 
 								// Determine if further data
 								if (bytesRead < this.readBuffer.limit()) {
-									isFurtherDataToRead = false; // all data
-																	// read
+									isFurtherDataToRead = false;
 								}
 							}
 						}
 
 						// Determine if send data consumed for further write
-						if (selectedKey.isWritable()) {
+						if ((readyOps & SelectionKey.OP_WRITE) != 0) {
 
 							// Process the write queue for the connection
 							if (connection.processWriteQueue()) {
@@ -450,33 +503,29 @@ public class SocketListener extends
 				// Clear the selected keys as now serviced
 				selectedKeys.clear();
 
-			} while (isServicingRequests);
+			} catch (ClosedSelectorException ex) {
+				// Closed selection (so shut down)
+				synchronized (this) {
+					this.isShutdown = true;
+					this.notify();
+					return null;
+				}
+			}
+
+			// Execute again and again until shutdown
+			context.doFlow(SocketListenerFlows.REPEAT, null, null);
+			return null;
+
+		} catch (Throwable ex) {
+			// Unhandled failure so shutdown
+			synchronized (this) {
+				this.isShutdown = true;
+				this.notify();
+			}
+
+			// Propagate the failure
+			throw ex;
 		}
-
-		// No return (as should be executed again and again until shutdown)
-		return null;
-	}
-
-	/*
-	 * =============== ConnectionHandlerContext ===============================
-	 * Does not require thread-safety as only accessed by the same Thread.
-	 */
-
-	/**
-	 * Current time for {@link ConnectionHandlerContext}.
-	 */
-	private long currentTime = -1;
-
-	@Override
-	public long getTime() {
-
-		// Lazy obtain the time (cleared for each run)
-		if (this.currentTime == -1) {
-			this.currentTime = System.currentTimeMillis();
-		}
-
-		// Return the current time
-		return this.currentTime;
 	}
 
 	/*
@@ -486,7 +535,7 @@ public class SocketListener extends
 	 */
 
 	/**
-	 * Data just read for the {@link ConnectionHandlerContext}.
+	 * Data just read for the {@link ReadContext}.
 	 */
 	private byte[] readData;
 
@@ -504,84 +553,106 @@ public class SocketListener extends
 	// No specific methods for HeartbeatContext.
 
 	/**
-	 * <p>
-	 * Close {@link Selector} {@link TaskContext}.
-	 * <p>
-	 * Enables running this {@link Task} until the {@link Selector} is closed.
+	 * {@link ServerSocketChannel} attachment.
 	 */
-	private class CloseSelectorTaskContext implements
-			TaskContext<SocketListener, None, Indexed> {
+	private class ServerSocketAttachment implements SelectionKeyAttachment {
 
 		/**
-		 * Indicates if complete, which means {@link Selector} is closed.
+		 * {@link ServerSocketChannel}.
 		 */
-		private boolean isComplete = false;
+		private final ServerSocketChannel channel;
 
 		/**
-		 * Indicates if complete.
+		 * {@link CommunicationProtocol}.
+		 */
+		private final CommunicationProtocol communicationProtocol;
+
+		/**
+		 * {@link ManagedObjectExecuteContext}.
+		 */
+		private final ManagedObjectExecuteContext<Indexed> executeContext;
+
+		/**
+		 * Instantiate.
 		 * 
-		 * @return <code>true</code> if complete.
+		 * @param channel
+		 *            {@link ServerSocketChannel}.
+		 * @param communicationProtocol
+		 *            {@link CommunicationProtocol}.
+		 * @param executeContext
+		 *            {@link ManagedObjectExecuteContext}.
 		 */
-		public boolean isComplete() {
-			return this.isComplete;
+		public ServerSocketAttachment(ServerSocketChannel channel, CommunicationProtocol communicationProtocol,
+				ManagedObjectExecuteContext<Indexed> executeContext) {
+			this.channel = channel;
+			this.communicationProtocol = communicationProtocol;
+			this.executeContext = executeContext;
 		}
 
 		/*
-		 * =================== TaskContext =========================
+		 * ================ SelectionKeyAttachment ==================
 		 */
 
 		@Override
-		public SocketListener getWork() {
-			return SocketListener.this;
+		public ManagedConnection getManagedConnection() {
+			return null;
+		}
+	}
+
+	/**
+	 * {@link AcceptedSocket} implementation.
+	 */
+	private class AcceptedSocketImpl implements AcceptedSocket {
+
+		/**
+		 * {@link SocketChannel}.
+		 */
+		private final SocketChannel socketChannel;
+
+		/**
+		 * {@link CommunicationProtocol}.
+		 */
+		private final CommunicationProtocol communicationProtocol;
+
+		/**
+		 * {@link ManagedObjectExecuteContext}.
+		 */
+		private final ManagedObjectExecuteContext<Indexed> executeContext;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param socketChannel
+		 *            {@link SocketChannel}.
+		 * @param communicationProtocol
+		 *            {@link CommunicationProtocol}.
+		 * @param executeContext
+		 *            {@link ManagedObjectExecuteContext}.
+		 */
+		private AcceptedSocketImpl(SocketChannel socketChannel, CommunicationProtocol communicationProtocol,
+				ManagedObjectExecuteContext<Indexed> executeContext) {
+			this.socketChannel = socketChannel;
+			this.communicationProtocol = communicationProtocol;
+			this.executeContext = executeContext;
+		}
+
+		/*
+		 * =================== AcceptedConnection =====================
+		 */
+
+		@Override
+		public SocketChannel getSocketChannel() {
+			return this.socketChannel;
 		}
 
 		@Override
-		public Object getProcessLock() {
-			return this;
+		public CommunicationProtocol getCommunicationProtocol() {
+			return this.communicationProtocol;
 		}
 
 		@Override
-		public Object getObject(None key) {
-			throw new IllegalStateException(
-					"No dependency should be required for close Selector");
-		}
-
-		@Override
-		public Object getObject(int dependencyIndex) {
-			throw new IllegalStateException(
-					"No dependency should be required for close Selector");
-		}
-
-		@Override
-		public FlowFuture doFlow(Indexed key, Object parameter) {
-			throw new IllegalStateException(
-					"No flow should be required for close Selector");
-		}
-
-		@Override
-		public FlowFuture doFlow(int flowIndex, Object parameter) {
-			throw new IllegalStateException(
-					"No flow should be required for close Selector");
-		}
-
-		@Override
-		public void doFlow(String workName, String taskName, Object parameter)
-				throws UnknownWorkException, UnknownTaskException,
-				InvalidParameterTypeException {
-			throw new IllegalStateException(
-					"No flow should be required for close Selector");
-		}
-
-		@Override
-		public void join(FlowFuture flowFuture, long timeout, Object token)
-				throws IllegalArgumentException {
-			throw new IllegalStateException(
-					"Join should be required for close Selector");
-		}
-
-		@Override
-		public void setComplete(boolean isComplete) {
-			this.isComplete = isComplete;
+		public ManagedObjectExecuteContext<Indexed> getManagedObjectExecuteContext() {
+			return this.executeContext;
 		}
 	}
 

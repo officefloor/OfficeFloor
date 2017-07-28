@@ -28,13 +28,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.OfficeAwareWorkFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.build.OfficeAwareManagedFunctionFactory;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.util.AbstractSingleTask;
@@ -51,14 +51,14 @@ import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
- * {@link Task} for a {@link HttpServlet} to service a {@link HttpRequest}.
+ * {@link ManagedFunction} for a {@link HttpServlet} to service a {@link HttpRequest}.
  * 
  * @author Daniel Sagenschneider
  */
 public class HttpServletTask
 		extends
 		AbstractSingleTask<HttpServletTask, HttpServletTask.DependencyKeys, None>
-		implements OfficeAwareWorkFactory<HttpServletTask>, HttpServletServicer {
+		implements OfficeAwareManagedFunctionFactory<HttpServletTask>, HttpServletServicer {
 
 	/**
 	 * Prefix of property for an initialisation parameter.
@@ -72,7 +72,7 @@ public class HttpServletTask
 	public static final String PROPERTY_SERVLET_MAPPINGS = "servlet.mappings";
 
 	/**
-	 * Name of the servicing {@link Task} for the {@link Servlet}.
+	 * Name of the servicing {@link ManagedFunction} for the {@link Servlet}.
 	 */
 	public static final String TASK_NAME = "service";
 
@@ -87,9 +87,9 @@ public class HttpServletTask
 	 * Sources the {@link Work} for a {@link HttpServletTask}.
 	 * 
 	 * @param workTypeBuilder
-	 *            {@link WorkTypeBuilder}.
+	 *            {@link FunctionNamespaceBuilder}.
 	 * @param context
-	 *            {@link WorkSourceContext}.
+	 *            {@link ManagedFunctionSourceContext}.
 	 * @param servletName
 	 *            Servlet name.
 	 * @param servlet
@@ -98,8 +98,8 @@ public class HttpServletTask
 	 *            Mappings to the {@link HttpServlet}.
 	 */
 	public static void sourceWork(
-			WorkTypeBuilder<HttpServletTask> workTypeBuilder,
-			WorkSourceContext context, String servletName, HttpServlet servlet,
+			FunctionNamespaceBuilder<HttpServletTask> workTypeBuilder,
+			ManagedFunctionSourceContext context, String servletName, HttpServlet servlet,
 			String... servletMappings) {
 
 		// Obtain the initialisation parameters
@@ -132,8 +132,8 @@ public class HttpServletTask
 		workTypeBuilder.setWorkFactory(factory);
 
 		// Add task to service HTTP request with HTTP Servlet
-		TaskTypeBuilder<DependencyKeys, None> task = workTypeBuilder
-				.addTaskType(TASK_NAME, factory, DependencyKeys.class,
+		ManagedFunctionTypeBuilder<DependencyKeys, None> task = workTypeBuilder
+				.addManagedFunctionType(TASK_NAME, factory, DependencyKeys.class,
 						None.class);
 		task.setDifferentiator(factory);
 		task.addObject(ServicerMapping.class).setKey(
@@ -255,8 +255,8 @@ public class HttpServletTask
 	 */
 
 	@Override
-	public Object doTask(
-			TaskContext<HttpServletTask, DependencyKeys, None> context)
+	public Object execute(
+			ManagedFunctionContext<HttpServletTask, DependencyKeys, None> context)
 			throws ServletException, IOException {
 
 		// Obtain the HTTP Servlet Container

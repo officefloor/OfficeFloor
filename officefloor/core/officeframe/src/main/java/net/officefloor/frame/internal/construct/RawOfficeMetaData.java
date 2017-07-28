@@ -19,14 +19,12 @@ package net.officefloor.frame.internal.construct;
 
 import java.util.Map;
 
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * Raw meta-data of the {@link Office}.
@@ -59,17 +57,7 @@ public interface RawOfficeMetaData {
 	Map<String, TeamManagement> getTeams();
 
 	/**
-	 * Obtains the {@link Team} to enable the worker ({@link Thread}) of the
-	 * responsible {@link Team} to continue on to execute the next {@link Job}.
-	 * 
-	 * @return {@link Team} to enable the worker ({@link Thread}) of the
-	 *         responsible {@link Team} to continue on to execute the next
-	 *         {@link Job}.
-	 */
-	Team getContinueTeam();
-
-	/**
-	 * Indicates whether the {@link Governance} is going to be manually managed.
+	 * Indicates if manually manage {@link Governance}.
 	 * 
 	 * @return <code>true</code> to manually manage {@link Governance}.
 	 */
@@ -121,35 +109,6 @@ public interface RawOfficeMetaData {
 	 *         {@link ThreadState} bound names.
 	 */
 	Map<String, RawBoundManagedObjectMetaData> getOfficeScopeManagedObjects();
-
-	/**
-	 * Obtains the {@link ProcessState} {@link RawBoundAdministratorMetaData}
-	 * instances.
-	 * 
-	 * @return {@link ProcessState} {@link RawBoundAdministratorMetaData}
-	 *         instances.
-	 */
-	RawBoundAdministratorMetaData<?, ?>[] getProcessBoundAdministrators();
-
-	/**
-	 * Obtains the {@link ThreadState} {@link RawBoundAdministratorMetaData}
-	 * instances.
-	 * 
-	 * @return {@link ThreadState} {@link RawBoundAdministratorMetaData}
-	 *         instances.
-	 */
-	RawBoundAdministratorMetaData<?, ?>[] getThreadBoundAdministrators();
-
-	/**
-	 * Obtains the scope {@link RawBoundAdministratorMetaData} instances of the
-	 * {@link Office} by their {@link ProcessState} and {@link ThreadState}
-	 * bound names.
-	 * 
-	 * @return Scope {@link RawBoundAdministratorMetaData} instances of the
-	 *         {@link Office} by the {@link ProcessState} and
-	 *         {@link ThreadState} bound names.
-	 */
-	Map<String, RawBoundAdministratorMetaData<?, ?>> getOfficeScopeAdministrators();
 
 	/**
 	 * Obtains the {@link OfficeMetaData}.

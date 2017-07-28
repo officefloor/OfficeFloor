@@ -18,8 +18,8 @@
 package net.officefloor.compile.officefloor;
 
 import net.officefloor.compile.properties.Property;
-import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.spi.team.source.TeamSourceProperty;
+import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSourceProperty;
 
 /**
  * <code>Type definition</code> of a {@link Property} that may be configured on

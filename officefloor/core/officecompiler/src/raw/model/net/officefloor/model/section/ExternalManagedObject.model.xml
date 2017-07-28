@@ -5,4 +5,6 @@
 	<list type="SubSectionObjectToExternalManagedObjectModel" name="sub section object" />
 	<list type="SectionManagedObjectDependencyToExternalManagedObjectModel"
 		name="dependent section managed object" />
+	<list type="ManagedFunctionObjectToExternalManagedObjectModel"
+		name="managed function object" />
 </model>

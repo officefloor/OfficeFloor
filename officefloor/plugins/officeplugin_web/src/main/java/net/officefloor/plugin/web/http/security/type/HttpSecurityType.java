@@ -17,7 +17,7 @@
  */
 package net.officefloor.plugin.web.http.security.type;
 
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 
 /**
@@ -53,11 +53,11 @@ public interface HttpSecurityType<S, C, D extends Enum<D>, F extends Enum<F>> {
 
 	/**
 	 * Obtains the {@link HttpSecurityFlowType} definitions of the
-	 * {@link JobSequence} instances required to be linked for the
+	 * {@link Flow} instances required to be linked for the
 	 * {@link HttpSecuritySource}.
 	 * 
 	 * @return {@link HttpSecurityFlowType} definitions of the
-	 *         {@link JobSequence} instances required to be linked for the
+	 *         {@link Flow} instances required to be linked for the
 	 *         {@link HttpSecuritySource}.
 	 */
 	HttpSecurityFlowType<?>[] getFlowTypes();

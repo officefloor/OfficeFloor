@@ -2,6 +2,7 @@
 <model>
     <field type="String" name="office floor team name" />
     <field type="String" name="team source class name" />
+	<list type="TypeQualificationModel" name="type qualification" />
     <list type="PropertyModel" name="property" plural="properties" />
     <list type="DeployedOfficeTeamToOfficeFloorTeamModel" name="deployed office team" />
     <list type="OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel"

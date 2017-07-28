@@ -17,11 +17,10 @@
  */
 package net.officefloor.eclipse.extension.managedobjectsource.clazz;
 
+import org.eclipse.swt.widgets.Composite;
+
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
-import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
-import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
 import net.officefloor.eclipse.extension.open.ExtensionOpener;
@@ -31,17 +30,13 @@ import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
-import org.eclipse.swt.widgets.Composite;
-
 /**
  * {@link ManagedObjectSourceExtension} for {@link ClassManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
 public class ClassManagedObjectSourceExtension
-		implements
-		ManagedObjectSourceExtension<Indexed, Indexed, ClassManagedObjectSource>,
-		ExtensionClasspathProvider, ExtensionOpener {
+		implements ManagedObjectSourceExtension<Indexed, Indexed, ClassManagedObjectSource>, ExtensionOpener {
 
 	/*
 	 * ================ ManagedObjectSourceExtension =========================
@@ -58,13 +53,11 @@ public class ClassManagedObjectSourceExtension
 	}
 
 	@Override
-	public void createControl(Composite page,
-			final ManagedObjectSourceExtensionContext context) {
+	public void createControl(Composite page, final ManagedObjectSourceExtensionContext context) {
 
 		// Provide property for class name
 		SourceExtensionUtil.loadPropertyLayout(page);
-		SourceExtensionUtil.createPropertyClass("Class",
-				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, page,
+		SourceExtensionUtil.createPropertyClass("Class", ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, page,
 				context, null);
 	}
 
@@ -72,8 +65,7 @@ public class ClassManagedObjectSourceExtension
 	public String getSuggestedManagedObjectSourceName(PropertyList properties) {
 
 		// Obtain the class name property
-		Property classNameProperty = properties
-				.getProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME);
+		Property classNameProperty = properties.getProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME);
 		if (classNameProperty == null) {
 			// No suggestion as no class name
 			return null;
@@ -94,16 +86,6 @@ public class ClassManagedObjectSourceExtension
 	}
 
 	/*
-	 * ======================= ExtensionClasspathProvider ======================
-	 */
-
-	@Override
-	public ClasspathProvision[] getClasspathProvisions() {
-		return new ClasspathProvision[] { new TypeClasspathProvision(
-				ClassManagedObjectSource.class) };
-	}
-
-	/*
 	 * ========================= ExtensionOpener ==============================
 	 */
 
@@ -111,8 +93,8 @@ public class ClassManagedObjectSourceExtension
 	public void openSource(ExtensionOpenerContext context) throws Exception {
 
 		// Obtain the name of the class
-		String className = context.getPropertyList().getPropertyValue(
-				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, null);
+		String className = context.getPropertyList().getPropertyValue(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				null);
 
 		// Ensure have class name
 		if (EclipseUtil.isBlank(className)) {

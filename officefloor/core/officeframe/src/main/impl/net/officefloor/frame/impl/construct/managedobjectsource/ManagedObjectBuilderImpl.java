@@ -18,15 +18,18 @@
 package net.officefloor.frame.impl.construct.managedobjectsource;
 
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.api.build.ManagedObjectPoolBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
+import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.source.SourceProperties;
+import net.officefloor.frame.impl.construct.managedobjectpool.ManagedObjectPoolBuilderImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
+import net.officefloor.frame.internal.configuration.ManagedObjectPoolConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
-import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.source.SourceProperties;
 
 /**
  * Implements the {@link ManagedObjectBuilder}.
@@ -34,8 +37,7 @@ import net.officefloor.frame.spi.source.SourceProperties;
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectBuilderImpl<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>>
-		implements ManagedObjectBuilder<F>,
-		ManagedObjectSourceConfiguration<F, MS> {
+		implements ManagedObjectBuilder<F>, ManagedObjectSourceConfiguration<F, MS> {
 
 	/**
 	 * Name of {@link ManagedObjectSource}.
@@ -63,9 +65,9 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, F extends Enum<F>, MS e
 	private final SourcePropertiesImpl properties = new SourcePropertiesImpl();
 
 	/**
-	 * {@link ManagedObjectPool}.
+	 * {@link ManagedObjectPoolConfiguration}.
 	 */
-	private ManagedObjectPool pool;
+	private ManagedObjectPoolConfiguration poolConfiguration;
 
 	/**
 	 * Timeout for {@link AsynchronousManagedObject}.
@@ -80,8 +82,7 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, F extends Enum<F>, MS e
 	 * @param managedObjectSourceClass
 	 *            {@link Class} of the {@link ManagedObjectSource}.
 	 */
-	public ManagedObjectBuilderImpl(String managedObjectSourceName,
-			Class<MS> managedObjectSourceClass) {
+	public ManagedObjectBuilderImpl(String managedObjectSourceName, Class<MS> managedObjectSourceClass) {
 		this.managedObjectSourceName = managedObjectSourceName;
 		this.managedObjectSourceInstance = null;
 		this.managedObjectSourceClass = managedObjectSourceClass;
@@ -95,8 +96,7 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, F extends Enum<F>, MS e
 	 * @param managedObjectSource
 	 *            {@link ManagedObjectSource} instance to use.
 	 */
-	public ManagedObjectBuilderImpl(String managedObjectSourceName,
-			MS managedObjectSource) {
+	public ManagedObjectBuilderImpl(String managedObjectSourceName, MS managedObjectSource) {
 		this.managedObjectSourceName = managedObjectSourceName;
 		this.managedObjectSourceInstance = managedObjectSource;
 		this.managedObjectSourceClass = null;
@@ -112,8 +112,10 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, F extends Enum<F>, MS e
 	}
 
 	@Override
-	public void setManagedObjectPool(ManagedObjectPool pool) {
-		this.pool = pool;
+	public ManagedObjectPoolBuilder setManagedObjectPool(ManagedObjectPoolFactory managedObjectPoolFactory) {
+		ManagedObjectPoolBuilderImpl poolBuilder = new ManagedObjectPoolBuilderImpl(managedObjectPoolFactory);
+		this.poolConfiguration = poolBuilder;
+		return poolBuilder;
 	}
 
 	@Override
@@ -123,8 +125,7 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, F extends Enum<F>, MS e
 
 	@Override
 	public ManagingOfficeBuilder<F> setManagingOffice(String officeName) {
-		ManagingOfficeBuilderImpl<F> managingOfficeBuilder = new ManagingOfficeBuilderImpl<F>(
-				officeName);
+		ManagingOfficeBuilderImpl<F> managingOfficeBuilder = new ManagingOfficeBuilderImpl<F>(officeName);
 		this.managingOfficeConfiguration = managingOfficeBuilder;
 		return managingOfficeBuilder;
 	}
@@ -159,8 +160,8 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, F extends Enum<F>, MS e
 	}
 
 	@Override
-	public ManagedObjectPool getManagedObjectPool() {
-		return this.pool;
+	public ManagedObjectPoolConfiguration getManagedObjectPoolConfiguration() {
+		return this.poolConfiguration;
 	}
 
 	@Override

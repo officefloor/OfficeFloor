@@ -1,0 +1,43 @@
+<context>
+	<office-floor>
+		<managed-object-sources>
+			<managed-object-source name="DEPENDENCY_ONE_SOURCE"
+				source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$DependencyManagedObject" />
+				</properties>
+				<managing-office name="OFFICE" />
+			</managed-object-source>
+			<managed-object-source name="DEPENDENCY_TWO_SOURCE"
+				source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$CycleManagedObject" />
+				</properties>
+				<managing-office name="OFFICE" />
+			</managed-object-source>
+		</managed-object-sources>
+		<managed-objects>
+			<managed-object name="DEPENDENCY_ONE_OBJECT" scope="THREAD">
+				<managed-object-source name="DEPENDENCY_ONE_SOURCE" />
+				<dependency name="dependency">
+					<!-- auto-wire the dependency -->
+					<!-- <managed-object name="DEPENDENCY_TWO_OBJECT" /> -->
+				</dependency>
+			</managed-object>
+			<managed-object name="DEPENDENCY_TWO_OBJECT" scope="THREAD">
+				<managed-object-source name="DEPENDENCY_TWO_SOURCE" />
+				<dependency name="dependency">
+					<!-- auto-wire the dependency -->
+					<!-- <managed-object name="DEPENDENCY_ONE_OBJECT" /> -->
+				</dependency>
+			</managed-object>
+		</managed-objects>
+		<offices>
+			<office name="OFFICE" source="${testcase}$CompileOfficeSource">
+				<object name="OBJECT">
+					<managed-object name="DEPENDENCY_ONE_OBJECT" />
+				</object>
+			</office>
+		</offices>
+	</office-floor>
+</context>

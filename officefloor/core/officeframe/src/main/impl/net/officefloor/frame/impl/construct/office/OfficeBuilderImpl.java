@@ -20,42 +20,40 @@ package net.officefloor.frame.impl.construct.office;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.frame.api.build.AdministratorBuilder;
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
-import net.officefloor.frame.api.build.FlowNodeBuilder;
+import net.officefloor.frame.api.build.FlowBuilder;
 import net.officefloor.frame.api.build.GovernanceBuilder;
-import net.officefloor.frame.api.build.GovernanceFactory;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
-import net.officefloor.frame.api.build.WorkBuilder;
-import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.profile.Profiler;
-import net.officefloor.frame.impl.construct.administrator.AdministratorBuilderImpl;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.impl.construct.function.EscalationConfigurationImpl;
 import net.officefloor.frame.impl.construct.governance.GovernanceBuilderImpl;
+import net.officefloor.frame.impl.construct.managedfunction.ManagedFunctionBuilderImpl;
+import net.officefloor.frame.impl.construct.managedfunction.ManagedFunctionReferenceImpl;
 import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuilderImpl;
-import net.officefloor.frame.impl.construct.task.TaskEscalationConfigurationImpl;
-import net.officefloor.frame.impl.construct.task.TaskNodeReferenceImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
-import net.officefloor.frame.impl.construct.work.WorkBuilderImpl;
-import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.BoundInputManagedObjectConfiguration;
+import net.officefloor.frame.internal.configuration.EscalationConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
-import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
-import net.officefloor.frame.internal.configuration.TaskNodeReference;
-import net.officefloor.frame.internal.configuration.WorkConfiguration;
 import net.officefloor.frame.internal.structure.EscalationFlow;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * Implements the {@link OfficeBuilder}.
@@ -95,6 +93,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	private final List<LinkedTeamConfiguration> teams = new LinkedList<LinkedTeamConfiguration>();
 
 	/**
+	 * Default {@link Team}.
+	 */
+	private String defaultOfficeTeamName = null;
+
+	/**
 	 * Listing of {@link LinkedManagedObjectSourceConfiguration}.
 	 */
 	private final List<LinkedManagedObjectSourceConfiguration> managedObjectSources = new LinkedList<LinkedManagedObjectSourceConfiguration>();
@@ -110,7 +113,8 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	private final List<ManagedObjectConfiguration<?>> processManagedObjects = new LinkedList<ManagedObjectConfiguration<?>>();
 
 	/**
-	 * By default do not manually manage {@link Governance}.
+	 * Flags whether to manually manage {@link Governance} via
+	 * {@link Administration} instances.
 	 */
 	private boolean isManuallyManageGovernance = false;
 
@@ -125,19 +129,9 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	private final List<ManagedObjectConfiguration<?>> threadManagedObjects = new LinkedList<ManagedObjectConfiguration<?>>();
 
 	/**
-	 * Listing of {@link ProcessState} bound {@link Administrator}.
+	 * Listing of {@link ManagedFunctionConfiguration}.
 	 */
-	private final List<AdministratorSourceConfiguration<?, ?>> processAdministrator = new LinkedList<AdministratorSourceConfiguration<?, ?>>();
-
-	/**
-	 * Listing of {@link ThreadState} bound {@link Administrator}.
-	 */
-	private final List<AdministratorSourceConfiguration<?, ?>> threadAdministrator = new LinkedList<AdministratorSourceConfiguration<?, ?>>();
-
-	/**
-	 * Listing of {@link WorkConfiguration}.
-	 */
-	private final List<WorkBuilderImpl<?>> works = new LinkedList<WorkBuilderImpl<?>>();
+	private final List<ManagedFunctionBuilderImpl<?, ?>> functions = new LinkedList<ManagedFunctionBuilderImpl<?, ?>>();
 
 	/**
 	 * Listing of registered {@link OfficeEnhancer} instances.
@@ -147,18 +141,32 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	/**
 	 * Listing of the {@link EscalationFlow} instances.
 	 */
-	private final List<TaskEscalationConfiguration> escalations = new LinkedList<TaskEscalationConfiguration>();
+	private final List<EscalationConfiguration> escalations = new LinkedList<EscalationConfiguration>();
 
 	/**
-	 * List of start up {@link Task} instances for the {@link Office}.
+	 * List of start up {@link ManagedFunction} instances for the
+	 * {@link Office}.
 	 */
-	private final List<TaskNodeReference> startupTasks = new LinkedList<TaskNodeReference>();
+	private final List<ManagedFunctionReference> startupFunctions = new LinkedList<ManagedFunctionReference>();
+
+	/**
+	 * {@link OfficeClock}.
+	 */
+	private OfficeClock clock = null;
 
 	/**
 	 * Interval in milli-seconds to monitor the {@link Office}. Default is 1
 	 * second.
 	 */
 	private long monitorOfficeInterval = 1000;
+
+	/**
+	 * <p>
+	 * Maximum {@link FunctionState} chain depth before it is broken.
+	 * <p>
+	 * Default set high enough to effectively have no breaking.
+	 */
+	private int maximumFunctionStateChainLength = 1000;
 
 	/**
 	 * {@link Profiler}.
@@ -180,94 +188,83 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	 */
 
 	@Override
+	public void setOfficeClock(OfficeClock clock) {
+		this.clock = clock;
+	}
+
+	@Override
 	public void setMonitorOfficeInterval(long monitorOfficeInterval) {
 		this.monitorOfficeInterval = monitorOfficeInterval;
 	}
 
 	@Override
+	public void setMaximumFunctionStateChainLength(int maximumFunctionStateChainLength) {
+		this.maximumFunctionStateChainLength = maximumFunctionStateChainLength;
+	}
+
+	@Override
 	public void registerTeam(String officeTeamName, String officeFloorTeamName) {
-		this.teams.add(new LinkedTeamConfigurationImpl(officeTeamName,
-				officeFloorTeamName));
+		this.teams.add(new LinkedTeamConfigurationImpl(officeTeamName, officeFloorTeamName));
 	}
 
 	@Override
-	public void registerManagedObjectSource(String officeManagedObjectName,
-			String officeFloorManagedObjectSourceName) {
-		this.managedObjectSources
-				.add(new LinkedManagedObjectSourceConfigurationImpl(
-						officeManagedObjectName,
-						officeFloorManagedObjectSourceName));
+	public void setDefaultTeam(String officeTeamName) {
+		this.defaultOfficeTeamName = officeTeamName;
 	}
 
 	@Override
-	public void setBoundInputManagedObject(String inputManagedObjectName,
-			String managedObjectSourceName) {
+	public void registerManagedObjectSource(String officeManagedObjectName, String officeFloorManagedObjectSourceName) {
+		this.managedObjectSources.add(new LinkedManagedObjectSourceConfigurationImpl(officeManagedObjectName,
+				officeFloorManagedObjectSourceName));
+	}
+
+	@Override
+	public void setBoundInputManagedObject(String inputManagedObjectName, String managedObjectSourceName) {
 		this.boundInputManagedObjects
-				.add(new BoundInputManagedObjectConfigurationImpl(
-						inputManagedObjectName, managedObjectSourceName));
+				.add(new BoundInputManagedObjectConfigurationImpl(inputManagedObjectName, managedObjectSourceName));
 	}
 
 	@Override
 	@SuppressWarnings("rawtypes")
-	public DependencyMappingBuilder addThreadManagedObject(
-			String threadManagedObjectName, String officeManagedObjectName) {
-		DependencyMappingBuilderImpl<?> builder = new DependencyMappingBuilderImpl(
-				threadManagedObjectName, officeManagedObjectName);
+	public DependencyMappingBuilder addThreadManagedObject(String threadManagedObjectName,
+			String officeManagedObjectName) {
+		DependencyMappingBuilderImpl<?> builder = new DependencyMappingBuilderImpl(threadManagedObjectName,
+				officeManagedObjectName);
 		this.threadManagedObjects.add(builder);
 		return builder;
 	}
 
 	@Override
 	@SuppressWarnings("rawtypes")
-	public DependencyMappingBuilder addProcessManagedObject(
-			String processManagedObjectName, String officeManagedObjectName) {
-		DependencyMappingBuilderImpl<?> builder = new DependencyMappingBuilderImpl(
-				processManagedObjectName, officeManagedObjectName);
+	public DependencyMappingBuilder addProcessManagedObject(String processManagedObjectName,
+			String officeManagedObjectName) {
+		DependencyMappingBuilderImpl<?> builder = new DependencyMappingBuilderImpl(processManagedObjectName,
+				officeManagedObjectName);
 		this.processManagedObjects.add(builder);
 		return builder;
 	}
 
 	@Override
-	public void setManuallyManageGovernance(boolean isManuallyManage) {
-		this.isManuallyManageGovernance = isManuallyManage;
+	public void setManuallyManageGovernance(boolean isManuallyManageGovernance) {
+		this.isManuallyManageGovernance = isManuallyManageGovernance;
 	}
 
 	@Override
-	public <I, F extends Enum<F>> GovernanceBuilder<F> addGovernance(
-			String governanceName,
-			GovernanceFactory<? super I, F> governanceFactory,
-			Class<I> extensionInterface) {
-		GovernanceBuilderImpl<I, F> builder = new GovernanceBuilderImpl<I, F>(
-				governanceName, governanceFactory, extensionInterface);
+	public <E, F extends Enum<F>> GovernanceBuilder<F> addGovernance(String governanceName, Class<E> extensionInterface,
+			GovernanceFactory<? super E, F> governanceFactory) {
+		GovernanceBuilderImpl<E, F> builder = new GovernanceBuilderImpl<E, F>(governanceName, extensionInterface,
+				governanceFactory);
 		this.governances.add(builder);
 		return builder;
 	}
 
 	@Override
-	public <I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorBuilder<A> addProcessAdministrator(
-			String processAdministratorName, Class<AS> adminsistratorSource) {
-		AdministratorBuilderImpl<I, A, AS> builder = new AdministratorBuilderImpl<I, A, AS>(
-				processAdministratorName, adminsistratorSource);
-		this.processAdministrator.add(builder);
-		return builder;
-	}
-
-	@Override
-	public <I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorBuilder<A> addThreadAdministrator(
-			String threadAdministratorName, Class<AS> adminsistratorSource) {
-		AdministratorBuilderImpl<I, A, AS> builder = new AdministratorBuilderImpl<I, A, AS>(
-				threadAdministratorName, adminsistratorSource);
-		this.threadAdministrator.add(builder);
-		return builder;
-	}
-
-	@Override
-	public <W extends Work> WorkBuilder<W> addWork(String workName,
-			WorkFactory<W> workFactory) {
-		WorkBuilderImpl<W> workBuilder = new WorkBuilderImpl<W>(workName,
-				workFactory);
-		this.works.add(workBuilder);
-		return workBuilder;
+	public <O extends Enum<O>, F extends Enum<F>> ManagedFunctionBuilder<O, F> addManagedFunction(String functionName,
+			ManagedFunctionFactory<O, F> mangedFunctionFactory) {
+		ManagedFunctionBuilderImpl<O, F> functionBuilder = new ManagedFunctionBuilderImpl<>(functionName,
+				mangedFunctionFactory);
+		this.functions.add(functionBuilder);
+		return functionBuilder;
 	}
 
 	@Override
@@ -276,17 +273,15 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
-	public void addEscalation(Class<? extends Throwable> typeOfCause,
-			String workName, String taskName) {
-		this.escalations.add(new TaskEscalationConfigurationImpl(typeOfCause,
-				new TaskNodeReferenceImpl(workName, taskName, typeOfCause)));
+	public void addEscalation(Class<? extends Throwable> typeOfCause, String functionName) {
+		this.escalations.add(new EscalationConfigurationImpl(typeOfCause,
+				new ManagedFunctionReferenceImpl(functionName, typeOfCause)));
 	}
 
 	@Override
-	public void addStartupTask(String workName, String taskName) {
-		// No argument to a start up task
-		this.startupTasks.add(new TaskNodeReferenceImpl(workName, taskName,
-				null));
+	public void addStartupFunction(String functionName) {
+		// No argument to a start up function
+		this.startupFunctions.add(new ManagedFunctionReferenceImpl(functionName, null));
 	}
 
 	@Override
@@ -304,8 +299,18 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
+	public OfficeClock getOfficeClock() {
+		return this.clock;
+	}
+
+	@Override
 	public long getMonitorOfficeInterval() {
 		return this.monitorOfficeInterval;
+	}
+
+	@Override
+	public int getMaximumFunctionStateChainLength() {
+		return this.maximumFunctionStateChainLength;
 	}
 
 	@Override
@@ -319,27 +324,28 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
+	public String getOfficeDefaultTeamName() {
+		return this.defaultOfficeTeamName;
+	}
+
+	@Override
 	public LinkedManagedObjectSourceConfiguration[] getRegisteredManagedObjectSources() {
-		return this.managedObjectSources
-				.toArray(new LinkedManagedObjectSourceConfiguration[0]);
+		return this.managedObjectSources.toArray(new LinkedManagedObjectSourceConfiguration[0]);
 	}
 
 	@Override
 	public BoundInputManagedObjectConfiguration[] getBoundInputManagedObjectConfiguration() {
-		return this.boundInputManagedObjects
-				.toArray(new BoundInputManagedObjectConfiguration[0]);
+		return this.boundInputManagedObjects.toArray(new BoundInputManagedObjectConfiguration[0]);
 	}
 
 	@Override
 	public ManagedObjectConfiguration<?>[] getProcessManagedObjectConfiguration() {
-		return this.processManagedObjects
-				.toArray(new ManagedObjectConfiguration[0]);
+		return this.processManagedObjects.toArray(new ManagedObjectConfiguration[0]);
 	}
 
 	@Override
 	public ManagedObjectConfiguration<?>[] getThreadManagedObjectConfiguration() {
-		return this.threadManagedObjects
-				.toArray(new ManagedObjectConfiguration[0]);
+		return this.threadManagedObjects.toArray(new ManagedObjectConfiguration[0]);
 	}
 
 	@Override
@@ -349,26 +355,12 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 
 	@Override
 	public GovernanceConfiguration<?, ?>[] getGovernanceConfiguration() {
-		return this.governances
-				.toArray(new GovernanceConfiguration[this.governances.size()]);
+		return this.governances.toArray(new GovernanceConfiguration[this.governances.size()]);
 	}
 
 	@Override
-	public AdministratorSourceConfiguration<?, ?>[] getProcessAdministratorSourceConfiguration() {
-		return this.processAdministrator
-				.toArray(new AdministratorSourceConfiguration[0]);
-	}
-
-	@Override
-	public AdministratorSourceConfiguration<?, ?>[] getThreadAdministratorSourceConfiguration() {
-		return this.threadAdministrator
-				.toArray(new AdministratorSourceConfiguration[0]);
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public <W extends Work> WorkConfiguration<W>[] getWorkConfiguration() {
-		return this.works.toArray(new WorkConfiguration[0]);
+	public ManagedFunctionConfiguration<?, ?>[] getManagedFunctionConfiguration() {
+		return this.functions.toArray(new ManagedFunctionConfiguration[0]);
 	}
 
 	@Override
@@ -377,33 +369,28 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
-	public TaskEscalationConfiguration[] getEscalationConfiguration() {
-		return this.escalations.toArray(new TaskEscalationConfiguration[0]);
+	public EscalationConfiguration[] getEscalationConfiguration() {
+		return this.escalations.toArray(new EscalationConfiguration[0]);
 	}
 
 	@Override
-	public FlowNodeBuilder<?> getFlowNodeBuilder(String namespace,
-			String workName, String taskName) {
+	public FlowBuilder<?> getFlowBuilder(String namespace, String functionName) {
 
-		// Obtain the work builder
-		String namespacedWorkName = getNamespacedName(namespace, workName);
-		WorkBuilderImpl<?> workBuilder = null;
-		for (WorkBuilderImpl<?> builder : this.works) {
-			if (namespacedWorkName.equals(builder.getWorkName())) {
-				workBuilder = builder;
+		// Obtain the function builder
+		String namespacedFunctionName = getNamespacedName(namespace, functionName);
+		for (ManagedFunctionBuilderImpl<?, ?> builder : this.functions) {
+			if (namespacedFunctionName.equals(builder.getFunctionName())) {
+				return builder;
 			}
 		}
-		if (workBuilder == null) {
-			return null; // no work builder by name
-		}
 
-		// Obtain the task builder (flow node builder)
-		return workBuilder.getTaskBuilder(namespace, taskName);
+		// As here, no function by name
+		return null;
 	}
 
 	@Override
-	public TaskNodeReference[] getStartupTasks() {
-		return this.startupTasks.toArray(new TaskNodeReference[0]);
+	public ManagedFunctionReference[] getStartupFunctions() {
+		return this.startupFunctions.toArray(new ManagedFunctionReference[0]);
 	}
 
 	@Override

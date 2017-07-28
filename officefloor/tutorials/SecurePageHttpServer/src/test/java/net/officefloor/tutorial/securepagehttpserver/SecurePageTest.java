@@ -19,14 +19,14 @@ package net.officefloor.tutorial.securepagehttpserver;
 
 import java.io.IOException;
 
-import junit.framework.TestCase;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
+
+import junit.framework.TestCase;
+import net.officefloor.OfficeFloorMain;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 
 /**
  * Tests the Secure Page.
@@ -47,7 +47,7 @@ public class SecurePageTest extends TestCase {
 		try {
 			this.client.close();
 		} finally {
-			WoofOfficeFloorSource.stop();
+			OfficeFloorMain.close();
 		}
 	}
 
@@ -55,7 +55,7 @@ public class SecurePageTest extends TestCase {
 	public void testSecurePage() throws Exception {
 
 		// Start server
-		WoofOfficeFloorSource.start();
+		OfficeFloorMain.open();
 
 		// Ensure redirect to secure access to page
 		this.assertHttpRequest("http://localhost:7878/card.woof");
@@ -69,8 +69,7 @@ public class SecurePageTest extends TestCase {
 
 	private void assertHttpRequest(String url) throws IOException {
 		HttpResponse response = this.client.execute(new HttpGet(url));
-		assertEquals("Should be successful (after possible redirect)", 200,
-				response.getStatusLine().getStatusCode());
+		assertEquals("Should be successful (after possible redirect)", 200, response.getStatusLine().getStatusCode());
 		String entity = EntityUtils.toString(response.getEntity());
 		assertTrue("Should be rendering page as secure (and not exception)",
 				entity.contains("<h1>Enter card details</h1>"));

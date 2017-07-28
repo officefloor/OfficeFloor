@@ -22,21 +22,21 @@ package net.officefloor.frame.internal.structure;
  * 
  * @author Daniel Sagenschneider
  */
-public interface LinkedListSet<E extends LinkedListSetEntry<E, O>, O> {
+public interface LinkedListSet<I extends LinkedListSetEntry<I, O>, O> {
 
 	/**
 	 * Obtains the head of this {@link LinkedListSet}.
 	 * 
 	 * @return Head {@link LinkedListSetEntry} of this {@link LinkedListSet}.
 	 */
-	E getHead();
+	I getHead();
 
 	/**
 	 * Obtains the tail of this {@link LinkedListSet}.
 	 * 
 	 * @return Tail of this {@link LinkedListSet}.
 	 */
-	E getTail();
+	I getTail();
 
 	/**
 	 * Adds a {@link LinkedListSetEntry} to this {@link LinkedListSet}.
@@ -48,7 +48,7 @@ public interface LinkedListSet<E extends LinkedListSetEntry<E, O>, O> {
 	 *             If {@link LinkedListSetEntry} is not valid for this
 	 *             {@link LinkedListSet}.
 	 */
-	void addEntry(E entry) throws IllegalStateException;
+	void addEntry(I entry) throws IllegalStateException;
 
 	/**
 	 * Removes this {@link LinkedListSetEntry} from the {@link LinkedListSet}.
@@ -63,7 +63,7 @@ public interface LinkedListSet<E extends LinkedListSetEntry<E, O>, O> {
 	 *             If {@link LinkedListSetEntry} is not valid for this
 	 *             {@link LinkedListSet}.
 	 */
-	boolean removeEntry(E entry) throws IllegalStateException;
+	boolean removeEntry(I entry) throws IllegalStateException;
 
 	/**
 	 * Purges all {@link LinkedListSetEntry} instances within this
@@ -72,14 +72,17 @@ public interface LinkedListSet<E extends LinkedListSetEntry<E, O>, O> {
 	 * @return Head of the {@link LinkedListSet} (before the purge) so that may
 	 *         action the {@link LinkedListSetEntry} instances.
 	 */
-	E purgeEntries();
+	I purgeEntries();
 
 	/**
+	 * <p>
 	 * Creates a copy of this {@link LinkedListSet} returning the head of the
 	 * copy.
+	 * <p>
+	 * The returned copy is {@link Thread} safe to iterate.
 	 * 
 	 * @return Head {@link LinkedListSetItem} of the copy.
 	 */
-	LinkedListSetItem<E> copyEntries();
+	LinkedListSetItem<I> copyEntries();
 
 }

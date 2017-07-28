@@ -20,7 +20,7 @@ package net.officefloor.eclipse.common.dialog.input.impl;
 import net.officefloor.eclipse.common.dialog.input.Input;
 import net.officefloor.eclipse.common.dialog.input.InputContext;
 import net.officefloor.eclipse.common.dialog.layout.NoMarginGridLayout;
-import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
+import net.officefloor.eclipse.configuration.project.ProjectConfigurationContext;
 import net.officefloor.eclipse.util.LogUtil;
 
 import org.eclipse.core.resources.IProject;

@@ -17,15 +17,14 @@
  */
 package net.officefloor.compile.impl.type;
 
-import java.util.function.Function;
-
+import net.officefloor.compile.impl.structure.CompileContextImpl;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.managedobject.ManagedObjectType;
-import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Abstract tests for the {@link TypeContext}.
+ * Abstract tests for the {@link CompileContext}.
  *
  * @param <N>
  *            {@link Node} type.
@@ -34,13 +33,12 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractTestTypeContext<N extends Node, T> extends
-		OfficeFrameTestCase {
+public abstract class AbstractTestTypeContext<N extends Node, T> extends OfficeFrameTestCase {
 
 	/**
-	 * {@link TypeContext} to test.
+	 * {@link CompileContext} to test.
 	 */
-	protected TypeContext context = new TypeContextImpl();
+	protected CompileContext context = new CompileContextImpl(null);
 
 	/**
 	 * Type of {@link Node} to create mocks.
@@ -55,10 +53,10 @@ public abstract class AbstractTestTypeContext<N extends Node, T> extends
 	/**
 	 * Function to load the type from the {@link Node}.
 	 */
-	private final Function<N, T> nodeTypeLoader;
+	private final ContextTypeLoader<N, T> nodeTypeLoader;
 
 	/**
-	 * Function to load the type from the {@link TypeContext}
+	 * Function to load the type from the {@link CompileContext}
 	 */
 	private final ContextTypeLoader<N, T> contextTypeLoader;
 
@@ -72,10 +70,9 @@ public abstract class AbstractTestTypeContext<N extends Node, T> extends
 	 * @param nodeTypeLoader
 	 *            Function to load the type from the {@link Node}.
 	 * @param contextTypeLoader
-	 *            Function to load the type from the {@link TypeContext}
+	 *            Function to load the type from the {@link CompileContext}
 	 */
-	public AbstractTestTypeContext(Class<N> nodeClass, Class<T> typeClass,
-			Function<N, T> nodeTypeLoader,
+	public AbstractTestTypeContext(Class<N> nodeClass, Class<T> typeClass, ContextTypeLoader<N, T> nodeTypeLoader,
 			ContextTypeLoader<N, T> contextTypeLoader) {
 		this.nodeClass = nodeClass;
 		this.typeClass = typeClass;
@@ -84,7 +81,7 @@ public abstract class AbstractTestTypeContext<N extends Node, T> extends
 	}
 
 	/**
-	 * Loads the type from the {@link TypeContext}.
+	 * Loads the type from the {@link CompileContext}.
 	 * 
 	 * @param <N>
 	 *            {@link Node} type.
@@ -94,15 +91,15 @@ public abstract class AbstractTestTypeContext<N extends Node, T> extends
 	protected interface ContextTypeLoader<N, T> {
 
 		/**
-		 * Loads the type from the {@link TypeContext}.
+		 * Loads the type from the {@link CompileContext}.
 		 * 
 		 * @param context
-		 *            {@link TypeContext}.
+		 *            {@link CompileContext}.
 		 * @param node
 		 *            {@link Node}.
 		 * @return Type.
 		 */
-		T loadType(TypeContext context, N node);
+		T loadType(CompileContext context, N node);
 	}
 
 	/**
@@ -111,7 +108,7 @@ public abstract class AbstractTestTypeContext<N extends Node, T> extends
 	public void testLoadType() {
 		T type = this.createMock(this.typeClass);
 		N mockNode = this.createMock(this.nodeClass);
-		this.recordReturn(mockNode, this.nodeTypeLoader.apply(mockNode), type);
+		this.recordReturn(mockNode, this.nodeTypeLoader.loadType(this.context, mockNode), type);
 		this.replayMockObjects();
 		T loadedType = this.contextTypeLoader.loadType(this.context, mockNode);
 		this.verifyMockObjects();
@@ -126,9 +123,8 @@ public abstract class AbstractTestTypeContext<N extends Node, T> extends
 		N mockNode = this.createMock(this.nodeClass);
 		T anotherType = this.createMock(this.typeClass);
 		N anotherNode = this.createMock(this.nodeClass);
-		this.recordReturn(mockNode, this.nodeTypeLoader.apply(mockNode), type);
-		this.recordReturn(anotherNode, this.nodeTypeLoader.apply(anotherNode),
-				anotherType);
+		this.recordReturn(mockNode, this.nodeTypeLoader.loadType(this.context, mockNode), type);
+		this.recordReturn(anotherNode, this.nodeTypeLoader.loadType(this.context, anotherNode), anotherType);
 		this.replayMockObjects();
 		T first = this.contextTypeLoader.loadType(this.context, mockNode);
 		T second = this.contextTypeLoader.loadType(this.context, mockNode);
@@ -144,12 +140,10 @@ public abstract class AbstractTestTypeContext<N extends Node, T> extends
 	 */
 	public void testCacheTypeNotAvailable() {
 		N mockNode = this.createMock(this.nodeClass);
-		this.recordReturn(mockNode, this.nodeTypeLoader.apply(mockNode), null);
+		this.recordReturn(mockNode, this.nodeTypeLoader.loadType(this.context, mockNode), null);
 		this.replayMockObjects();
-		assertNull("Should not load type",
-				this.contextTypeLoader.loadType(this.context, mockNode));
-		assertNull("Should cache type not available",
-				this.contextTypeLoader.loadType(this.context, mockNode));
+		assertNull("Should not load type", this.contextTypeLoader.loadType(this.context, mockNode));
+		assertNull("Should cache type not available", this.contextTypeLoader.loadType(this.context, mockNode));
 		this.verifyMockObjects();
 	}
 

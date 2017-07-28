@@ -1,0 +1,25 @@
+<context>
+	<office-floor>
+		<teams>
+			<team name="OFFICEFLOOR_TEAM" source="ONE_PERSON" />
+		</teams>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office">
+				<team name="OFFICE_TEAM">
+					<office-floor-team name="OFFICEFLOOR_TEAM" />
+				</team>
+			</office>
+		</offices>
+	</office-floor>
+	<office>
+		<teams>
+			<team name="OFFICE_TEAM" />
+		</teams>
+		<sections>
+			<section name="SECTION" source="CLASS"
+				location="${testcase}$NoDependencySectionClass">
+				<input name="function" />
+			</section>
+		</sections>
+	</office>
+</context>

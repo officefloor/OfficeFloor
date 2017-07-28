@@ -17,7 +17,6 @@
  */
 package net.officefloor.plugin.woof.template;
 
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 
@@ -28,21 +27,22 @@ import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
+import net.officefloor.configuration.ConfigurationContext;
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.impl.memory.MemoryConfigurationContext;
+import net.officefloor.frame.api.source.ResourceSource;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
-import net.officefloor.frame.spi.source.ResourceSource;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.impl.repository.memory.MemoryConfigurationContext;
-import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.woof.WoofChangeIssues;
-import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.HttpTemplateSection;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 
 /**
  * Utility functions for testing a {@link WoofTemplateExtensionSource}
@@ -224,7 +224,7 @@ public class WoofTemplateExtensionLoaderUtil {
 			throws Exception {
 
 		// Obtain the configuration item
-		ConfigurationItem item = context.getConfigurationItem(location);
+		ConfigurationItem item = context.getConfigurationItem(location, null);
 
 		// Determine if expecting the configuration item
 		if (content == null) {
@@ -236,7 +236,7 @@ public class WoofTemplateExtensionLoaderUtil {
 		Assert.assertNotNull("Should have configuration item for location " + location, item);
 
 		// Load the content of the configuration item
-		Reader reader = new InputStreamReader(item.getConfiguration());
+		Reader reader = item.getReader();
 		StringWriter buffer = new StringWriter();
 		for (int character = reader.read(); character != -1; character = reader.read()) {
 			buffer.write(character);
@@ -280,40 +280,47 @@ public class WoofTemplateExtensionLoaderUtil {
 	}
 
 	/**
-	 * Undertakes the extending of the {@link HttpTemplateAutoWireSection} by
-	 * the {@link WoofTemplateExtensionSource}.
+	 * Undertakes the extending of the {@link HttpTemplateSection} by the
+	 * {@link WoofTemplateExtensionSource}.
 	 * 
 	 * @param <S>
 	 *            {@link WoofTemplateExtensionSource} type.
 	 * @param extensionSourceClass
 	 *            {@link WoofTemplateExtensionSource} class.
+	 * @param templatePath
+	 *            URL path to the {@link HttpTemplateSection}.
 	 * @param template
-	 *            {@link HttpTemplateAutoWireSection}.
-	 * @param application
-	 *            {@link WebAutoWireApplication}.
+	 *            {@link HttpTemplateSection}.
+	 * @param webArchitect
+	 *            {@link WebArchitect}.
 	 * @param propertyNameValues
 	 *            {@link Property} name/value pairs.
 	 * @throws Exception
-	 *             If fails to extend {@link HttpTemplateAutoWireSection}.
+	 *             If fails to extend {@link HttpTemplateSection}.
 	 */
 	public static <S extends WoofTemplateExtensionSource> void extendTemplate(Class<S> extensionSourceClass,
-			HttpTemplateAutoWireSection template, WebAutoWireApplication application, String... propertyNameValues)
-			throws Exception {
-		extendTemplate(extensionSourceClass, template, application, null, null, propertyNameValues);
+			String templatePath, HttpTemplateSection template, OfficeArchitect officeArchitect,
+			WebArchitect webArchitect, String... propertyNameValues) throws Exception {
+		extendTemplate(extensionSourceClass, templatePath, template, officeArchitect, webArchitect, null, null,
+				propertyNameValues);
 	}
 
 	/**
-	 * Undertakes the extending of the {@link HttpTemplateAutoWireSection} by
-	 * the {@link WoofTemplateExtensionSource}.
+	 * Undertakes the extending of the {@link HttpTemplateSection} by the
+	 * {@link WoofTemplateExtensionSource}.
 	 * 
 	 * @param <S>
 	 *            {@link WoofTemplateExtensionSource} type.
 	 * @param extensionSourceClass
 	 *            {@link WoofTemplateExtensionSource} class.
+	 * @param templatePath
+	 *            URL path to the {@link HttpTemplateSection}.
 	 * @param template
-	 *            {@link HttpTemplateAutoWireSection}.
-	 * @param application
-	 *            {@link WebAutoWireApplication}.
+	 *            {@link HttpTemplateSection}.
+	 * @param officeArchitect
+	 *            {@link OfficeArchitect}.
+	 * @param webArchitect
+	 *            {@link WebArchitect}.
 	 * @param classLoader
 	 *            {@link ClassLoader}. May be <code>null</code>.
 	 * @param resourceSources
@@ -321,11 +328,12 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * @param propertyNameValues
 	 *            {@link Property} name/value pairs.
 	 * @throws Exception
-	 *             If fails to extend {@link HttpTemplateAutoWireSection}.
+	 *             If fails to extend {@link HttpTemplateSection}.
 	 */
 	public static <S extends WoofTemplateExtensionSource> void extendTemplate(Class<S> extensionSourceClass,
-			HttpTemplateAutoWireSection template, WebAutoWireApplication application, ClassLoader classLoader,
-			ResourceSource[] resourceSources, String... propertyNameValues) throws Exception {
+			String templatePath, HttpTemplateSection template, OfficeArchitect officeArchitect,
+			WebArchitect webArchitect, ClassLoader classLoader, ResourceSource[] resourceSources,
+			String... propertyNameValues) throws Exception {
 
 		// Obtains the source context
 		SourceContext sourceContext = getSourceContext(classLoader, resourceSources);
@@ -334,8 +342,8 @@ public class WoofTemplateExtensionLoaderUtil {
 		PropertyList properties = new PropertyListImpl(propertyNameValues);
 
 		// Undertake the extension of the template
-		getWoofTemplateExtensionLoader().extendTemplate(extensionSourceClass.getName(), properties, template,
-				application, sourceContext);
+		getWoofTemplateExtensionLoader().extendTemplate(extensionSourceClass.getName(), properties, templatePath,
+				template, officeArchitect, webArchitect, sourceContext);
 	}
 
 	/**

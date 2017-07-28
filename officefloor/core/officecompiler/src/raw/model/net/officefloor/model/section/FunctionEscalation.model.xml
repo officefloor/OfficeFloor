@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="escalation type" />
+	<field type="FunctionEscalationToFunctionModel" name="function" />
+	<field type="FunctionEscalationToExternalFlowModel" name="external flow" />
+	<field type="FunctionEscalationToSubSectionInputModel" name="sub section input" />
+</model>

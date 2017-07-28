@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="office team name" />
+	<field type="GovernanceModel" name="governance" end-field="office team" />
+	<field type="OfficeTeamModel" name="office team" end-list="governance" />
+</model>

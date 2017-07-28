@@ -19,7 +19,7 @@ package net.officefloor.plugin.servlet;
 
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
@@ -31,18 +31,14 @@ import net.officefloor.plugin.servlet.bridge.ServletBridge;
  * 
  * @author Daniel Sagenschneider
  */
-public class ServletDependencyManagedObjectSourceTest extends
-		OfficeFrameTestCase {
+public class ServletDependencyManagedObjectSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Validate specification.
 	 */
 	public void testSpecification() {
-		ManagedObjectLoaderUtil
-				.validateSpecification(
-						ServletDependencyManagedObjectSource.class,
-						ServletDependencyManagedObjectSource.PROPERTY_TYPE_NAME,
-						"Type");
+		ManagedObjectLoaderUtil.validateSpecification(ServletDependencyManagedObjectSource.class,
+				ServletDependencyManagedObjectSource.PROPERTY_TYPE_NAME, "Type");
 	}
 
 	/**
@@ -51,17 +47,13 @@ public class ServletDependencyManagedObjectSourceTest extends
 	public void testType() {
 
 		// Create the expected type
-		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
-				.createManagedObjectTypeBuilder();
+		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(MockEjbLocal.class);
-		type.addDependency(DependencyKeys.SERVLET_BRIDGE, ServletBridge.class,
-				null);
+		type.addDependency(DependencyKeys.SERVLET_BRIDGE, ServletBridge.class, null);
 
 		// Validate type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type,
-				ServletDependencyManagedObjectSource.class,
-				ServletDependencyManagedObjectSource.PROPERTY_TYPE_NAME,
-				MockEjbLocal.class.getName());
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, ServletDependencyManagedObjectSource.class,
+				ServletDependencyManagedObjectSource.PROPERTY_TYPE_NAME, MockEjbLocal.class.getName());
 	}
 
 	/**
@@ -78,9 +70,7 @@ public class ServletDependencyManagedObjectSourceTest extends
 
 		// Load the source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
-		loader.addProperty(
-				ServletDependencyManagedObjectSource.PROPERTY_TYPE_NAME,
-				MockEjbLocal.class.getName());
+		loader.addProperty(ServletDependencyManagedObjectSource.PROPERTY_TYPE_NAME, MockEjbLocal.class.getName());
 		ServletDependencyManagedObjectSource source = loader
 				.loadManagedObjectSource(ServletDependencyManagedObjectSource.class);
 

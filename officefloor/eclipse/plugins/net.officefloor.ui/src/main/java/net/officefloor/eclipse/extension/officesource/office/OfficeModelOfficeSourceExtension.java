@@ -32,8 +32,7 @@ import net.officefloor.model.office.OfficeModel;
  *
  * @author Daniel Sagenschneider
  */
-public class OfficeModelOfficeSourceExtension implements
-		OfficeSourceExtension<OfficeModelOfficeSource> {
+public class OfficeModelOfficeSourceExtension implements OfficeSourceExtension<OfficeModelOfficeSource> {
 
 	@Override
 	public Class<OfficeModelOfficeSource> getOfficeSourceClass() {
@@ -46,11 +45,10 @@ public class OfficeModelOfficeSourceExtension implements
 	}
 
 	@Override
-	public void createControl(Composite page,
-			OfficeSourceExtensionContext context) {
+	public void createControl(Composite page, OfficeSourceExtensionContext context) {
 		page.setLayout(new GridLayout());
-		new Label(page, SWT.NONE).setText("No properties required for "
-				+ OfficeModelOfficeSource.class.getSimpleName());
+		new Label(page, SWT.NONE)
+				.setText("No properties required for " + OfficeModelOfficeSource.class.getSimpleName());
 	}
 
 }

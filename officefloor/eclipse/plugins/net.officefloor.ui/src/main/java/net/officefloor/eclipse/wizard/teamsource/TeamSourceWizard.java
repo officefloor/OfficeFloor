@@ -22,32 +22,31 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.team.TeamType;
-import net.officefloor.eclipse.classpath.ProjectClassLoader;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.extension.ExtensionUtil;
-import net.officefloor.eclipse.extension.teamsource.TeamSourceExtension;
-import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
-import net.officefloor.eclipse.util.JavaUtil;
-import net.officefloor.eclipse.util.LogUtil;
-import net.officefloor.eclipse.wizard.WizardUtil;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.TeamSource;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.team.TeamType;
+import net.officefloor.eclipse.classpath.ProjectClassLoader;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.configuration.project.ProjectConfigurationContext;
+import net.officefloor.eclipse.extension.ExtensionUtil;
+import net.officefloor.eclipse.extension.teamsource.TeamSourceExtension;
+import net.officefloor.eclipse.util.JavaUtil;
+import net.officefloor.eclipse.util.LogUtil;
+import net.officefloor.eclipse.wizard.WizardUtil;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
+
 /**
  * {@link IWizard} to add and manage {@link Team} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public class TeamSourceWizard extends Wizard implements
-		TeamSourceInstanceContext {
+public class TeamSourceWizard extends Wizard implements TeamSourceInstanceContext {
 
 	/**
 	 * Facade method to obtain the {@link TeamInstance}.
@@ -60,13 +59,11 @@ public class TeamSourceWizard extends Wizard implements
 	 *            creating new {@link TeamInstance}.
 	 * @return {@link TeamInstance} or <code>null</code> if cancelled.
 	 */
-	public static TeamInstance getTeamInstance(
-			AbstractOfficeFloorEditPart<?, ?, ?> editPart,
+	public static TeamInstance getTeamInstance(AbstractOfficeFloorEditPart<?, ?, ?> editPart,
 			TeamInstance teamInstance) {
 
 		// Obtain the project
-		IProject project = ProjectConfigurationContext.getProject(editPart
-				.getEditor().getEditorInput());
+		IProject project = ProjectConfigurationContext.getProject(editPart.getEditor().getEditorInput());
 
 		// Create and run the wizard
 		TeamSourceWizard wizard = new TeamSourceWizard(project, teamInstance);
@@ -93,8 +90,7 @@ public class TeamSourceWizard extends Wizard implements
 	 *         {@link TeamSourceInstance}.
 	 */
 	@SuppressWarnings("rawtypes")
-	public static Map<String, TeamSourceInstance> createTeamSourceInstanceMap(
-			ClassLoader classLoader, IProject project,
+	public static Map<String, TeamSourceInstance> createTeamSourceInstanceMap(ClassLoader classLoader, IProject project,
 			TeamSourceInstanceContext context) {
 
 		// Obtain the team source instances (by class name to get unique set)
@@ -103,35 +99,29 @@ public class TeamSourceWizard extends Wizard implements
 		// Obtain from project class path
 		try {
 			// Obtain the types on the class path
-			IType[] types = JavaUtil.getSubTypes(project,
-					TeamSource.class.getName());
+			IType[] types = JavaUtil.getSubTypes(project, TeamSource.class.getName());
 			for (IType type : types) {
 				String className = type.getFullyQualifiedName();
 				if (ExtensionUtil.isIgnoreSource(className, classLoader)) {
 					continue; // ignore source
 				}
-				teamSourceInstances.put(className, new TeamSourceInstance(
-						className, null, classLoader, project, context));
+				teamSourceInstances.put(className,
+						new TeamSourceInstance(className, null, classLoader, project, context));
 			}
 		} catch (Throwable ex) {
-			LogUtil.logError(
-					"Failed to obtain java types from project class path", ex);
+			LogUtil.logError("Failed to obtain java types from project class path", ex);
 		}
 
 		// Obtain via extension point second to override
-		for (TeamSourceExtension teamSourceExtension : ExtensionUtil
-				.createTeamSourceExtensionList()) {
+		for (TeamSourceExtension teamSourceExtension : ExtensionUtil.createTeamSourceExtensionList()) {
 			try {
-				Class<?> teamSourceClass = teamSourceExtension
-						.getTeamSourceClass();
+				Class<?> teamSourceClass = teamSourceExtension.getTeamSourceClass();
 				String teamSourceClassName = teamSourceClass.getName();
-				teamSourceInstances.put(teamSourceClassName,
-						new TeamSourceInstance(teamSourceClassName,
-								teamSourceExtension, classLoader, project,
-								context));
+				teamSourceInstances.put(teamSourceClassName, new TeamSourceInstance(teamSourceClassName,
+						teamSourceExtension, classLoader, project, context));
 			} catch (Throwable ex) {
-				LogUtil.logError("Failed to create source instance for "
-						+ teamSourceExtension.getClass().getName(), ex);
+				LogUtil.logError("Failed to create source instance for " + teamSourceExtension.getClass().getName(),
+						ex);
 			}
 		}
 
@@ -190,30 +180,22 @@ public class TeamSourceWizard extends Wizard implements
 		ProjectClassLoader classLoader = ProjectClassLoader.create(project);
 
 		// Obtain the map of team source instances
-		Map<String, TeamSourceInstance> teamSourceInstanceMap = createTeamSourceInstanceMap(
-				classLoader, project, this);
+		Map<String, TeamSourceInstance> teamSourceInstanceMap = createTeamSourceInstanceMap(classLoader, project, this);
 
 		// Obtain the listing of team source instances (in order)
-		TeamSourceInstance[] teamSourceInstanceListing = teamSourceInstanceMap
-				.values().toArray(new TeamSourceInstance[0]);
-		Arrays.sort(teamSourceInstanceListing,
-				new Comparator<TeamSourceInstance>() {
-					@Override
-					public int compare(TeamSourceInstance a,
-							TeamSourceInstance b) {
-						return a.getTeamSourceClassName().compareTo(
-								b.getTeamSourceClassName());
-					}
-				});
+		TeamSourceInstance[] teamSourceInstanceListing = teamSourceInstanceMap.values()
+				.toArray(new TeamSourceInstance[0]);
+		Arrays.sort(teamSourceInstanceListing, new Comparator<TeamSourceInstance>() {
+			@Override
+			public int compare(TeamSourceInstance a, TeamSourceInstance b) {
+				return a.getTeamSourceClassName().compareTo(b.getTeamSourceClassName());
+			}
+		});
 
 		// Create the pages
-		this.listingPage = new TeamSourceListingWizardPage(
-				teamSourceInstanceListing);
+		this.listingPage = new TeamSourceListingWizardPage(teamSourceInstanceListing);
 		for (TeamSourceInstance teamSourceInstance : teamSourceInstanceListing) {
-			this.propertiesPages
-					.put(teamSourceInstance,
-							new TeamSourcePropertiesWizardPage(this,
-									teamSourceInstance));
+			this.propertiesPages.put(teamSourceInstance, new TeamSourcePropertiesWizardPage(this, teamSourceInstance));
 		}
 	}
 
@@ -235,8 +217,7 @@ public class TeamSourceWizard extends Wizard implements
 		this.addPage(this.listingPage);
 		if (this.propertiesPages.size() > 0) {
 			// Load the first properties page
-			this.addPage(this.propertiesPages.values().toArray(
-					new IWizardPage[0])[0]);
+			this.addPage(this.propertiesPages.values().toArray(new IWizardPage[0])[0]);
 		}
 	}
 
@@ -245,10 +226,8 @@ public class TeamSourceWizard extends Wizard implements
 		// Handle based on current page
 		if (page == this.listingPage) {
 			// Listing page, so obtain properties page based on selection
-			this.selectedTeamSourceInstance = this.listingPage
-					.getSelectedTeamSourceInstance();
-			this.currentPropertiesPage = this.propertiesPages
-					.get(this.selectedTeamSourceInstance);
+			this.selectedTeamSourceInstance = this.listingPage.getSelectedTeamSourceInstance();
+			this.currentPropertiesPage = this.propertiesPages.get(this.selectedTeamSourceInstance);
 
 			// Activate the page
 			this.currentPropertiesPage.activatePage();
@@ -287,18 +266,15 @@ public class TeamSourceWizard extends Wizard implements
 
 		// Obtain the details of the team instance
 		String teamName = this.selectedTeamSourceInstance.getTeamName();
-		String teamSourceClassName = this.selectedTeamSourceInstance
-				.getTeamSourceClassName();
-		PropertyList propertyList = this.selectedTeamSourceInstance
-				.getPropertyList();
+		String teamSourceClassName = this.selectedTeamSourceInstance.getTeamSourceClassName();
+		PropertyList propertyList = this.selectedTeamSourceInstance.getPropertyList();
 		TeamType teamType = this.selectedTeamSourceInstance.getTeamType();
 
 		// Normalise the properties
 		propertyList.normalise();
 
 		// Specify the team instance
-		this.teamInstance = new TeamInstance(teamName, teamSourceClassName,
-				propertyList, teamType);
+		this.teamInstance = new TeamInstance(teamName, teamSourceClassName, propertyList, teamType);
 
 		// Finished
 		return true;

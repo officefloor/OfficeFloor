@@ -17,13 +17,13 @@
  */
 package net.officefloor.eclipse.wizard.teamsource;
 
-import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.frame.spi.team.source.TeamSource;
-
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.frame.api.team.source.TeamSource;
 
 /**
  * {@link IWizardPage} providing the {@link PropertyList} for the
@@ -51,8 +51,7 @@ public class TeamSourcePropertiesWizardPage extends WizardPage {
 	 * @param teamSourceInstance
 	 *            {@link TeamSourceInstance} instances.
 	 */
-	TeamSourcePropertiesWizardPage(TeamSourceWizard teamSourceWizard,
-			TeamSourceInstance teamSourceInstance) {
+	TeamSourcePropertiesWizardPage(TeamSourceWizard teamSourceWizard, TeamSourceInstance teamSourceInstance) {
 		super("TeamSource properties");
 		this.teamSourceWizard = teamSourceWizard;
 		this.teamSourceInstance = teamSourceInstance;

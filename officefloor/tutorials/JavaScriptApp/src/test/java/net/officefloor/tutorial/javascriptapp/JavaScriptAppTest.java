@@ -21,15 +21,15 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import junit.framework.TestCase;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
+
+import junit.framework.TestCase;
+import net.officefloor.OfficeFloorMain;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 
 /**
  * Tests the JavaScript application.
@@ -42,10 +42,10 @@ public class JavaScriptAppTest extends TestCase {
 	 * Allow running as application to manually test the JavaScript.
 	 */
 	public static void main(String[] arguments) throws Exception {
-		WoofOfficeFloorSource.start();
+		OfficeFloorMain.open();
 		System.out.println("Press [enter] to exit");
 		new BufferedReader(new InputStreamReader(System.in)).readLine();
-		WoofOfficeFloorSource.stop();
+		OfficeFloorMain.close();
 	}
 
 	/**
@@ -55,7 +55,7 @@ public class JavaScriptAppTest extends TestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		WoofOfficeFloorSource.start();
+		OfficeFloorMain.open();
 	}
 
 	@Override
@@ -63,7 +63,7 @@ public class JavaScriptAppTest extends TestCase {
 		try {
 			this.client.close();
 		} finally {
-			WoofOfficeFloorSource.stop();
+			OfficeFloorMain.close();
 		}
 	}
 
@@ -74,18 +74,15 @@ public class JavaScriptAppTest extends TestCase {
 	}
 
 	public void testHttpJson() throws IOException {
-		String response = this.doAjax("subtraction",
-				"{ \"numberOne\" : \"3\", \"numberTwo\" : \"1\" }");
+		String response = this.doAjax("subtraction", "{ \"numberOne\" : \"3\", \"numberTwo\" : \"1\" }");
 		assertEquals("Incorrect response", "{\"result\":\"2\"}", response);
 	}
 
 	private String doAjax(String link, String payload) throws IOException {
-		HttpPost post = new HttpPost("http://localhost:7878/template-" + link
-				+ ".woof");
+		HttpPost post = new HttpPost("http://localhost:7878/template-" + link + ".woof");
 		post.setEntity(new StringEntity(payload));
 		HttpResponse response = this.client.execute(post);
-		assertEquals("Should be successful", 200, response.getStatusLine()
-				.getStatusCode());
+		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
 		return EntityUtils.toString(response.getEntity());
 	}
 	// END SNIPPET: tutorial

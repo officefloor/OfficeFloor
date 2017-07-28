@@ -22,6 +22,7 @@ package net.officefloor.frame.test;
 
 import java.awt.GraphicsEnvironment;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -59,12 +60,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
-
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
+import java.util.logging.Formatter;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.SimpleFormatter;
+import java.util.logging.StreamHandler;
 
 import org.easymock.ArgumentsMatcher;
 import org.easymock.MockControl;
+
+import junit.framework.AssertionFailedError;
+import junit.framework.TestCase;
+import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
 
 /**
  * {@link TestCase} providing additional helper functions.
@@ -140,7 +148,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		} finally {
 			// Provide start of verbose output
 			if (this.isVerbose) {
-				System.out.println("++++++++++++++++++++++++++ END:" + this.getName() + " ++++++++++++++++++++++++++");
+				System.out.println("+++ END: " + this.getClass().getSimpleName() + " . " + this.getName() + " +++\n");
 			}
 		}
 	}
@@ -846,19 +854,21 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 *            Expected content.
 	 * @param actual
 	 *            Actual content.
-	 * @throws IOException
-	 *             If fails to read contents.
 	 */
-	public static void assertContents(Reader expected, Reader actual) throws IOException {
-		BufferedReader expectedReader = new BufferedReader(expected);
-		BufferedReader actualReader = new BufferedReader(actual);
-		String expectedLine;
-		String actualLine;
-		int lineNumber = 1;
-		while ((actualLine = actualReader.readLine()) != null) {
-			expectedLine = expectedReader.readLine();
-			assertEquals("Incorrect line " + lineNumber, expectedLine, actualLine);
-			lineNumber++;
+	public static void assertContents(Reader expected, Reader actual) {
+		try {
+			BufferedReader expectedReader = new BufferedReader(expected);
+			BufferedReader actualReader = new BufferedReader(actual);
+			String expectedLine;
+			String actualLine;
+			int lineNumber = 1;
+			while ((actualLine = actualReader.readLine()) != null) {
+				expectedLine = expectedReader.readLine();
+				assertEquals("Incorrect line " + lineNumber, expectedLine, actualLine);
+				lineNumber++;
+			}
+		} catch (IOException ex) {
+			throw fail(ex);
 		}
 	}
 
@@ -1089,10 +1099,14 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	private boolean isVerbose = false;
 
 	/**
+	 * Indicates whether to have debug verbose output.
+	 */
+	private boolean isDebugVerbose = false;
+
+	/**
 	 * Default constructor.
 	 */
 	public OfficeFrameTestCase() {
-		super();
 	}
 
 	/**
@@ -1116,7 +1130,25 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 		// Provide start of verbose output
 		if (this.isVerbose) {
-			System.out.println("++++++++++++++++++++++++++ START:" + this.getName() + " ++++++++++++++++++++++++++");
+			System.out.println("+++ START: " + this.getClass().getSimpleName() + " . " + this.getName() + " +++");
+		}
+	}
+
+	/**
+	 * Specifies to provide debug verbose output to aid in debugging.
+	 */
+	public void setDebugVerbose() {
+		if (!this.isDebugVerbose) {
+			OfficeFloorImpl.getFrameworkLogger().setLevel(Level.FINEST);
+			StreamHandler handler = new StreamHandler(System.out, new Formatter() {
+				@Override
+				public String format(LogRecord record) {
+					return record.getMessage() + "\n";
+				}
+			});
+			handler.setLevel(Level.FINEST);
+			OfficeFloorImpl.getFrameworkLogger().addHandler(handler);
+			this.isDebugVerbose = true;
 		}
 	}
 
@@ -1311,19 +1343,74 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
+	 * Test logic interface.
+	 * 
+	 * @param <R>
+	 *            Return type.
+	 * @param <T>
+	 *            Possible {@link Throwable}.
+	 */
+	protected static interface TestLogic<R, T extends Throwable> {
+		R run() throws T;
+	}
+
+	/**
 	 * Undertakes test wrapping with mock object replay and verify.
 	 * 
-	 * @param <T>
+	 * @param <R>
 	 *            Return type of test logic.
+	 * @param <T>
+	 *            Possible {@link Throwable}.
 	 * @param test
-	 *            {@link Supplier} with test logic to wrap in replay/verify.
+	 *            Test logic to wrap in replay/verify.
 	 * @return Result of test logic.
 	 */
-	protected final <T> T doTest(Supplier<T> test) {
+	protected final <R, T extends Throwable> R doTest(TestLogic<R, T> test) throws T {
 		this.replayMockObjects();
-		T result = test.get();
+		R result = test.run();
 		this.verifyMockObjects();
 		return result;
+	}
+
+	/**
+	 * Test capture interface.
+	 * 
+	 * @param <T>
+	 *            Possible {@link Throwable}.
+	 */
+	protected static interface TestCapture<T extends Throwable> {
+		void run() throws T;
+	}
+
+	/**
+	 * Capture <code>std err</code> of test logic.
+	 * 
+	 * @param test
+	 *            Test logic to capture <code>std err</code>.
+	 * @return <code>std err</code> output.
+	 * @throws T
+	 *             Possible {@link Throwable}.
+	 */
+	protected final <T extends Throwable> String captureLoggerOutput(TestCapture<T> test) throws T {
+
+		// Add handler to capture the log error
+		ByteArrayOutputStream error = new ByteArrayOutputStream();
+		Handler errorHandler = new StreamHandler(error, new SimpleFormatter());
+		OfficeFloorImpl.getFrameworkLogger().addHandler(errorHandler);
+
+		// Undertake operation
+		try {
+
+			// Undertake test
+			test.run();
+
+			// Flush the handler
+			errorHandler.flush();
+
+		} finally {
+			OfficeFloorImpl.getFrameworkLogger().removeHandler(errorHandler);
+		}
+		return new String(error.toByteArray());
 	}
 
 	/**
@@ -1562,7 +1649,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param content
 	 *            Content for the file.
 	 * @param target
-	 *            Taret file.
+	 *            Target file.
 	 * @throws IOException
 	 *             If fails to create.
 	 */
@@ -1621,6 +1708,36 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
+	 * Waits for the check to be <code>true</code>.
+	 * 
+	 * @param check
+	 *            Check.
+	 */
+	public void waitForTrue(Supplier<Boolean> check) {
+		this.waitForTrue(check, 3);
+	}
+
+	/**
+	 * Waits for the check to be <code>true</code>.
+	 * 
+	 * @param check
+	 *            Check.
+	 * @param secondsToRun
+	 *            Seconds to wait before timing out.
+	 */
+	public void waitForTrue(Supplier<Boolean> check, int secondsToRun) {
+		long startTime = System.currentTimeMillis();
+		while (!check.get()) {
+			timeout(startTime, secondsToRun);
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException ex) {
+				fail("Sleep interrupted: " + ex.getMessage());
+			}
+		}
+	}
+
+	/**
 	 * Determines if printing messages.
 	 * 
 	 * @return <code>true</code> to print messages.
@@ -1657,17 +1774,13 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		// Obtain the memory management bean
 		MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
 
-		// Do best to garbage collect to get clearer results
-		memoryBean.gc(); // puts objects on finalise queue
-		memoryBean.gc(); // clears the finalise queue
-
 		// Obtain the heap diagnosis details
 		MemoryUsage heap = memoryBean.getHeapMemoryUsage();
 		float usedPercentage = (heap.getUsed() / (float) heap.getMax());
 
 		// Print the results
 		NumberFormat format = NumberFormat.getPercentInstance();
-		this.printMessage("HEAP: " + format.format(usedPercentage) + " (used=" + this.getMemorySize(heap.getUsed())
+		this.printMessage("    HEAP: " + format.format(usedPercentage) + " (used=" + this.getMemorySize(heap.getUsed())
 				+ ", max=" + this.getMemorySize(heap.getMax()) + ", init=" + this.getMemorySize(heap.getInit())
 				+ ", commit=" + this.getMemorySize(heap.getCommitted()) + ", fq="
 				+ memoryBean.getObjectPendingFinalizationCount() + ")");
@@ -1705,6 +1818,19 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return Run time in human readable form.
 	 */
 	public String getDisplayRunTime(long startTime) {
+		return this.getDisplayRunTime(startTime, System.currentTimeMillis());
+	}
+
+	/**
+	 * Obtains run time in human readable form.
+	 * 
+	 * @param startTime
+	 *            Start time of running.
+	 * @param endTime
+	 *            End time of running.
+	 * @return Run time in human readable form.
+	 */
+	public String getDisplayRunTime(long startTime, long endTime) {
 
 		// Obtain the run time in milliseconds
 		long runTime = (System.currentTimeMillis() - startTime);
@@ -1714,11 +1840,11 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		final long minutes = (60 * seconds);
 
 		if (runTime < seconds) {
-			return (runTime) + "ms";
+			return (runTime) + " milliseconds";
 		} else if (runTime < minutes) {
-			return (runTime / seconds) + "s";
+			return (((float) runTime) / seconds) + " seconds";
 		} else {
-			return (runTime / minutes) + " minutes";
+			return (((float) runTime) / minutes) + " minutes";
 		}
 	}
 
@@ -1736,7 +1862,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		}
 
 		// Print the message
-		System.out.println(this.getClass().getSimpleName() + "." + this.getName() + ": " + message);
+		System.out.println(message);
 	}
 
 	/**

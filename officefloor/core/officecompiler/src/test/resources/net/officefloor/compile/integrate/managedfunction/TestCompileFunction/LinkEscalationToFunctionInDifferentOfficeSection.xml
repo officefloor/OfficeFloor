@@ -1,0 +1,62 @@
+<context item-labels="true">
+	<office-floor>
+		<office-floor>
+			<offices>
+				<office name="OFFICE" source="OFFICE" location="office" />
+			</offices>
+		</office-floor>
+	</office-floor>
+	<office>
+		<office>
+			<sections>
+				<section name="SECTION_A" source="SECTION" location="section-one">
+					<output name="OUTPUT">
+						<section-input section="SECTION_B" input="INPUT" />
+					</output>
+				</section>
+				<section name="SECTION_B" source="SECTION" location="section-two">
+					<input name="INPUT" />
+				</section>
+			</sections>
+		</office>
+	</office>
+	<section-one>
+		<section>
+			<external-flows>
+				<external-flow name="OUTPUT" />
+			</external-flows>
+			<function-namespaces>
+				<function-namespace name="NAMESPACE" source="CLASS">
+					<properties>
+						<property name="class.name" value="${testcase}$CompileFunctionClass" />
+					</properties>
+					<managed-function name="escalationFunction" />
+				</function-namespace>
+			</function-namespaces>
+			<functions>
+				<function name="FUNCTION" function-namespace="NAMESPACE"
+					managed-function="escalationFunction">
+					<function-escalation escalation-type="java.lang.Exception">
+						<external-flow name="OUTPUT" />
+					</function-escalation>
+				</function>
+			</functions>
+		</section>
+	</section-one>
+	<section-two>
+		<section>
+			<function-namespaces>
+				<function-namespace name="NAMESPACE" source="CLASS">
+					<properties>
+						<property name="class.name" value="${testcase}$CompileFunctionClass" />
+					</properties>
+					<managed-function name="simpleFunction" />
+				</function-namespace>
+			</function-namespaces>
+			<functions>
+				<function name="INPUT" function-namespace="NAMESPACE"
+					managed-function="simpleFunction" public="true" />
+			</functions>
+		</section>
+	</section-two>
+</context>

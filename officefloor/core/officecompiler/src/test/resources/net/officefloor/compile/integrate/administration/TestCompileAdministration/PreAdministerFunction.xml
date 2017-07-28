@@ -1,0 +1,40 @@
+<context>
+	<office-floor>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office>
+		<administrations>
+			<administration name="ADMIN" source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$SimpleAdmin" />
+				</properties>
+				<team name="OFFICE_TEAM" />
+			</administration>
+		</administrations>
+		<sections>
+			<section name="SECTION" source="SECTION" location="section">
+				<sub-section>
+					<function name="FUNCTION">
+						<pre-administer administration="ADMIN" />
+					</function>
+				</sub-section>
+			</section>
+		</sections>
+	</office>
+	<section>
+		<function-namespaces>
+			<function-namespace name="NAMESPACE" source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$SimpleClass" />
+				</properties>
+				<managed-function name="function" />
+			</function-namespace>
+		</function-namespaces>
+		<functions>
+			<function name="FUNCTION" function-namespace="NAMESPACE"
+				managed-function="function" public="false" />
+		</functions>
+	</section>
+</context>

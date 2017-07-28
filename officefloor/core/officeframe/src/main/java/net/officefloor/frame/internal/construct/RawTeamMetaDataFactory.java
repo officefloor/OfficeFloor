@@ -17,10 +17,14 @@
  */
 package net.officefloor.frame.internal.construct;
 
+import java.util.function.Consumer;
+
 import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
+import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 
 /**
  * Factory for the construction of {@link RawTeamMetaData}.
@@ -36,15 +40,23 @@ public interface RawTeamMetaDataFactory {
 	 *            {@link TeamSource} type.
 	 * @param configuration
 	 *            {@link TeamConfiguration}.
+	 * @param threadDecorator
+	 *            Decorator for the created {@link Thread} instances. May be
+	 *            <code>null</code>.
 	 * @param sourceContext
 	 *            {@link SourceContext}.
+	 * @param threadLocalAwareExecutor
+	 *            {@link ThreadLocalAwareExecutor}.
+	 * @param managedExecutionFactory
+	 *            {@link ManagedExecutionFactory}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 * @return {@link RawTeamMetaData} or <code>null</code> if fails to
 	 *         construct.
 	 */
-	<TS extends TeamSource> RawTeamMetaData constructRawTeamMetaData(
-			TeamConfiguration<TS> configuration, SourceContext sourceContext,
+	<TS extends TeamSource> RawTeamMetaData constructRawTeamMetaData(TeamConfiguration<TS> configuration,
+			SourceContext sourceContext, Consumer<Thread> threadDecorator,
+			ThreadLocalAwareExecutor threadLocalAwareExecutor, ManagedExecutionFactory managedExecutionFactory,
 			OfficeFloorIssues issues);
 
 }

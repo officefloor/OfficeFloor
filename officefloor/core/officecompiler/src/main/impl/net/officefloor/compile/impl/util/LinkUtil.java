@@ -17,16 +17,29 @@
  */
 package net.officefloor.compile.impl.util;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.internal.structure.AutoWirer;
+import net.officefloor.compile.internal.structure.CompileContext;
+import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
+import net.officefloor.compile.internal.structure.LinkPoolNode;
+import net.officefloor.compile.internal.structure.LinkSynchronousNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
+import net.officefloor.compile.internal.structure.ManagedObjectNode;
+import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
+import net.officefloor.compile.internal.structure.OfficeNode;
+import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * Utility class to work with links.
@@ -38,26 +51,298 @@ public class LinkUtil {
 	/**
 	 * {@link LinkFlowNode} {@link Traverser}.
 	 */
-	private static final Traverser<LinkFlowNode> FLOW_TRAVERSER = (link) -> link
-			.getLinkedFlowNode();
+	private static final Traverser<LinkFlowNode> FLOW_TRAVERSER = (link) -> link.getLinkedFlowNode();
 
 	/**
 	 * {@link LinkObjectNode} {@link Traverser}.
 	 */
-	private static final Traverser<LinkObjectNode> OBJECT_TRAVERSER = (object) -> object
-			.getLinkedObjectNode();
+	private static final Traverser<LinkObjectNode> OBJECT_TRAVERSER = (object) -> object.getLinkedObjectNode();
 
 	/**
 	 * {@link LinkTeamNode} {@link Traverser}.
 	 */
-	private static final Traverser<LinkTeamNode> TEAM_TRAVERSER = (team) -> team
-			.getLinkedTeamNode();
+	private static final Traverser<LinkTeamNode> TEAM_TRAVERSER = (team) -> team.getLinkedTeamNode();
 
 	/**
 	 * {@link LinkOfficeNode} {@link Traverser}.
 	 */
-	private static final Traverser<LinkOfficeNode> OFFICE_TRAVERSER = (office) -> office
-			.getLinkedOfficeNode();
+	private static final Traverser<LinkOfficeNode> OFFICE_TRAVERSER = (office) -> office.getLinkedOfficeNode();
+
+	/**
+	 * {@link LinkPoolNode} {@link Traverser}.
+	 */
+	private static final Traverser<LinkPoolNode> POOL_TRAVERSER = (pool) -> pool.getLinkedPoolNode();
+
+	/**
+	 * Ensures both inputs are a {@link LinkFlowNode} and if so links them.
+	 *
+	 * @param linkSource
+	 *            Source {@link LinkFlowNode}.
+	 * @param linkTarget
+	 *            Target {@link LinkFlowNode}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @param node
+	 *            {@link Node} wishing to link the {@link Flow}.
+	 * @return <code>true</code> if linked.
+	 */
+	public static boolean linkFlow(Object linkSource, Object linkTarget, CompilerIssues issues, Node node) {
+
+		// Obtain the node
+		if (linkSource instanceof Node) {
+			node = (Node) linkSource;
+		}
+
+		// Ensure the link source is link flow node
+		if (!(linkSource instanceof LinkFlowNode)) {
+			issues.addIssue(node, "Invalid link source: " + linkSource + " ["
+					+ (linkSource == null ? null : linkSource.getClass().getName()) + "]");
+			return false; // can not link
+		}
+
+		// Ensure the link target is link flow node
+		if (!(linkTarget instanceof LinkFlowNode)) {
+			issues.addIssue(node, "Invalid link target: " + linkTarget + " ["
+					+ (linkTarget == null ? null : linkTarget.getClass().getName() + "]"));
+			return false; // can not link
+		}
+
+		// Link the nodes together
+		return ((LinkFlowNode) linkSource).linkFlowNode((LinkFlowNode) linkTarget);
+	}
+
+	/**
+	 * Ensures both inputs are a {@link LinkSynchronousNode} and if so links
+	 * them.
+	 * 
+	 * @param linkSource
+	 *            Source {@link LinkSynchronousNode}.
+	 * @param linkTarget
+	 *            Target {@link LinkSynchronousNode}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @param node
+	 *            {@link Node} wishing to link the {@link Flow}.
+	 * @return <code>true</code> if linked.
+	 */
+	@Deprecated // no synchronous OfficeFloor interaction (as always via queues)
+	public static boolean linkSynchronous(Object linkSource, Object linkTarget, CompilerIssues issues, Node node) {
+
+		// Obtain the node
+		if (linkSource instanceof Node) {
+			node = (Node) linkSource;
+		}
+
+		// Ensure the link source is link synchronous node
+		if (!(linkSource instanceof LinkSynchronousNode)) {
+			issues.addIssue(node, "Invalid link source: " + linkSource + " ["
+					+ (linkSource == null ? null : linkSource.getClass().getName()) + "]");
+			return false; // can not link
+		}
+
+		// Ensure the link target is link synchronous node
+		if (!(linkTarget instanceof LinkSynchronousNode)) {
+			issues.addIssue(node, "Invalid link target: " + linkTarget + " ["
+					+ (linkTarget == null ? null : linkTarget.getClass().getName() + "]"));
+			return false; // can not link
+		}
+
+		// Link the nodes together
+		return ((LinkSynchronousNode) linkSource).linkSynchronousNode((LinkSynchronousNode) linkTarget);
+	}
+
+	/**
+	 * Ensures both inputs are a {@link LinkObjectNode} and if so links them.
+	 *
+	 * @param linkSource
+	 *            Source {@link LinkObjectNode}.
+	 * @param linkTarget
+	 *            Target {@link LinkObjectNode}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @param node
+	 *            {@link Node} wishing to link the {@link Flow}.
+	 * @return <code>true</code> if linked.
+	 */
+	public static boolean linkObject(Object linkSource, Object linkTarget, CompilerIssues issues, Node node) {
+
+		// Obtain the node
+		if (linkSource instanceof Node) {
+			node = (Node) linkSource;
+		}
+
+		// Ensure the link source is link object node
+		if (!(linkSource instanceof LinkObjectNode)) {
+			issues.addIssue(node, "Invalid link source: " + linkSource + " ["
+					+ (linkSource == null ? null : linkSource.getClass().getName()) + "]");
+			return false; // can not link
+		}
+
+		// Ensure the link target is link object node
+		if (!(linkTarget instanceof LinkObjectNode)) {
+			issues.addIssue(node, "Invalid link target: " + linkTarget + " ["
+					+ (linkTarget == null ? null : linkTarget.getClass().getName() + "]"));
+			return false; // can not link
+		}
+
+		// Link the nodes together
+		return ((LinkObjectNode) linkSource).linkObjectNode((LinkObjectNode) linkTarget);
+	}
+
+	/**
+	 * Ensures both inputs are a {@link LinkTeamNode} and if so links them.
+	 *
+	 * @param linkSource
+	 *            Source {@link LinkTeamNode}.
+	 * @param linkTarget
+	 *            Target {@link LinkTeamNode}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @param node
+	 *            {@link Node} wishing to link the {@link Flow}.
+	 * @return <code>true</code> if linked.
+	 */
+	public static boolean linkTeam(Object linkSource, Object linkTarget, CompilerIssues issues, Node node) {
+
+		// Obtain the node
+		if (linkSource instanceof Node) {
+			node = (Node) linkSource;
+		}
+
+		// Ensure the link source is link team node
+		if (!(linkSource instanceof LinkTeamNode)) {
+			issues.addIssue(node, "Invalid link source: " + linkSource + " ["
+					+ (linkSource == null ? null : linkSource.getClass().getName()) + "]");
+			return false; // can not link
+		}
+
+		// Ensure the link target is link team node
+		if (!(linkTarget instanceof LinkTeamNode)) {
+			issues.addIssue(node, "Invalid link target: " + linkTarget + " ["
+					+ (linkTarget == null ? null : linkTarget.getClass().getName() + "]"));
+			return false; // can not link
+		}
+
+		// Link the nodes together
+		return ((LinkTeamNode) linkSource).linkTeamNode((LinkTeamNode) linkTarget);
+	}
+
+	/**
+	 * Ensures both inputs are a {@link LinkOfficeNode} and if so links them.
+	 *
+	 * @param linkSource
+	 *            Source {@link LinkOfficeNode}.
+	 * @param linkTarget
+	 *            Target {@link LinkOfficeNode}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @param node
+	 *            {@link Node} wishing to link the {@link Flow}.
+	 * @return <code>true</code> if linked.
+	 */
+	public static boolean linkOffice(Object linkSource, Object linkTarget, CompilerIssues issues, Node node) {
+
+		// Obtain the node
+		if (linkSource instanceof Node) {
+			node = (Node) linkSource;
+		}
+
+		// Ensure the link source is link office node
+		if (!(linkSource instanceof LinkOfficeNode)) {
+			issues.addIssue(node, "Invalid link source: " + linkSource + " ["
+					+ (linkSource == null ? null : linkSource.getClass().getName()) + "]");
+			return false; // can not link
+		}
+
+		// Ensure the link target is link office node
+		if (!(linkTarget instanceof LinkOfficeNode)) {
+			issues.addIssue(node, "Invalid link target: " + linkTarget + " ["
+					+ (linkTarget == null ? null : linkTarget.getClass().getName() + "]"));
+			return false; // can not link
+		}
+
+		// Link the nodes together
+		return ((LinkOfficeNode) linkSource).linkOfficeNode((LinkOfficeNode) linkTarget);
+	}
+
+	/**
+	 * Ensures both inputs are a {@link LinkPoolNode} and if so links them.
+	 * 
+	 * @param linkSource
+	 *            Source {@link LinkPoolNode}.
+	 * @param linkTarget
+	 *            Target {@link LinkPoolNode}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @param node
+	 *            {@link Node} wishing to link the {@link ManagedObjectPool}.
+	 * @return <code>true</code> if linked.
+	 */
+	public static boolean linkPool(Object linkSource, Object linkTarget, CompilerIssues issues, Node node) {
+
+		// Obtain the node
+		if (linkSource instanceof Node) {
+			node = (Node) linkSource;
+		}
+
+		// Ensure the link source is link pool node
+		if (!(linkSource instanceof LinkPoolNode)) {
+			issues.addIssue(node, "Invalid link source: " + linkSource + " ["
+					+ (linkSource == null ? null : linkSource.getClass().getName()) + "]");
+			return false; // can not link
+		}
+
+		// Ensure the link target is link pool node
+		if (!(linkTarget instanceof LinkPoolNode)) {
+			issues.addIssue(node, "Invalid link target: " + linkTarget + " ["
+					+ (linkTarget == null ? null : linkTarget.getClass().getName() + "]"));
+			return false; // can not link
+		}
+
+		// Link the nodes together
+		return ((LinkPoolNode) linkSource).linkPoolNode((LinkPoolNode) linkTarget);
+	}
+
+	/**
+	 * Links the {@link ManagedObjectSourceNode} to the
+	 * {@link InputManagedObjectNode}.
+	 *
+	 * @param inputManagedObject
+	 *            {@link InputManagedObjectNode}.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSourceNode}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @param node
+	 *            {@link Node} wishing to link the {@link Flow}.
+	 * @return <code>true</code> if linked.
+	 */
+	public static boolean linkManagedObjectSourceInput(Object managedObjectSource, Object inputManagedObject,
+			CompilerIssues issues, Node node) {
+
+		// Obtain the node
+		if (managedObjectSource instanceof Node) {
+			node = (Node) managedObjectSource;
+		}
+
+		// Ensure is a managed object source
+		if (!(managedObjectSource instanceof ManagedObjectSourceNode)) {
+			issues.addIssue(node, "Invalid managed object source node: " + managedObjectSource + " ["
+					+ (managedObjectSource == null ? null : managedObjectSource.getClass().getName() + "]"));
+			return false; // can not link
+		}
+
+		// Ensure is an input managed object node
+		if (!(inputManagedObject instanceof InputManagedObjectNode)) {
+			issues.addIssue(node, "Invalid input managed object node: " + inputManagedObject + " ["
+					+ (inputManagedObject == null ? null : inputManagedObject.getClass().getName() + "]"));
+			return false; // can not link
+		}
+
+		// Link the managed object source to the input managed object
+		return ((ManagedObjectSourceNode) managedObjectSource)
+				.linkInputManagedObjectNode((InputManagedObjectNode) inputManagedObject);
+	}
 
 	/**
 	 * Finds the furtherest target link by the specified type.
@@ -73,10 +358,9 @@ public class LinkUtil {
 	 * @return Furtherest target {@link LinkFlowNode} or <code>null</code> if no
 	 *         targets found.
 	 */
-	public static <T extends LinkFlowNode> T findFurtherestTarget(
-			LinkFlowNode link, Class<T> targetType, CompilerIssues issues) {
-		return retrieveFurtherestTarget(link, FLOW_TRAVERSER, targetType,
-				false, issues);
+	public static <T extends LinkFlowNode> T findFurtherestTarget(LinkFlowNode link, Class<T> targetType,
+			CompilerIssues issues) {
+		return retrieveFurtherestTarget(link, FLOW_TRAVERSER, targetType, false, issues);
 	}
 
 	/**
@@ -93,10 +377,9 @@ public class LinkUtil {
 	 * @return Furthurest target {@link LinkObjectNode} or <code>null</code> if
 	 *         no targets found.
 	 */
-	public static <T extends LinkObjectNode> T retrieveFurtherestTarget(
-			LinkObjectNode link, Class<T> targetType, CompilerIssues issues) {
-		return retrieveFurtherestTarget(link, OBJECT_TRAVERSER, targetType,
-				true, issues);
+	public static <T extends LinkObjectNode> T retrieveFurtherestTarget(LinkObjectNode link, Class<T> targetType,
+			CompilerIssues issues) {
+		return retrieveFurtherestTarget(link, OBJECT_TRAVERSER, targetType, true, issues);
 	}
 
 	/**
@@ -113,10 +396,8 @@ public class LinkUtil {
 	 * @return Target {@link LinkFlowNode} or <code>null</code> if target not
 	 *         found.
 	 */
-	public static <T extends LinkFlowNode> T findTarget(LinkFlowNode link,
-			Class<T> targetType, CompilerIssues issues) {
-		return retrieveTarget(link, FLOW_TRAVERSER, targetType, false, issues,
-				null).target;
+	public static <T extends LinkFlowNode> T findTarget(LinkFlowNode link, Class<T> targetType, CompilerIssues issues) {
+		return retrieveTarget(link, FLOW_TRAVERSER, targetType, false, issues, null).target;
 	}
 
 	/**
@@ -133,10 +414,9 @@ public class LinkUtil {
 	 * @return Target {@link LinkFlowNode} or <code>null</code> if issue
 	 *         obtaining which is reported to the {@link CompilerIssues}.
 	 */
-	public static <T extends LinkFlowNode> T retrieveTarget(LinkFlowNode link,
-			Class<T> targetType, CompilerIssues issues) {
-		return retrieveTarget(link, FLOW_TRAVERSER, targetType, true, issues,
-				null).target;
+	public static <T extends LinkFlowNode> T retrieveTarget(LinkFlowNode link, Class<T> targetType,
+			CompilerIssues issues) {
+		return retrieveTarget(link, FLOW_TRAVERSER, targetType, true, issues, null).target;
 	}
 
 	/**
@@ -153,14 +433,13 @@ public class LinkUtil {
 	 * @return Target {@link LinkObjectNode} or <code>null</code> if issue
 	 *         obtaining which is reported to the {@link CompilerIssues}.
 	 */
-	public static <T extends LinkObjectNode> T retrieveTarget(
-			LinkObjectNode link, Class<T> targetType, CompilerIssues issues) {
-		return retrieveTarget(link, OBJECT_TRAVERSER, targetType, true, issues,
-				null).target;
+	public static <T extends LinkObjectNode> T retrieveTarget(LinkObjectNode link, Class<T> targetType,
+			CompilerIssues issues) {
+		return retrieveTarget(link, OBJECT_TRAVERSER, targetType, true, issues, null).target;
 	}
 
 	/**
-	 * Retrieves the target link by the specified type.
+	 * Finds the target link by the specified type.
 	 * 
 	 * @param <T>
 	 *            Target type.
@@ -170,13 +449,10 @@ public class LinkUtil {
 	 *            Target {@link LinkTeamNode} type to retrieve.
 	 * @param issues
 	 *            {@link CompilerIssues}.
-	 * @return Target {@link LinkTeamNode} or <code>null</code> if issue
-	 *         obtaining which is reported to the {@link CompilerIssues}.
+	 * @return Target {@link LinkTeamNode} or <code>null</code> if not found.
 	 */
-	public static <T extends Node> T retrieveTarget(LinkTeamNode link,
-			Class<T> targetType, CompilerIssues issues) {
-		return retrieveTarget(link, TEAM_TRAVERSER, targetType, true, issues,
-				null).target;
+	public static <T extends Node> T findTarget(LinkTeamNode link, Class<T> targetType, CompilerIssues issues) {
+		return retrieveTarget(link, TEAM_TRAVERSER, targetType, false, issues, null).target;
 	}
 
 	/**
@@ -193,10 +469,26 @@ public class LinkUtil {
 	 * @return Target {@link LinkOfficeNode} or <code>null</code> if issue
 	 *         obtaining which is reported to the {@link CompilerIssues}.
 	 */
-	public static <T extends Node> T retrieveTarget(LinkOfficeNode link,
-			Class<T> targetType, CompilerIssues issues) {
-		return retrieveTarget(link, OFFICE_TRAVERSER, targetType, true, issues,
-				null).target;
+	public static <T extends Node> T retrieveTarget(LinkOfficeNode link, Class<T> targetType, CompilerIssues issues) {
+		return retrieveTarget(link, OFFICE_TRAVERSER, targetType, true, issues, null).target;
+	}
+
+	/**
+	 * Finds the target by the specified type.
+	 * 
+	 * @param <T>
+	 *            Target type.
+	 * @param link
+	 *            Starting {@link LinkPoolNode}.
+	 * @param targetType
+	 *            Target {@link LinkPoolNode} type to retrieve.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @return Target {@link LinkPoolNode} or <code>null</code> if target not
+	 *         found.
+	 */
+	public static <T extends Node> T findTarget(LinkPoolNode link, Class<T> targetType, CompilerIssues issues) {
+		return retrieveTarget(link, POOL_TRAVERSER, targetType, false, issues, null).target;
 	}
 
 	/**
@@ -214,8 +506,7 @@ public class LinkUtil {
 	 * @return <code>true</code> if successful, or <code>false</code> with issue
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	public static boolean linkFlowNode(LinkFlowNode node,
-			LinkFlowNode linkNode, CompilerIssues issues,
+	public static boolean linkFlowNode(LinkFlowNode node, LinkFlowNode linkNode, CompilerIssues issues,
 			Consumer<LinkFlowNode> loader) {
 		return linkNode(node, linkNode, FLOW_TRAVERSER, issues, loader);
 	}
@@ -235,10 +526,155 @@ public class LinkUtil {
 	 * @return <code>true</code> if successful, or <code>false</code> with issue
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	public static boolean linkObjectNode(LinkObjectNode node,
-			LinkObjectNode linkNode, CompilerIssues issues,
+	public static boolean linkObjectNode(LinkObjectNode node, LinkObjectNode linkNode, CompilerIssues issues,
 			Consumer<LinkObjectNode> loader) {
 		return linkNode(node, linkNode, OBJECT_TRAVERSER, issues, loader);
+	}
+
+	/**
+	 * Links the {@link AutoWire} {@link LinkObjectNode}.
+	 * 
+	 * @param node
+	 *            {@link LinkObjectNode} to have the link loaded.
+	 * @param linkNode
+	 *            Link {@link LinkObjectNode} to load.
+	 * @param office
+	 *            {@link OfficeNode}.
+	 * @param autoWirer
+	 *            {@link AutoWirer} to enable dependencies to be auto-wired.
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @param loader
+	 *            {@link Consumer} to load the link onto the
+	 *            {@link LinkObjectNode}.
+	 * @return <code>true</code> if successful, or <code>false</code> with issue
+	 *         reported to the {@link CompilerIssues}.
+	 */
+	public static boolean linkAutoWireObjectNode(LinkObjectNode node, LinkObjectNode linkNode, OfficeNode office,
+			AutoWirer<LinkObjectNode> autoWirer, CompileContext compileContext, CompilerIssues issues,
+			Consumer<LinkObjectNode> loader) {
+
+		// Link the object node
+		boolean isLinked = linkObjectNode(node, linkNode, issues, loader);
+
+		// Link managed object source to office
+		if (isLinked) {
+
+			// Obtain possible managed object fulfilling object dependency
+			ManagedObjectNode managedObject = retrieveTarget(node, OBJECT_TRAVERSER, ManagedObjectNode.class, false,
+					issues, null).target;
+			if (managedObject != null) {
+
+				// Determine if managed object source is managed by an office
+				ManagedObjectSourceNode managedObjectSource = managedObject.getManagedObjectSourceNode();
+				if (managedObjectSource != null) {
+					managedObjectSource.autoWireToOffice(office, issues);
+				}
+			}
+		}
+
+		// Link dependencies of manage object
+		ManagedObjectNode managedObject = retrieveTarget(node, OBJECT_TRAVERSER, ManagedObjectNode.class, false, issues,
+				null).target;
+		if (managedObject != null) {
+			managedObject.autoWireDependencies(autoWirer, office, compileContext);
+		}
+
+		// Return whether linked
+		return isLinked;
+	}
+
+	/**
+	 * Loads the {@link AutoWire} instances for the {@link LinkObjectNode} along
+	 * with its dependency {@link AutoWire} instances and subsequent
+	 * (transitive) dependency {@link AutoWire} instances.
+	 * 
+	 * @param node
+	 *            {@link LinkObjectNode} to load transitive dependency
+	 *            {@link AutoWire} instances.
+	 * @param allAutoWires
+	 *            {@link Set} to be loaded with all the {@link AutoWire}
+	 *            instances.
+	 * @param compileContext
+	 *            {@link CompileContext}
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 */
+	public static void loadAllObjectAutoWires(LinkObjectNode node, Set<AutoWire> allAutoWires,
+			CompileContext compileContext, CompilerIssues issues) {
+		loadAllObjectAutoWires(node, allAutoWires, compileContext, issues, new HashSet<>());
+	}
+
+	/**
+	 * Loads the {@link AutoWire} instances.
+	 * 
+	 * @param node
+	 *            {@link LinkObjectNode} to load transitive dependency
+	 *            {@link AutoWire} instances.
+	 * @param allAutoWires
+	 *            {@link Set} to be loaded with all the {@link AutoWire}
+	 *            instances.
+	 * @param compileContext
+	 *            {@link CompileContext}
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @param traversedNodes
+	 *            {@link LinkObjectNode} instances already traversed to avoid
+	 *            cycles (causing infinite loops).
+	 */
+	private static void loadAllObjectAutoWires(LinkObjectNode node, Set<AutoWire> allAutoWires,
+			CompileContext compileContext, CompilerIssues issues, Set<Node> traversedNodes) {
+
+		// Determine if already traversed the node
+		if (traversedNodes.contains(node)) {
+			return; // break cycle
+		}
+		traversedNodes.add(node);
+
+		// Handling of managed object
+		Consumer<ManagedObjectNode> loadManagedObject = (managedObject) -> {
+			// Load auto wires for the managed object
+			Arrays.stream(managedObject.getTypeQualifications(compileContext))
+					.forEach((typeQualification) -> allAutoWires
+							.add(new AutoWire(typeQualification.getQualifier(), typeQualification.getType())));
+
+			// Load the dependency auto wires
+			Arrays.stream(managedObject.getManagedObjectDepdendencies())
+					.forEach((dependency) -> loadAllObjectAutoWires(dependency, allAutoWires, compileContext, issues,
+							traversedNodes));
+		};
+
+		// Handling of office object
+		Consumer<OfficeObjectNode> loadOfficeObject = (officeObject) -> allAutoWires
+				.add(new AutoWire(officeObject.getTypeQualifier(), officeObject.getOfficeObjectType()));
+
+		// Determine if managed object
+		if (node instanceof ManagedObjectNode) {
+			loadManagedObject.accept((ManagedObjectNode) node);
+
+		} else {
+
+			// Attempt to obtain the managed object
+			ManagedObjectNode managedObject = retrieveTarget(node, OBJECT_TRAVERSER, ManagedObjectNode.class, false,
+					issues, null).target;
+			if (managedObject != null) {
+				loadManagedObject.accept(managedObject);
+
+			} else {
+
+				// Attempt to load office object
+				OfficeObjectNode officeObject = retrieveTarget(node, OBJECT_TRAVERSER, OfficeObjectNode.class, false,
+						issues, null).target;
+				if (officeObject != null) {
+					loadOfficeObject.accept(officeObject);
+
+				} else if (node instanceof OfficeObjectNode) {
+					loadOfficeObject.accept((OfficeObjectNode) node);
+				}
+			}
+		}
 	}
 
 	/**
@@ -256,8 +692,7 @@ public class LinkUtil {
 	 * @return <code>true</code> if successful, or <code>false</code> with issue
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	public static boolean linkTeamNode(LinkTeamNode node,
-			LinkTeamNode linkNode, CompilerIssues issues,
+	public static boolean linkTeamNode(LinkTeamNode node, LinkTeamNode linkNode, CompilerIssues issues,
 			Consumer<LinkTeamNode> loader) {
 		return linkNode(node, linkNode, TEAM_TRAVERSER, issues, loader);
 	}
@@ -277,10 +712,28 @@ public class LinkUtil {
 	 * @return <code>true</code> if successful, or <code>false</code> with issue
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	public static boolean linkOfficeNode(LinkOfficeNode node,
-			LinkOfficeNode linkNode, CompilerIssues issues,
+	public static boolean linkOfficeNode(LinkOfficeNode node, LinkOfficeNode linkNode, CompilerIssues issues,
 			Consumer<LinkOfficeNode> loader) {
 		return linkNode(node, linkNode, OFFICE_TRAVERSER, issues, loader);
+	}
+
+	/**
+	 * Links the {@link LinkPoolNode}.
+	 * 
+	 * @param node
+	 *            {@link LinkPoolNode} to have the link loaded.
+	 * @param linkNode
+	 *            Link {@link LinkPoolNode} to load.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @param loader
+	 *            {@link Consumer} to load the link on the {@link LinkPoolNode}.
+	 * @return <code>true</code> if successful, or <code>false</code> with issue
+	 *         reported to the {@link CompilerIssues}.
+	 */
+	public static boolean linkPoolNode(LinkPoolNode node, LinkPoolNode linkNode, CompilerIssues issues,
+			Consumer<LinkPoolNode> loader) {
+		return linkNode(node, linkNode, POOL_TRAVERSER, issues, loader);
 	}
 
 	/**
@@ -300,14 +753,13 @@ public class LinkUtil {
 	 *         Otherwise, <code>false</code> with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	private static <L extends Node> boolean linkNode(L node, L linkNode,
-			Traverser<L> traverser, CompilerIssues issues, Consumer<L> loader) {
+	private static <L extends Node> boolean linkNode(L node, L linkNode, Traverser<L> traverser, CompilerIssues issues,
+			Consumer<L> loader) {
 
 		// Ensure not already linked
 		L existingLink = traverser.getNextLinkNode(node);
 		if (existingLink != null) {
-			issues.addIssue(node, node.getNodeType() + " " + node.getNodeName()
-					+ " linked more than once");
+			issues.addIssue(node, node.getNodeType() + " " + node.getNodeName() + " linked more than once");
 			return false; // already linked
 		}
 
@@ -337,16 +789,14 @@ public class LinkUtil {
 	 *         targets found.
 	 */
 	@SuppressWarnings("unchecked")
-	private static <T extends Node, L extends Node> T retrieveFurtherestTarget(
-			L link, Traverser<L> traverser, Class<T> targetType,
-			boolean isIssueOnNoTarget, CompilerIssues issues) {
+	private static <T extends Node, L extends Node> T retrieveFurtherestTarget(L link, Traverser<L> traverser,
+			Class<T> targetType, boolean isIssueOnNoTarget, CompilerIssues issues) {
 
 		// Keep track of all traversed links
 		Set<Object> traversedLinks = new HashSet<Object>();
 
 		// Find the first target
-		T target = retrieveTarget(link, traverser, targetType,
-				isIssueOnNoTarget, issues, traversedLinks).target;
+		T target = retrieveTarget(link, traverser, targetType, isIssueOnNoTarget, issues, traversedLinks).target;
 
 		// Loop to find the furtherest target
 		T furtherestTarget = null;
@@ -356,8 +806,7 @@ public class LinkUtil {
 
 			// Attempt to obtain the next target
 			link = (L) target;
-			Target<T> result = retrieveTarget(link, traverser, targetType,
-					false, issues, traversedLinks);
+			Target<T> result = retrieveTarget(link, traverser, targetType, false, issues, traversedLinks);
 			if (result.isError) {
 				return null;
 			}
@@ -389,15 +838,12 @@ public class LinkUtil {
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	@SuppressWarnings("unchecked")
-	private static <T extends Node, L extends Node> Target<T> retrieveTarget(
-			L link, Traverser<L> traverser, Class<T> targetType,
-			boolean isIssueOnNoTarget, CompilerIssues issues,
-			Set<Object> traversedLinks) {
+	private static <T extends Node, L extends Node> Target<T> retrieveTarget(L link, Traverser<L> traverser,
+			Class<T> targetType, boolean isIssueOnNoTarget, CompilerIssues issues, Set<Object> traversedLinks) {
 
 		// Ensure have starting link
 		if (link == null) {
-			throw new IllegalArgumentException("No starting link to find "
-					+ targetType.getSimpleName());
+			throw new IllegalArgumentException("No starting link to find " + targetType.getSimpleName());
 		}
 
 		// Ensure have traversed links
@@ -416,10 +862,8 @@ public class LinkUtil {
 			// Determine if a cycle
 			if (traversedLinks.contains(link)) {
 				// In a cycle
-				issues.addIssue(previousLink,
-						previousLink.getNodeName()
-								+ " results in a cycle on linking to a "
-								+ targetType.getSimpleName());
+				issues.addIssue(previousLink, previousLink.getNodeName() + " results in a cycle on linking to a "
+						+ targetType.getSimpleName());
 				return new Target<T>(null, true);
 			}
 
@@ -439,9 +883,8 @@ public class LinkUtil {
 
 		// Run out of links, so could not find target
 		if (isIssueOnNoTarget) {
-			issues.addIssue(previousLink, previousLink.getNodeType() + " "
-					+ previousLink.getNodeName() + " is not linked to a "
-					+ targetType.getSimpleName());
+			issues.addIssue(previousLink, previousLink.getNodeType() + " " + previousLink.getNodeName()
+					+ " is not linked to a " + targetType.getSimpleName());
 		}
 		return new Target<T>(null, false); // target not found
 	}

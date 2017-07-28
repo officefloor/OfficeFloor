@@ -19,46 +19,45 @@ package net.officefloor.compile.impl.structure;
 
 import java.sql.Connection;
 
+import net.officefloor.compile.internal.structure.FunctionFlowNode;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SectionNode;
-import net.officefloor.compile.internal.structure.TaskFlowNode;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceSpecification;
+import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
+import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.section.ManagedObjectDependency;
-import net.officefloor.compile.spi.section.ManagedObjectFlow;
+import net.officefloor.compile.spi.section.FunctionFlow;
+import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
-import net.officefloor.compile.spi.section.SectionTask;
-import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.SubSectionInput;
 import net.officefloor.compile.spi.section.SubSectionObject;
 import net.officefloor.compile.spi.section.SubSectionOutput;
-import net.officefloor.compile.spi.section.TaskFlow;
-import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkSourceSpecification;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceSpecification;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
+import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.spi.TestSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
+import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 
 /**
@@ -86,20 +85,17 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	/**
 	 * Mock {@link OfficeFloorNode}.
 	 */
-	private final OfficeFloorNode officeFloor = this
-			.createMock(OfficeFloorNode.class);
+	private final OfficeFloorNode officeFloor = this.createMock(OfficeFloorNode.class);
 
 	/**
 	 * {@link SectionDesigner} to be tested.
 	 */
-	private final SectionNode node = this.nodeContext.createSectionNode(
-			SECTION_NAME, this.office);
+	private final SectionNode node = this.nodeContext.createSectionNode(SECTION_NAME, this.office);
 
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		this.node.initialise(ClassSectionSource.class.getName(),
-				new ClassSectionSource(), SECTION_LOCATION);
+		this.node.initialise(ClassSectionSource.class.getName(), new ClassSectionSource(), SECTION_LOCATION);
 	}
 
 	/**
@@ -109,8 +105,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testAddIssue() {
 
 		// Record adding the issue
-		this.issues.recordIssue(SECTION_NAME, SectionNodeImpl.class,
-				"TEST_ISSUE");
+		this.issues.recordIssue(SECTION_NAME, SectionNodeImpl.class, "TEST_ISSUE");
 
 		// Add the issue
 		this.replayMockObjects();
@@ -127,8 +122,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		final Exception failure = new Exception("cause");
 
 		// Record adding the issue
-		this.issues.recordIssue(SECTION_NAME, SectionNodeImpl.class,
-				"TEST_ISSUE", failure);
+		this.issues.recordIssue(SECTION_NAME, SectionNodeImpl.class, "TEST_ISSUE", failure);
 
 		// Add the issue
 		this.replayMockObjects();
@@ -142,11 +136,9 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testAddSectionInput() {
 		// Add two different inputs verifying details
 		this.replayMockObjects();
-		SectionInput input = this.node.addSectionInput("INPUT",
-				String.class.getName());
+		SectionInput input = this.node.addSectionInput("INPUT", String.class.getName());
 		assertNotNull("Must have input", input);
-		assertEquals("Incorrect input name", "INPUT",
-				input.getSectionInputName());
+		assertEquals("Incorrect input name", "INPUT", input.getSectionInputName());
 		assertNotSame("Should obtain another input", input,
 				this.node.addSectionInput("ANOTHER", Integer.class.getName()));
 		this.verifyMockObjects();
@@ -158,20 +150,16 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testAddSectionInputTwice() {
 
 		// Record issue in adding the input twice
-		this.issues.recordIssue("INPUT", SectionInputNodeImpl.class,
-				"Section Input INPUT already added");
+		this.issues.recordIssue("INPUT", SectionInputNodeImpl.class, "Section Input INPUT already added");
 
 		// Add the input twice
 		this.replayMockObjects();
-		SectionInput inputFirst = this.node.addSectionInput("INPUT",
-				String.class.getName());
-		SectionInput inputSecond = this.node.addSectionInput("INPUT",
-				Integer.class.getName());
+		SectionInput inputFirst = this.node.addSectionInput("INPUT", String.class.getName());
+		SectionInput inputSecond = this.node.addSectionInput("INPUT", Integer.class.getName());
 		this.verifyMockObjects();
 
 		// Should be the same input
-		assertEquals("Should be same input on adding twice", inputFirst,
-				inputSecond);
+		assertEquals("Should be same input on adding twice", inputFirst, inputSecond);
 	}
 
 	/**
@@ -180,14 +168,11 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testSectionOutput() {
 		// Add two different outputs verifying details
 		this.replayMockObjects();
-		SectionOutput output = this.node.addSectionOutput("OUTPUT",
-				Double.class.getName(), false);
+		SectionOutput output = this.node.addSectionOutput("OUTPUT", Double.class.getName(), false);
 		assertNotNull("Must have output", output);
-		assertEquals("Incorrect output name", "OUTPUT",
-				output.getSectionOutputName());
+		assertEquals("Incorrect output name", "OUTPUT", output.getSectionOutputName());
 		assertNotSame("Should obtain another output", output,
-				this.node.addSectionOutput("ANOTHER",
-						Exception.class.getName(), true));
+				this.node.addSectionOutput("ANOTHER", Exception.class.getName(), true));
 		this.verifyMockObjects();
 	}
 
@@ -197,20 +182,16 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testAddSectionOutputTwice() {
 
 		// Record issue in adding the input twice
-		this.issues.recordIssue("OUTPUT", SectionOutputNodeImpl.class,
-				"Section Output OUTPUT already added");
+		this.issues.recordIssue("OUTPUT", SectionOutputNodeImpl.class, "Section Output OUTPUT already added");
 
 		// Add the output twice
 		this.replayMockObjects();
-		SectionOutput outputFirst = this.node.addSectionOutput("OUTPUT",
-				Object.class.getName(), false);
-		SectionOutput outputSecond = this.node.addSectionOutput("OUTPUT",
-				Exception.class.getName(), true);
+		SectionOutput outputFirst = this.node.addSectionOutput("OUTPUT", Object.class.getName(), false);
+		SectionOutput outputSecond = this.node.addSectionOutput("OUTPUT", Exception.class.getName(), true);
 		this.verifyMockObjects();
 
 		// Should be the same output
-		assertEquals("Should be same output on adding twice", outputFirst,
-				outputSecond);
+		assertEquals("Should be same output on adding twice", outputFirst, outputSecond);
 	}
 
 	/**
@@ -219,11 +200,9 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testSectionObject() {
 		// Add two different outputs verifying details
 		this.replayMockObjects();
-		SectionObject object = this.node.addSectionObject("OBJECT",
-				Connection.class.getName());
+		SectionObject object = this.node.addSectionObject("OBJECT", Connection.class.getName());
 		assertNotNull("Must have object", object);
-		assertEquals("Incorrect object name", "OBJECT",
-				object.getSectionObjectName());
+		assertEquals("Incorrect object name", "OBJECT", object.getSectionObjectName());
 		assertNotSame("Should obtain another object", object,
 				this.node.addSectionObject("ANOTHER", Object.class.getName()));
 		this.verifyMockObjects();
@@ -235,20 +214,16 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testAddSectionObjectTwice() {
 
 		// Record issue in adding the object twice
-		this.issues.recordIssue("OBJECT", SectionObjectNodeImpl.class,
-				"Section Object OBJECT already added");
+		this.issues.recordIssue("OBJECT", SectionObjectNodeImpl.class, "Section Object OBJECT already added");
 
 		// Add the object twice
 		this.replayMockObjects();
-		SectionObject objectFirst = this.node.addSectionObject("OBJECT",
-				Connection.class.getName());
-		SectionObject objectSecond = this.node.addSectionObject("OBJECT",
-				Exception.class.getName());
+		SectionObject objectFirst = this.node.addSectionObject("OBJECT", Connection.class.getName());
+		SectionObject objectSecond = this.node.addSectionObject("OBJECT", Exception.class.getName());
 		this.verifyMockObjects();
 
 		// Should be the same object
-		assertEquals("Should be same object on adding twice", objectFirst,
-				objectSecond);
+		assertEquals("Should be same object on adding twice", objectFirst, objectSecond);
 	}
 
 	/**
@@ -262,15 +237,13 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 
 		// Add two different managed object sources verifying details
 		this.replayMockObjects();
-		SectionManagedObjectSource moSource = this.node
-				.addSectionManagedObjectSource("MO_SOURCE",
-						NotUseManagedObjectSource.class.getName());
+		SectionManagedObjectSource moSource = this.node.addSectionManagedObjectSource("MO_SOURCE",
+				NotUseManagedObjectSource.class.getName());
 		assertNotNull("Must have section managed object source", moSource);
-		assertEquals("Incorrect section managed object source name",
-				"MO_SOURCE", moSource.getSectionManagedObjectSourceName());
-		assertNotSame("Should obtain another section managed object source",
-				moSource, this.node.addSectionManagedObjectSource("ANOTHER",
-						NotUseManagedObjectSource.class.getName()));
+		assertEquals("Incorrect section managed object source name", "MO_SOURCE",
+				moSource.getSectionManagedObjectSourceName());
+		assertNotSame("Should obtain another section managed object source", moSource,
+				this.node.addSectionManagedObjectSource("ANOTHER", NotUseManagedObjectSource.class.getName()));
 		this.verifyMockObjects();
 	}
 
@@ -284,22 +257,18 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.recordOfficeFloorNode();
 
 		// Record issue in adding the section managed object source twice
-		this.issues.recordIssue("MO", ManagedObjectSourceNodeImpl.class,
-				"Managed Object Source MO already added");
+		this.issues.recordIssue("MO", ManagedObjectSourceNodeImpl.class, "Managed Object Source MO already added");
 
 		// Add the section managed object source twice
 		this.replayMockObjects();
-		SectionManagedObjectSource moSourceFirst = this.node
-				.addSectionManagedObjectSource("MO",
-						NotUseManagedObjectSource.class.getName());
-		SectionManagedObjectSource moSourceSecond = this.node
-				.addSectionManagedObjectSource("MO",
-						NotUseManagedObjectSource.class.getName());
+		SectionManagedObjectSource moSourceFirst = this.node.addSectionManagedObjectSource("MO",
+				NotUseManagedObjectSource.class.getName());
+		SectionManagedObjectSource moSourceSecond = this.node.addSectionManagedObjectSource("MO",
+				NotUseManagedObjectSource.class.getName());
 		this.verifyMockObjects();
 
 		// Should be the same section managed source object
-		assertEquals("Should be same section managed object on adding twice",
-				moSourceFirst, moSourceSecond);
+		assertEquals("Should be same section managed object on adding twice", moSourceFirst, moSourceSecond);
 	}
 
 	/**
@@ -313,15 +282,13 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 
 		// Add two different managed object sources verifying details
 		this.replayMockObjects();
-		SectionManagedObjectSource moSource = this.node
-				.addSectionManagedObjectSource("MO_SOURCE",
-						new NotUseManagedObjectSource());
+		SectionManagedObjectSource moSource = this.node.addSectionManagedObjectSource("MO_SOURCE",
+				new NotUseManagedObjectSource());
 		assertNotNull("Must have section managed object source", moSource);
-		assertEquals("Incorrect section managed object source name",
-				"MO_SOURCE", moSource.getSectionManagedObjectSourceName());
-		assertNotSame("Should obtain another section managed object source",
-				moSource, this.node.addSectionManagedObjectSource("ANOTHER",
-						new NotUseManagedObjectSource()));
+		assertEquals("Incorrect section managed object source name", "MO_SOURCE",
+				moSource.getSectionManagedObjectSourceName());
+		assertNotSame("Should obtain another section managed object source", moSource,
+				this.node.addSectionManagedObjectSource("ANOTHER", new NotUseManagedObjectSource()));
 		this.verifyMockObjects();
 	}
 
@@ -335,22 +302,18 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.recordOfficeFloorNode();
 
 		// Record issue in adding the section managed object source twice
-		this.issues.recordIssue("MO", ManagedObjectSourceNodeImpl.class,
-				"Managed Object Source MO already added");
+		this.issues.recordIssue("MO", ManagedObjectSourceNodeImpl.class, "Managed Object Source MO already added");
 
 		// Add the section managed object source twice
 		this.replayMockObjects();
-		SectionManagedObjectSource moSourceFirst = this.node
-				.addSectionManagedObjectSource("MO",
-						new NotUseManagedObjectSource());
-		SectionManagedObjectSource moSourceSecond = this.node
-				.addSectionManagedObjectSource("MO",
-						new NotUseManagedObjectSource());
+		SectionManagedObjectSource moSourceFirst = this.node.addSectionManagedObjectSource("MO",
+				new NotUseManagedObjectSource());
+		SectionManagedObjectSource moSourceSecond = this.node.addSectionManagedObjectSource("MO",
+				new NotUseManagedObjectSource());
 		this.verifyMockObjects();
 
 		// Should be the same section managed source object
-		assertEquals("Should be same section managed object on adding twice",
-				moSourceFirst, moSourceSecond);
+		assertEquals("Should be same section managed object on adding twice", moSourceFirst, moSourceSecond);
 	}
 
 	/**
@@ -365,19 +328,15 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 
 		// Add the managed object source
 		this.replayMockObjects();
-		SectionManagedObjectSource moSource = this.node
-				.addSectionManagedObjectSource("MO_SOURCE",
-						NotUseManagedObjectSource.class.getName());
+		SectionManagedObjectSource moSource = this.node.addSectionManagedObjectSource("MO_SOURCE",
+				NotUseManagedObjectSource.class.getName());
 
 		// Add two different managed objects verifying details
-		SectionManagedObject mo = moSource.addSectionManagedObject("MO",
-				ManagedObjectScope.WORK);
+		SectionManagedObject mo = moSource.addSectionManagedObject("MO", ManagedObjectScope.FUNCTION);
 		assertNotNull("Must have section managed object", mo);
-		assertEquals("Incorrect section managed object name", "MO",
-				mo.getSectionManagedObjectName());
+		assertEquals("Incorrect section managed object name", "MO", mo.getSectionManagedObjectName());
 		assertNotSame("Should obtain another section managed object", mo,
-				moSource.addSectionManagedObject("ANOTHER",
-						ManagedObjectScope.WORK));
+				moSource.addSectionManagedObject("ANOTHER", ManagedObjectScope.FUNCTION));
 		this.verifyMockObjects();
 	}
 
@@ -391,25 +350,20 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.recordOfficeFloorNode();
 
 		// Record issue in adding the section managed object twice
-		this.issues.recordIssue("MO", ManagedObjectNodeImpl.class,
-				"Managed Object MO already added");
+		this.issues.recordIssue("MO", ManagedObjectNodeImpl.class, "Managed Object MO already added");
 
 		// Add the managed object source
 		this.replayMockObjects();
-		SectionManagedObjectSource moSource = this.node
-				.addSectionManagedObjectSource("MO_SOURCE",
-						NotUseManagedObjectSource.class.getName());
+		SectionManagedObjectSource moSource = this.node.addSectionManagedObjectSource("MO_SOURCE",
+				NotUseManagedObjectSource.class.getName());
 
 		// Add the section managed object twice
-		SectionManagedObject moFirst = moSource.addSectionManagedObject("MO",
-				ManagedObjectScope.THREAD);
-		SectionManagedObject moSecond = moSource.addSectionManagedObject("MO",
-				ManagedObjectScope.PROCESS);
+		SectionManagedObject moFirst = moSource.addSectionManagedObject("MO", ManagedObjectScope.THREAD);
+		SectionManagedObject moSecond = moSource.addSectionManagedObject("MO", ManagedObjectScope.PROCESS);
 		this.verifyMockObjects();
 
 		// Should be the same section managed object
-		assertEquals("Should be same section managed object on adding twice",
-				moFirst, moSecond);
+		assertEquals("Should be same section managed object on adding twice", moFirst, moSecond);
 	}
 
 	/**
@@ -424,28 +378,22 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.recordOfficeFloorNode();
 
 		// Record issue in adding the section managed object twice
-		this.issues.recordIssue("MO", ManagedObjectNodeImpl.class,
-				"Managed Object MO already added");
+		this.issues.recordIssue("MO", ManagedObjectNodeImpl.class, "Managed Object MO already added");
 
 		// Add the managed object sources
 		this.replayMockObjects();
-		SectionManagedObjectSource moSourceOne = this.node
-				.addSectionManagedObjectSource("MO_SOURCE_ONE",
-						NotUseManagedObjectSource.class.getName());
-		SectionManagedObjectSource moSourceTwo = this.node
-				.addSectionManagedObjectSource("MO_SOURCE_TWO",
-						NotUseManagedObjectSource.class.getName());
+		SectionManagedObjectSource moSourceOne = this.node.addSectionManagedObjectSource("MO_SOURCE_ONE",
+				NotUseManagedObjectSource.class.getName());
+		SectionManagedObjectSource moSourceTwo = this.node.addSectionManagedObjectSource("MO_SOURCE_TWO",
+				NotUseManagedObjectSource.class.getName());
 
 		// Add the section managed object twice by different sources
-		SectionManagedObject moFirst = moSourceOne.addSectionManagedObject(
-				"MO", ManagedObjectScope.THREAD);
-		SectionManagedObject moSecond = moSourceTwo.addSectionManagedObject(
-				"MO", ManagedObjectScope.PROCESS);
+		SectionManagedObject moFirst = moSourceOne.addSectionManagedObject("MO", ManagedObjectScope.THREAD);
+		SectionManagedObject moSecond = moSourceTwo.addSectionManagedObject("MO", ManagedObjectScope.PROCESS);
 		this.verifyMockObjects();
 
 		// Should be the same section managed object
-		assertEquals("Should be same section managed object on adding twice",
-				moFirst, moSecond);
+		assertEquals("Should be same section managed object on adding twice", moFirst, moSecond);
 	}
 
 	/**
@@ -463,220 +411,195 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Obtain the section managed object
-		SectionManagedObjectSource moSource = this.node
-				.addSectionManagedObjectSource("MO_SOURCE",
-						NotUseManagedObjectSource.class.getName());
-		SectionManagedObject mo = moSource.addSectionManagedObject("MO",
-				ManagedObjectScope.THREAD);
+		SectionManagedObjectSource moSource = this.node.addSectionManagedObjectSource("MO_SOURCE",
+				NotUseManagedObjectSource.class.getName());
+		SectionManagedObject mo = moSource.addSectionManagedObject("MO", ManagedObjectScope.THREAD);
 
 		// Ensure can get dependency
-		ManagedObjectDependency dependency = mo
-				.getManagedObjectDependency("DEPENDENCY");
+		ManagedObjectDependency dependency = mo.getManagedObjectDependency("DEPENDENCY");
 		assertNotNull("Must have dependency", dependency);
-		assertEquals("Incorrect dependency name", "DEPENDENCY",
-				dependency.getManagedObjectDependencyName());
-		assertEquals("Should get same managed object dependency again",
-				dependency, mo.getManagedObjectDependency("DEPENDENCY"));
-		assertNotSame("Should not be same dependency for different name",
-				dependency, mo.getManagedObjectDependency("ANOTHER"));
+		assertEquals("Incorrect dependency name", "DEPENDENCY", dependency.getManagedObjectDependencyName());
+		assertEquals("Should get same managed object dependency again", dependency,
+				mo.getManagedObjectDependency("DEPENDENCY"));
+		assertNotSame("Should not be same dependency for different name", dependency,
+				mo.getManagedObjectDependency("ANOTHER"));
 
 		// Ensure can get flow
 		ManagedObjectFlow flow = moSource.getManagedObjectFlow("FLOW");
 		assertNotNull("Must have flow", flow);
-		assertEquals("Incorrect flow name", "FLOW",
-				flow.getManagedObjectFlowName());
-		assertEquals("Should get same task flow again", flow,
-				moSource.getManagedObjectFlow("FLOW"));
-		assertNotSame("Should not be same flow for different name", flow,
-				moSource.getManagedObjectFlow("ANOTHER"));
+		assertEquals("Incorrect flow name", "FLOW", flow.getManagedObjectFlowName());
+		assertEquals("Should get same function flow again", flow, moSource.getManagedObjectFlow("FLOW"));
+		assertNotSame("Should not be same flow for different name", flow, moSource.getManagedObjectFlow("ANOTHER"));
 
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensure can add a {@link SectionWork}.
+	 * Ensure can add a {@link SectionFunctionNamespace}.
 	 */
-	public void testAddSectionWork() {
-		// Add two different section works verifying details
+	public void testAddSectionFunctionNamespace() {
+		// Add two different section namespaces verifying details
 		this.replayMockObjects();
-		SectionWork work = this.node.addSectionWork("WORK",
-				NotUseWorkSource.class.getName());
-		assertNotNull("Must have section work", work);
-		assertEquals("Incorrect section work name", "WORK",
-				work.getSectionWorkName());
-		assertNotSame(
-				"Should obtain another section work",
-				work,
-				this.node.addSectionWork("ANOTHER",
-						NotUseWorkSource.class.getName()));
+		SectionFunctionNamespace namespace = this.node.addSectionFunctionNamespace("NAMESPACE",
+				NotUseManagedFunctionSource.class.getName());
+		assertNotNull("Must have section namespace", namespace);
+		assertEquals("Incorrect section namespace name", "NAMESPACE", namespace.getSectionFunctionNamespaceName());
+		assertNotSame("Should obtain another section namespace", namespace,
+				this.node.addSectionFunctionNamespace("ANOTHER", NotUseManagedFunctionSource.class.getName()));
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensure issue if add {@link SectionWork} by same name twice.
+	 * Ensure issue if add {@link SectionFunctionNamespace} by same name twice.
 	 */
-	public void testAddSectionWorkTwice() {
+	public void testAddSectionFunctionNamespaceTwice() {
 
-		// Record issue in adding the section work twice
-		this.issues.recordIssue("WORK", WorkNodeImpl.class,
-				"Work WORK already added");
+		// Record issue in adding the section namespace twice
+		this.issues.recordIssue("NAMESPACE", FunctionNamespaceNodeImpl.class,
+				"Function Namespace NAMESPACE already added");
 
-		// Add the section work twice
+		// Add the section namespace twice
 		this.replayMockObjects();
-		SectionWork workFirst = this.node.addSectionWork("WORK",
-				NotUseWorkSource.class.getName());
-		SectionWork workSecond = this.node.addSectionWork("WORK",
-				NotUseWorkSource.class.getName());
+		SectionFunctionNamespace namespaceFirst = this.node.addSectionFunctionNamespace("NAMESPACE",
+				NotUseManagedFunctionSource.class.getName());
+		SectionFunctionNamespace namespaceSecond = this.node.addSectionFunctionNamespace("NAMESPACE",
+				NotUseManagedFunctionSource.class.getName());
 		this.verifyMockObjects();
 
-		// Should be the same section work
-		assertEquals("Should be same section work on adding twice", workFirst,
-				workSecond);
+		// Should be the same section namespace
+		assertEquals("Should be same section namespace on adding twice", namespaceFirst, namespaceSecond);
 	}
 
 	/**
-	 * Ensure can add a {@link SectionWork} instance.
+	 * Ensure can add a {@link SectionFunctionNamespace} instance.
 	 */
-	public void testAddSectionWorkInstance() {
-		// Add two different section works verifying details
+	public void testAddSectionFunctionNamespaceInstance() {
+		// Add two different section namespaces verifying details
 		this.replayMockObjects();
-		SectionWork work = this.node.addSectionWork("WORK",
-				new NotUseWorkSource());
-		assertNotNull("Must have section work", work);
-		assertEquals("Incorrect section work name", "WORK",
-				work.getSectionWorkName());
-		assertNotSame("Should obtain another section work", work,
-				this.node.addSectionWork("ANOTHER", new NotUseWorkSource()));
+		SectionFunctionNamespace namespace = this.node.addSectionFunctionNamespace("NAMESPACE",
+				new NotUseManagedFunctionSource());
+		assertNotNull("Must have section namespace", namespace);
+		assertEquals("Incorrect section namespace name", "NAMESPACE", namespace.getSectionFunctionNamespaceName());
+		assertNotSame("Should obtain another section namespace", namespace,
+				this.node.addSectionFunctionNamespace("ANOTHER", new NotUseManagedFunctionSource()));
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensure issue if add {@link SectionWork} instance by same name twice.
+	 * Ensure issue if add {@link SectionFunctionNamespace} instance by same
+	 * name twice.
 	 */
-	public void testAddSectionWorkInstanceTwice() {
+	public void testAddSectionFunctionNamespaceInstanceTwice() {
 
-		// Record issue in adding the section work twice
-		this.issues.recordIssue("WORK", WorkNodeImpl.class,
-				"Work WORK already added");
+		// Record issue in adding the section namespace twice
+		this.issues.recordIssue("NAMESPACE", FunctionNamespaceNodeImpl.class,
+				"Function Namespace NAMESPACE already added");
 
-		// Add the section work twice
+		// Add the section namespace twice
 		this.replayMockObjects();
-		SectionWork workFirst = this.node.addSectionWork("WORK",
-				new NotUseWorkSource());
-		SectionWork workSecond = this.node.addSectionWork("WORK",
-				new NotUseWorkSource());
+		SectionFunctionNamespace namespaceFirst = this.node.addSectionFunctionNamespace("NAMESPACE",
+				new NotUseManagedFunctionSource());
+		SectionFunctionNamespace namespaceSecond = this.node.addSectionFunctionNamespace("NAMESPACE",
+				new NotUseManagedFunctionSource());
 		this.verifyMockObjects();
 
-		// Should be the same section work
-		assertEquals("Should be same section work on adding twice", workFirst,
-				workSecond);
+		// Should be the same section namespace
+		assertEquals("Should be same section namespace on adding twice", namespaceFirst, namespaceSecond);
 	}
 
 	/**
-	 * Ensure can add a {@link SectionTask}.
+	 * Ensure can add a {@link SectionFunction}.
 	 */
-	public void testAddSectionTask() {
-		// Add two different section tasks verifying details
+	public void testAddSectionFunction() {
+		// Add two different section functions verifying details
 		this.replayMockObjects();
-		SectionWork work = this.node.addSectionWork("WORK",
-				NotUseWorkSource.class.getName());
-		SectionTask task = work.addSectionTask("TASK", "TYPE");
-		assertNotNull("Must have section task", task);
-		assertEquals("Incorrect section task name", "TASK",
-				task.getSectionTaskName());
-		assertNotSame("Should obtain another section task", task,
-				work.addSectionTask("ANOTHER", "TYPE"));
+		SectionFunctionNamespace namespace = this.node.addSectionFunctionNamespace("NAMESPACE",
+				NotUseManagedFunctionSource.class.getName());
+		SectionFunction function = namespace.addSectionFunction("FUNCTION", "TYPE");
+		assertNotNull("Must have section function", function);
+		assertEquals("Incorrect section function name", "FUNCTION", function.getSectionFunctionName());
+		assertNotSame("Should obtain another section function", function,
+				namespace.addSectionFunction("ANOTHER", "TYPE"));
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensure issue if add {@link SectionTask} by same name twice.
+	 * Ensure issue if add {@link SectionFunction} by same name twice.
 	 */
-	public void testAddSectionTaskTwice() {
+	public void testAddSectionFunctionTwice() {
 
-		// Record issue in adding the section task twice
-		this.issues.recordIssue("TASK", TaskNodeImpl.class,
-				"Task TASK already added");
+		// Record issue in adding the section function twice
+		this.issues.recordIssue("FUNCTION", ManagedFunctionNodeImpl.class, "Managed Function FUNCTION already added");
 
-		// Add the section task twice by same work
+		// Add the section function twice by same namespace
 		this.replayMockObjects();
-		SectionWork work = this.node.addSectionWork("WORK",
-				NotUseWorkSource.class.getName());
-		SectionTask taskFirst = work.addSectionTask("TASK", "TYPE");
-		SectionTask taskSecond = work.addSectionTask("TASK", "ANOTHER_TYPE");
+		SectionFunctionNamespace namespace = this.node.addSectionFunctionNamespace("NAMESPACE",
+				NotUseManagedFunctionSource.class.getName());
+		SectionFunction functionFirst = namespace.addSectionFunction("FUNCTION", "TYPE");
+		SectionFunction functionSecond = namespace.addSectionFunction("FUNCTION", "ANOTHER_TYPE");
 		this.verifyMockObjects();
 
-		// Should be the same section work
-		assertEquals("Should be same section task on adding twice", taskFirst,
-				taskSecond);
+		// Should be the same section namespace
+		assertEquals("Should be same section function on adding twice", functionFirst, functionSecond);
 	}
 
 	/**
-	 * Ensure issue if add {@link SectionTask} by same name twice within a
-	 * {@link OfficeSection} with different {@link SectionWork}.
+	 * Ensure issue if add {@link SectionFunction} by same name twice within a
+	 * {@link OfficeSection} with different {@link SectionFunctionNamespace}.
 	 */
-	public void testAddSectionTaskTwiceByDifferentSectionWork() {
+	public void testAddSectionFunctionTwiceByDifferentSectionFunctionNamespace() {
 
-		// Record issue in adding the section task twice
-		this.issues.recordIssue("TASK", TaskNodeImpl.class,
-				"Task TASK already added");
+		// Record issue in adding the section function twice
+		this.issues.recordIssue("FUNCTION", ManagedFunctionNodeImpl.class, "Managed Function FUNCTION already added");
 
-		// Add the section task twice by different work
+		// Add the section function twice by different namespace
 		this.replayMockObjects();
-		SectionTask taskFirst = this.node.addSectionWork("WORK_ONE",
-				NotUseWorkSource.class.getName())
-				.addSectionTask("TASK", "TYPE");
-		SectionTask taskSecond = this.node.addSectionWork("WORK_TWO",
-				NotUseWorkSource.class.getName()).addSectionTask("TASK",
-				"ANOTHER_TYPE");
+		SectionFunction functionFirst = this.node
+				.addSectionFunctionNamespace("NAMESPACE_ONE", NotUseManagedFunctionSource.class.getName())
+				.addSectionFunction("FUNCTION", "TYPE");
+		SectionFunction functionSecond = this.node
+				.addSectionFunctionNamespace("NAMESPACE_TWO", NotUseManagedFunctionSource.class.getName())
+				.addSectionFunction("FUNCTION", "ANOTHER_TYPE");
 		this.verifyMockObjects();
 
-		// Should be the same section work
-		assertEquals("Should be same section task on adding twice", taskFirst,
-				taskSecond);
+		// Should be the same section namespace
+		assertEquals("Should be same section function on adding twice", functionFirst, functionSecond);
 	}
 
 	/**
-	 * Ensure able to get {@link TaskFlow} and {@link TaskObject} instances from
-	 * the {@link SectionTask}.
+	 * Ensure able to get {@link FunctionFlow} and {@link FunctionObject}
+	 * instances from the {@link SectionFunction}.
 	 */
-	public void testSectionTaskGetFlowsAndObjects() {
-		// Ensure able to get flow/objects from section task
+	public void testSectionFunctionGetFlowsAndObjects() {
+		// Ensure able to get flow/objects from section function
 		this.replayMockObjects();
 
-		// Obtain the section task
-		SectionTask task = this.node.addSectionWork("WORK",
-				NotUseWorkSource.class.getName())
-				.addSectionTask("TASK", "TYPE");
+		// Obtain the section function
+		SectionFunction function = this.node
+				.addSectionFunctionNamespace("NAMESPACE", NotUseManagedFunctionSource.class.getName())
+				.addSectionFunction("FUNCTION", "TYPE");
 
 		// Ensure can get flow
-		TaskFlow flow = task.getTaskFlow("FLOW");
+		FunctionFlow flow = function.getFunctionFlow("FLOW");
 		assertNotNull("Must have flow", flow);
-		assertEquals("Incorrect flow name", "FLOW", flow.getTaskFlowName());
-		assertEquals("Should get same task flow again", flow,
-				task.getTaskFlow("FLOW"));
-		assertNotSame("Should not be same flow for different name", flow,
-				task.getTaskFlow("ANOTHER"));
+		assertEquals("Incorrect flow name", "FLOW", flow.getFunctionFlowName());
+		assertEquals("Should get same function flow again", flow, function.getFunctionFlow("FLOW"));
+		assertNotSame("Should not be same flow for different name", flow, function.getFunctionFlow("ANOTHER"));
 
 		// Ensure can get object
-		TaskObject object = task.getTaskObject("OBJECT");
+		FunctionObject object = function.getFunctionObject("OBJECT");
 		assertNotNull("Must have object", object);
-		assertEquals("Incorrect object name", "OBJECT",
-				object.getTaskObjectName());
-		assertEquals("Should get same task object again", object,
-				task.getTaskObject("OBJECT"));
-		assertNotSame("Should not be same object for different name", object,
-				task.getTaskObject("ANOTHER"));
+		assertEquals("Incorrect object name", "OBJECT", object.getFunctionObjectName());
+		assertEquals("Should get same function object again", object, function.getFunctionObject("OBJECT"));
+		assertNotSame("Should not be same object for different name", object, function.getFunctionObject("ANOTHER"));
 
 		// Ensure can get escalation
-		TaskFlow escalation = task.getTaskEscalation("ESCALATION");
+		FunctionFlow escalation = function.getFunctionEscalation("ESCALATION");
 		assertNotNull("Must have escalation", escalation);
-		assertEquals("Incorrect escalation name", "ESCALATION",
-				escalation.getTaskFlowName());
-		assertEquals("Should get same task flow again", escalation,
-				task.getTaskEscalation("ESCALATION"));
-		assertNotSame("Should not be same escalation for different name",
-				escalation, task.getTaskEscalation("ANOTHER"));
+		assertEquals("Incorrect escalation name", "ESCALATION", escalation.getFunctionFlowName());
+		assertEquals("Should get same function flow again", escalation, function.getFunctionEscalation("ESCALATION"));
+		assertNotSame("Should not be same escalation for different name", escalation,
+				function.getFunctionEscalation("ANOTHER"));
 
 		this.verifyMockObjects();
 	}
@@ -687,11 +610,10 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testAddSubSection() {
 		// Add two different sub sections verifying details
 		this.replayMockObjects();
-		SubSection subSection = this.node.addSubSection("SUB_SECTION",
-				NotUseSectionSource.class.getName(), "SUB_SECTION_LOCATION");
+		SubSection subSection = this.node.addSubSection("SUB_SECTION", NotUseSectionSource.class.getName(),
+				"SUB_SECTION_LOCATION");
 		assertNotNull("Must have sub section", subSection);
-		assertEquals("Incorrect sub section name", "SUB_SECTION",
-				subSection.getSubSectionName());
+		assertEquals("Incorrect sub section name", "SUB_SECTION", subSection.getSubSectionName());
 		assertNotSame("Should obtain another sub section", subSection,
 				this.node.addSubSection("ANOTHER", "not used", "not used"));
 		this.verifyMockObjects();
@@ -703,20 +625,16 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testAddSubSectionTwice() {
 
 		// Record issue in adding the sub section twice
-		this.issues.recordIssue("SUB_SECTION", SectionNodeImpl.class,
-				"Section SUB_SECTION already added");
+		this.issues.recordIssue("SUB_SECTION", SectionNodeImpl.class, "Section SUB_SECTION already added");
 
 		// Add the sub section twice
 		this.replayMockObjects();
-		SubSection subSectionFirst = this.node.addSubSection("SUB_SECTION",
-				new NotUseSectionSource(), null);
-		SubSection subSectionSecond = this.node.addSubSection("SUB_SECTION",
-				new NotUseSectionSource(), null);
+		SubSection subSectionFirst = this.node.addSubSection("SUB_SECTION", new NotUseSectionSource(), null);
+		SubSection subSectionSecond = this.node.addSubSection("SUB_SECTION", new NotUseSectionSource(), null);
 		this.verifyMockObjects();
 
 		// Should be the same sub section
-		assertEquals("Should be same sub section on adding twice",
-				subSectionFirst, subSectionSecond);
+		assertEquals("Should be same sub section on adding twice", subSectionFirst, subSectionSecond);
 	}
 
 	/**
@@ -728,36 +646,28 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Obtain the sub section
-		SubSection subSection = this.node.addSubSection("SUB_SECTION",
-				NotUseSectionSource.class.getName(), "LOCATION");
+		SubSection subSection = this.node.addSubSection("SUB_SECTION", NotUseSectionSource.class.getName(), "LOCATION");
 
 		// Ensure can get input
 		SubSectionInput input = subSection.getSubSectionInput("INPUT");
 		assertNotNull("Must have input", input);
-		assertEquals("Incorrect input name", "INPUT",
-				input.getSubSectionInputName());
-		assertEquals("Should get same input again", input,
-				subSection.getSubSectionInput("INPUT"));
-		assertNotSame("Should not be same input for different name", input,
-				subSection.getSubSectionInput("ANOTHER"));
+		assertEquals("Incorrect input name", "INPUT", input.getSubSectionInputName());
+		assertEquals("Should get same input again", input, subSection.getSubSectionInput("INPUT"));
+		assertNotSame("Should not be same input for different name", input, subSection.getSubSectionInput("ANOTHER"));
 
 		// Ensure can get output
 		SubSectionOutput output = subSection.getSubSectionOutput("OUTPUT");
 		assertNotNull("Must have output", output);
-		assertEquals("Incorrect output name", "OUTPUT",
-				output.getSubSectionOutputName());
-		assertEquals("Should get same output again", output,
-				subSection.getSubSectionOutput("OUTPUT"));
+		assertEquals("Incorrect output name", "OUTPUT", output.getSubSectionOutputName());
+		assertEquals("Should get same output again", output, subSection.getSubSectionOutput("OUTPUT"));
 		assertNotSame("Should not be same output for different name", output,
 				subSection.getSubSectionOutput("ANOTHER"));
 
 		// Ensure can get object
 		SubSectionObject object = subSection.getSubSectionObject("OBJECT");
 		assertNotNull("Must have output", object);
-		assertEquals("Incorrect output name", "OBJECT",
-				object.getSubSectionObjectName());
-		assertEquals("Should get same object again", object,
-				subSection.getSubSectionObject("OBJECT"));
+		assertEquals("Incorrect output name", "OBJECT", object.getSubSectionObjectName());
+		assertEquals("Should get same object again", object, subSection.getSubSectionObject("OBJECT"));
 		assertNotSame("Should not be same object for different name", object,
 				subSection.getSubSectionObject("ANOTHER"));
 
@@ -775,25 +685,18 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 
 		// Ensure sub section input the same as section input added after
 		SubSectionInput subSectionInput = this.node.getSubSectionInput("INPUT");
-		SectionInput sectionInput = this.node.addSectionInput("INPUT",
-				String.class.getName());
+		SectionInput sectionInput = this.node.addSectionInput("INPUT", String.class.getName());
 		assertEquals("Inputs should be the same", subSectionInput, sectionInput);
 
 		// Ensure sub section output the same as section output added after
-		SubSectionOutput subSectionOutput = this.node
-				.getSubSectionOutput("OUTPUT");
-		SectionOutput sectionOutput = this.node.addSectionOutput("OUTPUT",
-				Exception.class.getName(), true);
-		assertEquals("Outputs should be the same", subSectionOutput,
-				sectionOutput);
+		SubSectionOutput subSectionOutput = this.node.getSubSectionOutput("OUTPUT");
+		SectionOutput sectionOutput = this.node.addSectionOutput("OUTPUT", Exception.class.getName(), true);
+		assertEquals("Outputs should be the same", subSectionOutput, sectionOutput);
 
 		// Ensure sub section object the same as section object added after
-		SubSectionObject subSectionObject = this.node
-				.getSubSectionObject("OBJECT");
-		SectionObject sectionObject = this.node.addSectionObject("OBJECT",
-				Connection.class.getName());
-		assertEquals("Objects should be the same", subSectionObject,
-				sectionObject);
+		SubSectionObject subSectionObject = this.node.getSubSectionObject("OBJECT");
+		SectionObject sectionObject = this.node.addSectionObject("OBJECT", Connection.class.getName());
+		assertEquals("Objects should be the same", subSectionObject, sectionObject);
 
 		this.verifyMockObjects();
 	}
@@ -804,41 +707,62 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testSectionQualifiedName() {
 
 		// Create sub sections that provide qualified name
-		SubSection subSection = this.node.addSubSection("SUB_SECTION",
-				NotUseSectionSource.class.getName(), SECTION_LOCATION);
+		SubSection subSection = this.node.addSubSection("SUB_SECTION", NotUseSectionSource.class.getName(),
+				SECTION_LOCATION);
 
 		// Obtain the section qualified name
 		SectionNode subSectionNode = (SectionNode) subSection;
-		String qualifiedName = subSectionNode.getSectionQualifiedName("WORK");
+		String qualifiedName = subSectionNode.getSectionQualifiedName("NAMESPACE");
 
 		// Validate qualified name
-		assertEquals("Invalid section qualified name",
-				"SECTION.SUB_SECTION.WORK", qualifiedName);
+		assertEquals("Invalid section qualified name", "SECTION.SUB_SECTION.NAMESPACE", qualifiedName);
 	}
 
 	/**
-	 * Ensure can link {@link SectionInput} to the {@link SectionTask}.
+	 * Ensure able to get a {@link Office} qualified name.
 	 */
-	public void testLinkSectionInputToSectionTask() {
+	public void testQualifiedName() {
+
+		// Record obtaining the office qualified name
+		this.recordReturn(this.office, this.office.getQualifiedName("SECTION.SUB_SECTION.NAMESPACE"),
+				"OFFICE.SECTION.SUB_SECTION.NAMESPACE");
+		this.replayMockObjects();
+
+		// Create sub sections that provide qualified name
+		SubSection subSection = this.node.addSubSection("SUB_SECTION", NotUseSectionSource.class.getName(),
+				SECTION_LOCATION);
+
+		// Obtain the section qualified name
+		SectionNode subSectionNode = (SectionNode) subSection;
+		String qualifiedName = subSectionNode.getQualifiedName("NAMESPACE");
+
+		// Validate qualified name
+		assertEquals("Invalid section qualified name", "OFFICE.SECTION.SUB_SECTION.NAMESPACE", qualifiedName);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can link {@link SectionInput} to the {@link SectionFunction}.
+	 */
+	public void testLinkSectionInputToSectionFunction() {
 
 		// Record already being linked
-		this.issues.recordIssue("INPUT", SectionInputNodeImpl.class,
-				"Section Input INPUT linked more than once");
+		this.issues.recordIssue("INPUT", SectionInputNodeImpl.class, "Section Input INPUT linked more than once");
 
 		this.replayMockObjects();
 
 		// Link
-		SectionInput input = this.node.addSectionInput("INPUT",
-				Object.class.getName());
-		SectionWork work = this.node.addSectionWork("WORK",
-				NotUseWorkSource.class.getName());
-		SectionTask task = work.addSectionTask("TASK", "TYPE");
-		this.node.link(input, task);
-		assertFlowLink("input -> task", input, task);
+		SectionInput input = this.node.addSectionInput("INPUT", Object.class.getName());
+		SectionFunctionNamespace namespace = this.node.addSectionFunctionNamespace("NAMESPACE",
+				NotUseManagedFunctionSource.class.getName());
+		SectionFunction function = namespace.addSectionFunction("FUNCTION", "TYPE");
+		this.node.link(input, function);
+		assertFlowLink("input -> function", input, function);
 
 		// Ensure only can link once
-		this.node.link(input, work.addSectionTask("ANOTHER", "TYPE"));
-		assertFlowLink("Can only link once", input, task);
+		this.node.link(input, namespace.addSectionFunction("ANOTHER", "TYPE"));
+		assertFlowLink("Can only link once", input, function);
 
 		this.verifyMockObjects();
 	}
@@ -849,18 +773,14 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkSectionInputToSubSectionInput() {
 
 		// Record already being linked
-		this.issues.recordIssue("INPUT", SectionInputNodeImpl.class,
-				"Section Input INPUT linked more than once");
+		this.issues.recordIssue("INPUT", SectionInputNodeImpl.class, "Section Input INPUT linked more than once");
 
 		this.replayMockObjects();
 
 		// Link
-		SectionInput input = this.node.addSectionInput("INPUT",
-				Object.class.getName());
-		SubSection subSection = this.node.addSubSection("SUB_SECTION",
-				NotUseSectionSource.class.getName(), "LOCATION");
-		SubSectionInput subSectionInput = subSection
-				.getSubSectionInput("SUB_SECTION_INPUT");
+		SectionInput input = this.node.addSectionInput("INPUT", Object.class.getName());
+		SubSection subSection = this.node.addSubSection("SUB_SECTION", NotUseSectionSource.class.getName(), "LOCATION");
+		SubSectionInput subSectionInput = subSection.getSubSectionInput("SUB_SECTION_INPUT");
 		this.node.link(input, subSectionInput);
 		assertFlowLink("input -> sub section input", input, subSectionInput);
 
@@ -877,236 +797,215 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkSectionInputToSectionOutput() {
 
 		// Record already being linked
-		this.issues.recordIssue("INPUT", SectionInputNodeImpl.class,
-				"Section Input INPUT linked more than once");
+		this.issues.recordIssue("INPUT", SectionInputNodeImpl.class, "Section Input INPUT linked more than once");
 
 		this.replayMockObjects();
 
 		// Link
-		SectionInput input = this.node.addSectionInput("INPUT",
-				Object.class.getName());
-		SectionOutput output = this.node.addSectionOutput("OUTPUT",
-				Object.class.getName(), false);
+		SectionInput input = this.node.addSectionInput("INPUT", Object.class.getName());
+		SectionOutput output = this.node.addSectionOutput("OUTPUT", Object.class.getName(), false);
 		this.node.link(input, output);
 		assertFlowLink("input -> output", input, output);
 
 		// Ensure only can link once
-		this.node.link(input, this.node.addSectionOutput("ANOTHER",
-				String.class.getName(), false));
+		this.node.link(input, this.node.addSectionOutput("ANOTHER", String.class.getName(), false));
 		assertFlowLink("Can only link once", input, output);
 
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensures can link {@link TaskFlow} to the {@link SectionTask}.
+	 * Ensures can link {@link FunctionFlow} to the {@link SectionFunction}.
 	 */
-	public void testLinkTaskFlowToSectionTask() {
+	public void testLinkFunctionFlowToSectionFunction() {
 
 		// Record already being linked
-		this.issues.recordIssue("FLOW", TaskFlowNodeImpl.class,
-				"Task Flow FLOW linked more than once");
+		this.issues.recordIssue("FLOW", FunctionFlowNodeImpl.class, "Function Flow FLOW linked more than once");
 
 		this.replayMockObjects();
 
 		// Link
-		SectionTask task = this.node.addSectionWork("WORK",
-				NotUseWorkSource.class.getName())
-				.addSectionTask("TASK", "TYPE");
-		TaskFlow flow = task.getTaskFlow("FLOW");
-		SectionTask targetTask = this.node.addSectionWork("TARGET",
-				NotUseWorkSource.class.getName()).addSectionTask("TARGET",
-				"TYPE");
-		this.node
-				.link(flow, targetTask, FlowInstigationStrategyEnum.SEQUENTIAL);
-		assertFlowLink("task flow -> task", flow, targetTask);
-		assertFlowInstigationStrategy(flow,
-				FlowInstigationStrategyEnum.SEQUENTIAL);
+		SectionFunction function = this.node
+				.addSectionFunctionNamespace("NAMESPACE", NotUseManagedFunctionSource.class.getName())
+				.addSectionFunction("FUNCTION", "TYPE");
+		FunctionFlow flow = function.getFunctionFlow("FLOW");
+		SectionFunction targetFunction = this.node
+				.addSectionFunctionNamespace("TARGET", NotUseManagedFunctionSource.class.getName())
+				.addSectionFunction("TARGET", "TYPE");
+		this.node.link(flow, targetFunction, false);
+		assertFlowLink("function flow -> function", flow, targetFunction);
+		assertSpawnThreadState(flow, false);
 
 		// Ensure only can link once
-		this.node.link(flow, task, FlowInstigationStrategyEnum.PARALLEL);
-		assertFlowLink("Can only link once", flow, targetTask);
-		assertFlowInstigationStrategy(flow,
-				FlowInstigationStrategyEnum.SEQUENTIAL);
+		this.node.link(flow, function, true);
+		assertFlowLink("Can only link once", flow, targetFunction);
+		assertSpawnThreadState(flow, false);
 
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensures can link {@link TaskFlow} to the {@link SubSectionInput}.
+	 * Ensures can link {@link FunctionFlow} to the {@link SubSectionInput}.
 	 */
-	public void testLinkTaskFlowToSubSectionInput() {
+	public void testLinkFunctionFlowToSubSectionInput() {
 
 		// Record already being linked
-		this.issues.recordIssue("FLOW", TaskFlowNodeImpl.class,
-				"Task Flow FLOW linked more than once");
+		this.issues.recordIssue("FLOW", FunctionFlowNodeImpl.class, "Function Flow FLOW linked more than once");
 
 		this.replayMockObjects();
 
 		// Link
-		SectionTask task = this.node.addSectionWork("WORK",
-				NotUseWorkSource.class.getName())
-				.addSectionTask("TASK", "TYPE");
-		TaskFlow flow = task.getTaskFlow("FLOW");
-		SubSection subSection = this.node.addSubSection("SUB_SECTION",
-				new NotUseSectionSource(), "LOCATION");
+		SectionFunction function = this.node
+				.addSectionFunctionNamespace("NAMESPACE", NotUseManagedFunctionSource.class.getName())
+				.addSectionFunction("FUNCTION", "TYPE");
+		FunctionFlow flow = function.getFunctionFlow("FLOW");
+		SubSection subSection = this.node.addSubSection("SUB_SECTION", new NotUseSectionSource(), "LOCATION");
 		SubSectionInput input = subSection.getSubSectionInput("INPUT");
-		this.node.link(flow, input, FlowInstigationStrategyEnum.PARALLEL);
-		assertFlowLink("task flow -> sub section input", flow, input);
-		assertFlowInstigationStrategy(flow,
-				FlowInstigationStrategyEnum.PARALLEL);
+		this.node.link(flow, input, true);
+		assertFlowLink("function flow -> sub section input", flow, input);
+		assertSpawnThreadState(flow, true);
 
 		// Ensure only can link once
-		this.node.link(flow, subSection.getSubSectionInput("ANOTHER"),
-				FlowInstigationStrategyEnum.SEQUENTIAL);
+		this.node.link(flow, subSection.getSubSectionInput("ANOTHER"), false);
 		assertFlowLink("Can only link once", flow, input);
-		assertFlowInstigationStrategy(flow,
-				FlowInstigationStrategyEnum.PARALLEL);
+		assertSpawnThreadState(flow, true);
 
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensures can link {@link TaskFlow} to the {@link SectionOutput}.
+	 * Ensures can link {@link FunctionFlow} to the {@link SectionOutput}.
 	 */
-	public void testLinkTaskFlowToSectionOutput() {
+	public void testLinkFunctionFlowToSectionOutput() {
 
 		// Record already being linked
-		this.issues.recordIssue("FLOW", TaskFlowNodeImpl.class,
-				"Task Flow FLOW linked more than once");
+		this.issues.recordIssue("FLOW", FunctionFlowNodeImpl.class, "Function Flow FLOW linked more than once");
 
 		this.replayMockObjects();
 
 		// Link (escalation)
-		SectionTask task = this.node.addSectionWork("WORK",
-				NotUseWorkSource.class.getName())
-				.addSectionTask("TASK", "TYPE");
-		TaskFlow flow = task.getTaskEscalation("FLOW");
-		SectionOutput output = this.node.addSectionOutput("OUTPUT",
-				Exception.class.getName(), true);
-		this.node.link(flow, output, FlowInstigationStrategyEnum.ASYNCHRONOUS);
-		assertFlowLink("task flow -> section output", flow, output);
-		// Task Escalation always sequential
-		assertFlowInstigationStrategy(flow,
-				FlowInstigationStrategyEnum.SEQUENTIAL);
+		SectionFunction function = this.node
+				.addSectionFunctionNamespace("NAMESPACE", NotUseManagedFunctionSource.class.getName())
+				.addSectionFunction("FUNCTION", "TYPE");
+		FunctionFlow flow = function.getFunctionEscalation("FLOW");
+		SectionOutput output = this.node.addSectionOutput("OUTPUT", Exception.class.getName(), true);
+		this.node.link(flow, output, true);
+		assertFlowLink("function flow -> section output", flow, output);
+		// Function Escalation always not spawn
+		assertSpawnThreadState(flow, false);
 
 		// Ensure only can link once
-		this.node.link(flow, this.node.addSectionOutput("ANOTHER",
-				Object.class.getName(), false),
-				FlowInstigationStrategyEnum.PARALLEL);
+		this.node.link(flow, this.node.addSectionOutput("ANOTHER", Object.class.getName(), false), true);
 		assertFlowLink("Can only link once", flow, output);
-		assertFlowInstigationStrategy(flow,
-				FlowInstigationStrategyEnum.SEQUENTIAL);
+		assertSpawnThreadState(flow, false);
 
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensures can link {@link SectionTask} to its next {@link SectionTask}.
+	 * Ensures can link {@link SectionFunction} to its next
+	 * {@link SectionFunction}.
 	 */
-	public void testLinkSectionTaskToNextSectionTask() {
+	public void testLinkSectionFunctionToNextSectionFunction() {
 
 		// Record already being linked
-		this.issues.recordIssue("TASK", TaskNodeImpl.class,
-				"Task TASK linked more than once");
+		this.issues.recordIssue("FUNCTION", ManagedFunctionNodeImpl.class,
+				"Managed Function FUNCTION linked more than once");
 
 		this.replayMockObjects();
 
 		// Link
-		SectionWork work = this.node.addSectionWork("WORK",
-				NotUseWorkSource.class.getName());
-		SectionTask task = work.addSectionTask("TASK", "TYPE");
-		SectionTask nextTask = work.addSectionTask("NEXT", "TYPE");
-		this.node.link(task, nextTask);
-		assertFlowLink("task -> next task", task, nextTask);
+		SectionFunctionNamespace namespace = this.node.addSectionFunctionNamespace("NAMESPACE",
+				NotUseManagedFunctionSource.class.getName());
+		SectionFunction function = namespace.addSectionFunction("FUNCTION", "TYPE");
+		SectionFunction nextFunction = namespace.addSectionFunction("NEXT", "TYPE");
+		this.node.link(function, nextFunction);
+		assertFlowLink("function -> next function", function, nextFunction);
 
 		// Ensure only can link once
-		this.node.link(task, work.addSectionTask("ANOTHER", "TYPE"));
-		assertFlowLink("Can only link once", task, nextTask);
+		this.node.link(function, namespace.addSectionFunction("ANOTHER", "TYPE"));
+		assertFlowLink("Can only link once", function, nextFunction);
 
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensures can link {@link SectionTask} to its next {@link SubSectionInput}.
+	 * Ensures can link {@link SectionFunction} to its next
+	 * {@link SubSectionInput}.
 	 */
-	public void testLinkSectionTaskToNextSubSectionInput() {
+	public void testLinkSectionFunctionToNextSubSectionInput() {
 
 		// Record already being linked
-		this.issues.recordIssue("TASK", TaskNodeImpl.class,
-				"Task TASK linked more than once");
+		this.issues.recordIssue("FUNCTION", ManagedFunctionNodeImpl.class,
+				"Managed Function FUNCTION linked more than once");
 
 		this.replayMockObjects();
 
 		// Link
-		SectionTask task = this.node.addSectionWork("WORK",
-				NotUseWorkSource.class.getName())
-				.addSectionTask("TASK", "TYPE");
-		SubSection subSection = this.node.addSubSection("SUB_SECTION",
-				new NotUseSectionSource(), "LOCATION");
+		SectionFunction function = this.node
+				.addSectionFunctionNamespace("NAMESPACE", NotUseManagedFunctionSource.class.getName())
+				.addSectionFunction("FUNCTION", "TYPE");
+		SubSection subSection = this.node.addSubSection("SUB_SECTION", new NotUseSectionSource(), "LOCATION");
 		SubSectionInput input = subSection.getSubSectionInput("INPUT");
-		this.node.link(task, input);
-		assertFlowLink("task -> next input", task, input);
+		this.node.link(function, input);
+		assertFlowLink("function -> next input", function, input);
 
 		// Ensure only can link once
-		this.node.link(task, subSection.getSubSectionInput("ANOTHER"));
-		assertFlowLink("Can only link once", task, input);
+		this.node.link(function, subSection.getSubSectionInput("ANOTHER"));
+		assertFlowLink("Can only link once", function, input);
 
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensures can link {@link SectionTask} to the {@link SectionOutput}.
+	 * Ensures can link {@link SectionFunction} to the {@link SectionOutput}.
 	 */
-	public void testLinkSectionTaskToNextSectionOutput() {
+	public void testLinkSectionFunctionToNextSectionOutput() {
 
 		// Record already being linked
-		this.issues.recordIssue("TASK", TaskNodeImpl.class,
-				"Task TASK linked more than once");
+		this.issues.recordIssue("FUNCTION", ManagedFunctionNodeImpl.class,
+				"Managed Function FUNCTION linked more than once");
 
 		this.replayMockObjects();
 
 		// Link
-		SectionTask task = this.node.addSectionWork("WORK",
-				NotUseWorkSource.class.getName())
-				.addSectionTask("TASK", "TYPE");
-		SectionOutput output = this.node.addSectionOutput("OUTPUT",
-				Object.class.getName(), false);
-		this.node.link(task, output);
-		assertFlowLink("task -> next output", task, output);
+		SectionFunction function = this.node
+				.addSectionFunctionNamespace("NAMESPACE", NotUseManagedFunctionSource.class.getName())
+				.addSectionFunction("FUNCTION", "TYPE");
+		SectionOutput output = this.node.addSectionOutput("OUTPUT", Object.class.getName(), false);
+		this.node.link(function, output);
+		assertFlowLink("function -> next output", function, output);
 
 		// Ensure only can link once
-		this.node.link(task, this.node.addSectionOutput("ANOTHER",
-				String.class.getName(), false));
-		assertFlowLink("Can only link once", task, output);
+		this.node.link(function, this.node.addSectionOutput("ANOTHER", String.class.getName(), false));
+		assertFlowLink("Can only link once", function, output);
 
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensures can link {@link SubSectionOutput} to the {@link SectionTask}.
+	 * Ensures can link {@link SubSectionOutput} to the {@link SectionFunction}.
 	 */
-	public void testLinkSubSectionOutputToSectionTask() {
+	public void testLinkSubSectionOutputToSectionFunction() {
 
 		// Record already being linked
-		this.issues.recordIssue("OUTPUT", SectionOutputNodeImpl.class,
-				"Section Output OUTPUT linked more than once");
+		this.issues.recordIssue("OUTPUT", SectionOutputNodeImpl.class, "Section Output OUTPUT linked more than once");
 
 		this.replayMockObjects();
 
 		// Link
-		SubSection subSection = this.node.addSubSection("SUB_SECTION",
-				NotUseSectionSource.class.getName(), SECTION_LOCATION);
+		SubSection subSection = this.node.addSubSection("SUB_SECTION", NotUseSectionSource.class.getName(),
+				SECTION_LOCATION);
 		SubSectionOutput output = subSection.getSubSectionOutput("OUTPUT");
-		SectionWork work = this.node.addSectionWork("WORK",
-				NotUseWorkSource.class.getName());
-		SectionTask task = work.addSectionTask("TASK", "TYPE");
-		this.node.link(output, task);
-		assertFlowLink("sub section output -> task", output, task);
+		SectionFunctionNamespace namespace = this.node.addSectionFunctionNamespace("NAMESPACE",
+				NotUseManagedFunctionSource.class.getName());
+		SectionFunction function = namespace.addSectionFunction("FUNCTION", "TYPE");
+		this.node.link(output, function);
+		assertFlowLink("sub section output -> function", output, function);
 
 		// Ensure only can link once
-		this.node.link(output, work.addSectionTask("ANOTHER", "TYPE"));
-		assertFlowLink("Can only link once", output, task);
+		this.node.link(output, namespace.addSectionFunction("ANOTHER", "TYPE"));
+		assertFlowLink("Can only link once", output, function);
 
 		this.verifyMockObjects();
 	}
@@ -1117,14 +1016,13 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkSubSectionOutputToSubSectionInput() {
 
 		// Record already being linked
-		this.issues.recordIssue("OUTPUT", SectionOutputNodeImpl.class,
-				"Section Output OUTPUT linked more than once");
+		this.issues.recordIssue("OUTPUT", SectionOutputNodeImpl.class, "Section Output OUTPUT linked more than once");
 
 		this.replayMockObjects();
 
 		// Link
-		SubSection subSection = this.node.addSubSection("SUB_SECTION",
-				NotUseSectionSource.class.getName(), SECTION_LOCATION);
+		SubSection subSection = this.node.addSubSection("SUB_SECTION", NotUseSectionSource.class.getName(),
+				SECTION_LOCATION);
 		SubSectionOutput output = subSection.getSubSectionOutput("OUTPUT");
 		SubSectionInput input = subSection.getSubSectionInput("INPUT");
 		this.node.link(output, input);
@@ -1143,33 +1041,30 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkSubSectionOutputToSectionOutput() {
 
 		// Record already being linked
-		this.issues.recordIssue("OUTPUT", SectionOutputNodeImpl.class,
-				"Section Output OUTPUT linked more than once");
+		this.issues.recordIssue("OUTPUT", SectionOutputNodeImpl.class, "Section Output OUTPUT linked more than once");
 
 		this.replayMockObjects();
 
 		// Link
-		SubSection subSection = this.node.addSubSection("SUB_SECTION",
-				NotUseSectionSource.class.getName(), SECTION_LOCATION);
+		SubSection subSection = this.node.addSubSection("SUB_SECTION", NotUseSectionSource.class.getName(),
+				SECTION_LOCATION);
 		SubSectionOutput output = subSection.getSubSectionOutput("OUTPUT");
-		SectionOutput sectionOutput = this.node.addSectionOutput("OUTPUT",
-				Object.class.getName(), false);
+		SectionOutput sectionOutput = this.node.addSectionOutput("OUTPUT", Object.class.getName(), false);
 		this.node.link(output, sectionOutput);
-		assertFlowLink("sub section output -> section output", output,
-				sectionOutput);
+		assertFlowLink("sub section output -> section output", output, sectionOutput);
 
 		// Ensure only can link once
-		this.node.link(output, this.node.addSectionOutput("ANOTHER",
-				String.class.getName(), false));
+		this.node.link(output, this.node.addSectionOutput("ANOTHER", String.class.getName(), false));
 		assertFlowLink("Can only link once", output, sectionOutput);
 
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensures can link {@link ManagedObjectFlow} to the {@link SectionTask}.
+	 * Ensures can link {@link ManagedObjectFlow} to the
+	 * {@link SectionFunction}.
 	 */
-	public void testLinkManagedObjectFlowToSectionTask() {
+	public void testLinkManagedObjectFlowToSectionFunction() {
 
 		// Record obtaining the OfficeFloor for the managed objects
 		this.recordOfficeFloorNode();
@@ -1181,19 +1076,18 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Link
-		SectionManagedObjectSource moSource = this.node
-				.addSectionManagedObjectSource("MO",
-						NotUseManagedObjectSource.class.getName());
+		SectionManagedObjectSource moSource = this.node.addSectionManagedObjectSource("MO",
+				NotUseManagedObjectSource.class.getName());
 		ManagedObjectFlow flow = moSource.getManagedObjectFlow("FLOW");
-		SectionWork work = this.node.addSectionWork("WORK",
-				NotUseWorkSource.class.getName());
-		SectionTask task = work.addSectionTask("TASK", "TYPE");
-		this.node.link(flow, task);
-		assertFlowLink("managed object flow -> section task", flow, task);
+		SectionFunctionNamespace namespace = this.node.addSectionFunctionNamespace("NAMESPACE",
+				NotUseManagedFunctionSource.class.getName());
+		SectionFunction function = namespace.addSectionFunction("FUNCTION", "TYPE");
+		this.node.link(flow, function);
+		assertFlowLink("managed object flow -> section function", flow, function);
 
 		// Ensure only can link once
-		this.node.link(flow, work.addSectionTask("ANOTHER", "TYPE"));
-		assertFlowLink("Can only link once", flow, task);
+		this.node.link(flow, namespace.addSectionFunction("ANOTHER", "TYPE"));
+		assertFlowLink("Can only link once", flow, function);
 
 		this.verifyMockObjects();
 	}
@@ -1213,12 +1107,11 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Link
-		SectionManagedObjectSource moSource = this.node
-				.addSectionManagedObjectSource("MO",
-						NotUseManagedObjectSource.class.getName());
+		SectionManagedObjectSource moSource = this.node.addSectionManagedObjectSource("MO",
+				NotUseManagedObjectSource.class.getName());
 		ManagedObjectFlow flow = moSource.getManagedObjectFlow("FLOW");
-		SubSection subSection = this.node.addSubSection("SUB_SECTION",
-				NotUseSectionSource.class.getName(), SECTION_LOCATION);
+		SubSection subSection = this.node.addSubSection("SUB_SECTION", NotUseSectionSource.class.getName(),
+				SECTION_LOCATION);
 		SubSectionInput input = subSection.getSubSectionInput("INPUT");
 		this.node.link(flow, input);
 		assertFlowLink("managed object flow -> sub section input", flow, input);
@@ -1245,55 +1138,50 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Link
-		SectionManagedObjectSource moSource = this.node
-				.addSectionManagedObjectSource("MO",
-						NotUseManagedObjectSource.class.getName());
+		SectionManagedObjectSource moSource = this.node.addSectionManagedObjectSource("MO",
+				NotUseManagedObjectSource.class.getName());
 		ManagedObjectFlow flow = moSource.getManagedObjectFlow("FLOW");
-		SectionOutput output = this.node.addSectionOutput("OUTPUT",
-				Object.class.getName(), false);
+		SectionOutput output = this.node.addSectionOutput("OUTPUT", Object.class.getName(), false);
 		this.node.link(flow, output);
 		assertFlowLink("managed object flow -> section output", flow, output);
 
 		// Ensure only can link once
-		this.node.link(flow, this.node.addSectionOutput("ANOTHER",
-				String.class.getName(), false));
+		this.node.link(flow, this.node.addSectionOutput("ANOTHER", String.class.getName(), false));
 		assertFlowLink("Can only link once", flow, output);
 
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensures can link {@link TaskObject} to the {@link SectionObject}.
+	 * Ensures can link {@link FunctionObject} to the {@link SectionObject}.
 	 */
-	public void testLinkTaskObjectToSectionObject() {
+	public void testLinkFunctionObjectToSectionObject() {
 
 		// Record already being linked
-		this.issues.recordIssue("OBJECT", TaskObjectNodeImpl.class,
-				"Task Object OBJECT linked more than once");
+		this.issues.recordIssue("OBJECT", FunctionObjectNodeImpl.class, "Function Object OBJECT linked more than once");
 
 		this.replayMockObjects();
 
 		// Link
-		TaskObject object = this.node
-				.addSectionWork("WORK", NotUseWorkSource.class.getName())
-				.addSectionTask("TASK", "TYPE").getTaskObject("OBJECT");
-		SectionObject sectionObject = this.node.addSectionObject("OUTPUT",
-				Connection.class.getName());
+		FunctionObject object = this.node
+				.addSectionFunctionNamespace("NAMESPACE", NotUseManagedFunctionSource.class.getName())
+				.addSectionFunction("FUNCTION", "TYPE").getFunctionObject("OBJECT");
+		SectionObject sectionObject = this.node.addSectionObject("OUTPUT", Connection.class.getName());
 		this.node.link(object, sectionObject);
-		assertObjectLink("task object -> section object", object, sectionObject);
+		assertObjectLink("function object -> section object", object, sectionObject);
 
 		// Ensure only can link once
-		this.node.link(object,
-				this.node.addSectionObject("ANOTHER", String.class.getName()));
+		this.node.link(object, this.node.addSectionObject("ANOTHER", String.class.getName()));
 		assertObjectLink("Can only link once", object, sectionObject);
 
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensures can link {@link TaskObject} to the {@link SectionManagedObject}.
+	 * Ensures can link {@link FunctionObject} to the
+	 * {@link SectionManagedObject}.
 	 */
-	public void testLinkTaskObjectToSectionManagedObject() {
+	public void testLinkFunctionObjectToSectionManagedObject() {
 
 		// Record obtaining the OfficeFloor for the managed objects
 		this.recordOfficeFloorNode();
@@ -1301,26 +1189,22 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.recordOfficeFloorNode();
 
 		// Record already being linked
-		this.issues.recordIssue("OBJECT", TaskObjectNodeImpl.class,
-				"Task Object OBJECT linked more than once");
+		this.issues.recordIssue("OBJECT", FunctionObjectNodeImpl.class, "Function Object OBJECT linked more than once");
 
 		this.replayMockObjects();
 
 		// Link
-		TaskObject object = this.node
-				.addSectionWork("WORK", NotUseWorkSource.class.getName())
-				.addSectionTask("TASK", "TYPE").getTaskObject("OBJECT");
-		SectionManagedObjectSource moSource = this.node
-				.addSectionManagedObjectSource("MO_SOURCE",
-						NotUseManagedObjectSource.class.getName());
-		SectionManagedObject mo = moSource.addSectionManagedObject("MO",
-				ManagedObjectScope.WORK);
+		FunctionObject object = this.node
+				.addSectionFunctionNamespace("NAMESPACE", NotUseManagedFunctionSource.class.getName())
+				.addSectionFunction("FUNCTION", "TYPE").getFunctionObject("OBJECT");
+		SectionManagedObjectSource moSource = this.node.addSectionManagedObjectSource("MO_SOURCE",
+				NotUseManagedObjectSource.class.getName());
+		SectionManagedObject mo = moSource.addSectionManagedObject("MO", ManagedObjectScope.FUNCTION);
 		this.node.link(object, mo);
-		assertObjectLink("task object -> section managed object", object, mo);
+		assertObjectLink("function object -> section managed object", object, mo);
 
 		// Ensure only can link once
-		this.node.link(object, moSource.addSectionManagedObject("ANOTHER",
-				ManagedObjectScope.THREAD));
+		this.node.link(object, moSource.addSectionManagedObject("ANOTHER", ManagedObjectScope.THREAD));
 		assertObjectLink("Can only link once", object, mo);
 
 		this.verifyMockObjects();
@@ -1332,24 +1216,19 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkSubSectionObjectToSectionObject() {
 
 		// Record already being linked
-		this.issues.recordIssue("OBJECT", SectionObjectNodeImpl.class,
-				"Section Object OBJECT linked more than once");
+		this.issues.recordIssue("OBJECT", SectionObjectNodeImpl.class, "Section Object OBJECT linked more than once");
 
 		this.replayMockObjects();
 
 		// Link
-		SubSectionObject object = this.node.addSubSection("SUB_SECTION",
-				new NotUseSectionSource(), SECTION_LOCATION)
+		SubSectionObject object = this.node.addSubSection("SUB_SECTION", new NotUseSectionSource(), SECTION_LOCATION)
 				.getSubSectionObject("OBJECT");
-		SectionObject sectionObject = this.node.addSectionObject("OUTPUT",
-				Connection.class.getName());
+		SectionObject sectionObject = this.node.addSectionObject("OUTPUT", Connection.class.getName());
 		this.node.link(object, sectionObject);
-		assertObjectLink("sub section object -> section object", object,
-				sectionObject);
+		assertObjectLink("sub section object -> section object", object, sectionObject);
 
 		// Ensure only can link once
-		this.node.link(object,
-				this.node.addSectionObject("ANOTHER", String.class.getName()));
+		this.node.link(object, this.node.addSectionObject("ANOTHER", String.class.getName()));
 		assertObjectLink("Can only link once", object, sectionObject);
 
 		this.verifyMockObjects();
@@ -1367,27 +1246,21 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.recordOfficeFloorNode();
 
 		// Record already being linked
-		this.issues.recordIssue("OBJECT", SectionObjectNodeImpl.class,
-				"Section Object OBJECT linked more than once");
+		this.issues.recordIssue("OBJECT", SectionObjectNodeImpl.class, "Section Object OBJECT linked more than once");
 
 		this.replayMockObjects();
 
 		// Link
-		SubSectionObject object = this.node.addSubSection("SUB_SECTION",
-				new NotUseSectionSource(), SECTION_LOCATION)
+		SubSectionObject object = this.node.addSubSection("SUB_SECTION", new NotUseSectionSource(), SECTION_LOCATION)
 				.getSubSectionObject("OBJECT");
-		SectionManagedObjectSource moSource = this.node
-				.addSectionManagedObjectSource("MO_SOURCE",
-						NotUseManagedObjectSource.class.getName());
-		SectionManagedObject mo = moSource.addSectionManagedObject("MO",
-				ManagedObjectScope.PROCESS);
+		SectionManagedObjectSource moSource = this.node.addSectionManagedObjectSource("MO_SOURCE",
+				NotUseManagedObjectSource.class.getName());
+		SectionManagedObject mo = moSource.addSectionManagedObject("MO", ManagedObjectScope.PROCESS);
 		this.node.link(object, mo);
-		assertObjectLink("sub section object -> section managed object",
-				object, mo);
+		assertObjectLink("sub section object -> section managed object", object, mo);
 
 		// Ensure only can link once
-		this.node.link(object, moSource.addSectionManagedObject("ANOTHER",
-				ManagedObjectScope.PROCESS));
+		this.node.link(object, moSource.addSectionManagedObject("ANOTHER", ManagedObjectScope.PROCESS));
 		assertObjectLink("Can only link once", object, mo);
 
 		this.verifyMockObjects();
@@ -1403,29 +1276,22 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.recordOfficeFloorNode();
 
 		// Record already being linked
-		this.issues.recordIssue("DEPENDENCY",
-				ManagedObjectDependencyNodeImpl.class,
+		this.issues.recordIssue("DEPENDENCY", ManagedObjectDependencyNodeImpl.class,
 				"Managed Object Dependency DEPENDENCY linked more than once");
 
 		this.replayMockObjects();
 
 		// Link
-		SectionManagedObjectSource moSource = this.node
-				.addSectionManagedObjectSource("MO_SOURCE",
-						NotUseManagedObjectSource.class.getName());
-		SectionManagedObject mo = moSource.addSectionManagedObject("MO",
-				ManagedObjectScope.WORK);
-		ManagedObjectDependency dependency = mo
-				.getManagedObjectDependency("DEPENDENCY");
-		SectionObject sectionObject = this.node.addSectionObject("OBJECT",
-				Connection.class.getName());
+		SectionManagedObjectSource moSource = this.node.addSectionManagedObjectSource("MO_SOURCE",
+				NotUseManagedObjectSource.class.getName());
+		SectionManagedObject mo = moSource.addSectionManagedObject("MO", ManagedObjectScope.FUNCTION);
+		ManagedObjectDependency dependency = mo.getManagedObjectDependency("DEPENDENCY");
+		SectionObject sectionObject = this.node.addSectionObject("OBJECT", Connection.class.getName());
 		this.node.link(dependency, sectionObject);
-		assertObjectLink("managed object dependency -> section object",
-				dependency, sectionObject);
+		assertObjectLink("managed object dependency -> section object", dependency, sectionObject);
 
 		// Ensure only can link once
-		this.node.link(dependency,
-				this.node.addSectionObject("ANOTHER", Object.class.getName()));
+		this.node.link(dependency, this.node.addSectionObject("ANOTHER", Object.class.getName()));
 		assertObjectLink("Can only link once", dependency, sectionObject);
 
 		this.verifyMockObjects();
@@ -1445,32 +1311,24 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.recordOfficeFloorNode();
 
 		// Record already being linked
-		this.issues.recordIssue("DEPENDENCY",
-				ManagedObjectDependencyNodeImpl.class,
+		this.issues.recordIssue("DEPENDENCY", ManagedObjectDependencyNodeImpl.class,
 				"Managed Object Dependency DEPENDENCY linked more than once");
 
 		this.replayMockObjects();
 
 		// Link
-		SectionManagedObjectSource moSource = this.node
-				.addSectionManagedObjectSource("MO_SOURCE",
-						NotUseManagedObjectSource.class.getName());
-		SectionManagedObject mo = moSource.addSectionManagedObject("MO",
-				ManagedObjectScope.WORK);
-		ManagedObjectDependency dependency = mo
-				.getManagedObjectDependency("DEPENDENCY");
-		SectionManagedObjectSource moSourceTarget = this.node
-				.addSectionManagedObjectSource("MO_SOURCE_TARGET",
-						NotUseManagedObjectSource.class.getName());
-		SectionManagedObject moTarget = moSourceTarget.addSectionManagedObject(
-				"MO_TARGET", ManagedObjectScope.PROCESS);
+		SectionManagedObjectSource moSource = this.node.addSectionManagedObjectSource("MO_SOURCE",
+				NotUseManagedObjectSource.class.getName());
+		SectionManagedObject mo = moSource.addSectionManagedObject("MO", ManagedObjectScope.FUNCTION);
+		ManagedObjectDependency dependency = mo.getManagedObjectDependency("DEPENDENCY");
+		SectionManagedObjectSource moSourceTarget = this.node.addSectionManagedObjectSource("MO_SOURCE_TARGET",
+				NotUseManagedObjectSource.class.getName());
+		SectionManagedObject moTarget = moSourceTarget.addSectionManagedObject("MO_TARGET", ManagedObjectScope.PROCESS);
 		this.node.link(dependency, moTarget);
-		assertObjectLink("managed object dependency -> section managed object",
-				dependency, moTarget);
+		assertObjectLink("managed object dependency -> section managed object", dependency, moTarget);
 
 		// Ensure only can link once
-		this.node.link(dependency, moSourceTarget.addSectionManagedObject(
-				"ANOTHER", ManagedObjectScope.WORK));
+		this.node.link(dependency, moSourceTarget.addSectionManagedObject("ANOTHER", ManagedObjectScope.FUNCTION));
 		assertObjectLink("Can only link once", dependency, moTarget);
 
 		this.verifyMockObjects();
@@ -1486,29 +1344,20 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.recordOfficeFloorNode();
 
 		// Record already being linked
-		this.issues.recordIssue("DEPENDENCY",
-				ManagedObjectDependencyNodeImpl.class,
+		this.issues.recordIssue("DEPENDENCY", ManagedObjectDependencyNodeImpl.class,
 				"Managed Object Dependency DEPENDENCY linked more than once");
 
 		this.replayMockObjects();
 
 		// Link
-		SectionManagedObjectSource moSource = this.node
-				.addSectionManagedObjectSource("MO_SOURCE", (String) null);
-		ManagedObjectDependency dependency = moSource
-				.getInputManagedObjectDependency("DEPENDENCY");
-		SectionObject moTarget = this.node.addSectionObject("MO_TARGET",
-				Connection.class.getName());
+		SectionManagedObjectSource moSource = this.node.addSectionManagedObjectSource("MO_SOURCE", (String) null);
+		ManagedObjectDependency dependency = moSource.getInputManagedObjectDependency("DEPENDENCY");
+		SectionObject moTarget = this.node.addSectionObject("MO_TARGET", Connection.class.getName());
 		this.node.link(dependency, moTarget);
-		assertObjectLink(
-				"input managed object dependency -> office floor managed object",
-				dependency, moTarget);
+		assertObjectLink("input managed object dependency -> office floor managed object", dependency, moTarget);
 
 		// Ensure only can link once
-		this.node.link(
-				dependency,
-				this.node.addSectionObject("ANOTHER",
-						Connection.class.getName()));
+		this.node.link(dependency, this.node.addSectionObject("ANOTHER", Connection.class.getName()));
 		assertObjectLink("Can only link once", dependency, moTarget);
 
 		this.verifyMockObjects();
@@ -1527,30 +1376,22 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.recordOfficeFloorNode();
 
 		// Record already being linked
-		this.issues.recordIssue("DEPENDENCY",
-				ManagedObjectDependencyNodeImpl.class,
+		this.issues.recordIssue("DEPENDENCY", ManagedObjectDependencyNodeImpl.class,
 				"Managed Object Dependency DEPENDENCY linked more than once");
 
 		this.replayMockObjects();
 
 		// Link
-		SectionManagedObjectSource moSource = this.node
-				.addSectionManagedObjectSource("MO_SOURCE", (String) null);
-		ManagedObjectDependency dependency = moSource
-				.getInputManagedObjectDependency("DEPENDENCY");
-		SectionManagedObjectSource moSourceTarget = this.node
-				.addSectionManagedObjectSource("MO_SOURCE_TARGET",
-						(String) null);
-		SectionManagedObject moTarget = moSourceTarget.addSectionManagedObject(
-				"MO_TARGET", ManagedObjectScope.PROCESS);
+		SectionManagedObjectSource moSource = this.node.addSectionManagedObjectSource("MO_SOURCE", (String) null);
+		ManagedObjectDependency dependency = moSource.getInputManagedObjectDependency("DEPENDENCY");
+		SectionManagedObjectSource moSourceTarget = this.node.addSectionManagedObjectSource("MO_SOURCE_TARGET",
+				(String) null);
+		SectionManagedObject moTarget = moSourceTarget.addSectionManagedObject("MO_TARGET", ManagedObjectScope.PROCESS);
 		this.node.link(dependency, moTarget);
-		assertObjectLink(
-				"input managed object dependency -> office floor managed object",
-				dependency, moTarget);
+		assertObjectLink("input managed object dependency -> office floor managed object", dependency, moTarget);
 
 		// Ensure only can link once
-		this.node.link(dependency, moSourceTarget.addSectionManagedObject(
-				"ANOTHER", ManagedObjectScope.PROCESS));
+		this.node.link(dependency, moSourceTarget.addSectionManagedObject("ANOTHER", ManagedObjectScope.PROCESS));
 		assertObjectLink("Can only link once", dependency, moTarget);
 
 		this.verifyMockObjects();
@@ -1560,32 +1401,28 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	 * Records obtaining the {@link OfficeFloorNode}.F
 	 */
 	private void recordOfficeFloorNode() {
-		this.recordReturn(this.office, this.office.getOfficeFloorNode(),
-				this.officeFloor);
+		this.recordReturn(this.office, this.office.getOfficeFloorNode(), this.officeFloor);
 	}
 
 	/**
-	 * Asserts the {@link FlowInstigationStrategyEnum} for the {@link TaskFlow}.
+	 * Asserts the spawn {@link ThreadState} for the {@link FunctionFlow}.
 	 * 
-	 * @param taskFlow
-	 *            {@link TaskFlow} to check.
-	 * @param instigationStrategy
-	 *            Expected {@link FlowInstigationStrategyEnum}.
+	 * @param functionFlow
+	 *            {@link FunctionFlow} to check.
+	 * @param isSpawnThreadState
+	 *            Expected spawn {@link ThreadState}.
 	 */
-	private static void assertFlowInstigationStrategy(TaskFlow taskFlow,
-			FlowInstigationStrategyEnum instigationStrategy) {
-		assertTrue("Task flow must be " + TaskFlowNode.class,
-				taskFlow instanceof TaskFlowNode);
-		assertEquals("Incorrect instigation strategy", instigationStrategy,
-				((TaskFlowNode) taskFlow).getFlowInstigationStrategy());
+	private static void assertSpawnThreadState(FunctionFlow functionFlow, boolean isSpawnThreadState) {
+		assertTrue("Function flow must be " + FunctionFlowNode.class, functionFlow instanceof FunctionFlowNode);
+		assertEquals("Incorrect spawn thread state", isSpawnThreadState,
+				((FunctionFlowNode) functionFlow).isSpawnThreadState());
 	}
 
 	/**
 	 * {@link ManagedObjectSource} that should not have its methods invoked.
 	 */
 	@TestSource
-	public static class NotUseManagedObjectSource implements
-			ManagedObjectSource<Indexed, Indexed> {
+	public static class NotUseManagedObjectSource implements ManagedObjectSource<Indexed, Indexed> {
 
 		/*
 		 * ===================== ManagedObjectSource ======================
@@ -1598,20 +1435,14 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		}
 
 		@Override
-		public void init(ManagedObjectSourceContext<Indexed> context)
+		public ManagedObjectSourceMetaData<Indexed, Indexed> init(ManagedObjectSourceContext<Indexed> context)
 				throws Exception {
-			fail("Should not use ManagedObjectSource");
-		}
-
-		@Override
-		public ManagedObjectSourceMetaData<Indexed, Indexed> getMetaData() {
 			fail("Should not use ManagedObjectSource");
 			return null;
 		}
 
 		@Override
-		public void start(ManagedObjectExecuteContext<Indexed> context)
-				throws Exception {
+		public void start(ManagedObjectExecuteContext<Indexed> context) throws Exception {
 			fail("Should not use ManagedObjectSource");
 		}
 
@@ -1627,25 +1458,25 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * {@link WorkSource} that should not have its methods invoked.
+	 * {@link ManagedFunctionSource} that should not have its methods invoked.
 	 */
 	@TestSource
-	public static class NotUseWorkSource implements WorkSource<Work> {
+	public static class NotUseManagedFunctionSource implements ManagedFunctionSource {
 
 		/*
-		 * ================== WorkSource ====================================
+		 * ================== ManagedFunctionSource ==================
 		 */
 
 		@Override
-		public WorkSourceSpecification getSpecification() {
-			fail("Should not use WorkSource");
+		public ManagedFunctionSourceSpecification getSpecification() {
+			fail("Should not use FunctionNamespaceSource");
 			return null;
 		}
 
 		@Override
-		public void sourceWork(WorkTypeBuilder<Work> workTypeBuilder,
-				WorkSourceContext context) throws Exception {
-			fail("Should not use WorkSource");
+		public void sourceManagedFunctions(FunctionNamespaceBuilder namespaceBuilder,
+				ManagedFunctionSourceContext context) throws Exception {
+			fail("Should not use ManagedFunctionSource");
 		}
 	}
 
@@ -1666,8 +1497,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		}
 
 		@Override
-		public void sourceSection(SectionDesigner sectionBuilder,
-				SectionSourceContext context) throws Exception {
+		public void sourceSection(SectionDesigner sectionBuilder, SectionSourceContext context) throws Exception {
 			fail("Should not use SectionSource");
 		}
 	}

@@ -17,7 +17,7 @@
  */
 package net.officefloor.tutorial.navigatehttpserver;
 
-import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.section.clazz.NextFunction;
 
 /**
  * Logic for <code>TemplateOne.ofp</code>.
@@ -27,7 +27,7 @@ import net.officefloor.plugin.section.clazz.NextTask;
 // START SNIPPET: example
 public class TemplateOne {
 
-	@NextTask("external")
+	@NextFunction("external")
 	public void navigate() {
 	}
 

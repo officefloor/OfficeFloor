@@ -17,10 +17,6 @@
  */
 package net.officefloor.eclipse.wizard.teamsource;
 
-import net.officefloor.eclipse.util.EclipseUtil;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.TeamSource;
-
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -34,6 +30,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Text;
+
+import net.officefloor.eclipse.util.EclipseUtil;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
 
 /**
  * {@link IWizardPage} providing the listing of {@link TeamSourceInstance}.
@@ -76,8 +76,7 @@ public class TeamSourceListingWizardPage extends WizardPage {
 		// Create the listing of labels
 		this.teamSourceLabels = new String[this.teamSourceInstances.length];
 		for (int i = 0; i < this.teamSourceLabels.length; i++) {
-			this.teamSourceLabels[i] = this.teamSourceInstances[i]
-					.getTeamSourceLabel();
+			this.teamSourceLabels[i] = this.teamSourceInstances[i].getTeamSourceLabel();
 		}
 
 		// Specify page details
@@ -113,14 +112,12 @@ public class TeamSourceListingWizardPage extends WizardPage {
 
 		// Add means to specify team name
 		Composite nameComposite = new Composite(page, SWT.NONE);
-		nameComposite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
-				false));
+		nameComposite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 		nameComposite.setLayout(new GridLayout(2, false));
 		Label nameLabel = new Label(nameComposite, SWT.NONE);
 		nameLabel.setText("Team name: ");
 		this.teamName = new Text(nameComposite, SWT.BORDER);
-		this.teamName.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
-				false));
+		this.teamName.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 		this.teamName.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -131,8 +128,7 @@ public class TeamSourceListingWizardPage extends WizardPage {
 
 		// Add listing of team sources
 		this.list = new List(page, SWT.SINGLE | SWT.BORDER);
-		this.list.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
-				false));
+		this.list.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 		this.list.setItems(this.teamSourceLabels);
 		this.list.addSelectionListener(new SelectionAdapter() {
 			@Override

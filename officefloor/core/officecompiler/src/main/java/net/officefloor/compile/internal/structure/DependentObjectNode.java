@@ -19,7 +19,6 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.object.DependentObjectType;
-import net.officefloor.compile.type.TypeContext;
 
 /**
  * {@link Node} of the object fulfilling a dependency.
@@ -36,11 +35,11 @@ public interface DependentObjectNode extends LinkObjectNode {
 	/**
 	 * Loads the {@link DependentObjectType}.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return {@link DependentObjectType} or <code>null</code> with issue
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	DependentObjectType loadDependentObjectType(TypeContext typeContext);
+	DependentObjectType loadDependentObjectType(CompileContext compileContext);
 
 }

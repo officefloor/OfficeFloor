@@ -25,13 +25,12 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.team.TeamType;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
-import net.officefloor.frame.spi.TestSource;
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
-import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.spi.team.source.TeamSourceContext;
-import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
+import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.api.team.Job;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSourceContext;
+import net.officefloor.frame.api.team.source.TeamSourceSpecification;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -86,8 +85,7 @@ public class LoadTeamTypeTest extends OfficeFrameTestCase {
 	public void testMissingResource() {
 
 		// Record missing class
-		this.issues
-				.recordIssue("Can not obtain resource at location 'missing'");
+		this.issues.recordIssue("Can not obtain resource at location 'missing'");
 
 		// Attempt to load
 		this.loadTeamType(false, new Loader() {
@@ -109,8 +107,7 @@ public class LoadTeamTypeTest extends OfficeFrameTestCase {
 	 *            {@link Property} name value pairs.
 	 * @return Loaded {@link TeamType}.
 	 */
-	private TeamType loadTeamType(boolean isExpectedToLoad, Loader loader,
-			String... propertyNameValuePairs) {
+	private TeamType loadTeamType(boolean isExpectedToLoad, Loader loader, String... propertyNameValuePairs) {
 
 		// Replay mock objects
 		this.replayMockObjects();
@@ -124,13 +121,11 @@ public class LoadTeamTypeTest extends OfficeFrameTestCase {
 		}
 
 		// Create the team loader and load the team
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
 		TeamLoader teamLoader = compiler.getTeamLoader();
 		MockLoadTeamSource.loader = loader;
-		TeamType teamType = teamLoader.loadTeamType("team",
-				MockLoadTeamSource.class, propertyList);
+		TeamType teamType = teamLoader.loadTeamType("team", MockLoadTeamSource.class, propertyList);
 
 		// Verify the mock objects
 		this.verifyMockObjects();
@@ -221,7 +216,7 @@ public class LoadTeamTypeTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void assignJob(Job job, TeamIdentifier assignerTeam) {
+		public void assignJob(Job job) {
 			fail("Should not be invoked in obtaining team type");
 		}
 

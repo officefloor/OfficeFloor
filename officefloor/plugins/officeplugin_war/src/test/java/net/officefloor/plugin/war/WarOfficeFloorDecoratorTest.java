@@ -30,7 +30,7 @@ import java.util.jar.JarInputStream;
 import net.officefloor.building.decorate.OfficeFloorDecoratorContext;
 import net.officefloor.console.OfficeBuilding;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 
 /**
  * Tests the {@link WarOfficeFloorDecoratorTest}.
@@ -52,15 +52,15 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 	/**
 	 * <p>
 	 * Ensure the same class path directory is used for public files as
-	 * {@link WebAutoWireApplication}.
+	 * {@link WebArchitect}.
 	 * <p>
 	 * This test ensures they stay the same and allows this project to not have
-	 * to reference the {@link WebAutoWireApplication} at run time (pulling in
+	 * to reference the {@link WebArchitect} at run time (pulling in
 	 * their dependencies for the {@link OfficeBuilding}).
 	 */
 	public void testMatchingPublicClassPathDirectory() {
 		assertEquals("Incorrect public class path directory",
-				WebAutoWireApplication.WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX
+				WebArchitect.WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX
 						+ "/", WarOfficeFloorDecorator.WEB_PUBLIC);
 	}
 

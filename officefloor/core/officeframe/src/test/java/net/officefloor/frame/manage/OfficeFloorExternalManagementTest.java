@@ -20,41 +20,28 @@ package net.officefloor.frame.manage;
 import java.sql.Connection;
 import java.util.Arrays;
 
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
-import net.officefloor.frame.api.manage.NoInitialTaskException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.manage.ProcessFuture;
-import net.officefloor.frame.api.manage.TaskManager;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.manage.UnknownOfficeException;
-import net.officefloor.frame.api.manage.UnknownTaskException;
-import net.officefloor.frame.api.manage.UnknownWorkException;
-import net.officefloor.frame.api.manage.WorkManager;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 
 /**
- * Ensures the external management API of {@link OfficeFloor} responses
+ * Ensures the external management API of {@link OfficeFloor} responds
  * correctly.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorExternalManagementTest extends
-		AbstractOfficeConstructTestCase {
+public class OfficeFloorExternalManagementTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * {@link Office} name.
 	 */
 	private String officeName;
-
-	/**
-	 * {@link Work} name.
-	 */
-	private final String workName = "WORK";
 
 	/**
 	 * {@link MockWork} instance.
@@ -65,11 +52,6 @@ public class OfficeFloorExternalManagementTest extends
 	 * Differentiator.
 	 */
 	private final Object differentiator = "Differentiator";
-
-	/**
-	 * No initial {@link Task} {@link Work} name.
-	 */
-	private final String noInitialTaskWorkName = "NO_INITIAL_TASK_WORK";
 
 	/**
 	 * {@link OfficeFloor} to test management.
@@ -83,23 +65,12 @@ public class OfficeFloorExternalManagementTest extends
 		// Obtain the Office name
 		this.officeName = this.getOfficeName();
 
-		// Construct Team
-		final String TEAM_NAME = "TEAM";
-		this.constructTeam("TEAM", new PassiveTeam());
-
-		// Construct the Work
+		// Construct the Function
 		this.mockWork = new MockWork();
-		ReflectiveWorkBuilder workBuilder = this.constructWork(this.mockWork,
-				this.workName, "initialTask");
-		ReflectiveTaskBuilder initialTask = workBuilder.buildTask(
-				"initialTask", TEAM_NAME);
+		ReflectiveFunctionBuilder initialTask = this.constructFunction(this.mockWork, "initialTask");
 		initialTask.buildParameter();
 		initialTask.getBuilder().setDifferentiator(this.differentiator);
-		workBuilder.buildTask("anotherTask", TEAM_NAME).buildParameter();
-
-		// Construct the Work (with no initial task)
-		MockWork noInitialTaskWork = new MockWork();
-		this.constructWork(noInitialTaskWork, this.noInitialTaskWorkName, null);
+		this.constructFunction(this.mockWork, "anotherTask").buildParameter();
 
 		// Compile OfficeFloor
 		this.officeFloor = this.constructOfficeFloor();
@@ -116,8 +87,7 @@ public class OfficeFloorExternalManagementTest extends
 			this.officeFloor.openOfficeFloor();
 			fail("Should not be able open twice");
 		} catch (IllegalStateException ex) {
-			assertEquals("Incorrect cause", ex.getMessage(),
-					"OfficeFloor is already open");
+			assertEquals("Incorrect cause", ex.getMessage(), "OfficeFloor is already open");
 		}
 	}
 
@@ -139,255 +109,106 @@ public class OfficeFloorExternalManagementTest extends
 	 * Ensure throws exception on unknown {@link Office} requested.
 	 */
 	public void testUnknownOffice() {
-		final String unknownOfficeName = "Unknown Office - adding name to ensure different "
-				+ this.officeName;
+		final String unknownOfficeName = "Unknown Office - adding name to ensure different " + this.officeName;
 		try {
 			this.officeFloor.getOffice(unknownOfficeName);
 			fail("Should not be able to obtain unknown Office");
 		} catch (UnknownOfficeException ex) {
-			assertEquals("Incorrect office", unknownOfficeName, ex
-					.getUnknownOfficeName());
-			assertEquals("Incorrect cause", "Unknown Office '"
-					+ unknownOfficeName + "'", ex.getMessage());
+			assertEquals("Incorrect office", unknownOfficeName, ex.getUnknownOfficeName());
+			assertEquals("Incorrect cause", "Unknown Office '" + unknownOfficeName + "'", ex.getMessage());
 		}
 	}
 
 	/**
-	 * Ensure able to obtain {@link Work} listing.
+	 * Ensure able to obtain {@link ManagedFunction} listing.
 	 */
-	public void testWorkListing() throws UnknownOfficeException,
-			UnknownWorkException {
+	public void testFunctionListing() throws UnknownOfficeException, UnknownFunctionException {
 
 		// Obtain the Office
 		Office office = this.officeFloor.getOffice(this.officeName);
 
-		// Ensure correct work list
-		String[] workNames = office.getWorkNames();
-		this.assertNames(workNames, this.workName, this.noInitialTaskWorkName);
+		// Ensure correct function list
+		String[] functionNames = office.getFunctionNames();
+		this.assertNames(functionNames, "initialTask", "anotherTask");
 
-		// Ensure able to obtain WorkManager
-		WorkManager work = office.getWorkManager(this.workName);
-		assertNotNull("Must have WorkManager", work);
+		// Ensure able to obtain FunctionManager
+		FunctionManager function = office.getFunctionManager("anotherTask");
+		assertNotNull("Must have FunctionManager", function);
 	}
 
 	/**
-	 * Ensures throws exception on unknown {@link WorkManager}.
+	 * Ensures throws exception on unknown {@link FunctionManager}.
 	 */
-	public void testUnknownWork() throws UnknownOfficeException {
+	public void testUnknownFunction() throws UnknownOfficeException {
 
 		// Obtain the Office
 		Office office = this.officeFloor.getOffice(this.officeName);
 
-		final String unknownWorkName = "Unknown Work";
+		final String unknownFunctionName = "Unknown Function";
 		try {
-			office.getWorkManager(unknownWorkName);
-			fail("Should not be able to obtain unknown WorkManager");
-		} catch (UnknownWorkException ex) {
-			assertEquals("Incorrect work", unknownWorkName, ex
-					.getUnknownWorkName());
-			assertEquals("Incorrect cause", "Unknown Work '" + unknownWorkName
-					+ "'", ex.getMessage());
+			office.getFunctionManager(unknownFunctionName);
+			fail("Should not be able to obtain unknown FunctionManager");
+		} catch (UnknownFunctionException ex) {
+			assertEquals("Incorrect function", unknownFunctionName, ex.getUnknownFunctionName());
+			assertEquals("Incorrect cause", "Unknown Function '" + unknownFunctionName + "'", ex.getMessage());
 		}
 	}
 
 	/**
-	 * Ensure able to obtain {@link Work} initial parameter type.
+	 * Ensure able to obtain {@link ManagedFunction} differentiator.
 	 */
-	public void testWorkParameterType() throws UnknownOfficeException,
-			UnknownWorkException, NoInitialTaskException {
+	public void testTaskDifferentiator() throws UnknownOfficeException, UnknownFunctionException {
 
-		// Obtain the Work Manager
-		WorkManager work = this.officeFloor.getOffice(this.officeName)
-				.getWorkManager(this.workName);
-
-		// Ensure correct work parameter type
-		assertEquals("Incorrect parameter type", Connection.class, work
-				.getWorkParameterType());
-	}
-
-	/**
-	 * Ensures the initial {@link Task} is invoked.
-	 */
-	public void testInvokeWork() throws UnknownOfficeException,
-			UnknownWorkException, NoInitialTaskException,
-			InvalidParameterTypeException {
-
-		// Obtain the Work Manager
-		WorkManager work = this.officeFloor.getOffice(this.officeName)
-				.getWorkManager(this.workName);
-
-		// Invoke the Work
-		Connection connection = this.createMock(Connection.class);
-		ProcessFuture future = work.invokeWork(connection);
-
-		// Ensure initial task invoked
-		assertTrue("Process should be complete (as passive team)", future
-				.isComplete());
-		assertTrue("Initial task should be invoked",
-				this.mockWork.isInitialTaskInvoked);
-	}
-
-	/**
-	 * Ensure not able to use {@link Work} directly.
-	 */
-	public void testFailWorkAsNoInitialTask() throws UnknownOfficeException,
-			UnknownWorkException, InvalidParameterTypeException {
-
-		// Obtain the Work Manager
-		WorkManager work = this.officeFloor.getOffice(this.officeName)
-				.getWorkManager(this.noInitialTaskWorkName);
-
-		// Ensure not able to obtain initial parameter type
-		try {
-			work.getWorkParameterType();
-			fail("Should not able to obtain work parameter type");
-		} catch (NoInitialTaskException ex) {
-			assertEquals("Incorrect cause", "No initial task for work '"
-					+ this.noInitialTaskWorkName + "'", ex.getMessage());
-		}
-
-		// Ensure not able to invoke Work
-		try {
-			work.invokeWork(null);
-			fail("Should not able to invoke Work");
-		} catch (NoInitialTaskException ex) {
-			assertEquals("Incorrect cause", "No initial task for work '"
-					+ this.noInitialTaskWorkName + "'", ex.getMessage());
-		}
-	}
-
-	/**
-	 * Ensure indicates if invalid parameter type.
-	 */
-	public void testFailInvokeWorkAsInvalidParameterType()
-			throws UnknownOfficeException, UnknownWorkException,
-			NoInitialTaskException {
-
-		// Obtain the Work Manager
-		WorkManager work = this.officeFloor.getOffice(this.officeName)
-				.getWorkManager(this.workName);
-
-		// Ensure fail on invalid parameter
-		try {
-			work.invokeWork("Invalid parameter type");
-			fail("Should not be successful on invalid parameter type");
-		} catch (InvalidParameterTypeException ex) {
-			assertEquals("Incorrect failure", "Invalid parameter type (input="
-					+ String.class.getName() + ", required="
-					+ Connection.class.getName() + ")", ex.getMessage());
-		}
-	}
-
-	/**
-	 * Ensure able to obtain {@link Task} listing.
-	 */
-	public void testTaskListing() throws UnknownOfficeException,
-			UnknownWorkException, UnknownTaskException {
-
-		// Obtain the Work
-		WorkManager work = this.officeFloor.getOffice(this.officeName)
-				.getWorkManager(this.workName);
-
-		// Ensure correct task list
-		String[] taskNames = work.getTaskNames();
-		this.assertNames(taskNames, "initialTask", "anotherTask");
-
-		// Ensure able to obtain TaskManager
-		TaskManager task = work.getTaskManager("anotherTask");
-		assertNotNull("Must have TaskManager", task);
-	}
-
-	/**
-	 * Ensures throws exception on unknown {@link TaskManager}.
-	 */
-	public void testUnknownTask() throws UnknownOfficeException,
-			UnknownWorkException {
-
-		// Obtain the Work
-		WorkManager work = this.officeFloor.getOffice(this.officeName)
-				.getWorkManager(this.workName);
-
-		final String unknownTaskName = "Unknown Task";
-		try {
-			work.getTaskManager(unknownTaskName);
-			fail("Should not be able to obtain unknown TaskManager");
-		} catch (UnknownTaskException ex) {
-			assertEquals("Incorrect task", unknownTaskName, ex
-					.getUnknownTaskName());
-			assertEquals("Incorrect cause", "Unknown Task '" + unknownTaskName
-					+ "'", ex.getMessage());
-		}
-	}
-
-	/**
-	 * Ensure able to obtain {@link Task} differentiator.
-	 */
-	public void testTaskDifferentiator() throws UnknownOfficeException,
-			UnknownWorkException, UnknownTaskException {
-
-		// Obtain the Task Manager
-		TaskManager task = this.officeFloor.getOffice(this.officeName)
-				.getWorkManager(this.workName).getTaskManager("initialTask");
+		// Obtain the Function Manager
+		FunctionManager function = this.officeFloor.getOffice(this.officeName).getFunctionManager("initialTask");
 
 		// Ensure correct differentiator
-		assertEquals("Incorrect differentiator", this.differentiator, task
-				.getDifferentiator());
+		assertEquals("Incorrect differentiator", this.differentiator, function.getDifferentiator());
 	}
 
 	/**
-	 * Ensure able to obtain {@link Task} parameter type.
+	 * Ensure able to obtain {@link ManagedFunction} parameter type.
 	 */
-	public void testTaskParameterType() throws UnknownOfficeException,
-			UnknownWorkException, UnknownTaskException {
+	public void testTaskParameterType() throws UnknownOfficeException, UnknownFunctionException {
 
-		// Obtain the Task Manager
-		TaskManager task = this.officeFloor.getOffice(this.officeName)
-				.getWorkManager(this.workName).getTaskManager("initialTask");
+		// Obtain the Function Manager
+		FunctionManager function = this.officeFloor.getOffice(this.officeName).getFunctionManager("initialTask");
 
 		// Ensure correct parameter type
-		assertEquals("Incorrect parameter type", Connection.class, task
-				.getParameterType());
+		assertEquals("Incorrect parameter type", Connection.class, function.getParameterType());
 	}
 
 	/**
-	 * Ensure able to invoke the {@link Task}.
+	 * Ensure able to invoke the {@link ManagedFunction}.
 	 */
-	public void testInvokeTask() throws UnknownOfficeException,
-			UnknownWorkException, UnknownTaskException,
-			InvalidParameterTypeException {
+	public void testInvokeFunction()
+			throws UnknownOfficeException, UnknownFunctionException, InvalidParameterTypeException {
 
-		// Obtain the Task Manager
-		TaskManager task = this.officeFloor.getOffice(this.officeName)
-				.getWorkManager(this.workName).getTaskManager("initialTask");
+		// Obtain the Function Manager
+		FunctionManager function = this.officeFloor.getOffice(this.officeName).getFunctionManager("initialTask");
 
-		// Invoke the Task
+		// Invoke the Function
 		Connection connection = this.createMock(Connection.class);
-		ProcessFuture future = task.invokeTask(connection);
+		function.invokeProcess(connection, null);
 
-		// Ensure task invoked
-		assertTrue("Process should be complete (as passive team)", future
-				.isComplete());
+		// Ensure function invoked
 		assertTrue("Task should be invoked", this.mockWork.isInitialTaskInvoked);
 	}
 
 	/**
 	 * Ensure indicates if invalid parameter type.
 	 */
-	public void testFailInvokeTaskAsInvalidParameterType()
-			throws UnknownOfficeException, UnknownWorkException,
-			UnknownTaskException {
+	public void testFailInvokeFunctionAsInvalidParameterType() throws UnknownOfficeException, UnknownFunctionException {
 
-		// Obtain the Task Manager
-		TaskManager task = this.officeFloor.getOffice(this.officeName)
-				.getWorkManager(this.workName).getTaskManager("initialTask");
+		// Obtain the Function Manager
+		FunctionManager function = this.officeFloor.getOffice(this.officeName).getFunctionManager("initialTask");
 
 		// Ensure fail on invalid parameter
 		try {
-			task.invokeTask("Invalid parameter type");
+			function.invokeProcess("Invalid parameter type", null);
 			fail("Should not be successful on invalid parameter type");
 		} catch (InvalidParameterTypeException ex) {
-			assertEquals("Incorrect failure", "Invalid parameter type (input="
-					+ String.class.getName() + ", required="
+			assertEquals("Incorrect failure", "Invalid parameter type (input=" + String.class.getName() + ", required="
 					+ Connection.class.getName() + ")", ex.getMessage());
 		}
 	}
@@ -403,8 +224,7 @@ public class OfficeFloorExternalManagementTest extends
 	private void assertNames(String[] actual, String... expected) {
 
 		// Ensure same length
-		assertEquals("Incorrect number of names", expected.length,
-				actual.length);
+		assertEquals("Incorrect number of names", expected.length, actual.length);
 
 		// Sort
 		Arrays.sort(expected);
@@ -417,17 +237,17 @@ public class OfficeFloorExternalManagementTest extends
 	}
 
 	/**
-	 * Mock {@link Work}.
+	 * Mock functionality.
 	 */
 	public class MockWork {
 
 		/**
-		 * Indicates if the initial {@link Task} has been invoked.
+		 * Indicates if the initial {@link ManagedFunction} has been invoked.
 		 */
 		public boolean isInitialTaskInvoked = false;
 
 		/**
-		 * Initial {@link Task}.
+		 * Initial {@link ManagedFunction}.
 		 * 
 		 * @param parameter
 		 *            Parameter with distinct type for identifying in testing.

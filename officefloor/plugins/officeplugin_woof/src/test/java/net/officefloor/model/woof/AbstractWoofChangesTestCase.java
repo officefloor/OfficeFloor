@@ -25,11 +25,12 @@ import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.configuration.ConfigurationContext;
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.WritableConfigurationItem;
+import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationContext;
+import net.officefloor.configuration.impl.memory.MemoryConfigurationContext;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
-import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
-import net.officefloor.model.impl.repository.memory.MemoryConfigurationItem;
-import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.test.changes.AbstractChangesTestCase;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityDependencyType;
@@ -42,8 +43,7 @@ import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoaderUtil;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractWoofChangesTestCase extends
-		AbstractChangesTestCase<WoofModel, WoofChanges> {
+public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCase<WoofModel, WoofChanges> {
 
 	/**
 	 * Creates the {@link WoofTemplateChangeContext}.
@@ -53,14 +53,11 @@ public abstract class AbstractWoofChangesTestCase extends
 	private static WoofTemplateChangeContext createWoofTemplateChangeContext() {
 
 		// Create the context
-		ClassLoader classLoader = Thread.currentThread()
-				.getContextClassLoader();
-		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(
-				classLoader);
-		WoofChangeIssues issues = WoofTemplateExtensionLoaderUtil
-				.getWoofChangeIssues();
-		WoofTemplateChangeContext context = new WoofTemplateChangeContextImpl(
-				false, classLoader, configurationContext, issues);
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(classLoader, null);
+		WoofChangeIssues issues = WoofTemplateExtensionLoaderUtil.getWoofChangeIssues();
+		WoofTemplateChangeContext context = new WoofTemplateChangeContextImpl(false, classLoader, configurationContext,
+				issues);
 
 		// Return the context
 		return context;
@@ -106,10 +103,10 @@ public abstract class AbstractWoofChangesTestCase extends
 	}
 
 	@Override
-	protected WoofModel retrieveModel(ConfigurationItem configurationItem)
-			throws Exception {
-		return new WoofRepositoryImpl(new ModelRepositoryImpl())
-				.retrieveWoOF(configurationItem);
+	protected WoofModel retrieveModel(ConfigurationItem configurationItem) throws Exception {
+		WoofModel woof = new WoofModel();
+		new WoofRepositoryImpl(new ModelRepositoryImpl()).retrieveWoof(woof, configurationItem);
+		return woof;
 	}
 
 	@Override
@@ -118,8 +115,7 @@ public abstract class AbstractWoofChangesTestCase extends
 	}
 
 	@Override
-	protected void assertModels(WoofModel expected, WoofModel actual)
-			throws Exception {
+	protected void assertModels(WoofModel expected, WoofModel actual) throws Exception {
 
 		// Determine if output XML of actual
 		if (this.isPrintMessages()) {
@@ -129,17 +125,17 @@ public abstract class AbstractWoofChangesTestCase extends
 
 			// Provide details of expected model
 			this.printMessage("------------------ EXPECTED ------------------");
-			ConfigurationItem expectedConfig = new MemoryConfigurationItem();
-			new WoofRepositoryImpl(new ModelRepositoryImpl()).storeWoOF(
-					expected, expectedConfig);
-			this.printMessage(expectedConfig.getConfiguration());
+			WritableConfigurationItem expectedConfig = MemoryConfigurationContext
+					.createWritableConfigurationItem("location");
+			new WoofRepositoryImpl(new ModelRepositoryImpl()).storeWoof(expected, expectedConfig);
+			this.printMessage(expectedConfig.getReader());
 
 			// Provide details of actual model
 			this.printMessage("------------------- ACTUAL -------------------");
-			ConfigurationItem actualConfig = new MemoryConfigurationItem();
-			new WoofRepositoryImpl(new ModelRepositoryImpl()).storeWoOF(actual,
-					actualConfig);
-			this.printMessage(actualConfig.getConfiguration());
+			WritableConfigurationItem actualConfig = MemoryConfigurationContext
+					.createWritableConfigurationItem("location");
+			new WoofRepositoryImpl(new ModelRepositoryImpl()).storeWoof(actual, actualConfig);
+			this.printMessage(actualConfig.getReader());
 			this.printMessage("================ END COMPARE =================");
 		}
 
@@ -154,8 +150,7 @@ public abstract class AbstractWoofChangesTestCase extends
 	 *            {@link SectionTypeConstructor}.
 	 * @return {@link SectionType}.
 	 */
-	protected SectionType constructSectionType(
-			SectionTypeConstructor constructor) {
+	protected SectionType constructSectionType(SectionTypeConstructor constructor) {
 
 		// Construct and return the office section
 		SectionTypeContextImpl context = new SectionTypeContextImpl();
@@ -202,8 +197,7 @@ public abstract class AbstractWoofChangesTestCase extends
 		 * @param isEscalationOnly
 		 *            Flag indicating if escalation only.
 		 */
-		void addSectionOutput(String name, Class<?> argumentType,
-				boolean isEscalationOnly);
+		void addSectionOutput(String name, Class<?> argumentType, boolean isEscalationOnly);
 
 		/**
 		 * Adds an {@link SectionObjectType}.
@@ -215,15 +209,13 @@ public abstract class AbstractWoofChangesTestCase extends
 		 * @param typeQualifier
 		 *            Type qualifier.
 		 */
-		void addSectionObject(String name, Class<?> objectType,
-				String typeQualifier);
+		void addSectionObject(String name, Class<?> objectType, String typeQualifier);
 	}
 
 	/**
 	 * {@link SectionTypeContext} implementation.
 	 */
-	private class SectionTypeContextImpl implements SectionTypeContext,
-			SectionType {
+	private class SectionTypeContextImpl implements SectionTypeContext, SectionType {
 
 		/**
 		 * {@link SectionInputType} instances.
@@ -246,23 +238,18 @@ public abstract class AbstractWoofChangesTestCase extends
 
 		@Override
 		public void addSectionInput(String name, Class<?> parameterType) {
-			this.inputs.add(new SectionTypeItem(name,
-					(parameterType == null ? null : parameterType.getName())));
+			this.inputs.add(new SectionTypeItem(name, (parameterType == null ? null : parameterType.getName())));
 		}
 
 		@Override
-		public void addSectionOutput(String name, Class<?> argumentType,
-				boolean isEscalationOnly) {
-			this.outputs.add(new SectionTypeItem(name,
-					(argumentType == null ? null : argumentType.getName()),
+		public void addSectionOutput(String name, Class<?> argumentType, boolean isEscalationOnly) {
+			this.outputs.add(new SectionTypeItem(name, (argumentType == null ? null : argumentType.getName()),
 					isEscalationOnly));
 		}
 
 		@Override
-		public void addSectionObject(String name, Class<?> objectType,
-				String typeQualifier) {
-			this.objects.add(new SectionTypeItem(name, objectType.getName(),
-					typeQualifier));
+		public void addSectionObject(String name, Class<?> objectType, String typeQualifier) {
+			this.objects.add(new SectionTypeItem(name, objectType.getName(), typeQualifier));
 		}
 
 		/*
@@ -288,8 +275,7 @@ public abstract class AbstractWoofChangesTestCase extends
 	/**
 	 * Item from {@link SectionType}.
 	 */
-	private class SectionTypeItem implements SectionInputType,
-			SectionOutputType, SectionObjectType {
+	private class SectionTypeItem implements SectionInputType, SectionOutputType, SectionObjectType {
 
 		/**
 		 * Name.
@@ -420,12 +406,11 @@ public abstract class AbstractWoofChangesTestCase extends
 	 * @return {@link HttpSecurityType}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected <C> HttpSecurityType<HttpSecurity, C, ?, ?> constructHttpSecurityType(
-			Class<C> credentialsType, HttpSecurityTypeConstructor constructor) {
+	protected <C> HttpSecurityType<HttpSecurity, C, ?, ?> constructHttpSecurityType(Class<C> credentialsType,
+			HttpSecurityTypeConstructor constructor) {
 
 		// Construct and return the office section
-		HttpSecurityTypeContextImpl<C, ?, ?> context = new HttpSecurityTypeContextImpl(
-				credentialsType);
+		HttpSecurityTypeContextImpl<C, ?, ?> context = new HttpSecurityTypeContextImpl(credentialsType);
 		constructor.construct(context);
 		return context;
 	}
@@ -461,8 +446,7 @@ public abstract class AbstractWoofChangesTestCase extends
 		 * @param key
 		 *            Dependency key.
 		 */
-		void addDependency(String dependencyName, Class<?> dependencyType,
-				String typeQualifier, Enum<?> key);
+		void addDependency(String dependencyName, Class<?> dependencyType, String typeQualifier, Enum<?> key);
 
 		/**
 		 * Adds a {@link HttpSecurityFlowType}.
@@ -481,8 +465,7 @@ public abstract class AbstractWoofChangesTestCase extends
 	 * {@link HttpSecurityTypeContext} implementation.
 	 */
 	private class HttpSecurityTypeContextImpl<C, D extends Enum<D>, F extends Enum<F>>
-			implements HttpSecurityTypeContext,
-			HttpSecurityType<HttpSecurity, C, D, F> {
+			implements HttpSecurityTypeContext, HttpSecurityType<HttpSecurity, C, D, F> {
 
 		/**
 		 * Type of credentials.
@@ -515,20 +498,17 @@ public abstract class AbstractWoofChangesTestCase extends
 
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public void addDependency(String dependencyName,
-				Class<?> dependencyType, String typeQualifier, Enum<?> key) {
+		public void addDependency(String dependencyName, Class<?> dependencyType, String typeQualifier, Enum<?> key) {
 			// Create and register the dependency (using next index)
-			this.dependencies.add(new HttpSecurityTypeItem(dependencyName,
-					dependencyType, typeQualifier, key, this.dependencies
-							.size()));
+			this.dependencies.add(new HttpSecurityTypeItem(dependencyName, dependencyType, typeQualifier, key,
+					this.dependencies.size()));
 		}
 
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public void addFlow(String flowName, Class<?> argumentType, Enum<?> key) {
 			// Create and register the flow (using next index)
-			this.flows.add(new HttpSecurityTypeItem(flowName, argumentType,
-					null, key, this.flows.size()));
+			this.flows.add(new HttpSecurityTypeItem(flowName, argumentType, null, key, this.flows.size()));
 		}
 
 		/*
@@ -548,15 +528,12 @@ public abstract class AbstractWoofChangesTestCase extends
 		@Override
 		@SuppressWarnings("unchecked")
 		public HttpSecurityDependencyType<D>[] getDependencyTypes() {
-			return this.dependencies
-					.toArray(new HttpSecurityDependencyType[this.dependencies
-							.size()]);
+			return this.dependencies.toArray(new HttpSecurityDependencyType[this.dependencies.size()]);
 		}
 
 		@Override
 		public HttpSecurityFlowType<?>[] getFlowTypes() {
-			return this.flows.toArray(new HttpSecurityFlowType[this.flows
-					.size()]);
+			return this.flows.toArray(new HttpSecurityFlowType[this.flows.size()]);
 		}
 	}
 
@@ -564,8 +541,8 @@ public abstract class AbstractWoofChangesTestCase extends
 	 * Item for {@link HttpSecurityDependencyType} and
 	 * {@link HttpSecurityFlowType}.
 	 */
-	private class HttpSecurityTypeItem<E extends Enum<E>> implements
-			HttpSecurityDependencyType<E>, HttpSecurityFlowType<E> {
+	private class HttpSecurityTypeItem<E extends Enum<E>>
+			implements HttpSecurityDependencyType<E>, HttpSecurityFlowType<E> {
 
 		/**
 		 * Name of item.
@@ -606,8 +583,7 @@ public abstract class AbstractWoofChangesTestCase extends
 		 * @param index
 		 *            Index.
 		 */
-		public HttpSecurityTypeItem(String itemName, Class<?> itemType,
-				String typeQualifier, E key, int index) {
+		public HttpSecurityTypeItem(String itemName, Class<?> itemType, String typeQualifier, E key, int index) {
 			this.itemName = itemName;
 			this.itemType = itemType;
 			this.typeQualifier = typeQualifier;

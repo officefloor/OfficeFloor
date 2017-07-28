@@ -20,23 +20,6 @@ package net.officefloor.plugin.web.http.security.integrate;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import net.officefloor.autowire.AutoWireOfficeFloor;
-import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.section.clazz.Parameter;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
-import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSection;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
-import net.officefloor.plugin.web.http.security.HttpAuthentication;
-import net.officefloor.plugin.web.http.security.HttpCredentials;
-import net.officefloor.plugin.web.http.security.HttpSecurity;
-import net.officefloor.plugin.web.http.security.HttpSecuritySource;
-import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
-
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -44,14 +27,30 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
+import net.officefloor.plugin.web.http.application.HttpSecuritySection;
+import net.officefloor.plugin.web.http.application.WebArchitect;
+import net.officefloor.plugin.web.http.security.HttpAuthentication;
+import net.officefloor.plugin.web.http.security.HttpCredentials;
+import net.officefloor.plugin.web.http.security.HttpSecurity;
+import net.officefloor.plugin.web.http.security.HttpSecuritySource;
+import net.officefloor.plugin.web.http.test.CompileWebContext;
+import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
+
 /**
  * Abstract functionality for integration testing of the
  * {@link HttpSecuritySource} implementations.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractHttpSecurityIntegrateTestCase extends
-		OfficeFrameTestCase {
+public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Port to use for testing.
@@ -75,48 +74,49 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends
 	private boolean isDigestHttpClientCookieBug = false;
 
 	/**
-	 * {@link AutoWireOfficeFloor}.
+	 * {@link OfficeFloor}.
 	 */
-	private AutoWireOfficeFloor officeFloor;
+	private OfficeFloor officeFloor;
 
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
 		// Configure the application
-		WebAutoWireApplication source = new HttpServerAutoWireOfficeFloorSource(
-				PORT);
+		WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
+		compiler.officeFloor((context) -> {
+			HttpTestUtil.configureTestHttpServer(context, PORT, "SERVICE", "service");
+		});
+		compiler.web((context) -> {
+			WebArchitect web = context.getWebArchitect();
 
-		// Configure the HTTP Security
-		assertNull("Should not have HTTP Security configured",
-				source.getHttpSecurity());
-		HttpSecurityAutoWireSection security = this
-				.configureHttpSecurity(source);
+			// Configure the HTTP Security
+			HttpSecuritySection security = this.configureHttpSecurity(context);
 
-		// Add servicing methods
-		AutoWireSection section = source.addSection("SERVICE",
-				ClassSectionSource.class.getName(), Servicer.class.getName());
-		source.linkUri("service", section, "service");
-		source.linkUri("logout", section, "logout");
+			// Add servicing methods
+			OfficeSection section = context.addSection("SERVICE", Servicer.class);
+			web.linkUri("service", section.getOfficeSectionInput("service"));
+			web.linkUri("logout", section.getOfficeSectionInput("logout"));
 
-		// Determine if security configured
-		if (security != null) {
-			source.link(security, "Failure", section, "handleFailure");
-		}
+			// Determine if security configured
+			if (security != null) {
+				context.getOfficeArchitect().link(security.getOfficeSection().getOfficeSectionOutput("Failure"),
+						section.getOfficeSectionInput("handleFailure"));
+			}
+		});
 
 		// Start the office
-		this.officeFloor = source.openOfficeFloor();
+		this.officeFloor = compiler.compileAndOpenOfficeFloor();
 	}
 
 	/**
-	 * Configures the {@link HttpSecurityAutoWireSection}.
+	 * Configures the {@link HttpSecuritySection}.
 	 * 
-	 * @param application
-	 *            {@link WebAutoWireApplication}.
-	 * @return Confgured {@link HttpSecurityAutoWireSection}.
+	 * @param context
+	 *            {@link CompileWebContext}.
+	 * @return Configured {@link HttpSecuritySection}.
 	 */
-	protected abstract HttpSecurityAutoWireSection configureHttpSecurity(
-			WebAutoWireApplication application) throws Exception;
+	protected abstract HttpSecuritySection configureHttpSecurity(CompileWebContext context);
 
 	@Override
 	protected void tearDown() throws Exception {
@@ -145,16 +145,15 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends
 	 * @throws IOException
 	 *             If fails to use credentials.
 	 */
-	protected CredentialsProvider useCredentials(String realm, String scheme,
-			String username, String password) throws IOException {
+	protected CredentialsProvider useCredentials(String realm, String scheme, String username, String password)
+			throws IOException {
 
 		// Close the existing client
 		this.client.close();
 
 		// Use client with credentials
 		HttpClientBuilder builder = HttpClientBuilder.create();
-		CredentialsProvider provider = HttpTestUtil.configureCredentials(
-				builder, realm, scheme, username, password);
+		CredentialsProvider provider = HttpTestUtil.configureCredentials(builder, realm, scheme, username, password);
 		this.client = builder.build();
 
 		// Reset the client context
@@ -179,13 +178,11 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends
 	 * @param expectedBodyContent
 	 *            Expected body content.
 	 */
-	protected void doRequest(String requestUriPath, int expectedStatus,
-			String expectedBodyContent) {
+	protected void doRequest(String requestUriPath, int expectedStatus, String expectedBodyContent) {
 		try {
 
 			// Undertake the request
-			HttpGet request = new HttpGet("http://localhost:" + PORT + "/"
-					+ requestUriPath);
+			HttpGet request = new HttpGet("http://localhost:" + PORT + "/" + requestUriPath);
 
 			// Execute the method
 			org.apache.http.HttpResponse response;
@@ -214,8 +211,8 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends
 			String body = HttpTestUtil.getEntityBody(response);
 
 			// Verify response
-			assertEquals("Should be successful. Response: " + body + " ["
-					+ response.getStatusLine().getReasonPhrase() + "]",
+			assertEquals(
+					"Should be successful. Response: " + body + " [" + response.getStatusLine().getReasonPhrase() + "]",
 					expectedStatus, status);
 			assertEquals("Incorrect response body", expectedBodyContent, body);
 
@@ -240,14 +237,9 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends
 		 * @throws IOException
 		 *             If fails.
 		 */
-		public void service(HttpSecurity security,
-				ServerHttpConnection connection) throws IOException {
-			connection
-					.getHttpResponse()
-					.getEntityWriter()
-					.write("Serviced for "
-							+ (security == null ? "guest" : security
-									.getRemoteUser()));
+		public void service(HttpSecurity security, ServerHttpConnection connection) throws IOException {
+			connection.getHttpResponse().getEntityWriter()
+					.write("Serviced for " + (security == null ? "guest" : security.getRemoteUser()));
 		}
 
 		/**
@@ -260,8 +252,7 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends
 		 * @throws IOException
 		 *             If fails.
 		 */
-		public void logout(
-				HttpAuthentication<HttpSecurity, HttpCredentials> authentication,
+		public void logout(HttpAuthentication<HttpSecurity, HttpCredentials> authentication,
 				ServerHttpConnection connection) throws IOException {
 
 			// Log out
@@ -281,10 +272,8 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends
 		 * @throws IOException
 		 *             If fails.
 		 */
-		public void handleFailure(@Parameter Throwable failure,
-				ServerHttpConnection connection) throws IOException {
-			PrintWriter writer = new PrintWriter(connection.getHttpResponse()
-					.getEntityWriter());
+		public void handleFailure(@Parameter Throwable failure, ServerHttpConnection connection) throws IOException {
+			PrintWriter writer = new PrintWriter(connection.getHttpResponse().getEntityWriter());
 			writer.write("ERROR: ");
 			failure.printStackTrace(writer);
 			writer.flush();

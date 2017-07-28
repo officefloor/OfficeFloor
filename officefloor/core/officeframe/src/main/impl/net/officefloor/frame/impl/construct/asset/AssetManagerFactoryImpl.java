@@ -22,11 +22,14 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.execute.asset.AssetManagerImpl;
-import net.officefloor.frame.impl.execute.asset.OfficeManagerImpl;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.OfficeManager;
+import net.officefloor.frame.internal.structure.FunctionLoop;
+import net.officefloor.frame.internal.structure.OfficeClock;
+import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * {@link AssetManagerFactory} implementation.
@@ -41,20 +44,54 @@ public class AssetManagerFactoryImpl implements AssetManagerFactory {
 	private final Map<String, AssetManager> registry = new HashMap<String, AssetManager>();
 
 	/**
-	 * {@link OfficeManagerImpl} to register the created {@link AssetManager}
-	 * instances.
+	 * {@link ProcessState} for managing the {@link Office} where all mutations
+	 * of the {@link Office} are undertaken on its main {@link ThreadState}.
 	 */
-	private final OfficeManager officeManager;
+	private final ProcessState officeManagerProcessState;
 
 	/**
-	 * Initiate.
-	 * 
-	 * @param officeManager
-	 *            {@link OfficeManager} to register the created
-	 *            {@link AssetManager} instances.
+	 * {@link OfficeClock}.
 	 */
-	public AssetManagerFactoryImpl(OfficeManager officeManager) {
-		this.officeManager = officeManager;
+	private final OfficeClock officeClock;
+
+	/**
+	 * {@link FunctionLoop}.
+	 */
+	private final FunctionLoop functionLoop;
+
+	/**
+	 * Flag to ensure no further {@link AssetManager} instances are created once
+	 * the {@link AssetManager} array is created.
+	 */
+	private boolean isAssetManagerListCreated = false;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param officeManagerProcessState
+	 *            {@link ProcessState} for managing the {@link Office} where all
+	 *            mutations of the {@link Office} are undertaken on its main
+	 *            {@link ThreadState}.
+	 * @param officeClock
+	 *            {@link OfficeClock}.
+	 * @param functionLoop
+	 *            {@link FunctionLoop}.
+	 */
+	public AssetManagerFactoryImpl(ProcessState officeManagerProcessState, OfficeClock officeClock,
+			FunctionLoop functionLoop) {
+		this.officeManagerProcessState = officeManagerProcessState;
+		this.officeClock = officeClock;
+		this.functionLoop = functionLoop;
+	}
+
+	/**
+	 * Obtain all the registered {@link AssetManager} instances.
+	 * 
+	 * @return Registered {@link AssetManager} instances.
+	 */
+	public AssetManager[] getAssetManagers() {
+		this.isAssetManagerListCreated = true;
+		return this.registry.values().stream().toArray(AssetManager[]::new);
 	}
 
 	/*
@@ -62,29 +99,31 @@ public class AssetManagerFactoryImpl implements AssetManagerFactory {
 	 */
 
 	@Override
-	public AssetManager createAssetManager(AssetType assetType,
-			String assetName, String responsibility, OfficeFloorIssues issues) {
+	public AssetManager createAssetManager(AssetType assetType, String assetName, String responsibility,
+			OfficeFloorIssues issues) {
 
 		// Create the name of the asset manager
-		String assetManagerName = assetType.toString() + ":" + assetName + "["
-				+ responsibility + "]";
+		String assetManagerName = assetType.toString() + ":" + assetName + "[" + responsibility + "]";
+
+		// Ensure will be included in the list
+		if (this.isAssetManagerListCreated) {
+			throw new IllegalStateException("Can not create " + AssetManager.class.getSimpleName() + " "
+					+ assetManagerName + " as list already generated");
+		}
 
 		// Determine if manager already available for responsibility over asset
 		if (this.registry.get(assetManagerName) != null) {
-			issues.addIssue(assetType, assetName, AssetManager.class
-					.getSimpleName()
-					+ " already responsible for '" + responsibility + "'");
+			issues.addIssue(assetType, assetName,
+					AssetManager.class.getSimpleName() + " already responsible for '" + responsibility + "'");
 			return null; // can not carry on
 		}
 
 		// Create the asset manager
-		AssetManager assetManager = new AssetManagerImpl(this.officeManager);
+		AssetManager assetManager = new AssetManagerImpl(this.officeManagerProcessState, this.officeClock,
+				this.functionLoop);
 
 		// Register the asset manager
 		this.registry.put(assetManagerName, assetManager);
-
-		// Register the asset manager with the office manager
-		this.officeManager.registerAssetManager(assetManager);
 
 		// Return the asset manager
 		return assetManager;

@@ -17,7 +17,7 @@
  */
 package net.officefloor.tutorials.presentation;
 
-import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.section.clazz.NextFunction;
 
 /**
  * POJO for presentation.
@@ -26,7 +26,7 @@ import net.officefloor.plugin.section.clazz.NextTask;
  */
 public class PurchasePojo {
 
-	@NextTask("processed")
+	@NextFunction("processed")
 	public void purchase() {
 	}
 

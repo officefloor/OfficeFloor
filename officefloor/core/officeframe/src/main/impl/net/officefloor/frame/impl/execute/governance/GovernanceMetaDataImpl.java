@@ -17,43 +17,32 @@
  */
 package net.officefloor.frame.impl.execute.governance;
 
-import net.officefloor.frame.api.build.GovernanceFactory;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.job.JobNodeActivatableSetImpl;
-import net.officefloor.frame.internal.structure.ActiveGovernanceControl;
-import net.officefloor.frame.internal.structure.ActiveGovernanceManager;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.governance.GovernanceContext;
+import net.officefloor.frame.api.governance.GovernanceFactory;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.FunctionLogic;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
-import net.officefloor.frame.internal.structure.GovernanceControl;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
-import net.officefloor.frame.internal.structure.JobSequence;
-import net.officefloor.frame.internal.structure.ManagedObjectContainer;
-import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionLogic;
+import net.officefloor.frame.internal.structure.ManagedFunctionLogicContext;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.internal.structure.WorkContainer;
-import net.officefloor.frame.internal.structure.WorkMetaData;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * {@link GovernanceMetaData} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
-		GovernanceMetaData<I, F> {
-
-	/**
-	 * {@link GovernanceWork} as {@link WorkMetaData}.
-	 */
-	private static final WorkMetaData<Work> governanceWorkMetaData = new GovernanceWork();
+public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceMetaData<I, F> {
 
 	/**
 	 * Name of the {@link Governance}.
@@ -72,15 +61,14 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	private final TeamManagement responsibleTeam;
 
 	/**
-	 * {@link Team} to enable the worker ({@link Thread}) of the responsible
-	 * {@link Team} to continue on to execute the next {@link Job}.
+	 * {@link OfficeMetaData}.
 	 */
-	private final Team continueTeam;
+	private OfficeMetaData officeMetaData;
 
 	/**
 	 * {@link FlowMetaData} instances.
 	 */
-	private FlowMetaData<?>[] flowMetaData;
+	private FlowMetaData[] flowMetaData;
 
 	/**
 	 * {@link EscalationProcedure} for the {@link GovernanceActivity} failures.
@@ -97,41 +85,38 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	 * @param responsibleTeam
 	 *            {@link TeamManagement} of {@link Team} responsible for the
 	 *            {@link GovernanceActivity} instances.
-	 * @param continueTeam
-	 *            {@link Team} to enable the worker ({@link Thread}) of the
-	 *            responsible {@link Team} to continue on to execute the next
-	 *            {@link Job}.
 	 */
-	public GovernanceMetaDataImpl(String governanceName,
-			GovernanceFactory<? super I, F> governanceFactory,
-			TeamManagement responsibleTeam, Team continueTeam) {
+	public GovernanceMetaDataImpl(String governanceName, GovernanceFactory<? super I, F> governanceFactory,
+			TeamManagement responsibleTeam) {
 		this.governanceName = governanceName;
 		this.governanceFactory = governanceFactory;
 		this.responsibleTeam = responsibleTeam;
-		this.continueTeam = continueTeam;
 	}
 
 	/**
 	 * Loads the remaining state.
 	 * 
+	 * @param officeMetaData
+	 *            {@link OfficeMetaData}.
 	 * @param flowMetaData
 	 *            {@link FlowMetaData} instances.
 	 * @param escalationProcedure
 	 *            {@link EscalationProcedure}.
 	 */
-	public void loadRemainingState(FlowMetaData<?>[] flowMetaData,
+	public void loadOfficeMetaData(OfficeMetaData officeMetaData, FlowMetaData[] flowMetaData,
 			EscalationProcedure escalationProcedure) {
 		this.flowMetaData = flowMetaData;
 		this.escalationProcedure = escalationProcedure;
+		this.officeMetaData = officeMetaData;
 	}
 
 	/*
-	 * ======================= JobMetaData =============================
+	 * ============ ManagedFunctionContainerMetaData ==================
 	 */
 
 	@Override
-	public JobNodeActivatableSet createJobActivableSet() {
-		return new JobNodeActivatableSetImpl();
+	public String getFunctionName() {
+		return this.governanceName;
 	}
 
 	@Override
@@ -140,12 +125,7 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	}
 
 	@Override
-	public Team getContinueTeam() {
-		return this.continueTeam;
-	}
-
-	@Override
-	public TaskMetaData<?, ?, ?> getNextTaskInFlow() {
+	public ManagedFunctionMetaData<?, ?> getNextManagedFunctionMetaData() {
 		// Never a next task for governance activity
 		return null;
 	}
@@ -155,19 +135,28 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 		return this.escalationProcedure;
 	}
 
+	@Override
+	public OfficeMetaData getOfficeMetaData() {
+		return this.officeMetaData;
+	}
+
 	/*
 	 * ================== GovernanceMetaData ==========================
 	 */
 
 	@Override
-	public String getJobName() {
-		// TODO indicate type of governance action being undertaken
-		return Governance.class.getSimpleName() + "-" + this.governanceName;
+	public String getGovernanceName() {
+		return this.governanceName;
 	}
 
 	@Override
-	public String getGovernanceName() {
-		return this.governanceName;
+	public GovernanceContainer<I> createGovernanceContainer(ThreadState threadState, int governanceIndex) {
+		return new GovernanceContainerImpl<>(this, threadState, governanceIndex);
+	}
+
+	@Override
+	public ManagedFunctionLogic createGovernanceFunctionLogic(GovernanceActivity<F> activity) {
+		return new GovernanceFunctionLogic(activity);
 	}
 
 	@Override
@@ -176,68 +165,72 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	}
 
 	@Override
-	public GovernanceContainer<I, F> createGovernanceContainer(
-			ThreadState threadState, int processRegisteredIndex) {
-		return new GovernanceContainerImpl<I, F>(this, threadState,
-				processRegisteredIndex);
-	}
-
-	@Override
-	public ActiveGovernanceManager<I, F> createActiveGovernance(
-			GovernanceContainer<I, F> governanceContainer,
-			GovernanceControl<I, F> governanceControl, I extensionInterface,
-			ManagedObjectContainer managedobjectContainer,
-			WorkContainer<?> workContainer,
-			int managedObjectContainerRegisteredIndex) {
-		return new ActiveGovernanceImpl<I, F>(governanceContainer, this,
-				governanceControl, extensionInterface, managedobjectContainer,
-				workContainer, managedObjectContainerRegisteredIndex);
-	}
-
-	@Override
-	public GovernanceActivity<I, F> createActivateActivity(
-			GovernanceControl<I, F> governanceControl) {
-		return new ActivateGovernanceActivity<I, F>(this, governanceControl);
-	}
-
-	@Override
-	public GovernanceActivity<I, F> createGovernActivity(
-			ActiveGovernanceControl<F> activeGovernanceControl) {
-		return new GovernGovernanceActivity<I, F>(this, activeGovernanceControl);
-	}
-
-	@Override
-	public GovernanceActivity<I, F> createEnforceActivity(
-			GovernanceControl<I, F> governanceControl) {
-		return new EnforceGovernanceActivity<I, F>(this, governanceControl);
-	}
-
-	@Override
-	public GovernanceActivity<I, F> createDisregardActivity(
-			GovernanceControl<I, F> governanceControl) {
-		return new DisregardGovernanceActivity<I, F>(this, governanceControl);
-	}
-
-	@Override
-	public FlowMetaData<?> getFlow(int flowIndex) {
+	public FlowMetaData getFlow(int flowIndex) {
 		return this.flowMetaData[flowIndex];
 	}
 
-	@Override
-	public JobNode createGovernanceJob(JobSequence flow,
-			GovernanceActivity<I, F> governanceActivity,
-			JobNode parallelJobNodeOwner) {
+	/**
+	 * {@link ManagedFunctionLogic} to undertake the {@link GovernanceActivity}.
+	 */
+	private class GovernanceFunctionLogic implements ManagedFunctionLogic {
 
-		// Obtain the process state
-		ProcessState processState = flow.getThreadState().getProcessState();
+		/**
+		 * {@link GovernanceActivity}.
+		 */
+		private final GovernanceActivity<F> activity;
 
-		// Create the work container
-		WorkContainer<Work> workContainer = governanceWorkMetaData
-				.createWorkContainer(processState);
+		/**
+		 * Instantiate.
+		 * 
+		 * @param activity
+		 *            {@link GovernanceActivity}.
+		 */
+		public GovernanceFunctionLogic(GovernanceActivity<F> activity) {
+			this.activity = activity;
+		}
 
-		// Create and return the job
-		return new GovernanceJob<I, F, Work>(flow, workContainer, this,
-				parallelJobNodeOwner, governanceActivity);
+		/*
+		 * ================ ManagedFunctionContainer =======================
+		 */
+
+		@Override
+		public Object execute(final ManagedFunctionLogicContext context) throws Throwable {
+
+			// Create the governance context
+			GovernanceContext<F> governanceContext = new GovernanceContext<F>() {
+
+				@Override
+				public void doFlow(F key, Object parameter, FlowCallback callback) {
+					this.doFlow(key.ordinal(), parameter, callback);
+				}
+
+				@Override
+				public void doFlow(int flowIndex, Object parameter, FlowCallback callback) {
+
+					// Obtain the flow meta-data
+					FlowMetaData flowMetaData = GovernanceMetaDataImpl.this.flowMetaData[flowIndex];
+
+					// Undertake the flow
+					context.doFlow(flowMetaData, parameter, callback);
+				}
+			};
+
+			// Execute the activity
+			final FunctionState next = this.activity.doActivity(governanceContext);
+
+			// Specify next function
+			if (next != null) {
+				context.next(new FunctionLogic() {
+					@Override
+					public FunctionState execute(Flow flow) throws Throwable {
+						return next;
+					}
+				});
+			}
+
+			// No next function for governance
+			return null;
+		}
 	}
 
 }

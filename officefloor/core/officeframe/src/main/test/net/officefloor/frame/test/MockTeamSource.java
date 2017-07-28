@@ -22,14 +22,11 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.TeamBuilder;
-import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeam;
-import net.officefloor.frame.spi.TestSource;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
-import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.spi.team.source.TeamSourceContext;
-import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
+import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSourceContext;
+import net.officefloor.frame.api.team.source.TeamSourceSpecification;
 
 /**
  * Mock {@link TeamSource}.
@@ -38,40 +35,6 @@ import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
  */
 @TestSource
 public class MockTeamSource implements TeamSource {
-
-	/**
-	 * Creates a {@link TeamIdentifier} for testing.
-	 * 
-	 * @return {@link TeamIdentifier} for testing.
-	 */
-	public static TeamIdentifier createTeamIdentifier() {
-		return new TeamIdentifier() {
-		};
-	}
-
-	/**
-	 * Convenience method to create a {@link OnePersonTeam}.
-	 * 
-	 * @param teamName
-	 *            Name of the {@link Team}.
-	 * @return {@link OnePersonTeam}.
-	 */
-	public static OnePersonTeam createOnePersonTeam(String teamName) {
-		return new OnePersonTeam(teamName,
-				MockTeamSource.createTeamIdentifier(), 100);
-	}
-
-	/**
-	 * Convenience method to create a {@link WorkerPerTaskTeam}.
-	 * 
-	 * @param teamName
-	 *            Name of the {@link Team}.
-	 * @return {@link WorkerPerTaskTeam}
-	 */
-	public static WorkerPerTaskTeam createWorkerPerTaskTeam(String teamName) {
-		return new WorkerPerTaskTeam(teamName,
-				MockTeamSource.createTeamIdentifier());
-	}
 
 	/**
 	 * Property name to source the {@link Team}.
@@ -94,12 +57,10 @@ public class MockTeamSource implements TeamSource {
 	 *            {@link Team}.
 	 * @return {@link TeamBuilder}.
 	 */
-	public static TeamBuilder<?> bindTeamBuilder(
-			OfficeFloorBuilder officeFloorBuilder, String teamName, Team team) {
+	public static TeamBuilder<?> bindTeamBuilder(OfficeFloorBuilder officeFloorBuilder, String teamName, Team team) {
 
 		// Create the team builder
-		TeamBuilder<?> teamBuilder = officeFloorBuilder.addTeam(teamName,
-				MockTeamSource.class);
+		TeamBuilder<?> teamBuilder = officeFloorBuilder.addTeam(teamName, MockTeamSource.class);
 
 		// Bind team builder to team
 		teamBuilder.addProperty(TEAM_PROPERTY, teamName);

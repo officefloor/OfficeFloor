@@ -17,10 +17,6 @@
  */
 package net.officefloor.plugin.jndi.servlet;
 
-import junit.framework.TestCase;
-import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -28,6 +24,10 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.WebAppContext;
+
+import junit.framework.TestCase;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 
 /**
  * Ensure that {@link OfficeFloor} can be integrated into a Servlet.
@@ -52,8 +52,8 @@ public class ServletIntegrationTest extends TestCase {
 		// Start servlet container with servlet
 		this.server = new Server(this.port);
 		WebAppContext context = new WebAppContext();
-		context.setBaseResource(Resource.newClassPathResource(this.getClass()
-				.getPackage().getName().replace('.', '/')));
+		context.setBaseResource(
+				Resource.newClassPathResource(this.getClass().getPackage().getName().replace('.', '/')));
 		context.setContextPath("/");
 		context.setSessionHandler(new SessionHandler());
 		context.addServlet(MockServlet.class, "/");
@@ -76,17 +76,14 @@ public class ServletIntegrationTest extends TestCase {
 		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
 
 			// Send request
-			HttpResponse response = client.execute(new HttpGet(
-					"http://localhost:" + this.port + "/"));
+			HttpResponse response = client.execute(new HttpGet("http://localhost:" + this.port + "/"));
 
 			// Ensure successful response
-			assertEquals("Unsuccessful request", 200, response.getStatusLine()
-					.getStatusCode());
+			assertEquals("Unsuccessful request", 200, response.getStatusLine().getStatusCode());
 
 			// Ensure OfficeFloor task invoked
 			String responseContent = HttpTestUtil.getEntityBody(response);
-			boolean isTaskInvoked = Boolean
-					.parseBoolean(responseContent.trim());
+			boolean isTaskInvoked = Boolean.parseBoolean(responseContent.trim());
 			assertTrue("Task should be invoked", isTaskInvoked);
 		}
 	}

@@ -19,8 +19,8 @@ package net.officefloor.plugin.web.http.security.store;
 
 import java.io.IOException;
 
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 
 /**
@@ -44,7 +44,7 @@ public interface CredentialStore {
 	 * Non-blank value indicating no algorithm.
 	 * <p>
 	 * This is useful for property configurations of {@link ManagedObjectSource}
-	 * and {@link WorkSource} instances that need to indicate an algorithm (and
+	 * and {@link ManagedFunctionSource} instances that need to indicate an algorithm (and
 	 * can not provide blank values for required properties).
 	 */
 	public static final String NO_ALGORITHM = "-";

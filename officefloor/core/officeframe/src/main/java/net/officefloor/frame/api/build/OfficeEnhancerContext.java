@@ -17,9 +17,8 @@
  */
 package net.officefloor.frame.api.build;
 
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * Context for the {@link OfficeEnhancer}.
@@ -29,32 +28,26 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 public interface OfficeEnhancerContext {
 
 	/**
-	 * Obtains the {@link FlowNodeBuilder} registered under the input
-	 * {@link Work} and {@link Task} names.
+	 * Obtains the {@link FlowBuilder} registered under the input
+	 * {@link ManagedFunction} name.
 	 * 
-	 * @param workName
-	 *            Name of the {@link Work}.
-	 * @param taskName
-	 *            Name of the {@link Task}.
-	 * @return {@link FlowNodeBuilder}.
+	 * @param functionName
+	 *            Name of the {@link ManagedFunction}.
+	 * @return {@link FlowBuilder} for the {@link ManagedFunction}.
 	 */
-	FlowNodeBuilder<?> getFlowNodeBuilder(String workName, String taskName);
+	FlowBuilder<?> getFlowBuilder(String functionName);
 
 	/**
-	 * Obtains the {@link FlowNodeBuilder} registered by the
-	 * {@link ManagedObjectSource} under the input {@link Work} and {@link Task}
-	 * names.
+	 * Obtains the {@link FlowBuilder} registered by the
+	 * {@link ManagedObjectSource} under the input {@link ManagedFunction} name.
 	 * 
 	 * @param managedObjectSourceName
 	 *            {@link ManagedObjectSource} name registered with the
 	 *            {@link OfficeFloorBuilder}.
-	 * @param workName
-	 *            Name of the {@link Work}.
-	 * @param taskName
-	 *            Name of the {@link Task}.
-	 * @return {@link FlowNodeBuilder}.
+	 * @param functionName
+	 *            Name of the {@link ManagedFunction}.
+	 * @return {@link FlowBuilder} for the {@link ManagedFunction}.
 	 */
-	FlowNodeBuilder<?> getFlowNodeBuilder(String managedObjectSourceName,
-			String workName, String taskName);
+	FlowBuilder<?> getFlowBuilder(String managedObjectSourceName, String functionName);
 
 }

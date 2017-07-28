@@ -25,7 +25,7 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSource;
-import net.officefloor.frame.spi.TestSource;
+import net.officefloor.frame.api.source.TestSource;
 
 /**
  * Mock {@link OfficeFloorSource} for testing.

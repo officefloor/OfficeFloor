@@ -35,45 +35,44 @@ import java.util.Set;
 
 import net.officefloor.compile.impl.properties.PropertiesUtil;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.spi.section.FunctionFlow;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
-import net.officefloor.compile.spi.section.SectionTask;
-import net.officefloor.compile.spi.section.SectionWork;
-import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
-import net.officefloor.compile.work.TaskType;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.source.UnknownPropertyError;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.source.UnknownPropertyError;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.DependencyMetaData;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.application.HttpSessionStateful;
-import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationWorkSource;
+import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationManagedFunctionSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.object.HttpSessionObjectManagedObjectSource;
-import net.officefloor.plugin.web.http.template.HttpTemplateTask;
-import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
+import net.officefloor.plugin.web.http.template.HttpTemplateFunction;
+import net.officefloor.plugin.web.http.template.HttpTemplateManagedFunctionSource;
 import net.officefloor.plugin.web.http.template.NotRenderTemplateAfter;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateParserImpl;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
-import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialTask.Flows;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialFunction.Flows;
 
 /**
  * {@link SectionSource} for the HTTP template.
@@ -85,7 +84,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	/**
 	 * Property name for the {@link HttpTemplate} URI path.
 	 */
-	public static final String PROPERTY_TEMPLATE_URI = HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI;
+	public static final String PROPERTY_TEMPLATE_URI = HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI;
 
 	/**
 	 * Property name for the {@link Class} providing the backing logic to the
@@ -102,7 +101,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	/**
 	 * Property name for the Content-Type for the {@link HttpTemplate}.
 	 */
-	public static final String PROPERTY_CONTENT_TYPE = HttpTemplateInitialWorkSource.PROPERTY_CONTENT_TYPE;
+	public static final String PROPERTY_CONTENT_TYPE = HttpTemplateInitialManagedFunctionSource.PROPERTY_CONTENT_TYPE;
 
 	/**
 	 * Property name for the {@link Charset} for the {@link HttpTemplate}.
@@ -293,13 +292,14 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	}
 
 	/**
-	 * Creates the {@link Task} key from the {@link Task} name.
+	 * Creates the {@link ManagedFunction} key from the {@link ManagedFunction}
+	 * name.
 	 * 
 	 * @param taskName
-	 *            Name of the {@link Task}.
-	 * @return Key for the {@link Task}.
+	 *            Name of the {@link ManagedFunction}.
+	 * @return Key for the {@link ManagedFunction}.
 	 */
-	private static String createTaskKey(String taskName) {
+	private static String createFunctionKey(String taskName) {
 		// Provide name in upper case to avoid case sensitivity
 		return taskName.toUpperCase();
 	}
@@ -319,11 +319,11 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 
 		// Create the context to source the HTTP template
 		SourcePropertiesImpl templateProperties = new SourcePropertiesImpl(context);
-		templateProperties.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE, templateLocation);
+		templateProperties.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE, templateLocation);
 		SourceContext templateContext = new SourceContextImpl(context.isLoadingType(), context, templateProperties);
 
 		// Obtain the HTTP template
-		HttpTemplate template = HttpTemplateWorkSource.getHttpTemplate(templateContext);
+		HttpTemplate template = HttpTemplateManagedFunctionSource.getHttpTemplate(templateContext);
 
 		// Return the HTTP template
 		return template;
@@ -366,7 +366,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	 * {@link TemplateBeanTask} for the section {@link Class} method by its
 	 * name.
 	 */
-	private final Map<String, TemplateClassTask> sectionClassMethodTasksByName = new HashMap<String, TemplateClassTask>();
+	private final Map<String, TemplateClassFunction> sectionClassMethodFunctionsByName = new HashMap<String, TemplateClassFunction>();
 
 	/**
 	 * Listing of the {@link TemplateFlowLink} instances.
@@ -423,7 +423,8 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		 * (i.e. containing sections have been overridden).
 		 */
 		Set<String> knownLinkNames = new HashSet<String>();
-		knownLinkNames.addAll(Arrays.asList(HttpTemplateWorkSource.getHttpTemplateLinkNames(highestAncestorTemplate)));
+		knownLinkNames.addAll(
+				Arrays.asList(HttpTemplateManagedFunctionSource.getHttpTemplateLinkNames(highestAncestorTemplate)));
 
 		// Undertake inheritance of the template (first does not inherit)
 		HttpTemplateSection[] sections = highestAncestorTemplate.getSections();
@@ -435,7 +436,8 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			HttpTemplateSection[] childSections = filterCommentHttpTemplateSections(childTemplate.getSections());
 
 			// Add the child link names
-			knownLinkNames.addAll(Arrays.asList(HttpTemplateWorkSource.getHttpTemplateLinkNames(childTemplate)));
+			knownLinkNames
+					.addAll(Arrays.asList(HttpTemplateManagedFunctionSource.getHttpTemplateLinkNames(childTemplate)));
 
 			// Obtain the sections from child inheritance
 			sections = inheritHttpTemplateSections(sections, childSections, designer);
@@ -475,7 +477,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		}
 
 		// Obtain the HTTP template
-		HttpTemplate template = HttpTemplateWorkSource.getHttpTemplate(new StringReader(templateContent));
+		HttpTemplate template = HttpTemplateManagedFunctionSource.getHttpTemplate(new StringReader(templateContent));
 
 		// Create the necessary dependency objects
 		SectionObject connectionObject = this.getOrCreateObject(null, ServerHttpConnection.class.getName());
@@ -487,86 +489,93 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		SectionOutput ioEscalation = this.getOrCreateOutput(IOException.class.getName(), IOException.class.getName(),
 				true);
 
-		// Load the initial task
-		SectionWork initialWork = designer.addSectionWork("INITIAL", HttpTemplateInitialWorkSource.class.getName());
-		PropertiesUtil.copyProperties(context, initialWork, HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI,
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX, HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
-				HttpTemplateInitialWorkSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
-				HttpTemplateInitialWorkSource.PROPERTY_CONTENT_TYPE, HttpTemplateInitialWorkSource.PROPERTY_CHARSET);
-		SectionTask initialTask = initialWork.addSectionTask("_INITIAL_TASK_", HttpTemplateInitialWorkSource.TASK_NAME);
-		designer.link(initialTask.getTaskObject("SERVER_HTTP_CONNECTION"), connectionObject);
-		designer.link(initialTask.getTaskObject("HTTP_APPLICATION_LOCATION"), locationObject);
-		designer.link(initialTask.getTaskObject("REQUEST_STATE"), requestStateObject);
-		designer.link(initialTask.getTaskObject("HTTP_SESSION"), sessionObject);
-		designer.link(initialTask.getTaskEscalation(IOException.class.getName()), ioEscalation,
-				FlowInstigationStrategyEnum.SEQUENTIAL);
+		// Load the initial function
+		SectionFunctionNamespace initialNamespace = designer.addSectionFunctionNamespace("INITIAL",
+				HttpTemplateInitialManagedFunctionSource.class.getName());
+		PropertiesUtil.copyProperties(context, initialNamespace,
+				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI,
+				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX,
+				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE,
+				HttpTemplateInitialManagedFunctionSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
+				HttpTemplateInitialManagedFunctionSource.PROPERTY_CONTENT_TYPE,
+				HttpTemplateInitialManagedFunctionSource.PROPERTY_CHARSET);
+		SectionFunction initialFunction = initialNamespace.addSectionFunction("_INITIAL_TASK_",
+				HttpTemplateInitialManagedFunctionSource.FUNCTION_NAME);
+		designer.link(initialFunction.getFunctionObject("SERVER_HTTP_CONNECTION"), connectionObject);
+		designer.link(initialFunction.getFunctionObject("HTTP_APPLICATION_LOCATION"), locationObject);
+		designer.link(initialFunction.getFunctionObject("REQUEST_STATE"), requestStateObject);
+		designer.link(initialFunction.getFunctionObject("HTTP_SESSION"), sessionObject);
+		designer.link(initialFunction.getFunctionEscalation(IOException.class.getName()), ioEscalation, false);
 
-		// Create and link rendering input to initial task
+		// Create and link rendering input to initial function
 		SectionInput sectionInput = designer.addSectionInput(RENDER_TEMPLATE_INPUT_NAME, null);
-		designer.link(sectionInput, initialTask);
+		designer.link(sectionInput, initialFunction);
 
 		// Load the HTTP template
-		final String TEMPLATE_WORK_NANE = "TEMPLATE";
-		SectionWork templateWork = designer.addSectionWork(TEMPLATE_WORK_NANE, HttpTemplateWorkSource.class.getName());
-		templateWork.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_CONTENT, templateContent);
+		final String TEMPLATE_NAMESPACE_NANE = "TEMPLATE";
+		SectionFunctionNamespace templateNamespace = designer.addSectionFunctionNamespace(TEMPLATE_NAMESPACE_NANE,
+				HttpTemplateManagedFunctionSource.class.getName());
+		templateNamespace.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_CONTENT, templateContent);
 
 		// Copy the template configuration
-		PropertiesUtil.copyProperties(context, templateWork, HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI,
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX, HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
-				HttpTemplateWorkSource.PROPERTY_CHARSET);
-		PropertiesUtil.copyPrefixedProperties(context, HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX,
-				templateWork);
+		PropertiesUtil.copyProperties(context, templateNamespace,
+				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI,
+				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX,
+				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE,
+				HttpTemplateManagedFunctionSource.PROPERTY_CHARSET);
+		PropertiesUtil.copyPrefixedProperties(context, HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX,
+				templateNamespace);
 
-		// Create the template tasks and ensure registered for logic flows
-		Map<String, SectionTask> templateTasks = new HashMap<String, SectionTask>();
+		// Create the template functions and ensure registered for logic flows
+		Map<String, SectionFunction> templateFunctions = new HashMap<>();
 		for (HttpTemplateSection templateSection : template.getSections()) {
 
-			// Obtain the template task name
-			String templateTaskName = templateSection.getSectionName();
+			// Obtain the template function name
+			String templateFunctionName = templateSection.getSectionName();
 
-			// Add the template task
-			SectionTask templateTask = templateWork.addSectionTask(templateTaskName, templateTaskName);
+			// Add the template function
+			SectionFunction templateFunction = templateNamespace.addSectionFunction(templateFunctionName,
+					templateFunctionName);
 
-			// Register the template task
-			templateTasks.put(templateTaskName, templateTask);
+			// Register the template function
+			templateFunctions.put(templateFunctionName, templateFunction);
 		}
 
-		// Load the HTTP template tasks
-		Map<String, SectionTask> contentTasksByName = new HashMap<String, SectionTask>();
-		SectionTask previousTemplateTask = initialTask;
+		// Load the HTTP template functions
+		Map<String, SectionFunction> contentFunctionsByName = new HashMap<>();
+		SectionFunction previousTemplateFunction = initialFunction;
 		for (HttpTemplateSection templateSection : template.getSections()) {
 
-			// Obtain the template task
-			String templateTaskName = templateSection.getSectionName();
-			SectionTask templateTask = templateTasks.get(templateTaskName);
+			// Obtain the template function
+			String templateFunctionName = templateSection.getSectionName();
+			SectionFunction templateFunction = templateFunctions.get(templateFunctionName);
 
 			// Link the dependencies (later will determine if bean dependency)
-			designer.link(templateTask.getTaskObject("SERVER_HTTP_CONNECTION"), connectionObject);
-			designer.link(templateTask.getTaskObject("HTTP_APPLICATION_LOCATION"), locationObject);
+			designer.link(templateFunction.getFunctionObject("SERVER_HTTP_CONNECTION"), connectionObject);
+			designer.link(templateFunction.getFunctionObject("HTTP_APPLICATION_LOCATION"), locationObject);
 
 			// Link the I/O escalation
-			designer.link(templateTask.getTaskEscalation(IOException.class.getName()), ioEscalation,
-					FlowInstigationStrategyEnum.SEQUENTIAL);
+			designer.link(templateFunction.getFunctionEscalation(IOException.class.getName()), ioEscalation, false);
 
 			// Keep track of task for later flow linking
-			contentTasksByName.put(createTaskKey(templateTaskName), templateTask);
+			contentFunctionsByName.put(createFunctionKey(templateFunctionName), templateFunction);
 
 			// Obtain the possible bean task method for the section
-			String beanMethodName = "get" + templateTaskName;
-			String beanTaskKey = createTaskKey(beanMethodName);
-			TemplateClassTask beanTask = this.sectionClassMethodTasksByName.get(beanTaskKey);
-			if (beanTask == null) {
+			String beanMethodName = "get" + templateFunctionName;
+			String beanFunctionKey = createFunctionKey(beanMethodName);
+			TemplateClassFunction beanFunction = this.sectionClassMethodFunctionsByName.get(beanFunctionKey);
+			if (beanFunction == null) {
 				// Attempt to find with Data suffix
-				beanTaskKey = beanTaskKey + "DATA";
-				beanTask = this.sectionClassMethodTasksByName.get(beanTaskKey);
+				beanFunctionKey = beanFunctionKey + "DATA";
+				beanFunction = this.sectionClassMethodFunctionsByName.get(beanFunctionKey);
 			}
 
 			// Bean task to not render template on completion
-			nonRenderTemplateTaskKeys.add(beanTaskKey);
+			nonRenderTemplateTaskKeys.add(beanFunctionKey);
 
 			// Determine if template section requires a bean
-			boolean isRequireBean = HttpTemplateWorkSource.isHttpTemplateSectionRequireBean(templateSection);
-			if ((isRequireBean) && (beanTask == null)) {
+			boolean isRequireBean = HttpTemplateManagedFunctionSource.isHttpTemplateSectionRequireBean(templateSection);
+			if ((isRequireBean) && (beanFunction == null)) {
 				// Section method required, determine if just missing method
 				if (!isLogicClass) {
 					// No template logic
@@ -578,27 +587,27 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 				}
 			}
 
-			// Validate and include the bean task
-			if (beanTask != null) {
+			// Validate and include the bean function
+			if (beanFunction != null) {
 
 				// Ensure bean task does not have a @Parameter
-				if (beanTask.parameter != null) {
+				if (beanFunction.parameter != null) {
 					designer.addIssue("Template bean method '" + beanMethodName + "' must not have a "
 							+ Parameter.class.getSimpleName() + " annotation");
 				}
 
-				// Ensure no next task (as must render section next)
-				Method method = beanTask.method;
-				if (method.isAnnotationPresent(NextTask.class)) {
-					designer.addIssue("Template bean method '" + method.getName() + "' (task " + beanTaskKey
-							+ ") must not be annotated with " + NextTask.class.getSimpleName());
+				// Ensure no next function (as must render section next)
+				Method method = beanFunction.method;
+				if (method.isAnnotationPresent(NextFunction.class)) {
+					designer.addIssue("Template bean method '" + method.getName() + "' (task " + beanFunctionKey
+							+ ") must not be annotated with " + NextFunction.class.getSimpleName());
 
 					// As NextTask annotation, do not render section
 					continue;
 				}
 
 				// Obtain the return type for the template
-				Class<?> returnType = beanTask.type.getReturnType();
+				Class<?> returnType = beanFunction.type.getReturnType();
 				if ((returnType == null) || (Void.class.equals(returnType))) {
 					// Must provide return if require a bean
 					if (isRequireBean) {
@@ -614,96 +623,104 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 					}
 
 					// Inform template of bean type
-					templateWork.addProperty(HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX + templateTaskName,
+					templateNamespace.addProperty(
+							HttpTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + templateFunctionName,
 							beanType.getName());
 
 					// Flag bean as parameter
-					templateTask.getTaskObject("OBJECT").flagAsParameter();
+					templateFunction.getFunctionObject("OBJECT").flagAsParameter();
 
 					// Handle iterating over array of beans
 					if (isArray) {
-						// Provide iterator task if array
-						SectionWork arrayIteratorWork = designer.addSectionWork(templateTaskName + "ArrayIterator",
-								HttpTemplateArrayIteratorWorkSource.class.getName());
-						arrayIteratorWork.addProperty(HttpTemplateArrayIteratorWorkSource.PROPERTY_COMPONENT_TYPE_NAME,
+						// Provide iterator function if array
+						SectionFunctionNamespace arrayIteratorNamespace = designer.addSectionFunctionNamespace(
+								templateFunctionName + "ArrayIterator",
+								HttpTemplateArrayIteratorManagedFunctionSource.class.getName());
+						arrayIteratorNamespace.addProperty(
+								HttpTemplateArrayIteratorManagedFunctionSource.PROPERTY_COMPONENT_TYPE_NAME,
 								beanType.getName());
-						SectionTask arrayIteratorTask = arrayIteratorWork.addSectionTask(
-								templateTaskName + "ArrayIterator", HttpTemplateArrayIteratorWorkSource.TASK_NAME);
-						arrayIteratorTask.getTaskObject(HttpTemplateArrayIteratorWorkSource.OBJECT_NAME)
+						SectionFunction arrayIteratorFunction = arrayIteratorNamespace.addSectionFunction(
+								templateFunctionName + "ArrayIterator",
+								HttpTemplateArrayIteratorManagedFunctionSource.FUNCTION_NAME);
+						arrayIteratorFunction
+								.getFunctionObject(HttpTemplateArrayIteratorManagedFunctionSource.OBJECT_NAME)
 								.flagAsParameter();
 
 						// Link iteration of array to rendering
-						designer.link(arrayIteratorTask.getTaskFlow(HttpTemplateArrayIteratorWorkSource.FLOW_NAME),
-								templateTask, FlowInstigationStrategyEnum.PARALLEL);
+						designer.link(
+								arrayIteratorFunction
+										.getFunctionFlow(HttpTemplateArrayIteratorManagedFunctionSource.FLOW_NAME),
+								templateFunction, false);
 
 						// Iterator is now controller for template
-						templateTask = arrayIteratorTask;
+						templateFunction = arrayIteratorFunction;
 					}
 				}
 			}
 
-			// Determine if linking from initial task
-			if (previousTemplateTask == initialTask) {
-				// Link as flow from initial task
-				TaskFlow renderFlow = initialTask.getTaskFlow(Flows.RENDER.name());
-				if (beanTask != null) {
-					// Link with bean task then template
-					designer.link(renderFlow, beanTask.task, FlowInstigationStrategyEnum.SEQUENTIAL);
-					designer.link(beanTask.task, templateTask);
+			// Determine if linking from initial function
+			if (previousTemplateFunction == initialFunction) {
+				// Link as flow from initial function
+				FunctionFlow renderFlow = initialFunction.getFunctionFlow(Flows.RENDER.name());
+				if (beanFunction != null) {
+					// Link with bean function then template
+					designer.link(renderFlow, beanFunction.function, false);
+					designer.link(beanFunction.function, templateFunction);
 				} else {
-					// No bean task so link to template
-					designer.link(renderFlow, templateTask, FlowInstigationStrategyEnum.SEQUENTIAL);
+					// No bean function so link to template
+					designer.link(renderFlow, templateFunction, false);
 				}
 
 			} else {
-				// Link as next from previous task
-				if (beanTask != null) {
-					// Link with bean task then template
-					designer.link(previousTemplateTask, beanTask.task);
-					designer.link(beanTask.task, templateTask);
+				// Link as next from previous function
+				if (beanFunction != null) {
+					// Link with bean function then template
+					designer.link(previousTemplateFunction, beanFunction.function);
+					designer.link(beanFunction.function, templateFunction);
 				} else {
-					// No bean task so link to template
-					designer.link(previousTemplateTask, templateTask);
+					// No bean function so link to template
+					designer.link(previousTemplateFunction, templateFunction);
 				}
 			}
 
-			// Template task is always previous task
-			previousTemplateTask = templateTask;
+			// Template function is always previous function
+			previousTemplateFunction = templateFunction;
 		}
 
-		// Link flows to template content tasks
+		// Link flows to template content functions
 		for (TemplateFlowLink flowLink : this.flowLinks) {
 
-			// Obtain the task flow and its name
-			TaskFlow taskFlow = flowLink.taskFlow;
-			String flowName = taskFlow.getTaskFlowName();
+			// Obtain the function flow and its name
+			FunctionFlow functionFlow = flowLink.functionFlow;
+			String flowName = functionFlow.getFunctionFlowName();
 
-			// Determine if linking to content task
-			SectionTask contentTask = contentTasksByName.get(createTaskKey(flowName));
+			// Determine if linking to content function
+			SectionFunction contentTask = contentFunctionsByName.get(createFunctionKey(flowName));
 			if (contentTask != null) {
-				// Link to content task
-				designer.link(taskFlow, contentTask, FlowInstigationStrategyEnum.SEQUENTIAL);
+				// Link to content function
+				designer.link(functionFlow, contentTask, false);
 
 			} else {
-				// Not linked to content task, so use default behaviour
-				super.linkTaskFlow(flowLink.taskFlow, flowLink.taskType, flowLink.flowInterfaceType,
+				// Not linked to content function, so use default behaviour
+				super.linkFunctionFlow(flowLink.functionFlow, flowLink.functionType, flowLink.flowInterfaceType,
 						flowLink.flowMethod, flowLink.flowArgumentType);
 			}
 		}
 
 		// Determine if the template is secure
-		boolean isTemplateSecure = HttpTemplateWorkSource.isHttpTemplateSecure(context);
+		boolean isTemplateSecure = HttpTemplateManagedFunctionSource.isHttpTemplateSecure(context);
 
 		// Obtain the template URI suffix
-		String templateUriSuffix = context.getProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX, null);
+		String templateUriSuffix = context.getProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX,
+				null);
 
 		// Determine if any unknown configured links
 		NEXT_PROPERTY: for (String propertyName : context.getPropertyNames()) {
-			if (propertyName.startsWith(HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX)) {
+			if (propertyName.startsWith(HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX)) {
 
 				// Obtain the link name
 				String configuredLinkName = propertyName
-						.substring(HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX.length());
+						.substring(HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX.length());
 
 				// Ignore if known link
 				if (knownLinkNames.contains(configuredLinkName)) {
@@ -716,49 +733,53 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		}
 
 		// Register the #{link} URL continuation tasks
-		String[] linkNames = HttpTemplateWorkSource.getHttpTemplateLinkNames(template);
+		String[] linkNames = HttpTemplateManagedFunctionSource.getHttpTemplateLinkNames(template);
 		final String linkUrlContinuationPrefix = "HTTP_URL_CONTINUATION_";
-		for (String linkTaskName : linkNames) {
+		for (String linkFunctionName : linkNames) {
 
 			// Obtain the link URI path
-			String linkUriPath = HttpTemplateWorkSource.getHttpTemplateLinkUrlContinuationPath(templateUriPath,
-					linkTaskName, templateUriSuffix);
+			String linkUriPath = HttpTemplateManagedFunctionSource
+					.getHttpTemplateLinkUrlContinuationPath(templateUriPath, linkFunctionName, templateUriSuffix);
 
 			// Determine if link is to be secure
-			boolean isLinkSecure = HttpTemplateTask.isLinkSecure(linkTaskName, isTemplateSecure, context);
+			boolean isLinkSecure = HttpTemplateFunction.isLinkSecure(linkFunctionName, isTemplateSecure, context);
 
 			// Create HTTP URL continuation
-			SectionWork urlContinuationWork = designer.addSectionWork(linkUrlContinuationPrefix + linkTaskName,
-					HttpUrlContinuationWorkSource.class.getName());
-			urlContinuationWork.addProperty(HttpUrlContinuationWorkSource.PROPERTY_URI_PATH, linkUriPath);
+			SectionFunctionNamespace urlContinuationNamespace = designer.addSectionFunctionNamespace(
+					linkUrlContinuationPrefix + linkFunctionName,
+					HttpUrlContinuationManagedFunctionSource.class.getName());
+			urlContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH,
+					linkUriPath);
 			if (isLinkSecure) {
 				/*
 				 * Only upgrade to secure connection. For non-secure will
 				 * already have the request and no need to close the existing
 				 * secure connection and establish a new non-secure connection.
 				 */
-				urlContinuationWork.addProperty(HttpUrlContinuationWorkSource.PROPERTY_SECURE,
+				urlContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_SECURE,
 						String.valueOf(isLinkSecure));
 			}
-			SectionTask urlContinuationTask = urlContinuationWork
-					.addSectionTask(linkUrlContinuationPrefix + linkTaskName, HttpUrlContinuationWorkSource.TASK_NAME);
+			SectionFunction urlContinuationFunction = urlContinuationNamespace.addSectionFunction(
+					linkUrlContinuationPrefix + linkFunctionName,
+					HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
 
-			// Obtain the link method task
-			String linkMethodTaskKey = createTaskKey(linkTaskName);
-			TemplateClassTask methodTask = this.sectionClassMethodTasksByName.get(linkMethodTaskKey);
-			if (methodTask == null) {
+			// Obtain the link method function
+			String linkMethodFunctionKey = createFunctionKey(linkFunctionName);
+			TemplateClassFunction methodFunction = this.sectionClassMethodFunctionsByName.get(linkMethodFunctionKey);
+			if (methodFunction == null) {
 				// No backing method, so output flow from template
-				SectionOutput sectionOutput = this.getOrCreateOutput(linkTaskName, null, false);
-				designer.link(urlContinuationTask, sectionOutput);
+				SectionOutput sectionOutput = this.getOrCreateOutput(linkFunctionName, null, false);
+				designer.link(urlContinuationFunction, sectionOutput);
 				continue; // linked
 			}
 
 			// Link servicing of request to the method
-			designer.link(urlContinuationTask, methodTask.task);
+			designer.link(urlContinuationFunction, methodFunction.function);
 		}
 
 		// Link bean tasks to re-render template by default
-		List<String> sectionClassMethodTaskNames = new ArrayList<String>(this.sectionClassMethodTasksByName.keySet());
+		List<String> sectionClassMethodTaskNames = new ArrayList<String>(
+				this.sectionClassMethodFunctionsByName.keySet());
 		Collections.sort(sectionClassMethodTaskNames);
 		for (String beanTaskKey : sectionClassMethodTaskNames) {
 
@@ -766,51 +787,51 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			if (!(nonRenderTemplateTaskKeys.contains(beanTaskKey))) {
 
 				// Potentially rendering so obtain the class method
-				TemplateClassTask methodTask = this.sectionClassMethodTasksByName.get(beanTaskKey);
-				Method method = methodTask.method;
+				TemplateClassFunction methodFunction = this.sectionClassMethodFunctionsByName.get(beanTaskKey);
+				Method method = methodFunction.method;
 
 				// Determine if not render template after
 				if (method.isAnnotationPresent(NotRenderTemplateAfter.class)) {
 					continue; // not render
 				}
 
-				// Determine if NextTask, so not render template after
-				if (method.isAnnotationPresent(NextTask.class)) {
+				// Determine if NextFunction, so not render template after
+				if (method.isAnnotationPresent(NextFunction.class)) {
 					continue; // not render
 				}
 
 				// Next task not linked, so link to render template
-				designer.link(methodTask.task, initialTask);
+				designer.link(methodFunction.function, initialFunction);
 			}
 		}
 
 		// Link last template task to output
 		SectionOutput output = this.getOrCreateOutput(ON_COMPLETION_OUTPUT_NAME, null, false);
-		designer.link(previousTemplateTask, output);
+		designer.link(previousTemplateFunction, output);
 	}
 
 	/**
-	 * {@link SectionTask} for the template class.
+	 * {@link SectionFunction} for the template class.
 	 */
-	private static class TemplateClassTask {
+	private static class TemplateClassFunction {
 
 		/**
-		 * {@link SectionTask}.
+		 * {@link SectionFunction}.
 		 */
-		public final SectionTask task;
+		public final SectionFunction function;
 
 		/**
-		 * {@link TaskType}.
+		 * {@link ManagedFunctionType}.
 		 */
-		public final TaskType<?, ?, ?> type;
+		public final ManagedFunctionType<?, ?> type;
 
 		/**
-		 * {@link Method} for the {@link SectionTask}.
+		 * {@link Method} for the {@link SectionFunction}.
 		 */
 		public final Method method;
 
 		/**
-		 * Type of parameter for {@link SectionTask}. <code>null</code>
+		 * Type of parameter for {@link SectionFunction}. <code>null</code>
 		 * indicates no parameter.
 		 */
 		public final Class<?> parameter;
@@ -818,18 +839,19 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		/**
 		 * Initiate.
 		 * 
-		 * @param task
-		 *            {@link SectionTask}.
+		 * @param function
+		 *            {@link SectionFunction}.
 		 * @param type
-		 *            {@link TaskType}.
+		 *            {@link ManagedFunctionType}.
 		 * @param method
-		 *            {@link Method} for the {@link SectionTask}.
+		 *            {@link Method} for the {@link SectionFunction}.
 		 * @param parameter
-		 *            Type of parameter for {@link SectionTask}.
+		 *            Type of parameter for {@link SectionFunction}.
 		 *            <code>null</code> indicates no parameter.
 		 */
-		public TemplateClassTask(SectionTask task, TaskType<?, ?, ?> type, Method method, Class<?> parameter) {
-			this.task = task;
+		public TemplateClassFunction(SectionFunction function, ManagedFunctionType<?, ?> type, Method method,
+				Class<?> parameter) {
+			this.function = function;
 			this.type = type;
 			this.method = method;
 			this.parameter = parameter;
@@ -837,19 +859,20 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	}
 
 	/**
-	 * Template {@link TaskFlow} instances to be linked.
+	 * Template {@link FunctionFlow} instances to be linked.
 	 */
 	private static class TemplateFlowLink {
 
 		/**
-		 * {@link TaskFlow} to be linked.
+		 * {@link FunctionFlow} to be linked.
 		 */
-		public final TaskFlow taskFlow;
+		public final FunctionFlow functionFlow;
 
 		/**
-		 * {@link TaskType} of the {@link Task} for the {@link TaskFlow}.
+		 * {@link ManagedFunctionType} of the {@link ManagedFunction} for the
+		 * {@link SectionFlow}.
 		 */
-		public final TaskType<?, ?, ?> taskType;
+		public final ManagedFunctionType<?, ?> functionType;
 
 		/**
 		 * Flow interface type.
@@ -869,11 +892,11 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		/**
 		 * Initiate.
 		 * 
-		 * @param taskFlow
-		 *            {@link TaskFlow} to be linked.
-		 * @param taskType
-		 *            {@link TaskType} of the {@link Task} for the
-		 *            {@link TaskFlow}.
+		 * @param functionFlow
+		 *            {@link FunctionFlow} to be linked.
+		 * @param functionType
+		 *            {@link ManagedFunctionType} of the {@link ManagedFunction}
+		 *            for the {@link FunctionFlow}.
 		 * @param flowInterfaceType
 		 *            Flow interface type.
 		 * @param flowMethod
@@ -881,10 +904,10 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		 * @param flowArgumentType
 		 *            Flow interface method argument type.
 		 */
-		public TemplateFlowLink(TaskFlow taskFlow, TaskType<?, ?, ?> taskType, Class<?> flowInterfaceType,
-				Method flowMethod, Class<?> flowArgumentType) {
-			this.taskFlow = taskFlow;
-			this.taskType = taskType;
+		public TemplateFlowLink(FunctionFlow functionFlow, ManagedFunctionType<?, ?> functionType,
+				Class<?> flowInterfaceType, Method flowMethod, Class<?> flowArgumentType) {
+			this.functionFlow = functionFlow;
+			this.functionType = functionType;
 			this.flowInterfaceType = flowInterfaceType;
 			this.flowMethod = flowMethod;
 			this.flowArgumentType = flowArgumentType;
@@ -907,8 +930,9 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		private final String extensionPropertyPrefix;
 
 		/**
-		 * {@link Set} to be populated with keys to {@link Task} instances that
-		 * are not to have the template rendered on their completion.
+		 * {@link Set} to be populated with keys to {@link ManagedFunction}
+		 * instances that are not to have the template rendered on their
+		 * completion.
 		 */
 		private final Set<String> nonRenderTemplateTaskKeys;
 
@@ -920,9 +944,9 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		 * @param extensionPropertyPrefix
 		 *            Prefix for a property of this extension.
 		 * @param nonRenderTemplateTaskKeys
-		 *            {@link Set} to be populated with keys to {@link Task}
-		 *            instances that are not to have the template rendered on
-		 *            their completion.
+		 *            {@link Set} to be populated with keys to
+		 *            {@link ManagedFunction} instances that are not to have the
+		 *            template rendered on their completion.
 		 */
 		public HttpTemplateSectionExtensionContextImpl(String templateContent, String extensionPropertyPrefix,
 				Set<String> nonRenderTemplateTaskKeys) {
@@ -952,7 +976,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 
 		@Override
 		public void flagAsNonRenderTemplateMethod(String templateClassMethodName) {
-			this.nonRenderTemplateTaskKeys.add(createTaskKey(templateClassMethodName));
+			this.nonRenderTemplateTaskKeys.add(createFunctionKey(templateClassMethodName));
 		}
 
 		@Override
@@ -1025,8 +1049,8 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		}
 
 		@Override
-		public SectionTask getTask(String taskName) {
-			return HttpTemplateSectionSource.this.getTaskByName(taskName);
+		public SectionFunction getFunction(String functionName) {
+			return HttpTemplateSectionSource.this.getFunctionByName(functionName);
 		}
 
 		@Override
@@ -1139,27 +1163,31 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	}
 
 	@Override
-	protected void enrichTask(SectionTask task, TaskType<?, ?, ?> taskType, Method method, Class<?> parameterType) {
+	protected void enrichFunction(SectionFunction function, ManagedFunctionType<?, ?> functionType, Method method,
+			Class<?> parameterType) {
 
 		// Do not include if no logic class
 		if (NoLogicClass.class.equals(this.sectionClass)) {
 			return;
 		}
 
-		// Keep track of the tasks to allow linking by case-insensitive names
-		String taskKey = createTaskKey(task.getSectionTaskName());
-		this.sectionClassMethodTasksByName.put(taskKey, new TemplateClassTask(task, taskType, method, parameterType));
+		// Keep track of the functions to allow linking by case-insensitive
+		// names
+		String functionKey = createFunctionKey(function.getSectionFunctionName());
+		this.sectionClassMethodFunctionsByName.put(functionKey,
+				new TemplateClassFunction(function, functionType, method, parameterType));
 
-		// Enrich the task
-		super.enrichTask(task, taskType, method, parameterType);
+		// Enrich the function
+		super.enrichFunction(function, functionType, method, parameterType);
 	}
 
 	@Override
-	protected void linkTaskFlow(TaskFlow taskFlow, TaskType<?, ?, ?> taskType, Class<?> flowInterfaceType,
-			Method flowMethod, Class<?> flowArgumentType) {
-		// At this stage, the template content tasks are not available.
+	protected void linkFunctionFlow(FunctionFlow functionFlow, ManagedFunctionType<?, ?> functionType,
+			Class<?> flowInterfaceType, Method flowMethod, Class<?> flowArgumentType) {
+		// At this stage, the template content functions are not available.
 		// Therefore just keep track of flows for later linking.
-		this.flowLinks.add(new TemplateFlowLink(taskFlow, taskType, flowInterfaceType, flowMethod, flowArgumentType));
+		this.flowLinks
+				.add(new TemplateFlowLink(functionFlow, functionType, flowInterfaceType, flowMethod, flowArgumentType));
 	}
 
 }

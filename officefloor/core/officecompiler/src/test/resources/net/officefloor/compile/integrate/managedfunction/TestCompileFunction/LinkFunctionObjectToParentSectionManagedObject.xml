@@ -1,0 +1,61 @@
+<context>
+	<office-floor>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office>
+		<sections>
+			<section name="SECTION" source="SECTION" location="section-one" />
+		</sections>
+	</office>
+	<section-one>
+		<section>
+			<managed-object-sources>
+				<managed-object-source name="MANAGED_OBJECT_SOURCE"
+					source="CLASS">
+					<properties>
+						<property name="class.name" value="${testcase}$CompileManagedObject" />
+					</properties>
+					<managing-office name="OFFICE" />
+				</managed-object-source>
+			</managed-object-sources>
+			<managed-objects>
+				<managed-object name="MANAGED_OBJECT" scope="THREAD">
+					<managed-object-source name="MANAGED_OBJECT_SOURCE" />
+				</managed-object>
+			</managed-objects>
+			<sub-sections>
+				<sub-section name="SECTION" source="SECTION" location="section-two">
+					<object name="OBJECT">
+						<managed-object name="MANAGED_OBJECT" />
+					</object>
+				</sub-section>
+			</sub-sections>
+		</section>
+	</section-one>
+	<section-two>
+		<section>
+			<external-managed-objects>
+				<external-managed-object name="OBJECT" />
+			</external-managed-objects>
+			<function-namespaces>
+				<function-namespace name="NAMESPACE" source="CLASS">
+					<properties>
+						<property name="class.name" value="${testcase}$CompileFunctionClass" />
+					</properties>
+					<managed-function name="objectFunction">
+						<managed-function-object name="${testcase}$CompileManagedObject"
+							parameter="false">
+							<external-managed-object name="OBJECT" />
+						</managed-function-object>
+					</managed-function>
+				</function-namespace>
+			</function-namespaces>
+			<functions>
+				<function name="FUNCTION" function-namespace="NAMESPACE"
+					managed-function="objectFunction" />
+			</functions>
+		</section>
+	</section-two>
+</context>

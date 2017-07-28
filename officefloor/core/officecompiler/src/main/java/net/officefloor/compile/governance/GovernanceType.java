@@ -17,12 +17,12 @@
  */
 package net.officefloor.compile.governance;
 
-import net.officefloor.frame.api.build.GovernanceFactory;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.governance.GovernanceFactory;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
-import net.officefloor.frame.internal.structure.JobSequence;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * <code>Type definition</code> of a {@link Governance}.
@@ -49,11 +49,11 @@ public interface GovernanceType<I, F extends Enum<F>> {
 
 	/**
 	 * Obtains the {@link GovernanceFlowType} definitions for the possible
-	 * {@link JobSequence} instances instigated by the
+	 * {@link Flow} instances instigated by the
 	 * {@link GovernanceActivity}.
 	 * 
 	 * @return {@link GovernanceFlowType} definitions for the possible
-	 *         {@link JobSequence} instances instigated by the
+	 *         {@link Flow} instances instigated by the
 	 *         {@link GovernanceActivity}.
 	 */
 	GovernanceFlowType<F>[] getFlowTypes();

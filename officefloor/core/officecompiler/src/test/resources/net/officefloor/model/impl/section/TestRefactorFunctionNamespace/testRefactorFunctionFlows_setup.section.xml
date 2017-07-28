@@ -1,0 +1,35 @@
+<section>
+	<external-flows>
+		<external-flow name="FLOW_REMOVE" />
+		<external-flow name="FLOW_CHANGE_DETAILS" />
+		<external-flow name="FLOW_RENAME" />
+		<external-flow name="FLOW_REORDER_A" />
+	</external-flows>
+	<function-namespaces>
+		<function-namespace name="NAMESPACE"
+			source="net.example.ExampleManagedFunctionSource">
+			<managed-function name="MANAGED_FUNCTION" />
+		</function-namespace>
+	</function-namespaces>
+	<functions>
+		<function name="FUNCTION" function-namespace="NAMESPACE"
+			managed-function="MANAGED_FUNCTION" return-type="java.lang.Short">
+			<function-flow name="REMOVE">
+				<external-flow name="FLOW_REMOVE" />
+			</function-flow>
+			<function-flow name="CHANGE_DETAILS" key="KEY_ONE"
+				argument-type="java.lang.Object">
+				<external-flow name="FLOW_CHANGE_DETAILS" />
+			</function-flow>
+			<function-flow name="RENAME_OLD">
+				<external-flow name="FLOW_RENAME" />
+			</function-flow>
+			<function-flow name="REORDER_A">
+				<external-flow name="FLOW_REORDER_A" />
+			</function-flow>
+			<function-flow name="REORDER_B">
+				<function name="FUNCTION" />
+			</function-flow>
+		</function>
+	</functions>
+</section>

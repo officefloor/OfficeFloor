@@ -17,17 +17,22 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.officefloor.compile.impl.office.OfficeTeamTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
+import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.office.OfficeTeamType;
+import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.office.OfficeTeam;
-import net.officefloor.compile.type.TypeContext;
 
 /**
  * {@link OfficeTeamNode} implementation.
@@ -63,6 +68,11 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 	}
 
 	/**
+	 * {@link TypeQualification} instances for this {@link ManagedObjectNode}.
+	 */
+	private final List<TypeQualification> typeQualifications = new LinkedList<TypeQualification>();
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param teamName
@@ -72,8 +82,7 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public OfficeTeamNodeImpl(String teamName, OfficeNode office,
-			NodeContext context) {
+	public OfficeTeamNodeImpl(String teamName, OfficeNode office, NodeContext context) {
 		this.teamName = teamName;
 		this.office = office;
 		this.context = context;
@@ -104,14 +113,18 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return NodeUtil.getChildNodes();
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}
 
 	@Override
 	public void initialise() {
-		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialisedState());
+		this.state = NodeUtil.initialise(this, this.context, this.state, () -> new InitialisedState());
 	}
 
 	/*
@@ -123,22 +136,31 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 		return this.teamName;
 	}
 
+	@Override
+	public void addTypeQualification(String qualifier, String type) {
+		this.typeQualifications.add(new TypeQualificationImpl(qualifier, type));
+	}
+
 	/*
 	 * ==================== OfficeTeamNode =========================
 	 */
 
 	@Override
-	public OfficeTeamType loadOfficeTeamType(TypeContext typeContext) {
+	public TypeQualification[] getTypeQualifications() {
+		return this.typeQualifications.stream().toArray(TypeQualification[]::new);
+	}
+
+	@Override
+	public OfficeTeamType loadOfficeTeamType(CompileContext compileContext) {
 
 		// Ensure have name
 		if (CompileUtil.isBlank(this.teamName)) {
-			this.context.getCompilerIssues().addIssue(this,
-					"Null name for " + TYPE);
+			this.context.getCompilerIssues().addIssue(this, "Null name for " + TYPE);
 			return null; // must have name
 		}
 
 		// Create and return type
-		return new OfficeTeamTypeImpl(this.teamName);
+		return new OfficeTeamTypeImpl(this.teamName, this.getTypeQualifications());
 	}
 
 	/*
@@ -152,8 +174,7 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 
 	@Override
 	public boolean linkTeamNode(LinkTeamNode node) {
-		return LinkUtil.linkTeamNode(this, node,
-				this.context.getCompilerIssues(),
+		return LinkUtil.linkTeamNode(this, node, this.context.getCompilerIssues(),
 				(link) -> this.linkedTeamNode = link);
 	}
 

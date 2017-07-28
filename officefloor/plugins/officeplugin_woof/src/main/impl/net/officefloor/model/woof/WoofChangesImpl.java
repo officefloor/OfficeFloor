@@ -35,20 +35,19 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.configuration.ConfigurationContext;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
-import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.change.AbstractChange;
 import net.officefloor.model.impl.change.AggregateChange;
 import net.officefloor.model.impl.change.NoChange;
-import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.plugin.web.http.security.HttpSecuritySectionSource;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityFlowType;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoader;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoaderImpl;
 
@@ -177,8 +176,7 @@ public class WoofChangesImpl implements WoofChanges {
 	 * @param nameExtractor
 	 *            {@link NameExtractor}.
 	 */
-	private static <M> void sortByName(List<M> models,
-			final NameExtractor<M> nameExtractor) {
+	private static <M> void sortByName(List<M> models, final NameExtractor<M> nameExtractor) {
 		Collections.sort(models, new Comparator<M>() {
 			@Override
 			public int compare(M a, M b) {
@@ -200,28 +198,23 @@ public class WoofChangesImpl implements WoofChanges {
 	private static void sortTemplateConfiguration(WoofTemplateModel template) {
 
 		// Sort outputs keeping template render complete output last
-		Collections.sort(template.getOutputs(),
-				new Comparator<WoofTemplateOutputModel>() {
-					@Override
-					public int compare(WoofTemplateOutputModel a,
-							WoofTemplateOutputModel b) {
-						String nameA = a.getWoofTemplateOutputName();
-						String nameB = b.getWoofTemplateOutputName();
-						if (nameA.equals(nameB)) {
-							return 0; // same
-						} else if (HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME
-								.equals(nameA)) {
-							return 1; // render complete output always last
-						} else if (HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME
-								.equals(nameB)) {
-							return -1; // render complete output always last
-						} else {
-							// Sort by name
-							return String.CASE_INSENSITIVE_ORDER.compare(nameA,
-									nameB);
-						}
-					}
-				});
+		Collections.sort(template.getOutputs(), new Comparator<WoofTemplateOutputModel>() {
+			@Override
+			public int compare(WoofTemplateOutputModel a, WoofTemplateOutputModel b) {
+				String nameA = a.getWoofTemplateOutputName();
+				String nameB = b.getWoofTemplateOutputName();
+				if (nameA.equals(nameB)) {
+					return 0; // same
+				} else if (HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME.equals(nameA)) {
+					return 1; // render complete output always last
+				} else if (HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME.equals(nameB)) {
+					return -1; // render complete output always last
+				} else {
+					// Sort by name
+					return String.CASE_INSENSITIVE_ORDER.compare(nameA, nameB);
+				}
+			}
+		});
 
 		// Sort the links
 		sortByName(template.getLinks(), TEMPLATE_LINK_NAME_EXTRACTOR);
@@ -255,28 +248,23 @@ public class WoofChangesImpl implements WoofChanges {
 		sortByName(access.getInputs(), ACCESS_INPUT_NAME_EXTRACTOR);
 
 		// Sort outputs keeping Failure output last
-		Collections.sort(access.getOutputs(),
-				new Comparator<WoofAccessOutputModel>() {
-					@Override
-					public int compare(WoofAccessOutputModel a,
-							WoofAccessOutputModel b) {
-						String nameA = a.getWoofAccessOutputName();
-						String nameB = b.getWoofAccessOutputName();
-						if (nameA.equals(nameB)) {
-							return 0; // same
-						} else if (HttpSecuritySectionSource.OUTPUT_FAILURE
-								.equals(nameA)) {
-							return 1; // render complete output always last
-						} else if (HttpSecuritySectionSource.OUTPUT_FAILURE
-								.equals(nameB)) {
-							return -1; // render complete output always last
-						} else {
-							// Sort by name
-							return String.CASE_INSENSITIVE_ORDER.compare(nameA,
-									nameB);
-						}
-					}
-				});
+		Collections.sort(access.getOutputs(), new Comparator<WoofAccessOutputModel>() {
+			@Override
+			public int compare(WoofAccessOutputModel a, WoofAccessOutputModel b) {
+				String nameA = a.getWoofAccessOutputName();
+				String nameB = b.getWoofAccessOutputName();
+				if (nameA.equals(nameB)) {
+					return 0; // same
+				} else if (HttpSecuritySectionSource.OUTPUT_FAILURE.equals(nameA)) {
+					return 1; // render complete output always last
+				} else if (HttpSecuritySectionSource.OUTPUT_FAILURE.equals(nameB)) {
+					return -1; // render complete output always last
+				} else {
+					// Sort by name
+					return String.CASE_INSENSITIVE_ORDER.compare(nameA, nameB);
+				}
+			}
+		});
 	}
 
 	/**
@@ -292,8 +280,8 @@ public class WoofChangesImpl implements WoofChanges {
 	 *            {@link NameExtractor}.
 	 * @return Unique name.
 	 */
-	private static <M> String getUniqueName(final String name, M model,
-			List<M> models, NameExtractor<M> nameExtractor) {
+	private static <M> String getUniqueName(final String name, M model, List<M> models,
+			NameExtractor<M> nameExtractor) {
 
 		// Determine suffix
 		String uniqueName = name;
@@ -351,15 +339,11 @@ public class WoofChangesImpl implements WoofChanges {
 	 *            {@link WoofTemplateModel} instances.
 	 * @return Unique {@link WoofTemplateModel} name.
 	 */
-	private static String getTemplateName(String templatePath, String uri,
-			WoofTemplateModel template, List<WoofTemplateModel> templates) {
-
-		// Name based on template URI
-		String templateName = WoofOfficeFloorSource.getTemplateSectionName(uri);
+	private static String getTemplateName(String templatePath, String uri, WoofTemplateModel template,
+			List<WoofTemplateModel> templates) {
 
 		// Obtain the unique template name
-		templateName = getUniqueName(templateName, template, templates,
-				TEMPLATE_NAME_EXTRACTOR);
+		String templateName = getUniqueName(uri, template, templates, TEMPLATE_NAME_EXTRACTOR);
 
 		// Return the template name
 		return templateName;
@@ -374,8 +358,7 @@ public class WoofChangesImpl implements WoofChanges {
 	 * @param list
 	 *            List to add the removed {@link ConnectionModel} instances.
 	 */
-	private static void removeConnection(ConnectionModel connection,
-			List<ConnectionModel> list) {
+	private static void removeConnection(ConnectionModel connection, List<ConnectionModel> list) {
 
 		// Ensure have connection to remove
 		if (connection == null) {
@@ -396,8 +379,7 @@ public class WoofChangesImpl implements WoofChanges {
 	 * @param list
 	 *            List to add the removed {@link ConnectionModel} instances.
 	 */
-	private static <C extends ConnectionModel> void removeConnections(
-			List<C> connections, List<ConnectionModel> list) {
+	private static <C extends ConnectionModel> void removeConnections(List<C> connections, List<ConnectionModel> list) {
 
 		// Ensure have connections
 		if (connections == null) {
@@ -417,8 +399,7 @@ public class WoofChangesImpl implements WoofChanges {
 	 *            {@link ConnectionModel} instances to reconnect. May be
 	 *            <code>null</code> if nothing to reconnect.
 	 */
-	private static <C extends ConnectionModel> void reconnectConnections(
-			C[] connections) {
+	private static <C extends ConnectionModel> void reconnectConnections(C[] connections) {
 
 		// Ensure have connections
 		if (connections == null) {
@@ -457,24 +438,20 @@ public class WoofChangesImpl implements WoofChanges {
 	 *         instances on the {@link WoofTemplateModel}.
 	 */
 	@SuppressWarnings("unchecked")
-	private static Change<WoofTemplateModel> refactorExtensions(
-			WoofTemplateModel existingTemplate, String newUri,
-			WoofTemplateExtension[] extensions,
-			final WoofTemplateModel changeTemplate,
-			SourceContext sourceContext,
+	private static Change<WoofTemplateModel> refactorExtensions(WoofTemplateModel existingTemplate, String newUri,
+			WoofTemplateExtension[] extensions, final WoofTemplateModel changeTemplate, SourceContext sourceContext,
 			ConfigurationContext configurationContext, WoofChangeIssues issues) {
 
 		// Create the list of existing extensions
 		final List<WoofTemplateExtensionModel> existingExtensions = new ArrayList<WoofTemplateExtensionModel>(
-				(existingTemplate == null ? Collections.EMPTY_LIST
-						: existingTemplate.getExtensions()));
+				(existingTemplate == null ? Collections.EMPTY_LIST : existingTemplate.getExtensions()));
 
 		// Create the list of new extensions (loaded later)
 		final List<WoofTemplateExtensionModel> newExtensions = new LinkedList<WoofTemplateExtensionModel>();
 
 		// Create change to refactor extensions
-		Change<WoofTemplateModel> change = new AbstractChange<WoofTemplateModel>(
-				changeTemplate, "Refactor extensions") {
+		Change<WoofTemplateModel> change = new AbstractChange<WoofTemplateModel>(changeTemplate,
+				"Refactor extensions") {
 			@Override
 			public void apply() {
 				changeTemplate.getExtensions().clear();
@@ -489,8 +466,7 @@ public class WoofChangesImpl implements WoofChanges {
 		};
 
 		// Obtain the old URI
-		String oldUri = (existingTemplate == null ? null : existingTemplate
-				.getUri());
+		String oldUri = (existingTemplate == null ? null : existingTemplate.getUri());
 
 		// Load the list of new extensions
 		List<WoofTemplateExtensionModel> availableExtensions = new LinkedList<WoofTemplateExtensionModel>();
@@ -502,23 +478,18 @@ public class WoofChangesImpl implements WoofChanges {
 
 				// Construct the extension model
 				WoofTemplateExtensionModel extensionModel = new WoofTemplateExtensionModel();
-				extensionModel.setExtensionClassName(newExtension
-						.getWoofTemplateExtensionSourceClassName());
-				for (WoofTemplateExtensionProperty property : newExtension
-						.getWoofTemplateExtensionProperties()) {
-					extensionModel.addProperty(new PropertyModel(property
-							.getName(), property.getValue()));
+				extensionModel.setExtensionClassName(newExtension.getWoofTemplateExtensionSourceClassName());
+				for (WoofTemplateExtensionProperty property : newExtension.getWoofTemplateExtensionProperties()) {
+					extensionModel.addProperty(new PropertyModel(property.getName(), property.getValue()));
 				}
 
 				// Refactor the extension
-				Change<?> extensionChange = refactorExtension(extensionModel,
-						oldUri, newUri, availableExtensions, changeTemplate,
-						sourceContext, configurationContext, issues);
+				Change<?> extensionChange = refactorExtension(extensionModel, oldUri, newUri, availableExtensions,
+						changeTemplate, sourceContext, configurationContext, issues);
 
 				// Include potential change into aggregate change
 				if (extensionChange != null) {
-					change = new AggregateChange<WoofTemplateModel>(
-							changeTemplate, "Refactor extensions", change,
+					change = new AggregateChange<WoofTemplateModel>(changeTemplate, "Refactor extensions", change,
 							extensionChange);
 				}
 
@@ -531,14 +502,12 @@ public class WoofChangesImpl implements WoofChanges {
 			for (WoofTemplateExtensionModel extensionModel : existingExtensions) {
 
 				// Refactor the extension
-				Change<?> extensionChange = refactorExtension(extensionModel,
-						oldUri, newUri, availableExtensions, changeTemplate,
-						sourceContext, configurationContext, issues);
+				Change<?> extensionChange = refactorExtension(extensionModel, oldUri, newUri, availableExtensions,
+						changeTemplate, sourceContext, configurationContext, issues);
 
 				// Include potential change into aggregate change
 				if (extensionChange != null) {
-					change = new AggregateChange<WoofTemplateModel>(
-							changeTemplate, "Refactor extensions", change,
+					change = new AggregateChange<WoofTemplateModel>(changeTemplate, "Refactor extensions", change,
 							extensionChange);
 				}
 
@@ -552,14 +521,13 @@ public class WoofChangesImpl implements WoofChanges {
 				availableExtensions)) {
 
 			// Refactor the extension (to remove)
-			Change<?> extensionChange = refactorExtension(extensionModel,
-					oldUri, null, availableExtensions, changeTemplate,
-					sourceContext, configurationContext, issues);
+			Change<?> extensionChange = refactorExtension(extensionModel, oldUri, null, availableExtensions,
+					changeTemplate, sourceContext, configurationContext, issues);
 
 			// Include potential change into aggregate change
 			if (extensionChange != null) {
-				change = new AggregateChange<WoofTemplateModel>(changeTemplate,
-						"Refactor extensions", change, extensionChange);
+				change = new AggregateChange<WoofTemplateModel>(changeTemplate, "Refactor extensions", change,
+						extensionChange);
 			}
 		}
 
@@ -593,22 +561,19 @@ public class WoofChangesImpl implements WoofChanges {
 	 *            {@link WoofChangeIssues}.
 	 * @return {@link Change} to refactor the {@link WoofTemplateExtension}.
 	 */
-	private static Change<?> refactorExtension(
-			WoofTemplateExtensionModel extension, String oldUri, String newUri,
-			List<WoofTemplateExtensionModel> existingExtensions,
-			WoofTemplateModel changeTemplate, SourceContext sourceContext,
-			ConfigurationContext configurationContext, WoofChangeIssues issues) {
+	private static Change<?> refactorExtension(WoofTemplateExtensionModel extension, String oldUri, String newUri,
+			List<WoofTemplateExtensionModel> existingExtensions, WoofTemplateModel changeTemplate,
+			SourceContext sourceContext, ConfigurationContext configurationContext, WoofChangeIssues issues) {
 
 		// Obtain the extension source class
 		String extensionSourceClassName = extension.getExtensionClassName();
 
 		// Obtain the first matching available extension
 		WoofTemplateExtensionModel matchingExtension = null;
-		FOUND_EXTENSION: for (Iterator<WoofTemplateExtensionModel> iterator = existingExtensions
-				.iterator(); iterator.hasNext();) {
+		FOUND_EXTENSION: for (Iterator<WoofTemplateExtensionModel> iterator = existingExtensions.iterator(); iterator
+				.hasNext();) {
 			WoofTemplateExtensionModel existingExtension = iterator.next();
-			if (extensionSourceClassName.equals(existingExtension
-					.getExtensionClassName())) {
+			if (extensionSourceClassName.equals(existingExtension.getExtensionClassName())) {
 				// Found matching extension
 				matchingExtension = existingExtension;
 				iterator.remove(); // remove as matched
@@ -625,8 +590,7 @@ public class WoofChangesImpl implements WoofChanges {
 		} else {
 			// Load properties for existing extension
 			for (PropertyModel property : matchingExtension.getProperties()) {
-				oldProperties.addProperty(property.getName(),
-						property.getValue());
+				oldProperties.addProperty(property.getName(), property.getValue());
 			}
 		}
 
@@ -638,8 +602,7 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Create the possible change
 		WoofTemplateExtensionLoader loader = new WoofTemplateExtensionLoaderImpl();
-		Change<?> change = loader.refactorTemplateExtension(
-				extensionSourceClassName, oldUri, oldProperties, newUri,
+		Change<?> change = loader.refactorTemplateExtension(extensionSourceClassName, oldUri, oldProperties, newUri,
 				newProperties, configurationContext, sourceContext, issues);
 
 		// Return the possible change
@@ -691,8 +654,7 @@ public class WoofChangesImpl implements WoofChanges {
 	 *            {@link WoofGovernanceAreaModel} instances sorted.
 	 */
 	private void sortGovernanceAreas(WoofGovernanceModel governance) {
-		sortByName(governance.getGovernanceAreas(),
-				GOVERNANCE_AREA_IDENTIFIER_EXTRACTOR);
+		sortByName(governance.getGovernanceAreas(), GOVERNANCE_AREA_IDENTIFIER_EXTRACTOR);
 	}
 
 	/**
@@ -751,8 +713,7 @@ public class WoofChangesImpl implements WoofChanges {
 		// Find the containing governance
 		WoofGovernanceModel containingGovernance = null;
 		for (WoofGovernanceModel governance : this.model.getWoofGovernances()) {
-			for (WoofGovernanceAreaModel check : governance
-					.getGovernanceAreas()) {
+			for (WoofGovernanceAreaModel check : governance.getGovernanceAreas()) {
 				if (check == area) {
 					// Found containing governance
 					containingGovernance = governance;
@@ -798,8 +759,7 @@ public class WoofChangesImpl implements WoofChanges {
 					isCyclicHierarchy = true;
 				}
 			}
-			WoofTemplateModel[] hierarchy = hierarchyList
-					.toArray(new WoofTemplateModel[hierarchyList.size()]);
+			WoofTemplateModel[] hierarchy = hierarchyList.toArray(new WoofTemplateModel[hierarchyList.size()]);
 
 			// Create the template path value and set of inherited output names
 			StringBuilder templatePathValue = new StringBuilder();
@@ -816,19 +776,16 @@ public class WoofChangesImpl implements WoofChanges {
 				templatePathValue.append(superTemplate.getTemplatePath());
 
 				// Include the inherited output names
-				for (WoofTemplateOutputModel output : superTemplate
-						.getOutputs()) {
+				for (WoofTemplateOutputModel output : superTemplate.getOutputs()) {
 					String outputName = output.getWoofTemplateOutputName();
 					inheritedOutputNames.add(outputName);
 				}
 			}
 
 			// Create and include template inheritance
-			WoofTemplateInheritance inheritance = new WoofTemplateInheritanceImpl(
-					template, hierarchy, templatePathValue.toString(),
-					inheritedOutputNames);
-			templateInheritances.put(template.getWoofTemplateName(),
-					inheritance);
+			WoofTemplateInheritance inheritance = new WoofTemplateInheritanceImpl(template, hierarchy,
+					templatePathValue.toString(), inheritedOutputNames);
+			templateInheritances.put(template.getWoofTemplateName(), inheritance);
 		}
 
 		// Return the template inheritances
@@ -836,35 +793,27 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofTemplateModel> addTemplate(String uri,
-			String templatePath, String templateLogicClass,
-			SectionType section, WoofTemplateModel superTemplate,
-			String contentType, boolean isTemplateSecure,
-			Map<String, Boolean> linksSecure,
-			String[] renderRedirectHttpMethods, boolean isContinueRendering,
-			WoofTemplateExtension[] extensions,
-			WoofTemplateChangeContext context) {
+	public Change<WoofTemplateModel> addTemplate(String uri, String templatePath, String templateLogicClass,
+			SectionType section, WoofTemplateModel superTemplate, String contentType, boolean isTemplateSecure,
+			Map<String, Boolean> linksSecure, String[] renderRedirectHttpMethods, boolean isContinueRendering,
+			WoofTemplateExtension[] extensions, WoofTemplateChangeContext context) {
 
 		// Obtain the template name
-		String templateName = getTemplateName(templatePath, uri, null,
-				this.model.getWoofTemplates());
+		String templateName = getTemplateName(templatePath, uri, null, this.model.getWoofTemplates());
 
 		// Obtain the super template name
-		String superTemplateName = (superTemplate == null ? null
-				: superTemplate.getWoofTemplateName());
+		String superTemplateName = (superTemplate == null ? null : superTemplate.getWoofTemplateName());
 
 		// Create the template
-		final WoofTemplateModel template = new WoofTemplateModel(templateName,
-				uri, templatePath, superTemplateName, templateLogicClass,
-				contentType, isTemplateSecure, isContinueRendering);
+		final WoofTemplateModel template = new WoofTemplateModel(templateName, uri, templatePath, superTemplateName,
+				templateLogicClass, contentType, isTemplateSecure, isContinueRendering);
 
 		// Determine if have links
 		if (linksSecure != null) {
 			// Add the links
 			for (String linkName : linksSecure.keySet()) {
 				Boolean isLinkSecure = linksSecure.get(linkName);
-				template.addLink(new WoofTemplateLinkModel(linkName,
-						isLinkSecure.booleanValue()));
+				template.addLink(new WoofTemplateLinkModel(linkName, isLinkSecure.booleanValue()));
 			}
 		}
 
@@ -872,8 +821,7 @@ public class WoofChangesImpl implements WoofChanges {
 		if (renderRedirectHttpMethods != null) {
 			// Add the redirects
 			for (String redirectMethod : renderRedirectHttpMethods) {
-				template.addRedirect(new WoofTemplateRedirectModel(
-						redirectMethod));
+				template.addRedirect(new WoofTemplateRedirectModel(redirectMethod));
 			}
 		}
 
@@ -881,11 +829,9 @@ public class WoofChangesImpl implements WoofChanges {
 		Set<String> inheritedOutputNames = null;
 		if (superTemplate != null) {
 			// Obtain the inherited template outputs
-			WoofTemplateInheritance inheritance = this
-					.getWoofTemplateInheritances().get(superTemplateName);
+			WoofTemplateInheritance inheritance = this.getWoofTemplateInheritances().get(superTemplateName);
 			if (inheritance != null) {
-				inheritedOutputNames = inheritance
-						.getInheritedWoofTemplateOutputNames();
+				inheritedOutputNames = inheritance.getInheritedWoofTemplateOutputNames();
 			}
 		}
 
@@ -902,26 +848,21 @@ public class WoofChangesImpl implements WoofChanges {
 			String argumentType = output.getArgumentType();
 
 			// Ignore if inherited
-			if ((inheritedOutputNames != null)
-					&& (inheritedOutputNames.contains(outputName))) {
+			if ((inheritedOutputNames != null) && (inheritedOutputNames.contains(outputName))) {
 				continue;
 			}
 
 			// Ignore continue rendering (if appropriate)
-			if ((!isContinueRendering)
-					&& (HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME
-							.equals(outputName))) {
+			if ((!isContinueRendering) && (HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME.equals(outputName))) {
 				continue; // ignore continue rendering
 			}
 
 			// Add the Woof Template Output
-			template.addOutput(new WoofTemplateOutputModel(outputName,
-					argumentType));
+			template.addOutput(new WoofTemplateOutputModel(outputName, argumentType));
 		}
 
 		// Return change to add template
-		Change<WoofTemplateModel> change = new AbstractChange<WoofTemplateModel>(
-				template, "Add Template") {
+		Change<WoofTemplateModel> change = new AbstractChange<WoofTemplateModel>(template, "Add Template") {
 			@Override
 			public void apply() {
 				WoofChangesImpl.this.model.addWoofTemplate(template);
@@ -938,12 +879,11 @@ public class WoofChangesImpl implements WoofChanges {
 		WoofChangeIssues issues = context.getWoofChangeIssues();
 
 		// Include adding extensions
-		Change<WoofTemplateModel> extensionChange = refactorExtensions(null,
-				uri, extensions, template, context,
+		Change<WoofTemplateModel> extensionChange = refactorExtensions(null, uri, extensions, template, context,
 				context.getConfigurationContext(), issues);
 		if (extensionChange != null) {
-			change = new AggregateChange<WoofTemplateModel>(template,
-					change.getChangeDescription(), change, extensionChange);
+			change = new AggregateChange<WoofTemplateModel>(template, change.getChangeDescription(), change,
+					extensionChange);
 		}
 
 		// Sort template configuration to ensure deterministic configuration
@@ -954,26 +894,19 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofTemplateModel> refactorTemplate(
-			final WoofTemplateModel template, final String uri,
-			final String templatePath, final String templateLogicClass,
-			SectionType sectionType, WoofTemplateModel superTemplate,
-			Set<String> inheritedTemplateOutputNames, String contentType,
-			final boolean isTemplateSecure,
-			final Map<String, Boolean> linksSecure,
-			final String[] renderRedirectHttpMethods,
-			final boolean isContinueRendering,
-			WoofTemplateExtension[] extensions,
-			Map<String, String> templateOutputNameMapping,
+	public Change<WoofTemplateModel> refactorTemplate(final WoofTemplateModel template, final String uri,
+			final String templatePath, final String templateLogicClass, SectionType sectionType,
+			WoofTemplateModel superTemplate, Set<String> inheritedTemplateOutputNames, String contentType,
+			final boolean isTemplateSecure, final Map<String, Boolean> linksSecure,
+			final String[] renderRedirectHttpMethods, final boolean isContinueRendering,
+			WoofTemplateExtension[] extensions, Map<String, String> templateOutputNameMapping,
 			WoofTemplateChangeContext context) {
 
 		// Obtain the template name after URI change
-		final String newTemplateName = getTemplateName(templatePath, uri,
-				template, this.model.getWoofTemplates());
+		final String newTemplateName = getTemplateName(templatePath, uri, template, this.model.getWoofTemplates());
 
 		// Create change to sort outputs
-		Change<WoofTemplateModel> sortChange = new AbstractChange<WoofTemplateModel>(
-				template, "Sort outputs") {
+		Change<WoofTemplateModel> sortChange = new AbstractChange<WoofTemplateModel>(template, "Sort outputs") {
 			@Override
 			public void apply() {
 				sortTemplateConfiguration(template);
@@ -995,8 +928,7 @@ public class WoofChangesImpl implements WoofChanges {
 		final String existingTemplateName = template.getWoofTemplateName();
 		final String existingUri = template.getUri();
 		final String existingTemplatePath = template.getTemplatePath();
-		final String existingTemplateClassName = template
-				.getTemplateClassName();
+		final String existingTemplateClassName = template.getTemplateClassName();
 		final String existingSuperTemplateName = template.getSuperTemplate();
 		final String existingContentType = template.getTemplateContentType();
 		final boolean existingIsTemplateSecure = template.getIsTemplateSecure();
@@ -1004,16 +936,14 @@ public class WoofChangesImpl implements WoofChanges {
 				template.getLinks());
 		final List<WoofTemplateRedirectModel> existingTemplateRedirects = new ArrayList<WoofTemplateRedirectModel>(
 				template.getRedirects());
-		final boolean existingIsContinueRendering = template
-				.getIsContinueRendering();
+		final boolean existingIsContinueRendering = template.getIsContinueRendering();
 
 		// Obtain the calculated new details
-		final String newSuperTemplateName = (superTemplate == null ? null
-				: superTemplate.getWoofTemplateName());
+		final String newSuperTemplateName = (superTemplate == null ? null : superTemplate.getWoofTemplateName());
 
 		// Create change to attributes
-		Change<WoofTemplateModel> attributeChange = new AbstractChange<WoofTemplateModel>(
-				template, "Refactor attributes") {
+		Change<WoofTemplateModel> attributeChange = new AbstractChange<WoofTemplateModel>(template,
+				"Refactor attributes") {
 			@Override
 			public void apply() {
 				// Refactor details
@@ -1027,16 +957,14 @@ public class WoofChangesImpl implements WoofChanges {
 				template.setIsContinueRendering(isContinueRendering);
 
 				// Refactor the links
-				for (WoofTemplateLinkModel link : new ArrayList<WoofTemplateLinkModel>(
-						template.getLinks())) {
+				for (WoofTemplateLinkModel link : new ArrayList<WoofTemplateLinkModel>(template.getLinks())) {
 					template.removeLink(link);
 				}
 				if (linksSecure != null) {
 					// Add the refactored links
 					for (String linkName : linksSecure.keySet()) {
 						Boolean isLinkSecure = linksSecure.get(linkName);
-						template.addLink(new WoofTemplateLinkModel(linkName,
-								isLinkSecure.booleanValue()));
+						template.addLink(new WoofTemplateLinkModel(linkName, isLinkSecure.booleanValue()));
 					}
 				}
 
@@ -1048,8 +976,7 @@ public class WoofChangesImpl implements WoofChanges {
 				if (renderRedirectHttpMethods != null) {
 					// Add the redirects
 					for (String redirectMethod : renderRedirectHttpMethods) {
-						template.addRedirect(new WoofTemplateRedirectModel(
-								redirectMethod));
+						template.addRedirect(new WoofTemplateRedirectModel(redirectMethod));
 					}
 				}
 			}
@@ -1067,8 +994,7 @@ public class WoofChangesImpl implements WoofChanges {
 				template.setIsContinueRendering(existingIsContinueRendering);
 
 				// Revert the links
-				for (WoofTemplateLinkModel link : new ArrayList<WoofTemplateLinkModel>(
-						template.getLinks())) {
+				for (WoofTemplateLinkModel link : new ArrayList<WoofTemplateLinkModel>(template.getLinks())) {
 					template.removeLink(link);
 				}
 				for (WoofTemplateLinkModel link : existingTemplateLinks) {
@@ -1091,10 +1017,8 @@ public class WoofChangesImpl implements WoofChanges {
 		WoofChangeIssues issues = context.getWoofChangeIssues();
 
 		// Refactor extensions (ensuring have extensions)
-		extensions = (extensions == null ? new WoofTemplateExtension[0]
-				: extensions);
-		Change<WoofTemplateModel> extensionChange = refactorExtensions(
-				template, uri, extensions, template, context,
+		extensions = (extensions == null ? new WoofTemplateExtension[0] : extensions);
+		Change<WoofTemplateModel> extensionChange = refactorExtensions(template, uri, extensions, template, context,
 				context.getConfigurationContext(), issues);
 		if (extensionChange != null) {
 			changes.add(extensionChange);
@@ -1103,13 +1027,11 @@ public class WoofChangesImpl implements WoofChanges {
 		// Obtain the mapping of existing outputs
 		Map<String, WoofTemplateOutputModel> existingOutputNameMapping = new HashMap<String, WoofTemplateOutputModel>();
 		for (WoofTemplateOutputModel output : template.getOutputs()) {
-			existingOutputNameMapping.put(output.getWoofTemplateOutputName(),
-					output);
+			existingOutputNameMapping.put(output.getWoofTemplateOutputName(), output);
 		}
 
 		// Refactor the outputs (either refactoring, adding or removing)
-		for (final SectionOutputType outputType : sectionType
-				.getSectionOutputTypes()) {
+		for (final SectionOutputType outputType : sectionType.getSectionOutputTypes()) {
 
 			// Ignore escalations
 			if (outputType.isEscalationOnly()) {
@@ -1121,55 +1043,45 @@ public class WoofChangesImpl implements WoofChanges {
 			final String argumentType = outputType.getArgumentType();
 
 			// Ignore if inheriting the output configuration
-			if ((inheritedTemplateOutputNames != null)
-					&& (inheritedTemplateOutputNames.contains(outputName))) {
+			if ((inheritedTemplateOutputNames != null) && (inheritedTemplateOutputNames.contains(outputName))) {
 				continue;
 			}
 
 			// Ignore continue rendering (if appropriate)
-			if ((!isContinueRendering)
-					&& (HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME
-							.equals(outputName))) {
+			if ((!isContinueRendering) && (HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME.equals(outputName))) {
 				continue; // ignore continue rendering
 			}
 
 			// Obtain the mapped section output model
 			String mappedOutputName = templateOutputNameMapping.get(outputName);
-			final WoofTemplateOutputModel existingOutputModel = existingOutputNameMapping
-					.remove(mappedOutputName);
+			final WoofTemplateOutputModel existingOutputModel = existingOutputNameMapping.remove(mappedOutputName);
 
 			// Determine action to take based on existing output
 			Change<WoofTemplateOutputModel> templateOutputChange;
 			if (existingOutputModel != null) {
 				// Create change to refactor existing output
-				final String existingOutputName = existingOutputModel
-						.getWoofTemplateOutputName();
-				final String existingArgumentType = existingOutputModel
-						.getArgumentType();
-				templateOutputChange = new AbstractChange<WoofTemplateOutputModel>(
-						existingOutputModel, "Refactor Template Output") {
+				final String existingOutputName = existingOutputModel.getWoofTemplateOutputName();
+				final String existingArgumentType = existingOutputModel.getArgumentType();
+				templateOutputChange = new AbstractChange<WoofTemplateOutputModel>(existingOutputModel,
+						"Refactor Template Output") {
 					@Override
 					public void apply() {
-						existingOutputModel
-								.setWoofTemplateOutputName(outputName);
+						existingOutputModel.setWoofTemplateOutputName(outputName);
 						existingOutputModel.setArgumentType(argumentType);
 					}
 
 					@Override
 					public void revert() {
-						existingOutputModel
-								.setWoofTemplateOutputName(existingOutputName);
-						existingOutputModel
-								.setArgumentType(existingArgumentType);
+						existingOutputModel.setWoofTemplateOutputName(existingOutputName);
+						existingOutputModel.setArgumentType(existingArgumentType);
 					}
 				};
 
 			} else {
 				// Create change to add output (with no URI)
-				final WoofTemplateOutputModel newOutputModel = new WoofTemplateOutputModel(
-						outputName, argumentType);
-				templateOutputChange = new AbstractChange<WoofTemplateOutputModel>(
-						newOutputModel, "Add Template Output") {
+				final WoofTemplateOutputModel newOutputModel = new WoofTemplateOutputModel(outputName, argumentType);
+				templateOutputChange = new AbstractChange<WoofTemplateOutputModel>(newOutputModel,
+						"Add Template Output") {
 					@Override
 					public void apply() {
 						template.addOutput(newOutputModel);
@@ -1183,8 +1095,7 @@ public class WoofChangesImpl implements WoofChanges {
 			}
 			changes.add(templateOutputChange);
 		}
-		for (final WoofTemplateOutputModel unmappedOutputModel : existingOutputNameMapping
-				.values()) {
+		for (final WoofTemplateOutputModel unmappedOutputModel : existingOutputNameMapping.values()) {
 			// Create change to remove the unmapped output model
 			Change<WoofTemplateOutputModel> unmappedOutputChange = new AbstractChange<WoofTemplateOutputModel>(
 					unmappedOutputModel, "Remove Template Output") {
@@ -1199,14 +1110,10 @@ public class WoofChangesImpl implements WoofChanges {
 
 					// Remove the connections
 					List<ConnectionModel> list = new LinkedList<ConnectionModel>();
-					removeConnection(unmappedOutputModel.getWoofResource(),
-							list);
-					removeConnection(unmappedOutputModel.getWoofSectionInput(),
-							list);
-					removeConnection(unmappedOutputModel.getWoofTemplate(),
-							list);
-					this.connections = list.toArray(new ConnectionModel[list
-							.size()]);
+					removeConnection(unmappedOutputModel.getWoofResource(), list);
+					removeConnection(unmappedOutputModel.getWoofSectionInput(), list);
+					removeConnection(unmappedOutputModel.getWoofTemplate(), list);
+					this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 					// Remove the template output
 					template.removeOutput(unmappedOutputModel);
@@ -1229,21 +1136,18 @@ public class WoofChangesImpl implements WoofChanges {
 		changes.add(sortChange);
 
 		// Create the aggregate change for refactoring
-		Change<WoofTemplateModel> change = new AggregateChange<WoofTemplateModel>(
-				template, "Refactor Template",
+		Change<WoofTemplateModel> change = new AggregateChange<WoofTemplateModel>(template, "Refactor Template",
 				changes.toArray(new Change[changes.size()]));
 
 		// Include super template name changes
-		change = this.includeSuperTemplateNameChanges(change,
-				existingTemplateName, newTemplateName);
+		change = this.includeSuperTemplateNameChanges(change, existingTemplateName, newTemplateName);
 
 		// Return the change for refactoring
 		return change;
 	}
 
 	@Override
-	public Change<WoofTemplateModel> changeTemplateUri(
-			final WoofTemplateModel template, final String uri,
+	public Change<WoofTemplateModel> changeTemplateUri(final WoofTemplateModel template, final String uri,
 			WoofTemplateChangeContext context) {
 
 		// Keep track of original values
@@ -1251,13 +1155,11 @@ public class WoofChangesImpl implements WoofChanges {
 		final String originalUri = template.getUri();
 
 		// Obtain the template name after URI change
-		final String newTemplateName = getTemplateName(
-				template.getTemplatePath(), uri, template,
+		final String newTemplateName = getTemplateName(template.getTemplatePath(), uri, template,
 				this.model.getWoofTemplates());
 
 		// Create change to template URI
-		Change<WoofTemplateModel> change = new AbstractChange<WoofTemplateModel>(
-				template, "Change Template URI") {
+		Change<WoofTemplateModel> change = new AbstractChange<WoofTemplateModel>(template, "Change Template URI") {
 			@Override
 			public void apply() {
 				// Update template URI
@@ -1280,25 +1182,23 @@ public class WoofChangesImpl implements WoofChanges {
 		WoofChangeIssues issues = context.getWoofChangeIssues();
 
 		// Refactor extensions for changed URI
-		Change<WoofTemplateModel> extensionChange = refactorExtensions(
-				template, uri, null, template, context,
+		Change<WoofTemplateModel> extensionChange = refactorExtensions(template, uri, null, template, context,
 				context.getConfigurationContext(), issues);
 		if (extensionChange != null) {
-			change = new AggregateChange<WoofTemplateModel>(template,
-					change.getChangeDescription(), change, extensionChange);
+			change = new AggregateChange<WoofTemplateModel>(template, change.getChangeDescription(), change,
+					extensionChange);
 		}
 
 		// Include changes for super template name
-		change = this.includeSuperTemplateNameChanges(change,
-				originalTemplateName, newTemplateName);
+		change = this.includeSuperTemplateNameChanges(change, originalTemplateName, newTemplateName);
 
 		// Return the change
 		return change;
 	}
 
 	@Override
-	public Change<WoofTemplateModel> removeTemplate(
-			final WoofTemplateModel template, WoofTemplateChangeContext context) {
+	public Change<WoofTemplateModel> removeTemplate(final WoofTemplateModel template,
+			WoofTemplateChangeContext context) {
 
 		// Obtain the template name
 		String templateName = template.getWoofTemplateName();
@@ -1312,14 +1212,13 @@ public class WoofChangesImpl implements WoofChanges {
 		}
 		if (!isInModel) {
 			// Template model not in model
-			return new NoChange<WoofTemplateModel>(template, "Remove template "
-					+ templateName, "Template " + templateName
-					+ " is not in WoOF model");
+			return new NoChange<WoofTemplateModel>(template, "Remove template " + templateName,
+					"Template " + templateName + " is not in WoOF model");
 		}
 
 		// Create change to remove template
-		Change<WoofTemplateModel> change = new AbstractChange<WoofTemplateModel>(
-				template, "Remove template " + templateName) {
+		Change<WoofTemplateModel> change = new AbstractChange<WoofTemplateModel>(template,
+				"Remove template " + templateName) {
 
 			/**
 			 * {@link ConnectionModel} instances.
@@ -1341,8 +1240,7 @@ public class WoofChangesImpl implements WoofChanges {
 					removeConnection(output.getWoofAccessInput(), list);
 					removeConnection(output.getWoofResource(), list);
 				}
-				this.connections = list
-						.toArray(new ConnectionModel[list.size()]);
+				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 				// Remove the template
 				WoofChangesImpl.this.model.removeWoofTemplate(template);
@@ -1361,17 +1259,15 @@ public class WoofChangesImpl implements WoofChanges {
 		WoofChangeIssues issues = context.getWoofChangeIssues();
 
 		// Refactor extensions for removing template
-		Change<WoofTemplateModel> extensionChange = refactorExtensions(
-				template, null, null, template, context,
+		Change<WoofTemplateModel> extensionChange = refactorExtensions(template, null, null, template, context,
 				context.getConfigurationContext(), issues);
 		if (extensionChange != null) {
-			change = new AggregateChange<WoofTemplateModel>(template,
-					change.getChangeDescription(), change, extensionChange);
+			change = new AggregateChange<WoofTemplateModel>(template, change.getChangeDescription(), change,
+					extensionChange);
 		}
 
 		// Include changes for child templates no longer inheriting
-		change = this.includeSuperTemplateNameChanges(change, templateName,
-				null);
+		change = this.includeSuperTemplateNameChanges(change, templateName, null);
 
 		// Return the change
 		return change;
@@ -1390,8 +1286,7 @@ public class WoofChangesImpl implements WoofChanges {
 	 * @return {@link Change} including any potential super template name
 	 *         changes.
 	 */
-	private Change<WoofTemplateModel> includeSuperTemplateNameChanges(
-			Change<WoofTemplateModel> currentChange,
+	private Change<WoofTemplateModel> includeSuperTemplateNameChanges(Change<WoofTemplateModel> currentChange,
 			final String originalTemplateName, final String newTemplateName) {
 
 		// Identify the child templates
@@ -1411,8 +1306,8 @@ public class WoofChangesImpl implements WoofChanges {
 		changes[0] = currentChange;
 		int changeIndex = 1;
 		for (final WoofTemplateModel childTemplate : childTemplates) {
-			changes[changeIndex++] = new AbstractChange<WoofTemplateModel>(
-					childTemplate, "Change Super Template Name") {
+			changes[changeIndex++] = new AbstractChange<WoofTemplateModel>(childTemplate,
+					"Change Super Template Name") {
 				@Override
 				public void apply() {
 					childTemplate.setSuperTemplate(newTemplateName);
@@ -1426,30 +1321,24 @@ public class WoofChangesImpl implements WoofChanges {
 		}
 
 		// Create and return the aggregate change
-		return new AggregateChange<WoofTemplateModel>(
-				currentChange.getTarget(),
-				currentChange.getChangeDescription(), changes);
+		return new AggregateChange<WoofTemplateModel>(currentChange.getTarget(), currentChange.getChangeDescription(),
+				changes);
 	}
 
 	@Override
-	public Change<WoofSectionModel> addSection(String sectionName,
-			String sectionSourceClassName, String sectionLocation,
-			PropertyList properties, SectionType section,
-			Map<String, String> inputToUri) {
+	public Change<WoofSectionModel> addSection(String sectionName, String sectionSourceClassName,
+			String sectionLocation, PropertyList properties, SectionType section, Map<String, String> inputToUri) {
 
 		// Obtain the unique section name
-		sectionName = getUniqueName(sectionName, null,
-				this.model.getWoofSections(), SECTION_NAME_EXTRACTOR);
+		sectionName = getUniqueName(sectionName, null, this.model.getWoofSections(), SECTION_NAME_EXTRACTOR);
 
 		// Create the section
-		final WoofSectionModel woofSection = new WoofSectionModel(sectionName,
-				sectionSourceClassName, sectionLocation);
+		final WoofSectionModel woofSection = new WoofSectionModel(sectionName, sectionSourceClassName, sectionLocation);
 
 		// Add the properties (if available)
 		if (properties != null) {
 			for (Property property : properties) {
-				woofSection.addProperty(new PropertyModel(property.getName(),
-						property.getValue()));
+				woofSection.addProperty(new PropertyModel(property.getName(), property.getValue()));
 			}
 		}
 
@@ -1458,8 +1347,7 @@ public class WoofChangesImpl implements WoofChanges {
 			String inputName = input.getSectionInputName();
 			String parameterType = input.getParameterType();
 			String uri = inputToUri.get(inputName);
-			woofSection.addInput(new WoofSectionInputModel(inputName,
-					parameterType, uri));
+			woofSection.addInput(new WoofSectionInputModel(inputName, parameterType, uri));
 		}
 
 		// Add the outputs
@@ -1473,8 +1361,7 @@ public class WoofChangesImpl implements WoofChanges {
 			// Add the output
 			String outputName = output.getSectionOutputName();
 			String argumentType = output.getArgumentType();
-			woofSection.addOutput(new WoofSectionOutputModel(outputName,
-					argumentType));
+			woofSection.addOutput(new WoofSectionOutputModel(outputName, argumentType));
 		}
 
 		// Sort the inputs/outputs
@@ -1496,11 +1383,9 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofSectionModel> refactorSection(
-			final WoofSectionModel section, final String sectionName,
-			final String sectionSourceClassName, final String sectionLocation,
-			final PropertyList properties, final SectionType sectionType,
-			Map<String, String> sectionInputNameMapping,
+	public Change<WoofSectionModel> refactorSection(final WoofSectionModel section, final String sectionName,
+			final String sectionSourceClassName, final String sectionLocation, final PropertyList properties,
+			final SectionType sectionType, Map<String, String> sectionInputNameMapping,
 			Map<String, String> sectionOutputNameMapping) {
 
 		// Ensure section available to remove
@@ -1513,13 +1398,11 @@ public class WoofChangesImpl implements WoofChanges {
 		if (!isInModel) {
 			// Section model not in model
 			return new NoChange<WoofSectionModel>(section, "Refactor section",
-					"Section " + section.getWoofSectionName()
-							+ " is not in WoOF model");
+					"Section " + section.getWoofSectionName() + " is not in WoOF model");
 		}
 
 		// Create change to sort inputs/outputs
-		Change<WoofSectionModel> sortChange = new AbstractChange<WoofSectionModel>(
-				section, "Sort inputs/outputs") {
+		Change<WoofSectionModel> sortChange = new AbstractChange<WoofSectionModel>(section, "Sort inputs/outputs") {
 			@Override
 			public void apply() {
 				sortSectionInputOutputs(section);
@@ -1539,15 +1422,13 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Obtain the existing details
 		final String existingSectionName = section.getWoofSectionName();
-		final String existingSectionSourceClassName = section
-				.getSectionSourceClassName();
+		final String existingSectionSourceClassName = section.getSectionSourceClassName();
 		final String existingSectionLocation = section.getSectionLocation();
-		final List<PropertyModel> existingProperties = new ArrayList<PropertyModel>(
-				section.getProperties());
+		final List<PropertyModel> existingProperties = new ArrayList<PropertyModel>(section.getProperties());
 
 		// Create change to attributes and properties
-		Change<WoofSectionModel> attributeChange = new AbstractChange<WoofSectionModel>(
-				section, "Refactor attributes") {
+		Change<WoofSectionModel> attributeChange = new AbstractChange<WoofSectionModel>(section,
+				"Refactor attributes") {
 			@Override
 			public void apply() {
 				// Refactor details
@@ -1559,8 +1440,7 @@ public class WoofChangesImpl implements WoofChanges {
 				section.getProperties().clear();
 				if (properties != null) {
 					for (Property property : properties) {
-						section.addProperty(new PropertyModel(property
-								.getName(), property.getValue()));
+						section.addProperty(new PropertyModel(property.getName(), property.getValue()));
 					}
 				}
 			}
@@ -1584,19 +1464,16 @@ public class WoofChangesImpl implements WoofChanges {
 		// Obtain the mapping of existing inputs
 		Map<String, WoofSectionInputModel> existingInputNameMapping = new HashMap<String, WoofSectionInputModel>();
 		for (WoofSectionInputModel input : section.getInputs()) {
-			existingInputNameMapping
-					.put(input.getWoofSectionInputName(), input);
+			existingInputNameMapping.put(input.getWoofSectionInputName(), input);
 		}
 
 		// Refactor the inputs (either refactoring, adding or removing)
-		for (final SectionInputType inputType : sectionType
-				.getSectionInputTypes()) {
+		for (final SectionInputType inputType : sectionType.getSectionInputTypes()) {
 
 			// Obtain the mapped section input model
 			final String inputName = inputType.getSectionInputName();
 			String mappedInputName = sectionInputNameMapping.get(inputName);
-			final WoofSectionInputModel existingInputModel = existingInputNameMapping
-					.remove(mappedInputName);
+			final WoofSectionInputModel existingInputModel = existingInputNameMapping.remove(mappedInputName);
 
 			// Obtain further type details
 			final String parameterType = inputType.getParameterType();
@@ -1605,32 +1482,26 @@ public class WoofChangesImpl implements WoofChanges {
 			Change<WoofSectionInputModel> sectionInputChange;
 			if (existingInputModel != null) {
 				// Create change to refactor existing input
-				final String existingInputName = existingInputModel
-						.getWoofSectionInputName();
-				final String existingParameterType = existingInputModel
-						.getParameterType();
-				sectionInputChange = new AbstractChange<WoofSectionInputModel>(
-						existingInputModel, "Refactor Section Input") {
+				final String existingInputName = existingInputModel.getWoofSectionInputName();
+				final String existingParameterType = existingInputModel.getParameterType();
+				sectionInputChange = new AbstractChange<WoofSectionInputModel>(existingInputModel,
+						"Refactor Section Input") {
 					@Override
 					public void apply() {
 						existingInputModel.setWoofSectionInputName(inputName);
 						existingInputModel.setParameterType(parameterType);
 
 						// Rename connections links
-						this.renameConnections(existingInputModel, sectionName,
-								inputName);
+						this.renameConnections(existingInputModel, sectionName, inputName);
 					}
 
 					@Override
 					public void revert() {
-						existingInputModel
-								.setWoofSectionInputName(existingInputName);
-						existingInputModel
-								.setParameterType(existingParameterType);
+						existingInputModel.setWoofSectionInputName(existingInputName);
+						existingInputModel.setParameterType(existingParameterType);
 
 						// Revert connection links
-						this.renameConnections(existingInputModel,
-								existingSectionName, existingInputName);
+						this.renameConnections(existingInputModel, existingSectionName, existingInputName);
 					}
 
 					/**
@@ -1644,33 +1515,28 @@ public class WoofChangesImpl implements WoofChanges {
 					 * @param inputName
 					 *            {@link WoofSectionInputModel} name.
 					 */
-					private void renameConnections(WoofSectionInputModel input,
-							String sectionName, String inputName) {
+					private void renameConnections(WoofSectionInputModel input, String sectionName, String inputName) {
 
 						// Rename exception connections
-						for (WoofExceptionToWoofSectionInputModel conn : input
-								.getWoofExceptions()) {
+						for (WoofExceptionToWoofSectionInputModel conn : input.getWoofExceptions()) {
 							conn.setSectionName(sectionName);
 							conn.setInputName(inputName);
 						}
 
 						// Rename section output connections
-						for (WoofSectionOutputToWoofSectionInputModel conn : input
-								.getWoofSectionOutputs()) {
+						for (WoofSectionOutputToWoofSectionInputModel conn : input.getWoofSectionOutputs()) {
 							conn.setSectionName(sectionName);
 							conn.setInputName(inputName);
 						}
 
 						// Rename start connections
-						for (WoofStartToWoofSectionInputModel conn : input
-								.getWoofStarts()) {
+						for (WoofStartToWoofSectionInputModel conn : input.getWoofStarts()) {
 							conn.setSectionName(sectionName);
 							conn.setInputName(inputName);
 						}
 
 						// Rename template connections
-						for (WoofTemplateOutputToWoofSectionInputModel conn : input
-								.getWoofTemplateOutputs()) {
+						for (WoofTemplateOutputToWoofSectionInputModel conn : input.getWoofTemplateOutputs()) {
 							conn.setSectionName(sectionName);
 							conn.setInputName(inputName);
 						}
@@ -1679,10 +1545,8 @@ public class WoofChangesImpl implements WoofChanges {
 
 			} else {
 				// Create change to add input (with no URI)
-				final WoofSectionInputModel newInputModel = new WoofSectionInputModel(
-						inputName, parameterType, null);
-				sectionInputChange = new AbstractChange<WoofSectionInputModel>(
-						newInputModel, "Add Section Input") {
+				final WoofSectionInputModel newInputModel = new WoofSectionInputModel(inputName, parameterType, null);
+				sectionInputChange = new AbstractChange<WoofSectionInputModel>(newInputModel, "Add Section Input") {
 					@Override
 					public void apply() {
 						section.addInput(newInputModel);
@@ -1696,8 +1560,7 @@ public class WoofChangesImpl implements WoofChanges {
 			}
 			changes.add(sectionInputChange);
 		}
-		for (final WoofSectionInputModel unmappedInputModel : existingInputNameMapping
-				.values()) {
+		for (final WoofSectionInputModel unmappedInputModel : existingInputNameMapping.values()) {
 			// Create change to remove the unmapped input model
 			Change<WoofSectionInputModel> unmappedInputChange = new AbstractChange<WoofSectionInputModel>(
 					unmappedInputModel, "Remove Section Input") {
@@ -1712,15 +1575,11 @@ public class WoofChangesImpl implements WoofChanges {
 
 					// Remove the connections
 					List<ConnectionModel> list = new LinkedList<ConnectionModel>();
-					removeConnections(unmappedInputModel.getWoofExceptions(),
-							list);
-					removeConnections(
-							unmappedInputModel.getWoofSectionOutputs(), list);
+					removeConnections(unmappedInputModel.getWoofExceptions(), list);
+					removeConnections(unmappedInputModel.getWoofSectionOutputs(), list);
 					removeConnections(unmappedInputModel.getWoofStarts(), list);
-					removeConnections(
-							unmappedInputModel.getWoofTemplateOutputs(), list);
-					this.connections = list.toArray(new ConnectionModel[list
-							.size()]);
+					removeConnections(unmappedInputModel.getWoofTemplateOutputs(), list);
+					this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 					// Remove the section input
 					section.removeInput(unmappedInputModel);
@@ -1742,13 +1601,11 @@ public class WoofChangesImpl implements WoofChanges {
 		// Obtain the mapping of existing outputs
 		Map<String, WoofSectionOutputModel> existingOutputNameMapping = new HashMap<String, WoofSectionOutputModel>();
 		for (WoofSectionOutputModel output : section.getOutputs()) {
-			existingOutputNameMapping.put(output.getWoofSectionOutputName(),
-					output);
+			existingOutputNameMapping.put(output.getWoofSectionOutputName(), output);
 		}
 
 		// Refactor the ouputs (either refactoring, adding or removing)
-		for (final SectionOutputType outputType : sectionType
-				.getSectionOutputTypes()) {
+		for (final SectionOutputType outputType : sectionType.getSectionOutputTypes()) {
 
 			// Ignore escalations
 			if (outputType.isEscalationOnly()) {
@@ -1758,8 +1615,7 @@ public class WoofChangesImpl implements WoofChanges {
 			// Obtain the mapped section output model
 			final String outputName = outputType.getSectionOutputName();
 			String mappedOutputName = sectionOutputNameMapping.get(outputName);
-			final WoofSectionOutputModel existingOutputModel = existingOutputNameMapping
-					.remove(mappedOutputName);
+			final WoofSectionOutputModel existingOutputModel = existingOutputNameMapping.remove(mappedOutputName);
 
 			// Obtain further type details
 			final String argumentType = outputType.getArgumentType();
@@ -1768,34 +1624,27 @@ public class WoofChangesImpl implements WoofChanges {
 			Change<WoofSectionOutputModel> sectionOutputChange;
 			if (existingOutputModel != null) {
 				// Create change to refactor existing output
-				final String existingOutputName = existingOutputModel
-						.getWoofSectionOutputName();
-				final String existingArgumentType = existingOutputModel
-						.getArgumentType();
-				sectionOutputChange = new AbstractChange<WoofSectionOutputModel>(
-						existingOutputModel, "Refactor Section Output") {
+				final String existingOutputName = existingOutputModel.getWoofSectionOutputName();
+				final String existingArgumentType = existingOutputModel.getArgumentType();
+				sectionOutputChange = new AbstractChange<WoofSectionOutputModel>(existingOutputModel,
+						"Refactor Section Output") {
 					@Override
 					public void apply() {
-						existingOutputModel
-								.setWoofSectionOutputName(outputName);
+						existingOutputModel.setWoofSectionOutputName(outputName);
 						existingOutputModel.setArgumentType(argumentType);
 					}
 
 					@Override
 					public void revert() {
-						existingOutputModel
-								.setWoofSectionOutputName(existingOutputName);
-						existingOutputModel
-								.setArgumentType(existingArgumentType);
+						existingOutputModel.setWoofSectionOutputName(existingOutputName);
+						existingOutputModel.setArgumentType(existingArgumentType);
 					}
 				};
 
 			} else {
 				// Create change to add output (with no URI)
-				final WoofSectionOutputModel newOutputModel = new WoofSectionOutputModel(
-						outputName, argumentType);
-				sectionOutputChange = new AbstractChange<WoofSectionOutputModel>(
-						newOutputModel, "Add Section Output") {
+				final WoofSectionOutputModel newOutputModel = new WoofSectionOutputModel(outputName, argumentType);
+				sectionOutputChange = new AbstractChange<WoofSectionOutputModel>(newOutputModel, "Add Section Output") {
 					@Override
 					public void apply() {
 						section.addOutput(newOutputModel);
@@ -1809,8 +1658,7 @@ public class WoofChangesImpl implements WoofChanges {
 			}
 			changes.add(sectionOutputChange);
 		}
-		for (final WoofSectionOutputModel unmappedOutputModel : existingOutputNameMapping
-				.values()) {
+		for (final WoofSectionOutputModel unmappedOutputModel : existingOutputNameMapping.values()) {
 			// Create change to remove the unmapped output model
 			Change<WoofSectionOutputModel> unmappedOutputChange = new AbstractChange<WoofSectionOutputModel>(
 					unmappedOutputModel, "Remove Section Output") {
@@ -1825,14 +1673,10 @@ public class WoofChangesImpl implements WoofChanges {
 
 					// Remove the connections
 					List<ConnectionModel> list = new LinkedList<ConnectionModel>();
-					removeConnection(unmappedOutputModel.getWoofResource(),
-							list);
-					removeConnection(unmappedOutputModel.getWoofSectionInput(),
-							list);
-					removeConnection(unmappedOutputModel.getWoofTemplate(),
-							list);
-					this.connections = list.toArray(new ConnectionModel[list
-							.size()]);
+					removeConnection(unmappedOutputModel.getWoofResource(), list);
+					removeConnection(unmappedOutputModel.getWoofSectionInput(), list);
+					removeConnection(unmappedOutputModel.getWoofTemplate(), list);
+					this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 					// Remove the section output
 					section.removeOutput(unmappedOutputModel);
@@ -1855,20 +1699,19 @@ public class WoofChangesImpl implements WoofChanges {
 		changes.add(sortChange);
 
 		// Return aggregate change for refactoring
-		return new AggregateChange<WoofSectionModel>(section,
-				"Refactor Section", changes.toArray(new Change[changes.size()]));
+		return new AggregateChange<WoofSectionModel>(section, "Refactor Section",
+				changes.toArray(new Change[changes.size()]));
 	}
 
 	@Override
-	public Change<WoofSectionInputModel> changeSectionInputUri(
-			final WoofSectionInputModel sectionInput, final String uri) {
+	public Change<WoofSectionInputModel> changeSectionInputUri(final WoofSectionInputModel sectionInput,
+			final String uri) {
 
 		// Maintain original URI
 		final String originalUri = sectionInput.getUri();
 
 		// Return change to URI
-		return new AbstractChange<WoofSectionInputModel>(sectionInput,
-				"Change Section Input URI") {
+		return new AbstractChange<WoofSectionInputModel>(sectionInput, "Change Section Input URI") {
 			@Override
 			public void apply() {
 				sectionInput.setUri(uri);
@@ -1893,14 +1736,12 @@ public class WoofChangesImpl implements WoofChanges {
 		}
 		if (!isInModel) {
 			// Section model not in model
-			return new NoChange<WoofSectionModel>(section, "Remove section "
-					+ section.getWoofSectionName(), "Section "
-					+ section.getWoofSectionName() + " is not in WoOF model");
+			return new NoChange<WoofSectionModel>(section, "Remove section " + section.getWoofSectionName(),
+					"Section " + section.getWoofSectionName() + " is not in WoOF model");
 		}
 
 		// Return change to remove section
-		return new AbstractChange<WoofSectionModel>(section, "Remove section "
-				+ section.getWoofSectionName()) {
+		return new AbstractChange<WoofSectionModel>(section, "Remove section " + section.getWoofSectionName()) {
 
 			/**
 			 * {@link ConnectionModel} instances.
@@ -1925,8 +1766,7 @@ public class WoofChangesImpl implements WoofChanges {
 					removeConnection(output.getWoofAccessInput(), list);
 					removeConnection(output.getWoofResource(), list);
 				}
-				this.connections = list
-						.toArray(new ConnectionModel[list.size()]);
+				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 				// Remove the section
 				WoofChangesImpl.this.model.removeWoofSection(section);
@@ -1943,20 +1783,16 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofAccessModel> setAccess(
-			String httpSecuritySourceClassName, long timeout,
-			PropertyList properties,
-			HttpSecurityType<?, ?, ?, ?> httpSecurityType) {
+	public Change<WoofAccessModel> addAccess(String accessName, String httpSecuritySourceClassName, long timeout,
+			PropertyList properties, HttpSecurityType<?, ?, ?, ?> httpSecurityType) {
 
 		// Create the action
-		final WoofAccessModel woofAccess = new WoofAccessModel(
-				httpSecuritySourceClassName, timeout);
+		final WoofAccessModel woofAccess = new WoofAccessModel(accessName, httpSecuritySourceClassName, timeout);
 
 		// Add the properties (if available)
 		if (properties != null) {
 			for (Property property : properties) {
-				woofAccess.addProperty(new PropertyModel(property.getName(),
-						property.getValue()));
+				woofAccess.addProperty(new PropertyModel(property.getName(), property.getValue()));
 			}
 		}
 
@@ -1966,76 +1802,46 @@ public class WoofChangesImpl implements WoofChanges {
 			// Add the output
 			String outputName = output.getFlowName();
 			Class<?> argumentType = output.getArgumentType();
-			woofAccess.addOutput(new WoofAccessOutputModel(outputName,
-					(argumentType == null ? null : argumentType.getName())));
+			woofAccess.addOutput(
+					new WoofAccessOutputModel(outputName, (argumentType == null ? null : argumentType.getName())));
 
 			// Has output flow
 			isOutputFlow = true;
 		}
-		woofAccess.addOutput(new WoofAccessOutputModel(
-				HttpSecuritySectionSource.OUTPUT_FAILURE, Throwable.class
-						.getName()));
+		woofAccess.addOutput(
+				new WoofAccessOutputModel(HttpSecuritySectionSource.OUTPUT_FAILURE, Throwable.class.getName()));
 
 		// Add the inputs (only if have output requiring application behaviour)
 		if (isOutputFlow) {
 			Class<?> credentialsType = httpSecurityType.getCredentialsClass();
-			woofAccess
-					.addInput(new WoofAccessInputModel("Authenticate",
-							(credentialsType == null ? null : credentialsType
-									.getName())));
+			woofAccess.addInput(new WoofAccessInputModel("Authenticate",
+					(credentialsType == null ? null : credentialsType.getName())));
 		}
 
 		// Sort the inputs/outputs
 		sortAccessInputOutputs(woofAccess);
 
-		// Create change to set access
-		Change<WoofAccessModel> change = new AbstractChange<WoofAccessModel>(
-				woofAccess, "Set Access") {
+		// Create and return change to set access
+		return new AbstractChange<WoofAccessModel>(woofAccess, "Set Access") {
 			@Override
 			public void apply() {
-				WoofChangesImpl.this.model.setWoofAccess(woofAccess);
+				WoofChangesImpl.this.model.addWoofAccess(woofAccess);
 			}
 
 			@Override
 			public void revert() {
-				WoofChangesImpl.this.model.setWoofAccess(null);
+				WoofChangesImpl.this.model.removeWoofAccess(null);
 			}
 		};
-
-		// Remove access if already specified
-		WoofAccessModel existingAccess = this.model.getWoofAccess();
-		if (existingAccess != null) {
-			// Create change to remove access
-			Change<WoofAccessModel> removeChange = this
-					.removeAccess(existingAccess);
-
-			// Provide aggregate change to remove and set
-			change = new AggregateChange<WoofAccessModel>(woofAccess,
-					"Set Access", removeChange, change);
-		}
-
-		// Return the change
-		return change;
 	}
 
 	@Override
-	public Change<WoofAccessModel> refactorAccess(final WoofAccessModel access,
-			final String httpSecuritySourceClassName, final long timeout,
-			final PropertyList properties,
-			HttpSecurityType<?, ?, ?, ?> httpSecurityType,
-			Map<String, String> accessOutputNameMapping) {
-
-		// Ensure access to remove
-		if (access != this.model.getWoofAccess()) {
-			// Access model not in model
-			return new NoChange<WoofAccessModel>(access, "Refactor access",
-					"Access " + access.getHttpSecuritySourceClassName()
-							+ " is not in WoOF model");
-		}
+	public Change<WoofAccessModel> refactorAccess(final WoofAccessModel access, String accessName,
+			final String httpSecuritySourceClassName, final long timeout, final PropertyList properties,
+			HttpSecurityType<?, ?, ?, ?> httpSecurityType, Map<String, String> accessOutputNameMapping) {
 
 		// Create change to sort outputs
-		Change<WoofAccessModel> sortChange = new AbstractChange<WoofAccessModel>(
-				access, "Sort outputs") {
+		Change<WoofAccessModel> sortChange = new AbstractChange<WoofAccessModel>(access, "Sort outputs") {
 			@Override
 			public void apply() {
 				sortAccessInputOutputs(access);
@@ -2054,15 +1860,12 @@ public class WoofChangesImpl implements WoofChanges {
 		changes.add(sortChange);
 
 		// Obtain the existing details
-		final String existingHttpSecuritySourceClassName = access
-				.getHttpSecuritySourceClassName();
+		final String existingHttpSecuritySourceClassName = access.getHttpSecuritySourceClassName();
 		final long existingTimeout = access.getTimeout();
-		final List<PropertyModel> existingProperties = new ArrayList<PropertyModel>(
-				access.getProperties());
+		final List<PropertyModel> existingProperties = new ArrayList<PropertyModel>(access.getProperties());
 
 		// Create change to attributes and properties
-		Change<WoofAccessModel> attributeChange = new AbstractChange<WoofAccessModel>(
-				access, "Refactor attributes") {
+		Change<WoofAccessModel> attributeChange = new AbstractChange<WoofAccessModel>(access, "Refactor attributes") {
 			@Override
 			public void apply() {
 				// Refactor details
@@ -2073,8 +1876,7 @@ public class WoofChangesImpl implements WoofChanges {
 				access.getProperties().clear();
 				if (properties != null) {
 					for (Property property : properties) {
-						access.addProperty(new PropertyModel(
-								property.getName(), property.getValue()));
+						access.addProperty(new PropertyModel(property.getName(), property.getValue()));
 					}
 				}
 			}
@@ -2101,26 +1903,20 @@ public class WoofChangesImpl implements WoofChanges {
 			// Obtain flow details
 			final String outputName = flowType.getFlowName();
 			Class<?> argumentTypeClass = flowType.getArgumentType();
-			final String argumentType = (argumentTypeClass == null ? null
-					: argumentTypeClass.getName());
+			final String argumentType = (argumentTypeClass == null ? null : argumentTypeClass.getName());
 
 			// Create the output for the flow
 			outputs.add(new ModelItemStruct(outputName, argumentType));
 		}
-		outputs.add(new ModelItemStruct(
-				HttpSecuritySectionSource.OUTPUT_FAILURE, Throwable.class
-						.getName()));
+		outputs.add(new ModelItemStruct(HttpSecuritySectionSource.OUTPUT_FAILURE, Throwable.class.getName()));
 
 		// Determine if application behaviour required (except for failure)
 		List<ModelItemStruct> inputs = new LinkedList<ModelItemStruct>();
 		if (outputs.size() > 1) {
 			// Require application behaviour so allow application authentication
 			Class<?> credentialsClass = httpSecurityType.getCredentialsClass();
-			String credentialsType = (credentialsClass == null ? null
-					: credentialsClass.getName());
-			inputs.add(new ModelItemStruct(
-					HttpSecuritySectionSource.INPUT_AUTHENTICATE,
-					credentialsType));
+			String credentialsType = (credentialsClass == null ? null : credentialsClass.getName());
+			inputs.add(new ModelItemStruct(HttpSecuritySectionSource.INPUT_AUTHENTICATE, credentialsType));
 		}
 
 		// Obtain the mapping of existing inputs
@@ -2137,19 +1933,16 @@ public class WoofChangesImpl implements WoofChanges {
 			final String parameterType = input.type;
 
 			// Obtain the equivalent input on model
-			final WoofAccessInputModel existingInputModel = existingInputNameMapping
-					.remove(inputName);
+			final WoofAccessInputModel existingInputModel = existingInputNameMapping.remove(inputName);
 
 			// Determine action to take based on existing input
 			Change<WoofAccessInputModel> accessInputChange;
 			if (existingInputModel != null) {
 				// Create change to refactor existing input
-				final String existingInputName = existingInputModel
-						.getWoofAccessInputName();
-				final String existingParameterType = existingInputModel
-						.getParameterType();
-				accessInputChange = new AbstractChange<WoofAccessInputModel>(
-						existingInputModel, "Refactor Access Input") {
+				final String existingInputName = existingInputModel.getWoofAccessInputName();
+				final String existingParameterType = existingInputModel.getParameterType();
+				accessInputChange = new AbstractChange<WoofAccessInputModel>(existingInputModel,
+						"Refactor Access Input") {
 					@Override
 					public void apply() {
 						existingInputModel.setWoofAccessInputName(inputName);
@@ -2161,14 +1954,11 @@ public class WoofChangesImpl implements WoofChanges {
 
 					@Override
 					public void revert() {
-						existingInputModel
-								.setWoofAccessInputName(existingInputName);
-						existingInputModel
-								.setParameterType(existingParameterType);
+						existingInputModel.setWoofAccessInputName(existingInputName);
+						existingInputModel.setParameterType(existingParameterType);
 
 						// Revert connection links
-						this.renameConnections(existingInputModel,
-								existingInputName);
+						this.renameConnections(existingInputModel, existingInputName);
 					}
 
 					/**
@@ -2180,18 +1970,15 @@ public class WoofChangesImpl implements WoofChanges {
 					 * @param inputName
 					 *            {@link WoofAccessInputModel} name.
 					 */
-					private void renameConnections(WoofAccessInputModel input,
-							String inputName) {
+					private void renameConnections(WoofAccessInputModel input, String inputName) {
 
 						// Rename section output connections
-						for (WoofSectionOutputToWoofAccessInputModel conn : input
-								.getWoofSectionOutputs()) {
+						for (WoofSectionOutputToWoofAccessInputModel conn : input.getWoofSectionOutputs()) {
 							conn.setInputName(inputName);
 						}
 
 						// Rename template connections
-						for (WoofTemplateOutputToWoofAccessInputModel conn : input
-								.getWoofTemplateOutputs()) {
+						for (WoofTemplateOutputToWoofAccessInputModel conn : input.getWoofTemplateOutputs()) {
 							conn.setInputName(inputName);
 						}
 					}
@@ -2199,10 +1986,8 @@ public class WoofChangesImpl implements WoofChanges {
 
 			} else {
 				// Create change to add input (with no URI)
-				final WoofAccessInputModel newInputModel = new WoofAccessInputModel(
-						inputName, parameterType);
-				accessInputChange = new AbstractChange<WoofAccessInputModel>(
-						newInputModel, "Add Access Input") {
+				final WoofAccessInputModel newInputModel = new WoofAccessInputModel(inputName, parameterType);
+				accessInputChange = new AbstractChange<WoofAccessInputModel>(newInputModel, "Add Access Input") {
 					@Override
 					public void apply() {
 						access.addInput(newInputModel);
@@ -2216,8 +2001,7 @@ public class WoofChangesImpl implements WoofChanges {
 			}
 			changes.add(accessInputChange);
 		}
-		for (final WoofAccessInputModel unmappedInputModel : existingInputNameMapping
-				.values()) {
+		for (final WoofAccessInputModel unmappedInputModel : existingInputNameMapping.values()) {
 			// Create change to remove the unmapped input model
 			Change<WoofAccessInputModel> unmappedInputChange = new AbstractChange<WoofAccessInputModel>(
 					unmappedInputModel, "Remove Access Input") {
@@ -2232,12 +2016,9 @@ public class WoofChangesImpl implements WoofChanges {
 
 					// Remove the connections
 					List<ConnectionModel> list = new LinkedList<ConnectionModel>();
-					removeConnections(
-							unmappedInputModel.getWoofSectionOutputs(), list);
-					removeConnections(
-							unmappedInputModel.getWoofTemplateOutputs(), list);
-					this.connections = list.toArray(new ConnectionModel[list
-							.size()]);
+					removeConnections(unmappedInputModel.getWoofSectionOutputs(), list);
+					removeConnections(unmappedInputModel.getWoofTemplateOutputs(), list);
+					this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 					// Remove the access input
 					access.removeInput(unmappedInputModel);
@@ -2259,8 +2040,7 @@ public class WoofChangesImpl implements WoofChanges {
 		// Obtain the mapping of existing outputs
 		Map<String, WoofAccessOutputModel> existingOutputNameMapping = new HashMap<String, WoofAccessOutputModel>();
 		for (WoofAccessOutputModel output : access.getOutputs()) {
-			existingOutputNameMapping.put(output.getWoofAccessOutputName(),
-					output);
+			existingOutputNameMapping.put(output.getWoofAccessOutputName(), output);
 		}
 
 		// Refactor the outputs (either refactoring, adding or removing)
@@ -2270,8 +2050,7 @@ public class WoofChangesImpl implements WoofChanges {
 			final String outputName = output.name;
 			String mappedOutputName = (accessOutputNameMapping == null ? null
 					: accessOutputNameMapping.get(outputName));
-			final WoofAccessOutputModel existingOutputModel = existingOutputNameMapping
-					.remove(mappedOutputName);
+			final WoofAccessOutputModel existingOutputModel = existingOutputNameMapping.remove(mappedOutputName);
 
 			// Obtain further type details
 			final String argumentType = output.type;
@@ -2280,12 +2059,10 @@ public class WoofChangesImpl implements WoofChanges {
 			Change<WoofAccessOutputModel> accessOutputChange;
 			if (existingOutputModel != null) {
 				// Create change to refactor existing output
-				final String existingOutputName = existingOutputModel
-						.getWoofAccessOutputName();
-				final String existingArgumentType = existingOutputModel
-						.getArgumentType();
-				accessOutputChange = new AbstractChange<WoofAccessOutputModel>(
-						existingOutputModel, "Refactor Access Output") {
+				final String existingOutputName = existingOutputModel.getWoofAccessOutputName();
+				final String existingArgumentType = existingOutputModel.getArgumentType();
+				accessOutputChange = new AbstractChange<WoofAccessOutputModel>(existingOutputModel,
+						"Refactor Access Output") {
 					@Override
 					public void apply() {
 						existingOutputModel.setWoofAccessOutputName(outputName);
@@ -2294,19 +2071,15 @@ public class WoofChangesImpl implements WoofChanges {
 
 					@Override
 					public void revert() {
-						existingOutputModel
-								.setWoofAccessOutputName(existingOutputName);
-						existingOutputModel
-								.setArgumentType(existingArgumentType);
+						existingOutputModel.setWoofAccessOutputName(existingOutputName);
+						existingOutputModel.setArgumentType(existingArgumentType);
 					}
 				};
 
 			} else {
 				// Create change to add output
-				final WoofAccessOutputModel newOutputModel = new WoofAccessOutputModel(
-						outputName, argumentType);
-				accessOutputChange = new AbstractChange<WoofAccessOutputModel>(
-						newOutputModel, "Add Access Output") {
+				final WoofAccessOutputModel newOutputModel = new WoofAccessOutputModel(outputName, argumentType);
+				accessOutputChange = new AbstractChange<WoofAccessOutputModel>(newOutputModel, "Add Access Output") {
 					@Override
 					public void apply() {
 						access.addOutput(newOutputModel);
@@ -2320,8 +2093,7 @@ public class WoofChangesImpl implements WoofChanges {
 			}
 			changes.add(accessOutputChange);
 		}
-		for (final WoofAccessOutputModel unmappedOutputModel : existingOutputNameMapping
-				.values()) {
+		for (final WoofAccessOutputModel unmappedOutputModel : existingOutputNameMapping.values()) {
 			// Create change to remove the unmapped output model
 			Change<WoofAccessOutputModel> unmappedOutputChange = new AbstractChange<WoofAccessOutputModel>(
 					unmappedOutputModel, "Remove Access Output") {
@@ -2336,14 +2108,10 @@ public class WoofChangesImpl implements WoofChanges {
 
 					// Remove the connections
 					List<ConnectionModel> list = new LinkedList<ConnectionModel>();
-					removeConnection(unmappedOutputModel.getWoofResource(),
-							list);
-					removeConnection(unmappedOutputModel.getWoofSectionInput(),
-							list);
-					removeConnection(unmappedOutputModel.getWoofTemplate(),
-							list);
-					this.connections = list.toArray(new ConnectionModel[list
-							.size()]);
+					removeConnection(unmappedOutputModel.getWoofResource(), list);
+					removeConnection(unmappedOutputModel.getWoofSectionInput(), list);
+					removeConnection(unmappedOutputModel.getWoofTemplate(), list);
+					this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 					// Remove the access output
 					access.removeOutput(unmappedOutputModel);
@@ -2402,18 +2170,8 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofAccessModel> removeAccess(final WoofAccessModel access) {
 
-		// Ensure access to remove
-		if (access != this.model.getWoofAccess()) {
-			// Access model not in model
-			return new NoChange<WoofAccessModel>(access, "Remove access "
-					+ access.getHttpSecuritySourceClassName(), "Access "
-					+ access.getHttpSecuritySourceClassName()
-					+ " is not in WoOF model");
-		}
-
 		// Return change to remove access
-		return new AbstractChange<WoofAccessModel>(access, "Remove access "
-				+ access.getHttpSecuritySourceClassName()) {
+		return new AbstractChange<WoofAccessModel>(access, "Remove access " + access.getHttpSecuritySourceClassName()) {
 
 			/**
 			 * {@link ConnectionModel} instances.
@@ -2434,17 +2192,16 @@ public class WoofChangesImpl implements WoofChanges {
 					removeConnection(output.getWoofSectionInput(), list);
 					removeConnection(output.getWoofResource(), list);
 				}
-				this.connections = list
-						.toArray(new ConnectionModel[list.size()]);
+				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 				// Remove the access
-				WoofChangesImpl.this.model.setWoofAccess(null);
+				WoofChangesImpl.this.model.removeWoofAccess(access);
 			}
 
 			@Override
 			public void revert() {
 				// Add back the access
-				WoofChangesImpl.this.model.setWoofAccess(access);
+				WoofChangesImpl.this.model.addWoofAccess(access);
 				reconnectConnections(this.connections);
 				sortAccessInputOutputs(access);
 			}
@@ -2452,29 +2209,25 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofGovernanceModel> addGovernance(String governanceName,
-			String governanceSourceClassName, PropertyList properties,
-			GovernanceType<?, ?> governanceType) {
+	public Change<WoofGovernanceModel> addGovernance(String governanceName, String governanceSourceClassName,
+			PropertyList properties, GovernanceType<?, ?> governanceType) {
 
 		// Obtain the unique governance name
-		governanceName = getUniqueName(governanceName, null,
-				this.model.getWoofGovernances(), GOVERNANCE_NAME_EXTRACTOR);
+		governanceName = getUniqueName(governanceName, null, this.model.getWoofGovernances(),
+				GOVERNANCE_NAME_EXTRACTOR);
 
 		// Create the governance
-		final WoofGovernanceModel woofGovernance = new WoofGovernanceModel(
-				governanceName, governanceSourceClassName);
+		final WoofGovernanceModel woofGovernance = new WoofGovernanceModel(governanceName, governanceSourceClassName);
 
 		// Add the properties (if available)
 		if (properties != null) {
 			for (Property property : properties) {
-				woofGovernance.addProperty(new PropertyModel(
-						property.getName(), property.getValue()));
+				woofGovernance.addProperty(new PropertyModel(property.getName(), property.getValue()));
 			}
 		}
 
 		// Return the change to add governance
-		return new AbstractChange<WoofGovernanceModel>(woofGovernance,
-				"Add Governance") {
+		return new AbstractChange<WoofGovernanceModel>(woofGovernance, "Add Governance") {
 			@Override
 			public void apply() {
 				WoofChangesImpl.this.model.addWoofGovernance(woofGovernance);
@@ -2489,10 +2242,9 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofGovernanceModel> refactorGovernance(
-			final WoofGovernanceModel governance, String governanceName,
-			final String governanceSourceClassName,
-			final PropertyList properties, GovernanceType<?, ?> governanceType) {
+	public Change<WoofGovernanceModel> refactorGovernance(final WoofGovernanceModel governance, String governanceName,
+			final String governanceSourceClassName, final PropertyList properties,
+			GovernanceType<?, ?> governanceType) {
 
 		// Ensure governance available to remove
 		boolean isInModel = false;
@@ -2503,43 +2255,34 @@ public class WoofChangesImpl implements WoofChanges {
 		}
 		if (!isInModel) {
 			// Governance model not in model
-			return new NoChange<WoofGovernanceModel>(
-					governance,
+			return new NoChange<WoofGovernanceModel>(governance,
 					"Refactor governance " + governance.getWoofGovernanceName(),
-					"Governance " + governance.getWoofGovernanceName()
-							+ " is not in WoOF model");
+					"Governance " + governance.getWoofGovernanceName() + " is not in WoOF model");
 		}
 
 		// Obtain the existing details
-		final String existingGovernanceName = governance
-				.getWoofGovernanceName();
-		final String existingGovernanceSourceClassName = governance
-				.getGovernanceSourceClassName();
-		final List<PropertyModel> existingProperties = new ArrayList<PropertyModel>(
-				governance.getProperties());
+		final String existingGovernanceName = governance.getWoofGovernanceName();
+		final String existingGovernanceSourceClassName = governance.getGovernanceSourceClassName();
+		final List<PropertyModel> existingProperties = new ArrayList<PropertyModel>(governance.getProperties());
 
 		// Obtain the unique governance name
-		final String uniqueGovernanceName = getUniqueName(governanceName,
-				governance, this.model.getWoofGovernances(),
+		final String uniqueGovernanceName = getUniqueName(governanceName, governance, this.model.getWoofGovernances(),
 				GOVERNANCE_NAME_EXTRACTOR);
 
 		// Return change to refactor governance
-		return new AbstractChange<WoofGovernanceModel>(governance,
-				"Refactor Governance") {
+		return new AbstractChange<WoofGovernanceModel>(governance, "Refactor Governance") {
 
 			@Override
 			public void apply() {
 				// Apply attribute changes
 				governance.setWoofGovernanceName(uniqueGovernanceName);
-				governance
-						.setGovernanceSourceClassName(governanceSourceClassName);
+				governance.setGovernanceSourceClassName(governanceSourceClassName);
 
 				// Apply property changes
 				governance.getProperties().clear();
 				if (properties != null) {
 					for (Property property : properties) {
-						governance.addProperty(new PropertyModel(property
-								.getName(), property.getValue()));
+						governance.addProperty(new PropertyModel(property.getName(), property.getValue()));
 					}
 				}
 
@@ -2551,8 +2294,7 @@ public class WoofChangesImpl implements WoofChanges {
 			public void revert() {
 				// Revert attributes
 				governance.setWoofGovernanceName(existingGovernanceName);
-				governance
-						.setGovernanceSourceClassName(existingGovernanceSourceClassName);
+				governance.setGovernanceSourceClassName(existingGovernanceSourceClassName);
 
 				// Revert properties
 				governance.getProperties().clear();
@@ -2567,8 +2309,7 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofGovernanceModel> removeGovernance(
-			final WoofGovernanceModel governance) {
+	public Change<WoofGovernanceModel> removeGovernance(final WoofGovernanceModel governance) {
 
 		// Ensure governance available to remove
 		boolean isInModel = false;
@@ -2581,8 +2322,7 @@ public class WoofChangesImpl implements WoofChanges {
 			// Governance model not in model
 			return new NoChange<WoofGovernanceModel>(governance,
 					"Remove governance " + governance.getWoofGovernanceName(),
-					"Governance " + governance.getWoofGovernanceName()
-							+ " is not in WoOF model");
+					"Governance " + governance.getWoofGovernanceName() + " is not in WoOF model");
 		}
 
 		// Return change to remove governance
@@ -2605,16 +2345,14 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofGovernanceAreaModel> addGovernanceArea(
-			final WoofGovernanceModel governance, int width, int height) {
+	public Change<WoofGovernanceAreaModel> addGovernanceArea(final WoofGovernanceModel governance, int width,
+			int height) {
 
 		// Create the governance area
-		final WoofGovernanceAreaModel area = new WoofGovernanceAreaModel(width,
-				height);
+		final WoofGovernanceAreaModel area = new WoofGovernanceAreaModel(width, height);
 
 		// Return the change to add governance area
-		return new AbstractChange<WoofGovernanceAreaModel>(area,
-				"Add governance area") {
+		return new AbstractChange<WoofGovernanceAreaModel>(area, "Add governance area") {
 			@Override
 			public void apply() {
 				governance.addGovernanceArea(area);
@@ -2629,22 +2367,18 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofGovernanceAreaModel> removeGovernanceArea(
-			final WoofGovernanceAreaModel governanceArea) {
+	public Change<WoofGovernanceAreaModel> removeGovernanceArea(final WoofGovernanceAreaModel governanceArea) {
 
 		// Ensure governance area in WoOF to remove
-		final WoofGovernanceModel governance = this
-				.getGovernance(governanceArea);
+		final WoofGovernanceModel governance = this.getGovernance(governanceArea);
 		if (governance == null) {
 			// Governance area not in model
-			return new NoChange<WoofGovernanceAreaModel>(governanceArea,
-					"Remove governance area ",
+			return new NoChange<WoofGovernanceAreaModel>(governanceArea, "Remove governance area ",
 					"Governance area is not in WoOF model");
 		}
 
 		// Return change to remove governance area
-		return new AbstractChange<WoofGovernanceAreaModel>(governanceArea,
-				"Remove governance area") {
+		return new AbstractChange<WoofGovernanceAreaModel>(governanceArea, "Remove governance area") {
 
 			@Override
 			public void apply() {
@@ -2665,12 +2399,10 @@ public class WoofChangesImpl implements WoofChanges {
 	public Change<WoofResourceModel> addResource(String resourcePath) {
 
 		// Obtain unique resource name
-		String resourceName = getUniqueName(resourcePath, null,
-				this.model.getWoofResources(), RESOURCE_NAME_EXTRACTOR);
+		String resourceName = getUniqueName(resourcePath, null, this.model.getWoofResources(), RESOURCE_NAME_EXTRACTOR);
 
 		// Create the resource
-		final WoofResourceModel resource = new WoofResourceModel(resourceName,
-				resourcePath);
+		final WoofResourceModel resource = new WoofResourceModel(resourceName, resourcePath);
 
 		// Return change to add resource
 		return new AbstractChange<WoofResourceModel>(resource, "Add Resource") {
@@ -2688,17 +2420,13 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofResourceModel> refactorResource(
-			WoofResourceModel resource, String resourcePath) {
-		return this.changeResourcePath(resource, resourcePath,
-				"Refactor Resource");
+	public Change<WoofResourceModel> refactorResource(WoofResourceModel resource, String resourcePath) {
+		return this.changeResourcePath(resource, resourcePath, "Refactor Resource");
 	}
 
 	@Override
-	public Change<WoofResourceModel> changeResourcePath(
-			final WoofResourceModel resource, final String resourcePath) {
-		return this.changeResourcePath(resource, resourcePath,
-				"Change Resource Path");
+	public Change<WoofResourceModel> changeResourcePath(final WoofResourceModel resource, final String resourcePath) {
+		return this.changeResourcePath(resource, resourcePath, "Change Resource Path");
 	}
 
 	/**
@@ -2712,14 +2440,12 @@ public class WoofChangesImpl implements WoofChanges {
 	 *            Description of type of {@link Change}.
 	 * @return {@link Change} to the path for the {@link WoofResourceModel}.
 	 */
-	private Change<WoofResourceModel> changeResourcePath(
-			final WoofResourceModel resource, final String resourcePath,
+	private Change<WoofResourceModel> changeResourcePath(final WoofResourceModel resource, final String resourcePath,
 			String changeDescription) {
 
 		// No change if no resource path
 		if (CompileUtil.isBlank(resourcePath)) {
-			return new NoChange<WoofResourceModel>(resource, changeDescription,
-					"Must provide resource path");
+			return new NoChange<WoofResourceModel>(resource, changeDescription, "Must provide resource path");
 		}
 
 		// Track original values
@@ -2727,12 +2453,11 @@ public class WoofChangesImpl implements WoofChanges {
 		final String originalPath = resource.getResourcePath();
 
 		// Obtain the resource name after the resource path
-		final String newName = getUniqueName(resourcePath, resource,
-				this.model.getWoofResources(), RESOURCE_NAME_EXTRACTOR);
+		final String newName = getUniqueName(resourcePath, resource, this.model.getWoofResources(),
+				RESOURCE_NAME_EXTRACTOR);
 
 		// Return change to resource path
-		return new AbstractChange<WoofResourceModel>(resource,
-				changeDescription) {
+		return new AbstractChange<WoofResourceModel>(resource, changeDescription) {
 			@Override
 			public void apply() {
 				resource.setResourcePath(resourcePath);
@@ -2750,8 +2475,7 @@ public class WoofChangesImpl implements WoofChanges {
 	};
 
 	@Override
-	public Change<WoofResourceModel> removeResource(
-			final WoofResourceModel resource) {
+	public Change<WoofResourceModel> removeResource(final WoofResourceModel resource) {
 
 		// Ensure resource available to remove
 		boolean isInModel = false;
@@ -2762,14 +2486,12 @@ public class WoofChangesImpl implements WoofChanges {
 		}
 		if (!isInModel) {
 			// Resource model not in model
-			return new NoChange<WoofResourceModel>(resource, "Remove resource "
-					+ resource.getWoofResourceName(), "Resource "
-					+ resource.getWoofResourceName() + " is not in WoOF model");
+			return new NoChange<WoofResourceModel>(resource, "Remove resource " + resource.getWoofResourceName(),
+					"Resource " + resource.getWoofResourceName() + " is not in WoOF model");
 		}
 
 		// Return change to remove resource
-		return new AbstractChange<WoofResourceModel>(resource,
-				"Remove resource " + resource.getWoofResourceName()) {
+		return new AbstractChange<WoofResourceModel>(resource, "Remove resource " + resource.getWoofResourceName()) {
 
 			/**
 			 * {@link ConnectionModel} instances.
@@ -2785,8 +2507,7 @@ public class WoofChangesImpl implements WoofChanges {
 				removeConnections(resource.getWoofSectionOutputs(), list);
 				removeConnections(resource.getWoofAccessOutputs(), list);
 				removeConnections(resource.getWoofExceptions(), list);
-				this.connections = list
-						.toArray(new ConnectionModel[list.size()]);
+				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 				// Remove the resource
 				WoofChangesImpl.this.model.removeWoofResource(resource);
@@ -2817,8 +2538,7 @@ public class WoofChangesImpl implements WoofChanges {
 			final WoofExceptionModel model = existingModel;
 			final int x = existingModel.getX();
 			final int y = existingModel.getY();
-			return new AbstractChange<WoofExceptionModel>(model,
-					"Add Exception") {
+			return new AbstractChange<WoofExceptionModel>(model, "Add Exception") {
 				@Override
 				public void apply() {
 					// No change as will be positioned
@@ -2834,12 +2554,10 @@ public class WoofChangesImpl implements WoofChanges {
 		}
 
 		// Create the exception
-		final WoofExceptionModel exception = new WoofExceptionModel(
-				exceptionClassName);
+		final WoofExceptionModel exception = new WoofExceptionModel(exceptionClassName);
 
 		// Return change to add exception
-		return new AbstractChange<WoofExceptionModel>(exception,
-				"Add Exception") {
+		return new AbstractChange<WoofExceptionModel>(exception, "Add Exception") {
 			@Override
 			public void apply() {
 				WoofChangesImpl.this.model.addWoofException(exception);
@@ -2854,8 +2572,8 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofExceptionModel> refactorException(
-			final WoofExceptionModel exception, final String exceptionClassName) {
+	public Change<WoofExceptionModel> refactorException(final WoofExceptionModel exception,
+			final String exceptionClassName) {
 
 		// Determine if the exception has already been handled
 		boolean isAlreadyHandled = false;
@@ -2873,17 +2591,15 @@ public class WoofChangesImpl implements WoofChanges {
 		}
 		if (isAlreadyHandled) {
 			// Exception already handled
-			return new NoChange<WoofExceptionModel>(exception,
-					"Refactor Exception", "Exception " + exceptionClassName
-							+ " is already handled");
+			return new NoChange<WoofExceptionModel>(exception, "Refactor Exception",
+					"Exception " + exceptionClassName + " is already handled");
 		}
 
 		// Obtain the existing exception class name (for revert)
 		final String existingExceptionClassName = exception.getClassName();
 
 		// Return change to refactor exception
-		return new AbstractChange<WoofExceptionModel>(exception,
-				"Refactor Exception") {
+		return new AbstractChange<WoofExceptionModel>(exception, "Refactor Exception") {
 			@Override
 			public void apply() {
 				exception.setClassName(exceptionClassName);
@@ -2897,8 +2613,7 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofExceptionModel> removeException(
-			final WoofExceptionModel exception) {
+	public Change<WoofExceptionModel> removeException(final WoofExceptionModel exception) {
 
 		// Ensure exception available to remove
 		boolean isInModel = false;
@@ -2909,15 +2624,12 @@ public class WoofChangesImpl implements WoofChanges {
 		}
 		if (!isInModel) {
 			// Exception model not in model
-			return new NoChange<WoofExceptionModel>(exception,
-					"Remove exception " + exception.getClassName(),
-					"Exception " + exception.getClassName()
-							+ " is not in WoOF model");
+			return new NoChange<WoofExceptionModel>(exception, "Remove exception " + exception.getClassName(),
+					"Exception " + exception.getClassName() + " is not in WoOF model");
 		}
 
 		// Return change to remove exception
-		return new AbstractChange<WoofExceptionModel>(exception,
-				"Remove exception " + exception.getClassName()) {
+		return new AbstractChange<WoofExceptionModel>(exception, "Remove exception " + exception.getClassName()) {
 
 			/**
 			 * {@link ConnectionModel} instances.
@@ -2932,8 +2644,7 @@ public class WoofChangesImpl implements WoofChanges {
 				removeConnection(exception.getWoofTemplate(), list);
 				removeConnection(exception.getWoofSectionInput(), list);
 				removeConnection(exception.getWoofResource(), list);
-				this.connections = list
-						.toArray(new ConnectionModel[list.size()]);
+				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 				// Remove the exception
 				WoofChangesImpl.this.model.removeWoofException(exception);
@@ -2986,8 +2697,7 @@ public class WoofChangesImpl implements WoofChanges {
 				// Remove the connections
 				List<ConnectionModel> list = new LinkedList<ConnectionModel>();
 				removeConnection(start.getWoofSectionInput(), list);
-				this.connections = list
-						.toArray(new ConnectionModel[list.size()]);
+				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 				// Remove the start
 				WoofChangesImpl.this.model.removeWoofStart(start);
@@ -3004,19 +2714,17 @@ public class WoofChangesImpl implements WoofChanges {
 
 	@Override
 	public Change<WoofTemplateOutputToWoofTemplateModel> linkTemplateOutputToTemplate(
-			final WoofTemplateOutputModel templateOutput,
-			WoofTemplateModel template) {
+			final WoofTemplateOutputModel templateOutput, WoofTemplateModel template) {
 
 		// Create the connection
 		final WoofTemplateOutputToWoofTemplateModel connection = new WoofTemplateOutputToWoofTemplateModel(
 				template.getWoofTemplateName(), templateOutput, template);
 
 		// Return change to link
-		return new AddLinkChange<WoofTemplateOutputToWoofTemplateModel, WoofTemplateOutputModel>(
-				connection, templateOutput, "Link Template Output to Template") {
+		return new AddLinkChange<WoofTemplateOutputToWoofTemplateModel, WoofTemplateOutputModel>(connection,
+				templateOutput, "Link Template Output to Template") {
 			@Override
-			protected void addExistingConnections(
-					WoofTemplateOutputModel source, List<ConnectionModel> list) {
+			protected void addExistingConnections(WoofTemplateOutputModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofAccessInput());
@@ -3028,38 +2736,30 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofTemplateOutputToWoofTemplateModel> removeTemplateOuputToTemplate(
 			final WoofTemplateOutputToWoofTemplateModel link) {
-		return new RemoveLinkChange<WoofTemplateOutputToWoofTemplateModel>(
-				link, "Remove Template Output to Template");
+		return new RemoveLinkChange<WoofTemplateOutputToWoofTemplateModel>(link, "Remove Template Output to Template");
 	}
 
 	@Override
 	public Change<WoofTemplateOutputToWoofSectionInputModel> linkTemplateOutputToSectionInput(
-			final WoofTemplateOutputModel templateOutput,
-			WoofSectionInputModel sectionInput) {
+			final WoofTemplateOutputModel templateOutput, WoofSectionInputModel sectionInput) {
 
 		// Obtain the containing section
 		WoofSectionModel section = this.getSection(sectionInput);
 		if (section == null) {
 			return new NoChange<WoofTemplateOutputToWoofSectionInputModel>(
 					new WoofTemplateOutputToWoofSectionInputModel(),
-					"The section input '"
-							+ sectionInput.getWoofSectionInputName()
-							+ "' was not found");
+					"The section input '" + sectionInput.getWoofSectionInputName() + "' was not found");
 		}
 
 		// Create the connection
 		final WoofTemplateOutputToWoofSectionInputModel connection = new WoofTemplateOutputToWoofSectionInputModel(
-				section.getWoofSectionName(),
-				sectionInput.getWoofSectionInputName(), templateOutput,
-				sectionInput);
+				section.getWoofSectionName(), sectionInput.getWoofSectionInputName(), templateOutput, sectionInput);
 
 		// Return change to add connection
-		return new AddLinkChange<WoofTemplateOutputToWoofSectionInputModel, WoofTemplateOutputModel>(
-				connection, templateOutput,
-				"Link Template Output to Section Input") {
+		return new AddLinkChange<WoofTemplateOutputToWoofSectionInputModel, WoofTemplateOutputModel>(connection,
+				templateOutput, "Link Template Output to Section Input") {
 			@Override
-			protected void addExistingConnections(
-					WoofTemplateOutputModel source, List<ConnectionModel> list) {
+			protected void addExistingConnections(WoofTemplateOutputModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofAccessInput());
@@ -3071,27 +2771,23 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofTemplateOutputToWoofSectionInputModel> removeTemplateOuputToSectionInput(
 			WoofTemplateOutputToWoofSectionInputModel link) {
-		return new RemoveLinkChange<WoofTemplateOutputToWoofSectionInputModel>(
-				link, "Remove Template Output to Section Input");
+		return new RemoveLinkChange<WoofTemplateOutputToWoofSectionInputModel>(link,
+				"Remove Template Output to Section Input");
 	}
 
 	@Override
 	public Change<WoofTemplateOutputToWoofAccessInputModel> linkTemplateOutputToAccessInput(
-			WoofTemplateOutputModel templateOutput,
-			WoofAccessInputModel accessInput) {
+			WoofTemplateOutputModel templateOutput, WoofAccessInputModel accessInput) {
 
 		// Create the connection
 		final WoofTemplateOutputToWoofAccessInputModel connection = new WoofTemplateOutputToWoofAccessInputModel(
-				accessInput.getWoofAccessInputName(), templateOutput,
-				accessInput);
+				accessInput.getWoofAccessInputName(), templateOutput, accessInput);
 
 		// Return change to add connection
-		return new AddLinkChange<WoofTemplateOutputToWoofAccessInputModel, WoofTemplateOutputModel>(
-				connection, templateOutput,
-				"Link Template Output to Access Input") {
+		return new AddLinkChange<WoofTemplateOutputToWoofAccessInputModel, WoofTemplateOutputModel>(connection,
+				templateOutput, "Link Template Output to Access Input") {
 			@Override
-			protected void addExistingConnections(
-					WoofTemplateOutputModel source, List<ConnectionModel> list) {
+			protected void addExistingConnections(WoofTemplateOutputModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofAccessInput());
@@ -3103,8 +2799,8 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofTemplateOutputToWoofAccessInputModel> removeTemplateOuputToAccessInput(
 			WoofTemplateOutputToWoofAccessInputModel link) {
-		return new RemoveLinkChange<WoofTemplateOutputToWoofAccessInputModel>(
-				link, "Remove Template Output to Access Input");
+		return new RemoveLinkChange<WoofTemplateOutputToWoofAccessInputModel>(link,
+				"Remove Template Output to Access Input");
 	}
 
 	@Override
@@ -3116,11 +2812,10 @@ public class WoofChangesImpl implements WoofChanges {
 				resource.getWoofResourceName(), templateOutput, resource);
 
 		// Return change to add connection
-		return new AddLinkChange<WoofTemplateOutputToWoofResourceModel, WoofTemplateOutputModel>(
-				connection, templateOutput, "Link Template Output to Resource") {
+		return new AddLinkChange<WoofTemplateOutputToWoofResourceModel, WoofTemplateOutputModel>(connection,
+				templateOutput, "Link Template Output to Resource") {
 			@Override
-			protected void addExistingConnections(
-					WoofTemplateOutputModel source, List<ConnectionModel> list) {
+			protected void addExistingConnections(WoofTemplateOutputModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofAccessInput());
@@ -3132,8 +2827,7 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofTemplateOutputToWoofResourceModel> removeTemplateOuputToResource(
 			WoofTemplateOutputToWoofResourceModel link) {
-		return new RemoveLinkChange<WoofTemplateOutputToWoofResourceModel>(
-				link, "Remove Template Output to Resource");
+		return new RemoveLinkChange<WoofTemplateOutputToWoofResourceModel>(link, "Remove Template Output to Resource");
 	}
 
 	@Override
@@ -3145,11 +2839,10 @@ public class WoofChangesImpl implements WoofChanges {
 				template.getWoofTemplateName(), sectionOutput, template);
 
 		// Return change to add connection
-		return new AddLinkChange<WoofSectionOutputToWoofTemplateModel, WoofSectionOutputModel>(
-				connection, sectionOutput, "Link Section Output to Template") {
+		return new AddLinkChange<WoofSectionOutputToWoofTemplateModel, WoofSectionOutputModel>(connection,
+				sectionOutput, "Link Section Output to Template") {
 			@Override
-			protected void addExistingConnections(
-					WoofSectionOutputModel source, List<ConnectionModel> list) {
+			protected void addExistingConnections(WoofSectionOutputModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofAccessInput());
@@ -3161,38 +2854,30 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofSectionOutputToWoofTemplateModel> removeSectionOuputToTemplate(
 			WoofSectionOutputToWoofTemplateModel link) {
-		return new RemoveLinkChange<WoofSectionOutputToWoofTemplateModel>(link,
-				"Remove Section Output to Template");
+		return new RemoveLinkChange<WoofSectionOutputToWoofTemplateModel>(link, "Remove Section Output to Template");
 	}
 
 	@Override
 	public Change<WoofSectionOutputToWoofSectionInputModel> linkSectionOutputToSectionInput(
-			WoofSectionOutputModel sectionOutput,
-			WoofSectionInputModel sectionInput) {
+			WoofSectionOutputModel sectionOutput, WoofSectionInputModel sectionInput) {
 
 		// Obtain the containing section
 		WoofSectionModel section = this.getSection(sectionInput);
 		if (section == null) {
 			return new NoChange<WoofSectionOutputToWoofSectionInputModel>(
 					new WoofSectionOutputToWoofSectionInputModel(),
-					"The section input '"
-							+ sectionInput.getWoofSectionInputName()
-							+ "' was not found");
+					"The section input '" + sectionInput.getWoofSectionInputName() + "' was not found");
 		}
 
 		// Create the connection
 		final WoofSectionOutputToWoofSectionInputModel connection = new WoofSectionOutputToWoofSectionInputModel(
-				section.getWoofSectionName(),
-				sectionInput.getWoofSectionInputName(), sectionOutput,
-				sectionInput);
+				section.getWoofSectionName(), sectionInput.getWoofSectionInputName(), sectionOutput, sectionInput);
 
 		// Return change to add connection
-		return new AddLinkChange<WoofSectionOutputToWoofSectionInputModel, WoofSectionOutputModel>(
-				connection, sectionOutput,
-				"Link Section Output to Section Input") {
+		return new AddLinkChange<WoofSectionOutputToWoofSectionInputModel, WoofSectionOutputModel>(connection,
+				sectionOutput, "Link Section Output to Section Input") {
 			@Override
-			protected void addExistingConnections(
-					WoofSectionOutputModel source, List<ConnectionModel> list) {
+			protected void addExistingConnections(WoofSectionOutputModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofAccessInput());
@@ -3204,27 +2889,23 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofSectionOutputToWoofSectionInputModel> removeSectionOuputToSectionInput(
 			WoofSectionOutputToWoofSectionInputModel link) {
-		return new RemoveLinkChange<WoofSectionOutputToWoofSectionInputModel>(
-				link, "Remove Section Output to Section Input");
+		return new RemoveLinkChange<WoofSectionOutputToWoofSectionInputModel>(link,
+				"Remove Section Output to Section Input");
 	}
 
 	@Override
 	public Change<WoofSectionOutputToWoofAccessInputModel> linkSectionOutputToAccessInput(
-			WoofSectionOutputModel sectionOutput,
-			WoofAccessInputModel accessInput) {
+			WoofSectionOutputModel sectionOutput, WoofAccessInputModel accessInput) {
 
 		// Create the connection
 		final WoofSectionOutputToWoofAccessInputModel connection = new WoofSectionOutputToWoofAccessInputModel(
-				accessInput.getWoofAccessInputName(), sectionOutput,
-				accessInput);
+				accessInput.getWoofAccessInputName(), sectionOutput, accessInput);
 
 		// Return change to add connection
-		return new AddLinkChange<WoofSectionOutputToWoofAccessInputModel, WoofSectionOutputModel>(
-				connection, sectionOutput,
-				"Link Section Output to Access Input") {
+		return new AddLinkChange<WoofSectionOutputToWoofAccessInputModel, WoofSectionOutputModel>(connection,
+				sectionOutput, "Link Section Output to Access Input") {
 			@Override
-			protected void addExistingConnections(
-					WoofSectionOutputModel source, List<ConnectionModel> list) {
+			protected void addExistingConnections(WoofSectionOutputModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofAccessInput());
@@ -3236,8 +2917,8 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofSectionOutputToWoofAccessInputModel> removeSectionOuputToAccessInput(
 			WoofSectionOutputToWoofAccessInputModel link) {
-		return new RemoveLinkChange<WoofSectionOutputToWoofAccessInputModel>(
-				link, "Remove Section Output to Access Input");
+		return new RemoveLinkChange<WoofSectionOutputToWoofAccessInputModel>(link,
+				"Remove Section Output to Access Input");
 	}
 
 	@Override
@@ -3249,11 +2930,10 @@ public class WoofChangesImpl implements WoofChanges {
 				resource.getWoofResourceName(), sectionOutput, resource);
 
 		// Return change to add connection
-		return new AddLinkChange<WoofSectionOutputToWoofResourceModel, WoofSectionOutputModel>(
-				connection, sectionOutput, "Link Section Output to Resource") {
+		return new AddLinkChange<WoofSectionOutputToWoofResourceModel, WoofSectionOutputModel>(connection,
+				sectionOutput, "Link Section Output to Resource") {
 			@Override
-			protected void addExistingConnections(
-					WoofSectionOutputModel source, List<ConnectionModel> list) {
+			protected void addExistingConnections(WoofSectionOutputModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofAccessInput());
@@ -3265,24 +2945,22 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofSectionOutputToWoofResourceModel> removeSectionOuputToResource(
 			WoofSectionOutputToWoofResourceModel link) {
-		return new RemoveLinkChange<WoofSectionOutputToWoofResourceModel>(link,
-				"Remove Section Output to Resource");
+		return new RemoveLinkChange<WoofSectionOutputToWoofResourceModel>(link, "Remove Section Output to Resource");
 	}
 
 	@Override
-	public Change<WoofAccessOutputToWoofTemplateModel> linkAccessOutputToTemplate(
-			WoofAccessOutputModel accessOutput, WoofTemplateModel template) {
+	public Change<WoofAccessOutputToWoofTemplateModel> linkAccessOutputToTemplate(WoofAccessOutputModel accessOutput,
+			WoofTemplateModel template) {
 
 		// Create the connection
 		final WoofAccessOutputToWoofTemplateModel connection = new WoofAccessOutputToWoofTemplateModel(
 				template.getWoofTemplateName(), accessOutput, template);
 
 		// Return change to add connection
-		return new AddLinkChange<WoofAccessOutputToWoofTemplateModel, WoofAccessOutputModel>(
-				connection, accessOutput, "Link Access Output to Template") {
+		return new AddLinkChange<WoofAccessOutputToWoofTemplateModel, WoofAccessOutputModel>(connection, accessOutput,
+				"Link Access Output to Template") {
 			@Override
-			protected void addExistingConnections(WoofAccessOutputModel source,
-					List<ConnectionModel> list) {
+			protected void addExistingConnections(WoofAccessOutputModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofResource());
@@ -3293,37 +2971,29 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofAccessOutputToWoofTemplateModel> removeAccessOuputToTemplate(
 			WoofAccessOutputToWoofTemplateModel link) {
-		return new RemoveLinkChange<WoofAccessOutputToWoofTemplateModel>(link,
-				"Remove Access Output to Template");
+		return new RemoveLinkChange<WoofAccessOutputToWoofTemplateModel>(link, "Remove Access Output to Template");
 	}
 
 	@Override
 	public Change<WoofAccessOutputToWoofSectionInputModel> linkAccessOutputToSectionInput(
-			WoofAccessOutputModel accessOutput,
-			WoofSectionInputModel sectionInput) {
+			WoofAccessOutputModel accessOutput, WoofSectionInputModel sectionInput) {
 
 		// Obtain the containing section
 		WoofSectionModel section = this.getSection(sectionInput);
 		if (section == null) {
-			return new NoChange<WoofAccessOutputToWoofSectionInputModel>(
-					new WoofAccessOutputToWoofSectionInputModel(),
-					"The section input '"
-							+ sectionInput.getWoofSectionInputName()
-							+ "' was not found");
+			return new NoChange<WoofAccessOutputToWoofSectionInputModel>(new WoofAccessOutputToWoofSectionInputModel(),
+					"The section input '" + sectionInput.getWoofSectionInputName() + "' was not found");
 		}
 
 		// Create the connection
 		final WoofAccessOutputToWoofSectionInputModel connection = new WoofAccessOutputToWoofSectionInputModel(
-				section.getWoofSectionName(),
-				sectionInput.getWoofSectionInputName(), accessOutput,
-				sectionInput);
+				section.getWoofSectionName(), sectionInput.getWoofSectionInputName(), accessOutput, sectionInput);
 
 		// Return change to add connection
-		return new AddLinkChange<WoofAccessOutputToWoofSectionInputModel, WoofAccessOutputModel>(
-				connection, accessOutput, "Link Access Output to Section Input") {
+		return new AddLinkChange<WoofAccessOutputToWoofSectionInputModel, WoofAccessOutputModel>(connection,
+				accessOutput, "Link Access Output to Section Input") {
 			@Override
-			protected void addExistingConnections(WoofAccessOutputModel source,
-					List<ConnectionModel> list) {
+			protected void addExistingConnections(WoofAccessOutputModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofResource());
@@ -3334,24 +3004,23 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofAccessOutputToWoofSectionInputModel> removeAccessOuputToSectionInput(
 			WoofAccessOutputToWoofSectionInputModel link) {
-		return new RemoveLinkChange<WoofAccessOutputToWoofSectionInputModel>(
-				link, "Remove Access Output to Section Input");
+		return new RemoveLinkChange<WoofAccessOutputToWoofSectionInputModel>(link,
+				"Remove Access Output to Section Input");
 	}
 
 	@Override
-	public Change<WoofAccessOutputToWoofResourceModel> linkAccessOutputToResource(
-			WoofAccessOutputModel accessOutput, WoofResourceModel resource) {
+	public Change<WoofAccessOutputToWoofResourceModel> linkAccessOutputToResource(WoofAccessOutputModel accessOutput,
+			WoofResourceModel resource) {
 
 		// Create the connection
 		final WoofAccessOutputToWoofResourceModel connection = new WoofAccessOutputToWoofResourceModel(
 				resource.getWoofResourceName(), accessOutput, resource);
 
 		// Return change to add connection
-		return new AddLinkChange<WoofAccessOutputToWoofResourceModel, WoofAccessOutputModel>(
-				connection, accessOutput, "Link Access Output to Resource") {
+		return new AddLinkChange<WoofAccessOutputToWoofResourceModel, WoofAccessOutputModel>(connection, accessOutput,
+				"Link Access Output to Resource") {
 			@Override
-			protected void addExistingConnections(WoofAccessOutputModel source,
-					List<ConnectionModel> list) {
+			protected void addExistingConnections(WoofAccessOutputModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofResource());
@@ -3362,24 +3031,22 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofAccessOutputToWoofResourceModel> removeAccessOuputToResource(
 			WoofAccessOutputToWoofResourceModel link) {
-		return new RemoveLinkChange<WoofAccessOutputToWoofResourceModel>(link,
-				"Remove Access Output to Resource");
+		return new RemoveLinkChange<WoofAccessOutputToWoofResourceModel>(link, "Remove Access Output to Resource");
 	}
 
 	@Override
-	public Change<WoofExceptionToWoofTemplateModel> linkExceptionToTemplate(
-			WoofExceptionModel exception, WoofTemplateModel template) {
+	public Change<WoofExceptionToWoofTemplateModel> linkExceptionToTemplate(WoofExceptionModel exception,
+			WoofTemplateModel template) {
 
 		// Create the connection
 		final WoofExceptionToWoofTemplateModel connection = new WoofExceptionToWoofTemplateModel(
 				template.getWoofTemplateName(), exception, template);
 
 		// Return change to add connection
-		return new AddLinkChange<WoofExceptionToWoofTemplateModel, WoofExceptionModel>(
-				connection, exception, "Link Exception to Template") {
+		return new AddLinkChange<WoofExceptionToWoofTemplateModel, WoofExceptionModel>(connection, exception,
+				"Link Exception to Template") {
 			@Override
-			protected void addExistingConnections(WoofExceptionModel source,
-					List<ConnectionModel> list) {
+			protected void addExistingConnections(WoofExceptionModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofResource());
@@ -3388,37 +3055,30 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofExceptionToWoofTemplateModel> removeExceptionToTemplate(
-			WoofExceptionToWoofTemplateModel link) {
-		return new RemoveLinkChange<WoofExceptionToWoofTemplateModel>(link,
-				"Remove Exception to Template");
+	public Change<WoofExceptionToWoofTemplateModel> removeExceptionToTemplate(WoofExceptionToWoofTemplateModel link) {
+		return new RemoveLinkChange<WoofExceptionToWoofTemplateModel>(link, "Remove Exception to Template");
 	}
 
 	@Override
-	public Change<WoofExceptionToWoofSectionInputModel> linkExceptionToSectionInput(
-			WoofExceptionModel exception, WoofSectionInputModel sectionInput) {
+	public Change<WoofExceptionToWoofSectionInputModel> linkExceptionToSectionInput(WoofExceptionModel exception,
+			WoofSectionInputModel sectionInput) {
 
 		// Obtain the containing section
 		WoofSectionModel section = this.getSection(sectionInput);
 		if (section == null) {
-			return new NoChange<WoofExceptionToWoofSectionInputModel>(
-					new WoofExceptionToWoofSectionInputModel(),
-					"The section input '"
-							+ sectionInput.getWoofSectionInputName()
-							+ "' was not found");
+			return new NoChange<WoofExceptionToWoofSectionInputModel>(new WoofExceptionToWoofSectionInputModel(),
+					"The section input '" + sectionInput.getWoofSectionInputName() + "' was not found");
 		}
 
 		// Create the connection
 		final WoofExceptionToWoofSectionInputModel connection = new WoofExceptionToWoofSectionInputModel(
-				section.getWoofSectionName(),
-				sectionInput.getWoofSectionInputName(), exception, sectionInput);
+				section.getWoofSectionName(), sectionInput.getWoofSectionInputName(), exception, sectionInput);
 
 		// Return change to add connection
-		return new AddLinkChange<WoofExceptionToWoofSectionInputModel, WoofExceptionModel>(
-				connection, exception, "Link Exception to Section Input") {
+		return new AddLinkChange<WoofExceptionToWoofSectionInputModel, WoofExceptionModel>(connection, exception,
+				"Link Exception to Section Input") {
 			@Override
-			protected void addExistingConnections(WoofExceptionModel source,
-					List<ConnectionModel> list) {
+			protected void addExistingConnections(WoofExceptionModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofResource());
@@ -3429,24 +3089,22 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofExceptionToWoofSectionInputModel> removeExceptionToSectionInput(
 			WoofExceptionToWoofSectionInputModel link) {
-		return new RemoveLinkChange<WoofExceptionToWoofSectionInputModel>(link,
-				"Remove Exception to Section Input");
+		return new RemoveLinkChange<WoofExceptionToWoofSectionInputModel>(link, "Remove Exception to Section Input");
 	}
 
 	@Override
-	public Change<WoofExceptionToWoofResourceModel> linkExceptionToResource(
-			WoofExceptionModel exception, WoofResourceModel resource) {
+	public Change<WoofExceptionToWoofResourceModel> linkExceptionToResource(WoofExceptionModel exception,
+			WoofResourceModel resource) {
 
 		// Create the connection
 		final WoofExceptionToWoofResourceModel connection = new WoofExceptionToWoofResourceModel(
 				resource.getWoofResourceName(), exception, resource);
 
 		// Return change to add connection
-		return new AddLinkChange<WoofExceptionToWoofResourceModel, WoofExceptionModel>(
-				connection, exception, "Link Exception to Resource") {
+		return new AddLinkChange<WoofExceptionToWoofResourceModel, WoofExceptionModel>(connection, exception,
+				"Link Exception to Resource") {
 			@Override
-			protected void addExistingConnections(WoofExceptionModel source,
-					List<ConnectionModel> list) {
+			protected void addExistingConnections(WoofExceptionModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofTemplate());
 				list.add(source.getWoofSectionInput());
 				list.add(source.getWoofResource());
@@ -3455,54 +3113,44 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofExceptionToWoofResourceModel> removeExceptionToResource(
-			WoofExceptionToWoofResourceModel link) {
-		return new RemoveLinkChange<WoofExceptionToWoofResourceModel>(link,
-				"Remove Exception to Resource");
+	public Change<WoofExceptionToWoofResourceModel> removeExceptionToResource(WoofExceptionToWoofResourceModel link) {
+		return new RemoveLinkChange<WoofExceptionToWoofResourceModel>(link, "Remove Exception to Resource");
 	}
 
 	@Override
-	public Change<WoofStartToWoofSectionInputModel> linkStartToSectionInput(
-			WoofStartModel start, WoofSectionInputModel sectionInput) {
+	public Change<WoofStartToWoofSectionInputModel> linkStartToSectionInput(WoofStartModel start,
+			WoofSectionInputModel sectionInput) {
 
 		// Obtain the containing section
 		WoofSectionModel section = this.getSection(sectionInput);
 		if (section == null) {
-			return new NoChange<WoofStartToWoofSectionInputModel>(
-					new WoofStartToWoofSectionInputModel(),
-					"The section input '"
-							+ sectionInput.getWoofSectionInputName()
-							+ "' was not found");
+			return new NoChange<WoofStartToWoofSectionInputModel>(new WoofStartToWoofSectionInputModel(),
+					"The section input '" + sectionInput.getWoofSectionInputName() + "' was not found");
 		}
 
 		// Create the connection
 		final WoofStartToWoofSectionInputModel connection = new WoofStartToWoofSectionInputModel(
-				section.getWoofSectionName(),
-				sectionInput.getWoofSectionInputName(), start, sectionInput);
+				section.getWoofSectionName(), sectionInput.getWoofSectionInputName(), start, sectionInput);
 
 		// Return change to add connection
-		return new AddLinkChange<WoofStartToWoofSectionInputModel, WoofStartModel>(
-				connection, start, "Link Start to Section Input") {
+		return new AddLinkChange<WoofStartToWoofSectionInputModel, WoofStartModel>(connection, start,
+				"Link Start to Section Input") {
 			@Override
-			protected void addExistingConnections(WoofStartModel source,
-					List<ConnectionModel> list) {
+			protected void addExistingConnections(WoofStartModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofSectionInput());
 			}
 		};
 	}
 
 	@Override
-	public Change<WoofStartToWoofSectionInputModel> removeStartToSectionInput(
-			WoofStartToWoofSectionInputModel link) {
-		return new RemoveLinkChange<WoofStartToWoofSectionInputModel>(link,
-				"Remove Start to Section Input");
+	public Change<WoofStartToWoofSectionInputModel> removeStartToSectionInput(WoofStartToWoofSectionInputModel link) {
+		return new RemoveLinkChange<WoofStartToWoofSectionInputModel>(link, "Remove Start to Section Input");
 	}
 
 	/**
 	 * Abstract {@link Change} to add a {@link ConnectionModel}.
 	 */
-	private abstract class AddLinkChange<C extends ConnectionModel, S extends Model>
-			extends AbstractChange<C> {
+	private abstract class AddLinkChange<C extends ConnectionModel, S extends Model> extends AbstractChange<C> {
 
 		/**
 		 * Source for {@link ConnectionModel}.
@@ -3537,8 +3185,7 @@ public class WoofChangesImpl implements WoofChanges {
 		 * @param list
 		 *            List to add the {@link ConnectionModel} instances.
 		 */
-		protected abstract void addExistingConnections(S source,
-				List<ConnectionModel> list);
+		protected abstract void addExistingConnections(S source, List<ConnectionModel> list);
 
 		/*
 		 * ====================== Change ======================
@@ -3576,8 +3223,7 @@ public class WoofChangesImpl implements WoofChanges {
 	/**
 	 * {@link Change} to remove the {@link ConnectionModel}.
 	 */
-	private class RemoveLinkChange<C extends ConnectionModel> extends
-			AbstractChange<C> {
+	private class RemoveLinkChange<C extends ConnectionModel> extends AbstractChange<C> {
 
 		/**
 		 * Initiate.

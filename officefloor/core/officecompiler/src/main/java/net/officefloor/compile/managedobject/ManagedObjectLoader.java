@@ -20,10 +20,9 @@ package net.officefloor.compile.managedobject;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourceType;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceProperty;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceSpecification;
 
 /**
  * Loads the {@link ManagedObjectType} from the {@link ManagedObjectSource}.
@@ -52,6 +51,25 @@ public interface ManagedObjectLoader {
 	 */
 	<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> PropertyList loadSpecification(
 			Class<MS> managedObjectSourceClass);
+
+	/**
+	 * Loads and returns the {@link PropertyList} from the
+	 * {@link ManagedObjectSourceSpecification} for the
+	 * {@link ManagedObjectSource}.
+	 * 
+	 * @param <D>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            Flow key type.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource} instance.
+	 * @return {@link PropertyList} of the {@link ManagedObjectSourceProperty}
+	 *         instances of the {@link ManagedObjectSourceSpecification} or
+	 *         <code>null</code> if issue, which is reported to the
+	 *         {@link CompilerIssues}.
+	 */
+	<D extends Enum<D>, F extends Enum<F>> PropertyList loadSpecification(
+			ManagedObjectSource<D, F> managedObjectSource);
 
 	/**
 	 * Loads and returns the {@link ManagedObjectType} for the
@@ -91,8 +109,7 @@ public interface ManagedObjectLoader {
 	 *         are reported to the {@link CompilerIssues}.
 	 */
 	<D extends Enum<D>, F extends Enum<F>> ManagedObjectType<D> loadManagedObjectType(
-			ManagedObjectSource<D, F> managedObjectSource,
-			PropertyList propertyList);
+			ManagedObjectSource<D, F> managedObjectSource, PropertyList propertyList);
 
 	/**
 	 * Loads and returns the {@link OfficeFloorManagedObjectSourceType} for the
@@ -115,8 +132,7 @@ public interface ManagedObjectLoader {
 	 *         if issues, which are reported to the {@link CompilerIssues}.
 	 */
 	<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> OfficeFloorManagedObjectSourceType loadOfficeFloorManagedObjectSourceType(
-			String managedObjectSourceName, Class<MS> managedObjectSourceClass,
-			PropertyList propertyList);
+			String managedObjectSourceName, Class<MS> managedObjectSourceClass, PropertyList propertyList);
 
 	/**
 	 * Loads and returns the {@link OfficeFloorManagedObjectSourceType} for the
@@ -139,18 +155,6 @@ public interface ManagedObjectLoader {
 	 *         if issues, which are reported to the {@link CompilerIssues}.
 	 */
 	<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> OfficeFloorManagedObjectSourceType loadOfficeFloorManagedObjectSourceType(
-			String managedObjectSourceName, MS managedObjectSource,
-			PropertyList propertyList);
-
-	/**
-	 * Determines if the {@link ManagedObjectType} requires to be configured as
-	 * an {@link OfficeFloorInputManagedObject}.
-	 * 
-	 * @param managedObjectType
-	 *            {@link ManagedObjectType}.
-	 * @return <code>true</code> if the {@link ManagedObjectType} is to be
-	 *         configured as an {@link OfficeFloorInputManagedObject}.
-	 */
-	boolean isInputManagedObject(ManagedObjectType<?> managedObjectType);
+			String managedObjectSourceName, MS managedObjectSource, PropertyList propertyList);
 
 }

@@ -31,15 +31,9 @@
 				<bound-managed-object-source name="MANAGED_OBJECT_SOURCE_A" />
 			</input-managed-object>
 		</input-managed-objects>
-		<teams>
-			<team name="TEAM" source="ONE_PERSON" />
-		</teams>
 		<offices>
 			<office name="OFFICE" source="OFFICE" location="office">
 				<input section="SECTION" input="INPUT" />
-				<team name="OFFICE_TEAM">
-					<office-floor-team name="TEAM" />
-				</team>
 				<object name="EXTERNAL_MANAGED_OBJECT">
 					<input-managed-object name="INPUT_MO" />
 				</object>
@@ -47,9 +41,6 @@
 		</offices>
 	</office-floor>
 	<office>
-		<teams>
-			<team name="OFFICE_TEAM" />
-		</teams>
 		<external-managed-objects>
 			<external-managed-object name="EXTERNAL_MANAGED_OBJECT"
 				object-type="${testcase}$SimpleManagedObject" object-scope="PROCESS">
@@ -61,32 +52,29 @@
 				<properties>
 					<property name="class.name" value="${testcase}$SimpleGovernance" />
 				</properties>
-				<team name="OFFICE_TEAM" />
 			</governance>
 		</governances>
 		<sections>
-			<section name="SECTION" source="DESK" location="desk">
+			<section name="SECTION" source="SECTION" location="section">
 				<input name="INPUT" />
-				<responsibility name="RESPONSIBILITY">
-					<team name="OFFICE_TEAM" />
-				</responsibility>
 			</section>
 		</sections>
 	</office>
-	<desk>
-		<works>
-			<work name="WORK" source="CLASS">
+	<section>
+		<function-namespaces>
+			<function-namespace name="NAMESPACE" source="CLASS">
 				<properties>
-					<property name="class.name" value="${testcase}$InputManagedObjectWork" />
+					<property name="class.name" value="${testcase}$InputManagedObjectClass" />
 				</properties>
-				<work-task name="handleInputManagedObject">
-					<task-object name="java.lang.Integer" parameter="true" />
-				</work-task>
-			</work>
-		</works>
-		<tasks>
-			<task name="INPUT" work="WORK" task="handleInputManagedObject"
-				public="true" />
-		</tasks>
-	</desk>
+				<managed-function name="handleInputManagedObject">
+					<managed-function-object name="java.lang.Integer"
+						parameter="true" />
+				</managed-function>
+			</function-namespace>
+		</function-namespaces>
+		<functions>
+			<function name="INPUT" function-namespace="NAMESPACE"
+				managed-function="handleInputManagedObject" public="true" />
+		</functions>
+	</section>
 </context>

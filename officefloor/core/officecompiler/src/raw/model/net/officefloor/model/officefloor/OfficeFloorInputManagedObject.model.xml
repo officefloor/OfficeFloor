@@ -5,6 +5,7 @@
 	<field
 		type="OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel"
 		name="bound office floor managed object source" />
+	<list type="TypeQualificationModel" name="type qualification" />
 	<list
 		type="OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel"
 		name="office floor managed object source" />

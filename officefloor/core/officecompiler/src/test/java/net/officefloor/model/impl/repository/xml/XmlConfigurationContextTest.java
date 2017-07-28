@@ -17,17 +17,16 @@
  */
 package net.officefloor.model.impl.repository.xml;
 
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 
+import net.officefloor.configuration.ConfigurationContext;
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.impl.xml.XmlFileConfigurationContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.model.impl.repository.xml.XmlConfigurationContext;
-import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.model.repository.ConfigurationItem;
 
 /**
- * Tests the {@link XmlConfigurationContext}.
+ * Tests the {@link XmlFileConfigurationContext}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -40,19 +39,16 @@ public class XmlConfigurationContextTest extends OfficeFrameTestCase {
 	public void testXmlConfigurationWithoutLabels() throws Exception {
 
 		// Create the XML configuration context
-		ConfigurationContext context = new XmlConfigurationContext(this,
+		ConfigurationContext context = new XmlFileConfigurationContext(this,
 				"XmlConfigurationContextWithoutLabels.xml");
 
 		// Validate the first configuration item
-		ConfigurationItem one = context.getConfigurationItem("one");
-		this.validateConfigurationItem(one, "one",
-				"<one name=\"value\">first</one>");
+		ConfigurationItem one = context.getConfigurationItem("one", null);
+		this.validateConfigurationItem(one, "one", "<one name=\"value\">first</one>");
 
 		// Validate the second configuration item
-		ConfigurationItem two = context.getConfigurationItem("two");
-		this
-				.validateConfigurationItem(two, "two",
-						"<two><element attribute=\"something\">another</element></two>");
+		ConfigurationItem two = context.getConfigurationItem("two", null);
+		this.validateConfigurationItem(two, "two", "<two><element attribute=\"something\">another</element></two>");
 	}
 
 	/**
@@ -62,19 +58,16 @@ public class XmlConfigurationContextTest extends OfficeFrameTestCase {
 	public void testXmlConfigurationWithLabels() throws Exception {
 
 		// Create the XML configuration context
-		ConfigurationContext context = new XmlConfigurationContext(this,
-				"XmlConfigurationContextWithLabels.xml");
+		ConfigurationContext context = new XmlFileConfigurationContext(this, "XmlConfigurationContextWithLabels.xml");
 
 		// Validate the first configuration item
-		ConfigurationItem one = context.getConfigurationItem("label-one");
-		this.validateConfigurationItem(one, "label-one",
-				"<one name=\"value\">first</one>");
+		ConfigurationItem one = context.getConfigurationItem("label-one", null);
+		this.validateConfigurationItem(one, "label-one", "<one name=\"value\">first</one>");
 
 		// Validate the second configuration item
-		ConfigurationItem two = context.getConfigurationItem("label-two");
-		this
-				.validateConfigurationItem(two, "label-two",
-						"<two><element attribute=\"something\">another</element></two>");
+		ConfigurationItem two = context.getConfigurationItem("label-two", null);
+		this.validateConfigurationItem(two, "label-two",
+				"<two><element attribute=\"something\">another</element></two>");
 	}
 
 	/**
@@ -83,14 +76,14 @@ public class XmlConfigurationContextTest extends OfficeFrameTestCase {
 	public void testXmlConfigurationTagReplace() throws Exception {
 
 		// Create the XML configuration context
-		XmlConfigurationContext context = new XmlConfigurationContext(this,
+		XmlFileConfigurationContext context = new XmlFileConfigurationContext(this,
 				"XmlConfigurationContextTagReplace.xml");
 
 		// Do tag replacement
-		context.addTag("TAG", "VALUE");
+		context.addProperty("TAG", "VALUE");
 
 		// Validate the tag replacement
-		ConfigurationItem item = context.getConfigurationItem("tag");
+		ConfigurationItem item = context.getConfigurationItem("tag", null);
 		this.validateConfigurationItem(item, "tag", "<tag>VALUE</tag>");
 	}
 
@@ -106,17 +99,12 @@ public class XmlConfigurationContextTest extends OfficeFrameTestCase {
 	 * @throws Exception
 	 *             If fails to obtain {@link ConfigurationItem} details.
 	 */
-	private void validateConfigurationItem(ConfigurationItem configurationItem,
-			String expectedLocation, String expectedContent) throws Exception {
-
-		// Ensure correct location
-		assertEquals("Incorrect location", expectedLocation, configurationItem
-				.getLocation());
+	private void validateConfigurationItem(ConfigurationItem configurationItem, String expectedLocation,
+			String expectedContent) throws Exception {
 
 		// Obtain the configuration item content
 		StringWriter writer = new StringWriter();
-		Reader reader = new InputStreamReader(configurationItem
-				.getConfiguration());
+		Reader reader = configurationItem.getReader();
 		for (int value = reader.read(); value != -1; value = reader.read()) {
 			writer.write(value);
 		}

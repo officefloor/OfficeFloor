@@ -18,7 +18,7 @@
 package net.officefloor.frame.impl.execute.escalation;
 
 import net.officefloor.frame.internal.structure.EscalationFlow;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 
 /**
  * Implementation of {@link EscalationFlow}.
@@ -33,10 +33,10 @@ public class EscalationFlowImpl implements EscalationFlow {
 	private final Class<? extends Throwable> typeOfCause;
 
 	/**
-	 * {@link TaskMetaData} determine the actions for this
+	 * {@link ManagedFunctionMetaData} determine the actions for this
 	 * {@link EscalationFlow}.
 	 */
-	private final TaskMetaData<?, ?, ?> taskMetaData;
+	private final ManagedFunctionMetaData<?, ?> taskMetaData;
 
 	/**
 	 * Initiate.
@@ -44,11 +44,10 @@ public class EscalationFlowImpl implements EscalationFlow {
 	 * @param typeOfCause
 	 *            Type of cause handled by this {@link EscalationFlow}.
 	 * @param taskMetaData
-	 *            {@link TaskMetaData} determine the actions for this
+	 *            {@link ManagedFunctionMetaData} determine the actions for this
 	 *            {@link EscalationFlow}.
 	 */
-	public EscalationFlowImpl(Class<? extends Throwable> typeOfCause,
-			TaskMetaData<?, ?, ?> taskMetaData) {
+	public EscalationFlowImpl(Class<? extends Throwable> typeOfCause, ManagedFunctionMetaData<?, ?> taskMetaData) {
 		this.typeOfCause = typeOfCause;
 		this.taskMetaData = taskMetaData;
 	}
@@ -63,7 +62,7 @@ public class EscalationFlowImpl implements EscalationFlow {
 	}
 
 	@Override
-	public TaskMetaData<?, ?, ?> getTaskMetaData() {
+	public ManagedFunctionMetaData<?, ?> getManagedFunctionMetaData() {
 		return this.taskMetaData;
 	}
 

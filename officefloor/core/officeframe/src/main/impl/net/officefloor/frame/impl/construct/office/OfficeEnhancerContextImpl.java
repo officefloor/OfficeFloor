@@ -17,11 +17,12 @@
  */
 package net.officefloor.frame.impl.construct.office;
 
-import net.officefloor.frame.api.build.FlowNodeBuilder;
+import net.officefloor.frame.api.build.FlowBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.construct.RawOfficeFloorMetaData;
@@ -44,12 +45,11 @@ public class OfficeEnhancerContextImpl implements OfficeEnhancerContext {
 	 *            {@link OfficeFloorIssues} to provide issues in enhancing the
 	 *            {@link OfficeConfiguration}.
 	 */
-	public static void enhanceOffice(String officeName,
-			OfficeConfiguration officeConfiguration, OfficeFloorIssues issues) {
+	public static void enhanceOffice(String officeName, OfficeConfiguration officeConfiguration,
+			OfficeFloorIssues issues) {
 
 		// Create the context to enhance
-		OfficeEnhancerContext context = new OfficeEnhancerContextImpl(
-				officeConfiguration);
+		OfficeEnhancerContext context = new OfficeEnhancerContextImpl(officeConfiguration);
 
 		// Enhance the office
 		for (OfficeEnhancer enhancer : officeConfiguration.getOfficeEnhancers()) {
@@ -58,8 +58,7 @@ public class OfficeEnhancerContextImpl implements OfficeEnhancerContext {
 			} catch (OfficeEnhancerError ex) {
 				issues.addIssue(AssetType.OFFICE, officeName, ex.getMessage());
 			} catch (Throwable ex) {
-				issues.addIssue(AssetType.OFFICE, officeName,
-						"Failure in enhancing office", ex);
+				issues.addIssue(AssetType.OFFICE, officeName, "Failure in enhancing office", ex);
 			}
 		}
 	}
@@ -86,20 +85,17 @@ public class OfficeEnhancerContextImpl implements OfficeEnhancerContext {
 	 */
 
 	@Override
-	public FlowNodeBuilder<?> getFlowNodeBuilder(String workName,
-			String taskName) {
-		return this.getFlowNodeBuilder(null, workName, taskName);
+	public FlowBuilder<?> getFlowBuilder(String functionName) {
+		return this.getFlowBuilder(null, functionName);
 	}
 
 	@Override
-	public FlowNodeBuilder<?> getFlowNodeBuilder(String namespace,
-			String workName, String taskName) {
-		FlowNodeBuilder<?> flowBuilder = this.officeConfiguration
-				.getFlowNodeBuilder(namespace, workName, taskName);
+	public FlowBuilder<?> getFlowBuilder(String namespace, String functionName) {
+		FlowBuilder<?> flowBuilder = this.officeConfiguration.getFlowBuilder(namespace, functionName);
 		if (flowBuilder == null) {
-			throw new OfficeEnhancerError("Task '" + taskName + "' of work '"
-					+ OfficeBuilderImpl.getNamespacedName(namespace, workName)
-					+ "' not available for enhancement");
+			throw new OfficeEnhancerError(
+					ManagedFunction.class.getSimpleName() + " '" + functionName + "' of namespace '"
+							+ (namespace == null ? "[none]" : namespace) + "' not available for enhancement");
 		}
 		return flowBuilder;
 	}

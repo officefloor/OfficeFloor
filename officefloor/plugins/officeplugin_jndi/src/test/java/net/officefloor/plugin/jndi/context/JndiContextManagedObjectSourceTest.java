@@ -22,15 +22,15 @@ import java.util.Hashtable;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
+import com.sun.jndi.url.mock.ContextEnvironmentValidator;
+import com.sun.jndi.url.mock.mockURLContextFactory;
+
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
-
-import com.sun.jndi.url.mock.ContextEnvironmentValidator;
-import com.sun.jndi.url.mock.mockURLContextFactory;
 
 /**
  * Tests the {@link JndiContextManagedObjectSource}.
@@ -43,8 +43,7 @@ public class JndiContextManagedObjectSourceTest extends OfficeFrameTestCase {
 	 * Validates the specification.
 	 */
 	public void testSpecification() {
-		ManagedObjectLoaderUtil
-				.validateSpecification(JndiContextManagedObjectSource.class);
+		ManagedObjectLoaderUtil.validateSpecification(JndiContextManagedObjectSource.class);
 	}
 
 	/**
@@ -53,13 +52,11 @@ public class JndiContextManagedObjectSourceTest extends OfficeFrameTestCase {
 	public void testType() {
 
 		// Create expected type
-		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
-				.createManagedObjectTypeBuilder();
+		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(Context.class);
 
 		// Validate the type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type,
-				JndiContextManagedObjectSource.class);
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, JndiContextManagedObjectSource.class);
 	}
 
 	/**
@@ -86,9 +83,8 @@ public class JndiContextManagedObjectSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Source the Context
-		Context sourcedContext = this.sourceContext(context,
-				Context.INITIAL_CONTEXT_FACTORY, mockURLContextFactory.class
-						.getName());
+		Context sourcedContext = this.sourceContext(context, Context.INITIAL_CONTEXT_FACTORY,
+				mockURLContextFactory.class.getName());
 
 		// Ensure correct Context
 		sourcedContext.rename("correct", "context");
@@ -113,10 +109,8 @@ public class JndiContextManagedObjectSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Source the Context
-		Context sourcedContext = this.sourceContext(context,
-				Context.INITIAL_CONTEXT_FACTORY, mockURLContextFactory.class
-						.getName(),
-				JndiContextManagedObjectSource.PROPERTY_SUB_CONTEXT_NAME,
+		Context sourcedContext = this.sourceContext(context, Context.INITIAL_CONTEXT_FACTORY,
+				mockURLContextFactory.class.getName(), JndiContextManagedObjectSource.PROPERTY_SUB_CONTEXT_NAME,
 				"test");
 
 		// Ensure correct Context
@@ -145,12 +139,9 @@ public class JndiContextManagedObjectSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Source the Context
-		Context sourcedContext = this.sourceContext(context,
-				Context.INITIAL_CONTEXT_FACTORY, mockURLContextFactory.class
-						.getName(),
-				JndiContextManagedObjectSource.PROPERTY_SUB_CONTEXT_NAME,
-				"test", JndiContextManagedObjectSource.PROPERTY_VALIDATE,
-				"true");
+		Context sourcedContext = this.sourceContext(context, Context.INITIAL_CONTEXT_FACTORY,
+				mockURLContextFactory.class.getName(), JndiContextManagedObjectSource.PROPERTY_SUB_CONTEXT_NAME, "test",
+				JndiContextManagedObjectSource.PROPERTY_VALIDATE, "true");
 
 		// Ensure correct Context
 		assertEquals("Incorrect Context", subContext, sourcedContext);
@@ -169,8 +160,7 @@ public class JndiContextManagedObjectSourceTest extends OfficeFrameTestCase {
 	 *            Name value property pairs.
 	 * @return Sourced {@link Context}.
 	 */
-	private Context sourceContext(Context context,
-			final String... nameValuePropertyPairs) throws Throwable {
+	private Context sourceContext(Context context, final String... nameValuePropertyPairs) throws Throwable {
 
 		// Setup to source InitialContext
 		mockURLContextFactory.reset();
@@ -181,8 +171,7 @@ public class JndiContextManagedObjectSourceTest extends OfficeFrameTestCase {
 				for (int i = 0; i < nameValuePropertyPairs.length; i += 2) {
 					String name = nameValuePropertyPairs[i];
 					String value = nameValuePropertyPairs[i + 1];
-					assertEquals("Incorrect property", value, environment
-							.get(name));
+					assertEquals("Incorrect property", value, environment.get(name));
 				}
 			}
 		});
@@ -194,8 +183,7 @@ public class JndiContextManagedObjectSourceTest extends OfficeFrameTestCase {
 			String value = nameValuePropertyPairs[i + 1];
 			loader.addProperty(name, value);
 		}
-		JndiContextManagedObjectSource mos = loader
-				.loadManagedObjectSource(JndiContextManagedObjectSource.class);
+		JndiContextManagedObjectSource mos = loader.loadManagedObjectSource(JndiContextManagedObjectSource.class);
 
 		// Obtain the Managed Object
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
@@ -205,8 +193,7 @@ public class JndiContextManagedObjectSourceTest extends OfficeFrameTestCase {
 		Object object = mo.getObject();
 		assertNotNull("Must have context", object);
 		assertTrue("Must be Context type", object instanceof Context);
-		assertTrue("Must be Synchronised Context",
-				object instanceof SynchronisedContext);
+		assertTrue("Must be Synchronised Context", object instanceof SynchronisedContext);
 
 		// Return the Context delegate
 		return ((SynchronisedContext) object).getDelegateContext();

@@ -17,7 +17,7 @@
  */
 package net.officefloor.tutorial.navigatehttpserver;
 
-import net.officefloor.plugin.work.clazz.FlowInterface;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 
 /**
  * Logic for <code>TemplateTwo.ofp</code>.

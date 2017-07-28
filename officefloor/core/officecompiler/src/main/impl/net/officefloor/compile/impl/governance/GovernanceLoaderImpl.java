@@ -38,16 +38,16 @@ import net.officefloor.compile.spi.governance.source.GovernanceSourceContext;
 import net.officefloor.compile.spi.governance.source.GovernanceSourceMetaData;
 import net.officefloor.compile.spi.governance.source.GovernanceSourceProperty;
 import net.officefloor.compile.spi.governance.source.GovernanceSourceSpecification;
-import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.governance.GovernanceFactory;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.source.SourceProperties;
+import net.officefloor.frame.api.source.UnknownClassError;
+import net.officefloor.frame.api.source.UnknownPropertyError;
+import net.officefloor.frame.api.source.UnknownResourceError;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.source.SourceProperties;
-import net.officefloor.frame.spi.source.UnknownClassError;
-import net.officefloor.frame.spi.source.UnknownPropertyError;
-import net.officefloor.frame.spi.source.UnknownResourceError;
 
 /**
  * {@link GovernanceLoader} implementation.
@@ -88,8 +88,7 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 			Class<GS> governanceSourceClass) {
 
 		// Instantiate the governance source
-		GS governanceSource = CompileUtil.newInstance(governanceSourceClass,
-				GovernanceSource.class, this.node,
+		GS governanceSource = CompileUtil.newInstance(governanceSourceClass, GovernanceSource.class, this.node,
 				this.nodeContext.getCompilerIssues());
 		if (governanceSource == null) {
 			return null; // failed to instantiate
@@ -100,17 +99,15 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 		try {
 			specification = governanceSource.getSpecification();
 		} catch (Throwable ex) {
-			this.addIssue("Failed to obtain "
-					+ GovernanceSourceSpecification.class.getSimpleName()
-					+ " from " + governanceSourceClass.getName(), ex);
+			this.addIssue("Failed to obtain " + GovernanceSourceSpecification.class.getSimpleName() + " from "
+					+ governanceSourceClass.getName(), ex);
 			return null; // failed to obtain
 		}
 
 		// Ensure have specification
 		if (specification == null) {
-			this.addIssue("No "
-					+ GovernanceSourceSpecification.class.getSimpleName()
-					+ " returned from " + governanceSourceClass.getName());
+			this.addIssue("No " + GovernanceSourceSpecification.class.getSimpleName() + " returned from "
+					+ governanceSourceClass.getName());
 			return null; // no specification obtained
 		}
 
@@ -119,13 +116,9 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 		try {
 			governanceSourceProperties = specification.getProperties();
 		} catch (Throwable ex) {
-			this.addIssue(
-					"Failed to obtain "
-							+ GovernanceSourceProperty.class.getSimpleName()
-							+ " instances from "
-							+ GovernanceSourceSpecification.class
-									.getSimpleName() + " for "
-							+ governanceSourceClass.getName(), ex);
+			this.addIssue("Failed to obtain " + GovernanceSourceProperty.class.getSimpleName() + " instances from "
+					+ GovernanceSourceSpecification.class.getSimpleName() + " for " + governanceSourceClass.getName(),
+					ex);
 			return null; // failed to obtain properties
 		}
 
@@ -137,14 +130,8 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 
 				// Ensure have the governance source property
 				if (mosProperty == null) {
-					this.addIssue(GovernanceSourceProperty.class
-							.getSimpleName()
-							+ " "
-							+ i
-							+ " is null from "
-							+ GovernanceSourceSpecification.class
-									.getSimpleName()
-							+ " for "
+					this.addIssue(GovernanceSourceProperty.class.getSimpleName() + " " + i + " is null from "
+							+ GovernanceSourceSpecification.class.getSimpleName() + " for "
 							+ governanceSourceClass.getName());
 					return null; // must have complete property details
 				}
@@ -154,28 +141,15 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 				try {
 					name = mosProperty.getName();
 				} catch (Throwable ex) {
-					this.addIssue(
-							"Failed to get name for "
-									+ GovernanceSourceProperty.class
-											.getSimpleName()
-									+ " "
-									+ i
-									+ " from "
-									+ GovernanceSourceSpecification.class
-											.getSimpleName() + " for "
-									+ governanceSourceClass.getName(), ex);
+					this.addIssue("Failed to get name for " + GovernanceSourceProperty.class.getSimpleName() + " " + i
+							+ " from " + GovernanceSourceSpecification.class.getSimpleName() + " for "
+							+ governanceSourceClass.getName(), ex);
 					return null; // must have complete property details
 				}
 				if (CompileUtil.isBlank(name)) {
-					this.addIssue(GovernanceSourceProperty.class
-							.getSimpleName()
-							+ " "
-							+ i
-							+ " provided blank name from "
-							+ GovernanceSourceSpecification.class
-									.getSimpleName()
-							+ " for "
-							+ governanceSourceClass.getName());
+					this.addIssue(GovernanceSourceProperty.class.getSimpleName() + " " + i
+							+ " provided blank name from " + GovernanceSourceSpecification.class.getSimpleName()
+							+ " for " + governanceSourceClass.getName());
 					return null; // must have complete property details
 				}
 
@@ -184,18 +158,9 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 				try {
 					label = mosProperty.getLabel();
 				} catch (Throwable ex) {
-					this.addIssue(
-							"Failed to get label for "
-									+ GovernanceSourceProperty.class
-											.getSimpleName()
-									+ " "
-									+ i
-									+ " ("
-									+ name
-									+ ") from "
-									+ GovernanceSourceSpecification.class
-											.getSimpleName() + " for "
-									+ governanceSourceClass.getName(), ex);
+					this.addIssue("Failed to get label for " + GovernanceSourceProperty.class.getSimpleName() + " " + i
+							+ " (" + name + ") from " + GovernanceSourceSpecification.class.getSimpleName() + " for "
+							+ governanceSourceClass.getName(), ex);
 					return null; // must have complete property details
 				}
 
@@ -213,56 +178,50 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 			Class<GS> governanceSourceClass, PropertyList properties) {
 
 		// Instantiate the governance source
-		GovernanceSource<I, F> governanceSource = CompileUtil.newInstance(
-				governanceSourceClass, GovernanceSource.class, this.node,
-				this.nodeContext.getCompilerIssues());
+		GovernanceSource<I, F> governanceSource = CompileUtil.newInstance(governanceSourceClass, GovernanceSource.class,
+				this.node, this.nodeContext.getCompilerIssues());
 		if (governanceSource == null) {
 			return null; // failed to instantiate
+
 		}
+
+		// Return the governance type
+		return this.loadGovernanceType(governanceSource, properties);
+	}
+
+	@Override
+	public <I, F extends Enum<F>, GS extends GovernanceSource<I, F>> GovernanceType<I, F> loadGovernanceType(
+			GS governanceSource, PropertyList properties) {
 
 		// Create the context for the governance source
 		SourceContext sourceContext = this.nodeContext.getRootSourceContext();
-		SourceProperties sourceProperties = new PropertyListSourceProperties(
-				properties);
-		GovernanceSourceContextImpl context = new GovernanceSourceContextImpl(
-				true, sourceContext, sourceProperties);
+		SourceProperties sourceProperties = new PropertyListSourceProperties(properties);
+		GovernanceSourceContextImpl context = new GovernanceSourceContextImpl(true, sourceContext, sourceProperties);
 
+		// Initialise the governance source and obtain the meta-data
+		GovernanceSourceMetaData<I, F> metaData;
 		try {
 			// Initialise the governance source
-			governanceSource.init(context);
+			metaData = governanceSource.init(context);
 
 		} catch (UnknownPropertyError ex) {
-			this.addIssue("Property '" + ex.getUnknownPropertyName()
-					+ "' must be specified");
+			this.addIssue("Property '" + ex.getUnknownPropertyName() + "' must be specified");
 			return null; // can not carry on
 
 		} catch (UnknownClassError ex) {
-			this.addIssue("Can not load class '" + ex.getUnknownClassName()
-					+ "'");
+			this.addIssue("Can not load class '" + ex.getUnknownClassName() + "'");
 			return null; // can not carry on
 
 		} catch (UnknownResourceError ex) {
-			this.addIssue("Can not obtain resource at location '"
-					+ ex.getUnknownResourceLocation() + "'");
+			this.addIssue("Can not obtain resource at location '" + ex.getUnknownResourceLocation() + "'");
 			return null; // can not carry on
 
 		} catch (Throwable ex) {
-			this.addIssue("Failed to initialise "
-					+ governanceSource.getClass().getName(), ex);
+			this.addIssue("Failed to initialise " + governanceSource.getClass().getName(), ex);
 			return null; // can not carry on
 		}
 
-		// Obtain the meta-data
-		GovernanceSourceMetaData<I, F> metaData;
-		try {
-			metaData = governanceSource.getMetaData();
-		} catch (Throwable ex) {
-			this.addIssue(
-					"Failed to get "
-							+ GovernanceSourceMetaData.class.getSimpleName(),
-					ex);
-			return null; // must have meta-data
-		}
+		// Ensure have meta-data
 		if (metaData == null) {
 			this.addIssue("Must provide meta-data");
 			return null; // can not carry on
@@ -278,8 +237,7 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 			// Ensure have governance factory
 			governanceFactory = metaData.getGovernanceFactory();
 			if (governanceFactory == null) {
-				this.addIssue("No " + GovernanceFactory.class.getSimpleName()
-						+ " provided");
+				this.addIssue("No " + GovernanceFactory.class.getSimpleName() + " provided");
 				return null; // can not carry on
 			}
 
@@ -303,15 +261,13 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 			}
 
 		} catch (Throwable ex) {
-			this.addIssue("Exception from "
-					+ governanceSource.getClass().getName(), ex);
+			this.addIssue("Exception from " + governanceSource.getClass().getName(), ex);
 			return null; // must be successful with meta-data
 		}
 
 		// Create the governance type
-		GovernanceType<I, F> governanceType = new GovernanceTypeImpl<I, F>(
-				governanceFactory, extensionInterface, flowTypes,
-				escalationTypes);
+		GovernanceType<I, F> governanceType = new GovernanceTypeImpl<I, F>(governanceFactory, extensionInterface,
+				flowTypes, escalationTypes);
 
 		// Return the governance type
 		return governanceType;
@@ -345,9 +301,7 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 
 				// Ensure have flow meta-data
 				if (flowMetaData == null) {
-					this.addIssue("Null "
-							+ GovernanceFlowMetaData.class.getSimpleName()
-							+ " for flow " + i);
+					this.addIssue("Null " + GovernanceFlowMetaData.class.getSimpleName() + " for flow " + i);
 					return null; // missing meta-data
 				}
 
@@ -372,10 +326,8 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 						if (!isIndexKeyMix) {
 							// Ensure the key is valid
 							if (!flowKeys.isInstance(key)) {
-								this.addIssue("Meta-data flows identified by different key types ("
-										+ flowKeys.getName()
-										+ ", "
-										+ key.getClass().getName() + ")");
+								this.addIssue("Meta-data flows identified by different key types (" + flowKeys.getName()
+										+ ", " + key.getClass().getName() + ")");
 								return null; // mismatched keys
 							}
 						}
@@ -394,8 +346,7 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 				int index = (key != null ? key.ordinal() : i);
 
 				// Create and add the flow type
-				flowTypes[i] = new GovernanceFlowTypeImpl<F>(index, type, key,
-						label);
+				flowTypes[i] = new GovernanceFlowTypeImpl<F>(index, type, key, label);
 			}
 		}
 
@@ -405,13 +356,11 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 			flowKeys = (flowTypes.length == 0 ? None.class : Indexed.class);
 		} else {
 			// Ensure exactly one flow per key
-			Set<?> keys = new HashSet<Object>(Arrays.asList(flowKeys
-					.getEnumConstants()));
+			Set<?> keys = new HashSet<Object>(Arrays.asList(flowKeys.getEnumConstants()));
 			for (GovernanceFlowType<F> flowType : flowTypes) {
 				F key = flowType.getKey();
 				if (!keys.contains(key)) {
-					this.addIssue("Must have exactly one flow per key (key="
-							+ key + ")");
+					this.addIssue("Must have exactly one flow per key (key=" + key + ")");
 					return null; // must be one flow per key
 				}
 				keys.remove(key);
@@ -426,8 +375,7 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 					isFirst = false;
 					msg.append(key.toString());
 				}
-				this.addIssue("Missing flow meta-data (keys=" + msg.toString()
-						+ ")");
+				this.addIssue("Missing flow meta-data (keys=" + msg.toString() + ")");
 				return null; // must have meta-data for each key
 			}
 		}
@@ -452,8 +400,7 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 	 * @return {@link GovernanceEscalationType} instances or <code>null</code>
 	 *         if issue obtaining.
 	 */
-	private GovernanceEscalationType[] getGovernanceEscalationTypes(
-			GovernanceSourceMetaData<?, ?> metaData) {
+	private GovernanceEscalationType[] getGovernanceEscalationTypes(GovernanceSourceMetaData<?, ?> metaData) {
 
 		// Obtain the governance escalations
 		GovernanceEscalationType[] escalationTypes;
@@ -475,8 +422,7 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 				}
 
 				// Create the escalation type
-				escalationTypes[i] = new GovernanceEscalationTypeImpl(
-						escalation.getSimpleName(), escalation);
+				escalationTypes[i] = new GovernanceEscalationTypeImpl(escalation.getSimpleName(), escalation);
 			}
 		}
 
@@ -491,8 +437,7 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 	 *            Description of the issue.
 	 */
 	private void addIssue(String issueDescription) {
-		this.nodeContext.getCompilerIssues().addIssue(this.node,
-				issueDescription);
+		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription);
 	}
 
 	/**
@@ -504,15 +449,13 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 	 *            Cause of the issue.
 	 */
 	private void addIssue(String issueDescription, Throwable cause) {
-		this.nodeContext.getCompilerIssues().addIssue(this.node,
-				issueDescription, cause);
+		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription, cause);
 	}
 
 	/**
 	 * {@link GovernanceSourceContext} implementation.
 	 */
-	private class GovernanceSourceContextImpl extends SourceContextImpl
-			implements GovernanceSourceContext {
+	private class GovernanceSourceContextImpl extends SourceContextImpl implements GovernanceSourceContext {
 
 		/**
 		 * Initiate.
@@ -522,8 +465,8 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 		 * @param sourceProperties
 		 *            {@link SourceProperties}.
 		 */
-		public GovernanceSourceContextImpl(boolean isLoadingType,
-				SourceContext delegate, SourceProperties sourceProperties) {
+		public GovernanceSourceContextImpl(boolean isLoadingType, SourceContext delegate,
+				SourceProperties sourceProperties) {
 			super(isLoadingType, delegate, sourceProperties);
 		}
 	}

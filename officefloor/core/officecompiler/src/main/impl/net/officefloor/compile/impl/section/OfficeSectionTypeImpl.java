@@ -23,7 +23,7 @@ import net.officefloor.compile.section.OfficeSectionObjectType;
 import net.officefloor.compile.section.OfficeSectionOutputType;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
-import net.officefloor.compile.section.OfficeTaskType;
+import net.officefloor.compile.section.OfficeFunctionType;
 import net.officefloor.compile.spi.office.OfficeSection;
 
 /**
@@ -85,14 +85,14 @@ public class OfficeSectionTypeImpl implements OfficeSectionType {
 	 *            Parent {@link OfficeSubSectionType}.
 	 * @param subSections
 	 *            {@link OfficeSubSectionType} instances.
-	 * @param tasks
-	 *            {@link OfficeTaskType} instances.
+	 * @param functions
+	 *            {@link OfficeFunctionType} instances.
 	 * @param managedObjects
 	 *            {@link OfficeSectionManagedObjectType} instances.
 	 */
 	public void initialiseAsOfficeSubSectionType(OfficeSubSectionType parent, OfficeSubSectionType[] subSections,
-			OfficeTaskType[] tasks, OfficeSectionManagedObjectType[] managedObjects) {
-		this.subSectionState = new SubSectionState(parent, subSections, tasks, managedObjects);
+			OfficeFunctionType[] functions, OfficeSectionManagedObjectType[] managedObjects) {
+		this.subSectionState = new SubSectionState(parent, subSections, functions, managedObjects);
 	}
 
 	/*
@@ -115,8 +115,8 @@ public class OfficeSectionTypeImpl implements OfficeSectionType {
 	}
 
 	@Override
-	public OfficeTaskType[] getOfficeTaskTypes() {
-		return this.subSectionState.tasks;
+	public OfficeFunctionType[] getOfficeFunctionTypes() {
+		return this.subSectionState.functions;
 	}
 
 	@Override
@@ -155,9 +155,9 @@ public class OfficeSectionTypeImpl implements OfficeSectionType {
 		private final OfficeSubSectionType[] subSections;
 
 		/**
-		 * {@link OfficeTaskType} instances.
+		 * {@link OfficeFunctionType} instances.
 		 */
-		private final OfficeTaskType[] tasks;
+		private final OfficeFunctionType[] functions;
 
 		/**
 		 * {@link OfficeSectionManagedObjectType} instances.
@@ -171,16 +171,16 @@ public class OfficeSectionTypeImpl implements OfficeSectionType {
 		 *            Parent {@link OfficeSubSectionType}.
 		 * @param subSections
 		 *            {@link OfficeSubSectionType} instances.
-		 * @param tasks
-		 *            {@link OfficeTaskType} instances.
+		 * @param functions
+		 *            {@link OfficeFunctionType} instances.
 		 * @param managedObjects
 		 *            {@link OfficeSectionManagedObjectType} instances.
 		 */
-		public SubSectionState(OfficeSubSectionType parent, OfficeSubSectionType[] subSections, OfficeTaskType[] tasks,
-				OfficeSectionManagedObjectType[] managedObjects) {
+		public SubSectionState(OfficeSubSectionType parent, OfficeSubSectionType[] subSections,
+				OfficeFunctionType[] functions, OfficeSectionManagedObjectType[] managedObjects) {
 			this.parent = parent;
 			this.subSections = subSections;
-			this.tasks = tasks;
+			this.functions = functions;
 			this.managedObjects = managedObjects;
 		}
 	}

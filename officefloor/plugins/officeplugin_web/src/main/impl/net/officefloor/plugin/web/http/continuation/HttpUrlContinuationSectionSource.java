@@ -20,14 +20,14 @@ package net.officefloor.plugin.web.http.continuation;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.autowire.AutoWireSectionTransformer;
-import net.officefloor.autowire.AutoWireSectionTransformerContext;
 import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.office.OfficeSectionTransformer;
+import net.officefloor.compile.spi.office.OfficeSectionTransformerContext;
+import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionInput;
-import net.officefloor.compile.spi.section.SectionTask;
-import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.SubSectionInput;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
@@ -37,7 +37,7 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpUriLink;
 
 /**
- * {@link AutoWireSectionTransformer} to provide the HTTP URL continuations.
+ * {@link OfficeSectionTransformer} to provide the HTTP URL continuations.
  * 
  * @author Daniel Sagenschneider
  */
@@ -64,17 +64,14 @@ public class HttpUrlContinuationSectionSource extends TransformSectionSource {
 	 * 
 	 * @param uri
 	 *            URI to be linked.
-	 * @param section
-	 *            {@link AutoWireSection} servicing the URI.
-	 * @param inputName
-	 *            Name of the {@link OfficeSectionInput} servicing the URI.
+	 * @param sectionInput
+	 *            {@link OfficeSectionInput} servicing the URI.
 	 * @return {@link HttpUriLink} to configure handling the URI.
 	 */
-	public HttpUriLink linkUri(String uri, AutoWireSection section,
-			String inputName) {
+	public HttpUriLink linkUri(String uri, OfficeSectionInput sectionInput) {
 
 		// Create and register the link
-		UriLink link = new UriLink(uri, section, inputName);
+		UriLink link = new UriLink(uri, sectionInput);
 		this.uriLinks.add(link);
 
 		// Return the link
@@ -82,12 +79,12 @@ public class HttpUrlContinuationSectionSource extends TransformSectionSource {
 	}
 
 	/**
-	 * Obtains the registered {@link HttpUriLink} instances.
+	 * Obtains the registered HTTP URIs.
 	 * 
-	 * @return Registered {@link HttpUriLink} instances.
+	 * @return Registered HTTP URIs.
 	 */
-	public HttpUriLink[] getRegisteredHttpUriLinks() {
-		return this.uriLinks.toArray(new HttpUriLink[this.uriLinks.size()]);
+	public String[] getRegisteredHttpUris() {
+		return this.uriLinks.stream().map((link) -> link.applicationUriPath).toArray(String[]::new);
 	}
 
 	/*
@@ -95,32 +92,24 @@ public class HttpUrlContinuationSectionSource extends TransformSectionSource {
 	 */
 
 	@Override
-	public AutoWireSection transformAutoWireSection(
-			AutoWireSectionTransformerContext context) {
-
-		// Obtain the transformed auto-wire section
-		AutoWireSection section = super.transformAutoWireSection(context);
+	public void configureProperties(OfficeSectionTransformerContext context, PropertyList properties) {
 
 		// Obtain the name of section being transformed
-		String sectionName = section.getSectionName();
+		String sectionName = context.getOfficeSectionName();
 
 		// Add properties for URL continuations of the section
 		for (UriLink link : this.uriLinks) {
 
 			// Ignore if link not for section
-			if (!(sectionName.equals(link.section.getSectionName()))) {
+			if (!(sectionName.equals(link.sectionInput.getOfficeSection().getOfficeSectionName()))) {
 				continue; // link not for section
 			}
 
 			// Add properties for the link
-			section.addProperty(PROPERTY_URL_LINK_PREFIX
-					+ link.applicationUriPath, link.inputName);
-			section.addProperty(PROPERTY_URL_SECURE_PREFIX
-					+ link.applicationUriPath, String.valueOf(link.isSecure));
+			properties.addProperty(PROPERTY_URL_LINK_PREFIX + link.applicationUriPath,
+					link.sectionInput.getOfficeSectionInputName());
+			properties.addProperty(PROPERTY_URL_SECURE_PREFIX + link.applicationUriPath, String.valueOf(link.isSecure));
 		}
-
-		// Return the transformed auto-wire section
-		return section;
 	}
 
 	@Override
@@ -141,47 +130,41 @@ public class HttpUrlContinuationSectionSource extends TransformSectionSource {
 				String inputName = context.getProperty(propertyName);
 
 				// Obtain the URI path
-				String uriPath = propertyName
-						.substring(PROPERTY_URL_LINK_PREFIX.length());
+				String uriPath = propertyName.substring(PROPERTY_URL_LINK_PREFIX.length());
 
-				// Transform URI Path to task name
-				String taskName = uriPath;
-				while (taskName.startsWith("/")) {
-					taskName = taskName.substring("/".length());
+				// Transform URI Path to function name
+				String functionName = uriPath;
+				while (functionName.startsWith("/")) {
+					functionName = functionName.substring("/".length());
 				}
-				if (taskName.trim().length() == 0) {
+				if (functionName.trim().length() == 0) {
 					// Root path
-					taskName = "_root_";
+					functionName = "_root_";
 				}
 
 				// Determine if secure
-				String isSecureText = context.getProperty(
-						PROPERTY_URL_SECURE_PREFIX + uriPath, null);
+				String isSecureText = context.getProperty(PROPERTY_URL_SECURE_PREFIX + uriPath, null);
 				Boolean isSecure = null;
 				if (isSecureText != null) {
 					isSecure = Boolean.valueOf(isSecureText);
 				}
 
 				// Add the URL continuation
-				SectionWork work = designer.addSectionWork(taskName,
-						HttpUrlContinuationWorkSource.class.getName());
-				work.addProperty(
-						HttpUrlContinuationWorkSource.PROPERTY_URI_PATH,
-						uriPath);
+				SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace(functionName,
+						HttpUrlContinuationManagedFunctionSource.class.getName());
+				namespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH, uriPath);
 				if (isSecure != null) {
-					work.addProperty(
-							HttpUrlContinuationWorkSource.PROPERTY_SECURE,
+					namespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_SECURE,
 							String.valueOf(isSecure));
 				}
-				SectionTask task = work.addSectionTask(taskName,
-						HttpUrlContinuationWorkSource.TASK_NAME);
+				SectionFunction function = namespace.addSectionFunction(functionName,
+						HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
 
 				// Obtain the input to service the URL continuation
-				SubSectionInput servicingInput = subSection
-						.getSubSectionInput(inputName);
+				SubSectionInput servicingInput = subSection.getSubSectionInput(inputName);
 
 				// Link the URL continuation for servicing
-				designer.link(task, servicingInput);
+				designer.link(function, servicingInput);
 			}
 		}
 	}
@@ -194,58 +177,34 @@ public class HttpUrlContinuationSectionSource extends TransformSectionSource {
 		/**
 		 * Application URI path.
 		 */
-		public final String applicationUriPath;
+		private final String applicationUriPath;
 
 		/**
-		 * {@link AutoWireSection} to handle the URI.
+		 * {@link OfficeSectionInput} to handle the URI.
 		 */
-		public final AutoWireSection section;
-
-		/**
-		 * Name {@link SectionInput} to handle the URI.
-		 */
-		public final String inputName;
+		private final OfficeSectionInput sectionInput;
 
 		/**
 		 * Indicates if requires secure {@link ServerHttpConnection}.
 		 */
-		public boolean isSecure = false;
+		private boolean isSecure = false;
 
 		/**
 		 * Initiate.
 		 * 
 		 * @param applicationUriPath
 		 *            Application URI path.
-		 * @param section
-		 *            {@link AutoWireSection} to handle the URI.
-		 * @param inputName
-		 *            Name {@link SectionInput} to handle the URI.
+		 * @param sectionInput
+		 *            {@link OfficeSectionInput} to handle the URI.
 		 */
-		public UriLink(String applicationUriPath, AutoWireSection section,
-				String inputName) {
+		public UriLink(String applicationUriPath, OfficeSectionInput sectionInput) {
 			this.applicationUriPath = applicationUriPath;
-			this.section = section;
-			this.inputName = inputName;
+			this.sectionInput = sectionInput;
 		}
 
 		/*
 		 * ===================== HttpUriLink ===========================
 		 */
-
-		@Override
-		public String getApplicationUriPath() {
-			return this.applicationUriPath;
-		}
-
-		@Override
-		public AutoWireSection getAutoWireSection() {
-			return this.section;
-		}
-
-		@Override
-		public String getAutoWireSectionInputName() {
-			return this.inputName;
-		}
 
 		@Override
 		public void setUriSecure(boolean isSecure) {

@@ -1,0 +1,75 @@
+<context item-labels="true">
+	<office-floor>
+		<office-floor>
+			<offices>
+				<office name="OFFICE" source="OFFICE" location="office" />
+			</offices>
+		</office-floor>
+	</office-floor>
+	<office>
+		<office>
+			<sections>
+				<section name="SECTION_A" source="SECTION" location="parent-section">
+					<output name="SECTION_OUTPUT">
+						<section-input section="SECTION_B" input="INPUT" />
+					</output>
+				</section>
+				<section name="SECTION_B" source="SECTION" location="section-two">
+					<input name="INPUT" />
+				</section>
+			</sections>
+		</office>
+	</office>
+	<parent-section>
+		<section>
+			<external-flows>
+				<external-flow name="SECTION_OUTPUT" />
+			</external-flows>
+			<sub-sections>
+				<sub-section name="section-one" source="SECTION"
+					location="section-one">
+					<output name="OUTPUT" escalation-only="false">
+						<external-flow name="SECTION_OUTPUT" />
+					</output>
+				</sub-section>
+			</sub-sections>
+		</section>
+	</parent-section>
+	<section-one>
+		<section>
+			<external-flows>
+				<external-flow name="OUTPUT" />
+			</external-flows>
+			<function-namespaces>
+				<function-namespace name="NAMESPACE" source="CLASS">
+					<properties>
+						<property name="class.name" value="${testcase}$CompileFunctionClass" />
+					</properties>
+					<managed-function name="nextFunction" />
+				</function-namespace>
+			</function-namespaces>
+			<functions>
+				<function name="FUNCTION" function-namespace="NAMESPACE"
+					managed-function="nextFunction">
+					<next-external-flow name="OUTPUT" />
+				</function>
+			</functions>
+		</section>
+	</section-one>
+	<section-two>
+		<section>
+			<function-namespaces>
+				<function-namespace name="NAMESPACE" source="CLASS">
+					<properties>
+						<property name="class.name" value="${testcase}$CompileFunctionClass" />
+					</properties>
+					<managed-function name="simpleFunction" />
+				</function-namespace>
+			</function-namespaces>
+			<functions>
+				<function name="INPUT" function-namespace="NAMESPACE"
+					managed-function="simpleFunction" public="true" />
+			</functions>
+		</section>
+	</section-two>
+</context>

@@ -17,21 +17,19 @@
  */
 package net.officefloor.plugin.socket.server.http.source;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireApplication;
-import net.officefloor.autowire.AutoWireObject;
-import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.autowire.ManagedObjectSourceWirer;
-import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.compile.ManagedObjectSourceService;
-import net.officefloor.compile.spi.section.SectionInput;
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.officefloor.DeployedOffice;
+import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
+import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
+import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
-import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
-import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeamSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.protocol.HttpCommunicationProtocol;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
@@ -44,88 +42,129 @@ import net.officefloor.plugin.socket.server.ssl.protocol.SslCommunicationProtoco
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpsServerSocketManagedObjectSource extends
-		AbstractServerSocketManagedObjectSource
-		implements
-		ManagedObjectSourceService<None, Indexed, HttpsServerSocketManagedObjectSource> {
+public class HttpsServerSocketManagedObjectSource extends AbstractServerSocketManagedObjectSource
+		implements ManagedObjectSourceService<None, Indexed, HttpsServerSocketManagedObjectSource> {
 
 	/**
-	 * Convenience method to create the {@link ManagedObjectSourceWirer} for
-	 * wiring in the {@link HttpsServerSocketManagedObjectSource}.
+	 * Convenience method to configure the
+	 * {@link HttpsServerSocketManagedObjectSource}.
 	 * 
-	 * @param sectionName
-	 *            Name of the section handling the {@link HttpRequest}.
-	 * @param sectionInputName
-	 *            Name of the {@link SectionInput} handling the
-	 *            {@link HttpRequest}.
-	 * @return {@link ManagedObjectSourceWirer} for wiring in the
-	 *         {@link HttpsServerSocketManagedObjectSource}.
-	 */
-	public static ManagedObjectSourceWirer createManagedObjectSourceWirer(
-			final String sectionName, final String sectionInputName) {
-		return new ManagedObjectSourceWirer() {
-			@Override
-			public void wire(ManagedObjectSourceWirerContext context) {
-
-				// Provide thread per each accepter and listener
-				context.mapTeam("accepter",
-						WorkerPerTaskTeamSource.class.getName());
-				context.mapTeam("listener",
-						WorkerPerTaskTeamSource.class.getName());
-
-				// Clean up (without thread context switch)
-				context.mapTeam("cleanup", PassiveTeamSource.class.getName());
-
-				// Service SSL tasks within own thread
-				context.mapTeam("SSL_TASKS",
-						OnePersonTeamSource.class.getName());
-
-				// Map request handler
-				context.mapFlow("HANDLE_HTTP_REQUEST", sectionName,
-						sectionInputName);
-			}
-		};
-	}
-
-	/**
-	 * Convenience method to auto-wire in a
-	 * {@link HttpsServerSocketManagedObjectSource} into an
-	 * {@link AutoWireApplication}.
-	 * 
-	 * @param source
-	 *            {@link AutoWireApplication}.
+	 * @param deployer
+	 *            {@link OfficeFloorDeployer}.
 	 * @param port
 	 *            Port to listen for HTTPS requests.
 	 * @param sslEngineSourceClass
 	 *            {@link SslEngineSource} class. May be <code>null</code>.
+	 * @param office
+	 *            {@link DeployedOffice}.
 	 * @param sectionName
-	 *            Name of the {@link AutoWireSection} servicing the requests.
+	 *            Name of the {@link OfficeSection} servicing the requests.
 	 * @param sectionInputName
-	 *            Name of the {@link SectionInput} on the
-	 *            {@link AutoWireSection} servicing the requests.
-	 * @return {@link AutoWireObject}.
+	 *            Name of the {@link OfficeSectionInput} on the
+	 *            {@link OfficeSection} servicing the requests.
+	 * @return {@link OfficeFloorInputManagedObject}.
 	 */
-	public static AutoWireObject autoWire(AutoWireApplication source, int port,
-			Class<? extends SslEngineSource> sslEngineSourceClass,
-			String sectionName, String sectionInputName) {
-
-		// Create the wirer
-		ManagedObjectSourceWirer wirer = createManagedObjectSourceWirer(
-				sectionName, sectionInputName);
+	public static OfficeFloorInputManagedObject configure(OfficeFloorDeployer deployer, int port,
+			Class<? extends SslEngineSource> sslEngineSourceClass, DeployedOffice office, String sectionName,
+			String sectionInputName) {
 
 		// Add this managed object source
-		AutoWireObject object = source.addManagedObject(
-				HttpsServerSocketManagedObjectSource.class.getName(), wirer,
-				new AutoWire(ServerHttpConnection.class));
-		object.addProperty(PROPERTY_PORT, String.valueOf(port));
+		OfficeFloorManagedObjectSource mos = deployer.addManagedObjectSource("HTTPS_SOURCE_" + port,
+				HttpsServerSocketManagedObjectSource.class.getName());
+		mos.addProperty(PROPERTY_PORT, String.valueOf(port));
 		if (sslEngineSourceClass != null) {
-			object.addProperty(
-					SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE,
-					sslEngineSourceClass.getName());
+			mos.addProperty(SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE, sslEngineSourceClass.getName());
 		}
 
-		// Return the object
-		return object;
+		// Managed by office
+		deployer.link(mos.getManagingOffice(), office);
+
+		// Add teams for the managed object source
+		deployer.link(mos.getManagedObjectTeam("listener"),
+				deployer.addTeam("LISTENER", ExecutorCachedTeamSource.class.getName()));
+		deployer.link(mos.getManagedObjectTeam("SSL"),
+				deployer.addTeam("SSL_RUNNER", ExecutorCachedTeamSource.class.getName()));
+
+		// Handle servicing of requests
+		deployer.link(mos.getManagedObjectFlow("HANDLE_HTTP_REQUEST"),
+				office.getDeployedOfficeInput(sectionName, sectionInputName));
+
+		// Create the input managed object
+		OfficeFloorInputManagedObject input = deployer.addInputManagedObject("HTTP_" + port);
+		input.addTypeQualification(null, ServerHttpConnection.class.getName());
+		deployer.link(mos, input);
+
+		// Return the input managed object
+		return input;
+	}
+
+	/**
+	 * Convenience method to configure both
+	 * {@link HttpServerSocketManagedObjectSource} and
+	 * {@link HttpsServerSocketManagedObjectSource}.
+	 * 
+	 * @param deployer
+	 *            {@link OfficeFloorDeployer}.
+	 * @param httpPort
+	 *            Port to listen for HTTP requests.
+	 * @param httpsPort
+	 *            Port to listen for HTTPS requests.
+	 * @param sslEngineSourceClass
+	 *            {@link SslEngineSource} class. May be <code>null</code>.
+	 * @param office
+	 *            {@link DeployedOffice}.
+	 * @param sectionName
+	 *            Name of the {@link OfficeSection} servicing the requests.
+	 * @param sectionInputName
+	 *            Name of the {@link OfficeSectionInput} on the
+	 *            {@link OfficeSection} servicing the requests.
+	 * @return {@link OfficeFloorInputManagedObject}.
+	 */
+	public static OfficeFloorInputManagedObject configure(OfficeFloorDeployer deployer, int httpPort, int httpsPort,
+			Class<? extends SslEngineSource> sslEngineSourceClass, DeployedOffice office, String sectionName,
+			String sectionInputName) {
+
+		// Add HTTP managed object source
+		OfficeFloorManagedObjectSource http = deployer.addManagedObjectSource("HTTP_SOURCE",
+				HttpServerSocketManagedObjectSource.class.getName());
+		http.addProperty(PROPERTY_PORT, String.valueOf(httpPort));
+
+		// Add HTTPS managed object source
+		OfficeFloorManagedObjectSource https = deployer.addManagedObjectSource("HTTPS_SOURCE",
+				HttpsServerSocketManagedObjectSource.class.getName());
+		https.addProperty(PROPERTY_PORT, String.valueOf(httpsPort));
+		if (sslEngineSourceClass != null) {
+			https.addProperty(SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE, sslEngineSourceClass.getName());
+		}
+
+		// Managed by office
+		deployer.link(http.getManagingOffice(), office);
+		deployer.link(https.getManagingOffice(), office);
+
+		// Add teams for the managed object source
+		OfficeFloorTeam listener = deployer.addTeam("LISTENER", ExecutorCachedTeamSource.class.getName());
+
+		// Configure the HTTP teams
+		deployer.link(http.getManagedObjectTeam("listener"), listener);
+
+		// Configure the HTTPS teams
+		deployer.link(https.getManagedObjectTeam("listener"), listener);
+		deployer.link(https.getManagedObjectTeam("ssl_runnable"),
+				deployer.addTeam("SSL_RUNNER", ExecutorCachedTeamSource.class.getName()));
+
+		// Handle servicing of requests
+		DeployedOfficeInput servicer = office.getDeployedOfficeInput(sectionName, sectionInputName);
+		deployer.link(http.getManagedObjectFlow("HANDLER"), servicer);
+		deployer.link(https.getManagedObjectFlow("HANDLER"), servicer);
+
+		// Create the input managed object
+		OfficeFloorInputManagedObject input = deployer.addInputManagedObject("HTTP");
+		input.addTypeQualification(null, ServerHttpConnection.class.getName());
+		deployer.link(http, input);
+		deployer.link(https, input);
+
+		// Return the input managed object
+		return input;
 	}
 
 	/*

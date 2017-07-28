@@ -20,8 +20,8 @@ package net.officefloor.frame.impl.execute.profile;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.officefloor.frame.api.profile.ProfiledProcess;
-import net.officefloor.frame.api.profile.ProfiledThread;
+import net.officefloor.frame.api.profile.ProfiledProcessState;
+import net.officefloor.frame.api.profile.ProfiledThreadState;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -33,7 +33,7 @@ import net.officefloor.frame.internal.structure.ThreadState;
  * 
  * @author Daniel Sagenschneider
  */
-public class ProcessProfilerImpl implements ProcessProfiler, ProfiledProcess {
+public class ProcessProfilerImpl implements ProcessProfiler, ProfiledProcessState {
 
 	/**
 	 * {@link Profiler}.
@@ -41,30 +41,67 @@ public class ProcessProfilerImpl implements ProcessProfiler, ProfiledProcess {
 	private final Profiler profiler;
 
 	/**
-	 * Start time stamp.
+	 * {@link Process} being profiled.
 	 */
-	private final long startTimestamp;
+	private final ProcessState process;
+
+	/**
+	 * Start time stamp in milliseconds.
+	 */
+	private final long startTimestampMilliseconds;
+
+	/**
+	 * Start time stamp in nanoseconds.
+	 */
+	private final long startTimestampNanoseconds;
 
 	/**
 	 * <p>
-	 * {@link ProfiledThread} instances for this {@link ProcessProfiler}.
+	 * {@link ProfiledThreadState} instances for this {@link ProcessProfiler}.
 	 * <p>
 	 * Typically only one {@link ThreadState} per {@link ProcessState}.
 	 */
-	private final List<ProfiledThread> threads = new ArrayList<ProfiledThread>(
-			1);
+	private final List<ProfiledThreadState> threads = new ArrayList<ProfiledThreadState>(1);
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param profiler
 	 *            {@link Profiler}.
-	 * @param startTimestamp
-	 *            Start time stamp.
+	 * @param process
+	 *            {@link ProcessState} being profiled.
+	 * @param startTimestampMilliseconds
+	 *            Start time stamp in milliseconds.
+	 * @param startTimestampNanoseconds
+	 *            Start time stamp in nanoseconds.
 	 */
-	public ProcessProfilerImpl(Profiler profiler, long startTimestamp) {
+	public ProcessProfilerImpl(Profiler profiler, ProcessState process, long startTimestampMilliseconds,
+			long startTimestampNanoseconds) {
 		this.profiler = profiler;
-		this.startTimestamp = startTimestamp;
+		this.process = process;
+		this.startTimestampMilliseconds = startTimestampMilliseconds;
+		this.startTimestampNanoseconds = startTimestampNanoseconds;
+	}
+
+	/**
+	 * Obtains the main {@link ThreadState} for the {@link ProcessState} being
+	 * profiled.
+	 * 
+	 * @return Main {@link ThreadState} for the {@link ProcessState} being
+	 *         profiled.
+	 */
+	ThreadState getMainThreadState() {
+		return this.process.getMainThreadState();
+	}
+
+	/**
+	 * Registers the {@link ProfiledThreadState}.
+	 * 
+	 * @param profiledThreadState
+	 *            {@link ProfiledThreadState}..
+	 */
+	void registerProfiledThreadState(ProfiledThreadState profiledThreadState) {
+		this.threads.add(profiledThreadState);
 	}
 
 	/*
@@ -72,17 +109,15 @@ public class ProcessProfilerImpl implements ProcessProfiler, ProfiledProcess {
 	 */
 
 	@Override
-	public ThreadProfiler addThread(ThreadState thread) {
-		long threadStartTimestamp = System.nanoTime();
-		ThreadProfilerImpl profiler = new ThreadProfilerImpl(
-				threadStartTimestamp);
-		this.threads.add(profiler);
-		return profiler;
+	public ThreadProfiler addThreadState(ThreadState threadState) {
+		long threadStartTimeMilliseconds = System.currentTimeMillis();
+		long threadStartTimestampNanoseconds = System.nanoTime();
+		return new ThreadProfilerImpl(threadState, this, threadStartTimeMilliseconds, threadStartTimestampNanoseconds);
 	}
 
 	@Override
-	public void processCompleted() {
-		this.profiler.profileProcess(this);
+	public void processStateCompleted() {
+		this.profiler.profileProcessState(this);
 	}
 
 	/*
@@ -90,13 +125,20 @@ public class ProcessProfilerImpl implements ProcessProfiler, ProfiledProcess {
 	 */
 
 	@Override
-	public long getStartTimestamp() {
-		return this.startTimestamp;
+	public List<ProfiledThreadState> getProfiledThreadStates() {
+		synchronized (this.process.getMainThreadState()) {
+			return this.threads;
+		}
 	}
 
 	@Override
-	public List<ProfiledThread> getProfiledThreads() {
-		return this.threads;
+	public long getStartTimestampMilliseconds() {
+		return this.startTimestampMilliseconds;
+	}
+
+	@Override
+	public long getStartTimestampNanoseconds() {
+		return this.startTimestampNanoseconds;
 	}
 
 }

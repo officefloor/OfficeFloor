@@ -17,23 +17,36 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.function.Function;
 
 import net.officefloor.compile.impl.officefloor.OfficeFloorSourceContextImpl;
 import net.officefloor.compile.impl.officefloor.OfficeFloorTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.impl.util.LoadTypeError;
+import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.internal.structure.AutoWirer;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
+import net.officefloor.compile.internal.structure.LinkObjectNode;
+import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
+import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeBindings;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
-import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
+import net.officefloor.compile.internal.structure.OfficeTeamNode;
+import net.officefloor.compile.internal.structure.OfficeTeamRegistry;
+import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
@@ -43,7 +56,9 @@ import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
 import net.officefloor.compile.officefloor.OfficeFloorType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.office.ManagedObjectTeam;
+import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
+import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
+import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
@@ -52,32 +67,34 @@ import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectPool;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
+import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
-import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
-import net.officefloor.compile.spi.section.ManagedObjectDependency;
-import net.officefloor.compile.spi.section.ManagedObjectFlow;
-import net.officefloor.compile.type.TypeContext;
-import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
+import net.officefloor.compile.spi.supplier.source.SupplierSource;
+import net.officefloor.configuration.ConfigurationError;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.profile.Profiler;
+import net.officefloor.frame.api.source.UnknownClassError;
+import net.officefloor.frame.api.source.UnknownPropertyError;
+import net.officefloor.frame.api.source.UnknownResourceError;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.source.UnknownClassError;
-import net.officefloor.frame.spi.source.UnknownPropertyError;
-import net.officefloor.frame.spi.source.UnknownResourceError;
 
 /**
  * {@link OfficeFloorNode} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorNodeImpl extends AbstractNode implements OfficeFloorNode {
+public class OfficeFloorNodeImpl implements OfficeFloorNode {
 
 	/**
 	 * {@link Class} name of the {@link OfficeFloorSource}.
@@ -139,6 +156,12 @@ public class OfficeFloorNodeImpl extends AbstractNode implements OfficeFloorNode
 	private final Map<String, ManagedObjectNode> managedObjects = new HashMap<String, ManagedObjectNode>();
 
 	/**
+	 * {@link ManagedObjectPoolNode} instances by their
+	 * {@link OfficeFloorManagedObjectPool} name.
+	 */
+	private final Map<String, ManagedObjectPoolNode> managedObjectPools = new HashMap<>();
+
+	/**
 	 * {@link SupplierNode} instances by their {@link OfficeFloorSupplier} name.
 	 */
 	private final Map<String, SupplierNode> suppliers = new HashMap<String, SupplierNode>();
@@ -152,6 +175,16 @@ public class OfficeFloorNodeImpl extends AbstractNode implements OfficeFloorNode
 	 * {@link OfficeNode} instances by their {@link DeployedOffice} name.
 	 */
 	private final Map<String, OfficeNode> offices = new HashMap<String, OfficeNode>();
+
+	/**
+	 * Indicates whether to {@link AutoWire} the objects.
+	 */
+	private boolean isAutoWireObjects = false;
+
+	/**
+	 * Indicates whether to {@link AutoWire} the {@link Team} instances.
+	 */
+	private boolean isAutoWireTeams = false;
 
 	/**
 	 * Initiate.
@@ -205,6 +238,12 @@ public class OfficeFloorNodeImpl extends AbstractNode implements OfficeFloorNode
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return NodeUtil.getChildNodes(this.teams, this.managedObjectSources, this.inputManagedObjects, this.suppliers,
+				this.managedObjects, this.offices);
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}
@@ -237,6 +276,16 @@ public class OfficeFloorNodeImpl extends AbstractNode implements OfficeFloorNode
 	 */
 
 	@Override
+	public void enableAutoWireObjects() {
+		this.isAutoWireObjects = true;
+	}
+
+	@Override
+	public void enableAutoWireTeams() {
+		this.isAutoWireTeams = true;
+	}
+
+	@Override
 	public OfficeFloorManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
 			String managedObjectSourceClassName) {
 		return NodeUtil.getInitialisedNode(managedObjectSourceName, this.managedObjectSources, this.context,
@@ -261,16 +310,48 @@ public class OfficeFloorNodeImpl extends AbstractNode implements OfficeFloorNode
 	}
 
 	@Override
+	public OfficeFloorManagedObjectPool addManagedObjectPool(String managedObjectPoolName,
+			String managedObjectPoolSourceClassName) {
+		return NodeUtil.getInitialisedNode(managedObjectPoolName, this.managedObjectPools, this.context,
+				() -> this.context.createManagedObjectPoolNode(managedObjectPoolName, this),
+				(managedObjectPool) -> managedObjectPool.initialise(managedObjectPoolSourceClassName, null));
+	}
+
+	@Override
+	public OfficeFloorManagedObjectPool addManagedObjectPool(String managedObjectPoolName,
+			ManagedObjectPoolSource managedObjectPoolSource) {
+		return NodeUtil.getInitialisedNode(managedObjectPoolName, this.managedObjectPools, this.context,
+				() -> this.context.createManagedObjectPoolNode(managedObjectPoolName, this),
+				(managedObjectPool) -> managedObjectPool.initialise(managedObjectPoolSource.getClass().getName(),
+						managedObjectPoolSource));
+	}
+
+	@Override
 	public OfficeFloorSupplier addSupplier(String supplierName, String supplierSourceClassName) {
 		return NodeUtil.getInitialisedNode(supplierName, this.suppliers, this.context,
-				() -> this.context.createSupplierNode(supplierName, supplierSourceClassName, this),
-				(supplier) -> supplier.initialise());
+				() -> this.context.createSupplierNode(supplierName, this),
+				(supplier) -> supplier.initialise(supplierSourceClassName, null));
+	}
+
+	@Override
+	public OfficeFloorSupplier addSupplier(String supplierName, SupplierSource supplierSource) {
+		return NodeUtil.getInitialisedNode(supplierName, this.suppliers, this.context,
+				() -> this.context.createSupplierNode(supplierName, this),
+				(supplier) -> supplier.initialise(supplierSource.getClass().getName(), supplierSource));
 	}
 
 	@Override
 	public OfficeFloorTeam addTeam(String teamName, String teamSourceClassName) {
 		return NodeUtil.getInitialisedNode(teamName, this.teams, this.context,
-				() -> this.context.createTeamNode(teamName, this), (team) -> team.initialise(teamSourceClassName));
+				() -> this.context.createTeamNode(teamName, this),
+				(team) -> team.initialise(teamSourceClassName, null));
+	}
+
+	@Override
+	public OfficeFloorTeam addTeam(String teamName, TeamSource teamSource) {
+		return NodeUtil.getInitialisedNode(teamName, this.teams, this.context,
+				() -> this.context.createTeamNode(teamName, this),
+				(team) -> team.initialise(teamSource.getClass().getName(), teamSource));
 	}
 
 	@Override
@@ -290,47 +371,54 @@ public class OfficeFloorNodeImpl extends AbstractNode implements OfficeFloorNode
 	@Override
 	public void link(OfficeFloorManagedObjectSource managedObjectSource,
 			OfficeFloorInputManagedObject inputManagedObject) {
-		this.linkManagedObjectSourceInput(managedObjectSource, inputManagedObject);
+		LinkUtil.linkManagedObjectSourceInput(managedObjectSource, inputManagedObject, this.context.getCompilerIssues(),
+				this);
+	}
+
+	@Override
+	public void link(OfficeFloorManagedObjectSource managedObjectSource,
+			OfficeFloorManagedObjectPool managedObjectPool) {
+		LinkUtil.linkPool(managedObjectSource, managedObjectPool, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(ManagedObjectTeam team, OfficeFloorTeam officeFloorTeam) {
-		this.linkTeam(team, officeFloorTeam);
+		LinkUtil.linkTeam(team, officeFloorTeam, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(ManagedObjectDependency dependency, OfficeFloorManagedObject managedObject) {
-		this.linkObject(dependency, managedObject);
+		LinkUtil.linkObject(dependency, managedObject, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(ManagedObjectDependency dependency, OfficeFloorInputManagedObject inputManagedObject) {
-		this.linkObject(dependency, inputManagedObject);
+		LinkUtil.linkObject(dependency, inputManagedObject, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(ManagedObjectFlow flow, DeployedOfficeInput input) {
-		this.linkFlow(flow, input);
+		LinkUtil.linkFlow(flow, input, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(ManagingOffice managingOffice, DeployedOffice office) {
-		this.linkOffice(managingOffice, office);
+		LinkUtil.linkOffice(managingOffice, office, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(OfficeTeam team, OfficeFloorTeam officeFloorTeam) {
-		this.linkTeam(team, officeFloorTeam);
+		LinkUtil.linkTeam(team, officeFloorTeam, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(OfficeObject requiredManagedObject, OfficeFloorManagedObject officeFloorManagedObject) {
-		this.linkObject(requiredManagedObject, officeFloorManagedObject);
+		LinkUtil.linkObject(requiredManagedObject, officeFloorManagedObject, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(OfficeObject officeObject, OfficeFloorInputManagedObject inputManagedObject) {
-		this.linkObject(officeObject, inputManagedObject);
+		LinkUtil.linkObject(officeObject, inputManagedObject, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
@@ -357,22 +445,15 @@ public class OfficeFloorNodeImpl extends AbstractNode implements OfficeFloorNode
 	 */
 
 	@Override
-	public void addProfiler(String officeName, Profiler profiler) {
-		// TODO implement OfficeFloorNode.addProfiler
-		throw new UnsupportedOperationException("TODO implement OfficeFloorNode.addProfiler");
-
-	}
-
-	@Override
 	public OfficeFloorManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
-			SuppliedManagedObjectNode suppliedManagedObject) {
+			SuppliedManagedObjectSourceNode suppliedManagedObject) {
 		return NodeUtil.getInitialisedNode(managedObjectSourceName, this.managedObjectSources, this.context,
 				() -> this.context.createManagedObjectSourceNode(managedObjectSourceName, suppliedManagedObject),
 				(managedObjectSource) -> managedObjectSource.initialise(null, null));
 	}
 
 	@Override
-	public boolean sourceOfficeFloor() {
+	public boolean sourceOfficeFloor(CompileContext compileContext) {
 
 		// Determine if must instantiate
 		OfficeFloorSource source = this.officeFloorSource;
@@ -394,12 +475,24 @@ public class OfficeFloorNodeImpl extends AbstractNode implements OfficeFloorNode
 		}
 
 		// Create the OfficeFloor source context
-		OfficeFloorSourceContext sourceContext = new OfficeFloorSourceContextImpl(false, this.officeFloorLocation,
+		OfficeFloorSourceContextImpl sourceContext = new OfficeFloorSourceContextImpl(false, this.officeFloorLocation,
 				this.properties, this, this.context);
+
+		// Obtain the extension services (ensuring all are available)
+		List<OfficeFloorExtensionService> extensionServices = new ArrayList<>();
+		for (OfficeFloorExtensionService extensionService : ServiceLoader.load(OfficeFloorExtensionService.class,
+				sourceContext.getClassLoader())) {
+			extensionServices.add(extensionService);
+		}
 
 		try {
 			// Source the OfficeFloor
 			source.sourceOfficeFloor(this, sourceContext);
+
+			// Extend the OfficeFloor
+			for (OfficeFloorExtensionService extensionService : extensionServices) {
+				extensionService.extendOfficeFloor(this, sourceContext);
+			}
 
 		} catch (UnknownPropertyError ex) {
 			this.addIssue("Missing property '" + ex.getUnknownPropertyName() + "' for "
@@ -415,6 +508,10 @@ public class OfficeFloorNodeImpl extends AbstractNode implements OfficeFloorNode
 			this.addIssue("Can not obtain resource at location '" + ex.getUnknownResourceLocation() + "' for "
 					+ OfficeFloorSource.class.getSimpleName() + " " + source.getClass().getName());
 			return false; // must have resource
+
+		} catch (ConfigurationError ex) {
+			ex.addConfigurationIssue(this, this.context.getCompilerIssues());
+			return false; // must have configuration
 
 		} catch (LoadTypeError ex) {
 			ex.addLoadTypeIssue(this, this.context.getCompilerIssues());
@@ -432,10 +529,26 @@ public class OfficeFloorNodeImpl extends AbstractNode implements OfficeFloorNode
 	}
 
 	@Override
-	public boolean sourceOfficeFloorTree() {
+	public boolean sourceOfficeFloorTree(CompileContext compileContext) {
 
 		// Source the OfficeFloor
-		boolean isSourced = this.sourceOfficeFloor();
+		boolean isSourced = this.sourceOfficeFloor(compileContext);
+		if (!isSourced) {
+			return false;
+		}
+
+		// Ensure all managed object sources are sourced
+		isSourced = CompileUtil.source(this.managedObjectSources,
+				(managedObjectSource) -> managedObjectSource.getSectionManagedObjectSourceName(),
+				(managedObjectSource) -> managedObjectSource.sourceManagedObjectSource(compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
+		// Ensure all managed objects are sourced
+		isSourced = CompileUtil.source(this.managedObjects,
+				(managedObject) -> managedObject.getSectionManagedObjectName(),
+				(managedObject) -> managedObject.sourceManagedObject(compileContext));
 		if (!isSourced) {
 			return false;
 		}
@@ -443,9 +556,56 @@ public class OfficeFloorNodeImpl extends AbstractNode implements OfficeFloorNode
 		// Source all the offices
 		isSourced = this.offices.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getDeployedOfficeName(), b.getDeployedOfficeName()))
-				.allMatch((office) -> office.sourceOfficeTree());
+				.allMatch((office) -> office.sourceOfficeTree(compileContext));
 		if (!isSourced) {
 			return false;
+		}
+
+		// Undertake auto-wire of objects
+		if (this.isAutoWireObjects) {
+
+			// Create the auto wirer
+			final AutoWirer<LinkObjectNode> officeFloorAutoWirer = this.context.createAutoWirer(LinkObjectNode.class);
+			final AutoWirer<LinkObjectNode> autoWirer = this.loadAutoWireObjectTargets(officeFloorAutoWirer,
+					compileContext);
+
+			// Iterate over offices (auto-wiring unlinked dependencies)
+			this.offices.values().stream()
+					.sorted((a, b) -> CompileUtil.sortCompare(a.getDeployedOfficeName(), b.getDeployedOfficeName()))
+					.forEachOrdered((office) -> office.autoWireObjects(autoWirer, compileContext));
+
+			// Iterate over managed objects (auto-wiring unlinked dependencies)
+			this.managedObjects.values().stream().sorted((a, b) -> CompileUtil
+					.sortCompare(a.getOfficeFloorManagedObjectName(), b.getOfficeFloorManagedObjectName()))
+					.forEachOrdered((managedObject) -> {
+						// Obtain the managing office for the managed object
+						ManagedObjectSourceNode managedObjectSource = managedObject.getManagedObjectSourceNode();
+						OfficeNode officeNode = managedObjectSource.getManagingOfficeNode();
+
+						// Load the dependencies for the managed object
+						managedObject.autoWireDependencies(autoWirer, officeNode, compileContext);
+					});
+		}
+
+		// Undertake auto-wire of teams
+		if (this.isAutoWireTeams) {
+
+			// Create the auto-wirer
+			final AutoWirer<LinkTeamNode> autoWirer = this.context.createAutoWirer(LinkTeamNode.class);
+			this.teams.values().forEach((team) -> {
+
+				// Create the target auto-wires
+				AutoWire[] targetAutoWires = Arrays.stream(team.getTypeQualifications())
+						.map((type) -> new AutoWire(type.getQualifier(), type.getType())).toArray(AutoWire[]::new);
+
+				// Add the target
+				autoWirer.addAutoWireTarget(team, targetAutoWires);
+			});
+
+			// Iterate over offices (auto-wiring teams)
+			this.offices.values().stream()
+					.sorted((a, b) -> CompileUtil.sortCompare(a.getDeployedOfficeName(), b.getDeployedOfficeName()))
+					.forEachOrdered((office) -> office.autoWireTeams(autoWirer, compileContext));
 		}
 
 		// As here, successfully sourced
@@ -453,7 +613,75 @@ public class OfficeFloorNodeImpl extends AbstractNode implements OfficeFloorNode
 	}
 
 	@Override
-	public OfficeFloorType loadOfficeFloorType(TypeContext typeContext) {
+	public AutoWirer<LinkObjectNode> loadAutoWireObjectTargets(AutoWirer<LinkObjectNode> autoWirer,
+			CompileContext compileContext) {
+
+		// Load the input managed objects (last to auto-wire)
+		this.inputManagedObjects.values().forEach((inputMo) -> {
+
+			// Create the auto-wires
+			AutoWire[] targetAutoWires = Arrays.stream(inputMo.getTypeQualifications(compileContext))
+					.map((type) -> new AutoWire(type.getQualifier(), type.getType())).toArray(AutoWire[]::new);
+
+			// Add the target
+			autoWirer.addAutoWireTarget(inputMo, targetAutoWires);
+		});
+
+		// Load the supplied managed objects
+		final AutoWirer<LinkObjectNode> supplierAutoWirer = autoWirer.createScopeAutoWirer();
+		this.suppliers.values().stream()
+				.forEach((supplier) -> supplier.loadAutoWireObjects(supplierAutoWirer, compileContext));
+
+		// Load the managed objects
+		final AutoWirer<LinkObjectNode> managedObjectAutoWirer = supplierAutoWirer.createScopeAutoWirer();
+		this.managedObjects.values().forEach((mo) -> {
+
+			// Create the auto-wires
+			AutoWire[] targetAutoWires = Arrays.stream(mo.getTypeQualifications(compileContext))
+					.map((type) -> new AutoWire(type.getQualifier(), type.getType())).toArray(AutoWire[]::new);
+
+			// Add the target
+			autoWirer.addAutoWireTarget(mo, targetAutoWires);
+		});
+
+		// Return the auto wirer
+		return managedObjectAutoWirer;
+	}
+
+	@Override
+	public void loadAutoWireTeamTargets(AutoWirer<LinkTeamNode> autoWirer, OfficeTeamRegistry officeTeamRegistry,
+			CompileContext compileContext) {
+		this.teams.values().forEach((team) -> {
+
+			// Create the auto-wires
+			AutoWire[] targetAutoWires = Arrays.stream(team.getTypeQualifications())
+					.map((type) -> new AutoWire(type.getQualifier(), type.getType())).toArray(AutoWire[]::new);
+
+			// Add the target
+			autoWirer.addAutoWireTarget((office) -> {
+
+				// Determine if team already linked to office
+				for (OfficeTeamNode officeTeam : officeTeamRegistry.getOfficeTeams()) {
+					TeamNode linkedTeam = LinkUtil.findTarget(officeTeam, TeamNode.class,
+							this.context.getCompilerIssues());
+					if (linkedTeam == team) {
+						// Already linked team, so use
+						return officeTeam;
+					}
+				}
+
+				// As here, the team is not link to office (so link)
+				OfficeTeamNode officeTeam = officeTeamRegistry.createOfficeTeam(team.getOfficeFloorTeamName());
+				LinkUtil.linkTeamNode(officeTeam, team, this.context.getCompilerIssues(),
+						(link) -> officeTeam.linkTeamNode(link));
+				return officeTeam;
+
+			}, targetAutoWires);
+		});
+	}
+
+	@Override
+	public OfficeFloorType loadOfficeFloorType(CompileContext compileContext) {
 
 		// Obtain the OfficeFloor source class
 		Class<? extends OfficeFloorSource> officeFloorSourceClass = this.context
@@ -486,7 +714,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements OfficeFloorNode
 		// Load the managed object source types (in deterministic order)
 		OfficeFloorManagedObjectSourceType[] managedObjectSourceTypes = CompileUtil.loadTypes(this.managedObjectSources,
 				(managedObjectSource) -> managedObjectSource.getOfficeFloorManagedObjectSourceName(),
-				(managedObjectSource) -> managedObjectSource.loadOfficeFloorManagedObjectSourceType(typeContext),
+				(managedObjectSource) -> managedObjectSource.loadOfficeFloorManagedObjectSourceType(compileContext),
 				OfficeFloorManagedObjectSourceType[]::new);
 		if (managedObjectSourceTypes == null) {
 			return null;
@@ -494,7 +722,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements OfficeFloorNode
 
 		// Load the team sources (in deterministic order)
 		OfficeFloorTeamSourceType[] teamTypes = CompileUtil.loadTypes(this.teams,
-				(team) -> team.getOfficeFloorTeamName(), (team) -> team.loadOfficeFloorTeamSourceType(typeContext),
+				(team) -> team.getOfficeFloorTeamName(), (team) -> team.loadOfficeFloorTeamSourceType(compileContext),
 				OfficeFloorTeamSourceType[]::new);
 		if (teamTypes == null) {
 			return null;
@@ -505,18 +733,19 @@ public class OfficeFloorNodeImpl extends AbstractNode implements OfficeFloorNode
 	}
 
 	@Override
-	public OfficeFloor deployOfficeFloor(OfficeFrame officeFrame, TypeContext typeContext) {
-
-		// Obtain the OfficeFloor builder
-		OfficeFloorBuilder builder = officeFrame.createOfficeFloorBuilder(this.officeFloorLocation);
+	public OfficeFloor deployOfficeFloor(String officeFloorName, OfficeFloorBuilder builder,
+			CompileContext compileContext) {
 
 		// Initiate the OfficeFloor builder with compiler details
 		this.context.initiateOfficeFloorBuilder(builder);
 
+		// Register the OfficeFloor source for possible MBean
+		compileContext.registerPossibleMBean(OfficeFloorSource.class, officeFloorName, this.officeFloorSource);
+
 		// Build the teams (in deterministic order)
 		this.teams.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeFloorTeamName(), b.getOfficeFloorTeamName()))
-				.forEachOrdered((team) -> team.buildTeam(builder));
+				.forEachOrdered((team) -> team.buildTeam(builder, compileContext));
 
 		// Build the offices (in deterministic order)
 		Map<OfficeNode, OfficeBindings> officeBindings = new HashMap<OfficeNode, OfficeBindings>();
@@ -529,7 +758,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements OfficeFloorNode
 					Profiler profiler = this.profilers.get(officeName);
 
 					// Build the office
-					OfficeBindings bindings = office.buildOffice(builder, typeContext, profiler);
+					OfficeBindings bindings = office.buildOffice(builder, compileContext, profiler);
 
 					// Keep track of the offices
 					officeBindings.put(office, bindings);
@@ -593,7 +822,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements OfficeFloorNode
 					bindings.buildInputManagedObjectIntoOffice(inputManagedObject);
 				});
 
-		// Return the built office floor
+		// Return the built OfficeFloor
 		return builder.buildOfficeFloor(new CompilerOfficeFloorIssues());
 	}
 

@@ -20,11 +20,11 @@ package net.officefloor.plugin.jms.activemq;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.plugin.jms.JmsAdminObjectFactory;
-
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.command.ActiveMQDestination;
+
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.plugin.jms.JmsAdminObjectFactory;
 
 /**
  * Factory for the creation of administered objects for ActiveMq.

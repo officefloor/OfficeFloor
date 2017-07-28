@@ -28,22 +28,21 @@ import net.officefloor.building.command.OfficeFloorCommandContext;
 import net.officefloor.building.command.OfficeFloorCommandEnvironment;
 import net.officefloor.building.command.OfficeFloorCommandFactory;
 import net.officefloor.building.command.OfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.FunctionNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.JvmOptionOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingHostOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeFloorLocationOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.OfficeFloorNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeFloorSourceOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.ParameterOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.PasswordOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.ProcessNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.PropertiesOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.TaskNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.UploadArtifactsOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.UsernameOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.WorkNameOfficeFloorCommandParameter;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.manager.OpenOfficeFloorConfiguration;
@@ -52,8 +51,7 @@ import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.building.process.ManagedProcessContext;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.console.OfficeBuilding;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -109,7 +107,7 @@ public class OfficeBuildingOpenOfficeFloorCommand implements OfficeFloorCommandF
 	/**
 	 * {@link Process} name.
 	 */
-	private final ProcessNameOfficeFloorCommandParameter processName = new ProcessNameOfficeFloorCommandParameter();
+	private final OfficeFloorNameOfficeFloorCommandParameter officeFloorName = new OfficeFloorNameOfficeFloorCommandParameter();
 
 	/**
 	 * {@link OfficeFloorSource} class name.
@@ -137,17 +135,12 @@ public class OfficeBuildingOpenOfficeFloorCommand implements OfficeFloorCommandF
 	private final OfficeNameOfficeFloorCommandParameter officeName = new OfficeNameOfficeFloorCommandParameter();
 
 	/**
-	 * {@link Work} name.
+	 * {@link ManagedFunction} name.
 	 */
-	private final WorkNameOfficeFloorCommandParameter workName = new WorkNameOfficeFloorCommandParameter();
+	private final FunctionNameOfficeFloorCommandParameter functionName = new FunctionNameOfficeFloorCommandParameter();
 
 	/**
-	 * {@link Task} name.
-	 */
-	private final TaskNameOfficeFloorCommandParameter taskName = new TaskNameOfficeFloorCommandParameter();
-
-	/**
-	 * Parameter for {@link Task}.
+	 * Parameter for {@link ManagedFunction}.
 	 */
 	private final ParameterOfficeFloorCommandParameter parameter = new ParameterOfficeFloorCommandParameter();
 
@@ -182,21 +175,21 @@ public class OfficeBuildingOpenOfficeFloorCommand implements OfficeFloorCommandF
 	public OpenOfficeFloorConfiguration getOpenOfficeFloorConfiguration() throws Exception {
 
 		// Obtain the OfficeFloor details
-		String processName = this.processName.getProcessName();
+		String officeFloorName = this.officeFloorName.getOfficeFloorName();
 		String officeFloorSourceClassName = this.officeFloorSource.getOfficeFloorSourceClassName();
 		String officeFloorLocation = this.officeFloorLocation.getOfficeFloorLocation();
 		Properties officeFloorProperties = this.officeFloorProperties.getProperties();
 		UploadArtifact[] uploadArtifacts = this.uploadArtifacts.getUploadArtifacts();
 		String[] jvmOptions = this.jvmOptions.getJvmOptions();
 		String officeName = this.officeName.getOfficeName();
-		String workName = this.workName.getWorkName();
-		String taskName = this.taskName.getTaskName();
+		String functionName = this.functionName.getFunctionName();
 		String parameterValue = this.parameter.getParameterValue();
 
 		// Create the open OfficeFloor configuration
-		OpenOfficeFloorConfiguration configuration = new OpenOfficeFloorConfiguration(officeFloorLocation);
-		configuration.setProcessName(processName);
+		OpenOfficeFloorConfiguration configuration = new OpenOfficeFloorConfiguration();
+		configuration.setOfficeFloorName(officeFloorName);
 		configuration.setOfficeFloorSourceClassName(officeFloorSourceClassName);
+		configuration.setOfficeFloorLocation(officeFloorLocation);
 		for (String propertyName : officeFloorProperties.stringPropertyNames()) {
 			String propertyValue = officeFloorProperties.getProperty(propertyName);
 			configuration.addOfficeFloorProperty(propertyName, propertyValue);
@@ -207,7 +200,7 @@ public class OfficeBuildingOpenOfficeFloorCommand implements OfficeFloorCommandF
 		for (String jvmOption : jvmOptions) {
 			configuration.addJvmOption(jvmOption);
 		}
-		configuration.setOpenTask(officeName, workName, taskName, parameterValue);
+		configuration.setOpenFunction(officeName, functionName, parameterValue);
 
 		// Return the configuration
 		return configuration;
@@ -257,13 +250,12 @@ public class OfficeBuildingOpenOfficeFloorCommand implements OfficeFloorCommandF
 			parameters.add(this.password);
 			parameters.add(this.uploadArtifacts);
 		}
-		parameters.add(this.processName);
+		parameters.add(this.officeFloorName);
 		parameters.add(this.officeFloorSource);
 		parameters.add(this.officeFloorLocation);
 		parameters.add(this.officeFloorProperties);
 		parameters.add(this.officeName);
-		parameters.add(this.workName);
-		parameters.add(this.taskName);
+		parameters.add(this.functionName);
 		parameters.add(this.parameter);
 		parameters.add(this.jvmOptions);
 
@@ -295,23 +287,18 @@ public class OfficeBuildingOpenOfficeFloorCommand implements OfficeFloorCommandF
 		// Obtain the open OfficeFloor configuration
 		OpenOfficeFloorConfiguration openOfficeFloorConfiguration = this.getOpenOfficeFloorConfiguration();
 
-		// Obtain details to invoke a task
+		// Obtain details to invoke a function
 		String officeName = this.officeName.getOfficeName();
-		String workName = this.workName.getWorkName();
-		String taskName = this.taskName.getTaskName();
+		String functionName = this.functionName.getFunctionName();
 		String parameterValue = this.parameter.getParameterValue();
 
 		// Generate the output suffix
 		StringBuilder outputSuffix = new StringBuilder();
-		if (workName != null) {
-			outputSuffix.append(" for work (office=");
+		if (functionName != null) {
+			outputSuffix.append(" for function (office=");
 			outputSuffix.append(officeName);
-			outputSuffix.append(", work=");
-			outputSuffix.append(workName);
-			if (taskName != null) {
-				outputSuffix.append(", task=");
-				outputSuffix.append(taskName);
-			}
+			outputSuffix.append(", function=");
+			outputSuffix.append(functionName);
 			if (parameterValue != null) {
 				outputSuffix.append(", parameter=");
 				outputSuffix.append(parameterValue);

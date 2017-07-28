@@ -18,10 +18,10 @@
 package net.officefloor.eclipse.common.editpolicies.directedit;
 
 import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
-import net.officefloor.eclipse.desk.DeskEditor;
+import net.officefloor.eclipse.section.SectionEditor;
 import net.officefloor.model.Model;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.desk.DeskChanges;
+import net.officefloor.model.section.SectionChanges;
 
 /**
  * Creates a {@link Change} to directly edit the name.
@@ -36,7 +36,7 @@ public interface DirectEditChangeFactory<C, M> {
 	 * @param changes
 	 *            Changes for the {@link Model} that is obtained from the
 	 *            {@link AbstractOfficeFloorEditor}. For example
-	 *            {@link DeskChanges} for the {@link DeskEditor}.
+	 *            {@link SectionChanges} for the {@link SectionEditor}.
 	 * @param target
 	 *            Target {@link Model} that is directly edited.
 	 * @param newValue

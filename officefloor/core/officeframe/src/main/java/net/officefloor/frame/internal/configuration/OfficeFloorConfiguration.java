@@ -17,12 +17,16 @@
  */
 package net.officefloor.frame.internal.configuration;
 
+import java.util.function.Consumer;
+
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSourceContext;
+import net.officefloor.frame.internal.structure.FunctionState;
 
 /**
  * Configuration for an {@link OfficeFloor}.
@@ -46,6 +50,15 @@ public interface OfficeFloorConfiguration {
 	SourceContext getSourceContext();
 
 	/**
+	 * Obtains the decorator of {@link Thread} instances created by the
+	 * {@link TeamSourceContext}.
+	 * 
+	 * @return Decorator of {@link Thread} instances created by the
+	 *         {@link TeamSourceContext}. May be <code>null</code>.
+	 */
+	Consumer<Thread> getThreadDecorator();
+
+	/**
 	 * Obtains the configuration of the {@link ManagedObjectSource} instances.
 	 * 
 	 * @return {@link ManagedObjectSource} configuration.
@@ -59,6 +72,13 @@ public interface OfficeFloorConfiguration {
 	 * @return {@link TeamConfiguration} instances.
 	 */
 	TeamConfiguration<?>[] getTeamConfiguration();
+
+	/**
+	 * Obtains the break {@link FunctionState} chain {@link TeamConfiguration}.
+	 * 
+	 * @return Break {@link FunctionState} chain {@link TeamConfiguration}.
+	 */
+	TeamConfiguration<?> getBreakChainTeamConfiguration();
 
 	/**
 	 * Obtains the configuration of the {@link Office} instances on the

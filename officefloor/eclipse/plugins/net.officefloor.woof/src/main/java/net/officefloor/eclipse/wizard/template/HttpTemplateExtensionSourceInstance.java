@@ -17,34 +17,34 @@
  */
 package net.officefloor.eclipse.wizard.template;
 
-import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
-import net.officefloor.compile.internal.structure.Node;
-import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.eclipse.classpath.ProjectClassLoader;
-import net.officefloor.eclipse.common.dialog.input.InputAdapter;
-import net.officefloor.eclipse.common.dialog.input.InputHandler;
-import net.officefloor.eclipse.common.dialog.input.impl.PropertyListInput;
-import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtension;
-import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtensionContext;
-import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
-import net.officefloor.eclipse.util.EclipseUtil;
-import net.officefloor.frame.impl.construct.source.SourceContextImpl;
-import net.officefloor.frame.spi.source.ResourceSource;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.source.SourceProperties;
-import net.officefloor.model.change.Change;
-import net.officefloor.model.change.Conflict;
-import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.model.woof.WoofChangeIssues;
-import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoader;
-import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoaderImpl;
-import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+
+import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
+import net.officefloor.compile.internal.structure.Node;
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.configuration.ConfigurationContext;
+import net.officefloor.eclipse.classpath.ProjectClassLoader;
+import net.officefloor.eclipse.common.dialog.input.InputAdapter;
+import net.officefloor.eclipse.common.dialog.input.InputHandler;
+import net.officefloor.eclipse.common.dialog.input.impl.PropertyListInput;
+import net.officefloor.eclipse.configuration.project.ProjectConfigurationContext;
+import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtension;
+import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtensionContext;
+import net.officefloor.eclipse.util.EclipseUtil;
+import net.officefloor.frame.api.source.ResourceSource;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.source.SourceProperties;
+import net.officefloor.frame.impl.construct.source.SourceContextImpl;
+import net.officefloor.model.change.Change;
+import net.officefloor.model.change.Conflict;
+import net.officefloor.model.woof.WoofChangeIssues;
+import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoader;
+import net.officefloor.plugin.woof.template.WoofTemplateExtensionLoaderImpl;
+import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
 
 /**
  * Instance of the {@link WoofTemplateExtensionSource}.

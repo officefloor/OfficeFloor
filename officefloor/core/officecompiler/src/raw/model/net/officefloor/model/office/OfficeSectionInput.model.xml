@@ -5,6 +5,11 @@
 	<list type="OfficeSectionOutputToOfficeSectionInputModel" name="office section output" />
 	<list type="OfficeManagedObjectSourceFlowToOfficeSectionInputModel"
 		name="office managed object source flow" />
+	<list type="AdministrationFlowToOfficeSectionInputModel" name="administration flow" />
+	<list type="GovernanceFlowToOfficeSectionInputModel" name="governance flow" />
 	<list type="OfficeEscalationToOfficeSectionInputModel" name="office escalation" />
+	<list type="AdministrationEscalationToOfficeSectionInputModel"
+		name="administration escalation" />
+	<list type="GovernanceEscalationToOfficeSectionInputModel" name="governance escalation" />
 	<list type="OfficeStartToOfficeSectionInputModel" name="office start" />
 </model>

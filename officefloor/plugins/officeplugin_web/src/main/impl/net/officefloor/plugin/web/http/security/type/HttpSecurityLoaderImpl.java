@@ -22,8 +22,9 @@ import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 
 /**
@@ -50,16 +51,13 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 			@SuppressWarnings({ "rawtypes", "unchecked" })
 			public PropertyList loadSpecification(
 					Class<HttpSecurityManagedObjectAdapterSource> managedObjectSourceClass) {
-				return managedObjectLoader
-						.loadSpecification(managedObjectSourceClass);
+				return managedObjectLoader.loadSpecification(managedObjectSourceClass);
 			}
 
 			@Override
 			public <D extends Enum<D>> ManagedObjectType<D> loadManagedObjectType(
-					HttpSecurityManagedObjectAdapterSource<D> source,
-					PropertyList properties) {
-				return managedObjectLoader.loadManagedObjectType(source,
-						properties);
+					HttpSecurityManagedObjectAdapterSource<D> source, PropertyList properties) {
+				return managedObjectLoader.loadManagedObjectType(source, properties);
 			}
 		};
 	}
@@ -67,28 +65,27 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 	/**
 	 * Initiate.
 	 * 
-	 * @param officeFloorSourceContext
+	 * @param officeSourceContext
 	 *            {@link OfficeFloorSourceContext}.
+	 * @param managedObjectSourceName
+	 *            Name of the {@link ManagedObjectSource}.
 	 */
-	public HttpSecurityLoaderImpl(
-			final OfficeFloorSourceContext officeFloorSourceContext) {
+	public HttpSecurityLoaderImpl(final OfficeSourceContext officeSourceContext, final String managedObjectSourceName) {
 		this.loader = new Loader() {
 			@Override
 			@SuppressWarnings("rawtypes")
 			public PropertyList loadSpecification(
 					Class<HttpSecurityManagedObjectAdapterSource> managedObjectSourceClass) {
 				throw new IllegalStateException(
-						"Should not require specification via "
-								+ OfficeFloorSourceContext.class.getName());
+						"Should not require specification via " + OfficeFloorSourceContext.class.getName());
 			}
 
 			@Override
 			@SuppressWarnings("unchecked")
 			public <D extends Enum<D>> ManagedObjectType<D> loadManagedObjectType(
-					HttpSecurityManagedObjectAdapterSource<D> source,
-					PropertyList properties) {
-				return (ManagedObjectType<D>) officeFloorSourceContext
-						.loadManagedObjectType(source, properties);
+					HttpSecurityManagedObjectAdapterSource<D> source, PropertyList properties) {
+				return (ManagedObjectType<D>) officeSourceContext.loadManagedObjectType(managedObjectSourceName, source,
+						properties);
 			}
 		};
 	}
@@ -103,15 +100,14 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 
 		// Obtain the specification
 		final PropertyList[] propertyList = new PropertyList[1];
-		HttpSecurityManagedObjectAdapterSource.doOperation(httpSecuritySource,
-				new Runnable() {
-					@Override
-					public void run() {
-						// Obtain the specification
-						propertyList[0] = HttpSecurityLoaderImpl.this.loader
-								.loadSpecification(HttpSecurityManagedObjectAdapterSource.class);
-					}
-				});
+		HttpSecurityManagedObjectAdapterSource.doOperation(httpSecuritySource, new Runnable() {
+			@Override
+			public void run() {
+				// Obtain the specification
+				propertyList[0] = HttpSecurityLoaderImpl.this.loader
+						.loadSpecification(HttpSecurityManagedObjectAdapterSource.class);
+			}
+		});
 
 		// Return the properties
 		return propertyList[0];
@@ -119,24 +115,24 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 
 	@Override
 	public <S, C, D extends Enum<D>, F extends Enum<F>> HttpSecurityType<S, C, D, F> loadHttpSecurityType(
-			HttpSecuritySource<S, C, D, F> httpSecuritySource,
-			PropertyList propertyList) {
+			HttpSecuritySource<S, C, D, F> httpSecuritySource, PropertyList propertyList) {
+
+		// Create the adaptation over the security source
+		HttpSecurityManagedObjectAdapterSource<D> adapter = new HttpSecurityManagedObjectAdapterSource<D>(
+				httpSecuritySource);
 
 		// Load the managed object type
-		ManagedObjectType<D> moType = this.loader.loadManagedObjectType(
-				new HttpSecurityManagedObjectAdapterSource<D>(
-						httpSecuritySource), propertyList);
+		ManagedObjectType<D> moType = this.loader.loadManagedObjectType(adapter, propertyList);
 		if (moType == null) {
 			return null; // failed to obtain type
 		}
 
 		// Obtain the credentials type
-		Class<C> credentialsType = httpSecuritySource.getMetaData()
-				.getCredentialsClass();
+		@SuppressWarnings("unchecked")
+		Class<C> credentialsType = (Class<C>) adapter.getHttpSecuritySourceMetaData().getCredentialsClass();
 
 		// Return the adapted type
-		return new ManagedObjectHttpSecurityType<S, C, D, F>(moType,
-				credentialsType);
+		return new ManagedObjectHttpSecurityType<S, C, D, F>(moType, credentialsType);
 	}
 
 	/**
@@ -152,8 +148,7 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 		 * @return {@link PropertyList} specification.
 		 */
 		@SuppressWarnings("rawtypes")
-		PropertyList loadSpecification(
-				Class<HttpSecurityManagedObjectAdapterSource> managedObjectSourceClass);
+		PropertyList loadSpecification(Class<HttpSecurityManagedObjectAdapterSource> managedObjectSourceClass);
 
 		/**
 		 * Loads the {@link ManagedObjectType}.
@@ -164,8 +159,7 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 		 *            {@link PropertyList}.
 		 * @return {@link ManagedObjectType}.
 		 */
-		<D extends Enum<D>> ManagedObjectType<D> loadManagedObjectType(
-				HttpSecurityManagedObjectAdapterSource<D> source,
+		<D extends Enum<D>> ManagedObjectType<D> loadManagedObjectType(HttpSecurityManagedObjectAdapterSource<D> source,
 				PropertyList properties);
 	}
 
@@ -195,8 +189,7 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 		 * @param credentialsType
 		 *            Credentials type.
 		 */
-		public ManagedObjectHttpSecurityType(ManagedObjectType<D> moType,
-				Class<C> credentialsType) {
+		public ManagedObjectHttpSecurityType(ManagedObjectType<D> moType, Class<C> credentialsType) {
 			this.moType = moType;
 			this.credentialsType = credentialsType;
 		}
@@ -219,35 +212,26 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public HttpSecurityDependencyType<D>[] getDependencyTypes() {
-			return AdaptFactory
-					.adaptArray(
-							this.moType.getDependencyTypes(),
-							HttpSecurityDependencyType.class,
-							new AdaptFactory<HttpSecurityDependencyType, ManagedObjectDependencyType<D>>() {
-								@Override
-								public HttpSecurityDependencyType<D> createAdaptedObject(
-										ManagedObjectDependencyType<D> delegate) {
-									return new ManagedObjectHttpSecurityDependencyType<D>(
-											delegate);
-								}
-							});
+			return AdaptFactory.adaptArray(this.moType.getDependencyTypes(), HttpSecurityDependencyType.class,
+					new AdaptFactory<HttpSecurityDependencyType, ManagedObjectDependencyType<D>>() {
+						@Override
+						public HttpSecurityDependencyType<D> createAdaptedObject(
+								ManagedObjectDependencyType<D> delegate) {
+							return new ManagedObjectHttpSecurityDependencyType<D>(delegate);
+						}
+					});
 		}
 
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public HttpSecurityFlowType<?>[] getFlowTypes() {
-			return AdaptFactory
-					.adaptArray(
-							this.moType.getFlowTypes(),
-							HttpSecurityFlowType.class,
-							new AdaptFactory<HttpSecurityFlowType, ManagedObjectFlowType>() {
-								@Override
-								public HttpSecurityFlowType createAdaptedObject(
-										ManagedObjectFlowType delegate) {
-									return new ManagedObjectHttpSecurityFlowType<F>(
-											delegate);
-								}
-							});
+			return AdaptFactory.adaptArray(this.moType.getFlowTypes(), HttpSecurityFlowType.class,
+					new AdaptFactory<HttpSecurityFlowType, ManagedObjectFlowType>() {
+						@Override
+						public HttpSecurityFlowType createAdaptedObject(ManagedObjectFlowType delegate) {
+							return new ManagedObjectHttpSecurityFlowType<F>(delegate);
+						}
+					});
 		}
 	}
 
@@ -269,8 +253,7 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 		 * @param dependency
 		 *            {@link ManagedObjectDependencyType}.
 		 */
-		public ManagedObjectHttpSecurityDependencyType(
-				ManagedObjectDependencyType<D> dependency) {
+		public ManagedObjectHttpSecurityDependencyType(ManagedObjectDependencyType<D> dependency) {
 			this.dependency = dependency;
 		}
 
@@ -308,8 +291,7 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader {
 	 * {@link HttpSecurityFlowType} adapted from the
 	 * {@link ManagedObjectFlowType}.
 	 */
-	private static class ManagedObjectHttpSecurityFlowType<F extends Enum<F>>
-			implements HttpSecurityFlowType<F> {
+	private static class ManagedObjectHttpSecurityFlowType<F extends Enum<F>> implements HttpSecurityFlowType<F> {
 
 		/**
 		 * {@link ManagedObjectFlowType}.

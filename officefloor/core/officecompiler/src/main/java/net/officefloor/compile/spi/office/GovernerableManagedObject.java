@@ -17,7 +17,7 @@
  */
 package net.officefloor.compile.spi.office;
 
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * {@link ManagedObject} that may be governed by an {@link OfficeGovernance}.

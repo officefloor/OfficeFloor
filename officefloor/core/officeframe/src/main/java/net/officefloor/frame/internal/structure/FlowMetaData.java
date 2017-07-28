@@ -17,37 +17,31 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
 
 /**
- * Meta-data of a {@link JobSequence}.
+ * Meta-data of a {@link Flow}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface FlowMetaData<W extends Work> {
+public interface FlowMetaData {
 
 	/**
-	 * Obtains the {@link FlowInstigationStrategyEnum} for the {@link JobSequence}.
+	 * Obtains the {@link ManagedFunctionMetaData} of the initial
+	 * {@link ManagedFunction} within the {@link Flow}.
 	 * 
-	 * @return {@link FlowInstigationStrategyEnum} for the {@link JobSequence}.
+	 * @return {@link ManagedFunctionMetaData} of the initial
+	 *         {@link ManagedFunction} within the {@link Flow}.
 	 */
-	FlowInstigationStrategyEnum getInstigationStrategy();
+	ManagedFunctionMetaData<?, ?> getInitialFunctionMetaData();
 
 	/**
-	 * Obtains the {@link TaskMetaData} of the initial {@link Task} within the
-	 * {@link JobSequence}.
+	 * Indicates whether the {@link Flow} should be instigated within a spawned
+	 * {@link ThreadState}.
 	 * 
-	 * @return {@link TaskMetaData} of the initial {@link Task} within the
-	 *         {@link JobSequence}.
+	 * @return <code>true</code> to execute the {@link Flow} within a spawned
+	 *         {@link ThreadState}.
 	 */
-	TaskMetaData<W, ?, ?> getInitialTaskMetaData();
-
-	/**
-	 * Obtains the {@link AssetManager} to managed this {@link JobSequence}.
-	 * 
-	 * @return {@link AssetManager} to managed this {@link JobSequence}.
-	 */
-	AssetManager getFlowManager();
+	boolean isSpawnThreadState();
 
 }

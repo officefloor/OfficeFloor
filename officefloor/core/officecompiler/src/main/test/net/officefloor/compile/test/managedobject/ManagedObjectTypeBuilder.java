@@ -21,14 +21,12 @@ import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
-import net.officefloor.compile.spi.office.ManagedObjectTeam;
-import net.officefloor.compile.spi.section.ManagedObjectDependency;
-import net.officefloor.compile.spi.section.ManagedObjectFlow;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.JobSequence;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
+import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
+import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * Builder for the {@link ManagedObjectType} to validate the loaded
@@ -49,6 +47,15 @@ public interface ManagedObjectTypeBuilder {
 	void setObjectClass(Class<?> objectClass);
 
 	/**
+	 * Flags the {@link ManagedObjectSource} as possibly being able to trigger a
+	 * {@link Flow}.
+	 * 
+	 * @param isInput
+	 *            <code>true</code> if can trigger a {@link Flow}.
+	 */
+	void setInput(boolean isInput);
+
+	/**
 	 * Adds a {@link ManagedObjectDependencyType}.
 	 * 
 	 * @param name
@@ -62,8 +69,7 @@ public interface ManagedObjectTypeBuilder {
 	 * @param key
 	 *            Key identifying the {@link ManagedObjectDependency}.
 	 */
-	void addDependency(String name, Class<?> type, String typeQualifier,
-			int index, Enum<?> key);
+	void addDependency(String name, Class<?> type, String typeQualifier, int index, Enum<?> key);
 
 	/**
 	 * <p>
@@ -93,17 +99,8 @@ public interface ManagedObjectTypeBuilder {
 	 *            Index of the {@link ManagedObjectFlow}.
 	 * @param key
 	 *            Key identifying the {@link ManagedObjectFlow}.
-	 * @param workName
-	 *            Name of {@link Work} instigating the {@link JobSequence} or
-	 *            <code>null</code> if done directly by
-	 *            {@link ManagedObjectSource}.
-	 * @param taskName
-	 *            Name of {@link Task} instigating the {@link JobSequence} or
-	 *            <code>null</code> if done directly by
-	 *            {@link ManagedObjectSource}.
 	 */
-	void addFlow(String name, Class<?> argumentType, int index, Enum<?> key,
-			String workName, String taskName);
+	void addFlow(String name, Class<?> argumentType, int index, Enum<?> key);
 
 	/**
 	 * <p>
@@ -117,17 +114,8 @@ public interface ManagedObjectTypeBuilder {
 	 *            Key identifying the {@link ManagedObjectFlow}.
 	 * @param argumentType
 	 *            Type of argument passed from the {@link ManagedObjectFlow}.
-	 * @param workName
-	 *            Name of {@link Work} instigating the {@link JobSequence} or
-	 *            <code>null</code> if done directly by
-	 *            {@link ManagedObjectSource}.
-	 * @param taskName
-	 *            Name of {@link Task} instigating the {@link JobSequence} or
-	 *            <code>null</code> if done directly by
-	 *            {@link ManagedObjectSource}.
 	 */
-	void addFlow(Enum<?> key, Class<?> argumentType, String workName,
-			String taskName);
+	void addFlow(Enum<?> key, Class<?> argumentType);
 
 	/**
 	 * Adds a {@link ManagedObjectTeamType}.

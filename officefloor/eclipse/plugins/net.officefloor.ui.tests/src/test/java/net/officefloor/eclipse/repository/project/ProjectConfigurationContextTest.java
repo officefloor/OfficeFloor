@@ -21,10 +21,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.model.repository.ConfigurationItem;
-
 import org.easymock.AbstractMatcher;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -32,6 +28,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.junit.Test;
+
+import net.officefloor.configuration.WritableConfigurationContext;
+import net.officefloor.configuration.WritableConfigurationItem;
+import net.officefloor.eclipse.configuration.project.ProjectConfigurationContext;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the {@link ProjectConfigurationContext}.
@@ -48,22 +49,12 @@ public class ProjectConfigurationContextTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link IProgressMonitor}.
 	 */
-	private final IProgressMonitor monitor = this
-			.createMock(IProgressMonitor.class);
+	private final IProgressMonitor monitor = this.createMock(IProgressMonitor.class);
 
 	/**
 	 * {@link ProjectConfigurationContext} to test.
 	 */
-	private final ConfigurationContext context = new ProjectConfigurationContext(
-			this.project, this.monitor);
-
-	/**
-	 * Should be able to edit the {@link IProject}.
-	 */
-	@Test
-	public void testNotReadOnly() {
-		assertFalse("Should be able to edit project", this.context.isReadOnly());
-	}
+	private final WritableConfigurationContext context = new ProjectConfigurationContext(this.project, this.monitor);
 
 	/**
 	 * Ensure failure if {@link IFile} already exists.
@@ -83,8 +74,7 @@ public class ProjectConfigurationContextTest extends OfficeFrameTestCase {
 			this.context.createConfigurationItem("Resource.xml", null);
 			fail("Should not be successful");
 		} catch (IOException ex) {
-			assertEquals("Incorrect exception",
-					"File 'Resource.xml' can not be created as already exists",
+			assertEquals("Incorrect exception", "File 'Resource.xml' can not be created as already exists",
 					ex.getMessage());
 		}
 
@@ -109,19 +99,16 @@ public class ProjectConfigurationContextTest extends OfficeFrameTestCase {
 		final IFolder grandParentFolder = this.createMock(IFolder.class);
 
 		// Record obtaining the file
-		final IFile file = this.recordGetFile(
-				"src/main/resources/Resource.xml", false);
+		final IFile file = this.recordGetFile("src/main/resources/Resource.xml", false);
 
 		// Record ensuring all folders exist
 		this.recordReturn(file, file.getParent(), folder);
 		this.recordReturn(folder, folder.exists(), false);
 		this.recordReturn(folder, folder.getParent(), parentFolder);
 		this.recordReturn(parentFolder, parentFolder.exists(), false);
-		this.recordReturn(parentFolder, parentFolder.getParent(),
-				grandParentFolder);
+		this.recordReturn(parentFolder, parentFolder.getParent(), grandParentFolder);
 		this.recordReturn(grandParentFolder, grandParentFolder.exists(), false);
-		this.recordReturn(grandParentFolder, grandParentFolder.getParent(),
-				this.project);
+		this.recordReturn(grandParentFolder, grandParentFolder.getParent(), this.project);
 		grandParentFolder.create(true, true, this.monitor);
 		parentFolder.create(true, true, this.monitor);
 		folder.create(true, true, this.monitor);
@@ -141,8 +128,7 @@ public class ProjectConfigurationContextTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		this.context.createConfigurationItem("src/main/resources/Resource.xml",
-				CONTENTS);
+		this.context.createConfigurationItem("src/main/resources/Resource.xml", CONTENTS);
 		this.verifyMockObjects();
 
 		// Validate expected content
@@ -200,7 +186,7 @@ public class ProjectConfigurationContextTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		ConfigurationItem item = this.context.getConfigurationItem("path");
+		WritableConfigurationItem item = this.context.getWritableConfigurationItem("path");
 		this.verifyMockObjects();
 
 		// Ensure item obtained
@@ -221,7 +207,7 @@ public class ProjectConfigurationContextTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		ConfigurationItem item = this.context.getConfigurationItem("path");
+		WritableConfigurationItem item = this.context.getWritableConfigurationItem("path");
 		this.verifyMockObjects();
 
 		// Ensure item not obtained
@@ -242,16 +228,14 @@ public class ProjectConfigurationContextTest extends OfficeFrameTestCase {
 		final IFile file = this.createMock(IFile.class);
 
 		// Record obtaining the file
-		this.recordReturn(this.project, this.project.getFile((IPath) null),
-				file, new AbstractMatcher() {
-					@Override
-					public boolean matches(Object[] expected, Object[] actual) {
-						IPath path = (IPath) actual[0];
-						assertEquals("Incorrect path", expectedPath,
-								path.toPortableString());
-						return true;
-					}
-				});
+		this.recordReturn(this.project, this.project.getFile((IPath) null), file, new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				IPath path = (IPath) actual[0];
+				assertEquals("Incorrect path", expectedPath, path.toPortableString());
+				return true;
+			}
+		});
 		this.recordReturn(file, file.exists(), isExist);
 
 		// Return the file

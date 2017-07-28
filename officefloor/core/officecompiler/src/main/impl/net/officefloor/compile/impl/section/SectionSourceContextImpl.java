@@ -19,9 +19,10 @@ package net.officefloor.compile.impl.section;
 
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionNode;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.compile.managedfunction.ManagedFunctionLoader;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
@@ -29,17 +30,14 @@ import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
-import net.officefloor.compile.work.WorkLoader;
-import net.officefloor.compile.work.WorkType;
-import net.officefloor.frame.impl.construct.source.SourceContextImpl;
+import net.officefloor.configuration.impl.ConfigurationSourceContextImpl;
 
 /**
  * {@link SectionSourceContext} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class SectionSourceContextImpl extends SourceContextImpl implements
-		SectionSourceContext {
+public class SectionSourceContextImpl extends ConfigurationSourceContextImpl implements SectionSourceContext {
 
 	/**
 	 * Location of the {@link OfficeSection}.
@@ -47,9 +45,9 @@ public class SectionSourceContextImpl extends SourceContextImpl implements
 	private final String sectionLocation;
 
 	/**
-	 * {@link Node} requiring the {@link OfficeSection}.
+	 * Parent {@link SectionNode}. May be <code>null</code>.
 	 */
-	private final Node node;
+	private final SectionNode parentSection;
 
 	/**
 	 * {@link NodeContext}.
@@ -65,23 +63,21 @@ public class SectionSourceContextImpl extends SourceContextImpl implements
 	 *            Location of the {@link SectionNode}.
 	 * @param propertyList
 	 *            {@link PropertyList}.
-	 * @param node
-	 *            {@link Node} requiring the {@link OfficeSection}.
+	 * @param parentSection
+	 *            Parent {@link SectionNode}. May be <code>null</code>.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public SectionSourceContextImpl(boolean isLoadingType,
-			String sectionLocation, PropertyList propertyList, Node node,
-			NodeContext context) {
-		super(isLoadingType, context.getRootSourceContext(),
-				new PropertyListSourceProperties(propertyList));
+	public SectionSourceContextImpl(boolean isLoadingType, String sectionLocation, PropertyList propertyList,
+			SectionNode parentSection, NodeContext context) {
+		super(isLoadingType, context.getRootSourceContext(), new PropertyListSourceProperties(propertyList));
 		this.sectionLocation = sectionLocation;
-		this.node = node;
+		this.parentSection = parentSection;
 		this.context = context;
 	}
 
 	/*
-	 * ================= SectionLoaderContext ================================
+	 * ================= SectionSourceContext ================================
 	 */
 
 	@Override
@@ -96,75 +92,75 @@ public class SectionSourceContextImpl extends SourceContextImpl implements
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public WorkType<?> loadWorkType(String workSourceClassName,
-			PropertyList properties) {
-		return CompileUtil.loadType(WorkType.class,
-				workSourceClassName,
-				this.context.getCompilerIssues(),
-				() -> {
+	public FunctionNamespaceType loadManagedFunctionType(String functionNamespace,
+			String managedFunctionSourceClassName, PropertyList properties) {
+		return CompileUtil.loadType(FunctionNamespaceType.class, managedFunctionSourceClassName,
+				this.context.getCompilerIssues(), () -> {
 
-					// Obtain the work source class
-				Class workSourceClass = this.context.getWorkSourceClass(
-						workSourceClassName, this.node);
-				if (workSourceClass == null) {
-					return null;
-				}
+					// Obtain the managed function source class
+					Class managedFunctionSourceClass = this.context
+							.getManagedFunctionSourceClass(managedFunctionSourceClassName, this.parentSection);
+					if (managedFunctionSourceClass == null) {
+						return null;
+					}
 
-				// Load and return the work type
-				WorkLoader workLoader = this.context.getWorkLoader(this.node);
-				return workLoader.loadWorkType(workSourceClass, properties);
-			});
+					// Load override properties
+					PropertyList overrideProperties = this.context.overrideProperties(this.parentSection,
+							this.parentSection.getQualifiedName(functionNamespace), properties);
+
+					// Load and return the function namespace type
+					ManagedFunctionLoader managedFunctionLoader = this.context
+							.getManagedFunctionLoader(this.parentSection);
+					return managedFunctionLoader.loadManagedFunctionType(managedFunctionSourceClass,
+							overrideProperties);
+				});
 	}
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public ManagedObjectType<?> loadManagedObjectType(
+	public ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceName,
 			String managedObjectSourceClassName, PropertyList properties) {
-		return CompileUtil.loadType(
-				ManagedObjectType.class,
-				managedObjectSourceClassName,
-				this.context.getCompilerIssues(),
-				() -> {
+		return CompileUtil.loadType(ManagedObjectType.class, managedObjectSourceClassName,
+				this.context.getCompilerIssues(), () -> {
 
 					// Obtain the managed object source class
 					Class managedObjectSourceClass = this.context
-							.getManagedObjectSourceClass(
-									managedObjectSourceClassName, this.node);
+							.getManagedObjectSourceClass(managedObjectSourceClassName, this.parentSection);
 					if (managedObjectSourceClass == null) {
 						return null;
 					}
 
+					// Load override properties
+					PropertyList overrideProperties = this.context.overrideProperties(this.parentSection,
+							this.parentSection.getQualifiedName(managedObjectSourceName), properties);
+
 					// Load and return the managed object type
-					ManagedObjectLoader managedObjectLoader = this.context
-							.getManagedObjectLoader(this.node);
-					return managedObjectLoader.loadManagedObjectType(
-							managedObjectSourceClass, properties);
+					ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(this.parentSection);
+					return managedObjectLoader.loadManagedObjectType(managedObjectSourceClass, overrideProperties);
 				});
 
 	}
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public SectionType loadSectionType(String sectionSourceClassName,
-			String location, PropertyList properties) {
-		return CompileUtil.loadType(SectionType.class,
-				sectionSourceClassName,
-				this.context.getCompilerIssues(),
-				() -> {
+	public SectionType loadSectionType(String sectionName, String sectionSourceClassName, String location,
+			PropertyList properties) {
+		return CompileUtil.loadType(SectionType.class, sectionSourceClassName, this.context.getCompilerIssues(), () -> {
 
-					// Obtain the section source class
-				Class sectionSourceClass = this.context.getSectionSourceClass(
-						sectionSourceClassName, this.node);
-				if (sectionSourceClass == null) {
-					return null;
-				}
+			// Obtain the section source class
+			Class sectionSourceClass = this.context.getSectionSourceClass(sectionSourceClassName, this.parentSection);
+			if (sectionSourceClass == null) {
+				return null;
+			}
 
-				// Load and return the section type
-				SectionLoader sectionLoader = this.context
-						.getSectionLoader(this.node);
-				return sectionLoader.loadSectionType(sectionSourceClass,
-						location, properties);
-			});
+			// Load override properties
+			PropertyList overrideProperties = this.context.overrideProperties(this.parentSection,
+					this.parentSection.getQualifiedName(sectionName), properties);
+
+			// Load and return the section type
+			SectionLoader sectionLoader = this.context.getSectionLoader(this.parentSection);
+			return sectionLoader.loadSectionType(sectionSourceClass, location, overrideProperties);
+		});
 	}
 
 }

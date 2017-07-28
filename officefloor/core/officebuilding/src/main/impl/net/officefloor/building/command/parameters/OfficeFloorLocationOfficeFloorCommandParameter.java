@@ -25,20 +25,18 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorLocationOfficeFloorCommandParameter extends
-		AbstractSingleValueOfficeFloorCommandParameter {
+public class OfficeFloorLocationOfficeFloorCommandParameter extends AbstractSingleValueOfficeFloorCommandParameter {
 
 	/**
 	 * Parameter name for the {@link OfficeFloor} location.
 	 */
-	public static final String PARAMETER_OFFICE_FLOOR_LOCATION = "officefloor";
+	public static final String PARAMETER_OFFICE_FLOOR_LOCATION = "location";
 
 	/**
 	 * Initiate.
 	 */
 	public OfficeFloorLocationOfficeFloorCommandParameter() {
-		super(PARAMETER_OFFICE_FLOOR_LOCATION, "of",
-				"Location of the OfficeFloor");
+		super(PARAMETER_OFFICE_FLOOR_LOCATION, "l", "Location of the OfficeFloor");
 	}
 
 	/**

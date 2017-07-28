@@ -38,6 +38,11 @@ import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 public class AccessInstance {
 
 	/**
+	 * Name of the {@link WoofAccessModel}.
+	 */
+	private final String accessName;
+
+	/**
 	 * {@link HttpSecuritySource} class name.
 	 */
 	private final String httpSecuritySourceClassName;
@@ -77,13 +82,15 @@ public class AccessInstance {
 	/**
 	 * Initiate for public use.
 	 * 
+	 * @param accessName
+	 *            Name of the {@link WoofAccessModel}.
 	 * @param httpSecuritySourceClassName
 	 *            {@link HttpSecuritySource} class name.
 	 * @param authenticationTimeout
 	 *            Authentication timeout.
 	 */
-	public AccessInstance(String httpSecuritySourceClassName,
-			long authenticationTimeout) {
+	public AccessInstance(String accessName, String httpSecuritySourceClassName, long authenticationTimeout) {
+		this.accessName = accessName;
 		this.httpSecuritySourceClassName = httpSecuritySourceClassName;
 		this.authenticationTimeout = authenticationTimeout;
 		this.propertyList = OfficeFloorCompiler.newPropertyList();
@@ -100,8 +107,8 @@ public class AccessInstance {
 	 *            {@link WoofAccessInputModel}.
 	 */
 	public AccessInstance(WoofAccessModel model) {
-		this.httpSecuritySourceClassName = model
-				.getHttpSecuritySourceClassName();
+		this.accessName = model.getAccessName();
+		this.httpSecuritySourceClassName = model.getHttpSecuritySourceClassName();
 		this.authenticationTimeout = model.getTimeout();
 		this.httpSecurityType = null;
 		this.accessModel = model;
@@ -111,14 +118,15 @@ public class AccessInstance {
 		// Load the properties
 		this.propertyList = OfficeFloorCompiler.newPropertyList();
 		for (PropertyModel property : model.getProperties()) {
-			this.propertyList.addProperty(property.getName()).setValue(
-					property.getValue());
+			this.propertyList.addProperty(property.getName()).setValue(property.getValue());
 		}
 	}
 
 	/**
 	 * Initiate from {@link HttpSecuritySourceInstance}.
 	 * 
+	 * @param accessName
+	 *            Name of the {@link WoofAccessModel}.
 	 * @param httpSecuritySourceClassName
 	 *            {@link HttpSecuritySource} class name.
 	 * @param authenticationTimeout
@@ -134,11 +142,10 @@ public class AccessInstance {
 	 *            Mapping of {@link HttpSecurityType} output name to
 	 *            {@link WoofAccessOutputModel} name.
 	 */
-	AccessInstance(String httpSecuritySourceClassName,
-			long authenticationTimeout, PropertyList propertyList,
-			HttpSecurityType<?, ?, ?, ?> httpSecurityType,
-			Map<String, String> inputNameMapping,
-			Map<String, String> outputNameMapping) {
+	AccessInstance(String accessName, String httpSecuritySourceClassName, long authenticationTimeout,
+			PropertyList propertyList, HttpSecurityType<?, ?, ?, ?> httpSecurityType,
+			Map<String, String> inputNameMapping, Map<String, String> outputNameMapping) {
+		this.accessName = accessName;
 		this.httpSecuritySourceClassName = httpSecuritySourceClassName;
 		this.authenticationTimeout = authenticationTimeout;
 		this.propertyList = propertyList;
@@ -146,6 +153,15 @@ public class AccessInstance {
 		this.accessModel = null;
 		this.inputNameMapping = inputNameMapping;
 		this.outputNameMapping = outputNameMapping;
+	}
+
+	/**
+	 * Obtains the name of the {@link WoofAccessModel}.
+	 * 
+	 * @return Name of the {@link WoofAccessModel}.
+	 */
+	public String getAccessName() {
+		return this.accessName;
 	}
 
 	/**

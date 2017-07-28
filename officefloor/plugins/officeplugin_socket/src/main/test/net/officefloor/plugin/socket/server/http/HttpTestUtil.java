@@ -28,16 +28,6 @@ import java.util.List;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 
-import net.officefloor.plugin.socket.server.http.conversation.HttpEntity;
-import net.officefloor.plugin.socket.server.http.conversation.impl.HttpEntityImpl;
-import net.officefloor.plugin.socket.server.http.conversation.impl.HttpRequestImpl;
-import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
-import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
-import net.officefloor.plugin.socket.server.ssl.OfficeFloorDefaultSslEngineSource;
-import net.officefloor.plugin.socket.server.ssl.SslEngineSource;
-import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
-
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -54,6 +44,22 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
+
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
+import net.officefloor.compile.test.officefloor.CompileOfficeFloorContext;
+import net.officefloor.plugin.socket.server.http.conversation.HttpEntity;
+import net.officefloor.plugin.socket.server.http.conversation.impl.HttpEntityImpl;
+import net.officefloor.plugin.socket.server.http.conversation.impl.HttpRequestImpl;
+import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
+import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
+import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
+import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
+import net.officefloor.plugin.socket.server.ssl.OfficeFloorDefaultSslEngineSource;
+import net.officefloor.plugin.socket.server.ssl.SslEngineSource;
+import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
 
 /**
  * Utility class aiding in testing HTTP functionality.
@@ -72,10 +78,56 @@ public class HttpTestUtil {
 	 * 
 	 * @return Next port number for testing.
 	 */
-	public static synchronized int getAvailablePort() {
+	public static int getAvailablePort() {
 		int port = portStart;
 		portStart++; // increment port for next test
 		return port;
+	}
+
+	/**
+	 * Convenience method to configure {@link CompileOfficeFloorContext} with a
+	 * test HTTP server.
+	 * 
+	 * @param context
+	 *            {@link CompileOfficeFloorContext}.
+	 * @param httpPort
+	 *            Port to listen for HTTP requests.
+	 * @param httpsPort
+	 *            Port to listen for HTTPS requests.
+	 * @param sectionName
+	 *            Name of the {@link OfficeSection} servicing the requests.
+	 * @param sectionInputName
+	 *            Name of the {@link OfficeSectionInput} on the
+	 *            {@link OfficeSection} servicing the requests.
+	 * @return {@link OfficeFloorInputManagedObject}.
+	 */
+	public static OfficeFloorInputManagedObject configureTestHttpServer(CompileOfficeFloorContext context, int port,
+			String sectionName, String sectionInputName) {
+		return HttpServerSocketManagedObjectSource.configure(context.getOfficeFloorDeployer(), port,
+				context.getDeployedOffice(), sectionName, sectionInputName);
+	}
+
+	/**
+	 * Convenience method to configure {@link CompileOfficeFloorContext} with a
+	 * test HTTP server.
+	 * 
+	 * @param context
+	 *            {@link CompileOfficeFloorContext}.
+	 * @param httpPort
+	 *            Port to listen for HTTP requests.
+	 * @param httpsPort
+	 *            Port to listen for HTTPS requests.
+	 * @param sectionName
+	 *            Name of the {@link OfficeSection} servicing the requests.
+	 * @param sectionInputName
+	 *            Name of the {@link OfficeSectionInput} on the
+	 *            {@link OfficeSection} servicing the requests.
+	 * @return {@link OfficeFloorInputManagedObject}.
+	 */
+	public static OfficeFloorInputManagedObject configureTestHttpServer(CompileOfficeFloorContext context, int port,
+			int httpsPort, String sectionName, String sectionInputName) {
+		return HttpsServerSocketManagedObjectSource.configure(context.getOfficeFloorDeployer(), port, httpsPort,
+				getSslEngineSourceClass(), context.getDeployedOffice(), sectionName, sectionInputName);
 	}
 
 	/**
@@ -87,8 +139,7 @@ public class HttpTestUtil {
 	 * @throws IOException
 	 *             If fails to obtain content.
 	 */
-	public static String getEntityBody(HttpResponse response)
-			throws IOException {
+	public static String getEntityBody(HttpResponse response) throws IOException {
 		return getEntityBody(response, Charset.defaultCharset());
 	}
 
@@ -103,8 +154,7 @@ public class HttpTestUtil {
 	 * @throws IOException
 	 *             If fails to obtain content.
 	 */
-	public static String getEntityBody(HttpResponse response, Charset charset)
-			throws IOException {
+	public static String getEntityBody(HttpResponse response, Charset charset) throws IOException {
 
 		// Obtain the entity
 		org.apache.http.HttpEntity entity = response.getEntity();
@@ -171,16 +221,14 @@ public class HttpTestUtil {
 	public static void configureNoRedirects(HttpClientBuilder builder) {
 		builder.setRedirectStrategy(new RedirectStrategy() {
 			@Override
-			public boolean isRedirected(HttpRequest request,
-					HttpResponse response, HttpContext context)
+			public boolean isRedirected(HttpRequest request, HttpResponse response, HttpContext context)
 					throws ProtocolException {
 				// No redirection
 				return false;
 			}
 
 			@Override
-			public HttpUriRequest getRedirect(HttpRequest request,
-					HttpResponse response, HttpContext context)
+			public HttpUriRequest getRedirect(HttpRequest request, HttpResponse response, HttpContext context)
 					throws ProtocolException {
 				Assert.fail("Should not need redirect request");
 				return null;
@@ -203,8 +251,7 @@ public class HttpTestUtil {
 	 *            Password.
 	 * @return {@link CredentialsProvider}.
 	 */
-	public static CredentialsProvider configureCredentials(
-			HttpClientBuilder builder, String realm, String scheme,
+	public static CredentialsProvider configureCredentials(HttpClientBuilder builder, String realm, String scheme,
 			String username, String password) {
 
 		// Provide credentials
@@ -249,24 +296,19 @@ public class HttpTestUtil {
 	 *             {@link net.officefloor.plugin.socket.server.http.HttpRequest}
 	 *             .
 	 */
-	public static net.officefloor.plugin.socket.server.http.HttpRequest createHttpRequest(
-			String method, String requestUri, String entity,
-			String... headerNameValues) throws Exception {
+	public static net.officefloor.plugin.socket.server.http.HttpRequest createHttpRequest(String method,
+			String requestUri, String entity, String... headerNameValues) throws Exception {
 
 		// Obtain the entity data
-		final Charset charset = AbstractServerSocketManagedObjectSource
-				.getCharset(null);
-		byte[] entityData = (entity == null ? new byte[0] : entity
-				.getBytes(charset));
+		final Charset charset = AbstractServerSocketManagedObjectSource.getCharset(null);
+		byte[] entityData = (entity == null ? new byte[0] : entity.getBytes(charset));
 
 		// Create the headers
 		List<HttpHeader> headers = new LinkedList<HttpHeader>();
 		if (entity != null) {
 			// Include content type and content length if entity
-			headers.add(new HttpHeaderImpl("content-type",
-					"text/plain; charset=" + charset.name()));
-			headers.add(new HttpHeaderImpl("content-length", String
-					.valueOf(entityData.length)));
+			headers.add(new HttpHeaderImpl("content-type", "text/plain; charset=" + charset.name()));
+			headers.add(new HttpHeaderImpl("content-length", String.valueOf(entityData.length)));
 		}
 		for (int i = 0; i < headerNameValues.length; i += 2) {
 			String name = headerNameValues[i];
@@ -275,14 +317,12 @@ public class HttpTestUtil {
 		}
 
 		// Create the entity input stream
-		ServerInputStreamImpl inputStream = new ServerInputStreamImpl(
-				new Object());
+		ServerInputStreamImpl inputStream = new ServerInputStreamImpl(new Object());
 		inputStream.inputData(entityData, 0, (entityData.length - 1), false);
 		HttpEntity httpEntity = new HttpEntityImpl(inputStream);
 
 		// Return the HTTP request
-		return new HttpRequestImpl(method, requestUri, "HTTP/1.1", headers,
-				httpEntity);
+		return new HttpRequestImpl(method, requestUri, "HTTP/1.1", headers, httpEntity);
 	}
 
 	/**
@@ -298,8 +338,7 @@ public class HttpTestUtil {
 	 * <p>
 	 * This allows working with a {@link OfficeFloorDefaultSslEngineSource}.
 	 */
-	private static class OfficeFloorDefaultSocketFactory implements
-			LayeredConnectionSocketFactory {
+	private static class OfficeFloorDefaultSocketFactory implements LayeredConnectionSocketFactory {
 
 		/*
 		 * ============== ConnectionSocketFactory ==================
@@ -311,8 +350,7 @@ public class HttpTestUtil {
 			// Create the secure connected socket
 			SSLContext sslContext;
 			try {
-				sslContext = OfficeFloorDefaultSslEngineSource
-						.createClientSslContext(null);
+				sslContext = OfficeFloorDefaultSslEngineSource.createClientSslContext(null);
 
 			} catch (Exception ex) {
 				// Propagate failure in configuring OfficeFloor default key
@@ -322,33 +360,27 @@ public class HttpTestUtil {
 			// Create the socket
 			SSLSocketFactory socketFactory = sslContext.getSocketFactory();
 			Socket socket = socketFactory.createSocket();
-			Assert.assertFalse("Socket should not be connected",
-					socket.isConnected());
+			Assert.assertFalse("Socket should not be connected", socket.isConnected());
 
 			// Return the socket
 			return socket;
 		}
 
 		@Override
-		public Socket connectSocket(int connectTimeout, Socket socket,
-				HttpHost host, InetSocketAddress remoteAddress,
-				InetSocketAddress localAddress, HttpContext context)
-				throws IOException {
+		public Socket connectSocket(int connectTimeout, Socket socket, HttpHost host, InetSocketAddress remoteAddress,
+				InetSocketAddress localAddress, HttpContext context) throws IOException {
 
 			// Connect the socket
-			socket.connect(new InetSocketAddress(host.getAddress(), host
-					.getPort()));
-			Assert.assertTrue("Socket should now be connected",
-					socket.isConnected());
+			socket.connect(new InetSocketAddress(host.getAddress(), host.getPort()));
+			Assert.assertTrue("Socket should now be connected", socket.isConnected());
 
 			// Return the connected socket
 			return socket;
 		}
 
 		@Override
-		public Socket createLayeredSocket(Socket socket, String target,
-				int port, HttpContext context) throws IOException,
-				UnknownHostException {
+		public Socket createLayeredSocket(Socket socket, String target, int port, HttpContext context)
+				throws IOException, UnknownHostException {
 			// Should be already secure socket
 			return socket;
 		}

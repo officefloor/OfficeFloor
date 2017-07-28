@@ -20,8 +20,8 @@ package net.officefloor.eclipse.wizard.managedobjectsource;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * Instance of a {@link ManagedObject}.
@@ -65,8 +65,7 @@ public class ManagedObjectInstance {
 	 * @param timeout
 	 *            Timeout for the {@link ManagedObject}
 	 */
-	public ManagedObjectInstance(String managedObjectName,
-			String managedObjectSourceClassName, long timeout) {
+	public ManagedObjectInstance(String managedObjectName, String managedObjectSourceClassName, long timeout) {
 		this.managedObjectName = managedObjectName;
 		this.managedObjectSourceClassName = managedObjectSourceClassName;
 		this.propertyList = OfficeFloorCompiler.newPropertyList();
@@ -88,8 +87,7 @@ public class ManagedObjectInstance {
 	 * @param timeout
 	 *            Timeout for the {@link ManagedObject}
 	 */
-	ManagedObjectInstance(String managedObjectName,
-			String managedObjectSourceClassName, PropertyList propertyList,
+	ManagedObjectInstance(String managedObjectName, String managedObjectSourceClassName, PropertyList propertyList,
 			ManagedObjectType<?> managedObjectType, long timeout) {
 		this.managedObjectName = managedObjectName;
 		this.managedObjectSourceClassName = managedObjectSourceClassName;

@@ -1,9 +1,19 @@
-<office>
+<office auto-wire-objects="true" auto-wire-teams="true">
+
+	<suppliers>
+		<supplier name="SUPPLIER" source="net.example.ExampleSupplierSource"
+			x="000" y="001">
+			<properties>
+				<property name="SUPPLIER_ONE" value="VALUE_ONE" />
+				<property name="SUPPLIER_TWO" value="VALUE_TWO" />
+			</properties>
+		</supplier>
+	</suppliers>
 
 	<external-managed-objects>
 		<external-managed-object name="EXTERNAL_MANAGED_OBJECT"
 			object-type="java.sql.Connection" object-scope="PROCESS" x="100" y="101">
-			<administer administrator="ADMINISTRATOR" order="1" />
+			<administer administration="ADMINISTRATION" order="1" />
 			<govern governance="GOVERNANCE" />
 		</external-managed-object>
 	</external-managed-objects>
@@ -12,6 +22,31 @@
 		<managed-object-source name="MANAGED_OBJECT_SOURCE"
 			source="net.example.ExampleManagedObjectSource" object-type="net.orm.Session"
 			timeout="10" x="200" y="201">
+			<properties>
+				<property name="MO_ONE" value="VALUE_ONE" />
+				<property name="MO_TWO" value="VALUE_TWO" />
+			</properties>
+			<managed-object-pool name="MANAGED_OBJECT_POOL" />
+			<input-dependency name="INPUT_DEPENDENCY_ONE"
+				object-type="java.sql.Connection">
+				<managed-object name="MANAGED_OBJECT_TWO" />
+			</input-dependency>
+			<input-dependency name="INPUT_DEPENDENCY_TWO"
+				object-type="java.sql.Connection">
+				<external-managed-object name="EXTERNAL_MANAGED_OBJECT" />
+			</input-dependency>
+			<flow name="FLOW" argument-type="java.lang.Integer">
+				<section-input section="SECTION" input="INPUT_A" />
+			</flow>
+			<team name="MO_TEAM">
+				<office-team name="TEAM" />
+			</team>
+		</managed-object-source>
+		<managed-object-source name="SUPPLIED_MANAGED_OBJECT_SOURCE"
+			object-type="net.orm.Session" x="210" y="211">
+			<supplier name="SUPPLIER" qualifier="QUALIFIER"
+				type="net.orm.SpecificSession" />
+			<!-- Supplied only different as has no source attribute -->
 			<properties>
 				<property name="MO_ONE" value="VALUE_ONE" />
 				<property name="MO_TWO" value="VALUE_TWO" />
@@ -25,7 +60,7 @@
 				<external-managed-object name="EXTERNAL_MANAGED_OBJECT" />
 			</input-dependency>
 			<flow name="FLOW" argument-type="java.lang.Integer">
-				<section-input section="SECTION" input="INPUT" />
+				<section-input section="SECTION" input="INPUT_A" />
 			</flow>
 			<team name="MO_TEAM">
 				<office-team name="TEAM" />
@@ -37,8 +72,11 @@
 		<managed-object name="MANAGED_OBJECT_ONE" scope="THREAD"
 			x="300" y="301">
 			<managed-object-source name="MANAGED_OBJECT_SOURCE" />
-			<administer administrator="ADMINISTRATOR" order="1" />
+			<administer administration="ADMINISTRATION" order="1" />
 			<govern governance="GOVERNANCE" />
+			<type-qualification qualifier="QUALIFIED"
+				type="java.sql.SpecificConnection" />
+			<type-qualification type="java.sql.GenericConnection" />
 			<dependency name="DEPENDENCY_ONE" object-type="java.sql.Connection">
 				<managed-object name="MANAGED_OBJECT_TWO" />
 			</dependency>
@@ -52,57 +90,85 @@
 		</managed-object>
 	</managed-objects>
 
+	<managed-object-pools>
+		<managed-object-pool name="MANAGED_OBJECT_POOL"
+			source="net.example.ExampleManagedObjectPoolSource" x="400" y="401">
+			<properties>
+				<property name="POOL_ONE" value="VALUE_ONE" />
+				<property name="POOL_TWO" value="VALUE_TWO" />
+			</properties>
+		</managed-object-pool>
+	</managed-object-pools>
+
 	<teams>
-		<team name="TEAM" x="400" y="401" />
+		<team name="TEAM" x="500" y="501">
+			<type-qualification qualifier="QUALIFIED"
+				type="java.sql.SpecificStatement" />
+			<type-qualification type="java.sql.GenericStatement" />
+		</team>
 	</teams>
 
 	<escalations>
-		<escalation escalation-type="java.lang.Exception" x="500"
-			y="501">
-			<handler section="SECTION" input="INPUT" />
+		<escalation escalation-type="java.lang.Exception" x="600"
+			y="601">
+			<handler section="SECTION" input="INPUT_B" />
 		</escalation>
 	</escalations>
 
-	<administrators>
-		<administrator name="ADMINISTRATOR"
-			source="net.example.ExampleAdministratorSource" scope="THREAD" x="600"
-			y="601">
+	<administrations>
+		<administration name="ADMINISTRATION"
+			source="net.example.ExampleAdministrationSource" x="700" y="701">
 			<properties>
 				<property name="ADMIN_ONE" value="VALUE_ONE" />
 				<property name="ADMIN_TWO" value="VALUE_TWO" />
 			</properties>
 			<team name="TEAM" />
-			<duty name="DUTY_ONE" />
-			<duty name="DUTY_TWO" />
-		</administrator>
-	</administrators>
+			<flow name="FLOW_ONE" argument-type="java.lang.Integer">
+				<input sub-section="SECTION" input="INPUT_A" />
+			</flow>
+			<flow name="FLOW_TWO" />
+			<escalation type="java.sql.SQLException">
+				<input sub-section="SECTION" input="INPUT_B" />
+			</escalation>
+			<escalation type="java.io.IOException" />
+		</administration>
+	</administrations>
 
 	<governances>
 		<governance name="GOVERNANCE" source="net.example.ExampleGovernanceSource"
-			x="700" y="701">
+			x="800" y="801">
 			<properties>
 				<property name="GOV_ONE" value="VALUE_ONE" />
 				<property name="GOV_TWO" value="VALUE_TWO" />
 			</properties>
 			<team name="TEAM" />
-			<governance-area x="710" y="711" height="720" width="721" />
+			<flow name="FLOW_A" argument-type="java.lang.String">
+				<input sub-section="SECTION" input="INPUT_A" />
+			</flow>
+			<flow name="FLOW_B" />
+			<escalation type="java.lang.NullPointerException">
+				<input sub-section="SECTION" input="INPUT_B" />
+			</escalation>
+			<escalation type="java.lang.RuntimeException" />
+			<governance-area x="810" y="811" height="820" width="821" />
 		</governance>
 	</governances>
-	
+
 	<starting>
-		<start name="START" x="800" y="801">
-			<flow section="SECTION" input="INPUT" />
+		<start name="START" x="900" y="901">
+			<flow section="SECTION" input="INPUT_A" />
 		</start>
 	</starting>
 
 	<sections>
 		<section name="SECTION" source="net.example.ExampleSectionSource"
-			location="SECTION_LOCATION" x="900" y="901">
+			location="SECTION_LOCATION" x="1000" y="1001">
 			<properties>
 				<property name="PROP_ONE" value="VALUE_ONE" />
 				<property name="PROP_TWO" value="VALUE_TWO" />
 			</properties>
-			<input name="INPUT" parameter-type="java.lang.Integer" />
+			<input name="INPUT_A" parameter-type="java.lang.Integer" />
+			<input name="INPUT_B" parameter-type="java.lang.Exception" />
 			<output name="OUTPUT_ONE" argument-type="java.lang.Float"
 				escalation-only="false">
 				<section-input section="SECTION_TARGET" input="INPUT" />
@@ -115,33 +181,30 @@
 			<object name="OBJECT_TWO" object-type="net.orm.Session">
 				<managed-object name="MANAGED_OBJECT" />
 			</object>
-			<responsibility name="RESPONSIBILITY">
-				<team name="TEAM" />
-				<object name="RESPONSIBILITY_OBJECT" />
-			</responsibility>
 			<sub-section>
 				<section-managed-object name="SECTION_MANAGED_OBJECT">
 					<team name="MO_TEAM" />
 					<govern governance="GOVERNANCE" />
 				</section-managed-object>
-				<task name="TASK">
-					<pre-administer administrator="ADMINISTRATOR" duty="DUTY_ONE" />
+				<function name="FUNCTION">
+					<team name="TEAM" />
+					<pre-administer administration="ADMINISTRATION" />
 					<govern governance="GOVERNANCE" />
-				</task>
+				</function>
 				<govern governance="GOVERNANCE" />
 				<sub-section name="SUB_SECTION">
 					<section-managed-object name="SUB_SECTION_MANAGED_OBJECT" />
-					<task name="SUB_SECTION_TASK">
-						<post-administer administrator="ADMINISTRATOR"
-							duty="DUTY_TWO" />
+					<function name="SUB_SECTION_FUNCTION">
+						<team name="TEAM" />
+						<post-administer administration="ADMINISTRATION" />
 						<govern governance="GOVERNANCE" />
-					</task>
+					</function>
 					<sub-section name="SUB_SUB_SECTION" />
 				</sub-section>
 			</sub-section>
 		</section>
 		<section name="SECTION_TARGET" source="net.example.ExampleSectionSource"
-			location="SECTION_LOCATION" x="910" y="911">
+			location="SECTION_LOCATION" x="1010" y="1011">
 			<input name="INPUT" parameter-type="java.lang.Float" />
 		</section>
 	</sections>

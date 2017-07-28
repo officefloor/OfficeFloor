@@ -18,8 +18,8 @@
 package net.officefloor.plugin.managedobject.clazz;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
-import net.officefloor.frame.spi.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
 
 /**
  * {@link CoordinatingManagedObject} to dependency inject the {@link Object}

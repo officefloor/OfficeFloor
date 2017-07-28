@@ -21,30 +21,30 @@ import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.integrate.managedobject.CompileOfficeFloorManagedObjectTest.InputManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionFunction;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.office.OfficeSubSection;
-import net.officefloor.compile.spi.office.OfficeSectionTask;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
-import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.plugin.governance.clazz.Enforce;
 import net.officefloor.plugin.governance.clazz.Govern;
+import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.ManagedObject;
 import net.officefloor.plugin.section.clazz.Property;
 import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
-import net.officefloor.plugin.work.clazz.ClassWorkSource;
-import net.officefloor.plugin.work.clazz.FlowInterface;
 
 /**
  * Tests compiling a {@link Governance}.
@@ -61,19 +61,14 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM",
-				OnePersonTeamSource.class);
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
-				"OFFICE", "OFFICE_TEAM", "TEAM");
-		this.record_officeBuilder_addGovernance("GOVERNANCE", "OFFICE_TEAM",
-				ClassGovernanceSource.class, SimpleManagedObject.class);
-		office.registerManagedObjectSource("MANAGED_OBJECT",
-				"MANAGED_OBJECT_SOURCE");
-		DependencyMappingBuilder dependencies = this
-				.record_officeBuilder_addProcessManagedObject("MANAGED_OBJECT",
-						"MANAGED_OBJECT");
-		this.record_officeFloorBuilder_addManagedObject(
-				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
+		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
+		this.record_officeBuilder_addGovernance("GOVERNANCE", "OFFICE_TEAM", ClassGovernanceSource.class,
+				SimpleManagedObject.class);
+		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");
+		DependencyMappingBuilder dependencies = this.record_officeBuilder_addProcessManagedObject("MANAGED_OBJECT",
+				"MANAGED_OBJECT");
+		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		dependencies.mapGovernance("GOVERNANCE");
@@ -95,35 +90,23 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM",
-				OnePersonTeamSource.class);
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
-				"OFFICE", "OFFICE_TEAM", "TEAM");
-		this.record_officeBuilder_addGovernance("GOVERNANCE", "OFFICE_TEAM",
-				ClassGovernanceSource.class, SimpleManagedObject.class);
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeBuilder_addGovernance("GOVERNANCE", ClassGovernanceSource.class, SimpleManagedObject.class);
 		office.setBoundInputManagedObject("INPUT_MO", "MANAGED_OBJECT_SOURCE_A");
-		this.record_officeBuilder_addWork("SECTION.WORK");
-		TaskBuilder<Work, ?, ?> task = this.record_workBuilder_addTask("INPUT",
-				"OFFICE_TEAM");
-		task.linkParameter(0, Integer.class);
-		this.record_officeFloorBuilder_addManagedObject(
-				"MANAGED_OBJECT_SOURCE_A", ClassManagedObjectSource.class, 0,
+		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "INPUT");
+		function.linkParameter(0, Integer.class);
+		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE_A", ClassManagedObjectSource.class, 0,
 				"class.name", ProcessManagedObject.class.getName());
-		ManagingOfficeBuilder<?> mosA = this
-				.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		DependencyMappingBuilder mapperA = this
-				.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MO");
+		ManagingOfficeBuilder<?> mosA = this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		DependencyMappingBuilder mapperA = this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MO");
 		mapperA.mapGovernance("GOVERNANCE");
-		mosA.linkProcess(0, "SECTION.WORK", "INPUT");
-		this.record_officeFloorBuilder_addManagedObject(
-				"MANAGED_OBJECT_SOURCE_B", ClassManagedObjectSource.class, 0,
+		mosA.linkFlow(0, "SECTION.INPUT");
+		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE_B", ClassManagedObjectSource.class, 0,
 				"class.name", ProcessManagedObject.class.getName());
-		ManagingOfficeBuilder<?> mosB = this
-				.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		DependencyMappingBuilder mapperB = this
-				.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MO");
+		ManagingOfficeBuilder<?> mosB = this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		DependencyMappingBuilder mapperB = this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MO");
 		mapperB.mapGovernance("GOVERNANCE");
-		mosB.linkProcess(0, "SECTION.WORK", "INPUT");
+		mosB.linkFlow(0, "SECTION.INPUT");
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -136,21 +119,16 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM",
-				OnePersonTeamSource.class);
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
-				"OFFICE", "OFFICE_TEAM", "TEAM");
-		this.record_officeBuilder_addGovernance("GOVERNANCE", "OFFICE_TEAM",
-				ClassGovernanceSource.class, SimpleManagedObject.class);
-		this.record_officeFloorBuilder_addManagedObject(
-				"OFFICE.MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
+		this.record_officeBuilder_addGovernance("GOVERNANCE", "OFFICE_TEAM", ClassGovernanceSource.class,
+				SimpleManagedObject.class);
+		this.record_officeFloorBuilder_addManagedObject("OFFICE.MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
 				0, "class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		office.registerManagedObjectSource("OFFICE.MANAGED_OBJECT",
-				"OFFICE.MANAGED_OBJECT_SOURCE");
+		office.registerManagedObjectSource("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT_SOURCE");
 		DependencyMappingBuilder dependencies = this
-				.record_officeBuilder_addProcessManagedObject(
-						"OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT");
+				.record_officeBuilder_addProcessManagedObject("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT");
 		dependencies.mapGovernance("GOVERNANCE");
 
 		// Compile the OfficeFloor
@@ -163,7 +141,7 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	 */
 	public void testGovernSectionManagedObject() {
 
-		// Record obtaining the section, managed object and work types
+		// Record obtaining the section, managed object and namespace types
 		this.issues.recordCaptureIssues(false);
 		this.issues.recordCaptureIssues(false);
 		this.issues.recordCaptureIssues(false);
@@ -172,41 +150,27 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM",
-				OnePersonTeamSource.class);
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
-				"OFFICE", "OFFICE_TEAM", "TEAM");
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 
-		this.record_officeBuilder_addGovernance("GOVERNANCE", "OFFICE_TEAM",
-				ClassGovernanceSource.class, SimpleManagedObject.class);
+		this.record_officeBuilder_addGovernance("GOVERNANCE", ClassGovernanceSource.class, SimpleManagedObject.class);
 
-		this.record_officeBuilder_addWork("SECTION.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask(
-				"doSomething", "OFFICE_TEAM");
-		task.linkManagedObject(0, "OFFICE.SECTION.OBJECT",
-				SectionWithManagedObject.class);
+		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "doSomething");
+		function.linkManagedObject(0, "OFFICE.SECTION.OBJECT", SectionWithManagedObject.class);
 
-		this.record_officeFloorBuilder_addManagedObject(
-				"OFFICE.SECTION.managedObject", ClassManagedObjectSource.class,
+		this.record_officeFloorBuilder_addManagedObject("OFFICE.SECTION.managedObject", ClassManagedObjectSource.class,
 				0, "class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		office.registerManagedObjectSource("OFFICE.SECTION.managedObject",
-				"OFFICE.SECTION.managedObject");
-		DependencyMappingBuilder managedObjectDependencies = this
-				.record_officeBuilder_addProcessManagedObject(
-						"OFFICE.SECTION.managedObject",
-						"OFFICE.SECTION.managedObject");
+		office.registerManagedObjectSource("OFFICE.SECTION.managedObject", "OFFICE.SECTION.managedObject");
+		DependencyMappingBuilder managedObjectDependencies = this.record_officeBuilder_addProcessManagedObject(
+				"OFFICE.SECTION.managedObject", "OFFICE.SECTION.managedObject");
 		managedObjectDependencies.mapGovernance("GOVERNANCE");
 
-		this.record_officeFloorBuilder_addManagedObject(
-				"OFFICE.SECTION.OBJECT", SectionClassManagedObjectSource.class,
+		this.record_officeFloorBuilder_addManagedObject("OFFICE.SECTION.OBJECT", SectionClassManagedObjectSource.class,
 				0, "class.name", SectionWithManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		office.registerManagedObjectSource("OFFICE.SECTION.OBJECT",
-				"OFFICE.SECTION.OBJECT");
+		office.registerManagedObjectSource("OFFICE.SECTION.OBJECT", "OFFICE.SECTION.OBJECT");
 		DependencyMappingBuilder sectionDependencies = this
-				.record_officeBuilder_addThreadManagedObject(
-						"OFFICE.SECTION.OBJECT", "OFFICE.SECTION.OBJECT");
+				.record_officeBuilder_addThreadManagedObject("OFFICE.SECTION.OBJECT", "OFFICE.SECTION.OBJECT");
 		sectionDependencies.mapDependency(0, "OFFICE.SECTION.managedObject");
 
 		// Compile the OfficeFloor
@@ -214,8 +178,8 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling {@link Governance} over a {@link Task} within a
-	 * {@link OfficeSection}.
+	 * Tests compiling {@link Governance} over a {@link ManagedFunction} within
+	 * a {@link OfficeSection}.
 	 */
 	public void testGovernSection() {
 
@@ -224,16 +188,10 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM",
-				OnePersonTeamSource.class);
-		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
-				"TEAM");
-		this.record_officeBuilder_addGovernance("GOVERNANCE", "OFFICE_TEAM",
-				ClassGovernanceSource.class, SimpleManagedObject.class);
-		this.record_officeBuilder_addWork("DESK.WORK");
-		TaskBuilder<?, ?, ?> governedTask = this.record_workBuilder_addTask(
-				"TASK", "OFFICE_TEAM");
-		governedTask.addGovernance("GOVERNANCE");
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeBuilder_addGovernance("GOVERNANCE", ClassGovernanceSource.class, SimpleManagedObject.class);
+		ManagedFunctionBuilder<?, ?> governedFunction = this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
+		governedFunction.addGovernance("GOVERNANCE");
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -250,51 +208,62 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM",
-				OnePersonTeamSource.class);
-		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
-				"TEAM");
-		this.record_officeBuilder_addGovernance("GOVERNANCE", "OFFICE_TEAM",
-				ClassGovernanceSource.class, SimpleManagedObject.class);
-		this.record_officeBuilder_addWork("SECTION.DESK.WORK");
-		TaskBuilder<?, ?, ?> governedTask = this.record_workBuilder_addTask(
-				"TASK", "OFFICE_TEAM");
-		governedTask.addGovernance("GOVERNANCE");
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeBuilder_addGovernance("GOVERNANCE", ClassGovernanceSource.class, SimpleManagedObject.class);
+		ManagedFunctionBuilder<?, ?> governedFunction = this.record_officeBuilder_addFunction("SECTION.SUB_SECTION",
+				"FUNCTION");
+		governedFunction.addGovernance("GOVERNANCE");
 
 		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
 	/**
-	 * Tests compiling {@link Governance} for a specific {@link OfficeSectionTask}.
+	 * Tests assigning the {@link Team} for the {@link Governance}.
 	 */
-	public void testGovernOfficeTask() {
+	public void testAssignGovernanceTeam() {
 
 		// Record obtaining the section type
 		this.issues.recordCaptureIssues(false);
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM",
-				OnePersonTeamSource.class);
-		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
-				"TEAM");
-		this.record_officeBuilder_addGovernance("GOVERNANCE", "OFFICE_TEAM",
-				ClassGovernanceSource.class, SimpleManagedObject.class);
-		this.record_officeBuilder_addWork("DESK.WORK");
-		TaskBuilder<?, ?, ?> governedTask = this.record_workBuilder_addTask(
-				"TASK", "OFFICE_TEAM");
-		governedTask.addGovernance("GOVERNANCE");
+		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
+		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
+		this.record_officeBuilder_addGovernance("GOVERNANCE", "OFFICE_TEAM", ClassGovernanceSource.class,
+				SimpleManagedObject.class);
+		ManagedFunctionBuilder<?, ?> governedFunction = this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
+		governedFunction.addGovernance("GOVERNANCE");
 
 		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
 	/**
-	 * Tests compiling {@link Governance} over a {@link Task} within a
-	 * {@link OfficeSubSection}.
+	 * Tests compiling {@link Governance} for a specific
+	 * {@link OfficeSectionFunction}.
 	 */
-	public void testSubSectionTaskInheritGovernance() {
+	public void testGovernOfficeFunction() {
+
+		// Record obtaining the section type
+		this.issues.recordCaptureIssues(false);
+
+		// Record building the OfficeFloor
+		this.record_init();
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeBuilder_addGovernance("GOVERNANCE", ClassGovernanceSource.class, SimpleManagedObject.class);
+		ManagedFunctionBuilder<?, ?> governedFunction = this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
+		governedFunction.addGovernance("GOVERNANCE");
+
+		// Compile the OfficeFloor
+		this.compile(true);
+	}
+
+	/**
+	 * Tests compiling {@link Governance} over a {@link ManagedFunction} within
+	 * a {@link OfficeSubSection}.
+	 */
+	public void testSubSectionFunctionInheritGovernance() {
 
 		// Record obtaining the section types
 		this.issues.recordCaptureIssues(false);
@@ -302,18 +271,12 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM",
-				OnePersonTeamSource.class);
-		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
-				"TEAM");
-		this.record_officeBuilder_addGovernance("GOVERNANCE", "OFFICE_TEAM",
-				ClassGovernanceSource.class, SimpleManagedObject.class);
-		this.record_officeBuilder_addWork("GOVERNED_SECTION.GOVERNED_DESK.WORK");
-		TaskBuilder<?, ?, ?> governedTask = this.record_workBuilder_addTask(
-				"TASK", "OFFICE_TEAM");
-		governedTask.addGovernance("GOVERNANCE");
-		this.record_officeBuilder_addWork("NON_GOVERNED_DESK.WORK");
-		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeBuilder_addGovernance("GOVERNANCE", ClassGovernanceSource.class, SimpleManagedObject.class);
+		ManagedFunctionBuilder<?, ?> governedFunction = this
+				.record_officeBuilder_addFunction("GOVERNED_SECTION.GOVERNED_SECTION", "FUNCTION");
+		governedFunction.addGovernance("GOVERNANCE");
+		this.record_officeBuilder_addFunction("NON_GOVERNED_SECTION", "FUNCTION");
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -340,20 +303,19 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Simple class for {@link ClassWorkSource}.
+	 * Simple class for {@link ClassManagedFunctionSource}.
 	 */
-	public static class SimpleWork {
+	public static class SimpleClass {
 
-		public void simpleTask() {
+		public void simpleFunction() {
 			fail("Should not be invoked in compiling");
 		}
 	}
 
 	/**
-	 * {@link Work} for {@link InputManagedObject} for the
-	 * {@link ClassWorkSource}.
+	 * {@link InputManagedObject} for the {@link ClassManagedFunctionSource}.
 	 */
-	public static class InputManagedObjectWork {
+	public static class InputManagedObjectClass {
 
 		public void handleInputManagedObject(Integer parameter) {
 		}

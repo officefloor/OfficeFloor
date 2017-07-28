@@ -17,15 +17,18 @@
  */
 package net.officefloor.compile.internal.structure;
 
-import net.officefloor.autowire.supplier.SupplyOrder;
+import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
+import net.officefloor.compile.spi.supplier.source.SupplierSource;
+import net.officefloor.compile.supplier.SupplierType;
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * Supplier {@link Node}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SupplierNode extends Node, OfficeFloorSupplier {
+public interface SupplierNode extends Node, OfficeFloorSupplier, OfficeSupplier {
 
 	/**
 	 * {@link Node} type.
@@ -34,16 +37,22 @@ public interface SupplierNode extends Node, OfficeFloorSupplier {
 
 	/**
 	 * Initialises the {@link SupplierNode}.
+	 * 
+	 * @param supplierSourceClassName
+	 *            {@link Class} name of the {@link SupplierSource}.
+	 * @param supplierSource
+	 *            Optional instantiated {@link SupplierSource}. May be
+	 *            <code>null</code>.
 	 */
-	void initialise();
+	void initialise(String supplierSourceClassName, SupplierSource supplierSource);
 
 	/**
-	 * Fill {@link SupplyOrder} instances.
+	 * Obtains the parent {@link OfficeNode}.
 	 * 
-	 * @param supplyOrders
-	 *            {@link SupplyOrder} instances to fill.
+	 * @return Parent {@link OfficeNode} or <code>null</code> if configured at
+	 *         the {@link OfficeFloor} level.
 	 */
-	void fillSupplyOrders(SupplyOrder... supplyOrders);
+	OfficeNode getOfficeNode();
 
 	/**
 	 * Obtains the parent {@link OfficeFloorNode}.
@@ -51,5 +60,31 @@ public interface SupplierNode extends Node, OfficeFloorSupplier {
 	 * @return Parent {@link OfficeFloorNode}.
 	 */
 	OfficeFloorNode getOfficeFloorNode();
+
+	/**
+	 * Registers as a possible MBean.
+	 * 
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 */
+	void registerAsPossibleMBean(CompileContext compileContext);
+
+	/**
+	 * Loads the {@link SuppliedManagedObjectSourceNode} instances as
+	 * {@link ManagedObjectNode} instances to the {@link AutoWirer}.
+	 * 
+	 * @param autoWirer
+	 *            {@link AutoWirer}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 */
+	void loadAutoWireObjects(AutoWirer<LinkObjectNode> autoWirer, CompileContext compileContext);
+
+	/**
+	 * Loads the {@link SupplierType}.
+	 * 
+	 * @return {@link SupplierType}.
+	 */
+	SupplierType loadSupplierType();
 
 }

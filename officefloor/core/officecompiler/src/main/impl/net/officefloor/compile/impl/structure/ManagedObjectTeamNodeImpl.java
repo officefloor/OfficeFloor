@@ -23,13 +23,13 @@ import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.ManagedObjectTeamNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
-import net.officefloor.compile.internal.structure.TaskTeamNode;
+import net.officefloor.compile.internal.structure.ResponsibleTeamNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.section.OfficeSectionManagedObjectTeamType;
 import net.officefloor.compile.spi.office.OfficeTeam;
-import net.officefloor.compile.type.TypeContext;
 
 /**
- * {@link TaskTeamNode} implementation.
+ * {@link ResponsibleTeamNode} implementation.
  * 
  * @author Daniel Sagenschneider
  */
@@ -73,8 +73,8 @@ public class ManagedObjectTeamNodeImpl implements ManagedObjectTeamNode {
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public ManagedObjectTeamNodeImpl(String teamName,
-			ManagedObjectSourceNode managedObjectSource, NodeContext context) {
+	public ManagedObjectTeamNodeImpl(String teamName, ManagedObjectSourceNode managedObjectSource,
+			NodeContext context) {
 		this.teamName = teamName;
 		this.managedObjectSourceNode = managedObjectSource;
 		this.context = context;
@@ -105,14 +105,18 @@ public class ManagedObjectTeamNodeImpl implements ManagedObjectTeamNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return NodeUtil.getChildNodes();
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}
 
 	@Override
 	public void initialise() {
-		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialisedState());
+		this.state = NodeUtil.initialise(this, this.context, this.state, () -> new InitialisedState());
 	}
 
 	/*
@@ -120,8 +124,7 @@ public class ManagedObjectTeamNodeImpl implements ManagedObjectTeamNode {
 	 */
 
 	@Override
-	public OfficeSectionManagedObjectTeamType loadOfficeSectionManagedObjectTeamType(
-			TypeContext typeContext) {
+	public OfficeSectionManagedObjectTeamType loadOfficeSectionManagedObjectTeamType(CompileContext compileContext) {
 		// TODO implement
 		// ManagedObjectTeamNode.loadOfficeSectionManagedObjectTeamType
 		throw new UnsupportedOperationException(
@@ -138,6 +141,13 @@ public class ManagedObjectTeamNodeImpl implements ManagedObjectTeamNode {
 		return this.teamName;
 	}
 
+	@Override
+	public void addTypeQualification(String qualifier, String type) {
+		// TODO implement
+		// ManagedObjectTeamNode.addTypeQualification
+		throw new UnsupportedOperationException("TODO implement ManagedObjectTeamNode.addTypeQualification");
+	}
+
 	/*
 	 * ================== LinkTeamNode ============================
 	 */
@@ -149,8 +159,7 @@ public class ManagedObjectTeamNodeImpl implements ManagedObjectTeamNode {
 
 	@Override
 	public boolean linkTeamNode(LinkTeamNode node) {
-		return LinkUtil.linkTeamNode(this, node,
-				this.context.getCompilerIssues(),
+		return LinkUtil.linkTeamNode(this, node, this.context.getCompilerIssues(),
 				(link) -> this.linkedTeamNode = link);
 	}
 

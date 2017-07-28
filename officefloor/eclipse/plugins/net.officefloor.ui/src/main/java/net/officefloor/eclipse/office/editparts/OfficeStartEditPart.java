@@ -36,20 +36,17 @@ import org.eclipse.gef.EditPart;
  * @author Daniel Sagenschneider
  */
 public class OfficeStartEditPart
-		extends
-		AbstractOfficeFloorEditPart<OfficeStartModel, OfficeStartEvent, OfficeStartFigure>
+		extends AbstractOfficeFloorEditPart<OfficeStartModel, OfficeStartEvent, OfficeStartFigure>
 		implements OfficeStartFigureContext {
 
 	@Override
 	protected OfficeStartFigure createOfficeFloorFigure() {
-		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
-				.createOfficeStartFigure(this);
+		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory().createOfficeStartFigure(this);
 	}
 
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		EclipseUtil.addToList(models, this.getCastedModel()
-				.getOfficeSectionInput());
+		EclipseUtil.addToList(models, this.getCastedModel().getOfficeSectionInput());
 	}
 
 	@Override
@@ -58,8 +55,7 @@ public class OfficeStartEditPart
 	}
 
 	@Override
-	protected void handlePropertyChange(OfficeStartEvent property,
-			PropertyChangeEvent evt) {
+	protected void handlePropertyChange(OfficeStartEvent property, PropertyChangeEvent evt) {
 		switch (property) {
 		case CHANGE_OFFICE_SECTION_INPUT:
 			this.refreshSourceConnections();

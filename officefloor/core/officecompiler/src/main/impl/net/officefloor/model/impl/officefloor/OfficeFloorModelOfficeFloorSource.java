@@ -17,22 +17,14 @@
  */
 package net.officefloor.model.impl.officefloor;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringWriter;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
 
-import net.officefloor.autowire.AutoWire;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.TripleKeyMap;
-import net.officefloor.compile.spi.office.ManagedObjectTeam;
+import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
+import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
+import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
@@ -40,6 +32,7 @@ import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectPool;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
@@ -47,11 +40,9 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSource;
-import net.officefloor.compile.spi.section.ManagedObjectDependency;
-import net.officefloor.compile.spi.section.ManagedObjectFlow;
+import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
-import net.officefloor.model.impl.repository.inputstream.InputStreamConfigurationItem;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
@@ -66,6 +57,7 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectPoolModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel;
@@ -75,22 +67,21 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorManagedObjectPoolModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.PropertyModel;
-import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.officefloor.TypeQualificationModel;
 
 /**
  * {@link OfficeFloorModel} {@link OfficeFloorSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorModelOfficeFloorSource extends
-		AbstractOfficeFloorSource {
+public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource {
 
 	/*
 	 * =================== AbstractOfficeFloorSource ==========================
@@ -102,89 +93,23 @@ public class OfficeFloorModelOfficeFloorSource extends
 	}
 
 	@Override
-	public void specifyConfigurationProperties(
-			RequiredProperties requiredProperties,
-			OfficeFloorSourceContext context) throws Exception {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorSource.specifyConfigurationProperties");
+	public void specifyConfigurationProperties(RequiredProperties requiredProperties, OfficeFloorSourceContext context)
+			throws Exception {
 	}
 
 	@Override
-	public void sourceOfficeFloor(OfficeFloorDeployer deployer,
-			OfficeFloorSourceContext context) throws Exception {
+	public void sourceOfficeFloor(OfficeFloorDeployer deployer, OfficeFloorSourceContext context) throws Exception {
 
-		// Obtain the configuration to the section
-		InputStream configuration = context.getResource(context
-				.getOfficeFloorLocation());
-		if (configuration == null) {
-			// Must have configuration
-			throw new FileNotFoundException("Can not find office floor '"
-					+ context.getOfficeFloorLocation() + "'");
-		}
+		// Retrieve the OfficeFloor model
+		ConfigurationItem configuration = context.getConfigurationItem(context.getOfficeFloorLocation(), null);
+		OfficeFloorModel officeFloor = new OfficeFloorModel();
+		new OfficeFloorRepositoryImpl(new ModelRepositoryImpl()).retrieveOfficeFloor(officeFloor, configuration);
 
-		// Read in the configuration
-		Reader reader = new InputStreamReader(configuration);
-		StringWriter configurationBuffer = new StringWriter();
-		for (int value = reader.read(); value != -1; value = reader.read()) {
-			configurationBuffer.write(value);
-		}
-		String config = configurationBuffer.toString();
-
-		// Replace the tags
-		Properties properties = context.getProperties();
-		for (String name : properties.stringPropertyNames()) {
-			String tag = "${" + name + "}";
-			String value = properties.getProperty(name);
-			config = config.replace(tag, value);
-		}
-
-		// Ensure all tags are replaced
-		int tagStart = -1;
-		int tagEnd = -1;
-		Set<String> warnedTagNames = new HashSet<String>();
-		do {
-			// Increment tag start past previous tag
-			tagStart++;
-
-			// Search for another tag
-			tagStart = config.indexOf("${", tagStart);
-			if (tagStart >= 0) {
-				tagEnd = config.indexOf("}", tagStart);
-				if (tagEnd >= 0) {
-					// Obtain the missing tag name
-					String tagName = config.substring(tagStart + "${".length(),
-							tagEnd);
-
-					// Only warn once about a missing tag
-					if (!warnedTagNames.contains(tagName)) {
-
-						// Provide warning of missing tag
-						deployer.addIssue("Property '" + tagName
-								+ "' must be specified");
-
-						// Now warned of missing tag
-						warnedTagNames.add(tagName);
-					}
-				}
-			}
-		} while ((tagStart >= 0) && (tagEnd >= 0));
-
-		// Utilised the tag replaced configuration
-		ConfigurationItem configurationItem = new TagReplacedOfficeFloorConfigurationItem(
-				config, new InputStreamConfigurationItem(configuration));
-
-		// Retrieve the office floor model
-		OfficeFloorModel officeFloor = new OfficeFloorRepositoryImpl(
-				new ModelRepositoryImpl())
-				.retrieveOfficeFloor(configurationItem);
-
-		// Add the office floor suppliers, keeping registry of them
+		// Add the OfficeFloor suppliers, keeping registry of them
 		Map<String, OfficeFloorSupplier> officeFloorSuppliers = new HashMap<String, OfficeFloorSupplier>();
-		for (OfficeFloorSupplierModel supplierModel : officeFloor
-				.getOfficeFloorSuppliers()) {
+		for (OfficeFloorSupplierModel supplierModel : officeFloor.getOfficeFloorSuppliers()) {
 
-			// Add the office floor supplier
+			// Add the OfficeFloor supplier
 			String supplierName = supplierModel.getOfficeFloorSupplierName();
 			OfficeFloorSupplier supplier = deployer.addSupplier(supplierName,
 					supplierModel.getSupplierSourceClassName());
@@ -196,14 +121,30 @@ public class OfficeFloorModelOfficeFloorSource extends
 			officeFloorSuppliers.put(supplierName, supplier);
 		}
 
-		// Add the office floor managed object sources, keeping registry of them
+		// Add the OfficeFloor managed object pools, keeping registry of them
+		Map<String, OfficeFloorManagedObjectPool> officeFloorManagedObjectPools = new HashMap<>();
+		for (OfficeFloorManagedObjectPoolModel poolModel : officeFloor.getOfficeFloorManagedObjectPools()) {
+
+			// Add the managed object pool
+			String managedObjectPoolName = poolModel.getOfficeFloorManagedObjectPoolName();
+			String managedObjectPoolSourceClassName = poolModel.getManagedObjectPoolSourceClassName();
+			OfficeFloorManagedObjectPool pool = deployer.addManagedObjectPool(managedObjectPoolName,
+					managedObjectPoolSourceClassName);
+			officeFloorManagedObjectPools.put(managedObjectPoolName, pool);
+
+			// Add properties for the managed object source
+			for (PropertyModel property : poolModel.getProperties()) {
+				pool.addProperty(property.getName(), property.getValue());
+			}
+		}
+
+		// Add the OfficeFloor managed object sources, keeping registry of them
 		Map<String, OfficeFloorManagedObjectSource> officeFloorManagedObjectSources = new HashMap<String, OfficeFloorManagedObjectSource>();
 		for (OfficeFloorManagedObjectSourceModel managedObjectSourceModel : officeFloor
 				.getOfficeFloorManagedObjectSources()) {
 
-			// Add the office floor managed object source
-			String managedObjectSourceName = managedObjectSourceModel
-					.getOfficeFloorManagedObjectSourceName();
+			// Add the OfficeFloor managed object source
+			String managedObjectSourceName = managedObjectSourceModel.getOfficeFloorManagedObjectSourceName();
 
 			// Determine if supplied managed object source
 			OfficeFloorManagedObjectSource managedObjectSource;
@@ -211,37 +152,31 @@ public class OfficeFloorModelOfficeFloorSource extends
 					.getOfficeFloorSupplier();
 			if (mosToSupplier != null) {
 				// Supplied managed object source, so obtain its supplier
-				String supplierName = mosToSupplier
-						.getOfficeFloorSupplierName();
-				OfficeFloorSupplier supplier = officeFloorSuppliers
-						.get(supplierName);
+				String supplierName = mosToSupplier.getOfficeFloorSupplierName();
+				OfficeFloorSupplier supplier = officeFloorSuppliers.get(supplierName);
 				if (supplier == null) {
 					// Must have supplier
-					deployer.addIssue("No supplier '" + supplierName
-							+ "' for managed object source "
-							+ managedObjectSourceName);
+					deployer.addIssue(
+							"No supplier '" + supplierName + "' for managed object source " + managedObjectSourceName);
 					continue; // must have supplier to add managed object source
 				}
 
 				// Supply the managed object source
-				String qualifier = mosToSupplier.getAutoWireQualifier();
+				String qualifier = mosToSupplier.getQualifier();
 				qualifier = (CompileUtil.isBlank(qualifier) ? null : qualifier);
-				String type = mosToSupplier.getAutoWireType();
-				managedObjectSource = supplier.addManagedObjectSource(
-						managedObjectSourceName, new AutoWire(qualifier, type));
+				String type = mosToSupplier.getType();
+				managedObjectSource = supplier.addOfficeFloorManagedObjectSource(managedObjectSourceName, type,
+						qualifier);
 
 			} else {
 				// Source the managed object source
-				managedObjectSource = deployer.addManagedObjectSource(
-						managedObjectSourceName, managedObjectSourceModel
-								.getManagedObjectSourceClassName());
+				managedObjectSource = deployer.addManagedObjectSource(managedObjectSourceName,
+						managedObjectSourceModel.getManagedObjectSourceClassName());
 			}
 
 			// Add properties for the managed object source
-			for (PropertyModel property : managedObjectSourceModel
-					.getProperties()) {
-				managedObjectSource.addProperty(property.getName(),
-						property.getValue());
+			for (PropertyModel property : managedObjectSourceModel.getProperties()) {
+				managedObjectSource.addProperty(property.getName(), property.getValue());
 			}
 
 			// Provide timeout
@@ -250,40 +185,45 @@ public class OfficeFloorModelOfficeFloorSource extends
 				try {
 					managedObjectSource.setTimeout(Long.valueOf(timeoutValue));
 				} catch (NumberFormatException ex) {
-					deployer.addIssue("Invalid timeout value: " + timeoutValue
-							+ " for managed object source "
+					deployer.addIssue("Invalid timeout value: " + timeoutValue + " for managed object source "
 							+ managedObjectSourceName);
 				}
 			}
 
 			// Register the managed object source
-			officeFloorManagedObjectSources.put(managedObjectSourceName,
-					managedObjectSource);
+			officeFloorManagedObjectSources.put(managedObjectSourceName, managedObjectSource);
+
+			// Determine if pool the managed object
+			OfficeFloorManagedObjectSourceToOfficeFloorManagedObjectPoolModel mosToPool = managedObjectSourceModel
+					.getOfficeFloorManagedObjectPool();
+			if (mosToPool != null) {
+				OfficeFloorManagedObjectPoolModel poolModel = mosToPool.getOfficeFloorManagedObjectPool();
+				if (poolModel != null) {
+					OfficeFloorManagedObjectPool pool = officeFloorManagedObjectPools
+							.get(poolModel.getOfficeFloorManagedObjectPoolName());
+					deployer.link(managedObjectSource, pool);
+				}
+			}
 		}
 
-		// Add the office floor managed objects, keeping registry of them
+		// Add the OfficeFloor managed objects, keeping registry of them
 		Map<String, OfficeFloorManagedObject> officeFloorManagedObjects = new HashMap<String, OfficeFloorManagedObject>();
-		for (OfficeFloorManagedObjectModel managedObjectModel : officeFloor
-				.getOfficeFloorManagedObjects()) {
+		for (OfficeFloorManagedObjectModel managedObjectModel : officeFloor.getOfficeFloorManagedObjects()) {
 
 			// Obtain the managed object details
-			String managedObjectName = managedObjectModel
-					.getOfficeFloorManagedObjectName();
-			ManagedObjectScope managedObjectScope = this.getManagedObjectScope(
-					managedObjectModel.getManagedObjectScope(), deployer,
-					managedObjectName);
+			String managedObjectName = managedObjectModel.getOfficeFloorManagedObjectName();
+			ManagedObjectScope managedObjectScope = this
+					.getManagedObjectScope(managedObjectModel.getManagedObjectScope(), deployer, managedObjectName);
 
 			// Obtain the managed object source for the managed object
 			OfficeFloorManagedObjectSource moSource = null;
 			OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel moToSource = managedObjectModel
 					.getOfficeFloorManagedObjectSource();
 			if (moToSource != null) {
-				OfficeFloorManagedObjectSourceModel moSourceModel = moToSource
-						.getOfficeFloorManagedObjectSource();
+				OfficeFloorManagedObjectSourceModel moSourceModel = moToSource.getOfficeFloorManagedObjectSource();
 				if (moSourceModel != null) {
 					moSource = officeFloorManagedObjectSources
-							.get(moSourceModel
-									.getOfficeFloorManagedObjectSourceName());
+							.get(moSourceModel.getOfficeFloorManagedObjectSourceName());
 				}
 			}
 			if (moSource == null) {
@@ -291,42 +231,45 @@ public class OfficeFloorModelOfficeFloorSource extends
 			}
 
 			// Add the managed object and also register it
-			OfficeFloorManagedObject managedObject = moSource
-					.addOfficeFloorManagedObject(managedObjectName,
-							managedObjectScope);
+			OfficeFloorManagedObject managedObject = moSource.addOfficeFloorManagedObject(managedObjectName,
+					managedObjectScope);
 			officeFloorManagedObjects.put(managedObjectName, managedObject);
+
+			// Load type qualifications
+			for (TypeQualificationModel qualification : managedObjectModel.getTypeQualifications()) {
+				managedObject.addTypeQualification(qualification.getQualifier(), qualification.getType());
+			}
 		}
 
-		// Add the office floor input managed objects, keeping registry of them
+		// Add the OfficeFloor input managed objects, keeping registry of them
 		Map<String, OfficeFloorInputManagedObject> officeFloorInputManagedObjects = new HashMap<String, OfficeFloorInputManagedObject>();
 		for (OfficeFloorInputManagedObjectModel inputManagedObjectModel : officeFloor
 				.getOfficeFloorInputManagedObjects()) {
 
 			// Add the input managed object and also register it
-			String inputManagedObjectName = inputManagedObjectModel
-					.getOfficeFloorInputManagedObjectName();
-			OfficeFloorInputManagedObject inputManagedObject = deployer
-					.addInputManagedObject(inputManagedObjectName);
-			officeFloorInputManagedObjects.put(inputManagedObjectName,
-					inputManagedObject);
+			String inputManagedObjectName = inputManagedObjectModel.getOfficeFloorInputManagedObjectName();
+			OfficeFloorInputManagedObject inputManagedObject = deployer.addInputManagedObject(inputManagedObjectName);
+			officeFloorInputManagedObjects.put(inputManagedObjectName, inputManagedObject);
+
+			// Load type qualifications
+			for (TypeQualificationModel qualification : inputManagedObjectModel.getTypeQualifications()) {
+				inputManagedObject.addTypeQualification(qualification.getQualifier(), qualification.getType());
+			}
 
 			// Provide the binding to managed object source (if available)
 			OfficeFloorManagedObjectSource boundManagedObjectSource = null;
 			OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel conn = inputManagedObjectModel
 					.getBoundOfficeFloorManagedObjectSource();
 			if (conn != null) {
-				OfficeFloorManagedObjectSourceModel boundMoSourceModel = conn
-						.getBoundOfficeFloorManagedObjectSource();
+				OfficeFloorManagedObjectSourceModel boundMoSourceModel = conn.getBoundOfficeFloorManagedObjectSource();
 				if (boundMoSourceModel != null) {
 					boundManagedObjectSource = officeFloorManagedObjectSources
-							.get(boundMoSourceModel
-									.getOfficeFloorManagedObjectSourceName());
+							.get(boundMoSourceModel.getOfficeFloorManagedObjectSourceName());
 				}
 			}
 			if (boundManagedObjectSource != null) {
 				// Have bound managed object source so bind it
-				inputManagedObject
-						.setBoundOfficeFloorManagedObjectSource(boundManagedObjectSource);
+				inputManagedObject.setBoundOfficeFloorManagedObjectSource(boundManagedObjectSource);
 			}
 
 			// Link dependencies for the input managed object
@@ -339,8 +282,7 @@ public class OfficeFloorModelOfficeFloorSource extends
 						.getOfficeFloorManagedObjectSource();
 				if (inputMosModel != null) {
 					inputMos = officeFloorManagedObjectSources
-							.get(inputMosModel
-									.getOfficeFloorManagedObjectSourceName());
+							.get(inputMosModel.getOfficeFloorManagedObjectSourceName());
 				}
 				if (inputMos != null) {
 					// Have managed object source so link input dependencies
@@ -362,8 +304,7 @@ public class OfficeFloorModelOfficeFloorSource extends
 									.getOfficeFloorManagedObject();
 							if (dependentMoModel != null) {
 								dependentManagedObject = officeFloorManagedObjects
-										.get(dependentMoModel
-												.getOfficeFloorManagedObjectName());
+										.get(dependentMoModel.getOfficeFloorManagedObjectName());
 							}
 						}
 						if (dependentManagedObject == null) {
@@ -378,8 +319,7 @@ public class OfficeFloorModelOfficeFloorSource extends
 		}
 
 		// Link the dependencies for the managed objects
-		for (OfficeFloorManagedObjectModel managedObjectModel : officeFloor
-				.getOfficeFloorManagedObjects()) {
+		for (OfficeFloorManagedObjectModel managedObjectModel : officeFloor.getOfficeFloorManagedObjects()) {
 
 			// Obtain the managed object
 			OfficeFloorManagedObject managedObject = officeFloorManagedObjects
@@ -390,22 +330,18 @@ public class OfficeFloorModelOfficeFloorSource extends
 					.getOfficeFloorManagedObjectDependencies()) {
 
 				// Add the dependency
-				String dependencyName = dependencyModel
-						.getOfficeFloorManagedObjectDependencyName();
-				ManagedObjectDependency dependency = managedObject
-						.getManagedObjectDependency(dependencyName);
+				String dependencyName = dependencyModel.getOfficeFloorManagedObjectDependencyName();
+				ManagedObjectDependency dependency = managedObject.getManagedObjectDependency(dependencyName);
 
 				// Link the dependent managed object
 				OfficeFloorManagedObject dependentManagedObject = null;
 				OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel dependencyToMo = dependencyModel
 						.getOfficeFloorManagedObject();
 				if (dependencyToMo != null) {
-					OfficeFloorManagedObjectModel dependentMoModel = dependencyToMo
-							.getOfficeFloorManagedObject();
+					OfficeFloorManagedObjectModel dependentMoModel = dependencyToMo.getOfficeFloorManagedObject();
 					if (dependentMoModel != null) {
 						dependentManagedObject = officeFloorManagedObjects
-								.get(dependentMoModel
-										.getOfficeFloorManagedObjectName());
+								.get(dependentMoModel.getOfficeFloorManagedObjectName());
 					}
 				}
 				if (dependentManagedObject != null) {
@@ -422,8 +358,7 @@ public class OfficeFloorModelOfficeFloorSource extends
 							.getOfficeFloorInputManagedObject();
 					if (inputMoModel != null) {
 						inputManagedObject = officeFloorInputManagedObjects
-								.get(inputMoModel
-										.getOfficeFloorInputManagedObjectName());
+								.get(inputMoModel.getOfficeFloorInputManagedObjectName());
 					}
 				}
 				if (inputManagedObject != null) {
@@ -433,16 +368,20 @@ public class OfficeFloorModelOfficeFloorSource extends
 			}
 		}
 
-		// Add the office floor teams, keeping registry of teams
+		// Add the OfficeFloor teams, keeping registry of teams
 		Map<String, OfficeFloorTeam> officeFloorTeams = new HashMap<String, OfficeFloorTeam>();
 		for (OfficeFloorTeamModel teamModel : officeFloor.getOfficeFloorTeams()) {
 
-			// Add the office floor team
+			// Add the OfficeFloor team
 			String teamName = teamModel.getOfficeFloorTeamName();
-			OfficeFloorTeam team = deployer.addTeam(teamName,
-					teamModel.getTeamSourceClassName());
+			OfficeFloorTeam team = deployer.addTeam(teamName, teamModel.getTeamSourceClassName());
 			for (PropertyModel property : teamModel.getProperties()) {
 				team.addProperty(property.getName(), property.getValue());
+			}
+
+			// Load the type qualifications
+			for (TypeQualificationModel qualification : teamModel.getTypeQualifications()) {
+				team.addTypeQualification(qualification.getQualifier(), qualification.getType());
 			}
 
 			// Register the team
@@ -456,8 +395,7 @@ public class OfficeFloorModelOfficeFloorSource extends
 
 			// Add the office, registering them
 			String officeName = officeModel.getDeployedOfficeName();
-			DeployedOffice office = deployer.addDeployedOffice(officeName,
-					officeModel.getOfficeSourceClassName(),
+			DeployedOffice office = deployer.addDeployedOffice(officeName, officeModel.getOfficeSourceClassName(),
 					officeModel.getOfficeLocation());
 			offices.put(officeName, office);
 			for (PropertyModel property : officeModel.getProperties()) {
@@ -465,36 +403,28 @@ public class OfficeFloorModelOfficeFloorSource extends
 			}
 
 			// Add the office inputs, registering them
-			for (DeployedOfficeInputModel inputModel : officeModel
-					.getDeployedOfficeInputs()) {
+			for (DeployedOfficeInputModel inputModel : officeModel.getDeployedOfficeInputs()) {
 				String sectionName = inputModel.getSectionName();
 				String sectionInputName = inputModel.getSectionInputName();
-				DeployedOfficeInput officeInput = office
-						.getDeployedOfficeInput(sectionName, sectionInputName);
-				officeInputs.put(officeName, sectionName, sectionInputName,
-						officeInput);
+				DeployedOfficeInput officeInput = office.getDeployedOfficeInput(sectionName, sectionInputName);
+				officeInputs.put(officeName, sectionName, sectionInputName, officeInput);
 			}
 
 			// Add the office objects
-			for (DeployedOfficeObjectModel objectModel : officeModel
-					.getDeployedOfficeObjects()) {
+			for (DeployedOfficeObjectModel objectModel : officeModel.getDeployedOfficeObjects()) {
 
 				// Add the office object
-				OfficeObject officeObject = office
-						.getDeployedOfficeObject(objectModel
-								.getDeployedOfficeObjectName());
+				OfficeObject officeObject = office.getDeployedOfficeObject(objectModel.getDeployedOfficeObjectName());
 
-				// Link the office floor managed object
+				// Link the OfficeFloor managed object
 				OfficeFloorManagedObject managedObject = null;
 				DeployedOfficeObjectToOfficeFloorManagedObjectModel connToMo = objectModel
 						.getOfficeFloorManagedObject();
 				if (connToMo != null) {
-					OfficeFloorManagedObjectModel managedObjectModel = connToMo
-							.getOfficeFloorManagedObject();
+					OfficeFloorManagedObjectModel managedObjectModel = connToMo.getOfficeFloorManagedObject();
 					if (managedObjectModel != null) {
 						managedObject = officeFloorManagedObjects
-								.get(managedObjectModel
-										.getOfficeFloorManagedObjectName());
+								.get(managedObjectModel.getOfficeFloorManagedObjectName());
 					}
 				}
 				if (managedObject != null) {
@@ -502,17 +432,15 @@ public class OfficeFloorModelOfficeFloorSource extends
 					deployer.link(officeObject, managedObject);
 				}
 
-				// Link the office floor input managed object
+				// Link the OfficeFloor input managed object
 				OfficeFloorInputManagedObject inputManagedObject = null;
 				DeployedOfficeObjectToOfficeFloorInputManagedObjectModel connToInputMo = objectModel
 						.getOfficeFloorInputManagedObject();
 				if (connToInputMo != null) {
-					OfficeFloorInputManagedObjectModel inputMoModel = connToInputMo
-							.getOfficeFloorInputManagedObject();
+					OfficeFloorInputManagedObjectModel inputMoModel = connToInputMo.getOfficeFloorInputManagedObject();
 					if (inputMoModel != null) {
 						inputManagedObject = officeFloorInputManagedObjects
-								.get(inputMoModel
-										.getOfficeFloorInputManagedObjectName());
+								.get(inputMoModel.getOfficeFloorInputManagedObjectName());
 					}
 				}
 				if (inputManagedObject != null) {
@@ -522,31 +450,25 @@ public class OfficeFloorModelOfficeFloorSource extends
 			}
 
 			// Add the office teams
-			for (DeployedOfficeTeamModel teamModel : officeModel
-					.getDeployedOfficeTeams()) {
+			for (DeployedOfficeTeamModel teamModel : officeModel.getDeployedOfficeTeams()) {
 
 				// Add the office team
-				OfficeTeam officeTeam = office.getDeployedOfficeTeam(teamModel
-						.getDeployedOfficeTeamName());
+				OfficeTeam officeTeam = office.getDeployedOfficeTeam(teamModel.getDeployedOfficeTeamName());
 
-				// Obtain the office floor team
+				// Obtain the OfficeFloor team
 				OfficeFloorTeam officeFloorTeam = null;
-				DeployedOfficeTeamToOfficeFloorTeamModel conn = teamModel
-						.getOfficeFloorTeam();
+				DeployedOfficeTeamToOfficeFloorTeamModel conn = teamModel.getOfficeFloorTeam();
 				if (conn != null) {
-					OfficeFloorTeamModel officeFloorTeamModel = conn
-							.getOfficeFloorTeam();
+					OfficeFloorTeamModel officeFloorTeamModel = conn.getOfficeFloorTeam();
 					if (officeFloorTeamModel != null) {
-						officeFloorTeam = officeFloorTeams
-								.get(officeFloorTeamModel
-										.getOfficeFloorTeamName());
+						officeFloorTeam = officeFloorTeams.get(officeFloorTeamModel.getOfficeFloorTeamName());
 					}
 				}
 				if (officeFloorTeam == null) {
-					continue; // must have undertaking office floor team
+					continue; // must have undertaking OfficeFloor team
 				}
 
-				// Have the office team be the office floor team
+				// Have the office team be the OfficeFloor team
 				deployer.link(officeTeam, officeFloorTeam);
 			}
 		}
@@ -557,8 +479,7 @@ public class OfficeFloorModelOfficeFloorSource extends
 
 			// Obtain the managed object source
 			OfficeFloorManagedObjectSource managedObjectSource = officeFloorManagedObjectSources
-					.get(managedObjectSourceModel
-							.getOfficeFloorManagedObjectSourceName());
+					.get(managedObjectSourceModel.getOfficeFloorManagedObjectSourceName());
 			if (managedObjectSource == null) {
 				continue; // must have managed object source
 			}
@@ -568,17 +489,14 @@ public class OfficeFloorModelOfficeFloorSource extends
 			OfficeFloorManagedObjectSourceToDeployedOfficeModel moToOffice = managedObjectSourceModel
 					.getManagingOffice();
 			if (moToOffice != null) {
-				DeployedOfficeModel officeModel = moToOffice
-						.getManagingOffice();
+				DeployedOfficeModel officeModel = moToOffice.getManagingOffice();
 				if (officeModel != null) {
-					managingOffice = offices.get(officeModel
-							.getDeployedOfficeName());
+					managingOffice = offices.get(officeModel.getDeployedOfficeName());
 				}
 			}
 			if (managingOffice != null) {
 				// Have the office manage the managed object
-				deployer.link(managedObjectSource.getManagingOffice(),
-						managingOffice);
+				deployer.link(managedObjectSource.getManagingOffice(), managingOffice);
 			}
 
 			// Obtain the input managed object
@@ -586,14 +504,11 @@ public class OfficeFloorModelOfficeFloorSource extends
 			OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel mosToInput = managedObjectSourceModel
 					.getOfficeFloorInputManagedObject();
 			if (mosToInput != null) {
-				OfficeFloorInputManagedObjectModel inputMo = mosToInput
-						.getOfficeFloorInputManagedObject();
+				OfficeFloorInputManagedObjectModel inputMo = mosToInput.getOfficeFloorInputManagedObject();
 				if (inputMo != null) {
-					String inputManagedObjectName = inputMo
-							.getOfficeFloorInputManagedObjectName();
+					String inputManagedObjectName = inputMo.getOfficeFloorInputManagedObjectName();
 					if (!CompileUtil.isBlank(inputManagedObjectName)) {
-						inputManagedObject = officeFloorInputManagedObjects
-								.get(inputManagedObjectName);
+						inputManagedObject = officeFloorInputManagedObjects.get(inputManagedObjectName);
 					}
 				}
 			}
@@ -602,31 +517,24 @@ public class OfficeFloorModelOfficeFloorSource extends
 				deployer.link(managedObjectSource, inputManagedObject);
 			}
 
-			// Add the office floor managed object source flows
+			// Add the OfficeFloor managed object source flows
 			for (OfficeFloorManagedObjectSourceFlowModel flowModel : managedObjectSourceModel
 					.getOfficeFloorManagedObjectSourceFlows()) {
 
-				// Add the office floor managed object source flow
-				String flowName = flowModel
-						.getOfficeFloorManagedObjectSourceFlowName();
-				ManagedObjectFlow flow = managedObjectSource
-						.getManagedObjectFlow(flowName);
+				// Add the OfficeFloor managed object source flow
+				String flowName = flowModel.getOfficeFloorManagedObjectSourceFlowName();
+				ManagedObjectFlow flow = managedObjectSource.getManagedObjectFlow(flowName);
 
 				// Obtain the office input
 				DeployedOfficeInput officeInput = null;
 				OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel flowToInput = flowModel
 						.getDeployedOfficeInput();
 				if (flowToInput != null) {
-					DeployedOfficeInputModel officeInputModel = flowToInput
-							.getDeployedOfficeInput();
+					DeployedOfficeInputModel officeInputModel = flowToInput.getDeployedOfficeInput();
 					if (officeInputModel != null) {
-						DeployedOfficeModel officeModel = this
-								.getOfficeForInput(officeInputModel,
-										officeFloor);
-						officeInput = officeInputs.get(
-								officeModel.getDeployedOfficeName(),
-								officeInputModel.getSectionName(),
-								officeInputModel.getSectionInputName());
+						DeployedOfficeModel officeModel = this.getOfficeForInput(officeInputModel, officeFloor);
+						officeInput = officeInputs.get(officeModel.getDeployedOfficeName(),
+								officeInputModel.getSectionName(), officeInputModel.getSectionInputName());
 					}
 				}
 				if (officeInput != null) {
@@ -635,26 +543,22 @@ public class OfficeFloorModelOfficeFloorSource extends
 				}
 			}
 
-			// Add the office floor managed object source teams
+			// Add the OfficeFloor managed object source teams
 			for (OfficeFloorManagedObjectSourceTeamModel mosTeamModel : managedObjectSourceModel
 					.getOfficeFloorManagedObjectSourceTeams()) {
 
-				// Add the office floor managed object source team
-				String mosTeamName = mosTeamModel
-						.getOfficeFloorManagedObjectSourceTeamName();
-				ManagedObjectTeam mosTeam = managedObjectSource
-						.getManagedObjectTeam(mosTeamName);
+				// Add the OfficeFloor managed object source team
+				String mosTeamName = mosTeamModel.getOfficeFloorManagedObjectSourceTeamName();
+				ManagedObjectTeam mosTeam = managedObjectSource.getManagedObjectTeam(mosTeamName);
 
-				// Obtain the office floor team
+				// Obtain the OfficeFloor team
 				OfficeFloorTeam team = null;
 				OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel mosTeamToTeam = mosTeamModel
 						.getOfficeFloorTeam();
 				if (mosTeamToTeam != null) {
-					OfficeFloorTeamModel teamModel = mosTeamToTeam
-							.getOfficeFloorTeam();
+					OfficeFloorTeamModel teamModel = mosTeamToTeam.getOfficeFloorTeam();
 					if (teamModel != null) {
-						team = officeFloorTeams.get(teamModel
-								.getOfficeFloorTeamName());
+						team = officeFloorTeams.get(teamModel.getOfficeFloorTeamName());
 					}
 				}
 				if (team != null) {
@@ -675,14 +579,12 @@ public class OfficeFloorModelOfficeFloorSource extends
 	 *            {@link OfficeFloorModel}.
 	 * @return {@link DeployedOfficeModel}.
 	 */
-	private DeployedOfficeModel getOfficeForInput(
-			DeployedOfficeInputModel officeInputModel,
+	private DeployedOfficeModel getOfficeForInput(DeployedOfficeInputModel officeInputModel,
 			OfficeFloorModel officeFloor) {
 
 		// Find the office for the input
 		for (DeployedOfficeModel office : officeFloor.getDeployedOffices()) {
-			for (DeployedOfficeInputModel input : office
-					.getDeployedOfficeInputs()) {
+			for (DeployedOfficeInputModel input : office.getDeployedOfficeInputs()) {
 				if (input == officeInputModel) {
 					// Found input, return containing office
 					return office;
@@ -707,81 +609,22 @@ public class OfficeFloorModelOfficeFloorSource extends
 	 * @return {@link ManagedObjectScope} or <code>null</code> with issue
 	 *         reported to the {@link OfficeFloorDeployer}.
 	 */
-	private ManagedObjectScope getManagedObjectScope(String managedObjectScope,
-			OfficeFloorDeployer deployer, String managedObjectName) {
+	private ManagedObjectScope getManagedObjectScope(String managedObjectScope, OfficeFloorDeployer deployer,
+			String managedObjectName) {
 
 		// Obtain the managed object scope
-		if (OfficeFloorChanges.PROCESS_MANAGED_OBJECT_SCOPE
-				.equals(managedObjectScope)) {
+		if (OfficeFloorChanges.PROCESS_MANAGED_OBJECT_SCOPE.equals(managedObjectScope)) {
 			return ManagedObjectScope.PROCESS;
-		} else if (OfficeFloorChanges.THREAD_MANAGED_OBJECT_SCOPE
-				.equals(managedObjectScope)) {
+		} else if (OfficeFloorChanges.THREAD_MANAGED_OBJECT_SCOPE.equals(managedObjectScope)) {
 			return ManagedObjectScope.THREAD;
-		} else if (OfficeFloorChanges.WORK_MANAGED_OBJECT_SCOPE
-				.equals(managedObjectScope)) {
-			return ManagedObjectScope.WORK;
+		} else if (OfficeFloorChanges.FUNCTION_MANAGED_OBJECT_SCOPE.equals(managedObjectScope)) {
+			return ManagedObjectScope.FUNCTION;
 		}
 
 		// Unknown scope if at this point
-		deployer.addIssue("Unknown managed object scope " + managedObjectScope
-				+ " for managed object " + managedObjectName);
+		deployer.addIssue(
+				"Unknown managed object scope " + managedObjectScope + " for managed object " + managedObjectName);
 		return null;
-	}
-
-	/**
-	 * Tag replaced {@link ConfigurationItem}.
-	 */
-	private class TagReplacedOfficeFloorConfigurationItem implements
-			ConfigurationItem {
-
-		/**
-		 * Tag replaced configuration.
-		 */
-		private final String configuration;
-
-		/**
-		 * Delegate {@link ConfigurationItem}.
-		 */
-		private final ConfigurationItem delegate;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param configuration
-		 *            Tag replaced configuration.
-		 * @param delegate
-		 *            Delegate {@link ConfigurationItem}.
-		 */
-		public TagReplacedOfficeFloorConfigurationItem(String configuration,
-				ConfigurationItem delegate) {
-			this.configuration = configuration;
-			this.delegate = delegate;
-		}
-
-		/*
-		 * ======================== ConfigurationItem =====================
-		 */
-
-		@Override
-		public ConfigurationContext getContext() {
-			return this.delegate.getContext();
-		}
-
-		@Override
-		public String getLocation() {
-			return this.delegate.getLocation();
-		}
-
-		@Override
-		public InputStream getConfiguration() throws Exception {
-			return new ByteArrayInputStream(this.configuration.getBytes());
-		}
-
-		@Override
-		public void setConfiguration(InputStream configuration)
-				throws Exception {
-			this.delegate.setConfiguration(configuration);
-		}
 	}
 
 }

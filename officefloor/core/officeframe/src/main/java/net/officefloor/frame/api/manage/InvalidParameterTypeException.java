@@ -17,10 +17,10 @@
  */
 package net.officefloor.frame.api.manage;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.function.ManagedFunction;
 
 /**
- * Indicates parameter type to {@link Task} is invalid.
+ * Indicates parameter type to {@link ManagedFunction} is invalid.
  * 
  * @author Daniel Sagenschneider
  */

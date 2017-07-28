@@ -17,11 +17,11 @@
  */
 package net.officefloor.model.woof;
 
+import net.officefloor.configuration.ConfigurationContext;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.source.SourceProperties;
-import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionChangeContext;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionConfiguration;
 
@@ -73,13 +73,10 @@ public class WoofTemplateExtensionChangeContextImpl extends SourceContextImpl
 	 * @param issues
 	 *            {@link WoofChangeIssues}.
 	 */
-	public WoofTemplateExtensionChangeContextImpl(boolean isLoadingType,
-			SourceContext sourceContext, String oldUri,
-			SourceProperties oldProperties, String newUri,
-			SourceProperties newProperties,
+	public WoofTemplateExtensionChangeContextImpl(boolean isLoadingType, SourceContext sourceContext, String oldUri,
+			SourceProperties oldProperties, String newUri, SourceProperties newProperties,
 			ConfigurationContext configurationContext, WoofChangeIssues issues) {
-		super(isLoadingType, sourceContext, (newUri == null ? null
-				: newProperties));
+		super(isLoadingType, sourceContext, (newUri == null ? null : newProperties));
 
 		// Store state
 		this.configurationContext = configurationContext;
@@ -89,16 +86,14 @@ public class WoofTemplateExtensionChangeContextImpl extends SourceContextImpl
 		if (oldUri == null) {
 			this.oldConfiguration = null; // no configuration
 		} else {
-			this.oldConfiguration = new WoofTemplateExtensionConfigurationImpl(
-					oldUri, oldProperties);
+			this.oldConfiguration = new WoofTemplateExtensionConfigurationImpl(oldUri, oldProperties);
 		}
 
 		// Create the new configuration
 		if (newUri == null) {
 			this.newConfiguration = null; // no configuration
 		} else {
-			this.newConfiguration = new WoofTemplateExtensionConfigurationImpl(
-					newUri, newProperties);
+			this.newConfiguration = new WoofTemplateExtensionConfigurationImpl(newUri, newProperties);
 		}
 	}
 
@@ -129,8 +124,8 @@ public class WoofTemplateExtensionChangeContextImpl extends SourceContextImpl
 	/**
 	 * {@link WoofTemplateExtensionConfiguration} implementation.
 	 */
-	private static class WoofTemplateExtensionConfigurationImpl extends
-			SourcePropertiesImpl implements WoofTemplateExtensionConfiguration {
+	private static class WoofTemplateExtensionConfigurationImpl extends SourcePropertiesImpl
+			implements WoofTemplateExtensionConfiguration {
 
 		/**
 		 * URI.
@@ -145,8 +140,7 @@ public class WoofTemplateExtensionChangeContextImpl extends SourceContextImpl
 		 * @param sourceProperties
 		 *            {@link SourceProperties}.
 		 */
-		public WoofTemplateExtensionConfigurationImpl(String uri,
-				SourceProperties sourceProperties) {
+		public WoofTemplateExtensionConfigurationImpl(String uri, SourceProperties sourceProperties) {
 			super(sourceProperties);
 			this.uri = uri;
 		}

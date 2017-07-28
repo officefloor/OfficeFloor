@@ -1,0 +1,17 @@
+<context>
+	<office-floor>
+		<teams>
+			<team name="OFFICEFLOOR_TEAM" source="ONE_PERSON">
+				<type-qualification type="${testcase}$CompileManagedObject" />
+			</team>
+		</teams>
+		<offices>
+			<office name="OFFICE" source="${testcase}$CompileOfficeSource">
+				<team name="OFFICE_TEAM">
+					<!-- auto-wire the team -->
+					<!-- <office-floor-team name="OFFICEFLOOR_TEAM" /> -->
+				</team>
+			</office>
+		</offices>
+	</office-floor>
+</context>

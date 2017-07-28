@@ -17,30 +17,47 @@
  */
 package net.officefloor.plugin.woof.template;
 
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.configuration.ConfigurationContext;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.plugin.web.http.application.HttpTemplateSection;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 
 /**
  * Context for the {@link WoofTemplateExtensionSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WoofTemplateExtensionSourceContext extends SourceContext {
+public interface WoofTemplateExtensionSourceContext extends SourceContext, ConfigurationContext {
 
 	/**
-	 * Obtains the {@link HttpTemplateAutoWireSection} being extended.
+	 * Obtains the URL path to the {@link HttpTemplateSection}.
 	 * 
-	 * @return {@link HttpTemplateAutoWireSection} being extended.
+	 * @return URL path to the {@link HttpTemplateSection}.
 	 */
-	HttpTemplateAutoWireSection getTemplate();
+	String getTemplatePath();
 
 	/**
-	 * Obtains the {@link WebAutoWireApplication} that the
-	 * {@link HttpTemplateAutoWireSection} has been added.
+	 * Obtains the {@link HttpTemplateSection} being extended.
 	 * 
-	 * @return {@link WebAutoWireApplication}.
+	 * @return {@link HttpTemplateSection} being extended.
 	 */
-	WebAutoWireApplication getWebApplication();
+	HttpTemplateSection getTemplate();
+
+	/**
+	 * Obtains the {@link WebArchitect} that the {@link HttpTemplateSection} has
+	 * been added.
+	 * 
+	 * @return {@link WebArchitect}.
+	 */
+	WebArchitect getWebApplication();
+
+	/**
+	 * Obtains the {@link OfficeArchitect} that the {@link HttpTemplateSection}
+	 * has been added.
+	 * 
+	 * @return {@link OfficeArchitect}.
+	 */
+	OfficeArchitect getOfficeArchitect();
 
 }

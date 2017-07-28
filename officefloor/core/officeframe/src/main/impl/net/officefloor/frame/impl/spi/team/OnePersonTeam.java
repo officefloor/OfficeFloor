@@ -17,27 +17,22 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
-import net.officefloor.frame.spi.team.JobContext;
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
+import java.util.concurrent.ThreadFactory;
+
+import net.officefloor.frame.api.team.Job;
+import net.officefloor.frame.api.team.Team;
 
 /**
- * Team having only one {@link Thread}.
+ * {@link Team} having only one {@link Thread}.
  * 
  * @author Daniel Sagenschneider
  */
 public class OnePersonTeam implements Team {
 
 	/**
-	 * Name of this {@link Team}.
+	 * {@link ThreadFactory}.
 	 */
-	private final String teamName;
-
-	/**
-	 * {@link TeamIdentifier} of the {@link Team}.
-	 */
-	private final TeamIdentifier teamIdentifier;
+	private final ThreadFactory threadFactory;
 
 	/**
 	 * Time to wait in milliseconds for a {@link Job}.
@@ -45,30 +40,41 @@ public class OnePersonTeam implements Team {
 	private final long waitTime;
 
 	/**
-	 * {@link OnePerson} of this {@link Team}.
-	 */
-	protected OnePerson person = null;
-
-	/**
 	 * {@link JobQueue}.
 	 */
-	private final JobQueue taskQueue = new JobQueue();
+	private final JobQueue jobQueue = new JobQueue();
+
+	/**
+	 * {@link OnePerson} of this {@link Team}.
+	 */
+	private OnePerson person = null;
+
+	/**
+	 * Single {@link Thread}.
+	 */
+	private Thread thread = null;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param teamName
-	 *            Name of this {@link Team}.
-	 * @param teamIdentifier
-	 *            {@link TeamIdentifier} of this {@link Team}.
+	 * @param threadFactory
+	 *            {@link ThreadFactory}.
 	 * @param waitTime
 	 *            Time to wait in milliseconds for a {@link Job}.
 	 */
-	public OnePersonTeam(String teamName, TeamIdentifier teamIdentifier,
-			long waitTime) {
-		this.teamName = teamName;
-		this.teamIdentifier = teamIdentifier;
+	public OnePersonTeam(ThreadFactory threadFactory, long waitTime) {
+		this.threadFactory = threadFactory;
 		this.waitTime = waitTime;
+	}
+
+	/**
+	 * Obtains the name of the single {@link Thread}.
+	 * 
+	 * @return Name of the single {@link Thread}. Will be <code>null</code> if
+	 *         {@link Team} not started.
+	 */
+	public String getThreadName() {
+		return (this.thread != null ? this.thread.getName() : null);
 	}
 
 	/*
@@ -76,30 +82,26 @@ public class OnePersonTeam implements Team {
 	 */
 
 	@Override
-	public synchronized void startWorking() {
+	public void startWorking() {
 		if (this.person != null) {
-			throw new IllegalStateException("Team " + this.getClass().getName()
-					+ " has already started working");
+			throw new IllegalStateException("Team " + this.getClass().getName() + " has already started working");
 		}
 
 		// Hire the person for the team
-		this.person = new OnePerson(this.taskQueue, this.waitTime);
+		this.person = new OnePerson(this.jobQueue, this.waitTime);
 
 		// Start the person working
-		String threadName = this.getClass().getSimpleName() + "_"
-				+ this.teamName;
-		Thread thread = new Thread(this.person, threadName);
-		thread.setDaemon(true);
-		thread.start();
+		this.thread = this.threadFactory.newThread(this.person);
+		this.thread.start();
 	}
 
 	@Override
-	public void assignJob(Job job, TeamIdentifier assignerTeam) {
-		this.taskQueue.enqueue(job);
+	public void assignJob(Job job) {
+		this.jobQueue.enqueue(job);
 	}
 
 	@Override
-	public synchronized void stopWorking() {
+	public void stopWorking() {
 		if (this.person != null) {
 			try {
 				// Stop the Person working
@@ -114,8 +116,9 @@ public class OnePersonTeam implements Team {
 					}
 				}
 			} finally {
-				// Release the person
+				// Release the person and thread
 				this.person = null;
+				this.thread = null;
 			}
 		}
 	}
@@ -123,17 +126,12 @@ public class OnePersonTeam implements Team {
 	/**
 	 * The individual comprising the {@link Team}.
 	 */
-	public class OnePerson implements Runnable, JobContext {
-
-		/**
-		 * Indicates no time is set.
-		 */
-		private static final long NO_TIME = 0;
+	public class OnePerson implements Runnable {
 
 		/**
 		 * {@link JobQueue}.
 		 */
-		private final JobQueue taskQueue;
+		private final JobQueue jobQueue;
 
 		/**
 		 * Time to wait in milliseconds for a {@link Job}.
@@ -151,20 +149,15 @@ public class OnePersonTeam implements Team {
 		protected volatile boolean finished = false;
 
 		/**
-		 * Time.
-		 */
-		private long time = NO_TIME;
-
-		/**
 		 * Initiate.
 		 * 
-		 * @param taskQueue
+		 * @param jobQueue
 		 *            {@link JobQueue}.
 		 * @param waitTime
 		 *            Time to wait in milliseconds for a {@link Job}.
 		 */
-		public OnePerson(JobQueue taskQueue, long waitTime) {
-			this.taskQueue = taskQueue;
+		public OnePerson(JobQueue jobQueue, long waitTime) {
+			this.jobQueue = jobQueue;
 			this.waitTime = waitTime;
 		}
 
@@ -177,49 +170,17 @@ public class OnePersonTeam implements Team {
 			try {
 				while (this.continueWorking) {
 
-					// Reset to no time
-					this.time = NO_TIME;
-
 					// Obtain the next job
-					Job job = this.taskQueue.dequeue(this.waitTime);
+					Job job = this.jobQueue.dequeue(this.waitTime);
 					if (job != null) {
 						// Have job therefore execute it
-						if (!job.doJob(this)) {
-							// Task needs to be re-executed
-							this.taskQueue.enqueue(job);
-						}
+						job.run();
 					}
 				}
 			} finally {
 				// Flag finished
 				this.finished = true;
 			}
-		}
-
-		/*
-		 * ==================== ExecutionContext ===========================
-		 */
-
-		@Override
-		public long getTime() {
-
-			// Ensure time is set
-			if (this.time == NO_TIME) {
-				this.time = System.currentTimeMillis();
-			}
-
-			// Return the time
-			return this.time;
-		}
-
-		@Override
-		public TeamIdentifier getCurrentTeam() {
-			return OnePersonTeam.this.teamIdentifier;
-		}
-
-		@Override
-		public boolean continueExecution() {
-			return this.continueWorking;
 		}
 	}
 

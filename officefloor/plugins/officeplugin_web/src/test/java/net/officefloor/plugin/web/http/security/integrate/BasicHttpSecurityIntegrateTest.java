@@ -19,41 +19,43 @@ package net.officefloor.plugin.web.http.security.integrate;
 
 import org.apache.http.client.CredentialsProvider;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireObject;
-import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSection;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.plugin.web.http.application.HttpSecuritySection;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.store.CredentialStore;
 import net.officefloor.plugin.web.http.security.store.PasswordFileManagedObjectSource;
+import net.officefloor.plugin.web.http.test.CompileWebContext;
 
 /**
  * Integrate tests the {@link BasicHttpSecuritySource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class BasicHttpSecurityIntegrateTest extends
-		AbstractHttpSecurityIntegrateTestCase {
+public class BasicHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrateTestCase {
 
 	@Override
-	protected HttpSecurityAutoWireSection configureHttpSecurity(
-			WebAutoWireApplication application) throws Exception {
+	protected HttpSecuritySection configureHttpSecurity(CompileWebContext context) {
+		WebArchitect web = context.getWebArchitect();
 
 		// Configure the HTTP Security
-		HttpSecurityAutoWireSection security = application
-				.setHttpSecurity(BasicHttpSecuritySource.class);
-		security.addProperty(BasicHttpSecuritySource.PROPERTY_REALM,
-				"TestRealm");
+		HttpSecuritySection security = web.addHttpSecurity("BASIC", BasicHttpSecuritySource.class);
+		security.addProperty(BasicHttpSecuritySource.PROPERTY_REALM, "TestRealm");
+
+		// Obtain the password file
+		String passwordFilePath;
+		try {
+			passwordFilePath = this.findFile(this.getClass(), "basic-password-file.txt").getAbsolutePath();
+		} catch (Throwable ex) {
+			throw fail(ex);
+		}
 
 		// Password File Credential Store
-		String passwordFilePath = this.findFile(this.getClass(),
-				"basic-password-file.txt").getAbsolutePath();
-		AutoWireObject passwordFile = application.addManagedObject(
-				PasswordFileManagedObjectSource.class.getName(), null,
-				new AutoWire(CredentialStore.class));
-		passwordFile.addProperty(
-				PasswordFileManagedObjectSource.PROPERTY_PASSWORD_FILE_PATH,
-				passwordFilePath);
+		OfficeManagedObjectSource passwordFileMos = context.getOfficeArchitect().addOfficeManagedObjectSource(
+				CredentialStore.class.getSimpleName(), PasswordFileManagedObjectSource.class.getName());
+		passwordFileMos.addProperty(PasswordFileManagedObjectSource.PROPERTY_PASSWORD_FILE_PATH, passwordFilePath);
+		passwordFileMos.addOfficeManagedObject(CredentialStore.class.getSimpleName(), ManagedObjectScope.PROCESS);
 
 		// Return the HTTP Security
 		return security;

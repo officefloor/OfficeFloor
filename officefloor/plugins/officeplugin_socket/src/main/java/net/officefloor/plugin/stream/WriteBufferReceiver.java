@@ -36,7 +36,7 @@ public interface WriteBufferReceiver {
 	 * 
 	 * @return Lock for this {@link WriteBufferReceiver}.
 	 */
-	Object getLock();
+	Object getWriteLock();
 
 	/**
 	 * Creates a {@link WriteBuffer} for the data.

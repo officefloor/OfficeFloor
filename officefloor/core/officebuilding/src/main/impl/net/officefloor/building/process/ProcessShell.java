@@ -62,26 +62,20 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 	public static final String TRIGGER_STOP_PROCESS_METHOD = "triggerStopProcess";
 
 	/**
-	 * {@link ObjectName} for the {@link ProcessShellMBean}.
-	 */
-	static ObjectName PROCESS_SHELL_OBJECT_NAME;
-
-	static {
-		try {
-			PROCESS_SHELL_OBJECT_NAME = new ObjectName("process", "type",
-					"ProcessShell");
-		} catch (MalformedObjectNameException ex) {
-			// This should never be the case
-		}
-	}
-
-	/**
 	 * Obtains the {@link ObjectName} for the {@link ProcessShellMBean}.
 	 * 
+	 * @param processName
+	 *            Process name.
 	 * @return {@link ObjectName} for the {@link ProcessShellMBean}.
 	 */
-	public static ObjectName getProcessShellObjectName() {
-		return PROCESS_SHELL_OBJECT_NAME;
+	public static ObjectName getProcessShellObjectName(String processName) {
+		try {
+			return new ObjectName(
+					"net.officefloor:type=" + ProcessShell.class.getSimpleName() + ",name=" + processName);
+		} catch (MalformedObjectNameException ex) {
+			// This should never be the case
+			throw new IllegalArgumentException(ex);
+		}
 	}
 
 	/**
@@ -100,18 +94,15 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 	 * @throws Throwable
 	 *             If failure in running the {@link ManagedProcess}.
 	 */
-	public static void run(String processNamespace,
-			byte[] serialisedManagedProcess) throws Throwable {
+	public static void run(String processNamespace, byte[] serialisedManagedProcess) throws Throwable {
 
 		// Obtain the managed process to run
 		ObjectInputStream managedProcessInput = new ObjectInputStream(
 				new ByteArrayInputStream(serialisedManagedProcess));
-		ManagedProcess managedProcess = (ManagedProcess) managedProcessInput
-				.readObject();
+		ManagedProcess managedProcess = (ManagedProcess) managedProcessInput.readObject();
 
 		// Create the context for the managed process
-		ProcessShell context = new ProcessShell(processNamespace,
-				ManagementFactory.getPlatformMBeanServer());
+		ProcessShell context = new ProcessShell(processNamespace, ManagementFactory.getPlatformMBeanServer());
 		try {
 
 			// Run the process
@@ -150,12 +141,11 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 	 * @throws IOException
 	 *             If failure in running the {@link ManagedProcess}.
 	 */
-	static void main(InputStream fromParentPipe, PrintStream logger,
-			PrintStream errorLogger, String... arguments) throws IOException {
+	static void main(InputStream fromParentPipe, PrintStream logger, PrintStream errorLogger, String... arguments)
+			throws IOException {
 
 		// Obtain pipe from parent
-		ObjectInputStream fromParentObjectPipe = new ObjectInputStream(
-				fromParentPipe);
+		ObjectInputStream fromParentObjectPipe = new ObjectInputStream(fromParentPipe);
 
 		// Attempt to run managed process
 		JMXConnectorServer connectorServer = null;
@@ -163,24 +153,20 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 		boolean isInitilised = false;
 		try {
 			try {
-				ProgressLogger.logInitialMessage(
-						"Process waiting on configuration", logger);
+				ProgressLogger.logInitialMessage("Process waiting on configuration", logger);
 
 				// Obtain the name space (always first)
 				Object object = fromParentObjectPipe.readObject();
 				if (!(object instanceof String)) {
 					throw new IllegalArgumentException(
-							"First object must be a " + String.class.getName()
-									+ " (process name space)");
+							"First object must be a " + String.class.getName() + " (process name space)");
 				}
 				String processName = (String) object;
 
 				// Obtain the Managed Process (always second)
 				object = fromParentObjectPipe.readObject();
 				if (!(object instanceof ManagedProcess)) {
-					throw new IllegalArgumentException(
-							"Second object must be a "
-									+ ManagedProcess.class.getName());
+					throw new IllegalArgumentException("Second object must be a " + ManagedProcess.class.getName());
 				}
 				ManagedProcess managedProcess = (ManagedProcess) object;
 
@@ -188,27 +174,24 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 				int parentPort = fromParentObjectPipe.readInt();
 
 				ProgressLogger.logCompleteMessage(
-						"received configuration (namespace " + processName
-								+ ", management port " + parentPort + ")",
+						"received configuration (namespace " + processName + ", management port " + parentPort + ")",
 						logger);
 
-				try (ProgressLogger progress = new ProgressLogger(
-						"Connecting to process management", "connected", logger)) {
+				try (ProgressLogger progress = new ProgressLogger("Connecting to process management", "connected",
+						logger)) {
 					// Connect to parent to send notifications
 					@SuppressWarnings("resource")
 					Socket parentSocket = new Socket(); // socket closed by
 														// shell
 					parentSocket.connect(new InetSocketAddress(parentPort));
-					toParentPipe = new ObjectOutputStream(
-							parentSocket.getOutputStream());
+					toParentPipe = new ObjectOutputStream(parentSocket.getOutputStream());
 				}
 
-				try (ProgressLogger progress = new ProgressLogger(
-						"Providing process control details", "provided", logger)) {
+				try (ProgressLogger progress = new ProgressLogger("Providing process control details", "provided",
+						logger)) {
 
 					// Create the MBean Server
-					MBeanServer mbeanServer = ManagementFactory
-							.getPlatformMBeanServer();
+					MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
 
 					// Create the server socket for the JMX Connector Server
 					final ServerSocket serverSocket = new ServerSocket();
@@ -217,15 +200,13 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 
 					// Set up environment for JMX Connector Server
 					Map<String, Object> environment = new HashMap<String, Object>();
-					environment
-							.put(RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE,
-									new RMIServerSocketFactory() {
-										@Override
-										public ServerSocket createServerSocket(
-												int port) throws IOException {
-											return serverSocket;
-										}
-									});
+					environment.put(RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE,
+							new RMIServerSocketFactory() {
+								@Override
+								public ServerSocket createServerSocket(int port) throws IOException {
+									return serverSocket;
+								}
+							});
 
 					/*
 					 * Use password to secure JMX Connector Server.
@@ -236,20 +217,14 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 					 */
 					UUID passwordUuid = UUID.randomUUID();
 					String userName = processName;
-					String password = String.valueOf(passwordUuid
-							.getMostSignificantBits())
-							+ String.valueOf(passwordUuid
-									.getLeastSignificantBits());
-					InputStream passwordStream = new ByteArrayInputStream(
-							(userName + "=" + password).getBytes());
-					environment.put(RMIConnectorServer.AUTHENTICATOR,
-							new PasswordAuthenticator(passwordStream));
+					String password = String.valueOf(passwordUuid.getMostSignificantBits())
+							+ String.valueOf(passwordUuid.getLeastSignificantBits());
+					InputStream passwordStream = new ByteArrayInputStream((userName + "=" + password).getBytes());
+					environment.put(RMIConnectorServer.AUTHENTICATOR, new PasswordAuthenticator(passwordStream));
 
 					// Start the JMX Connecter Server (also ensure shutdown)
-					connectorServer = JMXConnectorServerFactory
-							.newJMXConnectorServer(new JMXServiceURL(
-									JMX_COMMUNICATION_PROTOCOL, null,
-									serverPort), environment, mbeanServer);
+					connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(
+							new JMXServiceURL(JMX_COMMUNICATION_PROTOCOL, null, serverPort), environment, mbeanServer);
 					connectorServer.start();
 
 					// Send connection details back to parent
@@ -261,31 +236,28 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 					toParentPipe.flush();
 				}
 
-				try (ProgressLogger progress = new ProgressLogger(
-						"Waiting on management to connect", "connected", logger)) {
+				try (ProgressLogger progress = new ProgressLogger("Waiting on management to connect", "connected",
+						logger)) {
 					// Wait on parent to connect
 					fromParentObjectPipe.readBoolean();
 				}
 
 				// Create instance as context
-				ProcessShell context = new ProcessShell(processName,
-						connectorServer, toParentPipe);
+				ProcessShell context = new ProcessShell(processName, connectorServer, toParentPipe);
 
-				try (ProgressLogger progress = new ProgressLogger(
-						"Initialising the process", "initialised", logger)) {
+				try (ProgressLogger progress = new ProgressLogger("Initialising the process", "initialised", logger)) {
 					// Initialise the managed process
 					managedProcess.init(context);
 					isInitilised = true;
 				}
 
-				try (ProgressLogger progress = new ProgressLogger(
-						"Registering process MBean", "registered", logger)) {
+				try (ProgressLogger progress = new ProgressLogger("Registering process MBean", "registered", logger)) {
 					// Initialised so register the process shell MBean
-					context.registerMBean(context, PROCESS_SHELL_OBJECT_NAME);
+					context.registerMBean(context, getProcessShellObjectName(processName));
 				}
 
-				try (ProgressLogger progress = new ProgressLogger(
-						"Waiting for startup to complete", "completed", logger)) {
+				try (ProgressLogger progress = new ProgressLogger("Waiting for startup to complete", "completed",
+						logger)) {
 					// Wait on parent to register initialised
 					fromParentObjectPipe.readBoolean();
 				}
@@ -298,8 +270,7 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 			} catch (Throwable ex) {
 
 				// Log the failure
-				errorLogger.println(isInitilised ? "Process failure"
-						: "Failed to initialise process");
+				errorLogger.println(isInitilised ? "Process failure" : "Failed to initialise process");
 				ex.printStackTrace(errorLogger);
 
 				// Notify Process Manager of failure
@@ -307,17 +278,14 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 					try {
 
 						// Propagate process exception
-						ProcessException propagation = ProcessException
-								.propagate(ex);
+						ProcessException propagation = ProcessException.propagate(ex);
 
 						// Propagate exception to Process Manager
 						toParentPipe.writeObject(propagation);
 						toParentPipe.flush();
 					} catch (Throwable notifyEx) {
 						// Indicate failure to notify
-						errorLogger.println("Failed to notify "
-								+ ProcessManager.class.getSimpleName()
-								+ " of failure");
+						errorLogger.println("Failed to notify " + ProcessManager.class.getSimpleName() + " of failure");
 						notifyEx.printStackTrace(errorLogger);
 					}
 				}
@@ -377,8 +345,7 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 	 * @param toParentPipe
 	 *            {@link ObjectOutputStream} to send the notifications.
 	 */
-	public ProcessShell(String processNamespace,
-			JMXConnectorServer connectorServer, ObjectOutputStream toParentPipe) {
+	public ProcessShell(String processNamespace, JMXConnectorServer connectorServer, ObjectOutputStream toParentPipe) {
 		this.processNamespace = processNamespace;
 		this.connectorServer = connectorServer;
 		this.toParentPipe = toParentPipe;
@@ -446,8 +413,7 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 
 	@Override
 	public void registerMBean(Object mbean, ObjectName name)
-			throws InstanceAlreadyExistsException, MBeanRegistrationException,
-			NotCompliantMBeanException {
+			throws InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException {
 
 		// Determine if running in own process
 		if (this.connectorServer != null) {
@@ -458,9 +424,7 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 			// Notify managing parent process of the MBean
 			JMXServiceURL serviceUrl = this.connectorServer.getAddress();
 			try {
-				this.toParentPipe
-						.writeObject(new MBeanRegistrationNotification(
-								serviceUrl, name));
+				this.toParentPipe.writeObject(new MBeanRegistrationNotification(serviceUrl, name));
 				this.toParentPipe.flush();
 			} catch (IOException ex) {
 				// Must be able to register with managing parent process

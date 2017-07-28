@@ -17,16 +17,14 @@
  */
 package net.officefloor.eclipse.skin;
 
-import net.officefloor.eclipse.skin.desk.DeskFigureFactory;
+import org.eclipse.draw2d.IFigure;
+
 import net.officefloor.eclipse.skin.office.OfficeFigureFactory;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorFigureFactory;
 import net.officefloor.eclipse.skin.section.SectionFigureFactory;
-import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.section.SectionModel;
-
-import org.eclipse.draw2d.IFigure;
 
 /**
  * Skin that creates the necessary {@link IFigure} instances for representing
@@ -35,14 +33,6 @@ import org.eclipse.draw2d.IFigure;
  * @author Daniel Sagenschneider
  */
 public interface OfficeFloorSkin {
-
-	/**
-	 * Obtains the {@link DeskFigureFactory} to create necessary {@link IFigure}
-	 * instances for the {@link DeskModel}.
-	 * 
-	 * @return {@link DeskFigureFactory}.
-	 */
-	DeskFigureFactory getDeskFigureFactory();
 
 	/**
 	 * Obtains the {@link OfficeFigureFactory} to create necessary

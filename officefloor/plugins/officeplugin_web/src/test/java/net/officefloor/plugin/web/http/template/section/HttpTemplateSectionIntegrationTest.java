@@ -23,41 +23,6 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireObject;
-import net.officefloor.autowire.AutoWireOfficeFloor;
-import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.autowire.ManagedObjectSourceWirer;
-import net.officefloor.autowire.ManagedObjectSourceWirerContext;
-import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.spi.source.UnknownPropertyError;
-import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.section.clazz.NextTask;
-import net.officefloor.plugin.section.clazz.Parameter;
-import net.officefloor.plugin.section.work.WorkSectionSource;
-import net.officefloor.plugin.socket.server.http.HttpHeader;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
-import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
-import net.officefloor.plugin.web.http.application.HttpRequestObjectManagedObjectSource;
-import net.officefloor.plugin.web.http.application.HttpRequestState;
-import net.officefloor.plugin.web.http.application.HttpRequestStateManagedObjectSource;
-import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
-import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
-import net.officefloor.plugin.web.http.route.HttpRouteTask;
-import net.officefloor.plugin.web.http.route.HttpRouteWorkSource;
-import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
-import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
-import net.officefloor.plugin.web.http.template.NotRenderTemplateAfter;
-import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
-import net.officefloor.plugin.web.http.template.section.PostRedirectGetLogic.Parameters;
-
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
@@ -67,6 +32,35 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+
+import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.source.UnknownPropertyError;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedobject.singleton.Singleton;
+import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.plugin.socket.server.http.HttpHeader;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.application.HttpRequestObjectManagedObjectSource;
+import net.officefloor.plugin.web.http.application.HttpRequestState;
+import net.officefloor.plugin.web.http.application.HttpTemplateSection;
+import net.officefloor.plugin.web.http.application.WebArchitect;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
+import net.officefloor.plugin.web.http.route.HttpRouteFunction;
+import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.plugin.web.http.template.HttpTemplateManagedFunctionSource;
+import net.officefloor.plugin.web.http.template.NotRenderTemplateAfter;
+import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
+import net.officefloor.plugin.web.http.template.section.PostRedirectGetLogic.Parameters;
+import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
 
 /**
  * Tests the integration of the {@link HttpTemplateSectionSource}.
@@ -81,8 +75,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	private static final String RENDERED_TEMPLATE_XML = "<html><body><p>Template Test</p>"
 			+ "<p>&lt;img src=&quot;Test.png&quot; /&gt; <img src=\"Test.png\" /></p>"
 			+ "<p>Bean with property bean-property  0 1 2 3 4 5 6 7 8 9</p><table>"
-			+ "<tr><td>Name</td><td>Description</td></tr>"
-			+ "<tr><td>row</td><td>test row</td></tr></table>"
+			+ "<tr><td>Name</td><td>Description</td></tr>" + "<tr><td>row</td><td>test row</td></tr></table>"
 			+ "<form action=\"${LINK_nextTask_QUALIFICATION}/uri-nextTask${LINK_SUFFIX}\"><input type=\"submit\"/></form>"
 			+ "<form action=\"${LINK_submit_QUALIFICATION}/uri-submit${LINK_SUFFIX}\"><input type=\"submit\"/></form>"
 			+ "<a href=\"${LINK_nonMethodLink_QUALIFICATION}/uri-nonMethodLink${LINK_SUFFIX}\">Non-method link</a>"
@@ -92,19 +85,17 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	/**
 	 * Host name.
 	 */
-	private static final String HOST_NAME = HttpApplicationLocationManagedObjectSource
-			.getDefaultHostName();
+	private static final String HOST_NAME = HttpApplicationLocationManagedObjectSource.getDefaultHostName();
 
 	/**
-	 * {@link AutoWireOfficeFloorSource}.
+	 * {@link WebCompileOfficeFloor}.
 	 */
-	private final AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
+	private final WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
 
 	/**
 	 * Mock {@link Connection}.
 	 */
-	private final Connection connection = this
-			.createSynchronizedMock(Connection.class);
+	private final Connection connection = this.createSynchronizedMock(Connection.class);
 
 	/**
 	 * HTTP port for running on.
@@ -137,9 +128,9 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	private boolean isServiceMethodLink = false;
 
 	/**
-	 * {@link AutoWireOfficeFloor}.
+	 * {@link OfficeFloor}.
 	 */
-	private AutoWireOfficeFloor officeFloor;
+	private OfficeFloor officeFloor;
 
 	/**
 	 * {@link CloseableHttpClient}.
@@ -185,15 +176,14 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("/uri", false);
-		this.assertRenderedResponse("", LinkQualify.NONE, LinkQualify.NONE,
-				LinkQualify.NONE, LinkQualify.NONE, null, rendering);
+		this.assertRenderedResponse("", LinkQualify.NONE, LinkQualify.NONE, LinkQualify.NONE, LinkQualify.NONE, null,
+				rendering);
 	}
 
 	/**
 	 * Ensure can render template with default Content-Type and {@link Charset}.
 	 */
-	public void testRenderTemplateWithDefaultContentTypeAndCharset()
-			throws Exception {
+	public void testRenderTemplateWithDefaultContentTypeAndCharset() throws Exception {
 
 		// Start the server
 		this.isNonMethodLink = true;
@@ -202,40 +192,34 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		this.startHttpServer("Template.ofp", TemplateLogic.class);
 
 		// Create the expected Content-Type header value
-		String expectedContentType = this.contentType + "; charset="
-				+ this.charset.name();
+		String expectedContentType = this.contentType + "; charset=" + this.charset.name();
 
 		// Ensure correct rendering (with headers)
 		HttpResponse response = this.doRawHttpRequest("/uri", false);
 		Header header = response.getFirstHeader("Content-Type");
-		assertEquals("Incorrect Content-Type", expectedContentType,
-				header.getValue());
+		assertEquals("Incorrect Content-Type", expectedContentType, header.getValue());
 	}
 
 	/**
 	 * Ensure can render template specifying the Content-Type and
 	 * {@link Charset}.
 	 */
-	public void testRenderTemplateWithConfiguredContentTypeAndCharset()
-			throws Exception {
+	public void testRenderTemplateWithConfiguredContentTypeAndCharset() throws Exception {
 
 		// Start the server
 		this.isNonMethodLink = true;
 		this.contentType = "text/plain";
 		this.charset = Charset.forName("UTF-16");
-		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				HttpTemplateSectionSource.PROPERTY_CONTENT_TYPE, "text/plain",
-				HttpTemplateSectionSource.PROPERTY_CHARSET, "UTF-16");
+		this.startHttpServer("Template.ofp", TemplateLogic.class, HttpTemplateSectionSource.PROPERTY_CONTENT_TYPE,
+				"text/plain", HttpTemplateSectionSource.PROPERTY_CHARSET, "UTF-16");
 
 		// Create the expected Content-Type header value
-		String expectedContentType = this.contentType + "; charset="
-				+ this.charset.name();
+		String expectedContentType = this.contentType + "; charset=" + this.charset.name();
 
 		// Ensure correct rendering (with headers)
 		HttpResponse response = this.doRawHttpRequest("/uri", false);
 		Header header = response.getFirstHeader("Content-Type");
-		assertEquals("Incorrect Content-Type", expectedContentType,
-				header.getValue());
+		assertEquals("Incorrect Content-Type", expectedContentType, header.getValue());
 	}
 
 	/**
@@ -246,12 +230,12 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Start the server
 		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX, ".suffix");
+				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX, ".suffix");
 
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("/uri.suffix", false);
-		this.assertRenderedResponse("", LinkQualify.NONE, LinkQualify.NONE,
-				LinkQualify.NONE, LinkQualify.NONE, ".suffix", rendering);
+		this.assertRenderedResponse("", LinkQualify.NONE, LinkQualify.NONE, LinkQualify.NONE, LinkQualify.NONE,
+				".suffix", rendering);
 	}
 
 	/**
@@ -263,17 +247,14 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Start the server
 		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
-				String.valueOf(true),
-				HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX + "submit",
-				String.valueOf(false));
+				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE, String.valueOf(true),
+				HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "submit", String.valueOf(false));
 
 		// Ensure correct rendering of template
 		HttpResponse response = this.doRawHttpRequest("/uri-submit", false);
-		assertEquals("Should trigger redirect", 303, response.getStatusLine()
-				.getStatusCode());
-		assertEquals("Incorrect redirect URL", "https://" + HOST_NAME + ":"
-				+ this.httpsPort + "/uri" + HttpRouteTask.REDIRECT_URI_SUFFIX,
+		assertEquals("Should trigger redirect", 303, response.getStatusLine().getStatusCode());
+		assertEquals("Incorrect redirect URL",
+				"https://" + HOST_NAME + ":" + this.httpsPort + "/uri" + HttpRouteFunction.REDIRECT_URI_SUFFIX,
 				response.getFirstHeader("Location").getValue());
 	}
 
@@ -286,13 +267,11 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Start the server
 		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX + "submit",
-				String.valueOf(true));
+				HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "submit", String.valueOf(true));
 
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("/uri-submit", true);
-		this.assertRenderedResponse("<submit/>", LinkQualify.NON_SECURE,
-				LinkQualify.NONE, LinkQualify.NON_SECURE,
+		this.assertRenderedResponse("<submit/>", LinkQualify.NON_SECURE, LinkQualify.NONE, LinkQualify.NON_SECURE,
 				LinkQualify.NON_SECURE, null, rendering);
 	}
 
@@ -304,13 +283,12 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Start the server
 		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
-				String.valueOf(true));
+				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE, String.valueOf(true));
 
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("/uri", true);
-		this.assertRenderedResponse("", LinkQualify.NONE, LinkQualify.NONE,
-				LinkQualify.NONE, LinkQualify.NONE, null, rendering);
+		this.assertRenderedResponse("", LinkQualify.NONE, LinkQualify.NONE, LinkQualify.NONE, LinkQualify.NONE, null,
+				rendering);
 	}
 
 	/**
@@ -321,13 +299,12 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Start the server
 		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX + "submit",
-				String.valueOf(true));
+				HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "submit", String.valueOf(true));
 
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("/uri", false);
-		this.assertRenderedResponse("", LinkQualify.NONE, LinkQualify.SECURE,
-				LinkQualify.NONE, LinkQualify.NONE, null, rendering);
+		this.assertRenderedResponse("", LinkQualify.NONE, LinkQualify.SECURE, LinkQualify.NONE, LinkQualify.NONE, null,
+				rendering);
 	}
 
 	/**
@@ -338,15 +315,13 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Start the server
 		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
-				String.valueOf(true),
-				HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX
-						+ "nonMethodLink", String.valueOf(false));
+				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_SECURE, String.valueOf(true),
+				HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "nonMethodLink", String.valueOf(false));
 
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("/uri", true);
-		this.assertRenderedResponse("", LinkQualify.NONE, LinkQualify.NONE,
-				LinkQualify.NON_SECURE, LinkQualify.NONE, null, rendering);
+		this.assertRenderedResponse("", LinkQualify.NONE, LinkQualify.NONE, LinkQualify.NON_SECURE, LinkQualify.NONE,
+				null, rendering);
 	}
 
 	/**
@@ -361,8 +336,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 * Ensure continue to service GET method without redirect.
 	 */
 	public void testPostRedirectGet_NoRedirectAsGet() throws Exception {
-		HttpGet request = new HttpGet("http://" + HOST_NAME + ":"
-				+ this.httpPort + "/uri-post?text=TEST");
+		HttpGet request = new HttpGet("http://" + HOST_NAME + ":" + this.httpPort + "/uri-post?text=TEST");
 		this.doPostRedirectGetPatternTest(request, "TEST /uri-post");
 	}
 
@@ -370,13 +344,9 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 * Ensure maintain {@link HttpRequestState} across redirect.
 	 */
 	public void testPostRedirectGet_AlternateMethod() throws Exception {
-		HttpUriRequest request = new HttpOther("http://" + HOST_NAME + ":"
-				+ this.httpPort + "/uri-post?text=TEST");
-		this.doPostRedirectGetPatternTest(
-				request,
-				"TEST /uri-post",
-				HttpTemplateInitialWorkSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
-				request.getMethod());
+		HttpUriRequest request = new HttpOther("http://" + HOST_NAME + ":" + this.httpPort + "/uri-post?text=TEST");
+		this.doPostRedirectGetPatternTest(request, "TEST /uri-post",
+				HttpTemplateInitialManagedFunctionSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS, request.getMethod());
 	}
 
 	/**
@@ -414,8 +384,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 */
 	public void testPostRedirectGet_HttpResponseHeader() throws Exception {
 		HttpPost post = this.createHttpPost("?operation=HEADER");
-		HttpResponse response = this.doPostRedirectGetPatternTest(post,
-				" /uri-post");
+		HttpResponse response = this.doPostRedirectGetPatternTest(post, " /uri-post");
 		Header header = response.getFirstHeader("NAME");
 		assertNotNull("Should have HTTP header", header);
 		assertEquals("Incorrect HTTP header value", "VALUE", header.getValue());
@@ -445,8 +414,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 * @return {@link HttpPost}.
 	 */
 	private HttpPost createHttpPost(String requestUriSuffix) {
-		return new HttpPost("http://" + HOST_NAME + ":" + this.httpPort
-				+ "/uri-post"
+		return new HttpPost("http://" + HOST_NAME + ":" + this.httpPort + "/uri-post"
 				+ (requestUriSuffix == null ? "" : requestUriSuffix));
 	}
 
@@ -461,23 +429,20 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 *            Template name/value property pairs.
 	 * @return {@link HttpResponse}.
 	 */
-	private HttpResponse doPostRedirectGetPatternTest(HttpUriRequest request,
-			String expectedResponse, String... templatePropertyPairs)
-			throws Exception {
+	private HttpResponse doPostRedirectGetPatternTest(HttpUriRequest request, String expectedResponse,
+			String... templatePropertyPairs) throws Exception {
 
 		// Start the server
-		AutoWireObject parameters = this.source.addManagedObject(
-				HttpRequestObjectManagedObjectSource.class.getName(), null,
-				new AutoWire(Parameters.class));
-		parameters.addProperty(
-				HttpRequestObjectManagedObjectSource.PROPERTY_CLASS_NAME,
-				Parameters.class.getName());
-		parameters
-				.addProperty(
-						HttpRequestObjectManagedObjectSource.PROPERTY_IS_LOAD_HTTP_PARAMETERS,
-						String.valueOf(true));
-		this.startHttpServer("PostRedirectGet.ofp", PostRedirectGetLogic.class,
-				templatePropertyPairs);
+		this.compiler.office((context) -> {
+			OfficeManagedObjectSource parametersMos = context.getOfficeArchitect()
+					.addOfficeManagedObjectSource("PARAMETERS", HttpRequestObjectManagedObjectSource.class.getName());
+			parametersMos.addProperty(HttpRequestObjectManagedObjectSource.PROPERTY_CLASS_NAME,
+					Parameters.class.getName());
+			parametersMos.addProperty(HttpRequestObjectManagedObjectSource.PROPERTY_IS_LOAD_HTTP_PARAMETERS,
+					String.valueOf(true));
+			parametersMos.addOfficeManagedObject("PARAMETERS", ManagedObjectScope.PROCESS);
+		});
+		this.startHttpServer("PostRedirectGet.ofp", PostRedirectGetLogic.class, templatePropertyPairs);
 
 		// Execute the HTTP request
 		HttpResponse response = this.client.execute(request);
@@ -486,19 +451,15 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		if (!(request instanceof HttpGet)) {
 
 			// Ensure is a redirect
-			assertEquals("Should be redirect", 303, response.getStatusLine()
-					.getStatusCode());
+			assertEquals("Should be redirect", 303, response.getStatusLine().getStatusCode());
 			String redirectUrl = response.getFirstHeader("Location").getValue();
-			assertEquals("Incorrect redirect URL", "/uri"
-					+ HttpRouteTask.REDIRECT_URI_SUFFIX, redirectUrl);
+			assertEquals("Incorrect redirect URL", "/uri" + HttpRouteFunction.REDIRECT_URI_SUFFIX, redirectUrl);
 			response.getEntity().getContent().close();
 
 			// Undertake the GET (as triggered by redirect)
-			HttpGet get = new HttpGet("http://" + HOST_NAME + ":"
-					+ this.httpPort + redirectUrl);
+			HttpGet get = new HttpGet("http://" + HOST_NAME + ":" + this.httpPort + redirectUrl);
 			response = this.client.execute(get);
-			assertEquals("Should be successful", 200, response.getStatusLine()
-					.getStatusCode());
+			assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
 		}
 
 		// Ensure correct rendering of template
@@ -510,26 +471,26 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can handle submit to a link that has {@link NextTask} annotation
-	 * for handling.
+	 * Ensure can handle submit to a link that has {@link NextFunction}
+	 * annotation for handling.
 	 */
-	public void testSubmitWithNextTask() throws Exception {
+	public void testSubmitWithNextFunction() throws Exception {
 
 		// Start the server
 		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class);
 
-		final String RESPONSE = "nextTask - finished(NextTask)";
+		final String RESPONSE = "nextFunction - finished(NextFunction)";
 
 		// Ensure correctly renders template on submit
-		this.assertHttpRequest("/uri-nextTask", false, RESPONSE);
+		this.assertHttpRequest("/uri-nextFunction", false, RESPONSE);
 	}
 
 	/**
-	 * Ensure default behaviour of #{link} method without a {@link NextTask}
+	 * Ensure default behaviour of #{link} method without a {@link NextFunction}
 	 * annotation is to render the template.
 	 */
-	public void testSubmitWithoutNextTask() throws Exception {
+	public void testSubmitWithoutNextFunction() throws Exception {
 
 		// Start the server
 		this.isNonMethodLink = true;
@@ -537,27 +498,25 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Ensure correctly renders template on submit not invoking flow
 		String response = this.doHttpRequest("/uri-submit", false);
-		this.assertRenderedResponse("<submit />", LinkQualify.NONE,
-				LinkQualify.NONE, LinkQualify.NONE, LinkQualify.NONE, null,
-				response);
+		this.assertRenderedResponse("<submit />", LinkQualify.NONE, LinkQualify.NONE, LinkQualify.NONE,
+				LinkQualify.NONE, null, response);
 	}
 
 	/**
-	 * Ensure default behaviour of #{link} method without a {@link NextTask}
+	 * Ensure default behaviour of #{link} method without a {@link NextFunction}
 	 * annotation is to render the template.
 	 */
-	public void testSubmitWithoutNextTaskHavingUriSuffix() throws Exception {
+	public void testSubmitWithoutNextFunctionHavingUriSuffix() throws Exception {
 
 		// Start the server
 		this.isNonMethodLink = true;
 		this.startHttpServer("Template.ofp", TemplateLogic.class,
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX, ".suffix");
+				HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI_SUFFIX, ".suffix");
 
 		// Ensure correctly renders template on submit not invoking flow
 		String response = this.doHttpRequest("/uri-submit.suffix", false);
-		this.assertRenderedResponse("<submit />", LinkQualify.NONE,
-				LinkQualify.NONE, LinkQualify.NONE, LinkQualify.NONE,
-				".suffix", response);
+		this.assertRenderedResponse("<submit />", LinkQualify.NONE, LinkQualify.NONE, LinkQualify.NONE,
+				LinkQualify.NONE, ".suffix", response);
 	}
 
 	/**
@@ -571,12 +530,11 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		this.startHttpServer("Template.ofp", TemplateLogic.class);
 
 		// Ensure not renders template afterwards
-		this.assertHttpRequest("/uri-notRenderTemplateAfter", false,
-				"NOT_RENDER_TEMPLATE_AFTER");
+		this.assertHttpRequest("/uri-notRenderTemplateAfter", false, "NOT_RENDER_TEMPLATE_AFTER");
 	}
 
 	/**
-	 * Ensure with {@link NextTask} annotation that invoking a Flow takes
+	 * Ensure with {@link NextFunction} annotation that invoking a Flow takes
 	 * precedence.
 	 */
 	public void testSubmitInvokingFlow() throws Exception {
@@ -616,9 +574,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("/uri", false);
-		assertXmlEquals(
-				"Incorrect rendering",
-				"<html><body><p>hello world</p><p>section data</p></body></html>",
+		assertXmlEquals("Incorrect rendering", "<html><body><p>hello world</p><p>section data</p></body></html>",
 				rendering);
 	}
 
@@ -632,8 +588,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		this.startHttpServer("NoLogicTemplate.ofp", null);
 
 		// Ensure template is correct
-		this.assertHttpRequest("/uri", false,
-				" /uri-nonMethodLink /uri-doExternalFlow");
+		this.assertHttpRequest("/uri", false, " /uri-nonMethodLink /uri-doExternalFlow");
 
 		// Ensure links out from template
 		this.assertHttpRequest("/uri-nonMethodLink", false, "LINKED");
@@ -646,15 +601,11 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Start the server (with context path)
 		this.isNonMethodLink = true;
-		this.startHttpServer(
-				"NoLogicTemplate.ofp",
-				null,
-				HttpApplicationLocationManagedObjectSource.PROPERTY_CONTEXT_PATH,
-				"context");
+		this.startHttpServer("NoLogicTemplate.ofp", null,
+				HttpApplicationLocationManagedObjectSource.PROPERTY_CONTEXT_PATH, "context");
 
 		// Ensure template has context path for links
-		this.assertHttpRequest("/context/uri", false,
-				" /context/uri-nonMethodLink /context/uri-doExternalFlow");
+		this.assertHttpRequest("/context/uri", false, " /context/uri-nonMethodLink /context/uri-doExternalFlow");
 	}
 
 	/**
@@ -676,8 +627,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		this.assertHttpRequest("/uri?getTemplate=end", false, "End");
 
 		// Ensure can loop back
-		this.assertHttpRequest("/uri?getEnd=getTemplate", false,
-				"TemplateOne1TwoTemplateOne1TwoEnd");
+		this.assertHttpRequest("/uri?getEnd=getTemplate", false, "TemplateOne1TwoTemplateOne1TwoEnd");
 	}
 
 	/**
@@ -686,33 +636,28 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	public void testStatefulTemplate() throws Exception {
 
 		// Start the server
-		this.startHttpServer("StatefulTemplate.ofp",
-				StatefulTemplateLogic.class);
+		this.startHttpServer("StatefulTemplate.ofp", StatefulTemplateLogic.class);
 
 		// Ensure retains state across HTTP requests (by incrementing counter)
 		this.assertHttpRequest("/uri", false, "<a href='/uri-increment'>1</a>");
-		this.assertHttpRequest("/uri-increment", false,
-				"increment - finished(2)");
+		this.assertHttpRequest("/uri-increment", false, "increment - finished(2)");
 		this.assertHttpRequest("/uri", false, "<a href='/uri-increment'>2</a>");
-		this.assertHttpRequest("/uri-increment", false,
-				"increment - finished(3)");
+		this.assertHttpRequest("/uri-increment", false, "increment - finished(3)");
 		this.assertHttpRequest("/uri", false, "<a href='/uri-increment'>3</a>");
 	}
 
 	/**
-	 * Ensure on submit link that has next {@link Task} instances that if last
-	 * {@link Task} in Flow does not indicate {@link NextTask} that the template
-	 * is rendered.
+	 * Ensure on submit link that has next {@link ManagedFunction} instances
+	 * that if last {@link ManagedFunction} in Flow does not indicate
+	 * {@link NextFunction} that the template is rendered.
 	 */
 	public void testRenderByDefault() throws Exception {
 
 		// Start the server
-		this.startHttpServer("SubmitTemplate.ofp",
-				RenderByDefaultTemplateLogic.class);
+		this.startHttpServer("SubmitTemplate.ofp", RenderByDefaultTemplateLogic.class);
 
 		// Ensure render template again by default on link submit
-		this.assertHttpRequest("/uri-submit", false,
-				"Submit-RenderByDefault-/uri-submit");
+		this.assertHttpRequest("/uri-submit", false, "Submit-RenderByDefault-/uri-submit");
 	}
 
 	/**
@@ -720,19 +665,18 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 */
 	public static class RenderByDefaultTemplateLogic {
 
-		@NextTask("renderByDefault")
+		@NextFunction("renderByDefault")
 		public void submit(ServerHttpConnection connection) throws IOException {
 			writeMessage(connection, "Submit");
 		}
 
 		// Next is to render the template
-		public void renderByDefault(ServerHttpConnection connection)
-				throws IOException {
+		public void renderByDefault(ServerHttpConnection connection) throws IOException {
 			writeMessage(connection, "-RenderByDefault-");
 		}
 
 		// Required for test configuration
-		@NextTask("doExternalFlow")
+		@NextFunction("doExternalFlow")
 		public void required() {
 		}
 	}
@@ -743,12 +687,10 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	public void testNotRenderTemplateAfter() throws Exception {
 
 		// Start the server
-		this.startHttpServer("SubmitTemplate.ofp",
-				NotRenderTemplateAfterLogic.class);
+		this.startHttpServer("SubmitTemplate.ofp", NotRenderTemplateAfterLogic.class);
 
 		// Ensure not render template after on link submit
-		this.assertHttpRequest("/uri-submit", false,
-				"Submit-NotRenderTemplateAfter");
+		this.assertHttpRequest("/uri-submit", false, "Submit-NotRenderTemplateAfter");
 	}
 
 	/**
@@ -756,19 +698,18 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 */
 	public static class NotRenderTemplateAfterLogic {
 
-		@NextTask("notRenderTemplateAfter")
+		@NextFunction("notRenderTemplateAfter")
 		public void submit(ServerHttpConnection connection) throws IOException {
 			writeMessage(connection, "Submit");
 		}
 
 		@NotRenderTemplateAfter
-		public void notRenderTemplateAfter(ServerHttpConnection connection)
-				throws IOException {
+		public void notRenderTemplateAfter(ServerHttpConnection connection) throws IOException {
 			writeMessage(connection, "-NotRenderTemplateAfter");
 		}
 
 		// Required for test configuration
-		@NextTask("doExternalFlow")
+		@NextFunction("doExternalFlow")
 		public void required() {
 		}
 	}
@@ -779,8 +720,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	public void testNullSectionBean() throws Exception {
 
 		// Start the server
-		this.startHttpServer("NullBeanTemplate.ofp",
-				NullBeanTemplateLogic.class);
+		this.startHttpServer("NullBeanTemplate.ofp", NullBeanTemplateLogic.class);
 
 		// Ensure not render section for null section bean
 		this.assertHttpRequest("/uri", false, "START  END");
@@ -795,7 +735,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 			return null;
 		}
 
-		@NextTask("doExternalFlow")
+		@NextFunction("doExternalFlow")
 		public void necessaryForTest() {
 		}
 	}
@@ -809,8 +749,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		this.startHttpServer("NullBeanTemplate.ofp", VoidTemplateLogic.class);
 
 		// Ensure render section for void section return
-		this.assertHttpRequest("/uri", false,
-				"START  Should not be rendered on null section bean.  END");
+		this.assertHttpRequest("/uri", false, "START  Should not be rendered on null section bean.  END");
 	}
 
 	/**
@@ -821,7 +760,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		public void getSection() {
 		}
 
-		@NextTask("doExternalFlow")
+		@NextFunction("doExternalFlow")
 		public void necessaryForTest() {
 		}
 	}
@@ -832,8 +771,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	public void testNullSectionDataBean() throws Exception {
 
 		// Start the server
-		this.startHttpServer("NullBeanTemplate.ofp",
-				NullBeanDataTemplateLogic.class);
+		this.startHttpServer("NullBeanTemplate.ofp", NullBeanDataTemplateLogic.class);
 
 		// Ensure not render section for null section bean
 		this.assertHttpRequest("/uri", false, "START  END");
@@ -848,7 +786,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 			return null;
 		}
 
-		@NextTask("doExternalFlow")
+		@NextFunction("doExternalFlow")
 		public void necessaryForTest() {
 		}
 	}
@@ -859,15 +797,12 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	public void testInheritChildTemplate() throws Exception {
 
 		// Start the server
-		String parentTemplateLocation = this
-				.getTemplateLocation("ParentTemplate.ofp");
+		String parentTemplateLocation = this.getTemplateLocation("ParentTemplate.ofp");
 		this.startHttpServer("ChildTemplate.ofp", InheritChildLogic.class,
-				HttpTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES,
-				parentTemplateLocation);
+				HttpTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES, parentTemplateLocation);
 
 		// Ensure can inherit sections
-		this.assertHttpRequest("/uri", false,
-				"Parent VALUE Introduced Two Footer /uri-doExternalFlow");
+		this.assertHttpRequest("/uri", false, "Parent VALUE Introduced Two Footer /uri-doExternalFlow");
 	}
 
 	/**
@@ -890,18 +825,14 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	public void testInheritGrandChildTemplate() throws Exception {
 
 		// Start the server
-		String parentTemplateLocation = this
-				.getTemplateLocation("ParentTemplate.ofp");
-		String childTemplateLocation = this
-				.getTemplateLocation("ChildTemplate.ofp");
-		this.startHttpServer("GrandChildTemplate.ofp",
-				InheritGrandChildLogic.class,
+		String parentTemplateLocation = this.getTemplateLocation("ParentTemplate.ofp");
+		String childTemplateLocation = this.getTemplateLocation("ChildTemplate.ofp");
+		this.startHttpServer("GrandChildTemplate.ofp", InheritGrandChildLogic.class,
 				HttpTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES,
 				parentTemplateLocation + ", " + childTemplateLocation);
 
 		// Ensure can inherit sections
-		this.assertHttpRequest("/uri", false,
-				"Grand Child TEXT Override Different order Footer /uri-doExternalFlow");
+		this.assertHttpRequest("/uri", false, "Grand Child TEXT Override Different order Footer /uri-doExternalFlow");
 	}
 
 	/**
@@ -909,8 +840,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 */
 	public static class InheritGrandChildLogic extends InheritChildLogic {
 
-		public InheritGrandChildLogic getOne(
-				HttpSession differentSignatureToEnsureOverrideByName) {
+		public InheritGrandChildLogic getOne(HttpSession differentSignatureToEnsureOverrideByName) {
 			return this;
 		}
 
@@ -928,19 +858,14 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		this.isServiceMethodLink = true;
 
 		// Start the server (with extension)
-		this.startHttpServer("ExtensionTemplate.ofp",
-				MockExtensionTemplateLogic.class, "extension.1",
-				MockHttpTemplateSectionExtension.class.getName(),
-				"extension.1.name", "value",
+		this.startHttpServer("ExtensionTemplate.ofp", MockExtensionTemplateLogic.class, "extension.1",
+				MockHttpTemplateSectionExtension.class.getName(), "extension.1.name", "value",
 				"extension.1.mock.extension.index", "1", "extension.2",
-				MockHttpTemplateSectionExtension.class.getName(),
-				"extension.2.name", "value",
-				"extension.2.mock.extension.index", "2", "section.name",
-				"section.value");
+				MockHttpTemplateSectionExtension.class.getName(), "extension.2.name", "value",
+				"extension.2.mock.extension.index", "2", "section.name", "section.value");
 
 		// Ensure change with extension
-		this.assertHttpRequest("/uri", false,
-				"Overridden template with overridden class and /uri-serviceLink");
+		this.assertHttpRequest("/uri", false, "Overridden template with overridden class and /uri-serviceLink");
 
 		// Ensure service method not render template
 		this.assertHttpRequest("/uri-serviceLink", false, "SERVICE_METHOD");
@@ -949,34 +874,29 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link HttpTemplateSectionExtension} for testing.
 	 */
-	public static class MockHttpTemplateSectionExtension implements
-			HttpTemplateSectionExtension {
+	public static class MockHttpTemplateSectionExtension implements HttpTemplateSectionExtension {
 
 		/*
 		 * ================== HttpTemplateSectionExtension ====================
 		 */
 
 		@Override
-		public void extendTemplate(HttpTemplateSectionExtensionContext context)
-				throws Exception {
+		public void extendTemplate(HttpTemplateSectionExtensionContext context) throws Exception {
 
 			final String TEMPLATE_CONTENT = "Overridden template with ${property} and #{serviceLink}";
 
 			// Obtain the particular extension index
-			int extensionIndex = Integer.parseInt(context
-					.getProperty("mock.extension.index"));
+			int extensionIndex = Integer.parseInt(context.getProperty("mock.extension.index"));
 
 			// Validate overriding details
 			switch (extensionIndex) {
 			case 1:
 				// Ensure original template content
-				assertEquals("Incorrect original template content",
-						"extension", context.getTemplateContent());
+				assertEquals("Incorrect original template content", "extension", context.getTemplateContent());
 				break;
 			case 2:
 				// Ensure overridden template content
-				assertEquals("Template content should be overridden",
-						TEMPLATE_CONTENT, context.getTemplateContent());
+				assertEquals("Template content should be overridden", TEMPLATE_CONTENT, context.getTemplateContent());
 				break;
 			default:
 				fail("Should only be two extensions");
@@ -986,31 +906,24 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 			String[] names = context.getPropertyNames();
 			assertEquals("Incorrect number of properties", 2, names.length);
 			assertEquals("Incorrect property name", "name", names[0]);
-			assertEquals("Incorrect property value", "value",
-					context.getProperty("name"));
-			assertEquals("Incorrect property mock.extension.index",
-					"mock.extension.index", names[1]);
-			assertEquals("Not defaulting property", "default",
-					context.getProperty("unknown", "default"));
+			assertEquals("Incorrect property value", "value", context.getProperty("name"));
+			assertEquals("Incorrect property mock.extension.index", "mock.extension.index", names[1]);
+			assertEquals("Not defaulting property", "default", context.getProperty("unknown", "default"));
 			try {
 				// Ensure failure on unknown property
 				context.getProperty("unknown");
 				fail("Should not successfully obtain unknown property");
 			} catch (UnknownPropertyError ex) {
-				String unknownPropertyName = "extension." + extensionIndex
-						+ ".unknown";
-				assertEquals("Incorrect unknown property", unknownPropertyName,
-						ex.getUnknownPropertyName());
-				assertEquals("Incurrect unknown property message",
-						"Unknown property '" + unknownPropertyName + "'",
+				String unknownPropertyName = "extension." + extensionIndex + ".unknown";
+				assertEquals("Incorrect unknown property", unknownPropertyName, ex.getUnknownPropertyName());
+				assertEquals("Incurrect unknown property message", "Unknown property '" + unknownPropertyName + "'",
 						ex.getMessage());
 			}
 
 			// Validate section details
-			assertEquals("Incorrect section context", "section.value", context
-					.getSectionSourceContext().getProperty("section.name"));
-			assertNotNull("Assuming correct designer",
-					context.getSectionDesigner());
+			assertEquals("Incorrect section context", "section.value",
+					context.getSectionSourceContext().getProperty("section.name"));
+			assertNotNull("Assuming correct designer", context.getSectionDesigner());
 
 			// Extend the template (via overriding)
 			context.setTemplateContent(TEMPLATE_CONTENT);
@@ -1046,7 +959,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		/**
 		 * Necessary as using this for overriding template logic class.
 		 */
-		@NextTask("doExternalFlow")
+		@NextFunction("doExternalFlow")
 		public void submit() {
 		}
 
@@ -1056,8 +969,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		 * @param connection
 		 *            {@link ServerHttpConnection}.
 		 */
-		public void serviceMethod(ServerHttpConnection connection)
-				throws IOException {
+		public void serviceMethod(ServerHttpConnection connection) throws IOException {
 			Writer entity = connection.getHttpResponse().getEntityWriter();
 			entity.write("SERVICE_METHOD");
 			entity.flush();
@@ -1073,17 +985,14 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 *            Flags whether a secure connection is used.
 	 * @return {@link HttpResponse}.
 	 */
-	private HttpResponse doRawHttpRequest(String uri, boolean isSecure)
-			throws Exception {
+	private HttpResponse doRawHttpRequest(String uri, boolean isSecure) throws Exception {
 
 		// Execute the HTTP request
 		HttpGet request;
 		if (isSecure) {
-			request = new HttpGet("https://" + HOST_NAME + ":" + this.httpsPort
-					+ uri);
+			request = new HttpGet("https://" + HOST_NAME + ":" + this.httpsPort + uri);
 		} else {
-			request = new HttpGet("http://" + HOST_NAME + ":" + this.httpPort
-					+ uri);
+			request = new HttpGet("http://" + HOST_NAME + ":" + this.httpPort + uri);
 		}
 		HttpResponse response = this.client.execute(request);
 
@@ -1106,8 +1015,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		HttpResponse response = this.doRawHttpRequest(uri, isSecure);
 
 		// Ensure successful
-		assertEquals("Ensure successful", 200, response.getStatusLine()
-				.getStatusCode());
+		assertEquals("Ensure successful", 200, response.getStatusLine().getStatusCode());
 
 		// Obtain and return the response content
 		String content = HttpTestUtil.getEntityBody(response);
@@ -1124,8 +1032,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 * @param expectedResponse
 	 *            Expected content of the {@link HttpResponse}.
 	 */
-	private void assertHttpRequest(String uri, boolean isSecure,
-			String expectedResponse) throws Exception {
+	private void assertHttpRequest(String uri, boolean isSecure, String expectedResponse) throws Exception {
 
 		// Obtain the rendering
 		String rendering = this.doHttpRequest(uri, isSecure);
@@ -1173,8 +1080,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 * @param expectedResponsePrefix
 	 *            Prefix on the expected response. Typically for testing
 	 *            pre-processing before response.
-	 * @param nextTaskQualify
-	 *            {@link LinkQualify} for <code>nextTask</code> link.
+	 * @param nextFunctionQualify
+	 *            {@link LinkQualify} for <code>nextFunction</code> link.
 	 * @param submitQualify
 	 *            {@link LinkQualify} for <code>submit</code> link.
 	 * @param nonMethodLinkQualify
@@ -1184,29 +1091,21 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 * @param actualResponse
 	 *            Actual rendered response
 	 */
-	private void assertRenderedResponse(String expectedResponsePrefix,
-			LinkQualify nextTaskQualify, LinkQualify submitQualify,
-			LinkQualify nonMethodLinkQualify,
-			LinkQualify notRenderTemplateAfter, String linkUriSuffix,
-			String actualResponse) {
+	private void assertRenderedResponse(String expectedResponsePrefix, LinkQualify nextFunctionQualify,
+			LinkQualify submitQualify, LinkQualify nonMethodLinkQualify, LinkQualify notRenderTemplateAfter,
+			String linkUriSuffix, String actualResponse) {
 
 		// Transform expected response for link qualifications
-		String expectedResponse = expectedResponsePrefix
-				+ RENDERED_TEMPLATE_XML;
-		expectedResponse = expectedResponse.replace(
-				"${LINK_nextTask_QUALIFICATION}",
-				this.getLinkQualification(nextTaskQualify));
-		expectedResponse = expectedResponse.replace(
-				"${LINK_submit_QUALIFICATION}",
+		String expectedResponse = expectedResponsePrefix + RENDERED_TEMPLATE_XML;
+		expectedResponse = expectedResponse.replace("${LINK_nextFunction_QUALIFICATION}",
+				this.getLinkQualification(nextFunctionQualify));
+		expectedResponse = expectedResponse.replace("${LINK_submit_QUALIFICATION}",
 				this.getLinkQualification(submitQualify));
-		expectedResponse = expectedResponse.replace(
-				"${LINK_nonMethodLink_QUALIFICATION}",
+		expectedResponse = expectedResponse.replace("${LINK_nonMethodLink_QUALIFICATION}",
 				this.getLinkQualification(nonMethodLinkQualify));
-		expectedResponse = expectedResponse.replace(
-				"${LINK_notRenderTemplateAfter_QUALIFICATION}",
+		expectedResponse = expectedResponse.replace("${LINK_notRenderTemplateAfter_QUALIFICATION}",
 				this.getLinkQualification(notRenderTemplateAfter));
-		expectedResponse = expectedResponse.replace("${LINK_SUFFIX}",
-				(linkUriSuffix == null ? "" : linkUriSuffix));
+		expectedResponse = expectedResponse.replace("${LINK_SUFFIX}", (linkUriSuffix == null ? "" : linkUriSuffix));
 
 		// Validate the rendered response
 		assertXmlEquals("Incorrect rendering", expectedResponse, actualResponse);
@@ -1222,105 +1121,64 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 * @param templateProperties
 	 *            Template name/value property pairs.
 	 */
-	protected void startHttpServer(String templateName, Class<?> logicClass,
-			String... templatePropertyPairs) throws Exception {
+	protected void startHttpServer(String templateName, Class<?> logicClass, String... templatePropertyPairs)
+			throws Exception {
 
-		// Provide process scoping for managed objects
-		final ManagedObjectSourceWirer processScopeWirer = new ManagedObjectSourceWirer() {
-			@Override
-			public void wire(ManagedObjectSourceWirerContext context) {
-				context.setManagedObjectScope(ManagedObjectScope.PROCESS);
+		// Configure the server
+		this.compiler.officeFloor((context) -> {
+			HttpTestUtil.configureTestHttpServer(context, this.httpPort, this.httpsPort, "ROUTE", "route");
+		});
+
+		// Configure the application
+		this.compiler.web((context) -> {
+			WebArchitect web = context.getWebArchitect();
+			OfficeArchitect office = context.getOfficeArchitect();
+
+			// Add dependencies
+			Singleton.load(office, this.connection, new AutoWire(Connection.class));
+
+			// Provide unknown URL continuation for not handled requests
+			OfficeSection unknownUrlContinuationSection = context.addSection("UNKONWN_URL_CONTINUATION",
+					UnknownUrlContinuationServicer.class);
+			web.chainServicer(unknownUrlContinuationSection.getOfficeSectionInput("service"), null);
+
+			// Load the template section
+			final String templateLocation = this.getTemplateLocation(templateName);
+			HttpTemplateSection templateSection = web.addHttpTemplate("uri", templateLocation, logicClass);
+
+			// Load the additional properties
+			for (int i = 0; i < templatePropertyPairs.length; i += 2) {
+				String name = templatePropertyPairs[i];
+				String value = templatePropertyPairs[i + 1];
+				templateSection.addProperty(name, value);
 			}
-		};
 
-		// Add the HTTP server socket listener
-		HttpServerSocketManagedObjectSource.autoWire(this.source,
-				this.httpPort, "ROUTE", "route");
+			// Load mock section for handling outputs
+			OfficeSection handleOutputSection = context.addSection("OUTPUT", MockSection.class);
 
-		// Add the HTTPS server socket listener
-		HttpsServerSocketManagedObjectSource.autoWire(this.source,
-				this.httpsPort, HttpTestUtil.getSslEngineSourceClass(),
-				"ROUTE", "route");
+			// Link flow outputs
+			office.link(templateSection.getOfficeSection().getOfficeSectionOutput("output"),
+					handleOutputSection.getOfficeSectionInput("finished"));
+			office.link(templateSection.getOfficeSection().getOfficeSectionOutput("doExternalFlow"),
+					handleOutputSection.getOfficeSectionInput("finished"));
 
-		// Add dependencies
-		this.source.addObject(this.connection, new AutoWire(Connection.class));
-		this.source.addManagedObject(
-				HttpRequestStateManagedObjectSource.class.getName(),
-				processScopeWirer, new AutoWire(HttpRequestState.class));
-		this.source.addManagedObject(
-				HttpSessionManagedObjectSource.class.getName(),
-				processScopeWirer, new AutoWire(HttpSession.class)).setTimeout(
-				10 * 1000);
-		AutoWireObject location = this.source.addManagedObject(
-				HttpApplicationLocationManagedObjectSource.class.getName(),
-				processScopeWirer, new AutoWire(HttpApplicationLocation.class));
-		location.addProperty(
-				HttpApplicationLocationManagedObjectSource.PROPERTY_HTTP_PORT,
-				String.valueOf(this.httpPort));
-		location.addProperty(
-				HttpApplicationLocationManagedObjectSource.PROPERTY_HTTPS_PORT,
-				String.valueOf(this.httpsPort));
+			// Link non-method link
+			if (this.isNonMethodLink) {
+				OfficeSection handleOutputLink = context.addSection("LINK", MockLink.class);
+				office.link(templateSection.getOfficeSection().getOfficeSectionOutput("nonMethodLink"),
+						handleOutputLink.getOfficeSectionInput("linked"));
+			}
 
-		// Provide HTTP router for testing
-		AutoWireSection templateRouteSection = this.source.addSection("ROUTE",
-				WorkSectionSource.class.getName(),
-				HttpRouteWorkSource.class.getName());
-
-		// Provide unknown URL continuation for not handled requests
-		AutoWireSection unknownUrlContinuationSection = this.source.addSection(
-				"UNKONWN_URL_CONTINUATION", ClassSectionSource.class.getName(),
-				UnknownUrlContinuationServicer.class.getName());
-		this.source.link(templateRouteSection, "NOT_HANDLED",
-				unknownUrlContinuationSection, "service");
-
-		// Load the template section
-		final String templateLocation = this.getTemplateLocation(templateName);
-		AutoWireSection templateSection = this.source.addSection("SECTION",
-				HttpTemplateSectionSource.class.getName(), templateLocation);
-		if (logicClass != null) {
-			templateSection.addProperty(
-					HttpTemplateSectionSource.PROPERTY_CLASS_NAME,
-					logicClass.getName());
-		}
-		templateSection.addProperty(
-				HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI, "uri");
-
-		// Load the additional properties
-		for (int i = 0; i < templatePropertyPairs.length; i += 2) {
-			String name = templatePropertyPairs[i];
-			String value = templatePropertyPairs[i + 1];
-			templateSection.addProperty(name, value);
-			location.addProperty(name, value);
-		}
-
-		// Load mock section for handling outputs
-		AutoWireSection handleOutputSection = this.source
-				.addSection("OUTPUT", ClassSectionSource.class.getName(),
-						MockSection.class.getName());
-
-		// Link flow outputs
-		this.source.link(templateSection, "output", handleOutputSection,
-				"finished");
-		this.source.link(templateSection, "doExternalFlow",
-				handleOutputSection, "finished");
-
-		// Link non-method link
-		if (this.isNonMethodLink) {
-			AutoWireSection handleOutputLink = this.source.addSection("LINK",
-					ClassSectionSource.class.getName(),
-					MockLink.class.getName());
-			this.source.link(templateSection, "nonMethodLink",
-					handleOutputLink, "linked");
-		}
-
-		// Link service method link
-		if (this.isServiceMethodLink) {
-			this.source.link(templateSection, "serviceLink", templateSection,
-					"serviceMethod");
-		}
+			// Link service method link
+			if (this.isServiceMethodLink) {
+				office.link(templateSection.getOfficeSection().getOfficeSectionOutput("serviceLink"),
+						templateSection.getOfficeSection().getOfficeSectionInput("serviceMethod"));
+			}
+		});
 
 		// Open the OfficeFloor
-		this.officeFloor = this.source.openOfficeFloor();
+		this.officeFloor = this.compiler.compileAndOpenOfficeFloor();
+
 	}
 
 	/**
@@ -1331,8 +1189,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 * @return Template location.
 	 */
 	public String getTemplateLocation(String templateName) {
-		return this.getClass().getPackage().getName().replace('.', '/') + "/"
-				+ templateName;
+		return this.getClass().getPackage().getName().replace('.', '/') + "/" + templateName;
 	}
 
 	/**
@@ -1345,8 +1202,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 * @throws IOException
 	 *             If fails to write the message.
 	 */
-	private static void writeMessage(ServerHttpConnection connection,
-			String message) throws IOException {
+	private static void writeMessage(ServerHttpConnection connection, String message) throws IOException {
 		Writer writer = connection.getHttpResponse().getEntityWriter();
 		writer.write(message);
 		writer.flush();
@@ -1356,8 +1212,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 * Mock section for output tasks of the template.
 	 */
 	public static class MockSection {
-		public void finished(@Parameter String parameter,
-				ServerHttpConnection connection) throws IOException {
+		public void finished(@Parameter String parameter, ServerHttpConnection connection) throws IOException {
 			if ((parameter != null) && (parameter.length() > 0)) {
 				Writer writer = connection.getHttpResponse().getEntityWriter();
 				writer.write(" - finished(");

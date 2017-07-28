@@ -17,8 +17,8 @@
  */
 package net.officefloor.compile.section;
 
-import net.officefloor.compile.work.TaskEscalationType;
-import net.officefloor.compile.work.TaskFlowType;
+import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
+import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
 import net.officefloor.frame.api.manage.Office;
 
 /**
@@ -51,14 +51,14 @@ public interface SectionOutputType {
 	/**
 	 * <p>
 	 * Indicates if this {@link SectionOutputType} is used only to handle
-	 * {@link TaskEscalationType} instances.
+	 * {@link ManagedFunctionEscalationType} instances.
 	 * <p>
-	 * A {@link TaskFlowType} must be connected to an {@link SectionInputType},
-	 * however a {@link TaskEscalationType} may be generically handled by the
+	 * A {@link ManagedFunctionFlowType} must be connected to an {@link SectionInputType},
+	 * however a {@link ManagedFunctionEscalationType} may be generically handled by the
 	 * {@link Office}.
 	 * 
 	 * @return <code>true</code> if this {@link SectionOutputType} is
-	 *         {@link TaskEscalationType} instances only.
+	 *         {@link ManagedFunctionEscalationType} instances only.
 	 */
 	boolean isEscalationOnly();
 

@@ -19,12 +19,12 @@ package net.officefloor.plugin.web.http.security;
 
 import java.io.IOException;
 
-import net.officefloor.frame.spi.managedobject.AsynchronousListener;
-import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
-import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.ObjectRegistry;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.AsynchronousContext;
+import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.security.HttpAuthenticationManagedObjectSource.Dependencies;
 import net.officefloor.plugin.web.http.security.HttpAuthenticationManagedObjectSource.Flows;
@@ -49,9 +49,9 @@ public class HttpAuthenticationManagedObject<S, C>
 	private final ManagedObjectExecuteContext<Flows> executeContext;
 
 	/**
-	 * {@link AsynchronousListener}.
+	 * {@link AsynchronousContext}.
 	 */
-	private AsynchronousListener listener;
+	private AsynchronousContext asynchronousContext;
 
 	/**
 	 * {@link ServerHttpConnection}.
@@ -92,8 +92,8 @@ public class HttpAuthenticationManagedObject<S, C>
 	 */
 
 	@Override
-	public void registerAsynchronousCompletionListener(AsynchronousListener listener) {
-		this.listener = listener;
+	public void setAsynchronousContext(AsynchronousContext asynchronousContext) {
+		this.asynchronousContext = asynchronousContext;
 	}
 
 	@Override
@@ -147,9 +147,10 @@ public class HttpAuthenticationManagedObject<S, C>
 						null, null);
 
 				// Attempt authentication
-				this.listener.notifyStarted();
+				this.asynchronousContext.start(null);
 				this.executeContext.invokeProcess(Flows.AUTHENTICATE,
-						new TaskAuthenticateContextImpl(credentials, authenticationRequest), executeManagedObject, 0);
+						new TaskAuthenticateContextImpl(credentials, authenticationRequest), executeManagedObject, 0,
+						null);
 				isCompleteRequest = false; // context will complete
 			}
 
@@ -206,7 +207,7 @@ public class HttpAuthenticationManagedObject<S, C>
 
 		// Trigger logout
 		this.executeContext.invokeProcess(Flows.LOGOUT,
-				new TaskLogoutContextImpl(logoutRequest, this.connection, this.session), executeManagedObject, 0);
+				new TaskLogoutContextImpl(logoutRequest, this.connection, this.session), executeManagedObject, 0, null);
 	}
 
 	/**
@@ -255,9 +256,9 @@ public class HttpAuthenticationManagedObject<S, C>
 	}
 
 	/**
-	 * {@link TaskAuthenticateContext} implementation.
+	 * {@link FunctionAuthenticateContext} implementation.
 	 */
-	private class TaskAuthenticateContextImpl implements TaskAuthenticateContext<S, C> {
+	private class TaskAuthenticateContextImpl implements FunctionAuthenticateContext<S, C> {
 
 		/**
 		 * Credentials.
@@ -313,7 +314,7 @@ public class HttpAuthenticationManagedObject<S, C>
 				HttpAuthenticationManagedObject.this.security = security;
 
 				// Flag authentication complete
-				HttpAuthenticationManagedObject.this.listener.notifyComplete();
+				HttpAuthenticationManagedObject.this.asynchronousContext.complete(null);
 			}
 
 			// Flag authentication complete
@@ -330,7 +331,7 @@ public class HttpAuthenticationManagedObject<S, C>
 				HttpAuthenticationManagedObject.this.failure = failure;
 
 				// Flag authentication complete
-				HttpAuthenticationManagedObject.this.listener.notifyComplete();
+				HttpAuthenticationManagedObject.this.asynchronousContext.complete(null);
 			}
 
 			// Flag authentication complete
@@ -341,9 +342,9 @@ public class HttpAuthenticationManagedObject<S, C>
 	}
 
 	/**
-	 * {@link TaskLogoutContext} implementation.
+	 * {@link FunctionLogoutContext} implementation.
 	 */
-	private static class TaskLogoutContextImpl implements TaskLogoutContext {
+	private static class TaskLogoutContextImpl implements FunctionLogoutContext {
 
 		/**
 		 * {@link HttpLogoutRequest}.

@@ -20,37 +20,69 @@ package net.officefloor.frame.impl.execute.profile;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.officefloor.frame.api.profile.ProfiledJob;
-import net.officefloor.frame.api.profile.ProfiledThread;
-import net.officefloor.frame.internal.structure.JobMetaData;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.profile.ProfiledManagedFunction;
+import net.officefloor.frame.api.profile.ProfiledThreadState;
+import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FunctionStateContext;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.ManagedFunctionLogicMetaData;
+import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ThreadProfiler;
-import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * {@link ThreadProfiler} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class ThreadProfilerImpl implements ThreadProfiler, ProfiledThread {
+public class ThreadProfilerImpl extends AbstractLinkedListSetEntry<FunctionState, Flow>
+		implements ThreadProfiler, ProfiledThreadState {
 
 	/**
-	 * Start time stamp.
+	 * {@link ThreadState} being profiled.
 	 */
-	private final long startTimestamp;
+	private final ThreadState threadState;
 
 	/**
-	 * {@link ProfiledJob} instances.
+	 * {@link ProcessProfiler}.
 	 */
-	private final List<ProfiledJob> jobs = new ArrayList<ProfiledJob>(32);
+	private final ProcessProfilerImpl processProfiler;
+
+	/**
+	 * Start time stamp in milliseconds.
+	 */
+	private final long startTimestampMilliseconds;
+
+	/**
+	 * Start time stamp in nanoseconds.
+	 */
+	private final long startTimestampNanoseconds;
+
+	/**
+	 * {@link ProfiledManagedFunction} instances.
+	 */
+	private final List<ProfiledManagedFunction> functions = new ArrayList<ProfiledManagedFunction>(32);
 
 	/**
 	 * Initiate.
-	 * 
-	 * @param startTimestamp
-	 *            Start time stamp.
+	 *
+	 * @param threadState
+	 *            {@link ThreadState} being profiled.
+	 * @param processProfiler
+	 *            {@link ProcessProfiler}.
+	 * @param startTimestampMilliseconds
+	 *            Start time stamp in milliseconds.
+	 * @param startTimestampNanoseconds
+	 *            Start time stamp in nanoseconds.
 	 */
-	public ThreadProfilerImpl(long startTimestamp) {
-		this.startTimestamp = startTimestamp;
+	ThreadProfilerImpl(ThreadState threadState, ProcessProfilerImpl processProfiler, long startTimestampMilliseconds,
+			long startTimestampNanoseconds) {
+		this.threadState = threadState;
+		this.processProfiler = processProfiler;
+		this.startTimestampMilliseconds = startTimestampMilliseconds;
+		this.startTimestampNanoseconds = startTimestampNanoseconds;
 	}
 
 	/*
@@ -58,50 +90,82 @@ public class ThreadProfilerImpl implements ThreadProfiler, ProfiledThread {
 	 */
 
 	@Override
-	public void profileJob(JobMetaData jobMetaData) {
+	public void profileManagedFunction(ManagedFunctionLogicMetaData functionMetaData) {
 
-		// Obtain the start time stamp
-		long startTimestamp = System.nanoTime();
+		// Always invoked in ThreadState safety
 
-		// Obtain the job name
-		String jobName = jobMetaData.getJobName();
+		// Obtain the start time stamps
+		long startTimestampMilliseconds = System.currentTimeMillis();
+		long startTimestampNanoseconds = System.nanoTime();
+
+		// Obtain the function name
+		String functionName = functionMetaData.getFunctionName();
 
 		// Obtain the executing thread name
 		String executingThreadName = Thread.currentThread().getName();
 
-		// Create and add the profiled job
-		this.jobs.add(new ProfiledJobImpl(jobName, startTimestamp,
-				executingThreadName));
+		// Create and add the profiled function
+		this.functions.add(new ProfiledManagedFunctionImpl(functionName, startTimestampMilliseconds,
+				startTimestampNanoseconds, executingThreadName));
 	}
 
 	/*
-	 * ======================= ProfiledThread =================================
+	 * ======================= FunctionState ===========================
 	 */
 
 	@Override
-	public long getStartTimestamp() {
-		return this.startTimestamp;
+	public ThreadState getThreadState() {
+
+		// Always register thread profilers on main thread state of process
+		return this.processProfiler.getMainThreadState();
 	}
 
 	@Override
-	public List<ProfiledJob> getProfiledJobs() {
-		return this.jobs;
+	public FunctionState execute(FunctionStateContext context) throws Throwable {
+		this.processProfiler.registerProfiledThreadState(this);
+		return null;
+	}
+
+	/*
+	 * ======================= ProfiledThreadState =======================
+	 */
+
+	@Override
+	public long getSTartTimestampMilliseconds() {
+		return this.startTimestampMilliseconds;
+	}
+
+	@Override
+	public long getStartTimestampNanoseconds() {
+		return this.startTimestampNanoseconds;
+	}
+
+	@Override
+	public List<ProfiledManagedFunction> getProfiledManagedFunctions() {
+		synchronized (this.threadState) {
+			return this.functions;
+		}
 	}
 
 	/**
-	 * {@link ProfiledJob} implementation.
+	 * {@link ProfiledManagedFunction} implementation.
 	 */
-	private static class ProfiledJobImpl implements ProfiledJob {
+	private static class ProfiledManagedFunctionImpl implements ProfiledManagedFunction {
 
 		/**
-		 * {@link Job} name.
+		 * {@link ManagedFunction} name.
 		 */
-		private final String jobName;
+		private final String functionName;
 
 		/**
-		 * Start time stamp.
+		 * Start time stamp in milliseconds.
 		 */
-		private final long startTimestamp;
+		private final long startTimestampMilliseconds;
+
+		/**
+		 * Start time stamp in nanoseconds.
+		 */
+		private final long startTimestampNanoseconds;
 
 		/**
 		 * Name of the executing {@link Thread}.
@@ -111,35 +175,43 @@ public class ThreadProfilerImpl implements ThreadProfiler, ProfiledThread {
 		/**
 		 * Initiate.
 		 * 
-		 * @param jobName
-		 *            {@link Job} name.
-		 * @param startTimestamp
-		 *            Start time stamp.
+		 * @param functionName
+		 *            {@link ManagedFunction} name.
+		 * @param startTimestampMilliseconds
+		 *            Start time stamp in milliseconds.
+		 * @param startTimestampNanoseconds
+		 *            Start time stamp in nanoseconds.
 		 */
-		public ProfiledJobImpl(String jobName, long startTimestamp,
-				String executingThreadName) {
-			this.jobName = jobName;
-			this.startTimestamp = startTimestamp;
+		public ProfiledManagedFunctionImpl(String functionName, long startTimestampMilliseconds,
+				long startTimestampNanoseconds, String executingThreadName) {
+			this.functionName = functionName;
+			this.startTimestampMilliseconds = startTimestampMilliseconds;
+			this.startTimestampNanoseconds = startTimestampNanoseconds;
 			this.executingThreadName = executingThreadName;
 		}
 
 		/*
-		 * ====================== ProfiledJob =====================
+		 * ====================== ProfiledMangedFunction =====================
 		 */
 
 		@Override
-		public String getJobName() {
-			return this.jobName;
-		}
-
-		@Override
-		public long getStartTimestamp() {
-			return this.startTimestamp;
+		public String getFunctionName() {
+			return this.functionName;
 		}
 
 		@Override
 		public String getExecutingThreadName() {
 			return this.executingThreadName;
+		}
+
+		@Override
+		public long getStartTimestampMilliseconds() {
+			return this.startTimestampMilliseconds;
+		}
+
+		@Override
+		public long getStartTimestampNanoseconds() {
+			return this.startTimestampNanoseconds;
 		}
 	}
 

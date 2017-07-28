@@ -21,8 +21,8 @@ import net.officefloor.compile.spi.office.OfficeInput;
 import net.officefloor.compile.spi.office.OfficeOutput;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * <code>Type definition</code> of an {@link Office}.

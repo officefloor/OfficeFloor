@@ -17,7 +17,8 @@
  */
 package net.officefloor.model.section;
 
-import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.WritableConfigurationItem;
 
 /**
  * Repository of {@link SectionModel} instances.
@@ -29,14 +30,15 @@ public interface SectionRepository {
 	/**
 	 * Retrieves the {@link SectionModel} from the {@link ConfigurationItem}.
 	 * 
+	 * @param section
+	 *            {@link SectionModel}.
 	 * @param configuration
 	 *            {@link ConfigurationItem} containing the {@link SectionModel}.
 	 * @return {@link SectionModel}.
 	 * @throws Exception
 	 *             If fails to retrieve the {@link SectionModel}.
 	 */
-	SectionModel retrieveSection(ConfigurationItem configuration)
-			throws Exception;
+	void retrieveSection(SectionModel section, ConfigurationItem configuration) throws Exception;
 
 	/**
 	 * Stores the {@link SectionModel} into the {@link ConfigurationItem}.
@@ -44,11 +46,11 @@ public interface SectionRepository {
 	 * @param section
 	 *            {@link SectionModel}.
 	 * @param configuration
-	 *            {@link ConfigurationItem} to contain the {@link SectionModel}.
+	 *            {@link WritableConfigurationItem} to contain the
+	 *            {@link SectionModel}.
 	 * @throws Exception
 	 *             If fails to store the {@link SectionModel}.
 	 */
-	void storeSection(SectionModel section, ConfigurationItem configuration)
-			throws Exception;
+	void storeSection(SectionModel section, WritableConfigurationItem configuration) throws Exception;
 
 }

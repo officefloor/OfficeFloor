@@ -17,8 +17,11 @@
  */
 package net.officefloor.model.repository;
 
+import java.io.IOException;
+
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.model.Model;
-import net.officefloor.plugin.xml.unmarshall.designate.DesignateXmlUnmarshaller;
 
 /**
  * Repository to the {@link Model} instances.
@@ -28,75 +31,30 @@ import net.officefloor.plugin.xml.unmarshall.designate.DesignateXmlUnmarshaller;
 public interface ModelRepository {
 
 	/**
-	 * Creates the {@link ConfigurationItem} to hold the {@link Model}.
-	 * 
-	 * @param location
-	 *            Relative location within the {@link ConfigurationContext} to
-	 *            create the {@link ConfigurationItem}.
-	 * @param model
-	 *            {@link Model} to be stored in the created
-	 *            {@link ConfigurationItem}.
-	 * @param context
-	 *            {@link ConfigurationContext}.
-	 * @return {@link ConfigurationItem} created for the {@link Model}.
-	 * @throws Exception
-	 *             If fails to create the {@link ConfigurationItem}.
-	 */
-	ConfigurationItem create(String location, Object model,
-			ConfigurationContext context) throws Exception;
-
-	/**
-	 * Stores the {@link Model} within the {@link ConfigurationItem}.
-	 * 
-	 * @param model
-	 *            {@link Model} to be stored.
-	 * @param configuration
-	 *            {@link ConfigurationItem} to contain the {@link Model}.
-	 * @throws Exception
-	 *             If fails to store the {@link Model}.
-	 */
-	void store(Object model, ConfigurationItem configuration) throws Exception;
-
-	/**
 	 * Configures the {@link Model} from the {@link ConfigurationItem}.
 	 * 
-	 * @param <O>
-	 *            Model type.
 	 * @param model
 	 *            {@link Model} to be configured.
 	 * @param configuration
 	 *            {@link ConfigurationItem} containing configuration of the
 	 *            {@link Model}.
 	 * @return Configured {@link Model}.
-	 * @throws Exception
+	 * @throws IOException
 	 *             If fails to configure the {@link Model}.
 	 */
-	<O> O retrieve(O model, ConfigurationItem configuration) throws Exception;
+	void retrieve(Object model, ConfigurationItem configuration) throws IOException;
 
 	/**
-	 * Registers meta-data for a {@link Model} to be retrieved.
+	 * Stores the {@link Model} within the {@link WritableConfigurationItem}.
 	 * 
-	 * @param modelType
-	 *            {@link Class} of the {@link Model}.
-	 * @throws Exception
-	 *             If fails to configure the {@link DesignateXmlUnmarshaller}.
-	 */
-	void registerModel(Class<?> modelType) throws Exception;
-
-	/**
-	 * <p>
-	 * Retrieves the {@link Model} from the {@link ConfigurationItem}.
-	 * <p>
-	 * Only {@link Model} instances successfully registered by
-	 * {@link #registerModel(Class)} may be retrieved by this method.
-	 * 
+	 * @param model
+	 *            {@link Model} to be stored.
 	 * @param configuration
-	 *            {@link ConfigurationItem} containing configuration of the
+	 *            {@link WritableConfigurationItem} to contain the
 	 *            {@link Model}.
-	 * @return {@link Model} for the {@link ConfigurationItem}.
-	 * @throws Exception
-	 *             If fails to retrieve the {@link Model}.
+	 * @throws IOException
+	 *             If fails to store the {@link Model}.
 	 */
-	Object retrieve(ConfigurationItem configuration) throws Exception;
+	void store(Object model, WritableConfigurationItem configuration) throws IOException;
 
 }

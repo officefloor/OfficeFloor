@@ -24,20 +24,18 @@ import javax.net.ssl.SSLEngine;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
-import net.officefloor.frame.spi.source.SourceContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolContext;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
 import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.ssl.SslEngineSource;
-import net.officefloor.plugin.socket.server.ssl.SslTaskExecutor;
-import net.officefloor.plugin.socket.server.ssl.protocol.SslTaskWork.SslTaskDependencies;
+import net.officefloor.plugin.socket.server.ssl.protocol.SslFunction.SslTaskDependencies;
 
 /**
  * SSL {@link CommunicationProtocolSource} that wraps another
@@ -45,8 +43,7 @@ import net.officefloor.plugin.socket.server.ssl.protocol.SslTaskWork.SslTaskDepe
  * 
  * @author Daniel Sagenschneider
  */
-public class SslCommunicationProtocol implements CommunicationProtocolSource,
-		CommunicationProtocol, SslTaskExecutor {
+public class SslCommunicationProtocol implements CommunicationProtocolSource, CommunicationProtocol {
 
 	/**
 	 * Property to obtain the optional {@link SslEngineSource} to provide the
@@ -75,14 +72,9 @@ public class SslCommunicationProtocol implements CommunicationProtocolSource,
 	private int sendBufferSize;
 
 	/**
-	 * {@link ManagedObjectExecuteContext}.
+	 * Flow index to run the SSL {@link Runnable}.
 	 */
-	private ManagedObjectExecuteContext<Indexed> executeContext;
-
-	/**
-	 * Flow index to run the SSL tasks.
-	 */
-	private int sslTaskFlowIndex;
+	private int sslRunnableFlowIndex;
 
 	/**
 	 * Initiate.
@@ -91,8 +83,7 @@ public class SslCommunicationProtocol implements CommunicationProtocolSource,
 	 *            {@link CommunicationProtocolSource} to be wrapped with this
 	 *            SSL {@link CommunicationProtocolSource}.
 	 */
-	public SslCommunicationProtocol(
-			CommunicationProtocolSource wrappedCommunicationProtocolSource) {
+	public SslCommunicationProtocol(CommunicationProtocolSource wrappedCommunicationProtocolSource) {
 		this.wrappedCommunicationProtocolSource = wrappedCommunicationProtocolSource;
 	}
 
@@ -107,47 +98,38 @@ public class SslCommunicationProtocol implements CommunicationProtocolSource,
 	}
 
 	@Override
-	public CommunicationProtocol createCommunicationProtocol(
-			MetaDataContext<None, Indexed> configurationContext,
+	public CommunicationProtocol createCommunicationProtocol(MetaDataContext<None, Indexed> configurationContext,
 			CommunicationProtocolContext protocolContext) throws Exception {
-		ManagedObjectSourceContext<Indexed> mosContext = configurationContext
-				.getManagedObjectSourceContext();
+		ManagedObjectSourceContext<Indexed> mosContext = configurationContext.getManagedObjectSourceContext();
 
 		// Obtain the send buffer size
 		this.sendBufferSize = protocolContext.getSendBufferSize();
 
 		// Create the communication protocol to wrap
 		this.wrappedCommunicationProtocol = this.wrappedCommunicationProtocolSource
-				.createCommunicationProtocol(configurationContext,
-						protocolContext);
+				.createCommunicationProtocol(configurationContext, protocolContext);
 
 		// Obtain the SSL Engine Source
-		String sslEngineSourceClassName = mosContext.getProperty(
-				PROPERTY_SSL_ENGINE_SOURCE, null);
+		String sslEngineSourceClassName = mosContext.getProperty(PROPERTY_SSL_ENGINE_SOURCE, null);
 		if (sslEngineSourceClassName == null) {
 			// Use default SSL Engine source
 			this.sslEngineSource = new DefaultSslEngineSource();
 		} else {
 			// Instantiate specified source
-			this.sslEngineSource = (SslEngineSource) mosContext.loadClass(
-					sslEngineSourceClassName).newInstance();
+			this.sslEngineSource = (SslEngineSource) mosContext.loadClass(sslEngineSourceClassName).newInstance();
 		}
 
 		// Initialise the SSL Engine Source
 		this.sslEngineSource.init(mosContext);
 
 		// Create the flow to execute the SSL tasks
-		this.sslTaskFlowIndex = configurationContext.addFlow(Runnable.class)
-				.setLabel("SSL_TASKS").getIndex();
-		SslTaskWork sslTaskExecution = new SslTaskWork();
-		ManagedObjectWorkBuilder<SslTaskWork> work = mosContext.addWork(
-				"SSL_TASK_EXECUTOR", sslTaskExecution);
-		ManagedObjectTaskBuilder<SslTaskDependencies, None> task = work
-				.addTask("SSL_TASK_EXECUTOR", sslTaskExecution);
-		task.linkParameter(SslTaskDependencies.TASK, Runnable.class);
-		task.setTeam("SSL_TASKS");
-		mosContext.linkProcess(this.sslTaskFlowIndex, "SSL_TASK_EXECUTOR",
-				"SSL_TASK_EXECUTOR");
+		this.sslRunnableFlowIndex = configurationContext.addFlow(Runnable.class).setLabel("SSL_RUNNABLE").getIndex();
+		SslFunction sslFunctionExecution = new SslFunction();
+		ManagedObjectFunctionBuilder<SslTaskDependencies, None> function = mosContext
+				.addManagedFunction("SSL_RUNNABLE_EXECUTOR", sslFunctionExecution);
+		function.linkParameter(SslTaskDependencies.RUNNABLE, Runnable.class);
+		function.setResponsibleTeam("SSL");
+		mosContext.getFlow(this.sslRunnableFlowIndex).linkFunction("SSL_RUNNABLE_EXECUTOR");
 
 		// Return this wrapping the server socket handler
 		return this;
@@ -158,19 +140,8 @@ public class SslCommunicationProtocol implements CommunicationProtocolSource,
 	 */
 
 	@Override
-	public void setManagedObjectExecuteContext(
+	public SslConnectionHandler createConnectionHandler(Connection connection,
 			ManagedObjectExecuteContext<Indexed> executeContext) {
-
-		// Store execution context for executing SSL tasks
-		this.executeContext = executeContext;
-
-		// Provide execution context to wrapped server
-		this.wrappedCommunicationProtocol
-				.setManagedObjectExecuteContext(executeContext);
-	}
-
-	@Override
-	public SslConnectionHandler createConnectionHandler(Connection connection) {
 
 		// Obtain the remote connection details
 		InetSocketAddress remoteAddress = connection.getRemoteAddress();
@@ -178,27 +149,15 @@ public class SslCommunicationProtocol implements CommunicationProtocolSource,
 		int remotePort = remoteAddress.getPort();
 
 		// Create the server SSL engine
-		SSLEngine engine = this.sslEngineSource.createSslEngine(remoteHost,
-				remotePort);
+		SSLEngine engine = this.sslEngineSource.createSslEngine(remoteHost, remotePort);
 		engine.setUseClientMode(false); // Always in server mode
 
 		// Create the SSL connection wrapping the connection
-		SslConnectionHandler connectionHandler = new SslConnectionHandler(
-				connection, engine, this, this.sendBufferSize,
-				this.wrappedCommunicationProtocol);
+		SslConnectionHandler connectionHandler = new SslConnectionHandler(connection, engine, this.sendBufferSize,
+				this.wrappedCommunicationProtocol, executeContext, this.sslRunnableFlowIndex);
 
 		// Return the SSL connection handler
 		return connectionHandler;
-	}
-
-	/*
-	 * ===================== SslTaskExecutor ==================================
-	 */
-
-	@Override
-	public void beginTask(Runnable task) {
-		// Invoke process to execute the task
-		this.executeContext.invokeProcess(this.sslTaskFlowIndex, task, null, 0);
 	}
 
 	/**

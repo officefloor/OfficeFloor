@@ -19,7 +19,7 @@ package net.officefloor.compile.impl.properties;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyConfigurable;
-import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**

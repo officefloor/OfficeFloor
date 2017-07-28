@@ -1,0 +1,36 @@
+<context>
+	<office-floor>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office>
+		<sections>
+			<section name="SECTION" source="SECTION" location="section">
+				<output name="ESCALATION" escalation-only="true" />
+			</section>
+		</sections>
+	</office>
+	<section>
+		<external-flows>
+			<external-flow name="ESCALATION" />
+		</external-flows>
+		<function-namespaces>
+			<function-namespace name="NAMESPACE" source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$CompileFunctionClass" />
+				</properties>
+				<managed-function name="escalationFunction" />
+				<managed-function name="simpleFunction" />
+			</function-namespace>
+		</function-namespaces>
+		<functions>
+			<function name="FUNCTION" function-namespace="NAMESPACE"
+				managed-function="escalationFunction">
+				<function-escalation escalation-type="java.lang.Exception">
+					<external-flow name="ESCALATION" />
+				</function-escalation>
+			</function>
+		</functions>
+	</section>
+</context>

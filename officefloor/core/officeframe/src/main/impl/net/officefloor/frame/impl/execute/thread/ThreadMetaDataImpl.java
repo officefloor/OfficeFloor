@@ -17,12 +17,15 @@
  */
 package net.officefloor.frame.impl.execute.thread;
 
-import net.officefloor.frame.internal.structure.AdministratorMetaData;
-import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.EscalationFlow;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
-import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * {@link ThreadMetaData} implementation.
@@ -42,14 +45,24 @@ public class ThreadMetaDataImpl implements ThreadMetaData {
 	private final GovernanceMetaData<?, ?>[] governanceMetaData;
 
 	/**
-	 * {@link AdministratorMetaData} instances.
+	 * Maximum {@link FunctionState} chain length.
 	 */
-	private final AdministratorMetaData<?, ?>[] administratorMetaData;
+	private final int maximumFunctionChainLength;
 
 	/**
-	 * {@link GovernanceDeactivationStrategy} on {@link ThreadState} completion.
+	 * Break chain {@link TeamManagement}.
 	 */
-	private final GovernanceDeactivationStrategy governanceDeactivationStrategy;
+	private final TeamManagement breakChainTeamManagement;
+
+	/**
+	 * {@link Office} {@link EscalationProcedure}.
+	 */
+	private final EscalationProcedure officeEscalationProcedure;
+
+	/**
+	 * {@link OfficeFloor} {@link EscalationFlow}.
+	 */
+	private final EscalationFlow officeFloorEscalation;
 
 	/**
 	 * Initiate.
@@ -58,20 +71,25 @@ public class ThreadMetaDataImpl implements ThreadMetaData {
 	 *            {@link ManagedObjectMetaData} instances.
 	 * @param governanceMetaData
 	 *            {@link GovernanceMetaData} instances.
-	 * @param administratorMetaData
-	 *            {@link AdministratorMetaData} instances.
-	 * @param governanceDeactivationStrategy
-	 *            {@link GovernanceDeactivationStrategy} on {@link ThreadState}
-	 *            completion.
+	 * @param maximumFunctionChainLength
+	 *            Maximum {@link FunctionState} chain length.
+	 * @param breakChainTeamManagement
+	 *            Break chain {@link TeamManagement}.
+	 * @param officeEscalationProcedure
+	 *            {@link Office} {@link EscalationProcedure}.
+	 * @param officeFloorEscalation
+	 *            {@link OfficeFloor} {@link EscalationFlow}.
 	 */
 	public ThreadMetaDataImpl(ManagedObjectMetaData<?>[] managedObjectMetaData,
-			GovernanceMetaData<?, ?>[] governanceMetaData,
-			AdministratorMetaData<?, ?>[] administratorMetaData,
-			GovernanceDeactivationStrategy governanceDeactivationStrategy) {
+			GovernanceMetaData<?, ?>[] governanceMetaData, int maximumFunctionChainLength,
+			TeamManagement breakChainTeamManagement, EscalationProcedure officeEscalationProcedure,
+			EscalationFlow officeFloorEscalation) {
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.governanceMetaData = governanceMetaData;
-		this.administratorMetaData = administratorMetaData;
-		this.governanceDeactivationStrategy = governanceDeactivationStrategy;
+		this.maximumFunctionChainLength = maximumFunctionChainLength;
+		this.breakChainTeamManagement = breakChainTeamManagement;
+		this.officeEscalationProcedure = officeEscalationProcedure;
+		this.officeFloorEscalation = officeFloorEscalation;
 	}
 
 	/*
@@ -89,13 +107,23 @@ public class ThreadMetaDataImpl implements ThreadMetaData {
 	}
 
 	@Override
-	public AdministratorMetaData<?, ?>[] getAdministratorMetaData() {
-		return this.administratorMetaData;
+	public int getMaximumFunctionChainLength() {
+		return this.maximumFunctionChainLength;
 	}
 
 	@Override
-	public GovernanceDeactivationStrategy getGovernanceDeactivationStrategy() {
-		return this.governanceDeactivationStrategy;
+	public TeamManagement getBreakChainTeamManagement() {
+		return this.breakChainTeamManagement;
+	}
+
+	@Override
+	public EscalationProcedure getOfficeEscalationProcedure() {
+		return this.officeEscalationProcedure;
+	}
+
+	@Override
+	public EscalationFlow getOfficeFloorEscalation() {
+		return this.officeFloorEscalation;
 	}
 
 }

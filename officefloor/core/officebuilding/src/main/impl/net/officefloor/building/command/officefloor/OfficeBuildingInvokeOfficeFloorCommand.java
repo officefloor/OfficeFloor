@@ -25,6 +25,7 @@ import net.officefloor.building.command.OfficeFloorCommandContext;
 import net.officefloor.building.command.OfficeFloorCommandEnvironment;
 import net.officefloor.building.command.OfficeFloorCommandFactory;
 import net.officefloor.building.command.OfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.FunctionNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingHostOfficeFloorCommandParameter;
@@ -32,28 +33,24 @@ import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloor
 import net.officefloor.building.command.parameters.OfficeNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.ParameterOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.PasswordOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.ProcessNameOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.TaskNameOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.OfficeFloorNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.UsernameOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.WorkNameOfficeFloorCommandParameter;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.building.process.ManagedProcessContext;
-import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
+import net.officefloor.compile.mbean.OfficeFloorMBean;
 import net.officefloor.console.OfficeBuilding;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
- * {@link OfficeFloorCommandFactory} to invoke a {@link Task} within an
- * {@link OfficeFloor}.
+ * {@link OfficeFloorCommandFactory} to invoke a {@link ManagedFunction} within
+ * an {@link OfficeFloor}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeBuildingInvokeOfficeFloorCommand implements
-		OfficeFloorCommandFactory, OfficeFloorCommand {
+public class OfficeBuildingInvokeOfficeFloorCommand implements OfficeFloorCommandFactory, OfficeFloorCommand {
 
 	/**
 	 * {@link OfficeBuilding} host.
@@ -68,7 +65,7 @@ public class OfficeBuildingInvokeOfficeFloorCommand implements
 	/**
 	 * {@link Process} name.
 	 */
-	private final ProcessNameOfficeFloorCommandParameter processName = new ProcessNameOfficeFloorCommandParameter();
+	private final OfficeFloorNameOfficeFloorCommandParameter officeFloorName = new OfficeFloorNameOfficeFloorCommandParameter();
 
 	/**
 	 * Trust store {@link File}.
@@ -96,17 +93,12 @@ public class OfficeBuildingInvokeOfficeFloorCommand implements
 	private final OfficeNameOfficeFloorCommandParameter officeName = new OfficeNameOfficeFloorCommandParameter();
 
 	/**
-	 * {@link Work} name.
+	 * {@link ManagedFunction} name.
 	 */
-	private final WorkNameOfficeFloorCommandParameter workName = new WorkNameOfficeFloorCommandParameter();
+	private final FunctionNameOfficeFloorCommandParameter functionName = new FunctionNameOfficeFloorCommandParameter();
 
 	/**
-	 * {@link Task} name.
-	 */
-	private final TaskNameOfficeFloorCommandParameter taskName = new TaskNameOfficeFloorCommandParameter();
-
-	/**
-	 * Parameter value for {@link Task}.
+	 * Parameter value for {@link ManagedFunction}.
 	 */
 	private final ParameterOfficeFloorCommandParameter parameter = new ParameterOfficeFloorCommandParameter();
 
@@ -135,46 +127,38 @@ public class OfficeBuildingInvokeOfficeFloorCommand implements
 
 	@Override
 	public OfficeFloorCommandParameter[] getParameters() {
-		return new OfficeFloorCommandParameter[] { this.officeBuildingHost,
-				this.officeBuildingPort, this.processName, this.trustStore,
-				this.trustStorePassword, this.userName, this.password,
-				this.officeName, this.workName, this.taskName, this.parameter };
+		return new OfficeFloorCommandParameter[] { this.officeBuildingHost, this.officeBuildingPort,
+				this.officeFloorName, this.trustStore, this.trustStorePassword, this.userName, this.password,
+				this.officeName, this.functionName, this.parameter };
 	}
 
 	@Override
-	public void initialiseEnvironment(OfficeFloorCommandContext context)
-			throws Exception {
+	public void initialiseEnvironment(OfficeFloorCommandContext context) throws Exception {
 		// Nothing to initialise
 	}
 
 	@Override
-	public ManagedProcess createManagedProcess(
-			OfficeFloorCommandEnvironment environment) throws Exception {
+	public ManagedProcess createManagedProcess(OfficeFloorCommandEnvironment environment) throws Exception {
 
 		// Obtain the task invocation details
-		String officeBuildingHost = this.officeBuildingHost
-				.getOfficeBuildingHost();
-		int officeBuildingPort = this.officeBuildingPort
-				.getOfficeBuildingPort();
-		String processNamespace = this.processName.getProcessName();
+		String officeBuildingHost = this.officeBuildingHost.getOfficeBuildingHost();
+		int officeBuildingPort = this.officeBuildingPort.getOfficeBuildingPort();
+		String officeFloorName = this.officeFloorName.getOfficeFloorName();
 		File trustStore = this.trustStore.getKeyStore();
-		String trustStorePassword = this.trustStorePassword
-				.getKeyStorePassword();
+		String trustStorePassword = this.trustStorePassword.getKeyStorePassword();
 		String userName = this.userName.getUserName();
 		String password = this.password.getPassword();
 		String officeName = this.officeName.getOfficeName();
-		String workName = this.workName.getWorkName();
-		String taskName = this.taskName.getTaskName();
+		String functionName = this.functionName.getFunctionName();
 		String parameter = this.parameter.getParameterValue();
 
-		// Create and return process to invoke the task
-		return new InvokeManagedProcess(officeBuildingHost, officeBuildingPort,
-				processNamespace, trustStore, trustStorePassword, userName,
-				password, officeName, workName, taskName, parameter);
+		// Create and return process to invoke the function
+		return new InvokeManagedProcess(officeBuildingHost, officeBuildingPort, officeFloorName, trustStore,
+				trustStorePassword, userName, password, officeName, functionName, parameter);
 	}
 
 	/**
-	 * {@link ManagedProcess} to invoke a {@link Task}.
+	 * {@link ManagedProcess} to invoke a {@link ManagedFunction}.
 	 */
 	public static class InvokeManagedProcess implements ManagedProcess {
 
@@ -194,9 +178,9 @@ public class OfficeBuildingInvokeOfficeFloorCommand implements
 		private final int officeBuildingPort;
 
 		/**
-		 * {@link OfficeFloor} {@link Process} name space.
+		 * Name of the {@link OfficeFloor}.
 		 */
-		private final String processNamespace;
+		private final String officeFloorName;
 
 		/**
 		 * Location of the trust store {@link File}.
@@ -224,17 +208,12 @@ public class OfficeBuildingInvokeOfficeFloorCommand implements
 		private final String officeName;
 
 		/**
-		 * {@link Work} name.
+		 * {@link ManagedFunction} name.
 		 */
-		private final String workName;
+		private final String functionName;
 
 		/**
-		 * {@link Task} name.
-		 */
-		private final String taskName;
-
-		/**
-		 * Parameter value for the {@link Task}.
+		 * Parameter value for the {@link ManagedFunction}.
 		 */
 		private final String parameter;
 
@@ -245,8 +224,8 @@ public class OfficeBuildingInvokeOfficeFloorCommand implements
 		 *            {@link OfficeBuilding} host.
 		 * @param officeBuildingPort
 		 *            {@link OfficeBuilding} port.
-		 * @param processNamespace
-		 *            {@link OfficeFloor} {@link Process} name space.
+		 * @param officeFloorName
+		 *            Name of the {@link OfficeFloor}.
 		 * @param trustStore
 		 *            Trust store {@link File}.
 		 * @param trustStorePassword
@@ -257,28 +236,23 @@ public class OfficeBuildingInvokeOfficeFloorCommand implements
 		 *            Password to connect.
 		 * @param officeName
 		 *            {@link Office} name.
-		 * @param workName
-		 *            {@link Work} name.
-		 * @param taskName
-		 *            {@link Task} name.
+		 * @param functionName
+		 *            {@link ManagedFunction} name.
 		 * @param parameter
-		 *            Parameter value for the {@link Task}.
+		 *            Parameter value for the {@link ManagedFunction}.
 		 */
-		public InvokeManagedProcess(String officeBuildingHost,
-				int officeBuildingPort, String processNamespace,
-				File trustStore, String trustStorePassword, String userName,
-				String password, String officeName, String workName,
-				String taskName, String parameter) {
+		public InvokeManagedProcess(String officeBuildingHost, int officeBuildingPort, String officeFloorName,
+				File trustStore, String trustStorePassword, String userName, String password, String officeName,
+				String functionName, String parameter) {
 			this.officeBuildingHost = officeBuildingHost;
 			this.officeBuildingPort = officeBuildingPort;
-			this.processNamespace = processNamespace;
+			this.officeFloorName = officeFloorName;
 			this.trustStoreLocation = trustStore.getAbsolutePath();
 			this.trustStorePassword = trustStorePassword;
 			this.userName = userName;
 			this.password = password;
 			this.officeName = officeName;
-			this.workName = workName;
-			this.taskName = taskName;
+			this.functionName = functionName;
 			this.parameter = parameter;
 		}
 
@@ -294,27 +268,17 @@ public class OfficeBuildingInvokeOfficeFloorCommand implements
 		@Override
 		public void main() throws Throwable {
 
-			// Obtain the OfficeFloor manager
-			OfficeFloorManagerMBean officeFloorManager = OfficeBuildingManager
-					.getOfficeFloorManager(this.officeBuildingHost,
-							this.officeBuildingPort, this.processNamespace,
-							new File(this.trustStoreLocation),
-							this.trustStorePassword, this.userName,
-							this.password);
+			// Obtain the OfficeFloor
+			OfficeFloorMBean officeFloorManager = OfficeBuildingManager.getOfficeFloor(this.officeBuildingHost,
+					this.officeBuildingPort, this.officeFloorName, new File(this.trustStoreLocation),
+					this.trustStorePassword, this.userName, this.password);
 
-			// Invoke the Task within the OfficeFloor
-			officeFloorManager.invokeTask(this.officeName, this.workName,
-					this.taskName, this.parameter);
+			// Invoke the function within the OfficeFloor
+			officeFloorManager.invokeFunction(this.officeName, this.functionName, this.parameter);
 
 			// Indicate started
-			System.out.println("Invoked work "
-					+ this.workName
-					+ (this.taskName != null ? " (task " + this.taskName + ")"
-							: "")
-					+ " on office "
-					+ this.officeName
-					+ (this.parameter != null ? " with parameter "
-							+ this.parameter : ""));
+			System.out.println("Invoked function " + this.functionName + " on office " + this.officeName
+					+ (this.parameter != null ? " with parameter " + this.parameter : ""));
 		}
 	}
 

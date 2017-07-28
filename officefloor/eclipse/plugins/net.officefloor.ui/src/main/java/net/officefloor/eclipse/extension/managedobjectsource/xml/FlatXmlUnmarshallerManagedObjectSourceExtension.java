@@ -41,8 +41,7 @@ import org.eclipse.swt.widgets.Label;
  * @author Daniel Sagenschneider
  */
 public class FlatXmlUnmarshallerManagedObjectSourceExtension
-		implements
-		ManagedObjectSourceExtension<None, None, FlatXmlUnmarshallerManagedObjectSource> {
+		implements ManagedObjectSourceExtension<None, None, FlatXmlUnmarshallerManagedObjectSource> {
 
 	/*
 	 * ================ ManagedObjectSourceExtension =========================
@@ -59,33 +58,30 @@ public class FlatXmlUnmarshallerManagedObjectSourceExtension
 	}
 
 	@Override
-	public void createControl(Composite page,
-			final ManagedObjectSourceExtensionContext context) {
+	public void createControl(Composite page, final ManagedObjectSourceExtensionContext context) {
 
 		// Specify layout
 		page.setLayout(new GridLayout(2, false));
 
 		// Obtain the class name property
-		Property property = context.getPropertyList().getProperty(
-				FlatXmlUnmarshallerManagedObjectSource.CLASS_PROPERTY_NAME);
+		Property property = context.getPropertyList()
+				.getProperty(FlatXmlUnmarshallerManagedObjectSource.CLASS_PROPERTY_NAME);
 		if (property == null) {
-			property = context.getPropertyList().addProperty(
-					FlatXmlUnmarshallerManagedObjectSource.CLASS_PROPERTY_NAME);
+			property = context.getPropertyList()
+					.addProperty(FlatXmlUnmarshallerManagedObjectSource.CLASS_PROPERTY_NAME);
 		}
 		final Property classNameProperty = property;
 
 		// Provide selection of class name
 		new Label(page, SWT.NONE).setText("Class: ");
 		InputHandler<String> className = new InputHandler<String>(page,
-				new ClasspathClassInput(context.getProject(), page.getShell()),
-				new InputListener() {
+				new ClasspathClassInput(context.getProject(), page.getShell()), new InputListener() {
 
 					@Override
 					public void notifyValueChanged(Object value) {
 
 						// Obtain the class name
-						String className = (value == null ? null : value
-								.toString());
+						String className = (value == null ? null : value.toString());
 
 						// Inform of change of class name
 						classNameProperty.setValue(className);
@@ -97,16 +93,14 @@ public class FlatXmlUnmarshallerManagedObjectSourceExtension
 						context.setErrorMessage(message);
 					}
 				});
-		className.getControl().setLayoutData(
-				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+		className.getControl().setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 	}
 
 	@Override
 	public String getSuggestedManagedObjectSourceName(PropertyList properties) {
 
 		// Obtain the class name property
-		Property classNameProperty = properties
-				.getProperty(FlatXmlUnmarshallerManagedObjectSource.CLASS_PROPERTY_NAME);
+		Property classNameProperty = properties.getProperty(FlatXmlUnmarshallerManagedObjectSource.CLASS_PROPERTY_NAME);
 		if (classNameProperty == null) {
 			// No suggestion as no class name
 			return null;

@@ -17,9 +17,9 @@
  */
 package net.officefloor.plugin.web.http.session.attribute;
 
-import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.plugin.web.http.session.attribute.HttpSessionAttributeRetrieverManagedObjectSource.HttpSessionAttributeRetrieverDependencies;
 
 /**
@@ -28,8 +28,7 @@ import net.officefloor.plugin.web.http.session.attribute.HttpSessionAttributeRet
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSessionAttributeRetrieverManagedObject
-		implements
+public class HttpSessionAttributeRetrieverManagedObject implements
 		CoordinatingManagedObject<HttpSessionAttributeRetrieverManagedObjectSource.HttpSessionAttributeRetrieverDependencies> {
 
 	/**
@@ -42,9 +41,7 @@ public class HttpSessionAttributeRetrieverManagedObject
 	 */
 
 	@Override
-	public void loadObjects(
-			ObjectRegistry<HttpSessionAttributeRetrieverDependencies> registry)
-			throws Throwable {
+	public void loadObjects(ObjectRegistry<HttpSessionAttributeRetrieverDependencies> registry) throws Throwable {
 
 		// Obtain the HTTP session object
 		this.httpSessionObject = (HttpSessionAttribute<?>) registry

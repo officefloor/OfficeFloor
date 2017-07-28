@@ -18,8 +18,8 @@
 package net.officefloor.compile.impl.office;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.type.TypeContextImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
@@ -66,12 +66,10 @@ public class OfficeLoaderImpl implements OfficeLoader {
 	 */
 
 	@Override
-	public <O extends OfficeSource> PropertyList loadSpecification(
-			Class<O> officeSourceClass) {
+	public <O extends OfficeSource> PropertyList loadSpecification(Class<O> officeSourceClass) {
 
 		// Instantiate the office source
-		OfficeSource officeSource = CompileUtil.newInstance(officeSourceClass,
-				OfficeSource.class, this.node,
+		OfficeSource officeSource = CompileUtil.newInstance(officeSourceClass, OfficeSource.class, this.node,
 				this.nodeContext.getCompilerIssues());
 		if (officeSource == null) {
 			return null; // failed to instantiate
@@ -82,19 +80,15 @@ public class OfficeLoaderImpl implements OfficeLoader {
 		try {
 			specification = officeSource.getSpecification();
 		} catch (Throwable ex) {
-			this.addIssue(
-					"Failed to obtain "
-							+ OfficeSourceSpecification.class.getSimpleName()
-							+ " from " + officeSourceClass.getName(), ex, null);
+			this.addIssue("Failed to obtain " + OfficeSourceSpecification.class.getSimpleName() + " from "
+					+ officeSourceClass.getName(), ex, null);
 			return null; // failed to obtain
 		}
 
 		// Ensure have specification
 		if (specification == null) {
-			this.addIssue(
-					"No " + OfficeSourceSpecification.class.getSimpleName()
-							+ " returned from " + officeSourceClass.getName(),
-					null);
+			this.addIssue("No " + OfficeSourceSpecification.class.getSimpleName() + " returned from "
+					+ officeSourceClass.getName(), null);
 			return null; // no specification obtained
 		}
 
@@ -104,11 +98,9 @@ public class OfficeLoaderImpl implements OfficeLoader {
 			officeProperties = specification.getProperties();
 		} catch (Throwable ex) {
 			this.addIssue(
-					"Failed to obtain "
-							+ OfficeSourceProperty.class.getSimpleName()
-							+ " instances from "
-							+ OfficeSourceSpecification.class.getSimpleName()
-							+ " for " + officeSourceClass.getName(), ex, null);
+					"Failed to obtain " + OfficeSourceProperty.class.getSimpleName() + " instances from "
+							+ OfficeSourceSpecification.class.getSimpleName() + " for " + officeSourceClass.getName(),
+					ex, null);
 			return null; // failed to obtain properties
 		}
 
@@ -120,10 +112,9 @@ public class OfficeLoaderImpl implements OfficeLoader {
 
 				// Ensure have the office property
 				if (officeProperty == null) {
-					this.addIssue(OfficeSourceProperty.class.getSimpleName()
-							+ " " + i + " is null from "
-							+ OfficeSourceSpecification.class.getSimpleName()
-							+ " for " + officeSourceClass.getName(), null);
+					this.addIssue(OfficeSourceProperty.class.getSimpleName() + " " + i + " is null from "
+							+ OfficeSourceSpecification.class.getSimpleName() + " for " + officeSourceClass.getName(),
+							null);
 					return null; // must have complete property details
 				}
 
@@ -132,23 +123,15 @@ public class OfficeLoaderImpl implements OfficeLoader {
 				try {
 					name = officeProperty.getName();
 				} catch (Throwable ex) {
-					this.addIssue(
-							"Failed to get name for "
-									+ OfficeSourceProperty.class
-											.getSimpleName()
-									+ " "
-									+ i
-									+ " from "
-									+ OfficeSourceSpecification.class
-											.getSimpleName() + " for "
-									+ officeSourceClass.getName(), ex, null);
+					this.addIssue("Failed to get name for " + OfficeSourceProperty.class.getSimpleName() + " " + i
+							+ " from " + OfficeSourceSpecification.class.getSimpleName() + " for "
+							+ officeSourceClass.getName(), ex, null);
 					return null; // must have complete property details
 				}
 				if (CompileUtil.isBlank(name)) {
-					this.addIssue(OfficeSourceProperty.class.getSimpleName()
-							+ " " + i + " provided blank name from "
-							+ OfficeSourceSpecification.class.getSimpleName()
-							+ " for " + officeSourceClass.getName(), null);
+					this.addIssue(OfficeSourceProperty.class.getSimpleName() + " " + i + " provided blank name from "
+							+ OfficeSourceSpecification.class.getSimpleName() + " for " + officeSourceClass.getName(),
+							null);
 					return null; // must have complete property details
 				}
 
@@ -157,11 +140,9 @@ public class OfficeLoaderImpl implements OfficeLoader {
 				try {
 					label = officeProperty.getLabel();
 				} catch (Throwable ex) {
-					this.addIssue("Failed to get label for "
-							+ OfficeSourceProperty.class.getSimpleName() + " "
-							+ i + " (" + name + ") from "
-							+ OfficeSourceSpecification.class.getSimpleName()
-							+ " for " + officeSourceClass.getName(), ex, null);
+					this.addIssue("Failed to get label for " + OfficeSourceProperty.class.getSimpleName() + " " + i
+							+ " (" + name + ") from " + OfficeSourceSpecification.class.getSimpleName() + " for "
+							+ officeSourceClass.getName(), ex, null);
 					return null; // must have complete property details
 				}
 
@@ -175,13 +156,11 @@ public class OfficeLoaderImpl implements OfficeLoader {
 	}
 
 	@Override
-	public <O extends OfficeSource> OfficeType loadOfficeType(
-			Class<O> officeSourceClass, String officeLocation,
+	public <O extends OfficeSource> OfficeType loadOfficeType(Class<O> officeSourceClass, String officeLocation,
 			PropertyList propertyList) {
 
 		// Instantiate the office source
-		OfficeSource officeSource = CompileUtil.newInstance(officeSourceClass,
-				OfficeSource.class, this.node,
+		OfficeSource officeSource = CompileUtil.newInstance(officeSourceClass, OfficeSource.class, this.node,
 				this.nodeContext.getCompilerIssues());
 		if (officeSource == null) {
 			return null; // failed to instantiate
@@ -192,25 +171,26 @@ public class OfficeLoaderImpl implements OfficeLoader {
 	}
 
 	@Override
-	public OfficeType loadOfficeType(OfficeSource officeSource,
-			String officeLocation, PropertyList propertyList) {
+	public OfficeType loadOfficeType(OfficeSource officeSource, String officeLocation, PropertyList propertyList) {
 
 		// Create the office node
 		OfficeNode officeNode = this.nodeContext.createOfficeNode("Type", null);
-		officeNode.initialise(officeSource.getClass().getName(), officeSource,
-				officeLocation);
+		officeNode.initialise(officeSource.getClass().getName(), officeSource, officeLocation);
 
 		// Configure the office node
 		propertyList.configureProperties(officeNode);
 
+		// Create the compile context
+		CompileContext compileContext = this.nodeContext.createCompileContext();
+
 		// Source the office tree
-		boolean isSourced = officeNode.sourceOfficeWithTopLevelSections();
+		boolean isSourced = officeNode.sourceOfficeWithTopLevelSections(compileContext);
 		if (!isSourced) {
 			return null; // must source office successfully
 		}
 
 		// Return the office type
-		return officeNode.loadOfficeType(new TypeContextImpl());
+		return officeNode.loadOfficeType(compileContext);
 	}
 
 	/**
@@ -222,8 +202,7 @@ public class OfficeLoaderImpl implements OfficeLoader {
 	 *            Location of the {@link Office}.
 	 */
 	private void addIssue(String issueDescription, String officeLocation) {
-		this.nodeContext.getCompilerIssues().addIssue(this.node,
-				issueDescription);
+		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription);
 	}
 
 	/**
@@ -236,10 +215,8 @@ public class OfficeLoaderImpl implements OfficeLoader {
 	 * @param officeLocation
 	 *            Location of the {@link Office}.
 	 */
-	private void addIssue(String issueDescription, Throwable cause,
-			String officeLocation) {
-		this.nodeContext.getCompilerIssues().addIssue(this.node,
-				issueDescription, cause);
+	private void addIssue(String issueDescription, Throwable cause, String officeLocation) {
+		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription, cause);
 	}
 
 }

@@ -19,11 +19,11 @@ package net.officefloor.tutorial.authenticationhttpserver;
 
 import java.io.Serializable;
 
+import lombok.Data;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.web.http.application.HttpParameters;
 import net.officefloor.plugin.web.http.security.HttpCredentials;
 import net.officefloor.plugin.web.http.security.scheme.HttpCredentialsImpl;
-import net.officefloor.plugin.work.clazz.FlowInterface;
-import lombok.Data;
 
 /**
  * Logic for <code>login</code> page.
@@ -49,8 +49,7 @@ public class LoginLogic {
 	}
 
 	public void login(Form form, Flows flows) {
-		flows.authenticate(new HttpCredentialsImpl(form.getUsername(), form
-				.getPassword()));
+		flows.authenticate(new HttpCredentialsImpl(form.getUsername(), form.getPassword()));
 	}
 
 }

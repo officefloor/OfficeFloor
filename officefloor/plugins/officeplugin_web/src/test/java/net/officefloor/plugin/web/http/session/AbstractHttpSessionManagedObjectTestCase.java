@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.spi.managedobject.AsynchronousListener;
-import net.officefloor.frame.spi.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.AsynchronousContext;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -35,8 +35,6 @@ import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.plugin.web.http.cookie.HttpCookie;
-import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.session.HttpSessionManagedObject;
 import net.officefloor.plugin.web.http.session.spi.CreateHttpSessionOperation;
 import net.officefloor.plugin.web.http.session.spi.FreshHttpSession;
 import net.officefloor.plugin.web.http.session.spi.HttpSessionIdGenerator;
@@ -50,8 +48,7 @@ import net.officefloor.plugin.web.http.session.spi.StoreHttpSessionOperation;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractHttpSessionManagedObjectTestCase extends
-		OfficeFrameTestCase {
+public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Name of {@link HttpCookie} to contain the Session Id.
@@ -64,23 +61,20 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 	private final int serverHttpConnectionIndex = 0;
 
 	/**
-	 * Mock {@link AsynchronousListener}.
+	 * Mock {@link AsynchronousContext}.
 	 */
-	protected final AsynchronousListener asynchronousListener = this
-			.createMock(AsynchronousListener.class);
+	protected final AsynchronousContext asynchronousContext = this.createMock(AsynchronousContext.class);
 
 	/**
 	 * Mock {@link ObjectRegistry}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final ObjectRegistry<Indexed> objectRegistry = this
-			.createMock(ObjectRegistry.class);
+	private final ObjectRegistry<Indexed> objectRegistry = this.createMock(ObjectRegistry.class);
 
 	/**
 	 * Mock {@link ServerHttpConnection}.
 	 */
-	private final ServerHttpConnection connection = this
-			.createMock(ServerHttpConnection.class);
+	private final ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
 
 	/**
 	 * Mock {@link HttpRequest}.
@@ -140,14 +134,11 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 	 * @param session
 	 *            Actual {@link HttpSession}.
 	 */
-	protected static void assertHttpSession(String sessionId,
-			long creationTime, boolean isNew, HttpSession session) {
+	protected static void assertHttpSession(String sessionId, long creationTime, boolean isNew, HttpSession session) {
 		assertEquals("Incorrect Session Id", sessionId, session.getSessionId());
-		assertEquals("Incorrect creation time", creationTime,
-				session.getCreationTime());
+		assertEquals("Incorrect creation time", creationTime, session.getCreationTime());
 		assertEquals("Incorrect flagged on whether new", isNew, session.isNew());
-		assertEquals("Incorrect underlying attributes", "_ATTRIBUTE",
-				session.getAttribute("_TEST"));
+		assertEquals("Incorrect underlying attributes", "_ATTRIBUTE", session.getAttribute("_TEST"));
 	}
 
 	/*
@@ -164,17 +155,14 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 	 */
 	protected void record_sessionIdCookie(String sessionId) {
 		// Record obtaining the Http Request
-		this.recordReturn(this.objectRegistry,
-				this.objectRegistry.getObject(this.serverHttpConnectionIndex),
+		this.recordReturn(this.objectRegistry, this.objectRegistry.getObject(this.serverHttpConnectionIndex),
 				this.connection);
-		this.recordReturn(this.connection, this.connection.getHttpRequest(),
-				this.request);
+		this.recordReturn(this.connection, this.connection.getHttpRequest(), this.request);
 
 		// Record obtaining the Session Id
 		List<HttpHeader> headers = new ArrayList<HttpHeader>(1);
 		if (sessionId != null) {
-			headers.add(new HttpHeaderImpl("cookie", SESSION_ID_COOKIE_NAME
-					+ "=" + sessionId));
+			headers.add(new HttpHeaderImpl("cookie", SESSION_ID_COOKIE_NAME + "=" + sessionId));
 		}
 		this.recordReturn(this.request, this.request.getHeaders(), headers);
 	}
@@ -212,8 +200,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 	 * @param cause
 	 *            Cause of the failure.
 	 */
-	protected void record_generate_failedToGenerateSessionId(
-			final Throwable cause) {
+	protected void record_generate_failedToGenerateSessionId(final Throwable cause) {
 		this.mockOperations.add(new MockOperation() {
 			@Override
 			public void run() {
@@ -232,13 +219,12 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 	 * @param attributes
 	 *            Attributes.
 	 */
-	protected void record_create_sessionCreated(final long creationTime,
-			final long expireTime, final Map<String, Serializable> attributes) {
+	protected void record_create_sessionCreated(final long creationTime, final long expireTime,
+			final Map<String, Serializable> attributes) {
 		this.mockOperations.add(new MockOperation() {
 			@Override
 			public void run() {
-				this.createOperation.sessionCreated(creationTime, expireTime,
-						attributes);
+				this.createOperation.sessionCreated(creationTime, expireTime, attributes);
 			}
 		});
 	}
@@ -280,13 +266,12 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 	 * @param attributes
 	 *            Attributes.
 	 */
-	protected void record_retrieve_sessionRetrieved(final long creationTime,
-			final long expireTime, final Map<String, Serializable> attributes) {
+	protected void record_retrieve_sessionRetrieved(final long creationTime, final long expireTime,
+			final Map<String, Serializable> attributes) {
 		this.mockOperations.add(new MockOperation() {
 			@Override
 			public void run() {
-				this.retrieveOperation.sessionRetrieved(creationTime,
-						expireTime, attributes);
+				this.retrieveOperation.sessionRetrieved(creationTime, expireTime, attributes);
 			}
 		});
 	}
@@ -363,8 +348,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 	 * @param cause
 	 *            Cause of failure.
 	 */
-	protected void record_invalidate_failedToInvalidateSession(
-			final Throwable cause) {
+	protected void record_invalidate_failedToInvalidateSession(final Throwable cause) {
 		this.mockOperations.add(new MockOperation() {
 			@Override
 			public void run() {
@@ -383,33 +367,26 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 	 * @param expireTime
 	 *            Time to expire the added {@link HttpCookie}.
 	 */
-	protected void record_cookie_addSessionId(boolean isExistingSessionCookie,
-			String sessionId, long expireTime) {
+	protected void record_cookie_addSessionId(boolean isExistingSessionCookie, String sessionId, long expireTime) {
 
 		// Record checking for existing Session Id cookie
-		this.recordReturn(this.connection, this.connection.getHttpResponse(),
-				this.response);
+		this.recordReturn(this.connection, this.connection.getHttpResponse(), this.response);
 		if (isExistingSessionCookie) {
 			// Record existing Session cookie
 			HttpHeader existingCookieHeader = new HttpHeaderImpl("set-cookie",
 					SESSION_ID_COOKIE_NAME + "=\"Existing Session Id\"");
-			this.recordReturn(this.response, this.response.getHeaders(),
-					new HttpHeader[] { existingCookieHeader });
+			this.recordReturn(this.response, this.response.getHeaders(), new HttpHeader[] { existingCookieHeader });
 			this.response.removeHeader(existingCookieHeader);
 		} else {
 			// Record no existing Session cookie
-			this.recordReturn(this.response, this.response.getHeaders(),
-					new HttpHeader[0]);
+			this.recordReturn(this.response, this.response.getHeaders(), new HttpHeader[0]);
 		}
 
 		// Record adding the Session Id cookie
 		HttpCookie cookie = new HttpCookie(SESSION_ID_COOKIE_NAME, sessionId);
 		cookie.setExpires(expireTime);
 		cookie.setPath("/");
-		this.recordReturn(
-				this.response,
-				this.response.addHeader("set-cookie",
-						cookie.toHttpResponseHeaderValue()),
+		this.recordReturn(this.response, this.response.addHeader("set-cookie", cookie.toHttpResponseHeaderValue()),
 				this.createMock(HttpHeader.class));
 	}
 
@@ -423,10 +400,8 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 	 * @return New {@link HttpSessionManagedObject}.
 	 */
 	protected HttpSessionManagedObject createHttpSessionManagedObject() {
-		return new HttpSessionManagedObject(SESSION_ID_COOKIE_NAME,
-				this.serverHttpConnectionIndex, -1,
-				new MockHttpSessionIdGenerator(), -1,
-				new MockHttpSessionStore());
+		return new HttpSessionManagedObject(SESSION_ID_COOKIE_NAME, this.serverHttpConnectionIndex, -1,
+				new MockHttpSessionIdGenerator(), -1, new MockHttpSessionStore());
 	}
 
 	/**
@@ -435,11 +410,10 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 	 * @param mo
 	 *            {@link HttpSessionManagedObject}.
 	 */
-	protected void startCoordination(HttpSessionManagedObject mo)
-			throws Throwable {
+	protected void startCoordination(HttpSessionManagedObject mo) throws Throwable {
 
-		// Register the asynchronous listener
-		mo.registerAsynchronousCompletionListener(this.asynchronousListener);
+		// Register the asynchronous context
+		mo.setAsynchronousContext(this.asynchronousContext);
 
 		// Trigger the coordination
 		mo.loadObjects(this.objectRegistry);
@@ -450,8 +424,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 	 */
 	protected void verifyOperations() {
 		this.verifyMockObjects();
-		assertEquals("Operations still outstanding", 0,
-				this.mockOperations.size());
+		assertEquals("Operations still outstanding", 0, this.mockOperations.size());
 	}
 
 	/**
@@ -468,10 +441,8 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 	 * @param invalidate
 	 *            {@link InvalidateHttpSessionOperation}.
 	 */
-	private void runNextMockOperation(FreshHttpSession session,
-			CreateHttpSessionOperation create,
-			RetrieveHttpSessionOperation retrieve,
-			StoreHttpSessionOperation store,
+	private void runNextMockOperation(FreshHttpSession session, CreateHttpSessionOperation create,
+			RetrieveHttpSessionOperation retrieve, StoreHttpSessionOperation store,
 			InvalidateHttpSessionOperation invalidate) {
 		// Obtain the next operation
 		MockOperation operation = this.mockOperations.remove();
@@ -505,8 +476,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 
 		@Override
 		public void generateSessionId(FreshHttpSession session) {
-			AbstractHttpSessionManagedObjectTestCase.this.runNextMockOperation(
-					session, null, null, null, null);
+			AbstractHttpSessionManagedObjectTestCase.this.runNextMockOperation(session, null, null, null, null);
 		}
 	}
 
@@ -521,27 +491,22 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 
 		@Override
 		public void createHttpSession(CreateHttpSessionOperation operation) {
-			AbstractHttpSessionManagedObjectTestCase.this.runNextMockOperation(
-					null, operation, null, null, null);
+			AbstractHttpSessionManagedObjectTestCase.this.runNextMockOperation(null, operation, null, null, null);
 		}
 
 		@Override
 		public void retrieveHttpSession(RetrieveHttpSessionOperation operation) {
-			AbstractHttpSessionManagedObjectTestCase.this.runNextMockOperation(
-					null, null, operation, null, null);
+			AbstractHttpSessionManagedObjectTestCase.this.runNextMockOperation(null, null, operation, null, null);
 		}
 
 		@Override
 		public void storeHttpSession(StoreHttpSessionOperation operation) {
-			AbstractHttpSessionManagedObjectTestCase.this.runNextMockOperation(
-					null, null, null, operation, null);
+			AbstractHttpSessionManagedObjectTestCase.this.runNextMockOperation(null, null, null, operation, null);
 		}
 
 		@Override
-		public void invalidateHttpSession(
-				InvalidateHttpSessionOperation operation) {
-			AbstractHttpSessionManagedObjectTestCase.this.runNextMockOperation(
-					null, null, null, null, operation);
+		public void invalidateHttpSession(InvalidateHttpSessionOperation operation) {
+			AbstractHttpSessionManagedObjectTestCase.this.runNextMockOperation(null, null, null, null, operation);
 		}
 	}
 

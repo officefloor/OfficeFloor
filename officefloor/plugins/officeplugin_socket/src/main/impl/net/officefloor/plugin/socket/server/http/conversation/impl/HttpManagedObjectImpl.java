@@ -24,9 +24,9 @@ import java.nio.channels.ClosedChannelException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -39,14 +39,12 @@ import net.officefloor.plugin.socket.server.protocol.Connection;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpManagedObjectImpl implements HttpManagedObject,
-		ServerHttpConnection, EscalationHandler {
+public class HttpManagedObjectImpl implements HttpManagedObject, ServerHttpConnection, FlowCallback {
 
 	/**
 	 * {@link Logger}.
 	 */
-	private static final Logger LOGGER = Logger
-			.getLogger(HttpManagedObjectImpl.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(HttpManagedObjectImpl.class.getName());
 
 	/**
 	 * {@link Connection}.
@@ -84,13 +82,11 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 	 * @param request
 	 *            {@link HttpRequestImpl}.
 	 */
-	public HttpManagedObjectImpl(Connection connection,
-			HttpConversationImpl conversation, HttpRequestImpl request) {
+	public HttpManagedObjectImpl(Connection connection, HttpConversationImpl conversation, HttpRequestImpl request) {
 		this.connection = connection;
 		this.conversation = conversation;
 		this.request = request;
-		this.response = new HttpResponseImpl(this.conversation,
-				this.connection, request.getVersion());
+		this.response = new HttpResponseImpl(this.conversation, this.connection, request.getVersion());
 
 		// Keep track of the client HTTP method
 		this.clientHttpMethod = request.getMethod();
@@ -133,7 +129,7 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 	}
 
 	@Override
-	public EscalationHandler getEscalationHandler() {
+	public FlowCallback getFlowCallback() {
 		return this;
 	}
 
@@ -143,18 +139,9 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 	}
 
 	@Override
-	public void cleanup(CleanupEscalation[] cleanupEscalations)
-			throws IOException {
-
-		// Determine if escalations
-		if ((cleanupEscalations != null) && (cleanupEscalations.length > 0)) {
-			// Report cleanup escalations
-			this.response.sendCleanupEscalations(cleanupEscalations);
-
-		} else {
-			// Ensure response is triggered for sending
-			this.response.send();
-		}
+	public void cleanup(CleanupEscalation[] cleanupEscalations) throws IOException {
+		// Report cleanup escalations
+		this.response.handleCleanupEscalations(cleanupEscalations);
 	}
 
 	/*
@@ -202,20 +189,18 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 
 		// Ensure valid momento
 		if (!(momento instanceof StateMomento)) {
-			throw new IllegalArgumentException("Invalid momento for "
-					+ ServerHttpConnection.class.getSimpleName());
+			throw new IllegalArgumentException("Invalid momento for " + ServerHttpConnection.class.getSimpleName());
 		}
 		StateMomento state = (StateMomento) momento;
 
 		// Override the request with momento state
 		String requestHttpVersion = this.request.getVersion();
-		this.request = new HttpRequestImpl(requestHttpVersion,
-				state.requestMomento);
+		this.request = new HttpRequestImpl(requestHttpVersion, state.requestMomento);
 
 		// Override the response with momento state
 		String responseHttpVersion = this.response.getHttpVersion();
-		this.response = new HttpResponseImpl(this.conversation,
-				this.connection, responseHttpVersion, state.responseMomento);
+		this.response = new HttpResponseImpl(this.conversation, this.connection, responseHttpVersion,
+				state.responseMomento);
 	}
 
 	@Override
@@ -224,30 +209,34 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 	}
 
 	/*
-	 * ================== EscalationHandler =============================
+	 * ================== FlowCallback =============================
 	 */
 
 	@Override
-	public void handleEscalation(Throwable escalation) throws Throwable {
+	public void run(Throwable escalation) throws Throwable {
 		try {
 
 			// Send failure on handling request
-			this.response.sendFailure(escalation);
+			if (escalation != null) {
+				this.response.sendFailure(escalation);
+				return;
+			}
 
 		} catch (ClosedChannelException ex) {
 			// Can not send failure, as connection closed
 			if (LOGGER.isLoggable(Level.FINE)) {
-				LOGGER.log(Level.FINE,
-						"Failed sending escalation over closed connection", ex);
+				LOGGER.log(Level.FINE, "Failed sending escalation over closed connection", ex);
 			}
 
 		} catch (IOException ex) {
 			// Failed to send failure
 			if (LOGGER.isLoggable(Level.INFO)) {
-				LOGGER.log(Level.INFO, "Unable to send HTTP failure message",
-						ex);
+				LOGGER.log(Level.INFO, "Unable to send HTTP failure message", ex);
 			}
 		}
+
+		// Send the response
+		this.response.send();
 	}
 
 	/**
@@ -273,8 +262,7 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 		 * @param responseMomento
 		 *            Momento for the {@link HttpResponse}.
 		 */
-		public StateMomento(Serializable requestMomento,
-				Serializable responseMomento) {
+		public StateMomento(Serializable requestMomento, Serializable responseMomento) {
 			this.requestMomento = requestMomento;
 			this.responseMomento = responseMomento;
 		}

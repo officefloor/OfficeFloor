@@ -35,8 +35,8 @@ public interface Profiler {
 	 * <p>
 	 * 
 	 * @param process
-	 *            {@link ProfiledProcess}.
+	 *            {@link ProfiledProcessState}.
 	 */
-	void profileProcess(ProfiledProcess process);
+	void profileProcessState(ProfiledProcessState process);
 
 }

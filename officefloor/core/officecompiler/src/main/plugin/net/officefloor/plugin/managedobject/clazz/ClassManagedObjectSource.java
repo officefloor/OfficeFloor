@@ -17,7 +17,9 @@
  */
 package net.officefloor.plugin.managedobject.clazz;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,21 +35,21 @@ import java.util.Set;
 import net.officefloor.compile.ManagedObjectSourceService;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.plugin.work.clazz.FlowInterface;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 
 /**
  * {@link ManagedObjectSource} that manages an {@link Object} via reflection.
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassManagedObjectSource extends
-		AbstractManagedObjectSource<Indexed, Indexed> implements
-		ManagedObjectSourceService<Indexed, Indexed, ClassManagedObjectSource> {
+public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexed, Indexed>
+		implements ManagedObjectSourceService<Indexed, Indexed, ClassManagedObjectSource> {
 
 	/**
 	 * Convenience method to aid in unit testing.
@@ -64,8 +66,7 @@ public class ClassManagedObjectSource extends
 	 *             If fails to instantiate the instance and inject the
 	 *             dependencies.
 	 */
-	public static <T> T newInstance(Class<T> clazz,
-			Object... dependencyNameObjectListing) throws Exception {
+	public static <T> T newInstance(Class<T> clazz, Object... dependencyNameObjectListing) throws Exception {
 
 		// Create the map of dependencies
 		Map<String, Object> dependencies = new HashMap<String, Object>();
@@ -103,8 +104,7 @@ public class ClassManagedObjectSource extends
 	 *             If fails to instantiate the instance and inject the
 	 *             dependencies.
 	 */
-	public static <T> T newInstance(Class<T> clazz,
-			Map<String, Object> dependencies) throws Exception {
+	public static <T> T newInstance(Class<T> clazz, Map<String, Object> dependencies) throws Exception {
 
 		// Instantiate the object
 		T object = clazz.newInstance();
@@ -117,8 +117,7 @@ public class ClassManagedObjectSource extends
 		for (Field dependencyField : dependencyFields) {
 
 			// Obtain the dependency name
-			String dependencyName = retrieveDependencyName(dependencyField,
-					dependencyFields);
+			String dependencyName = retrieveDependencyName(dependencyField, dependencyFields);
 
 			// Obtain the dependency
 			Object dependency = dependencies.get(dependencyName);
@@ -139,8 +138,7 @@ public class ClassManagedObjectSource extends
 		for (Field processField : processFields) {
 
 			// Obtain the process name (as dependency inject interface)
-			String dependencyName = retrieveDependencyName(processField,
-					processFields);
+			String dependencyName = retrieveDependencyName(processField, processFields);
 
 			// Obtain the dependency (process interface)
 			Object dependency = dependencies.get(dependencyName);
@@ -160,9 +158,14 @@ public class ClassManagedObjectSource extends
 	public static final String CLASS_NAME_PROPERTY_NAME = "class.name";
 
 	/**
-	 * {@link Class} of the {@link Object} being managed.
+	 * Default {@link Constructor} arguments.
 	 */
-	private Class<?> objectClass;
+	private static final Object[] DEFAULT_CONSTRUCTOR_ARGUMENTS = new Object[0];
+
+	/**
+	 * {@link Constructor} for the {@link Object} being managed.
+	 */
+	private Constructor<?> objectConstructor;
 
 	/**
 	 * {@link DependencyMetaData} instances.
@@ -207,8 +210,7 @@ public class ClassManagedObjectSource extends
 	public DependencyMetaData[] extractDependencyMetaData(Class<?> objectClass) {
 
 		// Obtains the ordered dependency fields
-		List<Field> dependencyFields = this
-				.extractDependencyFields(objectClass);
+		List<Field> dependencyFields = this.extractDependencyFields(objectClass);
 		orderFields(dependencyFields);
 
 		// Create the dependency meta-data and register the dependencies
@@ -217,13 +219,11 @@ public class ClassManagedObjectSource extends
 		for (Field dependencyField : dependencyFields) {
 
 			// Obtain the name for the dependency
-			String dependencyName = retrieveDependencyName(dependencyField,
-					dependencyFields);
+			String dependencyName = retrieveDependencyName(dependencyField, dependencyFields);
 
 			// Add the dependency meta-data, ensuring can access field
 			dependencyField.setAccessible(true);
-			dependencyListing.add(new DependencyMetaData(dependencyName,
-					dependencyIndex++, dependencyField));
+			dependencyListing.add(new DependencyMetaData(dependencyName, dependencyIndex++, dependencyField));
 		}
 		DependencyMetaData[] dependencyMetaData = dependencyListing
 				.toArray(new DependencyMetaData[dependencyListing.size()]);
@@ -256,28 +256,27 @@ public class ClassManagedObjectSource extends
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<Indexed, Indexed> context)
-			throws Exception {
-		ManagedObjectSourceContext<Indexed> mosContext = context
-				.getManagedObjectSourceContext();
+	protected void loadMetaData(MetaDataContext<Indexed, Indexed> context) throws Exception {
+		ManagedObjectSourceContext<Indexed> mosContext = context.getManagedObjectSourceContext();
 
 		// Obtain the class
 		String className = mosContext.getProperty(CLASS_NAME_PROPERTY_NAME);
-		this.objectClass = mosContext.getClassLoader().loadClass(className);
+		Class<?> objectClass = mosContext.getClassLoader().loadClass(className);
+
+		// Obtain the default constructor
+		this.objectConstructor = objectClass.getConstructor(new Class<?>[0]);
 
 		// Provide managed object class to indicate coordinating
 		context.setManagedObjectClass(ClassManagedObject.class);
 
 		// Class is the object type returned from the managed object
-		context.setObjectClass(this.objectClass);
+		context.setObjectClass(objectClass);
 
 		// Create the dependency meta-data and register the dependencies
-		this.dependencyMetaData = this
-				.extractDependencyMetaData(this.objectClass);
+		this.dependencyMetaData = this.extractDependencyMetaData(objectClass);
 		for (DependencyMetaData dependency : this.dependencyMetaData) {
 			// Register the dependency
-			DependencyLabeller labeller = context
-					.addDependency(dependency.field.getType());
+			DependencyLabeller labeller = context.addDependency(dependency.field.getType());
 
 			// Use field name as name of dependency
 			labeller.setLabel(dependency.name);
@@ -291,7 +290,7 @@ public class ClassManagedObjectSource extends
 		}
 
 		// Obtain the process details
-		this.processStructs = retrieveOrderedProcessStructs(this.objectClass);
+		this.processStructs = retrieveOrderedProcessStructs(objectClass);
 
 		// Register the processes to be invoked
 		for (ProcessStruct processStruct : this.processStructs) {
@@ -300,16 +299,18 @@ public class ClassManagedObjectSource extends
 			processStruct.field.setAccessible(true);
 
 			// Register the process methods for the field
-			for (Method processMethod : processStruct.invokeMethods) {
+			for (ProcessMethodStruct processMethod : processStruct.invokeMethods) {
 
 				// Obtain the process name
-				String processName = retrieveProcessName(processStruct.field,
-						processMethod, this.processStructs);
+				String processName = retrieveProcessName(processStruct.field, processMethod.method,
+						this.processStructs);
 
 				// Obtain the argument type
-				Class<?>[] methodParameters = processMethod.getParameterTypes();
-				Class<?> argumentType = (methodParameters.length == 1 ? methodParameters[0]
-						: null);
+				Class<?> argumentType = null;
+				if (processMethod.isParameter) {
+					Class<?>[] methodParameters = processMethod.method.getParameterTypes();
+					argumentType = methodParameters[0];
+				}
 
 				// Add the flow
 				context.addFlow(argumentType).setLabel(processName);
@@ -320,13 +321,11 @@ public class ClassManagedObjectSource extends
 		this.classLoader = mosContext.getClassLoader();
 
 		// Add the object class as extension interface.
-		ClassExtensionInterfaceFactory.registerExtensionInterface(context,
-				this.objectClass);
+		ClassExtensionInterfaceFactory.registerExtensionInterface(context, objectClass);
 	}
 
 	@Override
-	public void start(ManagedObjectExecuteContext<Indexed> context)
-			throws Exception {
+	public void start(ManagedObjectExecuteContext<Indexed> context) throws Exception {
 
 		// Create the process meta-data
 		List<ProcessMetaData> processListing = new LinkedList<ProcessMetaData>();
@@ -334,15 +333,14 @@ public class ClassManagedObjectSource extends
 		for (ProcessStruct struct : this.processStructs) {
 
 			// Create the map of method name to its process index
-			Map<String, Integer> indexes = new HashMap<String, Integer>(
-					struct.invokeMethods.length);
-			for (Method invokeMethod : struct.invokeMethods) {
-				indexes.put(invokeMethod.getName(), new Integer(processIndex++));
+			Map<String, ProcessMethodMetaData> methodMetaData = new HashMap<>(struct.invokeMethods.length);
+			for (ProcessMethodStruct methodStruct : struct.invokeMethods) {
+				methodMetaData.put(methodStruct.method.getName(), new ProcessMethodMetaData(processIndex++,
+						methodStruct.isParameter, methodStruct.isFlowCallback));
 			}
 
 			// Create and add the process meta-data
-			processListing.add(new ProcessMetaData(struct.field, indexes,
-					this.classLoader, context));
+			processListing.add(new ProcessMetaData(struct.field, methodMetaData, this.classLoader, context));
 		}
 
 		// Only required process meta-data
@@ -355,11 +353,15 @@ public class ClassManagedObjectSource extends
 	protected ManagedObject getManagedObject() throws Throwable {
 
 		// Create an instance of the object
-		Object object = this.objectClass.newInstance();
+		Object object;
+		try {
+			object = this.objectConstructor.newInstance(DEFAULT_CONSTRUCTOR_ARGUMENTS);
+		} catch (InvocationTargetException ex) {
+			throw ex.getTargetException();
+		}
 
 		// Return a managed object to manage the object
-		return new ClassManagedObject(object, this.dependencyMetaData,
-				this.processMetaData);
+		return new ClassManagedObject(object, this.dependencyMetaData, this.processMetaData);
 	}
 
 	/**
@@ -372,8 +374,7 @@ public class ClassManagedObjectSource extends
 	 *            instances.
 	 * @return Unique {@link Dependency} inject name for the {@link Field}.
 	 */
-	private static String retrieveDependencyName(Field injectField,
-			List<Field> allInjectFields) {
+	private static String retrieveDependencyName(Field injectField, List<Field> allInjectFields) {
 
 		// Determine the name for the inject field
 		String injectName;
@@ -392,13 +393,11 @@ public class ClassManagedObjectSource extends
 			injectName = fieldInjectName;
 		} else {
 			// Field name not unique, so add class name for making unique
-			String classInjectName = injectField.getDeclaringClass()
-					.getSimpleName() + "." + injectField.getName();
+			String classInjectName = injectField.getDeclaringClass().getSimpleName() + "." + injectField.getName();
 			boolean isAnotherByClassName = false;
 			for (Field field : allInjectFields) {
 				if (field != injectField) {
-					String fieldClassName = field.getDeclaringClass()
-							.getSimpleName() + "." + field.getName();
+					String fieldClassName = field.getDeclaringClass().getSimpleName() + "." + field.getName();
 					if (fieldClassName.equals(classInjectName)) {
 						// Another field by same class name
 						isAnotherByClassName = true;
@@ -410,8 +409,7 @@ public class ClassManagedObjectSource extends
 				injectName = classInjectName;
 			} else {
 				// Use fully qualified name of field
-				injectName = injectField.getDeclaringClass().getName() + "."
-						+ injectField.getName();
+				injectName = injectField.getDeclaringClass().getName() + "." + injectField.getName();
 			}
 		}
 
@@ -433,8 +431,7 @@ public class ClassManagedObjectSource extends
 		// Create the listing of dependency fields (excluding Object fields)
 		List<Field> dependencyFields = new LinkedList<Field>();
 		Class<?> interrogateClass = clazz;
-		while ((interrogateClass != null)
-				&& (!Object.class.equals(interrogateClass))) {
+		while ((interrogateClass != null) && (!Object.class.equals(interrogateClass))) {
 			for (Field field : interrogateClass.getDeclaredFields()) {
 				if (field.getAnnotation(Dependency.class) != null) {
 					// Annotated as a dependency field
@@ -460,15 +457,16 @@ public class ClassManagedObjectSource extends
 	 *            {@link Field} instances.
 	 * @return Unique process name.
 	 */
-	private static String retrieveProcessName(Field processInterfaceField,
-			Method processMethod, List<ProcessStruct> processStructs) {
+	private static String retrieveProcessName(Field processInterfaceField, Method processMethod,
+			List<ProcessStruct> processStructs) {
 
 		// Determine the process name
 		String processName;
 		String methodName = processMethod.getName();
 		boolean isAnotherByMethodName = false;
 		for (ProcessStruct struct : processStructs) {
-			for (Method invokeMethod : struct.invokeMethods) {
+			for (ProcessMethodStruct invokeMethodStruct : struct.invokeMethods) {
+				Method invokeMethod = invokeMethodStruct.method;
 				if (processMethod != invokeMethod) {
 					if (invokeMethod.getName().equals(methodName)) {
 						// Another method by the same name
@@ -482,14 +480,13 @@ public class ClassManagedObjectSource extends
 			processName = methodName;
 		} else {
 			// Method name not unique, so add field name for making unique
-			String fieldProcessName = processInterfaceField.getName() + "."
-					+ processMethod.getName();
+			String fieldProcessName = processInterfaceField.getName() + "." + processMethod.getName();
 			boolean isAnotherByFieldName = false;
 			for (ProcessStruct struct : processStructs) {
-				for (Method invokeMethod : struct.invokeMethods) {
+				for (ProcessMethodStruct invokeMethodStruct : struct.invokeMethods) {
+					Method invokeMethod = invokeMethodStruct.method;
 					if (processMethod != invokeMethod) {
-						String compareName = struct.field.getName() + "."
-								+ invokeMethod.getName();
+						String compareName = struct.field.getName() + "." + invokeMethod.getName();
 						if (compareName.equals(fieldProcessName)) {
 							// Another method by field name
 							isAnotherByFieldName = true;
@@ -502,11 +499,8 @@ public class ClassManagedObjectSource extends
 				processName = fieldProcessName;
 			} else {
 				// Use fully qualified name of process method
-				processName = processInterfaceField.getDeclaringClass()
-						.getName()
-						+ "."
-						+ processInterfaceField.getName()
-						+ "." + processMethod.getName();
+				processName = processInterfaceField.getDeclaringClass().getName() + "."
+						+ processInterfaceField.getName() + "." + processMethod.getName();
 			}
 		}
 
@@ -517,7 +511,7 @@ public class ClassManagedObjectSource extends
 	/**
 	 * <p>
 	 * Retrieves the {@link ProcessStruct} instances for the
-	 * {@link ProcessInterface} {@link Field} instances ordered by:
+	 * {@link FlowInterface} {@link Field} instances ordered by:
 	 * <ol>
 	 * <li>field name</li>
 	 * <li>simple class name . field name</li>
@@ -529,21 +523,19 @@ public class ClassManagedObjectSource extends
 	 * Ordering is necessary to ensure similar indexes each time loaded.
 	 * 
 	 * @param clazz
-	 *            {@link Class} to interrogate for {@link ProcessInterface}
+	 *            {@link Class} to interrogate for {@link FlowInterface}
 	 *            {@link Field} instances.
 	 * @return Listing of {@link ProcessInterface} {@link Field} instances
 	 *         ordered by their names.
 	 * @throws Exception
 	 *             Should a {@link ProcessInterface} injection type be invalid.
 	 */
-	private static List<ProcessStruct> retrieveOrderedProcessStructs(
-			Class<?> clazz) throws Exception {
+	private static List<ProcessStruct> retrieveOrderedProcessStructs(Class<?> clazz) throws Exception {
 
 		// Create the listing of process fields (excluding Object fields)
 		List<Field> processFields = new LinkedList<Field>();
 		Class<?> interrogateClass = clazz;
-		while ((interrogateClass != null)
-				&& (!Object.class.equals(interrogateClass))) {
+		while ((interrogateClass != null) && (!Object.class.equals(interrogateClass))) {
 			for (Field field : interrogateClass.getDeclaredFields()) {
 				if (field.getType().getAnnotation(FlowInterface.class) != null) {
 					// Annotated as a flow interface field
@@ -563,12 +555,9 @@ public class ClassManagedObjectSource extends
 			// Obtain the process field type
 			Class<?> type = processField.getType();
 			if (!type.isInterface()) {
-				throw new Exception(
-						"Type for field "
-								+ processField.getName()
-								+ " must be an interface as the type is annotated with "
-								+ FlowInterface.class.getSimpleName()
-								+ " (type=" + type.getName() + ")");
+				throw new Exception("Type for field " + processField.getName()
+						+ " must be an interface as the type is annotated with " + FlowInterface.class.getSimpleName()
+						+ " (type=" + type.getName() + ")");
 			}
 
 			// Obtain the non Object methods
@@ -584,31 +573,24 @@ public class ClassManagedObjectSource extends
 				// Ensure the method name is unique for the type
 				String methodName = method.getName();
 				if (methodNames.contains(methodName)) {
-					throw new Exception(
-							"May not have duplicate process method names (field="
-									+ processField.getName() + ", type="
-									+ type.getName() + ", method=" + methodName
-									+ ")");
+					throw new Exception("May not have duplicate process method names (field=" + processField.getName()
+							+ ", type=" + type.getName() + ", method=" + methodName + ")");
 				}
 				methodNames.add(methodName);
 
 				// Ensure at most only one parameter to the method
 				Class<?>[] parameterTypes = method.getParameterTypes();
 				if (parameterTypes.length > 1) {
-					throw new Exception(
-							"Process methods may only have at most one parameter (field="
-									+ processField.getName() + ", method="
-									+ methodName + ")");
+					throw new Exception("Process methods may only have at most one parameter (field="
+							+ processField.getName() + ", method=" + methodName + ")");
 
 				}
 
 				// Ensure no return from method
 				Class<?> returnType = method.getReturnType();
 				if ((returnType != null) && (!(Void.TYPE.equals(returnType)))) {
-					throw new Exception(
-							"Process methods may only be void in return type (field="
-									+ processField.getName() + ", method="
-									+ methodName + ")");
+					throw new Exception("Process methods may only be void in return type (field="
+							+ processField.getName() + ", method=" + methodName + ")");
 				}
 
 				// Add the valid method
@@ -624,8 +606,52 @@ public class ClassManagedObjectSource extends
 				}
 			});
 
+			// Create the process method structs
+			ProcessMethodStruct[] processMethodStructs = new ProcessMethodStruct[invokeMethods.length];
+			for (int i = 0; i < processMethodStructs.length; i++) {
+				Method method = invokeMethods[i];
+
+				// Determine if parameter and flow callback
+				boolean isParameter = false;
+				boolean isFlowCallback = false;
+				Class<?>[] methodParams = method.getParameterTypes();
+				switch (methodParams.length) {
+				case 2:
+					// Two parameters, first parameter, second flow callback
+					isParameter = true;
+					if (!FlowCallback.class.isAssignableFrom(methodParams[1])) {
+						throw new Exception("Second parameter must be " + FlowCallback.class.getSimpleName()
+								+ " (field=" + processField.getName() + ", method=" + method.getName() + ")");
+					}
+					isFlowCallback = true;
+					break;
+
+				case 1:
+					// Single parameter, either parameter or flow callback
+					if (FlowCallback.class.isAssignableFrom(methodParams[0])) {
+						isFlowCallback = true;
+					} else {
+						isParameter = true;
+					}
+					break;
+
+				case 0:
+					// No parameters
+					break;
+
+				default:
+					// Invalid to have more than two parameter
+					throw new Exception(
+							"Flow methods may only have at most two parameters [<parameter>, <flow callback>] (field="
+									+ processField.getName() + ", method=" + method.getName() + ")");
+				}
+
+				// Load the process method struct
+				processMethodStructs[i] = new ProcessMethodStruct(method, isParameter, isFlowCallback);
+			}
+
 			// Create and add the process interface details
-			processStructs.add(new ProcessStruct(processField, invokeMethods));
+			processStructs.add(new ProcessStruct(processField, processMethodStructs));
 		}
 
 		// Return the process fields
@@ -633,19 +659,19 @@ public class ClassManagedObjectSource extends
 	}
 
 	/**
-	 * Details of a {@link ProcessInterface} on the class.
+	 * Details of a {@link FlowInterface} on the class.
 	 */
 	private static class ProcessStruct {
 
 		/**
-		 * {@link Field} to inject the {@link ProcessInterface}.
+		 * {@link Field} to inject the {@link FlowInterface}.
 		 */
 		public final Field field;
 
 		/**
 		 * {@link Method} instances to invoke the processes.
 		 */
-		public final Method[] invokeMethods;
+		public final ProcessMethodStruct[] invokeMethods;
 
 		/**
 		 * Initiate.
@@ -655,9 +681,46 @@ public class ClassManagedObjectSource extends
 		 * @param invokeMethods
 		 *            {@link Method} instances to invoke the processes.
 		 */
-		public ProcessStruct(Field field, Method[] invokeMethods) {
+		public ProcessStruct(Field field, ProcessMethodStruct[] invokeMethods) {
 			this.field = field;
 			this.invokeMethods = invokeMethods;
+		}
+	}
+
+	/**
+	 * Details of the {@link Method} of a {@link FlowInterface}.
+	 */
+	private static class ProcessMethodStruct {
+
+		/**
+		 * {@link Method} to invoke the process.
+		 */
+		private final Method method;
+
+		/**
+		 * Indicates if parameter in invoking the process.
+		 */
+		private boolean isParameter;
+
+		/**
+		 * Indicates if {@link FlowCallback} in invoking the process.
+		 */
+		private boolean isFlowCallback;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param method
+		 *            {@link Method} to invoke the process.
+		 * @param isParameter
+		 *            Indicates if parameter in invoking the process.
+		 * @param isFlowCallback
+		 *            Indicates if {@link FlowCallback} in invoking the process.
+		 */
+		public ProcessMethodStruct(Method method, boolean isParameter, boolean isFlowCallback) {
+			this.method = method;
+			this.isParameter = isParameter;
+			this.isFlowCallback = isFlowCallback;
 		}
 	}
 
@@ -695,13 +758,11 @@ public class ClassManagedObjectSource extends
 				Class<?> bClass = b.getDeclaringClass();
 				if (!(aClass.getSimpleName().equals(bClass.getSimpleName()))) {
 					// Simple class names different so compare by them
-					return aClass.getSimpleName().compareTo(
-							bClass.getSimpleName());
+					return aClass.getSimpleName().compareTo(bClass.getSimpleName());
 				}
 
 				// Field and simple class name same so compare by package
-				return aClass.getPackage().getName()
-						.compareTo(bClass.getPackage().getName());
+				return aClass.getPackage().getName().compareTo(bClass.getPackage().getName());
 			}
 		});
 	}

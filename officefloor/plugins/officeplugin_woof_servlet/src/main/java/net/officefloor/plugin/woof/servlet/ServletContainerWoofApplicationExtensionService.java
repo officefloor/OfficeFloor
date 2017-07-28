@@ -39,9 +39,9 @@ import net.officefloor.plugin.servlet.security.HttpServletSecurity;
 import net.officefloor.plugin.servlet.security.HttpServletSecurityManagedObjectSource;
 import net.officefloor.plugin.servlet.webxml.InvalidServletConfigurationException;
 import net.officefloor.plugin.servlet.webxml.WebXmlSectionSource;
-import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSection;
-import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSectionImpl;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.HttpSecuritySection;
+import net.officefloor.plugin.web.http.application.HttpSecuritySectionImpl;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.woof.WoofApplicationExtensionService;
 import net.officefloor.plugin.woof.WoofApplicationExtensionServiceContext;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
@@ -79,7 +79,7 @@ public class ServletContainerWoofApplicationExtensionService implements
 		};
 
 		// Obtain the web application
-		WebAutoWireApplication application = context.getWebApplication();
+		WebArchitect application = context.getWebApplication();
 
 		// Obtain the web.xml configuration
 		InputStream webXmlConfiguration = context
@@ -141,10 +141,10 @@ public class ServletContainerWoofApplicationExtensionService implements
 							httpServletSecurity);
 
 			// Provide time out
-			HttpSecurityAutoWireSection security = application
+			HttpSecuritySection security = application
 					.getHttpSecurity();
 			long timeout = (security != null ? security.getSecurityTimeout()
-					: HttpSecurityAutoWireSectionImpl.DEFAULT_HTTP_SECURITY_TIMEOUT);
+					: HttpSecuritySectionImpl.DEFAULT_HTTP_SECURITY_TIMEOUT);
 			httpServletSecurityObject.setTimeout(timeout);
 		}
 

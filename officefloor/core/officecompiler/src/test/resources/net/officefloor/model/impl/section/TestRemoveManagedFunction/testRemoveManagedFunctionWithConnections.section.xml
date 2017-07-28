@@ -1,0 +1,22 @@
+<section>
+	<external-managed-objects>
+		<external-managed-object name="MO"
+			object-type="java.lang.Object" />
+	</external-managed-objects>
+	<external-flows>
+		<external-flow name="FLOW" argument-type="java.lang.String" />
+	</external-flows>
+	<function-nanespaces>
+		<function-namespace name="NAMESPACE"
+			source="net.example.ExampleManagedFunctionSource">
+			<managed-function name="MANAGED_FUNCTION_B" />
+		</function-namespace>
+	</function-nanespaces>
+	<functions>
+		<function name="FUNCTION_C" function-namespace="NAMESPACE"
+			managed-function="MANAGED_FUNCTION_B">
+			<function-flow name="FLOW" argument-type="java.lang.Object" />
+			<function-escalation escalation-type="java.lang.Exception" />
+		</function>
+	</functions>
+</section>

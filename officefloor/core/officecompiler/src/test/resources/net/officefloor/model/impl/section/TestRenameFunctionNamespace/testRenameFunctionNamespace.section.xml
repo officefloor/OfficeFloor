@@ -1,0 +1,8 @@
+<section>
+	<function-namespaces>
+		<function-namespace name="NEW_NAME"
+			source="net.example.ExampleManagedFunctionSource">
+			<managed-function name="FUNCTION" />
+		</function-namespace>
+	</function-namespaces>
+</section>

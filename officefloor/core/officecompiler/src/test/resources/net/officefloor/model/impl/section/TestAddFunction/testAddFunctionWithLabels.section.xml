@@ -1,0 +1,16 @@
+<section>
+	<function-namespaces>
+		<function-namespace name="NAMESPACE"
+			source="net.example.ExampleManagedFunctionSource">
+			<managed-function name="MANAGED_FUNCTION" />
+		</function-namespace>
+	</function-namespaces>
+	<functions>
+		<function name="FUNCTION" function-namespace="NAMESPACE"
+			managed-function="MANAGED_FUNCTION">
+			<function-flow name="FLOW_ONE" argument-type="java.lang.String" />
+			<function-flow name="FLOW_TWO" argument-type="java.lang.Integer" />
+			<function-escalation escalation-type="java.lang.Exception" />
+		</function>
+	</functions>
+</section>

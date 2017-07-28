@@ -20,10 +20,11 @@ package net.officefloor.compile.internal.structure;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
-import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.Office;
@@ -34,8 +35,8 @@ import net.officefloor.frame.api.profile.Profiler;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeNode extends LinkOfficeNode, ManagedObjectRegistry,
-		OfficeArchitect, DeployedOffice {
+public interface OfficeNode
+		extends LinkOfficeNode, ManagedObjectRegistry, OfficeTeamRegistry, OfficeArchitect, DeployedOffice {
 
 	/**
 	 * {@link Node} type.
@@ -53,27 +54,53 @@ public interface OfficeNode extends LinkOfficeNode, ManagedObjectRegistry,
 	 * @param officeLocation
 	 *            Location of the {@link Office}.
 	 */
-	void initialise(String officeSourceClassName, OfficeSource officeSource,
-			String officeLocation);
+	void initialise(String officeSourceClassName, OfficeSource officeSource, String officeLocation);
+
+	/**
+	 * Adds a {@link OfficeManagedObjectSource} supplied from an
+	 * {@link OfficeSupplier}.
+	 * 
+	 * @param managedObjectSourceName
+	 *            Name of the {@link OfficeManagedObjectSource}.
+	 * @param suppliedManagedObject
+	 *            {@link SuppliedManagedObjectSourceNode} to supply the
+	 *            {@link OfficeManagedObjectSource}.
+	 * @return {@link OfficeManagedObjectSource}.
+	 */
+	OfficeManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
+			SuppliedManagedObjectSourceNode suppliedManagedObject);
 
 	/**
 	 * Sources this {@link Office} along with its top level
 	 * {@link OfficeSection} instances into this {@link OfficeNode}.
 	 * 
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	boolean sourceOfficeWithTopLevelSections();
+	boolean sourceOfficeWithTopLevelSections(CompileContext compileContext);
 
 	/**
 	 * Sources this {@link Office} and all descendant {@link Node} instances.
 	 * 
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	boolean sourceOfficeTree();
+	boolean sourceOfficeTree(CompileContext compileContext);
+
+	/**
+	 * Obtain the qualified name.
+	 * 
+	 * @param simpleName
+	 *            Simple name to qualify with the {@link Office} name space.
+	 * @return {@link Office} qualified name.
+	 */
+	String getQualifiedName(String simpleName);
 
 	/**
 	 * Obtains the {@link OfficeFloorNode} containing this {@link OfficeNode}.
@@ -85,25 +112,44 @@ public interface OfficeNode extends LinkOfficeNode, ManagedObjectRegistry,
 	/**
 	 * Loads the {@link OfficeType}.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return {@link OfficeType} or <code>null</code> if issue loading with
 	 *         issue reported to the {@link CompilerIssues}.
 	 */
-	OfficeType loadOfficeType(TypeContext typeContext);
+	OfficeType loadOfficeType(CompileContext compileContext);
+
+	/**
+	 * Auto-wires the {@link OfficeObjectNode} instances that are unlinked.
+	 * 
+	 * @param autoWirer
+	 *            {@link AutoWirer}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 */
+	void autoWireObjects(AutoWirer<LinkObjectNode> autoWirer, CompileContext compileContext);
+
+	/**
+	 * Auto-wires the {@link OfficeTeamNode} instances that are unlinked.
+	 * 
+	 * @param autoWirer
+	 *            {@link AutoWirer}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 */
+	void autoWireTeams(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext);
 
 	/**
 	 * Builds the {@link Office} for this {@link OfficeNode}.
 	 * 
 	 * @param builder
 	 *            {@link OfficeFloorBuilder}.
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @param profiler
 	 *            Optional {@link Profiler}. May be <code>null</code>.
 	 * @return {@link OfficeBuilder} for the built {@link Office}.
 	 */
-	OfficeBindings buildOffice(OfficeFloorBuilder builder,
-			TypeContext typeContext, Profiler profiler);
+	OfficeBindings buildOffice(OfficeFloorBuilder builder, CompileContext compileContext, Profiler profiler);
 
 }

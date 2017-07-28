@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.officefloor</groupId>
 		<artifactId>officefloor</artifactId>
-		<version>2.18.0</version>
+		<version>3.0.0</version>
 	</parent>
 	<groupId>net.officefloor.tutorial</groupId>
 	<artifactId>tutorials</artifactId>
@@ -32,10 +32,13 @@
 		<module>TeamHttpServer</module>
 		<module>TestHttpServer</module>
 		<module>TransactionHttpServer</module>
+
+<!-- TODO: fix up to v3.0 of OfficeFloor 
 		<module>WoofServletDependencyInjection</module>
 		<module>WoofServletJspIntegration</module>
 		<module>WoofServletMigration</module>
 		<module>WoofServletWebApplication</module>
+-->
 	</modules>
 	<properties>
 		<ant-jsch-version>1.8.4</ant-jsch-version>

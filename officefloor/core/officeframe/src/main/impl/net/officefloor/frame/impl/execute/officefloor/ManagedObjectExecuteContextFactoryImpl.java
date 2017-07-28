@@ -17,21 +17,14 @@
  */
 package net.officefloor.frame.impl.execute.officefloor;
 
-import java.util.Timer;
-
-import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectExecuteContextFactory;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.ProcessTicker;
-import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * {@link ManagedObjectExecuteContextFactory} implementation.
@@ -54,7 +47,7 @@ public class ManagedObjectExecuteContextFactoryImpl<F extends Enum<F>>
 	/**
 	 * {@link FlowMetaData} in index order for the {@link ManagedObjectSource}.
 	 */
-	private final FlowMetaData<?>[] processLinks;
+	private final FlowMetaData[] processLinks;
 
 	/**
 	 * {@link OfficeMetaData} to create {@link ProcessState} instances.
@@ -62,16 +55,15 @@ public class ManagedObjectExecuteContextFactoryImpl<F extends Enum<F>>
 	private final OfficeMetaData officeMetaData;
 
 	/**
-	 * {@link TeamManagement} of the {@link Team} responsible for the
-	 * {@link ManagedObjectSource} {@link Escalation} handling.
+	 * Instantiate for {@link ManagedObjectExecuteContext} that has no
+	 * {@link FlowMetaData}.
 	 */
-	private final TeamManagement escalationResponsibleTeam;
-
-	/**
-	 * {@link Team} to let the worker ({@link Thread}) continue on to execute
-	 * the {@link ManagedObjectSource} {@link EscalationHandler}.
-	 */
-	private final Team escalationContinueTeam;
+	public ManagedObjectExecuteContextFactoryImpl() {
+		this.managedObjectMetaData = null;
+		this.processMoIndex = -1;
+		this.processLinks = new FlowMetaData[0];
+		this.officeMetaData = null;
+	}
 
 	/**
 	 * Initiate.
@@ -87,25 +79,13 @@ public class ManagedObjectExecuteContextFactoryImpl<F extends Enum<F>>
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData} to create {@link ProcessState}
 	 *            instances.
-	 * @param escalationResponsibleTeam
-	 *            {@link TeamManagement} of the {@link Team} responsible for the
-	 *            {@link ManagedObjectSource} {@link Escalation} handling.
-	 * @param escalationContinueTeam
-	 *            {@link Team} to let the worker ({@link Thread}) continue on to
-	 *            execute the {@link ManagedObjectSource}
-	 *            {@link EscalationHandler}.
 	 */
-	public ManagedObjectExecuteContextFactoryImpl(
-			ManagedObjectMetaData<?> managedObjectMetaData, int processMoIndex,
-			FlowMetaData<?>[] processLinks, OfficeMetaData officeMetaData,
-			TeamManagement escalationResponsibleTeam,
-			Team escalationContinueTeam) {
+	public ManagedObjectExecuteContextFactoryImpl(ManagedObjectMetaData<?> managedObjectMetaData, int processMoIndex,
+			FlowMetaData[] processLinks, OfficeMetaData officeMetaData) {
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.processMoIndex = processMoIndex;
 		this.processLinks = processLinks;
 		this.officeMetaData = officeMetaData;
-		this.escalationResponsibleTeam = escalationResponsibleTeam;
-		this.escalationContinueTeam = escalationContinueTeam;
 	}
 
 	/*
@@ -113,13 +93,9 @@ public class ManagedObjectExecuteContextFactoryImpl<F extends Enum<F>>
 	 */
 
 	@Override
-	public ManagedObjectExecuteContext<F> createManagedObjectExecuteContext(
-			ProcessTicker ticker, Timer timer) {
-		return new ManagedObjectExecuteContextImpl<F>(
-				this.managedObjectMetaData, this.processMoIndex,
-				this.processLinks, this.officeMetaData,
-				this.escalationResponsibleTeam, this.escalationContinueTeam,
-				ticker, timer);
+	public ManagedObjectExecuteContext<F> createManagedObjectExecuteContext() {
+		return new ManagedObjectExecuteContextImpl<>(this.managedObjectMetaData, this.processMoIndex, this.processLinks,
+				this.officeMetaData);
 	}
 
 }

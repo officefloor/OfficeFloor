@@ -21,7 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.compile.impl.util.DoubleKeyMap;
-import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
 /**
@@ -51,19 +52,16 @@ public class WoofRepositoryImpl implements WoofRepository {
 	 */
 
 	@Override
-	public WoofModel retrieveWoOF(ConfigurationItem configuration)
-			throws Exception {
+	public void retrieveWoof(WoofModel woof, ConfigurationItem configuration) throws Exception {
 
 		// Load the WoOF from the configuration
-		WoofModel woof = this.modelRepository.retrieve(new WoofModel(),
-				configuration);
+		this.modelRepository.retrieve(woof, configuration);
 
 		// Create the set of Section Inputs
 		DoubleKeyMap<String, String, WoofSectionInputModel> sectionInputs = new DoubleKeyMap<String, String, WoofSectionInputModel>();
 		for (WoofSectionModel section : woof.getWoofSections()) {
 			for (WoofSectionInputModel input : section.getInputs()) {
-				sectionInputs.put(section.getWoofSectionName(),
-						input.getWoofSectionInputName(), input);
+				sectionInputs.put(section.getWoofSectionName(), input.getWoofSectionInputName(), input);
 			}
 		}
 
@@ -75,8 +73,7 @@ public class WoofRepositoryImpl implements WoofRepository {
 
 		// Create the set of Access Inputs
 		Map<String, WoofAccessInputModel> accessInputs = new HashMap<String, WoofAccessInputModel>();
-		WoofAccessModel access = woof.getWoofAccess();
-		if (access != null) {
+		for (WoofAccessModel access : woof.getWoofAccesses()) {
 			for (WoofAccessInputModel input : access.getInputs()) {
 				accessInputs.put(input.getWoofAccessInputName(), input);
 			}
@@ -93,11 +90,9 @@ public class WoofRepositoryImpl implements WoofRepository {
 			for (WoofTemplateOutputModel templateOutput : template.getOutputs()) {
 
 				// Connect Template Output to Section Input
-				WoofTemplateOutputToWoofSectionInputModel connSection = templateOutput
-						.getWoofSectionInput();
+				WoofTemplateOutputToWoofSectionInputModel connSection = templateOutput.getWoofSectionInput();
 				if (connSection != null) {
-					WoofSectionInputModel sectionInput = sectionInputs.get(
-							connSection.getSectionName(),
+					WoofSectionInputModel sectionInput = sectionInputs.get(connSection.getSectionName(),
 							connSection.getInputName());
 					if (sectionInput != null) {
 						connSection.setWoofTemplateOutput(templateOutput);
@@ -107,11 +102,9 @@ public class WoofRepositoryImpl implements WoofRepository {
 				}
 
 				// Connect Template Output to Template
-				WoofTemplateOutputToWoofTemplateModel connTemplate = templateOutput
-						.getWoofTemplate();
+				WoofTemplateOutputToWoofTemplateModel connTemplate = templateOutput.getWoofTemplate();
 				if (connTemplate != null) {
-					WoofTemplateModel target = templates.get(connTemplate
-							.getTemplateName());
+					WoofTemplateModel target = templates.get(connTemplate.getTemplateName());
 					if (target != null) {
 						connTemplate.setWoofTemplateOutput(templateOutput);
 						connTemplate.setWoofTemplate(target);
@@ -120,11 +113,9 @@ public class WoofRepositoryImpl implements WoofRepository {
 				}
 
 				// Connect Template Output to Access Input
-				WoofTemplateOutputToWoofAccessInputModel connAccess = templateOutput
-						.getWoofAccessInput();
+				WoofTemplateOutputToWoofAccessInputModel connAccess = templateOutput.getWoofAccessInput();
 				if (connAccess != null) {
-					WoofAccessInputModel accessInput = accessInputs
-							.get(connAccess.getInputName());
+					WoofAccessInputModel accessInput = accessInputs.get(connAccess.getInputName());
 					if (accessInput != null) {
 						connAccess.setWoofTemplateOutput(templateOutput);
 						connAccess.setWoofAccessInput(accessInput);
@@ -133,11 +124,9 @@ public class WoofRepositoryImpl implements WoofRepository {
 				}
 
 				// Connect Template Output to Resource
-				WoofTemplateOutputToWoofResourceModel connResource = templateOutput
-						.getWoofResource();
+				WoofTemplateOutputToWoofResourceModel connResource = templateOutput.getWoofResource();
 				if (connResource != null) {
-					WoofResourceModel resource = resources.get(connResource
-							.getResourceName());
+					WoofResourceModel resource = resources.get(connResource.getResourceName());
 					if (resource != null) {
 						connResource.setWoofTemplateOutput(templateOutput);
 						connResource.setWoofResource(resource);
@@ -152,11 +141,9 @@ public class WoofRepositoryImpl implements WoofRepository {
 			for (WoofSectionOutputModel sectionOutput : section.getOutputs()) {
 
 				// Connect Section Output to Section Input
-				WoofSectionOutputToWoofSectionInputModel connSection = sectionOutput
-						.getWoofSectionInput();
+				WoofSectionOutputToWoofSectionInputModel connSection = sectionOutput.getWoofSectionInput();
 				if (connSection != null) {
-					WoofSectionInputModel sectionInput = sectionInputs.get(
-							connSection.getSectionName(),
+					WoofSectionInputModel sectionInput = sectionInputs.get(connSection.getSectionName(),
 							connSection.getInputName());
 					if (sectionInput != null) {
 						connSection.setWoofSectionOutput(sectionOutput);
@@ -166,11 +153,9 @@ public class WoofRepositoryImpl implements WoofRepository {
 				}
 
 				// Connect Section Output to Template
-				WoofSectionOutputToWoofTemplateModel connTemplate = sectionOutput
-						.getWoofTemplate();
+				WoofSectionOutputToWoofTemplateModel connTemplate = sectionOutput.getWoofTemplate();
 				if (connTemplate != null) {
-					WoofTemplateModel target = templates.get(connTemplate
-							.getTemplateName());
+					WoofTemplateModel target = templates.get(connTemplate.getTemplateName());
 					if (target != null) {
 						connTemplate.setWoofSectionOutput(sectionOutput);
 						connTemplate.setWoofTemplate(target);
@@ -179,11 +164,9 @@ public class WoofRepositoryImpl implements WoofRepository {
 				}
 
 				// Connection Section Output to Access Input
-				WoofSectionOutputToWoofAccessInputModel connAccess = sectionOutput
-						.getWoofAccessInput();
+				WoofSectionOutputToWoofAccessInputModel connAccess = sectionOutput.getWoofAccessInput();
 				if (connAccess != null) {
-					WoofAccessInputModel accessInput = accessInputs
-							.get(connAccess.getInputName());
+					WoofAccessInputModel accessInput = accessInputs.get(connAccess.getInputName());
 					if (accessInput != null) {
 						connAccess.setWoofSectionOutput(sectionOutput);
 						connAccess.setWoofAccessInput(accessInput);
@@ -192,11 +175,9 @@ public class WoofRepositoryImpl implements WoofRepository {
 				}
 
 				// Connect Section Output to Resource
-				WoofSectionOutputToWoofResourceModel connResource = sectionOutput
-						.getWoofResource();
+				WoofSectionOutputToWoofResourceModel connResource = sectionOutput.getWoofResource();
 				if (connResource != null) {
-					WoofResourceModel resource = resources.get(connResource
-							.getResourceName());
+					WoofResourceModel resource = resources.get(connResource.getResourceName());
 					if (resource != null) {
 						connResource.setWoofSectionOutput(sectionOutput);
 						connResource.setWoofResource(resource);
@@ -206,18 +187,16 @@ public class WoofRepositoryImpl implements WoofRepository {
 			}
 		}
 
-		// Connect access (if available)
-		if (access != null) {
+		// Connect accesses
+		for (WoofAccessModel access : woof.getWoofAccesses()) {
 
 			// Connect the Access Outputs
 			for (WoofAccessOutputModel accessOutput : access.getOutputs()) {
 
 				// Connect Access Output to Section Input
-				WoofAccessOutputToWoofSectionInputModel connSection = accessOutput
-						.getWoofSectionInput();
+				WoofAccessOutputToWoofSectionInputModel connSection = accessOutput.getWoofSectionInput();
 				if (connSection != null) {
-					WoofSectionInputModel sectionInput = sectionInputs.get(
-							connSection.getSectionName(),
+					WoofSectionInputModel sectionInput = sectionInputs.get(connSection.getSectionName(),
 							connSection.getInputName());
 					if (sectionInput != null) {
 						connSection.setWoofAccessOutput(accessOutput);
@@ -227,11 +206,9 @@ public class WoofRepositoryImpl implements WoofRepository {
 				}
 
 				// Connect Access Output to Template
-				WoofAccessOutputToWoofTemplateModel connTemplate = accessOutput
-						.getWoofTemplate();
+				WoofAccessOutputToWoofTemplateModel connTemplate = accessOutput.getWoofTemplate();
 				if (connTemplate != null) {
-					WoofTemplateModel template = templates.get(connTemplate
-							.getTemplateName());
+					WoofTemplateModel template = templates.get(connTemplate.getTemplateName());
 					if (template != null) {
 						connTemplate.setWoofAccessOutput(accessOutput);
 						connTemplate.setWoofTemplate(template);
@@ -240,11 +217,9 @@ public class WoofRepositoryImpl implements WoofRepository {
 				}
 
 				// Connect Access Output to Resource
-				WoofAccessOutputToWoofResourceModel connResource = accessOutput
-						.getWoofResource();
+				WoofAccessOutputToWoofResourceModel connResource = accessOutput.getWoofResource();
 				if (connResource != null) {
-					WoofResourceModel resource = resources.get(connResource
-							.getResourceName());
+					WoofResourceModel resource = resources.get(connResource.getResourceName());
 					if (resource != null) {
 						connResource.setWoofAccessOutput(accessOutput);
 						connResource.setWoofResource(resource);
@@ -258,11 +233,9 @@ public class WoofRepositoryImpl implements WoofRepository {
 		for (WoofExceptionModel exception : woof.getWoofExceptions()) {
 
 			// Connect Exception to Section Input
-			WoofExceptionToWoofSectionInputModel connSection = exception
-					.getWoofSectionInput();
+			WoofExceptionToWoofSectionInputModel connSection = exception.getWoofSectionInput();
 			if (connSection != null) {
-				WoofSectionInputModel sectionInput = sectionInputs.get(
-						connSection.getSectionName(),
+				WoofSectionInputModel sectionInput = sectionInputs.get(connSection.getSectionName(),
 						connSection.getInputName());
 				if (sectionInput != null) {
 					connSection.setWoofException(exception);
@@ -272,11 +245,9 @@ public class WoofRepositoryImpl implements WoofRepository {
 			}
 
 			// Connect Exception to Template
-			WoofExceptionToWoofTemplateModel connTemplate = exception
-					.getWoofTemplate();
+			WoofExceptionToWoofTemplateModel connTemplate = exception.getWoofTemplate();
 			if (connTemplate != null) {
-				WoofTemplateModel target = templates.get(connTemplate
-						.getTemplateName());
+				WoofTemplateModel target = templates.get(connTemplate.getTemplateName());
 				if (target != null) {
 					connTemplate.setWoofException(exception);
 					connTemplate.setWoofTemplate(target);
@@ -285,11 +256,9 @@ public class WoofRepositoryImpl implements WoofRepository {
 			}
 
 			// Connect Exception to Resource
-			WoofExceptionToWoofResourceModel connResource = exception
-					.getWoofResource();
+			WoofExceptionToWoofResourceModel connResource = exception.getWoofResource();
 			if (connResource != null) {
-				WoofResourceModel resource = resources.get(connResource
-						.getResourceName());
+				WoofResourceModel resource = resources.get(connResource.getResourceName());
 				if (resource != null) {
 					connResource.setWoofException(exception);
 					connResource.setWoofResource(resource);
@@ -302,11 +271,9 @@ public class WoofRepositoryImpl implements WoofRepository {
 		for (WoofStartModel start : woof.getWoofStarts()) {
 
 			// Connect Start to Section Input
-			WoofStartToWoofSectionInputModel connSection = start
-					.getWoofSectionInput();
+			WoofStartToWoofSectionInputModel connSection = start.getWoofSectionInput();
 			if (connSection != null) {
-				WoofSectionInputModel sectionInput = sectionInputs.get(
-						connSection.getSectionName(),
+				WoofSectionInputModel sectionInput = sectionInputs.get(connSection.getSectionName(),
 						connSection.getInputName());
 				if (sectionInput != null) {
 					connSection.setWoofStart(start);
@@ -315,50 +282,41 @@ public class WoofRepositoryImpl implements WoofRepository {
 				}
 			}
 		}
-
-		// Return the WoOF
-		return woof;
 	}
 
 	@Override
-	public void storeWoOF(WoofModel woof, ConfigurationItem configuration)
-			throws Exception {
+	public void storeWoof(WoofModel woof, WritableConfigurationItem configuration) throws Exception {
 
 		// Specify section inputs
 		for (WoofSectionModel section : woof.getWoofSections()) {
 			for (WoofSectionInputModel input : section.getInputs()) {
 
 				// Specify section inputs for section output
-				for (WoofSectionOutputToWoofSectionInputModel conn : input
-						.getWoofSectionOutputs()) {
+				for (WoofSectionOutputToWoofSectionInputModel conn : input.getWoofSectionOutputs()) {
 					conn.setSectionName(section.getWoofSectionName());
 					conn.setInputName(input.getWoofSectionInputName());
 				}
 
 				// Specify section inputs for template output
-				for (WoofTemplateOutputToWoofSectionInputModel conn : input
-						.getWoofTemplateOutputs()) {
+				for (WoofTemplateOutputToWoofSectionInputModel conn : input.getWoofTemplateOutputs()) {
 					conn.setSectionName(section.getWoofSectionName());
 					conn.setInputName(input.getWoofSectionInputName());
 				}
 
 				// Specify section inputs for access output
-				for (WoofAccessOutputToWoofSectionInputModel conn : input
-						.getWoofAccessOutputs()) {
+				for (WoofAccessOutputToWoofSectionInputModel conn : input.getWoofAccessOutputs()) {
 					conn.setSectionName(section.getWoofSectionName());
 					conn.setInputName(input.getWoofSectionInputName());
 				}
 
 				// Specify section inputs for exception
-				for (WoofExceptionToWoofSectionInputModel conn : input
-						.getWoofExceptions()) {
+				for (WoofExceptionToWoofSectionInputModel conn : input.getWoofExceptions()) {
 					conn.setSectionName(section.getWoofSectionName());
 					conn.setInputName(input.getWoofSectionInputName());
 				}
 
 				// Specify section inputs for start
-				for (WoofStartToWoofSectionInputModel conn : input
-						.getWoofStarts()) {
+				for (WoofStartToWoofSectionInputModel conn : input.getWoofStarts()) {
 					conn.setSectionName(section.getWoofSectionName());
 					conn.setInputName(input.getWoofSectionInputName());
 				}
@@ -369,44 +327,37 @@ public class WoofRepositoryImpl implements WoofRepository {
 		for (WoofTemplateModel template : woof.getWoofTemplates()) {
 
 			// Specify templates for section output
-			for (WoofSectionOutputToWoofTemplateModel conn : template
-					.getWoofSectionOutputs()) {
+			for (WoofSectionOutputToWoofTemplateModel conn : template.getWoofSectionOutputs()) {
 				conn.setTemplateName(template.getWoofTemplateName());
 			}
 
 			// Specify templates for template output
-			for (WoofTemplateOutputToWoofTemplateModel conn : template
-					.getWoofTemplateOutputs()) {
+			for (WoofTemplateOutputToWoofTemplateModel conn : template.getWoofTemplateOutputs()) {
 				conn.setTemplateName(template.getWoofTemplateName());
 			}
 
 			// Specify templates for access output
-			for (WoofAccessOutputToWoofTemplateModel conn : template
-					.getWoofAccessOutputs()) {
+			for (WoofAccessOutputToWoofTemplateModel conn : template.getWoofAccessOutputs()) {
 				conn.setTemplateName(template.getWoofTemplateName());
 			}
 
 			// Specify templates for exception
-			for (WoofExceptionToWoofTemplateModel conn : template
-					.getWoofExceptions()) {
+			for (WoofExceptionToWoofTemplateModel conn : template.getWoofExceptions()) {
 				conn.setTemplateName(template.getWoofTemplateName());
 			}
 		}
 
 		// Specify access inputs (if access available)
-		WoofAccessModel access = woof.getWoofAccess();
-		if (access != null) {
+		for (WoofAccessModel access : woof.getWoofAccesses()) {
 			for (WoofAccessInputModel input : access.getInputs()) {
 
 				// Specify access input for section output
-				for (WoofSectionOutputToWoofAccessInputModel conn : input
-						.getWoofSectionOutputs()) {
+				for (WoofSectionOutputToWoofAccessInputModel conn : input.getWoofSectionOutputs()) {
 					conn.setInputName(input.getWoofAccessInputName());
 				}
 
 				// Specify access input for template output
-				for (WoofTemplateOutputToWoofAccessInputModel conn : input
-						.getWoofTemplateOutputs()) {
+				for (WoofTemplateOutputToWoofAccessInputModel conn : input.getWoofTemplateOutputs()) {
 					conn.setInputName(input.getWoofAccessInputName());
 				}
 			}
@@ -416,26 +367,22 @@ public class WoofRepositoryImpl implements WoofRepository {
 		for (WoofResourceModel resource : woof.getWoofResources()) {
 
 			// Specify resources for section output
-			for (WoofSectionOutputToWoofResourceModel conn : resource
-					.getWoofSectionOutputs()) {
+			for (WoofSectionOutputToWoofResourceModel conn : resource.getWoofSectionOutputs()) {
 				conn.setResourceName(resource.getWoofResourceName());
 			}
 
 			// Specify resources for template output
-			for (WoofTemplateOutputToWoofResourceModel conn : resource
-					.getWoofTemplateOutputs()) {
+			for (WoofTemplateOutputToWoofResourceModel conn : resource.getWoofTemplateOutputs()) {
 				conn.setResourceName(resource.getWoofResourceName());
 			}
 
 			// Specify resources for access output
-			for (WoofAccessOutputToWoofResourceModel conn : resource
-					.getWoofAccessOutputs()) {
+			for (WoofAccessOutputToWoofResourceModel conn : resource.getWoofAccessOutputs()) {
 				conn.setResourceName(resource.getWoofResourceName());
 			}
 
 			// Specify resources for exception
-			for (WoofExceptionToWoofResourceModel conn : resource
-					.getWoofExceptions()) {
+			for (WoofExceptionToWoofResourceModel conn : resource.getWoofExceptions()) {
 				conn.setResourceName(resource.getWoofResourceName());
 			}
 		}

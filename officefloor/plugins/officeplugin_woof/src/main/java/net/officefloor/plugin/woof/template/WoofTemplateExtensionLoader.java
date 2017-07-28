@@ -19,14 +19,15 @@ package net.officefloor.plugin.woof.template;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.configuration.ConfigurationContext;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.woof.WoofChangeIssues;
 import net.officefloor.model.woof.WoofTemplateModel;
-import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.HttpTemplateSection;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 
 /**
  * Loads the extension from the {@link WoofTemplateExtensionSource}.
@@ -53,8 +54,8 @@ public interface WoofTemplateExtensionLoader {
 	 *         <code>null</code> if issue, which is reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	PropertyList loadSpecification(String woofTemplateExtensionSourceClassName,
-			ClassLoader classLoader, CompilerIssues issues);
+	PropertyList loadSpecification(String woofTemplateExtensionSourceClassName, ClassLoader classLoader,
+			CompilerIssues issues);
 
 	/**
 	 * Refactors the {@link WoofTemplateExtensionSource} for the
@@ -82,15 +83,12 @@ public interface WoofTemplateExtensionLoader {
 	 *         {@link WoofTemplateExtensionSource} for the
 	 *         {@link WoofTemplateModel}.
 	 */
-	Change<?> refactorTemplateExtension(
-			String woofTemplateExtensionSourceClassName, String oldUri,
-			SourceProperties oldProperties, String newUri,
-			SourceProperties newProperties,
-			ConfigurationContext configurationContext,
-			SourceContext sourceContext, WoofChangeIssues issues);
+	Change<?> refactorTemplateExtension(String woofTemplateExtensionSourceClassName, String oldUri,
+			SourceProperties oldProperties, String newUri, SourceProperties newProperties,
+			ConfigurationContext configurationContext, SourceContext sourceContext, WoofChangeIssues issues);
 
 	/**
-	 * Extends the {@link HttpTemplateAutoWireSection} with the
+	 * Extends the {@link HttpTemplateSection} with the
 	 * {@link WoofTemplateExtensionSource}.
 	 * 
 	 * @param extensionSourceClassName
@@ -98,18 +96,21 @@ public interface WoofTemplateExtensionLoader {
 	 * @param properties
 	 *            {@link PropertyList} to configure the
 	 *            {@link WoofTemplateExtensionSource}.
+	 * @param templatePath
+	 *            URL path to the {@link HttpTemplateSection}.
 	 * @param template
-	 *            {@link HttpTemplateAutoWireSection} to be extended.
-	 * @param application
-	 *            {@link WebAutoWireApplication}.
+	 *            {@link HttpTemplateSection} to be extended.
+	 * @param officeArchitect
+	 *            {@link OfficeArchitect}.
+	 * @param webArchitect
+	 *            {@link WebArchitect}.
 	 * @param sourceContext
 	 *            {@link SourceContext}.
 	 * @throws WoofTemplateExtensionException
-	 *             If fails to extend the {@link HttpTemplateAutoWireSection}.
+	 *             If fails to extend the {@link HttpTemplateSection}.
 	 */
-	void extendTemplate(String extensionSourceClassName,
-			PropertyList properties, HttpTemplateAutoWireSection template,
-			WebAutoWireApplication application, SourceContext sourceContext)
-			throws WoofTemplateExtensionException;
+	void extendTemplate(String extensionSourceClassName, PropertyList properties, String templatePath,
+			HttpTemplateSection template, OfficeArchitect officeArchitect, WebArchitect webArchitect,
+			SourceContext sourceContext) throws WoofTemplateExtensionException;
 
 }

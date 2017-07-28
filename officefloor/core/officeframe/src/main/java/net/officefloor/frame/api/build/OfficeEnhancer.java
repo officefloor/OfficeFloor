@@ -17,10 +17,10 @@
  */
 package net.officefloor.frame.api.build;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.structure.JobSequence;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * <p>
@@ -28,11 +28,12 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
  * <p>
  * This enables:
  * <ol>
- * <li>linking in the {@link Task} instances created by the
- * {@link ManagedObjectSource} to other {@link Task} instances within the
+ * <li>linking in the {@link ManagedFunction} instances created by the
+ * {@link ManagedObjectSource} to other {@link ManagedFunction} instances within
+ * the {@link Office}</li>
+ * <li>linking the {@link Flow} instances instigated by the
+ * {@link ManagedObjectSource} to a {@link ManagedFunction} instances within the
  * {@link Office}</li>
- * <li>linking the {@link JobSequence} instances instigated by the
- * {@link ManagedObjectSource} to a {@link Task} within the {@link Office}</li>
  * </ol>
  * 
  * @author Daniel Sagenschneider

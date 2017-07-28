@@ -28,20 +28,20 @@ import javax.persistence.PersistenceException;
 
 import org.hsqldb.jdbcDriver;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireApplication;
-import net.officefloor.autowire.AutoWireObject;
-import net.officefloor.autowire.AutoWireOfficeFloor;
-import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.autowire.ManagedObjectSourceWirer;
-import net.officefloor.autowire.ManagedObjectSourceWirerContext;
-import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeGovernance;
+import net.officefloor.compile.spi.office.OfficeManagedObject;
+import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.test.governance.GovernanceLoaderUtil;
 import net.officefloor.compile.test.governance.GovernanceTypeBuilder;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.plugin.managedobject.singleton.Singleton;
+import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
 
 /**
@@ -51,11 +51,6 @@ import net.officefloor.plugin.section.clazz.Parameter;
  */
 public class JpaTransactionGovernanceSourceTest extends AbstractJpaTestCase {
 
-	/**
-	 * {@link AutoWireOfficeFloor}.
-	 */
-	private AutoWireOfficeFloor officeFloor;
-
 	@Override
 	protected void setUp() throws Exception {
 
@@ -63,47 +58,38 @@ public class JpaTransactionGovernanceSourceTest extends AbstractJpaTestCase {
 		super.setUp();
 
 		// Configure the application
-		AutoWireApplication app = new AutoWireOfficeFloorSource();
-		AutoWireSection transactionSection = app.addSection("TRANSACTION",
-				ClassSectionSource.class.getName(),
-				TransactionWork.class.getName());
-		AutoWireSection nonTransactionSection = app.addSection(
-				"NON_TRANSACTION", ClassSectionSource.class.getName(),
-				NonTransactionWork.class.getName());
-		app.link(transactionSection, "check", nonTransactionSection, "check");
-		app.linkEscalation(PersistenceException.class, nonTransactionSection,
-				"handleFailure");
-		app.addObject(this.connection, new AutoWire(Connection.class));
-		AutoWireObject jpaObject = app.addManagedObject(
-				JpaEntityManagerManagedObjectSource.class.getName(),
-				new ManagedObjectSourceWirer() {
-					@Override
-					public void wire(ManagedObjectSourceWirerContext context) {
-						context.mapTeam(
-								JpaEntityManagerManagedObjectSource.TEAM_CLOSE,
-								new AutoWire(EntityManager.class));
-					}
-				}, new AutoWire(EntityManager.class));
-		jpaObject
-				.addProperty(
-						JpaEntityManagerManagedObjectSource.PROPERTY_PERSISTENCE_UNIT_NAME,
-						"test");
-		jpaObject.addProperty("datanucleus.ConnectionDriverName",
-				jdbcDriver.class.getName());
-		app.addGovernance("TRANSACTION",
-				JpaTransactionGovernanceSource.class.getName()).governSection(
-				transactionSection);
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.officeFloor((context) -> {
+			OfficeFloorDeployer deployer = context.getOfficeFloorDeployer();
+			deployer.addManagedObjectSource("CONNECTION", new Singleton(this.connection));
+		});
+		compile.office((context) -> {
+			OfficeArchitect architect = context.getOfficeArchitect();
+			OfficeSection transaction = context.addSection("TRANSACTION", TransactionWork.class);
+			OfficeSection nonTransaction = context.addSection("NON_TRANSACTION", NonTransactionWork.class);
+			architect.link(transaction.getOfficeSectionOutput("check"), nonTransaction.getOfficeSectionInput("check"));
+			architect.link(architect.addOfficeEscalation(PersistenceException.class.getName()),
+					nonTransaction.getOfficeSectionInput("handleFailure"));
+			OfficeManagedObjectSource jpa = architect.addOfficeManagedObjectSource("JPA",
+					JpaEntityManagerManagedObjectSource.class.getName());
+			jpa.addProperty(JpaEntityManagerManagedObjectSource.PROPERTY_PERSISTENCE_UNIT_NAME, "test");
+			jpa.addProperty("datanucleus.ConnectionDriverName", jdbcDriver.class.getName());
+			OfficeManagedObject mo = jpa.addOfficeManagedObject("JPA", ManagedObjectScope.THREAD);
+			OfficeGovernance governance = architect.addOfficeGovernance("TRANSACTION",
+					JpaTransactionGovernanceSource.class.getName());
+			transaction.addGovernance(governance);
+			governance.governManagedObject(mo);
+		});
 
 		// Open the OfficeFloor
-		this.officeFloor = app.openOfficeFloor();
+		this.officeFloor = compile.compileAndOpenOfficeFloor();
 	}
 
 	/**
 	 * Validate the specification.
 	 */
 	public void testSpecification() {
-		GovernanceLoaderUtil
-				.validateSpecification(JpaTransactionGovernanceSource.class);
+		GovernanceLoaderUtil.validateSpecification(JpaTransactionGovernanceSource.class);
 	}
 
 	/**
@@ -112,13 +98,11 @@ public class JpaTransactionGovernanceSourceTest extends AbstractJpaTestCase {
 	public void testType() {
 
 		// Create the expected type
-		GovernanceTypeBuilder<?> type = GovernanceLoaderUtil
-				.createGovernanceTypeBuilder();
+		GovernanceTypeBuilder<?> type = GovernanceLoaderUtil.createGovernanceTypeBuilder();
 		type.setExtensionInterface(EntityTransaction.class);
 
 		// Validate the type
-		GovernanceLoaderUtil.validateGovernanceType(type,
-				JpaTransactionGovernanceSource.class);
+		GovernanceLoaderUtil.validateGovernanceType(type, JpaTransactionGovernanceSource.class);
 	}
 
 	/**
@@ -126,8 +110,8 @@ public class JpaTransactionGovernanceSourceTest extends AbstractJpaTestCase {
 	 */
 	public void testCommitTransaction() throws Exception {
 
-		// Invoke task to write entity within transaction
-		this.officeFloor.invokeTask("TRANSACTION.WORK", "task", null);
+		// Invoke function to write entity within transaction
+		this.officeFloor.getOffice("OFFICE").getFunctionManager("TRANSACTION.function").invokeProcess(null, null);
 
 		// Validate the entry is within the database
 		assertEntry(this.connection);
@@ -138,8 +122,8 @@ public class JpaTransactionGovernanceSourceTest extends AbstractJpaTestCase {
 	 */
 	public void testRollbackTransaction() throws Exception {
 
-		// Invoke task that fails rolling back transaction
-		this.officeFloor.invokeTask("TRANSACTION.WORK", "failingTask", null);
+		// Invoke function that fails rolling back transaction
+		this.officeFloor.getOffice("OFFICE").getFunctionManager("TRANSACTION.failingTask").invokeProcess(null, null);
 
 		// Validate no entries as rollback
 		assertNoEntries(this.connection);
@@ -151,8 +135,7 @@ public class JpaTransactionGovernanceSourceTest extends AbstractJpaTestCase {
 	 * @param connection
 	 *            {@link Connection}.
 	 */
-	private static void assertNoEntries(Connection connection)
-			throws SQLException {
+	private static void assertNoEntries(Connection connection) throws SQLException {
 		Statement statement = connection.createStatement();
 		ResultSet results = statement.executeQuery("SELECT * FROM MOCKENTITY");
 		assertFalse("Should not be an entry", results.next());
@@ -170,12 +153,10 @@ public class JpaTransactionGovernanceSourceTest extends AbstractJpaTestCase {
 
 		// Validate entry in database
 		Statement statement = connection.createStatement();
-		ResultSet results = statement
-				.executeQuery("SELECT ID, NAME, DESCRIPTION FROM MOCKENTITY");
+		ResultSet results = statement.executeQuery("SELECT ID, NAME, DESCRIPTION FROM MOCKENTITY");
 		assertTrue("Should have entry", results.next());
 		assertEquals("Incorrect name", "transaction", results.getString("NAME"));
-		assertEquals("Incorrect description", "mock transaction entity",
-				results.getString("DESCRIPTION"));
+		assertEquals("Incorrect description", "mock transaction entity", results.getString("DESCRIPTION"));
 		long identifier = results.getLong("ID");
 		statement.close();
 
@@ -184,21 +165,18 @@ public class JpaTransactionGovernanceSourceTest extends AbstractJpaTestCase {
 	}
 
 	/**
-	 * Mock {@link Work} for test by similar name.
+	 * Mock {@link ManagedFunction} for test by similar name.
 	 */
 	public static class TransactionWork {
 
-		@NextTask("check")
-		public void task(EntityManager entityManager, Connection connection)
-				throws SQLException {
+		@NextFunction("check")
+		public void function(EntityManager entityManager, Connection connection) throws SQLException {
 
 			// Ensure within transaction
-			assertTrue("Should be within transaction", entityManager
-					.getTransaction().isActive());
+			assertTrue("Should be within transaction", entityManager.getTransaction().isActive());
 
 			// Persist the entity
-			entityManager.persist(new MockEntity("transaction",
-					"mock transaction entity"));
+			entityManager.persist(new MockEntity("transaction", "mock transaction entity"));
 
 			// Ensure entity not yet written as within transaction
 			assertNoEntries(connection);
@@ -207,49 +185,41 @@ public class JpaTransactionGovernanceSourceTest extends AbstractJpaTestCase {
 		public void failingTask(EntityManager entityManager) {
 
 			// Ensure within transaction
-			assertTrue("Should be within transaction", entityManager
-					.getTransaction().isActive());
+			assertTrue("Should be within transaction", entityManager.getTransaction().isActive());
 
 			// Write an entry that will persist (but be rolled back)
-			entityManager.persist(new MockEntity("VALID",
-					"Valid entry to rollback"));
+			entityManager.persist(new MockEntity("VALID", "Valid entry to rollback"));
 
 			// Write an entry to fail persisting (rolling back transaction)
-			entityManager.persist(new MockEntity(null,
-					"Causes transaction rollback"));
+			entityManager.persist(new MockEntity(null, "Causes transaction rollback"));
 		}
 	}
 
 	/**
-	 * Mock {@link Work} that does not have transaction {@link Governance}.
+	 * Mock {@link ManagedFunction} that does not have transaction
+	 * {@link Governance}.
 	 */
 	public static class NonTransactionWork {
 
-		public void check(Connection connection, EntityManager entityManager)
-				throws SQLException {
+		public void check(Connection connection, EntityManager entityManager) throws SQLException {
 
 			// Ensure not within transaction
-			assertFalse("Should not be within a transaction", entityManager
-					.getTransaction().isActive());
+			assertFalse("Should not be within a transaction", entityManager.getTransaction().isActive());
 
 			// Ensure entity written after transaction
 			long identifier = assertEntry(connection);
 
 			// Ensure able to continue to use entity manager
-			MockEntity entity = entityManager.find(MockEntity.class,
-					Long.valueOf(identifier));
+			MockEntity entity = entityManager.find(MockEntity.class, Long.valueOf(identifier));
 			assertEquals("Incorrect name", "transaction", entity.getName());
-			assertEquals("Incorrect description", "mock transaction entity",
-					entity.getDescription());
+			assertEquals("Incorrect description", "mock transaction entity", entity.getDescription());
 		}
 
-		public void handleFailure(@Parameter PersistenceException ex,
-				EntityManager entityManager, Connection connection)
-				throws SQLException {
+		public void handleFailure(@Parameter PersistenceException ex, EntityManager entityManager,
+				Connection connection) throws SQLException {
 
 			// Ensure not within transaction
-			assertFalse("Should not be within transaction", entityManager
-					.getTransaction().isActive());
+			assertFalse("Should not be within transaction", entityManager.getTransaction().isActive());
 
 			// Ensure no entries on rollback
 			assertNoEntries(connection);

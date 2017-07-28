@@ -129,7 +129,7 @@ public class ServerOutputStreamImpl extends ServerOutputStream {
 	public Serializable exportState(Writer writer) throws DataWrittenException,
 			IOException {
 
-		synchronized (this.receiver.getLock()) {
+		synchronized (this.receiver.getWriteLock()) {
 
 			// Flush writer data for state
 			if (writer != null) {
@@ -222,7 +222,7 @@ public class ServerOutputStreamImpl extends ServerOutputStream {
 	 */
 	public void clear() throws IOException {
 
-		synchronized (this.receiver.getLock()) {
+		synchronized (this.receiver.getWriteLock()) {
 
 			// Clear the data
 			this.currentData = null;
@@ -238,7 +238,7 @@ public class ServerOutputStreamImpl extends ServerOutputStream {
 	@Override
 	public void write(ByteBuffer cachedBuffer) throws IOException {
 
-		synchronized (this.receiver.getLock()) {
+		synchronized (this.receiver.getWriteLock()) {
 
 			// Move current data for writing
 			if (this.currentData != null) {
@@ -259,7 +259,7 @@ public class ServerOutputStreamImpl extends ServerOutputStream {
 	@Override
 	public void write(int b) throws IOException {
 
-		synchronized (this.receiver.getLock()) {
+		synchronized (this.receiver.getWriteLock()) {
 
 			// Ensure not closed
 			this.ensureNotClosed();
@@ -298,7 +298,7 @@ public class ServerOutputStreamImpl extends ServerOutputStream {
 	@Override
 	public void flush() throws IOException {
 
-		synchronized (this.receiver.getLock()) {
+		synchronized (this.receiver.getWriteLock()) {
 
 			// Do nothing if flushing writer
 			if (this.isFlushingWriter) {
@@ -347,7 +347,7 @@ public class ServerOutputStreamImpl extends ServerOutputStream {
 	@Override
 	public void close() throws IOException {
 
-		synchronized (this.receiver.getLock()) {
+		synchronized (this.receiver.getWriteLock()) {
 
 			// Do nothing if already closed
 			if (this.receiver.isClosed()) {

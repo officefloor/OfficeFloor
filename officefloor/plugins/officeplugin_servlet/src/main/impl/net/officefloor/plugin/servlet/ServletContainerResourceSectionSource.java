@@ -28,6 +28,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionObject;
@@ -37,14 +42,9 @@ import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.servlet.bridge.ServletBridge;
@@ -208,7 +208,7 @@ public class ServletContainerResourceSectionSource extends
 	}
 
 	/**
-	 * {@link Task} to link to {@link Servlet} container resource.
+	 * {@link ManagedFunction} to link to {@link Servlet} container resource.
 	 */
 	public static class ServletContainerResourceTask
 			extends
@@ -234,8 +234,8 @@ public class ServletContainerResourceSectionSource extends
 		 */
 
 		@Override
-		public Object doTask(
-				TaskContext<ServletContainerResourceTask, DependencyKeys, None> context) {
+		public Object execute(
+				ManagedFunctionContext<ServletContainerResourceTask, DependencyKeys, None> context) {
 
 			// Obtain the Servlet bridge
 			ServletBridge bridge = (ServletBridge) context
@@ -257,7 +257,7 @@ public class ServletContainerResourceSectionSource extends
 	}
 
 	/**
-	 * {@link WorkSource} to link to {@link Servlet} container resource.
+	 * {@link ManagedFunctionSource} to link to {@link Servlet} container resource.
 	 */
 	public static class ServletContainerResourceWorkSource extends
 			AbstractWorkSource<ServletContainerResourceTask> {
@@ -277,9 +277,9 @@ public class ServletContainerResourceSectionSource extends
 		}
 
 		@Override
-		public void sourceWork(
-				WorkTypeBuilder<ServletContainerResourceTask> workTypeBuilder,
-				WorkSourceContext context) throws Exception {
+		public void sourceManagedFunctions(
+				FunctionNamespaceBuilder<ServletContainerResourceTask> workTypeBuilder,
+				ManagedFunctionSourceContext context) throws Exception {
 
 			// Obtain the request dispatcher path
 			String requestDispatcherPath = context.getProperty(
@@ -289,8 +289,8 @@ public class ServletContainerResourceSectionSource extends
 			ServletContainerResourceTask factory = new ServletContainerResourceTask(
 					requestDispatcherPath);
 			workTypeBuilder.setWorkFactory(factory);
-			TaskTypeBuilder<DependencyKeys, None> task = workTypeBuilder
-					.addTaskType("RESOURCE", factory, DependencyKeys.class,
+			ManagedFunctionTypeBuilder<DependencyKeys, None> task = workTypeBuilder
+					.addManagedFunctionType("RESOURCE", factory, DependencyKeys.class,
 							None.class);
 			task.addObject(ServletBridge.class).setKey(
 					DependencyKeys.SERVLET_BRIDGE);

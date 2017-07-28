@@ -28,15 +28,16 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.team.TeamType;
-import net.officefloor.frame.impl.construct.team.TeamSourceContextImpl;
-import net.officefloor.frame.spi.source.UnknownClassError;
-import net.officefloor.frame.spi.source.UnknownPropertyError;
-import net.officefloor.frame.spi.source.UnknownResourceError;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
-import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.spi.team.source.TeamSourceProperty;
-import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
+import net.officefloor.frame.api.source.UnknownClassError;
+import net.officefloor.frame.api.source.UnknownPropertyError;
+import net.officefloor.frame.api.source.UnknownResourceError;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSourceProperty;
+import net.officefloor.frame.api.team.source.TeamSourceSpecification;
+import net.officefloor.frame.impl.execute.execution.ManagedExecutionFactoryImpl;
+import net.officefloor.frame.impl.execute.team.TeamSourceContextImpl;
 
 /**
  * {@link TeamLoader} implementation.
@@ -44,12 +45,6 @@ import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
  * @author Daniel Sagenschneider
  */
 public class TeamLoaderImpl implements TeamLoader {
-
-	/**
-	 * {@link TeamIdentifier} for the {@link TeamType}.
-	 */
-	private static final TeamIdentifier TYPE_TEAM = new TeamIdentifier() {
-	};
 
 	/**
 	 * {@link Node} requiring the {@link Team}.
@@ -79,33 +74,36 @@ public class TeamLoaderImpl implements TeamLoader {
 	 */
 
 	@Override
-	public <TS extends TeamSource> PropertyList loadSpecification(
-			Class<TS> teamSourceClass) {
+	public <TS extends TeamSource> PropertyList loadSpecification(Class<TS> teamSourceClass) {
 
 		// Instantiate the team source
-		TeamSource teamSource = CompileUtil.newInstance(teamSourceClass,
-				TeamSource.class, this.node,
+		TeamSource teamSource = CompileUtil.newInstance(teamSourceClass, TeamSource.class, this.node,
 				this.nodeContext.getCompilerIssues());
 		if (teamSource == null) {
 			return null; // failed to instantiate
 		}
+
+		// Load and return the specification
+		return this.loadSpecification(teamSource);
+	}
+
+	@Override
+	public PropertyList loadSpecification(TeamSource teamSource) {
 
 		// Obtain the specification
 		TeamSourceSpecification specification;
 		try {
 			specification = teamSource.getSpecification();
 		} catch (Throwable ex) {
-			this.addIssue(
-					"Failed to obtain "
-							+ TeamSourceSpecification.class.getSimpleName()
-							+ " from " + teamSourceClass.getName(), ex);
+			this.addIssue("Failed to obtain " + TeamSourceSpecification.class.getSimpleName() + " from "
+					+ teamSource.getClass().getName(), ex);
 			return null; // failed to obtain
 		}
 
 		// Ensure have specification
 		if (specification == null) {
-			this.addIssue("No " + TeamSourceSpecification.class.getSimpleName()
-					+ " returned from " + teamSourceClass.getName());
+			this.addIssue("No " + TeamSourceSpecification.class.getSimpleName() + " returned from "
+					+ teamSource.getClass().getName());
 			return null; // no specification obtained
 		}
 
@@ -115,11 +113,9 @@ public class TeamLoaderImpl implements TeamLoader {
 			teamSourceProperties = specification.getProperties();
 		} catch (Throwable ex) {
 			this.addIssue(
-					"Failed to obtain "
-							+ TeamSourceProperty.class.getSimpleName()
-							+ " instances from "
-							+ TeamSourceSpecification.class.getSimpleName()
-							+ " for " + teamSourceClass.getName(), ex);
+					"Failed to obtain " + TeamSourceProperty.class.getSimpleName() + " instances from "
+							+ TeamSourceSpecification.class.getSimpleName() + " for " + teamSource.getClass().getName(),
+					ex);
 			return null; // failed to obtain properties
 		}
 
@@ -131,10 +127,9 @@ public class TeamLoaderImpl implements TeamLoader {
 
 				// Ensure have the team source property
 				if (teamProperty == null) {
-					this.addIssue(TeamSourceProperty.class.getSimpleName()
-							+ " " + i + " is null from "
-							+ TeamSourceSpecification.class.getSimpleName()
-							+ " for " + teamSourceClass.getName());
+					this.addIssue(TeamSourceProperty.class.getSimpleName() + " " + i + " is null from "
+							+ TeamSourceSpecification.class.getSimpleName() + " for "
+							+ teamSource.getClass().getName());
 					return null; // must have complete property details
 				}
 
@@ -143,22 +138,15 @@ public class TeamLoaderImpl implements TeamLoader {
 				try {
 					name = teamProperty.getName();
 				} catch (Throwable ex) {
-					this.addIssue(
-							"Failed to get name for "
-									+ TeamSourceProperty.class.getSimpleName()
-									+ " "
-									+ i
-									+ " from "
-									+ TeamSourceSpecification.class
-											.getSimpleName() + " for "
-									+ teamSourceClass.getName(), ex);
+					this.addIssue("Failed to get name for " + TeamSourceProperty.class.getSimpleName() + " " + i
+							+ " from " + TeamSourceSpecification.class.getSimpleName() + " for "
+							+ teamSource.getClass().getName(), ex);
 					return null; // must have complete property details
 				}
 				if (CompileUtil.isBlank(name)) {
-					this.addIssue(TeamSourceProperty.class.getSimpleName()
-							+ " " + i + " provided blank name from "
-							+ TeamSourceSpecification.class.getSimpleName()
-							+ " for " + teamSourceClass.getName());
+					this.addIssue(TeamSourceProperty.class.getSimpleName() + " " + i + " provided blank name from "
+							+ TeamSourceSpecification.class.getSimpleName() + " for "
+							+ teamSource.getClass().getName());
 					return null; // must have complete property details
 				}
 
@@ -167,11 +155,9 @@ public class TeamLoaderImpl implements TeamLoader {
 				try {
 					label = teamProperty.getLabel();
 				} catch (Throwable ex) {
-					this.addIssue("Failed to get label for "
-							+ TeamSourceProperty.class.getSimpleName() + " "
-							+ i + " (" + name + ") from "
-							+ TeamSourceSpecification.class.getSimpleName()
-							+ " for " + teamSourceClass.getName(), ex);
+					this.addIssue("Failed to get label for " + TeamSourceProperty.class.getSimpleName() + " " + i + " ("
+							+ name + ") from " + TeamSourceSpecification.class.getSimpleName() + " for "
+							+ teamSource.getClass().getName(), ex);
 					return null; // must have complete property details
 				}
 
@@ -185,22 +171,28 @@ public class TeamLoaderImpl implements TeamLoader {
 	}
 
 	@Override
-	public <TS extends TeamSource> TeamType loadTeamType(String teamName,
-			Class<TS> teamSourceClass, PropertyList propertyList) {
+	public <TS extends TeamSource> TeamType loadTeamType(String teamName, Class<TS> teamSourceClass,
+			PropertyList propertyList) {
 
 		// Instantiate the team source
-		TeamSource teamSource = CompileUtil.newInstance(teamSourceClass,
-				TeamSource.class, this.node,
+		TeamSource teamSource = CompileUtil.newInstance(teamSourceClass, TeamSource.class, this.node,
 				this.nodeContext.getCompilerIssues());
 		if (teamSource == null) {
 			return null; // failed to instantiate
 		}
 
+		// Load and return the team type
+		return this.loadTeamType(teamName, teamSource, propertyList);
+	}
+
+	@Override
+	public TeamType loadTeamType(String teamName, TeamSource teamSource, PropertyList propertyList) {
+
 		// Attempt to create the team
 		try {
-			teamSource.createTeam(new TeamSourceContextImpl(true, teamName,
-					TYPE_TEAM, new PropertyListSourceProperties(propertyList),
-					this.nodeContext.getRootSourceContext()));
+			teamSource.createTeam(new TeamSourceContextImpl(true, teamName, null,
+					new ManagedExecutionFactoryImpl(new ThreadCompletionListener[0]),
+					new PropertyListSourceProperties(propertyList), this.nodeContext.getRootSourceContext()));
 
 		} catch (UnknownPropertyError ex) {
 			this.nodeContext.getCompilerIssues().addIssue(this.node,
@@ -213,15 +205,13 @@ public class TeamLoaderImpl implements TeamLoader {
 			return null; // must have class
 
 		} catch (UnknownResourceError ex) {
-			this.nodeContext.getCompilerIssues().addIssue(
-					this.node,
-					"Can not obtain resource at location '"
-							+ ex.getUnknownResourceLocation() + "'");
+			this.nodeContext.getCompilerIssues().addIssue(this.node,
+					"Can not obtain resource at location '" + ex.getUnknownResourceLocation() + "'");
 			return null; // must have resource
 
 		} catch (Throwable ex) {
 			this.nodeContext.getCompilerIssues().addIssue(this.node,
-					"Failed to initialise " + teamSourceClass.getName(), ex);
+					"Failed to initialise " + teamSource.getClass().getName(), ex);
 			return null; // failed loading team
 		}
 
@@ -230,12 +220,43 @@ public class TeamLoaderImpl implements TeamLoader {
 	}
 
 	@Override
-	public <TS extends TeamSource> OfficeFloorTeamSourceType loadOfficeFloorTeamSourceType(
-			String teamName, Class<TS> teamSourceClass,
-			PropertyList propertyList) {
+	public <TS extends TeamSource> OfficeFloorTeamSourceType loadOfficeFloorTeamSourceType(String teamName,
+			Class<TS> teamSourceClass, PropertyList propertyList) {
 
 		// Load the specification
 		PropertyList properties = this.loadSpecification(teamSourceClass);
+
+		// Load and return the type
+		return this.loadOfficeFloorTeamSourceType(teamName, properties, propertyList);
+	}
+
+	@Override
+	public OfficeFloorTeamSourceType loadOfficeFloorTeamSourceType(String teamName, TeamSource teamSource,
+			PropertyList propertyList) {
+
+		// Load the specification
+		PropertyList properties = this.loadSpecification(teamSource);
+
+		// Load and return the type
+		return this.loadOfficeFloorTeamSourceType(teamName, properties, propertyList);
+	}
+
+	/**
+	 * Loads the {@link OfficeFloorTeamSourceType}.
+	 * 
+	 * @param teamName
+	 *            Name of the {@link Team}.
+	 * @param properties
+	 *            {@link PropertyList} from specification.
+	 * @param propertyList
+	 *            {@link PropertyList} for loading
+	 *            {@link OfficeFloorTeamSourceType}.
+	 * @return {@link OfficeFloorTeamSourceType}.
+	 */
+	private OfficeFloorTeamSourceType loadOfficeFloorTeamSourceType(String teamName, PropertyList properties,
+			PropertyList propertyList) {
+
+		// Ensure have properties
 		if (properties == null) {
 			return null;
 		}
@@ -243,13 +264,11 @@ public class TeamLoaderImpl implements TeamLoader {
 		// Load the values onto the properties
 		// Note: create additional optional properties as needed
 		for (Property property : propertyList) {
-			properties.getOrAddProperty(property.getName()).setValue(
-					property.getValue());
+			properties.getOrAddProperty(property.getName()).setValue(property.getValue());
 		}
 
 		// Create and return type
-		return new OfficeFloorTeamSourceTypeImpl(teamName,
-				PropertyNode.constructPropertyNodes(properties));
+		return new OfficeFloorTeamSourceTypeImpl(teamName, PropertyNode.constructPropertyNodes(properties));
 	}
 
 	/**
@@ -259,8 +278,7 @@ public class TeamLoaderImpl implements TeamLoader {
 	 *            Description of the issue.
 	 */
 	private void addIssue(String issueDescription) {
-		this.nodeContext.getCompilerIssues().addIssue(this.node,
-				issueDescription);
+		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription);
 	}
 
 	/**
@@ -272,8 +290,7 @@ public class TeamLoaderImpl implements TeamLoader {
 	 *            Cause of the issue.
 	 */
 	private void addIssue(String issueDescription, Throwable cause) {
-		this.nodeContext.getCompilerIssues().addIssue(this.node,
-				issueDescription, cause);
+		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription, cause);
 	}
 
 }

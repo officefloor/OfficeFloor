@@ -24,15 +24,14 @@ import javax.sql.ConnectionEvent;
 import javax.sql.ConnectionEventListener;
 import javax.sql.PooledConnection;
 
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * JDBC {@link ManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */
-public class JdbcManagedObject implements ManagedObject,
-		ConnectionEventListener {
+public class JdbcManagedObject implements ManagedObject, ConnectionEventListener {
 
 	/**
 	 * {@link PooledConnection}.

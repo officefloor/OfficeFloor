@@ -17,10 +17,10 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.JobContext;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
+import java.util.concurrent.ThreadFactory;
+
+import net.officefloor.frame.api.team.Job;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * {@link Team} implementation of many {@link Thread} instances that follow the
@@ -28,12 +28,12 @@ import net.officefloor.frame.spi.team.TeamIdentifier;
  * 
  * @author Daniel Sagenschneider
  */
-public class LeaderFollowerTeam extends ThreadGroup implements Team {
+public class LeaderFollowerTeam implements Team {
 
 	/**
-	 * {@link TeamIdentifier} of this {@link Team}.
+	 * {@link ThreadFactory}.
 	 */
-	private final TeamIdentifier teamIdentifier;
+	private final ThreadFactory threadFactory;
 
 	/**
 	 * {@link TeamMember} instances.
@@ -46,9 +46,14 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 	private final TeamMemberStack teamMemberStack;
 
 	/**
+	 * Time to wait in milliseconds for a {@link Job}.
+	 */
+	private final long waitTime;
+
+	/**
 	 * {@link JobQueue}.
 	 */
-	private final JobQueue taskQueue = new JobQueue();
+	private final JobQueue jobQueue = new JobQueue();
 
 	/**
 	 * Flag indicating to continue to work.
@@ -58,20 +63,17 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 	/**
 	 * Initiate with the name of team.
 	 * 
-	 * @param teamName
-	 *            Name of team.
-	 * @param teamIdentifier
-	 *            {@link TeamIdentifier} of this {@link Team}.
 	 * @param teamMemberCount
 	 *            Number of {@link TeamMember} instances within this
 	 *            {@link LeaderFollowerTeam}.
+	 * @param threadFactory
+	 *            {@link ThreadFactory}.
 	 * @param waitTime
 	 *            Time to wait in milliseconds for a {@link Job}.
 	 */
-	public LeaderFollowerTeam(String teamName, TeamIdentifier teamIdentifier,
-			int teamMemberCount, long waitTime) {
-		super(teamName);
-		this.teamIdentifier = teamIdentifier;
+	public LeaderFollowerTeam(int teamMemberCount, ThreadFactory threadFactory, long waitTime) {
+		this.threadFactory = threadFactory;
+		this.waitTime = waitTime;
 
 		// Create the Team Member stack (indicating number of Team Members)
 		this.teamMemberStack = new TeamMemberStack(teamMemberCount);
@@ -80,8 +82,7 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 		this.teamMembers = new TeamMember[teamMemberCount];
 		for (int i = 0; i < this.teamMembers.length; i++) {
 			// Create the Team Member
-			this.teamMembers[i] = new TeamMember(this.teamMemberStack,
-					this.taskQueue, waitTime);
+			this.teamMembers[i] = new TeamMember();
 		}
 	}
 
@@ -90,28 +91,25 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 	 */
 
 	@Override
-	public synchronized void startWorking() {
+	public void startWorking() {
 
 		// Ensure indicate to continue working
 		this.continueWorking = true;
 
 		// Start the team members working
 		for (int i = 0; i < this.teamMembers.length; i++) {
-			String threadName = this.getClass().getSimpleName() + "_"
-					+ this.getName() + "_" + String.valueOf(i);
-			Thread thread = new Thread(this, this.teamMembers[i], threadName);
-			thread.setDaemon(true);
+			Thread thread = this.threadFactory.newThread(this.teamMembers[i]);
 			thread.start();
 		}
 	}
 
 	@Override
-	public void assignJob(Job job, TeamIdentifier assignerTeam) {
-		this.taskQueue.enqueue(job);
+	public void assignJob(Job job) {
+		this.jobQueue.enqueue(job);
 	}
 
 	@Override
-	public synchronized void stopWorking() {
+	public void stopWorking() {
 
 		// Flag team members to stop working
 		this.continueWorking = false;
@@ -121,7 +119,8 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 
 			// Wait until team member is finished
 			while (!teamMember.finished) {
-				// Flag to wake up team member
+
+				// Wake up team member
 				synchronized (teamMember) {
 					teamMember.notify();
 				}
@@ -132,75 +131,20 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 		}
 	}
 
-	/*
-	 * ================== ThreadGroup =================================
-	 */
-
-	@Override
-	public void uncaughtException(Thread t, Throwable e) {
-		// Indicate failure
-		System.out.println(t.getName() + "[" + t.getId() + "]: "
-				+ e.getMessage() + " (" + e.getClass().getSimpleName() + ")");
-		e.printStackTrace();
-	}
-
 	/**
 	 * Team member of the {@link LeaderFollowerTeam}.
 	 */
-	protected class TeamMember implements Runnable, JobContext {
-
-		/**
-		 * Indicates unknown time.
-		 */
-		private static final int UNKNOWN_TIME = 0;
-
-		/**
-		 * Stack of the {@link TeamMember} instances.
-		 */
-		private final TeamMemberStack teamMemberStack;
-
-		/**
-		 * Queue of {@link Job} instances to execute.
-		 */
-		private final JobQueue taskQueue;
-
-		/**
-		 * Time to wait in milliseconds for a {@link Job}.
-		 */
-		private final long waitTime;
+	private class TeamMember implements Runnable {
 
 		/**
 		 * Previous {@link TeamMember} for {@link TeamMemberStack} to use.
 		 */
-		protected TeamMember previous = null;
+		private TeamMember previous = null;
 
 		/**
 		 * Flag to indicate finished.
 		 */
-		protected volatile boolean finished = false;
-
-		/**
-		 * Time for the {@link Job}.
-		 */
-		private long time;
-
-		/**
-		 * Initiate the {@link TeamMember}.
-		 * 
-		 * @param teamMemberStack
-		 *            {@link TeamMemberStack} for the {@link TeamMember}
-		 *            instances of this {@link Team}.
-		 * @param taskQueue
-		 *            {@link JobQueue} of {@link Job} instances.
-		 * @param waitTime
-		 *            Time to wait in milliseconds for a {@link Job}.
-		 */
-		public TeamMember(TeamMemberStack teamMemberStack, JobQueue taskQueue,
-				long waitTime) {
-			this.teamMemberStack = teamMemberStack;
-			this.taskQueue = taskQueue;
-			this.waitTime = waitTime;
-		}
+		private volatile boolean finished = false;
 
 		/*
 		 * ================== Runnable ======================================
@@ -208,10 +152,14 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 
 		@Override
 		public void run() {
+			
+			// Easy access to team
+			LeaderFollowerTeam team = LeaderFollowerTeam.this;
+			
 			try {
 				for (;;) {
 					// Obtain the next job to run
-					Job job = this.taskQueue.dequeue(this.waitTime);
+					Job job = team.jobQueue.dequeue(team.waitTime);
 					if (job == null) {
 						// No job, so check if continue working
 						if (!LeaderFollowerTeam.this.continueWorking) {
@@ -220,52 +168,20 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 						}
 
 						// Wait to be leader to try for another job
-						this.teamMemberStack.waitToBeLeader(this);
+						team.teamMemberStack.waitToBeLeader(this);
 
 					} else {
 						// Have job so promote leader for possible next job
-						this.teamMemberStack.promoteLeader(this);
-
-						// Reset for running the job
-						this.time = UNKNOWN_TIME;
+						team.teamMemberStack.promoteLeader(this);
 
 						// Run the job
-						if (!job.doJob(this)) {
-							// Job needs to be re-run
-							this.taskQueue.enqueue(job);
-						}
+						job.run();
 					}
 				}
 			} finally {
 				// Flag finished
 				this.finished = true;
 			}
-		}
-
-		/*
-		 * =================== ExecutionContext ===============================
-		 */
-
-		@Override
-		public long getTime() {
-
-			// Ensure have the time
-			if (this.time == UNKNOWN_TIME) {
-				this.time = System.currentTimeMillis();
-			}
-
-			// Return the time
-			return this.time;
-		}
-
-		@Override
-		public TeamIdentifier getCurrentTeam() {
-			return LeaderFollowerTeam.this.teamIdentifier;
-		}
-
-		@Override
-		public boolean continueExecution() {
-			return LeaderFollowerTeam.this.continueWorking;
 		}
 	}
 

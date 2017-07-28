@@ -20,6 +20,7 @@ package net.officefloor.plugin.stream.impl;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -45,8 +46,7 @@ import net.officefloor.plugin.stream.WriteBufferReceiver;
  * 
  * @author Daniel Sagenschneider
  */
-public class ServerOutputStreamTest extends OfficeFrameTestCase implements
-		WriteBufferReceiver {
+public class ServerOutputStreamTest extends OfficeFrameTestCase implements WriteBufferReceiver {
 
 	/**
 	 * Send buffer size.
@@ -56,8 +56,7 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 	/**
 	 * {@link ServerOutputStream} to test.
 	 */
-	private final ServerOutputStreamImpl stream = new ServerOutputStreamImpl(
-			this, this.sendBufferSize);
+	private final ServerOutputStreamImpl stream = new ServerOutputStreamImpl(this, this.sendBufferSize);
 
 	/**
 	 * Written {@link WriteBuffer} instances.
@@ -74,8 +73,7 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 	 */
 	public void testFlushNoData() throws IOException {
 		this.stream.flush();
-		assertEquals("Should not write data if none", 0,
-				this.writtenData.size());
+		assertEquals("Should not write data if none", 0, this.writtenData.size());
 	}
 
 	/**
@@ -84,8 +82,7 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 	public void testFlushData() throws IOException {
 		this.stream.write("TEST".getBytes());
 		this.stream.flush();
-		assertEquals("Should just be the one write buffer", 1,
-				this.writtenData.size());
+		assertEquals("Should just be the one write buffer", 1, this.writtenData.size());
 		this.assertWrittenData("TEST");
 	}
 
@@ -107,8 +104,7 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 		this.stream.flush();
 
 		// Validate that data written
-		assertEquals("Incorrect number of write buffers", numberOfBuffers,
-				this.writtenData.size());
+		assertEquals("Incorrect number of write buffers", numberOfBuffers, this.writtenData.size());
 
 		// Validate the data is correct
 		for (int i = 0; i < this.writtenData.size(); i++) {
@@ -116,8 +112,7 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 
 			// Ensure data is correct
 			for (int j = 0; j < writeData.length; j++) {
-				assertEquals("Incorrect value for write buffer " + i
-						+ " (index " + j + ")", i, writeData[j]);
+				assertEquals("Incorrect value for write buffer " + i + " (index " + j + ")", i, writeData[j]);
 			}
 		}
 	}
@@ -170,18 +165,13 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 
 		// Flush data and confirm as expected
 		this.stream.flush();
-		assertEquals("Incorrect number of received buffers", 4,
-				this.writtenData.size());
+		assertEquals("Incorrect number of received buffers", 4, this.writtenData.size());
 		WriteBuffer one = this.writtenData.get(0);
-		assertEquals("Incorrect first write buffer", "ONE",
-				new String(one.getData(), 0, one.length()));
-		assertSame("Incorrect second write buffer", two, this.writtenData
-				.get(1).getDataBuffer());
-		assertSame("Incorrect third write buffer", three,
-				this.writtenData.get(2).getDataBuffer());
+		assertEquals("Incorrect first write buffer", "ONE", new String(one.getData(), 0, one.length()));
+		assertSame("Incorrect second write buffer", two, this.writtenData.get(1).getDataBuffer());
+		assertSame("Incorrect third write buffer", three, this.writtenData.get(2).getDataBuffer());
 		WriteBuffer four = this.writtenData.get(3);
-		assertEquals("Incorrect fourth write buffer", "FOUR",
-				new String(four.getData(), 0, four.length()));
+		assertEquals("Incorrect fourth write buffer", "FOUR", new String(four.getData(), 0, four.length()));
 	}
 
 	/**
@@ -205,16 +195,14 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 	/**
 	 * Ensure only allow appropriate momento.
 	 */
-	public void testInvalidMomento() {
+	public void testInvalidMomento() throws IOException {
 
 		// Ensure fails if invalid momento
-		try {
-			new ServerOutputStreamImpl(this, this.sendBufferSize,
-					this.createMock(Serializable.class));
+		try (Closeable closeable = new ServerOutputStreamImpl(this, this.sendBufferSize,
+				this.createMock(Serializable.class))) {
 			fail("Should not be successful");
 		} catch (IllegalArgumentException ex) {
-			assertEquals("Incorrect cause",
-					"Invalid momento for ServerOutputStream", ex.getMessage());
+			assertEquals("Incorrect cause", "Invalid momento for ServerOutputStream", ex.getMessage());
 		}
 	}
 
@@ -232,10 +220,8 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 			this.stream.exportState(null);
 			fail("Should not be successful");
 		} catch (DataWrittenException ex) {
-			assertEquals(
-					"Incorrect cause",
-					"ServerOutputStream has written data to client.  Can not create State momento.",
-					ex.getMessage());
+			assertEquals("Incorrect cause",
+					"ServerOutputStream has written data to client.  Can not create State momento.", ex.getMessage());
 		}
 	}
 
@@ -309,15 +295,13 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 			output.flush();
 
 			// Unserialise the momento
-			ByteArrayInputStream inputBuffer = new ByteArrayInputStream(
-					outputBuffer.toByteArray());
+			ByteArrayInputStream inputBuffer = new ByteArrayInputStream(outputBuffer.toByteArray());
 			ObjectInputStream input = new ObjectInputStream(inputBuffer);
-			Serializable unserialisedMomento = (Serializable) input
-					.readObject();
+			Serializable unserialisedMomento = (Serializable) input.readObject();
 
 			// Create new output stream from momento
-			ServerOutputStream clonedStream = new ServerOutputStreamImpl(this,
-					this.sendBufferSize, unserialisedMomento);
+			ServerOutputStream clonedStream = new ServerOutputStreamImpl(this, this.sendBufferSize,
+					unserialisedMomento);
 
 			// Ensure can continue to write further data
 			final String furtherContent = "_FURTHER_CONTENT";
@@ -327,8 +311,7 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 			clonedStream.flush();
 
 			// Validate expected data
-			this.assertWrittenData((expectedContent == null ? ""
-					: expectedContent) + furtherContent);
+			this.assertWrittenData((expectedContent == null ? "" : expectedContent) + furtherContent);
 
 			// Close the cloned stream
 			clonedStream.close();
@@ -384,7 +367,7 @@ public class ServerOutputStreamTest extends OfficeFrameTestCase implements
 	 */
 
 	@Override
-	public Object getLock() {
+	public Object getWriteLock() {
 		return this;
 	}
 

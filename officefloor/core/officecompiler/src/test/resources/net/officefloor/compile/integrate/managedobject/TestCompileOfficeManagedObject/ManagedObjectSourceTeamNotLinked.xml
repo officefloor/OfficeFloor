@@ -8,7 +8,7 @@
 		<managed-object-sources>
 			<managed-object-source name="MANAGED_OBJECT_SOURCE"
 				source="${testcase}$TeamManagedObject">
-				<team name="MANAGED_OBJECT_TEAM" />
+				<team name="MANAGED_OBJECT_SOURCE_TEAM" />
 			</managed-object-source>
 		</managed-object-sources>
 	</office>

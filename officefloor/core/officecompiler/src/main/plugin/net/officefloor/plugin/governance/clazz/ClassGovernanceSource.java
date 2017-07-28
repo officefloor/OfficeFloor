@@ -28,7 +28,7 @@ import net.officefloor.compile.spi.governance.source.GovernanceSourceContext;
 import net.officefloor.compile.spi.governance.source.impl.AbstractGovernanceSource;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.api.governance.Governance;
 
 /**
  * {@link GovernanceSource} that uses a {@link Class} to reflectively provide

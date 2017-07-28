@@ -18,11 +18,10 @@
 package net.officefloor.plugin.web.http.session.attribute;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.plugin.web.http.session.attribute.HttpSessionAttribute;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
  * {@link ManagedObjectSource} that retrieves the {@link Object} from the
@@ -30,8 +29,7 @@ import net.officefloor.plugin.web.http.session.attribute.HttpSessionAttribute;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSessionAttributeRetrieverManagedObjectSource
-		extends
+public class HttpSessionAttributeRetrieverManagedObjectSource extends
 		AbstractManagedObjectSource<HttpSessionAttributeRetrieverManagedObjectSource.HttpSessionAttributeRetrieverDependencies, None> {
 
 	/**
@@ -57,11 +55,9 @@ public class HttpSessionAttributeRetrieverManagedObjectSource
 	}
 
 	@Override
-	protected void loadMetaData(
-			MetaDataContext<HttpSessionAttributeRetrieverDependencies, None> context)
+	protected void loadMetaData(MetaDataContext<HttpSessionAttributeRetrieverDependencies, None> context)
 			throws Exception {
-		ManagedObjectSourceContext<None> mosContext = context
-				.getManagedObjectSourceContext();
+		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Obtain the type for being returned
 		String typeName = mosContext.getProperty(PROPERTY_TYPE_NAME);
@@ -70,8 +66,7 @@ public class HttpSessionAttributeRetrieverManagedObjectSource
 		// Load the meta-data
 		context.setManagedObjectClass(HttpSessionAttributeRetrieverManagedObject.class);
 		context.setObjectClass(type);
-		context.addDependency(
-				HttpSessionAttributeRetrieverDependencies.HTTP_SESSION_OBJECT,
+		context.addDependency(HttpSessionAttributeRetrieverDependencies.HTTP_SESSION_OBJECT,
 				HttpSessionAttribute.class);
 	}
 

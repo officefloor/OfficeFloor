@@ -20,7 +20,7 @@ package net.officefloor.plugin.web.http.template.section;
 import java.io.IOException;
 import java.io.Serializable;
 
-import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.stream.ServerWriter;
@@ -64,8 +64,7 @@ public class PostRedirectGetLogic {
 	 * @throws IOException
 	 *             If fails to write content to the {@link HttpResponse}.
 	 */
-	public void post(Parameters parameters, ServerHttpConnection connection)
-			throws IOException {
+	public void post(Parameters parameters, ServerHttpConnection connection) throws IOException {
 
 		// Obtain the response
 		HttpResponse response = connection.getHttpResponse();
@@ -97,7 +96,7 @@ public class PostRedirectGetLogic {
 	/**
 	 * Required for setup.
 	 */
-	@NextTask("doExternalFlow")
+	@NextFunction("doExternalFlow")
 	public void requiredForSetup() {
 	}
 

@@ -18,24 +18,28 @@
 package net.officefloor.frame.impl.construct.team;
 
 import net.officefloor.frame.api.build.TeamBuilder;
+import net.officefloor.frame.api.source.SourceProperties;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
-import net.officefloor.frame.spi.source.SourceProperties;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.TeamSource;
 
 /**
  * Implements the {@link TeamBuilder}.
  * 
  * @author Daniel Sagenschneider
  */
-public class TeamBuilderImpl<TS extends TeamSource> implements TeamBuilder<TS>,
-		TeamConfiguration<TS> {
+public class TeamBuilderImpl<TS extends TeamSource> implements TeamBuilder<TS>, TeamConfiguration<TS> {
 
 	/**
 	 * Name of the {@link Team}.
 	 */
 	private final String teamName;
+
+	/**
+	 * {@link TeamSource}.
+	 */
+	private final TS teamSource;
 
 	/**
 	 * {@link Class} of the {@link TeamSource}.
@@ -52,11 +56,26 @@ public class TeamBuilderImpl<TS extends TeamSource> implements TeamBuilder<TS>,
 	 * 
 	 * @param teamName
 	 *            Name of the {@link Team}.
+	 * @param teamSource
+	 *            {@link TeamSource}.
+	 */
+	public TeamBuilderImpl(String teamName, TS teamSource) {
+		this.teamName = teamName;
+		this.teamSource = teamSource;
+		this.teamSourceClass = null;
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param teamName
+	 *            Name of the {@link Team}.
 	 * @param teamSourceClass
 	 *            {@link Class} of the {@link TeamSource}.
 	 */
 	public TeamBuilderImpl(String teamName, Class<TS> teamSourceClass) {
 		this.teamName = teamName;
+		this.teamSource = null;
 		this.teamSourceClass = teamSourceClass;
 	}
 
@@ -76,6 +95,11 @@ public class TeamBuilderImpl<TS extends TeamSource> implements TeamBuilder<TS>,
 	@Override
 	public String getTeamName() {
 		return this.teamName;
+	}
+
+	@Override
+	public TS getTeamSource() {
+		return this.teamSource;
 	}
 
 	@Override

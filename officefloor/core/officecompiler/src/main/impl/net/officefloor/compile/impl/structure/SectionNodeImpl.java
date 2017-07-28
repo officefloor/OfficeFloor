@@ -18,7 +18,9 @@
 package net.officefloor.compile.impl.structure;
 
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -28,9 +30,20 @@ import net.officefloor.compile.impl.section.OfficeSectionTypeImpl;
 import net.officefloor.compile.impl.section.SectionSourceContextImpl;
 import net.officefloor.compile.impl.section.SectionTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.impl.util.LoadTypeError;
+import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.internal.structure.AutoWireLink;
+import net.officefloor.compile.internal.structure.AutoWirer;
+import net.officefloor.compile.internal.structure.CompileContext;
+import net.officefloor.compile.internal.structure.FunctionFlowNode;
+import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
+import net.officefloor.compile.internal.structure.LinkObjectNode;
+import net.officefloor.compile.internal.structure.LinkTeamNode;
+import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
+import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -40,69 +53,68 @@ import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
-import net.officefloor.compile.internal.structure.TaskFlowNode;
-import net.officefloor.compile.internal.structure.TaskNode;
-import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.compile.office.OfficeAvailableSectionInputType;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.OfficeFunctionType;
 import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectType;
 import net.officefloor.compile.section.OfficeSectionObjectType;
 import net.officefloor.compile.section.OfficeSectionOutputType;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
-import net.officefloor.compile.section.OfficeTaskType;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
+import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionFunction;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
-import net.officefloor.compile.spi.office.OfficeSectionTask;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
-import net.officefloor.compile.spi.section.ManagedObjectDependency;
-import net.officefloor.compile.spi.section.ManagedObjectFlow;
+import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
+import net.officefloor.compile.spi.section.FunctionFlow;
+import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.compile.spi.section.SectionManagedObjectPool;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
-import net.officefloor.compile.spi.section.SectionTask;
-import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.SubSectionInput;
 import net.officefloor.compile.spi.section.SubSectionObject;
 import net.officefloor.compile.spi.section.SubSectionOutput;
-import net.officefloor.compile.spi.section.TaskFlow;
-import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.type.TypeContext;
-import net.officefloor.compile.work.WorkType;
+import net.officefloor.configuration.ConfigurationError;
 import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.source.UnknownClassError;
+import net.officefloor.frame.api.source.UnknownPropertyError;
+import net.officefloor.frame.api.source.UnknownResourceError;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.source.UnknownClassError;
-import net.officefloor.frame.spi.source.UnknownPropertyError;
-import net.officefloor.frame.spi.source.UnknownResourceError;
+import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * {@link SectionNode} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class SectionNodeImpl extends AbstractNode implements SectionNode {
+public class SectionNodeImpl implements SectionNode {
 
 	/**
 	 * Name of this {@link SubSection}.
@@ -195,6 +207,12 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	private final Map<String, ManagedObjectSourceNode> managedObjectSourceNodes = new HashMap<String, ManagedObjectSourceNode>();
 
 	/**
+	 * {@link ManagedObjectPoolNode} instances by thier
+	 * {@link SectionManagedObjectPool} names.
+	 */
+	private final Map<String, ManagedObjectPoolNode> managedObjectPoolNodes = new HashMap<>();
+
+	/**
 	 * {@link ManagedObjectNode} instances by their {@link SectionManagedObject}
 	 * name.
 	 */
@@ -207,20 +225,30 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	private final List<GovernanceNode> governances = new LinkedList<GovernanceNode>();
 
 	/**
-	 * {@link Node} instances by their {@link SectionWork} names.
+	 * {@link Node} instances by their {@link SectionFunctionNamespace} names.
 	 */
-	private final Map<String, WorkNode> workNodes = new HashMap<String, WorkNode>();
+	private final Map<String, FunctionNamespaceNode> namespaceNodes = new HashMap<String, FunctionNamespaceNode>();
 
 	/**
-	 * Map of {@link TaskNode} instances for this {@link OfficeSection} by their
-	 * {@link SectionTask} names.
+	 * Map of {@link ManagedFunctionNode} instances for this
+	 * {@link OfficeSection} by their {@link SectionFunction} names.
 	 */
-	private final Map<String, TaskNode> taskNodes = new HashMap<String, TaskNode>();
+	private final Map<String, ManagedFunctionNode> functionNodes = new HashMap<String, ManagedFunctionNode>();
 
 	/**
 	 * {@link SubSection} instances by their names.
 	 */
 	private final Map<String, SectionNode> subSections = new HashMap<String, SectionNode>();
+
+	/**
+	 * Super {@link SectionNode}.
+	 */
+	private SectionNode superSectionNode = null;
+
+	/**
+	 * {@link SectionSource} used to source the {@link OfficeSection}.
+	 */
+	private SectionSource usedSectionSource = null;
 
 	/**
 	 * Initialises this {@link SectionNode} with the basic information.
@@ -242,6 +270,15 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 		// Create the additional objects
 		this.propertyList = this.context.createPropertyList();
+	}
+
+	/**
+	 * Obtains the overridden {@link PropertyList}.
+	 * 
+	 * @return Overridden {@link PropertyList}.
+	 */
+	private PropertyList getProperties() {
+		return this.context.overrideProperties(this, this.getQualifiedName(null), this.propertyList);
 	}
 
 	/*
@@ -271,6 +308,12 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return NodeUtil.getChildNodes(this.inputs, this.outputs, this.objects, this.subSections, this.functionNodes,
+				this.managedObjectSourceNodes, this.managedObjects);
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}
@@ -282,18 +325,15 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	/*
-	 * ======================= TaskRegistry =======================
+	 * ===================== ManagedFunctionRegistry =======================
 	 */
 
 	@Override
-	public TaskNode getTaskNode(String taskName) {
-		return NodeUtil.getNode(taskName, this.taskNodes, () -> this.context.createTaskNode(taskName));
-	}
-
-	@Override
-	public TaskNode addTaskNode(String taskName, String taskTypeName, WorkNode workNode) {
-		return NodeUtil.getInitialisedNode(taskName, this.taskNodes, this.context,
-				() -> this.context.createTaskNode(taskName), (task) -> task.initialise(taskTypeName, workNode));
+	public ManagedFunctionNode addManagedFunctionNode(String functionName, String functionTypeName,
+			FunctionNamespaceNode namespaceNode) {
+		return NodeUtil.getInitialisedNode(functionName, this.functionNodes, this.context,
+				() -> this.context.createFunctionNode(functionName),
+				(function) -> function.initialise(functionTypeName, namespaceNode));
 	}
 
 	/*
@@ -319,7 +359,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	 */
 
 	@Override
-	public boolean sourceSection() {
+	public boolean sourceSection(CompileContext compileContext) {
 
 		// Ensure the section is initialised
 		if (!this.isInitialised()) {
@@ -346,9 +386,12 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 			}
 		}
 
+		// Keep track of the section source
+		this.usedSectionSource = source;
+
 		// Create the section source context
-		SectionSourceContext context = new SectionSourceContextImpl(true, this.state.sectionLocation, this.propertyList,
-				this, this.context);
+		SectionSourceContext context = new SectionSourceContextImpl(true, this.state.sectionLocation,
+				this.getProperties(), this, this.context);
 
 		try {
 			// Source the section type
@@ -369,6 +412,10 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 					+ SectionSource.class.getSimpleName() + " " + source.getClass().getName());
 			return false; // must have resource
 
+		} catch (ConfigurationError ex) {
+			ex.addConfigurationIssue(this, this.context.getCompilerIssues());
+			return false; // must have configuration
+
 		} catch (LoadTypeError ex) {
 			ex.addLoadTypeIssue(this, this.context.getCompilerIssues());
 			return false; // must not fail in loading types
@@ -384,39 +431,133 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
-	public boolean sourceSectionTree() {
+	public boolean sourceSectionTree(CompileContext compileContext) {
 
 		// Source this section
-		boolean isSourced = this.sourceSection();
+		boolean isSourced = this.sourceSection(compileContext);
+		if (!isSourced) {
+			return false;
+		}
+
+		// Ensure all functions are sourced
+		isSourced = CompileUtil.source(this.functionNodes, (function) -> function.getSectionFunctionName(),
+				(function) -> function.souceManagedFunction(compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
+		// Ensure all managed object sources are source
+		isSourced = CompileUtil.source(this.managedObjectSourceNodes,
+				(managedObjectSource) -> managedObjectSource.getSectionManagedObjectSourceName(),
+				(managedObjectSource) -> managedObjectSource.sourceManagedObjectSource(compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
+		// Ensure all managed objects are sourced
+		isSourced = CompileUtil.source(this.managedObjects,
+				(managedObject) -> managedObject.getSectionManagedObjectName(),
+				(managedObject) -> managedObject.sourceManagedObject(compileContext));
 		if (!isSourced) {
 			return false;
 		}
 
 		// Successful only if all sub sections are also sourced
-		return CompileUtil.sourceTree(this.subSections, (subSection) -> subSection.getOfficeSectionName(),
-				(subSection) -> subSection.sourceSectionTree());
+		return CompileUtil.source(this.subSections, (subSection) -> subSection.getOfficeSectionName(),
+				(subSection) -> subSection.sourceSectionTree(compileContext));
 	}
 
 	@Override
-	public SectionType loadSectionType(TypeContext typeContext) {
+	public boolean sourceInheritance(CompileContext compileContext) {
+
+		// Iterate over outputs linking via inheritance
+		boolean isValid[] = new boolean[] { true };
+		this.outputs.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getSectionOutputName(), b.getSectionOutputName()))
+				.forEachOrdered((output) -> {
+
+					// Determine if output already linked
+					if (output.getLinkedFlowNode() != null) {
+						return; // already linked
+					}
+
+					// Search the inheritance hierarchy for link
+					SectionNode searchSection = this;
+					boolean isCyclicInheritance = false;
+					Deque<SectionNode> inheritanceHierarchy = new LinkedList<SectionNode>();
+					do {
+
+						// Obtain link configuration from search section
+						SectionOutputNode parentSectionOutput = searchSection
+								.getSectionOutputNode(output.getSectionOutputName());
+						if ((parentSectionOutput != null) && (parentSectionOutput.getLinkedFlowNode() != null)) {
+							// Inherit the link
+							output.linkFlowNode(parentSectionOutput.getLinkedFlowNode());
+
+							// Link configured
+							return;
+						}
+
+						// Use super section in next iteration if no link
+						searchSection = searchSection.getSuperSection();
+
+						// Determine if cyclic inheritance
+						if (inheritanceHierarchy.contains(searchSection)) {
+							isCyclicInheritance = true;
+						}
+						inheritanceHierarchy.push(searchSection);
+
+					} while ((!isCyclicInheritance) && (searchSection != null));
+
+					// Provide issue if cyclic inheritance hierarchy
+					if (isCyclicInheritance) {
+						// Flag invalid
+						isValid[0] = false;
+
+						// Cyclic inheritance, so provide issue
+						StringBuilder hierarchyLog = new StringBuilder();
+						for (Iterator<SectionNode> iterator = inheritanceHierarchy.iterator(); iterator.hasNext();) {
+							hierarchyLog.append(iterator.next().getQualifiedName(null) + " : ");
+						}
+						this.context.getCompilerIssues().addIssue(this,
+								"Cyclic section inheritance hierarchy ( " + hierarchyLog.toString() + "... )");
+					}
+				});
+
+		// Return whether valid
+		return isValid[0];
+	}
+
+	@Override
+	public SectionNode getSuperSection() {
+		return this.superSectionNode;
+	}
+
+	@Override
+	public SectionOutputNode getSectionOutputNode(String outputName) {
+		return this.outputs.get(outputName);
+	}
+
+	@Override
+	public SectionType loadSectionType(CompileContext compileContext) {
 
 		// Obtain the listing of input types sorted by name
 		SectionInputType[] inputTypes = CompileUtil.loadTypes(this.inputs, (input) -> input.getSectionInputName(),
-				(input) -> input.loadSectionInputType(typeContext), SectionInputType[]::new);
+				(input) -> input.loadSectionInputType(compileContext), SectionInputType[]::new);
 		if (inputTypes == null) {
 			return null;
 		}
 
 		// Obtain the listing of output types sorted by name
 		SectionOutputType[] outputTypes = CompileUtil.loadTypes(this.outputs, (output) -> output.getSectionOutputName(),
-				(output) -> output.loadSectionOutputType(typeContext), SectionOutputType[]::new);
+				(output) -> output.loadSectionOutputType(compileContext), SectionOutputType[]::new);
 		if (outputTypes == null) {
 			return null;
 		}
 
 		// Obtain the listing of object types sorted by name
 		SectionObjectType[] objectTypes = CompileUtil.loadTypes(this.objects, (object) -> object.getSectionObjectName(),
-				(object) -> object.loadSectionObjectType(typeContext), SectionObjectType[]::new);
+				(object) -> object.loadSectionObjectType(compileContext), SectionObjectType[]::new);
 		if (objectTypes == null) {
 			return null;
 		}
@@ -426,18 +567,18 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
-	public OfficeSectionType loadOfficeSectionType(TypeContext typeContext) {
+	public OfficeSectionType loadOfficeSectionType(CompileContext compileContext) {
 
 		// Load the section type
-		SectionType sectionType = this.loadSectionType(typeContext);
+		SectionType sectionType = this.loadSectionType(compileContext);
 		if (sectionType == null) {
 			return null; // must load section type
 		}
 
 		// Obtain the section inputs
 		OfficeSectionInputType[] inputTypes = CompileUtil.loadTypes(this.inputs,
-				(input) -> input.getOfficeSectionInputName(), (input) -> input.loadOfficeSectionInputType(typeContext),
-				OfficeSectionInputType[]::new);
+				(input) -> input.getOfficeSectionInputName(),
+				(input) -> input.loadOfficeSectionInputType(compileContext), OfficeSectionInputType[]::new);
 		if (inputTypes == null) {
 			return null; // must load types
 		}
@@ -445,7 +586,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		// Add the office context for the section outputs
 		OfficeSectionOutputType[] outputTypes = CompileUtil.loadTypes(this.outputs,
 				(output) -> output.getOfficeSectionOutputName(),
-				(output) -> output.loadOfficeSectionOutputType(typeContext), OfficeSectionOutputType[]::new);
+				(output) -> output.loadOfficeSectionOutputType(compileContext), OfficeSectionOutputType[]::new);
 		if (outputTypes == null) {
 			return null; // must load types
 		}
@@ -453,7 +594,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		// Add the office context for the section objects
 		OfficeSectionObjectType[] objectTypes = CompileUtil.loadTypes(this.objects,
 				(object) -> object.getOfficeSectionObjectName(),
-				(object) -> object.loadOfficeSectionObjectType(typeContext), OfficeSectionObjectType[]::new);
+				(object) -> object.loadOfficeSectionObjectType(compileContext), OfficeSectionObjectType[]::new);
 		if (objectTypes == null) {
 			return null; // must load types
 		}
@@ -461,7 +602,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		// Create the office section type
 		OfficeSectionTypeImpl officeSectionType = new OfficeSectionTypeImpl(this.sectionName, inputTypes, outputTypes,
 				objectTypes);
-		boolean isInitialised = this.initialiseSubSectionState(officeSectionType, null, typeContext);
+		boolean isInitialised = this.initialiseSubSectionState(officeSectionType, null, compileContext);
 		if (!isInitialised) {
 			return null; // must be initialised
 		}
@@ -471,12 +612,13 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
-	public OfficeSectionType loadOfficeSubSectionType(OfficeSubSectionType parentSectionType, TypeContext typeContext) {
+	public OfficeSectionType loadOfficeSubSectionType(OfficeSubSectionType parentSectionType,
+			CompileContext compileContext) {
 
 		// Create the office section type
 		OfficeSectionTypeImpl officeSectionType = new OfficeSectionTypeImpl(this.sectionName,
 				new OfficeSectionInputType[] {}, new OfficeSectionOutputType[] {}, new OfficeSectionObjectType[] {});
-		boolean isInitialised = this.initialiseSubSectionState(officeSectionType, parentSectionType, typeContext);
+		boolean isInitialised = this.initialiseSubSectionState(officeSectionType, parentSectionType, compileContext);
 		if (!isInitialised) {
 			return null; // must be initialised
 		}
@@ -493,18 +635,18 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	 *            {@link OfficeSectionTypeImpl}.
 	 * @param parentSectionType
 	 *            Parent {@link OfficeSubSectionType}.
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return <code>true</code> if initialised {@link OfficeSubSectionType}
 	 *         state.
 	 */
 	private boolean initialiseSubSectionState(OfficeSectionTypeImpl sectionType, OfficeSubSectionType parentSectionType,
-			TypeContext typeContext) {
+			CompileContext compileContext) {
 
 		// Load the sub sections
 		OfficeSubSectionType[] subSections = CompileUtil.loadTypes(this.subSections,
 				(subSection) -> subSection.getSubSectionName(),
-				(subSection) -> subSection.loadOfficeSubSectionType(sectionType, typeContext),
+				(subSection) -> subSection.loadOfficeSubSectionType(sectionType, compileContext),
 				OfficeSubSectionType[]::new);
 		if (subSections == null) {
 			return false;
@@ -513,23 +655,15 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		// Load managed object types
 		OfficeSectionManagedObjectType[] managedObjectTypes = CompileUtil.loadTypes(this.managedObjects,
 				(mos) -> mos.getOfficeSectionManagedObjectName(),
-				(mos) -> mos.loadOfficeSectionManagedObjectType(typeContext), OfficeSectionManagedObjectType[]::new);
+				(mos) -> mos.loadOfficeSectionManagedObjectType(compileContext), OfficeSectionManagedObjectType[]::new);
 		if (managedObjectTypes == null) {
 			return false;
 		}
 
-		// Add the office context for the tasks
-		OfficeTaskType[] taskTypes = CompileUtil.loadTypes(this.taskNodes, (task) -> task.getOfficeTaskName(), task -> {
-			// Obtain the work type of the work for the task
-			WorkNode work = task.getWorkNode();
-			WorkType<?> workType = typeContext.getOrLoadWorkType(work);
-			if (workType == null) {
-				return null;
-			}
-
-			// Load and return the task type
-			return task.loadOfficeTaskType(sectionType, typeContext);
-		}, OfficeTaskType[]::new);
+		// Add the office context for the functions
+		OfficeFunctionType[] taskTypes = CompileUtil.loadTypes(this.functionNodes,
+				(function) -> function.getOfficeFunctionName(),
+				function -> function.loadOfficeFunctionType(sectionType, compileContext), OfficeFunctionType[]::new);
 		if (taskTypes == null) {
 			return false;
 		}
@@ -540,11 +674,11 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
-	public OfficeAvailableSectionInputType[] loadOfficeAvailableSectionInputTypes(TypeContext typeContext) {
+	public OfficeAvailableSectionInputType[] loadOfficeAvailableSectionInputTypes(CompileContext compileContext) {
 		return CompileUtil.loadTypes(this.inputs, (input) -> input.getOfficeSectionInputName(), (input) -> {
 
 			// Load the input type
-			OfficeSectionInputType inputType = input.loadOfficeSectionInputType(typeContext);
+			OfficeSectionInputType inputType = input.loadOfficeSectionInputType(compileContext);
 			if (inputType == null) {
 				return null;
 			}
@@ -575,10 +709,26 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
+	public String getQualifiedName(String simpleName) {
+
+		// Obtain the qualified name for this section
+		String qualifiedName = this.sectionName + (simpleName != null ? "." + simpleName : "");
+
+		// Recursively determine the qualified name
+		if (this.parentSection == null) {
+			// Top level section
+			return this.office.getQualifiedName(qualifiedName);
+		} else {
+			// Further parent sections
+			return this.parentSection.getQualifiedName(qualifiedName);
+		}
+	}
+
+	@Override
 	public String getSectionQualifiedName(String simpleName) {
 
 		// Obtain the qualified name for this section
-		String qualifiedName = this.sectionName + "." + simpleName;
+		String qualifiedName = this.sectionName + (simpleName != null ? "." + simpleName : "");
 
 		// Recursively determine the qualified name
 		if (this.parentSection == null) {
@@ -591,12 +741,62 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
-	public void buildSection(OfficeBuilder officeBuilder, OfficeBindings officeBindings, TypeContext typeContext) {
+	public void autoWireObjects(AutoWirer<LinkObjectNode> autoWirer, CompileContext compileContext) {
 
-		// Build the tasks (in deterministic order)
-		this.taskNodes.values().stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(a.getSectionTaskName(), b.getSectionTaskName()))
-				.forEachOrdered((task) -> officeBindings.buildTaskIntoOffice(task));
+		// Auto-wire the objects
+		this.objects.values().forEach((object) -> {
+
+			// Ignore if already configured
+			if (object.getLinkedObjectNode() != null) {
+				return;
+			}
+
+			// Obtain the type
+			SectionObjectType objectType = object.loadSectionObjectType(compileContext);
+			if (objectType == null) {
+				return; // must have type
+			}
+
+			// Auto-wire the object
+			AutoWireLink<LinkObjectNode>[] links = autoWirer.getAutoWireLinks(object,
+					new AutoWire(objectType.getTypeQualifier(), objectType.getObjectType()));
+			if (links.length == 1) {
+				LinkUtil.linkAutoWireObjectNode(object, links[0].getTargetNode(this.office), this.office, autoWirer,
+						compileContext, this.context.getCompilerIssues(), (link) -> object.linkObjectNode(link));
+			}
+		});
+	}
+
+	@Override
+	public void autoWireTeams(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext) {
+
+		// Associate responsibility for the functions
+		this.functionNodes.values()
+				.forEach((function) -> function.autoWireManagedFunctionResponsibility(autoWirer, compileContext));
+
+		// Auto-wire managed object source teams
+		this.managedObjectSourceNodes.values().stream().sorted(
+				(a, b) -> CompileUtil.sortCompare(a.getManagedObjectSourceName(), b.getManagedObjectSourceName()))
+				.forEachOrdered((mos) -> mos.autoWireTeams(autoWirer, compileContext));
+
+		// Auto-wire the sub sections
+		this.subSections.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getSubSectionName(), b.getSubSectionName()))
+				.forEachOrdered((subSection) -> subSection.autoWireTeams(autoWirer, compileContext));
+	}
+
+	@Override
+	public void buildSection(OfficeBuilder officeBuilder, OfficeBindings officeBindings,
+			CompileContext compileContext) {
+
+		// Register as possible MBean
+		String qualifiedName = this.getQualifiedName(null);
+		compileContext.registerPossibleMBean(SectionSource.class, qualifiedName, this.usedSectionSource);
+
+		// Build the functions (in deterministic order)
+		this.functionNodes.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getSectionFunctionName(), b.getSectionFunctionName()))
+				.forEachOrdered((function) -> officeBindings.buildManagedFunctionIntoOffice(function));
 
 		// Build the managed object sources (in deterministic order)
 		this.managedObjectSourceNodes.values().stream()
@@ -613,7 +813,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		// Build the sub sections (in deterministic order)
 		this.subSections.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getSubSectionName(), b.getSubSectionName()))
-				.forEachOrdered((subSection) -> subSection.buildSection(officeBuilder, officeBindings, typeContext));
+				.forEachOrdered((subSection) -> subSection.buildSection(officeBuilder, officeBindings, compileContext));
 	}
 
 	@Override
@@ -702,17 +902,35 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
-	public SectionWork addSectionWork(String workName, String workSourceClassName) {
-		return NodeUtil.getInitialisedNode(workName, this.workNodes, this.context,
-				() -> this.context.createWorkNode(workName, this),
-				(work) -> work.initialise(workSourceClassName, null));
+	public SectionManagedObjectPool addManagedObjectPool(String managedObjectPoolName,
+			String managedObjectPoolSourceClassName) {
+		return NodeUtil.getInitialisedNode(managedObjectPoolName, this.managedObjectPoolNodes, this.context,
+				() -> this.context.createManagedObjectPoolNode(managedObjectPoolName, this),
+				(pool) -> pool.initialise(managedObjectPoolSourceClassName, null));
 	}
 
 	@Override
-	public SectionWork addSectionWork(String workName, WorkSource<?> workSource) {
-		return NodeUtil.getInitialisedNode(workName, this.workNodes, this.context,
-				() -> this.context.createWorkNode(workName, this),
-				(work) -> work.initialise(workSource.getClass().getName(), workSource));
+	public SectionManagedObjectPool addManagedObjectPool(String managedObjectPoolName,
+			ManagedObjectPoolSource managedObjectPoolSource) {
+		return NodeUtil.getInitialisedNode(managedObjectPoolName, this.managedObjectPoolNodes, this.context,
+				() -> this.context.createManagedObjectPoolNode(managedObjectPoolName, this),
+				(pool) -> pool.initialise(managedObjectPoolSource.getClass().getName(), managedObjectPoolSource));
+	}
+
+	@Override
+	public SectionFunctionNamespace addSectionFunctionNamespace(String namespaceName,
+			String managedFunctionSourceClassName) {
+		return NodeUtil.getInitialisedNode(namespaceName, this.namespaceNodes, this.context,
+				() -> this.context.createFunctionNamespaceNode(namespaceName, this),
+				(work) -> work.initialise(managedFunctionSourceClassName, null));
+	}
+
+	@Override
+	public SectionFunctionNamespace addSectionFunctionNamespace(String namespaceName,
+			ManagedFunctionSource managedFunctionSource) {
+		return NodeUtil.getInitialisedNode(namespaceName, this.namespaceNodes, this.context,
+				() -> this.context.createFunctionNamespaceNode(namespaceName, this),
+				(work) -> work.initialise(managedFunctionSource.getClass().getName(), managedFunctionSource));
 	}
 
 	@Override
@@ -730,139 +948,143 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
-	public void link(SectionInput sectionInput, SectionTask task) {
-		this.linkFlow(sectionInput, task);
+	public void link(SectionInput sectionInput, SectionFunction task) {
+		LinkUtil.linkFlow(sectionInput, task, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(SectionInput sectionInput, SubSectionInput subSectionInput) {
-		this.linkFlow(sectionInput, subSectionInput);
+		LinkUtil.linkFlow(sectionInput, subSectionInput, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(SectionInput sectionInput, SectionOutput sectionOutput) {
-		this.linkFlow(sectionInput, sectionOutput);
+		LinkUtil.linkFlow(sectionInput, sectionOutput, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
-	public void link(TaskFlow taskFlow, SectionTask task, FlowInstigationStrategyEnum instigationStrategy) {
-		if (this.linkFlow(taskFlow, task)) {
-			// Linked so specify instigation strategy
-			this.loadFlowInstigationStrategy(taskFlow, instigationStrategy);
+	public void link(FunctionFlow taskFlow, SectionFunction task, boolean isSpawnThreadState) {
+		if (LinkUtil.linkFlow(taskFlow, task, this.context.getCompilerIssues(), this)) {
+			// Linked so specify spawn thread state
+			this.loadSpawnThreadState(taskFlow, isSpawnThreadState);
 		}
 	}
 
 	@Override
-	public void link(TaskFlow taskFlow, SubSectionInput subSectionInput,
-			FlowInstigationStrategyEnum instigationStrategy) {
-		if (this.linkFlow(taskFlow, subSectionInput)) {
-			// Linked so specify instigation strategy
-			this.loadFlowInstigationStrategy(taskFlow, instigationStrategy);
+	public void link(FunctionFlow taskFlow, SubSectionInput subSectionInput, boolean isSpawnThreadState) {
+		if (LinkUtil.linkFlow(taskFlow, subSectionInput, this.context.getCompilerIssues(), this)) {
+			// Linked so specify spawn thread state
+			this.loadSpawnThreadState(taskFlow, isSpawnThreadState);
 		}
 	}
 
 	@Override
-	public void link(TaskFlow taskFlow, SectionOutput sectionOutput, FlowInstigationStrategyEnum instigationStrategy) {
-		if (this.linkFlow(taskFlow, sectionOutput)) {
-			// Linked so specify instigation strategy
-			this.loadFlowInstigationStrategy(taskFlow, instigationStrategy);
+	public void link(FunctionFlow taskFlow, SectionOutput sectionOutput, boolean isSpawnThreadState) {
+		if (LinkUtil.linkFlow(taskFlow, sectionOutput, this.context.getCompilerIssues(), this)) {
+			// Linked so specify spawn thread state
+			this.loadSpawnThreadState(taskFlow, isSpawnThreadState);
 		}
 	}
 
 	@Override
-	public void link(SectionTask task, SectionTask nextTask) {
-		this.linkFlow(task, nextTask);
+	public void link(SectionFunction task, SectionFunction nextTask) {
+		LinkUtil.linkFlow(task, nextTask, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
-	public void link(SectionTask task, SubSectionInput subSectionInput) {
-		this.linkFlow(task, subSectionInput);
+	public void link(SectionFunction task, SubSectionInput subSectionInput) {
+		LinkUtil.linkFlow(task, subSectionInput, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
-	public void link(SectionTask task, SectionOutput sectionOutput) {
-		this.linkFlow(task, sectionOutput);
+	public void link(SectionFunction task, SectionOutput sectionOutput) {
+		LinkUtil.linkFlow(task, sectionOutput, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
-	public void link(SubSectionOutput subSectionOutput, SectionTask task) {
-		this.linkFlow(subSectionOutput, task);
+	public void link(SubSectionOutput subSectionOutput, SectionFunction task) {
+		LinkUtil.linkFlow(subSectionOutput, task, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(SubSectionOutput subSectionOutput, SubSectionInput subSectionInput) {
-		this.linkFlow(subSectionOutput, subSectionInput);
+		LinkUtil.linkFlow(subSectionOutput, subSectionInput, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(SubSectionOutput subSectionOutput, SectionOutput sectionOutput) {
-		this.linkFlow(subSectionOutput, sectionOutput);
+		LinkUtil.linkFlow(subSectionOutput, sectionOutput, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
-	public void link(ManagedObjectFlow managedObjectFlow, SectionTask task) {
-		this.linkFlow(managedObjectFlow, task);
+	public void link(SectionManagedObjectSource managedObjectSource, SectionManagedObjectPool managedObjectPool) {
+		LinkUtil.linkPool(managedObjectSource, managedObjectPool, this.context.getCompilerIssues(), this);
+	}
+
+	@Override
+	public void link(ManagedObjectFlow managedObjectFlow, SectionFunction task) {
+		LinkUtil.linkFlow(managedObjectFlow, task, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(ManagedObjectFlow managedObjectFlow, SubSectionInput subSectionInput) {
-		this.linkFlow(managedObjectFlow, subSectionInput);
+		LinkUtil.linkFlow(managedObjectFlow, subSectionInput, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(ManagedObjectFlow managedObjectFlow, SectionOutput sectionOutput) {
-		this.linkFlow(managedObjectFlow, sectionOutput);
+		LinkUtil.linkFlow(managedObjectFlow, sectionOutput, this.context.getCompilerIssues(), this);
 	}
 
 	/**
-	 * Loads the {@link FlowInstigationStrategyEnum} for the {@link TaskFlow}.
+	 * Loads whether the {@link FunctionFlow} will spawn a {@link ThreadState}.
 	 * 
-	 * @param taskFlow
-	 *            {@link TaskFlow}.
-	 * @param instigationStrategy
-	 *            {@link FlowInstigationStrategyEnum}.
+	 * @param functionFlow
+	 *            {@link FunctionFlow}.
+	 * @param isSpawnThreadState
+	 *            <code>true</code> to spawn a {@link ThreadState}.
 	 */
-	private void loadFlowInstigationStrategy(TaskFlow taskFlow, FlowInstigationStrategyEnum instigationStrategy) {
+	private void loadSpawnThreadState(FunctionFlow functionFlow, boolean isSpawnThreadState) {
 
-		// Ensure a task flow node
-		if (!(taskFlow instanceof TaskFlowNode)) {
-			this.addIssue("Invalid task flow: " + taskFlow + " ["
-					+ (taskFlow == null ? null : taskFlow.getClass().getName()) + "]");
-			return; // can not load instigation strategy
+		// Ensure a function flow node
+		if (!(functionFlow instanceof FunctionFlowNode)) {
+			this.addIssue("Invalid function flow: " + functionFlow + " ["
+					+ (functionFlow == null ? null : functionFlow.getClass().getName()) + "]");
+			return; // can not load spawning
 		}
 
-		// Load the instigation strategy
-		((TaskFlowNode) taskFlow).setFlowInstigationStrategy(instigationStrategy);
+		// Load whether spawns thread state
+		((FunctionFlowNode) functionFlow).setSpawnThreadState(isSpawnThreadState);
 	}
 
 	@Override
-	public void link(TaskObject taskObject, SectionObject sectionObject) {
-		this.linkObject(taskObject, sectionObject);
+	public void link(FunctionObject taskObject, SectionObject sectionObject) {
+		LinkUtil.linkObject(taskObject, sectionObject, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(SubSectionObject subSectionObject, SectionObject sectionObject) {
-		this.linkObject(subSectionObject, sectionObject);
+		LinkUtil.linkObject(subSectionObject, sectionObject, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
-	public void link(TaskObject taskObject, SectionManagedObject sectionManagedObject) {
-		this.linkObject(taskObject, sectionManagedObject);
+	public void link(FunctionObject taskObject, SectionManagedObject sectionManagedObject) {
+		LinkUtil.linkObject(taskObject, sectionManagedObject, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(SubSectionObject subSectionObject, SectionManagedObject sectionManagedObject) {
-		this.linkObject(subSectionObject, sectionManagedObject);
+		LinkUtil.linkObject(subSectionObject, sectionManagedObject, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(ManagedObjectDependency dependency, SectionObject sectionObject) {
-		this.linkObject(dependency, sectionObject);
+		LinkUtil.linkObject(dependency, sectionObject, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
 	public void link(ManagedObjectDependency dependency, SectionManagedObject sectionManagedObject) {
-		this.linkObject(dependency, sectionManagedObject);
+		LinkUtil.linkObject(dependency, sectionManagedObject, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
@@ -900,13 +1122,18 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
+	public void setSuperOfficeSection(OfficeSection superSection) {
+		this.superSectionNode = (SectionNode) superSection;
+	}
+
+	@Override
 	public OfficeSubSection getOfficeSubSection(String sectionName) {
 		return NodeUtil.getNode(sectionName, this.subSections, () -> this.context.createSectionNode(sectionName, this));
 	}
 
 	@Override
-	public OfficeSectionTask getOfficeSectionTask(String taskName) {
-		return NodeUtil.getNode(taskName, this.taskNodes, () -> this.context.createTaskNode(taskName));
+	public OfficeSectionFunction getOfficeSectionFunction(String functionName) {
+		return NodeUtil.getNode(functionName, this.functionNodes, () -> this.context.createFunctionNode(functionName));
 	}
 
 	@Override
@@ -934,6 +1161,42 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 		// Add the governance
 		this.governances.add(governanceNode);
+	}
+
+	/*
+	 * ================== OfficeSectionTransformerContext ==================
+	 */
+
+	@Override
+	public String getSectionSourceClassName() {
+		return this.state.sectionSourceClassName;
+	}
+
+	@Override
+	public String getSectionLocation() {
+		return this.state.sectionLocation;
+	}
+
+	@Override
+	public PropertyList getSectionProperties() {
+		return this.propertyList;
+	}
+
+	@Override
+	public PropertyList createPropertyList() {
+		return this.context.createPropertyList();
+	}
+
+	@Override
+	public void setTransformedOfficeSection(String sectionSourceClassName, String sectionLocation,
+			PropertyList sectionProperties) {
+
+		// Load the transformation
+		this.state = new InitialisedState(sectionSourceClassName, null, sectionLocation);
+		this.propertyList.clear();
+		for (Property property : sectionProperties) {
+			this.propertyList.addProperty(property.getName()).setValue(property.getValue());
+		}
 	}
 
 }

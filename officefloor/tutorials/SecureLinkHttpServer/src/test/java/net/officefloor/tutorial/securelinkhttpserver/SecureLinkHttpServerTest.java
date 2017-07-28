@@ -17,15 +17,15 @@
  */
 package net.officefloor.tutorial.securelinkhttpserver;
 
-import junit.framework.TestCase;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
+
+import junit.framework.TestCase;
+import net.officefloor.OfficeFloorMain;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 
 /**
  * Tests the Secure Link.
@@ -45,7 +45,7 @@ public class SecureLinkHttpServerTest extends TestCase {
 		try {
 			this.client.close();
 		} finally {
-			WoofOfficeFloorSource.stop();
+			OfficeFloorMain.open();
 		}
 	}
 
@@ -56,22 +56,18 @@ public class SecureLinkHttpServerTest extends TestCase {
 	public void testLinkRenderedSecure() throws Exception {
 
 		// Obtain the default host name for the link
-		String hostName = HttpApplicationLocationManagedObjectSource
-				.getDefaultHostName();
+		String hostName = HttpApplicationLocationManagedObjectSource.getDefaultHostName();
 
 		// Start the server
-		WoofOfficeFloorSource.start();
+		OfficeFloorMain.close();
 
 		// Obtain the page
-		HttpResponse response = this.client.execute(new HttpGet("http://"
-				+ hostName + ":7878"));
+		HttpResponse response = this.client.execute(new HttpGet("http://" + hostName + ":7878"));
 		String renderedPage = EntityUtils.toString(response.getEntity());
 
 		// Ensure login form (link) is secure
-		assertTrue(
-				"Login form should be secure",
-				renderedPage.contains("form action=\"https://" + hostName
-						+ ":7979/-login.woof"));
+		assertTrue("Login form should be secure",
+				renderedPage.contains("form action=\"https://" + hostName + ":7979/-login.woof"));
 	}
 	// END SNIPPET: tutorial
 

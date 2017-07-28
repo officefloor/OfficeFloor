@@ -20,7 +20,7 @@ package net.officefloor.compile.impl.governance;
 import net.officefloor.compile.governance.GovernanceEscalationType;
 import net.officefloor.compile.governance.GovernanceFlowType;
 import net.officefloor.compile.governance.GovernanceType;
-import net.officefloor.frame.api.build.GovernanceFactory;
+import net.officefloor.frame.api.governance.GovernanceFactory;
 
 /**
  * {@link GovernanceType} implementation.

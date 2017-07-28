@@ -22,32 +22,31 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.compile.managedobject.ManagedObjectType;
-import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.eclipse.classpath.ProjectClassLoader;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.extension.ExtensionUtil;
-import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
-import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
-import net.officefloor.eclipse.util.JavaUtil;
-import net.officefloor.eclipse.util.LogUtil;
-import net.officefloor.eclipse.wizard.WizardUtil;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 
+import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.eclipse.classpath.ProjectClassLoader;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.configuration.project.ProjectConfigurationContext;
+import net.officefloor.eclipse.extension.ExtensionUtil;
+import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
+import net.officefloor.eclipse.util.JavaUtil;
+import net.officefloor.eclipse.util.LogUtil;
+import net.officefloor.eclipse.wizard.WizardUtil;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+
 /**
  * {@link IWizard} to add and manage {@link ManagedObject} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectSourceWizard extends Wizard implements
-		ManagedObjectSourceInstanceContext {
+public class ManagedObjectSourceWizard extends Wizard implements ManagedObjectSourceInstanceContext {
 
 	/**
 	 * Facade method to obtain the {@link ManagedObjectInstance}.
@@ -61,13 +60,11 @@ public class ManagedObjectSourceWizard extends Wizard implements
 	 *            {@link ManagedObjectInstance}.
 	 * @return {@link ManagedObjectInstance} or <code>null</code> if cancelled.
 	 */
-	public static ManagedObjectInstance getManagedObjectInstance(
-			AbstractOfficeFloorEditPart<?, ?, ?> editPart,
+	public static ManagedObjectInstance getManagedObjectInstance(AbstractOfficeFloorEditPart<?, ?, ?> editPart,
 			ManagedObjectInstance managedObjectInstance) {
 
 		// Create and run the wizard
-		ManagedObjectSourceWizard wizard = new ManagedObjectSourceWizard(
-				editPart);
+		ManagedObjectSourceWizard wizard = new ManagedObjectSourceWizard(editPart);
 		if (WizardUtil.runWizard(wizard, editPart)) {
 			// Successful so return the managed object instance
 			return wizard.getManagedObjectInstance();
@@ -91,9 +88,8 @@ public class ManagedObjectSourceWizard extends Wizard implements
 	 *         {@link ManagedObjectSourceInstance}.
 	 */
 	@SuppressWarnings("rawtypes")
-	public static Map<String, ManagedObjectSourceInstance> createManagedObjectSourceInstanceMap(
-			ClassLoader classLoader, IProject project,
-			ManagedObjectSourceInstanceContext context) {
+	public static Map<String, ManagedObjectSourceInstance> createManagedObjectSourceInstanceMap(ClassLoader classLoader,
+			IProject project, ManagedObjectSourceInstanceContext context) {
 
 		// Obtain the managed object source instances (unique set)
 		Map<String, ManagedObjectSourceInstance> managedObjectSourceInstances = new HashMap<String, ManagedObjectSourceInstance>();
@@ -101,38 +97,31 @@ public class ManagedObjectSourceWizard extends Wizard implements
 		// Obtain from project class path
 		try {
 			// Obtain the types on the class path
-			IType[] types = JavaUtil.getSubTypes(project,
-					ManagedObjectSource.class.getName());
+			IType[] types = JavaUtil.getSubTypes(project, ManagedObjectSource.class.getName());
 			for (IType type : types) {
 				String className = type.getFullyQualifiedName();
 				if (ExtensionUtil.isIgnoreSource(className, classLoader)) {
 					continue; // ignore source
 				}
 				managedObjectSourceInstances.put(className,
-						new ManagedObjectSourceInstance(className, null,
-								classLoader, project, context));
+						new ManagedObjectSourceInstance(className, null, classLoader, project, context));
 			}
 		} catch (Throwable ex) {
-			LogUtil.logError(
-					"Failed to obtain java types from project class path", ex);
+			LogUtil.logError("Failed to obtain java types from project class path", ex);
 		}
 
 		// Obtain via extension point second to override
 		for (ManagedObjectSourceExtension managedObjectSourceExtension : ExtensionUtil
 				.createManagedObjectSourceExtensionList()) {
 			try {
-				Class<?> managedObjectSourceClass = managedObjectSourceExtension
-						.getManagedObjectSourceClass();
-				String managedObjectSourceClassName = managedObjectSourceClass
-						.getName();
-				managedObjectSourceInstances.put(managedObjectSourceClassName,
-						new ManagedObjectSourceInstance(
-								managedObjectSourceClassName,
-								managedObjectSourceExtension, classLoader,
-								project, context));
+				Class<?> managedObjectSourceClass = managedObjectSourceExtension.getManagedObjectSourceClass();
+				String managedObjectSourceClassName = managedObjectSourceClass.getName();
+				managedObjectSourceInstances.put(managedObjectSourceClassName, new ManagedObjectSourceInstance(
+						managedObjectSourceClassName, managedObjectSourceExtension, classLoader, project, context));
 			} catch (Throwable ex) {
-				LogUtil.logError("Failed to create source instance for "
-						+ managedObjectSourceExtension.getClass().getName(), ex);
+				LogUtil.logError(
+						"Failed to create source instance for " + managedObjectSourceExtension.getClass().getName(),
+						ex);
 			}
 		}
 
@@ -177,8 +166,7 @@ public class ManagedObjectSourceWizard extends Wizard implements
 	 * @param editPart
 	 *            {@link AbstractOfficeFloorEditPart}.
 	 */
-	public ManagedObjectSourceWizard(
-			AbstractOfficeFloorEditPart<?, ?, ?> editPart) {
+	public ManagedObjectSourceWizard(AbstractOfficeFloorEditPart<?, ?, ?> editPart) {
 		this(editPart, null);
 	}
 
@@ -192,13 +180,11 @@ public class ManagedObjectSourceWizard extends Wizard implements
 	 *            <code>null</code> to create a new
 	 *            {@link ManagedObjectInstance}.
 	 */
-	public ManagedObjectSourceWizard(
-			AbstractOfficeFloorEditPart<?, ?, ?> editPart,
+	public ManagedObjectSourceWizard(AbstractOfficeFloorEditPart<?, ?, ?> editPart,
 			ManagedObjectInstance managedObjectInstance) {
 
 		// Obtain the project
-		IProject project = ProjectConfigurationContext.getProject(editPart
-				.getEditor().getEditorInput());
+		IProject project = ProjectConfigurationContext.getProject(editPart.getEditor().getEditorInput());
 
 		// Obtain the class loader for the project
 		ProjectClassLoader classLoader = ProjectClassLoader.create(project);
@@ -208,25 +194,20 @@ public class ManagedObjectSourceWizard extends Wizard implements
 				classLoader, project, this);
 
 		// Obtain the listing of managed object source instances (in order)
-		ManagedObjectSourceInstance[] managedObjectSourceInstanceListing = managedObjectSourceInstanceMap
-				.values().toArray(new ManagedObjectSourceInstance[0]);
-		Arrays.sort(managedObjectSourceInstanceListing,
-				new Comparator<ManagedObjectSourceInstance>() {
-					@Override
-					public int compare(ManagedObjectSourceInstance a,
-							ManagedObjectSourceInstance b) {
-						return a.getManagedObjectSourceClassName().compareTo(
-								b.getManagedObjectSourceClassName());
-					}
-				});
+		ManagedObjectSourceInstance[] managedObjectSourceInstanceListing = managedObjectSourceInstanceMap.values()
+				.toArray(new ManagedObjectSourceInstance[0]);
+		Arrays.sort(managedObjectSourceInstanceListing, new Comparator<ManagedObjectSourceInstance>() {
+			@Override
+			public int compare(ManagedObjectSourceInstance a, ManagedObjectSourceInstance b) {
+				return a.getManagedObjectSourceClassName().compareTo(b.getManagedObjectSourceClassName());
+			}
+		});
 
 		// Create the pages
-		this.listingPage = new ManagedObjectSourceListingWizardPage(
-				managedObjectSourceInstanceListing);
+		this.listingPage = new ManagedObjectSourceListingWizardPage(managedObjectSourceInstanceListing);
 		for (ManagedObjectSourceInstance managedObjectSourceInstance : managedObjectSourceInstanceListing) {
 			this.propertiesPages.put(managedObjectSourceInstance,
-					new ManagedObjectSourcePropertiesWizardPage(this,
-							managedObjectSourceInstance));
+					new ManagedObjectSourcePropertiesWizardPage(this, managedObjectSourceInstance));
 		}
 		this.detailsPage = new ManagedObjectSourceDetailsWizardPage();
 	}
@@ -249,8 +230,7 @@ public class ManagedObjectSourceWizard extends Wizard implements
 		this.addPage(this.listingPage);
 		if (this.propertiesPages.size() > 0) {
 			// Load the first properties page
-			this.addPage(this.propertiesPages.values().toArray(
-					new IWizardPage[0])[0]);
+			this.addPage(this.propertiesPages.values().toArray(new IWizardPage[0])[0]);
 		}
 		this.addPage(this.detailsPage);
 	}
@@ -260,18 +240,15 @@ public class ManagedObjectSourceWizard extends Wizard implements
 		// Handle based on current page
 		if (page == this.listingPage) {
 			// Listing page, so obtain properties page based on selection
-			this.selectedManagedObjectSourceInstance = this.listingPage
-					.getSelectedManagedObjectSourceInstance();
-			this.currentPropertiesPage = this.propertiesPages
-					.get(this.selectedManagedObjectSourceInstance);
+			this.selectedManagedObjectSourceInstance = this.listingPage.getSelectedManagedObjectSourceInstance();
+			this.currentPropertiesPage = this.propertiesPages.get(this.selectedManagedObjectSourceInstance);
 
 			// Return as next page to set properties
 			return this.currentPropertiesPage;
 
 		} else if (page instanceof ManagedObjectSourcePropertiesWizardPage) {
 			// Properties specified, so now select tasks
-			this.detailsPage
-					.loadManagedObjectSourceInstance(this.selectedManagedObjectSourceInstance);
+			this.detailsPage.loadManagedObjectSourceInstance(this.selectedManagedObjectSourceInstance);
 			return this.detailsPage;
 
 		} else {
@@ -313,18 +290,15 @@ public class ManagedObjectSourceWizard extends Wizard implements
 		long defaultTimetout = this.detailsPage.getDefaultTimeout();
 		String managedObjectSourceClassName = this.selectedManagedObjectSourceInstance
 				.getManagedObjectSourceClassName();
-		PropertyList propertyList = this.selectedManagedObjectSourceInstance
-				.getPropertyList();
-		ManagedObjectType<?> managedObjectType = this.selectedManagedObjectSourceInstance
-				.getManagedObjectType();
+		PropertyList propertyList = this.selectedManagedObjectSourceInstance.getPropertyList();
+		ManagedObjectType<?> managedObjectType = this.selectedManagedObjectSourceInstance.getManagedObjectType();
 
 		// Normalise the properties
 		propertyList.normalise();
 
 		// Specify the managed object instance
-		this.managedObjectInstance = new ManagedObjectInstance(
-				managedObjectName, managedObjectSourceClassName, propertyList,
-				managedObjectType, defaultTimetout);
+		this.managedObjectInstance = new ManagedObjectInstance(managedObjectName, managedObjectSourceClassName,
+				propertyList, managedObjectType, defaultTimetout);
 
 		// Finished
 		return true;
@@ -351,8 +325,7 @@ public class ManagedObjectSourceWizard extends Wizard implements
 	@Override
 	public void setManagedObjectTypeLoaded(boolean isManagedObjectTypeLoaded) {
 		if (this.currentPropertiesPage != null) {
-			this.currentPropertiesPage
-					.setPageComplete(isManagedObjectTypeLoaded);
+			this.currentPropertiesPage.setPageComplete(isManagedObjectTypeLoaded);
 		}
 	}
 

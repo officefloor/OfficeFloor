@@ -19,7 +19,7 @@ package net.officefloor.plugin.web.http.parameters.source;
 
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
@@ -32,15 +32,13 @@ import net.officefloor.plugin.socket.server.http.conversation.impl.HttpRequestIm
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpParametersLoaderManagedObjectSourceTest extends
-		OfficeFrameTestCase {
+public class HttpParametersLoaderManagedObjectSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Validates the specification.
 	 */
 	public void testSpecification() {
-		ManagedObjectLoaderUtil.validateSpecification(
-				HttpParametersLoaderManagedObjectSource.class,
+		ManagedObjectLoaderUtil.validateSpecification(HttpParametersLoaderManagedObjectSource.class,
 				HttpParametersLoaderManagedObjectSource.PROPERTY_TYPE_NAME,
 				HttpParametersLoaderManagedObjectSource.PROPERTY_TYPE_NAME);
 	}
@@ -49,18 +47,12 @@ public class HttpParametersLoaderManagedObjectSourceTest extends
 	 * Validates the type.
 	 */
 	public void testType() {
-		ManagedObjectTypeBuilder mo = ManagedObjectLoaderUtil
-				.createManagedObjectTypeBuilder();
+		ManagedObjectTypeBuilder mo = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		mo.setObjectClass(MockType.class);
-		mo.addDependency(
-				HttpParametersLoaderDependencies.SERVER_HTTP_CONNECTION,
-				ServerHttpConnection.class, null);
-		mo.addDependency(HttpParametersLoaderDependencies.OBJECT,
-				MockType.class, null);
-		ManagedObjectLoaderUtil.validateManagedObjectType(mo,
-				HttpParametersLoaderManagedObjectSource.class,
-				HttpParametersLoaderManagedObjectSource.PROPERTY_TYPE_NAME,
-				MockType.class.getName());
+		mo.addDependency(HttpParametersLoaderDependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class, null);
+		mo.addDependency(HttpParametersLoaderDependencies.OBJECT, MockType.class, null);
+		ManagedObjectLoaderUtil.validateManagedObjectType(mo, HttpParametersLoaderManagedObjectSource.class,
+				HttpParametersLoaderManagedObjectSource.PROPERTY_TYPE_NAME, MockType.class.getName());
 	}
 
 	/**
@@ -69,10 +61,8 @@ public class HttpParametersLoaderManagedObjectSourceTest extends
 	public void testLoad() throws Throwable {
 
 		// Record loading the object
-		ServerHttpConnection connection = this
-				.createMock(ServerHttpConnection.class);
-		HttpRequest request = new HttpRequestImpl("GET", "/path?VALUE=value",
-				"HTTP/1.1", null, null);
+		ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
+		HttpRequest request = new HttpRequestImpl("GET", "/path?VALUE=value", "HTTP/1.1", null, null);
 		this.recordReturn(connection, connection.getHttpRequest(), request);
 		MockType mockType = this.createMock(MockType.class);
 		mockType.setValue("value");
@@ -80,20 +70,15 @@ public class HttpParametersLoaderManagedObjectSourceTest extends
 		// Test
 		this.replayMockObjects();
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
-		loader.addProperty(
-				HttpParametersLoaderManagedObjectSource.PROPERTY_TYPE_NAME,
-				MockType.class.getName());
+		loader.addProperty(HttpParametersLoaderManagedObjectSource.PROPERTY_TYPE_NAME, MockType.class.getName());
 		HttpParametersLoaderManagedObjectSource mos = loader
 				.loadManagedObjectSource(HttpParametersLoaderManagedObjectSource.class);
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
-		user.mapDependency(
-				HttpParametersLoaderDependencies.SERVER_HTTP_CONNECTION,
-				connection);
+		user.mapDependency(HttpParametersLoaderDependencies.SERVER_HTTP_CONNECTION, connection);
 		user.mapDependency(HttpParametersLoaderDependencies.OBJECT, mockType);
 		ManagedObject mo = user.sourceManagedObject(mos);
 		Object object = mo.getObject();
-		assertEquals("Incorrect object (should provide dependency)", mockType,
-				object);
+		assertEquals("Incorrect object (should provide dependency)", mockType, object);
 		this.verifyMockObjects();
 	}
 

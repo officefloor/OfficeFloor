@@ -17,40 +17,33 @@
  */
 package net.officefloor.frame.impl.execute.office;
 
-import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.manage.ProcessFuture;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.profile.Profiler;
+import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.process.ProcessStateImpl;
-import net.officefloor.frame.impl.execute.profile.ProcessProfilerImpl;
-import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.EscalationFlow;
-import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
-import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.FunctionLoop;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
+import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.OfficeStartupTask;
+import net.officefloor.frame.internal.structure.OfficeStartupFunction;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
-import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.ProcessTicker;
-import net.officefloor.frame.internal.structure.TaskMetaData;
-import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.internal.structure.WorkMetaData;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
-import net.officefloor.frame.spi.team.source.ProcessContextListener;
+import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
+import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * {@link OfficeMetaData} implementation.
@@ -58,73 +51,6 @@ import net.officefloor.frame.spi.team.source.ProcessContextListener;
  * @author Daniel Sagenschneider
  */
 public class OfficeMetaDataImpl implements OfficeMetaData {
-
-	/**
-	 * {@link TeamIdentifier} for invoking the {@link ProcessState}.
-	 */
-	public static final TeamIdentifier INVOKE_PROCESS_TEAM = new TeamIdentifier() {
-	};
-
-	/**
-	 * <p>
-	 * Convenience method to invoke a {@link Process}.
-	 * <p>
-	 * This is used by the {@link WorkManagerImpl} and {@link TaskManagerImpl}
-	 * for invoking a {@link ProcessState}.
-	 * 
-	 * @param officeMetaData
-	 *            {@link OfficeMetaData}.
-	 * @param flowMetaData
-	 *            {@link FlowMetaData}.
-	 * @param parameter
-	 *            Parameter.
-	 * @param processTicker
-	 *            {@link ProcessTicker}.
-	 * @return {@link ProcessFuture} for the invoked {@link ProcessState}.
-	 * @throws InvalidParameterTypeException
-	 *             Should the parameter type be incorrect the {@link Task}.
-	 */
-	public static ProcessFuture invokeProcess(OfficeMetaData officeMetaData,
-			FlowMetaData<?> flowMetaData, Object parameter,
-			ProcessTicker processTicker) throws InvalidParameterTypeException {
-
-		// Ensure correct parameter type
-		if (parameter != null) {
-			Class<?> taskParameterType = flowMetaData.getInitialTaskMetaData()
-					.getParameterType();
-			if (taskParameterType != null) {
-				Class<?> inputParameterType = parameter.getClass();
-				if (!taskParameterType.isAssignableFrom(inputParameterType)) {
-					throw new InvalidParameterTypeException(
-							"Invalid parameter type (input="
-									+ inputParameterType.getName()
-									+ ", required="
-									+ taskParameterType.getName() + ")");
-				}
-			}
-		}
-
-		// Create the job node within a new process
-		JobNode jobNode = officeMetaData.createProcess(flowMetaData, parameter,
-				null, null, null);
-
-		// Obtain the ProcessState
-		ProcessState processState = jobNode.getJobSequence().getThreadState()
-				.getProcessState();
-
-		// Indicate process started and register to be notified of completion.
-		// Must register before activating job to have trigger on completion.
-		if (processTicker != null) {
-			processTicker.processStarted();
-			processState.registerProcessCompletionListener(processTicker);
-		}
-
-		// Assign the job node to the Team
-		jobNode.activateJob(INVOKE_PROCESS_TEAM);
-
-		// Indicate when process of work complete
-		return processState.getProcessFuture();
-	}
 
 	/**
 	 * Name of the {@link Office}.
@@ -137,10 +63,30 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	private final OfficeManager officeManager;
 
 	/**
-	 * {@link WorkMetaData} of the {@link Work} that can be done within the
-	 * {@link Office}.
+	 * {@link OfficeClock}.
 	 */
-	private final WorkMetaData<?>[] workMetaDatas;
+	private final OfficeClock officeClock;
+
+	/**
+	 * {@link Timer} for the {@link Office}.
+	 */
+	private final Timer timer;
+
+	/**
+	 * {@link FunctionLoop}.
+	 */
+	private final FunctionLoop functionLoop;
+
+	/**
+	 * {@link ManagedFunctionMetaData} of the {@link ManagedFunction} that can
+	 * be executed within the {@link Office}.
+	 */
+	private final ManagedFunctionMetaData<?, ?>[] functionMetaDatas;
+
+	/**
+	 * {@link ManagedFunctionLocator}.
+	 */
+	private final ManagedFunctionLocator functionLocator;
 
 	/**
 	 * {@link ProcessMetaData} of the {@link ProcessState} instances created
@@ -149,35 +95,24 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	private final ProcessMetaData processMetaData;
 
 	/**
-	 * {@link ProcessContextListener} instances.
+	 * {@link OfficeStartupFunction} instances.
 	 */
-	private final ProcessContextListener[] processContextListeners;
+	private final OfficeStartupFunction[] startupFunctions;
 
 	/**
-	 * {@link OfficeStartupTask} instances.
+	 * {@link ThreadLocalAwareExecutor}.s
 	 */
-	private final OfficeStartupTask[] startupTasks;
+	private final ThreadLocalAwareExecutor threadLocalAwareExecutor;
 
 	/**
-	 * {@link EscalationProcedure} for the {@link Office}.
+	 * {@link ManagedExecutionFactory}.
 	 */
-	private final EscalationProcedure escalationProcedure;
-
-	/**
-	 * {@link OfficeFloor} {@link EscalationFlow}.
-	 */
-	private final EscalationFlow officeFloorEscalation;
+	private final ManagedExecutionFactory managedExecutionFactory;
 
 	/**
 	 * {@link Profiler}.
 	 */
 	private final Profiler profiler;
-
-	/**
-	 * Required {@link Governance} for the input {@link ManagedObject}
-	 * {@link EscalationHandler}.
-	 */
-	private final boolean[] inputManagedObjectEscalationRequiredGovernance;
 
 	/**
 	 * Initiate.
@@ -186,46 +121,46 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 *            Name of the {@link Office}.
 	 * @param officeManager
 	 *            {@link OfficeManager}.
-	 * @param workMetaDatas
-	 *            {@link WorkMetaData} of the {@link Work} that can be done
-	 *            within the {@link Office}.
+	 * @param officeClock
+	 *            {@link OfficeClock}.
+	 * @param timer
+	 *            {@link Timer} for the {@link Office}.
+	 * @param functionLoop
+	 *            {@link FunctionLoop}.
+	 * @param threadLocalAwareExecutor
+	 *            {@link ThreadLocalAwareExecutor}.
+	 * @param managedExecutionFactory
+	 *            {@link ManagedExecutionFactory}.
+	 * @param functionMetaDatas
+	 *            {@link ManagedFunctionMetaData} of the {@link ManagedFunction}
+	 *            that can be executed within the {@link Office}.
+	 * @param functionLocator
+	 *            {@link ManagedFunctionLocator}.
 	 * @param processMetaData
 	 *            {@link ProcessMetaData} of the {@link ProcessState} instances
 	 *            created within this {@link Office}.
-	 * @param processContextListeners
-	 *            {@link ProcessContextListener} instances.
-	 * @param startupTasks
-	 *            {@link OfficeStartupTask} instances.
-	 * @param escalationProcedure
-	 *            {@link EscalationProcedure} for the {@link Office}.
-	 * @param officeFloorEscalation
-	 *            {@link OfficeFloor} {@link EscalationFlow}.
+	 * @param startupFunctions
+	 *            {@link OfficeStartupFunction} instances.
 	 * @param profiler
 	 *            {@link Profiler}.
 	 */
-	public OfficeMetaDataImpl(String officeName, OfficeManager officeManager,
-			WorkMetaData<?>[] workMetaDatas, ProcessMetaData processMetaData,
-			ProcessContextListener[] processContextListeners,
-			OfficeStartupTask[] startupTasks,
-			EscalationProcedure escalationProcedure,
-			EscalationFlow officeFloorEscalation, Profiler profiler) {
+	public OfficeMetaDataImpl(String officeName, OfficeManager officeManager, OfficeClock officeClock, Timer timer,
+			FunctionLoop functionLoop, ThreadLocalAwareExecutor threadLocalAwareExecutor,
+			ManagedExecutionFactory managedExecutionFactory, ManagedFunctionMetaData<?, ?>[] functionMetaDatas,
+			ManagedFunctionLocator functionLocator, ProcessMetaData processMetaData,
+			OfficeStartupFunction[] startupFunctions, Profiler profiler) {
 		this.officeName = officeName;
+		this.officeClock = officeClock;
+		this.timer = timer;
+		this.functionLoop = functionLoop;
+		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
+		this.managedExecutionFactory = managedExecutionFactory;
 		this.officeManager = officeManager;
-		this.workMetaDatas = workMetaDatas;
+		this.functionMetaDatas = functionMetaDatas;
+		this.functionLocator = functionLocator;
 		this.processMetaData = processMetaData;
-		this.processContextListeners = processContextListeners;
-		this.startupTasks = startupTasks;
-		this.escalationProcedure = escalationProcedure;
-		this.officeFloorEscalation = officeFloorEscalation;
+		this.startupFunctions = startupFunctions;
 		this.profiler = profiler;
-
-		// Always no governance for input managed object escalation handling
-		GovernanceMetaData<?, ?>[] governanceMetaData = this.processMetaData
-				.getThreadMetaData().getGovernanceMetaData();
-		this.inputManagedObjectEscalationRequiredGovernance = new boolean[governanceMetaData.length];
-		for (int i = 0; i < this.inputManagedObjectEscalationRequiredGovernance.length; i++) {
-			this.inputManagedObjectEscalationRequiredGovernance[i] = false;
-		}
 	}
 
 	/*
@@ -243,90 +178,164 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	}
 
 	@Override
+	public OfficeClock getOfficeClock() {
+		return this.officeClock;
+	}
+
+	@Override
+	public FunctionLoop getFunctionLoop() {
+		return this.functionLoop;
+	}
+
+	@Override
 	public ProcessMetaData getProcessMetaData() {
 		return this.processMetaData;
 	}
 
 	@Override
-	public WorkMetaData<?>[] getWorkMetaData() {
-		return this.workMetaDatas;
+	public ManagedFunctionMetaData<?, ?>[] getManagedFunctionMetaData() {
+		return this.functionMetaDatas;
 	}
 
 	@Override
-	public EscalationProcedure getEscalationProcedure() {
-		return this.escalationProcedure;
+	public ManagedFunctionLocator getManagedFunctionLocator() {
+		return this.functionLocator;
 	}
 
 	@Override
-	public OfficeStartupTask[] getStartupTasks() {
-		return this.startupTasks;
+	public OfficeStartupFunction[] getStartupFunctions() {
+		return this.startupFunctions;
 	}
 
 	@Override
-	public <W extends Work> JobNode createProcess(FlowMetaData<W> flowMetaData,
-			Object parameter, EscalationHandler invocationEscalationHandler,
-			TeamManagement escalationResponsibleTeam,
-			Team escalationContinueTeam) {
-		return this.createProcess(flowMetaData, parameter,
-				invocationEscalationHandler, escalationResponsibleTeam,
-				escalationContinueTeam, null, null, -1);
+	public ManagedExecutionFactory getManagedExecutionFactory() {
+		return this.managedExecutionFactory;
 	}
 
 	@Override
-	public <W extends Work> JobNode createProcess(FlowMetaData<W> flowMetaData,
-			Object parameter, EscalationHandler invocationEscalationHandler,
-			TeamManagement escalationResponsibleTeam,
-			Team escalationContinueTeam, ManagedObject inputManagedObject,
-			ManagedObjectMetaData<?> inputManagedObjectMetaData,
-			int processBoundIndexForInputManagedObject) {
+	public FunctionState createProcess(FlowMetaData flowMetaData, Object parameter, FlowCallback callback,
+			ThreadState callbackThreadState) {
+		return this.createProcess(flowMetaData, parameter, callback, callbackThreadState, null, null, -1);
+	}
 
-		// Create the process profiler (if profiling)
-		ProcessProfiler processProfiler = (this.profiler == null ? null
-				: new ProcessProfilerImpl(this.profiler, System.nanoTime()));
+	@Override
+	public void invokeProcess(FlowMetaData flowMetaData, Object parameter, long delay, FlowCallback callback,
+			ThreadState callbackThreadState, ManagedObject inputManagedObject,
+			ManagedObjectMetaData<?> inputManagedObjectMetaData, int processBoundIndexForInputManagedObject)
+			throws InvalidParameterTypeException {
+
+		// Obtain the initial function meta-data
+		ManagedFunctionMetaData<?, ?> initialFunctionMetaData = flowMetaData.getInitialFunctionMetaData();
+
+		// Ensure correct parameter type
+		if (parameter != null) {
+			Class<?> functionParameterType = initialFunctionMetaData.getParameterType();
+			if (functionParameterType != null) {
+				Class<?> inputParameterType = parameter.getClass();
+				if (!functionParameterType.isAssignableFrom(inputParameterType)) {
+					throw new InvalidParameterTypeException("Invalid parameter type (input="
+							+ inputParameterType.getName() + ", required=" + functionParameterType.getName() + ")");
+				}
+			}
+		}
+
+		// Create the process
+		final FunctionState function = this.createProcess(flowMetaData, parameter, callback, callbackThreadState,
+				inputManagedObject, inputManagedObjectMetaData, processBoundIndexForInputManagedObject);
+
+		// Trigger the process
+		if (delay > 0) {
+
+			// Delay execution of the process
+			this.timer.schedule(new TimerTask() {
+				@Override
+				public void run() {
+
+					// Easy access to office meta-data
+					OfficeMetaDataImpl officeMetaData = OfficeMetaDataImpl.this;
+
+					// Must execute on another thread (not hold up timer thread)
+					new Thread(() -> {
+
+						// Execute the process
+						if (officeMetaData.threadLocalAwareExecutor != null) {
+							officeMetaData.threadLocalAwareExecutor.runInContext(function, officeMetaData.functionLoop);
+						} else {
+							officeMetaData.functionLoop.executeFunction(function);
+						}
+
+					}).run();
+				}
+			}, delay);
+
+		} else {
+			// Execute the process immediately on current thread
+			if (this.threadLocalAwareExecutor != null) {
+				this.threadLocalAwareExecutor.runInContext(function, this.functionLoop);
+			} else {
+				this.functionLoop.executeFunction(function);
+			}
+		}
+	}
+
+	/**
+	 * Creates a new {@link ProcessState}.
+	 * 
+	 * @param flowMetaData
+	 *            {@link FlowMetaData} for the initial {@link ManagedFunction}.
+	 * @param parameter
+	 *            Parameter for the initial {@link ManagedFunction}.
+	 * @param callback
+	 *            Optional {@link FlowCallback} to invoke on completion of the
+	 *            {@link ProcessState}. May be <code>null</code>.
+	 * @param callbackThreadState
+	 *            Optional {@link ThreadState} to invoked the
+	 *            {@link FlowCallback} within. May be <code>null</code>.
+	 * @param inputManagedObject
+	 *            Input {@link ManagedObject}. May be <code>null</code> if no
+	 *            input {@link ManagedObject}.
+	 * @param inputManagedObjectMetaData
+	 *            {@link ManagedObjectMetaData} to the input
+	 *            {@link ManagedObject}.
+	 * @param processBoundIndexForInputManagedObject
+	 *            Index of the input {@link ManagedObject} within the
+	 *            {@link ProcessState}.
+	 * @return Initial {@link FunctionState} to be executed for the
+	 *         {@link ProcessState}.
+	 */
+	private FunctionState createProcess(FlowMetaData flowMetaData, Object parameter, FlowCallback callback,
+			ThreadState callbackThreadState, ManagedObject inputManagedObject,
+			ManagedObjectMetaData<?> inputManagedObjectMetaData, int processBoundIndexForInputManagedObject) {
 
 		// Create the Process State (based on whether have managed object)
 		ProcessState processState;
 		if (inputManagedObject == null) {
 			// Create Process without an Input Managed Object
-			processState = new ProcessStateImpl(this.processMetaData,
-					this.processContextListeners, this,
-					this.officeFloorEscalation, processProfiler,
-					invocationEscalationHandler, escalationResponsibleTeam,
-					escalationContinueTeam,
-					this.inputManagedObjectEscalationRequiredGovernance);
-
+			processState = new ProcessStateImpl(this.processMetaData, this, callback, callbackThreadState,
+					this.threadLocalAwareExecutor, this.profiler);
 		} else {
 			// Create Process with the Input Managed Object
-			processState = new ProcessStateImpl(this.processMetaData,
-					this.processContextListeners, this,
-					this.officeFloorEscalation, processProfiler,
-					inputManagedObject, inputManagedObjectMetaData,
-					processBoundIndexForInputManagedObject,
-					invocationEscalationHandler, escalationResponsibleTeam,
-					escalationContinueTeam,
-					this.inputManagedObjectEscalationRequiredGovernance);
+			processState = new ProcessStateImpl(this.processMetaData, this, callback, callbackThreadState,
+					this.threadLocalAwareExecutor, this.profiler, inputManagedObject, inputManagedObjectMetaData,
+					processBoundIndexForInputManagedObject);
 		}
 
 		// Create the Flow
-		AssetManager flowAssetManager = flowMetaData.getFlowManager();
-		JobSequence flow = processState.createThread(flowAssetManager);
+		ThreadState threadState = processState.getMainThreadState();
+		Flow flow = threadState.createFlow(null);
 
-		// Obtain the task meta-data
-		TaskMetaData<W, ?, ?> taskMetaData = flowMetaData
-				.getInitialTaskMetaData();
+		// Obtain the function meta-data
+		ManagedFunctionMetaData<?, ?> functionMetaData = flowMetaData.getInitialFunctionMetaData();
 
-		// Create the Job Node for the initial job
-		JobNode jobNode = flow.createTaskNode(taskMetaData, null, parameter,
-				GovernanceDeactivationStrategy.ENFORCE);
+		// Create the initial function of the process
+		FunctionState function = flow.createManagedFunction(parameter, functionMetaData, true, null);
 
-		// Notify of created process context
-		Object processIdentifier = processState.getProcessIdentifier();
-		for (int i = 0; i < this.processContextListeners.length; i++) {
-			this.processContextListeners[i].processCreated(processIdentifier);
-		}
+		// Ensure register main thread profiler
+		FunctionState registerThreadProfiler = function.getThreadState().registerThreadProfiler();
+		function = Promise.then(registerThreadProfiler, function);
 
-		// Return the Job Node
-		return jobNode;
+		// Return the function
+		return function;
 	}
 
 }

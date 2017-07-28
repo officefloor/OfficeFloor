@@ -4,6 +4,10 @@
 	<field type="String" name="managed object source class name" />
 	<field type="String" name="object type" />
 	<field type="String" name="timeout" />
+	<field type="OfficeManagedObjectSourceToOfficeSupplierModel"
+		name="office supplier" />
+	<field type="OfficeManagedObjectSourceToOfficeManagedObjectPoolModel"
+		name="office managed object pool" />
 	<list type="PropertyModel" name="property" plural="properties" />
 	<list type="OfficeManagedObjectToOfficeManagedObjectSourceModel"
 		name="office managed object" />

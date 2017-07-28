@@ -17,20 +17,6 @@
  */
 package net.officefloor.eclipse.skin.standard.section;
 
-import net.officefloor.eclipse.skin.section.SectionManagedObjectFigure;
-import net.officefloor.eclipse.skin.section.SectionManagedObjectFigureContext;
-import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
-import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
-import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
-import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
-import net.officefloor.eclipse.skin.standard.figure.RoundedContainerFigure;
-import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.model.section.SectionManagedObjectDependencyToSectionManagedObjectModel;
-import net.officefloor.model.section.SectionManagedObjectModel;
-import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectSourceModel;
-import net.officefloor.model.section.SubSectionObjectToSectionManagedObjectModel;
-
 import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.GridData;
@@ -39,13 +25,27 @@ import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.swt.SWT;
 
+import net.officefloor.eclipse.skin.section.SectionManagedObjectFigure;
+import net.officefloor.eclipse.skin.section.SectionManagedObjectFigureContext;
+import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
+import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
+import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
+import net.officefloor.eclipse.skin.standard.figure.RoundedContainerFigure;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.model.section.SectionManagedObjectDependencyToSectionManagedObjectModel;
+import net.officefloor.model.section.SectionManagedObjectModel;
+import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectSourceModel;
+import net.officefloor.model.section.SubSectionObjectToSectionManagedObjectModel;
+
 /**
  * {@link SectionManagedObjectFigure} implementation.
  *
  * @author Daniel Sagenschneider
  */
-public class StandardSectionManagedObjectFigure extends
-		AbstractOfficeFloorFigure implements SectionManagedObjectFigure {
+public class StandardSectionManagedObjectFigure extends AbstractOfficeFloorFigure
+		implements SectionManagedObjectFigure {
 
 	/**
 	 * {@link Label} containing the {@link SectionManagedObjectModel} name.
@@ -63,8 +63,7 @@ public class StandardSectionManagedObjectFigure extends
 	 * @param context
 	 *            {@link SectionManagedObjectFigureContext}.
 	 */
-	public StandardSectionManagedObjectFigure(
-			SectionManagedObjectFigureContext context) {
+	public StandardSectionManagedObjectFigure(SectionManagedObjectFigureContext context) {
 		this.context = context;
 
 		// Create the figure
@@ -79,40 +78,30 @@ public class StandardSectionManagedObjectFigure extends
 		figure.add(objectAndMo);
 
 		// Add the section object and managed object dependency connector
-		ConnectorFigure dependency = new ConnectorFigure(
-				ConnectorDirection.WEST, StandardOfficeFloorColours.BLACK());
+		ConnectorFigure dependency = new ConnectorFigure(ConnectorDirection.WEST, StandardOfficeFloorColours.BLACK());
 		dependency.setBorder(new MarginBorder(10, 0, 0, 0));
-		objectAndMoLayout.setConstraint(dependency, new GridData(SWT.BEGINNING,
-				SWT.BEGINNING, false, false));
+		objectAndMoLayout.setConstraint(dependency, new GridData(SWT.BEGINNING, SWT.BEGINNING, false, false));
 		objectAndMo.add(dependency);
 
 		// Register connection to section objects and dependencies
 		ConnectionAnchor dependencyAnchor = dependency.getConnectionAnchor();
-		this.registerConnectionAnchor(
-				SubSectionObjectToSectionManagedObjectModel.class,
+		this.registerConnectionAnchor(SubSectionObjectToSectionManagedObjectModel.class, dependencyAnchor);
+		this.registerConnectionAnchor(SectionManagedObjectDependencyToSectionManagedObjectModel.class,
 				dependencyAnchor);
-		this
-				.registerConnectionAnchor(
-						SectionManagedObjectDependencyToSectionManagedObjectModel.class,
-						dependencyAnchor);
 
 		// Create the managed object source
-		RoundedContainerFigure mo = new RoundedContainerFigure(this
-				.getSectionManagedObjectLabel(), StandardOfficeFloorColours
-				.MANAGED_OBJECT(), 20, false);
+		RoundedContainerFigure mo = new RoundedContainerFigure(this.getSectionManagedObjectLabel(),
+				StandardOfficeFloorColours.MANAGED_OBJECT(), 20, false);
 		this.sectionManagedObjectName = mo.getContainerName();
 		objectAndMo.add(mo);
 
 		// Add the managed object source connector
-		ConnectorFigure mos = new ConnectorFigure(ConnectorDirection.SOUTH,
-				StandardOfficeFloorColours.LINK_LINE());
-		figureLayout.setConstraint(mos, new GridData(SWT.CENTER, SWT.BEGINNING,
-				true, false));
+		ConnectorFigure mos = new ConnectorFigure(ConnectorDirection.SOUTH, StandardOfficeFloorColours.LINK_LINE());
+		figureLayout.setConstraint(mos, new GridData(SWT.CENTER, SWT.BEGINNING, true, false));
 		figure.add(mos);
 
 		// Register the connections to managed object source
-		this.registerConnectionAnchor(
-				SectionManagedObjectToSectionManagedObjectSourceModel.class,
+		this.registerConnectionAnchor(SectionManagedObjectToSectionManagedObjectSourceModel.class,
 				mos.getConnectionAnchor());
 
 		// Specify the figures
@@ -140,8 +129,8 @@ public class StandardSectionManagedObjectFigure extends
 			case THREAD:
 				scopeName = "thread";
 				break;
-			case WORK:
-				scopeName = "work";
+			case FUNCTION:
+				scopeName = "function";
 				break;
 			default:
 				scopeName = "Unknown";
@@ -150,8 +139,7 @@ public class StandardSectionManagedObjectFigure extends
 		}
 
 		// Return the label text
-		return this.context.getSectionManagedObjectName() + " [" + scopeName
-				+ "]";
+		return this.context.getSectionManagedObjectName() + " [" + scopeName + "]";
 	}
 
 	/*
@@ -160,14 +148,12 @@ public class StandardSectionManagedObjectFigure extends
 
 	@Override
 	public void setSectionManagedObjectName(String sectionManagedObjectName) {
-		this.sectionManagedObjectName.setText(this
-				.getSectionManagedObjectLabel());
+		this.sectionManagedObjectName.setText(this.getSectionManagedObjectLabel());
 	}
 
 	@Override
 	public void setManagedObjectScope(ManagedObjectScope managedObjectScope) {
-		this.sectionManagedObjectName.setText(this
-				.getSectionManagedObjectLabel());
+		this.sectionManagedObjectName.setText(this.getSectionManagedObjectLabel());
 	}
 
 	@Override

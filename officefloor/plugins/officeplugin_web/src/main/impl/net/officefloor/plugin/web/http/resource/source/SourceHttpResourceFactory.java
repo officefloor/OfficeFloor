@@ -27,12 +27,12 @@ import java.util.List;
 import net.officefloor.compile.impl.properties.PropertiesUtil;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyConfigurable;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.source.SourceProperties;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.source.SourceProperties;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.resource.HttpDirectory;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpFileDescriber;
@@ -50,7 +50,7 @@ import net.officefloor.plugin.web.http.resource.war.WarHttpResourceFactory;
  * It incorporates other {@link HttpResourceFactory} implementations configured
  * from the {@link SourceProperties} to achieve its functionality. This provides
  * reusable {@link HttpResourceFactory} capabilities for the various HTTP Web
- * {@link ManagedObjectSource} and {@link WorkSource} implementations.
+ * {@link ManagedObjectSource} and {@link ManagedFunctionSource} implementations.
  * 
  * @author Daniel Sagenschneider
  */
@@ -190,7 +190,7 @@ public class SourceHttpResourceFactory implements HttpResourceFactory {
 				PROPERTY_RESOURCE_DIRECTORIES, null);
 		String classPathPrefix = context.getProperty(
 				PROPERTY_CLASS_PATH_PREFIX,
-				WebAutoWireApplication.WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX);
+				WebArchitect.WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX);
 		ClassLoader classLoader = context.getClassLoader();
 		boolean isDirect = Boolean.parseBoolean(context.getProperty(
 				PROPERTY_DIRECT_STATIC_CONTENT, String.valueOf(Boolean.TRUE)));

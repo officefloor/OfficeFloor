@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -63,20 +64,6 @@ import mx4j.tools.remote.proxy.RemoteMBeanProxy;
 public class ProcessManager implements ProcessManagerMBean {
 
 	/**
-	 * {@link ObjectName} for the {@link ProcessManagerMBean}.
-	 */
-	static ObjectName PROCESS_MANAGER_OBJECT_NAME;
-
-	static {
-		try {
-			PROCESS_MANAGER_OBJECT_NAME = new ObjectName("process", "type",
-					"ProcessManager");
-		} catch (MalformedObjectNameException ex) {
-			// This should never be the case
-		}
-	}
-
-	/**
 	 * Default {@link ManagedProcess} name.
 	 */
 	public static final String DEFAULT_PROCESS_NAME = "Process";
@@ -89,10 +76,18 @@ public class ProcessManager implements ProcessManagerMBean {
 	/**
 	 * Obtains the {@link ObjectName} for the {@link ProcessManagerMBean}.
 	 * 
+	 * @param processName
+	 *            Process name.
 	 * @return {@link ObjectName} for the {@link ProcessManagerMBean}.
 	 */
-	public static ObjectName getProcessManagerObjectName() {
-		return PROCESS_MANAGER_OBJECT_NAME;
+	public static ObjectName getProcessManagerObjectName(String processName) {
+		try {
+			return new ObjectName(
+					"net.officefloor:type=" + ProcessManager.class.getSimpleName() + ",name=" + processName);
+		} catch (MalformedObjectNameException ex) {
+			// This should never be the case
+			throw new IllegalArgumentException(ex);
+		}
 	}
 
 	/**
@@ -125,8 +120,8 @@ public class ProcessManager implements ProcessManagerMBean {
 	 * @throws ProcessException
 	 *             if fails to run the {@link ManagedProcess}.
 	 */
-	public static void runProcess(ManagedProcess managedProcess,
-			ProcessConfiguration configuration) throws ProcessException {
+	public static void runProcess(ManagedProcess managedProcess, ProcessConfiguration configuration)
+			throws ProcessException {
 
 		// Ensure have configuration to prevent NPE
 		if (configuration == null) {
@@ -139,8 +134,7 @@ public class ProcessManager implements ProcessManagerMBean {
 		// Create the process class loader
 		List<URL> processClassPathUrls = new LinkedList<URL>();
 		try {
-			for (String classPathEntry : processClassPath
-					.split(File.pathSeparator)) {
+			for (String classPathEntry : processClassPath.split(File.pathSeparator)) {
 				File classPathFile = new File(classPathEntry);
 				URL classPathUrl = classPathFile.toURI().toURL();
 				processClassPathUrls.add(classPathUrl);
@@ -149,8 +143,7 @@ public class ProcessManager implements ProcessManagerMBean {
 			throw newProcessException(ex.getMessage(), ex);
 		}
 		try (URLClassLoader processClassLoader = new URLClassLoader(
-				processClassPathUrls.toArray(new URL[processClassPathUrls
-						.size()]))) {
+				processClassPathUrls.toArray(new URL[processClassPathUrls.size()]))) {
 
 			// Obtain the process name (also name space as not register MBeans)
 			String processName = configuration.getProcessName();
@@ -160,23 +153,20 @@ public class ProcessManager implements ProcessManagerMBean {
 			final String processNamespace = processName;
 
 			// Obtain the process output stream factory
-			ProcessOutputStreamFactory outputStreamFactory = configuration
-					.getProcessOutputStreamFactory();
+			ProcessOutputStreamFactory outputStreamFactory = configuration.getProcessOutputStreamFactory();
 			if (outputStreamFactory == null) {
 				outputStreamFactory = new StdProcessOutputStreamFactory();
 			}
 
 			// Obtain the logger
-			PrintStream logger = new PrintStream(
-					outputStreamFactory.createStandardProcessOutputStream(
-							processNamespace, new String[] { "runProcess" }));
+			PrintStream logger = new PrintStream(outputStreamFactory.createStandardProcessOutputStream(processNamespace,
+					new String[] { "runProcess" }));
 
 			// Serialise managed process for use
 			final ByteArrayOutputStream serialisedManagedProcess = new ByteArrayOutputStream();
 			synchronized (serialisedManagedProcess) {
 				try {
-					ObjectOutputStream serialiser = new ObjectOutputStream(
-							serialisedManagedProcess);
+					ObjectOutputStream serialiser = new ObjectOutputStream(serialisedManagedProcess);
 					serialiser.writeObject(managedProcess);
 				} catch (IOException ex) {
 					throw newProcessException(ex.getMessage(), ex);
@@ -184,20 +174,17 @@ public class ProcessManager implements ProcessManagerMBean {
 			}
 
 			// Create the process manager
-			ProcessManager processManager = new ProcessManager(processName,
-					processName, null, logger, null, null);
+			ProcessManager processManager = new ProcessManager(processName, processName, null, logger, null, null);
 
 			// Maintain class path for resetting
-			final String originalClassPath = System
-					.getProperty(SYSTEM_PROPERTY_CLASS_PATH);
+			final String originalClassPath = System.getProperty(SYSTEM_PROPERTY_CLASS_PATH);
 			try {
 
 				// Specify the java class path
 				System.setProperty(SYSTEM_PROPERTY_CLASS_PATH, processClassPath);
 
 				// Notify starting listener (if one provided)
-				ProcessStartListener startListener = configuration
-						.getProcessStartListener();
+				ProcessStartListener startListener = configuration.getProcessStartListener();
 				if (startListener != null) {
 					startListener.processStarted(processManager);
 				}
@@ -213,20 +200,16 @@ public class ProcessManager implements ProcessManagerMBean {
 							// Obtain the serialised managed process
 							byte[] managedProcessBytes;
 							synchronized (serialisedManagedProcess) {
-								managedProcessBytes = serialisedManagedProcess
-										.toByteArray();
+								managedProcessBytes = serialisedManagedProcess.toByteArray();
 							}
 
 							// Create the process shell within class loader
-							Class<?> shellClass = Thread.currentThread()
-									.getContextClassLoader()
+							Class<?> shellClass = Thread.currentThread().getContextClassLoader()
 									.loadClass(ProcessShell.class.getName());
 
 							// Run the process within shell
-							Method runMethod = shellClass.getMethod("run",
-									String.class, byte[].class);
-							runMethod.invoke(null, processNamespace,
-									managedProcessBytes);
+							Method runMethod = shellClass.getMethod("run", String.class, byte[].class);
+							runMethod.invoke(null, processNamespace, managedProcessBytes);
 
 						} catch (Throwable ex) {
 							// Capture failure to propagate
@@ -260,13 +243,8 @@ public class ProcessManager implements ProcessManagerMBean {
 					for (;;) {
 						// Propagate failure in process
 						if (failure[0] != null) {
-							throw newProcessException(
-									"Failed to run ProcessShell for "
-											+ managedProcess
-											+ " ["
-											+ managedProcess.getClass()
-													.getName() + "]",
-									failure[0]);
+							throw newProcessException("Failed to run ProcessShell for " + managedProcess + " ["
+									+ managedProcess.getClass().getName() + "]", failure[0]);
 						}
 
 						// Determine if complete
@@ -285,12 +263,10 @@ public class ProcessManager implements ProcessManagerMBean {
 
 			} finally {
 				// Reset to original class path
-				System.setProperty(SYSTEM_PROPERTY_CLASS_PATH,
-						originalClassPath);
+				System.setProperty(SYSTEM_PROPERTY_CLASS_PATH, originalClassPath);
 
 				// Notify completion listener (if one provided)
-				ProcessCompletionListener completionListener = configuration
-						.getProcessCompletionListener();
+				ProcessCompletionListener completionListener = configuration.getProcessCompletionListener();
 				if (completionListener != null) {
 					completionListener.processCompleted(processManager);
 				}
@@ -315,8 +291,8 @@ public class ProcessManager implements ProcessManagerMBean {
 	 * @throws ProcessException
 	 *             If fails to start the {@link Process}.
 	 */
-	public static ProcessManager startProcess(ManagedProcess managedProcess,
-			ProcessConfiguration configuration) throws ProcessException {
+	public static ProcessManager startProcess(ManagedProcess managedProcess, ProcessConfiguration configuration)
+			throws ProcessException {
 
 		// Ensure have configuration to prevent NPE
 		if (configuration == null) {
@@ -327,8 +303,7 @@ public class ProcessManager implements ProcessManagerMBean {
 		String javaHome = System.getProperty("java.home");
 		File javaBinDir = new File(javaHome, "bin");
 		if (!javaBinDir.isDirectory()) {
-			throw newProcessException("Can not find java bin directory at "
-					+ javaBinDir.getAbsolutePath(), null);
+			throw newProcessException("Can not find java bin directory at " + javaBinDir.getAbsolutePath(), null);
 		}
 
 		// Obtain the java executable
@@ -338,8 +313,7 @@ public class ProcessManager implements ProcessManagerMBean {
 			javaExecutable = new File(javaBinDir, "javaw.exe");
 			if (!javaExecutable.isFile()) {
 				// Not windows either, so can not find
-				throw newProcessException("Can not find java executable in "
-						+ javaBinDir.getAbsolutePath(), null);
+				throw newProcessException("Can not find java executable in " + javaBinDir.getAbsolutePath(), null);
 			}
 		}
 
@@ -370,15 +344,13 @@ public class ProcessManager implements ProcessManagerMBean {
 		}
 
 		// Obtain the process output stream factory
-		ProcessOutputStreamFactory outputStreamFactory = configuration
-				.getProcessOutputStreamFactory();
+		ProcessOutputStreamFactory outputStreamFactory = configuration.getProcessOutputStreamFactory();
 		if (outputStreamFactory == null) {
 			outputStreamFactory = new StdProcessOutputStreamFactory();
 		}
 
 		// Obtain the process completion listener
-		ProcessCompletionListener completionListener = configuration
-				.getProcessCompletionListener();
+		ProcessCompletionListener completionListener = configuration.getProcessCompletionListener();
 
 		// Obtain the unique MBean name space
 		String mbeanNamespace = processName;
@@ -397,11 +369,9 @@ public class ProcessManager implements ProcessManagerMBean {
 		OutputStream outStream;
 		OutputStream errStream;
 		try {
-			outStream = outputStreamFactory
-					.createStandardProcessOutputStream(mbeanNamespace,
-							command.toArray(new String[command.size()]));
-			errStream = outputStreamFactory
-					.createErrorProcessOutputStream(mbeanNamespace);
+			outStream = outputStreamFactory.createStandardProcessOutputStream(mbeanNamespace,
+					command.toArray(new String[command.size()]));
+			errStream = outputStreamFactory.createErrorProcessOutputStream(mbeanNamespace);
 		} catch (IOException ex) {
 			// Release process name space
 			releaseMBeanNamespace(mbeanNamespace);
@@ -419,8 +389,7 @@ public class ProcessManager implements ProcessManagerMBean {
 		ObjectOutputStream toProcessPipe;
 		ProcessNotificationHandler notificationHandler;
 		try {
-			try (ProgressLogger progress = new ProgressLogger(
-					"Process spawned under namespace " + mbeanNamespace,
+			try (ProgressLogger progress = new ProgressLogger("Process spawned under namespace " + mbeanNamespace,
 					"spawned", logger)) {
 
 				// Start the process (first as Process required by Manager)
@@ -428,28 +397,22 @@ public class ProcessManager implements ProcessManagerMBean {
 				process = builder.start();
 
 				// Gobble the stdout and stderr of the process
-				new StreamGobbler(mbeanNamespace, process.getInputStream(),
-						outStream, logger).start();
-				new StreamGobbler(mbeanNamespace, process.getErrorStream(),
-						errStream, logger).start();
+				new StreamGobbler(mbeanNamespace, process.getInputStream(), outStream, logger).start();
+				new StreamGobbler(mbeanNamespace, process.getErrorStream(), errStream, logger).start();
 				Thread.yield(); // give chance to start
 			}
 
-			try (ProgressLogger progress = new ProgressLogger(
-					"Initiating process management", "initiated", logger)) {
+			try (ProgressLogger progress = new ProgressLogger("Initiating process management", "initiated", logger)) {
 
 				// Create the process manager for the process
-				processManager = new ProcessManager(processName,
-						mbeanNamespace, process, logger, completionListener,
+				processManager = new ProcessManager(processName, mbeanNamespace, process, logger, completionListener,
 						mbeanServer);
 
 				// Obtain pipe to process
-				toProcessPipe = new ObjectOutputStream(
-						process.getOutputStream());
+				toProcessPipe = new ObjectOutputStream(process.getOutputStream());
 
 				// Create process response handler
-				notificationHandler = new ProcessNotificationHandler(
-						processManager, toProcessPipe, logger);
+				notificationHandler = new ProcessNotificationHandler(processManager, toProcessPipe, logger);
 			}
 		} catch (Exception ex) {
 			// Release process name space
@@ -462,8 +425,7 @@ public class ProcessManager implements ProcessManagerMBean {
 		// Start the handling of the process.
 		// (handler will release MBean name space)
 		try {
-			ProgressLogger.logInitialMessage("Starting process management",
-					logger);
+			ProgressLogger.logInitialMessage("Starting process management", logger);
 
 			// Start handling process responses
 			notificationHandler.start();
@@ -478,15 +440,12 @@ public class ProcessManager implements ProcessManagerMBean {
 			toProcessPipe.writeInt(fromProcessPort);
 			toProcessPipe.flush();
 
-			ProgressLogger.logCompleteMessage("started on port "
-					+ fromProcessPort, logger);
+			ProgressLogger.logCompleteMessage("started on port " + fromProcessPort, logger);
 
 			// Notify starting listener (if one provided)
-			ProcessStartListener startListener = configuration
-					.getProcessStartListener();
+			ProcessStartListener startListener = configuration.getProcessStartListener();
 			if (startListener != null) {
-				try (ProgressLogger progress = new ProgressLogger(
-						"Notifying process started", "notified", logger)) {
+				try (ProgressLogger progress = new ProgressLogger("Notifying process started", "notified", logger)) {
 					startListener.processStarted(processManager);
 				}
 			}
@@ -500,17 +459,14 @@ public class ProcessManager implements ProcessManagerMBean {
 			synchronized (processManager) {
 				// Wait until process is initialised (or complete)
 				long endTime = System.currentTimeMillis() + 20000;
-				while ((!processManager.isInitialised)
-						&& (!processManager.isComplete)) {
+				while ((!processManager.isInitialised) && (!processManager.isComplete)) {
 					processManager.wait(100);
 
 					// Time out waiting for process to start
 					if (System.currentTimeMillis() > endTime) {
-						throw newProcessException("Took too long for "
-								+ ProcessShell.class.getSimpleName() + " for "
-								+ managedProcess + " ["
-								+ managedProcess.getClass().getName() + "]",
-								null, process, logger);
+						throw newProcessException("Took too long for " + ProcessShell.class.getSimpleName() + " for "
+								+ managedProcess + " [" + managedProcess.getClass().getName() + "]", null, process,
+								logger);
 					}
 				}
 			}
@@ -518,16 +474,14 @@ public class ProcessManager implements ProcessManagerMBean {
 			// Determine if failure in running ProcessShell
 			if (!processManager.isInitialised) {
 				// Failed to start the ProcessShell
-				throw newProcessException("Failed to start "
-						+ ProcessShell.class.getSimpleName() + " for "
-						+ managedProcess + " ["
-						+ managedProcess.getClass().getName() + "]",
+				throw newProcessException(
+						"Failed to start " + ProcessShell.class.getSimpleName() + " for " + managedProcess + " ["
+								+ managedProcess.getClass().getName() + "]",
 						processManager.processShellFailure, process, logger);
 			}
 		} catch (InterruptedException ex) {
 			// Interrupted in beginning the process
-			throw newProcessException("Process start interruption", ex,
-					process, logger);
+			throw newProcessException("Process start interruption", ex, process, logger);
 		}
 
 		// Return the manager for the process
@@ -547,11 +501,18 @@ public class ProcessManager implements ProcessManagerMBean {
 	 * @throws MalformedObjectNameException
 	 *             If resulting local name is malformed.
 	 */
-	public static ObjectName getLocalObjectName(String processNamespace,
-			ObjectName remoteObjectName) throws MalformedObjectNameException {
-		return new ObjectName(processNamespace + "."
-				+ remoteObjectName.getDomain(),
-				remoteObjectName.getKeyPropertyList());
+	public static ObjectName getLocalObjectName(String processNamespace, ObjectName remoteObjectName)
+			throws MalformedObjectNameException {
+
+		// Obtain the domain
+		String domain = remoteObjectName.getDomain();
+
+		// Create the remote keys
+		Hashtable<String, String> keyProperties = new Hashtable<>(remoteObjectName.getKeyPropertyList());
+		keyProperties.put("process", processNamespace);
+
+		// Return the new object name
+		return new ObjectName(domain, keyProperties);
 	}
 
 	/**
@@ -599,8 +560,7 @@ public class ProcessManager implements ProcessManagerMBean {
 	 *            Cause. May be <code>null</code>.
 	 * @return {@link ProcessException}.
 	 */
-	private static ProcessException newProcessException(String message,
-			Throwable cause) {
+	private static ProcessException newProcessException(String message, Throwable cause) {
 		return newProcessException(message, cause, null, null);
 	}
 
@@ -620,8 +580,8 @@ public class ProcessManager implements ProcessManagerMBean {
 	 *            Logger.
 	 * @return {@link ProcessException}.
 	 */
-	private static ProcessException newProcessException(String message,
-			Throwable cause, Process process, PrintStream logger) {
+	private static ProcessException newProcessException(String message, Throwable cause, Process process,
+			PrintStream logger) {
 
 		// Ensure kill the process
 		try {
@@ -633,8 +593,7 @@ public class ProcessManager implements ProcessManagerMBean {
 			if (logger == null) {
 				logger = System.out;
 			}
-			logger.println("WARNING: Failed to destroy process for issue "
-					+ message);
+			logger.println("WARNING: Failed to destroy process for issue " + message);
 			destroyEx.printStackTrace(logger);
 		}
 
@@ -725,32 +684,14 @@ public class ProcessManager implements ProcessManagerMBean {
 	 * @param mbeanServer
 	 *            {@link MBeanServer}.
 	 */
-	private ProcessManager(String processName, String mbeanNamespace,
-			Process process, PrintStream logger,
-			ProcessCompletionListener completionListener,
-			MBeanServer mbeanServer) {
+	private ProcessManager(String processName, String mbeanNamespace, Process process, PrintStream logger,
+			ProcessCompletionListener completionListener, MBeanServer mbeanServer) {
 		this.processName = processName;
 		this.mbeanNamespace = mbeanNamespace;
 		this.process = process;
 		this.logger = logger;
 		this.completionListener = completionListener;
 		this.mbeanServer = mbeanServer;
-	}
-
-	/**
-	 * Obtains the local {@link ObjectName} for the remote MBean in the
-	 * {@link Process} being managed by this {@link ProcessManager}.
-	 * 
-	 * @param objectName
-	 *            {@link ObjectName} of the remote MBean.
-	 * @return Local {@link ObjectName} for the remote MBean in the
-	 *         {@link Process} being managed.
-	 * @throws MalformedObjectNameException
-	 *             If resulting local name is malformed.
-	 */
-	public ObjectName getLocalObjectName(ObjectName objectName)
-			throws MalformedObjectNameException {
-		return getLocalObjectName(this.mbeanNamespace, objectName);
 	}
 
 	/**
@@ -779,11 +720,10 @@ public class ProcessManager implements ProcessManagerMBean {
 	 * @throws Exception
 	 *             If fails to register the MBean.
 	 */
-	private void registerRemoteMBeanLocally(ObjectName remoteMBeanName,
-			MBeanServerConnection connection) throws Exception {
+	private void registerRemoteMBeanLocally(ObjectName remoteMBeanName, MBeanServerConnection connection)
+			throws Exception {
 		// Register the remote MBean locally
-		RemoteMBeanProxy mbeanProxy = new RemoteMBeanProxy(remoteMBeanName,
-				connection);
+		RemoteMBeanProxy mbeanProxy = new RemoteMBeanProxy(remoteMBeanName, connection);
 		this.registerMBean(mbeanProxy, remoteMBeanName);
 	}
 
@@ -878,8 +818,7 @@ public class ProcessManager implements ProcessManagerMBean {
 			try {
 				server.unregisterMBean(mbeanName);
 			} catch (Throwable ex) {
-				this.logger.println("WARNING: Failed to unregister MBean "
-						+ mbeanName);
+				this.logger.println("WARNING: Failed to unregister MBean " + mbeanName);
 				ex.printStackTrace(this.logger);
 			}
 		}
@@ -892,8 +831,7 @@ public class ProcessManager implements ProcessManagerMBean {
 			try {
 				listener.processCompleted(this);
 			} catch (Throwable ex) {
-				this.logger.println("WARNING: "
-						+ ProcessCompletionListener.class.getSimpleName() + " "
+				this.logger.println("WARNING: " + ProcessCompletionListener.class.getSimpleName() + " "
 						+ listener.getClass().getName() + " failed");
 				ex.printStackTrace(this.logger);
 			}
@@ -912,6 +850,11 @@ public class ProcessManager implements ProcessManagerMBean {
 	@Override
 	public String getProcessNamespace() {
 		return this.mbeanNamespace;
+	}
+
+	@Override
+	public ObjectName getLocalObjectName(ObjectName objectName) throws MalformedObjectNameException {
+		return getLocalObjectName(this.mbeanNamespace, objectName);
 	}
 
 	@Override
@@ -947,17 +890,14 @@ public class ProcessManager implements ProcessManagerMBean {
 
 		try {
 			// Obtain the process shell MBean name
-			ObjectName name = this
-					.getLocalObjectName(ProcessShell.PROCESS_SHELL_OBJECT_NAME);
+			ObjectName name = this.getLocalObjectName(ProcessShell.getProcessShellObjectName(this.processName));
 
 			// Trigger stopping the process
-			server.invoke(name, ProcessShell.TRIGGER_STOP_PROCESS_METHOD, null,
-					null);
+			server.invoke(name, ProcessShell.TRIGGER_STOP_PROCESS_METHOD, null, null);
 
 		} catch (Exception ex) {
 			// Propagate failure
-			throw newProcessException(ex.getMessage(), ex, this.process,
-					this.logger);
+			throw newProcessException(ex.getMessage(), ex, this.process, this.logger);
 		}
 	}
 
@@ -1020,9 +960,8 @@ public class ProcessManager implements ProcessManagerMBean {
 		 * @param logger
 		 *            Logger.
 		 */
-		public ProcessNotificationHandler(ProcessManager processManager,
-				ObjectOutputStream toProcessPipe, PrintStream logger)
-				throws IOException {
+		public ProcessNotificationHandler(ProcessManager processManager, ObjectOutputStream toProcessPipe,
+				PrintStream logger) throws IOException {
 			this.processManager = processManager;
 			this.toProcessPipe = toProcessPipe;
 			this.logger = logger;
@@ -1074,30 +1013,24 @@ public class ProcessManager implements ProcessManagerMBean {
 
 					// Register the Process Manager MBean
 					this.processManager.registerMBean(this.processManager,
-							ProcessManager.PROCESS_MANAGER_OBJECT_NAME);
+							getProcessManagerObjectName(this.processManager.processName));
 
 					// Obtain pipe from process
-					fromProcessPipe = new ObjectInputStream(
-							socket.getInputStream());
+					fromProcessPipe = new ObjectInputStream(socket.getInputStream());
 
 					// Obtain connection details
-					Object[] connectionDetails = (Object[]) fromProcessPipe
-							.readObject();
+					Object[] connectionDetails = (Object[]) fromProcessPipe.readObject();
 					JMXServiceURL processServiceUrl = (JMXServiceURL) connectionDetails[0];
 					String userName = (String) connectionDetails[1];
 					String password = (String) connectionDetails[2];
 
 					// Specify the host and port
-					this.processManager.setProcessHostAndPort(
-							processServiceUrl.getHost(),
-							processServiceUrl.getPort());
+					this.processManager.setProcessHostAndPort(processServiceUrl.getHost(), processServiceUrl.getPort());
 
 					// Connect to the process
 					Map<String, Object> env = new HashMap<String, Object>();
-					env.put(JMXConnector.CREDENTIALS, new String[] { userName,
-							password });
-					JMXConnector connector = JMXConnectorFactory.connect(
-							processServiceUrl, env);
+					env.put(JMXConnector.CREDENTIALS, new String[] { userName, password });
+					JMXConnector connector = JMXConnectorFactory.connect(processServiceUrl, env);
 					this.connection = connector.getMBeanServerConnection();
 
 					// Provide notification that connected to process
@@ -1131,29 +1064,23 @@ public class ProcessManager implements ProcessManagerMBean {
 
 						// Determine if notification
 						if (!(object instanceof MBeanRegistrationNotification)) {
-							throw new IllegalArgumentException(
-									"Unknown response: "
-											+ object
-											+ " ["
-											+ (object == null ? "null" : object
-													.getClass().getName()));
+							throw new IllegalArgumentException("Unknown response: " + object + " ["
+									+ (object == null ? "null" : object.getClass().getName()));
 						}
 						MBeanRegistrationNotification registration = (MBeanRegistrationNotification) object;
 
 						// Register the remote MBean locally
-						ObjectName remoteMBeanName = registration
-								.getMBeanName();
-						this.processManager.registerRemoteMBeanLocally(
-								remoteMBeanName, this.connection);
+						ObjectName remoteMBeanName = registration.getMBeanName();
+						this.processManager.registerRemoteMBeanLocally(remoteMBeanName, this.connection);
 
 						// Determine if process shell MBean.
 						// Must be done after registering to ensure available.
-						if (ProcessShell.PROCESS_SHELL_OBJECT_NAME
+						if (ProcessShell.getProcessShellObjectName(this.processManager.processName)
 								.equals(remoteMBeanName)) {
 							// Notify process that registered initialised
 							this.toProcessPipe.writeBoolean(true);
 							this.toProcessPipe.flush();
-							
+
 							// Have process shell MBean so now initialised
 							this.processManager.flagInitialised();
 						}
@@ -1163,8 +1090,7 @@ public class ProcessManager implements ProcessManagerMBean {
 					// Determine if potential wrapped EOF cause
 					Throwable previousCause = null; // stops infinite loop
 					Throwable currentCause = ex;
-					while ((currentCause != null)
-							&& (currentCause != previousCause)) {
+					while ((currentCause != null) && (currentCause != previousCause)) {
 
 						// Determine if EOF cause (assumed process completed)
 						if (currentCause instanceof EOFException) {
@@ -1191,9 +1117,7 @@ public class ProcessManager implements ProcessManagerMBean {
 					}
 				} catch (Throwable ex) {
 					// Indicate error
-					this.logger.println("WARNING: "
-							+ ProcessNotificationHandler.class.getSimpleName()
-							+ " error");
+					this.logger.println("WARNING: " + ProcessNotificationHandler.class.getSimpleName() + " error");
 					ex.printStackTrace(this.logger);
 				}
 			}
@@ -1238,8 +1162,7 @@ public class ProcessManager implements ProcessManagerMBean {
 		 * @param logger
 		 *            Logger.
 		 */
-		public StreamGobbler(String processNamespace, InputStream input,
-				OutputStream output, PrintStream logger) {
+		public StreamGobbler(String processNamespace, InputStream input, OutputStream output, PrintStream logger) {
 
 			// Must synchronize as used by another Thread
 			synchronized (this) {
@@ -1261,15 +1184,14 @@ public class ProcessManager implements ProcessManagerMBean {
 		public synchronized void run() {
 			try {
 				// Consume from stream until EOF
-				for (int value = this.input.read(); value != -1; value = this.input
-						.read()) {
+				for (int value = this.input.read(); value != -1; value = this.input.read()) {
 					this.output.write(value);
 				}
 
 			} catch (Throwable ex) {
 				// Provide stack trace and exit
-				this.logger.println("WARNING: " + this.processNamespace + " "
-						+ StreamGobbler.class.getSimpleName() + " error");
+				this.logger.println(
+						"WARNING: " + this.processNamespace + " " + StreamGobbler.class.getSimpleName() + " error");
 				ex.printStackTrace(this.logger);
 
 			} finally {
@@ -1283,8 +1205,7 @@ public class ProcessManager implements ProcessManagerMBean {
 					this.output.close();
 				} catch (Throwable ex) {
 					// Provide stack trace and exit
-					this.logger.println("WARNING: " + this.processNamespace
-							+ " " + StreamGobbler.class.getSimpleName()
+					this.logger.println("WARNING: " + this.processNamespace + " " + StreamGobbler.class.getSimpleName()
 							+ " failed closing stream");
 					ex.printStackTrace(this.logger);
 				}

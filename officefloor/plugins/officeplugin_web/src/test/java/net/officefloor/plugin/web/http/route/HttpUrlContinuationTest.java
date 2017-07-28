@@ -20,12 +20,12 @@ package net.officefloor.plugin.web.http.route;
 import java.io.IOException;
 import java.io.Serializable;
 
+import org.easymock.AbstractMatcher;
+
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.session.HttpSession;
-
-import org.easymock.AbstractMatcher;
 
 /**
  * Tests the {@link HttpUrlContinuation}.
@@ -48,20 +48,15 @@ public class HttpUrlContinuationTest extends OfficeFrameTestCase {
 	 * @param test
 	 *            {@link OfficeFrameTestCase}.
 	 */
-	public static void recordSaveRequest(String attributeKey,
-			ServerHttpConnection connection, HttpRequestState requestState,
-			HttpSession session, OfficeFrameTestCase test) throws IOException {
+	public static void recordSaveRequest(String attributeKey, ServerHttpConnection connection,
+			HttpRequestState requestState, HttpSession session, OfficeFrameTestCase test) throws IOException {
 
-		final Serializable connectionMomento = test
-				.createMock(Serializable.class);
-		final Serializable requestStateMomento = test
-				.createMock(Serializable.class);
+		final Serializable connectionMomento = test.createMock(Serializable.class);
+		final Serializable requestStateMomento = test.createMock(Serializable.class);
 
 		// Record obtaining state
-		test.recordReturn(connection, connection.exportState(),
-				connectionMomento);
-		test.recordReturn(requestState, requestState.exportState(),
-				requestStateMomento);
+		test.recordReturn(connection, connection.exportState(), connectionMomento);
+		test.recordReturn(requestState, requestState.exportState(), requestStateMomento);
 
 		// Record storing within the session
 		session.setAttribute(attributeKey, null);
@@ -93,10 +88,8 @@ public class HttpUrlContinuationTest extends OfficeFrameTestCase {
 	 * @param test
 	 *            {@link OfficeFrameTestCase}.
 	 */
-	public static void recordReinstateRequest(boolean isReinstate,
-			String attributeKey, ServerHttpConnection connection,
-			HttpRequestState requestState, HttpSession session,
-			OfficeFrameTestCase test) throws IOException {
+	public static void recordReinstateRequest(boolean isReinstate, String attributeKey, ServerHttpConnection connection,
+			HttpRequestState requestState, HttpSession session, OfficeFrameTestCase test) throws IOException {
 
 		// Determine if reinstate
 		if (!isReinstate) {
@@ -106,16 +99,12 @@ public class HttpUrlContinuationTest extends OfficeFrameTestCase {
 		}
 
 		// Record reinstating the request
-		final Serializable connectionMomento = test
-				.createMock(Serializable.class);
-		final Serializable requestStateMomento = test
-				.createMock(Serializable.class);
+		final Serializable connectionMomento = test.createMock(Serializable.class);
+		final Serializable requestStateMomento = test.createMock(Serializable.class);
 
 		// Record obtaining the request momento
-		Serializable requestMomento = createRequestStateMomento(
-				connectionMomento, requestStateMomento);
-		test.recordReturn(session, session.getAttribute(attributeKey),
-				requestMomento);
+		Serializable requestMomento = createRequestStateMomento(connectionMomento, requestStateMomento);
+		test.recordReturn(session, session.getAttribute(attributeKey), requestMomento);
 
 		// Load the state
 		connection.importState(connectionMomento);
@@ -131,18 +120,15 @@ public class HttpUrlContinuationTest extends OfficeFrameTestCase {
 	 *            {@link HttpRequestState} momento.
 	 * @return Request state momento.
 	 */
-	public static Serializable createRequestStateMomento(
-			Serializable connectionMomento, Serializable requestStateMomento)
-			throws IOException {
-		return new RequestStateMomentoExtractor(connectionMomento,
-				requestStateMomento).extractRedirectStateMomento();
+	public static Serializable createRequestStateMomento(Serializable connectionMomento,
+			Serializable requestStateMomento) throws IOException {
+		return new RequestStateMomentoExtractor(connectionMomento, requestStateMomento).extractRedirectStateMomento();
 	}
 
 	/**
 	 * Enables obtaining the redirect state momento.
 	 */
-	private static class RequestStateMomentoExtractor extends
-			OfficeFrameTestCase {
+	private static class RequestStateMomentoExtractor extends OfficeFrameTestCase {
 
 		/**
 		 * {@link ServerHttpConnection} momento.
@@ -162,8 +148,7 @@ public class HttpUrlContinuationTest extends OfficeFrameTestCase {
 		 * @param requestStateMomento
 		 *            {@link HttpRequestState} momento.
 		 */
-		public RequestStateMomentoExtractor(Serializable connectionMomento,
-				Serializable requestStateMomento) {
+		public RequestStateMomentoExtractor(Serializable connectionMomento, Serializable requestStateMomento) {
 			this.connectionMomento = connectionMomento;
 			this.requestStateMomento = requestStateMomento;
 		}
@@ -177,17 +162,13 @@ public class HttpUrlContinuationTest extends OfficeFrameTestCase {
 
 			final String KEY = "KEY";
 
-			final ServerHttpConnection connection = this
-					.createMock(ServerHttpConnection.class);
-			final HttpRequestState requestState = this
-					.createMock(HttpRequestState.class);
+			final ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
+			final HttpRequestState requestState = this.createMock(HttpRequestState.class);
 			final HttpSession session = this.createMock(HttpSession.class);
 
 			// Record saving request
-			this.recordReturn(connection, connection.exportState(),
-					this.connectionMomento);
-			this.recordReturn(requestState, requestState.exportState(),
-					this.requestStateMomento);
+			this.recordReturn(connection, connection.exportState(), this.connectionMomento);
+			this.recordReturn(requestState, requestState.exportState(), this.requestStateMomento);
 
 			// Record and capture request state momento
 			final Serializable[] redirectStateMomento = new Serializable[1];
@@ -203,8 +184,7 @@ public class HttpUrlContinuationTest extends OfficeFrameTestCase {
 
 			// Run redirect to extract the redirect state momento
 			this.replayMockObjects();
-			HttpUrlContinuation.saveRequest(KEY, connection, requestState,
-					session);
+			HttpUrlContinuation.saveRequest(KEY, connection, requestState, session);
 			this.verifyMockObjects();
 
 			// Return the extracted redirect state momento
@@ -218,15 +198,12 @@ public class HttpUrlContinuationTest extends OfficeFrameTestCase {
 	public void testInstance() {
 
 		// Ensure correct instance values
-		HttpUrlContinuation continuation = new HttpUrlContinuation("WORK",
-				"TASK", Boolean.TRUE);
-		assertEquals("Incorrect work", "WORK", continuation.getWorkName());
-		assertEquals("Incorrect task", "TASK", continuation.getTaskName());
+		HttpUrlContinuation continuation = new HttpUrlContinuation("FUNCTION", Boolean.TRUE);
+		assertEquals("Incorrect function", "FUNCTION", continuation.getFunctionName());
 		assertTrue("Should be secure", continuation.isSecure().booleanValue());
 
 		// Ensure secure may be null
-		assertNull("May be null secure value", new HttpUrlContinuation("WORK",
-				"TASK", null).isSecure());
+		assertNull("May be null secure value", new HttpUrlContinuation("FUNCTION", null).isSecure());
 	}
 
 	/**
@@ -234,10 +211,8 @@ public class HttpUrlContinuationTest extends OfficeFrameTestCase {
 	 */
 	public void testSaveRequest() throws Exception {
 
-		final ServerHttpConnection connection = this
-				.createMock(ServerHttpConnection.class);
-		final HttpRequestState requestState = this
-				.createMock(HttpRequestState.class);
+		final ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
+		final HttpRequestState requestState = this.createMock(HttpRequestState.class);
 		final HttpSession session = this.createMock(HttpSession.class);
 
 		// Record saving request
@@ -245,8 +220,7 @@ public class HttpUrlContinuationTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		HttpUrlContinuation.saveRequest("KEY", connection, requestState,
-				session);
+		HttpUrlContinuation.saveRequest("KEY", connection, requestState, session);
 		this.verifyMockObjects();
 	}
 
@@ -255,20 +229,16 @@ public class HttpUrlContinuationTest extends OfficeFrameTestCase {
 	 */
 	public void testReinstateRequest() throws Exception {
 
-		final ServerHttpConnection connection = this
-				.createMock(ServerHttpConnection.class);
-		final HttpRequestState requestState = this
-				.createMock(HttpRequestState.class);
+		final ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
+		final HttpRequestState requestState = this.createMock(HttpRequestState.class);
 		final HttpSession session = this.createMock(HttpSession.class);
 
 		// Record reinstating the request
-		recordReinstateRequest(true, "KEY", connection, requestState, session,
-				this);
+		recordReinstateRequest(true, "KEY", connection, requestState, session, this);
 
 		// Test
 		this.replayMockObjects();
-		boolean isReinstated = HttpUrlContinuation.reinstateRequest("KEY",
-				connection, requestState, session);
+		boolean isReinstated = HttpUrlContinuation.reinstateRequest("KEY", connection, requestState, session);
 		assertTrue("Request should be reinstated", isReinstated);
 		this.verifyMockObjects();
 	}
@@ -278,20 +248,16 @@ public class HttpUrlContinuationTest extends OfficeFrameTestCase {
 	 */
 	public void testNotReinstateRequest() throws Exception {
 
-		final ServerHttpConnection connection = this
-				.createMock(ServerHttpConnection.class);
-		final HttpRequestState requestState = this
-				.createMock(HttpRequestState.class);
+		final ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
+		final HttpRequestState requestState = this.createMock(HttpRequestState.class);
 		final HttpSession session = this.createMock(HttpSession.class);
 
 		// Record not reinstating the request
-		recordReinstateRequest(false, "KEY", connection, requestState, session,
-				this);
+		recordReinstateRequest(false, "KEY", connection, requestState, session, this);
 
 		// Test
 		this.replayMockObjects();
-		boolean isReinstated = HttpUrlContinuation.reinstateRequest("KEY",
-				connection, requestState, session);
+		boolean isReinstated = HttpUrlContinuation.reinstateRequest("KEY", connection, requestState, session);
 		assertFalse("Request should not be reinstated", isReinstated);
 		this.verifyMockObjects();
 	}

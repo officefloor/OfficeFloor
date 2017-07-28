@@ -52,16 +52,16 @@ public interface OfficeSubSectionType {
 
 	/**
 	 * <p>
-	 * Obtains the {@link OfficeTaskType} instances for this particular
+	 * Obtains the {@link OfficeFunctionType} instances for this particular
 	 * {@link OfficeSubSection}.
 	 * <p>
-	 * This does not include the {@link OfficeTaskType} instances of the sub
+	 * This does not include the {@link OfficeFunctionType} instances of the sub
 	 * sections.
 	 * 
-	 * @return {@link OfficeTaskType} instances for this particular
+	 * @return {@link OfficeFunctionType} instances for this particular
 	 *         {@link OfficeSubSection}.
 	 */
-	OfficeTaskType[] getOfficeTaskTypes();
+	OfficeFunctionType[] getOfficeFunctionTypes();
 
 	/**
 	 * <p>

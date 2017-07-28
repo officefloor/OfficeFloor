@@ -29,30 +29,27 @@ import javax.jms.ServerSession;
 import javax.jms.ServerSessionPool;
 import javax.jms.Session;
 
-import net.officefloor.admin.transaction.Transaction;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.jms.JmsAdminObjectFactory;
 import net.officefloor.plugin.jms.JmsUtil;
-import net.officefloor.plugin.jms.server.OnMessageTask.OnMessageDependencies;
-import net.officefloor.plugin.jms.server.OnMessageTask.OnMessageFlows;
+import net.officefloor.plugin.jms.server.OnMessageManagedFunction.OnMessageDependencies;
+import net.officefloor.plugin.jms.server.OnMessageManagedFunction.OnMessageFlows;
+import net.officefloor.plugin.transaction.Transaction;
 
 /**
  * JMS Server {@link ManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class JmsServerManagedObjectSource
-		extends
-		AbstractManagedObjectSource<None, JmsServerManagedObjectSource.JmsServerFlows>
-		implements ServerSessionPool {
+public class JmsServerManagedObjectSource extends
+		AbstractManagedObjectSource<None, JmsServerManagedObjectSource.JmsServerFlows> implements ServerSessionPool {
 
 	/**
 	 * Property name to obtain the message selector.
@@ -116,8 +113,7 @@ public class JmsServerManagedObjectSource
 	 * @param jmsServerManagedObject
 	 *            {@link JmsServerManagedObject} to be returned to pool.
 	 */
-	protected void returnJmsServerManagedObject(
-			JmsServerManagedObject jmsServerManagedObject) {
+	protected void returnJmsServerManagedObject(JmsServerManagedObject jmsServerManagedObject) {
 		synchronized (this.serverSessionPool) {
 			// Return to pool
 			this.serverSessionPool.add(jmsServerManagedObject);
@@ -135,7 +131,7 @@ public class JmsServerManagedObjectSource
 	 */
 	public void runSession(JmsServerManagedObject managedObject) {
 		// Invoke on message to run the session and process message
-		this.executeContext.invokeProcess(0, managedObject, managedObject, 0);
+		this.executeContext.invokeProcess(0, managedObject, managedObject, 0, null);
 	}
 
 	/*
@@ -144,67 +140,48 @@ public class JmsServerManagedObjectSource
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(JmsUtil.JMS_ADMIN_OBJECT_FACTORY_CLASS_PROPERTY,
-				"Admin Object Factory");
+		context.addProperty(JmsUtil.JMS_ADMIN_OBJECT_FACTORY_CLASS_PROPERTY, "Admin Object Factory");
 		context.addProperty(JMS_MAX_SERVER_SESSIONS, "JMS Max Sessions");
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<None, JmsServerFlows> context)
-			throws Exception {
+	protected void loadMetaData(MetaDataContext<None, JmsServerFlows> context) throws Exception {
 
 		// Obtain the managed object source context
-		ManagedObjectSourceContext<JmsServerFlows> mosContext = context
-				.getManagedObjectSourceContext();
+		ManagedObjectSourceContext<JmsServerFlows> mosContext = context.getManagedObjectSourceContext();
 
 		// Specify object types
 		context.setManagedObjectClass(JmsServerManagedObject.class);
 		context.setObjectClass(Void.class); // may not use
 
 		// Obtain the JMS admin object factory
-		this.jmsAdminObjectFactory = JmsUtil
-				.getJmsAdminObjectFactory(mosContext);
+		this.jmsAdminObjectFactory = JmsUtil.getJmsAdminObjectFactory(mosContext);
 
 		// Obtain the property values
-		this.maxSessions = Integer.parseInt(mosContext
-				.getProperty(JMS_MAX_SERVER_SESSIONS));
-		this.messageSelector = mosContext.getProperty(JMS_MESSAGE_SELECTOR,
-				null);
+		this.maxSessions = Integer.parseInt(mosContext.getProperty(JMS_MAX_SERVER_SESSIONS));
+		this.messageSelector = mosContext.getProperty(JMS_MESSAGE_SELECTOR, null);
 
-		// Link the on message task
+		// Link the on message function
 		context.addFlow(JmsServerFlows.ON_MESSAGE, JmsServerManagedObject.class);
-		mosContext
-				.linkProcess(JmsServerFlows.ON_MESSAGE, "server", "onmessage");
-		OnMessageTask onMessageTask = new OnMessageTask();
-		ManagedObjectTaskBuilder<OnMessageDependencies, OnMessageFlows> taskBuilder = mosContext
-				.addWork("server", onMessageTask).addTask("onmessage",
-						onMessageTask);
-		taskBuilder.linkParameter(
-				OnMessageDependencies.JMS_SERVER_MANAGED_OBJECT,
-				JmsServerManagedObject.class);
-		taskBuilder.linkFlow(OnMessageFlows.ON_MESSAGE, null,
-				FlowInstigationStrategyEnum.SEQUENTIAL, Message.class);
-		taskBuilder.setTeam("team");
+		mosContext.getFlow(JmsServerFlows.ON_MESSAGE).linkFunction("onmessage");
+		ManagedObjectFunctionBuilder<OnMessageDependencies, OnMessageFlows> functionBuilder = mosContext
+				.addManagedFunction("onmessage", new OnMessageManagedFunction());
+		functionBuilder.linkParameter(OnMessageDependencies.JMS_SERVER_MANAGED_OBJECT, JmsServerManagedObject.class);
+		context.addFlow(JmsServerFlows.SERVICE_MESSAGE, Message.class);
+		functionBuilder.linkFlow(OnMessageFlows.ON_MESSAGE, mosContext.getFlow(JmsServerFlows.SERVICE_MESSAGE),
+				Message.class, false);
+		functionBuilder.setResponsibleTeam("team");
 
-		// Register the recycle task
-		new RecycleJmsServerTask(this).registerAsRecycleTask(
-				context.getManagedObjectSourceContext(), "team");
+		// Register the recycle function
+		mosContext.getRecycleFunction(new RecycleJmsServerManagedFunction(this)).linkParameter(0,
+				RecycleManagedObjectParameter.class);
 
 		// Specify extension interfaces
-		context.addManagedObjectExtensionInterface(Transaction.class,
-				new ExtensionInterfaceFactory<Transaction>() {
-					@Override
-					public Transaction createExtensionInterface(
-							ManagedObject managedObject) {
-						// Return as Transaction
-						return (Transaction) managedObject;
-					}
-				});
+		context.addManagedObjectExtensionInterface(Transaction.class, (managedObject) -> (Transaction) managedObject);
 	}
 
 	@Override
-	public void start(ManagedObjectExecuteContext<JmsServerFlows> context)
-			throws Exception {
+	public void start(ManagedObjectExecuteContext<JmsServerFlows> context) throws Exception {
 
 		// Maintain reference to context
 		this.executeContext = context;
@@ -212,16 +189,14 @@ public class JmsServerManagedObjectSource
 		// TODO consider moving the below into a startup task
 
 		// Obtain the connection factory and destination
-		this.connectionFactory = jmsAdminObjectFactory
-				.createConnectionFactory();
+		this.connectionFactory = jmsAdminObjectFactory.createConnectionFactory();
 		this.destination = jmsAdminObjectFactory.createDestination();
 
 		// Create the connection
 		this.connection = this.connectionFactory.createConnection();
 
 		// Create the connection consumer (max of one message per session)
-		this.connection.createConnectionConsumer(this.destination,
-				this.messageSelector, this, 1);
+		this.connection.createConnectionConsumer(this.destination, this.messageSelector, this, 1);
 
 		// Start the connection
 		this.connection.start();
@@ -230,9 +205,7 @@ public class JmsServerManagedObjectSource
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
 		// Can not source server managed object
-		throw new UnsupportedOperationException(
-				"Can not source a managed object from a "
-						+ this.getClass().getName());
+		throw new UnsupportedOperationException("Can not source a managed object from a " + this.getClass().getName());
 	}
 
 	/*
@@ -265,8 +238,7 @@ public class JmsServerManagedObjectSource
 				} else {
 					// Create the server session (transacted)
 					session = new JmsServerManagedObject(this,
-							this.connection.createSession(true,
-									Session.SESSION_TRANSACTED));
+							this.connection.createSession(true, Session.SESSION_TRANSACTED));
 
 					// Increment the number of sessions
 					this.numberOfSessions++;
@@ -286,7 +258,12 @@ public class JmsServerManagedObjectSource
 		/**
 		 * Handles the {@link Message}.
 		 */
-		ON_MESSAGE
+		ON_MESSAGE,
+
+		/**
+		 * Services the {@link Message}.
+		 */
+		SERVICE_MESSAGE
 	}
 
 }

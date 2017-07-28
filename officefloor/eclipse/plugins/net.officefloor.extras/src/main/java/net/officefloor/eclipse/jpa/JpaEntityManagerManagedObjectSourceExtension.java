@@ -17,14 +17,14 @@
  */
 package net.officefloor.eclipse.jpa;
 
+import org.eclipse.swt.widgets.Composite;
+
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.jpa.JpaEntityManagerManagedObjectSource;
-
-import org.eclipse.swt.widgets.Composite;
 
 /**
  * {@link ManagedObjectSourceExtension} for the
@@ -34,8 +34,7 @@ import org.eclipse.swt.widgets.Composite;
  */
 // START SNIPPET: tutorial
 public class JpaEntityManagerManagedObjectSourceExtension
-		implements
-		ManagedObjectSourceExtension<None, None, JpaEntityManagerManagedObjectSource> {
+		implements ManagedObjectSourceExtension<None, None, JpaEntityManagerManagedObjectSource> {
 
 	/*
 	 * ===================== ManagedObjectSourceExtension ======================
@@ -52,26 +51,18 @@ public class JpaEntityManagerManagedObjectSourceExtension
 	}
 
 	@Override
-	public void createControl(Composite page,
-			ManagedObjectSourceExtensionContext context) {
+	public void createControl(Composite page, ManagedObjectSourceExtensionContext context) {
 
 		// Specify layout of page
 		SourceExtensionUtil.loadPropertyLayout(page);
 
 		// Provide property for persistence unit
-		SourceExtensionUtil
-				.createPropertyText(
-						"Persistence Unit",
-						JpaEntityManagerManagedObjectSource.PROPERTY_PERSISTENCE_UNIT_NAME,
-						null, page, context, null);
+		SourceExtensionUtil.createPropertyText("Persistence Unit",
+				JpaEntityManagerManagedObjectSource.PROPERTY_PERSISTENCE_UNIT_NAME, null, page, context, null);
 
 		// Provide additional dynamic properties for the Entity Manager
-		SourceExtensionUtil
-				.createPropertyList(
-						"Properties",
-						page,
-						context,
-						JpaEntityManagerManagedObjectSource.PROPERTY_PERSISTENCE_UNIT_NAME);
+		SourceExtensionUtil.createPropertyList("Properties", page, context,
+				JpaEntityManagerManagedObjectSource.PROPERTY_PERSISTENCE_UNIT_NAME);
 	}
 
 	@Override

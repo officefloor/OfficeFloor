@@ -26,10 +26,11 @@ import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.SectionInputType;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SubSectionInput;
-import net.officefloor.compile.type.TypeContext;
 
 /**
  * {@link SectionInputNode} node.
@@ -90,8 +91,7 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public SectionInputNodeImpl(String inputName, SectionNode section,
-			NodeContext context) {
+	public SectionInputNodeImpl(String inputName, SectionNode section, NodeContext context) {
 		this.inputName = inputName;
 		this.section = section;
 		this.context = context;
@@ -122,14 +122,18 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return NodeUtil.getChildNodes();
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}
 
 	@Override
 	public void initialise(String parameterType) {
-		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialisedState(parameterType));
+		this.state = NodeUtil.initialise(this, this.context, this.state, () -> new InitialisedState(parameterType));
 	}
 
 	/*
@@ -137,25 +141,21 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	 */
 
 	@Override
-	public SectionInputType loadSectionInputType(TypeContext typeContext) {
+	public SectionInputType loadSectionInputType(CompileContext compileContext) {
 
 		// Ensure have input name
 		if (CompileUtil.isBlank(this.inputName)) {
-			this.context.getCompilerIssues().addIssue(this,
-					"Null name for " + TYPE);
+			this.context.getCompilerIssues().addIssue(this, "Null name for " + TYPE);
 			return null; // must have names for inputs
 		}
 
 		// Create and return type
-		return new SectionInputTypeImpl(this.inputName,
-				this.state.parameterType);
+		return new SectionInputTypeImpl(this.inputName, this.state.parameterType);
 	}
 
 	@Override
-	public OfficeSectionInputType loadOfficeSectionInputType(
-			TypeContext typeContext) {
-		return new OfficeSectionInputTypeImpl(this.inputName,
-				this.state.parameterType);
+	public OfficeSectionInputType loadOfficeSectionInputType(CompileContext compileContext) {
+		return new OfficeSectionInputTypeImpl(this.inputName, this.state.parameterType);
 	}
 
 	/*
@@ -179,6 +179,11 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	/*
 	 * ===================== OfficeSectionInput =====================
 	 */
+
+	@Override
+	public OfficeSection getOfficeSection() {
+		return this.section;
+	}
 
 	@Override
 	public String getOfficeSectionInputName() {
@@ -205,8 +210,7 @@ public class SectionInputNodeImpl implements SectionInputNode {
 
 	@Override
 	public boolean linkFlowNode(LinkFlowNode node) {
-		return LinkUtil.linkFlowNode(this, node,
-				this.context.getCompilerIssues(),
+		return LinkUtil.linkFlowNode(this, node, this.context.getCompilerIssues(),
 				(link) -> this.linkedFlowNode = link);
 	}
 

@@ -59,8 +59,8 @@ public class SslConnectionImpl implements Connection {
 	 */
 
 	@Override
-	public Object getLock() {
-		return this.wrappedConnection.getLock();
+	public Object getWriteLock() {
+		return this.wrappedConnection.getWriteLock();
 	}
 
 	@Override

@@ -23,7 +23,7 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.TestSource;
+import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
 import net.officefloor.plugin.web.http.security.HttpChallengeContext;
@@ -42,8 +42,7 @@ import net.officefloor.plugin.web.http.security.scheme.BasicHttpSecuritySource;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSecuritySourceSpecificationRunnableTest extends
-		OfficeFrameTestCase {
+public class HttpSecuritySourceSpecificationRunnableTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure can load specification.
@@ -51,20 +50,17 @@ public class HttpSecuritySourceSpecificationRunnableTest extends
 	public void testLoadSpecification() throws Exception {
 
 		// Compiler
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 
 		// Ensure obtain properties
-		PropertyList properties = compiler.run(
-				HttpSecuritySourceSpecificationRunnable.class,
+		PropertyList properties = compiler.run(HttpSecuritySourceSpecificationRunnable.class,
 				BasicHttpSecuritySource.class.getName());
 
 		// Ensure properties are correct
 		assertNotNull("Should have properties", properties);
 		String[] names = properties.getPropertyNames();
 		assertEquals("Incorrect number of properties", 1, names.length);
-		assertEquals("Incorrect property",
-				BasicHttpSecuritySource.PROPERTY_REALM, names[0]);
+		assertEquals("Incorrect property", BasicHttpSecuritySource.PROPERTY_REALM, names[0]);
 	}
 
 	/**
@@ -73,20 +69,17 @@ public class HttpSecuritySourceSpecificationRunnableTest extends
 	public void testConvenienceLoadSpecification() throws Exception {
 
 		// Compiler
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 
 		// Load via convenience method
 		PropertyList properties = HttpSecuritySourceSpecificationRunnable
-				.loadSpecification(BasicHttpSecuritySource.class.getName(),
-						compiler);
+				.loadSpecification(BasicHttpSecuritySource.class.getName(), compiler);
 
 		// Ensure properties are correct
 		assertNotNull("Should have properties", properties);
 		String[] names = properties.getPropertyNames();
 		assertEquals("Incorrect number of properties", 1, names.length);
-		assertEquals("Incorrect property",
-				BasicHttpSecuritySource.PROPERTY_REALM, names[0]);
+		assertEquals("Incorrect property", BasicHttpSecuritySource.PROPERTY_REALM, names[0]);
 	}
 
 	/**
@@ -104,13 +97,11 @@ public class HttpSecuritySourceSpecificationRunnableTest extends
 		this.replayMockObjects();
 
 		// Compiler
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(issues);
 
 		// Ensure not obtain properties
-		PropertyList properties = compiler.run(
-				HttpSecuritySourceSpecificationRunnable.class,
+		PropertyList properties = compiler.run(HttpSecuritySourceSpecificationRunnable.class,
 				MockHttpSecuritySource.class.getName());
 		assertNull("Should not have properties", properties);
 
@@ -122,8 +113,8 @@ public class HttpSecuritySourceSpecificationRunnableTest extends
 	 * Mock {@link HttpSecuritySource} that fails loading specification.
 	 */
 	@TestSource
-	public static class MockHttpSecuritySource implements
-			HttpSecuritySource<HttpSecurity, HttpCredentials, None, None> {
+	public static class MockHttpSecuritySource
+			implements HttpSecuritySource<HttpSecurity, HttpCredentials, None, None> {
 
 		/*
 		 * =============== HttpSecuritySource =================
@@ -135,33 +126,26 @@ public class HttpSecuritySourceSpecificationRunnableTest extends
 		}
 
 		@Override
-		public void init(HttpSecuritySourceContext context) throws Exception {
-			fail("Should not be required for loading specification");
-		}
-
-		@Override
-		public HttpSecuritySourceMetaData<HttpSecurity, HttpCredentials, None, None> getMetaData() {
+		public HttpSecuritySourceMetaData<HttpSecurity, HttpCredentials, None, None> init(
+				HttpSecuritySourceContext context) throws Exception {
 			fail("Should not be required for loading specification");
 			return null;
 		}
 
 		@Override
-		public boolean ratify(
-				HttpRatifyContext<HttpSecurity, HttpCredentials> context) {
+		public boolean ratify(HttpRatifyContext<HttpSecurity, HttpCredentials> context) {
 			fail("Should not be required for loading specification");
 			return false;
 		}
 
 		@Override
-		public void authenticate(
-				HttpAuthenticateContext<HttpSecurity, HttpCredentials, None> context)
+		public void authenticate(HttpAuthenticateContext<HttpSecurity, HttpCredentials, None> context)
 				throws IOException {
 			fail("Should not be required for loading specification");
 		}
 
 		@Override
-		public void challenge(HttpChallengeContext<None, None> context)
-				throws IOException {
+		public void challenge(HttpChallengeContext<None, None> context) throws IOException {
 			fail("Should not be required for loading specification");
 		}
 

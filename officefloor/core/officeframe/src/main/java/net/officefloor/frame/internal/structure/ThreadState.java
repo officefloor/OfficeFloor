@@ -17,11 +17,11 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
+import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
+import net.officefloor.frame.api.team.Job;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * <p>
@@ -32,61 +32,107 @@ import net.officefloor.frame.spi.team.TeamIdentifier;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ThreadState extends FlowAsset, FlowFuture,
-		LinkedListSetEntry<ThreadState, ProcessState> {
+public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessState> {
 
 	/**
-	 * Obtains the lock for this {@link ThreadState}.
+	 * Indicates if this {@link ThreadState} is attached to the current
+	 * {@link Thread}.
 	 * 
-	 * @return Lock for this {@link ThreadState}.
+	 * @return <code>true</cod> if {@link ThreadState} is attached to the
+	 *         current {@link Thread}.
 	 */
-	Object getThreadLock();
+	boolean isAttachedToThread();
 
 	/**
-	 * Obtains the {@link ThreadMetaData} for this {@link ThreadState}.
+	 * Indicates if changes to the {@link ThreadState} are safe on the current
+	 * {@link Thread}.
 	 * 
-	 * @return {@link ThreadMetaData} for this {@link ThreadState}.
+	 * @return <code>true</code> should changes to the {@link ThreadState} be
+	 *         safe on the current {@link Thread}.
 	 */
-	ThreadMetaData getThreadMetaData();
+	boolean isThreadStateSafe();
 
 	/**
-	 * Returning a {@link Throwable} indicates that the thread has failed.
+	 * Creates {@link FunctionState} to execute the chain of the first
+	 * {@link FunctionState} before moving onto execute the chain of the second
+	 * {@link FunctionState}.
 	 * 
-	 * @return {@link Throwable} indicating the thread has failed or
-	 *         <code>null</code> indicating thread still going fine.
+	 * @param function
+	 *            Head of initial {@link FunctionState} chain to complete.
+	 * @param thenFunction
+	 *            Head of the second {@link FunctionState} chain to then
+	 *            complete next.
+	 * @return {@link FunctionState} to execute the chains one after another.
 	 */
-	Throwable getFailure();
+	FunctionState then(FunctionState function, FunctionState thenFunction);
 
 	/**
-	 * Sets the {@link Throwable} cause to indicate that the thread has failed.
+	 * <p>
+	 * Obtains the maximum {@link FunctionState} chain length for this
+	 * {@link ThreadState}.
+	 * <p>
+	 * Once the {@link FunctionState} chain has reached this length, it will be
+	 * broken. (spawned in another {@link Thread}). This avoids
+	 * {@link StackOverflowError} issues in {@link FunctionState} chain being
+	 * too large.
 	 * 
-	 * @param cause
-	 *            Cause of the thread's failure.
+	 * @return Maximum {@link FunctionState} chain length for this
+	 *         {@link ThreadState}.
 	 */
-	void setFailure(Throwable cause);
+	int getMaximumFunctionChainLength();
 
 	/**
-	 * Creates a {@link JobSequence} contained in this {@link ThreadState}.
+	 * Obtains the {@link TeamManagement} to break {@link FunctionState} call
+	 * chains.
 	 * 
-	 * @return New {@link JobSequence}.
+	 * @return {@link TeamManagement} for an active {@link Team}. An active
+	 *         {@link Team} contains {@link Thread} instances that will execute
+	 *         the {@link Job} with a different {@link Thread} stack.
 	 */
-	JobSequence createJobSequence();
+	TeamManagement getBreakChainTeamManagement();
 
 	/**
-	 * Flags that the input {@link JobSequence} has completed.
+	 * Runs the {@link ProcessSafeOperation}.
 	 * 
-	 * @param jobSequence
-	 *            {@link JobSequence} that has completed.
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances
-	 *            waiting on this {@link ThreadState} if all {@link JobSequence}
-	 *            instances of this {@link ThreadState} are complete.
-	 * @param currentTeam
-	 *            {@link TeamIdentifier} of the current {@link Team} completing
-	 *            the {@link JobSequence}.
+	 * @param operation
+	 *            {@link ProcessSafeOperation}.
+	 * @return Optional return value from {@link ProcessSafeOperation}.
+	 * @throws T
+	 *             Optional {@link Throwable} from {@link ProcessSafeOperation}.
 	 */
-	void jobSequenceComplete(JobSequence jobSequence,
-			JobNodeActivateSet activateSet, TeamIdentifier currentTeam);
+	<R, T extends Throwable> R runProcessSafeOperation(ProcessSafeOperation<R, T> operation) throws T;
+
+	/**
+	 * Creates a {@link Flow} contained in this {@link ThreadState}.
+	 * 
+	 * @param completion
+	 *            Optional {@link FlowCompletion} to handle completion of the
+	 *            {@link Flow}. May be <code>null</code>.
+	 * @return New {@link Flow}.
+	 */
+	Flow createFlow(FlowCompletion completion);
+
+	/**
+	 * Handles the {@link Escalation} from a {@link Flow} of this
+	 * {@link ThreadState}.
+	 * 
+	 * @param escalation
+	 *            {@link Escalation}.
+	 * @return {@link FunctionState} to handle the {@link Escalation}.
+	 */
+	FunctionState handleEscalation(Throwable escalation);
+
+	/**
+	 * Flags that the input {@link Flow} has completed.
+	 * 
+	 * @param flow
+	 *            {@link Flow} that has completed.
+	 * @param flowEscalation
+	 *            Possible {@link Escalation} from the {@link Flow}. May be
+	 *            <code>null</code>.
+	 * @return Optional {@link FunctionState} to complete the {@link Flow}.
+	 */
+	FunctionState flowComplete(Flow flow, Throwable flowEscalation);
 
 	/**
 	 * Obtains the {@link ProcessState} of the process containing this
@@ -107,20 +153,6 @@ public interface ThreadState extends FlowAsset, FlowFuture,
 	ManagedObjectContainer getManagedObjectContainer(int index);
 
 	/**
-	 * <p>
-	 * Checks whether the particular {@link Governance} is active.
-	 * <p>
-	 * This enables light weight checking by not having to create the
-	 * {@link GovernanceContainer}.
-	 * 
-	 * @param index
-	 *            Index of the {@link GovernanceContainer} to determine if the
-	 *            {@link Governance} is active.
-	 * @return <code>true</code> if the {@link Governance} is activate.
-	 */
-	boolean isGovernanceActive(int index);
-
-	/**
 	 * Obtains the {@link GovernanceContainer} for the input index.
 	 * 
 	 * @param index
@@ -128,73 +160,36 @@ public interface ThreadState extends FlowAsset, FlowFuture,
 	 * @return {@link GovernanceContainer} for the index only if active. If not
 	 *         active will return <code>null</code>.
 	 */
-	GovernanceContainer<?, ?> getGovernanceContainer(int index);
+	GovernanceContainer<?> getGovernanceContainer(int index);
 
 	/**
-	 * Flags the {@link Governance} has completed.
-	 * 
-	 * @param governanceContainer
-	 *            {@link GovernanceContainer} of the completed
-	 *            {@link Governance}.
-	 */
-	void governanceComplete(GovernanceContainer<?, ?> governanceContainer);
-
-	/**
-	 * Obtains the {@link AdministratorContainer} for the input index.
+	 * <p>
+	 * Indicates if the {@link Governance} is active.
+	 * <p>
+	 * This provides a quick check and avoids creation of the
+	 * {@link GovernanceContainer}.
 	 * 
 	 * @param index
-	 *            Index of the {@link AdministratorContainer} to be returned.
-	 * @return {@link AdministratorContainer} for the index.
+	 *            Index of the {@link Governance} to check active.
+	 * @return <code>true</code> if the {@link Governance} is active.
 	 */
-	AdministratorContainer<?, ?> getAdministratorContainer(int index);
+	boolean isGovernanceActive(int index);
 
 	/**
-	 * <p>
-	 * Flags that escalation is about to happen on this {@link ThreadState}.
-	 * <p>
-	 * This allows the {@link ThreadState} to know not to clean up should all
-	 * its {@link JobSequence} instances be closed and a new one will be created
-	 * for the {@link EscalationFlow}.
+	 * Obtains the {@link FunctionState} to register the {@link ThreadProfiler}.
 	 * 
-	 * @param currentJobNode
-	 *            Current {@link JobNode} being executed.
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet}.
+	 * @return {@link FunctionState} to register the {@link ThreadProfiler}. May
+	 *         be <code>null</code> if no {@link ThreadProfiler} required.
 	 */
-	void escalationStart(JobNode currentJobNode, JobNodeActivateSet activateSet);
+	FunctionState registerThreadProfiler();
 
 	/**
-	 * Flags that escalation has complete on this {@link ThreadState}.
+	 * Profiles that {@link ManagedObjectContainer} is being executed.
 	 * 
-	 * @param currentJobNode
-	 *            Current {@link JobNode} being executed.
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet}.
+	 * @param functionMetaData
+	 *            {@link ManagedFunctionLogicMetaData} of the
+	 *            {@link ManagedFunctionContainer} being executed.
 	 */
-	void escalationComplete(JobNode currentJobNode,
-			JobNodeActivateSet activateSet);
-
-	/**
-	 * Obtains the {@link EscalationLevel} of this {@link ThreadState}.
-	 * 
-	 * @return {@link EscalationLevel} of this {@link ThreadState}.
-	 */
-	EscalationLevel getEscalationLevel();
-
-	/**
-	 * Specifies the {@link EscalationLevel} for this {@link ThreadState}.
-	 * 
-	 * @param escalationLevel
-	 *            {@link EscalationLevel}.
-	 */
-	void setEscalationLevel(EscalationLevel escalationLevel);
-
-	/**
-	 * Profiles that {@link Job} is being executed.
-	 * 
-	 * @param jobMetaData
-	 *            {@link JobMetaData} of the {@link Job} being executed.
-	 */
-	void profile(JobMetaData jobMetaData);
+	void profile(ManagedFunctionLogicMetaData functionMetaData);
 
 }

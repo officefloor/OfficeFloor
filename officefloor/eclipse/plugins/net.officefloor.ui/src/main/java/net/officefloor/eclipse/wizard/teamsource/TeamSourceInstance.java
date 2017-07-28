@@ -39,8 +39,8 @@ import net.officefloor.eclipse.common.dialog.input.impl.PropertyListInput;
 import net.officefloor.eclipse.extension.teamsource.TeamSourceExtension;
 import net.officefloor.eclipse.extension.teamsource.TeamSourceExtensionContext;
 import net.officefloor.eclipse.util.EclipseUtil;
-import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.spi.team.source.TeamSourceProperty;
+import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSourceProperty;
 
 /**
  * {@link TeamSource} instance.

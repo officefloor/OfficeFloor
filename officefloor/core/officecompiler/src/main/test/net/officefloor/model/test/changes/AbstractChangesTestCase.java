@@ -21,21 +21,20 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import junit.framework.TestCase;
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.Model;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.change.Conflict;
-import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
-import net.officefloor.model.repository.ConfigurationItem;
 
 /**
  * Abstract operations {@link TestCase}.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractChangesTestCase<M extends Model, O> extends
-		OfficeFrameTestCase {
+public abstract class AbstractChangesTestCase<M extends Model, O> extends OfficeFrameTestCase {
 
 	/**
 	 * {@link Model} loaded for testing.
@@ -89,8 +88,7 @@ public abstract class AbstractChangesTestCase<M extends Model, O> extends
 	 * @throws Exception
 	 *             If fails to retrieve the {@link Model}.
 	 */
-	protected abstract M retrieveModel(ConfigurationItem configurationItem)
-			throws Exception;
+	protected abstract M retrieveModel(ConfigurationItem configurationItem) throws Exception;
 
 	/**
 	 * Creates the {@link Model} operations.
@@ -135,8 +133,7 @@ public abstract class AbstractChangesTestCase<M extends Model, O> extends
 	 * @return Test name for the setup {@link ConfigurationItem}.
 	 */
 	private String getSetupTestName() {
-		return (this.isSpecificSetupFilePerTest ? this.getName() + "_" : "")
-				+ "setup";
+		return (this.isSpecificSetupFilePerTest ? this.getName() + "_" : "") + "setup";
 	}
 
 	/**
@@ -158,22 +155,18 @@ public abstract class AbstractChangesTestCase<M extends Model, O> extends
 	 *            Expected descriptions for the {@link Conflict} instances on
 	 *            the {@link Change}.
 	 */
-	protected <T> void assertChange(Change<T> change, T expectedTarget,
-			String expectedChangeDescription, boolean expectCanApply,
-			String... expectedConflictDescriptions) {
+	protected <T> void assertChange(Change<T> change, T expectedTarget, String expectedChangeDescription,
+			boolean expectCanApply, String... expectedConflictDescriptions) {
 
 		// Ensure details of change correct
 		if (expectedTarget != null) {
 			assertEquals("Incorrect target", expectedTarget, change.getTarget());
 		}
-		assertEquals("Incorrect change description", expectedChangeDescription,
-				change.getChangeDescription());
+		assertEquals("Incorrect change description", expectedChangeDescription, change.getChangeDescription());
 		Conflict[] conflicts = change.getConflicts();
-		assertEquals("Incorrect number of conflicts",
-				expectedConflictDescriptions.length, conflicts.length);
+		assertEquals("Incorrect number of conflicts", expectedConflictDescriptions.length, conflicts.length);
 		for (int i = 0; i < expectedConflictDescriptions.length; i++) {
-			assertEquals("Incorrect description for conflict " + i,
-					expectedConflictDescriptions[i],
+			assertEquals("Incorrect description for conflict " + i, expectedConflictDescriptions[i],
 					conflicts[i].getConflictDescription());
 		}
 
@@ -289,8 +282,7 @@ public abstract class AbstractChangesTestCase<M extends Model, O> extends
 	protected void assertModels(M expected, M actual) throws Exception {
 
 		// Ensure the models are the same
-		assertGraph(expected, actual,
-				RemoveConnectionsAction.REMOVE_CONNECTIONS_METHOD_NAME);
+		assertGraph(expected, actual, RemoveConnectionsAction.REMOVE_CONNECTIONS_METHOD_NAME);
 	}
 
 	/**
@@ -307,23 +299,18 @@ public abstract class AbstractChangesTestCase<M extends Model, O> extends
 
 		// Move the 'Test' to start of test case name
 		String testCasePath = this.getClass().getSimpleName();
-		testCasePath = this.getClass().getPackage().getName().replace('.', '/')
-				+ "/Test"
-				+ testCasePath.substring(0,
-						(testCasePath.length() - "Test".length()));
+		testCasePath = this.getClass().getPackage().getName().replace('.', '/') + "/Test"
+				+ testCasePath.substring(0, (testCasePath.length() - "Test".length()));
 
 		// Construct the path to the model
 		String testPath = testCasePath.replace('.', '/') + "/" + testName;
-		String modelPath = testPath + (specific == null ? "" : "/" + specific)
-				+ this.getModelFileExtension();
+		String modelPath = testPath + (specific == null ? "" : "/" + specific) + this.getModelFileExtension();
 
 		try {
 			// Obtain the configuration item to the model
-			ConfigurationItem item = new ClassLoaderConfigurationContext(this
-					.getClass().getClassLoader())
-					.getConfigurationItem(modelPath);
-			assertNotNull("Can not find model configuration: " + modelPath,
-					item);
+			ConfigurationItem item = new ClassLoaderConfigurationContext(this.getClass().getClassLoader(), null)
+					.getConfigurationItem(modelPath, null);
+			assertNotNull("Can not find model configuration: " + modelPath, item);
 
 			// Return the retrieved model
 			return this.retrieveModel(item);
@@ -332,8 +319,7 @@ public abstract class AbstractChangesTestCase<M extends Model, O> extends
 			// Fail on failure (stops have to throw exception in tests)
 			StringWriter msg = new StringWriter();
 			ex.printStackTrace(new PrintWriter(msg));
-			fail("Failed to retrieveModel: " + modelPath + "\n"
-					+ msg.toString());
+			fail("Failed to retrieveModel: " + modelPath + "\n" + msg.toString());
 			return null; // fail will throw
 		}
 	}

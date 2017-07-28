@@ -18,7 +18,7 @@
 package net.officefloor.compile.impl.managedobject;
 
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * {@link ManagedObjectTeamType} implementation.

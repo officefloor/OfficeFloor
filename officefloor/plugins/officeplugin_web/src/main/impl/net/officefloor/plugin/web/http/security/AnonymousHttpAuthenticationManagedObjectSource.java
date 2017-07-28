@@ -20,8 +20,8 @@ package net.officefloor.plugin.web.http.security;
 import java.io.IOException;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
  * <p>
@@ -35,9 +35,8 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
  * 
  * @author Daniel Sagenschneider
  */
-public class AnonymousHttpAuthenticationManagedObjectSource<S, C> extends
-		AbstractManagedObjectSource<None, None> implements ManagedObject,
-		HttpAuthentication<S, C> {
+public class AnonymousHttpAuthenticationManagedObjectSource<S, C> extends AbstractManagedObjectSource<None, None>
+		implements ManagedObject, HttpAuthentication<S, C> {
 
 	/*
 	 * ================== ManagedObjectSource =========================
@@ -49,8 +48,7 @@ public class AnonymousHttpAuthenticationManagedObjectSource<S, C> extends
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<None, None> context)
-			throws Exception {
+	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
 		context.setObjectClass(HttpAuthentication.class);
 	}
 

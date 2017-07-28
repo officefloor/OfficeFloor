@@ -17,9 +17,9 @@
  */
 package net.officefloor.frame.api.build;
 
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * <p>
@@ -36,7 +36,7 @@ public interface DependencyMappingBuilder {
 	/**
 	 * Specifies the {@link ManagedObject} for the dependency key.
 	 * 
-	 * @param <D>
+	 * @param <O>
 	 *            Dependency key type.
 	 * @param key
 	 *            Key of the dependency.
@@ -44,7 +44,7 @@ public interface DependencyMappingBuilder {
 	 *            Name of the {@link ManagedObject} within the scope that this
 	 *            {@link DependencyMappingBuilder} was created.
 	 */
-	<D extends Enum<D>> void mapDependency(D key, String scopeManagedObjectName);
+	<O extends Enum<O>> void mapDependency(O key, String scopeManagedObjectName);
 
 	/**
 	 * Specifies the {@link ManagedObject} for the index identifying the

@@ -27,7 +27,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
+import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
@@ -153,8 +153,7 @@ public class HttpResponseImpl implements HttpResponse {
 	 * @param httpVersion
 	 *            HTTP version.
 	 */
-	public HttpResponseImpl(HttpConversationImpl conversation,
-			Connection connection, String httpVersion) {
+	public HttpResponseImpl(HttpConversationImpl conversation, Connection connection, String httpVersion) {
 		this.conversation = conversation;
 		this.connection = connection;
 
@@ -163,8 +162,7 @@ public class HttpResponseImpl implements HttpResponse {
 		this.status = HttpStatus.SC_OK;
 		this.statusMessage = HttpStatus.getStatusMessage(this.status);
 		this.charset = this.conversation.getDefaultCharset();
-		this.entity = new ServerOutputStreamImpl(this.receiver,
-				this.conversation.getSendBufferSize());
+		this.entity = new ServerOutputStreamImpl(this.receiver, this.conversation.getSendBufferSize());
 	}
 
 	/**
@@ -179,13 +177,12 @@ public class HttpResponseImpl implements HttpResponse {
 	 * @param momento
 	 *            Momento containing the state for this {@link HttpResponse}.
 	 */
-	public HttpResponseImpl(HttpConversationImpl conversation,
-			Connection connection, String httpVersion, Serializable momento) {
+	public HttpResponseImpl(HttpConversationImpl conversation, Connection connection, String httpVersion,
+			Serializable momento) {
 
 		// Ensure valid momento
 		if (!(momento instanceof StateMomento)) {
-			throw new IllegalArgumentException("Invalid momento for "
-					+ HttpResponse.class.getSimpleName());
+			throw new IllegalArgumentException("Invalid momento for " + HttpResponse.class.getSimpleName());
 		}
 		StateMomento state = (StateMomento) momento;
 
@@ -198,8 +195,8 @@ public class HttpResponseImpl implements HttpResponse {
 		this.headers.addAll(state.headers);
 		this.contentType = state.contentType;
 		this.charset = Charset.forName(state.charset);
-		this.entity = new ServerOutputStreamImpl(this.receiver,
-				this.conversation.getSendBufferSize(), state.entityState);
+		this.entity = new ServerOutputStreamImpl(this.receiver, this.conversation.getSendBufferSize(),
+				state.entityState);
 		this.isOutputStream = state.isOutputStream;
 		if (state.isEntityWriter) {
 			this.loadEntityWriterThreadUnsafe();
@@ -227,20 +224,16 @@ public class HttpResponseImpl implements HttpResponse {
 	 */
 	Serializable exportState() throws DataWrittenException, IOException {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Prepare state for momento
-			List<HttpHeader> httpHeaders = new ArrayList<HttpHeader>(
-					this.headers);
+			List<HttpHeader> httpHeaders = new ArrayList<HttpHeader>(this.headers);
 			String charsetSerializeName = this.charset.name();
-			Serializable entityMomento = this.entity
-					.exportState(this.entityWriter);
+			Serializable entityMomento = this.entity.exportState(this.entityWriter);
 
 			// Create and return the state momento
-			return new StateMomento(this.status, this.statusMessage,
-					httpHeaders, entityMomento, this.contentType,
-					charsetSerializeName, this.isOutputStream,
-					(this.entityWriter != null));
+			return new StateMomento(this.status, this.statusMessage, httpHeaders, entityMomento, this.contentType,
+					charsetSerializeName, this.isOutputStream, (this.entityWriter != null));
 		}
 	}
 
@@ -268,7 +261,7 @@ public class HttpResponseImpl implements HttpResponse {
 	void sendFailure(Throwable failure) throws IOException {
 
 		// Lock as called from Escalation Handler
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Clear the response to write the failure
 			this.resetUnsafe();
@@ -288,8 +281,7 @@ public class HttpResponseImpl implements HttpResponse {
 
 			// Write the failure response
 			ServerWriter writer = this.getEntityWriter();
-			String failMessage = failure.getClass().getSimpleName() + ": "
-					+ failure.getMessage();
+			String failMessage = failure.getClass().getSimpleName() + ": " + failure.getMessage();
 			writer.write(failMessage);
 			if (this.conversation.isSendStackTraceOnFailure()) {
 				// Provide the stack trace
@@ -308,18 +300,22 @@ public class HttpResponseImpl implements HttpResponse {
 	}
 
 	/**
-	 * Flags failure in processing the {@link HttpRequest}.
+	 * Handles possible {@link CleanupEscalation} instances.
 	 * 
 	 * @param cleanupEscalations
 	 *            {@link CleanupEscalation} instances.
 	 * @throws IOException
 	 *             If fails to send the failure response.
 	 */
-	void sendCleanupEscalations(CleanupEscalation[] cleanupEscalations)
-			throws IOException {
+	void handleCleanupEscalations(CleanupEscalation[] cleanupEscalations) throws IOException {
+
+		// Determine if clean up escalations
+		if ((cleanupEscalations == null) || (cleanupEscalations.length == 0)) {
+			return; // no clean up escalations
+		}
 
 		// Lock as called from process completion handler
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Clear the response to write the failure
 			this.resetUnsafe();
@@ -332,22 +328,27 @@ public class HttpResponseImpl implements HttpResponse {
 
 			// Write the failure response
 			ServerWriter writer = this.getEntityWriter();
+			boolean isFirst = true;
 			for (CleanupEscalation cleanupEscalation : cleanupEscalations) {
 				Throwable escalation = cleanupEscalation.getEscalation();
-				
+
+				// Provide separator
+				if (!isFirst) {
+					writer.write("\n");
+				}
+				isFirst = false;
+
 				// Write the escalation details to the response
-				String failMessage = "Cleanup of object type "
-						+ cleanupEscalation.getObjectType().getName() + ": "
-						+ escalation.getMessage() + " ("
-						+ escalation.getClass().getSimpleName() + ")\n";
+				String failMessage = "Cleanup of object type " + cleanupEscalation.getObjectType().getName() + ": "
+						+ escalation.getMessage() + " (" + escalation.getClass().getSimpleName() + ")";
 				writer.write(failMessage);
 				if (this.conversation.isSendStackTraceOnFailure()) {
 					// Provide the stack trace
-					writer.write("\n");
+					writer.write("\n\n");
 					PrintWriter stackTraceWriter = new PrintWriter(writer);
 					escalation.printStackTrace(stackTraceWriter);
 					stackTraceWriter.flush();
-					writer.write("\n\n\n");
+					writer.write("\n\n");
 				}
 			}
 
@@ -370,39 +371,31 @@ public class HttpResponseImpl implements HttpResponse {
 	private void writeHeader(long contentLength) throws IOException {
 
 		// Create output stream to write header
-		ServerOutputStream header = new ServerOutputStreamImpl(this.receiver,
-				this.conversation.getSendBufferSize());
+		ServerOutputStream header = new ServerOutputStreamImpl(this.receiver, this.conversation.getSendBufferSize());
 
 		// Ensure appropriate successful status for no content
 		if ((contentLength == 0) && (this.status == HttpStatus.SC_OK)) {
 			this.setStatus(HttpStatus.SC_NO_CONTENT);
 		}
-		
+
 		// Write the status line
-		writeUsAscii(this.version + " " + String.valueOf(this.status) + " "
-				+ this.statusMessage + EOL, header);
+		writeUsAscii(this.version + " " + String.valueOf(this.status) + " " + this.statusMessage + EOL, header);
 
 		// Write the managed headers
-		writeUsAscii(
-				HEADER_NAME_SERVER + ": " + this.conversation.getServerName()
-						+ EOL, header);
-		writeUsAscii(HEADER_NAME_DATE + ": "
-				+ this.conversation.getHttpServerClock().getDateHeaderValue()
-				+ EOL, header);
+		writeUsAscii(HEADER_NAME_SERVER + ": " + this.conversation.getServerName() + EOL, header);
+		writeUsAscii(HEADER_NAME_DATE + ": " + this.conversation.getHttpServerClock().getDateHeaderValue() + EOL,
+				header);
 		String contentType = this.getContentTypeThreadUnsafe();
 		if (contentType != null) {
-			writeUsAscii(HEADER_NAME_CONTENT_TYPE + ": " + contentType + EOL,
-					header);
+			writeUsAscii(HEADER_NAME_CONTENT_TYPE + ": " + contentType + EOL, header);
 		}
-		writeUsAscii(HEADER_NAME_CONTENT_LENGTH + ": " + contentLength + EOL,
-				header);
+		writeUsAscii(HEADER_NAME_CONTENT_LENGTH + ": " + contentLength + EOL, header);
 
 		// Write the unmanaged headers
 		for (HttpHeader httpHeader : this.headers) {
 			String name = httpHeader.getName();
 			String value = httpHeader.getValue();
-			writeUsAscii(name + ": " + (value == null ? "" : value) + EOL,
-					header);
+			writeUsAscii(name + ": " + (value == null ? "" : value) + EOL, header);
 		}
 		writeUsAscii(EOL, header);
 
@@ -420,8 +413,7 @@ public class HttpResponseImpl implements HttpResponse {
 	 * @throws IOException
 	 *             If fails to write the value.
 	 */
-	private static void writeUsAscii(String value,
-			ServerOutputStream outputStream) throws IOException {
+	private static void writeUsAscii(String value, ServerOutputStream outputStream) throws IOException {
 		outputStream.write(value.getBytes(HttpRequestParserImpl.US_ASCII));
 	}
 
@@ -450,7 +442,7 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public void setVersion(String version) {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Specify the version
 			this.version = version;
@@ -460,7 +452,7 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public String getVersion() {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Return the version
 			return this.version;
@@ -480,7 +472,7 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public int getStatus() {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Return the current status
 			return this.status;
@@ -490,7 +482,7 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public void setStatus(int status, String statusMessage) {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Specify the status
 			this.status = status;
@@ -501,7 +493,7 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public String getStatusMessage() {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Return the current status message
 			return this.statusMessage;
@@ -511,7 +503,7 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public void reset() throws IOException {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Reset the response
 			this.resetUnsafe();
@@ -522,20 +514,18 @@ public class HttpResponseImpl implements HttpResponse {
 	public HttpHeader addHeader(String name, String value) {
 
 		// Ignore specifying managed headers
-		if (HEADER_NAME_SERVER.equalsIgnoreCase(name)
-				|| HEADER_NAME_DATE.equalsIgnoreCase(name)
+		if (HEADER_NAME_SERVER.equalsIgnoreCase(name) || HEADER_NAME_DATE.equalsIgnoreCase(name)
 				|| HEADER_NAME_CONTENT_TYPE.equalsIgnoreCase(name)
 				|| HEADER_NAME_CONTENT_LENGTH.equalsIgnoreCase(name)) {
-			throw new IllegalArgumentException(HttpHeader.class.getSimpleName()
-					+ " '" + name + "' can not be set, as is managed by the "
-					+ HttpResponse.class.getSimpleName());
+			throw new IllegalArgumentException(HttpHeader.class.getSimpleName() + " '" + name
+					+ "' can not be set, as is managed by the " + HttpResponse.class.getSimpleName());
 		}
 
 		// Create the HTTP header
 		HttpHeader header = new HttpHeaderImpl(name, value);
 
 		// Add the header
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 			this.headers.add(header);
 		}
 
@@ -546,7 +536,7 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public HttpHeader getHeader(String name) {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Search for the first header by the name
 			for (HttpHeader header : this.headers) {
@@ -564,23 +554,17 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public HttpHeader[] getHeaders() {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
-			// Create the array of headers
-			HttpHeader[] headers;
-			synchronized (this.connection.getLock()) {
-				headers = this.headers.toArray(new HttpHeader[0]);
-			}
-
-			// Return the headers
-			return headers;
+			// Create and return the array of headers
+			return this.headers.toArray(new HttpHeader[0]);
 		}
 	}
 
 	@Override
 	public void removeHeader(HttpHeader header) {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Remove the header
 			this.headers.remove(header);
@@ -590,11 +574,10 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public void removeHeaders(String name) {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Remove all headers by name
-			for (Iterator<HttpHeader> iterator = this.headers.iterator(); iterator
-					.hasNext();) {
+			for (Iterator<HttpHeader> iterator = this.headers.iterator(); iterator.hasNext();) {
 				HttpHeader header = iterator.next();
 				if (name.equalsIgnoreCase(header.getName())) {
 					// Remove the header
@@ -607,12 +590,11 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public ServerOutputStream getEntity() throws IOException {
 
-		synchronized (this.receiver.getLock()) {
+		synchronized (this.receiver.getWriteLock()) {
 
 			// Ensure not using writer
 			if (this.entityWriter != null) {
-				throw new IOException(
-						"getEntityWriter() has already been invoked");
+				throw new IOException("getEntityWriter() has already been invoked");
 			}
 
 			// Flag using the output stream
@@ -624,30 +606,27 @@ public class HttpResponseImpl implements HttpResponse {
 	}
 
 	@Override
-	public void setContentType(String contentType, Charset charset)
-			throws IOException {
+	public void setContentType(String contentType, Charset charset) throws IOException {
 
-		synchronized (this.receiver.getLock()) {
+		synchronized (this.receiver.getWriteLock()) {
 
 			// Ensure not using entity writer
 			if (this.entityWriter != null) {
-				throw new IOException(
-						"getEntityWriter() has already been invoked");
+				throw new IOException("getEntityWriter() has already been invoked");
 			}
 
 			// Specify the content type
 			this.contentType = contentType;
 
 			// Specify the charset (or use default if none provided)
-			this.charset = (charset == null ? this.conversation
-					.getDefaultCharset() : charset);
+			this.charset = (charset == null ? this.conversation.getDefaultCharset() : charset);
 		}
 	}
 
 	@Override
 	public String getContentType() {
 
-		synchronized (this.receiver.getLock()) {
+		synchronized (this.receiver.getWriteLock()) {
 
 			// Return the content type
 			return this.getContentTypeThreadUnsafe();
@@ -657,7 +636,7 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public Charset getContentCharset() {
 
-		synchronized (this.receiver.getLock()) {
+		synchronized (this.receiver.getWriteLock()) {
 
 			// Return the charset
 			return this.charset;
@@ -678,15 +657,13 @@ public class HttpResponseImpl implements HttpResponse {
 		}
 
 		// Provide the content type (appending charset if using writer)
-		return this.contentType
-				+ (this.entityWriter != null ? "; charset="
-						+ this.charset.name() : "");
+		return this.contentType + (this.entityWriter != null ? "; charset=" + this.charset.name() : "");
 	}
 
 	@Override
 	public ServerWriter getEntityWriter() throws IOException {
 
-		synchronized (this.receiver.getLock()) {
+		synchronized (this.receiver.getWriteLock()) {
 
 			// Ensure not using output stream
 			if (this.isOutputStream) {
@@ -712,14 +689,13 @@ public class HttpResponseImpl implements HttpResponse {
 	 * Loads the {@link ServerWriter}.
 	 */
 	private void loadEntityWriterThreadUnsafe() {
-		this.entityWriter = new ServerWriter(this.entity, this.charset,
-				this.receiver.getLock());
+		this.entityWriter = new ServerWriter(this.entity, this.charset, this.receiver.getWriteLock());
 	}
 
 	@Override
 	public void send() throws IOException {
 
-		synchronized (this.receiver.getLock()) {
+		synchronized (this.receiver.getWriteLock()) {
 
 			// Close the entity which triggers sending response
 			if (this.entityWriter != null) {
@@ -733,8 +709,7 @@ public class HttpResponseImpl implements HttpResponse {
 	/**
 	 * {@link HttpResponse} {@link WriteBufferReceiver}.
 	 */
-	private class HttpResponseWriteBufferReceiver implements
-			WriteBufferReceiver {
+	private class HttpResponseWriteBufferReceiver implements WriteBufferReceiver {
 
 		/**
 		 * HTTP header {@link WriteBuffer} instances.
@@ -767,8 +742,7 @@ public class HttpResponseImpl implements HttpResponse {
 			}
 
 			// Write the data for the response
-			WriteBuffer[] responseData = new WriteBuffer[this.headerBuffers.length
-					+ this.entityBuffers.size()];
+			WriteBuffer[] responseData = new WriteBuffer[this.headerBuffers.length + this.entityBuffers.size()];
 			int index = 0;
 			for (WriteBuffer buffer : this.headerBuffers) {
 				responseData[index++] = buffer;
@@ -791,14 +765,13 @@ public class HttpResponseImpl implements HttpResponse {
 		 */
 
 		@Override
-		public Object getLock() {
-			return HttpResponseImpl.this.connection.getLock();
+		public Object getWriteLock() {
+			return HttpResponseImpl.this.connection.getWriteLock();
 		}
 
 		@Override
 		public WriteBuffer createWriteBuffer(byte[] data, int length) {
-			return HttpResponseImpl.this.connection.createWriteBuffer(data,
-					length);
+			return HttpResponseImpl.this.connection.createWriteBuffer(data, length);
 		}
 
 		@Override
@@ -840,9 +813,7 @@ public class HttpResponseImpl implements HttpResponse {
 					break;
 
 				default:
-					throw new IllegalStateException("Unknown "
-							+ WriteBuffer.class.getSimpleName() + " type: "
-							+ type);
+					throw new IllegalStateException("Unknown " + WriteBuffer.class.getSimpleName() + " type: " + type);
 				}
 			}
 
@@ -928,10 +899,8 @@ public class HttpResponseImpl implements HttpResponse {
 		 * @param isEntityWriter
 		 *            Indicates if a {@link ServerWriter}.
 		 */
-		public StateMomento(int status, String statusMessage,
-				List<HttpHeader> headers, Serializable entityState,
-				String contentType, String charset, boolean isOutputStream,
-				boolean isEntityWriter) {
+		public StateMomento(int status, String statusMessage, List<HttpHeader> headers, Serializable entityState,
+				String contentType, String charset, boolean isOutputStream, boolean isEntityWriter) {
 			this.status = status;
 			this.statusMessage = statusMessage;
 			this.headers = headers;

@@ -21,7 +21,7 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
 
 import net.officefloor.compile.section.TypeQualification;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link TypeQualification} of a {@link ManagedObjectSource}.

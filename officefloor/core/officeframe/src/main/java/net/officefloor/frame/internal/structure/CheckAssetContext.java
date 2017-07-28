@@ -31,40 +31,39 @@ public interface CheckAssetContext {
 	 * As many {@link Asset} instances may be checked at the same time (or
 	 * nanoseconds from each other) this provides optimisation to obtain the
 	 * current time in milliseconds (equivalent to
-	 * {@link System#currentTimeMillis()}).
+	 * {@link System#currentTimeMillis()} for purpose of checking {@link Asset}
+	 * timeouts).
 	 * 
-	 * @return Time of check.
+	 * @return {@link System#currentTimeMillis()} equivalent for checking
+	 *         {@link Asset} timeouts.
 	 */
 	long getTime();
 
 	/**
-	 * Activates all {@link JobNode} instances waiting on the {@link Asset}.
-	 * 
+	 * Releases the {@link FunctionState} instances waiting on the {@link Asset}.
 	 * 
 	 * @param isPermanent
-	 *            <code>true</code> indicates that all {@link JobNode} instances
-	 *            added to the {@link AssetMonitor} from now on are activated
-	 *            immediately. It is useful to flag an {@link AssetMonitor} in
+	 *            <code>true</code> indicates that all {@link FunctionState} instances
+	 *            added to the {@link AssetLatch} from now on are activated
+	 *            immediately. It is useful to flag an {@link AssetLatch} in
 	 *            this state when the {@link Asset} is no longer being used to
-	 *            stop a {@link JobNode} from waiting forever.
+	 *            stop a {@link FunctionState} from waiting forever.
 	 */
-	void activateJobNodes(boolean isPermanent);
+	void releaseFunctions(boolean isPermanent);
 
 	/**
-	 * Activates all {@link JobNode} instances waiting on the {@link Asset}
-	 * providing the {@link ThreadState} of the {@link JobNode} with input
-	 * failure.
+	 * Fails the {@link FunctionState} instances waiting on this {@link Asset}.
 	 * 
 	 * @param failure
 	 *            Failure to propagate to the {@link ThreadState} of the
-	 *            {@link JobNode} instances waiting on the {@link AssetMonitor}.
+	 *            {@link FunctionState} instances waiting on the {@link Asset}.
 	 * @param isPermanent
-	 *            <code>true</code> indicates that all {@link JobNode} instances
-	 *            added to the {@link AssetMonitor} from now on are activated
+	 *            <code>true</code> indicates that all {@link FunctionState} instances
+	 *            added to the {@link AssetLatch} from now on are activated
 	 *            immediately with the input failure. It is useful to flag an
-	 *            {@link AssetMonitor} in this state when the {@link Asset} is
-	 *            in a failed state that can not be recovered from.
+	 *            {@link AssetLatch} in this state when the {@link Asset} is in
+	 *            a failed state that can not be recovered from.
 	 */
-	void failJobNodes(Throwable failure, boolean isPermanent);
+	void failFunctions(Throwable failure, boolean isPermanent);
 
 }

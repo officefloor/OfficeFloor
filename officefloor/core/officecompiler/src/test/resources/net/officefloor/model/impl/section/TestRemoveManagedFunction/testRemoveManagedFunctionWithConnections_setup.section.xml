@@ -1,0 +1,55 @@
+<section>
+	<external-managed-objects>
+		<external-managed-object name="MO"
+			object-type="java.lang.Object" />
+	</external-managed-objects>
+	<external-flows>
+		<external-flow name="FLOW" argument-type="java.lang.String" />
+	</external-flows>
+	<function-namespaces>
+		<function-namespace name="NAMESPACE"
+			source="net.example.ExampleManagedFunctionSource">
+			<managed-function name="MANAGED_FUNCTION_A">
+				<managed-function-object name="OBJECT"
+					object-type="java.lang.Object">
+					<external-managed-object name="MO" />
+				</managed-function-object>
+			</managed-function>
+			<managed-function name="MANAGED_FUNCTION_B" />
+		</function-namespace>
+	</function-namespaces>
+	<functions>
+		<function name="FUNCTION_A" function-namespace="NAMESPACE"
+			managed-function="MANAGED_FUNCTION_A" return-type="java.lang.Integer">
+			<function-flow name="FLOW_TO_FUNCTION" argument-type="java.lang.Double">
+				<function name="FUNCTION_C" />
+			</function-flow>
+			<function-flow name="FLOW_TO_EXT_FLOW" argument-type="java.lang.String">
+				<external-flow name="FLOW" />
+			</function-flow>
+			<next-function name="FUNCTION_C" />
+			<function-escalation escalation-type="java.lang.Exception">
+				<function name="FUNCTION_C" />
+			</function-escalation>
+			<function-escalation escalation-type="java.lang.Error">
+				<external-flow name="FLOW" />
+			</function-escalation>
+		</function>
+		<function name="FUNCTION_B" function-namespace="NAMESPACE"
+			managed-function="MANAGED_FUNCTION_A" return-type="java.lang.String">
+			<next-external-flow name="FLOW" />
+			<!-- not including flows and escalations as testing next external flow, 
+				however as same managed function should have them -->
+		</function>
+		<function name="FUNCTION_C" function-namespace="NAMESPACE"
+			managed-function="MANAGED_FUNCTION_B">
+			<function-flow name="FLOW" argument-type="java.lang.Object">
+				<function name="FUNCTION_A" />
+			</function-flow>
+			<next-function name="FUNCTION_A" />
+			<function-escalation escalation-type="java.lang.Exception">
+				<function name="FUNCTION_B" />
+			</function-escalation>
+		</function>
+	</functions>
+</section>

@@ -23,14 +23,14 @@ import java.util.Map;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
-import net.officefloor.frame.spi.TestSource;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceSpecification;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
+import net.officefloor.frame.api.source.TestSource;
 
 /**
  * Mock implementation of the {@link ManagedObjectSource} for testing.
@@ -67,14 +67,12 @@ public class MockManagedObjectSource implements ManagedObjectSource<None, None> 
 	 * @return {@link ManagedObjectBuilder} for additional configuration.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <F extends Enum<F>> ManagedObjectBuilder<F> bindManagedObject(
-			String name, ManagedObject managedObject,
-			ManagedObjectSourceMetaData<?, F> sourceMetaData,
+	public static <F extends Enum<F>> ManagedObjectBuilder<F> bindManagedObject(String name,
+			ManagedObject managedObject, ManagedObjectSourceMetaData<?, F> sourceMetaData,
 			OfficeFloorBuilder officeFloorBuilder) {
 
 		// Create the Managed Object Builder
-		ManagedObjectBuilder<None> builder = officeFloorBuilder
-				.addManagedObject(name, MockManagedObjectSource.class);
+		ManagedObjectBuilder<None> builder = officeFloorBuilder.addManagedObject(name, MockManagedObjectSource.class);
 
 		// Provide managed object link to meta-data
 		builder.addProperty(MANAGED_OBJECT_PROPERTY, name);
@@ -108,37 +106,31 @@ public class MockManagedObjectSource implements ManagedObjectSource<None, None> 
 
 	@Override
 	public ManagedObjectSourceSpecification getSpecification() {
-		throw new UnsupportedOperationException(
-				"Not supported by mock implementation");
+		throw new UnsupportedOperationException("Not supported by mock implementation");
 	}
 
 	@Override
-	@SuppressWarnings("rawtypes")
-	public void init(ManagedObjectSourceContext context) throws Exception {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public ManagedObjectSourceMetaData<None, None> init(ManagedObjectSourceContext context) throws Exception {
 
 		// Obtain the name of the Managed Object
-		String name = context.getProperties().getProperty(
-				MANAGED_OBJECT_PROPERTY);
+		String name = context.getProperties().getProperty(MANAGED_OBJECT_PROPERTY);
 
 		// Ensure have Managed Object
 		if (name == null) {
-			throw new Exception("Property '" + MANAGED_OBJECT_PROPERTY
-					+ "' must be specified - likely that not bound.");
+			throw new Exception(
+					"Property '" + MANAGED_OBJECT_PROPERTY + "' must be specified - likely that not bound.");
 		}
 
 		// Obtain the Managed Object Source State
 		this.managedObjectSourceState = REGISTRY.get(name);
-	}
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public ManagedObjectSourceMetaData<None, None> getMetaData() {
+		// Obtain the managed object source meta-data
 		return this.managedObjectSourceState.managedObjectSourceMetaData;
 	}
 
 	@Override
-	public void start(ManagedObjectExecuteContext<None> context)
-			throws Exception {
+	public void start(ManagedObjectExecuteContext<None> context) throws Exception {
 		// Mock not require starting
 	}
 

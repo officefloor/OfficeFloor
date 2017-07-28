@@ -18,10 +18,21 @@
 package net.officefloor.eclipse.woof;
 
 import java.io.File;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.gef.EditPart;
+import org.eclipse.gef.EditPolicy;
+import org.eclipse.gef.requests.CreateConnectionRequest;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorPart;
+
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
@@ -31,7 +42,7 @@ import net.officefloor.eclipse.common.editpolicies.layout.ChildEditPolicyFactory
 import net.officefloor.eclipse.common.editpolicies.layout.ConstraintChangeFactory;
 import net.officefloor.eclipse.common.editpolicies.layout.DeleteChangeFactory;
 import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
-import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
+import net.officefloor.eclipse.configuration.project.ProjectConfigurationContext;
 import net.officefloor.eclipse.woof.editparts.WoofAccessEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofAccessInputEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofAccessOutputEditPart;
@@ -83,11 +94,10 @@ import net.officefloor.eclipse.woof.operations.RefactorGovernanceOperation;
 import net.officefloor.eclipse.woof.operations.RefactorResourceOperation;
 import net.officefloor.eclipse.woof.operations.RefactorSectionOperation;
 import net.officefloor.eclipse.woof.operations.RefactorTemplateOperation;
-import net.officefloor.eclipse.woof.operations.SetAccessOperation;
-import net.officefloor.frame.spi.source.ResourceSource;
+import net.officefloor.eclipse.woof.operations.AddAccessOperation;
+import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
-import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.woof.WoofAccessInputModel;
 import net.officefloor.model.woof.WoofAccessModel;
 import net.officefloor.model.woof.WoofAccessOutputModel;
@@ -124,26 +134,14 @@ import net.officefloor.model.woof.WoofTemplateOutputToWoofAccessInputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofResourceModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofTemplateModel;
-import net.officefloor.plugin.woof.WoofContextConfigurable;
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
-
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.gef.EditPart;
-import org.eclipse.gef.EditPolicy;
-import org.eclipse.gef.requests.CreateConnectionRequest;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IEditorPart;
+import net.officefloor.plugin.woof.WoofLoaderExtensionService;
 
 /**
  * Editor for the {@link WoofModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofEditor extends
-		AbstractOfficeFloorEditor<WoofModel, WoofChanges> {
+public class WoofEditor extends AbstractOfficeFloorEditor<WoofModel, WoofChanges> {
 
 	/**
 	 * ID for this {@link IEditorPart}.
@@ -157,32 +155,12 @@ public class WoofEditor extends
 	 */
 	public WoofTemplateChangeContext getWoofTemplateChangeContext() {
 
-		// Create the configuration context
-		ProjectConfigurationContext configurationContext = new ProjectConfigurationContext(
-				WoofEditor.this.getEditorInput());
+		// Obtain the location of the project
+		ProjectConfigurationContext configurationContext = new ProjectConfigurationContext(this.getEditorInput());
+		File projectDir = configurationContext.getProject().getLocation().toFile();
 
-		// Obtain the resource context
-		final List<ResourceSource> resourceSources = new LinkedList<ResourceSource>();
-		WoofContextConfigurable configurable = new WoofContextConfigurable() {
-			@Override
-			public void addProperty(String name, String value) {
-				// No properties required
-			}
-
-			@Override
-			public void setWebAppDirectory(File webAppDir) {
-				// Not required
-			}
-
-			@Override
-			public void addResources(ResourceSource resourceSource) {
-				resourceSources.add(resourceSource);
-			}
-		};
-		File projectDir = configurationContext.getProject().getLocation()
-				.toFile();
-		WoofOfficeFloorSource.loadWebResourcesFromMavenProject(configurable,
-				projectDir);
+		// Obtain the resource sources
+		ResourceSource[] resourceSources = WoofLoaderExtensionService.createResourceSources(projectDir);
 
 		// Create the WoOF change issues
 		WoofChangeIssues issues = new WoofChangeIssues() {
@@ -194,12 +172,10 @@ public class WoofEditor extends
 				Shell shell = WoofEditor.this.getSite().getShell();
 
 				// Create the status
-				IStatus status = new Status(IStatus.ERROR,
-						WoofPlugin.PLUGIN_ID, message, cause);
+				IStatus status = new Status(IStatus.ERROR, WoofPlugin.PLUGIN_ID, message, cause);
 
 				// Display the error
-				ErrorDialog dialog = new ErrorDialog(shell, "Error", message,
-						status, IStatus.ERROR);
+				ErrorDialog dialog = new ErrorDialog(shell, "Error", message, status, IStatus.ERROR);
 				dialog.open();
 			}
 
@@ -210,12 +186,9 @@ public class WoofEditor extends
 		};
 
 		// Create the change context
-		ClassLoader classLoader = Thread.currentThread()
-				.getContextClassLoader();
-		WoofTemplateChangeContext context = new WoofTemplateChangeContextImpl(
-				true, classLoader, configurationContext, issues,
-				resourceSources.toArray(new ResourceSource[resourceSources
-						.size()]));
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		WoofTemplateChangeContext context = new WoofTemplateChangeContextImpl(true, classLoader, configurationContext,
+				issues, resourceSources);
 
 		// Return the change context
 		return context;
@@ -232,22 +205,19 @@ public class WoofEditor extends
 	}
 
 	@Override
-	protected WoofModel retrieveModel(ConfigurationItem configuration)
-			throws Exception {
-		return new WoofRepositoryImpl(new ModelRepositoryImpl())
-				.retrieveWoOF(configuration);
+	protected WoofModel retrieveModel(ConfigurationItem configuration) throws Exception {
+		WoofModel woof = new WoofModel();
+		new WoofRepositoryImpl(new ModelRepositoryImpl()).retrieveWoof(woof, configuration);
+		return woof;
 	}
 
 	@Override
-	protected void storeModel(WoofModel model, ConfigurationItem configuration)
-			throws Exception {
-		new WoofRepositoryImpl(new ModelRepositoryImpl()).storeWoOF(model,
-				configuration);
+	protected void storeModel(WoofModel model, WritableConfigurationItem configuration) throws Exception {
+		new WoofRepositoryImpl(new ModelRepositoryImpl()).storeWoof(model, configuration);
 	}
 
 	@Override
-	protected void populateEditPartTypes(
-			Map<Class<?>, Class<? extends EditPart>> map) {
+	protected void populateEditPartTypes(Map<Class<?>, Class<? extends EditPart>> map) {
 
 		// Entities
 		map.put(WoofModel.class, WoofEditPart.class);
@@ -266,38 +236,22 @@ public class WoofEditor extends
 		map.put(WoofStartModel.class, WoofStartEditPart.class);
 
 		// Connections
-		map.put(WoofTemplateOutputToWoofTemplateModel.class,
-				WoofTemplateOutputToWoofTemplateEditPart.class);
-		map.put(WoofTemplateOutputToWoofSectionInputModel.class,
-				WoofTemplateOutputToWoofSectionInputEditPart.class);
-		map.put(WoofTemplateOutputToWoofAccessInputModel.class,
-				WoofTemplateOutputToWoofAccessInputEditPart.class);
-		map.put(WoofTemplateOutputToWoofResourceModel.class,
-				WoofTemplateOutputToWoofResourceEditPart.class);
-		map.put(WoofSectionOutputToWoofTemplateModel.class,
-				WoofSectionOutputToWoofTemplateEditPart.class);
-		map.put(WoofSectionOutputToWoofSectionInputModel.class,
-				WoofSectionOutputToWoofSectionInputEditPart.class);
-		map.put(WoofSectionOutputToWoofAccessInputModel.class,
-				WoofSectionOutputToWoofAccessInputEditPart.class);
-		map.put(WoofSectionOutputToWoofResourceModel.class,
-				WoofSectionOutputToWoofResourceEditPart.class);
-		map.put(WoofAccessOutputToWoofTemplateModel.class,
-				WoofAccessOutputToWoofTemplateEditPart.class);
-		map.put(WoofAccessOutputToWoofSectionInputModel.class,
-				WoofAccessOutputToWoofSectionInputEditPart.class);
-		map.put(WoofAccessOutputToWoofResourceModel.class,
-				WoofAccessOutputToWoofResourceEditPart.class);
-		map.put(WoofGovernanceToWoofGovernanceAreaModel.class,
-				WoofGovernanceToWoofGovernanceAreaEditPart.class);
-		map.put(WoofExceptionToWoofTemplateModel.class,
-				WoofExceptionToWoofTemplateEditPart.class);
-		map.put(WoofExceptionToWoofSectionInputModel.class,
-				WoofExceptionToWoofSectionInputEditPart.class);
-		map.put(WoofExceptionToWoofResourceModel.class,
-				WoofExceptionToWoofResourceEditPart.class);
-		map.put(WoofStartToWoofSectionInputModel.class,
-				WoofStartToWoofSectionInputEditPart.class);
+		map.put(WoofTemplateOutputToWoofTemplateModel.class, WoofTemplateOutputToWoofTemplateEditPart.class);
+		map.put(WoofTemplateOutputToWoofSectionInputModel.class, WoofTemplateOutputToWoofSectionInputEditPart.class);
+		map.put(WoofTemplateOutputToWoofAccessInputModel.class, WoofTemplateOutputToWoofAccessInputEditPart.class);
+		map.put(WoofTemplateOutputToWoofResourceModel.class, WoofTemplateOutputToWoofResourceEditPart.class);
+		map.put(WoofSectionOutputToWoofTemplateModel.class, WoofSectionOutputToWoofTemplateEditPart.class);
+		map.put(WoofSectionOutputToWoofSectionInputModel.class, WoofSectionOutputToWoofSectionInputEditPart.class);
+		map.put(WoofSectionOutputToWoofAccessInputModel.class, WoofSectionOutputToWoofAccessInputEditPart.class);
+		map.put(WoofSectionOutputToWoofResourceModel.class, WoofSectionOutputToWoofResourceEditPart.class);
+		map.put(WoofAccessOutputToWoofTemplateModel.class, WoofAccessOutputToWoofTemplateEditPart.class);
+		map.put(WoofAccessOutputToWoofSectionInputModel.class, WoofAccessOutputToWoofSectionInputEditPart.class);
+		map.put(WoofAccessOutputToWoofResourceModel.class, WoofAccessOutputToWoofResourceEditPart.class);
+		map.put(WoofGovernanceToWoofGovernanceAreaModel.class, WoofGovernanceToWoofGovernanceAreaEditPart.class);
+		map.put(WoofExceptionToWoofTemplateModel.class, WoofExceptionToWoofTemplateEditPart.class);
+		map.put(WoofExceptionToWoofSectionInputModel.class, WoofExceptionToWoofSectionInputEditPart.class);
+		map.put(WoofExceptionToWoofResourceModel.class, WoofExceptionToWoofResourceEditPart.class);
+		map.put(WoofStartToWoofSectionInputModel.class, WoofStartToWoofSectionInputEditPart.class);
 	}
 
 	@Override
@@ -317,7 +271,7 @@ public class WoofEditor extends
 		list.add(new DeleteSectionOperation(woofChanges));
 
 		// Access actions
-		list.add(new SetAccessOperation(woofChanges));
+		list.add(new AddAccessOperation(woofChanges));
 		list.add(new RefactorAccessOperation(woofChanges));
 		list.add(new DeleteAccessOperation(woofChanges));
 
@@ -355,210 +309,162 @@ public class WoofEditor extends
 		});
 
 		// Allow resizing governance area
-		policy.addConstraint(WoofGovernanceAreaModel.class,
-				new ConstraintChangeFactory<WoofGovernanceAreaModel>() {
-					@Override
-					public Change<WoofGovernanceAreaModel> createChange(
-							WoofGovernanceAreaModel target, Rectangle constraint) {
-						return new ResizeWoofGovernanceAreaChange(target,
-								constraint);
-					}
-				});
-		policy.addChild(WoofGovernanceAreaModel.class,
-				new ChildEditPolicyFactory<WoofGovernanceAreaModel>() {
-					@Override
-					public EditPolicy createEditPolicy(
-							WoofGovernanceAreaModel target) {
-						return new WoofResizableEditPolicy();
-					}
-				});
+		policy.addConstraint(WoofGovernanceAreaModel.class, new ConstraintChangeFactory<WoofGovernanceAreaModel>() {
+			@Override
+			public Change<WoofGovernanceAreaModel> createChange(WoofGovernanceAreaModel target, Rectangle constraint) {
+				return new ResizeWoofGovernanceAreaChange(target, constraint);
+			}
+		});
+		policy.addChild(WoofGovernanceAreaModel.class, new ChildEditPolicyFactory<WoofGovernanceAreaModel>() {
+			@Override
+			public EditPolicy createEditPolicy(WoofGovernanceAreaModel target) {
+				return new WoofResizableEditPolicy();
+			}
+		});
 
 		// Allow deleting template
-		policy.addDelete(WoofTemplateModel.class,
-				new DeleteChangeFactory<WoofTemplateModel>() {
-					@Override
-					public Change<WoofTemplateModel> createChange(
-							WoofTemplateModel target) {
-						// Return the change to remove the template
-						return WoofEditor.this
-								.getModelChanges()
-								.removeTemplate(
-										target,
-										WoofEditor.this
-												.getWoofTemplateChangeContext());
-					}
-				});
+		policy.addDelete(WoofTemplateModel.class, new DeleteChangeFactory<WoofTemplateModel>() {
+			@Override
+			public Change<WoofTemplateModel> createChange(WoofTemplateModel target) {
+				// Return the change to remove the template
+				return WoofEditor.this.getModelChanges().removeTemplate(target,
+						WoofEditor.this.getWoofTemplateChangeContext());
+			}
+		});
 
 		// Allow deleting section
-		policy.addDelete(WoofSectionModel.class,
-				new DeleteChangeFactory<WoofSectionModel>() {
-					@Override
-					public Change<WoofSectionModel> createChange(
-							WoofSectionModel target) {
-						return WoofEditor.this.getModelChanges().removeSection(
-								target);
-					}
-				});
+		policy.addDelete(WoofSectionModel.class, new DeleteChangeFactory<WoofSectionModel>() {
+			@Override
+			public Change<WoofSectionModel> createChange(WoofSectionModel target) {
+				return WoofEditor.this.getModelChanges().removeSection(target);
+			}
+		});
 
 		// Allow deleting access
-		policy.addDelete(WoofAccessModel.class,
-				new DeleteChangeFactory<WoofAccessModel>() {
-					@Override
-					public Change<WoofAccessModel> createChange(
-							WoofAccessModel target) {
-						return WoofEditor.this.getModelChanges().removeAccess(
-								target);
-					}
-				});
+		policy.addDelete(WoofAccessModel.class, new DeleteChangeFactory<WoofAccessModel>() {
+			@Override
+			public Change<WoofAccessModel> createChange(WoofAccessModel target) {
+				return WoofEditor.this.getModelChanges().removeAccess(target);
+			}
+		});
 
 		// Allow deleting governance
-		policy.addDelete(WoofGovernanceModel.class,
-				new DeleteChangeFactory<WoofGovernanceModel>() {
-					@Override
-					public Change<WoofGovernanceModel> createChange(
-							WoofGovernanceModel target) {
-						return WoofEditor.this.getModelChanges()
-								.removeGovernance(target);
-					}
-				});
+		policy.addDelete(WoofGovernanceModel.class, new DeleteChangeFactory<WoofGovernanceModel>() {
+			@Override
+			public Change<WoofGovernanceModel> createChange(WoofGovernanceModel target) {
+				return WoofEditor.this.getModelChanges().removeGovernance(target);
+			}
+		});
 
 		// Allow deleting governance area
-		policy.addDelete(WoofGovernanceAreaModel.class,
-				new DeleteChangeFactory<WoofGovernanceAreaModel>() {
-					@Override
-					public Change<WoofGovernanceAreaModel> createChange(
-							WoofGovernanceAreaModel target) {
-						return WoofEditor.this.getModelChanges()
-								.removeGovernanceArea(target);
-					}
-				});
+		policy.addDelete(WoofGovernanceAreaModel.class, new DeleteChangeFactory<WoofGovernanceAreaModel>() {
+			@Override
+			public Change<WoofGovernanceAreaModel> createChange(WoofGovernanceAreaModel target) {
+				return WoofEditor.this.getModelChanges().removeGovernanceArea(target);
+			}
+		});
 
 		// Allow deleting resource
-		policy.addDelete(WoofResourceModel.class,
-				new DeleteChangeFactory<WoofResourceModel>() {
-					@Override
-					public Change<WoofResourceModel> createChange(
-							WoofResourceModel target) {
-						return WoofEditor.this.getModelChanges()
-								.removeResource(target);
-					}
-				});
+		policy.addDelete(WoofResourceModel.class, new DeleteChangeFactory<WoofResourceModel>() {
+			@Override
+			public Change<WoofResourceModel> createChange(WoofResourceModel target) {
+				return WoofEditor.this.getModelChanges().removeResource(target);
+			}
+		});
 
 		// Allow deleting exception
-		policy.addDelete(WoofExceptionModel.class,
-				new DeleteChangeFactory<WoofExceptionModel>() {
-					@Override
-					public Change<WoofExceptionModel> createChange(
-							WoofExceptionModel target) {
-						return WoofEditor.this.getModelChanges()
-								.removeException(target);
-					}
-				});
+		policy.addDelete(WoofExceptionModel.class, new DeleteChangeFactory<WoofExceptionModel>() {
+			@Override
+			public Change<WoofExceptionModel> createChange(WoofExceptionModel target) {
+				return WoofEditor.this.getModelChanges().removeException(target);
+			}
+		});
 
 		// Allow deleting start
-		policy.addDelete(WoofStartModel.class,
-				new DeleteChangeFactory<WoofStartModel>() {
-					@Override
-					public Change<WoofStartModel> createChange(
-							WoofStartModel target) {
-						return WoofEditor.this.getModelChanges().removeStart(
-								target);
-					}
-				});
+		policy.addDelete(WoofStartModel.class, new DeleteChangeFactory<WoofStartModel>() {
+			@Override
+			public Change<WoofStartModel> createChange(WoofStartModel target) {
+				return WoofEditor.this.getModelChanges().removeStart(target);
+			}
+		});
 
 		// Allow deleting template output to template
-		policy.addDelete(
-				WoofTemplateOutputToWoofTemplateModel.class,
+		policy.addDelete(WoofTemplateOutputToWoofTemplateModel.class,
 				new DeleteChangeFactory<WoofTemplateOutputToWoofTemplateModel>() {
 					@Override
 					public Change<WoofTemplateOutputToWoofTemplateModel> createChange(
 							WoofTemplateOutputToWoofTemplateModel target) {
-						return WoofEditor.this.getModelChanges()
-								.removeTemplateOuputToTemplate(target);
+						return WoofEditor.this.getModelChanges().removeTemplateOuputToTemplate(target);
 					}
 				});
 
 		// Allow deleting template output to section input
-		policy.addDelete(
-				WoofTemplateOutputToWoofSectionInputModel.class,
+		policy.addDelete(WoofTemplateOutputToWoofSectionInputModel.class,
 				new DeleteChangeFactory<WoofTemplateOutputToWoofSectionInputModel>() {
 					@Override
 					public Change<WoofTemplateOutputToWoofSectionInputModel> createChange(
 							WoofTemplateOutputToWoofSectionInputModel target) {
-						return WoofEditor.this.getModelChanges()
-								.removeTemplateOuputToSectionInput(target);
+						return WoofEditor.this.getModelChanges().removeTemplateOuputToSectionInput(target);
 					}
 				});
 
 		// Allow deleting template output to access input
-		policy.addDelete(
-				WoofTemplateOutputToWoofAccessInputModel.class,
+		policy.addDelete(WoofTemplateOutputToWoofAccessInputModel.class,
 				new DeleteChangeFactory<WoofTemplateOutputToWoofAccessInputModel>() {
 					@Override
 					public Change<WoofTemplateOutputToWoofAccessInputModel> createChange(
 							WoofTemplateOutputToWoofAccessInputModel target) {
-						return WoofEditor.this.getModelChanges()
-								.removeTemplateOuputToAccessInput(target);
+						return WoofEditor.this.getModelChanges().removeTemplateOuputToAccessInput(target);
 					}
 				});
 
 		// Allow deleting template output to resource
-		policy.addDelete(
-				WoofTemplateOutputToWoofResourceModel.class,
+		policy.addDelete(WoofTemplateOutputToWoofResourceModel.class,
 				new DeleteChangeFactory<WoofTemplateOutputToWoofResourceModel>() {
 					@Override
 					public Change<WoofTemplateOutputToWoofResourceModel> createChange(
 							WoofTemplateOutputToWoofResourceModel target) {
-						return WoofEditor.this.getModelChanges()
-								.removeTemplateOuputToResource(target);
+						return WoofEditor.this.getModelChanges().removeTemplateOuputToResource(target);
 					}
 				});
 
 		// Allow deleting section output to template
-		policy.addDelete(
-				WoofSectionOutputToWoofTemplateModel.class,
+		policy.addDelete(WoofSectionOutputToWoofTemplateModel.class,
 				new DeleteChangeFactory<WoofSectionOutputToWoofTemplateModel>() {
 					@Override
 					public Change<WoofSectionOutputToWoofTemplateModel> createChange(
 							WoofSectionOutputToWoofTemplateModel target) {
-						return WoofEditor.this.getModelChanges()
-								.removeSectionOuputToTemplate(target);
+						return WoofEditor.this.getModelChanges().removeSectionOuputToTemplate(target);
 					}
 				});
 
 		// Allow deleting section output to section input
-		policy.addDelete(
-				WoofSectionOutputToWoofSectionInputModel.class,
+		policy.addDelete(WoofSectionOutputToWoofSectionInputModel.class,
 				new DeleteChangeFactory<WoofSectionOutputToWoofSectionInputModel>() {
 					@Override
 					public Change<WoofSectionOutputToWoofSectionInputModel> createChange(
 							WoofSectionOutputToWoofSectionInputModel target) {
-						return WoofEditor.this.getModelChanges()
-								.removeSectionOuputToSectionInput(target);
+						return WoofEditor.this.getModelChanges().removeSectionOuputToSectionInput(target);
 					}
 				});
 
 		// Allow deleting section output to access input
-		policy.addDelete(
-				WoofSectionOutputToWoofAccessInputModel.class,
+		policy.addDelete(WoofSectionOutputToWoofAccessInputModel.class,
 				new DeleteChangeFactory<WoofSectionOutputToWoofAccessInputModel>() {
 					@Override
 					public Change<WoofSectionOutputToWoofAccessInputModel> createChange(
 							WoofSectionOutputToWoofAccessInputModel target) {
-						return WoofEditor.this.getModelChanges()
-								.removeSectionOuputToAccessInput(target);
+						return WoofEditor.this.getModelChanges().removeSectionOuputToAccessInput(target);
 					}
 				});
 
 		// Allow deleting section output to resource
-		policy.addDelete(
-				WoofSectionOutputToWoofResourceModel.class,
+		policy.addDelete(WoofSectionOutputToWoofResourceModel.class,
 				new DeleteChangeFactory<WoofSectionOutputToWoofResourceModel>() {
 					@Override
 					public Change<WoofSectionOutputToWoofResourceModel> createChange(
 							WoofSectionOutputToWoofResourceModel target) {
-						return WoofEditor.this.getModelChanges()
-								.removeSectionOuputToResource(target);
+						return WoofEditor.this.getModelChanges().removeSectionOuputToResource(target);
 					}
 				});
 
@@ -568,20 +474,17 @@ public class WoofEditor extends
 					@Override
 					public Change<WoofAccessOutputToWoofTemplateModel> createChange(
 							WoofAccessOutputToWoofTemplateModel target) {
-						return WoofEditor.this.getModelChanges()
-								.removeAccessOuputToTemplate(target);
+						return WoofEditor.this.getModelChanges().removeAccessOuputToTemplate(target);
 					}
 				});
 
 		// Allow deleting access output to section input
-		policy.addDelete(
-				WoofAccessOutputToWoofSectionInputModel.class,
+		policy.addDelete(WoofAccessOutputToWoofSectionInputModel.class,
 				new DeleteChangeFactory<WoofAccessOutputToWoofSectionInputModel>() {
 					@Override
 					public Change<WoofAccessOutputToWoofSectionInputModel> createChange(
 							WoofAccessOutputToWoofSectionInputModel target) {
-						return WoofEditor.this.getModelChanges()
-								.removeAccessOuputToSectionInput(target);
+						return WoofEditor.this.getModelChanges().removeAccessOuputToSectionInput(target);
 					}
 				});
 
@@ -591,8 +494,7 @@ public class WoofEditor extends
 					@Override
 					public Change<WoofAccessOutputToWoofResourceModel> createChange(
 							WoofAccessOutputToWoofResourceModel target) {
-						return WoofEditor.this.getModelChanges()
-								.removeAccessOuputToResource(target);
+						return WoofEditor.this.getModelChanges().removeAccessOuputToResource(target);
 					}
 				});
 
@@ -602,20 +504,17 @@ public class WoofEditor extends
 					@Override
 					public Change<WoofExceptionToWoofTemplateModel> createChange(
 							WoofExceptionToWoofTemplateModel target) {
-						return WoofEditor.this.getModelChanges()
-								.removeExceptionToTemplate(target);
+						return WoofEditor.this.getModelChanges().removeExceptionToTemplate(target);
 					}
 				});
 
 		// Allow deleting exception to section input
-		policy.addDelete(
-				WoofExceptionToWoofSectionInputModel.class,
+		policy.addDelete(WoofExceptionToWoofSectionInputModel.class,
 				new DeleteChangeFactory<WoofExceptionToWoofSectionInputModel>() {
 					@Override
 					public Change<WoofExceptionToWoofSectionInputModel> createChange(
 							WoofExceptionToWoofSectionInputModel target) {
-						return WoofEditor.this.getModelChanges()
-								.removeExceptionToSectionInput(target);
+						return WoofEditor.this.getModelChanges().removeExceptionToSectionInput(target);
 					}
 				});
 
@@ -625,8 +524,7 @@ public class WoofEditor extends
 					@Override
 					public Change<WoofExceptionToWoofResourceModel> createChange(
 							WoofExceptionToWoofResourceModel target) {
-						return WoofEditor.this.getModelChanges()
-								.removeExceptionToResource(target);
+						return WoofEditor.this.getModelChanges().removeExceptionToResource(target);
 					}
 				});
 
@@ -636,234 +534,161 @@ public class WoofEditor extends
 					@Override
 					public Change<WoofStartToWoofSectionInputModel> createChange(
 							WoofStartToWoofSectionInputModel target) {
-						return WoofEditor.this.getModelChanges()
-								.removeStartToSectionInput(target);
+						return WoofEditor.this.getModelChanges().removeStartToSectionInput(target);
 					}
 				});
 	}
 
 	@Override
-	protected void populateGraphicalEditPolicy(
-			OfficeFloorGraphicalNodeEditPolicy policy) {
+	protected void populateGraphicalEditPolicy(OfficeFloorGraphicalNodeEditPolicy policy) {
 
 		// Connect template output to template
-		policy.addConnection(
-				WoofTemplateOutputModel.class,
-				WoofTemplateModel.class,
+		policy.addConnection(WoofTemplateOutputModel.class, WoofTemplateModel.class,
 				new ConnectionChangeFactory<WoofTemplateOutputModel, WoofTemplateModel>() {
 					@Override
-					public Change<?> createChange(
-							WoofTemplateOutputModel source,
-							WoofTemplateModel target,
+					public Change<?> createChange(WoofTemplateOutputModel source, WoofTemplateModel target,
 							CreateConnectionRequest request) {
-						return WoofEditor.this.getModelChanges()
-								.linkTemplateOutputToTemplate(source, target);
+						return WoofEditor.this.getModelChanges().linkTemplateOutputToTemplate(source, target);
 					}
 				});
 
 		// Connect template output to section input
-		policy.addConnection(
-				WoofTemplateOutputModel.class,
-				WoofSectionInputModel.class,
+		policy.addConnection(WoofTemplateOutputModel.class, WoofSectionInputModel.class,
 				new ConnectionChangeFactory<WoofTemplateOutputModel, WoofSectionInputModel>() {
 					@Override
-					public Change<?> createChange(
-							WoofTemplateOutputModel source,
-							WoofSectionInputModel target,
+					public Change<?> createChange(WoofTemplateOutputModel source, WoofSectionInputModel target,
 							CreateConnectionRequest request) {
-						return WoofEditor.this.getModelChanges()
-								.linkTemplateOutputToSectionInput(source,
-										target);
+						return WoofEditor.this.getModelChanges().linkTemplateOutputToSectionInput(source, target);
 					}
 				});
 
 		// Connect template output to access input
-		policy.addConnection(
-				WoofTemplateOutputModel.class,
-				WoofAccessInputModel.class,
+		policy.addConnection(WoofTemplateOutputModel.class, WoofAccessInputModel.class,
 				new ConnectionChangeFactory<WoofTemplateOutputModel, WoofAccessInputModel>() {
 					@Override
-					public Change<?> createChange(
-							WoofTemplateOutputModel source,
-							WoofAccessInputModel target,
+					public Change<?> createChange(WoofTemplateOutputModel source, WoofAccessInputModel target,
 							CreateConnectionRequest request) {
-						return WoofEditor.this
-								.getModelChanges()
-								.linkTemplateOutputToAccessInput(source, target);
+						return WoofEditor.this.getModelChanges().linkTemplateOutputToAccessInput(source, target);
 					}
 				});
 
 		// Connect template output to resource
-		policy.addConnection(
-				WoofTemplateOutputModel.class,
-				WoofResourceModel.class,
+		policy.addConnection(WoofTemplateOutputModel.class, WoofResourceModel.class,
 				new ConnectionChangeFactory<WoofTemplateOutputModel, WoofResourceModel>() {
 					@Override
-					public Change<?> createChange(
-							WoofTemplateOutputModel source,
-							WoofResourceModel target,
+					public Change<?> createChange(WoofTemplateOutputModel source, WoofResourceModel target,
 							CreateConnectionRequest request) {
-						return WoofEditor.this.getModelChanges()
-								.linkTemplateOutputToResource(source, target);
+						return WoofEditor.this.getModelChanges().linkTemplateOutputToResource(source, target);
 					}
 				});
 
 		// Connect section output to template
-		policy.addConnection(
-				WoofSectionOutputModel.class,
-				WoofTemplateModel.class,
+		policy.addConnection(WoofSectionOutputModel.class, WoofTemplateModel.class,
 				new ConnectionChangeFactory<WoofSectionOutputModel, WoofTemplateModel>() {
 					@Override
-					public Change<?> createChange(
-							WoofSectionOutputModel source,
-							WoofTemplateModel target,
+					public Change<?> createChange(WoofSectionOutputModel source, WoofTemplateModel target,
 							CreateConnectionRequest request) {
-						return WoofEditor.this.getModelChanges()
-								.linkSectionOutputToTemplate(source, target);
+						return WoofEditor.this.getModelChanges().linkSectionOutputToTemplate(source, target);
 					}
 				});
 
 		// Connect section output to section input
-		policy.addConnection(
-				WoofSectionOutputModel.class,
-				WoofSectionInputModel.class,
+		policy.addConnection(WoofSectionOutputModel.class, WoofSectionInputModel.class,
 				new ConnectionChangeFactory<WoofSectionOutputModel, WoofSectionInputModel>() {
 					@Override
-					public Change<?> createChange(
-							WoofSectionOutputModel source,
-							WoofSectionInputModel target,
+					public Change<?> createChange(WoofSectionOutputModel source, WoofSectionInputModel target,
 							CreateConnectionRequest request) {
-						return WoofEditor.this
-								.getModelChanges()
-								.linkSectionOutputToSectionInput(source, target);
+						return WoofEditor.this.getModelChanges().linkSectionOutputToSectionInput(source, target);
 					}
 				});
 
 		// Connect section output to access input
-		policy.addConnection(
-				WoofSectionOutputModel.class,
-				WoofAccessInputModel.class,
+		policy.addConnection(WoofSectionOutputModel.class, WoofAccessInputModel.class,
 				new ConnectionChangeFactory<WoofSectionOutputModel, WoofAccessInputModel>() {
 					@Override
-					public Change<?> createChange(
-							WoofSectionOutputModel source,
-							WoofAccessInputModel target,
+					public Change<?> createChange(WoofSectionOutputModel source, WoofAccessInputModel target,
 							CreateConnectionRequest request) {
-						return WoofEditor.this.getModelChanges()
-								.linkSectionOutputToAccessInput(source, target);
+						return WoofEditor.this.getModelChanges().linkSectionOutputToAccessInput(source, target);
 					}
 				});
 
 		// Connect section output to resource
-		policy.addConnection(
-				WoofSectionOutputModel.class,
-				WoofResourceModel.class,
+		policy.addConnection(WoofSectionOutputModel.class, WoofResourceModel.class,
 				new ConnectionChangeFactory<WoofSectionOutputModel, WoofResourceModel>() {
 					@Override
-					public Change<?> createChange(
-							WoofSectionOutputModel source,
-							WoofResourceModel target,
+					public Change<?> createChange(WoofSectionOutputModel source, WoofResourceModel target,
 							CreateConnectionRequest request) {
-						return WoofEditor.this.getModelChanges()
-								.linkSectionOutputToResource(source, target);
+						return WoofEditor.this.getModelChanges().linkSectionOutputToResource(source, target);
 					}
 				});
 
 		// Connect access output to template
-		policy.addConnection(
-				WoofAccessOutputModel.class,
-				WoofTemplateModel.class,
+		policy.addConnection(WoofAccessOutputModel.class, WoofTemplateModel.class,
 				new ConnectionChangeFactory<WoofAccessOutputModel, WoofTemplateModel>() {
 					@Override
-					public Change<?> createChange(WoofAccessOutputModel source,
-							WoofTemplateModel target,
+					public Change<?> createChange(WoofAccessOutputModel source, WoofTemplateModel target,
 							CreateConnectionRequest request) {
-						return WoofEditor.this.getModelChanges()
-								.linkAccessOutputToTemplate(source, target);
+						return WoofEditor.this.getModelChanges().linkAccessOutputToTemplate(source, target);
 					}
 				});
 
 		// Connect access output to section input
-		policy.addConnection(
-				WoofAccessOutputModel.class,
-				WoofSectionInputModel.class,
+		policy.addConnection(WoofAccessOutputModel.class, WoofSectionInputModel.class,
 				new ConnectionChangeFactory<WoofAccessOutputModel, WoofSectionInputModel>() {
 					@Override
-					public Change<?> createChange(WoofAccessOutputModel source,
-							WoofSectionInputModel target,
+					public Change<?> createChange(WoofAccessOutputModel source, WoofSectionInputModel target,
 							CreateConnectionRequest request) {
-						return WoofEditor.this.getModelChanges()
-								.linkAccessOutputToSectionInput(source, target);
+						return WoofEditor.this.getModelChanges().linkAccessOutputToSectionInput(source, target);
 					}
 				});
 
 		// Connect access output to resource
-		policy.addConnection(
-				WoofAccessOutputModel.class,
-				WoofResourceModel.class,
+		policy.addConnection(WoofAccessOutputModel.class, WoofResourceModel.class,
 				new ConnectionChangeFactory<WoofAccessOutputModel, WoofResourceModel>() {
 					@Override
-					public Change<?> createChange(WoofAccessOutputModel source,
-							WoofResourceModel target,
+					public Change<?> createChange(WoofAccessOutputModel source, WoofResourceModel target,
 							CreateConnectionRequest request) {
-						return WoofEditor.this.getModelChanges()
-								.linkAccessOutputToResource(source, target);
+						return WoofEditor.this.getModelChanges().linkAccessOutputToResource(source, target);
 					}
 				});
 
 		// Connect exception to template
-		policy.addConnection(
-				WoofExceptionModel.class,
-				WoofTemplateModel.class,
+		policy.addConnection(WoofExceptionModel.class, WoofTemplateModel.class,
 				new ConnectionChangeFactory<WoofExceptionModel, WoofTemplateModel>() {
 					@Override
-					public Change<?> createChange(WoofExceptionModel source,
-							WoofTemplateModel target,
+					public Change<?> createChange(WoofExceptionModel source, WoofTemplateModel target,
 							CreateConnectionRequest request) {
-						return WoofEditor.this.getModelChanges()
-								.linkExceptionToTemplate(source, target);
+						return WoofEditor.this.getModelChanges().linkExceptionToTemplate(source, target);
 					}
 				});
 
 		// Connect exception to section input
-		policy.addConnection(
-				WoofExceptionModel.class,
-				WoofSectionInputModel.class,
+		policy.addConnection(WoofExceptionModel.class, WoofSectionInputModel.class,
 				new ConnectionChangeFactory<WoofExceptionModel, WoofSectionInputModel>() {
 					@Override
-					public Change<?> createChange(WoofExceptionModel source,
-							WoofSectionInputModel target,
+					public Change<?> createChange(WoofExceptionModel source, WoofSectionInputModel target,
 							CreateConnectionRequest request) {
-						return WoofEditor.this.getModelChanges()
-								.linkExceptionToSectionInput(source, target);
+						return WoofEditor.this.getModelChanges().linkExceptionToSectionInput(source, target);
 					}
 				});
 
 		// Connect exception to resource
-		policy.addConnection(
-				WoofExceptionModel.class,
-				WoofResourceModel.class,
+		policy.addConnection(WoofExceptionModel.class, WoofResourceModel.class,
 				new ConnectionChangeFactory<WoofExceptionModel, WoofResourceModel>() {
 					@Override
-					public Change<?> createChange(WoofExceptionModel source,
-							WoofResourceModel target,
+					public Change<?> createChange(WoofExceptionModel source, WoofResourceModel target,
 							CreateConnectionRequest request) {
-						return WoofEditor.this.getModelChanges()
-								.linkExceptionToResource(source, target);
+						return WoofEditor.this.getModelChanges().linkExceptionToResource(source, target);
 					}
 				});
 
 		// Connect start to section input
-		policy.addConnection(
-				WoofStartModel.class,
-				WoofSectionInputModel.class,
+		policy.addConnection(WoofStartModel.class, WoofSectionInputModel.class,
 				new ConnectionChangeFactory<WoofStartModel, WoofSectionInputModel>() {
 					@Override
-					public Change<?> createChange(WoofStartModel source,
-							WoofSectionInputModel target,
+					public Change<?> createChange(WoofStartModel source, WoofSectionInputModel target,
 							CreateConnectionRequest request) {
-						return WoofEditor.this.getModelChanges()
-								.linkStartToSectionInput(source, target);
+						return WoofEditor.this.getModelChanges().linkStartToSectionInput(source, target);
 					}
 				});
 	}

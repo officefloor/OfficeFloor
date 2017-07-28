@@ -20,10 +20,10 @@ package net.officefloor.frame.impl.construct.source;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-import net.officefloor.frame.spi.source.ResourceSource;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.source.UnknownClassError;
-import net.officefloor.frame.spi.source.UnknownResourceError;
+import net.officefloor.frame.api.source.ResourceSource;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.source.UnknownClassError;
+import net.officefloor.frame.api.source.UnknownResourceError;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**

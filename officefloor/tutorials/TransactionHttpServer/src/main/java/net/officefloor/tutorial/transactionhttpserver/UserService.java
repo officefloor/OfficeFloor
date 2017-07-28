@@ -19,7 +19,7 @@ package net.officefloor.tutorial.transactionhttpserver;
 
 import javax.persistence.EntityManager;
 
-import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
 
 /**
@@ -30,9 +30,8 @@ import net.officefloor.plugin.section.clazz.Parameter;
 // START SNIPPET: tutorial
 public class UserService {
 
-	@NextTask("userAdded")
-	public void createUser(@Parameter UserProperties properties,
-			EntityManager entityManager) {
+	@NextFunction("userAdded")
+	public void createUser(@Parameter UserProperties properties, EntityManager entityManager) {
 		User user = new User();
 		user.setUserName(nullBlankString(properties.getUserName()));
 		Person person = new Person();

@@ -26,9 +26,9 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeInputNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeOutputNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.spi.office.OfficeInput;
-import net.officefloor.compile.type.TypeContext;
 
 /**
  * Implementation of the {@link OfficeInputNode}.
@@ -119,6 +119,11 @@ public class OfficeInputNodeImpl implements OfficeInputNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return NodeUtil.getChildNodes();
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}
@@ -133,9 +138,9 @@ public class OfficeInputNodeImpl implements OfficeInputNode {
 	 */
 
 	@Override
-	public OfficeInputType loadOfficeInputType(TypeContext typeContext) {
+	public OfficeInputType loadOfficeInputType(CompileContext compileContext) {
 		return new OfficeInputTypeImpl(this.name, this.state.parameterType, (this.linkedSynchronousNode == null ? null
-				: this.linkedSynchronousNode.loadOfficeOutputType(typeContext)));
+				: this.linkedSynchronousNode.loadOfficeOutputType(compileContext)));
 	}
 
 	/*

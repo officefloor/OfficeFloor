@@ -1,0 +1,27 @@
+<context>
+	<office-floor>
+		<managed-object-sources>
+			<managed-object-source name="MANAGED_OBJECT_SOURCE"
+				source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$CompileManagedObject" />
+				</properties>
+				<!-- Also auto-wire the office -->
+				<!-- <managing-office name="OFFICE" /> -->
+			</managed-object-source>
+		</managed-object-sources>
+		<managed-objects>
+			<managed-object name="MANAGED_OBJECT" scope="THREAD">
+				<managed-object-source name="MANAGED_OBJECT_SOURCE" />
+			</managed-object>
+		</managed-objects>
+		<offices>
+			<office name="OFFICE" source="${testcase}$CompileOfficeSource">
+				<object name="OBJECT">
+					<!-- auto-wire object -->
+					<!-- <managed-object name="MANAGED_OBJECT" /> -->
+				</object>
+			</office>
+		</offices>
+	</office-floor>
+</context>

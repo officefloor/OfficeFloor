@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.plugin.servlet.context.MappedHttpServletRequest;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
@@ -173,7 +173,7 @@ public class HttpServletContainerImpl implements HttpServletContainer,
 	@Override
 	public void service(ServerHttpConnection connection,
 			HttpRequestState attributes, HttpSession session,
-			HttpServletSecurity security, TaskContext<?, ?, ?> taskContext,
+			HttpServletSecurity security, ManagedFunctionContext<?, ?, ?> taskContext,
 			ServicerMapping mapping) throws ServletException, IOException {
 
 		// Obtain the last access time

@@ -9,17 +9,35 @@
 	</external-managed-objects>
 	<sub-sections>
 		<sub-section name="SUB_SECTION"
-			source="net.officefloor.model.impl.desk.DeskModelSectionSource"
-			location="net/officefloor/model/impl/desk/DeskModelSectionSourceTest.desk.xml">
-			<input name="INPUT" parameter-type="java.lang.Integer" public="true" />
-			<output name="SECTION_OUTPUT" argument-type="java.lang.Float"
+			source="net.officefloor.plugin.section.clazz.ClassSectionSource"
+			location="net.officefloor.model.impl.section.SectionModelSectionSourceTest$MockSection">
+			<input name="sectionInput" parameter-type="java.lang.Integer"
+				public="true" />
+			<output name="sectionOutput" argument-type="java.lang.Float"
 				escalation-only="false">
 				<external-flow name="OUTPUT" />
 			</output>
-			<output name="SECTION_ESCALATION" argument-type="java.lang.Exception"
+			<output name="java.lang.Exception" argument-type="java.lang.Exception"
 				escalation-only="true">
 				<external-flow name="ESCALATION" />
 			</output>
 		</sub-section>
 	</sub-sections>
+	<function-namespaces>
+		<function-namespace name="NAMESPACE"
+			source="net.officefloor.model.impl.section.MockManagedFunctionSource">
+			<managed-function name="MANAGED_FUNCTION">
+				<managed-function-object name="PARAMETER"
+					object-type="java.lang.Long" parameter="true" />
+			</managed-function>
+		</function-namespace>
+	</function-namespaces>
+	<functions>
+		<function name="FUNCTION_INPUT" public="true"
+			function-namespace="NAMESPACE" managed-function="MANAGED_FUNCTION">
+			<function-escalation escalation-type="java.lang.Exception">
+				<external-flow name="ESCALATION" />
+			</function-escalation>
+		</function>
+	</functions>
 </section>

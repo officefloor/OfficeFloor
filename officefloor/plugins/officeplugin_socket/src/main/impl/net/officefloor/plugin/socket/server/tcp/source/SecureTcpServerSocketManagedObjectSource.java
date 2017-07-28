@@ -17,7 +17,7 @@
  */
 package net.officefloor.plugin.socket.server.tcp.source;
 
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
 import net.officefloor.plugin.socket.server.ssl.protocol.SslCommunicationProtocol;
@@ -30,8 +30,7 @@ import net.officefloor.plugin.socket.server.tcp.protocol.TcpCommunicationProtoco
  * 
  * @author Daniel Sagenschneider
  */
-public class SecureTcpServerSocketManagedObjectSource extends
-		AbstractServerSocketManagedObjectSource {
+public class SecureTcpServerSocketManagedObjectSource extends AbstractServerSocketManagedObjectSource {
 
 	/*
 	 * ============== AbstractServerSocketManagedObjectSource ===============

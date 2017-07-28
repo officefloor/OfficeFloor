@@ -62,4 +62,11 @@ public interface Node {
 	 */
 	boolean isInitialised();
 
+	/**
+	 * Obtains the child {@link Node} instances.
+	 * 
+	 * @return Child {@link Node} instances.
+	 */
+	Node[] getChildNodes();
+
 }

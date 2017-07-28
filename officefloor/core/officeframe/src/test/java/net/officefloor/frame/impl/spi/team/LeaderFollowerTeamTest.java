@@ -17,9 +17,13 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
-import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam.TeamMember;
-import net.officefloor.frame.test.MockTeamSource;
+import java.lang.Thread.State;
+import java.util.ArrayList;
+import java.util.List;
+
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.util.TeamSourceStandAlone;
 
 /**
  * Tests the {@link LeaderFollowerTeam}.
@@ -29,42 +33,37 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link LeaderFollowerTeam} to test.
-	 */
-	protected LeaderFollowerTeam team;
-
-	/**
 	 * Single member and single task.
 	 */
-	public void testSingleMemberOneTask() {
+	public void testSingleMemberOneTask() throws Exception {
 		this.leaderFollowerTest(1, 1);
 	}
 
 	/**
 	 * Multiple members and single task.
 	 */
-	public void testMultipleMembersOneTask() {
+	public void testMultipleMembersOneTask() throws Exception {
 		this.leaderFollowerTest(3, 1);
 	}
 
 	/**
 	 * Single member and multiple tasks.
 	 */
-	public void testSingleMemberMultipleTasks() {
+	public void testSingleMemberMultipleTasks() throws Exception {
 		this.leaderFollowerTest(1, 6);
 	}
 
 	/**
 	 * Multiple members and multiple tasks.
 	 */
-	public void testMulitpleMembersMultipleTasks() {
+	public void testMulitpleMembersMultipleTasks() throws Exception {
 		this.leaderFollowerTest(3, 6);
 	}
 
 	/**
 	 * High load test.
 	 */
-	public void testHighLoad() {
+	public void testHighLoad() throws Exception {
 		this.leaderFollowerTest(100, 100);
 	}
 
@@ -74,12 +73,20 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 	 * @param teamMemberCount
 	 *            Count of workers in the team.
 	 */
-	private void leaderFollowerTest(int teamMemberCount, int taskCount) {
+	private void leaderFollowerTest(int teamMemberCount, int taskCount) throws Exception {
+
+		final int teamSize = 10;
+		final List<Thread> teamThreads = new ArrayList<>();
 
 		// Create the team and start it working
-		this.team = new LeaderFollowerTeam("Test",
-				MockTeamSource.createTeamIdentifier(), teamMemberCount, 10);
-		this.team.startWorking();
+		TeamSourceStandAlone standAlone = new TeamSourceStandAlone();
+		standAlone.setThreadDecorator((thread) -> teamThreads.add(thread));
+		standAlone.addProperty(LeaderFollowerTeamSource.TEAM_SIZE_PROPERTY_NAME, String.valueOf(teamSize));
+		Team team = standAlone.loadTeam(LeaderFollowerTeamSource.class);
+		team.startWorking();
+
+		// Ensure have appropriate number of threads
+		assertEquals("Incorrect number of threads", teamSize, teamThreads.size());
 
 		// Wait some time before assigning tasks
 		try {
@@ -89,36 +96,26 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 		}
 
 		// Assign tasks and wait on them to be started for execution
-		MockTaskContainer[] tasks = new MockTaskContainer[taskCount];
+		MockJob[] tasks = new MockJob[taskCount];
 		for (int i = 0; i < taskCount; i++) {
-			tasks[i] = new MockTaskContainer();
-			tasks[i].assignJobToTeam(this.team, 10);
+			tasks[i] = new MockJob();
+			tasks[i].assignJobToTeam(team, 10);
 		}
 
-		// Obtain the team members
-		TeamMember[] teamMembers = new TeamMember[this.team.teamMembers.length];
-		for (int i = 0; i < teamMembers.length; i++) {
-			teamMembers[i] = this.team.teamMembers[i];
-		}
+		// Stop processing (should have all threads finished)
+		team.stopWorking();
 
-		// Flag the tasks to stop processing
-		for (int i = 0; i < taskCount; i++) {
-			tasks[i].stopProcessing = true;
-		}
+		// Allow some time for last thread to terminate
+		Thread.sleep(1);
 
-		// Stop processing (should have all teams finished)
-		this.team.stopWorking();
-
-		// Ensure each team member has stopped working
-		for (int i = 0; i < teamMembers.length; i++) {
-			assertTrue("Team member " + i + " should be finished working",
-					teamMembers[i].finished);
+		// Ensure all threads are stopped
+		for (Thread thread : teamThreads) {
+			assertEquals("Thread " + thread.getName() + " should be terminated", State.TERMINATED, thread.getState());
 		}
 
 		// Should have invoked each task at least once
 		for (int i = 0; i < tasks.length; i++) {
-			assertTrue("Should have invoked task " + i + " at least once",
-					tasks[i].doTaskInvocationCount >= 1);
+			assertTrue("Should have invoked task " + i + " at least once", tasks[i].doTaskInvocationCount >= 1);
 		}
 	}
 

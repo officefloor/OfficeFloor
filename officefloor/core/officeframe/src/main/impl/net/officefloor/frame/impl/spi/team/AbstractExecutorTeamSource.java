@@ -17,18 +17,22 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.JobContext;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
-import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.spi.team.source.TeamSourceContext;
-import net.officefloor.frame.spi.team.source.impl.AbstractTeamSource;
+import net.officefloor.frame.api.team.Job;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSourceContext;
+import net.officefloor.frame.api.team.source.impl.AbstractTeamSource;
+import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
+import net.officefloor.frame.util.TeamSourceStandAlone;
 
 /**
  * {@link TeamSource} based on the {@link Executors} cached thread pool.
@@ -43,6 +47,38 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 	public static final String PROPERTY_THREAD_PRIORITY = "thread.priority";
 
 	/**
+	 * Maximum time to wait in seconds for the {@link ExecutorService} to
+	 * shutdown.
+	 */
+	public static final String PROPERTY_SHUTDOWN_TIME_IN_SECONDS = "max.shutdown.time";
+
+	/**
+	 * Convenience method to create a {@link Team} from the implementation of
+	 * this {@link AbstractExecutorTeamSource}.
+	 * 
+	 * @return {@link Team}.
+	 * @throws IllegalArgumentException
+	 *             If fails to provide correct information to load the
+	 *             {@link Team}.
+	 */
+	public Team createTeam(String... parameterNameValues) throws IllegalArgumentException {
+		TeamSourceStandAlone standAlone = new TeamSourceStandAlone();
+		for (int i = 0; i < parameterNameValues.length; i += 2) {
+			String name = parameterNameValues[i];
+			String value = parameterNameValues[i + 1];
+			standAlone.addProperty(name, value);
+		}
+		try {
+			Team team = standAlone.loadTeam(this.getClass());
+			team.startWorking();
+			return team;
+		} catch (Exception ex) {
+			// Propagate failure
+			throw new IllegalArgumentException(ex);
+		}
+	}
+
+	/**
 	 * Obtains the factory to create {@link ExecutorService}.
 	 * 
 	 * @param context
@@ -54,9 +90,8 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 	 * @throws Exception
 	 *             If fails to create the {@link ExecutorServiceFactory}.
 	 */
-	protected abstract ExecutorServiceFactory createExecutorServiceFactory(
-			TeamSourceContext context, ThreadFactory threadFactory)
-			throws Exception;
+	protected abstract ExecutorServiceFactory createExecutorServiceFactory(TeamSourceContext context,
+			ThreadFactory threadFactory) throws Exception;
 
 	/**
 	 * Factory to create the {@link ExecutorService}.
@@ -70,23 +105,6 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		 */
 		ExecutorService createExecutorService();
 
-	}
-
-	/**
-	 * Creates the {@link Team}.
-	 * 
-	 * @param executorServiceFactory
-	 *            {@link ExecutorServiceFactory}.
-	 * @param teamIdentifier
-	 *            {@link TeamIdentifier}.
-	 * @return {@link Team}.
-	 */
-	protected static Team createTeam(
-			ExecutorServiceFactory executorServiceFactory,
-			TeamIdentifier teamIdentifier) {
-
-		// Create and return the executor team
-		return new ExecutorTeam(executorServiceFactory, teamIdentifier);
 	}
 
 	/*
@@ -103,78 +121,15 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 
 		// Obtain the details of the team
 		String teamName = context.getTeamName();
-		TeamIdentifier teamIdentifier = context.getTeamIdentifier();
-		final int threadPriority = Integer
-				.valueOf(context.getProperty(PROPERTY_THREAD_PRIORITY,
-						String.valueOf(Thread.NORM_PRIORITY)));
+		int maxShutdownWaitTimeInSeconds = Integer
+				.valueOf(context.getProperty(PROPERTY_SHUTDOWN_TIME_IN_SECONDS, String.valueOf(10)));
+		int threadPriority = Integer
+				.valueOf(context.getProperty(PROPERTY_THREAD_PRIORITY, String.valueOf(Thread.NORM_PRIORITY)));
 
 		// Create and return the executor team
-		return new ExecutorTeam(this.createExecutorServiceFactory(context,
-				new TeamThreadFactory(teamName, threadPriority)),
-				teamIdentifier);
-	}
-
-	/**
-	 * {@link ThreadFactory} for the {@link Team}.
-	 */
-	protected static class TeamThreadFactory implements ThreadFactory {
-
-		/**
-		 * {@link ThreadGroup}.
-		 */
-		private final ThreadGroup group;
-
-		/**
-		 * Prefix of {@link Thread} name.
-		 */
-		private final String threadNamePrefix;
-
-		/**
-		 * Index of the next {@link Thread}.
-		 */
-		private final AtomicInteger nextThreadIndex = new AtomicInteger(1);
-
-		/**
-		 * {@link Thread} priority.
-		 */
-		private final int threadPriority;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param teamName
-		 *            Name of the {@link Team}.
-		 * @param threadPriority
-		 *            {@link Thread} priority.
-		 */
-		protected TeamThreadFactory(String teamName, int threadPriority) {
-			SecurityManager s = System.getSecurityManager();
-			this.group = (s != null) ? s.getThreadGroup() : Thread
-					.currentThread().getThreadGroup();
-			this.threadNamePrefix = teamName + "-";
-			this.threadPriority = threadPriority;
-		}
-
-		/*
-		 * ==================== ThreadFactory =======================
-		 */
-
-		@Override
-		public Thread newThread(Runnable r) {
-
-			// Create and configure the thread
-			Thread thread = new Thread(this.group, r, this.threadNamePrefix
-					+ this.nextThreadIndex.getAndIncrement(), 0);
-			if (thread.isDaemon()) {
-				thread.setDaemon(false);
-			}
-			if (thread.getPriority() != this.threadPriority) {
-				thread.setPriority(this.threadPriority);
-			}
-
-			// Return the thread
-			return thread;
-		}
+		ThreadFactory threadFactory = context.getThreadFactory(threadPriority);
+		ExecutorServiceFactory serviceFactory = this.createExecutorServiceFactory(context, threadFactory);
+		return new ExecutorTeam(teamName, serviceFactory, maxShutdownWaitTimeInSeconds);
 	}
 
 	/**
@@ -188,9 +143,14 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		private final ExecutorServiceFactory factory;
 
 		/**
-		 * {@link TeamIdentifier} of this {@link Team}.
+		 * Name of the {@link Team}.
 		 */
-		private final TeamIdentifier teamIdentifier;
+		private final String teamName;
+
+		/**
+		 * Maximum time in seconds to wait for shutdown.
+		 */
+		private final int maxShutdownWaitTimeInSeconds;
 
 		/**
 		 * {@link ExecutorService}.
@@ -198,22 +158,19 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		private ExecutorService servicer;
 
 		/**
-		 * Indicates if to continue working.
-		 */
-		private volatile boolean isContinueWorking = true;
-
-		/**
 		 * Initiate.
 		 * 
+		 * @param teamName
+		 *            Name of the {@link Team}.
 		 * @param factory
 		 *            {@link ExecutorServiceFactory}.
-		 * @param teamIdentifier
-		 *            Identifier of the {@link Team}.
+		 * @param maxShutdownWaitTimeInSeconds
+		 *            Maximum time in seconds to wait for shutdown.
 		 */
-		public ExecutorTeam(ExecutorServiceFactory factory,
-				TeamIdentifier teamIdentifier) {
+		public ExecutorTeam(String teamName, ExecutorServiceFactory factory, int maxShutdownWaitTimeInSeconds) {
+			this.teamName = teamName;
 			this.factory = factory;
-			this.teamIdentifier = teamIdentifier;
+			this.maxShutdownWaitTimeInSeconds = maxShutdownWaitTimeInSeconds;
 		}
 
 		/*
@@ -221,99 +178,61 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		 */
 
 		@Override
-		public synchronized void startWorking() {
+		public void startWorking() {
 			this.servicer = this.factory.createExecutorService();
-		}
 
-		@Override
-		public void assignJob(Job job, TeamIdentifier assignerTeam) {
-			this.servicer.execute(new JobRunnable(job, this));
-		}
-
-		@Override
-		public synchronized void stopWorking() {
-
-			// Flag to stop working
-			this.isContinueWorking = false;
-
-			// Shutdown servicer
-			this.servicer.shutdown();
-			this.servicer = null;
-		}
-	}
-
-	/**
-	 * {@link Runnable} {@link JobContext}.
-	 */
-	private static class JobRunnable implements Runnable, JobContext {
-
-		/**
-		 * {@link Job} to execute.
-		 */
-		private final Job job;
-
-		/**
-		 * {@link ExecutorTeam} responsible for the {@link Job} completion.
-		 */
-		private final ExecutorTeam team;
-
-		/**
-		 * Time optimisation.
-		 */
-		private long time = -1;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param job
-		 *            {@link Job} to execute.
-		 * @param team
-		 *            {@link ExecutorTeam} responsible for the {@link Job}
-		 *            completion.
-		 */
-		public JobRunnable(Job job, ExecutorTeam team) {
-			this.job = job;
-			this.team = team;
-		}
-
-		/*
-		 * ================= Runnable ======================
-		 */
-
-		@Override
-		public void run() {
-			do {
-
-				// Attempt to complete the Job.
-				if (this.job.doJob(this)) {
-					// Job complete
-					return;
-				}
-
-			} while (this.team.isContinueWorking);
-		}
-
-		/*
-		 * ================= JobContext ===================
-		 */
-
-		@Override
-		public long getTime() {
-			if (time < 0) {
-				time = System.currentTimeMillis();
+			// Determine if can handle rejected jobs
+			if (this.servicer instanceof ThreadPoolExecutor) {
+				ThreadPoolExecutor threadPool = (ThreadPoolExecutor) this.servicer;
+				threadPool.setRejectedExecutionHandler((job, exception) -> {
+					((Job) job).cancel(new RejectedExecutionException());
+				});
 			}
-			return time;
 		}
 
 		@Override
-		public TeamIdentifier getCurrentTeam() {
-			return this.team.teamIdentifier;
+		public void assignJob(Job job) {
+			this.servicer.execute(job);
 		}
 
 		@Override
-		public boolean continueExecution() {
-			// Always continue execution
-			return true;
+		public void stopWorking() {
+
+			// Determine if can wait for thread pool to complete
+			if (this.servicer instanceof ThreadPoolExecutor) {
+				ThreadPoolExecutor threadPool = (ThreadPoolExecutor) this.servicer;
+				BlockingQueue<Runnable> queue = threadPool.getQueue();
+
+				// Wait some time until queue is empty
+				long endWaitTime = System.currentTimeMillis() + (this.maxShutdownWaitTimeInSeconds * 1000);
+				while ((!queue.isEmpty()) || (threadPool.getActiveCount() > 0)) {
+
+					// Determine if still within time
+					if (System.currentTimeMillis() <= endWaitTime) {
+
+						// Still within time, so wait a little
+						try {
+							Thread.sleep(10);
+						} catch (InterruptedException ex) {
+						}
+					}
+				}
+			}
+
+			// Shutdown executor
+			this.servicer.shutdown();
+
+			// Await termination
+			try {
+				if (this.servicer.awaitTermination(this.maxShutdownWaitTimeInSeconds, TimeUnit.SECONDS)) {
+					return; // successful shutdown
+				}
+			} catch (InterruptedException ex) {
+			}
+
+			// Failed shutdown within time period
+			OfficeFloorImpl.getFrameworkLogger().log(Level.WARNING, "Team " + this.teamName + " failed to stop within "
+					+ this.maxShutdownWaitTimeInSeconds + " seconds");
 		}
 	}
 

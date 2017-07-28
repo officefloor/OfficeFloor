@@ -91,14 +91,12 @@ public class TypeAdapter implements InvocationHandler {
 	 *            {@link ClassLoader} of the implementation.
 	 * @return Return value from the {@link Method} invocation.
 	 */
-	public static Object invokeNoExceptionMethod(Object implementation,
-			String methodName, Object[] arguments, Class<?>[] paramTypes,
-			ClassLoader clientClassLoader, ClassLoader implClassLoader) {
+	public static Object invokeNoExceptionMethod(Object implementation, String methodName, Object[] arguments,
+			Class<?>[] paramTypes, ClassLoader clientClassLoader, ClassLoader implClassLoader) {
 		try {
 
 			// Invoke the method
-			return invokeMethod(implementation, methodName, arguments,
-					paramTypes, clientClassLoader, implClassLoader);
+			return invokeMethod(implementation, methodName, arguments, paramTypes, clientClassLoader, implClassLoader);
 
 			// Provide best attempt to propagate failure
 		} catch (RuntimeException ex) {
@@ -107,9 +105,8 @@ public class TypeAdapter implements InvocationHandler {
 			throw (Error) ex;
 		} catch (Throwable ex) {
 			// Incompatibility in throws
-			throw OfficeFloorVersionIncompatibilityException
-					.newTypeIncompatibilityException(implementation,
-							methodName, paramTypes);
+			throw OfficeFloorVersionIncompatibilityException.newTypeIncompatibilityException(implementation, methodName,
+					paramTypes);
 		}
 	}
 
@@ -132,10 +129,8 @@ public class TypeAdapter implements InvocationHandler {
 	 * @throws Throwable
 	 *             If fails to invoke the {@link Method}.
 	 */
-	public static Object invokeMethod(Object implementation, String methodName,
-			Object[] arguments, Class<?>[] paramTypes,
-			ClassLoader clientClassLoader, ClassLoader implClassLoader)
-			throws Throwable {
+	public static Object invokeMethod(Object implementation, String methodName, Object[] arguments,
+			Class<?>[] paramTypes, ClassLoader clientClassLoader, ClassLoader implClassLoader) throws Throwable {
 
 		// Ensure have arguments
 		if (arguments == null) {
@@ -149,9 +144,8 @@ public class TypeAdapter implements InvocationHandler {
 			Class<?> paramType = translateClass(paramTypes[i], implClassLoader);
 			if (paramType == null) {
 				// No adapted parameter type, then must not be compatible method
-				throw OfficeFloorVersionIncompatibilityException
-						.newTypeIncompatibilityException(implementation,
-								methodName, paramTypes);
+				throw OfficeFloorVersionIncompatibilityException.newTypeIncompatibilityException(implementation,
+						methodName, paramTypes);
 			}
 			paramTypes[i] = paramType;
 		}
@@ -166,15 +160,13 @@ public class TypeAdapter implements InvocationHandler {
 
 		} catch (NoSuchMethodException ex) {
 			// No method, so not compatible
-			throw OfficeFloorVersionIncompatibilityException
-					.newTypeIncompatibilityException(implementation,
-							methodName, paramTypes);
+			throw OfficeFloorVersionIncompatibilityException.newTypeIncompatibilityException(implementation, methodName,
+					paramTypes);
 		}
 
 		// Adapt the arguments
 		for (int i = 0; i < arguments.length; i++) {
-			arguments[i] = adaptObject(arguments[i], paramTypes[i],
-					clientClassLoader, implClassLoader);
+			arguments[i] = adaptObject(arguments[i], paramTypes[i], clientClassLoader, implClassLoader);
 		}
 
 		// Invoke the method
@@ -185,14 +177,12 @@ public class TypeAdapter implements InvocationHandler {
 
 		} catch (InvocationTargetException ex) {
 			// Propagate method failure
-			throw (Throwable) adaptObject(ex.getCause(), Throwable.class,
-					clientClassLoader, implClassLoader);
+			throw (Throwable) adaptObject(ex.getCause(), Throwable.class, clientClassLoader, implClassLoader);
 
 		} catch (Exception ex) {
 			// Not compatible
-			throw OfficeFloorVersionIncompatibilityException
-					.newTypeIncompatibilityException(implementation,
-							methodName, paramTypes);
+			throw OfficeFloorVersionIncompatibilityException.newTypeIncompatibilityException(implementation, methodName,
+					paramTypes);
 		}
 
 		// Obtain the return type
@@ -202,8 +192,7 @@ public class TypeAdapter implements InvocationHandler {
 		}
 
 		// Adapt return value
-		returnValue = adaptObject(returnValue, returnType, implClassLoader,
-				clientClassLoader);
+		returnValue = adaptObject(returnValue, returnType, implClassLoader, clientClassLoader);
 
 		// Return the value
 		return returnValue;
@@ -225,9 +214,8 @@ public class TypeAdapter implements InvocationHandler {
 	 *             If fails to adapt the object.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static Object adaptObject(Object object, Class<?> requiredType,
-			ClassLoader clientClassLoader, ClassLoader implClassLoader)
-			throws Exception {
+	private static Object adaptObject(Object object, Class<?> requiredType, ClassLoader clientClassLoader,
+			ClassLoader implClassLoader) throws Exception {
 
 		// Null does not need adapting
 		if (object == null) {
@@ -255,8 +243,7 @@ public class TypeAdapter implements InvocationHandler {
 		}
 
 		// Determine if compatible array
-		if ((objectClass.isArray())
-				&& (isCompatibleType(objectClass.getComponentType()))) {
+		if ((objectClass.isArray()) && (isCompatibleType(objectClass.getComponentType()))) {
 			// Maintain array object (for primitive arrays)
 			return object;
 		}
@@ -272,20 +259,17 @@ public class TypeAdapter implements InvocationHandler {
 		if (objectClass.isEnum()) {
 			// Transform enumeration
 			Enum<?> enumObject = (Enum<?>) object;
-			Class<?> adaptObjectClass = translateClass(objectClass,
-					implClassLoader);
+			Class<?> adaptObjectClass = translateClass(objectClass, implClassLoader);
 			return Enum.valueOf((Class) adaptObjectClass, enumObject.name());
 		}
 
 		// Transform for InputStream
 		if (InputStream.class.getName().equals(requiredType.getName())) {
 			// Create adapted InputStream
-			Class<?> adaptInputStreamClass = translateClass(InputStreamAdapter.class,
-					implClassLoader);
-			Constructor<?> constructor = adaptInputStreamClass.getConstructor(
-					Object.class, ClassLoader.class, ClassLoader.class);
-			Object instance = constructor.newInstance(object,
-					clientClassLoader, implClassLoader);
+			Class<?> adaptInputStreamClass = translateClass(InputStreamAdapter.class, implClassLoader);
+			Constructor<?> constructor = adaptInputStreamClass.getConstructor(Object.class, ClassLoader.class,
+					ClassLoader.class);
+			Object instance = constructor.newInstance(object, clientClassLoader, implClassLoader);
 			return instance;
 		}
 
@@ -300,21 +284,16 @@ public class TypeAdapter implements InvocationHandler {
 				Constructor<?> constructor;
 				try {
 					// Attempt to adapt the actual throwable type
-					Class<?> adaptedCauseClass = translateClass(objectClass,
-							implClassLoader);
-					constructor = adaptedCauseClass
-							.getConstructor(String.class);
+					Class<?> adaptedCauseClass = translateClass(objectClass, implClassLoader);
+					constructor = adaptedCauseClass.getConstructor(String.class);
 					return constructor.newInstance(cause.getMessage());
 
 				} catch (Throwable ex) {
 					// Only provide exception for CompilerIssue.
 					// Therefore can adapt the exception with another.
-					Class<?> adaptedExceptionClass = translateClass(
-							AdaptedException.class, implClassLoader);
-					constructor = adaptedExceptionClass.getConstructor(
-							String.class, String.class);
-					return constructor.newInstance(cause.getMessage(), cause
-							.getClass().getName());
+					Class<?> adaptedExceptionClass = translateClass(AdaptedException.class, implClassLoader);
+					constructor = adaptedExceptionClass.getConstructor(String.class, String.class);
+					return constructor.newInstance(cause.getMessage(), cause.getClass().getName());
 				}
 			}
 		}
@@ -322,17 +301,13 @@ public class TypeAdapter implements InvocationHandler {
 		// Transform possible array
 		if (objectClass.isArray()) {
 			// Proxy the array
-			Class<?> adaptedComponentType = translateClass(
-					objectClass.getComponentType(), implClassLoader);
+			Class<?> adaptedComponentType = translateClass(objectClass.getComponentType(), implClassLoader);
 			Object[] objectArray = (Object[]) object;
-			Object[] adaptedArray = (Object[]) Array.newInstance(
-					adaptedComponentType, objectArray.length);
+			Object[] adaptedArray = (Object[]) Array.newInstance(adaptedComponentType, objectArray.length);
 
 			// Adapt the elements
 			for (int i = 0; i < adaptedArray.length; i++) {
-				adaptedArray[i] = adaptObject(objectArray[i],
-						adaptedComponentType, clientClassLoader,
-						implClassLoader);
+				adaptedArray[i] = adaptObject(objectArray[i], adaptedComponentType, clientClassLoader, implClassLoader);
 			}
 
 			// Return the adapted array
@@ -341,8 +316,7 @@ public class TypeAdapter implements InvocationHandler {
 
 		// Adapt by interfaces
 		Class<?>[] interfaces = getInterfaces(objectClass);
-		return createProxy(object, implClassLoader, clientClassLoader,
-				interfaces);
+		return createProxy(object, implClassLoader, clientClassLoader, interfaces);
 	}
 
 	/**
@@ -353,8 +327,7 @@ public class TypeAdapter implements InvocationHandler {
 	 * @return <code>true</code> if compatible type.
 	 */
 	private static boolean isCompatibleType(Class<?> type) {
-		return (compatibleObjectTypes.contains(type.getName()))
-				|| (type.isPrimitive());
+		return (compatibleObjectTypes.contains(type.getName())) || (type.isPrimitive());
 	}
 
 	/**
@@ -369,8 +342,7 @@ public class TypeAdapter implements InvocationHandler {
 	 * @throws ClassNotFoundException
 	 *             If fails to obtain translated {@link Class}.
 	 */
-	private static Class<?> translateClass(Class<?> clazz,
-			ClassLoader classLoader) throws ClassNotFoundException {
+	private static Class<?> translateClass(Class<?> clazz, ClassLoader classLoader) throws ClassNotFoundException {
 
 		// Do not translate if primitive
 		if (clazz.isPrimitive()) {
@@ -391,8 +363,7 @@ public class TypeAdapter implements InvocationHandler {
 				}
 
 				// Translate array of object
-				Class<?> adaptedComponentType = classLoader
-						.loadClass(componentType.getName());
+				Class<?> adaptedComponentType = classLoader.loadClass(componentType.getName());
 				return Array.newInstance(adaptedComponentType, 0).getClass();
 			}
 
@@ -464,8 +435,7 @@ public class TypeAdapter implements InvocationHandler {
 	 * @throws ClassNotFoundException
 	 *             If fails to load interface type for {@link Proxy}.
 	 */
-	public static Object createProxy(Object implementation,
-			ClassLoader clientClassLoader, ClassLoader implClassLoader,
+	public static Object createProxy(Object implementation, ClassLoader clientClassLoader, ClassLoader implClassLoader,
 			Class<?>... interfaceTypes) throws ClassNotFoundException {
 
 		// Ensure interface types can be loaded by client Class Loader
@@ -473,8 +443,7 @@ public class TypeAdapter implements InvocationHandler {
 		for (int i = 0; i < interfaceTypes.length; i++) {
 
 			// Translate the interface
-			Class<?> adaptedInterfaceType = translateClass(interfaceTypes[i],
-					clientClassLoader);
+			Class<?> adaptedInterfaceType = translateClass(interfaceTypes[i], clientClassLoader);
 			if (adaptedInterfaceType != null) {
 				// Have adaption available
 				interfaces.add(adaptedInterfaceType);
@@ -483,9 +452,8 @@ public class TypeAdapter implements InvocationHandler {
 		interfaceTypes = interfaces.toArray(new Class[interfaces.size()]);
 
 		// Create the proxy
-		Object proxy = Proxy.newProxyInstance(clientClassLoader,
-				interfaceTypes, new TypeAdapter(implementation,
-						clientClassLoader, implClassLoader, interfaceTypes));
+		Object proxy = Proxy.newProxyInstance(clientClassLoader, interfaceTypes,
+				new TypeAdapter(implementation, clientClassLoader, implClassLoader, interfaceTypes));
 
 		// Return the proxy
 		return proxy;
@@ -523,8 +491,8 @@ public class TypeAdapter implements InvocationHandler {
 	 * @param interfaceTypes
 	 *            Interface types. Keep reference to make debugging easier.
 	 */
-	private TypeAdapter(Object implementation, ClassLoader clientClassLoader,
-			ClassLoader implClassLoader, Class<?>[] interfaceTypes) {
+	private TypeAdapter(Object implementation, ClassLoader clientClassLoader, ClassLoader implClassLoader,
+			Class<?>[] interfaceTypes) {
 		this.implementation = implementation;
 		this.clientClassLoader = clientClassLoader;
 		this.implClassLoader = implClassLoader;
@@ -551,11 +519,9 @@ public class TypeAdapter implements InvocationHandler {
 	 */
 
 	@Override
-	public Object invoke(Object proxy, Method method, Object[] args)
-			throws Throwable {
-		return invokeMethod(this.implementation, method.getName(), args,
-				method.getParameterTypes(), this.clientClassLoader,
-				this.implClassLoader);
+	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+		return invokeMethod(this.implementation, method.getName(), args, method.getParameterTypes(),
+				this.clientClassLoader, this.implClassLoader);
 	}
 
 }

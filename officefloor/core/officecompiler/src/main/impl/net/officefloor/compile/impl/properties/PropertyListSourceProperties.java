@@ -19,8 +19,8 @@ package net.officefloor.compile.impl.properties;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
-import net.officefloor.frame.spi.source.SourceProperties;
 
 /**
  * {@link SourceProperties} initialised from a {@link PropertyList}.
@@ -36,8 +36,10 @@ public class PropertyListSourceProperties extends SourcePropertiesImpl {
 	 *            {@link PropertyList}.
 	 */
 	public PropertyListSourceProperties(PropertyList properties) {
-		for (Property property : properties) {
-			this.addProperty(property.getName(), property.getValue());
+		if (properties != null) {
+			for (Property property : properties) {
+				this.addProperty(property.getName(), property.getValue());
+			}
 		}
 	}
 

@@ -20,10 +20,10 @@ package net.officefloor.plugin.governance.clazz;
 import java.lang.reflect.Method;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.governance.GovernanceContext;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.plugin.work.clazz.ClassTask;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.governance.GovernanceContext;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.plugin.managedfunction.clazz.ClassFunction;
 
 /**
  * {@link Class} {@link Governance}.
@@ -81,14 +81,14 @@ public class ClassGovernance implements Governance<Object, Indexed> {
 	@Override
 	public void governManagedObject(Object extensionInterface,
 			GovernanceContext<Indexed> context) throws Throwable {
-		ClassTask.invokeMethod(this.instance, this.governMethod,
+		ClassFunction.invokeMethod(this.instance, this.governMethod,
 				new Object[] { extensionInterface });
 	}
 
 	@Override
 	public void enforceGovernance(GovernanceContext<Indexed> context)
 			throws Throwable {
-		ClassTask
+		ClassFunction
 				.invokeMethod(this.instance, this.enforceMethod, new Object[0]);
 	}
 
@@ -97,7 +97,7 @@ public class ClassGovernance implements Governance<Object, Indexed> {
 			throws Throwable {
 		// Disregard if method to do so
 		if (this.disregardMethod != null) {
-			ClassTask.invokeMethod(this.instance, this.disregardMethod,
+			ClassFunction.invokeMethod(this.instance, this.disregardMethod,
 					new Object[0]);
 		}
 	}

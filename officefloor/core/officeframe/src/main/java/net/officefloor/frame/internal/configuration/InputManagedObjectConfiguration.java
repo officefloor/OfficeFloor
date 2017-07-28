@@ -17,15 +17,15 @@
  */
 package net.officefloor.frame.internal.configuration;
 
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Configuration of a {@link ManagedObject} input into a {@link ProcessState}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface InputManagedObjectConfiguration<D extends Enum<D>> {
+public interface InputManagedObjectConfiguration<O extends Enum<O>> {
 
 	/**
 	 * Obtains name the input {@link ManagedObject} is bound to within the
@@ -42,7 +42,7 @@ public interface InputManagedObjectConfiguration<D extends Enum<D>> {
 	 * 
 	 * @return {@link ManagedObjectDependencyConfiguration} instances.
 	 */
-	ManagedObjectDependencyConfiguration<D>[] getDependencyConfiguration();
+	ManagedObjectDependencyConfiguration<O>[] getDependencyConfiguration();
 
 	/**
 	 * Obtains the listing of {@link ManagedObjectGovernanceConfiguration}

@@ -1,12 +1,5 @@
 <office-floor>
-    <teams>
-        <team name="TEAM" source="PASSIVE"/>
-    </teams>
     <offices>
-        <office name="OFFICE" source="OFFICE" location="net/officefloor/plugin/jndi/context/test.office">
-            <team name="OFFICE_TEAM">
-                <office-floor-team name="TEAM"/>
-            </team>
-        </office>
+        <office name="OFFICE" source="OFFICE" location="net/officefloor/plugin/jndi/context/test.office" />
     </offices>
 </office-floor>

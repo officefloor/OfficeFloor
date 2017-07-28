@@ -23,23 +23,24 @@ import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionTransformerContext;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
-import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.OfficeFloorBuilder;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * Node within the hierarchy of {@link OfficeSection} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionNode extends Node, ManagedObjectRegistry, TaskRegistry,
-		SectionDesigner, SubSection, OfficeSection {
+public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctionRegistry,
+		OfficeSectionTransformerContext, SectionDesigner, SubSection, OfficeSection {
 
 	/**
 	 * {@link Node} type.
@@ -57,8 +58,7 @@ public interface SectionNode extends Node, ManagedObjectRegistry, TaskRegistry,
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection}.
 	 */
-	void initialise(String sectionSourceClassName, SectionSource sectionSource,
-			String sectionLocation);
+	void initialise(String sectionSourceClassName, SectionSource sectionSource, String sectionLocation);
 
 	/**
 	 * <p>
@@ -66,70 +66,101 @@ public interface SectionNode extends Node, ManagedObjectRegistry, TaskRegistry,
 	 * <p>
 	 * This will only source the top level {@link OfficeSection}.
 	 * 
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	boolean sourceSection();
+	boolean sourceSection(CompileContext compileContext);
 
 	/**
 	 * Sources this {@link SectionNode} and all its descendant {@link Node}
 	 * instances recursively.
 	 * 
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	boolean sourceSectionTree();
+	boolean sourceSectionTree(CompileContext compileContext);
+
+	/**
+	 * Sources the inheritance of the {@link SectionNode}.
+	 * 
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 * @return <code>true</code> if successfully sourced. Otherwise
+	 *         <code>false</code> with issue reported to the
+	 *         {@link CompilerIssues}.
+	 */
+	boolean sourceInheritance(CompileContext compileContext);
+
+	/**
+	 * Obtains the parent {@link SectionNode} to this {@link SectionNode}.
+	 * 
+	 * @return Parent {@link SectionNode} to this {@link SectionNode}.
+	 */
+	SectionNode getSuperSection();
+
+	/**
+	 * Obtains the possible {@link SectionOutputNode}.
+	 * 
+	 * @param outputName
+	 *            Name of the {@link SectionOutputNode}.
+	 * @return {@link SectionOutputNode} or <code>null</code> if no
+	 *         {@link SectionOutputNode} by name on the {@link SectionNode}.
+	 */
+	SectionOutputNode getSectionOutputNode(String outputName);
 
 	/**
 	 * Loads the {@link SectionType}.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return {@link SectionType} or <code>null</code> if issue loading with
 	 *         issue reported to the {@link CompilerIssues}.
 	 * 
 	 * @see #sourceSection()
 	 */
-	SectionType loadSectionType(TypeContext typeContext);
+	SectionType loadSectionType(CompileContext compileContext);
 
 	/**
 	 * Loads the {@link OfficeSectionType}.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return {@link OfficeSectionType} or <code>null</code> if issue loading
 	 *         with issue reported to the {@link CompilerIssues}.
 	 * 
 	 * @see #sourceSectionTree()
 	 */
-	OfficeSectionType loadOfficeSectionType(TypeContext typeContext);
+	OfficeSectionType loadOfficeSectionType(CompileContext compileContext);
 
 	/**
 	 * Loads the {@link OfficeSubSectionType}.
 	 * 
 	 * @param parentSectionType
 	 *            Parent {@link OfficeSubSectionType}.
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return {@link OfficeSubSectionType} or <code>null</code> if issue
 	 *         loading with issue reported to the {@link CompilerIssues}.
 	 */
-	OfficeSubSectionType loadOfficeSubSectionType(
-			OfficeSubSectionType parentSectionType, TypeContext typeContext);
+	OfficeSubSectionType loadOfficeSubSectionType(OfficeSubSectionType parentSectionType,
+			CompileContext compileContext);
 
 	/**
 	 * Loads the {@link OfficeAvailableSectionInputType} instances.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return {@link OfficeAvailableSectionInputType} instances or
 	 *         <code>null</code> with issues reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	OfficeAvailableSectionInputType[] loadOfficeAvailableSectionInputTypes(
-			TypeContext typeContext);
+	OfficeAvailableSectionInputType[] loadOfficeAvailableSectionInputTypes(CompileContext compileContext);
 
 	/**
 	 * Obtains the {@link DeployedOfficeInput}.
@@ -149,7 +180,8 @@ public interface SectionNode extends Node, ManagedObjectRegistry, TaskRegistry,
 	 * <ol>
 	 * <li>{@link GovernanceNode} assigned to this particular
 	 * {@link SectionNode}</li>
-	 * <li>{@link GovernanceNode} assigned to any parent {@link SectionNode}</li>
+	 * <li>{@link GovernanceNode} assigned to any parent
+	 * {@link SectionNode}</li>
 	 * </ol>
 	 * 
 	 * @return {@link GovernanceNode} instances providing {@link Governance}
@@ -175,14 +207,47 @@ public interface SectionNode extends Node, ManagedObjectRegistry, TaskRegistry,
 	OfficeNode getOfficeNode();
 
 	/**
-	 * Obtain the {@link OfficeSection} qualified name.
+	 * Obtain the {@link OfficeSection} qualified name. This includes the
+	 * {@link Office} name.
 	 * 
 	 * @param simpleName
 	 *            Simple name to qualify with the {@link OfficeSection} name
 	 *            space.
 	 * @return {@link OfficeSection} qualified name.
 	 */
+	String getQualifiedName(String simpleName);
+
+	/**
+	 * Obtains the {@link SectionNode} qualified name within the
+	 * {@link OfficeNode}.
+	 * 
+	 * @param simpleName
+	 *            Simple name to qualify with the {@link SectionNode} name
+	 *            space.
+	 * @return {@link SectionNode} qualified name.
+	 */
 	String getSectionQualifiedName(String simpleName);
+
+	/**
+	 * Auto-wires the {@link SectionObjectNode} instances that are unlinked.
+	 * 
+	 * @param autoWirer
+	 *            {@link AutoWirer}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 */
+	void autoWireObjects(AutoWirer<LinkObjectNode> autoWirer, CompileContext compileContext);
+
+	/**
+	 * Auto-wires the {@link SectionFunction} instances to a possible
+	 * responsible {@link Team}.
+	 * 
+	 * @param autoWirer
+	 *            {@link AutoWirer}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 */
+	void autoWireTeams(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext);
 
 	/**
 	 * Builds this {@link OfficeSection} for this {@link SectionNode}.
@@ -193,10 +258,9 @@ public interface SectionNode extends Node, ManagedObjectRegistry, TaskRegistry,
 	 * @param officeBindings
 	 *            {@link OfficeBindings} of the {@link Office} containing this
 	 *            {@link SectionNode}.
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 */
-	void buildSection(OfficeBuilder officeBuilder,
-			OfficeBindings officeBindings, TypeContext typeContext);
+	void buildSection(OfficeBuilder officeBuilder, OfficeBindings officeBindings, CompileContext compileContext);
 
 }

@@ -18,28 +18,27 @@
 package net.officefloor.plugin.web.http.application;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
  * {@link ManagedObjectSource} for the {@link HttpRequestState}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpApplicationStateManagedObjectSource extends
-		AbstractManagedObjectSource<None, None> {
+public class HttpApplicationStateManagedObjectSource extends AbstractManagedObjectSource<None, None> {
 
 	/**
 	 * Attributes.
 	 */
-	private final Map<String, Object> attributes = new HashMap<String, Object>();
+	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
 	/*
 	 * =================== ManagedObjectSource ==========================
@@ -51,8 +50,7 @@ public class HttpApplicationStateManagedObjectSource extends
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<None, None> context)
-			throws Exception {
+	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
 		context.setObjectClass(HttpApplicationState.class);
 	}
 
@@ -64,8 +62,7 @@ public class HttpApplicationStateManagedObjectSource extends
 	/**
 	 * {@link ManagedObject} for the {@link HttpRequestState}.
 	 */
-	private class HttpRequestStateManagedObject implements ManagedObject,
-			HttpApplicationState {
+	private class HttpRequestStateManagedObject implements ManagedObject, HttpApplicationState {
 
 		/*
 		 * ====================== ManagedObject ===========================
@@ -82,37 +79,25 @@ public class HttpApplicationStateManagedObjectSource extends
 
 		@Override
 		public Object getAttribute(String name) {
-			synchronized (HttpApplicationStateManagedObjectSource.this.attributes) {
-				return HttpApplicationStateManagedObjectSource.this.attributes
-						.get(name);
-			}
+			return HttpApplicationStateManagedObjectSource.this.attributes.get(name);
 		}
 
 		@Override
-		public synchronized Iterator<String> getAttributeNames() {
-			synchronized (HttpApplicationStateManagedObjectSource.this.attributes) {
-				// Create copy of names (stops concurrency issues)
-				List<String> names = new ArrayList<String>(
-						HttpApplicationStateManagedObjectSource.this.attributes
-								.keySet());
-				return names.iterator();
-			}
+		public Iterator<String> getAttributeNames() {
+			// Create copy of names (stops concurrency issues)
+			List<String> names = new ArrayList<String>(
+					HttpApplicationStateManagedObjectSource.this.attributes.keySet());
+			return names.iterator();
 		}
 
 		@Override
-		public synchronized void setAttribute(String name, Object object) {
-			synchronized (HttpApplicationStateManagedObjectSource.this.attributes) {
-				HttpApplicationStateManagedObjectSource.this.attributes.put(
-						name, object);
-			}
+		public void setAttribute(String name, Object object) {
+			HttpApplicationStateManagedObjectSource.this.attributes.put(name, object);
 		}
 
 		@Override
-		public synchronized void removeAttribute(String name) {
-			synchronized (HttpApplicationStateManagedObjectSource.this.attributes) {
-				HttpApplicationStateManagedObjectSource.this.attributes
-						.remove(name);
-			}
+		public void removeAttribute(String name) {
+			HttpApplicationStateManagedObjectSource.this.attributes.remove(name);
 		}
 	}
 

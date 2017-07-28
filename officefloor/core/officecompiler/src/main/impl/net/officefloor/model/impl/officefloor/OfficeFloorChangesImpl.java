@@ -43,6 +43,7 @@ import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.change.AbstractChange;
 import net.officefloor.model.impl.change.DisconnectChange;
+import net.officefloor.model.impl.change.NoChange;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
@@ -68,6 +69,7 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorMa
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.PropertyModel;
+import net.officefloor.model.officefloor.TypeQualificationModel;
 
 /**
  * {@link OfficeFloorChanges} implementation.
@@ -111,8 +113,8 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 			return PROCESS_MANAGED_OBJECT_SCOPE;
 		case THREAD:
 			return THREAD_MANAGED_OBJECT_SCOPE;
-		case WORK:
-			return WORK_MANAGED_OBJECT_SCOPE;
+		case FUNCTION:
+			return FUNCTION_MANAGED_OBJECT_SCOPE;
 		default:
 			throw new IllegalStateException("Unknown scope " + scope);
 		}
@@ -123,95 +125,78 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 	 */
 
 	@Override
-	public Change<DeployedOfficeModel> addDeployedOffice(String officeName,
-			String officeSourceClassName, String officeLocation,
-			PropertyList propertyList, OfficeType officeType) {
+	public Change<DeployedOfficeModel> addDeployedOffice(String officeName, String officeSourceClassName,
+			String officeLocation, PropertyList propertyList, OfficeType officeType) {
 
 		// TODO test this method (addDeployedOffice)
 
 		// Create the deployed office
-		final DeployedOfficeModel office = new DeployedOfficeModel(officeName,
-				officeSourceClassName, officeLocation);
+		final DeployedOfficeModel office = new DeployedOfficeModel(officeName, officeSourceClassName, officeLocation);
 		for (Property property : propertyList) {
-			office.addProperty(new PropertyModel(property.getName(), property
-					.getValue()));
+			office.addProperty(new PropertyModel(property.getName(), property.getValue()));
 		}
 
 		// Add the inputs for the office
-		for (OfficeAvailableSectionInputType input : officeType
-				.getOfficeSectionInputTypes()) {
-			office.addDeployedOfficeInput(new DeployedOfficeInputModel(input
-					.getOfficeSectionName(), input.getOfficeSectionInputName(),
-					input.getParameterType()));
+		for (OfficeAvailableSectionInputType input : officeType.getOfficeSectionInputTypes()) {
+			office.addDeployedOfficeInput(new DeployedOfficeInputModel(input.getOfficeSectionName(),
+					input.getOfficeSectionInputName(), input.getParameterType()));
 		}
 
 		// Add the teams for the office
 		for (OfficeTeamType team : officeType.getOfficeTeamTypes()) {
-			office.addDeployedOfficeTeam(new DeployedOfficeTeamModel(team
-					.getOfficeTeamName()));
+			office.addDeployedOfficeTeam(new DeployedOfficeTeamModel(team.getOfficeTeamName()));
 		}
 
 		// Add the objects for the office
-		for (OfficeManagedObjectType managedObject : officeType
-				.getOfficeManagedObjectTypes()) {
-			office.addDeployedOfficeObject(new DeployedOfficeObjectModel(
-					managedObject.getOfficeManagedObjectName(), managedObject
-							.getObjectType()));
+		for (OfficeManagedObjectType managedObject : officeType.getOfficeManagedObjectTypes()) {
+			office.addDeployedOfficeObject(new DeployedOfficeObjectModel(managedObject.getOfficeManagedObjectName(),
+					managedObject.getObjectType()));
 		}
 
 		// Return the change to add the office
 		return new AbstractChange<DeployedOfficeModel>(office, "Add office") {
 			@Override
 			public void apply() {
-				OfficeFloorChangesImpl.this.officeFloor
-						.addDeployedOffice(office);
+				OfficeFloorChangesImpl.this.officeFloor.addDeployedOffice(office);
 			}
 
 			@Override
 			public void revert() {
-				OfficeFloorChangesImpl.this.officeFloor
-						.removeDeployedOffice(office);
+				OfficeFloorChangesImpl.this.officeFloor.removeDeployedOffice(office);
 			}
 		};
 	}
 
 	@Override
-	public Change<DeployedOfficeModel> removeDeployedOffice(
-			final DeployedOfficeModel deployedOffice) {
+	public Change<DeployedOfficeModel> removeDeployedOffice(final DeployedOfficeModel deployedOffice) {
 
 		// TODO test this method (removeDeployedOffice)
 
 		// Return change to remove the office
-		return new AbstractChange<DeployedOfficeModel>(deployedOffice,
-				"Remove office") {
+		return new AbstractChange<DeployedOfficeModel>(deployedOffice, "Remove office") {
 			@Override
 			public void apply() {
-				OfficeFloorChangesImpl.this.officeFloor
-						.removeDeployedOffice(deployedOffice);
+				OfficeFloorChangesImpl.this.officeFloor.removeDeployedOffice(deployedOffice);
 			}
 
 			@Override
 			public void revert() {
-				OfficeFloorChangesImpl.this.officeFloor
-						.addDeployedOffice(deployedOffice);
+				OfficeFloorChangesImpl.this.officeFloor.addDeployedOffice(deployedOffice);
 			}
 		};
 	}
 
 	@Override
-	public Change<DeployedOfficeModel> renameDeployedOffice(
-			final DeployedOfficeModel deployedOffice,
+	public Change<DeployedOfficeModel> renameDeployedOffice(final DeployedOfficeModel deployedOffice,
 			final String newDeployedOfficeName) {
 
 		// TODO test this method (renameDeployedOffice)
 
 		// Obtain the old name
-		final String oldDeployedOfficeName = deployedOffice
-				.getDeployedOfficeName();
+		final String oldDeployedOfficeName = deployedOffice.getDeployedOfficeName();
 
 		// Return change to rename the office
-		return new AbstractChange<DeployedOfficeModel>(deployedOffice,
-				"Rename office to " + newDeployedOfficeName) {
+		return new AbstractChange<DeployedOfficeModel>(deployedOffice, "Rename office to " + newDeployedOfficeName) {
 			@Override
 			public void apply() {
 				deployedOffice.setDeployedOfficeName(newDeployedOfficeName);
@@ -225,12 +210,9 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 	}
 
 	@Override
-	public Change<DeployedOfficeModel> refactorDeployedOffice(
-			final DeployedOfficeModel office, final String officeName,
-			final String officeSourceClassName, final String officeLocation,
-			PropertyList properties, OfficeType officeType,
-			Map<String, String> objectNameMapping,
-			Map<String, String> inputNameMapping,
+	public Change<DeployedOfficeModel> refactorDeployedOffice(final DeployedOfficeModel office, final String officeName,
+			final String officeSourceClassName, final String officeLocation, PropertyList properties,
+			OfficeType officeType, Map<String, String> objectNameMapping, Map<String, String> inputNameMapping,
 			Map<String, String> teamNameMapping) {
 
 		// Create the list to contain all refactor changes
@@ -240,11 +222,9 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 
 		// Add change for office details
 		final String existingOfficeName = office.getDeployedOfficeName();
-		final String existingOfficeSourceClassName = office
-				.getOfficeSourceClassName();
+		final String existingOfficeSourceClassName = office.getOfficeSourceClassName();
 		final String existingOfficeLocation = office.getOfficeLocation();
-		refactor.add(new AbstractChange<DeployedOfficeModel>(office,
-				"Change office details") {
+		refactor.add(new AbstractChange<DeployedOfficeModel>(office, "Change office details") {
 			@Override
 			public void apply() {
 				office.setDeployedOfficeName(officeName);
@@ -261,15 +241,12 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		});
 
 		// Add change to the properties
-		final List<PropertyModel> existingProperties = new ArrayList<PropertyModel>(
-				office.getProperties());
+		final List<PropertyModel> existingProperties = new ArrayList<PropertyModel>(office.getProperties());
 		final List<PropertyModel> newProperties = new LinkedList<PropertyModel>();
 		for (Property property : properties) {
-			newProperties.add(new PropertyModel(property.getName(), property
-					.getValue()));
+			newProperties.add(new PropertyModel(property.getName(), property.getValue()));
 		}
-		refactor.add(new AbstractChange<DeployedOfficeModel>(office,
-				"Change office properties") {
+		refactor.add(new AbstractChange<DeployedOfficeModel>(office, "Change office properties") {
 			@Override
 			public void apply() {
 				for (PropertyModel property : existingProperties) {
@@ -295,15 +272,12 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 
 		// Create the map of existing objects to their names
 		Map<String, DeployedOfficeObjectModel> existingObjectMapping = new HashMap<String, DeployedOfficeObjectModel>();
-		for (DeployedOfficeObjectModel object : office
-				.getDeployedOfficeObjects()) {
-			existingObjectMapping.put(object.getDeployedOfficeObjectName(),
-					object);
+		for (DeployedOfficeObjectModel object : office.getDeployedOfficeObjects()) {
+			existingObjectMapping.put(object.getDeployedOfficeObjectName(), object);
 		}
 
 		// Create the listing of target objects
-		OfficeManagedObjectType[] objectTypes = officeType
-				.getOfficeManagedObjectTypes();
+		OfficeManagedObjectType[] objectTypes = officeType.getOfficeManagedObjectTypes();
 		final DeployedOfficeObjectModel[] targetObjects = new DeployedOfficeObjectModel[objectTypes.length];
 		for (int o = 0; o < targetObjects.length; o++) {
 			OfficeManagedObjectType objectType = objectTypes[o];
@@ -314,18 +288,16 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 			// TODO refactor extension interfaces
 
 			// Obtain the object for object type (may need to create)
-			DeployedOfficeObjectModel findObject = this.getExistingItem(
-					objectName, objectNameMapping, existingObjectMapping);
+			DeployedOfficeObjectModel findObject = this.getExistingItem(objectName, objectNameMapping,
+					existingObjectMapping);
 			final DeployedOfficeObjectModel object = (findObject != null ? findObject
 					: new DeployedOfficeObjectModel(objectName, objectTypeName));
 			targetObjects[o] = object;
 
 			// Refactor details of object
-			final String existingObjectName = object
-					.getDeployedOfficeObjectName();
+			final String existingObjectName = object.getDeployedOfficeObjectName();
 			final String existingObjectTypeName = object.getObjectType();
-			refactor.add(new AbstractChange<DeployedOfficeObjectModel>(object,
-					"Refactor office object") {
+			refactor.add(new AbstractChange<DeployedOfficeObjectModel>(object, "Refactor office object") {
 				@Override
 				public void apply() {
 					object.setDeployedOfficeObjectName(objectName);
@@ -343,17 +315,14 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		// Ensure target objects sorted by name
 		Arrays.sort(targetObjects, new Comparator<DeployedOfficeObjectModel>() {
 			@Override
-			public int compare(DeployedOfficeObjectModel a,
-					DeployedOfficeObjectModel b) {
-				return a.getDeployedOfficeObjectName().compareTo(
-						b.getDeployedOfficeObjectName());
+			public int compare(DeployedOfficeObjectModel a, DeployedOfficeObjectModel b) {
+				return a.getDeployedOfficeObjectName().compareTo(b.getDeployedOfficeObjectName());
 			}
 		});
 
 		// Obtain the existing objects
-		final DeployedOfficeObjectModel[] existingObjects = office
-				.getDeployedOfficeObjects().toArray(
-						new DeployedOfficeObjectModel[0]);
+		final DeployedOfficeObjectModel[] existingObjects = office.getDeployedOfficeObjects()
+				.toArray(new DeployedOfficeObjectModel[0]);
 
 		// Add changes to disconnect existing objects to be removed
 		Set<DeployedOfficeObjectModel> targetObjectSet = new HashSet<DeployedOfficeObjectModel>(
@@ -362,13 +331,10 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 			if (!(targetObjectSet.contains(existingObject))) {
 				// Add change to disconnect object
 				final DeployedOfficeObjectModel object = existingObject;
-				refactor.add(new DisconnectChange<DeployedOfficeObjectModel>(
-						existingObject) {
+				refactor.add(new DisconnectChange<DeployedOfficeObjectModel>(existingObject) {
 					@Override
-					protected void populateRemovedConnections(
-							List<ConnectionModel> connList) {
-						DeployedOfficeObjectToOfficeFloorManagedObjectModel conn = object
-								.getOfficeFloorManagedObject();
+					protected void populateRemovedConnections(List<ConnectionModel> connList) {
+						DeployedOfficeObjectToOfficeFloorManagedObjectModel conn = object.getOfficeFloorManagedObject();
 						if (conn != null) {
 							conn.remove();
 							connList.add(conn);
@@ -379,8 +345,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		}
 
 		// Add change to refactor objects
-		refactor.add(new AbstractChange<DeployedOfficeModel>(office,
-				"Refactor objects of office") {
+		refactor.add(new AbstractChange<DeployedOfficeModel>(office, "Refactor objects of office") {
 			@Override
 			public void apply() {
 				// Remove existing objects, add target objects
@@ -409,14 +374,12 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		// Create the map of existing inputs to their names
 		Map<String, DeployedOfficeInputModel> existingInputMapping = new HashMap<String, DeployedOfficeInputModel>();
 		for (DeployedOfficeInputModel input : office.getDeployedOfficeInputs()) {
-			String sectionInputName = input.getSectionName()
-					+ SECTION_INPUT_SEPARATOR + input.getSectionInputName();
+			String sectionInputName = input.getSectionName() + SECTION_INPUT_SEPARATOR + input.getSectionInputName();
 			existingInputMapping.put(sectionInputName, input);
 		}
 
 		// Create the listing of target inputs
-		OfficeAvailableSectionInputType[] inputTypes = officeType
-				.getOfficeSectionInputTypes();
+		OfficeAvailableSectionInputType[] inputTypes = officeType.getOfficeSectionInputTypes();
 		final DeployedOfficeInputModel[] targetInputs = new DeployedOfficeInputModel[inputTypes.length];
 		for (int i = 0; i < targetInputs.length; i++) {
 			OfficeAvailableSectionInputType inputType = inputTypes[i];
@@ -424,24 +387,21 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 			// Obtain the details of the input
 			final String sectionName = inputType.getOfficeSectionName();
 			final String inputName = inputType.getOfficeSectionInputName();
-			final String sectionInputName = sectionName
-					+ SECTION_INPUT_SEPARATOR + inputName;
+			final String sectionInputName = sectionName + SECTION_INPUT_SEPARATOR + inputName;
 			final String parameterTypeName = inputType.getParameterType();
 
 			// Obtain the input for input type (may need to create)
-			DeployedOfficeInputModel findInput = this.getExistingItem(
-					sectionInputName, inputNameMapping, existingInputMapping);
+			DeployedOfficeInputModel findInput = this.getExistingItem(sectionInputName, inputNameMapping,
+					existingInputMapping);
 			final DeployedOfficeInputModel input = (findInput != null ? findInput
-					: new DeployedOfficeInputModel(sectionName, inputName,
-							parameterTypeName));
+					: new DeployedOfficeInputModel(sectionName, inputName, parameterTypeName));
 			targetInputs[i] = input;
 
 			// Refactor details of input
 			final String existingSectionName = input.getSectionName();
 			final String existingInputName = input.getSectionInputName();
 			final String existingParmeterTypeName = input.getParameterType();
-			refactor.add(new AbstractChange<DeployedOfficeInputModel>(input,
-					"Refactor office input") {
+			refactor.add(new AbstractChange<DeployedOfficeInputModel>(input, "Refactor office input") {
 				@Override
 				public void apply() {
 					input.setSectionName(sectionName);
@@ -461,18 +421,15 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		// Ensure target inputs sorted by name
 		Arrays.sort(targetInputs, new Comparator<DeployedOfficeInputModel>() {
 			@Override
-			public int compare(DeployedOfficeInputModel a,
-					DeployedOfficeInputModel b) {
-				return (a.getSectionName() + SECTION_INPUT_SEPARATOR + a
-						.getSectionInputName()).compareTo(b.getSectionName()
-						+ SECTION_INPUT_SEPARATOR + b.getSectionInputName());
+			public int compare(DeployedOfficeInputModel a, DeployedOfficeInputModel b) {
+				return (a.getSectionName() + SECTION_INPUT_SEPARATOR + a.getSectionInputName())
+						.compareTo(b.getSectionName() + SECTION_INPUT_SEPARATOR + b.getSectionInputName());
 			}
 		});
 
 		// Obtain the existing inputs
-		final DeployedOfficeInputModel[] existingInputs = office
-				.getDeployedOfficeInputs().toArray(
-						new DeployedOfficeInputModel[0]);
+		final DeployedOfficeInputModel[] existingInputs = office.getDeployedOfficeInputs()
+				.toArray(new DeployedOfficeInputModel[0]);
 
 		// Add changes to disconnect existing inputs to be removed
 		Set<DeployedOfficeInputModel> targetInputSet = new HashSet<DeployedOfficeInputModel>(
@@ -481,11 +438,9 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 			if (!(targetInputSet.contains(existingInput))) {
 				// Add change to disconnect input
 				final DeployedOfficeInputModel input = existingInput;
-				refactor.add(new DisconnectChange<DeployedOfficeInputModel>(
-						existingInput) {
+				refactor.add(new DisconnectChange<DeployedOfficeInputModel>(existingInput) {
 					@Override
-					protected void populateRemovedConnections(
-							List<ConnectionModel> connList) {
+					protected void populateRemovedConnections(List<ConnectionModel> connList) {
 						for (OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel conn : new ArrayList<OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel>(
 								input.getOfficeFloorManagedObjectSourceFlows())) {
 							conn.remove();
@@ -497,8 +452,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		}
 
 		// Add change to refactor inputs
-		refactor.add(new AbstractChange<DeployedOfficeModel>(office,
-				"Refactor inputs of office") {
+		refactor.add(new AbstractChange<DeployedOfficeModel>(office, "Refactor inputs of office") {
 			@Override
 			public void apply() {
 				// Remove existing inputs, add target inputs
@@ -540,16 +494,13 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 			final String teamName = teamType.getOfficeTeamName();
 
 			// Obtain the team for team type (may need to create)
-			DeployedOfficeTeamModel findTeam = this.getExistingItem(teamName,
-					teamNameMapping, existingTeamMapping);
-			final DeployedOfficeTeamModel team = (findTeam != null ? findTeam
-					: new DeployedOfficeTeamModel(teamName));
+			DeployedOfficeTeamModel findTeam = this.getExistingItem(teamName, teamNameMapping, existingTeamMapping);
+			final DeployedOfficeTeamModel team = (findTeam != null ? findTeam : new DeployedOfficeTeamModel(teamName));
 			targetTeams[i] = team;
 
 			// Refactor details of team
 			final String existingTeamName = team.getDeployedOfficeTeamName();
-			refactor.add(new AbstractChange<DeployedOfficeTeamModel>(team,
-					"Refactor office team") {
+			refactor.add(new AbstractChange<DeployedOfficeTeamModel>(team, "Refactor office team") {
 				@Override
 				public void apply() {
 					team.setDeployedOfficeTeamName(teamName);
@@ -565,32 +516,25 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		// Ensure target teams sorted by name
 		Arrays.sort(targetTeams, new Comparator<DeployedOfficeTeamModel>() {
 			@Override
-			public int compare(DeployedOfficeTeamModel a,
-					DeployedOfficeTeamModel b) {
-				return a.getDeployedOfficeTeamName().compareTo(
-						b.getDeployedOfficeTeamName());
+			public int compare(DeployedOfficeTeamModel a, DeployedOfficeTeamModel b) {
+				return a.getDeployedOfficeTeamName().compareTo(b.getDeployedOfficeTeamName());
 			}
 		});
 
 		// Obtain the existing teams
-		final DeployedOfficeTeamModel[] existingTeams = office
-				.getDeployedOfficeTeams().toArray(
-						new DeployedOfficeTeamModel[0]);
+		final DeployedOfficeTeamModel[] existingTeams = office.getDeployedOfficeTeams()
+				.toArray(new DeployedOfficeTeamModel[0]);
 
 		// Add changes to disconnect existing teams to be removed
-		Set<DeployedOfficeTeamModel> targetTeamSet = new HashSet<DeployedOfficeTeamModel>(
-				Arrays.asList(targetTeams));
+		Set<DeployedOfficeTeamModel> targetTeamSet = new HashSet<DeployedOfficeTeamModel>(Arrays.asList(targetTeams));
 		for (DeployedOfficeTeamModel existingTeam : existingTeams) {
 			if (!(targetTeamSet.contains(existingTeam))) {
 				// Add change to disconnect team
 				final DeployedOfficeTeamModel team = existingTeam;
-				refactor.add(new DisconnectChange<DeployedOfficeTeamModel>(
-						existingTeam) {
+				refactor.add(new DisconnectChange<DeployedOfficeTeamModel>(existingTeam) {
 					@Override
-					protected void populateRemovedConnections(
-							List<ConnectionModel> connList) {
-						DeployedOfficeTeamToOfficeFloorTeamModel conn = team
-								.getOfficeFloorTeam();
+					protected void populateRemovedConnections(List<ConnectionModel> connList) {
+						DeployedOfficeTeamToOfficeFloorTeamModel conn = team.getOfficeFloorTeam();
 						if (conn != null) {
 							conn.remove();
 							connList.add(conn);
@@ -601,8 +545,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		}
 
 		// Add change to refactor teams
-		refactor.add(new AbstractChange<DeployedOfficeModel>(office,
-				"Refactor teams of office") {
+		refactor.add(new AbstractChange<DeployedOfficeModel>(office, "Refactor teams of office") {
 			@Override
 			public void apply() {
 				// Remove existing teams, add target teams
@@ -629,8 +572,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		// ----------------- Refactoring -------------------------------
 
 		// Return change to do all the refactoring
-		return new AbstractChange<DeployedOfficeModel>(office,
-				"Refactor deployed office") {
+		return new AbstractChange<DeployedOfficeModel>(office, "Refactor deployed office") {
 			@Override
 			public void apply() {
 				for (Change<?> change : refactor) {
@@ -659,8 +601,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 	 * @param existingNameToItem
 	 *            Mapping of existing item name to the existing item.
 	 */
-	private <T> T getExistingItem(String targetItemName,
-			Map<String, String> targetToExistingName,
+	private <T> T getExistingItem(String targetItemName, Map<String, String> targetToExistingName,
 			Map<String, T> existingNameToItem) {
 
 		// Obtain the existing item name
@@ -675,24 +616,20 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 	}
 
 	@Override
-	public Change<OfficeFloorManagedObjectModel> addOfficeFloorManagedObject(
-			String managedObjectName, ManagedObjectScope managedObjectScope,
-			OfficeFloorManagedObjectSourceModel managedObjectSource,
+	public Change<OfficeFloorManagedObjectModel> addOfficeFloorManagedObject(String managedObjectName,
+			ManagedObjectScope managedObjectScope, OfficeFloorManagedObjectSourceModel managedObjectSource,
 			ManagedObjectType<?> managedObjectType) {
 
 		// TODO test this method (addOfficeFloorManagedObject)
 
 		// Create the managed object
-		final OfficeFloorManagedObjectModel managedObject = new OfficeFloorManagedObjectModel(
-				managedObjectName, getManagedObjectScope(managedObjectScope));
+		final OfficeFloorManagedObjectModel managedObject = new OfficeFloorManagedObjectModel(managedObjectName,
+				getManagedObjectScope(managedObjectScope));
 
 		// Add the dependencies for the managed object
-		for (ManagedObjectDependencyType<?> dependency : managedObjectType
-				.getDependencyTypes()) {
-			managedObject
-					.addOfficeFloorManagedObjectDependency(new OfficeFloorManagedObjectDependencyModel(
-							dependency.getDependencyName(), dependency
-									.getDependencyType().getName()));
+		for (ManagedObjectDependencyType<?> dependency : managedObjectType.getDependencyTypes()) {
+			managedObject.addOfficeFloorManagedObjectDependency(new OfficeFloorManagedObjectDependencyModel(
+					dependency.getDependencyName(), dependency.getDependencyType().getName()));
 		}
 
 		// Create connection to the managed object source
@@ -701,20 +638,17 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		conn.setOfficeFloorManagedObjectSource(managedObjectSource);
 
 		// Return change to add the managed object
-		return new AbstractChange<OfficeFloorManagedObjectModel>(managedObject,
-				"Add managed object") {
+		return new AbstractChange<OfficeFloorManagedObjectModel>(managedObject, "Add managed object") {
 			@Override
 			public void apply() {
-				OfficeFloorChangesImpl.this.officeFloor
-						.addOfficeFloorManagedObject(managedObject);
+				OfficeFloorChangesImpl.this.officeFloor.addOfficeFloorManagedObject(managedObject);
 				conn.connect();
 			}
 
 			@Override
 			public void revert() {
 				conn.remove();
-				OfficeFloorChangesImpl.this.officeFloor
-						.removeOfficeFloorManagedObject(managedObject);
+				OfficeFloorChangesImpl.this.officeFloor.removeOfficeFloorManagedObject(managedObject);
 			}
 		};
 	}
@@ -730,21 +664,18 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 				.getOfficeFloorManagedObjectSource();
 
 		// Return change to remove the managed object
-		return new AbstractChange<OfficeFloorManagedObjectModel>(managedObject,
-				"Remove managed object") {
+		return new AbstractChange<OfficeFloorManagedObjectModel>(managedObject, "Remove managed object") {
 			@Override
 			public void apply() {
 				if (conn != null) {
 					conn.remove();
 				}
-				OfficeFloorChangesImpl.this.officeFloor
-						.removeOfficeFloorManagedObject(managedObject);
+				OfficeFloorChangesImpl.this.officeFloor.removeOfficeFloorManagedObject(managedObject);
 			}
 
 			@Override
 			public void revert() {
-				OfficeFloorChangesImpl.this.officeFloor
-						.addOfficeFloorManagedObject(managedObject);
+				OfficeFloorChangesImpl.this.officeFloor.addOfficeFloorManagedObject(managedObject);
 				if (conn != null) {
 					conn.connect();
 				}
@@ -754,36 +685,31 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 
 	@Override
 	public Change<OfficeFloorManagedObjectModel> renameOfficeFloorManagedObject(
-			final OfficeFloorManagedObjectModel managedObject,
-			final String newManagedObjectName) {
+			final OfficeFloorManagedObjectModel managedObject, final String newManagedObjectName) {
 
 		// TODO test this method (renameOfficeFloorManagedObject)
 
 		// Obtain the old managed object name
-		final String oldManagedObjectName = managedObject
-				.getOfficeFloorManagedObjectName();
+		final String oldManagedObjectName = managedObject.getOfficeFloorManagedObjectName();
 
 		// Return change to rename the managed object
 		return new AbstractChange<OfficeFloorManagedObjectModel>(managedObject,
 				"Rename managed object to " + newManagedObjectName) {
 			@Override
 			public void apply() {
-				managedObject
-						.setOfficeFloorManagedObjectName(newManagedObjectName);
+				managedObject.setOfficeFloorManagedObjectName(newManagedObjectName);
 			}
 
 			@Override
 			public void revert() {
-				managedObject
-						.setOfficeFloorManagedObjectName(oldManagedObjectName);
+				managedObject.setOfficeFloorManagedObjectName(oldManagedObjectName);
 			}
 		};
 	}
 
 	@Override
 	public Change<OfficeFloorManagedObjectModel> rescopeOfficeFloorManagedObject(
-			final OfficeFloorManagedObjectModel managedObject,
-			ManagedObjectScope newManagedObjectScope) {
+			final OfficeFloorManagedObjectModel managedObject, ManagedObjectScope newManagedObjectScope) {
 
 		// TODO test this method (scopeOfficeFloorManagedObject)
 
@@ -809,51 +735,99 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 	}
 
 	@Override
-	public Change<OfficeFloorManagedObjectSourceModel> addOfficeFloorManagedObjectSource(
-			String managedObjectSourceName,
-			String managedObjectSourceClassName, PropertyList properties,
-			long timeout, ManagedObjectType<?> managedObjectType) {
+	public Change<TypeQualificationModel> addOfficeFloorManagedObjectTypeQualification(
+			OfficeFloorManagedObjectModel officeFloorManagedObject, String qualifier, String type) {
+
+		// Create the type qualification
+		final TypeQualificationModel typeQualification = new TypeQualificationModel(qualifier, type);
+
+		// Return change to add type qualification
+		return new AbstractChange<TypeQualificationModel>(typeQualification, "Add Managed Object Type Qualification") {
+			@Override
+			public void apply() {
+				officeFloorManagedObject.addTypeQualification(typeQualification);
+			}
+
+			@Override
+			public void revert() {
+				officeFloorManagedObject.removeTypeQualification(typeQualification);
+			}
+		};
+	}
+
+	@Override
+	public Change<TypeQualificationModel> removeOfficeFloorManagedObjectTypeQualification(
+			TypeQualificationModel typeQualification) {
+
+		// Find the managed object containing the type qualification
+		OfficeFloorManagedObjectModel containingOfficeManagedObject = null;
+		for (OfficeFloorManagedObjectModel mo : this.officeFloor.getOfficeFloorManagedObjects()) {
+			for (TypeQualificationModel check : mo.getTypeQualifications()) {
+				if (check == typeQualification) {
+					containingOfficeManagedObject = mo;
+				}
+			}
+		}
+		if (containingOfficeManagedObject == null) {
+			// Must find team containing type qualification
+			return new NoChange<TypeQualificationModel>(typeQualification, "Remove Managed Object Type Qualification",
+					"Type Qualification not on Managed Object in Office");
+		}
+
+		// Return change to remove type qualification
+		final OfficeFloorManagedObjectModel officeManagedObject = containingOfficeManagedObject;
+		return new AbstractChange<TypeQualificationModel>(typeQualification,
+				"Remove Managed Object Type Qualification") {
+			@Override
+			public void apply() {
+				officeManagedObject.removeTypeQualification(typeQualification);
+			}
+
+			@Override
+			public void revert() {
+				officeManagedObject.addTypeQualification(typeQualification);
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeFloorManagedObjectSourceModel> addOfficeFloorManagedObjectSource(String managedObjectSourceName,
+			String managedObjectSourceClassName, PropertyList properties, long timeout,
+			ManagedObjectType<?> managedObjectType) {
 
 		// TODO test this method (addOfficeFloorManagedObjectSource)
 
 		// Create the managed object source
 		final OfficeFloorManagedObjectSourceModel managedObjectSource = new OfficeFloorManagedObjectSourceModel(
-				managedObjectSourceName, managedObjectSourceClassName,
-				managedObjectType.getObjectClass().getName(),
+				managedObjectSourceName, managedObjectSourceClassName, managedObjectType.getObjectClass().getName(),
 				String.valueOf(timeout));
 		for (Property property : properties) {
-			managedObjectSource.addProperty(new PropertyModel(property
-					.getName(), property.getValue()));
+			managedObjectSource.addProperty(new PropertyModel(property.getName(), property.getValue()));
 		}
 
 		// Add the flows for the managed object source
 		for (ManagedObjectFlowType<?> flow : managedObjectType.getFlowTypes()) {
-			managedObjectSource
-					.addOfficeFloorManagedObjectSourceFlow(new OfficeFloorManagedObjectSourceFlowModel(
-							flow.getFlowName(), flow.getArgumentType()
-									.getName()));
+			managedObjectSource.addOfficeFloorManagedObjectSourceFlow(
+					new OfficeFloorManagedObjectSourceFlowModel(flow.getFlowName(), flow.getArgumentType().getName()));
 		}
 
 		// Add the teams for the managed object source
 		for (ManagedObjectTeamType team : managedObjectType.getTeamTypes()) {
-			managedObjectSource
-					.addOfficeFloorManagedObjectSourceTeam(new OfficeFloorManagedObjectSourceTeamModel(
-							team.getTeamName()));
+			managedObjectSource.addOfficeFloorManagedObjectSourceTeam(
+					new OfficeFloorManagedObjectSourceTeamModel(team.getTeamName()));
 		}
 
 		// Return the change to add the managed object source
-		return new AbstractChange<OfficeFloorManagedObjectSourceModel>(
-				managedObjectSource, "Add managed object source") {
+		return new AbstractChange<OfficeFloorManagedObjectSourceModel>(managedObjectSource,
+				"Add managed object source") {
 			@Override
 			public void apply() {
-				OfficeFloorChangesImpl.this.officeFloor
-						.addOfficeFloorManagedObjectSource(managedObjectSource);
+				OfficeFloorChangesImpl.this.officeFloor.addOfficeFloorManagedObjectSource(managedObjectSource);
 			}
 
 			@Override
 			public void revert() {
-				OfficeFloorChangesImpl.this.officeFloor
-						.removeOfficeFloorManagedObjectSource(managedObjectSource);
+				OfficeFloorChangesImpl.this.officeFloor.removeOfficeFloorManagedObjectSource(managedObjectSource);
 			}
 		};
 	}
@@ -865,119 +839,100 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		// TODO test this method (removeOfficeFloorManagedObjectSource)
 
 		// Return change to remove the managed object source
-		return new AbstractChange<OfficeFloorManagedObjectSourceModel>(
-				managedObjectSource, "Remove managed object source") {
+		return new AbstractChange<OfficeFloorManagedObjectSourceModel>(managedObjectSource,
+				"Remove managed object source") {
 			@Override
 			public void apply() {
-				OfficeFloorChangesImpl.this.officeFloor
-						.removeOfficeFloorManagedObjectSource(managedObjectSource);
+				OfficeFloorChangesImpl.this.officeFloor.removeOfficeFloorManagedObjectSource(managedObjectSource);
 			}
 
 			@Override
 			public void revert() {
-				OfficeFloorChangesImpl.this.officeFloor
-						.addOfficeFloorManagedObjectSource(managedObjectSource);
+				OfficeFloorChangesImpl.this.officeFloor.addOfficeFloorManagedObjectSource(managedObjectSource);
 			}
 		};
 	}
 
 	@Override
 	public Change<OfficeFloorManagedObjectSourceModel> renameOfficeFloorManagedObjectSource(
-			final OfficeFloorManagedObjectSourceModel managedObjectSource,
-			final String newManagedObjectSourceName) {
+			final OfficeFloorManagedObjectSourceModel managedObjectSource, final String newManagedObjectSourceName) {
 
 		// TODO test this method (renameOfficeFloorManagedObjectSource)
 
 		// Obtain the old managed object source name
-		final String oldManagedObjectSourceName = managedObjectSource
-				.getOfficeFloorManagedObjectSourceName();
+		final String oldManagedObjectSourceName = managedObjectSource.getOfficeFloorManagedObjectSourceName();
 
 		// Return change to rename the managed object source
-		return new AbstractChange<OfficeFloorManagedObjectSourceModel>(
-				managedObjectSource, "Rename managed object source to "
-						+ newManagedObjectSourceName) {
+		return new AbstractChange<OfficeFloorManagedObjectSourceModel>(managedObjectSource,
+				"Rename managed object source to " + newManagedObjectSourceName) {
 			@Override
 			public void apply() {
-				managedObjectSource
-						.setOfficeFloorManagedObjectSourceName(newManagedObjectSourceName);
+				managedObjectSource.setOfficeFloorManagedObjectSourceName(newManagedObjectSourceName);
 			}
 
 			@Override
 			public void revert() {
-				managedObjectSource
-						.setOfficeFloorManagedObjectSourceName(oldManagedObjectSourceName);
+				managedObjectSource.setOfficeFloorManagedObjectSourceName(oldManagedObjectSourceName);
 			}
 		};
 	}
 
 	@Override
-	public Change<OfficeFloorTeamModel> addOfficeFloorTeam(String teamName,
-			String teamSourceClassName, PropertyList properties,
-			TeamType teamType) {
+	public Change<OfficeFloorTeamModel> addOfficeFloorTeam(String teamName, String teamSourceClassName,
+			PropertyList properties, TeamType teamType) {
 
 		// TODO test this method (addOfficeFloorTeam)
 
 		// Create the office floor team
-		final OfficeFloorTeamModel team = new OfficeFloorTeamModel(teamName,
-				teamSourceClassName);
+		final OfficeFloorTeamModel team = new OfficeFloorTeamModel(teamName, teamSourceClassName);
 		for (Property property : properties) {
-			team.addProperty(new PropertyModel(property.getName(), property
-					.getValue()));
+			team.addProperty(new PropertyModel(property.getName(), property.getValue()));
 		}
 
 		// Return change to add the office floor team
 		return new AbstractChange<OfficeFloorTeamModel>(team, "Add team") {
 			@Override
 			public void apply() {
-				OfficeFloorChangesImpl.this.officeFloor
-						.addOfficeFloorTeam(team);
+				OfficeFloorChangesImpl.this.officeFloor.addOfficeFloorTeam(team);
 			}
 
 			@Override
 			public void revert() {
-				OfficeFloorChangesImpl.this.officeFloor
-						.removeOfficeFloorTeam(team);
+				OfficeFloorChangesImpl.this.officeFloor.removeOfficeFloorTeam(team);
 			}
 		};
 	}
 
 	@Override
-	public Change<OfficeFloorTeamModel> removeOfficeFloorTeam(
-			final OfficeFloorTeamModel officeFloorTeam) {
+	public Change<OfficeFloorTeamModel> removeOfficeFloorTeam(final OfficeFloorTeamModel officeFloorTeam) {
 
 		// TODO test this method (removeOfficeFloorTeam)
 
 		// Return change to remove the office floor team
-		return new AbstractChange<OfficeFloorTeamModel>(officeFloorTeam,
-				"Remove team") {
+		return new AbstractChange<OfficeFloorTeamModel>(officeFloorTeam, "Remove team") {
 			@Override
 			public void apply() {
-				OfficeFloorChangesImpl.this.officeFloor
-						.removeOfficeFloorTeam(officeFloorTeam);
+				OfficeFloorChangesImpl.this.officeFloor.removeOfficeFloorTeam(officeFloorTeam);
 			}
 
 			@Override
 			public void revert() {
-				OfficeFloorChangesImpl.this.officeFloor
-						.addOfficeFloorTeam(officeFloorTeam);
+				OfficeFloorChangesImpl.this.officeFloor.addOfficeFloorTeam(officeFloorTeam);
 			}
 		};
 	}
 
 	@Override
-	public Change<OfficeFloorTeamModel> renameOfficeFloorTeam(
-			final OfficeFloorTeamModel officeFloorTeam,
+	public Change<OfficeFloorTeamModel> renameOfficeFloorTeam(final OfficeFloorTeamModel officeFloorTeam,
 			final String newOfficeFloorTeamName) {
 
 		// TODO test this method (renameOfficeFloorTeam)
 
 		// Obtain the old office floor team name
-		final String oldOfficeFloorTeamName = officeFloorTeam
-				.getOfficeFloorTeamName();
+		final String oldOfficeFloorTeamName = officeFloorTeam.getOfficeFloorTeamName();
 
 		// Return the change to rename the office floor team
-		return new AbstractChange<OfficeFloorTeamModel>(officeFloorTeam,
-				"Rename team to " + newOfficeFloorTeamName) {
+		return new AbstractChange<OfficeFloorTeamModel>(officeFloorTeam, "Rename team to " + newOfficeFloorTeamName) {
 			@Override
 			public void apply() {
 				officeFloorTeam.setOfficeFloorTeamName(newOfficeFloorTeamName);
@@ -991,9 +946,63 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 	}
 
 	@Override
+	public Change<TypeQualificationModel> addOfficeFloorTeamTypeQualification(OfficeFloorTeamModel officeFloorTeam,
+			String qualifier, String type) {
+
+		// Create the type qualification
+		final TypeQualificationModel typeQualification = new TypeQualificationModel(qualifier, type);
+
+		// Return change to add type qualification
+		return new AbstractChange<TypeQualificationModel>(typeQualification, "Add Team Type Qualification") {
+			@Override
+			public void apply() {
+				officeFloorTeam.addTypeQualification(typeQualification);
+			}
+
+			@Override
+			public void revert() {
+				officeFloorTeam.removeTypeQualification(typeQualification);
+			}
+		};
+	}
+
+	@Override
+	public Change<TypeQualificationModel> removeOfficeFloorTeamTypeQualification(
+			TypeQualificationModel typeQualification) {
+
+		// Find the team containing the type qualification
+		OfficeFloorTeamModel containingOfficeTeam = null;
+		for (OfficeFloorTeamModel team : this.officeFloor.getOfficeFloorTeams()) {
+			for (TypeQualificationModel check : team.getTypeQualifications()) {
+				if (check == typeQualification) {
+					containingOfficeTeam = team;
+				}
+			}
+		}
+		if (containingOfficeTeam == null) {
+			// Must find team containing type qualification
+			return new NoChange<TypeQualificationModel>(typeQualification, "Remove Team Type Qualification",
+					"Type Qualification not on Team in Office");
+		}
+
+		// Return change to remove type qualification
+		final OfficeFloorTeamModel officeTeam = containingOfficeTeam;
+		return new AbstractChange<TypeQualificationModel>(typeQualification, "Remove Team Type Qualification") {
+			@Override
+			public void apply() {
+				officeTeam.removeTypeQualification(typeQualification);
+			}
+
+			@Override
+			public void revert() {
+				officeTeam.addTypeQualification(typeQualification);
+			}
+		};
+	}
+
+	@Override
 	public Change<DeployedOfficeObjectToOfficeFloorManagedObjectModel> linkDeployedOfficeObjectToOfficeFloorManagedObject(
-			DeployedOfficeObjectModel deployedOfficeObject,
-			OfficeFloorManagedObjectModel officeFloorManagedObject) {
+			DeployedOfficeObjectModel deployedOfficeObject, OfficeFloorManagedObjectModel officeFloorManagedObject) {
 
 		// TODO test (linkDeployedOfficeObjectToOfficeFloorManagedObject)
 
@@ -1003,8 +1012,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		conn.setOfficeFloorManagedObject(officeFloorManagedObject);
 
 		// Create change to add the connection
-		return new AbstractChange<DeployedOfficeObjectToOfficeFloorManagedObjectModel>(
-				conn, "Connect") {
+		return new AbstractChange<DeployedOfficeObjectToOfficeFloorManagedObjectModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -1040,8 +1048,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 
 	@Override
 	public Change<DeployedOfficeObjectToOfficeFloorInputManagedObjectModel> linkDeployedOfficeObjectToOfficeFloorInputManagedObject(
-			DeployedOfficeObjectModel deployedOfficeObject,
-			OfficeFloorInputManagedObjectModel inputManagedObject) {
+			DeployedOfficeObjectModel deployedOfficeObject, OfficeFloorInputManagedObjectModel inputManagedObject) {
 
 		// TODO test (linkDeployedOfficeObjectToOfficeFloorInputManagedObject)
 
@@ -1051,8 +1058,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		conn.setOfficeFloorInputManagedObject(inputManagedObject);
 
 		// Return change to add the connection
-		return new AbstractChange<DeployedOfficeObjectToOfficeFloorInputManagedObjectModel>(
-				conn, "Connect") {
+		return new AbstractChange<DeployedOfficeObjectToOfficeFloorInputManagedObjectModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -1088,8 +1094,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 
 	@Override
 	public Change<DeployedOfficeTeamToOfficeFloorTeamModel> linkDeployedOfficeTeamToOfficeFloorTeam(
-			DeployedOfficeTeamModel deployedOfficeTeam,
-			OfficeFloorTeamModel officeFloorTeam) {
+			DeployedOfficeTeamModel deployedOfficeTeam, OfficeFloorTeamModel officeFloorTeam) {
 
 		// TODO test (linkDeployedOfficeTeamToOfficeFloorTeam)
 
@@ -1099,8 +1104,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		conn.setOfficeFloorTeam(officeFloorTeam);
 
 		// Return the change to add connection
-		return new AbstractChange<DeployedOfficeTeamToOfficeFloorTeamModel>(
-				conn, "Connect") {
+		return new AbstractChange<DeployedOfficeTeamToOfficeFloorTeamModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -1120,8 +1124,8 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		// TODO test (removeDeployedOfficeTeamToOfficeFloorTeam)
 
 		// Return the change to remove the connection
-		return new AbstractChange<DeployedOfficeTeamToOfficeFloorTeamModel>(
-				deployedOfficeTeamToOfficeFloorTeam, "Remove") {
+		return new AbstractChange<DeployedOfficeTeamToOfficeFloorTeamModel>(deployedOfficeTeamToOfficeFloorTeam,
+				"Remove") {
 			@Override
 			public void apply() {
 				deployedOfficeTeamToOfficeFloorTeam.remove();
@@ -1147,8 +1151,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		conn.setOfficeFloorManagedObject(officeFloorManagedObject);
 
 		// Return change to add the connection
-		return new AbstractChange<OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel>(
-				conn, "Connect") {
+		return new AbstractChange<OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -1169,18 +1172,15 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 
 		// Return change to remove the connection
 		return new AbstractChange<OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel>(
-				officeFloorManagedObjectDependencyToOfficeFloorManagedObject,
-				"Remove") {
+				officeFloorManagedObjectDependencyToOfficeFloorManagedObject, "Remove") {
 			@Override
 			public void apply() {
-				officeFloorManagedObjectDependencyToOfficeFloorManagedObject
-						.remove();
+				officeFloorManagedObjectDependencyToOfficeFloorManagedObject.remove();
 			}
 
 			@Override
 			public void revert() {
-				officeFloorManagedObjectDependencyToOfficeFloorManagedObject
-						.connect();
+				officeFloorManagedObjectDependencyToOfficeFloorManagedObject.connect();
 			}
 		};
 	}
@@ -1198,8 +1198,8 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		conn.setOfficeFloorInputManagedObject(officeFloorInputManagedObject);
 
 		// Return change to add the connection
-		return new AbstractChange<OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel>(
-				conn, "Connect") {
+		return new AbstractChange<OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel>(conn,
+				"Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -1220,18 +1220,15 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 
 		// Return change to remove the connection
 		return new AbstractChange<OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel>(
-				officeFloorManagedObjectDependencyToOfficeFloorInputManagedObject,
-				"Remove") {
+				officeFloorManagedObjectDependencyToOfficeFloorInputManagedObject, "Remove") {
 			@Override
 			public void apply() {
-				officeFloorManagedObjectDependencyToOfficeFloorInputManagedObject
-						.remove();
+				officeFloorManagedObjectDependencyToOfficeFloorInputManagedObject.remove();
 			}
 
 			@Override
 			public void revert() {
-				officeFloorManagedObjectDependencyToOfficeFloorInputManagedObject
-						.connect();
+				officeFloorManagedObjectDependencyToOfficeFloorInputManagedObject.connect();
 			}
 		};
 	}
@@ -1249,8 +1246,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		conn.setDeployedOfficeInput(deployedOfficeInput);
 
 		// Return the change to remove the connection
-		return new AbstractChange<OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel>(
-				conn, "Connect") {
+		return new AbstractChange<OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -1271,18 +1267,15 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 
 		// Return the change to remove the connection
 		return new AbstractChange<OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel>(
-				officeFloorManagedObjectSourceFlowToDeployedOfficeInput,
-				"Remove") {
+				officeFloorManagedObjectSourceFlowToDeployedOfficeInput, "Remove") {
 			@Override
 			public void apply() {
-				officeFloorManagedObjectSourceFlowToDeployedOfficeInput
-						.remove();
+				officeFloorManagedObjectSourceFlowToDeployedOfficeInput.remove();
 			}
 
 			@Override
 			public void revert() {
-				officeFloorManagedObjectSourceFlowToDeployedOfficeInput
-						.connect();
+				officeFloorManagedObjectSourceFlowToDeployedOfficeInput.connect();
 			}
 		};
 	}
@@ -1300,8 +1293,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		conn.setOfficeFloorTeam(officeFloorTeam);
 
 		// Return change to add the connection
-		return new AbstractChange<OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel>(
-				conn, "Connect") {
+		return new AbstractChange<OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -1337,8 +1329,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 
 	@Override
 	public Change<OfficeFloorManagedObjectSourceToDeployedOfficeModel> linkOfficeFloorManagedObjectSourceToDeployedOffice(
-			OfficeFloorManagedObjectSourceModel officeFloorManagedObjectSource,
-			DeployedOfficeModel deployedOffice) {
+			OfficeFloorManagedObjectSourceModel officeFloorManagedObjectSource, DeployedOfficeModel deployedOffice) {
 
 		// TODO test (OfficeFloorManagedObjectSourceToDeployedOfficeModel)
 
@@ -1348,8 +1339,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		conn.setManagingOffice(deployedOffice);
 
 		// Return change to add the connection
-		return new AbstractChange<OfficeFloorManagedObjectSourceToDeployedOfficeModel>(
-				conn, "Connect") {
+		return new AbstractChange<OfficeFloorManagedObjectSourceToDeployedOfficeModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -1384,8 +1374,8 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 	}
 
 	@Override
-	public Change<OfficeFloorInputManagedObjectModel> addOfficeFloorInputManagedObject(
-			String inputManagedObjectName, String objectType) {
+	public Change<OfficeFloorInputManagedObjectModel> addOfficeFloorInputManagedObject(String inputManagedObjectName,
+			String objectType) {
 
 		// TODO test (addOfficeFloorInputManagedObject)
 
@@ -1394,46 +1384,38 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 				inputManagedObjectName, objectType);
 
 		// Return change to add the input managed object
-		return new AbstractChange<OfficeFloorInputManagedObjectModel>(
-				inputManagedObject, "Add Input Managed Object") {
+		return new AbstractChange<OfficeFloorInputManagedObjectModel>(inputManagedObject, "Add Input Managed Object") {
 			@Override
 			public void apply() {
-				OfficeFloorChangesImpl.this.officeFloor
-						.addOfficeFloorInputManagedObject(inputManagedObject);
+				OfficeFloorChangesImpl.this.officeFloor.addOfficeFloorInputManagedObject(inputManagedObject);
 			}
 
 			@Override
 			public void revert() {
-				OfficeFloorChangesImpl.this.officeFloor
-						.removeOfficeFloorInputManagedObject(inputManagedObject);
+				OfficeFloorChangesImpl.this.officeFloor.removeOfficeFloorInputManagedObject(inputManagedObject);
 			}
 		};
 	}
 
 	@Override
 	public Change<OfficeFloorInputManagedObjectModel> renameOfficeFloorInputManagedObject(
-			final OfficeFloorInputManagedObjectModel inputManagedObject,
-			final String newInputManagedObjectName) {
+			final OfficeFloorInputManagedObjectModel inputManagedObject, final String newInputManagedObjectName) {
 
 		// TODO test (renameOfficeFloorInputManagedObject)
 
 		// Obtain the existing input managed object name for reverting
-		final String existingInputManagedObjectName = inputManagedObject
-				.getOfficeFloorInputManagedObjectName();
+		final String existingInputManagedObjectName = inputManagedObject.getOfficeFloorInputManagedObjectName();
 
 		// Return change to rename
-		return new AbstractChange<OfficeFloorInputManagedObjectModel>(
-				inputManagedObject, "Rename") {
+		return new AbstractChange<OfficeFloorInputManagedObjectModel>(inputManagedObject, "Rename") {
 			@Override
 			public void apply() {
-				inputManagedObject
-						.setOfficeFloorInputManagedObjectName(newInputManagedObjectName);
+				inputManagedObject.setOfficeFloorInputManagedObjectName(newInputManagedObjectName);
 			}
 
 			@Override
 			public void revert() {
-				inputManagedObject
-						.setOfficeFloorInputManagedObjectName(existingInputManagedObjectName);
+				inputManagedObject.setOfficeFloorInputManagedObjectName(existingInputManagedObjectName);
 			}
 		};
 	}
@@ -1445,18 +1427,15 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		// TODO test (removeOfficeFloorInputManagedObject)
 
 		// Return change to remove the input managed object
-		return new AbstractChange<OfficeFloorInputManagedObjectModel>(
-				inputManagedObject, "Remove") {
+		return new AbstractChange<OfficeFloorInputManagedObjectModel>(inputManagedObject, "Remove") {
 			@Override
 			public void apply() {
-				OfficeFloorChangesImpl.this.officeFloor
-						.removeOfficeFloorInputManagedObject(inputManagedObject);
+				OfficeFloorChangesImpl.this.officeFloor.removeOfficeFloorInputManagedObject(inputManagedObject);
 			}
 
 			@Override
 			public void revert() {
-				OfficeFloorChangesImpl.this.officeFloor
-						.addOfficeFloorInputManagedObject(inputManagedObject);
+				OfficeFloorChangesImpl.this.officeFloor.addOfficeFloorInputManagedObject(inputManagedObject);
 			}
 		};
 	}
@@ -1474,8 +1453,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		conn.setOfficeFloorInputManagedObject(inputManagedObject);
 
 		// Return change to add the link
-		return new AbstractChange<OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel>(
-				conn, "Connect") {
+		return new AbstractChange<OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -1522,8 +1500,8 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		conn.setBoundOfficeFloorManagedObjectSource(boundManagedObjectSource);
 
 		// Return change to add the connection
-		return new AbstractChange<OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel>(
-				conn, "Connect") {
+		return new AbstractChange<OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel>(conn,
+				"Connect") {
 			@Override
 			public void apply() {
 				conn.connect();

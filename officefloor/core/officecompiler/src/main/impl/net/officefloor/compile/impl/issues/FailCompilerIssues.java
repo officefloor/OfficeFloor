@@ -36,21 +36,20 @@ public class FailCompilerIssues extends AbstractCompilerIssues {
 	 * 
 	 * @param compiler
 	 *            {@link OfficeFloorCompiler}.
-	 * @param officeFloorLocation
-	 *            {@link OfficeFloor} location.
+	 * @param officeFloorName
+	 *            {@link OfficeFloor} name.
 	 * @return {@link OfficeFloor}.
 	 * @throws CompileException
 	 *             If fails to compile.
 	 */
-	public static OfficeFloor compile(OfficeFloorCompiler compiler,
-			String officeFloorLocation) throws CompileException {
+	public static OfficeFloor compile(OfficeFloorCompiler compiler, String officeFloorName) throws CompileException {
 
 		// Override the compiler issues
 		compiler.setCompilerIssues(new FailCompilerIssues());
 
 		// Compile
 		try {
-			return compiler.compile(officeFloorLocation);
+			return compiler.compile(officeFloorName);
 		} catch (CompileError propagate) {
 			throw new CompileException(propagate.issue);
 		}

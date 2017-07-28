@@ -122,7 +122,7 @@ public interface PropertyList extends Iterable<Property> {
 
 	/**
 	 * <p>
-	 * Normalises the {@link Property}the instances.
+	 * Normalises the {@link Property} instances.
 	 * <p>
 	 * This will remove:
 	 * <ol>

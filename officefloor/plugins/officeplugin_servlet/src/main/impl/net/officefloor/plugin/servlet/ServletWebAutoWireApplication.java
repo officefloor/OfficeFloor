@@ -55,19 +55,19 @@ import net.officefloor.plugin.servlet.web.http.session.ServletHttpSessionManaged
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpApplicationState;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
-import net.officefloor.plugin.web.http.application.WebApplicationAutoWireOfficeFloorSource;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.WebArchitectEmployer;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
- * {@link Servlet} {@link WebAutoWireApplication}.
+ * {@link Servlet} {@link WebArchitect}.
  * 
  * @author Daniel Sagenschneider
  */
 public class ServletWebAutoWireApplication<S extends OfficeFloorServlet>
-		extends WebApplicationAutoWireOfficeFloorSource implements
-		WebAutoWireApplication {
+		extends WebArchitectEmployer implements
+		WebArchitect {
 
 	/**
 	 * <p>

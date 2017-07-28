@@ -19,7 +19,7 @@ package net.officefloor.compile;
 
 import java.util.ServiceLoader;
 
-import net.officefloor.autowire.spi.supplier.source.SupplierSource;
+import net.officefloor.compile.spi.supplier.source.SupplierSource;
 
 /**
  * <p>

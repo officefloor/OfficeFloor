@@ -21,30 +21,28 @@ import java.util.Arrays;
 import java.util.Deque;
 import java.util.LinkedList;
 
-import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
+import org.junit.Assert;
+
+import net.officefloor.plugin.web.http.application.HttpTemplateSection;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSourceContext;
 import net.officefloor.plugin.woof.template.WoofTemplateExtensionSourceService;
 import net.officefloor.plugin.woof.template.impl.AbstractWoofTemplateExtensionSource;
-
-import org.junit.Assert;
 
 /**
  * Mock implicit {@link WoofTemplateExtensionSourceService}.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockImplicitWoofTemplateExtensionSourceService extends
-		AbstractWoofTemplateExtensionSource
-		implements
-		WoofTemplateExtensionSourceService<MockImplicitWoofTemplateExtensionSourceService> {
+public class MockImplicitWoofTemplateExtensionSourceService extends AbstractWoofTemplateExtensionSource
+		implements WoofTemplateExtensionSourceService<MockImplicitWoofTemplateExtensionSourceService> {
 
 	/**
 	 * Resets for testing loading implicit {@link WoofTemplateExtensionSource}.
 	 * 
 	 * @param templateUris
-	 *            URIs of the {@link HttpTemplateAutoWireSection} instances
-	 *            being extended.
+	 *            URIs of the {@link HttpTemplateSection} instances being
+	 *            extended.
 	 */
 	public static void reset(String... templateUris) {
 		MockImplicitWoofTemplateExtensionSourceService.templateUris = new LinkedList<String>(
@@ -52,7 +50,7 @@ public class MockImplicitWoofTemplateExtensionSourceService extends
 	}
 
 	/**
-	 * Expected {@link HttpTemplateAutoWireSection} URIs.
+	 * Expected {@link HttpTemplateSection} URIs.
 	 */
 	private static Deque<String> templateUris = null;
 
@@ -80,18 +78,15 @@ public class MockImplicitWoofTemplateExtensionSourceService extends
 	}
 
 	@Override
-	public void extendTemplate(WoofTemplateExtensionSourceContext context)
-			throws Exception {
+	public void extendTemplate(WoofTemplateExtensionSourceContext context) throws Exception {
 
 		// Obtain the template URI
-		HttpTemplateAutoWireSection template = context.getTemplate();
-		String uri = template.getTemplateUri();
+		String uri = context.getTemplatePath();
 
 		// Ensure expecting the template
 		String expectedUri = templateUris.pollFirst();
 		Assert.assertNotNull("Not expecting template " + uri, expectedUri);
-		Assert.assertEquals("Incorrect template URI for extension",
-				expectedUri, uri);
+		Assert.assertEquals("Incorrect template URI for extension", expectedUri, uri);
 	}
 
 }

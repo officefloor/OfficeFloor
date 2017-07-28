@@ -17,8 +17,8 @@
  */
 package net.officefloor.frame.test;
 
-import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * Reflective flow to be used as a parameter.
@@ -28,12 +28,13 @@ import net.officefloor.frame.internal.structure.JobSequence;
 public interface ReflectiveFlow {
 
 	/**
-	 * Invokes the flow.
+	 * Invokes the {@link Flow}.
 	 * 
 	 * @param parameter
-	 *            Parameter to the flow.
-	 * @return {@link FlowFuture} for the invoked {@link JobSequence}.
+	 *            Parameter to the {@link Flow}.
+	 * @param callback
+	 *            Optional {@link FlowCallback}. May be <code>null</code>.
 	 */
-	FlowFuture doFlow(Object parameter);
+	void doFlow(Object parameter, FlowCallback callback);
 
 }

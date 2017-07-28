@@ -17,8 +17,6 @@
  */
 package net.officefloor.eclipse.common.editor;
 
-import net.officefloor.eclipse.desk.DeskEditor;
-
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.ui.IActionBars;
@@ -27,8 +25,13 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.actions.ActionFactory;
 
+import net.officefloor.eclipse.office.OfficeEditor;
+import net.officefloor.eclipse.officefloor.OfficeFloorEditor;
+import net.officefloor.eclipse.section.SectionEditor;
+
 /**
- * {@link IEditorActionBarContributor} for the {@link DeskEditor}.
+ * {@link IEditorActionBarContributor} for the {@link SectionEditor},
+ * {@link OfficeEditor} and {@link OfficeFloorEditor}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -76,12 +79,10 @@ public class CoreEditorActionContributor implements IEditorActionBarContributor 
 	 * @param targetEditor
 	 *            {@link IEditorPart}.
 	 */
-	protected void hookInAction(ActionFactory actionFactory,
-			IEditorPart targetEditor) {
+	protected void hookInAction(ActionFactory actionFactory, IEditorPart targetEditor) {
 
 		// Obtain the action registry
-		ActionRegistry actionRegistry = (ActionRegistry) targetEditor
-				.getAdapter(ActionRegistry.class);
+		ActionRegistry actionRegistry = (ActionRegistry) targetEditor.getAdapter(ActionRegistry.class);
 
 		// Obtain the action
 		String actionId = actionFactory.getId();
@@ -93,8 +94,7 @@ public class CoreEditorActionContributor implements IEditorActionBarContributor 
 		}
 
 		// Register the action
-		targetEditor.getEditorSite().getActionBars().setGlobalActionHandler(
-				actionId, action);
+		targetEditor.getEditorSite().getActionBars().setGlobalActionHandler(actionId, action);
 	}
 
 	@Override

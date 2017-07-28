@@ -19,46 +19,47 @@ package net.officefloor.frame.test;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.Thread.State;
+import java.lang.reflect.Method;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.atomic.AtomicLong;
 
 import junit.framework.TestCase;
 import net.officefloor.frame.api.OfficeFrame;
-import net.officefloor.frame.api.build.AdministratorBuilder;
+import net.officefloor.frame.api.build.DependencyMappingBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.TeamBuilder;
-import net.officefloor.frame.api.build.WorkBuilder;
-import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.manage.ProcessFuture;
-import net.officefloor.frame.api.manage.WorkManager;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.OfficeClock;
 
 /**
  * Abstract {@link TestCase} for construction testing of an Office.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractOfficeConstructTestCase extends
-		OfficeFrameTestCase implements EscalationHandler {
+public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCase
+		implements EscalationHandler, OfficeClock {
 
 	/**
 	 * Index of the current {@link OfficeFloor} being constructed.
@@ -77,6 +78,11 @@ public abstract class AbstractOfficeConstructTestCase extends
 	private final List<OfficeFloor> constructedOfficeFloors = new LinkedList<OfficeFloor>();
 
 	/**
+	 * {@link Thread} instances used by the {@link OfficeFloor}.
+	 */
+	private final Deque<Thread> usedThreads = new ConcurrentLinkedDeque<>();
+
+	/**
 	 * {@link OfficeFloorBuilder}.
 	 */
 	private OfficeFloorBuilder officeFloorBuilder;
@@ -87,26 +93,21 @@ public abstract class AbstractOfficeConstructTestCase extends
 	private OfficeBuilder officeBuilder;
 
 	/**
-	 * {@link WorkBuilder}.
-	 */
-	private WorkBuilder<?> workBuilder;
-
-	/**
 	 * List of method names in order they are invoked by the
-	 * {@link ReflectiveTaskBuilder} instances for the test.
+	 * {@link ReflectiveFunctionBuilder} instances for the test.
 	 */
-	private List<String> reflectiveTaskInvokedMethods = new LinkedList<String>();
+	private List<String> reflectiveFunctionInvokedMethods = new LinkedList<String>();
 
 	/**
 	 * <p>
 	 * Flag indicating whether to record the invocations of the
-	 * {@link ReflectiveTaskBuilder} instances.
+	 * {@link ReflectiveFunctionBuilder} instances.
 	 * <p>
-	 * This is necessary as stress tests using the {@link ReflectiveTaskBuilder}
-	 * will get {@link OutOfMemoryError} issues should every {@link Task}
-	 * executed be recorded.
+	 * This is necessary as stress tests using the
+	 * {@link ReflectiveFunctionBuilder} will get {@link OutOfMemoryError}
+	 * issues should every {@link ManagedFunction} executed be recorded.
 	 */
-	private boolean isRecordReflectiveTaskMethodsInvoked = false;
+	private boolean isRecordReflectiveFunctionMethodsInvoked = false;
 
 	/**
 	 * {@link Throwable} for the {@link EscalationHandler}.
@@ -119,6 +120,11 @@ public abstract class AbstractOfficeConstructTestCase extends
 	private final Object exceptionLock = new Object();
 
 	/**
+	 * Current time for the {@link OfficeClock}.
+	 */
+	private AtomicLong currentTime;
+
+	/**
 	 * {@link OfficeFloor}.
 	 */
 	private OfficeFloor officeFloor = null;
@@ -127,14 +133,90 @@ public abstract class AbstractOfficeConstructTestCase extends
 	protected void setUp() throws Exception {
 		// Initiate for constructing office
 		OFFICE_FLOOR_INDEX++;
-		this.officeFloorBuilder = OfficeFrame.getInstance()
-				.createOfficeFloorBuilder(this.getOfficeFloorName());
+		this.officeFloorBuilder = OfficeFrame.getInstance().createOfficeFloorBuilder(this.getOfficeFloorName());
 		OFFICE_INDEX++;
-		this.officeBuilder = this.officeFloorBuilder.addOffice(this
-				.getOfficeName());
+		this.officeBuilder = this.officeFloorBuilder.addOffice(this.getOfficeName());
 
 		// Initiate to receive the top level escalation to report back in tests
 		this.officeFloorBuilder.setEscalationHandler(this);
+
+		// Initiate to control the time to be deterministic
+		this.currentTime = new AtomicLong(System.currentTimeMillis());
+		this.getOfficeBuilder().setOfficeClock(this);
+
+		// No monitoring by default
+		this.getOfficeBuilder().setMonitorOfficeInterval(0);
+
+		// Track the teams (to ensure correctly stopped)
+		this.officeFloorBuilder.setThreadDecorator((thread) -> this.usedThreads.add(thread));
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+
+		// Close the constructed OfficeFloors
+		for (OfficeFloor officeFloor : this.constructedOfficeFloors) {
+			officeFloor.closeOfficeFloor();
+		}
+
+		// Give the thread pools some chance to terminate threads
+		long maxEndTime = System.currentTimeMillis() + 1000;
+		boolean isContinueChecking;
+		do {
+			// Determine if all complete
+			isContinueChecking = false;
+			for (Thread thread : this.usedThreads) {
+				if (!State.TERMINATED.equals(thread.getState())) {
+					isContinueChecking = true;
+					Thread.sleep(1); // allow active threads to complete
+				}
+			}
+
+			// If timed out waiting, just exit
+			if (System.currentTimeMillis() > maxEndTime) {
+				isContinueChecking = false;
+			}
+		} while (isContinueChecking);
+
+		// Enough time provided, so ensure all threads terminated
+		while (!this.usedThreads.isEmpty()) {
+			Thread usedThread = this.usedThreads.remove();
+			assertEquals("Thread " + usedThread.getName() + " should be terminated", State.TERMINATED,
+					usedThread.getState());
+		}
+
+		// Propagate possible failure
+		synchronized (this.exceptionLock) {
+
+			// Propagate failure
+			if (this.exception != null) {
+				if (this.exception instanceof Exception) {
+					throw (Exception) this.exception;
+				} else if (this.exception instanceof Error) {
+					throw (Error) this.exception;
+				} else {
+					StringWriter buffer = new StringWriter();
+					this.exception.printStackTrace(new PrintWriter(buffer));
+					fail("Unknown failure " + this.exception.getClass().getName() + ": " + buffer.toString());
+				}
+			}
+		}
+
+		// Ensure complete tear down of test
+		super.tearDown();
+	}
+
+	/*
+	 * ====================== OfficeClock ================================
+	 */
+
+	@Override
+	public long currentTimeMillis() {
+		return this.currentTime.get();
+	}
+
+	public void adjustCurrentTimeMillis(long timeInMilliseconds) {
+		this.currentTime.addAndGet(timeInMilliseconds);
 	}
 
 	/*
@@ -145,10 +227,8 @@ public abstract class AbstractOfficeConstructTestCase extends
 	public void handleEscalation(Throwable escalation) throws Throwable {
 		synchronized (this.exceptionLock) {
 			// Indicate a office floor level escalation
-			System.err.println("OFFICE FLOOR ESCALATION: "
-					+ escalation.getMessage() + " ["
-					+ escalation.getClass().getSimpleName() + " at "
-					+ escalation.getStackTrace()[0].toString() + "]");
+			System.err.println("OFFICE FLOOR ESCALATION: " + escalation.getMessage() + " ["
+					+ escalation.getClass().getSimpleName() + " at " + escalation.getStackTrace()[0].toString() + "]");
 
 			// Record exception to be thrown later
 			this.exception = escalation;
@@ -177,46 +257,12 @@ public abstract class AbstractOfficeConstructTestCase extends
 		}
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
-		try {
-
-			// Close the constructed office floors
-			for (OfficeFloor officeFloor : this.constructedOfficeFloors) {
-				officeFloor.closeOfficeFloor();
-			}
-
-			// Propagate possible failure
-			synchronized (this.exceptionLock) {
-				// Return if no failure
-				if (this.exception == null) {
-					return;
-				}
-
-				// Propagate failure
-				if (this.exception instanceof Exception) {
-					throw (Exception) this.exception;
-				} else if (this.exception instanceof Error) {
-					throw (Error) this.exception;
-				} else {
-					StringWriter buffer = new StringWriter();
-					this.exception.printStackTrace(new PrintWriter(buffer));
-					fail("Unknown failure "
-							+ this.exception.getClass().getName() + ": "
-							+ buffer.toString());
-				}
-			}
-		} finally {
-			super.tearDown();
-		}
-	}
-
 	/**
 	 * Obtains the {@link OfficeFloorBuilder}.
 	 * 
 	 * @return {@link OfficeFloorBuilder}.
 	 */
-	protected OfficeFloorBuilder getOfficeFloorBuilder() {
+	public OfficeFloorBuilder getOfficeFloorBuilder() {
 		return this.officeFloorBuilder;
 	}
 
@@ -225,7 +271,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * 
 	 * @return {@link OfficeBuilder}.
 	 */
-	protected OfficeBuilder getOfficeBuilder() {
+	public OfficeBuilder getOfficeBuilder() {
 		return this.officeBuilder;
 	}
 
@@ -234,7 +280,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * 
 	 * @return Name of the {@link OfficeFloor} currently being constructed.
 	 */
-	protected String getOfficeFloorName() {
+	public String getOfficeFloorName() {
 		return "officefloor-" + OFFICE_FLOOR_INDEX;
 	}
 
@@ -243,126 +289,78 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * 
 	 * @return Name of the {@link Office} currently being constructed.
 	 */
-	protected String getOfficeName() {
+	public String getOfficeName() {
 		return "office-" + OFFICE_INDEX;
 	}
 
 	/**
-	 * Facade method to register a {@link Work}.
+	 * Constructs the {@link ReflectiveFunctionBuilder}.
 	 * 
-	 * @param <W>
-	 *            {@link Work} type.
-	 * @param workName
-	 *            Name of the {@link Work}.
-	 * @param workFactory
-	 *            {@link WorkFactory}.
-	 * @return {@link WorkBuilder} for the {@link Work}.
+	 * @param object
+	 *            {@link Object} containing the {@link Method}.
+	 * @param methodName
+	 *            Name of the {@link Method}.
+	 * @return {@link ReflectiveFunctionBuilder}.
 	 */
-	public <W extends Work> WorkBuilder<W> constructWork(String workName,
-			WorkFactory<W> workFactory) {
-
-		// Construct the work
-		WorkBuilder<W> workBuilder = this.officeBuilder.addWork(workName,
-				workFactory);
-
-		// Make current work builder
-		this.workBuilder = workBuilder;
-
-		// Return the work builder
-		return workBuilder;
+	public ReflectiveFunctionBuilder constructFunction(Object object, String methodName) {
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		ReflectiveFunctionBuilder builder = new ReflectiveFunctionBuilder((Class) object.getClass(), object, methodName,
+				this.officeBuilder, this);
+		return builder;
 	}
 
 	/**
-	 * Facade method to register a {@link Work}.
+	 * Constructs the {@link ReflectiveFunctionBuilder} for a static
+	 * {@link Method}.
 	 * 
-	 * @param <W>
-	 *            {@link Work} type.
-	 * @param workName
-	 *            Name of the {@link Work}.
-	 * @param work
-	 *            {@link Work}.
-	 * @param initialTaskName
-	 *            Name of the initial {@link Task}.
-	 * @return {@link WorkBuilder} for the {@link Work}.
+	 * @param clazz
+	 *            {@link Class} containing the static {@link Method}.
+	 * @param methodName
+	 *            Name of the {@link Method}.
+	 * @return {@link ReflectiveFunctionBuilder}.
 	 */
-	public <W extends Work> WorkBuilder<W> constructWork(String workName,
-			final W work, String initialTaskName) {
-
-		// Create the Work Factory
-		WorkFactory<W> workFactory = new WorkFactory<W>() {
-			public W createWork() {
-				return work;
-			}
-		};
-
-		// Construct the work builder
-		WorkBuilder<W> workBuilder = this.constructWork(workName, workFactory);
-
-		// Specify the initial task (if provided)
-		if (initialTaskName != null) {
-			workBuilder.setInitialTask(initialTaskName);
-		}
-
-		// Return the work builder
-		return workBuilder;
-	}
-
-	/**
-	 * Constructs the {@link ReflectiveWorkBuilder}.
-	 * 
-	 * @param workObject
-	 *            Work object.
-	 * @param workName
-	 *            Work name.
-	 * @param initialTaskName
-	 *            Initial task name. May be <code>null</code> if no initial
-	 *            {@link Task}.
-	 * @return {@link ReflectiveWorkBuilder}.
-	 */
-	public ReflectiveWorkBuilder constructWork(Object workObject,
-			String workName, String initialTaskName) {
-		// Return the created work builder
-		return new ReflectiveWorkBuilder(this, workName, workObject,
-				this.officeBuilder, initialTaskName);
+	public ReflectiveFunctionBuilder constructStaticFunction(Class<?> clazz, String methodName) {
+		return new ReflectiveFunctionBuilder(clazz, null, methodName, this.officeBuilder, this);
 	}
 
 	/**
 	 * <p>
 	 * Specifies whether to record the invocations of the
-	 * {@link ReflectiveTaskBuilder} instances.
+	 * {@link ReflectiveFunctionBuilder} instances.
 	 * <p>
-	 * This is necessary as stress tests using the {@link ReflectiveTaskBuilder}
-	 * will get {@link OutOfMemoryError} issues should every {@link Task}
-	 * executed be recorded.
+	 * This is necessary as stress tests using the
+	 * {@link ReflectiveFunctionBuilder} will get {@link OutOfMemoryError}
+	 * issues should every {@link ManagedFunction} executed be recorded.
 	 * <p>
 	 * By default this is <code>false</code> to not record.
 	 * 
 	 * @param isRecord
-	 *            <code>true</code> to record the {@link Task} instances
-	 *            invoked.
+	 *            <code>true</code> to record the {@link ManagedFunction}
+	 *            instances invoked.
 	 */
-	public void setRecordReflectiveTaskMethodsInvoked(boolean isRecord) {
-		synchronized (this.reflectiveTaskInvokedMethods) {
-			this.isRecordReflectiveTaskMethodsInvoked = isRecord;
+	public void setRecordReflectiveFunctionMethodsInvoked(boolean isRecord) {
+		synchronized (this.reflectiveFunctionInvokedMethods) {
+			this.isRecordReflectiveFunctionMethodsInvoked = isRecord;
 		}
 	}
 
 	/**
-	 * Invoked by the {@link ReflectiveTaskBuilder} when it executes the method.
+	 * Invoked by the {@link ReflectiveFunctionBuilder} when it executes the
+	 * method.
 	 * 
 	 * @param methodName
 	 *            Name of method being invoked.
 	 */
-	public void recordReflectiveTaskMethodInvoked(String methodName) {
-		synchronized (this.reflectiveTaskInvokedMethods) {
-			if (this.isRecordReflectiveTaskMethodsInvoked) {
-				this.reflectiveTaskInvokedMethods.add(methodName);
+	public void recordReflectiveFunctionMethodInvoked(String methodName) {
+		synchronized (this.reflectiveFunctionInvokedMethods) {
+			if (this.isRecordReflectiveFunctionMethodsInvoked) {
+				this.reflectiveFunctionInvokedMethods.add(methodName);
 			}
 		}
 	}
 
 	/**
-	 * Validates the order the {@link ReflectiveTaskBuilder} invoked the
+	 * Validates the order the {@link ReflectiveFunctionBuilder} invoked the
 	 * methods.
 	 * 
 	 * @param methodNames
@@ -370,7 +368,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * @see #setRecordReflectiveTaskMethodsInvoked(boolean)
 	 */
 	public void validateReflectiveMethodOrder(String... methodNames) {
-		synchronized (this.reflectiveTaskInvokedMethods) {
+		synchronized (this.reflectiveFunctionInvokedMethods) {
 
 			// Create expected method calls
 			StringBuilder actualMethods = new StringBuilder();
@@ -380,167 +378,59 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 			// Create the actual method calls
 			StringBuilder expectedMethods = new StringBuilder();
-			for (String methodName : this.reflectiveTaskInvokedMethods) {
+			for (String methodName : this.reflectiveFunctionInvokedMethods) {
 				expectedMethods.append(methodName.trim() + " ");
 			}
 
 			// Validate appropriate methods called
-			assertEquals(
-					"Incorrect methods invoked [ " + actualMethods.toString()
-							+ "]", actualMethods.toString(),
+			assertEquals("Incorrect methods invoked [ " + actualMethods.toString() + "]", actualMethods.toString(),
 					expectedMethods.toString());
 		}
 	}
 
 	/**
-	 * Facade method to register a {@link Task}.
+	 * Facade method to register a {@link ManagedFunction}.
 	 * 
-	 * @param <W>
-	 *            {@link Work} type.
-	 * @param <D>
+	 * @param <O>
 	 *            Dependency key type.
 	 * @param <F>
 	 *            Flow key type.
-	 * @param taskName
-	 *            Name of the {@link Task}.
-	 * @param taskFactory
-	 *            {@link TaskFactory}.
-	 * @param teamName
-	 *            Name of the {@link Team}.
-	 * @return {@link TaskBuilder} for the {@link Task}.
+	 * @param functionName
+	 *            Name of the {@link ManagedFunction}.
+	 * @param functionFactory
+	 *            {@link ManagedFunctionFactory}.
+	 * @return {@link ManagedFunctionBuilder} for the {@link ManagedFunction}.
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <W extends Work, D extends Enum<D>, F extends Enum<F>> TaskBuilder<W, D, F> constructTask(
-			String taskName, TaskFactory<W, D, F> taskFactory, String teamName) {
-
-		// Create the Task Builder
-		TaskBuilder taskBuilder = ((WorkBuilder) this.workBuilder).addTask(
-				taskName, taskFactory);
-
-		// Link to Team
-		taskBuilder.setTeam(teamName);
-
-		// Return the Task Builder
-		return taskBuilder;
+	public <O extends Enum<O>, F extends Enum<F>> ManagedFunctionBuilder<O, F> constructFunction(String functionName,
+			ManagedFunctionFactory<O, F> functionFactory) {
+		return this.officeBuilder.addManagedFunction(functionName, functionFactory);
 	}
 
 	/**
-	 * Facade method to register a {@link Task}.
-	 *
-	 * @param <W>
-	 *            {@link Work} type.
-	 * @param <D>
-	 *            Dependency key type.
-	 * @param <F>
-	 *            Flow key type.
-	 * @param taskName
-	 *            Name of the {@link Task}.
-	 * @param taskFactory
-	 *            {@link TaskFactory}.
-	 * @param teamName
-	 *            Name of the {@link Team}.
-	 * @param moName
-	 *            Name of the {@link ManagedObject}.
-	 * @param moType
-	 *            Type of the {@link ManagedObject}.
-	 * @param nextTaskName
-	 *            Name of the next {@link Task}.
-	 * @param nextTaskArgumentType
-	 *            Type of argument to the next {@link Task}.
-	 * @return {@link TaskBuilder} for the {@link Task}.
-	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <W extends Work, D extends Enum<D>, F extends Enum<F>> TaskBuilder<W, D, F> constructTask(
-			String taskName, TaskFactory<W, D, F> taskFactory, String teamName,
-			String moName, Class<?> moType, String nextTaskName,
-			Class<?> nextTaskArgumentType) {
-
-		// Create the Task Builder
-		TaskBuilder taskBuilder = this.constructTask(taskName, taskFactory,
-				teamName);
-
-		// Register the next task and managed object
-		if (nextTaskName != null) {
-			taskBuilder.setNextTaskInFlow(nextTaskName, nextTaskArgumentType);
-		}
-		if (moName != null) {
-			taskBuilder.linkManagedObject(0, moName, moType);
-		}
-
-		// Return the task builder
-		return taskBuilder;
-	}
-
-	/**
-	 * Facade method to register a {@link Task}.
+	 * Facade method to register a {@link ManagedFunction}.
 	 * 
-	 * @param <W>
-	 *            {@link Work} type.
-	 * @param <D>
+	 * @param <O>
 	 *            Dependency key type.
 	 * @param <F>
 	 *            Flow key type.
-	 * @param taskName
-	 *            Name of the {@link Task}.
-	 * @param task
-	 *            {@link Task}.
-	 * @param teamName
-	 *            Name of the {@link Team}.
-	 * @param nextTaskName
-	 *            Name of the next {@link Task}.
-	 * @param nextTaskArgumentType
-	 *            {@link Class} of the argument to the next {@link Task}.
-	 * @return {@link TaskBuilder} for the {@link Task}.
+	 * @param functionName
+	 *            Name of the {@link ManagedFunction}.
+	 * @param function
+	 *            {@link ManagedFunction}.
+	 * @return {@link ManagedFunctionBuilder} for the {@link ManagedFunction}.
 	 */
-	@SuppressWarnings("rawtypes")
-	public <W extends Work, D extends Enum<D>, F extends Enum<F>> TaskBuilder constructTask(
-			String taskName, final Task<W, D, F> task, String teamName,
-			String nextTaskName, Class<?> nextTaskArgumentType) {
+	public <O extends Enum<O>, F extends Enum<F>> ManagedFunctionBuilder<O, F> constructFunction(String functionName,
+			final ManagedFunction<O, F> function) {
 
-		// Create the Task Factory
-		TaskFactory<W, D, F> taskFactory = new TaskFactory<W, D, F>() {
-			public Task<W, D, F> createTask(W work) {
-				return task;
+		// Create the Function Factory
+		ManagedFunctionFactory<O, F> functionFactory = new ManagedFunctionFactory<O, F>() {
+			public ManagedFunction<O, F> createManagedFunction() {
+				return function;
 			}
 		};
 
-		// Construct and return the Task
-		return this.constructTask(taskName, taskFactory, teamName, null, null,
-				nextTaskName, nextTaskArgumentType);
-	}
-
-	/**
-	 * Facade method to register a {@link ManagedObject}.
-	 * 
-	 * @param <D>
-	 *            Dependency key type.
-	 * @param <F>
-	 *            Flow key type.
-	 * @param <MS>
-	 *            {@link ManagedObjectSource} type.
-	 * @param managedObjectName
-	 *            Name of the {@link ManagedObject}.
-	 * @param managedObjectSourceClass
-	 *            {@link ManagedObjectSource} {@link Class}.
-	 * @return {@link ManagedObjectBuilder}.
-	 */
-	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> constructManagedObject(
-			String managedObjectName, Class<MS> managedObjectSourceClass) {
-
-		// Obtain the managed object source name
-		String managedObjectSourceName = "of-" + managedObjectName;
-
-		// Create the Managed Object Builder
-		ManagedObjectBuilder<F> managedObjectBuilder = this
-				.getOfficeFloorBuilder().addManagedObject(
-						managedObjectSourceName, managedObjectSourceClass);
-
-		// Link into the Office
-		this.officeBuilder.registerManagedObjectSource(managedObjectName,
-				managedObjectSourceName);
-
-		// Return the Managed Object Builder
-		return managedObjectBuilder;
+		// Construct and return the function
+		return this.constructFunction(functionName, functionFactory);
 	}
 
 	/**
@@ -557,28 +447,27 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * @param managedObjectSourceClass
 	 *            {@link ManagedObjectSource} {@link Class}.
 	 * @param managingOffice
-	 *            Name of the managing {@link Office}.
+	 *            Name of the managing {@link Office}. May be <code>null</code>
+	 *            to manually register for {@link ManagingOfficeBuilder}.
 	 * @return {@link ManagedObjectBuilder}.
 	 */
 	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> constructManagedObject(
-			String managedObjectName, Class<MS> managedObjectSourceClass,
-			String managingOffice) {
+			String managedObjectName, Class<MS> managedObjectSourceClass, String managingOffice) {
 
 		// Obtain the managed object source name
 		String managedObjectSourceName = "of-" + managedObjectName;
 
 		// Create the Managed Object Builder
-		ManagedObjectBuilder<F> managedObjectBuilder = this
-				.getOfficeFloorBuilder().addManagedObject(
-						managedObjectSourceName, managedObjectSourceClass);
+		ManagedObjectBuilder<F> managedObjectBuilder = this.getOfficeFloorBuilder()
+				.addManagedObject(managedObjectSourceName, managedObjectSourceClass);
 
 		// Flag managing office
-		managedObjectBuilder.setManagingOffice(managingOffice)
-				.setInputManagedObjectName(managedObjectName);
+		if (managingOffice != null) {
+			managedObjectBuilder.setManagingOffice(managingOffice);
+		}
 
 		// Link into the Office
-		this.officeBuilder.registerManagedObjectSource(managedObjectName,
-				managedObjectSourceName);
+		this.officeBuilder.registerManagedObjectSource(managedObjectName, managedObjectSourceName);
 
 		// Return the Managed Object Builder
 		return managedObjectBuilder;
@@ -591,64 +480,37 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 *            Dependency key type.
 	 * @param <F>
 	 *            Flow key type.
+	 * @param <MS>
+	 *            {@link ManagedObjectSource} type.
 	 * @param managedObjectName
 	 *            Name of the {@link ManagedObject}.
-	 * @param metaData
-	 *            {@link ManagedObjectSourceMetaData}.
-	 * @param managedObject
-	 *            {@link ManagedObject}.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource} instance.
 	 * @param managingOffice
-	 *            Name of the managing {@link Office}.
+	 *            Name of the managing {@link Office}. May be <code>null</code>
+	 *            to manually register for {@link ManagingOfficeBuilder}.
 	 * @return {@link ManagedObjectBuilder}.
 	 */
-	public <D extends Enum<D>, F extends Enum<F>> ManagedObjectBuilder<F> constructManagedObject(
-			String managedObjectName,
-			ManagedObjectSourceMetaData<D, F> metaData,
-			ManagedObject managedObject, String managingOffice) {
+	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> constructManagedObject(
+			String managedObjectName, MS managedObjectSource, String managingOffice) {
 
-		// Obtain managed object source name
+		// Obtain the managed object source name
 		String managedObjectSourceName = "of-" + managedObjectName;
 
-		// Bind Managed Object
-		ManagedObjectBuilder<F> managedObjectBuilder = MockManagedObjectSource
-				.bindManagedObject(managedObjectSourceName, managedObject,
-						metaData, this.getOfficeFloorBuilder());
+		// Create the Managed Object Builder
+		ManagedObjectBuilder<F> managedObjectBuilder = this.getOfficeFloorBuilder()
+				.addManagedObject(managedObjectSourceName, managedObjectSource);
 
 		// Flag managing office
-		managedObjectBuilder.setManagingOffice(managingOffice)
-				.setInputManagedObjectName(managedObjectName);
+		if (managingOffice != null) {
+			managedObjectBuilder.setManagingOffice(managingOffice);
+		}
 
 		// Link into the Office
-		this.officeBuilder.registerManagedObjectSource(managedObjectName,
-				managedObjectSourceName);
+		this.officeBuilder.registerManagedObjectSource(managedObjectName, managedObjectSourceName);
 
-		// Return the builder
+		// Return the Managed Object Builder
 		return managedObjectBuilder;
-	}
-
-	/**
-	 * Facade method to register a {@link ManagedObject}.
-	 * 
-	 * @param managedObjectName
-	 *            Name of the {@link ManagedObject}.
-	 * @param managedObject
-	 *            {@link ManagedObject}.
-	 * @param managingOffice
-	 *            Name of the managing {@link Office}.
-	 * @return {@link ManagedObjectBuilder}.
-	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public ManagedObjectBuilder<?> constructManagedObject(
-			String managedObjectName, ManagedObject managedObject,
-			String managingOffice) {
-
-		// Create the mock Managed Object Source meta-data
-		ManagedObjectSourceMetaData metaData = new MockManagedObjectSourceMetaData(
-				managedObject);
-
-		// Register the Managed Object
-		return this.constructManagedObject(managedObjectName, metaData,
-				managedObject, managingOffice);
 	}
 
 	/**
@@ -659,11 +521,13 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * @param managedObjectName
 	 *            Name of the {@link ManagedObject}.
 	 * @param managingOffice
-	 *            Name of the mananaging {@link Office}.
+	 *            Name of the mananaging {@link Office}. May be
+	 *            <code>null</code> to manually register for
+	 *            {@link ManagingOfficeBuilder}.
 	 * @return {@link ManagedObjectBuilder}.
 	 */
-	public ManagedObjectBuilder<?> constructManagedObject(final Object object,
-			String managedObjectName, String managingOffice) {
+	public ManagedObjectBuilder<?> constructManagedObject(final Object object, String managedObjectName,
+			String managingOffice) {
 
 		// Create the wrapping Managed Object
 		ManagedObject managedObject = new ManagedObject() {
@@ -672,9 +536,77 @@ public abstract class AbstractOfficeConstructTestCase extends
 			}
 		};
 
-		// Register the managed object
-		return this.constructManagedObject(managedObjectName, managedObject,
-				managingOffice);
+		// Obtain managed object source name
+		String managedObjectSourceName = "of-" + managedObjectName;
+
+		// Bind Managed Object
+		@SuppressWarnings("rawtypes")
+		ManagedObjectSourceMetaData metaData = new MockManagedObjectSourceMetaData(managedObject);
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		ManagedObjectBuilder managedObjectBuilder = MockManagedObjectSource.bindManagedObject(managedObjectSourceName,
+				managedObject, metaData, this.getOfficeFloorBuilder());
+
+		// Flag managing office
+		if (managingOffice != null) {
+			managedObjectBuilder.setManagingOffice(managingOffice);
+		}
+
+		// Link into the Office
+		this.officeBuilder.registerManagedObjectSource(managedObjectName, managedObjectSourceName);
+
+		// Return the builder
+		return managedObjectBuilder;
+	}
+
+	/**
+	 * Builds the {@link ManagedObject} for use at the desired
+	 * {@link ManagedObjectScope}.
+	 * 
+	 * @param officeManagedObjectName
+	 *            Name to bind the {@link ManagedObject} under.
+	 * @param managedObjectScope
+	 *            {@link ManagedObjectScope} for the {@link ManagedObject}.
+	 * @param managedFunctionBuilder
+	 *            {@link ManagedFunctionBuilder} if binding to
+	 *            {@link ManagedObjectScope#FUNCTION}.
+	 * @return {@link DependencyMappingBuilder} for the bound
+	 *         {@link ManagedObject}.
+	 */
+	public DependencyMappingBuilder bindManagedObject(String bindName, ManagedObjectScope managedObjectScope,
+			ManagedFunctionBuilder<?, ?> managedFunctionBuilder) {
+
+		// Build the managed object based on scope
+		switch (managedObjectScope) {
+		case FUNCTION:
+			return managedFunctionBuilder.addManagedObject(bindName, bindName);
+
+		case THREAD:
+			return this.officeBuilder.addThreadManagedObject(bindName, bindName);
+
+		case PROCESS:
+			return this.officeBuilder.addProcessManagedObject(bindName, bindName);
+
+		default:
+			TestCase.fail("Unknown managed object scope " + managedObjectScope);
+			return null;
+		}
+	}
+
+	/**
+	 * Constructs the {@link Governance}.
+	 * 
+	 * @param object
+	 *            {@link Object} containing the {@link Method} instances used
+	 *            for {@link Governance}.
+	 * @param governanceName
+	 *            Name of the {@link Governance}.
+	 * @return {@link ReflectiveGovernanceBuilder}.
+	 */
+	public ReflectiveGovernanceBuilder constructGovernance(Object object, String governanceName) {
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		ReflectiveGovernanceBuilder builder = new ReflectiveGovernanceBuilder((Class) object.getClass(), object,
+				governanceName, this.officeBuilder, this);
+		return builder;
 	}
 
 	/**
@@ -692,8 +624,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 		String officeFloorTeamName = "of-" + teamName;
 
 		// Bind the team into the office floor
-		TeamBuilder<?> teamBuilder = MockTeamSource.bindTeamBuilder(
-				this.officeFloorBuilder, officeFloorTeamName, team);
+		TeamBuilder<?> teamBuilder = MockTeamSource.bindTeamBuilder(this.officeFloorBuilder, officeFloorTeamName, team);
 
 		// Link into the Office
 		this.officeBuilder.registerTeam(teamName, officeFloorTeamName);
@@ -713,15 +644,13 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 *            {@link TeamSource} class.
 	 * @return {@link TeamBuilder}.
 	 */
-	public <TS extends TeamSource> TeamBuilder<?> constructTeam(
-			String teamName, Class<TS> teamSourceClass) {
+	public <TS extends TeamSource> TeamBuilder<?> constructTeam(String teamName, Class<TS> teamSourceClass) {
 
 		// Obtain the office floor team name
 		String officeFloorTeamName = "of-" + teamName;
 
 		// Add the team to the office floor
-		TeamBuilder<?> teamBuilder = this.officeFloorBuilder.addTeam(
-				officeFloorTeamName, teamSourceClass);
+		TeamBuilder<?> teamBuilder = this.officeFloorBuilder.addTeam(officeFloorTeamName, teamSourceClass);
 
 		// Link into the office
 		this.officeBuilder.registerTeam(teamName, officeFloorTeamName);
@@ -731,80 +660,13 @@ public abstract class AbstractOfficeConstructTestCase extends
 	}
 
 	/**
-	 * Facade method to create a {@link Administrator}.
-	 * 
-	 * @param <I>
-	 *            Extension interface type.
-	 * @param <A>
-	 *            {@link Administrator} type.
-	 * @param adminName
-	 *            Name of the {@link Administrator}.
-	 * @param administrator
-	 *            {@link Administrator}.
-	 * @param administratorMetaData
-	 *            {@link AdministratorSourceMetaData}.
-	 * @param teamName
-	 *            Name of {@link Team} for {@link Administrator} {@link Duty}
-	 *            instances.
-	 * @return {@link AdministratorBuilder}.
-	 */
-	public <I extends Object, A extends Enum<A>> AdministratorBuilder<A> constructAdministrator(
-			String adminName, Administrator<I, A> administrator,
-			AdministratorSourceMetaData<I, A> administratorMetaData,
-			String teamName) {
-
-		// Bind the Administrator
-		AdministratorBuilder<A> adminBuilder = MockAdministratorSource
-				.bindAdministrator(adminName, administrator,
-						administratorMetaData, this.officeBuilder);
-
-		// Configure the administrator
-		adminBuilder.setTeam(teamName);
-
-		// Return the administrator builder
-		return adminBuilder;
-	}
-
-	/**
-	 * Facade method to construct an {@link Administrator}.
-	 * 
-	 * @param <I>
-	 *            Extension interface type.
-	 * @param <A>
-	 *            {@link Administrator} type.
-	 * @param <AS>
-	 *            {@link AdministratorSource} type.
-	 * @param adminName
-	 *            Name of the {@link Administrator}.
-	 * @param adminSource
-	 *            {@link AdministratorSource} {@link Class}.
-	 * @param teamName
-	 *            Name of {@link Team} for {@link Administrator} {@link Duty}
-	 *            instances.
-	 * @return {@link AdministratorBuilder}.
-	 */
-	public <I extends Object, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorBuilder<A> constructAdministrator(
-			String adminName, Class<AS> adminSource, String teamName) {
-
-		// Create the Administrator Builder
-		AdministratorBuilder<A> adminBuilder = this.officeBuilder
-				.addThreadAdministrator(adminName, adminSource);
-
-		// Configure the administrator
-		adminBuilder.setTeam(teamName);
-
-		// Return the administrator builder
-		return adminBuilder;
-	}
-
-	/**
 	 * Facade method to create the {@link OfficeFloor}.
 	 * 
 	 * @return {@link OfficeFloor}.
 	 * @throws Exception
 	 *             If fails to construct the {@link OfficeFloor}.
 	 */
-	protected OfficeFloor constructOfficeFloor() throws Exception {
+	public OfficeFloor constructOfficeFloor() throws Exception {
 
 		// Construct the Office Floor
 		this.officeFloor = this.officeFloorBuilder.buildOfficeFloor();
@@ -812,87 +674,169 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 		// Initiate for constructing another office
 		OFFICE_FLOOR_INDEX++;
-		this.officeFloorBuilder = OfficeFrame.getInstance()
-				.createOfficeFloorBuilder(this.getOfficeFloorName());
+		this.officeFloorBuilder = OfficeFrame.getInstance().createOfficeFloorBuilder(this.getOfficeFloorName());
 		OFFICE_INDEX++;
-		this.officeBuilder = this.officeFloorBuilder.addOffice(this
-				.getOfficeName());
+		this.officeBuilder = this.officeFloorBuilder.addOffice(this.getOfficeName());
 
-		// Return the Office Floor
+		// Track the threads created
+		this.officeFloorBuilder.setThreadDecorator((thread) -> this.usedThreads.add(thread));
+
+		// Return the OfficeFloor
 		return this.officeFloor;
 	}
 
 	/**
-	 * Facade method to invoke work of an office. It will create the
-	 * {@link OfficeFloor} if necessary and times out after 3 seconds if invoked
-	 * {@link Work} is not complete.
+	 * Triggers the {@link ManagedFunction} but does not wait for its
+	 * completion.
 	 * 
-	 * @param workName
-	 *            Name of the work to invoke.
+	 * @param functionName
+	 *            Name of the {@link ManagedFunction}.
 	 * @param parameter
-	 *            Parameter.
+	 *            Parameter for the {@link ManagedFunction}.
+	 * @param callback
+	 *            {@link FlowCallback}. May be <code>null</code>.
+	 * @return {@link Office} containing the {@link ManagedFunction}.
 	 * @throws Exception
-	 *             If fails to construct office or work invocation failure.
+	 *             If fails to trigger the {@link ManagedFunction}.
 	 */
-	protected void invokeWork(String workName, Object parameter)
-			throws Exception {
-		this.invokeWork(workName, parameter, 3);
+	public Office triggerFunction(String functionName, Object parameter, FlowCallback callback) throws Exception {
+
+		// Obtain the name of the office being constructed
+		String officeName = this.getOfficeName();
+
+		// Determine if required to construct
+		if (this.officeFloor == null) {
+			// Construct the OfficeFloor
+			this.officeFloor = this.constructOfficeFloor();
+
+			// Open the OfficeFloor
+			this.officeFloor.openOfficeFloor();
+		}
+
+		// Invoke the function
+		Office office = this.officeFloor.getOffice(officeName);
+		FunctionManager functionManager = office.getFunctionManager(functionName);
+		functionManager.invokeProcess(parameter, callback);
+
+		// Return the office
+		return office;
 	}
 
 	/**
-	 * Facade method to invoke work of an office. It will create the office
-	 * floor if necessary.
+	 * Facade method to invoke {@link ManagedFunction} of an {@link Office}. It
+	 * will create the {@link OfficeFloor} if necessary and times out after 3
+	 * seconds if invoked {@link ManagedFunction} is not complete.
 	 * 
-	 * @param workName
-	 *            Name of the work to invoke.
+	 * @param functionName
+	 *            Name of the {@link ManagedFunction} to invoke.
+	 * @param parameter
+	 *            Parameter.
+	 * @throws Exception
+	 *             If fails to construct {@link Office} or
+	 *             {@link ManagedFunction} invocation failure.
+	 */
+	public void invokeFunction(String functionName, Object parameter) throws Exception {
+		this.invokeFunction(functionName, parameter, 3);
+	}
+
+	/**
+	 * Facade method to invoke the {@link ManagedFunction} of an {@link Office}
+	 * and validate the {@link ManagedFunction} instances invoked.
+	 * 
+	 * @param functionName
+	 *            Name of the {@link ManagedFunction} to invoke.
+	 * @param parameter
+	 *            Parameter.
+	 * @param expectedFunctions
+	 *            Names of the expected {@link ManagedFunction} instances to be
+	 *            invoked in the order specified.
+	 * @throws Exception
+	 *             If fails to construct {@link Office} or
+	 *             {@link ManagedFunction} invocation failure.
+	 */
+	public void invokeFunctionAndValidate(String functionName, Object parameter, String... expectedFunctions)
+			throws Exception {
+		this.setRecordReflectiveFunctionMethodsInvoked(true);
+		this.invokeFunction(functionName, parameter);
+		this.validateReflectiveMethodOrder(expectedFunctions);
+	}
+
+	/**
+	 * Facade method to invoke {@link ManagedFunction} of an {@link Office}. It
+	 * will create the {@link OfficeFloor} if necessary.
+	 * 
+	 * @param functionName
+	 *            Name of the {@link ManagedFunction} to invoke.
 	 * @param parameter
 	 *            Parameter.
 	 * @param secondsToRun
 	 *            Seconds to run.
 	 * @throws Exception
-	 *             If fails to construct office or work invocation failure.
+	 *             If fails to construct {@link Office} or
+	 *             {@link ManagedFunction} invocation failure.
 	 */
-	protected void invokeWork(String workName, Object parameter,
-			int secondsToRun) throws Exception {
+	public void invokeFunction(String functionName, Object parameter, int secondsToRun) throws Exception {
 
-		// Obtain the name of the office being constructed
-		String officeName = this.getOfficeName();
+		// Wait on this object
+		Closure<Boolean> isComplete = new Closure<Boolean>(false);
+		Closure<Throwable> failure = new Closure<>();
 
-		// Determine if required to construct work
-		if (this.officeFloor == null) {
-			// Construct the office floor
-			this.officeFloor = this.constructOfficeFloor();
+		// Invoke the function
+		FlowCallback callback = new FlowCallback() {
+			@Override
+			public void run(Throwable escalation) throws Throwable {
 
-			// Open the office floor
-			this.officeFloor.openOfficeFloor();
-		}
+				// Notify complete
+				AbstractOfficeConstructTestCase.this.printMessage("Complete");
 
-		// Invoke the work
-		Office office = this.officeFloor.getOffice(officeName);
-		WorkManager workManager = office.getWorkManager(workName);
-		ProcessFuture processFuture = workManager.invokeWork(parameter);
+				// Flag complete
+				synchronized (isComplete) {
+					isComplete.value = true;
+					failure.value = escalation;
+					isComplete.notify();
+				}
+			}
+		};
+		this.triggerFunction(functionName, parameter, callback);
 
-		// Block until flow is complete (or times out)
-		int iteration = 0;
-		long startBlockTime = System.currentTimeMillis();
-		while (!processFuture.isComplete()) {
+		try {
+			// Block until flow is complete (or times out)
+			int iteration = 0;
+			long startBlockTime = System.currentTimeMillis();
+			synchronized (isComplete) {
+				while (!isComplete.value) {
 
-			// Only timeout if positive time to run
-			if (secondsToRun > 0) {
-				// Provide heap diagnostics and time out
-				this.timeout(startBlockTime, secondsToRun);
+					// Only timeout if positive time to run
+					if (secondsToRun > 0) {
+						// Provide heap diagnostics and time out
+						this.timeout(startBlockTime, secondsToRun);
+					}
+
+					// Output heap diagnostics after every approximate 3 seconds
+					iteration++;
+					if ((iteration % 30) == 0) {
+						iteration = 0;
+						this.printHeapMemoryDiagnostics();
+					}
+
+					// Wait some time as still executing
+					isComplete.wait(100);
+				}
+
+				// Ensure propagate escalations
+				if (failure.value != null) {
+					throw failure.value;
+				}
+				this.validateNoTopLevelEscalation();
 			}
 
-			// Output heap diagnostics after every approximate 3 seconds
-			iteration++;
-			if ((iteration % 30) == 0) {
-				iteration = 0;
-				this.printHeapMemoryDiagnostics();
-			}
-
-			// Wait some time as still executing
-			synchronized (processFuture) {
-				processFuture.wait(100);
+		} catch (Throwable ex) {
+			if (ex instanceof Error) {
+				throw (Error) ex;
+			} else if (ex instanceof Exception) {
+				throw (Exception) ex;
+			} else {
+				throw new Error(ex);
 			}
 		}
 	}

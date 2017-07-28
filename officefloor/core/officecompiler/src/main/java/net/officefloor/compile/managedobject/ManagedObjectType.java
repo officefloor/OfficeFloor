@@ -17,10 +17,11 @@
  */
 package net.officefloor.compile.managedobject;
 
-import net.officefloor.frame.internal.structure.JobSequence;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * <code>Type definition</code> of a {@link ManagedObject}.
@@ -48,10 +49,23 @@ public interface ManagedObjectType<D extends Enum<D>> {
 	ManagedObjectDependencyType<D>[] getDependencyTypes();
 
 	/**
-	 * Obtains the {@link ManagedObjectFlowType} definitions of the {@link JobSequence}
+	 * <p>
+	 * Indicates if the {@link ManagedObjectSource} may trigger a {@link Flow}.
+	 * <p>
+	 * Note that a {@link ManagedObjectSource} can provide no
+	 * {@link ManagedObjectFlowType} instances yet still be input (as
+	 * {@link ManagedObjectSource} provides the {@link ManagedFunction} for the
+	 * {@link Flow}).
+	 * 
+	 * @return <code>true</code> if input.
+	 */
+	boolean isInput();
+
+	/**
+	 * Obtains the {@link ManagedObjectFlowType} definitions of the {@link Flow}
 	 * instances required to be linked for the {@link ManagedObjectSource}.
 	 * 
-	 * @return {@link ManagedObjectFlowType} definitions of the {@link JobSequence}
+	 * @return {@link ManagedObjectFlowType} definitions of the {@link Flow}
 	 *         instances required to be linked for the
 	 *         {@link ManagedObjectSource}.
 	 */

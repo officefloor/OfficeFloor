@@ -18,69 +18,25 @@
 package net.officefloor.frame.internal.structure;
 
 /**
- * <p>
  * {@link AssetManager} to manage {@link Asset} instances.
- * <p>
- * May be used as a {@link LinkedListSetEntry} in a list of {@link AssetManager}
- * instances for a {@link OfficeManager}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AssetManager extends
-		LinkedListSetEntry<AssetManager, OfficeManager> {
-
-	/**
-	 * Obtains the {@link OfficeManager} managing this {@link AssetManager}.
-	 * 
-	 * @return {@link OfficeManager} managing this {@link AssetManager}.
-	 */
-	OfficeManager getOfficeManager();
+public interface AssetManager extends FunctionState {
 
 	/**
 	 * <p>
-	 * Creates a new {@link AssetMonitor}.
+	 * Creates a new {@link AssetLatch}.
 	 * <p>
-	 * The returned {@link AssetMonitor} is not being managed by this
-	 * {@link AssetManager}. To have the {@link AssetMonitor} managed, it must
-	 * be registered with this {@link AssetManager}. This allows for only the
-	 * list of {@link AssetMonitor} instances requiring management to be
-	 * managed.
+	 * The returned {@link AssetLatch} is not being managed by this
+	 * {@link AssetManager}. To have the {@link AssetLatch} managed, it must be
+	 * registered with this {@link AssetManager}. This allows for only the list
+	 * of {@link AssetLatch} instances requiring management to be managed.
 	 * 
 	 * @param asset
-	 *            {@link Asset} that {@link JobNode} instances will wait on.
-	 * @return {@link AssetMonitor} for the {@link Asset}.
+	 *            {@link Asset} that {@link FunctionState} instances will wait on.
+	 * @return {@link AssetLatch} for the {@link Asset}.
 	 */
-	AssetMonitor createAssetMonitor(Asset asset);
-
-	/**
-	 * Does a single check on the {@link Asset} instances of the registered
-	 * {@link AssetMonitor} instances for management.
-	 * 
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet} to add all {@link JobNode}
-	 *            instances requiring activation from the check. A
-	 *            {@link AssetManager} should not activate {@link JobNode}
-	 *            instances itself.
-	 */
-	void checkOnAssets(JobNodeActivateSet activateSet);
-
-	/**
-	 * Registers a {@link AssetMonitor} to be managed by this
-	 * {@link AssetManager}.
-	 * 
-	 * @param monitor
-	 *            {@link AssetMonitor} to be managed by this
-	 *            {@link AssetManager}.
-	 */
-	void registerAssetMonitor(AssetMonitor monitor);
-
-	/**
-	 * Unregisters a {@link AssetMonitor} from being managed by this
-	 * {@link AssetManager}.
-	 * 
-	 * @param monitor
-	 *            {@link AssetMonitor} no longer requiring managing.
-	 */
-	void unregisterAssetMonitor(AssetMonitor monitor);
+	AssetLatch createAssetLatch(Asset asset);
 
 }

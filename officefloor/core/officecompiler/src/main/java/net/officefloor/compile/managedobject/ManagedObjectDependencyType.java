@@ -17,7 +17,7 @@
  */
 package net.officefloor.compile.managedobject;
 
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * <code>Type definition</code> of a dependency required by the

@@ -38,8 +38,8 @@ import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeam;
@@ -584,14 +584,14 @@ public class ServletBridgeManagedObjectSource
 	}
 
 	/**
-	 * {@link Task} to complete the {@link AsyncContext}.
+	 * {@link ManagedFunction} to complete the {@link AsyncContext}.
 	 */
 	public static class CompleteAsyncContextTask extends
 			AbstractSingleTask<CompleteAsyncContextTask, None, None> {
 
 		@Override
-		public Object doTask(
-				TaskContext<CompleteAsyncContextTask, None, None> context) {
+		public Object execute(
+				ManagedFunctionContext<CompleteAsyncContextTask, None, None> context) {
 
 			// Obtain the recycle parameter
 			RecycleManagedObjectParameter<ServletBridgeManagedObject> parameter = this

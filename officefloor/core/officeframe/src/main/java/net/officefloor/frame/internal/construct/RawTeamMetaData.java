@@ -17,10 +17,9 @@
  */
 package net.officefloor.frame.internal.construct;
 
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.ThreadLocalAwareTeam;
 import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.ProcessContextListener;
-import net.officefloor.frame.spi.team.source.TeamSource;
 
 /**
  * Raw meta-data for a {@link Team}.
@@ -44,12 +43,10 @@ public interface RawTeamMetaData {
 	TeamManagement getTeamManagement();
 
 	/**
-	 * Obtains the {@link ProcessContextListener} instances for the
-	 * {@link TeamSource}.
+	 * Indicates if {@link ThreadLocalAwareTeam}.
 	 * 
-	 * @return {@link ProcessContextListener} instances for the
-	 *         {@link TeamSource}.
+	 * @return {@link ThreadLocalAwareTeam}.
 	 */
-	ProcessContextListener[] getProcessContextListeners();
+	boolean isRequireThreadLocalAwareness();
 
 }

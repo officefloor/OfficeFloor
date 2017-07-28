@@ -23,7 +23,7 @@ import javax.naming.directory.DirContext;
 
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.plugin.jndi.ldap.AbstractLdapTest;
@@ -39,8 +39,7 @@ public class JndiDirContextManagedObjectSourceTest extends AbstractLdapTest {
 	 * Ensure correct specification.
 	 */
 	public void testSpecification() {
-		ManagedObjectLoaderUtil
-				.validateSpecification(JndiDirContextManagedObjectSource.class);
+		ManagedObjectLoaderUtil.validateSpecification(JndiDirContextManagedObjectSource.class);
 	}
 
 	/**
@@ -49,13 +48,11 @@ public class JndiDirContextManagedObjectSourceTest extends AbstractLdapTest {
 	public void testType() {
 
 		// Create the expected type
-		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
-				.createManagedObjectTypeBuilder();
+		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(DirContext.class);
 
 		// Validate the type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type,
-				JndiDirContextManagedObjectSource.class);
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, JndiDirContextManagedObjectSource.class);
 	}
 
 	/**
@@ -68,11 +65,9 @@ public class JndiDirContextManagedObjectSourceTest extends AbstractLdapTest {
 
 		// Obtain the JNDI Context Managed Object Source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
-		loader.addProperty(Context.INITIAL_CONTEXT_FACTORY,
-				"com.sun.jndi.ldap.LdapCtxFactory");
+		loader.addProperty(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
 		loader.addProperty(Context.PROVIDER_URL, LDAP_URL);
-		JndiDirContextManagedObjectSource mos = loader
-				.loadManagedObjectSource(JndiDirContextManagedObjectSource.class);
+		JndiDirContextManagedObjectSource mos = loader.loadManagedObjectSource(JndiDirContextManagedObjectSource.class);
 
 		// Obtain the Managed Object
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
@@ -82,8 +77,7 @@ public class JndiDirContextManagedObjectSourceTest extends AbstractLdapTest {
 		Object object = mo.getObject();
 		assertNotNull("Must have DirContext", object);
 		assertTrue("Must be DirContext type", object instanceof DirContext);
-		assertTrue("Must be Synchronised DirContext",
-				object instanceof SynchronisedDirContext);
+		assertTrue("Must be Synchronised DirContext", object instanceof SynchronisedDirContext);
 
 		// Ensure can obtain the entry
 		DirContext context = (DirContext) object;
@@ -101,14 +95,10 @@ public class JndiDirContextManagedObjectSourceTest extends AbstractLdapTest {
 
 		// Obtain the JNDI Context Managed Object Source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
-		loader.addProperty(Context.INITIAL_CONTEXT_FACTORY,
-				"com.sun.jndi.ldap.LdapCtxFactory");
+		loader.addProperty(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
 		loader.addProperty(Context.PROVIDER_URL, LDAP_URL);
-		loader.addProperty(
-				JndiDirContextManagedObjectSource.PROPERTY_SUB_CONTEXT_NAME,
-				LDAP_DOMAIN);
-		JndiDirContextManagedObjectSource mos = loader
-				.loadManagedObjectSource(JndiDirContextManagedObjectSource.class);
+		loader.addProperty(JndiDirContextManagedObjectSource.PROPERTY_SUB_CONTEXT_NAME, LDAP_DOMAIN);
+		JndiDirContextManagedObjectSource mos = loader.loadManagedObjectSource(JndiDirContextManagedObjectSource.class);
 
 		// Obtain the Managed Object
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
@@ -118,8 +108,7 @@ public class JndiDirContextManagedObjectSourceTest extends AbstractLdapTest {
 		Object object = mo.getObject();
 		assertNotNull("Must have DirContext", object);
 		assertTrue("Must be DirContext type", object instanceof DirContext);
-		assertTrue("Must be Synchronised DirContext",
-				object instanceof SynchronisedDirContext);
+		assertTrue("Must be Synchronised DirContext", object instanceof SynchronisedDirContext);
 
 		// Ensure can obtain the entry
 		DirContext context = (DirContext) object;

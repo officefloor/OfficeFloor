@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import net.officefloor.model.change.Change;
-import net.officefloor.plugin.web.http.security.HttpCredentials;
-import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 
 /**
  * Tests removing from a {@link WoofModel}.
@@ -40,8 +38,8 @@ public class RemoveConnectedTest extends AbstractWoofChangesTestCase {
 		WoofTemplateModel template = this.model.getWoofTemplates().get(0);
 
 		// Remove the template
-		Change<WoofTemplateModel> change = this.operations.removeTemplate(
-				template, this.getWoofTemplateChangeContext());
+		Change<WoofTemplateModel> change = this.operations.removeTemplate(template,
+				this.getWoofTemplateChangeContext());
 		this.assertChange(change, template, "Remove template TEMPLATE", true);
 	}
 
@@ -54,8 +52,7 @@ public class RemoveConnectedTest extends AbstractWoofChangesTestCase {
 		WoofSectionModel section = this.model.getWoofSections().get(0);
 
 		// Remove the section
-		Change<WoofSectionModel> change = this.operations
-				.removeSection(section);
+		Change<WoofSectionModel> change = this.operations.removeSection(section);
 		this.assertChange(change, section, "Remove section SECTION", true);
 	}
 
@@ -65,37 +62,11 @@ public class RemoveConnectedTest extends AbstractWoofChangesTestCase {
 	public void testRemoveAccess() {
 
 		// Obtain the access to remove
-		WoofAccessModel access = this.model.getWoofAccess();
+		WoofAccessModel access = this.model.getWoofAccesses().get(0);
 
 		// Remove the access
 		Change<WoofAccessModel> change = this.operations.removeAccess(access);
-		this.assertChange(change, access,
-				"Remove access net.example.HttpSecuritySource", true);
-	}
-
-	/**
-	 * Ensure able to remove the existing {@link WoofAccessModel}.
-	 */
-	public void testOverwriteAccess() {
-
-		// Create the HTTP Security type
-		HttpSecurityType<?, ?, ?, ?> securityType = this
-				.constructHttpSecurityType(HttpCredentials.class,
-						new HttpSecurityTypeConstructor() {
-							@Override
-							public void construct(
-									HttpSecurityTypeContext context) {
-								// Add flow
-								context.addFlow("OUTPUT", String.class, null);
-							}
-						});
-
-		// Obtain change to overwrite the Access
-		Change<WoofAccessModel> change = this.operations.setAccess(
-				"net.overwrite.HttpSecuritySource", 1000, null, securityType);
-
-		// Remove the access
-		this.assertChange(change, null, "Set Access", true);
+		this.assertChange(change, access, "Remove access net.example.HttpSecuritySource", true);
 	}
 
 	/**
@@ -107,8 +78,7 @@ public class RemoveConnectedTest extends AbstractWoofChangesTestCase {
 		WoofResourceModel resource = this.model.getWoofResources().get(0);
 
 		// Remove the resource
-		Change<WoofResourceModel> change = this.operations
-				.removeResource(resource);
+		Change<WoofResourceModel> change = this.operations.removeResource(resource);
 		this.assertChange(change, resource, "Remove resource RESOURCE", true);
 	}
 
@@ -143,18 +113,14 @@ public class RemoveConnectedTest extends AbstractWoofChangesTestCase {
 	 * @param exceptionClass
 	 *            Class of the {@link Exception}.
 	 */
-	private void doRemoveExceptionTest(int index,
-			Class<? extends Throwable> exceptionClass) {
+	private void doRemoveExceptionTest(int index, Class<? extends Throwable> exceptionClass) {
 
 		// Obtain the exception to remove
-		WoofExceptionModel exception = this.model.getWoofExceptions()
-				.get(index);
+		WoofExceptionModel exception = this.model.getWoofExceptions().get(index);
 
 		// Remove the exception
-		Change<WoofExceptionModel> change = this.operations
-				.removeException(exception);
-		this.assertChange(change, exception, "Remove exception "
-				+ exceptionClass.getName(), true);
+		Change<WoofExceptionModel> change = this.operations.removeException(exception);
+		this.assertChange(change, exception, "Remove exception " + exceptionClass.getName(), true);
 	}
 
 	/**

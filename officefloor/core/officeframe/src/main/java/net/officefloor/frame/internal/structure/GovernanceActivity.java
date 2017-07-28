@@ -17,53 +17,26 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.governance.GovernanceContext;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.JobContext;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.governance.GovernanceContext;
 
 /**
- * Activity regarding the {@link Governance}.
- * 
+ * Activity undertaken for {@link Governance}.
+ *
  * @author Daniel Sagenschneider
  */
-public interface GovernanceActivity<I, F extends Enum<F>> {
+public interface GovernanceActivity<F extends Enum<F>> {
 
 	/**
-	 * Obtains the {@link GovernanceMetaData} for this
-	 * {@link GovernanceActivity}.
+	 * Undertakes the {@link Governance} activity.
 	 * 
-	 * @return {@link GovernanceMetaData} for this {@link GovernanceActivity}.
-	 */
-	GovernanceMetaData<I, F> getGovernanceMetaData();
-
-	/**
-	 * Undertakes an activity regarding the {@link Governance}.
-	 * 
-	 * @param governanceContext
-	 *            {@link GovernanceContext}
-	 * @param jobContext
-	 *            {@link JobContext}.
-	 * @param jobNode
-	 *            {@link JobNode}.
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet}.
-	 * @param currentTeam
-	 *            {@link TeamIdentifier} of the current {@link Team} undertaking
-	 *            the activity.
-	 * @param containerContext
-	 *            {@link ContainerContext}.
-	 * @return <code>true</code> should activity be successfully trigger. In
-	 *         other words, does not need re-executing as waiting on
-	 *         {@link ManagedObject}.
+	 * @param context
+	 *            {@link GovernanceContext}.
+	 * @return Optional {@link FunctionState} to further execute for the
+	 *         {@link GovernanceActivity}.
 	 * @throws Throwable
-	 *             If activity fails.
+	 *             If issue in undertaking the {@link GovernanceActivity}.
 	 */
-	boolean doActivity(GovernanceContext<F> governanceContext,
-			JobContext jobContext, JobNode jobNode,
-			JobNodeActivateSet activateSet, TeamIdentifier currentTeam,
-			ContainerContext containerContext) throws Throwable;
+	FunctionState doActivity(GovernanceContext<F> context) throws Throwable;
 
 }

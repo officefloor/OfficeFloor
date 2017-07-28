@@ -1,0 +1,25 @@
+<context>
+	<office-floor>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office>
+		<suppliers>
+			<supplier name="SUPPLIER" source="${testcase}$CompileSupplierSource" />
+		</suppliers>
+		<managed-object-sources>
+			<managed-object-source name="DEPENDENCY_SOURCE"
+				source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$DependencyManagedObject" />
+				</properties>
+			</managed-object-source>
+		</managed-object-sources>
+		<managed-objects>
+			<managed-object name="DEPENDENCY" scope="PROCESS">
+				<managed-object-source name="DEPENDENCY_SOURCE" />
+			</managed-object>
+		</managed-objects>
+	</office>
+</context>

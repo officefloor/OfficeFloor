@@ -24,11 +24,11 @@ import net.officefloor.compile.impl.properties.PropertiesUtil;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 /**
@@ -37,8 +37,7 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
  * @author Daniel Sagenschneider
  */
 public class HttpApplicationLocationManagedObjectSource
-		extends
-		AbstractManagedObjectSource<HttpApplicationLocationManagedObjectSource.Dependencies, None> {
+		extends AbstractManagedObjectSource<HttpApplicationLocationManagedObjectSource.Dependencies, None> {
 
 	/**
 	 * Copies the {@link Property} instances.
@@ -48,12 +47,9 @@ public class HttpApplicationLocationManagedObjectSource
 	 * @param target
 	 *            {@link PropertyConfigurable}.
 	 */
-	public static void copyProperties(SourceProperties source,
-			PropertyConfigurable target) {
-		PropertiesUtil.copyProperties(source, target, PROPERTY_DOMAIN,
-				PROPERTY_HTTP_PORT, PROPERTY_HTTPS_PORT, PROPERTY_CONTEXT_PATH,
-				PROPERTY_CLUSTER_HOST, PROPERTY_CLUSTER_HTTP_PORT,
-				PROPERTY_CLUSTER_HTTPS_PORT);
+	public static void copyProperties(SourceProperties source, PropertyConfigurable target) {
+		PropertiesUtil.copyProperties(source, target, PROPERTY_DOMAIN, PROPERTY_HTTP_PORT, PROPERTY_HTTPS_PORT,
+				PROPERTY_CONTEXT_PATH, PROPERTY_CLUSTER_HOST, PROPERTY_CLUSTER_HTTP_PORT, PROPERTY_CLUSTER_HTTPS_PORT);
 	}
 
 	/**
@@ -170,24 +166,20 @@ public class HttpApplicationLocationManagedObjectSource
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<Dependencies, None> context)
-			throws Exception {
-		ManagedObjectSourceContext<None> mosContext = context
-				.getManagedObjectSourceContext();
+	protected void loadMetaData(MetaDataContext<Dependencies, None> context) throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Obtain the configuration
 		this.domain = mosContext.getProperty(PROPERTY_DOMAIN, null);
-		this.httpPort = Integer.parseInt(mosContext.getProperty(
-				PROPERTY_HTTP_PORT, String.valueOf(DEFAULT_HTTP_PORT)));
-		this.httpsPort = Integer.parseInt(mosContext.getProperty(
-				PROPERTY_HTTPS_PORT, String.valueOf(DEFAULT_HTTPS_PORT)));
+		this.httpPort = Integer.parseInt(mosContext.getProperty(PROPERTY_HTTP_PORT, String.valueOf(DEFAULT_HTTP_PORT)));
+		this.httpsPort = Integer
+				.parseInt(mosContext.getProperty(PROPERTY_HTTPS_PORT, String.valueOf(DEFAULT_HTTPS_PORT)));
 		this.contextPath = mosContext.getProperty(PROPERTY_CONTEXT_PATH, null);
-		this.clusterHostName = mosContext.getProperty(PROPERTY_CLUSTER_HOST,
-				null);
-		this.clusterHttpPort = Integer.parseInt(mosContext.getProperty(
-				PROPERTY_CLUSTER_HTTP_PORT, String.valueOf(this.httpPort)));
-		this.clusterHttpsPort = Integer.parseInt(mosContext.getProperty(
-				PROPERTY_CLUSTER_HTTPS_PORT, String.valueOf(this.httpsPort)));
+		this.clusterHostName = mosContext.getProperty(PROPERTY_CLUSTER_HOST, null);
+		this.clusterHttpPort = Integer
+				.parseInt(mosContext.getProperty(PROPERTY_CLUSTER_HTTP_PORT, String.valueOf(this.httpPort)));
+		this.clusterHttpsPort = Integer
+				.parseInt(mosContext.getProperty(PROPERTY_CLUSTER_HTTPS_PORT, String.valueOf(this.httpsPort)));
 
 		// Ensure have cluster host
 		if (this.clusterHostName == null) {
@@ -209,8 +201,7 @@ public class HttpApplicationLocationManagedObjectSource
 			}
 
 			// Transform to canonical path
-			this.contextPath = HttpApplicationLocationMangedObject
-					.transformToCanonicalPath(this.contextPath);
+			this.contextPath = HttpApplicationLocationMangedObject.transformToCanonicalPath(this.contextPath);
 
 			// No context if root path
 			if ("/".equals(this.contextPath)) {
@@ -221,16 +212,13 @@ public class HttpApplicationLocationManagedObjectSource
 		// Provide the meta-data
 		context.setObjectClass(HttpApplicationLocation.class);
 		context.setManagedObjectClass(HttpApplicationLocationMangedObject.class);
-		context.addDependency(Dependencies.SERVER_HTTP_CONNECTION,
-				ServerHttpConnection.class);
+		context.addDependency(Dependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class);
 	}
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-		return new HttpApplicationLocationMangedObject(this.domain,
-				this.httpPort, this.httpsPort, this.contextPath,
-				this.clusterHostName, this.clusterHttpPort,
-				this.clusterHttpsPort);
+		return new HttpApplicationLocationMangedObject(this.domain, this.httpPort, this.httpsPort, this.contextPath,
+				this.clusterHostName, this.clusterHttpPort, this.clusterHttpsPort);
 	}
 
 }

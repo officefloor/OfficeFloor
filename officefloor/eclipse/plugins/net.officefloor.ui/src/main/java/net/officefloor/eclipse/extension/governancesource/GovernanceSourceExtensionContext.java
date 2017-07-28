@@ -17,14 +17,14 @@
  */
 package net.officefloor.eclipse.extension.governancesource;
 
+import org.eclipse.core.resources.IProject;
+
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSourceSpecification;
-import net.officefloor.frame.spi.governance.Governance;
-
-import org.eclipse.core.resources.IProject;
+import net.officefloor.frame.api.governance.Governance;
 
 /**
  * Context for the {@link GovernanceSourceExtension}.
@@ -50,7 +50,8 @@ public interface GovernanceSourceExtensionContext {
 	 * The {@link PropertyList} may be in any state:
 	 * <ol>
 	 * <li>no value {@link PropertyList} populated from the
-	 * {@link GovernanceSourceSpecification} (creating a {@link Governance})</li>
+	 * {@link GovernanceSourceSpecification} (creating a
+	 * {@link Governance})</li>
 	 * <li>any changed state based on editing of the {@link Governance} (editing
 	 * {@link Governance})</li>
 	 * </ol>

@@ -20,20 +20,17 @@ package net.officefloor.compile.integrate.resource;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.autowire.AutoWireOfficeFloor;
-import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
-import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.extension.CompileOffice;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.frame.spi.source.ResourceSource;
-import net.officefloor.frame.spi.source.SourceContext;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.ResourceSource;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 
@@ -47,7 +44,7 @@ public class ResourceIntegrationTest extends OfficeFrameTestCase {
 	/**
 	 * Resource.
 	 */
-	private static InputStream workResource;
+	private static InputStream namespaceResource;
 
 	/**
 	 * Ensure the {@link SourceContext} of {@link OfficeFrame} contains the
@@ -55,45 +52,37 @@ public class ResourceIntegrationTest extends OfficeFrameTestCase {
 	 */
 	public void testIntegrateSourceContext() throws Exception {
 
-		final ResourceSource resourceSource = this
-				.createMock(ResourceSource.class);
+		final ResourceSource resourceSource = this.createMock(ResourceSource.class);
 		final InputStream resource = new ByteArrayInputStream(new byte[0]);
 
 		// Reset test
-		workResource = null;
+		namespaceResource = null;
 
 		// Record (multiple times as loading managed object type)
 		for (int i = 0; i < 3; i++) {
-			this.recordReturn(resourceSource,
-					resourceSource.sourceResource("REQUIRED RESOURCE"),
-					resource);
+			this.recordReturn(resourceSource, resourceSource.sourceResource("REQUIRED RESOURCE"), resource);
 		}
 
 		// Test
 		this.replayMockObjects();
 
 		// Configure OfficeFloor
-		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource(
-				OfficeFloorCompiler.newOfficeFloorCompiler(null));
-		source.addManagedObject(ClassLoaderManagedObjectSource.class.getName(),
-				null, new AutoWire(ClassLoader.class));
-		source.addManagedObject(ResourceManagedObjectSource.class.getName(),
-				null, new AutoWire(InputStream.class));
-		source.addSection("SECTION", ClassSectionSource.class.getName(),
-				ResourceWork.class.getName());
-		source.assignDefaultTeam(PassiveTeamSource.class.getName());
+		CompileOffice compile = new CompileOffice();
+		compile.getOfficeFloorCompiler().addResources(resourceSource);
+		OfficeFloor officeFloor = compile.compileAndOpenOffice((architect, context) -> {
+			architect.enableAutoWireObjects();
+			architect.addOfficeManagedObjectSource("CLASS_LOADER", ClassLoaderManagedObjectSource.class.getName())
+					.addOfficeManagedObject("CLASS_LOADER", ManagedObjectScope.THREAD);
+			architect.addOfficeManagedObjectSource("RESOURCE", ResourceManagedObjectSource.class.getName())
+					.addOfficeManagedObject("RESOURCE", ManagedObjectScope.PROCESS);
+			architect.addOfficeSection("SECTION", ClassSectionSource.class.getName(), ResourceClass.class.getName());
+		});
 
-		// Configure for the OfficeFrame
-		source.getOfficeFloorCompiler().addResources(resourceSource);
-
-		// Start the OfficeFloor
-		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
-
-		// Invoke the work
-		officeFloor.invokeTask("SECTION.WORK", "task", null);
+		// Invoke the function
+		officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.function").invokeProcess(null, null);
 
 		// Ensure correct resources
-		assertSame("Incorrect resource", resource, workResource);
+		assertSame("Incorrect resource", resource, namespaceResource);
 
 		// Close OfficeFloor
 		officeFloor.closeOfficeFloor();
@@ -103,19 +92,19 @@ public class ResourceIntegrationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * {@link Work}.
+	 * Resource {@link Class}.
 	 */
-	public static class ResourceWork {
-		public void task(ClassLoader classLoader, InputStream resource) {
-			workResource = resource;
+	public static class ResourceClass {
+		public void function(ClassLoader classLoader, InputStream resource) {
+			namespaceResource = resource;
 		}
 	}
 
 	/**
 	 * {@link ManagedObjectSource} to obtain the {@link ClassLoader}.
 	 */
-	public static class ClassLoaderManagedObjectSource extends
-			AbstractManagedObjectSource<None, None> implements ManagedObject {
+	public static class ClassLoaderManagedObjectSource extends AbstractManagedObjectSource<None, None>
+			implements ManagedObject {
 
 		private ClassLoader classLoader;
 
@@ -125,10 +114,8 @@ public class ResourceIntegrationTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		protected void loadMetaData(MetaDataContext<None, None> context)
-				throws Exception {
-			ManagedObjectSourceContext<None> mosContext = context
-					.getManagedObjectSourceContext();
+		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+			ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 			context.setObjectClass(ClassLoader.class);
 			this.classLoader = mosContext.getClassLoader();
 		}
@@ -147,8 +134,8 @@ public class ResourceIntegrationTest extends OfficeFrameTestCase {
 	/**
 	 * {@link ManagedObjectSource} to obtain the resource.
 	 */
-	public static class ResourceManagedObjectSource extends
-			AbstractManagedObjectSource<None, None> implements ManagedObject {
+	public static class ResourceManagedObjectSource extends AbstractManagedObjectSource<None, None>
+			implements ManagedObject {
 
 		private InputStream resource;
 
@@ -158,10 +145,8 @@ public class ResourceIntegrationTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		protected void loadMetaData(MetaDataContext<None, None> context)
-				throws Exception {
-			ManagedObjectSourceContext<None> mosContext = context
-					.getManagedObjectSourceContext();
+		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+			ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 			context.setObjectClass(InputStream.class);
 			this.resource = mosContext.getResource("REQUIRED RESOURCE");
 		}

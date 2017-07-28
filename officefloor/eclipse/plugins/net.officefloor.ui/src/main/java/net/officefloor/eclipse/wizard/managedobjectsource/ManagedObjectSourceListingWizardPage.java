@@ -17,8 +17,6 @@
  */
 package net.officefloor.eclipse.wizard.managedobjectsource;
 
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -27,6 +25,8 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.List;
+
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link IWizardPage} providing the listing of
@@ -58,16 +58,14 @@ public class ManagedObjectSourceListingWizardPage extends WizardPage {
 	 * @param managedObjectSourceInstances
 	 *            Listing of {@link ManagedObjectSourceInstance}.
 	 */
-	ManagedObjectSourceListingWizardPage(
-			ManagedObjectSourceInstance[] managedObjectSourceInstances) {
+	ManagedObjectSourceListingWizardPage(ManagedObjectSourceInstance[] managedObjectSourceInstances) {
 		super("ManagedObjectSource listing");
 		this.managedObjectSourceInstances = managedObjectSourceInstances;
 
 		// Create the listing of labels
 		this.managedObjectSourceLabels = new String[this.managedObjectSourceInstances.length];
 		for (int i = 0; i < this.managedObjectSourceLabels.length; i++) {
-			this.managedObjectSourceLabels[i] = this.managedObjectSourceInstances[i]
-					.getManagedObjectSourceLabel();
+			this.managedObjectSourceLabels[i] = this.managedObjectSourceInstances[i].getManagedObjectSourceLabel();
 		}
 
 		// Specify page details
@@ -109,12 +107,10 @@ public class ManagedObjectSourceListingWizardPage extends WizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				// Determine if selected
-				boolean isSelected = (ManagedObjectSourceListingWizardPage.this.list
-						.getSelectionIndex() >= 0);
+				boolean isSelected = (ManagedObjectSourceListingWizardPage.this.list.getSelectionIndex() >= 0);
 
 				// Page complete when managed object loader selected
-				ManagedObjectSourceListingWizardPage.this
-						.setPageComplete(isSelected);
+				ManagedObjectSourceListingWizardPage.this.setPageComplete(isSelected);
 			}
 		});
 

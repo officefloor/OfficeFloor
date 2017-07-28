@@ -17,8 +17,8 @@
  */
 package net.officefloor.compile.managedobject;
 
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * <code>Type definition</code> of a {@link Team} required by the

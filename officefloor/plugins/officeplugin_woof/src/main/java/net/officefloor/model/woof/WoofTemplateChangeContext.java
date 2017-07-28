@@ -17,9 +17,9 @@
  */
 package net.officefloor.model.woof;
 
-import net.officefloor.frame.spi.source.SourceContext;
+import net.officefloor.configuration.ConfigurationContext;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * Context for changing a {@link WoofTemplateModel}.
@@ -34,8 +34,8 @@ public interface WoofTemplateChangeContext extends SourceContext {
 	 * <p>
 	 * The {@link ConfigurationContext} is at the root of the Project source.
 	 * <p>
-	 * Note that Projects are anticipated to follow the standard <a
-	 * href="http://maven.apache.org">Maven</a> project structure.
+	 * Note that Projects are anticipated to follow the standard
+	 * <a href="http://maven.apache.org">Maven</a> project structure.
 	 * 
 	 * @return {@link ConfigurationContext}.
 	 */

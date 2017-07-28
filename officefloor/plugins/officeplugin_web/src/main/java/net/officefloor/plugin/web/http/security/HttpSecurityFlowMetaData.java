@@ -17,10 +17,10 @@
  */
 package net.officefloor.plugin.web.http.security;
 
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
- * Describes a {@link JobSequence} required by the {@link HttpSecuritySource}.
+ * Describes a {@link Flow} required by the {@link HttpSecuritySource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -28,9 +28,9 @@ public interface HttpSecurityFlowMetaData<F extends Enum<F>> {
 
 	/**
 	 * Obtains the {@link Enum} key identifying the application
-	 * {@link JobSequence} to instigate.
+	 * {@link Flow} to instigate.
 	 * 
-	 * @return {@link Enum} key identifying the application {@link JobSequence}
+	 * @return {@link Enum} key identifying the application {@link Flow}
 	 *         to instigate.
 	 */
 	F getKey();
@@ -38,19 +38,19 @@ public interface HttpSecurityFlowMetaData<F extends Enum<F>> {
 	/**
 	 * <p>
 	 * Obtains the {@link Class} of the argument that is passed to the
-	 * {@link JobSequence}.
+	 * {@link Flow}.
 	 * <p>
 	 * This may be <code>null</code> to indicate no argument is passed.
 	 * 
-	 * @return Type of the argument that is passed to the {@link JobSequence}.
+	 * @return Type of the argument that is passed to the {@link Flow}.
 	 */
 	Class<?> getArgumentType();
 
 	/**
-	 * Provides a descriptive name for this {@link JobSequence}. This is useful
-	 * to better describe the {@link JobSequence}.
+	 * Provides a descriptive name for this {@link Flow}. This is useful
+	 * to better describe the {@link Flow}.
 	 * 
-	 * @return Descriptive name for this {@link JobSequence}.
+	 * @return Descriptive name for this {@link Flow}.
 	 */
 	String getLabel();
 

@@ -21,8 +21,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 
-import net.officefloor.model.desk.DeskModel;
-
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -39,8 +37,10 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
+import net.officefloor.model.Model;
+
 /**
- * New {@link DeskModel} {@link Wizard}.
+ * New {@link Model} {@link Wizard}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -90,8 +90,8 @@ public abstract class AbstractNewWizard extends Wizard implements INewWizard {
 	 * @param itemFileContents
 	 *            Contents for the file.
 	 */
-	public AbstractNewWizard(String title, String description,
-			String initialItemName, String extension, String itemFileContents) {
+	public AbstractNewWizard(String title, String description, String initialItemName, String extension,
+			String itemFileContents) {
 		this.title = title;
 		this.description = description;
 		this.initialItemName = initialItemName;
@@ -106,9 +106,8 @@ public abstract class AbstractNewWizard extends Wizard implements INewWizard {
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		// Create the page
-		this.page = new OfficeItemNewWizardPage(selection, this.title,
-				this.title, this.description, this.initialItemName,
-				this.extension);
+		this.page = new OfficeItemNewWizardPage(selection, this.title, this.title, this.description,
+				this.initialItemName, this.extension);
 	}
 
 	/*
@@ -130,11 +129,9 @@ public abstract class AbstractNewWizard extends Wizard implements INewWizard {
 
 		// Create runnable to create item
 		IRunnableWithProgress op = new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor)
-					throws InvocationTargetException {
+			public void run(IProgressMonitor monitor) throws InvocationTargetException {
 				try {
-					AbstractNewWizard.this.doFinish(container, itemName,
-							monitor);
+					AbstractNewWizard.this.doFinish(container, itemName, monitor);
 				} catch (Throwable e) {
 					throw new InvocationTargetException(e);
 				} finally {
@@ -150,8 +147,7 @@ public abstract class AbstractNewWizard extends Wizard implements INewWizard {
 			return false;
 		} catch (InvocationTargetException e) {
 			Throwable realException = e.getTargetException();
-			MessageDialog.openError(this.getShell(), "Error",
-					realException.getMessage());
+			MessageDialog.openError(this.getShell(), "Error", realException.getMessage());
 			return false;
 		}
 		return true;
@@ -167,16 +163,14 @@ public abstract class AbstractNewWizard extends Wizard implements INewWizard {
 	 * @param monitor
 	 *            {@link IProgressMonitor}.
 	 */
-	private void doFinish(IResource resource, String itemName,
-			IProgressMonitor monitor) throws Exception {
+	private void doFinish(IResource resource, String itemName, IProgressMonitor monitor) throws Exception {
 
 		// Indicate progress
 		monitor.beginTask("Creating " + itemName, 2);
 
 		// Obtain the Container
 		if ((!resource.exists()) || (!(resource instanceof IContainer))) {
-			MessageDialog.openError(this.getShell(), "Error", "Container \""
-					+ resource + "\" does not exist.");
+			MessageDialog.openError(this.getShell(), "Error", "Container \"" + resource + "\" does not exist.");
 			return; // container must exist
 		}
 		IContainer container = (IContainer) resource;
@@ -184,8 +178,7 @@ public abstract class AbstractNewWizard extends Wizard implements INewWizard {
 		// Create the file for the item
 		monitor.setTaskName("Creating item file ...");
 		final IFile file = container.getFile(new Path(itemName));
-		InputStream stream = new ByteArrayInputStream(
-				this.itemFileContents.getBytes());
+		InputStream stream = new ByteArrayInputStream(this.itemFileContents.getBytes());
 		if (file.exists()) {
 			file.setContents(stream, true, true, monitor);
 		} else {
@@ -197,8 +190,7 @@ public abstract class AbstractNewWizard extends Wizard implements INewWizard {
 		monitor.setTaskName("Opening file for editing ...");
 		this.getShell().getDisplay().asyncExec(new Runnable() {
 			public void run() {
-				IWorkbenchPage page = PlatformUI.getWorkbench()
-						.getActiveWorkbenchWindow().getActivePage();
+				IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 				try {
 					IDE.openEditor(page, file, true);
 				} catch (PartInitException e) {

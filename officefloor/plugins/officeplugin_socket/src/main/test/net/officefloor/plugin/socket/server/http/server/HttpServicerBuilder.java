@@ -17,33 +17,32 @@
  */
 package net.officefloor.plugin.socket.server.http.server;
 
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 /**
- * Builder to construct the HTTP service {@link Task}.
+ * Builder to construct the HTTP service {@link ManagedFunction}.
  *
  * @author Daniel Sagenschneider
  */
 public interface HttpServicerBuilder {
 
 	/**
-	 * Builds the {@link ServerHttpConnection} servicer {@link Task}.
+	 * Builds the {@link ServerHttpConnection} servicer {@link ManagedFunction}.
 	 *
 	 * @param managedObjectName
 	 *            Name that the {@link ManagedObject} for the
 	 *            {@link ServerHttpConnection} is registered under.
 	 * @param server
-	 *            {@link MockHttpServer} to construct the servicer {@link Task}
-	 *            instances.
-	 * @return {@link HttpServicerTask} to link the {@link ManagedObjectSource}
+	 *            {@link MockHttpServer} to construct the servicer
+	 *            {@link ManagedFunction} instances.
+	 * @return {@link HttpServicerFunction} to link the {@link ManagedObjectSource}
 	 *         to service the {@link ServerHttpConnection}.
 	 * @throws Exception
-	 *             If fails to build the servicer {@link Task}.
+	 *             If fails to build the servicer {@link ManagedFunction}.
 	 */
-	HttpServicerTask buildServicer(String managedObjectName,
-			MockHttpServer server) throws Exception;
+	HttpServicerFunction buildServicer(String managedObjectName, MockHttpServer server) throws Exception;
 
 }

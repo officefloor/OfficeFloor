@@ -19,13 +19,12 @@ package net.officefloor.compile.integrate.profile;
 
 import java.util.List;
 
-import net.officefloor.autowire.AutoWireOfficeFloor;
-import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
+import net.officefloor.extension.CompileOffice;
 import net.officefloor.frame.api.OfficeFrame;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.profile.ProfiledJob;
-import net.officefloor.frame.api.profile.ProfiledProcess;
-import net.officefloor.frame.api.profile.ProfiledThread;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.profile.ProfiledManagedFunction;
+import net.officefloor.frame.api.profile.ProfiledProcessState;
+import net.officefloor.frame.api.profile.ProfiledThreadState;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -43,40 +42,41 @@ public class ProfilerIntegrationTest extends OfficeFrameTestCase {
 	public void testConfigureProfiler() throws Exception {
 
 		// Configure OfficeFloor
-		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
-		source.addSection("SECTION", ClassSectionSource.class.getName(),
-				ProfiledWork.class.getName());
+		CompileOffice compile = new CompileOffice();
 
 		// Configure the profiler
-		final ProfiledProcess[] profiledProcess = new ProfiledProcess[1];
-		source.setProfiler(new Profiler() {
+		final ProfiledProcessState[] profiledProcess = new ProfiledProcessState[1];
+		compile.getOfficeFloorCompiler().addProfiler("OFFICE", new Profiler() {
 			@Override
-			public void profileProcess(ProfiledProcess process) {
+			public void profileProcessState(ProfiledProcessState process) {
 				profiledProcess[0] = process;
 			}
 		});
 
-		// Invoke the work
-		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
-		officeFloor.invokeTask("SECTION.WORK", "task", null);
+		// Compile the Office
+		OfficeFloor officeFloor = compile.compileAndOpenOffice((architect, context) -> {
+			architect.addOfficeSection("SECTION", ClassSectionSource.class.getName(), ProfiledClass.class.getName());
+		});
+
+		// Invoke the function
+		officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.function").invokeProcess(null, null);
 		officeFloor.closeOfficeFloor();
 
 		// Ensure profiled
 		assertNotNull("Should be profiling office", profiledProcess[0]);
-		List<ProfiledThread> threads = profiledProcess[0].getProfiledThreads();
+		List<ProfiledThreadState> threads = profiledProcess[0].getProfiledThreadStates();
 		assertEquals("Should have one thread profiled", 1, threads.size());
-		List<ProfiledJob> jobs = threads.get(0).getProfiledJobs();
-		assertEquals("Should just be one job profiled", 1, jobs.size());
-		ProfiledJob job = jobs.get(0);
-		assertEquals("Incorrect profiled job", "SECTION.WORK.task",
-				job.getJobName());
+		List<ProfiledManagedFunction> functions = threads.get(0).getProfiledManagedFunctions();
+		assertEquals("Should just be one function profiled", 1, functions.size());
+		ProfiledManagedFunction function = functions.get(0);
+		assertEquals("Incorrect profiled function", "SECTION.function", function.getFunctionName());
 	}
 
 	/**
-	 * Profiled {@link Work}.
+	 * Profiled {@link Class}.
 	 */
-	public static class ProfiledWork {
-		public void task() {
+	public static class ProfiledClass {
+		public void function() {
 		}
 	}
 

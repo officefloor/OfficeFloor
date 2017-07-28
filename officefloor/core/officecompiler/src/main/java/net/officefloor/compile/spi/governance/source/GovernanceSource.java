@@ -17,7 +17,7 @@
  */
 package net.officefloor.compile.spi.governance.source;
 
-import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.api.governance.Governance;
 
 /**
  * Source to obtain the {@link Governance}.
@@ -39,30 +39,16 @@ public interface GovernanceSource<I, F extends Enum<F>> {
 	GovernanceSourceSpecification getSpecification();
 
 	/**
-	 * Called only once after the {@link GovernanceSource} is instantiated.
+	 * Initialises the {@link GovernanceSource}.
 	 * 
 	 * @param context
 	 *            {@link GovernanceSourceContext} to initialise this instance of
 	 *            the {@link GovernanceSource}.
+	 * @return Meta-data to describe this.
 	 * @throws Exception
 	 *             Should the {@link GovernanceSource} fail to configure itself
 	 *             from the input properties.
 	 */
-	void init(GovernanceSourceContext context) throws Exception;
-
-	/**
-	 * <p>
-	 * Obtains the meta-data to describe this.
-	 * <p>
-	 * This is called after the {@link #init(GovernanceSourceContext)} method
-	 * and therefore may use the configuration.
-	 * <p>
-	 * This should always return non-null. If there is a problem due to
-	 * incorrect configuration, the {@link #init(GovernanceSourceContext)}
-	 * method should indicate this via an exception.
-	 * 
-	 * @return Meta-data to describe this.
-	 */
-	GovernanceSourceMetaData<I, F> getMetaData();
+	GovernanceSourceMetaData<I, F> init(GovernanceSourceContext context) throws Exception;
 
 }

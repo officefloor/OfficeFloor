@@ -31,7 +31,7 @@ import org.eclipse.jdt.launching.ExecutionArguments;
 import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
 
-import net.officefloor.console.OpenOfficeFloor;
+import net.officefloor.OfficeFloorMain;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -39,17 +39,16 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorLaunchConfigurationDelegate extends
-		AbstractJavaLaunchConfigurationDelegate implements
-		ILaunchConfigurationDelegate {
+public class OfficeFloorLaunchConfigurationDelegate extends AbstractJavaLaunchConfigurationDelegate
+		implements ILaunchConfigurationDelegate {
 
 	/*
 	 * =============== ILaunchConfigurationDelegate ======================
 	 */
 
 	@Override
-	public void launch(ILaunchConfiguration configuration, String mode,
-			ILaunch launch, IProgressMonitor monitor) throws CoreException {
+	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
+			throws CoreException {
 
 		// Ensure have a monitor
 		if (monitor == null) {
@@ -60,7 +59,7 @@ public class OfficeFloorLaunchConfigurationDelegate extends
 		IVMRunner runner = this.getVMRunner(configuration, mode);
 
 		// Obtain the main type name
-		String mainTypeName = OpenOfficeFloor.class.getName();
+		String mainTypeName = OfficeFloorMain.class.getName();
 
 		// Create class path
 		String[] classpath = this.getClasspath(configuration);
@@ -69,38 +68,22 @@ public class OfficeFloorLaunchConfigurationDelegate extends
 		String[] environment = this.getEnvironment(configuration);
 
 		// Program and VM arguments
-		String programArguments = configuration.getAttribute(
-				OfficeFloorLauncher.ATTR_OFFICE_FLOOR_FILE, "");
-		String officeName = configuration.getAttribute(
-				OfficeFloorLauncher.ATTR_OFFICE_NAME, "");
-		if ((officeName != null) && (officeName.trim().length() > 0)) {
-			String workName = configuration.getAttribute(
-					OfficeFloorLauncher.ATTR_WORK_NAME, "");
-
-			// Flag to invoke work (within office)
-			programArguments += " " + officeName + " " + workName;
-		}
 		String vmAguments = this.getVMArguments(configuration);
-		ExecutionArguments executionArguments = new ExecutionArguments(
-				vmAguments, programArguments);
+		ExecutionArguments executionArguments = new ExecutionArguments(vmAguments, "");
 
 		// Obtain the working directory
-		File workingDir = verifyWorkingDirectory(configuration);
-		String workingDirName = (workingDir == null ? null : workingDir
-				.getAbsolutePath());
+		File workingDir = this.verifyWorkingDirectory(configuration);
+		String workingDirName = (workingDir == null ? null : workingDir.getAbsolutePath());
 
 		// Obtain the VM specific attributes
-		Map<String, Object> vmAttributesMap = this
-				.getVMSpecificAttributesMap(configuration);
+		Map<String, Object> vmAttributesMap = this.getVMSpecificAttributesMap(configuration);
 
 		// Obtain the boot path
 		String[] bootpath = this.getBootpath(configuration);
 
 		// Create and initialise the VM configuration
-		VMRunnerConfiguration runConfig = new VMRunnerConfiguration(
-				mainTypeName, classpath);
-		runConfig.setProgramArguments(executionArguments
-				.getProgramArgumentsArray());
+		VMRunnerConfiguration runConfig = new VMRunnerConfiguration(mainTypeName, classpath);
+		runConfig.setProgramArguments(executionArguments.getProgramArgumentsArray());
 		runConfig.setEnvironment(environment);
 		runConfig.setVMArguments(executionArguments.getVMArgumentsArray());
 		runConfig.setWorkingDirectory(workingDirName);

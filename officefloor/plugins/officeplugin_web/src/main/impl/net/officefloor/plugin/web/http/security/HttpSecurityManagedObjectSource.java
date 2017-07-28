@@ -19,14 +19,14 @@ package net.officefloor.plugin.web.http.security;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.AsynchronousListener;
-import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
-import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.ObjectRegistry;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.managedobject.AsynchronousContext;
+import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
  * {@link ManagedObjectSource} for the {@link HttpSecuritySource} (or its
@@ -35,8 +35,7 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
  * @author Daniel Sagenschneider
  */
 public class HttpSecurityManagedObjectSource
-		extends
-		AbstractManagedObjectSource<HttpSecurityManagedObjectSource.Dependencies, None> {
+		extends AbstractManagedObjectSource<HttpSecurityManagedObjectSource.Dependencies, None> {
 
 	/**
 	 * Name of {@link Property} for the HTTP security type.
@@ -75,41 +74,35 @@ public class HttpSecurityManagedObjectSource
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<Dependencies, None> context)
-			throws Exception {
-		ManagedObjectSourceContext<None> mosContext = context
-				.getManagedObjectSourceContext();
+	protected void loadMetaData(MetaDataContext<Dependencies, None> context) throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Obtain the security type
-		String securityTypeName = mosContext
-				.getProperty(PROPERTY_HTTP_SECURITY_TYPE);
+		String securityTypeName = mosContext.getProperty(PROPERTY_HTTP_SECURITY_TYPE);
 		Class<?> securityType = mosContext.loadClass(securityTypeName);
 
 		// Determine if allowing null HTTP Security
-		this.isEscalateNullHttpSecurity = Boolean.parseBoolean(mosContext
-				.getProperty(PROPERTY_IS_ESCALATE_AUTHENTICATION_REQUIRED,
-						String.valueOf(true)));
+		this.isEscalateNullHttpSecurity = Boolean.parseBoolean(
+				mosContext.getProperty(PROPERTY_IS_ESCALATE_AUTHENTICATION_REQUIRED, String.valueOf(true)));
 
 		// Specify the meta-data
 		context.setObjectClass(securityType);
 		context.setManagedObjectClass(HttpSecurityManagedObject.class);
 
 		// Add the dependency
-		context.addDependency(Dependencies.HTTP_AUTHENTICATION,
-				HttpAuthentication.class);
+		context.addDependency(Dependencies.HTTP_AUTHENTICATION, HttpAuthentication.class);
 	}
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-		return new HttpSecurityManagedObject<Object, Object>(
-				this.isEscalateNullHttpSecurity);
+		return new HttpSecurityManagedObject<Object, Object>(this.isEscalateNullHttpSecurity);
 	}
 
 	/**
 	 * {@link ManagedObject} for the HTTP security.
 	 */
-	public static class HttpSecurityManagedObject<S, C> implements
-			AsynchronousManagedObject, CoordinatingManagedObject<Dependencies> {
+	public static class HttpSecurityManagedObject<S, C>
+			implements AsynchronousManagedObject, CoordinatingManagedObject<Dependencies> {
 
 		/**
 		 * Indicates if escalate <code>null</code> HTTP Security.
@@ -117,9 +110,9 @@ public class HttpSecurityManagedObjectSource
 		private final boolean isEscalateNullHttpSecurity;
 
 		/**
-		 * {@link AsynchronousListener}.
+		 * {@link AsynchronousContext}.
 		 */
-		private AsynchronousListener listener;
+		private AsynchronousContext asynchronousContext;
 
 		/**
 		 * {@link HttpAuthentication}.
@@ -140,7 +133,7 @@ public class HttpSecurityManagedObjectSource
 		 * Flags authentication complete.
 		 */
 		private synchronized void flagAuthenticationComplete() {
-			this.listener.notifyComplete();
+			this.asynchronousContext.complete(null);
 		}
 
 		/*
@@ -148,26 +141,22 @@ public class HttpSecurityManagedObjectSource
 		 */
 
 		@Override
-		public void registerAsynchronousCompletionListener(
-				AsynchronousListener listener) {
-			this.listener = listener;
+		public void setAsynchronousContext(AsynchronousContext asynchronousContext) {
+			this.asynchronousContext = asynchronousContext;
 		}
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public synchronized void loadObjects(
-				ObjectRegistry<Dependencies> registry) throws Throwable {
+		public synchronized void loadObjects(ObjectRegistry<Dependencies> registry) throws Throwable {
 
 			// Obtain the HTTP authentication
-			this.authentication = (HttpAuthentication<S, C>) registry
-					.getObject(Dependencies.HTTP_AUTHENTICATION);
+			this.authentication = (HttpAuthentication<S, C>) registry.getObject(Dependencies.HTTP_AUTHENTICATION);
 
 			// Flag started authenticate
-			this.listener.notifyStarted();
+			this.asynchronousContext.start(null);
 
 			// Trigger authentication
-			this.authentication
-					.authenticate(new HttpAuthenticateRequestImpl<S, C>(this));
+			this.authentication.authenticate(new HttpAuthenticateRequestImpl<S, C>(this));
 		}
 
 		@Override
@@ -189,8 +178,7 @@ public class HttpSecurityManagedObjectSource
 	/**
 	 * {@link HttpAuthenticateRequest} implementation.
 	 */
-	private static class HttpAuthenticateRequestImpl<S, C> implements
-			HttpAuthenticateRequest<C> {
+	private static class HttpAuthenticateRequestImpl<S, C> implements HttpAuthenticateRequest<C> {
 
 		/**
 		 * {@link HttpSecurityManagedObject}.
@@ -203,8 +191,7 @@ public class HttpSecurityManagedObjectSource
 		 * @param managedObject
 		 *            {@link HttpSecurityManagedObject}.
 		 */
-		public HttpAuthenticateRequestImpl(
-				HttpSecurityManagedObject<S, C> managedObject) {
+		public HttpAuthenticateRequestImpl(HttpSecurityManagedObject<S, C> managedObject) {
 			this.managedObject = managedObject;
 		}
 

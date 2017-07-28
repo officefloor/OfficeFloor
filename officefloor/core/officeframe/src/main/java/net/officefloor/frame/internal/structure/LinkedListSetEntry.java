@@ -22,7 +22,7 @@ package net.officefloor.frame.internal.structure;
  * 
  * @author Daniel Sagenschneider
  */
-public interface LinkedListSetEntry<E extends LinkedListSetEntry<E, O>, O> {
+public interface LinkedListSetEntry<I extends LinkedListSetEntry<I, O>, O> {
 
 	/**
 	 * <p>
@@ -33,10 +33,11 @@ public interface LinkedListSetEntry<E extends LinkedListSetEntry<E, O>, O> {
 	 * {@link LinkedListSet} they were intended for and can not be shared
 	 * between {@link LinkedListSet} instances. This constraint:
 	 * <ol>
-	 * <li>ensures the integrity of the {@link JobNode}, {@link JobSequence},
+	 * <li>ensures the integrity of the {@link FunctionState}, {@link Flow},
 	 * {@link ThreadState}, {@link ProcessState} structure, and</li>
 	 * <li>improves uniqueness performance as {@link #getNext()} and
-	 * {@link #getPrev()} both returning <code>null</code> indicates not added</li>
+	 * {@link #getPrev()} both returning <code>null</code> indicates not
+	 * added</li>
 	 * </ol>
 	 * 
 	 * @return Owner of the {@link LinkedListSet} that may contain this
@@ -54,7 +55,7 @@ public interface LinkedListSetEntry<E extends LinkedListSetEntry<E, O>, O> {
 	 * 
 	 * @return Previous {@link LinkedListSetEntry} in the {@link LinkedListSet}.
 	 */
-	E getPrev();
+	I getPrev();
 
 	/**
 	 * Specifies the previous {@link LinkedListSetEntry} in the
@@ -64,7 +65,7 @@ public interface LinkedListSetEntry<E extends LinkedListSetEntry<E, O>, O> {
 	 *            Previous {@link LinkedListSetEntry} in the
 	 *            {@link LinkedListSet}.
 	 */
-	void setPrev(E entry);
+	void setPrev(I entry);
 
 	/**
 	 * <p>
@@ -75,7 +76,7 @@ public interface LinkedListSetEntry<E extends LinkedListSetEntry<E, O>, O> {
 	 * 
 	 * @return Next {@link LinkedListSetEntry} in the {@link LinkedListSet}.
 	 */
-	E getNext();
+	I getNext();
 
 	/**
 	 * Specifies the next {@link LinkedListSetEntry} in the
@@ -84,6 +85,6 @@ public interface LinkedListSetEntry<E extends LinkedListSetEntry<E, O>, O> {
 	 * @param entry
 	 *            Next {@link LinkedListSetEntry} in the {@link LinkedListSet}.
 	 */
-	void setNext(E entry);
+	void setNext(I entry);
 
 }

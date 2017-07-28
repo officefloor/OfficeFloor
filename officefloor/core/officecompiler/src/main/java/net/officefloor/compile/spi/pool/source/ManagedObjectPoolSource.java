@@ -17,7 +17,7 @@
  */
 package net.officefloor.compile.spi.pool.source;
 
-import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 
 /**
  * Sources a {@link ManagedObjectPool}.
@@ -43,16 +43,19 @@ public interface ManagedObjectPoolSource {
 	 * 
 	 * @param context
 	 *            {@link ManagedObjectPoolSourceContext}.
+	 * @return {@link ManagedObjectPoolSourceMetaData} for the
+	 *         {@link ManagedObjectPool}.
 	 * @throws Exception
 	 *             If fails to configure the {@link ManagedObjectPoolSource}.
 	 */
 	void init(ManagedObjectPoolSourceContext context) throws Exception;
 
 	/**
-	 * Creates the {@link ManagedObjectPool}.
+	 * Obtains the {@link ManagedObjectPoolSourceMetaData}.
 	 * 
-	 * @return {@link ManagedObjectPool}.
+	 * @return {@link ManagedObjectPoolSourceMetaData}.
 	 */
-	ManagedObjectPool createManagedObjectPool();
+	@Deprecated // make return of init
+	ManagedObjectPoolSourceMetaData getMetaData();
 
 }

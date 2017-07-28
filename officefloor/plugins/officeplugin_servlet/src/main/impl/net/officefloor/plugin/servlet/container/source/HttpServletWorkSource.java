@@ -19,14 +19,14 @@ package net.officefloor.plugin.servlet.container.source;
 
 import javax.servlet.http.HttpServlet;
 
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
 import net.officefloor.plugin.servlet.container.HttpServletContainer;
 
 /**
- * {@link WorkSource} for a {@link HttpServletContainer}.
+ * {@link ManagedFunctionSource} for a {@link HttpServletContainer}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -65,8 +65,8 @@ public class HttpServletWorkSource extends AbstractWorkSource<HttpServletTask> {
 	}
 
 	@Override
-	public void sourceWork(WorkTypeBuilder<HttpServletTask> workTypeBuilder,
-			WorkSourceContext context) throws Exception {
+	public void sourceManagedFunctions(FunctionNamespaceBuilder<HttpServletTask> workTypeBuilder,
+			ManagedFunctionSourceContext context) throws Exception {
 
 		// Obtain the properties
 		String servletName = context.getProperty(PROPERTY_SERVLET_NAME);

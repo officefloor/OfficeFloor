@@ -17,7 +17,6 @@
  */
 package net.officefloor.frame.impl.execute.process;
 
-import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
@@ -35,11 +34,6 @@ public class ProcessMetaDataImpl implements ProcessMetaData {
 	private final ManagedObjectMetaData<?>[] managedObjectMetaData;
 
 	/**
-	 * {@link AdministratorMetaData} instances.
-	 */
-	private final AdministratorMetaData<?, ?>[] administratorMetaData;
-
-	/**
 	 * {@link ThreadMetaData}.
 	 */
 	private final ThreadMetaData threadMetaData;
@@ -49,17 +43,11 @@ public class ProcessMetaDataImpl implements ProcessMetaData {
 	 * 
 	 * @param managedObjectMetaData
 	 *            {@link ManagedObjectMetaData} instances.
-	 * @param administratorMetaData
-	 *            {@link AdministratorMetaData} instances.
 	 * @param threadMetaData
 	 *            {@link ThreadMetaData}.
 	 */
-	public ProcessMetaDataImpl(
-			ManagedObjectMetaData<?>[] managedObjectMetaData,
-			AdministratorMetaData<?, ?>[] administratorMetaData,
-			ThreadMetaData threadMetaData) {
+	public ProcessMetaDataImpl(ManagedObjectMetaData<?>[] managedObjectMetaData, ThreadMetaData threadMetaData) {
 		this.managedObjectMetaData = managedObjectMetaData;
-		this.administratorMetaData = administratorMetaData;
 		this.threadMetaData = threadMetaData;
 	}
 
@@ -70,11 +58,6 @@ public class ProcessMetaDataImpl implements ProcessMetaData {
 	@Override
 	public ManagedObjectMetaData<?>[] getManagedObjectMetaData() {
 		return this.managedObjectMetaData;
-	}
-
-	@Override
-	public AdministratorMetaData<?, ?>[] getAdministratorMetaData() {
-		return this.administratorMetaData;
 	}
 
 	@Override

@@ -19,8 +19,8 @@ package net.officefloor.compile.spi.officefloor.source;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.model.repository.ConfigurationItem;
 
 /**
  * Sources the {@link OfficeFloor}.
@@ -73,8 +73,8 @@ public interface OfficeFloorSource {
 	 * @throws Exception
 	 *             If fails to initialise the {@link OfficeFloorSource}.
 	 */
-	void specifyConfigurationProperties(RequiredProperties requiredProperties,
-			OfficeFloorSourceContext context) throws Exception;
+	void specifyConfigurationProperties(RequiredProperties requiredProperties, OfficeFloorSourceContext context)
+			throws Exception;
 
 	/**
 	 * Sources the {@link OfficeFloor} by deploying it via the input
@@ -92,7 +92,6 @@ public interface OfficeFloorSource {
 	 * @throws Exception
 	 *             If fails to source the {@link OfficeFloor}.
 	 */
-	void sourceOfficeFloor(OfficeFloorDeployer deployer,
-			OfficeFloorSourceContext context) throws Exception;
+	void sourceOfficeFloor(OfficeFloorDeployer deployer, OfficeFloorSourceContext context) throws Exception;
 
 }

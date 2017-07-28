@@ -26,10 +26,9 @@ import javax.net.ssl.SSLSocketFactory;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
-import net.officefloor.frame.test.MockTeamSource;
+import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.plugin.socket.server.ssl.OfficeFloorDefaultSslEngineSource;
 import net.officefloor.plugin.socket.server.ssl.protocol.SslCommunicationProtocol;
-import net.officefloor.plugin.socket.server.tcp.protocol.TcpCommunicationProtocol;
 
 /**
  * Tests the {@link SecureTcpServerSocketManagedObjectSource}.
@@ -43,53 +42,39 @@ public class SecureTcpServerTest extends AbstractTcpServerTestCase {
 	 */
 
 	@Override
-	protected void registerManagedObjectSource(int port,
-			String managedObjectName, String workName, String taskName) {
+	protected void registerManagedObjectSource(int port, String managedObjectName, String functionName) {
 
 		// Obtain the office name and builder
 		String officeName = this.getOfficeName();
 
 		// Register the Server Socket Managed Object
-		ManagedObjectBuilder<Indexed> serverSocketBuilder = this
-				.constructManagedObject(managedObjectName,
-						SecureTcpServerSocketManagedObjectSource.class);
-		serverSocketBuilder.addProperty(
-				TcpServerSocketManagedObjectSource.PROPERTY_PORT,
-				String.valueOf(port));
-		serverSocketBuilder.addProperty(
-				TcpCommunicationProtocol.PROPERTY_MAXIMUM_IDLE_TIME,
-				String.valueOf(10000));
-		serverSocketBuilder.addProperty(
-				SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE,
+		ManagedObjectBuilder<Indexed> serverSocketBuilder = this.constructManagedObject(managedObjectName,
+				SecureTcpServerSocketManagedObjectSource.class, officeName);
+		serverSocketBuilder.addProperty(TcpServerSocketManagedObjectSource.PROPERTY_PORT, String.valueOf(port));
+		serverSocketBuilder.addProperty(SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE,
 				OfficeFloorDefaultSslEngineSource.class.getName());
 		serverSocketBuilder.setTimeout(10000);
 
 		// Register the necessary teams for socket listening
 		this.constructManagedObjectSourceTeam(managedObjectName, "accepter",
-				MockTeamSource.createOnePersonTeam("accepter"));
+				new ExecutorCachedTeamSource().createTeam());
 		this.constructManagedObjectSourceTeam(managedObjectName, "listener",
-				MockTeamSource.createWorkerPerTaskTeam("listener"));
-		this.constructManagedObjectSourceTeam(managedObjectName, "cleanup",
-				MockTeamSource.createOnePersonTeam("cleanup"));
-		this.constructManagedObjectSourceTeam(managedObjectName, "SSL_TASKS",
-				MockTeamSource.createOnePersonTeam("SSL_TASKS"));
+				new ExecutorCachedTeamSource().createTeam());
+		this.constructManagedObjectSourceTeam(managedObjectName, "SSL", new ExecutorCachedTeamSource().createTeam());
 
 		// Have server socket managed by office
-		ManagingOfficeBuilder<Indexed> managingOfficeBuilder = serverSocketBuilder
-				.setManagingOffice(officeName);
+		ManagingOfficeBuilder<Indexed> managingOfficeBuilder = serverSocketBuilder.setManagingOffice(officeName);
 
-		// Hook in work of test
+		// Hook in function of test
 		managingOfficeBuilder.setInputManagedObjectName(managedObjectName);
-		managingOfficeBuilder.linkProcess(0, workName, taskName);
+		managingOfficeBuilder.linkFlow(1, functionName);
 	}
 
 	@Override
-	protected Socket createClientSocket(InetAddress address, int port)
-			throws Exception {
+	protected Socket createClientSocket(InetAddress address, int port) throws Exception {
 
 		// Create the secure connected socket
-		SSLContext context = OfficeFloorDefaultSslEngineSource
-				.createClientSslContext(null);
+		SSLContext context = OfficeFloorDefaultSslEngineSource.createClientSslContext(null);
 		SSLSocketFactory socketFactory = context.getSocketFactory();
 		Socket socket = socketFactory.createSocket(address, port);
 

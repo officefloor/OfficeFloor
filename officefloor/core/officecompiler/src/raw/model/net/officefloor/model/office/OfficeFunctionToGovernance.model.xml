@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="governance name" />
+	<field type="OfficeFunctionModel" name="office function"
+		end-list="governance" />
+	<field type="GovernanceModel" name="governance" end-list="office function" />
+</model>

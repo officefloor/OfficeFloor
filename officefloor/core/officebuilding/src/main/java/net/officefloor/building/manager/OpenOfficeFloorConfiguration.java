@@ -23,8 +23,7 @@ import java.util.List;
 import java.util.Properties;
 
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -42,9 +41,9 @@ public final class OpenOfficeFloorConfiguration implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Name of the {@link Process} to run the {@link OfficeFloor}.
+	 * Name of the {@link OfficeFloor}.
 	 */
-	private String processName = null;
+	private String officeFloorName = null;
 
 	/**
 	 * {@link OfficeFloorSource} class name.
@@ -77,52 +76,37 @@ public final class OpenOfficeFloorConfiguration implements Serializable {
 	private List<String> jvmOptions = new LinkedList<String>();
 
 	/**
-	 * Name of the {@link Office} containing the {@link Work} to run.
+	 * Name of the {@link Office} containing the {@link ManagedFunction} to run.
 	 */
 	private String officeName = null;
 
 	/**
-	 * Name of the {@link Work} to run.
+	 * Name of the {@link ManagedFunction} to run.
 	 */
-	private String workName = null;
+	private String functionName = null;
 
 	/**
-	 * Name of the {@link Task} to run.
-	 */
-	private String taskName = null;
-
-	/**
-	 * Parameter for the {@link Task} to run.
+	 * Parameter for the {@link ManagedFunction} to run.
 	 */
 	private String parameter = null;
 
 	/**
-	 * Initiate.
+	 * Obtains the name of the {@link OfficeFloor}.
 	 * 
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor}.
+	 * @return Name of the {@link OfficeFloor}.
 	 */
-	public OpenOfficeFloorConfiguration(String officeFloorLocation) {
-		this.officeFloorLocation = officeFloorLocation;
+	public String getOfficeFloorName() {
+		return this.officeFloorName;
 	}
 
 	/**
-	 * Obtains the name of the {@link Process}.
+	 * Specifies the name of the {@link OfficeFloor}.
 	 * 
-	 * @return Name of the {@link Process}.
+	 * @param officeFloorName
+	 *            Name of the {@link OfficeFloor}.
 	 */
-	public String getProcessName() {
-		return this.processName;
-	}
-
-	/**
-	 * Specifies the name of the {@link Process}.
-	 * 
-	 * @param processName
-	 *            Name of the {@link Process}.
-	 */
-	public void setProcessName(String processName) {
-		this.processName = processName;
+	public void setOfficeFloorName(String officeFloorName) {
+		this.officeFloorName = officeFloorName;
 	}
 
 	/**
@@ -149,11 +133,8 @@ public final class OpenOfficeFloorConfiguration implements Serializable {
 	 * Adds a configured class path entry.
 	 * <p>
 	 * Please be aware that the {@link OfficeBuildingManager} may disallow
-	 * opening {@link OfficeFloor} instances with configured class path entries.
-	 * <p>
-	 * This should never be used in Production. It is made available for the
-	 * maven plug-ins to be able to run {@link OfficeFloor} instances from
-	 * project configuration.
+	 * opening {@link OfficeFloor} instances with configured class path entries
+	 * due to security concerns.
 	 * 
 	 * @param classPathEntry
 	 *            Class path entry.
@@ -250,56 +231,47 @@ public final class OpenOfficeFloorConfiguration implements Serializable {
 	}
 
 	/**
-	 * Specifies the {@link Task} to trigger on opening the {@link OfficeFloor}.
+	 * Specifies the {@link ManagedFunction} to trigger on opening the
+	 * {@link OfficeFloor}.
 	 * 
 	 * @param officeName
-	 *            Name of the {@link Office} containing the {@link Work}.
-	 * @param workName
-	 *            Name of {@link Work}.
-	 * @param taskName
-	 *            Name of {@link Task}.
+	 *            Name of the {@link Office} containing the
+	 *            {@link ManagedFunction}.
+	 * @param functionName
+	 *            Name of {@link ManagedFunction}.
 	 * @param parameter
-	 *            Parameter to the {@link Task}.
+	 *            Parameter to the {@link ManagedFunction}.
 	 */
-	public void setOpenTask(String officeName, String workName, String taskName, String parameter) {
+	public void setOpenFunction(String officeName, String functionName, String parameter) {
 		this.officeName = officeName;
-		this.workName = workName;
-		this.taskName = taskName;
+		this.functionName = functionName;
 		this.parameter = parameter;
 	}
 
 	/**
-	 * Obtains the name of the {@link Office} containing the {@link Work} to be
-	 * run.
+	 * Obtains the name of the {@link Office} containing the
+	 * {@link ManagedFunction} to be run.
 	 * 
-	 * @return Name of the {@link Office} containing the {@link Work} to be run.
+	 * @return Name of the {@link Office} containing the {@link ManagedFunction}
+	 *         to be run.
 	 */
 	public String getOfficeName() {
 		return this.officeName;
 	}
 
 	/**
-	 * Obtains the name of the {@link Work} to be run.
+	 * Obtains the name of the {@link ManagedFunction} to be run.
 	 * 
-	 * @return Name of the {@link Work} to be run.
+	 * @return Name of the {@link ManagedFunction} to be run.
 	 */
-	public String getWorkName() {
-		return this.workName;
+	public String getFunctionName() {
+		return this.functionName;
 	}
 
 	/**
-	 * Obtains the name of the {@link Task} to be run.
+	 * Obtains the parameter for the {@link ManagedFunction} to be run.
 	 * 
-	 * @return Name of the {@link Task} to be run.
-	 */
-	public String getTaskName() {
-		return this.taskName;
-	}
-
-	/**
-	 * Obtains the parameter for the {@link Task} to be run.
-	 * 
-	 * @return Parameter for the {@link Task} to be run.
+	 * @return Parameter for the {@link ManagedFunction} to be run.
 	 */
 	public String getParameter() {
 		return this.parameter;

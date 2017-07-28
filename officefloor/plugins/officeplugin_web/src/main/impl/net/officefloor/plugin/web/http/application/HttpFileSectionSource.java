@@ -21,21 +21,20 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.officefloor.compile.spi.section.FunctionFlow;
+import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
-import net.officefloor.compile.spi.section.SectionTask;
-import net.officefloor.compile.spi.section.SectionWork;
-import net.officefloor.compile.spi.section.TaskFlow;
-import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.resource.HttpFile;
-import net.officefloor.plugin.web.http.resource.source.HttpFileWorkSource;
-import net.officefloor.plugin.web.http.resource.source.HttpFileWorkSource.DependencyKeys;
+import net.officefloor.plugin.web.http.resource.source.HttpFileManagedFunctionSource;
+import net.officefloor.plugin.web.http.resource.source.HttpFileManagedFunctionSource.DependencyKeys;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 
 /**
@@ -60,18 +59,15 @@ public class HttpFileSectionSource extends AbstractSectionSource {
 	}
 
 	@Override
-	public void sourceSection(SectionDesigner designer,
-			SectionSourceContext context) throws Exception {
+	public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
 
 		// Create the Server HTTP Connection dependency
 		SectionObject serverHttpConnectionDependency = designer
-				.addSectionObject(ServerHttpConnection.class.getSimpleName(),
-						ServerHttpConnection.class.getName());
+				.addSectionObject(ServerHttpConnection.class.getSimpleName(), ServerHttpConnection.class.getName());
 
 		// Create the I/O escalation
-		SectionOutput ioEscalationOutput = designer.addSectionOutput(
-				IOException.class.getSimpleName(), IOException.class.getName(),
-				true);
+		SectionOutput ioEscalationOutput = designer.addSectionOutput(IOException.class.getSimpleName(),
+				IOException.class.getName(), true);
 
 		// Link to the resource paths
 		Set<String> resourcePaths = new HashSet<String>();
@@ -86,32 +82,26 @@ public class HttpFileSectionSource extends AbstractSectionSource {
 					continue; // only register once
 				}
 
-				// Create the resource task
-				SectionWork work = designer.addSectionWork(resourcePath,
-						HttpFileWorkSource.class.getName());
-				SourceHttpResourceFactory.copyProperties(context, work);
-				work.addProperty(HttpFileWorkSource.PROPERTY_RESOURCE_PATH,
-						resourcePath);
-				SectionTask task = work.addSectionTask(resourcePath,
-						HttpFileWorkSource.TASK_HTTP_FILE);
+				// Create the resource function
+				SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace(resourcePath,
+						HttpFileManagedFunctionSource.class.getName());
+				SourceHttpResourceFactory.copyProperties(context, namespace);
+				namespace.addProperty(HttpFileManagedFunctionSource.PROPERTY_RESOURCE_PATH, resourcePath);
+				SectionFunction function = namespace.addSectionFunction(resourcePath,
+						HttpFileManagedFunctionSource.FUNCTION_HTTP_FILE);
 
 				// Link Server HTTP Connection
-				TaskObject serverHttpConnectionObject = task
-						.getTaskObject(DependencyKeys.SERVER_HTTP_CONNECTION
-								.name());
-				designer.link(serverHttpConnectionObject,
-						serverHttpConnectionDependency);
+				FunctionObject serverHttpConnectionObject = function
+						.getFunctionObject(DependencyKeys.SERVER_HTTP_CONNECTION.name());
+				designer.link(serverHttpConnectionObject, serverHttpConnectionDependency);
 
 				// Link I/O escalation
-				TaskFlow ioEscalationFlow = task
-						.getTaskEscalation(IOException.class.getName());
-				designer.link(ioEscalationFlow, ioEscalationOutput,
-						FlowInstigationStrategyEnum.SEQUENTIAL);
+				FunctionFlow ioEscalationFlow = function.getFunctionEscalation(IOException.class.getName());
+				designer.link(ioEscalationFlow, ioEscalationOutput, false);
 
 				// Link input for the resource task
-				SectionInput input = designer.addSectionInput(resourcePath,
-						null);
-				designer.link(input, task);
+				SectionInput input = designer.addSectionInput(resourcePath, null);
+				designer.link(input, function);
 			}
 		}
 	}

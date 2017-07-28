@@ -21,8 +21,7 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
-import net.officefloor.compile.type.TypeContext;
-import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.api.governance.Governance;
 
 /**
  * {@link OfficeObject} node.
@@ -46,7 +45,7 @@ public interface OfficeObjectNode extends LinkObjectNode, OfficeObject {
 
 	/**
 	 * <p>
-	 * Adds an {@link AdministratorNode} for this
+	 * Adds an {@link AdministrationNode} for this
 	 * {@link OfficeManagedObjectType}.
 	 * <p>
 	 * This allows the {@link OfficeManagedObjectType} to report the extension
@@ -54,9 +53,9 @@ public interface OfficeObjectNode extends LinkObjectNode, OfficeObject {
 	 * {@link OfficeFloorManagedObject} for the {@link OfficeObject}.
 	 * 
 	 * @param administrator
-	 *            {@link AdministratorNode}.
+	 *            {@link AdministrationNode}.
 	 */
-	void addAdministrator(AdministratorNode administrator);
+	void addAdministrator(AdministrationNode administrator);
 
 	/**
 	 * <p>
@@ -82,14 +81,28 @@ public interface OfficeObjectNode extends LinkObjectNode, OfficeObject {
 	GovernanceNode[] getGovernances();
 
 	/**
+	 * Obtains the type of the {@link OfficeObject}.
+	 * 
+	 * @return Type of the {@link OfficeObject}.
+	 */
+	String getOfficeObjectType();
+
+	/**
+	 * Obtains the type qualifier for the {@link OfficeObject}.
+	 * 
+	 * @return Type qualifier for the {@link OfficeObject}.
+	 */
+	String getTypeQualifier();
+
+	/**
 	 * Loads the {@link OfficeManagedObjectType} for this
 	 * {@link OfficeObjectNode}.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return {@link OfficeManagedObjectType} or <code>null</code> with issues
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	OfficeManagedObjectType loadOfficeManagedObjectType(TypeContext typeContext);
+	OfficeManagedObjectType loadOfficeManagedObjectType(CompileContext compileContext);
 
 }

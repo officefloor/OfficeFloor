@@ -1,0 +1,31 @@
+<context>
+	<office-floor>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office>
+		<sections>
+			<section name="SECTION" source="SECTION" location="section" />
+		</sections>
+	</office>
+	<section>
+		<function-namespaces>
+			<function-namespace name="NAMESPACE" source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$CompileFunctionClass" />
+				</properties>
+				<managed-function name="nextFunction" />
+				<managed-function name="simpleFunction" />
+			</function-namespace>
+		</function-namespaces>
+		<functions>
+			<function name="FUNCTION_A" function-namespace="NAMESPACE"
+				managed-function="nextFunction">
+				<next-function name="FUNCTION_B" />
+			</function>
+			<function name="FUNCTION_B" function-namespace="NAMESPACE"
+				managed-function="simpleFunction" />
+		</functions>
+	</section>
+</context>

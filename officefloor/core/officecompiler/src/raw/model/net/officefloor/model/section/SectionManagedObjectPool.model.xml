@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="section managed object pool name" />
+	<field type="String" name="managed object pool source class name" />
+	<list type="PropertyModel" name="property" plural="properties" />
+	<list type="SectionManagedObjectSourceToSectionManagedObjectPoolModel"
+		name="section managed object source" />
+</model>

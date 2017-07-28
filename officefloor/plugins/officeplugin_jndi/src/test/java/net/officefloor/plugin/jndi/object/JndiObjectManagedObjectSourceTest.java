@@ -22,7 +22,7 @@ import javax.sql.DataSource;
 
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
@@ -33,18 +33,15 @@ import net.officefloor.plugin.jndi.object.JndiObjectManagedObjectSource.JndiObje
  * 
  * @author Daniel Sagenschneider
  */
-public class JndiObjectManagedObjectSourceTest extends
-		AbstractOfficeConstructTestCase {
+public class JndiObjectManagedObjectSourceTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Validates the specification.
 	 */
 	public void testSpecification() {
-		ManagedObjectLoaderUtil.validateSpecification(
-				JndiObjectManagedObjectSource.class,
+		ManagedObjectLoaderUtil.validateSpecification(JndiObjectManagedObjectSource.class,
 				JndiObjectManagedObjectSource.PROPERTY_JNDI_NAME, "JNDI Name",
-				JndiObjectManagedObjectSource.PROPERTY_OBJECT_TYPE,
-				"Object Type");
+				JndiObjectManagedObjectSource.PROPERTY_OBJECT_TYPE, "Object Type");
 	}
 
 	/**
@@ -53,18 +50,14 @@ public class JndiObjectManagedObjectSourceTest extends
 	public void testType() {
 
 		// Create the expected type
-		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
-				.createManagedObjectTypeBuilder();
+		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(DataSource.class);
 		type.addDependency(JndiObjectDependency.CONTEXT, Context.class, null);
 
 		// Validate type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type,
-				JndiObjectManagedObjectSource.class,
-				JndiObjectManagedObjectSource.PROPERTY_JNDI_NAME,
-				"java:comp/env/jdbc/DataSourceName",
-				JndiObjectManagedObjectSource.PROPERTY_OBJECT_TYPE,
-				DataSource.class.getName());
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, JndiObjectManagedObjectSource.class,
+				JndiObjectManagedObjectSource.PROPERTY_JNDI_NAME, "java:comp/env/jdbc/DataSourceName",
+				JndiObjectManagedObjectSource.PROPERTY_OBJECT_TYPE, DataSource.class.getName());
 	}
 
 	/**
@@ -85,12 +78,9 @@ public class JndiObjectManagedObjectSourceTest extends
 
 		// Obtain the JNDI Context Managed Object Source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
-		loader.addProperty(JndiObjectManagedObjectSource.PROPERTY_JNDI_NAME,
-				jndiName);
-		loader.addProperty(JndiObjectManagedObjectSource.PROPERTY_OBJECT_TYPE,
-				DataSource.class.getName());
-		JndiObjectManagedObjectSource mos = loader
-				.loadManagedObjectSource(JndiObjectManagedObjectSource.class);
+		loader.addProperty(JndiObjectManagedObjectSource.PROPERTY_JNDI_NAME, jndiName);
+		loader.addProperty(JndiObjectManagedObjectSource.PROPERTY_OBJECT_TYPE, DataSource.class.getName());
+		JndiObjectManagedObjectSource mos = loader.loadManagedObjectSource(JndiObjectManagedObjectSource.class);
 
 		// Obtain the Managed Object
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();

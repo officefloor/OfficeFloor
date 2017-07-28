@@ -26,28 +26,28 @@ import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
-import net.officefloor.compile.spi.section.SectionTask;
-import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
-import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.SectionClassManagedFunctionSource;
 import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
-import net.officefloor.plugin.section.clazz.SectionClassWorkSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
-import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationWorkSource;
+import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationManagedFunctionSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
+import net.officefloor.plugin.web.http.template.HttpTemplateManagedFunctionSource;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource.NoLogicClass;
 import net.officefloor.plugin.web.http.template.section.TemplateLogic.RowBean;
-import net.officefloor.plugin.work.clazz.ClassWorkSource;
 
 /**
  * Tests the {@link HttpTemplateSectionSource}.
@@ -85,7 +85,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		expected.addSectionInput("getBeanProperty", null);
 		expected.addSectionInput("getBeanArray", null);
 		expected.addSectionInput("getList", null);
-		expected.addSectionInput("nextTask", null);
+		expected.addSectionInput("nextFunction", null);
 		expected.addSectionInput("submit", null);
 		expected.addSectionInput("doInternalFlow", Integer.class.getName());
 		expected.addSectionInput("notRenderTemplateAfter", null);
@@ -117,111 +117,122 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		injectMos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, RowBean.class.getName());
 		injectMos.addSectionManagedObject("managedObject", ManagedObjectScope.THREAD);
 
-		// Initial, Template and Class work
-		SectionWork initialWork = expected.addSectionWork("INITIAL", HttpTemplateInitialWorkSource.class.getName());
-		initialWork.addProperty(HttpTemplateInitialWorkSource.PROPERTY_TEMPLATE_URI, "template");
-		SectionWork templateWork = expected.addSectionWork("TEMPLATE", HttpTemplateWorkSource.class.getName());
-		templateWork.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE,
+		// Initial, Template and Class namespace
+		SectionFunctionNamespace initialNamespace = expected.addSectionFunctionNamespace("INITIAL",
+				HttpTemplateInitialManagedFunctionSource.class.getName());
+		initialNamespace.addProperty(HttpTemplateInitialManagedFunctionSource.PROPERTY_TEMPLATE_URI, "template");
+		SectionFunctionNamespace templateNamespace = expected.addSectionFunctionNamespace("TEMPLATE",
+				HttpTemplateManagedFunctionSource.class.getName());
+		templateNamespace.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE,
 				SectionLoaderUtil.getClassPathLocation(this.getClass(), "Template.ofp"));
-		templateWork.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI, "template");
-		templateWork.addProperty(HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX + "template",
+		templateNamespace.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI, "template");
+		templateNamespace.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "template",
 				TemplateLogic.class.getName());
-		templateWork.addProperty(HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX + "List", RowBean.class.getName());
-		SectionWork classWork = expected.addSectionWork("WORK", SectionClassWorkSource.class.getName());
-		classWork.addProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME, TemplateLogic.class.getName());
-		SectionWork iteratorWork = expected.addSectionWork("ListArrayIterator",
-				HttpTemplateArrayIteratorWorkSource.class.getName());
-		iteratorWork.addProperty(HttpTemplateArrayIteratorWorkSource.PROPERTY_COMPONENT_TYPE_NAME,
+		templateNamespace.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "List",
+				RowBean.class.getName());
+		SectionFunctionNamespace classNamespace = expected.addSectionFunctionNamespace("WORK",
+				SectionClassManagedFunctionSource.class.getName());
+		classNamespace.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, TemplateLogic.class.getName());
+		SectionFunctionNamespace iteratorNamespace = expected.addSectionFunctionNamespace("ListArrayIterator",
+				HttpTemplateArrayIteratorManagedFunctionSource.class.getName());
+		iteratorNamespace.addProperty(HttpTemplateArrayIteratorManagedFunctionSource.PROPERTY_COMPONENT_TYPE_NAME,
 				RowBean.class.getName());
 
-		// Initial task
-		SectionTask initial = initialWork.addSectionTask("_INITIAL_TASK_", HttpTemplateInitialWorkSource.TASK_NAME);
-		expected.link(initial.getTaskObject("SERVER_HTTP_CONNECTION"), httpConnection);
-		expected.link(initial.getTaskObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
-		expected.link(initial.getTaskObject("REQUEST_STATE"), requestState);
-		expected.link(initial.getTaskObject("HTTP_SESSION"), httpSession);
-		initial.getTaskFlow("RENDER");
+		// Initial function
+		SectionFunction initial = initialNamespace.addSectionFunction("_INITIAL_FUNCTION_",
+				HttpTemplateInitialManagedFunctionSource.FUNCTION_NAME);
+		expected.link(initial.getFunctionObject("SERVER_HTTP_CONNECTION"), httpConnection);
+		expected.link(initial.getFunctionObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
+		expected.link(initial.getFunctionObject("REQUEST_STATE"), requestState);
+		expected.link(initial.getFunctionObject("HTTP_SESSION"), httpSession);
+		initial.getFunctionFlow("RENDER");
 
 		// Template
-		SectionTask getTemplate = classWork.addSectionTask("getTemplate", "getTemplate");
-		expected.link(getTemplate.getTaskObject("OBJECT"), sectionMo);
-		SectionTask template = templateWork.addSectionTask("template", "template");
-		expected.link(template.getTaskObject("SERVER_HTTP_CONNECTION"), httpConnection);
-		expected.link(template.getTaskObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
-		expected.link(template.getTaskObject("OBJECT"), sectionMo);
+		SectionFunction getTemplate = classNamespace.addSectionFunction("getTemplate", "getTemplate");
+		expected.link(getTemplate.getFunctionObject("OBJECT"), sectionMo);
+		SectionFunction template = templateNamespace.addSectionFunction("template", "template");
+		expected.link(template.getFunctionObject("SERVER_HTTP_CONNECTION"), httpConnection);
+		expected.link(template.getFunctionObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
+		expected.link(template.getFunctionObject("OBJECT"), sectionMo);
 
 		// Methods for beans/properties
 		for (String beanMethodName : new String[] { "getTemplateName", "getEscapedHtml", "getUnescapedHtml",
 				"getNullBean", "getBean", "getBeanProperty", "getBeanArray" }) {
-			SectionTask beanMethodTask = classWork.addSectionTask(beanMethodName, beanMethodName);
-			expected.link(beanMethodTask.getTaskObject("OBJECT"), sectionMo);
+			SectionFunction beanMethodFunction = classNamespace.addSectionFunction(beanMethodName, beanMethodName);
+			expected.link(beanMethodFunction.getFunctionObject("OBJECT"), sectionMo);
 		}
 
 		// List
-		SectionTask getList = classWork.addSectionTask("getList", "getList");
-		expected.link(getList.getTaskObject("OBJECT"), sectionMo);
-		expected.link(getList.getTaskObject(HttpSession.class.getName()), httpSession);
-		SectionTask list = templateWork.addSectionTask("List", "List");
-		expected.link(list.getTaskObject("SERVER_HTTP_CONNECTION"), httpConnection);
-		expected.link(list.getTaskObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
-		expected.link(list.getTaskObject("OBJECT"), sectionMo);
-		SectionTask listArrayIterator = iteratorWork.addSectionTask("ListArrayIterator", "iterate");
-		listArrayIterator.getTaskObject("ARRAY").flagAsParameter();
+		SectionFunction getList = classNamespace.addSectionFunction("getList", "getList");
+		expected.link(getList.getFunctionObject("OBJECT"), sectionMo);
+		expected.link(getList.getFunctionObject(HttpSession.class.getName()), httpSession);
+		SectionFunction list = templateNamespace.addSectionFunction("List", "List");
+		expected.link(list.getFunctionObject("SERVER_HTTP_CONNECTION"), httpConnection);
+		expected.link(list.getFunctionObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
+		expected.link(list.getFunctionObject("OBJECT"), sectionMo);
+		SectionFunction listArrayIterator = iteratorNamespace.addSectionFunction("ListArrayIterator", "iterate");
+		listArrayIterator.getFunctionObject("ARRAY").flagAsParameter();
 
 		// Tail
-		SectionTask tail = templateWork.addSectionTask("Tail", "Tail");
-		expected.link(tail.getTaskObject("SERVER_HTTP_CONNECTION"), httpConnection);
-		expected.link(tail.getTaskObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
+		SectionFunction tail = templateNamespace.addSectionFunction("Tail", "Tail");
+		expected.link(tail.getFunctionObject("SERVER_HTTP_CONNECTION"), httpConnection);
+		expected.link(tail.getFunctionObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
 
-		// nextTask link URL continuation
-		SectionWork nextTaskContinuationWork = expected.addSectionWork("HTTP_URL_CONTINUATION_nextTask",
-				HttpUrlContinuationWorkSource.class.getName());
-		nextTaskContinuationWork.addProperty(HttpUrlContinuationWorkSource.PROPERTY_URI_PATH, "/next");
-		nextTaskContinuationWork.addSectionTask("HTTP_URL_CONTINUATION_nextTask",
-				HttpUrlContinuationWorkSource.TASK_NAME);
+		// nextFunction link URL continuation
+		SectionFunctionNamespace nextFunctionContinuationNamespace = expected.addSectionFunctionNamespace(
+				"HTTP_URL_CONTINUATION_nextFunction", HttpUrlContinuationManagedFunctionSource.class.getName());
+		nextFunctionContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH,
+				"/next");
+		nextFunctionContinuationNamespace.addSectionFunction("HTTP_URL_CONTINUATION_nextFunction",
+				HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
 
-		// Handle nextTask task
-		SectionTask nextTaskMethod = classWork.addSectionTask("nextTask", "nextTask");
-		expected.link(nextTaskMethod.getTaskObject("OBJECT"), sectionMo);
-		expected.link(nextTaskMethod.getTaskObject(ServerHttpConnection.class.getName()), httpConnection);
+		// Handle nextFunction function
+		SectionFunction nextFunctionMethod = classNamespace.addSectionFunction("nextFunction", "nextFunction");
+		expected.link(nextFunctionMethod.getFunctionObject("OBJECT"), sectionMo);
+		expected.link(nextFunctionMethod.getFunctionObject(ServerHttpConnection.class.getName()), httpConnection);
 
 		// submit link URL continuation
-		SectionWork submitContinuationWork = expected.addSectionWork("HTTP_URL_CONTINUATION_submit",
-				HttpUrlContinuationWorkSource.class.getName());
-		submitContinuationWork.addProperty(HttpUrlContinuationWorkSource.PROPERTY_URI_PATH, "/submit");
-		submitContinuationWork.addSectionTask("HTTP_URL_CONTINUATION_submit", HttpUrlContinuationWorkSource.TASK_NAME);
+		SectionFunctionNamespace submitContinuationNamespace = expected.addSectionFunctionNamespace(
+				"HTTP_URL_CONTINUATION_submit", HttpUrlContinuationManagedFunctionSource.class.getName());
+		submitContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH, "/submit");
+		submitContinuationNamespace.addSectionFunction("HTTP_URL_CONTINUATION_submit",
+				HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
 
-		// Handle submit task
-		SectionTask submitMethod = classWork.addSectionTask("submit", "submit");
-		expected.link(submitMethod.getTaskObject("OBJECT"), sectionMo);
-		expected.link(submitMethod.getTaskObject(ServerHttpConnection.class.getName()), httpConnection);
+		// Handle submit function
+		SectionFunction submitMethod = classNamespace.addSectionFunction("submit", "submit");
+		expected.link(submitMethod.getFunctionObject("OBJECT"), sectionMo);
+		expected.link(submitMethod.getFunctionObject(ServerHttpConnection.class.getName()), httpConnection);
 
 		// Route non-method link
-		SectionWork nonMethodContinuationWork = expected.addSectionWork("HTTP_URL_CONTINUATION_nonMethodLink",
-				HttpUrlContinuationWorkSource.class.getName());
-		nonMethodContinuationWork.addProperty(HttpUrlContinuationWorkSource.PROPERTY_URI_PATH, "/nonMethod");
-		nonMethodContinuationWork.addSectionTask("HTTP_URL_CONTINUATION_nonMethodLink",
-				HttpUrlContinuationWorkSource.TASK_NAME);
+		SectionFunctionNamespace nonMethodContinuationNamespace = expected.addSectionFunctionNamespace(
+				"HTTP_URL_CONTINUATION_nonMethodLink", HttpUrlContinuationManagedFunctionSource.class.getName());
+		nonMethodContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH,
+				"/nonMethod");
+		nonMethodContinuationNamespace.addSectionFunction("HTTP_URL_CONTINUATION_nonMethodLink",
+				HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
 
-		// Extra task
-		SectionTask doInternalFlow = classWork.addSectionTask("doInternalFlow", "doInternalFlow");
-		expected.link(doInternalFlow.getTaskObject("OBJECT"), sectionMo);
-		doInternalFlow.getTaskObject(Integer.class.getName()).flagAsParameter();
-		expected.link(doInternalFlow.getTaskObject(Connection.class.getName()), connection);
-		expected.link(doInternalFlow.getTaskObject(ServerHttpConnection.class.getName()), httpConnection);
+		// Extra function
+		SectionFunction doInternalFlow = classNamespace.addSectionFunction("doInternalFlow", "doInternalFlow");
+		expected.link(doInternalFlow.getFunctionObject("OBJECT"), sectionMo);
+		doInternalFlow.getFunctionObject(Integer.class.getName()).flagAsParameter();
+		expected.link(doInternalFlow.getFunctionObject(Connection.class.getName()), connection);
+		expected.link(doInternalFlow.getFunctionObject(ServerHttpConnection.class.getName()), httpConnection);
 
 		// Not render template after link
-		SectionWork notRenderTemplateAfterWork = expected.addSectionWork("HTTP_URL_CONTINUATION_notRenderTemplateAfter",
-				HttpUrlContinuationWorkSource.class.getName());
-		notRenderTemplateAfterWork.addProperty(HttpUrlContinuationWorkSource.PROPERTY_URI_PATH, "/notRender");
-		notRenderTemplateAfterWork.addSectionTask("HTTP_URL_CONTINUATION_notRenderTemplateAfter",
-				HttpUrlContinuationWorkSource.TASK_NAME);
+		SectionFunctionNamespace notRenderTemplateAfterNamespace = expected.addSectionFunctionNamespace(
+				"HTTP_URL_CONTINUATION_notRenderTemplateAfter",
+				HttpUrlContinuationManagedFunctionSource.class.getName());
+		notRenderTemplateAfterNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH,
+				"/notRender");
+		notRenderTemplateAfterNamespace.addSectionFunction("HTTP_URL_CONTINUATION_notRenderTemplateAfter",
+				HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
 
-		// Handle not render template after task
-		SectionTask notRenderTemplateAfterMethod = classWork.addSectionTask("notRenderTemplateAfter",
+		// Handle not render template after function
+		SectionFunction notRenderTemplateAfterMethod = classNamespace.addSectionFunction("notRenderTemplateAfter",
 				"notRenderTemplateAfter");
-		expected.link(notRenderTemplateAfterMethod.getTaskObject("OBJECT"), sectionMo);
-		expected.link(notRenderTemplateAfterMethod.getTaskObject(ServerHttpConnection.class.getName()), httpConnection);
+		expected.link(notRenderTemplateAfterMethod.getFunctionObject("OBJECT"), sectionMo);
+		expected.link(notRenderTemplateAfterMethod.getFunctionObject(ServerHttpConnection.class.getName()),
+				httpConnection);
 
 		// Validate type
 		SectionLoaderUtil.validateSection(expected, HttpTemplateSectionSource.class, this.getClass(), "Template.ofp",
@@ -268,56 +279,62 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 				TemplateDataLogic.class.getName());
 		SectionManagedObject sectionMo = sectionMos.addSectionManagedObject("OBJECT", ManagedObjectScope.THREAD);
 
-		// Initial, Template and Class work
-		SectionWork initialWork = expected.addSectionWork("INITIAL", HttpTemplateInitialWorkSource.class.getName());
-		initialWork.addProperty(HttpTemplateInitialWorkSource.PROPERTY_TEMPLATE_URI, "template");
-		SectionWork templateWork = expected.addSectionWork("TEMPLATE", HttpTemplateWorkSource.class.getName());
-		templateWork.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE,
+		// Initial, Template and Class namespace
+		SectionFunctionNamespace initialNamespace = expected.addSectionFunctionNamespace("INITIAL",
+				HttpTemplateInitialManagedFunctionSource.class.getName());
+		initialNamespace.addProperty(HttpTemplateInitialManagedFunctionSource.PROPERTY_TEMPLATE_URI, "template");
+		SectionFunctionNamespace templateNamespace = expected.addSectionFunctionNamespace("TEMPLATE",
+				HttpTemplateManagedFunctionSource.class.getName());
+		templateNamespace.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE,
 				SectionLoaderUtil.getClassPathLocation(this.getClass(), "TemplateData.ofp"));
-		templateWork.addProperty(HttpTemplateInitialWorkSource.PROPERTY_TEMPLATE_URI, "template");
-		templateWork.addProperty(HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX + "template",
+		templateNamespace.addProperty(HttpTemplateInitialManagedFunctionSource.PROPERTY_TEMPLATE_URI, "template");
+		templateNamespace.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "template",
 				TemplateDataLogic.class.getName());
-		templateWork.addProperty(HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX + "section",
+		templateNamespace.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_BEAN_PREFIX + "section",
 				TemplateDataLogic.class.getName());
-		SectionWork classWork = expected.addSectionWork("WORK", SectionClassWorkSource.class.getName());
-		classWork.addProperty(SectionClassWorkSource.CLASS_NAME_PROPERTY_NAME, TemplateDataLogic.class.getName());
+		SectionFunctionNamespace classNamespace = expected.addSectionFunctionNamespace("WORK",
+				SectionClassManagedFunctionSource.class.getName());
+		classNamespace.addProperty(SectionClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
+				TemplateDataLogic.class.getName());
 
-		// Initial task
-		SectionTask initial = initialWork.addSectionTask("_INITIAL_TASK_", HttpTemplateInitialWorkSource.TASK_NAME);
-		expected.link(initial.getTaskObject("SERVER_HTTP_CONNECTION"), httpConnection);
-		expected.link(initial.getTaskObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
-		expected.link(initial.getTaskObject("REQUEST_STATE"), requestState);
-		expected.link(initial.getTaskObject("HTTP_SESSION"), httpSession);
-		initial.getTaskFlow("RENDER");
+		// Initial function
+		SectionFunction initial = initialNamespace.addSectionFunction("_INITIAL_TASK_",
+				HttpTemplateInitialManagedFunctionSource.FUNCTION_NAME);
+		expected.link(initial.getFunctionObject("SERVER_HTTP_CONNECTION"), httpConnection);
+		expected.link(initial.getFunctionObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
+		expected.link(initial.getFunctionObject("REQUEST_STATE"), requestState);
+		expected.link(initial.getFunctionObject("HTTP_SESSION"), httpSession);
+		initial.getFunctionFlow("RENDER");
 
 		// Template
-		SectionTask getTemplate = classWork.addSectionTask("getTemplateData", "getTemplateData");
-		expected.link(getTemplate.getTaskObject("OBJECT"), sectionMo);
-		SectionTask template = templateWork.addSectionTask("template", "template");
-		expected.link(template.getTaskObject("SERVER_HTTP_CONNECTION"), httpConnection);
-		expected.link(template.getTaskObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
-		expected.link(template.getTaskObject("OBJECT"), sectionMo);
+		SectionFunction getTemplate = classNamespace.addSectionFunction("getTemplateData", "getTemplateData");
+		expected.link(getTemplate.getFunctionObject("OBJECT"), sectionMo);
+		SectionFunction template = templateNamespace.addSectionFunction("template", "template");
+		expected.link(template.getFunctionObject("SERVER_HTTP_CONNECTION"), httpConnection);
+		expected.link(template.getFunctionObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
+		expected.link(template.getFunctionObject("OBJECT"), sectionMo);
 
 		// Message
-		SectionTask message = classWork.addSectionTask("getMessage", "getMessage");
-		expected.link(message.getTaskObject("OBJECT"), sectionMo);
+		SectionFunction message = classNamespace.addSectionFunction("getMessage", "getMessage");
+		expected.link(message.getFunctionObject("OBJECT"), sectionMo);
 
 		// Section
-		SectionTask getSection = classWork.addSectionTask("getSectionData", "getSectionData");
-		expected.link(getSection.getTaskObject("OBJECT"), sectionMo);
-		SectionTask section = templateWork.addSectionTask("section", "section");
-		expected.link(section.getTaskObject("SERVER_HTTP_CONNECTION"), httpConnection);
-		expected.link(section.getTaskObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
-		initial.getTaskObject("REQUEST_STATE");
-		expected.link(section.getTaskObject("OBJECT"), sectionMo);
+		SectionFunction getSection = classNamespace.addSectionFunction("getSectionData", "getSectionData");
+		expected.link(getSection.getFunctionObject("OBJECT"), sectionMo);
+		SectionFunction section = templateNamespace.addSectionFunction("section", "section");
+		expected.link(section.getFunctionObject("SERVER_HTTP_CONNECTION"), httpConnection);
+		expected.link(section.getFunctionObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
+		initial.getFunctionObject("REQUEST_STATE");
+		expected.link(section.getFunctionObject("OBJECT"), sectionMo);
 
 		// Description
-		SectionTask description = classWork.addSectionTask("getDescription", "getDescription");
-		expected.link(description.getTaskObject("OBJECT"), sectionMo);
+		SectionFunction description = classNamespace.addSectionFunction("getDescription", "getDescription");
+		expected.link(description.getFunctionObject("OBJECT"), sectionMo);
 
 		// External flow
-		SectionTask doExternalFlow = classWork.addSectionTask("requiredForIntegration", "requiredForIntegration");
-		expected.link(doExternalFlow.getTaskObject("OBJECT"), sectionMo);
+		SectionFunction doExternalFlow = classNamespace.addSectionFunction("requiredForIntegration",
+				"requiredForIntegration");
+		expected.link(doExternalFlow.getFunctionObject("OBJECT"), sectionMo);
 
 		// Validate type
 		SectionLoaderUtil.validateSection(expected, HttpTemplateSectionSource.class, this.getClass(),
@@ -357,46 +374,53 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		sectionMos.addProperty(SectionClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, NoLogicClass.class.getName());
 		SectionManagedObject sectionMo = sectionMos.addSectionManagedObject("OBJECT", ManagedObjectScope.THREAD);
 
-		// Add the no logic class (with internal task)
-		SectionWork classWork = expected.addSectionWork("WORK", SectionClassWorkSource.class.getName());
-		classWork.addProperty(SectionClassWorkSource.CLASS_NAME_PROPERTY_NAME, NoLogicClass.class.getName());
-		SectionTask getTemplate = classWork.addSectionTask("notIncludedInput", "notIncludedInput");
-		expected.link(getTemplate.getTaskObject("OBJECT"), sectionMo);
+		// Add the no logic class (with internal function)
+		SectionFunctionNamespace classNamespace = expected.addSectionFunctionNamespace("WORK",
+				SectionClassManagedFunctionSource.class.getName());
+		classNamespace.addProperty(SectionClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
+				NoLogicClass.class.getName());
+		SectionFunction getTemplate = classNamespace.addSectionFunction("notIncludedInput", "notIncludedInput");
+		expected.link(getTemplate.getFunctionObject("OBJECT"), sectionMo);
 
-		// Initial and Template work
-		SectionWork initialWork = expected.addSectionWork("INITIAL", HttpTemplateInitialWorkSource.class.getName());
-		initialWork.addProperty(HttpTemplateInitialWorkSource.PROPERTY_TEMPLATE_URI, "template");
-		SectionWork templateWork = expected.addSectionWork("TEMPLATE", HttpTemplateWorkSource.class.getName());
-		templateWork.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE,
+		// Initial and Template namespace
+		SectionFunctionNamespace initialNamespace = expected.addSectionFunctionNamespace("INITIAL",
+				HttpTemplateInitialManagedFunctionSource.class.getName());
+		initialNamespace.addProperty(HttpTemplateInitialManagedFunctionSource.PROPERTY_TEMPLATE_URI, "template");
+		SectionFunctionNamespace templateNamspace = expected.addSectionFunctionNamespace("TEMPLATE",
+				HttpTemplateManagedFunctionSource.class.getName());
+		templateNamspace.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_FILE,
 				SectionLoaderUtil.getClassPathLocation(this.getClass(), "NoLogicTemplate.ofp"));
-		templateWork.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI, "template");
+		templateNamspace.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_TEMPLATE_URI, "template");
 
-		// Initial task
-		SectionTask initial = initialWork.addSectionTask("_INITIAL_TASK_", HttpTemplateInitialWorkSource.TASK_NAME);
-		expected.link(initial.getTaskObject("SERVER_HTTP_CONNECTION"), httpConnection);
-		expected.link(initial.getTaskObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
-		expected.link(initial.getTaskObject("REQUEST_STATE"), requestState);
-		expected.link(initial.getTaskObject("HTTP_SESSION"), httpSession);
-		initial.getTaskFlow("RENDER");
+		// Initial function
+		SectionFunction initial = initialNamespace.addSectionFunction("_INITIAL_FUNCTION_",
+				HttpTemplateInitialManagedFunctionSource.FUNCTION_NAME);
+		expected.link(initial.getFunctionObject("SERVER_HTTP_CONNECTION"), httpConnection);
+		expected.link(initial.getFunctionObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
+		expected.link(initial.getFunctionObject("REQUEST_STATE"), requestState);
+		expected.link(initial.getFunctionObject("HTTP_SESSION"), httpSession);
+		initial.getFunctionFlow("RENDER");
 
 		// Section
-		SectionTask section = templateWork.addSectionTask("Section", "Section");
-		expected.link(section.getTaskObject("SERVER_HTTP_CONNECTION"), httpConnection);
-		expected.link(section.getTaskObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
+		SectionFunction section = templateNamspace.addSectionFunction("Section", "Section");
+		expected.link(section.getFunctionObject("SERVER_HTTP_CONNECTION"), httpConnection);
+		expected.link(section.getFunctionObject("HTTP_APPLICATION_LOCATION"), applicationLocation);
 
 		// nonMethodLink URL continuation
-		SectionWork nonMethodContinuationWork = expected.addSectionWork("HTTP_URL_CONTINUATION_nonMethodLink",
-				HttpUrlContinuationWorkSource.class.getName());
-		nonMethodContinuationWork.addProperty(HttpUrlContinuationWorkSource.PROPERTY_URI_PATH, "nonMethod");
-		nonMethodContinuationWork.addSectionTask("HTTP_URL_CONTINUATION_nonMethodLink",
-				HttpUrlContinuationWorkSource.TASK_NAME);
+		SectionFunctionNamespace nonMethodContinuationNamespace = expected.addSectionFunctionNamespace(
+				"HTTP_URL_CONTINUATION_nonMethodLink", HttpUrlContinuationManagedFunctionSource.class.getName());
+		nonMethodContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH,
+				"nonMethod");
+		nonMethodContinuationNamespace.addSectionFunction("HTTP_URL_CONTINUATION_nonMethodLink",
+				HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
 
 		// doExternalFlow URL continuation
-		SectionWork doExternalFlowContinuationWork = expected.addSectionWork("HTTP_URL_CONTINUATION_doExternalFlow",
-				HttpUrlContinuationWorkSource.class.getName());
-		doExternalFlowContinuationWork.addProperty(HttpUrlContinuationWorkSource.PROPERTY_URI_PATH, "doExternalFlow");
-		doExternalFlowContinuationWork.addSectionTask("HTTP_URL_CONTINUATION_doExternalFlow",
-				HttpUrlContinuationWorkSource.TASK_NAME);
+		SectionFunctionNamespace doExternalFlowContinuationNamespace = expected.addSectionFunctionNamespace(
+				"HTTP_URL_CONTINUATION_doExternalFlow", HttpUrlContinuationManagedFunctionSource.class.getName());
+		doExternalFlowContinuationNamespace.addProperty(HttpUrlContinuationManagedFunctionSource.PROPERTY_URI_PATH,
+				"doExternalFlow");
+		doExternalFlowContinuationNamespace.addSectionFunction("HTTP_URL_CONTINUATION_doExternalFlow",
+				HttpUrlContinuationManagedFunctionSource.FUNCTION_NAME);
 
 		// Validate type
 		SectionLoaderUtil.validateSection(expected, HttpTemplateSectionSource.class, this.getClass(),
@@ -427,7 +451,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		// Create the properties
 		PropertyList properties = compiler.createPropertyList();
 		properties.addProperty(HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI).setValue("/uri");
-		properties.addProperty(HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX + "LINK")
+		properties.addProperty(HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "LINK")
 				.setValue(String.valueOf(true));
 
 		// Test
@@ -467,7 +491,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		SectionLoaderUtil.validateSectionType(expected, HttpTemplateSectionSource.class, childTemplatePath,
 				HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI, "uri",
 				HttpTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES, parentTemplatePath,
-				HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX + "link", String.valueOf(true));
+				HttpTemplateManagedFunctionSource.PROPERTY_LINK_SECURE_PREFIX + "link", String.valueOf(true));
 	}
 
 	/**
@@ -535,21 +559,21 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Section method may not be annotated with {@link NextTask}.
+	 * Section method may not be annotated with {@link NextFunction}.
 	 */
-	public void testIllegalNextTaskAnnotationForSectionMethod() {
+	public void testIllegalNextFunctionAnnotationForSectionMethod() {
 
 		MockCompilerIssues issues = new MockCompilerIssues(this);
 
 		// Obtain the template location
-		String templatePath = this.getPackageRelativePath(this.getClass()) + "/NextTaskErrorTemplate.ofp";
+		String templatePath = this.getPackageRelativePath(this.getClass()) + "/NextFunctionErrorTemplate.ofp";
 
 		// Record loading the work type
 		issues.recordCaptureIssues(false);
 
 		// Record errors
 		issues.recordIssue("Type", SectionNodeImpl.class,
-				"Template bean method 'getSection' (task GETSECTION) must not be annotated with NextTask");
+				"Template bean method 'getSection' (task GETSECTION) must not be annotated with NextFunction");
 
 		// Create loader
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
@@ -559,7 +583,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		// Create the properties
 		PropertyList properties = compiler.createPropertyList();
 		properties.addProperty(HttpTemplateSectionSource.PROPERTY_CLASS_NAME)
-				.setValue(NextTaskErrorLogic.class.getName());
+				.setValue(NextFunctionErrorLogic.class.getName());
 		properties.addProperty(HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI).setValue("uri");
 
 		// Test

@@ -24,14 +24,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.NameAwareManagedObject;
-import net.officefloor.frame.spi.managedobject.ObjectRegistry;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
@@ -44,8 +44,7 @@ import net.officefloor.plugin.web.http.application.HttpRequestState;
  * @author Daniel Sagenschneider
  */
 public class JsonRequestReaderManagedObjectSource
-		extends
-		AbstractManagedObjectSource<JsonRequestReaderManagedObjectSource.Dependencies, None> {
+		extends AbstractManagedObjectSource<JsonRequestReaderManagedObjectSource.Dependencies, None> {
 
 	/**
 	 * Dependency keys.
@@ -92,21 +91,17 @@ public class JsonRequestReaderManagedObjectSource
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected void loadMetaData(MetaDataContext<Dependencies, None> context)
-			throws Exception {
-		ManagedObjectSourceContext<None> mosContext = context
-				.getManagedObjectSourceContext();
+	protected void loadMetaData(MetaDataContext<Dependencies, None> context) throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Obtain the Object class
-		String objectClassName = mosContext
-				.getProperty(PROPERTY_JSON_OBJECT_CLASS);
+		String objectClassName = mosContext.getProperty(PROPERTY_JSON_OBJECT_CLASS);
 		Class<?> objectClass = mosContext.loadClass(objectClassName);
 
 		// Object must be serializable
 		if (!(Serializable.class.isAssignableFrom(objectClass))) {
-			throw new Exception("JSON object " + objectClass.getName()
-					+ " must be " + Serializable.class.getSimpleName()
-					+ " as stored in " + HttpRequestState.class.getSimpleName());
+			throw new Exception("JSON object " + objectClass.getName() + " must be "
+					+ Serializable.class.getSimpleName() + " as stored in " + HttpRequestState.class.getSimpleName());
 		}
 		this.objectClass = (Class<? extends Serializable>) objectClass;
 
@@ -116,15 +111,12 @@ public class JsonRequestReaderManagedObjectSource
 		// Provide meta-data
 		context.setObjectClass(this.objectClass);
 		context.setManagedObjectClass(JsonRequestReaderManagedObject.class);
-		context.addDependency(Dependencies.SERVER_HTTP_CONNECTION,
-				ServerHttpConnection.class);
-		context.addDependency(Dependencies.HTTP_REQUEST_STATE,
-				HttpRequestState.class);
+		context.addDependency(Dependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class);
+		context.addDependency(Dependencies.HTTP_REQUEST_STATE, HttpRequestState.class);
 	}
 
 	@Override
-	public void start(ManagedObjectExecuteContext<None> context)
-			throws Exception {
+	public void start(ManagedObjectExecuteContext<None> context) throws Exception {
 		// Create the object mapper
 		this.mapper = new ObjectMapper();
 	}
@@ -137,8 +129,8 @@ public class JsonRequestReaderManagedObjectSource
 	/**
 	 * {@link ManagedObject} for the JSON read Object.
 	 */
-	private class JsonRequestReaderManagedObject implements
-			NameAwareManagedObject, CoordinatingManagedObject<Dependencies> {
+	private class JsonRequestReaderManagedObject
+			implements NameAwareManagedObject, CoordinatingManagedObject<Dependencies> {
 
 		/**
 		 * Name the Object is bound in the {@link HttpRequestState}.
@@ -161,44 +153,36 @@ public class JsonRequestReaderManagedObjectSource
 
 		@Override
 		public void setBoundManagedObjectName(String boundManagedObjectName) {
-			this.boundName = (JsonRequestReaderManagedObjectSource.this.bindName != null ? JsonRequestReaderManagedObjectSource.this.bindName
-					: boundManagedObjectName);
+			this.boundName = (JsonRequestReaderManagedObjectSource.this.bindName != null
+					? JsonRequestReaderManagedObjectSource.this.bindName : boundManagedObjectName);
 		}
 
 		@Override
-		public void loadObjects(ObjectRegistry<Dependencies> registry)
-				throws Throwable {
+		public void loadObjects(ObjectRegistry<Dependencies> registry) throws Throwable {
 
 			// Obtain the dependencies
-			this.connection = (ServerHttpConnection) registry
-					.getObject(Dependencies.SERVER_HTTP_CONNECTION);
-			this.requestState = (HttpRequestState) registry
-					.getObject(Dependencies.HTTP_REQUEST_STATE);
+			this.connection = (ServerHttpConnection) registry.getObject(Dependencies.SERVER_HTTP_CONNECTION);
+			this.requestState = (HttpRequestState) registry.getObject(Dependencies.HTTP_REQUEST_STATE);
 		}
 
 		@Override
 		public Object getObject() throws Throwable {
 
 			// Lazy obtain the object
-			Serializable object = this.requestState
-					.getAttribute(this.boundName);
+			Serializable object = this.requestState.getAttribute(this.boundName);
 			if (object == null) {
 
 				// Obtain the JSON pay load
 				HttpRequest request = this.connection.getHttpRequest();
-				InputStream browseInputStream = request.getEntity()
-						.createBrowseInputStream();
+				InputStream browseInputStream = request.getEntity().createBrowseInputStream();
 				if (browseInputStream.available() <= 0) {
 					// No pay load, then provide empty object
-					object = JsonRequestReaderManagedObjectSource.this.objectClass
-							.newInstance();
+					object = JsonRequestReaderManagedObjectSource.this.objectClass.newInstance();
 
 				} else {
 					// Load the object from the request
-					object = JsonRequestReaderManagedObjectSource.this.mapper
-							.readValue(
-									browseInputStream,
-									JsonRequestReaderManagedObjectSource.this.objectClass);
+					object = JsonRequestReaderManagedObjectSource.this.mapper.readValue(browseInputStream,
+							JsonRequestReaderManagedObjectSource.this.objectClass);
 				}
 
 				// Register the object

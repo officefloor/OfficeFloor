@@ -19,8 +19,8 @@ package net.officefloor.plugin.web.http.security;
 
 import java.io.IOException;
 
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
@@ -48,30 +48,16 @@ public interface HttpSecuritySource<S, C, D extends Enum<D>, F extends Enum<F>> 
 	HttpSecuritySourceSpecification getSpecification();
 
 	/**
-	 * Called only once after the {@link HttpSecuritySource} is instantiated.
+	 * Initialises the {@link HttpSecuritySource}.
 	 * 
 	 * @param context
 	 *            {@link HttpSecuritySourceContext} to use in initialising.
+	 * @return Meta-data to describe this.
 	 * @throws Exception
 	 *             Should the {@link HttpSecuritySource} fail to configure
 	 *             itself from the input properties.
 	 */
-	void init(HttpSecuritySourceContext context) throws Exception;
-
-	/**
-	 * <p>
-	 * Obtains the meta-data to describe this.
-	 * <p>
-	 * This is called after the {@link #init(HttpSecuritySourceContext)} method
-	 * and therefore may use the configuration.
-	 * <p>
-	 * This should always return non-null. If there is a problem due to
-	 * incorrect configuration, the {@link #init(HttpSecuritySourceContext)}
-	 * should indicate this via an exception.
-	 * 
-	 * @return Meta-data to describe this.
-	 */
-	HttpSecuritySourceMetaData<S, C, D, F> getMetaData();
+	HttpSecuritySourceMetaData<S, C, D, F> init(HttpSecuritySourceContext context) throws Exception;
 
 	/**
 	 * <p>
@@ -81,7 +67,7 @@ public interface HttpSecuritySource<S, C, D extends Enum<D>, F extends Enum<F>> 
 	 * As authentication will likely require communication with external
 	 * services (LDAP store, database, etc), this method allows checking whether
 	 * enough information is available to undertake the authentication. The
-	 * purpose is to avoid the {@link Job} depending on
+	 * purpose is to avoid the {@link ManagedFunction} depending on
 	 * {@link HttpAuthentication} and inherit the dependencies of authentication
 	 * subsequently causing execution by the authentication {@link Team} -
 	 * especially as the majority of {@link HttpRequest} servicing will have the
@@ -104,8 +90,7 @@ public interface HttpSecuritySource<S, C, D extends Enum<D>, F extends Enum<F>> 
 	 * @throws IOException
 	 *             If failure in communicating to necessary security services.
 	 */
-	void authenticate(HttpAuthenticateContext<S, C, D> context)
-			throws IOException;
+	void authenticate(HttpAuthenticateContext<S, C, D> context) throws IOException;
 
 	/**
 	 * Triggers the authentication challenge to the client.

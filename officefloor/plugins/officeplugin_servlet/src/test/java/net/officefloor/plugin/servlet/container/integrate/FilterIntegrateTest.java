@@ -45,7 +45,7 @@ import net.officefloor.plugin.servlet.filter.configuration.FilterInstance;
 import net.officefloor.plugin.servlet.filter.configuration.FilterMappings;
 import net.officefloor.plugin.servlet.mapping.MappingType;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
+import net.officefloor.plugin.socket.server.http.server.HttpServicerFunction;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -59,7 +59,7 @@ import org.apache.http.client.methods.HttpGet;
 public class FilterIntegrateTest extends MockHttpServletServer {
 
 	@Override
-	public HttpServicerTask buildServlet(String servletContextName,
+	public HttpServicerFunction buildServlet(String servletContextName,
 			String httpName, String requestAttributesName, String sessionName,
 			String securityName) {
 
@@ -136,7 +136,7 @@ public class FilterIntegrateTest extends MockHttpServletServer {
 				SERVLET_SERVER_NAME);
 
 		// Construct HTTP Servlet to handle request
-		HttpServicerTask reference = this.constructHttpServlet(
+		HttpServicerFunction reference = this.constructHttpServlet(
 				DISPATCH_SERVLET_NAME, SERVLET_CONTEXT_NAME, httpName,
 				requestAttributesName, sessionName, securityName,
 				HttpServletWorkSource.class,

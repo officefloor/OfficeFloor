@@ -23,13 +23,13 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.NameAwareManagedObject;
-import net.officefloor.frame.spi.managedobject.ObjectRegistry;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.parameters.HttpParametersLoader;
@@ -41,8 +41,7 @@ import net.officefloor.plugin.web.http.parameters.HttpParametersLoaderImpl;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpRequestObjectManagedObjectSource extends
-		AbstractManagedObjectSource<Indexed, None> {
+public class HttpRequestObjectManagedObjectSource extends AbstractManagedObjectSource<Indexed, None> {
 
 	/**
 	 * Name of property containing the class name.
@@ -99,10 +98,8 @@ public class HttpRequestObjectManagedObjectSource extends
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected void loadMetaData(MetaDataContext<Indexed, None> context)
-			throws Exception {
-		ManagedObjectSourceContext<None> mosContext = context
-				.getManagedObjectSourceContext();
+	protected void loadMetaData(MetaDataContext<Indexed, None> context) throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Obtain the class
 		String className = mosContext.getProperty(PROPERTY_CLASS_NAME);
@@ -110,9 +107,8 @@ public class HttpRequestObjectManagedObjectSource extends
 
 		// Object must be serializable
 		if (!(Serializable.class.isAssignableFrom(this.objectClass))) {
-			throw new Exception(HttpRequestState.class.getSimpleName()
-					+ " object " + this.objectClass.getName() + " must be "
-					+ Serializable.class.getSimpleName());
+			throw new Exception(HttpRequestState.class.getSimpleName() + " object " + this.objectClass.getName()
+					+ " must be " + Serializable.class.getSimpleName());
 		}
 
 		// Obtain the overridden bind name
@@ -124,18 +120,16 @@ public class HttpRequestObjectManagedObjectSource extends
 		context.addDependency(HttpRequestState.class).setLabel("REQUEST_STATE");
 
 		// Determine if load parameters
-		boolean isLoadParameters = Boolean.parseBoolean(mosContext.getProperty(
-				PROPERTY_IS_LOAD_HTTP_PARAMETERS, String.valueOf(false)));
+		boolean isLoadParameters = Boolean
+				.parseBoolean(mosContext.getProperty(PROPERTY_IS_LOAD_HTTP_PARAMETERS, String.valueOf(false)));
 		if (isLoadParameters) {
 
 			// Provide the additional meta-data for loading parameters
-			context.addDependency(ServerHttpConnection.class).setLabel(
-					"SERVER_HTTP_CONNECTION");
+			context.addDependency(ServerHttpConnection.class).setLabel("SERVER_HTTP_CONNECTION");
 
 			// Obtain whether case insensitive (true by default)
-			boolean isCaseInsensitive = Boolean.parseBoolean(mosContext
-					.getProperty(PROPERTY_CASE_INSENSITIVE,
-							Boolean.toString(true)));
+			boolean isCaseInsensitive = Boolean
+					.parseBoolean(mosContext.getProperty(PROPERTY_CASE_INSENSITIVE, Boolean.toString(true)));
 
 			// Create the alias mappings
 			Map<String, String> aliasMappings = new HashMap<String, String>();
@@ -156,8 +150,7 @@ public class HttpRequestObjectManagedObjectSource extends
 
 			// Initialise the HTTP parameters loader
 			this.loader = new HttpParametersLoaderImpl<Object>();
-			this.loader.init(this.objectClass, aliasMappings,
-					isCaseInsensitive, null);
+			this.loader.init(this.objectClass, aliasMappings, isCaseInsensitive, null);
 		}
 
 	}
@@ -171,8 +164,7 @@ public class HttpRequestObjectManagedObjectSource extends
 	 * {@link ManagedObject} to retrieve the object from the
 	 * {@link HttpRequestState}.
 	 */
-	public class HttpRequestObjectManagedObject implements
-			NameAwareManagedObject, CoordinatingManagedObject<Indexed> {
+	public class HttpRequestObjectManagedObject implements NameAwareManagedObject, CoordinatingManagedObject<Indexed> {
 
 		/**
 		 * Name to bind the object to the {@link HttpRequestState}.
@@ -191,14 +183,13 @@ public class HttpRequestObjectManagedObjectSource extends
 		@Override
 		public void setBoundManagedObjectName(String boundManagedObjectName) {
 			// Use bind name in preference to managed object name
-			this.boundName = (HttpRequestObjectManagedObjectSource.this.bindName != null ? HttpRequestObjectManagedObjectSource.this.bindName
-					: boundManagedObjectName);
+			this.boundName = (HttpRequestObjectManagedObjectSource.this.bindName != null
+					? HttpRequestObjectManagedObjectSource.this.bindName : boundManagedObjectName);
 		}
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public void loadObjects(ObjectRegistry<Indexed> registry)
-				throws Throwable {
+		public void loadObjects(ObjectRegistry<Indexed> registry) throws Throwable {
 
 			// Obtain the HTTP request state
 			HttpRequestState state = (HttpRequestState) registry.getObject(0);
@@ -207,21 +198,18 @@ public class HttpRequestObjectManagedObjectSource extends
 			this.object = state.getAttribute(this.boundName);
 			if (this.object == null) {
 				// Instantiate and register the object
-				this.object = (Serializable) HttpRequestObjectManagedObjectSource.this.objectClass
-						.newInstance();
+				this.object = (Serializable) HttpRequestObjectManagedObjectSource.this.objectClass.newInstance();
 				state.setAttribute(this.boundName, this.object);
 
 				// Determine if load parameters
 				if (HttpRequestObjectManagedObjectSource.this.loader != null) {
 
 					// Obtain the request
-					ServerHttpConnection connection = (ServerHttpConnection) registry
-							.getObject(1);
+					ServerHttpConnection connection = (ServerHttpConnection) registry.getObject(1);
 					HttpRequest request = connection.getHttpRequest();
 
 					// Load parameters from the request
-					HttpRequestObjectManagedObjectSource.this.loader
-							.loadParameters(request, this.object);
+					HttpRequestObjectManagedObjectSource.this.loader.loadParameters(request, this.object);
 				}
 			}
 		}

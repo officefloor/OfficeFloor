@@ -30,36 +30,37 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import net.officefloor.compile.administrator.AdministratorType;
-import net.officefloor.compile.administrator.DutyType;
+import net.officefloor.compile.administration.AdministrationType;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.OfficeFunctionType;
 import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.OfficeSectionObjectType;
 import net.officefloor.compile.section.OfficeSectionOutputType;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
-import net.officefloor.compile.section.OfficeTaskType;
-import net.officefloor.compile.spi.office.OfficeSectionTask;
-import net.officefloor.frame.internal.structure.AdministratorScope;
+import net.officefloor.compile.spi.office.OfficeSectionFunction;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.change.AbstractChange;
 import net.officefloor.model.impl.change.DisconnectChange;
 import net.officefloor.model.impl.change.NoChange;
-import net.officefloor.model.office.AdministratorModel;
-import net.officefloor.model.office.AdministratorToOfficeTeamModel;
-import net.officefloor.model.office.DutyModel;
+import net.officefloor.model.office.AdministrationModel;
+import net.officefloor.model.office.AdministrationToOfficeTeamModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
-import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
+import net.officefloor.model.office.ExternalManagedObjectToAdministrationModel;
 import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
+import net.officefloor.model.office.OfficeFunctionModel;
+import net.officefloor.model.office.OfficeFunctionToOfficeTeamModel;
+import net.officefloor.model.office.OfficeFunctionToPostAdministrationModel;
+import net.officefloor.model.office.OfficeFunctionToPreAdministrationModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToOfficeManagedObjectModel;
@@ -69,7 +70,7 @@ import net.officefloor.model.office.OfficeManagedObjectSourceFlowToOfficeSection
 import net.officefloor.model.office.OfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
-import net.officefloor.model.office.OfficeManagedObjectToAdministratorModel;
+import net.officefloor.model.office.OfficeManagedObjectToAdministrationModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeSectionInputModel;
@@ -79,16 +80,12 @@ import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectMo
 import net.officefloor.model.office.OfficeSectionObjectToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
-import net.officefloor.model.office.OfficeSectionResponsibilityModel;
-import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
 import net.officefloor.model.office.OfficeStartModel;
 import net.officefloor.model.office.OfficeStartToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSubSectionModel;
-import net.officefloor.model.office.OfficeTaskModel;
-import net.officefloor.model.office.OfficeTaskToPostDutyModel;
-import net.officefloor.model.office.OfficeTaskToPreDutyModel;
 import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.office.PropertyModel;
+import net.officefloor.model.office.TypeQualificationModel;
 
 /**
  * {@link OfficeChanges} implementation.
@@ -132,8 +129,8 @@ public class OfficeChangesImpl implements OfficeChanges {
 			return PROCESS_MANAGED_OBJECT_SCOPE;
 		case THREAD:
 			return THREAD_MANAGED_OBJECT_SCOPE;
-		case WORK:
-			return WORK_MANAGED_OBJECT_SCOPE;
+		case FUNCTION:
+			return FUNCTION_MANAGED_OBJECT_SCOPE;
 		default:
 			throw new IllegalStateException("Unknown scope " + scope);
 		}
@@ -151,8 +148,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 	 * @return <code>true</code> if {@link OfficeSubSectionModel} may be
 	 *         cleaned.
 	 */
-	private boolean cleanSubSection(final OfficeSubSectionModel subSection,
-			List<Change<?>> changes) {
+	private boolean cleanSubSection(final OfficeSubSectionModel subSection, List<Change<?>> changes) {
 
 		// Ensure have sub section
 		if (subSection == null) {
@@ -165,8 +161,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 			// Determine if can clean the sub sub section
 			if (this.cleanSubSection(subSubSection, changes)) {
 				// Create change to remove the sub sub section as can clean it
-				Change<?> change = new AbstractChange<OfficeSubSectionModel>(
-						subSubSection, "Clean") {
+				Change<?> change = new AbstractChange<OfficeSubSectionModel>(subSubSection, "Clean") {
 					@Override
 					public void apply() {
 						subSection.removeOfficeSubSection(subSubSection);
@@ -184,24 +179,22 @@ public class OfficeChangesImpl implements OfficeChanges {
 			}
 		}
 
-		// Clean any tasks that do not have connections
-		for (final OfficeTaskModel task : new ArrayList<OfficeTaskModel>(
-				subSection.getOfficeTasks())) {
-			int preDutyCount = task.getPreDuties().size();
-			int postDutyCount = task.getPostDuties().size();
-			if ((preDutyCount == 0) && (postDutyCount == 0)) {
-				// Task not connected to duty, so remove (clean) it
-				// Create change to remove the task
-				Change<?> change = new AbstractChange<OfficeTaskModel>(task,
-						"Clean") {
+		// Clean any functions that do not have connections
+		for (final OfficeFunctionModel function : new ArrayList<OfficeFunctionModel>(subSection.getOfficeFunctions())) {
+			int preAdminCount = function.getPreAdministrations().size();
+			int postAdminCount = function.getPostAdministrations().size();
+			if ((preAdminCount == 0) && (postAdminCount == 0)) {
+				// Function not connected to admin, so remove (clean) it
+				// Create change to remove the function
+				Change<?> change = new AbstractChange<OfficeFunctionModel>(function, "Clean") {
 					@Override
 					public void apply() {
-						subSection.removeOfficeTask(task);
+						subSection.removeOfficeFunction(function);
 					}
 
 					@Override
 					public void revert() {
-						subSection.addOfficeTask(task);
+						subSection.addOfficeFunction(function);
 					}
 				};
 
@@ -213,65 +206,63 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 		// Return whether this sub section has become a leaf and may be cleaned
 		int subSubSectionCount = subSection.getOfficeSubSections().size();
-		int taskCount = subSection.getOfficeTasks().size();
-		boolean canClean = ((subSubSectionCount == 0) && (taskCount == 0));
+		int functionCount = subSection.getOfficeFunctions().size();
+		boolean canClean = ((subSubSectionCount == 0) && (functionCount == 0));
 		return canClean;
 	}
 
 	/**
 	 * Obtains the {@link OfficeSectionModel} containing the
-	 * {@link OfficeTaskModel}.
+	 * {@link OfficeFunctionModel}.
 	 * 
-	 * @param task
-	 *            {@link OfficeTaskModel}.
-	 * @return {@link OfficeSectionModel} containing the {@link OfficeTaskModel}
-	 *         or <code>null</code> if {@link OfficeTaskModel} not found in
-	 *         {@link OfficeModel}.
+	 * @param function
+	 *            {@link OfficeFunctionModel}.
+	 * @return {@link OfficeSectionModel} containing the
+	 *         {@link OfficeFunctionModel} or <code>null</code> if
+	 *         {@link OfficeFunctionModel} not found in {@link OfficeModel}.
 	 */
-	private OfficeSectionModel getContainingOfficeSection(OfficeTaskModel task) {
+	private OfficeSectionModel getContainingOfficeSection(OfficeFunctionModel function) {
 
-		// Find the the section containing the office task
+		// Find the the section containing the office function
 		for (OfficeSectionModel section : this.office.getOfficeSections()) {
-			if (this.containsTask(section.getOfficeSubSection(), task)) {
-				// Found the section containing the office task
+			if (this.containsFunction(section.getOfficeSubSection(), function)) {
+				// Found the section containing the office function
 				return section;
 			}
 		}
 
-		// If at this point, the office task is not found in the office
+		// If at this point, the office function is not found in the office
 		return null;
 	}
 
 	/**
 	 * Determines if the {@link OfficeSubSectionModel} contains the
-	 * {@link OfficeTaskModel} on itself or any of its
+	 * {@link OfficeFunctionModel} on itself or any of its
 	 * {@link OfficeSubSectionModel} instances.
 	 * 
 	 * @param subSection
 	 *            {@link OfficeSubSectionModel} to check if contains
-	 *            {@link OfficeTaskModel}.
-	 * @param task
-	 *            {@link OfficeTaskModel}.
+	 *            {@link OfficeFunctionModel}.
+	 * @param function
+	 *            {@link OfficeFunctionModel}.
 	 * @return <code>true</code> if {@link OfficeSubSectionModel} or any of its
 	 *         {@link OfficeSubSectionModel} instances contains the
-	 *         {@link OfficeTaskModel}.
+	 *         {@link OfficeFunctionModel}.
 	 */
-	private boolean containsTask(OfficeSubSectionModel subSection,
-			OfficeTaskModel task) {
+	private boolean containsFunction(OfficeSubSectionModel subSection, OfficeFunctionModel function) {
 
-		// Determine if sub section contains the task
-		for (OfficeTaskModel checkTask : subSection.getOfficeTasks()) {
-			if (task == checkTask) {
-				// Sub section contains the task
+		// Determine if sub section contains the function
+		for (OfficeFunctionModel checkFunction : subSection.getOfficeFunctions()) {
+			if (function == checkFunction) {
+				// Sub section contains the function
 				return true;
 			}
 		}
 
 		// Determine if contained in sub sub section
-		for (OfficeSubSectionModel subSubSection : subSection
-				.getOfficeSubSections()) {
-			if (this.containsTask(subSubSection, task)) {
-				// Sub sub section contains the task
+		for (OfficeSubSectionModel subSubSection : subSection.getOfficeSubSections()) {
+			if (this.containsFunction(subSubSection, function)) {
+				// Sub sub section contains the function
 				return true;
 			}
 		}
@@ -281,47 +272,41 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	/**
-	 * Links the {@link OfficeTaskModel} to the {@link DutyModel}.
+	 * Links the {@link OfficeFunctionModel} to the {@link AdministrationModel}.
 	 * 
 	 * @param officeSectionModel
-	 *            {@link OfficeSectionModel} containing the {@link OfficeSectionTask}.
-	 * @param officeTaskType
-	 *            {@link OfficeTaskType} of {@link OfficeSectionTask} to link to
-	 *            {@link DutyModel}.
-	 * @param duty
-	 *            {@link DutyModel}.
+	 *            {@link OfficeSectionModel} containing the
+	 *            {@link OfficeSectionFunction}.
+	 * @param officeFunctionType
+	 *            {@link OfficeFunctionType} of {@link OfficeSectionFunction} to
+	 *            link to {@link AdministrationModel}.
+	 * @param administration
+	 *            {@link AdministrationModel}.
 	 * @param connectionModel
 	 *            Specific {@link ConnectionModel}.
 	 * @param connectConnection
 	 *            Configures the {@link ConnectionModel} with end points.
-	 * @return {@link Change} to link the {@link OfficeTaskModel} to the
-	 *         {@link DutyModel}.
+	 * @return {@link Change} to link the {@link OfficeFunctionModel} to the
+	 *         {@link AdministrationModel}.
 	 */
-	private <C extends ConnectionModel> Change<C> linkOfficeTaskToDuty(
-			OfficeSectionModel officeSectionModel,
-			OfficeTaskType officeTaskType, DutyModel duty, C connectionModel,
-			Consumer<OfficeTaskModel> connectConnection) {
+	private <C extends ConnectionModel> Change<C> linkOfficeFunctionToAdministration(
+			OfficeSectionModel officeSectionModel, OfficeFunctionType officeFunctionType,
+			AdministrationModel adminstration, C connectionModel, Consumer<OfficeFunctionModel> connectConnection) {
 
 		// Create hierarchy of sub section names (not include top level section)
 		final Deque<String> subSectionNames = new LinkedList<String>();
-		OfficeSubSectionType subSectionType = officeTaskType
-				.getOfficeSubSectionType();
+		OfficeSubSectionType subSectionType = officeFunctionType.getOfficeSubSectionType();
 		while (subSectionType.getParentOfficeSubSectionType() != null) {
 			subSectionNames.push(subSectionType.getOfficeSectionName());
 			subSectionType = subSectionType.getParentOfficeSubSectionType();
 		}
 
 		// Find the lowest sub section in hierarchy
-		OfficeSubSectionModel subSectionModel = officeSectionModel
-				.getOfficeSubSection();
+		OfficeSubSectionModel subSectionModel = officeSectionModel.getOfficeSubSection();
 		while (!subSectionNames.isEmpty()) {
 			String sectionName = subSectionNames.pop();
-			OfficeSubSectionModel[] matches = subSectionModel
-					.getOfficeSubSections()
-					.stream()
-					.filter((subSubSectionModel) -> (sectionName
-							.equals(subSubSectionModel
-									.getOfficeSubSectionName())))
+			OfficeSubSectionModel[] matches = subSectionModel.getOfficeSubSections().stream()
+					.filter((subSubSectionModel) -> (sectionName.equals(subSubSectionModel.getOfficeSubSectionName())))
 					.toArray(OfficeSubSectionModel[]::new);
 			if (matches.length > 0) {
 				// Sub section already exists (continue to next level)
@@ -338,8 +323,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 		OfficeSubSectionModel branchTail = null;
 		while (!subSectionNames.isEmpty()) {
 			String sectionName = subSectionNames.pop();
-			OfficeSubSectionModel subSubSection = new OfficeSubSectionModel(
-					sectionName);
+			OfficeSubSectionModel subSubSection = new OfficeSubSectionModel(sectionName);
 			if (branchHead == null) {
 				branchHead = subSubSection;
 				branchTail = branchHead;
@@ -349,27 +333,24 @@ public class OfficeChangesImpl implements OfficeChanges {
 			}
 		}
 
-		// Obtain the task
-		String taskName = officeTaskType.getOfficeTaskName();
-		OfficeTaskModel foundTask = null;
+		// Obtain the function
+		String functionName = officeFunctionType.getOfficeFunctionName();
+		OfficeFunctionModel foundFunction = null;
 		if (branchHead == null) {
-			OfficeTaskModel[] tasks = subSectionModel
-					.getOfficeTasks()
-					.stream()
-					.filter((task) -> (taskName.equals(task.getOfficeTaskName())))
-					.toArray(OfficeTaskModel[]::new);
-			if (tasks.length > 0) {
-				foundTask = tasks[0];
+			OfficeFunctionModel[] functions = subSectionModel.getOfficeFunctions().stream()
+					.filter((function) -> (functionName.equals(function.getOfficeFunctionName())))
+					.toArray(OfficeFunctionModel[]::new);
+			if (functions.length > 0) {
+				foundFunction = functions[0];
 			}
 		}
 
-		// Return change to link office task to duty
+		// Return change to link office function to administration
 		final OfficeSubSectionModel existingLeaf = subSectionModel;
 		final OfficeSubSectionModel newHead = branchHead;
 		final OfficeSubSectionModel newTail = branchTail;
-		final OfficeTaskModel existingTask = foundTask;
-		final OfficeTaskModel newTask = (foundTask != null ? null
-				: new OfficeTaskModel(taskName));
+		final OfficeFunctionModel existingFunction = foundFunction;
+		final OfficeFunctionModel newFunction = (foundFunction != null ? null : new OfficeFunctionModel(functionName));
 		return new AbstractChange<C>(connectionModel, "Connect") {
 
 			@Override
@@ -382,26 +363,23 @@ public class OfficeChangesImpl implements OfficeChanges {
 					tail = newTail;
 				}
 
-				// Add the task
-				OfficeTaskModel taskModel = existingTask;
-				if (newTask != null) {
-					tail.addOfficeTask(newTask);
-					taskModel = newTask;
+				// Add the function
+				OfficeFunctionModel functionModel = existingFunction;
+				if (newFunction != null) {
+					tail.addOfficeFunction(newFunction);
+					functionModel = newFunction;
 
-					// Keep the tasks ordered for the sub section
-					Collections.sort(tail.getOfficeTasks(),
-							new Comparator<OfficeTaskModel>() {
-								@Override
-								public int compare(OfficeTaskModel a,
-										OfficeTaskModel b) {
-									return a.getOfficeTaskName().compareTo(
-											b.getOfficeTaskName());
-								}
-							});
+					// Keep the functions ordered for the sub section
+					Collections.sort(tail.getOfficeFunctions(), new Comparator<OfficeFunctionModel>() {
+						@Override
+						public int compare(OfficeFunctionModel a, OfficeFunctionModel b) {
+							return a.getOfficeFunctionName().compareTo(b.getOfficeFunctionName());
+						}
+					});
 				}
 
 				// Connect the link
-				connectConnection.accept(taskModel);
+				connectConnection.accept(functionModel);
 
 				// Connect the connection
 				connectionModel.connect();
@@ -412,13 +390,13 @@ public class OfficeChangesImpl implements OfficeChanges {
 				// Remove the connection
 				connectionModel.remove();
 
-				// Remove the possible new task
-				if (newTask != null) {
+				// Remove the possible new function
+				if (newFunction != null) {
 					OfficeSubSectionModel tail = existingLeaf;
 					if (newHead != null) {
 						tail = newTail;
 					}
-					tail.removeOfficeTask(newTask);
+					tail.removeOfficeFunction(newFunction);
 				}
 
 				// Remove the possible branch
@@ -434,47 +412,35 @@ public class OfficeChangesImpl implements OfficeChanges {
 	 */
 
 	@Override
-	public Change<OfficeSectionModel> addOfficeSection(
-			String sectionSourceClassName, String sectionLocation,
+	public Change<OfficeSectionModel> addOfficeSection(String sectionSourceClassName, String sectionLocation,
 			PropertyList properties, OfficeSectionType officeSectionType) {
 
 		// TODO test this method (addOfficeSection)
 
 		// Create the office section model
 		String sectionName = officeSectionType.getOfficeSectionName();
-		final OfficeSectionModel section = new OfficeSectionModel(sectionName,
-				sectionSourceClassName, sectionLocation);
+		final OfficeSectionModel section = new OfficeSectionModel(sectionName, sectionSourceClassName, sectionLocation);
 		for (Property property : properties) {
-			section.addProperty(new PropertyModel(property.getName(), property
-					.getValue()));
+			section.addProperty(new PropertyModel(property.getName(), property.getValue()));
 		}
 
 		// Add the inputs
-		for (OfficeSectionInputType inputType : officeSectionType
-				.getOfficeSectionInputTypes()) {
-			section.addOfficeSectionInput(new OfficeSectionInputModel(inputType
-					.getOfficeSectionInputName(), inputType.getParameterType()));
+		for (OfficeSectionInputType inputType : officeSectionType.getOfficeSectionInputTypes()) {
+			section.addOfficeSectionInput(
+					new OfficeSectionInputModel(inputType.getOfficeSectionInputName(), inputType.getParameterType()));
 		}
 
 		// Add the outputs
-		for (OfficeSectionOutputType outputType : officeSectionType
-				.getOfficeSectionOutputTypes()) {
-			section.addOfficeSectionOutput(new OfficeSectionOutputModel(
-					outputType.getOfficeSectionOutputName(), outputType
-							.getArgumentType(), outputType.isEscalationOnly()));
+		for (OfficeSectionOutputType outputType : officeSectionType.getOfficeSectionOutputTypes()) {
+			section.addOfficeSectionOutput(new OfficeSectionOutputModel(outputType.getOfficeSectionOutputName(),
+					outputType.getArgumentType(), outputType.isEscalationOnly()));
 		}
 
 		// Add the objects
-		for (OfficeSectionObjectType objectType : officeSectionType
-				.getOfficeSectionObjectTypes()) {
-			section.addOfficeSectionObject(new OfficeSectionObjectModel(
-					objectType.getOfficeSectionObjectName(), objectType
-							.getObjectType()));
+		for (OfficeSectionObjectType objectType : officeSectionType.getOfficeSectionObjectTypes()) {
+			section.addOfficeSectionObject(
+					new OfficeSectionObjectModel(objectType.getOfficeSectionObjectName(), objectType.getObjectType()));
 		}
-
-		// Add a responsibility for convenience
-		section.addOfficeSectionResponsibility(new OfficeSectionResponsibilityModel(
-				"Responsibility"));
 
 		// Return the change to add the section
 		return new AbstractChange<OfficeSectionModel>(section, "Add section") {
@@ -491,17 +457,14 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<OfficeSectionModel> removeOfficeSection(
-			final OfficeSectionModel officeSection) {
+	public Change<OfficeSectionModel> removeOfficeSection(final OfficeSectionModel officeSection) {
 
 		// TODO test this method (removeOfficeSection)
 
-		return new AbstractChange<OfficeSectionModel>(officeSection,
-				"Remove section") {
+		return new AbstractChange<OfficeSectionModel>(officeSection, "Remove section") {
 			@Override
 			public void apply() {
-				OfficeChangesImpl.this.office
-						.removeOfficeSection(officeSection);
+				OfficeChangesImpl.this.office.removeOfficeSection(officeSection);
 			}
 
 			@Override
@@ -512,15 +475,13 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<OfficeSectionModel> renameOfficeSection(
-			final OfficeSectionModel officeSection,
+	public Change<OfficeSectionModel> renameOfficeSection(final OfficeSectionModel officeSection,
 			final String newOfficeSectionName) {
 
 		// TODO test this method (renameOfficeSection)
 
 		// Obtain the old name
-		final String oldOfficeSectionName = officeSection
-				.getOfficeSectionName();
+		final String oldOfficeSectionName = officeSection.getOfficeSectionName();
 
 		// Return the change to rename the office section
 		return new AbstractChange<OfficeSectionModel>(officeSection,
@@ -538,13 +499,10 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<OfficeSectionModel> refactorOfficeSection(
-			final OfficeSectionModel sectionModel, final String sectionName,
-			final String sectionSourceClassName, final String sectionLocation,
-			PropertyList properties, OfficeSectionType officeSectionType,
-			Map<String, String> inputNameMapping,
-			Map<String, String> outputNameMapping,
-			Map<String, String> objectNameMapping) {
+	public Change<OfficeSectionModel> refactorOfficeSection(final OfficeSectionModel sectionModel,
+			final String sectionName, final String sectionSourceClassName, final String sectionLocation,
+			PropertyList properties, OfficeSectionType officeSectionType, Map<String, String> inputNameMapping,
+			Map<String, String> outputNameMapping, Map<String, String> objectNameMapping) {
 
 		// Create the list to contain all refactor changes
 		final List<Change<?>> refactor = new LinkedList<Change<?>>();
@@ -553,12 +511,9 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 		// Add change to details of office section
 		final String existingSectionName = sectionModel.getOfficeSectionName();
-		final String existingSectionSourceClassName = sectionModel
-				.getSectionSourceClassName();
-		final String existingSectionLocation = sectionModel
-				.getSectionLocation();
-		refactor.add(new AbstractChange<OfficeSectionModel>(sectionModel,
-				"Change office section details") {
+		final String existingSectionSourceClassName = sectionModel.getSectionSourceClassName();
+		final String existingSectionLocation = sectionModel.getSectionLocation();
+		refactor.add(new AbstractChange<OfficeSectionModel>(sectionModel, "Change office section details") {
 			@Override
 			public void apply() {
 				sectionModel.setOfficeSectionName(sectionName);
@@ -569,22 +524,18 @@ public class OfficeChangesImpl implements OfficeChanges {
 			@Override
 			public void revert() {
 				sectionModel.setOfficeSectionName(existingSectionName);
-				sectionModel
-						.setSectionSourceClassName(existingSectionSourceClassName);
+				sectionModel.setSectionSourceClassName(existingSectionSourceClassName);
 				sectionModel.setSectionLocation(existingSectionLocation);
 			}
 		});
 
 		// Add change to the properties
-		final List<PropertyModel> existingProperties = new ArrayList<PropertyModel>(
-				sectionModel.getProperties());
+		final List<PropertyModel> existingProperties = new ArrayList<PropertyModel>(sectionModel.getProperties());
 		final List<PropertyModel> newProperties = new LinkedList<PropertyModel>();
 		for (Property property : properties) {
-			newProperties.add(new PropertyModel(property.getName(), property
-					.getValue()));
+			newProperties.add(new PropertyModel(property.getName(), property.getValue()));
 		}
-		refactor.add(new AbstractChange<OfficeSectionModel>(sectionModel,
-				"Change section properties") {
+		refactor.add(new AbstractChange<OfficeSectionModel>(sectionModel, "Change section properties") {
 			@Override
 			public void apply() {
 				for (PropertyModel property : existingProperties) {
@@ -610,15 +561,12 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 		// Create the map of existing objects to their names
 		Map<String, OfficeSectionObjectModel> existingObjectMapping = new HashMap<String, OfficeSectionObjectModel>();
-		for (OfficeSectionObjectModel object : sectionModel
-				.getOfficeSectionObjects()) {
-			existingObjectMapping.put(object.getOfficeSectionObjectName(),
-					object);
+		for (OfficeSectionObjectModel object : sectionModel.getOfficeSectionObjects()) {
+			existingObjectMapping.put(object.getOfficeSectionObjectName(), object);
 		}
 
 		// Create the listing of target objects
-		OfficeSectionObjectType[] objectTypes = officeSectionType
-				.getOfficeSectionObjectTypes();
+		OfficeSectionObjectType[] objectTypes = officeSectionType.getOfficeSectionObjectTypes();
 		final OfficeSectionObjectModel[] targetObjects = new OfficeSectionObjectModel[objectTypes.length];
 		for (int o = 0; o < targetObjects.length; o++) {
 			OfficeSectionObjectType objectType = objectTypes[o];
@@ -628,18 +576,16 @@ public class OfficeChangesImpl implements OfficeChanges {
 			final String objectTypeName = objectType.getObjectType();
 
 			// Obtain the object for object type (may need to create)
-			OfficeSectionObjectModel findObject = this.getExistingItem(
-					objectName, objectNameMapping, existingObjectMapping);
+			OfficeSectionObjectModel findObject = this.getExistingItem(objectName, objectNameMapping,
+					existingObjectMapping);
 			final OfficeSectionObjectModel object = (findObject != null ? findObject
 					: new OfficeSectionObjectModel(objectName, objectTypeName));
 			targetObjects[o] = object;
 
 			// Refactor details of object
-			final String existingObjectName = object
-					.getOfficeSectionObjectName();
+			final String existingObjectName = object.getOfficeSectionObjectName();
 			final String existingObjectTypeName = object.getObjectType();
-			refactor.add(new AbstractChange<OfficeSectionObjectModel>(object,
-					"Refactor office section object") {
+			refactor.add(new AbstractChange<OfficeSectionObjectModel>(object, "Refactor office section object") {
 				@Override
 				public void apply() {
 					object.setOfficeSectionObjectName(objectName);
@@ -657,17 +603,14 @@ public class OfficeChangesImpl implements OfficeChanges {
 		// Ensure target objects sorted by name
 		Arrays.sort(targetObjects, new Comparator<OfficeSectionObjectModel>() {
 			@Override
-			public int compare(OfficeSectionObjectModel a,
-					OfficeSectionObjectModel b) {
-				return a.getOfficeSectionObjectName().compareTo(
-						b.getOfficeSectionObjectName());
+			public int compare(OfficeSectionObjectModel a, OfficeSectionObjectModel b) {
+				return a.getOfficeSectionObjectName().compareTo(b.getOfficeSectionObjectName());
 			}
 		});
 
 		// Obtain the existing objects
-		final OfficeSectionObjectModel[] existingObjects = sectionModel
-				.getOfficeSectionObjects().toArray(
-						new OfficeSectionObjectModel[0]);
+		final OfficeSectionObjectModel[] existingObjects = sectionModel.getOfficeSectionObjects()
+				.toArray(new OfficeSectionObjectModel[0]);
 
 		// Add changes to disconnect existing objects to be removed
 		Set<OfficeSectionObjectModel> targetObjectSet = new HashSet<OfficeSectionObjectModel>(
@@ -676,13 +619,10 @@ public class OfficeChangesImpl implements OfficeChanges {
 			if (!(targetObjectSet.contains(existingObject))) {
 				// Add change to disconnect object
 				final OfficeSectionObjectModel object = existingObject;
-				refactor.add(new DisconnectChange<OfficeSectionObjectModel>(
-						existingObject) {
+				refactor.add(new DisconnectChange<OfficeSectionObjectModel>(existingObject) {
 					@Override
-					protected void populateRemovedConnections(
-							List<ConnectionModel> connList) {
-						OfficeSectionObjectToExternalManagedObjectModel conn = object
-								.getExternalManagedObject();
+					protected void populateRemovedConnections(List<ConnectionModel> connList) {
+						OfficeSectionObjectToExternalManagedObjectModel conn = object.getExternalManagedObject();
 						if (conn != null) {
 							conn.remove();
 							connList.add(conn);
@@ -693,8 +633,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 		}
 
 		// Add change to refactor objects
-		refactor.add(new AbstractChange<OfficeSectionModel>(sectionModel,
-				"Refactor objects of office section") {
+		refactor.add(new AbstractChange<OfficeSectionModel>(sectionModel, "Refactor objects of office section") {
 			@Override
 			public void apply() {
 				// Remove existing objects, add target objects
@@ -722,15 +661,12 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 		// Create the map of existing inputs to their names
 		Map<String, OfficeSectionInputModel> existingInputMapping = new HashMap<String, OfficeSectionInputModel>();
-		for (OfficeSectionInputModel object : sectionModel
-				.getOfficeSectionInputs()) {
-			existingInputMapping
-					.put(object.getOfficeSectionInputName(), object);
+		for (OfficeSectionInputModel object : sectionModel.getOfficeSectionInputs()) {
+			existingInputMapping.put(object.getOfficeSectionInputName(), object);
 		}
 
 		// Create the listing of target inputs
-		OfficeSectionInputType[] inputTypes = officeSectionType
-				.getOfficeSectionInputTypes();
+		OfficeSectionInputType[] inputTypes = officeSectionType.getOfficeSectionInputTypes();
 		final OfficeSectionInputModel[] targetInputs = new OfficeSectionInputModel[inputTypes.length];
 		for (int i = 0; i < targetInputs.length; i++) {
 			OfficeSectionInputType inputType = inputTypes[i];
@@ -740,18 +676,15 @@ public class OfficeChangesImpl implements OfficeChanges {
 			final String parameterTypeName = inputType.getParameterType();
 
 			// Obtain the input for input type (may need to create)
-			OfficeSectionInputModel findInput = this.getExistingItem(inputName,
-					inputNameMapping, existingInputMapping);
+			OfficeSectionInputModel findInput = this.getExistingItem(inputName, inputNameMapping, existingInputMapping);
 			final OfficeSectionInputModel input = (findInput != null ? findInput
 					: new OfficeSectionInputModel(inputName, parameterTypeName));
 			targetInputs[i] = input;
 
 			// Refactor details of input
 			final String existingInputName = input.getOfficeSectionInputName();
-			final String existingInputParameterTypeName = input
-					.getParameterType();
-			refactor.add(new AbstractChange<OfficeSectionInputModel>(input,
-					"Refactor office section input") {
+			final String existingInputParameterTypeName = input.getParameterType();
+			refactor.add(new AbstractChange<OfficeSectionInputModel>(input, "Refactor office section input") {
 				@Override
 				public void apply() {
 					input.setOfficeSectionInputName(inputName);
@@ -769,30 +702,24 @@ public class OfficeChangesImpl implements OfficeChanges {
 		// Ensure target inputs sorted by name
 		Arrays.sort(targetInputs, new Comparator<OfficeSectionInputModel>() {
 			@Override
-			public int compare(OfficeSectionInputModel a,
-					OfficeSectionInputModel b) {
-				return a.getOfficeSectionInputName().compareTo(
-						b.getOfficeSectionInputName());
+			public int compare(OfficeSectionInputModel a, OfficeSectionInputModel b) {
+				return a.getOfficeSectionInputName().compareTo(b.getOfficeSectionInputName());
 			}
 		});
 
 		// Obtain the existing inputs
-		final OfficeSectionInputModel[] existingInputs = sectionModel
-				.getOfficeSectionInputs().toArray(
-						new OfficeSectionInputModel[0]);
+		final OfficeSectionInputModel[] existingInputs = sectionModel.getOfficeSectionInputs()
+				.toArray(new OfficeSectionInputModel[0]);
 
 		// Add changes to disconnect existing inputs to be removed
-		Set<OfficeSectionInputModel> targetInputSet = new HashSet<OfficeSectionInputModel>(
-				Arrays.asList(targetInputs));
+		Set<OfficeSectionInputModel> targetInputSet = new HashSet<OfficeSectionInputModel>(Arrays.asList(targetInputs));
 		for (OfficeSectionInputModel existingInput : existingInputs) {
 			if (!(targetInputSet.contains(existingInput))) {
 				// Add change to disconnect input
 				final OfficeSectionInputModel input = existingInput;
-				refactor.add(new DisconnectChange<OfficeSectionInputModel>(
-						existingInput) {
+				refactor.add(new DisconnectChange<OfficeSectionInputModel>(existingInput) {
 					@Override
-					protected void populateRemovedConnections(
-							List<ConnectionModel> connList) {
+					protected void populateRemovedConnections(List<ConnectionModel> connList) {
 						for (OfficeSectionOutputToOfficeSectionInputModel conn : new ArrayList<OfficeSectionOutputToOfficeSectionInputModel>(
 								input.getOfficeSectionOutputs())) {
 							conn.remove();
@@ -804,8 +731,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 		}
 
 		// Add change to refactor inputs
-		refactor.add(new AbstractChange<OfficeSectionModel>(sectionModel,
-				"Refactor inputs of office section") {
+		refactor.add(new AbstractChange<OfficeSectionModel>(sectionModel, "Refactor inputs of office section") {
 			@Override
 			public void apply() {
 				// Remove existing inputs, add target inputs
@@ -833,15 +759,12 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 		// Create the map of existing outputs to their names
 		Map<String, OfficeSectionOutputModel> existingOutputMapping = new HashMap<String, OfficeSectionOutputModel>();
-		for (OfficeSectionOutputModel object : sectionModel
-				.getOfficeSectionOutputs()) {
-			existingOutputMapping.put(object.getOfficeSectionOutputName(),
-					object);
+		for (OfficeSectionOutputModel object : sectionModel.getOfficeSectionOutputs()) {
+			existingOutputMapping.put(object.getOfficeSectionOutputName(), object);
 		}
 
 		// Create the listing of target outputs
-		OfficeSectionOutputType[] outputTypes = officeSectionType
-				.getOfficeSectionOutputTypes();
+		OfficeSectionOutputType[] outputTypes = officeSectionType.getOfficeSectionOutputTypes();
 		final OfficeSectionOutputModel[] targetOutputs = new OfficeSectionOutputModel[outputTypes.length];
 		for (int o = 0; o < targetOutputs.length; o++) {
 			OfficeSectionOutputType outputType = outputTypes[o];
@@ -852,21 +775,17 @@ public class OfficeChangesImpl implements OfficeChanges {
 			final boolean isEscalationOnly = outputType.isEscalationOnly();
 
 			// Obtain the output for output type (may need to create)
-			OfficeSectionOutputModel findOutput = this.getExistingItem(
-					outputName, outputNameMapping, existingOutputMapping);
+			OfficeSectionOutputModel findOutput = this.getExistingItem(outputName, outputNameMapping,
+					existingOutputMapping);
 			final OfficeSectionOutputModel output = (findOutput != null ? findOutput
-					: new OfficeSectionOutputModel(outputName,
-							argumentTypeName, isEscalationOnly));
+					: new OfficeSectionOutputModel(outputName, argumentTypeName, isEscalationOnly));
 			targetOutputs[o] = output;
 
 			// Refactor details of output
-			final String existingOutputName = output
-					.getOfficeSectionOutputName();
-			final String existingOutputArgumentTypeName = output
-					.getArgumentType();
+			final String existingOutputName = output.getOfficeSectionOutputName();
+			final String existingOutputArgumentTypeName = output.getArgumentType();
 			final boolean existingIsEscalationOnly = output.getEscalationOnly();
-			refactor.add(new AbstractChange<OfficeSectionOutputModel>(output,
-					"Refactor office section output") {
+			refactor.add(new AbstractChange<OfficeSectionOutputModel>(output, "Refactor office section output") {
 				@Override
 				public void apply() {
 					output.setOfficeSectionOutputName(outputName);
@@ -886,17 +805,14 @@ public class OfficeChangesImpl implements OfficeChanges {
 		// Ensure target outputs sorted by name
 		Arrays.sort(targetOutputs, new Comparator<OfficeSectionOutputModel>() {
 			@Override
-			public int compare(OfficeSectionOutputModel a,
-					OfficeSectionOutputModel b) {
-				return a.getOfficeSectionOutputName().compareTo(
-						b.getOfficeSectionOutputName());
+			public int compare(OfficeSectionOutputModel a, OfficeSectionOutputModel b) {
+				return a.getOfficeSectionOutputName().compareTo(b.getOfficeSectionOutputName());
 			}
 		});
 
 		// Obtain the existing outputs
-		final OfficeSectionOutputModel[] existingOutputs = sectionModel
-				.getOfficeSectionOutputs().toArray(
-						new OfficeSectionOutputModel[0]);
+		final OfficeSectionOutputModel[] existingOutputs = sectionModel.getOfficeSectionOutputs()
+				.toArray(new OfficeSectionOutputModel[0]);
 
 		// Add changes to disconnect existing outputs to be removed
 		Set<OfficeSectionOutputModel> targetOutputSet = new HashSet<OfficeSectionOutputModel>(
@@ -905,13 +821,10 @@ public class OfficeChangesImpl implements OfficeChanges {
 			if (!(targetOutputSet.contains(existingOutput))) {
 				// Add change to disconnect output
 				final OfficeSectionOutputModel output = existingOutput;
-				refactor.add(new DisconnectChange<OfficeSectionOutputModel>(
-						existingOutput) {
+				refactor.add(new DisconnectChange<OfficeSectionOutputModel>(existingOutput) {
 					@Override
-					protected void populateRemovedConnections(
-							List<ConnectionModel> connList) {
-						OfficeSectionOutputToOfficeSectionInputModel conn = output
-								.getOfficeSectionInput();
+					protected void populateRemovedConnections(List<ConnectionModel> connList) {
+						OfficeSectionOutputToOfficeSectionInputModel conn = output.getOfficeSectionInput();
 						if (conn != null) {
 							conn.remove();
 							connList.add(conn);
@@ -922,8 +835,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 		}
 
 		// Add change to refactor outputs
-		refactor.add(new AbstractChange<OfficeSectionModel>(sectionModel,
-				"Refactor outputs of office section") {
+		refactor.add(new AbstractChange<OfficeSectionModel>(sectionModel, "Refactor outputs of office section") {
 			@Override
 			public void apply() {
 				// Remove existing outputs, add target outputs
@@ -950,8 +862,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 		// ----------------- Refactoring -------------------------------
 
 		// Return change to do all the refactoring
-		return new AbstractChange<OfficeSectionModel>(sectionModel,
-				"Refactor office section") {
+		return new AbstractChange<OfficeSectionModel>(sectionModel, "Refactor office section") {
 			@Override
 			public void apply() {
 				for (Change<?> change : refactor) {
@@ -980,8 +891,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 	 * @param existingNameToItem
 	 *            Mapping of existing item name to the existing item.
 	 */
-	private <T> T getExistingItem(String targetItemName,
-			Map<String, String> targetToExistingName,
+	private <T> T getExistingItem(String targetItemName, Map<String, String> targetToExistingName,
 			Map<String, T> existingNameToItem) {
 
 		// Obtain the existing item name
@@ -996,18 +906,16 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<ExternalManagedObjectModel> addExternalManagedObject(
-			String externalManagedObjectName, String objectType) {
+	public Change<ExternalManagedObjectModel> addExternalManagedObject(String externalManagedObjectName,
+			String objectType) {
 
 		// TODO test this method (addExternalManagedObject)
 
 		// Create the external managed object
-		final ExternalManagedObjectModel mo = new ExternalManagedObjectModel(
-				externalManagedObjectName, objectType);
+		final ExternalManagedObjectModel mo = new ExternalManagedObjectModel(externalManagedObjectName, objectType);
 
 		// Return change to add external managed object
-		return new AbstractChange<ExternalManagedObjectModel>(mo,
-				"Add external object") {
+		return new AbstractChange<ExternalManagedObjectModel>(mo, "Add external object") {
 			@Override
 			public void apply() {
 				OfficeChangesImpl.this.office.addExternalManagedObject(mo);
@@ -1027,97 +935,80 @@ public class OfficeChangesImpl implements OfficeChanges {
 		// TODO test this method (removeExternalManagedObject)
 
 		// Return change to remove external managed object
-		return new AbstractChange<ExternalManagedObjectModel>(
-				externalManagedObject, "Remove external object") {
+		return new AbstractChange<ExternalManagedObjectModel>(externalManagedObject, "Remove external object") {
 			@Override
 			public void apply() {
-				OfficeChangesImpl.this.office
-						.removeExternalManagedObject(externalManagedObject);
+				OfficeChangesImpl.this.office.removeExternalManagedObject(externalManagedObject);
 			}
 
 			@Override
 			public void revert() {
-				OfficeChangesImpl.this.office
-						.addExternalManagedObject(externalManagedObject);
+				OfficeChangesImpl.this.office.addExternalManagedObject(externalManagedObject);
 			}
 		};
 	}
 
 	@Override
 	public Change<ExternalManagedObjectModel> renameExternalManagedObject(
-			final ExternalManagedObjectModel externalManagedObject,
-			final String newExternalManagedObjectName) {
+			final ExternalManagedObjectModel externalManagedObject, final String newExternalManagedObjectName) {
 
 		// TODO test this method (renameExternalManagedObject)
 
 		// Obtain the old name for the external managed object
-		final String oldExternalManagedObjectName = externalManagedObject
-				.getExternalManagedObjectName();
+		final String oldExternalManagedObjectName = externalManagedObject.getExternalManagedObjectName();
 
 		// Return change to rename external managed object
-		return new AbstractChange<ExternalManagedObjectModel>(
-				externalManagedObject, "Rename external object to "
-						+ newExternalManagedObjectName) {
+		return new AbstractChange<ExternalManagedObjectModel>(externalManagedObject,
+				"Rename external object to " + newExternalManagedObjectName) {
 			@Override
 			public void apply() {
-				externalManagedObject
-						.setExternalManagedObjectName(newExternalManagedObjectName);
+				externalManagedObject.setExternalManagedObjectName(newExternalManagedObjectName);
 			}
 
 			@Override
 			public void revert() {
-				externalManagedObject
-						.setExternalManagedObjectName(oldExternalManagedObjectName);
+				externalManagedObject.setExternalManagedObjectName(oldExternalManagedObjectName);
 			}
 		};
 	}
 
 	@Override
-	public Change<OfficeManagedObjectSourceModel> addOfficeManagedObjectSource(
-			String managedObjectSourceName,
-			String managedObjectSourceClassName, PropertyList properties,
-			long timeout, ManagedObjectType<?> managedObjectType) {
+	public Change<OfficeManagedObjectSourceModel> addOfficeManagedObjectSource(String managedObjectSourceName,
+			String managedObjectSourceClassName, PropertyList properties, long timeout,
+			ManagedObjectType<?> managedObjectType) {
 
 		// TODO test this method (addOfficeManagedObjectSource)
 
 		// Create the managed object source
 		final OfficeManagedObjectSourceModel managedObjectSource = new OfficeManagedObjectSourceModel(
-				managedObjectSourceName, managedObjectSourceClassName,
-				managedObjectType.getObjectClass().getName(),
+				managedObjectSourceName, managedObjectSourceClassName, managedObjectType.getObjectClass().getName(),
 				String.valueOf(timeout));
 		for (Property property : properties) {
-			managedObjectSource.addProperty(new PropertyModel(property
-					.getName(), property.getValue()));
+			managedObjectSource.addProperty(new PropertyModel(property.getName(), property.getValue()));
 		}
 
 		// Add the flows for the managed object source
 		for (ManagedObjectFlowType<?> flow : managedObjectType.getFlowTypes()) {
-			managedObjectSource
-					.addOfficeManagedObjectSourceFlow(new OfficeManagedObjectSourceFlowModel(
-							flow.getFlowName(), flow.getArgumentType()
-									.getName()));
+			managedObjectSource.addOfficeManagedObjectSourceFlow(
+					new OfficeManagedObjectSourceFlowModel(flow.getFlowName(), flow.getArgumentType().getName()));
 		}
 
 		// Add the teams for the managed object source
 		for (ManagedObjectTeamType team : managedObjectType.getTeamTypes()) {
 			managedObjectSource
-					.addOfficeManagedObjectSourceTeam(new OfficeManagedObjectSourceTeamModel(
-							team.getTeamName()));
+					.addOfficeManagedObjectSourceTeam(new OfficeManagedObjectSourceTeamModel(team.getTeamName()));
 		}
 
 		// Return the change to add the managed object source
-		return new AbstractChange<OfficeManagedObjectSourceModel>(
-				managedObjectSource, "Add managed object source") {
+		return new AbstractChange<OfficeManagedObjectSourceModel>(managedObjectSource, "Add managed object source") {
 			@Override
 			public void apply() {
-				OfficeChangesImpl.this.office
-						.addOfficeManagedObjectSource(managedObjectSource);
+				OfficeChangesImpl.this.office.addOfficeManagedObjectSource(managedObjectSource);
 			}
 
 			@Override
 			public void revert() {
-				OfficeChangesImpl.this.office
-						.removeOfficeManagedObjectSource(managedObjectSource);
+				OfficeChangesImpl.this.office.removeOfficeManagedObjectSource(managedObjectSource);
 			}
 		};
 	}
@@ -1129,70 +1020,58 @@ public class OfficeChangesImpl implements OfficeChanges {
 		// TODO this this method (removeOfficeManagedObjectSource)
 
 		// Return change to remove the managed object source
-		return new AbstractChange<OfficeManagedObjectSourceModel>(
-				managedObjectSource, "Remove managed object source") {
+		return new AbstractChange<OfficeManagedObjectSourceModel>(managedObjectSource, "Remove managed object source") {
 			@Override
 			public void apply() {
-				OfficeChangesImpl.this.office
-						.removeOfficeManagedObjectSource(managedObjectSource);
+				OfficeChangesImpl.this.office.removeOfficeManagedObjectSource(managedObjectSource);
 			}
 
 			@Override
 			public void revert() {
-				OfficeChangesImpl.this.office
-						.addOfficeManagedObjectSource(managedObjectSource);
+				OfficeChangesImpl.this.office.addOfficeManagedObjectSource(managedObjectSource);
 			}
 		};
 	}
 
 	@Override
 	public Change<OfficeManagedObjectSourceModel> renameOfficeManagedObjectSource(
-			final OfficeManagedObjectSourceModel managedObjectSource,
-			final String newManagedObjectSourceName) {
+			final OfficeManagedObjectSourceModel managedObjectSource, final String newManagedObjectSourceName) {
 
 		// TODO test this method (renameOfficeManagedObjectSource)
 
 		// Obtain the old managed object source name
-		final String oldManagedObjectSourceName = managedObjectSource
-				.getOfficeManagedObjectSourceName();
+		final String oldManagedObjectSourceName = managedObjectSource.getOfficeManagedObjectSourceName();
 
 		// Return change to rename the managed object source
-		return new AbstractChange<OfficeManagedObjectSourceModel>(
-				managedObjectSource, "Rename managed object source to "
-						+ newManagedObjectSourceName) {
+		return new AbstractChange<OfficeManagedObjectSourceModel>(managedObjectSource,
+				"Rename managed object source to " + newManagedObjectSourceName) {
 			@Override
 			public void apply() {
-				managedObjectSource
-						.setOfficeManagedObjectSourceName(newManagedObjectSourceName);
+				managedObjectSource.setOfficeManagedObjectSourceName(newManagedObjectSourceName);
 			}
 
 			@Override
 			public void revert() {
-				managedObjectSource
-						.setOfficeManagedObjectSourceName(oldManagedObjectSourceName);
+				managedObjectSource.setOfficeManagedObjectSourceName(oldManagedObjectSourceName);
 			}
 		};
 	}
 
 	@Override
-	public Change<OfficeManagedObjectModel> addOfficeManagedObject(
-			String managedObjectName, ManagedObjectScope managedObjectScope,
-			OfficeManagedObjectSourceModel managedObjectSource,
+	public Change<OfficeManagedObjectModel> addOfficeManagedObject(String managedObjectName,
+			ManagedObjectScope managedObjectScope, OfficeManagedObjectSourceModel managedObjectSource,
 			ManagedObjectType<?> managedObjectType) {
 
 		// TODO test this method (addOfficeManagedObject)
 
 		// Create the managed object
-		final OfficeManagedObjectModel managedObject = new OfficeManagedObjectModel(
-				managedObjectName, getManagedObjectScope(managedObjectScope));
+		final OfficeManagedObjectModel managedObject = new OfficeManagedObjectModel(managedObjectName,
+				getManagedObjectScope(managedObjectScope));
 
 		// Add the dependencies for the managed object
-		for (ManagedObjectDependencyType<?> dependency : managedObjectType
-				.getDependencyTypes()) {
-			managedObject
-					.addOfficeManagedObjectDependency(new OfficeManagedObjectDependencyModel(
-							dependency.getDependencyName(), dependency
-									.getDependencyType().getName()));
+		for (ManagedObjectDependencyType<?> dependency : managedObjectType.getDependencyTypes()) {
+			managedObject.addOfficeManagedObjectDependency(new OfficeManagedObjectDependencyModel(
+					dependency.getDependencyName(), dependency.getDependencyType().getName()));
 		}
 
 		// Create connection to the managed object source
@@ -1201,57 +1080,48 @@ public class OfficeChangesImpl implements OfficeChanges {
 		conn.setOfficeManagedObjectSource(managedObjectSource);
 
 		// Return change to add the managed object
-		return new AbstractChange<OfficeManagedObjectModel>(managedObject,
-				"Add managed object") {
+		return new AbstractChange<OfficeManagedObjectModel>(managedObject, "Add managed object") {
 			@Override
 			public void apply() {
-				OfficeChangesImpl.this.office
-						.addOfficeManagedObject(managedObject);
+				OfficeChangesImpl.this.office.addOfficeManagedObject(managedObject);
 				conn.connect();
 			}
 
 			@Override
 			public void revert() {
 				conn.remove();
-				OfficeChangesImpl.this.office
-						.removeOfficeManagedObject(managedObject);
+				OfficeChangesImpl.this.office.removeOfficeManagedObject(managedObject);
 			}
 		};
 	}
 
 	@Override
-	public Change<OfficeManagedObjectModel> removeOfficeManagedObject(
-			final OfficeManagedObjectModel managedObject) {
+	public Change<OfficeManagedObjectModel> removeOfficeManagedObject(final OfficeManagedObjectModel managedObject) {
 
 		// TODO test this method (removeFloorManagedObject)
 
 		// Return change to remove the managed object
-		return new AbstractChange<OfficeManagedObjectModel>(managedObject,
-				"Remove managed object") {
+		return new AbstractChange<OfficeManagedObjectModel>(managedObject, "Remove managed object") {
 			@Override
 			public void apply() {
-				OfficeChangesImpl.this.office
-						.removeOfficeManagedObject(managedObject);
+				OfficeChangesImpl.this.office.removeOfficeManagedObject(managedObject);
 			}
 
 			@Override
 			public void revert() {
-				OfficeChangesImpl.this.office
-						.addOfficeManagedObject(managedObject);
+				OfficeChangesImpl.this.office.addOfficeManagedObject(managedObject);
 			}
 		};
 	}
 
 	@Override
-	public Change<OfficeManagedObjectModel> renameOfficeManagedObject(
-			final OfficeManagedObjectModel managedObject,
+	public Change<OfficeManagedObjectModel> renameOfficeManagedObject(final OfficeManagedObjectModel managedObject,
 			final String newManagedObjectName) {
 
 		// TODO test this method (renameOfficeManagedObject)
 
 		// Obtain the old managed object name
-		final String oldManagedObjectName = managedObject
-				.getOfficeManagedObjectName();
+		final String oldManagedObjectName = managedObject.getOfficeManagedObjectName();
 
 		// Return change to rename the managed object
 		return new AbstractChange<OfficeManagedObjectModel>(managedObject,
@@ -1269,8 +1139,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<OfficeManagedObjectModel> rescopeOfficeManagedObject(
-			final OfficeManagedObjectModel managedObject,
+	public Change<OfficeManagedObjectModel> rescopeOfficeManagedObject(final OfficeManagedObjectModel managedObject,
 			final ManagedObjectScope newManagedObjectScope) {
 
 		// TODO test this method (rescopeOfficeManagedObject)
@@ -1282,8 +1151,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 		final String oldScope = managedObject.getManagedObjectScope();
 
 		// Return change to re-scope the managed object
-		return new AbstractChange<OfficeManagedObjectModel>(managedObject,
-				"Rescope managed object to " + newScope) {
+		return new AbstractChange<OfficeManagedObjectModel>(managedObject, "Rescope managed object to " + newScope) {
 			@Override
 			public void apply() {
 				managedObject.setManagedObjectScope(newScope);
@@ -1292,6 +1160,62 @@ public class OfficeChangesImpl implements OfficeChanges {
 			@Override
 			public void revert() {
 				managedObject.setManagedObjectScope(oldScope);
+			}
+		};
+	}
+
+	@Override
+	public Change<TypeQualificationModel> addOfficeManagedObjectTypeQualification(
+			OfficeManagedObjectModel officeManagedObject, String qualifier, String type) {
+
+		// Create the type qualification
+		final TypeQualificationModel typeQualification = new TypeQualificationModel(qualifier, type);
+
+		// Return change to add type qualification
+		return new AbstractChange<TypeQualificationModel>(typeQualification, "Add Managed Object Type Qualification") {
+			@Override
+			public void apply() {
+				officeManagedObject.addTypeQualification(typeQualification);
+			}
+
+			@Override
+			public void revert() {
+				officeManagedObject.removeTypeQualification(typeQualification);
+			}
+		};
+	}
+
+	@Override
+	public Change<TypeQualificationModel> removeOfficeManagedObjectTypeQualification(
+			TypeQualificationModel typeQualification) {
+
+		// Find the managed object containing the type qualification
+		OfficeManagedObjectModel containingOfficeManagedObject = null;
+		for (OfficeManagedObjectModel mo : this.office.getOfficeManagedObjects()) {
+			for (TypeQualificationModel check : mo.getTypeQualifications()) {
+				if (check == typeQualification) {
+					containingOfficeManagedObject = mo;
+				}
+			}
+		}
+		if (containingOfficeManagedObject == null) {
+			// Must find managed object containing type qualification
+			return new NoChange<TypeQualificationModel>(typeQualification, "Remove Managed Object Type Qualification",
+					"Type Qualification not on Managed Object in Office");
+		}
+
+		// Return change to remove type qualification
+		final OfficeManagedObjectModel officeManagedObject = containingOfficeManagedObject;
+		return new AbstractChange<TypeQualificationModel>(typeQualification,
+				"Remove Managed Object Type Qualification") {
+			@Override
+			public void apply() {
+				officeManagedObject.removeTypeQualification(typeQualification);
+			}
+
+			@Override
+			public void revert() {
+				officeManagedObject.addTypeQualification(typeQualification);
 			}
 		};
 	}
@@ -1319,8 +1243,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<OfficeTeamModel> removeOfficeTeam(
-			final OfficeTeamModel officeTeam) {
+	public Change<OfficeTeamModel> removeOfficeTeam(final OfficeTeamModel officeTeam) {
 
 		// TODO test this method (removeOfficeTeam)
 
@@ -1334,6 +1257,60 @@ public class OfficeChangesImpl implements OfficeChanges {
 			@Override
 			public void revert() {
 				OfficeChangesImpl.this.office.addOfficeTeam(officeTeam);
+			}
+		};
+	}
+
+	@Override
+	public Change<TypeQualificationModel> addOfficeTeamTypeQualification(OfficeTeamModel officeTeam, String qualifier,
+			String type) {
+
+		// Create the type qualification
+		final TypeQualificationModel typeQualification = new TypeQualificationModel(qualifier, type);
+
+		// Return change to add type qualification
+		return new AbstractChange<TypeQualificationModel>(typeQualification, "Add Team Type Qualification") {
+			@Override
+			public void apply() {
+				officeTeam.addTypeQualification(typeQualification);
+			}
+
+			@Override
+			public void revert() {
+				officeTeam.removeTypeQualification(typeQualification);
+			}
+		};
+	}
+
+	@Override
+	public Change<TypeQualificationModel> removeOfficeTeamTypeQualification(TypeQualificationModel typeQualification) {
+
+		// Find the team containing the type qualification
+		OfficeTeamModel containingOfficeTeam = null;
+		for (OfficeTeamModel team : this.office.getOfficeTeams()) {
+			for (TypeQualificationModel check : team.getTypeQualifications()) {
+				if (check == typeQualification) {
+					containingOfficeTeam = team;
+				}
+			}
+		}
+		if (containingOfficeTeam == null) {
+			// Must find team containing type qualification
+			return new NoChange<TypeQualificationModel>(typeQualification, "Remove Team Type Qualification",
+					"Type Qualification not on Team in Office");
+		}
+
+		// Return change to remove type qualification
+		final OfficeTeamModel officeTeam = containingOfficeTeam;
+		return new AbstractChange<TypeQualificationModel>(typeQualification, "Remove Team Type Qualification") {
+			@Override
+			public void apply() {
+				officeTeam.removeTypeQualification(typeQualification);
+			}
+
+			@Override
+			public void revert() {
+				officeTeam.addTypeQualification(typeQualification);
 			}
 		};
 	}
@@ -1379,8 +1356,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<OfficeStartModel> removeOfficeStart(
-			final OfficeStartModel officeStart) {
+	public Change<OfficeStartModel> removeOfficeStart(final OfficeStartModel officeStart) {
 
 		// TODO test this method (removeOfficeStart)
 
@@ -1399,8 +1375,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<OfficeTeamModel> renameOfficeTeam(
-			final OfficeTeamModel officeTeam, final String newOfficeTeamName) {
+	public Change<OfficeTeamModel> renameOfficeTeam(final OfficeTeamModel officeTeam, final String newOfficeTeamName) {
 
 		// TODO test this method (renameOfficeTeam)
 
@@ -1408,8 +1383,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 		final String oldOfficeTeamName = officeTeam.getOfficeTeamName();
 
 		// Return change to rename the office team
-		return new AbstractChange<OfficeTeamModel>(officeTeam,
-				"Rename team to " + newOfficeTeamName) {
+		return new AbstractChange<OfficeTeamModel>(officeTeam, "Rename team to " + newOfficeTeamName) {
 			@Override
 			public void apply() {
 				officeTeam.setOfficeTeamName(newOfficeTeamName);
@@ -1423,123 +1397,90 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<AdministratorModel> addAdministrator(
-			String administratorName, String administratorSourceClassName,
-			PropertyList properties, AdministratorScope administratorScope,
-			AdministratorType<?, ?> administratorType) {
+	public Change<AdministrationModel> addAdministration(String administrationName,
+			String administrationSourceClassName, PropertyList properties,
+			AdministrationType<?, ?, ?> administrationType) {
 
-		// TODO test this method (addAdministrator)
-
-		// Obtain the administrator scope text
-		String administratorScopeText;
-		switch (administratorScope) {
-		case PROCESS:
-			administratorScopeText = PROCESS_ADMINISTRATOR_SCOPE;
-			break;
-		case THREAD:
-			administratorScopeText = THREAD_ADMINISTRATOR_SCOPE;
-			break;
-		case WORK:
-			administratorScopeText = WORK_ADMINISTRATOR_SCOPE;
-			break;
-		default:
-			throw new IllegalStateException("Unknown administrator scope "
-					+ administratorScope);
-		}
+		// TODO test this method (addAdministration)
 
 		// Create the administrator
-		final AdministratorModel administrator = new AdministratorModel(
-				administratorName, administratorSourceClassName,
-				administratorScopeText);
+		final AdministrationModel administration = new AdministrationModel(administrationName,
+				administrationSourceClassName);
 		for (Property property : properties) {
-			administrator.addProperty(new PropertyModel(property.getName(),
-					property.getValue()));
+			administration.addProperty(new PropertyModel(property.getName(), property.getValue()));
 		}
 
-		// Add the duties
-		for (DutyType<?, ?> duty : administratorType.getDutyTypes()) {
-			administrator.addDuty(new DutyModel(duty.getDutyName()));
-		}
+		// TODO add flows for administration
 
-		// Return change to add the administrator
-		return new AbstractChange<AdministratorModel>(administrator,
-				"Add administrator") {
+		// TODO add escalations for administration
+
+		// Return change to add the administration
+		return new AbstractChange<AdministrationModel>(administration, "Add administration") {
 			@Override
 			public void apply() {
-				OfficeChangesImpl.this.office
-						.addOfficeAdministrator(administrator);
+				OfficeChangesImpl.this.office.addAdministration(administration);
 			}
 
 			@Override
 			public void revert() {
-				OfficeChangesImpl.this.office
-						.removeOfficeAdministrator(administrator);
+				OfficeChangesImpl.this.office.removeAdministration(administration);
 			}
 		};
 	}
 
 	@Override
-	public Change<AdministratorModel> removeAdministrator(
-			final AdministratorModel administrator) {
+	public Change<AdministrationModel> removeAdministration(final AdministrationModel administration) {
 
-		// TODO test this method (removeAdministrator)
+		// TODO test this method (removeAdministration)
 
-		// Return change to remove administrator
-		return new AbstractChange<AdministratorModel>(administrator,
-				"Remove administrator") {
+		// Return change to remove administration
+		return new AbstractChange<AdministrationModel>(administration, "Remove administration") {
 			@Override
 			public void apply() {
-				OfficeChangesImpl.this.office
-						.removeOfficeAdministrator(administrator);
+				OfficeChangesImpl.this.office.removeAdministration(administration);
 			}
 
 			@Override
 			public void revert() {
-				OfficeChangesImpl.this.office
-						.addOfficeAdministrator(administrator);
+				OfficeChangesImpl.this.office.addAdministration(administration);
 			}
 		};
 	}
 
 	@Override
-	public Change<AdministratorModel> renameAdministrator(
-			final AdministratorModel administrator,
-			final String newAdministratorName) {
+	public Change<AdministrationModel> renameAdministration(final AdministrationModel administration,
+			final String newAdministrationName) {
 
-		// TODO test this method (renameAdministrator)
+		// TODO test this method (renameAdministration)
 
 		// Obtain the old name
-		final String oldAdministratorName = administrator
-				.getAdministratorName();
+		final String oldAdministrationName = administration.getAdministrationName();
 
-		// Return change to rename the administrator
-		return new AbstractChange<AdministratorModel>(administrator,
-				"Rename administrator to " + newAdministratorName) {
+		// Return change to rename the administration
+		return new AbstractChange<AdministrationModel>(administration,
+				"Rename administration to " + newAdministrationName) {
 			@Override
 			public void apply() {
-				administrator.setAdministratorName(newAdministratorName);
+				administration.setAdministrationName(newAdministrationName);
 			}
 
 			@Override
 			public void revert() {
-				administrator.setAdministratorName(oldAdministratorName);
+				administration.setAdministrationName(oldAdministrationName);
 			}
 		};
 	}
 
 	@Override
-	public Change<OfficeEscalationModel> addOfficeEscalation(
-			String escalationType) {
+	public Change<OfficeEscalationModel> addOfficeEscalation(String escalationType) {
 
 		// TODO test this method (addOfficeEscalation)
 
 		// Create the office escalation
-		final OfficeEscalationModel escalation = new OfficeEscalationModel(
-				escalationType);
+		final OfficeEscalationModel escalation = new OfficeEscalationModel(escalationType);
 
 		// Return change to add office escalation
-		return new AbstractChange<OfficeEscalationModel>(escalation,
-				"Add escalation") {
+		return new AbstractChange<OfficeEscalationModel>(escalation, "Add escalation") {
 			@Override
 			public void apply() {
 				OfficeChangesImpl.this.office.addOfficeEscalation(escalation);
@@ -1547,131 +1488,33 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 			@Override
 			public void revert() {
-				OfficeChangesImpl.this.office
-						.removeOfficeEscalation(escalation);
+				OfficeChangesImpl.this.office.removeOfficeEscalation(escalation);
 			}
 		};
 	}
 
 	@Override
-	public Change<OfficeEscalationModel> removeOfficeEscalation(
-			final OfficeEscalationModel officeEscalation) {
+	public Change<OfficeEscalationModel> removeOfficeEscalation(final OfficeEscalationModel officeEscalation) {
 
 		// TODO test this method (removeOfficeEscalation)
 
 		// Return change to remove office escalation
-		return new AbstractChange<OfficeEscalationModel>(officeEscalation,
-				"Remove escalation") {
+		return new AbstractChange<OfficeEscalationModel>(officeEscalation, "Remove escalation") {
 			@Override
 			public void apply() {
-				OfficeChangesImpl.this.office
-						.removeOfficeEscalation(officeEscalation);
+				OfficeChangesImpl.this.office.removeOfficeEscalation(officeEscalation);
 			}
 
 			@Override
 			public void revert() {
-				OfficeChangesImpl.this.office
-						.addOfficeEscalation(officeEscalation);
-			}
-		};
-	}
-
-	@Override
-	public Change<OfficeSectionResponsibilityModel> addOfficeSectionResponsibility(
-			final OfficeSectionModel section,
-			String officeSectionResponsibilityName) {
-
-		// TODO test this method (addOfficeSectionResponsibility)
-
-		// Create the office section responsibility
-		final OfficeSectionResponsibilityModel responsibility = new OfficeSectionResponsibilityModel(
-				officeSectionResponsibilityName);
-
-		// Return change to add office section responsibility
-		return new AbstractChange<OfficeSectionResponsibilityModel>(
-				responsibility, "Add responsibility") {
-			@Override
-			public void apply() {
-				section.addOfficeSectionResponsibility(responsibility);
-			}
-
-			@Override
-			public void revert() {
-				section.removeOfficeSectionResponsibility(responsibility);
-			}
-		};
-	}
-
-	@Override
-	public Change<OfficeSectionResponsibilityModel> removeOfficeSectionResponsibility(
-			final OfficeSectionResponsibilityModel officeSectionResponsibility) {
-
-		// Find the office section containing the responsibility
-		OfficeSectionModel officeSection = null;
-		for (OfficeSectionModel section : this.office.getOfficeSections()) {
-			for (OfficeSectionResponsibilityModel check : section
-					.getOfficeSectionResponsibilities()) {
-				if (check == officeSectionResponsibility) {
-					officeSection = section;
-				}
-			}
-		}
-		if (officeSection == null) {
-			// Must find section containing responsibility
-			return new NoChange<OfficeSectionResponsibilityModel>(
-					officeSectionResponsibility, "Remove responsibility",
-					"Responsibility not in office");
-		}
-
-		// Return change to remove the responsibility
-		final OfficeSectionModel section = officeSection;
-		return new AbstractChange<OfficeSectionResponsibilityModel>(
-				officeSectionResponsibility, "Remove responsibility") {
-			@Override
-			public void apply() {
-				section.removeOfficeSectionResponsibility(officeSectionResponsibility);
-			}
-
-			@Override
-			public void revert() {
-				section.addOfficeSectionResponsibility(officeSectionResponsibility);
-			}
-		};
-	}
-
-	@Override
-	public Change<OfficeSectionResponsibilityModel> renameOfficeSectionResponsibility(
-			final OfficeSectionResponsibilityModel officeSectionResponsibility,
-			final String newOfficeSectionResponsibilityName) {
-
-		// TODO test this method (renameOfficeSectionResponsibility)
-
-		// Obtain the old name
-		final String oldOfficeSectionResponsibilityName = officeSectionResponsibility
-				.getOfficeSectionResponsibilityName();
-
-		// Return change to rename responsibility
-		return new AbstractChange<OfficeSectionResponsibilityModel>(
-				officeSectionResponsibility, "Rename responsibility to "
-						+ newOfficeSectionResponsibilityName) {
-			@Override
-			public void apply() {
-				officeSectionResponsibility
-						.setOfficeSectionResponsibilityName(newOfficeSectionResponsibilityName);
-			}
-
-			@Override
-			public void revert() {
-				officeSectionResponsibility
-						.setOfficeSectionResponsibilityName(oldOfficeSectionResponsibilityName);
+				OfficeChangesImpl.this.office.addOfficeEscalation(officeEscalation);
 			}
 		};
 	}
 
 	@Override
 	public Change<OfficeSectionObjectToExternalManagedObjectModel> linkOfficeSectionObjectToExternalManagedObject(
-			OfficeSectionObjectModel officeSectionObject,
-			ExternalManagedObjectModel externalManagedObject) {
+			OfficeSectionObjectModel officeSectionObject, ExternalManagedObjectModel externalManagedObject) {
 
 		// TODO test (linkOfficeSectionObjectToExternalManagedObject)
 
@@ -1681,8 +1524,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 		conn.setExternalManagedObject(externalManagedObject);
 
 		// Return change to add connection
-		return new AbstractChange<OfficeSectionObjectToExternalManagedObjectModel>(
-				conn, "Connect") {
+		return new AbstractChange<OfficeSectionObjectToExternalManagedObjectModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -1718,8 +1560,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 	@Override
 	public Change<OfficeSectionObjectToOfficeManagedObjectModel> linkOfficeSectionObjectToOfficeManagedObject(
-			OfficeSectionObjectModel officeSectionObject,
-			OfficeManagedObjectModel officeManagedObject) {
+			OfficeSectionObjectModel officeSectionObject, OfficeManagedObjectModel officeManagedObject) {
 
 		// TODO test this method (linkOfficeSectionObjectToOfficeManagedObject)
 
@@ -1729,8 +1570,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 		conn.setOfficeManagedObject(officeManagedObject);
 
 		// Return change to add connection
-		return new AbstractChange<OfficeSectionObjectToOfficeManagedObjectModel>(
-				conn, "Connect") {
+		return new AbstractChange<OfficeSectionObjectToOfficeManagedObjectModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -1766,8 +1606,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 	@Override
 	public Change<OfficeManagedObjectDependencyToOfficeManagedObjectModel> linkOfficeManagedObjectDependencyToOfficeManagedObject(
-			OfficeManagedObjectDependencyModel dependency,
-			OfficeManagedObjectModel managedObject) {
+			OfficeManagedObjectDependencyModel dependency, OfficeManagedObjectModel managedObject) {
 
 		// TODO test (linkOfficeManagedObjectDependencyToOfficeManagedObject)
 
@@ -1777,8 +1616,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 		conn.setOfficeManagedObject(managedObject);
 
 		// Return change to add connection
-		return new AbstractChange<OfficeManagedObjectDependencyToOfficeManagedObjectModel>(
-				conn, "Connect") {
+		return new AbstractChange<OfficeManagedObjectDependencyToOfficeManagedObjectModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -1814,8 +1652,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 	@Override
 	public Change<OfficeManagedObjectDependencyToExternalManagedObjectModel> linkOfficeManagedObjectDependencyToExternalManagedObject(
-			OfficeManagedObjectDependencyModel dependency,
-			ExternalManagedObjectModel externalManagedObject) {
+			OfficeManagedObjectDependencyModel dependency, ExternalManagedObjectModel externalManagedObject) {
 
 		// TODO test (linkOfficeManagedObjectDependencyToExternalManagedObject)
 
@@ -1825,8 +1662,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 		conn.setExternalManagedObject(externalManagedObject);
 
 		// Return the change to add the connection
-		return new AbstractChange<OfficeManagedObjectDependencyToExternalManagedObjectModel>(
-				conn, "Connect") {
+		return new AbstractChange<OfficeManagedObjectDependencyToExternalManagedObjectModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -1863,8 +1699,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 	@Override
 	public Change<OfficeManagedObjectSourceFlowToOfficeSectionInputModel> linkOfficeManagedObjectSourceFlowToOfficeSectionInput(
-			OfficeManagedObjectSourceFlowModel managedObjectSourceFlow,
-			OfficeSectionInputModel officeSectionInput) {
+			OfficeManagedObjectSourceFlowModel managedObjectSourceFlow, OfficeSectionInputModel officeSectionInput) {
 
 		// TODO test (linkOfficeManagedObjectSourceFlowToOfficeSectionInput)
 
@@ -1874,8 +1709,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 		conn.setOfficeSectionInput(officeSectionInput);
 
 		// Return change to add the connection
-		return new AbstractChange<OfficeManagedObjectSourceFlowToOfficeSectionInputModel>(
-				conn, "Connect") {
+		return new AbstractChange<OfficeManagedObjectSourceFlowToOfficeSectionInputModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -1911,8 +1745,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 	@Override
 	public Change<OfficeSectionOutputToOfficeSectionInputModel> linkOfficeSectionOutputToOfficeSectionInput(
-			OfficeSectionOutputModel officeSectionOutput,
-			OfficeSectionInputModel officeSectionInput) {
+			OfficeSectionOutputModel officeSectionOutput, OfficeSectionInputModel officeSectionInput) {
 
 		// TODO test this method (linkOfficeSectionOutputToOfficeSectionInput)
 
@@ -1922,8 +1755,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 		conn.setOfficeSectionInput(officeSectionInput);
 
 		// Return change to add connection
-		return new AbstractChange<OfficeSectionOutputToOfficeSectionInputModel>(
-				conn, "Connect") {
+		return new AbstractChange<OfficeSectionOutputToOfficeSectionInputModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -1943,8 +1775,8 @@ public class OfficeChangesImpl implements OfficeChanges {
 		// TODO test this method (removeOfficeSectionOutputToOfficeSectionInput)
 
 		// Return change to remove the connection
-		return new AbstractChange<OfficeSectionOutputToOfficeSectionInputModel>(
-				officeSectionOutputToOfficeSectionInput, "Remove") {
+		return new AbstractChange<OfficeSectionOutputToOfficeSectionInputModel>(officeSectionOutputToOfficeSectionInput,
+				"Remove") {
 			@Override
 			public void apply() {
 				officeSectionOutputToOfficeSectionInput.remove();
@@ -1958,20 +1790,18 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<OfficeSectionResponsibilityToOfficeTeamModel> linkOfficeSectionResponsibilityToOfficeTeam(
-			OfficeSectionResponsibilityModel officeSectionResponsibility,
+	public Change<OfficeFunctionToOfficeTeamModel> linkOfficeFunctionToOfficeTeam(OfficeFunctionModel officeFunction,
 			OfficeTeamModel officeTeam) {
 
-		// TODO test this method (linkOfficeSectionResponsibilityToOfficeTeam)
+		// TODO test this method (linkOfficeFunctionToOfficeTeam)
 
 		// Create the connection
-		final OfficeSectionResponsibilityToOfficeTeamModel conn = new OfficeSectionResponsibilityToOfficeTeamModel();
-		conn.setOfficeSectionResponsibility(officeSectionResponsibility);
+		final OfficeFunctionToOfficeTeamModel conn = new OfficeFunctionToOfficeTeamModel();
+		conn.setOfficeFunction(officeFunction);
 		conn.setOfficeTeam(officeTeam);
 
 		// Return change to add the connection
-		return new AbstractChange<OfficeSectionResponsibilityToOfficeTeamModel>(
-				conn, "Connect") {
+		return new AbstractChange<OfficeFunctionToOfficeTeamModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -1985,30 +1815,28 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<OfficeSectionResponsibilityToOfficeTeamModel> removeOfficeSectionResponsibilityToOfficeTeam(
-			final OfficeSectionResponsibilityToOfficeTeamModel officeSectionResponsibilityToOfficeTeam) {
+	public Change<OfficeFunctionToOfficeTeamModel> removeOfficeFunctionToOfficeTeam(
+			final OfficeFunctionToOfficeTeamModel officeFunctionToOfficeTeam) {
 
 		// TODO test this method (removeOfficeSectionResponsibilityToOfficeTeam)
 
 		// Return change to remove connection
-		return new AbstractChange<OfficeSectionResponsibilityToOfficeTeamModel>(
-				officeSectionResponsibilityToOfficeTeam, "Remove") {
+		return new AbstractChange<OfficeFunctionToOfficeTeamModel>(officeFunctionToOfficeTeam, "Remove") {
 			@Override
 			public void apply() {
-				officeSectionResponsibilityToOfficeTeam.remove();
+				officeFunctionToOfficeTeam.remove();
 			}
 
 			@Override
 			public void revert() {
-				officeSectionResponsibilityToOfficeTeam.connect();
+				officeFunctionToOfficeTeam.connect();
 			}
 		};
 	}
 
 	@Override
 	public Change<OfficeManagedObjectSourceTeamToOfficeTeamModel> linkOfficeManagedObjectSourceTeamToOfficeTeam(
-			OfficeManagedObjectSourceTeamModel mosTeam,
-			OfficeTeamModel officeTeam) {
+			OfficeManagedObjectSourceTeamModel mosTeam, OfficeTeamModel officeTeam) {
 
 		// TODO test this method (linkOfficeManagedObjectSourceTeamToOfficeTeam)
 
@@ -2018,8 +1846,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 		conn.setOfficeTeam(officeTeam);
 
 		// Return change to add the connection
-		return new AbstractChange<OfficeManagedObjectSourceTeamToOfficeTeamModel>(
-				conn, "Connect") {
+		return new AbstractChange<OfficeManagedObjectSourceTeamToOfficeTeamModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -2054,19 +1881,18 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<AdministratorToOfficeTeamModel> linkAdministratorToOfficeTeam(
-			AdministratorModel administrator, OfficeTeamModel officeTeam) {
+	public Change<AdministrationToOfficeTeamModel> linkAdministrationToOfficeTeam(AdministrationModel administration,
+			OfficeTeamModel officeTeam) {
 
-		// TODO test this method (linkAdministratorToOfficeTeam)
+		// TODO test this method (linkAdministrationToOfficeTeam)
 
 		// Create the connection
-		final AdministratorToOfficeTeamModel conn = new AdministratorToOfficeTeamModel();
-		conn.setAdministrator(administrator);
+		final AdministrationToOfficeTeamModel conn = new AdministrationToOfficeTeamModel();
+		conn.setAdministration(administration);
 		conn.setOfficeTeam(officeTeam);
 
 		// Return change to add connection
-		return new AbstractChange<AdministratorToOfficeTeamModel>(conn,
-				"Connect") {
+		return new AbstractChange<AdministrationToOfficeTeamModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -2080,41 +1906,38 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<AdministratorToOfficeTeamModel> removeAdministratorToOfficeTeam(
-			final AdministratorToOfficeTeamModel administratorToOfficeTeam) {
+	public Change<AdministrationToOfficeTeamModel> removeAdministrationToOfficeTeam(
+			final AdministrationToOfficeTeamModel administrationToOfficeTeam) {
 
-		// TODO test this method (removeAdministratorToOfficeTeam)
+		// TODO test this method (removeAdministrationToOfficeTeam)
 
 		// Return change to remove the connection
-		return new AbstractChange<AdministratorToOfficeTeamModel>(
-				administratorToOfficeTeam, "Remove") {
+		return new AbstractChange<AdministrationToOfficeTeamModel>(administrationToOfficeTeam, "Remove") {
 			@Override
 			public void apply() {
-				administratorToOfficeTeam.remove();
+				administrationToOfficeTeam.remove();
 			}
 
 			@Override
 			public void revert() {
-				administratorToOfficeTeam.connect();
+				administrationToOfficeTeam.connect();
 			}
 		};
 	}
 
 	@Override
-	public Change<ExternalManagedObjectToAdministratorModel> linkExternalManagedObjectToAdministrator(
-			ExternalManagedObjectModel externalManagedObject,
-			AdministratorModel administrator) {
+	public Change<ExternalManagedObjectToAdministrationModel> linkExternalManagedObjectToAdministration(
+			ExternalManagedObjectModel externalManagedObject, AdministrationModel administration) {
 
-		// TODO test this method (linkExternalManagedObjectToAdministrator)
+		// TODO test this method (linkExternalManagedObjectToAdministration)
 
 		// Create the connection
-		final ExternalManagedObjectToAdministratorModel conn = new ExternalManagedObjectToAdministratorModel();
+		final ExternalManagedObjectToAdministrationModel conn = new ExternalManagedObjectToAdministrationModel();
 		conn.setExternalManagedObject(externalManagedObject);
-		conn.setAdministrator(administrator);
+		conn.setAdministration(administration);
 
 		// Return change to add the connection
-		return new AbstractChange<ExternalManagedObjectToAdministratorModel>(
-				conn, "Conect") {
+		return new AbstractChange<ExternalManagedObjectToAdministrationModel>(conn, "Conect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -2128,41 +1951,39 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<ExternalManagedObjectToAdministratorModel> removeExternalManagedObjectToAdministrator(
-			final ExternalManagedObjectToAdministratorModel externalManagedObjectToAdministrator) {
+	public Change<ExternalManagedObjectToAdministrationModel> removeExternalManagedObjectToAdministration(
+			final ExternalManagedObjectToAdministrationModel externalManagedObjectToAdministration) {
 
-		// TODO test this method (removeExternalManagedObjectToAdministrator)
+		// TODO test this method (removeExternalManagedObjectToAdministration)
 
 		// Return change to remove the connection
-		return new AbstractChange<ExternalManagedObjectToAdministratorModel>(
-				externalManagedObjectToAdministrator, "Remove") {
+		return new AbstractChange<ExternalManagedObjectToAdministrationModel>(externalManagedObjectToAdministration,
+				"Remove") {
 			@Override
 			public void apply() {
-				externalManagedObjectToAdministrator.remove();
+				externalManagedObjectToAdministration.remove();
 			}
 
 			@Override
 			public void revert() {
-				externalManagedObjectToAdministrator.connect();
+				externalManagedObjectToAdministration.connect();
 			}
 		};
 	}
 
 	@Override
-	public Change<OfficeManagedObjectToAdministratorModel> linkOfficeManagedObjectToAdministrator(
-			OfficeManagedObjectModel managedObject,
-			AdministratorModel administrator) {
+	public Change<OfficeManagedObjectToAdministrationModel> linkOfficeManagedObjectToAdministration(
+			OfficeManagedObjectModel managedObject, AdministrationModel administration) {
 
-		// TODO test this method (linkOfficeManagedObjectToAdministrator)
+		// TODO test this method (linkOfficeManagedObjectToAdministration)
 
 		// Create the connection
-		final OfficeManagedObjectToAdministratorModel conn = new OfficeManagedObjectToAdministratorModel();
+		final OfficeManagedObjectToAdministrationModel conn = new OfficeManagedObjectToAdministrationModel();
 		conn.setOfficeManagedObject(managedObject);
-		conn.setAdministrator(administrator);
+		conn.setAdministration(administration);
 
 		// Return change to add the connection
-		return new AbstractChange<OfficeManagedObjectToAdministratorModel>(
-				conn, "Connect") {
+		return new AbstractChange<OfficeManagedObjectToAdministrationModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -2176,57 +1997,55 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<OfficeManagedObjectToAdministratorModel> removeOfficeManagedObjectToAdministrator(
-			final OfficeManagedObjectToAdministratorModel managedObjectToAdministrator) {
+	public Change<OfficeManagedObjectToAdministrationModel> removeOfficeManagedObjectToAdministration(
+			final OfficeManagedObjectToAdministrationModel managedObjectToAdministration) {
 
-		// TODO test this method (removeOfficeManagedObjectToAdministrator)
+		// TODO test this method (removeOfficeManagedObjectToAdministration)
 
 		// Return change to remove the connection
-		return new AbstractChange<OfficeManagedObjectToAdministratorModel>(
-				managedObjectToAdministrator, "Remove") {
+		return new AbstractChange<OfficeManagedObjectToAdministrationModel>(managedObjectToAdministration, "Remove") {
 			@Override
 			public void apply() {
-				managedObjectToAdministrator.remove();
+				managedObjectToAdministration.remove();
 			}
 
 			@Override
 			public void revert() {
-				managedObjectToAdministrator.connect();
+				managedObjectToAdministration.connect();
 			}
 		};
 	}
 
 	@Override
-	public Change<OfficeTaskToPreDutyModel> linkOfficeTaskToPreDuty(
-			OfficeSectionModel officeSectionModel,
-			final OfficeTaskType officeTaskType, final DutyModel duty) {
+	public Change<OfficeFunctionToPreAdministrationModel> linkOfficeFunctionToPreAdministration(
+			OfficeSectionModel officeSectionModel, final OfficeFunctionType officeFunctionType,
+			final AdministrationModel administration) {
 
-		// TODO test this method (linkOfficeTaskToPreDuty)
+		// TODO test this method (linkOfficeFunctionToPreAdministration)
 
 		// Create the connection
-		final OfficeTaskToPreDutyModel connectionModel = new OfficeTaskToPreDutyModel();
+		final OfficeFunctionToPreAdministrationModel connectionModel = new OfficeFunctionToPreAdministrationModel();
 
-		// Return change to link office task to post duty
-		return this.linkOfficeTaskToDuty(officeSectionModel, officeTaskType,
-				duty, connectionModel, (officeTaskModel) -> {
-					connectionModel.setOfficeTask(officeTaskModel);
-					connectionModel.setDuty(duty);
+		// Return change to link office function to pre administration
+		return this.linkOfficeFunctionToAdministration(officeSectionModel, officeFunctionType, administration,
+				connectionModel, (officeFunctionModel) -> {
+					connectionModel.setOfficeFunction(officeFunctionModel);
+					connectionModel.setAdministration(administration);
 				});
 	}
 
 	@Override
-	public Change<OfficeTaskToPreDutyModel> removeOfficeTaskToPreDuty(
-			final OfficeTaskToPreDutyModel officeTaskToPreDuty) {
+	public Change<OfficeFunctionToPreAdministrationModel> removeOfficeFunctionToPreAdministration(
+			final OfficeFunctionToPreAdministrationModel officeFunctionToPreAdministration) {
 
-		// TODO test this method (removeOfficeTaskToPreDuty)
+		// TODO test this method (removeOfficeFunctionToPreAdministration)
 
-		// Obtain the office section containing the task
+		// Obtain the office section containing the function
 		final OfficeSectionModel officeSection = this
-				.getContainingOfficeSection(officeTaskToPreDuty.getOfficeTask());
+				.getContainingOfficeSection(officeFunctionToPreAdministration.getOfficeFunction());
 
 		// Return change to remove the connection
-		return new AbstractChange<OfficeTaskToPreDutyModel>(
-				officeTaskToPreDuty, "Remove") {
+		return new AbstractChange<OfficeFunctionToPreAdministrationModel>(officeFunctionToPreAdministration, "Remove") {
 
 			/**
 			 * Clean {@link Change} instances.
@@ -2236,12 +2055,11 @@ public class OfficeChangesImpl implements OfficeChanges {
 			@Override
 			public void apply() {
 				// Remove the connection
-				officeTaskToPreDuty.remove();
+				officeFunctionToPreAdministration.remove();
 
 				// Clean up sub section
 				this.cleanChanges = new LinkedList<Change<?>>();
-				OfficeChangesImpl.this.cleanSubSection(
-						officeSection.getOfficeSubSection(), this.cleanChanges);
+				OfficeChangesImpl.this.cleanSubSection(officeSection.getOfficeSubSection(), this.cleanChanges);
 			}
 
 			@Override
@@ -2252,43 +2070,42 @@ public class OfficeChangesImpl implements OfficeChanges {
 				}
 
 				// Re-add the connection
-				officeTaskToPreDuty.connect();
+				officeFunctionToPreAdministration.connect();
 			}
 		};
 	}
 
 	@Override
-	public Change<OfficeTaskToPostDutyModel> linkOfficeTaskToPostDuty(
-			OfficeSectionModel officeSectionModel,
-			final OfficeTaskType officeTaskType, final DutyModel duty) {
+	public Change<OfficeFunctionToPostAdministrationModel> linkOfficeFunctionToPostAdministration(
+			OfficeSectionModel officeSectionModel, final OfficeFunctionType officeFunctionType,
+			final AdministrationModel administration) {
 
-		// TODO test this method (linkOfficeTaskToPostDuty)
+		// TODO test this method (linkOfficeFunctionToPostAdministration)
 
 		// Create the connection
-		final OfficeTaskToPostDutyModel connectionModel = new OfficeTaskToPostDutyModel();
+		final OfficeFunctionToPostAdministrationModel connectionModel = new OfficeFunctionToPostAdministrationModel();
 
-		// Return change to link office task to post duty
-		return this.linkOfficeTaskToDuty(officeSectionModel, officeTaskType,
-				duty, connectionModel, (officeTaskModel) -> {
-					connectionModel.setOfficeTask(officeTaskModel);
-					connectionModel.setDuty(duty);
+		// Return change to link office function to post administration
+		return this.linkOfficeFunctionToAdministration(officeSectionModel, officeFunctionType, administration,
+				connectionModel, (officeFunctionModel) -> {
+					connectionModel.setOfficeFunction(officeFunctionModel);
+					connectionModel.setAdministration(administration);
 				});
 	}
 
 	@Override
-	public Change<OfficeTaskToPostDutyModel> removeOfficeTaskToPostDuty(
-			final OfficeTaskToPostDutyModel officeTaskToPostDuty) {
+	public Change<OfficeFunctionToPostAdministrationModel> removeOfficeFunctionToPostAdministration(
+			final OfficeFunctionToPostAdministrationModel officeFunctionToPostAdministration) {
 
-		// TODO test this method (removeOfficeTaskToPostDuty)
+		// TODO test this method (removeOfficeFunctionToPostAdministration)
 
-		// Obtain the office section containing the task
+		// Obtain the office section containing the function
 		final OfficeSectionModel officeSection = this
-				.getContainingOfficeSection(officeTaskToPostDuty
-						.getOfficeTask());
+				.getContainingOfficeSection(officeFunctionToPostAdministration.getOfficeFunction());
 
 		// Return change to remove the connection
-		return new AbstractChange<OfficeTaskToPostDutyModel>(
-				officeTaskToPostDuty, "Remove") {
+		return new AbstractChange<OfficeFunctionToPostAdministrationModel>(officeFunctionToPostAdministration,
+				"Remove") {
 
 			/**
 			 * Clean {@link Change} instances.
@@ -2298,12 +2115,11 @@ public class OfficeChangesImpl implements OfficeChanges {
 			@Override
 			public void apply() {
 				// Remove the connection
-				officeTaskToPostDuty.remove();
+				officeFunctionToPostAdministration.remove();
 
 				// Clean up sub section
 				this.cleanChanges = new LinkedList<Change<?>>();
-				OfficeChangesImpl.this.cleanSubSection(
-						officeSection.getOfficeSubSection(), this.cleanChanges);
+				OfficeChangesImpl.this.cleanSubSection(officeSection.getOfficeSubSection(), this.cleanChanges);
 			}
 
 			@Override
@@ -2314,15 +2130,14 @@ public class OfficeChangesImpl implements OfficeChanges {
 				}
 
 				// Re-add the connection
-				officeTaskToPostDuty.connect();
+				officeFunctionToPostAdministration.connect();
 			}
 		};
 	}
 
 	@Override
 	public Change<OfficeEscalationToOfficeSectionInputModel> linkOfficeEscalationToOfficeSectionInput(
-			OfficeEscalationModel escalation,
-			OfficeSectionInputModel sectionInput) {
+			OfficeEscalationModel escalation, OfficeSectionInputModel sectionInput) {
 
 		// TODO test this method (linkOfficeEscalationToOfficeSectionInput)
 
@@ -2332,8 +2147,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 		conn.setOfficeSectionInput(sectionInput);
 
 		// Return change to add the connection
-		return new AbstractChange<OfficeEscalationToOfficeSectionInputModel>(
-				conn, "Connect") {
+		return new AbstractChange<OfficeEscalationToOfficeSectionInputModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -2353,8 +2167,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 		// TODO test this method (removeOfficeEscalationToOfficeSectionInput)
 
 		// Return change to remove the connection
-		return new AbstractChange<OfficeEscalationToOfficeSectionInputModel>(
-				escalationToSectionInput, "Remove") {
+		return new AbstractChange<OfficeEscalationToOfficeSectionInputModel>(escalationToSectionInput, "Remove") {
 			@Override
 			public void apply() {
 				escalationToSectionInput.remove();
@@ -2368,8 +2181,8 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
-	public Change<OfficeStartToOfficeSectionInputModel> linkOfficeStartToOfficeSectionInput(
-			OfficeStartModel start, OfficeSectionInputModel sectionInput) {
+	public Change<OfficeStartToOfficeSectionInputModel> linkOfficeStartToOfficeSectionInput(OfficeStartModel start,
+			OfficeSectionInputModel sectionInput) {
 
 		// TODO test this method (linkOfficeStartToOfficeSectionInput)
 
@@ -2379,8 +2192,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 		conn.setOfficeSectionInput(sectionInput);
 
 		// Return change to add the connection
-		return new AbstractChange<OfficeStartToOfficeSectionInputModel>(conn,
-				"Connect") {
+		return new AbstractChange<OfficeStartToOfficeSectionInputModel>(conn, "Connect") {
 			@Override
 			public void apply() {
 				conn.connect();
@@ -2400,8 +2212,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 		// TODO test this method (removeOfficeStartToOfficeSectionInput)
 
 		// Return change to remove the connection
-		return new AbstractChange<OfficeStartToOfficeSectionInputModel>(
-				startToSectionInput, "Remove") {
+		return new AbstractChange<OfficeStartToOfficeSectionInputModel>(startToSectionInput, "Remove") {
 			@Override
 			public void apply() {
 				startToSectionInput.remove();

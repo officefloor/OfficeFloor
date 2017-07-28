@@ -17,15 +17,21 @@
  */
 package net.officefloor.frame.util;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.function.Consumer;
+
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.source.SourceProperties;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
-import net.officefloor.frame.impl.construct.team.TeamSourceContextImpl;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.source.SourceProperties;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
-import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.spi.team.source.TeamSourceContext;
+import net.officefloor.frame.impl.execute.execution.ManagedExecutionFactoryImpl;
+import net.officefloor.frame.impl.execute.team.TeamSourceContextImpl;
+import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
 
 /**
  * Loads a {@link TeamSource} for stand-alone use.
@@ -35,9 +41,41 @@ import net.officefloor.frame.spi.team.source.TeamSourceContext;
 public class TeamSourceStandAlone {
 
 	/**
+	 * Name of the {@link Team}.
+	 */
+	private final String teamName;
+
+	/**
 	 * {@link SourceProperties} to initialise the {@link TeamSource}.
 	 */
 	private final SourcePropertiesImpl properties = new SourcePropertiesImpl();
+
+	/**
+	 * {@link Thread} decorator. May be <code>null</code>.
+	 */
+	private Consumer<Thread> threadDecorator = null;
+
+	/**
+	 * {@link ThreadCompletionListener} instances.
+	 */
+	private final List<ThreadCompletionListener> threadCompletionListeners = new LinkedList<>();
+
+	/**
+	 * Default instantiation.
+	 */
+	public TeamSourceStandAlone() {
+		this.teamName = null;
+	}
+
+	/**
+	 * Instantiate with {@link Team} name.
+	 * 
+	 * @param teamName
+	 *            Name of the {@link Team}.
+	 */
+	public TeamSourceStandAlone(String teamName) {
+		this.teamName = teamName;
+	}
 
 	/**
 	 * Initialises and returns the {@link TeamSource} instance.
@@ -51,8 +89,7 @@ public class TeamSourceStandAlone {
 	 *             If fails instantiation and initialising the
 	 *             {@link TeamSource}.
 	 */
-	public <TS extends TeamSource> TS loadTeamSource(Class<TS> teamSourceClass)
-			throws Exception {
+	public <TS extends TeamSource> TS loadTeamSource(Class<TS> teamSourceClass) throws Exception {
 
 		// Create the team source
 		TS teamSource = teamSourceClass.newInstance();
@@ -74,6 +111,27 @@ public class TeamSourceStandAlone {
 	}
 
 	/**
+	 * Specifies the decorator of the {@link Thread} instances created by the
+	 * {@link TeamSourceContext}.
+	 * 
+	 * @param decorator
+	 *            {@link Thread} decorator.
+	 */
+	public void setThreadDecorator(Consumer<Thread> decorator) {
+		this.threadDecorator = decorator;
+	}
+
+	/**
+	 * Adds a {@link ThreadCompletionListener}.
+	 * 
+	 * @param threadCompletionListener
+	 *            {@link ThreadCompletionListener}.
+	 */
+	public void addThreadCompletionListener(ThreadCompletionListener threadCompletionListener) {
+		this.threadCompletionListeners.add(threadCompletionListener);
+	}
+
+	/**
 	 * Returns a {@link Team} from the loaded {@link TeamSource}.
 	 * 
 	 * @param <TS>
@@ -85,22 +143,20 @@ public class TeamSourceStandAlone {
 	 *             If fails loading the {@link TeamSource} and creating a
 	 *             {@link Team}.
 	 */
-	public <TS extends TeamSource> Team loadTeam(Class<TS> teamSourceClass)
-			throws Exception {
+	public <TS extends TeamSource> Team loadTeam(Class<TS> teamSourceClass) throws Exception {
 
 		// Load the team source
 		TS teamSource = this.loadTeamSource(teamSourceClass);
 
-		// Create identifier for team
-		TeamIdentifier teamIdentifier = new TeamIdentifier() {
-		};
+		// Obtain the team name (default to class name if not provided)
+		String teamName = (this.teamName != null ? this.teamName : teamSourceClass.getSimpleName());
 
 		// Create team source context
-		SourceContext sourceContext = new SourceContextImpl(false, Thread
-				.currentThread().getContextClassLoader());
-		TeamSourceContext context = new TeamSourceContextImpl(false,
-				teamSourceClass.getSimpleName(), teamIdentifier,
-				this.properties, sourceContext);
+		SourceContext sourceContext = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader());
+		ManagedExecutionFactory managedExecutionFactory = new ManagedExecutionFactoryImpl(
+				this.threadCompletionListeners.toArray(new ThreadCompletionListener[0]));
+		TeamSourceContext context = new TeamSourceContextImpl(false, teamName, this.threadDecorator,
+				managedExecutionFactory, this.properties, sourceContext);
 
 		// Return the created team
 		return teamSource.createTeam(context);

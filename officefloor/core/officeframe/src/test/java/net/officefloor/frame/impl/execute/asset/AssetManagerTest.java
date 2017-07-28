@@ -17,63 +17,174 @@
  */
 package net.officefloor.frame.impl.execute.asset;
 
-import junit.framework.TestCase;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
+import net.officefloor.frame.impl.execute.job.FunctionLoopImpl;
+import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
+import net.officefloor.frame.impl.execute.office.OfficeManagerProcessState;
+import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
+import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.internal.structure.Asset;
+import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
-import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeActivateSet;
-import net.officefloor.frame.internal.structure.OfficeManager;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FunctionStateContext;
+import net.officefloor.frame.internal.structure.FunctionLoop;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.OfficeClock;
+import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
-import org.easymock.AbstractMatcher;
-
 /**
- * Tests the {@link AssetManager}.
- * 
+ * Tests the {@link AssetLatch}.
+ *
  * @author Daniel Sagenschneider
  */
 public class AssetManagerTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link OfficeManager}.
+	 * {@link OfficeClock}.
 	 */
-	private final OfficeManager officeManager = this
-			.createMock(OfficeManager.class);
+	private final OfficeClock clock = this.createMock(OfficeClock.class);
 
 	/**
-	 * {@link AssetManager} being tested.
+	 * {@link FunctionLoop}.
 	 */
-	private final AssetManagerImpl assetManager = new AssetManagerImpl(
-			this.officeManager);
+	private final FunctionLoop loop = new FunctionLoopImpl(null);
+
+	/**
+	 * {@link ProcessState}.
+	 */
+	private final ProcessState processState = new OfficeManagerProcessState(this.clock, 1000,
+			new TeamManagementImpl(new ExecutorCachedTeamSource().createTeam()), this.loop);
+
+	/**
+	 * {@link AssetManager}.
+	 */
+	private final AssetManager assetManager = new AssetManagerImpl(this.processState, this.clock, this.loop);
 
 	/**
 	 * {@link Asset}.
 	 */
-	private final Asset asset = this.createMock(Asset.class);
+	private final MockAsset asset = new MockAsset();
 
 	/**
-	 * {@link AssetMonitor}.
+	 * {@link AssetLatch}.
 	 */
-	private AssetMonitor monitor = this.createMock(AssetMonitor.class);
+	private final AssetLatch latch = this.assetManager.createAssetLatch(asset);
 
 	/**
-	 * {@link JobNodeActivateSet}.
+	 * Ensure can await on {@link AssetLatch}.
 	 */
-	private final JobNodeActivateSet activateSet = this
-			.createMock(JobNodeActivateSet.class);
+	public void testAwaitOnLatch() {
+		MockFunctionState function = new MockFunctionState();
+		this.replayMockObjects();
+		this.doOperation(() -> this.latch.awaitOnAsset(function));
+		this.verifyMockObjects();
+		assertFalse("Should have function awaiting", function.isExecuted);
+	}
+
+	/**
+	 * Ensure can await and release.
+	 */
+	public void testReleaseLatch() {
+		MockFunctionState function = new MockFunctionState();
+		this.replayMockObjects();
+		this.doOperation(() -> this.latch.awaitOnAsset(function));
+		assertFalse("Function should be awaiting", function.isExecuted);
+		this.latch.releaseFunctions(false);
+		this.verifyMockObjects();
+		assertTrue("Should execute function as released", function.isExecuted);
+	}
+
+	/**
+	 * Ensure can await, release then await, release again.
+	 */
+	public void testReleaseLatchTwice() {
+		MockFunctionState first = new MockFunctionState();
+		MockFunctionState second = new MockFunctionState();
+		this.replayMockObjects();
+		this.doOperation(() -> this.latch.awaitOnAsset(first));
+		assertFalse("Function should be awaiting", first.isExecuted);
+		this.latch.releaseFunctions(false);
+		assertTrue("Should execute function as released", first.isExecuted);
+		this.doOperation(() -> this.latch.awaitOnAsset(second));
+		assertFalse("Second function should be awaiting", second.isExecuted);
+		this.latch.releaseFunctions(false);
+		assertTrue("Should execute second function as released", second.isExecuted);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure permanently release.
+	 */
+	public void testPermanentlyReleaseLatch() throws Throwable {
+		MockFunctionState function = new MockFunctionState();
+		this.replayMockObjects();
+		this.latch.releaseFunctions(true);
+		this.doOperation(() -> this.latch.awaitOnAsset(function));
+		assertTrue("Should activate function immediately", function.isExecuted);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can await and fail.
+	 */
+	public void testFailLatch() {
+		MockFunctionState function = new MockFunctionState();
+		Exception failure = new Exception("TEST");
+		this.replayMockObjects();
+		this.doOperation(() -> this.latch.awaitOnAsset(function));
+		assertNull("Should be no failure", function.exception);
+		this.latch.failFunctions(failure, false);
+		assertSame("Should have failed the function", failure, function.exception);
+		this.verifyMockObjects();
+		assertFalse("Should not have executed the function", function.isExecuted);
+	}
+
+	/**
+	 * Ensure can await, fail and await, fail again.
+	 */
+	public void testFailLatchTwice() {
+		MockFunctionState first = new MockFunctionState();
+		MockFunctionState second = new MockFunctionState();
+		Exception failure = new Exception("TEST");
+		this.replayMockObjects();
+		this.doOperation(() -> this.latch.awaitOnAsset(first));
+		assertNull("Should be no failure for first function", first.exception);
+		this.latch.failFunctions(failure, false);
+		assertSame("Should have failed the first function", failure, first.exception);
+		this.doOperation(() -> this.latch.awaitOnAsset(second));
+		assertNull("Should be no failure for second function", second.exception);
+		this.latch.failFunctions(failure, false);
+		assertSame("Should have failed the second function", failure, second.exception);
+		this.verifyMockObjects();
+		assertFalse("Should not have executed the first function", first.isExecuted);
+		assertFalse("Should not have executed the second function", second.isExecuted);
+	}
+
+	/**
+	 * Ensure permanently fail.
+	 */
+	public void testPermanentlyFailLatch() {
+		MockFunctionState function = new MockFunctionState();
+		Exception failure = new Exception("TEST");
+		this.replayMockObjects();
+		this.latch.failFunctions(failure, true);
+		this.doOperation(() -> this.latch.awaitOnAsset(function));
+		assertEquals("Should fail function immediately", failure, function.exception);
+		this.verifyMockObjects();
+	}
 
 	/**
 	 * Tests the {@link AssetManager} checking on no {@link Asset} instances.
 	 */
 	public void testCheckOnNoAssets() {
-
-		// Nothing to record
-
-		// Register monitor and check on its asset that does nothing
 		this.replayMockObjects();
-		this.assetManager.checkOnAssets(this.activateSet);
+		this.doOperation(() -> this.assetManager);
 		this.verifyMockObjects();
 	}
 
@@ -81,202 +192,150 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 	 * Tests the {@link AssetManager} checking on an {@link Asset}.
 	 */
 	public void testCheckOnAsset() {
-
-		// Record
-		this.record_registerAssetMonitor_copyLinkedList();
-		this.record_checkOnAsset();
-
-		// Register monitor and check on its asset that does nothing
+		MockFunctionState function = new MockFunctionState();
+		this.asset.check = (context) -> {
+		};
 		this.replayMockObjects();
-		this.assetManager.registerAssetMonitor(this.monitor);
-		this.assetManager.checkOnAssets(this.activateSet);
+		this.doOperation(() -> this.latch.awaitOnAsset(function));
+		this.doOperation(() -> this.assetManager);
 		this.verifyMockObjects();
-	}
-
-	/**
-	 * Tests the {@link AssetMonitor} being registered and unregistered before a
-	 * check on the {@link Asset}.
-	 */
-	public void testRegisterAndUnregisterBeforeCheckOnAsset() {
-
-		// Record
-		this.recordReturn(this.monitor, this.monitor.getLinkedListSetOwner(),
-				this.assetManager);
-		this.recordReturn(this.monitor, this.monitor.getPrev(), null);
-		this.recordReturn(this.monitor, this.monitor.getLinkedListSetOwner(),
-				this.assetManager);
-		this.recordReturn(this.monitor, this.monitor.getPrev(), null);
-		this.recordReturn(this.monitor, this.monitor.getNext(), null);
-		this.recordReturn(this.monitor, this.monitor.getNext(), null);
-		this.recordReturn(this.monitor, this.monitor.getPrev(), null);
-		this.monitor.setNext(null);
-		this.monitor.setPrev(null);
-
-		// Register and unregister monitor before the check on assets
-		this.replayMockObjects();
-		this.assetManager.registerAssetMonitor(this.monitor);
-		this.assetManager.unregisterAssetMonitor(this.monitor);
-		this.assetManager.checkOnAssets(this.activateSet);
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Tests the {@link Asset} throwing an {@link Exception} on being checked.
-	 */
-	public void testHandleCheckOnAssetThrowingException() {
-
-		final AssetMonitor failingMonitor = this.createMock(AssetMonitor.class);
-		final Asset failingAsset = this.createMock(Asset.class);
-		final RuntimeException failure = new RuntimeException("Fail check");
-		final AssetMonitor secondMonitor = this.createMock(AssetMonitor.class);
-		final Asset secondAsset = this.createMock(Asset.class);
-
-		// Record registering both assets
-		this.recordReturn(failingMonitor, failingMonitor
-				.getLinkedListSetOwner(), this.assetManager);
-		this.recordReturn(failingMonitor, failingMonitor.getPrev(), null);
-		this.recordReturn(secondMonitor, secondMonitor.getLinkedListSetOwner(),
-				this.assetManager);
-		this.recordReturn(secondMonitor, secondMonitor.getPrev(), null);
-		failingMonitor.setNext(secondMonitor);
-		secondMonitor.setPrev(failingMonitor);
-
-		// Record copying the list of asset monitors
-		this.recordReturn(secondMonitor, secondMonitor.getPrev(),
-				failingMonitor);
-		this.recordReturn(failingMonitor, failingMonitor.getPrev(), null);
-
-		// Record checking on the failing asset
-		this.recordReturn(failingMonitor, failingMonitor.getAsset(),
-				failingAsset);
-		failingAsset.checkOnAsset(this.assetManager);
-		this.control(failingAsset).expectAndThrow(null, failure);
-		failingMonitor.failJobNodes(this.activateSet, failure, false);
-
-		// Record checking on the second asset
-		this.recordReturn(secondMonitor, secondMonitor.getAsset(), secondAsset);
-		secondAsset.checkOnAsset(this.assetManager);
-
-		// Register monitor and handle exception from checking on asset
-		this.replayMockObjects();
-		this.assetManager.registerAssetMonitor(failingMonitor);
-		this.assetManager.registerAssetMonitor(secondMonitor);
-		this.assetManager.checkOnAssets(this.activateSet);
-		this.verifyMockObjects();
+		assertFalse("Function should not be executed", function.isExecuted);
+		assertNull("Function should not be failed", function.exception);
 	}
 
 	/**
 	 * Ensures the time from {@link CheckAssetContext} is correct.
 	 */
 	public void testCheckTime() {
-
-		// Record
-		this.record_registerAssetMonitor_copyLinkedList();
-		this.record_checkOnAsset();
-		this.control(this.asset).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				CheckAssetContext context = (CheckAssetContext) actual[0];
-
-				// Ensure time is accurate
-				long checkTime = context.getTime();
-				assertTrue("Check time inaccurate (given ms margin)", ((System
-						.currentTimeMillis() - checkTime) < 1));
-
-				// Sleep some time to move time on
-				try {
-					Thread.sleep(10);
-				} catch (Throwable ex) {
-					TestCase.fail("Failed in moving time on: "
-							+ ex.getMessage());
-				}
-
-				// Ensure time is still the same (for optimising)
-				assertEquals("Incorrect time", checkTime, context.getTime());
-
-				return true;
-			}
-		});
-
-		// Register monitor and check on its asset that uses the time
+		long currentTime = System.currentTimeMillis();
+		this.recordReturn(this.clock, this.clock.currentTimeMillis(), currentTime);
+		MockFunctionState function = new MockFunctionState();
+		this.asset.check = (context) -> {
+			assertEquals("Incorrect time", currentTime, context.getTime());
+		};
 		this.replayMockObjects();
-		this.assetManager.registerAssetMonitor(this.monitor);
-		this.assetManager.checkOnAssets(this.activateSet);
+		this.doOperation(() -> this.latch.awaitOnAsset(function));
+		this.doOperation(() -> this.assetManager);
 		this.verifyMockObjects();
+		assertFalse("Function should not be executed", function.isExecuted);
+		assertNull("Function should not be failed", function.exception);
 	}
 
 	/**
-	 * Ensures can activate {@link JobNode} instances from the
-	 * {@link CheckAssetContext}.
+	 * Tests the {@link AssetManager} timing out the {@link Asset}.
 	 */
-	public void testActivateJobNodesFromCheckAssetContext() {
-
-		final boolean isPermanent = false;
-
-		// Record
-		this.record_registerAssetMonitor_copyLinkedList();
-		this.record_checkOnAsset();
-		this.control(this.asset).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				CheckAssetContext context = (CheckAssetContext) actual[0];
-				context.activateJobNodes(isPermanent);
-				return true;
-			}
-		});
-		this.monitor.activateJobNodes(this.activateSet, isPermanent);
-
-		// Register monitor and check on its asset that activates jobs
+	public void testTimeoutAsset() {
+		MockFunctionState function = new MockFunctionState();
+		Exception failure = new Exception("TIMEOUT");
+		this.asset.check = (context) -> {
+			context.failFunctions(failure, false);
+		};
 		this.replayMockObjects();
-		this.assetManager.registerAssetMonitor(this.monitor);
-		this.assetManager.checkOnAssets(this.activateSet);
+		this.doOperation(() -> this.latch.awaitOnAsset(function));
+		this.doOperation(() -> this.assetManager);
 		this.verifyMockObjects();
+		assertFalse("Function should not be executed", function.isExecuted);
+		assertSame("Function should be failed", failure, function.exception);
 	}
 
 	/**
-	 * Ensures can fail {@link JobNode} instances from the
-	 * {@link CheckAssetContext}.
+	 * Tests the {@link Asset} throwing an {@link Exception} on being checked.
 	 */
-	public void testFailJobNodesFromCheckAssetContext() {
-
-		final boolean isPermanent = true;
-		final Exception failure = new Exception("Asset failure");
-
-		// Record
-		this.record_registerAssetMonitor_copyLinkedList();
-		this.record_checkOnAsset();
-		this.control(this.asset).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				CheckAssetContext context = (CheckAssetContext) actual[0];
-				context.failJobNodes(failure, isPermanent);
-				return true;
-			}
-		});
-		this.monitor.failJobNodes(this.activateSet, failure, isPermanent);
-
-		// Register monitor and check on its asset that activates jobs
+	public void testHandleCheckOnAssetThrowingException() {
+		MockFunctionState function = new MockFunctionState();
+		RuntimeException failure = new RuntimeException("TEST");
+		this.asset.check = (context) -> {
+			throw failure;
+		};
 		this.replayMockObjects();
-		this.assetManager.registerAssetMonitor(this.monitor);
-		this.assetManager.checkOnAssets(this.activateSet);
+		this.doOperation(() -> this.latch.awaitOnAsset(function));
+		this.doOperation(() -> this.assetManager);
 		this.verifyMockObjects();
+		assertFalse("Function should not be executed", function.isExecuted);
+		assertSame("Function should be failed", failure, function.exception);
 	}
 
 	/**
-	 * Records registering the {@link AssetMonitor}.
+	 * Undertakes the operation.
+	 * 
+	 * @param operation
+	 *            Operation.
 	 */
-	private void record_registerAssetMonitor_copyLinkedList() {
-		this.recordReturn(this.monitor, this.monitor.getLinkedListSetOwner(),
-				this.assetManager);
-		this.recordReturn(this.monitor, this.monitor.getPrev(), null);
-		this.recordReturn(this.monitor, this.monitor.getPrev(), null);
+	private void doOperation(Supplier<FunctionState> operation) {
+		FunctionState operationFunction = operation.get();
+		this.loop.executeFunction(operationFunction);
 	}
 
 	/**
-	 * Records checking on the {@link Asset}.
+	 * Mock {@link Asset}.
 	 */
-	private void record_checkOnAsset() {
-		this.recordReturn(this.monitor, this.monitor.getAsset(), this.asset);
-		this.asset.checkOnAsset(this.assetManager);
+	private class MockAsset implements Asset {
+
+		/**
+		 * {@link ThreadState}.
+		 */
+		private final ThreadState threadState = AssetManagerTest.this.processState.getMainThreadState();
+
+		/**
+		 * {@link Consumer} to check on the {@link Asset}.
+		 */
+		private Consumer<CheckAssetContext> check;
+
+		/*
+		 * ======================== Asset ====================================
+		 */
+
+		@Override
+		public ThreadState getOwningThreadState() {
+			return this.threadState;
+		}
+
+		@Override
+		public void checkOnAsset(CheckAssetContext context) {
+			this.check.accept(context);
+		}
 	}
+
+	/**
+	 * Mock {@link FunctionState}.
+	 */
+	private class MockFunctionState extends AbstractLinkedListSetEntry<FunctionState, Flow> implements FunctionState {
+
+		/**
+		 * {@link ThreadState}.
+		 */
+		private final ThreadState threadState = AssetManagerTest.this.processState.getMainThreadState();
+
+		/**
+		 * Indicates if executed.
+		 */
+		private boolean isExecuted = false;
+
+		/**
+		 * {@link Throwable}.
+		 */
+		private Throwable exception = null;
+
+		/*
+		 * ======================= FunctionState ==============================
+		 */
+
+		@Override
+		public ThreadState getThreadState() {
+			return this.threadState;
+		}
+
+		@Override
+		public FunctionState execute(FunctionStateContext context) throws Throwable {
+			this.isExecuted = true;
+			return null;
+		}
+
+		@Override
+		public FunctionState handleEscalation(Throwable escalation) {
+			this.exception = escalation;
+			return null;
+		}
+	}
+
 }

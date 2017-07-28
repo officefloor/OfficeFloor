@@ -20,12 +20,12 @@ package net.officefloor.tutorial.exceptionhttpserver;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-import junit.framework.TestCase;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
-
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
+
+import junit.framework.TestCase;
+import net.officefloor.OfficeFloorMain;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 
 /**
  * Ensure appropriately handling exception.
@@ -42,14 +42,13 @@ public class ExceptionHttpServerTest extends TestCase {
 		System.setErr(new PrintStream(error, true));
 
 		// Start server
-		WoofOfficeFloorSource.start();
-		
+		OfficeFloorMain.open();
+
 		// Clear setup log
 		error.reset();
 
 		// Submit to trigger the exception
-		this.client.execute(new HttpGet(
-				"http://localhost:7878/template-submit.woof"));
+		this.client.execute(new HttpGet("http://localhost:7878/template-submit.woof"));
 
 		// Ensure handling by logging the failure
 		String log = new String(error.toByteArray()).trim();
@@ -77,7 +76,7 @@ public class ExceptionHttpServerTest extends TestCase {
 		this.client.close();
 
 		// Stop server
-		WoofOfficeFloorSource.stop();
+		OfficeFloorMain.close();
 	}
 
 }

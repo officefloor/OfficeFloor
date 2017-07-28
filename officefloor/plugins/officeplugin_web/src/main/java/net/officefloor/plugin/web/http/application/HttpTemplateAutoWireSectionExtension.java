@@ -17,15 +17,14 @@
  */
 package net.officefloor.plugin.web.http.application;
 
-import net.officefloor.autowire.AutoWireProperties;
+import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
 
 /**
  * Allows configuring the {@link HttpTemplateSectionExtension} for the
- * {@link HttpTemplateAutoWireSection}.
+ * {@link HttpTemplateSection}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpTemplateAutoWireSectionExtension extends
-		AutoWireProperties {
+public interface HttpTemplateAutoWireSectionExtension extends PropertyConfigurable {
 }

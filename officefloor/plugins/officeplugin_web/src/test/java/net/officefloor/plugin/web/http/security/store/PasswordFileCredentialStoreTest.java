@@ -52,10 +52,8 @@ public class PasswordFileCredentialStoreTest extends OfficeFrameTestCase {
 	 * Logs the credentials to put into the password file.
 	 */
 	public void testShowCredentials() {
-		assertEquals("Incorrect credentials", "Y3JlZGVudGlhbHM=", Base64
-				.encodeBase64String(
-						"credentials".getBytes(HttpRequestParserImpl.US_ASCII))
-				.trim());
+		assertEquals("Incorrect credentials", "Y3JlZGVudGlhbHM=",
+				Base64.encodeBase64String("credentials".getBytes(HttpRequestParserImpl.US_ASCII)).trim());
 	}
 
 	/**
@@ -65,20 +63,15 @@ public class PasswordFileCredentialStoreTest extends OfficeFrameTestCase {
 
 		// Load the password file
 		File rawFile = this.findFile(this.getClass(), PASSWORD_FILE_NAME);
-		PasswordFile file = PasswordFileCredentialStore
-				.loadPasswordFile(rawFile);
+		PasswordFile file = PasswordFileCredentialStore.loadPasswordFile(rawFile);
 
 		// Validate password file algorithm
-		assertEquals("Incorrect credential algorithm", ALGORITHM, file
-				.getAlgorithm());
+		assertEquals("Incorrect credential algorithm", ALGORITHM, file.getAlgorithm());
 
 		// Validate the password file entries
-		assertPasswordEntry(file.getEntry("daniel"), "daniel", "credentials",
-				"founder", "administrator", "developer");
-		assertPasswordEntry(file.getEntry("melanie"), "melanie", "credentials",
-				"wife");
-		assertPasswordEntry(file.getEntry("zeddy"), "zeddy", "credentials",
-				"cat");
+		assertPasswordEntry(file.getEntry("daniel"), "daniel", "credentials", "founder", "administrator", "developer");
+		assertPasswordEntry(file.getEntry("melanie"), "melanie", "credentials", "wife");
+		assertPasswordEntry(file.getEntry("zeddy"), "zeddy", "credentials", "cat");
 		assertNull("Expected no invalid entry", file.getEntry("invalid"));
 		assertNull("Expected missing entry", file.getEntry("MissingEntry"));
 	}
@@ -91,8 +84,7 @@ public class PasswordFileCredentialStoreTest extends OfficeFrameTestCase {
 			this.createCredentialStore("empty-file.txt");
 			fail("Should not be successful");
 		} catch (IOException ex) {
-			assertEquals("Incorrect cause",
-					"Must provide algorithm definition first", ex.getMessage());
+			assertEquals("Incorrect cause", "Must provide algorithm definition first", ex.getMessage());
 		}
 	}
 
@@ -105,8 +97,7 @@ public class PasswordFileCredentialStoreTest extends OfficeFrameTestCase {
 			this.createCredentialStore("no-algorithm-definition.txt");
 			fail("Should not be successful");
 		} catch (IOException ex) {
-			assertEquals("Incorrect cause",
-					"Must provide algorithm definition first", ex.getMessage());
+			assertEquals("Incorrect cause", "Must provide algorithm definition first", ex.getMessage());
 		}
 	}
 
@@ -114,8 +105,7 @@ public class PasswordFileCredentialStoreTest extends OfficeFrameTestCase {
 	 * Ensure can handle password file with no entries.
 	 */
 	public void testNoEntries() throws IOException {
-		PasswordFileCredentialStore store = this
-				.createCredentialStore("no-entries.txt");
+		PasswordFileCredentialStore store = this.createCredentialStore("no-entries.txt");
 		assertNotNull("Expecting store (even if no entries)", store);
 	}
 
@@ -132,12 +122,9 @@ public class PasswordFileCredentialStoreTest extends OfficeFrameTestCase {
 	 */
 	public void testRetrieveEntry() throws Exception {
 		CredentialStore store = this.createCredentialStore(PASSWORD_FILE_NAME);
-		assertNotNull("Expect to find daniel", store.retrieveCredentialEntry(
-				"daniel", null));
-		assertNotNull("Expect to find daniel in a realm", store
-				.retrieveCredentialEntry("daniel", "realm"));
-		assertNull("Should not find unknown entry", store
-				.retrieveCredentialEntry("unknown", null));
+		assertNotNull("Expect to find daniel", store.retrieveCredentialEntry("daniel", null));
+		assertNotNull("Expect to find daniel in a realm", store.retrieveCredentialEntry("daniel", "realm"));
+		assertNull("Should not find unknown entry", store.retrieveCredentialEntry("unknown", null));
 	}
 
 	/**
@@ -169,16 +156,13 @@ public class PasswordFileCredentialStoreTest extends OfficeFrameTestCase {
 	 *            Name of the file containing the password details.
 	 * @return {@link PasswordFileCredentialStore}.
 	 */
-	private PasswordFileCredentialStore createCredentialStore(
-			String passwordFileName) throws IOException {
+	private PasswordFileCredentialStore createCredentialStore(String passwordFileName) throws IOException {
 		// Load the password file
 		File rawFile = this.findFile(this.getClass(), passwordFileName);
-		PasswordFile file = PasswordFileCredentialStore
-				.loadPasswordFile(rawFile);
+		PasswordFile file = PasswordFileCredentialStore.loadPasswordFile(rawFile);
 
 		// Create the credential store
-		PasswordFileCredentialStore store = new PasswordFileCredentialStore(
-				file);
+		PasswordFileCredentialStore store = new PasswordFileCredentialStore(file);
 
 		// Return the credential store
 		return store;
@@ -196,8 +180,7 @@ public class PasswordFileCredentialStoreTest extends OfficeFrameTestCase {
 	 * @param roles
 	 *            Expected roles.
 	 */
-	private static void assertPasswordEntry(PasswordEntry entry, String userId,
-			String credentials, String... roles) {
+	private static void assertPasswordEntry(PasswordEntry entry, String userId, String credentials, String... roles) {
 		try {
 			// Ensure correct user Id
 			assertEquals("Incorrect user Id", userId, entry.getUserId());
@@ -223,12 +206,9 @@ public class PasswordFileCredentialStoreTest extends OfficeFrameTestCase {
 	 * @param actualCredentials
 	 *            Actual credentials.
 	 */
-	private static void assertCredentials(String expectedCredentials,
-			byte[] actualCredentials) {
-		String actualCredentialsText = new String(actualCredentials,
-				HttpRequestParserImpl.US_ASCII);
-		assertEquals("Incorrect credentials", expectedCredentials,
-				actualCredentialsText);
+	private static void assertCredentials(String expectedCredentials, byte[] actualCredentials) {
+		String actualCredentialsText = new String(actualCredentials, HttpRequestParserImpl.US_ASCII);
+		assertEquals("Incorrect credentials", expectedCredentials, actualCredentialsText);
 	}
 
 	/**
@@ -239,13 +219,10 @@ public class PasswordFileCredentialStoreTest extends OfficeFrameTestCase {
 	 * @param expectedRoles
 	 *            Expected roles.
 	 */
-	private static void assertRoles(Set<String> actualRoles,
-			String... expectedRoles) {
-		assertEquals("Incorrect number of roles", expectedRoles.length,
-				actualRoles.size());
+	private static void assertRoles(Set<String> actualRoles, String... expectedRoles) {
+		assertEquals("Incorrect number of roles", expectedRoles.length, actualRoles.size());
 		for (String role : expectedRoles) {
-			assertTrue("Expected to have role: '" + role + "'", actualRoles
-					.contains(role));
+			assertTrue("Expected to have role: '" + role + "'", actualRoles.contains(role));
 		}
 	}
 

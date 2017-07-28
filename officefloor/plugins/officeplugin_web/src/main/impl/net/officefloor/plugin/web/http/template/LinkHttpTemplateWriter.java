@@ -66,7 +66,7 @@ public class LinkHttpTemplateWriter implements HttpTemplateWriter {
 		this.isLinkSecure = isLinkSecure;
 
 		// Create the link URI path
-		this.linkUriPath = HttpTemplateWorkSource
+		this.linkUriPath = HttpTemplateManagedFunctionSource
 				.getHttpTemplateLinkUrlContinuationPath(templateUriPath,
 						content.getName(), templateUriSuffix);
 	}

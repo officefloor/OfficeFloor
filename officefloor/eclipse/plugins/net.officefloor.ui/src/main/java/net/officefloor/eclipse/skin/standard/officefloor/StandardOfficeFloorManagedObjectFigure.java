@@ -44,8 +44,8 @@ import org.eclipse.swt.SWT;
  *
  * @author Daniel Sagenschneider
  */
-public class StandardOfficeFloorManagedObjectFigure extends
-		AbstractOfficeFloorFigure implements OfficeFloorManagedObjectFigure {
+public class StandardOfficeFloorManagedObjectFigure extends AbstractOfficeFloorFigure
+		implements OfficeFloorManagedObjectFigure {
 
 	/**
 	 * {@link Label} containing the {@link OfficeFloorManagedObjectModel} name.
@@ -63,8 +63,7 @@ public class StandardOfficeFloorManagedObjectFigure extends
 	 * @param context
 	 *            {@link OfficeFloorManagedObjectFigureContext}.
 	 */
-	public StandardOfficeFloorManagedObjectFigure(
-			OfficeFloorManagedObjectFigureContext context) {
+	public StandardOfficeFloorManagedObjectFigure(OfficeFloorManagedObjectFigureContext context) {
 		this.context = context;
 
 		// Create the figure
@@ -79,42 +78,31 @@ public class StandardOfficeFloorManagedObjectFigure extends
 		figure.add(objectAndMo);
 
 		// Add the office object and managed object dependency connector
-		ConnectorFigure dependency = new ConnectorFigure(
-				ConnectorDirection.WEST, StandardOfficeFloorColours.BLACK());
+		ConnectorFigure dependency = new ConnectorFigure(ConnectorDirection.WEST, StandardOfficeFloorColours.BLACK());
 		dependency.setBorder(new MarginBorder(10, 0, 0, 0));
-		objectAndMoLayout.setConstraint(dependency, new GridData(SWT.BEGINNING,
-				SWT.BEGINNING, false, false));
+		objectAndMoLayout.setConstraint(dependency, new GridData(SWT.BEGINNING, SWT.BEGINNING, false, false));
 		objectAndMo.add(dependency);
 
 		// Register connection to office objects and dependencies
 		ConnectionAnchor dependencyAnchor = dependency.getConnectionAnchor();
-		this.registerConnectionAnchor(
-				DeployedOfficeObjectToOfficeFloorManagedObjectModel.class,
+		this.registerConnectionAnchor(DeployedOfficeObjectToOfficeFloorManagedObjectModel.class, dependencyAnchor);
+		this.registerConnectionAnchor(OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel.class,
 				dependencyAnchor);
-		this
-				.registerConnectionAnchor(
-						OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel.class,
-						dependencyAnchor);
 
 		// Create the managed object source
-		RoundedContainerFigure mo = new RoundedContainerFigure(this
-				.getOfficeFloorManagedObjectLabel(), StandardOfficeFloorColours
-				.MANAGED_OBJECT(), 20, false);
+		RoundedContainerFigure mo = new RoundedContainerFigure(this.getOfficeFloorManagedObjectLabel(),
+				StandardOfficeFloorColours.MANAGED_OBJECT(), 20, false);
 		this.officeFloorManagedObjectName = mo.getContainerName();
 		objectAndMo.add(mo);
 
 		// Add the managed object source connector
-		ConnectorFigure mos = new ConnectorFigure(ConnectorDirection.SOUTH,
-				StandardOfficeFloorColours.BLACK());
-		figureLayout.setConstraint(mos, new GridData(SWT.CENTER, SWT.BEGINNING,
-				true, false));
+		ConnectorFigure mos = new ConnectorFigure(ConnectorDirection.SOUTH, StandardOfficeFloorColours.BLACK());
+		figureLayout.setConstraint(mos, new GridData(SWT.CENTER, SWT.BEGINNING, true, false));
 		figure.add(mos);
 
 		// Register the connections to managed object source
-		this
-				.registerConnectionAnchor(
-						OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel.class,
-						mos.getConnectionAnchor());
+		this.registerConnectionAnchor(OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel.class,
+				mos.getConnectionAnchor());
 
 		// Specify the figures
 		this.setFigure(figure);
@@ -141,8 +129,8 @@ public class StandardOfficeFloorManagedObjectFigure extends
 			case THREAD:
 				scopeName = "thread";
 				break;
-			case WORK:
-				scopeName = "work";
+			case FUNCTION:
+				scopeName = "function";
 				break;
 			default:
 				scopeName = "Unknown";
@@ -151,8 +139,7 @@ public class StandardOfficeFloorManagedObjectFigure extends
 		}
 
 		// Return the label text
-		return this.context.getOfficeFloorManagedObjectName() + " ["
-				+ scopeName + "]";
+		return this.context.getOfficeFloorManagedObjectName() + " [" + scopeName + "]";
 	}
 
 	/*
@@ -160,16 +147,13 @@ public class StandardOfficeFloorManagedObjectFigure extends
 	 */
 
 	@Override
-	public void setOfficeFloorManagedObjectName(
-			String officeFloorManagedObjectName) {
-		this.officeFloorManagedObjectName.setText(this
-				.getOfficeFloorManagedObjectLabel());
+	public void setOfficeFloorManagedObjectName(String officeFloorManagedObjectName) {
+		this.officeFloorManagedObjectName.setText(this.getOfficeFloorManagedObjectLabel());
 	}
 
 	@Override
 	public void setManagedObjectScope(ManagedObjectScope managedObjectScope) {
-		this.officeFloorManagedObjectName.setText(this
-				.getOfficeFloorManagedObjectLabel());
+		this.officeFloorManagedObjectName.setText(this.getOfficeFloorManagedObjectLabel());
 	}
 
 	@Override

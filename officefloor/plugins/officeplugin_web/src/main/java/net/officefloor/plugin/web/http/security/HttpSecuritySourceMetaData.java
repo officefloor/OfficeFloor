@@ -17,8 +17,8 @@
  */
 package net.officefloor.plugin.web.http.security;
 
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * Meta-data of the {@link HttpSecuritySource}.
@@ -40,7 +40,7 @@ public interface HttpSecuritySourceMetaData<S, C, D extends Enum<D>, F extends E
 	 * application.
 	 * <p>
 	 * An instance of this {@link Class} is to be provided as a parameter to the
-	 * {@link Task} that attempts authentication. This allows application
+	 * {@link ManagedFunction} that attempts authentication. This allows application
 	 * specific behaviour to obtain the credentials (such as a login page).
 	 * <p>
 	 * Should the security protocol be application agnostic (such as client
@@ -64,7 +64,7 @@ public interface HttpSecuritySourceMetaData<S, C, D extends Enum<D>, F extends E
 	 * Obtains the list of {@link HttpSecurityFlowMetaData} instances should
 	 * this {@link HttpSecuritySource} require application specific behaviour.
 	 * 
-	 * @return Meta-data of application {@link JobSequence} instances instigated
+	 * @return Meta-data of application {@link Flow} instances instigated
 	 *         by this {@link HttpSecuritySource}.
 	 */
 	HttpSecurityFlowMetaData<F>[] getFlowMetaData();

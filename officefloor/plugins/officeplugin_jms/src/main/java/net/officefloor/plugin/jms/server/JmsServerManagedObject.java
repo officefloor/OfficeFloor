@@ -23,16 +23,15 @@ import javax.jms.MessageListener;
 import javax.jms.ServerSession;
 import javax.jms.Session;
 
-import net.officefloor.admin.transaction.Transaction;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.plugin.transaction.Transaction;
 
 /**
  * {@link ManagedObject} for the JMS server.
  * 
  * @author Daniel Sagenschneider
  */
-public class JmsServerManagedObject implements ManagedObject, ServerSession,
-		MessageListener, Transaction {
+public class JmsServerManagedObject implements ManagedObject, ServerSession, MessageListener, Transaction {
 
 	/**
 	 * {@link JmsServerManagedObjectSource}.
@@ -64,8 +63,7 @@ public class JmsServerManagedObject implements ManagedObject, ServerSession,
 	 * @throws JMSException
 	 *             If fails to initiate.
 	 */
-	protected JmsServerManagedObject(JmsServerManagedObjectSource moSource,
-			Session session) throws JMSException {
+	protected JmsServerManagedObject(JmsServerManagedObjectSource moSource, Session session) throws JMSException {
 		this.moSource = moSource;
 		this.session = session;
 

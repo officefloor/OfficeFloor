@@ -17,7 +17,8 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * Scopes for a {@link ManagedObject}.
@@ -27,9 +28,9 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 public enum ManagedObjectScope {
 
 	/**
-	 * {@link ManagedObject} bound to {@link WorkContainer}.
+	 * {@link ManagedObject} bound to {@link ManagedFunction}.
 	 */
-	WORK,
+	FUNCTION,
 
 	/**
 	 * {@link ManagedObject} bound to {@link ThreadState}.

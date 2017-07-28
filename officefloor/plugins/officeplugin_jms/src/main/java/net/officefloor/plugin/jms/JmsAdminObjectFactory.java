@@ -23,7 +23,7 @@ package net.officefloor.plugin.jms;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 
 /**
  * Factory for the creation of the {@link ConnectionFactory} and

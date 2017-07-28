@@ -18,10 +18,9 @@
 package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.source.SourceProperties;
 
 /**
  * Configuration of a {@link ManagedObjectSource}.
@@ -74,19 +73,21 @@ public interface ManagedObjectSourceConfiguration<F extends Enum<F>, MS extends 
 	ManagingOfficeConfiguration<F> getManagingOfficeConfiguration();
 
 	/**
-	 * Obtains the {@link ManagedObjectPool} for this
+	 * Obtains the {@link ManagedObjectPoolConfiguration} for this
 	 * {@link ManagedObjectSource}.
 	 * 
-	 * @return {@link ManagedObjectPool} for this {@link ManagedObjectSource} or
-	 *         <code>null</code> if not to be pooled.
+	 * @return {@link ManagedObjectPoolConfiguration} for this
+	 *         {@link ManagedObjectSource} or <code>null</code> if not to be
+	 *         pooled.
 	 */
-	ManagedObjectPool getManagedObjectPool();
+	ManagedObjectPoolConfiguration getManagedObjectPoolConfiguration();
 
 	/**
 	 * Obtains the timeout to:
 	 * <ol>
 	 * <li>to source the {@link ManagedObject}</li>
-	 * <li>have asynchronous operations on the {@link ManagedObject} complete</li>
+	 * <li>have asynchronous operations on the {@link ManagedObject}
+	 * complete</li>
 	 * </ol>
 	 * 
 	 * @return Timeout.

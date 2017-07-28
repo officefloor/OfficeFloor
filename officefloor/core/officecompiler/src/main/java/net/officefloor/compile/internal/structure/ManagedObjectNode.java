@@ -19,23 +19,21 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.section.OfficeSectionManagedObjectType;
+import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObject;
-import net.officefloor.compile.type.TypeContext;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Node representing an instance use of a {@link ManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectNode extends DependentObjectNode,
-		BoundManagedObjectNode, SectionManagedObject,
-		OfficeSectionManagedObject, OfficeManagedObject,
-		OfficeFloorManagedObject {
+public interface ManagedObjectNode extends DependentObjectNode, BoundManagedObjectNode, SectionManagedObject,
+		OfficeSectionManagedObject, OfficeManagedObject, OfficeFloorManagedObject {
 
 	/**
 	 * {@link Node} type.
@@ -51,8 +49,18 @@ public interface ManagedObjectNode extends DependentObjectNode,
 	 *            {@link ManagedObjectSourceNode} for the
 	 *            {@link ManagedObjectNode}.
 	 */
-	void initialise(ManagedObjectScope managedObjectScope,
-			ManagedObjectSourceNode managedObjectSourceNode);
+	void initialise(ManagedObjectScope managedObjectScope, ManagedObjectSourceNode managedObjectSourceNode);
+
+	/**
+	 * Sources the {@link ManagedObject}.
+	 * 
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 * @return <code>true</code> if successfully sourced the
+	 *         {@link ManagedObject}. <code>false</code> if failed to source,
+	 *         with issures reported to the {@link CompilerIssues}.
+	 */
+	boolean sourceManagedObject(CompileContext compileContext);
 
 	/**
 	 * Obtains the {@link ManagedObjectSourceNode} for this
@@ -64,14 +72,43 @@ public interface ManagedObjectNode extends DependentObjectNode,
 	ManagedObjectSourceNode getManagedObjectSourceNode();
 
 	/**
+	 * Obtains the {@link TypeQualification} instances for the
+	 * {@link ManagedObject}.
+	 * 
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 * @return {@link TypeQualification} instances for the
+	 *         {@link ManagedObject}.
+	 */
+	TypeQualification[] getTypeQualifications(CompileContext compileContext);
+
+	/**
+	 * Obtains the {@link ManagedObjectDependencyNode} instances.
+	 * 
+	 * @return {@link ManagedObjectDependencyNode} instances.
+	 */
+	ManagedObjectDependencyNode[] getManagedObjectDepdendencies();
+
+	/**
+	 * Auto-wires the dependencies for the {@link ManagedObject}.
+	 * 
+	 * @param autoWirer
+	 *            {@link AutoWirer}.
+	 * @param office
+	 *            {@link OfficeNode} requiring the auto-wiring.
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 */
+	void autoWireDependencies(AutoWirer<LinkObjectNode> autoWirer, OfficeNode office, CompileContext compileContext);
+
+	/**
 	 * Loads the {@link OfficeSectionManagedObjectType}.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return {@link OfficeSectionManagedObjectType} or <code>null</code> with
 	 *         issues reported to the {@link CompilerIssues}.
 	 */
-	OfficeSectionManagedObjectType loadOfficeSectionManagedObjectType(
-			TypeContext typeContext);
+	OfficeSectionManagedObjectType loadOfficeSectionManagedObjectType(CompileContext compileContext);
 
 }

@@ -22,7 +22,7 @@ package net.officefloor.frame.internal.structure;
  * 
  * @author Daniel Sagenschneider
  */
-public interface LinkedListSetItem<E> {
+public interface LinkedListSetItem<I> {
 
 	/**
 	 * Obtains the {@link LinkedListSetEntry} copied out of the
@@ -31,7 +31,7 @@ public interface LinkedListSetItem<E> {
 	 * @return {@link LinkedListSetEntry} copied out of the
 	 *         {@link LinkedListSet}.
 	 */
-	E getEntry();
+	I getEntry();
 
 	/**
 	 * Obtains the next {@link LinkedListSetItem} copied out of the
@@ -40,6 +40,6 @@ public interface LinkedListSetItem<E> {
 	 * @return Next {@link LinkedListSetItem} copied out of the
 	 *         {@link LinkedListSet}.
 	 */
-	LinkedListSetItem<E> getNext();
+	LinkedListSetItem<I> getNext();
 
 }

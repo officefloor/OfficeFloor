@@ -19,8 +19,8 @@ package net.officefloor.plugin.ejb;
 
 import javax.ejb.Local;
 import javax.naming.NamingException;
+import javax.resource.spi.work.Work;
 
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**

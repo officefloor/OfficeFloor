@@ -29,11 +29,13 @@ import net.officefloor.building.process.ProcessConfiguration;
 import net.officefloor.building.process.ProcessManager;
 import net.officefloor.building.util.OfficeBuildingTestUtil;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.mbean.OfficeFloorMBean;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
 
 /**
  * Tests the {@link OfficeFloorManager}.
@@ -43,58 +45,72 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class OfficeFloorManagerTest extends OfficeFrameTestCase {
 
 	/**
+	 * {@link ProcessManager}.
+	 */
+	private ProcessManager processManager = null;
+
+	@Override
+	protected void tearDown() throws Exception {
+
+		// Ensure stop the process
+		if (this.processManager != null) {
+			this.processManager.destroyProcess();
+			OfficeBuildingTestUtil.waitUntilProcessComplete(this.processManager, null);
+		}
+
+		// Super tear down
+		super.tearDown();
+	}
+
+	/**
 	 * Ensures the {@link OfficeFloor} configuration is correct by running it.
 	 */
 	public void testEnsureOfficeFloorRuns() throws Exception {
 
 		// Create the compiler
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(new FailTestCompilerIssues());
 		compiler.addSourceAliases();
+		compiler.setOfficeFloorSourceClass(OfficeFloorModelOfficeFloorSource.class);
+		compiler.setOfficeFloorLocation(this.getOfficeFloorLocation());
 		compiler.addProperty("team.name", "TEAM");
 
 		// Compile the test OfficeFloor
-		OfficeFloor officeFloor = compiler.compile(this
-				.getOfficeFloorLocation());
+		OfficeFloor officeFloor = compiler.compile("OfficeFloor");
 
 		// Open the OfficeFloor
 		officeFloor.openOfficeFloor();
 
-		// Run work to write to temporary file
+		// Run function to write to temporary file
 		File file = OfficeBuildingTestUtil.createTempFile(this);
-		officeFloor.getOffice("OFFICE").getWorkManager("SECTION.WORK")
-				.invokeWork(file.getAbsolutePath());
+		officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.writeMessage").invokeProcess(file.getAbsolutePath(),
+				null);
 
 		// Close the OfficeFloor
 		officeFloor.closeOfficeFloor();
 
 		// Validate content in file
-		OfficeBuildingTestUtil.validateFileContent("Expecting content written",
-				MockWork.MESSAGE, file);
+		OfficeBuildingTestUtil.validateFileContent("Expecting content written", MockWork.MESSAGE, file);
 	}
 
 	/**
-	 * Ensure can start the {@link OfficeFloor} {@link Process} and invoke
-	 * {@link Work}.
+	 * Ensure can start an {@link OfficeFloor} to execute a
+	 * {@link ManagedFunctionk}.
 	 */
 	public void testOfficeFloorManagedProcess() throws Throwable {
 
 		// Create the OfficeFloor managed process
 		File file = OfficeBuildingTestUtil.createTempFile(this);
-		OfficeFloorManager managedProcess = new OfficeFloorManager(null,
+		OfficeFloorManager managedProcess = new OfficeFloorManager(OfficeFloorModelOfficeFloorSource.class.getName(),
 				this.getOfficeFloorLocation(), this.getOfficeFloorProperties());
-		managedProcess.invokeTask("OFFICE", "SECTION.WORK", "writeMessage",
-				file.getAbsolutePath());
+		managedProcess.addExecuteFunction("OFFICE", "SECTION.writeMessage", file.getAbsolutePath());
 
 		// Run process ensuring it completes
-		ProcessManager manager = ProcessManager.startProcess(managedProcess,
-				null);
-		OfficeBuildingTestUtil.waitUntilProcessComplete(manager, null);
+		this.processManager = ProcessManager.startProcess(managedProcess, null);
+		OfficeBuildingTestUtil.waitUntilProcessComplete(this.processManager, null);
 
 		// Validate content in file
-		OfficeBuildingTestUtil.validateFileContent("Expecting content written",
-				MockWork.MESSAGE, file);
+		OfficeBuildingTestUtil.validateFileContent("Expecting content written", MockWork.MESSAGE, file);
 	}
 
 	/**
@@ -110,28 +126,24 @@ public class OfficeFloorManagerTest extends OfficeFrameTestCase {
 
 		// Create the Mock OfficeFloorSource
 		File file = OfficeBuildingTestUtil.createTempFile(this);
-		OfficeFloorManager managedProcess = new OfficeFloorManager(
-				MockOfficeFloorSource.class.getName(), file.getAbsolutePath(),
-				properties);
+		OfficeFloorManager managedProcess = new OfficeFloorManager(MockOfficeFloorSource.class.getName(),
+				file.getAbsolutePath(), properties);
 
 		// Start process (should be using alternate OfficeFloorSource)
-		ProcessManager manager = ProcessManager.startProcess(managedProcess,
-				null);
-		manager.destroyProcess();
+		this.processManager = ProcessManager.startProcess(managedProcess, null);
 
 		// Validate content in file
-		OfficeBuildingTestUtil.validateFileContent("Expecting content written",
-				MESSAGE, file);
+		OfficeBuildingTestUtil.validateFileContent("Expecting content written", MESSAGE, file);
 	}
 
 	/**
-	 * Ensure able to invoke {@link Work} remotely.
+	 * Ensure able to invoke {@link ManagedFunction} remotely.
 	 */
-	public void testInvokeWorkRemotely() throws Exception {
+	public void testInvokeFunctionRemotely() throws Exception {
 
 		// Create the OfficeFloor managed process
 		File file = OfficeBuildingTestUtil.createTempFile(this);
-		OfficeFloorManager managedProcess = new OfficeFloorManager(null,
+		OfficeFloorManager managedProcess = new OfficeFloorManager(OfficeFloorModelOfficeFloorSource.class.getName(),
 				this.getOfficeFloorLocation(), this.getOfficeFloorProperties());
 
 		// Create process configuration
@@ -140,29 +152,69 @@ public class OfficeFloorManagerTest extends OfficeFrameTestCase {
 		configuration.setMbeanServer(mbeanServer);
 
 		// Run the process
-		ProcessManager manager = ProcessManager.startProcess(managedProcess,
-				configuration);
+		this.processManager = ProcessManager.startProcess(managedProcess, configuration);
 
 		// Ensure the OfficeFloor managed process MBean registered
-		ObjectName mbeanName = manager
-				.getLocalObjectName(OfficeFloorManager.OFFICE_FLOOR_MANAGER_OBJECT_NAME);
-		assertTrue("OfficeFloor MBean must be registered",
-				mbeanServer.isRegistered(mbeanName));
+		ObjectName officeFloorManagerName = this.processManager.getLocalObjectName(
+				OfficeFloorManager.getOfficeFloorManagerObjectName(this.processManager.getProcessName()));
+		assertTrue("OfficeFloor Manager MBean must be registered", mbeanServer.isRegistered(officeFloorManagerName));
 
-		// Obtain the OfficeFloor MBean
-		OfficeFloorManagerMBean mbean = JMX.newMBeanProxy(mbeanServer,
-				mbeanName, OfficeFloorManagerMBean.class);
+		// Obtain the OfficeFloor Manager MBean
+		OfficeFloorManagerMBean officeFloorManager = JMX.newMBeanProxy(mbeanServer, officeFloorManagerName,
+				OfficeFloorManagerMBean.class);
+		OfficeBuildingTestUtil.waitUntilOfficeFloorOpens(officeFloorManager, this.processManager, mbeanServer);
 
-		// Invoke the work
-		mbean.invokeTask("OFFICE", "SECTION.WORK", null, file.getAbsolutePath());
+		// As OfficeFloor is open, should have registered OfficeFloor MBean
+		ObjectName officeFloorName = this.processManager
+				.getLocalObjectName(OfficeFloorManager.getOfficeFloorObjectName(this.processManager.getProcessName()));
+		assertTrue("OfficeFloor MBean must be registered as OfficeFloor open",
+				mbeanServer.isRegistered(officeFloorName));
+
+		// Invoke the function within OfficeFloor
+		OfficeFloorMBean officeFloor = JMX.newMBeanProxy(mbeanServer, officeFloorName, OfficeFloorMBean.class);
+		officeFloor.invokeFunction("OFFICE", "SECTION.writeMessage", file.getAbsolutePath());
 
 		// Stop the managed process
-		manager.triggerStopProcess();
-		OfficeBuildingTestUtil.waitUntilProcessComplete(manager, null);
+		this.processManager.triggerStopProcess();
+		OfficeBuildingTestUtil.waitUntilProcessComplete(this.processManager, null);
 
 		// Validate content in file
-		OfficeBuildingTestUtil.validateFileContent("Expecting content written",
-				MockWork.MESSAGE, file);
+		OfficeBuildingTestUtil.validateFileContent("Expecting content written", MockWork.MESSAGE, file);
+	}
+
+	/**
+	 * Ensure listen to {@link OfficeFloor} for closing.
+	 */
+	public void testCloseViaOfficeFloor() throws Exception {
+
+		// Create the OfficeFloor managed process
+		OfficeFloorManager managedProcess = new OfficeFloorManager(OfficeFloorModelOfficeFloorSource.class.getName(),
+				this.getOfficeFloorLocation(), this.getOfficeFloorProperties());
+
+		// Create process configuration
+		ProcessConfiguration configuration = new ProcessConfiguration();
+		MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+		configuration.setMbeanServer(mbeanServer);
+
+		// Run the process
+		this.processManager = ProcessManager.startProcess(managedProcess, configuration);
+
+		// Obtain the OfficeFloor Manager MBean
+		ObjectName officeFloorManagerName = this.processManager.getLocalObjectName(
+				OfficeFloorManager.getOfficeFloorManagerObjectName(this.processManager.getProcessName()));
+		OfficeFloorManagerMBean officeFloorManager = JMX.newMBeanProxy(mbeanServer, officeFloorManagerName,
+				OfficeFloorManagerMBean.class);
+		OfficeBuildingTestUtil.waitUntilOfficeFloorOpens(officeFloorManager, this.processManager, mbeanServer);
+
+		// Obtain the OfficeFloor MBean
+		ObjectName officeFloorName = this.processManager
+				.getLocalObjectName(OfficeFloorManager.getOfficeFloorObjectName(this.processManager.getProcessName()));
+		OfficeFloorMBean officeFloor = JMX.newMBeanProxy(mbeanServer, officeFloorName, OfficeFloorMBean.class);
+
+		// Stop via the OfficeFloor (and wait until notifies process complete)
+		officeFloor.closeOfficeFloor();
+		OfficeBuildingTestUtil.waitUntilProcessComplete(this.processManager, null);
+		assertTrue("Process should be complete", this.processManager.isProcessComplete());
 	}
 
 	/**
@@ -171,8 +223,7 @@ public class OfficeFloorManagerTest extends OfficeFrameTestCase {
 	 * @return Location of the {@link OfficeFloor} configuration.
 	 */
 	private String getOfficeFloorLocation() {
-		String officeFloorLocation = this.getClass().getPackage().getName()
-				.replace('.', '/')
+		String officeFloorLocation = this.getClass().getPackage().getName().replace('.', '/')
 				+ "/TestOfficeFloor.officefloor";
 		return officeFloorLocation;
 	}

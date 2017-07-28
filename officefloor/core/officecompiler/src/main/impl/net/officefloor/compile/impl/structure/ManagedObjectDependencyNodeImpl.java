@@ -26,20 +26,19 @@ import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.object.DependentObjectType;
 import net.officefloor.compile.object.ObjectDependencyType;
-import net.officefloor.compile.spi.section.ManagedObjectDependency;
-import net.officefloor.compile.type.TypeContext;
+import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 
 /**
  * {@link ManagedObjectDependencyNode} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectDependencyNodeImpl implements
-		ManagedObjectDependencyNode {
+public class ManagedObjectDependencyNodeImpl implements ManagedObjectDependencyNode {
 
 	/**
 	 * Name of this {@link ManagedObjectDependency}.
@@ -83,8 +82,8 @@ public class ManagedObjectDependencyNodeImpl implements
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public ManagedObjectDependencyNodeImpl(String dependencyName,
-			ManagedObjectNode managedObject, NodeContext context) {
+	public ManagedObjectDependencyNodeImpl(String dependencyName, ManagedObjectNode managedObject,
+			NodeContext context) {
 		this.dependencyName = dependencyName;
 		this.parent = managedObject;
 		this.context = context;
@@ -103,8 +102,8 @@ public class ManagedObjectDependencyNodeImpl implements
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public ManagedObjectDependencyNodeImpl(String dependencyName,
-			ManagedObjectSourceNode managedObjectSource, NodeContext context) {
+	public ManagedObjectDependencyNodeImpl(String dependencyName, ManagedObjectSourceNode managedObjectSource,
+			NodeContext context) {
 		this.dependencyName = dependencyName;
 		this.parent = managedObjectSource;
 		this.context = context;
@@ -138,14 +137,18 @@ public class ManagedObjectDependencyNodeImpl implements
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return NodeUtil.getChildNodes();
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}
 
 	@Override
 	public void initialise() {
-		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialisedState());
+		this.state = NodeUtil.initialise(this, this.context, this.state, () -> new InitialisedState());
 	}
 
 	/*
@@ -157,33 +160,41 @@ public class ManagedObjectDependencyNodeImpl implements
 		return this.dependencyName;
 	}
 
+	@Override
+	public void setOverrideQualifier(String qualifier) {
+		// TODO implement setOverrideQualifier
+		throw new UnsupportedOperationException("TODO implement setOverrideQualifier");
+	}
+
+	@Override
+	public void setSpecificType(String type) {
+		// TODO implement setSpecificType
+		throw new UnsupportedOperationException("TODO implement setSpecificType");
+	}
+
 	/**
 	 * ===================== ObjectDependencyNode ==============================
 	 */
 
 	@Override
-	public ObjectDependencyType loadObjectDependencyType(TypeContext typeContext) {
+	public ObjectDependencyType loadObjectDependencyType(CompileContext compileContext) {
 
 		// Obtain the managed object type
-		ManagedObjectType<?> managedObjectType = typeContext
-				.getOrLoadManagedObjectType(this.managedObjectSource);
+		ManagedObjectType<?> managedObjectType = compileContext.getOrLoadManagedObjectType(this.managedObjectSource);
 		if (managedObjectType == null) {
 			return null; // must have type
 		}
 
 		// Obtain the dependency type
 		ManagedObjectDependencyType<?> dependency = null;
-		for (ManagedObjectDependencyType<?> moDependency : managedObjectType
-				.getDependencyTypes()) {
+		for (ManagedObjectDependencyType<?> moDependency : managedObjectType.getDependencyTypes()) {
 			if (this.dependencyName.equals(moDependency.getDependencyName())) {
 				dependency = moDependency;
 			}
 		}
 		if (dependency == null) {
-			this.context.getCompilerIssues().addIssue(
-					this,
-					ManagedObjectSourceNode.TYPE + " does not have dependency "
-							+ this.dependencyName);
+			this.context.getCompilerIssues().addIssue(this,
+					ManagedObjectSourceNode.TYPE + " does not have dependency " + this.dependencyName);
 			return null;
 		}
 
@@ -192,20 +203,18 @@ public class ManagedObjectDependencyNodeImpl implements
 		String typeQualifier = dependency.getTypeQualifier();
 
 		// Obtain dependent object
-		DependentObjectNode dependentObjectNode = LinkUtil
-				.retrieveFurtherestTarget(this, DependentObjectNode.class,
-						this.context.getCompilerIssues());
+		DependentObjectNode dependentObjectNode = LinkUtil.retrieveFurtherestTarget(this, DependentObjectNode.class,
+				this.context.getCompilerIssues());
 		if (dependentObjectNode == null) {
 			return null;
 		}
 
 		// Obtain the dependent object type
-		DependentObjectType dependentObjectType = dependentObjectNode
-				.loadDependentObjectType(typeContext);
+		DependentObjectType dependentObjectType = dependentObjectNode.loadDependentObjectType(compileContext);
 
 		// Create and return the dependency type
-		return new ObjectDependencyTypeImpl(this.dependencyName,
-				dependencyType, typeQualifier, false, dependentObjectType);
+		return new ObjectDependencyTypeImpl(this.dependencyName, dependencyType, typeQualifier, false,
+				dependentObjectType);
 	}
 
 	/*
@@ -219,8 +228,7 @@ public class ManagedObjectDependencyNodeImpl implements
 
 	@Override
 	public boolean linkObjectNode(LinkObjectNode node) {
-		return LinkUtil.linkObjectNode(this, node,
-				this.context.getCompilerIssues(),
+		return LinkUtil.linkObjectNode(this, node, this.context.getCompilerIssues(),
 				(link) -> this.linkedObjectNode = link);
 	}
 

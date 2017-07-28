@@ -1,0 +1,11 @@
+<context>
+	<office-floor>
+		<offices>
+			<office name="OVERRIDE_OFFICE" source="${testcase}$TestOfficeSource">
+				<properties>
+					<property name="value" value="to be overridden" />
+				</properties>
+			</office>
+		</offices>
+	</office-floor>
+</context>

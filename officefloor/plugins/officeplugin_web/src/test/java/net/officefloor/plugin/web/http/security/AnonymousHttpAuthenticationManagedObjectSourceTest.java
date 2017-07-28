@@ -19,7 +19,7 @@ package net.officefloor.plugin.web.http.security;
 
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
@@ -29,16 +29,14 @@ import net.officefloor.frame.util.ManagedObjectUserStandAlone;
  * 
  * @author Daniel Sagenschneider
  */
-public class AnonymousHttpAuthenticationManagedObjectSourceTest extends
-		OfficeFrameTestCase {
+public class AnonymousHttpAuthenticationManagedObjectSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Validate specification.
 	 */
 	@SuppressWarnings("unchecked")
 	public void testSpecification() {
-		ManagedObjectLoaderUtil
-				.validateSpecification(AnonymousHttpAuthenticationManagedObjectSource.class);
+		ManagedObjectLoaderUtil.validateSpecification(AnonymousHttpAuthenticationManagedObjectSource.class);
 	}
 
 	/**
@@ -48,13 +46,11 @@ public class AnonymousHttpAuthenticationManagedObjectSourceTest extends
 	public void testType() {
 
 		// Create expected type
-		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
-				.createManagedObjectTypeBuilder();
+		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(HttpAuthentication.class);
 
 		// Validate expected type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type,
-				AnonymousHttpAuthenticationManagedObjectSource.class);
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, AnonymousHttpAuthenticationManagedObjectSource.class);
 	}
 
 	/**
@@ -63,8 +59,7 @@ public class AnonymousHttpAuthenticationManagedObjectSourceTest extends
 	@SuppressWarnings("unchecked")
 	public void testAuthenticate() throws Throwable {
 
-		final HttpAuthenticateRequest<Void> request = this
-				.createMock(HttpAuthenticateRequest.class);
+		final HttpAuthenticateRequest<Void> request = this.createMock(HttpAuthenticateRequest.class);
 
 		// Record request completing immediately
 		request.authenticationComplete();
@@ -88,13 +83,11 @@ public class AnonymousHttpAuthenticationManagedObjectSourceTest extends
 
 		// Trigger authentication
 		authentication.authenticate(request);
-		assertNull("Should not provide HTTP Security as anonymous",
-				authentication.getHttpSecurity());
+		assertNull("Should not provide HTTP Security as anonymous", authentication.getHttpSecurity());
 
 		// Trigger authentication again without request
 		authentication.authenticate(null);
-		assertNull("Should again be anonymous",
-				authentication.getHttpSecurity());
+		assertNull("Should again be anonymous", authentication.getHttpSecurity());
 
 		// Verify functionality
 		this.verifyMockObjects();
@@ -106,8 +99,7 @@ public class AnonymousHttpAuthenticationManagedObjectSourceTest extends
 	@SuppressWarnings("unchecked")
 	public void testLogout() throws Throwable {
 
-		final HttpLogoutRequest request = this
-				.createMock(HttpLogoutRequest.class);
+		final HttpLogoutRequest request = this.createMock(HttpLogoutRequest.class);
 
 		// Record request completing immediately
 		request.logoutComplete(null);
@@ -135,8 +127,7 @@ public class AnonymousHttpAuthenticationManagedObjectSourceTest extends
 
 		// Trigger logout again without request
 		authentication.logout(null);
-		assertNull("Should again be anonymous",
-				authentication.getHttpSecurity());
+		assertNull("Should again be anonymous", authentication.getHttpSecurity());
 
 		// Verify functionality
 		this.verifyMockObjects();

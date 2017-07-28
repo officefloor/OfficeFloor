@@ -18,18 +18,19 @@
 package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TaskMetaData;
-import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * Raw meta-data of the {@link Governance}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface RawGovernanceMetaData<I, F extends Enum<F>> {
+public interface RawGovernanceMetaData<E, F extends Enum<F>> {
 
 	/**
 	 * Obtains the name of the {@link Governance}.
@@ -43,7 +44,7 @@ public interface RawGovernanceMetaData<I, F extends Enum<F>> {
 	 * 
 	 * @return Extension interface type used by the {@link Governance}.
 	 */
-	Class<I> getExtensionInterfaceType();
+	Class<E> getExtensionInterfaceType();
 
 	/**
 	 * Obtains the index to obtain the {@link Governance} from the
@@ -55,24 +56,28 @@ public interface RawGovernanceMetaData<I, F extends Enum<F>> {
 	int getGovernanceIndex();
 
 	/**
-	 * Links the {@link TaskMetaData} instances to enable {@link JobSequence} of
-	 * execution.
+	 * Links the {@link ManagedFunctionMetaData} instances to enable
+	 * {@link Flow} of execution.
 	 * 
-	 * @param taskLocator
-	 *            {@link OfficeMetaDataLocator}.
-	 * @param assetManagerFactory
-	 *            {@link AssetManagerFactory}.
+	 * @param officeMetaData
+	 *            {@link OfficeMetaData}.
+	 * @param flowMetaDataFactory
+	 *            {@link FlowMetaDataFactory}.
+	 * @param escalationFlowFactory
+	 *            {@link EscalationFlowFactory}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
+	 * @return <code>true</code> if successfully loaded the
+	 *         {@link OfficeMetaData}.
 	 */
-	void linkOfficeMetaData(OfficeMetaDataLocator taskLocator,
-			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
+	boolean loadOfficeMetaData(OfficeMetaData officeMetaData, FlowMetaDataFactory flowMetaDataFactory,
+			EscalationFlowFactory escalationFlowFactory, OfficeFloorIssues issues);
 
 	/**
 	 * Obtains the {@link GovernanceMetaData}.
 	 * 
 	 * @return {@link GovernanceMetaData}.
 	 */
-	GovernanceMetaData<I, F> getGovernanceMetaData();
+	GovernanceMetaData<E, F> getGovernanceMetaData();
 
 }

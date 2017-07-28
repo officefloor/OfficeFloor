@@ -2,12 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse Woof Plug-in
 Bundle-SymbolicName: net.officefloor.woof;singleton:=true
-Bundle-Version: 2.18.0
+Bundle-Version: 3.0.0
 Bundle-Vendor: OfficeFloor
 Bundle-Activator: net.officefloor.eclipse.WoofPlugin
 Bundle-ActivationPolicy: lazy
-Require-Bundle: net.officefloor.core;bundle-version="2.18.0",
- net.officefloor.ui;bundle-version="2.18.0"
+Require-Bundle: net.officefloor.core;bundle-version="3.0.0",
+ net.officefloor.ui;bundle-version="3.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-BuddyPolicy: registered
 Eclipse-RegisterBuddy: net.officefloor.core, 
@@ -117,7 +117,6 @@ Export-Package: net.officefloor.eclipse,
  net.officefloor.plugin.web.http.security.scheme,
  net.officefloor.plugin.web.http.security.store,
  net.officefloor.plugin.web.http.security.type,
- net.officefloor.plugin.web.http.server,
  net.officefloor.plugin.web.http.session,
  net.officefloor.plugin.web.http.session.attribute,
  net.officefloor.plugin.web.http.session.generator,
@@ -127,12 +126,12 @@ Export-Package: net.officefloor.eclipse,
  net.officefloor.plugin.web.http.template,
  net.officefloor.plugin.web.http.template.parse,
  net.officefloor.plugin.web.http.template.section,
+ net.officefloor.plugin.web.http.test,
  net.officefloor.plugin.web.http.tokenise,
  net.officefloor.plugin.woof,
  net.officefloor.plugin.woof.template,
  net.officefloor.plugin.woof.template.impl
 Bundle-ClassPath: .,
- officeplugin_woof-2.18.0.jar,
- officeplugin_base-2.18.0.jar,
- officeplugin_web-2.18.0.jar,
- officeplugin_socket-2.18.0.jar
+ officeplugin_woof-3.0.0.jar,
+ officeplugin_web-3.0.0.jar,
+ officeplugin_socket-3.0.0.jar

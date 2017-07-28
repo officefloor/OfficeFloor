@@ -17,16 +17,16 @@
  */
 package net.officefloor.tutorial.testhttpserver;
 
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
-import net.officefloor.tutorial.testhttpserver.TemplateLogic.Parameters;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
 import org.junit.Test;
+
+import net.officefloor.OfficeFloorMain;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+import net.officefloor.tutorial.testhttpserver.TemplateLogic.Parameters;
 
 /**
  * Tests the {@link TemplateLogic}.
@@ -58,13 +58,12 @@ public class TemplateLogicTest extends Assert {
 	public void systemTest() throws Exception {
 
 		// Start the application
-		WoofOfficeFloorSource.start();
+		OfficeFloorMain.open();
 
 		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
 
 			// Send request to add
-			HttpGet request = new HttpGet(
-					"http://localhost:7878/template-add.woof?a=1&b=2");
+			HttpGet request = new HttpGet("http://localhost:7878/template-add.woof?a=1&b=2");
 			HttpResponse response = client.execute(request);
 
 			// Ensure added the values
@@ -73,7 +72,7 @@ public class TemplateLogicTest extends Assert {
 
 		} finally {
 			// Stop the application
-			WoofOfficeFloorSource.stop();
+			OfficeFloorMain.close();
 		}
 	}
 	// END SNIPPET: system

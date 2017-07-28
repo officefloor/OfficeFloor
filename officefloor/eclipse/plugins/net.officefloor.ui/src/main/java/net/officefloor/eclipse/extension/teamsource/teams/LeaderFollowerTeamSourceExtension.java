@@ -37,8 +37,7 @@ import org.eclipse.swt.widgets.Text;
  *
  * @author Daniel Sagenschneider
  */
-public class LeaderFollowerTeamSourceExtension implements
-		TeamSourceExtension<LeaderFollowerTeamSource> {
+public class LeaderFollowerTeamSourceExtension implements TeamSourceExtension<LeaderFollowerTeamSource> {
 
 	/*
 	 * =============== TeamSourceExtension ==============================
@@ -55,13 +54,11 @@ public class LeaderFollowerTeamSourceExtension implements
 	}
 
 	@Override
-	public void createControl(Composite page,
-			final TeamSourceExtensionContext context) {
+	public void createControl(Composite page, final TeamSourceExtensionContext context) {
 
 		// Obtain the properties
 		PropertyList properties = context.getPropertyList();
-		final Property sizeProperty = properties
-				.getOrAddProperty(LeaderFollowerTeamSource.TEAM_SIZE_PROPERTY_NAME);
+		final Property sizeProperty = properties.getOrAddProperty(LeaderFollowerTeamSource.TEAM_SIZE_PROPERTY_NAME);
 
 		// Default initial values
 		String sizeValue = sizeProperty.getValue();

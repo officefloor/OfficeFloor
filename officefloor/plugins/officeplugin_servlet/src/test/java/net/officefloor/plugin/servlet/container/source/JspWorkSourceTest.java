@@ -22,10 +22,10 @@ import java.util.HashMap;
 
 import javax.servlet.ServletException;
 
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.servlet.container.HttpServletServicer;
@@ -63,9 +63,9 @@ public class JspWorkSourceTest extends OfficeFrameTestCase {
 				new HashMap<String, String>());
 
 		// Create the expected type
-		WorkTypeBuilder<HttpServletTask> type = WorkLoaderUtil
+		FunctionNamespaceBuilder<HttpServletTask> type = WorkLoaderUtil
 				.createWorkTypeBuilder(factory);
-		TaskTypeBuilder<DependencyKeys, None> task = type.addTaskType(
+		ManagedFunctionTypeBuilder<DependencyKeys, None> task = type.addManagedFunctionType(
 				"service", factory, DependencyKeys.class, None.class);
 		task.setDifferentiator(factory);
 		task.addObject(ServicerMapping.class).setKey(
@@ -83,12 +83,12 @@ public class JspWorkSourceTest extends OfficeFrameTestCase {
 		task.addEscalation(IOException.class);
 
 		// Validate type
-		WorkType<HttpServletTask> work = WorkLoaderUtil.validateWorkType(type,
+		FunctionNamespaceType<HttpServletTask> work = WorkLoaderUtil.validateWorkType(type,
 				JspWorkSource.class);
 
 		// Ensure match JSP extension
 		HttpServletServicer differentiator = (HttpServletServicer) work
-				.getTaskTypes()[0].getTaskFactory();
+				.getManagedFunctionTypes()[0].getManagedFunctionFactory();
 		String[] mappings = differentiator.getServletMappings();
 		assertEquals("Incorrect number of mappings", 1, mappings.length);
 		assertEquals("Incorrect JSP extension mapping", "*.jsp", mappings[0]);

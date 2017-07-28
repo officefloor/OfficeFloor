@@ -40,10 +40,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.TaskManager;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.plugin.servlet.container.HttpServletServicer;
 import net.officefloor.plugin.servlet.container.IteratorEnumeration;
@@ -169,7 +169,7 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 
 						// Iterate over tasks of the Office
 						for (String taskName : work.getTaskNames()) {
-							TaskManager task = work.getTaskManager(taskName);
+							FunctionManager task = work.getTaskManager(taskName);
 
 							// Load task if Servicer
 							Object differentiator = task.getDifferentiator();
@@ -229,7 +229,7 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 	}
 
 	@Override
-	public ServletTaskReference mapPath(Office office, String path) {
+	public ServletFunctionReference mapPath(Office office, String path) {
 		// Obtain the context
 		OfficeContext context = this.getOfficeContext(office);
 
@@ -459,7 +459,7 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 	 * {@link Office} {@link HttpServletServicer}.
 	 */
 	private class OfficeServicer implements HttpServletServicer,
-			ServletTaskReference {
+			ServletFunctionReference {
 
 		/**
 		 * Name of {@link Work} for forwarding.
@@ -467,7 +467,7 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		private final String workName;
 
 		/**
-		 * Name of {@link Task} for forwarding.
+		 * Name of {@link ManagedFunction} for forwarding.
 		 */
 		private final String taskName;
 
@@ -482,7 +482,7 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		 * @param workName
 		 *            Name of {@link Work} for forwarding.
 		 * @param taskName
-		 *            Name of {@link Task} for forwarding.
+		 *            Name of {@link ManagedFunction} for forwarding.
 		 * @param httpServlet
 		 *            {@link HttpServletServicer} to include {@link HttpServlet}
 		 *            .
@@ -538,7 +538,7 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		}
 
 		@Override
-		public String getTaskName() {
+		public String getFunctionName() {
 			return this.taskName;
 		}
 	}
@@ -555,7 +555,7 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		private final String workName;
 
 		/**
-		 * Name of {@link Task} for forwarding.
+		 * Name of {@link ManagedFunction} for forwarding.
 		 */
 		private final String taskName;
 
@@ -575,7 +575,7 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		 * @param workName
 		 *            Name of {@link Work} for forwarding.
 		 * @param taskName
-		 *            Name of {@link Task} for forwarding.
+		 *            Name of {@link ManagedFunction} for forwarding.
 		 * @param httpServlet
 		 *            {@link HttpServletServicer} to include {@link HttpServlet}
 		 *            .

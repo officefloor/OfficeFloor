@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="FunctionModel" name="function" end-field="managed function" />
+	<field type="ManagedFunctionModel" name="managed function"
+		end-list="function" />
+</model>

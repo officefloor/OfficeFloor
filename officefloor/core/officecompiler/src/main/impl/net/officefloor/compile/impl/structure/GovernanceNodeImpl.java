@@ -17,9 +17,19 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
 import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.governance.GovernanceType;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
+import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.internal.structure.AutoWireLink;
+import net.officefloor.compile.internal.structure.AutoWirer;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
@@ -32,11 +42,10 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.GovernerableManagedObject;
 import net.officefloor.compile.spi.office.OfficeGovernance;
-import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * Implementation of the {@link GovernanceNode}.
@@ -96,12 +105,28 @@ public class GovernanceNodeImpl implements GovernanceNode {
 		 *            {@link GovernanceSource} instance to use. Should this be
 		 *            specified it overrides the {@link Class}.
 		 */
-		public InitialisedState(String governanceSourceClassName,
-				GovernanceSource<?, ?> governanceSource) {
+		public InitialisedState(String governanceSourceClassName, GovernanceSource<?, ?> governanceSource) {
 			this.governanceSourceClassName = governanceSourceClassName;
 			this.governanceSource = governanceSource;
 		}
 	}
+
+	/**
+	 * {@link OfficeObjectNode} instances being governed by this
+	 * {@link Governance}.
+	 */
+	private final List<OfficeObjectNode> governedOfficeObjects = new LinkedList<>();
+
+	/**
+	 * {@link ManagedObjectNode} instances being governed by this
+	 * {@link Governance}.
+	 */
+	private final List<ManagedObjectNode> governedManagedObjects = new LinkedList<>();
+
+	/**
+	 * {@link GovernanceSource} used to source this {@link GovernanceNode}.
+	 */
+	private GovernanceSource<?, ?> usedGovernanceSource = null;
 
 	/**
 	 * Initiate.
@@ -114,8 +139,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public GovernanceNodeImpl(String governanceName, OfficeNode officeNode,
-			NodeContext context) {
+	public GovernanceNodeImpl(String governanceName, OfficeNode officeNode, NodeContext context) {
 		this.governanceName = governanceName;
 		this.officeNode = officeNode;
 		this.context = context;
@@ -149,16 +173,19 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return NodeUtil.getChildNodes();
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}
 
 	@Override
-	public void initialise(String governanceSourceClassName,
-			GovernanceSource<?, ?> governanceSource) {
+	public void initialise(String governanceSourceClassName, GovernanceSource<?, ?> governanceSource) {
 		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialisedState(governanceSourceClassName,
-						governanceSource));
+				() -> new InitialisedState(governanceSourceClassName, governanceSource));
 	}
 
 	/*
@@ -166,44 +193,93 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	 */
 
 	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public GovernanceType<?, ?> loadGovernanceType() {
 
-		// Obtain the governance source class
-		Class governanceSourceClass = this.context.getGovernanceSourceClass(
-				this.state.governanceSourceClassName, this);
-		if (governanceSourceClass == null) {
-			return null; // must obtain source class
+		// Load the override properties
+		PropertyList overrideProperties = this.context.overrideProperties(this,
+				this.officeNode.getQualifiedName(this.governanceName), this.properties);
+
+		// Create the governance loader
+		GovernanceLoader loader = this.context.getGovernanceLoader(this);
+
+		// Obtain the goverannce source
+		GovernanceSource<?, ?> governanceSource = this.state.governanceSource;
+		if (governanceSource == null) {
+
+			// Obtain the governance source class
+			Class<? extends GovernanceSource<?, ?>> governanceSourceClass = this.context
+					.getGovernanceSourceClass(this.state.governanceSourceClassName, this);
+			if (governanceSourceClass == null) {
+				return null; // must obtain source class
+			}
+
+			// Obtain the governance source
+			governanceSource = CompileUtil.newInstance(governanceSourceClass, GovernanceSource.class, this,
+					this.context.getCompilerIssues());
+			if (governanceSource == null) {
+				return null; // must obtain source
+			}
 		}
 
+		// Keep track of used governance source
+		this.usedGovernanceSource = governanceSource;
+
 		// Load and return the governance type
-		GovernanceLoader loader = this.context.getGovernanceLoader(this);
-		return loader
-				.loadGovernanceType(governanceSourceClass, this.properties);
+		return loader.loadGovernanceType(governanceSource, overrideProperties);
+	}
+
+	@Override
+	public void autoWireTeam(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext) {
+
+		// Ignore if already specified team
+		if (this.linkedTeamNode != null) {
+			return;
+		}
+
+		// Create the listing of source auto-wires
+		Set<AutoWire> autoWires = new HashSet<>();
+		this.governedOfficeObjects.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeObjectName(), b.getOfficeObjectName()))
+				.forEachOrdered((object) -> LinkUtil.loadAllObjectAutoWires(object, autoWires, compileContext,
+						this.context.getCompilerIssues()));
+		this.governedManagedObjects.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getGovernerableManagedObjectName(),
+						b.getGovernerableManagedObjectName()))
+				.forEachOrdered((managedObject) -> LinkUtil.loadAllObjectAutoWires(managedObject, autoWires,
+						compileContext, this.context.getCompilerIssues()));
+		AutoWire[] sourceAutoWires = autoWires.stream().toArray(AutoWire[]::new);
+
+		// Attempt to auto-wire this governance
+		AutoWireLink<LinkTeamNode>[] links = autoWirer.findAutoWireLinks(this, sourceAutoWires);
+		if (links.length == 1) {
+			LinkUtil.linkTeamNode(this, links[0].getTargetNode(this.officeNode), this.context.getCompilerIssues(),
+					(link) -> this.linkTeamNode(link));
+		}
 	}
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void buildGovernance(OfficeBuilder officeBuilder,
-			TypeContext typeContext) {
+	public void buildGovernance(OfficeBuilder officeBuilder, CompileContext compileContext) {
 
 		// Obtain the governance type
-		GovernanceType govType = typeContext.getOrLoadGovernanceType(this);
+		GovernanceType govType = compileContext.getOrLoadGovernanceType(this);
 		if (govType == null) {
 			return; // must obtain governance type
 		}
 
+		// Register as possible MBean
+		String qualifiedName = this.officeNode.getQualifiedName(this.governanceName);
+		compileContext.registerPossibleMBean(GovernanceSource.class, qualifiedName, this.usedGovernanceSource);
+
 		// Build the governance
-		GovernanceBuilder govBuilder = officeBuilder.addGovernance(
-				this.governanceName, govType.getGovernanceFactory(),
-				govType.getExtensionInterface());
+		GovernanceBuilder govBuilder = officeBuilder.addGovernance(this.governanceName, govType.getExtensionInterface(),
+				govType.getGovernanceFactory());
 
 		// Obtain the office team responsible for this governance
-		OfficeTeamNode officeTeam = LinkUtil.retrieveTarget(this,
-				OfficeTeamNode.class, this.context.getCompilerIssues());
+		OfficeTeamNode officeTeam = LinkUtil.findTarget(this, OfficeTeamNode.class, this.context.getCompilerIssues());
 		if (officeTeam != null) {
 			// Build the team responsible for the governance
-			govBuilder.setTeam(officeTeam.getOfficeTeamName());
+			govBuilder.setResponsibleTeam(officeTeam.getOfficeTeamName());
 		}
 	}
 
@@ -229,19 +305,18 @@ public class GovernanceNodeImpl implements GovernanceNode {
 			// Register governance with the managed object node
 			ManagedObjectNode managedObjectNode = (ManagedObjectNode) managedObject;
 			managedObjectNode.addGovernance(this, this.officeNode);
+			this.governedManagedObjects.add(managedObjectNode);
 
 		} else if (managedObject instanceof OfficeObjectNode) {
 			// Register governance with the office object node
 			OfficeObjectNode officeObjectNode = (OfficeObjectNode) managedObject;
 			officeObjectNode.addGovernance(this);
+			this.governedOfficeObjects.add(officeObjectNode);
 
 		} else {
-			// Unknown governerable managed object node
-			this.context.getCompilerIssues().addIssue(
-					this,
-					"Unknown "
-							+ GovernerableManagedObject.class.getSimpleName()
-							+ " node");
+			// Unknown governable managed object node
+			this.context.getCompilerIssues().addIssue(this,
+					"Unknown " + GovernerableManagedObject.class.getSimpleName() + " node");
 		}
 	}
 
@@ -256,8 +331,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 
 	@Override
 	public boolean linkTeamNode(LinkTeamNode node) {
-		return LinkUtil.linkTeamNode(this, node,
-				this.context.getCompilerIssues(),
+		return LinkUtil.linkTeamNode(this, node, this.context.getCompilerIssues(),
 				(link) -> this.linkedTeamNode = link);
 	}
 

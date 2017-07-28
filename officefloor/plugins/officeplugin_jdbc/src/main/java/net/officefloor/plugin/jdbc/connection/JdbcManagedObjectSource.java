@@ -34,11 +34,12 @@ import javax.sql.DataSource;
 import javax.sql.PooledConnection;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.jdbc.util.ReflectionUtil;
 
 /**
@@ -46,8 +47,7 @@ import net.officefloor.plugin.jdbc.util.ReflectionUtil;
  * 
  * @author Daniel Sagenschneider
  */
-public class JdbcManagedObjectSource extends
-		AbstractManagedObjectSource<None, None> {
+public class JdbcManagedObjectSource extends AbstractManagedObjectSource<None, None> {
 
 	/**
 	 * Property name of the {@link ConnectionPoolDataSourceFactory} class.
@@ -91,12 +91,11 @@ public class JdbcManagedObjectSource extends
 	 *             Should there be a failure creating or configuring the
 	 *             {@link ConnectionPoolDataSource}.
 	 */
-	protected ConnectionPoolDataSource getConnectionPoolDataSource(
-			ManagedObjectSourceContext<?> context) throws Exception {
+	protected ConnectionPoolDataSource getConnectionPoolDataSource(ManagedObjectSourceContext<?> context)
+			throws Exception {
 
 		// Determine if a factory is configured
-		String factoryClassName = context.getProperty(
-				CONNECTION_POOL_DATA_SOURCE_FACTORY_PROPERTY, null);
+		String factoryClassName = context.getProperty(CONNECTION_POOL_DATA_SOURCE_FACTORY_PROPERTY, null);
 		if (factoryClassName != null) {
 			// Use the factory to obtain the connection pool data source
 			Class<?> clazz = context.loadClass(factoryClassName);
@@ -106,15 +105,13 @@ public class JdbcManagedObjectSource extends
 		}
 
 		// No factory so use connection pool data source directly
-		String className = context
-				.getProperty(CONNECTION_POOL_DATA_SOURCE_CLASS_PROPERTY);
+		String className = context.getProperty(CONNECTION_POOL_DATA_SOURCE_CLASS_PROPERTY);
 
 		// Obtain the properties for the connection pool
 		Properties properties = context.getProperties();
 
 		// Create and return the connection pool data source
-		return ReflectionUtil.createInitialisedBean(className,
-				context.getClassLoader(), ConnectionPoolDataSource.class,
+		return ReflectionUtil.createInitialisedBean(className, context.getClassLoader(), ConnectionPoolDataSource.class,
 				properties);
 	}
 
@@ -125,36 +122,29 @@ public class JdbcManagedObjectSource extends
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
 		// Ensure data source provided
-		context.addProperty(CONNECTION_POOL_DATA_SOURCE_CLASS_PROPERTY,
-				ConnectionPoolDataSource.class.getSimpleName());
+		context.addProperty(CONNECTION_POOL_DATA_SOURCE_CLASS_PROPERTY, ConnectionPoolDataSource.class.getSimpleName());
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<None, None> context)
-			throws Exception {
-		ManagedObjectSourceContext<None> mosContext = context
-				.getManagedObjectSourceContext();
+	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Obtain the connection pool data source
-		this.dataSource = this.getConnectionPoolDataSource(context
-				.getManagedObjectSourceContext());
+		this.dataSource = this.getConnectionPoolDataSource(context.getManagedObjectSourceContext());
 
 		// Determine if required to initialise the database
-		String initialiseScript = mosContext.getProperty(
-				DATA_SOURCE_INITIALISE_SCRIPT, null);
+		String initialiseScript = mosContext.getProperty(DATA_SOURCE_INITIALISE_SCRIPT, null);
 		if (initialiseScript != null) {
 			// Obtain access to the initialise script contents
-			this.initialiseScriptInputStream = mosContext
-					.getResource(initialiseScript);
+			this.initialiseScriptInputStream = mosContext.getResource(initialiseScript);
 			if (this.initialiseScriptInputStream == null) {
-				throw new Exception("Can not find initialise script '"
-						+ initialiseScript + "'");
+				throw new Exception("Can not find initialise script '" + initialiseScript + "'");
 			}
 		}
 
-		// Create the recycle task
-		new RecycleJdbcTask().registerAsRecycleTask(
-				context.getManagedObjectSourceContext(), "jdbc.recycle");
+		// Create the recycle function
+		mosContext.getRecycleFunction(new RecycleJdbcManagedFunction()).linkParameter(0,
+				RecycleManagedObjectParameter.class);
 
 		// Specify the meta-data
 		context.setObjectClass(Connection.class);
@@ -162,8 +152,7 @@ public class JdbcManagedObjectSource extends
 	}
 
 	@Override
-	public void start(ManagedObjectExecuteContext<None> context)
-			throws Exception {
+	public void start(ManagedObjectExecuteContext<None> context) throws Exception {
 
 		// Obtain a connection to the database (to ensure working)
 		PooledConnection connection = this.dataSource.getPooledConnection();
@@ -179,8 +168,7 @@ public class JdbcManagedObjectSource extends
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
 		// Obtain the pooled connection
-		PooledConnection pooledConnection = this.dataSource
-				.getPooledConnection();
+		PooledConnection pooledConnection = this.dataSource.getPooledConnection();
 
 		// Return the JDBC managed object
 		return new JdbcManagedObject(pooledConnection);
@@ -200,8 +188,7 @@ public class JdbcManagedObjectSource extends
 		}
 
 		// Read the statements for the initialise script
-		BufferedReader reader = new BufferedReader(new InputStreamReader(
-				this.initialiseScriptInputStream));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(this.initialiseScriptInputStream));
 		List<String> statements = new LinkedList<String>();
 		StringBuilder currentStatement = new StringBuilder();
 		String line;
@@ -232,8 +219,7 @@ public class JdbcManagedObjectSource extends
 		reader.close();
 
 		// Run the statements to initialise data source
-		PooledConnection pooledConnection = this.dataSource
-				.getPooledConnection();
+		PooledConnection pooledConnection = this.dataSource.getPooledConnection();
 		Connection connection = pooledConnection.getConnection();
 		for (String sql : statements) {
 			Statement statement = connection.createStatement();

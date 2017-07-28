@@ -20,37 +20,30 @@ package net.officefloor.plugin.socket.server.http.integrate;
 import java.io.IOException;
 import java.io.StringWriter;
 
-import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.ManagedObjectBuilder;
-import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.OfficeEnhancer;
-import net.officefloor.frame.api.build.OfficeEnhancerContext;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.spi.TestSource;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.frame.test.MockTeamSource;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import javax.resource.spi.work.Work;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.server.HttpServicerFunction;
+import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 
 /**
  * Tests appropriately handles cleanup.
@@ -71,7 +64,7 @@ public class HttpCleanupServerTest extends MockHttpServer {
 		RecycleEscalationManagedObjectSource.escalation = null;
 
 		// Undertake request
-		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
+		try (CloseableHttpClient client = this.createHttpClient()) {
 
 			// Create the request
 			HttpGet method = new HttpGet(this.getServerUrl() + "/path");
@@ -83,8 +76,7 @@ public class HttpCleanupServerTest extends MockHttpServer {
 
 			// Read in the body of the response
 			String responseEntity = HttpTestUtil.getEntityBody(response);
-			assertEquals("Incorrect response entity", "No cleanup escalations",
-					responseEntity);
+			assertEquals("Incorrect response entity", "No cleanup escalations", responseEntity);
 		}
 	}
 
@@ -98,7 +90,7 @@ public class HttpCleanupServerTest extends MockHttpServer {
 		RecycleEscalationManagedObjectSource.escalation = escalation;
 
 		// Undertake request
-		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
+		try (CloseableHttpClient client = this.createHttpClient()) {
 
 			// Create the request
 			HttpGet method = new HttpGet(this.getServerUrl() + "/path");
@@ -111,12 +103,9 @@ public class HttpCleanupServerTest extends MockHttpServer {
 			// Read in the body of the response
 			String responseEntity = HttpTestUtil.getEntityBody(response);
 			StringWriter expectedEntity = new StringWriter();
-			expectedEntity.write("Cleanup of object type "
-					+ RecycleEscalationManagedObjectSource.class.getName()
-					+ ": TEST (" + escalation.getClass().getSimpleName()
-					+ ")\n");
-			assertEquals("Incorrect response entity",
-					expectedEntity.toString(), responseEntity);
+			expectedEntity.write("Cleanup of object type " + RecycleEscalationManagedObjectSource.class.getName()
+					+ ": TEST (" + escalation.getClass().getSimpleName() + ")");
+			assertEquals("Incorrect response entity", expectedEntity.toString(), responseEntity);
 		}
 	}
 
@@ -125,43 +114,23 @@ public class HttpCleanupServerTest extends MockHttpServer {
 	 */
 
 	@Override
-	public HttpServicerTask buildServicer(String managedObjectName,
-			MockHttpServer server) throws Exception {
-
-		// Register team to do the work
-		server.constructTeam("WORKER",
-				MockTeamSource.createOnePersonTeam("WORKER"));
+	public HttpServicerFunction buildServicer(String managedObjectName, MockHttpServer server) throws Exception {
 
 		// Register the managed object
-		ManagedObjectBuilder<None> builder = this.getOfficeFloorBuilder()
-				.addManagedObject("ESCALATE",
-						RecycleEscalationManagedObjectSource.class);
+		ManagedObjectBuilder<None> builder = this.getOfficeFloorBuilder().addManagedObject("ESCALATE",
+				RecycleEscalationManagedObjectSource.class);
 		builder.setManagingOffice(this.getOfficeName());
-		this.getOfficeBuilder().addThreadManagedObject("MO_ESCALATE",
-				"ESCALATE");
-		this.getOfficeBuilder().registerManagedObjectSource("ESCALATE",
-				"ESCALATE");
+		this.getOfficeBuilder().addThreadManagedObject("MO_ESCALATE", "ESCALATE");
+		this.getOfficeBuilder().registerManagedObjectSource("ESCALATE", "ESCALATE");
 
-		// Configure the teams for recycling the managed object
-		this.getOfficeBuilder().addOfficeEnhancer(new OfficeEnhancer() {
-			@Override
-			public void enhanceOffice(OfficeEnhancerContext context) {
-				context.getFlowNodeBuilder("ESCALATE", "#recycle#", "cleanup")
-						.setTeam("WORKER");
-			}
-		});
+		// Register the servicer to process messages
+		MockServicer servicer = new MockServicer();
+		ReflectiveFunctionBuilder functionBuilder = server.constructFunction(servicer, "service");
+		functionBuilder.buildObject(managedObjectName);
+		functionBuilder.buildObject("MO_ESCALATE");
 
-		// Register the work to process messages
-		MockWork work = new MockWork();
-		ReflectiveWorkBuilder workBuilder = server.constructWork(work,
-				"servicer", "service");
-		ReflectiveTaskBuilder taskBuilder = workBuilder.buildTask("service",
-				"WORKER");
-		taskBuilder.buildObject(managedObjectName);
-		taskBuilder.buildObject("MO_ESCALATE");
-
-		// Return the reference to the service task
-		return new HttpServicerTask("servicer", "service");
+		// Return the reference to the service function
+		return new HttpServicerFunction("service");
 	}
 
 	/**
@@ -170,10 +139,8 @@ public class HttpCleanupServerTest extends MockHttpServer {
 	 * @author Daniel Sagenschneider
 	 */
 	@TestSource
-	public static class RecycleEscalationManagedObjectSource extends
-			AbstractManagedObjectSource<None, None> implements ManagedObject,
-			WorkFactory<Work>, Work, TaskFactory<Work, Indexed, None>,
-			Task<Work, Indexed, None> {
+	public static class RecycleEscalationManagedObjectSource extends AbstractManagedObjectSource<None, None>
+			implements ManagedObject, ManagedFunctionFactory<Indexed, None>, ManagedFunction<Indexed, None> {
 
 		/**
 		 * {@link Escalation} on cleanup.
@@ -190,19 +157,14 @@ public class HttpCleanupServerTest extends MockHttpServer {
 		}
 
 		@Override
-		protected void loadMetaData(MetaDataContext<None, None> context)
-				throws Exception {
+		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
 
 			// Configure
 			context.setObjectClass(this.getClass());
 
-			// Provide recycle task
-			ManagedObjectSourceContext<None> mos = context
-					.getManagedObjectSourceContext();
-			ManagedObjectWorkBuilder<Work> cleanup = mos.getRecycleWork(this);
-			ManagedObjectTaskBuilder<Indexed, None> recycleTask = cleanup
-					.addTask("cleanup", this);
-			recycleTask.linkParameter(0, RecycleManagedObjectParameter.class);
+			// Provide recycle function
+			ManagedObjectSourceContext<None> mos = context.getManagedObjectSourceContext();
+			mos.getRecycleFunction(this).linkParameter(0, RecycleManagedObjectParameter.class);
 		}
 
 		@Override
@@ -220,30 +182,20 @@ public class HttpCleanupServerTest extends MockHttpServer {
 		}
 
 		/*
-		 * ===================== WorkFactory =================================
+		 * =================== ManagedFunctionFactory ======================
 		 */
 
 		@Override
-		public Work createWork() {
+		public ManagedFunction<Indexed, None> createManagedFunction() {
 			return this;
 		}
 
 		/*
-		 * ===================== TaskFactory =================================
+		 * ===================== ManagedFunction ============================
 		 */
 
 		@Override
-		public Task<Work, Indexed, None> createTask(Work work) {
-			return this;
-		}
-
-		/*
-		 * ======================== Task =====================================
-		 */
-
-		@Override
-		public Object doTask(TaskContext<Work, Indexed, None> context)
-				throws Throwable {
+		public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
 
 			// Trigger escalation if provided
 			Throwable cleanupFailure = RecycleEscalationManagedObjectSource.escalation;
@@ -251,7 +203,7 @@ public class HttpCleanupServerTest extends MockHttpServer {
 				throw cleanupFailure;
 			}
 
-			// No further tasks
+			// No further functions
 			return null;
 		}
 	}
@@ -259,7 +211,7 @@ public class HttpCleanupServerTest extends MockHttpServer {
 	/**
 	 * Mock {@link Work}.
 	 */
-	public static class MockWork {
+	public static class MockServicer {
 
 		/**
 		 * Service method.
@@ -269,11 +221,9 @@ public class HttpCleanupServerTest extends MockHttpServer {
 		 * @param managedObject
 		 *            {@link RecycleEscalationManagedObjectSource}.
 		 */
-		public void service(ServerHttpConnection connection,
-				RecycleEscalationManagedObjectSource managedObject)
+		public void service(ServerHttpConnection connection, RecycleEscalationManagedObjectSource managedObject)
 				throws IOException {
-			connection.getHttpResponse().getEntityWriter()
-					.write("No cleanup escalations");
+			connection.getHttpResponse().getEntityWriter().write("No cleanup escalations");
 		}
 	}
 

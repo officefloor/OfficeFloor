@@ -1,0 +1,17 @@
+<section>
+	<external-managed-objects>
+		<external-managed-object name="MO"
+			object-type="java.lang.String" />
+	</external-managed-objects>
+	<function-namespaces>
+		<function-namespace name="NAMESPACE"
+			source="net.example.ExampleManagedFunctionSource">
+			<managed-function name="MANAGED_FUNCTION">
+				<managed-function-object name="OBJECT"
+					parameter="true" />
+				<managed-function-object name="PARAMETER"
+					parameter="true" />
+			</managed-function>
+		</function-namespace>
+	</function-namespaces>
+</section>

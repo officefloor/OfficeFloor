@@ -1,0 +1,46 @@
+<context>
+	<office-floor>
+		<teams>
+			<team name="TEAM" source="ONE_PERSON" />
+		</teams>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office">
+				<team name="OFFICE_TEAM">
+					<office-floor-team name="TEAM" />
+				</team>
+			</office>
+		</offices>
+	</office-floor>
+	<office>
+		<teams>
+			<team name="OFFICE_TEAM" />
+		</teams>
+		<governances>
+			<governance name="GOVERNANCE" source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$SimpleGovernance" />
+				</properties>
+				<team name="OFFICE_TEAM" />
+				<governance-area x="20" y="20" height="60" width="60" />
+			</governance>
+		</governances>
+		<sections>
+			<section name="SECTION" source="SECTION" location="section"
+				x="40" y="40" />
+		</sections>
+	</office>
+	<section>
+		<function-namespaces>
+			<function-namespace name="NAMESPACE" source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$SimpleClass" />
+				</properties>
+				<managed-function name="simpleFunction" />
+			</function-namespace>
+		</function-namespaces>
+		<functions>
+			<function name="FUNCTION" function-namespace="NAMESPACE"
+				managed-function="simpleFunction" />
+		</functions>
+	</section>
+</context>

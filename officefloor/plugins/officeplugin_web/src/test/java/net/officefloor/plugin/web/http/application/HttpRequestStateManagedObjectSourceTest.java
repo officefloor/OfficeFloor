@@ -28,7 +28,7 @@ import java.util.List;
 
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
@@ -38,8 +38,7 @@ import net.officefloor.frame.util.ManagedObjectUserStandAlone;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpRequestStateManagedObjectSourceTest extends
-		OfficeFrameTestCase {
+public class HttpRequestStateManagedObjectSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link HttpRequestObjectManagedObjectSource}.
@@ -51,8 +50,7 @@ public class HttpRequestStateManagedObjectSourceTest extends
 	 */
 	public void testSpecification() {
 		// Should require no properties
-		ManagedObjectLoaderUtil
-				.validateSpecification(HttpRequestStateManagedObjectSource.class);
+		ManagedObjectLoaderUtil.validateSpecification(HttpRequestStateManagedObjectSource.class);
 	}
 
 	/**
@@ -61,13 +59,11 @@ public class HttpRequestStateManagedObjectSourceTest extends
 	public void testType() {
 
 		// Create expected type
-		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
-				.createManagedObjectTypeBuilder();
+		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(HttpRequestState.class);
 
 		// Validate type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type,
-				HttpRequestStateManagedObjectSource.class);
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, HttpRequestStateManagedObjectSource.class);
 	}
 
 	/**
@@ -82,8 +78,7 @@ public class HttpRequestStateManagedObjectSourceTest extends
 		final String NAME = "name";
 		final Serializable ATTRIBUTE = "ATTRIBUTE";
 		state.setAttribute(NAME, ATTRIBUTE);
-		assertEquals("Must obtain attribute", ATTRIBUTE,
-				state.getAttribute(NAME));
+		assertEquals("Must obtain attribute", ATTRIBUTE, state.getAttribute(NAME));
 		Iterator<String> names = state.getAttributeNames();
 		assertTrue("Expect name", names.hasNext());
 		assertEquals("Incorrect name", NAME, names.next());
@@ -91,8 +86,7 @@ public class HttpRequestStateManagedObjectSourceTest extends
 
 		// Source another managed object as should be new empty state
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
-		HttpRequestState another = (HttpRequestState) user.sourceManagedObject(
-				this.source).getObject();
+		HttpRequestState another = (HttpRequestState) user.sourceManagedObject(this.source).getObject();
 		assertNull("Should be new empty state", another.getAttribute(NAME));
 
 		// Ensure can remove attribute
@@ -112,8 +106,7 @@ public class HttpRequestStateManagedObjectSourceTest extends
 			requestState.importState(momento);
 			fail("Should not be successful");
 		} catch (IllegalArgumentException ex) {
-			assertEquals("Incorrect cause",
-					"Invalid momento for HttpRequestState", ex.getMessage());
+			assertEquals("Incorrect cause", "Invalid momento for HttpRequestState", ex.getMessage());
 		}
 	}
 
@@ -140,8 +133,7 @@ public class HttpRequestStateManagedObjectSourceTest extends
 
 		// Create and validate the cloned request state
 		HttpRequestState clonedState = this.createClonedState(requestState);
-		assertHttpRequestState(clonedState, "ATTRIBUTE_ONE", "VALUE_A",
-				"ATTRIBUTE_TWO", "VALUE_B");
+		assertHttpRequestState(clonedState, "ATTRIBUTE_ONE", "VALUE_A", "ATTRIBUTE_TWO", "VALUE_B");
 	}
 
 	/**
@@ -193,27 +185,23 @@ public class HttpRequestStateManagedObjectSourceTest extends
 	 *            {@link HttpRequestState} (listed in alphabetical order by
 	 *            name).
 	 */
-	private void assertHttpRequestState(HttpRequestState state,
-			String... attributeNameValuePairs) {
+	private void assertHttpRequestState(HttpRequestState state, String... attributeNameValuePairs) {
 
 		// Obtain the list of all names in the state
 		int expectedNumberOfAttributes = (attributeNameValuePairs.length / 2);
 		List<String> names = new ArrayList<String>(expectedNumberOfAttributes);
-		for (Iterator<String> iterator = state.getAttributeNames(); iterator
-				.hasNext();) {
+		for (Iterator<String> iterator = state.getAttributeNames(); iterator.hasNext();) {
 			String name = iterator.next();
 			names.add(name);
 		}
-		assertEquals("Incorrect number of attributes",
-				expectedNumberOfAttributes, names.size());
+		assertEquals("Incorrect number of attributes", expectedNumberOfAttributes, names.size());
 
 		// Validate correct name/value pairs
 		for (int i = 0; i < expectedNumberOfAttributes; i++) {
 			String name = attributeNameValuePairs[i * 2];
 			String expectedValue = attributeNameValuePairs[(i * 2) + 1];
 			String actualValue = (String) state.getAttribute(name);
-			assertEquals("Incorrect value for attribute '" + name + "'",
-					expectedValue, actualValue);
+			assertEquals("Incorrect value for attribute '" + name + "'", expectedValue, actualValue);
 		}
 	}
 
@@ -224,8 +212,7 @@ public class HttpRequestStateManagedObjectSourceTest extends
 	 *            {@link HttpRequestState} to clone.
 	 * @return Cloned {@link HttpRequestState}.
 	 */
-	private HttpRequestState createClonedState(HttpRequestState requestState)
-			throws Throwable {
+	private HttpRequestState createClonedState(HttpRequestState requestState) throws Throwable {
 
 		// Export the momento
 		Serializable momento = requestState.exportState();
@@ -237,8 +224,7 @@ public class HttpRequestStateManagedObjectSourceTest extends
 		output.flush();
 
 		// Unserialise the momento
-		ByteArrayInputStream inputBuffer = new ByteArrayInputStream(
-				outputBuffer.toByteArray());
+		ByteArrayInputStream inputBuffer = new ByteArrayInputStream(outputBuffer.toByteArray());
 		ObjectInputStream input = new ObjectInputStream(inputBuffer);
 		Serializable unserialisedMomento = (Serializable) input.readObject();
 
@@ -259,8 +245,7 @@ public class HttpRequestStateManagedObjectSourceTest extends
 
 		// Load the source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
-		this.source = loader
-				.loadManagedObjectSource(HttpRequestStateManagedObjectSource.class);
+		this.source = loader.loadManagedObjectSource(HttpRequestStateManagedObjectSource.class);
 
 		// Source the managed object
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();

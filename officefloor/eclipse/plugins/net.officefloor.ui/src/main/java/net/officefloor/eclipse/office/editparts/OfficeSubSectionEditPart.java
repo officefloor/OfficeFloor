@@ -35,8 +35,7 @@ import org.eclipse.gef.EditPart;
  * @author Daniel Sagenschneider
  */
 public class OfficeSubSectionEditPart
-		extends
-		AbstractOfficeFloorEditPart<OfficeSubSectionModel, OfficeSubSectionEvent, OfficeSubSectionFigure>
+		extends AbstractOfficeFloorEditPart<OfficeSubSectionModel, OfficeSubSectionEvent, OfficeSubSectionFigure>
 		implements OfficeSubSectionFigureContext {
 
 	/*
@@ -45,13 +44,12 @@ public class OfficeSubSectionEditPart
 
 	@Override
 	protected OfficeSubSectionFigure createOfficeFloorFigure() {
-		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
-				.createOfficeSubSectionFigure(this);
+		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory().createOfficeSubSectionFigure(this);
 	}
 
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
-		childModels.addAll(this.getCastedModel().getOfficeTasks());
+		childModels.addAll(this.getCastedModel().getOfficeFunctions());
 		childModels.addAll(this.getCastedModel().getOfficeSubSections());
 	}
 
@@ -61,23 +59,19 @@ public class OfficeSubSectionEditPart
 	}
 
 	@Override
-	protected void handlePropertyChange(OfficeSubSectionEvent property,
-			PropertyChangeEvent evt) {
+	protected void handlePropertyChange(OfficeSubSectionEvent property, PropertyChangeEvent evt) {
 		switch (property) {
 		case CHANGE_OFFICE_SUB_SECTION_NAME:
-			this.getOfficeFloorFigure().setOfficeSubSectionName(
-					this.getOfficeSubSectionName());
+			this.getOfficeFloorFigure().setOfficeSubSectionName(this.getOfficeSubSectionName());
 			break;
 
-		case ADD_OFFICE_TASK:
-		case REMOVE_OFFICE_TASK:
+		case ADD_OFFICE_FUNCTION:
+		case REMOVE_OFFICE_FUNCTION:
 		case ADD_OFFICE_SUB_SECTION:
 		case REMOVE_OFFICE_SUB_SECTION:
 			this.refreshChildren();
 			break;
 
-		case ADD_OFFICE_GOVERNANCE:
-		case REMOVE_OFFICE_GOVERNANCE:
 		case ADD_OFFICE_SECTION_MANAGED_OBJECT:
 		case REMOVE_OFFICE_SECTION_MANAGED_OBJECT:
 			// TODO add governance configuration

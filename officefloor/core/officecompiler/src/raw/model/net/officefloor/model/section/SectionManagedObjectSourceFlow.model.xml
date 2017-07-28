@@ -6,4 +6,5 @@
 		name="external flow" />
 	<field type="SectionManagedObjectSourceFlowToSubSectionInputModel"
 		name="sub section input" />
+	<field type="SectionManagedObjectSourceFlowToFunctionModel" name="function" />
 </model>

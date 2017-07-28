@@ -25,21 +25,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.section.clazz.NextTask;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.web.http.application.HttpApplicationState;
-import net.officefloor.plugin.web.http.application.HttpApplicationStateful;
-import net.officefloor.plugin.web.http.application.HttpParameters;
-import net.officefloor.plugin.web.http.application.HttpRequestState;
-import net.officefloor.plugin.web.http.application.HttpRequestStateful;
-import net.officefloor.plugin.web.http.application.HttpSessionStateful;
-import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
-import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -52,14 +37,28 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.WebAppContext;
 
+import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.application.HttpApplicationState;
+import net.officefloor.plugin.web.http.application.HttpApplicationStateful;
+import net.officefloor.plugin.web.http.application.HttpParameters;
+import net.officefloor.plugin.web.http.application.HttpRequestState;
+import net.officefloor.plugin.web.http.application.HttpRequestStateful;
+import net.officefloor.plugin.web.http.application.HttpSessionStateful;
+import net.officefloor.plugin.web.http.application.HttpTemplateSection;
+import net.officefloor.plugin.web.http.application.WebArchitect;
+import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
+
 /**
  * Ensure able to integrate to provide objects for JSP rendering by Servlet
  * container.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorServletIntegrationToContainerTest extends
-		OfficeFrameTestCase {
+public class OfficeFloorServletIntegrationToContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Port.
@@ -90,9 +89,8 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 		// Start servlet container with servlet
 		this.server = new Server(this.port);
 		this.context = new WebAppContext();
-		this.context.setBaseResource(Resource.newClassPathResource(this
-				.getClass().getPackage().getName().replace('.', '/')
-				+ "/integrate"));
+		this.context.setBaseResource(
+				Resource.newClassPathResource(this.getClass().getPackage().getName().replace('.', '/') + "/integrate"));
 		this.context.setContextPath("/");
 		this.context.setSessionHandler(new SessionHandler());
 		this.server.setHandler(this.context);
@@ -124,8 +122,7 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 
 		// Add the JSP
 		this.context.addServlet(new ServletHolder(JspServlet.class), "*.jsp");
-		this.context.setClassLoader(Thread.currentThread()
-				.getContextClassLoader());
+		this.context.setClassLoader(Thread.currentThread().getContextClassLoader());
 
 		// Add listener to initialise application object
 		this.context.addEventListener(new ServletContextListener() {
@@ -134,8 +131,7 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 				// Load the application object
 				MockApplicationObject object = new MockApplicationObject();
 				object.text = "INIT";
-				event.getServletContext().setAttribute("ApplicationBean",
-						object);
+				event.getServletContext().setAttribute("ApplicationBean", object);
 			}
 
 			@Override
@@ -151,8 +147,7 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 		this.assertHttpRequest("/Template.jsp", "INIT null null");
 
 		// Invoke to use template submit to create state for JSP
-		this.assertHttpRequest("/template-submit.integrate",
-				"application session request");
+		this.assertHttpRequest("/template-submit.integrate", "application session request");
 	}
 
 	/**
@@ -171,14 +166,13 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 		}
 
 		@Override
-		public boolean configure(WebAutoWireApplication application,
-				ServletContext servletContext) throws Exception {
+		public boolean configure(WebArchitect application, ServletContext servletContext) throws Exception {
 
 			// Should obtain template content from ServletContext
 			final String templatePath = "JspTemplate.ofp";
 
-			HttpTemplateAutoWireSection template = application.addHttpTemplate(
-					"template", templatePath, MockTemplateLogic.class);
+			HttpTemplateSection template = application.addHttpTemplate("template", templatePath,
+					MockTemplateLogic.class);
 			application.linkToResource(template, "jsp", "Template.jsp");
 			return true;
 		}
@@ -188,13 +182,10 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 	 * Template Logic for testing.
 	 */
 	public static class MockTemplateLogic {
-		@NextTask("jsp")
-		public void submit(MockApplicationObject application,
-				MockSessionObject session, MockRequestObject request) {
+		@NextFunction("jsp")
+		public void submit(MockApplicationObject application, MockSessionObject session, MockRequestObject request) {
 			// Ensure pick up state from Servlet Container
-			assertEquals(
-					"Application object should be initialised from Servlet",
-					"INIT", application.getText());
+			assertEquals("Application object should be initialised from Servlet", "INIT", application.getText());
 
 			// Specify state for JSP
 			application.text = "application";
@@ -271,8 +262,7 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 		this.server.start();
 
 		// Ensure can obtain resource from ServletContext
-		this.assertHttpRequest("/resource.resource",
-				"Servlet Container Resource");
+		this.assertHttpRequest("/resource.resource", "Servlet Container Resource");
 	}
 
 	/**
@@ -289,8 +279,7 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 		this.server.start();
 
 		// Ensure can obtain Servlet resource
-		this.assertHttpRequest("/resource.html",
-				"<html><body>Servlet Resource</body></html>");
+		this.assertHttpRequest("/resource.html", "<html><body>Servlet Resource</body></html>");
 	}
 
 	/**
@@ -307,8 +296,7 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 		this.server.start();
 
 		// Ensure can obtain Servlet resource
-		this.assertHttpRequest("/resource.html",
-				"<html><body>Servlet Resource</body></html>");
+		this.assertHttpRequest("/resource.html", "<html><body>Servlet Resource</body></html>");
 	}
 
 	/**
@@ -333,15 +321,13 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 		}
 
 		@Override
-		public boolean configure(WebAutoWireApplication application,
-				ServletContext servletContext) throws Exception {
+		public boolean configure(WebArchitect application, ServletContext servletContext) throws Exception {
 
 			// Should obtain template content from ServletContext
 			final String templatePath = "ServletTemplate.ofp";
 
 			// Add the template
-			application.addHttpTemplate(templateUri, templatePath,
-					MockTemplate.class);
+			application.addHttpTemplate(templateUri, templatePath, MockTemplate.class);
 
 			// Configure
 			return true;
@@ -375,19 +361,15 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 		this.server.start();
 
 		// Ensure can obtain template content from ServletContext
-		HttpResponse response = this.client.execute(new HttpPost(
-				"http://localhost:" + this.port
-						+ "/template-post.redirect?parameter=TEST"));
-		assertEquals("Should be successful", 200, response.getStatusLine()
-				.getStatusCode());
+		HttpResponse response = this.client
+				.execute(new HttpPost("http://localhost:" + this.port + "/template-post.redirect?parameter=TEST"));
+		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
 
 		// Validate content
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		response.getEntity().writeTo(buffer);
 		String body = buffer.toString();
-		assertEquals(
-				"Incorrect response",
-				"POST - parameter=TEST, state=AVAILABLE, link=/template-post.redirect",
+		assertEquals("Incorrect response", "POST - parameter=TEST, state=AVAILABLE, link=/template-post.redirect",
 				body.trim());
 	}
 
@@ -407,12 +389,10 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 		}
 
 		@Override
-		public boolean configure(WebAutoWireApplication application,
-				ServletContext servletContext) throws Exception {
+		public boolean configure(WebArchitect application, ServletContext servletContext) throws Exception {
 
 			// Add the template
-			application.addHttpTemplate("template", "PostRedirectGet.ofp",
-					PostRedirectGetLogic.class);
+			application.addHttpTemplate("template", "PostRedirectGet.ofp", PostRedirectGetLogic.class);
 
 			// Run
 			return true;
@@ -424,8 +404,7 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 	 */
 	public static class PostRedirectGetLogic {
 
-		public void post(PostRedirectGetParameters parameters,
-				ServerHttpConnection connection) throws IOException {
+		public void post(PostRedirectGetParameters parameters, ServerHttpConnection connection) throws IOException {
 
 			// Provide initial content that should be saved across redirect
 			connection.getHttpResponse().getEntityWriter().write("POST - ");
@@ -434,8 +413,7 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 			parameters.state = "AVAILABLE";
 		}
 
-		public PostRedirectGetParameters getTemplateData(
-				PostRedirectGetParameters parameters) {
+		public PostRedirectGetParameters getTemplateData(PostRedirectGetParameters parameters) {
 			return parameters;
 		}
 	}
@@ -471,20 +449,17 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 	 * @param expectedResponse
 	 *            Expected response.
 	 */
-	private void assertHttpRequest(String uri, String expectedResponse)
-			throws Exception {
+	private void assertHttpRequest(String uri, String expectedResponse) throws Exception {
 
 		// Send request
-		HttpResponse response = this.client.execute(new HttpGet(
-				"http://localhost:" + this.port + uri));
+		HttpResponse response = this.client.execute(new HttpGet("http://localhost:" + this.port + uri));
 		int statusCode = response.getStatusLine().getStatusCode();
 
 		// Ensure appropriately integrated state for JSP
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		response.getEntity().writeTo(buffer);
 		String body = buffer.toString();
-		assertEquals("Incorrect response (response status " + statusCode + ")",
-				expectedResponse, body.trim());
+		assertEquals("Incorrect response (response status " + statusCode + ")", expectedResponse, body.trim());
 
 		// Ensure also successful
 		assertEquals("Should be successful", 200, statusCode);

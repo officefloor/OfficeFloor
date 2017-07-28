@@ -17,14 +17,14 @@
  */
 package net.officefloor.tutorial.dipojohttpserver;
 
-import junit.framework.TestCase;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
+
+import junit.framework.TestCase;
+import net.officefloor.OfficeFloorMain;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 
 /**
  * Ensure correctly renders the page.
@@ -45,7 +45,7 @@ public class DiPojoHttpServerTest extends TestCase {
 			this.client.close();
 		} finally {
 			// Stop the server
-			WoofOfficeFloorSource.stop();
+			OfficeFloorMain.open();
 		}
 	}
 
@@ -56,13 +56,11 @@ public class DiPojoHttpServerTest extends TestCase {
 	public void testRenderPage() throws Exception {
 
 		// Start the server
-		WoofOfficeFloorSource.start();
+		OfficeFloorMain.close();
 
 		// Obtain the page
-		HttpResponse response = this.client.execute(new HttpGet(
-				"http://localhost:7878/template.woof"));
-		assertEquals("Should be successful", 200, response.getStatusLine()
-				.getStatusCode());
+		HttpResponse response = this.client.execute(new HttpGet("http://localhost:7878/template.woof"));
+		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
 
 		// Ensure page contains correct rendered content
 		String page = EntityUtils.toString(response.getEntity());

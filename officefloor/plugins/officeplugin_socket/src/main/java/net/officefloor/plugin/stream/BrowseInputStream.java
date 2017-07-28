@@ -22,8 +22,8 @@ import java.io.InputStream;
 
 /**
  * <p>
- * Enables browsing the content of the {@link ServerInputStream} without consuming
- * bytes of the {@link ServerInputStream}.
+ * Enables browsing the content of the {@link ServerInputStream} without
+ * consuming bytes of the {@link ServerInputStream}.
  * <p>
  * Please be aware that this is non-blocking and acts similar to an
  * {@link ServerInputStream}.
@@ -43,19 +43,5 @@ public abstract class BrowseInputStream extends InputStream {
 
 	@Override
 	public abstract int available() throws IOException;
-	
-// TODO provide more efficient implementations of the below
-
-//	@Override
-//	public abstract int read(byte[] b) throws IOException,
-//			NoAvailableInputException;
-
-//	@Override
-//	public abstract int read(byte[] b, int off, int len) throws IOException,
-//			NoAvailableInputException;
-
-//	@Override
-//	public abstract long skip(long n) throws IOException,
-//			NoAvailableInputException;
 
 }

@@ -22,7 +22,7 @@ package net.officefloor.plugin.socket.server.protocol;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ReadContext extends ConnectionHandlerContext {
+public interface ReadContext {
 
 	/**
 	 * <p>

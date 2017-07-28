@@ -11,6 +11,9 @@
 	<field
 		type="OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel"
 		name="office floor input managed object" />
+	<field
+		type="OfficeFloorManagedObjectSourceToOfficeFloorManagedObjectPoolModel"
+		name="office floor managed object pool" />
 	<list type="PropertyModel" name="property" plural="properties" />
 	<list type="OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel"
 		name="office floor managed object" />

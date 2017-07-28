@@ -19,7 +19,7 @@ package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * Configuration linking a {@link Team}.

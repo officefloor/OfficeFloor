@@ -18,9 +18,11 @@
 package net.officefloor.compile.spi.officefloor;
 
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
-import net.officefloor.compile.spi.section.ManagedObjectDependency;
+import net.officefloor.compile.section.TypeQualification;
+import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * {@link ManagedObject} within the {@link OfficeFloor}.
@@ -37,6 +39,21 @@ public interface OfficeFloorManagedObject {
 	String getOfficeFloorManagedObjectName();
 
 	/**
+	 * <p>
+	 * Adds an {@link TypeQualification} for this
+	 * {@link OfficeFloorManagedObject}.
+	 * <p>
+	 * This enables distinguishing {@link OfficeFloorManagedObject} instances to
+	 * enable, for example, dynamic {@link Team} assignment.
+	 * 
+	 * @param qualifier
+	 *            Qualifier. May be <code>null</code> if no qualification.
+	 * @param type
+	 *            Type (typically the fully qualified type).
+	 */
+	void addTypeQualification(String qualifier, String type);
+
+	/**
 	 * Obtains the {@link ManagedObjectDependency} for the
 	 * {@link ManagedObjectDependencyType}.
 	 * 
@@ -44,7 +61,6 @@ public interface OfficeFloorManagedObject {
 	 *            Name of the {@link ManagedObjectDependencyType}.
 	 * @return {@link ManagedObjectDependency}.
 	 */
-	ManagedObjectDependency getManagedObjectDependency(
-			String managedObjectDependencyName);
+	ManagedObjectDependency getManagedObjectDependency(String managedObjectDependencyName);
 
 }

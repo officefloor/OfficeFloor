@@ -26,14 +26,15 @@ import net.officefloor.compile.office.OfficeOutputType;
 import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
+import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.office.OfficeInput;
 import net.officefloor.compile.spi.office.OfficeOutput;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorModel;
-import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.test.changes.AbstractChangesTestCase;
 
 /**
@@ -41,8 +42,8 @@ import net.officefloor.model.test.changes.AbstractChangesTestCase;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractOfficeFloorChangesTestCase extends
-		AbstractChangesTestCase<OfficeFloorModel, OfficeFloorChanges> {
+public abstract class AbstractOfficeFloorChangesTestCase
+		extends AbstractChangesTestCase<OfficeFloorModel, OfficeFloorChanges> {
 
 	/**
 	 * Initiate.
@@ -65,10 +66,10 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 	 */
 
 	@Override
-	protected OfficeFloorModel retrieveModel(ConfigurationItem configurationItem)
-			throws Exception {
-		return new OfficeFloorRepositoryImpl(new ModelRepositoryImpl())
-				.retrieveOfficeFloor(configurationItem);
+	protected OfficeFloorModel retrieveModel(ConfigurationItem configurationItem) throws Exception {
+		OfficeFloorModel officeFloor = new OfficeFloorModel();
+		new OfficeFloorRepositoryImpl(new ModelRepositoryImpl()).retrieveOfficeFloor(officeFloor, configurationItem);
+		return officeFloor;
 	}
 
 	@Override
@@ -123,8 +124,7 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 		 * @param parameterType
 		 *            Parameter type.
 		 */
-		void addOfficeSectionInput(String sectionName, String inputName,
-				Class<?> parameterType);
+		void addOfficeSectionInput(String sectionName, String inputName, Class<?> parameterType);
 
 		/**
 		 * Add {@link OfficeManagedObjectType}.
@@ -138,8 +138,8 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 		 * @param extensionInterfaces
 		 *            Extension interfaces.
 		 */
-		void addOfficeManagedObject(String name, Class<?> objectType,
-				String typeQualifier, Class<?>... extensionInterfaces);
+		void addOfficeManagedObject(String name, Class<?> objectType, String typeQualifier,
+				Class<?>... extensionInterfaces);
 
 		/**
 		 * Add {@link OfficeTeamType}.
@@ -159,8 +159,7 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 		 * @param response
 		 *            {@link OfficeOutputType}.
 		 */
-		void addOfficeInput(String inputName, Class<?> parameterType,
-				OfficeOutputType response);
+		void addOfficeInput(String inputName, Class<?> parameterType, OfficeOutputType response);
 
 		/**
 		 * Add {@link OfficeOutputType}.
@@ -172,15 +171,13 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 		 * @param handler
 		 *            {@link OfficeInputType}.
 		 */
-		void addOfficeOutput(String outputName, Class<?> argumentType,
-				OfficeInputType handler);
+		void addOfficeOutput(String outputName, Class<?> argumentType, OfficeInputType handler);
 	}
 
 	/**
 	 * {@link OfficeTypeContext} implementation.
 	 */
-	private class OfficeTypeContextImpl implements OfficeTypeContext,
-			OfficeType {
+	private class OfficeTypeContextImpl implements OfficeTypeContext, OfficeType {
 
 		/**
 		 * {@link OfficeInputType} instances.
@@ -212,31 +209,24 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 		 */
 
 		@Override
-		public void addOfficeInput(String inputName, Class<?> parameterType,
-				OfficeOutputType response) {
-			this.inputs.add(new OfficeTypeItem(inputName, parameterType
-					.getName(), response));
+		public void addOfficeInput(String inputName, Class<?> parameterType, OfficeOutputType response) {
+			this.inputs.add(new OfficeTypeItem(inputName, parameterType.getName(), response));
 		}
 
 		@Override
-		public void addOfficeOutput(String outputName, Class<?> argumentType,
-				OfficeInputType handler) {
-			this.outputs.add(new OfficeTypeItem(outputName, argumentType
-					.getName(), handler));
+		public void addOfficeOutput(String outputName, Class<?> argumentType, OfficeInputType handler) {
+			this.outputs.add(new OfficeTypeItem(outputName, argumentType.getName(), handler));
 		}
 
 		@Override
-		public void addOfficeSectionInput(String name, String inputName,
-				Class<?> parameterType) {
-			this.sectionInputs.add(new OfficeTypeItem(name, inputName,
-					parameterType.getName()));
+		public void addOfficeSectionInput(String name, String inputName, Class<?> parameterType) {
+			this.sectionInputs.add(new OfficeTypeItem(name, inputName, parameterType.getName()));
 		}
 
 		@Override
-		public void addOfficeManagedObject(String name, Class<?> objectType,
-				String typeQualifier, Class<?>... extensionInterfaces) {
-			this.objects.add(new OfficeTypeItem(name, objectType.getName(),
-					typeQualifier, extensionInterfaces));
+		public void addOfficeManagedObject(String name, Class<?> objectType, String typeQualifier,
+				Class<?>... extensionInterfaces) {
+			this.objects.add(new OfficeTypeItem(name, objectType.getName(), typeQualifier, extensionInterfaces));
 		}
 
 		@Override
@@ -279,9 +269,8 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 	/**
 	 * {@link OfficeType} item.
 	 */
-	private class OfficeTypeItem implements OfficeAvailableSectionInputType,
-			OfficeManagedObjectType, OfficeTeamType, OfficeInputType,
-			OfficeOutputType {
+	private class OfficeTypeItem implements OfficeAvailableSectionInputType, OfficeManagedObjectType, OfficeTeamType,
+			OfficeInputType, OfficeOutputType {
 
 		/**
 		 * Name.
@@ -328,8 +317,7 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 		 * @param parameterType
 		 *            Parameter type.
 		 */
-		public OfficeTypeItem(String name, String inputName,
-				String parameterType) {
+		public OfficeTypeItem(String name, String inputName, String parameterType) {
 			this.name = name;
 			this.inputName = inputName;
 			this.type = parameterType;
@@ -349,8 +337,7 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 		 * @param response
 		 *            {@link OfficeOutputType}.
 		 */
-		public OfficeTypeItem(String name, String parameterType,
-				OfficeOutputType response) {
+		public OfficeTypeItem(String name, String parameterType, OfficeOutputType response) {
 			this.name = name;
 			this.inputName = null;
 			this.type = parameterType;
@@ -370,8 +357,7 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 		 * @param handler
 		 *            {@link OfficeInputType}.
 		 */
-		public OfficeTypeItem(String name, String argumentType,
-				OfficeInputType handler) {
+		public OfficeTypeItem(String name, String argumentType, OfficeInputType handler) {
 			this.name = name;
 			this.inputName = null;
 			this.type = argumentType;
@@ -393,8 +379,7 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 		 * @param extensionInterfaces
 		 *            Extension interfaces.
 		 */
-		public OfficeTypeItem(String name, String objectType,
-				String typeQualifier, Class<?>[] extensionInterfaces) {
+		public OfficeTypeItem(String name, String objectType, String typeQualifier, Class<?>[] extensionInterfaces) {
 			this.name = name;
 			this.inputName = null;
 			this.type = objectType;
@@ -483,6 +468,11 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 		@Override
 		public String getOfficeTeamName() {
 			return this.name;
+		}
+
+		@Override
+		public TypeQualification[] getTypeQualification() {
+			return new TypeQualification[0];
 		}
 
 		/*

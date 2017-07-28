@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="administration name" />
+	<field type="String" name="administration source class name" />
+	<field type="AdministrationToOfficeTeamModel" name="office team" />
+	<list type="PropertyModel" name="property" plural="properties" />
+	<list type="AdministrationFlowModel" name="administration flow"
+		cascade-remove="true" />
+	<list type="AdministrationEscalationModel" name="administration escalation"
+		cascade-remove="true" />
+	<list type="OfficeFunctionToPreAdministrationModel" name="pre office function" />
+	<list type="OfficeFunctionToPostAdministrationModel" name="post office function" />
+	<list type="ExternalManagedObjectToAdministrationModel" name="external managed object" />
+	<list type="OfficeManagedObjectToAdministrationModel" name="office managed object" />
+</model>

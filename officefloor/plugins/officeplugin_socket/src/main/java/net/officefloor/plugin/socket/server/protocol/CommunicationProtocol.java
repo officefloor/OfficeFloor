@@ -18,8 +18,7 @@
 package net.officefloor.plugin.socket.server.protocol;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 
 /**
  * <p>
@@ -32,23 +31,15 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContex
 public interface CommunicationProtocol {
 
 	/**
-	 * Provides the {@link CommunicationProtocol} the
-	 * {@link ManagedObjectExecuteContext} to enable it to invoke
-	 * {@link ProcessState} instances to process input.
-	 * 
-	 * @param executeContext
-	 *            {@link ManagedObjectExecuteContext}.
-	 */
-	void setManagedObjectExecuteContext(
-			ManagedObjectExecuteContext<Indexed> executeContext);
-
-	/**
 	 * Creates a {@link ConnectionHandler} for a new {@link Connection}.
 	 * 
 	 * @param connection
 	 *            A new {@link Connection} requiring handling.
+	 * @param executeContext
+	 *            {@link ManagedObjectExecuteContext}.
 	 * @return {@link ConnectionHandler} to handle the new {@link Connection}.
 	 */
-	ConnectionHandler createConnectionHandler(Connection connection);
+	ConnectionHandler createConnectionHandler(Connection connection,
+			ManagedObjectExecuteContext<Indexed> executeContext);
 
 }

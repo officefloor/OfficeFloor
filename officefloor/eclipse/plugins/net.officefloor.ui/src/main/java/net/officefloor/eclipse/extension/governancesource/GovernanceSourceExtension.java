@@ -17,22 +17,20 @@
  */
 package net.officefloor.eclipse.extension.governancesource;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.eclipse.extension.ExtensionUtil;
-import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.eclipse.extension.open.ExtensionOpener;
-
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 
 /**
  * Interface for extension to provide enriched {@link GovernanceSource} usage.
  * 
  * @author Daniel Sagenschneider
  * 
- * @see ExtensionClasspathProvider
  * @see ExtensionOpener
  */
 public interface GovernanceSourceExtension<I, F extends Enum<F>, S extends GovernanceSource<I, F>> {
@@ -40,8 +38,7 @@ public interface GovernanceSourceExtension<I, F extends Enum<F>, S extends Gover
 	/**
 	 * Extension ID.
 	 */
-	public static final String EXTENSION_ID = ExtensionUtil
-			.getExtensionId("governancesources");
+	public static final String EXTENSION_ID = ExtensionUtil.getExtensionId("governancesources");
 
 	/**
 	 * Obtains the class of the {@link GovernanceSource} being enriched in its

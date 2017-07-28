@@ -17,15 +17,14 @@
  */
 package net.officefloor.plugin.section.transform;
 
-import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.autowire.AutoWireSectionTransformer;
-import net.officefloor.autowire.AutoWireSectionTransformerContext;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.compile.spi.office.OfficeSectionTransformer;
+import net.officefloor.compile.spi.office.OfficeSectionTransformerContext;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionObject;
@@ -43,8 +42,7 @@ import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class TransformSectionSource extends AbstractSectionSource implements
-		AutoWireSectionTransformer {
+public class TransformSectionSource extends AbstractSectionSource implements OfficeSectionTransformer {
 
 	/**
 	 * Name of the {@link Property} for the {@link Class} name of the
@@ -113,10 +111,10 @@ public class TransformSectionSource extends AbstractSectionSource implements
 	 * @throws Exception
 	 *             If fails to load the wrapped {@link SubSection}.
 	 */
-	protected void loadSubSection(String sectionSourceClassName,
-			String sectionLocation, PropertyList properties) throws Exception {
-		SubSection subSection = this.getDesginer().addSubSection(
-				SUB_SECTION_NAME, sectionSourceClassName, sectionLocation);
+	protected void loadSubSection(String sectionSourceClassName, String sectionLocation, PropertyList properties)
+			throws Exception {
+		SubSection subSection = this.getDesginer().addSubSection(SUB_SECTION_NAME, sectionSourceClassName,
+				sectionLocation);
 		for (Property property : properties) {
 			subSection.addProperty(property.getName(), property.getValue());
 		}
@@ -133,8 +131,7 @@ public class TransformSectionSource extends AbstractSectionSource implements
 	 * @throws Exception
 	 *             If fails to load the {@link SectionInput}.
 	 */
-	protected void loadSectionInput(SectionInputType inputType)
-			throws Exception {
+	protected void loadSectionInput(SectionInputType inputType) throws Exception {
 
 		// Obtain the designer
 		TransformSectionDesigner designer = this.getDesginer();
@@ -145,8 +142,7 @@ public class TransformSectionSource extends AbstractSectionSource implements
 		// Default map to Section Input
 		String inputName = inputType.getSectionInputName();
 		SubSectionInput wrappedInput = subSection.getSubSectionInput(inputName);
-		SectionInput input = designer.addSectionInput(inputName,
-				inputType.getParameterType());
+		SectionInput input = designer.addSectionInput(inputName, inputType.getParameterType());
 		designer.link(input, wrappedInput);
 	}
 
@@ -161,8 +157,7 @@ public class TransformSectionSource extends AbstractSectionSource implements
 	 * @throws Exception
 	 *             If fails to load the {@link SectionOutput}.
 	 */
-	protected void loadSectionOutput(SectionOutputType outputType)
-			throws Exception {
+	protected void loadSectionOutput(SectionOutputType outputType) throws Exception {
 
 		// Obtain the designer
 		TransformSectionDesigner designer = this.getDesginer();
@@ -172,10 +167,9 @@ public class TransformSectionSource extends AbstractSectionSource implements
 
 		// Default map to Section Output
 		String outputName = outputType.getSectionOutputName();
-		SubSectionOutput wrappedOutput = subSection
-				.getSubSectionOutput(outputName);
-		SectionOutput output = designer.addSectionOutput(outputName,
-				outputType.getArgumentType(), outputType.isEscalationOnly());
+		SubSectionOutput wrappedOutput = subSection.getSubSectionOutput(outputName);
+		SectionOutput output = designer.addSectionOutput(outputName, outputType.getArgumentType(),
+				outputType.isEscalationOnly());
 		designer.link(wrappedOutput, output);
 	}
 
@@ -190,8 +184,7 @@ public class TransformSectionSource extends AbstractSectionSource implements
 	 * @throws Exception
 	 *             If fails to laod the {@link SectionObject}.
 	 */
-	protected void loadSectionObject(SectionObjectType objectType)
-			throws Exception {
+	protected void loadSectionObject(SectionObjectType objectType) throws Exception {
 
 		// Obtain the designer
 		TransformSectionDesigner designer = this.getDesginer();
@@ -201,10 +194,8 @@ public class TransformSectionSource extends AbstractSectionSource implements
 
 		// Default map to Section Object
 		String objectName = objectType.getSectionObjectName();
-		SubSectionObject wrappedObject = subSection
-				.getSubSectionObject(objectName);
-		SectionObject object = designer.addSectionObject(objectName,
-				objectType.getObjectType());
+		SubSectionObject wrappedObject = subSection.getSubSectionObject(objectName);
+		SectionObject object = designer.addSectionObject(objectName, objectType.getObjectType());
 		object.setTypeQualifier(objectType.getTypeQualifier());
 		designer.link(wrappedObject, object);
 	}
@@ -223,32 +214,41 @@ public class TransformSectionSource extends AbstractSectionSource implements
 	}
 
 	/*
-	 * ====================== AutoWireSectionTransformer =====================
+	 * ====================== OfficeSectionTransformer =====================
 	 */
 
 	@Override
-	public AutoWireSection transformAutoWireSection(
-			AutoWireSectionTransformerContext context) {
+	public void transformOfficeSection(OfficeSectionTransformerContext context) {
 
-		// Obtain the section
-		AutoWireSection section = context.getSection();
-
-		// Create the transformed section
-		AutoWireSection transformedSection = context.createSection(
-				section.getSectionName(), this.getClass().getName(), null);
-		transformedSection.addProperty(PROPERTY_SECTION_SOURCE_CLASS_NAME,
-				section.getSectionSourceClassName());
-		String location = section.getSectionLocation();
+		// Create the properties
+		PropertyList properties = context.createPropertyList();
+		properties.addProperty(PROPERTY_SECTION_SOURCE_CLASS_NAME).setValue(context.getSectionSourceClassName());
+		String location = context.getSectionLocation();
 		if (location != null) {
-			transformedSection.addProperty(PROPERTY_SECTION_LOCATION, location);
+			properties.addProperty(PROPERTY_SECTION_LOCATION).setValue(location);
 		}
-		for (Property property : section.getProperties()) {
-			transformedSection.addProperty(PROPERTY_SECTION_PROPERTY_PREFIX
-					+ property.getName(), property.getValue());
+		for (Property property : context.getSectionProperties()) {
+			properties.addProperty(PROPERTY_SECTION_PROPERTY_PREFIX + property.getName()).setValue(property.getValue());
 		}
 
-		// Return the transformed section
-		return transformedSection;
+		// Load additional properties
+		this.configureProperties(context, properties);
+
+		// Transform the section
+		context.setTransformedOfficeSection(this.getClass().getName(), null, properties);
+	}
+
+	/**
+	 * Enables overriding to configure additional {@link Property} instances.
+	 * 
+	 * @param context
+	 *            {@link OfficeSectionTransformerContext}.
+	 * @param properties
+	 *            {@link PropertyList} to load additional {@link Property}
+	 *            instances.
+	 */
+	protected void configureProperties(OfficeSectionTransformerContext context, PropertyList properties) {
+		// No additional properties
 	}
 
 	/*
@@ -257,23 +257,19 @@ public class TransformSectionSource extends AbstractSectionSource implements
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(PROPERTY_SECTION_SOURCE_CLASS_NAME,
-				"Section Source");
+		context.addProperty(PROPERTY_SECTION_SOURCE_CLASS_NAME, "Section Source");
 	}
 
 	@Override
-	public void sourceSection(SectionDesigner designer,
-			SectionSourceContext context) throws Exception {
+	public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
 
 		// Load state for override methods
 		this.transformDesigner = new TransformSectionDesigner(designer);
 		this.context = context;
 
 		// Obtain the section details to transform
-		String sectionSourceClassName = context
-				.getProperty(PROPERTY_SECTION_SOURCE_CLASS_NAME);
-		String sectionLocation = context.getProperty(PROPERTY_SECTION_LOCATION,
-				null);
+		String sectionSourceClassName = context.getProperty(PROPERTY_SECTION_SOURCE_CLASS_NAME);
+		String sectionLocation = context.getProperty(PROPERTY_SECTION_LOCATION, null);
 
 		// Obtain the properties for the section
 		PropertyList sectionProperties = context.createPropertyList();
@@ -282,22 +278,19 @@ public class TransformSectionSource extends AbstractSectionSource implements
 
 				// Section property, so obtain the property details
 				String propertyValue = context.getProperty(propertyName);
-				String sectionPropertyName = propertyName
-						.substring(PROPERTY_SECTION_PROPERTY_PREFIX.length());
+				String sectionPropertyName = propertyName.substring(PROPERTY_SECTION_PROPERTY_PREFIX.length());
 
 				// Add the section property
-				sectionProperties.addProperty(sectionPropertyName).setValue(
-						propertyValue);
+				sectionProperties.addProperty(sectionPropertyName).setValue(propertyValue);
 			}
 		}
 
 		// Obtain the section type
-		SectionType type = context.loadSectionType(sectionSourceClassName,
-				sectionLocation, sectionProperties);
+		SectionType type = context.loadSectionType("TRANSFORM", sectionSourceClassName, sectionLocation,
+				sectionProperties);
 
 		// Add the section to transform
-		this.loadSubSection(sectionSourceClassName, sectionLocation,
-				sectionProperties);
+		this.loadSubSection(sectionSourceClassName, sectionLocation, sectionProperties);
 
 		// Map the inputs
 		for (SectionInputType inputType : type.getSectionInputTypes()) {

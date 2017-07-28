@@ -17,47 +17,42 @@
  */
 package net.officefloor.frame.impl.execute.managedobject;
 
-import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.team.Job;
+import net.officefloor.frame.impl.execute.function.Promise;
+import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.CleanupSequence;
-import net.officefloor.frame.internal.structure.ContainerContext;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.FunctionStateContext;
+import net.officefloor.frame.internal.structure.FunctionLoop;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
+import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectReadyCheck;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.ProcessCompletionListener;
-import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.internal.structure.WorkContainer;
-import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
-import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.NameAwareManagedObject;
-import net.officefloor.frame.spi.managedobject.ObjectRegistry;
-import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
-import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
-import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.JobContext;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Meta-data of the {@link ManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
-		ManagedObjectMetaData<D> {
+public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObjectMetaData<O> {
 
 	/**
 	 * Name of the {@link ManagedObject} bound within the
@@ -79,6 +74,12 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 * {@link ManagedObjectSource} of the {@link ManagedObject}.
 	 */
 	private final ManagedObjectSource<?, ?> source;
+
+	/**
+	 * Indicates if the {@link ManagedObject} implements
+	 * {@link ProcessAwareManagedObject}.
+	 */
+	private final boolean isProcessAwareManagedObject;
 
 	/**
 	 * Indicates if the {@link ManagedObject} implements
@@ -145,23 +146,10 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	/**
 	 * {@link FlowMetaData} for the recycling of this {@link ManagedObject}.
 	 */
-	private FlowMetaData<?> recycleFlowMetaData;
+	private FlowMetaData recycleFlowMetaData;
 
 	/**
-	 * {@link TeamManagement} for handling escalation of recycling the
-	 * {@link ManagedObject}.
-	 */
-	private TeamManagement recycleEscalationResponsibleTeam;
-
-	/**
-	 * Continue {@link Team} for handling escalation of recycling the
-	 * {@link ManagedObject}.
-	 */
-	private Team recycleEscalationContinueTeam;
-
-	/**
-	 * Initiate with meta-data of the {@link ManagedObject} to source specific
-	 * to the {@link Work}.
+	 * Instantiate.
 	 * 
 	 * @param boundManagedObjectName
 	 *            Name of the {@link ManagedObject} bound within the
@@ -173,11 +161,14 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 *            Instance index.
 	 * @param source
 	 *            {@link ManagedObjectSource} of the {@link ManagedObject}.
+	 * @param pool
+	 *            {@link ManagedObjectPool} of the {@link ManagedObject}.
+	 * @param isProcessAwareManagedObject
+	 *            <code>true</code> if the {@link ManagedObject} is
+	 *            {@link ProcessAwareManagedObject}.
 	 * @param isNameAwareManagedObject
 	 *            <code>true</code> if the {@link ManagedObject} is
 	 *            {@link NameAwareManagedObject}.
-	 * @param pool
-	 *            {@link ManagedObjectPool} of the {@link ManagedObject}.
 	 * @param sourcingManager
 	 *            {@link AssetManager} to manage the sourcing of the
 	 *            {@link ManagedObject} instances.
@@ -200,20 +191,17 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 *            {@link ManagedObjectGovernanceMetaData} instances applicable
 	 *            to this {@link ManagedObject}.
 	 */
-	public ManagedObjectMetaDataImpl(String boundManagedObjectName,
-			Class<?> objectType, int instanceIndex,
-			ManagedObjectSource<?, ?> source, ManagedObjectPool pool,
-			boolean isNameAwareManagedObject, AssetManager sourcingManager,
-			boolean isManagedObjectAsynchronous,
-			AssetManager operationsManager,
-			boolean isCoordinatingManagedObject,
-			ManagedObjectIndex[] dependencyMapping, long timeout,
-			ManagedObjectGovernanceMetaData<?>[] governanceMetaData) {
+	public ManagedObjectMetaDataImpl(String boundManagedObjectName, Class<?> objectType, int instanceIndex,
+			ManagedObjectSource<?, ?> source, ManagedObjectPool pool, boolean isProcessAwareManagedObject,
+			boolean isNameAwareManagedObject, AssetManager sourcingManager, boolean isManagedObjectAsynchronous,
+			AssetManager operationsManager, boolean isCoordinatingManagedObject, ManagedObjectIndex[] dependencyMapping,
+			long timeout, ManagedObjectGovernanceMetaData<?>[] governanceMetaData) {
 		this.boundManagedObjectName = boundManagedObjectName;
 		this.objectType = objectType;
 		this.instanceIndex = instanceIndex;
 		this.source = source;
 		this.timeout = timeout;
+		this.isProcessAwareManagedObject = isProcessAwareManagedObject;
 		this.isNameAwareManagedObject = isNameAwareManagedObject;
 		this.isCoordinatingManagedObject = isCoordinatingManagedObject;
 		this.dependencyMapping = dependencyMapping;
@@ -233,21 +221,10 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 * @param recycleFlowMetaData
 	 *            {@link FlowMetaData} for the recycling of this
 	 *            {@link ManagedObject}.
-	 * @param recycleEscalationResponsibleTeam
-	 *            {@link TeamManagement} for handling escalation of recycling
-	 *            the {@link ManagedObject}.
-	 * @param recycleEscalationContinueTeam
-	 *            Continue {@link Team} for handling escalation of recycling the
-	 *            {@link ManagedObject}.
 	 */
-	public void loadRemainingState(OfficeMetaData officeMetaData,
-			FlowMetaData<?> recycleFlowMetaData,
-			TeamManagement recycleEscalationResponsibleTeam,
-			Team recycleEscalationContinueTeam) {
+	public void loadRemainingState(OfficeMetaData officeMetaData, FlowMetaData recycleFlowMetaData) {
 		this.officeMetaData = officeMetaData;
 		this.recycleFlowMetaData = recycleFlowMetaData;
-		this.recycleEscalationResponsibleTeam = recycleEscalationResponsibleTeam;
-		this.recycleEscalationContinueTeam = recycleEscalationContinueTeam;
 	}
 
 	/*
@@ -267,12 +244,6 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	@Override
 	public int getInstanceIndex() {
 		return this.instanceIndex;
-	}
-
-	@Override
-	public ManagedObjectContainer createManagedObjectContainer(
-			ProcessState processState) {
-		return new ManagedObjectContainerImpl(this, processState);
 	}
 
 	@Override
@@ -296,6 +267,11 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	}
 
 	@Override
+	public boolean isProcessAwareManagedObject() {
+		return this.isProcessAwareManagedObject;
+	}
+
+	@Override
 	public boolean isNameAwareManagedObject() {
 		return this.isNameAwareManagedObject;
 	}
@@ -316,19 +292,176 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	}
 
 	@Override
-	public <W extends Work> boolean isDependenciesReady(
-			WorkContainer<W> workContainer, JobContext jobContext,
-			JobNode jobNode, JobNodeActivateSet activateSet,
-			ContainerContext context) {
-		return workContainer.isManagedObjectsReady(this.dependencyMapping,
-				jobContext, jobNode, activateSet, context);
+	public FunctionLoop getFunctionLoop() {
+		return this.officeMetaData.getFunctionLoop();
 	}
 
 	@Override
-	public <W extends Work> ObjectRegistry<D> createObjectRegistry(
-			WorkContainer<W> workContainer, ThreadState threadState) {
-		return new ObjectRegistryImpl<D>(workContainer, this.dependencyMapping,
-				threadState);
+	public OfficeClock getOfficeClock() {
+		return this.officeMetaData.getOfficeClock();
+	}
+
+	@Override
+	public FunctionState checkReady(ManagedFunctionContainer managedFunction, ManagedObjectReadyCheck check,
+			ManagedObjectContainer currentContainer) {
+
+		// Ensure there are dependencies
+		if ((this.dependencyMapping.length == 0) && (currentContainer == null)) {
+			return null; // nothing to check
+		}
+
+		// Create the managed object ready check wrapper
+		ManagedObjectReadyCheckWrapper wrapper = new ManagedObjectReadyCheckWrapper(check);
+
+		// Create the array of check functions
+		FunctionState[] checkFunctions = new FunctionState[this.dependencyMapping.length
+				+ ((currentContainer != null) ? 1 : 0)];
+		for (int i = 0; i < this.dependencyMapping.length; i++) {
+
+			// Obtain the dependent managed object container
+			ManagedObjectContainer dependency = ManagedObjectContainerImpl
+					.getManagedObjectContainer(this.dependencyMapping[i], managedFunction);
+
+			// Create check function for the dependency
+			checkFunctions[i] = dependency.checkReady(wrapper);
+		}
+		if (currentContainer != null) {
+			checkFunctions[checkFunctions.length - 1] = currentContainer.checkReady(wrapper);
+		}
+
+		// Return function to check all managed objects are ready
+		return new CheckReadyFunctionState(wrapper, checkFunctions, 0);
+	}
+
+	/**
+	 * Wrapper around {@link ManagedObjectReadyCheck} to determine if
+	 * {@link ManagedObject} was not ready.
+	 */
+	private static class ManagedObjectReadyCheckWrapper implements ManagedObjectReadyCheck {
+
+		/**
+		 * Delegate {@link ManagedObjectReadyCheck}.
+		 */
+		private final ManagedObjectReadyCheck delegate;
+
+		/**
+		 * Indicates if ready.
+		 */
+		private boolean isReady = true;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param delegate
+		 *            Delegate {@link ManagedObjectReadyCheck}.
+		 */
+		public ManagedObjectReadyCheckWrapper(ManagedObjectReadyCheck delegate) {
+			this.delegate = delegate;
+		}
+
+		/*
+		 * ====================== ManagedObjectReadyCheck ====================
+		 */
+
+		@Override
+		public FunctionState getLatchFunction() {
+			return this.delegate.getLatchFunction();
+		}
+
+		@Override
+		public ManagedFunctionContainer getManagedFunctionContainer() {
+			return this.delegate.getManagedFunctionContainer();
+		}
+
+		@Override
+		public FunctionState setNotReady() {
+
+			// Flag not ready
+			this.isReady = false;
+
+			// Return not ready job node
+			return this.delegate.setNotReady();
+		}
+	}
+
+	/**
+	 * {@link FunctionState} to check {@link ManagedObject} is ready.
+	 */
+	private static class CheckReadyFunctionState extends AbstractLinkedListSetEntry<FunctionState, Flow>
+			implements FunctionState {
+
+		/**
+		 * {@link ManagedObjectReadyCheckWrapper}.
+		 */
+		private final ManagedObjectReadyCheckWrapper readyCheck;
+
+		/**
+		 * {@link FunctionState} instances to check the necessary
+		 * {@link ManagedObject} instances are ready.
+		 */
+		private final FunctionState[] checkFunctions;
+
+		/**
+		 * Index of the {@link FunctionState} to use for checking.
+		 */
+		private final int currentFunctionIndex;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param readyCheck
+		 *            {@link ManagedObjectReadyCheckWrapper}.
+		 * @param checkFunctions
+		 *            {@link FunctionState} instances to check the necessary
+		 *            {@link ManagedObject} instances are ready.
+		 * @param currentFunctionIndex
+		 *            Index of the {@link FunctionState} to use for checking.
+		 */
+		public CheckReadyFunctionState(ManagedObjectReadyCheckWrapper readyCheck, FunctionState[] checkFunctions,
+				int currentFunctionIndex) {
+			this.readyCheck = readyCheck;
+			this.checkFunctions = checkFunctions;
+			this.currentFunctionIndex = currentFunctionIndex;
+		}
+
+		/*
+		 * ====================== FunctionState ====================
+		 */
+
+		@Override
+		public ThreadState getThreadState() {
+			return this.checkFunctions[this.currentFunctionIndex].getThreadState();
+		}
+
+		@Override
+		public FunctionState execute(FunctionStateContext context) throws Throwable {
+
+			// Undertake check for current function
+			FunctionState currentFunction = this.checkFunctions[this.currentFunctionIndex];
+			FunctionState nextFunction = currentFunction.execute(context);
+
+			// Determine if not ready (only single checking)
+			if (!this.readyCheck.isReady) {
+				// Not ready, so no further checking necessary
+				return nextFunction;
+			}
+
+			// Determine if last check
+			int nextFunctionIndex = this.currentFunctionIndex + 1;
+			if (nextFunctionIndex >= this.checkFunctions.length) {
+				// No further checks
+				return nextFunction;
+			}
+
+			// Continue with check of next managed object
+			return Promise.then(nextFunction,
+					new CheckReadyFunctionState(this.readyCheck, this.checkFunctions, nextFunctionIndex));
+		}
+	}
+
+	@Override
+	public ObjectRegistry<O> createObjectRegistry(ManagedFunctionContainer currentContainer) {
+		return new ObjectRegistryImpl<O>(currentContainer, this.dependencyMapping);
 	}
 
 	@Override
@@ -337,117 +470,8 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	}
 
 	@Override
-	public JobNode createRecycleJobNode(ManagedObject managedObject,
-			CleanupSequence cleanupSequence) {
-		if (this.recycleFlowMetaData == null) {
-			// No recycling for managed objects
-			return null;
-		} else {
-			// Create the recycle managed object parameter
-			RecycleManagedObjectParameterImpl<ManagedObject> parameter = new RecycleManagedObjectParameterImpl<ManagedObject>(
-					managedObject, cleanupSequence);
-
-			// Create the recycle job node
-			JobNode recycleJobNode = this.officeMetaData.createProcess(
-					this.recycleFlowMetaData, parameter, parameter,
-					this.recycleEscalationResponsibleTeam,
-					this.recycleEscalationContinueTeam);
-
-			// Listen to process completion (handle not being recycled)
-			recycleJobNode.getJobSequence().getThreadState().getProcessState()
-					.registerProcessCompletionListener(parameter);
-
-			// Return the recycle job node
-			return recycleJobNode;
-		}
-	}
-
-	/**
-	 * Implementation of {@link RecycleManagedObjectParameter}.
-	 */
-	private class RecycleManagedObjectParameterImpl<MO extends ManagedObject>
-			implements RecycleManagedObjectParameter<MO>, EscalationHandler,
-			ProcessCompletionListener {
-
-		/**
-		 * {@link ManagedObject} being recycled.
-		 */
-		private final MO managedObject;
-
-		/**
-		 * {@link CleanupSequence}.
-		 */
-		private final CleanupSequence cleanupSequence;
-
-		/**
-		 * Flag indicating if has been recycled.
-		 */
-		private volatile boolean isRecycled = false;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param managedObject
-		 *            {@link ManagedObject} to recycle.
-		 * @param cleanupSequence
-		 *            {@link CleanupSequence}.
-		 */
-		RecycleManagedObjectParameterImpl(MO managedObject,
-				CleanupSequence cleanupSequence) {
-			this.managedObject = managedObject;
-			this.cleanupSequence = cleanupSequence;
-		}
-
-		/*
-		 * ============= RecycleManagedObjectParameter =======================
-		 */
-
-		@Override
-		public MO getManagedObject() {
-			return this.managedObject;
-		}
-
-		@Override
-		public void reuseManagedObject(MO managedObject) {
-			// Return to pool
-			if (ManagedObjectMetaDataImpl.this.pool != null) {
-				ManagedObjectMetaDataImpl.this.pool
-						.returnManagedObject(managedObject);
-			}
-
-			// Flag recycled
-			this.isRecycled = true;
-		}
-
-		@Override
-		public CleanupEscalation[] getCleanupEscalations() {
-			return this.cleanupSequence.getCleanupEscalations();
-		}
-
-		/*
-		 * ================== EscalationHandler ===============================
-		 */
-
-		@Override
-		public void handleEscalation(Throwable escalation) throws Throwable {
-			// Register the failure of recycling
-			this.cleanupSequence.registerCleanupEscalation(
-					ManagedObjectMetaDataImpl.this.objectType, escalation);
-		}
-
-		/*
-		 * ============= ProcessCompletionListener ============================
-		 */
-
-		@Override
-		public void processComplete(TeamIdentifier currentTeam) {
-			if ((!this.isRecycled)
-					&& (ManagedObjectMetaDataImpl.this.pool != null)) {
-				// Not recycled, therefore lost to pool
-				ManagedObjectMetaDataImpl.this.pool
-						.lostManagedObject(this.managedObject);
-			}
-		}
+	public FunctionState recycle(ManagedObject managedObject, ManagedObjectCleanup cleanup) {
+		return cleanup.cleanup(this.recycleFlowMetaData, this.objectType, managedObject, this.pool);
 	}
 
 }

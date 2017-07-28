@@ -23,6 +23,7 @@ package net.officefloor.compile.internal.structure;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated // external integration via queues (no synchronous)
 public interface LinkSynchronousNode {
 
 	/**

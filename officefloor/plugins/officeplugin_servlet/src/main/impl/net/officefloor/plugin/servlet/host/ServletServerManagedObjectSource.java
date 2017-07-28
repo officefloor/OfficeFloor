@@ -29,7 +29,7 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
 import net.officefloor.plugin.servlet.log.Logger;
 import net.officefloor.plugin.servlet.resource.ClassPathResourceLocator;
 import net.officefloor.plugin.servlet.resource.ResourceLocator;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 
 /**
@@ -101,7 +101,7 @@ public class ServletServerManagedObjectSource
 		// Create the resource locator
 		String classPathPrefix = mosContext.getProperty(
 				PROPERTY_CLASS_PATH_PREFIX,
-				WebAutoWireApplication.WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX);
+				WebArchitect.WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX);
 		ClassLoader classLoader = mosContext.getClassLoader();
 		this.resourceLocator = new ClassPathResourceLocator(classPathPrefix,
 				classLoader);

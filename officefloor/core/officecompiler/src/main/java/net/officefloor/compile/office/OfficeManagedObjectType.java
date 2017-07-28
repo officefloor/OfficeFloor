@@ -19,7 +19,7 @@ package net.officefloor.compile.office;
 
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * <code>Type definition</code> of a {@link ManagedObject} required by the

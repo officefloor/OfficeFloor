@@ -21,8 +21,8 @@ import org.easymock.AbstractMatcher;
 
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
-import net.officefloor.frame.spi.managedobject.AsynchronousListener;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.AsynchronousContext;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
@@ -39,17 +39,14 @@ public class HttpSecurityManagedObjectSourceTest extends OfficeFrameTestCase {
 	 * {@link HttpAuthentication}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final HttpAuthentication<HttpSecurity, Void> authentication = this
-			.createMock(HttpAuthentication.class);
+	private final HttpAuthentication<HttpSecurity, Void> authentication = this.createMock(HttpAuthentication.class);
 
 	/**
 	 * Validate specification.
 	 */
 	public void testSpecification() {
-		ManagedObjectLoaderUtil.validateSpecification(
-				HttpSecurityManagedObjectSource.class,
-				HttpSecurityManagedObjectSource.PROPERTY_HTTP_SECURITY_TYPE,
-				"HTTP Security Type");
+		ManagedObjectLoaderUtil.validateSpecification(HttpSecurityManagedObjectSource.class,
+				HttpSecurityManagedObjectSource.PROPERTY_HTTP_SECURITY_TYPE, "HTTP Security Type");
 	}
 
 	/**
@@ -58,27 +55,21 @@ public class HttpSecurityManagedObjectSourceTest extends OfficeFrameTestCase {
 	public void testType() {
 
 		// Create the expected type
-		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
-				.createManagedObjectTypeBuilder();
+		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(HttpSecurity.class);
-		type.addDependency(Dependencies.HTTP_AUTHENTICATION,
-				HttpAuthentication.class, null);
+		type.addDependency(Dependencies.HTTP_AUTHENTICATION, HttpAuthentication.class, null);
 
 		// Validate type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type,
-				HttpSecurityManagedObjectSource.class,
-				HttpSecurityManagedObjectSource.PROPERTY_HTTP_SECURITY_TYPE,
-				HttpSecurity.class.getName());
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, HttpSecurityManagedObjectSource.class,
+				HttpSecurityManagedObjectSource.PROPERTY_HTTP_SECURITY_TYPE, HttpSecurity.class.getName());
 	}
 
 	/**
 	 * Ensure not loading HTTP security as waiting on authentication.
 	 */
 	public void testLoadWaitingOnAuthentication() throws Throwable {
-		final HttpSecurity authenticationSecurity = this
-				.createMock(HttpSecurity.class);
-		HttpSecurity loadedSecurity = this.loadHttpSecurity(
-				authenticationSecurity, false, false);
+		final HttpSecurity authenticationSecurity = this.createMock(HttpSecurity.class);
+		HttpSecurity loadedSecurity = this.loadHttpSecurity(authenticationSecurity, false, false);
 		assertNull("Should not yet have security", loadedSecurity);
 	}
 
@@ -86,12 +77,9 @@ public class HttpSecurityManagedObjectSourceTest extends OfficeFrameTestCase {
 	 * Ensure can load as authenticated.
 	 */
 	public void testLoadAuthenticated() throws Throwable {
-		final HttpSecurity authenticationSecurity = this
-				.createMock(HttpSecurity.class);
-		HttpSecurity loadedSecurity = this.loadHttpSecurity(
-				authenticationSecurity, true, false);
-		assertSame("Should be same security", authenticationSecurity,
-				loadedSecurity);
+		final HttpSecurity authenticationSecurity = this.createMock(HttpSecurity.class);
+		HttpSecurity loadedSecurity = this.loadHttpSecurity(authenticationSecurity, true, false);
+		assertSame("Should be same security", authenticationSecurity, loadedSecurity);
 	}
 
 	/**
@@ -128,17 +116,14 @@ public class HttpSecurityManagedObjectSourceTest extends OfficeFrameTestCase {
 	 * @return {@link HttpSecurity} from {@link ManagedObject}.
 	 */
 	@SuppressWarnings("unchecked")
-	private HttpSecurity loadHttpSecurity(HttpSecurity httpSecurity,
-			final boolean isAuthenticatedImmediately,
+	private HttpSecurity loadHttpSecurity(HttpSecurity httpSecurity, final boolean isAuthenticatedImmediately,
 			boolean isAllowNullHttpSecurity) throws Throwable {
 
-		final AsynchronousListener listener = this
-				.createMock(AsynchronousListener.class);
-		final HttpAuthenticateRequest<Void> request = this
-				.createMock(HttpAuthenticateRequest.class);
+		final AsynchronousContext async = this.createMock(AsynchronousContext.class);
+		final HttpAuthenticateRequest<Void> request = this.createMock(HttpAuthenticateRequest.class);
 
 		// Record authenticating
-		listener.notifyStarted();
+		async.start(null);
 		this.authentication.authenticate(request);
 		this.control(authentication).setMatcher(new AbstractMatcher() {
 			@Override
@@ -146,9 +131,7 @@ public class HttpSecurityManagedObjectSourceTest extends OfficeFrameTestCase {
 
 				// Ensure always have request (for asynchronous listener)
 				HttpAuthenticateRequest<Void> actualRequest = (HttpAuthenticateRequest<Void>) actual[0];
-				assertNotNull(
-						"Should always have request to wrap asynchronous listener functionality",
-						actualRequest);
+				assertNotNull("Should always have request to wrap asynchronous listener functionality", actualRequest);
 
 				// Trigger that completed authentication
 				if (isAuthenticatedImmediately) {
@@ -160,9 +143,8 @@ public class HttpSecurityManagedObjectSourceTest extends OfficeFrameTestCase {
 			}
 		});
 		if (isAuthenticatedImmediately) {
-			this.recordReturn(this.authentication,
-					this.authentication.getHttpSecurity(), httpSecurity);
-			listener.notifyComplete();
+			this.recordReturn(this.authentication, this.authentication.getHttpSecurity(), httpSecurity);
+			async.complete(null);
 		}
 
 		// Test
@@ -171,12 +153,10 @@ public class HttpSecurityManagedObjectSourceTest extends OfficeFrameTestCase {
 
 			// Load the source
 			ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
-			loader.addProperty(
-					HttpSecurityManagedObjectSource.PROPERTY_HTTP_SECURITY_TYPE,
+			loader.addProperty(HttpSecurityManagedObjectSource.PROPERTY_HTTP_SECURITY_TYPE,
 					HttpSecurity.class.getName());
 			if (isAllowNullHttpSecurity) {
-				loader.addProperty(
-						HttpSecurityManagedObjectSource.PROPERTY_IS_ESCALATE_AUTHENTICATION_REQUIRED,
+				loader.addProperty(HttpSecurityManagedObjectSource.PROPERTY_IS_ESCALATE_AUTHENTICATION_REQUIRED,
 						String.valueOf(false));
 			}
 			HttpSecurityManagedObjectSource source = loader
@@ -184,17 +164,14 @@ public class HttpSecurityManagedObjectSourceTest extends OfficeFrameTestCase {
 
 			// Source the managed object
 			ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
-			user.setAsynchronousListener(listener);
-			user.mapDependency(Dependencies.HTTP_AUTHENTICATION,
-					this.authentication);
-			ManagedObject managedObject = user.sourceManagedObject(source,
-					false);
+			user.setAsynchronousListener(async);
+			user.mapDependency(Dependencies.HTTP_AUTHENTICATION, this.authentication);
+			ManagedObject managedObject = user.sourceManagedObject(source, false);
 
 			// Obtain and return the HTTP security
 			if (isAuthenticatedImmediately) {
 				// Obtain and return the HTTP security
-				HttpSecurity security = (HttpSecurity) managedObject
-						.getObject();
+				HttpSecurity security = (HttpSecurity) managedObject.getObject();
 				return security;
 
 			} else {

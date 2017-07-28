@@ -20,7 +20,7 @@ package net.officefloor.plugin.xml.unmarshall.flat;
 import java.io.File;
 import java.io.FileInputStream;
 
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;

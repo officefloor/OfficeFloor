@@ -18,12 +18,12 @@
 package net.officefloor.plugin.web.http.template.section;
 
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
-import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
-import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 
 /**
@@ -100,14 +100,14 @@ public interface HttpTemplateSectionExtensionContext extends SourceProperties {
 	SectionManagedObject getTemplateLogicObject();
 
 	/**
-	 * Obtains the {@link SectionTask} by the name.
+	 * Obtains the {@link SectionFunction} by the name.
 	 * 
-	 * @param taskName
-	 *            {@link SectionTask} name.
-	 * @return {@link SectionTask} or <code>null</code> if no
-	 *         {@link SectionTask} by name.
+	 * @param functionName
+	 *            {@link SectionFunction} name.
+	 * @return {@link SectionFunction} or <code>null</code> if no
+	 *         {@link SectionFunction} by name.
 	 */
-	SectionTask getTask(String taskName);
+	SectionFunction getFunction(String functionName);
 
 	/**
 	 * Obtains or creates the {@link SectionObject} for the type name.
@@ -129,7 +129,6 @@ public interface HttpTemplateSectionExtensionContext extends SourceProperties {
 	 *            <code>true</code> if escalation only.
 	 * @return {@link SectionOutput}.
 	 */
-	SectionOutput getOrCreateSectionOutput(String name, String argumentType,
-			boolean isEscalationOnly);
+	SectionOutput getOrCreateSectionOutput(String name, String argumentType, boolean isEscalationOnly);
 
 }

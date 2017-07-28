@@ -17,8 +17,7 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * Meta-data for the {@link ProcessState}.
@@ -35,15 +34,6 @@ public interface ProcessMetaData {
 	 *         instances bound to the {@link ProcessState}.
 	 */
 	ManagedObjectMetaData<?>[] getManagedObjectMetaData();
-
-	/**
-	 * Obtains the {@link AdministratorMetaData} of the {@link Administrator}
-	 * instances bound to the {@link ProcessState}.
-	 * 
-	 * @return {@link AdministratorMetaData} of the {@link Administrator}
-	 *         instances bound to the {@link ProcessState}.
-	 */
-	AdministratorMetaData<?, ?>[] getAdministratorMetaData();
 
 	/**
 	 * Obtains the {@link ThreadMetaData} of {@link ThreadState} instances

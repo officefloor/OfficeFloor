@@ -21,20 +21,19 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.officefloor.autowire.AutoWireOfficeFloor;
-import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.web.http.application.HttpParameters;
-import net.officefloor.plugin.web.http.server.HttpServerAutoWireApplication;
-import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
-import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniserTest;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
+
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+import net.officefloor.plugin.web.http.application.HttpParameters;
+import net.officefloor.plugin.web.http.application.WebArchitect;
+import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
+import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniserTest;
 
 /**
  * <p>
@@ -47,14 +46,14 @@ import org.apache.http.impl.client.CloseableHttpClient;
 public class HttpParametersIntegrationTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link HttpServerAutoWireApplication}.
+	 * {@link WebCompileOfficeFloor}.
 	 */
-	private final HttpServerAutoWireApplication source = new HttpServerAutoWireOfficeFloorSource();
+	private final WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
 
 	/**
-	 * {@link AutoWireOfficeFloor}.
+	 * {@link OfficeFloor}.
 	 */
-	private AutoWireOfficeFloor server;
+	private OfficeFloor officeFloor;
 
 	/**
 	 * {@link CloseableHttpClient}.
@@ -69,14 +68,20 @@ public class HttpParametersIntegrationTest extends OfficeFrameTestCase {
 	@Override
 	protected void setUp() throws Exception {
 
-		// Configure the application
-		AutoWireSection section = this.source.addSection("SERVICE",
-				ClassSectionSource.class.getName(), Servicer.class.getName());
-		this.source.linkUri("service", section, "service");
-		this.source.addHttpRequestObject(Parameters.class, true);
+		this.compiler.officeFloor((context) -> {
+			HttpTestUtil.configureTestHttpServer(context, 7878, "SERVICE", "service");
+		});
+		this.compiler.web((context) -> {
+			WebArchitect web = context.getWebArchitect();
+
+			// Configure the application
+			OfficeSection section = context.addSection("SERVICE", Servicer.class);
+			web.linkUri("service", section.getOfficeSectionInput("service"));
+			web.addHttpRequestObject(Parameters.class, true);
+		});
 
 		// Start the server
-		this.server = this.source.openOfficeFloor();
+		this.officeFloor = this.compiler.compileAndOpenOfficeFloor();
 	}
 
 	@Override
@@ -86,8 +91,8 @@ public class HttpParametersIntegrationTest extends OfficeFrameTestCase {
 			this.client.close();
 		} finally {
 			// Stop the server
-			if (this.server != null) {
-				this.server.closeOfficeFloor();
+			if (this.officeFloor != null) {
+				this.officeFloor.closeOfficeFloor();
 			}
 		}
 	}
@@ -159,18 +164,14 @@ public class HttpParametersIntegrationTest extends OfficeFrameTestCase {
 			for (int lowBits = 0; lowBits <= 0xF; lowBits++) {
 
 				// Do not test control characters
-				if (HttpRequestTokeniserTest.isControlCharacter(highBits,
-						lowBits)) {
+				if (HttpRequestTokeniserTest.isControlCharacter(highBits, lowBits)) {
 					continue;
 				}
 
 				// Obtain the characters
-				String high = HttpRequestTokeniserTest
-						.getCharacterValue(highBits);
-				String low = HttpRequestTokeniserTest
-						.getCharacterValue(lowBits);
-				String character = HttpRequestTokeniserTest.getCharacterValue(
-						(byte) highBits, (byte) lowBits);
+				String high = HttpRequestTokeniserTest.getCharacterValue(highBits);
+				String low = HttpRequestTokeniserTest.getCharacterValue(lowBits);
+				String character = HttpRequestTokeniserTest.getCharacterValue((byte) highBits, (byte) lowBits);
 
 				// Set up for next request
 				synchronized (HttpParametersIntegrationTest.class) {
@@ -179,16 +180,13 @@ public class HttpParametersIntegrationTest extends OfficeFrameTestCase {
 
 				// Undertake the request
 				HttpUriRequest request = new HttpGet(
-						"http://localhost:7878/service?one=1&value=%" + high
-								+ low + ";two=2");
+						"http://localhost:7878/service?one=1&value=%" + high + low + ";two=2");
 				HttpResponse response = this.client.execute(request);
-				assertEquals("Should be successful (no entity)", 204, response
-						.getStatusLine().getStatusCode());
+				assertEquals("Should be successful (no entity)", 204, response.getStatusLine().getStatusCode());
 
 				// Validate that obtained appropriate character value
 				synchronized (HttpParametersIntegrationTest.class) {
-					assertEquals("Incorrect character value", character,
-							actualValue);
+					assertEquals("Incorrect character value", character, actualValue);
 				}
 
 				// Track the characters tested

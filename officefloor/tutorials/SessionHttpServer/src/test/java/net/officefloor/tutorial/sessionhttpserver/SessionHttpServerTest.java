@@ -17,15 +17,15 @@
  */
 package net.officefloor.tutorial.sessionhttpserver;
 
-import junit.framework.TestCase;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
-import net.officefloor.tutorial.sessionhttpserver.TemplateLogic.Post;
-import net.officefloor.tutorial.sessionhttpserver.TemplateLogic.Posts;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
+
+import junit.framework.TestCase;
+import net.officefloor.OfficeFloorMain;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+import net.officefloor.tutorial.sessionhttpserver.TemplateLogic.Post;
+import net.officefloor.tutorial.sessionhttpserver.TemplateLogic.Posts;
 
 /**
  * Tests the Session HTTP Server.
@@ -48,8 +48,7 @@ public class SessionHttpServerTest extends TestCase {
 		assertSame("Ensure post added", post, session.getPosts()[0]);
 
 		// Ensure post provided from template logic
-		assertSame("Ensure post available", post, logic
-				.getTemplateData(session).getPosts()[0]);
+		assertSame("Ensure post available", post, logic.getTemplateData(session).getPosts()[0]);
 	}
 
 	// END SNIPPET: pojo
@@ -59,7 +58,7 @@ public class SessionHttpServerTest extends TestCase {
 	public void testSessionPage() throws Exception {
 
 		// Start server
-		WoofOfficeFloorSource.start();
+		OfficeFloorMain.open();
 
 		// Send request for empty session
 		this.doRequest("http://localhost:7878/post.woof");
@@ -70,8 +69,7 @@ public class SessionHttpServerTest extends TestCase {
 
 	private void doRequest(String url) throws Exception {
 		HttpResponse response = this.client.execute(new HttpGet(url));
-		assertEquals("Request should be successful", 200, response
-				.getStatusLine().getStatusCode());
+		assertEquals("Request should be successful", 200, response.getStatusLine().getStatusCode());
 		response.getEntity().writeTo(System.out);
 	}
 
@@ -82,7 +80,7 @@ public class SessionHttpServerTest extends TestCase {
 			this.client.close();
 		} finally {
 			// Stop server
-			WoofOfficeFloorSource.stop();
+			OfficeFloorMain.close();
 		}
 	}
 

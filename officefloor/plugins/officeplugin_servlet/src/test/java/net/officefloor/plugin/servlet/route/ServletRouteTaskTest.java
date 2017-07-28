@@ -19,11 +19,11 @@ package net.officefloor.plugin.servlet.route;
 
 import javax.servlet.Servlet;
 
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
-import net.officefloor.plugin.servlet.context.ServletTaskReference;
+import net.officefloor.plugin.servlet.context.ServletFunctionReference;
 import net.officefloor.plugin.servlet.route.ServletRouteTask.DependencyKeys;
 import net.officefloor.plugin.servlet.route.ServletRouteTask.FlowKeys;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -47,11 +47,11 @@ public class ServletRouteTaskTest extends OfficeFrameTestCase {
 	private final Office office = this.createMock(Office.class);
 
 	/**
-	 * {@link TaskContext}.
+	 * {@link ManagedFunctionContext}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final TaskContext<ServletRouteTask, DependencyKeys, FlowKeys> taskContext = this
-			.createMock(TaskContext.class);
+	private final ManagedFunctionContext<ServletRouteTask, DependencyKeys, FlowKeys> taskContext = this
+			.createMock(ManagedFunctionContext.class);
 
 	/**
 	 * {@link ServerHttpConnection}.
@@ -71,10 +71,10 @@ public class ServletRouteTaskTest extends OfficeFrameTestCase {
 			.createMock(OfficeServletContext.class);
 
 	/**
-	 * {@link ServletTaskReference}.
+	 * {@link ServletFunctionReference}.
 	 */
-	private final ServletTaskReference reference = this
-			.createMock(ServletTaskReference.class);
+	private final ServletFunctionReference reference = this
+			.createMock(ServletFunctionReference.class);
 
 	@Override
 	protected void setUp() throws Exception {
@@ -104,13 +104,13 @@ public class ServletRouteTaskTest extends OfficeFrameTestCase {
 				.mapPath(this.office, PATH), this.reference);
 		this.recordReturn(this.reference, this.reference.getWorkName(),
 				WORK_NAME);
-		this.recordReturn(this.reference, this.reference.getTaskName(),
+		this.recordReturn(this.reference, this.reference.getFunctionName(),
 				TASK_NAME);
 		this.taskContext.doFlow(WORK_NAME, TASK_NAME, null);
 
 		// Test
 		this.replayMockObjects();
-		this.task.doTask(this.taskContext);
+		this.task.execute(this.taskContext);
 		this.verifyMockObjects();
 	}
 
@@ -137,7 +137,7 @@ public class ServletRouteTaskTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		this.task.doTask(this.taskContext);
+		this.task.execute(this.taskContext);
 		this.verifyMockObjects();
 	}
 

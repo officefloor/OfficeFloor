@@ -68,8 +68,7 @@ public class OfficeStartNodeImpl implements OfficeStartNode {
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public OfficeStartNodeImpl(String startName, OfficeNode office,
-			NodeContext context) {
+	public OfficeStartNodeImpl(String startName, OfficeNode office, NodeContext context) {
 		this.startName = startName;
 		this.officeNode = office;
 		this.context = context;
@@ -100,14 +99,18 @@ public class OfficeStartNodeImpl implements OfficeStartNode {
 	}
 
 	@Override
+	public Node[] getChildNodes() {
+		return NodeUtil.getChildNodes();
+	}
+
+	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}
 
 	@Override
 	public void initialise() {
-		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialisedState());
+		this.state = NodeUtil.initialise(this, this.context, this.state, () -> new InitialisedState());
 	}
 
 	/*
@@ -130,8 +133,7 @@ public class OfficeStartNodeImpl implements OfficeStartNode {
 
 	@Override
 	public boolean linkFlowNode(LinkFlowNode node) {
-		return LinkUtil.linkFlowNode(this, node,
-				this.context.getCompilerIssues(),
+		return LinkUtil.linkFlowNode(this, node, this.context.getCompilerIssues(),
 				(link) -> this.linkedFlowNode = link);
 	}
 

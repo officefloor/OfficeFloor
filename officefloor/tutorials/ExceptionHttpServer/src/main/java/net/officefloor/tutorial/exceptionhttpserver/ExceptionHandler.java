@@ -19,7 +19,7 @@ package net.officefloor.tutorial.exceptionhttpserver;
 
 import java.sql.SQLException;
 
-import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
 
 /**
@@ -30,7 +30,7 @@ import net.officefloor.plugin.section.clazz.Parameter;
 // START SNIPPET: tutorial
 public class ExceptionHandler {
 
-	@NextTask("TechnicalFault")
+	@NextFunction("TechnicalFault")
 	public void handleSqlException(@Parameter SQLException ex) {
 		// Production code may take some action and would use a Logger
 		System.err.println(ex.getMessage());

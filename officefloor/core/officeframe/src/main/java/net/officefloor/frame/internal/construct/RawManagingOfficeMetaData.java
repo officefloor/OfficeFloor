@@ -21,15 +21,15 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedObjectExecuteContextFactory;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * Meta-data of a {@link ManagedObject} that is managed by the {@link Office}.
@@ -49,13 +49,13 @@ public interface RawManagingOfficeMetaData<F extends Enum<F>> {
 	/**
 	 * <p>
 	 * Indicates if the {@link ManagedObjectSource} requires instigating
-	 * {@link JobSequence} instances.
+	 * {@link Flow} instances.
 	 * <p>
 	 * If <code>true</code> it means the {@link ManagedObjectSource} must be
 	 * bound to the {@link ProcessState} of the {@link Office}.
 	 * 
 	 * @return <code>true</code> if the {@link ManagedObjectSource} requires
-	 *         instigating {@link JobSequence} instances.
+	 *         instigating {@link Flow} instances.
 	 */
 	boolean isRequireFlows();
 
@@ -65,7 +65,7 @@ public interface RawManagingOfficeMetaData<F extends Enum<F>> {
 	 * of the {@link ManagedObject} within the {@link ProcessState} of the
 	 * {@link Office}.
 	 * <p>
-	 * Should the {@link ManagedObjectSource} instigate a {@link JobSequence}, a
+	 * Should the {@link ManagedObjectSource} instigate a {@link Flow}, a
 	 * {@link ManagedObject} from the {@link ManagedObjectSource} is to be made
 	 * available to the {@link ProcessState}. Whether the {@link Office} wants
 	 * to make use of the {@link ManagedObject} is its choice but is available
@@ -88,32 +88,23 @@ public interface RawManagingOfficeMetaData<F extends Enum<F>> {
 
 	/**
 	 * Sets up the {@link ManagedObjectSource} to be managed by the
-	 * {@link Office} of the input {@link OfficeMetaDataLocator}.
+	 * {@link Office} of the input {@link ManagedFunctionLocator}.
 	 * 
+	 * @param officeMetaData
+	 *            {@link OfficeMetaData}.
 	 * @param processBoundManagedObjectMetaData
 	 *            {@link RawBoundManagedObjectMetaData} of the
 	 *            {@link ProcessState} bound {@link ManagedObject} instances of
 	 *            the managing {@link Office}.
-	 * @param metaDataLocator
-	 *            {@link OfficeMetaDataLocator} for the {@link Office} managing
-	 *            the {@link ManagedObjectSource}.
 	 * @param officeTeams
 	 *            {@link TeamManagement} instances by their {@link Office}
 	 *            names.
-	 * @param continueTeamManagement
-	 *            {@link TeamManagement} for the {@link Team} to let the worker
-	 *            ({@link Thread}) continue on to execute the next {@link Job}.
-	 * @param assetManagerFactory
-	 *            {@link AssetManagerFactory}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	void manageByOffice(
-			RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData,
-			OfficeMetaDataLocator metaDataLocator,
-			Map<String, TeamManagement> officeTeams,
-			TeamManagement continueTeamManagement,
-			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
+	void manageByOffice(OfficeMetaData officeMetaData,
+			RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData, Map<String, TeamManagement> officeTeams,
+			OfficeFloorIssues issues);
 
 	/**
 	 * Obtains the {@link ManagedObjectExecuteContextFactory} for the

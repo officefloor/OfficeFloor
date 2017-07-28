@@ -17,24 +17,22 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
-import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.NameAwareManagedObject;
-import net.officefloor.frame.spi.managedobject.ObjectRegistry;
-import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
-import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * Meta-data of a {@link ManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectMetaData<D extends Enum<D>> {
+public interface ManagedObjectMetaData<O extends Enum<O>> {
 
 	/**
 	 * Obtains the name of the {@link ManagedObject} bound within the
@@ -61,8 +59,7 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 * <p>
 	 * {@link ManagedObjectSource} instances that invoke {@link ProcessState}
 	 * instances with the same type of Object may all be bound to the same
-	 * {@link ManagedObjectIndex}. Allows similar {@link Job} processing of the
-	 * {@link ManagedObject} instances.
+	 * {@link ManagedObjectIndex}.
 	 * 
 	 * @return Instance index of the {@link ManagedObject} bound to the
 	 *         {@link ManagedObjectIndex}.
@@ -70,15 +67,11 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	int getInstanceIndex();
 
 	/**
-	 * Creates a new {@link ManagedObjectContainer}.
+	 * Obtains the {@link FunctionLoop} for the {@link ManagedObject}.
 	 * 
-	 * @param processState
-	 *            {@link ProcessState} that the {@link ManagedObject} is bound
-	 *            within.
-	 * @return New {@link ManagedObjectContainer}.
+	 * @return {@link FunctionLoop} for the {@link ManagedObject}.
 	 */
-	ManagedObjectContainer createManagedObjectContainer(
-			ProcessState processState);
+	FunctionLoop getFunctionLoop();
 
 	/**
 	 * Obtains the {@link AssetManager} that manages the sourcing of the
@@ -104,12 +97,28 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	ManagedObjectPool getManagedObjectPool();
 
 	/**
+	 * Obtains the {@link OfficeClock}.
+	 * 
+	 * @return {@link OfficeClock}.
+	 */
+	OfficeClock getOfficeClock();
+
+	/**
 	 * Obtains the time out in milliseconds for the asynchronous operation to
 	 * complete.
 	 * 
 	 * @return Time out in milliseconds.
 	 */
 	long getTimeout();
+
+	/**
+	 * Indicates if the {@link ManagedObject} implements
+	 * {@link ProcessAwareManagedObject}.
+	 * 
+	 * @return <code>true</code> if the {@link ManagedObject} implements
+	 *         {@link ProcessAwareManagedObject}.
+	 */
+	boolean isProcessAwareManagedObject();
 
 	/**
 	 * Indicates if the {@link ManagedObject} implements
@@ -161,58 +170,52 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	boolean isCoordinatingManagedObject();
 
 	/**
-	 * Indicates if dependency {@link ManagedObject} instances are ready.
+	 * <p>
+	 * Creates a {@link FunctionState} to check if the dependencies of this
+	 * {@link ManagedObject} are ready.
+	 * <p>
+	 * Should a {@link ManagedObject} not be ready, then will latch the
+	 * {@link ManagedFunctionContainer} to wait for the {@link ManagedObject} to
+	 * be ready.
 	 * 
-	 * @param <W>
-	 *            {@link Work} type.
-	 * @param workContainer
-	 *            {@link WorkContainer}.
-	 * @param jobContext
-	 *            {@link JobContext}.
-	 * @param jobNode
-	 *            {@link JobNode}.
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet}.
-	 * @param context
-	 *            {@link ContainerContext}.
-	 * @return <code>true</code> if all dependency {@link ManagedObject}
-	 *         instances are ready.
+	 * @param managedFunction
+	 *            {@link ManagedFunctionContainer} requesting the check of the
+	 *            {@link ManagedObject} to be ready.
+	 * @param check
+	 *            {@link ManagedObjectReadyCheck}.
+	 * @param currentContainer
+	 *            Optional able to include the current
+	 *            {@link ManagedObjectContainer} for this
+	 *            {@link ManagedObjectMetaData} in ready check. May be
+	 *            <code>null</code> to not include.
+	 * @return {@link FunctionState} instances to check if the dependencies of
+	 *         this {@link ManagedObject} are ready.
 	 */
-	<W extends Work> boolean isDependenciesReady(
-			WorkContainer<W> workContainer, JobContext jobContext,
-			JobNode jobNode, JobNodeActivateSet activateSet,
-			ContainerContext context);
+	FunctionState checkReady(ManagedFunctionContainer managedFunction, ManagedObjectReadyCheck check,
+			ManagedObjectContainer currentContainer);
 
 	/**
 	 * Creates the {@link ObjectRegistry} for the {@link ManagedObject}.
 	 *
-	 * @param <W>
-	 *            {@link Work} type.
-	 * @param workContainer
-	 *            {@link WorkContainer} to obtain the coordinating
-	 *            {@link ManagedObject} instances.
-	 * @param threadState
-	 *            {@link ThreadState} to provide access to the
-	 *            {@link ProcessState} bound {@link ManagedObject} instances.
+	 * @param currentContainer
+	 *            {@link ManagedFunctionContainer}.
 	 * @return {@link ObjectRegistry}.
 	 */
-	<W extends Work> ObjectRegistry<D> createObjectRegistry(
-			WorkContainer<W> workContainer, ThreadState threadState);
+	ObjectRegistry<O> createObjectRegistry(ManagedFunctionContainer currentContainer);
 
 	/**
-	 * Creates the {@link JobNode} for the recycling of the
+	 * Creates the {@link FunctionState} for the recycling of the
 	 * {@link ManagedObject}.
 	 * 
 	 * @param managedObject
 	 *            {@link ManagedObject} to be recycled. Obtained by the
 	 *            {@link RecycleManagedObjectParameter#getManagedObject()}.
 	 * @param cleanupSequence
-	 *            {@link CleanupSequence}.
-	 * @return {@link JobNode} for the recycling this {@link ManagedObject} or
-	 *         <code>null</code> if no recycling is required for this
-	 *         {@link ManagedObject}.
+	 *            {@link ManagedObjectCleanup}.
+	 * @return {@link FunctionState} for the recycling this
+	 *         {@link ManagedObject} or <code>null</code> if no recycling is
+	 *         required for this {@link ManagedObject}.
 	 */
-	JobNode createRecycleJobNode(ManagedObject managedObject,
-			CleanupSequence cleanupSequence);
+	FunctionState recycle(ManagedObject managedObject, ManagedObjectCleanup cleanupSequence);
 
 }

@@ -17,32 +17,23 @@
  */
 package net.officefloor.plugin.woof;
 
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.model.repository.ConfigurationItem;
-import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.WebArchitect;
 
 /**
- * Loads the WoOF configuration to the {@link WebAutoWireApplication}.
+ * Loads the WoOF configuration to the {@link WebArchitect}.
  * 
  * @author Daniel Sagenschneider
  */
 public interface WoofLoader {
 
 	/**
-	 * Loads the WoOF configuration to the {@link WebAutoWireApplication}.
+	 * Loads the WoOF configuration.
 	 * 
-	 * @param woofConfiguration
-	 *            {@link ConfigurationItem} containing the WoOF configuration.
-	 * @param application
-	 *            {@link WebAutoWireApplication}.
-	 * @param sourceContext
-	 *            {@link SourceContext} to provide context in loading the WoOF
-	 *            configuration.
+	 * @param context
+	 *            {@link WoofLoaderContext}.
 	 * @throws Exception
 	 *             If fails to load the configuration.
 	 */
-	void loadWoofConfiguration(ConfigurationItem woofConfiguration,
-			WebAutoWireApplication application, SourceContext sourceContext)
-			throws Exception;
+	void loadWoofConfiguration(WoofLoaderContext context) throws Exception;
 
 }

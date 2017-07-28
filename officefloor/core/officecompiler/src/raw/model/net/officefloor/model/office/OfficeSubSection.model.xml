@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
 	<field type="String" name="office sub section name" />
-	<list type="OfficeTaskModel" name="office task" />
+	<list type="OfficeFunctionModel" name="office function" />
 	<list type="OfficeSectionManagedObjectModel" name="office section managed object" />
 	<list type="OfficeSubSectionModel" name="office sub section" />
-	<list type="OfficeSubSectionToOfficeGovernanceModel" name="office governance" />
+	<list type="OfficeSubSectionToGovernanceModel" name="governance" />
 </model>

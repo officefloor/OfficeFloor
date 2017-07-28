@@ -17,21 +17,22 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.api.function.ManagedFunction;
 
 /**
  * Profiler of the {@link ThreadState}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ThreadProfiler {
+public interface ThreadProfiler extends FunctionState {
 
 	/**
-	 * Profiles execution of a {@link Job}.
+	 * Profiles execution of a {@link ManagedFunction}.
 	 * 
-	 * @param jobMetaData
-	 *            {@link JobMetaData} of the {@link Job} being executed.
+	 * @param fuctionMetaData
+	 *            {@link ManagedFunctionLogicMetaData} of the
+	 *            {@link ManagedFunction} being executed.
 	 */
-	void profileJob(JobMetaData jobMetaData);
+	void profileManagedFunction(ManagedFunctionLogicMetaData functionMetaData);
 
 }

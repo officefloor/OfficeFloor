@@ -17,8 +17,7 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * Provides management of a particular {@link Team}.
@@ -28,11 +27,11 @@ import net.officefloor.frame.spi.team.TeamIdentifier;
 public interface TeamManagement {
 
 	/**
-	 * Obtains the {@link TeamIdentifier} for the {@link Team}.
+	 * Obtains the identifier for the {@link Team}.
 	 * 
-	 * @return {@link TeamIdentifier} for the {@link Team}.
+	 * @return Identifier for the {@link Team}.
 	 */
-	TeamIdentifier getIdentifier();
+	Object getIdentifier();
 
 	/**
 	 * Obtains the {@link Team} under this management.

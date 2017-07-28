@@ -1,0 +1,16 @@
+<context>
+	<office-floor>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office>
+		<sections>
+			<section name="SECTION" source="CLASS"
+				location="${testcase}$CompileSectionClass">
+				<input name="function" />
+				<output name="UNKNOWN" />
+			</section>
+		</sections>
+	</office>
+</context>

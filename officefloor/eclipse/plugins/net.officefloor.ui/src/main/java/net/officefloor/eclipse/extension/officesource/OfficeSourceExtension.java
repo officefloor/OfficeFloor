@@ -17,22 +17,20 @@
  */
 package net.officefloor.eclipse.extension.officesource;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.eclipse.extension.ExtensionUtil;
-import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.eclipse.extension.open.ExtensionOpener;
-
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 
 /**
  * Interface for extension to provide enriched {@link OfficeSource} usage.
  * 
  * @author Daniel Sagenschneider
  * 
- * @see ExtensionClasspathProvider
  * @see ExtensionOpener
  */
 public interface OfficeSourceExtension<S extends OfficeSource> {
@@ -40,8 +38,7 @@ public interface OfficeSourceExtension<S extends OfficeSource> {
 	/**
 	 * Extension ID.
 	 */
-	public static final String EXTENSION_ID = ExtensionUtil
-			.getExtensionId("officesources");
+	public static final String EXTENSION_ID = ExtensionUtil.getExtensionId("officesources");
 
 	/**
 	 * Obtains the class of the {@link OfficeSource} being enriched in its

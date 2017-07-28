@@ -23,8 +23,8 @@ import javax.naming.Context;
 import javax.naming.directory.DirContext;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.plugin.jndi.dircontext.JndiDirContextManagedObjectSource;
 
 /**

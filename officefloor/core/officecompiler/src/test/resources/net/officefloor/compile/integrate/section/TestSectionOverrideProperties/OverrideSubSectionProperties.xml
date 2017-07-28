@@ -1,0 +1,22 @@
+<context>
+	<office-floor>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office>
+		<sections>
+			<section name="SECTION" source="SECTION" location="section" />
+		</sections>
+	</office>
+	<section>
+		<sub-sections>
+			<sub-section name="OVERRIDE_SUB_SECTION" source="${testcase}$TestSectionSource"
+				location="section">
+				<properties>
+					<property name="value" value="to be overridden" />
+				</properties>
+			</sub-section>
+		</sub-sections>
+	</section>
+</context>

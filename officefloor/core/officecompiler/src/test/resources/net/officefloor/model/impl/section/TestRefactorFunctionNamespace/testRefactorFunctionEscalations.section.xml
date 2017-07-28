@@ -1,0 +1,28 @@
+<section>
+	<external-flows>
+		<external-flow name="FLOW_REMOVE" />
+		<external-flow name="FLOW_RUNTIME" />
+		<external-flow name="FLOW_REORDER" />
+	</external-flows>
+	<function-namespaces>
+		<function-namespace name="NAMESPACE"
+			source="net.example.ExampleManagedFunctionSource">
+			<managed-function name="MANAGED_FUNCTION" />
+		</function-namespace>
+	</function-namespaces>
+	<functions>
+		<function name="FUNCTION" function-namespace="NAMESPACE"
+			managed-function="MANAGED_FUNCTION">
+			<function-escalation escalation-type="java.lang.RuntimeException">
+				<external-flow name="FLOW_RUNTIME" />
+			</function-escalation>
+			<function-escalation escalation-type="java.sql.SQLException" />
+			<function-escalation escalation-type="java.lang.Error">
+				<function name="FUNCTION" />
+			</function-escalation>
+			<function-escalation escalation-type="java.lang.Exception">
+				<external-flow name="FLOW_REORDER" />
+			</function-escalation>
+		</function>
+	</functions>
+</section>

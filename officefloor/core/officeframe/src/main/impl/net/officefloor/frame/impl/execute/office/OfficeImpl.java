@@ -17,12 +17,11 @@
  */
 package net.officefloor.frame.impl.execute.office;
 
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.UnknownWorkException;
-import net.officefloor.frame.api.manage.WorkManager;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.ProcessTicker;
-import net.officefloor.frame.internal.structure.WorkMetaData;
 
 /**
  * {@link Office} implementation.
@@ -37,21 +36,13 @@ public class OfficeImpl implements Office {
 	private final OfficeMetaData metaData;
 
 	/**
-	 * {@link ProcessTicker}.
-	 */
-	private final ProcessTicker processTicker;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param metaData
 	 *            {@link OfficeMetaData}.
-	 * @param processTicker
-	 *            {@link ProcessTicker}.
 	 */
-	public OfficeImpl(OfficeMetaData metaData, ProcessTicker processTicker) {
+	public OfficeImpl(OfficeMetaData metaData) {
 		this.metaData = metaData;
-		this.processTicker = processTicker;
 	}
 
 	/*
@@ -59,34 +50,36 @@ public class OfficeImpl implements Office {
 	 */
 
 	@Override
-	public String[] getWorkNames() {
-
-		// Obtain the work names
-		WorkMetaData<?>[] workMetaData = this.metaData.getWorkMetaData();
-		String[] workNames = new String[workMetaData.length];
-		for (int i = 0; i < workNames.length; i++) {
-			workNames[i] = workMetaData[i].getWorkName();
-		}
-
-		// Return the work names
-		return workNames;
+	public void runAssetChecks() {
+		this.metaData.getOfficeManager().runAssetChecks();
 	}
 
 	@Override
-	public WorkManager getWorkManager(String workName)
-			throws UnknownWorkException {
+	public String[] getFunctionNames() {
 
-		// Obtain the work meta-data for the work
-		for (WorkMetaData<?> workMetaData : this.metaData.getWorkMetaData()) {
-			if (workMetaData.getWorkName().equals(workName)) {
-				// Have the work meta-data, so return a work manager for it
-				return new WorkManagerImpl(workMetaData, this.metaData,
-						this.processTicker);
-			}
+		// Obtain the function names
+		ManagedFunctionMetaData<?, ?>[] functionMetaData = this.metaData.getManagedFunctionMetaData();
+		String[] functionNames = new String[functionMetaData.length];
+		for (int i = 0; i < functionNames.length; i++) {
+			functionNames[i] = functionMetaData[i].getFunctionName();
 		}
 
-		// Unknown work if at this point
-		throw new UnknownWorkException(workName);
+		// Return the function names
+		return functionNames;
+	}
+
+	@Override
+	public FunctionManager getFunctionManager(String functionName) throws UnknownFunctionException {
+
+		// Obtain the function meta-data for the function
+		ManagedFunctionMetaData<?, ?> functionMetaData = this.metaData.getManagedFunctionLocator()
+				.getManagedFunctionMetaData(functionName);
+		if (functionMetaData == null) {
+			throw new UnknownFunctionException(functionName);
+		}
+
+		// Have function meta-data, so return function manager for it
+		return new FunctionManagerImpl(functionMetaData, this.metaData);
 	}
 
 }

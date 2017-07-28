@@ -17,16 +17,16 @@
  */
 package net.officefloor.tutorials.presentation;
 
-import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.section.clazz.NextFunction;
 
 /**
- * POJO for presentation. 
+ * POJO for presentation.
  *
  * @author Daniel Sagenschneider
  */
 public class ReceiptPojo {
-	
-	@NextTask("receipted")
+
+	@NextFunction("receipted")
 	public void receipt() {
 	}
 

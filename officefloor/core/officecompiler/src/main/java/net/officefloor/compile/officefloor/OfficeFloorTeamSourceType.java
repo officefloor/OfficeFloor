@@ -19,7 +19,7 @@ package net.officefloor.compile.officefloor;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSource;
 
 /**
  * <code>Type definition</code> of a {@link TeamSource} available to be

@@ -20,9 +20,9 @@ package net.officefloor.plugin.web.http.application;
 import java.util.Iterator;
 
 /**
- * State for the {@link WebAutoWireApplication}.
+ * State for the {@link WebArchitect}.
  * <p>
- * This interface is used within the {@link WebAutoWireApplication} to allow
+ * This interface is used within the {@link WebArchitect} to allow
  * integration with a JEE Servlet container.
  * 
  * @author Daniel Sagenschneider

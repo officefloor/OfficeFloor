@@ -20,9 +20,9 @@ package net.officefloor.plugin.web.http.location;
 import java.util.Deque;
 import java.util.LinkedList;
 
-import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource.Dependencies;
@@ -32,8 +32,8 @@ import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedOb
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpApplicationLocationMangedObject implements
-		CoordinatingManagedObject<Dependencies>, HttpApplicationLocation {
+public class HttpApplicationLocationMangedObject
+		implements CoordinatingManagedObject<Dependencies>, HttpApplicationLocation {
 
 	/**
 	 * Transforms the input Request URI path to a canonical path.
@@ -44,8 +44,7 @@ public class HttpApplicationLocationMangedObject implements
 	 * @throws InvalidHttpRequestUriException
 	 *             Should the Request URI path be invalid.
 	 */
-	public static String transformToCanonicalPath(String path)
-			throws InvalidHttpRequestUriException {
+	public static String transformToCanonicalPath(String path) throws InvalidHttpRequestUriException {
 
 		// Root if empty path
 		if (path == null) {
@@ -111,8 +110,7 @@ public class HttpApplicationLocationMangedObject implements
 				// Determine if previous segment
 				if (segmentBegin >= 0) {
 					// Process the segment (keeping track if canonical)
-					isPathCanonical &= processSegment(path, segmentBegin, i,
-							canonicalSegments);
+					isPathCanonical &= processSegment(path, segmentBegin, i, canonicalSegments);
 				}
 
 				// Flag start of next segment
@@ -136,8 +134,7 @@ public class HttpApplicationLocationMangedObject implements
 		// Determine if last segment
 		if (segmentBegin <= path.length()) {
 			// Process the last segment (keeping track if canonical)
-			isPathCanonical &= processSegment(path, segmentBegin,
-					path.length(), canonicalSegments);
+			isPathCanonical &= processSegment(path, segmentBegin, path.length(), canonicalSegments);
 		}
 
 		// Determine if path is already canonical
@@ -183,8 +180,7 @@ public class HttpApplicationLocationMangedObject implements
 	 * @throws InvalidHttpRequestUriException
 	 *             Should the segment result in an invalid path.
 	 */
-	private static boolean processSegment(String path, int beginIndex,
-			int endIndex, Deque<String> canonicalSegments)
+	private static boolean processSegment(String path, int beginIndex, int endIndex, Deque<String> canonicalSegments)
 			throws InvalidHttpRequestUriException {
 
 		// Obtain the segment
@@ -223,10 +219,8 @@ public class HttpApplicationLocationMangedObject implements
 	 *            Path that is invalid.
 	 * @return {@link InvalidHttpRequestUriException}.
 	 */
-	private static InvalidHttpRequestUriException createInvalidHttpRequestUriException(
-			String path) {
-		return new InvalidHttpRequestUriException(HttpStatus.SC_BAD_REQUEST,
-				"Invalid request URI path [" + path + "]");
+	private static InvalidHttpRequestUriException createInvalidHttpRequestUriException(String path) {
+		return new InvalidHttpRequestUriException(HttpStatus.SC_BAD_REQUEST, "Invalid request URI path [" + path + "]");
 	}
 
 	/**
@@ -297,9 +291,8 @@ public class HttpApplicationLocationMangedObject implements
 	 * @param clusterHttpsPort
 	 *            Cluster HTTPS port.
 	 */
-	public HttpApplicationLocationMangedObject(String domain, int httpPort,
-			int httpsPort, String contextPath, String clusterHostName,
-			int clusterHttpPort, int clusterHttpsPort) {
+	public HttpApplicationLocationMangedObject(String domain, int httpPort, int httpsPort, String contextPath,
+			String clusterHostName, int clusterHttpPort, int clusterHttpsPort) {
 		this.domain = domain;
 		this.httpPort = httpPort;
 		this.httpsPort = httpsPort;
@@ -309,13 +302,11 @@ public class HttpApplicationLocationMangedObject implements
 		this.clusterHttpsPort = clusterHttpsPort;
 
 		// Determine the unsecured prefix for a client link
-		this.unsecuredPrefix = "http://" + this.domain
-				+ (this.httpPort == 80 ? "" : ":" + this.httpPort)
+		this.unsecuredPrefix = "http://" + this.domain + (this.httpPort == 80 ? "" : ":" + this.httpPort)
 				+ (this.contextPath == null ? "" : this.contextPath);
 
 		// Determine the secured prefix for a client link
-		this.securedPrefix = "https://" + this.domain
-				+ (this.httpsPort == 443 ? "" : ":" + this.httpsPort)
+		this.securedPrefix = "https://" + this.domain + (this.httpsPort == 443 ? "" : ":" + this.httpsPort)
 				+ (this.contextPath == null ? "" : this.contextPath);
 	}
 
@@ -324,11 +315,9 @@ public class HttpApplicationLocationMangedObject implements
 	 */
 
 	@Override
-	public void loadObjects(ObjectRegistry<Dependencies> registry)
-			throws Throwable {
+	public void loadObjects(ObjectRegistry<Dependencies> registry) throws Throwable {
 		// Obtain the server HTTP connection
-		this.connection = (ServerHttpConnection) registry
-				.getObject(Dependencies.SERVER_HTTP_CONNECTION);
+		this.connection = (ServerHttpConnection) registry.getObject(Dependencies.SERVER_HTTP_CONNECTION);
 	}
 
 	@Override
@@ -377,8 +366,7 @@ public class HttpApplicationLocationMangedObject implements
 
 	@Override
 	public String transformToApplicationCanonicalPath(String requestUri)
-			throws InvalidHttpRequestUriException,
-			IncorrectHttpRequestContextPathException {
+			throws InvalidHttpRequestUriException, IncorrectHttpRequestContextPathException {
 
 		// Root if empty path
 		if (requestUri == null) {
@@ -399,11 +387,9 @@ public class HttpApplicationLocationMangedObject implements
 
 			// Ensure have context path
 			if (!(canonicalPath.startsWith(this.contextPath))) {
-				throw new IncorrectHttpRequestContextPathException(
-						HttpStatus.SC_NOT_FOUND,
-						"Incorrect context path for application [context="
-								+ this.contextPath + ", request=" + requestUri
-								+ "]");
+				throw new IncorrectHttpRequestContextPathException(HttpStatus.SC_NOT_FOUND,
+						"Incorrect context path for application [context=" + this.contextPath + ", request="
+								+ requestUri + "]");
 			}
 
 			// Strip off the context path

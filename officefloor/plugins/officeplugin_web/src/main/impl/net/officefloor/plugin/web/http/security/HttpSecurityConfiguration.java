@@ -24,49 +24,20 @@ import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSecurityConfiguration<S, C, D extends Enum<D>, F extends Enum<F>> {
-
-	/**
-	 * {@link HttpSecuritySource}.
-	 */
-	private final HttpSecuritySource<S, C, D, F> httpSecuritySource;
-
-	/**
-	 * {@link HttpSecurityType}.
-	 */
-	private final HttpSecurityType<S, C, D, F> httpSecurityType;
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param httpSecuritySource
-	 *            {@link HttpSecuritySource}.
-	 * @param httpSecurityType
-	 *            {@link HttpSecurityType}.
-	 */
-	public HttpSecurityConfiguration(
-			HttpSecuritySource<S, C, D, F> httpSecuritySource,
-			HttpSecurityType<S, C, D, F> httpSecurityType) {
-		this.httpSecuritySource = httpSecuritySource;
-		this.httpSecurityType = httpSecurityType;
-	}
+public interface HttpSecurityConfiguration<S, C, D extends Enum<D>, F extends Enum<F>> {
 
 	/**
 	 * Obtains the {@link HttpSecuritySource}.
 	 * 
 	 * @return {@link HttpSecuritySource}.
 	 */
-	public HttpSecuritySource<S, C, D, F> getHttpSecuritySource() {
-		return this.httpSecuritySource;
-	}
+	HttpSecuritySource<S, C, D, F> getHttpSecuritySource();
 
 	/**
 	 * Obtains the {@link HttpSecurityType}.
 	 * 
 	 * @return {@link HttpSecurityType}.
 	 */
-	public HttpSecurityType<S, C, D, F> getHttpSecurityType() {
-		return this.httpSecurityType;
-	}
+	HttpSecurityType<S, C, D, F> getHttpSecurityType();
 
 }

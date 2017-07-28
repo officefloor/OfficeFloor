@@ -36,8 +36,7 @@ import org.eclipse.swt.widgets.Text;
  *
  * @author Daniel Sagenschneider
  */
-public class OnePersonTeamSourceExtension implements
-		TeamSourceExtension<OnePersonTeamSource> {
+public class OnePersonTeamSourceExtension implements TeamSourceExtension<OnePersonTeamSource> {
 
 	/*
 	 * ================ TeamSourceExtension ==============================
@@ -54,13 +53,11 @@ public class OnePersonTeamSourceExtension implements
 	}
 
 	@Override
-	public void createControl(Composite page,
-			final TeamSourceExtensionContext context) {
+	public void createControl(Composite page, final TeamSourceExtensionContext context) {
 
 		// Obtain the wait property
 		final Property waitProperty = context.getPropertyList()
-				.getOrAddProperty(
-						OnePersonTeamSource.MAX_WAIT_TIME_PROPERTY_NAME);
+				.getOrAddProperty(OnePersonTeamSource.MAX_WAIT_TIME_PROPERTY_NAME);
 
 		// Obtain initial value
 		String initialValue = waitProperty.getValue();

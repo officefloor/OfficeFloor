@@ -17,18 +17,17 @@
  */
 package net.officefloor.frame.impl.execute.officefloor;
 
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.ManagedObjectExecuteContextFactory;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
-import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link ManagedObjectSourceInstance} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectSourceInstanceImpl<F extends Enum<F>> implements
-		ManagedObjectSourceInstance<F> {
+public class ManagedObjectSourceInstanceImpl<F extends Enum<F>> implements ManagedObjectSourceInstance<F> {
 
 	/**
 	 * {@link ManagedObjectSource}.
@@ -57,8 +56,7 @@ public class ManagedObjectSourceInstanceImpl<F extends Enum<F>> implements
 	 * @param managedObjectPool
 	 *            {@link ManagedObjectPool}.
 	 */
-	public ManagedObjectSourceInstanceImpl(
-			ManagedObjectSource<?, F> managedObjectSource,
+	public ManagedObjectSourceInstanceImpl(ManagedObjectSource<?, F> managedObjectSource,
 			ManagedObjectExecuteContextFactory<F> managedObjectExecuteContextFactory,
 			ManagedObjectPool managedObjectPool) {
 		this.managedObjectSource = managedObjectSource;

@@ -22,21 +22,19 @@ import net.officefloor.compile.officefloor.OfficeFloorType;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
-import net.officefloor.compile.type.TypeContext;
-import net.officefloor.frame.api.OfficeFrame;
-import net.officefloor.frame.api.manage.Office;
+import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
+import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.profile.Profiler;
 
 /**
  * {@link OfficeFloor} node.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorNode extends Node, PropertyConfigurable,
-		ManagedObjectRegistry, OfficeFloorDeployer {
+public interface OfficeFloorNode extends Node, PropertyConfigurable, ManagedObjectRegistry, OfficeFloorDeployer {
 
 	/**
 	 * Default name of the {@link OfficeFloorNode}.
@@ -54,29 +52,18 @@ public interface OfficeFloorNode extends Node, PropertyConfigurable,
 	void initialise();
 
 	/**
-	 * Adds a {@link Profiler} for an {@link Office}.
-	 * 
-	 * @param officeName
-	 *            Name of the {@link Office} to profile.
-	 * @param profiler
-	 *            {@link Profiler}.
-	 */
-	void addProfiler(String officeName, Profiler profiler);
-
-	/**
 	 * Adds a {@link OfficeFloorManagedObjectSource} supplied from an
 	 * {@link OfficeFloorSupplier}.
 	 * 
 	 * @param managedObjectSourceName
 	 *            Name of the {@link OfficeFloorManagedObjectSource}.
 	 * @param suppliedManagedObject
-	 *            {@link SuppliedManagedObjectNode} to supply the
+	 *            {@link SuppliedManagedObjectSourceNode} to supply the
 	 *            {@link OfficeFloorManagedObjectSource}.
 	 * @return {@link OfficeFloorManagedObjectSource}.
 	 */
-	OfficeFloorManagedObjectSource addManagedObjectSource(
-			String managedObjectSourceName,
-			SuppliedManagedObjectNode suppliedManagedObject);
+	OfficeFloorManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
+			SuppliedManagedObjectSourceNode suppliedManagedObject);
 
 	/**
 	 * <p>
@@ -84,41 +71,77 @@ public interface OfficeFloorNode extends Node, PropertyConfigurable,
 	 * <p>
 	 * This will only source the top level {@link OfficeSection}.
 	 * 
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	boolean sourceOfficeFloor();
+	boolean sourceOfficeFloor(CompileContext compileContext);
 
 	/**
 	 * Sources this {@link OfficeFloorNode} and all its descendant {@link Node}
 	 * instances recursively.
 	 * 
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	boolean sourceOfficeFloorTree();
+	boolean sourceOfficeFloorTree(CompileContext compileContext);
+
+	/**
+	 * Loads the {@link AutoWire} targets for the
+	 * {@link OfficeFloorManagedObject} instances.
+	 * 
+	 * @param autoWirer
+	 *            {@link AutoWirer} to be loaded with the
+	 *            {@link OfficeFloorManagedObject} targets.
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 * @return {@link AutoWirer} with context for the {@link OfficeFloor}.
+	 */
+	AutoWirer<LinkObjectNode> loadAutoWireObjectTargets(AutoWirer<LinkObjectNode> autoWirer,
+			CompileContext compileContext);
+
+	/**
+	 * Loads the {@link AutoWire} targets for the {@link OfficeFloorTeam}
+	 * instances.
+	 * 
+	 * @param autoWirer
+	 *            {@link AutoWire} to be loaded with the {@link OfficeFloorTeam}
+	 *            targets.
+	 * @param officeTeamRegistry
+	 *            {@link OfficeTeamRegistry}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 */
+	void loadAutoWireTeamTargets(AutoWirer<LinkTeamNode> autoWirer, OfficeTeamRegistry officeTeamRegistry,
+			CompileContext compileContext);
 
 	/**
 	 * Loads the {@link OfficeFloorType}.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return <code>true</code> if the {@link OfficeFloorType} was loaded.
 	 */
-	OfficeFloorType loadOfficeFloorType(TypeContext typeContext);
+	OfficeFloorType loadOfficeFloorType(CompileContext compileContext);
 
 	/**
 	 * Deploys the {@link OfficeFloor}.
 	 * 
-	 * @param officeFrame
-	 *            {@link OfficeFrame} to deploy the {@link OfficeFloor} within.
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param officeFloorName
+	 *            Name of the {@link OfficeFloor}.
+	 * @param officeFloorBuilder
+	 *            {@link OfficeFloorBuilder} to build the deployed
+	 *            {@link OfficeFloor}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return {@link OfficeFloor}.
 	 */
-	OfficeFloor deployOfficeFloor(OfficeFrame officeFrame,
-			TypeContext typeContext);
+	OfficeFloor deployOfficeFloor(String officeFloorName, OfficeFloorBuilder officeFloorBuilder,
+			CompileContext compileContext);
 
 }

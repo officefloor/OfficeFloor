@@ -2,6 +2,10 @@
 <unmarshall node="office-floor"
 	class="net.officefloor.model.officefloor.OfficeFloorModel">
 
+	<!-- OFFICE ATTRIBUTES -->
+	<value method="setIsAutoWireObjects" node="office-floor@auto-wire-objects" />
+	<value method="setIsAutoWireTeams" node="office-floor@auto-wire-teams" />
+
 	<!-- SUPPLIERS -->
 	<object method="addOfficeFloorSupplier" node="supplier"
 		class="net.officefloor.model.officefloor.OfficeFloorSupplierModel">
@@ -30,11 +34,15 @@
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
+		<object method="setOfficeFloorManagedObjectPool" node="managed-object-pool"
+			class="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorManagedObjectPoolModel">
+			<value method="setOfficeFloorManagedObjectPoolName" node="managed-object-pool@name" />
+		</object>
 		<object method="setOfficeFloorSupplier" node="supplier"
 			class="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel">
 			<value method="setOfficeFloorSupplierName" node="supplier@name" />
-			<value method="setAutoWireType" node="supplier@type" />
-			<value method="setAutoWireQualifier" node="supplier@qualifier" />
+			<value method="setType" node="supplier@type" />
+			<value method="setQualifier" node="supplier@qualifier" />
 		</object>
 		<object method="setManagingOffice" node="managing-office"
 			class="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel">
@@ -83,6 +91,11 @@
 		<value method="setObjectType" node="input-managed-object@object-type" />
 		<value method="setX" node="input-managed-object@x" />
 		<value method="setY" node="input-managed-object@y" />
+		<object method="addTypeQualification" node="type-qualification"
+			class="net.officefloor.model.officefloor.TypeQualificationModel">
+			<value method="setQualifier" node="type-qualification@qualifier" />
+			<value method="setType" node="type-qualification@type" />
+		</object>
 		<object method="setBoundOfficeFloorManagedObjectSource" node="bound-managed-object-source"
 			class="net.officefloor.model.officefloor.OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel">
 			<value method="setOfficeFloorManagedObjectSourceName" node="bound-managed-object-source@name" />
@@ -100,6 +113,11 @@
 			class="net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel">
 			<value method="setOfficeFloorManagedObjectSourceName" node="managed-object-source@name" />
 		</object>
+		<object method="addTypeQualification" node="type-qualification"
+			class="net.officefloor.model.officefloor.TypeQualificationModel">
+			<value method="setQualifier" node="type-qualification@qualifier" />
+			<value method="setType" node="type-qualification@type" />
+		</object>
 		<object method="addOfficeFloorManagedObjectDependency" node="dependency"
 			class="net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel">
 			<value method="setOfficeFloorManagedObjectDependencyName" node="dependency@name" />
@@ -115,6 +133,20 @@
 		</object>
 	</object>
 
+	<!-- MANAGED OBJECT POOLS -->
+	<object method="addOfficeFloorManagedObjectPool" node="managed-object-pool"
+		class="net.officefloor.model.officefloor.OfficeFloorManagedObjectPoolModel">
+		<value method="setOfficeFloorManagedObjectPoolName" node="managed-object-pool@name" />
+		<value method="setManagedObjectPoolSourceClassName" node="managed-object-pool@source" />
+		<value method="setX" node="managed-object-pool@x" />
+		<value method="setY" node="managed-object-pool@y" />
+		<object method="addProperty" node="property"
+			class="net.officefloor.model.officefloor.PropertyModel">
+			<value method="setName" node="property@name" />
+			<value method="setValue" node="property@value" />
+		</object>
+	</object>
+
 	<!-- TEAMS -->
 	<object method="addOfficeFloorTeam" node="team"
 		class="net.officefloor.model.officefloor.OfficeFloorTeamModel">
@@ -126,6 +158,11 @@
 			class="net.officefloor.model.officefloor.PropertyModel">
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
+		</object>
+		<object method="addTypeQualification" node="type-qualification"
+			class="net.officefloor.model.officefloor.TypeQualificationModel">
+			<value method="setQualifier" node="type-qualification@qualifier" />
+			<value method="setType" node="type-qualification@type" />
 		</object>
 	</object>
 

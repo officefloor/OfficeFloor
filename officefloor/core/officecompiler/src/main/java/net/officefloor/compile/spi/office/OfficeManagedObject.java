@@ -19,11 +19,10 @@ package net.officefloor.compile.spi.office;
 
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.section.TypeQualification;
-import net.officefloor.compile.spi.section.ManagedObjectDependency;
-import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * {@link ManagedObject} for the {@link Office}.
@@ -42,9 +41,9 @@ public interface OfficeManagedObject
 
 	/**
 	 * <p>
-	 * Adds an {@link TypeQualification} for this {@link SectionManagedObject}.
+	 * Adds an {@link TypeQualification} for this {@link OfficeManagedObject}.
 	 * <p>
-	 * This enables distinguishing {@link SectionManagedObject} instances to
+	 * This enables distinguishing {@link OfficeManagedObject} instances to
 	 * enable, for example, dynamic {@link Team} assignment.
 	 * 
 	 * @param qualifier

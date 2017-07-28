@@ -40,19 +40,4 @@ public interface ConnectionHandler {
 	 */
 	void handleRead(ReadContext context) throws IOException;
 
-	/**
-	 * <p>
-	 * Handles a heart beat on {@link Connection}.
-	 * <p>
-	 * Typical use of the heart beat is to allow the {@link ConnectionHandler}
-	 * to close an idle {@link Connection}.
-	 * 
-	 * @param context
-	 *            {@link HeartBeatContext}.
-	 * @throws IOException
-	 *             If fails to handle heart beat. Possibly from attempting to
-	 *             close it.
-	 */
-	void handleHeartbeat(HeartBeatContext context) throws IOException;
-
 }

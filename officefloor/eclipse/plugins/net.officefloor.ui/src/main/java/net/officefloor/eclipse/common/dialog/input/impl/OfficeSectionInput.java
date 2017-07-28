@@ -36,9 +36,9 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
+import net.officefloor.compile.section.OfficeFunctionType;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
-import net.officefloor.compile.section.OfficeTaskType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.eclipse.common.dialog.input.Input;
@@ -168,7 +168,7 @@ public class OfficeSectionInput implements Input<Tree> {
 			List<Object> children = new LinkedList<Object>();
 			if (parent instanceof OfficeSubSectionType) {
 				OfficeSubSectionType subSectionType = (OfficeSubSectionType) parent;
-				children.addAll(Arrays.asList(subSectionType.getOfficeTaskTypes()));
+				children.addAll(Arrays.asList(subSectionType.getOfficeFunctionTypes()));
 				children.addAll(Arrays.asList(subSectionType.getOfficeSubSectionTypes()));
 
 			} else {
@@ -220,8 +220,8 @@ public class OfficeSectionInput implements Input<Tree> {
 			// Return description
 			if (element instanceof OfficeSubSectionType) {
 				return "Section: " + ((OfficeSubSection) element).getOfficeSectionName();
-			} else if (element instanceof OfficeTaskType) {
-				return "Task: " + ((OfficeTaskType) element).getOfficeTaskName();
+			} else if (element instanceof OfficeFunctionType) {
+				return "Function: " + ((OfficeFunctionType) element).getOfficeFunctionName();
 			} else {
 				// Unknown type
 				return "UNKNOWN TYPE: " + element + " [" + (element == null ? null : element.getClass().getName())

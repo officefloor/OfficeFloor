@@ -20,12 +20,11 @@ package net.officefloor.plugin.web.http.session;
 import java.net.HttpCookie;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.generator.UuidHttpSessionIdGenerator;
 import net.officefloor.plugin.web.http.session.spi.HttpSessionIdGenerator;
 import net.officefloor.plugin.web.http.session.spi.HttpSessionStore;
@@ -36,8 +35,7 @@ import net.officefloor.plugin.web.http.session.store.MemoryHttpSessionStore;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSessionManagedObjectSource extends
-		AbstractManagedObjectSource<Indexed, Indexed> {
+public class HttpSessionManagedObjectSource extends AbstractManagedObjectSource<Indexed, Indexed> {
 
 	/**
 	 * Property name to obtain the {@link HttpCookie} name of the Session Id.
@@ -116,33 +114,27 @@ public class HttpSessionManagedObjectSource extends
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<Indexed, Indexed> context)
-			throws Exception {
-		ManagedObjectSourceContext<Indexed> mosContext = context
-				.getManagedObjectSourceContext();
+	protected void loadMetaData(MetaDataContext<Indexed, Indexed> context) throws Exception {
+		ManagedObjectSourceContext<Indexed> mosContext = context.getManagedObjectSourceContext();
 
 		// Specify types
 		context.setObjectClass(HttpSession.class);
 		context.setManagedObjectClass(HttpSessionManagedObject.class);
 
 		// Obtain the Session Id cookie name
-		this.sessionIdCookieName = mosContext
-				.getProperty(PROPERTY_SESSION_ID_COOKIE_NAME,
-						DEFAULT_SESSION_ID_COOKIE_NAME);
+		this.sessionIdCookieName = mosContext.getProperty(PROPERTY_SESSION_ID_COOKIE_NAME,
+				DEFAULT_SESSION_ID_COOKIE_NAME);
 
 		// Register dependency on HTTP connection
-		this.serverHttpConnectionIndex = context
-				.addDependency(ServerHttpConnection.class)
-				.setLabel("HTTP_CONNECTION").getIndex();
+		this.serverHttpConnectionIndex = context.addDependency(ServerHttpConnection.class).setLabel("HTTP_CONNECTION")
+				.getIndex();
 
 		// Deterimine Session Id generator to use
-		String useDependencySessionIdGenerator = mosContext.getProperty(
-				PROPERTY_USE_DEPENDENCY_SESSION_ID_GENERATOR,
+		String useDependencySessionIdGenerator = mosContext.getProperty(PROPERTY_USE_DEPENDENCY_SESSION_ID_GENERATOR,
 				String.valueOf(false));
 		if (Boolean.parseBoolean(useDependencySessionIdGenerator)) {
 			// Use dependency Session Id generator
-			this.httpSessionIdGeneratorIndex = context
-					.addDependency(HttpSessionIdGenerator.class)
+			this.httpSessionIdGeneratorIndex = context.addDependency(HttpSessionIdGenerator.class)
 					.setLabel("SESSION_ID_GENERATOR").getIndex();
 		} else {
 			// Use default Session Id generator
@@ -150,27 +142,23 @@ public class HttpSessionManagedObjectSource extends
 		}
 
 		// Determine Session Store to use
-		String useDependencySessionStore = mosContext.getProperty(
-				PROPERTY_USE_DEPENDENCY_SESSION_STORE, String.valueOf(false));
+		String useDependencySessionStore = mosContext.getProperty(PROPERTY_USE_DEPENDENCY_SESSION_STORE,
+				String.valueOf(false));
 		if (Boolean.parseBoolean(useDependencySessionStore)) {
 			// Use dependency Session Store
-			this.httpSessionStoreIndex = context
-					.addDependency(HttpSessionStore.class)
-					.setLabel("SESSION_STORE").getIndex();
+			this.httpSessionStoreIndex = context.addDependency(HttpSessionStore.class).setLabel("SESSION_STORE")
+					.getIndex();
 		} else {
 			// Use default Session Store
-			int maxIdleTime = Integer.parseInt(mosContext.getProperty(
-					PROPERTY_MAX_IDLE_TIME,
-					String.valueOf(DEFAULT_MAX_IDLE_TIME)));
+			int maxIdleTime = Integer
+					.parseInt(mosContext.getProperty(PROPERTY_MAX_IDLE_TIME, String.valueOf(DEFAULT_MAX_IDLE_TIME)));
 			this.store = new MemoryHttpSessionStore(maxIdleTime);
 		}
 	}
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-		return new HttpSessionManagedObject(this.sessionIdCookieName,
-				this.serverHttpConnectionIndex,
-				this.httpSessionIdGeneratorIndex, this.generator,
-				this.httpSessionStoreIndex, this.store);
+		return new HttpSessionManagedObject(this.sessionIdCookieName, this.serverHttpConnectionIndex,
+				this.httpSessionIdGeneratorIndex, this.generator, this.httpSessionStoreIndex, this.store);
 	}
 }

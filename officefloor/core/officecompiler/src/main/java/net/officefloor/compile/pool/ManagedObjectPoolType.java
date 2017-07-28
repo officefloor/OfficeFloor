@@ -17,24 +17,38 @@
  */
 package net.officefloor.compile.pool;
 
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListenerFactory;
 
 /**
- * <p>
  * <code>Type definition</code> of a {@link ManagedObjectPool}.
- * <p>
- * All {@link ManagedObjectPool} instances implement the same interface. They
- * however differ in their characteristics which is internal to the
- * {@link ManagedObjectPool}.
- * <p>
- * TODO Need to consider if necessary to provide criteria on a
- * {@link ManagedObjectSource} to differentiate which {@link ManagedObjectPool}
- * may pool its {@link ManagedObject} instances.
  * 
  * @author Daniel Sagenschneider
  */
 public interface ManagedObjectPoolType {
+
+	/**
+	 * Obtains the type of object being pooled.
+	 * 
+	 * @return Type of object being pooled.
+	 */
+	Class<?> getPooledObjectType();
+
+	/**
+	 * Obtains the {@link ManagedObjectPoolFactory} for the
+	 * {@link ManagedObjectPool}.
+	 * 
+	 * @return {@link ManagedObjectPoolFactory} for the
+	 *         {@link ManagedObjectPool}.
+	 */
+	ManagedObjectPoolFactory getManagedObjectPoolFactory();
+
+	/**
+	 * Obtains the {@link ThreadCompletionListenerFactory} instances.
+	 * 
+	 * @return {@link ThreadCompletionListenerFactory} instances.
+	 */
+	ThreadCompletionListenerFactory[] getThreadCompletionListenerFactories();
 
 }

@@ -19,47 +19,57 @@ package net.officefloor.frame.impl.construct.officefloor;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuildException;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorMetaDataImpl;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.source.ResourceSource;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSourceContext;
+import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaDataImpl;
 import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaDataImpl;
+import net.officefloor.frame.impl.construct.managedfunction.RawManagedFunctionMetaDataImpl;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataImpl;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectBuilderImpl;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaDataImpl;
 import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
 import net.officefloor.frame.impl.construct.office.RawOfficeMetaDataImpl;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
-import net.officefloor.frame.impl.construct.task.RawTaskMetaDataImpl;
 import net.officefloor.frame.impl.construct.team.RawTeamMetaDataImpl;
 import net.officefloor.frame.impl.construct.team.TeamBuilderImpl;
-import net.officefloor.frame.impl.construct.work.RawWorkMetaDataImpl;
 import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
+import net.officefloor.frame.impl.execute.officefloor.ThreadLocalAwareExecutorImpl;
+import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
 import net.officefloor.frame.internal.construct.RawOfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.source.ResourceSource;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.team.source.TeamSource;
 
 /**
  * Implementation of {@link OfficeFloorBuilder}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
-		OfficeFloorConfiguration {
+public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorConfiguration {
+
+	/**
+	 * Name of the break {@link FunctionState} chain {@link Team}.
+	 */
+	private static final String BREAK_CHAIN_TEAM_NAME = "_BREAK_CHAIN_";
 
 	/**
 	 * Name of the {@link OfficeFloor}.
@@ -77,6 +87,13 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 	private final List<TeamConfiguration<?>> teams = new LinkedList<TeamConfiguration<?>>();
 
 	/**
+	 * Break {@link FunctionState} chain {@link Team}. Initiate with default
+	 * {@link TeamSource}.
+	 */
+	private TeamBuilderImpl<?> breakChainTeam = new TeamBuilderImpl<>(BREAK_CHAIN_TEAM_NAME,
+			ExecutorCachedTeamSource.class);
+
+	/**
 	 * Listing of {@link OfficeConfiguration} instances.
 	 */
 	private final List<OfficeConfiguration> offices = new LinkedList<OfficeConfiguration>();
@@ -87,6 +104,12 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 	private ClassLoader classLoader = null;
 
 	/**
+	 * Decorator of the {@link Thread} instances created by the
+	 * {@link TeamSourceContext}.
+	 */
+	private Consumer<Thread> threadDecorator = null;
+
+	/**
 	 * {@link ResourceSource} instances.
 	 */
 	private final List<ResourceSource> resourceSources = new LinkedList<ResourceSource>();
@@ -95,6 +118,11 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 	 * {@link EscalationProcedure}.
 	 */
 	private EscalationHandler escalationHandler = null;
+
+	/**
+	 * {@link OfficeFloorListener} instances.
+	 */
+	private final List<OfficeFloorListener> listeners = new LinkedList<>();
 
 	/**
 	 * Initiate.
@@ -116,24 +144,33 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 	}
 
 	@Override
+	public void setThreadDecorator(Consumer<Thread> decorator) {
+		this.threadDecorator = decorator;
+	}
+
+	@Override
 	public void addResources(ResourceSource resourceSource) {
 		this.resourceSources.add(resourceSource);
+	}
+
+	@Override
+	public void addOfficeFloorListener(OfficeFloorListener listener) {
+		this.listeners.add(listener);
 	}
 
 	@Override
 	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> addManagedObject(
 			String managedObjectSourceName, Class<MS> managedObjectSourceClass) {
 		// Create, register and return the builder
-		ManagedObjectBuilderImpl<D, F, MS> builder = new ManagedObjectBuilderImpl<D, F, MS>(
-				managedObjectSourceName, managedObjectSourceClass);
+		ManagedObjectBuilderImpl<D, F, MS> builder = new ManagedObjectBuilderImpl<D, F, MS>(managedObjectSourceName,
+				managedObjectSourceClass);
 		this.mangedObjects.add(builder);
 		return builder;
 	}
 
 	@Override
 	public <D extends Enum<D>, F extends Enum<F>> ManagedObjectBuilder<F> addManagedObject(
-			String managedObjectSourceName,
-			ManagedObjectSource<D, F> managedObjectSource) {
+			String managedObjectSourceName, ManagedObjectSource<D, F> managedObjectSource) {
 		// Create, register and return the builder
 		ManagedObjectBuilderImpl<D, F, ManagedObjectSource<D, F>> builder = new ManagedObjectBuilderImpl<D, F, ManagedObjectSource<D, F>>(
 				managedObjectSourceName, managedObjectSource);
@@ -142,13 +179,24 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 	}
 
 	@Override
-	public <TS extends TeamSource> TeamBuilder<TS> addTeam(String teamName,
-			Class<TS> teamSourceClass) {
+	public <TS extends TeamSource> TeamBuilder<TS> addTeam(String teamName, Class<TS> teamSourceClass) {
 		// Create, register and return the builder
-		TeamBuilderImpl<TS> builder = new TeamBuilderImpl<TS>(teamName,
-				teamSourceClass);
+		TeamBuilderImpl<TS> builder = new TeamBuilderImpl<TS>(teamName, teamSourceClass);
 		this.teams.add(builder);
 		return builder;
+	}
+
+	@Override
+	public <TS extends TeamSource> TeamBuilder<TS> addTeam(String teamName, TS teamSource) {
+		// Create, register and return the builder
+		TeamBuilderImpl<TS> builder = new TeamBuilderImpl<>(teamName, teamSource);
+		this.teams.add(builder);
+		return builder;
+	}
+
+	@Override
+	public TeamConfiguration<?> getBreakChainTeamConfiguration() {
+		return this.breakChainTeam;
 	}
 
 	@Override
@@ -172,21 +220,16 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 	@Override
 	public OfficeFloor buildOfficeFloor(OfficeFloorIssues issuesListener) {
 
-		// Build this office floor
-		RawOfficeFloorMetaData rawMetaData = RawOfficeFloorMetaDataImpl
-				.getFactory().constructRawOfficeFloorMetaData(this,
-						issuesListener, RawTeamMetaDataImpl.getFactory(),
-						RawManagedObjectMetaDataImpl.getFactory(),
-						RawBoundManagedObjectMetaDataImpl.getFactory(),
-						RawGovernanceMetaDataImpl.getFactory(),
-						RawBoundAdministratorMetaDataImpl.getFactory(),
-						RawOfficeMetaDataImpl.getFactory(),
-						RawWorkMetaDataImpl.getFactory(),
-						RawTaskMetaDataImpl.getFactory());
+		// Build this OfficeFloor
+		RawOfficeFloorMetaData rawMetaData = RawOfficeFloorMetaDataImpl.getFactory().constructRawOfficeFloorMetaData(
+				this, issuesListener, RawTeamMetaDataImpl.getFactory(), new ThreadLocalAwareExecutorImpl(),
+				RawManagedObjectMetaDataImpl.getFactory(), RawBoundManagedObjectMetaDataImpl.getFactory(),
+				RawGovernanceMetaDataImpl.getFactory(), RawAdministrationMetaDataImpl.getFactory(),
+				RawOfficeMetaDataImpl.getFactory(), RawManagedFunctionMetaDataImpl.getFactory());
 
 		// Obtain the office floor meta-data and return the office floor
 		OfficeFloorMetaData metaData = rawMetaData.getOfficeFloorMetaData();
-		return new OfficeFloorImpl(metaData);
+		return new OfficeFloorImpl(metaData, this.listeners.toArray(new OfficeFloorListener[this.listeners.size()]));
 	}
 
 	/*
@@ -199,6 +242,11 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 	}
 
 	@Override
+	public Consumer<Thread> getThreadDecorator() {
+		return this.threadDecorator;
+	}
+
+	@Override
 	public SourceContext getSourceContext() {
 
 		// Obtain the class loader
@@ -208,22 +256,25 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 		}
 
 		// Create and return the source context
-		return new SourceContextImpl(
-				false,
-				classLoader,
-				this.resourceSources
-						.toArray(new ResourceSource[this.resourceSources.size()]));
+		return new SourceContextImpl(false, classLoader,
+				this.resourceSources.toArray(new ResourceSource[this.resourceSources.size()]));
 	}
 
 	@Override
 	public ManagedObjectSourceConfiguration<?, ?>[] getManagedObjectSourceConfiguration() {
-		return this.mangedObjects
-				.toArray(new ManagedObjectSourceConfiguration[0]);
+		return this.mangedObjects.toArray(new ManagedObjectSourceConfiguration[0]);
 	}
 
 	@Override
 	public TeamConfiguration<?>[] getTeamConfiguration() {
 		return this.teams.toArray(new TeamConfiguration[0]);
+	}
+
+	@Override
+	public <TS extends TeamSource> TeamBuilder<TS> setBreakChainTeam(Class<TS> teamSourceClass) {
+		TeamBuilderImpl<TS> builder = new TeamBuilderImpl<>(BREAK_CHAIN_TEAM_NAME, teamSourceClass);
+		this.breakChainTeam = builder;
+		return builder;
 	}
 
 	@Override

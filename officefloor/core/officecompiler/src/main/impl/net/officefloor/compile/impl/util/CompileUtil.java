@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.IssueCapture;
-import net.officefloor.frame.spi.source.SourceContext;
+import net.officefloor.frame.api.source.SourceContext;
 
 /**
  * Utility methods to aid in compiling.
@@ -376,7 +376,7 @@ public class CompileUtil {
 	 *         Otherwise, <code>false</code> with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	public static <N> boolean sourceTree(Map<String, N> nodesMap, Function<N, String> sortKeyExtractor,
+	public static <N> boolean source(Map<String, N> nodesMap, Function<N, String> sortKeyExtractor,
 			Predicate<N> sourcer) {
 		return nodesMap.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(sortKeyExtractor.apply(a), sortKeyExtractor.apply(b)))

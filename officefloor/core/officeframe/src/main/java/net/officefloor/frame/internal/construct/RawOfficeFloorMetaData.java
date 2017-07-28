@@ -18,11 +18,14 @@
 package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.structure.EscalationFlow;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.ProcessContextListener;
+import net.officefloor.frame.internal.structure.TeamManagement;
+import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 
 /**
  * Raw meta-data for the {@link OfficeFloor}.
@@ -42,13 +45,26 @@ public interface RawOfficeFloorMetaData {
 	RawTeamMetaData getRawTeamMetaData(String teamName);
 
 	/**
-	 * Obtains the {@link ProcessContextListener} instances for the
-	 * {@link OfficeFloor}.
+	 * Obtains the {@link TeamManagement} to break the {@link FunctionState}
+	 * chain.
 	 * 
-	 * @return {@link ProcessContextListener} instances for the
-	 *         {@link OfficeFloor}.
+	 * @return {@link TeamManagement} to break the {@link FunctionState} chain.
 	 */
-	ProcessContextListener[] getProcessContextListeners();
+	TeamManagement getBreakChainTeamManagement();
+
+	/**
+	 * Obtains the {@link ThreadLocalAwareExecutor}.
+	 * 
+	 * @return {@link ThreadLocalAwareExecutor}.
+	 */
+	ThreadLocalAwareExecutor getThreadLocalAwareExecutor();
+
+	/**
+	 * Obtains the {@link ManagedExecutionFactory}.
+	 * 
+	 * @return {@link ManagedExecutionFactory}.
+	 */
+	ManagedExecutionFactory getManagedExecutionFactory();
 
 	/**
 	 * Obtains the {@link RawManagedObjectMetaData} for the
@@ -59,8 +75,7 @@ public interface RawOfficeFloorMetaData {
 	 * @return {@link RawManagedObjectMetaData} or <code>null</code> if not
 	 *         exist for name.
 	 */
-	RawManagedObjectMetaData<?, ?> getRawManagedObjectMetaData(
-			String managedObjectSourceName);
+	RawManagedObjectMetaData<?, ?> getRawManagedObjectMetaData(String managedObjectSourceName);
 
 	/**
 	 * Obtains the {@link EscalationFlow} for the {@link OfficeFloor}.

@@ -1,0 +1,44 @@
+<section>
+	<external-flows>
+		<external-flow name="FLOW" argument-type="java.lang.Object" />
+	</external-flows>
+	<function-namespaces>
+		<function-namespace name="NAMESPACE"
+			source="net.example.ExampleManagedFunctionSource">
+			<managed-function name="MANAGED_FUNCTION" />
+		</function-namespace>
+	</function-namespaces>
+	<functions>
+		<function name="FUNCTION_A" function-namespace="NAMESPACE"
+			managed-function="MANAGED_FUNCTION" return-type="java.lang.Integer">
+			<function-flow name="FLOW_TO_FUNCTION" argument-type="java.lang.Double">
+				<function name="FUNCTION_B" />
+			</function-flow>
+			<function-flow name="FLOW_TO_EXT_FLOW" argument-type="java.lang.String">
+				<external-flow name="FLOW" />
+			</function-flow>
+			<!-- Should not have both next-task and next-external-flow but have in 
+				this case for testing -->
+			<next-function name="FUNCTION_B" />
+			<next-external-flow name="FLOW" />
+			<function-escalation escalation-type="java.lang.Exception">
+				<function name="FUNCTION_B" />
+			</function-escalation>
+			<function-escalation escalation-type="java.lang.Error">
+				<external-flow name="FLOW" />
+			</function-escalation>
+		</function>
+		<function name="FUNCTION_B" function-namespace="NAMESPACE"
+			managed-function="MANAGED_FUNCTION" return-type="java.lang.String">
+			<!-- not including flows and escalations as testing being linked to, however 
+				as same managed-function should have them -->
+			<function-flow name="FLOW" argument-type="java.lang.Object">
+				<function name="FUNCTION_A" />
+			</function-flow>
+			<next-function name="FUNCTION_A" />
+			<function-escalation escalation-type="java.lang.Exception">
+				<function name="FUNCTION_A" />
+			</function-escalation>
+		</function>
+	</functions>
+</section>

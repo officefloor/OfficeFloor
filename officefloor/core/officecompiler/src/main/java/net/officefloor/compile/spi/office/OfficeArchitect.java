@@ -17,15 +17,20 @@
  */
 package net.officefloor.compile.spi.office;
 
+import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
+import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
+import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
+import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
-import net.officefloor.compile.spi.section.ManagedObjectDependency;
-import net.officefloor.compile.spi.section.ManagedObjectFlow;
+import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
+import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * Architect to structure the {@link Office}.
@@ -33,6 +38,16 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
  * @author Daniel Sagenschneider
  */
 public interface OfficeArchitect {
+
+	/**
+	 * Flags to attempt to auto wire any non-configured object links.
+	 */
+	void enableAutoWireObjects();
+
+	/**
+	 * Flags to attempt to auto wire any non-configured {@link Team} links.
+	 */
+	void enableAutoWireTeams();
 
 	/**
 	 * Adds a {@link OfficeInput}.
@@ -89,8 +104,7 @@ public interface OfficeArchitect {
 	 *            Location of the {@link OfficeSection}.
 	 * @return Added {@link OfficeSection}.
 	 */
-	OfficeSection addOfficeSection(String sectionName,
-			String sectionSourceClassName, String sectionLocation);
+	OfficeSection addOfficeSection(String sectionName, String sectionSourceClassName, String sectionLocation);
 
 	/**
 	 * Adds an {@link OfficeSection}.
@@ -103,8 +117,25 @@ public interface OfficeArchitect {
 	 *            Location of the {@link OfficeSection}.
 	 * @return Added {@link OfficeSection}.
 	 */
-	OfficeSection addOfficeSection(String sectionName,
-			SectionSource sectionSource, String sectionLocation);
+	OfficeSection addOfficeSection(String sectionName, SectionSource sectionSource, String sectionLocation);
+
+	/**
+	 * Obtains the {@link OfficeSection}.
+	 * 
+	 * @param sectionName
+	 *            Name of the {@link OfficeSection}.
+	 * @return {@link OfficeSection}.
+	 */
+	OfficeSection getOfficeSection(String sectionName);
+
+	/**
+	 * Adds an {@link OfficeSectionTransformer} to transform the
+	 * {@link OfficeSection} instances of the {@link Office}.
+	 * 
+	 * @param transformer
+	 *            {@link OfficeSectionTransformer}.
+	 */
+	void addOfficeSectionTransformer(OfficeSectionTransformer transformer);
 
 	/**
 	 * Adds a {@link OfficeManagedObjectSource}.
@@ -115,8 +146,8 @@ public interface OfficeArchitect {
 	 *            Fully qualified class name of the {@link ManagedObjectSource}.
 	 * @return Added {@link OfficeManagedObjectSource}.
 	 */
-	OfficeManagedObjectSource addOfficeManagedObjectSource(
-			String managedObjectSourceName, String managedObjectSourceClassName);
+	OfficeManagedObjectSource addOfficeManagedObjectSource(String managedObjectSourceName,
+			String managedObjectSourceClassName);
 
 	/**
 	 * Adds a {@link OfficeManagedObjectSource}.
@@ -127,9 +158,54 @@ public interface OfficeArchitect {
 	 *            {@link ManagedObjectSource} instance to use.
 	 * @return Added {@link OfficeManagedObjectSource}.
 	 */
-	OfficeManagedObjectSource addOfficeManagedObjectSource(
-			String managedObjectSourceName,
+	OfficeManagedObjectSource addOfficeManagedObjectSource(String managedObjectSourceName,
 			ManagedObjectSource<?, ?> managedObjectSource);
+
+	/**
+	 * Adds an {@link OfficeManagedObjectPool}.
+	 * 
+	 * @param managedObjectPoolName
+	 *            Name of the {@link OfficeManagedObjectPool}.
+	 * @param managedObjectPoolSourceClassName
+	 *            Fully qualified class name of the
+	 *            {@link ManagedObjectPoolSource}.
+	 * @return Added {@link OfficeManagedObjectPool}.
+	 */
+	OfficeManagedObjectPool addManagedObjectPool(String managedObjectPoolName, String managedObjectPoolSourceClassName);
+
+	/**
+	 * Adds an {@link OfficeManagedObjectPool}.
+	 * 
+	 * @param managedObjectPoolName
+	 *            Name of the {@link OfficeManagedObjectPool}.
+	 * @param managedObjectPoolSource
+	 *            {@link ManagedObjectPoolSource} instance to use.
+	 * @return {@link OfficeManagedObjectPool}.
+	 */
+	OfficeManagedObjectPool addManagedObjectPool(String managedObjectPoolName,
+			ManagedObjectPoolSource managedObjectPoolSource);
+
+	/**
+	 * Adds an {@link OfficeSupplier}.
+	 * 
+	 * @param supplierName
+	 *            Name of the {@link OfficeSupplier}.
+	 * @param supplierSourceClassName
+	 *            Fully qualified class name of the {@link SupplierSource}.
+	 * @return {@link OfficeSupplier}.
+	 */
+	OfficeSupplier addSupplier(String supplierName, String supplierSourceClassName);
+
+	/**
+	 * Adds an {@link OfficeSupplier}.
+	 * 
+	 * @param supplierName
+	 *            Name of the {@link OfficeSupplier}.
+	 * @param supplierSource
+	 *            {@link SupplierSource} instance to use.
+	 * @return {@link OfficeFloorSupplier}.
+	 */
+	OfficeSupplier addSupplier(String supplierName, SupplierSource supplierSource);
 
 	/**
 	 * Adds a {@link OfficeGovernance}.
@@ -140,8 +216,7 @@ public interface OfficeArchitect {
 	 *            Fully qualified class name of the {@link GovernanceSource}.
 	 * @return Added {@link OfficeGovernance}.
 	 */
-	OfficeGovernance addOfficeGovernance(String governanceName,
-			String governanceSourceClassName);
+	OfficeGovernance addOfficeGovernance(String governanceName, String governanceSourceClassName);
 
 	/**
 	 * Adds an {@link OfficeGovernance}.
@@ -152,32 +227,31 @@ public interface OfficeArchitect {
 	 *            {@link GovernanceSource} instance to use.
 	 * @return Added {@link OfficeGovernance}.
 	 */
-	OfficeGovernance addOfficeGovernance(String governanceName,
-			GovernanceSource<?, ?> governanceSource);
+	OfficeGovernance addOfficeGovernance(String governanceName, GovernanceSource<?, ?> governanceSource);
 
 	/**
-	 * Adds an {@link OfficeAdministrator}.
+	 * Adds an {@link OfficeAdministration}.
 	 * 
-	 * @param administratorName
-	 *            Name of the {@link OfficeAdministrator}.
-	 * @param administratorSourceClassName
-	 *            Fully qualified class name of the {@link AdministratorSource}.
-	 * @return Added {@link OfficeAdministrator}.
+	 * @param administrationName
+	 *            Name of the {@link OfficeAdministration}.
+	 * @param administrationSourceClassName
+	 *            Fully qualified class name of the
+	 *            {@link AdministrationSource}.
+	 * @return Added {@link OfficeAdministration}.
 	 */
-	OfficeAdministrator addOfficeAdministrator(String administratorName,
-			String administratorSourceClassName);
+	OfficeAdministration addOfficeAdministration(String administrationName, String administrationSourceClassName);
 
 	/**
-	 * Adds an {@link OfficeAdministrator}.
+	 * Adds an {@link OfficeAdministration}.
 	 * 
-	 * @param administratorName
-	 *            Name of the {@link OfficeAdministrator}.
-	 * @param administratorSource
-	 *            {@link AdministratorSource} instance to use.
-	 * @return Added {@link OfficeAdministrator}.
+	 * @param administrationName
+	 *            Name of the {@link OfficeAdministration}.
+	 * @param administrationSource
+	 *            {@link AdministrationSource} instance to use.
+	 * @return Added {@link OfficeAdministration}.
 	 */
-	OfficeAdministrator addOfficeAdministrator(String administratorName,
-			AdministratorSource<?, ?> administratorSource);
+	OfficeAdministration addOfficeAdministration(String administrationName,
+			AdministrationSource<?, ?, ?> administrationSource);
 
 	/**
 	 * Adds an {@link OfficeEscalation}.
@@ -206,6 +280,7 @@ public interface OfficeArchitect {
 	 * @param output
 	 *            {@link OfficeOutput} to provide response.
 	 */
+	@Deprecated // integration via queues so no synchronous communication
 	void link(OfficeInput input, OfficeOutput output);
 
 	/**
@@ -228,6 +303,7 @@ public interface OfficeArchitect {
 	 * @param input
 	 *            {@link OfficeInput} to handle response.
 	 */
+	@Deprecated // integration via queues so no synchronous communication
 	void link(OfficeOutput output, OfficeInput input);
 
 	/**
@@ -250,8 +326,7 @@ public interface OfficeArchitect {
 	 * @param managedObject
 	 *            {@link OfficeManagedObject}.
 	 */
-	void link(OfficeSectionObject sectionObject,
-			OfficeManagedObject managedObject);
+	void link(OfficeSectionObject sectionObject, OfficeManagedObject managedObject);
 
 	/**
 	 * Links the {@link OfficeSectionObject} to be the {@link OfficeObject}.
@@ -264,6 +339,17 @@ public interface OfficeArchitect {
 	void link(OfficeSectionObject sectionObject, OfficeObject managedObject);
 
 	/**
+	 * Links the {@link OfficeManagedObjectSource} to be pooled by the
+	 * {@link OfficeManagedObjectPool}.
+	 * 
+	 * @param managedObjectSource
+	 *            {@link OfficeManagedObjectSource}.
+	 * @param managedObjectPool
+	 *            {@link OfficeManagedObjectPool}.
+	 */
+	void link(OfficeManagedObjectSource managedObjectSource, OfficeManagedObjectPool managedObjectPool);
+
+	/**
 	 * Links the {@link ManagedObjectDependency} to be the
 	 * {@link OfficeManagedObject}.
 	 * 
@@ -272,8 +358,7 @@ public interface OfficeArchitect {
 	 * @param managedObject
 	 *            {@link OfficeManagedObject}.
 	 */
-	void link(ManagedObjectDependency dependency,
-			OfficeManagedObject managedObject);
+	void link(ManagedObjectDependency dependency, OfficeManagedObject managedObject);
 
 	/**
 	 * Links the {@link ManagedObjectDependency} to be the {@link OfficeObject}.
@@ -329,14 +414,14 @@ public interface OfficeArchitect {
 	void link(OfficeStart start, OfficeSectionInput input);
 
 	/**
-	 * Links the {@link TaskTeam} to be the {@link OfficeTeam}.
+	 * Links the {@link ResponsibleTeam} to be the {@link OfficeTeam}.
 	 * 
 	 * @param team
-	 *            {@link TaskTeam}.
+	 *            {@link ResponsibleTeam}.
 	 * @param officeTeam
 	 *            {@link OfficeTeam}.
 	 */
-	void link(TaskTeam team, OfficeTeam officeTeam);
+	void link(ResponsibleTeam team, OfficeTeam officeTeam);
 
 	/**
 	 * Links the {@link ManagedObjectTeam} to be the {@link OfficeTeam}.
@@ -361,14 +446,14 @@ public interface OfficeArchitect {
 
 	/**
 	 * Links the {@link OfficeTeam} to be responsible for the
-	 * {@link OfficeAdministrator}.
+	 * {@link OfficeAdministration}.
 	 * 
 	 * @param administrator
-	 *            {@link OfficeAdministrator}.
+	 *            {@link OfficeAdministration}.
 	 * @param officeTeam
 	 *            {@link OfficeTeam}.
 	 */
-	void link(OfficeAdministrator administrator, OfficeTeam officeTeam);
+	void link(OfficeAdministration administrator, OfficeTeam officeTeam);
 
 	/**
 	 * <p>

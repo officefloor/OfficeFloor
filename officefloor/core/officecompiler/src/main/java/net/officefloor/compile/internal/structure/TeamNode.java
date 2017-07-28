@@ -19,12 +19,12 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
+import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.team.TeamType;
-import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
 
 /**
  * {@link OfficeFloorTeam} node.
@@ -43,17 +43,11 @@ public interface TeamNode extends LinkTeamNode, OfficeFloorTeam {
 	 * 
 	 * @param teamSourceClassName
 	 *            Class name of the {@link TeamSource}.
+	 * @param teamSource
+	 *            Optional instantiated {@link TeamSource}. May be
+	 *            <code>null</code>.
 	 */
-	void initialise(String teamSourceClassName);
-
-	/**
-	 * Indicates if have the {@link TeamSource} configured.
-	 * 
-	 * @return <code>true</code> if have the {@link TeamSource} configured.
-	 */
-	@Deprecated
-	// should be part of internal checks
-	boolean hasTeamSource();
+	void initialise(String teamSourceClassName, TeamSource teamSource);
 
 	/**
 	 * Loads the {@link TeamType} for the {@link TeamSource}.
@@ -66,19 +60,30 @@ public interface TeamNode extends LinkTeamNode, OfficeFloorTeam {
 	/**
 	 * Loads the {@link OfficeFloorTeamSourceType}.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return {@link OfficeFloorTeamSourceType} or <code>null</code> with
 	 *         issues reported to the {@link CompilerIssues}.
 	 */
-	OfficeFloorTeamSourceType loadOfficeFloorTeamSourceType(
-			TypeContext typeContext);
+	OfficeFloorTeamSourceType loadOfficeFloorTeamSourceType(CompileContext compileContext);
+
+	/**
+	 * Obtains the {@link TypeQualification} instances for the
+	 * {@link OfficeFloorTeam}.
+	 * 
+	 * @return {@link TypeQualification} instances for the
+	 *         {@link OfficeFloorTeam}.
+	 */
+	TypeQualification[] getTypeQualifications();
 
 	/**
 	 * Builds the {@link Team} for this {@link TeamNode}.
 	 * 
 	 * @param builder
 	 *            {@link OfficeFloorBuilder}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 */
-	void buildTeam(OfficeFloorBuilder builder);
+	void buildTeam(OfficeFloorBuilder builder, CompileContext compileContext);
+
 }

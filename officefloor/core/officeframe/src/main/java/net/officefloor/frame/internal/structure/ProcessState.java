@@ -17,17 +17,9 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.manage.ProcessFuture;
-import net.officefloor.frame.api.manage.UnknownTaskException;
-import net.officefloor.frame.api.manage.UnknownWorkException;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * <p>
@@ -49,88 +41,55 @@ public interface ProcessState {
 	Object getProcessIdentifier();
 
 	/**
-	 * Obtains the {@link ProcessFuture} for this {@link ProcessState}.
-	 * 
-	 * @return {@link ProcessFuture} for this {@link ProcessState}.
-	 */
-	ProcessFuture getProcessFuture();
-
-	/**
 	 * <p>
-	 * Obtains the lock for this {@link ProcessState}.
+	 * Obtains the main {@link ThreadState} for this {@link ProcessState}.
 	 * <p>
-	 * This is the internal lock to the {@link OfficeFloor} engine and should
-	 * not be used outside of the {@link OfficeFloor} engine.
+	 * The main {@link ThreadState} is used for any {@link ProcessState}
+	 * mutations. This avoids the possibility of data corruption, as only one
+	 * {@link ThreadState} may alter the {@link ProcessState}.
 	 * 
-	 * @return Lock of this {@link ProcessState}.
+	 * @return Main {@link ThreadState} for this {@link ProcessState}.
 	 */
-	Object getProcessLock();
+	ThreadState getMainThreadState();
 
 	/**
-	 * Obtains the {@link ProcessMetaData} for this {@link ProcessState}.
+	 * Spawns a new {@link ThreadState} contained in this {@link ProcessState}.
 	 * 
-	 * @return {@link ProcessMetaData} for this {@link ProcessState}.
+	 * @param managedFunctionMetaData
+	 *            {@link ManagedFunctionMetaData} of the initial
+	 *            {@link ManagedFunction} within the spawned
+	 *            {@link ThreadState}.
+	 * @param parameter
+	 *            Parameter for the initial {@link ManagedFunction}.
+	 * @param completion
+	 *            Optional {@link FlowCompletion} to be notified of completion
+	 *            of the spawned {@link ThreadState}.
+	 * @param isEscalationHandlingThreadState
+	 *            Indicates whether the {@link ThreadState} is for
+	 *            {@link Escalation} handling.
+	 * @return {@link FunctionState} to spawn the {@link ThreadState}.
 	 */
-	ProcessMetaData getProcessMetaData();
-
-	/**
-	 * Obtains the {@link CleanupSequence} for this {@link ProcessState}.
-	 * 
-	 * @return {@link CleanupSequence} for this {@link ProcessState}.
-	 */
-	CleanupSequence getCleanupSequence();
-
-	/**
-	 * Obtains the {@link TaskMetaData} for the {@link Work} and {@link Task}
-	 * within the {@link Office} containing this {@link ProcessState}.
-	 * 
-	 * @param workName
-	 *            {@link Work} name containing the {@link Task}.
-	 * @param taskName
-	 *            {@link Task} name within the {@link Work}.
-	 * @return {@link TaskMetaData}.
-	 * @throws UnknownWorkException
-	 *             If no {@link Work} by name within the {@link Office}.
-	 * @throws UnknownTaskException
-	 *             If no {@link Task} by name within the {@link Work}.
-	 */
-	TaskMetaData<?, ?, ?> getTaskMetaData(String workName, String taskName)
-			throws UnknownWorkException, UnknownTaskException;
-
-	/**
-	 * <p>
-	 * Creates a {@link JobSequence} for the new {@link ThreadState} contained
-	 * in this {@link ProcessState}.
-	 * <p>
-	 * The new {@link ThreadState} is available from the returned
-	 * {@link JobSequence}.
-	 * 
-	 * @param assetManager
-	 *            {@link AssetManager} for the {@link ThreadState}.
-	 * @return {@link JobSequence} for the new {@link ThreadState} contained in
-	 *         this {@link ProcessState}.
-	 */
-	JobSequence createThread(AssetManager assetManager);
+	FunctionState spawnThreadState(ManagedFunctionMetaData<?, ?> managedFunctionMetaData, Object parameter,
+			FlowCompletion completion, boolean isEscalationHandlingThreadState);
 
 	/**
 	 * Flags that the input {@link ThreadState} has complete.
 	 * 
 	 * @param thread
 	 *            {@link ThreadState} that has completed.
-	 * @param activeSet
-	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances
-	 *            waiting on this {@link ProcessState} if all
-	 *            {@link ThreadState} instances of this {@link ProcessState} are
-	 *            complete. This is unlikely to be used but is available for
-	 *            {@link ManagedObject} instances bound to this
-	 *            {@link ProcessState} requiring unloading (rather than relying
-	 *            on the {@link OfficeManager}).
-	 * @param currentTeam
-	 *            {@link TeamIdentifier} of the current {@link Team} completing
-	 *            the {@link ThreadState}.
+	 * @param threadCompletion
+	 *            Optional {@link FunctionState} for the completion of
+	 *            the{@link ThreadState}. May be <code>null</code>.
+	 * @return {@link FunctionState} to complete the {@link ThreadState}.
 	 */
-	void threadComplete(ThreadState thread, JobNodeActivateSet activeSet,
-			TeamIdentifier currentTeam);
+	FunctionState threadComplete(ThreadState thread, FunctionState threadCompletion);
+
+	/**
+	 * Obtains the {@link FunctionLoop} for the {@link ProcessState}.
+	 * 
+	 * @return {@link FunctionLoop} for the {@link ProcessState}.
+	 */
+	FunctionLoop getFunctionLoop();
 
 	/**
 	 * Obtains the {@link ManagedObjectContainer} for the input index.
@@ -142,44 +101,10 @@ public interface ProcessState {
 	ManagedObjectContainer getManagedObjectContainer(int index);
 
 	/**
-	 * Obtains the {@link AdministratorContainer} for the input index.
+	 * Obtains the {@link ManagedObjectCleanup} for this {@link ProcessState}.
 	 * 
-	 * @param index
-	 *            Index of the {@link AdministratorContainer} to be returned.
-	 * @return {@link AdministratorContainer} for the index.
+	 * @return {@link ManagedObjectCleanup} for this {@link ProcessState}.
 	 */
-	AdministratorContainer<?, ?> getAdministratorContainer(int index);
-
-	/**
-	 * Obtains the {@link EscalationFlow} for the {@link EscalationHandler}
-	 * provided by the invocation of this {@link ProcessState}.
-	 * 
-	 * @return {@link EscalationFlow} or <code>null</code> if the invoker did
-	 *         not provide a {@link EscalationHandler}.
-	 */
-	EscalationFlow getInvocationEscalation();
-
-	/**
-	 * Obtains the {@link EscalationProcedure} for the {@link Office}.
-	 * 
-	 * @return {@link EscalationProcedure} for the {@link Office}.
-	 */
-	EscalationProcedure getOfficeEscalationProcedure();
-
-	/**
-	 * Obtains the catch all {@link EscalationFlow} for the {@link OfficeFloor}.
-	 * 
-	 * @return Catch all {@link EscalationFlow} for the {@link OfficeFloor}.
-	 */
-	EscalationFlow getOfficeFloorEscalation();
-
-	/**
-	 * Registers a {@link ProcessCompletionListener} with this
-	 * {@link ProcessState}.
-	 * 
-	 * @param listener
-	 *            {@link ProcessCompletionListener}.
-	 */
-	void registerProcessCompletionListener(ProcessCompletionListener listener);
+	ManagedObjectCleanup getManagedObjectCleanup();
 
 }

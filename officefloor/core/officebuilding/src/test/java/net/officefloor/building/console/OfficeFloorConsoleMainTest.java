@@ -68,7 +68,8 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 
 		// Ensure error regarding no OFFICE_FLOOR_HOME
 		this.assertOut();
-		this.assertErr("ERROR: OFFICE_FLOOR_HOME not specified. Must be an environment variable pointing to the OfficeFloor install directory.");
+		this.assertErr(
+				"ERROR: OFFICE_FLOOR_HOME not specified. Must be an environment variable pointing to the OfficeFloor install directory.");
 	}
 
 	/**
@@ -77,8 +78,7 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 	public void testOfficeFloorHomeNotExist() throws Throwable {
 
 		// Run with non-existent OFFICE_FLOOR_HOME
-		System.setProperty(OfficeFloorConsoleMain.OFFICE_FLOOR_HOME,
-				"<OFFICE_FLOOR_HOME not exists>");
+		System.setProperty(OfficeFloorConsoleMain.OFFICE_FLOOR_HOME, "<OFFICE_FLOOR_HOME not exists>");
 		this.failMain(null, true, "");
 
 		// Ensure error regarding no OFFICE_FLOOR_HOME
@@ -96,8 +96,7 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 
 		// Ensure error regarding no script name
 		this.assertOut();
-		this.assertErr(
-				"ERROR: Invalid call from script.                                ",
+		this.assertErr("ERROR: Invalid call from script.                                ",
 				"                                                                ",
 				"usage: java ... net.officefloor.building.console.OfficeFloorConsoleMain <script> <factory> <args>");
 	}
@@ -112,8 +111,7 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 
 		// Ensure error regarding no script name
 		this.assertOut();
-		this.assertErr(
-				"ERROR: Invalid call from script.                                ",
+		this.assertErr("ERROR: Invalid call from script.                                ",
 				"                                                                ",
 				"usage: java ... net.officefloor.building.console.OfficeFloorConsoleMain <script> <factory> <args>");
 	}
@@ -128,7 +126,8 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 
 		// Ensure error regarding no script name
 		this.assertOut();
-		this.assertErr("ERROR: Invalid OfficeFloorConsoleFactory InvalidFactoryClass : InvalidFactoryClass [ClassNotFoundException]");
+		this.assertErr(
+				"ERROR: Invalid OfficeFloorConsoleFactory InvalidFactoryClass : InvalidFactoryClass [ClassNotFoundException]");
 	}
 
 	/**
@@ -204,8 +203,7 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 	/**
 	 * Ensure can load the open OfficeFloor configuration.
 	 */
-	public void testLoadOfficeBuildingOpenOfficeFloorConfiguration()
-			throws Throwable {
+	public void testLoadOfficeBuildingOpenOfficeFloorConfiguration() throws Throwable {
 
 		// Provides means to obtain the open OfficeFloor configuration
 		ConfigureOfficeFloor configure = new ConfigureOfficeFloor();
@@ -214,20 +212,16 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 		this.loadOfficeFloorHomeSystemProperty("Configure");
 
 		// Run the OfficeFloor console
-		OfficeFloorConsoleMain.run("TEST", new String[0], configure,
-				OfficeFloorConsoleMain.DEFAULT_ERROR_HANDLER);
+		OfficeFloorConsoleMain.run("TEST", new String[0], configure, OfficeFloorConsoleMain.DEFAULT_ERROR_HANDLER);
 
 		// Ensure no errors
 		this.assertOut();
 		this.assertErr();
 
 		// Validate the configuration
-		OpenOfficeFloorConfiguration configuration = configure
-				.getOpenOfficeFloorConfiguration();
-		assertEquals(
-				"Should have OfficeFloor location loaded from properties file",
-				"net.officefloor.test.TestOfficeFloor",
-				configuration.getOfficeFloorLocation());
+		OpenOfficeFloorConfiguration configuration = configure.getOpenOfficeFloorConfiguration();
+		assertEquals("Should have OfficeFloor location loaded from properties file",
+				"net.officefloor.test.TestOfficeFloor", configuration.getOfficeFloorLocation());
 	}
 
 	/**
@@ -248,10 +242,8 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 		this.assertErr();
 
 		// Validate the configuration
-		assertEquals(
-				"Should have OfficeFloor location loaded from properties file",
-				"net.officefloor.test.TestOfficeFloor",
-				configuration.getOfficeFloorLocation());
+		assertEquals("Should have OfficeFloor location loaded from properties file",
+				"net.officefloor.test.TestOfficeFloor", configuration.getOfficeFloorLocation());
 	}
 
 	/**
@@ -266,8 +258,7 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 	 * @param commandLine
 	 *            Command line to be split into arguments.
 	 */
-	private void failMain(String officeFloorHome, boolean isPrefix,
-			String commandLine) throws Throwable {
+	private void failMain(String officeFloorHome, boolean isPrefix, String commandLine) throws Throwable {
 		try {
 			this.runMain(officeFloorHome, isPrefix, commandLine);
 			fail("Should not be successful");
@@ -288,8 +279,7 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 	 * @param commandLine
 	 *            Command line to be split into arguments.
 	 */
-	private void runMain(String officeFloorHome, boolean isPrefix,
-			String commandLine) throws Throwable {
+	private void runMain(String officeFloorHome, boolean isPrefix, String commandLine) throws Throwable {
 
 		// Determine if specify the OFFICE_FLOOR_HOME
 		if (officeFloorHome != null) {
@@ -297,9 +287,7 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 		}
 
 		// Determine arguments
-		String argumentLine = (isPrefix ? "script "
-				+ MockConsoleFactory.class.getName() + " " : "")
-				+ commandLine;
+		String argumentLine = (isPrefix ? "script " + MockConsoleFactory.class.getName() + " " : "") + commandLine;
 
 		// Run office floor console main
 		String[] arguments = argumentLine.split("\\s+");
@@ -313,35 +301,28 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 	 * @param officeFloorHome
 	 *            Relative OfficeFloor home.
 	 */
-	private void loadOfficeFloorHomeSystemProperty(String officeFloorHome)
-			throws IOException {
+	private void loadOfficeFloorHomeSystemProperty(String officeFloorHome) throws IOException {
 
 		// Attempt to find the OfficeFloor home directory
 		File officeFloorHomeDir = null;
 		try {
 			// Attempt to find by properties file first.
-			File propertiesFile = this
-					.findFile(
-							this.getClass(),
-							officeFloorHome
-									+ "/"
-									+ OfficeFloorConsoleMain.PROPERTIES_FILE_RELATIVE_PATH);
+			File propertiesFile = this.findFile(this.getClass(),
+					officeFloorHome + "/" + OfficeFloorConsoleMain.PROPERTIES_FILE_RELATIVE_PATH);
 
 			// Obtain the OFFICE_FLOOR_HOME (home/config/properties-file)
 			officeFloorHomeDir = propertiesFile.getParentFile().getParentFile();
 
 		} catch (FileNotFoundException ex) {
 			// Obtain by marker file
-			File markerFile = this.findFile(this.getClass(), officeFloorHome
-					+ "/OfficeFloorHome.marker");
+			File markerFile = this.findFile(this.getClass(), officeFloorHome + "/OfficeFloorHome.marker");
 
 			// Obtain the OFFICE_FLOOR_HOME (home/marker-file)
 			officeFloorHomeDir = markerFile.getParentFile();
 		}
 
 		// Specify the OFFICE_FLOOR_HOME property for testing
-		System.setProperty(OfficeFloorConsoleMain.OFFICE_FLOOR_HOME,
-				officeFloorHomeDir.getAbsolutePath());
+		System.setProperty(OfficeFloorConsoleMain.OFFICE_FLOOR_HOME, officeFloorHomeDir.getAbsolutePath());
 	}
 
 	/**
@@ -349,8 +330,7 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 	 * from default constructor and records details of the
 	 * {@link OfficeFloorConsole} via static reference.
 	 */
-	public static class MockConsoleFactory implements
-			OfficeFloorConsoleFactory, OfficeFloorConsole {
+	public static class MockConsoleFactory implements OfficeFloorConsoleFactory, OfficeFloorConsole {
 
 		/**
 		 * Flag indicating if run was successful.
@@ -375,8 +355,7 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 		 */
 
 		@Override
-		public OfficeFloorConsole createOfficeFloorConsole(String scriptName,
-				Properties environment) throws Exception {
+		public OfficeFloorConsole createOfficeFloorConsole(String scriptName, Properties environment) throws Exception {
 
 			// Ensure script name correct
 			assertEquals("Incorrect script name", "script", scriptName);
@@ -388,11 +367,10 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 			env.putAll(expectedEnvironment);
 
 			// Validate the environment
-			assertEquals("Incorrect number of environment properties",
-					env.size(), environment.size());
+			assertEquals("Incorrect number of environment properties", env.size(), environment.size());
 			for (String name : env.stringPropertyNames()) {
-				assertEquals("Incorrect value for property " + name,
-						env.getProperty(name), environment.getProperty(name));
+				assertEquals("Incorrect value for property " + name, env.getProperty(name),
+						environment.getProperty(name));
 			}
 
 			// Return this for testing
@@ -404,10 +382,8 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 		 */
 
 		@Override
-		public boolean run(PrintStream out, PrintStream err,
-				ProcessStartListener startListener,
-				ProcessCompletionListener completionListener,
-				String... arguments) {
+		public boolean run(PrintStream out, PrintStream err, ProcessStartListener startListener,
+				ProcessCompletionListener completionListener, String... arguments) {
 
 			// Flag running command
 			out.print("run");

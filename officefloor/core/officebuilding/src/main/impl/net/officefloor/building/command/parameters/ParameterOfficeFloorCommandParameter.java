@@ -24,8 +24,7 @@ import net.officefloor.building.command.OfficeFloorCommandParameter;
  * 
  * @author Daniel Sagenschneider
  */
-public class ParameterOfficeFloorCommandParameter extends
-		AbstractSingleValueOfficeFloorCommandParameter {
+public class ParameterOfficeFloorCommandParameter extends AbstractSingleValueOfficeFloorCommandParameter {
 
 	/**
 	 * Parameter name for the parameter value.
@@ -36,7 +35,7 @@ public class ParameterOfficeFloorCommandParameter extends
 	 * Initiate.
 	 */
 	public ParameterOfficeFloorCommandParameter() {
-		super(PARAMETER_PARAMETER_VALUE, null, "Parameter for the Task");
+		super(PARAMETER_PARAMETER_VALUE, null, "Parameter for the Function");
 	}
 
 	/**

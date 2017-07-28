@@ -20,12 +20,13 @@
 			<artifactId>officeplugin_woof</artifactId>
 			<version>\${officefloor-version}</version>
 		</dependency>
+<!-- Uncomment if within Servlet  
 		<dependency>
-			<!-- Remove if running stand alone -->
 			<groupId>net.officefloor.plugin</groupId>
 			<artifactId>officeplugin_woof_servlet</artifactId>
 			<version>\${officefloor-version}</version>
 		</dependency>
+-->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

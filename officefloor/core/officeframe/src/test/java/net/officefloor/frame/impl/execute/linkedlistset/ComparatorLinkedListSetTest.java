@@ -17,7 +17,6 @@
  */
 package net.officefloor.frame.impl.execute.linkedlistset;
 
-import net.officefloor.frame.impl.execute.linkedlistset.ComparatorLinkedListSet;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 
 /**

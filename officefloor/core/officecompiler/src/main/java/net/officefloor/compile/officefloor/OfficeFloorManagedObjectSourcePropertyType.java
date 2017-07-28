@@ -18,8 +18,8 @@
 package net.officefloor.compile.officefloor;
 
 import net.officefloor.compile.properties.Property;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceProperty;
 
 /**
  * <code>Type definition</code> of a configurable {@link Property} of the

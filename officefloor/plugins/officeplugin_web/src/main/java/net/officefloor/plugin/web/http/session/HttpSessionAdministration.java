@@ -17,8 +17,8 @@
  */
 package net.officefloor.plugin.web.http.session;
 
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 
 /**
  * Administration interface for the {@link HttpSession}.
@@ -50,7 +50,7 @@ public interface HttpSessionAdministration {
 	 * Indicates if the invalidate or store operation are complete.
 	 * <p>
 	 * As is an {@link AsynchronousManagedObject}, the next time a new
-	 * {@link Task} is run the operation should be complete. This method enables
+	 * {@link ManagedFunction} is run the operation should be complete. This method enables
 	 * determining if completed immediately and there were no failures of the
 	 * operation.
 	 *

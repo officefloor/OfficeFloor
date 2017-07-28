@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="governance name" />
+	<field type="ExternalManagedObjectModel" name="external managed object"
+		end-list="governance" />
+	<field type="GovernanceModel" name="governance" end-list="external managed object" />
+</model>

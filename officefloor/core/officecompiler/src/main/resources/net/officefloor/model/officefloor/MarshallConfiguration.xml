@@ -2,6 +2,12 @@
 <marshall type="net.officefloor.model.officefloor.OfficeFloorModel"
 	element="office-floor">
 
+	<!-- OFFICE ATTRIBUTES -->
+	<attributes>
+		<attribute method="getIsAutoWireObjects" attribute="auto-wire-objects" />
+		<attribute method="getIsAutoWireTeams" attribute="auto-wire-teams" />
+	</attributes>
+
 	<!-- SUPPLIERS -->
 	<collection method="getOfficeFloorSuppliers" element="suppliers">
 		<item type="net.officefloor.model.officefloor.OfficeFloorSupplierModel"
@@ -49,11 +55,17 @@
 					</attributes>
 				</item>
 			</collection>
+			<object method="getOfficeFloorManagedObjectPool" element="managed-object-pool">
+				<attributes>
+					<attribute method="getOfficeFloorManagedObjectPoolName"
+						attribute="name" />
+				</attributes>
+			</object>
 			<object method="getOfficeFloorSupplier" element="supplier">
 				<attributes>
 					<attribute method="getOfficeFloorSupplierName" attribute="name" />
-					<attribute method="getAutoWireType" attribute="type" />
-					<attribute method="getAutoWireQualifier" attribute="qualifier" />
+					<attribute method="getType" attribute="type" />
+					<attribute method="getQualifier" attribute="qualifier" />
 				</attributes>
 			</object>
 			<object method="getManagingOffice" element="managing-office">
@@ -133,6 +145,15 @@
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
+			<collection method="getTypeQualifications">
+				<item type="net.officefloor.model.officefloor.TypeQualificationModel"
+					element="type-qualification">
+					<attributes>
+						<attribute method="getQualifier" attribute="qualifier" />
+						<attribute method="getType" attribute="type" />
+					</attributes>
+				</item>
+			</collection>
 			<object method="getBoundOfficeFloorManagedObjectSource"
 				element="bound-managed-object-source">
 				<attributes>
@@ -161,6 +182,15 @@
 						attribute="name" />
 				</attributes>
 			</object>
+			<collection method="getTypeQualifications">
+				<item type="net.officefloor.model.officefloor.TypeQualificationModel"
+					element="type-qualification">
+					<attributes>
+						<attribute method="getQualifier" attribute="qualifier" />
+						<attribute method="getType" attribute="type" />
+					</attributes>
+				</item>
+			</collection>
 			<collection method="getOfficeFloorManagedObjectDependencies">
 				<item
 					type="net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel"
@@ -187,6 +217,32 @@
 		</item>
 	</collection>
 
+	<!-- MANAGED OBJECT POOLS -->
+	<collection method="getOfficeFloorManagedObjectPools"
+		element="managed-object-pools">
+		<item
+			type="net.officefloor.model.officefloor.OfficeFloorManagedObjectPoolModel"
+			element="managed-object-pool">
+			<attributes>
+				<attribute method="getOfficeFloorManagedObjectPoolName"
+					attribute="name" />
+				<attribute method="getManagedObjectPoolSourceClassName"
+					attribute="source" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+			<collection method="getProperties" element="properties">
+				<item type="net.officefloor.model.officefloor.PropertyModel"
+					element="property">
+					<attributes>
+						<attribute method="getName" attribute="name" />
+						<attribute method="getValue" attribute="value" />
+					</attributes>
+				</item>
+			</collection>
+		</item>
+	</collection>
+
 	<!-- TEAMS -->
 	<collection method="getOfficeFloorTeams" element="teams">
 		<item type="net.officefloor.model.officefloor.OfficeFloorTeamModel"
@@ -203,6 +259,15 @@
 					<attributes>
 						<attribute method="getName" attribute="name" />
 						<attribute method="getValue" attribute="value" />
+					</attributes>
+				</item>
+			</collection>
+			<collection method="getTypeQualifications">
+				<item type="net.officefloor.model.officefloor.TypeQualificationModel"
+					element="type-qualification">
+					<attributes>
+						<attribute method="getQualifier" attribute="qualifier" />
+						<attribute method="getType" attribute="type" />
 					</attributes>
 				</item>
 			</collection>

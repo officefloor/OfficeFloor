@@ -17,15 +17,18 @@
  */
 package net.officefloor.frame.api.build;
 
+import java.util.function.Consumer;
+
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.source.ResourceSource;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.source.ResourceSource;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSourceContext;
+import net.officefloor.frame.internal.structure.FunctionState;
 
 /**
  * Builder of an {@link OfficeFloor}.
@@ -44,6 +47,16 @@ public interface OfficeFloorBuilder {
 	void setClassLoader(ClassLoader classLoader);
 
 	/**
+	 * Decorates all the {@link Thread} instances created by the
+	 * {@link TeamSourceContext}.
+	 * 
+	 * @param decorator
+	 *            Decorates all the {@link Thread} instances created by the
+	 *            {@link TeamSourceContext}.
+	 */
+	void setThreadDecorator(Consumer<Thread> decorator);
+
+	/**
 	 * Adds a {@link ResourceSource} to locate resources.
 	 * 
 	 * @param resourceSource
@@ -52,9 +65,17 @@ public interface OfficeFloorBuilder {
 	void addResources(ResourceSource resourceSource);
 
 	/**
+	 * Adds an {@link OfficeFloorListener}.
+	 * 
+	 * @param listener
+	 *            {@link OfficeFloorListener}.
+	 */
+	void addOfficeFloorListener(OfficeFloorListener listener);
+
+	/**
 	 * Adds a {@link ManagedObjectSource} to this {@link OfficeFloorBuilder}.
 	 * 
-	 * @param <D>
+	 * @param <O>
 	 *            Dependency key type.
 	 * @param <F>
 	 *            Flow key type.
@@ -66,13 +87,13 @@ public interface OfficeFloorBuilder {
 	 *            Class of the {@link ManagedObjectSource}.
 	 * @return {@link ManagedObjectBuilder}.
 	 */
-	<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> addManagedObject(
+	<O extends Enum<O>, F extends Enum<F>, MS extends ManagedObjectSource<O, F>> ManagedObjectBuilder<F> addManagedObject(
 			String managedObjectSourceName, Class<MS> managedObjectSourceClass);
 
 	/**
 	 * Adds a {@link ManagedObjectSource} to this {@link OfficeFloorBuilder}.
 	 * 
-	 * @param <D>
+	 * @param <O>
 	 *            Dependency key type.
 	 * @param <F>
 	 *            Flow key type.
@@ -82,24 +103,48 @@ public interface OfficeFloorBuilder {
 	 *            {@link ManagedObjectSource} instance to use.
 	 * @return {@link ManagedObjectBuilder}.
 	 */
-	<D extends Enum<D>, F extends Enum<F>> ManagedObjectBuilder<F> addManagedObject(
-			String managedObjectSourceName,
-			ManagedObjectSource<D, F> managedObjectSource);
+	<O extends Enum<O>, F extends Enum<F>> ManagedObjectBuilder<F> addManagedObject(String managedObjectSourceName,
+			ManagedObjectSource<O, F> managedObjectSource);
 
 	/**
-	 * Adds a {@link Team} which will execute {@link JobNode} instances within
-	 * this {@link OfficeFloor}.
+	 * Adds a {@link Team} which will execute {@link FunctionState} instances
+	 * within this {@link OfficeFloor}.
 	 * 
 	 * @param <TS>
 	 *            {@link TeamSource} type.
 	 * @param teamName
 	 *            Name to register the {@link Team} under.
 	 * @param teamSourceClass
+	 *            {@link TeamSource} {@link Class} name to source the
+	 *            {@link Team}.
+	 * @return {@link TeamBuilder} to build the {@link Team}.
+	 */
+	<TS extends TeamSource> TeamBuilder<TS> addTeam(String teamName, Class<TS> teamSourceClass);
+
+	/**
+	 * Adds a {@link Team} which will execute {@link FunctionState} instances
+	 * within the {@link OfficeFloor}.
+	 * 
+	 * @param teamName
+	 *            Name to register the {@link Team} under.
+	 * @param teamSource
 	 *            {@link TeamSource} to source the {@link Team}.
 	 * @return {@link TeamBuilder} to build the {@link Team}.
 	 */
-	<TS extends TeamSource> TeamBuilder<TS> addTeam(String teamName,
-			Class<TS> teamSourceClass);
+	<TS extends TeamSource> TeamBuilder<TS> addTeam(String teamName, TS teamSource);
+
+	/**
+	 * <p>
+	 * Specifies the break {@link FunctionState} chain {@link Team}.
+	 * <p>
+	 * This need not be specified, but is available to override the default
+	 * {@link Team}.
+	 * 
+	 * @param teamSourceClass
+	 *            {@link TeamSource} to source the {@link Team}.
+	 * @return {@link TeamBuilder} to build the {@link Team}.
+	 */
+	<TS extends TeamSource> TeamBuilder<TS> setBreakChainTeam(Class<TS> teamSourceClass);
 
 	/**
 	 * Adds an {@link Office} on the {@link OfficeFloor}.

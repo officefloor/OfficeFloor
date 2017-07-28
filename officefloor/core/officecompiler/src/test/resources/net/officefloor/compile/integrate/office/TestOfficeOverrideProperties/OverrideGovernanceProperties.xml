@@ -1,0 +1,25 @@
+<context>
+	<office-floor>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office>
+		<governances>
+			<governance name="OVERRIDE_GOVERNANCE" source="CLASS">
+				<properties>
+					<property name="class.name" value="to be overridden" />
+				</properties>
+			</governance>
+		</governances>
+		<sections>
+			<section name="SECTION" source="CLASS" location="${testcase}$CompileFunction">
+				<sub-section>
+					<function name="function">
+						<govern governance="OVERRIDE_GOVERNANCE" />
+					</function>
+				</sub-section>
+			</section>
+		</sections>
+	</office>
+</context>

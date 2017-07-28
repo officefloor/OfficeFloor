@@ -17,25 +17,25 @@
  */
 package net.officefloor.compile.spi.officefloor.source;
 
-import net.officefloor.autowire.spi.supplier.source.SupplierSource;
-import net.officefloor.autowire.supplier.SupplierType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.source.OfficeSource;
-import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
+import net.officefloor.compile.spi.supplier.source.SupplierSource;
+import net.officefloor.compile.supplier.SupplierType;
+import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.source.SourceContext;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.source.SourceContext;
 
 /**
  * Context for the {@link OfficeFloorSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorSourceContext extends SourceContext {
+public interface OfficeFloorSourceContext extends SourceContext, ConfigurationContext {
 
 	/**
 	 * <p>
@@ -63,6 +63,8 @@ public interface OfficeFloorSourceContext extends SourceContext {
 	 * {@link ManagedObject} to allow reflective configuration by the
 	 * {@link OfficeFloorSource}.
 	 * 
+	 * @param managedObjectSourceName
+	 *            Name of the {@link ManagedObjectSource}.
 	 * @param managedObjectSourceClassName
 	 *            Name of the implementing {@link ManagedObjectSource} class.
 	 *            May also be an alias.
@@ -72,8 +74,8 @@ public interface OfficeFloorSourceContext extends SourceContext {
 	 * @return {@link ManagedObjectType} or <code>null</code> if fails to load
 	 *         the {@link ManagedObjectType}.
 	 */
-	ManagedObjectType<?> loadManagedObjectType(
-			String managedObjectSourceClassName, PropertyList properties);
+	ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceName, String managedObjectSourceClassName,
+			PropertyList properties);
 
 	/**
 	 * <p>
@@ -83,6 +85,8 @@ public interface OfficeFloorSourceContext extends SourceContext {
 	 * {@link ManagedObject} to allow reflective configuration by the
 	 * {@link OfficeFloorSource}.
 	 * 
+	 * @param managedObjectSourceName
+	 *            Name of the {@link ManagedObjectSource}.
 	 * @param managedObjectSource
 	 *            {@link ManagedObjectSource} instance.
 	 * @param properties
@@ -91,20 +95,8 @@ public interface OfficeFloorSourceContext extends SourceContext {
 	 * @return {@link ManagedObjectType} or <code>null</code> if fails to load
 	 *         the {@link ManagedObjectType}.
 	 */
-	ManagedObjectType<?> loadManagedObjectType(
-			ManagedObjectSource<?, ?> managedObjectSource,
-			PropertyList properties);
-
-	/**
-	 * Determines if the {@link ManagedObjectType} requires to be configured as
-	 * an {@link OfficeFloorInputManagedObject}.
-	 * 
-	 * @param managedObjectType
-	 *            {@link ManagedObjectType}.
-	 * @return <code>true</code> if the {@link ManagedObjectType} is to be
-	 *         configured as an {@link OfficeFloorInputManagedObject}.
-	 */
-	boolean isInputManagedObject(ManagedObjectType<?> managedObjectType);
+	ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceName,
+			ManagedObjectSource<?, ?> managedObjectSource, PropertyList properties);
 
 	/**
 	 * <p>
@@ -114,6 +106,8 @@ public interface OfficeFloorSourceContext extends SourceContext {
 	 * {@link SupplierSource} to allow reflective configuration by the
 	 * {@link OfficeFloorSource}.
 	 * 
+	 * @param supplierName
+	 *            Name of the {@link SupplierSource}.
 	 * @param supplierSourceClassName
 	 *            Name of the implementing {@link SupplierSource} class. May
 	 *            also be an alias.
@@ -122,8 +116,7 @@ public interface OfficeFloorSourceContext extends SourceContext {
 	 * @return {@link SupplierType} or <code>null</code> if fails to load the
 	 *         {@link SupplierType}.
 	 */
-	SupplierType loadSupplierType(String supplierSourceClassName,
-			PropertyList properties);
+	SupplierType loadSupplierType(String supplierName, String supplierSourceClassName, PropertyList properties);
 
 	/**
 	 * <p>
@@ -132,6 +125,8 @@ public interface OfficeFloorSourceContext extends SourceContext {
 	 * This is to enable obtaining the type information for the {@link Office}
 	 * to allow reflective configuration by the {@link OfficeFloorSource}.
 	 * 
+	 * @param officeName
+	 *            Name of the {@link Office}.
 	 * @param officeSourceClassName
 	 *            Name of the implementing {@link OfficeSource} class. May also
 	 *            be an alias.
@@ -142,7 +137,7 @@ public interface OfficeFloorSourceContext extends SourceContext {
 	 * @return {@link OfficeType} or <code>null</code> if fails to load the
 	 *         {@link OfficeType}.
 	 */
-	OfficeType loadOfficeType(String officeSourceClassName, String location,
+	OfficeType loadOfficeType(String officeName, String officeSourceClassName, String location,
 			PropertyList properties);
 
 	/**
@@ -152,6 +147,8 @@ public interface OfficeFloorSourceContext extends SourceContext {
 	 * This is to enable obtaining the type information for the {@link Office}
 	 * to allow reflective configuration by the {@link OfficeFloorSource}.
 	 * 
+	 * @param officeName
+	 *            Name of the {@link Office}.
 	 * @param officeSource
 	 *            {@link OfficeSource} instance.
 	 * @param location
@@ -161,7 +158,6 @@ public interface OfficeFloorSourceContext extends SourceContext {
 	 * @return {@link OfficeType} or <code>null</code> if fails to load the
 	 *         {@link OfficeType}.
 	 */
-	OfficeType loadOfficeType(OfficeSource officeSource, String location,
-			PropertyList properties);
+	OfficeType loadOfficeType(String officeName, OfficeSource officeSource, String location, PropertyList properties);
 
 }

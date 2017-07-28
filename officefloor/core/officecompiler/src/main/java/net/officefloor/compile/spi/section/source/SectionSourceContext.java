@@ -17,24 +17,24 @@
  */
 package net.officefloor.compile.spi.section.source;
 
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SubSection;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.work.WorkType;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.source.SourceContext;
+import net.officefloor.configuration.ConfigurationContext;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.source.SourceContext;
 
 /**
  * Context for loading a {@link SectionType}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionSourceContext extends SourceContext {
+public interface SectionSourceContext extends SourceContext, ConfigurationContext {
 
 	/**
 	 * <p>
@@ -55,21 +55,25 @@ public interface SectionSourceContext extends SourceContext {
 
 	/**
 	 * <p>
-	 * Loads the {@link WorkType}.
+	 * Loads the {@link FunctionNamespaceType}.
 	 * <p>
-	 * This is to enable obtaining the type information for the {@link Work} to
-	 * allow reflective configuration by the {@link SectionSource}.
+	 * This is to enable obtaining the type information for the
+	 * {@link ManagedFunctionSource} to allow reflective configuration by the
+	 * {@link SectionSource}.
 	 * 
-	 * @param workSourceClassName
-	 *            Name of the implementing {@link WorkSource} class. May also be
-	 *            an alias.
+	 * @param functionNamespace
+	 *            Name space of the {@link ManagedFunctionSource}.
+	 * @param managedFunctionSourceClassName
+	 *            Name of the implementing {@link ManagedFunctionSource} class.
+	 *            May also be an alias.
 	 * @param properties
 	 *            {@link PropertyList} to configure the implementing
-	 *            {@link WorkSource}.
-	 * @return {@link WorkType} or <code>null</code> if fails to load the
-	 *         {@link WorkType}.
+	 *            {@link ManagedFunctionSource}.
+	 * @return {@link FunctionNamespaceType} or <code>null</code> if fails to
+	 *         load the {@link FunctionNamespaceType}.
 	 */
-	WorkType<?> loadWorkType(String workSourceClassName, PropertyList properties);
+	FunctionNamespaceType loadManagedFunctionType(String functionNamespace, String managedFunctionSourceClassName,
+			PropertyList properties);
 
 	/**
 	 * <p>
@@ -79,6 +83,8 @@ public interface SectionSourceContext extends SourceContext {
 	 * {@link ManagedObject} to allow reflective configuration by the
 	 * {@link SectionSource}.
 	 * 
+	 * @param managedObjectSourceName
+	 *            Name of the {@link ManagedObjectSource}.
 	 * @param managedObjectSourceClassName
 	 *            Name of the implementing {@link ManagedObjectSource} class.
 	 *            May also be an alias.
@@ -88,8 +94,8 @@ public interface SectionSourceContext extends SourceContext {
 	 * @return {@link ManagedObjectType} or <code>null</code> if fails to load
 	 *         the {@link ManagedObjectType}.
 	 */
-	ManagedObjectType<?> loadManagedObjectType(
-			String managedObjectSourceClassName, PropertyList properties);
+	ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceName, String managedObjectSourceClassName,
+			PropertyList properties);
 
 	/**
 	 * <p>
@@ -99,6 +105,8 @@ public interface SectionSourceContext extends SourceContext {
 	 * {@link SubSection} to allow reflective configuration by the
 	 * {@link SectionSource}.
 	 * 
+	 * @param sectionName
+	 *            Name of the {@link SubSection}.
 	 * @param sectionSourceClassName
 	 *            Name of the implementing {@link SectionSource} class. May also
 	 *            be an alias.
@@ -109,7 +117,7 @@ public interface SectionSourceContext extends SourceContext {
 	 * @return {@link SectionType} or <code>null</code> if fails to load the
 	 *         {@link SectionType}.
 	 */
-	SectionType loadSectionType(String sectionSourceClassName, String location,
+	SectionType loadSectionType(String sectionName, String sectionSourceClassName, String location,
 			PropertyList properties);
 
 }

@@ -24,6 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -61,6 +62,8 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IEditorInput;
 
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.action.OperationAction;
@@ -69,10 +72,9 @@ import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editpolicies.connection.OfficeFloorGraphicalNodeEditPolicy;
 import net.officefloor.eclipse.common.editpolicies.layout.CommonGraphicalViewerKeyHandler;
 import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
-import net.officefloor.eclipse.repository.project.FileConfigurationItem;
+import net.officefloor.eclipse.configuration.project.ProjectConfigurationContext;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.Model;
-import net.officefloor.model.repository.ConfigurationItem;
 
 /**
  * Provides an abstract {@link GraphicalEditor} for the Office Floor items to
@@ -496,7 +498,8 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends Grap
 		super.setInput(input);
 
 		// Obtain the configuration
-		FileConfigurationItem configuration = new FileConfigurationItem(this.getEditorInput());
+		WritableConfigurationItem configuration = ProjectConfigurationContext
+				.getWritableConfigurationItem(this.getEditorInput(), null);
 
 		// Retrieve the Model
 		try {
@@ -507,7 +510,8 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends Grap
 		}
 
 		// Specify Title of editor
-		this.setPartName(configuration.getFileName());
+		IFile file = ProjectConfigurationContext.getFile(this.getEditorInput());
+		this.setPartName(file.getName());
 
 		// Create the model changes
 		this.modelChanges = this.createModelChanges(this.getCastedModel());
@@ -539,8 +543,10 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends Grap
 
 	@Override
 	public void doSave(IProgressMonitor monitor) {
+
 		// Obtain the configuration
-		FileConfigurationItem configuration = new FileConfigurationItem(this.getEditorInput(), monitor);
+		WritableConfigurationItem configuration = ProjectConfigurationContext
+				.getWritableConfigurationItem(this.getEditorInput(), monitor);
 
 		try {
 			// Store the Model
@@ -560,11 +566,11 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends Grap
 	 * @param model
 	 *            Model to be stored.
 	 * @param configuration
-	 *            Configuration of the Model.
+	 *            {@link WritableConfigurationItem}.
 	 * @throws Exception
 	 *             If fails to store the Model.
 	 */
-	protected abstract void storeModel(M model, ConfigurationItem configuration) throws Exception;
+	protected abstract void storeModel(M model, WritableConfigurationItem configuration) throws Exception;
 
 	@Override
 	public void doSaveAs() {

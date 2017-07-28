@@ -21,12 +21,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.ObjectRegistry;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.parameters.HttpParametersLoader;
@@ -38,8 +38,8 @@ import net.officefloor.plugin.web.http.parameters.HttpParametersLoaderImpl;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpParametersLoaderManagedObjectSource extends
-		AbstractManagedObjectSource<HttpParametersLoaderDependencies, None> {
+public class HttpParametersLoaderManagedObjectSource
+		extends AbstractManagedObjectSource<HttpParametersLoaderDependencies, None> {
 
 	/**
 	 * Property to obtain the fully qualified type name of the Object to have
@@ -75,11 +75,8 @@ public class HttpParametersLoaderManagedObjectSource extends
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected void loadMetaData(
-			MetaDataContext<HttpParametersLoaderDependencies, None> context)
-			throws Exception {
-		ManagedObjectSourceContext<None> mosContext = context
-				.getManagedObjectSourceContext();
+	protected void loadMetaData(MetaDataContext<HttpParametersLoaderDependencies, None> context) throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Obtain the type
 		String typeName = mosContext.getProperty(PROPERTY_TYPE_NAME);
@@ -87,8 +84,7 @@ public class HttpParametersLoaderManagedObjectSource extends
 
 		// Obtain whether case insensitive (true by default)
 		boolean isCaseInsensitive = Boolean
-				.parseBoolean(mosContext.getProperty(PROPERTY_CASE_INSENSITIVE,
-						Boolean.toString(true)));
+				.parseBoolean(mosContext.getProperty(PROPERTY_CASE_INSENSITIVE, Boolean.toString(true)));
 
 		// Create the alias mappings
 		Map<String, String> aliasMappings = new HashMap<String, String>();
@@ -113,9 +109,7 @@ public class HttpParametersLoaderManagedObjectSource extends
 		// Load the meta-data
 		context.setManagedObjectClass(HttpParametersLoaderManagedObject.class);
 		context.setObjectClass(type);
-		context.addDependency(
-				HttpParametersLoaderDependencies.SERVER_HTTP_CONNECTION,
-				ServerHttpConnection.class);
+		context.addDependency(HttpParametersLoaderDependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class);
 		context.addDependency(HttpParametersLoaderDependencies.OBJECT, type);
 	}
 
@@ -127,8 +121,8 @@ public class HttpParametersLoaderManagedObjectSource extends
 	/**
 	 * {@link ManagedObject} to load the parameters.
 	 */
-	private class HttpParametersLoaderManagedObject implements
-			CoordinatingManagedObject<HttpParametersLoaderDependencies> {
+	private class HttpParametersLoaderManagedObject
+			implements CoordinatingManagedObject<HttpParametersLoaderDependencies> {
 
 		/**
 		 * Object to be loaded with parameters.
@@ -141,19 +135,16 @@ public class HttpParametersLoaderManagedObjectSource extends
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public void loadObjects(
-				ObjectRegistry<HttpParametersLoaderDependencies> registry)
-				throws Throwable {
+		public void loadObjects(ObjectRegistry<HttpParametersLoaderDependencies> registry) throws Throwable {
 
 			// Obtain the dependencies
 			ServerHttpConnection connection = (ServerHttpConnection) registry
 					.getObject(HttpParametersLoaderDependencies.SERVER_HTTP_CONNECTION);
-			this.object = registry
-					.getObject(HttpParametersLoaderDependencies.OBJECT);
+			this.object = registry.getObject(HttpParametersLoaderDependencies.OBJECT);
 
 			// Load the parameters onto the object
-			HttpParametersLoaderManagedObjectSource.this.loader.loadParameters(
-					connection.getHttpRequest(), this.object);
+			HttpParametersLoaderManagedObjectSource.this.loader.loadParameters(connection.getHttpRequest(),
+					this.object);
 		}
 
 		@Override

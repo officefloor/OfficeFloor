@@ -26,9 +26,9 @@ import javax.sql.DataSource;
 
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.manage.WorkManager;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
+import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.plugin.jdbc.ConnectionValidator;
 
@@ -37,8 +37,7 @@ import net.officefloor.plugin.jdbc.ConnectionValidator;
  * 
  * @author Daniel Sagenschneider
  */
-public class DataSourceManagedObjectSourceTest extends
-		AbstractOfficeConstructTestCase {
+public class DataSourceManagedObjectSourceTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Mock {@link Connection}.
@@ -62,28 +61,25 @@ public class DataSourceManagedObjectSourceTest extends
 
 		// Construct the task to validate the connection
 		final List<Connection> connections = new LinkedList<Connection>();
-		DataSourceTask task = new DataSourceTask(new ConnectionValidator() {
+		DataSourceManagedFunction task = new DataSourceManagedFunction(new ConnectionValidator() {
 			@Override
-			public void validateConnection(Connection connection)
-					throws Throwable {
+			public void validateConnection(Connection connection) throws Throwable {
 				// Record the connection being used
 				connections.add(connection);
 			}
 		});
-		String workName = task.construct(this.getOfficeBuilder(), null,
-				"DATA_SOURCE", "TEAM");
+		String functionName = task.construct(this.getOfficeBuilder(), null, "DATA_SOURCE", "TEAM");
 
 		// Configure the necessary Teams
-		this.constructTeam("TEAM", new PassiveTeam());
+		this.constructTeam("TEAM", PassiveTeamSource.createPassiveTeam());
 
 		// Test
 		this.replayMockObjects();
 
 		// Configure the DataSource managed object
-		ManagedObjectBuilder<None> moBuilder = this.constructManagedObject(
-				"DATA_SOURCE", DataSourceManagedObjectSource.class, officeName);
-		moBuilder.addProperty(
-				DataSourceManagedObjectSource.PROPERTY_DATA_SOURCE_CLASS_NAME,
+		ManagedObjectBuilder<None> moBuilder = this.constructManagedObject("DATA_SOURCE",
+				DataSourceManagedObjectSource.class, officeName);
+		moBuilder.addProperty(DataSourceManagedObjectSource.PROPERTY_DATA_SOURCE_CLASS_NAME,
 				MockDataSource.class.getName());
 		moBuilder.addProperty("driver", Driver.class.getName());
 		moBuilder.addProperty("url", "server:10000");
@@ -99,26 +95,22 @@ public class DataSourceManagedObjectSourceTest extends
 
 		// Verify properties were loaded onto connection pool data source
 		MockDataSource dataSource = MockDataSource.getInstance();
-		assertEquals("Incorrect driver", Driver.class.getName(),
-				dataSource.getDriver());
+		assertEquals("Incorrect driver", Driver.class.getName(), dataSource.getDriver());
 		assertEquals("Incorrect url", "server:10000", dataSource.getUrl());
 		assertEquals("Incorrect server", "server", dataSource.getServerName());
 		assertEquals("Incorrect port", 10000, dataSource.getPort());
-		assertEquals("Incorrect database", "database",
-				dataSource.getDatabaseName());
+		assertEquals("Incorrect database", "database", dataSource.getDatabaseName());
 		assertEquals("Incorrect username", "user", dataSource.getUsername());
-		assertEquals("Incorrect password", "not telling",
-				dataSource.getPassword());
+		assertEquals("Incorrect password", "not telling", dataSource.getPassword());
 
-		// Obtain the work manager with task to use the connection
-		WorkManager workManager = officeFloor.getOffice(officeName)
-				.getWorkManager(workName);
+		// Obtain the function manager with function to use the connection
+		FunctionManager functionManager = officeFloor.getOffice(officeName).getFunctionManager(functionName);
 
-		// Invoke work to use the connection
-		workManager.invokeWork(null);
+		// Invoke function to use the connection
+		functionManager.invokeProcess(null, null);
 
-		// Invoke work to re-use the connection
-		workManager.invokeWork(null);
+		// Invoke function to re-use the connection
+		functionManager.invokeProcess(null, null);
 
 		// Close the Office Floor
 		officeFloor.closeOfficeFloor();
@@ -128,10 +120,8 @@ public class DataSourceManagedObjectSourceTest extends
 
 		// Verify task invoked twice with connection
 		assertEquals("Incorrect times task invoked", 2, connections.size());
-		assertEquals("Incorrect first connection", this.connection,
-				connections.get(0));
-		assertEquals("Incorrect second connection", this.connection,
-				connections.get(1));
+		assertEquals("Incorrect first connection", this.connection, connections.get(0));
+		assertEquals("Incorrect second connection", this.connection, connections.get(1));
 	}
 
 }

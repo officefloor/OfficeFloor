@@ -17,42 +17,22 @@
  */
 package net.officefloor.frame.api.escalate;
 
-import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.internal.structure.EscalationFlow;
-import net.officefloor.frame.internal.structure.EscalationLevel;
-import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.JobSequence;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.manage.Office;
 
 /**
- * <p>
- * Provides means for:
- * <ol>
- * <li>a {@link ManagedObjectSource}, or</li>
- * <li>the {@link OfficeFloor}</li>
- * </ol>
- * to handle a {@link Throwable} that is not handled by the
- * {@link EscalationProcedure} of the {@link JobSequence}.
- * <p>
- * An example of this would be a HTTP server {@link ManagedObjectSource} that
- * would send a status 500 on a {@link Throwable}.
- * <p>
- * Note that this does not just handle {@link Escalation} instances but any type
- * of {@link Throwable}.
- * 
- * @see EscalationLevel
- * 
+ * Handles an {@link Escalation} from an {@link Office}.
+ *
  * @author Daniel Sagenschneider
  */
 public interface EscalationHandler {
 
 	/**
-	 * Handles the {@link Throwable}.
+	 * Handles an {@link Escalation} from an {@link Office}.
 	 * 
 	 * @param escalation
-	 *            Escalation.
+	 *            {@link Escalation}.
 	 * @throws Throwable
-	 *             If fails to handle {@link EscalationFlow}.
+	 *             Should failure in handling {@link Escalation}.
 	 */
 	void handleEscalation(Throwable escalation) throws Throwable;
 

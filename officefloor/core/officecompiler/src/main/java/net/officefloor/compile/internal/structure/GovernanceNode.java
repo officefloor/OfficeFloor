@@ -20,9 +20,9 @@ package net.officefloor.compile.internal.structure;
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.OfficeGovernance;
-import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * {@link OfficeGovernance} node.
@@ -45,8 +45,7 @@ public interface GovernanceNode extends LinkTeamNode, OfficeGovernance {
 	 *            Optional instantiated {@link GovernanceSource} to use. May be
 	 *            <code>null</code>.
 	 */
-	void initialise(String governanceSourceClassName,
-			GovernanceSource<?, ?> governanceSource);
+	void initialise(String governanceSourceClassName, GovernanceSource<?, ?> governanceSource);
 
 	/**
 	 * Loads the {@link GovernanceType} for this {@link GovernanceNode}.
@@ -57,13 +56,23 @@ public interface GovernanceNode extends LinkTeamNode, OfficeGovernance {
 	GovernanceType<?, ?> loadGovernanceType();
 
 	/**
+	 * Auto wires the {@link Team} for this {@link Governance}.
+	 * 
+	 * @param autoWirer
+	 *            {@link AutoWirer}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 */
+	void autoWireTeam(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext);
+
+	/**
 	 * Builds this {@link Governance} into the {@link OfficeBuilder}.
 	 * 
 	 * @param officeBuilder
 	 *            {@link OfficeBuilder}.
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 */
-	void buildGovernance(OfficeBuilder officeBuilder, TypeContext typeContext);
+	void buildGovernance(OfficeBuilder officeBuilder, CompileContext compileContext);
 
 }

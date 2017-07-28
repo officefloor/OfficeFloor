@@ -17,10 +17,13 @@
  */
 package net.officefloor.eclipse.skin.officefloor;
 
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.PolylineConnection;
+
+import net.officefloor.compile.spi.office.OfficeInput;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.office.OfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeModel;
-import net.officefloor.model.office.OfficeTaskModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
@@ -42,9 +45,6 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeF
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
-
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.PolylineConnection;
 
 /**
  * Factory to create the {@link IFigure} instances for the skin of the
@@ -118,8 +118,7 @@ public interface OfficeFloorFigureFactory {
 	 *            {@link OfficeFloorManagedObjectFigureContext}.
 	 * @return {@link OfficeFloorManagedObjectFigure}.
 	 */
-	OfficeFloorManagedObjectFigure createOfficeFloorManagedObjectFigure(
-			OfficeFloorManagedObjectFigureContext context);
+	OfficeFloorManagedObjectFigure createOfficeFloorManagedObjectFigure(OfficeFloorManagedObjectFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
@@ -139,8 +138,7 @@ public interface OfficeFloorFigureFactory {
 	 *            {@link DeployedOfficeFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	DeployedOfficeFigure createDeployedOfficeFigure(
-			DeployedOfficeFigureContext context);
+	DeployedOfficeFigure createDeployedOfficeFigure(DeployedOfficeFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
@@ -150,18 +148,16 @@ public interface OfficeFloorFigureFactory {
 	 *            {@link DeployedOfficeObjectFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	DeployedOfficeObjectFigure createDeployedOfficeObjectFigure(
-			DeployedOfficeObjectFigureContext context);
+	DeployedOfficeObjectFigure createDeployedOfficeObjectFigure(DeployedOfficeObjectFigureContext context);
 
 	/**
-	 * Creates the {@link OfficeFloorFigure} for the {@link OfficeTaskModel}.
+	 * Creates the {@link OfficeFloorFigure} for the {@link OfficeInput}.
 	 * 
 	 * @param context
 	 *            {@link DeployedOfficeInputFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	DeployedOfficeInputFigure createDeployedOfficeInputFigure(
-			DeployedOfficeInputFigureContext context);
+	DeployedOfficeInputFigure createDeployedOfficeInputFigure(DeployedOfficeInputFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link }.
@@ -170,8 +166,7 @@ public interface OfficeFloorFigureFactory {
 	 *            {@link DeployedOfficeTeamFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	DeployedOfficeTeamFigure createDeployedOfficeTeamFigure(
-			DeployedOfficeTeamFigureContext context);
+	DeployedOfficeTeamFigure createDeployedOfficeTeamFigure(DeployedOfficeTeamFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorTeamFigure} for the
@@ -181,8 +176,7 @@ public interface OfficeFloorFigureFactory {
 	 *            {@link OfficeFloorTeamFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorTeamFigure createOfficeFloorTeamFigure(
-			OfficeFloorTeamFigureContext context);
+	OfficeFloorTeamFigure createOfficeFloorTeamFigure(OfficeFloorTeamFigureContext context);
 
 	/**
 	 * Decorates the
@@ -194,8 +188,7 @@ public interface OfficeFloorFigureFactory {
 	 * @param context
 	 *            {@link OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel}
 	 */
-	void decorateOfficeFloorManagedObjectToOfficeFloorManagedObjectSourceFigure(
-			PolylineConnection figure,
+	void decorateOfficeFloorManagedObjectToOfficeFloorManagedObjectSourceFigure(PolylineConnection figure,
 			OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceFigureContext context);
 
 	/**
@@ -207,8 +200,7 @@ public interface OfficeFloorFigureFactory {
 	 * @param context
 	 *            {@link DeployedOfficeObjectToOfficeFloorManagedObjectFigureContext}
 	 */
-	void decorateDeployedOfficeObjectToOfficeFloorManagedObjectFigure(
-			PolylineConnection figure,
+	void decorateDeployedOfficeObjectToOfficeFloorManagedObjectFigure(PolylineConnection figure,
 			DeployedOfficeObjectToOfficeFloorManagedObjectFigureContext context);
 
 	/**
@@ -221,8 +213,7 @@ public interface OfficeFloorFigureFactory {
 	 *            {@link DeployedOfficeObjectToOfficeFloorInputManagedObjectFigureContext}
 	 *            .
 	 */
-	void decorateDeployedOfficeObjectToOfficeFloorInputManagedObjectFigure(
-			PolylineConnection figure,
+	void decorateDeployedOfficeObjectToOfficeFloorInputManagedObjectFigure(PolylineConnection figure,
 			DeployedOfficeObjectToOfficeFloorInputManagedObjectFigureContext context);
 
 	/**
@@ -233,8 +224,7 @@ public interface OfficeFloorFigureFactory {
 	 * @param context
 	 *            {@link DeployedOfficeTeamToOfficeFloorTeamFigureContext}.
 	 */
-	void decorateDeployedOfficeTeamToOfficeFloorTeamFigure(
-			PolylineConnection figure,
+	void decorateDeployedOfficeTeamToOfficeFloorTeamFigure(PolylineConnection figure,
 			DeployedOfficeTeamToOfficeFloorTeamFigureContext context);
 
 	/**
@@ -247,8 +237,7 @@ public interface OfficeFloorFigureFactory {
 	 * @param context
 	 *            {@link OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectFigureContext}
 	 */
-	void decorateOfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectFigure(
-			PolylineConnection figure,
+	void decorateOfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectFigure(PolylineConnection figure,
 			OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectFigureContext context);
 
 	/**
@@ -261,8 +250,7 @@ public interface OfficeFloorFigureFactory {
 	 * @param context
 	 *            {@link OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectFigureContext}
 	 */
-	void decorateOfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectFigure(
-			PolylineConnection figure,
+	void decorateOfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectFigure(PolylineConnection figure,
 			OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectFigureContext context);
 
 	/**
@@ -275,8 +263,7 @@ public interface OfficeFloorFigureFactory {
 	 *            {@link OfficeFloorManagedObjectSourceToDeployedOfficeFigureContext}
 	 *            .
 	 */
-	void decorateOfficeFloorManagedObjectSourceToDeployedOfficeFigure(
-			PolylineConnection figure,
+	void decorateOfficeFloorManagedObjectSourceToDeployedOfficeFigure(PolylineConnection figure,
 			OfficeFloorManagedObjectSourceToDeployedOfficeFigureContext context);
 
 	/**
@@ -290,8 +277,7 @@ public interface OfficeFloorFigureFactory {
 	 *            {@link OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectFigureContext}
 	 *            .
 	 */
-	void decorateOfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectFigure(
-			PolylineConnection figure,
+	void decorateOfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectFigure(PolylineConnection figure,
 			OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectFigureContext context);
 
 	/**
@@ -305,8 +291,7 @@ public interface OfficeFloorFigureFactory {
 	 *            {@link OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceFigureContext}
 	 *            .
 	 */
-	void decorateOfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceFigure(
-			PolylineConnection figure,
+	void decorateOfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceFigure(PolylineConnection figure,
 			OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceFigureContext context);
 
 	/**
@@ -319,8 +304,7 @@ public interface OfficeFloorFigureFactory {
 	 * @param context
 	 *            {@link OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputFigureContext}
 	 */
-	void decorateOfficeFloorManagedObjectSourceFlowToDeployedOfficeInputFigure(
-			PolylineConnection figure,
+	void decorateOfficeFloorManagedObjectSourceFlowToDeployedOfficeInputFigure(PolylineConnection figure,
 			OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputFigureContext context);
 
 	/**
@@ -332,8 +316,7 @@ public interface OfficeFloorFigureFactory {
 	 * @param context
 	 *            {@link OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamFigureContext}
 	 */
-	void decorateOfficeFloorManagedObjectSourceTeamToOfficeFloorTeamFigure(
-			PolylineConnection figure,
+	void decorateOfficeFloorManagedObjectSourceTeamToOfficeFloorTeamFigure(PolylineConnection figure,
 			OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamFigureContext context);
 
 	/**

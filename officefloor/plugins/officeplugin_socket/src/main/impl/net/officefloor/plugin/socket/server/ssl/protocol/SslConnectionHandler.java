@@ -31,28 +31,28 @@ import javax.net.ssl.SSLEngineResult.HandshakeStatus;
 import javax.net.ssl.SSLEngineResult.Status;
 import javax.net.ssl.SSLSession;
 
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.protocol.Connection;
 import net.officefloor.plugin.socket.server.protocol.ConnectionHandler;
-import net.officefloor.plugin.socket.server.protocol.HeartBeatContext;
 import net.officefloor.plugin.socket.server.protocol.ReadContext;
 import net.officefloor.plugin.socket.server.protocol.WriteBuffer;
 import net.officefloor.plugin.socket.server.protocol.WriteBufferEnum;
-import net.officefloor.plugin.socket.server.ssl.SslTaskExecutor;
+import net.officefloor.plugin.socket.server.ssl.SslFunctionExecutor;
 
 /**
  * SSL {@link ConnectionHandler}.
  * 
  * @author Daniel Sagenschneider
  */
-public class SslConnectionHandler implements ConnectionHandler, ReadContext,
-		HeartBeatContext {
+public class SslConnectionHandler implements ConnectionHandler, SslFunctionExecutor, ReadContext {
 
 	/**
 	 * {@link Logger}.
 	 */
-	private static final Logger LOGGER = Logger
-			.getLogger(SslConnectionHandler.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(SslConnectionHandler.class.getName());
 
 	/**
 	 * {@link Connection}.
@@ -63,11 +63,6 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 	 * {@link SSLEngine}.
 	 */
 	private final SSLEngine engine;
-
-	/**
-	 * {@link SslTaskExecutor}.
-	 */
-	private final SslTaskExecutor taskExecutor;
 
 	/**
 	 * Send buffer size.
@@ -90,14 +85,25 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 	private final Queue<WriteBuffer> writeData = new LinkedList<WriteBuffer>();
 
 	/**
+	 * {@link ManagedObjectExecuteContext}.
+	 */
+	private final ManagedObjectExecuteContext<Indexed> executeContext;
+
+	/**
+	 * {@link Flow} index of the {@link ManagedObjectExecuteContext} to execute
+	 * the {@link SslRunnable} instances.
+	 */
+	private final int sslRunnableFlowIndex;
+
+	/**
 	 * Indicates if closing.
 	 */
 	private boolean isClosing = false;
 
 	/**
-	 * Current {@link SslTask} being run.
+	 * Current {@link SslRunnable} being run.
 	 */
-	private SslTask task = null;
+	private SslRunnable sslRunnable = null;
 
 	/**
 	 * Failure in attempting to process.
@@ -112,24 +118,30 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 	 * @param engine
 	 *            {@link SSLEngine}.
 	 * @param taskExecutor
-	 *            {@link SslTaskExecutor}.
+	 *            {@link SslFunctionExecutor}.
 	 * @param sendBufferSize
 	 *            Send buffer size.
 	 * @param wrappedCommunicationProtocol
 	 *            Wrapped {@link CommunicationProtocol}.
+	 * @param executeContext
+	 *            {@link ManagedObjectExecuteContext}.
+	 * @param sslRunnableFlowIndex
+	 *            {@link Flow} index of the {@link ManagedObjectExecuteContext}
+	 *            to execute the {@link SslRunnable} instances.
 	 */
-	public SslConnectionHandler(Connection connection, SSLEngine engine,
-			SslTaskExecutor taskExecutor, int sendBufferSize,
-			CommunicationProtocol wrappedCommunicationProtocol) {
+	public SslConnectionHandler(Connection connection, SSLEngine engine, int sendBufferSize,
+			CommunicationProtocol wrappedCommunicationProtocol, ManagedObjectExecuteContext<Indexed> executeContext,
+			int sslRunnableFlowIndex) {
 		this.engine = engine;
-		this.taskExecutor = taskExecutor;
 		this.sendBufferSize = sendBufferSize;
 		this.connection = connection;
+		this.executeContext = executeContext;
+		this.sslRunnableFlowIndex = sslRunnableFlowIndex;
 
 		// Create the connection handler to wrap
 		Connection sslConnection = new SslConnectionImpl(this, this.connection);
-		this.wrappedConnectionHandler = wrappedCommunicationProtocol
-				.createConnectionHandler(sslConnection);
+		this.wrappedConnectionHandler = wrappedCommunicationProtocol.createConnectionHandler(sslConnection,
+				executeContext);
 	}
 
 	/**
@@ -147,7 +159,7 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 			}
 
 			// Do not process if a task is being run
-			if (this.task != null) {
+			if (this.sslRunnable != null) {
 				return;
 			}
 
@@ -157,8 +169,7 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 				// Process based on state of engine
 				boolean isInputData = false;
 				boolean isOutputData = false;
-				HandshakeStatus handshakeStatus = this.engine
-						.getHandshakeStatus();
+				HandshakeStatus handshakeStatus = this.engine.getHandshakeStatus();
 				switch (handshakeStatus) {
 
 				case NEED_UNWRAP:
@@ -180,8 +191,8 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 				case NEED_TASK:
 					// Trigger processing of the delegated task
 					Runnable delegatedTask = this.engine.getDelegatedTask();
-					this.task = new SslTask(delegatedTask);
-					this.taskExecutor.beginTask(this.task);
+					this.sslRunnable = new SslRunnable(delegatedTask);
+					this.beginRunnable(this.sslRunnable);
 					return; // Must wait on task to complete
 
 				case NOT_HANDSHAKING:
@@ -195,9 +206,8 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 
 				default:
 					// Should only be in above states
-					throw new IllegalStateException("Illegal "
-							+ SSLEngine.class.getSimpleName()
-							+ " handshake state " + handshakeStatus);
+					throw new IllegalStateException(
+							"Illegal " + SSLEngine.class.getSimpleName() + " handshake state " + handshakeStatus);
 				}
 
 				// Obtain the SSL session
@@ -215,36 +225,30 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 					byte[] dataToUnwrap = new byte[availableData];
 					int readDataIndex = 0;
 					for (byte[] data : this.readData) {
-						System.arraycopy(data, 0, dataToUnwrap, readDataIndex,
-								data.length);
+						System.arraycopy(data, 0, dataToUnwrap, readDataIndex, data.length);
 						readDataIndex += data.length;
 					}
 					this.readData.clear();
 
 					// Wrap the read data at packet buffer size
 					int packetBufferSize = session.getPacketBufferSize();
-					ByteBuffer dataToUnwrapBuffer = ByteBuffer.wrap(
-							dataToUnwrap, 0,
+					ByteBuffer dataToUnwrapBuffer = ByteBuffer.wrap(dataToUnwrap, 0,
 							Math.min(dataToUnwrap.length, packetBufferSize));
 
 					// Obtain temporary buffer to receive plain text
-					int applicationBufferSize = session
-							.getApplicationBufferSize();
+					int applicationBufferSize = session.getApplicationBufferSize();
 					byte[] tempBytes = new byte[applicationBufferSize];
 					ByteBuffer tempBuffer = ByteBuffer.wrap(tempBytes);
 
 					// Unwrap the read data
-					SSLEngineResult sslEngineResult = this.engine.unwrap(
-							dataToUnwrapBuffer, tempBuffer);
+					SSLEngineResult sslEngineResult = this.engine.unwrap(dataToUnwrapBuffer, tempBuffer);
 
 					// Determine if further data to consume on another pass
 					int bytesConsumed = sslEngineResult.bytesConsumed();
 					if (bytesConsumed < availableData) {
 						// Make data available for further reading
-						byte[] furtherData = new byte[availableData
-								- bytesConsumed];
-						System.arraycopy(dataToUnwrap, bytesConsumed,
-								furtherData, 0, furtherData.length);
+						byte[] furtherData = new byte[availableData - bytesConsumed];
+						System.arraycopy(dataToUnwrap, bytesConsumed, furtherData, 0, furtherData.length);
 						this.readData.add(furtherData);
 					}
 
@@ -259,16 +263,14 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 						int bytesProduced = sslEngineResult.bytesProduced();
 						if (bytesProduced > 0) {
 							this.readContextData = new byte[bytesProduced];
-							System.arraycopy(tempBytes, 0,
-									this.readContextData, 0, bytesProduced);
+							System.arraycopy(tempBytes, 0, this.readContextData, 0, bytesProduced);
 							this.wrappedConnectionHandler.handleRead(this);
 						}
 						break;
 					case CLOSED:
 						// Should be no application input data on close.
 						// Determine if in close handshake.
-						HandshakeStatus closeHandshakeStatus = this.engine
-								.getHandshakeStatus();
+						HandshakeStatus closeHandshakeStatus = this.engine.getHandshakeStatus();
 						switch (closeHandshakeStatus) {
 						case NEED_TASK:
 						case NEED_UNWRAP:
@@ -280,13 +282,11 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 							this.connection.close();
 							return; // closed, no further interaction
 						default:
-							throw new IllegalStateException("Unknown status "
-									+ status);
+							throw new IllegalStateException("Unknown status " + status);
 						}
 						break;
 					default:
-						throw new IllegalStateException("Unknown status "
-								+ status);
+						throw new IllegalStateException("Unknown status " + status);
 					}
 				}
 
@@ -310,8 +310,7 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 							availableData += buffer.getDataBuffer().remaining();
 							break;
 						default:
-							throw new IllegalStateException("Unknown type "
-									+ type);
+							throw new IllegalStateException("Unknown type " + type);
 						}
 					}
 					byte[] dataToWrap = new byte[availableData];
@@ -322,8 +321,7 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 						case BYTE_ARRAY:
 							byte[] data = buffer.getData();
 							int length = buffer.length();
-							System.arraycopy(data, 0, dataToWrap,
-									writeDataIndex, length);
+							System.arraycopy(data, 0, dataToWrap, writeDataIndex, length);
 							writeDataIndex += length;
 							break;
 						case BYTE_BUFFER:
@@ -333,33 +331,26 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 							writeDataIndex += length;
 							break;
 						default:
-							throw new IllegalStateException("Unknown type "
-									+ type);
+							throw new IllegalStateException("Unknown type " + type);
 						}
 					}
 					this.writeData.clear();
 
 					// Wrap the read data at application buffer size
-					int applicationBufferSize = session
-							.getApplicationBufferSize();
-					ByteBuffer dataToWrapBuffer = ByteBuffer.wrap(dataToWrap,
-							0,
+					int applicationBufferSize = session.getApplicationBufferSize();
+					ByteBuffer dataToWrapBuffer = ByteBuffer.wrap(dataToWrap, 0,
 							Math.min(dataToWrap.length, applicationBufferSize));
 
 					// Wrap the written data
-					SSLEngineResult sslEngineResult = this.engine.wrap(
-							dataToWrapBuffer, tempBuffer);
+					SSLEngineResult sslEngineResult = this.engine.wrap(dataToWrapBuffer, tempBuffer);
 
 					// Determine if further data to consume on another pass
 					int bytesConsumed = sslEngineResult.bytesConsumed();
 					if (bytesConsumed < availableData) {
 						// Make data available for further writing
-						byte[] furtherData = new byte[availableData
-								- bytesConsumed];
-						System.arraycopy(dataToWrap, bytesConsumed,
-								furtherData, 0, furtherData.length);
-						this.writeData.add(this.connection.createWriteBuffer(
-								furtherData, furtherData.length));
+						byte[] furtherData = new byte[availableData - bytesConsumed];
+						System.arraycopy(dataToWrap, bytesConsumed, furtherData, 0, furtherData.length);
+						this.writeData.add(this.connection.createWriteBuffer(furtherData, furtherData.length));
 
 					} else {
 						// All data written, so check if close
@@ -379,35 +370,26 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 
 							// Write the cipher data to the connection
 							byte[] cipherData = new byte[bytesProduced];
-							System.arraycopy(tempBytes, 0, cipherData, 0,
-									bytesProduced);
+							System.arraycopy(tempBytes, 0, cipherData, 0, bytesProduced);
 
 							// Ensure all buffers within send buffer size
 							WriteBuffer[] writeBuffers = new WriteBuffer[(cipherData.length / this.sendBufferSize)
-									+ ((cipherData.length % this.sendBufferSize) > 0 ? 1
-											: 0)];
+									+ ((cipherData.length % this.sendBufferSize) > 0 ? 1 : 0)];
 
 							// Re-use cipher data for first buffer
-							int totalBytesLoaded = Math.min(cipherData.length,
-									this.sendBufferSize);
-							writeBuffers[0] = this.connection
-									.createWriteBuffer(cipherData,
-											totalBytesLoaded);
+							int totalBytesLoaded = Math.min(cipherData.length, this.sendBufferSize);
+							writeBuffers[0] = this.connection.createWriteBuffer(cipherData, totalBytesLoaded);
 
 							// Load remaining buffers (if any)
 							int writeBufferIndex = 1;
 							while (totalBytesLoaded < cipherData.length) {
 
 								// Determine the bytes for next buffer
-								int bytesToLoad = Math.min(
-										(cipherData.length - totalBytesLoaded),
-										this.sendBufferSize);
-								byte[] writeBufferData = Arrays.copyOfRange(
-										cipherData, totalBytesLoaded,
+								int bytesToLoad = Math.min((cipherData.length - totalBytesLoaded), this.sendBufferSize);
+								byte[] writeBufferData = Arrays.copyOfRange(cipherData, totalBytesLoaded,
 										(totalBytesLoaded + bytesToLoad));
-								writeBuffers[writeBufferIndex++] = this.connection
-										.createWriteBuffer(writeBufferData,
-												bytesToLoad);
+								writeBuffers[writeBufferIndex++] = this.connection.createWriteBuffer(writeBufferData,
+										bytesToLoad);
 
 								// Increment the number of bytes loaded
 								totalBytesLoaded += bytesToLoad;
@@ -421,8 +403,7 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 						if (status == Status.CLOSED) {
 
 							// Determine if in close handshake
-							HandshakeStatus closeHandshakeStatus = this.engine
-									.getHandshakeStatus();
+							HandshakeStatus closeHandshakeStatus = this.engine.getHandshakeStatus();
 							switch (closeHandshakeStatus) {
 							case NEED_TASK:
 							case NEED_UNWRAP:
@@ -434,14 +415,12 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 								this.connection.close();
 								return; // closed, no further processing
 							default:
-								throw new IllegalStateException(
-										"Unknown status " + status);
+								throw new IllegalStateException("Unknown status " + status);
 							}
 						}
 						break;
 					default:
-						throw new IllegalStateException("Unknown status "
-								+ status);
+						throw new IllegalStateException("Unknown status " + status);
 					}
 				}
 			}
@@ -471,7 +450,7 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 	 */
 	void writeData(WriteBuffer[] data) {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Queue the data
 			for (WriteBuffer buffer : data) {
@@ -488,7 +467,7 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 	 */
 	void triggerClose() {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Flag to close
 			this.isClosing = true;
@@ -505,11 +484,21 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 	 */
 	boolean isClosing() {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Indicate if closing or closed
 			return this.isClosing;
 		}
+	}
+
+	/*
+	 * ===================== SslFunctionExecutor =====================
+	 */
+
+	@Override
+	public void beginRunnable(Runnable runnable) {
+		// Invoke process to execute the runnable
+		this.executeContext.invokeProcess(this.sslRunnableFlowIndex, runnable, null, 0, null);
 	}
 
 	/*
@@ -519,7 +508,7 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 	@Override
 	public void handleRead(ReadContext context) throws IOException {
 
-		synchronized (this.connection.getLock()) {
+		synchronized (this.connection.getWriteLock()) {
 
 			// Queue the data
 			this.readData.add(context.getData());
@@ -529,21 +518,9 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 		}
 	}
 
-	@Override
-	public void handleHeartbeat(HeartBeatContext context) throws IOException {
-
-		// Allow wrapped connection handler to handle heart beat
-		this.wrappedConnectionHandler.handleHeartbeat(context);
-	}
-
 	/*
-	 * =============== HeartBeatContext & ReadContext ======================
+	 * ========================== ReadContext ================================
 	 */
-
-	@Override
-	public long getTime() {
-		return System.currentTimeMillis();
-	}
 
 	/**
 	 * {@link ReadContext} data.
@@ -556,9 +533,9 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 	}
 
 	/**
-	 * Wraps the SSL task to be executed.
+	 * Wraps the SSL {@link Runnable} to be executed.
 	 */
-	private class SslTask implements Runnable {
+	private class SslRunnable implements Runnable {
 
 		/**
 		 * Actual SSL task to be run.
@@ -571,7 +548,7 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 		 * @param task
 		 *            SSL task to be run.
 		 */
-		public SslTask(Runnable task) {
+		public SslRunnable(Runnable task) {
 			this.task = task;
 		}
 
@@ -587,15 +564,14 @@ public class SslConnectionHandler implements ConnectionHandler, ReadContext,
 
 			} catch (Throwable ex) {
 				// Flag failure in running task
-				synchronized (SslConnectionHandler.this.connection.getLock()) {
-					SslConnectionHandler.this.failure = new IOException(
-							"SSL delegated task failed", ex);
+				synchronized (SslConnectionHandler.this.connection.getWriteLock()) {
+					SslConnectionHandler.this.failure = new IOException("SSL delegated runnable failed", ex);
 				}
 
 			} finally {
 				// Flag task complete and trigger further processing
-				synchronized (SslConnectionHandler.this.connection.getLock()) {
-					SslConnectionHandler.this.task = null;
+				synchronized (SslConnectionHandler.this.connection.getWriteLock()) {
+					SslConnectionHandler.this.sslRunnable = null;
 					SslConnectionHandler.this.process();
 				}
 			}

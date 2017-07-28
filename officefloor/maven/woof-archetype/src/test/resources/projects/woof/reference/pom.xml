@@ -8,7 +8,7 @@
 	<name>WoofArchetypeResult</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<officefloor-version>2.18.0</officefloor-version>
+		<officefloor-version>3.0.0</officefloor-version>
 		<jetty-version>9.2.2.v20140723</jetty-version>
 		<compiler-version>3.6.0</compiler-version>
 		<failsafe-version>2.19.1</failsafe-version>
@@ -20,12 +20,13 @@
 			<artifactId>officeplugin_woof</artifactId>
 			<version>${officefloor-version}</version>
 		</dependency>
+<!-- Uncomment if within Servlet  
 		<dependency>
-			<!-- Remove if running stand alone -->
 			<groupId>net.officefloor.plugin</groupId>
 			<artifactId>officeplugin_woof_servlet</artifactId>
 			<version>${officefloor-version}</version>
 		</dependency>
+-->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

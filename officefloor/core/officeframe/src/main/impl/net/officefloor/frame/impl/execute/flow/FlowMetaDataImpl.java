@@ -17,52 +17,44 @@
  */
 package net.officefloor.frame.impl.execute.flow;
 
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.JobSequence;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * Implementation of the {@link FlowMetaData}.
  * 
  * @author Daniel Sagenschneider
  */
-public class FlowMetaDataImpl<W extends Work> implements FlowMetaData<W> {
+public class FlowMetaDataImpl implements FlowMetaData {
 
 	/**
-	 * {@link FlowInstigationStrategyEnum}.
+	 * {@link ManagedFunctionMetaData} of the initial {@link ManagedFunction} of
+	 * the {@link Flow}.
 	 */
-	private final FlowInstigationStrategyEnum strategy;
+	private final ManagedFunctionMetaData<?, ?> initialFunctionMetaData;
 
 	/**
-	 * {@link TaskMetaData} of the initial {@link Task} of the {@link JobSequence}.
+	 * Indicates whether the {@link Flow} should be instigated in a spawned
+	 * {@link ThreadState}.
 	 */
-	private final TaskMetaData<W, ?, ?> initialTaskMetaData;
-
-	/**
-	 * {@link AssetManager} to managed this {@link JobSequence}.
-	 */
-	private final AssetManager flowManager;
+	private final boolean isSpawnThreadState;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param strategy
-	 *            {@link FlowInstigationStrategyEnum}.
-	 * @param initialTaskMetaData
-	 *            {@link TaskMetaData} of the initial {@link Task} of the
-	 *            {@link JobSequence}.
-	 * @param flowManager
-	 *            {@link AssetManager} to managed this {@link JobSequence}.
+	 * @param isSpawnThreadState
+	 *            Indicates whether the {@link Flow} should be instigated in a
+	 *            spawned {@link ThreadState}.
+	 * @param initialFunctionMetaData
+	 *            {@link ManagedFunctionMetaData} of the initial
+	 *            {@link ManagedFunction} of the {@link Flow}.
 	 */
-	public FlowMetaDataImpl(FlowInstigationStrategyEnum strategy,
-			TaskMetaData<W, ?, ?> initialTaskMetaData, AssetManager flowManager) {
-		this.strategy = strategy;
-		this.initialTaskMetaData = initialTaskMetaData;
-		this.flowManager = flowManager;
+	public FlowMetaDataImpl(boolean isSpawnThreadState, ManagedFunctionMetaData<?, ?> initialFunctionMetaData) {
+		this.isSpawnThreadState = isSpawnThreadState;
+		this.initialFunctionMetaData = initialFunctionMetaData;
 	}
 
 	/*
@@ -70,18 +62,13 @@ public class FlowMetaDataImpl<W extends Work> implements FlowMetaData<W> {
 	 */
 
 	@Override
-	public FlowInstigationStrategyEnum getInstigationStrategy() {
-		return this.strategy;
+	public ManagedFunctionMetaData<?, ?> getInitialFunctionMetaData() {
+		return this.initialFunctionMetaData;
 	}
 
 	@Override
-	public TaskMetaData<W, ?, ?> getInitialTaskMetaData() {
-		return this.initialTaskMetaData;
-	}
-
-	@Override
-	public AssetManager getFlowManager() {
-		return this.flowManager;
+	public boolean isSpawnThreadState() {
+		return this.isSpawnThreadState;
 	}
 
 }

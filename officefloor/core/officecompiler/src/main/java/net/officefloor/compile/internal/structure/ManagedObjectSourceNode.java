@@ -27,20 +27,19 @@ import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
-import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * Node representing a {@link ManagedObjectSource}.
  *
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectSourceNode extends Node,
-		SectionManagedObjectSource, OfficeManagedObjectSource,
+public interface ManagedObjectSourceNode extends LinkPoolNode, SectionManagedObjectSource, OfficeManagedObjectSource,
 		OfficeSectionManagedObjectSource, OfficeFloorManagedObjectSource {
 
 	/**
@@ -57,50 +56,50 @@ public interface ManagedObjectSourceNode extends Node,
 	 *            Optional instantiated {@link ManagedObjectSource}. May be
 	 *            <code>null</code>.
 	 */
-	void initialise(String managedObjectSourceClassName,
-			ManagedObjectSource<?, ?> managedObjectSource);
+	void initialise(String managedObjectSourceClassName, ManagedObjectSource<?, ?> managedObjectSource);
 
 	/**
-	 * Indicates if have a {@link ManagedObjectSource} configured.
+	 * Sources the {@link ManagedObjectSource}.
 	 * 
-	 * @return <code>true</code> if have the {@link ManagedObjectSource}
-	 *         configured.
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 * @return <code>true</code> if successfully sourced the
+	 *         {@link ManagedObjectSource}. <code>false</code> if failed to
+	 *         source, with issues reported to the {@link CompilerIssues}.
 	 */
-	@Deprecated
-	// determine another means than exposing the method (such as isInitialised)
-	boolean hasManagedObjectSource();
+	boolean sourceManagedObjectSource(CompileContext compileContext);
 
 	/**
 	 * Loads the {@link ManagedObjectType}.
 	 * 
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return {@link ManagedObjectType} or <code>null</code> if issue loading
 	 *         with issue reported to the {@link CompilerIssues}.
 	 */
-	ManagedObjectType<?> loadManagedObjectType();
+	ManagedObjectType<?> loadManagedObjectType(CompileContext compileContext);
 
 	/**
 	 * Loads the {@link OfficeSectionManagedObjectSourceType}.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return {@link OfficeSectionManagedObjectSourceType} or <code>null</code>
 	 *         if issue loading with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	OfficeSectionManagedObjectSourceType loadOfficeSectionManagedObjectSourceType(
-			TypeContext typeContext);
+	OfficeSectionManagedObjectSourceType loadOfficeSectionManagedObjectSourceType(CompileContext compileContext);
 
 	/**
 	 * Loads the {@link OfficeFloorManagedObjectSourceType}.
 	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 * @return {@link OfficeFloorManagedObjectSourceType} or <code>null</code>
 	 *         if issue loading with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	OfficeFloorManagedObjectSourceType loadOfficeFloorManagedObjectSourceType(
-			TypeContext typeContext);
+	OfficeFloorManagedObjectSourceType loadOfficeFloorManagedObjectSourceType(CompileContext compileContext);
 
 	/**
 	 * Obtains the name that this {@link ManagedObjectSource} was added to the
@@ -173,6 +172,28 @@ public interface ManagedObjectSourceNode extends Node,
 	InputManagedObjectNode getInputManagedObjectNode();
 
 	/**
+	 * Auto-wires the {@link Team} instances for this
+	 * {@link ManagedObjectSource}.
+	 * 
+	 * @param autoWirer
+	 *            {@link AutoWirer}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 */
+	void autoWireTeams(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext);
+
+	/**
+	 * Auto-wires this {@link ManagedObjectSourceNode} to the
+	 * {@link OfficeNode}.
+	 * 
+	 * @param officeNode
+	 *            {@link OfficeNode}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 */
+	void autoWireToOffice(OfficeNode officeNode, CompilerIssues issues);
+
+	/**
 	 * Builds {@link ManagedObjectSource} for this {@link ManagedObjectNode}.
 	 *
 	 * @param builder
@@ -184,11 +205,10 @@ public interface ManagedObjectSourceNode extends Node,
 	 *            {@link OfficeBuilder} for the {@link ManagingOffice}.
 	 * @param officeBindings
 	 *            {@link OfficeBindings}.
-	 * @param typeContext
-	 *            {@link TypeContext}.
+	 * @param compileContext
+	 *            {@link CompileContext}.
 	 */
-	void buildManagedObject(OfficeFloorBuilder builder,
-			OfficeNode managingOffice, OfficeBuilder managingOfficeBuilder,
-			OfficeBindings officeBindings, TypeContext typeContext);
+	void buildManagedObject(OfficeFloorBuilder builder, OfficeNode managingOffice, OfficeBuilder managingOfficeBuilder,
+			OfficeBindings officeBindings, CompileContext compileContext);
 
 }

@@ -28,15 +28,15 @@ import javax.sql.PooledConnection;
 
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.manage.WorkManager;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
+import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.plugin.jdbc.ConnectionValidator;
 import net.officefloor.plugin.jdbc.connection.JdbcDataSourceAccess;
+import net.officefloor.plugin.jdbc.connection.JdbcManagedFunction;
 import net.officefloor.plugin.jdbc.connection.JdbcManagedObjectSource;
-import net.officefloor.plugin.jdbc.connection.JdbcTask;
 
 /**
  * Provides the abstract functionality for testing the
@@ -44,8 +44,7 @@ import net.officefloor.plugin.jdbc.connection.JdbcTask;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractVendorJdbcTest extends
-		AbstractOfficeConstructTestCase {
+public abstract class AbstractVendorJdbcTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Flag indicating if the database is available.
@@ -68,13 +67,11 @@ public abstract class AbstractVendorJdbcTest extends
 			String value = properties.getProperty(name);
 			loader.addProperty(name, value);
 		}
-		JdbcManagedObjectSource mos = loader
-				.initManagedObjectSource(JdbcManagedObjectSource.class);
+		JdbcManagedObjectSource mos = loader.initManagedObjectSource(JdbcManagedObjectSource.class);
 
 		// Attempt to obtain connection to database to ensure available
 		try {
-			ConnectionPoolDataSource dataSource = JdbcDataSourceAccess
-					.obtainConnectionPoolDataSource(mos);
+			ConnectionPoolDataSource dataSource = JdbcDataSourceAccess.obtainConnectionPoolDataSource(mos);
 			PooledConnection connection = dataSource.getPooledConnection();
 			connection.close();
 
@@ -87,20 +84,17 @@ public abstract class AbstractVendorJdbcTest extends
 
 			// Indicate database not available
 			System.err.println("============================================");
-			System.err.println("  Test " + this.getName()
-					+ " invalid as database not available");
+			System.err.println("  Test " + this.getName() + " invalid as database not available");
 			ex.printStackTrace();
 			System.err.println("============================================");
 		}
 
 		// Clean up database ready for testing
 		try {
-			ConnectionPoolDataSource dataSource = JdbcDataSourceAccess
-					.obtainConnectionPoolDataSource(mos);
+			ConnectionPoolDataSource dataSource = JdbcDataSourceAccess.obtainConnectionPoolDataSource(mos);
 			PooledConnection connection = dataSource.getPooledConnection();
 			if (this.isDropTablesOnSetup()) {
-				Statement statement = connection.getConnection()
-						.createStatement();
+				Statement statement = connection.getConnection().createStatement();
 				statement.execute("DROP TABLE PRODUCT");
 			}
 			connection.close();
@@ -161,54 +155,46 @@ public abstract class AbstractVendorJdbcTest extends
 		String officeName = this.getOfficeName();
 
 		// Configure the JDBC managed object
-		ManagedObjectBuilder<None> moBuilder = this.constructManagedObject(
-				"JDBC", JdbcManagedObjectSource.class, officeName);
+		ManagedObjectBuilder<None> moBuilder = this.constructManagedObject("JDBC", JdbcManagedObjectSource.class,
+				officeName);
 		Properties properties = this.getDataSourceProperties();
-		System.out.println("Loading "
-				+ JdbcManagedObjectSource.class.getSimpleName()
-				+ " with properties:");
+		System.out.println("Loading " + JdbcManagedObjectSource.class.getSimpleName() + " with properties:");
 		for (String name : properties.stringPropertyNames()) {
 			String value = properties.getProperty(name);
 			System.out.println("    " + name + "=" + value);
 			moBuilder.addProperty(name, value);
 		}
-		moBuilder.addProperty(
-				JdbcManagedObjectSource.DATA_SOURCE_INITIALISE_SCRIPT, this
-						.getFileLocation(AbstractVendorJdbcTest.class,
-								"InitialiseDatabase.sql"));
+		moBuilder.addProperty(JdbcManagedObjectSource.DATA_SOURCE_INITIALISE_SCRIPT,
+				this.getFileLocation(AbstractVendorJdbcTest.class, "InitialiseDatabase.sql"));
 
 		// Configure the task for the connection
-		JdbcTask task = new JdbcTask(new ConnectionValidator() {
+		JdbcManagedFunction task = new JdbcManagedFunction(new ConnectionValidator() {
 			@Override
-			public void validateConnection(Connection connection)
-					throws Throwable {
+			public void validateConnection(Connection connection) throws Throwable {
 				// Obtain the product name to validate working
 				Statement statement = connection.createStatement();
-				ResultSet resultSet = statement
-						.executeQuery("SELECT PRODUCT_NAME FROM PRODUCT WHERE PRODUCT_ID = 1");
+				ResultSet resultSet = statement.executeQuery("SELECT PRODUCT_NAME FROM PRODUCT WHERE PRODUCT_ID = 1");
 				resultSet.next();
 				String productName = resultSet.getString("PRODUCT_NAME");
 				assertEquals("Incorrect product name", "Test", productName);
 				statement.close();
 			}
 		});
-		String workName = task.construct(this.getOfficeBuilder(), null, "JDBC",
-				"TEAM");
+		String functionName = task.construct(this.getOfficeBuilder(), null, "JDBC", "TEAM");
 
 		// Configure the necessary Teams
-		this.constructTeam("TEAM", new PassiveTeam());
-		this.constructTeam("of-JDBC.jdbc.recycle", new PassiveTeam());
+		this.constructTeam("TEAM", PassiveTeamSource.createPassiveTeam());
+		this.constructTeam("of-JDBC.jdbc.recycle", PassiveTeamSource.createPassiveTeam());
 
 		// Open the Office Floor
 		OfficeFloor officeFloor = this.constructOfficeFloor();
 		officeFloor.openOfficeFloor();
 
-		// Obtain the work manager with task to use the connection
-		WorkManager workManager = officeFloor.getOffice(officeName)
-				.getWorkManager(workName);
+		// Obtain the function manager with function to use the connection
+		FunctionManager functionManager = officeFloor.getOffice(officeName).getFunctionManager(functionName);
 
-		// Invoke work to use the connection
-		workManager.invokeWork(null);
+		// Invoke function to use the connection
+		functionManager.invokeProcess(null, null);
 
 		// Close the Office Floor
 		officeFloor.closeOfficeFloor();

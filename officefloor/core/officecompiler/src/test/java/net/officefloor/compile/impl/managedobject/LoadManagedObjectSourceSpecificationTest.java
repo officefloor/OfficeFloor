@@ -25,14 +25,14 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.TestSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceProperty;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceSpecification;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
+import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -40,8 +40,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * 
  * @author Daniel Sagenschneider
  */
-public class LoadManagedObjectSourceSpecificationTest extends
-		OfficeFrameTestCase {
+public class LoadManagedObjectSourceSpecificationTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link CompilerIssues}.
@@ -69,13 +68,12 @@ public class LoadManagedObjectSourceSpecificationTest extends
 	 */
 	public void testFailInstantiateForManagedObjectSourceSpecification() {
 
-		final RuntimeException failure = new RuntimeException(
-				"instantiate failure");
+		final RuntimeException failure = new RuntimeException("instantiate failure");
 
 		// Record failure to instantiate
-		this.issues.recordIssue("Failed to instantiate "
-				+ MockManagedObjectSource.class.getName()
-				+ " by default constructor", failure);
+		this.issues.recordIssue(
+				"Failed to instantiate " + MockManagedObjectSource.class.getName() + " by default constructor",
+				failure);
 
 		// Attempt to obtain specification
 		MockManagedObjectSource.instantiateFailure = failure;
@@ -94,8 +92,8 @@ public class LoadManagedObjectSourceSpecificationTest extends
 
 		// Record failure to instantiate
 		this.issues.recordIssue(
-				"Failed to obtain ManagedObjectSourceSpecification from "
-						+ MockManagedObjectSource.class.getName(), failure);
+				"Failed to obtain ManagedObjectSourceSpecification from " + MockManagedObjectSource.class.getName(),
+				failure);
 
 		// Attempt to obtain specification
 		MockManagedObjectSource.specificationFailure = failure;
@@ -110,9 +108,8 @@ public class LoadManagedObjectSourceSpecificationTest extends
 	public void testNoManagedObjectSourceSpecification() {
 
 		// Record no specification returned
-		this.issues
-				.recordIssue("No ManagedObjectSourceSpecification returned from "
-						+ MockManagedObjectSource.class.getName());
+		this.issues.recordIssue(
+				"No ManagedObjectSourceSpecification returned from " + MockManagedObjectSource.class.getName());
 
 		// Attempt to obtain specification
 		MockManagedObjectSource.specification = null;
@@ -127,17 +124,14 @@ public class LoadManagedObjectSourceSpecificationTest extends
 	 */
 	public void testFailGetManagedObjectSourceProperties() {
 
-		final NullPointerException failure = new NullPointerException(
-				"Fail to get managed object source properties");
+		final NullPointerException failure = new NullPointerException("Fail to get managed object source properties");
 
 		// Record null properties
-		this.control(this.specification).expectAndThrow(
-				this.specification.getProperties(), failure);
-		this.issues
-				.recordIssue(
-						"Failed to obtain ManagedObjectSourceProperty instances from ManagedObjectSourceSpecification for "
-								+ MockManagedObjectSource.class.getName(),
-						failure);
+		this.control(this.specification).expectAndThrow(this.specification.getProperties(), failure);
+		this.issues.recordIssue(
+				"Failed to obtain ManagedObjectSourceProperty instances from ManagedObjectSourceSpecification for "
+						+ MockManagedObjectSource.class.getName(),
+				failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -152,8 +146,7 @@ public class LoadManagedObjectSourceSpecificationTest extends
 	public void testNullManagedObjectSourcePropertiesArray() {
 
 		// Record null properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(), null);
+		this.recordReturn(this.specification, this.specification.getProperties(), null);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -168,12 +161,10 @@ public class LoadManagedObjectSourceSpecificationTest extends
 	public void testNullManagedObjectSourcePropertyElement() {
 
 		// Record null properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new ManagedObjectSourceProperty[] { null });
-		this.issues
-				.recordIssue("ManagedObjectSourceProperty 0 is null from ManagedObjectSourceSpecification for "
-						+ MockManagedObjectSource.class.getName());
+		this.issues.recordIssue("ManagedObjectSourceProperty 0 is null from ManagedObjectSourceSpecification for "
+				+ MockManagedObjectSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -187,16 +178,14 @@ public class LoadManagedObjectSourceSpecificationTest extends
 	 */
 	public void testNullManagedObjectSourcePropertyName() {
 
-		final ManagedObjectSourceProperty property = this
-				.createMock(ManagedObjectSourceProperty.class);
+		final ManagedObjectSourceProperty property = this.createMock(ManagedObjectSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new ManagedObjectSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
-		this.issues
-				.recordIssue("ManagedObjectSourceProperty 0 provided blank name from ManagedObjectSourceSpecification for "
+		this.issues.recordIssue(
+				"ManagedObjectSourceProperty 0 provided blank name from ManagedObjectSourceSpecification for "
 						+ MockManagedObjectSource.class.getName());
 
 		// Attempt to obtain specification
@@ -211,21 +200,17 @@ public class LoadManagedObjectSourceSpecificationTest extends
 	 */
 	public void testFailGetManagedObjectSourcePropertyName() {
 
-		final RuntimeException failure = new RuntimeException(
-				"Failed to get property name");
-		final ManagedObjectSourceProperty property = this
-				.createMock(ManagedObjectSourceProperty.class);
+		final RuntimeException failure = new RuntimeException("Failed to get property name");
+		final ManagedObjectSourceProperty property = this.createMock(ManagedObjectSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new ManagedObjectSourceProperty[] { property });
 		this.control(property).expectAndThrow(property.getName(), failure);
-		this.issues
-				.recordIssue(
-						"Failed to get name for ManagedObjectSourceProperty 0 from ManagedObjectSourceSpecification for "
-								+ MockManagedObjectSource.class.getName(),
-						failure);
+		this.issues.recordIssue(
+				"Failed to get name for ManagedObjectSourceProperty 0 from ManagedObjectSourceSpecification for "
+						+ MockManagedObjectSource.class.getName(),
+				failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -239,22 +224,18 @@ public class LoadManagedObjectSourceSpecificationTest extends
 	 */
 	public void testFailGetManagedObjectSourcePropertyLabel() {
 
-		final RuntimeException failure = new RuntimeException(
-				"Failed to get property label");
-		final ManagedObjectSourceProperty property = this
-				.createMock(ManagedObjectSourceProperty.class);
+		final RuntimeException failure = new RuntimeException("Failed to get property label");
+		final ManagedObjectSourceProperty property = this.createMock(ManagedObjectSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new ManagedObjectSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
 		this.control(property).expectAndThrow(property.getLabel(), failure);
-		this.issues
-				.recordIssue(
-						"Failed to get label for ManagedObjectSourceProperty 0 (NAME) from ManagedObjectSourceSpecification for "
-								+ MockManagedObjectSource.class.getName(),
-						failure);
+		this.issues.recordIssue(
+				"Failed to get label for ManagedObjectSourceProperty 0 (NAME) from ManagedObjectSourceSpecification for "
+						+ MockManagedObjectSource.class.getName(),
+				failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -267,24 +248,16 @@ public class LoadManagedObjectSourceSpecificationTest extends
 	 */
 	public void testLoadManagedObjectSourceSpecification() {
 
-		final ManagedObjectSourceProperty propertyWithLabel = this
-				.createMock(ManagedObjectSourceProperty.class);
-		final ManagedObjectSourceProperty propertyWithoutLabel = this
-				.createMock(ManagedObjectSourceProperty.class);
+		final ManagedObjectSourceProperty propertyWithLabel = this.createMock(ManagedObjectSourceProperty.class);
+		final ManagedObjectSourceProperty propertyWithoutLabel = this.createMock(ManagedObjectSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
-				new ManagedObjectSourceProperty[] { propertyWithLabel,
-						propertyWithoutLabel });
-		this.recordReturn(propertyWithLabel, propertyWithLabel.getName(),
-				"NAME");
-		this.recordReturn(propertyWithLabel, propertyWithLabel.getLabel(),
-				"LABEL");
-		this.recordReturn(propertyWithoutLabel, propertyWithoutLabel.getName(),
-				"NO LABEL");
-		this.recordReturn(propertyWithoutLabel,
-				propertyWithoutLabel.getLabel(), null);
+		this.recordReturn(this.specification, this.specification.getProperties(),
+				new ManagedObjectSourceProperty[] { propertyWithLabel, propertyWithoutLabel });
+		this.recordReturn(propertyWithLabel, propertyWithLabel.getName(), "NAME");
+		this.recordReturn(propertyWithLabel, propertyWithLabel.getLabel(), "LABEL");
+		this.recordReturn(propertyWithoutLabel, propertyWithoutLabel.getName(), "NO LABEL");
+		this.recordReturn(propertyWithoutLabel, propertyWithoutLabel.getLabel(), null);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -301,25 +274,20 @@ public class LoadManagedObjectSourceSpecificationTest extends
 	 * @param propertyNames
 	 *            Expected {@link Property} names for being returned.
 	 */
-	private void loadSpecification(boolean isExpectToLoad,
-			String... propertyNameLabelPairs) {
+	private void loadSpecification(boolean isExpectToLoad, String... propertyNameLabelPairs) {
 
 		// Load the managed object specification specification
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
-		ManagedObjectLoader managedObjectLoader = compiler
-				.getManagedObjectLoader();
-		PropertyList propertyList = managedObjectLoader
-				.loadSpecification(MockManagedObjectSource.class);
+		ManagedObjectLoader managedObjectLoader = compiler.getManagedObjectLoader();
+		PropertyList propertyList = managedObjectLoader.loadSpecification(MockManagedObjectSource.class);
 
 		// Determine if expected to load
 		if (isExpectToLoad) {
 			assertNotNull("Expected to load specification", propertyList);
 
 			// Ensure the properties are as expected
-			PropertyListUtil.validatePropertyNameLabels(propertyList,
-					propertyNameLabelPairs);
+			PropertyListUtil.validatePropertyNameLabels(propertyList, propertyNameLabelPairs);
 
 		} else {
 			assertNull("Should not load specification", propertyList);
@@ -330,8 +298,7 @@ public class LoadManagedObjectSourceSpecificationTest extends
 	 * Mock {@link ManagedObjectSource} for testing.
 	 */
 	@TestSource
-	public static class MockManagedObjectSource implements
-			ManagedObjectSource<None, None> {
+	public static class MockManagedObjectSource implements ManagedObjectSource<None, None> {
 
 		/**
 		 * Failure to instantiate an instance.
@@ -386,20 +353,13 @@ public class LoadManagedObjectSourceSpecificationTest extends
 		}
 
 		@Override
-		public void init(ManagedObjectSourceContext<None> context)
-				throws Exception {
-			fail("Should not be invoked for obtaining specification");
-		}
-
-		@Override
-		public ManagedObjectSourceMetaData<None, None> getMetaData() {
+		public ManagedObjectSourceMetaData<None, None> init(ManagedObjectSourceContext<None> context) throws Exception {
 			fail("Should not be invoked for obtaining specification");
 			return null;
 		}
 
 		@Override
-		public void start(ManagedObjectExecuteContext<None> context)
-				throws Exception {
+		public void start(ManagedObjectExecuteContext<None> context) throws Exception {
 			fail("Should not be invoked for obtaining specification");
 		}
 
