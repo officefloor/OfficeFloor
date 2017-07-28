@@ -17,12 +17,6 @@
  */
 package net.officefloor.eclipse.wizard.managedobjectsource;
 
-import net.officefloor.compile.managedobject.ManagedObjectType;
-import net.officefloor.compile.work.TaskType;
-import net.officefloor.eclipse.util.EclipseUtil;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -34,9 +28,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import net.officefloor.eclipse.util.EclipseUtil;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+
 /**
- * {@link IWizardPage} to select the {@link TaskType} instances of the
- * {@link ManagedObjectType} to include.
+ * {@link IWizardPage} to provide details of the {@link ManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -79,8 +76,7 @@ public class ManagedObjectSourceDetailsWizardPage extends WizardPage {
 	 * @param managedObjectSourceInstance
 	 *            {@link ManagedObjectSourceInstance}.
 	 */
-	public void loadManagedObjectSourceInstance(
-			ManagedObjectSourceInstance managedObjectSourceInstance) {
+	public void loadManagedObjectSourceInstance(ManagedObjectSourceInstance managedObjectSourceInstance) {
 
 		// Do nothing if same managed object source
 		if (this.managedObjectSourceInstance == managedObjectSourceInstance) {
@@ -89,9 +85,8 @@ public class ManagedObjectSourceDetailsWizardPage extends WizardPage {
 
 		// Specify managed object source (may be null)
 		this.managedObjectSourceInstance = managedObjectSourceInstance;
-		String suggestedManagedObjectName = (this.managedObjectSourceInstance != null ? this.managedObjectSourceInstance
-				.getSuggestedManagedObjectName()
-				: "");
+		String suggestedManagedObjectName = (this.managedObjectSourceInstance != null
+				? this.managedObjectSourceInstance.getSuggestedManagedObjectName() : "");
 
 		// Specify the suggested managed object name
 		this.managedObjectName.setText(suggestedManagedObjectName);
@@ -128,8 +123,7 @@ public class ManagedObjectSourceDetailsWizardPage extends WizardPage {
 		// Provide control to specify name
 		new Label(page, SWT.None).setText("ManagedObject name: ");
 		this.managedObjectName = new Text(page, SWT.SINGLE | SWT.BORDER);
-		this.managedObjectName.setLayoutData(new GridData(SWT.FILL,
-				SWT.BEGINNING, true, false));
+		this.managedObjectName.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 		this.managedObjectName.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -141,8 +135,7 @@ public class ManagedObjectSourceDetailsWizardPage extends WizardPage {
 		new Label(page, SWT.None).setText("Default timeout: ");
 		this.defaultTimeoutText = new Text(page, SWT.SINGLE | SWT.BORDER);
 		this.defaultTimeoutText.setText("0");
-		this.defaultTimeoutText.setLayoutData(new GridData(SWT.FILL,
-				SWT.BEGINNING, true, false));
+		this.defaultTimeoutText.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 		this.defaultTimeoutText.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {

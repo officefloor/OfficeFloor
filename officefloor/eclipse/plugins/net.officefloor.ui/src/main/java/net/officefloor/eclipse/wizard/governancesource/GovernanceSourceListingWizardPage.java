@@ -17,10 +17,6 @@
  */
 package net.officefloor.eclipse.wizard.governancesource;
 
-import net.officefloor.compile.spi.governance.source.GovernanceSource;
-import net.officefloor.eclipse.util.EclipseUtil;
-import net.officefloor.frame.spi.governance.Governance;
-
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -34,6 +30,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Text;
+
+import net.officefloor.compile.spi.governance.source.GovernanceSource;
+import net.officefloor.eclipse.util.EclipseUtil;
+import net.officefloor.frame.api.governance.Governance;
 
 /**
  * {@link IWizardPage} providing the listing of {@link GovernanceSourceInstance}
@@ -79,8 +79,7 @@ public class GovernanceSourceListingWizardPage extends WizardPage {
 	 *            {@link GovernanceInstance} being refactor or <code>null</code>
 	 *            if creating.
 	 */
-	GovernanceSourceListingWizardPage(
-			GovernanceSourceInstance[] governanceSourceInstances,
+	GovernanceSourceListingWizardPage(GovernanceSourceInstance[] governanceSourceInstances,
 			GovernanceInstance governanceInstance) {
 		super("GovernanceSource listing");
 		this.governanceSourceInstances = governanceSourceInstances;
@@ -89,8 +88,7 @@ public class GovernanceSourceListingWizardPage extends WizardPage {
 		// Create the listing of labels
 		this.governanceSourceLabels = new String[this.governanceSourceInstances.length];
 		for (int i = 0; i < this.governanceSourceLabels.length; i++) {
-			this.governanceSourceLabels[i] = this.governanceSourceInstances[i]
-					.getGovernanceSourceLabel();
+			this.governanceSourceLabels[i] = this.governanceSourceInstances[i].getGovernanceSourceLabel();
 		}
 
 		// Specify page details
@@ -126,19 +124,16 @@ public class GovernanceSourceListingWizardPage extends WizardPage {
 
 		// Add means to specify governance name
 		Composite nameComposite = new Composite(page, SWT.NONE);
-		nameComposite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
-				false));
+		nameComposite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 		nameComposite.setLayout(new GridLayout(2, false));
 		Label nameLabel = new Label(nameComposite, SWT.NONE);
 		nameLabel.setText("Governance name: ");
 		this.governanceName = new Text(nameComposite, SWT.BORDER);
-		this.governanceName.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING,
-				true, false));
+		this.governanceName.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 		if (this.governanceInstance != null) {
 			// Provide governance name if refactoring.
 			// (Must be done before modifyier listener)
-			this.governanceName.setText(this.governanceInstance
-					.getGovernanceName());
+			this.governanceName.setText(this.governanceInstance.getGovernanceName());
 		}
 		this.governanceName.addModifyListener(new ModifyListener() {
 			@Override
@@ -150,8 +145,7 @@ public class GovernanceSourceListingWizardPage extends WizardPage {
 
 		// Add listing of governance sources
 		this.list = new List(page, SWT.SINGLE | SWT.BORDER);
-		this.list.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
-				false));
+		this.list.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 		this.list.setItems(this.governanceSourceLabels);
 		this.list.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -163,10 +157,8 @@ public class GovernanceSourceListingWizardPage extends WizardPage {
 		// Flag selected governance instance (if refactoring work)
 		if (this.governanceInstance != null) {
 			for (int i = 0; i < this.governanceSourceInstances.length; i++) {
-				if (this.governanceSourceInstances[i]
-						.getGovernanceSourceClassName().equals(
-								this.governanceInstance
-										.getGovernanceSourceClassName())) {
+				if (this.governanceSourceInstances[i].getGovernanceSourceClassName()
+						.equals(this.governanceInstance.getGovernanceSourceClassName())) {
 					// Governance source for the selected instance
 					this.list.select(i);
 				}

@@ -18,11 +18,9 @@
 package net.officefloor.eclipse.skin.standard;
 
 import net.officefloor.eclipse.skin.OfficeFloorSkin;
-import net.officefloor.eclipse.skin.desk.DeskFigureFactory;
 import net.officefloor.eclipse.skin.office.OfficeFigureFactory;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorFigureFactory;
 import net.officefloor.eclipse.skin.section.SectionFigureFactory;
-import net.officefloor.eclipse.skin.standard.desk.StandardDeskFigureFactory;
 import net.officefloor.eclipse.skin.standard.office.StandardOfficeFigureFactory;
 import net.officefloor.eclipse.skin.standard.officefloor.StandardOfficeFloorFigureFactory;
 import net.officefloor.eclipse.skin.standard.section.StandardSectionFigureFactory;
@@ -51,11 +49,6 @@ public class StandardOfficeFloorSkin implements OfficeFloorSkin {
 	}
 
 	/**
-	 * {@link DeskFigureFactory}.
-	 */
-	private final DeskFigureFactory deskFigureFactory = new StandardDeskFigureFactory();
-
-	/**
 	 * {@link OfficeFigureFactory}.
 	 */
 	private final OfficeFigureFactory officeFigureFactory = new StandardOfficeFigureFactory();
@@ -73,11 +66,6 @@ public class StandardOfficeFloorSkin implements OfficeFloorSkin {
 	/*
 	 * ==================== OfficeFloorSkin ================================
 	 */
-
-	@Override
-	public DeskFigureFactory getDeskFigureFactory() {
-		return this.deskFigureFactory;
-	}
 
 	@Override
 	public OfficeFigureFactory getOfficeFigureFactory() {

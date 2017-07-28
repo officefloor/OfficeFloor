@@ -19,9 +19,6 @@ package net.officefloor.eclipse.util;
 
 import java.util.LinkedList;
 
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.configuration.project.FileConfigurationItem;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaProject;
@@ -29,6 +26,9 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.configuration.project.ProjectConfigurationContext;
 
 /**
  * Utility methods for working with Java.
@@ -49,13 +49,11 @@ public class JavaUtil {
 	 * @throws JavaModelException
 	 *             If fails to obtain sub types.
 	 */
-	public static IType[] getSubTypes(
-			AbstractOfficeFloorEditPart<?, ?, ?> editPart, String typeName)
+	public static IType[] getSubTypes(AbstractOfficeFloorEditPart<?, ?, ?> editPart, String typeName)
 			throws JavaModelException {
 
 		// Obtain the project
-		IProject project = FileConfigurationItem.getFile(
-				editPart.getEditor().getEditorInput()).getProject();
+		IProject project = ProjectConfigurationContext.getProject(editPart.getEditor().getEditorInput());
 
 		// Obtain the sub types
 		return getSubTypes(project, typeName);
@@ -74,8 +72,7 @@ public class JavaUtil {
 	 * @throws JavaModelException
 	 *             If fails to obtain sub types.
 	 */
-	public static IType[] getSubTypes(IProject project, String typeName)
-			throws JavaModelException {
+	public static IType[] getSubTypes(IProject project, String typeName) throws JavaModelException {
 
 		// Obtain the type on the class path
 		IJavaProject javaProject = JavaCore.create(project);

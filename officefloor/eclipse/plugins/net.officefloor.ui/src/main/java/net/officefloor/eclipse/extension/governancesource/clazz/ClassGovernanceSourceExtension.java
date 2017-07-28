@@ -17,9 +17,8 @@
  */
 package net.officefloor.eclipse.extension.governancesource.clazz;
 
-import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
-import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
-import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
+import org.eclipse.swt.widgets.Composite;
+
 import net.officefloor.eclipse.extension.governancesource.GovernanceSourceExtension;
 import net.officefloor.eclipse.extension.governancesource.GovernanceSourceExtensionContext;
 import net.officefloor.eclipse.extension.open.ExtensionOpener;
@@ -29,15 +28,13 @@ import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 
-import org.eclipse.swt.widgets.Composite;
-
 /**
  * {@link GovernanceSourceExtension} for {@link ClassGovernanceSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassGovernanceSourceExtension implements
-		GovernanceSourceExtension<Object, Indexed, ClassGovernanceSource>, ExtensionClasspathProvider, ExtensionOpener {
+public class ClassGovernanceSourceExtension
+		implements GovernanceSourceExtension<Object, Indexed, ClassGovernanceSource>, ExtensionOpener {
 
 	/*
 	 * ================ GovernanceSourceExtension =========================
@@ -60,15 +57,6 @@ public class ClassGovernanceSourceExtension implements
 		SourceExtensionUtil.loadPropertyLayout(page);
 		SourceExtensionUtil.createPropertyClass("Class", ClassGovernanceSource.CLASS_NAME_PROPERTY_NAME, page, context,
 				null);
-	}
-
-	/*
-	 * ======================= ExtensionClasspathProvider ======================
-	 */
-
-	@Override
-	public ClasspathProvision[] getClasspathProvisions() {
-		return new ClasspathProvision[] { new TypeClasspathProvision(ClassGovernanceSource.class) };
 	}
 
 	/*

@@ -47,7 +47,8 @@ import net.officefloor.eclipse.util.EclipseUtil;
  * 
  * @author Daniel Sagenschneider
  */
-public class AdministrationSourceInstance extends AbstractCompilerIssues implements AdministrationSourceExtensionContext {
+public class AdministrationSourceInstance extends AbstractCompilerIssues
+		implements AdministrationSourceExtensionContext {
 
 	/**
 	 * Fully qualified class name of the {@link AdministrationSource}.
@@ -58,7 +59,7 @@ public class AdministrationSourceInstance extends AbstractCompilerIssues impleme
 	 * {@link AdministrationSourceExtension}. May be <code>null</code> if not
 	 * obtained via extension point.
 	 */
-	private final AdministrationSourceExtension<?, ?, ?> administrationSourceExtension;
+	private final AdministrationSourceExtension<?, ?, ?, ?> administrationSourceExtension;
 
 	/**
 	 * {@link AdministrationLoader}.
@@ -105,10 +106,11 @@ public class AdministrationSourceInstance extends AbstractCompilerIssues impleme
 	 * Initiate.
 	 * 
 	 * @param administrationSourceClassName
-	 *            Fully qualified class name of the {@link AdministrationSource}.
+	 *            Fully qualified class name of the
+	 *            {@link AdministrationSource}.
 	 * @param administrationSourceExtension
-	 *            {@link AdministrationSourceExtension}. May be <code>null</code>
-	 *            .
+	 *            {@link AdministrationSourceExtension}. May be
+	 *            <code>null</code> .
 	 * @param classLoader
 	 *            {@link ClassLoader}.
 	 * @param project
@@ -117,7 +119,7 @@ public class AdministrationSourceInstance extends AbstractCompilerIssues impleme
 	 *            {@link AdministrationSourceInstanceContext}.
 	 */
 	AdministrationSourceInstance(String administrationSourceClassName,
-			AdministrationSourceExtension<?, ?, ?> administrationSourceExtension, ClassLoader classLoader,
+			AdministrationSourceExtension<?, ?, ?, ?> administrationSourceExtension, ClassLoader classLoader,
 			IProject project, AdministrationSourceInstanceContext context) {
 		this.administrationSourceClassName = administrationSourceClassName;
 		this.administrationSourceExtension = administrationSourceExtension;
@@ -137,7 +139,7 @@ public class AdministrationSourceInstance extends AbstractCompilerIssues impleme
 	 * @param administrationName
 	 *            Name of the {@link OfficeAdministration}.
 	 */
-	public void setAdministratorName(String administrationName) {
+	public void setAdministrationName(String administrationName) {
 		this.administrationName = administrationName;
 
 		// Notify properties changed as now have location
@@ -302,7 +304,7 @@ public class AdministrationSourceInstance extends AbstractCompilerIssues impleme
 	}
 
 	/*
-	 * ============== AdministrationSourceExtensionContext ======================
+	 * ========== AdministrationSourceExtensionContext ==========
 	 */
 
 	@Override
@@ -321,11 +323,11 @@ public class AdministrationSourceInstance extends AbstractCompilerIssues impleme
 		// Clear the error message
 		this.context.setErrorMessage(null);
 
-		// Attempt to load the administrator type.
-		// Issues notified back via the administrator loader.
+		// Attempt to load the administration type.
+		// Issues notified back via the administration loader.
 		this.loadAdministrationType();
 
-		// Flag whether the administrator type was loaded
+		// Flag whether the administration type was loaded
 		this.context.setAdministrationTypeLoaded(this.administrationType != null);
 	}
 

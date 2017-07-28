@@ -17,21 +17,21 @@
  */
 package net.officefloor.eclipse.skin.section;
 
-import net.officefloor.model.desk.WorkTaskObjectModel;
-
 import org.eclipse.draw2d.IFigure;
 
+import net.officefloor.model.section.ManagedFunctionObjectModel;
+
 /**
- * Context for the {@link WorkTaskObjectModel} {@link IFigure}.
+ * Context for the {@link ManagedFunctionObjectModel} {@link IFigure}.
  * 
  * @author Daniel Sagenschneider
  */
 public interface ManagedFunctionObjectFigureContext {
 
 	/**
-	 * Obtains the object name for the {@link WorkTaskObjectModel}.
+	 * Obtains the object name for the {@link ManagedFunctionObjectModel}.
 	 * 
-	 * @return Object name for the {@link WorkTaskObjectModel}.
+	 * @return Object name for the {@link ManagedFunctionObjectModel}.
 	 */
 	String getManagedFunctionObjectName();
 
@@ -43,15 +43,15 @@ public interface ManagedFunctionObjectFigureContext {
 	String getObjectType();
 
 	/**
-	 * Flags if this {@link WorkTaskObjectModel} is the parameter.
+	 * Flags if this {@link ManagedFunctionObjectModel} is the parameter.
 	 * 
-	 * @return <code>true</code> if the {@link WorkTaskObjectModel} is the
-	 *         parameter.
+	 * @return <code>true</code> if the {@link ManagedFunctionObjectModel} is
+	 *         the parameter.
 	 */
 	boolean isParameter();
 
 	/**
-	 * Flags whether the {@link WorkTaskObjectModel} is the parameter.
+	 * Flags whether the {@link ManagedFunctionObjectModel} is the parameter.
 	 * 
 	 * @param isParameter
 	 *            Flag indicating if the parameter.

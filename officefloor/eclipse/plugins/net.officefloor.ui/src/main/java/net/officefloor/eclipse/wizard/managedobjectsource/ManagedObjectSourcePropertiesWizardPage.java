@@ -17,14 +17,14 @@
  */
 package net.officefloor.eclipse.wizard.managedobjectsource;
 
-import net.officefloor.compile.managedobject.ManagedObjectType;
-import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+
+import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link IWizardPage} providing the {@link PropertyList} for the
@@ -52,8 +52,7 @@ public class ManagedObjectSourcePropertiesWizardPage extends WizardPage {
 	 * @param managedObjectSourceInstance
 	 *            {@link ManagedObjectSourceInstance} instances.
 	 */
-	ManagedObjectSourcePropertiesWizardPage(
-			ManagedObjectSourceWizard managedObjectSourceWizard,
+	ManagedObjectSourcePropertiesWizardPage(ManagedObjectSourceWizard managedObjectSourceWizard,
 			ManagedObjectSourceInstance managedObjectSourceInstance) {
 		super("ManagedObjectSource properties");
 		this.managedObjectSourceWizard = managedObjectSourceWizard;

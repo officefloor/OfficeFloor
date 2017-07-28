@@ -21,7 +21,7 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
-import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.api.governance.Governance;
 
 /**
  * Instance of a {@link Governance}.
@@ -58,8 +58,7 @@ public class GovernanceInstance {
 	 * @param governanceSourceClassName
 	 *            {@link GovernanceSource} class name.
 	 */
-	public GovernanceInstance(String governanceName,
-			String governanceSourceClassName) {
+	public GovernanceInstance(String governanceName, String governanceSourceClassName) {
 		this.governanceName = governanceName;
 		this.governanceSourceClassName = governanceSourceClassName;
 		this.propertyList = OfficeFloorCompiler.newPropertyList();
@@ -78,8 +77,8 @@ public class GovernanceInstance {
 	 * @param governanceType
 	 *            {@link GovernanceType}.
 	 */
-	GovernanceInstance(String governanceName, String governanceSourceClassName,
-			PropertyList propertyList, GovernanceType<?, ?> governanceType) {
+	GovernanceInstance(String governanceName, String governanceSourceClassName, PropertyList propertyList,
+			GovernanceType<?, ?> governanceType) {
 		this.governanceName = governanceName;
 		this.governanceSourceClassName = governanceSourceClassName;
 		this.propertyList = propertyList;

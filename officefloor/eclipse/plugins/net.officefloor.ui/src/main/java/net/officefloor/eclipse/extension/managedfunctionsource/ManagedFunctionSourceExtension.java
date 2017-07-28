@@ -24,7 +24,6 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.eclipse.extension.ExtensionUtil;
-import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.eclipse.extension.open.ExtensionOpener;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.model.section.FunctionNamespaceModel;
@@ -35,7 +34,6 @@ import net.officefloor.model.section.FunctionNamespaceModel;
  * 
  * @author Daniel Sagenschneider
  * 
- * @see ExtensionClasspathProvider
  * @see ExtensionOpener
  */
 public interface ManagedFunctionSourceExtension<S extends ManagedFunctionSource> {

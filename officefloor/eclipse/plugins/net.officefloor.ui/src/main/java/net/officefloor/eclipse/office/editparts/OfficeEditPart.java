@@ -19,18 +19,17 @@ package net.officefloor.eclipse.office.editparts;
 
 import java.util.List;
 
+import org.eclipse.gef.EditPart;
+
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
 import net.officefloor.model.office.OfficeModel;
-
-import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link OfficeModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeEditPart extends
-		AbstractOfficeFloorDiagramEditPart<OfficeModel> {
+public class OfficeEditPart extends AbstractOfficeFloorDiagramEditPart<OfficeModel> {
 
 	@Override
 	protected void populateChildren(List<Object> childModels) {
@@ -40,7 +39,7 @@ public class OfficeEditPart extends
 		childModels.addAll(office.getOfficeManagedObjectSources());
 		childModels.addAll(office.getOfficeManagedObjects());
 		childModels.addAll(office.getOfficeTeams());
-		childModels.addAll(office.getOfficeAdministrators());
+		childModels.addAll(office.getAdministrations());
 		childModels.addAll(office.getOfficeEscalations());
 		childModels.addAll(office.getOfficeStarts());
 	}

@@ -24,13 +24,12 @@ import org.eclipse.gef.EditPart;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.office.models.PostTaskAdministrationJointPointModel;
+import net.officefloor.eclipse.office.models.PostFunctionAdministrationJointPointModel;
 import net.officefloor.eclipse.office.models.PreFunctionAdministrationJointPointModel;
 import net.officefloor.eclipse.skin.office.OfficeFunctionFigure;
 import net.officefloor.eclipse.skin.office.OfficeFunctionFigureContext;
 import net.officefloor.model.office.OfficeFunctionModel;
 import net.officefloor.model.office.OfficeFunctionModel.OfficeFunctionEvent;
-import net.officefloor.model.office.OfficeTaskModel.OfficeTaskEvent;
 
 /**
  * {@link EditPart} for the {@link OfficeFunctionModel}.
@@ -44,63 +43,59 @@ public class OfficeFunctionEditPart
 	/**
 	 * {@link PreFunctionAdministrationJointPointModel}.
 	 */
-	private PreFunctionAdministrationJointPointModel preTaskAdministrationJoinPoint;
+	private PreFunctionAdministrationJointPointModel preFunctionAdministrationJoinPoint;
 
 	/**
-	 * {@link PostTaskAdministrationJointPointModel}.
+	 * {@link PostFunctionAdministrationJointPointModel}.
 	 */
-	private PostTaskAdministrationJointPointModel postTaskAdministrationJoinPoint;
+	private PostFunctionAdministrationJointPointModel postFunctionAdministrationJoinPoint;
 
 	@Override
 	protected void init() {
-		// Create the task administration join points
-		this.preTaskAdministrationJoinPoint = new PreFunctionAdministrationJointPointModel(this.getCastedModel());
-		this.postTaskAdministrationJoinPoint = new PostTaskAdministrationJointPointModel(this.getCastedModel());
+		// Create the function administration join points
+		this.preFunctionAdministrationJoinPoint = new PreFunctionAdministrationJointPointModel(this.getCastedModel());
+		this.postFunctionAdministrationJoinPoint = new PostFunctionAdministrationJointPointModel(this.getCastedModel());
 	}
 
 	@Override
 	protected OfficeFunctionFigure createOfficeFloorFigure() {
-		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory().createOfficeTaskFigure(this);
+		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory().createOfficeFunctionFigure(this);
 	}
 
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
 		// Add task administration join points
-		childModels.add(this.preTaskAdministrationJoinPoint);
-		childModels.add(this.postTaskAdministrationJoinPoint);
+		childModels.add(this.preFunctionAdministrationJoinPoint);
+		childModels.add(this.postFunctionAdministrationJoinPoint);
 	}
 
 	@Override
-	protected Class<OfficeTaskEvent> getPropertyChangeEventType() {
-		return OfficeTaskEvent.class;
+	protected Class<OfficeFunctionEvent> getPropertyChangeEventType() {
+		return OfficeFunctionEvent.class;
 	}
 
 	@Override
-	protected void handlePropertyChange(OfficeTaskEvent property, PropertyChangeEvent evt) {
+	protected void handlePropertyChange(OfficeFunctionEvent property, PropertyChangeEvent evt) {
 		switch (property) {
-		case ADD_OFFICE_GOVERNANCE:
-		case REMOVE_OFFICE_GOVERNANCE:
-			// TODO add governance configuration
+
+		case CHANGE_OFFICE_FUNCTION_NAME:
+			this.getOfficeFloorFigure().setOfficeFunctionName(this.getOfficeFunctionName());
 			break;
 
-		case CHANGE_OFFICE_TASK_NAME:
-			this.getOfficeFloorFigure().setOfficeTaskName(this.getOfficeFunctionName());
+		case ADD_PRE_ADMINISTRATION:
+		case REMOVE_PRE_ADMINISTRATION:
+			this.preFunctionAdministrationJoinPoint.triggerDutyChangeEvent();
 			break;
 
-		case ADD_PRE_DUTY:
-		case REMOVE_PRE_DUTY:
-			this.preTaskAdministrationJoinPoint.triggerDutyChangeEvent();
-			break;
-
-		case ADD_POST_DUTY:
-		case REMOVE_POST_DUTY:
-			this.postTaskAdministrationJoinPoint.triggerDutyChangeEvent();
+		case ADD_POST_ADMINISTRATION:
+		case REMOVE_POST_ADMINISTRATION:
+			this.postFunctionAdministrationJoinPoint.triggerDutyChangeEvent();
 			break;
 		}
 	}
 
 	/*
-	 * =================== OfficeTaskFigureContext =========================
+	 * =================== OfficeFunctionFigureContext =========================
 	 */
 
 	@Override

@@ -67,7 +67,7 @@ public class ManagedFunctionObjectEditPart extends
 
 		case CHANGE_OBJECT_NAME:
 		case CHANGE_OBJECT_TYPE:
-			this.getOfficeFloorFigure().setWorkTaskObjectName(this);
+			this.getOfficeFloorFigure().setManagedFunctionObjectName(this);
 			break;
 
 		case CHANGE_EXTERNAL_MANAGED_OBJECT:

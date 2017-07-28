@@ -23,9 +23,6 @@ import org.eclipse.swt.widgets.Composite;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
-import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
-import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
 import net.officefloor.eclipse.extension.managedfunctionsource.FunctionDocumentationContext;
 import net.officefloor.eclipse.extension.managedfunctionsource.ManagedFunctionSourceExtension;
 import net.officefloor.eclipse.extension.managedfunctionsource.ManagedFunctionSourceExtensionContext;
@@ -41,8 +38,8 @@ import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassManagedFunctionSourceExtension implements ManagedFunctionSourceExtension<ClassManagedFunctionSource>,
-		ExtensionClasspathProvider, ExtensionOpener {
+public class ClassManagedFunctionSourceExtension
+		implements ManagedFunctionSourceExtension<ClassManagedFunctionSource>, ExtensionOpener {
 
 	/*
 	 * ================= ManagedFunctionSourceExtension =================
@@ -130,15 +127,6 @@ public class ClassManagedFunctionSourceExtension implements ManagedFunctionSourc
 			// Provide detailed method signature
 			return "Invokes method:\n\n\t" + methodSignature;
 		}
-	}
-
-	/*
-	 * ======================= ExtensionClasspathProvider ======================
-	 */
-
-	@Override
-	public ClasspathProvision[] getClasspathProvisions() {
-		return new ClasspathProvision[] { new TypeClasspathProvision(ClassManagedFunctionSource.class) };
 	}
 
 	/*

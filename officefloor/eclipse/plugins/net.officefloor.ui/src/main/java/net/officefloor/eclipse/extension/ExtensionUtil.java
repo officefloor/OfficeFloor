@@ -38,7 +38,6 @@ import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.classpath.ClasspathUtil;
 import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.extension.administrationsource.AdministrationSourceExtension;
-import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.eclipse.extension.governancesource.GovernanceSourceExtension;
 import net.officefloor.eclipse.extension.managedfunctionsource.ManagedFunctionSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
@@ -168,7 +167,7 @@ public class ExtensionUtil {
 	 * {@link SourceClassExtractor} for {@link AdministrationSourceExtension}.
 	 */
 	@SuppressWarnings("rawtypes")
-	private static final SourceClassExtractor<AdministrationSourceExtension> ADMINISTRATOR_SOURCE_CLASS_EXTRACTOR = (
+	private static final SourceClassExtractor<AdministrationSourceExtension> ADMINISTRATION_SOURCE_CLASS_EXTRACTOR = (
 			sourceExtension) -> sourceExtension.getAdministrationSourceClass();
 
 	/**
@@ -179,9 +178,9 @@ public class ExtensionUtil {
 	 *         respective {@link AdministrationSource} class name.
 	 */
 	@SuppressWarnings("rawtypes")
-	public static Map<String, AdministrationSourceExtension> createAdministratorSourceExtensionMap() {
+	public static Map<String, AdministrationSourceExtension> createAdministrationSourceExtensionMap() {
 		return createSourceExtensionMap(AdministrationSourceExtension.EXTENSION_ID, AdministrationSourceExtension.class,
-				ADMINISTRATOR_SOURCE_CLASS_EXTRACTOR);
+				ADMINISTRATION_SOURCE_CLASS_EXTRACTOR);
 	}
 
 	/**
@@ -190,8 +189,8 @@ public class ExtensionUtil {
 	 * @return Listing of {@link AdministrationSourceExtension} instances.
 	 */
 	@SuppressWarnings("rawtypes")
-	public static List<AdministrationSourceExtension> createAdministratorSourceExtensionList() {
-		return createSourceExtensionList(createAdministratorSourceExtensionMap());
+	public static List<AdministrationSourceExtension> createAdministrationSourceExtensionList() {
+		return createSourceExtensionList(createAdministrationSourceExtensionMap());
 	}
 
 	/**
@@ -285,33 +284,6 @@ public class ExtensionUtil {
 	}
 
 	/**
-	 * {@link SourceClassExtractor} for the {@link ExtensionClasspathProvider}.
-	 */
-	private static final SourceClassExtractor<ExtensionClasspathProvider> EXTENSION_CLASS_EXTRACTOR = (
-			sourceExtension) -> sourceExtension.getClass();
-
-	/**
-	 * Creates the map of {@link ExtensionClasspathProvider} instances by their
-	 * respective class name.
-	 * 
-	 * @return Map of {@link ExtensionClasspathProvider} instances by their
-	 *         respective class name.
-	 */
-	public static Map<String, ExtensionClasspathProvider> createExtensionClasspathProviderMap() {
-		return createSourceExtensionMap(ExtensionClasspathProvider.EXTENSION_ID, ExtensionClasspathProvider.class,
-				EXTENSION_CLASS_EXTRACTOR);
-	}
-
-	/**
-	 * Creates the listing of {@link ExtensionClasspathProvider} instances.
-	 * 
-	 * @return Listing of {@link ExtensionClasspathProvider} instances.
-	 */
-	public static List<ExtensionClasspathProvider> createExtensionClasspathProviderList() {
-		return createSourceExtensionList(createExtensionClasspathProviderMap());
-	}
-
-	/**
 	 * Opens the {@link ManagedFunctionSource}.
 	 * 
 	 * @param managedFunctionSourceClassName
@@ -388,7 +360,7 @@ public class ExtensionUtil {
 	public static void openAdministrationSource(String administrationSourceClassName, PropertyList properties,
 			AbstractOfficeFloorEditor<?, ?> editor) {
 		openSource(AdministrationSourceExtension.EXTENSION_ID, AdministrationSourceExtension.class,
-				ADMINISTRATOR_SOURCE_CLASS_EXTRACTOR, administrationSourceClassName, null, properties, editor);
+				ADMINISTRATION_SOURCE_CLASS_EXTRACTOR, administrationSourceClassName, null, properties, editor);
 	}
 
 	/**
@@ -497,81 +469,6 @@ public class ExtensionUtil {
 		// No extension or source location, so open the source class directly
 		String resourcePath = sourceClassName.replace('.', '/') + ".class";
 		ClasspathUtil.openClasspathResource(resourcePath, editor);
-	}
-
-	/**
-	 * Obtains the map of {@link ExtensionClasspathProvider} instances by the
-	 * extension class name.
-	 * 
-	 * @return Map of {@link ExtensionClasspathProvider} instances by the
-	 *         extension class name.
-	 */
-	public static Map<String, ExtensionClasspathProvider> createClasspathProvidersByExtensionClassNames() {
-
-		// Create the listing of extension class path providers
-		Map<String, ExtensionClasspathProvider> providers = new HashMap<String, ExtensionClasspathProvider>();
-
-		// Load the managed function source extensions
-		loadExtensionClasspathProviders(createManagedFunctionSourceExtensionMap(),
-				MANAGED_FUNCTION_SOURCE_CLASS_EXTRACTOR, providers);
-
-		// Load the managed object source extensions
-		loadExtensionClasspathProviders(createManagedObjectSourceExtensionMap(), MANAGED_OBJECT_SOURCE_CLASS_EXTRACTOR,
-				providers);
-
-		// Load the governance source extensions
-		loadExtensionClasspathProviders(createGovernanceSourceExtensionMap(), GOVERNANCE_SOURCE_CLASS_EXTRACTOR,
-				providers);
-
-		// Load the administrator source extensions
-		loadExtensionClasspathProviders(createAdministratorSourceExtensionMap(), ADMINISTRATOR_SOURCE_CLASS_EXTRACTOR,
-				providers);
-
-		// Load the team source extensions
-		loadExtensionClasspathProviders(createTeamSourceExtensionMap(), TEAM_SOURCE_CLASS_EXTRACTOR, providers);
-
-		// Load the section source extensions
-		loadExtensionClasspathProviders(createSectionSourceExtensionMap(), SECTION_SOURCE_CLASS_EXTRACTOR, providers);
-
-		// Load the office source extensions
-		loadExtensionClasspathProviders(createOfficeSourceExtensionMap(), OFFICE_SOURCE_CLASS_EXTRACTOR, providers);
-
-		// Load the non-source extension class path providers
-		loadExtensionClasspathProviders(createExtensionClasspathProviderMap(), EXTENSION_CLASS_EXTRACTOR, providers);
-
-		// Return the mapping of extension class name to class path provider
-		return providers;
-	}
-
-	/**
-	 * Loads the source {@link Class} extensions that are
-	 * {@link ExtensionClasspathProvider} instances.
-	 * 
-	 * @param sourceExtensionMap
-	 *            Source {@link Class} extensions.
-	 * @param extractor
-	 *            {@link SourceClassExtractor}.
-	 * @param providers
-	 *            Map of {@link ExtensionClasspathProvider} instances by the
-	 *            source {@link Class} name.
-	 */
-	private static <E> void loadExtensionClasspathProviders(Map<String, E> sourceExtensionMap,
-			SourceClassExtractor<E> extractor, Map<String, ExtensionClasspathProvider> providers) {
-		for (E sourceExtension : sourceExtensionMap.values()) {
-			if (sourceExtension instanceof ExtensionClasspathProvider) {
-
-				// Obtain the source class
-				Class<?> sourceClass = extractor.getSourceClass(sourceExtension);
-				if (sourceClass == null) {
-					continue; // ignore as must provide source class
-				}
-
-				// Load the extension class path provider
-				String sourceClassName = sourceClass.getName();
-				ExtensionClasspathProvider provider = (ExtensionClasspathProvider) sourceExtension;
-				providers.put(sourceClassName, provider);
-			}
-		}
 	}
 
 	/**

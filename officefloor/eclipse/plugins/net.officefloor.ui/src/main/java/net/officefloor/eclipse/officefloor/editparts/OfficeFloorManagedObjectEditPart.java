@@ -20,6 +20,9 @@ package net.officefloor.eclipse.officefloor.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.gef.EditPart;
+
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
@@ -34,20 +37,16 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel.OfficeFloorManagedObjectEvent;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
-import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel.OfficeFloorManagedObjectEvent;
-
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link OfficeFloorManagedObjectModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorManagedObjectEditPart
-		extends
+public class OfficeFloorManagedObjectEditPart extends
 		AbstractOfficeFloorEditPart<OfficeFloorManagedObjectModel, OfficeFloorManagedObjectEvent, OfficeFloorManagedObjectFigure>
 		implements OfficeFloorManagedObjectFigureContext {
 
@@ -57,27 +56,23 @@ public class OfficeFloorManagedObjectEditPart
 
 	@Override
 	protected OfficeFloorManagedObjectFigure createOfficeFloorFigure() {
-		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
-				.createOfficeFloorManagedObjectFigure(this);
+		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory().createOfficeFloorManagedObjectFigure(this);
 	}
 
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
-		childModels.addAll(this.getCastedModel()
-				.getOfficeFloorManagedObjectDependencies());
+		childModels.addAll(this.getCastedModel().getOfficeFloorManagedObjectDependencies());
 	}
 
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		EclipseUtil.addToList(models, this.getCastedModel()
-				.getOfficeFloorManagedObjectSource());
+		EclipseUtil.addToList(models, this.getCastedModel().getOfficeFloorManagedObjectSource());
 	}
 
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getDeployedOfficeObjects());
-		models.addAll(this.getCastedModel()
-				.getDependentOfficeFloorManagedObjects());
+		models.addAll(this.getCastedModel().getDependentOfficeFloorManagedObjects());
 	}
 
 	@Override
@@ -86,20 +81,17 @@ public class OfficeFloorManagedObjectEditPart
 		policy.allowDirectEdit(new DirectEditAdapter<OfficeFloorChanges, OfficeFloorManagedObjectModel>() {
 			@Override
 			public String getInitialValue() {
-				return OfficeFloorManagedObjectEditPart.this.getCastedModel()
-						.getOfficeFloorManagedObjectName();
+				return OfficeFloorManagedObjectEditPart.this.getCastedModel().getOfficeFloorManagedObjectName();
 			}
 
 			@Override
 			public IFigure getLocationFigure() {
-				return OfficeFloorManagedObjectEditPart.this
-						.getOfficeFloorFigure()
+				return OfficeFloorManagedObjectEditPart.this.getOfficeFloorFigure()
 						.getOfficeFloorManagedObjectNameFigure();
 			}
 
 			@Override
-			public Change<OfficeFloorManagedObjectModel> createChange(
-					OfficeFloorChanges changes,
+			public Change<OfficeFloorManagedObjectModel> createChange(OfficeFloorChanges changes,
 					OfficeFloorManagedObjectModel target, String newValue) {
 				return changes.renameOfficeFloorManagedObject(target, newValue);
 			}
@@ -107,37 +99,30 @@ public class OfficeFloorManagedObjectEditPart
 	}
 
 	@Override
-	protected void populateOfficeFloorOpenEditPolicy(
-			OfficeFloorOpenEditPolicy<OfficeFloorManagedObjectModel> policy) {
+	protected void populateOfficeFloorOpenEditPolicy(OfficeFloorOpenEditPolicy<OfficeFloorManagedObjectModel> policy) {
 		policy.allowOpening(new OpenHandler<OfficeFloorManagedObjectModel>() {
 			@Override
-			public void doOpen(
-					OpenHandlerContext<OfficeFloorManagedObjectModel> context) {
+			public void doOpen(OpenHandlerContext<OfficeFloorManagedObjectModel> context) {
 
 				// Obtain the managed object source for the managed object
 				OfficeFloorManagedObjectSourceModel managedObjectSource = null;
-				OfficeFloorManagedObjectModel managedObject = context
-						.getModel();
+				OfficeFloorManagedObjectModel managedObject = context.getModel();
 				if (managedObject != null) {
 					OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel conn = managedObject
 							.getOfficeFloorManagedObjectSource();
 					if (conn != null) {
-						managedObjectSource = conn
-								.getOfficeFloorManagedObjectSource();
+						managedObjectSource = conn.getOfficeFloorManagedObjectSource();
 					}
 				}
 				if (managedObjectSource == null) {
 					// Must have connected managed object source
-					context.getEditPart()
-							.messageError(
-									"Can not open managed object.\n"
-											+ "\nPlease ensure the managed object is connected to a managed object source.");
+					context.getEditPart().messageError("Can not open managed object.\n"
+							+ "\nPlease ensure the managed object is connected to a managed object source.");
 					return; // can not open
 				}
 
 				// Open the managed object source for the managed object
-				OfficeFloorManagedObjectSourceEditPart.openManagedObjectSource(
-						managedObjectSource, context);
+				OfficeFloorManagedObjectSourceEditPart.openManagedObjectSource(managedObjectSource, context);
 			}
 		});
 	}
@@ -148,17 +133,15 @@ public class OfficeFloorManagedObjectEditPart
 	}
 
 	@Override
-	protected void handlePropertyChange(OfficeFloorManagedObjectEvent property,
-			PropertyChangeEvent evt) {
+	protected void handlePropertyChange(OfficeFloorManagedObjectEvent property, PropertyChangeEvent evt) {
 		switch (property) {
 		case CHANGE_OFFICE_FLOOR_MANAGED_OBJECT_NAME:
-			this.getOfficeFloorFigure().setOfficeFloorManagedObjectName(
-					this.getCastedModel().getOfficeFloorManagedObjectName());
+			this.getOfficeFloorFigure()
+					.setOfficeFloorManagedObjectName(this.getCastedModel().getOfficeFloorManagedObjectName());
 			break;
 
 		case CHANGE_MANAGED_OBJECT_SCOPE:
-			this.getOfficeFloorFigure().setManagedObjectScope(
-					this.getManagedObjectScope());
+			this.getOfficeFloorFigure().setManagedObjectScope(this.getManagedObjectScope());
 			break;
 
 		case ADD_OFFICE_FLOOR_MANAGED_OBJECT_DEPENDENCY:
@@ -196,12 +179,10 @@ public class OfficeFloorManagedObjectEditPart
 		String scopeName = this.getCastedModel().getManagedObjectScope();
 		if (OfficeFloorChanges.PROCESS_MANAGED_OBJECT_SCOPE.equals(scopeName)) {
 			return ManagedObjectScope.PROCESS;
-		} else if (OfficeFloorChanges.THREAD_MANAGED_OBJECT_SCOPE
-				.equals(scopeName)) {
+		} else if (OfficeFloorChanges.THREAD_MANAGED_OBJECT_SCOPE.equals(scopeName)) {
 			return ManagedObjectScope.THREAD;
-		} else if (OfficeFloorChanges.WORK_MANAGED_OBJECT_SCOPE
-				.equals(scopeName)) {
-			return ManagedObjectScope.WORK;
+		} else if (OfficeFloorChanges.FUNCTION_MANAGED_OBJECT_SCOPE.equals(scopeName)) {
+			return ManagedObjectScope.FUNCTION;
 		} else {
 			// Unknown scope
 			return null;

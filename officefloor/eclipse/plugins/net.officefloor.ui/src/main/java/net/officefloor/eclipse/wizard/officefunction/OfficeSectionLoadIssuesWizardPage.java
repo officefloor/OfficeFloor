@@ -56,8 +56,7 @@ public class OfficeSectionLoadIssuesWizardPage extends WizardPage {
 		this.issues = issues;
 
 		// Specify page details
-		this.setTitle("Issues in loading "
-				+ OfficeSection.class.getSimpleName());
+		this.setTitle("Issues in loading " + OfficeSection.class.getSimpleName());
 	}
 
 	/*

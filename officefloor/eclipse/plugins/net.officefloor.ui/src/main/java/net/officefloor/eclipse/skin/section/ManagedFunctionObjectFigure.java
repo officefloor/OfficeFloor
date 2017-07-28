@@ -18,7 +18,7 @@
 package net.officefloor.eclipse.skin.section;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.desk.WorkTaskObjectModel;
+import net.officefloor.model.section.ManagedFunctionObjectModel;
 
 /**
  * {@link OfficeFloorFigure} for the {@link ManagedFunctionObjectFigure}.
@@ -28,13 +28,13 @@ import net.officefloor.model.desk.WorkTaskObjectModel;
 public interface ManagedFunctionObjectFigure extends OfficeFloorFigure {
 
 	/**
-	 * Specifies the {@link WorkTaskObjectModel} name to display.
+	 * Specifies the {@link ManagedFunctionObjectModel} name to display.
 	 * 
 	 * @param context
-	 *            {@link ManagedFunctionObjectFigureContext} to determine name to
-	 *            display.
+	 *            {@link ManagedFunctionObjectFigureContext} to determine name
+	 *            to display.
 	 */
-	void setWorkTaskObjectName(ManagedFunctionObjectFigureContext context);
+	void setManagedFunctionObjectName(ManagedFunctionObjectFigureContext context);
 
 	/**
 	 * Flags to display whether a parameter.

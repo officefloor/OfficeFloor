@@ -17,11 +17,10 @@
  */
 package net.officefloor.eclipse.extension.managedobjectsource.clazz;
 
+import org.eclipse.swt.widgets.Composite;
+
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
-import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
-import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
 import net.officefloor.eclipse.extension.open.ExtensionOpener;
@@ -31,16 +30,13 @@ import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
-import org.eclipse.swt.widgets.Composite;
-
 /**
  * {@link ManagedObjectSourceExtension} for {@link ClassManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
 public class ClassManagedObjectSourceExtension
-		implements ManagedObjectSourceExtension<Indexed, Indexed, ClassManagedObjectSource>, ExtensionClasspathProvider,
-		ExtensionOpener {
+		implements ManagedObjectSourceExtension<Indexed, Indexed, ClassManagedObjectSource>, ExtensionOpener {
 
 	/*
 	 * ================ ManagedObjectSourceExtension =========================
@@ -87,15 +83,6 @@ public class ClassManagedObjectSourceExtension
 
 		// Return the simple class name
 		return simpleClassName;
-	}
-
-	/*
-	 * ======================= ExtensionClasspathProvider ======================
-	 */
-
-	@Override
-	public ClasspathProvision[] getClasspathProvisions() {
-		return new ClasspathProvision[] { new TypeClasspathProvision(ClassManagedObjectSource.class) };
 	}
 
 	/*

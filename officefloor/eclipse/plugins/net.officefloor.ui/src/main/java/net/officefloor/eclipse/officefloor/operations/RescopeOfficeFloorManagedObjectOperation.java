@@ -30,8 +30,8 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
  *
  * @author Daniel Sagenschneider
  */
-public class RescopeOfficeFloorManagedObjectOperation extends
-		AbstractOfficeFloorChangeOperation<OfficeFloorManagedObjectEditPart> {
+public class RescopeOfficeFloorManagedObjectOperation
+		extends AbstractOfficeFloorChangeOperation<OfficeFloorManagedObjectEditPart> {
 
 	/**
 	 * Initialise.
@@ -39,10 +39,8 @@ public class RescopeOfficeFloorManagedObjectOperation extends
 	 * @param officeFloorChanges
 	 *            {@link OfficeFloorChanges}.
 	 */
-	public RescopeOfficeFloorManagedObjectOperation(
-			OfficeFloorChanges officeFloorChanges) {
-		super("Rescope Managed Object", OfficeFloorManagedObjectEditPart.class,
-				officeFloorChanges);
+	public RescopeOfficeFloorManagedObjectOperation(OfficeFloorChanges officeFloorChanges) {
+		super("Rescope Managed Object", OfficeFloorManagedObjectEditPart.class, officeFloorChanges);
 	}
 
 	/*
@@ -59,15 +57,12 @@ public class RescopeOfficeFloorManagedObjectOperation extends
 		// Obtain the current scope for the managed object
 		ManagedObjectScope currentScope;
 		String currentScopeText = managedObject.getManagedObjectScope();
-		if (OfficeFloorChanges.PROCESS_MANAGED_OBJECT_SCOPE
-				.equals(currentScopeText)) {
+		if (OfficeFloorChanges.PROCESS_MANAGED_OBJECT_SCOPE.equals(currentScopeText)) {
 			currentScope = ManagedObjectScope.PROCESS;
-		} else if (OfficeFloorChanges.THREAD_MANAGED_OBJECT_SCOPE
-				.equals(currentScopeText)) {
+		} else if (OfficeFloorChanges.THREAD_MANAGED_OBJECT_SCOPE.equals(currentScopeText)) {
 			currentScope = ManagedObjectScope.THREAD;
-		} else if (OfficeFloorChanges.WORK_MANAGED_OBJECT_SCOPE
-				.equals(currentScopeText)) {
-			currentScope = ManagedObjectScope.WORK;
+		} else if (OfficeFloorChanges.FUNCTION_MANAGED_OBJECT_SCOPE.equals(currentScopeText)) {
+			currentScope = ManagedObjectScope.FUNCTION;
 		} else {
 			// Can not determine, so default to process
 			currentScope = ManagedObjectScope.PROCESS;
@@ -75,8 +70,7 @@ public class RescopeOfficeFloorManagedObjectOperation extends
 
 		// Obtain the managed object scope
 		ScopeBean bean = new ScopeBean(currentScope);
-		BeanDialog dialog = context.getEditPart().createBeanDialog(bean, "X",
-				"Y");
+		BeanDialog dialog = context.getEditPart().createBeanDialog(bean, "X", "Y");
 		dialog.registerPropertyInput("Scope", new ManagedObjectScopeInput());
 		if (!dialog.populate()) {
 			// Cancel, so no change

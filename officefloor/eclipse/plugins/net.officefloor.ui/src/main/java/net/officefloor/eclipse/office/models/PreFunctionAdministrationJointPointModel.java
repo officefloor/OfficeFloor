@@ -17,7 +17,7 @@
  */
 package net.officefloor.eclipse.office.models;
 
-import net.officefloor.model.office.OfficeTaskModel;
+import net.officefloor.model.office.OfficeFunctionModel;
 
 /**
  * Pre {@link AbstractFunctionAdministrationJoinPointModel}.
@@ -29,11 +29,11 @@ public class PreFunctionAdministrationJointPointModel extends AbstractFunctionAd
 	/**
 	 * Initiate.
 	 * 
-	 * @param task
-	 *            {@link OfficeTaskModel}.
+	 * @param function
+	 *            {@link OfficeFunctionModel}.
 	 */
-	public PreFunctionAdministrationJointPointModel(OfficeTaskModel task) {
-		super(task, true);
+	public PreFunctionAdministrationJointPointModel(OfficeFunctionModel function) {
+		super(function, true);
 	}
 
 }

@@ -17,14 +17,14 @@
  */
 package net.officefloor.eclipse.skin.standard.figure;
 
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-
 import org.eclipse.draw2d.Ellipse;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FlowLayout;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.swt.graphics.Color;
+
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * {@link ManagedObject} {@link Figure}.

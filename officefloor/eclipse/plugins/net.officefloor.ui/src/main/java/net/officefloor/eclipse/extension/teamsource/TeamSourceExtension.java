@@ -23,15 +23,12 @@ import org.eclipse.swt.widgets.Control;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.ExtensionUtil;
-import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.frame.api.team.source.TeamSource;
 
 /**
  * Interface for extension to provide enriched {@link TeamSource} usage.
  * 
  * @author Daniel Sagenschneider
- * 
- * @see ExtensionClasspathProvider
  */
 public interface TeamSourceExtension<S extends TeamSource> {
 

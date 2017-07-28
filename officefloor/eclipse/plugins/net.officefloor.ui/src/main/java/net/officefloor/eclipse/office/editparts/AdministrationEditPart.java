@@ -52,7 +52,7 @@ public class AdministrationEditPart
 
 	@Override
 	protected AdministrationFigure createOfficeFloorFigure() {
-		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory().createAdministratorFigure(this);
+		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory().createAdministrationFigure(this);
 	}
 
 	@Override

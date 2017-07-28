@@ -18,20 +18,19 @@
 package net.officefloor.eclipse.office.operations;
 
 import net.officefloor.eclipse.office.editparts.OfficeEditPart;
-import net.officefloor.eclipse.wizard.administrationsource.AdministratorInstance;
-import net.officefloor.eclipse.wizard.administrationsource.AdministratorSourceWizard;
+import net.officefloor.eclipse.wizard.administrationsource.AdministrationInstance;
+import net.officefloor.eclipse.wizard.administrationsource.AdministrationSourceWizard;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.office.AdministratorModel;
+import net.officefloor.model.office.AdministrationModel;
 import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeModel;
 
 /**
- * Adds an {@link AdministratorModel} to the {@link OfficeModel}.
+ * Adds an {@link AdministrationModel} to the {@link OfficeModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class AddAdministratorOperation extends
-		AbstractOfficeChangeOperation<OfficeEditPart> {
+public class AddAdministratorOperation extends AbstractOfficeChangeOperation<OfficeEditPart> {
 
 	/**
 	 * Initiate.
@@ -40,7 +39,7 @@ public class AddAdministratorOperation extends
 	 *            {@link OfficeChanges}.
 	 */
 	public AddAdministratorOperation(OfficeChanges officeChanges) {
-		super("Add administrator", OfficeEditPart.class, officeChanges);
+		super("Add administration", OfficeEditPart.class, officeChanges);
 	}
 
 	/*
@@ -50,25 +49,22 @@ public class AddAdministratorOperation extends
 	@Override
 	protected Change<?> getChange(OfficeChanges changes, Context context) {
 
-		// Obtain the administrator instance
-		AdministratorInstance administrator = AdministratorSourceWizard
-				.getAdministratorInstance(context.getEditPart(), null);
-		if (administrator == null) {
-			return null; // must have administrator
+		// Obtain the administration instance
+		AdministrationInstance administration = AdministrationSourceWizard
+				.getAdministrationInstance(context.getEditPart(), null);
+		if (administration == null) {
+			return null; // must have administration
 		}
 
-		// Create change to add administrator
-		Change<AdministratorModel> change = changes.addAdministrator(
-				administrator.getAdministratorName(),
-				administrator.getAdministratorSourceClassName(),
-				administrator.getPropertylist(),
-				administrator.getAdministratorScope(),
-				administrator.getAdministratorType());
+		// Create change to add administration
+		Change<AdministrationModel> change = changes.addAdministration(administration.getAdministrationName(),
+				administration.getAdministratorSourceClassName(), administration.getPropertylist(),
+				administration.getAdministrationType());
 
-		// Position the administrator
+		// Position the administration
 		context.positionModel(change.getTarget());
 
-		// Return the change to add the administrator
+		// Return the change to add the administration
 		return change;
 	}
 

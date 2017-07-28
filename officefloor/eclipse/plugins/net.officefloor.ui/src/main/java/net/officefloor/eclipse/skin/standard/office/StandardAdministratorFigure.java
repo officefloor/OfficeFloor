@@ -17,19 +17,6 @@
  */
 package net.officefloor.eclipse.skin.standard.office;
 
-import net.officefloor.eclipse.skin.office.AdministrationFigure;
-import net.officefloor.eclipse.skin.office.AdministrationFigureContext;
-import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
-import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
-import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
-import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
-import net.officefloor.eclipse.skin.standard.figure.RoundedContainerFigure;
-import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.office.AdministratorModel;
-import net.officefloor.model.office.AdministratorToOfficeTeamModel;
-import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
-import net.officefloor.model.office.OfficeManagedObjectToAdministratorModel;
-
 import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.GridData;
@@ -38,16 +25,30 @@ import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.swt.SWT;
 
+import net.officefloor.eclipse.skin.office.AdministrationFigure;
+import net.officefloor.eclipse.skin.office.AdministrationFigureContext;
+import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
+import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
+import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
+import net.officefloor.eclipse.skin.standard.figure.RoundedContainerFigure;
+import net.officefloor.model.office.AdministrationModel;
+import net.officefloor.model.office.AdministrationToOfficeTeamModel;
+import net.officefloor.model.office.ExternalManagedObjectToAdministrationModel;
+import net.officefloor.model.office.OfficeFunctionToPostAdministrationModel;
+import net.officefloor.model.office.OfficeFunctionToPreAdministrationModel;
+import net.officefloor.model.office.OfficeManagedObjectToAdministrationModel;
+
 /**
  * Standard {@link AdministrationFigure}.
  *
  * @author Daniel Sagenschneider
  */
-public class StandardAdministratorFigure extends AbstractOfficeFloorFigure
-		implements AdministrationFigure {
+public class StandardAdministratorFigure extends AbstractOfficeFloorFigure implements AdministrationFigure {
 
 	/**
-	 * {@link Label} containing the {@link AdministratorModel} name.
+	 * {@link Label} containing the {@link AdministrationModel} name.
 	 */
 	private final Label administratorName;
 
@@ -64,39 +65,35 @@ public class StandardAdministratorFigure extends AbstractOfficeFloorFigure
 		NoSpacingGridLayout layout = new NoSpacingGridLayout(3);
 		figure.setLayoutManager(layout);
 
-		// Managed Object connector
-		ConnectorFigure mo = new ConnectorFigure(ConnectorDirection.WEST,
-				StandardOfficeFloorColours.BLACK());
-		mo.setBorder(new MarginBorder(10, 0, 0, 0));
-		figure.add(mo);
-		layout.setConstraint(mo, new GridData(0, SWT.BEGINNING, false, false));
+		// Managed Object / Function connector
+		ConnectorFigure moOrFunction = new ConnectorFigure(ConnectorDirection.WEST, StandardOfficeFloorColours.BLACK());
+		moOrFunction.setBorder(new MarginBorder(10, 0, 0, 0));
+		figure.add(moOrFunction);
+		layout.setConstraint(moOrFunction, new GridData(0, SWT.BEGINNING, false, false));
 
 		// Register the anchor to external and office managed objects
-		ConnectionAnchor moAnchor = mo.getConnectionAnchor();
-		this.registerConnectionAnchor(
-				ExternalManagedObjectToAdministratorModel.class, moAnchor);
-		this.registerConnectionAnchor(
-				OfficeManagedObjectToAdministratorModel.class, moAnchor);
+		ConnectionAnchor moOrFunctionAnchor = moOrFunction.getConnectionAnchor();
+		this.registerConnectionAnchor(ExternalManagedObjectToAdministrationModel.class, moOrFunctionAnchor);
+		this.registerConnectionAnchor(OfficeManagedObjectToAdministrationModel.class, moOrFunctionAnchor);
 
-		// Create the administrator container
-		RoundedContainerFigure administrator = new RoundedContainerFigure(
-				context.getAdministrationName(), StandardOfficeFloorColours
-						.ADMINISTRATOR(), 20, false);
+		// Register anchor to office functions
+		this.registerConnectionAnchor(OfficeFunctionToPreAdministrationModel.class, moOrFunctionAnchor);
+		this.registerConnectionAnchor(OfficeFunctionToPostAdministrationModel.class, moOrFunctionAnchor);
+
+		// Create the administration container
+		RoundedContainerFigure administrator = new RoundedContainerFigure(context.getAdministrationName(),
+				StandardOfficeFloorColours.ADMINISTRATOR(), 20, false);
 		figure.add(administrator);
 		this.administratorName = administrator.getContainerName();
 
 		// Team connector
-		ConnectorFigure team = new ConnectorFigure(ConnectorDirection.EAST,
-				StandardOfficeFloorColours.BLACK());
+		ConnectorFigure team = new ConnectorFigure(ConnectorDirection.EAST, StandardOfficeFloorColours.BLACK());
 		team.setBorder(new MarginBorder(10, 0, 0, 0));
 		figure.add(team);
-		layout
-				.setConstraint(team, new GridData(0, SWT.BEGINNING, false,
-						false));
+		layout.setConstraint(team, new GridData(0, SWT.BEGINNING, false, false));
 
 		// Register the anchor to team
-		this.registerConnectionAnchor(AdministratorToOfficeTeamModel.class,
-				team.getConnectionAnchor());
+		this.registerConnectionAnchor(AdministrationToOfficeTeamModel.class, team.getConnectionAnchor());
 
 		// Specify the figures
 		this.setFigure(figure);
@@ -104,7 +101,7 @@ public class StandardAdministratorFigure extends AbstractOfficeFloorFigure
 	}
 
 	/*
-	 * ===================== AdministratorFigure =========================
+	 * ===================== AdministrationFigure =========================
 	 */
 
 	@Override
