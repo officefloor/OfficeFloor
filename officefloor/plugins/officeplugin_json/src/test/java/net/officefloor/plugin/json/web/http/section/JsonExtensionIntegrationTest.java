@@ -30,9 +30,9 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.json.HttpJson;
 import net.officefloor.plugin.json.JsonResponseWriter;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.web.http.application.HttpTemplateSection;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
+import net.officefloor.server.http.HttpTestUtil;
 
 /**
  * Validates the extension of {@link HttpTemplateSection} via JSON.

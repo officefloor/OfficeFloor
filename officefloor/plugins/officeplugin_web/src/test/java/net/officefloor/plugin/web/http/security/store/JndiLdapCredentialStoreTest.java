@@ -29,10 +29,10 @@ import javax.naming.directory.DirContext;
 import javax.naming.directory.SearchResult;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.plugin.web.http.security.store.CredentialEntry;
 import net.officefloor.plugin.web.http.security.store.CredentialStore;
 import net.officefloor.plugin.web.http.security.store.JndiLdapCredentialStore;
+import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
 
 import org.apache.commons.codec.binary.Base64;
 

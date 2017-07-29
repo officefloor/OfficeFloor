@@ -30,11 +30,11 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.parameters.HttpParametersException;
 import net.officefloor.plugin.web.http.parameters.HttpParametersLoader;
 import net.officefloor.plugin.web.http.parameters.HttpParametersLoaderImpl;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * {@link ManagedFunctionSource} to load the {@link HttpRequest} parameters onto

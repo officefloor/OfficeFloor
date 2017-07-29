@@ -23,9 +23,9 @@ import java.util.LinkedList;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource.Dependencies;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.protocol.HttpStatus;
 
 /**
  * {@link HttpApplicationLocation} {@link ManagedObject}.

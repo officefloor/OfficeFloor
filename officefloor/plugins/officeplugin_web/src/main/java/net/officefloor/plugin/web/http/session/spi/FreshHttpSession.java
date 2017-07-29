@@ -17,8 +17,8 @@
  */
 package net.officefloor.plugin.web.http.session.spi;
 
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Newly created {@link HttpSession} requiring a session Id.

@@ -27,7 +27,7 @@ import org.eclipse.jetty.webapp.WebAppContext;
 
 import junit.framework.TestCase;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+import net.officefloor.server.http.HttpTestUtil;
 
 /**
  * Ensure that {@link OfficeFloor} can be integrated into a Servlet.

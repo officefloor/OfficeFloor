@@ -19,8 +19,8 @@ package net.officefloor.plugin.web.http.security.scheme;
 
 import java.nio.charset.Charset;
 
-import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.plugin.web.http.security.HttpCredentials;
+import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
 
 /**
  * {@link HttpCredentials} implementation.

@@ -21,14 +21,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpHeader;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.web.http.security.HttpChallengeContext;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.protocol.HttpStatus;
 
 /**
  * Mock {@link HttpChallengeContext} for testing {@link HttpSecuritySource}

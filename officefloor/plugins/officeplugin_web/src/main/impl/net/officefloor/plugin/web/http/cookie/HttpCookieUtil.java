@@ -20,9 +20,9 @@ package net.officefloor.plugin.web.http.cookie;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.plugin.socket.server.http.HttpHeader;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpResponse;
 
 /**
  * Utility methods for working with {@link HttpCookie} instances from the

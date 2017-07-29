@@ -30,7 +30,7 @@ import org.hsqldb.jdbc.jdbcDataSource;
 
 import junit.framework.TestCase;
 import net.officefloor.OfficeFloorMain;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+import net.officefloor.server.http.HttpTestUtil;
 
 /**
  * Tests the {@link TeamHttpServer}.

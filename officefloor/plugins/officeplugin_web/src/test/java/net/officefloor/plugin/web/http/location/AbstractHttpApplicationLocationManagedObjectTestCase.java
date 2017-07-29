@@ -19,10 +19,10 @@ package net.officefloor.plugin.web.http.location;
 
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource.Dependencies;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.protocol.HttpStatus;
 
 /**
  * Provides listing of common tests for the various states of the

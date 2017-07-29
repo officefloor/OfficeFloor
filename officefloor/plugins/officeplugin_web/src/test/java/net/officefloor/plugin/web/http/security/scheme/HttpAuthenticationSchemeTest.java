@@ -21,9 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpHeader;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
+import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
 
 /**
  * Tests the {@link HttpAuthenticationScheme}.

@@ -44,9 +44,6 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.NextFunction;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 import net.officefloor.plugin.web.http.route.HttpRouteFunction;
@@ -56,6 +53,9 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExten
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtensionContext;
 import net.officefloor.plugin.web.http.test.CompileWebExtension;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
+import net.officefloor.server.http.HttpTestUtil;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.impl.AbstractServerSocketManagedObjectSource;
 
 /**
  * Tests the {@link WebArchitectEmployer}.

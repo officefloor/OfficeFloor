@@ -35,8 +35,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.managedfunction.ManagedFunctionSectionSource;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.application.HttpRequestStateManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpUriLink;
@@ -46,6 +44,8 @@ import net.officefloor.plugin.web.http.route.HttpRouteFunction;
 import net.officefloor.plugin.web.http.route.HttpRouteManagedFunctionSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
+import net.officefloor.server.http.HttpTestUtil;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Tests the {@link HttpUrlContinuationSectionSource}.

@@ -32,10 +32,10 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.json.JsonResponseWriter;
 import net.officefloor.plugin.json.write.JsonResponseWriterManagedObjectSource.Dependencies;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
+import net.officefloor.server.http.HttpTestUtil;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.impl.AbstractServerSocketManagedObjectSource;
 
 /**
  * Tests the {@link JsonResponseWriterManagedObjectSource}.

@@ -33,8 +33,6 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceC
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationManagedFunctionSource;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.template.parse.BeanHttpTemplateSectionContent;
@@ -44,6 +42,8 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSectionContent;
 import net.officefloor.plugin.web.http.template.parse.LinkHttpTemplateSectionContent;
 import net.officefloor.plugin.web.http.template.parse.PropertyHttpTemplateSectionContent;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.impl.AbstractServerSocketManagedObjectSource;
 
 /**
  * {@link ManagedFunctionSource} for the HTTP template.

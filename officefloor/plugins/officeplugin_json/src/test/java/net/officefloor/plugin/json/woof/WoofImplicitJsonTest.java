@@ -26,10 +26,10 @@ import net.officefloor.frame.test.LoggerAssertion;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.json.HttpJson;
 import net.officefloor.plugin.json.JsonResponseWriter;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.woof.WoofLoader;
 import net.officefloor.plugin.woof.WoofLoaderImpl;
+import net.officefloor.server.http.HttpTestUtil;
+import net.officefloor.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.woof.WoofLoaderExtensionService;
 
 import org.apache.http.HttpResponse;

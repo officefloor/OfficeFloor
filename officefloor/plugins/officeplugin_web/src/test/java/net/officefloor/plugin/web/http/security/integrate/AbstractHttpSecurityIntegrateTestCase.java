@@ -31,10 +31,6 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.Parameter;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.web.http.application.HttpSecuritySection;
 import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.security.HttpAuthentication;
@@ -43,6 +39,10 @@ import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.test.CompileWebContext;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpTestUtil;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.protocol.HttpStatus;
 
 /**
  * Abstract functionality for integration testing of the

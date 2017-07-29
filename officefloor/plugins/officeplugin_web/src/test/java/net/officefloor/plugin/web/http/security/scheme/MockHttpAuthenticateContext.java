@@ -26,15 +26,15 @@ import org.easymock.AbstractMatcher;
 import org.junit.Assert;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpHeader;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
 
 /**
  * Mock {@link HttpAuthenticateContext} for testing {@link HttpSecuritySource}

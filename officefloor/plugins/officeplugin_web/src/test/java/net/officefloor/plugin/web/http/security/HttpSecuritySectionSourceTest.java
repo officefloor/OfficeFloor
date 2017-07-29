@@ -21,7 +21,6 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.scheme.DigestHttpSecuritySource;
@@ -29,6 +28,7 @@ import net.officefloor.plugin.web.http.security.scheme.FormHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.store.CredentialStore;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityLoaderUtil;
 import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Tests the {@link HttpSecuritySectionSource}.

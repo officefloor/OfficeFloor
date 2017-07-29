@@ -29,12 +29,12 @@ import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.DependencyKeys;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.resource.source.HttpFileSenderManagedFunctionSource;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 

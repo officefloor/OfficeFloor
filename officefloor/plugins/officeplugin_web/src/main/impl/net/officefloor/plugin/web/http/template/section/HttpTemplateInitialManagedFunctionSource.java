@@ -25,8 +25,6 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiatorImpl;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
@@ -35,6 +33,8 @@ import net.officefloor.plugin.web.http.template.HttpTemplateManagedFunctionSourc
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialFunction.Dependencies;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialFunction.Flows;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.impl.AbstractServerSocketManagedObjectSource;
 
 /**
  * {@link ManagedFunctionSource} to provide the

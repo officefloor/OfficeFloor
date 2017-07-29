@@ -24,7 +24,7 @@ import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.server.http.HttpResponse;
 
 /**
  * Context for the {@link HttpTemplateSectionExtension}.

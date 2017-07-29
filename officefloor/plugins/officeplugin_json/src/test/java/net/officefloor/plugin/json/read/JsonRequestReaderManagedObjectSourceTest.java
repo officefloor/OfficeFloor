@@ -42,14 +42,14 @@ import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.plugin.json.read.JsonRequestReaderManagedObjectSource.Dependencies;
 import net.officefloor.plugin.section.clazz.NextFunction;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
-import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
-import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpTestUtil;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
+import net.officefloor.server.http.source.HttpServerSocketManagedObjectSource;
+import net.officefloor.server.stream.impl.ServerInputStreamImpl;
 
 /**
  * Tests the {@link JsonRequestReaderManagedObjectSource}.

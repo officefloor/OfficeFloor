@@ -21,9 +21,9 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import net.officefloor.plugin.section.clazz.NextFunction;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.stream.ServerWriter;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.stream.ServerWriter;
 
 /**
  * Logic for the POST/Redirect/GET pattern tests.

@@ -22,8 +22,6 @@ import java.io.IOException;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.IncorrectHttpRequestContextPathException;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
@@ -33,6 +31,8 @@ import net.officefloor.plugin.web.http.resource.HttpResource;
 import net.officefloor.plugin.web.http.resource.HttpResourceCreationListener;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.NotExistHttpResource;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * {@link ManagedFunction} to locate a {@link HttpFile} via a

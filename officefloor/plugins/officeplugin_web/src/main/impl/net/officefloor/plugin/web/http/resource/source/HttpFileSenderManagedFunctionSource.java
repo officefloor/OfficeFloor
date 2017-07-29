@@ -28,9 +28,6 @@ import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFu
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationMangedObject;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
@@ -42,6 +39,9 @@ import net.officefloor.plugin.web.http.resource.HttpResourceCreationListener;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.classpath.ClasspathHttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.DependencyKeys;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.protocol.HttpStatus;
 
 /**
  * <p>

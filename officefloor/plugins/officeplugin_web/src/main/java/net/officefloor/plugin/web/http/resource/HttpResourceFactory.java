@@ -19,9 +19,9 @@ package net.officefloor.plugin.web.http.resource;
 
 import java.io.IOException;
 
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpResponse;
 
 /**
  * Factory to create a {@link HttpResource}.

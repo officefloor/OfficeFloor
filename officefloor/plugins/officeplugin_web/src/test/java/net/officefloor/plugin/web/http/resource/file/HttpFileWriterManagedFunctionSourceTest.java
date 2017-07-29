@@ -29,13 +29,13 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpHeader;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
-import net.officefloor.plugin.stream.impl.MockServerOutputStream;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.file.HttpFileWriterFunction.HttpFileWriterFunctionDependencies;
+import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.parse.UsAsciiUtil;
+import net.officefloor.server.stream.impl.MockServerOutputStream;
 
 /**
  * Tests the {@link HttpFileWriterManagedFunctionSource}.

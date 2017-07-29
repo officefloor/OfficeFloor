@@ -25,9 +25,6 @@ import java.util.HashSet;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpHeader;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.scheme.DigestHttpSecuritySource.Dependencies;
@@ -36,6 +33,9 @@ import net.officefloor.plugin.web.http.security.store.CredentialStore;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityLoaderUtil;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityTypeBuilder;
 import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
 
 import org.apache.commons.codec.binary.Hex;
 import org.easymock.AbstractMatcher;

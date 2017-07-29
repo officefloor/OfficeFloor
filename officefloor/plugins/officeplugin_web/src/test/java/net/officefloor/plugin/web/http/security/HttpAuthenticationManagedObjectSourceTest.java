@@ -30,11 +30,11 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.InvokedProcessServicer;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.security.HttpAuthenticationManagedObjectSource.Dependencies;
 import net.officefloor.plugin.web.http.security.HttpAuthenticationManagedObjectSource.Flows;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Tests the {@link HttpAuthenticationManagedObjectSource}.

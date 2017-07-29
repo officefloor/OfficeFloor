@@ -28,7 +28,6 @@ import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiator;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
@@ -37,6 +36,7 @@ import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteFunction
 import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteFunctionFlows;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * <p>

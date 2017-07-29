@@ -21,10 +21,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.security.HttpLogoutContext;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Mock {@link HttpLogoutContext} for testing {@link HttpSecuritySource}

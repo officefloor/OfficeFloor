@@ -27,12 +27,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.plugin.socket.server.http.HttpHeader;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
-import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
 import net.officefloor.plugin.web.http.security.HttpChallengeContext;
 import net.officefloor.plugin.web.http.security.HttpLogoutContext;
@@ -45,6 +39,12 @@ import net.officefloor.plugin.web.http.security.store.CredentialEntry;
 import net.officefloor.plugin.web.http.security.store.CredentialStore;
 import net.officefloor.plugin.web.http.security.store.CredentialStoreUtil;
 import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
+import net.officefloor.server.http.protocol.HttpStatus;
 
 import org.apache.commons.codec.binary.Hex;
 

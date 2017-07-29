@@ -21,8 +21,6 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.IncorrectHttpRequestContextPathException;
 import net.officefloor.plugin.web.http.resource.HttpDirectory;
@@ -32,6 +30,8 @@ import net.officefloor.plugin.web.http.resource.HttpResourceCreationListener;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.NotExistHttpResource;
 import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.DependencyKeys;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Tests the {@link HttpFileFactoryFunction}.

@@ -29,7 +29,7 @@ import org.apache.http.util.EntityUtils;
 
 import junit.framework.TestCase;
 import net.officefloor.OfficeFloorMain;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+import net.officefloor.server.http.HttpTestUtil;
 
 /**
  * Tests the JavaScript application.

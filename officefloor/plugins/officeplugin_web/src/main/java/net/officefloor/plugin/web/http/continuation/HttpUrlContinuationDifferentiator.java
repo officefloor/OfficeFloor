@@ -18,8 +18,8 @@
 package net.officefloor.plugin.web.http.continuation;
 
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * <p>

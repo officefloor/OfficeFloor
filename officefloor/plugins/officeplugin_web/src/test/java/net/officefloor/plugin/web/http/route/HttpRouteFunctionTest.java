@@ -30,11 +30,6 @@ import net.officefloor.frame.api.function.OfficeAwareManagedFunctionFactory;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpHeader;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.continuation.DuplicateHttpUrlContinuationException;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiator;
@@ -43,6 +38,11 @@ import net.officefloor.plugin.web.http.location.IncorrectHttpRequestContextPathE
 import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteFunctionDependencies;
 import net.officefloor.plugin.web.http.route.HttpRouteFunction.HttpRouteFunctionFlows;
 import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.protocol.HttpStatus;
 
 /**
  * Tests the {@link HttpRouteFunction}.

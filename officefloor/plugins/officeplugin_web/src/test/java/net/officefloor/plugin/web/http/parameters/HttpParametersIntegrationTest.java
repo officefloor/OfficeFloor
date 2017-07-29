@@ -29,11 +29,11 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.web.http.application.HttpParameters;
 import net.officefloor.plugin.web.http.application.WebArchitect;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniserTest;
+import net.officefloor.server.http.HttpTestUtil;
 
 /**
  * <p>

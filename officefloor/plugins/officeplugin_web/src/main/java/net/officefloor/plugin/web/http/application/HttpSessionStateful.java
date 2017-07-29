@@ -24,11 +24,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.object.HttpSessionObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
+import net.officefloor.server.http.HttpRequest;
 
 /**
  * <p>

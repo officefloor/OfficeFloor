@@ -29,8 +29,8 @@ import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource.Dependencies;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Tests the {@link HttpApplicationLocationManagedObjectSource}.

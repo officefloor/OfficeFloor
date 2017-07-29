@@ -17,14 +17,14 @@
  */
 package net.officefloor.tutorial.testhttpserver;
 
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
 import org.junit.Test;
+
+import net.officefloor.server.http.HttpTestUtil;
 
 /**
  * Tests the {@link TemplateLogic}.

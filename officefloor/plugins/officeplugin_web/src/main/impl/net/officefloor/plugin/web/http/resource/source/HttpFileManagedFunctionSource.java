@@ -29,14 +29,14 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationMangedObject;
 import net.officefloor.plugin.web.http.resource.AbstractHttpFile;
 import net.officefloor.plugin.web.http.resource.FileExtensionHttpFileDescriber;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpResource;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * {@link ManagedFunctionSource} for always sending a particular

@@ -24,13 +24,13 @@ import java.util.List;
 import java.util.Properties;
 
 import junit.framework.TestCase;
-import net.officefloor.plugin.socket.server.http.HttpHeader;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
-import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
-import net.officefloor.plugin.stream.ServerOutputStream;
-import net.officefloor.plugin.stream.ServerWriter;
-import net.officefloor.plugin.stream.impl.MockServerOutputStream;
+import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.parse.UsAsciiUtil;
+import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
+import net.officefloor.server.stream.ServerOutputStream;
+import net.officefloor.server.stream.ServerWriter;
+import net.officefloor.server.stream.impl.MockServerOutputStream;
 
 /**
  * Mock {@link HttpResponse}.

@@ -25,7 +25,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import net.officefloor.OfficeFloorMain;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+import net.officefloor.server.http.HttpTestUtil;
 import net.officefloor.tutorial.testhttpserver.TemplateLogic.Parameters;
 
 /**

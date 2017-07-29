@@ -33,8 +33,8 @@ import net.officefloor.compile.spi.section.SubSectionInput;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.plugin.section.transform.TransformSectionDesigner;
 import net.officefloor.plugin.section.transform.TransformSectionSource;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpUriLink;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * {@link OfficeSectionTransformer} to provide the HTTP URL continuations.

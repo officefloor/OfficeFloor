@@ -29,9 +29,9 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.web.http.template.HttpTemplateManagedFunctionSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
+import net.officefloor.server.http.HttpTestUtil;
 
 /**
  * Ensure integration of {@link HttpTemplateManagedFunctionSource} and

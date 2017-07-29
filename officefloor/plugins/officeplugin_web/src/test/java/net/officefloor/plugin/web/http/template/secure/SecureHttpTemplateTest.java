@@ -33,8 +33,6 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpParameters;
 import net.officefloor.plugin.web.http.application.HttpRequestObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpTemplateSection;
@@ -44,6 +42,8 @@ import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedOb
 import net.officefloor.plugin.web.http.route.HttpRouteFunction;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
+import net.officefloor.server.http.HttpTestUtil;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Ensures secure functionality of {@link HttpTemplate}.

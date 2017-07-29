@@ -22,8 +22,8 @@ import java.io.Serializable;
 import java.util.Iterator;
 
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.server.http.HttpRequest;
 
 /**
  * <p>

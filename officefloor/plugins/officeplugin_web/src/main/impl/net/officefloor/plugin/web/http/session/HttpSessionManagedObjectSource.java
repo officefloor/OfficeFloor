@@ -24,11 +24,11 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.session.generator.UuidHttpSessionIdGenerator;
 import net.officefloor.plugin.web.http.session.spi.HttpSessionIdGenerator;
 import net.officefloor.plugin.web.http.session.spi.HttpSessionStore;
 import net.officefloor.plugin.web.http.session.store.MemoryHttpSessionStore;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * {@link ManagedObjectSource} for a {@link HttpSession}.

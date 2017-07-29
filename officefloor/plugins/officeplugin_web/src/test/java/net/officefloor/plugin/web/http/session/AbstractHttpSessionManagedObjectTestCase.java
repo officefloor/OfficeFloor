@@ -29,11 +29,6 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpHeader;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.plugin.web.http.cookie.HttpCookie;
 import net.officefloor.plugin.web.http.session.spi.CreateHttpSessionOperation;
 import net.officefloor.plugin.web.http.session.spi.FreshHttpSession;
@@ -42,6 +37,11 @@ import net.officefloor.plugin.web.http.session.spi.HttpSessionStore;
 import net.officefloor.plugin.web.http.session.spi.InvalidateHttpSessionOperation;
 import net.officefloor.plugin.web.http.session.spi.RetrieveHttpSessionOperation;
 import net.officefloor.plugin.web.http.session.spi.StoreHttpSessionOperation;
+import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
 
 /**
  * Tests the {@link HttpSessionManagedObject}.

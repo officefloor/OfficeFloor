@@ -17,7 +17,7 @@
  */
 package net.officefloor.plugin.web.http.location;
 
-import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequest;
 
 /**
  * Location details of the HTTP application.

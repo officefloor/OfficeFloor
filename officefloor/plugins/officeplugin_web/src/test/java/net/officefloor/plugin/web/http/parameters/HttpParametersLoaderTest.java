@@ -24,10 +24,10 @@ import java.util.Map;
 import org.easymock.AbstractMatcher;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.web.http.parameters.HttpParametersLoader;
 import net.officefloor.plugin.web.http.parameters.HttpParametersLoaderImpl;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpTestUtil;
 
 /**
  * Tests the {@link HttpParametersLoader}.

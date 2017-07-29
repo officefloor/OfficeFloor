@@ -22,7 +22,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.charset.Charset;
 
-import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.server.http.HttpResponse;
 
 /**
  * Abstract {@link HttpFile} implementation.

@@ -22,9 +22,9 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.stream.BrowseInputStream;
-import net.officefloor.plugin.stream.ServerInputStream;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.stream.BrowseInputStream;
+import net.officefloor.server.stream.ServerInputStream;
 
 /**
  * {@link HttpRequestTokeniser} implementation.

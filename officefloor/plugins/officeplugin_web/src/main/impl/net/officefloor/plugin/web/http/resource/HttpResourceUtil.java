@@ -20,9 +20,9 @@ package net.officefloor.plugin.web.http.resource;
 import java.util.Deque;
 import java.util.LinkedList;
 
-import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.resource.HttpResource;
+import net.officefloor.server.http.protocol.HttpStatus;
 
 /**
  * Utility functions for a {@link HttpResource}.

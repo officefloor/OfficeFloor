@@ -20,7 +20,7 @@ package net.officefloor.plugin.web.http.resource;
 import java.io.IOException;
 
 import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Listener for the creation of a {@link HttpResource}.

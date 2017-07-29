@@ -22,12 +22,12 @@ import java.io.IOException;
 import java.util.Set;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.plugin.web.http.security.store.CredentialEntry;
 import net.officefloor.plugin.web.http.security.store.CredentialStore;
 import net.officefloor.plugin.web.http.security.store.PasswordEntry;
 import net.officefloor.plugin.web.http.security.store.PasswordFile;
 import net.officefloor.plugin.web.http.security.store.PasswordFileCredentialStore;
+import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
 
 import org.apache.commons.codec.binary.Base64;
 

@@ -19,9 +19,9 @@ package net.officefloor.plugin.web.http.application;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Allows wiring the flows of the {@link HttpTemplate}.

@@ -23,11 +23,11 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpResponse;
 
 /**
  * Web configuration extensions for the {@link OfficeArchitect}.

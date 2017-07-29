@@ -23,11 +23,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
-import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
 import net.officefloor.plugin.web.http.security.HttpChallengeContext;
 import net.officefloor.plugin.web.http.security.HttpLogoutContext;
@@ -36,6 +31,11 @@ import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.security.impl.AbstractHttpSecuritySource;
 import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
+import net.officefloor.server.http.protocol.HttpStatus;
 
 import org.apache.commons.codec.binary.Base64;
 
