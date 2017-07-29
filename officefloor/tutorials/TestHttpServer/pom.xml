@@ -53,8 +53,9 @@
 				</executions>
 			</plugin>
 			<!-- START SNIPPET: tutorial -->
-			<plugin>
 				<!-- Start/Stop application for Integration tests -->
+<!-- TODO re-enable Integration Test
+			<plugin>
 				<groupId>net.officefloor.maven</groupId>
 				<artifactId>officefloor-maven-plugin</artifactId>
 				<executions>
@@ -75,8 +76,10 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
+-->
 				<!-- Run Integration tests -->
+<!-- TODO re-enable Integration Test
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<executions>
@@ -88,6 +91,7 @@
 					</execution>
 				</executions>
 			</plugin>
+-->
 			<!-- END SNIPPET: tutorial -->
 		</plugins>
 	</build>

@@ -1,0 +1,1 @@
+TODO change src/test/resources/projects/woof/reference/goal.txt back to install

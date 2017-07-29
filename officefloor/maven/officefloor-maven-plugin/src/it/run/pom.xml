@@ -34,7 +34,8 @@
 						<id>start-woof</id>
 						<phase>process-test-classes</phase>
 						<goals>
-							<goal>run</goal>
+							<goal>start</goal>
+							<goal>open</goal>
 						</goals>
 					</execution>
 					<execution>
