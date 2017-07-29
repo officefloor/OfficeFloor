@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.function;
 
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionLogicImpl;
@@ -31,6 +32,7 @@ import net.officefloor.frame.internal.structure.ManagedFunctionLogic;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
@@ -40,6 +42,12 @@ import net.officefloor.frame.internal.structure.ThreadState;
  * @author Daniel Sagenschneider
  */
 public class ManagedFunctionBoundManagedObjects {
+
+	/**
+	 * Reduce object creation as {@link ManagedObject} instances typically bound
+	 * to {@link ThreadState} and {@link ProcessState}.
+	 */
+	private static final ManagedObjectContainer[] NO_FUNCTION_BOUND_MANAGED_OBJECTS = new ManagedObjectContainer[0];
 
 	/**
 	 * Registered {@link ManagedFunctionInterest} instances.
@@ -81,9 +89,16 @@ public class ManagedFunctionBoundManagedObjects {
 
 		// Load the managed object containers bound to the function
 		ManagedObjectMetaData<?>[] managedObjectMetaData = managedFunctionMetaData.getManagedObjectMetaData();
-		this.managedObjects = new ManagedObjectContainer[managedObjectMetaData.length];
-		for (int i = 0; i < managedObjectMetaData.length; i++) {
-			this.managedObjects[i] = new ManagedObjectContainerImpl(managedObjectMetaData[i], threadState);
+		if (managedObjectMetaData.length == 0) {
+			// Reduce object creation as rarely bound to function
+			this.managedObjects = NO_FUNCTION_BOUND_MANAGED_OBJECTS;
+
+		} else {
+			// Load the function bound containers (as will be used in execution)
+			this.managedObjects = new ManagedObjectContainer[managedObjectMetaData.length];
+			for (int i = 0; i < managedObjectMetaData.length; i++) {
+				this.managedObjects[i] = new ManagedObjectContainerImpl(managedObjectMetaData[i], threadState);
+			}
 		}
 
 		// Load the managed function container

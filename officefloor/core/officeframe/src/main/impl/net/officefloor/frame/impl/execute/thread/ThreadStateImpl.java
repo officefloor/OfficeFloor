@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.frame.impl.execute.flow.FlowImpl;
 import net.officefloor.frame.impl.execute.function.AbstractDelegateFunctionState;
@@ -65,6 +66,11 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	 * {@link Logger}.
 	 */
 	private static final Logger LOGGER = OfficeFloorImpl.getFrameworkLogger();
+
+	/**
+	 * Reduce object creation as {@link Governance} not always used.
+	 */
+	private static final GovernanceContainer<?>[] NO_THREAD_GOVERNANCE = new GovernanceContainer[0];
 
 	/**
 	 * {@link ActiveThreadState} for the executing {@link Thread}.
@@ -309,7 +315,11 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 		// Create the array to reference the governances
 		GovernanceMetaData<?, ?>[] governanceMetaData = this.threadMetaData.getGovernanceMetaData();
-		this.governanceContainers = new GovernanceContainer[governanceMetaData.length];
+		if (governanceMetaData.length == 0) {
+			this.governanceContainers = NO_THREAD_GOVERNANCE;
+		} else {
+			this.governanceContainers = new GovernanceContainer[governanceMetaData.length];
+		}
 
 		// Create thread profiler
 		this.profiler = (processProfiler == null ? null : processProfiler.addThreadState(this));
