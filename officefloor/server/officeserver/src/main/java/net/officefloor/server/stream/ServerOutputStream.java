@@ -31,9 +31,9 @@ public abstract class ServerOutputStream extends OutputStream {
 
 	/**
 	 * <p>
-	 * Writes a cached {@link ByteBuffer}.
+	 * Writes a {@link ByteBuffer}.
 	 * <p>
-	 * This is to enable efficient I/O of writing cached content.
+	 * This is to enable efficient I/O of writing content (typically cached).
 	 * 
 	 * @param cachedBuffer
 	 *            Cached {@link ByteBuffer} that should never change its
@@ -42,26 +42,5 @@ public abstract class ServerOutputStream extends OutputStream {
 	 *             If fails to write the {@link ByteBuffer}.
 	 */
 	public abstract void write(ByteBuffer cachedBuffer) throws IOException;
-
-	/*
-	 * ================= OutputStream =========================
-	 */
-
-	@Override
-	public abstract void write(int b) throws IOException;
-
-	// TODO provide more performance implementations
-	// @Override
-	// public abstract void write(byte[] b) throws IOException;
-	//
-	// @Override
-	// public abstract void write(byte[] b, int off, int len) throws
-	// IOException;
-
-	@Override
-	public abstract void flush() throws IOException;
-
-	@Override
-	public abstract void close() throws IOException;
 
 }

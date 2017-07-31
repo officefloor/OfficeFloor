@@ -158,7 +158,7 @@ public class HttpTemplateInitialFunction
 		// Determine if POST/redirect/GET pattern to be applied
 		if (!isRedirectRequired) {
 			// Request likely overridden to POST, so use client HTTP method
-			String method = connection.getHttpMethod();
+			String method = connection.getHttpMethod().getName();
 			if (this.renderRedirectHttpMethods.contains(method.toUpperCase())) {
 				// Flag redirect for POST/redirect/GET pattern
 				isRedirectRequired = true;

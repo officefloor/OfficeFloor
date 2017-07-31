@@ -27,7 +27,10 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
+import net.officefloor.frame.api.manage.UnknownOfficeException;
 
 /**
  * {@link OfficeFloor} node.
@@ -143,5 +146,18 @@ public interface OfficeFloorNode extends Node, PropertyConfigurable, ManagedObje
 	 */
 	OfficeFloor deployOfficeFloor(String officeFloorName, OfficeFloorBuilder officeFloorBuilder,
 			CompileContext compileContext);
+
+	/**
+	 * Loads the {@link FunctionManager} instances to externally trigger this
+	 * {@link OfficeFloorNode}.
+	 * 
+	 * @param officeFloor
+	 *            {@link OfficeFloor} for this {@link OfficeFloorNode}.
+	 * @throws UnknownOfficeException
+	 *             {@link UnknownOfficeException}.
+	 * @throws UnknownFunctionException
+	 *             {@link UnknownFunctionException}.
+	 */
+	void loadExternalServicing(OfficeFloor officeFloor) throws UnknownOfficeException, UnknownFunctionException;
 
 }

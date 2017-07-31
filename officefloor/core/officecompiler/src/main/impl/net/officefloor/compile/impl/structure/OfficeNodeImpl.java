@@ -106,6 +106,7 @@ import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.api.source.UnknownClassError;
@@ -958,6 +959,16 @@ public class OfficeNodeImpl implements OfficeNode {
 
 		// Return the office bindings
 		return officeBindings;
+	}
+
+	@Override
+	public void loadExternalServicing(Office office) throws UnknownFunctionException {
+		SectionNode[] sectionNodes = this.sections.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSectionName(), b.getOfficeSectionName()))
+				.toArray(SectionNode[]::new);
+		for (SectionNode sectionNode : sectionNodes) {
+			sectionNode.loadExternalServicing(office);
+		}
 	}
 
 	/*

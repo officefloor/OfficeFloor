@@ -40,7 +40,7 @@ import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.D
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.stream.impl.MockServerOutputStream;
+import net.officefloor.server.stream.MockServerOutputStream;
 
 /**
  * Tests the {@link HttpFileSenderManagedFunctionSource}.

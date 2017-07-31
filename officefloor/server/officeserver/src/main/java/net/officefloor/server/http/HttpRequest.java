@@ -30,11 +30,11 @@ import net.officefloor.server.stream.ServerInputStream;
 public interface HttpRequest {
 
 	/**
-	 * Obtains the HTTP method. For example GET, POST, etc.
+	 * Obtains the {@link HttpMethod}.
 	 * 
-	 * @return HTTP method.
+	 * @return {@link HttpMethod}.
 	 */
-	String getMethod();
+	HttpMethod getHttpMethod();
 
 	/**
 	 * Obtains the Request URI as provided on the request.

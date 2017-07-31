@@ -35,7 +35,7 @@ import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.parse.UsAsciiUtil;
-import net.officefloor.server.stream.impl.MockServerOutputStream;
+import net.officefloor.server.stream.MockServerOutputStream;
 
 /**
  * Tests the {@link HttpFileWriterManagedFunctionSource}.

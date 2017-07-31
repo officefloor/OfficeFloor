@@ -32,6 +32,7 @@ import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
@@ -110,6 +111,11 @@ public abstract class AbstractOfficeFloorTestCase extends AbstractStructureTestC
 	 * Records initiating the {@link OfficeFloorBuilder}.
 	 */
 	protected void record_initiateOfficeFloorBuilder() {
+
+		// Record adding listener for external service handling
+		this.officeFloorBuilder.addOfficeFloorListener(null);
+		this.control(this.officeFloorBuilder).setMatcher(new TypeMatcher(OfficeFloorListener.class));
+
 		// Record initiate OfficeFloor builder
 		this.officeFloorBuilder.setClassLoader(Thread.currentThread().getContextClassLoader());
 		this.officeFloorBuilder.addResources(this.resourceSource);

@@ -24,14 +24,17 @@ import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SubSectionInput;
+import net.officefloor.frame.api.manage.FunctionManager;
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
 
 /**
  * {@link SectionInput} node.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionInputNode extends LinkFlowNode, SectionInput,
-		SubSectionInput, OfficeSectionInput, DeployedOfficeInput {
+public interface SectionInputNode
+		extends LinkFlowNode, SectionInput, SubSectionInput, OfficeSectionInput, DeployedOfficeInput {
 
 	/**
 	 * {@link Node} type.
@@ -45,6 +48,17 @@ public interface SectionInputNode extends LinkFlowNode, SectionInput,
 	 *            Parameter type.
 	 */
 	void initialise(String parameterType);
+
+	/**
+	 * Loads the {@link FunctionManager} instances to externally trigger this
+	 * {@link SectionInputNode}.
+	 * 
+	 * @param office
+	 *            {@link Office} containing this {@link SectionInputNode}.
+	 * @throws UnknownFunctionException
+	 *             {@link UnknownFunctionException}.
+	 */
+	void loadExternalServicing(Office office) throws UnknownFunctionException;
 
 	/**
 	 * Loads the {@link SectionInputType}.

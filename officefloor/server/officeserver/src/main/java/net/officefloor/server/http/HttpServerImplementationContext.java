@@ -1,0 +1,86 @@
+/*
+ * OfficeFloor - http://www.officefloor.net
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package net.officefloor.server.http;
+
+import javax.net.ssl.SSLContext;
+
+import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.ServiceHandler;
+import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionContext;
+
+/**
+ * Context for the {@link HttpServerImplementation}.
+ * 
+ * @author Daniel Sagenschneider
+ */
+public interface HttpServerImplementationContext {
+
+	/**
+	 * Obtains the HTTP port.
+	 * 
+	 * @return HTTP port.
+	 */
+	int getHttpPort();
+
+	/**
+	 * Obtains the HTTPS port.
+	 * 
+	 * @return HTTPS port.
+	 */
+	int getHttpsPort();
+
+	/**
+	 * <p>
+	 * Obtains the {@link SSLContext} to use for HTTPS.
+	 * <p>
+	 * Should the {@link HttpServer} be behind a Reverse Proxy providing SSL,
+	 * then this may be <code>null</code> if the Reverse Proxy is communicating
+	 * via non-secure HTTP.
+	 * 
+	 * @return {@link SSLContext} to use for HTTPS. May be <code>null</code> if
+	 *         behind Reverse Proxy handling SSL (with communication to Reverse
+	 *         Proxy over non-secure HTTP).
+	 */
+	SSLContext getSslContext();
+
+	/**
+	 * Configures a {@link ServiceHandler}.
+	 * 
+	 * @param serviceHandler
+	 *            {@link ServiceHandler}.
+	 */
+	void addServiceHandler(ServiceHandler serviceHandler);
+
+	/**
+	 * Obtains the {@link OfficeFloorDeployer} to configure the
+	 * {@link HttpServer}.
+	 * 
+	 * @return {@link OfficeFloorDeployer} to configure the {@link HttpServer}.
+	 */
+	OfficeFloorDeployer getOfficeFloorDeployer();
+
+	/**
+	 * Obtains the {@link OfficeFloorExtensionContext} to obtain details to
+	 * configure the {@link HttpServerImplementation}.
+	 * 
+	 * @return {@link OfficeFloorExtensionContext} to obtain details to
+	 *         configure the {@link HttpServerImplementation}.
+	 */
+	OfficeFloorExtensionContext getOfficeFloorExtensionContext();
+
+}

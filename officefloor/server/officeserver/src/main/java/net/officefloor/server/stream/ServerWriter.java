@@ -18,39 +18,15 @@
 package net.officefloor.server.stream;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 
 /**
  * Server {@link Writer}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ServerWriter extends OutputStreamWriter {
-
-	/**
-	 * {@link ServerOutputStream}.
-	 */
-	private final ServerOutputStream outputStream;
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param outputStream
-	 *            {@link ServerOutputStream}.
-	 * @param charset
-	 *            {@link Charset}.
-	 * @param lock
-	 *            Lock for <code>synchronize</code>.
-	 */
-	public ServerWriter(ServerOutputStream outputStream, Charset charset,
-			Object lock) {
-		super(outputStream, charset);
-		this.lock = lock;
-		this.outputStream = outputStream;
-	}
+public abstract class ServerWriter extends Writer {
 
 	/**
 	 * <p>
@@ -64,14 +40,7 @@ public class ServerWriter extends OutputStreamWriter {
 	 * @throws IOException
 	 *             If fails to write the bytes.
 	 */
-	public final void write(byte[] encodedBytes) throws IOException {
-
-		// Flush any content before directly writing bytes
-		this.flush();
-
-		// Write the encoded bytes
-		this.outputStream.write(encodedBytes);
-	}
+	public abstract void write(byte[] encodedBytes) throws IOException;
 
 	/**
 	 * <p>
@@ -85,13 +54,6 @@ public class ServerWriter extends OutputStreamWriter {
 	 * @throws IOException
 	 *             If fails to write the bytes.
 	 */
-	public final void write(ByteBuffer encodedBytes) throws IOException {
-
-		// Flush any content before directly writing bytes
-		this.flush();
-
-		// Write the encoded bytes
-		this.outputStream.write(encodedBytes);
-	}
+	public abstract void write(ByteBuffer encodedBytes) throws IOException;
 
 }

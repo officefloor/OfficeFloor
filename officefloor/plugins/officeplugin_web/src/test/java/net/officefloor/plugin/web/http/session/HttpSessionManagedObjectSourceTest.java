@@ -31,10 +31,10 @@ import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpServicerFunction;
 import net.officefloor.server.http.HttpTestUtil;
+import net.officefloor.server.http.MockHttpServer;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.server.HttpServicerFunction;
-import net.officefloor.server.http.server.MockHttpServer;
 
 /**
  * Tests the {@link HttpSessionManagedObjectSource}.

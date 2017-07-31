@@ -19,8 +19,6 @@ package net.officefloor.server.http;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -54,22 +52,6 @@ public interface ServerHttpConnection {
 	boolean isSecure();
 
 	/**
-	 * Obtains the local address for this {@link ServerHttpConnection}.
-	 * 
-	 * @return {@link InetSocketAddress} describing the local {@link Socket} for
-	 *         this {@link ServerHttpConnection}.
-	 */
-	InetSocketAddress getLocalAddress();
-
-	/**
-	 * Obtains the remote address for this {@link ServerHttpConnection}.
-	 * 
-	 * @return {@link InetSocketAddress} describing the remote {@link Socket}
-	 *         for this {@link ServerHttpConnection}.
-	 */
-	InetSocketAddress getRemoteAddress();
-
-	/**
 	 * <p>
 	 * Exports the state of the current {@link HttpRequest} and
 	 * {@link HttpResponse}.
@@ -100,12 +82,12 @@ public interface ServerHttpConnection {
 	 * 
 	 * @see #exportState()
 	 */
-	void importState(Serializable momento) throws IllegalArgumentException,
-			IOException;
+	void importState(Serializable momento) throws IllegalArgumentException, IOException;
 
 	/**
 	 * <p>
-	 * Obtains the client sent HTTP method of the {@link ServerHttpConnection}.
+	 * Obtains the client sent {@link HttpMethod} of the
+	 * {@link ServerHttpConnection}.
 	 * <p>
 	 * As the {@link HttpRequest} method is overridden, this method may be used
 	 * by logic requiring to know the actual client HTTP method. An example of
@@ -113,11 +95,11 @@ public interface ServerHttpConnection {
 	 * the client sent {@link HttpRequest} method is a <code>POST</code> or
 	 * <code>GET</code> (regardless of imported state).
 	 * 
-	 * @return Client sent HTTP method.
+	 * @return Client sent {@link HttpMethod}.
 	 * 
 	 * @see #exportState()
 	 * @see #importState(Serializable)
 	 */
-	String getHttpMethod();
+	HttpMethod getHttpMethod();
 
 }

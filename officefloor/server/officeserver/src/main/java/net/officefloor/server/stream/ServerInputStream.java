@@ -17,8 +17,9 @@
  */
 package net.officefloor.server.stream;
 
-import java.io.IOException;
 import java.io.InputStream;
+
+import net.officefloor.server.tcp.NoAvailableInputException;
 
 /**
  * <p>
@@ -32,22 +33,12 @@ import java.io.InputStream;
 public abstract class ServerInputStream extends InputStream {
 
 	/**
-	 * Obtains a new {@link BrowseInputStream} that starts browsing the input
-	 * content from the current position of the {@link ServerInputStream} within
-	 * the input stream of data.
+	 * Obtains a new {@link InputStream} that starts browsing the input content
+	 * from the current position of the {@link ServerInputStream} within the
+	 * input stream of data.
 	 * 
-	 * @return {@link BrowseInputStream}.
+	 * @return {@link InputStream}.
 	 */
-	public abstract BrowseInputStream createBrowseInputStream();
-
-	/*
-	 * ===================== InputStream ===========================
-	 */
-
-	@Override
-	public abstract int read() throws IOException, NoAvailableInputException;
-
-	@Override
-	public abstract int available() throws IOException;
+	public abstract InputStream createBrowseInputStream();
 
 }

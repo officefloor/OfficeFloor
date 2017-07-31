@@ -178,6 +178,15 @@ public interface OfficeFloorDeployer {
 	DeployedOffice addDeployedOffice(String officeName, OfficeSource officeSource, String officeLocation);
 
 	/**
+	 * Obtains the {@link DeployedOffice}.
+	 * 
+	 * @param officeName
+	 *            Name of the {@link DeployedOffice}.
+	 * @return {@link DeployedOffice}.
+	 */
+	DeployedOffice getDeployedOffice(String officeName);
+
+	/**
 	 * Links the {@link ManagedObjectTeam} to be the {@link OfficeFloorTeam}.
 	 * 
 	 * @param team

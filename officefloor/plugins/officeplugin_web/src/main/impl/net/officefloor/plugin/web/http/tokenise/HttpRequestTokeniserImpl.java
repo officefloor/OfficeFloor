@@ -18,12 +18,12 @@
 package net.officefloor.plugin.web.http.tokenise;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.server.http.HttpRequest;
-import net.officefloor.server.stream.BrowseInputStream;
 import net.officefloor.server.stream.ServerInputStream;
 
 /**
@@ -53,36 +53,31 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 
 		// Extract the parameters
 		final Map<String, String> parameters = new HashMap<String, String>();
-		new HttpRequestTokeniserImpl().tokeniseHttpRequest(request,
-				new HttpRequestTokenHandler() {
+		new HttpRequestTokeniserImpl().tokeniseHttpRequest(request, new HttpRequestTokenHandler() {
 
-					@Override
-					public void handlePath(String path)
-							throws HttpRequestTokeniseException {
-						// Ignore
-					}
+			@Override
+			public void handlePath(String path) throws HttpRequestTokeniseException {
+				// Ignore
+			}
 
-					@Override
-					public void handleHttpParameter(String name, String value)
-							throws HttpRequestTokeniseException {
-						// Only add the first value for parameter
-						if (!parameters.containsKey(name)) {
-							parameters.put(name, value);
-						}
-					}
+			@Override
+			public void handleHttpParameter(String name, String value) throws HttpRequestTokeniseException {
+				// Only add the first value for parameter
+				if (!parameters.containsKey(name)) {
+					parameters.put(name, value);
+				}
+			}
 
-					@Override
-					public void handleQueryString(String queryString)
-							throws HttpRequestTokeniseException {
-						// Ignore
-					}
+			@Override
+			public void handleQueryString(String queryString) throws HttpRequestTokeniseException {
+				// Ignore
+			}
 
-					@Override
-					public void handleFragment(String fragment)
-							throws HttpRequestTokeniseException {
-						// Ignore
-					}
-				});
+			@Override
+			public void handleFragment(String fragment) throws HttpRequestTokeniseException {
+				// Ignore
+			}
+		});
 
 		// Return the parameters
 		return parameters;
@@ -93,9 +88,8 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 	 */
 
 	@Override
-	public void tokeniseHttpRequest(HttpRequest request,
-			HttpRequestTokenHandler handler) throws IOException,
-			HttpRequestTokeniseException {
+	public void tokeniseHttpRequest(HttpRequest request, HttpRequestTokenHandler handler)
+			throws IOException, HttpRequestTokeniseException {
 
 		// Create the temporary buffer (aids reducing object creation)
 		TempBuffer tempBuffer = new TempBuffer();
@@ -105,7 +99,7 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 		this.loadTokens(requestUri, false, handler, tempBuffer);
 
 		// Only load parameters of entity if a POST
-		if ("POST".equalsIgnoreCase(request.getMethod())) {
+		if ("POST".equalsIgnoreCase(request.getHttpMethod().getName())) {
 
 			// Obtain the content encoding of the entity
 			// TODO handle content encoding
@@ -124,8 +118,7 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 
 				// Obtain the data
 				if (data.length > 0) {
-					BrowseInputStream browseStream = entity
-							.createBrowseInputStream();
+					InputStream browseStream = entity.createBrowseInputStream();
 					browseStream.read(data);
 				}
 
@@ -143,8 +136,7 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 	}
 
 	@Override
-	public void tokeniseRequestURI(String requestURI,
-			HttpRequestTokenHandler handler)
+	public void tokeniseRequestURI(String requestURI, HttpRequestTokenHandler handler)
 			throws HttpRequestTokeniseException {
 
 		// Create the temporary buffer (aids reducing object creation)
@@ -168,9 +160,8 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 	 * @throws HttpRequestTokeniseException
 	 *             If fails to parse the parameters.
 	 */
-	private void loadTokens(String contents, boolean isOnlyParameters,
-			HttpRequestTokenHandler handler, TempBuffer tempBuffer)
-			throws HttpRequestTokeniseException {
+	private void loadTokens(String contents, boolean isOnlyParameters, HttpRequestTokenHandler handler,
+			TempBuffer tempBuffer) throws HttpRequestTokeniseException {
 
 		// The implementation of this method reduces character array creations
 		// and copying by using sub strings. This should both improve parsing
@@ -198,8 +189,7 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 				if (!isPathProcessed) {
 					// Load the path
 					nameEnd = i; // before '?'
-					this.loadPath(contents, nameBegin, nameEnd,
-							isRequireTranslate, handler, tempBuffer);
+					this.loadPath(contents, nameBegin, nameEnd, isRequireTranslate, handler, tempBuffer);
 
 					// No longer processing path
 					isPathProcessed = true;
@@ -224,8 +214,8 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 			case ';':
 				// Have parameter name/value, so load
 				valueEnd = i; // before terminator
-				this.loadParameter(contents, nameBegin, nameEnd, valueBegin,
-						valueEnd, isRequireTranslate, handler, tempBuffer);
+				this.loadParameter(contents, nameBegin, nameEnd, valueBegin, valueEnd, isRequireTranslate, handler,
+						tempBuffer);
 
 				// Reset for next parameter name/value
 				nameBegin = i + 1; // after terminator
@@ -240,22 +230,19 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 				if (!isPathProcessed) {
 					// Load path
 					nameEnd = i; // before '#'
-					this.loadPath(contents, nameBegin, nameEnd,
-							isRequireTranslate, handler, tempBuffer);
+					this.loadPath(contents, nameBegin, nameEnd, isRequireTranslate, handler, tempBuffer);
 
 				} else {
 					// At end of parameters as have fragment
 					valueEnd = i; // before '#'
 					if (valueBegin > 0) {
 						// Have name/value before fragment so load
-						this.loadParameter(contents, nameBegin, nameEnd,
-								valueBegin, valueEnd, isRequireTranslate,
+						this.loadParameter(contents, nameBegin, nameEnd, valueBegin, valueEnd, isRequireTranslate,
 								handler, tempBuffer);
 
 						// Load the query string
 						queryEnd = valueEnd; // end of last parameter value
-						this.loadQueryString(contents, queryBegin, queryEnd,
-								isOnlyParameters, handler);
+						this.loadQueryString(contents, queryBegin, queryEnd, isOnlyParameters, handler);
 					}
 				}
 
@@ -274,19 +261,17 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 		if (!isPathProcessed) {
 			// Only path so load as path
 			nameEnd = contents.length();
-			this.loadPath(contents, nameBegin, nameEnd, isRequireTranslate,
-					handler, tempBuffer);
+			this.loadPath(contents, nameBegin, nameEnd, isRequireTranslate, handler, tempBuffer);
 
 		} else if (valueBegin > 0) {
 			// Load the final parameter
 			valueEnd = contents.length();
-			this.loadParameter(contents, nameBegin, nameEnd, valueBegin,
-					valueEnd, isRequireTranslate, handler, tempBuffer);
+			this.loadParameter(contents, nameBegin, nameEnd, valueBegin, valueEnd, isRequireTranslate, handler,
+					tempBuffer);
 
 			// Load the query string
 			queryEnd = valueEnd; // end of last parameter value
-			this.loadQueryString(contents, queryBegin, queryEnd,
-					isOnlyParameters, handler);
+			this.loadQueryString(contents, queryBegin, queryEnd, isOnlyParameters, handler);
 		}
 	}
 
@@ -308,9 +293,8 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 	 * @throws HttpRequestTokeniseException
 	 *             If fails to load the path.
 	 */
-	private void loadPath(String contents, int pathBegin, int pathEnd,
-			boolean isRequireTranslate, HttpRequestTokenHandler handler,
-			TempBuffer tempBuffer) throws HttpRequestTokeniseException {
+	private void loadPath(String contents, int pathBegin, int pathEnd, boolean isRequireTranslate,
+			HttpRequestTokenHandler handler, TempBuffer tempBuffer) throws HttpRequestTokeniseException {
 
 		// Obtain the path
 		String path = contents.substring(pathBegin, pathEnd);
@@ -338,9 +322,8 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 	 * @throws HttpRequestTokeniseException
 	 *             If fails to load the query string.
 	 */
-	private void loadQueryString(String contents, int queryBegin, int queryEnd,
-			boolean isOnlyParameters, HttpRequestTokenHandler handler)
-			throws HttpRequestTokeniseException {
+	private void loadQueryString(String contents, int queryBegin, int queryEnd, boolean isOnlyParameters,
+			HttpRequestTokenHandler handler) throws HttpRequestTokeniseException {
 
 		// Only load query string if not just parameters
 		if (!isOnlyParameters) {
@@ -372,17 +355,14 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 	 * @throws HttpRequestTokeniseException
 	 *             If fails to load the parameter.
 	 */
-	private void loadParameter(String contents, int nameBegin, int nameEnd,
-			int valueBegin, int valueEnd, boolean isRequireTranslate,
-			HttpRequestTokenHandler handler, TempBuffer tempBuffer)
+	private void loadParameter(String contents, int nameBegin, int nameEnd, int valueBegin, int valueEnd,
+			boolean isRequireTranslate, HttpRequestTokenHandler handler, TempBuffer tempBuffer)
 			throws HttpRequestTokeniseException {
 
 		// Ensure valid
 		if ((nameEnd < 0) || (valueBegin < 0) || (valueEnd < 0)) {
-			throw new HttpRequestTokeniseException(
-					"Invalid HTTP contents (name " + nameBegin + "," + nameEnd
-							+ "  value " + valueBegin + "," + valueEnd + "): "
-							+ contents);
+			throw new HttpRequestTokeniseException("Invalid HTTP contents (name " + nameBegin + "," + nameEnd
+					+ "  value " + valueBegin + "," + valueEnd + "): " + contents);
 		}
 
 		// Obtain the raw name and value
@@ -390,10 +370,8 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 		String rawValue = contents.substring(valueBegin, valueEnd);
 
 		// Obtain the name and value
-		String name = (isRequireTranslate ? this.translate(rawName, tempBuffer)
-				: rawName);
-		String value = (isRequireTranslate ? this.translate(rawValue,
-				tempBuffer) : rawValue);
+		String name = (isRequireTranslate ? this.translate(rawName, tempBuffer) : rawName);
+		String value = (isRequireTranslate ? this.translate(rawValue, tempBuffer) : rawValue);
 
 		// Handle the parameter
 		handler.handleHttpParameter(name, value);
@@ -417,8 +395,7 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 	 * @throws HttpRequestTokeniseException
 	 *             If fails to translate.
 	 */
-	private String translate(String parameterText, TempBuffer tempBuffer)
-			throws HttpRequestTokeniseException {
+	private String translate(String parameterText, TempBuffer tempBuffer) throws HttpRequestTokeniseException {
 
 		// Obtain the temporary buffer
 		char[] buffer = tempBuffer.buffer;
@@ -482,8 +459,7 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 		// Should always be in non-escape state after translating
 		if (escape != EscapeState.NONE) {
 			throw new HttpRequestTokeniseException(
-					"Invalid parameter text as escaping not complete: '"
-							+ parameterText + "'");
+					"Invalid parameter text as escaping not complete: '" + parameterText + "'");
 		}
 
 		// Return the translated text
@@ -499,8 +475,7 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 	 * @throws HttpRequestTokeniseException
 	 *             If invalid character for escaping.
 	 */
-	private byte translateEscapedCharToBits(char character)
-			throws HttpRequestTokeniseException {
+	private byte translateEscapedCharToBits(char character) throws HttpRequestTokeniseException {
 
 		// Obtain the bits for the character
 		int bits;
@@ -512,8 +487,7 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 			bits = (character - 'a') + 0xA;
 		} else {
 			// Invalid character for escaping
-			throw new HttpRequestTokeniseException(
-					"Invalid character for escaping: " + character);
+			throw new HttpRequestTokeniseException("Invalid character for escaping: " + character);
 		}
 
 		// Return the bits

@@ -429,7 +429,7 @@ public class DigestHttpSecuritySource
 		}
 
 		// Obtain the method
-		String httpMethod = request.getMethod();
+		String httpMethod = request.getHttpMethod().getName();
 
 		// Calculate A2 value
 		Digest a2Digest = new Digest(algorithm);

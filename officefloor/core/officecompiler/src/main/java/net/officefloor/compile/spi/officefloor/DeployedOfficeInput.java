@@ -17,6 +17,9 @@
  */
 package net.officefloor.compile.spi.officefloor;
 
+import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
+import net.officefloor.frame.api.manage.FunctionManager;
+
 /**
  * Input into a {@link DeployedOffice}.
  * 
@@ -30,5 +33,18 @@ public interface DeployedOfficeInput {
 	 * @return Name of the {@link DeployedOfficeInput}.
 	 */
 	String getDeployedOfficeInputName();
+
+	/**
+	 * <p>
+	 * Obtains the {@link FunctionManager} to externally trigger this
+	 * {@link DeployedOfficeInput}.
+	 * <p>
+	 * This allows {@link OfficeFloorExtensionService} instances to obtain the
+	 * {@link FunctionManager} for external triggering of service handling.
+	 * 
+	 * @return {@link FunctionManager} to externally trigger this
+	 *         {@link DeployedOfficeInput}.
+	 */
+	FunctionManager getFunctionManager();
 
 }

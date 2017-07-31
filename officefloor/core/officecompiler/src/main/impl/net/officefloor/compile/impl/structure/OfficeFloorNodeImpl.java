@@ -80,6 +80,8 @@ import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
+import net.officefloor.frame.api.manage.UnknownOfficeException;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.api.source.UnknownClassError;
@@ -366,6 +368,11 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 		return NodeUtil.getInitialisedNode(officeName, this.offices, this.context,
 				() -> this.context.createOfficeNode(officeName, this),
 				(office) -> office.initialise(officeSourceClassName, null, officeLocation));
+	}
+
+	@Override
+	public DeployedOffice getDeployedOffice(String officeName) {
+		return NodeUtil.getNode(officeName, this.offices, () -> this.context.createOfficeNode(officeName, this));
 	}
 
 	@Override
@@ -824,6 +831,24 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 
 		// Return the built OfficeFloor
 		return builder.buildOfficeFloor(new CompilerOfficeFloorIssues());
+	}
+
+	@Override
+	public void loadExternalServicing(OfficeFloor officeFloor) throws UnknownOfficeException, UnknownFunctionException {
+
+		// Load external servicing for each office
+		OfficeNode[] officeNodes = this.offices.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getDeployedOfficeName(), b.getDeployedOfficeName()))
+				.toArray(OfficeNode[]::new);
+		for (OfficeNode officeNode : officeNodes) {
+
+			// Obtain the office
+			String officeName = officeNode.getDeployedOfficeName();
+			Office office = officeFloor.getOffice(officeName);
+
+			// Load external servicing
+			officeNode.loadExternalServicing(office);
+		}
 	}
 
 	/**

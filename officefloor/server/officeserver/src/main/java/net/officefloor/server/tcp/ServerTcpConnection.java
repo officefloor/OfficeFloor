@@ -22,12 +22,11 @@ import java.io.IOException;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.server.protocol.Connection;
 import net.officefloor.server.stream.ServerInputStream;
 import net.officefloor.server.stream.ServerOutputStream;
 
 /**
- * TCP connection to be handled by the {@link OfficeFloor}.
+ * TCP connection to be handled by {@link OfficeFloor}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -63,7 +62,7 @@ public interface ServerTcpConnection {
 	 * Obtains the {@link ServerOutputStream} to write data back to the client.
 	 * <p>
 	 * Closing the {@link ServerOutputStream} will result in closing the
-	 * {@link Connection}.
+	 * connection.
 	 * 
 	 * @return {@link ServerOutputStream}.
 	 */

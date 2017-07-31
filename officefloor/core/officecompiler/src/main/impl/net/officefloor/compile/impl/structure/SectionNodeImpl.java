@@ -102,6 +102,7 @@ import net.officefloor.configuration.ConfigurationError;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.UnknownClassError;
 import net.officefloor.frame.api.source.UnknownPropertyError;
@@ -814,6 +815,26 @@ public class SectionNodeImpl implements SectionNode {
 		this.subSections.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getSubSectionName(), b.getSubSectionName()))
 				.forEachOrdered((subSection) -> subSection.buildSection(officeBuilder, officeBindings, compileContext));
+	}
+
+	@Override
+	public void loadExternalServicing(Office office) throws UnknownFunctionException {
+
+		// Load the section inputs
+		SectionInputNode[] inputNodes = this.inputs.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getSectionInputName(), b.getSectionInputName()))
+				.toArray(SectionInputNode[]::new);
+		for (SectionInputNode inputNode : inputNodes) {
+			inputNode.loadExternalServicing(office);
+		}
+
+		// Load the sub sections
+		SectionNode[] subSectionNodes = this.subSections.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getSubSectionName(), b.getSubSectionName()))
+				.toArray(SectionNode[]::new);
+		for (SectionNode subSectionNode : subSectionNodes) {
+			subSectionNode.loadExternalServicing(office);
+		}
 	}
 
 	@Override

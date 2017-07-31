@@ -351,7 +351,7 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 				this.store.retrieveCredentialEntry("Mufasa", REALM), this.entry);
 		this.recordReturn(this.entry, this.entry.retrieveCredentials(), digest);
 		this.recordReturn(this.store, this.store.getAlgorithm(), ALGORITHM);
-		this.recordReturn(request, request.getMethod(), "GET");
+		this.recordReturn(request, request.getHttpMethod(), "GET");
 		this.recordReturn(this.entry, this.entry.retrieveRoles(),
 				new HashSet<String>(Arrays.asList("prince")));
 		this.authenticationContext

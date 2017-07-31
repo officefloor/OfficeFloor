@@ -54,12 +54,11 @@ import net.officefloor.server.http.conversation.HttpEntity;
 import net.officefloor.server.http.conversation.impl.HttpEntityImpl;
 import net.officefloor.server.http.conversation.impl.HttpRequestImpl;
 import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
-import net.officefloor.server.http.server.MockHttpServer;
 import net.officefloor.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.server.http.source.HttpsServerSocketManagedObjectSource;
 import net.officefloor.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.server.ssl.OfficeFloorDefaultSslEngineSource;
-import net.officefloor.server.ssl.SslEngineSource;
+import net.officefloor.server.ssl.SslContextSource;
 import net.officefloor.server.stream.impl.ServerInputStreamImpl;
 
 /**
@@ -266,14 +265,14 @@ public class HttpTestUtil {
 	}
 
 	/**
-	 * Obtains the {@link SslEngineSource} for the corresponding configured
+	 * Obtains the {@link SslContextSource} for the corresponding configured
 	 * HTTPS.
 	 * 
-	 * @return {@link SslEngineSource} for the corresponding configured HTTPS.
+	 * @return {@link SslContextSource} for the corresponding configured HTTPS.
 	 * 
 	 * @see #configureHttps(HttpClientBuilder)
 	 */
-	public static Class<? extends SslEngineSource> getSslEngineSourceClass() {
+	public static Class<? extends SslContextSource> getSslEngineSourceClass() {
 		return OfficeFloorDefaultSslEngineSource.class;
 	}
 

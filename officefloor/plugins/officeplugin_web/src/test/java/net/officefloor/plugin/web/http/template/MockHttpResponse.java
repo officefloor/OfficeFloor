@@ -28,9 +28,9 @@ import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.parse.UsAsciiUtil;
 import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
+import net.officefloor.server.stream.MockServerOutputStream;
 import net.officefloor.server.stream.ServerOutputStream;
 import net.officefloor.server.stream.ServerWriter;
-import net.officefloor.server.stream.impl.MockServerOutputStream;
 
 /**
  * Mock {@link HttpResponse}.

@@ -27,7 +27,9 @@ import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.profile.Profiler;
 
 /**
@@ -151,5 +153,16 @@ public interface OfficeNode
 	 * @return {@link OfficeBuilder} for the built {@link Office}.
 	 */
 	OfficeBindings buildOffice(OfficeFloorBuilder builder, CompileContext compileContext, Profiler profiler);
+
+	/**
+	 * Loads the {@link FunctionManager} instances to externally trigger this
+	 * {@link OfficeNode}.
+	 * 
+	 * @param office
+	 *            {@link Office} for this {@link OfficeNode}.
+	 * @throws UnknownFunctionException
+	 *             {@link UnknownFunctionException}.
+	 */
+	void loadExternalServicing(Office office) throws UnknownFunctionException;
 
 }

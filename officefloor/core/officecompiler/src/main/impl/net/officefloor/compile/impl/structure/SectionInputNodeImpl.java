@@ -17,11 +17,13 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import net.officefloor.compile.impl.issues.FailCompilerIssues;
 import net.officefloor.compile.impl.section.OfficeSectionInputTypeImpl;
 import net.officefloor.compile.impl.section.SectionInputTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
+import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionInputNode;
@@ -31,6 +33,11 @@ import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SubSectionInput;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.manage.FunctionManager;
+import net.officefloor.frame.api.manage.InvalidParameterTypeException;
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
 
 /**
  * {@link SectionInputNode} node.
@@ -79,6 +86,11 @@ public class SectionInputNodeImpl implements SectionInputNode {
 			this.parameterType = parameterType;
 		}
 	}
+
+	/**
+	 * {@link ExternalServiceProxyFunctionManager}.
+	 */
+	private ExternalServiceProxyFunctionManager externalFunctionManager = null;
 
 	/**
 	 * Instantiate.
@@ -141,6 +153,30 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	 */
 
 	@Override
+	public void loadExternalServicing(Office office) throws UnknownFunctionException {
+
+		// Determine if externally triggered
+		if (this.externalFunctionManager == null) {
+			return; // not externally triggered
+		}
+
+		// Obtain the function node servicing this section input
+		ManagedFunctionNode functionNode = LinkUtil.retrieveTarget(this, ManagedFunctionNode.class,
+				new FailCompilerIssues());
+		if (functionNode == null) {
+			// Compiled, so this should not occur
+			return; // must have function
+		}
+
+		// Obtain the corresponding function manager
+		String functionName = functionNode.getQualifiedFunctionName();
+		FunctionManager functionManager = office.getFunctionManager(functionName);
+
+		// Load the function to the proxy
+		this.externalFunctionManager.delegate = functionManager;
+	}
+
+	@Override
 	public SectionInputType loadSectionInputType(CompileContext compileContext) {
 
 		// Ensure have input name
@@ -199,6 +235,18 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		return this.inputName;
 	}
 
+	@Override
+	public FunctionManager getFunctionManager() {
+
+		// Lazy create the function manager
+		if (this.externalFunctionManager == null) {
+			this.externalFunctionManager = new ExternalServiceProxyFunctionManager();
+		}
+
+		// Return the external function manager
+		return this.externalFunctionManager;
+	}
+
 	/*
 	 * =================== LinkFlowNode ============================
 	 */
@@ -217,6 +265,32 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	@Override
 	public LinkFlowNode getLinkedFlowNode() {
 		return this.linkedFlowNode;
+	}
+
+	/**
+	 * Proxy {@link FunctionManager} for external service handling.
+	 */
+	private static class ExternalServiceProxyFunctionManager implements FunctionManager {
+
+		/**
+		 * Delegate {@link FunctionManager}.
+		 */
+		private FunctionManager delegate = null;
+
+		@Override
+		public Object getDifferentiator() {
+			return this.delegate.getDifferentiator();
+		}
+
+		@Override
+		public Class<?> getParameterType() {
+			return this.delegate.getParameterType();
+		}
+
+		@Override
+		public void invokeProcess(Object parameter, FlowCallback callback) throws InvalidParameterTypeException {
+			this.delegate.invokeProcess(parameter, callback);
+		}
 	}
 
 }
