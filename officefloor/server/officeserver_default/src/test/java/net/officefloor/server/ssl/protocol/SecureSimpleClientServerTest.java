@@ -34,7 +34,7 @@ import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.server.http.protocol.CommunicationProtocolSource;
 import net.officefloor.server.impl.SimpleClientServerTest;
-import net.officefloor.server.ssl.OfficeFloorDefaultSslEngineSource;
+import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
 import net.officefloor.server.ssl.protocol.SslCommunicationProtocol;
 
 /**
@@ -56,7 +56,7 @@ public class SecureSimpleClientServerTest extends SimpleClientServerTest {
 		super.setUp();
 
 		// Create the client side of connection
-		SSLContext context = OfficeFloorDefaultSslEngineSource.createClientSslContext(null);
+		SSLContext context = OfficeFloorDefaultSslContextSource.createClientSslContext(null);
 		this.clientEngine = context.createSSLEngine("server", 443);
 		this.clientEngine.setUseClientMode(true);
 
@@ -106,7 +106,7 @@ public class SecureSimpleClientServerTest extends SimpleClientServerTest {
 	protected Properties getCommunicationProtocolProperties() {
 		Properties properties = new Properties();
 		properties.setProperty(SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE,
-				OfficeFloorDefaultSslEngineSource.class.getName());
+				OfficeFloorDefaultSslContextSource.class.getName());
 		return properties;
 	}
 

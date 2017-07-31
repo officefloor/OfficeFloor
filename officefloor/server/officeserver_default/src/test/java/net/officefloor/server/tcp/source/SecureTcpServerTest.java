@@ -27,7 +27,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
-import net.officefloor.server.ssl.OfficeFloorDefaultSslEngineSource;
+import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
 import net.officefloor.server.ssl.protocol.SslCommunicationProtocol;
 import net.officefloor.server.tcp.source.SecureTcpServerSocketManagedObjectSource;
 import net.officefloor.server.tcp.source.TcpServerSocketManagedObjectSource;
@@ -54,7 +54,7 @@ public class SecureTcpServerTest extends AbstractTcpServerTestCase {
 				SecureTcpServerSocketManagedObjectSource.class, officeName);
 		serverSocketBuilder.addProperty(TcpServerSocketManagedObjectSource.PROPERTY_PORT, String.valueOf(port));
 		serverSocketBuilder.addProperty(SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE,
-				OfficeFloorDefaultSslEngineSource.class.getName());
+				OfficeFloorDefaultSslContextSource.class.getName());
 		serverSocketBuilder.setTimeout(10000);
 
 		// Register the necessary teams for socket listening
@@ -76,7 +76,7 @@ public class SecureTcpServerTest extends AbstractTcpServerTestCase {
 	protected Socket createClientSocket(InetAddress address, int port) throws Exception {
 
 		// Create the secure connected socket
-		SSLContext context = OfficeFloorDefaultSslEngineSource.createClientSslContext(null);
+		SSLContext context = OfficeFloorDefaultSslContextSource.createClientSslContext(null);
 		SSLSocketFactory socketFactory = context.getSocketFactory();
 		Socket socket = socketFactory.createSocket(address, port);
 

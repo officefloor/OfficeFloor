@@ -24,9 +24,8 @@ import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
-import net.officefloor.compile.spi.officefloor.ServiceHandler;
-import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionContext;
-import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
+import net.officefloor.frame.api.manage.FunctionManager;
 
 /**
  * HTTP Server.
@@ -38,12 +37,13 @@ public class HttpServer {
 	/**
 	 * Configures the {@link HttpServer}.
 	 * 
-	 * @param sourceContext
-	 *            {@link SourceContext}.
+	 * @param officeFloorDeployer
+	 *            {@link OfficeFloorDeployer}.
+	 * @param context
+	 *            {@link OfficeFloorSourceContext}.
 	 */
-	public static void configureHttpServer(OfficeFloorDeployer officeFloorDeployer,
-			OfficeFloorExtensionContext context) {
-
+	public static void configureHttpServer(OfficeFloorDeployer officeFloorDeployer, OfficeFloorSourceContext context) {
+		// TODO configure HTTP Server from properties
 	}
 
 	/**
@@ -70,11 +70,11 @@ public class HttpServer {
 	 * @param officeFloorDeployer
 	 *            {@link OfficeFloorDeployer}.
 	 * @param context
-	 *            {@link OfficeFloorExtensionContext}.
+	 *            {@link OfficeFloorSourceContext}.
 	 */
 	public static void configureHttpServer(int httpPort, int httpsPort, HttpServerImplementation implementation,
 			SSLContext sslContext, String serviceOfficeName, String serviceSectionName, String serviceSectionInputName,
-			OfficeFloorDeployer officeFloorDeployer, OfficeFloorExtensionContext context) {
+			OfficeFloorDeployer officeFloorDeployer, OfficeFloorSourceContext context) {
 
 		// Obtain the deployed office
 		DeployedOffice office = officeFloorDeployer.getDeployedOffice(serviceOfficeName);
@@ -101,8 +101,13 @@ public class HttpServer {
 			}
 
 			@Override
-			public void addServiceHandler(ServiceHandler serviceHandler) {
-				officeInput.addServiceHandler(serviceHandler);
+			public DeployedOfficeInput getInternalServiceHandler() {
+				return officeInput;
+			}
+
+			@Override
+			public FunctionManager getExternalServiceHandler() {
+				return officeInput.getFunctionManager();
 			}
 
 			@Override
@@ -111,7 +116,7 @@ public class HttpServer {
 			}
 
 			@Override
-			public OfficeFloorExtensionContext getOfficeFloorExtensionContext() {
+			public OfficeFloorSourceContext getOfficeFloorSourceContext() {
 				return context;
 			}
 		});

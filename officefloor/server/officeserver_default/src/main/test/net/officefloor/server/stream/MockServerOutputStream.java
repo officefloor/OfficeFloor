@@ -27,10 +27,6 @@ import net.officefloor.server.http.protocol.WriteBuffer;
 import net.officefloor.server.http.protocol.WriteBufferEnum;
 import net.officefloor.server.impl.ArrayWriteBuffer;
 import net.officefloor.server.impl.BufferWriteBuffer;
-import net.officefloor.server.stream.ServerOutputStream;
-import net.officefloor.server.stream.ServerWriter;
-import net.officefloor.server.stream.ServerWriterImpl;
-import net.officefloor.server.stream.WriteBufferReceiver;
 import net.officefloor.server.stream.impl.ServerOutputStreamImpl;
 
 /**
@@ -38,7 +34,7 @@ import net.officefloor.server.stream.impl.ServerOutputStreamImpl;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockServerOutputStream {
+public class MockServerOutputStream implements WriteBufferReceiver {
 
 	/**
 	 * Default send buffer size.

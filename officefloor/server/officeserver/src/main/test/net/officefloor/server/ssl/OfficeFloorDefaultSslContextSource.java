@@ -40,7 +40,7 @@ import net.officefloor.frame.api.source.SourceContext;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorDefaultSslEngineSource implements SslContextSource {
+public class OfficeFloorDefaultSslContextSource implements SslContextSource {
 
 	/**
 	 * Property to specify the SSL protocol to use.
@@ -50,7 +50,7 @@ public class OfficeFloorDefaultSslEngineSource implements SslContextSource {
 	/**
 	 * {@link Logger}.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(OfficeFloorDefaultSslEngineSource.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(OfficeFloorDefaultSslContextSource.class.getName());
 
 	/**
 	 * Creates the {@link OfficeFloor} default server {@link SSLContext}.
@@ -151,7 +151,7 @@ public class OfficeFloorDefaultSslEngineSource implements SslContextSource {
 	private static KeyStore createOfficeFloorDefaultKeyStore() throws Exception {
 
 		// Obtain the default key store content
-		String officeFloorDefaultKeysPath = OfficeFloorDefaultSslEngineSource.class.getPackage().getName().replace('.',
+		String officeFloorDefaultKeysPath = OfficeFloorDefaultSslContextSource.class.getPackage().getName().replace('.',
 				'/') + "/OfficeFloorDefault.jks";
 		InputStream officeFloorDefaultKeys = Thread.currentThread().getContextClassLoader()
 				.getResourceAsStream(officeFloorDefaultKeysPath);
@@ -169,7 +169,7 @@ public class OfficeFloorDefaultSslEngineSource implements SslContextSource {
 	}
 
 	/*
-	 * ============== SslEngineSource ==========================
+	 * ============== SslContextSource ==========================
 	 */
 
 	@Override
@@ -177,7 +177,7 @@ public class OfficeFloorDefaultSslEngineSource implements SslContextSource {
 
 		// Indicate loading generic OfficeFloor key store
 		if ((!(context.isLoadingType())) && (LOGGER.isLoggable(Level.INFO))) {
-			LOGGER.log(Level.INFO, "Using default OfficeFloor Key Store. "
+			LOGGER.log(Level.WARNING, "Using default OfficeFloor Key Store. "
 					+ "This should only be used for testing and NEVER in production.");
 		}
 

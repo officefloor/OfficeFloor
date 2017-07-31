@@ -19,9 +19,10 @@ package net.officefloor.server.http;
 
 import javax.net.ssl.SSLContext;
 
+import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
-import net.officefloor.compile.spi.officefloor.ServiceHandler;
-import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionContext;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
+import net.officefloor.frame.api.manage.FunctionManager;
 
 /**
  * Context for the {@link HttpServerImplementation}.
@@ -59,12 +60,18 @@ public interface HttpServerImplementationContext {
 	SSLContext getSslContext();
 
 	/**
-	 * Configures a {@link ServiceHandler}.
+	 * Obtains the {@link DeployedOfficeInput} for internal invoked servicing.
 	 * 
-	 * @param serviceHandler
-	 *            {@link ServiceHandler}.
+	 * @return {@link DeployedOfficeInput} for internal invoked servicing.
 	 */
-	void addServiceHandler(ServiceHandler serviceHandler);
+	DeployedOfficeInput getInternalServiceHandler();
+
+	/**
+	 * Obtains the {@link FunctionManager} for external invoked servicing.
+	 * 
+	 * @return {@link FunctionManager} for external invoked servicing.
+	 */
+	FunctionManager getExternalServiceHandler();
 
 	/**
 	 * Obtains the {@link OfficeFloorDeployer} to configure the
@@ -75,12 +82,12 @@ public interface HttpServerImplementationContext {
 	OfficeFloorDeployer getOfficeFloorDeployer();
 
 	/**
-	 * Obtains the {@link OfficeFloorExtensionContext} to obtain details to
+	 * Obtains the {@link OfficeFloorSourceContext} to obtain details to
 	 * configure the {@link HttpServerImplementation}.
 	 * 
-	 * @return {@link OfficeFloorExtensionContext} to obtain details to
-	 *         configure the {@link HttpServerImplementation}.
+	 * @return {@link OfficeFloorSourceContext} to obtain details to configure
+	 *         the {@link HttpServerImplementation}.
 	 */
-	OfficeFloorExtensionContext getOfficeFloorExtensionContext();
+	OfficeFloorSourceContext getOfficeFloorSourceContext();
 
 }

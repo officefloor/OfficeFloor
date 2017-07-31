@@ -57,7 +57,7 @@ import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.server.http.source.HttpsServerSocketManagedObjectSource;
 import net.officefloor.server.impl.AbstractServerSocketManagedObjectSource;
-import net.officefloor.server.ssl.OfficeFloorDefaultSslEngineSource;
+import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
 import net.officefloor.server.ssl.SslContextSource;
 import net.officefloor.server.stream.impl.ServerInputStreamImpl;
 
@@ -273,7 +273,7 @@ public class HttpTestUtil {
 	 * @see #configureHttps(HttpClientBuilder)
 	 */
 	public static Class<? extends SslContextSource> getSslEngineSourceClass() {
-		return OfficeFloorDefaultSslEngineSource.class;
+		return OfficeFloorDefaultSslContextSource.class;
 	}
 
 	/**
@@ -336,7 +336,7 @@ public class HttpTestUtil {
 	 * {@link LayeredConnectionSocketFactory} to connect to the
 	 * {@link MockHttpServer} over secure connection.
 	 * <p>
-	 * This allows working with a {@link OfficeFloorDefaultSslEngineSource}.
+	 * This allows working with a {@link OfficeFloorDefaultSslContextSource}.
 	 */
 	private static class OfficeFloorDefaultSocketFactory implements LayeredConnectionSocketFactory {
 
@@ -350,7 +350,7 @@ public class HttpTestUtil {
 			// Create the secure connected socket
 			SSLContext sslContext;
 			try {
-				sslContext = OfficeFloorDefaultSslEngineSource.createClientSslContext(null);
+				sslContext = OfficeFloorDefaultSslContextSource.createClientSslContext(null);
 
 			} catch (Exception ex) {
 				// Propagate failure in configuring OfficeFloor default key
