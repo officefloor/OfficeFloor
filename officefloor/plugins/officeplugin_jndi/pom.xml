@@ -44,7 +44,7 @@
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.server</groupId>
-			<artifactId>officeserver</artifactId>
+			<artifactId>officeserver_default</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

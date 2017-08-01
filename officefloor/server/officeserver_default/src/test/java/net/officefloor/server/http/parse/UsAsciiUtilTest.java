@@ -18,7 +18,7 @@
 package net.officefloor.server.http.parse;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.server.http.parse.UsAsciiUtil;
+import net.officefloor.server.http.UsAsciiUtil;
 
 /**
  * Tests the {@link UsAsciiUtil}.

@@ -23,7 +23,7 @@ import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniser;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniserImpl;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpTestUtil;
-import net.officefloor.server.http.parse.UsAsciiUtil;
+import net.officefloor.server.http.UsAsciiUtil;
 
 /**
  * Tests the {@link HttpRequestTokeniser}.

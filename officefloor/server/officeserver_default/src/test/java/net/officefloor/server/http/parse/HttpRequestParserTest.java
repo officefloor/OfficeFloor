@@ -24,9 +24,9 @@ import java.util.Arrays;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.UsAsciiUtil;
 import net.officefloor.server.http.parse.HttpRequestParseException;
 import net.officefloor.server.http.parse.HttpRequestParser;
-import net.officefloor.server.http.parse.UsAsciiUtil;
 import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.server.http.protocol.HttpStatus;
 

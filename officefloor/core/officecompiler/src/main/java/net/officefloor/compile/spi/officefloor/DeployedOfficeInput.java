@@ -35,6 +35,15 @@ public interface DeployedOfficeInput {
 	String getDeployedOfficeInputName();
 
 	/**
+	 * Obtains the {@link DeployedOffice} containing this
+	 * {@link DeployedOfficeInput}.
+	 * 
+	 * @return {@link DeployedOffice} containing this
+	 *         {@link DeployedOfficeInput}.
+	 */
+	DeployedOffice getDeployedOffice();
+
+	/**
 	 * <p>
 	 * Obtains the {@link FunctionManager} to externally trigger this
 	 * {@link DeployedOfficeInput}.

@@ -83,7 +83,7 @@ public class AutoWireHttpsSocketTest extends OfficeFrameTestCase {
 		// Register the managed object source
 		this.compile.officeFloor(
 				(context) -> HttpsServerSocketManagedObjectSource.configure(context.getOfficeFloorDeployer(), this.port,
-						null, context.getDeployedOffice(), "TEST", "handleRequest"));
+						null, context.getDeployedOffice().getDeployedOfficeInput("TEST", "handleRequest")));
 
 		// Open the OfficeFloor
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
@@ -108,9 +108,9 @@ public class AutoWireHttpsSocketTest extends OfficeFrameTestCase {
 	public void testCallAutoWiredHttpsServer() throws Exception {
 
 		// Register the managed object source
-		this.compile.officeFloor(
-				(context) -> HttpsServerSocketManagedObjectSource.configure(context.getOfficeFloorDeployer(), this.port,
-						HttpTestUtil.getSslEngineSourceClass(), context.getDeployedOffice(), "TEST", "handleRequest"));
+		this.compile.officeFloor((context) -> HttpsServerSocketManagedObjectSource.configure(
+				context.getOfficeFloorDeployer(), this.port, HttpTestUtil.createTestServerSslContext(),
+				context.getDeployedOffice().getDeployedOfficeInput("TEST", "handleRequest")));
 
 		// Open the OfficeFloor
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();

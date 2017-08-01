@@ -134,6 +134,11 @@
 				<artifactId>officeserver</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>net.officefloor.server</groupId>
+				<artifactId>officeserver_default</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<!-- Plugins -->
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>

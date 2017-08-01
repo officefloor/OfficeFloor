@@ -49,7 +49,7 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloorContext;
-import net.officefloor.server.http.HttpHeader;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.conversation.HttpEntity;
 import net.officefloor.server.http.conversation.impl.HttpEntityImpl;
 import net.officefloor.server.http.conversation.impl.HttpRequestImpl;
@@ -58,7 +58,6 @@ import net.officefloor.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.server.http.source.HttpsServerSocketManagedObjectSource;
 import net.officefloor.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
-import net.officefloor.server.ssl.SslContextSource;
 import net.officefloor.server.stream.impl.ServerInputStreamImpl;
 
 /**
@@ -127,7 +126,8 @@ public class HttpTestUtil {
 	public static OfficeFloorInputManagedObject configureTestHttpServer(CompileOfficeFloorContext context, int port,
 			int httpsPort, String sectionName, String sectionInputName) {
 		return HttpsServerSocketManagedObjectSource.configure(context.getOfficeFloorDeployer(), port, httpsPort,
-				getSslEngineSourceClass(), context.getDeployedOffice(), sectionName, sectionInputName);
+				createTestServerSslContext(),
+				context.getDeployedOffice().getDeployedOfficeInput(sectionName, sectionInputName));
 	}
 
 	/**
@@ -205,7 +205,7 @@ public class HttpTestUtil {
 	 * @param builder
 	 *            {@link HttpClientBuilder}.
 	 * 
-	 * @see #getSslEngineSourceClass()
+	 * @see #createTestServerSslContext()
 	 */
 	public static void configureHttps(HttpClientBuilder builder) {
 		// Provide SSL Socket Factory
@@ -265,20 +265,21 @@ public class HttpTestUtil {
 	}
 
 	/**
-	 * Obtains the {@link SslContextSource} for the corresponding configured
-	 * HTTPS.
+	 * Creates the {@link SSLContext}.
 	 * 
-	 * @return {@link SslContextSource} for the corresponding configured HTTPS.
-	 * 
-	 * @see #configureHttps(HttpClientBuilder)
+	 * @return {@link SSLContext}.
 	 */
-	public static Class<? extends SslContextSource> getSslEngineSourceClass() {
-		return OfficeFloorDefaultSslContextSource.class;
+	public static SSLContext createTestServerSslContext() {
+		try {
+			return OfficeFloorDefaultSslContextSource.createServerSslContext(null);
+		} catch (Exception ex) {
+			// Should always create, otherwise fail test
+			throw OfficeFrameTestCase.fail(ex);
+		}
 	}
 
 	/**
-	 * Creates a {@link net.officefloor.server.http.HttpRequest}
-	 * for testing.
+	 * Creates a {@link net.officefloor.server.http.HttpRequest} for testing.
 	 * 
 	 * @param method
 	 *            HTTP method (GET, POST).
@@ -286,18 +287,16 @@ public class HttpTestUtil {
 	 *            Request URI.
 	 * @param entity
 	 *            Contents of the
-	 *            {@link net.officefloor.server.http.HttpRequest}
-	 *            entity.
+	 *            {@link net.officefloor.server.http.HttpRequest} entity.
 	 * @param headerNameValues
 	 *            {@link HttpHeader} name values.
 	 * @return {@link net.officefloor.server.http.HttpRequest}.
 	 * @throws Exception
 	 *             If fails to create the
-	 *             {@link net.officefloor.server.http.HttpRequest}
-	 *             .
+	 *             {@link net.officefloor.server.http.HttpRequest} .
 	 */
-	public static net.officefloor.server.http.HttpRequest createHttpRequest(String method,
-			String requestUri, String entity, String... headerNameValues) throws Exception {
+	public static net.officefloor.server.http.HttpRequest createHttpRequest(String method, String requestUri,
+			String entity, String... headerNameValues) throws Exception {
 
 		// Obtain the entity data
 		final Charset charset = AbstractServerSocketManagedObjectSource.getCharset(null);

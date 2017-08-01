@@ -30,7 +30,7 @@ import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.parse.UsAsciiUtil;
+import net.officefloor.server.http.UsAsciiUtil;
 import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.server.http.protocol.HttpCommunicationProtocol;
 import net.officefloor.server.impl.AbstractClientServerTestCase;

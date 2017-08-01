@@ -26,7 +26,7 @@ import java.util.Properties;
 import junit.framework.TestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpResponse;
-import net.officefloor.server.http.parse.UsAsciiUtil;
+import net.officefloor.server.http.UsAsciiUtil;
 import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.server.stream.MockServerOutputStream;
 import net.officefloor.server.stream.ServerOutputStream;

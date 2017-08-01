@@ -667,8 +667,10 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 * Ensure can create {@link SectionInputNode}.
 	 */
 	public void testCreateSectionInputNode() {
+		this.recordReturn(this.section, this.section.getOfficeNode(), this.office);
 		SectionInputNode node = this.doTest(() -> {
 			SectionInputNode input = this.context.createSectionInputNode("INPUT", this.section);
+			assertEquals("Incorrect office", this.office, input.getDeployedOffice());
 			return input;
 		});
 		assertNode(node, "INPUT", "Section Input", null, this.section);

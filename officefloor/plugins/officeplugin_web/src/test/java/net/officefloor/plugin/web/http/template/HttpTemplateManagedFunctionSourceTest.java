@@ -53,7 +53,7 @@ import net.officefloor.plugin.web.http.template.parse.LinkHttpTemplateSectionCon
 import net.officefloor.plugin.web.http.template.parse.PropertyHttpTemplateSectionContentImpl;
 import net.officefloor.plugin.web.http.template.parse.StaticHttpTemplateSectionContentImpl;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.parse.UsAsciiUtil;
+import net.officefloor.server.http.UsAsciiUtil;
 
 /**
  * Tests the {@link HttpTemplateManagedFunctionSource}.

@@ -78,13 +78,28 @@ public class SslCommunicationProtocol implements CommunicationProtocolSource, Co
 
 	/**
 	 * Initiate.
+	 *
+	 * @param sslContext
+	 *            {@link SSLContext}.
+	 * @param wrappedCommunicationProtocolSource
+	 *            {@link CommunicationProtocolSource} to be wrapped with this
+	 *            SSL {@link CommunicationProtocolSource}.
+	 */
+	public SslCommunicationProtocol(SSLContext sslContext,
+			CommunicationProtocolSource wrappedCommunicationProtocolSource) {
+		this.sslContext = sslContext;
+		this.wrappedCommunicationProtocolSource = wrappedCommunicationProtocolSource;
+	}
+
+	/**
+	 * Initiate.
 	 * 
 	 * @param wrappedCommunicationProtocolSource
 	 *            {@link CommunicationProtocolSource} to be wrapped with this
 	 *            SSL {@link CommunicationProtocolSource}.
 	 */
 	public SslCommunicationProtocol(CommunicationProtocolSource wrappedCommunicationProtocolSource) {
-		this.wrappedCommunicationProtocolSource = wrappedCommunicationProtocolSource;
+		this(null, wrappedCommunicationProtocolSource);
 	}
 
 	/*
@@ -110,16 +125,18 @@ public class SslCommunicationProtocol implements CommunicationProtocolSource, Co
 				.createCommunicationProtocol(configurationContext, protocolContext);
 
 		// Obtain the SSL Context
-		String sslContextSourceClassName = mosContext.getProperty(PROPERTY_SSL_ENGINE_SOURCE, null);
-		SslContextSource sslContextSource;
-		if (sslContextSourceClassName == null) {
-			// Use default SSL Engine source
-			sslContextSource = new DefaultSslContextSource();
-		} else {
-			// Instantiate specified source
-			sslContextSource = (SslContextSource) mosContext.loadClass(sslContextSourceClassName).newInstance();
+		if (this.sslContext == null) {
+			String sslContextSourceClassName = mosContext.getProperty(PROPERTY_SSL_ENGINE_SOURCE, null);
+			SslContextSource sslContextSource;
+			if (sslContextSourceClassName == null) {
+				// Use default SSL Engine source
+				sslContextSource = new DefaultSslContextSource();
+			} else {
+				// Instantiate specified source
+				sslContextSource = (SslContextSource) mosContext.loadClass(sslContextSourceClassName).newInstance();
+			}
+			this.sslContext = sslContextSource.createSslContext(mosContext);
 		}
-		this.sslContext = sslContextSource.createSslContext(mosContext);
 
 		// Create the flow to execute the SSL tasks
 		this.sslRunnableFlowIndex = configurationContext.addFlow(Runnable.class).setLabel("SSL_RUNNABLE").getIndex();

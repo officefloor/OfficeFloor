@@ -17,15 +17,12 @@
  */
 package net.officefloor.server.http.source;
 
-import net.officefloor.compile.ManagedObjectSourceService;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
-import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -38,8 +35,7 @@ import net.officefloor.server.impl.AbstractServerSocketManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpServerSocketManagedObjectSource extends AbstractServerSocketManagedObjectSource
-		implements ManagedObjectSourceService<None, Indexed, HttpServerSocketManagedObjectSource> {
+public class HttpServerSocketManagedObjectSource extends AbstractServerSocketManagedObjectSource {
 
 	/**
 	 * Convenience method to configure the
@@ -84,20 +80,6 @@ public class HttpServerSocketManagedObjectSource extends AbstractServerSocketMan
 
 		// Return the input managed object
 		return input;
-	}
-
-	/*
-	 * ==================== ManagedObjectSourceService ====================
-	 */
-
-	@Override
-	public String getManagedObjectSourceAlias() {
-		return "HTTP_SERVER";
-	}
-
-	@Override
-	public Class<HttpServerSocketManagedObjectSource> getManagedObjectSourceClass() {
-		return HttpServerSocketManagedObjectSource.class;
 	}
 
 	/*

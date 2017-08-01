@@ -17,24 +17,21 @@
  */
 package net.officefloor.server.http.source;
 
-import net.officefloor.compile.ManagedObjectSourceService;
-import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.office.OfficeSectionInput;
+import javax.net.ssl.SSLContext;
+
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
-import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
+import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.protocol.CommunicationProtocolSource;
 import net.officefloor.server.http.protocol.HttpCommunicationProtocol;
 import net.officefloor.server.impl.AbstractServerSocketManagedObjectSource;
-import net.officefloor.server.ssl.SslContextSource;
 import net.officefloor.server.ssl.protocol.SslCommunicationProtocol;
 
 /**
@@ -42,8 +39,7 @@ import net.officefloor.server.ssl.protocol.SslCommunicationProtocol;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpsServerSocketManagedObjectSource extends AbstractServerSocketManagedObjectSource
-		implements ManagedObjectSourceService<None, Indexed, HttpsServerSocketManagedObjectSource> {
+public class HttpsServerSocketManagedObjectSource extends AbstractServerSocketManagedObjectSource {
 
 	/**
 	 * Convenience method to configure the
@@ -53,28 +49,23 @@ public class HttpsServerSocketManagedObjectSource extends AbstractServerSocketMa
 	 *            {@link OfficeFloorDeployer}.
 	 * @param port
 	 *            Port to listen for HTTPS requests.
-	 * @param sslEngineSourceClass
-	 *            {@link SslContextSource} class. May be <code>null</code>.
-	 * @param office
-	 *            {@link DeployedOffice}.
-	 * @param sectionName
-	 *            Name of the {@link OfficeSection} servicing the requests.
-	 * @param sectionInputName
-	 *            Name of the {@link OfficeSectionInput} on the
-	 *            {@link OfficeSection} servicing the requests.
+	 * @param sslContext
+	 *            {@link SslContext}. May be <code>null</code>.
+	 * @param officeInput
+	 *            {@link DeployedOfficeInput} to service {@link HttpRequest}
+	 *            instances.
 	 * @return {@link OfficeFloorInputManagedObject}.
 	 */
-	public static OfficeFloorInputManagedObject configure(OfficeFloorDeployer deployer, int port,
-			Class<? extends SslContextSource> sslEngineSourceClass, DeployedOffice office, String sectionName,
-			String sectionInputName) {
+	public static OfficeFloorInputManagedObject configure(OfficeFloorDeployer deployer, int port, SSLContext sslContext,
+			DeployedOfficeInput officeInput) {
 
 		// Add this managed object source
 		OfficeFloorManagedObjectSource mos = deployer.addManagedObjectSource("HTTPS_SOURCE_" + port,
-				HttpsServerSocketManagedObjectSource.class.getName());
+				new HttpsServerSocketManagedObjectSource(sslContext));
 		mos.addProperty(PROPERTY_PORT, String.valueOf(port));
-		if (sslEngineSourceClass != null) {
-			mos.addProperty(SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE, sslEngineSourceClass.getName());
-		}
+
+		// Obtain the office
+		DeployedOffice office = officeInput.getDeployedOffice();
 
 		// Managed by office
 		deployer.link(mos.getManagingOffice(), office);
@@ -86,8 +77,7 @@ public class HttpsServerSocketManagedObjectSource extends AbstractServerSocketMa
 				deployer.addTeam("SSL_RUNNER", ExecutorCachedTeamSource.class.getName()));
 
 		// Handle servicing of requests
-		deployer.link(mos.getManagedObjectFlow("HANDLE_HTTP_REQUEST"),
-				office.getDeployedOfficeInput(sectionName, sectionInputName));
+		deployer.link(mos.getManagedObjectFlow("HANDLE_HTTP_REQUEST"), officeInput);
 
 		// Create the input managed object
 		OfficeFloorInputManagedObject input = deployer.addInputManagedObject("HTTP_" + port);
@@ -109,20 +99,15 @@ public class HttpsServerSocketManagedObjectSource extends AbstractServerSocketMa
 	 *            Port to listen for HTTP requests.
 	 * @param httpsPort
 	 *            Port to listen for HTTPS requests.
-	 * @param sslEngineSourceClass
-	 *            {@link SslContextSource} class. May be <code>null</code>.
-	 * @param office
-	 *            {@link DeployedOffice}.
-	 * @param sectionName
-	 *            Name of the {@link OfficeSection} servicing the requests.
-	 * @param sectionInputName
-	 *            Name of the {@link OfficeSectionInput} on the
-	 *            {@link OfficeSection} servicing the requests.
+	 * @param sslContext
+	 *            {@link SslContext}. May be <code>null</code>.
+	 * @param officeInput
+	 *            {@link DeployedOfficeInput} to service {@link HttpRequest}
+	 *            instances.
 	 * @return {@link OfficeFloorInputManagedObject}.
 	 */
 	public static OfficeFloorInputManagedObject configure(OfficeFloorDeployer deployer, int httpPort, int httpsPort,
-			Class<? extends SslContextSource> sslEngineSourceClass, DeployedOffice office, String sectionName,
-			String sectionInputName) {
+			SSLContext sslContext, DeployedOfficeInput officeInput) {
 
 		// Add HTTP managed object source
 		OfficeFloorManagedObjectSource http = deployer.addManagedObjectSource("HTTP_SOURCE",
@@ -131,11 +116,11 @@ public class HttpsServerSocketManagedObjectSource extends AbstractServerSocketMa
 
 		// Add HTTPS managed object source
 		OfficeFloorManagedObjectSource https = deployer.addManagedObjectSource("HTTPS_SOURCE",
-				HttpsServerSocketManagedObjectSource.class.getName());
+				new HttpsServerSocketManagedObjectSource(sslContext));
 		https.addProperty(PROPERTY_PORT, String.valueOf(httpsPort));
-		if (sslEngineSourceClass != null) {
-			https.addProperty(SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE, sslEngineSourceClass.getName());
-		}
+
+		// Obtain the office
+		DeployedOffice office = officeInput.getDeployedOffice();
 
 		// Managed by office
 		deployer.link(http.getManagingOffice(), office);
@@ -153,9 +138,8 @@ public class HttpsServerSocketManagedObjectSource extends AbstractServerSocketMa
 				deployer.addTeam("SSL_RUNNER", ExecutorCachedTeamSource.class.getName()));
 
 		// Handle servicing of requests
-		DeployedOfficeInput servicer = office.getDeployedOfficeInput(sectionName, sectionInputName);
-		deployer.link(http.getManagedObjectFlow("HANDLER"), servicer);
-		deployer.link(https.getManagedObjectFlow("HANDLER"), servicer);
+		deployer.link(http.getManagedObjectFlow("HANDLER"), officeInput);
+		deployer.link(https.getManagedObjectFlow("HANDLER"), officeInput);
 
 		// Create the input managed object
 		OfficeFloorInputManagedObject input = deployer.addInputManagedObject("HTTP");
@@ -167,18 +151,26 @@ public class HttpsServerSocketManagedObjectSource extends AbstractServerSocketMa
 		return input;
 	}
 
-	/*
-	 * ==================== ManagedObjectSourceService ====================
+	/**
+	 * {@link SSLContext}.
 	 */
+	private final SSLContext sslContext;
 
-	@Override
-	public String getManagedObjectSourceAlias() {
-		return "HTTPS_SERVER";
+	/**
+	 * Instantiate.
+	 * 
+	 * @param sslContext
+	 *            {@link SSLContext}.
+	 */
+	public HttpsServerSocketManagedObjectSource(SSLContext sslContext) {
+		this.sslContext = sslContext;
 	}
 
-	@Override
-	public Class<HttpsServerSocketManagedObjectSource> getManagedObjectSourceClass() {
-		return HttpsServerSocketManagedObjectSource.class;
+	/**
+	 * Default constructor for {@link Class} name configuration.
+	 */
+	public HttpsServerSocketManagedObjectSource() {
+		this(null);
 	}
 
 	/*
@@ -187,7 +179,7 @@ public class HttpsServerSocketManagedObjectSource extends AbstractServerSocketMa
 
 	@Override
 	protected CommunicationProtocolSource createCommunicationProtocolSource() {
-		return new SslCommunicationProtocol(new HttpCommunicationProtocol());
+		return new SslCommunicationProtocol(this.sslContext, new HttpCommunicationProtocol());
 	}
 
 }

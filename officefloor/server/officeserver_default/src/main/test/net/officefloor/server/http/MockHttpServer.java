@@ -111,7 +111,7 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase imp
 					officeName);
 			this.constructManagedObjectSourceTeam(MO_NAME, "SSL", ExecutorCachedTeamSource.class);
 			serverSocketBuilder.addProperty(SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE,
-					HttpTestUtil.getSslEngineSourceClass().getName());
+					HttpTestUtil.createTestServerSslContext().getClass().getName());
 		} else {
 			// Setup non-secure HTTP server
 			this.isServerSecure = false;
