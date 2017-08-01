@@ -42,7 +42,8 @@ import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedOb
 import net.officefloor.plugin.web.http.route.HttpRouteFunction;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
-import net.officefloor.server.http.HttpTestUtil;
+import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.HttpServerTestUtil;
 import net.officefloor.server.http.ServerHttpConnection;
 
 /**
@@ -83,13 +84,13 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 		// Configure the client (to not redirect)
 		HttpClientBuilder builder = HttpClientBuilder.create();
-		HttpTestUtil.configureHttps(builder);
-		HttpTestUtil.configureNoRedirects(builder);
+		HttpClientTestUtil.configureHttps(builder);
+		HttpClientTestUtil.configureNoRedirects(builder);
 		this.client = builder.build();
 
 		// Configure the HTTP server
 		this.compiler.officeFloor((context) -> {
-			HttpTestUtil.configureTestHttpServer(context, 7878, 7979, "ROUTE", "route");
+			HttpServerTestUtil.configureTestHttpServer(context, 7878, 7979, "ROUTE", "route");
 		});
 	}
 

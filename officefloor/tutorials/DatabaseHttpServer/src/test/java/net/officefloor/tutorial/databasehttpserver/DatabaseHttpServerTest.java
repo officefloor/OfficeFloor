@@ -30,7 +30,7 @@ import org.hsqldb.jdbc.jdbcDataSource;
 
 import junit.framework.TestCase;
 import net.officefloor.OfficeFloorMain;
-import net.officefloor.server.http.HttpTestUtil;
+import net.officefloor.server.http.HttpClientTestUtil;
 
 /**
  * Tests the {@link DatabaseHttpServer}.
@@ -95,7 +95,7 @@ public class DatabaseHttpServerTest extends TestCase {
 	 * Requests page from HTTP Server.
 	 */
 	// START SNIPPET: test
-	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
+	private final CloseableHttpClient client = HttpClientTestUtil.createHttpClient();
 
 	public void testInteraction() throws Exception {
 

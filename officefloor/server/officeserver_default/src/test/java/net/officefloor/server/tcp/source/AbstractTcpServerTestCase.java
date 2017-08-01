@@ -31,7 +31,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
-import net.officefloor.server.http.HttpTestUtil;
+import net.officefloor.server.http.HttpServerTestUtil;
 import net.officefloor.server.tcp.ServerTcpConnection;
 
 /**
@@ -107,7 +107,7 @@ public abstract class AbstractTcpServerTestCase extends AbstractOfficeConstructT
 		this.setVerbose(true);
 
 		// Specify the port
-		PORT = HttpTestUtil.getAvailablePort();
+		PORT = HttpServerTestUtil.getAvailablePort();
 
 		// Names to handle ServerTcpConnection
 		final String MO_NAME = "MO";

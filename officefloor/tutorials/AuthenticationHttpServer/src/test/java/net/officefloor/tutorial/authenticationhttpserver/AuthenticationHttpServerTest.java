@@ -26,7 +26,7 @@ import org.apache.http.util.EntityUtils;
 
 import junit.framework.TestCase;
 import net.officefloor.OfficeFloorMain;
-import net.officefloor.server.http.HttpTestUtil;
+import net.officefloor.server.http.HttpClientTestUtil;
 
 /**
  * Tests the Secure Link.
@@ -38,7 +38,7 @@ public class AuthenticationHttpServerTest extends TestCase {
 	/**
 	 * {@link CloseableHttpClient}.
 	 */
-	private final CloseableHttpClient client = HttpTestUtil.createHttpClient(true);
+	private final CloseableHttpClient client = HttpClientTestUtil.createHttpClient(true);
 
 	@Override
 	protected void tearDown() throws Exception {

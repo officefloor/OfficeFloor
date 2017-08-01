@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,12 +22,11 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
-import java.util.LinkedList;
-import java.util.List;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -45,90 +44,14 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
 
-import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.office.OfficeSectionInput;
-import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
-import net.officefloor.compile.test.officefloor.CompileOfficeFloorContext;
-import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.server.http.conversation.HttpEntity;
-import net.officefloor.server.http.conversation.impl.HttpEntityImpl;
-import net.officefloor.server.http.conversation.impl.HttpRequestImpl;
-import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
-import net.officefloor.server.http.source.HttpServerSocketManagedObjectSource;
-import net.officefloor.server.http.source.HttpsServerSocketManagedObjectSource;
-import net.officefloor.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
-import net.officefloor.server.stream.impl.ServerInputStreamImpl;
 
 /**
  * Utility class aiding in testing HTTP functionality.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpTestUtil {
-
-	/**
-	 * Starting port number.
-	 */
-	private static int portStart = 12643;
-
-	/**
-	 * Obtains the next port number for testing.
-	 * 
-	 * @return Next port number for testing.
-	 */
-	public static int getAvailablePort() {
-		int port = portStart;
-		portStart++; // increment port for next test
-		return port;
-	}
-
-	/**
-	 * Convenience method to configure {@link CompileOfficeFloorContext} with a
-	 * test HTTP server.
-	 * 
-	 * @param context
-	 *            {@link CompileOfficeFloorContext}.
-	 * @param httpPort
-	 *            Port to listen for HTTP requests.
-	 * @param httpsPort
-	 *            Port to listen for HTTPS requests.
-	 * @param sectionName
-	 *            Name of the {@link OfficeSection} servicing the requests.
-	 * @param sectionInputName
-	 *            Name of the {@link OfficeSectionInput} on the
-	 *            {@link OfficeSection} servicing the requests.
-	 * @return {@link OfficeFloorInputManagedObject}.
-	 */
-	public static OfficeFloorInputManagedObject configureTestHttpServer(CompileOfficeFloorContext context, int port,
-			String sectionName, String sectionInputName) {
-		return HttpServerSocketManagedObjectSource.configure(context.getOfficeFloorDeployer(), port,
-				context.getDeployedOffice(), sectionName, sectionInputName);
-	}
-
-	/**
-	 * Convenience method to configure {@link CompileOfficeFloorContext} with a
-	 * test HTTP server.
-	 * 
-	 * @param context
-	 *            {@link CompileOfficeFloorContext}.
-	 * @param httpPort
-	 *            Port to listen for HTTP requests.
-	 * @param httpsPort
-	 *            Port to listen for HTTPS requests.
-	 * @param sectionName
-	 *            Name of the {@link OfficeSection} servicing the requests.
-	 * @param sectionInputName
-	 *            Name of the {@link OfficeSectionInput} on the
-	 *            {@link OfficeSection} servicing the requests.
-	 * @return {@link OfficeFloorInputManagedObject}.
-	 */
-	public static OfficeFloorInputManagedObject configureTestHttpServer(CompileOfficeFloorContext context, int port,
-			int httpsPort, String sectionName, String sectionInputName) {
-		return HttpsServerSocketManagedObjectSource.configure(context.getOfficeFloorDeployer(), port, httpsPort,
-				createTestServerSslContext(),
-				context.getDeployedOffice().getDeployedOfficeInput(sectionName, sectionInputName));
-	}
+public class HttpClientTestUtil {
 
 	/**
 	 * Obtains the {@link HttpEntity} content.
@@ -265,69 +188,9 @@ public class HttpTestUtil {
 	}
 
 	/**
-	 * Creates the {@link SSLContext}.
-	 * 
-	 * @return {@link SSLContext}.
-	 */
-	public static SSLContext createTestServerSslContext() {
-		try {
-			return OfficeFloorDefaultSslContextSource.createServerSslContext(null);
-		} catch (Exception ex) {
-			// Should always create, otherwise fail test
-			throw OfficeFrameTestCase.fail(ex);
-		}
-	}
-
-	/**
-	 * Creates a {@link net.officefloor.server.http.HttpRequest} for testing.
-	 * 
-	 * @param method
-	 *            HTTP method (GET, POST).
-	 * @param requestUri
-	 *            Request URI.
-	 * @param entity
-	 *            Contents of the
-	 *            {@link net.officefloor.server.http.HttpRequest} entity.
-	 * @param headerNameValues
-	 *            {@link HttpHeader} name values.
-	 * @return {@link net.officefloor.server.http.HttpRequest}.
-	 * @throws Exception
-	 *             If fails to create the
-	 *             {@link net.officefloor.server.http.HttpRequest} .
-	 */
-	public static net.officefloor.server.http.HttpRequest createHttpRequest(String method, String requestUri,
-			String entity, String... headerNameValues) throws Exception {
-
-		// Obtain the entity data
-		final Charset charset = AbstractServerSocketManagedObjectSource.getCharset(null);
-		byte[] entityData = (entity == null ? new byte[0] : entity.getBytes(charset));
-
-		// Create the headers
-		List<HttpHeader> headers = new LinkedList<HttpHeader>();
-		if (entity != null) {
-			// Include content type and content length if entity
-			headers.add(new HttpHeaderImpl("content-type", "text/plain; charset=" + charset.name()));
-			headers.add(new HttpHeaderImpl("content-length", String.valueOf(entityData.length)));
-		}
-		for (int i = 0; i < headerNameValues.length; i += 2) {
-			String name = headerNameValues[i];
-			String value = headerNameValues[i + 1];
-			headers.add(new HttpHeaderImpl(name, value));
-		}
-
-		// Create the entity input stream
-		ServerInputStreamImpl inputStream = new ServerInputStreamImpl(new Object());
-		inputStream.inputData(entityData, 0, (entityData.length - 1), false);
-		HttpEntity httpEntity = new HttpEntityImpl(inputStream);
-
-		// Return the HTTP request
-		return new HttpRequestImpl(method, requestUri, "HTTP/1.1", headers, httpEntity);
-	}
-
-	/**
 	 * All access via static methods.
 	 */
-	private HttpTestUtil() {
+	private HttpClientTestUtil() {
 	}
 
 	/**

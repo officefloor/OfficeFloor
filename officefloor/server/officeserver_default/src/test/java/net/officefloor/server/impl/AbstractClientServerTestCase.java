@@ -41,7 +41,7 @@ import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.SocketManager;
-import net.officefloor.server.http.HttpTestUtil;
+import net.officefloor.server.http.HttpServerTestUtil;
 import net.officefloor.server.http.protocol.CommunicationProtocol;
 import net.officefloor.server.http.protocol.CommunicationProtocolContext;
 import net.officefloor.server.http.protocol.CommunicationProtocolSource;
@@ -135,7 +135,7 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 	protected void setUp() throws Exception {
 		try {
 			// Obtain port
-			this.port = HttpTestUtil.getAvailablePort();
+			this.port = HttpServerTestUtil.getAvailablePort();
 
 			// Obtain the socket buffer send size
 			Socket socket = new Socket();

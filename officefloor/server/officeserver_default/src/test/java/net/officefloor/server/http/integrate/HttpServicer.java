@@ -18,7 +18,6 @@
 package net.officefloor.server.http.integrate;
 
 import java.io.OutputStreamWriter;
-import java.net.InetSocketAddress;
 
 import junit.framework.TestCase;
 import net.officefloor.server.http.HttpRequest;
@@ -33,12 +32,6 @@ import net.officefloor.server.http.ServerHttpConnection;
 public class HttpServicer {
 
 	/**
-	 * Expected local {@link InetSocketAddress} for the
-	 * {@link ServerHttpConnection}.
-	 */
-	private final InetSocketAddress expectedLocalAddress;
-
-	/**
 	 * Flag indicating if expecting {@link ServerHttpConnection} to be secure.
 	 */
 	private final boolean expectIsSecure;
@@ -46,15 +39,11 @@ public class HttpServicer {
 	/**
 	 * Initiate.
 	 * 
-	 * @param expectedLocalAddress
-	 *            Expected local {@link InetSocketAddress} for the
-	 *            {@link ServerHttpConnection}.
 	 * @param expectIsSecure
 	 *            Flag indicating if expecting {@link ServerHttpConnection} to
 	 *            be secure.
 	 */
-	public HttpServicer(InetSocketAddress expectedLocalAddress, boolean expectIsSecure) {
-		this.expectedLocalAddress = expectedLocalAddress;
+	public HttpServicer(boolean expectIsSecure) {
 		this.expectIsSecure = expectIsSecure;
 	}
 
@@ -65,9 +54,6 @@ public class HttpServicer {
 	 *            {@link ServerHttpConnection}.
 	 */
 	public void service(ServerHttpConnection connection) throws Throwable {
-
-		// Obtain expected local port
-		int expectedLocalPort = this.expectedLocalAddress.getPort();
 
 		// Validate whether secure channel
 		TestCase.assertEquals("Incorrect secure channel indication", this.expectIsSecure, connection.isSecure());

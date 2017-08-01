@@ -25,7 +25,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import net.officefloor.OfficeFloorMain;
-import net.officefloor.server.http.HttpTestUtil;
+import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.tutorial.testhttpserver.TemplateLogic.Parameters;
 
 /**
@@ -60,7 +60,7 @@ public class TemplateLogicTest extends Assert {
 		// Start the application
 		OfficeFloorMain.open();
 
-		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
 
 			// Send request to add
 			HttpGet request = new HttpGet("http://localhost:7878/template-add.woof?a=1&b=2");

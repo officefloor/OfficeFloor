@@ -36,9 +36,9 @@ import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 import net.officefloor.plugin.xml.XmlUnmarshaller;
 import net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshallerFactory;
+import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.HttpServicerBuilder;
 import net.officefloor.server.http.HttpServicerFunction;
-import net.officefloor.server.http.HttpTestUtil;
 import net.officefloor.server.http.MockHttpServer;
 import net.officefloor.server.http.request.config.CommunicationConfig;
 import net.officefloor.server.http.request.config.HeaderConfig;
@@ -282,7 +282,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 			HttpResponse methodResponse = client.execute(method);
 
 			// Obtain the response body
-			String actualResponseBody = HttpTestUtil.getEntityBody(methodResponse);
+			String actualResponseBody = HttpClientTestUtil.getEntityBody(methodResponse);
 
 			// Validate no failure in processing
 			this.server.validateNoTopLevelEscalation();

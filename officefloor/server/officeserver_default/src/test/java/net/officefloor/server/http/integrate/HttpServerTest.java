@@ -24,8 +24,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.HttpServicerFunction;
-import net.officefloor.server.http.HttpTestUtil;
 import net.officefloor.server.http.MockHttpServer;
 import net.officefloor.server.http.protocol.HttpStatus;
 import net.officefloor.server.http.source.HttpServerSocketManagedObjectSource;
@@ -45,7 +45,7 @@ public class HttpServerTest extends MockHttpServer {
 	public HttpServicerFunction buildServicer(String managedObjectName, MockHttpServer server) throws Exception {
 
 		// Register the servicer to process messages
-		HttpServicer servicer = new HttpServicer(this.getLocalAddress(), this.isServerSecure());
+		HttpServicer servicer = new HttpServicer(this.isServerSecure());
 		ReflectiveFunctionBuilder functionBuilder = server.constructFunction(servicer, "service");
 		functionBuilder.buildObject(managedObjectName);
 
@@ -151,7 +151,7 @@ public class HttpServerTest extends MockHttpServer {
 		assertEquals("Incorrect status", 200, status);
 
 		// Read in the body of the response
-		String body = HttpTestUtil.getEntityBody(response);
+		String body = HttpClientTestUtil.getEntityBody(response);
 
 		// Return the body
 		return body;

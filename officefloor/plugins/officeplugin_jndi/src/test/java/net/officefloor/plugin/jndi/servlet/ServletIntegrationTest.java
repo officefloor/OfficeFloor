@@ -27,7 +27,8 @@ import org.eclipse.jetty.webapp.WebAppContext;
 
 import junit.framework.TestCase;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.server.http.HttpTestUtil;
+import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.HttpServerTestUtil;
 
 /**
  * Ensure that {@link OfficeFloor} can be integrated into a Servlet.
@@ -39,7 +40,7 @@ public class ServletIntegrationTest extends TestCase {
 	/**
 	 * Port of {@link Server}.
 	 */
-	private final int port = HttpTestUtil.getAvailablePort();
+	private final int port = HttpServerTestUtil.getAvailablePort();
 
 	/**
 	 * {@link Server}.
@@ -73,7 +74,7 @@ public class ServletIntegrationTest extends TestCase {
 	 */
 	public void testOfficeFloorWithinServlet() throws Exception {
 
-		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
 
 			// Send request
 			HttpResponse response = client.execute(new HttpGet("http://localhost:" + this.port + "/"));
@@ -82,7 +83,7 @@ public class ServletIntegrationTest extends TestCase {
 			assertEquals("Unsuccessful request", 200, response.getStatusLine().getStatusCode());
 
 			// Ensure OfficeFloor task invoked
-			String responseContent = HttpTestUtil.getEntityBody(response);
+			String responseContent = HttpClientTestUtil.getEntityBody(response);
 			boolean isTaskInvoked = Boolean.parseBoolean(responseContent.trim());
 			assertTrue("Task should be invoked", isTaskInvoked);
 		}

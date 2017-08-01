@@ -23,7 +23,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 
 import junit.framework.TestCase;
 import net.officefloor.OfficeFloorMain;
-import net.officefloor.server.http.HttpTestUtil;
+import net.officefloor.server.http.HttpClientTestUtil;
 
 /**
  * Tests the {@link DynamicHttpServer}.
@@ -50,7 +50,7 @@ public class DynamicHttpServerTest extends TestCase {
 		OfficeFloorMain.open();
 
 		// Send request for dynamic page
-		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
 			HttpResponse response = client.execute(new HttpGet("http://localhost:7878/example.woof"));
 
 			// Ensure request is successful

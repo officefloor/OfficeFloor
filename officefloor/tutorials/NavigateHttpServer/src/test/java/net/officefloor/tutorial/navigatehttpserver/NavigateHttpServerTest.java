@@ -23,7 +23,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 
 import junit.framework.TestCase;
 import net.officefloor.OfficeFloorMain;
-import net.officefloor.server.http.HttpTestUtil;
+import net.officefloor.server.http.HttpClientTestUtil;
 
 /**
  * Tests the {@link NavigateHttpServer}.
@@ -33,7 +33,7 @@ import net.officefloor.server.http.HttpTestUtil;
 public class NavigateHttpServerTest extends TestCase {
 
 	// START SNIPPET: test
-	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
+	private final CloseableHttpClient client = HttpClientTestUtil.createHttpClient();
 
 	public void testNavigate() throws Exception {
 

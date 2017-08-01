@@ -30,8 +30,9 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.HttpResponse;
-import net.officefloor.server.http.HttpTestUtil;
+import net.officefloor.server.http.HttpServerTestUtil;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.source.HttpsServerSocketManagedObjectSource;
 
@@ -61,7 +62,7 @@ public class AutoWireHttpsSocketTest extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 
 		// Obtain the port for the test
-		this.port = HttpTestUtil.getAvailablePort();
+		this.port = HttpServerTestUtil.getAvailablePort();
 
 		// Add the section to handle the HTTP request
 		this.compile.office((context) -> context.addSection("TEST", MockSection.class));
@@ -109,14 +110,14 @@ public class AutoWireHttpsSocketTest extends OfficeFrameTestCase {
 
 		// Register the managed object source
 		this.compile.officeFloor((context) -> HttpsServerSocketManagedObjectSource.configure(
-				context.getOfficeFloorDeployer(), this.port, HttpTestUtil.createTestServerSslContext(),
+				context.getOfficeFloorDeployer(), this.port, HttpServerTestUtil.createTestServerSslContext(),
 				context.getDeployedOffice().getDeployedOfficeInput("TEST", "handleRequest")));
 
 		// Open the OfficeFloor
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
 		// Send request (with OfficeFloor test SslContext)
-		try (CloseableHttpClient client = HttpTestUtil.createHttpClient(true)) {
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient(true)) {
 
 			HttpGet request = new HttpGet("https://localhost:" + this.port);
 			org.apache.http.HttpResponse response = client.execute(request);
@@ -125,7 +126,7 @@ public class AutoWireHttpsSocketTest extends OfficeFrameTestCase {
 			assertEquals("Request must be successful", 200, response.getStatusLine().getStatusCode());
 
 			// Ensure appropriate response
-			assertEquals("Incorrect response", "hello world", HttpTestUtil.getEntityBody(response));
+			assertEquals("Incorrect response", "hello world", HttpClientTestUtil.getEntityBody(response));
 		}
 	}
 

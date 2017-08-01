@@ -44,8 +44,8 @@ import net.officefloor.plugin.json.read.JsonRequestReaderManagedObjectSource.Dep
 import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
+import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.HttpRequest;
-import net.officefloor.server.http.HttpTestUtil;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.server.http.source.HttpServerSocketManagedObjectSource;
@@ -266,7 +266,7 @@ public class JsonRequestReaderManagedObjectSourceTest extends OfficeFrameTestCas
 			mos.addOfficeManagedObject("JSON", ManagedObjectScope.THREAD);
 		});
 		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor();
-		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
 
 			// Reset service to obtain the JSON object
 			MockService.object = null;

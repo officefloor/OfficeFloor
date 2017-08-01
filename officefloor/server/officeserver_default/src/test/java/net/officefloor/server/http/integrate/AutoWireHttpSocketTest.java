@@ -27,8 +27,9 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.HttpResponse;
-import net.officefloor.server.http.HttpTestUtil;
+import net.officefloor.server.http.HttpServerTestUtil;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.source.HttpServerSocketManagedObjectSource;
 
@@ -44,20 +45,20 @@ public class AutoWireHttpSocketTest extends OfficeFrameTestCase {
 	 */
 	public void testCallAutoWiredHttpServer() throws Exception {
 
-		final int PORT = HttpTestUtil.getAvailablePort();
+		final int PORT = HttpServerTestUtil.getAvailablePort();
 		final CompileOfficeFloor compile = new CompileOfficeFloor();
 		compile.officeFloor((context) -> HttpServerSocketManagedObjectSource.configure(context.getOfficeFloorDeployer(),
 				PORT, context.getDeployedOffice(), "TEST", "handleRequest"));
 		compile.office((context) -> {
 			context.getOfficeArchitect().enableAutoWireObjects();
-			context.addSection("TEST", MockSection.class);	
+			context.addSection("TEST", MockSection.class);
 		});
 
 		// Open the OfficeFloor
 		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor();
 		try {
 
-			try (CloseableHttpClient client = HttpTestUtil.createHttpClient(false)) {
+			try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient(false)) {
 
 				// Send request
 				HttpGet request = new HttpGet("http://localhost:" + PORT);
@@ -67,7 +68,7 @@ public class AutoWireHttpSocketTest extends OfficeFrameTestCase {
 				assertEquals("Request must be successful", 200, response.getStatusLine().getStatusCode());
 
 				// Ensure appropriate response
-				assertEquals("Incorrect response", "hello world", HttpTestUtil.getEntityBody(response));
+				assertEquals("Incorrect response", "hello world", HttpClientTestUtil.getEntityBody(response));
 			}
 
 		} finally {

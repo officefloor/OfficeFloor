@@ -39,8 +39,9 @@ import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.test.CompileWebContext;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
+import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.HttpRequest;
-import net.officefloor.server.http.HttpTestUtil;
+import net.officefloor.server.http.HttpServerTestUtil;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.protocol.HttpStatus;
 
@@ -55,12 +56,12 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 	/**
 	 * Port to use for testing.
 	 */
-	private final int PORT = HttpTestUtil.getAvailablePort();
+	private final int PORT = HttpServerTestUtil.getAvailablePort();
 
 	/**
 	 * {@link CloseableHttpClient} to use for testing.
 	 */
-	private CloseableHttpClient client = HttpTestUtil.createHttpClient(false);
+	private CloseableHttpClient client = HttpClientTestUtil.createHttpClient(false);
 
 	/**
 	 * {@link HttpClientContext}.
@@ -85,7 +86,7 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 		// Configure the application
 		WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
 		compiler.officeFloor((context) -> {
-			HttpTestUtil.configureTestHttpServer(context, PORT, "SERVICE", "service");
+			HttpServerTestUtil.configureTestHttpServer(context, PORT, "SERVICE", "service");
 		});
 		compiler.web((context) -> {
 			WebArchitect web = context.getWebArchitect();
@@ -153,7 +154,7 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 
 		// Use client with credentials
 		HttpClientBuilder builder = HttpClientBuilder.create();
-		CredentialsProvider provider = HttpTestUtil.configureCredentials(builder, realm, scheme, username, password);
+		CredentialsProvider provider = HttpClientTestUtil.configureCredentials(builder, realm, scheme, username, password);
 		this.client = builder.build();
 
 		// Reset the client context
@@ -208,7 +209,7 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 
 			// Obtain the details of the response
 			int status = response.getStatusLine().getStatusCode();
-			String body = HttpTestUtil.getEntityBody(response);
+			String body = HttpClientTestUtil.getEntityBody(response);
 
 			// Verify response
 			assertEquals(

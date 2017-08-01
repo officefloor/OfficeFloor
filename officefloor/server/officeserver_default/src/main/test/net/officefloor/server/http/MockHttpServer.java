@@ -17,8 +17,6 @@
  */
 package net.officefloor.server.http;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -96,7 +94,7 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase imp
 		AbstractServerSocketManagedObjectSource.closeSocketManager();
 
 		// Specify the port
-		this.port = HttpTestUtil.getAvailablePort();
+		this.port = HttpServerTestUtil.getAvailablePort();
 
 		// Obtain the office name and builder
 		String officeName = this.getOfficeName();
@@ -111,7 +109,7 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase imp
 					officeName);
 			this.constructManagedObjectSourceTeam(MO_NAME, "SSL", ExecutorCachedTeamSource.class);
 			serverSocketBuilder.addProperty(SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE,
-					HttpTestUtil.createTestServerSslContext().getClass().getName());
+					HttpServerTestUtil.createTestServerSslContext().getClass().getName());
 		} else {
 			// Setup non-secure HTTP server
 			this.isServerSecure = false;
@@ -183,26 +181,13 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase imp
 	public CloseableHttpClient createHttpClient() {
 
 		// Create the HTTP client
-		CloseableHttpClient client = HttpTestUtil.createHttpClient(this.isServerSecure);
+		CloseableHttpClient client = HttpClientTestUtil.createHttpClient(this.isServerSecure);
 
 		// Register the HTTP client for cleanup
 		this.httpClients.add(client);
 
 		// Return the HTTP client
 		return client;
-	}
-
-	/**
-	 * Obtains the local {@link InetSocketAddress} for this server.
-	 * 
-	 * @return Local {@link InetSocketAddress} for this server.
-	 */
-	public InetSocketAddress getLocalAddress() {
-		try {
-			return new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(), this.port);
-		} catch (Exception ex) {
-			throw fail(ex);
-		}
 	}
 
 	/**

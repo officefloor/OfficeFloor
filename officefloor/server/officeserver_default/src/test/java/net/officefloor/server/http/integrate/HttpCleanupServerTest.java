@@ -38,8 +38,8 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.HttpServicerFunction;
-import net.officefloor.server.http.HttpTestUtil;
 import net.officefloor.server.http.MockHttpServer;
 import net.officefloor.server.http.ServerHttpConnection;
 
@@ -73,7 +73,7 @@ public class HttpCleanupServerTest extends MockHttpServer {
 			assertEquals("Incorrect status", 200, status);
 
 			// Read in the body of the response
-			String responseEntity = HttpTestUtil.getEntityBody(response);
+			String responseEntity = HttpClientTestUtil.getEntityBody(response);
 			assertEquals("Incorrect response entity", "No cleanup escalations", responseEntity);
 		}
 	}
@@ -99,7 +99,7 @@ public class HttpCleanupServerTest extends MockHttpServer {
 			assertEquals("Incorrect status", 500, status);
 
 			// Read in the body of the response
-			String responseEntity = HttpTestUtil.getEntityBody(response);
+			String responseEntity = HttpClientTestUtil.getEntityBody(response);
 			StringWriter expectedEntity = new StringWriter();
 			expectedEntity.write("Cleanup of object type " + RecycleEscalationManagedObjectSource.class.getName()
 					+ ": TEST (" + escalation.getClass().getSimpleName() + ")");

@@ -25,7 +25,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 
 import junit.framework.TestCase;
 import net.officefloor.OfficeFloorMain;
-import net.officefloor.server.http.HttpTestUtil;
+import net.officefloor.server.http.HttpClientTestUtil;
 
 /**
  * Ensure appropriately handling exception.
@@ -58,7 +58,7 @@ public class ExceptionHttpServerTest extends TestCase {
 
 	private PrintStream stderr;
 
-	private CloseableHttpClient client = HttpTestUtil.createHttpClient();
+	private CloseableHttpClient client = HttpClientTestUtil.createHttpClient();
 
 	@Override
 	protected void setUp() throws Exception {

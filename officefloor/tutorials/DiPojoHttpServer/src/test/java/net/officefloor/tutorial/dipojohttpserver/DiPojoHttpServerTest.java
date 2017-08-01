@@ -24,7 +24,7 @@ import org.apache.http.util.EntityUtils;
 
 import junit.framework.TestCase;
 import net.officefloor.OfficeFloorMain;
-import net.officefloor.server.http.HttpTestUtil;
+import net.officefloor.server.http.HttpClientTestUtil;
 
 /**
  * Ensure correctly renders the page.
@@ -36,7 +36,7 @@ public class DiPojoHttpServerTest extends TestCase {
 	/**
 	 * {@link CloseableHttpClient}.
 	 */
-	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
+	private final CloseableHttpClient client = HttpClientTestUtil.createHttpClient();
 
 	@Override
 	protected void tearDown() throws Exception {
