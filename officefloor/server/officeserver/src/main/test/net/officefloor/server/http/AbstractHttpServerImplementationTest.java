@@ -17,7 +17,13 @@
  */
 package net.officefloor.server.http;
 
+import java.io.IOException;
+
 import javax.net.ssl.SSLContext;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 import junit.framework.TestCase;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
@@ -90,15 +96,23 @@ public abstract class AbstractHttpServerImplementationTest extends TestCase {
 	/**
 	 * Ensure can send a single HTTP request.
 	 */
-	public void testSingleRequest() {
-		fail("TODO implement single request");
+	public void testSingleRequest() throws IOException {
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
+			HttpResponse response = client.execute(new HttpGet("http://localhost:7878/test"));
+			assertEquals("Incorrect status", 200, response.getStatusLine().getStatusCode());
+			assertEquals("Incorrect response", "ECHO", HttpClientTestUtil.getEntityBody(response));
+		}
 	}
 
 	/**
 	 * Ensure can send a single HTTPS request.
 	 */
-	public void testSingleSecureRequest() {
-		fail("TODO implement single secure request");
+	public void testSingleSecureRequest() throws IOException {
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient(true)) {
+			HttpResponse response = client.execute(new HttpGet("https://localhost:7979/test"));
+			assertEquals("Incorrect status", 200, response.getStatusLine().getStatusCode());
+			assertEquals("Incorrect response", "ECHO", HttpClientTestUtil.getEntityBody(response));
+		}
 	}
 
 	/**

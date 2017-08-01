@@ -141,7 +141,7 @@ public class HttpMethod implements Serializable {
 	 */
 	HttpMethod(String name, HttpMethodEnum httpMethodEnum) {
 		this.name = name;
-		this.hashCode = this.name.hashCode();
+		this.hashCode = (this.name == null ? "".hashCode() : this.name.hashCode());
 		this.httpMethodEnum = httpMethodEnum;
 	}
 
@@ -161,7 +161,6 @@ public class HttpMethod implements Serializable {
 
 		// Match based on name
 		return this.name.equals(httpMethod.name);
-
 	}
 
 	/**
