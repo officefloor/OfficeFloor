@@ -78,6 +78,7 @@
 		<failsafe-version>2.19.1</failsafe-version>
 		<compiler-version>3.6.0</compiler-version>
 		<ant-jsch-version>1.8.4</ant-jsch-version>
+		<netty-version>4.1.14.Final</netty-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -386,6 +387,11 @@
 				<groupId>commons-httpclient</groupId>
 				<artifactId>commons-httpclient</artifactId>
 				<version>4.5.2</version>
+			</dependency>
+			<dependency>
+				<groupId>io.netty</groupId>
+				<artifactId>netty-all</artifactId>
+				<version>${netty-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.openejb</groupId>
