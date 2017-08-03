@@ -52,8 +52,7 @@ public class UsAsciiUtil {
 	 * @param actual
 	 *            Actual US-ASCII text.
 	 */
-	public static void assertEquals(String message, String expected,
-			byte[] actual) {
+	public static void assertEquals(String message, String expected, byte[] actual) {
 		TestCase.assertEquals(message, expected, convertToString(actual));
 	}
 
@@ -182,18 +181,15 @@ public class UsAsciiUtil {
 	 */
 	private static class UsAsciiArgumentsMatcher implements ArgumentsMatcher {
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.easymock.ArgumentsMatcher#matches(java.lang.Object[],
-		 * java.lang.Object[])
+		/**
+		 * ================= ArgumentsMatcher ======================
 		 */
+
 		@Override
 		public boolean matches(Object[] expected, Object[] actual) {
 
 			// First argument is always content
-			String expectedContent = UsAsciiUtil.convertToString(this
-					.getAsciiContent(expected[0]));
+			String expectedContent = UsAsciiUtil.convertToString(this.getAsciiContent(expected[0]));
 
 			// Obtain actual data
 			byte[] actualData = this.getAsciiContent(actual[0]);
@@ -215,15 +211,9 @@ public class UsAsciiUtil {
 			return expectedContent.endsWith(actualContent);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.easymock.ArgumentsMatcher#toString(java.lang.Object[])
-		 */
 		@Override
 		public String toString(Object[] arguments) {
-			return UsAsciiUtil.convertToString(this
-					.getAsciiContent(arguments[0]));
+			return UsAsciiUtil.convertToString(this.getAsciiContent(arguments[0]));
 		}
 
 		/**
@@ -248,8 +238,7 @@ public class UsAsciiUtil {
 				buffer.get(data, 0, data.length);
 				return data;
 			} else {
-				TestCase.fail("Unknown argument type: "
-						+ argument.getClass().getName());
+				TestCase.fail("Unknown argument type: " + argument.getClass().getName());
 				return null;
 			}
 		}

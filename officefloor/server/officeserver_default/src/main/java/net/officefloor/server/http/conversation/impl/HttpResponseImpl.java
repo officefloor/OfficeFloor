@@ -384,8 +384,10 @@ public class HttpResponseImpl implements HttpResponse {
 
 		// Write the managed headers
 		writeUsAscii(HEADER_NAME_SERVER + ": " + this.conversation.getServerName() + EOL, header);
-		writeUsAscii(HEADER_NAME_DATE + ": " + this.conversation.getHttpServerClock().getDateHeaderValue() + EOL,
-				header);
+		if (false) {
+			writeUsAscii(HEADER_NAME_DATE + ": " + this.conversation.getHttpServerClock().getDateHeaderValue() + EOL,
+					header);
+		}
 		String contentType = this.getContentTypeThreadUnsafe();
 		if (contentType != null) {
 			writeUsAscii(HEADER_NAME_CONTENT_TYPE + ": " + contentType + EOL, header);

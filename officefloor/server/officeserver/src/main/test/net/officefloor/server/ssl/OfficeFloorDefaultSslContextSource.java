@@ -19,6 +19,7 @@ package net.officefloor.server.ssl;
 
 import java.io.InputStream;
 import java.security.KeyStore;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -67,7 +68,8 @@ public class OfficeFloorDefaultSslContextSource implements SslContextSource {
 		KeyStore keyStore = createOfficeFloorDefaultKeyStore();
 
 		// Create the Key Managers
-		KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+		String defaultAlgorithm = KeyManagerFactory.getDefaultAlgorithm();
+		KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(defaultAlgorithm);
 		keyManagerFactory.init(keyStore, "Changeit".toCharArray());
 		KeyManager[] keyManagers = keyManagerFactory.getKeyManagers();
 
@@ -94,8 +96,8 @@ public class OfficeFloorDefaultSslContextSource implements SslContextSource {
 		KeyStore keyStore = createOfficeFloorDefaultKeyStore();
 
 		// Create the Trust Managers
-		TrustManagerFactory trustManagerFactory = TrustManagerFactory
-				.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+		String defaultAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+		TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(defaultAlgorithm);
 		trustManagerFactory.init(keyStore);
 		TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
 
@@ -126,6 +128,7 @@ public class OfficeFloorDefaultSslContextSource implements SslContextSource {
 
 		// Try finding an available protocol from default protocols
 		String[] protocols = SSLContext.getDefault().getSupportedSSLParameters().getProtocols();
+		Arrays.sort(protocols);
 		if (protocols != null) {
 			for (String protocol : protocols) {
 				try {
