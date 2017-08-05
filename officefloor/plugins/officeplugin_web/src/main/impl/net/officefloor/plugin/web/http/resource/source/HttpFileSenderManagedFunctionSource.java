@@ -161,14 +161,14 @@ public class HttpFileSenderManagedFunctionSource extends AbstractManagedFunction
 					AbstractHttpFile.writeHttpFile(httpFile, response);
 
 					// Specify found status
-					response.setStatus(HttpStatus.SC_OK);
+					response.setHttpStatus(HttpStatus.SC_OK);
 
 				} else {
 					// File not found so write file not found content
 					AbstractHttpFile.writeHttpFile(fileNotFoundContent, response);
 
 					// Specify not found status
-					response.setStatus(HttpStatus.SC_NOT_FOUND);
+					response.setHttpStatus(HttpStatus.SC_NOT_FOUND);
 				}
 
 				// Send the response

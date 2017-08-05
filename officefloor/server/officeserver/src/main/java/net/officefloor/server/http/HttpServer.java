@@ -23,9 +23,9 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
+import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
-import net.officefloor.frame.api.manage.FunctionManager;
 
 /**
  * HTTP Server.
@@ -85,6 +85,15 @@ public class HttpServer {
 		// Configure the HTTP server
 		implementation.configureHttpServer(new HttpServerImplementationContext() {
 
+			/**
+			 * Lazy instantiated {@link ExternalServiceInput}.
+			 */
+			private ExternalServiceInput<ServerHttpConnection> serviceInput;
+
+			/*
+			 * ================= HttpServerImplementationContext ==============
+			 */
+
 			@Override
 			public int getHttpPort() {
 				return httpPort;
@@ -101,13 +110,16 @@ public class HttpServer {
 			}
 
 			@Override
-			public DeployedOfficeInput getInternalServiceHandler() {
+			public DeployedOfficeInput getInternalServiceInput() {
 				return officeInput;
 			}
 
 			@Override
-			public FunctionManager getExternalServiceHandler() {
-				return officeInput.getFunctionManager();
+			public ExternalServiceInput<ServerHttpConnection> getExternalServiceInput() {
+				if (this.serviceInput == null) {
+					this.serviceInput = officeInput.addExternalServiceInput(ServerHttpConnection.class);
+				}
+				return this.serviceInput;
 			}
 
 			@Override

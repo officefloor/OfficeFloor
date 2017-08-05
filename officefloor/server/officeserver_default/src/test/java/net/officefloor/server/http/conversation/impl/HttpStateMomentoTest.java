@@ -31,12 +31,12 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpStatus;
+import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.clock.HttpServerClock;
 import net.officefloor.server.http.conversation.HttpEntity;
 import net.officefloor.server.http.conversation.HttpManagedObject;
-import net.officefloor.server.http.conversation.impl.HttpConversationImpl;
-import net.officefloor.server.http.conversation.impl.HttpEntityImpl;
 import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.server.http.protocol.Connection;
@@ -58,20 +58,18 @@ public class HttpStateMomentoTest extends OfficeFrameTestCase {
 	/**
 	 * {@link ServerHttpConnection}.
 	 */
-	private final ServerHttpConnection serverHttpConnection = createConnection(
-			"GET", "/request", "HTTP/1.1", null, this.connection);
+	private final ServerHttpConnection serverHttpConnection = createConnection("GET", "/request", "HTTP/1.1", null,
+			this.connection);
 
 	/**
 	 * Ensure can not except an invalid momento.
 	 */
 	public void testInvalidStateMomento() throws IOException {
 		try {
-			this.serverHttpConnection.importState(this
-					.createMock(Serializable.class));
+			this.serverHttpConnection.importState(this.createMock(Serializable.class));
 			fail("Should not be successful");
 		} catch (IllegalArgumentException ex) {
-			assertEquals("Incorrect cause",
-					"Invalid momento for ServerHttpConnection", ex.getMessage());
+			assertEquals("Incorrect cause", "Invalid momento for ServerHttpConnection", ex.getMessage());
 		}
 	}
 
@@ -86,8 +84,8 @@ public class HttpStateMomentoTest extends OfficeFrameTestCase {
 	 * Ensure able to export and import complex {@link HttpRequest} state.
 	 */
 	public void testComplexRequestState() {
-		doRequestStateMomentoTest("POST", "/request", "1.0", "Entity Content",
-				"header_one", "value_one", "header_two", "value_two");
+		doRequestStateMomentoTest("POST", "/request", "1.0", "Entity Content", "header_one", "value_one", "header_two",
+				"value_two");
 	}
 
 	/**
@@ -106,14 +104,12 @@ public class HttpStateMomentoTest extends OfficeFrameTestCase {
 	 *            HTTP header name/value pairs.
 	 * @return {@link ServerHttpConnection}.
 	 */
-	private static void doRequestStateMomentoTest(String method,
-			String requestURI, String httpVersion, String entityContent,
-			String... headerNameValues) {
+	private static void doRequestStateMomentoTest(String method, String requestURI, String httpVersion,
+			String entityContent, String... headerNameValues) {
 		try {
 
 			// Create the connection (should not need connection)
-			ServerHttpConnection connection = createConnection(method,
-					requestURI, httpVersion, entityContent,
+			ServerHttpConnection connection = createConnection(method, requestURI, httpVersion, entityContent,
 					new MockConnection(), headerNameValues);
 
 			// Extract the momento
@@ -126,16 +122,13 @@ public class HttpStateMomentoTest extends OfficeFrameTestCase {
 			output.flush();
 
 			// Unserialise the momento
-			ByteArrayInputStream inputBuffer = new ByteArrayInputStream(
-					outputBuffer.toByteArray());
+			ByteArrayInputStream inputBuffer = new ByteArrayInputStream(outputBuffer.toByteArray());
 			ObjectInputStream input = new ObjectInputStream(inputBuffer);
-			Serializable unserialisedMomento = (Serializable) input
-					.readObject();
+			Serializable unserialisedMomento = (Serializable) input.readObject();
 
 			// Create new connection to ensure import state
-			ServerHttpConnection newConnection = createConnection(
-					"OVERRIDE_METHOD", "/override/path", "MaintainVersion",
-					"Override content", null, "Header", "Overridden");
+			ServerHttpConnection newConnection = createConnection("OVERRIDE_METHOD", "/override/path",
+					"MaintainVersion", "Override content", null, "Header", "Overridden");
 
 			// Override new connection state with momento details
 			newConnection.importState(unserialisedMomento);
@@ -144,46 +137,37 @@ public class HttpStateMomentoTest extends OfficeFrameTestCase {
 			HttpRequest request = newConnection.getHttpRequest();
 			assertEquals("Incorrect method", method, request.getHttpMethod());
 			assertEquals("Incorrect path", requestURI, request.getRequestURI());
-			assertEquals(
-					"Must maintain version of current request to keep HTTP communication/negotiation valid",
-					"MaintainVersion", request.getVersion());
+			assertEquals("Must maintain version of current request to keep HTTP communication/negotiation valid",
+					"MaintainVersion", request.getHttpVersion());
 			List<HttpHeader> headers = request.getHeaders();
-			assertEquals("Incorrect number of headers",
-					(headerNameValues.length / 2), headers.size());
+			assertEquals("Incorrect number of headers", (headerNameValues.length / 2), headers.size());
 			for (int i = 0; i < headerNameValues.length; i += 2) {
 				String name = headerNameValues[i];
 				String value = headerNameValues[i + 1];
 				int headerIndex = i / 2;
 				HttpHeader header = headers.get(headerIndex);
-				assertEquals("Incorrect name for header " + headerIndex, name,
-						header.getName());
-				assertEquals("Incorrect value for header " + headerIndex + " ("
-						+ name + ")", value, header.getValue());
+				assertEquals("Incorrect name for header " + headerIndex, name, header.getName());
+				assertEquals("Incorrect value for header " + headerIndex + " (" + name + ")", value, header.getValue());
 			}
 
 			// Determine entity correctly
 			ServerInputStream entity = request.getEntity();
 			if (entityContent == null) {
 				// Should have no entity content (end of stream)
-				assertEquals("Should have no entity content", -1,
-						entity.available());
+				assertEquals("Should have no entity content", -1, entity.available());
 
 			} else {
 				// Ensure appropriate entity content is available
 				byte[] expectedBytes = entityContent.getBytes();
-				assertEquals("Incorrect number of bytes available",
-						expectedBytes.length, entity.available());
+				assertEquals("Incorrect number of bytes available", expectedBytes.length, entity.available());
 				byte[] actualBytes = new byte[expectedBytes.length];
 				entity.read(actualBytes);
-				assertEquals("Incorrect entity content", entityContent,
-						new String(actualBytes));
-				assertEquals("Should now be end of stream", -1,
-						entity.available());
+				assertEquals("Incorrect entity content", entityContent, new String(actualBytes));
+				assertEquals("Should now be end of stream", -1, entity.available());
 			}
 
 			// Ensure connection still reflects the actual HTTP method
-			assertEquals("Incorrect connection HTTP method", "OVERRIDE_METHOD",
-					newConnection.getHttpMethod());
+			assertEquals("Incorrect connection HTTP method", "OVERRIDE_METHOD", newConnection.getHttpMethod());
 
 		} catch (Exception ex) {
 			fail(ex);
@@ -201,8 +185,7 @@ public class HttpStateMomentoTest extends OfficeFrameTestCase {
 	 * Content is already written for response.
 	 */
 	public void testNonEmptyEntityResponse() throws Exception {
-		this.serverHttpConnection.getHttpResponse().getEntity()
-				.write("TEST".getBytes());
+		this.serverHttpConnection.getHttpResponse().getEntity().write("TEST".getBytes());
 		this.doResponseStateMomentoTest();
 	}
 
@@ -210,8 +193,7 @@ public class HttpStateMomentoTest extends OfficeFrameTestCase {
 	 * Content is already written for response.
 	 */
 	public void testNonEmptyEntityWriterResponse() throws Exception {
-		this.serverHttpConnection.getHttpResponse().getEntityWriter()
-				.write("TEST");
+		this.serverHttpConnection.getHttpResponse().getEntityWriter().write("TEST");
 		this.doResponseStateMomentoTest();
 	}
 
@@ -220,7 +202,7 @@ public class HttpStateMomentoTest extends OfficeFrameTestCase {
 	 */
 	public void testComplexResponse() throws Exception {
 		HttpResponse response = this.serverHttpConnection.getHttpResponse();
-		response.setStatus(203, "Another status");
+		response.setHttpStatus(new HttpStatus(203, "Another status"));
 		response.addHeader("HEADER_ONE", "VALUE_ONE");
 		response.addHeader("HEADER_TWO", "VALUE_TWO");
 		response.setContentType("zip", HttpRequestParserImpl.US_ASCII);
@@ -255,17 +237,15 @@ public class HttpStateMomentoTest extends OfficeFrameTestCase {
 		output.flush();
 
 		// Unserialise the momento
-		ByteArrayInputStream inputBuffer = new ByteArrayInputStream(
-				outputBuffer.toByteArray());
+		ByteArrayInputStream inputBuffer = new ByteArrayInputStream(outputBuffer.toByteArray());
 		ObjectInputStream input = new ObjectInputStream(inputBuffer);
 		Serializable unserialisedMomento = (Serializable) input.readObject();
 
 		// Create the new connection (cloning the state)
 		MockConnection newConnection = new MockConnection();
-		ServerHttpConnection newServerHttpConnection = createConnection("GET",
-				"/testing/response", "HTTP/1.1", null, newConnection);
-		newServerHttpConnection.getHttpResponse().setVersion(
-				"NOT_OVERRIDE_VERSION");
+		ServerHttpConnection newServerHttpConnection = createConnection("GET", "/testing/response", "HTTP/1.1", null,
+				newConnection);
+		newServerHttpConnection.getHttpResponse().setHttpVersion(new HttpVersion("NOT_OVERRIDE_VERSION"));
 		newServerHttpConnection.importState(unserialisedMomento);
 
 		// Ensure not override HTTP version
@@ -275,13 +255,11 @@ public class HttpStateMomentoTest extends OfficeFrameTestCase {
 				actualContent.startsWith("NOT_OVERRIDE_VERSION "));
 
 		// Validate same content
-		HttpResponse originalResponse = this.serverHttpConnection
-				.getHttpResponse();
-		originalResponse.setVersion("NOT_OVERRIDE_VERSION");
+		HttpResponse originalResponse = this.serverHttpConnection.getHttpResponse();
+		originalResponse.setHttpVersion(new HttpVersion("NOT_OVERRIDE_VERSION"));
 		originalResponse.send();
 		String expectedContent = new String(this.connection.getWrittenBytes());
-		assertEquals("Incorrect cloned response", expectedContent,
-				actualContent);
+		assertEquals("Incorrect cloned response", expectedContent, actualContent);
 
 		// Return the cloned connection
 		return newServerHttpConnection;
@@ -304,9 +282,8 @@ public class HttpStateMomentoTest extends OfficeFrameTestCase {
 	 *            HTTP header name/value pairs.
 	 * @return {@link ServerHttpConnection}.
 	 */
-	private static ServerHttpConnection createConnection(String method,
-			String requestURI, String httpVersion, String entityContent,
-			Connection connection, String... headerNameValues) {
+	private static ServerHttpConnection createConnection(String method, String requestURI, String httpVersion,
+			String entityContent, Connection connection, String... headerNameValues) {
 
 		// Create the entity
 		ServerInputStreamImpl entity = new ServerInputStreamImpl(new Object());
@@ -323,9 +300,8 @@ public class HttpStateMomentoTest extends OfficeFrameTestCase {
 		// Create the conversation
 		int sendBufferSize = 1024;
 		Charset defaultCharset = Charset.defaultCharset();
-		HttpConversationImpl conversation = new HttpConversationImpl(
-				connection, "TEST", sendBufferSize, defaultCharset, false,
-				new HttpServerClock() {
+		HttpConversationImpl conversation = new HttpConversationImpl(connection, "TEST", sendBufferSize, defaultCharset,
+				false, new HttpServerClock() {
 					@Override
 					public String getDateHeaderValue() {
 						return "[Mock Time]";
@@ -341,8 +317,7 @@ public class HttpStateMomentoTest extends OfficeFrameTestCase {
 		}
 
 		// Add the request
-		HttpManagedObject mo = conversation.addRequest(method, requestURI,
-				httpVersion, headers, httpEntity);
+		HttpManagedObject mo = conversation.addRequest(method, requestURI, httpVersion, headers, httpEntity);
 
 		// Return the connection
 		return mo.getServerHttpConnection();

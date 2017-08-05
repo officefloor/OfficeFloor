@@ -25,17 +25,17 @@ package net.officefloor.server.http;
 public class HttpException extends Exception {
 
 	/**
-	 * HTTP status.
+	 * {@link HttpStatus}.
 	 */
-	private final int httpStatus;
+	private final HttpStatus httpStatus;
 
 	/**
 	 * Initiate.
 	 *
 	 * @param httpStatus
-	 *            HTTP status of exception.
+	 *            {@link HttpStatus} of exception.
 	 */
-	public HttpException(int httpStatus) {
+	public HttpException(HttpStatus httpStatus) {
 		this.httpStatus = httpStatus;
 	}
 
@@ -43,13 +43,13 @@ public class HttpException extends Exception {
 	 * Initiate.
 	 *
 	 * @param httpStatus
-	 *            HTTP status of exception.
+	 *            {@link HttpStatus} of exception.
 	 * @param message
 	 *            Message.
 	 * @param cause
 	 *            Cause.
 	 */
-	public HttpException(int httpStatus, String message, Throwable cause) {
+	public HttpException(HttpStatus httpStatus, String message, Throwable cause) {
 		super(message, cause);
 		this.httpStatus = httpStatus;
 	}
@@ -58,11 +58,11 @@ public class HttpException extends Exception {
 	 * Initiate.
 	 *
 	 * @param httpStatus
-	 *            HTTP status of exception.
+	 *            {@link HttpStatus} of exception.
 	 * @param message
 	 *            Message.
 	 */
-	public HttpException(int httpStatus, String message) {
+	public HttpException(HttpStatus httpStatus, String message) {
 		super(message);
 		this.httpStatus = httpStatus;
 	}
@@ -71,21 +71,21 @@ public class HttpException extends Exception {
 	 * Initiate.
 	 *
 	 * @param httpStatus
-	 *            HTTP status of exception.
+	 *            {@link HttpStatus} of exception.
 	 * @param cause
 	 *            Cause.
 	 */
-	public HttpException(int httpStatus, Throwable cause) {
+	public HttpException(HttpStatus httpStatus, Throwable cause) {
 		super(cause);
 		this.httpStatus = httpStatus;
 	}
 
 	/**
-	 * Obtains the HTTP status of this exception.
+	 * Obtains the {@link HttpStatus} of this exception.
 	 *
-	 * @return HTTP status of this exception.
+	 * @return {@link HttpStatus} of this exception.
 	 */
-	public int getHttpStatus() {
+	public HttpStatus getHttpStatus() {
 		return this.httpStatus;
 	}
 

@@ -17,7 +17,6 @@
  */
 package net.officefloor.server.http;
 
-import java.io.IOException;
 import java.util.List;
 
 import net.officefloor.server.stream.ServerInputStream;
@@ -44,12 +43,11 @@ public interface HttpRequest {
 	String getRequestURI();
 
 	/**
-	 * Obtains the HTTP version of the request. For example HTTP/1.0, HTTP/1.1,
-	 * etc.
+	 * Obtains the {@link HttpVersion}.
 	 * 
-	 * @return HTTP version of the request.
+	 * @return {@link HttpVersion}.
 	 */
-	String getVersion();
+	HttpVersion getHttpVersion();
 
 	/**
 	 * Obtains the {@link HttpHeader} instances in the order they appear on the
@@ -64,9 +62,7 @@ public interface HttpRequest {
 	 * Obtains the {@link ServerInputStream} to the entity of the HTTP request.
 	 * 
 	 * @return {@link ServerInputStream} to the entity of the HTTP request.
-	 * @throws IOException
-	 *             If failure in reading the entity.
 	 */
-	ServerInputStream getEntity() throws IOException;
+	ServerInputStream getEntity();
 
 }

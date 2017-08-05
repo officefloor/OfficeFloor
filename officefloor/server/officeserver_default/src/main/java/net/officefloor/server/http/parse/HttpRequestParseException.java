@@ -18,6 +18,7 @@
 package net.officefloor.server.http.parse;
 
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.InvalidHttpRequestException;
 
 /**
@@ -31,23 +32,21 @@ public class HttpRequestParseException extends InvalidHttpRequestException {
 	 * Initiate.
 	 *
 	 * @param httpStatus
-	 *            HTTP status indicating failure.
-	 * @param message
-	 *            Reason for parsing failure.
+	 *            {@link HttpStatus} indicating failure.
 	 */
-	public HttpRequestParseException(int httpStatus, String message) {
-		super(httpStatus, message);
+	public HttpRequestParseException(HttpStatus httpStatus) {
+		super(httpStatus);
 	}
 
 	/**
 	 * Initiate.
 	 *
 	 * @param httpStatus
-	 *            HTTP status indicating failure.
+	 *            {@link HttpStatus} indicating failure.
 	 * @param cause
 	 *            Cause of parsing failure.
 	 */
-	public HttpRequestParseException(int httpStatus, Throwable cause) {
+	public HttpRequestParseException(HttpStatus httpStatus, Throwable cause) {
 		super(httpStatus, cause);
 	}
 

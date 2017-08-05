@@ -24,6 +24,7 @@ import java.util.List;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.conversation.HttpEntity;
 import net.officefloor.server.stream.ServerInputStream;
 import net.officefloor.server.stream.impl.NotAllDataAvailableException;
@@ -49,7 +50,7 @@ public class HttpRequestImpl implements HttpRequest {
 	/**
 	 * Version.
 	 */
-	private final String version;
+	private final HttpVersion version;
 
 	/**
 	 * Headers.
@@ -79,7 +80,7 @@ public class HttpRequestImpl implements HttpRequest {
 			HttpEntity entity) {
 		this.method = new HttpMethod(method);
 		this.requestURI = requestURI;
-		this.version = httpVersion;
+		this.version = new HttpVersion(httpVersion);
 		this.headers = headers;
 		this.entity = entity;
 	}
@@ -103,7 +104,7 @@ public class HttpRequestImpl implements HttpRequest {
 		// Load the state
 		this.method = new HttpMethod(state.method);
 		this.requestURI = state.requestURI;
-		this.version = httpVersion;
+		this.version = new HttpVersion(httpVersion);
 		this.headers = state.headers;
 		this.entity = new HttpEntityImpl(new ServerInputStreamImpl(new Object(), state.entityMomento));
 	}
@@ -140,7 +141,7 @@ public class HttpRequestImpl implements HttpRequest {
 	}
 
 	@Override
-	public String getVersion() {
+	public HttpVersion getHttpVersion() {
 		return this.version;
 	}
 

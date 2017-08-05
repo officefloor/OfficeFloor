@@ -32,7 +32,7 @@ public class OfficeFloorHttpServerImplementation implements HttpServerImplementa
 
 		// Configure HTTP and HTTPS
 		HttpsServerSocketManagedObjectSource.configure(context.getOfficeFloorDeployer(), context.getHttpPort(),
-				context.getHttpsPort(), context.getSslContext(), context.getInternalServiceHandler());
+				context.getHttpsPort(), context.getSslContext(), context.getInternalServiceInput());
 
 	}
 

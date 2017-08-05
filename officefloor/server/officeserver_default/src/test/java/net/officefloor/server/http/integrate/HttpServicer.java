@@ -64,7 +64,7 @@ public class HttpServicer {
 		// Detail request being serviced
 		String requestUri = request.getRequestURI();
 		System.out.println(this.getClass().getSimpleName() + " serving request: " + request.getHttpMethod() + " "
-				+ requestUri + " " + request.getVersion());
+				+ requestUri + " " + request.getHttpVersion());
 
 		// Determine if invalid cause failure
 		final String failUri = "/fail";

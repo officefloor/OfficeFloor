@@ -99,7 +99,7 @@ public class RequestWork {
 		TestCase.assertEquals("Incorrect request URI", req.path,
 				request.getRequestURI());
 		TestCase.assertEquals("Incorrect version", req.version,
-				request.getVersion());
+				request.getHttpVersion());
 
 		// Validate request headers provided
 		for (int i = 0; i < req.headers.size(); i++) {

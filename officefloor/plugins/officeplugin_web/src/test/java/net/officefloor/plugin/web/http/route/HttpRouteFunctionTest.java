@@ -83,7 +83,7 @@ public class HttpRouteFunctionTest extends OfficeFrameTestCase {
 			HttpUrlContinuationTest.recordSaveRequest("_OfficeFloorRedirectedRequest_", connection, requestState,
 					session, test);
 			test.recordReturn(connection, connection.getHttpResponse(), response);
-			response.setStatus(303); // Status = See other
+			response.setHttpStatus(303); // Status = See other
 			test.recordReturn(response,
 					response.addHeader("Location", redirectUrl + HttpRouteFunction.REDIRECT_URI_SUFFIX), header);
 

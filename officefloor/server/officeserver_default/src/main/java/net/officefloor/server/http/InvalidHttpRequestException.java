@@ -29,14 +29,13 @@ public class InvalidHttpRequestException extends HttpException {
 	 * Initiate.
 	 *
 	 * @param httpStatus
-	 *            HTTP status of this exception.
+	 *            {@link HttpStatus} of this exception.
 	 * @param message
 	 *            Message.
 	 * @param cause
 	 *            Cause.
 	 */
-	public InvalidHttpRequestException(int httpStatus, String message,
-			Throwable cause) {
+	public InvalidHttpRequestException(HttpStatus httpStatus, String message, Throwable cause) {
 		super(httpStatus, message, cause);
 	}
 
@@ -44,11 +43,11 @@ public class InvalidHttpRequestException extends HttpException {
 	 * Initiate.
 	 *
 	 * @param httpStatus
-	 *            HTTP status of this exception.
+	 *            {@link HttpStatus} of this exception.
 	 * @param message
 	 *            Message.
 	 */
-	public InvalidHttpRequestException(int httpStatus, String message) {
+	public InvalidHttpRequestException(HttpStatus httpStatus, String message) {
 		super(httpStatus, message);
 	}
 
@@ -56,11 +55,11 @@ public class InvalidHttpRequestException extends HttpException {
 	 * Initiate.
 	 *
 	 * @param httpStatus
-	 *            HTTP status of this exception.
+	 *            {@link HttpStatus} of this exception.
 	 * @param cause
 	 *            Cause.
 	 */
-	public InvalidHttpRequestException(int httpStatus, Throwable cause) {
+	public InvalidHttpRequestException(HttpStatus httpStatus, Throwable cause) {
 		super(httpStatus, cause);
 	}
 
@@ -68,9 +67,9 @@ public class InvalidHttpRequestException extends HttpException {
 	 * Initiate.
 	 *
 	 * @param httpStatus
-	 *            HTTP status of this exception.
+	 *            {@link HttpStatus} of this exception.
 	 */
-	public InvalidHttpRequestException(int httpStatus) {
+	public InvalidHttpRequestException(HttpStatus httpStatus) {
 		super(httpStatus);
 	}
 

@@ -46,6 +46,11 @@ import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
 public abstract class AbstractHttpServerImplementationTest extends OfficeFrameTestCase {
 
 	/**
+	 * Number of pipeline requests.
+	 */
+	private static final int PIPELINE_REQUEST_COUNT = 100000;
+
+	/**
 	 * Creates the {@link HttpServerImplementation} to test.
 	 * 
 	 * @return {@link HttpServerImplementation} to test.
@@ -163,7 +168,7 @@ public abstract class AbstractHttpServerImplementationTest extends OfficeFrameTe
 		executor.doPipelineRun(20000).printResult(this.getName() + " WARMUP");
 
 		// Undertake performance run
-		executor.doPipelineRun(100000).printResult(this.getName() + " RUN");
+		executor.doPipelineRun(PIPELINE_REQUEST_COUNT).printResult(this.getName() + " RUN");
 	}
 
 	/**
@@ -177,7 +182,7 @@ public abstract class AbstractHttpServerImplementationTest extends OfficeFrameTe
 		// Create the pipeline executors
 		PipelineExecutor[] executors = new PipelineExecutor[CLIENT_COUNT];
 		for (int i = 0; i < CLIENT_COUNT; i++) {
-			executors[i] = new PipelineExecutor(7878, 100000);
+			executors[i] = new PipelineExecutor(7878, PIPELINE_REQUEST_COUNT);
 		}
 
 		// Do warm up

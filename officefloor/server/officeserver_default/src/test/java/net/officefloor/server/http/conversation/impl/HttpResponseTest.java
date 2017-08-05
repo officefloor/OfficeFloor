@@ -33,17 +33,15 @@ import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpStatus;
+import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.UsAsciiUtil;
 import net.officefloor.server.http.clock.HttpServerClock;
 import net.officefloor.server.http.conversation.HttpConversation;
 import net.officefloor.server.http.conversation.HttpEntity;
 import net.officefloor.server.http.conversation.HttpManagedObject;
-import net.officefloor.server.http.conversation.impl.HttpConversationImpl;
-import net.officefloor.server.http.conversation.impl.HttpEntityImpl;
-import net.officefloor.server.http.conversation.impl.HttpResponseImpl;
 import net.officefloor.server.http.parse.HttpRequestParseException;
 import net.officefloor.server.http.protocol.Connection;
-import net.officefloor.server.http.protocol.HttpStatus;
 import net.officefloor.server.http.protocol.WriteBuffer;
 import net.officefloor.server.http.protocol.WriteBufferEnum;
 import net.officefloor.server.impl.ArrayWriteBuffer;
@@ -84,9 +82,9 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 	 */
 	public void testDefaults() {
 		HttpResponse response = this.createHttpResponse();
-		assertEquals("Incorrect version", "HTTP/1.1", response.getVersion());
-		assertEquals("Incorrect status", 200, response.getStatus());
-		assertEquals("Incorrect status message", "OK", response.getStatusMessage());
+		assertEquals("Incorrect version", "HTTP/1.1", response.getHttpVersion());
+		assertEquals("Incorrect status", 200, response.getHttpStatus().getStatusCode());
+		assertEquals("Incorrect status message", "OK", response.getHttpStatus().getStatusMessage());
 		assertEquals("Incorrect content type", null, response.getContentType());
 		assertEquals("Incorrect charset", DEFAULT_CHARSET, response.getContentCharset());
 	}
@@ -98,18 +96,19 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		HttpResponse response = this.createHttpResponse();
 
 		// Change version
-		response.setVersion("HTTP/1.0");
-		assertEquals("Incorrect version", "HTTP/1.0", response.getVersion());
+		response.setHttpVersion(new HttpVersion("HTTP/1.0"));
+		assertEquals("Incorrect version", "HTTP/1.0", response.getHttpVersion());
 
 		// Change status (with message defaulted)
-		response.setStatus(204);
-		assertEquals("Incorrect status", 204, response.getStatus());
-		assertEquals("Incorrect status message", HttpStatus.getStatusMessage(204), response.getStatusMessage());
+		response.setHttpStatus(HttpStatus.getHttpStatus(204));
+		assertEquals("Incorrect status", 204, response.getHttpStatus().getStatusCode());
+		assertEquals("Incorrect status message", "No content", response.getHttpStatus().getStatusMessage());
 
 		// Change status and its message
-		response.setStatus(404, "Different status message");
-		assertEquals("Incorrect status", 404, response.getStatus());
-		assertEquals("Incorrect status message", "Different status message", response.getStatusMessage());
+		response.setHttpStatus(new HttpStatus(404, "Different status message"));
+		assertEquals("Incorrect status", 404, response.getHttpStatus().getStatusCode());
+		assertEquals("Incorrect status message", "Different status message",
+				response.getHttpStatus().getStatusMessage());
 
 		// Change content type with default charset
 		response.setContentType("text/xml", null);
@@ -258,7 +257,8 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 	 */
 	public void testSendParseFailure() throws IOException {
 
-		final Throwable FAILURE = new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST, "Fail Parse Test");
+		final Throwable FAILURE = new HttpRequestParseException(
+				new HttpStatus(HttpStatus.BAD_REQUEST.getStatusCode(), "Fail Parse Test"));
 
 		this.sendFailure(FAILURE);
 		this.assertWireContent(

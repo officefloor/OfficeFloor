@@ -26,8 +26,8 @@ import org.apache.http.client.methods.HttpUriRequest;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.HttpServicerFunction;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.MockHttpServer;
-import net.officefloor.server.http.protocol.HttpStatus;
 import net.officefloor.server.http.source.HttpServerSocketManagedObjectSource;
 
 /**
@@ -119,7 +119,7 @@ public class HttpServerTest extends MockHttpServer {
 		HttpResponse response = client.execute(request);
 
 		// Ensure indicate server failure
-		assertEquals("Should be server failure", HttpStatus.SC_INTERNAL_SERVER_ERROR,
+		assertEquals("Should be server failure", HttpStatus.INTERNAL_SERVER_ERROR.getStatusCode(),
 				response.getStatusLine().getStatusCode());
 	}
 

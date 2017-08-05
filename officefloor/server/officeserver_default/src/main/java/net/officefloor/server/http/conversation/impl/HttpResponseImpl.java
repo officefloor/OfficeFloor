@@ -31,11 +31,12 @@ import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpStatus;
+import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.parse.HttpRequestParseException;
 import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.server.http.protocol.Connection;
-import net.officefloor.server.http.protocol.HttpStatus;
 import net.officefloor.server.http.protocol.WriteBuffer;
 import net.officefloor.server.http.protocol.WriteBufferEnum;
 import net.officefloor.server.stream.ServerOutputStream;
@@ -93,19 +94,14 @@ public class HttpResponseImpl implements HttpResponse {
 	private final HttpResponseWriteBufferReceiver receiver = new HttpResponseWriteBufferReceiver();
 
 	/**
-	 * Version.
+	 * {@link HttpVersion}.
 	 */
-	private String version;
+	private HttpVersion version;
 
 	/**
-	 * Status code.
+	 * {@link HttpStatus}.
 	 */
-	private int status;
-
-	/**
-	 * Status message.
-	 */
-	private String statusMessage;
+	private HttpStatus status;
 
 	/**
 	 * Headers.
@@ -152,16 +148,15 @@ public class HttpResponseImpl implements HttpResponse {
 	 * @param connection
 	 *            {@link Connection}.
 	 * @param httpVersion
-	 *            HTTP version.
+	 *            {@link HttpVersion}.
 	 */
-	public HttpResponseImpl(HttpConversationImpl conversation, Connection connection, String httpVersion) {
+	public HttpResponseImpl(HttpConversationImpl conversation, Connection connection, HttpVersion httpVersion) {
 		this.conversation = conversation;
 		this.connection = connection;
 
 		// Specify initial values
 		this.version = httpVersion;
-		this.status = HttpStatus.SC_OK;
-		this.statusMessage = HttpStatus.getStatusMessage(this.status);
+		this.status = HttpStatus.OK;
 		this.charset = this.conversation.getDefaultCharset();
 		this.entity = new ServerOutputStreamImpl(this.receiver, this.conversation.getSendBufferSize());
 	}
@@ -174,11 +169,11 @@ public class HttpResponseImpl implements HttpResponse {
 	 * @param connection
 	 *            {@link Connection}.
 	 * @param httpVersion
-	 *            HTTP version.
+	 *            {@link HttpVersion}.
 	 * @param momento
 	 *            Momento containing the state for this {@link HttpResponse}.
 	 */
-	public HttpResponseImpl(HttpConversationImpl conversation, Connection connection, String httpVersion,
+	public HttpResponseImpl(HttpConversationImpl conversation, Connection connection, HttpVersion httpVersion,
 			Serializable momento) {
 
 		// Ensure valid momento
@@ -191,8 +186,7 @@ public class HttpResponseImpl implements HttpResponse {
 		this.conversation = conversation;
 		this.connection = connection;
 		this.version = httpVersion;
-		this.status = state.status;
-		this.statusMessage = state.statusMessage;
+		this.status = HttpStatus.getHttpStatus(state.status);
 		this.headers.addAll(state.headers);
 		this.contentType = state.contentType;
 		this.charset = Charset.forName(state.charset);
@@ -202,15 +196,6 @@ public class HttpResponseImpl implements HttpResponse {
 		if (state.isEntityWriter) {
 			this.loadEntityWriterThreadUnsafe();
 		}
-	}
-
-	/**
-	 * Obtains the HTTP version.
-	 * 
-	 * @return HTTP version.
-	 */
-	String getHttpVersion() {
-		return this.version;
 	}
 
 	/**
@@ -233,8 +218,9 @@ public class HttpResponseImpl implements HttpResponse {
 			Serializable entityMomento = this.entity.exportState(this.entityWriter);
 
 			// Create and return the state momento
-			return new StateMomento(this.status, this.statusMessage, httpHeaders, entityMomento, this.contentType,
-					charsetSerializeName, this.isOutputStream, (this.entityWriter != null));
+			return new StateMomento(this.status.getStatusCode(), this.status.getStatusMessage(), httpHeaders,
+					entityMomento, this.contentType, charsetSerializeName, this.isOutputStream,
+					(this.entityWriter != null));
 		}
 	}
 
@@ -274,10 +260,10 @@ public class HttpResponseImpl implements HttpResponse {
 			if (failure instanceof HttpRequestParseException) {
 				// Parse request failure
 				HttpRequestParseException parseFailure = (HttpRequestParseException) failure;
-				this.setStatus(parseFailure.getHttpStatus());
+				this.setHttpStatus(parseFailure.getHttpStatus());
 			} else {
 				// Handling request failure
-				this.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+				this.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 
 			// Write the failure response
@@ -325,7 +311,7 @@ public class HttpResponseImpl implements HttpResponse {
 			this.contentType = "text/plain";
 
 			// Write the failure header details
-			this.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			this.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
 
 			// Write the failure response
 			ServerWriter writer = this.getEntityWriter();
@@ -375,12 +361,13 @@ public class HttpResponseImpl implements HttpResponse {
 		ServerOutputStream header = new ServerOutputStreamImpl(this.receiver, this.conversation.getSendBufferSize());
 
 		// Ensure appropriate successful status for no content
-		if ((contentLength == 0) && (this.status == HttpStatus.SC_OK)) {
-			this.setStatus(HttpStatus.SC_NO_CONTENT);
+		if ((contentLength == 0) && (this.status.isEqual(HttpStatus.OK))) {
+			this.setHttpStatus(HttpStatus.NO_CONTENT);
 		}
 
 		// Write the status line
-		writeUsAscii(this.version + " " + String.valueOf(this.status) + " " + this.statusMessage + EOL, header);
+		writeUsAscii(this.version + " " + String.valueOf(this.status.getStatusCode()) + " "
+				+ this.status.getStatusMessage() + EOL, header);
 
 		// Write the managed headers
 		writeUsAscii(HEADER_NAME_SERVER + ": " + this.conversation.getServerName() + EOL, header);
@@ -443,7 +430,7 @@ public class HttpResponseImpl implements HttpResponse {
 	 */
 
 	@Override
-	public void setVersion(String version) {
+	public void setHttpVersion(HttpVersion version) {
 
 		synchronized (this.connection.getWriteLock()) {
 
@@ -453,7 +440,7 @@ public class HttpResponseImpl implements HttpResponse {
 	}
 
 	@Override
-	public String getVersion() {
+	public HttpVersion getHttpVersion() {
 
 		synchronized (this.connection.getWriteLock()) {
 
@@ -463,43 +450,22 @@ public class HttpResponseImpl implements HttpResponse {
 	}
 
 	@Override
-	public void setStatus(int status) {
-
-		// Obtain the status message
-		String message = HttpStatus.getStatusMessage(status);
-
-		// Set status and message
-		this.setStatus(status, message);
-	}
-
-	@Override
-	public int getStatus() {
-
-		synchronized (this.connection.getWriteLock()) {
-
-			// Return the current status
-			return this.status;
-		}
-	}
-
-	@Override
-	public void setStatus(int status, String statusMessage) {
+	public void setHttpStatus(HttpStatus status) {
 
 		synchronized (this.connection.getWriteLock()) {
 
 			// Specify the status
 			this.status = status;
-			this.statusMessage = statusMessage;
 		}
 	}
 
 	@Override
-	public String getStatusMessage() {
+	public HttpStatus getHttpStatus() {
 
 		synchronized (this.connection.getWriteLock()) {
 
-			// Return the current status message
-			return this.statusMessage;
+			// Return the current status
+			return this.status;
 		}
 	}
 

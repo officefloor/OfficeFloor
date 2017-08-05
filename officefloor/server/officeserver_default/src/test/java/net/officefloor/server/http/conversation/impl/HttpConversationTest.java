@@ -32,17 +32,15 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.UsAsciiUtil;
 import net.officefloor.server.http.clock.HttpServerClock;
 import net.officefloor.server.http.conversation.HttpConversation;
 import net.officefloor.server.http.conversation.HttpEntity;
 import net.officefloor.server.http.conversation.HttpManagedObject;
-import net.officefloor.server.http.conversation.impl.HttpConversationImpl;
-import net.officefloor.server.http.conversation.impl.HttpEntityImpl;
 import net.officefloor.server.http.parse.HttpRequestParseException;
 import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.server.http.protocol.Connection;
-import net.officefloor.server.http.protocol.HttpStatus;
 import net.officefloor.server.stream.impl.ServerInputStreamImpl;
 
 /**
@@ -199,8 +197,8 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 	 * Ensure {@link HttpRequestParseException} response is sent immediately.
 	 */
 	public void testParseFailure() throws IOException {
-		final HttpRequestParseException failure = new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
-				"Body of parse failure response");
+		final HttpRequestParseException failure = new HttpRequestParseException(
+				new HttpStatus(HttpStatus.BAD_REQUEST.getStatusCode(), "Body of parse failure response"));
 		this.conversation.parseFailure(failure, true);
 		String message = failure.getClass().getSimpleName() + ": " + failure.getMessage();
 		this.assertWireData(
@@ -217,8 +215,8 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 	 * {@link HttpRequestParseException} is then sent immediately.
 	 */
 	public void testStopProcessingOnParseFailure() throws IOException {
-		final HttpRequestParseException failure = new HttpRequestParseException(HttpStatus.SC_REQUEST_URI_TOO_LARGE,
-				"Body of parse failure response");
+		final HttpRequestParseException failure = new HttpRequestParseException(
+				new HttpStatus(HttpStatus.REQUEST_URI_TOO_LARGE.getStatusCode(), "Body of parse failure response"));
 
 		// Add request and then parse failure
 		HttpResponse response = this.addRequest("GET", "/pathOne", "HTTP/1.1", null).getServerHttpConnection()

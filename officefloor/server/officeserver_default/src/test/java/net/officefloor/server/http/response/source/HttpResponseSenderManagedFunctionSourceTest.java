@@ -35,6 +35,7 @@ import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.protocol.WriteBuffer;
 import net.officefloor.server.http.response.source.HttpResponseSendFunction;
@@ -48,7 +49,7 @@ import net.officefloor.server.stream.impl.ServerOutputStreamImpl;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
+public class HttpResponseSenderManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Validate specification.
@@ -78,7 +79,7 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testTriggerSendWithNoContent() throws Throwable {
 
-		final int status = 204;
+		final HttpStatus status = HttpStatus.NO_CONTENT;
 
 		ManagedFunctionContext<HttpResponseSendTaskDependencies, None> managedFunctionContext = this
 				.createMock(ManagedFunctionContext.class);
@@ -89,7 +90,7 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(managedFunctionContext,
 				managedFunctionContext.getObject(HttpResponseSendTaskDependencies.SERVER_HTTP_CONNECTION), connection);
 		this.recordReturn(connection, connection.getHttpResponse(), response);
-		response.setStatus(status);
+		response.setHttpStatus(status);
 		response.send();
 
 		// Test
@@ -113,7 +114,7 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testTriggerSendWithContent() throws Throwable {
 
-		final int status = 204;
+		final HttpStatus status = HttpStatus.NO_CONTENT;
 		final String testContentFileName = "TestContent.html";
 		final String testContentFilePath = this.getPackageRelativePath(this.getClass()) + "/" + testContentFileName;
 		File testContentFile = this.findFile(this.getClass(), "TestContent.html");
@@ -130,7 +131,7 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(managedFunctionContext,
 				managedFunctionContext.getObject(HttpResponseSendTaskDependencies.SERVER_HTTP_CONNECTION), connection);
 		this.recordReturn(connection, connection.getHttpResponse(), response);
-		response.setStatus(status);
+		response.setHttpStatus(status);
 		this.recordReturn(response, response.getEntity(), new ServerOutputStreamImpl(receiver, 1024));
 		this.recordReturn(receiver, receiver.getWriteLock(), new Object());
 		final ByteBuffer[] entityContent = new ByteBuffer[1];

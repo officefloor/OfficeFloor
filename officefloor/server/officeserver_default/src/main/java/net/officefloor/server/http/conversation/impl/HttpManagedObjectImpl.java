@@ -29,6 +29,7 @@ import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.conversation.HttpConversation;
 import net.officefloor.server.http.conversation.HttpManagedObject;
@@ -86,7 +87,7 @@ public class HttpManagedObjectImpl implements HttpManagedObject, ServerHttpConne
 		this.connection = connection;
 		this.conversation = conversation;
 		this.request = request;
-		this.response = new HttpResponseImpl(this.conversation, this.connection, request.getVersion());
+		this.response = new HttpResponseImpl(this.conversation, this.connection, request.getHttpVersion());
 
 		// Keep track of the client HTTP method
 		this.clientHttpMethod = request.getHttpMethod();
@@ -184,11 +185,11 @@ public class HttpManagedObjectImpl implements HttpManagedObject, ServerHttpConne
 		StateMomento state = (StateMomento) momento;
 
 		// Override the request with momento state
-		String requestHttpVersion = this.request.getVersion();
+		String requestHttpVersion = this.request.getHttpVersion().getName();
 		this.request = new HttpRequestImpl(requestHttpVersion, state.requestMomento);
 
 		// Override the response with momento state
-		String responseHttpVersion = this.response.getHttpVersion();
+		HttpVersion responseHttpVersion = this.response.getHttpVersion();
 		this.response = new HttpResponseImpl(this.conversation, this.connection, responseHttpVersion,
 				state.responseMomento);
 	}

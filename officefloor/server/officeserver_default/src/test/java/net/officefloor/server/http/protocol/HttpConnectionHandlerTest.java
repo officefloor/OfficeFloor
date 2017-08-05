@@ -25,13 +25,12 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.conversation.HttpConversation;
 import net.officefloor.server.http.conversation.HttpEntity;
 import net.officefloor.server.http.conversation.impl.HttpManagedObjectImpl;
 import net.officefloor.server.http.parse.HttpRequestParseException;
 import net.officefloor.server.http.parse.HttpRequestParser;
-import net.officefloor.server.http.protocol.HttpConnectionHandler;
-import net.officefloor.server.http.protocol.HttpStatus;
 
 /**
  * Tests the {@link HttpConnectionHandler}.
@@ -115,8 +114,7 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	public void testParseFailure() throws Exception {
 
 		// Additional test objects
-		final HttpRequestParseException failure = new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
-				"Parse Failure");
+		final HttpRequestParseException failure = new HttpRequestParseException(HttpStatus.BAD_REQUEST);
 
 		// Record actions
 		this.recordReturn(this.readContext, this.readContext.getData(), this.readData);

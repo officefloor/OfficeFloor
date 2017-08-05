@@ -140,7 +140,7 @@ public class MockHttpChallengeContext<D extends Enum<D>, F extends Enum<F>>
 		HttpResponse httpResponse = this.recordGetHttpResponse();
 
 		// Record the challenge
-		httpResponse.setStatus(HttpStatus.SC_UNAUTHORIZED);
+		httpResponse.setHttpStatus(HttpStatus.SC_UNAUTHORIZED);
 		this.testCase.recordReturn(httpResponse, httpResponse.addHeader(
 				"WWW-Authenticate", authenticateHeaderValue), header);
 	}

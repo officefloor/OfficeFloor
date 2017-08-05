@@ -28,6 +28,7 @@ import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 
 /**
@@ -70,9 +71,9 @@ public class HttpResponseSendFunction
 	}
 
 	/**
-	 * HTTP status for the {@link HttpResponse}.
+	 * {@link HttpStatus} for the {@link HttpResponse}.
 	 */
-	private final int status;
+	private final HttpStatus status;
 
 	/**
 	 * Content for the {@link HttpResponse}. May be <code>null</code>.
@@ -88,7 +89,7 @@ public class HttpResponseSendFunction
 	 *            Content for {@link HttpResponse}. May be <code>null</code>.
 	 */
 	public HttpResponseSendFunction(int status, byte[] content) {
-		this.status = status;
+		this.status = HttpStatus.getHttpStatus(status);
 		if (content == null) {
 			// No content
 			this.content = null;
@@ -113,10 +114,8 @@ public class HttpResponseSendFunction
 				.getObject(HttpResponseSendTaskDependencies.SERVER_HTTP_CONNECTION);
 		HttpResponse response = connection.getHttpResponse();
 
-		// Provide the status if specified
-		if (this.status > 0) {
-			response.setStatus(this.status);
-		}
+		// Provide the status
+		response.setHttpStatus(this.status);
 
 		// Provide entity if have content
 		if (this.content != null) {

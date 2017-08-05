@@ -20,9 +20,9 @@ package net.officefloor.server.http;
 import javax.net.ssl.SSLContext;
 
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
+import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
-import net.officefloor.frame.api.manage.FunctionManager;
 
 /**
  * Context for the {@link HttpServerImplementation}.
@@ -64,14 +64,14 @@ public interface HttpServerImplementationContext {
 	 * 
 	 * @return {@link DeployedOfficeInput} for internal invoked servicing.
 	 */
-	DeployedOfficeInput getInternalServiceHandler();
+	DeployedOfficeInput getInternalServiceInput();
 
 	/**
-	 * Obtains the {@link FunctionManager} for external invoked servicing.
+	 * Obtains the {@link ExternalServiceInput}.
 	 * 
-	 * @return {@link FunctionManager} for external invoked servicing.
+	 * @return {@link ExternalServiceInput}.
 	 */
-	FunctionManager getExternalServiceHandler();
+	ExternalServiceInput<ServerHttpConnection> getExternalServiceInput();
 
 	/**
 	 * Obtains the {@link OfficeFloorDeployer} to configure the

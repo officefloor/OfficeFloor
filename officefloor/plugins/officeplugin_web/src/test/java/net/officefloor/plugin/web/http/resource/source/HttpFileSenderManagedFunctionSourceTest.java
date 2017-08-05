@@ -268,7 +268,7 @@ public class HttpFileSenderManagedFunctionSourceTest extends OfficeFrameTestCase
 		Charset charset = Charset.defaultCharset();
 		this.response.setContentType("text/html", charset);
 		this.recordReturn(this.response, this.response.getEntityWriter(), this.entity.getServerWriter());
-		this.response.setStatus(status);
+		this.response.setHttpStatus(status);
 		this.response.send();
 	}
 

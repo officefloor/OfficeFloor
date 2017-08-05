@@ -188,7 +188,7 @@ public class MockHttpSecuritySource extends
 
 		// Load the challenge
 		HttpResponse response = context.getConnection().getHttpResponse();
-		response.setStatus(HttpStatus.SC_UNAUTHORIZED);
+		response.setHttpStatus(HttpStatus.SC_UNAUTHORIZED);
 		response.addHeader("WWW-Authenticate",
 				IMPLEMENTING_AUTHENTICATION_SCHEME_BASIC + " realm=\"" + REALM
 						+ "\"");

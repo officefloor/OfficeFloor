@@ -31,67 +31,51 @@ import net.officefloor.server.stream.ServerWriter;
 public interface HttpResponse {
 
 	/**
+	 * Default {@link Charset}.
+	 */
+	static Charset UTF8_CHARSET = Charset.forName("UTF-8");
+
+	/**
+	 * Obtains the {@link HttpVersion}.
+	 * 
+	 * @return {@link HttpVersion}.
+	 */
+	HttpVersion getHttpVersion();
+
+	/**
 	 * <p>
-	 * Allows specifying the HTTP version on the response. Values should be
-	 * either HTTP/1.0 or HTTP/1.1.
+	 * Override the {@link HttpVersion}.
 	 * <p>
 	 * This defaults to value on {@link HttpRequest}.
 	 * 
 	 * @param version
-	 *            HTTP version.
+	 *            {@link HttpVersion}.
 	 */
-	void setVersion(String version);
-
-	/**
-	 * Obtains the HTTP version.
-	 * 
-	 * @return HTTP version.
-	 */
-	String getVersion();
+	void setHttpVersion(HttpVersion version);
 
 	/**
 	 * <p>
-	 * Specifies the status of the response with the default status message.
-	 * <p>
-	 * This defaults to 200 assuming the request was processed successfully.
-	 * 
-	 * @param status
-	 *            Status of the response.
-	 */
-	void setStatus(int status);
-
-	/**
-	 * <p>
-	 * Obtains the status.
+	 * Obtains the {@link HttpStatus}.
 	 * <p>
 	 * This is the current status. The status may changed based on particular
 	 * HTTP rules (e.g. 200 becoming 204 due to no entity) or there being a
 	 * failure in processing the message.
 	 * 
-	 * @return Current status.
+	 * @return Current {@link HttpStatus}.
 	 */
-	int getStatus();
+	HttpStatus getHttpStatus();
 
 	/**
-	 * Specifies the status of the response including specifying the status
-	 * human readable message.
+	 * <p>
+	 * Specifies the {@link HttpStatus}.
+	 * <p>
+	 * This defaults to {@link HttpStatus#OK} assuming the request was processed
+	 * successfully.
 	 * 
 	 * @param status
-	 *            Status of the response.
-	 * @param statusMessage
-	 *            Human readable status message.
-	 * @see #setStatus(int)
+	 *            {@link HttpStatus}.
 	 */
-	void setStatus(int status, String statusMessage);
-
-	/**
-	 * Obtains the current status message.
-	 * 
-	 * @return Current status message.
-	 * 
-	 * @see #getStatus()
-	 */
-	String getStatusMessage();
+	void setHttpStatus(HttpStatus status);
 
 	/**
 	 * Resets the {@link HttpResponse} by clearing {@link HttpHeader} instances
@@ -118,8 +102,7 @@ public interface HttpResponse {
 	 *             Should the {@link HttpHeader} be managed by the
 	 *             {@link HttpResponse}.
 	 */
-	HttpHeader addHeader(String name, String value)
-			throws IllegalArgumentException;
+	HttpHeader addHeader(String name, String value) throws IllegalArgumentException;
 
 	/**
 	 * Obtains the first {@link HttpHeader} by the name.

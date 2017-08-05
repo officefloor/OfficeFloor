@@ -26,6 +26,7 @@ import java.util.Properties;
 import junit.framework.TestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.UsAsciiUtil;
 import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.server.stream.MockServerOutputStream;
@@ -50,9 +51,9 @@ public class MockHttpResponse implements HttpResponse {
 	private String statusMessage = null;
 
 	/**
-	 * Version.
+	 * {@link HttpVersion}.
 	 */
-	private String version = null;
+	private HttpVersion version = null;
 
 	/**
 	 * Headers.
@@ -62,8 +63,7 @@ public class MockHttpResponse implements HttpResponse {
 	/**
 	 * Entity.
 	 */
-	private MockServerOutputStream entity = new MockServerOutputStream(
-			UsAsciiUtil.US_ASCII);
+	private MockServerOutputStream entity = new MockServerOutputStream(UsAsciiUtil.US_ASCII);
 
 	/**
 	 * Flag indicating if sent.
@@ -104,22 +104,22 @@ public class MockHttpResponse implements HttpResponse {
 	 */
 
 	@Override
-	public void setVersion(String version) {
+	public void setHttpVersion(HttpVersion version) {
 		this.version = version;
 	}
 
 	@Override
-	public String getVersion() {
+	public HttpVersion getHttpVersion() {
 		return this.version;
 	}
 
 	@Override
-	public void setStatus(int status) {
+	public void setHttpStatus(int status) {
 		this.status = status;
 	}
 
 	@Override
-	public int getStatus() {
+	public int getHttpStatus() {
 		return this.status;
 	}
 
@@ -136,14 +136,12 @@ public class MockHttpResponse implements HttpResponse {
 
 	@Override
 	public void reset() throws IOException {
-		throw new IllegalStateException("Can not reset "
-				+ MockHttpResponse.class.getSimpleName());
+		throw new IllegalStateException("Can not reset " + MockHttpResponse.class.getSimpleName());
 	}
 
 	@Override
 	public HttpHeader addHeader(String name, String value) {
-		TestCase.assertFalse("Response already contains header '" + name + "'",
-				this.headers.containsKey(name));
+		TestCase.assertFalse("Response already contains header '" + name + "'", this.headers.containsKey(name));
 		this.headers.setProperty(name, value);
 		return new HttpHeaderImpl(name, value);
 	}
@@ -183,10 +181,8 @@ public class MockHttpResponse implements HttpResponse {
 	}
 
 	@Override
-	public void setContentType(String contentType, Charset charset)
-			throws IOException {
-		throw new IllegalStateException("Can not change Content-Type for "
-				+ MockHttpResponse.class.getSimpleName());
+	public void setContentType(String contentType, Charset charset) throws IOException {
+		throw new IllegalStateException("Can not change Content-Type for " + MockHttpResponse.class.getSimpleName());
 	}
 
 	@Override

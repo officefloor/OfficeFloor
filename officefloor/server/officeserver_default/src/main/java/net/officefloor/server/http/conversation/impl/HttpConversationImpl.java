@@ -26,6 +26,7 @@ import java.util.Queue;
 
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.clock.HttpServerClock;
 import net.officefloor.server.http.conversation.HttpConversation;
 import net.officefloor.server.http.conversation.HttpEntity;
@@ -92,8 +93,7 @@ public class HttpConversationImpl implements HttpConversation {
 	 * @param clock
 	 *            {@link HttpServerClock}.
 	 */
-	public HttpConversationImpl(Connection connection, String serverName,
-			int sendBufferSize, Charset defaultCharset,
+	public HttpConversationImpl(Connection connection, String serverName, int sendBufferSize, Charset defaultCharset,
 			boolean isSendStackTraceOnFailure, HttpServerClock clock) {
 		this.connection = connection;
 		this.serverName = serverName;
@@ -150,8 +150,7 @@ public class HttpConversationImpl implements HttpConversation {
 		synchronized (this) {
 
 			// Send the complete responses in order registered
-			for (Iterator<HttpManagedObjectImpl> iterator = this.managedObjects
-					.iterator(); iterator.hasNext();) {
+			for (Iterator<HttpManagedObjectImpl> iterator = this.managedObjects.iterator(); iterator.hasNext();) {
 				HttpManagedObjectImpl managedObject = iterator.next();
 
 				// Attempt to queue response for sending
@@ -180,16 +179,14 @@ public class HttpConversationImpl implements HttpConversation {
 	 */
 
 	@Override
-	public HttpManagedObject addRequest(String method, String requestURI,
-			String httpVersion, List<HttpHeader> headers, HttpEntity entity) {
+	public HttpManagedObject addRequest(String method, String requestURI, String httpVersion, List<HttpHeader> headers,
+			HttpEntity entity) {
 
 		// Create the request
-		HttpRequestImpl request = new HttpRequestImpl(method, requestURI,
-				httpVersion, headers, entity);
+		HttpRequestImpl request = new HttpRequestImpl(method, requestURI, httpVersion, headers, entity);
 
 		// Create the HTTP managed object
-		HttpManagedObjectImpl managedObject = new HttpManagedObjectImpl(
-				this.connection, this, request);
+		HttpManagedObjectImpl managedObject = new HttpManagedObjectImpl(this.connection, this, request);
 
 		// Register the HTTP managed object
 		synchronized (this) {
@@ -201,16 +198,13 @@ public class HttpConversationImpl implements HttpConversation {
 	}
 
 	@Override
-	public void parseFailure(HttpRequestParseException failure,
-			boolean isCloseConnection) throws IOException {
+	public void parseFailure(HttpRequestParseException failure, boolean isCloseConnection) throws IOException {
 
 		// Create response for parse failure
-		HttpResponseImpl response = new HttpResponseImpl(this, this.connection,
-				"HTTP/1.0");
+		HttpResponseImpl response = new HttpResponseImpl(this, this.connection, HttpVersion.HTTP_1_0);
 
 		// Create the HTTP managed object
-		HttpManagedObjectImpl managedObject = new HttpManagedObjectImpl(
-				response);
+		HttpManagedObjectImpl managedObject = new HttpManagedObjectImpl(response);
 
 		// Register the HTTP managed object
 		synchronized (this) {

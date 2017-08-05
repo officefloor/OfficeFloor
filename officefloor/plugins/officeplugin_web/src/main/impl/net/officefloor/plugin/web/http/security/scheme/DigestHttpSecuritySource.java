@@ -544,7 +544,7 @@ public class DigestHttpSecuritySource
 
 		// Specify unauthorised
 		HttpResponse response = connection.getHttpResponse();
-		response.setStatus(HttpStatus.SC_UNAUTHORIZED);
+		response.setHttpStatus(HttpStatus.SC_UNAUTHORIZED);
 		response.addHeader("WWW-Authenticate", challenge);
 
 		// Record details for authentication
