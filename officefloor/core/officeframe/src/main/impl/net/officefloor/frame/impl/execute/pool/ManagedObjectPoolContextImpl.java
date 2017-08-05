@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.execute.pool;
 
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.impl.execute.execution.ManagedExecutionFactoryImpl;
 
 /**
  * {@link ManagedObjectPoolContext} implementation.
@@ -26,18 +27,6 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectPoolContextImpl implements ManagedObjectPoolContext {
-
-	/**
-	 * {@link ThreadLocal} to indicate if the current {@link Thread} is managed.
-	 */
-	private static final ThreadLocal<Boolean> isCurrentThreadManaged = new ThreadLocal<>();
-
-	/**
-	 * Flags that the current {@link Thread} is managed.
-	 */
-	public static void flagCurrentThreadManaged() {
-		isCurrentThreadManaged.set(Boolean.TRUE);
-	}
 
 	/**
 	 * {@link ManagedObjectSource}.
@@ -65,7 +54,7 @@ public class ManagedObjectPoolContextImpl implements ManagedObjectPoolContext {
 
 	@Override
 	public boolean isCurrentThreadManaged() {
-		return isCurrentThreadManaged.get() == Boolean.TRUE;
+		return ManagedExecutionFactoryImpl.isCurrentThreadManaged();
 	}
 
 }

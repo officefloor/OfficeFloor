@@ -98,16 +98,18 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements Manag
 		}
 		FlowMetaData flowMetaData = this.processLinks[flowIndex];
 
-		try {
-			
-			// Invoke the process
-			this.officeMetaData.invokeProcess(flowMetaData, parameter, delay, callback, null, managedObject,
-					this.managedObjectMetaData, this.processMoIndex);
+		// Ensure execution is managed
+		this.officeMetaData.getManagedExecutionFactory().createManagedExecution(() -> {
+			try {
 
-		} catch (InvalidParameterTypeException ex) {
-			// Propagate (unlikely so no need for checked exception)
-			throw new IllegalArgumentException(ex);
-		}
+				// Invoke the process
+				this.officeMetaData.invokeProcess(flowMetaData, parameter, delay, callback, null, managedObject,
+						this.managedObjectMetaData, this.processMoIndex);
+			} catch (InvalidParameterTypeException ex) {
+				// Propagate (unlikely so no need for checked exception)
+				throw new IllegalArgumentException(ex);
+			}
+		}).execute();
 	}
 
 }

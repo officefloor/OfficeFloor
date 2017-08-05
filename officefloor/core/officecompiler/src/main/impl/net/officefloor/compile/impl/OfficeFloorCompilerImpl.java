@@ -598,8 +598,13 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		// Register the external servicer OfficeFloor listener
 		builder.addOfficeFloorListener(new ExternalServicingOfficeFloorListener(node));
 
-		// Add configured OfficeFloor listeners
+		// Add compiler configured OfficeFloor listeners
 		for (OfficeFloorListener listener : this.officeFloorListeners) {
+			builder.addOfficeFloorListener(listener);
+		}
+		
+		// Add deployer configured OfficeFloor listeners
+		for (OfficeFloorListener listener : node.getOfficeFloorListeners()) {
 			builder.addOfficeFloorListener(listener);
 		}
 

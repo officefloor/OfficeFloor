@@ -27,6 +27,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
+import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
@@ -131,6 +132,15 @@ public interface OfficeFloorNode extends Node, PropertyConfigurable, ManagedObje
 	 * @return <code>true</code> if the {@link OfficeFloorType} was loaded.
 	 */
 	OfficeFloorType loadOfficeFloorType(CompileContext compileContext);
+
+	/**
+	 * Obtains the {@link OfficeFloorDeployer} configured
+	 * {@link OfficeFloorListener} instances.
+	 * 
+	 * @return {@link OfficeFloorDeployer} configured
+	 *         {@link OfficeFloorListener} instances.
+	 */
+	OfficeFloorListener[] getOfficeFloorListeners();
 
 	/**
 	 * Deploys the {@link OfficeFloor}.

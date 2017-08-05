@@ -18,7 +18,11 @@
 package net.officefloor.compile.spi.officefloor;
 
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
+import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.manage.FunctionManager;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * Input into a {@link DeployedOffice}.
@@ -55,5 +59,31 @@ public interface DeployedOfficeInput {
 	 *         {@link DeployedOfficeInput}.
 	 */
 	FunctionManager getFunctionManager();
+
+	/**
+	 * <p>
+	 * Adds an {@link ExternalServiceInput} to externally trigger this
+	 * {@link DeployedOfficeInput}.
+	 * <p>
+	 * This allows {@link OfficeFloorExtensionService} instances to run external
+	 * services (running within their own {@link Thread}) to use
+	 * {@link OfficeFloor} to service.
+	 * <p>
+	 * Should the external service require running within the
+	 * {@link OfficeFloor} open/close life-cycle, add an
+	 * {@link OfficeFloorListener} to the {@link OfficeFloorDeployer}.
+	 * <p>
+	 * An example use case is running {@link OfficeFloor} within a JEE server
+	 * and having {@link OfficeFloor} service the Servlet requests.
+	 * <p>
+	 * Note should more complex interaction be required with
+	 * {@link OfficeFloor}, consider creating a {@link ManagedObjectSource} and
+	 * invoking services through the {@link ManagedObjectExecuteContext}.
+	 * 
+	 * @param objectType
+	 *            Type of object provided to the {@link ExternalServiceInput}.
+	 * @return {@link ExternalServiceInput}.
+	 */
+	<O> ExternalServiceInput<O> addExternalServiceInput(Class<O> objectType);
 
 }

@@ -26,6 +26,7 @@ import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
+import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -48,6 +49,18 @@ public interface OfficeFloorDeployer {
 	 * Flags to attempt to auto wire any non-configured {@link Team} links.
 	 */
 	void enableAutoWireTeams();
+
+	/**
+	 * <p>
+	 * Adds an {@link OfficeFloorListener}.
+	 * <p>
+	 * This enables external services to operate in the open/close life-cycle of
+	 * {@link OfficeFloor}.
+	 * 
+	 * @param listener
+	 *            {@link OfficeFloorListener}.
+	 */
+	void addOfficeFloorListener(OfficeFloorListener listener);
 
 	/**
 	 * Adds a {@link OfficeFloorTeam}.

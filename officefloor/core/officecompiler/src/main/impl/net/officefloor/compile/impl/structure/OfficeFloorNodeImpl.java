@@ -20,6 +20,7 @@ package net.officefloor.compile.impl.structure;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
@@ -78,6 +79,7 @@ import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.configuration.ConfigurationError;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
@@ -189,6 +191,11 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	private boolean isAutoWireTeams = false;
 
 	/**
+	 * {@link OfficeFloorListener} instances.
+	 */
+	private final List<OfficeFloorListener> listeners = new LinkedList<>();
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param officeFloorSourceClassName
@@ -285,6 +292,11 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	@Override
 	public void enableAutoWireTeams() {
 		this.isAutoWireTeams = true;
+	}
+
+	@Override
+	public void addOfficeFloorListener(OfficeFloorListener listener) {
+		this.listeners.add(listener);
 	}
 
 	@Override
@@ -737,6 +749,11 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 
 		// Load and return the type
 		return new OfficeFloorTypeImpl(propertyTypes, managedObjectSourceTypes, teamTypes);
+	}
+
+	@Override
+	public OfficeFloorListener[] getOfficeFloorListeners() {
+		return this.listeners.toArray(new OfficeFloorListener[this.listeners.size()]);
 	}
 
 	@Override

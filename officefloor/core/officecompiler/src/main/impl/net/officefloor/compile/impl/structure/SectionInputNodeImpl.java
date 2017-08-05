@@ -22,23 +22,33 @@ import net.officefloor.compile.impl.section.OfficeSectionInputTypeImpl;
 import net.officefloor.compile.impl.section.SectionInputTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeFloorNode;
+import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
-import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
+import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
+import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.section.SubSectionInput;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
  * {@link SectionInputNode} node.
@@ -253,6 +263,31 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		return this.externalFunctionManager;
 	}
 
+	@Override
+	public <O> ExternalServiceInput<O> addExternalServiceInput(Class<O> objectType) {
+
+		// Create the external service input
+		ExternalServiceInputManagedObjectSource<O> input = new ExternalServiceInputManagedObjectSource<>(objectType);
+
+		// Add to OfficeFloor (to make available for auto-wiring)
+		OfficeNode office = this.section.getOfficeNode();
+		OfficeFloorNode officeFloor = office.getOfficeFloorNode();
+
+		// Configure the managed object source
+		String inputObjectName = ExternalServiceInput.class.getSimpleName() + "_" + objectType.getName();
+		OfficeFloorManagedObjectSource mos = officeFloor.addManagedObjectSource(inputObjectName, input);
+		LinkUtil.linkOffice(mos.getManagingOffice(), office, this.context.getCompilerIssues(), this);
+		LinkUtil.linkFlow(mos.getManagedObjectFlow(Flows.SERVICE.name()), this, this.context.getCompilerIssues(), this);
+
+		// Configure external service input
+		OfficeFloorInputManagedObject inputMo = officeFloor.addInputManagedObject(inputObjectName);
+		inputMo.addTypeQualification(null, objectType.getName());
+		LinkUtil.linkManagedObjectSourceInput(mos, inputMo, this.context.getCompilerIssues(), this);
+
+		// Return the external service input
+		return input;
+	}
+
 	/*
 	 * =================== LinkFlowNode ============================
 	 */
@@ -296,6 +331,111 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		@Override
 		public void invokeProcess(Object parameter, FlowCallback callback) throws InvalidParameterTypeException {
 			this.delegate.invokeProcess(parameter, callback);
+		}
+	}
+
+	/**
+	 * Flows for the {@link ExternalServiceInputManagedObjectSource}.
+	 */
+	private static enum Flows {
+		SERVICE
+	}
+
+	/**
+	 * {@link ExternalServiceInput} {@link ManagedObjectSource}.
+	 * 
+	 * @param <O>
+	 *            {@link ExternalServiceInput} object type.
+	 */
+	private static class ExternalServiceInputManagedObjectSource<O> extends AbstractManagedObjectSource<None, Flows>
+			implements ExternalServiceInput<O> {
+
+		/**
+		 * {@link ExternalServiceInput} object type.
+		 */
+		private Class<O> objectType;
+
+		/**
+		 * {@link ManagedObjectExecuteContext}.
+		 */
+		private ManagedObjectExecuteContext<Flows> context;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param objectType
+		 *            {@link ExternalServiceInput} object type.
+		 */
+		private ExternalServiceInputManagedObjectSource(Class<O> objectType) {
+			this.objectType = objectType;
+		}
+
+		/*
+		 * =============== ExternalServiceInput ================
+		 */
+
+		@Override
+		public void service(O object, FlowCallback callback) {
+			this.context.invokeProcess(Flows.SERVICE, null, new ExternalServiceManagedObject<O>(object), 0, callback);
+		}
+
+		/*
+		 * ================ ManagedObjectSource =================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<None, Flows> context) throws Exception {
+			context.setObjectClass(this.objectType);
+			context.setManagedObjectClass(ExternalServiceManagedObject.class);
+			context.addFlow(Flows.SERVICE, null);
+		}
+
+		@Override
+		public void start(ManagedObjectExecuteContext<Flows> context) throws Exception {
+			this.context = context;
+		}
+
+		@Override
+		protected ManagedObject getManagedObject() throws Throwable {
+			// Not externally servicing, so no object
+			return new ExternalServiceManagedObject<O>(null);
+		}
+	}
+
+	/**
+	 * {@link ManagedObject} containing the {@link ExternalServiceInput} object.
+	 * 
+	 * @param <O>
+	 *            {@link ExternalServiceInput} object type.
+	 */
+	private static class ExternalServiceManagedObject<O> implements ManagedObject {
+
+		/**
+		 * {@link ExternalServiceInput} object.
+		 */
+		private final O object;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param object
+		 *            {@link ExternalServiceInput} object.
+		 */
+		private ExternalServiceManagedObject(O object) {
+			this.object = object;
+		}
+
+		/*
+		 * =================== ManagedObject ====================
+		 */
+
+		@Override
+		public Object getObject() throws Throwable {
+			return this.object;
 		}
 	}
 
