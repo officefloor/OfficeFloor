@@ -25,6 +25,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.conversation.HttpConversation;
 import net.officefloor.server.http.conversation.HttpEntity;
 import net.officefloor.server.http.conversation.HttpManagedObject;
@@ -115,9 +116,12 @@ public class HttpConnectionHandler implements ConnectionHandler {
 					HttpEntity entity = this.parser.getEntity();
 					this.parser.reset(); // reset for next request
 
+					// Translate to HTTP headers
+					HttpRequestHeaders httpHeaders = null;
+
 					// Service the request
 					HttpManagedObject managedObject = this.conversation.addRequest(method, requestURI, httpVersion,
-							headers, entity);
+							httpHeaders, entity);
 					this.executeContext.invokeProcess(this.requestHandlingFlowIndex,
 							managedObject.getServerHttpConnection(), managedObject, 0, managedObject.getFlowCallback());
 				}

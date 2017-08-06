@@ -60,7 +60,7 @@ public class HttpCookieUtilTest extends OfficeFrameTestCase {
 				"should only return first found cookie"));
 
 		// Record
-		this.recordReturn(this.httpRequest, this.httpRequest.getHeaders(),
+		this.recordReturn(this.httpRequest, this.httpRequest.getHttpHeaders(),
 				headers);
 
 		// Extract the http cookie
@@ -82,7 +82,7 @@ public class HttpCookieUtilTest extends OfficeFrameTestCase {
 		headers.add(this.createCookieHttpHeader("test", "\"value\""));
 
 		// Record
-		this.recordReturn(this.httpRequest, this.httpRequest.getHeaders(),
+		this.recordReturn(this.httpRequest, this.httpRequest.getHttpHeaders(),
 				headers);
 
 		// Extract the http cookie
@@ -104,7 +104,7 @@ public class HttpCookieUtilTest extends OfficeFrameTestCase {
 		headers.add(this.createCookieHttpHeader("test", "\"\""));
 
 		// Record
-		this.recordReturn(this.httpRequest, this.httpRequest.getHeaders(),
+		this.recordReturn(this.httpRequest, this.httpRequest.getHttpHeaders(),
 				headers);
 
 		// Extract the http cookie
@@ -131,7 +131,7 @@ public class HttpCookieUtilTest extends OfficeFrameTestCase {
 		headers.add(header);
 
 		// Record
-		this.recordReturn(this.httpRequest, this.httpRequest.getHeaders(),
+		this.recordReturn(this.httpRequest, this.httpRequest.getHttpHeaders(),
 				headers);
 
 		// Extract the http cookie
@@ -163,7 +163,7 @@ public class HttpCookieUtilTest extends OfficeFrameTestCase {
 		headers.add(header);
 
 		// Record
-		this.recordReturn(this.httpRequest, this.httpRequest.getHeaders(),
+		this.recordReturn(this.httpRequest, this.httpRequest.getHttpHeaders(),
 				headers);
 
 		// Extract the http cookie

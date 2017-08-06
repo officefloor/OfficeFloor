@@ -42,7 +42,7 @@ public class HttpAuthenticationScheme {
 
 		// Obtain the authenticate header value
 		String authenticate = "";
-		for (HttpHeader header : request.getHeaders()) {
+		for (HttpHeader header : request.getHttpHeaders()) {
 			if ("Authorization".equalsIgnoreCase(header.getName())) {
 				authenticate = header.getValue();
 			}

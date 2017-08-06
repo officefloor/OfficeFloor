@@ -94,22 +94,17 @@ public class RequestWork {
 		// Validate the request
 		RequestConfig req = communication.request;
 		HttpRequest request = connection.getHttpRequest();
-		TestCase.assertEquals("Incorrect method", req.method,
-				request.getHttpMethod());
-		TestCase.assertEquals("Incorrect request URI", req.path,
-				request.getRequestURI());
-		TestCase.assertEquals("Incorrect version", req.version,
-				request.getHttpVersion());
+		TestCase.assertEquals("Incorrect method", req.method, request.getHttpMethod());
+		TestCase.assertEquals("Incorrect request URI", req.path, request.getRequestURI());
+		TestCase.assertEquals("Incorrect version", req.version, request.getHttpVersion());
 
 		// Validate request headers provided
 		for (int i = 0; i < req.headers.size(); i++) {
 			HeaderConfig headerConfig = req.headers.get(i);
-			HttpHeader httpHeader = request.getHeaders().get(i);
-			TestCase.assertEquals("Invalid request header name (" + i + ")",
-					headerConfig.name, httpHeader.getName());
-			TestCase.assertEquals("Invalid request header value ("
-					+ headerConfig.name + ", " + i + ")", headerConfig.value,
-					httpHeader.getValue());
+			HttpHeader httpHeader = request.getHttpHeaders().headerAt(i);
+			TestCase.assertEquals("Invalid request header name (" + i + ")", headerConfig.name, httpHeader.getName());
+			TestCase.assertEquals("Invalid request header value (" + headerConfig.name + ", " + i + ")",
+					headerConfig.value, httpHeader.getValue());
 		}
 
 		// Validate the request body
@@ -118,8 +113,7 @@ public class RequestWork {
 		for (int value = reader.read(); value != -1; value = reader.read()) {
 			bodyBuffer.write(value);
 		}
-		String actualBody = (bodyBuffer.getBuffer().length() == 0 ? null
-				: bodyBuffer.toString());
+		String actualBody = (bodyBuffer.getBuffer().length() == 0 ? null : bodyBuffer.toString());
 		TestCase.assertEquals("Incorrect request body", req.body, actualBody);
 
 		// Throw exception if specified

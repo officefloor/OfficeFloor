@@ -108,7 +108,6 @@ public class HttpServerTestUtil {
 				context.getDeployedOffice().getDeployedOfficeInput(sectionName, sectionInputName));
 	}
 
-
 	/**
 	 * Creates the {@link SSLContext}.
 	 * 
@@ -165,8 +164,11 @@ public class HttpServerTestUtil {
 		inputStream.inputData(entityData, 0, (entityData.length - 1), false);
 		HttpEntity httpEntity = new HttpEntityImpl(inputStream);
 
+		// HTTP headers
+		HttpRequestHeaders httpHeaders = null;
+
 		// Return the HTTP request
-		return new HttpRequestImpl(method, requestUri, "HTTP/1.1", headers, httpEntity);
+		return new HttpRequestImpl(method, requestUri, "HTTP/1.1", httpHeaders, httpEntity);
 	}
 
 	/**

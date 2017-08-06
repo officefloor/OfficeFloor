@@ -17,14 +17,11 @@
  */
 package net.officefloor.server.http.protocol;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.conversation.HttpConversation;
 import net.officefloor.server.http.conversation.HttpEntity;
@@ -80,7 +77,7 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 		final String method = "GET";
 		final String requestURI = "/path";
 		final String httpVersion = "HTTP/1.1";
-		final List<HttpHeader> headers = new LinkedList<HttpHeader>();
+		final HttpRequestHeaders headers = this.createMock(HttpRequestHeaders.class);
 		final HttpEntity entity = this.createMock(HttpEntity.class);
 		final HttpManagedObjectImpl managedObject = new HttpManagedObjectImpl(null);
 

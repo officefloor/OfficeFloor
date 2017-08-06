@@ -30,6 +30,7 @@ import java.util.List;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
@@ -139,13 +140,13 @@ public class HttpStateMomentoTest extends OfficeFrameTestCase {
 			assertEquals("Incorrect path", requestURI, request.getRequestURI());
 			assertEquals("Must maintain version of current request to keep HTTP communication/negotiation valid",
 					"MaintainVersion", request.getHttpVersion());
-			List<HttpHeader> headers = request.getHeaders();
-			assertEquals("Incorrect number of headers", (headerNameValues.length / 2), headers.size());
+			HttpRequestHeaders headers = request.getHttpHeaders();
+			assertEquals("Incorrect number of headers", (headerNameValues.length / 2), headers.length());
 			for (int i = 0; i < headerNameValues.length; i += 2) {
 				String name = headerNameValues[i];
 				String value = headerNameValues[i + 1];
 				int headerIndex = i / 2;
-				HttpHeader header = headers.get(headerIndex);
+				HttpHeader header = headers.headerAt(headerIndex);
 				assertEquals("Incorrect name for header " + headerIndex, name, header.getName());
 				assertEquals("Incorrect value for header " + headerIndex + " (" + name + ")", value, header.getValue());
 			}
@@ -315,9 +316,10 @@ public class HttpStateMomentoTest extends OfficeFrameTestCase {
 			String value = headerNameValues[i + 1];
 			headers.add(new HttpHeaderImpl(name, value));
 		}
+		HttpRequestHeaders httpheaders = null;
 
 		// Add the request
-		HttpManagedObject mo = conversation.addRequest(method, requestURI, httpVersion, headers, httpEntity);
+		HttpManagedObject mo = conversation.addRequest(method, requestURI, httpVersion, httpheaders, httpEntity);
 
 		// Return the connection
 		return mo.getServerHttpConnection();

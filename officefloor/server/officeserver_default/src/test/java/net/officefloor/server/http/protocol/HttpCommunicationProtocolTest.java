@@ -19,6 +19,7 @@ package net.officefloor.server.http.protocol;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -28,6 +29,7 @@ import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.UsAsciiUtil;
@@ -370,8 +372,12 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 		}
 
 		// Validate the headers
-		List<HttpHeader> actualHeaders = request.getHeaders();
-		assertEquals("Incorrect number of HTTP headers", expectedHeaders.size(), actualHeaders.size());
+		HttpRequestHeaders actualHeaders = request.getHttpHeaders();
+		assertEquals("Incorrect number of HTTP headers", expectedHeaders.size(), actualHeaders.length());
+		List<HttpHeader> actualHeadersList = new ArrayList<>(actualHeaders.length());
+		for (HttpHeader actualHeader : actualHeaders) {
+			actualHeadersList.add(actualHeader);
+		}
 		for (HttpHeader expectedHeader : expectedHeaders) {
 
 			// Find the corresponding actual header
@@ -387,9 +393,9 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 					expectedHeader.getValue(), actualHeader.getValue());
 
 			// Remove the actual header (as matched)
-			actualHeaders.remove(actualHeader);
+			actualHeadersList.remove(actualHeader);
 		}
-		assertEquals("Should be no actual headers as all matched", 0, actualHeaders.size());
+		assertEquals("Should be no actual headers as all matched", 0, actualHeadersList.size());
 
 		// Ensure the entity is as expected
 		int available = request.getEntity().available();

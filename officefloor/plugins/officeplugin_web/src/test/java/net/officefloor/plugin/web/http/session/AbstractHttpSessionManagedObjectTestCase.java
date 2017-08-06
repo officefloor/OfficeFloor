@@ -164,7 +164,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 		if (sessionId != null) {
 			headers.add(new HttpHeaderImpl("cookie", SESSION_ID_COOKIE_NAME + "=" + sessionId));
 		}
-		this.recordReturn(this.request, this.request.getHeaders(), headers);
+		this.recordReturn(this.request, this.request.getHttpHeaders(), headers);
 	}
 
 	/**

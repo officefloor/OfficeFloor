@@ -114,7 +114,7 @@ public class HttpAuthenticationSchemeTest extends OfficeFrameTestCase {
 		}
 
 		// Record obtaining the HTTP headers from request
-		this.recordReturn(this.request, this.request.getHeaders(), headers);
+		this.recordReturn(this.request, this.request.getHttpHeaders(), headers);
 
 		// Return the HTTP headers
 		return headers;

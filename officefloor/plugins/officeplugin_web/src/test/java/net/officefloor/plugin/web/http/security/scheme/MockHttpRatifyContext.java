@@ -133,7 +133,7 @@ public class MockHttpRatifyContext<S, C> implements HttpRatifyContext<S, C> {
 			headers.add(new HttpHeaderImpl("Authorization",
 					authorizationHeaderValue));
 		}
-		this.testCase.recordReturn(httpRequest, httpRequest.getHeaders(),
+		this.testCase.recordReturn(httpRequest, httpRequest.getHttpHeaders(),
 				headers);
 
 		// Return the HTTP request

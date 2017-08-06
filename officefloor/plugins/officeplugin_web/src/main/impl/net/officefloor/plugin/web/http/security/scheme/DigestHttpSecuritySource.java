@@ -488,7 +488,7 @@ public class DigestHttpSecuritySource
 
 		// Obtain the ETag header value (if available)
 		String eTag = "";
-		for (HttpHeader header : request.getHeaders()) {
+		for (HttpHeader header : request.getHttpHeaders()) {
 			if ("ETag".equalsIgnoreCase(header.getName())) {
 				eTag = header.getValue();
 			}

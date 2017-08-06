@@ -31,6 +31,7 @@ import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.UsAsciiUtil;
@@ -352,8 +353,11 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		entityStream.inputData(entityData, 0, (entityData.length - 1), false);
 		HttpEntity httpEntity = new HttpEntityImpl(entityStream);
 
+		// HTTP headers
+		HttpRequestHeaders httpHeaders = null;
+
 		// Add the request
-		return this.conversation.addRequest(method, requestURI, httpVersion, headers, httpEntity);
+		return this.conversation.addRequest(method, requestURI, httpVersion, httpHeaders, httpEntity);
 	}
 
 }

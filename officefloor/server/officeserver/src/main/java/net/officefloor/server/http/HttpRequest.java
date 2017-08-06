@@ -17,8 +17,6 @@
  */
 package net.officefloor.server.http;
 
-import java.util.List;
-
 import net.officefloor.server.stream.ServerInputStream;
 
 /**
@@ -50,13 +48,11 @@ public interface HttpRequest {
 	HttpVersion getHttpVersion();
 
 	/**
-	 * Obtains the {@link HttpHeader} instances in the order they appear on the
-	 * request.
+	 * Obtains the {@link HttpRequestHeaders}.
 	 * 
-	 * @return {@link HttpHeader} instances in the order they appear on the
-	 *         request.
+	 * @return {@link HttpRequestHeaders}.
 	 */
-	List<HttpHeader> getHeaders();
+	HttpRequestHeaders getHttpHeaders();
 
 	/**
 	 * Obtains the {@link ServerInputStream} to the entity of the HTTP request.

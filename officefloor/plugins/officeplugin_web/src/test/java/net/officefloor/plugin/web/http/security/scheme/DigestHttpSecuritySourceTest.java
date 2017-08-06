@@ -252,7 +252,7 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 		// Record
 		HttpRequest request = challengeContext.recordGetHttpRequest();
 		this.recordReturn(this.store, this.store.getAlgorithm(), ALGORITHM);
-		this.recordReturn(request, request.getHeaders(), Arrays.asList(header));
+		this.recordReturn(request, request.getHttpHeaders(), Arrays.asList(header));
 		this.recordReturn(header, header.getName(), "ETag");
 		this.recordReturn(header, header.getValue(), eTag);
 		session.setAttribute("#" + DigestHttpSecuritySource.class.getName()

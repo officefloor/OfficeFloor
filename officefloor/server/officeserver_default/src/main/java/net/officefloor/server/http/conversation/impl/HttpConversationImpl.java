@@ -21,10 +21,9 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 
-import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.clock.HttpServerClock;
@@ -179,8 +178,8 @@ public class HttpConversationImpl implements HttpConversation {
 	 */
 
 	@Override
-	public HttpManagedObject addRequest(String method, String requestURI, String httpVersion, List<HttpHeader> headers,
-			HttpEntity entity) {
+	public HttpManagedObject addRequest(String method, String requestURI, String httpVersion,
+			HttpRequestHeaders headers, HttpEntity entity) {
 
 		// Create the request
 		HttpRequestImpl request = new HttpRequestImpl(method, requestURI, httpVersion, headers, entity);

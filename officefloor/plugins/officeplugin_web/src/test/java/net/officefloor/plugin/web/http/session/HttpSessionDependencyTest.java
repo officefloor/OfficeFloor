@@ -92,7 +92,7 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 
 		// Record attempting to creating a new session.
 		// (Also ensures directly using the generator and store)
-		this.recordReturn(this.httpRequest, this.httpRequest.getHeaders(), new ArrayList<HttpHeader>(0));
+		this.recordReturn(this.httpRequest, this.httpRequest.getHttpHeaders(), new ArrayList<HttpHeader>(0));
 		this.generator.generateSessionId(null);
 		this.control(this.generator).setMatcher(new AbstractMatcher() {
 			@Override
@@ -141,7 +141,7 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 
 		// Record attempting to creating a new session.
 		// (Also ensures using the dependency generator and store)
-		this.recordReturn(this.httpRequest, this.httpRequest.getHeaders(), new ArrayList<HttpHeader>(0));
+		this.recordReturn(this.httpRequest, this.httpRequest.getHttpHeaders(), new ArrayList<HttpHeader>(0));
 		this.generator.generateSessionId(null);
 		this.control(this.generator).setMatcher(new AbstractMatcher() {
 			@Override

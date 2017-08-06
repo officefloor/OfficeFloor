@@ -26,12 +26,12 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.sql.SQLException;
-import java.util.LinkedList;
 import java.util.Map;
 
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
@@ -658,8 +658,8 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		ServerInputStreamImpl content = new ServerInputStreamImpl(new Object());
 		content.inputData(null, 0, 0, false);
 		HttpEntity entity = new HttpEntityImpl(content);
-		HttpManagedObject mo = this.conversation.addRequest("GET", "/mock", "HTTP/1.1", new LinkedList<HttpHeader>(),
-				entity);
+		HttpRequestHeaders httpHeaders = null;
+		HttpManagedObject mo = this.conversation.addRequest("GET", "/mock", "HTTP/1.1", httpHeaders, entity);
 
 		// Return the http response from managed object
 		return mo.getServerHttpConnection().getHttpResponse();

@@ -18,12 +18,12 @@
 package net.officefloor.server.http.conversation.impl;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.conversation.HttpEntity;
 import net.officefloor.server.stream.ServerInputStream;
@@ -55,7 +55,7 @@ public class HttpRequestImpl implements HttpRequest {
 	/**
 	 * Headers.
 	 */
-	private final List<HttpHeader> headers;
+	private final HttpRequestHeaders headers;
 
 	/**
 	 * Entity.
@@ -72,11 +72,11 @@ public class HttpRequestImpl implements HttpRequest {
 	 * @param httpVersion
 	 *            HTTP version.
 	 * @param headers
-	 *            {@link HttpHeader} instances.
+	 *            {@link HttpRequestHeaders}.
 	 * @param entity
 	 *            {@link HttpEntity} to the entity.
 	 */
-	public HttpRequestImpl(String method, String requestURI, String httpVersion, List<HttpHeader> headers,
+	public HttpRequestImpl(String method, String requestURI, String httpVersion, HttpRequestHeaders headers,
 			HttpEntity entity) {
 		this.method = new HttpMethod(method);
 		this.requestURI = requestURI;
@@ -105,7 +105,7 @@ public class HttpRequestImpl implements HttpRequest {
 		this.method = new HttpMethod(state.method);
 		this.requestURI = state.requestURI;
 		this.version = new HttpVersion(httpVersion);
-		this.headers = state.headers;
+		this.headers = null; // state.headers;
 		this.entity = new HttpEntityImpl(new ServerInputStreamImpl(new Object(), state.entityMomento));
 	}
 
@@ -119,7 +119,7 @@ public class HttpRequestImpl implements HttpRequest {
 	Serializable exportState() throws NotAllDataAvailableException {
 
 		// Prepare state for momento
-		List<HttpHeader> httpHeaders = new ArrayList<HttpHeader>(this.headers);
+		List<HttpHeader> httpHeaders = null; // new ArrayList<HttpHeader>(this.headers);
 		Serializable entityMomento = this.entity.exportState();
 
 		// Create and return the momento
@@ -146,7 +146,7 @@ public class HttpRequestImpl implements HttpRequest {
 	}
 
 	@Override
-	public List<HttpHeader> getHeaders() {
+	public HttpRequestHeaders getHttpHeaders() {
 		return this.headers;
 	}
 

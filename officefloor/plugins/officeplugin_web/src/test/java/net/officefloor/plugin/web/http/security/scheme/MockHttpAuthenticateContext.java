@@ -180,7 +180,7 @@ public class MockHttpAuthenticateContext<S, C, D extends Enum<D>> implements
 			headers.add(new HttpHeaderImpl("Authorization",
 					authorizationHeaderValue));
 		}
-		this.testCase.recordReturn(httpRequest, httpRequest.getHeaders(),
+		this.testCase.recordReturn(httpRequest, httpRequest.getHttpHeaders(),
 				headers);
 
 		// Return the HTTP request

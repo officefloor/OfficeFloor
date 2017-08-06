@@ -52,7 +52,7 @@ public class HttpCookieUtil {
 	 */
 	public static List<HttpCookie> extractHttpCookies(HttpRequest request) {
 		List<HttpCookie> cookies = new LinkedList<HttpCookie>();
-		for (HttpHeader header : request.getHeaders()) {
+		for (HttpHeader header : request.getHttpHeaders()) {
 			if (HEADER_NAME_COOKIE.equalsIgnoreCase(header.getName())) {
 				cookies.addAll(HttpCookie.parse(header.getValue()));
 			}
@@ -75,7 +75,7 @@ public class HttpCookieUtil {
 	public static HttpCookie extractHttpCookie(String cookieName,
 			HttpRequest request) {
 		// Search for the cookie by the name
-		for (HttpHeader header : request.getHeaders()) {
+		for (HttpHeader header : request.getHttpHeaders()) {
 			if (HEADER_NAME_COOKIE.equalsIgnoreCase(header.getName())) {
 				List<HttpCookie> cookies = HttpCookie.parse(header.getValue());
 				for (HttpCookie cookie : cookies) {

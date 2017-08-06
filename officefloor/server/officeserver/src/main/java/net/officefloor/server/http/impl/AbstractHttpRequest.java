@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.server.http.netty;
+package net.officefloor.server.http.impl;
 
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
@@ -24,44 +24,32 @@ import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.stream.ServerInputStream;
 
 /**
- * Netty {@link HttpRequest}.
+ * Abstract {@link HttpRequest}.
  * 
  * @author Daniel Sagenschneider
  */
-public class NettyHttpRequest implements HttpRequest {
+public class AbstractHttpRequest implements HttpRequest {
 
-	/**
-	 * {@link io.netty.handler.codec.http.HttpRequest}.
-	 */
-	private final io.netty.handler.codec.http.HttpRequest nettyHttpRequest;
-
-	/**
-	 * Instantiate.
-	 * 
-	 * @param nettyHttpRequest
-	 *            {@link io.netty.handler.codec.http.HttpRequest}.
-	 */
-	public NettyHttpRequest(io.netty.handler.codec.http.HttpRequest nettyHttpRequest) {
-		this.nettyHttpRequest = nettyHttpRequest;
-	}
-
-	/**
-	 * ============== HttpReqeust ==================
+	/*
+	 * ================= HttpRequest =====================
 	 */
 
 	@Override
 	public HttpMethod getHttpMethod() {
-		return new HttpMethod(this.nettyHttpRequest.method().name());
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
 	public String getRequestURI() {
-		return this.nettyHttpRequest.uri();
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
 	public HttpVersion getHttpVersion() {
-		return new HttpVersion(this.nettyHttpRequest.protocolVersion().protocolName());
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
@@ -75,4 +63,5 @@ public class NettyHttpRequest implements HttpRequest {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 }

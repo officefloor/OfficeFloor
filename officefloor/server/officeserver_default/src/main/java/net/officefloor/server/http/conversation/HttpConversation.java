@@ -18,10 +18,9 @@
 package net.officefloor.server.http.conversation;
 
 import java.io.IOException;
-import java.util.List;
 
-import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.parse.HttpRequestParseException;
 import net.officefloor.server.http.protocol.Connection;
 
@@ -42,13 +41,13 @@ public interface HttpConversation {
 	 * @param httpVersion
 	 *            HTTP Version.
 	 * @param headers
-	 *            {@link HttpHeader} instances.
+	 *            {@link HttpRequestHeaders}.
 	 * @param entity
 	 *            {@link HttpEntity} to the entity of the {@link HttpRequest}.
 	 * @return {@link HttpManagedObject} to process the {@link HttpRequest}.
 	 */
-	HttpManagedObject addRequest(String method, String requestURI,
-			String httpVersion, List<HttpHeader> headers, HttpEntity entity);
+	HttpManagedObject addRequest(String method, String requestURI, String httpVersion, HttpRequestHeaders headers,
+			HttpEntity entity);
 
 	/**
 	 * Handles a failure in parsing a {@link HttpRequest}.
@@ -62,8 +61,7 @@ public interface HttpConversation {
 	 *             If fails to write response regarding the
 	 *             {@link HttpRequestParseException}.
 	 */
-	void parseFailure(HttpRequestParseException failure,
-			boolean isCloseConnection) throws IOException;
+	void parseFailure(HttpRequestParseException failure, boolean isCloseConnection) throws IOException;
 
 	/**
 	 * Closes the {@link Connection}.
