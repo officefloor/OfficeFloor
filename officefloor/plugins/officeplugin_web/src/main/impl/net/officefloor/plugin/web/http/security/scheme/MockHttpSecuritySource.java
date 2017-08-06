@@ -22,6 +22,8 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import org.apache.commons.codec.binary.Base64;
+
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
 import net.officefloor.plugin.web.http.security.HttpChallengeContext;
@@ -33,11 +35,9 @@ import net.officefloor.plugin.web.http.security.impl.AbstractHttpSecuritySource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
-import net.officefloor.server.http.protocol.HttpStatus;
-
-import org.apache.commons.codec.binary.Base64;
 
 /**
  * <p>
@@ -54,8 +54,7 @@ import org.apache.commons.codec.binary.Base64;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockHttpSecuritySource extends
-		AbstractHttpSecuritySource<HttpSecurity, Void, None, None> {
+public class MockHttpSecuritySource extends AbstractHttpSecuritySource<HttpSecurity, Void, None, None> {
 
 	/**
 	 * Authentication scheme reported to the application via the
@@ -96,9 +95,7 @@ public class MockHttpSecuritySource extends
 	}
 
 	@Override
-	protected void loadMetaData(
-			MetaDataContext<HttpSecurity, Void, None, None> context)
-			throws Exception {
+	protected void loadMetaData(MetaDataContext<HttpSecurity, Void, None, None> context) throws Exception {
 		context.setSecurityClass(HttpSecurity.class);
 	}
 
@@ -106,8 +103,7 @@ public class MockHttpSecuritySource extends
 	public boolean ratify(HttpRatifyContext<HttpSecurity, Void> context) {
 
 		// Attempt to obtain from session
-		HttpSecurity security = (HttpSecurity) context.getSession()
-				.getAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
+		HttpSecurity security = (HttpSecurity) context.getSession().getAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
 		if (security != null) {
 			// Load the security and no need to authenticate
 			context.setHttpSecurity(security);
@@ -116,11 +112,9 @@ public class MockHttpSecuritySource extends
 
 		// Determine if basic credentials on request
 		HttpAuthenticationScheme scheme = HttpAuthenticationScheme
-				.getHttpAuthenticationScheme(context.getConnection()
-						.getHttpRequest());
+				.getHttpAuthenticationScheme(context.getConnection().getHttpRequest());
 		if ((scheme == null)
-				|| (!(IMPLEMENTING_AUTHENTICATION_SCHEME_BASIC
-						.equalsIgnoreCase(scheme.getAuthentiationScheme())))) {
+				|| (!(IMPLEMENTING_AUTHENTICATION_SCHEME_BASIC.equalsIgnoreCase(scheme.getAuthentiationScheme())))) {
 			return false; // must be basic authentication
 		}
 
@@ -129,9 +123,7 @@ public class MockHttpSecuritySource extends
 	}
 
 	@Override
-	public void authenticate(
-			HttpAuthenticateContext<HttpSecurity, Void, None> context)
-			throws IOException {
+	public void authenticate(HttpAuthenticateContext<HttpSecurity, Void, None> context) throws IOException {
 
 		// Obtain the connection
 		ServerHttpConnection connection = context.getConnection();
@@ -140,14 +132,12 @@ public class MockHttpSecuritySource extends
 		HttpAuthenticationScheme scheme = HttpAuthenticationScheme
 				.getHttpAuthenticationScheme(connection.getHttpRequest());
 		if ((scheme == null)
-				|| (!(IMPLEMENTING_AUTHENTICATION_SCHEME_BASIC
-						.equalsIgnoreCase(scheme.getAuthentiationScheme())))) {
+				|| (!(IMPLEMENTING_AUTHENTICATION_SCHEME_BASIC.equalsIgnoreCase(scheme.getAuthentiationScheme())))) {
 			return; // no/incorrect authentication scheme
 		}
 
 		// Decode Base64 credentials into userId:password text
-		byte[] userIdPasswordBytes = Base64
-				.decodeBase64(scheme.getParameters());
+		byte[] userIdPasswordBytes = Base64.decodeBase64(scheme.getParameters());
 		String userIdPassword = new String(userIdPasswordBytes, US_ASCII);
 
 		// Split out the userId and password
@@ -170,28 +160,23 @@ public class MockHttpSecuritySource extends
 		}
 
 		// Create the HTTP Security
-		HttpSecurity security = new HttpSecurityImpl(
-				AUTHENTICATION_SCHEME_MOCK, userId, new HashSet<String>(
-						Arrays.asList(roles)));
+		HttpSecurity security = new HttpSecurityImpl(AUTHENTICATION_SCHEME_MOCK, userId,
+				new HashSet<String>(Arrays.asList(roles)));
 
 		// Remember HTTP Security for further requests
-		context.getSession().setAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY,
-				security);
+		context.getSession().setAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY, security);
 
 		// Return the HTTP Security
 		context.setHttpSecurity(security);
 	}
 
 	@Override
-	public void challenge(HttpChallengeContext<None, None> context)
-			throws IOException {
+	public void challenge(HttpChallengeContext<None, None> context) throws IOException {
 
 		// Load the challenge
 		HttpResponse response = context.getConnection().getHttpResponse();
-		response.setHttpStatus(HttpStatus.SC_UNAUTHORIZED);
-		response.addHeader("WWW-Authenticate",
-				IMPLEMENTING_AUTHENTICATION_SCHEME_BASIC + " realm=\"" + REALM
-						+ "\"");
+		response.setHttpStatus(HttpStatus.UNAUTHORIZED);
+		response.addHeader("WWW-Authenticate", IMPLEMENTING_AUTHENTICATION_SCHEME_BASIC + " realm=\"" + REALM + "\"");
 	}
 
 	@Override

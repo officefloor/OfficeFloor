@@ -26,6 +26,7 @@ import java.util.Properties;
 import junit.framework.TestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.UsAsciiUtil;
 import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
@@ -41,14 +42,9 @@ import net.officefloor.server.stream.ServerWriter;
 public class MockHttpResponse implements HttpResponse {
 
 	/**
-	 * Status.
+	 * {@link HttpStatus}.
 	 */
-	private int status = -1;
-
-	/**
-	 * Status message.
-	 */
-	private String statusMessage = null;
+	private HttpStatus status = null;
 
 	/**
 	 * {@link HttpVersion}.
@@ -114,24 +110,13 @@ public class MockHttpResponse implements HttpResponse {
 	}
 
 	@Override
-	public void setHttpStatus(int status) {
+	public void setHttpStatus(HttpStatus status) {
 		this.status = status;
 	}
 
 	@Override
-	public int getHttpStatus() {
+	public HttpStatus getHttpStatus() {
 		return this.status;
-	}
-
-	@Override
-	public void setStatus(int status, String statusMessage) {
-		this.status = status;
-		this.statusMessage = statusMessage;
-	}
-
-	@Override
-	public String getStatusMessage() {
-		return this.statusMessage;
 	}
 
 	@Override

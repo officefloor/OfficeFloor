@@ -24,8 +24,8 @@ import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource.Dependencies;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.protocol.HttpStatus;
 
 /**
  * {@link HttpApplicationLocation} {@link ManagedObject}.
@@ -220,7 +220,7 @@ public class HttpApplicationLocationMangedObject
 	 * @return {@link InvalidHttpRequestUriException}.
 	 */
 	private static InvalidHttpRequestUriException createInvalidHttpRequestUriException(String path) {
-		return new InvalidHttpRequestUriException(HttpStatus.SC_BAD_REQUEST, "Invalid request URI path [" + path + "]");
+		return new InvalidHttpRequestUriException(HttpStatus.BAD_REQUEST, "Invalid request URI path [" + path + "]");
 	}
 
 	/**
@@ -387,7 +387,7 @@ public class HttpApplicationLocationMangedObject
 
 			// Ensure have context path
 			if (!(canonicalPath.startsWith(this.contextPath))) {
-				throw new IncorrectHttpRequestContextPathException(HttpStatus.SC_NOT_FOUND,
+				throw new IncorrectHttpRequestContextPathException(HttpStatus.NOT_FOUND,
 						"Incorrect context path for application [context=" + this.contextPath + ", request="
 								+ requestUri + "]");
 			}

@@ -21,8 +21,8 @@ import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource.Dependencies;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.protocol.HttpStatus;
 
 /**
  * Provides listing of common tests for the various states of the
@@ -128,13 +128,13 @@ public abstract class AbstractHttpApplicationLocationManagedObjectTestCase exten
 		} catch (InvalidHttpRequestUriException ex) {
 			// Invalid request if no context path
 			assertEquals("Invalid only if no context path", "", contextPath);
-			assertEquals("Incorrect HTTP status", HttpStatus.SC_BAD_REQUEST, ex.getHttpStatus());
+			assertEquals("Incorrect HTTP status", HttpStatus.BAD_REQUEST, ex.getHttpStatus());
 			assertEquals("Incorrect message", "Invalid request URI path [" + requestUri + "]", ex.getMessage());
 
 		} catch (IncorrectHttpRequestContextPathException ex) {
 			// Incorrect as missing context path
 			assertTrue("Incorrect only if have context path", (contextPath.trim().length() > 0));
-			assertEquals("Incorrect HTTP status", HttpStatus.SC_NOT_FOUND, ex.getHttpStatus());
+			assertEquals("Incorrect HTTP status", HttpStatus.NOT_FOUND, ex.getHttpStatus());
 			assertEquals("Incorrect message",
 					"Incorrect context path for application [context=" + contextPath + ", request=" + requestUri + "]",
 					ex.getMessage());

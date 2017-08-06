@@ -20,6 +20,8 @@ package net.officefloor.plugin.web.http.security.scheme;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
+import org.apache.commons.codec.binary.Base64;
+
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
 import net.officefloor.plugin.web.http.security.HttpChallengeContext;
@@ -34,11 +36,9 @@ import net.officefloor.plugin.web.http.security.store.CredentialStoreUtil;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
-import net.officefloor.server.http.protocol.HttpStatus;
-
-import org.apache.commons.codec.binary.Base64;
 
 /**
  * {@link HttpSecuritySource} for <code>Basic</code> HTTP security.
@@ -46,8 +46,7 @@ import org.apache.commons.codec.binary.Base64;
  * @author Daniel Sagenschneider
  */
 public class BasicHttpSecuritySource
-		extends
-		AbstractHttpSecuritySource<HttpSecurity, Void, BasicHttpSecuritySource.Dependencies, None> {
+		extends AbstractHttpSecuritySource<HttpSecurity, Void, BasicHttpSecuritySource.Dependencies, None> {
 
 	/**
 	 * Authentication scheme Basic.
@@ -92,27 +91,22 @@ public class BasicHttpSecuritySource
 	}
 
 	@Override
-	protected void loadMetaData(
-			MetaDataContext<HttpSecurity, Void, Dependencies, None> context)
-			throws Exception {
-		HttpSecuritySourceContext securityContext = context
-				.getHttpSecuritySourceContext();
+	protected void loadMetaData(MetaDataContext<HttpSecurity, Void, Dependencies, None> context) throws Exception {
+		HttpSecuritySourceContext securityContext = context.getHttpSecuritySourceContext();
 
 		// Obtain the realm
 		this.realm = securityContext.getProperty(PROPERTY_REALM);
 
 		// Provide meta-data
 		context.setSecurityClass(HttpSecurity.class);
-		context.addDependency(Dependencies.CREDENTIAL_STORE,
-				CredentialStore.class);
+		context.addDependency(Dependencies.CREDENTIAL_STORE, CredentialStore.class);
 	}
 
 	@Override
 	public boolean ratify(HttpRatifyContext<HttpSecurity, Void> context) {
 
 		// Attempt to obtain from session
-		HttpSecurity security = (HttpSecurity) context.getSession()
-				.getAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
+		HttpSecurity security = (HttpSecurity) context.getSession().getAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
 		if (security != null) {
 			// Load the security and no need to authenticate
 			context.setHttpSecurity(security);
@@ -121,11 +115,8 @@ public class BasicHttpSecuritySource
 
 		// Determine if basic credentials on request
 		HttpAuthenticationScheme scheme = HttpAuthenticationScheme
-				.getHttpAuthenticationScheme(context.getConnection()
-						.getHttpRequest());
-		if ((scheme == null)
-				|| (!(AUTHENTICATION_SCHEME_BASIC.equalsIgnoreCase(scheme
-						.getAuthentiationScheme())))) {
+				.getHttpAuthenticationScheme(context.getConnection().getHttpRequest());
+		if ((scheme == null) || (!(AUTHENTICATION_SCHEME_BASIC.equalsIgnoreCase(scheme.getAuthentiationScheme())))) {
 			return false; // must be basic authentication
 		}
 
@@ -134,9 +125,7 @@ public class BasicHttpSecuritySource
 	}
 
 	@Override
-	public void authenticate(
-			HttpAuthenticateContext<HttpSecurity, Void, Dependencies> context)
-			throws IOException {
+	public void authenticate(HttpAuthenticateContext<HttpSecurity, Void, Dependencies> context) throws IOException {
 
 		// Obtain the connection
 		ServerHttpConnection connection = context.getConnection();
@@ -144,15 +133,12 @@ public class BasicHttpSecuritySource
 		// Obtain the authentication scheme
 		HttpAuthenticationScheme scheme = HttpAuthenticationScheme
 				.getHttpAuthenticationScheme(connection.getHttpRequest());
-		if ((scheme == null)
-				|| (!(AUTHENTICATION_SCHEME_BASIC.equalsIgnoreCase(scheme
-						.getAuthentiationScheme())))) {
+		if ((scheme == null) || (!(AUTHENTICATION_SCHEME_BASIC.equalsIgnoreCase(scheme.getAuthentiationScheme())))) {
 			return; // no/incorrect authentication scheme
 		}
 
 		// Decode Base64 credentials into userId:password text
-		byte[] userIdPasswordBytes = Base64
-				.decodeBase64(scheme.getParameters());
+		byte[] userIdPasswordBytes = Base64.decodeBase64(scheme.getParameters());
 		String userIdPassword = new String(userIdPasswordBytes, US_ASCII);
 
 		// Split out the userId and password
@@ -164,39 +150,33 @@ public class BasicHttpSecuritySource
 		String password = userIdPassword.substring(separatorIndex + 1);
 
 		// Obtain the credential entry for the connection
-		CredentialStore store = (CredentialStore) context
-				.getObject(Dependencies.CREDENTIAL_STORE);
+		CredentialStore store = (CredentialStore) context.getObject(Dependencies.CREDENTIAL_STORE);
 
 		// Authenticate
-		HttpSecurity security = CredentialStoreUtil.authenticate(userId,
-				this.realm, password.getBytes(US_ASCII),
+		HttpSecurity security = CredentialStoreUtil.authenticate(userId, this.realm, password.getBytes(US_ASCII),
 				AUTHENTICATION_SCHEME_BASIC, store);
 		if (security == null) {
 			return; // not authenticated
 		}
 
 		// Remember HTTP Security for further requests
-		context.getSession().setAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY,
-				security);
+		context.getSession().setAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY, security);
 
 		// Return the HTTP Security
 		context.setHttpSecurity(security);
 	}
 
 	@Override
-	public void challenge(HttpChallengeContext<Dependencies, None> context)
-			throws IOException {
+	public void challenge(HttpChallengeContext<Dependencies, None> context) throws IOException {
 
 		// Load the challenge
 		HttpResponse response = context.getConnection().getHttpResponse();
-		response.setHttpStatus(HttpStatus.SC_UNAUTHORIZED);
-		response.addHeader("WWW-Authenticate", AUTHENTICATION_SCHEME_BASIC
-				+ " realm=\"" + this.realm + "\"");
+		response.setHttpStatus(HttpStatus.UNAUTHORIZED);
+		response.addHeader("WWW-Authenticate", AUTHENTICATION_SCHEME_BASIC + " realm=\"" + this.realm + "\"");
 	}
 
 	@Override
-	public void logout(HttpLogoutContext<Dependencies> context)
-			throws IOException {
+	public void logout(HttpLogoutContext<Dependencies> context) throws IOException {
 
 		// Forget HTTP Security for further requests (requires login again)
 		context.getSession().removeAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);

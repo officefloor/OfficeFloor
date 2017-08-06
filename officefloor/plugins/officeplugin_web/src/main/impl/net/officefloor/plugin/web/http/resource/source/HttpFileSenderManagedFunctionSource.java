@@ -40,8 +40,8 @@ import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.classpath.ClasspathHttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.DependencyKeys;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.protocol.HttpStatus;
 
 /**
  * <p>
@@ -161,14 +161,14 @@ public class HttpFileSenderManagedFunctionSource extends AbstractManagedFunction
 					AbstractHttpFile.writeHttpFile(httpFile, response);
 
 					// Specify found status
-					response.setHttpStatus(HttpStatus.SC_OK);
+					response.setHttpStatus(HttpStatus.OK);
 
 				} else {
 					// File not found so write file not found content
 					AbstractHttpFile.writeHttpFile(fileNotFoundContent, response);
 
 					// Specify not found status
-					response.setHttpStatus(HttpStatus.SC_NOT_FOUND);
+					response.setHttpStatus(HttpStatus.NOT_FOUND);
 				}
 
 				// Send the response

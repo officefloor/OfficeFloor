@@ -42,8 +42,8 @@ import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
 import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpServerTestUtil;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.protocol.HttpStatus;
 
 /**
  * Abstract functionality for integration testing of the
@@ -154,7 +154,8 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 
 		// Use client with credentials
 		HttpClientBuilder builder = HttpClientBuilder.create();
-		CredentialsProvider provider = HttpClientTestUtil.configureCredentials(builder, realm, scheme, username, password);
+		CredentialsProvider provider = HttpClientTestUtil.configureCredentials(builder, realm, scheme, username,
+				password);
 		this.client = builder.build();
 
 		// Reset the client context
@@ -200,7 +201,7 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 			 * authentication
 			 */
 			if (this.isDigestHttpClientCookieBug
-					&& (response.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED)) {
+					&& (response.getStatusLine().getStatusCode() == HttpStatus.UNAUTHORIZED.getStatusCode())) {
 				// Try authentication again, with the cookie
 				this.context.getTargetAuthState().reset();
 				request.reset();

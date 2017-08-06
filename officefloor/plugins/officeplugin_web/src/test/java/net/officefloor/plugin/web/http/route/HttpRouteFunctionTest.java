@@ -41,8 +41,8 @@ import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.protocol.HttpStatus;
 
 /**
  * Tests the {@link HttpRouteFunction}.
@@ -83,7 +83,7 @@ public class HttpRouteFunctionTest extends OfficeFrameTestCase {
 			HttpUrlContinuationTest.recordSaveRequest("_OfficeFloorRedirectedRequest_", connection, requestState,
 					session, test);
 			test.recordReturn(connection, connection.getHttpResponse(), response);
-			response.setHttpStatus(303); // Status = See other
+			response.setHttpStatus(HttpStatus.SEE_OTHER);
 			test.recordReturn(response,
 					response.addHeader("Location", redirectUrl + HttpRouteFunction.REDIRECT_URI_SUFFIX), header);
 
@@ -144,7 +144,7 @@ public class HttpRouteFunctionTest extends OfficeFrameTestCase {
 		this.recordReturn(this.request, this.request.getRequestURI(), "/path");
 		this.location.transformToApplicationCanonicalPath("/path");
 		this.control(this.location).setThrowable(
-				new IncorrectHttpRequestContextPathException(HttpStatus.SC_NOT_FOUND, "Must have context path"));
+				new IncorrectHttpRequestContextPathException(HttpStatus.NOT_FOUND, "Must have context path"));
 		this.context.doFlow(HttpRouteFunctionFlows.NOT_HANDLED, null, null);
 
 		// Test

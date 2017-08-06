@@ -26,6 +26,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.codec.binary.Hex;
+
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
 import net.officefloor.plugin.web.http.security.HttpChallengeContext;
@@ -42,11 +44,9 @@ import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
-import net.officefloor.server.http.protocol.HttpStatus;
-
-import org.apache.commons.codec.binary.Hex;
 
 /**
  * {@link HttpSecuritySource} for <code>Digest</code> HTTP security.
@@ -54,8 +54,7 @@ import org.apache.commons.codec.binary.Hex;
  * @author Daniel Sagenschneider
  */
 public class DigestHttpSecuritySource
-		extends
-		AbstractHttpSecuritySource<HttpSecurity, Void, DigestHttpSecuritySource.Dependencies, None> {
+		extends AbstractHttpSecuritySource<HttpSecurity, Void, DigestHttpSecuritySource.Dependencies, None> {
 
 	/**
 	 * Authentication scheme Digest.
@@ -86,8 +85,7 @@ public class DigestHttpSecuritySource
 	/**
 	 * Key into the {@link HttpSession} for the {@link SecurityState}.
 	 */
-	protected static final String SECURITY_STATE_SESSION_KEY = "#"
-			+ DigestHttpSecuritySource.class.getName() + "#";
+	protected static final String SECURITY_STATE_SESSION_KEY = "#" + DigestHttpSecuritySource.class.getName() + "#";
 
 	/**
 	 * Dependency keys.
@@ -284,11 +282,8 @@ public class DigestHttpSecuritySource
 	}
 
 	@Override
-	protected void loadMetaData(
-			MetaDataContext<HttpSecurity, Void, Dependencies, None> context)
-			throws Exception {
-		HttpSecuritySourceContext securityContext = context
-				.getHttpSecuritySourceContext();
+	protected void loadMetaData(MetaDataContext<HttpSecurity, Void, Dependencies, None> context) throws Exception {
+		HttpSecuritySourceContext securityContext = context.getHttpSecuritySourceContext();
 
 		// Obtain the properties
 		this.realm = securityContext.getProperty(PROPERTY_REALM);
@@ -296,16 +291,14 @@ public class DigestHttpSecuritySource
 
 		// Provide meta-data
 		context.setSecurityClass(HttpSecurity.class);
-		context.addDependency(Dependencies.CREDENTIAL_STORE,
-				CredentialStore.class);
+		context.addDependency(Dependencies.CREDENTIAL_STORE, CredentialStore.class);
 	}
 
 	@Override
 	public boolean ratify(HttpRatifyContext<HttpSecurity, Void> context) {
 
 		// Attempt to obtain from session
-		HttpSecurity security = (HttpSecurity) context.getSession()
-				.getAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
+		HttpSecurity security = (HttpSecurity) context.getSession().getAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
 		if (security != null) {
 			// Load the security and no need to authenticate
 			context.setHttpSecurity(security);
@@ -314,11 +307,8 @@ public class DigestHttpSecuritySource
 
 		// Determine if digest credentials on request
 		HttpAuthenticationScheme scheme = HttpAuthenticationScheme
-				.getHttpAuthenticationScheme(context.getConnection()
-						.getHttpRequest());
-		if ((scheme == null)
-				|| (!(AUTHENTICATION_SCHEME_DIGEST.equalsIgnoreCase(scheme
-						.getAuthentiationScheme())))) {
+				.getHttpAuthenticationScheme(context.getConnection().getHttpRequest());
+		if ((scheme == null) || (!(AUTHENTICATION_SCHEME_DIGEST.equalsIgnoreCase(scheme.getAuthentiationScheme())))) {
 			return false; // no/incorrect authentication scheme
 		}
 
@@ -327,31 +317,24 @@ public class DigestHttpSecuritySource
 	}
 
 	@Override
-	public void authenticate(
-			HttpAuthenticateContext<HttpSecurity, Void, Dependencies> context)
-			throws IOException {
+	public void authenticate(HttpAuthenticateContext<HttpSecurity, Void, Dependencies> context) throws IOException {
 
 		// Obtain the dependencies
 		ServerHttpConnection connection = context.getConnection();
 		HttpRequest request = connection.getHttpRequest();
 		HttpSession session = context.getSession();
-		CredentialStore store = (CredentialStore) context
-				.getObject(Dependencies.CREDENTIAL_STORE);
+		CredentialStore store = (CredentialStore) context.getObject(Dependencies.CREDENTIAL_STORE);
 
 		// Obtain the authentication scheme
-		HttpAuthenticationScheme scheme = HttpAuthenticationScheme
-				.getHttpAuthenticationScheme(request);
-		if ((scheme == null)
-				|| (!(AUTHENTICATION_SCHEME_DIGEST.equalsIgnoreCase(scheme
-						.getAuthentiationScheme())))) {
+		HttpAuthenticationScheme scheme = HttpAuthenticationScheme.getHttpAuthenticationScheme(request);
+		if ((scheme == null) || (!(AUTHENTICATION_SCHEME_DIGEST.equalsIgnoreCase(scheme.getAuthentiationScheme())))) {
 			return; // no/incorrect authentication scheme
 		}
 
 		// Authenticate Digest as per RFC2617
 
 		// Obtain the nounce
-		SecurityState securityState = (SecurityState) session
-				.getAttribute(SECURITY_STATE_SESSION_KEY);
+		SecurityState securityState = (SecurityState) session.getAttribute(SECURITY_STATE_SESSION_KEY);
 		if (securityState == null) {
 			// No challenge (i.e. no nounce), so not authenticated
 			return;
@@ -377,8 +360,7 @@ public class DigestHttpSecuritySource
 		// Ensure correct nonce count
 		if (nonceCount != null) {
 			try {
-				byte[] decodedNonceCount = Hex.decodeHex(nonceCount
-						.toCharArray());
+				byte[] decodedNonceCount = Hex.decodeHex(nonceCount.toCharArray());
 				long nonceCountValue = 0;
 				for (byte decodedNonceCountByte : decodedNonceCount) {
 					nonceCountValue <<= 8; // shift to right by byte
@@ -459,8 +441,7 @@ public class DigestHttpSecuritySource
 		digest.append(nonce);
 
 		// Provide "auth", "auth-int" details
-		if (("auth".equalsIgnoreCase(qop))
-				|| ("auth-int".equalsIgnoreCase(qop))) {
+		if (("auth".equalsIgnoreCase(qop)) || ("auth-int".equalsIgnoreCase(qop))) {
 			digest.appendColon();
 			digest.append(nonceCount);
 			digest.appendColon();
@@ -484,27 +465,23 @@ public class DigestHttpSecuritySource
 
 		// Authenticated, so obtain roles and create the HTTP Security
 		Set<String> roles = entry.retrieveRoles();
-		HttpSecurity security = new HttpSecurityImpl(
-				AUTHENTICATION_SCHEME_DIGEST, username, roles);
+		HttpSecurity security = new HttpSecurityImpl(AUTHENTICATION_SCHEME_DIGEST, username, roles);
 
 		// Remember HTTP Security for further requests
-		context.getSession().setAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY,
-				security);
+		context.getSession().setAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY, security);
 
 		// Return the HTTP Security
 		context.setHttpSecurity(security);
 	}
 
 	@Override
-	public void challenge(HttpChallengeContext<Dependencies, None> context)
-			throws IOException {
+	public void challenge(HttpChallengeContext<Dependencies, None> context) throws IOException {
 
 		// Obtain the dependencies
 		ServerHttpConnection connection = context.getConnection();
 		HttpRequest request = connection.getHttpRequest();
 		HttpSession session = context.getSession();
-		CredentialStore store = (CredentialStore) context
-				.getObject(Dependencies.CREDENTIAL_STORE);
+		CredentialStore store = (CredentialStore) context.getObject(Dependencies.CREDENTIAL_STORE);
 
 		// Obtain the algorithm
 		String algorithm = store.getAlgorithm();
@@ -537,24 +514,21 @@ public class DigestHttpSecuritySource
 		String opaque = new String(opaqueData, US_ASCII);
 
 		// Construct the authentication challenge
-		String challenge = AUTHENTICATION_SCHEME_DIGEST + " realm=\""
-				+ this.realm + "\", qop=\"auth,auth-int\", nonce=\"" + nonce
-				+ "\", opaque=\"" + opaque + "\", algorithm=\"" + algorithm
-				+ "\"";
+		String challenge = AUTHENTICATION_SCHEME_DIGEST + " realm=\"" + this.realm
+				+ "\", qop=\"auth,auth-int\", nonce=\"" + nonce + "\", opaque=\"" + opaque + "\", algorithm=\""
+				+ algorithm + "\"";
 
 		// Specify unauthorised
 		HttpResponse response = connection.getHttpResponse();
-		response.setHttpStatus(HttpStatus.SC_UNAUTHORIZED);
+		response.setHttpStatus(HttpStatus.UNAUTHORIZED);
 		response.addHeader("WWW-Authenticate", challenge);
 
 		// Record details for authentication
-		session.setAttribute(SECURITY_STATE_SESSION_KEY, new SecurityState(
-				nonce, opaque));
+		session.setAttribute(SECURITY_STATE_SESSION_KEY, new SecurityState(nonce, opaque));
 	}
 
 	@Override
-	public void logout(HttpLogoutContext<Dependencies> context)
-			throws IOException {
+	public void logout(HttpLogoutContext<Dependencies> context) throws IOException {
 
 		// Forget HTTP Security for further requests (requires login again)
 		context.getSession().removeAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
@@ -578,8 +552,7 @@ public class DigestHttpSecuritySource
 		/**
 		 * Provides access to a mock {@link SecurityState} for testing.
 		 */
-		protected static final Object MOCK_SECURITY_STATE = new SecurityState(
-				MOCK_NONCE, MOCK_OPAQUE);
+		protected static final Object MOCK_SECURITY_STATE = new SecurityState(MOCK_NONCE, MOCK_OPAQUE);
 	}
 
 	/**
@@ -642,8 +615,7 @@ public class DigestHttpSecuritySource
 		public Digest(String algorithm) throws IOException {
 			this.digest = CredentialStoreUtil.createDigest(algorithm);
 			if (this.digest == null) {
-				throw new IOException("Unable to create Digest for algorithm '"
-						+ algorithm + "'");
+				throw new IOException("Unable to create Digest for algorithm '" + algorithm + "'");
 			}
 		}
 

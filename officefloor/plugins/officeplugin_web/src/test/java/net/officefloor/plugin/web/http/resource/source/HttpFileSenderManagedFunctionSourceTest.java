@@ -39,6 +39,7 @@ import net.officefloor.plugin.web.http.resource.HttpResource;
 import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryFunction.DependencyKeys;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.stream.MockServerOutputStream;
 
@@ -268,7 +269,7 @@ public class HttpFileSenderManagedFunctionSourceTest extends OfficeFrameTestCase
 		Charset charset = Charset.defaultCharset();
 		this.response.setContentType("text/html", charset);
 		this.recordReturn(this.response, this.response.getEntityWriter(), this.entity.getServerWriter());
-		this.response.setHttpStatus(status);
+		this.response.setHttpStatus(HttpStatus.getHttpStatus(status));
 		this.response.send();
 	}
 

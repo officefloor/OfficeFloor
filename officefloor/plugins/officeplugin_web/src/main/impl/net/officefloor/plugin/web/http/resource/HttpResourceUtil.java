@@ -21,8 +21,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
-import net.officefloor.plugin.web.http.resource.HttpResource;
-import net.officefloor.server.http.protocol.HttpStatus;
+import net.officefloor.server.http.HttpStatus;
 
 /**
  * Utility functions for a {@link HttpResource}.
@@ -43,8 +42,7 @@ public class HttpResourceUtil {
 	 *             Should the Request URI path be invalid.
 	 */
 	@Deprecated
-	public static String transformToCanonicalPath(String path)
-			throws InvalidHttpRequestUriException {
+	public static String transformToCanonicalPath(String path) throws InvalidHttpRequestUriException {
 
 		// Root if empty path
 		if (path == null) {
@@ -110,8 +108,7 @@ public class HttpResourceUtil {
 				// Determine if previous segment
 				if (segmentBegin >= 0) {
 					// Process the segment (keeping track if canonical)
-					isPathCanonical &= processSegment(path, segmentBegin, i,
-							canonicalSegments);
+					isPathCanonical &= processSegment(path, segmentBegin, i, canonicalSegments);
 				}
 
 				// Flag start of next segment
@@ -135,8 +132,7 @@ public class HttpResourceUtil {
 		// Determine if last segment
 		if (segmentBegin <= path.length()) {
 			// Process the last segment (keeping track if canonical)
-			isPathCanonical &= processSegment(path, segmentBegin,
-					path.length(), canonicalSegments);
+			isPathCanonical &= processSegment(path, segmentBegin, path.length(), canonicalSegments);
 		}
 
 		// Determine if path is already canonical
@@ -182,8 +178,7 @@ public class HttpResourceUtil {
 	 * @throws InvalidHttpRequestUriException
 	 *             Should the segment result in an invalid path.
 	 */
-	private static boolean processSegment(String path, int beginIndex,
-			int endIndex, Deque<String> canonicalSegments)
+	private static boolean processSegment(String path, int beginIndex, int endIndex, Deque<String> canonicalSegments)
 			throws InvalidHttpRequestUriException {
 
 		// Obtain the segment
@@ -222,10 +217,8 @@ public class HttpResourceUtil {
 	 *            Path that is invalid.
 	 * @return {@link InvalidHttpRequestUriException}.
 	 */
-	private static InvalidHttpRequestUriException createInvalidHttpRequestUriException(
-			String path) {
-		return new InvalidHttpRequestUriException(HttpStatus.SC_BAD_REQUEST,
-				"Invalid request URI path [" + path + "]");
+	private static InvalidHttpRequestUriException createInvalidHttpRequestUriException(String path) {
+		return new InvalidHttpRequestUriException(HttpStatus.BAD_REQUEST, "Invalid request URI path [" + path + "]");
 	}
 
 	/**

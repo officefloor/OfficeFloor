@@ -18,6 +18,7 @@
 package net.officefloor.plugin.web.http.location;
 
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.InvalidHttpRequestException;
 
 /**
@@ -26,19 +27,17 @@ import net.officefloor.server.http.InvalidHttpRequestException;
  * 
  * @author Daniel Sagenschneider
  */
-public class IncorrectHttpRequestContextPathException extends
-		InvalidHttpRequestException {
+public class IncorrectHttpRequestContextPathException extends InvalidHttpRequestException {
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param httpStatus
-	 *            HTTP status of exception.
+	 *            {@link HttpStatus} of exception.
 	 * @param message
 	 *            Message.
 	 */
-	public IncorrectHttpRequestContextPathException(int httpStatus,
-			String message) {
+	public IncorrectHttpRequestContextPathException(HttpStatus httpStatus, String message) {
 		super(httpStatus, message);
 	}
 
