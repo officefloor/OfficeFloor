@@ -41,7 +41,7 @@ public interface HttpRequestHeaders extends Iterable<HttpHeader> {
 	 *            Name of the {@link HttpHeader} instances.
 	 * @return All {@link HttpHeader} instances by the name.
 	 */
-	Iterable<HttpHeader> getHeaders(String CharSequence);
+	Iterable<HttpHeader> getHeaders(CharSequence name);
 
 	/**
 	 * Obtains the {@link HttpHeader} at the index.

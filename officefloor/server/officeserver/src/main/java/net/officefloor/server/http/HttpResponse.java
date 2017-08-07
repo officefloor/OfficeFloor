@@ -31,11 +31,6 @@ import net.officefloor.server.stream.ServerWriter;
 public interface HttpResponse {
 
 	/**
-	 * Default {@link Charset}.
-	 */
-	static Charset UTF8_CHARSET = Charset.forName("UTF-8");
-
-	/**
 	 * Obtains the {@link HttpVersion}.
 	 * 
 	 * @return {@link HttpVersion}.
@@ -78,67 +73,11 @@ public interface HttpResponse {
 	void setHttpStatus(HttpStatus status);
 
 	/**
-	 * Resets the {@link HttpResponse} by clearing {@link HttpHeader} instances
-	 * and the entity.
+	 * Obtains the {@link HttpResponseHeaders}.
 	 * 
-	 * @throws IOException
-	 *             If committed to send the {@link HttpResponse}.
+	 * @return {@link HttpResponseHeaders}.
 	 */
-	void reset() throws IOException;
-
-	/**
-	 * <p>
-	 * Adds a {@link HttpHeader} for the response.
-	 * <p>
-	 * {@link HttpHeader} instances are provided on the response in the order
-	 * they are added.
-	 * 
-	 * @param name
-	 *            Name of {@link HttpHeader}.
-	 * @param value
-	 *            Value of {@link HttpHeader}.
-	 * @return {@link HttpHeader} instance added.
-	 * @throws IllegalArgumentException
-	 *             Should the {@link HttpHeader} be managed by the
-	 *             {@link HttpResponse}.
-	 */
-	HttpHeader addHeader(String name, String value) throws IllegalArgumentException;
-
-	/**
-	 * Obtains the first {@link HttpHeader} by the name.
-	 * 
-	 * @param name
-	 *            Name of the {@link HttpHeader}.
-	 * @return First {@link HttpHeader} by the name.
-	 */
-	HttpHeader getHeader(String name);
-
-	/**
-	 * Obtains all the {@link HttpHeader} instances for the response.
-	 * 
-	 * @return All the {@link HttpHeader} instances for the response.
-	 */
-	HttpHeader[] getHeaders();
-
-	/**
-	 * Removes the particular {@link HttpHeader} from the response.
-	 * 
-	 * @param header
-	 *            {@link HttpHeader} to be removed from the response.
-	 */
-	void removeHeader(HttpHeader header);
-
-	/**
-	 * <p>
-	 * Removes all {@link HttpHeader} instances by the name.
-	 * <p>
-	 * This method compliments {@link #addHeader(String, String)} to allow
-	 * adding a new single {@link HttpHeader} instance by name.
-	 * 
-	 * @param name
-	 *            Name of the {@link HttpHeader} instances to remove.
-	 */
-	void removeHeaders(String name);
+	HttpResponseHeaders getHttpHeaders();
 
 	/**
 	 * <p>
@@ -220,6 +159,15 @@ public interface HttpResponse {
 	 * @see #send()
 	 */
 	ServerWriter getEntityWriter() throws IOException;
+
+	/**
+	 * Resets the {@link HttpResponse} by clearing {@link HttpHeader} instances
+	 * and the entity.
+	 * 
+	 * @throws IOException
+	 *             If committed to send the {@link HttpResponse}.
+	 */
+	void reset() throws IOException;
 
 	/**
 	 * Sends this {@link HttpResponse}. After calling this the

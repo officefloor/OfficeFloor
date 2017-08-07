@@ -375,18 +375,19 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 			// Record existing Session cookie
 			HttpHeader existingCookieHeader = new HttpHeaderImpl("set-cookie",
 					SESSION_ID_COOKIE_NAME + "=\"Existing Session Id\"");
-			this.recordReturn(this.response, this.response.getHeaders(), new HttpHeader[] { existingCookieHeader });
-			this.response.removeHeader(existingCookieHeader);
+			this.recordReturn(this.response, this.response.getHttpHeaders(), new HttpHeader[] { existingCookieHeader });
+			this.response.getHttpHeaders().removeHeader(existingCookieHeader);
 		} else {
 			// Record no existing Session cookie
-			this.recordReturn(this.response, this.response.getHeaders(), new HttpHeader[0]);
+			this.recordReturn(this.response, this.response.getHttpHeaders(), new HttpHeader[0]);
 		}
 
 		// Record adding the Session Id cookie
 		HttpCookie cookie = new HttpCookie(SESSION_ID_COOKIE_NAME, sessionId);
 		cookie.setExpires(expireTime);
 		cookie.setPath("/");
-		this.recordReturn(this.response, this.response.addHeader("set-cookie", cookie.toHttpResponseHeaderValue()),
+		this.recordReturn(this.response,
+				this.response.getHttpHeaders().addHeader("set-cookie", cookie.toHttpResponseHeaderValue()),
 				this.createMock(HttpHeader.class));
 	}
 

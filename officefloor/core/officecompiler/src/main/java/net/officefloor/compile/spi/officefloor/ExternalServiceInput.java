@@ -25,19 +25,24 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 /**
  * External service input to {@link OfficeFloor}.
  * 
+ * @param <O>
+ *            Type of object returned from the {@link ManagedObject}.
+ * @param <M>
+ *            Type of {@link ManagedObject}.
+ * 
  * @author Daniel Sagenschneider
  */
-public interface ExternalServiceInput<O> {
+public interface ExternalServiceInput<O, M extends ManagedObject> {
 
 	/**
 	 * Invoked by an external service to use {@link OfficeFloor}.
 	 * 
-	 * @param object
-	 *            Object made available as a {@link ManagedObject} for
-	 *            dependency injection into {@link ManagedFunction} instances.
+	 * @param managedObject
+	 *            {@link ManagedObject} for dependency injection into
+	 *            {@link ManagedFunction} instances.
 	 * @param callback
 	 *            {@link FlowCallback} to indicate servicing complete.
 	 */
-	void service(O object, FlowCallback callback);
+	void service(M managedObject, FlowCallback callback);
 
 }

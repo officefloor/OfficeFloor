@@ -381,7 +381,7 @@ public class HttpStatus {
 	/**
 	 * UTF-8 content for this {@link HttpStatus}.
 	 */
-	private final byte[] utf8_content;
+	private final byte[] byteContent;
 
 	/**
 	 * {@link HttpStatusEnum}.
@@ -413,7 +413,7 @@ public class HttpStatus {
 	HttpStatus(int statusCode, String statusMessage, HttpStatusEnum httpStatusEnum) {
 		this.statusCode = statusCode;
 		this.statusMessage = statusMessage;
-		this.utf8_content = (this.statusCode + " " + this.statusMessage).getBytes(HttpResponse.UTF8_CHARSET);
+		this.byteContent = (this.statusCode + " " + this.statusMessage).getBytes(ServerHttpConnection.HTTP_CHARSET);
 		this.httpStatusEnum = httpStatusEnum;
 	}
 
@@ -466,7 +466,7 @@ public class HttpStatus {
 	 * @return Bytes to write this {@link HttpStatus}.
 	 */
 	byte[] getBytes() {
-		return this.utf8_content;
+		return this.byteContent;
 	}
 
 	/*

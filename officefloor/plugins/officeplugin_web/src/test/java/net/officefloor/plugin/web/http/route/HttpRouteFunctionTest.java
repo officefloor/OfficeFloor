@@ -84,8 +84,8 @@ public class HttpRouteFunctionTest extends OfficeFrameTestCase {
 					session, test);
 			test.recordReturn(connection, connection.getHttpResponse(), response);
 			response.setHttpStatus(HttpStatus.SEE_OTHER);
-			test.recordReturn(response,
-					response.addHeader("Location", redirectUrl + HttpRouteFunction.REDIRECT_URI_SUFFIX), header);
+			test.recordReturn(response, response.getHttpHeaders().addHeader("Location",
+					redirectUrl + HttpRouteFunction.REDIRECT_URI_SUFFIX), header);
 
 		} catch (Exception ex) {
 			throw fail(ex);

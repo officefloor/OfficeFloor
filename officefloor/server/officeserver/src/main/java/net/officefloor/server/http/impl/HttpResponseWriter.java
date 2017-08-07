@@ -17,51 +17,35 @@
  */
 package net.officefloor.server.http.impl;
 
-import net.officefloor.server.http.HttpMethod;
-import net.officefloor.server.http.HttpRequest;
-import net.officefloor.server.http.HttpRequestHeaders;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
-import net.officefloor.server.stream.ServerInputStream;
+import net.officefloor.server.stream.PooledBuffer;
 
 /**
- * Abstract {@link HttpRequest}.
+ * Writes the {@link HttpResponse}.
  * 
+ * @param <B>
+ *            Type of buffer.
  * @author Daniel Sagenschneider
  */
-public class AbstractHttpRequest implements HttpRequest {
+public interface HttpResponseWriter<B> {
 
-	/*
-	 * ================= HttpRequest =====================
+	/**
+	 * Writes the {@link HttpResponse}.
+	 * 
+	 * @param version
+	 *            {@link HttpVersion}.
+	 * @param status
+	 *            {@link HttpStatus}.
+	 * @param responseHttpheaders
+	 *            {@link WritableHttpHeader} instances for the
+	 *            {@link HttpResponse}.
+	 * @param responseHttpEntity
+	 *            {@link PooledBuffer} instances containing the
+	 *            {@link HttpResponse} entity.
 	 */
-
-	@Override
-	public HttpMethod getHttpMethod() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getRequestURI() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public HttpVersion getHttpVersion() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public HttpRequestHeaders getHttpHeaders() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ServerInputStream getEntity() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	void writeHttpResponse(HttpVersion version, HttpStatus status, Iterable<WritableHttpHeader> responseHttpheaders,
+			Iterable<PooledBuffer<B>> responseHttpEntity);
 
 }

@@ -92,7 +92,7 @@ public class HttpFileWriterManagedFunctionSourceTest extends OfficeFrameTestCase
 		this.recordReturn(connection, connection.getHttpResponse(), response);
 		response.reset();
 		this.recordReturn(httpFile, httpFile.getContentEncoding(), contentEncoding);
-		this.recordReturn(response, response.addHeader("Content-Encoding", contentEncoding), header);
+		this.recordReturn(response, response.getHttpHeaders().addHeader("Content-Encoding", contentEncoding), header);
 		this.recordReturn(httpFile, httpFile.getContentType(), contentType);
 		this.recordReturn(httpFile, httpFile.getCharset(), charset);
 		response.setContentType(contentType, charset);

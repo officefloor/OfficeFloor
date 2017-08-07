@@ -19,13 +19,11 @@ package net.officefloor.server.http;
 
 import javax.net.ssl.SSLContext;
 
-import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.office.OfficeSectionInput;
-import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * HTTP Server.
@@ -57,15 +55,8 @@ public class HttpServer {
 	 *            {@link HttpServerImplementation}.
 	 * @param sslContext
 	 *            {@link SSLContext}.
-	 * @param serviceOfficeName
-	 *            Name of the {@link DeployedOffice} servicing the
-	 *            {@link ServerHttpConnection}.
-	 * @param serviceSectionName
-	 *            Name of the {@link OfficeSection} within the
-	 *            {@link DeployedOffice} servicing the
-	 *            {@link ServerHttpConnection}.
-	 * @param serviceSectionInputName
-	 *            Name of the {@link OfficeSectionInput} servicing the
+	 * @param serviceInput
+	 *            {@link DeployedOfficeInput} servicing the
 	 *            {@link ServerHttpConnection}.
 	 * @param officeFloorDeployer
 	 *            {@link OfficeFloorDeployer}.
@@ -73,22 +64,11 @@ public class HttpServer {
 	 *            {@link OfficeFloorSourceContext}.
 	 */
 	public static void configureHttpServer(int httpPort, int httpsPort, HttpServerImplementation implementation,
-			SSLContext sslContext, String serviceOfficeName, String serviceSectionName, String serviceSectionInputName,
-			OfficeFloorDeployer officeFloorDeployer, OfficeFloorSourceContext context) {
-
-		// Obtain the deployed office
-		DeployedOffice office = officeFloorDeployer.getDeployedOffice(serviceOfficeName);
-
-		// Obtain the input for service handling
-		DeployedOfficeInput officeInput = office.getDeployedOfficeInput(serviceSectionName, serviceSectionInputName);
+			SSLContext sslContext, DeployedOfficeInput serviceInput, OfficeFloorDeployer officeFloorDeployer,
+			OfficeFloorSourceContext context) {
 
 		// Configure the HTTP server
 		implementation.configureHttpServer(new HttpServerImplementationContext() {
-
-			/**
-			 * Lazy instantiated {@link ExternalServiceInput}.
-			 */
-			private ExternalServiceInput<ServerHttpConnection> serviceInput;
 
 			/*
 			 * ================= HttpServerImplementationContext ==============
@@ -111,15 +91,13 @@ public class HttpServer {
 
 			@Override
 			public DeployedOfficeInput getInternalServiceInput() {
-				return officeInput;
+				return serviceInput;
 			}
 
 			@Override
-			public ExternalServiceInput<ServerHttpConnection> getExternalServiceInput() {
-				if (this.serviceInput == null) {
-					this.serviceInput = officeInput.addExternalServiceInput(ServerHttpConnection.class);
-				}
-				return this.serviceInput;
+			public <M extends ManagedObject> ExternalServiceInput<ServerHttpConnection, M> getExternalServiceInput(
+					Class<M> managedObjectType) {
+				return serviceInput.addExternalServiceInput(ServerHttpConnection.class, managedObjectType);
 			}
 
 			@Override

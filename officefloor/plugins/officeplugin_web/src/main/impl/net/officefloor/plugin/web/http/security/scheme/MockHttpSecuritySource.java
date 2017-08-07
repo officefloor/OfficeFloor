@@ -176,7 +176,8 @@ public class MockHttpSecuritySource extends AbstractHttpSecuritySource<HttpSecur
 		// Load the challenge
 		HttpResponse response = context.getConnection().getHttpResponse();
 		response.setHttpStatus(HttpStatus.UNAUTHORIZED);
-		response.addHeader("WWW-Authenticate", IMPLEMENTING_AUTHENTICATION_SCHEME_BASIC + " realm=\"" + REALM + "\"");
+		response.getHttpHeaders().addHeader("WWW-Authenticate",
+				IMPLEMENTING_AUTHENTICATION_SCHEME_BASIC + " realm=\"" + REALM + "\"");
 	}
 
 	@Override

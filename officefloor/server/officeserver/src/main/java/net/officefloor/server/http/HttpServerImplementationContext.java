@@ -23,6 +23,7 @@ import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * Context for the {@link HttpServerImplementation}.
@@ -69,9 +70,12 @@ public interface HttpServerImplementationContext {
 	/**
 	 * Obtains the {@link ExternalServiceInput}.
 	 * 
+	 * @param managedObjectType
+	 *            Type of the {@link ManagedObject}.
 	 * @return {@link ExternalServiceInput}.
 	 */
-	ExternalServiceInput<ServerHttpConnection> getExternalServiceInput();
+	<M extends ManagedObject> ExternalServiceInput<ServerHttpConnection, M> getExternalServiceInput(
+			Class<M> managedObjectType);
 
 	/**
 	 * Obtains the {@link OfficeFloorDeployer} to configure the

@@ -253,7 +253,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 
 		// Provide some content on response (should be cleared)
 		HttpResponse response = mo.getServerHttpConnection().getHttpResponse();
-		response.addHeader("SuccessfulHeader", "SuccessfulValue");
+		response.getHttpHeaders().addHeader("SuccessfulHeader", "SuccessfulValue");
 		response.getEntity().write("SUCCESSFUL CONTENT".getBytes());
 
 		// Handle failure in processing the request

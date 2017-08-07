@@ -71,7 +71,7 @@ public class PostRedirectGetLogic {
 
 		// Determine if provide header
 		if ("HEADER".equals(parameters.operation)) {
-			response.addHeader("NAME", "VALUE");
+			response.getHttpHeaders().addHeader("NAME", "VALUE");
 
 		} else if ("ENTITY".equals(parameters.operation)) {
 			ServerWriter writer = response.getEntityWriter();

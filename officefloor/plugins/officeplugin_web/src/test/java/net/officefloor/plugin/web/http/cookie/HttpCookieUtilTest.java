@@ -46,8 +46,7 @@ public class HttpCookieUtilTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link HttpResponse}.
 	 */
-	private final HttpResponse httpResponse = this
-			.createMock(HttpResponse.class);
+	private final HttpResponse httpResponse = this.createMock(HttpResponse.class);
 
 	/**
 	 * Ensure extracts the first {@link HttpCookie} by name.
@@ -56,17 +55,14 @@ public class HttpCookieUtilTest extends OfficeFrameTestCase {
 
 		List<HttpHeader> headers = new ArrayList<HttpHeader>(1);
 		headers.add(this.createCookieHttpHeader("test", "value"));
-		headers.add(this.createCookieHttpHeader("test",
-				"should only return first found cookie"));
+		headers.add(this.createCookieHttpHeader("test", "should only return first found cookie"));
 
 		// Record
-		this.recordReturn(this.httpRequest, this.httpRequest.getHttpHeaders(),
-				headers);
+		this.recordReturn(this.httpRequest, this.httpRequest.getHttpHeaders(), headers);
 
 		// Extract the http cookie
 		this.replayMockObjects();
-		HttpCookie cookie = HttpCookieUtil.extractHttpCookie("test",
-				this.httpRequest);
+		HttpCookie cookie = HttpCookieUtil.extractHttpCookie("test", this.httpRequest);
 		this.verifyMockObjects();
 
 		// Ensure correct cookie
@@ -82,13 +78,11 @@ public class HttpCookieUtilTest extends OfficeFrameTestCase {
 		headers.add(this.createCookieHttpHeader("test", "\"value\""));
 
 		// Record
-		this.recordReturn(this.httpRequest, this.httpRequest.getHttpHeaders(),
-				headers);
+		this.recordReturn(this.httpRequest, this.httpRequest.getHttpHeaders(), headers);
 
 		// Extract the http cookie
 		this.replayMockObjects();
-		HttpCookie cookie = HttpCookieUtil.extractHttpCookie("test",
-				this.httpRequest);
+		HttpCookie cookie = HttpCookieUtil.extractHttpCookie("test", this.httpRequest);
 		this.verifyMockObjects();
 
 		// Ensure correct cookie
@@ -104,13 +98,11 @@ public class HttpCookieUtilTest extends OfficeFrameTestCase {
 		headers.add(this.createCookieHttpHeader("test", "\"\""));
 
 		// Record
-		this.recordReturn(this.httpRequest, this.httpRequest.getHttpHeaders(),
-				headers);
+		this.recordReturn(this.httpRequest, this.httpRequest.getHttpHeaders(), headers);
 
 		// Extract the http cookie
 		this.replayMockObjects();
-		HttpCookie cookie = HttpCookieUtil.extractHttpCookie("test",
-				this.httpRequest);
+		HttpCookie cookie = HttpCookieUtil.extractHttpCookie("test", this.httpRequest);
 		this.verifyMockObjects();
 
 		// Ensure correct cookie
@@ -126,18 +118,15 @@ public class HttpCookieUtilTest extends OfficeFrameTestCase {
 		List<HttpHeader> headers = new ArrayList<HttpHeader>(1);
 		HttpHeader one = this.createCookieHttpHeader("another", "value");
 		HttpHeader two = this.createCookieHttpHeader("test", "value");
-		HttpHeader header = new HttpHeaderImpl(one.getName(), one.getValue()
-				+ "," + two.getValue());
+		HttpHeader header = new HttpHeaderImpl(one.getName(), one.getValue() + "," + two.getValue());
 		headers.add(header);
 
 		// Record
-		this.recordReturn(this.httpRequest, this.httpRequest.getHttpHeaders(),
-				headers);
+		this.recordReturn(this.httpRequest, this.httpRequest.getHttpHeaders(), headers);
 
 		// Extract the http cookie
 		this.replayMockObjects();
-		HttpCookie cookie = HttpCookieUtil.extractHttpCookie("test",
-				this.httpRequest);
+		HttpCookie cookie = HttpCookieUtil.extractHttpCookie("test", this.httpRequest);
 		this.verifyMockObjects();
 
 		// Ensure correct cookie
@@ -151,25 +140,19 @@ public class HttpCookieUtilTest extends OfficeFrameTestCase {
 	public void testIgnoreQuotedSeparators() {
 
 		List<HttpHeader> headers = new ArrayList<HttpHeader>(1);
-		HttpHeader attributeSeparatorHeader = this.createCookieHttpHeader(
-				"attribute", "\";\"");
-		HttpHeader cookieSeparatorHeader = this.createCookieHttpHeader(
-				"cookie", "\",\"");
+		HttpHeader attributeSeparatorHeader = this.createCookieHttpHeader("attribute", "\";\"");
+		HttpHeader cookieSeparatorHeader = this.createCookieHttpHeader("cookie", "\",\"");
 		HttpHeader cookieHeader = this.createCookieHttpHeader("test", "value");
-		HttpHeader header = new HttpHeaderImpl(cookieHeader.getName(),
-				attributeSeparatorHeader.getValue() + ","
-						+ cookieSeparatorHeader.getValue() + ","
-						+ cookieHeader.getValue());
+		HttpHeader header = new HttpHeaderImpl(cookieHeader.getName(), attributeSeparatorHeader.getValue() + ","
+				+ cookieSeparatorHeader.getValue() + "," + cookieHeader.getValue());
 		headers.add(header);
 
 		// Record
-		this.recordReturn(this.httpRequest, this.httpRequest.getHttpHeaders(),
-				headers);
+		this.recordReturn(this.httpRequest, this.httpRequest.getHttpHeaders(), headers);
 
 		// Extract the http cookie
 		this.replayMockObjects();
-		HttpCookie cookie = HttpCookieUtil.extractHttpCookie("test",
-				this.httpRequest);
+		HttpCookie cookie = HttpCookieUtil.extractHttpCookie("test", this.httpRequest);
 		this.verifyMockObjects();
 
 		// Ensure correct cookie
@@ -192,16 +175,13 @@ public class HttpCookieUtilTest extends OfficeFrameTestCase {
 		cookie.setDomain(".officefloor.net");
 
 		// Record adding cookie
-		this.recordReturn(this.httpResponse, this.httpResponse.getHeaders(),
-				new HttpHeader[0]);
-		this.recordReturn(this.httpResponse, this.httpResponse.addHeader(
-				"set-cookie", "test=\"value\"; expires=" + expireText
-						+ "; path=/; domain=.officefloor.net"), header);
+		this.recordReturn(this.httpResponse, this.httpResponse.getHttpHeaders(), new HttpHeader[0]);
+		this.recordReturn(this.httpResponse, this.httpResponse.getHttpHeaders().addHeader("set-cookie",
+				"test=\"value\"; expires=" + expireText + "; path=/; domain=.officefloor.net"), header);
 
 		// Add the cookie to HTTP response
 		this.replayMockObjects();
-		HttpHeader returnedHeader = HttpCookieUtil.addHttpCookie(cookie,
-				this.httpResponse);
+		HttpHeader returnedHeader = HttpCookieUtil.addHttpCookie(cookie, this.httpResponse);
 		this.verifyMockObjects();
 		assertSame("Incorrect HTTP header", header, returnedHeader);
 	}
@@ -221,10 +201,8 @@ public class HttpCookieUtilTest extends OfficeFrameTestCase {
 		existingCookie.setExpires(currentTime + 1000);
 		existingCookie.setPath("/existing");
 		existingCookie.setDomain(".existing.officefloor.net");
-		HttpHeader existingHeader = new HttpHeaderImpl("set-cookie",
-				existingCookie.toHttpResponseHeaderValue());
-		HttpHeader anotherHeader = new HttpHeaderImpl("set-cookie",
-				"another=cookie");
+		HttpHeader existingHeader = new HttpHeaderImpl("set-cookie", existingCookie.toHttpResponseHeaderValue());
+		HttpHeader anotherHeader = new HttpHeaderImpl("set-cookie", "another=cookie");
 
 		// Create the HTTP cookie
 		HttpCookie cookie = new HttpCookie("test", "replace");
@@ -233,18 +211,17 @@ public class HttpCookieUtilTest extends OfficeFrameTestCase {
 		cookie.setDomain(".replace.officefloor.net");
 
 		// Record adding cookie (removing existing cookie header)
-		this.recordReturn(this.httpResponse, this.httpResponse.getHeaders(),
+		this.recordReturn(this.httpResponse, this.httpResponse.getHttpHeaders(),
 				new HttpHeader[] { existingHeader, anotherHeader });
-		this.httpResponse.removeHeader(existingHeader);
-		this.recordReturn(this.httpResponse, this.httpResponse.addHeader(
-				"set-cookie", "test=\"replace\"; expires=" + expireText
-						+ "; path=/replace; domain=.replace.officefloor.net"),
+		this.httpResponse.getHttpHeaders().removeHeader(existingHeader);
+		this.recordReturn(this.httpResponse,
+				this.httpResponse.getHttpHeaders().addHeader("set-cookie",
+						"test=\"replace\"; expires=" + expireText + "; path=/replace; domain=.replace.officefloor.net"),
 				header);
 
 		// Add the cookie to HTTP response
 		this.replayMockObjects();
-		HttpHeader returnedHeader = HttpCookieUtil.addHttpCookie(cookie,
-				this.httpResponse);
+		HttpHeader returnedHeader = HttpCookieUtil.addHttpCookie(cookie, this.httpResponse);
 		this.verifyMockObjects();
 		assertSame("Incorrect HTTP header", header, returnedHeader);
 	}
@@ -275,8 +252,7 @@ public class HttpCookieUtilTest extends OfficeFrameTestCase {
 	 * @return Expire text.
 	 */
 	private String getExpireText(long expireTime) {
-		SimpleDateFormat formatter = new SimpleDateFormat(
-				"EEE',' dd-MMM-yyyy HH:mm:ss 'GMT'");
+		SimpleDateFormat formatter = new SimpleDateFormat("EEE',' dd-MMM-yyyy HH:mm:ss 'GMT'");
 		formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
 		return formatter.format(new Date(expireTime));
 	}

@@ -26,6 +26,7 @@ import java.util.Properties;
 import junit.framework.TestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpResponseHeaders;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.UsAsciiUtil;
@@ -123,7 +124,14 @@ public class MockHttpResponse implements HttpResponse {
 	public void reset() throws IOException {
 		throw new IllegalStateException("Can not reset " + MockHttpResponse.class.getSimpleName());
 	}
-
+	
+	@Override
+	public HttpResponseHeaders getHttpHeaders() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+/*
 	@Override
 	public HttpHeader addHeader(String name, String value) {
 		TestCase.assertFalse("Response already contains header '" + name + "'", this.headers.containsKey(name));
@@ -159,11 +167,12 @@ public class MockHttpResponse implements HttpResponse {
 	public void removeHeaders(String name) {
 		this.headers.remove(name);
 	}
+*/
 
 	@Override
 	public ServerOutputStream getEntity() {
 		return this.entity.getServerOutputStream();
-	}
+	}	
 
 	@Override
 	public void setContentType(String contentType, Charset charset) throws IOException {

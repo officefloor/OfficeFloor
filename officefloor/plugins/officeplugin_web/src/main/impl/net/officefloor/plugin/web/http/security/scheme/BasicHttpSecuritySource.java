@@ -172,7 +172,8 @@ public class BasicHttpSecuritySource
 		// Load the challenge
 		HttpResponse response = context.getConnection().getHttpResponse();
 		response.setHttpStatus(HttpStatus.UNAUTHORIZED);
-		response.addHeader("WWW-Authenticate", AUTHENTICATION_SCHEME_BASIC + " realm=\"" + this.realm + "\"");
+		response.getHttpHeaders().addHeader("WWW-Authenticate",
+				AUTHENTICATION_SCHEME_BASIC + " realm=\"" + this.realm + "\"");
 	}
 
 	@Override

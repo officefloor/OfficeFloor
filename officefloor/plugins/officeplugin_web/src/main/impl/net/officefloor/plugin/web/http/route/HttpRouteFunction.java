@@ -93,7 +93,7 @@ public class HttpRouteFunction extends
 		// Send redirect
 		HttpResponse response = connection.getHttpResponse();
 		response.setHttpStatus(HttpStatus.SEE_OTHER);
-		response.addHeader("Location", redirectUrl + REDIRECT_URI_SUFFIX);
+		response.getHttpHeaders().addHeader("Location", redirectUrl + REDIRECT_URI_SUFFIX);
 	}
 
 	/**

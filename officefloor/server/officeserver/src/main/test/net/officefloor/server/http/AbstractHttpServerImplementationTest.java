@@ -33,6 +33,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import junit.framework.TestCase;
+import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -81,8 +82,12 @@ public abstract class AbstractHttpServerImplementationTest extends OfficeFrameTe
 		CompileOfficeFloor compile = new CompileOfficeFloor();
 		compile.officeFloor((context) -> {
 
+			// Obtain the input
+			DeployedOfficeInput serviceHandler = context.getOfficeFloorDeployer().getDeployedOffice("OFFICE")
+					.getDeployedOfficeInput("SERVICER", "service");
+
 			// Configure the HTTP Server
-			HttpServer.configureHttpServer(7878, 7979, implementation, sslContext, "OFFICE", "SERVICER", "service",
+			HttpServer.configureHttpServer(7878, 7979, implementation, sslContext, serviceHandler,
 					context.getOfficeFloorDeployer(), context.getOfficeFloorSourceContext());
 
 		});

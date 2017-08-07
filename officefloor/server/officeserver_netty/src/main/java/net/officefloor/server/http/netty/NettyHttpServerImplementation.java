@@ -18,8 +18,12 @@
 package net.officefloor.server.http.netty;
 
 import java.net.InetSocketAddress;
+import java.util.Iterator;
+import java.util.Map.Entry;
+import java.util.function.Supplier;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
@@ -37,9 +41,14 @@ import io.netty.channel.kqueue.KQueueServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.ResourceLeakDetector.Level;
@@ -47,9 +56,20 @@ import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpServerImplementation;
 import net.officefloor.server.http.HttpServerImplementationContext;
+import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.impl.HttpResponseWriter;
+import net.officefloor.server.http.impl.NonMaterialisedHttpHeader;
+import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
+import net.officefloor.server.http.impl.SerialisableHttpHeader;
+import net.officefloor.server.http.impl.ServerHttpConnectionImpl;
+import net.officefloor.server.http.impl.WritableHttpHeader;
+import net.officefloor.server.stream.PooledBuffer;
+import net.officefloor.server.stream.impl.ByteSequence;
 
 /**
  * Netty {@link HttpServerImplementation}.
@@ -70,7 +90,7 @@ public class NettyHttpServerImplementation implements HttpServerImplementation, 
 	/**
 	 * {@link ExternalServiceInput}.
 	 */
-	private ExternalServiceInput<ServerHttpConnection> serviceInput;
+	private ExternalServiceInput<ServerHttpConnection, ServerHttpConnectionImpl> serviceInput;
 
 	/**
 	 * {@link EventLoopGroup}.
@@ -86,7 +106,7 @@ public class NettyHttpServerImplementation implements HttpServerImplementation, 
 		this.context = context;
 
 		// Obtain the service input for handling requests
-		this.serviceInput = context.getExternalServiceInput();
+		this.serviceInput = context.getExternalServiceInput(ServerHttpConnectionImpl.class);
 
 		// Hook into OfficeFloor life-cycle
 		context.getOfficeFloorDeployer().addOfficeFloorListener(this);
@@ -178,15 +198,159 @@ public class NettyHttpServerImplementation implements HttpServerImplementation, 
 		 */
 		private void service(ChannelHandlerContext context, HttpRequest request) throws Exception {
 
+			// Supply the method
+			Supplier<HttpMethod> methodSupplier = () -> {
+				io.netty.handler.codec.http.HttpMethod nettyHttpMethod = request.method();
+				String methodName = nettyHttpMethod.asciiName().toString();
+				switch (methodName) {
+				case "GET":
+					return HttpMethod.GET;
+				case "POST":
+					return HttpMethod.POST;
+				case "PUT":
+					return HttpMethod.PUT;
+				case "DELETE":
+					return HttpMethod.DELETE;
+				case "CONNECT":
+					return HttpMethod.CONNECT;
+				case "HEAD":
+					return HttpMethod.HEAD;
+				case "OPTIONS":
+					return HttpMethod.OPTIONS;
+				default:
+					return new HttpMethod(methodName);
+				}
+			};
+
+			// Supply the request URI
+			Supplier<String> requestUriSupplier = () -> request.uri();
+
+			// Obtain the version
+			HttpVersion version;
+			String versionName = request.protocolVersion().protocolName();
+			switch (versionName) {
+			case "HTTP/1.0":
+				version = HttpVersion.HTTP_1_0;
+			case "HTTP/1.1":
+				version = HttpVersion.HTTP_1_1;
+			default:
+				version = new HttpVersion(versionName);
+			}
+
+			// Obtain the request headers
+			NonMaterialisedHttpHeaders requestHeaders = new NonMaterialisedHttpHeaders() {
+
+				@Override
+				public Iterator<NonMaterialisedHttpHeader> iterator() {
+					Iterator<Entry<CharSequence, CharSequence>> iterator = request.headers().iteratorCharSequence();
+					return new Iterator<NonMaterialisedHttpHeader>() {
+
+						@Override
+						public boolean hasNext() {
+							return iterator.hasNext();
+						}
+
+						@Override
+						public NonMaterialisedHttpHeader next() {
+							Entry<CharSequence, CharSequence> entry = iterator.next();
+							CharSequence entryName = entry.getKey();
+							return new NonMaterialisedHttpHeader() {
+
+								@Override
+								public boolean isNameEqual(CharSequence name) {
+									if (entryName.length() == name.length()) {
+										for (int i = 0; i < name.length(); i++) {
+											if (entryName.charAt(i) != name.charAt(i)) {
+												return false; // different
+											}
+										}
+										return true; // as here, equal
+									}
+									return false; // not equal on length
+								}
+
+								@Override
+								public HttpHeader materialiseHttpHeader() {
+									return new SerialisableHttpHeader(entry.getKey().toString(),
+											entry.getValue().toString());
+								}
+							};
+						}
+					};
+				}
+
+				@Override
+				public int length() {
+					return request.headers().size();
+				}
+			};
+
+			// Obtain the request entity content
+			ByteSequence requestEntity = null;
+			if (request instanceof FullHttpRequest) {
+				FullHttpRequest fullRequest = (FullHttpRequest) request;
+				ByteBuf entityByteBuf = fullRequest.content();
+				requestEntity = new ByteSequence() {
+
+					@Override
+					public byte byteAt(int index) {
+						return entityByteBuf.getByte(index);
+					}
+
+					@Override
+					public int length() {
+						return entityByteBuf.capacity();
+					}
+				};
+			}
+
+			// Create the response
+			FullHttpResponse response = new DefaultFullHttpResponse(io.netty.handler.codec.http.HttpVersion.HTTP_1_1,
+					HttpResponseStatus.OK, false);
+
+			// Handle response
+			HttpResponseWriter<ByteBuf> responseWriter = (responseVersion, status, responseHttpHeaders,
+					responseHttpEntity) -> {
+
+				// Specify the status
+				HttpResponseStatus nettyStatus = HttpResponseStatus.valueOf(status.getStatusCode());
+				response.setStatus(nettyStatus);
+
+				// Create and write the response
+				HttpHeaders headers = response.headers();
+				for (WritableHttpHeader header : responseHttpHeaders) {
+					headers.add(header.getName(), header.getValue());
+				}
+
+				// Write the response
+				ByteBuf responseBuffer = response.content();
+				for (PooledBuffer<ByteBuf> pooledBuffer : responseHttpEntity) {
+					if (pooledBuffer.isReadOnly()) {
+						responseBuffer.writeBytes(pooledBuffer.getReadOnlyByteBuffer());
+					} else {
+						responseBuffer.writeBytes(pooledBuffer.getBuffer());
+					}
+				}
+
+				// Send the response
+				context.write(response);
+			};
+
+			// Create the Netty buffer pool
+			NettyBufferPool bufferPool = new NettyBufferPool(response);
+
+			// Create the Server HTTP connection
+			ServerHttpConnectionImpl connection = new ServerHttpConnectionImpl(false, methodSupplier,
+					requestUriSupplier, version, requestHeaders, requestEntity, responseWriter, bufferPool);
+
 			// Service the request
-			NettyServerHttpConnection connection = new NettyServerHttpConnection(context, request, false);
 			NettyHttpServerImplementation.this.serviceInput.service(connection, (escalation) -> {
-				
+
 				if (escalation != null) {
 					escalation.printStackTrace();
 				}
-				
-				// Ensure send the response
+
+				// Ensure send response
 				connection.getHttpResponse().send();
 			});
 		}

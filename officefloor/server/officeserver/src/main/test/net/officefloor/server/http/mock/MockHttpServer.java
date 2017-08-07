@@ -1,0 +1,443 @@
+/*
+ * OfficeFloor - http://www.officefloor.net
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package net.officefloor.server.http.mock;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.function.Supplier;
+
+import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
+import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
+import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpServer;
+import net.officefloor.server.http.HttpServerImplementation;
+import net.officefloor.server.http.HttpServerImplementationContext;
+import net.officefloor.server.http.HttpStatus;
+import net.officefloor.server.http.HttpVersion;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.impl.HttpResponseWriter;
+import net.officefloor.server.http.impl.NonMaterialisedHttpHeader;
+import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
+import net.officefloor.server.http.impl.ServerHttpConnectionImpl;
+import net.officefloor.server.http.impl.WritableHttpHeader;
+import net.officefloor.server.stream.impl.ByteArrayByteSequence;
+import net.officefloor.server.stream.impl.ByteSequence;
+
+/**
+ * Mock {@link HttpServer}.
+ * 
+ * @author Daniel Sagenschneider
+ */
+public class MockHttpServer implements HttpServerImplementation {
+
+	/**
+	 * Configures the {@link MockHttpServer} to be serviced by the
+	 * {@link DeployedOfficeInput}.
+	 * 
+	 * @param input
+	 *            {@link DeployedOfficeInput}.
+	 * @return {@link MockHttpServer} to send {@link HttpRequest} instances.
+	 */
+	public static MockHttpServer configureMockHttpServer(DeployedOfficeInput input) {
+		MockHttpServer httpServer = new MockHttpServer();
+		HttpServer.configureHttpServer(-1, -1, httpServer, null, input, null, null);
+		return httpServer;
+	}
+
+	/**
+	 * {@link ExternalServiceInput}.
+	 */
+	private ExternalServiceInput<ServerHttpConnection, ServerHttpConnectionImpl> serviceInput;
+
+	/**
+	 * Instantiated via static methods.
+	 */
+	private MockHttpServer() {
+	}
+
+	/**
+	 * Creates the {@link MockHttpRequestBuilder}.
+	 * 
+	 * @return {@link MockHttpRequestBuilder}.
+	 */
+	public MockHttpRequestBuilder createMockHttpRequest() {
+		return new MockHttpRequestBuilderImpl();
+	}
+
+	/**
+	 * Sends the {@link MockHttpRequestBuilder}.
+	 * 
+	 * @param request
+	 *            {@link MockHttpRequestBuilder}.
+	 * @param callback
+	 *            {@link MockHttpRequestCallback} to receive the
+	 *            {@link MockHttpResponse}.
+	 */
+	public void send(MockHttpRequestBuilder request, MockHttpRequestCallback callback) {
+
+		// Ensure have implementation
+		if (!(request instanceof MockHttpRequestBuilderImpl)) {
+			throw new IllegalArgumentException("Must create request with createMockHttpRequest()");
+		}
+		MockHttpRequestBuilderImpl impl = (MockHttpRequestBuilderImpl) request;
+
+		// Create the inputs
+		boolean isSecure = impl.isSecure;
+		Supplier<HttpMethod> methodSupplier = () -> impl.method;
+		Supplier<String> requestUriSupplier = () -> impl.requestUri;
+		HttpVersion requestVersion = impl.version;
+		NonMaterialisedHttpHeaders requestHeaders = impl;
+		ByteSequence requestEntity = new ByteArrayByteSequence(impl.entity.toByteArray());
+
+		// Mock buffer pool
+		MockBufferPool bufferPool = new MockBufferPool();
+
+		// Create the mock HTTP response
+		MockHttpResponseImpl response = new MockHttpResponseImpl();
+
+		// Handle response
+		HttpResponseWriter<byte[]> responseWriter = (responseVersion, status, responseHttpHeaders,
+				responseHttpEntity) -> {
+
+			// Obtain the listing of response HTTP headers
+			List<WritableHttpHeader> headers = new ArrayList<>();
+			for (WritableHttpHeader header : responseHttpHeaders) {
+				headers.add(header);
+			}
+
+			// Load response successful
+			response.setSuccessful(requestVersion, status, headers);
+		};
+
+		// Create the server HTTP connection
+		ServerHttpConnectionImpl connection = new ServerHttpConnectionImpl(isSecure, methodSupplier, requestUriSupplier,
+				requestVersion, requestHeaders, requestEntity, responseWriter, bufferPool);
+
+		// Service the request
+		this.serviceInput.service(connection, (escalation) -> {
+
+			// Flag potential escalation
+			if (escalation != null) {
+				response.setFailed(escalation);
+			}
+
+			// Response received
+			callback.response(response);
+		});
+	}
+
+	/**
+	 * Sends the {@link MockHttpRequestBuilder} and blocks waiting for the
+	 * {@link MockHttpResponse}.
+	 * 
+	 * @param request
+	 *            {@link MockHttpRequestBuilder}.
+	 * @eturn {@link MockHttpResponse}.
+	 */
+	public MockHttpResponse send(MockHttpRequestBuilder request) {
+		return null;
+	}
+
+	/*
+	 * ================= HttpServerImplementation ==================
+	 */
+
+	@Override
+	public void configureHttpServer(HttpServerImplementationContext context) {
+		this.serviceInput = context.getExternalServiceInput(ServerHttpConnectionImpl.class);
+	}
+
+	/**
+	 * {@link MockHttpRequestBuilder} implementation.
+	 */
+	private static class MockHttpRequestBuilderImpl implements MockHttpRequestBuilder, NonMaterialisedHttpHeaders {
+
+		/**
+		 * Indicates if secure.
+		 */
+		private boolean isSecure = false;
+
+		/**
+		 * {@link HttpMethod}.
+		 */
+		private HttpMethod method = HttpMethod.GET;
+
+		/**
+		 * Request URI.
+		 */
+		private String requestUri = "/";
+
+		/**
+		 * {@link HttpVersion}.
+		 */
+		private HttpVersion version = HttpVersion.HTTP_1_1;
+
+		/**
+		 * {@link HttpHeader} instances.
+		 */
+		private final List<MockNonMaterialisedHttpHeader> headers = new LinkedList<>();
+
+		/**
+		 * HTTP entity.
+		 */
+		private final ByteArrayOutputStream entity = new ByteArrayOutputStream();
+
+		/*
+		 * ================== MockHttpRequestBuilder ========================
+		 */
+
+		@Override
+		public void setSecure(boolean isSecure) {
+			this.isSecure = isSecure;
+		}
+
+		@Override
+		public void setHttpMethod(HttpMethod method) {
+			this.method = method;
+		}
+
+		@Override
+		public void setRequestUri(String requestUri) {
+			this.requestUri = requestUri;
+		}
+
+		@Override
+		public void setHttpVersion(HttpVersion version) {
+			this.version = version;
+		}
+
+		@Override
+		public void addHttpHeader(String name, String value) {
+			this.headers.add(new MockNonMaterialisedHttpHeader(name, value));
+		}
+
+		@Override
+		public OutputStream getHttpEntity() {
+			return this.entity;
+		}
+
+		/*
+		 * ================== NonMaterialisedHttpHeaders =====================
+		 */
+
+		@Override
+		public Iterator<NonMaterialisedHttpHeader> iterator() {
+			final Iterator<MockNonMaterialisedHttpHeader> iterator = this.headers.iterator();
+			return new Iterator<NonMaterialisedHttpHeader>() {
+				@Override
+				public boolean hasNext() {
+					return iterator.hasNext();
+				}
+
+				@Override
+				public NonMaterialisedHttpHeader next() {
+					return iterator.next();
+				}
+			};
+		}
+
+		@Override
+		public int length() {
+			return this.headers.size();
+		}
+	}
+
+	/**
+	 * {@link NonMaterialisedHttpHeader}.
+	 */
+	private static class MockNonMaterialisedHttpHeader implements NonMaterialisedHttpHeader, HttpHeader {
+
+		/**
+		 * {@link HttpHeader} name.
+		 */
+		private final String name;
+
+		/**
+		 * Bytes for non-materialised name.
+		 */
+		private final byte[] nameBytes;
+
+		/**
+		 * {@link HttpHeader} value.
+		 */
+		private final String value;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param name
+		 *            {@link HttpHeader} name.
+		 * @param value
+		 *            {@link HttpHeader} value.
+		 */
+		public MockNonMaterialisedHttpHeader(String name, String value) {
+			this.name = name;
+			this.value = value;
+
+			// Obtain the bytes for the name
+			this.nameBytes = this.name.getBytes(ServerHttpConnection.HTTP_CHARSET);
+		}
+
+		/*
+		 * ================= NonMaterialisedHttpHeader ========================
+		 */
+
+		@Override
+		public boolean isNameEqual(CharSequence name) {
+
+			// Check equal based on HTTP charset
+			if (this.nameBytes.length == name.length()) {
+				for (int i = 0; i < this.nameBytes.length; i++) {
+					if (this.nameBytes[i] != name.charAt(i)) {
+						return false; // not same value
+					}
+				}
+				return true; // equal
+			}
+			return false; // not equal as different length
+		}
+
+		@Override
+		public HttpHeader materialiseHttpHeader() {
+			return this;
+		}
+
+		/*
+		 * ======================== HttpHeader ================================
+		 */
+
+		@Override
+		public String getName() {
+			return this.name;
+		}
+
+		@Override
+		public String getValue() {
+			return this.value;
+		}
+	}
+
+	/**
+	 * {@link MockHttpResponse} implementation.
+	 */
+	private static class MockHttpResponseImpl implements MockHttpResponse {
+
+		/**
+		 * Potential failure in servicing.
+		 */
+		private Throwable failure = null;
+
+		/**
+		 * {@link HttpVersion}.
+		 */
+		private HttpVersion version;
+
+		/**
+		 * {@link HttpStatus}.
+		 */
+		private HttpStatus status;
+
+		/**
+		 * {@link HttpHeader} instances.
+		 */
+		private List<WritableHttpHeader> headers;
+
+		/**
+		 * Flags the {@link MockHttpResponse} as successful.
+		 * 
+		 * @param version
+		 *            {@link HttpVersion}.
+		 * @param status
+		 *            {@link HttpStatus}.
+		 * @param headers
+		 *            {@link List} of {@link HttpHeader} instances.
+		 */
+		private synchronized void setSuccessful(HttpVersion version, HttpStatus status,
+				List<WritableHttpHeader> headers) {
+			this.version = version;
+			this.status = status;
+			this.headers = headers;
+		}
+
+		/**
+		 * Flags the {@link MockHttpResponse} has failed.
+		 * 
+		 * @param failure
+		 *            Failure.
+		 */
+		private synchronized void setFailed(Throwable failure) {
+			this.failure = failure;
+		}
+
+		/**
+		 * Ensures successful.
+		 */
+		private void ensureSuccessful() {
+			if (this.failure instanceof RuntimeException) {
+				throw (RuntimeException) this.failure;
+			} else if (this.failure instanceof Error) {
+				throw (Error) this.failure;
+			} else {
+				throw new Error(this.failure);
+			}
+		}
+
+		/*
+		 * =============== MockHttpResponse =======================
+		 */
+
+		@Override
+		public synchronized HttpVersion getHttpVersion() {
+			this.ensureSuccessful();
+			return this.version;
+		}
+
+		@Override
+		public synchronized HttpStatus getHttpStatus() {
+			this.ensureSuccessful();
+			return this.status;
+		}
+
+		@Override
+		public synchronized List<WritableHttpHeader> getHttpHeaders() {
+			this.ensureSuccessful();
+			return this.headers;
+		}
+
+		@Override
+		public synchronized InputStream getHttpEntity() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public synchronized String getHttpEntity(Charset charset) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+	}
+
+}

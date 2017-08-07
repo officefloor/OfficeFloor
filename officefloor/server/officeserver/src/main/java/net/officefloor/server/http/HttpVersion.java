@@ -111,7 +111,7 @@ public class HttpVersion implements Serializable {
 	/**
 	 * UTF-8 content for this {@link HttpVersion}.
 	 */
-	private final byte[] utf8_content;
+	private final byte[] byteContent;
 
 	/**
 	 * Hash code.
@@ -143,7 +143,7 @@ public class HttpVersion implements Serializable {
 	 */
 	HttpVersion(String name, HttpVersionEnum httpMethodEnum) {
 		this.name = name;
-		this.utf8_content = name.getBytes(HttpResponse.UTF8_CHARSET);
+		this.byteContent = name.getBytes(ServerHttpConnection.HTTP_CHARSET);
 		this.hashCode = (this.name == null ? "".hashCode() : this.name.hashCode());
 		this.httpVersionEnum = httpMethodEnum;
 	}
@@ -195,7 +195,7 @@ public class HttpVersion implements Serializable {
 	 * @return Bytes to write this {@link HttpVersion}.
 	 */
 	byte[] getBytes() {
-		return this.utf8_content;
+		return this.byteContent;
 	}
 
 	/*

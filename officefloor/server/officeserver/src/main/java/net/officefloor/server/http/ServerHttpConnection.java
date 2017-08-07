@@ -19,6 +19,7 @@ package net.officefloor.server.http;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.charset.Charset;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -28,6 +29,16 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * @author Daniel Sagenschneider
  */
 public interface ServerHttpConnection {
+
+	/**
+	 * HTTP {@link Charset}.
+	 */
+	static Charset HTTP_CHARSET = Charset.forName("US-ASCII");
+
+	/**
+	 * HTTP entity default {@link Charset}.
+	 */
+	static Charset DEFAULT_HTTP_ENTITY_CHARSET = Charset.forName("UTF-8");
 
 	/**
 	 * Obtains the {@link HttpRequest} for this {@link ServerHttpConnection}.

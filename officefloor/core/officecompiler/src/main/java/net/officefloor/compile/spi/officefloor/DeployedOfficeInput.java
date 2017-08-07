@@ -21,6 +21,7 @@ import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionSer
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
@@ -82,8 +83,12 @@ public interface DeployedOfficeInput {
 	 * 
 	 * @param objectType
 	 *            Type of object provided to the {@link ExternalServiceInput}.
+	 * @param managedObjectType
+	 *            Type of the {@link ManagedObject} to the
+	 *            {@link ExternalServiceInput}.
 	 * @return {@link ExternalServiceInput}.
 	 */
-	<O> ExternalServiceInput<O> addExternalServiceInput(Class<O> objectType);
+	<O, M extends ManagedObject> ExternalServiceInput<O, M> addExternalServiceInput(Class<O> objectType,
+			Class<M> managedObjectType);
 
 }

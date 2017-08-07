@@ -103,9 +103,9 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 			}
 		});
 		this.recordReturn(this.connection, this.connection.getHttpResponse(), this.httpResponse);
-		this.recordReturn(this.httpResponse, this.httpResponse.getHeaders(), new HttpHeader[0]);
+		this.recordReturn(this.httpResponse, this.httpResponse.getHttpHeaders(), new HttpHeader[0]);
 		this.recordReturn(this.httpResponse,
-				this.httpResponse.addHeader("set-cookie",
+				this.httpResponse.getHttpHeaders().addHeader("set-cookie",
 						new HttpCookie("JSESSIONID", "SESSION_ID", 2000, null, "/").toHttpResponseHeaderValue()),
 				this.createMock(HttpHeader.class));
 		this.store.createHttpSession(null);
@@ -152,9 +152,9 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 			}
 		});
 		this.recordReturn(this.connection, this.connection.getHttpResponse(), this.httpResponse);
-		this.recordReturn(this.httpResponse, this.httpResponse.getHeaders(), new HttpHeader[0]);
+		this.recordReturn(this.httpResponse, this.httpResponse.getHttpHeaders(), new HttpHeader[0]);
 		this.recordReturn(this.httpResponse,
-				this.httpResponse.addHeader("set-cookie",
+				this.httpResponse.getHttpHeaders().addHeader("set-cookie",
 						new HttpCookie("JSESSIONID", "SESSION_ID", 2000, null, "/").toHttpResponseHeaderValue()),
 				this.createMock(HttpHeader.class));
 		this.store.createHttpSession(null);

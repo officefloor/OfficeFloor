@@ -33,6 +33,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpResponseHeaders;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.UsAsciiUtil;
@@ -169,7 +170,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 	 */
 	public void testNullHeaderValue() throws IOException {
 		HttpResponse response = this.createHttpResponse();
-		response.addHeader("null", null);
+		response.getHttpHeaders().addHeader("null", null);
 		response.send();
 		this.assertWireContent("HTTP/1.1 204 No Content\nServer: TEST\nDate: [Mock Time]\nContent-Length: 0\nnull: ",
 				null, null);
@@ -203,7 +204,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 	 */
 	private void doAddManagedHeaderTest(HttpResponse response, String headerName) {
 		try {
-			response.addHeader(headerName, "Should cause exception");
+			response.getHttpHeaders().addHeader(headerName, "Should cause exception");
 			fail("Should not be successful in setting header " + headerName);
 		} catch (IllegalArgumentException ex) {
 			assertEquals("Incorrect cause",
@@ -219,37 +220,32 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 
 		// Create the response
 		HttpResponse response = this.createHttpResponse();
+		HttpResponseHeaders headers = response.getHttpHeaders();
 
 		// Ensure can add header
-		HttpHeader headerOne = response.addHeader("test", "one");
+		HttpHeader headerOne = headers.addHeader("test", "one");
 		assertHttpHeader("test", "one", headerOne);
 
 		// Add another header
-		HttpHeader headerTwo = response.addHeader("test", "two");
+		HttpHeader headerTwo = headers.addHeader("test", "two");
 		assertHttpHeader("test", "two", headerTwo);
 
 		// Ensure get first header
-		HttpHeader firstHeader = response.getHeader("test");
+		HttpHeader firstHeader = headers.getHeader("test");
 		assertHttpHeader("test", "one", firstHeader);
 
-		// Ensure listing of headers returned is correct
-		HttpHeader[] headers = response.getHeaders();
-		assertEquals("Incorrect number of headers", 2, headers.length);
-		assertHttpHeader("test", "one", headers[0]);
-		assertHttpHeader("test", "two", headers[1]);
-
 		// Remove header one
-		response.removeHeader(headerOne);
+		headers.removeHeader(headerOne);
 
 		// Ensure find new first header
-		HttpHeader newFirstHeader = response.getHeader("test");
+		HttpHeader newFirstHeader = headers.getHeader("test");
 		assertHttpHeader("test", "two", newFirstHeader);
 
 		// Add further headers by name and remove ensuring no headers
-		response.addHeader("test", "three");
-		response.addHeader("test", "four");
-		response.removeHeaders("test");
-		assertNull("Should be no headers by name on removing", response.getHeader("test"));
+		headers.addHeader("test", "three");
+		headers.addHeader("test", "four");
+		headers.removeHeaders("test");
+		assertNull("Should be no headers by name on removing", headers.getHeader("test"));
 	}
 
 	/**
@@ -613,7 +609,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		HttpResponse response = this.createHttpResponse();
 
 		// Provide details (to be reset)
-		response.addHeader("RESET", "ME");
+		response.getHttpHeaders().addHeader("RESET", "ME");
 		ServerWriter writer = response.getEntityWriter();
 		writer.write("TEST");
 		writer.flush();

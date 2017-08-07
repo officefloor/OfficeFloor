@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.server.http.impl;
+package net.officefloor.server.stream.impl;
 
 /**
  * Sequence of <code>byte</code> values.

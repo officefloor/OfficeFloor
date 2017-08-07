@@ -382,7 +382,7 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 
 			// Find the corresponding actual header
 			HttpHeader actualHeader = null;
-			FOUND: for (HttpHeader header : actualHeaders) {
+			FOUND: for (HttpHeader header : actualHeadersList) {
 				if (expectedHeader.getName().equals(header.getName())) {
 					actualHeader = header;
 					break FOUND;

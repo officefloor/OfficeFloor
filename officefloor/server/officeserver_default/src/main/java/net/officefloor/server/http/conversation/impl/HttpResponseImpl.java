@@ -31,6 +31,7 @@ import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpResponseHeaders;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.parse.HttpRequestParseException;
@@ -468,6 +469,12 @@ public class HttpResponseImpl implements HttpResponse {
 			return this.status;
 		}
 	}
+	
+	@Override
+	public HttpResponseHeaders getHttpHeaders() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	@Override
 	public void reset() throws IOException {
@@ -479,6 +486,7 @@ public class HttpResponseImpl implements HttpResponse {
 		}
 	}
 
+/*
 	@Override
 	public HttpHeader addHeader(String name, String value) {
 
@@ -555,6 +563,7 @@ public class HttpResponseImpl implements HttpResponse {
 			}
 		}
 	}
+*/
 
 	@Override
 	public ServerOutputStream getEntity() throws IOException {

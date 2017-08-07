@@ -45,7 +45,14 @@ import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
+import net.officefloor.frame.api.managedobject.AsynchronousContext;
+import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.ProcessAwareContext;
+import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
@@ -264,10 +271,12 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	}
 
 	@Override
-	public <O> ExternalServiceInput<O> addExternalServiceInput(Class<O> objectType) {
+	public <O, M extends ManagedObject> ExternalServiceInput<O, M> addExternalServiceInput(Class<O> objectType,
+			Class<M> managedObjectType) {
 
 		// Create the external service input
-		ExternalServiceInputManagedObjectSource<O> input = new ExternalServiceInputManagedObjectSource<>(objectType);
+		ExternalServiceInputManagedObjectSource<O, M> input = new ExternalServiceInputManagedObjectSource<>(objectType,
+				managedObjectType);
 
 		// Add to OfficeFloor (to make available for auto-wiring)
 		OfficeNode office = this.section.getOfficeNode();
@@ -347,13 +356,18 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	 * @param <O>
 	 *            {@link ExternalServiceInput} object type.
 	 */
-	private static class ExternalServiceInputManagedObjectSource<O> extends AbstractManagedObjectSource<None, Flows>
-			implements ExternalServiceInput<O> {
+	private static class ExternalServiceInputManagedObjectSource<O, M extends ManagedObject>
+			extends AbstractManagedObjectSource<None, Flows> implements ExternalServiceInput<O, M> {
 
 		/**
 		 * {@link ExternalServiceInput} object type.
 		 */
-		private Class<O> objectType;
+		private final Class<O> objectType;
+
+		/**
+		 * {@link ManagedObject} type.
+		 */
+		private final Class<M> managedObjectType;
 
 		/**
 		 * {@link ManagedObjectExecuteContext}.
@@ -365,9 +379,12 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		 * 
 		 * @param objectType
 		 *            {@link ExternalServiceInput} object type.
+		 * @param managedObjectType
+		 *            {@link ManagedObject} type.
 		 */
-		private ExternalServiceInputManagedObjectSource(Class<O> objectType) {
+		private ExternalServiceInputManagedObjectSource(Class<O> objectType, Class<M> managedObjectType) {
 			this.objectType = objectType;
+			this.managedObjectType = managedObjectType;
 		}
 
 		/*
@@ -375,8 +392,8 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		 */
 
 		@Override
-		public void service(O object, FlowCallback callback) {
-			this.context.invokeProcess(Flows.SERVICE, null, new ExternalServiceManagedObject<O>(object), 0, callback);
+		public void service(M managedObject, FlowCallback callback) {
+			this.context.invokeProcess(Flows.SERVICE, null, managedObject, 0, callback);
 		}
 
 		/*
@@ -390,7 +407,7 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		@Override
 		protected void loadMetaData(MetaDataContext<None, Flows> context) throws Exception {
 			context.setObjectClass(this.objectType);
-			context.setManagedObjectClass(ExternalServiceManagedObject.class);
+			context.setManagedObjectClass(this.managedObjectType);
 			context.addFlow(Flows.SERVICE, null);
 		}
 
@@ -402,32 +419,16 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		@Override
 		protected ManagedObject getManagedObject() throws Throwable {
 			// Not externally servicing, so no object
-			return new ExternalServiceManagedObject<O>(null);
+			return new NullManagedObject();
 		}
 	}
 
 	/**
-	 * {@link ManagedObject} containing the {@link ExternalServiceInput} object.
-	 * 
-	 * @param <O>
-	 *            {@link ExternalServiceInput} object type.
+	 * {@link ManagedObject} providing <code>null</code> value. Must implement
+	 * all {@link ManagedObject} interfaces to avoid {@link ClassCastException}.
 	 */
-	private static class ExternalServiceManagedObject<O> implements ManagedObject {
-
-		/**
-		 * {@link ExternalServiceInput} object.
-		 */
-		private final O object;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param object
-		 *            {@link ExternalServiceInput} object.
-		 */
-		private ExternalServiceManagedObject(O object) {
-			this.object = object;
-		}
+	private static class NullManagedObject implements ManagedObject, NameAwareManagedObject,
+			CoordinatingManagedObject<None>, AsynchronousManagedObject, ProcessAwareManagedObject {
 
 		/*
 		 * =================== ManagedObject ====================
@@ -435,8 +436,29 @@ public class SectionInputNodeImpl implements SectionInputNode {
 
 		@Override
 		public Object getObject() throws Throwable {
-			return this.object;
+			return null;
 		}
+
+		@Override
+		public void setBoundManagedObjectName(String boundManagedObjectName) {
+			// Ignored
+		}
+
+		@Override
+		public void setProcessAwareContext(ProcessAwareContext context) {
+			// Ignored
+		}
+
+		@Override
+		public void setAsynchronousContext(AsynchronousContext context) {
+			// Ignored
+		}
+
+		@Override
+		public void loadObjects(ObjectRegistry<None> registry) throws Throwable {
+			// Ignored
+		}
+
 	}
 
 }

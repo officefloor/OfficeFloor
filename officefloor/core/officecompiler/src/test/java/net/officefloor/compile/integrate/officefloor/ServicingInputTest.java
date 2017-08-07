@@ -31,6 +31,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
@@ -63,7 +64,7 @@ public class ServicingInputTest extends OfficeFrameTestCase {
 	/**
 	 * {@link ExternalServiceInput} obtained from {@link DeployedOfficeInput}.
 	 */
-	private ExternalServiceInput<ServiceInputObject> externalServiceInput;
+	private ExternalServiceInput<ServiceInputObject, ServiceInputObject> externalServiceInput;
 
 	/**
 	 * {@link ExternalManagedObjectSource}.
@@ -107,7 +108,7 @@ public class ServicingInputTest extends OfficeFrameTestCase {
 
 			// External service input
 			this.externalServiceInput = office.getDeployedOfficeInput("SECTION", "externalServiceInput")
-					.addExternalServiceInput(ServiceInputObject.class);
+					.addExternalServiceInput(ServiceInputObject.class, ServiceInputObject.class);
 
 			// Internally invoke from managed object
 			OfficeFloorManagedObjectSource internalMos = deployer.addManagedObjectSource("MOS_INTERNAL",
@@ -170,7 +171,9 @@ public class ServicingInputTest extends OfficeFrameTestCase {
 		ServiceInputObject serviceObject = new ServiceInputObject();
 		this.externalServiceInput.service(serviceObject, null);
 		assertEquals("Incorrect value", "EXTERNAL_SERVICE_INPUT", value);
-		assertEquals("Incorrect service input servicing", "EXTERNAL_SERVICE_INPUT", serviceObject.value);
+		assertEquals("Incorrect service input servicing",
+				"ExternalServiceInput_" + ServiceInputObject.class.getName() + ":EXTERNAL_SERVICE_INPUT",
+				serviceObject.value);
 	}
 
 	/**
@@ -243,14 +246,27 @@ public class ServicingInputTest extends OfficeFrameTestCase {
 
 		public void service(@Parameter String parameter, ServiceInputObject input) {
 			if (input != null) {
-				input.value = parameter;
+				input.value = input.name + ":" + parameter;
 			}
 			value = parameter;
 		}
 	}
 
-	private static class ServiceInputObject {
+	private static class ServiceInputObject implements NameAwareManagedObject {
+
+		private String name;
+
 		private String value = null;
+
+		@Override
+		public void setBoundManagedObjectName(String boundManagedObjectName) {
+			this.name = boundManagedObjectName;
+		}
+
+		@Override
+		public Object getObject() throws Throwable {
+			return this;
+		}
 	}
 
 	@FlowInterface
