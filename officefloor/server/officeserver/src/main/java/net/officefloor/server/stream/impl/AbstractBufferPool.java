@@ -20,7 +20,7 @@ package net.officefloor.server.stream.impl;
 import java.nio.ByteBuffer;
 
 import net.officefloor.server.stream.BufferPool;
-import net.officefloor.server.stream.PooledBuffer;
+import net.officefloor.server.stream.StreamBuffer;
 
 /**
  * Abstract {@link BufferPool}.
@@ -34,14 +34,14 @@ public abstract class AbstractBufferPool<B> implements BufferPool<B> {
 	 */
 
 	@Override
-	public PooledBuffer<B> getReadOnlyBuffer(ByteBuffer buffer) {
-		return new ReadOnlyPooledBuffer(buffer);
+	public StreamBuffer<B> getUnpooledStreamBuffer(ByteBuffer buffer) {
+		return new UnpooledStreamBuffer(buffer);
 	}
 
 	/**
-	 * Read only {@link PooledBuffer}.
+	 * Unpooled {@link StreamBuffer}.
 	 */
-	protected class ReadOnlyPooledBuffer implements PooledBuffer<B> {
+	protected class UnpooledStreamBuffer implements StreamBuffer<B> {
 
 		/**
 		 * {@link ByteBuffer}.
@@ -54,7 +54,7 @@ public abstract class AbstractBufferPool<B> implements BufferPool<B> {
 		 * @param buffer
 		 *            Read-only {@link ByteBuffer}.
 		 */
-		private ReadOnlyPooledBuffer(ByteBuffer buffer) {
+		private UnpooledStreamBuffer(ByteBuffer buffer) {
 			this.buffer = buffer;
 		}
 
@@ -63,28 +63,28 @@ public abstract class AbstractBufferPool<B> implements BufferPool<B> {
 		 */
 
 		@Override
-		public boolean isReadOnly() {
-			return true;
+		public boolean isPooled() {
+			return false;
 		}
 
 		@Override
-		public B getBuffer() {
-			throw new IllegalStateException(this.getClass().getSimpleName() + " is read-only");
+		public B getPooledBuffer() {
+			throw new IllegalStateException(this.getClass().getSimpleName() + " is unpooled");
 		}
 
 		@Override
-		public ByteBuffer getReadOnlyByteBuffer() {
+		public ByteBuffer getUnpooledByteBuffer() {
 			return this.buffer;
 		}
 
 		@Override
 		public boolean write(byte datum) {
-			throw new IllegalStateException(this.getClass().getSimpleName() + " is read-only");
+			throw new IllegalStateException(this.getClass().getSimpleName() + " is unpooled");
 		}
 
 		@Override
 		public int write(byte[] data, int offset, int length) {
-			throw new IllegalStateException(this.getClass().getSimpleName() + " is read-only");
+			throw new IllegalStateException(this.getClass().getSimpleName() + " is unpooled");
 		}
 
 		@Override
@@ -94,22 +94,22 @@ public abstract class AbstractBufferPool<B> implements BufferPool<B> {
 	}
 
 	/**
-	 * Writable {@link PooledBuffer}.
+	 * Pooled {@link StreamBuffer}.
 	 */
-	protected abstract class AbstractWritablePooledBuffer implements PooledBuffer<B> {
+	protected abstract class AbstractPooledStreamBuffer implements StreamBuffer<B> {
 
 		/*
 		 * =================== PooledBuffer ======================
 		 */
 
 		@Override
-		public boolean isReadOnly() {
-			return false;
+		public boolean isPooled() {
+			return true;
 		}
 
 		@Override
-		public ByteBuffer getReadOnlyByteBuffer() {
-			throw new IllegalStateException(this.getClass().getSimpleName() + " is writable");
+		public ByteBuffer getUnpooledByteBuffer() {
+			throw new IllegalStateException(this.getClass().getSimpleName() + " is pooled");
 		}
 	}
 

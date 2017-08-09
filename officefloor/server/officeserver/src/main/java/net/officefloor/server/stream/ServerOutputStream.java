@@ -35,12 +35,11 @@ public abstract class ServerOutputStream extends OutputStream {
 	 * <p>
 	 * This is to enable efficient I/O of writing content (typically cached).
 	 * 
-	 * @param cachedBuffer
-	 *            Cached {@link ByteBuffer} that should never change its
-	 *            content.
+	 * @param buffer
+	 *            {@link ByteBuffer} that should never change its content.
 	 * @throws IOException
 	 *             If fails to write the {@link ByteBuffer}.
 	 */
-	public abstract void write(ByteBuffer cachedBuffer) throws IOException;
+	public abstract void write(ByteBuffer buffer) throws IOException;
 
 }

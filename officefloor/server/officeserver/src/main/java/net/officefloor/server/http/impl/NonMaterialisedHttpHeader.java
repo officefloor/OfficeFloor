@@ -27,13 +27,11 @@ import net.officefloor.server.http.HttpHeader;
 public interface NonMaterialisedHttpHeader {
 
 	/**
-	 * Indicates if the {@link HttpHeader} name matches.
+	 * Obtains the {@link HttpHeader} name.
 	 * 
-	 * @param name
-	 *            Name of the {@link HttpHeader}.
-	 * @return <code>true</code> if name matches.
+	 * @return {@link HttpHeader} name.
 	 */
-	boolean isNameEqual(CharSequence name);
+	CharSequence getName();
 
 	/**
 	 * Materialises the {@link HttpHeader}.

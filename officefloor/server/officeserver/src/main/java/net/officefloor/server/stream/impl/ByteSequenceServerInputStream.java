@@ -63,7 +63,12 @@ public class ByteSequenceServerInputStream extends ServerInputStream {
 
 	@Override
 	public int read() throws IOException {
-		return this.byteSequence.byteAt(this.position++);
+		if (this.position >= this.byteSequence.length()) {
+			return -1; // end of stream
+		} else {
+			// Return next byte
+			return this.byteSequence.byteAt(this.position++);
+		}
 	}
 
 	@Override

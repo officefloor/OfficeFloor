@@ -20,7 +20,7 @@ package net.officefloor.server.http.impl;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
-import net.officefloor.server.stream.PooledBuffer;
+import net.officefloor.server.stream.StreamBuffer;
 
 /**
  * Writes the {@link HttpResponse}.
@@ -42,10 +42,10 @@ public interface HttpResponseWriter<B> {
 	 *            {@link WritableHttpHeader} instances for the
 	 *            {@link HttpResponse}.
 	 * @param responseHttpEntity
-	 *            {@link PooledBuffer} instances containing the
+	 *            {@link StreamBuffer} instances containing the
 	 *            {@link HttpResponse} entity.
 	 */
 	void writeHttpResponse(HttpVersion version, HttpStatus status, Iterable<WritableHttpHeader> responseHttpheaders,
-			Iterable<PooledBuffer<B>> responseHttpEntity);
+			Iterable<StreamBuffer<B>> responseHttpEntity);
 
 }

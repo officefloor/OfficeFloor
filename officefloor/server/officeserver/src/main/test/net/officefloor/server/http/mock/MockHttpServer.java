@@ -18,8 +18,11 @@
 package net.officefloor.server.http.mock;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -29,6 +32,7 @@ import java.util.function.Supplier;
 
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
@@ -128,8 +132,11 @@ public class MockHttpServer implements HttpServerImplementation {
 				headers.add(header);
 			}
 
+			// Create the input stream to the response HTTP entity
+			InputStream responseEntityInputStream = MockBufferPool.createInputStream(responseHttpEntity);
+
 			// Load response successful
-			response.setSuccessful(requestVersion, status, headers);
+			response.setSuccessful(requestVersion, status, headers, responseEntityInputStream);
 		};
 
 		// Create the server HTTP connection
@@ -158,7 +165,15 @@ public class MockHttpServer implements HttpServerImplementation {
 	 * @eturn {@link MockHttpResponse}.
 	 */
 	public MockHttpResponse send(MockHttpRequestBuilder request) {
-		return null;
+
+		// Create the synchronous callback
+		SynchronousMockHttpRequestCallback callback = new SynchronousMockHttpRequestCallback();
+
+		// Undertake the request
+		this.send(request, callback);
+
+		// Block waiting for response
+		return callback.waitForResponse(1000);
 	}
 
 	/*
@@ -276,11 +291,6 @@ public class MockHttpServer implements HttpServerImplementation {
 		private final String name;
 
 		/**
-		 * Bytes for non-materialised name.
-		 */
-		private final byte[] nameBytes;
-
-		/**
 		 * {@link HttpHeader} value.
 		 */
 		private final String value;
@@ -296,29 +306,11 @@ public class MockHttpServer implements HttpServerImplementation {
 		public MockNonMaterialisedHttpHeader(String name, String value) {
 			this.name = name;
 			this.value = value;
-
-			// Obtain the bytes for the name
-			this.nameBytes = this.name.getBytes(ServerHttpConnection.HTTP_CHARSET);
 		}
 
 		/*
 		 * ================= NonMaterialisedHttpHeader ========================
 		 */
-
-		@Override
-		public boolean isNameEqual(CharSequence name) {
-
-			// Check equal based on HTTP charset
-			if (this.nameBytes.length == name.length()) {
-				for (int i = 0; i < this.nameBytes.length; i++) {
-					if (this.nameBytes[i] != name.charAt(i)) {
-						return false; // not same value
-					}
-				}
-				return true; // equal
-			}
-			return false; // not equal as different length
-		}
 
 		@Override
 		public HttpHeader materialiseHttpHeader() {
@@ -366,6 +358,11 @@ public class MockHttpServer implements HttpServerImplementation {
 		private List<WritableHttpHeader> headers;
 
 		/**
+		 * HTTP entity {@link InputStream}.
+		 */
+		private InputStream entityInputStream;
+
+		/**
 		 * Flags the {@link MockHttpResponse} as successful.
 		 * 
 		 * @param version
@@ -374,12 +371,15 @@ public class MockHttpServer implements HttpServerImplementation {
 		 *            {@link HttpStatus}.
 		 * @param headers
 		 *            {@link List} of {@link HttpHeader} instances.
+		 * @param entityInputStream
+		 *            HTTP entity {@link InputStream}.
 		 */
 		private synchronized void setSuccessful(HttpVersion version, HttpStatus status,
-				List<WritableHttpHeader> headers) {
+				List<WritableHttpHeader> headers, InputStream entityInputStream) {
 			this.version = version;
 			this.status = status;
 			this.headers = headers;
+			this.entityInputStream = entityInputStream;
 		}
 
 		/**
@@ -429,14 +429,82 @@ public class MockHttpServer implements HttpServerImplementation {
 
 		@Override
 		public synchronized InputStream getHttpEntity() {
-			// TODO Auto-generated method stub
-			return null;
+			return this.entityInputStream;
 		}
 
 		@Override
 		public synchronized String getHttpEntity(Charset charset) {
-			// TODO Auto-generated method stub
-			return null;
+
+			// Read in the contents
+			StringWriter writer = new StringWriter();
+			try {
+				InputStreamReader reader = new InputStreamReader(this.entityInputStream, charset);
+				for (int character = reader.read(); character != -1; character = reader.read()) {
+					writer.write(character);
+				}
+				writer.flush();
+			} catch (IOException ex) {
+				throw OfficeFrameTestCase.fail(ex);
+			}
+
+			// Return the entity as text
+			return writer.toString();
+		}
+	}
+
+	/**
+	 * {@link MockHttpRequestCallback} to enable synchronous invocation.
+	 */
+	private static class SynchronousMockHttpRequestCallback implements MockHttpRequestCallback {
+
+		/**
+		 * {@link MockHttpResponse}.
+		 */
+		private MockHttpResponse response = null;
+
+		/**
+		 * Wait for the {@link MockHttpResponse}.
+		 * 
+		 * @param maxWaitTimeInMilliseconds
+		 *            Max wait time in milliseconds.
+		 * @return {@link MockHttpResponse}.
+		 */
+		private synchronized MockHttpResponse waitForResponse(int maxWaitTimeInMilliseconds) {
+
+			// Wait for the response
+			try {
+				long startTime = System.currentTimeMillis();
+				while (this.response == null) {
+
+					// Determine if timed out
+					long runTimeInSeconds = (System.currentTimeMillis() - startTime);
+					if (runTimeInSeconds > maxWaitTimeInMilliseconds) {
+						throw new Error("Timed out waiting for " + MockHttpResponse.class.getSimpleName());
+					}
+
+					// Wait some time for response
+					this.wait(10);
+				}
+			} catch (InterruptedException ex) {
+				throw new Error(ex);
+			}
+
+			// Return the response
+			return this.response;
+		}
+
+		/*
+		 * ==================== MockHttpRequestCallback =======================
+		 */
+
+		@Override
+		public synchronized void response(MockHttpResponse response) {
+
+			// Specify response
+			this.response = response;
+
+			// Notify have response
+			this.notify();
 		}
 	}
 

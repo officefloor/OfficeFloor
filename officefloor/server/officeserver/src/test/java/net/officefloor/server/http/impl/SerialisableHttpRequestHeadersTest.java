@@ -148,8 +148,9 @@ public class SerialisableHttpRequestHeadersTest extends OfficeFrameTestCase {
 		SerialisableHttpRequestHeaders copy = new SerialisableHttpRequestHeaders(this.headers);
 		int i = 0;
 		for (HttpHeader header : copy) {
-			assertHttpHeader(this.list.get(i++), header);
+			assertHttpHeader(this.list.get(i), header);
 			assertNotSame("Should be copy of HTTP header", this.headers.headerAt(i), header);
+			i++;
 		}
 		assertEquals("Incorrect number of headers", this.list.size(), i);
 	}

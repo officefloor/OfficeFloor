@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequestHeaders;
@@ -89,26 +90,84 @@ public class SerialisableHttpRequestHeaders implements HttpRequestHeaders, Seria
 
 	@Override
 	public HttpHeader getHeader(CharSequence name) {
-		// TODO Auto-generated method stub
+		final String nameString = name.toString();
+
+		// Search for header by name
+		for (int i = 0; i < this.headers.length; i++) {
+			HttpHeader header = this.headers[i];
+			if (header.getName().equalsIgnoreCase(nameString)) {
+				return header;
+			}
+		}
+
+		// As here, no header by the name
 		return null;
 	}
 
 	@Override
 	public Iterable<HttpHeader> getHeaders(CharSequence name) {
-		// TODO Auto-generated method stub
-		return null;
+		final String nameString = name.toString();
+		return new Iterable<HttpHeader>() {
+			@Override
+			public Iterator<HttpHeader> iterator() {
+				return new Iterator<HttpHeader>() {
+
+					private int index = -1; // index of next
+
+					@Override
+					public boolean hasNext() {
+
+						// Easy access to headers
+						HttpHeader[] headers = SerialisableHttpRequestHeaders.this.headers;
+
+						// Determine if match on name for next
+						for (int i = (this.index + 1); i < headers.length; i++) {
+							HttpHeader header = headers[i];
+							if (header.getName().equalsIgnoreCase(nameString)) {
+								return true; // another header by name
+							}
+						}
+
+						// As here, no further header by name
+						return false;
+					}
+
+					@Override
+					public HttpHeader next() {
+
+						// Easy access to headers
+						HttpHeader[] headers = SerialisableHttpRequestHeaders.this.headers;
+
+						// Obtain next header by name
+						this.index++;
+						while (this.index < headers.length) {
+							HttpHeader header = headers[this.index];
+							
+							// Determine if the header
+							if (header.getName().equalsIgnoreCase(nameString)) {
+								return header; // next matching header
+							}
+							
+							// Try next header
+							this.index++;
+						}
+
+						// As here, no next header
+						throw new NoSuchElementException();
+					}
+				};
+			}
+		};
 	}
 
 	@Override
 	public HttpHeader headerAt(int index) {
-		// TODO Auto-generated method stub
-		return null;
+		return this.headers[index];
 	}
 
 	@Override
 	public int length() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.headers.length;
 	}
 
 }

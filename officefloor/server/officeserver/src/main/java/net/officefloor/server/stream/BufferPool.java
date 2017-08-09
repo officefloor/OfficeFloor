@@ -29,20 +29,24 @@ import java.nio.ByteBuffer;
 public interface BufferPool<B> {
 
 	/**
-	 * Obtains a {@link PooledBuffer}.
+	 * Obtains a {@link StreamBuffer}.
 	 * 
-	 * @return {@link PooledBuffer}.
+	 * @return {@link StreamBuffer}.
 	 */
-	PooledBuffer<B> getPooledBuffer();
+	StreamBuffer<B> getPooledStreamBuffer();
 
 	/**
-	 * Obtains an {@link PooledBuffer} that is not pooled. This is for
-	 * {@link ByteBuffer} instances that are read only to avoid copying.
+	 * <p>
+	 * Obtains an {@link StreamBuffer} that is not pooled. This is for
+	 * {@link ByteBuffer} instances that are managed outside the BufferPool.
+	 * <p>
+	 * Typical use is to create {@link StreamBuffer} for some read-only cached
+	 * content within a {@link ByteBuffer}.
 	 * 
 	 * @param buffer
 	 *            {@link ByteBuffer}.
-	 * @return {@link PooledBuffer} for the read only {@link ByteBuffer}.
+	 * @return {@link StreamBuffer} for the unpooled {@link ByteBuffer}.
 	 */
-	PooledBuffer<B> getReadOnlyBuffer(ByteBuffer buffer);
+	StreamBuffer<B> getUnpooledStreamBuffer(ByteBuffer buffer);
 
 }

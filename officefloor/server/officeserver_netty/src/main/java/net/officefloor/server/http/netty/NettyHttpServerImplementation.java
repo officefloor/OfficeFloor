@@ -68,7 +68,7 @@ import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.impl.SerialisableHttpHeader;
 import net.officefloor.server.http.impl.ServerHttpConnectionImpl;
 import net.officefloor.server.http.impl.WritableHttpHeader;
-import net.officefloor.server.stream.PooledBuffer;
+import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.impl.ByteSequence;
 
 /**
@@ -253,20 +253,11 @@ public class NettyHttpServerImplementation implements HttpServerImplementation, 
 						@Override
 						public NonMaterialisedHttpHeader next() {
 							Entry<CharSequence, CharSequence> entry = iterator.next();
-							CharSequence entryName = entry.getKey();
 							return new NonMaterialisedHttpHeader() {
 
 								@Override
-								public boolean isNameEqual(CharSequence name) {
-									if (entryName.length() == name.length()) {
-										for (int i = 0; i < name.length(); i++) {
-											if (entryName.charAt(i) != name.charAt(i)) {
-												return false; // different
-											}
-										}
-										return true; // as here, equal
-									}
-									return false; // not equal on length
+								public CharSequence getName() {
+									return entry.getKey();
 								}
 
 								@Override
@@ -324,11 +315,11 @@ public class NettyHttpServerImplementation implements HttpServerImplementation, 
 
 				// Write the response
 				ByteBuf responseBuffer = response.content();
-				for (PooledBuffer<ByteBuf> pooledBuffer : responseHttpEntity) {
-					if (pooledBuffer.isReadOnly()) {
-						responseBuffer.writeBytes(pooledBuffer.getReadOnlyByteBuffer());
+				for (StreamBuffer<ByteBuf> pooledBuffer : responseHttpEntity) {
+					if (pooledBuffer.isPooled()) {
+						responseBuffer.writeBytes(pooledBuffer.getUnpooledByteBuffer());
 					} else {
-						responseBuffer.writeBytes(pooledBuffer.getBuffer());
+						responseBuffer.writeBytes(pooledBuffer.getPooledBuffer());
 					}
 				}
 

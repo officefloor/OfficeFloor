@@ -20,34 +20,34 @@ package net.officefloor.server.stream;
 import java.nio.ByteBuffer;
 
 /**
- * Pooled buffer.
+ * Buffer that is part of a stream.
  * 
  * @param <B>
  *            Type of buffer.
  * @author Daniel Sagenschneider
  */
-public interface PooledBuffer<B> {
+public interface StreamBuffer<B> {
 
 	/**
 	 * Indicates if pooled.
 	 * 
 	 * @return <code>true</code> if pooled.
 	 */
-	boolean isReadOnly();
+	boolean isPooled();
 
 	/**
-	 * Obtains the buffer.
+	 * Obtains the pooled buffer.
 	 * 
 	 * @return Buffer. Will be <code>null</code> if read-only.
 	 */
-	B getBuffer();
+	B getPooledBuffer();
 
 	/**
 	 * Obtains the read-only {@link ByteBuffer}.
 	 * 
 	 * @return {@link ByteBuffer}. Will be <code>null</code> if read-only.
 	 */
-	ByteBuffer getReadOnlyByteBuffer();
+	ByteBuffer getUnpooledByteBuffer();
 
 	/**
 	 * Writes a byte to the buffer.
@@ -84,7 +84,7 @@ public interface PooledBuffer<B> {
 	}
 
 	/**
-	 * Releases this {@link PooledBuffer} for re-use.
+	 * Releases this {@link StreamBuffer} for re-use.
 	 */
 	void release();
 

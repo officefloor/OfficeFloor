@@ -22,14 +22,14 @@ import java.nio.ByteBuffer;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.FullHttpResponse;
 import net.officefloor.server.stream.BufferPool;
-import net.officefloor.server.stream.PooledBuffer;
+import net.officefloor.server.stream.StreamBuffer;
 
 /**
  * Netty {@link BufferPool}.
  * 
  * @author Daniel Sagenschneider
  */
-public class NettyBufferPool implements BufferPool<ByteBuf>, PooledBuffer<ByteBuf> {
+public class NettyBufferPool implements BufferPool<ByteBuf>, StreamBuffer<ByteBuf> {
 
 	/**
 	 * {@link FullHttpResponse}.
@@ -51,12 +51,12 @@ public class NettyBufferPool implements BufferPool<ByteBuf>, PooledBuffer<ByteBu
 	 */
 
 	@Override
-	public PooledBuffer<ByteBuf> getPooledBuffer() {
+	public StreamBuffer<ByteBuf> getPooledStreamBuffer() {
 		return this;
 	}
 
 	@Override
-	public PooledBuffer<ByteBuf> getReadOnlyBuffer(ByteBuffer buffer) {
+	public StreamBuffer<ByteBuf> getUnpooledStreamBuffer(ByteBuffer buffer) {
 		this.response.content().writeBytes(buffer);
 		return this;
 	}
@@ -66,17 +66,17 @@ public class NettyBufferPool implements BufferPool<ByteBuf>, PooledBuffer<ByteBu
 	 */
 
 	@Override
-	public boolean isReadOnly() {
+	public boolean isPooled() {
 		return false;
 	}
 
 	@Override
-	public ByteBuf getBuffer() {
+	public ByteBuf getPooledBuffer() {
 		return this.response.content();
 	}
 
 	@Override
-	public ByteBuffer getReadOnlyByteBuffer() {
+	public ByteBuffer getUnpooledByteBuffer() {
 		throw new IllegalStateException(this.getClass().getSimpleName() + " is always writable");
 	}
 

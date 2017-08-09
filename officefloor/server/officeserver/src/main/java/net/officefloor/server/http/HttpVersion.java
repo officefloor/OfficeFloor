@@ -143,8 +143,13 @@ public class HttpVersion implements Serializable {
 	 */
 	HttpVersion(String name, HttpVersionEnum httpMethodEnum) {
 		this.name = name;
-		this.byteContent = name.getBytes(ServerHttpConnection.HTTP_CHARSET);
-		this.hashCode = (this.name == null ? "".hashCode() : this.name.hashCode());
+		if (name == null) {
+			this.byteContent = new byte[0];
+			this.hashCode = "".hashCode();
+		} else {
+			this.byteContent = name.getBytes(ServerHttpConnection.HTTP_CHARSET);
+			this.hashCode = name.hashCode();
+		}
 		this.httpVersionEnum = httpMethodEnum;
 	}
 

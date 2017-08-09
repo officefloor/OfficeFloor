@@ -217,8 +217,8 @@ public class MaterialisingHttpRequestHeadersTest extends OfficeFrameTestCase imp
 		}
 
 		@Override
-		public boolean isNameEqual(CharSequence name) {
-			return this.name.contentEquals(name);
+		public String getName() {
+			return this.name;
 		}
 
 		@Override
