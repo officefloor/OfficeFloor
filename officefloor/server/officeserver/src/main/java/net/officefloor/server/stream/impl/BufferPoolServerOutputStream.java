@@ -18,14 +18,21 @@
 package net.officefloor.server.stream.impl;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
+import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.server.stream.BufferPool;
-import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.ServerOutputStream;
+import net.officefloor.server.stream.ServerWriter;
+import net.officefloor.server.stream.StreamBuffer;
 
 /**
  * {@link ServerOutputStream} that writes to {@link StreamBuffer} instances from
@@ -56,6 +63,105 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 	private StreamBuffer<B> currentBuffer = null;
 
 	/**
+	 * Unsafe {@link OutputStream} to write content. This allows both the
+	 * {@link ServerOutputStream} and {@link ServerWriter} to provide coarse
+	 * grained locking.
+	 */
+	private final ServerOutputStream unsafeOutputStream = new ServerOutputStream() {
+
+		@Override
+		public void write(ByteBuffer buffer) throws IOException {
+
+			// Easy access to attributes
+			@SuppressWarnings("resource")
+			BufferPoolServerOutputStream<B> stream = BufferPoolServerOutputStream.this;
+
+			// Add the unpooled buffer
+			StreamBuffer<B> streamBuffer = stream.bufferPool.getUnpooledStreamBuffer(buffer);
+			stream.buffers.add(streamBuffer);
+
+			// Clear current buffer, so new buffer to continue writing
+			stream.currentBuffer = null;
+		}
+
+		@Override
+		public void write(int b) throws IOException {
+
+			// Easy access to attributes
+			@SuppressWarnings("resource")
+			BufferPoolServerOutputStream<B> stream = BufferPoolServerOutputStream.this;
+
+			// Ensure have current buffer
+			if (stream.currentBuffer == null) {
+				stream.currentBuffer = stream.bufferPool.getPooledStreamBuffer();
+				stream.buffers.add(stream.currentBuffer);
+			}
+
+			// Write the byte to the current buffer
+			boolean isWritten = stream.currentBuffer.write((byte) b);
+
+			// Determine if full and must write to another buffer
+			if (!isWritten) {
+				// Add another buffer and write the data
+				stream.currentBuffer = stream.bufferPool.getPooledStreamBuffer();
+				stream.buffers.add(stream.currentBuffer);
+				isWritten = stream.currentBuffer.write((byte) b);
+				if (!isWritten) {
+					// Should always be able to write a byte to a new buffer
+					throw new IOException("Failed to write byte " + String.valueOf(b) + " to new "
+							+ stream.currentBuffer.getClass().getName());
+				}
+			}
+		}
+
+		@Override
+		public void write(byte[] bytes, int off, int len) throws IOException {
+			// Easy access to attributes
+			@SuppressWarnings("resource")
+			BufferPoolServerOutputStream<B> stream = BufferPoolServerOutputStream.this;
+
+			// All mutation of values
+			int offset = off;
+			int remaining = len;
+
+			// Ensure have current buffer
+			if (stream.currentBuffer == null) {
+				stream.currentBuffer = stream.bufferPool.getPooledStreamBuffer();
+				stream.buffers.add(stream.currentBuffer);
+			}
+
+			// Keep writing to buffers until complete
+			do {
+
+				// Write the bytes to buffer
+				int bytesWritten = stream.currentBuffer.write(bytes, offset, remaining);
+
+				// Determine number of bytes remaining
+				remaining -= bytesWritten;
+
+				// Adjust for potential another write
+				if (remaining > 0) {
+					offset += bytesWritten;
+					stream.currentBuffer = stream.bufferPool.getPooledStreamBuffer();
+					stream.buffers.add(stream.currentBuffer);
+				}
+
+			} while (remaining > 0);
+		}
+
+		@Override
+		public void flush() throws IOException {
+			// Nothing to flush
+		}
+
+		@Override
+		public void close() throws IOException {
+			// TODO trigger sending response
+			throw new UnsupportedOperationException("TODO trigger sending response on OutputStream.close()");
+		}
+	};
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param bufferPool
@@ -69,6 +175,17 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 	}
 
 	/**
+	 * Obtains the {@link ServerWriter}.
+	 * 
+	 * @param charset
+	 *            {@link Charset} for writing out {@link String} data.
+	 * @return {@link ServerWriter}.
+	 */
+	public ServerWriter getServerWriter(Charset charset) {
+		return new BufferPoolServerWriter(charset);
+	}
+
+	/**
 	 * Obtains the {@link StreamBuffer} instances used by this
 	 * {@link ServerOutputStream}.
 	 * 
@@ -79,87 +196,186 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 		return this.context.run(() -> this.buffers);
 	}
 
+	/**
+	 * Function interface to define an operation with no return (void return).
+	 */
+	private static interface SafeVoidOperation<T extends Throwable> {
+
+		/**
+		 * Undertake operation.
+		 * 
+		 * @throws T
+		 *             Possible failure from operation.
+		 */
+		void run() throws T;
+	}
+
+	/**
+	 * Wraps execution to be {@link ProcessState} ({@link Thread}) safe.
+	 * 
+	 * @param operation
+	 *            {@link ProcessSafeOperation}.
+	 * @return Result of {@link ProcessSafeOperation}.
+	 * @throws T
+	 *             If {@link ProcessSafeOperation} fails.
+	 */
+	private <T extends Throwable> void safe(SafeVoidOperation<T> operation) throws T {
+		this.context.run(() -> {
+			operation.run();
+			return null; // void return
+		});
+	}
+
 	/*
 	 * ==================== ServerOutputStream ===================
 	 */
 
 	@Override
 	public void write(ByteBuffer buffer) throws IOException {
-
-		// Add the unpooled buffer
-		StreamBuffer<B> streamBuffer = this.bufferPool.getUnpooledStreamBuffer(buffer);
-		this.buffers.add(streamBuffer);
-
-		// Clear current buffer, so new buffer to continue writing
-		this.currentBuffer = null;
+		this.safe(() -> this.unsafeOutputStream.write(buffer));
 	}
 
 	@Override
 	public void write(int b) throws IOException {
-		this.context.run(() -> {
-
-			// Ensure have current buffer
-			if (this.currentBuffer == null) {
-				this.currentBuffer = this.bufferPool.getPooledStreamBuffer();
-				this.buffers.add(this.currentBuffer);
-			}
-
-			// Write the byte to the current buffer
-			boolean isWritten = this.currentBuffer.write((byte) b);
-
-			// Determine if full and must write to another buffer
-			if (!isWritten) {
-				// Add another buffer and write the data
-				this.currentBuffer = this.bufferPool.getPooledStreamBuffer();
-				this.buffers.add(this.currentBuffer);
-				isWritten = this.currentBuffer.write((byte) b);
-				if (!isWritten) {
-					// Should always be able to write a byte to a new buffer
-					throw new IOException("Failed to write byte " + String.valueOf(b) + " to new "
-							+ this.currentBuffer.getClass().getName());
-				}
-			}
-
-			// Void return
-			return null;
-		});
+		this.safe(() -> this.unsafeOutputStream.write(b));
 	}
 
 	@Override
-	public void write(byte[] bytes, int off, int len) throws IOException {
-		this.context.run(() -> {
+	public void write(byte[] b) throws IOException {
+		this.safe(() -> this.unsafeOutputStream.write(b));
+	}
 
-			// All mutation of values
-			int offset = off;
-			int remaining = len;
+	@Override
+	public void write(byte[] b, int off, int len) throws IOException {
+		this.safe(() -> this.unsafeOutputStream.write(b, off, len));
+	}
 
-			// Ensure have current buffer
-			if (this.currentBuffer == null) {
-				this.currentBuffer = this.bufferPool.getPooledStreamBuffer();
-				this.buffers.add(this.currentBuffer);
-			}
+	@Override
+	public void flush() throws IOException {
+		this.safe(() -> this.unsafeOutputStream.flush());
+	}
 
-			// Keep writing to buffers until complete
-			do {
+	@Override
+	public void close() throws IOException {
+		this.safe(() -> this.unsafeOutputStream.close());
+	}
 
-				// Write the bytes to buffer
-				int bytesWritten = this.currentBuffer.write(bytes, offset, remaining);
+	/**
+	 * {@link BufferPool} {@link ServerWriter}.
+	 */
+	private class BufferPoolServerWriter extends ServerWriter {
 
-				// Determine number of bytes remaining
-				remaining -= bytesWritten;
+		/**
+		 * Delegate {@link OutputStreamWriter}.
+		 */
+		private final OutputStreamWriter delegate;
 
-				// Adjust for potential another write
-				if (remaining > 0) {
-					offset += bytesWritten;
-					this.currentBuffer = this.bufferPool.getPooledStreamBuffer();
-					this.buffers.add(this.currentBuffer);
-				}
+		/**
+		 * Instantiate.
+		 * 
+		 * @param charset
+		 *            {@link Charset}.
+		 */
+		private BufferPoolServerWriter(Charset charset) {
+			this.delegate = new OutputStreamWriter(BufferPoolServerOutputStream.this.unsafeOutputStream, charset);
+		}
 
-			} while (remaining > 0);
+		/**
+		 * Easier access to safe.
+		 * 
+		 * @param operation
+		 *            {@link ProcessSafeOperation}.
+		 * @throws T
+		 *             If {@link ProcessSafeOperation} fails.
+		 */
+		private <T extends Throwable> void safe(SafeVoidOperation<T> operation) throws T {
+			BufferPoolServerOutputStream.this.safe(operation);
+		}
 
-			// Void return
-			return null;
-		});
+		/*
+		 * ============= ServerWriter =====================
+		 */
+
+		@Override
+		public void write(byte[] encodedBytes) throws IOException {
+			this.safe(() -> {
+
+				// Flush to ensure written out
+				this.delegate.flush();
+
+				// Write the encoded bytes
+				BufferPoolServerOutputStream.this.unsafeOutputStream.write(encodedBytes);
+			});
+		}
+
+		@Override
+		public void write(ByteBuffer encodedBytes) throws IOException {
+			this.safe(() -> {
+
+				// Flush to ensure written out
+				this.delegate.flush();
+
+				// Write the buffer
+				BufferPoolServerOutputStream.this.unsafeOutputStream.write(encodedBytes);
+			});
+		}
+
+		/*
+		 * ================ Writer ========================
+		 */
+
+		@Override
+		public void write(int c) throws IOException {
+			this.safe(() -> this.delegate.write(c));
+		}
+
+		@Override
+		public void write(char[] cbuf) throws IOException {
+			this.safe(() -> this.delegate.write(cbuf));
+		}
+
+		@Override
+		public void write(String str) throws IOException {
+			this.safe(() -> this.delegate.write(str));
+		}
+
+		@Override
+		public void write(String str, int off, int len) throws IOException {
+			this.safe(() -> this.delegate.write(str, off, len));
+		}
+
+		@Override
+		public Writer append(CharSequence csq) throws IOException {
+			this.safe(() -> this.delegate.append(csq));
+			return this;
+		}
+
+		@Override
+		public Writer append(CharSequence csq, int start, int end) throws IOException {
+			this.safe(() -> this.delegate.append(csq, start, end));
+			return this;
+		}
+
+		@Override
+		public Writer append(char c) throws IOException {
+			this.safe(() -> this.delegate.append(c));
+			return this;
+		}
+
+		@Override
+		public void write(char[] cbuf, int off, int len) throws IOException {
+			this.safe(() -> this.delegate.write(cbuf, off, len));
+		}
+
+		@Override
+		public void flush() throws IOException {
+			this.safe(() -> this.delegate.flush());
+		}
+
+		@Override
+		public void close() throws IOException {
+			this.safe(() -> this.delegate.close());
+		}
 	}
 
 }

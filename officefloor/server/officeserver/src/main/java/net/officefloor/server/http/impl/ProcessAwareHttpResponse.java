@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 
+import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpResponseHeaders;
@@ -30,13 +31,14 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.stream.BufferPool;
 import net.officefloor.server.stream.ServerOutputStream;
 import net.officefloor.server.stream.ServerWriter;
+import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
 
 /**
  * {@link Serializable} {@link HttpResponse}.
  * 
  * @author Daniel Sagenschneider
  */
-public class SerialisableHttpResponse implements HttpResponse {
+public class ProcessAwareHttpResponse<B> implements HttpResponse {
 
 	/**
 	 * <code>Content-Type</code> {@link HttpHeader} name.
@@ -54,25 +56,48 @@ public class SerialisableHttpResponse implements HttpResponse {
 	private HttpStatus status = HttpStatus.OK;
 
 	/**
-	 * {@link SerialisableHttpResponseHeaders}.
+	 * {@link ProcessAwareHttpResponseHeaders}.
 	 */
-	private final SerialisableHttpResponseHeaders headers = new SerialisableHttpResponseHeaders();
+	private final ProcessAwareHttpResponseHeaders headers = new ProcessAwareHttpResponseHeaders();
+
+	/**
+	 * {@link BufferPoolServerOutputStream}.
+	 */
+	private final BufferPoolServerOutputStream<B> outputStream;
+
+	/**
+	 * {@link ProcessAwareContext}.
+	 */
+	private final ProcessAwareContext processAwareContext;
+
+	/**
+	 * {@link HttpResponseWriter}.
+	 */
+	private final HttpResponseWriter<B> responseWriter;
 
 	/**
 	 * {@link Charset} for the {@link ServerWriter}.
 	 */
 	private Charset charset = ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET;
-	
+
 	/**
 	 * Instantiate.
 	 * 
 	 * @param version
 	 *            {@link HttpVersion}.
-	 * @param byteBufferPool
+	 * @param bufferPool
 	 *            {@link BufferPool}.
+	 * @param processAwareContext
+	 *            {@link ProcessAwareContext}.
+	 * @param responseWriter
+	 *            {@link HttpResponseWriter}.
 	 */
-	public SerialisableHttpResponse(HttpVersion version) {
+	public ProcessAwareHttpResponse(HttpVersion version, BufferPool<B> bufferPool,
+			ProcessAwareContext processAwareContext, HttpResponseWriter<B> responseWriter) {
 		this.version = version;
+		this.outputStream = new BufferPoolServerOutputStream<>(bufferPool, processAwareContext);
+		this.processAwareContext = processAwareContext;
+		this.responseWriter = responseWriter;
 	}
 
 	/*
@@ -81,22 +106,22 @@ public class SerialisableHttpResponse implements HttpResponse {
 
 	@Override
 	public HttpVersion getHttpVersion() {
-		return this.version;
+		return this.processAwareContext.run(() -> this.version);
 	}
 
 	@Override
 	public void setHttpVersion(HttpVersion version) {
-		this.version = version;
+		this.processAwareContext.run(() -> this.version = version);
 	}
 
 	@Override
 	public HttpStatus getHttpStatus() {
-		return this.status;
+		return this.processAwareContext.run(() -> this.status);
 	}
 
 	@Override
 	public void setHttpStatus(HttpStatus status) {
-		this.status = status;
+		this.processAwareContext.run(() -> this.status = status);
 	}
 
 	@Override
@@ -106,35 +131,42 @@ public class SerialisableHttpResponse implements HttpResponse {
 
 	@Override
 	public void setContentType(String contentType, Charset charset) throws IOException {
-		this.headers.removeHeaders(CONTENT_TYPE);
-		if (contentType != null) {
-			this.headers.addHeader(CONTENT_TYPE,
-					(charset == ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET ? "" : ";charset=" + charset.name()));
-		}
-		this.charset = charset;
+		this.processAwareContext.run(() -> {
+
+			// Specify the content type header
+			this.headers.removeHeaders(CONTENT_TYPE);
+			if (contentType != null) {
+				this.headers.addHeader(CONTENT_TYPE, (charset == ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET ? ""
+						: ";charset=" + charset.name()));
+			}
+			this.charset = (charset != null ? charset : ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
+
+			// Void return
+			return null;
+		});
 	}
 
 	@Override
 	public String getContentType() {
-		HttpHeader header = this.headers.getHeader(CONTENT_TYPE);
-		return (header == null ? null : header.getValue());
+		return this.processAwareContext.run(() -> {
+			HttpHeader header = this.headers.getHeader(CONTENT_TYPE);
+			return (header == null ? null : header.getValue());
+		});
 	}
 
 	@Override
 	public Charset getContentCharset() {
-		return this.charset;
+		return this.processAwareContext.run(() -> this.charset);
 	}
 
 	@Override
 	public ServerOutputStream getEntity() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		return this.outputStream;
 	}
 
 	@Override
 	public ServerWriter getEntityWriter() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		return this.outputStream.getServerWriter(this.charset);
 	}
 
 	@Override
@@ -146,7 +178,6 @@ public class SerialisableHttpResponse implements HttpResponse {
 	@Override
 	public void send() throws IOException {
 		// TODO Auto-generated method stub
-
 	}
 
 }

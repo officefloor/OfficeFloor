@@ -32,6 +32,7 @@ import java.util.function.Supplier;
 
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
+import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
@@ -45,7 +46,7 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.impl.HttpResponseWriter;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeader;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
-import net.officefloor.server.http.impl.ServerHttpConnectionImpl;
+import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.http.impl.WritableHttpHeader;
 import net.officefloor.server.stream.impl.ByteArrayByteSequence;
 import net.officefloor.server.stream.impl.ByteSequence;
@@ -74,7 +75,7 @@ public class MockHttpServer implements HttpServerImplementation {
 	/**
 	 * {@link ExternalServiceInput}.
 	 */
-	private ExternalServiceInput<ServerHttpConnection, ServerHttpConnectionImpl> serviceInput;
+	private ExternalServiceInput<ServerHttpConnection, ProcessAwareManagedObject> serviceInput;
 
 	/**
 	 * Instantiated via static methods.
@@ -136,12 +137,13 @@ public class MockHttpServer implements HttpServerImplementation {
 			InputStream responseEntityInputStream = MockBufferPool.createInputStream(responseHttpEntity);
 
 			// Load response successful
-			response.setSuccessful(requestVersion, status, headers, responseEntityInputStream);
+			response.setSuccessful(responseVersion, status, headers, responseEntityInputStream);
 		};
 
 		// Create the server HTTP connection
-		ServerHttpConnectionImpl connection = new ServerHttpConnectionImpl(isSecure, methodSupplier, requestUriSupplier,
-				requestVersion, requestHeaders, requestEntity, responseWriter, bufferPool);
+		ProcessAwareServerHttpConnectionManagedObject<byte[]> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
+				isSecure, methodSupplier, requestUriSupplier, requestVersion, requestHeaders, requestEntity,
+				responseWriter, bufferPool);
 
 		// Service the request
 		this.serviceInput.service(connection, (escalation) -> {
@@ -182,7 +184,7 @@ public class MockHttpServer implements HttpServerImplementation {
 
 	@Override
 	public void configureHttpServer(HttpServerImplementationContext context) {
-		this.serviceInput = context.getExternalServiceInput(ServerHttpConnectionImpl.class);
+		this.serviceInput = context.getExternalServiceInput(ProcessAwareManagedObject.class);
 	}
 
 	/**
@@ -396,12 +398,14 @@ public class MockHttpServer implements HttpServerImplementation {
 		 * Ensures successful.
 		 */
 		private void ensureSuccessful() {
-			if (this.failure instanceof RuntimeException) {
-				throw (RuntimeException) this.failure;
-			} else if (this.failure instanceof Error) {
-				throw (Error) this.failure;
-			} else {
-				throw new Error(this.failure);
+			if (this.failure != null) {
+				if (this.failure instanceof RuntimeException) {
+					throw (RuntimeException) this.failure;
+				} else if (this.failure instanceof Error) {
+					throw (Error) this.failure;
+				} else {
+					throw new Error(this.failure);
+				}
 			}
 		}
 

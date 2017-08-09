@@ -31,7 +31,7 @@ import net.officefloor.server.http.HttpResponseHeaders;
  * 
  * @author Daniel Sagenschneider
  */
-public class SerialisableHttpResponseHeaders implements HttpResponseHeaders {
+public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 
 	/**
 	 * {@link HttpHeader} instances.
@@ -83,7 +83,7 @@ public class SerialisableHttpResponseHeaders implements HttpResponseHeaders {
 	public Iterable<HttpHeader> getHeaders(String name) {
 		return () -> new Iterator<HttpHeader>() {
 
-			List<HttpHeader> headers = SerialisableHttpResponseHeaders.this.headers;
+			List<HttpHeader> headers = ProcessAwareHttpResponseHeaders.this.headers;
 
 			int position = 0;
 

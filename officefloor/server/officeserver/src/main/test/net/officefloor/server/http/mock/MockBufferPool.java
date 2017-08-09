@@ -19,13 +19,17 @@ package net.officefloor.server.http.mock;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.junit.Assert;
 
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.stream.BufferPool;
 import net.officefloor.server.stream.StreamBuffer;
 
@@ -48,6 +52,31 @@ public class MockBufferPool implements BufferPool<byte[]> {
 	 */
 	public static InputStream createInputStream(Iterable<StreamBuffer<byte[]>> buffers) {
 		return new MockBufferPoolInputStream(buffers.iterator());
+	}
+
+	/**
+	 * Convenience method to obtain the contents of the buffers as a string.
+	 * 
+	 * @param buffers
+	 *            {@link StreamBuffer} instances that should be supplied by a
+	 *            {@link MockBufferPool}.
+	 * @param charset
+	 *            {@link Charset} of underlying data.
+	 * @return Content of buffers as string.
+	 */
+	public static String getContent(Iterable<StreamBuffer<byte[]>> buffers, Charset charset) {
+		try {
+			InputStream inputStream = createInputStream(buffers);
+			InputStreamReader reader = new InputStreamReader(inputStream, charset);
+			StringWriter content = new StringWriter();
+			for (int character = reader.read(); character != -1; character = reader.read()) {
+				content.write(character);
+			}
+			content.flush();
+			return content.toString();
+		} catch (IOException ex) {
+			throw OfficeFrameTestCase.fail(ex);
+		}
 	}
 
 	/**

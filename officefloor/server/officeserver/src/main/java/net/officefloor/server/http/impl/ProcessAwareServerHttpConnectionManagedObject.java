@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.function.Supplier;
 
+import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.server.http.HttpMethod;
@@ -32,11 +33,16 @@ import net.officefloor.server.stream.BufferPool;
 import net.officefloor.server.stream.impl.ByteSequence;
 
 /**
- * {@link ServerHttpConnection} implementation.
+ * {@link ServerHttpConnection} implementation available for
+ * {@link ExternalServiceInput}.
+ * 
+ * @param <B>
+ *            Type of underlying buffer being used.
  * 
  * @author Daniel Sagenschneider
  */
-public class ServerHttpConnectionImpl implements ServerHttpConnection, ProcessAwareManagedObject {
+public class ProcessAwareServerHttpConnectionManagedObject<B>
+		implements ServerHttpConnection, ProcessAwareManagedObject {
 
 	/**
 	 * Indicates if secure.
@@ -56,12 +62,22 @@ public class ServerHttpConnectionImpl implements ServerHttpConnection, ProcessAw
 	/**
 	 * {@link HttpResponse}.
 	 */
-	private final SerialisableHttpResponse response;
+	private ProcessAwareHttpResponse<B> response;
 
 	/**
 	 * {@link Supplier} for the {@link HttpMethod}.
 	 */
 	private final Supplier<HttpMethod> methodSupplier;
+
+	/**
+	 * {@link BufferPool}.
+	 */
+	private final BufferPool<B> bufferPool;
+
+	/**
+	 * {@link HttpResponseWriter}.
+	 */
+	private final HttpResponseWriter<B> httpResponseWriter;
 
 	/**
 	 * {@link HttpMethod}.
@@ -73,9 +89,31 @@ public class ServerHttpConnectionImpl implements ServerHttpConnection, ProcessAw
 	 */
 	private ProcessAwareContext processAwareContext;
 
-	public ServerHttpConnectionImpl(boolean isSecure, Supplier<HttpMethod> methodSupplier,
+	/**
+	 * Instantiate.
+	 * 
+	 * @param isSecure
+	 *            Indicates if secure.
+	 * @param methodSupplier
+	 *            {@link Supplier} for the {@link HttpRequest}
+	 *            {@link HttpMethod}.
+	 * @param requestUriSupplier
+	 *            {@link Supplier} for the {@link HttpRequest} URI.
+	 * @param version
+	 *            {@link HttpVersion} for the {@link HttpRequest}.
+	 * @param requestHeaders
+	 *            {@link NonMaterialisedHttpHeaders} for the
+	 *            {@link HttpRequest}.
+	 * @param requestEntity
+	 *            {@link ByteSequence} for the {@link HttpRequest} entity.
+	 * @param writer
+	 *            {@link HttpResponseWriter}.
+	 * @param bufferPool
+	 *            {@link BufferPool}.
+	 */
+	public ProcessAwareServerHttpConnectionManagedObject(boolean isSecure, Supplier<HttpMethod> methodSupplier,
 			Supplier<String> requestUriSupplier, HttpVersion version, NonMaterialisedHttpHeaders requestHeaders,
-			ByteSequence requestEntity, HttpResponseWriter writer, BufferPool byteBufferPool) {
+			ByteSequence requestEntity, HttpResponseWriter<B> writer, BufferPool<B> bufferPool) {
 
 		// Indicate if secure
 		this.isSecure = isSecure;
@@ -86,8 +124,9 @@ public class ServerHttpConnectionImpl implements ServerHttpConnection, ProcessAw
 		this.methodSupplier = methodSupplier;
 		this.requestEntity = requestEntity;
 
-		// Create the HTTP response
-		this.response = new SerialisableHttpResponse(version);
+		// Store remaining state
+		this.bufferPool = bufferPool;
+		this.httpResponseWriter = writer;
 	}
 
 	/*
@@ -97,6 +136,10 @@ public class ServerHttpConnectionImpl implements ServerHttpConnection, ProcessAw
 	@Override
 	public void setProcessAwareContext(ProcessAwareContext context) {
 		this.processAwareContext = context;
+
+		// Create the HTTP response (with context awareness)
+		this.response = new ProcessAwareHttpResponse<B>(this.request.getHttpVersion(), this.bufferPool, context,
+				this.httpResponseWriter);
 	}
 
 	@Override

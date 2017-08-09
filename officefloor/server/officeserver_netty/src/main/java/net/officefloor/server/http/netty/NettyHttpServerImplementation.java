@@ -66,7 +66,7 @@ import net.officefloor.server.http.impl.HttpResponseWriter;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeader;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.impl.SerialisableHttpHeader;
-import net.officefloor.server.http.impl.ServerHttpConnectionImpl;
+import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.http.impl.WritableHttpHeader;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.impl.ByteSequence;
@@ -90,7 +90,7 @@ public class NettyHttpServerImplementation implements HttpServerImplementation, 
 	/**
 	 * {@link ExternalServiceInput}.
 	 */
-	private ExternalServiceInput<ServerHttpConnection, ServerHttpConnectionImpl> serviceInput;
+	private ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject> serviceInput;
 
 	/**
 	 * {@link EventLoopGroup}.
@@ -106,7 +106,7 @@ public class NettyHttpServerImplementation implements HttpServerImplementation, 
 		this.context = context;
 
 		// Obtain the service input for handling requests
-		this.serviceInput = context.getExternalServiceInput(ServerHttpConnectionImpl.class);
+		this.serviceInput = context.getExternalServiceInput(ProcessAwareServerHttpConnectionManagedObject.class);
 
 		// Hook into OfficeFloor life-cycle
 		context.getOfficeFloorDeployer().addOfficeFloorListener(this);
@@ -331,7 +331,7 @@ public class NettyHttpServerImplementation implements HttpServerImplementation, 
 			NettyBufferPool bufferPool = new NettyBufferPool(response);
 
 			// Create the Server HTTP connection
-			ServerHttpConnectionImpl connection = new ServerHttpConnectionImpl(false, methodSupplier,
+			ProcessAwareServerHttpConnectionManagedObject connection = new ProcessAwareServerHttpConnectionManagedObject(false, methodSupplier,
 					requestUriSupplier, version, requestHeaders, requestEntity, responseWriter, bufferPool);
 
 			// Service the request
