@@ -48,6 +48,7 @@ import net.officefloor.server.http.impl.NonMaterialisedHttpHeader;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.http.impl.WritableHttpHeader;
+import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.impl.ByteArrayByteSequence;
 import net.officefloor.server.stream.impl.ByteSequence;
 
@@ -132,6 +133,11 @@ public class MockHttpServer implements HttpServerImplementation {
 			for (WritableHttpHeader header : responseHttpHeaders) {
 				headers.add(header);
 			}
+			
+			// Release all the buffers (as now considered written)
+			for (StreamBuffer<byte[]> buffer : responseHttpEntity) {
+				buffer.release();
+			}
 
 			// Create the input stream to the response HTTP entity
 			InputStream responseEntityInputStream = MockBufferPool.createInputStream(responseHttpEntity);
@@ -152,6 +158,9 @@ public class MockHttpServer implements HttpServerImplementation {
 			if (escalation != null) {
 				response.setFailed(escalation);
 			}
+			
+			// Ensure send response
+			connection.getHttpResponse().send();
 
 			// Response received
 			callback.response(response);

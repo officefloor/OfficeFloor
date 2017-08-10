@@ -25,6 +25,7 @@ import java.util.NoSuchElementException;
 
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpResponseHeaders;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * {@link Serializable} {@link HttpResponseHeaders}.
@@ -34,9 +35,20 @@ import net.officefloor.server.http.HttpResponseHeaders;
 public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 
 	/**
-	 * {@link HttpHeader} instances.
+	 * {@link WritableHttpHeader} instances.
 	 */
-	private final List<HttpHeader> headers = new ArrayList<>(16);
+	private final List<WritableHttpHeader> headers = new ArrayList<>(16);
+
+	/**
+	 * Obtains the {@link WritableHttpHeader} instances for the
+	 * {@link HttpResponseWriter}.
+	 * 
+	 * @return {@link WritableHttpHeader} instances for the
+	 *         {@link HttpResponseWriter}.
+	 */
+	public List<WritableHttpHeader> getWritableHttpHeaders() {
+		return this.headers;
+	}
 
 	/*
 	 * ====================== HttpResponseHeaders ========================
@@ -44,12 +56,36 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 
 	@Override
 	public Iterator<HttpHeader> iterator() {
-		return this.headers.iterator();
+		return new Iterator<HttpHeader>() {
+
+			List<? extends HttpHeader> headers = ProcessAwareHttpResponseHeaders.this.headers;
+
+			int position = 0;
+
+			@Override
+			public boolean hasNext() {
+				return this.position < this.headers.size();
+			}
+
+			@Override
+			public HttpHeader next() {
+
+				// Ensure another header
+				if (this.position >= this.headers.size()) {
+					throw new NoSuchElementException();
+				}
+
+				// Return the next header
+				HttpHeader header = this.headers.get(this.position);
+				this.position++; // increment for next
+				return header;
+			}
+		};
 	}
 
 	@Override
 	public HttpHeader addHeader(String name, String value) throws IllegalArgumentException {
-		SerialisableHttpHeader header = new SerialisableHttpHeader(name, value);
+		WritableHttpHeader header = new WritableHttpHeaderImpl(name, value);
 		this.headers.add(header);
 		return header;
 	}
@@ -61,7 +97,7 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 
 	@Override
 	public void removeHeaders(String name) {
-		Iterator<HttpHeader> iterator = this.headers.iterator();
+		Iterator<WritableHttpHeader> iterator = this.headers.iterator();
 		while (iterator.hasNext()) {
 			if (name.equalsIgnoreCase(iterator.next().getName())) {
 				iterator.remove();
@@ -83,7 +119,7 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 	public Iterable<HttpHeader> getHeaders(String name) {
 		return () -> new Iterator<HttpHeader>() {
 
-			List<HttpHeader> headers = ProcessAwareHttpResponseHeaders.this.headers;
+			List<? extends HttpHeader> headers = ProcessAwareHttpResponseHeaders.this.headers;
 
 			int position = 0;
 
@@ -122,6 +158,62 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 	@Override
 	public int length() {
 		return this.headers.size();
+	}
+
+	/**
+	 * {@link WritableHttpHeader} implementation.
+	 */
+	private static class WritableHttpHeaderImpl implements WritableHttpHeader {
+
+		/**
+		 * Name.
+		 */
+		private final String name;
+
+		/**
+		 * Value.
+		 */
+		private final String value;
+
+		/**
+		 * HTTP encoded bytes for the name.
+		 */
+		private final byte[] nameBytes;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param name
+		 *            {@link HttpHeader} name.
+		 * @param value
+		 *            {@link HttpHeader} value.
+		 */
+		public WritableHttpHeaderImpl(String name, String value) {
+			this.name = name;
+			this.value = value;
+
+			// Obtain the writable bytes
+			this.nameBytes = this.name.getBytes(ServerHttpConnection.HTTP_CHARSET);
+		}
+
+		/*
+		 * ================= WritableHttpHeader ==================
+		 */
+
+		@Override
+		public String getName() {
+			return this.name;
+		}
+
+		@Override
+		public String getValue() {
+			return this.value;
+		}
+
+		@Override
+		public byte[] getNameBytes() {
+			return this.nameBytes;
+		}
 	}
 
 }

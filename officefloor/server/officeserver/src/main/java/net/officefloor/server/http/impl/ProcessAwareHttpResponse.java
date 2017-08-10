@@ -177,7 +177,15 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse {
 
 	@Override
 	public void send() throws IOException {
-		// TODO Auto-generated method stub
+		this.processAwareContext.run(() -> {
+
+			// Write the response
+			this.responseWriter.writeHttpResponse(this.version, this.status, this.headers.getWritableHttpHeaders(),
+					this.outputStream.getBuffers());
+
+			// Void return
+			return null;
+		});
 	}
 
 }

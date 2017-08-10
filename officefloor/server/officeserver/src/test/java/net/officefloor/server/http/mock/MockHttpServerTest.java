@@ -28,6 +28,7 @@ import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.stream.ServerWriter;
 
 /**
  * Tests the {@link MockHttpServer}.
@@ -109,7 +110,9 @@ public class MockHttpServerTest extends OfficeFrameTestCase {
 			assertEquals("Should be no entity", -1, request.getEntity().read());
 
 			// Send content for response (to ensure handled)
-			connection.getHttpResponse().getEntityWriter().write("Hello World");
+			ServerWriter writer = connection.getHttpResponse().getEntityWriter();
+			writer.write("Hello World");
+			writer.flush();
 		}
 	}
 
