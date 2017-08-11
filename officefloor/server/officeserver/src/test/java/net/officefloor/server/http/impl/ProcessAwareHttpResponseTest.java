@@ -131,7 +131,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		// Ensure writes have HTTP header
 		this.response.send();
 		Iterator<WritableHttpHeader> iterator = this.httpHeaders.iterator();
-		assertEquals("Should have header", iterator.hasNext());
+		assertTrue("Should have header", iterator.hasNext());
 		WritableHttpHeader header = iterator.next();
 		assertEquals("Incorrect header name", "test", header.getName());
 		assertEquals("Incorrect header value", "value", header.getValue());

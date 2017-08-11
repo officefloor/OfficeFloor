@@ -17,7 +17,9 @@
  */
 package net.officefloor.server.http.impl;
 
+import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
@@ -25,6 +27,11 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderName;
 import net.officefloor.server.http.HttpHeaderValue;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.mock.MockBufferPool;
+import net.officefloor.server.stream.ServerWriter;
+import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
 
 /**
  * Tests the {@link ProcessAwareHttpResponseHeaders}.
@@ -157,8 +164,28 @@ public class ProcessAwareHttpResponseHeadersTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure correct writing of {@link WritableHttpHeader}.
 	 */
-	public void testWrittenHeaderBytes() {
-		fail("TODO implement");
+	public void testWrittenHeaderBytes() throws IOException {
+
+		// Obtain writer
+		MockBufferPool bufferPool = new MockBufferPool();
+		@SuppressWarnings("resource")
+		BufferPoolServerOutputStream<byte[]> outputStream = new BufferPoolServerOutputStream<>(bufferPool);
+		ServerWriter writer = outputStream.getServerWriter(ServerHttpConnection.HTTP_CHARSET);
+
+		// Write the headers
+		for (WritableHttpHeader header : this.headers.getWritableHttpHeaders()) {
+			header.writeHttpHeader(writer);
+		}
+		writer.flush();
+
+		// Obtain the content
+		List<StreamBuffer<byte[]>> buffers = outputStream.getBuffers();
+		MockBufferPool.releaseStreamBuffers(buffers);
+		String content = MockBufferPool.getContent(buffers, ServerHttpConnection.HTTP_CHARSET);
+
+		// Ensure correct content
+		String expectedContent = "one: 1\r\ntwo: 2\r\nsame: First\r\nthree: 3\r\nsame: Second\r\n";
+		assertEquals("Incorrect HTTP headers content", expectedContent, content);
 	}
 
 	/**

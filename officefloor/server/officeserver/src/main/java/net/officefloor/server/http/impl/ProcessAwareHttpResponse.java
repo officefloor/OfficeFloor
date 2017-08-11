@@ -165,6 +165,9 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse {
 
 	@Override
 	public void setHttpVersion(HttpVersion version) {
+		if (version == null) {
+			throw new IllegalArgumentException("Must provide version");
+		}
 		this.processAwareContext.run(() -> this.version = version);
 	}
 
@@ -175,6 +178,9 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse {
 
 	@Override
 	public void setHttpStatus(HttpStatus status) {
+		if (status == null) {
+			throw new IllegalArgumentException("Must provide status");
+		}
 		this.processAwareContext.run(() -> this.status = status);
 	}
 
