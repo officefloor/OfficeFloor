@@ -90,6 +90,7 @@ public class NettyHttpServerImplementation implements HttpServerImplementation, 
 	/**
 	 * {@link ExternalServiceInput}.
 	 */
+	@SuppressWarnings("rawtypes")
 	private ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject> serviceInput;
 
 	/**
@@ -300,8 +301,8 @@ public class NettyHttpServerImplementation implements HttpServerImplementation, 
 					HttpResponseStatus.OK, false);
 
 			// Handle response
-			HttpResponseWriter<ByteBuf> responseWriter = (responseVersion, status, responseHttpHeaders,
-					responseHttpEntity) -> {
+			HttpResponseWriter<ByteBuf> responseWriter = (responseVersion, status, httpHeaders, contentLength,
+					contentType, content) -> {
 
 				// Specify the status
 				HttpResponseStatus nettyStatus = HttpResponseStatus.valueOf(status.getStatusCode());
@@ -309,13 +310,13 @@ public class NettyHttpServerImplementation implements HttpServerImplementation, 
 
 				// Create and write the response
 				HttpHeaders headers = response.headers();
-				for (WritableHttpHeader header : responseHttpHeaders) {
+				for (WritableHttpHeader header : httpHeaders) {
 					headers.add(header.getName(), header.getValue());
 				}
 
 				// Write the response
 				ByteBuf responseBuffer = response.content();
-				for (StreamBuffer<ByteBuf> pooledBuffer : responseHttpEntity) {
+				for (StreamBuffer<ByteBuf> pooledBuffer : content) {
 					if (pooledBuffer.isPooled()) {
 						responseBuffer.writeBytes(pooledBuffer.getUnpooledByteBuffer());
 					} else {
@@ -331,8 +332,9 @@ public class NettyHttpServerImplementation implements HttpServerImplementation, 
 			NettyBufferPool bufferPool = new NettyBufferPool(response);
 
 			// Create the Server HTTP connection
-			ProcessAwareServerHttpConnectionManagedObject connection = new ProcessAwareServerHttpConnectionManagedObject(false, methodSupplier,
-					requestUriSupplier, version, requestHeaders, requestEntity, responseWriter, bufferPool);
+			ProcessAwareServerHttpConnectionManagedObject<ByteBuf> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
+					false, methodSupplier, requestUriSupplier, version, requestHeaders, requestEntity, responseWriter,
+					bufferPool);
 
 			// Service the request
 			NettyHttpServerImplementation.this.serviceInput.service(connection, (escalation) -> {

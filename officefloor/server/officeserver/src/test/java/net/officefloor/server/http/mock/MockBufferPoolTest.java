@@ -24,12 +24,10 @@ import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.nio.ByteBuffer;
 
-import net.officefloor.frame.api.managedobject.ProcessAwareContext;
-import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.ServerOutputStream;
+import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
 
 /**
@@ -52,13 +50,7 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 	/**
 	 * {@link ServerOutputStream} to write data to buffers.
 	 */
-	private final BufferPoolServerOutputStream<byte[]> output = new BufferPoolServerOutputStream<>(this.pool,
-			new ProcessAwareContext() {
-				@Override
-				public <R, T extends Throwable> R run(ProcessSafeOperation<R, T> operation) throws T {
-					return operation.run();
-				}
-			});
+	private final BufferPoolServerOutputStream<byte[]> output = new BufferPoolServerOutputStream<>(this.pool);
 
 	/**
 	 * Ensure can release pooled {@link StreamBuffer} back to

@@ -35,7 +35,7 @@ public interface HttpResponseHeaders extends Iterable<HttpHeader> {
 	 *            Name of {@link HttpHeader}.
 	 * @param value
 	 *            Value of {@link HttpHeader}.
-	 * @return {@link HttpHeader} instance added.
+	 * @return Added {@link HttpHeader}.
 	 * @throws IllegalArgumentException
 	 *             Should the {@link HttpHeader} be managed by the
 	 *             {@link HttpResponse}.
@@ -43,12 +43,55 @@ public interface HttpResponseHeaders extends Iterable<HttpHeader> {
 	HttpHeader addHeader(String name, String value) throws IllegalArgumentException;
 
 	/**
+	 * Adds a {@link HttpHeader}.
+	 * 
+	 * @param name
+	 *            {@link HttpHeaderName}.
+	 * @param value
+	 *            Value of {@link HttpHeader}.
+	 * @return Added {@link HttpHeader}
+	 * @throws IllegalArgumentException
+	 *             Should the {@link HttpHeader} be managed by the
+	 *             {@link HttpResponse}.
+	 */
+	HttpHeader addHeader(HttpHeaderName name, String value) throws IllegalArgumentException;
+
+	/**
+	 * Adds a {@link HttpHeader}.
+	 * 
+	 * @param name
+	 *            Name of {@link HttpHeader}.
+	 * @param value
+	 *            {@link HttpHeaderValue}.
+	 * @return Added {@link HttpHeader}.
+	 * @throws IllegalArgumentException
+	 *             Should the {@link HttpHeader} be managed by the
+	 *             {@link HttpResponse}.
+	 */
+	HttpHeader addHeader(String name, HttpHeaderValue value) throws IllegalArgumentException;
+
+	/**
+	 * Adds a {@link HttpHeader}.
+	 * 
+	 * @param name
+	 *            {@link HttpHeaderName}.
+	 * @param value
+	 *            {@link HttpHeaderValue}.
+	 * @return Added {@link HttpHeader}.
+	 * @throws IllegalArgumentException
+	 *             Should the {@link HttpHeader} be managed by the
+	 *             {@link HttpResponse}.
+	 */
+	HttpHeader addHeader(HttpHeaderName name, HttpHeaderValue value) throws IllegalArgumentException;
+
+	/**
 	 * Removes the particular {@link HttpHeader} from the response.
 	 * 
 	 * @param header
 	 *            {@link HttpHeader} to be removed from the response.
+	 * @return <code>true</code> if the {@link HttpHeader} was removed.
 	 */
-	void removeHeader(HttpHeader header);
+	boolean removeHeader(HttpHeader header);
 
 	/**
 	 * <p>
@@ -59,8 +102,10 @@ public interface HttpResponseHeaders extends Iterable<HttpHeader> {
 	 * 
 	 * @param name
 	 *            Name of the {@link HttpHeader} instances to remove.
+	 * @param <code>true</code>
+	 *            if {@link HttpHeader} instances were removed by the name.
 	 */
-	void removeHeaders(String name);
+	boolean removeHeaders(String name);
 
 	/**
 	 * Obtains the first {@link HttpHeader} by the name.

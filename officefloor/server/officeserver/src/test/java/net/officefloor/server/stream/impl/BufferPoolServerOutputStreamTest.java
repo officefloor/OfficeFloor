@@ -23,8 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 
-import net.officefloor.frame.api.managedobject.ProcessAwareContext;
-import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.mock.MockBufferPool;
 import net.officefloor.server.stream.StreamBuffer;
@@ -45,12 +43,7 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 	 * {@link BufferPoolServerOutputStream} to test.
 	 */
 	private final BufferPoolServerOutputStream<byte[]> outputStream = new BufferPoolServerOutputStream<>(
-			this.bufferPool, new ProcessAwareContext() {
-				@Override
-				public <R, T extends Throwable> R run(ProcessSafeOperation<R, T> operation) throws T {
-					return operation.run();
-				}
-			});
+			this.bufferPool);
 
 	/**
 	 * Ensure can write a single byte.

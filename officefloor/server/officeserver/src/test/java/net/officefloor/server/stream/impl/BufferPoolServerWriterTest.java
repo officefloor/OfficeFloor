@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-import net.officefloor.frame.api.managedobject.ProcessAwareContext;
-import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockBufferPool;
@@ -46,12 +44,7 @@ public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 	 * {@link BufferPoolServerOutputStream}.
 	 */
 	private final BufferPoolServerOutputStream<byte[]> outputStream = new BufferPoolServerOutputStream<>(
-			this.bufferPool, new ProcessAwareContext() {
-				@Override
-				public <R, T extends Throwable> R run(ProcessSafeOperation<R, T> operation) throws T {
-					return operation.run();
-				}
-			});
+			this.bufferPool);
 
 	/**
 	 * {@link ServerWriter} to test.

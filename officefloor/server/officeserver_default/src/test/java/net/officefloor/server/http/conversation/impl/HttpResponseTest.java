@@ -170,7 +170,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 	 */
 	public void testNullHeaderValue() throws IOException {
 		HttpResponse response = this.createHttpResponse();
-		response.getHttpHeaders().addHeader("null", null);
+		response.getHttpHeaders().addHeader("null", (String) null);
 		response.send();
 		this.assertWireContent("HTTP/1.1 204 No Content\nServer: TEST\nDate: [Mock Time]\nContent-Length: 0\nnull: ",
 				null, null);
@@ -352,7 +352,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 
 		// Write some content
 		HttpResponse response = this.createHttpResponse();
-		response.setContentType(null, charset);
+		response.setContentType((String) null, charset);
 		ServerWriter entityWriter = response.getEntityWriter();
 		entityWriter.write("TEST");
 		entityWriter.flush();
@@ -565,7 +565,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 			// Test with the charset if can use
 			if (canUse) {
 				HttpResponse response = this.createHttpResponse();
-				response.setContentType(null, charset);
+				response.setContentType((String) null, charset);
 				ServerWriter entity = response.getEntityWriter();
 				entity.write("TEST");
 				entity.close();
@@ -589,7 +589,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 
 		// Should now not be able to change charset
 		try {
-			response.setContentType(null, UsAsciiUtil.US_ASCII);
+			response.setContentType((String) null, UsAsciiUtil.US_ASCII);
 			fail("Should not be able to change the charset");
 		} catch (IOException ex) {
 			assertEquals("Incorrect cause", "getEntityWriter() has already been invoked", ex.getMessage());
@@ -597,7 +597,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 
 		// Ensure can change after reset
 		response.reset();
-		response.setContentType(null, UsAsciiUtil.US_ASCII);
+		response.setContentType((String) null, UsAsciiUtil.US_ASCII);
 	}
 
 	/**

@@ -19,18 +19,14 @@ package net.officefloor.plugin.web.http.template;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Properties;
 
-import junit.framework.TestCase;
-import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpResponseHeaders;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.UsAsciiUtil;
-import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.server.stream.MockServerOutputStream;
 import net.officefloor.server.stream.ServerOutputStream;
 import net.officefloor.server.stream.ServerWriter;
@@ -173,6 +169,11 @@ public class MockHttpResponse implements HttpResponse {
 	public ServerOutputStream getEntity() {
 		return this.entity.getServerOutputStream();
 	}	
+
+	@Override
+	public void setContentType(HttpHeaderValue contentTypeAndCharsetValue, Charset charset) throws IOException {
+		throw new IllegalStateException("Can not change Content-Type for " + MockHttpResponse.class.getSimpleName());
+	}
 
 	@Override
 	public void setContentType(String contentType, Charset charset) throws IOException {

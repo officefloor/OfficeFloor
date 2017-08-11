@@ -15,28 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.server.http.impl;
+package net.officefloor.server.http.mock;
 
-import java.io.IOException;
-
-import net.officefloor.server.http.HttpHeader;
-import net.officefloor.server.stream.ServerWriter;
+import net.officefloor.frame.api.managedobject.ProcessAwareContext;
+import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 
 /**
- * Writable {@link HttpHeader}.
+ * Mock {@link ProcessAwareContext} that just runs the
+ * {@link ProcessSafeOperation}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WritableHttpHeader extends HttpHeader {
+public class MockProcessAwareContext implements ProcessAwareContext {
 
-	/**
-	 * Writes the {@link HttpHeader} to the {@link ServerWriter}.
-	 * 
-	 * @param writer
-	 *            {@link ServerWriter}.
-	 * @throws IOException
-	 *             If fails to write the {@link HttpHeader}.
+	/*
+	 * =================== ProcessAwareContext =====================
 	 */
-	void writeHttpHeader(ServerWriter writer) throws IOException;
+
+	@Override
+	public <R, T extends Throwable> R run(ProcessSafeOperation<R, T> operation) throws T {
+		return operation.run();
+	}
 
 }

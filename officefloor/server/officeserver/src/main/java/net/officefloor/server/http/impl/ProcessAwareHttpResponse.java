@@ -22,7 +22,7 @@ import java.io.Serializable;
 import java.nio.charset.Charset;
 
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
-import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpResponseHeaders;
 import net.officefloor.server.http.HttpStatus;
@@ -32,6 +32,8 @@ import net.officefloor.server.stream.BufferPool;
 import net.officefloor.server.stream.ServerOutputStream;
 import net.officefloor.server.stream.ServerWriter;
 import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
+import net.officefloor.server.stream.impl.ProcessAwareServerOutputStream;
+import net.officefloor.server.stream.impl.ProcessAwareServerWriter;
 
 /**
  * {@link Serializable} {@link HttpResponse}.
@@ -41,9 +43,14 @@ import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
 public class ProcessAwareHttpResponse<B> implements HttpResponse {
 
 	/**
-	 * <code>Content-Type</code> {@link HttpHeader} name.
+	 * Binary <code>Content-Type</code>.
 	 */
-	private static final String CONTENT_TYPE = "Content-Type";
+	private static final HttpHeaderValue BINARY_CONTENT = new HttpHeaderValue("application/octet-stream");
+
+	/**
+	 * Text <code>Content-Type</code>.
+	 */
+	private static final HttpHeaderValue TEXT_CONTENT = new HttpHeaderValue("text/plain");
 
 	/**
 	 * {@link HttpVersion}.
@@ -58,12 +65,17 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse {
 	/**
 	 * {@link ProcessAwareHttpResponseHeaders}.
 	 */
-	private final ProcessAwareHttpResponseHeaders headers = new ProcessAwareHttpResponseHeaders();
+	private final ProcessAwareHttpResponseHeaders headers;
 
 	/**
 	 * {@link BufferPoolServerOutputStream}.
 	 */
-	private final BufferPoolServerOutputStream<B> outputStream;
+	private final BufferPoolServerOutputStream<B> bufferPoolOutputStream;
+
+	/**
+	 * {@link ProcessAwareServerOutputStream}.
+	 */
+	private final ProcessAwareServerOutputStream safeOutputStream;
 
 	/**
 	 * {@link ProcessAwareContext}.
@@ -74,6 +86,11 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse {
 	 * {@link HttpResponseWriter}.
 	 */
 	private final HttpResponseWriter<B> responseWriter;
+
+	/**
+	 * <code>Content-Type</code> value.
+	 */
+	private HttpHeaderValue contentType = null;
 
 	/**
 	 * {@link Charset} for the {@link ServerWriter}.
@@ -95,9 +112,27 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse {
 	public ProcessAwareHttpResponse(HttpVersion version, BufferPool<B> bufferPool,
 			ProcessAwareContext processAwareContext, HttpResponseWriter<B> responseWriter) {
 		this.version = version;
-		this.outputStream = new BufferPoolServerOutputStream<>(bufferPool, processAwareContext);
+		this.headers = new ProcessAwareHttpResponseHeaders(processAwareContext);
+		this.bufferPoolOutputStream = new BufferPoolServerOutputStream<>(bufferPool);
+		this.safeOutputStream = new ProcessAwareServerOutputStream(this.bufferPoolOutputStream, processAwareContext);
 		this.processAwareContext = processAwareContext;
 		this.responseWriter = responseWriter;
+	}
+
+	/**
+	 * Derives the <code>Content-Type</code>.
+	 * 
+	 * @return <code>Content-Type</code>
+	 */
+	private HttpHeaderValue deriveContentType() {
+
+		// Determine if content-type specified
+		if (this.contentType != null) {
+			return this.contentType;
+		} else {
+			// Not specified, so determine based on state
+			return (this.responseWriter == null ? BINARY_CONTENT : TEXT_CONTENT);
+		}
 	}
 
 	/*
@@ -133,13 +168,30 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse {
 	public void setContentType(String contentType, Charset charset) throws IOException {
 		this.processAwareContext.run(() -> {
 
-			// Specify the content type header
-			this.headers.removeHeaders(CONTENT_TYPE);
-			if (contentType != null) {
-				this.headers.addHeader(CONTENT_TYPE, (charset == ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET ? ""
-						: ";charset=" + charset.name()));
-			}
+			// Specify the charset (ensuring default)
 			this.charset = (charset != null ? charset : ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
+
+			// Specify the content type
+			if (this.charset == ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET) {
+				this.contentType = new HttpHeaderValue(contentType);
+			} else {
+				this.contentType = new HttpHeaderValue(contentType + ";charset=" + this.charset.name());
+			}
+
+			// Void return
+			return null;
+		});
+	}
+
+	@Override
+	public void setContentType(HttpHeaderValue contentTypeAndCharsetValue, Charset charset) throws IOException {
+		this.processAwareContext.run(() -> {
+
+			// Specify the charset (ensuring default)
+			this.charset = (charset != null ? charset : ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
+
+			// Use content-type as is
+			this.contentType = contentTypeAndCharsetValue;
 
 			// Void return
 			return null;
@@ -148,10 +200,7 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse {
 
 	@Override
 	public String getContentType() {
-		return this.processAwareContext.run(() -> {
-			HttpHeader header = this.headers.getHeader(CONTENT_TYPE);
-			return (header == null ? null : header.getValue());
-		});
+		return this.processAwareContext.run(() -> this.deriveContentType().getValue());
 	}
 
 	@Override
@@ -161,12 +210,13 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse {
 
 	@Override
 	public ServerOutputStream getEntity() throws IOException {
-		return this.outputStream;
+		return this.safeOutputStream;
 	}
 
 	@Override
 	public ServerWriter getEntityWriter() throws IOException {
-		return this.outputStream.getServerWriter(this.charset);
+		return new ProcessAwareServerWriter(this.bufferPoolOutputStream.getServerWriter(this.charset),
+				this.processAwareContext);
 	}
 
 	@Override
@@ -179,9 +229,16 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse {
 	public void send() throws IOException {
 		this.processAwareContext.run(() -> {
 
+			// Determine content details
+			int contentLength = this.bufferPoolOutputStream.getContentLength();
+			HttpHeaderValue contentType = null;
+			if (contentLength > 0) {
+				contentType = this.deriveContentType();
+			}
+
 			// Write the response
 			this.responseWriter.writeHttpResponse(this.version, this.status, this.headers.getWritableHttpHeaders(),
-					this.outputStream.getBuffers());
+					contentLength, contentType, this.bufferPoolOutputStream.getBuffers());
 
 			// Void return
 			return null;

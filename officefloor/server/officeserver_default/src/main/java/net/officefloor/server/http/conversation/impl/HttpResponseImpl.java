@@ -29,6 +29,7 @@ import java.util.List;
 
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpResponseHeaders;
@@ -581,6 +582,12 @@ public class HttpResponseImpl implements HttpResponse {
 			// Return the entity
 			return this.entity;
 		}
+	}
+
+	@Override
+	public void setContentType(HttpHeaderValue contentTypeAndCharsetValue, Charset charset) throws IOException {
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override

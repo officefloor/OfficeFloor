@@ -126,14 +126,14 @@ public class MockHttpServer implements HttpServerImplementation {
 
 		// Handle response
 		HttpResponseWriter<byte[]> responseWriter = (responseVersion, status, responseHttpHeaders,
-				responseHttpEntity) -> {
+				httpEntityContentLength, httpEntityContentType, responseHttpEntity) -> {
 
 			// Obtain the listing of response HTTP headers
 			List<WritableHttpHeader> headers = new ArrayList<>();
 			for (WritableHttpHeader header : responseHttpHeaders) {
 				headers.add(header);
 			}
-			
+
 			// Release all the buffers (as now considered written)
 			for (StreamBuffer<byte[]> buffer : responseHttpEntity) {
 				buffer.release();
@@ -158,7 +158,7 @@ public class MockHttpServer implements HttpServerImplementation {
 			if (escalation != null) {
 				response.setFailed(escalation);
 			}
-			
+
 			// Ensure send response
 			connection.getHttpResponse().send();
 

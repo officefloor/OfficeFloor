@@ -15,28 +15,60 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.server.http.impl;
+package net.officefloor.server.http;
 
 import java.io.IOException;
 
-import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.stream.ServerWriter;
 
 /**
- * Writable {@link HttpHeader}.
+ * Means to provide common {@link HttpHeader} names in already encoded HTTP
+ * bytes for faster writing.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WritableHttpHeader extends HttpHeader {
+public class HttpHeaderName {
 
 	/**
-	 * Writes the {@link HttpHeader} to the {@link ServerWriter}.
+	 * Name.
+	 */
+	private final String name;
+
+	/**
+	 * Pre-encoded bytes of name ready for HTTP output.
+	 */
+	private final byte[] encodedName;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param name
+	 *            {@link HttpHeaderName}.
+	 */
+	public HttpHeaderName(String name) {
+		this.name = name.toLowerCase(); // case insensitive
+		this.encodedName = this.name.getBytes(ServerHttpConnection.HTTP_CHARSET);
+	}
+
+	/**
+	 * Obtains the name.
+	 * 
+	 * @return Name.
+	 */
+	public String getName() {
+		return this.name;
+	}
+
+	/**
+	 * Writes the name to the {@link ServerWriter}.
 	 * 
 	 * @param writer
 	 *            {@link ServerWriter}.
 	 * @throws IOException
-	 *             If fails to write the {@link HttpHeader}.
+	 *             If fails to write the name.
 	 */
-	void writeHttpHeader(ServerWriter writer) throws IOException;
+	public void writeName(ServerWriter writer) throws IOException {
+		writer.write(this.encodedName);
+	}
 
 }

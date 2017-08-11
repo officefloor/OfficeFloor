@@ -41,6 +41,19 @@ import net.officefloor.server.stream.StreamBuffer;
 public class MockBufferPool implements BufferPool<byte[]> {
 
 	/**
+	 * Releases the {@link StreamBuffer} instances.
+	 * 
+	 * @param buffers
+	 *            {@link StreamBuffer} instances to release by to their
+	 *            {@link BufferPool}.
+	 */
+	public static void releaseStreamBuffers(Iterable<StreamBuffer<byte[]>> buffers) {
+		for (StreamBuffer<byte[]> buffer : buffers) {
+			buffer.release();
+		}
+	}
+
+	/**
 	 * Creates an {@link InputStream} to the content of the {@link StreamBuffer}
 	 * instances.
 	 * 

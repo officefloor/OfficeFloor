@@ -17,6 +17,7 @@
  */
 package net.officefloor.server.http.impl;
 
+import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
@@ -38,14 +39,18 @@ public interface HttpResponseWriter<B> {
 	 *            {@link HttpVersion}.
 	 * @param status
 	 *            {@link HttpStatus}.
-	 * @param responseHttpheaders
+	 * @param httpHeaders
 	 *            {@link WritableHttpHeader} instances for the
 	 *            {@link HttpResponse}.
-	 * @param responseHttpEntity
+	 * @param contentLength
+	 *            Number of bytes in the HTTP entity.
+	 * @param contentType
+	 *            <code>Content-Type</code> of the HTTP entity.
+	 * @param content
 	 *            {@link StreamBuffer} instances containing the
 	 *            {@link HttpResponse} entity.
 	 */
-	void writeHttpResponse(HttpVersion version, HttpStatus status, Iterable<WritableHttpHeader> responseHttpheaders,
-			Iterable<StreamBuffer<B>> responseHttpEntity);
+	void writeHttpResponse(HttpVersion version, HttpStatus status, Iterable<WritableHttpHeader> httpHeaders,
+			int contentLength, HttpHeaderValue contentType, Iterable<StreamBuffer<B>> content);
 
 }

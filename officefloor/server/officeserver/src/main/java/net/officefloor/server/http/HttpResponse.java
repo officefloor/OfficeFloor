@@ -95,12 +95,32 @@ public interface HttpResponse {
 	 *            {@link Charset} for the <code>Content-Type</code>. This may be
 	 *            <code>null</code> to use the default {@link Charset}. Also use
 	 *            <code>null</code> for <code>Content-Type</code>s that do not
-	 *            require character encoding.
+	 *            require character encoding (including the default HTTP content
+	 *            encoding).
 	 * @throws IOException
 	 *             If attempting to specify after calling
 	 *             {@link #getEntityWriter()}.
 	 */
 	void setContentType(String contentType, Charset charset) throws IOException;
+
+	/**
+	 * <p>
+	 * Provides means to use {@link HttpHeaderValue} to specify both the
+	 * <code>Content-Type</code> and <code>charset</code> for more efficiency.
+	 * <p>
+	 * Note that {@link HttpHeaderValue} will require the inclusion of the
+	 * <code>charset</code>, as the <code>charset</code> will not be appended.
+	 * 
+	 * @param contentTypeAndCharsetValue
+	 *            {@link HttpHeaderValue} for the <code>Content-Type</code> and
+	 *            <code>charset</code>.
+	 * @param charset
+	 *            {@link Charset} to configure the {@link ServerWriter}.
+	 * @throws IOException
+	 *             If attempting to specify after calling
+	 *             {@link #getEntityWriter()}.
+	 */
+	void setContentType(HttpHeaderValue contentTypeAndCharsetValue, Charset charset) throws IOException;
 
 	/**
 	 * Obtains the <code>Content-Type</code>.
