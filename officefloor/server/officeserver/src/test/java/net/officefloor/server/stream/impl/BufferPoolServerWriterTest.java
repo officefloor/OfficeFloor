@@ -17,8 +17,15 @@
  */
 package net.officefloor.server.stream.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -63,9 +70,7 @@ public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 		List<StreamBuffer<byte[]>> buffers = this.outputStream.getBuffers();
 
 		// Release the buffers (as consider request written)
-		for (StreamBuffer<byte[]> buffer : buffers) {
-			buffer.release();
-		}
+		MockBufferPool.releaseStreamBuffers(buffers);
 
 		// Obtain the content
 		return MockBufferPool.getContent(buffers, ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
@@ -78,6 +83,75 @@ public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 		this.writer.write("Hello World");
 		this.writer.flush();
 		assertEquals("Incorrect written data", "Hello World", this.getContent());
+	}
+
+	/**
+	 * Ensure can write/read UTF-16.
+	 */
+	public void testWriteReadUTF16() throws IOException {
+		Charset charset = Charset.forName("UTF-16");
+
+		// Write out the data
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		OutputStreamWriter writer = new OutputStreamWriter(buffer, charset);
+		writer.write("Hello World");
+		writer.flush();
+
+		// Ensure the data is correct
+		byte[] expectedData = "Hello World".getBytes(charset);
+		byte[] actualData = buffer.toByteArray();
+		assertEquals("Incorrect data length", expectedData.length, actualData.length);
+		for (int i = 0; i < expectedData.length; i++) {
+			assertEquals("Incorrect byte " + i, expectedData[i], actualData[i]);
+		}
+		assertEquals("Incorrect content", "Hello World", new String(actualData, charset));
+
+		// Ensure can read in data
+		StringWriter result = new StringWriter();
+		InputStreamReader reader = new InputStreamReader(new ByteArrayInputStream(actualData), charset);
+		for (int character = reader.read(); character != -1; character = reader.read()) {
+			result.write(character);
+		}
+		assertEquals("Incorrect write/read UTF-16 content", "Hello World", result.toString());
+	}
+
+	/**
+	 * Ensure can write in different {@link Charset}.
+	 */
+	public void testUTF16() throws IOException {
+
+		Charset charset = Charset.forName("UTF-16");
+
+		// Write out the data
+		ServerWriter differentCharset = this.outputStream.getServerWriter(charset);
+		differentCharset.write("Hello World");
+		differentCharset.flush();
+
+		// Obtain the buffers
+		List<StreamBuffer<byte[]>> buffers = this.outputStream.getBuffers();
+		MockBufferPool.releaseStreamBuffers(buffers);
+
+		// Ensure stream in correct data
+		byte[] expectedData = "Hello World".getBytes(charset);
+		InputStream expectedInput = new ByteArrayInputStream(expectedData);
+		InputStream actualInput = MockBufferPool.createInputStream(buffers);
+		for (int i = 0; i < expectedData.length; i++) {
+			assertEquals("Incorrect byte " + i + "(" + Character.valueOf((char) expectedData[i]) + ")",
+					expectedInput.read(), actualInput.read());
+		}
+		assertEquals("Should be end of input data", -1, actualInput.read());
+
+		// Ensure stream data
+		StringWriter result = new StringWriter();
+		InputStreamReader reader = new InputStreamReader(MockBufferPool.createInputStream(buffers), charset);
+		for (int character = reader.read(); character != -1; character = reader.read()) {
+			result.write(character);
+		}
+		assertEquals("Incorrect write/read UTF-16 content", "Hello World", result.toString());
+
+		// Ensure can read in content
+		String content = MockBufferPool.getContent(buffers, charset);
+		assertEquals("Incorrect written content", "Hello World", content);
 	}
 
 	/**

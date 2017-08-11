@@ -54,6 +54,11 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 	private StreamBuffer<B> currentBuffer = null;
 
 	/**
+	 * <code>Content-Length</code>.
+	 */
+	private int contentLength = 0;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param bufferPool
@@ -80,7 +85,7 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 	 * @return Content length of output data.
 	 */
 	public int getContentLength() {
-		throw new UnsupportedOperationException("TODO implement");
+		return this.contentLength;
 	}
 
 	/**
@@ -111,6 +116,9 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 
 		// Clear current buffer, so new buffer to continue writing
 		stream.currentBuffer = null;
+		
+		// Content included
+		this.contentLength += buffer.remaining();
 	}
 
 	@Override
@@ -141,6 +149,9 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 						+ stream.currentBuffer.getClass().getName());
 			}
 		}
+
+		// Additional byte written
+		this.contentLength++;
 	}
 
 	@Override
@@ -176,6 +187,9 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 			}
 
 		} while (remaining > 0);
+
+		// Content written
+		this.contentLength += len;
 	}
 
 	@Override

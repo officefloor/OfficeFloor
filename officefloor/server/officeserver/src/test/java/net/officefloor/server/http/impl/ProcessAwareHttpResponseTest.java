@@ -139,6 +139,20 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 	}
 
 	/**
+	 * Ensure no HTTP entity content.
+	 */
+	public void testEmptyContent() throws IOException {
+
+		// Send without content
+		this.response.send();
+
+		// Ensure no content
+		assertEquals("Should be no content", 0, this.contentLength);
+		assertNull("No content-type, as no content", this.contentType);
+		assertFalse("No content", this.content.iterator().hasNext());
+	}
+
+	/**
 	 * Outputs the HTTP entity content.
 	 */
 	public void testOutputEntityContent() throws IOException {
@@ -152,14 +166,51 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 
 		// Send the response
 		this.response.send();
-		
-		// Ensure
-		
+
+		// Ensure correct content details
+		assertEquals("Incorrect Content-Length", 1, this.contentLength);
+		assertEquals("Incorrect Content-Type", "application/octet-stream", this.contentType.getValue());
+
 		// Ensure correct content
 		MockBufferPool.releaseStreamBuffers(this.content);
 		InputStream input = MockBufferPool.createInputStream(this.content);
 		assertEquals("Should be the written byte", 1, input.read());
 		assertEquals("Should be no further content", -1, input.read());
+	}
+
+	/**
+	 * Ensure default the <code>Content-Type</code> appropriately.
+	 */
+	public void testDefaultContentTypes() throws IOException {
+
+		// Ensure correct default
+		assertEquals("Incorrect default Content-Type", "application/octet-stream", this.response.getContentType());
+
+		// Obtain writer (so becomes text output)
+		this.response.getEntityWriter();
+		assertEquals("Incorrect text default Content-Type", "text/plain", this.response.getContentType());
+	}
+
+	/**
+	 * Ensure derive the <code>Content-Type</code> appropriately.
+	 */
+	public void testDeriveContentType() throws IOException {
+
+		// Ensure keep defaulting charset
+		this.response.setContentType("text/html", null);
+		assertEquals("text/html", this.response.getContentType());
+		assertEquals(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET, this.response.getContentCharset());
+
+		// Change charset
+		Charset charset = Charset.forName("UTF-16");
+		this.response.setContentType("application/json", charset);
+		assertEquals("application/json; charset=UTF-16", this.response.getContentType());
+		assertEquals(charset, this.response.getContentCharset());
+
+		// Ensure specify value
+		this.response.setContentType(new HttpHeaderValue("application/xml"), charset);
+		assertEquals("application/xml", this.response.getContentType());
+		assertEquals(charset, this.response.getContentCharset());
 	}
 
 	/**
@@ -177,8 +228,9 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		try {
 			this.response.setContentType("text/html", charset);
 			fail("Should not be able to change the charset");
-		} catch (IllegalStateException ex) {
-			assertEquals("Already committed to write charset UTF-8", ex.getMessage());
+		} catch (IOException ex) {
+			assertEquals("Can not change Content-Type. Committed to writing text/plain (charset UTF-8)",
+					ex.getMessage());
 		}
 
 		// Ensure same writer provided
@@ -186,12 +238,16 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 
 		// Send the response
 		this.response.send();
+
+		// Ensure correct content details
+		assertEquals("Incorrect Content-Length",
+				"TEST".getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET).length, this.contentLength);
+		assertEquals("Incorrect Content-Type", "text/plain", this.contentType.getValue());
+
+		// Ensure correct content
 		MockBufferPool.releaseStreamBuffers(this.content);
 		String content = MockBufferPool.getContent(this.content, ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
 		assertEquals("Incorrect sent content", "TEST", content);
-
-		// Ensure indicate content and length
-
 	}
 
 	/**
@@ -199,13 +255,28 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 	 */
 	public void testWriteEntityInUTF16() throws IOException {
 
-		// Ensure diffferent charset
+		// Ensure different charset
 		Charset charset = Charset.forName("UTF-16");
 		assertNotEquals("Should not be UTF-16", charset, this.response.getContentCharset());
 
-		// Specify the content type
-		this.response.setContentType(new HttpHeaderValue("text/plain"), charset);
+		// Specify the charset
+		this.response.setContentType((String) null, charset);
 
+		// Write some content
+		ServerWriter writer = this.response.getEntityWriter();
+		writer.write("TEST");
+
+		// Send the response
+		this.response.send();
+
+		// Ensure correct content details
+		assertEquals("Incorrect Content-Length", "TEST".getBytes(charset).length, this.contentLength);
+		assertEquals("Incorrect Content-Type", "text/plain; charset=" + charset.name(), this.contentType.getValue());
+
+		// Ensure correct content
+		MockBufferPool.releaseStreamBuffers(this.content);
+		String content = MockBufferPool.getContent(this.content, charset);
+		assertEquals("Incorrect sent content", "TEST", content);
 	}
 
 	/*

@@ -78,6 +78,11 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse {
 	private final ProcessAwareServerOutputStream safeOutputStream;
 
 	/**
+	 * {@link ServerWriter}.
+	 */
+	private ServerWriter entityWriter = null;
+
+	/**
 	 * {@link ProcessAwareContext}.
 	 */
 	private final ProcessAwareContext processAwareContext;
@@ -131,7 +136,21 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse {
 			return this.contentType;
 		} else {
 			// Not specified, so determine based on state
-			return (this.responseWriter == null ? BINARY_CONTENT : TEXT_CONTENT);
+			return (this.entityWriter == null ? BINARY_CONTENT : TEXT_CONTENT);
+		}
+	}
+
+	/**
+	 * Determines if can change the <code>Content-Type</code> and
+	 * {@link Charset}.
+	 * 
+	 * @throws IOException
+	 *             If not able to change.
+	 */
+	private void allowContentTypeChange() throws IOException {
+		if (this.entityWriter != null) {
+			throw new IOException("Can not change Content-Type. Committed to writing "
+					+ this.deriveContentType().getValue() + " (charset " + this.charset.name() + ")");
 		}
 	}
 
@@ -168,14 +187,19 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse {
 	public void setContentType(String contentType, Charset charset) throws IOException {
 		this.processAwareContext.run(() -> {
 
+			// Ensure can change Content-Type
+			this.allowContentTypeChange();
+
 			// Specify the charset (ensuring default)
 			this.charset = (charset != null ? charset : ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
 
 			// Specify the content type
+			String nonNullContentType = (contentType != null ? contentType : TEXT_CONTENT.getValue());
 			if (this.charset == ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET) {
 				this.contentType = new HttpHeaderValue(contentType);
 			} else {
-				this.contentType = new HttpHeaderValue(contentType + ";charset=" + this.charset.name());
+				// Ensure have content type
+				this.contentType = new HttpHeaderValue(nonNullContentType + "; charset=" + this.charset.name());
 			}
 
 			// Void return
@@ -186,6 +210,9 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse {
 	@Override
 	public void setContentType(HttpHeaderValue contentTypeAndCharsetValue, Charset charset) throws IOException {
 		this.processAwareContext.run(() -> {
+
+			// Ensure can change Content-Type
+			this.allowContentTypeChange();
 
 			// Specify the charset (ensuring default)
 			this.charset = (charset != null ? charset : ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
@@ -215,8 +242,11 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse {
 
 	@Override
 	public ServerWriter getEntityWriter() throws IOException {
-		return new ProcessAwareServerWriter(this.bufferPoolOutputStream.getServerWriter(this.charset),
-				this.processAwareContext);
+		if (this.entityWriter == null) {
+			this.entityWriter = new ProcessAwareServerWriter(this.bufferPoolOutputStream.getServerWriter(this.charset),
+					this.processAwareContext);
+		}
+		return this.entityWriter;
 	}
 
 	@Override
@@ -228,6 +258,11 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse {
 	@Override
 	public void send() throws IOException {
 		this.processAwareContext.run(() -> {
+
+			// If writer, ensure flushed
+			if (this.entityWriter != null) {
+				this.entityWriter.flush();
+			}
 
 			// Determine content details
 			int contentLength = this.bufferPoolOutputStream.getContentLength();

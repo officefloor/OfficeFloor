@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.mock.MockBufferPool;
@@ -116,14 +116,16 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 	 *            Listing of validators for each {@link StreamBuffer}.
 	 */
 	@SafeVarargs
-	private final void assertBuffers(Consumer<StreamBuffer<byte[]>>... validators) {
+	private final void assertBuffers(Function<StreamBuffer<byte[]>, Integer>... validators) {
 		List<StreamBuffer<byte[]>> buffers = this.outputStream.getBuffers();
 		assertEquals("Incorrect number of buffers", validators.length, buffers.size());
 		Iterator<StreamBuffer<byte[]>> bufferIterator = buffers.iterator();
-		for (Consumer<StreamBuffer<byte[]>> validator : validators) {
+		int expectedTotalBytes = 0;
+		for (Function<StreamBuffer<byte[]>, Integer> validator : validators) {
 			StreamBuffer<byte[]> buffer = bufferIterator.next();
-			validator.accept(buffer);
+			expectedTotalBytes += validator.apply(buffer);
 		}
+		assertEquals("Incorrect Content-Length", expectedTotalBytes, this.outputStream.getContentLength());
 	}
 
 	/**
@@ -133,8 +135,9 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 	 *            {@link StreamBuffer}.
 	 * @param expectedBytes
 	 *            Expected bytes.
+	 * @return Number of bytes in buffer.
 	 */
-	private static void assertData(StreamBuffer<byte[]> buffer, int... expectedBytes) {
+	private static int assertData(StreamBuffer<byte[]> buffer, int... expectedBytes) {
 		assertTrue("Should be pooled buffer", buffer.isPooled());
 		byte[] data = buffer.getPooledBuffer();
 		assertTrue("Buffer should be larger than expected bytes", data.length >= expectedBytes.length);
@@ -144,6 +147,7 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 		for (int i = expectedBytes.length; i < data.length; i++) {
 			assertEquals("Rest of buffer empty for byte " + i, 0, data[i]);
 		}
+		return expectedBytes.length;
 	}
 
 	/**
@@ -153,14 +157,16 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 	 *            {@link StreamBuffer}.
 	 * @param expectedBytes
 	 *            Expected bytes.
+	 * @return Number of bytes in buffer.
 	 */
-	private static void assertByteBuffer(StreamBuffer<byte[]> buffer, int... expectedBytes) {
+	private static int assertByteBuffer(StreamBuffer<byte[]> buffer, int... expectedBytes) {
 		assertFalse("Should be unpooled buffer", buffer.isPooled());
 		ByteBuffer byteBuffer = buffer.getUnpooledByteBuffer();
 		assertEquals("Incorrect number of bytes", expectedBytes.length, byteBuffer.remaining());
 		for (int i = 0; i < expectedBytes.length; i++) {
 			assertEquals("Incorrect byte " + i, expectedBytes[i], byteBuffer.get());
 		}
+		return expectedBytes.length;
 	}
 
 }

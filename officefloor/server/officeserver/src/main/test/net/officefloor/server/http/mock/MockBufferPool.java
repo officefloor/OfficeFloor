@@ -297,6 +297,17 @@ public class MockBufferPool implements BufferPool<byte[]> {
 	private static class MockBufferPoolInputStream extends InputStream {
 
 		/**
+		 * Translate the byte to an int value.
+		 * 
+		 * @param value
+		 *            Byte value.
+		 * @return Int value.
+		 */
+		private static int byteToInt(byte value) {
+			return value & 0xff;
+		}
+
+		/**
 		 * {@link Iterator} over the {@link StreamBuffer} instances for the
 		 * stream of data to return.
 		 */
@@ -346,7 +357,7 @@ public class MockBufferPool implements BufferPool<byte[]> {
 						// Determine if can read data from buffer
 						if (this.currentBufferPosition < pooledBuffer.position) {
 							// Read the data from the buffer
-							return bufferData[this.currentBufferPosition++];
+							return byteToInt(bufferData[this.currentBufferPosition++]);
 						}
 
 						// As here, finished reading current buffer
@@ -358,7 +369,7 @@ public class MockBufferPool implements BufferPool<byte[]> {
 
 						// Determine if can read from byte buffer
 						if (byteBuffer.remaining() > 0) {
-							return byteBuffer.get();
+							return byteToInt(byteBuffer.get());
 						}
 
 						// As here, finished reading current buffer
