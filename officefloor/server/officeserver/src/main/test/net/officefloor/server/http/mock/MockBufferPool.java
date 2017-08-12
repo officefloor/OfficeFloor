@@ -120,6 +120,25 @@ public class MockBufferPool implements BufferPool<byte[]> {
 	}
 
 	/**
+	 * Indicates if there are active {@link StreamBuffer} instances.
+	 * 
+	 * @return <code>true</code> if there are active {@link StreamBuffer}
+	 *         instances not released back to this {@link BufferPool}.
+	 */
+	public boolean isActiveBuffers() {
+
+		// Determine if non-released (active) buffer
+		for (AbstractMockStreamBuffer buffer : this.createdBuffers) {
+			if (!buffer.isReleased) {
+				return true; // not released buffer, so still active
+			}
+		}
+
+		// All buffers released, so none are active
+		return false;
+	}
+
+	/**
 	 * Asserts that all {@link StreamBuffer} instances have been released.
 	 */
 	public void assertAllBuffersReturned() {

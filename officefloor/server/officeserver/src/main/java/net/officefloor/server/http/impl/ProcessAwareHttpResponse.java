@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.nio.charset.Charset;
 
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
+import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpResponseHeaders;
@@ -54,6 +55,11 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	private static final HttpHeaderValue TEXT_CONTENT = new HttpHeaderValue("text/plain");
 
 	/**
+	 * Client {@link HttpVersion}.
+	 */
+	private final HttpVersion clientVersion;
+
+	/**
 	 * {@link HttpVersion}.
 	 */
 	private HttpVersion version;
@@ -66,7 +72,7 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	/**
 	 * {@link ProcessAwareHttpResponseHeaders}.
 	 */
-	private final ProcessAwareHttpResponseHeaders headers;
+	private ProcessAwareHttpResponseHeaders headers;
 
 	/**
 	 * {@link BufferPoolServerOutputStream}.
@@ -122,6 +128,7 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	 */
 	public ProcessAwareHttpResponse(HttpVersion version, BufferPool<B> bufferPool,
 			ProcessAwareContext processAwareContext, HttpResponseWriter<B> responseWriter) {
+		this.clientVersion = version;
 		this.version = version;
 		this.headers = new ProcessAwareHttpResponseHeaders(processAwareContext);
 		this.bufferPoolOutputStream = new BufferPoolServerOutputStream<>(bufferPool, this);
@@ -160,13 +167,26 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 		}
 	}
 
+	/**
+	 * Undertakes a {@link ProcessSafeOperation}.
+	 * 
+	 * @param operation
+	 *            {@link ProcessSafeOperation}.
+	 * @return Result of {@link ProcessSafeOperation}.
+	 * @throws T
+	 *             Possible {@link Throwable} from {@link ProcessSafeOperation}.
+	 */
+	private <R, T extends Throwable> R safe(ProcessSafeOperation<R, T> operation) throws T {
+		return this.processAwareContext.run(operation);
+	}
+
 	/*
 	 * ===================== HttpResponse ========================
 	 */
 
 	@Override
 	public HttpVersion getHttpVersion() {
-		return this.processAwareContext.run(() -> this.version);
+		return this.safe(() -> this.version);
 	}
 
 	@Override
@@ -174,12 +194,12 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 		if (version == null) {
 			throw new IllegalArgumentException("Must provide version");
 		}
-		this.processAwareContext.run(() -> this.version = version);
+		this.safe(() -> this.version = version);
 	}
 
 	@Override
 	public HttpStatus getHttpStatus() {
-		return this.processAwareContext.run(() -> this.status);
+		return this.safe(() -> this.status);
 	}
 
 	@Override
@@ -187,7 +207,7 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 		if (status == null) {
 			throw new IllegalArgumentException("Must provide status");
 		}
-		this.processAwareContext.run(() -> this.status = status);
+		this.safe(() -> this.status = status);
 	}
 
 	@Override
@@ -197,7 +217,7 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 
 	@Override
 	public void setContentType(String contentType, Charset charset) throws IOException {
-		this.processAwareContext.run(() -> {
+		this.safe(() -> {
 
 			// Ensure can change Content-Type
 			this.allowContentTypeChange();
@@ -221,7 +241,7 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 
 	@Override
 	public void setContentType(HttpHeaderValue contentTypeAndCharsetValue, Charset charset) throws IOException {
-		this.processAwareContext.run(() -> {
+		this.safe(() -> {
 
 			// Ensure can change Content-Type
 			this.allowContentTypeChange();
@@ -239,12 +259,12 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 
 	@Override
 	public String getContentType() {
-		return this.processAwareContext.run(() -> this.deriveContentType().getValue());
+		return this.safe(() -> this.deriveContentType().getValue());
 	}
 
 	@Override
 	public Charset getContentCharset() {
-		return this.processAwareContext.run(() -> this.charset);
+		return this.safe(() -> this.charset);
 	}
 
 	@Override
@@ -254,22 +274,45 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 
 	@Override
 	public ServerWriter getEntityWriter() throws IOException {
-		if (this.entityWriter == null) {
-			this.entityWriter = new ProcessAwareServerWriter(this.bufferPoolOutputStream.getServerWriter(this.charset),
-					this.processAwareContext);
-		}
-		return this.entityWriter;
+		return this.safe(() -> {
+			if (this.entityWriter == null) {
+				this.entityWriter = new ProcessAwareServerWriter(
+						this.bufferPoolOutputStream.getServerWriter(this.charset), this.processAwareContext);
+			}
+			return this.entityWriter;
+		});
 	}
 
 	@Override
 	public void reset() throws IOException {
-		// TODO Auto-generated method stub
+		this.safe(() -> {
 
+			// Ensure not sent
+			if (this.isSent) {
+				throw new IOException("Already committed to send response");
+			}
+
+			// Reset the response
+			this.version = this.clientVersion;
+			this.status = HttpStatus.OK;
+			this.headers = new ProcessAwareHttpResponseHeaders(processAwareContext);
+
+			// Release writing content
+			this.contentType = null;
+			this.charset = ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET;
+			this.entityWriter = null;
+
+			// Release the buffers
+			this.bufferPoolOutputStream.clear();
+
+			// Void return
+			return null;
+		});
 	}
 
 	@Override
 	public void send() throws IOException {
-		this.processAwareContext.run(() -> {
+		this.safe(() -> {
 
 			// Determine if already sent
 			if (this.isSent) {

@@ -135,6 +135,23 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 	}
 
 	/**
+	 * Clears this {@link OutputStream} and releases the {@link StreamBuffer}
+	 * instances.
+	 */
+	public void clear() {
+
+		// Release all the buffer
+		for (StreamBuffer<B> buffer : this.buffers) {
+			buffer.release();
+		}
+		this.buffers.clear();
+		this.currentBuffer = null;
+
+		// No content
+		this.contentLength = 0;
+	}
+
+	/**
 	 * Ensures the {@link OutputStream} is open.
 	 * 
 	 * @throws IOException

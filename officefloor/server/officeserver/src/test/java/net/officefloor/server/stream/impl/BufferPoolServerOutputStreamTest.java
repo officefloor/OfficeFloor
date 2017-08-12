@@ -18,6 +18,7 @@
 package net.officefloor.server.stream.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.List;
@@ -108,6 +109,35 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 				(buffer) -> assertData(buffer, 5, 6, 7, 8), (buffer) -> assertData(buffer, 9),
 				(buffer) -> assertByteBuffer(buffer, 10), (buffer) -> assertByteBuffer(buffer, 11),
 				(buffer) -> assertData(buffer, 12));
+	}
+
+	/**
+	 * Ensure can clear the {@link BufferPoolServerOutputStream}.
+	 */
+	public void testClear() throws IOException {
+
+		// Write content
+		this.outputStream.write(new byte[] { 1, 2, 3, 4, 5 });
+		this.outputStream.write(ByteBuffer.wrap(new byte[] { 6, 7, 8, 9, 10 }));
+		this.outputStream.write(11);
+		assertEquals("Incorrect content length", 11, this.outputStream.getContentLength());
+
+		// Clear the output
+		this.outputStream.clear();
+
+		// Ensure all buffers released
+		this.bufferPool.assertAllBuffersReturned();
+		assertEquals("Should be no content", 0, this.outputStream.getContentLength());
+
+		// Ensure can write some further content
+		this.outputStream.write(12);
+		assertEquals("Should start length incrementing again", 1, this.outputStream.getContentLength());
+
+		// Ensure only data after the clear
+		MockBufferPool.releaseStreamBuffers(this.outputStream.getBuffers());
+		InputStream input = MockBufferPool.createInputStream(this.outputStream.getBuffers());
+		assertEquals("Incorrect value after clear", 12, input.read());
+		assertEquals("Should be only the byte", -1, input.read());
 	}
 
 	/**

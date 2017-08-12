@@ -17,8 +17,6 @@
  */
 package net.officefloor.server.http.impl;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.Serializable;
 
 import net.officefloor.server.http.HttpMethod;
@@ -55,7 +53,7 @@ public class SerialisableHttpRequest implements HttpRequest, Serializable {
 	/**
 	 * {@link HttpVersion}.
 	 */
-	private final HttpVersion version;
+	private transient final HttpVersion version;
 
 	/**
 	 * {@link HttpRequestHeaders}.
@@ -137,6 +135,18 @@ public class SerialisableHttpRequest implements HttpRequest, Serializable {
 	}
 
 	/**
+	 * Creates a {@link SerialisableHttpRequest} from this {@link Serializable}
+	 * state.
+	 * 
+	 * @param clientHttpVersion
+	 *            {@link HttpVersion} that the client is currently using.
+	 * @return {@link SerialisableHttpRequest}.
+	 */
+	public SerialisableHttpRequest createHttpRequest(HttpVersion clientHttpVersion) {
+		return new SerialisableHttpRequest(this.method, this.requestUri, clientHttpVersion, this.headers, entity);
+	}
+
+	/**
 	 * Obtains the {@link ByteSequence} for the entity.
 	 * 
 	 * @return {@link ByteSequence} for the entity.
@@ -172,15 +182,6 @@ public class SerialisableHttpRequest implements HttpRequest, Serializable {
 	@Override
 	public ServerInputStream getEntity() {
 		return this.entityStream;
-	}
-
-	/**
-	 * =============== Serializable ==================
-	 */
-
-	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-		in.defaultReadObject();
-		this.entityStream = new ByteSequenceServerInputStream(this.entity, 0);
 	}
 
 }

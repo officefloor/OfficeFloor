@@ -71,9 +71,14 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	private final Supplier<HttpMethod> methodSupplier;
 
 	/**
-	 * {@link HttpRequestHeaders}.
+	 * Client {@link HttpMethod}.
 	 */
-	private final HttpRequestHeaders headers;
+	private HttpMethod clientMethod = null;
+
+	/**
+	 * Client {@link HttpRequestHeaders}.
+	 */
+	private final HttpRequestHeaders clientHeaders;
 
 	/**
 	 * {@link BufferPool}.
@@ -84,11 +89,6 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	 * {@link HttpResponseWriter}.
 	 */
 	private final HttpResponseWriter<B> httpResponseWriter;
-
-	/**
-	 * {@link HttpMethod}.
-	 */
-	private HttpMethod method = null;
 
 	/**
 	 * {@link ProcessAwareContext}.
@@ -125,8 +125,8 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 		this.isSecure = isSecure;
 
 		// Create the HTTP request
-		this.headers = new MaterialisingHttpRequestHeaders(requestHeaders);
-		this.request = new MaterialisingHttpRequest(methodSupplier, requestUriSupplier, version, this.headers,
+		this.clientHeaders = new MaterialisingHttpRequestHeaders(requestHeaders);
+		this.request = new MaterialisingHttpRequest(methodSupplier, requestUriSupplier, version, this.clientHeaders,
 				requestEntity);
 		this.methodSupplier = methodSupplier;
 		this.requestEntity = requestEntity;
@@ -165,7 +165,7 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 
 	@Override
 	public HttpRequest getHttpRequest() {
-		return this.request;
+		return this.processAwareContext.run(() -> this.request);
 	}
 
 	@Override
@@ -184,7 +184,8 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 			if (!(momento instanceof SerialisableHttpRequest)) {
 				throw new IllegalArgumentException("Invalid momento to import state");
 			}
-			SerialisableHttpRequest serialisableRequest = (SerialisableHttpRequest) momento;
+			SerialisableHttpRequest state = (SerialisableHttpRequest) momento;
+			SerialisableHttpRequest serialisableRequest = state.createHttpRequest(this.request.getHttpVersion());
 			this.request = serialisableRequest;
 			this.requestEntity = serialisableRequest.getEntityByteSequence();
 			return null;
@@ -193,15 +194,15 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 
 	@Override
 	public HttpMethod getClientHttpMethod() {
-		if (this.method == null) {
-			this.method = this.methodSupplier.get();
+		if (this.clientMethod == null) {
+			this.clientMethod = this.methodSupplier.get();
 		}
-		return this.method;
+		return this.clientMethod;
 	}
 
 	@Override
 	public HttpRequestHeaders getClientHttpHeaders() {
-		return this.headers;
+		return this.clientHeaders;
 	}
 
 }

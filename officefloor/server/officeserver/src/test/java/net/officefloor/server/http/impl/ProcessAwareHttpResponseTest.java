@@ -279,6 +279,72 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		assertEquals("Incorrect sent content", "TEST", content);
 	}
 
+	/**
+	 * Ensure reset the {@link HttpResponse}.
+	 */
+	public void testReset() throws IOException {
+
+		// Ensure different charset
+		Charset charset = Charset.forName("UTF-16");
+		assertNotEquals("Should not be UTF-16", charset, this.response.getContentCharset());
+
+		// Mutate the response
+		this.response.setHttpStatus(HttpStatus.CONTINUE);
+		this.response.setHttpVersion(HttpVersion.HTTP_1_0);
+		this.response.setContentType("text/html", charset);
+		this.response.getHttpHeaders().addHeader("name", "value");
+		ServerWriter writer = this.response.getEntityWriter();
+		writer.write("TEST");
+		writer.flush();
+
+		// Ensure response mutated
+		assertEquals("Incorrect mutated status", HttpStatus.CONTINUE, this.response.getHttpStatus());
+		assertEquals("Incorrect mutated version", HttpVersion.HTTP_1_0, this.response.getHttpVersion());
+		assertEquals("Incorrect mutated heders", 1, this.response.getHttpHeaders().length());
+		assertTrue("Should be using buffers for entity content", this.bufferPool.isActiveBuffers());
+
+		// Reset
+		this.response.reset();
+
+		// Ensure response reset
+		assertEquals("Inccorect reset status", HttpStatus.OK, this.response.getHttpStatus());
+		assertEquals("Incorrect reset version", HttpVersion.HTTP_1_1, this.response.getHttpVersion());
+		assertEquals("Should clear headers", 0, this.response.getHttpHeaders().length());
+		assertFalse("No entity, as should release all buffers", this.bufferPool.isActiveBuffers());
+
+		// Ensure able to continue forming response (typically an error)
+		this.response.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+		this.response.setHttpVersion(HttpVersion.HTTP_1_0);
+		this.response.getHttpHeaders().addHeader("error", "occurred");
+		this.response.getEntityWriter().write("ERROR: something");
+
+		// Send response (to ensure reset entity)
+		this.response.send();
+
+		// Ensure correct details sent
+		assertEquals("Incorrect version", HttpVersion.HTTP_1_0, this.version);
+		assertEquals("Incorrect status", HttpStatus.INTERNAL_SERVER_ERROR, this.status);
+		Iterator<WritableHttpHeader> headers = this.httpHeaders.iterator();
+		assertTrue("Should be a header", headers.hasNext());
+		WritableHttpHeader header = headers.next();
+		assertEquals("Incorrect header name", "error", header.getName());
+		assertEquals("incorrect header value", "occurred", header.getValue());
+		assertFalse("Should only be one header", headers.hasNext());
+
+		// Ensure only entity content after the reset is sent
+		MockBufferPool.releaseStreamBuffers(this.content);
+		String content = MockBufferPool.getContent(this.content, ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
+		assertEquals("Incorrect entity content since reset", "ERROR: something", content);
+
+		// Ensure can not reset after sending
+		try {
+			this.response.reset();
+			fail("Should not be sucessful");
+		} catch (IOException ex) {
+			assertEquals("Already committed to send response", ex.getMessage());
+		}
+	}
+
 	/*
 	 * ===================== HttpResponseWriter ============================
 	 */
