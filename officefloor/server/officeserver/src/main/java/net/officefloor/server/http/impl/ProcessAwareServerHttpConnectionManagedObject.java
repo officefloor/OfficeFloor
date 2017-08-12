@@ -26,6 +26,7 @@ import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -68,6 +69,11 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	 * {@link Supplier} for the {@link HttpMethod}.
 	 */
 	private final Supplier<HttpMethod> methodSupplier;
+
+	/**
+	 * {@link HttpRequestHeaders}.
+	 */
+	private final HttpRequestHeaders headers;
 
 	/**
 	 * {@link BufferPool}.
@@ -119,8 +125,9 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 		this.isSecure = isSecure;
 
 		// Create the HTTP request
-		this.request = new MaterialisingHttpRequest(methodSupplier, requestUriSupplier, version,
-				new MaterialisingHttpRequestHeaders(requestHeaders), requestEntity);
+		this.headers = new MaterialisingHttpRequestHeaders(requestHeaders);
+		this.request = new MaterialisingHttpRequest(methodSupplier, requestUriSupplier, version, this.headers,
+				requestEntity);
 		this.methodSupplier = methodSupplier;
 		this.requestEntity = requestEntity;
 
@@ -174,6 +181,9 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	@Override
 	public void importState(Serializable momento) throws IllegalArgumentException, IOException {
 		this.processAwareContext.run(() -> {
+			if (!(momento instanceof SerialisableHttpRequest)) {
+				throw new IllegalArgumentException("Invalid momento to import state");
+			}
 			SerialisableHttpRequest serialisableRequest = (SerialisableHttpRequest) momento;
 			this.request = serialisableRequest;
 			this.requestEntity = serialisableRequest.getEntityByteSequence();
@@ -182,11 +192,16 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	}
 
 	@Override
-	public HttpMethod getHttpMethod() {
+	public HttpMethod getClientHttpMethod() {
 		if (this.method == null) {
 			this.method = this.methodSupplier.get();
 		}
 		return this.method;
+	}
+
+	@Override
+	public HttpRequestHeaders getClientHttpHeaders() {
+		return this.headers;
 	}
 
 }

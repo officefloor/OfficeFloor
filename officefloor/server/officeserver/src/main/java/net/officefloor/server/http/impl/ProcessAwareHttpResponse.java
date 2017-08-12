@@ -32,6 +32,7 @@ import net.officefloor.server.stream.BufferPool;
 import net.officefloor.server.stream.ServerOutputStream;
 import net.officefloor.server.stream.ServerWriter;
 import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
+import net.officefloor.server.stream.impl.CloseHandler;
 import net.officefloor.server.stream.impl.ProcessAwareServerOutputStream;
 import net.officefloor.server.stream.impl.ProcessAwareServerWriter;
 
@@ -40,7 +41,7 @@ import net.officefloor.server.stream.impl.ProcessAwareServerWriter;
  * 
  * @author Daniel Sagenschneider
  */
-public class ProcessAwareHttpResponse<B> implements HttpResponse {
+public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 
 	/**
 	 * Binary <code>Content-Type</code>.
@@ -103,6 +104,11 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse {
 	private Charset charset = ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET;
 
 	/**
+	 * Indicates if this {@link HttpResponse} has been sent.
+	 */
+	private boolean isSent = false;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param version
@@ -118,7 +124,7 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse {
 			ProcessAwareContext processAwareContext, HttpResponseWriter<B> responseWriter) {
 		this.version = version;
 		this.headers = new ProcessAwareHttpResponseHeaders(processAwareContext);
-		this.bufferPoolOutputStream = new BufferPoolServerOutputStream<>(bufferPool);
+		this.bufferPoolOutputStream = new BufferPoolServerOutputStream<>(bufferPool, this);
 		this.safeOutputStream = new ProcessAwareServerOutputStream(this.bufferPoolOutputStream, processAwareContext);
 		this.processAwareContext = processAwareContext;
 		this.responseWriter = responseWriter;
@@ -265,6 +271,11 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse {
 	public void send() throws IOException {
 		this.processAwareContext.run(() -> {
 
+			// Determine if already sent
+			if (this.isSent) {
+				return null; // already sent
+			}
+
 			// If writer, ensure flushed
 			if (this.entityWriter != null) {
 				this.entityWriter.flush();
@@ -277,13 +288,32 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse {
 				contentType = this.deriveContentType();
 			}
 
-			// Write the response
+			// Write the response (and consider sent)
+			this.isSent = true;
 			this.responseWriter.writeHttpResponse(this.version, this.status, this.headers.getWritableHttpHeaders(),
 					contentLength, contentType, this.bufferPoolOutputStream.getBuffers());
 
 			// Void return
 			return null;
 		});
+	}
+
+	/*
+	 * ======================= CloseHandler =================================
+	 */
+
+	@Override
+	public boolean isClosed() {
+
+		// Closed if sent
+		return this.isSent;
+	}
+
+	@Override
+	public void close() throws IOException {
+
+		// Send on close
+		this.send();
 	}
 
 }

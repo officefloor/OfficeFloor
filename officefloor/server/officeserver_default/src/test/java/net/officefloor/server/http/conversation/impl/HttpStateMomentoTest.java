@@ -168,7 +168,7 @@ public class HttpStateMomentoTest extends OfficeFrameTestCase {
 			}
 
 			// Ensure connection still reflects the actual HTTP method
-			assertEquals("Incorrect connection HTTP method", "OVERRIDE_METHOD", newConnection.getHttpMethod());
+			assertEquals("Incorrect connection HTTP method", "OVERRIDE_METHOD", newConnection.getClientHttpMethod());
 
 		} catch (Exception ex) {
 			fail(ex);

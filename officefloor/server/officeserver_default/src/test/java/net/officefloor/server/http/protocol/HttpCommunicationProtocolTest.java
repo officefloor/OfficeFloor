@@ -286,7 +286,7 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 		assertNotNull("Should have received HTTP request", this.serverHttpConnection);
 		assertHttpRequest(this.serverHttpConnection.getHttpRequest(), expectedMethod, expectedUri, expectedEntity,
 				expectedHeaderNameValues);
-		assertEquals("Incorrect connection HTTP method", expectedMethod, this.serverHttpConnection.getHttpMethod());
+		assertEquals("Incorrect connection HTTP method", expectedMethod, this.serverHttpConnection.getClientHttpMethod());
 	}
 
 	/**

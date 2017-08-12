@@ -27,6 +27,8 @@ import java.io.StringWriter;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -56,8 +58,15 @@ public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 	/**
 	 * {@link ServerWriter} to test.
 	 */
-	private final ServerWriter writer = this.outputStream
-			.getServerWriter(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
+	private ServerWriter writer;
+
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+
+		// Create the server writer to test
+		this.writer = this.outputStream.getServerWriter(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
+	}
 
 	/**
 	 * Obtains the content written to buffers.
@@ -175,6 +184,78 @@ public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 		this.writer.write(new char[] { '.' });
 		this.writer.flush();
 		assertEquals("Incorrect written data", "TEST-buffer.", this.getContent());
+	}
+
+	/**
+	 * Ensure triggers close.
+	 */
+	public void testClose() throws IOException {
+
+		final CloseHandler handler = this.createMock(CloseHandler.class);
+		@SuppressWarnings("resource")
+		BufferPoolServerOutputStream<byte[]> outputStream = new BufferPoolServerOutputStream<>(this.bufferPool,
+				handler);
+
+		// Record close only once
+		this.recordReturn(handler, handler.isClosed(), false); // ServerWriter
+		this.recordReturn(handler, handler.isClosed(), false); // writer close
+		this.recordReturn(handler, handler.isClosed(), false); // outputStream
+		handler.close();
+		this.recordReturn(handler, handler.isClosed(), true);
+
+		// Replay
+		this.replayMockObjects();
+
+		// Obtain the writer
+		final ServerWriter writer = outputStream.getServerWriter(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
+
+		// Close
+		writer.close();
+
+		// Should only close once
+		writer.close();
+
+		// Verify close only once
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Closed operation {@link Function} interface.
+	 */
+	private static interface ClosedOperation {
+		void run() throws IOException;
+	}
+
+	/**
+	 * Ensure {@link IOException} itestf closed.
+	 */
+	public void testEnsureClosed() throws IOException {
+
+		// Close the output
+		this.writer.close();
+
+		// Tests that exception on being closed
+		Consumer<ClosedOperation> test = (operation) -> {
+			try {
+				operation.run();
+				fail("Should not be successful");
+			} catch (IOException ex) {
+				assertEquals("Incorrect cause", "Stream closed", ex.getMessage());
+			}
+		};
+
+		// Ensure closed
+		test.accept(() -> this.writer.flush());
+		test.accept(() -> this.writer.append((char) 1));
+		test.accept(() -> this.writer.append("2"));
+		test.accept(() -> this.writer.append("3", 0, 1));
+		test.accept(() -> this.writer.write(new byte[] { 4 }));
+		test.accept(() -> this.writer.write(ByteBuffer.wrap(new byte[] { 5 })));
+		test.accept(() -> this.writer.write(6));
+		test.accept(() -> this.writer.write(new char[] { 7 }));
+		test.accept(() -> this.writer.write("9"));
+		test.accept(() -> this.writer.write(new char[] { 9 }, 0, 1));
+		test.accept(() -> this.writer.write("10", 0, 2));
 	}
 
 }

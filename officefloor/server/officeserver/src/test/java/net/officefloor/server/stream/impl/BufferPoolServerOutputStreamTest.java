@@ -21,9 +21,11 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockBufferPool;
 import net.officefloor.server.stream.StreamBuffer;
 
@@ -106,6 +108,67 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 				(buffer) -> assertData(buffer, 5, 6, 7, 8), (buffer) -> assertData(buffer, 9),
 				(buffer) -> assertByteBuffer(buffer, 10), (buffer) -> assertByteBuffer(buffer, 11),
 				(buffer) -> assertData(buffer, 12));
+	}
+
+	/**
+	 * Ensure triggers close.
+	 */
+	public void testClose() throws IOException {
+
+		final CloseHandler handler = this.createMock(CloseHandler.class);
+		final BufferPoolServerOutputStream<byte[]> outputStream = new BufferPoolServerOutputStream<>(this.bufferPool,
+				handler);
+
+		// Record close only once
+		this.recordReturn(handler, handler.isClosed(), false);
+		handler.close();
+		this.recordReturn(handler, handler.isClosed(), true);
+
+		// Replay
+		this.replayMockObjects();
+
+		// Close
+		outputStream.close();
+
+		// Should only close once
+		outputStream.close();
+
+		// Verify close only once
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Closed operation {@link Function} interface.
+	 */
+	private static interface ClosedOperation {
+		void run() throws IOException;
+	}
+
+	/**
+	 * Ensure {@link IOException} itestf closed.
+	 */
+	public void testEnsureClosed() throws IOException {
+
+		// Close the output
+		this.outputStream.close();
+
+		// Tests that exception on being closed
+		Consumer<ClosedOperation> test = (operation) -> {
+			try {
+				operation.run();
+				fail("Should not be successful");
+			} catch (IOException ex) {
+				assertEquals("Incorrect cause", "Closed", ex.getMessage());
+			}
+		};
+
+		// Ensure closed
+		test.accept(() -> this.outputStream.flush());
+		test.accept(() -> this.outputStream.getServerWriter(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
+		test.accept(() -> this.outputStream.write(new byte[] { 1 }));
+		test.accept(() -> this.outputStream.write(ByteBuffer.wrap(new byte[] { 2 })));
+		test.accept(() -> this.outputStream.write(3));
+		test.accept(() -> this.outputStream.write(new byte[] { 4 }, 0, 1));
 	}
 
 	/**

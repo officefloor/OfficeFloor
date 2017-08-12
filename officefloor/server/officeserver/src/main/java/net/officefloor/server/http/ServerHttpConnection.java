@@ -100,17 +100,35 @@ public interface ServerHttpConnection {
 	 * Obtains the client sent {@link HttpMethod} of the
 	 * {@link ServerHttpConnection}.
 	 * <p>
-	 * As the {@link HttpRequest} method is overridden, this method may be used
-	 * by logic requiring to know the actual client HTTP method. An example of
-	 * this logic is the POST/redirect/GET pattern that needs to know whether
-	 * the client sent {@link HttpRequest} method is a <code>POST</code> or
-	 * <code>GET</code> (regardless of imported state).
+	 * As the {@link HttpRequest} is overridden, this allows logic requiring to
+	 * know the actual client {@link HttpMethod}. An example of this logic is
+	 * the POST/redirect/GET pattern that needs to know whether the client sent
+	 * {@link HttpRequest} method is a <code>POST</code> or <code>GET</code>
+	 * (regardless of imported state).
 	 * 
 	 * @return Client sent {@link HttpMethod}.
 	 * 
 	 * @see #exportState()
 	 * @see #importState(Serializable)
 	 */
-	HttpMethod getHttpMethod();
+	HttpMethod getClientHttpMethod();
+
+	/**
+	 * <p>
+	 * Obtains the client sent {@link HttpRequestHeaders} of the
+	 * {@link ServerHttpConnection}.
+	 * <p>
+	 * As the {@link HttpRequest} is overridden, this allows logic requiring to
+	 * know the actual client {@link HttpRequestHeaders}. An example of this
+	 * logic is checking for the <code>Authorization</code> {@link HttpHeader}
+	 * to ensure it was sent by the client for servicing the
+	 * {@link HttpRequest}.
+	 * 
+	 * @return Client sent {@link HttpRequestHeaders}.
+	 * 
+	 * @see #exportState()
+	 * @see #importState(Serializable)
+	 */
+	HttpRequestHeaders getClientHttpHeaders();
 
 }

@@ -20,14 +20,17 @@ package net.officefloor.server.http.impl;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
@@ -35,9 +38,11 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockBufferPool;
 import net.officefloor.server.http.mock.MockNonMaterialisedHttpHeaders;
 import net.officefloor.server.http.mock.MockProcessAwareContext;
+import net.officefloor.server.stream.ServerOutputStream;
 import net.officefloor.server.stream.ServerWriter;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.impl.ByteArrayByteSequence;
+import net.officefloor.server.stream.impl.ByteSequence;
 
 /**
  * Tests the {@link ProcessAwareServerHttpConnectionManagedObject}.
@@ -60,7 +65,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 	/**
 	 * {@link HttpVersion}.
 	 */
-	private final HttpVersion requestVersion = HttpVersion.HTTP_1_1;
+	private HttpVersion requestVersion = HttpVersion.HTTP_1_1;
 
 	/**
 	 * {@link NonMaterialisedHttpHeaders}.
@@ -73,24 +78,25 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 	private final MockBufferPool bufferPool = new MockBufferPool();
 
 	/**
-	 * Request HTTP entity.
-	 */
-	private final ByteArrayByteSequence requestEntity = new ByteArrayByteSequence(
-			"TEST".getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
-
-	/**
 	 * {@link ProcessAwareServerHttpConnectionManagedObject} to be tested.
 	 */
-	private final ProcessAwareServerHttpConnectionManagedObject<byte[]> connection = this.createServerHttpConnection();
+	private final ProcessAwareServerHttpConnectionManagedObject<byte[]> connection = this
+			.createServerHttpConnection("TEST");
 
 	/**
 	 * Creates a {@link ProcessAwareServerHttpConnectionManagedObject} for
 	 * testing.
+	 * 
+	 * @param requestEntityContent
+	 *            Content for the {@link HttpRequest} entity.
 	 */
-	private ProcessAwareServerHttpConnectionManagedObject<byte[]> createServerHttpConnection() {
+	private ProcessAwareServerHttpConnectionManagedObject<byte[]> createServerHttpConnection(
+			String requestEntityContent) {
+		ByteSequence requestEntity = new ByteArrayByteSequence(
+				requestEntityContent.getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
 		ProcessAwareServerHttpConnectionManagedObject<byte[]> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
-				true, () -> this.method, () -> this.requestUri, this.requestVersion, this.requestHeaders,
-				this.requestEntity, this, this.bufferPool);
+				true, () -> this.method, () -> this.requestUri, this.requestVersion, this.requestHeaders, requestEntity,
+				this, this.bufferPool);
 		connection.setProcessAwareContext(new MockProcessAwareContext());
 		return connection;
 	}
@@ -104,7 +110,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		this.requestHeaders.addHttpHeader("name", "value");
 
 		// Ensure correct connection information
-		assertEquals("Incorrect connection method", HttpMethod.GET, this.connection.getHttpMethod());
+		assertEquals("Incorrect connection method", HttpMethod.GET, this.connection.getClientHttpMethod());
 
 		// Ensure correct request information
 		HttpRequest request = this.connection.getHttpRequest();
@@ -182,6 +188,32 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 	}
 
 	/**
+	 * Ensure sends the {@link HttpResponse} on closing the
+	 * {@link ServerOutputStream}.
+	 */
+	public void testSendOnCloseServerOutputStream() throws IOException {
+
+		// Close the output stream
+		this.connection.getHttpResponse().getEntity().close();
+
+		// Ensure response sent
+		assertEquals("Should be sent", HttpStatus.OK, this.status);
+	}
+
+	/**
+	 * Ensure sends the {@link HttpResponse} on closing the
+	 * {@link ServerWriter}.
+	 */
+	public void testSendOnCloseServerWriter() throws IOException {
+
+		// Close the server writer
+		this.connection.getHttpResponse().getEntityWriter().close();
+
+		// Ensure response sent
+		assertEquals("Should be sent", HttpStatus.OK, this.status);
+	}
+
+	/**
 	 * Ensure send only once. Repeated sends will not do anything.
 	 */
 	public void testSendOnlyOnce() throws IOException {
@@ -190,6 +222,10 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		HttpResponse response = this.connection.getHttpResponse();
 		response.setHttpStatus(HttpStatus.BAD_REQUEST);
 
+		// Obtain the entity (must be before close, otherwise exception)
+		ServerOutputStream entity = response.getEntity();
+		ServerWriter entityWriter = response.getEntityWriter();
+
 		// Send
 		response.send();
 		assertEquals("Should be sent", HttpStatus.BAD_REQUEST, this.status);
@@ -197,9 +233,115 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		// Change response and send (but now should not send)
 		response.setHttpStatus(HttpStatus.OK);
 		response.send();
-
-		// Should not re-send (change the response status)
 		assertEquals("Should not re-send", HttpStatus.BAD_REQUEST, this.status);
+
+		// Ensure close output stream does not re-send
+		entity.close();
+		assertEquals("Should not re-send", HttpStatus.BAD_REQUEST, this.status);
+
+		// Ensure close writer does not re-send
+		entityWriter.close();
+		assertEquals("Should not re-send", HttpStatus.BAD_REQUEST, this.status);
+	}
+
+	/**
+	 * Ensure can serialise the {@link ServerHttpConnection} state.
+	 */
+	public void testSerialiseState() throws IOException {
+
+		// Create connection with altered request state
+		this.method = HttpMethod.POST;
+		this.requestUri = "/serialise";
+		this.requestVersion = HttpVersion.HTTP_1_0;
+		this.requestHeaders.addHttpHeader("serialise", "serialised");
+		ServerHttpConnection connection = this.createServerHttpConnection("SERIALISE");
+		assertServerHttpConnection(connection, HttpMethod.POST, "/serialise", HttpVersion.HTTP_1_0,
+				new String[] { "serialise", "serialised" }, "SERIALISE", HttpMethod.POST,
+				new String[] { "serialise", "serialised" });
+
+		// Serialise out the connection state
+		Serializable momento = connection.exportState();
+
+		// Reset the connection details (for new connection)
+		this.method = HttpMethod.GET;
+		this.requestUri = "/";
+		this.requestVersion = HttpVersion.HTTP_1_1;
+		this.requestHeaders = new MockNonMaterialisedHttpHeaders();
+		this.requestHeaders.addHttpHeader("input", "header");
+		ServerHttpConnection newConnection = this.createServerHttpConnection("TEST");
+		assertServerHttpConnection(newConnection, HttpMethod.GET, "/", HttpVersion.HTTP_1_1,
+				new String[] { "input", "header" }, "TEST", HttpMethod.GET, new String[] { "input", "header" });
+
+		// Ensure can import state (maintains version)
+		newConnection.importState(momento);
+		assertServerHttpConnection(newConnection, HttpMethod.POST, "/serialise", HttpVersion.HTTP_1_1,
+				new String[] { "serialise", "serialised" }, "SERIALISE", HttpMethod.GET,
+				new String[] { "input", "header" });
+	}
+
+	/**
+	 * Asserts the content of the {@link HttpRequest}.
+	 * 
+	 * @param connection
+	 *            {@link ServerHttpConnection} containing the
+	 *            {@link HttpRequest}.
+	 * @param requestMethod
+	 *            Expected {@link HttpRequest} {@link HttpMethod}.
+	 * @param requestUri
+	 *            Expected {@link HttpRequest} URI.
+	 * @param requestVersion
+	 *            Expected {@link HttpRequest} {@link HttpVersion}.
+	 * @param requestHeaderNameValuePairs
+	 *            Expected {@link HttpRequest} {@link HttpRequestHeaders}
+	 *            name/value pairs.
+	 * @param enityContent
+	 *            Expected {@link HttpRequest} entity content.
+	 * @param clientMethod
+	 *            Expected client {@link HttpMethod}.
+	 * @param clientHeaderNameValuePairs
+	 *            Expected client {@link HttpRequestHeaders}.
+	 */
+	private void assertServerHttpConnection(ServerHttpConnection connection, HttpMethod requestMethod,
+			String requestUri, HttpVersion requestVersion, String[] requestHeaderNameValuePairs, String enityContent,
+			HttpMethod clientMethod, String[] clientHeaderNameValuePairs) throws IOException {
+
+		// Validate the client details
+		assertEquals("Incorrect client method", this.method, connection.getClientHttpMethod());
+		assertEquals("Incorrect number of client headers", clientHeaderNameValuePairs.length / 2,
+				connection.getClientHttpHeaders().length());
+		for (int i = 0; i < clientHeaderNameValuePairs.length; i += 2) {
+			String name = clientHeaderNameValuePairs[i];
+			String value = clientHeaderNameValuePairs[i + 1];
+			HttpHeader header = connection.getClientHttpHeaders().headerAt(i / 2);
+			assertEquals("Incorrect client header name", name, header.getName());
+			assertEquals("Incorrect client header value", value, header.getValue());
+		}
+
+		// Validate the request
+		HttpRequest request = connection.getHttpRequest();
+		assertEquals("Incorrect request method", requestMethod, request.getHttpMethod());
+		assertEquals("Incorrect request URI", requestUri, request.getRequestURI());
+		assertEquals("Incorrect request version", requestVersion, request.getHttpVersion());
+
+		// Validate the request headers
+		assertEquals("Incorrect number of request headers", requestHeaderNameValuePairs.length / 2,
+				request.getHttpHeaders().length());
+		for (int i = 0; i < requestHeaderNameValuePairs.length; i += 2) {
+			String name = requestHeaderNameValuePairs[i];
+			String value = requestHeaderNameValuePairs[i + 1];
+			HttpHeader header = request.getHttpHeaders().headerAt(i / 2);
+			assertEquals("Incorrect request header name", name, header.getName());
+			assertEquals("Incorrect request header value", value, header.getValue());
+		}
+
+		// Validate the entity content
+		StringWriter actualContent = new StringWriter();
+		InputStreamReader reader = new InputStreamReader(request.getEntity(),
+				ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
+		for (int character = reader.read(); character != -1; character = reader.read()) {
+			actualContent.write(character);
+		}
+		assertEquals("Incorrect request entity", enityContent, actualContent.toString());
 	}
 
 	/*

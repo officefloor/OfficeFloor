@@ -295,7 +295,7 @@ public class HttpTemplateInitialManagedFunctionSourceTest extends OfficeFrameTes
 
 			// Record determining method for POST, redirect, GET pattern
 			if (method != null) {
-				this.recordReturn(connection, connection.getHttpMethod(), method);
+				this.recordReturn(connection, connection.getClientHttpMethod(), method);
 			}
 
 			// Record redirect or render

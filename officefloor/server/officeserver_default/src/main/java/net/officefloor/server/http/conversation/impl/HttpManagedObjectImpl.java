@@ -28,6 +28,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -195,8 +196,14 @@ public class HttpManagedObjectImpl implements HttpManagedObject, ServerHttpConne
 	}
 
 	@Override
-	public HttpMethod getHttpMethod() {
+	public HttpMethod getClientHttpMethod() {
 		return this.clientHttpMethod;
+	}
+
+	@Override
+	public HttpRequestHeaders getClientHttpHeaders() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	/*

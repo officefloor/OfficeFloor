@@ -18,6 +18,7 @@
 package net.officefloor.server.stream.impl;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.ByteBuffer;
@@ -44,6 +45,11 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 	private final BufferPool<B> bufferPool;
 
 	/**
+	 * {@link CloseHandler}.
+	 */
+	private final CloseHandler closeHandler;
+
+	/**
 	 * {@link StreamBuffer} instances with content.
 	 */
 	private final List<StreamBuffer<B>> buffers = new ArrayList<>();
@@ -63,9 +69,35 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 	 * 
 	 * @param bufferPool
 	 *            {@link BufferPool}.
+	 * @param closeHandler
+	 *            {@link CloseHandler}.
+	 */
+	public BufferPoolServerOutputStream(BufferPool<B> bufferPool, CloseHandler closeHandler) {
+		this.bufferPool = bufferPool;
+		this.closeHandler = closeHandler;
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param bufferPool
+	 *            {@link BufferPool}.
 	 */
 	public BufferPoolServerOutputStream(BufferPool<B> bufferPool) {
-		this.bufferPool = bufferPool;
+		this(bufferPool, new CloseHandler() {
+
+			private boolean isClosed = false;
+
+			@Override
+			public boolean isClosed() {
+				return this.isClosed;
+			}
+
+			@Override
+			public void close() {
+				this.isClosed = true;
+			}
+		});
 	}
 
 	/**
@@ -74,8 +106,11 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 	 * @param charset
 	 *            {@link Charset} for writing out {@link String} data.
 	 * @return {@link ServerWriter}.
+	 * @throws IOException
+	 *             Should {@link ServerOutputStream} be closed.
 	 */
-	public ServerWriter getServerWriter(Charset charset) {
+	public ServerWriter getServerWriter(Charset charset) throws IOException {
+		this.ensureOpen();
 		return new BufferPoolServerWriter(charset);
 	}
 
@@ -99,54 +134,60 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 		return this.buffers;
 	}
 
+	/**
+	 * Ensures the {@link OutputStream} is open.
+	 * 
+	 * @throws IOException
+	 *             If {@link OutputStream} is closed.
+	 */
+	private final void ensureOpen() throws IOException {
+		if (this.closeHandler.isClosed()) {
+			throw new IOException("Closed");
+		}
+	}
+
 	/*
 	 * ===================== ServerOutputStream ======================
 	 */
 
 	@Override
 	public void write(ByteBuffer buffer) throws IOException {
-
-		// Easy access to attributes
-		@SuppressWarnings("resource")
-		BufferPoolServerOutputStream<B> stream = BufferPoolServerOutputStream.this;
+		this.ensureOpen();
 
 		// Add the unpooled buffer
-		StreamBuffer<B> streamBuffer = stream.bufferPool.getUnpooledStreamBuffer(buffer);
-		stream.buffers.add(streamBuffer);
+		StreamBuffer<B> streamBuffer = this.bufferPool.getUnpooledStreamBuffer(buffer);
+		this.buffers.add(streamBuffer);
 
 		// Clear current buffer, so new buffer to continue writing
-		stream.currentBuffer = null;
-		
+		this.currentBuffer = null;
+
 		// Content included
 		this.contentLength += buffer.remaining();
 	}
 
 	@Override
 	public void write(int b) throws IOException {
-
-		// Easy access to attributes
-		@SuppressWarnings("resource")
-		BufferPoolServerOutputStream<B> stream = BufferPoolServerOutputStream.this;
+		this.ensureOpen();
 
 		// Ensure have current buffer
-		if (stream.currentBuffer == null) {
-			stream.currentBuffer = stream.bufferPool.getPooledStreamBuffer();
-			stream.buffers.add(stream.currentBuffer);
+		if (this.currentBuffer == null) {
+			this.currentBuffer = this.bufferPool.getPooledStreamBuffer();
+			this.buffers.add(this.currentBuffer);
 		}
 
 		// Write the byte to the current buffer
-		boolean isWritten = stream.currentBuffer.write((byte) b);
+		boolean isWritten = this.currentBuffer.write((byte) b);
 
 		// Determine if full and must write to another buffer
 		if (!isWritten) {
 			// Add another buffer and write the data
-			stream.currentBuffer = stream.bufferPool.getPooledStreamBuffer();
-			stream.buffers.add(stream.currentBuffer);
-			isWritten = stream.currentBuffer.write((byte) b);
+			this.currentBuffer = this.bufferPool.getPooledStreamBuffer();
+			this.buffers.add(this.currentBuffer);
+			isWritten = this.currentBuffer.write((byte) b);
 			if (!isWritten) {
 				// Should always be able to write a byte to a new buffer
 				throw new IOException("Failed to write byte " + String.valueOf(b) + " to new "
-						+ stream.currentBuffer.getClass().getName());
+						+ this.currentBuffer.getClass().getName());
 			}
 		}
 
@@ -156,25 +197,23 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 
 	@Override
 	public void write(byte[] bytes, int off, int len) throws IOException {
-		// Easy access to attributes
-		@SuppressWarnings("resource")
-		BufferPoolServerOutputStream<B> stream = BufferPoolServerOutputStream.this;
+		this.ensureOpen();
 
 		// All mutation of values
 		int offset = off;
 		int remaining = len;
 
 		// Ensure have current buffer
-		if (stream.currentBuffer == null) {
-			stream.currentBuffer = stream.bufferPool.getPooledStreamBuffer();
-			stream.buffers.add(stream.currentBuffer);
+		if (this.currentBuffer == null) {
+			this.currentBuffer = this.bufferPool.getPooledStreamBuffer();
+			this.buffers.add(this.currentBuffer);
 		}
 
 		// Keep writing to buffers until complete
 		do {
 
 			// Write the bytes to buffer
-			int bytesWritten = stream.currentBuffer.write(bytes, offset, remaining);
+			int bytesWritten = this.currentBuffer.write(bytes, offset, remaining);
 
 			// Determine number of bytes remaining
 			remaining -= bytesWritten;
@@ -182,8 +221,8 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 			// Adjust for potential another write
 			if (remaining > 0) {
 				offset += bytesWritten;
-				stream.currentBuffer = stream.bufferPool.getPooledStreamBuffer();
-				stream.buffers.add(stream.currentBuffer);
+				this.currentBuffer = this.bufferPool.getPooledStreamBuffer();
+				this.buffers.add(this.currentBuffer);
 			}
 
 		} while (remaining > 0);
@@ -194,13 +233,21 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 
 	@Override
 	public void flush() throws IOException {
-		// Nothing to flush
+		this.ensureOpen();
+
+		// Nothing to flush, as always writes straight to buffers
 	}
 
 	@Override
 	public void close() throws IOException {
-		// TODO trigger sending response
-		throw new UnsupportedOperationException("TODO trigger sending response on OutputStream.close()");
+
+		// Ensure close only once
+		if (this.closeHandler.isClosed()) {
+			return; // already closed
+		}
+
+		// Handle close
+		this.closeHandler.close();
 	}
 
 	/**
@@ -301,6 +348,13 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 
 		@Override
 		public void close() throws IOException {
+
+			// Determine if already closed
+			if (BufferPoolServerOutputStream.this.closeHandler.isClosed()) {
+				return; // already closed
+			}
+
+			// Close
 			this.delegate.close();
 		}
 	}
