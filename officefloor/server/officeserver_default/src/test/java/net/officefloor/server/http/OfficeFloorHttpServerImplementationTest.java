@@ -22,7 +22,7 @@ package net.officefloor.server.http;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerImplementationTest {
+public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerImplementationTest<Object> {
 
 	@Override
 	protected HttpServerImplementation createHttpServerImplementation() {
@@ -31,18 +31,18 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 
 	@Override
 	protected HttpHeader[] getServerResponseHeaderValues() {
-		return new HttpHeader[] { newHttpHeader("Content-Length", "?"), newHttpHeader("Content-Type", "?") };
+		return new HttpHeader[] { newHttpHeader("Server", "WoOF 3.0.0"), newHttpHeader("Content-Length", "?") };
 	}
 
 	@Override
 	protected Object startRawHttpServer(int httpPort) throws Exception {
-		// TODO Auto-generated method stub
+		this.startHttpServer(FastServicer.class);
 		return null;
 	}
 
 	@Override
 	protected void stopRawHttpServer(Object momento) throws Exception {
-		// TODO Auto-generated method stub
+		// OfficeFloor will be shutdown
 	}
 
 }
