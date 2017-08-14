@@ -18,38 +18,78 @@
 package net.officefloor.server.http;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import junit.framework.TestCase;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.server.http.impl.SerialisableHttpHeader;
 import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
+import net.officefloor.server.stream.ServerWriter;
 
 /**
  * Abstract {@link TestCase} for testing a {@link HttpServerImplementation}.
  * 
+ * @param <M>
+ *            Type of momento from raw HTTP server.
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractHttpServerImplementationTest extends OfficeFrameTestCase {
+public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFrameTestCase {
 
 	/**
 	 * Number of pipeline requests.
 	 */
-	private static final int PIPELINE_REQUEST_COUNT = 100000;
+	private static final int PIPELINE_REQUEST_COUNT = 1000000;
+
+	/**
+	 * HTTP non-secure port.
+	 */
+	private static final int HTTP_PORT = 7878;
+
+	/**
+	 * HTTPS secure port.
+	 */
+	private static final int HTTPS_PORT = 7979;
+
+	/**
+	 * Creates a new {@link HttpHeader}.
+	 * 
+	 * @param name
+	 *            {@link HttpHeader} name.
+	 * @param value
+	 *            {@link HttpHeader} value.
+	 * @return New {@link HttpHeader}.
+	 */
+	protected static HttpHeader newHttpHeader(String name, String value) {
+		return new SerialisableHttpHeader(name, value);
+	}
+
+	/**
+	 * Test {@link Exception} to be thrown for testing handling
+	 * {@link Escalation}.
+	 */
+	private static final Exception TEST_EXCEPTION = new Exception("Test Failure");
 
 	/**
 	 * Creates the {@link HttpServerImplementation} to test.
@@ -59,9 +99,50 @@ public abstract class AbstractHttpServerImplementationTest extends OfficeFrameTe
 	protected abstract HttpServerImplementation createHttpServerImplementation();
 
 	/**
+	 * <p>
+	 * Starts a raw implementation of the underlying HTTP server. This allows
+	 * performance comparisons of adding in {@link OfficeFloor} servicing
+	 * overheads.
+	 * <p>
+	 * The raw implementation is to return &quote;hello world&quot; in UTF-8
+	 * encoding for the response entity.
+	 * 
+	 * @param httpPort
+	 *            Port to serve requests on.
+	 * @return Momento to provide to stopping the server.
+	 * @throws Exception
+	 *             If fails to start the raw HTTP server.
+	 */
+	protected abstract M startRawHttpServer(int httpPort) throws Exception;
+
+	/**
+	 * Stops the raw implementation.
+	 * 
+	 * @param momento
+	 *            Momento provided from starting the raw HTTP server.
+	 * @throws Exception
+	 *             If fails to stop the raw HTTP server.
+	 */
+	protected abstract void stopRawHttpServer(M momento) throws Exception;
+
+	/**
+	 * Obtains the server response {@link HttpHeader} instances in the order
+	 * they are sent from the server.
+	 * 
+	 * @return Server response {@link HttpHeader} instances in the order they
+	 *         are sent from the server.
+	 */
+	protected abstract HttpHeader[] getServerResponseHeaderValues();
+
+	/**
 	 * {@link OfficeFloor}.
 	 */
-	private OfficeFloor officeFloor;
+	private OfficeFloor officeFloor = null;
+
+	/**
+	 * Momento of HTTP server.
+	 */
+	private M momento = null;
 
 	/**
 	 * Registered {@link PipelineExecutor} instances.
@@ -71,6 +152,52 @@ public abstract class AbstractHttpServerImplementationTest extends OfficeFrameTe
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
+
+		// Reset the compare results
+		CompareResult.reset(this.getClass());
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+
+		// Close the executors
+		for (PipelineExecutor executor : this.executors) {
+			executor.close();
+		}
+
+		// Close the OfficeFloor
+		if (this.officeFloor != null) {
+			this.officeFloor.closeOfficeFloor();
+		}
+
+		// Stop the raw HTTP server
+		if (this.momento != null) {
+			this.stopRawHttpServer(this.momento);
+		}
+
+		// Ensure the server has stopped serving requests
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
+			client.execute(new HttpGet("http://localhost:" + HTTP_PORT + "/test"));
+			fail("Server should have stopped listening");
+		} catch (HttpHostConnectException ex) {
+			assertTrue("Incorrect connection error", ex.getMessage().startsWith("Connect to localhost:7878")
+					&& ex.getMessage().endsWith("failed: Connection refused"));
+		}
+
+		// Remaining tear down
+		super.tearDown();
+	}
+
+	/**
+	 * Starts the {@link HttpServer}.
+	 * 
+	 * @param sectionServicer
+	 *            {@link Class} of the {@link ClassSectionSource} to service the
+	 *            {@link HttpRequest}.
+	 * @throws Exception
+	 *             If fails to start the {@link HttpServer}.
+	 */
+	protected void startHttpServer(Class<?> sectionServicer) throws Exception {
 
 		// Create the HTTP server implementation
 		HttpServerImplementation implementation = this.createHttpServerImplementation();
@@ -87,111 +214,213 @@ public abstract class AbstractHttpServerImplementationTest extends OfficeFrameTe
 					.getDeployedOfficeInput("SERVICER", "service");
 
 			// Configure the HTTP Server
-			HttpServer.configureHttpServer(7878, 7979, implementation, sslContext, serviceHandler,
+			HttpServer.configureHttpServer(HTTP_PORT, HTTPS_PORT, implementation, sslContext, serviceHandler,
 					context.getOfficeFloorDeployer(), context.getOfficeFloorSourceContext());
 
 		});
 		compile.office((context) -> {
-			context.addSection("SERVICER", Servicer.class);
+			context.addSection("SERVICER", sectionServicer);
 		});
 		this.officeFloor = compile.compileAndOpenOfficeFloor();
 	}
 
 	public static class Servicer {
+
 		public void service(ServerHttpConnection connection) throws Exception {
 			assertEquals("Incorrect request URI", "/test", connection.getHttpRequest().getRequestURI());
 			connection.getHttpResponse().getEntityWriter().write("hello world");
 		}
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	public static class FastServicer {
 
-		// Close the executors
-		for (PipelineExecutor executor : this.executors) {
-			executor.close();
+		private static final byte[] HELLO_WORLD = "hello world"
+				.getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
+		private static final HttpHeaderValue TEXT_PLAIN = new HttpHeaderValue("text/plain");
+
+		public void service(ServerHttpConnection connection) throws Exception {
+			net.officefloor.server.http.HttpResponse response = connection.getHttpResponse();
+			response.setContentType(TEXT_PLAIN, null);
+			response.getEntity().write(HELLO_WORLD);
 		}
+	}
 
-		// Close the OfficeFloor
-		if (this.officeFloor != null) {
-			this.officeFloor.closeOfficeFloor();
+	public static class FailServicer {
+		public void service(ServerHttpConnection connection) throws Exception {
+
+			// Write some content, that should be reset
+			net.officefloor.server.http.HttpResponse response = connection.getHttpResponse();
+			response.getHttpHeaders().addHeader("test", "not sent");
+			ServerWriter writer = response.getEntityWriter();
+			writer.write("This content should be reset");
+			writer.flush();
+
+			// Escalate the test exception
+			throw TEST_EXCEPTION;
 		}
-
-		// Remaining tear down
-		super.tearDown();
 	}
 
 	/**
 	 * Ensure can send a single HTTP request.
 	 */
-	public void testSingleRequest() throws IOException {
+	public void testSingleRequest() throws Exception {
+		this.startHttpServer(Servicer.class);
+		this.doSingleRequest(false);
+	}
+
+	/**
+	 * Undertakes a single request.
+	 */
+	private void doSingleRequest(boolean isSecure) throws IOException {
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
-			HttpResponse response = client.execute(new HttpGet("http://localhost:7878/test"));
+			HttpResponse response = client.execute(new HttpGet(
+					(isSecure ? "https" : "http") + "://localhost:" + (isSecure ? HTTPS_PORT : HTTP_PORT) + "/test"));
 			assertEquals("Incorrect status", 200, response.getStatusLine().getStatusCode());
 			assertEquals("Incorrect response", "hello world", HttpClientTestUtil.getEntityBody(response));
+		}
+	}
+
+	/**
+	 * Ensure can handle {@link Escalation}.
+	 */
+	public void testHandleError() throws Exception {
+		this.startHttpServer(FailServicer.class);
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
+			HttpResponse response = client.execute(new HttpGet("http://localhost:" + HTTP_PORT));
+
+			// Ensure flag as internal server error
+			assertEquals("Incorrect status", 500, response.getStatusLine().getStatusCode());
+
+			// Ensure exception in response
+			StringWriter content = new StringWriter();
+			TEST_EXCEPTION.printStackTrace(new PrintWriter(content));
+			String contentText = content.toString();
+			assertEquals("Incorrect response", contentText, HttpClientTestUtil.getEntityBody(response));
+
+			// Ensure correct header information
+			assertEquals("Incorrect error Content-Length", String.valueOf(contentText.length()),
+					response.getFirstHeader("Content-Length").getValue());
+			assertEquals("Incorrect error Content-Type", "text/plain",
+					response.getFirstHeader("Content-Type").getValue());
 		}
 	}
 
 	/**
 	 * Ensure can send a single HTTPS request.
 	 */
-	public void testSingleSecureRequest() throws IOException {
-		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient(true)) {
-			HttpResponse response = client.execute(new HttpGet("https://localhost:7979/test"));
-			assertEquals("Incorrect status", 200, response.getStatusLine().getStatusCode());
-			assertEquals("Incorrect response", "hello world", HttpClientTestUtil.getEntityBody(response));
-		}
+	public void testSingleSecureRequest() throws Exception {
+		this.startHttpServer(Servicer.class);
+		this.doSingleRequest(true);
 	}
 
 	/**
 	 * Ensure can send multiple HTTP requests.
 	 */
-	public void testMultipleRequests() throws IOException {
+	public void testMultipleRequests() throws Exception {
+		this.startHttpServer(Servicer.class);
 		for (int i = 0; i < 1000; i++) {
-			this.testSingleRequest();
+			this.doSingleRequest(false);
 		}
 	}
 
 	/**
 	 * Ensure can send multiple HTTPS requests.
 	 */
-	public void testMultipleSecureRequests() throws IOException {
+	public void testMultipleSecureRequests() throws Exception {
+		this.startHttpServer(Servicer.class);
 		for (int i = 0; i < 1000; i++) {
-			this.testSingleSecureRequest();
+			this.doSingleRequest(true);
 		}
 	}
 
 	/**
 	 * Ensure can pipeline HTTP requests.
 	 */
-	public void testPipelining() throws Exception {
+	public void testOfficeFloorPipelining() throws Exception {
+		this.doPipeliningTest(true);
+	}
+
+	/**
+	 * Ensure can pipeline HTTP requests.
+	 */
+	public void testRawPipelining() throws Exception {
+		this.doPipeliningTest(false);
+	}
+
+	/**
+	 * Undertakes the pipelining test.
+	 * 
+	 * @param isOfficeFloor
+	 *            If is {@link OfficeFloor} HTTP server.
+	 */
+	private void doPipeliningTest(boolean isOfficeFloor) throws Exception {
+
+		// Start the HTTP server
+		if (isOfficeFloor) {
+			// Start the OfficeFloor HTTP server
+			this.startHttpServer(FastServicer.class);
+		} else {
+			// Start the Raw HTTP server
+			this.momento = this.startRawHttpServer(HTTP_PORT);
+		}
 
 		// Create pipeline executor
-		PipelineExecutor executor = new PipelineExecutor(7878, 1000);
+		PipelineExecutor executor = new PipelineExecutor(HTTP_PORT, 1000);
 
 		// Do warm up
-		executor.doPipelineRun(20000).printResult(this.getName() + " WARMUP");
+		executor.doPipelineRun(100000).printResult(this.getName() + " WARMUP");
 
 		// Undertake performance run
-		executor.doPipelineRun(PIPELINE_REQUEST_COUNT).printResult(this.getName() + " RUN");
+		PipelineResult result = executor.doPipelineRun(PIPELINE_REQUEST_COUNT);
+		result.printResult(this.getName() + " RUN");
+
+		// Load for comparison
+		CompareResult.setResult("pipelining", isOfficeFloor, result);
 	}
 
 	/**
 	 * Ensure can service multiple requests pipelined.
 	 */
-	public void testHeavyLoad() throws Exception {
+	public void testOfficeFloorHeavyLoad() throws Exception {
+		this.doHeavyLoadTest(true);
+	}
+
+	/**
+	 * Ensure can service multiple requests pipelined.
+	 */
+	public void testRawHeavyLoad() throws Exception {
+		this.doHeavyLoadTest(false);
+	}
+
+	/**
+	 * Undertakes the heavy pipelining test.
+	 * 
+	 * @param isOfficeFloor
+	 *            IF is {@link OfficeFloor} HTTP server.
+	 */
+	public void doHeavyLoadTest(boolean isOfficeFloor) throws Exception {
 
 		// Number of clients
 		final int CLIENT_COUNT = 2;
 
+		// Start the HTTP server
+		if (isOfficeFloor) {
+			// Start the OfficeFloor HTTP server
+			this.startHttpServer(FastServicer.class);
+		} else {
+			// Start the Raw HTTP server
+			this.momento = this.startRawHttpServer(HTTP_PORT);
+		}
+
 		// Create the pipeline executors
-		PipelineExecutor[] executors = new PipelineExecutor[CLIENT_COUNT];
+		@SuppressWarnings("unchecked")
+		PipelineExecutor[] executors = new AbstractHttpServerImplementationTest.PipelineExecutor[CLIENT_COUNT];
 		for (int i = 0; i < CLIENT_COUNT; i++) {
-			executors[i] = new PipelineExecutor(7878, PIPELINE_REQUEST_COUNT);
+			executors[i] = new PipelineExecutor(HTTP_PORT, PIPELINE_REQUEST_COUNT);
 		}
 
 		// Do warm up
-		executors[0].doPipelineRun(20000).printResult(this.getName() + " WARMUP");
+		executors[0].doPipelineRun(100000).printResult(this.getName() + " WARMUP");
 
 		// Run the executors
 		for (PipelineExecutor executor : executors) {
@@ -215,7 +444,11 @@ public abstract class AbstractHttpServerImplementationTest extends OfficeFrameTe
 			maxEndTime = (result.endTime > maxEndTime) ? result.endTime : maxEndTime;
 			totalRequests += result.requestCount;
 		}
-		new PipelineResult(minStartTime, maxEndTime, totalRequests).printResult(this.getName() + " TOTAL");
+		PipelineResult result = new PipelineResult(minStartTime, maxEndTime, totalRequests);
+		result.printResult(this.getName() + " TOTAL");
+
+		// Provide results for comparison
+		CompareResult.setResult("Heavy Load", isOfficeFloor, result);
 	}
 
 	/**
@@ -302,11 +535,22 @@ public abstract class AbstractHttpServerImplementationTest extends OfficeFrameTe
 			requestBuffer.flip();
 
 			// Create the expected response
+			HttpHeader[] responseHeaders = AbstractHttpServerImplementationTest.this.getServerResponseHeaderValues();
 			StringBuilder response = new StringBuilder();
 			response.append("HTTP/1.1 200 OK\n");
-			response.append("Server: WoOF 3.0.0\n");
-			response.append("Content-Type: text/html; charset=UTF-8\n");
-			response.append("Content-Length: 11\n");
+			for (HttpHeader header : responseHeaders) {
+				switch (header.getName().toLowerCase()) {
+				case "content-length":
+					response.append(header.getName() + ": 11\n");
+					break;
+				case "content-type":
+					response.append(header.getName() + ": text/plain\n");
+					break;
+				default:
+					response.append(header.getName() + ": " + header.getValue() + "\n");
+					break;
+				}
+			}
 			response.append("\n");
 			response.append("hello world");
 			byte[] responseData = UsAsciiUtil.convertToHttp(response.toString());
@@ -474,12 +718,110 @@ public abstract class AbstractHttpServerImplementationTest extends OfficeFrameTe
 			this.requestCount = requestCount;
 		}
 
+		private long getRunTime() {
+			return this.endTime - this.startTime;
+		}
+
+		private int getRequestsPerSecond() {
+			return (int) ((this.requestCount) / (((float) this.getRunTime()) / 1000.0));
+		}
+
 		private void printResult(String prefix) {
-			long runTime = this.endTime - this.startTime;
-			int requestsPerSecond = (int) ((this.requestCount) / (((float) runTime) / 1000.0));
+			long runTime = this.getRunTime();
+			int requestsPerSecond = this.getRequestsPerSecond();
 			System.out.println(prefix + " ran " + this.requestCount + " requests in " + runTime + " milliseconds ("
 					+ requestsPerSecond + " per second)");
 		}
+	}
+
+	/**
+	 * Compares results of {@link OfficeFloor} servicing against Raw servicing.
+	 */
+	private static class CompareResult {
+
+		private static Class<?> testClass;
+
+		private static Map<Class<?>, Map<String, CompareResult>> results = new HashMap<>();
+
+		private static void reset(Class<?> testClazz) {
+			testClass = testClazz;
+		}
+
+		private static void setResult(String prefix, boolean isOfficeFloorResult, PipelineResult pipelineResult) {
+
+			// Obtain the compare result
+			Map<String, CompareResult> testResults = results.get(testClass);
+			if (testResults == null) {
+				testResults = new HashMap<>();
+				results.put(testClass, testResults);
+			}
+			CompareResult result = testResults.get(prefix);
+			if (result == null) {
+				result = new CompareResult();
+				testResults.put(prefix, result);
+			}
+
+			// Load the pipeline result
+			if (isOfficeFloorResult) {
+				result.officeFloorResult = pipelineResult;
+			} else {
+				result.rawResult = pipelineResult;
+			}
+
+			// Determine if have both values
+			if (result.officeFloorResult == null) {
+				return; // missing OfficeFloor result
+			}
+			if (result.rawResult == null) {
+				return; // missing Raw result
+			}
+
+			// Have both values, so print comparison
+			final String format = "%1$15s";
+			StringWriter message = new StringWriter();
+			PrintWriter out = new PrintWriter(message);
+			out.println("============================================================");
+			out.println(testClass.getSimpleName() + " - " + prefix);
+			out.println();
+
+			// Output headers
+			out.print(String.format(format, ""));
+			out.print(String.format(format, "OfficeFloor"));
+			out.print(String.format(format, "Raw"));
+			out.println(String.format(format, "Difference"));
+
+			// Output the run time
+			out.print(String.format(format, "Run time (ms)"));
+			out.print(String.format(format, String.valueOf(result.officeFloorResult.getRunTime())));
+			out.print(String.format(format, String.valueOf(result.rawResult.getRunTime())));
+			out.println(String.format(format,
+					String.valueOf(result.officeFloorResult.getRunTime() - result.rawResult.getRunTime())));
+
+			// Output the requests per second
+			out.print(String.format(format, "Requests/Sec"));
+			out.print(String.format(format, String.valueOf(result.officeFloorResult.getRequestsPerSecond())));
+			out.print(String.format(format, String.valueOf(result.rawResult.getRequestsPerSecond())));
+			out.println(String.format(format, String.valueOf(
+					result.rawResult.getRequestsPerSecond() - result.officeFloorResult.getRequestsPerSecond())));
+
+			// Overhead increase
+			out.println();
+			out.print(String.format(format, "Overhead (%)"));
+			out.print(String.format(format, ""));
+			out.print(String.format(format, ""));
+			long runtimeDifference = result.officeFloorResult.getRunTime() - result.rawResult.getRunTime();
+			long maxRunTime = Math.max(result.officeFloorResult.getRunTime(), result.rawResult.getRunTime());
+			float difference = (float) runtimeDifference / (float) maxRunTime;
+			out.println(String.format(format, String.valueOf(difference)));
+
+			out.println("============================================================");
+			out.flush();
+			System.out.println(message.toString());
+		}
+
+		private PipelineResult officeFloorResult = null;
+
+		private PipelineResult rawResult = null;
 	}
 
 }

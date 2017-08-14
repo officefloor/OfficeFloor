@@ -94,7 +94,8 @@ public class NettyBufferPool implements BufferPool<ByteBuf>, StreamBuffer<ByteBu
 
 	@Override
 	public void release() {
-		// Let Netty manage
+		// Called on response reset, so clear content
+		this.response.content().clear();
 	}
 
 }

@@ -29,4 +29,20 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 		return new OfficeFloorHttpServerImplementation();
 	}
 
+	@Override
+	protected HttpHeader[] getServerResponseHeaderValues() {
+		return new HttpHeader[] { newHttpHeader("Content-Length", "?"), newHttpHeader("Content-Type", "?") };
+	}
+
+	@Override
+	protected Object startRawHttpServer(int httpPort) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	protected void stopRawHttpServer(Object momento) throws Exception {
+		// TODO Auto-generated method stub
+	}
+
 }

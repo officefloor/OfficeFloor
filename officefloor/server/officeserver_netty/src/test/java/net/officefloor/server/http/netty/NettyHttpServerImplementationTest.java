@@ -17,7 +17,18 @@
  */
 package net.officefloor.server.http.netty;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
+import io.netty.util.AsciiString;
+import io.netty.util.CharsetUtil;
 import net.officefloor.server.http.AbstractHttpServerImplementationTest;
+import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpServerImplementation;
 
 /**
@@ -25,11 +36,51 @@ import net.officefloor.server.http.HttpServerImplementation;
  * 
  * @author Daniel Sagenschneider
  */
-public class NettyHttpServerImplementationTest extends AbstractHttpServerImplementationTest {
+public class NettyHttpServerImplementationTest
+		extends AbstractHttpServerImplementationTest<NettyHttpServerImplementationTest.RawNettyHttpServer> {
 
 	@Override
 	protected HttpServerImplementation createHttpServerImplementation() {
 		return new NettyHttpServerImplementation();
+	}
+
+	@Override
+	protected HttpHeader[] getServerResponseHeaderValues() {
+		return new HttpHeader[] { newHttpHeader("Content-Length", "?"), newHttpHeader("Content-Type", "?") };
+	}
+
+	@Override
+	protected RawNettyHttpServer startRawHttpServer(int httpPort) throws Exception {
+		RawNettyHttpServer server = new RawNettyHttpServer();
+		server.startHttpServer(httpPort, -1, null);
+		return server;
+	}
+
+	@Override
+	protected void stopRawHttpServer(RawNettyHttpServer server) throws Exception {
+		server.stopHttpServer();
+	}
+
+	/**
+	 * Raw Netty HTTP Server.
+	 */
+	public static class RawNettyHttpServer extends AbstractNettyHttpServer {
+
+		private static final byte[] HELLO_WORLD = "hello world".getBytes(CharsetUtil.UTF_8);
+		private static final CharSequence CONTENT_LENGTH = new AsciiString("Content-Length");
+		private static final int HELLO_WORLD_LENGTH = HELLO_WORLD.length;
+		private static final ByteBuf HELLO_WORLD_BUFFER = Unpooled
+				.unreleasableBuffer(Unpooled.directBuffer().writeBytes(HELLO_WORLD));
+		private static final CharSequence CONTENT_TYPE = new AsciiString("Content-Type");
+		private static final CharSequence TYPE_PLAIN = new AsciiString("text/plain");
+
+		@Override
+		protected void service(ChannelHandlerContext context, HttpRequest request) throws Exception {
+			FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK,
+					HELLO_WORLD_BUFFER.duplicate(), false);
+			response.headers().set(CONTENT_LENGTH, HELLO_WORLD_LENGTH).set(CONTENT_TYPE, TYPE_PLAIN);
+			context.write(response);
+		}
 	}
 
 }
