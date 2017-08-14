@@ -31,12 +31,12 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 
 	@Override
 	protected HttpHeader[] getServerResponseHeaderValues() {
-		return new HttpHeader[] { newHttpHeader("Server", "WoOF 3.0.0"), newHttpHeader("Content-Length", "?") };
+		return new HttpHeader[] { newHttpHeader("Content-Type", "?"), newHttpHeader("Content-Length", "?") };
 	}
 
 	@Override
 	protected Object startRawHttpServer(int httpPort) throws Exception {
-		this.startHttpServer(FastServicer.class);
+		this.startHttpServer(Servicer.class);
 		return null;
 	}
 

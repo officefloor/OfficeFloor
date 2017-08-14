@@ -372,14 +372,16 @@ public class HttpResponseImpl implements HttpResponse {
 				+ this.status.getStatusMessage() + EOL, header);
 
 		// Write the managed headers
-		writeUsAscii(HEADER_NAME_SERVER + ": " + this.conversation.getServerName() + EOL, header);
 		if (false) {
+			writeUsAscii(HEADER_NAME_SERVER + ": " + this.conversation.getServerName() + EOL, header);
 			writeUsAscii(HEADER_NAME_DATE + ": " + this.conversation.getHttpServerClock().getDateHeaderValue() + EOL,
 					header);
 		}
 		String contentType = this.getContentTypeThreadUnsafe();
 		if (contentType != null) {
 			writeUsAscii(HEADER_NAME_CONTENT_TYPE + ": " + contentType + EOL, header);
+		} else {
+			writeUsAscii(HEADER_NAME_CONTENT_TYPE + ": text/plain" + EOL, header);
 		}
 		writeUsAscii(HEADER_NAME_CONTENT_LENGTH + ": " + contentLength + EOL, header);
 
@@ -642,7 +644,7 @@ public class HttpResponseImpl implements HttpResponse {
 		}
 
 		// Provide the content type (appending charset if using writer)
-		return this.contentType + (this.entityWriter != null ? "; charset=" + this.charset.name() : "");
+		return this.contentType;
 	}
 
 	@Override
@@ -657,7 +659,7 @@ public class HttpResponseImpl implements HttpResponse {
 
 			// Provide the default content type
 			if (this.contentType == null) {
-				this.contentType = "text/html";
+				this.contentType = "text/plain";
 			}
 
 			// Lazy create the entity writer
