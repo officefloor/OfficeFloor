@@ -22,7 +22,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 import java.util.regex.Pattern;
 
 import net.officefloor.frame.api.function.FlowCallback;
@@ -34,7 +33,6 @@ import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.UsAsciiUtil;
 import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
-import net.officefloor.server.http.protocol.HttpCommunicationProtocol;
 import net.officefloor.server.impl.AbstractClientServerTestCase;
 import net.officefloor.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.server.stream.ServerOutputStream;
@@ -71,18 +69,6 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 	@Override
 	protected CommunicationProtocolSource getCommunicationProtocolSource() {
 		return new HttpCommunicationProtocol();
-	}
-
-	@Override
-	protected Properties getCommunicationProtocolProperties() {
-		Properties properties = super.getCommunicationProtocolProperties();
-
-		// Mock the date
-		properties.setProperty(HttpCommunicationProtocol.PROPERTY_HTTP_SERVER_CLOCK_SOURCE,
-				MockHttpServerClock.class.getName());
-
-		// Return the properties
-		return properties;
 	}
 
 	@Override
@@ -286,7 +272,8 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 		assertNotNull("Should have received HTTP request", this.serverHttpConnection);
 		assertHttpRequest(this.serverHttpConnection.getHttpRequest(), expectedMethod, expectedUri, expectedEntity,
 				expectedHeaderNameValues);
-		assertEquals("Incorrect connection HTTP method", expectedMethod, this.serverHttpConnection.getClientHttpMethod());
+		assertEquals("Incorrect connection HTTP method", expectedMethod,
+				this.serverHttpConnection.getClientHttpMethod());
 	}
 
 	/**

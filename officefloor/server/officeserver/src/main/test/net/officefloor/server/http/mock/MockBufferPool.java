@@ -31,6 +31,7 @@ import org.junit.Assert;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.stream.BufferPool;
+import net.officefloor.server.stream.ByteBufferFactory;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**
@@ -38,7 +39,7 @@ import net.officefloor.server.stream.StreamBuffer;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockBufferPool implements BufferPool<byte[]> {
+public class MockBufferPool implements BufferPool<ByteBuffer> {
 
 	/**
 	 * Releases the {@link StreamBuffer} instances.
@@ -47,8 +48,8 @@ public class MockBufferPool implements BufferPool<byte[]> {
 	 *            {@link StreamBuffer} instances to release by to their
 	 *            {@link BufferPool}.
 	 */
-	public static void releaseStreamBuffers(Iterable<StreamBuffer<byte[]>> buffers) {
-		for (StreamBuffer<byte[]> buffer : buffers) {
+	public static void releaseStreamBuffers(Iterable<StreamBuffer<ByteBuffer>> buffers) {
+		for (StreamBuffer<ByteBuffer> buffer : buffers) {
 			buffer.release();
 		}
 	}
@@ -63,7 +64,7 @@ public class MockBufferPool implements BufferPool<byte[]> {
 	 * @return {@link InputStream} to read the data from the
 	 *         {@link StreamBuffer} instances.
 	 */
-	public static InputStream createInputStream(Iterable<StreamBuffer<byte[]>> buffers) {
+	public static InputStream createInputStream(Iterable<StreamBuffer<ByteBuffer>> buffers) {
 		return new MockBufferPoolInputStream(buffers.iterator());
 	}
 
@@ -77,7 +78,7 @@ public class MockBufferPool implements BufferPool<byte[]> {
 	 *            {@link Charset} of underlying data.
 	 * @return Content of buffers as string.
 	 */
-	public static String getContent(Iterable<StreamBuffer<byte[]>> buffers, Charset charset) {
+	public static String getContent(Iterable<StreamBuffer<ByteBuffer>> buffers, Charset charset) {
 		try {
 			InputStream inputStream = createInputStream(buffers);
 			InputStreamReader reader = new InputStreamReader(inputStream, charset);
@@ -93,9 +94,9 @@ public class MockBufferPool implements BufferPool<byte[]> {
 	}
 
 	/**
-	 * Size of the buffers.
+	 * {@link ByteBufferFactory}.
 	 */
-	private final int bufferSize;
+	private final ByteBufferFactory byteBufferFactory;
 
 	/**
 	 * Registered {@link AbstractMockStreamBuffer} instances.
@@ -106,17 +107,18 @@ public class MockBufferPool implements BufferPool<byte[]> {
 	 * Instantiate with default buffer size for testing.
 	 */
 	public MockBufferPool() {
-		this(3); // small buffer to ensure handling filling buffer
+		// small buffer to ensure handling filling buffer
+		this(() -> ByteBuffer.allocate(3));
 	}
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param bufferSize
-	 *            Size of the buffers.
+	 * @param byteBufferFactory
+	 *            {@link ByteBufferFactory}.
 	 */
-	public MockBufferPool(int bufferSize) {
-		this.bufferSize = bufferSize;
+	public MockBufferPool(ByteBufferFactory byteBufferFactory) {
+		this.byteBufferFactory = byteBufferFactory;
 	}
 
 	/**
@@ -152,14 +154,14 @@ public class MockBufferPool implements BufferPool<byte[]> {
 	 */
 
 	@Override
-	public StreamBuffer<byte[]> getPooledStreamBuffer() {
-		MockPooledStreamBuffer buffer = new MockPooledStreamBuffer(this.bufferSize);
+	public StreamBuffer<ByteBuffer> getPooledStreamBuffer() {
+		MockPooledStreamBuffer buffer = new MockPooledStreamBuffer(this.byteBufferFactory.createByteBuffer());
 		this.createdBuffers.add(buffer);
 		return buffer;
 	}
 
 	@Override
-	public StreamBuffer<byte[]> getUnpooledStreamBuffer(ByteBuffer byteBuffer) {
+	public StreamBuffer<ByteBuffer> getUnpooledStreamBuffer(ByteBuffer byteBuffer) {
 		MockUnpooledStreamBuffer buffer = new MockUnpooledStreamBuffer(byteBuffer);
 		this.createdBuffers.add(buffer);
 		return buffer;
@@ -168,7 +170,7 @@ public class MockBufferPool implements BufferPool<byte[]> {
 	/**
 	 * Abstract mock {@link StreamBuffer}.
 	 */
-	private static abstract class AbstractMockStreamBuffer implements StreamBuffer<byte[]> {
+	private static abstract class AbstractMockStreamBuffer implements StreamBuffer<ByteBuffer> {
 
 		/**
 		 * Indicates if released.
@@ -189,21 +191,16 @@ public class MockBufferPool implements BufferPool<byte[]> {
 		/**
 		 * Buffer.
 		 */
-		private final byte[] buffer;
-
-		/**
-		 * Position within buffer to write next data.
-		 */
-		private int position = 0;
+		private final ByteBuffer buffer;
 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param bufferSize
-		 *            Size of the buffer.
+		 * @param buffer
+		 *            {@link ByteBuffer}.
 		 */
-		private MockPooledStreamBuffer(int bufferSize) {
-			this.buffer = new byte[bufferSize];
+		private MockPooledStreamBuffer(ByteBuffer buffer) {
+			this.buffer = buffer;
 		}
 
 		/*
@@ -222,7 +219,7 @@ public class MockBufferPool implements BufferPool<byte[]> {
 		}
 
 		@Override
-		public byte[] getPooledBuffer() {
+		public ByteBuffer getPooledBuffer() {
 			return this.buffer;
 		}
 
@@ -230,12 +227,12 @@ public class MockBufferPool implements BufferPool<byte[]> {
 		public boolean write(byte datum) {
 
 			// Determine if buffer full
-			if (this.position >= this.buffer.length) {
+			if (this.buffer.remaining() == 0) {
 				return false;
 			}
 
 			// Add the byte to the buffer
-			this.buffer[this.position++] = datum;
+			this.buffer.put(datum);
 			return true;
 		}
 
@@ -243,13 +240,10 @@ public class MockBufferPool implements BufferPool<byte[]> {
 		public int write(byte[] data, int offset, int length) {
 
 			// Obtain the length of data to write
-			int writeLength = Math.min(length, this.buffer.length - this.position);
+			int writeLength = Math.min(length, this.buffer.remaining());
 
 			// Write the data
-			int endLength = offset + writeLength;
-			for (int i = offset; i < endLength; i++) {
-				this.buffer[this.position++] = data[i];
-			}
+			this.buffer.put(data, offset, writeLength);
 
 			// Return the bytes written
 			return writeLength;
@@ -286,7 +280,7 @@ public class MockBufferPool implements BufferPool<byte[]> {
 		}
 
 		@Override
-		public byte[] getPooledBuffer() {
+		public ByteBuffer getPooledBuffer() {
 			Assert.fail(this.getClass().getSimpleName() + " is unpooled");
 			return null;
 		}
@@ -330,7 +324,7 @@ public class MockBufferPool implements BufferPool<byte[]> {
 		 * {@link Iterator} over the {@link StreamBuffer} instances for the
 		 * stream of data to return.
 		 */
-		private final Iterator<StreamBuffer<byte[]>> iterator;
+		private final Iterator<StreamBuffer<ByteBuffer>> iterator;
 
 		/**
 		 * Current {@link StreamBuffer} to read contents.
@@ -349,7 +343,7 @@ public class MockBufferPool implements BufferPool<byte[]> {
 		 *            {@link Iterator} over the {@link StreamBuffer} instances
 		 *            for the stream of data to return.
 		 */
-		private MockBufferPoolInputStream(Iterator<StreamBuffer<byte[]>> iterator) {
+		private MockBufferPoolInputStream(Iterator<StreamBuffer<ByteBuffer>> iterator) {
 			this.iterator = iterator;
 		}
 
@@ -368,15 +362,13 @@ public class MockBufferPool implements BufferPool<byte[]> {
 
 					// Attempt to obtain value from current buffer
 					if (this.currentBuffer.isPooled()) {
-						MockPooledStreamBuffer pooledBuffer = (MockPooledStreamBuffer) this.currentBuffer;
-
 						// Obtain the pooled data
-						byte[] bufferData = this.currentBuffer.getPooledBuffer();
+						ByteBuffer bufferData = this.currentBuffer.getPooledBuffer();
 
 						// Determine if can read data from buffer
-						if (this.currentBufferPosition < pooledBuffer.position) {
+						if (this.currentBufferPosition < bufferData.position()) {
 							// Read the data from the buffer
-							return byteToInt(bufferData[this.currentBufferPosition++]);
+							return byteToInt(bufferData.get(this.currentBufferPosition++));
 						}
 
 						// As here, finished reading current buffer
@@ -402,7 +394,7 @@ public class MockBufferPool implements BufferPool<byte[]> {
 				}
 
 				// Obtain the next buffer to read
-				StreamBuffer<byte[]> streamBuffer = this.iterator.next();
+				StreamBuffer<ByteBuffer> streamBuffer = this.iterator.next();
 				this.currentBufferPosition = 0;
 
 				// Ensure the buffer is released (as written HTTP response)

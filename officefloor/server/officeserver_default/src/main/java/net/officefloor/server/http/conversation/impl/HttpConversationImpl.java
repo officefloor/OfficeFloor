@@ -22,22 +22,30 @@ import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.function.Supplier;
 
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpVersion;
-import net.officefloor.server.http.clock.HttpServerClock;
 import net.officefloor.server.http.conversation.HttpConversation;
 import net.officefloor.server.http.conversation.HttpEntity;
 import net.officefloor.server.http.conversation.HttpManagedObject;
+import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.parse.HttpRequestParseException;
 import net.officefloor.server.http.protocol.Connection;
+import net.officefloor.server.stream.impl.ByteSequence;
 
 /**
  * Manages the HTTP conversation on a {@link Connection}.
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated // TODO merge into HttpConnectionHandler
 public class HttpConversationImpl implements HttpConversation {
 
 	/**
@@ -46,25 +54,20 @@ public class HttpConversationImpl implements HttpConversation {
 	private final Connection connection;
 
 	/**
+	 * {@link ManagedObjectExecuteContext}.
+	 */
+	private final ManagedObjectExecuteContext<Indexed> executeContext;
+
+	/**
+	 * {@link Flow} index to handle processing {@link HttpRequest}.
+	 */
+	private final int requestHandlingFlowIndex;
+
+	/**
 	 * {@link HttpManagedObjectImpl} instances currently being processed for the
 	 * {@link Connection}.
 	 */
 	private final Queue<HttpManagedObjectImpl> managedObjects = new LinkedList<HttpManagedObjectImpl>();
-
-	/**
-	 * Server name.
-	 */
-	private final String serverName;
-
-	/**
-	 * Size of the send buffers.
-	 */
-	private final int sendBufferSize;
-
-	/**
-	 * Default {@link Charset} for the {@link HttpResponse} entity.
-	 */
-	private final Charset defaultCharset;
 
 	/**
 	 * Flags whether to send the stack trace on failure.
@@ -72,70 +75,23 @@ public class HttpConversationImpl implements HttpConversation {
 	private final boolean isSendStackTraceOnFailure;
 
 	/**
-	 * {@link HttpServerClock}.
-	 */
-	private final HttpServerClock clock;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param connection
 	 *            {@link Connection}.
-	 * @param serverName
-	 *            Server name.
-	 * @param sendBufferSize
-	 *            Size of the send buffers.
-	 * @param defaultCharset
-	 *            Default {@link Charset} for the {@link HttpResponse} entity.
+	 * @param executeContext
+	 *            {@link ManagedObjectExecuteContext}.
+	 * @param requestHandlingFlowIndex
+	 *            {@link Flow} index to handle processing {@link HttpRequest}.
 	 * @param isSendStackTraceOnFailure
 	 *            Flags whether to send the stack trace on failure.
-	 * @param clock
-	 *            {@link HttpServerClock}.
 	 */
-	public HttpConversationImpl(Connection connection, String serverName, int sendBufferSize, Charset defaultCharset,
-			boolean isSendStackTraceOnFailure, HttpServerClock clock) {
+	public HttpConversationImpl(Connection connection, ManagedObjectExecuteContext<Indexed> executeContext,
+			int requestHandlingFlowIndex, boolean isSendStackTraceOnFailure) {
 		this.connection = connection;
-		this.serverName = serverName;
-		this.sendBufferSize = sendBufferSize;
-		this.defaultCharset = defaultCharset;
+		this.executeContext = executeContext;
+		this.requestHandlingFlowIndex = requestHandlingFlowIndex;
 		this.isSendStackTraceOnFailure = isSendStackTraceOnFailure;
-		this.clock = clock;
-	}
-
-	/**
-	 * Obtains the server name.
-	 * 
-	 * @return Server name.
-	 */
-	String getServerName() {
-		return this.serverName;
-	}
-
-	/**
-	 * Obtains the send buffer size.
-	 * 
-	 * @return Send buffer size.
-	 */
-	int getSendBufferSize() {
-		return this.sendBufferSize;
-	}
-
-	/**
-	 * Obtains the default {@link Charset}.
-	 * 
-	 * @return Default {@link Charset}.
-	 */
-	Charset getDefaultCharset() {
-		return this.defaultCharset;
-	}
-
-	/**
-	 * Obtains the {@link HttpServerClock}.
-	 * 
-	 * @return {@link HttpServerClock}.
-	 */
-	HttpServerClock getHttpServerClock() {
-		return this.clock;
 	}
 
 	/**
@@ -178,8 +134,8 @@ public class HttpConversationImpl implements HttpConversation {
 	 */
 
 	@Override
-	public HttpManagedObject addRequest(String method, String requestURI, String httpVersion,
-			HttpRequestHeaders headers, HttpEntity entity) {
+	public void serviceRequest(Supplier<HttpMethod> methodSupplier, Supplier<String> requestUriSupplier,
+			HttpVersion httpVersion, NonMaterialisedHttpHeaders headers, ByteSequence entity) {
 
 		// Create the request
 		HttpRequestImpl request = new HttpRequestImpl(method, requestURI, httpVersion, headers, entity);
@@ -192,8 +148,9 @@ public class HttpConversationImpl implements HttpConversation {
 			this.managedObjects.add(managedObject);
 		}
 
-		// Return the managed object
-		return managedObject;
+		// Invoke process to service the request
+		this.executeContext.invokeProcess(this.requestHandlingFlowIndex, null, managedObject, 0,
+				managedObject.getFlowCallback());
 	}
 
 	@Override

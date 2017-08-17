@@ -91,7 +91,7 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.parser, this.parser.getEntity(), entity);
 		this.parser.reset();
 		this.recordReturn(this.conversation,
-				this.conversation.addRequest(method, requestURI, httpVersion, headers, entity), managedObject);
+				this.conversation.serviceRequest(method, requestURI, httpVersion, headers, entity), managedObject);
 		this.executeContext.invokeProcess(0, managedObject, managedObject, 0, managedObject.getFlowCallback());
 		this.recordReturn(this.parser, this.parser.nextByteToParseIndex(), -1);
 

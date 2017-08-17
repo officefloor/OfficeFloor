@@ -15,20 +15,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.server.http.clock;
+package net.officefloor.server;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
+
+import net.officefloor.server.http.protocol.Connection;
+import net.officefloor.server.stream.StreamBuffer;
 
 /**
- * Clock for the HTTP Server.
+ * <p>
+ * Handler for a {@link Connection}.
+ * <p>
+ * Required to be implemented by the handler provider.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpServerClock {
+public interface ConnectionHandler {
 
 	/**
-	 * Obtains the header value for the Date.
+	 * Handles a read from the {@link SocketChannel}.
 	 * 
-	 * @return Header value for the Date.
+	 * @param buffer
+	 *            {@link StreamBuffer} containing the bytes read.
+	 * @throws IOException
+	 *             If fails to handle read.
 	 */
-	String getDateHeaderValue();
+	void handleRead(StreamBuffer<ByteBuffer> buffer) throws IOException;
 
 }

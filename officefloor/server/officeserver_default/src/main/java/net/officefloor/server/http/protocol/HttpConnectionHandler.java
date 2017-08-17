@@ -18,19 +18,23 @@
 package net.officefloor.server.http.protocol;
 
 import java.io.IOException;
-import java.util.List;
+import java.nio.ByteBuffer;
+import java.util.function.Supplier;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.ConnectionHandler;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
-import net.officefloor.server.http.HttpRequestHeaders;
+import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.conversation.HttpConversation;
-import net.officefloor.server.http.conversation.HttpEntity;
-import net.officefloor.server.http.conversation.HttpManagedObject;
+import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.parse.HttpRequestParseException;
 import net.officefloor.server.http.parse.HttpRequestParser;
+import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.impl.ByteSequence;
 
 /**
  * HTTP {@link ConnectionHandler}.
@@ -50,16 +54,6 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	private final HttpRequestParser parser;
 
 	/**
-	 * {@link ManagedObjectExecuteContext}.
-	 */
-	private final ManagedObjectExecuteContext<Indexed> executeContext;
-
-	/**
-	 * {@link Flow} index to handle processing {@link HttpRequest}.
-	 */
-	private final int requestHandlingFlowIndex;
-
-	/**
 	 * Flag indicating if {@link HttpRequestParseException} on processing input.
 	 * Once a {@link HttpRequestParseException} occurs it is unrecoverable and
 	 * the {@link Connection} should be closed.
@@ -73,26 +67,18 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	 *            {@link HttpConversation}.
 	 * @param parser
 	 *            {@link HttpRequestParser}.
-	 * @param executeContext
-	 *            {@link ManagedObjectExecuteContext}.
-	 * @param requestHandlingFlowIndex
-	 *            {@link Flow} index to handle processing {@link HttpRequest}.
 	 */
-	public HttpConnectionHandler(HttpConversation conversation, HttpRequestParser parser,
-			ManagedObjectExecuteContext<Indexed> executeContext, int requestHandlingFlowIndex) {
+	public HttpConnectionHandler(HttpConversation conversation, HttpRequestParser parser) {
 		this.conversation = conversation;
 		this.parser = parser;
-		this.executeContext = executeContext;
-		this.requestHandlingFlowIndex = requestHandlingFlowIndex;
 	}
 
 	/*
 	 * ================ ConnectionHandler ==============================
-	 * Thread-safe by the lock taken in SockerListener.
 	 */
 
 	@Override
-	public void handleRead(ReadContext context) throws IOException {
+	public void handleRead(StreamBuffer<ByteBuffer> buffer) throws IOException {
 		try {
 
 			// Ignore all further content if parse failure
@@ -101,34 +87,24 @@ public class HttpConnectionHandler implements ConnectionHandler {
 			}
 
 			// Loop as may have more than one request on read
-			byte[] readData = context.getData();
-			int startIndex = 0;
-			while (startIndex >= 0) {
+			do {
 
 				// Parse the read content
-				if (this.parser.parse(readData, startIndex)) {
+				if (this.parser.parse(buffer)) {
 
 					// Received the full HTTP request to start processing
-					String method = this.parser.getMethod();
-					String requestURI = this.parser.getRequestURI();
-					String httpVersion = this.parser.getHttpVersion();
-					List<HttpHeader> headers = this.parser.getHeaders();
-					HttpEntity entity = this.parser.getEntity();
+					Supplier<HttpMethod> methodSupplier = this.parser.getMethod();
+					Supplier<String> requestUriSupplier = this.parser.getRequestURI();
+					HttpVersion httpVersion = this.parser.getHttpVersion();
+					NonMaterialisedHttpHeaders headers = this.parser.getHeaders();
+					ByteSequence entity = this.parser.getEntity();
 					this.parser.reset(); // reset for next request
 
-					// Translate to HTTP headers
-					HttpRequestHeaders httpHeaders = null;
-
 					// Service the request
-					HttpManagedObject managedObject = this.conversation.addRequest(method, requestURI, httpVersion,
-							httpHeaders, entity);
-					this.executeContext.invokeProcess(this.requestHandlingFlowIndex,
-							managedObject.getServerHttpConnection(), managedObject, 0, managedObject.getFlowCallback());
+					this.conversation.serviceRequest(methodSupplier, requestUriSupplier, httpVersion, headers, entity);
 				}
 
-				// Obtain the next start index
-				startIndex = this.parser.nextByteToParseIndex();
-			}
+			} while (!this.parser.isFinishedReadingBuffer());
 
 		} catch (HttpRequestParseException ex) {
 			// Flag that input no longer valid

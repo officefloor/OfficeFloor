@@ -34,9 +34,6 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.clock.HttpServerClock;
-import net.officefloor.server.http.clock.HttpServerClockImpl;
-import net.officefloor.server.http.clock.HttpServerClockSource;
 import net.officefloor.server.http.conversation.HttpConversation;
 import net.officefloor.server.http.conversation.impl.HttpConversationImpl;
 import net.officefloor.server.http.conversation.impl.HttpManagedObjectImpl;
@@ -135,16 +132,6 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource, C
 	 */
 	private int requestHandlingFlowIndex;
 
-	/**
-	 * Property name for the {@link HttpServerClockSource} class.
-	 */
-	public static String PROPERTY_HTTP_SERVER_CLOCK_SOURCE = "http.server.clock.source";
-
-	/**
-	 * {@link HttpServerClock}.
-	 */
-	private HttpServerClock httpServerClock;
-
 	/*
 	 * =================== CommunicationProtocolSource ======================
 	 */
@@ -179,13 +166,6 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource, C
 		}
 		this.serverName = serverName.toString();
 
-		// Obtain the HTTP server clock
-		String httpServerClockSourceClassName = mosContext.getProperty(PROPERTY_HTTP_SERVER_CLOCK_SOURCE,
-				HttpServerClockImpl.class.getName());
-		HttpServerClockSource httpServerClockSource = (HttpServerClockSource) mosContext
-				.loadClass(httpServerClockSourceClassName).newInstance();
-		this.httpServerClock = httpServerClockSource.createHttpServerClock(configurationContext);
-
 		// Obtain context details
 		this.sendBufferSize = protocolContext.getSendBufferSize();
 		this.defaultCharset = protocolContext.getDefaultCharset();
@@ -213,11 +193,11 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource, C
 	@Override
 	public HttpConnectionHandler createConnectionHandler(Connection connection,
 			ManagedObjectExecuteContext<Indexed> executeContext) {
-		HttpConversation conversation = new HttpConversationImpl(connection, this.serverName, this.sendBufferSize,
-				this.defaultCharset, this.isSendStackTraceOnFailure, this.httpServerClock);
+		HttpConversation conversation = new HttpConversationImpl(connection, executeContext,
+				this.requestHandlingFlowIndex, this.isSendStackTraceOnFailure);
 		HttpRequestParser parser = new HttpRequestParserImpl(this.maximumHttpRequestHeaders, this.maxTextPartLength,
 				this.maximumRequestBodyLength);
-		return new HttpConnectionHandler(conversation, parser, executeContext, this.requestHandlingFlowIndex);
+		return new HttpConnectionHandler(conversation, parser);
 	}
 
 }

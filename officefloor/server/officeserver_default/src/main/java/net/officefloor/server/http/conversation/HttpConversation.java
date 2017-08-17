@@ -18,11 +18,16 @@
 package net.officefloor.server.http.conversation;
 
 import java.io.IOException;
+import java.util.function.Supplier;
 
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
-import net.officefloor.server.http.HttpRequestHeaders;
+import net.officefloor.server.http.HttpVersion;
+import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.parse.HttpRequestParseException;
 import net.officefloor.server.http.protocol.Connection;
+import net.officefloor.server.stream.impl.ByteSequence;
 
 /**
  * HTTP conversation.
@@ -32,22 +37,22 @@ import net.officefloor.server.http.protocol.Connection;
 public interface HttpConversation {
 
 	/**
-	 * Adds a {@link HttpRequest} to the conversation.
+	 * Services the {@link HttpRequest} in the conversation.
 	 * 
-	 * @param method
-	 *            Method.
-	 * @param requestURI
-	 *            Request URI.
+	 * @param methodSupplier
+	 *            {@link Supplier} of the {@link HttpMethod}.
+	 * @param requestUriSupplier
+	 *            {@link Supplier} of the request URI.
 	 * @param httpVersion
-	 *            HTTP Version.
+	 *            {@link HttpVersion}.
 	 * @param headers
-	 *            {@link HttpRequestHeaders}.
+	 *            {@link NonMaterialisedHttpHeaders}.
 	 * @param entity
-	 *            {@link HttpEntity} to the entity of the {@link HttpRequest}.
-	 * @return {@link HttpManagedObject} to process the {@link HttpRequest}.
+	 *            {@link ByteSequence} to the HTTP entity.
+	 * @return {@link ManagedObject} to process the {@link HttpRequest}.
 	 */
-	HttpManagedObject addRequest(String method, String requestURI, String httpVersion, HttpRequestHeaders headers,
-			HttpEntity entity);
+	void serviceRequest(Supplier<HttpMethod> methodSupplier, Supplier<String> requestUriSupplier,
+			HttpVersion httpVersion, NonMaterialisedHttpHeaders headers, ByteSequence entity);
 
 	/**
 	 * Handles a failure in parsing a {@link HttpRequest}.

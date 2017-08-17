@@ -48,15 +48,15 @@ import net.officefloor.server.SocketManager;
 import net.officefloor.server.WriteDataAction;
 import net.officefloor.server.http.protocol.CommunicationProtocol;
 import net.officefloor.server.http.protocol.Connection;
-import net.officefloor.server.http.protocol.ReadContext;
+import net.officefloor.server.stream.BufferPool;
+import net.officefloor.server.stream.StreamBuffer;
 
 /**
  * Listens to {@link Socket} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public class SocketListener extends StaticManagedFunction<None, SocketListener.SocketListenerFlows>
-		implements ReadContext {
+public class SocketListener extends StaticManagedFunction<None, SocketListener.SocketListenerFlows> {
 
 	/**
 	 * Flows for the {@link SocketListener}.
@@ -86,14 +86,9 @@ public class SocketListener extends StaticManagedFunction<None, SocketListener.S
 	private final Queue<AcceptedSocket> acceptedSockets = new ConcurrentLinkedQueue<AcceptedSocket>();
 
 	/**
-	 * {@link ByteBuffer} to use for reading content.
+	 * {@link BufferPool}.
 	 */
-	private final ByteBuffer readBuffer;
-
-	/**
-	 * Send {@link ByteBuffer} size.
-	 */
-	private final int sendBufferSize;
+	private final BufferPool<ByteBuffer> bufferPool;
 
 	/**
 	 * {@link Queue} of {@link WriteDataAction} instances to be undertaken on
@@ -101,11 +96,6 @@ public class SocketListener extends StaticManagedFunction<None, SocketListener.S
 	 * empties.
 	 */
 	private final Queue<WriteDataAction> writeActions = new ConcurrentLinkedQueue<WriteDataAction>();
-
-	/**
-	 * Pool of {@link ByteBuffer} instances.
-	 */
-	private final Queue<ByteBuffer> writeBufferPool = new ConcurrentLinkedQueue<ByteBuffer>();
 
 	/**
 	 * <p>
@@ -131,17 +121,12 @@ public class SocketListener extends StaticManagedFunction<None, SocketListener.S
 	 * 
 	 * @param socketManager
 	 *            {@link SocketManager}.
-	 * @param receiveBufferSize
-	 *            Receive buffer size.
-	 * @param sendBufferSize
-	 *            Send buffer size.
+	 * @param bufferPool
+	 *            {@link BufferPool}.
 	 */
-	public SocketListener(SocketManager socketManager, int receiveBufferSize, int sendBufferSize) {
+	public SocketListener(SocketManager socketManager, BufferPool<ByteBuffer> bufferPool) {
 		this.socketManager = socketManager;
-		this.sendBufferSize = sendBufferSize;
-
-		// Create the read buffer
-		this.readBuffer = ByteBuffer.allocateDirect(receiveBufferSize);
+		this.bufferPool = bufferPool;
 	}
 
 	/**
@@ -303,38 +288,6 @@ public class SocketListener extends StaticManagedFunction<None, SocketListener.S
 	}
 
 	/**
-	 * Obtains a {@link ByteBuffer} for writing.
-	 * 
-	 * @return {@link ByteBuffer} for writing.
-	 */
-	ByteBuffer getWriteBufferFromPool() {
-
-		// Determine if one in pool
-		ByteBuffer buffer = this.writeBufferPool.poll();
-		if (buffer != null) {
-
-			// Clear pooled buffer for use
-			buffer.clear();
-
-		} else {
-			// No buffers in pool so create a new one
-			buffer = ByteBuffer.allocateDirect(this.sendBufferSize);
-		}
-
-		// Return the buffer
-		return buffer;
-	}
-
-	/**
-	 * Returns the {@link ByteBuffer} to the pool.
-	 */
-	void returnWriteBufferToPool(ByteBuffer buffer) {
-
-		// Return buffer to pool
-		this.writeBufferPool.add(buffer);
-	}
-
-	/**
 	 * Obtains the {@link SelectionKeyAttachment} for the {@link SelectionKey}.
 	 * 
 	 * @param selectionKey
@@ -395,6 +348,8 @@ public class SocketListener extends StaticManagedFunction<None, SocketListener.S
 				// Determine if shutting down
 				if (selectedCount == 0) {
 					if (this.isStopListening) {
+
+						// Shutdown and stop listening cycle
 						synchronized (this) {
 							this.isShutdown = true;
 							this.notify();
@@ -452,13 +407,19 @@ public class SocketListener extends StaticManagedFunction<None, SocketListener.S
 							boolean isFurtherDataToRead = true;
 							while (isFurtherDataToRead) {
 
-								// Obtain the buffer
-								ByteBuffer buffer = this.readBuffer.duplicate();
+								// Obtain the stream buffer for connection
+								StreamBuffer<ByteBuffer> readBuffer = connection.getReadStreamBuffer();
+								if ((readBuffer == null) || (readBuffer.getPooledBuffer().remaining() == 0)) {
+									// Require new read buffer for connection
+									readBuffer = this.bufferPool.getPooledStreamBuffer();
+									connection.setReadStreamBuffer(readBuffer);
+								}
+								ByteBuffer readByteBuffer = readBuffer.getPooledBuffer();
 
 								// Read content from channel
 								int bytesRead;
 								try {
-									bytesRead = socketChannel.read(buffer);
+									bytesRead = socketChannel.read(readByteBuffer);
 								} catch (IOException ex) {
 									// Connection failed
 									connection.terminate();
@@ -471,14 +432,12 @@ public class SocketListener extends StaticManagedFunction<None, SocketListener.S
 									continue NEXT_KEY;
 								}
 
-								// Obtain the data and handle
-								buffer.flip();
-								this.readData = new byte[bytesRead];
-								buffer.get(this.readData);
-								connection.getConnectionHandler().handleRead(this);
+								// Handle the read
+								connection.getConnectionHandler().handleRead(readBuffer);
 
 								// Determine if further data
-								if (bytesRead < this.readBuffer.limit()) {
+								if (readByteBuffer.remaining() > 0) {
+									// Buffer did not fill, so no further data
 									isFurtherDataToRead = false;
 								}
 							}
@@ -527,30 +486,6 @@ public class SocketListener extends StaticManagedFunction<None, SocketListener.S
 			throw ex;
 		}
 	}
-
-	/*
-	 * ================== ReadContext =====================================
-	 * ReadContext does not require thread-safety as only accessed by the same
-	 * Thread.
-	 */
-
-	/**
-	 * Data just read for the {@link ReadContext}.
-	 */
-	private byte[] readData;
-
-	@Override
-	public byte[] getData() {
-		return this.readData;
-	}
-
-	/*
-	 * =================== HeartbeatContext ===============================
-	 * HeartbeatContext does not require thread-safety as only accessed by the
-	 * same Thread.
-	 */
-
-	// No specific methods for HeartbeatContext.
 
 	/**
 	 * {@link ServerSocketChannel} attachment.

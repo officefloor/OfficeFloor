@@ -18,6 +18,7 @@
 package net.officefloor.server.http.impl;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.List;
 
@@ -169,7 +170,7 @@ public class ProcessAwareHttpResponseHeadersTest extends OfficeFrameTestCase {
 		// Obtain writer
 		MockBufferPool bufferPool = new MockBufferPool();
 		@SuppressWarnings("resource")
-		BufferPoolServerOutputStream<byte[]> outputStream = new BufferPoolServerOutputStream<>(bufferPool);
+		BufferPoolServerOutputStream<ByteBuffer> outputStream = new BufferPoolServerOutputStream<>(bufferPool);
 		ServerWriter writer = outputStream.getServerWriter(ServerHttpConnection.HTTP_CHARSET);
 
 		// Write the headers
@@ -179,7 +180,7 @@ public class ProcessAwareHttpResponseHeadersTest extends OfficeFrameTestCase {
 		writer.flush();
 
 		// Obtain the content
-		List<StreamBuffer<byte[]>> buffers = outputStream.getBuffers();
+		List<StreamBuffer<ByteBuffer>> buffers = outputStream.getBuffers();
 		MockBufferPool.releaseStreamBuffers(buffers);
 		String content = MockBufferPool.getContent(buffers, ServerHttpConnection.HTTP_CHARSET);
 

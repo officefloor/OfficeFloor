@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Serializable;
 import java.io.StringWriter;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 
@@ -50,7 +51,7 @@ import net.officefloor.server.stream.impl.ByteSequence;
  * @author Daniel Sagenschneider
  */
 public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTestCase
-		implements HttpResponseWriter<byte[]> {
+		implements HttpResponseWriter<ByteBuffer> {
 
 	/**
 	 * {@link HttpMethod}.
@@ -80,7 +81,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 	/**
 	 * {@link ProcessAwareServerHttpConnectionManagedObject} to be tested.
 	 */
-	private final ProcessAwareServerHttpConnectionManagedObject<byte[]> connection = this
+	private final ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = this
 			.createServerHttpConnection("TEST");
 
 	/**
@@ -90,11 +91,11 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 	 * @param requestEntityContent
 	 *            Content for the {@link HttpRequest} entity.
 	 */
-	private ProcessAwareServerHttpConnectionManagedObject<byte[]> createServerHttpConnection(
+	private ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> createServerHttpConnection(
 			String requestEntityContent) {
 		ByteSequence requestEntity = new ByteArrayByteSequence(
 				requestEntityContent.getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
-		ProcessAwareServerHttpConnectionManagedObject<byte[]> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
+		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
 				true, () -> this.method, () -> this.requestUri, this.requestVersion, this.requestHeaders, requestEntity,
 				this, this.bufferPool);
 		connection.setProcessAwareContext(new MockProcessAwareContext());
@@ -358,11 +359,11 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 
 	private HttpHeaderValue contentType = null;
 
-	private Iterable<StreamBuffer<byte[]>> content = null;
+	private Iterable<StreamBuffer<ByteBuffer>> content = null;
 
 	@Override
 	public void writeHttpResponse(HttpVersion version, HttpStatus status, Iterable<WritableHttpHeader> httpHeaders,
-			int contentLength, HttpHeaderValue contentType, Iterable<StreamBuffer<byte[]>> content) {
+			int contentLength, HttpHeaderValue contentType, Iterable<StreamBuffer<ByteBuffer>> content) {
 		this.responseVersion = version;
 		this.status = status;
 		this.responseHeaders = httpHeaders;

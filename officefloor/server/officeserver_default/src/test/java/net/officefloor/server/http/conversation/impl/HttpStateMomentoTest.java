@@ -35,7 +35,6 @@ import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.clock.HttpServerClock;
 import net.officefloor.server.http.conversation.HttpEntity;
 import net.officefloor.server.http.conversation.HttpManagedObject;
 import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
@@ -212,12 +211,12 @@ public class HttpStateMomentoTest extends OfficeFrameTestCase {
 
 		// Ensure headers available from response (with correct ordering)
 		HttpResponse clonedResponse = connection.getHttpResponse();
-//		HttpHeader[] headers = clonedResponse.getHttpHeaders().getHeaders();
-//		assertEquals("Incorrect number of headers", 2, headers.length);
-//		assertEquals("Incorrect header one", "HEADER_ONE: VALUE_ONE",
-//				headers[0].getName() + ": " + headers[0].getValue());
-//		assertEquals("Incorrect header two", "HEADER_TWO: VALUE_TWO",
-//				headers[1].getName() + ": " + headers[1].getValue());
+		// HttpHeader[] headers = clonedResponse.getHttpHeaders().getHeaders();
+		// assertEquals("Incorrect number of headers", 2, headers.length);
+		// assertEquals("Incorrect header one", "HEADER_ONE: VALUE_ONE",
+		// headers[0].getName() + ": " + headers[0].getValue());
+		// assertEquals("Incorrect header two", "HEADER_TWO: VALUE_TWO",
+		// headers[1].getName() + ": " + headers[1].getValue());
 	}
 
 	/**
@@ -302,12 +301,7 @@ public class HttpStateMomentoTest extends OfficeFrameTestCase {
 		int sendBufferSize = 1024;
 		Charset defaultCharset = Charset.defaultCharset();
 		HttpConversationImpl conversation = new HttpConversationImpl(connection, "TEST", sendBufferSize, defaultCharset,
-				false, new HttpServerClock() {
-					@Override
-					public String getDateHeaderValue() {
-						return "[Mock Time]";
-					}
-				});
+				false);
 
 		// Create the listing of headers
 		List<HttpHeader> headers = new LinkedList<HttpHeader>();

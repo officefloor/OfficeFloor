@@ -37,7 +37,6 @@ import net.officefloor.server.http.HttpResponseHeaders;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.UsAsciiUtil;
-import net.officefloor.server.http.clock.HttpServerClock;
 import net.officefloor.server.http.conversation.HttpConversation;
 import net.officefloor.server.http.conversation.HttpEntity;
 import net.officefloor.server.http.conversation.HttpManagedObject;
@@ -634,13 +633,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 	 *            Flags whether to send the stack trace on failure.
 	 */
 	private HttpConversation createHttpConversation(boolean isSendStackTraceOnFailure) {
-		return new HttpConversationImpl(this, "TEST", 1024, DEFAULT_CHARSET, isSendStackTraceOnFailure,
-				new HttpServerClock() {
-					@Override
-					public String getDateHeaderValue() {
-						return "[Mock Time]";
-					}
-				});
+		return new HttpConversationImpl(this, "TEST", 1024, DEFAULT_CHARSET, isSendStackTraceOnFailure);
 	}
 
 	/**
@@ -655,7 +648,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		content.inputData(null, 0, 0, false);
 		HttpEntity entity = new HttpEntityImpl(content);
 		HttpRequestHeaders httpHeaders = null;
-		HttpManagedObject mo = this.conversation.addRequest("GET", "/mock", "HTTP/1.1", httpHeaders, entity);
+		HttpManagedObject mo = this.conversation.serviceRequest("GET", "/mock", "HTTP/1.1", httpHeaders, entity);
 
 		// Return the http response from managed object
 		return mo.getServerHttpConnection().getHttpResponse();

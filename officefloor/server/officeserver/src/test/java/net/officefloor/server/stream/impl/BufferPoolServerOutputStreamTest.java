@@ -40,12 +40,12 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 	/**
 	 * {@link MockBufferPool}.
 	 */
-	private final MockBufferPool bufferPool = new MockBufferPool(4);
+	private final MockBufferPool bufferPool = new MockBufferPool(() -> ByteBuffer.allocate(4));
 
 	/**
 	 * {@link BufferPoolServerOutputStream} to test.
 	 */
-	private final BufferPoolServerOutputStream<byte[]> outputStream = new BufferPoolServerOutputStream<>(
+	private final BufferPoolServerOutputStream<ByteBuffer> outputStream = new BufferPoolServerOutputStream<>(
 			this.bufferPool);
 
 	/**
@@ -53,7 +53,7 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 	 */
 	public void testSingleByte() throws IOException {
 		this.outputStream.write(1);
-		this.assertBuffers((buffer) -> assertData(buffer, 1));
+		this.assertBuffers((buffer) -> assertPooledBuffer(buffer, 1));
 	}
 
 	/**
@@ -61,7 +61,7 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 	 */
 	public void testNoBytes() throws IOException {
 		this.outputStream.write(new byte[] {});
-		this.assertBuffers((buffer) -> assertData(buffer));
+		this.assertBuffers((buffer) -> assertPooledBuffer(buffer));
 	}
 
 	/**
@@ -70,7 +70,7 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 	 */
 	public void testFillBuffer() throws IOException {
 		this.outputStream.write(new byte[] { 1, 2, 3, 4 });
-		this.assertBuffers((buffer) -> assertData(buffer, 1, 2, 3, 4));
+		this.assertBuffers((buffer) -> assertPooledBuffer(buffer, 1, 2, 3, 4));
 	}
 
 	/**
@@ -78,7 +78,8 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 	 */
 	public void testMultipleBuffers() throws IOException {
 		this.outputStream.write(new byte[] { 1, 2, 3, 4, 5, 6 });
-		this.assertBuffers((buffer) -> assertData(buffer, 1, 2, 3, 4), (buffer) -> assertData(buffer, 5, 6));
+		this.assertBuffers((buffer) -> assertPooledBuffer(buffer, 1, 2, 3, 4),
+				(buffer) -> assertPooledBuffer(buffer, 5, 6));
 	}
 
 	/**
@@ -88,9 +89,9 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 		this.outputStream.write(new byte[] { 1, 2, 3, 4 });
 		this.outputStream.write(ByteBuffer.wrap(new byte[] { 5, 6, 7, 8, 9, 10 }).duplicate());
 		this.outputStream.write(new byte[] { 11, 12, 13, 14 });
-		this.assertBuffers((buffer) -> assertData(buffer, 1, 2, 3, 4),
-				(buffer) -> assertByteBuffer(buffer, 5, 6, 7, 8, 9, 10),
-				(buffer) -> assertData(buffer, 11, 12, 13, 14));
+		this.assertBuffers((buffer) -> assertPooledBuffer(buffer, 1, 2, 3, 4),
+				(buffer) -> assertUnpooledBuffer(buffer, 5, 6, 7, 8, 9, 10),
+				(buffer) -> assertPooledBuffer(buffer, 11, 12, 13, 14));
 	}
 
 	/**
@@ -105,10 +106,10 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 		this.outputStream.write(ByteBuffer.wrap(new byte[] { 10 }).duplicate());
 		this.outputStream.write(ByteBuffer.wrap(new byte[] { 11 }).duplicate());
 		this.outputStream.write(new byte[] { 12 });
-		this.assertBuffers((buffer) -> assertData(buffer, 1, 2, 3), (buffer) -> assertByteBuffer(buffer, 4),
-				(buffer) -> assertData(buffer, 5, 6, 7, 8), (buffer) -> assertData(buffer, 9),
-				(buffer) -> assertByteBuffer(buffer, 10), (buffer) -> assertByteBuffer(buffer, 11),
-				(buffer) -> assertData(buffer, 12));
+		this.assertBuffers((buffer) -> assertPooledBuffer(buffer, 1, 2, 3), (buffer) -> assertUnpooledBuffer(buffer, 4),
+				(buffer) -> assertPooledBuffer(buffer, 5, 6, 7, 8), (buffer) -> assertPooledBuffer(buffer, 9),
+				(buffer) -> assertUnpooledBuffer(buffer, 10), (buffer) -> assertUnpooledBuffer(buffer, 11),
+				(buffer) -> assertPooledBuffer(buffer, 12));
 	}
 
 	/**
@@ -146,8 +147,8 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 	public void testClose() throws IOException {
 
 		final CloseHandler handler = this.createMock(CloseHandler.class);
-		final BufferPoolServerOutputStream<byte[]> outputStream = new BufferPoolServerOutputStream<>(this.bufferPool,
-				handler);
+		final BufferPoolServerOutputStream<ByteBuffer> outputStream = new BufferPoolServerOutputStream<>(
+				this.bufferPool, handler);
 
 		// Record close only once
 		this.recordReturn(handler, handler.isClosed(), false);
@@ -209,13 +210,13 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 	 *            Listing of validators for each {@link StreamBuffer}.
 	 */
 	@SafeVarargs
-	private final void assertBuffers(Function<StreamBuffer<byte[]>, Integer>... validators) {
-		List<StreamBuffer<byte[]>> buffers = this.outputStream.getBuffers();
+	private final void assertBuffers(Function<StreamBuffer<ByteBuffer>, Integer>... validators) {
+		List<StreamBuffer<ByteBuffer>> buffers = this.outputStream.getBuffers();
 		assertEquals("Incorrect number of buffers", validators.length, buffers.size());
-		Iterator<StreamBuffer<byte[]>> bufferIterator = buffers.iterator();
+		Iterator<StreamBuffer<ByteBuffer>> bufferIterator = buffers.iterator();
 		int expectedTotalBytes = 0;
-		for (Function<StreamBuffer<byte[]>, Integer> validator : validators) {
-			StreamBuffer<byte[]> buffer = bufferIterator.next();
+		for (Function<StreamBuffer<ByteBuffer>, Integer> validator : validators) {
+			StreamBuffer<ByteBuffer> buffer = bufferIterator.next();
 			expectedTotalBytes += validator.apply(buffer);
 		}
 		assertEquals("Incorrect Content-Length", expectedTotalBytes, this.outputStream.getContentLength());
@@ -230,15 +231,15 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 	 *            Expected bytes.
 	 * @return Number of bytes in buffer.
 	 */
-	private static int assertData(StreamBuffer<byte[]> buffer, int... expectedBytes) {
+	private static int assertPooledBuffer(StreamBuffer<ByteBuffer> buffer, int... expectedBytes) {
 		assertTrue("Should be pooled buffer", buffer.isPooled());
-		byte[] data = buffer.getPooledBuffer();
-		assertTrue("Buffer should be larger than expected bytes", data.length >= expectedBytes.length);
+		ByteBuffer data = buffer.getPooledBuffer();
+		assertTrue("Buffer should be larger than expected bytes", data.position() >= expectedBytes.length);
 		for (int i = 0; i < expectedBytes.length; i++) {
-			assertEquals("Incorrect byte " + i, expectedBytes[i], data[i]);
+			assertEquals("Incorrect byte " + i, expectedBytes[i], data.get(i));
 		}
-		for (int i = expectedBytes.length; i < data.length; i++) {
-			assertEquals("Rest of buffer empty for byte " + i, 0, data[i]);
+		for (int i = expectedBytes.length; i < data.position(); i++) {
+			assertEquals("Rest of buffer empty for byte " + i, 0, data.get(i));
 		}
 		return expectedBytes.length;
 	}
@@ -252,7 +253,7 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 	 *            Expected bytes.
 	 * @return Number of bytes in buffer.
 	 */
-	private static int assertByteBuffer(StreamBuffer<byte[]> buffer, int... expectedBytes) {
+	private static int assertUnpooledBuffer(StreamBuffer<ByteBuffer> buffer, int... expectedBytes) {
 		assertFalse("Should be unpooled buffer", buffer.isPooled());
 		ByteBuffer byteBuffer = buffer.getUnpooledByteBuffer();
 		assertEquals("Incorrect number of bytes", expectedBytes.length, byteBuffer.remaining());

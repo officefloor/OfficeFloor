@@ -35,7 +35,6 @@ import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.UsAsciiUtil;
-import net.officefloor.server.http.clock.HttpServerClock;
 import net.officefloor.server.http.conversation.HttpConversation;
 import net.officefloor.server.http.conversation.HttpEntity;
 import net.officefloor.server.http.conversation.HttpManagedObject;
@@ -65,12 +64,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 	 * {@link HttpConversation} to test.
 	 */
 	private final HttpConversation conversation = new HttpConversationImpl(this.connection, "TEST", 1024, US_ASCII,
-			false, new HttpServerClock() {
-				@Override
-				public String getDateHeaderValue() {
-					return "[Mock time]";
-				}
-			});
+			false);
 
 	/**
 	 * Ensure no data on the wire until {@link HttpResponse} is closed.
@@ -357,7 +351,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		HttpRequestHeaders httpHeaders = null;
 
 		// Add the request
-		return this.conversation.addRequest(method, requestURI, httpVersion, httpHeaders, httpEntity);
+		return this.conversation.serviceRequest(method, requestURI, httpVersion, httpHeaders, httpEntity);
 	}
 
 }

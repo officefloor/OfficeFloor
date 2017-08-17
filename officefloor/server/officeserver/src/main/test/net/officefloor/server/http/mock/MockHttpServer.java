@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -125,7 +126,7 @@ public class MockHttpServer implements HttpServerImplementation {
 		MockHttpResponseImpl response = new MockHttpResponseImpl();
 
 		// Handle response
-		HttpResponseWriter<byte[]> responseWriter = (responseVersion, status, responseHttpHeaders,
+		HttpResponseWriter<ByteBuffer> responseWriter = (responseVersion, status, responseHttpHeaders,
 				httpEntityContentLength, httpEntityContentType, responseHttpEntity) -> {
 
 			// Obtain the listing of response HTTP headers
@@ -135,7 +136,7 @@ public class MockHttpServer implements HttpServerImplementation {
 			}
 
 			// Release all the buffers (as now considered written)
-			for (StreamBuffer<byte[]> buffer : responseHttpEntity) {
+			for (StreamBuffer<ByteBuffer> buffer : responseHttpEntity) {
 				buffer.release();
 			}
 
@@ -147,7 +148,7 @@ public class MockHttpServer implements HttpServerImplementation {
 		};
 
 		// Create the server HTTP connection
-		ProcessAwareServerHttpConnectionManagedObject<byte[]> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
+		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
 				isSecure, methodSupplier, requestUriSupplier, requestVersion, requestHeaders, requestEntity,
 				responseWriter, bufferPool);
 

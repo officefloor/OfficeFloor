@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNotEquals;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.function.Consumer;
@@ -43,7 +44,7 @@ import net.officefloor.server.stream.StreamBuffer;
  * 
  * @author Daniel Sagenschneider
  */
-public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements HttpResponseWriter<byte[]> {
+public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements HttpResponseWriter<ByteBuffer> {
 
 	/**
 	 * {@link MockBufferPool}.
@@ -53,7 +54,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 	/**
 	 * {@link ProcessAwareHttpResponse} to test.
 	 */
-	private final ProcessAwareHttpResponse<byte[]> response = new ProcessAwareHttpResponse<>(HttpVersion.HTTP_1_1,
+	private final ProcessAwareHttpResponse<ByteBuffer> response = new ProcessAwareHttpResponse<>(HttpVersion.HTTP_1_1,
 			this.bufferPool, new MockProcessAwareContext(), this);
 
 	/**
@@ -359,11 +360,11 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 
 	private HttpHeaderValue contentType = null;
 
-	private Iterable<StreamBuffer<byte[]>> content = null;
+	private Iterable<StreamBuffer<ByteBuffer>> content = null;
 
 	@Override
 	public void writeHttpResponse(HttpVersion version, HttpStatus status, Iterable<WritableHttpHeader> httpHeaders,
-			int contentLength, HttpHeaderValue contentType, Iterable<StreamBuffer<byte[]>> content) {
+			int contentLength, HttpHeaderValue contentType, Iterable<StreamBuffer<ByteBuffer>> content) {
 		this.version = version;
 		this.status = status;
 		this.httpHeaders = httpHeaders;

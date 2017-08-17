@@ -32,11 +32,11 @@ import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.server.ConnectionHandler;
 import net.officefloor.server.ManagedConnection;
 import net.officefloor.server.WriteDataAction;
 import net.officefloor.server.http.protocol.CommunicationProtocol;
 import net.officefloor.server.http.protocol.Connection;
-import net.officefloor.server.http.protocol.ConnectionHandler;
 import net.officefloor.server.http.protocol.WriteBuffer;
 import net.officefloor.server.http.protocol.WriteBufferEnum;
 

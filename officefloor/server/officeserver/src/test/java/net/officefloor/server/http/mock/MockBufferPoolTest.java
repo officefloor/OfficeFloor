@@ -45,12 +45,12 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 	/**
 	 * {@link MockBufferPool}.
 	 */
-	private final MockBufferPool pool = new MockBufferPool(BUFFER_SIZE);
+	private final MockBufferPool pool = new MockBufferPool(() -> ByteBuffer.allocate(BUFFER_SIZE));
 
 	/**
 	 * {@link ServerOutputStream} to write data to buffers.
 	 */
-	private final BufferPoolServerOutputStream<byte[]> output = new BufferPoolServerOutputStream<>(this.pool);
+	private final BufferPoolServerOutputStream<ByteBuffer> output = new BufferPoolServerOutputStream<>(this.pool);
 
 	/**
 	 * Ensure can release pooled {@link StreamBuffer} back to
@@ -59,7 +59,7 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 	public void testReleasePooledStreamBuffer() {
 
 		// Obtain the writable buffer
-		StreamBuffer<byte[]> buffer = this.pool.getPooledStreamBuffer();
+		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
 		assertTrue("Should not be pooled", buffer.isPooled());
 
 		// Ensure issue if not returned to pool
@@ -81,7 +81,7 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 	public void testReleaseUnpooledStreamBuffer() {
 
 		// Obtain the read-only buffer
-		StreamBuffer<byte[]> buffer = this.pool.getUnpooledStreamBuffer(ByteBuffer.allocate(4));
+		StreamBuffer<ByteBuffer> buffer = this.pool.getUnpooledStreamBuffer(ByteBuffer.allocate(4));
 		assertFalse("Should be unpooled", buffer.isPooled());
 
 		// Ensure issue if not returned to pool
@@ -102,14 +102,12 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 	public void testWriteToBuffer() {
 
 		// Obtain the writable buffer
-		StreamBuffer<byte[]> buffer = this.pool.getPooledStreamBuffer();
+		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
 
 		// Ensure buffer initialised to zero
-		byte[] data = buffer.getPooledBuffer();
-		assertEquals("Incorrect data size", BUFFER_SIZE, data.length);
-		for (int i = 0; i < BUFFER_SIZE; i++) {
-			assertEquals("Data should be initialised to zero", 0, data[i]);
-		}
+		ByteBuffer data = buffer.getPooledBuffer();
+		assertEquals("Incorrect data size", BUFFER_SIZE, data.capacity());
+		assertEquals("Should be no data", 0, data.position());
 
 		// Write bytes to buffer
 		for (int i = 0; i < BUFFER_SIZE; i++) {
@@ -121,7 +119,7 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 
 		// Ensure the buffer contains the data
 		for (int i = 0; i < BUFFER_SIZE; i++) {
-			assertEquals("Incorrect byte value", i, data[i]);
+			assertEquals("Incorrect byte value", i, data.get(i));
 		}
 	}
 
@@ -131,7 +129,7 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 	public void testBulkWriteToBuffer() {
 
 		// Obtain the writable buffer
-		StreamBuffer<byte[]> buffer = this.pool.getPooledStreamBuffer();
+		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
 
 		// Bulk write to data
 		byte[] write = new byte[BUFFER_SIZE];
@@ -146,9 +144,9 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 		assertEquals("Buffer should now be full", 0, buffer.write(write, 0, write.length));
 
 		// Ensure the buffer contains the data
-		byte[] data = buffer.getPooledBuffer();
+		ByteBuffer data = buffer.getPooledBuffer();
 		for (int i = 0; i < BUFFER_SIZE; i++) {
-			assertEquals("Incorrect byte value", i, data[i]);
+			assertEquals("Incorrect byte value", i, data.get(i));
 		}
 	}
 
@@ -158,7 +156,7 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 	public void testUnderwriteBuffer() {
 
 		// Obtain the writable buffer
-		StreamBuffer<byte[]> buffer = this.pool.getPooledStreamBuffer();
+		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
 
 		// Write to the buffer
 		buffer.write((byte) 1);
@@ -166,12 +164,12 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 		buffer.write(furtherData);
 
 		// Ensure the data is correct
-		byte[] data = buffer.getPooledBuffer();
+		ByteBuffer data = buffer.getPooledBuffer();
 		for (int i = 0; i < 3; i++) {
-			assertEquals("Incorrect byte value", i + 1, data[i]);
+			assertEquals("Incorrect byte value", i + 1, data.get(i));
 		}
 		for (int i = 3; i < BUFFER_SIZE; i++) {
-			assertEquals("Incorrect unset bytes", 0, data[i]);
+			assertEquals("Incorrect unset bytes", 0, data.get(i));
 		}
 	}
 
@@ -181,7 +179,7 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 	public void testOverwriteBuffer() {
 
 		// Obtain the writable buffer
-		StreamBuffer<byte[]> buffer = this.pool.getPooledStreamBuffer();
+		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
 
 		// Write twice the data length
 		byte[] write = new byte[BUFFER_SIZE * 2];
@@ -196,9 +194,9 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 		assertEquals("Buffer should now be full", 0, buffer.write(write, BUFFER_SIZE, write.length - BUFFER_SIZE));
 
 		// Ensure the buffer contains the data
-		byte[] data = buffer.getPooledBuffer();
+		ByteBuffer data = buffer.getPooledBuffer();
 		for (int i = 0; i < BUFFER_SIZE; i++) {
-			assertEquals("Incorrect byte value", i, data[i]);
+			assertEquals("Incorrect byte value", i, data.get(i));
 		}
 	}
 
@@ -211,7 +209,7 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 		this.output.write((byte) 1);
 
 		// Mimic writing HTTP response by releasing buffers
-		for (StreamBuffer<byte[]> streamBuffer : this.output.getBuffers()) {
+		for (StreamBuffer<ByteBuffer> streamBuffer : this.output.getBuffers()) {
 			streamBuffer.release();
 		}
 
@@ -241,7 +239,7 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 		writer.flush();
 
 		// Mimic writing HTTP response by releasing buffers
-		for (StreamBuffer<byte[]> streamBuffer : this.output.getBuffers()) {
+		for (StreamBuffer<ByteBuffer> streamBuffer : this.output.getBuffers()) {
 			streamBuffer.release();
 		}
 
@@ -287,7 +285,7 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 		}
 
 		// Mimic writing HTTP response by releasing buffers
-		for (StreamBuffer<byte[]> streamBuffer : this.output.getBuffers()) {
+		for (StreamBuffer<ByteBuffer> streamBuffer : this.output.getBuffers()) {
 			streamBuffer.release();
 		}
 

@@ -19,6 +19,7 @@ package net.officefloor.server.http.protocol;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.server.ConnectionHandler;
 
 /**
  * <p>

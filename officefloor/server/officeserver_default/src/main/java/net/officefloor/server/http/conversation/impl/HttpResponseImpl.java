@@ -23,7 +23,6 @@ import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -36,7 +35,6 @@ import net.officefloor.server.http.HttpResponseHeaders;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.parse.HttpRequestParseException;
-import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.server.http.protocol.Connection;
 import net.officefloor.server.http.protocol.WriteBuffer;
@@ -64,11 +62,6 @@ public class HttpResponseImpl implements HttpResponse {
 	 * Name of the header Server.
 	 */
 	private static final String HEADER_NAME_SERVER = "Server";
-
-	/**
-	 * Name of the header Date.
-	 */
-	private static final String HEADER_NAME_DATE = "Date";
 
 	/**
 	 * Name of the header Content-Type.
@@ -374,8 +367,6 @@ public class HttpResponseImpl implements HttpResponse {
 		// Write the managed headers
 		if (false) {
 			writeUsAscii(HEADER_NAME_SERVER + ": " + this.conversation.getServerName() + EOL, header);
-			writeUsAscii(HEADER_NAME_DATE + ": " + this.conversation.getHttpServerClock().getDateHeaderValue() + EOL,
-					header);
 		}
 		String contentType = this.getContentTypeThreadUnsafe();
 		if (contentType != null) {
@@ -472,7 +463,7 @@ public class HttpResponseImpl implements HttpResponse {
 			return this.status;
 		}
 	}
-	
+
 	@Override
 	public HttpResponseHeaders getHttpHeaders() {
 		// TODO Auto-generated method stub
@@ -489,84 +480,58 @@ public class HttpResponseImpl implements HttpResponse {
 		}
 	}
 
-/*
-	@Override
-	public HttpHeader addHeader(String name, String value) {
-
-		// Ignore specifying managed headers
-		if (HEADER_NAME_SERVER.equalsIgnoreCase(name) || HEADER_NAME_DATE.equalsIgnoreCase(name)
-				|| HEADER_NAME_CONTENT_TYPE.equalsIgnoreCase(name)
-				|| HEADER_NAME_CONTENT_LENGTH.equalsIgnoreCase(name)) {
-			throw new IllegalArgumentException(HttpHeader.class.getSimpleName() + " '" + name
-					+ "' can not be set, as is managed by the " + HttpResponse.class.getSimpleName());
-		}
-
-		// Create the HTTP header
-		HttpHeader header = new HttpHeaderImpl(name, value);
-
-		// Add the header
-		synchronized (this.connection.getWriteLock()) {
-			this.headers.add(header);
-		}
-
-		// Return the added header
-		return header;
-	}
-
-	@Override
-	public HttpHeader getHeader(String name) {
-
-		synchronized (this.connection.getWriteLock()) {
-
-			// Search for the first header by the name
-			for (HttpHeader header : this.headers) {
-				if (name.equalsIgnoreCase(header.getName())) {
-					// Found first header so return it
-					return header;
-				}
-			}
-		}
-
-		// As here did not find header by name
-		return null;
-	}
-
-	@Override
-	public HttpHeader[] getHeaders() {
-
-		synchronized (this.connection.getWriteLock()) {
-
-			// Create and return the array of headers
-			return this.headers.toArray(new HttpHeader[0]);
-		}
-	}
-
-	@Override
-	public void removeHeader(HttpHeader header) {
-
-		synchronized (this.connection.getWriteLock()) {
-
-			// Remove the header
-			this.headers.remove(header);
-		}
-	}
-
-	@Override
-	public void removeHeaders(String name) {
-
-		synchronized (this.connection.getWriteLock()) {
-
-			// Remove all headers by name
-			for (Iterator<HttpHeader> iterator = this.headers.iterator(); iterator.hasNext();) {
-				HttpHeader header = iterator.next();
-				if (name.equalsIgnoreCase(header.getName())) {
-					// Remove the header
-					iterator.remove();
-				}
-			}
-		}
-	}
-*/
+	/*
+	 * @Override public HttpHeader addHeader(String name, String value) {
+	 * 
+	 * // Ignore specifying managed headers if
+	 * (HEADER_NAME_SERVER.equalsIgnoreCase(name) ||
+	 * HEADER_NAME_DATE.equalsIgnoreCase(name) ||
+	 * HEADER_NAME_CONTENT_TYPE.equalsIgnoreCase(name) ||
+	 * HEADER_NAME_CONTENT_LENGTH.equalsIgnoreCase(name)) { throw new
+	 * IllegalArgumentException(HttpHeader.class.getSimpleName() + " '" + name +
+	 * "' can not be set, as is managed by the " +
+	 * HttpResponse.class.getSimpleName()); }
+	 * 
+	 * // Create the HTTP header HttpHeader header = new HttpHeaderImpl(name,
+	 * value);
+	 * 
+	 * // Add the header synchronized (this.connection.getWriteLock()) {
+	 * this.headers.add(header); }
+	 * 
+	 * // Return the added header return header; }
+	 * 
+	 * @Override public HttpHeader getHeader(String name) {
+	 * 
+	 * synchronized (this.connection.getWriteLock()) {
+	 * 
+	 * // Search for the first header by the name for (HttpHeader header :
+	 * this.headers) { if (name.equalsIgnoreCase(header.getName())) { // Found
+	 * first header so return it return header; } } }
+	 * 
+	 * // As here did not find header by name return null; }
+	 * 
+	 * @Override public HttpHeader[] getHeaders() {
+	 * 
+	 * synchronized (this.connection.getWriteLock()) {
+	 * 
+	 * // Create and return the array of headers return this.headers.toArray(new
+	 * HttpHeader[0]); } }
+	 * 
+	 * @Override public void removeHeader(HttpHeader header) {
+	 * 
+	 * synchronized (this.connection.getWriteLock()) {
+	 * 
+	 * // Remove the header this.headers.remove(header); } }
+	 * 
+	 * @Override public void removeHeaders(String name) {
+	 * 
+	 * synchronized (this.connection.getWriteLock()) {
+	 * 
+	 * // Remove all headers by name for (Iterator<HttpHeader> iterator =
+	 * this.headers.iterator(); iterator.hasNext();) { HttpHeader header =
+	 * iterator.next(); if (name.equalsIgnoreCase(header.getName())) { // Remove
+	 * the header iterator.remove(); } } } }
+	 */
 
 	@Override
 	public ServerOutputStream getEntity() throws IOException {
@@ -589,7 +554,7 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public void setContentType(HttpHeaderValue contentTypeAndCharsetValue, Charset charset) throws IOException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override

@@ -19,6 +19,7 @@ package net.officefloor.server.impl;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.charset.Charset;
@@ -38,11 +39,13 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.server.SocketManager;
+import net.officefloor.server.buffer.ThreadLocalByteBufferPool;
 import net.officefloor.server.http.protocol.CommunicationProtocol;
 import net.officefloor.server.http.protocol.CommunicationProtocolContext;
 import net.officefloor.server.http.protocol.CommunicationProtocolSource;
 import net.officefloor.server.http.protocol.Connection;
 import net.officefloor.server.impl.SocketListener.SocketListenerFlows;
+import net.officefloor.server.stream.BufferPool;
 
 /**
  * Abstract {@link ManagedObjectSource} for a {@link ServerSocketChannel}.
@@ -164,12 +167,17 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 			// Create the connection manager
 			singletonSocketManager = new SocketManagerImpl(socketListeners);
 
+			// Create the buffer pool
+			int TODO_threadLocalPoolSize = 100000;
+			int TODO_corePoolSize = 1000000;
+			BufferPool<ByteBuffer> readBufferPool = new ThreadLocalByteBufferPool(
+					() -> ByteBuffer.allocateDirect(receiveBufferSize), TODO_threadLocalPoolSize, TODO_corePoolSize);
+
 			// Load the socket listeners
 			for (int i = 0; i < socketListeners.length; i++) {
 
 				// Create the socket listener
-				SocketListener socketListener = new SocketListener(singletonSocketManager, receiveBufferSize,
-						sendBufferSize);
+				SocketListener socketListener = new SocketListener(singletonSocketManager, readBufferPool);
 
 				// Register the socket listener
 				socketListeners[i] = socketListener;

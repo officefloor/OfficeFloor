@@ -52,7 +52,7 @@ public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 	/**
 	 * {@link BufferPoolServerOutputStream}.
 	 */
-	private final BufferPoolServerOutputStream<byte[]> outputStream = new BufferPoolServerOutputStream<>(
+	private final BufferPoolServerOutputStream<ByteBuffer> outputStream = new BufferPoolServerOutputStream<>(
 			this.bufferPool);
 
 	/**
@@ -76,7 +76,7 @@ public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 	private String getContent() {
 
 		// Obtain the buffers
-		List<StreamBuffer<byte[]>> buffers = this.outputStream.getBuffers();
+		List<StreamBuffer<ByteBuffer>> buffers = this.outputStream.getBuffers();
 
 		// Release the buffers (as consider request written)
 		MockBufferPool.releaseStreamBuffers(buffers);
@@ -137,7 +137,7 @@ public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 		differentCharset.flush();
 
 		// Obtain the buffers
-		List<StreamBuffer<byte[]>> buffers = this.outputStream.getBuffers();
+		List<StreamBuffer<ByteBuffer>> buffers = this.outputStream.getBuffers();
 		MockBufferPool.releaseStreamBuffers(buffers);
 
 		// Ensure stream in correct data
@@ -193,7 +193,7 @@ public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 
 		final CloseHandler handler = this.createMock(CloseHandler.class);
 		@SuppressWarnings("resource")
-		BufferPoolServerOutputStream<byte[]> outputStream = new BufferPoolServerOutputStream<>(this.bufferPool,
+		BufferPoolServerOutputStream<ByteBuffer> outputStream = new BufferPoolServerOutputStream<>(this.bufferPool,
 				handler);
 
 		// Record close only once

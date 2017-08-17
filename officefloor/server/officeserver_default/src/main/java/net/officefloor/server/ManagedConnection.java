@@ -18,11 +18,12 @@
 package net.officefloor.server;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
 import net.officefloor.server.http.protocol.Connection;
-import net.officefloor.server.http.protocol.ConnectionHandler;
+import net.officefloor.server.stream.StreamBuffer;
 
 /**
  * Managed {@link Connection}.
@@ -44,6 +45,21 @@ public interface ManagedConnection {
 	 * @return {@link SocketChannel} for the {@link Connection}.
 	 */
 	SocketChannel getSocketChannel();
+
+	/**
+	 * Obtains the read {@link StreamBuffer}.
+	 * 
+	 * @return Read {@link StreamBuffer}.
+	 */
+	StreamBuffer<ByteBuffer> getReadStreamBuffer();
+
+	/**
+	 * Specifies the read {@link StreamBuffer}.
+	 * 
+	 * @param readStreamBuffer
+	 *            Read {@link StreamBuffer}.
+	 */
+	void setReadStreamBuffer(StreamBuffer<ByteBuffer> readStreamBuffer);
 
 	/**
 	 * Obtains the {@link ConnectionHandler}.

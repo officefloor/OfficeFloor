@@ -25,6 +25,7 @@ import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListenerFactory;
 import net.officefloor.server.stream.BufferPool;
+import net.officefloor.server.stream.ByteBufferFactory;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**

@@ -19,6 +19,8 @@ package net.officefloor.server.http.protocol;
 
 import java.nio.ByteBuffer;
 
+import net.officefloor.server.ConnectionHandler;
+
 /**
  * Buffer with data to write.
  * 

@@ -18,6 +18,7 @@
 package net.officefloor.server.http.parse.impl;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +28,10 @@ import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.conversation.HttpEntity;
 import net.officefloor.server.http.conversation.impl.HttpEntityImpl;
+import net.officefloor.server.http.impl.SerialisableHttpHeader;
 import net.officefloor.server.http.parse.HttpRequestParseException;
 import net.officefloor.server.http.parse.HttpRequestParser;
+import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.impl.ServerInputStreamImpl;
 
 /**
@@ -139,6 +142,11 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	 * Maximum length of the entity.
 	 */
 	private final long maxEntityLength;
+
+	/**
+	 * Current {@link StreamBuffer}.
+	 */
+	private StreamBuffer<ByteBuffer> currentStreamBuffer = null;
 
 	/**
 	 * Next byte to parse index.
@@ -313,7 +321,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 		}
 
 		// Add the header
-		this.headers.add(new HttpHeaderImpl(name, value));
+		this.headers.add(new SerialisableHttpHeader(name, value));
 
 		// Reset for next header
 		this.text_headerName = "";
@@ -390,8 +398,8 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	}
 
 	@Override
-	public int nextByteToParseIndex() {
-		return this.nextByteToParseIndex;
+	public boolean isFinishedReadingBuffer() {
+		return this.nextByteToParseIndex >= this.currentStreamBuffer.getPooledBuffer().position();
 	}
 
 	private static final HttpStatus WHITE_SPACING_BEFORE_FIRST_HTTP_HEADER = new HttpStatus(
@@ -416,17 +424,24 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 			HttpStatus.BAD_REQUEST.getStatusCode(), "Should expect LR after a CR after header");
 
 	@Override
-	public boolean parse(byte[] data, int startIndex) throws IOException, HttpRequestParseException {
+	public boolean parse(StreamBuffer<ByteBuffer> streamBuffer) throws IOException, HttpRequestParseException {
 
-		// Flag next byte to parse
-		this.nextByteToParseIndex = startIndex;
+		// Determine if still reading from same buffer (or new buffer)
+		if (streamBuffer != this.currentStreamBuffer) {
+			// Now current buffer
+			this.currentStreamBuffer = streamBuffer;
+			this.nextByteToParseIndex = 0;
+		}
+
+		// Obtain the data to read
+		ByteBuffer data = streamBuffer.getPooledBuffer();
 
 		// Determine if parsing head
 		if (this.parseState != ParseState.ENTITY) {
 
 			// Loop parsing available content up to entity
-			NEXT_CHARACTER: for (; this.nextByteToParseIndex < data.length; this.nextByteToParseIndex++) {
-				byte character = data[this.nextByteToParseIndex];
+			NEXT_CHARACTER: while (this.nextByteToParseIndex < data.position()) {
+				byte character = data.get(this.nextByteToParseIndex);
 
 				// Parse the character of the HTTP request
 				switch (this.parseState) {
@@ -621,7 +636,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 		if (this.contentLength > 0) {
 
 			// Determine remaining bytes
-			int remainingBytes = data.length - this.nextByteToParseIndex;
+			int remainingBytes = data.position() - this.nextByteToParseIndex;
 
 			// Determine the number of bytes required for entity
 			long requiredBytes = this.contentLength - this.entityStream.available();
@@ -638,7 +653,8 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 
 			} else {
 				// Consume all of the bytes
-				this.entityStream.inputData(data, this.nextByteToParseIndex, (data.length - 1), isFurtherDataRequired);
+				this.entityStream.inputData(data, this.nextByteToParseIndex, (data.position() - 1),
+						isFurtherDataRequired);
 				this.nextByteToParseIndex = -1; // all bytes consumed
 			}
 
@@ -650,7 +666,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 			this.entityStream.inputData(null, 0, 0, false);
 
 			// Determine if consumed all bytes
-			if (this.nextByteToParseIndex == data.length) {
+			if (this.nextByteToParseIndex == data.position()) {
 				this.nextByteToParseIndex = -1; // all bytes consumed
 			}
 		}

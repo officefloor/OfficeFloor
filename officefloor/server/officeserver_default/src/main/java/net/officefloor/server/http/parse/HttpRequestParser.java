@@ -18,11 +18,18 @@
 package net.officefloor.server.http.parse;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.function.Supplier;
 
 import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.conversation.HttpEntity;
+import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
+import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.impl.ByteSequence;
 
 /**
  * Parses a {@link HttpRequest}.
@@ -49,8 +56,7 @@ public interface HttpRequestParser {
 	 * 
 	 * @see #nextByteToParseIndex()
 	 */
-	boolean parse(byte[] data, int startIndex) throws IOException,
-			HttpRequestParseException;
+	boolean parse(StreamBuffer<ByteBuffer> data) throws IOException, HttpRequestParseException;
 
 	/**
 	 * <p>
@@ -64,7 +70,7 @@ public interface HttpRequestParser {
 	 * @return Index of the next byte to parse or <code>-1</code> if all bytes
 	 *         consumed.
 	 */
-	int nextByteToParseIndex();
+	boolean isFinishedReadingBuffer();
 
 	/**
 	 * Resets for parsing another {@link HttpRequest}.
@@ -76,34 +82,34 @@ public interface HttpRequestParser {
 	 * 
 	 * @return Method.
 	 */
-	String getMethod();
+	Supplier<HttpMethod> getMethod();
 
 	/**
 	 * Obtains the request URI.
 	 * 
 	 * @return Request URI.
 	 */
-	String getRequestURI();
+	Supplier<String> getRequestURI();
 
 	/**
 	 * Obtains the HTTP version.
 	 * 
 	 * @return HTTP version.
 	 */
-	String getHttpVersion();
+	HttpVersion getHttpVersion();
 
 	/**
 	 * Obtains the {@link HttpHeader} instances in the order supplied.
 	 * 
 	 * @return {@link HttpHeader} instances in the order supplied.
 	 */
-	List<HttpHeader> getHeaders();
+	NonMaterialisedHttpHeaders getHeaders();
 
 	/**
 	 * Obtains the {@link HttpEntity} of the {@link HttpRequest}.
 	 * 
 	 * @return {@link HttpEntity} of the {@link HttpRequest}.
 	 */
-	HttpEntity getEntity();
+	ByteSequence getEntity();
 
 }

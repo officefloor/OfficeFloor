@@ -36,6 +36,11 @@ public interface ServerHttpConnection {
 	static Charset HTTP_CHARSET = Charset.forName("US-ASCII");
 
 	/**
+	 * URI {@link Charset}.
+	 */
+	static Charset URI_CHARSET = Charset.forName("UTF-8");
+
+	/**
 	 * HTTP entity default {@link Charset}.
 	 */
 	static Charset DEFAULT_HTTP_ENTITY_CHARSET = Charset.forName("UTF-8");
