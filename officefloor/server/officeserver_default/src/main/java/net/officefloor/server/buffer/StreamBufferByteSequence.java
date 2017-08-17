@@ -61,12 +61,38 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 	 * {@link StreamBufferByteSequence} instances to ensure the
 	 * {@link CharBuffer} is appropriately sized for purpose.
 	 */
-	private static final ThreadLocal<CharBuffer> tempBuffer = new ThreadLocal<CharBuffer>() {
+	private static final ThreadLocal<ThreadLocalState> threadLocalState = new ThreadLocal<ThreadLocalState>() {
 		@Override
-		protected CharBuffer initialValue() {
-			return CharBuffer.allocate(maxByteLength);
+		protected ThreadLocalState initialValue() {
+			return new ThreadLocalState(maxByteLength);
 		}
 	};
+
+	/**
+	 * {@link ThreadLocal} state.
+	 */
+	private static class ThreadLocalState {
+
+		/**
+		 * Re-useable {@link CharBuffer} for reduced memory.
+		 */
+		private final CharBuffer charBuffer;
+
+		/**
+		 * 
+		 */
+		private final CharsetDecoder uriDecoder = ServerHttpConnection.URI_CHARSET.newDecoder();
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param charBufferLength
+		 *            Length of the {@link CharBuffer}.
+		 */
+		private ThreadLocalState(int charBufferLength) {
+			charBuffer = CharBuffer.allocate(charBufferLength);
+		}
+	}
 
 	/**
 	 * Obtains a {@link CharBuffer} ensuring it fits the max character length.
@@ -78,19 +104,30 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 	private static CharBuffer getCharBuffer(int maxCharLength) {
 
 		// Obtain the char buffer
-		CharBuffer charBuffer = tempBuffer.get();
-		if (charBuffer.capacity() < maxCharLength) {
+		ThreadLocalState state = threadLocalState.get();
+		if (state.charBuffer.capacity() < maxCharLength) {
 			// Need to use larger char buffer
-			charBuffer = CharBuffer.allocate(maxCharLength);
-			tempBuffer.set(charBuffer);
+			state = new ThreadLocalState(maxCharLength);
+			threadLocalState.set(state);
 
 		} else {
 			// Use the char buffer, but clear ready for use
-			charBuffer.clear();
+			state.charBuffer.clear();
 		}
 
 		// Return the char buffer
-		return charBuffer;
+		return state.charBuffer;
+	}
+
+	/**
+	 * Obtains the URI {@link CharsetDecoder}.
+	 * 
+	 * @return URI {@link CharsetDecoder}.
+	 */
+	private static CharsetDecoder getUriDecoder() {
+		CharsetDecoder decoder = threadLocalState.get().uriDecoder;
+		decoder.reset();
+		return decoder;
 	}
 
 	/**
@@ -334,7 +371,7 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 		for (int i = 0; i < charLength; i++) {
 			temp.put(httpSequence.charAt(i));
 		}
-		
+
 		// Return the string value
 		temp.flip();
 		return temp.toString();
@@ -343,12 +380,20 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 	/**
 	 * Obtains this {@link ByteSequence} decoded to a URI {@link String}.
 	 * 
+	 * @param invalidValueExceptionFactory
+	 *            Factory to create the {@link Exception} should the
+	 *            {@link ByteSequence} not be valid for the URI.
 	 * @return {@link ByteSequence} decoded to a URI {@link String}.
+	 * @throws T
+	 *             If invalid {@link ByteSequence} for the URI.
 	 */
-	public String toUriString() {
+	public <T extends Throwable> String toUriString(Function<CoderResult, T> invalidValueExceptionFactory) throws T {
 
-		// TODO implement
-		return null;
+		// Obtain the URI decoder
+		CharsetDecoder uriDecorder = getUriDecoder();
+
+		// Return the string
+		return this.toString(uriDecorder, invalidValueExceptionFactory);
 	}
 
 	/**
@@ -370,6 +415,26 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 
 		// Create the decoder for the charset
 		CharsetDecoder decoder = charset.newDecoder();
+
+		// Return the string
+		return this.toString(decoder, invalidValueExceptionFactory);
+	}
+
+	/**
+	 * Obtains this {@link ByteSequence} as a {@link String} via the
+	 * {@link CharsetDecoder}.
+	 * 
+	 * @param decoder
+	 *            {@link CharsetDecoder}.
+	 * @param invalidValueExceptionFactory
+	 *            Factory to create the {@link Exception} should the
+	 *            {@link ByteSequence} not be valid for the {@link Charset}.
+	 * @return {@link String} value for the {@link StreamBuffer} values.
+	 * @throws T
+	 *             If invalid {@link ByteSequence} for {@link Charset}.
+	 */
+	private <T extends Throwable> String toString(CharsetDecoder decoder,
+			Function<CoderResult, T> invalidValueExceptionFactory) throws T {
 
 		// Determine worst case char buffer size
 		int maxCharLength = (int) Math.ceil(this.sequenceLength * decoder.maxCharsPerByte());

@@ -268,14 +268,15 @@ public class StreamBufferByteSequenceTest extends OfficeFrameTestCase {
 			assertSame("Incorrect exception", exception, ex);
 		}
 	}
-	
+
 	/**
 	 * Ensure can decode bytes along with URI decoding.
 	 */
 	public void testToUriString() throws IOException {
 		StreamBufferByteSequence sequence = this.writeContentToSequence("Test%20Decode",
 				ServerHttpConnection.URI_CHARSET);
-		assertEquals("Incorrect decoded URI", "Test Decode", sequence.toUriString());
+		assertEquals("Incorrect decoded URI", "Test Decode",
+				sequence.toUriString((result) -> new IOException("Should not occurr")));
 	}
 
 	/**
