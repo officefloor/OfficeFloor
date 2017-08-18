@@ -22,16 +22,21 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpStatus;
+import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.conversation.HttpEntity;
 import net.officefloor.server.http.conversation.impl.HttpEntityImpl;
+import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.impl.SerialisableHttpHeader;
 import net.officefloor.server.http.parse.HttpRequestParseException;
 import net.officefloor.server.http.parse.HttpRequestParser;
 import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.impl.ByteSequence;
 import net.officefloor.server.stream.impl.ServerInputStreamImpl;
 
 /**
@@ -144,9 +149,9 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	private final long maxEntityLength;
 
 	/**
-	 * Current {@link StreamBuffer}.
+	 * Current {@link ByteBuffer}.
 	 */
-	private StreamBuffer<ByteBuffer> currentStreamBuffer = null;
+	private ByteBuffer currentBuffer = null;
 
 	/**
 	 * Next byte to parse index.
@@ -204,9 +209,9 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	private List<HttpHeader> headers;
 
 	/**
-	 * {@link ServerInputStreamImpl}.
+	 * {@link ByteSequence} for the entity.
 	 */
-	private ServerInputStreamImpl entityStream;
+	private ByteSequence entityData;
 
 	/**
 	 * Initiate.
@@ -394,12 +399,12 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 		this.headers = new ArrayList<HttpHeader>(16);
 
 		// Once parsed, no further input so do not block writing by input
-		this.entityStream = new ServerInputStreamImpl(new Object());
+		this.entityData = null;
 	}
 
 	@Override
-	public boolean isFinishedReadingBuffer() {
-		return this.nextByteToParseIndex >= this.currentStreamBuffer.getPooledBuffer().position();
+	public boolean isFinishedParsingBuffer() {
+		return this.nextByteToParseIndex >= this.currentBuffer.position();
 	}
 
 	private static final HttpStatus WHITE_SPACING_BEFORE_FIRST_HTTP_HEADER = new HttpStatus(
@@ -424,24 +429,21 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 			HttpStatus.BAD_REQUEST.getStatusCode(), "Should expect LR after a CR after header");
 
 	@Override
-	public boolean parse(StreamBuffer<ByteBuffer> streamBuffer) throws IOException, HttpRequestParseException {
+	public boolean parse(ByteBuffer buffer) throws IOException, HttpRequestParseException {
 
 		// Determine if still reading from same buffer (or new buffer)
-		if (streamBuffer != this.currentStreamBuffer) {
+		if (buffer != this.currentBuffer) {
 			// Now current buffer
-			this.currentStreamBuffer = streamBuffer;
+			this.currentBuffer = buffer;
 			this.nextByteToParseIndex = 0;
 		}
-
-		// Obtain the data to read
-		ByteBuffer data = streamBuffer.getPooledBuffer();
 
 		// Determine if parsing head
 		if (this.parseState != ParseState.ENTITY) {
 
 			// Loop parsing available content up to entity
-			NEXT_CHARACTER: while (this.nextByteToParseIndex < data.position()) {
-				byte character = data.get(this.nextByteToParseIndex);
+			NEXT_CHARACTER: while (this.nextByteToParseIndex < buffer.position()) {
+				byte character = buffer.get(this.nextByteToParseIndex);
 
 				// Parse the character of the HTTP request
 				switch (this.parseState) {
@@ -636,10 +638,10 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 		if (this.contentLength > 0) {
 
 			// Determine remaining bytes
-			int remainingBytes = data.position() - this.nextByteToParseIndex;
+			int remainingBytes = buffer.position() - this.nextByteToParseIndex;
 
 			// Determine the number of bytes required for entity
-			long requiredBytes = this.contentLength - this.entityStream.available();
+			long requiredBytes = this.contentLength ; //- this.entityStream.available();
 
 			// Determine if further data required
 			boolean isFurtherDataRequired = (requiredBytes > remainingBytes);
@@ -648,13 +650,13 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 			if (remainingBytes > requiredBytes) {
 				// Consume partial of the bytes (-1 as index not length)
 				int endIndex = this.nextByteToParseIndex + ((int) requiredBytes) - 1;
-				this.entityStream.inputData(data, this.nextByteToParseIndex, endIndex, false);
+//				this.entityStream.inputData(buffer, this.nextByteToParseIndex, endIndex, false);
 				this.nextByteToParseIndex = endIndex + 1; // after bytes read
 
 			} else {
 				// Consume all of the bytes
-				this.entityStream.inputData(data, this.nextByteToParseIndex, (data.position() - 1),
-						isFurtherDataRequired);
+//				this.entityStream.inputData(buffer, this.nextByteToParseIndex, (buffer.position() - 1),
+//						isFurtherDataRequired);
 				this.nextByteToParseIndex = -1; // all bytes consumed
 			}
 
@@ -663,10 +665,10 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 
 		} else {
 			// No content (indicate no further data)
-			this.entityStream.inputData(null, 0, 0, false);
+//			this.entityStream.inputData(null, 0, 0, false);
 
 			// Determine if consumed all bytes
-			if (this.nextByteToParseIndex == data.position()) {
+			if (this.nextByteToParseIndex == buffer.position()) {
 				this.nextByteToParseIndex = -1; // all bytes consumed
 			}
 		}
@@ -676,28 +678,33 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	}
 
 	@Override
-	public String getMethod() {
-		return this.text_method;
+	public Supplier<HttpMethod> getMethod() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
-	public String getRequestURI() {
-		return this.text_path;
+	public Supplier<String> getRequestURI() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
-	public String getVersion() {
-		return this.text_version;
+	public HttpVersion getVersion() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
-	public List<HttpHeader> getHeaders() {
-		return this.headers;
+	public NonMaterialisedHttpHeaders getHeaders() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
-	public HttpEntity getEntity() {
-		return new HttpEntityImpl(this.entityStream);
+	public ByteSequence getEntity() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
