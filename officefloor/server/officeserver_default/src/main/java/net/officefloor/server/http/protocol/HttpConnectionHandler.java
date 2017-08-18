@@ -95,7 +95,7 @@ public class HttpConnectionHandler implements ConnectionHandler {
 					// Received the full HTTP request to start processing
 					Supplier<HttpMethod> methodSupplier = this.parser.getMethod();
 					Supplier<String> requestUriSupplier = this.parser.getRequestURI();
-					HttpVersion httpVersion = this.parser.getHttpVersion();
+					HttpVersion httpVersion = this.parser.getVersion();
 					NonMaterialisedHttpHeaders headers = this.parser.getHeaders();
 					ByteSequence entity = this.parser.getEntity();
 					this.parser.reset(); // reset for next request

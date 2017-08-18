@@ -686,7 +686,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	}
 
 	@Override
-	public String getHttpVersion() {
+	public String getVersion() {
 		return this.text_version;
 	}
 

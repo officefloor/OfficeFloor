@@ -19,16 +19,13 @@ package net.officefloor.server.http.parse;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.List;
 import java.util.function.Supplier;
 
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpVersion;
-import net.officefloor.server.http.conversation.HttpEntity;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
-import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.impl.ByteSequence;
 
 /**
@@ -53,24 +50,18 @@ public interface HttpRequestParser {
 	 *             If fails to read bytes.
 	 * @throws HttpRequestParseException
 	 *             If failure to parse {@link HttpRequest}.
-	 * 
-	 * @see #nextByteToParseIndex()
 	 */
-	boolean parse(StreamBuffer<ByteBuffer> data) throws IOException, HttpRequestParseException;
+	boolean parse(ByteBuffer data) throws IOException, HttpRequestParseException;
 
 	/**
-	 * <p>
-	 * Obtains the index of the next byte to parse from the previous
-	 * {@link #parse(byte[], int)}.
-	 * <p>
-	 * Should all bytes be consumed this will return <code>-1</code>. Note that
-	 * if {@link #parse(byte[], int)} returns <code>false</code>, this will
-	 * always return <code>-1</code> as all bytes are to be consumed.
+	 * Determines if finished reading data from the {@link ByteBuffer}.
 	 * 
-	 * @return Index of the next byte to parse or <code>-1</code> if all bytes
-	 *         consumed.
+	 * @return <code>true</code> if finished reading data from the
+	 *         {@link ByteBuffer}. <code>false</code> to have the
+	 *         {@link ByteBuffer} passed back into parsing to complete parsing
+	 *         all the data.
 	 */
-	boolean isFinishedReadingBuffer();
+	boolean isFinishedParsingBuffer();
 
 	/**
 	 * Resets for parsing another {@link HttpRequest}.
@@ -78,25 +69,25 @@ public interface HttpRequestParser {
 	void reset();
 
 	/**
-	 * Obtains the method.
+	 * Obtains the {@link Supplier} for the {@link HttpMethod}.
 	 * 
-	 * @return Method.
+	 * @return {@link Supplier} for the {@link HttpMethod}.
 	 */
 	Supplier<HttpMethod> getMethod();
 
 	/**
-	 * Obtains the request URI.
+	 * Obtains the {@link Supplier} for the request URI.
 	 * 
-	 * @return Request URI.
+	 * @return {@link Supplier} for the request URI.
 	 */
 	Supplier<String> getRequestURI();
 
 	/**
-	 * Obtains the HTTP version.
+	 * Obtains the {@link HttpVersion}.
 	 * 
-	 * @return HTTP version.
+	 * @return {@link HttpVersion}.
 	 */
-	HttpVersion getHttpVersion();
+	HttpVersion getVersion();
 
 	/**
 	 * Obtains the {@link HttpHeader} instances in the order supplied.
@@ -106,9 +97,11 @@ public interface HttpRequestParser {
 	NonMaterialisedHttpHeaders getHeaders();
 
 	/**
-	 * Obtains the {@link HttpEntity} of the {@link HttpRequest}.
+	 * Obtains the {@link ByteSequence} to the entity data of the
+	 * {@link HttpRequest}.
 	 * 
-	 * @return {@link HttpEntity} of the {@link HttpRequest}.
+	 * @return {@link ByteSequence} to the entity data of the
+	 *         {@link HttpRequest}.
 	 */
 	ByteSequence getEntity();
 

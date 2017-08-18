@@ -86,7 +86,7 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.parser, this.parser.parse(this.readData, 0), true);
 		this.recordReturn(this.parser, this.parser.getMethod(), method);
 		this.recordReturn(this.parser, this.parser.getRequestURI(), requestURI);
-		this.recordReturn(this.parser, this.parser.getHttpVersion(), httpVersion);
+		this.recordReturn(this.parser, this.parser.getVersion(), httpVersion);
 		this.recordReturn(this.parser, this.parser.getHeaders(), headers);
 		this.recordReturn(this.parser, this.parser.getEntity(), entity);
 		this.parser.reset();
