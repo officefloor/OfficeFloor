@@ -22,6 +22,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.function.Function;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -270,13 +271,86 @@ public class StreamBufferByteSequenceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can decode all URI bytes.
+	 */
+	public void testUriDecodeAllBytes() throws IOException {
+
+		final Function<Byte, Byte> getHex = (value) -> {
+			if ((0 <= value) && (value <= 9)) {
+				return (byte) (value + (byte) '0');
+			} else if ((10 <= value) && (value < 16)) {
+				return (byte) ((byte) 'A' + value - 10);
+			} else {
+				fail("Invalid value " + value);
+				return null;
+			}
+		};
+
+		final byte HTTP_PERCENTAGE = "%".getBytes(ServerHttpConnection.URI_CHARSET)[0];
+		final byte HTTP_SPACE = " ".getBytes(ServerHttpConnection.URI_CHARSET)[0];
+
+		// Write all bytes encoded
+		for (int i = Byte.MIN_VALUE; i <= Byte.MAX_VALUE; i++) {
+			byte hi = (byte) (i & 0xf0);
+			hi >>= 4; // move hi to number
+			hi = getHex.apply((byte) (hi & 0x0f));
+			byte low = getHex.apply((byte) (i & 0x0f));
+
+			// Write the encoded bytes
+			this.output.write(HTTP_PERCENTAGE);
+			this.output.write(hi);
+			this.output.write(low);
+		}
+
+		// Add in the additional '+'
+		StreamBufferByteSequence sequence = this.writeContentToSequence("+", ServerHttpConnection.URI_CHARSET);
+
+		// Decode the sequence
+		sequence.decodeUri((message) -> new IOException("Should not occur"));
+
+		// Ensure the stream no has decoded bytes
+		int index = 0;
+		for (int value = Byte.MIN_VALUE; value <= Byte.MAX_VALUE; value++) {
+			assertEquals("Incorrect decoded byte at " + index, value, sequence.byteAt(index++));
+		}
+		assertEquals("Incorrect decoded +", HTTP_SPACE, sequence.byteAt(index++));
+	}
+
+	/**
+	 * Ensure handles invalid URI encoding.
+	 */
+	public void testInvalidUriEncoding() throws IOException {
+		final Exception exception = new Exception("TEST");
+		StreamBufferByteSequence sequence = this.writeContentToSequence("%G@", ServerHttpConnection.URI_CHARSET);
+		try {
+			sequence.decodeUri((message) -> exception);
+		} catch (Exception ex) {
+			assertSame("Incorrect exception", exception, ex);
+		}
+	}
+
+	/**
+	 * Ensure handles incomplete URI encoding.
+	 */
+	public void testIncompleteUriEncoding() throws IOException {
+		final Exception exception = new Exception("TEST");
+		StreamBufferByteSequence sequence = this.writeContentToSequence("%A", ServerHttpConnection.URI_CHARSET);
+		try {
+			sequence.decodeUri((message) -> exception);
+		} catch (Exception ex) {
+			assertSame("Incorrect exception", exception, ex);
+		}
+	}
+
+	/**
 	 * Ensure can decode bytes along with URI decoding.
 	 */
 	public void testToUriString() throws IOException {
-		StreamBufferByteSequence sequence = this.writeContentToSequence("Test%20Decode",
+		StreamBufferByteSequence sequence = this.writeContentToSequence("Test%20Decode+",
 				ServerHttpConnection.URI_CHARSET);
-		assertEquals("Incorrect decoded URI", "Test Decode",
-				sequence.toUriString((result) -> new IOException("Should not occurr")));
+		assertEquals("Incorrect decoded URI", "Test Decode ",
+				sequence.decodeUri((message) -> new IOException("Should not occur: " + message))
+						.toUriString((result) -> new IOException("Should not occur: " + result)));
 	}
 
 	/**

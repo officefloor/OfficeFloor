@@ -131,19 +131,29 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 	}
 
 	/**
-	 * HTTP space character.
+	 * HTTP space (' ') character.
 	 */
-	private static final byte HTTP_SP = " ".getBytes(ServerHttpConnection.HTTP_CHARSET)[0];
+	private static final byte HTTP_SPACE = " ".getBytes(ServerHttpConnection.HTTP_CHARSET)[0];
 
 	/**
-	 * HTTP tab character.
+	 * HTTP tab ('\t') character.
 	 */
 	private static final byte HTTP_TAB = "\t".getBytes(ServerHttpConnection.HTTP_CHARSET)[0];
 
 	/**
-	 * HTTTP quote character.
+	 * HTTP quote ('"') character.
 	 */
 	private static final byte HTTP_QUOTE = "\"".getBytes(ServerHttpConnection.HTTP_CHARSET)[0];
+
+	/**
+	 * HTTP % character.
+	 */
+	private static final byte HTTP_PERCENTAGE = "%".getBytes(ServerHttpConnection.HTTP_CHARSET)[0];
+
+	/**
+	 * HTTP + character.
+	 */
+	private static final byte HTTP_PLUS = "+".getBytes(ServerHttpConnection.HTTP_CHARSET)[0];
 
 	/**
 	 * Head {@link StreamSegment}.
@@ -228,7 +238,7 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 		StreamSegment segment = this.head;
 		int segmentTrimOffset = 0;
 		byte character = segment.buffer.getPooledBuffer().get(segment.offset + segmentTrimOffset);
-		while ((character == HTTP_SP) || (character == HTTP_TAB)) {
+		while ((character == HTTP_SPACE) || (character == HTTP_TAB)) {
 
 			// Space so trim off the content
 			this.sequenceLength--;
@@ -260,7 +270,7 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 		segment = this.tail;
 		int segmentTrimLength = segment.length;
 		character = segment.buffer.getPooledBuffer().get(segment.offset + segmentTrimLength - 1);
-		while ((character == HTTP_SP) || (character == HTTP_TAB)) {
+		while ((character == HTTP_SPACE) || (character == HTTP_TAB)) {
 
 			// Space so trim off the content
 			this.sequenceLength--;
@@ -375,6 +385,158 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 		// Return the string value
 		temp.flip();
 		return temp.toString();
+	}
+
+	/**
+	 * Decode URI states
+	 */
+	private static enum DecodeState {
+		NO_ESCAPE, AWAITING_HI_BITS, AWAITING_LOW_BITS
+	}
+
+	/**
+	 * Decodes the URI.
+	 * 
+	 * @param invalidDecodeExceptionFactory
+	 *            {@link Function} to create an invalid encoding
+	 *            {@link Throwable}.
+	 * @return <code>this</code>.
+	 * @throws T
+	 *             If invalid encoding.
+	 */
+	public <T extends Throwable> StreamBufferByteSequence decodeUri(Function<String, T> invalidDecodeExceptionFactory)
+			throws T {
+
+		// Decode the % encoding
+		StreamSegment readSegment = this.head;
+		StreamSegment writeSegment = this.head;
+		int writeSegmentPosition = 0;
+
+		// Decode details
+		DecodeState state = DecodeState.NO_ESCAPE;
+		byte hiBits = 0;
+		byte lowBits = 0;
+		int decodeCount = 0;
+
+		// Loop decoding the content
+		while (readSegment != null) {
+
+			// Read the values for the segment
+			for (int i = 0; i < readSegment.length; i++) {
+				byte readByte = readSegment.buffer.getPooledBuffer().get(readSegment.offset + i);
+
+				// Handle writing content (based on state)
+				boolean isWriteByte = true;
+				switch (state) {
+				case NO_ESCAPE:
+					// Determine if escaping
+					if (readByte == HTTP_PERCENTAGE) {
+						// Encoded byte
+						decodeCount++;
+						state = DecodeState.AWAITING_HI_BITS;
+						isWriteByte = false;
+
+					} else if (readByte == HTTP_PLUS) {
+						// Space character ('+' = ' ')
+						readByte = HTTP_SPACE;
+					}
+					break;
+
+				case AWAITING_HI_BITS:
+					hiBits = readByte;
+					state = DecodeState.AWAITING_LOW_BITS;
+					isWriteByte = false;
+					break;
+
+				case AWAITING_LOW_BITS:
+					// Decode the encoded byte
+					lowBits = decodeUriByte(readByte, invalidDecodeExceptionFactory);
+					readByte = decodeUriByte(hiBits, invalidDecodeExceptionFactory);
+					readByte <<= 4; // move low bits to hi bits
+					readByte |= lowBits; // add low bits
+					state = DecodeState.NO_ESCAPE;
+				}
+
+				// Determine if write the byte
+				if (isWriteByte) {
+					// Write out the unencoded byte
+					if (writeSegmentPosition >= writeSegment.length) {
+						// Move to next buffer (as filled current buffer)
+						writeSegment = writeSegment.next;
+						writeSegmentPosition = 0;
+					}
+					writeSegment.buffer.getPooledBuffer().put(writeSegment.offset + writeSegmentPosition, readByte);
+					writeSegmentPosition++;
+				}
+			}
+
+			// Obtain the next segment
+			readSegment = readSegment.next;
+		}
+
+		// Determine if incomplete encoding
+		if (state != DecodeState.NO_ESCAPE) {
+			throw invalidDecodeExceptionFactory.apply("Incomplete encoding");
+		}
+
+		// Remove the remaining content
+		this.sequenceLength -= (decodeCount * 2); // %XX (3) => Y (1)
+		writeSegment.length = writeSegmentPosition;
+		writeSegment.next = null;
+		this.tail = writeSegment;
+
+		// Reset current position
+		this.currentSegment = this.head;
+		this.currentSegmentPosition = 0;
+		this.currentPosition = 0;
+
+		// Return this
+		return this;
+	}
+
+	/**
+	 * Decodes the byte to its 4 bit value.
+	 * 
+	 * @param value
+	 *            Value to be decoded.
+	 * @param invalidDecodeExceptionFactory
+	 *            {@link Function} to generate the {@link Throwable} should be
+	 *            invalid encoding.
+	 * @return Encoded 4 bits in the low bits of the return byte.
+	 * @throws T
+	 *             If invalid encoding.
+	 */
+	private static <T extends Throwable> byte decodeUriByte(byte value,
+			Function<String, T> invalidDecodeExceptionFactory) throws T {
+		byte hi = (byte) (value & 0xf0);
+		byte low = (byte) (value & 0x0f);
+		switch (hi) {
+		case 0x30: // '0'
+			// Digits (low value correct)
+			if (low > 10) {
+				throw invalidDecodeExceptionFactory
+						.apply("Invalid encoded character " + Character.toString((char) value));
+			}
+			return low;
+
+		case 0x40: // 'A'
+			// Capital letter (A + 10)
+			if ((low == 0) || (low > 6)) { // '@' or 'F'
+				throw invalidDecodeExceptionFactory
+						.apply("Invalid encoded character " + Character.toString((char) value));
+			}
+			return (byte) (low + 9); // (A==1) + 9 = 10
+
+		case 0x60: // 'a'
+			if ((low == 0) || (low > 6)) { // '@' or 'f'
+				throw invalidDecodeExceptionFactory
+						.apply("Invalid encoded character " + Character.toString((char) value));
+			}
+			return (byte) (low + 9); // (a==1) + 9 = 10
+
+		default:
+			throw invalidDecodeExceptionFactory.apply("Invalid encoded character " + Character.toString((char) value));
+		}
 	}
 
 	/**
