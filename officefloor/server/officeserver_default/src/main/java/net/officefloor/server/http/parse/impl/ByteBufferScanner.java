@@ -48,15 +48,15 @@ public class ByteBufferScanner {
 
 			// Obtain the 8 bytes
 			long bytes = buffer.getLong(startPosition);
-			
+
 			// TODO REMOVE
 			String bytesHex = Long.toHexString(bytes);
 
 			// Determine if the bytes contain the value
 			long xorWithMask = bytes ^ mask; // matching byte will be 0
-			
+
 			// TODO REMOVE
-			String xorWithMaskHex = Long.toHexString(xorWithMask); 
+			String xorWithMaskHex = Long.toHexString(xorWithMask);
 
 			/*
 			 * Need to find if any byte is zero. As ASCII is 7 bits, can use the
@@ -71,17 +71,17 @@ public class ByteBufferScanner {
 			 * HTTP content is 7 bits so win efficiency in scanning past bytes
 			 * not of interest.
 			 */
-			long overflow = xorWithMask + 0x7f7f7f7f7f7f7f7fl;
-			
+			long overflow = xorWithMask + 0x7f7f7f7f7f7f7f7fL;
+
 			// TODO REMOVE
 			String overflowHex = Long.toHexString(overflow);
-			
-			long topBitCheck = overflow & 0x8080808080808080l;
-			
+
+			long topBitCheck = overflow & 0x8080808080808080L;
+
 			// TODO REMOVE
 			String topBitCheckHex = Long.toHexString(topBitCheck);
-			
-			while (topBitCheck != 0x8080808080808080l) {
+
+			while (topBitCheck != 0x8080808080808080L) {
 
 				/*
 				 * Potential value within the 8 bytes, so search for it.
@@ -94,56 +94,144 @@ public class ByteBufferScanner {
 				 * UTF-8 creating false positives. However, also HTTP with end
 				 * of HTTP headers having repeating CR LF bytes.
 				 */
-				long IIII_OOOO_Check = topBitCheck & 0x00000000ffffffffl;
-				
+				long IIII_OOOO_Check = topBitCheck & 0x00000000ffffffffL;
+
 				// TODO REMOVE
 				String IIII_OOOO_CheckHex = Long.toHexString(IIII_OOOO_Check);
-				
-				if (IIII_OOOO_Check == 0x0000000080808080l) {
+
+				if (IIII_OOOO_Check == 0x0000000080808080L) {
 					// First byte of interest in first 4 bytes
-					long IIOO_OOOO_Check = topBitCheck & 0x0000ffff00000000l;
-					if (IIOO_OOOO_Check == 0x0000808000000000l) {
+					long IIOO_OOOO_Check = topBitCheck & 0x0000ffff00000000L;
+					if (IIOO_OOOO_Check == 0x0000808000000000L) {
 						// First byte of interest in first 2 bytes
-						long IOOO_OOOO_Check = topBitCheck & 0x00ff000000000000l;
-						if (IOOO_OOOO_Check == 0x0080000000000000l) {
+						long IOOO_OOOO_Check = topBitCheck & 0x00ff000000000000L;
+						if (IOOO_OOOO_Check == 0x0080000000000000L) {
 
 							// Check first byte
-							long check = bytes & 0xff00000000000000l;
+							long check = bytes & 0xff00000000000000L;
 							check >>= 56; // 7 x 8 bits
 							if (check == value) {
 								// Found at first byte
 								return startPosition;
 							} else {
 								// False positive, set top bit to ignore
-								topBitCheck |= 0x8000000000000000l;
+								topBitCheck |= 0x8000000000000000L;
 							}
 
 						} else {
 
 							// Check second byte
-							long check = bytes & 0x00ff000000000000l;
+							long check = bytes & 0x00ff000000000000L;
 							check >>= 48; // 6 x 8 bits
 							if (check == value) {
 								// Found at second byte
 								return startPosition + 1;
 							} else {
 								// False positive, set top bit to ignore
-								topBitCheck |= 0x0080000000000000l;
+								topBitCheck |= 0x0080000000000000L;
 							}
 
 						}
 					} else {
 						// First byte of interest in second 2 bytes
-						long OOIO_OOOO_Check = topBitCheck & 0x0000ff00000000000000l;
-						if (OOIO_OOOO_Check == 0x00008000000000000000l) {
+						                                     
+						long OOIO_OOOO_Check = topBitCheck & 0x000000ff00000000L;
+						
+						// TODO REMOVE
+						String OOIO_OOOO_CheckHex = Long.toHexString(OOIO_OOOO_Check);
+						if (OOIO_OOOO_Check == 0x0000008000000000L) {
+
+							// Check third byte
+							long check = bytes & 0x0000ff0000000000L;
+							check >>= 40; // 5 x 8 bits
+							if (check == value) {
+								// Found at third byte
+								return startPosition + 2;
+							} else {
+								// False positive, set top bit to ignore
+								topBitCheck |= 0x0000800000000000L;
+							}
 
 						} else {
+
+							// Check fourth byte
+							long check = bytes & 0x000000ff00000000L;
+							check >>= 32; // 4 x 8 bits
+							if (check == value) {
+								// Found at fourth byte
+								return startPosition + 3;
+							} else {
+								// False positive, set top bit to ignore
+								topBitCheck |= 0x0000008000000000L;
+							}
 
 						}
 					}
 				} else {
 					// First byte of interest in last 4 bytes
+					long OOOO_IIOO_Check = topBitCheck & 0x000000000000ffffL;
+					if (OOOO_IIOO_Check == 0x0000000000008080L) {
+						// First byte of interest in third 2 bytes
+						long OOOO_IOOO_Check = topBitCheck & 0x0000000000ff0000L;
+						if (OOOO_IOOO_Check == 0x0000000000800000L) {
 
+							// Check fifth byte
+							long check = bytes & 0x00000000ff000000L;
+							check >>= 24; // 3 x 8 bits
+							if (check == value) {
+								// Found at fifth byte
+								return startPosition + 4;
+							} else {
+								// False positive, set top bit to ignore
+								topBitCheck |= 0x0000000080000000L;
+							}
+
+						} else {
+
+							// Check sixth byte
+							long check = bytes & 0x0000000000ff0000L;
+							check >>= 16; // 2 x 8 bits
+							if (check == value) {
+								// Found at sixth byte
+								return startPosition + 5;
+							} else {
+								// False positive, set top bit to ignore
+								topBitCheck |= 0x0000000000800000L;
+							}
+
+						}
+					} else {
+						// First byte of interest in fourth 2 bytes
+						long OOOO_OOIO_Check = topBitCheck & 0x00000000000000ffL;
+						if (OOOO_OOIO_Check == 0x0000000000000080L) {
+
+							// Check seventh byte
+							long check = bytes & 0x000000000000ff00L;
+							check >>= 8; // 1 x 8 bits
+							if (check == value) {
+								// Found at seventh byte
+								return startPosition + 6;
+							} else {
+								// False positive, set top bit to ignore
+								topBitCheck |= 0x0000000000008000L;
+							}
+
+						} else {
+
+							// Check eighth byte
+							long check = bytes & 0x00000000000000ffL;
+							// bytes already in correct place for check
+							if (check == value) {
+								// Found at eighth byte
+								return startPosition + 7;
+							} else {
+								// False positive, set top bit to ignore
+								// Note: should exit loop
+								topBitCheck |= 0x0000000000000080L;
+							}
+
+						}
+					}
 				}
 			}
 
