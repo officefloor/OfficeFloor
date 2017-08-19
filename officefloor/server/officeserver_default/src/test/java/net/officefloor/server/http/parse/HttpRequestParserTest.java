@@ -31,6 +31,7 @@ import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.HttpVersion.HttpVersionEnum;
 import net.officefloor.server.http.UsAsciiUtil;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeader;
+import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.server.stream.impl.ByteSequence;
 
@@ -97,7 +98,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	 * GET.
 	 */
 	public void testGetMethod() {
-		this.doMethodTest("GET ", HttpMethod.GET, null, null, null, false);
+		this.doMethodTest("GET /test", HttpMethod.GET, null, null, null, false);
 	}
 
 	/**
@@ -736,37 +737,46 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 		}
 
 		// Validate correct number of headers
-		assertEquals("Incorrect number of headers", (expectedHeaderNameValues.length / 2),
-				this.parser.getHeaders().length());
+		if (expectedHeaderNameValues.length == 0) {
+			// Should be no headers
+			NonMaterialisedHttpHeaders headers = this.parser.getHeaders();
+			assertTrue("Should not have headers", (headers == null) || (headers.length() == 0));
 
-		// Validate correct headers
-		Iterator<NonMaterialisedHttpHeader> headers = this.parser.getHeaders().iterator();
-		for (int i = 0; i < expectedHeaderNameValues.length; i += 2) {
-			String expectedHeaderName = expectedHeaderNameValues[i];
-			String expectedHeaderValue = expectedHeaderNameValues[i + 1];
-			int headerIndex = i / 2;
+		} else {
+			// Validate the headers
+			assertEquals("Incorrect number of headers", (expectedHeaderNameValues.length / 2),
+					this.parser.getHeaders().length());
 
-			// Useful suffix to identify incorrect header
-			String msgSuffix = " (" + expectedHeaderName + ": " + expectedHeaderValue + " [" + headerIndex + "])";
+			// Validate correct headers
+			Iterator<NonMaterialisedHttpHeader> headers = this.parser.getHeaders().iterator();
+			for (int i = 0; i < expectedHeaderNameValues.length; i += 2) {
+				String expectedHeaderName = expectedHeaderNameValues[i];
+				String expectedHeaderValue = expectedHeaderNameValues[i + 1];
+				int headerIndex = i / 2;
 
-			// Obtain the non materialised header
-			assertEquals("Should have header" + msgSuffix, headers.hasNext());
-			NonMaterialisedHttpHeader header = headers.next();
+				// Useful suffix to identify incorrect header
+				String msgSuffix = " (" + expectedHeaderName + ": " + expectedHeaderValue + " [" + headerIndex + "])";
 
-			// Ensure correct name
-			CharSequence nameSequence = header.getName();
-			assertEquals("Incorrect header name length" + msgSuffix, expectedHeaderName.length(),
-					nameSequence.length());
-			for (int charIndex = 0; charIndex < expectedHeaderName.length(); charIndex++) {
-				assertEquals("Incorrect character " + charIndex + msgSuffix, expectedHeaderName.charAt(charIndex),
-						nameSequence.charAt(charIndex));
+				// Obtain the non materialised header
+				assertEquals("Should have header" + msgSuffix, headers.hasNext());
+				NonMaterialisedHttpHeader header = headers.next();
+
+				// Ensure correct name
+				CharSequence nameSequence = header.getName();
+				assertEquals("Incorrect header name length" + msgSuffix, expectedHeaderName.length(),
+						nameSequence.length());
+				for (int charIndex = 0; charIndex < expectedHeaderName.length(); charIndex++) {
+					assertEquals("Incorrect character " + charIndex + msgSuffix, expectedHeaderName.charAt(charIndex),
+							nameSequence.charAt(charIndex));
+				}
+
+				// Materialise the header (and ensure correct name/value)
+				HttpHeader materialisedHeader = header.materialiseHttpHeader();
+				assertEquals("Incorrect materialised name" + msgSuffix, expectedHeaderName,
+						materialisedHeader.getName());
+				assertEquals("Incorrect materialised value" + msgSuffix, expectedHeaderValue,
+						materialisedHeader.getValue());
 			}
-
-			// Materialise the header (and ensure correct name/value)
-			HttpHeader materialisedHeader = header.materialiseHttpHeader();
-			assertEquals("Incorrect materialised name" + msgSuffix, expectedHeaderName, materialisedHeader.getName());
-			assertEquals("Incorrect materialised value" + msgSuffix, expectedHeaderValue,
-					materialisedHeader.getValue());
 		}
 
 		// Validate the entity
@@ -839,7 +849,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 			// Create data to parse
 			byte[] data = this.createDataToParse(httpRequest, isRemoveCR);
 			ByteBuffer buffer = ByteBuffer.wrap(data);
-			buffer.flip(); // to mimic just read in
+			buffer.position(buffer.capacity()); // to mimic just read in
 
 			// Parse the content
 			boolean isComplete = this.parser.parse(buffer);
@@ -880,7 +890,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 		// Create input buffer stream with content
 		byte[] content = UsAsciiUtil.convertToHttp(invalidHttpRequest);
 		ByteBuffer buffer = ByteBuffer.wrap(content);
-		buffer.flip(); // to mimic just read in data
+		buffer.position(buffer.capacity()); // to mimic just read in data
 
 		// Should not be able parse invalid method
 		try {
