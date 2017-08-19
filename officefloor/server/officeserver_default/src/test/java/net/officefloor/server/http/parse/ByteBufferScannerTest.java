@@ -117,7 +117,7 @@ public class ByteBufferScannerTest extends OfficeFrameTestCase {
 	 * Ensure can start with offset.
 	 */
 	public void testOffsetStart() {
-		assertEquals(10, scan(createBuffer(1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 1), 3, 7));
+		assertEquals(10, scan(createBuffer(1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 1), 3, 1));
 	}
 
 	/**
@@ -127,11 +127,13 @@ public class ByteBufferScannerTest extends OfficeFrameTestCase {
 	public void testExhaustiveFindByte() {
 
 		// Exhaustively handle each byte value
-		for (int value = Byte.MIN_VALUE; value <= Byte.MAX_VALUE; value++) {
+		// (Don't need to check negatives, as don't search for negative HTTP
+		// characters)
+		for (int value = 0; value <= Byte.MAX_VALUE; value++) {
 
-			// Create the buffer with all other values before value
+			// Create buffer with all other values before value (+1 for zero)
 			int extraBytes = 16; // ensure uses long comparison
-			byte[] data = new byte[Math.abs(Byte.MIN_VALUE) + Byte.MAX_VALUE + extraBytes];
+			byte[] data = new byte[Math.abs(Byte.MIN_VALUE) + Byte.MAX_VALUE + extraBytes + 1];
 			int writeIndex = 0;
 			for (int b = Byte.MIN_VALUE; b <= Byte.MAX_VALUE; b++) {
 				if (b != value) {
@@ -151,7 +153,8 @@ public class ByteBufferScannerTest extends OfficeFrameTestCase {
 			int scanIndex = scan(buffer, 0, value);
 
 			// Ensure correct index
-			assertEquals("Incorrect index for byte " + Integer.toHexString(value), valueIndex, scanIndex);
+			assertEquals("Incorrect index for byte " + Integer.toHexString(value) + " (" + value + ")", valueIndex,
+					scanIndex);
 		}
 	}
 
@@ -162,16 +165,20 @@ public class ByteBufferScannerTest extends OfficeFrameTestCase {
 	public void testExhaustiveNotFindByte() {
 
 		// Exhaustively handle each byte value
-		for (int value = Byte.MIN_VALUE; value <= Byte.MAX_VALUE; value++) {
+		// (again don't need to check for negative values)
+		for (int value = 0; value <= Byte.MAX_VALUE; value++) {
 
-			// Create the buffer with all other values
-			byte[] data = new byte[Math.abs(Byte.MIN_VALUE) + Byte.MAX_VALUE - 1];
+			// Create the buffer with all other values (+1 for zero)
+			byte[] data = new byte[Math.abs(Byte.MIN_VALUE) + Byte.MAX_VALUE + 1];
 			int writeIndex = 0;
 			for (int b = Byte.MIN_VALUE; b <= Byte.MAX_VALUE; b++) {
 				if (b != value) {
 					data[writeIndex++] = (byte) b;
 				}
 			}
+			
+			// Ensure last byte not zero (to match 0)
+			data[writeIndex] = -1;
 
 			// Create the buffer
 			ByteBuffer buffer = ByteBuffer.wrap(data);
@@ -181,7 +188,7 @@ public class ByteBufferScannerTest extends OfficeFrameTestCase {
 			int scanIndex = scan(buffer, 0, value);
 
 			// Ensure not find the value
-			assertEquals("Should not find byte " + Integer.toHexString(value), -1, scanIndex);
+			assertEquals("Should not find byte " + Integer.toHexString(value) + " (" + value + ")", -1, scanIndex);
 		}
 	}
 

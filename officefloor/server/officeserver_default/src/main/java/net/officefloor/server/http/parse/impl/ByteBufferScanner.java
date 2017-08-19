@@ -26,6 +26,13 @@ import java.nio.ByteBuffer;
  */
 public class ByteBufferScanner {
 
+	/**
+	 * Creates a scan byte mask.
+	 * 
+	 * @param value
+	 *            Byte value to create the scan mask.
+	 * @return Scan mask for the byte value.
+	 */
 	public static long createScanByteMask(byte value) {
 		long mask = value;
 		for (int i = 0; i < 7; i++) {
@@ -35,6 +42,27 @@ public class ByteBufferScanner {
 		return mask;
 	}
 
+	/**
+	 * <p>
+	 * Scans the {@link ByteBuffer} to find the next byte of particular value.
+	 * <p>
+	 * Note: the algorithm used does not handle negative byte values. However,
+	 * the values (ASCII characters) searched for in HTTP parsing are all
+	 * positive.
+	 * 
+	 * @param buffer
+	 *            {@link ByteBuffer} to scan. Position indicates last value
+	 *            (exclusively).
+	 * @param startPosition
+	 *            Start position in the {@link ByteBuffer} to start scanning
+	 *            from.
+	 * @param value
+	 *            Byte value to scan for.
+	 * @param mask
+	 *            Scan mask. See {@link #createScanByteMask(byte)}.
+	 * @return Index within the {@link ByteBuffer} of the next byte value. Or
+	 *         <code>-1</code> if does not find the byte.
+	 */
 	public static final int scanToByte(ByteBuffer buffer, int startPosition, byte value, long mask) {
 
 		// Obtain the end position (exclusive)
@@ -49,14 +77,8 @@ public class ByteBufferScanner {
 			// Obtain the 8 bytes
 			long bytes = buffer.getLong(startPosition);
 
-			// TODO REMOVE
-			String bytesHex = Long.toHexString(bytes);
-
 			// Determine if the bytes contain the value
 			long xorWithMask = bytes ^ mask; // matching byte will be 0
-
-			// TODO REMOVE
-			String xorWithMaskHex = Long.toHexString(xorWithMask);
 
 			/*
 			 * Need to find if any byte is zero. As ASCII is 7 bits, can use the
@@ -71,16 +93,8 @@ public class ByteBufferScanner {
 			 * HTTP content is 7 bits so win efficiency in scanning past bytes
 			 * not of interest.
 			 */
-			long overflow = xorWithMask + 0x7f7f7f7f7f7f7f7fL;
-
-			// TODO REMOVE
-			String overflowHex = Long.toHexString(overflow);
-
-			long topBitCheck = overflow & 0x8080808080808080L;
-
-			// TODO REMOVE
-			String topBitCheckHex = Long.toHexString(topBitCheck);
-
+			long overflowNonZero = xorWithMask + 0x7f7f7f7f7f7f7f7fL;
+			long topBitCheck = overflowNonZero & 0x8080808080808080L;
 			while (topBitCheck != 0x8080808080808080L) {
 
 				/*
@@ -95,10 +109,6 @@ public class ByteBufferScanner {
 				 * of HTTP headers having repeating CR LF bytes.
 				 */
 				long IIII_OOOO_Check = topBitCheck & 0x00000000ffffffffL;
-
-				// TODO REMOVE
-				String IIII_OOOO_CheckHex = Long.toHexString(IIII_OOOO_Check);
-
 				if (IIII_OOOO_Check == 0x0000000080808080L) {
 					// First byte of interest in first 4 bytes
 					long IIOO_OOOO_Check = topBitCheck & 0x0000ffff00000000L;
@@ -134,11 +144,7 @@ public class ByteBufferScanner {
 						}
 					} else {
 						// First byte of interest in second 2 bytes
-						                                     
 						long OOIO_OOOO_Check = topBitCheck & 0x000000ff00000000L;
-						
-						// TODO REMOVE
-						String OOIO_OOOO_CheckHex = Long.toHexString(OOIO_OOOO_Check);
 						if (OOIO_OOOO_Check == 0x0000008000000000L) {
 
 							// Check third byte
