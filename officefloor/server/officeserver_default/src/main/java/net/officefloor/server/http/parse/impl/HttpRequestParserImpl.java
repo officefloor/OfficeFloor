@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
+import net.officefloor.server.buffer.StreamBufferByteSequence;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
@@ -48,15 +49,29 @@ import net.officefloor.server.stream.impl.ServerInputStreamImpl;
 public class HttpRequestParserImpl implements HttpRequestParser {
 
 	private static long GET_PUT_MASK = longMask("GET ");
+	private static long POST_HEAD_MASK = longMask("POST ");
+	private static long CONNECT_OPTIONS_MASK = longMask("CONNECT ");
+	private static long DELETE_MASK = longMask("DELETE ");
 
 	private static long GET_ = longBytes("GET ");
+	private static long PUT_ = longBytes("PUT ");
+	private static long POST_ = longBytes("POST ");
+	private static long HEAD_ = longBytes("HEAD ");
+	private static long CONNECT_ = longBytes("CONNECT ");
+	private static long OPTIONS_ = longBytes("OPTIONS ");
+	private static long DELETE_ = longBytes("DELETE ");
 
 	private static Supplier<HttpMethod> methodGet = () -> HttpMethod.GET;
-
-	private static long PUT_ = longBytes("PUT ");
-
 	private static Supplier<HttpMethod> methodPut = () -> HttpMethod.PUT;
-	
+	private static Supplier<HttpMethod> methodPost = () -> HttpMethod.POST;
+	private static Supplier<HttpMethod> methodHead = () -> HttpMethod.HEAD;
+	private static Supplier<HttpMethod> methodConnect = () -> HttpMethod.CONNECT;
+	private static Supplier<HttpMethod> methodOptions = () -> HttpMethod.OPTIONS;
+	private static Supplier<HttpMethod> methodDelete = () -> HttpMethod.DELETE;
+
+	private static byte HTTP_SPACE = " ".getBytes(ServerHttpConnection.HTTP_CHARSET)[0];
+	private static long MASK_SPACE = ByteBufferScanner.createScanByteMask(HTTP_SPACE);
+
 	static {
 		System.out.println("GET_PUT_MASK: " + Long.toHexString(GET_PUT_MASK));
 		System.out.println("GET_: " + Long.toHexString(GET_));
@@ -109,6 +124,11 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	private Supplier<HttpMethod> method = null;
 
 	/**
+	 * {@link Supplier} for the request URI.
+	 */
+	private Supplier<String> requestUri = null;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param maxHeaderCount
@@ -132,7 +152,10 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	}
 
 	@Override
-	public boolean parse(ByteBuffer data) throws IOException, HttpRequestParseException {
+	public boolean parse(StreamBuffer<ByteBuffer> buffer) throws IOException, HttpRequestParseException {
+
+		// Obtain the byte buffer containing the data
+		ByteBuffer data = buffer.getPooledBuffer();
 
 		// Determine remaining length
 		int remaining = data.position();
@@ -156,21 +179,79 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 		long checkGetPut = bytes & GET_PUT_MASK;
 		if (checkGetPut == GET_) {
 			this.method = methodGet;
-			
+			position += 4; // after space
+
 		} else if (checkGetPut == PUT_) {
 			this.method = methodPut;
-			
+			position += 4; // after space
+
 		} else {
 			// Look for next most common methods: "POST ", "HEAD "
 			long checkPostHead = bytes & POST_HEAD_MASK;
 			if (checkPostHead == POST_) {
 				this.method = methodPost;
-				
-			} else if (checkPostHead = HEAD_) {
+				position += 5; // after space
+
+			} else if (checkPostHead == HEAD_) {
 				this.method = methodHead;
-				
+				position += 5; // after space
+
+			} else {
+				// Check next common: "CONNECT ", "OPTIONS "
+				long checkConnectOptions = bytes & CONNECT_OPTIONS_MASK;
+				if (checkConnectOptions == CONNECT_) {
+					this.method = methodConnect;
+					position += 8; // after space
+
+				} else if (checkConnectOptions == OPTIONS_) {
+					this.method = methodOptions;
+					position += 8; // after space
+
+				} else {
+					// Check for remaining common: "DELETE "
+					long checkDelete = bytes & DELETE_MASK;
+					if (checkDelete == DELETE_) {
+						this.method = methodDelete;
+						position += 7; // after space
+
+					} else {
+						// Custom method, so find the space
+						int spacePosition = ByteBufferScanner.scanToByte(data, position, HTTP_SPACE, MASK_SPACE);
+						if (spacePosition == -1) {
+							// TODO create byte sequence for current content
+
+							// Not enough data
+							return false;
+
+						} else {
+							// Create method from byte sequence
+							int methodByteLength = spacePosition - position;
+							if (methodByteLength == 0) {
+								// No method provided
+								// TODO handle no method provided
+							}
+							final StreamBufferByteSequence methodSequence = new StreamBufferByteSequence(buffer,
+									position, methodByteLength);
+							this.method = () -> new HttpMethod(methodSequence.toHttpString());
+						}
+					}
+				}
 			}
 		}
+
+		// Obtain the path
+		int spacePosition = ByteBufferScanner.scanToByte(data, position, HTTP_SPACE, MASK_SPACE);
+		if (spacePosition == -1) {
+			return false; // need more data to complete path
+		}
+
+		// Create the path
+		final StreamBufferByteSequence uriSequence = new StreamBufferByteSequence(buffer, position,
+				spacePosition - position);
+		this.requestUri = () -> uriSequence.decodeUri((result) -> new Error()).toUriString((message) -> new Error());
+		position = spacePosition + 1; // +1 to more past space
+		
+		// Obtain the version
 
 		// TODO Auto-generated method stub
 		return false;
@@ -195,8 +276,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 
 	@Override
 	public Supplier<String> getRequestURI() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.requestUri;
 	}
 
 	@Override

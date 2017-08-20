@@ -26,6 +26,7 @@ import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
+import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.impl.ByteSequence;
 
 /**
@@ -38,8 +39,9 @@ public interface HttpRequestParser {
 	/**
 	 * Parses the {@link HttpRequest} from the data.
 	 * 
-	 * @param data
-	 *            Data to be parsed for the {@link HttpRequest}.
+	 * @param buffer
+	 *            {@link StreamBuffer} containing the data to be parsed for the
+	 *            {@link HttpRequest}.
 	 * @param startIndex
 	 *            Index within the data to start parsing.
 	 * @return <code>true</code> if the {@link HttpRequest} has been fully
@@ -51,7 +53,7 @@ public interface HttpRequestParser {
 	 * @throws HttpRequestParseException
 	 *             If failure to parse {@link HttpRequest}.
 	 */
-	boolean parse(ByteBuffer data) throws IOException, HttpRequestParseException;
+	boolean parse(StreamBuffer<ByteBuffer> buffer) throws IOException, HttpRequestParseException;
 
 	/**
 	 * Determines if finished reading data from the {@link ByteBuffer}.

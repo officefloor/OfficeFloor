@@ -32,7 +32,9 @@ import net.officefloor.server.http.HttpVersion.HttpVersionEnum;
 import net.officefloor.server.http.UsAsciiUtil;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeader;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
+import net.officefloor.server.http.mock.MockBufferPool;
 import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
+import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.impl.ByteSequence;
 
 /**
@@ -105,49 +107,49 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	 * POST.
 	 */
 	public void testPostMethod() {
-		this.doMethodTest("POST ", HttpMethod.POST, null, null, null, false);
+		this.doMethodTest("POST /test", HttpMethod.POST, null, null, null, false);
 	}
 
 	/**
 	 * PUT.
 	 */
 	public void testPutMethod() {
-		this.doMethodTest("PUT ", HttpMethod.PUT, null, null, null, false);
+		this.doMethodTest("PUT /test", HttpMethod.PUT, null, null, null, false);
 	}
 
 	/**
 	 * DELETE.
 	 */
 	public void testDeleteMethod() {
-		this.doMethodTest("DELETE ", HttpMethod.DELETE, null, null, null, false);
+		this.doMethodTest("DELETE /test", HttpMethod.DELETE, null, null, null, false);
 	}
 
 	/**
 	 * CONNECT.
 	 */
 	public void testConnectMethod() {
-		this.doMethodTest("CONNECT ", HttpMethod.CONNECT, null, null, null, false);
+		this.doMethodTest("CONNECT /test", HttpMethod.CONNECT, null, null, null, false);
 	}
 
 	/**
 	 * HEAD.
 	 */
 	public void testHeadMethod() {
-		this.doMethodTest("HEAD ", HttpMethod.HEAD, null, null, null, false);
+		this.doMethodTest("HEAD /test", HttpMethod.HEAD, null, null, null, false);
 	}
 
 	/**
 	 * OPTIONS.
 	 */
 	public void testOptionsMethod() {
-		this.doMethodTest("OPTIONS ", HttpMethod.OPTIONS, null, null, null, false);
+		this.doMethodTest("OPTIONS /test", HttpMethod.OPTIONS, null, null, null, false);
 	}
 
 	/**
 	 * Custom method.
 	 */
 	public void testCustomMethod() {
-		this.doMethodTest("custom ", new HttpMethod("custom"), null, null, null, false);
+		this.doMethodTest("custom /test", new HttpMethod("custom"), null, null, null, false);
 	}
 
 	/**
@@ -256,17 +258,19 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 
 		// Provide only partial entity (typically if network packet is split)
 		byte[] firstPacket = UsAsciiUtil.convertToUsAscii("POST /path HTTP/1.1\nContent-Length: 4\n\nTE");
-		ByteBuffer firstBuffer = ByteBuffer.wrap(firstPacket);
-		firstBuffer.flip(); // mimic writing
-		boolean isCompleteOnFirstPacket = this.parser.parse(firstBuffer);
+		MockBufferPool poolOne = new MockBufferPool(() -> ByteBuffer.allocate(firstPacket.length));
+		StreamBuffer<ByteBuffer> bufferOne = poolOne.getPooledStreamBuffer();
+		bufferOne.write(firstPacket);
+		boolean isCompleteOnFirstPacket = this.parser.parse(bufferOne);
 		assertFalse("Should not complete if partial entity", isCompleteOnFirstPacket);
 		assertTrue("Should have consumed all bytes", this.parser.isFinishedParsingBuffer());
 
 		// Provide remaining of entity (with some data of next HTTP request)
 		byte[] secondPacket = UsAsciiUtil.convertToUsAscii("ST more");
-		ByteBuffer secondBuffer = ByteBuffer.wrap(secondPacket);
-		secondBuffer.flip(); // mimic writing
-		boolean isCompleteOnSecondPacket = this.parser.parse(secondBuffer);
+		MockBufferPool poolTwo = new MockBufferPool(() -> ByteBuffer.allocate(secondPacket.length));
+		StreamBuffer<ByteBuffer> bufferTwo = poolTwo.getPooledStreamBuffer();
+		bufferTwo.write(secondPacket);
+		boolean isCompleteOnSecondPacket = this.parser.parse(bufferTwo);
 		assertTrue("Should be complete with remaining of entity received", isCompleteOnSecondPacket);
 		assertFalse("Should have further bytes remaining", this.parser.isFinishedParsingBuffer());
 
@@ -848,8 +852,9 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 
 			// Create data to parse
 			byte[] data = this.createDataToParse(httpRequest, isRemoveCR);
-			ByteBuffer buffer = ByteBuffer.wrap(data);
-			buffer.position(buffer.capacity()); // to mimic just read in
+			MockBufferPool pool = new MockBufferPool(() -> ByteBuffer.allocate(data.length));
+			StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
+			buffer.write(data);
 
 			// Parse the content
 			boolean isComplete = this.parser.parse(buffer);
@@ -889,8 +894,9 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 
 		// Create input buffer stream with content
 		byte[] content = UsAsciiUtil.convertToHttp(invalidHttpRequest);
-		ByteBuffer buffer = ByteBuffer.wrap(content);
-		buffer.position(buffer.capacity()); // to mimic just read in data
+		MockBufferPool pool = new MockBufferPool(() -> ByteBuffer.allocate(content.length));
+		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
+		buffer.write(content);
 
 		// Should not be able parse invalid method
 		try {
