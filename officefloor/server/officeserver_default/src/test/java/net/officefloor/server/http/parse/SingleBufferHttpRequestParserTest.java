@@ -40,7 +40,8 @@ public class SingleBufferHttpRequestParserTest extends AbstractHttpRequestParser
 		buffer.write(request);
 
 		// Return parsing of the data
-		return parser.parse(buffer);
+		parser.appendStreamBuffer(buffer);
+		return parser.parse();
 	}
 
 }

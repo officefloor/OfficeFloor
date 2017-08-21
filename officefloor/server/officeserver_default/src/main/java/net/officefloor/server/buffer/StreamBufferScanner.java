@@ -15,31 +15,124 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.server.http.parse.impl;
+package net.officefloor.server.buffer;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
+
+import net.officefloor.server.stream.StreamBuffer;
 
 /**
- * Provides utility methods for scanning a {@link ByteBuffer}.
+ * Provides scanning of {@link StreamBuffer} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public class ByteBufferScanner {
+public class StreamBufferScanner {
 
 	/**
-	 * Creates a scan byte mask.
-	 * 
-	 * @param value
-	 *            Byte value to create the scan mask.
-	 * @return Scan mask for the byte value.
+	 * Scan target.
 	 */
-	public static long createScanByteMask(byte value) {
-		long mask = value;
-		for (int i = 0; i < 7; i++) {
-			mask <<= 8; // move bytes up
-			mask |= value; // add in the value
+	public static class ScanTarget {
+
+		/**
+		 * Byte value to scan.
+		 */
+		public final byte value;
+
+		/**
+		 * Mask for the value.
+		 */
+		public final long mask;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param value
+		 *            Target byte for scan.
+		 */
+		public ScanTarget(byte value) {
+			this.value = value;
+
+			// Create the mask from the value
+			long mask = value;
+			for (int i = 0; i < 7; i++) {
+				mask <<= 8; // move bytes up
+				mask |= value; // add in the value
+			}
+			this.mask = mask;
 		}
-		return mask;
+	}
+
+	/**
+	 * List of {@link StreamBuffer} instances involved up to current position.
+	 * Typically, content should not span more than two {@link StreamBuffer}
+	 * instances.
+	 */
+	private final List<StreamBuffer<ByteBuffer>> buffers = new ArrayList<>(2);
+
+	/**
+	 * Appends {@link StreamBuffer} for scanning.
+	 * 
+	 * @param buffer
+	 *            {@link StreamBuffer}.
+	 */
+	public void appendStreamBuffer(StreamBuffer<ByteBuffer> buffer) {
+	}
+
+	/**
+	 * Builds a long from the {@link StreamBuffer} at current position.
+	 * 
+	 * @param buffer
+	 *            {@link StreamBuffer} to build a long from.
+	 * @param invalidHttpCharacterExceptionFactory
+	 *            Factory to create an {@link Exception} should there be an
+	 *            invalid HTTP character.
+	 * @return Long value, otherwise <code>-1</code> if not enough bytes in
+	 *         {@link StreamBuffer} to build a long.
+	 * @throws T
+	 *             If invalid HTTP character.
+	 */
+	public <T extends Throwable> long buildLong(Supplier<T> invalidHttpCharacterExceptionFactory) throws T {
+		// TODO implement
+		return -1;
+	}
+
+	public <T extends Throwable> short buildShort(Supplier<T> invalidHttpCharacterExceptionFactory) throws T {
+		// TODO implement
+		return -1;
+	}
+
+	public int skipBytes(int numberOfBytes) {
+		return -1;
+	}
+
+	public <T extends Throwable> int peekToTarget(ScanTarget target, int maxBytesLength,
+			Supplier<T> tooLongExceptionFactory) throws T {
+		// TODO implement
+		return -1;
+	}
+
+	public StreamBufferByteSequence scanBytes(int numberOfBytes) {
+		// TODO implement
+		return null;
+	}
+
+	/**
+	 * Scans the {@link StreamBuffer} for the byte value from the current
+	 * position.
+	 * 
+	 * @param target
+	 *            {@link ScanTarget}.
+	 * @return {@link StreamBufferByteSequence} if found the byte. Otherwise,
+	 *         <code>null</code> indicating further {@link StreamBuffer}
+	 *         instances may contain the byte.
+	 */
+	public <T extends Throwable> StreamBufferByteSequence scanToTarget(ScanTarget target, int maxBytesLength,
+			Supplier<T> tooLongExceptionFactory) throws T {
+		// TODO implement
+		return null;
 	}
 
 	/**
@@ -108,14 +201,14 @@ public class ByteBufferScanner {
 				 * UTF-8 creating false positives. However, also HTTP with end
 				 * of HTTP headers having repeating CR LF bytes.
 				 */
-				long IIII_OOOO_Check = topBitCheck & 0x00000000ffffffffL;
-				if (IIII_OOOO_Check == 0x0000000080808080L) {
+				long IIII_OOOO_Check = topBitCheck & 0xffffffff00000000L;
+				if (IIII_OOOO_Check != 0x8080808000000000L) {
 					// First byte of interest in first 4 bytes
-					long IIOO_OOOO_Check = topBitCheck & 0x0000ffff00000000L;
-					if (IIOO_OOOO_Check == 0x0000808000000000L) {
+					long IIOO_OOOO_Check = topBitCheck & 0xffff000000000000L;
+					if (IIOO_OOOO_Check != 0x8080000000000000L) {
 						// First byte of interest in first 2 bytes
-						long IOOO_OOOO_Check = topBitCheck & 0x00ff000000000000L;
-						if (IOOO_OOOO_Check == 0x0080000000000000L) {
+						long IOOO_OOOO_Check = topBitCheck & 0xff00000000000000L;
+						if (IOOO_OOOO_Check != 0x8000000000000000L) {
 
 							// Check first byte
 							long check = bytes & 0xff00000000000000L;
@@ -144,8 +237,8 @@ public class ByteBufferScanner {
 						}
 					} else {
 						// First byte of interest in second 2 bytes
-						long OOIO_OOOO_Check = topBitCheck & 0x000000ff00000000L;
-						if (OOIO_OOOO_Check == 0x0000008000000000L) {
+						long OOIO_OOOO_Check = topBitCheck & 0x0000ff0000000000L;
+						if (OOIO_OOOO_Check != 0x0000800000000000L) {
 
 							// Check third byte
 							long check = bytes & 0x0000ff0000000000L;
@@ -175,11 +268,11 @@ public class ByteBufferScanner {
 					}
 				} else {
 					// First byte of interest in last 4 bytes
-					long OOOO_IIOO_Check = topBitCheck & 0x000000000000ffffL;
-					if (OOOO_IIOO_Check == 0x0000000000008080L) {
+					long OOOO_IIOO_Check = topBitCheck & 0x00000000ffff0000L;
+					if (OOOO_IIOO_Check != 0x0000000080800000L) {
 						// First byte of interest in third 2 bytes
-						long OOOO_IOOO_Check = topBitCheck & 0x0000000000ff0000L;
-						if (OOOO_IOOO_Check == 0x0000000000800000L) {
+						long OOOO_IOOO_Check = topBitCheck & 0x00000000ff000000L;
+						if (OOOO_IOOO_Check != 0x0000000080000000L) {
 
 							// Check fifth byte
 							long check = bytes & 0x00000000ff000000L;
@@ -208,8 +301,8 @@ public class ByteBufferScanner {
 						}
 					} else {
 						// First byte of interest in fourth 2 bytes
-						long OOOO_OOIO_Check = topBitCheck & 0x00000000000000ffL;
-						if (OOOO_OOIO_Check == 0x0000000000000080L) {
+						long OOOO_OOIO_Check = topBitCheck & 0x000000000000ff00L;
+						if (OOOO_OOIO_Check != 0x0000000000008000L) {
 
 							// Check seventh byte
 							long check = bytes & 0x000000000000ff00L;
@@ -262,12 +355,6 @@ public class ByteBufferScanner {
 
 		// As here, did not find value in buffer
 		return -1;
-	}
-
-	/**
-	 * All access via static methods.
-	 */
-	private ByteBufferScanner() {
 	}
 
 }

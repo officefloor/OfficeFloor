@@ -15,24 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.server.http.parse;
+package net.officefloor.server.buffer;
 
 import java.nio.ByteBuffer;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.server.http.parse.impl.ByteBufferScanner;
+import net.officefloor.server.buffer.StreamBufferScanner;
 
 /**
- * Tests the {@link ByteBufferScanner}.
+ * Tests the {@link StreamBufferScanner}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ByteBufferScannerTest extends OfficeFrameTestCase {
-
-	/**
-	 * {@link ByteBuffer} for long comparison of finding byte.
-	 */
-	private static final ByteBuffer longNumberedBuffer = createBuffer(1, 2, 3, 4, 5, 6, 7, 8);
+public class StreamBufferScannerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure creates correct scan mask.
@@ -47,56 +42,56 @@ public class ByteBufferScannerTest extends OfficeFrameTestCase {
 	 * Ensure can find byte.
 	 */
 	public void testFirstByte() {
-		assertEquals(0, scan(longNumberedBuffer, 0, 1));
+		assertEquals(0, scanFirst(1));
 	}
 
 	/**
 	 * Ensure can find byte.
 	 */
 	public void testSecondByte() {
-		assertEquals(1, scan(longNumberedBuffer, 0, 2));
+		assertEquals(1, scanFirst(2));
 	}
 
 	/**
 	 * Ensure can find byte.
 	 */
 	public void testThirdByte() {
-		assertEquals(2, scan(longNumberedBuffer, 0, 3));
+		assertEquals(2, scanFirst(3));
 	}
 
 	/**
 	 * Ensure can find byte.
 	 */
 	public void testFourthByte() {
-		assertEquals(3, scan(longNumberedBuffer, 0, 4));
+		assertEquals(3, scanFirst(4));
 	}
 
 	/**
 	 * Ensure can find byte.
 	 */
 	public void testFifthByte() {
-		assertEquals(4, scan(longNumberedBuffer, 0, 5));
+		assertEquals(4, scanFirst(5));
 	}
 
 	/**
 	 * Ensure can find byte.
 	 */
 	public void testSixthByte() {
-		assertEquals(5, scan(longNumberedBuffer, 0, 6));
+		assertEquals(5, scanFirst(6));
 	}
 
 	/**
 	 * Ensure can find byte.
 	 */
 	public void testSeventhByte() {
-		assertEquals(6, scan(longNumberedBuffer, 0, 7));
+		assertEquals(6, scanFirst(7));
 	}
 
 	/**
 	 * Ensure can find byte.
 	 */
 	public void testEighthByte() {
-		assertEquals(7, scan(longNumberedBuffer, 0, 8));
+		assertEquals(7, scanFirst(8));
 	}
 
 	/**
@@ -176,7 +171,7 @@ public class ByteBufferScannerTest extends OfficeFrameTestCase {
 					data[writeIndex++] = (byte) b;
 				}
 			}
-			
+
 			// Ensure last byte not zero (to match 0)
 			data[writeIndex] = -1;
 
@@ -193,6 +188,34 @@ public class ByteBufferScannerTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Creates a number buffer with value being repeated for rest of long bytes.
+	 * Then scans for that value to ensure returns first.
+	 * 
+	 * @param value
+	 *            Value.
+	 * @return {@link ByteBuffer} for long read.
+	 */
+	private static int scanFirst(int value) {
+
+		// Create the buffer
+		byte[] data = new byte[8];
+		for (int i = 0; i < value; i++) {
+			data[i] = (byte) (i + 1);
+		}
+		for (int i = value; i < data.length; i++) {
+			data[i] = (byte) value;
+		}
+		ByteBuffer buffer = ByteBuffer.wrap(data);
+		buffer.position(buffer.capacity());
+
+		// Scan the buffer for the value
+		int scanIndex = scan(buffer, 0, value);
+
+		// Return the scan index
+		return scanIndex;
+	}
+
+	/**
 	 * Convenience method to scan.
 	 * 
 	 * @param buffer
@@ -205,7 +228,7 @@ public class ByteBufferScannerTest extends OfficeFrameTestCase {
 	 */
 	private static int scan(ByteBuffer buffer, int startPosition, int value) {
 		long mask = mask(value);
-		return ByteBufferScanner.scanToByte(buffer, startPosition, (byte) value, mask);
+		return StreamBufferScanner.scanToByte(buffer, startPosition, (byte) value, mask);
 	}
 
 	/**
@@ -216,7 +239,7 @@ public class ByteBufferScannerTest extends OfficeFrameTestCase {
 	 * @return Mask.
 	 */
 	private static long mask(int value) {
-		return ByteBufferScanner.createScanByteMask((byte) value);
+		return StreamBufferScanner.createScanByteMask((byte) value);
 	}
 
 	/**

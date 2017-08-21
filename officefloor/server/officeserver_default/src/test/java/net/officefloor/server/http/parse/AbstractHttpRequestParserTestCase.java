@@ -35,7 +35,7 @@ import net.officefloor.server.http.UsAsciiUtil;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeader;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.mock.MockBufferPool;
-import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
+import net.officefloor.server.http.parse.HttpRequestParser.HttpRequestParserMetaData;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.impl.ByteSequence;
 
@@ -82,7 +82,8 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * {@link HttpRequestParser} to test.
 	 */
-	private HttpRequestParser parser = new HttpRequestParserImpl(MAX_HEADER_COUNT, MAX_TEXT_LENGTH, MAX_ENTITY_LENGTH);
+	private HttpRequestParser parser = new HttpRequestParser(
+			new HttpRequestParserMetaData(MAX_HEADER_COUNT, MAX_TEXT_LENGTH, MAX_ENTITY_LENGTH));
 
 	/**
 	 * Ensure correct initial state.
@@ -370,7 +371,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	 * Validates partial method being too long.
 	 */
 	public void testTooLong_PartialMethod() {
-		this.parser = new HttpRequestParserImpl(MAX_HEADER_COUNT, 1, MAX_ENTITY_LENGTH);
+		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 1, MAX_ENTITY_LENGTH));
 		this.doInvalidMethodTest("TooLarge", HttpStatus.BAD_REQUEST, "Method too long");
 	}
 
@@ -378,7 +379,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	 * Validates complete method being too long.
 	 */
 	public void testTooLong_CompleteMethod() {
-		this.parser = new HttpRequestParserImpl(MAX_HEADER_COUNT, 1, MAX_ENTITY_LENGTH);
+		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 1, MAX_ENTITY_LENGTH));
 		this.doInvalidMethodTest("TooLarge ", HttpStatus.BAD_REQUEST, "Method too long");
 	}
 
@@ -386,7 +387,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	 * Validates partial request URI being too long.
 	 */
 	public void testTooLong_PartialRequestURI() {
-		this.parser = new HttpRequestParserImpl(MAX_HEADER_COUNT, 3, MAX_ENTITY_LENGTH);
+		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 3, MAX_ENTITY_LENGTH));
 		this.doInvalidMethodTest("GET /TooLong", HttpStatus.REQUEST_URI_TOO_LARGE, "Request-URI Too Long");
 	}
 
@@ -394,7 +395,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	 * Validates complete request URI being too long.
 	 */
 	public void testTooLong_CompleteRequestURI() {
-		this.parser = new HttpRequestParserImpl(MAX_HEADER_COUNT, 3, MAX_ENTITY_LENGTH);
+		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 3, MAX_ENTITY_LENGTH));
 		this.doInvalidMethodTest("GET /TooLong ", HttpStatus.REQUEST_URI_TOO_LARGE, "Request-URI Too Long");
 	}
 
@@ -402,7 +403,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	 * Validates partial version too long.
 	 */
 	public void testTooLong_PartialVersion() {
-		this.parser = new HttpRequestParserImpl(MAX_HEADER_COUNT, 5, MAX_ENTITY_LENGTH);
+		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 5, MAX_ENTITY_LENGTH));
 		this.doInvalidMethodTest("GET /path TooLong", HttpStatus.BAD_REQUEST, "Version too long");
 	}
 
@@ -410,7 +411,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	 * Validates complete version too long.
 	 */
 	public void testTooLong_CompleteVersion() {
-		this.parser = new HttpRequestParserImpl(MAX_HEADER_COUNT, 5, MAX_ENTITY_LENGTH);
+		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 5, MAX_ENTITY_LENGTH));
 		this.doInvalidMethodTest("GET /path TooLong\n", HttpStatus.BAD_REQUEST, "Version too long");
 	}
 
@@ -418,7 +419,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	 * Validates partial header name too long.
 	 */
 	public void testTooLong_PartialHeaderName() {
-		this.parser = new HttpRequestParserImpl(MAX_HEADER_COUNT, 8, MAX_ENTITY_LENGTH);
+		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 8, MAX_ENTITY_LENGTH));
 		this.doInvalidMethodTest("GET /path HTTP/1.1\nTooLongHeaderName", HttpStatus.BAD_REQUEST,
 				"Header name too long");
 	}
@@ -427,7 +428,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	 * Validates complete header name too long.
 	 */
 	public void testTooLong_CompleteHeaderName() {
-		this.parser = new HttpRequestParserImpl(MAX_HEADER_COUNT, 8, MAX_ENTITY_LENGTH);
+		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 8, MAX_ENTITY_LENGTH));
 		this.doInvalidMethodTest("GET /path HTTP/1.1\nTooLongHeaderName:", HttpStatus.BAD_REQUEST,
 				"Header name too long");
 	}
@@ -436,7 +437,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	 * Validates partial header value too long.
 	 */
 	public void testTooLong_PartialHeaderValue() {
-		this.parser = new HttpRequestParserImpl(MAX_HEADER_COUNT, 8, MAX_ENTITY_LENGTH);
+		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 8, MAX_ENTITY_LENGTH));
 		this.doInvalidMethodTest("GET /path HTTP/1.1\nName: HeaderValueTooLong", HttpStatus.BAD_REQUEST,
 				"Header value too long");
 	}
@@ -445,7 +446,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	 * Validates complete header value too long.
 	 */
 	public void testTooLong_CompleteHeaderValue() {
-		this.parser = new HttpRequestParserImpl(MAX_HEADER_COUNT, 8, MAX_ENTITY_LENGTH);
+		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 8, MAX_ENTITY_LENGTH));
 		this.doInvalidMethodTest("GET /path HTTP/1.1\nName: HeaderValueTooLong\n", HttpStatus.BAD_REQUEST,
 				"Header value too long");
 	}
@@ -515,8 +516,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 		this.doMethodTest("POST /one HTTP/1.1\nContent-Length: 4\nHeaderOne: ValueOne\n\nTEST", HttpMethod.POST, "/one",
 				HttpVersion.HTTP_1_1, "TEST", true, "Content-Length", "4", "HeaderOne", "ValueOne");
 
-		// Reset and parse second request
-		this.parser.reset();
+		// Parse second request
 		this.doMethodTest("PUT /two HTTP/1.0\nContent-Length: 7\nHeaderTwo: ValueTwo\n\nANOTHER", HttpMethod.PUT,
 				"/two", HttpVersion.HTTP_1_1, "ANOTHER", true, "Content-Length", "7", "HeaderTwo", "ValueTwo");
 	}
@@ -569,7 +569,6 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 				// Validate not parse escaped character
 				this.doMethodTest("GET /" + escapedCharacter + " HTTP/1.1\n\n", HttpMethod.GET, "/" + escapedCharacter,
 						HttpVersion.HTTP_1_1, "", true);
-				this.parser.reset();
 			}
 		}
 	}
@@ -695,7 +694,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 				String msgSuffix = " (" + expectedHeaderName + ": " + expectedHeaderValue + " [" + headerIndex + "])";
 
 				// Obtain the non materialised header
-				assertEquals("Should have header" + msgSuffix, headers.hasNext());
+				assertTrue("Should have header" + msgSuffix, headers.hasNext());
 				NonMaterialisedHttpHeader header = headers.next();
 
 				// Ensure correct name
@@ -718,7 +717,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 
 		// Validate the entity
 		ByteSequence entityData = this.parser.getEntity();
-		if (expectedEntity == null) {
+		if ((expectedEntity == null) || (expectedEntity.equals(""))) {
 			// Should be no entity content available
 			assertNull("Should be no entity, as not yet parsed", entityData);
 
@@ -772,8 +771,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 			assertEquals("Incorrect parse result", (expectedEntity != null), isComplete);
 
 			// Ensure correctly indicates if completed with buffer
-			assertEquals("Incorrect completion with buffer", expectedCompleteReadingBuffer,
-					this.parser.isFinishedParsingBuffer());
+			assertEquals("Incorrect completion with buffer", !expectedCompleteReadingBuffer, this.parser.parse());
 
 		} catch (HttpException ex) {
 			// Parse exception not expected
