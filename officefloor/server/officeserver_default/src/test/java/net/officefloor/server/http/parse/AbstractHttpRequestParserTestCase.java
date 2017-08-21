@@ -23,9 +23,11 @@ import java.nio.ByteBuffer;
 import java.util.Iterator;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpMethod.HttpMethodEnum;
+import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.HttpVersion.HttpVersionEnum;
@@ -42,7 +44,25 @@ import net.officefloor.server.stream.impl.ByteSequence;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpRequestParserTest extends OfficeFrameTestCase {
+public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestCase {
+
+	/**
+	 * <p>
+	 * Test specific undertaking of parsing the {@link HttpRequest}.
+	 * <p>
+	 * This allows child implementations to run the full range of tests by
+	 * different feeds of the data in {@link StreamBuffer} instances.
+	 * 
+	 * @param parser
+	 *            {@link HttpRequestParser} to use to parse the
+	 *            {@link HttpRequest}.
+	 * @param request
+	 *            {@link HttpRequest} bytes to parse.
+	 * @return Result of parsing the bytes.
+	 * @throws HttpException
+	 *             If fails to parse the {@link HttpRequest}.
+	 */
+	protected abstract boolean parse(HttpRequestParser parser, byte[] request) throws HttpException;
 
 	/**
 	 * Maximum number of {@link HttpHeader} instances for testing.
@@ -76,6 +96,21 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to handle simple request
+	 */
+	public void testSimpleRequest() {
+		this.doMethodTest("GET / HTTP/1.1\n\n", HttpMethod.GET, "/", HttpVersion.HTTP_1_1, "", true);
+	}
+
+	/**
+	 * Ensure able to handle simple request
+	 */
+	public void testSimpleFullRequest() {
+		this.doMethodTest("GET / HTTP/1.1\nContent-Length: 4\n\nTEST", HttpMethod.GET, "/", HttpVersion.HTTP_1_1, "",
+				true, "Content-Length", "4");
+	}
+
+	/**
 	 * Ensure able to handle empty request.
 	 */
 	public void testEmpty() {
@@ -83,17 +118,17 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to handle a blank request (only spaces received for it).
+	 * Ensure invalid if leading spaces.
 	 */
-	public void testBlank() {
-		this.doMethodTest(" ", null, null, null, null, false);
+	public void testLeadingSpacesInvalid() {
+		this.doInvalidMethodTest(" GET /test", HttpStatus.BAD_REQUEST, "Leading spaces for request invalid");
 	}
 
 	/**
-	 * Ensure able to handle leading spaces.
+	 * Ensure able to handle a blank request (only spaces received for it).
 	 */
-	public void testLeadingSpaces() {
-		this.doMethodTest(" \n GET ", HttpMethod.GET, null, null, null, false);
+	public void testRobustness_SeparatingCRLF() {
+		this.doMethodTest("\nGET /test HTTP/1.1\n\n", HttpMethod.GET, "/test", HttpVersion.HTTP_1_1, "", true);
 	}
 
 	/**
@@ -153,10 +188,10 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to parse up to just the path.
+	 * Ensure able to parse up to just the request URI.
 	 */
-	public void testToPath() {
-		this.doMethodTest("GET /path ", HttpMethod.GET, "/path", null, null, false);
+	public void testToRequestUri() {
+		this.doMethodTest("GET /uri ", HttpMethod.GET, "/uri", null, null, false);
 	}
 
 	/**
@@ -178,13 +213,6 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	 */
 	public void testCustomVersion() {
 		this.doMethodTest("GET /path custom\n", HttpMethod.GET, "/path", new HttpVersion("custom"), null, false);
-	}
-
-	/**
-	 * Ensure tolerance if request line contains LF without preceding CR.
-	 */
-	public void testToVersionMissingCR() {
-		this.doMethodTest(true, "GET /path HTTP/1.1\n", HttpMethod.GET, "/path", HttpVersion.HTTP_1_1, null, false);
 	}
 
 	/**
@@ -211,26 +239,10 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to delimit header name via LF.
-	 */
-	public void testToHeaderNameNoValueMissingCR() {
-		this.doMethodTest(true, "GET /path HTTP/1.1\nHeader\n", HttpMethod.GET, "/path", HttpVersion.HTTP_1_1, null,
-				false, "Header", "");
-	}
-
-	/**
 	 * Ensure able to parse up to just the header name.
 	 */
 	public void testToHeaderValue() {
 		this.doMethodTest("POST /path HTTP/1.1\nContent-Length: 10\nHost", HttpMethod.POST, "/path",
-				HttpVersion.HTTP_1_1, null, false, "Content-Length", "10");
-	}
-
-	/**
-	 * Ensure tolerance if header contains LF without preceding CR.
-	 */
-	public void testHeaderMissingCR() {
-		this.doMethodTest(true, "POST /path HTTP/1.1\nContent-Length: 10\nHost", HttpMethod.POST, "/path",
 				HttpVersion.HTTP_1_1, null, false, "Content-Length", "10");
 	}
 
@@ -240,43 +252,6 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	public void testToEntity() {
 		this.doMethodTest("POST /path HTTP/1.1\nContent-Length: 1000\n\nNOT ALL CONTENT", HttpMethod.POST, "/path",
 				HttpVersion.HTTP_1_1, "NOT ALL CONTENT", false, "Content-Length", "1000");
-	}
-
-	/**
-	 * Ensure tolerance if header separation from entity contains LF without
-	 * preceding CR.
-	 */
-	public void testToEntityMissingCR() {
-		this.doMethodTest(true, "POST /path HTTP/1.1\nContent-Length: 1000\n\nNOT ALL CONTENT", HttpMethod.POST,
-				"/path", HttpVersion.HTTP_1_1, "NOT ALL CONTENT", false, "Content-Length", "1000");
-	}
-
-	/**
-	 * Ensure multiple parsing for completing the entity content.
-	 */
-	public void testPartialEntityThenComplete() throws Exception {
-
-		// Provide only partial entity (typically if network packet is split)
-		byte[] firstPacket = UsAsciiUtil.convertToUsAscii("POST /path HTTP/1.1\nContent-Length: 4\n\nTE");
-		MockBufferPool poolOne = new MockBufferPool(() -> ByteBuffer.allocate(firstPacket.length));
-		StreamBuffer<ByteBuffer> bufferOne = poolOne.getPooledStreamBuffer();
-		bufferOne.write(firstPacket);
-		boolean isCompleteOnFirstPacket = this.parser.parse(bufferOne);
-		assertFalse("Should not complete if partial entity", isCompleteOnFirstPacket);
-		assertTrue("Should have consumed all bytes", this.parser.isFinishedParsingBuffer());
-
-		// Provide remaining of entity (with some data of next HTTP request)
-		byte[] secondPacket = UsAsciiUtil.convertToUsAscii("ST more");
-		MockBufferPool poolTwo = new MockBufferPool(() -> ByteBuffer.allocate(secondPacket.length));
-		StreamBuffer<ByteBuffer> bufferTwo = poolTwo.getPooledStreamBuffer();
-		bufferTwo.write(secondPacket);
-		boolean isCompleteOnSecondPacket = this.parser.parse(bufferTwo);
-		assertTrue("Should be complete with remaining of entity received", isCompleteOnSecondPacket);
-		assertFalse("Should have further bytes remaining", this.parser.isFinishedParsingBuffer());
-
-		// Validate the parsing
-		this.validateHttpRequestParserState(HttpMethod.POST, "/path", HttpVersion.HTTP_1_1, "TEST", "Content-Length",
-				"4");
 	}
 
 	/**
@@ -296,29 +271,11 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to have header value on multiple lines with missing CR.
-	 */
-	public void testMultiplelineHeaderValueMissingCR() {
-		this.doMethodTest(true, "GET /path HTTP/1.1\nMultiline: Value One\n Value Two\n\n", HttpMethod.GET, "/path",
-				HttpVersion.HTTP_1_1, "", true, "Multiline", "Value One Value Two");
-	}
-
-	/**
 	 * Ensure able to parse header and entity separation containing white
 	 * spacing. This is to be more tolerant of the client.
 	 */
 	public void testHeaderToEntityHavingWhitespacing() {
 		this.doMethodTest("POST /path HTTP/1.1\nContent-Length: 4\n \t\nTEST", HttpMethod.POST, "/path",
-				HttpVersion.HTTP_1_1, "TEST", true, "Content-Length", "4");
-	}
-
-	/**
-	 * Ensure able to parse header and entity separation containing white
-	 * spacing. This is to be more tolerant of the client. Also tolerant of
-	 * missing CR.
-	 */
-	public void testHeaderToEntityHavingWhitespacingMissingCR() {
-		this.doMethodTest(true, "POST /path HTTP/1.1\nContent-Length: 4\n \t\nTEST", HttpMethod.POST, "/path",
 				HttpVersion.HTTP_1_1, "TEST", true, "Content-Length", "4");
 	}
 
@@ -331,26 +288,10 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to parse header and entity separation containing white
-	 * spacing. This is to be more tolerant of the client. Also tolerant of
-	 * missing CR.
-	 */
-	public void testWhitespacingInGetCompletionMissingCR() {
-		this.doMethodTest(true, "GET /path HTTP/1.1\n \t\n", HttpMethod.GET, "/path", HttpVersion.HTTP_1_1, "", true);
-	}
-
-	/**
 	 * Validate GET.
 	 */
 	public void testGet() {
 		this.doMethodTest("GET /path HTTP/1.1\n\n", HttpMethod.GET, "/path", HttpVersion.HTTP_1_1, "", true);
-	}
-
-	/**
-	 * Ensure tolerance if GET request is missing CR before the LF.
-	 */
-	public void testGetMissingCR() {
-		this.doMethodTest(true, "GET /path HTTP/1.1\n\n", HttpMethod.GET, "/path", HttpVersion.HTTP_1_1, "", true);
 	}
 
 	/**
@@ -406,14 +347,6 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	 */
 	public void testPost() {
 		this.doMethodTest("POST /path HTTP/1.1\nContent-Length: 4\n\nTEST", HttpMethod.POST, "/path",
-				HttpVersion.HTTP_1_1, "TEST", true, "Content-Length", "4");
-	}
-
-	/**
-	 * Ensure tolerance if POST request is missing CR before the LF.
-	 */
-	public void testPostMissingCR() {
-		this.doMethodTest(true, "POST /path HTTP/1.1\nContent-Length: 4\n\nTEST", HttpMethod.POST, "/path",
 				HttpVersion.HTTP_1_1, "TEST", true, "Content-Length", "4");
 	}
 
@@ -820,44 +753,16 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	private void doMethodTest(String httpRequest, HttpMethod expectedMethod, String expectedPath,
 			HttpVersion expectedVersion, String expectedEntity, boolean expectedCompleteReadingBuffer,
 			String... expectedHeaderNameValues) {
-		this.doMethodTest(false, httpRequest, expectedMethod, expectedPath, expectedVersion, expectedEntity,
-				expectedCompleteReadingBuffer, expectedHeaderNameValues);
-	}
-
-	/**
-	 * Does a valid HTTP request test.
-	 * 
-	 * @param isRemoveCR
-	 *            Flag indicating to remove the CR (typically before the LF).
-	 *            This is to allow more tolerant handling of requests.
-	 * @param httpRequest
-	 *            HTTP request content.
-	 * @param expectedMethod
-	 *            Expected method.
-	 * @param expectedPath
-	 *            Expected path.
-	 * @param expectedVersion
-	 *            Expected version.
-	 * @param expectedEntity
-	 *            Expected entity.
-	 * @param expectedCompleteReadingBuffer
-	 *            Indicates if expected completion of reading the buffer.
-	 * @param expectedHeaderNameValues
-	 *            Expected listing of header name/values.
-	 */
-	private void doMethodTest(boolean isRemoveCR, String httpRequest, HttpMethod expectedMethod, String expectedPath,
-			HttpVersion expectedVersion, String expectedEntity, boolean expectedCompleteReadingBuffer,
-			String... expectedHeaderNameValues) {
 		try {
 
 			// Create data to parse
-			byte[] data = this.createDataToParse(httpRequest, isRemoveCR);
+			byte[] data = this.createDataToParse(httpRequest, false);
 			MockBufferPool pool = new MockBufferPool(() -> ByteBuffer.allocate(data.length));
 			StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
 			buffer.write(data);
 
 			// Parse the content
-			boolean isComplete = this.parser.parse(buffer);
+			boolean isComplete = this.parse(this.parser, data);
 
 			// Validate the parse state
 			this.validateHttpRequestParserState(expectedMethod, expectedPath, expectedVersion, expectedEntity,
@@ -870,7 +775,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 			assertEquals("Incorrect completion with buffer", expectedCompleteReadingBuffer,
 					this.parser.isFinishedParsingBuffer());
 
-		} catch (HttpRequestParseException ex) {
+		} catch (HttpException ex) {
 			// Parse exception not expected
 			fail("Request should be parsed successfully [failure " + ex.getHttpStatus() + ": " + ex.getMessage() + "]");
 
@@ -894,26 +799,20 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 
 		// Create input buffer stream with content
 		byte[] content = UsAsciiUtil.convertToHttp(invalidHttpRequest);
-		MockBufferPool pool = new MockBufferPool(() -> ByteBuffer.allocate(content.length));
-		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
-		buffer.write(content);
 
 		// Should not be able parse invalid method
 		try {
 
 			// Parse the content
-			this.parser.parse(buffer);
+			this.parse(this.parser, content);
 
 			// Should not be parsed
 			fail("Should not parse invalid HTTP request:\n" + invalidHttpRequest);
 
-		} catch (HttpRequestParseException ex) {
+		} catch (HttpException ex) {
 			// Validate details of parse failure
 			assertEquals("Incorrect http status", expectedHttpStatus, ex.getHttpStatus());
 			assertEquals("Incorrect parse failure reason", expectedParseFailureReason, ex.getMessage());
-
-		} catch (IOException ex) {
-			fail("Should not have I/O failure: " + ex.getMessage());
 		}
 	}
 

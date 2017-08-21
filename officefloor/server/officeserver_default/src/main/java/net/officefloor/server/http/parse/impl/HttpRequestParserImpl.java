@@ -17,29 +17,21 @@
  */
 package net.officefloor.server.http.parse.impl;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Supplier;
 
 import net.officefloor.server.buffer.StreamBufferByteSequence;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.conversation.HttpEntity;
-import net.officefloor.server.http.conversation.impl.HttpEntityImpl;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
-import net.officefloor.server.http.impl.SerialisableHttpHeader;
-import net.officefloor.server.http.parse.HttpRequestParseException;
 import net.officefloor.server.http.parse.HttpRequestParser;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.impl.ByteSequence;
-import net.officefloor.server.stream.impl.ServerInputStreamImpl;
 
 /**
  * {@link HttpRequestParser} implementation.
@@ -61,6 +53,11 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	private static long OPTIONS_ = longBytes("OPTIONS ");
 	private static long DELETE_ = longBytes("DELETE ");
 
+	private static long HTTP_1_0 = longBytes("HTTP/1.0");
+	private static long HTTP_1_1 = longBytes("HTTP/1.1");
+
+	private static short CRLF = shortBytes("\n\r");
+
 	private static Supplier<HttpMethod> methodGet = () -> HttpMethod.GET;
 	private static Supplier<HttpMethod> methodPut = () -> HttpMethod.PUT;
 	private static Supplier<HttpMethod> methodPost = () -> HttpMethod.POST;
@@ -69,13 +66,23 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	private static Supplier<HttpMethod> methodOptions = () -> HttpMethod.OPTIONS;
 	private static Supplier<HttpMethod> methodDelete = () -> HttpMethod.DELETE;
 
-	private static byte HTTP_SPACE = " ".getBytes(ServerHttpConnection.HTTP_CHARSET)[0];
+	private static byte HTTP_SPACE = httpByte(" ");
 	private static long MASK_SPACE = ByteBufferScanner.createScanByteMask(HTTP_SPACE);
+	private static byte HTTP_CR = httpByte("\r");
+	private static long MASK_CR = ByteBufferScanner.createScanByteMask(HTTP_CR);
+	private static byte HTTP_LF = httpByte("\n");
+	private static byte HTTP_COLON = httpByte(":");
+	private static long MASK_COLON = ByteBufferScanner.createScanByteMask(HTTP_COLON);
 
-	static {
-		System.out.println("GET_PUT_MASK: " + Long.toHexString(GET_PUT_MASK));
-		System.out.println("GET_: " + Long.toHexString(GET_));
-		System.out.println("PUT_:" + Long.toHexString(PUT_));
+	/**
+	 * Obtains the HTTP byte for the {@link String} value.
+	 * 
+	 * @param text
+	 *            String value.
+	 * @return byte value.
+	 */
+	private static byte httpByte(String text) {
+		return text.getBytes(ServerHttpConnection.HTTP_CHARSET)[0];
 	}
 
 	/**
@@ -119,6 +126,26 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	}
 
 	/**
+	 * Obtains the short value for the {@link String} value.
+	 * 
+	 * @param text
+	 *            String value.
+	 * @return Short value with bytes at top of long.
+	 */
+	private static short shortBytes(String text) {
+		byte[] httpBytes = text.getBytes(ServerHttpConnection.HTTP_CHARSET);
+		short value = 0;
+		for (int i = 0; i < httpBytes.length; i++) {
+			value <<= 8; // move bytes up by a byte
+			value |= httpBytes[i]; // include bytes in value
+		}
+		for (int i = httpBytes.length; i < 2; i++) {
+			value <<= 8; // move bytes to leave zero for matching
+		}
+		return value;
+	}
+
+	/**
 	 * {@link Supplier} for the {@link HttpMethod}.
 	 */
 	private Supplier<HttpMethod> method = null;
@@ -127,6 +154,11 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	 * {@link Supplier} for the request URI.
 	 */
 	private Supplier<String> requestUri = null;
+
+	/**
+	 * {@link HttpVersion}.
+	 */
+	private HttpVersion version = null;
 
 	/**
 	 * Initiate.
@@ -147,12 +179,8 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	 * ================= HttpRequestParser ======================
 	 */
 
-	private static enum ParseState {
-		NEW_REQUEST
-	}
-
 	@Override
-	public boolean parse(StreamBuffer<ByteBuffer> buffer) throws IOException, HttpRequestParseException {
+	public boolean parse(StreamBuffer<ByteBuffer> buffer) throws HttpException {
 
 		// Obtain the byte buffer containing the data
 		ByteBuffer data = buffer.getPooledBuffer();
@@ -250,8 +278,72 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 				spacePosition - position);
 		this.requestUri = () -> uriSequence.decodeUri((result) -> new Error()).toUriString((message) -> new Error());
 		position = spacePosition + 1; // +1 to more past space
-		
+
 		// Obtain the version
+		int crPosition = ByteBufferScanner.scanToByte(data, position, HTTP_CR, MASK_CR);
+		if (crPosition == -1) {
+			return false; // need more data to complete version
+		}
+
+		// Determine if common version
+		final int commonVersionLength = 8; // HTTP/1.X
+		int versionByteLength = crPosition - position;
+		if (versionByteLength == commonVersionLength) {
+			long checkVersion = data.getLong(position);
+			if (checkVersion == HTTP_1_1) {
+				this.version = HttpVersion.HTTP_1_1;
+				position += commonVersionLength;
+
+			} else if (checkVersion == HTTP_1_0) {
+				this.version = HttpVersion.HTTP_1_0;
+				position += commonVersionLength;
+			}
+		}
+
+		// If no common version, create custom version
+		if (this.version == null) {
+			StreamBufferByteSequence versionSequence = new StreamBufferByteSequence(buffer, position,
+					crPosition - position);
+			String httpVersionText = versionSequence.toHttpString();
+			this.version = new HttpVersion(httpVersionText);
+		}
+
+		// Ensure next character is LF (after CR)
+		int lfPosition = crPosition + 1;
+		byte character = data.get(lfPosition);
+		if (character != HTTP_LF) {
+			throw new HttpException(HttpStatus.BAD_REQUEST);
+		}
+		position = lfPosition + 1;
+
+		// Determine if end of headers
+		short checkCrLf = data.getShort(position);
+		if (checkCrLf == CRLF) {
+			// End of header section
+			System.out.println("TODO handle end of header section");
+
+		} else {
+			// Scan in the header name
+			int colonPosition = ByteBufferScanner.scanToByte(data, position, HTTP_COLON, MASK_COLON);
+			if (colonPosition == -1) {
+				return false; // need more data to complete header name
+			}
+
+			// Scan in the header value
+			position = colonPosition + 1;
+			crPosition = ByteBufferScanner.scanToByte(data, position, HTTP_CR, MASK_CR);
+			if (crPosition == -1) {
+				return false; // need more data to complete header value
+			}
+
+			// Ensure next character is LF (after CR)
+			lfPosition = crPosition + 1;
+			character = data.get(lfPosition);
+			if (character != HTTP_LF) {
+				throw new HttpException(HttpStatus.BAD_REQUEST);
+			}
+			position = lfPosition + 1;
+		}
 
 		// TODO Auto-generated method stub
 		return false;
@@ -281,8 +373,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 
 	@Override
 	public HttpVersion getVersion() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.version;
 	}
 
 	@Override

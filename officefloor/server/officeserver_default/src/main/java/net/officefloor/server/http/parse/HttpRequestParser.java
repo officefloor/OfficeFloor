@@ -17,10 +17,10 @@
  */
 package net.officefloor.server.http.parse;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.function.Supplier;
 
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
@@ -48,12 +48,10 @@ public interface HttpRequestParser {
 	 *         parsed. <code>false</code> indicates this method should be called
 	 *         again when further data is available to obtain the full
 	 *         {@link HttpRequest}.
-	 * @throws IOException
-	 *             If fails to read bytes.
-	 * @throws HttpRequestParseException
+	 * @throws HttpException
 	 *             If failure to parse {@link HttpRequest}.
 	 */
-	boolean parse(StreamBuffer<ByteBuffer> buffer) throws IOException, HttpRequestParseException;
+	boolean parse(StreamBuffer<ByteBuffer> buffer) throws HttpException;
 
 	/**
 	 * Determines if finished reading data from the {@link ByteBuffer}.
