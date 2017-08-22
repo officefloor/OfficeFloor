@@ -24,24 +24,34 @@ import net.officefloor.server.http.mock.MockBufferPool;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**
- * {@link AbstractHttpRequestParserTestCase} that uses a single
- * {@link ByteBuffer}.
+ * {@link AbstractHttpRequestParserTestCase} that progressively writes the
+ * content to the parser.
  * 
  * @author Daniel Sagenschneider
  */
-public class SingleBufferHttpRequestParserTest extends AbstractHttpRequestParserTestCase {
+public class ProgressiveWriteBufferHttpRequestParserTest extends AbstractHttpRequestParserTestCase {
 
 	@Override
 	protected boolean parse(HttpRequestParser parser, byte[] request) throws HttpException {
 
-		// Create single buffer with data
-		MockBufferPool pool = new MockBufferPool(() -> ByteBuffer.allocateDirect(request.length));
+		// Create single buffer to progressively write the data
+		MockBufferPool pool = new MockBufferPool(() -> ByteBuffer.allocate(request.length));
 		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
-		buffer.write(request);
 
-		// Return parsing of the data
-		parser.appendStreamBuffer(buffer);
-		return parser.parse();
+		// Progressively write and parse a byte at a time
+		boolean parseResult = false;
+		for (int i = 0; i < request.length; i++) {
+
+			// Progressively write the next byte
+			buffer.write(request[i]);
+
+			// Append same buffer with additional bytes
+			parser.appendStreamBuffer(buffer);
+			parseResult = parser.parse();
+		}
+
+		// Return last parse result
+		return parseResult;
 	}
 
 }

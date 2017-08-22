@@ -138,6 +138,12 @@ public class StreamBufferScanner {
 	 */
 	public <T extends Throwable> long buildLong(Supplier<T> illegalValueExceptionFactory) throws T {
 
+		// Ensure capture start (and clear previous buffers)
+		if (this.start == -1) {
+			this.previousBuffers.clear();
+			this.start = this.position;
+		}
+
 		// Determine if remaining content for long in current buffer
 		ByteBuffer data = this.currentBuffer.getPooledBuffer();
 		int remaining = data.position() - this.position;
@@ -231,6 +237,12 @@ public class StreamBufferScanner {
 	 */
 	public <T extends Throwable> short buildShort(Supplier<T> illegalValueExceptionFactory) throws T {
 
+		// Ensure capture start (and clear previous buffers)
+		if (this.start == -1) {
+			this.previousBuffers.clear();
+			this.start = this.position;
+		}
+
 		// Determine if remaining content for long in current buffer
 		ByteBuffer data = this.currentBuffer.getPooledBuffer();
 		int remaining = data.position() - this.position;
@@ -296,6 +308,12 @@ public class StreamBufferScanner {
 	 *             If invalid value.
 	 */
 	public <T extends Throwable> byte buildByte(Supplier<T> illegalValueExceptionFactory) throws T {
+
+		// Ensure capture start (and clear previous buffers)
+		if (this.start == -1) {
+			this.previousBuffers.clear();
+			this.start = this.position;
+		}
 
 		// Determine if remaining content for byte in current buffer
 		ByteBuffer data = this.currentBuffer.getPooledBuffer();

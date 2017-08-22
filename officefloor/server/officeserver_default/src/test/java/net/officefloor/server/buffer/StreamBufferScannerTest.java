@@ -420,7 +420,7 @@ public class StreamBufferScannerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to build short then long from same position.
+	 * Ensure able to build byte then short then long from same position.
 	 */
 	public void testBuildByteThenShortThenLong() {
 
@@ -435,6 +435,126 @@ public class StreamBufferScannerTest extends OfficeFrameTestCase {
 
 		// Ensure can build long
 		assertEquals("Incorrect built long", 0x0102030405060708L, scanner.buildLong(shouldNotOccur));
+	}
+
+	/**
+	 * Ensure able to build long then short then byte from same position.
+	 */
+	public void testBuildLongThenShortThenByte() {
+
+		// Create the scanner with values
+		StreamBufferScanner scanner = createScanner(0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08);
+
+		// Ensure can build long
+		assertEquals("Incorrect built long", 0x0102030405060708L, scanner.buildLong(shouldNotOccur));
+
+		// Ensure can build short
+		assertEquals("Incorrect built short", 0x0102, scanner.buildShort(shouldNotOccur));
+
+		// Ensure can build byte
+		assertEquals("Incorrect built byte", 0x01, scanner.buildByte(shouldNotOccur));
+	}
+
+	/**
+	 * Ensure can build long and re-use bytes for scan.
+	 */
+	public void testProgressivelyBuildLongThenScanToTarget() {
+
+		// Create the scanner
+		StreamBufferScanner scanner = createScanner(1);
+		assertEquals("Should not build", -1, scanner.buildLong(shouldNotOccur));
+
+		// Progressively build the long
+		for (int i = 1; i < 7; i++) {
+			scanner.appendStreamBuffer(createBuffer(i + 1));
+			assertEquals("Should not build after " + i, -1, scanner.buildLong(shouldNotOccur));
+		}
+		scanner.appendStreamBuffer(createBuffer(8));
+		assertEquals("Incorrect built long", 0x0102030405060708L, scanner.buildLong(shouldNotOccur));
+
+		// Ensure scan to target includes the long
+		StreamBufferByteSequence sequence = scanner.scanToTarget(new ScanTarget((byte) 7), 1000, shouldNotOccur);
+		assertEquals("Should have scanned bytes", 7, sequence.length());
+		for (int i = 0; i < 7; i++) {
+			assertEquals("Incorrect byte", i + 1, sequence.byteAt(i));
+		}
+
+		// Ensure able to scan again
+		sequence = scanner.scanToTarget(new ScanTarget((byte) 7), 1000, shouldNotOccur);
+		assertEquals("Should find again, but no data", 0, sequence.length());
+
+		// Ensure able to scan beyond the byte
+		sequence = scanner.scanToTarget(new ScanTarget((byte) 9), 1000, shouldNotOccur);
+		assertNull("Should not find byte", sequence);
+
+		// Ensure after adding target, includes the remaining long bytes
+		scanner.appendStreamBuffer(createBuffer(9));
+		sequence = scanner.scanToTarget(new ScanTarget((byte) 9), 1000, shouldNotOccur);
+		assertEquals("Should include remaining long content", 2, sequence.length());
+		for (int i = 0; i < 2; i++) {
+			assertEquals("Incorrect long byte", i + 7, sequence.byteAt(i));
+		}
+	}
+
+	/**
+	 * Ensure can build short and re-use bytes for scan.
+	 */
+	public void testProgressivelyBuildShortThenScanToTarget() {
+
+		// Create the scanner
+		StreamBufferScanner scanner = createScanner(1);
+		assertEquals("Should not build", -1, scanner.buildShort(shouldNotOccur));
+
+		// Progressively build the short
+		scanner.appendStreamBuffer(createBuffer(2));
+		assertEquals("Incorrect built short", 0x0102, scanner.buildShort(shouldNotOccur));
+
+		// Ensure scan to target includes the short
+		StreamBufferByteSequence sequence = scanner.scanToTarget(new ScanTarget((byte) 2), 1000, shouldNotOccur);
+		assertEquals("Should have scanned bytes", 1, sequence.length());
+		assertEquals("Incorrect byte", 1, sequence.byteAt(0));
+
+		// Ensure able to scan again
+		sequence = scanner.scanToTarget(new ScanTarget((byte) 2), 1000, shouldNotOccur);
+		assertEquals("Should find again, but no data", 0, sequence.length());
+
+		// Ensure able to scan beyond the byte
+		sequence = scanner.scanToTarget(new ScanTarget((byte) 3), 1000, shouldNotOccur);
+		assertNull("Should not find byte", sequence);
+
+		// Ensure after adding target, includes the remaining short bytes
+		scanner.appendStreamBuffer(createBuffer(3));
+		sequence = scanner.scanToTarget(new ScanTarget((byte) 3), 1000, shouldNotOccur);
+		assertEquals("Should include remaining short content", 1, sequence.length());
+		assertEquals("Incorrect short remaining byte", 2, sequence.byteAt(0));
+	}
+
+	/**
+	 * Ensure can build byte and re-use bytes for scan.
+	 */
+	public void testProgressivelyBuildByteThenScanToTarget() {
+
+		// Create the scanner
+		StreamBufferScanner scanner = createScanner(1);
+		assertEquals("Incorrect built byte", 0x0001, scanner.buildByte(shouldNotOccur));
+
+		// Ensure scan to target includes the short
+		StreamBufferByteSequence sequence = scanner.scanToTarget(new ScanTarget((byte) 1), 1000, shouldNotOccur);
+		assertEquals("Should have scanned bytes", 0, sequence.length());
+
+		// Ensure able to scan again
+		sequence = scanner.scanToTarget(new ScanTarget((byte) 1), 1000, shouldNotOccur);
+		assertEquals("Should find again, but no data", 0, sequence.length());
+
+		// Ensure able to scan beyond the byte
+		sequence = scanner.scanToTarget(new ScanTarget((byte) 2), 1000, shouldNotOccur);
+		assertNull("Should not find byte", sequence);
+
+		// Ensure after adding target, includes the remaining short bytes
+		scanner.appendStreamBuffer(createBuffer(2));
+		sequence = scanner.scanToTarget(new ScanTarget((byte) 2), 1000, shouldNotOccur);
+		assertEquals("Should include remaining byte content", 1, sequence.length());
+		assertEquals("Incorrect remaining byte", 1, sequence.byteAt(0));
 	}
 
 	/**
