@@ -204,6 +204,7 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 	 *            Length of data from the {@link StreamBuffer}.
 	 */
 	public StreamBufferByteSequence(StreamBuffer<ByteBuffer> buffer, int offset, int length) {
+		// Load the state (allow first buffer to be empty)
 		this.head = new StreamSegment(buffer, offset, length);
 		this.tail = this.head;
 		this.sequenceLength = length;
@@ -221,6 +222,12 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 	 *            Length of data from the {@link StreamBuffer}.
 	 */
 	public void appendStreamBuffer(StreamBuffer<ByteBuffer> buffer, int offset, int length) {
+
+		// Ignore empty buffers
+		if (length == 0) {
+			return;
+		}
+
 		// Append segment
 		this.tail.next = new StreamSegment(buffer, offset, length);
 		this.tail = this.tail.next;
