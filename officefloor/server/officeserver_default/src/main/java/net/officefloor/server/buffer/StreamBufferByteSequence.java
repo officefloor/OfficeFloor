@@ -637,6 +637,44 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 		return temp.toString();
 	}
 
+	/**
+	 * Obtains this {@link ByteSequence} as a <code>long</code> value.
+	 * 
+	 * @param invalidDigitExceptionFactory
+	 *            {@link Function} to create an {@link Throwable} should there
+	 *            be an invalid HTTP digit.
+	 * @return <code>long</code> value.
+	 * @throws T
+	 *             If invalid value to convert to long.
+	 */
+	public <T extends Throwable> long toLong(Function<Character, T> invalidDigitExceptionFactory) throws T {
+
+		// Obtain the HTTP sequence
+		CharSequence httpSequence = this.getHttpCharSequence();
+		int charLength = httpSequence.length();
+
+		// Add bytes to create long
+		long value = 0;
+		for (int i = 0; i < charLength; i++) {
+
+			// Obtain the character
+			char character = httpSequence.charAt(i);
+
+			// Translate character to digit value
+			char digit = (char) (character - '0');
+			if ((digit < 0) || (digit > 9)) {
+				throw invalidDigitExceptionFactory.apply(digit);
+			}
+
+			// Add the digit to the value
+			value *= 10;
+			value += digit;
+		}
+
+		// Return the long value
+		return value;
+	}
+
 	/*
 	 * =================== ByteSequence ======================
 	 */

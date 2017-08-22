@@ -122,7 +122,6 @@ public class NonMaterialisedHeadersImpl implements NonMaterialisedHttpHeaders {
 
 			// Ensure trim the header
 			if (!this.isHeaderTrimmed) {
-				this.name.trim();
 				this.value.trim();
 			}
 

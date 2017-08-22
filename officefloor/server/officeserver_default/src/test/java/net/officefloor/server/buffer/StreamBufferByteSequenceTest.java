@@ -364,6 +364,30 @@ public class StreamBufferByteSequenceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can obtain long value.
+	 */
+	public void testToLong() throws IOException {
+		StreamBufferByteSequence sequence = this.writeContentToSequence("9876543210",
+				ServerHttpConnection.HTTP_CHARSET);
+		assertEquals("Incorrect long value", 9876543210L,
+				sequence.toLong((character) -> new IOException("Should not occur")));
+	}
+
+	/**
+	 * Ensure handle invalid long.
+	 */
+	public void testInvalidLong() throws IOException {
+		StreamBufferByteSequence sequence = this.writeContentToSequence("invalid", ServerHttpConnection.HTTP_CHARSET);
+		Exception exception = new Exception("TEST");
+		try {
+			sequence.toLong((character) -> exception);
+			fail("Should not be successful");
+		} catch (Exception ex) {
+			assertSame("Incorrect cause", exception, ex);
+		}
+	}
+
+	/**
 	 * Writes the content to the {@link StreamBufferByteSequence}.
 	 * 
 	 * @param content

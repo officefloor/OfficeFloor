@@ -80,7 +80,7 @@ public class MaterialisingHttpRequestHeaders implements HttpRequestHeaders {
 	 * @return <code>true</code> if the {@link CharSequence} instances are equal
 	 *         ignoring case.
 	 */
-	private static boolean httpEqualsIgnoreCase(CharSequence one, CharSequence two) {
+	public static boolean httpEqualsIgnoreCase(CharSequence one, CharSequence two) {
 		if (one.length() == two.length()) {
 			for (int i = 0; i < one.length(); i++) {
 				char charOne = httpLowerCase(one.charAt(i));

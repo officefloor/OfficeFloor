@@ -360,7 +360,7 @@ public class StreamBufferScanner {
 	 *            Number of bytes to scan.
 	 * @return {@link StreamBufferByteSequence} to the scanned bytes.
 	 */
-	public StreamBufferByteSequence scanBytes(int numberOfBytes) {
+	public StreamBufferByteSequence scanBytes(long numberOfBytes) {
 
 		// Ensure capture start
 		if (this.start == -1) {
@@ -368,7 +368,7 @@ public class StreamBufferScanner {
 		}
 
 		// Determine remaining bytes required
-		int requiredBytes = numberOfBytes - this.previousBufferBytes;
+		long requiredBytes = numberOfBytes - this.previousBufferBytes;
 
 		// Determine number of available bytes in current buffer
 		ByteBuffer data = this.currentBuffer.getPooledBuffer();
@@ -377,8 +377,9 @@ public class StreamBufferScanner {
 		// Determine if have bytes to complete scan
 		if (requiredBytes <= availableBytes) {
 
-			// Have all bytes so create byte sequence (+1 continue after)
-			this.position = this.position + requiredBytes;
+			// Have all bytes so create byte sequence
+			// (Buffer size should always be less than max int)
+			this.position = (int) (this.position + requiredBytes);
 			return this.createByteSequence();
 		}
 

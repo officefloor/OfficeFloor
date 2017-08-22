@@ -28,7 +28,7 @@ import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.impl.NonMaterialisedHttpHeader;
+import net.officefloor.server.http.impl.MaterialisingHttpRequestHeaders;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.stream.impl.ByteSequence;
 
@@ -289,6 +289,7 @@ public class HttpRequestParser extends StreamBufferScanner {
 						} else {
 							// Create method from byte sequence
 							this.method = () -> new HttpMethod(methodSequence.toHttpString());
+							this.skipBytes(1); // move past space
 						}
 					}
 				}
@@ -312,8 +313,7 @@ public class HttpRequestParser extends StreamBufferScanner {
 
 		// Determine if common version
 		final int commonVersionLength = 8; // "HTTP/1.X"
-		final int commonVersionCrPosition = commonVersionLength + 1; // +CR
-		if (crPosition == commonVersionCrPosition) {
+		if (crPosition == commonVersionLength) {
 			long checkVersion = this.buildLong(() -> new Error("TODO implement"));
 			if (checkVersion == HTTP_1_1) {
 				this.version = HttpVersion.HTTP_1_1;
@@ -345,6 +345,9 @@ public class HttpRequestParser extends StreamBufferScanner {
 		// Load the headers
 		this.headers = new NonMaterialisedHeadersImpl(16);
 
+		// Capture content length
+		long contentLength = 0;
+
 		// Determine if end of headers
 		short checkCrLf = this.buildShort(() -> new Error("TODO implement"));
 		if (checkCrLf == -1) {
@@ -358,6 +361,10 @@ public class HttpRequestParser extends StreamBufferScanner {
 			if (headerName == null) {
 				return false; // require further bytes
 			}
+			this.skipBytes(1); // move past ':'
+
+			// Always trim header name for comparisons
+			headerName.trim();
 
 			// Scan in the header value
 			StreamBufferByteSequence headerValue = this.scanToTarget(CR_TARGET, this.metaData.maxTextLength,
@@ -368,6 +375,12 @@ public class HttpRequestParser extends StreamBufferScanner {
 
 			// Add the header
 			this.headers.addHttpHeader(headerName, headerValue);
+
+			// Determine if Content Length
+			if (MaterialisingHttpRequestHeaders.httpEqualsIgnoreCase("content-length", headerName)) {
+				// Obtain the content length
+				contentLength = headerValue.trim().toLong((digit) -> new Error("TODO implement"));
+			}
 
 			// Ensure next character is LF (after CR)
 			checkCrLf = this.buildShort(() -> new Error("TODO implement"));
@@ -386,12 +399,6 @@ public class HttpRequestParser extends StreamBufferScanner {
 			}
 		}
 		this.skipBytes(2); // CRLF
-
-		// Have the headers, so determine if content length
-		int contentLength = 0;
-		for (NonMaterialisedHttpHeader header : this.headers) {
-			// TODO search for Content-Length and obtain as long
-		}
 
 		// Build entity of content length
 		this.entity = this.scanBytes(contentLength);
