@@ -128,10 +128,15 @@ public class StreamBufferScanner {
 	 * Builds a long (8 bytes) from the {@link StreamBuffer} at current
 	 * position.
 	 * 
+	 * @param illegalValueExceptionFactory
+	 *            {@link Supplier} to create {@link Throwable} for illegal long
+	 *            value.
 	 * @return Long value, otherwise <code>-1</code> if not enough bytes in
 	 *         {@link StreamBuffer} to build a long.
+	 * @throws T
+	 *             If invalid value.
 	 */
-	public long buildLong() {
+	public <T extends Throwable> long buildLong(Supplier<T> illegalValueExceptionFactory) throws T {
 
 		// Determine if remaining content for long in current buffer
 		ByteBuffer data = this.currentBuffer.getPooledBuffer();
@@ -139,7 +144,18 @@ public class StreamBufferScanner {
 
 		// Determine if build immediately (typical case)
 		if ((this.previousBufferBytes == 0) && (remaining >= 8)) {
-			return data.getLong(this.position);
+
+			// Obtain the bytes directly from buffer
+			long returnBytes = data.getLong(this.position);
+
+			// Ensure legal value
+			if (returnBytes == -1) {
+				// Illegal value
+				throw illegalValueExceptionFactory.get();
+			}
+
+			// Return the short bytes
+			return returnBytes;
 		}
 
 		// Append to previous bytes
@@ -156,7 +172,7 @@ public class StreamBufferScanner {
 				int intBytes = data.getInt(position);
 				position += 4; // read the 4 bytes
 				this.pastBufferLong <<= 32; // move up 4 bytes
-				this.pastBufferLong += intBytes;
+				this.pastBufferLong += intBytes & 0xffffffff;
 				remaining -= 4; // 4 bytes
 				break;
 
@@ -166,7 +182,7 @@ public class StreamBufferScanner {
 				int shortBytes = data.getShort(position);
 				position += 2; // read the 2 bytes
 				this.pastBufferLong <<= 16; // move up 2 bytes
-				this.pastBufferLong += shortBytes;
+				this.pastBufferLong += shortBytes & 0xffff;
 				remaining -= 2; // 2 bytes
 				break;
 
@@ -174,7 +190,7 @@ public class StreamBufferScanner {
 				// Append the single byte
 				int singleByte = data.get(position);
 				this.pastBufferLong <<= 8; // move up a byte
-				this.pastBufferLong += singleByte;
+				this.pastBufferLong += singleByte & 0xff;
 				remaining = 0; // should always complete on last single byte
 				break;
 			}
@@ -186,6 +202,14 @@ public class StreamBufferScanner {
 			long returnBytes = this.pastBufferLong;
 			this.pastBufferLong = 0;
 			this.previousBufferBytes = 0;
+
+			// Ensure legal value
+			if (returnBytes == -1) {
+				// Illegal value
+				throw illegalValueExceptionFactory.get();
+			}
+
+			// Return the long bytes
 			return returnBytes;
 		}
 
@@ -196,11 +220,16 @@ public class StreamBufferScanner {
 	/**
 	 * Builds a short (2 bytes) from the {@link StreamBuffer} at current
 	 * position.
-	 * 
+	 *
+	 * @param illegalValueExceptionFactory
+	 *            {@link Supplier} to create {@link Throwable} for illegal short
+	 *            value.
 	 * @return Short value, otherwise <code>-1</code> if not enough bytes in
 	 *         {@link StreamBuffer} to build a short.
+	 * @throws T
+	 *             If invalid value.
 	 */
-	public short buildShort() {
+	public <T extends Throwable> short buildShort(Supplier<T> illegalValueExceptionFactory) throws T {
 
 		// Determine if remaining content for long in current buffer
 		ByteBuffer data = this.currentBuffer.getPooledBuffer();
@@ -208,7 +237,18 @@ public class StreamBufferScanner {
 
 		// Determine if build immediately (typical case)
 		if ((this.previousBufferBytes == 0) && (remaining >= 2)) {
-			return data.getShort(this.position);
+
+			// Obtain the bytes directly from buffer
+			short returnBytes = data.getShort(this.position);
+
+			// Ensure legal value
+			if (returnBytes == -1) {
+				// Illegal value
+				throw illegalValueExceptionFactory.get();
+			}
+
+			// Return the short bytes
+			return returnBytes;
 		}
 
 		// Append to previous bytes (could be buffers of 1 byte each)
@@ -217,17 +257,26 @@ public class StreamBufferScanner {
 		if (remaining == 1) {
 			// Append the single byte
 			// Will only ever be 1 byte appending, otherwise have short
-			int singleByte = data.get(position);
+			int singleByte = data.get(this.position);
 			this.pastBufferLong <<= 8; // move up a byte
-			this.pastBufferLong += singleByte;
+			this.pastBufferLong += singleByte & 0xff;
 		}
 
 		// Determine if have the short
 		if (this.previousBufferBytes == 2) {
+
 			// Have all bytes, so reset and return short
-			short returnBytes = (short) this.pastBufferLong;
+			short returnBytes = (short) (this.pastBufferLong & 0xffff);
 			this.pastBufferLong = 0;
 			this.previousBufferBytes = 0;
+
+			// Ensure legal value
+			if (returnBytes == -1) {
+				// Illegal value
+				throw illegalValueExceptionFactory.get();
+			}
+
+			// Return the short bytes
 			return returnBytes;
 		}
 

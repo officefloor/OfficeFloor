@@ -216,30 +216,58 @@ public class StreamBufferScannerTest extends OfficeFrameTestCase {
 		StreamBufferScanner scanner = createScanner(1, 1, 1, 1, 1, 1, 1, 1);
 
 		// Ensure can build first long
-		assertEquals("Incorrect immediate long", 0x0101010101010101L, scanner.buildLong());
-		assertEquals("Should be able build same long", 0x0101010101010101L, scanner.buildLong());
+		assertEquals("Incorrect immediate long", 0x0101010101010101L, scanner.buildLong(shouldNotOccur));
+		assertEquals("Should be able build same long", 0x0101010101010101L, scanner.buildLong(shouldNotOccur));
 
 		// Skip the long bytes
 		scanner.skipBytes(8);
 
 		// Ensure require further data for second long
-		assertEquals("Should require further bytes for another long", -1, scanner.buildLong());
+		assertEquals("Should require further bytes for another long", -1, scanner.buildLong(shouldNotOccur));
 
 		// Incrementally add further data (ensuring requires all data)
 		for (int i = 1; i <= 7; i++) {
 			scanner.appendStreamBuffer(createBuffer(2));
-			assertEquals("Only " + i + " bytes for long", -1, scanner.buildLong());
+			assertEquals("Only " + i + " bytes for long", -1, scanner.buildLong(shouldNotOccur));
 		}
 
 		// Add remaining byte to now build the long
 		scanner.appendStreamBuffer(createBuffer(2));
-		assertEquals("Incorrect built long", 0x0202020202020202L, scanner.buildLong());
+		assertEquals("Incorrect built long", 0x0202020202020202L, scanner.buildLong(shouldNotOccur));
 
 		// Ensure can scan in 7 bytes then 1 byte (test the bulk data reads)
 		scanner.appendStreamBuffer(createBuffer(3));
-		assertEquals("Only first byte", -1, scanner.buildLong());
+		assertEquals("Only first byte", -1, scanner.buildLong(shouldNotOccur));
 		scanner.appendStreamBuffer(createBuffer(3, 3, 3, 3, 3, 3, 3));
-		assertEquals("Should bulk read in bytes", 0x0303030303030303L, scanner.buildLong());
+		assertEquals("Should bulk read in bytes", 0x0303030303030303L, scanner.buildLong(shouldNotOccur));
+	}
+
+	/**
+	 * Ensure handle negative values in building long.
+	 */
+	public void testBuildLongWithNegativeValues() {
+		StreamBufferScanner scanner = createScanner(0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe);
+		assertEquals("Should provide long value", 0xfffffffffffffffeL, scanner.buildLong(shouldNotOccur));
+	}
+
+	/**
+	 * Series of 0xff bytes should not occur when building a long.
+	 */
+	public void testBuildIllegalLong() {
+
+		// Create the scanner with 0xff long value in bytes
+		StreamBufferScanner scanner = createScanner(0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff);
+		assertEquals("Not enough bytes", -1, scanner.buildLong(shouldNotOccur));
+
+		// Add the final byte for -1 long value
+		scanner.appendStreamBuffer(createBuffer(0xff));
+		final Exception exception = new Exception("TEST");
+		try {
+			long value = scanner.buildLong(() -> exception);
+			fail("Should not be successful");
+		} catch (Exception ex) {
+			assertSame("Should be same exception", exception, ex);
+		}
 	}
 
 	/**
@@ -251,22 +279,50 @@ public class StreamBufferScannerTest extends OfficeFrameTestCase {
 		StreamBufferScanner scanner = createScanner(1, 1);
 
 		// Ensure can build first short
-		assertEquals("Incorrect immediate short", 0x0101L, scanner.buildShort());
-		assertEquals("Should be able build same long", 0x0101L, scanner.buildShort());
+		assertEquals("Incorrect immediate short", 0x0101L, scanner.buildShort(shouldNotOccur));
+		assertEquals("Should be able build same long", 0x0101L, scanner.buildShort(shouldNotOccur));
 
 		// Skip the short bytes
 		scanner.skipBytes(2);
 
 		// Ensure require further data for second short
-		assertEquals("Should require further bytes for another short", -1, scanner.buildShort());
+		assertEquals("Should require further bytes for another short", -1, scanner.buildShort(shouldNotOccur));
 
 		// Incrementally add further data (ensuring requires all data)
 		scanner.appendStreamBuffer(createBuffer(2));
-		assertEquals("Only 1 byte for short", -1, scanner.buildShort());
+		assertEquals("Only 1 byte for short", -1, scanner.buildShort(shouldNotOccur));
 
 		// Add remaining byte to now build the short
 		scanner.appendStreamBuffer(createBuffer(2));
-		assertEquals("Incorrect built short", 0x0202L, scanner.buildShort());
+		assertEquals("Incorrect built short", 0x0202L, scanner.buildShort(shouldNotOccur));
+	}
+
+	/**
+	 * Ensure handle negative values in building short.
+	 */
+	public void testBuildShortWithNegativeValues() {
+		StreamBufferScanner scanner = createScanner(0xff, 0xfe);
+		assertEquals("Should provide short value", -2, scanner.buildShort(shouldNotOccur));
+	}
+
+	/**
+	 * Series of -1 bytes should not occur when building a short.
+	 */
+	public void testBuildIllegalShort() {
+
+		// Create the scanner with -1 short value in bytes
+		StreamBufferScanner scanner = createScanner(0xff);
+		assertEquals("Not enough bytes", -1, scanner.buildShort(shouldNotOccur));
+
+		// Add the final byte for -1 short value
+		scanner.appendStreamBuffer(createBuffer(0xff));
+		final Exception exception = new Exception("TEST");
+		try {
+			long value = scanner.buildShort(() -> exception);
+			fail("Should not be successful");
+		} catch (Exception ex) {
+			assertSame("Should be same exception", exception, ex);
+		}
 	}
 
 	/**
@@ -279,8 +335,8 @@ public class StreamBufferScannerTest extends OfficeFrameTestCase {
 
 		// Ensure can skip bytes
 		scanner.skipBytes(3);
-		assertEquals("Incorrect long", 0x0202020202020202L, scanner.buildLong());
-		assertEquals("Incorrect short", 0x0202, scanner.buildShort());
+		assertEquals("Incorrect long", 0x0202020202020202L, scanner.buildLong(shouldNotOccur));
+		assertEquals("Incorrect short", 0x0202, scanner.buildShort(shouldNotOccur));
 
 		// Ensure find target after skipping byte
 		StreamBufferByteSequence sequence = scanner.scanToTarget(new ScanTarget((byte) 1), 1000, shouldNotOccur);
@@ -290,7 +346,7 @@ public class StreamBufferScannerTest extends OfficeFrameTestCase {
 		}
 
 		// Ensure scan is exclusive
-		assertEquals("Should now obtain target and next byte", 0x0102, scanner.buildShort());
+		assertEquals("Should now obtain target and next byte", 0x0102, scanner.buildShort(shouldNotOccur));
 	}
 
 	/**
@@ -306,7 +362,7 @@ public class StreamBufferScannerTest extends OfficeFrameTestCase {
 		assertEquals("Should find byte", 2, scanner.peekToTarget(new ScanTarget((byte) 3)));
 
 		// Should not have progressed through buffer data
-		assertEquals("Should still be at start", 0x0102, scanner.buildShort());
+		assertEquals("Should still be at start", 0x0102, scanner.buildShort(shouldNotOccur));
 	}
 
 	/**

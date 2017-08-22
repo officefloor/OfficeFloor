@@ -305,7 +305,7 @@ public class HttpRequestParser extends StreamBufferScanner {
 		this.skipBytes(1); // skip the space
 
 		// Obtain the version
-		int crPosition = this.peekToTarget(CR_TARGET, this.metaData.maxTextLength, () -> new Error("TODO implement"));
+		int crPosition = this.peekToTarget(CR_TARGET);
 		if (crPosition == -1) {
 			return false; // require further bytes
 		}
