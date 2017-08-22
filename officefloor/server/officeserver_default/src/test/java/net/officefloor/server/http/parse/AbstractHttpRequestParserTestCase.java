@@ -17,9 +17,7 @@
  */
 package net.officefloor.server.http.parse;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.Iterator;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -34,7 +32,6 @@ import net.officefloor.server.http.HttpVersion.HttpVersionEnum;
 import net.officefloor.server.http.UsAsciiUtil;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeader;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
-import net.officefloor.server.http.mock.MockBufferPool;
 import net.officefloor.server.http.parse.HttpRequestParser.HttpRequestParserMetaData;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.impl.ByteSequence;
@@ -234,8 +231,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	 * Ensure able to delimit header name via CR.
 	 */
 	public void testToHeaderNameNoValue() {
-		this.doMethodTest("GET /path HTTP/1.1\nHeader\n", HttpMethod.GET, "/path", HttpVersion.HTTP_1_1, null, "Header",
-				"");
+		this.doMethodTest("GET /path HTTP/1.1\nHeader\n", HttpMethod.GET, "/path", HttpVersion.HTTP_1_1, null);
 	}
 
 	/**
@@ -259,32 +255,16 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	 */
 	public void testLeadingSpaceToHeader() {
 		this.doInvalidMethodTest("GET /path HTTP/1.1\n \t WhiteSpaceBeforeHeader: value\n", HttpStatus.BAD_REQUEST,
-				"White spacing before first HTTP header");
+				"White spacing before HTTP header name");
 	}
 
 	/**
 	 * Ensure able to have header value on multiple lines.
 	 */
 	public void testMultiplelineHeaderValue() {
-		this.doMethodTest("GET /path HTTP/1.1\nMultiline: Value One\n Value Two\n\n", HttpMethod.GET, "/path",
-				HttpVersion.HTTP_1_1, "", "Multiline", "Value One Value Two");
-	}
-
-	/**
-	 * Ensure able to parse header and entity separation containing white
-	 * spacing. This is to be more tolerant of the client.
-	 */
-	public void testHeaderToEntityHavingWhitespacing() {
-		this.doMethodTest("POST /path HTTP/1.1\nContent-Length: 4\n \t\nTEST", HttpMethod.POST, "/path",
-				HttpVersion.HTTP_1_1, "TEST", "Content-Length", "4");
-	}
-
-	/**
-	 * Ensure able to parse header separation containing white spacing to no
-	 * entity. This is to be more tolerant of the client.
-	 */
-	public void testWhitespacingInGetCompletion() {
-		this.doMethodTest("GET /path HTTP/1.1\n \t\n", HttpMethod.GET, "/path", HttpVersion.HTTP_1_1, "");
+		// As of RFC-7230, multi-line requests have been deprecated
+		this.doInvalidMethodTest("GET /path HTTP/1.1\nMultiline: Value One\n Value Two\n\n", HttpStatus.BAD_REQUEST,
+				"White spacing before HTTP header name");
 	}
 
 	/**
@@ -322,16 +302,8 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	 * Ensure able to have blank value for header.
 	 */
 	public void testHeaders_BlankValue() {
-		this.doMethodTest("GET /path HTTP/1.1\nHeader1:\nHeader2: \n\n", HttpMethod.GET, "/path", HttpVersion.HTTP_1_1,
-				"", "Header1", "", "Header2", "");
-	}
-
-	/**
-	 * Ensure able to have no value for header.
-	 */
-	public void testHeaders_NoValue() {
-		this.doMethodTest("GET /path HTTP/1.1\nHeader1\nHeader2 \n\n", HttpMethod.GET, "/path", HttpVersion.HTTP_1_1,
-				"", "Header1", "", "Header2", "");
+		this.doMethodTest("GET /path HTTP/1.1\nHeader1:\nHeader2: \t \n\n", HttpMethod.GET, "/path",
+				HttpVersion.HTTP_1_1, "", "Header1", "", "Header2", "");
 	}
 
 	/**
@@ -363,7 +335,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	 */
 	public void testPostWithNotAllOfEntityReceived() {
 		this.doMethodTest("POST /path HTTP/1.1\nContent-Length: 10\n\n12345", HttpMethod.POST, "/path",
-				HttpVersion.HTTP_1_1, "12345", "Content-Length", "10");
+				HttpVersion.HTTP_1_1, null, "Content-Length", "10");
 	}
 
 	/**
@@ -375,27 +347,11 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	}
 
 	/**
-	 * Validates complete method being too long.
-	 */
-	public void testTooLong_CompleteMethod() {
-		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 1, MAX_ENTITY_LENGTH));
-		this.doInvalidMethodTest("TooLarge ", HttpStatus.BAD_REQUEST, "Method too long");
-	}
-
-	/**
 	 * Validates partial request URI being too long.
 	 */
 	public void testTooLong_PartialRequestURI() {
 		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 3, MAX_ENTITY_LENGTH));
-		this.doInvalidMethodTest("GET /TooLong", HttpStatus.REQUEST_URI_TOO_LARGE, "Request-URI Too Long");
-	}
-
-	/**
-	 * Validates complete request URI being too long.
-	 */
-	public void testTooLong_CompleteRequestURI() {
-		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 3, MAX_ENTITY_LENGTH));
-		this.doInvalidMethodTest("GET /TooLong ", HttpStatus.REQUEST_URI_TOO_LARGE, "Request-URI Too Long");
+		this.doInvalidMethodTest("GET /TooLong", HttpStatus.REQUEST_URI_TOO_LARGE, "Request-URI Too Large");
 	}
 
 	/**
@@ -404,14 +360,6 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	public void testTooLong_PartialVersion() {
 		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 5, MAX_ENTITY_LENGTH));
 		this.doInvalidMethodTest("GET /path TooLong", HttpStatus.BAD_REQUEST, "Version too long");
-	}
-
-	/**
-	 * Validates complete version too long.
-	 */
-	public void testTooLong_CompleteVersion() {
-		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 5, MAX_ENTITY_LENGTH));
-		this.doInvalidMethodTest("GET /path TooLong\n", HttpStatus.BAD_REQUEST, "Version too long");
 	}
 
 	/**
@@ -424,29 +372,11 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	}
 
 	/**
-	 * Validates complete header name too long.
-	 */
-	public void testTooLong_CompleteHeaderName() {
-		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 8, MAX_ENTITY_LENGTH));
-		this.doInvalidMethodTest("GET /path HTTP/1.1\nTooLongHeaderName:", HttpStatus.BAD_REQUEST,
-				"Header name too long");
-	}
-
-	/**
 	 * Validates partial header value too long.
 	 */
 	public void testTooLong_PartialHeaderValue() {
 		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 8, MAX_ENTITY_LENGTH));
 		this.doInvalidMethodTest("GET /path HTTP/1.1\nName: HeaderValueTooLong", HttpStatus.BAD_REQUEST,
-				"Header value too long");
-	}
-
-	/**
-	 * Validates complete header value too long.
-	 */
-	public void testTooLong_CompleteHeaderValue() {
-		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 8, MAX_ENTITY_LENGTH));
-		this.doInvalidMethodTest("GET /path HTTP/1.1\nName: HeaderValueTooLong\n", HttpStatus.BAD_REQUEST,
 				"Header value too long");
 	}
 
@@ -476,22 +406,6 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	}
 
 	/**
-	 * Validates that Content-Length is required for POST.
-	 */
-	public void testNoContentLengthForPost() {
-		this.doInvalidMethodTest("POST /path HTTP/1.1\n\nTEST", HttpStatus.LENGTH_REQUIRED,
-				"Must provide Content-Length header for POST");
-	}
-
-	/**
-	 * Validates that Content-Length is required for PUT.
-	 */
-	public void testNoContentLengthForPut() {
-		this.doInvalidMethodTest("PUT /path HTTP/1.1\n\nTEST", HttpStatus.LENGTH_REQUIRED,
-				"Must provide Content-Length header for PUT");
-	}
-
-	/**
 	 * Ensures the Content-Length contains a value.
 	 */
 	public void testBlankContentLengthValue() {
@@ -517,7 +431,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 
 		// Parse second request
 		this.doMethodTest("PUT /two HTTP/1.0\nContent-Length: 7\nHeaderTwo: ValueTwo\n\nANOTHER", HttpMethod.PUT,
-				"/two", HttpVersion.HTTP_1_1, "ANOTHER", "Content-Length", "7", "HeaderTwo", "ValueTwo");
+				"/two", HttpVersion.HTTP_1_0, "ANOTHER", "Content-Length", "7", "HeaderTwo", "ValueTwo");
 	}
 
 	/**
@@ -533,9 +447,21 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	 * translation as need to distinguish '&amp;' characters appropriately. Plus
 	 * if not using URL then do not raise issue unnecessarily.
 	 */
-	public void testPercentageInvalidValue() {
-		this.doMethodTest("GET /invalid%WRONG HTTP/1.1\n\n", HttpMethod.GET, "/invalid%WRONG", HttpVersion.HTTP_1_1,
-				"");
+	public void testPercentageInvalidValue() throws HttpException {
+
+		// Parse the content (lazy decode, so successful)
+		byte[] data = UsAsciiUtil.convertToHttp("GET /invalid%WRONG HTTP/1.1\n\n");
+		this.parse(this.parser, data);
+
+		// Ensure issue in decoding the URI
+		try {
+			this.parser.getRequestURI().get();
+			fail("Should not be successful, when attempting to decode request URI");
+		} catch (HttpException ex) {
+			assertEquals("Incorrect status code", HttpStatus.BAD_REQUEST.getStatusCode(),
+					ex.getHttpStatus().getStatusCode());
+			assertEquals("Incorrect reason", "Invalid encoded character R for URI", ex.getMessage());
+		}
 	}
 
 	/**
@@ -553,19 +479,20 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 		for (int highBits = 0; highBits <= 0xF; highBits++) {
 			for (int lowBits = 0; lowBits <= 0xF; lowBits++) {
 
-				// Obtain the characters
+				// Obtain the encoded characters
 				String high = this.getCharacterValue(highBits);
 				String low = this.getCharacterValue(lowBits);
-				String escapedCharacter = "%" + high + low;
+				String encodedCharacters = "%" + high + low;
 
 				// Do not run for control characters
 				byte value = (byte) ((highBits << 4) | lowBits);
 				if ((value <= 31) || (value == 127)) {
 					continue; // control character
 				}
+				String decodedCharacter = Character.toString((char) value);
 
 				// Validate not parse escaped character
-				this.doMethodTest("GET /" + escapedCharacter + " HTTP/1.1\n\n", HttpMethod.GET, "/" + escapedCharacter,
+				this.doMethodTest("GET /" + encodedCharacters + " HTTP/1.1\n\n", HttpMethod.GET, "/" + decodedCharacter,
 						HttpVersion.HTTP_1_1, "");
 			}
 		}
@@ -588,37 +515,6 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 			throw new IllegalArgumentException("Invalid hexidecimal value " + hexidecimal);
 		}
 		return String.valueOf((char) charValue);
-	}
-
-	/**
-	 * Creates the data to parse.
-	 * 
-	 * @param httpRequest
-	 *            HTTP request content.
-	 * @param isRemoveCR
-	 *            Flag indicating to remove the CR (typically before the LF).
-	 *            This is to allow more tolerant handling of requests.
-	 * @return Data to parse.
-	 */
-	private byte[] createDataToParse(String httpRequest, boolean isRemoveCR) throws IOException {
-
-		// Create buffer stream with content
-		byte[] content = UsAsciiUtil.convertToHttp(httpRequest);
-		if (isRemoveCR) {
-			// Remove the CR characters (testing tolerance)
-			byte CR = UsAsciiUtil.convertToUsAscii('\r');
-			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-			for (byte value : content) {
-				if (value == CR) {
-					continue; // do not include CR
-				}
-				buffer.write(value);
-			}
-			content = buffer.toByteArray();
-		}
-
-		// Return the data
-		return content;
 	}
 
 	/**
@@ -750,10 +646,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 		try {
 
 			// Create data to parse
-			byte[] data = this.createDataToParse(httpRequest, false);
-			MockBufferPool pool = new MockBufferPool(() -> ByteBuffer.allocate(data.length));
-			StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
-			buffer.write(data);
+			byte[] data = UsAsciiUtil.convertToHttp(httpRequest);
 
 			// Parse the content
 			boolean isComplete = this.parse(this.parser, data);

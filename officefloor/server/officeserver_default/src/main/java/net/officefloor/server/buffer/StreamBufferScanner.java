@@ -285,6 +285,43 @@ public class StreamBufferScanner {
 	}
 
 	/**
+	 * Builds a byte from the {@link StreamBuffer} at current position.
+	 *
+	 * @param illegalValueExceptionFactory
+	 *            {@link Supplier} to create {@link Throwable} for illegal short
+	 *            value.
+	 * @return Byte value, otherwise <code>-1</code> if not enough bytes in
+	 *         {@link StreamBuffer} to build a byte.
+	 * @throws T
+	 *             If invalid value.
+	 */
+	public <T extends Throwable> byte buildByte(Supplier<T> illegalValueExceptionFactory) throws T {
+
+		// Determine if remaining content for byte in current buffer
+		ByteBuffer data = this.currentBuffer.getPooledBuffer();
+		int remaining = data.position() - this.position;
+
+		// Determine if build immediately (typical case)
+		if ((this.previousBufferBytes == 0) && (remaining >= 1)) {
+
+			// Obtain the bytes directly from buffer
+			byte returnBytes = data.get(this.position);
+
+			// Ensure legal value
+			if (returnBytes == -1) {
+				// Illegal value
+				throw illegalValueExceptionFactory.get();
+			}
+
+			// Return the short bytes
+			return returnBytes;
+		}
+
+		// As here, not enough bytes to build short
+		return -1;
+	}
+
+	/**
 	 * Skips forward the particular number of bytes in the current
 	 * {@link StreamBuffer}.
 	 * 
@@ -362,8 +399,9 @@ public class StreamBufferScanner {
 	 */
 	public StreamBufferByteSequence scanBytes(long numberOfBytes) {
 
-		// Ensure capture start
+		// Ensure capture start (and clear previous buffers)
 		if (this.start == -1) {
+			this.previousBuffers.clear();
 			this.start = this.position;
 		}
 
@@ -408,10 +446,14 @@ public class StreamBufferScanner {
 	public <T extends Throwable> StreamBufferByteSequence scanToTarget(ScanTarget target, int maxBytesLength,
 			Supplier<T> tooLongExceptionFactory) throws T {
 
-		// Ensure capture start
+		// Ensure capture start (and clear previous buffers)
 		if (this.start == -1) {
+			this.previousBuffers.clear();
 			this.start = this.position;
 		}
+
+		// Obtain the start position
+		int startPosition = this.position;
 
 		// Determine if remaining content for long in current buffer
 		ByteBuffer data = this.currentBuffer.getPooledBuffer();
@@ -448,6 +490,12 @@ public class StreamBufferScanner {
 
 			// Attempt at next position
 			this.position++;
+		}
+
+		// Add to previous bytes (and error if too long)
+		this.previousBufferBytes += (this.position - startPosition);
+		if (this.previousBufferBytes > maxBytesLength) {
+			throw tooLongExceptionFactory.get();
 		}
 
 		// As here, did not find byte in the buffer

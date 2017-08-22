@@ -18,11 +18,16 @@
 package net.officefloor.server.http;
 
 /**
+ * <p>
  * HTTP {@link Exception}.
+ * <p>
+ * This is a {@link RuntimeException} as typically this is handled directly by
+ * the {@link HttpServerImplementation} to send a {@link HttpResponse}. It is
+ * typically not for application logic to handle.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpException extends Exception {
+public class HttpException extends RuntimeException {
 
 	/**
 	 * No {@link HttpHeader} instances value.
@@ -51,6 +56,7 @@ public class HttpException extends Exception {
 	 *            {@link HttpStatus}.
 	 */
 	public HttpException(HttpStatus status) {
+		super(status.getStatusMessage());
 		this.status = status;
 		this.headers = NO_HEADERS;
 		this.entity = null;
@@ -67,6 +73,7 @@ public class HttpException extends Exception {
 	 *            Entity for the {@link HttpResponse}. May be <code>null</code>.
 	 */
 	public HttpException(HttpStatus status, HttpHeader[] headers, String entity) {
+		super(status.getStatusMessage());
 		this.status = status;
 		this.headers = (headers == null ? NO_HEADERS : headers);
 		this.entity = entity;
