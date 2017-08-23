@@ -58,7 +58,7 @@ public class StreamBufferByteSequenceTest extends OfficeFrameTestCase {
 	 */
 	public void testEmpty() {
 
-		// Add empty buffer
+		// Create with empty buffer
 		StreamBuffer<ByteBuffer> buffer = this.bufferPool.getPooledStreamBuffer();
 		StreamBufferByteSequence sequence = new StreamBufferByteSequence(buffer, 0, 0);
 		assertEquals("Should have no data", 0, sequence.length());
@@ -77,6 +77,37 @@ public class StreamBufferByteSequenceTest extends OfficeFrameTestCase {
 		} catch (ArrayIndexOutOfBoundsException ex) {
 			assertEquals("Incorrect exception", "Asking for byte 0 of ByteSequence with length 0 bytes",
 					ex.getMessage());
+		}
+	}
+
+	/**
+	 * Ensure no data initially and then append some data.
+	 */
+	public void testEmptyThenAppend() {
+
+		// Create with empty buffer
+		StreamBuffer<ByteBuffer> buffer = this.bufferPool.getPooledStreamBuffer();
+		StreamBufferByteSequence sequence = new StreamBufferByteSequence(buffer, 0, 0);
+		assertEquals("Should have no data", 0, sequence.length());
+
+		// Add no data then some data
+		final int DATA_LENGTH = 10;
+		for (int i = 0; i < DATA_LENGTH; i++) {
+
+			// Add empty buffer
+			StreamBuffer<ByteBuffer> emptyBuffer = this.bufferPool.getPooledStreamBuffer();
+			sequence.appendStreamBuffer(emptyBuffer, 0, 0);
+
+			// Add some data
+			StreamBuffer<ByteBuffer> dataBuffer = this.bufferPool.getPooledStreamBuffer();
+			dataBuffer.write((byte) (i + 1));
+			sequence.appendStreamBuffer(dataBuffer, 0, dataBuffer.getPooledBuffer().position());
+		}
+
+		// Ensure able to obtain the data
+		assertEquals("Incorrect number of bytes", DATA_LENGTH, sequence.length());
+		for (int i = 0; i < DATA_LENGTH; i++) {
+			assertEquals("Incorrect byte", i + 1, sequence.byteAt(i));
 		}
 	}
 

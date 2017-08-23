@@ -19,6 +19,7 @@ package net.officefloor.server.buffer;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -87,9 +88,9 @@ public class StreamBufferScanner {
 	private StreamBuffer<ByteBuffer> currentBuffer = null;
 
 	/**
-	 * Start position to read data for {@link StreamBufferByteSequence}.
+	 * Start position to read data from for the first {@link StreamBuffer}.
 	 */
-	private int start = -1;
+	private int start = 0;
 
 	/**
 	 * Position within the current {@link StreamBuffer}.
@@ -138,12 +139,6 @@ public class StreamBufferScanner {
 	 */
 	public <T extends Throwable> long buildLong(Supplier<T> illegalValueExceptionFactory) throws T {
 
-		// Ensure capture start (and clear previous buffers)
-		if (this.start == -1) {
-			this.previousBuffers.clear();
-			this.start = this.position;
-		}
-
 		// Determine if remaining content for long in current buffer
 		ByteBuffer data = this.currentBuffer.getPooledBuffer();
 		int remaining = data.position() - this.position;
@@ -165,8 +160,8 @@ public class StreamBufferScanner {
 		}
 
 		// Append to previous bytes
+		long returnLong = this.pastBufferLong;
 		remaining = Math.min(remaining, 8 - this.previousBufferBytes);
-		this.previousBufferBytes += remaining; // will be appending bytes
 		int position = this.position;
 		while (remaining != 0) {
 			switch (remaining) {
@@ -177,8 +172,8 @@ public class StreamBufferScanner {
 				// Take 4 bytes and append
 				int intBytes = data.getInt(position);
 				position += 4; // read the 4 bytes
-				this.pastBufferLong <<= 32; // move up 4 bytes
-				this.pastBufferLong += intBytes & 0xffffffff;
+				returnLong <<= 32; // move up 4 bytes
+				returnLong += intBytes & 0xffffffff;
 				remaining -= 4; // 4 bytes
 				break;
 
@@ -187,39 +182,38 @@ public class StreamBufferScanner {
 				// Take 2 bytes and append
 				int shortBytes = data.getShort(position);
 				position += 2; // read the 2 bytes
-				this.pastBufferLong <<= 16; // move up 2 bytes
-				this.pastBufferLong += shortBytes & 0xffff;
+				returnLong <<= 16; // move up 2 bytes
+				returnLong += shortBytes & 0xffff;
 				remaining -= 2; // 2 bytes
 				break;
 
 			case 1:
 				// Append the single byte
 				int singleByte = data.get(position);
-				this.pastBufferLong <<= 8; // move up a byte
-				this.pastBufferLong += singleByte & 0xff;
+				returnLong <<= 8; // move up a byte
+				returnLong += singleByte & 0xff;
 				remaining = 0; // should always complete on last single byte
 				break;
 			}
 		}
 
 		// Determine if have the long
-		if (this.previousBufferBytes == 8) {
-			// Have all bytes, so reset and return long
-			long returnBytes = this.pastBufferLong;
-			this.pastBufferLong = 0;
-			this.previousBufferBytes = 0;
-
-			// Ensure legal value
-			if (returnBytes == -1) {
+		if (remaining == 0) {
+			// Have all bytes, so ensure legal value
+			if (returnLong == -1) {
 				// Illegal value
 				throw illegalValueExceptionFactory.get();
 			}
 
 			// Return the long bytes
-			return returnBytes;
+			return returnLong;
 		}
 
-		// As here, not enough bytes to build long
+		// As here, not enough bytes to build long (so keep track)
+		this.pastBufferLong = returnLong;
+		this.previousBufferBytes += (8 - remaining);
+
+		// Not able to build long
 		return -1;
 	}
 
@@ -236,12 +230,6 @@ public class StreamBufferScanner {
 	 *             If invalid value.
 	 */
 	public <T extends Throwable> short buildShort(Supplier<T> illegalValueExceptionFactory) throws T {
-
-		// Ensure capture start (and clear previous buffers)
-		if (this.start == -1) {
-			this.previousBuffers.clear();
-			this.start = this.position;
-		}
 
 		// Determine if remaining content for long in current buffer
 		ByteBuffer data = this.currentBuffer.getPooledBuffer();
@@ -275,12 +263,14 @@ public class StreamBufferScanner {
 		}
 
 		// Determine if have the short
-		if (this.previousBufferBytes == 2) {
+		if (this.previousBufferBytes >= 2) {
 
-			// Have all bytes, so reset and return short
-			short returnBytes = (short) (this.pastBufferLong & 0xffff);
-			this.pastBufferLong = 0;
-			this.previousBufferBytes = 0;
+			// Obtain the just the first two bytes
+			long bytes = this.pastBufferLong;
+			bytes >>= (this.previousBufferBytes - 2) * 8;
+
+			// Have all bytes, so obtain short
+			short returnBytes = (short) (bytes & 0xffff);
 
 			// Ensure legal value
 			if (returnBytes == -1) {
@@ -309,12 +299,6 @@ public class StreamBufferScanner {
 	 */
 	public <T extends Throwable> byte buildByte(Supplier<T> illegalValueExceptionFactory) throws T {
 
-		// Ensure capture start (and clear previous buffers)
-		if (this.start == -1) {
-			this.previousBuffers.clear();
-			this.start = this.position;
-		}
-
 		// Determine if remaining content for byte in current buffer
 		ByteBuffer data = this.currentBuffer.getPooledBuffer();
 		int remaining = data.position() - this.position;
@@ -337,19 +321,6 @@ public class StreamBufferScanner {
 
 		// As here, not enough bytes to build short
 		return -1;
-	}
-
-	/**
-	 * Skips forward the particular number of bytes in the current
-	 * {@link StreamBuffer}.
-	 * 
-	 * @param numberOfBytes
-	 *            Number of bytes to skip.
-	 */
-	public void skipBytes(int numberOfBytes) {
-
-		// Skip forward the bytes
-		this.position += numberOfBytes;
 	}
 
 	/**
@@ -417,12 +388,6 @@ public class StreamBufferScanner {
 	 */
 	public StreamBufferByteSequence scanBytes(long numberOfBytes) {
 
-		// Ensure capture start (and clear previous buffers)
-		if (this.start == -1) {
-			this.previousBuffers.clear();
-			this.start = this.position;
-		}
-
 		// Determine remaining bytes required
 		long requiredBytes = numberOfBytes - this.previousBufferBytes;
 
@@ -464,10 +429,20 @@ public class StreamBufferScanner {
 	public <T extends Throwable> StreamBufferByteSequence scanToTarget(ScanTarget target, int maxBytesLength,
 			Supplier<T> tooLongExceptionFactory) throws T {
 
-		// Ensure capture start (and clear previous buffers)
-		if (this.start == -1) {
-			this.previousBuffers.clear();
-			this.start = this.position;
+		// Determine if previous bytes
+		if (this.previousBufferBytes != 0) {
+			// Previous bytes from short/long, so use first
+			int previousBytesIndex = indexOf(this.pastBufferLong, target);
+			if (previousBytesIndex != -1) {
+				// Obtain number of bytes (may not be full, as possibly short)
+				int numberOfPreviousBytes = previousBytesIndex - (8 - this.previousBufferBytes);
+
+				// Remove previous bytes (as now consumed)
+				this.removePastBufferLongBytes(previousBytesIndex);
+
+				// Return content to index
+				return this.createByteSequence(numberOfPreviousBytes);
+			}
 		}
 
 		// Obtain the start position
@@ -500,7 +475,7 @@ public class StreamBufferScanner {
 		while (this.position < data.position()) {
 
 			// At worse, 7 bytes so just check each
-			byte value = data.get(position);
+			byte value = data.get(this.position);
 			if (value == target.value) {
 				// Found the byte
 				return this.createByteSequence();
@@ -518,6 +493,70 @@ public class StreamBufferScanner {
 
 		// As here, did not find byte in the buffer
 		return null;
+	}
+
+	private void removePastBufferLongBytes(int numberOfBytes) {
+		// Remove previous bytes (as now consumed)
+		switch (numberOfBytes) {
+		case 8:
+			// Remove all bytes
+			this.pastBufferLong = 0;
+			this.previousBufferBytes = 0;
+			break;
+		case 7:
+			// Leave only last byte
+			this.pastBufferLong &= 0xff;
+			this.previousBufferBytes = 1;
+			break;
+		case 6:
+			// Leave two bytes
+			this.pastBufferLong &= 0xffff;
+			this.previousBufferBytes = 2;
+			break;
+		case 5:
+			// Leave 3 bytes
+			this.pastBufferLong &= 0xffffff;
+			this.previousBufferBytes = 3;
+			break;
+		case 4:
+			// Leave 4 bytes
+			this.pastBufferLong &= 0xffffffff;
+			this.previousBufferBytes = 4;
+			break;
+		case 3:
+			// Leave 5 bytes
+			this.pastBufferLong &= 0xffffffffffL;
+			this.previousBufferBytes = 5;
+			break;
+		case 2:
+			// Leave 6 bytes
+			this.pastBufferLong &= 0xffffffffffffL;
+			this.previousBufferBytes = 6;
+			break;
+		case 1:
+			// Leave 7 bytes
+			this.pastBufferLong &= 0xffffffffffffffL;
+			this.previousBufferBytes = 7;
+			break;
+		// 0 leave all bytes
+		}
+	}
+
+	/**
+	 * Skips forward the particular number of bytes in the current
+	 * {@link StreamBuffer}.
+	 * 
+	 * @param numberOfBytes
+	 *            Number of bytes to skip.
+	 */
+	public void skipBytes(int numberOfBytes) {
+
+		// Remove possible previous buffer bytes
+		int pastBufferBytes = Math.min(numberOfBytes, this.previousBufferBytes);
+		this.removePastBufferLongBytes(pastBufferBytes);
+
+		// Consume number of bytes
+		this.createByteSequence(numberOfBytes);
 	}
 
 	/**
@@ -554,15 +593,104 @@ public class StreamBufferScanner {
 			}
 
 			// Add in the current buffer
-			length = this.currentBuffer.getPooledBuffer().position();
+			length = this.position;
 			sequence.appendStreamBuffer(this.currentBuffer, 0, length);
 
 			// Reset previous buffers, as now in byte sequence
 			this.previousBuffers.clear();
 		}
 
-		// Reset
-		this.start = -1;
+		// Reset to current position to continue
+		this.start = this.position;
+		this.previousBuffers.clear();
+		this.previousBufferBytes = 0;
+		this.pastBufferLong = 0;
+
+		// Return the sequence
+		return sequence;
+	}
+
+	/**
+	 * <p>
+	 * Creates a {@link StreamBufferByteSequence} from current position to the
+	 * specified number of bytes.
+	 * <p>
+	 * This will also reset to after the number of bytes.
+	 * 
+	 * @param numberOfBytes
+	 *            Number of bytes for the {@link StreamBufferByteSequence}.
+	 * @return {@link StreamBufferByteSequence} with the specified number of
+	 *         bytes.
+	 */
+	private StreamBufferByteSequence createByteSequence(int numberOfBytes) {
+
+		// Create the byte sequence
+		StreamBufferByteSequence sequence;
+		if (this.previousBuffers.size() > 0) {
+
+			// Have past buffers, so include data from them
+			StreamBuffer<ByteBuffer> firstBuffer = this.previousBuffers.get(0);
+			int length = firstBuffer.getPooledBuffer().position() - this.start;
+
+			// Determine if all data on first buffer
+			if (numberOfBytes <= length) {
+				// All content from first buffer (adjust for remaining)
+				sequence = new StreamBufferByteSequence(firstBuffer, this.start, numberOfBytes);
+				this.start += numberOfBytes; // remove content for next
+				return sequence;
+
+			}
+
+			// Consumes all of first buffer and requires further data
+			sequence = new StreamBufferByteSequence(firstBuffer, this.start, length);
+			numberOfBytes -= length;
+
+			// Remove the first buffer
+			Iterator<StreamBuffer<ByteBuffer>> iterator = this.previousBuffers.iterator();
+			iterator.next(); // move to first buffer
+			iterator.remove(); // remove first buffer
+
+			// Load in remaining data
+			while (iterator.hasNext()) {
+
+				// Obtain next buffer
+				StreamBuffer<ByteBuffer> buffer = iterator.next();
+
+				// Obtain the number of bytes in next buffer
+				length = buffer.getPooledBuffer().position();
+
+				// Determine if buffer completes the required data
+				if (numberOfBytes <= length) {
+					// Add the sequence (with appropriate bytes)
+					sequence.appendStreamBuffer(buffer, 0, numberOfBytes);
+
+					// Set start to appropriate position
+					this.start = numberOfBytes;
+
+					// Return the completed sequence
+					return sequence;
+				}
+
+				// Include the entire buffer (and remove as included)
+				sequence.appendStreamBuffer(buffer, 0, length);
+				iterator.remove();
+
+				// Obtain remaining bytes
+				numberOfBytes -= length;
+			}
+
+			// As here, require data from current buffer
+			sequence.appendStreamBuffer(this.currentBuffer, 0, numberOfBytes);
+			this.position = numberOfBytes;
+
+		} else {
+			// Only current buffer
+			sequence = new StreamBufferByteSequence(this.currentBuffer, this.start, numberOfBytes);
+			this.position = numberOfBytes;
+		}
+
+		// Continue next sequence after these bytes
+		this.start = numberOfBytes;
 
 		// Return the sequence
 		return sequence;

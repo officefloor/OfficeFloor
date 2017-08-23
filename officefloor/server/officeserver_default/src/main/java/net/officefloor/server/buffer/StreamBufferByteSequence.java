@@ -683,7 +683,7 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 	public byte byteAt(int index) {
 
 		// Ensure within range
-		if ((index < 0) || (index > this.sequenceLength)) {
+		if ((index < 0) || (index >= this.sequenceLength)) {
 			throw new ArrayIndexOutOfBoundsException("Asking for byte " + index + " of "
 					+ ByteSequence.class.getSimpleName() + " with length " + this.sequenceLength + " bytes");
 		}
@@ -723,6 +723,13 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 				}
 
 			}
+		}
+		
+		// Ensure data in segment (also handles empty segments)
+		while (this.currentSegment.length <= this.currentSegmentPosition) {
+			// Move to next segment
+			this.currentSegment = this.currentSegment.next;
+			this.currentSegmentPosition = 0;
 		}
 
 		// Return the byte at the current position
