@@ -484,6 +484,10 @@ public class StreamBufferScanner {
 
 		// Determine if previous bytes
 		if (this.bufferLongByteCount != 0) {
+			
+			// TODO REMOVE
+			String bufferLongHex = Long.toHexString(this.bufferLong);
+			
 			// Previous bytes from short/long, so use first
 			int previousBytesIndex = indexOf(this.bufferLong, target);
 			if (previousBytesIndex != -1) {
@@ -496,6 +500,10 @@ public class StreamBufferScanner {
 				// Return content to index
 				return this.createByteSequence(numberOfPreviousBytes);
 			}
+			
+			// As here, did not find in buffer (so clear)
+			this.bufferLong = 0;
+			this.bufferLongByteCount = 0;
 		}
 
 		// Obtain the scan start position
@@ -559,22 +567,22 @@ public class StreamBufferScanner {
 			break;
 		case 7:
 			// Leave only last byte
-			this.bufferLong &= 0xff;
+			this.bufferLong &= 0xffL;
 			this.bufferLongByteCount = 1;
 			break;
 		case 6:
 			// Leave two bytes
-			this.bufferLong &= 0xffff;
+			this.bufferLong &= 0xffffL;
 			this.bufferLongByteCount = 2;
 			break;
 		case 5:
 			// Leave 3 bytes
-			this.bufferLong &= 0xffffff;
+			this.bufferLong &= 0xffffffL;
 			this.bufferLongByteCount = 3;
 			break;
 		case 4:
 			// Leave 4 bytes
-			this.bufferLong &= 0xffffffff;
+			this.bufferLong &= 0xffffffffL;
 			this.bufferLongByteCount = 4;
 			break;
 		case 3:
@@ -606,8 +614,10 @@ public class StreamBufferScanner {
 	public void skipBytes(int numberOfBytes) {
 
 		// Remove possible previous buffer bytes
-		int pastBufferBytes = Math.min(numberOfBytes, this.bufferLongByteCount);
-		this.removePastBufferLongBytes(pastBufferBytes);
+		if (this.bufferLongByteCount > 0) {
+			int pastBufferBytes = Math.min(numberOfBytes, this.bufferLongByteCount);
+			this.removePastBufferLongBytes(pastBufferBytes);
+		}
 
 		// Consume number of bytes
 		this.createByteSequence(numberOfBytes);
@@ -743,7 +753,7 @@ public class StreamBufferScanner {
 
 			// As here, require data from current buffer
 			sequence.appendStreamBuffer(this.currentBuffer, 0, numberOfBytes);
-			
+
 			// Set position for next scan
 			this.currentBufferStartPosition = numberOfBytes;
 			this.currentBufferScanStart = this.currentBufferStartPosition;

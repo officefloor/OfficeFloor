@@ -343,6 +343,72 @@ public class StreamBufferScannerTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can build a long and then scan within the long buffer to find the
+	 * bytes.
+	 */
+	public void testBuildLongThenScanIncludesBytes() {
+
+		// Progressively add bytes
+		StreamBufferScanner scanner = createScanner(1);
+		for (int i = 1; i < 8; i++) {
+			assertEquals("Not enough bytes", -1, scanner.buildLong(shouldNotOccur));
+			scanner.appendStreamBuffer(createBuffer(i + 1));
+		}
+
+		// Ensure able to build the long
+		long bytes = scanner.buildLong(shouldNotOccur);
+		assertEquals("Incorrect long", 0x0102030405060708L, bytes);
+
+		// Skip 4 bytes (e.g. "GET ")
+		scanner.skipBytes(4);
+
+		// Ensure can get bytes from buffer long
+		StreamBufferByteSequence sequence = scanner.scanToTarget(new ScanTarget((byte) 6), 1000, shouldNotOccur);
+		assertEquals("Incorrect number of bytes", 1, sequence.length());
+		assertEquals("Incorrect byte", 5, sequence.byteAt(0));
+	}
+
+	/**
+	 * Ensure can build a long and then skip some of the bytes and include bytes
+	 * in scan.
+	 */
+	public void testBuildLongThenSkipThenScanIncludesBufferLongBytes() {
+
+		// Progressively add bytes
+		StreamBufferScanner scanner = createScanner(1);
+		for (int i = 1; i < 8; i++) {
+			assertEquals("Not enough bytes", -1, scanner.buildLong(shouldNotOccur));
+			scanner.appendStreamBuffer(createBuffer(i + 1));
+		}
+
+		// Ensure able to build the long
+		long bytes = scanner.buildLong(shouldNotOccur);
+		assertEquals("Incorrect long", 0x0102030405060708L, bytes);
+
+		// Skip 4 bytes (e.g. "GET ")
+		scanner.skipBytes(4);
+
+		// Should not find the 4 value (as skipped past)
+		ScanTarget target = new ScanTarget((byte) 4);
+		assertNull("Should not find skipped value", scanner.scanToTarget(target, 1000, shouldNotOccur));
+
+		// Add skipped value (should find with all remaining long values)
+		scanner.appendStreamBuffer(createBuffer(4, 5));
+		StreamBufferByteSequence sequence = scanner.scanToTarget(target, 1000, shouldNotOccur);
+		assertEquals("Incorrect number of bytes", 4, sequence.length());
+		for (int i = 0; i < 4; i++) {
+			assertEquals("Incorrect byte", i + 5, sequence.byteAt(i));
+		}
+
+		// Ensure continue to find further scan targets
+		sequence = scanner.scanToTarget(target, 1000, shouldNotOccur);
+		assertEquals("Should find again", 0, sequence.length());
+		sequence = scanner.scanToTarget(new ScanTarget((byte) 5), 1000, shouldNotOccur);
+		assertEquals("Should find target", 1, sequence.length());
+		assertEquals("Incorrect value", 4, sequence.byteAt(0));
+	}
+
+	/**
 	 * Ensure can build short.
 	 */
 	public void testBuildShort() {
