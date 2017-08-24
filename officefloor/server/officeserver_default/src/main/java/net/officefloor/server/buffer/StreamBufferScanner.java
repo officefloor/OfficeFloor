@@ -484,10 +484,7 @@ public class StreamBufferScanner {
 
 		// Determine if previous bytes
 		if (this.bufferLongByteCount != 0) {
-			
-			// TODO REMOVE
-			String bufferLongHex = Long.toHexString(this.bufferLong);
-			
+
 			// Previous bytes from short/long, so use first
 			int previousBytesIndex = indexOf(this.bufferLong, target);
 			if (previousBytesIndex != -1) {
@@ -495,26 +492,22 @@ public class StreamBufferScanner {
 				int numberOfPreviousBytes = previousBytesIndex - (8 - this.bufferLongByteCount);
 
 				// Remove previous bytes (as now consumed)
-				this.removePastBufferLongBytes(previousBytesIndex);
+				this.removeBufferLongBytes(previousBytesIndex);
 
 				// Return content to index
 				return this.createByteSequence(numberOfPreviousBytes);
 			}
-			
+
 			// As here, did not find in buffer (so clear)
 			this.bufferLong = 0;
 			this.bufferLongByteCount = 0;
 		}
 
-		// Obtain the scan start position
-		int startPosition = this.currentBufferScanStart;
-
 		// Determine if remaining content for long in current buffer
 		ByteBuffer data = this.currentBuffer.getPooledBuffer();
-		int lastPosition = data.position();
 
 		// Keep reading until end of current buffer
-		int lastFullReadPosition = lastPosition - 7;
+		int lastFullReadPosition = data.position() - 7;
 		while (this.currentBufferScanStart < lastFullReadPosition) {
 
 			// Read in the long (8 bytes)
@@ -548,8 +541,9 @@ public class StreamBufferScanner {
 		}
 
 		// Add to previous bytes (and error if too long)
-		long scannedBytes = (lastPosition - startPosition) + this.previousBuffersByteCount;
-		if (scannedBytes > maxBytesLength) {
+		long scannedBytes = (this.currentBufferScanStart - this.currentBufferStartPosition)
+				+ this.previousBuffersByteCount;
+		if (scannedBytes >= maxBytesLength) {
 			throw tooLongExceptionFactory.get();
 		}
 
@@ -557,7 +551,40 @@ public class StreamBufferScanner {
 		return null;
 	}
 
-	private void removePastBufferLongBytes(int numberOfBytes) {
+	/**
+	 * Skips forward the particular number of bytes in the current
+	 * {@link StreamBuffer}.
+	 * 
+	 * @param numberOfBytes
+	 *            Number of bytes to skip.
+	 */
+	public void skipBytes(int numberOfBytes) {
+
+		// Remove possible previous buffer bytes
+		if (this.bufferLongByteCount > 0) {
+			int pastBufferBytes;
+			if (numberOfBytes > this.bufferLongByteCount) {
+				// Remove all bytes in long buffer
+				pastBufferBytes = 8;
+			} else {
+				// Obtain index of remaining byte
+				pastBufferBytes = 8 - (this.bufferLongByteCount - numberOfBytes);
+			}
+			this.removeBufferLongBytes(pastBufferBytes);
+		}
+
+		// Consume number of bytes
+		this.createByteSequence(numberOfBytes);
+	}
+
+	/**
+	 * Removes past bytes from the long buffer.
+	 * 
+	 * @param numberOfBytes
+	 *            Number of bytes to remove. Value is absolute and does not take
+	 *            into account number of bytes in the buffer.
+	 */
+	private void removeBufferLongBytes(int numberOfBytes) {
 		// Remove previous bytes (as now consumed)
 		switch (numberOfBytes) {
 		case 8:
@@ -602,25 +629,6 @@ public class StreamBufferScanner {
 			break;
 		// 0 leave all bytes
 		}
-	}
-
-	/**
-	 * Skips forward the particular number of bytes in the current
-	 * {@link StreamBuffer}.
-	 * 
-	 * @param numberOfBytes
-	 *            Number of bytes to skip.
-	 */
-	public void skipBytes(int numberOfBytes) {
-
-		// Remove possible previous buffer bytes
-		if (this.bufferLongByteCount > 0) {
-			int pastBufferBytes = Math.min(numberOfBytes, this.bufferLongByteCount);
-			this.removePastBufferLongBytes(pastBufferBytes);
-		}
-
-		// Consume number of bytes
-		this.createByteSequence(numberOfBytes);
 	}
 
 	/**
@@ -775,7 +783,7 @@ public class StreamBufferScanner {
 	 * <p>
 	 * Note: the algorithm used does not handle negative byte values. However,
 	 * the values (ASCII characters) searched for in HTTP parsing are all
-	 * positive (7 bits of the byte).
+	 * positive (lower 7 bits of the byte).
 	 * 
 	 * @param bytes
 	 *            Long of 8 bytes to check for the value.
@@ -793,14 +801,15 @@ public class StreamBufferScanner {
 		 * Need to find if any byte is zero. As ASCII is 7 bits, can use the top
 		 * bit for overflow to find if any byte is zero. In other words, add
 		 * 0x7f (01111111) to each byte and if top bit is 1, then not the byte
-		 * of interest (as byte is 0 from previous XOR).
+		 * of interest (as byte of interest is 0 from previous XOR).
 		 * 
 		 * Note: top bit value of 0 may only mean potential matching byte, as
 		 * could have UTF-8 encoded characters. However, the separation
 		 * characters for HTTP parsing are all 7 bit values. Therefore, will
-		 * need to check for false positives (and null 0). However, most HTTP
+		 * need to check for false positives (e.g. null 0). However, most HTTP
 		 * content is 7 bits so win efficiency in scanning past bytes not of
-		 * interest.
+		 * interest (i.e. can potentially skip past 8 bytes in 4 operations -
+		 * where looping over the 8 bytes is 8 operations minimum).
 		 */
 		long overflowNonZero = xorWithMask + 0x7f7f7f7f7f7f7f7fL;
 		long topBitCheck = overflowNonZero & 0x8080808080808080L;

@@ -279,6 +279,40 @@ public class StreamBufferScannerTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure progressive scan to large.
+	 */
+	public void testProgressiveScanToLarge() {
+
+		// Create buffer to progressively write
+		final int MAX_LENGTH = 10;
+		MockBufferPool pool = new MockBufferPool(() -> ByteBuffer.allocate(MAX_LENGTH));
+		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
+
+		// Create the scanner
+		StreamBufferScanner scanner = new StreamBufferScanner();
+
+		// Details for testing
+		ScanTarget target = new ScanTarget((byte) MAX_LENGTH);
+
+		// Progressively load data ensuring no issue of too long
+		for (int i = 0; i < (MAX_LENGTH - 1); i++) {
+			buffer.write((byte) i);
+			scanner.appendStreamBuffer(buffer);
+			assertNull("Should not find target for " + i, scanner.scanToTarget(target, MAX_LENGTH, shouldNotOccur));
+		}
+
+		// Tip over max length (+1 so not find value)
+		buffer.write((byte) (MAX_LENGTH + 1));
+		final Exception exception = new Exception("TEST");
+		try {
+			scanner.scanToTarget(target, MAX_LENGTH, () -> exception);
+			fail("Should not be successful");
+		} catch (Exception ex) {
+			assertSame("Incorrect exception", exception, ex);
+		}
+	}
+
+	/**
 	 * Ensure can build long.
 	 */
 	public void testBuildLong() {
@@ -461,6 +495,76 @@ public class StreamBufferScannerTest extends OfficeFrameTestCase {
 		} catch (Exception ex) {
 			assertSame("Should be same exception", exception, ex);
 		}
+	}
+
+	/**
+	 * Ensure can build a short and then scan within the long buffer to find the
+	 * bytes.
+	 */
+	public void testBuildShortThenScanIncludesBytes() {
+
+		// Progressively add bytes
+		StreamBufferScanner scanner = createScanner(1);
+		for (int i = 1; i < 2; i++) {
+			assertEquals("Not enough bytes", -1, scanner.buildShort(shouldNotOccur));
+			scanner.appendStreamBuffer(createBuffer(i + 1));
+		}
+
+		// Ensure able to build the short
+		short bytes = scanner.buildShort(shouldNotOccur);
+		assertEquals("Incorrect short", 0x0102, bytes);
+
+		// Add byte after short to find
+		scanner.appendStreamBuffer(createBuffer(3));
+
+		// Ensure can get bytes from buffer long
+		StreamBufferByteSequence sequence = scanner.scanToTarget(new ScanTarget((byte) 3), 1000, shouldNotOccur);
+		assertEquals("Should find in the buffer", 2, sequence.length());
+		for (int i = 0; i < 2; i++) {
+			assertEquals("Incorrect bytes", i + 1, sequence.byteAt(i));
+		}
+
+		// Ensure no long find bytes from long buffer
+		sequence = scanner.scanToTarget(new ScanTarget((byte) 2), 1000, shouldNotOccur);
+		assertNull("Should not find byte", sequence);
+	}
+
+	/**
+	 * Ensure can build a long and then skip some of the bytes and include bytes
+	 * in scan.
+	 */
+	public void testBuildShortThenSkipThenScanIncludesBufferLongBytes() {
+
+		// Progressively add bytes
+		StreamBufferScanner scanner = createScanner(1);
+		for (int i = 1; i < 2; i++) {
+			assertEquals("Not enough bytes", -1, scanner.buildLong(shouldNotOccur));
+			scanner.appendStreamBuffer(createBuffer(i + 1));
+		}
+
+		// Ensure able to build the short
+		short bytes = scanner.buildShort(shouldNotOccur);
+		assertEquals("Incorrect short", 0x0102, bytes);
+
+		// Skip 1 bytes (e.g. " ")
+		scanner.skipBytes(1);
+
+		// Should not find the 4 value (as skipped past)
+		ScanTarget target = new ScanTarget((byte) 1);
+		assertNull("Should not find skipped value", scanner.scanToTarget(target, 1000, shouldNotOccur));
+
+		// Add skipped value (should find with all remaining long values)
+		scanner.appendStreamBuffer(createBuffer(1, 2));
+		StreamBufferByteSequence sequence = scanner.scanToTarget(target, 1000, shouldNotOccur);
+		assertEquals("Incorrect number of bytes", 1, sequence.length());
+		assertEquals("Incorrect byte", 2, sequence.byteAt(0));
+
+		// Ensure continue to find further scan targets
+		sequence = scanner.scanToTarget(target, 1000, shouldNotOccur);
+		assertEquals("Should find again", 0, sequence.length());
+		sequence = scanner.scanToTarget(new ScanTarget((byte) 2), 1000, shouldNotOccur);
+		assertEquals("Should find target", 1, sequence.length());
+		assertEquals("Incorrect value", 1, sequence.byteAt(0));
 	}
 
 	/**

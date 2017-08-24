@@ -358,7 +358,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	 * Validates partial version too long.
 	 */
 	public void testTooLong_PartialVersion() {
-		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 5, MAX_ENTITY_LENGTH));
+		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 6, MAX_ENTITY_LENGTH));
 		this.doInvalidMethodTest("GET /path TooLong", HttpStatus.BAD_REQUEST, "Version too long");
 	}
 
@@ -366,7 +366,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	 * Validates partial header name too long.
 	 */
 	public void testTooLong_PartialHeaderName() {
-		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 8, MAX_ENTITY_LENGTH));
+		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 9, MAX_ENTITY_LENGTH));
 		this.doInvalidMethodTest("GET /path HTTP/1.1\nTooLongHeaderName", HttpStatus.BAD_REQUEST,
 				"Header name too long");
 	}
@@ -375,7 +375,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	 * Validates partial header value too long.
 	 */
 	public void testTooLong_PartialHeaderValue() {
-		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 8, MAX_ENTITY_LENGTH));
+		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 9, MAX_ENTITY_LENGTH));
 		this.doInvalidMethodTest("GET /path HTTP/1.1\nName: HeaderValueTooLong", HttpStatus.BAD_REQUEST,
 				"Header value too long");
 	}

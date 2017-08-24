@@ -112,6 +112,8 @@ public class HttpRequestParser extends StreamBufferScanner {
 	private static final ScanTarget CR_TARGET = new ScanTarget(httpByte("\r"));
 	private static final ScanTarget COLON_TARGET = new ScanTarget(httpByte(":"));
 
+	private static final int COMMON_HTTP_VERSION_LENGTH = "HTTP/1.X".length();
+
 	private static NonMaterialisedHeadersImpl NO_HEADERS = new NonMaterialisedHeadersImpl(0);
 
 	/**
@@ -197,6 +199,20 @@ public class HttpRequestParser extends StreamBufferScanner {
 	}
 
 	/**
+	 * State of parsing the {@link HttpRequest}.
+	 */
+	private static enum RequestParseState {
+		NEW_REQUEST, LEADING_CRLF, METHOD, CUSTOM_METHOD, REQUEST_URI, VERSION, CUSTOM_VERSION, REQUEST_LINE_EOLN, HEADERS, PARSE_HEADERS, ENTITY
+	}
+
+	/**
+	 * State of parsing the {@link HttpHeader}.
+	 */
+	private static enum HeaderParseState {
+		LEADING_SPACE_CHECK, HEADER_NAME, HEADER_VALUE, HEADER_EOLN, END_OF_HEADERS
+	}
+
+	/**
 	 * {@link HttpRequestParserMetaData}.
 	 */
 	private final HttpRequestParserMetaData metaData;
@@ -254,20 +270,6 @@ public class HttpRequestParser extends StreamBufferScanner {
 	 */
 	public HttpRequestParser(HttpRequestParserMetaData metaData) {
 		this.metaData = metaData;
-	}
-
-	/**
-	 * State of parsing the {@link HttpRequest}.
-	 */
-	private static enum RequestParseState {
-		NEW_REQUEST, LEADING_CRLF, METHOD, CUSTOM_METHOD, REQUEST_URI, VERSION, CUSTOM_VERSION, REQUEST_LINE_EOLN, HEADERS, PARSE_HEADERS, ENTITY
-	}
-
-	/**
-	 * State of parsing the {@link HttpHeader}.
-	 */
-	private static enum HeaderParseState {
-		LEADING_SPACE_CHECK, HEADER_NAME, HEADER_VALUE, HEADER_EOLN, END_OF_HEADERS
 	}
 
 	/**
@@ -420,19 +422,18 @@ public class HttpRequestParser extends StreamBufferScanner {
 			// Determine if common version
 			// (can not build long, as long may extend past end of request)
 			int crPosition = this.peekToTarget(CR_TARGET);
-			final int commonVersionLength = 8; // "HTTP/1.X"
-			if (crPosition == commonVersionLength) {
+			if (crPosition == COMMON_HTTP_VERSION_LENGTH) {
 
 				// Just the right length for common version
 				// (able to build long, as have the data from peek)
 				long checkVersion = this.buildLong(() -> new Error("TODO implement"));
 				if (checkVersion == HTTP_1_1) {
 					this.version = HttpVersion.HTTP_1_1;
-					this.skipBytes(commonVersionLength);
+					this.skipBytes(COMMON_HTTP_VERSION_LENGTH);
 
 				} else if (checkVersion == HTTP_1_0) {
 					this.version = HttpVersion.HTTP_1_0;
-					this.skipBytes(commonVersionLength);
+					this.skipBytes(COMMON_HTTP_VERSION_LENGTH);
 				}
 			}
 
@@ -448,9 +449,28 @@ public class HttpRequestParser extends StreamBufferScanner {
 					return false; // require further bytes
 				}
 
-				// Create custom version
-				String httpVersionText = versionSequence.toHttpString();
-				this.version = new HttpVersion(httpVersionText);
+				// Determine if potentially common version
+				// (buffer boundaries may mean peek did not find it)
+				if (versionSequence.length() == COMMON_HTTP_VERSION_LENGTH) {
+					// Attempt to determine if common version
+					long checkVersion = 0;
+					for (int i = 0; i < COMMON_HTTP_VERSION_LENGTH; i++) {
+						checkVersion <<= 8; // move up 8 bytes
+						checkVersion |= versionSequence.byteAt(i);
+					}
+					if (checkVersion == HTTP_1_1) {
+						this.version = HttpVersion.HTTP_1_1;
+					} else if (checkVersion == HTTP_1_0) {
+						this.version = HttpVersion.HTTP_1_0;
+					}
+				}
+
+				// Determine if custom version
+				if (this.version == null) {
+					// Create custom version
+					String httpVersionText = versionSequence.toHttpString();
+					this.version = new HttpVersion(httpVersionText);
+				}
 			}
 
 			this.stateRequest = RequestParseState.REQUEST_LINE_EOLN;
@@ -597,7 +617,7 @@ public class HttpRequestParser extends StreamBufferScanner {
 		case ENTITY:
 
 			// Build entity of content length
-			this.entity = this.scanBytes(contentLength);
+			this.entity = this.scanBytes(this.contentLength);
 			if (this.entity == null) {
 				return false; // require further bytes
 			}
