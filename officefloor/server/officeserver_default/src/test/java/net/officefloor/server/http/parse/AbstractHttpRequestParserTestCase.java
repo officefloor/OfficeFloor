@@ -549,7 +549,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 		// Validate the request URI
 		if (expectedPath == null) {
 			// Should not have request URI
-			assertNull("Reqeust URI not yet parsed", this.parser.getRequestURI());
+			assertNull("Request URI not yet parsed", this.parser.getRequestURI());
 		} else {
 			assertEquals("Incorrect request URI", expectedPath, this.parser.getRequestURI().get());
 		}
