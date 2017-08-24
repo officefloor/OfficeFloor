@@ -104,7 +104,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	 * Ensure able to handle simple request
 	 */
 	public void testSimpleFullRequest() {
-		this.doMethodTest("GET / HTTP/1.1\nContent-Length: 4\n\nTEST", HttpMethod.GET, "/", HttpVersion.HTTP_1_1,
+		this.doMethodTest("POST / HTTP/1.1\nContent-Length: 4\n\nTEST", HttpMethod.POST, "/", HttpVersion.HTTP_1_1,
 				"TEST", "Content-Length", "4");
 	}
 
