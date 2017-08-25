@@ -244,12 +244,9 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 		// Trim the left side
 		StreamSegment segment = this.head;
 		int segmentTrimOffset = 0;
-		byte character = segment.buffer.getPooledBuffer().get(segment.offset + segmentTrimOffset);
-		while ((character == HTTP_SPACE) || (character == HTTP_TAB)) {
-
-			// Space so trim off the content
-			this.sequenceLength--;
-			segmentTrimOffset++;
+		boolean isWhiteSpace;
+		byte character;
+		do {
 
 			// Determine if trimmed out buffer
 			if (segmentTrimOffset >= segment.length) {
@@ -262,9 +259,18 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 				}
 			}
 
-			// Obtain the next charcter
+			// Obtain the character
 			character = segment.buffer.getPooledBuffer().get(segment.offset + segmentTrimOffset);
-		}
+
+			// Determine if white space
+			isWhiteSpace = ((character == HTTP_SPACE) || (character == HTTP_TAB));
+			if (isWhiteSpace) {
+				// Trim off the character
+				this.sequenceLength--;
+				segmentTrimOffset++;
+			}
+
+		} while (isWhiteSpace);
 		segment.offset += segmentTrimOffset;
 		segment.length -= segmentTrimOffset;
 
@@ -724,7 +730,7 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 
 			}
 		}
-		
+
 		// Ensure data in segment (also handles empty segments)
 		while (this.currentSegment.length <= this.currentSegmentPosition) {
 			// Move to next segment

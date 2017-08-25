@@ -39,10 +39,29 @@ public class HttpParsingPerformanceTest extends OfficeFrameTestCase {
 	private static final int ITERATIONS = 1000000;
 
 	/**
+	 * Tests a simple GET.
+	 */
+	public void testSimpleGet() {
+		this.doPerformance(1, "GET / HTTP/1.1\n\n");
+	}
+
+	/**
 	 * Tests a simple POST.
 	 */
 	public void testSimplePost() {
 		this.doPerformance(1, "POST / HTTP/1.1\nContent-Length: 4\n\nTEST");
+	}
+
+	/**
+	 * More realistic real world GET request
+	 */
+	public void testRealWorldGet() {
+		this.doPerformance(1,
+				"GET /plaintext HTTP/1.1\n" + "Host: server\n"
+						+ "User-Agent: Mozilla/5.0 (X11; Linux x86_64) Gecko/20130501 Firefox/30.0 AppleWebKit/600.00 Chrome/30.0.0000.0 Trident/10.0 Safari/600.00\n"
+						+ "Cookie: uid=12345678901234567890; __utma=1.1234567890.1234567890.1234567890.1234567890.12; wd=2560x1600\n"
+						+ "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\n"
+						+ "Accept-Language: en-US,en;q=0.5\n" + "Connection: keep-alive" + "\n\n");
 	}
 
 	/**
@@ -65,7 +84,7 @@ public class HttpParsingPerformanceTest extends OfficeFrameTestCase {
 		HttpRequestParser parser = new HttpRequestParser(new HttpRequestParserMetaData(100, 100, 100));
 
 		// Run warm up
-		for (int i = 0; i < 1000000; i++) {
+		for (int i = 0; i < (ITERATIONS / 100); i++) {
 			parser.appendStreamBuffer(buffer);
 			for (int j = 0; j < requestCount; j++) {
 				if (!parser.parse()) {
@@ -89,10 +108,13 @@ public class HttpParsingPerformanceTest extends OfficeFrameTestCase {
 		long endTime = System.currentTimeMillis();
 
 		// Log time
+		final String format = "%1$20s";
 		long numberOfRequests = ITERATIONS * requestCount;
-		long runTime = endTime - startTime;
-		System.out.println(
-				this.getName() + " completed " + numberOfRequests + " requests in " + runTime + " milliseconds");
+		long runTime = Math.max(1, endTime - startTime);
+		long requestsPerSecond = (long) (((double) numberOfRequests) / ((double) (runTime) / (double) 1000.0));
+		System.out.println(String.format(format, this.getName()) + String.format(format, numberOfRequests)
+				+ " requests " + String.format(format, runTime) + " milliseconds "
+				+ String.format(format, requestsPerSecond) + " / second");
 	}
 
 }

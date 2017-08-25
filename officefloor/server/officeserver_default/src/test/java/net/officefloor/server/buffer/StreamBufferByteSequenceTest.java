@@ -244,6 +244,30 @@ public class StreamBufferByteSequenceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can trim an empty {@link StreamBuffer}.
+	 */
+	public void testTrimEmptyBuffer() throws IOException {
+		MockBufferPool pool = new MockBufferPool(() -> ByteBuffer.allocate(0));
+		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
+		StreamBufferByteSequence sequence = new StreamBufferByteSequence(buffer, 0, 0);
+		sequence.trim();
+		assertEquals("Incorrect HTTP content", "", sequence.toHttpString());
+	}
+
+	/**
+	 * Ensure can trim a segmented {@link StreamBuffer}.
+	 */
+	public void testTrimSegmentedBuffer() throws IOException {
+		StreamBufferByteSequence sequence = this.writeContentToSequence("               T                 ",
+				ServerHttpConnection.HTTP_CHARSET);
+		MockBufferPool pool = new MockBufferPool(() -> ByteBuffer.allocate(0));
+		sequence.appendStreamBuffer(pool.getPooledStreamBuffer(), 0, 0);
+		sequence.trim();
+		assertEquals("Incorrect HTTP content", "T", sequence.toHttpString());
+
+	}
+
+	/**
 	 * Ensure can remove quotes for HTTP {@link String}.
 	 */
 	public void testRemoveQuotesForHttpString() throws IOException {

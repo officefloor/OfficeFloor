@@ -574,7 +574,61 @@ public class StreamBufferScanner {
 		}
 
 		// Consume number of bytes
-		this.createByteSequence(numberOfBytes);
+		if (this.previousBuffers.size() == 0) {
+			// Only current buffer
+			this.currentBufferStartPosition += numberOfBytes;
+			this.currentBufferScanStart = this.currentBufferStartPosition;
+
+		} else {
+			// Have past buffers, so include data from them
+			StreamBuffer<ByteBuffer> firstBuffer = this.previousBuffers.get(0);
+			int length = firstBuffer.getPooledBuffer().position() - this.firstPreviousBufferStart;
+
+			// Determine if all data on first previous buffer
+			if (numberOfBytes <= length) {
+				// All content from first buffer (adjust for remaining)
+				this.firstPreviousBufferStart += numberOfBytes;
+				return;
+			}
+
+			// Consumes all of first buffer and requires further data
+			numberOfBytes -= length;
+
+			// Create iterator and remove the first buffer (as already included)
+			Iterator<StreamBuffer<ByteBuffer>> iterator = this.previousBuffers.iterator();
+			iterator.next(); // move to first buffer
+			iterator.remove(); // remove first buffer
+
+			// Load in remaining data
+			while (iterator.hasNext()) {
+
+				// Obtain next buffer
+				StreamBuffer<ByteBuffer> buffer = iterator.next();
+
+				// Obtain the number of bytes in next buffer
+				length = buffer.getPooledBuffer().position();
+
+				// Determine if buffer completes the required data
+				if (numberOfBytes <= length) {
+					// Set start to appropriate position
+					this.firstPreviousBufferStart = numberOfBytes;
+					return;
+				}
+
+				// Skip the entire buffer
+				iterator.remove();
+
+				// Obtain remaining bytes
+				numberOfBytes -= length;
+			}
+
+			// All previous buffers removed
+			this.firstPreviousBufferStart = 0; // no previous buffer
+
+			// Set position for next scan
+			this.currentBufferStartPosition = numberOfBytes;
+			this.currentBufferScanStart = this.currentBufferStartPosition;
+		}
 	}
 
 	/**
