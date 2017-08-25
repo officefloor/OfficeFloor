@@ -17,6 +17,8 @@
  */
 package net.officefloor.server.http.parse;
 
+import java.nio.charset.CoderResult;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import net.officefloor.server.buffer.StreamBufferByteSequence;
@@ -115,6 +117,26 @@ public class HttpRequestParser extends StreamBufferScanner {
 	private static final int COMMON_HTTP_VERSION_LENGTH = "HTTP/1.X".length();
 
 	private static NonMaterialisedHeadersImpl NO_HEADERS = new NonMaterialisedHeadersImpl(0);
+
+	private static final Supplier<HttpException> exceptionInvalidCharacter = () -> new HttpException(
+			new HttpStatus(HttpStatus.BAD_REQUEST.getStatusCode(), "Invalid HTTP character"));
+	private static final Supplier<HttpException> exceptionMethodTooLong = () -> new HttpException(
+			new HttpStatus(HttpStatus.BAD_REQUEST.getStatusCode(), "Method too long"));
+	private static final Supplier<HttpException> exceptionRequestUriTooLong = () -> new HttpException(
+			HttpStatus.REQUEST_URI_TOO_LARGE);
+	private static final Function<String, HttpException> exceptionDecodeUri = (result) -> new HttpException(
+			new HttpStatus(HttpStatus.BAD_REQUEST.getStatusCode(), result + " for URI"));
+	private static final Function<CoderResult, HttpException> exceptionUriString = (message) -> new HttpException(
+			new HttpStatus(HttpStatus.BAD_REQUEST.getStatusCode(), "Can not decode URI to UTF-8 text"));
+	private static final Supplier<HttpException> exceptionVersionTooLong = () -> new HttpException(
+			new HttpStatus(HttpStatus.BAD_REQUEST.getStatusCode(), "Version too long"));
+	private static final Supplier<HttpException> exceptionHeaderNameTooLong = () -> new HttpException(
+			new HttpStatus(HttpStatus.BAD_REQUEST.getStatusCode(), "Header name too long"));
+	private static final Supplier<HttpException> exceptionHeaderValueTooLong = () -> new HttpException(
+			new HttpStatus(HttpStatus.BAD_REQUEST.getStatusCode(), "Header value too long"));
+	private static final Function<Character, HttpException> exceptionInvalidContentLengthValue = (
+			digit) -> new HttpException(new HttpStatus(HttpStatus.LENGTH_REQUIRED.getStatusCode(),
+					"Content-Length header value must be an integer"));
 
 	/**
 	 * Obtains the HTTP byte for the {@link String} value.
@@ -301,7 +323,7 @@ public class HttpRequestParser extends StreamBufferScanner {
 		case LEADING_CRLF:
 
 			// Determine if separating CRLF
-			checkCrLf = this.buildShort(() -> new Error("TODO implement"));
+			checkCrLf = this.buildShort(exceptionInvalidCharacter);
 			if (checkCrLf == -1) {
 				return false; // require further bytes
 			}
@@ -311,7 +333,7 @@ public class HttpRequestParser extends StreamBufferScanner {
 				this.skipBytes(2);
 
 				// Read in the next short
-				checkCrLf = this.buildShort(() -> new Error("TODO implement"));
+				checkCrLf = this.buildShort(exceptionInvalidCharacter);
 				if (checkCrLf == -1) {
 					return false; // require further bytes
 				}
@@ -332,7 +354,7 @@ public class HttpRequestParser extends StreamBufferScanner {
 			 * known methods are less than 8 bytes. Furthermore, all requests
 			 * are at least 9 bytes ("M / V\n\r\n\r" = 9).
 			 */
-			long bytes = this.buildLong(() -> new Error("TODO implement"));
+			long bytes = this.buildLong(exceptionInvalidCharacter);
 			if (bytes == -1) {
 				return false; // require further bytes
 			}
@@ -387,8 +409,7 @@ public class HttpRequestParser extends StreamBufferScanner {
 			if (this.method == null) {
 				// Custom method, so find the space
 				final StreamBufferByteSequence methodSequence = this.scanToTarget(SPACE_TARGET,
-						this.metaData.maxTextLength, () -> new HttpException(
-								new HttpStatus(HttpStatus.BAD_REQUEST.getStatusCode(), "Method too long")));
+						this.metaData.maxTextLength, exceptionMethodTooLong);
 				if (methodSequence == null) {
 					return false; // require further bytes
 				}
@@ -403,17 +424,14 @@ public class HttpRequestParser extends StreamBufferScanner {
 
 			// Obtain the request URI
 			final StreamBufferByteSequence uriSequence = this.scanToTarget(SPACE_TARGET, this.metaData.maxTextLength,
-					() -> new HttpException(HttpStatus.REQUEST_URI_TOO_LARGE));
+					exceptionRequestUriTooLong);
 			if (uriSequence == null) {
 				return false; // require further bytes
 			}
 			if (uriSequence.length() <= 0) {
 				throw new HttpException(new HttpStatus(HttpStatus.BAD_REQUEST.getStatusCode(), "No request URI"));
 			}
-			this.requestUri = () -> uriSequence
-					.decodeUri((result) -> new HttpException(
-							new HttpStatus(HttpStatus.BAD_REQUEST.getStatusCode(), result + " for URI")))
-					.toUriString((message) -> new Error());
+			this.requestUri = () -> uriSequence.decodeUri(exceptionDecodeUri).toUriString(exceptionUriString);
 			this.skipBytes(1); // skip the space
 
 			this.stateRequest = RequestParseState.VERSION;
@@ -426,7 +444,7 @@ public class HttpRequestParser extends StreamBufferScanner {
 
 				// Just the right length for common version
 				// (able to build long, as have the data from peek)
-				long checkVersion = this.buildLong(() -> new Error("TODO implement"));
+				long checkVersion = this.buildLong(exceptionInvalidCharacter);
 				if (checkVersion == HTTP_1_1) {
 					this.version = HttpVersion.HTTP_1_1;
 					this.skipBytes(COMMON_HTTP_VERSION_LENGTH);
@@ -443,8 +461,7 @@ public class HttpRequestParser extends StreamBufferScanner {
 			// If no common version, create custom version
 			if (this.version == null) {
 				StreamBufferByteSequence versionSequence = this.scanToTarget(CR_TARGET, this.metaData.maxTextLength,
-						() -> new HttpException(
-								new HttpStatus(HttpStatus.BAD_REQUEST.getStatusCode(), "Version too long")));
+						exceptionVersionTooLong);
 				if (versionSequence == null) {
 					return false; // require further bytes
 				}
@@ -477,7 +494,7 @@ public class HttpRequestParser extends StreamBufferScanner {
 		case REQUEST_LINE_EOLN:
 
 			// Ensure line delimited by CRLF
-			short eoln = this.buildShort(() -> new Error("TODO implement"));
+			short eoln = this.buildShort(exceptionInvalidCharacter);
 			if (eoln == -1) {
 				return false; // require further bytes
 			}
@@ -490,7 +507,7 @@ public class HttpRequestParser extends StreamBufferScanner {
 		case HEADERS:
 
 			// Determine if end of headers
-			checkCrLf = this.buildShort(() -> new Error("TODO implement"));
+			checkCrLf = this.buildShort(exceptionInvalidCharacter);
 			if (checkCrLf == -1) {
 				return false; // require further bytes
 			}
@@ -515,7 +532,7 @@ public class HttpRequestParser extends StreamBufferScanner {
 				case LEADING_SPACE_CHECK:
 
 					// Ensure no leading spacing before header name
-					byte headerNameFirstCharacter = this.buildByte(() -> new Error("TODO implement"));
+					byte headerNameFirstCharacter = this.buildByte(exceptionInvalidCharacter);
 					if (headerNameFirstCharacter == -1) {
 						return false; // require further bytes
 					}
@@ -535,12 +552,14 @@ public class HttpRequestParser extends StreamBufferScanner {
 
 					// Scan in the header name
 					this.headerName = this.scanToTarget(COLON_TARGET, this.metaData.maxTextLength,
-							() -> new HttpException(
-									new HttpStatus(HttpStatus.BAD_REQUEST.getStatusCode(), "Header name too long")));
+							exceptionHeaderNameTooLong);
 					if (this.headerName == null) {
 						return false; // require further bytes
 					}
 					this.skipBytes(1); // move past ':'
+
+					// Trim possible trailing space to name
+					this.headerName.trim();
 
 					// Ensure have header name
 					if (this.headerName.length() == 0) {
@@ -548,16 +567,12 @@ public class HttpRequestParser extends StreamBufferScanner {
 								new HttpStatus(HttpStatus.BAD_REQUEST.getStatusCode(), "Missing header name"));
 					}
 
-					// Trim possible trailing space to name
-					this.headerName.trim();
-
 					this.stateHeader = HeaderParseState.HEADER_VALUE;
 				case HEADER_VALUE:
 
 					// Scan in the header value
 					StreamBufferByteSequence headerValue = this.scanToTarget(CR_TARGET, this.metaData.maxTextLength,
-							() -> new HttpException(
-									new HttpStatus(HttpStatus.BAD_REQUEST.getStatusCode(), "Header value too long")));
+							exceptionHeaderValueTooLong);
 					if (headerValue == null) {
 						return false; // require further bytes
 					}
@@ -573,9 +588,7 @@ public class HttpRequestParser extends StreamBufferScanner {
 							throw new HttpException(new HttpStatus(HttpStatus.LENGTH_REQUIRED.getStatusCode(),
 									"Content-Length header value must be an integer"));
 						}
-						this.contentLength = headerValue.toLong(
-								(digit) -> new HttpException(new HttpStatus(HttpStatus.LENGTH_REQUIRED.getStatusCode(),
-										"Content-Length header value must be an integer")));
+						this.contentLength = headerValue.toLong(exceptionInvalidContentLengthValue);
 
 						// Determine if content length too long
 						if (this.contentLength > this.metaData.maxEntityLength) {
@@ -589,7 +602,7 @@ public class HttpRequestParser extends StreamBufferScanner {
 				case HEADER_EOLN:
 
 					// Ensure next character is LF (after CR)
-					checkCrLf = this.buildShort(() -> new Error("TODO implement"));
+					checkCrLf = this.buildShort(exceptionInvalidCharacter);
 					if (checkCrLf == -1) {
 						return false; // require further bytes
 					}
@@ -602,7 +615,7 @@ public class HttpRequestParser extends StreamBufferScanner {
 				case END_OF_HEADERS:
 
 					// Obtain the potential CRLF
-					checkCrLf = this.buildShort(() -> new Error("TODO implement"));
+					checkCrLf = this.buildShort(exceptionInvalidCharacter);
 					if (checkCrLf == -1) {
 						return false; // require further bytes
 					}
