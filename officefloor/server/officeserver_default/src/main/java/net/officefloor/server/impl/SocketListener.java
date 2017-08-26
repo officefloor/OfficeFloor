@@ -24,6 +24,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedSelectorException;
+import java.nio.channels.Pipe;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -124,7 +125,7 @@ public class SocketListener extends StaticManagedFunction<None, SocketListener.S
 	 * @param bufferPool
 	 *            {@link BufferPool}.
 	 */
-	public SocketListener(SocketManager socketManager, BufferPool<ByteBuffer> bufferPool) {
+	public SocketListener(SocketManager socketManager, BufferPool<ByteBuffer> bufferPool) throws IOException {
 		this.socketManager = socketManager;
 		this.bufferPool = bufferPool;
 	}

@@ -653,7 +653,7 @@ public class StreamBufferScanner {
 	private void removeBufferLongBytes(int numberOfBytes) {
 
 		// Remove possible previous buffer bytes
-		if (this.bufferLongByteCount > 0) {
+		if (this.bufferLongByteCount != 0) {
 			int pastBufferBytes;
 			if (numberOfBytes > this.bufferLongByteCount) {
 				// Remove all bytes in long buffer

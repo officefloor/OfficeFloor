@@ -21,14 +21,12 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.channels.SocketChannel;
 
-import net.officefloor.server.stream.WriteBufferReceiver;
-
 /**
  * {@link SocketChannel} connection.
  * 
  * @author Daniel Sagenschneider
  */
-public interface Connection extends WriteBufferReceiver {
+public interface Connection {
 
 	/**
 	 * Indicates if the connection is over a secure channel (e.g. utilising

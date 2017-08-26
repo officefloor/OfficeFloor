@@ -18,10 +18,8 @@
 package net.officefloor.server.ssl.protocol;
 
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 
 import net.officefloor.server.http.protocol.Connection;
-import net.officefloor.server.http.protocol.WriteBuffer;
 
 /**
  * {@link Connection} providing SSL wrapping of another {@link Connection}.
@@ -59,11 +57,6 @@ public class SslConnectionImpl implements Connection {
 	 */
 
 	@Override
-	public Object getWriteLock() {
-		return this.wrappedConnection.getWriteLock();
-	}
-
-	@Override
 	public InetSocketAddress getLocalAddress() {
 		return this.wrappedConnection.getLocalAddress();
 	}
@@ -77,32 +70,6 @@ public class SslConnectionImpl implements Connection {
 	public boolean isSecure() {
 		// SSL connection is secure
 		return true;
-	}
-
-	@Override
-	public WriteBuffer createWriteBuffer(byte[] data, int length) {
-		return this.wrappedConnection.createWriteBuffer(data, length);
-	}
-
-	@Override
-	public WriteBuffer createWriteBuffer(ByteBuffer buffer) {
-		return this.wrappedConnection.createWriteBuffer(buffer);
-	}
-
-	@Override
-	public void writeData(WriteBuffer[] data) {
-		this.connectionHandler.writeData(data);
-	}
-
-	@Override
-	public void close() {
-		this.connectionHandler.triggerClose();
-	}
-
-	@Override
-	public boolean isClosed() {
-		return (this.connectionHandler.isClosing())
-				|| (this.wrappedConnection.isClosed());
 	}
 
 }

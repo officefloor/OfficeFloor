@@ -118,7 +118,7 @@ public class SslCommunicationProtocol implements CommunicationProtocolSource, Co
 		ManagedObjectSourceContext<Indexed> mosContext = configurationContext.getManagedObjectSourceContext();
 
 		// Obtain the send buffer size
-		this.sendBufferSize = protocolContext.getSendBufferSize();
+//		this.sendBufferSize = protocolContext.getSendBufferSize();
 
 		// Create the communication protocol to wrap
 		this.wrappedCommunicationProtocol = this.wrappedCommunicationProtocolSource

@@ -19,10 +19,8 @@ package net.officefloor.server.ssl.protocol;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.net.ssl.SSLEngine;
@@ -37,17 +35,15 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.server.ConnectionHandler;
 import net.officefloor.server.http.protocol.CommunicationProtocol;
 import net.officefloor.server.http.protocol.Connection;
-import net.officefloor.server.http.protocol.ReadContext;
-import net.officefloor.server.http.protocol.WriteBuffer;
-import net.officefloor.server.http.protocol.WriteBufferEnum;
 import net.officefloor.server.ssl.SslFunctionExecutor;
+import net.officefloor.server.stream.StreamBuffer;
 
 /**
  * SSL {@link ConnectionHandler}.
  * 
  * @author Daniel Sagenschneider
  */
-public class SslConnectionHandler implements ConnectionHandler, SslFunctionExecutor, ReadContext {
+public class SslConnectionHandler implements ConnectionHandler, SslFunctionExecutor {
 
 	/**
 	 * {@link Logger}.
@@ -78,11 +74,6 @@ public class SslConnectionHandler implements ConnectionHandler, SslFunctionExecu
 	 * {@link Queue} of read data to be processed.
 	 */
 	private final Queue<byte[]> readData = new LinkedList<byte[]>();
-
-	/**
-	 * {@link Queue} of write data to be processed.
-	 */
-	private final Queue<WriteBuffer> writeData = new LinkedList<WriteBuffer>();
 
 	/**
 	 * {@link ManagedObjectExecuteContext}.
@@ -152,11 +143,11 @@ public class SslConnectionHandler implements ConnectionHandler, SslFunctionExecu
 		try {
 
 			// Do not process if failure or connection closed
-			if ((this.failure != null) || (this.connection.isClosed())) {
-				this.readData.clear();
-				this.writeData.clear();
-				return;
-			}
+//			if ((this.failure != null) || (this.connection.isClosed())) {
+//				this.readData.clear();
+//				this.writeData.clear();
+//				return;
+//			}
 
 			// Do not process if a task is being run
 			if (this.sslRunnable != null) {
@@ -198,7 +189,7 @@ public class SslConnectionHandler implements ConnectionHandler, SslFunctionExecu
 				case NOT_HANDSHAKING:
 					// Flag data to process
 					isInputData = (this.readData.size() > 0);
-					isOutputData = ((this.writeData.size() > 0) || this.isClosing);
+//					isOutputData = ((this.writeData.size() > 0) || this.isClosing);
 					if ((!isInputData) && (!isOutputData)) {
 						return; // no data to process
 					}
@@ -262,9 +253,9 @@ public class SslConnectionHandler implements ConnectionHandler, SslFunctionExecu
 						// Handle the unwrapped data
 						int bytesProduced = sslEngineResult.bytesProduced();
 						if (bytesProduced > 0) {
-							this.readContextData = new byte[bytesProduced];
-							System.arraycopy(tempBytes, 0, this.readContextData, 0, bytesProduced);
-							this.wrappedConnectionHandler.handleRead(this);
+//							this.readContextData = new byte[bytesProduced];
+//							System.arraycopy(tempBytes, 0, this.readContextData, 0, bytesProduced);
+//							this.wrappedConnectionHandler.handleRead(this);
 						}
 						break;
 					case CLOSED:
@@ -279,7 +270,7 @@ public class SslConnectionHandler implements ConnectionHandler, SslFunctionExecu
 							break;
 						case NOT_HANDSHAKING:
 							// Close handshake complete, close connection
-							this.connection.close();
+//							this.connection.close();
 							return; // closed, no further interaction
 						default:
 							throw new IllegalStateException("Unknown status " + status);
@@ -290,139 +281,139 @@ public class SslConnectionHandler implements ConnectionHandler, SslFunctionExecu
 					}
 				}
 
-				if (isOutputData) {
-					// Handle outputting data
-
-					// Obtain temporary buffer to receive cipher text
-					int packetBufferSize = session.getPacketBufferSize();
-					byte[] tempBytes = new byte[packetBufferSize];
-					ByteBuffer tempBuffer = ByteBuffer.wrap(tempBytes);
-
-					// Obtain all the write data
-					int availableData = 0;
-					for (WriteBuffer buffer : this.writeData) {
-						WriteBufferEnum type = buffer.getType();
-						switch (type) {
-						case BYTE_ARRAY:
-							availableData += buffer.length();
-							break;
-						case BYTE_BUFFER:
-							availableData += buffer.getDataBuffer().remaining();
-							break;
-						default:
-							throw new IllegalStateException("Unknown type " + type);
-						}
-					}
-					byte[] dataToWrap = new byte[availableData];
-					int writeDataIndex = 0;
-					for (WriteBuffer buffer : this.writeData) {
-						WriteBufferEnum type = buffer.getType();
-						switch (type) {
-						case BYTE_ARRAY:
-							byte[] data = buffer.getData();
-							int length = buffer.length();
-							System.arraycopy(data, 0, dataToWrap, writeDataIndex, length);
-							writeDataIndex += length;
-							break;
-						case BYTE_BUFFER:
-							ByteBuffer dataBuffer = buffer.getDataBuffer();
-							length = dataBuffer.remaining();
-							dataBuffer.get(dataToWrap, writeDataIndex, length);
-							writeDataIndex += length;
-							break;
-						default:
-							throw new IllegalStateException("Unknown type " + type);
-						}
-					}
-					this.writeData.clear();
-
-					// Wrap the read data at application buffer size
-					int applicationBufferSize = session.getApplicationBufferSize();
-					ByteBuffer dataToWrapBuffer = ByteBuffer.wrap(dataToWrap, 0,
-							Math.min(dataToWrap.length, applicationBufferSize));
-
-					// Wrap the written data
-					SSLEngineResult sslEngineResult = this.engine.wrap(dataToWrapBuffer, tempBuffer);
-
-					// Determine if further data to consume on another pass
-					int bytesConsumed = sslEngineResult.bytesConsumed();
-					if (bytesConsumed < availableData) {
-						// Make data available for further writing
-						byte[] furtherData = new byte[availableData - bytesConsumed];
-						System.arraycopy(dataToWrap, bytesConsumed, furtherData, 0, furtherData.length);
-						this.writeData.add(this.connection.createWriteBuffer(furtherData, furtherData.length));
-
-					} else {
-						// All data written, so check if close
-						if (this.isClosing) {
-							this.engine.closeOutbound();
-						}
-					}
-
-					// Process based on status
-					Status status = sslEngineResult.getStatus();
-					switch (status) {
-					case OK:
-					case CLOSED:
-						// Handle cipher data produced for connection
-						int bytesProduced = sslEngineResult.bytesProduced();
-						if (bytesProduced > 0) {
-
-							// Write the cipher data to the connection
-							byte[] cipherData = new byte[bytesProduced];
-							System.arraycopy(tempBytes, 0, cipherData, 0, bytesProduced);
-
-							// Ensure all buffers within send buffer size
-							WriteBuffer[] writeBuffers = new WriteBuffer[(cipherData.length / this.sendBufferSize)
-									+ ((cipherData.length % this.sendBufferSize) > 0 ? 1 : 0)];
-
-							// Re-use cipher data for first buffer
-							int totalBytesLoaded = Math.min(cipherData.length, this.sendBufferSize);
-							writeBuffers[0] = this.connection.createWriteBuffer(cipherData, totalBytesLoaded);
-
-							// Load remaining buffers (if any)
-							int writeBufferIndex = 1;
-							while (totalBytesLoaded < cipherData.length) {
-
-								// Determine the bytes for next buffer
-								int bytesToLoad = Math.min((cipherData.length - totalBytesLoaded), this.sendBufferSize);
-								byte[] writeBufferData = Arrays.copyOfRange(cipherData, totalBytesLoaded,
-										(totalBytesLoaded + bytesToLoad));
-								writeBuffers[writeBufferIndex++] = this.connection.createWriteBuffer(writeBufferData,
-										bytesToLoad);
-
-								// Increment the number of bytes loaded
-								totalBytesLoaded += bytesToLoad;
-							}
-
-							// Write the data
-							this.connection.writeData(writeBuffers);
-						}
-
-						// Handle close
-						if (status == Status.CLOSED) {
-
-							// Determine if in close handshake
-							HandshakeStatus closeHandshakeStatus = this.engine.getHandshakeStatus();
-							switch (closeHandshakeStatus) {
-							case NEED_TASK:
-							case NEED_UNWRAP:
-							case NEED_WRAP:
-								// Allow close handshake to proceed
-								break;
-							case NOT_HANDSHAKING:
-								// Close handshake complete, close connection
-								this.connection.close();
-								return; // closed, no further processing
-							default:
-								throw new IllegalStateException("Unknown status " + status);
-							}
-						}
-						break;
-					default:
-						throw new IllegalStateException("Unknown status " + status);
-					}
-				}
+//				if (isOutputData) {
+//					// Handle outputting data
+//
+//					// Obtain temporary buffer to receive cipher text
+//					int packetBufferSize = session.getPacketBufferSize();
+//					byte[] tempBytes = new byte[packetBufferSize];
+//					ByteBuffer tempBuffer = ByteBuffer.wrap(tempBytes);
+//
+//					// Obtain all the write data
+//					int availableData = 0;
+//					for (WriteBuffer buffer : this.writeData) {
+//						WriteBufferEnum type = buffer.getType();
+//						switch (type) {
+//						case BYTE_ARRAY:
+//							availableData += buffer.length();
+//							break;
+//						case BYTE_BUFFER:
+//							availableData += buffer.getDataBuffer().remaining();
+//							break;
+//						default:
+//							throw new IllegalStateException("Unknown type " + type);
+//						}
+//					}
+//					byte[] dataToWrap = new byte[availableData];
+//					int writeDataIndex = 0;
+//					for (WriteBuffer buffer : this.writeData) {
+//						WriteBufferEnum type = buffer.getType();
+//						switch (type) {
+//						case BYTE_ARRAY:
+//							byte[] data = buffer.getData();
+//							int length = buffer.length();
+//							System.arraycopy(data, 0, dataToWrap, writeDataIndex, length);
+//							writeDataIndex += length;
+//							break;
+//						case BYTE_BUFFER:
+//							ByteBuffer dataBuffer = buffer.getDataBuffer();
+//							length = dataBuffer.remaining();
+//							dataBuffer.get(dataToWrap, writeDataIndex, length);
+//							writeDataIndex += length;
+//							break;
+//						default:
+//							throw new IllegalStateException("Unknown type " + type);
+//						}
+//					}
+//					this.writeData.clear();
+//
+//					// Wrap the read data at application buffer size
+//					int applicationBufferSize = session.getApplicationBufferSize();
+//					ByteBuffer dataToWrapBuffer = ByteBuffer.wrap(dataToWrap, 0,
+//							Math.min(dataToWrap.length, applicationBufferSize));
+//
+//					// Wrap the written data
+//					SSLEngineResult sslEngineResult = this.engine.wrap(dataToWrapBuffer, tempBuffer);
+//
+//					// Determine if further data to consume on another pass
+//					int bytesConsumed = sslEngineResult.bytesConsumed();
+//					if (bytesConsumed < availableData) {
+//						// Make data available for further writing
+//						byte[] furtherData = new byte[availableData - bytesConsumed];
+//						System.arraycopy(dataToWrap, bytesConsumed, furtherData, 0, furtherData.length);
+//						this.writeData.add(this.connection.createWriteBuffer(furtherData, furtherData.length));
+//
+//					} else {
+//						// All data written, so check if close
+//						if (this.isClosing) {
+//							this.engine.closeOutbound();
+//						}
+//					}
+//
+//					// Process based on status
+//					Status status = sslEngineResult.getStatus();
+//					switch (status) {
+//					case OK:
+//					case CLOSED:
+//						// Handle cipher data produced for connection
+//						int bytesProduced = sslEngineResult.bytesProduced();
+//						if (bytesProduced > 0) {
+//
+//							// Write the cipher data to the connection
+//							byte[] cipherData = new byte[bytesProduced];
+//							System.arraycopy(tempBytes, 0, cipherData, 0, bytesProduced);
+//
+//							// Ensure all buffers within send buffer size
+//							WriteBuffer[] writeBuffers = new WriteBuffer[(cipherData.length / this.sendBufferSize)
+//									+ ((cipherData.length % this.sendBufferSize) > 0 ? 1 : 0)];
+//
+//							// Re-use cipher data for first buffer
+//							int totalBytesLoaded = Math.min(cipherData.length, this.sendBufferSize);
+//							writeBuffers[0] = this.connection.createWriteBuffer(cipherData, totalBytesLoaded);
+//
+//							// Load remaining buffers (if any)
+//							int writeBufferIndex = 1;
+//							while (totalBytesLoaded < cipherData.length) {
+//
+//								// Determine the bytes for next buffer
+//								int bytesToLoad = Math.min((cipherData.length - totalBytesLoaded), this.sendBufferSize);
+//								byte[] writeBufferData = Arrays.copyOfRange(cipherData, totalBytesLoaded,
+//										(totalBytesLoaded + bytesToLoad));
+//								writeBuffers[writeBufferIndex++] = this.connection.createWriteBuffer(writeBufferData,
+//										bytesToLoad);
+//
+//								// Increment the number of bytes loaded
+//								totalBytesLoaded += bytesToLoad;
+//							}
+//
+//							// Write the data
+//							this.connection.writeData(writeBuffers);
+//						}
+//
+//						// Handle close
+//						if (status == Status.CLOSED) {
+//
+//							// Determine if in close handshake
+//							HandshakeStatus closeHandshakeStatus = this.engine.getHandshakeStatus();
+//							switch (closeHandshakeStatus) {
+//							case NEED_TASK:
+//							case NEED_UNWRAP:
+//							case NEED_WRAP:
+//								// Allow close handshake to proceed
+//								break;
+//							case NOT_HANDSHAKING:
+//								// Close handshake complete, close connection
+//								this.connection.close();
+//								return; // closed, no further processing
+//							default:
+//								throw new IllegalStateException("Unknown status " + status);
+//							}
+//						}
+//						break;
+//					default:
+//						throw new IllegalStateException("Unknown status " + status);
+//					}
+//				}
 			}
 
 		} catch (IOException ex) {
@@ -430,64 +421,15 @@ public class SslConnectionHandler implements ConnectionHandler, SslFunctionExecu
 			this.failure = ex;
 
 			// Log SSL failure
-			if (LOGGER.isLoggable(Level.INFO)) {
-				LOGGER.log(Level.INFO, "Failure in connection", ex);
-			}
+//			if (LOGGER.isLoggable(Level.INFO)) {
+//				LOGGER.log(Level.INFO, "Failure in connection", ex);
+//			}
 
 			// Failure, so close connection
-			try {
-				this.connection.close();
-			} catch (IOException ignore) {
-			}
-		}
-	}
-
-	/**
-	 * Written data to the SSL {@link Connection}.
-	 * 
-	 * @param data
-	 *            {@link WriteBuffer} data.
-	 */
-	void writeData(WriteBuffer[] data) {
-
-		synchronized (this.connection.getWriteLock()) {
-
-			// Queue the data
-			for (WriteBuffer buffer : data) {
-				this.writeData.add(buffer);
-			}
-
-			// Process data
-			this.process();
-		}
-	}
-
-	/**
-	 * Triggers the closing the SSL {@link Connection}.
-	 */
-	void triggerClose() {
-
-		synchronized (this.connection.getWriteLock()) {
-
-			// Flag to close
-			this.isClosing = true;
-
-			// Process the closing
-			this.process();
-		}
-	}
-
-	/**
-	 * Indicates if closing or closed.
-	 * 
-	 * @return <code>true</code> if closing or closed.
-	 */
-	boolean isClosing() {
-
-		synchronized (this.connection.getWriteLock()) {
-
-			// Indicate if closing or closed
-			return this.isClosing;
+//			try {
+//				this.connection.close();
+//			} catch (IOException ignore) {
+//			}
 		}
 	}
 
@@ -506,30 +448,16 @@ public class SslConnectionHandler implements ConnectionHandler, SslFunctionExecu
 	 */
 
 	@Override
-	public void handleRead(ReadContext context) throws IOException {
+	public void handleRead(StreamBuffer<ByteBuffer> buffer) throws IOException {
 
-		synchronized (this.connection.getWriteLock()) {
-
-			// Queue the data
-			this.readData.add(context.getData());
-
-			// Process data
-			this.process();
-		}
-	}
-
-	/*
-	 * ========================== ReadContext ================================
-	 */
-
-	/**
-	 * {@link ReadContext} data.
-	 */
-	private byte[] readContextData = null;
-
-	@Override
-	public byte[] getData() {
-		return this.readContextData;
+//		synchronized (this.connection.getWriteLock()) {
+//
+//			// Queue the data
+//			this.readData.add(context.getData());
+//
+//			// Process data
+//			this.process();
+//		}
 	}
 
 	/**
@@ -564,16 +492,16 @@ public class SslConnectionHandler implements ConnectionHandler, SslFunctionExecu
 
 			} catch (Throwable ex) {
 				// Flag failure in running task
-				synchronized (SslConnectionHandler.this.connection.getWriteLock()) {
-					SslConnectionHandler.this.failure = new IOException("SSL delegated runnable failed", ex);
-				}
+//				synchronized (SslConnectionHandler.this.connection.getWriteLock()) {
+//					SslConnectionHandler.this.failure = new IOException("SSL delegated runnable failed", ex);
+//				}
 
 			} finally {
 				// Flag task complete and trigger further processing
-				synchronized (SslConnectionHandler.this.connection.getWriteLock()) {
-					SslConnectionHandler.this.sslRunnable = null;
-					SslConnectionHandler.this.process();
-				}
+//				synchronized (SslConnectionHandler.this.connection.getWriteLock()) {
+//					SslConnectionHandler.this.sslRunnable = null;
+//					SslConnectionHandler.this.process();
+//				}
 			}
 		}
 	}

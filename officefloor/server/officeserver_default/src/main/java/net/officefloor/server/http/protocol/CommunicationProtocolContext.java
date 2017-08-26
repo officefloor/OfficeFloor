@@ -18,7 +18,8 @@
 package net.officefloor.server.http.protocol;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
+
+import net.officefloor.server.stream.BufferPool;
 
 /**
  * Context for the {@link CommunicationProtocolSource}.
@@ -28,22 +29,10 @@ import java.nio.charset.Charset;
 public interface CommunicationProtocolContext {
 
 	/**
-	 * <p>
-	 * Obtains the size of the {@link ByteBuffer} instances for writing. The
-	 * {@link WriteBuffer} sizes for data should not exceed this value.
-	 * <p>
-	 * This allows the {@link CommunicationProtocolSource} to create buffers
-	 * that match size to reduce the amount of copy routines required.
+	 * Obtains the {@link BufferPool}.
 	 * 
-	 * @return Size of the write buffers for sending data.
+	 * @return {@link BufferPool}.
 	 */
-	int getSendBufferSize();
-
-	/**
-	 * Obtains the default {@link Charset} for the server.
-	 * 
-	 * @return Default {@link Charset} for the server.
-	 */
-	Charset getDefaultCharset();
+	BufferPool<ByteBuffer> getBufferPool();
 
 }

@@ -21,11 +21,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
-import java.nio.charset.Charset;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
@@ -34,11 +32,6 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.conversation.HttpConversation;
-import net.officefloor.server.http.conversation.impl.HttpConversationImpl;
-import net.officefloor.server.http.conversation.impl.HttpManagedObjectImpl;
-import net.officefloor.server.http.parse.HttpRequestParser;
-import net.officefloor.server.http.parse.impl.HttpRequestParserImpl;
 
 /**
  * HTTP {@link CommunicationProtocolSource}.
@@ -113,16 +106,6 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource, C
 	private int maxTextPartLength;
 
 	/**
-	 * Send buffer size.
-	 */
-	private int sendBufferSize;
-
-	/**
-	 * Default {@link Charset}.
-	 */
-	private Charset defaultCharset;
-
-	/**
 	 * Server name.
 	 */
 	private String serverName;
@@ -166,12 +149,8 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource, C
 		}
 		this.serverName = serverName.toString();
 
-		// Obtain context details
-		this.sendBufferSize = protocolContext.getSendBufferSize();
-		this.defaultCharset = protocolContext.getDefaultCharset();
-
 		// Specify types
-		configurationContext.setManagedObjectClass(HttpManagedObjectImpl.class);
+		// configurationContext.setManagedObjectClass(HttpManagedObjectImpl.class);
 		configurationContext.setObjectClass(ServerHttpConnection.class);
 
 		// Provide the flow to handle the HTTP request
@@ -179,8 +158,9 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource, C
 				.setLabel("HANDLE_HTTP_REQUEST").getIndex();
 
 		// Ensure connection is cleaned up when process finished
-		mosContext.getRecycleFunction(new HttpCleanupManagedFunction()).linkParameter(0,
-				RecycleManagedObjectParameter.class);
+		// mosContext.getRecycleFunction(new
+		// HttpCleanupManagedFunction()).linkParameter(0,
+		// RecycleManagedObjectParameter.class);
 
 		// Return this as the server
 		return this;
@@ -193,11 +173,7 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource, C
 	@Override
 	public HttpConnectionHandler createConnectionHandler(Connection connection,
 			ManagedObjectExecuteContext<Indexed> executeContext) {
-		HttpConversation conversation = new HttpConversationImpl(connection, executeContext,
-				this.requestHandlingFlowIndex, this.isSendStackTraceOnFailure);
-		HttpRequestParser parser = new HttpRequestParserImpl(this.maximumHttpRequestHeaders, this.maxTextPartLength,
-				this.maximumRequestBodyLength);
-		return new HttpConnectionHandler(conversation, parser);
+		return new HttpConnectionHandler(false, null, null);
 	}
 
 }

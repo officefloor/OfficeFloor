@@ -22,8 +22,6 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
-import java.nio.charset.Charset;
-import java.nio.charset.IllegalCharsetNameException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -37,7 +35,6 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuild
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.server.SocketManager;
 import net.officefloor.server.buffer.ThreadLocalByteBufferPool;
 import net.officefloor.server.http.protocol.CommunicationProtocol;
@@ -46,6 +43,7 @@ import net.officefloor.server.http.protocol.CommunicationProtocolSource;
 import net.officefloor.server.http.protocol.Connection;
 import net.officefloor.server.impl.SocketListener.SocketListenerFlows;
 import net.officefloor.server.stream.BufferPool;
+import net.officefloor.server.stream.StreamBuffer;
 
 /**
  * Abstract {@link ManagedObjectSource} for a {@link ServerSocketChannel}.
@@ -68,17 +66,7 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	/**
 	 * Name of property to obtain the send buffer size.
 	 */
-	public static final String PROPERTY_SEND_BUFFER_SIZE = "send.buffer.size";
-
-	/**
-	 * Name of property to obtain the receive buffer size.
-	 */
-	public static final String PROPERTY_RECEIVE_BUFFER_SIZE = "receive.buffer.size";
-
-	/**
-	 * Name of property to obtain the default {@link Charset}.
-	 */
-	public static final String PROPERTY_DEFAULT_CHARSET = "default.charset";
+	public static final String PROPERTY_BUFFER_SIZE = "buffer.size";
 
 	/**
 	 * Name of property to specify the number of {@link SocketListener}
@@ -86,11 +74,6 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	 * {@link Runtime#availableProcessors()}.
 	 */
 	public static final String PROPERTY_SOCKET_LISTENER_COUNT = "socket.listener.count";
-
-	/**
-	 * Default {@link Charset} to use if one is not configured.
-	 */
-	public static final String DEFAULT_CHARSET = "UTF-8";
 
 	/**
 	 * Singleton {@link SocketManager} for all {@link Connection} instances.
@@ -103,33 +86,6 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	private static Set<AbstractServerSocketManagedObjectSource> registeredServerSocketManagedObjectSources = new HashSet<AbstractServerSocketManagedObjectSource>();
 
 	/**
-	 * Obtains the {@link Charset}.
-	 * 
-	 * @param properties
-	 *            {@link SourceProperties}. May be <code>null</code> if no
-	 *            {@link SourceProperties} are available.
-	 * @return {@link Charset}.
-	 */
-	public static Charset getCharset(SourceProperties properties) {
-
-		// Attempt to obtain configured charset
-		String charsetName = (properties == null) ? null : properties.getProperty(PROPERTY_DEFAULT_CHARSET, null);
-		if (charsetName != null) {
-			// Use the configured charset
-			return Charset.forName(charsetName);
-
-		} else {
-			try {
-				// Not configured, use default for flexibility
-				return Charset.forName(DEFAULT_CHARSET);
-			} catch (IllegalCharsetNameException ex) {
-				// Fall back to system default
-				return Charset.defaultCharset();
-			}
-		}
-	}
-
-	/**
 	 * Obtains the {@link SocketManager}.
 	 * 
 	 * @param mosContext
@@ -140,15 +96,13 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	 *            {@link SocketManager}.
 	 * @param numberOfSocketListeners
 	 *            Number of {@link SocketListener} instances.
-	 * @param sendBufferSize
-	 *            Send buffer size.
-	 * @param receiveBufferSize
-	 *            Receive buffer size.
+	 * @param bufferPool
+	 *            {@link BufferPool}.
 	 * @return {@link SocketManager}.
 	 */
 	private static synchronized SocketManager getSocketManager(ManagedObjectSourceContext<Indexed> mosContext,
-			AbstractServerSocketManagedObjectSource instance, int numberOfSocketListeners, int sendBufferSize,
-			int receiveBufferSize) {
+			AbstractServerSocketManagedObjectSource instance, int numberOfSocketListeners,
+			BufferPool<ByteBuffer> bufferPool) throws IOException {
 
 		// Ensure consistent interface for teams
 		mosContext.addManagedFunction("consistency", () -> (context) -> null).setResponsibleTeam("listener");
@@ -167,17 +121,11 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 			// Create the connection manager
 			singletonSocketManager = new SocketManagerImpl(socketListeners);
 
-			// Create the buffer pool
-			int TODO_threadLocalPoolSize = 100000;
-			int TODO_corePoolSize = 1000000;
-			BufferPool<ByteBuffer> readBufferPool = new ThreadLocalByteBufferPool(
-					() -> ByteBuffer.allocateDirect(receiveBufferSize), TODO_threadLocalPoolSize, TODO_corePoolSize);
-
 			// Load the socket listeners
 			for (int i = 0; i < socketListeners.length; i++) {
 
 				// Create the socket listener
-				SocketListener socketListener = new SocketListener(singletonSocketManager, readBufferPool);
+				SocketListener socketListener = new SocketListener(singletonSocketManager, bufferPool);
 
 				// Register the socket listener
 				socketListeners[i] = socketListener;
@@ -265,14 +213,9 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	private final CommunicationProtocolSource communicationProtocolSource;
 
 	/**
-	 * Send buffer size.
+	 * {@link StreamBuffer} size.
 	 */
-	private int sendBufferSize;
-
-	/**
-	 * Default {@link Charset}.
-	 */
-	private Charset defaultCharset;
+	private int bufferSize;
 
 	/**
 	 * {@link ServerSocketChannel} backlog size.
@@ -306,20 +249,6 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	protected abstract CommunicationProtocolSource createCommunicationProtocolSource();
 
 	/*
-	 * ====================== CommunicationProtocolContext =====================
-	 */
-
-	@Override
-	public int getSendBufferSize() {
-		return this.sendBufferSize;
-	}
-
-	@Override
-	public Charset getDefaultCharset() {
-		return this.defaultCharset;
-	}
-
-	/*
 	 * =================== AbstractManagedObjectSource ==================
 	 */
 
@@ -346,13 +275,9 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 
 		// Obtain the configuration
 		this.port = Integer.parseInt(mosContext.getProperty(PROPERTY_PORT));
-		this.sendBufferSize = Integer
-				.parseInt(mosContext.getProperty(PROPERTY_SEND_BUFFER_SIZE, String.valueOf(osSendBufferSize)));
-		int receiveBufferSize = Integer
-				.parseInt(mosContext.getProperty(PROPERTY_RECEIVE_BUFFER_SIZE, String.valueOf(osReceiveBufferSize)));
-
-		// Obtain the default charset
-		this.defaultCharset = getCharset(mosContext);
+		this.bufferSize = Integer
+				.parseInt(mosContext.getProperty(PROPERTY_BUFFER_SIZE, String.valueOf(osSendBufferSize)));
+		BufferPool<ByteBuffer> bufferPool = null;
 
 		// Obtain the number of socket listeners
 		int numberOfSocketListeners = Integer.parseInt(mosContext.getProperty(PROPERTY_SOCKET_LISTENER_COUNT,
@@ -362,8 +287,7 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 		this.serverSocketBackLogSize = 25000; // TODO make configurable
 
 		// Obtain the connection manager
-		this.socketManager = getSocketManager(mosContext, this, numberOfSocketListeners, this.sendBufferSize,
-				receiveBufferSize);
+		this.socketManager = getSocketManager(mosContext, this, numberOfSocketListeners, bufferPool);
 
 		// Create the communication protocol
 		this.communicationProtocol = this.communicationProtocolSource.createCommunicationProtocol(context, this);
@@ -399,6 +323,16 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 				LOGGER.log(Level.INFO, "Failed to release " + SocketManager.class.getSimpleName(), ex);
 			}
 		}
+	}
+
+	/*
+	 * ====================== CommunicationProtocolContext =============
+	 */
+
+	@Override
+	public BufferPool<ByteBuffer> getBufferPool() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

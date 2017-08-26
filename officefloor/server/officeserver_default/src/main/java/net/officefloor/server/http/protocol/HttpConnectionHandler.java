@@ -19,20 +19,19 @@ package net.officefloor.server.http.protocol;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Supplier;
 
-import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.server.ConnectionHandler;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpMethod;
-import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpVersion;
-import net.officefloor.server.http.conversation.HttpConversation;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
-import net.officefloor.server.http.parse.HttpRequestParseException;
+import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.http.parse.HttpRequestParser;
+import net.officefloor.server.http.parse.HttpRequestParser.HttpRequestParserMetaData;
+import net.officefloor.server.stream.BufferPool;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.impl.ByteSequence;
 
@@ -44,9 +43,9 @@ import net.officefloor.server.stream.impl.ByteSequence;
 public class HttpConnectionHandler implements ConnectionHandler {
 
 	/**
-	 * {@link HttpConversation}.
+	 * Indicates if secure connection
 	 */
-	private final HttpConversation conversation;
+	private final boolean isSecure;
 
 	/**
 	 * {@link HttpRequestParser}.
@@ -54,23 +53,35 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	private final HttpRequestParser parser;
 
 	/**
-	 * Flag indicating if {@link HttpRequestParseException} on processing input.
-	 * Once a {@link HttpRequestParseException} occurs it is unrecoverable and
-	 * the {@link Connection} should be closed.
+	 * {@link BufferPool}.
 	 */
-	private boolean isParseFailure = false;
+	private final BufferPool<ByteBuffer> bufferPool;
+
+	/**
+	 * List of previous {@link StreamBuffer} instances.
+	 */
+	private List<StreamBuffer<ByteBuffer>> previousBuffers = null;
+
+	/**
+	 * Current {@link StreamBuffer}.
+	 */
+	private StreamBuffer<ByteBuffer> currentBuffer = null;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param conversation
-	 *            {@link HttpConversation}.
-	 * @param parser
-	 *            {@link HttpRequestParser}.
+	 * @param isSecure
+	 *            Indicates if secure connection.
+	 * @param bufferPool
+	 *            {@link BufferPool}.
+	 * @param parserMetaData
+	 *            {@link HttpRequestParserMetaData}.
 	 */
-	public HttpConnectionHandler(HttpConversation conversation, HttpRequestParser parser) {
-		this.conversation = conversation;
-		this.parser = parser;
+	public HttpConnectionHandler(boolean isSecure, BufferPool<ByteBuffer> bufferPool,
+			HttpRequestParserMetaData parserMetaData) {
+		this.isSecure = isSecure;
+		this.parser = new HttpRequestParser(parserMetaData);
+		this.bufferPool = bufferPool;
 	}
 
 	/*
@@ -81,44 +92,41 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	public void handleRead(StreamBuffer<ByteBuffer> buffer) throws IOException {
 		try {
 
-			// Ignore all further content if parse failure
-			if (this.isParseFailure) {
-				return;
-			}
+			// Determine if new buffer
+			if (this.currentBuffer != buffer) {
 
-			// Loop as may have more than one request on read
-			do {
-
-				// Parse the read content
-				if (this.parser.parse(buffer)) {
-
-					// Received the full HTTP request to start processing
-					Supplier<HttpMethod> methodSupplier = this.parser.getMethod();
-					Supplier<String> requestUriSupplier = this.parser.getRequestURI();
-					HttpVersion httpVersion = this.parser.getVersion();
-					NonMaterialisedHttpHeaders headers = this.parser.getHeaders();
-					ByteSequence entity = this.parser.getEntity();
-					this.parser.reset(); // reset for next request
-
-					// Service the request
-					this.conversation.serviceRequest(methodSupplier, requestUriSupplier, httpVersion, headers, entity);
+				// New buffer, so move current to previous
+				if (this.currentBuffer != null) {
+					if (this.previousBuffers == null) {
+						this.previousBuffers = new LinkedList<>();
+					}
+					this.previousBuffers.add(this.currentBuffer);
 				}
 
-			} while (!this.parser.isFinishedReadingBuffer());
+				// Use new buffer
+				this.currentBuffer = buffer;
+				this.parser.appendStreamBuffer(buffer);
+			}
 
-		} catch (HttpRequestParseException ex) {
-			// Flag that input no longer valid
-			this.isParseFailure = true;
+			// Parse the read content (until no further requests)
+			while (this.parser.parse()) {
 
+				// Received the full HTTP request to start processing
+				Supplier<HttpMethod> methodSupplier = this.parser.getMethod();
+				Supplier<String> requestUriSupplier = this.parser.getRequestURI();
+				HttpVersion version = this.parser.getVersion();
+				NonMaterialisedHttpHeaders requestHeaders = this.parser.getHeaders();
+				ByteSequence requestEntity = this.parser.getEntity();
+
+				// Create the server HTTP connection
+				ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> serverHttpConnection = new ProcessAwareServerHttpConnectionManagedObject<>(
+						this.isSecure, methodSupplier, requestUriSupplier, version, requestHeaders, requestEntity,
+						null, this.bufferPool);
+
+			}
+
+		} catch (HttpException ex) {
 			// Process failed parsing (close connection when response sent)
-			this.conversation.parseFailure(ex, true);
-
-		} catch (IOException ex) {
-			// As error in I/O connection no longer valid
-			this.isParseFailure = true; // skip remaining content if can read
-
-			// Propagate failure
-			throw ex;
 		}
 	}
 

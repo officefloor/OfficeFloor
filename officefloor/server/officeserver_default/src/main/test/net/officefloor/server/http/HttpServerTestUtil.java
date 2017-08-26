@@ -17,10 +17,6 @@
  */
 package net.officefloor.server.http;
 
-import java.nio.charset.Charset;
-import java.util.LinkedList;
-import java.util.List;
-
 import javax.net.ssl.SSLContext;
 
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -28,15 +24,9 @@ import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloorContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.server.http.conversation.HttpEntity;
-import net.officefloor.server.http.conversation.impl.HttpEntityImpl;
-import net.officefloor.server.http.conversation.impl.HttpRequestImpl;
-import net.officefloor.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.server.http.source.HttpsServerSocketManagedObjectSource;
-import net.officefloor.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
-import net.officefloor.server.stream.impl.ServerInputStreamImpl;
 
 /**
  * Utility class aiding in testing HTTP functionality.
@@ -120,55 +110,6 @@ public class HttpServerTestUtil {
 			// Should always create, otherwise fail test
 			throw OfficeFrameTestCase.fail(ex);
 		}
-	}
-
-	/**
-	 * Creates a {@link net.officefloor.server.http.HttpRequest} for testing.
-	 * 
-	 * @param method
-	 *            HTTP method (GET, POST).
-	 * @param requestUri
-	 *            Request URI.
-	 * @param entity
-	 *            Contents of the
-	 *            {@link net.officefloor.server.http.HttpRequest} entity.
-	 * @param headerNameValues
-	 *            {@link HttpHeader} name values.
-	 * @return {@link net.officefloor.server.http.HttpRequest}.
-	 * @throws Exception
-	 *             If fails to create the
-	 *             {@link net.officefloor.server.http.HttpRequest} .
-	 */
-	public static net.officefloor.server.http.HttpRequest createHttpRequest(String method, String requestUri,
-			String entity, String... headerNameValues) throws Exception {
-
-		// Obtain the entity data
-		final Charset charset = AbstractServerSocketManagedObjectSource.getCharset(null);
-		byte[] entityData = (entity == null ? new byte[0] : entity.getBytes(charset));
-
-		// Create the headers
-		List<HttpHeader> headers = new LinkedList<HttpHeader>();
-		if (entity != null) {
-			// Include content type and content length if entity
-			headers.add(new HttpHeaderImpl("content-type", "text/plain; charset=" + charset.name()));
-			headers.add(new HttpHeaderImpl("content-length", String.valueOf(entityData.length)));
-		}
-		for (int i = 0; i < headerNameValues.length; i += 2) {
-			String name = headerNameValues[i];
-			String value = headerNameValues[i + 1];
-			headers.add(new HttpHeaderImpl(name, value));
-		}
-
-		// Create the entity input stream
-		ServerInputStreamImpl inputStream = new ServerInputStreamImpl(new Object());
-		inputStream.inputData(entityData, 0, (entityData.length - 1), false);
-		HttpEntity httpEntity = new HttpEntityImpl(inputStream);
-
-		// HTTP headers
-		HttpRequestHeaders httpHeaders = null;
-
-		// Return the HTTP request
-		return new HttpRequestImpl(method, requestUri, "HTTP/1.1", httpHeaders, httpEntity);
 	}
 
 	/**
