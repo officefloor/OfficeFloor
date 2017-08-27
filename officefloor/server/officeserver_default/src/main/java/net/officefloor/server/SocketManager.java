@@ -18,70 +18,106 @@
 package net.officefloor.server;
 
 import java.io.IOException;
-import java.nio.channels.Selector;
+import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.server.http.protocol.CommunicationProtocol;
+import net.officefloor.server.http.protocol.Connection;
 
 /**
- * Manages the {@link SocketChannel} instances.
+ * Manages the {@link AcceptedSocket} instances across the available
+ * {@link SocketListener} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SocketManager {
+public class SocketManager {
 
 	/**
-	 * Opens the {@link Selector} instances for managing the
-	 * {@link AcceptedSocket} instances.
-	 * 
-	 * @throws IOException
-	 *             If fails to open all the {@link Selector} instances.
+	 * Listing of {@link SocketListener} instances.
 	 */
-	void openSocketSelectors() throws IOException;
+	private final SocketListener[] socketListeners;
 
 	/**
-	 * Binds a {@link ServerSocketChannel}.
-	 * 
-	 * @param port
-	 *            Port of the {@link ServerSocketChannel}.
-	 * @param serverSocketBackLogSize
-	 *            Server back log size.
-	 * @param communicationProtocol
-	 *            {@link CommunicationProtocol}.
-	 * @param executeContext
-	 *            {@link ManagedObjectExecuteContext}.
-	 * @throws IOException
-	 *             If fails to bind the {@link ServerSocketChannel}.
+	 * Index of the next {@link SocketListener} for handling the listening of a
+	 * {@link ServerSocketChannel}.
 	 */
-	void bindServerSocket(int port, int serverSocketBackLogSize, CommunicationProtocol communicationProtocol,
-			ManagedObjectExecuteContext<Indexed> executeContext) throws IOException;
+	private int nextServerSocketListener = 0;
 
 	/**
-	 * Manages the {@link AcceptedSocket}.
-	 * 
-	 * @param socket
-	 *            {@link AcceptedSocket} to be managed.
+	 * Index of the next {@link SocketListener} for a new {@link Connection}.
 	 */
-	void manageSocket(AcceptedSocket socket);
+	private final AtomicInteger nextSocketListener = new AtomicInteger(0);
 
 	/**
-	 * Closes the {@link Selector} instances for managing the
-	 * {@link AcceptedSocket} instances.
-	 * 
-	 * @throws IOException
-	 *             If fails to close {@link Selector} instances.
+	 * Indicates if the {@link SocketListener} instances are open.
 	 */
-	void closeSocketSelectors() throws IOException;
+	private boolean isSocketListenersOpen = false;
 
 	/**
-	 * Waits for the {@link Selector} and {@link ServerSocketChannel} to close.
+	 * Initiate.
 	 * 
-	 * @throws IOException
-	 *             If fails to close.
+	 * @param socketListeners
+	 *            Available {@link SocketListener} instances.
 	 */
-	void waitForClose() throws IOException;
+	public SocketManager(SocketListener... socketListeners) {
+		this.socketListeners = socketListeners;
+	}
+
+	public synchronized void openSocketSelectors() throws IOException {
+
+		// Determine if already open
+		if (this.isSocketListenersOpen) {
+			return;
+		}
+
+		// Open the socket listeners
+		this.isSocketListenersOpen = true;
+		for (SocketListener socketListener : this.socketListeners) {
+			socketListener.openSelector();
+		}
+	}
+
+	public synchronized void bindServerSocket(int port, int serverSocketBackLogSize,
+			CommunicationProtocol communicationProtocol, ManagedObjectExecuteContext<Indexed> executeContext)
+			throws IOException {
+
+		// Obtain the next socket listener
+		int nextServerSocketListener = (this.nextServerSocketListener++) % this.socketListeners.length;
+		SocketListener socketListener = this.socketListeners[nextServerSocketListener];
+
+		// Bind the server socket
+		socketListener.bindServerSocket(new InetSocketAddress(port), serverSocketBackLogSize, communicationProtocol,
+				executeContext);
+	}
+
+	public void manageSocket(AcceptedSocket connection) {
+
+		// Spread the connections across the socket listeners
+		int next = this.nextSocketListener.getAndAccumulate(1,
+				(prev, increment) -> (prev + increment) % this.socketListeners.length);
+
+		// Register connection with socket listener
+		this.socketListeners[next].registerAcceptedConnection(connection);
+	}
+
+	public synchronized void closeSocketSelectors() throws IOException {
+
+		// No longer open
+		this.isSocketListenersOpen = false;
+
+		// Stop the socket listeners
+		for (SocketListener socketListener : this.socketListeners) {
+			socketListener.closeSelector();
+		}
+	}
+
+	public synchronized void waitForClose() throws IOException {
+		for (SocketListener socketListener : this.socketListeners) {
+			socketListener.waitForShutdown();
+		}
+	}
 
 }

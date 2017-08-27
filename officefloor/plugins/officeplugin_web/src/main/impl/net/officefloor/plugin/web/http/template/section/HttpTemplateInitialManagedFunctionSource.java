@@ -33,8 +33,8 @@ import net.officefloor.plugin.web.http.template.HttpTemplateManagedFunctionSourc
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialFunction.Dependencies;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialFunction.Flows;
+import net.officefloor.server.AbstractServerSocketManagedObjectSource;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.impl.AbstractServerSocketManagedObjectSource;
 
 /**
  * {@link ManagedFunctionSource} to provide the

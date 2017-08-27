@@ -53,10 +53,10 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExten
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtensionContext;
 import net.officefloor.plugin.web.http.test.CompileWebExtension;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
+import net.officefloor.server.AbstractServerSocketManagedObjectSource;
 import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.HttpServerTestUtil;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.impl.AbstractServerSocketManagedObjectSource;
 
 /**
  * Tests the {@link WebArchitectEmployer}.

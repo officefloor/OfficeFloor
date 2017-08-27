@@ -25,10 +25,10 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
+import net.officefloor.server.AbstractServerSocketManagedObjectSource;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.protocol.CommunicationProtocolSource;
 import net.officefloor.server.http.protocol.HttpCommunicationProtocol;
-import net.officefloor.server.impl.AbstractServerSocketManagedObjectSource;
 
 /**
  * {@link ManagedObjectSource} for a {@link ServerHttpConnection}.

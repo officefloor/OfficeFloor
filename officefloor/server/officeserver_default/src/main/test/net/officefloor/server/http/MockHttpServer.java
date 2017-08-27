@@ -33,9 +33,9 @@ import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.server.AbstractServerSocketManagedObjectSource;
 import net.officefloor.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.server.http.source.HttpsServerSocketManagedObjectSource;
-import net.officefloor.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.server.ssl.protocol.SslCommunicationProtocol;
 
 /**

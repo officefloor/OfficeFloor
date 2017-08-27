@@ -35,8 +35,8 @@ import net.officefloor.plugin.json.JsonResponseWriter;
 import net.officefloor.plugin.woof.WoofLoader;
 import net.officefloor.plugin.woof.WoofLoaderExtensionService;
 import net.officefloor.plugin.woof.WoofLoaderImpl;
+import net.officefloor.server.AbstractServerSocketManagedObjectSource;
 import net.officefloor.server.http.HttpClientTestUtil;
-import net.officefloor.server.impl.AbstractServerSocketManagedObjectSource;
 
 /**
  * Ensure JSON implicitly works for WoOF.

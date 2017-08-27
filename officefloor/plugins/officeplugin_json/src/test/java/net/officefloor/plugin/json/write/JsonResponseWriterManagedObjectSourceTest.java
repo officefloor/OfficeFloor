@@ -33,10 +33,10 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.json.JsonResponseWriter;
 import net.officefloor.plugin.json.write.JsonResponseWriterManagedObjectSource.Dependencies;
 import net.officefloor.plugin.web.http.test.WebCompileOfficeFloor;
+import net.officefloor.server.AbstractServerSocketManagedObjectSource;
 import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.HttpServerTestUtil;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.impl.AbstractServerSocketManagedObjectSource;
 
 /**
  * Tests the {@link JsonResponseWriterManagedObjectSource}.

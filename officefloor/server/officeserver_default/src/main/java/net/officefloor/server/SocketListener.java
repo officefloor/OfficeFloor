@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.server.impl;
+package net.officefloor.server;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -24,7 +24,6 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedSelectorException;
-import java.nio.channels.Pipe;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -43,10 +42,6 @@ import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.server.AcceptedSocket;
-import net.officefloor.server.ManagedConnection;
-import net.officefloor.server.SocketManager;
-import net.officefloor.server.WriteDataAction;
 import net.officefloor.server.http.protocol.CommunicationProtocol;
 import net.officefloor.server.http.protocol.Connection;
 import net.officefloor.server.stream.BufferPool;

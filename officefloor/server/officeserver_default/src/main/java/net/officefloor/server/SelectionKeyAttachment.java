@@ -15,11 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.server.impl;
+package net.officefloor.server;
 
 import java.nio.channels.SelectionKey;
-
-import net.officefloor.server.ManagedConnection;
 
 /**
  * {@link SelectionKey} attachment.
