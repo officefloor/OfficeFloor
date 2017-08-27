@@ -242,6 +242,7 @@ public class SocketServicer implements Runnable {
 
 			// Release buffer (as content not important, only notification)
 			this.readBuffer.release();
+			this.readBuffer = null;
 
 			// Flag to shutdown
 			SocketServicer.this.isShutdown = true;
