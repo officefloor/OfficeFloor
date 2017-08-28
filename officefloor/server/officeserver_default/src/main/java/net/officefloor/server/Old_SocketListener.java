@@ -52,10 +52,10 @@ import net.officefloor.server.stream.StreamBuffer;
  * 
  * @author Daniel Sagenschneider
  */
-public class SocketListener extends StaticManagedFunction<None, SocketListener.SocketListenerFlows> {
+public class Old_SocketListener extends StaticManagedFunction<None, Old_SocketListener.SocketListenerFlows> {
 
 	/**
-	 * Flows for the {@link SocketListener}.
+	 * Flows for the {@link Old_SocketListener}.
 	 */
 	public static enum SocketListenerFlows {
 		REPEAT
@@ -64,12 +64,12 @@ public class SocketListener extends StaticManagedFunction<None, SocketListener.S
 	/**
 	 * {@link Logger}.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(SocketListener.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(Old_SocketListener.class.getName());
 
 	/**
-	 * {@link SocketManager}.
+	 * {@link Old_SocketManager}.
 	 */
-	private final SocketManager socketManager;
+	private final Old_SocketManager socketManager;
 
 	/**
 	 * Listing of bound {@link ServerSocketChannel} instances.
@@ -116,17 +116,17 @@ public class SocketListener extends StaticManagedFunction<None, SocketListener.S
 	 * Initiate.
 	 * 
 	 * @param socketManager
-	 *            {@link SocketManager}.
+	 *            {@link Old_SocketManager}.
 	 * @param bufferPool
 	 *            {@link BufferPool}.
 	 */
-	public SocketListener(SocketManager socketManager, BufferPool<ByteBuffer> bufferPool) throws IOException {
+	public Old_SocketListener(Old_SocketManager socketManager, BufferPool<ByteBuffer> bufferPool) throws IOException {
 		this.socketManager = socketManager;
 		this.bufferPool = bufferPool;
 	}
 
 	/**
-	 * Open the {@link Selector} for this {@link SocketListener}.
+	 * Open the {@link Selector} for this {@link Old_SocketListener}.
 	 * 
 	 * @throws IOException
 	 *             If fails to open the {@link Selector}.
@@ -191,7 +191,7 @@ public class SocketListener extends StaticManagedFunction<None, SocketListener.S
 	}
 
 	/**
-	 * Close the {@link Selector} for this {@link SocketListener}.
+	 * Close the {@link Selector} for this {@link Old_SocketListener}.
 	 * 
 	 * @throws IOException
 	 *             If fails to close {@link Selector} and any
@@ -226,7 +226,7 @@ public class SocketListener extends StaticManagedFunction<None, SocketListener.S
 	}
 
 	/**
-	 * Waits for shutdown of the {@link SocketListener}.
+	 * Waits for shutdown of the {@link Old_SocketListener}.
 	 * 
 	 * @throws IOException
 	 *             If fails to shut down.
@@ -251,7 +251,7 @@ public class SocketListener extends StaticManagedFunction<None, SocketListener.S
 	}
 
 	/**
-	 * Registers a {@link AcceptedSocket} with this {@link SocketListener}.
+	 * Registers a {@link AcceptedSocket} with this {@link Old_SocketListener}.
 	 * 
 	 * @param connection
 	 *            {@link AcceptedSocket}.

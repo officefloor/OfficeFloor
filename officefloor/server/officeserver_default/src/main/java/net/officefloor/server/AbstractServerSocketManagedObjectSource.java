@@ -35,7 +35,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuild
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.server.SocketListener.SocketListenerFlows;
+import net.officefloor.server.Old_SocketListener.SocketListenerFlows;
 import net.officefloor.server.http.protocol.CommunicationProtocol;
 import net.officefloor.server.http.protocol.CommunicationProtocolContext;
 import net.officefloor.server.http.protocol.CommunicationProtocolSource;
@@ -67,16 +67,16 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	public static final String PROPERTY_BUFFER_SIZE = "buffer.size";
 
 	/**
-	 * Name of property to specify the number of {@link SocketListener}
+	 * Name of property to specify the number of {@link Old_SocketListener}
 	 * instances. If not specified, will default to
 	 * {@link Runtime#availableProcessors()}.
 	 */
 	public static final String PROPERTY_SOCKET_LISTENER_COUNT = "socket.listener.count";
 
 	/**
-	 * Singleton {@link SocketManager} for all {@link Connection} instances.
+	 * Singleton {@link Old_SocketManager} for all {@link Connection} instances.
 	 */
-	private static SocketManager singletonSocketManager;
+	private static Old_SocketManager singletonSocketManager;
 
 	/**
 	 * Registered {@link AbstractServerSocketManagedObjectSource} instances.
@@ -84,21 +84,21 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	private static Set<AbstractServerSocketManagedObjectSource> registeredServerSocketManagedObjectSources = new HashSet<AbstractServerSocketManagedObjectSource>();
 
 	/**
-	 * Obtains the {@link SocketManager}.
+	 * Obtains the {@link Old_SocketManager}.
 	 * 
 	 * @param mosContext
 	 *            {@link ManagedObjectSourceContext}.
 	 * @param instance
 	 *            Instance of the
 	 *            {@link AbstractServerSocketManagedObjectSource} using the
-	 *            {@link SocketManager}.
+	 *            {@link Old_SocketManager}.
 	 * @param numberOfSocketListeners
-	 *            Number of {@link SocketListener} instances.
+	 *            Number of {@link Old_SocketListener} instances.
 	 * @param bufferPool
 	 *            {@link BufferPool}.
-	 * @return {@link SocketManager}.
+	 * @return {@link Old_SocketManager}.
 	 */
-	private static synchronized SocketManager getSocketManager(ManagedObjectSourceContext<Indexed> mosContext,
+	private static synchronized Old_SocketManager getSocketManager(ManagedObjectSourceContext<Indexed> mosContext,
 			AbstractServerSocketManagedObjectSource instance, int numberOfSocketListeners,
 			BufferPool<ByteBuffer> bufferPool) throws IOException {
 
@@ -114,16 +114,16 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 		if (singletonSocketManager == null) {
 
 			// Create the array of socket listeners
-			SocketListener[] socketListeners = new SocketListener[numberOfSocketListeners];
+			Old_SocketListener[] socketListeners = new Old_SocketListener[numberOfSocketListeners];
 
 			// Create the connection manager
-			singletonSocketManager = new SocketManager(socketListeners);
+			singletonSocketManager = new Old_SocketManager(socketListeners);
 
 			// Load the socket listeners
 			for (int i = 0; i < socketListeners.length; i++) {
 
 				// Create the socket listener
-				SocketListener socketListener = new SocketListener(singletonSocketManager, bufferPool);
+				Old_SocketListener socketListener = new Old_SocketListener(singletonSocketManager, bufferPool);
 
 				// Register the socket listener
 				socketListeners[i] = socketListener;
@@ -149,13 +149,13 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 
 	/**
 	 * <p>
-	 * Closes the possible open {@link SocketManager} and releases all
-	 * {@link Selector} instances for the {@link SocketListener} instances.
+	 * Closes the possible open {@link Old_SocketManager} and releases all
+	 * {@link Selector} instances for the {@link Old_SocketListener} instances.
 	 * <p>
 	 * Made public so that tests may use to close.
 	 * 
 	 * @throws IOException
-	 *             If fails to close the {@link SocketManager}.
+	 *             If fails to close the {@link Old_SocketManager}.
 	 */
 	public static synchronized void closeSocketManager() throws IOException {
 
@@ -178,15 +178,15 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	/**
 	 * <p>
 	 * Releases the {@link AbstractServerSocketManagedObjectSource} instance
-	 * from the {@link SocketManager}.
+	 * from the {@link Old_SocketManager}.
 	 * <p>
 	 * Once all {@link AbstractServerSocketManagedObjectSource} instances are
-	 * release, the {@link SocketManager} itself is sclosed.
+	 * release, the {@link Old_SocketManager} itself is sclosed.
 	 * 
 	 * @param instance
 	 *            {@link AbstractServerSocketManagedObjectSource}.
 	 * @throws IOException
-	 *             If fails to close the {@link SocketManager}.
+	 *             If fails to close the {@link Old_SocketManager}.
 	 */
 	private static synchronized void releaseFromSocketManager(AbstractServerSocketManagedObjectSource instance)
 			throws IOException {
@@ -221,9 +221,9 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	private int serverSocketBackLogSize;
 
 	/**
-	 * {@link SocketManager}.
+	 * {@link Old_SocketManager}.
 	 */
-	private SocketManager socketManager;
+	private Old_SocketManager socketManager;
 
 	/**
 	 * {@link CommunicationProtocol}.
@@ -318,7 +318,7 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 		} catch (IOException ex) {
 			// Shutting down so just log issue
 			if (LOGGER.isLoggable(Level.INFO)) {
-				LOGGER.log(Level.INFO, "Failed to release " + SocketManager.class.getSimpleName(), ex);
+				LOGGER.log(Level.INFO, "Failed to release " + Old_SocketManager.class.getSimpleName(), ex);
 			}
 		}
 	}

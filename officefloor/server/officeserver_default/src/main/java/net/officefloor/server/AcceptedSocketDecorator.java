@@ -18,27 +18,20 @@
 package net.officefloor.server;
 
 import java.net.Socket;
-import java.nio.ByteBuffer;
-
-import net.officefloor.server.stream.StreamBuffer;
 
 /**
- * Services the {@link Socket}.
+ * Decorates the accepted {@link Socket} connections.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SocketServicer<R> {
+public interface AcceptedSocketDecorator {
 
 	/**
-	 * Services the {@link Socket}.
+	 * Decorates the accepted {@link Socket} connections.
 	 * 
-	 * @param readBuffer
-	 *            {@link StreamBuffer} containing the just read bytes. Note that
-	 *            this could be the same {@link StreamBuffer} as previous, with
-	 *            just further bytes written.
-	 * @param requestHandler
-	 *            Services the requests from the {@link Socket}.
+	 * @param socket
+	 *            Accepted {@link Socket}.
 	 */
-	void service(StreamBuffer<ByteBuffer> readBuffer, RequestHandler<R> requestHandler);
+	void decorate(Socket socket);
 
 }

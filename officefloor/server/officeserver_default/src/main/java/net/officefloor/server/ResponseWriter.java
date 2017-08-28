@@ -20,25 +20,24 @@ package net.officefloor.server;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 
+import net.officefloor.server.stream.BufferPool;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**
- * Services the {@link Socket}.
+ * Writes the response.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SocketServicer<R> {
+public interface ResponseWriter {
 
 	/**
-	 * Services the {@link Socket}.
+	 * Writes the {@link StreamBuffer} instances as the response.
 	 * 
-	 * @param readBuffer
-	 *            {@link StreamBuffer} containing the just read bytes. Note that
-	 *            this could be the same {@link StreamBuffer} as previous, with
-	 *            just further bytes written.
-	 * @param requestHandler
-	 *            Services the requests from the {@link Socket}.
+	 * @param responseBuffers
+	 *            Response contained in the {@link StreamBuffer} instances. Once
+	 *            the {@link StreamBuffer} is written back to the
+	 *            {@link Socket}, it is released back to its {@link BufferPool}.
 	 */
-	void service(StreamBuffer<ByteBuffer> readBuffer, RequestHandler<R> requestHandler);
+	void write(Iterable<StreamBuffer<ByteBuffer>> responseBuffers);
 
 }

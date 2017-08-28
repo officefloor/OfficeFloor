@@ -54,9 +54,9 @@ public class ConnectionImpl implements Connection, ManagedConnection, SelectionK
 	private final ConnectionHandler connectionHandler;
 
 	/**
-	 * {@link SocketListener} handling this {@link Connection}.
+	 * {@link Old_SocketListener} handling this {@link Connection}.
 	 */
-	private final SocketListener socketListener;
+	private final Old_SocketListener socketListener;
 
 	/**
 	 * Indicates if registered for write.
@@ -81,13 +81,13 @@ public class ConnectionImpl implements Connection, ManagedConnection, SelectionK
 	 * @param socketChannel
 	 *            {@link SocketChannel} for this {@link Connection}.
 	 * @param socketListener
-	 *            {@link SocketListener}.
+	 *            {@link Old_SocketListener}.
 	 * @param communicationProtocol
 	 *            {@link CommunicationProtocol}.
 	 * @param executeContext
 	 *            {@link ManagedObjectExecuteContext}.
 	 */
-	public ConnectionImpl(SelectionKey selectionKey, SocketChannel socketChannel, SocketListener socketListener,
+	public ConnectionImpl(SelectionKey selectionKey, SocketChannel socketChannel, Old_SocketListener socketListener,
 			CommunicationProtocol communicationProtocol, ManagedObjectExecuteContext<Indexed> executeContext) {
 		this.selectionKey = selectionKey;
 		this.socketChannel = socketChannel;

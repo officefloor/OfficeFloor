@@ -17,28 +17,23 @@
  */
 package net.officefloor.server;
 
-import java.net.Socket;
-import java.nio.ByteBuffer;
-
-import net.officefloor.server.stream.StreamBuffer;
-
 /**
- * Services the {@link Socket}.
+ * Services requests.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SocketServicer<R> {
+public interface RequestServicer<R> {
 
 	/**
-	 * Services the {@link Socket}.
+	 * Services the request.
 	 * 
-	 * @param readBuffer
-	 *            {@link StreamBuffer} containing the just read bytes. Note that
-	 *            this could be the same {@link StreamBuffer} as previous, with
-	 *            just further bytes written.
-	 * @param requestHandler
-	 *            Services the requests from the {@link Socket}.
+	 * @param request
+	 *            Request.
+	 * @param responseWriter
+	 *            {@link ResponseWriter}. To enable pipelining of requests, this
+	 *            {@link ResponseWriter} must be invoked to indicate the request
+	 *            has been serviced (even if no data to send).
 	 */
-	void service(StreamBuffer<ByteBuffer> readBuffer, RequestHandler<R> requestHandler);
+	void service(R request, ResponseWriter responseWriter);
 
 }
