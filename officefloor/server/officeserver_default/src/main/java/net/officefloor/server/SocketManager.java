@@ -422,6 +422,19 @@ public class SocketManager {
 								}
 							}
 						}
+
+						// Determine if write content
+						if ((readyOps & SelectionKey.OP_WRITE) == SelectionKey.OP_WRITE) {
+
+							// Obtain accepted socket (write further content)
+							AcceptedSocket<?> acceptedSocket = (AcceptedSocket<?>) selectedKey.attachment();
+
+							// Write further content
+							if (acceptedSocket.write()) {
+								// All content written, no longer write interest
+								selectedKey.interestOps(SelectionKey.OP_READ);
+							}
+						}
 					}
 
 					// Clear the selected keys as now serviced
@@ -491,6 +504,11 @@ public class SocketManager {
 		private final RequestServicer<R> requestServicer;
 
 		/**
+		 * {@link SelectionKey}.
+		 */
+		private SelectionKey selectionKey;
+
+		/**
 		 * Head {@link SocketRequest}.
 		 */
 		private SocketRequest<R> head = null;
@@ -533,6 +551,26 @@ public class SocketManager {
 
 			// Provide the response buffers for the request
 			socketRequest.responseBuffers = responseBuffers;
+			
+			// Prepare the pooled response buffers
+			for (StreamBuffer<ByteBuffer> streamBuffer : responseBuffers) {
+				if (streamBuffer.isPooled()) {
+					streamBuffer.getPooledBuffer().flip();
+				}
+			}
+			
+			// Write response data
+			this.write();
+		}
+
+		/**
+		 * Undertakes writing the response data.
+		 * 
+		 * @return <code>true</code> if all response data written.
+		 */
+		private boolean write() {
+
+			// TODO determine if thread safe
 
 			// Write buffers in order (and as available)
 			while ((this.head != null) && (this.head.responseBuffers != null)) {
@@ -545,10 +583,7 @@ public class SocketManager {
 					StreamBuffer<ByteBuffer> streamBuffer = iterator.next();
 					ByteBuffer buffer = (streamBuffer.isPooled() ? streamBuffer.getPooledBuffer()
 							: streamBuffer.getUnpooledByteBuffer());
-
-					// Prepare the buffer
-					buffer.flip();
-
+					
 					// Write the buffer
 					try {
 						this.socketChannel.write(buffer);
@@ -559,16 +594,19 @@ public class SocketManager {
 						} catch (IOException closeException) {
 							LOGGER.log(Level.WARNING, "Failed to close connection", closeException);
 						}
+
+						// TODO release all remaining buffers
 					}
 
 					// Determine if written all bytes
 					if (buffer.remaining() != 0) {
 						// Not all bytes written, so write when buffer emptied
 
-						// TODO handle take interest in write
+						// Flag interest in write (as buffer full)
+						this.selectionKey.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
 
 						// Can not write anything further
-						return;
+						return false; // require further writes
 					}
 
 					// Data written, so remove buffer and release it
@@ -579,6 +617,9 @@ public class SocketManager {
 				// Write head response, so move onto next request
 				this.head = this.head.next;
 			}
+
+			// As here, all data written
+			return true;
 		}
 
 		/*
@@ -731,7 +772,8 @@ public class SocketManager {
 				// Obtain the accepted socket and register
 				AcceptedSocket<?> acceptedSocket = iterator.next();
 				try {
-					acceptedSocket.socketChannel.register(this.listener.selector, SelectionKey.OP_READ, acceptedSocket);
+					acceptedSocket.selectionKey = acceptedSocket.socketChannel.register(this.listener.selector,
+							SelectionKey.OP_READ, acceptedSocket);
 				} catch (IOException ex) {
 					LOGGER.log(Level.WARNING, "Failed to register accepted socket", ex);
 				}

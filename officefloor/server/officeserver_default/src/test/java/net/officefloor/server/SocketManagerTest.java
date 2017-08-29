@@ -23,9 +23,13 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.function.Function;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.mock.MockBufferPool;
@@ -261,6 +265,7 @@ public class SocketManagerTest extends OfficeFrameTestCase {
 
 				// Now write the first request (out of order)
 				writer[0].write(new ArrayList<>(Arrays.asList(this.tester.createStreamBuffer(1))));
+				break;
 
 			default:
 				fail("Invalid request " + request);
@@ -272,9 +277,8 @@ public class SocketManagerTest extends OfficeFrameTestCase {
 		// Undertake connect and send data
 		try (Socket client = new Socket(InetAddress.getLocalHost(), 7878)) {
 
-			OutputStream outputStream = client.getOutputStream();
-
 			// Trigger the requests
+			OutputStream outputStream = client.getOutputStream();
 			outputStream.write(1);
 			outputStream.flush();
 
@@ -293,6 +297,95 @@ public class SocketManagerTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can select on write operations to complete writing the large
+	 * response.
+	 */
+	public void testLargeResponse() throws IOException, InterruptedException {
+		this.tester = new SocketManagerTester(1);
+
+		final Function<Integer, Byte> indexValue = (index) -> (byte) (index % Byte.MAX_VALUE);
+
+		// Bind to server socket
+		final int[] bufferSize = new int[] { -1 };
+		this.tester.manager.bindServerSocket(7878, null, (socket) -> {
+			synchronized (bufferSize) {
+				try {
+					bufferSize[0] = socket.getSendBufferSize() * 5;
+					bufferSize.notify();
+				} catch (SocketException ex) {
+					throw fail(ex);
+				}
+			}
+		}, (buffer, requestHandler) -> {
+			requestHandler.handleRequest((byte) 1);
+		}, (request, responseWriter) -> {
+			// Create very large response
+			List<StreamBuffer<ByteBuffer>> buffers = new LinkedList<>();
+			StreamBuffer<ByteBuffer> buffer = this.tester.bufferPool.getPooledStreamBuffer();
+			buffers.add(buffer);
+			for (int i = 0; i < bufferSize[0]; i++) {
+				byte value = indexValue.apply(i);
+				if (!buffer.write(value)) {
+					// Buffer full so write use another
+					buffer = this.tester.bufferPool.getPooledStreamBuffer();
+					buffers.add(buffer);
+					buffer.write(value);
+				}
+			}
+
+			// Send large response
+			responseWriter.write(buffers);
+		});
+
+		this.tester.start();
+
+		// Undertake connect and send data
+		try (Socket client = new Socket(InetAddress.getLocalHost(), 7878)) {
+
+			// Trigger the request
+			OutputStream outputStream = client.getOutputStream();
+			outputStream.write(1);
+			outputStream.flush();
+
+			// Ensure have buffer size
+			long startTime = System.currentTimeMillis();
+			long size;
+			synchronized (bufferSize) {
+				while (bufferSize[0] <= 0) {
+					this.timeout(startTime);
+					bufferSize.wait(10);
+				}
+				size = bufferSize[0];
+			}
+
+			// Read in contents (allowing timing out if too long)
+			TestThread reader = new TestThread(() -> {
+				try {
+					// Ensure have all the data
+					InputStream inputStream = client.getInputStream();
+					for (int i = 0; i < size; i++) {
+						assertEquals("Inocrrect value for index " + i, (byte) indexValue.apply(i), inputStream.read());
+					}
+				} catch (IOException ex) {
+					throw fail(ex);
+				}
+			});
+			reader.start();
+
+			// Ensure read in all content (allowing time for response)
+			reader.waitForCompletion(startTime, 20);
+		}
+	}
+
+	// TODO delay creating request (via another thread)
+
+	// TODO delay sending response (via another thread)
+
+	// TODO delay sending multiple responses (via multiple threads)
+
+	// TODO put in checks to ensure on shutdown that all buffers released
+
+	/**
 	 * Tester to wrap testing the {@link SocketManager}.
 	 */
 	private class SocketManagerTester {
@@ -300,7 +393,7 @@ public class SocketManagerTest extends OfficeFrameTestCase {
 		/**
 		 * {@link BufferPool}.
 		 */
-		private final MockBufferPool bufferPool = new MockBufferPool(() -> ByteBuffer.allocateDirect(10));
+		private final MockBufferPool bufferPool = new MockBufferPool(() -> ByteBuffer.allocateDirect(1024));
 
 		/**
 		 * {@link SocketManager} to test.
@@ -310,7 +403,7 @@ public class SocketManagerTest extends OfficeFrameTestCase {
 		/**
 		 * {@link Thread} instances for the {@link SocketManager}.
 		 */
-		private final SocketThread[] threads;
+		private final TestThread[] threads;
 
 		/**
 		 * Instantiate.
@@ -321,9 +414,9 @@ public class SocketManagerTest extends OfficeFrameTestCase {
 		private SocketManagerTester(int listenerCount) throws IOException {
 			this.manager = new SocketManager(1, this.bufferPool);
 			Runnable[] runnables = this.manager.getRunnables();
-			this.threads = new SocketThread[runnables.length];
+			this.threads = new TestThread[runnables.length];
 			for (int i = 0; i < runnables.length; i++) {
-				this.threads[i] = new SocketThread(runnables[i]);
+				this.threads[i] = new TestThread(runnables[i]);
 			}
 		}
 
@@ -343,7 +436,7 @@ public class SocketManagerTest extends OfficeFrameTestCase {
 		}
 
 		/**
-		 * Starts the {@link SocketThread} instances.
+		 * Starts the {@link TestThread} instances.
 		 */
 		private void start() {
 			for (int i = 0; i < this.threads.length; i++) {
@@ -352,7 +445,7 @@ public class SocketManagerTest extends OfficeFrameTestCase {
 		}
 
 		/**
-		 * Waits on completion of the {@link SocketThread} instances.
+		 * Waits on completion of the {@link TestThread} instances.
 		 */
 		private void waitForCompletion() {
 			long startTime = System.currentTimeMillis();
@@ -363,23 +456,27 @@ public class SocketManagerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * {@link Socket} {@link Thread} for testing.
+	 * {@link Thread} for testing.
 	 */
-	private class SocketThread extends Thread {
+	private class TestThread extends Thread {
 
 		private final Runnable runnable;
 
 		private Object completion = null;
 
-		private SocketThread(Runnable runnable) {
+		private TestThread(Runnable runnable) {
 			this.runnable = runnable;
 		}
 
-		private synchronized void waitForCompletion(long startTime) {
+		private void waitForCompletion(long startTime) {
+			this.waitForCompletion(startTime, 3);
+		}
+
+		private synchronized void waitForCompletion(long startTime, int secondsToRun) {
 			while (this.completion == null) {
 
 				// Determine if timed out
-				SocketManagerTest.this.timeout(startTime);
+				SocketManagerTest.this.timeout(startTime, secondsToRun);
 
 				// Not timed out, so wait a little longer
 				try {
@@ -387,6 +484,11 @@ public class SocketManagerTest extends OfficeFrameTestCase {
 				} catch (InterruptedException ex) {
 					throw SocketManagerTest.fail(ex);
 				}
+			}
+
+			// Determine if failure
+			if (this.completion instanceof Throwable) {
+				throw fail((Throwable) this.completion);
 			}
 		}
 
