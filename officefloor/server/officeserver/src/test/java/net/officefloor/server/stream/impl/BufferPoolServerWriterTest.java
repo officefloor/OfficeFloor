@@ -26,7 +26,6 @@ import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -76,13 +75,13 @@ public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 	private String getContent() {
 
 		// Obtain the buffers
-		List<StreamBuffer<ByteBuffer>> buffers = this.outputStream.getBuffers();
+		StreamBuffer<ByteBuffer> headBuffer = this.outputStream.getBuffers();
 
 		// Release the buffers (as consider request written)
-		MockBufferPool.releaseStreamBuffers(buffers);
+		MockBufferPool.releaseStreamBuffers(headBuffer);
 
 		// Obtain the content
-		return MockBufferPool.getContent(buffers, ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
+		return MockBufferPool.getContent(headBuffer, ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
 	}
 
 	/**
@@ -137,13 +136,13 @@ public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 		differentCharset.flush();
 
 		// Obtain the buffers
-		List<StreamBuffer<ByteBuffer>> buffers = this.outputStream.getBuffers();
-		MockBufferPool.releaseStreamBuffers(buffers);
+		StreamBuffer<ByteBuffer> headBuffer = this.outputStream.getBuffers();
+		MockBufferPool.releaseStreamBuffers(headBuffer);
 
 		// Ensure stream in correct data
 		byte[] expectedData = "Hello World".getBytes(charset);
 		InputStream expectedInput = new ByteArrayInputStream(expectedData);
-		InputStream actualInput = MockBufferPool.createInputStream(buffers);
+		InputStream actualInput = MockBufferPool.createInputStream(headBuffer);
 		for (int i = 0; i < expectedData.length; i++) {
 			assertEquals("Incorrect byte " + i + "(" + Character.valueOf((char) expectedData[i]) + ")",
 					expectedInput.read(), actualInput.read());
@@ -152,14 +151,14 @@ public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 
 		// Ensure stream data
 		StringWriter result = new StringWriter();
-		InputStreamReader reader = new InputStreamReader(MockBufferPool.createInputStream(buffers), charset);
+		InputStreamReader reader = new InputStreamReader(MockBufferPool.createInputStream(headBuffer), charset);
 		for (int character = reader.read(); character != -1; character = reader.read()) {
 			result.write(character);
 		}
 		assertEquals("Incorrect write/read UTF-16 content", "Hello World", result.toString());
 
 		// Ensure can read in content
-		String content = MockBufferPool.getContent(buffers, charset);
+		String content = MockBufferPool.getContent(headBuffer, charset);
 		assertEquals("Incorrect written content", "Hello World", content);
 	}
 

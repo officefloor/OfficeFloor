@@ -21,15 +21,15 @@ import java.nio.ByteBuffer;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.FullHttpResponse;
-import net.officefloor.server.stream.BufferPool;
+import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**
- * Netty {@link BufferPool}.
+ * Netty {@link StreamBufferPool}.
  * 
  * @author Daniel Sagenschneider
  */
-public class NettyBufferPool implements BufferPool<ByteBuf>, StreamBuffer<ByteBuf> {
+public class NettyBufferPool extends StreamBuffer<ByteBuf> implements StreamBufferPool<ByteBuf> {
 
 	/**
 	 * {@link FullHttpResponse}.
@@ -43,6 +43,7 @@ public class NettyBufferPool implements BufferPool<ByteBuf>, StreamBuffer<ByteBu
 	 *            {@link FullHttpResponse}.
 	 */
 	public NettyBufferPool(FullHttpResponse response) {
+		super(response.content(), null);
 		this.response = response;
 	}
 
@@ -64,21 +65,6 @@ public class NettyBufferPool implements BufferPool<ByteBuf>, StreamBuffer<ByteBu
 	/*
 	 * ================== PooledBuffer ==============
 	 */
-
-	@Override
-	public boolean isPooled() {
-		return false;
-	}
-
-	@Override
-	public ByteBuf getPooledBuffer() {
-		return this.response.content();
-	}
-
-	@Override
-	public ByteBuffer getUnpooledByteBuffer() {
-		throw new IllegalStateException(this.getClass().getSimpleName() + " is always writable");
-	}
 
 	@Override
 	public boolean write(byte datum) {

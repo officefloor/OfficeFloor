@@ -26,7 +26,7 @@ import java.nio.ByteBuffer;
  *            Type of buffer being pooled.
  * @author Daniel Sagenschneider
  */
-public interface BufferPool<B> {
+public interface StreamBufferPool<B> {
 
 	/**
 	 * Obtains a {@link StreamBuffer}.

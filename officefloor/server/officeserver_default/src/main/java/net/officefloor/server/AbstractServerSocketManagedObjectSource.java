@@ -40,7 +40,7 @@ import net.officefloor.server.http.protocol.CommunicationProtocol;
 import net.officefloor.server.http.protocol.CommunicationProtocolContext;
 import net.officefloor.server.http.protocol.CommunicationProtocolSource;
 import net.officefloor.server.http.protocol.Connection;
-import net.officefloor.server.stream.BufferPool;
+import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**
@@ -95,12 +95,12 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	 * @param numberOfSocketListeners
 	 *            Number of {@link Old_SocketListener} instances.
 	 * @param bufferPool
-	 *            {@link BufferPool}.
+	 *            {@link StreamBufferPool}.
 	 * @return {@link Old_SocketManager}.
 	 */
 	private static synchronized Old_SocketManager getSocketManager(ManagedObjectSourceContext<Indexed> mosContext,
 			AbstractServerSocketManagedObjectSource instance, int numberOfSocketListeners,
-			BufferPool<ByteBuffer> bufferPool) throws IOException {
+			StreamBufferPool<ByteBuffer> bufferPool) throws IOException {
 
 		// Ensure consistent interface for teams
 		mosContext.addManagedFunction("consistency", () -> (context) -> null).setResponsibleTeam("listener");
@@ -275,7 +275,7 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 		this.port = Integer.parseInt(mosContext.getProperty(PROPERTY_PORT));
 		this.bufferSize = Integer
 				.parseInt(mosContext.getProperty(PROPERTY_BUFFER_SIZE, String.valueOf(osSendBufferSize)));
-		BufferPool<ByteBuffer> bufferPool = null;
+		StreamBufferPool<ByteBuffer> bufferPool = null;
 
 		// Obtain the number of socket listeners
 		int numberOfSocketListeners = Integer.parseInt(mosContext.getProperty(PROPERTY_SOCKET_LISTENER_COUNT,
@@ -328,7 +328,7 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	 */
 
 	@Override
-	public BufferPool<ByteBuffer> getBufferPool() {
+	public StreamBufferPool<ByteBuffer> getBufferPool() {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -20,6 +20,8 @@ package net.officefloor.server.http;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.management.GarbageCollectorMXBean;
+import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -30,6 +32,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.management.NotificationEmitter;
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.HttpResponse;
@@ -71,6 +74,19 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * HTTPS secure port.
 	 */
 	private static final int HTTPS_PORT = 7979;
+	
+	static {
+		// Hook in for GC
+		for (GarbageCollectorMXBean gcBean : ManagementFactory.getGarbageCollectorMXBeans()) {
+			NotificationEmitter emitter = (NotificationEmitter) gcBean;
+			emitter.addNotificationListener((notification, handback) -> {
+
+				// Indicate Garbage collection
+				System.out.println(" -> GC: " + gcBean.getName() + " (" + gcBean.getCollectionTime() + " ms) - "
+						+ notification.getType());
+			}, null, null);
+		}
+	}
 
 	/**
 	 * Creates a new {@link HttpHeader}.

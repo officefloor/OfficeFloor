@@ -20,8 +20,6 @@ package net.officefloor.server.stream.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.Iterator;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -211,14 +209,13 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 	 */
 	@SafeVarargs
 	private final void assertBuffers(Function<StreamBuffer<ByteBuffer>, Integer>... validators) {
-		List<StreamBuffer<ByteBuffer>> buffers = this.outputStream.getBuffers();
-		assertEquals("Incorrect number of buffers", validators.length, buffers.size());
-		Iterator<StreamBuffer<ByteBuffer>> bufferIterator = buffers.iterator();
+		StreamBuffer<ByteBuffer> buffer = this.outputStream.getBuffers();
 		int expectedTotalBytes = 0;
 		for (Function<StreamBuffer<ByteBuffer>, Integer> validator : validators) {
-			StreamBuffer<ByteBuffer> buffer = bufferIterator.next();
 			expectedTotalBytes += validator.apply(buffer);
+			buffer = buffer.next;
 		}
+		assertNull("Incorrect number of buffers", buffer); // move past end
 		assertEquals("Incorrect Content-Length", expectedTotalBytes, this.outputStream.getContentLength());
 	}
 
@@ -232,8 +229,8 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 	 * @return Number of bytes in buffer.
 	 */
 	private static int assertPooledBuffer(StreamBuffer<ByteBuffer> buffer, int... expectedBytes) {
-		assertTrue("Should be pooled buffer", buffer.isPooled());
-		ByteBuffer data = buffer.getPooledBuffer();
+		assertTrue("Should be pooled buffer", buffer.isPooled);
+		ByteBuffer data = buffer.pooledBuffer;
 		assertTrue("Buffer should be larger than expected bytes", data.position() >= expectedBytes.length);
 		for (int i = 0; i < expectedBytes.length; i++) {
 			assertEquals("Incorrect byte " + i, expectedBytes[i], data.get(i));
@@ -254,8 +251,8 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 	 * @return Number of bytes in buffer.
 	 */
 	private static int assertUnpooledBuffer(StreamBuffer<ByteBuffer> buffer, int... expectedBytes) {
-		assertFalse("Should be unpooled buffer", buffer.isPooled());
-		ByteBuffer byteBuffer = buffer.getUnpooledByteBuffer();
+		assertFalse("Should be unpooled buffer", buffer.isPooled);
+		ByteBuffer byteBuffer = buffer.unpooledByteBuffer;
 		assertEquals("Incorrect number of bytes", expectedBytes.length, byteBuffer.remaining());
 		for (int i = 0; i < expectedBytes.length; i++) {
 			assertEquals("Incorrect byte " + i, expectedBytes[i], byteBuffer.get());

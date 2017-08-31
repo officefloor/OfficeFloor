@@ -44,7 +44,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.server.http.protocol.CommunicationProtocol;
 import net.officefloor.server.http.protocol.Connection;
-import net.officefloor.server.stream.BufferPool;
+import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**
@@ -82,9 +82,9 @@ public class Old_SocketListener extends StaticManagedFunction<None, Old_SocketLi
 	private final Queue<AcceptedSocket> acceptedSockets = new ConcurrentLinkedQueue<AcceptedSocket>();
 
 	/**
-	 * {@link BufferPool}.
+	 * {@link StreamBufferPool}.
 	 */
-	private final BufferPool<ByteBuffer> bufferPool;
+	private final StreamBufferPool<ByteBuffer> bufferPool;
 
 	/**
 	 * {@link Queue} of {@link WriteDataAction} instances to be undertaken on
@@ -118,9 +118,10 @@ public class Old_SocketListener extends StaticManagedFunction<None, Old_SocketLi
 	 * @param socketManager
 	 *            {@link Old_SocketManager}.
 	 * @param bufferPool
-	 *            {@link BufferPool}.
+	 *            {@link StreamBufferPool}.
 	 */
-	public Old_SocketListener(Old_SocketManager socketManager, BufferPool<ByteBuffer> bufferPool) throws IOException {
+	public Old_SocketListener(Old_SocketManager socketManager, StreamBufferPool<ByteBuffer> bufferPool)
+			throws IOException {
 		this.socketManager = socketManager;
 		this.bufferPool = bufferPool;
 	}
@@ -405,12 +406,12 @@ public class Old_SocketListener extends StaticManagedFunction<None, Old_SocketLi
 
 								// Obtain the stream buffer for connection
 								StreamBuffer<ByteBuffer> readBuffer = connection.getReadStreamBuffer();
-								if ((readBuffer == null) || (readBuffer.getPooledBuffer().remaining() == 0)) {
+								if ((readBuffer == null) || (readBuffer.pooledBuffer.remaining() == 0)) {
 									// Require new read buffer for connection
 									readBuffer = this.bufferPool.getPooledStreamBuffer();
 									connection.setReadStreamBuffer(readBuffer);
 								}
-								ByteBuffer readByteBuffer = readBuffer.getPooledBuffer();
+								ByteBuffer readByteBuffer = readBuffer.pooledBuffer;
 
 								// Read content from channel
 								int bytesRead;

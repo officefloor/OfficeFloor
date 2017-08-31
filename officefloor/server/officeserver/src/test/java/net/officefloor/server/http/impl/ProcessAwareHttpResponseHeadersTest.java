@@ -20,7 +20,6 @@ package net.officefloor.server.http.impl;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
-import java.util.List;
 
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
@@ -174,13 +173,15 @@ public class ProcessAwareHttpResponseHeadersTest extends OfficeFrameTestCase {
 		ServerWriter writer = outputStream.getServerWriter(ServerHttpConnection.HTTP_CHARSET);
 
 		// Write the headers
-		for (WritableHttpHeader header : this.headers.getWritableHttpHeaders()) {
+		Iterator<WritableHttpHeader> iterator = this.headers.getWritableHttpHeaders();
+		while (iterator.hasNext()) {
+			WritableHttpHeader header = iterator.next();
 			header.writeHttpHeader(writer);
 		}
 		writer.flush();
 
 		// Obtain the content
-		List<StreamBuffer<ByteBuffer>> buffers = outputStream.getBuffers();
+		StreamBuffer<ByteBuffer> buffers = outputStream.getBuffers();
 		MockBufferPool.releaseStreamBuffers(buffers);
 		String content = MockBufferPool.getContent(buffers, ServerHttpConnection.HTTP_CHARSET);
 
@@ -199,13 +200,25 @@ public class ProcessAwareHttpResponseHeadersTest extends OfficeFrameTestCase {
 	 *            {@link Iterator}.
 	 */
 	private static void assertHeaderNames(Iterable<? extends HttpHeader> headers, String... expectedHeaderNames) {
-		Iterator<? extends HttpHeader> iterator = headers.iterator();
+		assertHeaderNames(headers.iterator(), expectedHeaderNames);
+	}
+
+	/**
+	 * Asserts the {@link HttpHeader} instances.
+	 * 
+	 * @param headers
+	 *            {@link Iterator} over the {@link HttpHeader} instances.
+	 * @param expectedHeaderNames
+	 *            Expected {@link HttpHeader} names in order as per
+	 *            {@link Iterator}.
+	 */
+	private static void assertHeaderNames(Iterator<? extends HttpHeader> headers, String... expectedHeaderNames) {
 		for (int i = 0; i < expectedHeaderNames.length; i++) {
-			assertTrue("Should have HTTP header " + i, iterator.hasNext());
-			HttpHeader header = iterator.next();
+			assertTrue("Should have HTTP header " + i, headers.hasNext());
+			HttpHeader header = headers.next();
 			assertEquals("Incorrect HTTP header " + i, expectedHeaderNames[i], header.getName());
 		}
-		assertFalse("Should be no further headers", iterator.hasNext());
+		assertFalse("Should be no further headers", headers.hasNext());
 	}
 
 	/**

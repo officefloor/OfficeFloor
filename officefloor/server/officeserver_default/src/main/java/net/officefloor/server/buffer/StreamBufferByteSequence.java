@@ -260,7 +260,7 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 			}
 
 			// Obtain the character
-			character = segment.buffer.getPooledBuffer().get(segment.offset + segmentTrimOffset);
+			character = segment.buffer.pooledBuffer.get(segment.offset + segmentTrimOffset);
 
 			// Determine if white space
 			isWhiteSpace = ((character == HTTP_SPACE) || (character == HTTP_TAB));
@@ -282,7 +282,7 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 		// Trim the right side
 		segment = this.tail;
 		int segmentTrimLength = segment.length;
-		character = segment.buffer.getPooledBuffer().get(segment.offset + segmentTrimLength - 1);
+		character = segment.buffer.pooledBuffer.get(segment.offset + segmentTrimLength - 1);
 		while ((character == HTTP_SPACE) || (character == HTTP_TAB)) {
 
 			// Space so trim off the content
@@ -309,7 +309,7 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 			}
 
 			// Obtain the next character
-			character = segment.buffer.getPooledBuffer().get(segment.offset + segmentTrimLength - 1);
+			character = segment.buffer.pooledBuffer.get(segment.offset + segmentTrimLength - 1);
 		}
 		segment.length = segmentTrimLength;
 
@@ -326,11 +326,11 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 			throws T {
 
 		// Determine if starts with quote
-		byte character = this.head.buffer.getPooledBuffer().get(this.head.offset);
+		byte character = this.head.buffer.pooledBuffer.get(this.head.offset);
 		if (character == HTTP_QUOTE) {
 
 			// Determine if last character is quote
-			character = this.tail.buffer.getPooledBuffer().get(this.tail.offset + this.tail.length - 1);
+			character = this.tail.buffer.pooledBuffer.get(this.tail.offset + this.tail.length - 1);
 			if (character != HTTP_QUOTE) {
 				throw invalidValueExceptionFactory.get();
 			}
@@ -436,7 +436,7 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 
 			// Read the values for the segment
 			for (int i = 0; i < readSegment.length; i++) {
-				byte readByte = readSegment.buffer.getPooledBuffer().get(readSegment.offset + i);
+				byte readByte = readSegment.buffer.pooledBuffer.get(readSegment.offset + i);
 
 				// Handle writing content (based on state)
 				boolean isWriteByte = true;
@@ -478,7 +478,7 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 						writeSegment = writeSegment.next;
 						writeSegmentPosition = 0;
 					}
-					writeSegment.buffer.getPooledBuffer().put(writeSegment.offset + writeSegmentPosition, readByte);
+					writeSegment.buffer.pooledBuffer.put(writeSegment.offset + writeSegmentPosition, readByte);
 					writeSegmentPosition++;
 				}
 			}
@@ -622,7 +622,7 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 		while (segment != null) {
 
 			// Slice up buffer to content
-			ByteBuffer input = segment.buffer.getPooledBuffer().duplicate();
+			ByteBuffer input = segment.buffer.pooledBuffer.duplicate();
 			input.position(segment.offset);
 			input.limit(segment.offset + segment.length);
 
@@ -739,8 +739,7 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 		}
 
 		// Return the byte at the current position
-		return this.currentSegment.buffer.getPooledBuffer()
-				.get(this.currentSegment.offset + this.currentSegmentPosition);
+		return this.currentSegment.buffer.pooledBuffer.get(this.currentSegment.offset + this.currentSegmentPosition);
 	}
 
 	@Override

@@ -19,15 +19,15 @@ package net.officefloor.server.stream.impl;
 
 import java.nio.ByteBuffer;
 
-import net.officefloor.server.stream.BufferPool;
+import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**
- * Abstract {@link BufferPool}.
+ * Abstract {@link StreamBufferPool}.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractBufferPool<B> implements BufferPool<B> {
+public abstract class AbstractStreamBufferPool<B> implements StreamBufferPool<B> {
 
 	/*
 	 * ==================== BufferPool =======================
@@ -41,12 +41,7 @@ public abstract class AbstractBufferPool<B> implements BufferPool<B> {
 	/**
 	 * Unpooled {@link StreamBuffer}.
 	 */
-	protected class UnpooledStreamBuffer implements StreamBuffer<B> {
-
-		/**
-		 * {@link ByteBuffer}.
-		 */
-		private final ByteBuffer buffer;
+	protected class UnpooledStreamBuffer extends StreamBuffer<B> {
 
 		/**
 		 * Instantiate.
@@ -55,27 +50,12 @@ public abstract class AbstractBufferPool<B> implements BufferPool<B> {
 		 *            Read-only {@link ByteBuffer}.
 		 */
 		private UnpooledStreamBuffer(ByteBuffer buffer) {
-			this.buffer = buffer;
+			super(null, buffer);
 		}
 
 		/*
-		 * =================== PooledBuffer ======================
+		 * =================== StreamBuffer ======================
 		 */
-
-		@Override
-		public boolean isPooled() {
-			return false;
-		}
-
-		@Override
-		public B getPooledBuffer() {
-			throw new IllegalStateException(this.getClass().getSimpleName() + " is unpooled");
-		}
-
-		@Override
-		public ByteBuffer getUnpooledByteBuffer() {
-			return this.buffer;
-		}
 
 		@Override
 		public boolean write(byte datum) {
@@ -90,26 +70,6 @@ public abstract class AbstractBufferPool<B> implements BufferPool<B> {
 		@Override
 		public void release() {
 			// Nothing to release
-		}
-	}
-
-	/**
-	 * Pooled {@link StreamBuffer}.
-	 */
-	protected abstract class AbstractPooledStreamBuffer implements StreamBuffer<B> {
-
-		/*
-		 * =================== PooledBuffer ======================
-		 */
-
-		@Override
-		public boolean isPooled() {
-			return true;
-		}
-
-		@Override
-		public ByteBuffer getUnpooledByteBuffer() {
-			throw new IllegalStateException(this.getClass().getSimpleName() + " is pooled");
 		}
 	}
 

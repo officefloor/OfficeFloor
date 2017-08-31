@@ -22,6 +22,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.Pipe;
 import java.nio.channels.ReadableByteChannel;
@@ -39,7 +40,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.officefloor.server.stream.BufferPool;
+import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**
@@ -86,11 +87,11 @@ public class SocketManager {
 	 * @param listenerCount
 	 *            Number of {@link SocketListener} instances.
 	 * @param bufferPool
-	 *            {@link BufferPool}.
+	 *            {@link StreamBufferPool}.
 	 * @throws IOException
 	 *             If fails to initialise {@link Socket} management.
 	 */
-	public SocketManager(int listenerCount, BufferPool<ByteBuffer> bufferPool) throws IOException {
+	public SocketManager(int listenerCount, StreamBufferPool<ByteBuffer> bufferPool) throws IOException {
 		this.listeners = new SocketListener[listenerCount];
 		for (int i = 0; i < listeners.length; i++) {
 			listeners[i] = new SocketListener(bufferPool);
@@ -188,9 +189,9 @@ public class SocketManager {
 	private class SocketListener implements Runnable {
 
 		/**
-		 * {@link BufferPool}.
+		 * {@link StreamBufferPool}.
 		 */
-		private final BufferPool<ByteBuffer> bufferPool;
+		private final StreamBufferPool<ByteBuffer> bufferPool;
 
 		/**
 		 * {@link Selector}.
@@ -216,12 +217,12 @@ public class SocketManager {
 		 * Instantiate.
 		 * 
 		 * @param bufferPool
-		 *            {@link BufferPool}.
+		 *            {@link StreamBufferPool}.
 		 * @throws IOException
 		 *             If fails to establish necessary {@link Socket} and
 		 *             {@link Pipe} facilities.
 		 */
-		private SocketListener(BufferPool<ByteBuffer> bufferPool) throws IOException {
+		private SocketListener(StreamBufferPool<ByteBuffer> bufferPool) throws IOException {
 			this.bufferPool = bufferPool;
 
 			// Create the selector
@@ -305,6 +306,25 @@ public class SocketManager {
 			this.shutdownPipe.sink().write(NOTIFY_BUFFER.duplicate());
 		}
 
+		/**
+		 * Terminates the {@link SelectionKey}.
+		 * 
+		 * @param selectionKey
+		 *            {@link SelectionKey}.
+		 */
+		private void terminteSelectionKey(SelectionKey selectionKey) {
+			try {
+				selectionKey.channel().close();
+			} catch (ClosedChannelException ex) {
+				// Ignore, already closed
+			} catch (IOException ex) {
+				LOGGER.log(Level.WARNING, "Failed closing connection", ex);
+			} finally {
+				// Ensure cancel the key
+				selectionKey.cancel();
+			}
+		}
+
 		/*
 		 * =================== Runnable =========================
 		 */
@@ -318,7 +338,7 @@ public class SocketManager {
 
 					// Select keys
 					try {
-						this.selector.select(1000); // 1 second
+						this.selector.select(50);
 					} catch (IOException ex) {
 						// Should not occur
 						LOGGER.log(Level.SEVERE, "Selector failure", ex);
@@ -329,10 +349,19 @@ public class SocketManager {
 					Set<SelectionKey> selectedKeys = this.selector.selectedKeys();
 
 					// Service the selected keys
-					NEXT_KEY: for (SelectionKey selectedKey : selectedKeys) {
+					Iterator<SelectionKey> iterator = selectedKeys.iterator();
+					NEXT_KEY: while (iterator.hasNext()) {
+						SelectionKey selectedKey = iterator.next();
+						iterator.remove();
 
-						// Obtain the ready operations
-						int readyOps = selectedKey.readyOps();
+						// Obtain the ready operations (and handle cancelled)
+						int readyOps;
+						try {
+							readyOps = selectedKey.readyOps();
+						} catch (CancelledKeyException ex) {
+							this.terminteSelectionKey(selectedKey);
+							continue NEXT_KEY;
+						}
 
 						// Determine if accept
 						if ((readyOps & SelectionKey.OP_ACCEPT) == SelectionKey.OP_ACCEPT) {
@@ -351,6 +380,7 @@ public class SocketManager {
 								// Configure the socket
 								Socket socket = socketChannel.socket();
 								socket.setTcpNoDelay(true);
+								socket.setReuseAddress(true);
 								handler.acceptedSocketDecorator.decorate(socket);
 
 								// Manage the accepted socket
@@ -373,54 +403,33 @@ public class SocketManager {
 							// Obtain the read handler
 							AbstractReadHandler handler = (AbstractReadHandler) selectedKey.attachment();
 
-							// Keep reading data until empty socket buffer
-							boolean isFurtherDataToRead = true;
-							while (isFurtherDataToRead) {
-
-								// Ensure have buffer to handle read
-								if ((handler.readBuffer == null)
-										|| (handler.readBuffer.getPooledBuffer().remaining() == 0)) {
-									// Require a new buffer
-									handler.readBuffer = this.bufferPool.getPooledStreamBuffer();
-								}
-
-								// Obtain the byte buffer
-								ByteBuffer buffer = handler.readBuffer.getPooledBuffer();
-
-								// Read content from channel
-								int bytesRead = 0;
-								IOException readFailure = null;
-								try {
-									bytesRead = handler.channel.read(buffer);
-								} catch (IOException ex) {
-									readFailure = ex;
-								}
-
-								// Determine if closed connection or in error
-								if ((bytesRead < 0) || (readFailure != null)) {
-									// Connection failed, so terminate
-									try {
-										handler.channel.close();
-									} catch (ClosedChannelException ex) {
-										// Ignore, already closed
-									} catch (IOException ex) {
-										LOGGER.log(Level.WARNING, "Failed closing connection", ex);
-									} finally {
-										// Ensure cancel the key
-										selectedKey.cancel();
-									}
-									continue NEXT_KEY;
-								}
-
-								// Handle the read
-								handler.handleRead();
-
-								// Determine if further data
-								if (buffer.remaining() != 0) {
-									// Buffer did not fill, so no further data
-									isFurtherDataToRead = false;
-								}
+							// Ensure have buffer to handle read
+							if ((handler.readBuffer == null) || (handler.readBuffer.pooledBuffer.remaining() == 0)) {
+								// Require a new buffer
+								handler.readBuffer = this.bufferPool.getPooledStreamBuffer();
 							}
+
+							// Obtain the byte buffer
+							ByteBuffer buffer = handler.readBuffer.pooledBuffer;
+
+							// Read content from channel
+							int bytesRead = 0;
+							IOException readFailure = null;
+							try {
+								bytesRead = handler.channel.read(buffer);
+							} catch (IOException ex) {
+								readFailure = ex;
+							}
+
+							// Determine if closed connection or in error
+							if ((bytesRead < 0) || (readFailure != null)) {
+								// Connection failed, so terminate
+								this.terminteSelectionKey(selectedKey);
+								continue NEXT_KEY;
+							}
+
+							// Handle the read
+							handler.handleRead();
 						}
 
 						// Determine if write content
@@ -436,9 +445,6 @@ public class SocketManager {
 							}
 						}
 					}
-
-					// Clear the selected keys as now serviced
-					selectedKeys.clear();
 				}
 
 			} finally {
@@ -509,6 +515,17 @@ public class SocketManager {
 		private SelectionKey selectionKey;
 
 		/**
+		 * Request {@link StreamBuffer} instances to be released with the
+		 * current request.
+		 */
+		private StreamBuffer<ByteBuffer> releaseRequestBuffers = null;
+
+		/**
+		 * Previous request {@link StreamBuffer}.
+		 */
+		private StreamBuffer<ByteBuffer> previousRequestBuffer = null;
+
+		/**
 		 * Head {@link SocketRequest}.
 		 */
 		private SocketRequest<R> head = null;
@@ -541,24 +558,25 @@ public class SocketManager {
 		 * 
 		 * @param socketRequest
 		 *            {@link SocketRequest}.
-		 * @param responseBuffers
-		 *            Response {@link StreamBuffer} instances for the
+		 * @param headResponseBuffer
+		 *            Head response {@link StreamBuffer} of the linked list of
+		 *            {@link StreamBuffer} instances for the
 		 *            {@link SocketRequest}.
 		 */
-		private void writeResponse(SocketRequest<R> socketRequest, Iterable<StreamBuffer<ByteBuffer>> responseBuffers) {
+		private void writeResponse(SocketRequest<R> socketRequest, StreamBuffer<ByteBuffer> headResponseBuffer) {
 
 			// TODO determine if thread safe
 
 			// Provide the response buffers for the request
-			socketRequest.responseBuffers = responseBuffers;
-			
+			socketRequest.headResponseBuffer = headResponseBuffer;
+
 			// Prepare the pooled response buffers
-			for (StreamBuffer<ByteBuffer> streamBuffer : responseBuffers) {
-				if (streamBuffer.isPooled()) {
-					streamBuffer.getPooledBuffer().flip();
-				}
+			StreamBuffer<ByteBuffer> streamBuffer = headResponseBuffer;
+			while (streamBuffer != null) {
+				streamBuffer.pooledBuffer.flip();
+				streamBuffer = streamBuffer.next;
 			}
-			
+
 			// Write response data
 			this.write();
 		}
@@ -568,22 +586,24 @@ public class SocketManager {
 		 * 
 		 * @return <code>true</code> if all response data written.
 		 */
-		private boolean write() {
+		private synchronized boolean write() {
 
 			// TODO determine if thread safe
 
 			// Write buffers in order (and as available)
-			while ((this.head != null) && (this.head.responseBuffers != null)) {
+			while ((this.head != null) && (this.head.headResponseBuffer != null)) {
 
 				// Write the response
-				Iterator<StreamBuffer<ByteBuffer>> iterator = this.head.responseBuffers.iterator();
-				while (iterator.hasNext()) {
+				NEXT_BUFFER: while (this.head.headResponseBuffer != null) {
 
 					// Obtain the next buffer
-					StreamBuffer<ByteBuffer> streamBuffer = iterator.next();
-					ByteBuffer buffer = (streamBuffer.isPooled() ? streamBuffer.getPooledBuffer()
-							: streamBuffer.getUnpooledByteBuffer());
-					
+					StreamBuffer<ByteBuffer> streamBuffer = this.head.headResponseBuffer;
+					ByteBuffer buffer = (streamBuffer.isPooled ? streamBuffer.pooledBuffer
+							: streamBuffer.unpooledByteBuffer);
+					if (buffer.remaining() == 0) {
+						continue NEXT_BUFFER;
+					}
+
 					// Write the buffer
 					try {
 						this.socketChannel.write(buffer);
@@ -609,9 +629,16 @@ public class SocketManager {
 						return false; // require further writes
 					}
 
-					// Data written, so remove buffer and release it
-					iterator.remove();
+					// Buffer written, move to next (releasing written buffer)
+					this.head.headResponseBuffer = streamBuffer.next;
 					streamBuffer.release();
+				}
+
+				// As here, response written (so release all buffers)
+				StreamBuffer<ByteBuffer> requestBuffer = this.head.headRequestBuffer;
+				while (requestBuffer != null) {
+					requestBuffer.release();
+					requestBuffer = requestBuffer.next;
 				}
 
 				// Write head response, so move onto next request
@@ -629,7 +656,13 @@ public class SocketManager {
 		@Override
 		public void handleRead() {
 
-			// TODO keep track of buffers (to enable releasing)
+			// Keep track of buffers (to enable releasing)
+			if ((this.previousRequestBuffer != null) && (this.previousRequestBuffer != this.readBuffer)) {
+				// New buffer (release previous on servicing request)
+				this.previousRequestBuffer.next = this.releaseRequestBuffers;
+				this.releaseRequestBuffers = this.previousRequestBuffer;
+			}
+			this.previousRequestBuffer = this.readBuffer;
 
 			// Service the socket
 			this.socketServicer.service(this.readBuffer, this);
@@ -643,7 +676,8 @@ public class SocketManager {
 		public void handleRequest(R request) {
 
 			// Create the socket request
-			SocketRequest<R> socketRequest = new SocketRequest<>(this);
+			SocketRequest<R> socketRequest = new SocketRequest<>(this, this.releaseRequestBuffers);
+			this.releaseRequestBuffers = null;
 
 			// TODO determine if thread safe
 
@@ -674,23 +708,33 @@ public class SocketManager {
 		private final AcceptedSocket<R> acceptedSocket;
 
 		/**
+		 * Head request {@link StreamBuffer} of the linked list of
+		 * {@link StreamBuffer} instances.
+		 */
+		private final StreamBuffer<ByteBuffer> headRequestBuffer;
+
+		/**
+		 * Head response {@link StreamBuffer} of the linked list of
+		 * {@link StreamBuffer} instances.
+		 */
+		private StreamBuffer<ByteBuffer> headResponseBuffer = null;
+
+		/**
 		 * Next {@link SocketRequest}.
 		 */
 		private SocketRequest<R> next = null;
-
-		/**
-		 * Response {@link StreamBuffer} instances.
-		 */
-		private Iterable<StreamBuffer<ByteBuffer>> responseBuffers = null;
 
 		/**
 		 * Instantiate.
 		 * 
 		 * @param acceptedSocket
 		 *            {@link AcceptedSocket}.
+		 * @param headRequestBuffer
+		 *            Request {@link StreamBuffer} instances.
 		 */
-		private SocketRequest(AcceptedSocket<R> acceptedSocket) {
+		private SocketRequest(AcceptedSocket<R> acceptedSocket, StreamBuffer<ByteBuffer> headRequestBuffer) {
 			this.acceptedSocket = acceptedSocket;
+			this.headRequestBuffer = headRequestBuffer;
 		}
 
 		/*
@@ -698,8 +742,8 @@ public class SocketManager {
 		 */
 
 		@Override
-		public void write(Iterable<StreamBuffer<ByteBuffer>> responseBuffers) {
-			this.acceptedSocket.writeResponse(this, responseBuffers);
+		public void write(StreamBuffer<ByteBuffer> headResponseBuffers) {
+			this.acceptedSocket.writeResponse(this, headResponseBuffers);
 		}
 	}
 
@@ -818,9 +862,9 @@ public class SocketManager {
 			this.readBuffer.release();
 			this.readBuffer = null;
 
-			// Cancel all keys
+			// Terminate all keys
 			for (SelectionKey key : this.listener.selector.keys()) {
-				key.cancel();
+				this.listener.terminteSelectionKey(key);
 			}
 
 			// Flag to shutdown

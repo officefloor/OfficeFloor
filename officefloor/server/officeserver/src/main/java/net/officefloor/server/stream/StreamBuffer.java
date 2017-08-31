@@ -26,66 +26,112 @@ import java.nio.ByteBuffer;
  *            Type of buffer.
  * @author Daniel Sagenschneider
  */
-public interface StreamBuffer<B> {
+public abstract class StreamBuffer<B> {
 
 	/**
 	 * Indicates if pooled.
 	 * 
 	 * @return <code>true</code> if pooled.
 	 */
-	boolean isPooled();
+	public final boolean isPooled;
 
 	/**
 	 * Obtains the pooled buffer.
 	 * 
 	 * @return Buffer. Will be <code>null</code> if read-only.
 	 */
-	B getPooledBuffer();
+	public final B pooledBuffer;
 
 	/**
 	 * Obtains the read-only {@link ByteBuffer}.
 	 * 
 	 * @return {@link ByteBuffer}. Will be <code>null</code> if read-only.
 	 */
-	ByteBuffer getUnpooledByteBuffer();
+	public final ByteBuffer unpooledByteBuffer;
 
 	/**
-	 * Writes a byte to the buffer.
+	 * <p>
+	 * Next {@link StreamBuffer} in the stream.
+	 * <p>
+	 * This allows chaining {@link StreamBuffer} instances into a linked list
+	 * (and avoids memory management overheads of creating/destroying lists).
+	 */
+	public StreamBuffer<B> next = null;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param pooledBuffer
+	 *            Pooled buffer. Must be <code>null</code> if unpooled
+	 *            {@link ByteBuffer} provided.
+	 * @param unpooledByteBuffer
+	 *            Unpooled {@link ByteBuffer}. Must be <code>null</code> if
+	 *            pooled buffer provided.
+	 * @throws IllegalArgumentException
+	 *             If not providing the one buffer.
+	 */
+	public StreamBuffer(B pooledBuffer, ByteBuffer unpooledByteBuffer) {
+		if (pooledBuffer != null) {
+
+			// Pooled buffer, so ensure only pooled buffer
+			if (unpooledByteBuffer != null) {
+				throw new IllegalArgumentException("Must provide either pooled or unpooled buffer (not both)");
+			}
+
+			// Setup for pooled buffer
+			this.isPooled = true;
+			this.pooledBuffer = pooledBuffer;
+			this.unpooledByteBuffer = null;
+
+		} else if (unpooledByteBuffer != null) {
+			// Setup for unpooled buffer
+			this.isPooled = false;
+			this.pooledBuffer = null;
+			this.unpooledByteBuffer = unpooledByteBuffer;
+
+		} else {
+			// No buffer provided
+			throw new IllegalArgumentException("Must provide a pooled or unpooled buffer");
+		}
+	}
+
+	/**
+	 * Writes a byte to the pooled buffer.
 	 * 
 	 * @param datum
 	 *            Byte value.
 	 * @return <code>true</code> if written value to buffer. <code>false</code>
-	 *         indicates the buffer is full.
+	 *         indicates the pooled buffer is full.
 	 */
-	boolean write(byte datum);
+	public abstract boolean write(byte datum);
 
 	/**
-	 * Writes the data to the buffer.
+	 * Writes the data to the pooled buffer.
 	 * 
 	 * @param data
-	 *            Data to write to the buffer.
+	 *            Data to write to the pooled buffer.
 	 * @param offset
 	 *            Offset within the data to write the data.
 	 * @param length
 	 *            Length of data to write the data.
 	 * @return Number of bytes written.
 	 */
-	int write(byte[] data, int offset, int length);
+	public abstract int write(byte[] data, int offset, int length);
 
 	/**
-	 * Writes all the data to the buffer.
+	 * Writes all the data to the pooled buffer.
 	 * 
 	 * @param data
-	 *            Data to write to the buffer.
+	 *            Data to write to the pooled buffer.
 	 * @return Number of bytes written.
 	 */
-	default int write(byte[] data) {
+	public int write(byte[] data) {
 		return this.write(data, 0, data.length);
 	}
 
 	/**
 	 * Releases this {@link StreamBuffer} for re-use.
 	 */
-	void release();
+	public abstract void release();
 
 }

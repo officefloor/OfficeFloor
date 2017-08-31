@@ -68,8 +68,8 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		// Ensure correct defaults
 		assertEquals("Incorrect version", HttpVersion.HTTP_1_1, this.version);
 		assertEquals("Incorrect status", HttpStatus.OK, this.status);
-		assertFalse("Should be no headers", this.httpHeaders.iterator().hasNext());
-		assertFalse("Should be no entity data", this.content.iterator().hasNext());
+		assertFalse("Should be no headers", this.httpHeaders.hasNext());
+		assertNull("Should be no entity data", this.contentHeadStreamBuffer);
 	}
 
 	/**
@@ -131,12 +131,11 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 
 		// Ensure writes have HTTP header
 		this.response.send();
-		Iterator<WritableHttpHeader> iterator = this.httpHeaders.iterator();
-		assertTrue("Should have header", iterator.hasNext());
-		WritableHttpHeader header = iterator.next();
+		assertTrue("Should have header", this.httpHeaders.hasNext());
+		WritableHttpHeader header = this.httpHeaders.next();
 		assertEquals("Incorrect header name", "test", header.getName());
 		assertEquals("Incorrect header value", "value", header.getValue());
-		assertFalse("Should be no further headers", iterator.hasNext());
+		assertFalse("Should be no further headers", this.httpHeaders.hasNext());
 	}
 
 	/**
@@ -150,7 +149,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		// Ensure no content
 		assertEquals("Should be no content", 0, this.contentLength);
 		assertNull("No content-type, as no content", this.contentType);
-		assertFalse("No content", this.content.iterator().hasNext());
+		assertNull("No content", this.contentHeadStreamBuffer);
 	}
 
 	/**
@@ -173,8 +172,8 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		assertEquals("Incorrect Content-Type", "application/octet-stream", this.contentType.getValue());
 
 		// Ensure correct content
-		MockBufferPool.releaseStreamBuffers(this.content);
-		InputStream input = MockBufferPool.createInputStream(this.content);
+		MockBufferPool.releaseStreamBuffers(this.contentHeadStreamBuffer);
+		InputStream input = MockBufferPool.createInputStream(this.contentHeadStreamBuffer);
 		assertEquals("Should be the written byte", 1, input.read());
 		assertEquals("Should be no further content", -1, input.read());
 	}
@@ -246,8 +245,9 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		assertEquals("Incorrect Content-Type", "text/plain", this.contentType.getValue());
 
 		// Ensure correct content
-		MockBufferPool.releaseStreamBuffers(this.content);
-		String content = MockBufferPool.getContent(this.content, ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
+		MockBufferPool.releaseStreamBuffers(this.contentHeadStreamBuffer);
+		String content = MockBufferPool.getContent(this.contentHeadStreamBuffer,
+				ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
 		assertEquals("Incorrect sent content", "TEST", content);
 	}
 
@@ -275,8 +275,8 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		assertEquals("Incorrect Content-Type", "text/plain; charset=" + charset.name(), this.contentType.getValue());
 
 		// Ensure correct content
-		MockBufferPool.releaseStreamBuffers(this.content);
-		String content = MockBufferPool.getContent(this.content, charset);
+		MockBufferPool.releaseStreamBuffers(this.contentHeadStreamBuffer);
+		String content = MockBufferPool.getContent(this.contentHeadStreamBuffer, charset);
 		assertEquals("Incorrect sent content", "TEST", content);
 	}
 
@@ -325,16 +325,16 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		// Ensure correct details sent
 		assertEquals("Incorrect version", HttpVersion.HTTP_1_0, this.version);
 		assertEquals("Incorrect status", HttpStatus.INTERNAL_SERVER_ERROR, this.status);
-		Iterator<WritableHttpHeader> headers = this.httpHeaders.iterator();
-		assertTrue("Should be a header", headers.hasNext());
-		WritableHttpHeader header = headers.next();
+		assertTrue("Should be a header", this.httpHeaders.hasNext());
+		WritableHttpHeader header = this.httpHeaders.next();
 		assertEquals("Incorrect header name", "error", header.getName());
 		assertEquals("incorrect header value", "occurred", header.getValue());
-		assertFalse("Should only be one header", headers.hasNext());
+		assertFalse("Should only be one header", this.httpHeaders.hasNext());
 
 		// Ensure only entity content after the reset is sent
-		MockBufferPool.releaseStreamBuffers(this.content);
-		String content = MockBufferPool.getContent(this.content, ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
+		MockBufferPool.releaseStreamBuffers(this.contentHeadStreamBuffer);
+		String content = MockBufferPool.getContent(this.contentHeadStreamBuffer,
+				ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
 		assertEquals("Incorrect entity content since reset", "ERROR: something", content);
 
 		// Ensure can not reset after sending
@@ -354,23 +354,23 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 
 	private HttpStatus status = null;
 
-	private Iterable<WritableHttpHeader> httpHeaders = null;
+	private Iterator<WritableHttpHeader> httpHeaders = null;
 
-	private int contentLength;
+	private long contentLength;
 
 	private HttpHeaderValue contentType = null;
 
-	private Iterable<StreamBuffer<ByteBuffer>> content = null;
+	private StreamBuffer<ByteBuffer> contentHeadStreamBuffer = null;
 
 	@Override
-	public void writeHttpResponse(HttpVersion version, HttpStatus status, Iterable<WritableHttpHeader> httpHeaders,
-			int contentLength, HttpHeaderValue contentType, Iterable<StreamBuffer<ByteBuffer>> content) {
+	public void writeHttpResponse(HttpVersion version, HttpStatus status, Iterator<WritableHttpHeader> httpHeaders,
+			long contentLength, HttpHeaderValue contentType, StreamBuffer<ByteBuffer> contentHeadStreamBuffer) {
 		this.version = version;
 		this.status = status;
 		this.httpHeaders = httpHeaders;
 		this.contentLength = contentLength;
 		this.contentType = contentType;
-		this.content = content;
+		this.contentHeadStreamBuffer = contentHeadStreamBuffer;
 	}
 
 }

@@ -131,13 +131,16 @@ public class MockHttpServer implements HttpServerImplementation {
 
 			// Obtain the listing of response HTTP headers
 			List<WritableHttpHeader> headers = new ArrayList<>();
-			for (WritableHttpHeader header : responseHttpHeaders) {
+			while (responseHttpHeaders.hasNext()) {
+				WritableHttpHeader header = responseHttpHeaders.next();
 				headers.add(header);
 			}
 
 			// Release all the buffers (as now considered written)
-			for (StreamBuffer<ByteBuffer> buffer : responseHttpEntity) {
+			StreamBuffer<ByteBuffer> buffer = responseHttpEntity;
+			while (buffer != null) {
 				buffer.release();
+				buffer = buffer.next;
 			}
 
 			// Create the input stream to the response HTTP entity

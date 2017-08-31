@@ -31,7 +31,7 @@ import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.http.parse.HttpRequestParser;
 import net.officefloor.server.http.parse.HttpRequestParser.HttpRequestParserMetaData;
-import net.officefloor.server.stream.BufferPool;
+import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.impl.ByteSequence;
 
@@ -53,9 +53,9 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	private final HttpRequestParser parser;
 
 	/**
-	 * {@link BufferPool}.
+	 * {@link StreamBufferPool}.
 	 */
-	private final BufferPool<ByteBuffer> bufferPool;
+	private final StreamBufferPool<ByteBuffer> bufferPool;
 
 	/**
 	 * List of previous {@link StreamBuffer} instances.
@@ -73,11 +73,11 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	 * @param isSecure
 	 *            Indicates if secure connection.
 	 * @param bufferPool
-	 *            {@link BufferPool}.
+	 *            {@link StreamBufferPool}.
 	 * @param parserMetaData
 	 *            {@link HttpRequestParserMetaData}.
 	 */
-	public HttpConnectionHandler(boolean isSecure, BufferPool<ByteBuffer> bufferPool,
+	public HttpConnectionHandler(boolean isSecure, StreamBufferPool<ByteBuffer> bufferPool,
 			HttpRequestParserMetaData parserMetaData) {
 		this.isSecure = isSecure;
 		this.parser = new HttpRequestParser(parserMetaData);

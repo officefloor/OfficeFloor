@@ -20,7 +20,7 @@ package net.officefloor.server;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 
-import net.officefloor.server.stream.BufferPool;
+import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**
@@ -33,11 +33,12 @@ public interface ResponseWriter {
 	/**
 	 * Writes the {@link StreamBuffer} instances as the response.
 	 * 
-	 * @param responseBuffers
-	 *            Response contained in the {@link StreamBuffer} instances. Once
-	 *            the {@link StreamBuffer} is written back to the
-	 *            {@link Socket}, it is released back to its {@link BufferPool}.
+	 * @param headResponseBuffer
+	 *            Head {@link StreamBuffer} for the linked list of
+	 *            {@link StreamBuffer} instances for the response. Once the
+	 *            {@link StreamBuffer} is written back to the {@link Socket}, it
+	 *            is released back to its {@link StreamBufferPool}.
 	 */
-	void write(Iterable<StreamBuffer<ByteBuffer>> responseBuffers);
+	void write(StreamBuffer<ByteBuffer> headResponseBuffer);
 
 }

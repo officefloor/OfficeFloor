@@ -25,16 +25,12 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.function.Function;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.mock.MockBufferPool;
-import net.officefloor.server.stream.BufferPool;
 import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.StreamBufferPool;
 
 /**
  * Tests the {@link SocketListener}.
@@ -129,7 +125,7 @@ public class SocketManagerTest extends OfficeFrameTestCase {
 		byte[] data = new byte[] { 0 };
 		this.tester.manager.bindServerSocket(7878, null, null, (buffer, requestHandler) -> {
 			synchronized (data) {
-				data[0] = buffer.getPooledBuffer().get(0);
+				data[0] = buffer.pooledBuffer.get(0);
 				data.notify();
 			}
 		}, (request, responseWriter) -> {
@@ -213,7 +209,7 @@ public class SocketManagerTest extends OfficeFrameTestCase {
 		this.tester.manager.bindServerSocket(7878, null, null, (buffer, requestHandler) -> {
 			requestHandler.handleRequest("SEND");
 		}, (request, responseWriter) -> {
-			responseWriter.write(new ArrayList<>(Arrays.asList(this.tester.createStreamBuffer(1))));
+			responseWriter.write(this.tester.createStreamBuffer(1));
 		});
 
 		this.tester.start();
@@ -261,10 +257,10 @@ public class SocketManagerTest extends OfficeFrameTestCase {
 
 			case 2:
 				// Second request, so write (out of order)
-				responseWriter.write(new ArrayList<>(Arrays.asList(this.tester.createStreamBuffer(2))));
+				responseWriter.write(this.tester.createStreamBuffer(2));
 
 				// Now write the first request (out of order)
-				writer[0].write(new ArrayList<>(Arrays.asList(this.tester.createStreamBuffer(1))));
+				writer[0].write(this.tester.createStreamBuffer(1));
 				break;
 
 			default:
@@ -320,15 +316,14 @@ public class SocketManagerTest extends OfficeFrameTestCase {
 			requestHandler.handleRequest((byte) 1);
 		}, (request, responseWriter) -> {
 			// Create very large response
-			List<StreamBuffer<ByteBuffer>> buffers = new LinkedList<>();
-			StreamBuffer<ByteBuffer> buffer = this.tester.bufferPool.getPooledStreamBuffer();
-			buffers.add(buffer);
+			StreamBuffer<ByteBuffer> buffers = this.tester.bufferPool.getPooledStreamBuffer();
+			StreamBuffer<ByteBuffer> buffer = buffers;
 			for (int i = 0; i < bufferSize[0]; i++) {
 				byte value = indexValue.apply(i);
 				if (!buffer.write(value)) {
 					// Buffer full so write use another
-					buffer = this.tester.bufferPool.getPooledStreamBuffer();
-					buffers.add(buffer);
+					buffer.next = this.tester.bufferPool.getPooledStreamBuffer();
+					buffer = buffer.next;
 					buffer.write(value);
 				}
 			}
@@ -377,11 +372,135 @@ public class SocketManagerTest extends OfficeFrameTestCase {
 		}
 	}
 
+	/**
+	 * Ensure can delay sending a response.
+	 */
+	public void testDelaySendResponse() throws IOException {
+		this.tester = new SocketManagerTester(1);
+
+		// Bind to server socket
+		Throwable[] failure = new Throwable[] { null };
+		this.tester.manager.bindServerSocket(7878, null, null, (buffer, requestHandler) -> {
+			requestHandler.handleRequest("SEND");
+		}, (request, responseWriter) -> {
+			// Delay sending the response
+			new Thread(() -> {
+				try {
+					// Delay writing response
+					Thread.sleep(1);
+
+					// Write the delayed response
+					responseWriter.write(this.tester.createStreamBuffer(1));
+				} catch (Throwable ex) {
+					synchronized (failure) {
+						failure[0] = ex;
+					}
+				}
+			}).start();
+		});
+
+		this.tester.start();
+
+		// Undertake connect and send data
+		try (Socket client = new Socket(InetAddress.getLocalHost(), 7878)) {
+
+			// Send some data (to trigger request)
+			OutputStream outputStream = client.getOutputStream();
+			outputStream.write(1);
+			outputStream.flush();
+
+			// Receive the response
+			InputStream inputStream = client.getInputStream();
+			long startTime = System.currentTimeMillis();
+			while (inputStream.available() == 0) {
+				this.timeout(startTime);
+				Thread.yield(); // allow processing
+			}
+
+			// Ensure correct byte
+			int value = inputStream.read();
+			assertEquals("Incorrect response", 1, value);
+		}
+
+		// Ensure no failures
+		synchronized (failure) {
+			if (failure[0] != null) {
+				throw fail(failure[0]);
+			}
+		}
+	}
+
+	/**
+	 * Ensure can delay sending multiple responses.
+	 */
+	public void testDelaySendingMultipleResponses() throws IOException {
+		this.tester = new SocketManagerTester(1);
+
+		final byte RESPONSE_COUNT = 100;
+
+		// Bind to server socket
+		Throwable[] failure = new Throwable[] { null };
+		this.tester.manager.bindServerSocket(7878, null, null, (buffer, requestHandler) -> {
+			for (byte i = 0; i < RESPONSE_COUNT; i++) {
+				requestHandler.handleRequest(i);
+			}
+		}, (request, responseWriter) -> {
+			// Delay only the even responses
+			byte index = (byte) request;
+			if ((index % 2) == 0) {
+				// Delay the response
+				new Thread(() -> {
+					try {
+						// Delay writing response
+						Thread.sleep(1);
+
+						// Write the delayed response
+						responseWriter.write(this.tester.createStreamBuffer(index));
+					} catch (Throwable ex) {
+						synchronized (failure) {
+							failure[0] = ex;
+						}
+					}
+				}).start();
+			} else {
+				// Send the response immediately
+				responseWriter.write(this.tester.createStreamBuffer(index));
+			}
+		});
+
+		this.tester.start();
+
+		// Undertake connect and send data
+		try (Socket client = new Socket(InetAddress.getLocalHost(), 7878)) {
+
+			// Send some data (to trigger request)
+			OutputStream outputStream = client.getOutputStream();
+			outputStream.write(1);
+			outputStream.flush();
+
+			// Receive the response
+			InputStream inputStream = client.getInputStream();
+			long startTime = System.currentTimeMillis();
+			while (inputStream.available() == 0) {
+				this.timeout(startTime);
+				Thread.yield(); // allow processing
+			}
+
+			// Ensure correct results
+			for (byte i = 0; i < RESPONSE_COUNT; i++) {
+				assertEquals("Incorrect response", i, inputStream.read());
+			}
+		}
+
+		// Ensure no failures
+		synchronized (failure) {
+			if (failure[0] != null) {
+				throw fail(failure[0]);
+			}
+		}
+	}
+
 	// TODO delay creating request (via another thread)
-
-	// TODO delay sending response (via another thread)
-
-	// TODO delay sending multiple responses (via multiple threads)
 
 	// TODO put in checks to ensure on shutdown that all buffers released
 
@@ -391,7 +510,7 @@ public class SocketManagerTest extends OfficeFrameTestCase {
 	private class SocketManagerTester {
 
 		/**
-		 * {@link BufferPool}.
+		 * {@link StreamBufferPool}.
 		 */
 		private final MockBufferPool bufferPool = new MockBufferPool(() -> ByteBuffer.allocateDirect(1024));
 
@@ -452,6 +571,9 @@ public class SocketManagerTest extends OfficeFrameTestCase {
 			for (int i = 0; i < this.threads.length; i++) {
 				this.threads[i].waitForCompletion(startTime);
 			}
+
+			// As all complete, should have release all buffers
+//			this.bufferPool.assertAllBuffersReturned();
 		}
 	}
 

@@ -19,7 +19,7 @@ package net.officefloor.server.http.protocol;
 
 import java.nio.ByteBuffer;
 
-import net.officefloor.server.stream.BufferPool;
+import net.officefloor.server.stream.StreamBufferPool;
 
 /**
  * Context for the {@link CommunicationProtocolSource}.
@@ -29,10 +29,10 @@ import net.officefloor.server.stream.BufferPool;
 public interface CommunicationProtocolContext {
 
 	/**
-	 * Obtains the {@link BufferPool}.
+	 * Obtains the {@link StreamBufferPool}.
 	 * 
-	 * @return {@link BufferPool}.
+	 * @return {@link StreamBufferPool}.
 	 */
-	BufferPool<ByteBuffer> getBufferPool();
+	StreamBufferPool<ByteBuffer> getBufferPool();
 
 }

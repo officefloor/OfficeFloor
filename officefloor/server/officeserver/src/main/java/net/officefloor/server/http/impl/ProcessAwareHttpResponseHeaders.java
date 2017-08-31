@@ -19,9 +19,7 @@ package net.officefloor.server.http.impl;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
@@ -42,9 +40,19 @@ import net.officefloor.server.stream.ServerWriter;
 public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 
 	/**
-	 * {@link WritableHttpHeader} instances.
+	 * Head {@link WritableHttpHeaderImpl} instance.
 	 */
-	private final List<WritableHttpHeader> headers = new ArrayList<>(16);
+	private WritableHttpHeaderImpl head = null;
+
+	/**
+	 * Tail {@link WritableHttpHeaderImpl} instance.
+	 */
+	private WritableHttpHeaderImpl tail = null;
+
+	/**
+	 * Count of the number of headers.
+	 */
+	private int headerCount = 0;
 
 	/**
 	 * {@link ProcessAwareContext}.
@@ -68,8 +76,83 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 	 * @return {@link WritableHttpHeader} instances for the
 	 *         {@link HttpResponseWriter}.
 	 */
-	public List<WritableHttpHeader> getWritableHttpHeaders() {
-		return this.headers;
+	public Iterator<WritableHttpHeader> getWritableHttpHeaders() {
+		return new Iterator<WritableHttpHeader>() {
+
+			WritableHttpHeaderImpl current = null;
+
+			@Override
+			public boolean hasNext() {
+				return (this.current == null ? (ProcessAwareHttpResponseHeaders.this.head != null)
+						: (this.current.next != null));
+			}
+
+			@Override
+			public WritableHttpHeader next() {
+
+				// Determine if first
+				if (this.current == null) {
+					this.current = ProcessAwareHttpResponseHeaders.this.head;
+					if (this.current == null) {
+						throw new NoSuchElementException();
+					}
+					return this.current;
+				}
+
+				// Obtain next (ensuring exists)
+				if (this.current.next == null) {
+					throw new NoSuchElementException();
+				}
+				this.current = this.current.next;
+				return this.current;
+			}
+
+			@Override
+			public void remove() {
+				this.current = ProcessAwareHttpResponseHeaders.this.removeHttpHeader(this.current);
+			}
+		};
+	}
+
+	/**
+	 * Removes the {@link HttpHeader}.
+	 * 
+	 * @param header
+	 *            {@link WritableHttpHeaderImpl} to remove.
+	 * @return Previous {@link WritableHttpHeaderImpl}. May be <code>null</code>
+	 *         if head.
+	 */
+	private WritableHttpHeaderImpl removeHttpHeader(WritableHttpHeaderImpl header) {
+
+		// Determine if first
+		if (header == this.head) {
+			// Drop the first
+			this.head = this.head.next;
+			if (this.head == null) {
+				this.tail = null; // only header
+			}
+			this.headerCount--;
+			return null; // removed first (no previous)
+
+		} else {
+			// Find previous
+			WritableHttpHeaderImpl prev = this.head;
+			while (prev.next != header) {
+				prev = prev.next;
+				if (prev == null) {
+					throw new NoSuchElementException();
+				}
+			}
+
+			// Drop the current (moving out of linked list)
+			prev.next = header.next;
+			if (prev.next == null) {
+				// Removed last, so update list
+				this.tail = prev;
+			}
+			this.headerCount--;
+			return prev; // removed
+		}
 	}
 
 	/**
@@ -102,8 +185,17 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 	private final HttpHeader safeAddHeader(String name, HttpHeaderName headerName, String value,
 			HttpHeaderValue headerValue) {
 		return this.safe(() -> {
-			WritableHttpHeader header = new WritableHttpHeaderImpl(name, headerName, value, headerValue);
-			this.headers.add(header);
+			WritableHttpHeaderImpl header = new WritableHttpHeaderImpl(name, headerName, value, headerValue);
+			if (this.head == null) {
+				// First header
+				this.head = header;
+				this.tail = header;
+			} else {
+				// Append the header
+				this.tail.next = header;
+				this.tail = header;
+			}
+			this.headerCount++;
 			return header;
 		});
 	}
@@ -116,15 +208,15 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 		/**
 		 * Unsafe {@link Iterator}.
 		 */
-		private final Iterator<HttpHeader> unsafeIterator;
+		private final Iterator<? extends HttpHeader> unsafeIterator;
 
 		/**
 		 * Instantiate.
 		 * 
 		 * @param unsafeIterator
-		 *            Unsafe {@link Iterable}.
+		 *            Unsafe {@link Iterator}.
 		 */
-		private SafeIterator(Iterator<HttpHeader> unsafeIterator) {
+		private SafeIterator(Iterator<? extends HttpHeader> unsafeIterator) {
 			this.unsafeIterator = unsafeIterator;
 		}
 
@@ -179,37 +271,7 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 
 	@Override
 	public Iterator<HttpHeader> iterator() {
-		return new SafeIterator(new Iterator<HttpHeader>() {
-
-			List<? extends HttpHeader> headers = ProcessAwareHttpResponseHeaders.this.headers;
-
-			int position = 0;
-
-			@Override
-			public boolean hasNext() {
-				return this.position < this.headers.size();
-			}
-
-			@Override
-			public HttpHeader next() {
-
-				// Ensure another header
-				if (this.position >= this.headers.size()) {
-					throw new NoSuchElementException();
-				}
-
-				// Return the next header
-				HttpHeader header = this.headers.get(this.position);
-				this.position++; // increment for next
-				return header;
-			}
-
-			@Override
-			public void remove() {
-				// Remove current header (previous to next header)
-				this.headers.remove(--this.position);
-			}
-		});
+		return new SafeIterator(this.getWritableHttpHeaders());
 	}
 
 	@Override
@@ -234,13 +296,20 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 
 	@Override
 	public boolean removeHeader(HttpHeader header) {
-		return this.safe(() -> this.headers.remove(header));
+		return this.safe(() -> {
+			try {
+				this.removeHttpHeader((WritableHttpHeaderImpl) header);
+				return true;
+			} catch (NoSuchElementException ex) {
+				return false;
+			}
+		});
 	}
 
 	@Override
 	public boolean removeHeaders(String name) {
 		return this.safe(() -> {
-			Iterator<WritableHttpHeader> iterator = this.headers.iterator();
+			Iterator<WritableHttpHeader> iterator = this.getWritableHttpHeaders();
 			boolean isRemoved = false;
 			while (iterator.hasNext()) {
 				if (name.equalsIgnoreCase(iterator.next().getName())) {
@@ -255,7 +324,9 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 	@Override
 	public HttpHeader getHeader(String name) {
 		return this.safe(() -> {
-			for (HttpHeader header : this.headers) {
+			Iterator<WritableHttpHeader> iterator = this.getWritableHttpHeaders();
+			while (iterator.hasNext()) {
+				WritableHttpHeader header = iterator.next();
 				if (name.equalsIgnoreCase(header.getName())) {
 					return header;
 				}
@@ -268,18 +339,26 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 	public Iterable<HttpHeader> getHeaders(String name) {
 		return () -> new SafeIterator(new Iterator<HttpHeader>() {
 
-			List<? extends HttpHeader> headers = ProcessAwareHttpResponseHeaders.this.headers;
-
-			int position = 0;
+			WritableHttpHeaderImpl current = null;
 
 			@Override
 			public boolean hasNext() {
 
+				// Obtain the next header
+				WritableHttpHeaderImpl next;
+				if (this.current == null) {
+					// First header
+					next = ProcessAwareHttpResponseHeaders.this.head;
+				} else {
+					next = this.current.next;
+				}
+
 				// Determine if further values
-				for (int i = this.position; i < this.headers.size(); i++) {
-					if (name.equalsIgnoreCase(this.headers.get(i).getName())) {
+				while (next != null) {
+					if (name.equalsIgnoreCase(next.getName())) {
 						return true;
 					}
+					next = next.next;
 				}
 				return false; // no further headers by name
 			}
@@ -287,33 +366,50 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 			@Override
 			public HttpHeader next() {
 
-				// Move to next position
-				for (; this.position < this.headers.size(); this.position++) {
-					HttpHeader header = this.headers.get(this.position);
-					if (name.equalsIgnoreCase(header.getName())) {
-						this.position++; // increment for next
-						return header; // found next header
-					}
+				// Obtain the next header
+				WritableHttpHeaderImpl next;
+				if (this.current == null) {
+					// First header
+					next = ProcessAwareHttpResponseHeaders.this.head;
+				} else {
+					next = this.current.next;
 				}
+
+				// Move to next position
+				while (next != null) {
+					if (name.equalsIgnoreCase(next.getName())) {
+						// Found next value
+						this.current = next;
+						return this.current;
+					}
+					next = next.next;
+				}
+
+				// As here, no next header by name
 				throw new NoSuchElementException();
 			}
 
 			@Override
 			public void remove() {
-				// Remove current header (previous to next header)
-				this.headers.remove(--this.position);
+				this.current = ProcessAwareHttpResponseHeaders.this.removeHttpHeader(this.current);
 			}
 		});
 	}
 
 	@Override
 	public HttpHeader headerAt(int index) {
-		return this.safe(() -> this.headers.get(index));
+		return this.safe(() -> {
+			WritableHttpHeaderImpl header = this.head;
+			for (int i = 0; i < index; i++) {
+				header = header.next;
+			}
+			return header;
+		});
 	}
 
 	@Override
 	public int length() {
-		return this.safe(() -> this.headers.size());
+		return this.safe(() -> this.headerCount);
 	}
 
 	/**
@@ -350,6 +446,11 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 		 * Optional {@link HttpHeaderValue}.
 		 */
 		private final HttpHeaderValue headerValue;
+
+		/**
+		 * Next {@link WritableHttpHeaderImpl}.
+		 */
+		private WritableHttpHeaderImpl next = null;
 
 		/**
 		 * Instantiate.

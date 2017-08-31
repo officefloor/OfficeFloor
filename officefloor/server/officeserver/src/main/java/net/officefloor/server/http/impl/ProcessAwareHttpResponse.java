@@ -29,7 +29,7 @@ import net.officefloor.server.http.HttpResponseHeaders;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.stream.BufferPool;
+import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.ServerOutputStream;
 import net.officefloor.server.stream.ServerWriter;
 import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
@@ -120,13 +120,13 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	 * @param version
 	 *            {@link HttpVersion}.
 	 * @param bufferPool
-	 *            {@link BufferPool}.
+	 *            {@link StreamBufferPool}.
 	 * @param processAwareContext
 	 *            {@link ProcessAwareContext}.
 	 * @param responseWriter
 	 *            {@link HttpResponseWriter}.
 	 */
-	public ProcessAwareHttpResponse(HttpVersion version, BufferPool<B> bufferPool,
+	public ProcessAwareHttpResponse(HttpVersion version, StreamBufferPool<B> bufferPool,
 			ProcessAwareContext processAwareContext, HttpResponseWriter<B> responseWriter) {
 		this.clientVersion = version;
 		this.version = version;
@@ -325,7 +325,7 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 			}
 
 			// Determine content details
-			int contentLength = this.bufferPoolOutputStream.getContentLength();
+			long contentLength = this.bufferPoolOutputStream.getContentLength();
 			HttpHeaderValue contentType = null;
 			if (contentLength > 0) {
 				contentType = this.deriveContentType();

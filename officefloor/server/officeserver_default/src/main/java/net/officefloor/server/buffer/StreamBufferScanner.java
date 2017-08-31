@@ -143,11 +143,11 @@ public class StreamBufferScanner {
 			if (this.previousBuffers.size() == 0) {
 				// Add the first previous buffer (keep track of start position)
 				this.firstPreviousBufferStart = this.currentBufferStartPosition;
-				this.previousBuffersByteCount += (this.currentBuffer.getPooledBuffer().position()
+				this.previousBuffersByteCount += (this.currentBuffer.pooledBuffer.position()
 						- this.firstPreviousBufferStart);
 			} else {
 				// Add further previous buffer (entire buffer)
-				this.previousBuffersByteCount += this.currentBuffer.getPooledBuffer().position();
+				this.previousBuffersByteCount += this.currentBuffer.pooledBuffer.position();
 			}
 
 			// Add the current buffer as a previous buffer
@@ -178,7 +178,7 @@ public class StreamBufferScanner {
 	public <T extends Throwable> long buildLong(Supplier<T> illegalValueExceptionFactory) throws T {
 
 		// Determine if remaining content for long in current buffer
-		ByteBuffer data = this.currentBuffer.getPooledBuffer();
+		ByteBuffer data = this.currentBuffer.pooledBuffer;
 		int remaining = data.position() - this.currentBufferScanStart;
 
 		// Determine if build immediately (typical case)
@@ -281,7 +281,7 @@ public class StreamBufferScanner {
 	public <T extends Throwable> short buildShort(Supplier<T> illegalValueExceptionFactory) throws T {
 
 		// Determine if remaining content for long in current buffer
-		ByteBuffer data = this.currentBuffer.getPooledBuffer();
+		ByteBuffer data = this.currentBuffer.pooledBuffer;
 		int remaining = data.position() - this.currentBufferScanStart;
 
 		// Determine if build immediately (typical case)
@@ -350,7 +350,7 @@ public class StreamBufferScanner {
 	public <T extends Throwable> byte buildByte(Supplier<T> illegalValueExceptionFactory) throws T {
 
 		// Determine if remaining content for byte in current buffer
-		ByteBuffer data = this.currentBuffer.getPooledBuffer();
+		ByteBuffer data = this.currentBuffer.pooledBuffer;
 		int remaining = data.position() - this.currentBufferScanStart;
 
 		// Determine if build immediately (typical case)
@@ -407,7 +407,7 @@ public class StreamBufferScanner {
 	public <T extends Throwable> int peekToTarget(ScanTarget target) throws T {
 
 		// Determine if remaining content for long in current buffer
-		ByteBuffer data = this.currentBuffer.getPooledBuffer();
+		ByteBuffer data = this.currentBuffer.pooledBuffer;
 		int lastPosition = data.position();
 
 		// Obtain current position in the buffer to start scanning
@@ -466,7 +466,7 @@ public class StreamBufferScanner {
 		}
 
 		// Determine number of available bytes in current buffer
-		ByteBuffer data = this.currentBuffer.getPooledBuffer();
+		ByteBuffer data = this.currentBuffer.pooledBuffer;
 		int availableBytes = data.position() - this.currentBufferStartPosition;
 
 		// Determine if have bytes to complete scan
@@ -520,7 +520,7 @@ public class StreamBufferScanner {
 		}
 
 		// Determine if remaining content for long in current buffer
-		ByteBuffer data = this.currentBuffer.getPooledBuffer();
+		ByteBuffer data = this.currentBuffer.pooledBuffer;
 
 		// Keep reading until end of current buffer
 		int lastFullReadPosition = data.position() - 7;
@@ -592,7 +592,7 @@ public class StreamBufferScanner {
 		} else {
 			// Have past buffers, so include data from them
 			StreamBuffer<ByteBuffer> firstBuffer = this.previousBuffers.get(0);
-			int length = firstBuffer.getPooledBuffer().position() - this.firstPreviousBufferStart;
+			int length = firstBuffer.pooledBuffer.position() - this.firstPreviousBufferStart;
 
 			// Determine if all data on first previous buffer
 			if (numberOfBytes <= length) {
@@ -616,7 +616,7 @@ public class StreamBufferScanner {
 				StreamBuffer<ByteBuffer> buffer = iterator.next();
 
 				// Obtain the number of bytes in next buffer
-				length = buffer.getPooledBuffer().position();
+				length = buffer.pooledBuffer.position();
 
 				// Determine if buffer completes the required data
 				if (numberOfBytes <= length) {
@@ -733,13 +733,13 @@ public class StreamBufferScanner {
 
 			// Previous buffers
 			StreamBuffer<ByteBuffer> firstBuffer = this.previousBuffers.get(0);
-			int length = firstBuffer.getPooledBuffer().position() - this.firstPreviousBufferStart;
+			int length = firstBuffer.pooledBuffer.position() - this.firstPreviousBufferStart;
 			sequence = new StreamBufferByteSequence(firstBuffer, this.firstPreviousBufferStart, length);
 
 			// Add in remaining previous buffers
 			for (int i = 1; i < this.previousBuffers.size(); i++) {
 				StreamBuffer<ByteBuffer> nextBuffer = this.previousBuffers.get(i);
-				length = nextBuffer.getPooledBuffer().position();
+				length = nextBuffer.pooledBuffer.position();
 				sequence.appendStreamBuffer(nextBuffer, 0, length);
 			}
 
@@ -796,7 +796,7 @@ public class StreamBufferScanner {
 		} else {
 			// Have past buffers, so include data from them
 			StreamBuffer<ByteBuffer> firstBuffer = this.previousBuffers.get(0);
-			int length = firstBuffer.getPooledBuffer().position() - this.firstPreviousBufferStart;
+			int length = firstBuffer.pooledBuffer.position() - this.firstPreviousBufferStart;
 
 			// Determine if all data on first previous buffer
 			if (numberOfBytes <= length) {
@@ -823,7 +823,7 @@ public class StreamBufferScanner {
 				StreamBuffer<ByteBuffer> buffer = iterator.next();
 
 				// Obtain the number of bytes in next buffer
-				length = buffer.getPooledBuffer().position();
+				length = buffer.pooledBuffer.position();
 
 				// Determine if buffer completes the required data
 				if (numberOfBytes <= length) {

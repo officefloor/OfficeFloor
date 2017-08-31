@@ -60,7 +60,7 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 
 		// Obtain the writable buffer
 		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
-		assertTrue("Should not be pooled", buffer.isPooled());
+		assertTrue("Should not be pooled", buffer.isPooled);
 
 		// Ensure issue if not returned to pool
 		try {
@@ -82,7 +82,7 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 
 		// Obtain the read-only buffer
 		StreamBuffer<ByteBuffer> buffer = this.pool.getUnpooledStreamBuffer(ByteBuffer.allocate(4));
-		assertFalse("Should be unpooled", buffer.isPooled());
+		assertFalse("Should be unpooled", buffer.isPooled);
 
 		// Ensure issue if not returned to pool
 		try {
@@ -105,7 +105,7 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
 
 		// Ensure buffer initialised to zero
-		ByteBuffer data = buffer.getPooledBuffer();
+		ByteBuffer data = buffer.pooledBuffer;
 		assertEquals("Incorrect data size", BUFFER_SIZE, data.capacity());
 		assertEquals("Should be no data", 0, data.position());
 
@@ -144,7 +144,7 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 		assertEquals("Buffer should now be full", 0, buffer.write(write, 0, write.length));
 
 		// Ensure the buffer contains the data
-		ByteBuffer data = buffer.getPooledBuffer();
+		ByteBuffer data = buffer.pooledBuffer;
 		for (int i = 0; i < BUFFER_SIZE; i++) {
 			assertEquals("Incorrect byte value", i, data.get(i));
 		}
@@ -164,7 +164,7 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 		buffer.write(furtherData);
 
 		// Ensure the data is correct
-		ByteBuffer data = buffer.getPooledBuffer();
+		ByteBuffer data = buffer.pooledBuffer;
 		for (int i = 0; i < 3; i++) {
 			assertEquals("Incorrect byte value", i + 1, data.get(i));
 		}
@@ -194,7 +194,7 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 		assertEquals("Buffer should now be full", 0, buffer.write(write, BUFFER_SIZE, write.length - BUFFER_SIZE));
 
 		// Ensure the buffer contains the data
-		ByteBuffer data = buffer.getPooledBuffer();
+		ByteBuffer data = buffer.pooledBuffer;
 		for (int i = 0; i < BUFFER_SIZE; i++) {
 			assertEquals("Incorrect byte value", i, data.get(i));
 		}
@@ -209,8 +209,10 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 		this.output.write((byte) 1);
 
 		// Mimic writing HTTP response by releasing buffers
-		for (StreamBuffer<ByteBuffer> streamBuffer : this.output.getBuffers()) {
+		StreamBuffer<ByteBuffer> streamBuffer = this.output.getBuffers();
+		while (streamBuffer != null) {
 			streamBuffer.release();
+			streamBuffer = streamBuffer.next;
 		}
 
 		// Create the input stream to read in content
@@ -239,8 +241,10 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 		writer.flush();
 
 		// Mimic writing HTTP response by releasing buffers
-		for (StreamBuffer<ByteBuffer> streamBuffer : this.output.getBuffers()) {
+		StreamBuffer<ByteBuffer> streamBuffer = this.output.getBuffers();
+		while (streamBuffer != null) {
 			streamBuffer.release();
+			streamBuffer = streamBuffer.next;
 		}
 
 		// Ensure can read in the large string
@@ -285,8 +289,10 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 		}
 
 		// Mimic writing HTTP response by releasing buffers
-		for (StreamBuffer<ByteBuffer> streamBuffer : this.output.getBuffers()) {
+		StreamBuffer<ByteBuffer> streamBuffer = this.output.getBuffers();
+		while (streamBuffer != null) {
 			streamBuffer.release();
+			streamBuffer = streamBuffer.next;
 		}
 
 		// Read in the text

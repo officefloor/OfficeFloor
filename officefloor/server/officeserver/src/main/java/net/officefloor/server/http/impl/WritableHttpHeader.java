@@ -37,6 +37,7 @@ public interface WritableHttpHeader extends HttpHeader {
 	 * @throws IOException
 	 *             If fails to write the {@link HttpHeader}.
 	 */
+	@Deprecated // pass StreamBuffer with StreamBufferPool (so can append content)
 	void writeHttpHeader(ServerWriter writer) throws IOException;
 
 }

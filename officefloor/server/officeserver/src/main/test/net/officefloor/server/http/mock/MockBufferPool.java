@@ -24,33 +24,33 @@ import java.io.StringWriter;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Deque;
-import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.junit.Assert;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.server.stream.BufferPool;
 import net.officefloor.server.stream.ByteBufferFactory;
 import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.StreamBufferPool;
 
 /**
- * Mock {@link BufferPool}.
+ * Mock {@link StreamBufferPool}.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockBufferPool implements BufferPool<ByteBuffer> {
+public class MockBufferPool implements StreamBufferPool<ByteBuffer> {
 
 	/**
 	 * Releases the {@link StreamBuffer} instances.
 	 * 
-	 * @param buffers
-	 *            {@link StreamBuffer} instances to release by to their
-	 *            {@link BufferPool}.
+	 * @param headBuffer
+	 *            Head {@link StreamBuffer} of linked list of
+	 *            {@link StreamBuffer} instances.
 	 */
-	public static void releaseStreamBuffers(Iterable<StreamBuffer<ByteBuffer>> buffers) {
-		for (StreamBuffer<ByteBuffer> buffer : buffers) {
-			buffer.release();
+	public static void releaseStreamBuffers(StreamBuffer<ByteBuffer> headBuffer) {
+		while (headBuffer != null) {
+			headBuffer.release();
+			headBuffer = headBuffer.next;
 		}
 	}
 
@@ -58,29 +58,29 @@ public class MockBufferPool implements BufferPool<ByteBuffer> {
 	 * Creates an {@link InputStream} to the content of the {@link StreamBuffer}
 	 * instances.
 	 * 
-	 * @param buffers
-	 *            {@link StreamBuffer} instances that should be supplied by a
-	 *            {@link MockBufferPool}.
+	 * @param headBuffer
+	 *            Head {@link StreamBuffer} of linked list of
+	 *            {@link StreamBuffer} instances.
 	 * @return {@link InputStream} to read the data from the
 	 *         {@link StreamBuffer} instances.
 	 */
-	public static InputStream createInputStream(Iterable<StreamBuffer<ByteBuffer>> buffers) {
-		return new MockBufferPoolInputStream(buffers.iterator());
+	public static InputStream createInputStream(StreamBuffer<ByteBuffer> headBuffer) {
+		return new MockBufferPoolInputStream(headBuffer);
 	}
 
 	/**
 	 * Convenience method to obtain the contents of the buffers as a string.
 	 * 
-	 * @param buffers
-	 *            {@link StreamBuffer} instances that should be supplied by a
-	 *            {@link MockBufferPool}.
+	 * @param headBuffer
+	 *            Head {@link StreamBuffer} of linked list of
+	 *            {@link StreamBuffer} instances.
 	 * @param charset
 	 *            {@link Charset} of underlying data.
 	 * @return Content of buffers as string.
 	 */
-	public static String getContent(Iterable<StreamBuffer<ByteBuffer>> buffers, Charset charset) {
+	public static String getContent(StreamBuffer<ByteBuffer> headBuffer, Charset charset) {
 		try {
-			InputStream inputStream = createInputStream(buffers);
+			InputStream inputStream = createInputStream(headBuffer);
 			InputStreamReader reader = new InputStreamReader(inputStream, charset);
 			StringWriter content = new StringWriter();
 			for (int character = reader.read(); character != -1; character = reader.read()) {
@@ -125,7 +125,7 @@ public class MockBufferPool implements BufferPool<ByteBuffer> {
 	 * Indicates if there are active {@link StreamBuffer} instances.
 	 * 
 	 * @return <code>true</code> if there are active {@link StreamBuffer}
-	 *         instances not released back to this {@link BufferPool}.
+	 *         instances not released back to this {@link StreamBufferPool}.
 	 */
 	public boolean isActiveBuffers() {
 
@@ -170,12 +170,24 @@ public class MockBufferPool implements BufferPool<ByteBuffer> {
 	/**
 	 * Abstract mock {@link StreamBuffer}.
 	 */
-	private static abstract class AbstractMockStreamBuffer implements StreamBuffer<ByteBuffer> {
+	private static abstract class AbstractMockStreamBuffer extends StreamBuffer<ByteBuffer> {
 
 		/**
 		 * Indicates if released.
 		 */
 		private volatile boolean isReleased = false;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param pooledBuffer
+		 *            Pooled {@link ByteBuffer}.
+		 * @param unpooledByteBuffer
+		 *            Unpooled {@link ByteBuffer}.
+		 */
+		public AbstractMockStreamBuffer(ByteBuffer pooledBuffer, ByteBuffer unpooledByteBuffer) {
+			super(pooledBuffer, unpooledByteBuffer);
+		}
 
 		@Override
 		public void release() {
@@ -189,18 +201,13 @@ public class MockBufferPool implements BufferPool<ByteBuffer> {
 	private static class MockPooledStreamBuffer extends AbstractMockStreamBuffer {
 
 		/**
-		 * Buffer.
-		 */
-		private final ByteBuffer buffer;
-
-		/**
 		 * Instantiate.
 		 * 
 		 * @param buffer
 		 *            {@link ByteBuffer}.
 		 */
 		private MockPooledStreamBuffer(ByteBuffer buffer) {
-			this.buffer = buffer;
+			super(buffer, null);
 		}
 
 		/*
@@ -208,31 +215,15 @@ public class MockBufferPool implements BufferPool<ByteBuffer> {
 		 */
 
 		@Override
-		public boolean isPooled() {
-			return true;
-		}
-
-		@Override
-		public ByteBuffer getUnpooledByteBuffer() {
-			Assert.fail("Can not obtain ByteBuffer for " + this.getClass().getSimpleName());
-			return null;
-		}
-
-		@Override
-		public ByteBuffer getPooledBuffer() {
-			return this.buffer;
-		}
-
-		@Override
 		public boolean write(byte datum) {
 
 			// Determine if buffer full
-			if (this.buffer.remaining() == 0) {
+			if (this.pooledBuffer.remaining() == 0) {
 				return false;
 			}
 
 			// Add the byte to the buffer
-			this.buffer.put(datum);
+			this.pooledBuffer.put(datum);
 			return true;
 		}
 
@@ -240,10 +231,10 @@ public class MockBufferPool implements BufferPool<ByteBuffer> {
 		public int write(byte[] data, int offset, int length) {
 
 			// Obtain the length of data to write
-			int writeLength = Math.min(length, this.buffer.remaining());
+			int writeLength = Math.min(length, this.pooledBuffer.remaining());
 
 			// Write the data
-			this.buffer.put(data, offset, writeLength);
+			this.pooledBuffer.put(data, offset, writeLength);
 
 			// Return the bytes written
 			return writeLength;
@@ -256,39 +247,18 @@ public class MockBufferPool implements BufferPool<ByteBuffer> {
 	private static class MockUnpooledStreamBuffer extends AbstractMockStreamBuffer {
 
 		/**
-		 * {@link ByteBuffer}.
-		 */
-		private final ByteBuffer buffer;
-
-		/**
 		 * Instantiate.
 		 * 
 		 * @param buffer
 		 *            Read-only {@link ByteBuffer}.
 		 */
 		private MockUnpooledStreamBuffer(ByteBuffer buffer) {
-			this.buffer = buffer;
+			super(null, buffer);
 		}
 
 		/*
 		 * =================== PooledBuffer ======================
 		 */
-
-		@Override
-		public boolean isPooled() {
-			return false;
-		}
-
-		@Override
-		public ByteBuffer getPooledBuffer() {
-			Assert.fail(this.getClass().getSimpleName() + " is unpooled");
-			return null;
-		}
-
-		@Override
-		public ByteBuffer getUnpooledByteBuffer() {
-			return this.buffer;
-		}
 
 		@Override
 		public boolean write(byte datum) {
@@ -321,12 +291,6 @@ public class MockBufferPool implements BufferPool<ByteBuffer> {
 		}
 
 		/**
-		 * {@link Iterator} over the {@link StreamBuffer} instances for the
-		 * stream of data to return.
-		 */
-		private final Iterator<StreamBuffer<ByteBuffer>> iterator;
-
-		/**
 		 * Current {@link StreamBuffer} to read contents.
 		 */
 		private AbstractMockStreamBuffer currentBuffer = null;
@@ -339,12 +303,14 @@ public class MockBufferPool implements BufferPool<ByteBuffer> {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param iterator
-		 *            {@link Iterator} over the {@link StreamBuffer} instances
-		 *            for the stream of data to return.
+		 * @param headBuffer
+		 *            Head {@link StreamBuffer} of linked list of
+		 *            {@link StreamBuffer} instances.
 		 */
-		private MockBufferPoolInputStream(Iterator<StreamBuffer<ByteBuffer>> iterator) {
-			this.iterator = iterator;
+		private MockBufferPoolInputStream(StreamBuffer<ByteBuffer> headBuffer) {
+			Assert.assertTrue("Should only be mock buffer " + headBuffer.getClass().getName(),
+					headBuffer instanceof AbstractMockStreamBuffer);
+			this.currentBuffer = (AbstractMockStreamBuffer) headBuffer;
 		}
 
 		/*
@@ -357,45 +323,39 @@ public class MockBufferPool implements BufferPool<ByteBuffer> {
 			// Loop until read byte (or end of stream)
 			for (;;) {
 
-				// Determine if current buffer to read value
-				if (this.currentBuffer != null) {
-
-					// Attempt to obtain value from current buffer
-					if (this.currentBuffer.isPooled()) {
-						// Obtain the pooled data
-						ByteBuffer bufferData = this.currentBuffer.getPooledBuffer();
-
-						// Determine if can read data from buffer
-						if (this.currentBufferPosition < bufferData.position()) {
-							// Read the data from the buffer
-							return byteToInt(bufferData.get(this.currentBufferPosition++));
-						}
-
-						// As here, finished reading current buffer
-						this.currentBuffer = null;
-
-					} else {
-						// Attempt to read from unpooled byte buffer
-						ByteBuffer byteBuffer = this.currentBuffer.getUnpooledByteBuffer();
-
-						// Determine if can read from byte buffer
-						if (byteBuffer.remaining() > 0) {
-							return byteToInt(byteBuffer.get());
-						}
-
-						// As here, finished reading current buffer
-						this.currentBuffer = null;
-					}
-				}
-
-				// Determine if further data
-				if (!this.iterator.hasNext()) {
+				// Determine if completed stream
+				if (this.currentBuffer == null) {
 					return -1; // end of stream
 				}
 
+				// Attempt to obtain value from current buffer
+				if (this.currentBuffer.isPooled) {
+					// Obtain the pooled data
+					ByteBuffer bufferData = this.currentBuffer.pooledBuffer;
+
+					// Determine if can read data from buffer
+					if (this.currentBufferPosition < bufferData.position()) {
+						// Read the data from the buffer
+						return byteToInt(bufferData.get(this.currentBufferPosition++));
+					}
+
+				} else {
+					// Attempt to read from unpooled byte buffer
+					ByteBuffer byteBuffer = this.currentBuffer.unpooledByteBuffer;
+
+					// Determine if can read from byte buffer
+					if (byteBuffer.remaining() > 0) {
+						return byteToInt(byteBuffer.get());
+					}
+				}
+
 				// Obtain the next buffer to read
-				StreamBuffer<ByteBuffer> streamBuffer = this.iterator.next();
+				StreamBuffer<ByteBuffer> streamBuffer = this.currentBuffer.next;
 				this.currentBufferPosition = 0;
+				if (streamBuffer == null) {
+					this.currentBuffer = null;
+					return -1; // end of stream
+				}
 
 				// Ensure the buffer is released (as written HTTP response)
 				Assert.assertTrue("Should only be mock buffer " + streamBuffer.getClass().getName(),

@@ -30,6 +30,7 @@ import net.officefloor.server.stream.ServerOutputStream;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated
 public interface ServerTcpConnection {
 
 	/**

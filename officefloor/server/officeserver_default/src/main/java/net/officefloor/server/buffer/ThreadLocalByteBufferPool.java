@@ -24,18 +24,19 @@ import java.util.List;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListenerFactory;
-import net.officefloor.server.stream.BufferPool;
+import net.officefloor.server.stream.StreamBufferPool;
+import net.officefloor.server.stream.impl.AbstractStreamBufferPool;
 import net.officefloor.server.stream.ByteBufferFactory;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**
- * {@link BufferPool} of {@link ByteBuffer} instances that utilises
+ * {@link StreamBufferPool} of {@link ByteBuffer} instances that utilises
  * {@link ThreadLocal} caches for performance.
  * 
  * @author Daniel Sagenschneider
  */
-public class ThreadLocalByteBufferPool
-		implements BufferPool<ByteBuffer>, ThreadCompletionListenerFactory, ThreadCompletionListener {
+public class ThreadLocalByteBufferPool extends AbstractStreamBufferPool<ByteBuffer>
+		implements ThreadCompletionListenerFactory, ThreadCompletionListener {
 
 	/**
 	 * {@link ThreadLocal} pool.
@@ -181,16 +182,12 @@ public class ThreadLocalByteBufferPool
 
 		} else {
 			// Pooled buffer, so reset for use
-			pooledBuffer.getPooledBuffer().clear();
+			pooledBuffer.pooledBuffer.clear();
+			pooledBuffer.next = null;
 		}
 
 		// Return the pooled buffer
 		return pooledBuffer;
-	}
-
-	@Override
-	public StreamBuffer<ByteBuffer> getUnpooledStreamBuffer(ByteBuffer buffer) {
-		return new UnpooledStreamBuffer(buffer);
 	}
 
 	/**
@@ -217,75 +214,15 @@ public class ThreadLocalByteBufferPool
 
 		// Release the thread local pool buffers to core pool
 		this.releaseAllToCorePool(threadLocalPool);
-		
+
 		// Release from thread memory
 		threadLocalPool.clear();
 	}
 
 	/**
-	 * Unpooled {@link StreamBuffer}.
-	 */
-	private static class UnpooledStreamBuffer implements StreamBuffer<ByteBuffer> {
-
-		/**
-		 * {@link ByteBuffer}.
-		 */
-		private final ByteBuffer byteBuffer;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param byteBuffer
-		 *            {@link ByteBuffer}.
-		 */
-		private UnpooledStreamBuffer(ByteBuffer byteBuffer) {
-			this.byteBuffer = byteBuffer;
-		}
-
-		/**
-		 * ================== StreamBuffer ===================
-		 */
-
-		@Override
-		public boolean isPooled() {
-			return false;
-		}
-
-		@Override
-		public ByteBuffer getPooledBuffer() {
-			throw new IllegalStateException("Unpooled buffer");
-		}
-
-		@Override
-		public ByteBuffer getUnpooledByteBuffer() {
-			return this.byteBuffer;
-		}
-
-		@Override
-		public boolean write(byte datum) {
-			throw new IllegalStateException("Unpooled buffer");
-		}
-
-		@Override
-		public int write(byte[] data, int offset, int length) {
-			throw new IllegalStateException("Unpooled buffer");
-		}
-
-		@Override
-		public void release() {
-			// Does nothing
-		}
-	}
-
-	/**
 	 * Pooled {@link StreamBuffer}.
 	 */
-	private class PooledStreamBuffer implements StreamBuffer<ByteBuffer> {
-
-		/**
-		 * {@link ByteBuffer}.
-		 */
-		private final ByteBuffer byteBuffer;
+	private class PooledStreamBuffer extends StreamBuffer<ByteBuffer> {
 
 		/**
 		 * Instantiate.
@@ -294,7 +231,7 @@ public class ThreadLocalByteBufferPool
 		 *            {@link ByteBuffer}.
 		 */
 		private PooledStreamBuffer(ByteBuffer byteBuffer) {
-			this.byteBuffer = byteBuffer;
+			super(byteBuffer, null);
 		}
 
 		/*
@@ -302,30 +239,15 @@ public class ThreadLocalByteBufferPool
 		 */
 
 		@Override
-		public boolean isPooled() {
-			return true;
-		}
-
-		@Override
-		public ByteBuffer getPooledBuffer() {
-			return this.byteBuffer;
-		}
-
-		@Override
-		public ByteBuffer getUnpooledByteBuffer() {
-			throw new IllegalStateException("Pooled buffer");
-		}
-
-		@Override
 		public boolean write(byte datum) {
 
 			// Ensure space write data
-			if (this.byteBuffer.remaining() <= 0) {
+			if (this.pooledBuffer.remaining() <= 0) {
 				return false; // buffer is full
 			}
 
 			// Write the data
-			this.byteBuffer.put(datum);
+			this.pooledBuffer.put(datum);
 			return true;
 		}
 
@@ -333,10 +255,10 @@ public class ThreadLocalByteBufferPool
 		public int write(byte[] data, int offset, int length) {
 
 			// Obtain the bytes to write
-			int writeBytes = Math.min(length, this.byteBuffer.remaining());
+			int writeBytes = Math.min(length, this.pooledBuffer.remaining());
 
 			// Write the bytes
-			this.byteBuffer.put(data, offset, writeBytes);
+			this.pooledBuffer.put(data, offset, writeBytes);
 
 			// Return the number of written bytes
 			return writeBytes;

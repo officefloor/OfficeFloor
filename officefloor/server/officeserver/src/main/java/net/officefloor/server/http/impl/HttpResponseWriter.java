@@ -17,6 +17,8 @@
  */
 package net.officefloor.server.http.impl;
 
+import java.util.Iterator;
+
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
@@ -46,11 +48,13 @@ public interface HttpResponseWriter<B> {
 	 *            Number of bytes in the HTTP entity.
 	 * @param contentType
 	 *            <code>Content-Type</code> of the HTTP entity.
-	 * @param content
+	 * @param contentHeadStreamBuffer
+	 *            Head {@link StreamBuffer} instance to the linked list of
 	 *            {@link StreamBuffer} instances containing the
-	 *            {@link HttpResponse} entity.
+	 *            {@link HttpResponse} entity. May be <code>null</code> if no
+	 *            entity content.
 	 */
-	void writeHttpResponse(HttpVersion version, HttpStatus status, Iterable<WritableHttpHeader> httpHeaders,
-			int contentLength, HttpHeaderValue contentType, Iterable<StreamBuffer<B>> content);
+	void writeHttpResponse(HttpVersion version, HttpStatus status, Iterator<WritableHttpHeader> httpHeaders,
+			long contentLength, HttpHeaderValue contentType, StreamBuffer<B> contentHeadStreamBuffer);
 
 }

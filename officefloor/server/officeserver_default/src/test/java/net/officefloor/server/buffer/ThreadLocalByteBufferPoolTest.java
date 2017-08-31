@@ -64,10 +64,10 @@ public class ThreadLocalByteBufferPoolTest extends OfficeFrameTestCase {
 
 		// Ensure have buffer
 		assertNotNull("Should have buffer", buffer);
-		assertFalse("Should be unpooled", buffer.isPooled());
+		assertFalse("Should be unpooled", buffer.isPooled);
 
 		// Ensure correct byte buffer
-		assertSame("Incorrect byte buffer", content, buffer.getUnpooledByteBuffer());
+		assertSame("Incorrect byte buffer", content, buffer.unpooledByteBuffer);
 	}
 
 	/**
@@ -80,10 +80,10 @@ public class ThreadLocalByteBufferPoolTest extends OfficeFrameTestCase {
 
 		// Ensure have buffer
 		assertNotNull("Should have buffer", buffer);
-		assertTrue("Should be pooled", buffer.isPooled());
+		assertTrue("Should be pooled", buffer.isPooled);
 
 		// Ensure have correct byte buffer by size
-		ByteBuffer content = buffer.getPooledBuffer();
+		ByteBuffer content = buffer.pooledBuffer;
 		assertEquals("Incorrect capacity", BUFFER_SIZE, content.capacity());
 		assertEquals("Retrieved buffer should be ready to use", 0, content.position());
 		assertEquals("Should have full use of buffer", BUFFER_SIZE, content.remaining());
@@ -99,8 +99,8 @@ public class ThreadLocalByteBufferPoolTest extends OfficeFrameTestCase {
 		StreamBuffer<ByteBuffer> original = this.pool.getPooledStreamBuffer();
 
 		// Write content to the buffer
-		ByteBuffer originalContent = original.getPooledBuffer();
-		original.getPooledBuffer().put((byte) 1);
+		ByteBuffer originalContent = original.pooledBuffer;
+		original.pooledBuffer.put((byte) 1);
 		assertEquals("Should have written data", 1, originalContent.position());
 
 		// Release the buffer back to pool
@@ -111,7 +111,7 @@ public class ThreadLocalByteBufferPoolTest extends OfficeFrameTestCase {
 		assertSame("Should be same buffer returned", original, another);
 
 		// Ensure buffer is ready to use
-		ByteBuffer anotherContent = another.getPooledBuffer();
+		ByteBuffer anotherContent = another.pooledBuffer;
 		assertSame("Should same byte buffer", originalContent, anotherContent);
 		assertEquals("Buffer should be ready to use", 0, anotherContent.position());
 		assertEquals("Should have full use of buffer", BUFFER_SIZE, anotherContent.remaining());
@@ -228,7 +228,7 @@ public class ThreadLocalByteBufferPoolTest extends OfficeFrameTestCase {
 
 		// Obtain the buffer
 		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
-		ByteBuffer content = buffer.getPooledBuffer();
+		ByteBuffer content = buffer.pooledBuffer;
 
 		// Write content to the buffer
 		for (int i = 0; i < BUFFER_SIZE; i++) {
@@ -254,7 +254,7 @@ public class ThreadLocalByteBufferPoolTest extends OfficeFrameTestCase {
 
 		// Obtain the buffer
 		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
-		ByteBuffer content = buffer.getPooledBuffer();
+		ByteBuffer content = buffer.pooledBuffer;
 
 		// Write the content to the buffer
 		byte[] data = new byte[BUFFER_SIZE];
@@ -281,7 +281,7 @@ public class ThreadLocalByteBufferPoolTest extends OfficeFrameTestCase {
 
 		// Obtain the buffer
 		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
-		ByteBuffer content = buffer.getPooledBuffer();
+		ByteBuffer content = buffer.pooledBuffer;
 
 		// Create content to write
 		byte datum = 1;

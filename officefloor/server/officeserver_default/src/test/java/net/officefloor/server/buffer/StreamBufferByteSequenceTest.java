@@ -27,7 +27,7 @@ import java.util.function.Function;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockBufferPool;
-import net.officefloor.server.stream.BufferPool;
+import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
 
@@ -44,9 +44,9 @@ public class StreamBufferByteSequenceTest extends OfficeFrameTestCase {
 	private static final int BUFFER_SIZE = 4;
 
 	/**
-	 * {@link BufferPool}
+	 * {@link StreamBufferPool}
 	 */
-	private final BufferPool<ByteBuffer> bufferPool = new MockBufferPool(() -> ByteBuffer.allocate(BUFFER_SIZE));
+	private final StreamBufferPool<ByteBuffer> bufferPool = new MockBufferPool(() -> ByteBuffer.allocate(BUFFER_SIZE));
 
 	/**
 	 * {@link OutputStream} to write to the {@link StreamBuffer} instances.
@@ -101,7 +101,7 @@ public class StreamBufferByteSequenceTest extends OfficeFrameTestCase {
 			// Add some data
 			StreamBuffer<ByteBuffer> dataBuffer = this.bufferPool.getPooledStreamBuffer();
 			dataBuffer.write((byte) (i + 1));
-			sequence.appendStreamBuffer(dataBuffer, 0, dataBuffer.getPooledBuffer().position());
+			sequence.appendStreamBuffer(dataBuffer, 0, dataBuffer.pooledBuffer.position());
 		}
 
 		// Ensure able to obtain the data
@@ -170,12 +170,14 @@ public class StreamBufferByteSequenceTest extends OfficeFrameTestCase {
 
 		// Load up byte sequence
 		StreamBufferByteSequence sequence = null;
-		for (StreamBuffer<ByteBuffer> buffer : output.getBuffers()) {
+		StreamBuffer<ByteBuffer> buffer = output.getBuffers();
+		while (buffer != null) {
 			if (sequence == null) {
-				sequence = new StreamBufferByteSequence(buffer, 0, buffer.getPooledBuffer().position());
+				sequence = new StreamBufferByteSequence(buffer, 0, buffer.pooledBuffer.position());
 			} else {
-				sequence.appendStreamBuffer(buffer, 0, buffer.getPooledBuffer().position());
+				sequence.appendStreamBuffer(buffer, 0, buffer.pooledBuffer.position());
 			}
+			buffer = buffer.next;
 		}
 
 		// Ensure correct bytes
@@ -299,7 +301,13 @@ public class StreamBufferByteSequenceTest extends OfficeFrameTestCase {
 				ServerHttpConnection.HTTP_CHARSET);
 
 		// Ensure using three buffers
-		assertEquals("Incorrect number of buffers", 3, this.output.getBuffers().size());
+		StreamBuffer<ByteBuffer> buffer = this.output.getBuffers();
+		int size = 0;
+		while (buffer != null) {
+			size++;
+			buffer = buffer.next;
+		}
+		assertEquals("Incorrect number of buffers", 3, size);
 
 		// Ensure trims correctly
 		sequence.trim();
@@ -460,12 +468,14 @@ public class StreamBufferByteSequenceTest extends OfficeFrameTestCase {
 
 		// Load the byte sequence
 		StreamBufferByteSequence sequence = null;
-		for (StreamBuffer<ByteBuffer> buffer : this.output.getBuffers()) {
+		StreamBuffer<ByteBuffer> buffer = this.output.getBuffers();
+		while (buffer != null) {
 			if (sequence == null) {
-				sequence = new StreamBufferByteSequence(buffer, 0, buffer.getPooledBuffer().position());
+				sequence = new StreamBufferByteSequence(buffer, 0, buffer.pooledBuffer.position());
 			} else {
-				sequence.appendStreamBuffer(buffer, 0, buffer.getPooledBuffer().position());
+				sequence.appendStreamBuffer(buffer, 0, buffer.pooledBuffer.position());
 			}
+			buffer = buffer.next;
 		}
 
 		// Return the byte sequence

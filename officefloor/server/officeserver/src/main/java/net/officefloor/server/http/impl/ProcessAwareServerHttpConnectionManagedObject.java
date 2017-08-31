@@ -30,7 +30,7 @@ import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.stream.BufferPool;
+import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.impl.ByteSequence;
 
 /**
@@ -81,9 +81,9 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	private final HttpRequestHeaders clientHeaders;
 
 	/**
-	 * {@link BufferPool}.
+	 * {@link StreamBufferPool}.
 	 */
-	private final BufferPool<B> bufferPool;
+	private final StreamBufferPool<B> bufferPool;
 
 	/**
 	 * {@link HttpResponseWriter}.
@@ -115,11 +115,11 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	 * @param writer
 	 *            {@link HttpResponseWriter}.
 	 * @param bufferPool
-	 *            {@link BufferPool}.
+	 *            {@link StreamBufferPool}.
 	 */
 	public ProcessAwareServerHttpConnectionManagedObject(boolean isSecure, Supplier<HttpMethod> methodSupplier,
 			Supplier<String> requestUriSupplier, HttpVersion version, NonMaterialisedHttpHeaders requestHeaders,
-			ByteSequence requestEntity, HttpResponseWriter<B> writer, BufferPool<B> bufferPool) {
+			ByteSequence requestEntity, HttpResponseWriter<B> writer, StreamBufferPool<B> bufferPool) {
 
 		// Indicate if secure
 		this.isSecure = isSecure;

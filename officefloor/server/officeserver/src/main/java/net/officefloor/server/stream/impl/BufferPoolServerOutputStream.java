@@ -23,26 +23,24 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
 
-import net.officefloor.server.stream.BufferPool;
 import net.officefloor.server.stream.ServerOutputStream;
 import net.officefloor.server.stream.ServerWriter;
 import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.StreamBufferPool;
 
 /**
  * {@link ServerOutputStream} that writes to {@link StreamBuffer} instances from
- * a {@link BufferPool}.
+ * a {@link StreamBufferPool}.
  * 
  * @author Daniel Sagenschneider
  */
 public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 
 	/**
-	 * {@link BufferPool}.
+	 * {@link StreamBufferPool}.
 	 */
-	private final BufferPool<B> bufferPool;
+	private final StreamBufferPool<B> bufferPool;
 
 	/**
 	 * {@link CloseHandler}.
@@ -50,29 +48,29 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 	private final CloseHandler closeHandler;
 
 	/**
-	 * {@link StreamBuffer} instances with content.
+	 * Head {@link StreamBuffer}.
 	 */
-	private final List<StreamBuffer<B>> buffers = new ArrayList<>();
+	private StreamBuffer<B> head = null;
 
 	/**
-	 * Current {@link StreamBuffer} being written.
+	 * Tail {@link StreamBuffer}.
 	 */
-	private StreamBuffer<B> currentBuffer = null;
+	private StreamBuffer<B> tail = null;
 
 	/**
 	 * <code>Content-Length</code>.
 	 */
-	private int contentLength = 0;
+	private long contentLength = 0;
 
 	/**
 	 * Instantiate.
 	 * 
 	 * @param bufferPool
-	 *            {@link BufferPool}.
+	 *            {@link StreamBufferPool}.
 	 * @param closeHandler
 	 *            {@link CloseHandler}.
 	 */
-	public BufferPoolServerOutputStream(BufferPool<B> bufferPool, CloseHandler closeHandler) {
+	public BufferPoolServerOutputStream(StreamBufferPool<B> bufferPool, CloseHandler closeHandler) {
 		this.bufferPool = bufferPool;
 		this.closeHandler = closeHandler;
 	}
@@ -81,9 +79,9 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 	 * Instantiate.
 	 * 
 	 * @param bufferPool
-	 *            {@link BufferPool}.
+	 *            {@link StreamBufferPool}.
 	 */
-	public BufferPoolServerOutputStream(BufferPool<B> bufferPool) {
+	public BufferPoolServerOutputStream(StreamBufferPool<B> bufferPool) {
 		this(bufferPool, new CloseHandler() {
 
 			private boolean isClosed = false;
@@ -119,19 +117,19 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 	 * 
 	 * @return Content length of output data.
 	 */
-	public int getContentLength() {
+	public long getContentLength() {
 		return this.contentLength;
 	}
 
 	/**
-	 * Obtains the {@link StreamBuffer} instances used by this
+	 * Obtains the head {@link StreamBuffer} instances used by this
 	 * {@link ServerOutputStream}.
 	 * 
 	 * @return {@link StreamBuffer} instances used by this
 	 *         {@link ServerOutputStream}.
 	 */
-	public List<StreamBuffer<B>> getBuffers() {
-		return this.buffers;
+	public StreamBuffer<B> getBuffers() {
+		return this.head;
 	}
 
 	/**
@@ -140,12 +138,12 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 	 */
 	public void clear() {
 
-		// Release all the buffer
-		for (StreamBuffer<B> buffer : this.buffers) {
-			buffer.release();
+		// Release all the buffers (and clear list)
+		while (this.head != null) {
+			this.head.release();
+			this.head = this.head.next;
 		}
-		this.buffers.clear();
-		this.currentBuffer = null;
+		this.tail = null;
 
 		// No content
 		this.contentLength = 0;
@@ -173,10 +171,15 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 
 		// Add the unpooled buffer
 		StreamBuffer<B> streamBuffer = this.bufferPool.getUnpooledStreamBuffer(buffer);
-		this.buffers.add(streamBuffer);
-
-		// Clear current buffer, so new buffer to continue writing
-		this.currentBuffer = null;
+		if (this.head == null) {
+			// First buffer
+			this.head = streamBuffer;
+			this.tail = streamBuffer;
+		} else {
+			// Append buffer
+			this.tail.next = streamBuffer;
+			this.tail = streamBuffer;
+		}
 
 		// Content included
 		this.contentLength += buffer.remaining();
@@ -186,25 +189,33 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 	public void write(int b) throws IOException {
 		this.ensureOpen();
 
-		// Ensure have current buffer
-		if (this.currentBuffer == null) {
-			this.currentBuffer = this.bufferPool.getPooledStreamBuffer();
-			this.buffers.add(this.currentBuffer);
+		// Ensure have current pooled buffer
+		if (this.tail == null) {
+			// Add first buffer
+			StreamBuffer<B> streamBuffer = this.bufferPool.getPooledStreamBuffer();
+			this.head = streamBuffer;
+			this.tail = streamBuffer;
+		} else if (!this.tail.isPooled) {
+			// Last is not pooled, so add pooled
+			StreamBuffer<B> streamBuffer = this.bufferPool.getPooledStreamBuffer();
+			this.tail.next = streamBuffer;
+			this.tail = streamBuffer;
 		}
 
 		// Write the byte to the current buffer
-		boolean isWritten = this.currentBuffer.write((byte) b);
+		boolean isWritten = this.tail.write((byte) b);
 
 		// Determine if full and must write to another buffer
 		if (!isWritten) {
 			// Add another buffer and write the data
-			this.currentBuffer = this.bufferPool.getPooledStreamBuffer();
-			this.buffers.add(this.currentBuffer);
-			isWritten = this.currentBuffer.write((byte) b);
+			StreamBuffer<B> streamBuffer = this.bufferPool.getPooledStreamBuffer();
+			this.tail.next = streamBuffer;
+			this.tail = streamBuffer;
+			isWritten = this.tail.write((byte) b);
 			if (!isWritten) {
 				// Should always be able to write a byte to a new buffer
-				throw new IOException("Failed to write byte " + String.valueOf(b) + " to new "
-						+ this.currentBuffer.getClass().getName());
+				throw new IOException(
+						"Failed to write byte " + String.valueOf(b) + " to new " + this.tail.getClass().getName());
 			}
 		}
 
@@ -220,17 +231,24 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 		int offset = off;
 		int remaining = len;
 
-		// Ensure have current buffer
-		if (this.currentBuffer == null) {
-			this.currentBuffer = this.bufferPool.getPooledStreamBuffer();
-			this.buffers.add(this.currentBuffer);
+		// Ensure have current pooled buffer
+		if (this.tail == null) {
+			// Add first buffer
+			StreamBuffer<B> streamBuffer = this.bufferPool.getPooledStreamBuffer();
+			this.head = streamBuffer;
+			this.tail = streamBuffer;
+		} else if (!this.tail.isPooled) {
+			// Last is not pooled, so add pooled
+			StreamBuffer<B> streamBuffer = this.bufferPool.getPooledStreamBuffer();
+			this.tail.next = streamBuffer;
+			this.tail = streamBuffer;
 		}
 
 		// Keep writing to buffers until complete
 		do {
 
 			// Write the bytes to buffer
-			int bytesWritten = this.currentBuffer.write(bytes, offset, remaining);
+			int bytesWritten = this.tail.write(bytes, offset, remaining);
 
 			// Determine number of bytes remaining
 			remaining -= bytesWritten;
@@ -238,8 +256,9 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 			// Adjust for potential another write
 			if (remaining > 0) {
 				offset += bytesWritten;
-				this.currentBuffer = this.bufferPool.getPooledStreamBuffer();
-				this.buffers.add(this.currentBuffer);
+				StreamBuffer<B> streamBuffer = this.bufferPool.getPooledStreamBuffer();
+				this.tail.next = streamBuffer;
+				this.tail = streamBuffer;
 			}
 
 		} while (remaining > 0);
@@ -268,7 +287,7 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 	}
 
 	/**
-	 * {@link BufferPool} {@link ServerWriter}.
+	 * {@link StreamBufferPool} {@link ServerWriter}.
 	 */
 	private class BufferPoolServerWriter extends ServerWriter {
 

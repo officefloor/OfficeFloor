@@ -17,12 +17,27 @@
  */
 package net.officefloor.server.http;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
+import net.officefloor.frame.api.managedobject.ProcessAwareContext;
+import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
+import net.officefloor.server.SocketManager;
+import net.officefloor.server.buffer.ThreadLocalByteBufferPool;
+import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
+import net.officefloor.server.stream.StreamBufferPool;
+
 /**
  * Tests the {@link OfficeFloorHttpServerImplementation}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerImplementationTest<Object> {
+public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerImplementationTest<SocketManager> {
+
+	private static final byte[] helloWorld = "hello world".getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
+	private static final HttpHeaderValue textPlain = new HttpHeaderValue("text/plain");
 
 	@Override
 	protected HttpServerImplementation createHttpServerImplementation() {
@@ -31,18 +46,75 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 
 	@Override
 	protected HttpHeader[] getServerResponseHeaderValues() {
-		return new HttpHeader[] { newHttpHeader("Content-Type", "?"), newHttpHeader("Content-Length", "?") };
+		return new HttpHeader[] { newHttpHeader("content-type", "?"), newHttpHeader("content-length", "?") };
 	}
 
 	@Override
-	protected Object startRawHttpServer(int httpPort) throws Exception {
-		this.startHttpServer(Servicer.class);
-		return null;
+	protected SocketManager startRawHttpServer(int httpPort) throws Exception {
+
+		// Create the buffer pool
+		StreamBufferPool<ByteBuffer> bufferPool = new ThreadLocalByteBufferPool(() -> ByteBuffer.allocateDirect(4096),
+				Integer.MAX_VALUE, Integer.MAX_VALUE);
+
+		// Create the socket manager
+		SocketManager manager = new SocketManager(Runtime.getRuntime().availableProcessors(), bufferPool);
+
+		// Create raw HTTP servicing
+		RawHttpServicer servicer = new RawHttpServicer(bufferPool);
+		manager.bindServerSocket(httpPort, null, null, servicer, servicer);
+
+		// Start servicing
+		Executor executor = Executors.newCachedThreadPool();
+		for (Runnable runnable : manager.getRunnables()) {
+			executor.execute(runnable);
+		}
+
+		// Return the socket manager
+		return manager;
 	}
 
 	@Override
-	protected void stopRawHttpServer(Object momento) throws Exception {
-		// OfficeFloor will be shutdown
+	protected void stopRawHttpServer(SocketManager momento) throws Exception {
+		momento.shutdown();
+	}
+
+	/**
+	 * Raw {@link AbstractHttpServicer}.
+	 */
+	private static class RawHttpServicer extends AbstractHttpServicer {
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param bufferPool
+		 *            {@link StreamBufferPool}.
+		 */
+		public RawHttpServicer(StreamBufferPool<ByteBuffer> bufferPool) {
+			super(false, bufferPool, new HttpRequestParserMetaData(100, 1000, 1000000));
+		}
+
+		/*
+		 * ===================== HttpServicer ====================
+		 */
+
+		@Override
+		protected void service(ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection)
+				throws IOException {
+
+			// Configure process awareness
+			connection.setProcessAwareContext(new ProcessAwareContext() {
+				@Override
+				public <R, T extends Throwable> R run(ProcessSafeOperation<R, T> operation) throws T {
+					return operation.run();
+				}
+			});
+
+			// Service the connection
+			HttpResponse response = connection.getHttpResponse();
+			response.getEntity().write(helloWorld);
+			response.setContentType(textPlain, null);
+			response.send();
+		}
 	}
 
 }

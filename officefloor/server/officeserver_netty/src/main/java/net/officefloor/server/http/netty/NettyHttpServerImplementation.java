@@ -222,14 +222,15 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 			// Write the content details
 			HttpHeaders headers = response.headers();
 			if (contentLength > 0) {
-				headers.addInt("Content-Length", contentLength);
+				headers.addInt("Content-Length", (int) contentLength);
 				if (contentType != null) {
 					headers.add("Content-Type", contentType.getValue());
 				}
 			}
 
 			// Load the remaining headers
-			for (WritableHttpHeader header : httpHeaders) {
+			while (httpHeaders.hasNext()) {
+				WritableHttpHeader header = httpHeaders.next();
 				headers.add(header.getName(), header.getValue());
 			}
 

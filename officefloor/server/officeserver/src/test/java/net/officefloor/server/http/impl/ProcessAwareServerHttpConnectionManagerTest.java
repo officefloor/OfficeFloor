@@ -142,10 +142,10 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		// Validate the default details
 		assertEquals("Incorrect version", this.requestVersion, this.responseVersion);
 		assertEquals("Incorect status", HttpStatus.OK, this.status);
-		assertFalse("Should be no headers", this.responseHeaders.iterator().hasNext());
+		assertFalse("Should be no headers", this.responseHeaders.hasNext());
 		assertEquals("Should be no entity", 0, this.contentLength);
 		assertNull("No Content-Type for no entity", this.contentType);
-		assertFalse("No entity content", this.content.iterator().hasNext());
+		assertNull("No entity content", this.contentHeadStreamBuffer);
 	}
 
 	/**
@@ -173,18 +173,17 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		// Validate the response
 		assertEquals("Incorrect version", HttpVersion.HTTP_1_0, this.responseVersion);
 		assertEquals("Incorect status", HttpStatus.CREATED, this.status);
-		Iterator<WritableHttpHeader> headers = this.responseHeaders.iterator();
-		assertTrue("Should be a headers", headers.hasNext());
-		assertEquals("Incorrect header", "name", headers.next().getName());
-		assertFalse("Should be just the one header", headers.hasNext());
+		assertTrue("Should be a headers", this.responseHeaders.hasNext());
+		assertEquals("Incorrect header", "name", this.responseHeaders.next().getName());
+		assertFalse("Should be just the one header", this.responseHeaders.hasNext());
 
 		// Validate the content details
 		assertEquals("Incorrect content length", expectedContent.length, this.contentLength);
 		assertEquals("Incorrect content type", "text/html; charset=" + charset.name(), this.contentType.getValue());
 
 		// Validate the content
-		MockBufferPool.releaseStreamBuffers(this.content);
-		String content = MockBufferPool.getContent(this.content, charset);
+		MockBufferPool.releaseStreamBuffers(this.contentHeadStreamBuffer);
+		String content = MockBufferPool.getContent(this.contentHeadStreamBuffer, charset);
 		assertEquals("Incorrect content", "TEST RESPONSE", content);
 	}
 
@@ -353,23 +352,23 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 
 	private HttpStatus status = null;
 
-	private Iterable<WritableHttpHeader> responseHeaders = null;
+	private Iterator<WritableHttpHeader> responseHeaders = null;
 
-	private int contentLength;
+	private long contentLength;
 
 	private HttpHeaderValue contentType = null;
 
-	private Iterable<StreamBuffer<ByteBuffer>> content = null;
+	private StreamBuffer<ByteBuffer> contentHeadStreamBuffer = null;
 
 	@Override
-	public void writeHttpResponse(HttpVersion version, HttpStatus status, Iterable<WritableHttpHeader> httpHeaders,
-			int contentLength, HttpHeaderValue contentType, Iterable<StreamBuffer<ByteBuffer>> content) {
+	public void writeHttpResponse(HttpVersion version, HttpStatus status, Iterator<WritableHttpHeader> httpHeaders,
+			long contentLength, HttpHeaderValue contentType, StreamBuffer<ByteBuffer> contentHeadStreamBuffer) {
 		this.responseVersion = version;
 		this.status = status;
 		this.responseHeaders = httpHeaders;
 		this.contentLength = contentLength;
 		this.contentType = contentType;
-		this.content = content;
+		this.contentHeadStreamBuffer = contentHeadStreamBuffer;
 	}
 
 }
