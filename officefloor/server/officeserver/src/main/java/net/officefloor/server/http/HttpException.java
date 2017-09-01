@@ -17,6 +17,12 @@
  */
 package net.officefloor.server.http;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.StreamBufferPool;
+
 /**
  * <p>
  * HTTP {@link Exception}.
@@ -30,9 +36,29 @@ package net.officefloor.server.http;
 public class HttpException extends RuntimeException {
 
 	/**
-	 * No {@link HttpHeader} instances value.
+	 * {@link HttpHeader} space.
 	 */
-	private static final HttpHeader[] NO_HEADERS = new HttpHeader[0];
+	private static byte[] SPACE = " ".getBytes(ServerHttpConnection.HTTP_CHARSET);
+
+	/**
+	 * {@link HttpHeader} end of line encoded bytes.
+	 */
+	private static byte[] HEADER_EOLN = "\r\n".getBytes(ServerHttpConnection.HTTP_CHARSET);
+
+	/**
+	 * {@link HttpHeader} name/value separation.
+	 */
+	private static byte[] COLON_SPACE = ": ".getBytes(ServerHttpConnection.HTTP_CHARSET);
+
+	/**
+	 * Content-Length {@link HttpHeaderName}.
+	 */
+	private static HttpHeaderName CONTENT_LENGTH = new HttpHeaderName("Content-Length");
+
+	/**
+	 * No {@link WritableHttpHeader} instances value.
+	 */
+	private static final WritableHttpHeader[] NO_HEADERS = new WritableHttpHeader[0];
 
 	/**
 	 * {@link HttpStatus}.
@@ -40,9 +66,10 @@ public class HttpException extends RuntimeException {
 	private final HttpStatus status;
 
 	/**
-	 * Possible {@link HttpHeader} instances for the {@link HttpResponse}.
+	 * Possible {@link WritableHttpHeader} instances for the
+	 * {@link HttpResponse}.
 	 */
-	private final HttpHeader[] headers;
+	private final WritableHttpHeader[] headers;
 
 	/**
 	 * {@link HttpResponse} entity content.
@@ -72,7 +99,7 @@ public class HttpException extends RuntimeException {
 	 * @param entity
 	 *            Entity for the {@link HttpResponse}. May be <code>null</code>.
 	 */
-	public HttpException(HttpStatus status, HttpHeader[] headers, String entity) {
+	public HttpException(HttpStatus status, WritableHttpHeader[] headers, String entity) {
 		super(status.getStatusMessage());
 		this.status = status;
 		this.headers = (headers == null ? NO_HEADERS : headers);
@@ -105,6 +132,60 @@ public class HttpException extends RuntimeException {
 	 */
 	public String getEntity() {
 		return this.entity;
+	}
+
+	/**
+	 * Writes the HTTP response for this {@link HttpException}.
+	 * 
+	 * @param version
+	 *            {@link HttpVersion}.
+	 * @param isIncludeStackTrace
+	 *            Whether to include the stack trace.
+	 * @param head
+	 *            Head {@link StreamBuffer} of the linked list of
+	 *            {@link StreamBuffer} instances.
+	 * @param bufferPool
+	 *            {@link StreamBufferPool}.
+	 */
+	public <B> void writeHttpResponse(HttpVersion version, boolean isIncludeStackTrace, StreamBuffer<B> head,
+			StreamBufferPool<B> bufferPool) {
+
+		// Write the status line
+		version.write(head, bufferPool);
+		StreamBuffer.write(SPACE, 0, SPACE.length, head, bufferPool);
+		this.status.write(head, bufferPool);
+		StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, head, bufferPool);
+
+		// Write the headers
+		for (int i = 0; i < this.headers.length; i++) {
+			this.headers[i].write(head, bufferPool);
+		}
+
+		// Determine if include the stack trace
+		if (!isIncludeStackTrace) {
+			// Complete request without entity
+			StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, head, bufferPool);
+			return;
+		}
+
+		// Generate the stack trace
+		StringWriter stackTrace = new StringWriter();
+		PrintWriter writer = new PrintWriter(stackTrace);
+		this.printStackTrace(writer);
+		writer.flush();
+		byte[] stackTraceBytes = stackTrace.toString().getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
+
+		// Write header for the content length
+		CONTENT_LENGTH.write(head, bufferPool);
+		StreamBuffer.write(COLON_SPACE, 0, COLON_SPACE.length, head, bufferPool);
+		HttpHeaderValue.writeInteger(stackTraceBytes.length, head, bufferPool);
+		StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, head, bufferPool);
+
+		// Write end of headers
+		StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, head, bufferPool);
+
+		// Write the stack trace
+		StreamBuffer.write(stackTraceBytes, 0, stackTraceBytes.length, head, bufferPool);
 	}
 
 }

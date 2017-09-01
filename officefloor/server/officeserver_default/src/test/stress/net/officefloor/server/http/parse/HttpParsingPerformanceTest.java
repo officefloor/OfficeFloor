@@ -22,7 +22,7 @@ import java.nio.ByteBuffer;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.UsAsciiUtil;
-import net.officefloor.server.http.mock.MockBufferPool;
+import net.officefloor.server.http.mock.MockStreamBufferPool;
 import net.officefloor.server.http.parse.HttpRequestParser.HttpRequestParserMetaData;
 import net.officefloor.server.stream.StreamBuffer;
 
@@ -73,7 +73,7 @@ public class HttpParsingPerformanceTest extends OfficeFrameTestCase {
 		byte[] data = UsAsciiUtil.convertToHttp(wireContent);
 
 		// Create a buffer with the content
-		MockBufferPool pool = new MockBufferPool(() -> ByteBuffer.allocateDirect(data.length));
+		MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocateDirect(data.length));
 		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
 		buffer.write(data);
 

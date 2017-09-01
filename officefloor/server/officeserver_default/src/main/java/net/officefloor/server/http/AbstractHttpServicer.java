@@ -29,12 +29,9 @@ import net.officefloor.server.SocketServicer;
 import net.officefloor.server.http.impl.HttpResponseWriter;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
-import net.officefloor.server.http.impl.WritableHttpHeader;
 import net.officefloor.server.http.parse.HttpRequestParser;
-import net.officefloor.server.stream.ServerWriter;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
-import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
 import net.officefloor.server.stream.impl.ByteSequence;
 
 /**
@@ -45,6 +42,10 @@ import net.officefloor.server.stream.impl.ByteSequence;
  */
 public abstract class AbstractHttpServicer extends HttpRequestParser
 		implements SocketServicer<HttpRequestParser>, RequestServicer<HttpRequestParser> {
+
+	private static final byte[] SPACE = " ".getBytes(ServerHttpConnection.HTTP_CHARSET);
+	private static byte[] HEADER_EOLN = "\r\n".getBytes(ServerHttpConnection.HTTP_CHARSET);
+	private static byte[] COLON_SPACE = ": ".getBytes(ServerHttpConnection.HTTP_CHARSET);
 
 	private static final HttpHeaderName CONTENT_LENGTH_NAME = new HttpHeaderName("Content-Length");
 	private static final HttpHeaderName CONTENT_TYPE_NAME = new HttpHeaderName("Content-Type");
@@ -89,46 +90,6 @@ public abstract class AbstractHttpServicer extends HttpRequestParser
 	protected abstract void service(ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection)
 			throws IOException, HttpException;
 
-	/**
-	 * Writes the {@link HttpException} response.
-	 * 
-	 * @param version
-	 *            {@link HttpVersion}.
-	 * @param exception
-	 *            {@link HttpException} response.
-	 * @param writer
-	 *            {@link ResponseWriter}.
-	 */
-	private void writeHttpException(HttpVersion version, HttpException exception, ResponseWriter writer) {
-		try {
-			// Write the response
-			BufferPoolServerOutputStream<ByteBuffer> outputStream = new BufferPoolServerOutputStream<>(this.bufferPool);
-			ServerWriter headerWriter = outputStream.getServerWriter(ServerHttpConnection.HTTP_CHARSET);
-
-			// Obtain the status
-			HttpStatus status = exception.getHttpStatus();
-
-			// Write the header
-			headerWriter.write(version.getBytes());
-			headerWriter.write(' ');
-			headerWriter.write(status.getBytes());
-			headerWriter.write('\r');
-			headerWriter.write('\n');
-			headerWriter.write('\r');
-			headerWriter.write('\n');
-			headerWriter.flush();
-
-			// Obtain the buffers
-			StreamBuffer<ByteBuffer> buffers = outputStream.getBuffers();
-
-			writer.write(buffers);
-		} catch (IOException ex) {
-
-			// Provide means to close connection
-			ex.printStackTrace();
-		}
-	}
-
 	/*
 	 * ===================== SocketServicer ======================
 	 */
@@ -162,66 +123,63 @@ public abstract class AbstractHttpServicer extends HttpRequestParser
 		ByteSequence requestEntity = this.getEntity();
 
 		// Create the HTTP response writer
-		HttpResponseWriter<ByteBuffer> writer = (responseVersion, status, httpHeaders, contentLength, contentType,
+		HttpResponseWriter<ByteBuffer> writer = (responseVersion, status, httpHeader, contentLength, contentType,
 				content) -> {
+
+			// Create buffer for response header
+			StreamBuffer<ByteBuffer> responseHeader = this.bufferPool.getPooledStreamBuffer();
 			try {
-				try {
-					// Write the response
-					BufferPoolServerOutputStream<ByteBuffer> outputStream = new BufferPoolServerOutputStream<>(
-							this.bufferPool);
-					ServerWriter headerWriter = outputStream.getServerWriter(ServerHttpConnection.HTTP_CHARSET);
+				// Write the response
+				responseVersion.write(responseHeader, this.bufferPool);
+				StreamBuffer.write(SPACE, 0, SPACE.length, responseHeader, this.bufferPool);
+				status.write(responseHeader, this.bufferPool);
+				StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHeader, bufferPool);
 
-					// Write the header
-					headerWriter.write(responseVersion.getBytes());
-					headerWriter.write(' ');
-					headerWriter.write(status.getBytes());
-					headerWriter.write('\r');
-					headerWriter.write('\n');
-					if (contentType != null) {
-						CONTENT_TYPE_NAME.writeName(headerWriter);
-						headerWriter.write(':');
-						headerWriter.write(' ');
-						contentType.writeValue(headerWriter);
-						headerWriter.append('\r');
-						headerWriter.append('\n');
-					}
-					if (contentLength > 0) {
-						CONTENT_LENGTH_NAME.writeName(headerWriter);
-						headerWriter.write(':');
-						headerWriter.write(' ');
-						headerWriter.write(String.valueOf(contentLength));
-						headerWriter.append('\r');
-						headerWriter.append('\n');
-					}
-					while (httpHeaders.hasNext()) {
-						WritableHttpHeader header = httpHeaders.next();
-						header.writeHttpHeader(headerWriter);
-					}
-					headerWriter.write('\r');
-					headerWriter.write('\n');
-					headerWriter.flush();
-
-					// Obtain the buffers
-					StreamBuffer<ByteBuffer> buffers = outputStream.getBuffers();
-
-					// Append entity buffers
-					StreamBuffer<ByteBuffer> lastHeader = buffers;
-					while (lastHeader.next != null) {
-						lastHeader = lastHeader.next;
-					}
-					lastHeader.next = content;
-
-					// Write the response
-					responseWriter.write(buffers);
-
-				} catch (IOException ex) {
-					// Propagate as HTTP exception
-					throw new HttpException(
-							new HttpStatus(HttpStatus.INTERNAL_SERVER_ERROR.getStatusCode(), ex.getMessage()));
+				// Write the header
+				if (contentType != null) {
+					CONTENT_TYPE_NAME.write(responseHeader, this.bufferPool);
+					StreamBuffer.write(COLON_SPACE, 0, COLON_SPACE.length, responseHeader, this.bufferPool);
+					contentType.write(responseHeader, this.bufferPool);
+					StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHeader, this.bufferPool);
 				}
+				if (contentLength > 0) {
+					CONTENT_LENGTH_NAME.write(responseHeader, this.bufferPool);
+					StreamBuffer.write(COLON_SPACE, 0, COLON_SPACE.length, responseHeader, this.bufferPool);
+					HttpHeaderValue.writeInteger(contentLength, responseHeader, this.bufferPool);
+					StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHeader, this.bufferPool);
+				}
+				while (httpHeader != null) {
+					httpHeader.write(responseHeader, this.bufferPool);
+					httpHeader = httpHeader.next;
+				}
+				StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHeader, bufferPool);
+
+				// Append entity buffers
+				StreamBuffer<ByteBuffer> lastHeader = responseHeader;
+				while (lastHeader.next != null) {
+					lastHeader = lastHeader.next;
+				}
+				lastHeader.next = content;
+
+				// Write the response
+				responseWriter.write(responseHeader);
+
 			} catch (HttpException ex) {
+
+				// Release the attempted response
+				while (responseHeader != null) {
+					responseHeader.release();
+					responseHeader = responseHeader.next;
+				}
+				while (content != null) {
+					content.release();
+					content = content.next;
+				}
+
 				// Send HTTP exception
-				this.writeHttpException(version, ex, responseWriter);
+				StreamBuffer<ByteBuffer> response = this.bufferPool.getPooledStreamBuffer();
+				ex.writeHttpResponse(version, true, response, this.bufferPool);
+				responseWriter.write(response);
 			}
 		};
 
@@ -242,7 +200,9 @@ public abstract class AbstractHttpServicer extends HttpRequestParser
 			}
 		} catch (HttpException ex) {
 			// Send HTTP exception
-			this.writeHttpException(version, ex, responseWriter);
+			StreamBuffer<ByteBuffer> response = this.bufferPool.getPooledStreamBuffer();
+			ex.writeHttpResponse(version, true, response, this.bufferPool);
+			responseWriter.write(response);
 		}
 	}
 

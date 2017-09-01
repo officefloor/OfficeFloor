@@ -46,7 +46,6 @@ import net.officefloor.server.http.impl.NonMaterialisedHttpHeader;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.http.impl.SerialisableHttpHeader;
-import net.officefloor.server.http.impl.WritableHttpHeader;
 import net.officefloor.server.stream.impl.ByteSequence;
 
 /**
@@ -212,7 +211,7 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 				HttpResponseStatus.OK, false);
 
 		// Handle response
-		HttpResponseWriter<ByteBuf> responseWriter = (responseVersion, status, httpHeaders, contentLength, contentType,
+		HttpResponseWriter<ByteBuf> responseWriter = (responseVersion, status, httpHeader, contentLength, contentType,
 				content) -> {
 
 			// Specify the status
@@ -229,9 +228,9 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 			}
 
 			// Load the remaining headers
-			while (httpHeaders.hasNext()) {
-				WritableHttpHeader header = httpHeaders.next();
-				headers.add(header.getName(), header.getValue());
+			while (httpHeader != null) {
+				headers.add(httpHeader.getName(), httpHeader.getValue());
+				httpHeader = httpHeader.next;
 			}
 
 			// Send the response

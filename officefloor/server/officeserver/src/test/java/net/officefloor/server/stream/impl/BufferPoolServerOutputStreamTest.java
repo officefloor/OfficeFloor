@@ -25,7 +25,7 @@ import java.util.function.Function;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.mock.MockBufferPool;
+import net.officefloor.server.http.mock.MockStreamBufferPool;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**
@@ -36,9 +36,9 @@ import net.officefloor.server.stream.StreamBuffer;
 public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link MockBufferPool}.
+	 * {@link MockStreamBufferPool}.
 	 */
-	private final MockBufferPool bufferPool = new MockBufferPool(() -> ByteBuffer.allocate(4));
+	private final MockStreamBufferPool bufferPool = new MockStreamBufferPool(() -> ByteBuffer.allocate(4));
 
 	/**
 	 * {@link BufferPoolServerOutputStream} to test.
@@ -133,8 +133,8 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 		assertEquals("Should start length incrementing again", 1, this.outputStream.getContentLength());
 
 		// Ensure only data after the clear
-		MockBufferPool.releaseStreamBuffers(this.outputStream.getBuffers());
-		InputStream input = MockBufferPool.createInputStream(this.outputStream.getBuffers());
+		MockStreamBufferPool.releaseStreamBuffers(this.outputStream.getBuffers());
+		InputStream input = MockStreamBufferPool.createInputStream(this.outputStream.getBuffers());
 		assertEquals("Incorrect value after clear", 12, input.read());
 		assertEquals("Should be only the byte", -1, input.read());
 	}

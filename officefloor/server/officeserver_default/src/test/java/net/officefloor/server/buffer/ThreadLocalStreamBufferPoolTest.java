@@ -24,11 +24,11 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**
- * Tests the {@link ThreadLocalByteBufferPool}.
+ * Tests the {@link ThreadLocalStreamBufferPool}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ThreadLocalByteBufferPoolTest extends OfficeFrameTestCase {
+public class ThreadLocalStreamBufferPoolTest extends OfficeFrameTestCase {
 
 	/**
 	 * Size of the pooled {@link ByteBuffer} instances.
@@ -48,9 +48,9 @@ public class ThreadLocalByteBufferPoolTest extends OfficeFrameTestCase {
 	private static final int CORE_POOL_SIZE = 2;
 
 	/**
-	 * {@link ThreadLocalByteBufferPool} to test.
+	 * {@link ThreadLocalStreamBufferPool} to test.
 	 */
-	private final ThreadLocalByteBufferPool pool = new ThreadLocalByteBufferPool(() -> ByteBuffer.allocate(BUFFER_SIZE),
+	private final ThreadLocalStreamBufferPool pool = new ThreadLocalStreamBufferPool(() -> ByteBuffer.allocate(BUFFER_SIZE),
 			THREAD_LOCAL_POOL_SIZE, CORE_POOL_SIZE);
 
 	/**
@@ -87,6 +87,25 @@ public class ThreadLocalByteBufferPoolTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect capacity", BUFFER_SIZE, content.capacity());
 		assertEquals("Retrieved buffer should be ready to use", 0, content.position());
 		assertEquals("Should have full use of buffer", BUFFER_SIZE, content.remaining());
+	}
+
+	/**
+	 * Ensure same {@link StreamBuffer} returned after release.
+	 */
+	public void testThreadLocalRecycle() {
+		final StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
+		buffer.release();
+		assertSame("Should obtain buffer just released", buffer, this.pool.getPooledStreamBuffer());
+	}
+
+	/**
+	 * Ensure same {@link StreamBuffer} returned after release (to core pool).
+	 */
+	public void testCoreRecycle() {
+		final StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
+		buffer.release();
+		this.pool.createThreadCompletionListener(null).threadComplete();
+		assertSame("Should obtain buffer just released", buffer, this.pool.getPooledStreamBuffer());
 	}
 
 	/**

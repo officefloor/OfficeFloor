@@ -17,9 +17,8 @@
  */
 package net.officefloor.server.http;
 
-import java.io.IOException;
-
-import net.officefloor.server.stream.ServerWriter;
+import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.StreamBufferPool;
 
 /**
  * Means to provide common {@link HttpHeader} names in already encoded HTTP
@@ -60,15 +59,16 @@ public class HttpHeaderName {
 	}
 
 	/**
-	 * Writes the name to the {@link ServerWriter}.
+	 * Writes this {@link HttpHeaderName} to the {@link StreamBuffer}.
 	 * 
-	 * @param writer
-	 *            {@link ServerWriter}.
-	 * @throws IOException
-	 *             If fails to write the name.
+	 * @param head
+	 *            Head {@link StreamBuffer} of linked list of
+	 *            {@link StreamBuffer} instances.
+	 * @param bufferPool
+	 *            {@link StreamBufferPool}.
 	 */
-	public void writeName(ServerWriter writer) throws IOException {
-		writer.write(this.encodedName);
+	public <B> void write(StreamBuffer<B> head, StreamBufferPool<B> bufferPool) {
+		StreamBuffer.write(this.encodedName, 0, this.encodedName.length, head, bufferPool);
 	}
 
 }

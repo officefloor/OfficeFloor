@@ -25,7 +25,7 @@ import java.util.concurrent.Executors;
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.server.SocketManager;
-import net.officefloor.server.buffer.ThreadLocalByteBufferPool;
+import net.officefloor.server.buffer.ThreadLocalStreamBufferPool;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.stream.StreamBufferPool;
 
@@ -53,11 +53,12 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 	protected SocketManager startRawHttpServer(int httpPort) throws Exception {
 
 		// Create the buffer pool
-		StreamBufferPool<ByteBuffer> bufferPool = new ThreadLocalByteBufferPool(() -> ByteBuffer.allocateDirect(4096),
-				Integer.MAX_VALUE, Integer.MAX_VALUE);
+		final int bufferSize = 65536;
+		StreamBufferPool<ByteBuffer> bufferPool = new ThreadLocalStreamBufferPool(
+				() -> ByteBuffer.allocateDirect(bufferSize), Integer.MAX_VALUE, Integer.MAX_VALUE);
 
 		// Create the socket manager
-		SocketManager manager = new SocketManager(Runtime.getRuntime().availableProcessors(), bufferPool);
+		SocketManager manager = new SocketManager(Runtime.getRuntime().availableProcessors(), bufferPool, bufferSize);
 
 		// Create raw HTTP servicing
 		RawHttpServicer servicer = new RawHttpServicer(bufferPool);
@@ -84,6 +85,16 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 	private static class RawHttpServicer extends AbstractHttpServicer {
 
 		/**
+		 * {@link ProcessAwareContext}.
+		 */
+		private static ProcessAwareContext processAwareContext = new ProcessAwareContext() {
+			@Override
+			public <R, T extends Throwable> R run(ProcessSafeOperation<R, T> operation) throws T {
+				return operation.run();
+			}
+		};
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param bufferPool
@@ -102,12 +113,7 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 				throws IOException {
 
 			// Configure process awareness
-			connection.setProcessAwareContext(new ProcessAwareContext() {
-				@Override
-				public <R, T extends Throwable> R run(ProcessSafeOperation<R, T> operation) throws T {
-					return operation.run();
-				}
-			});
+			connection.setProcessAwareContext(processAwareContext);
 
 			// Service the connection
 			HttpResponse response = connection.getHttpResponse();

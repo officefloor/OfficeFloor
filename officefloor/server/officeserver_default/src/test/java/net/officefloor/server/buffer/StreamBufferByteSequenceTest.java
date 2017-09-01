@@ -26,7 +26,7 @@ import java.util.function.Function;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.mock.MockBufferPool;
+import net.officefloor.server.http.mock.MockStreamBufferPool;
 import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
@@ -46,7 +46,7 @@ public class StreamBufferByteSequenceTest extends OfficeFrameTestCase {
 	/**
 	 * {@link StreamBufferPool}
 	 */
-	private final StreamBufferPool<ByteBuffer> bufferPool = new MockBufferPool(() -> ByteBuffer.allocate(BUFFER_SIZE));
+	private final StreamBufferPool<ByteBuffer> bufferPool = new MockStreamBufferPool(() -> ByteBuffer.allocate(BUFFER_SIZE));
 
 	/**
 	 * {@link OutputStream} to write to the {@link StreamBuffer} instances.
@@ -249,7 +249,7 @@ public class StreamBufferByteSequenceTest extends OfficeFrameTestCase {
 	 * Ensure can trim an empty {@link StreamBuffer}.
 	 */
 	public void testTrimEmptyBuffer() throws IOException {
-		MockBufferPool pool = new MockBufferPool(() -> ByteBuffer.allocate(0));
+		MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocate(0));
 		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
 		StreamBufferByteSequence sequence = new StreamBufferByteSequence(buffer, 0, 0);
 		sequence.trim();
@@ -262,7 +262,7 @@ public class StreamBufferByteSequenceTest extends OfficeFrameTestCase {
 	public void testTrimSegmentedBuffer() throws IOException {
 		StreamBufferByteSequence sequence = this.writeContentToSequence("               T                 ",
 				ServerHttpConnection.HTTP_CHARSET);
-		MockBufferPool pool = new MockBufferPool(() -> ByteBuffer.allocate(0));
+		MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocate(0));
 		sequence.appendStreamBuffer(pool.getPooledStreamBuffer(), 0, 0);
 		sequence.trim();
 		assertEquals("Incorrect HTTP content", "T", sequence.toHttpString());

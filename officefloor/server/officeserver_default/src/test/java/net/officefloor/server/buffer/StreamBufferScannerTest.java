@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.buffer.StreamBufferScanner.ScanTarget;
-import net.officefloor.server.http.mock.MockBufferPool;
+import net.officefloor.server.http.mock.MockStreamBufferPool;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**
@@ -285,7 +285,7 @@ public class StreamBufferScannerTest extends OfficeFrameTestCase {
 
 		// Create buffer to progressively write
 		final int MAX_LENGTH = 10;
-		MockBufferPool pool = new MockBufferPool(() -> ByteBuffer.allocate(MAX_LENGTH));
+		MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocate(MAX_LENGTH));
 		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
 
 		// Create the scanner
@@ -981,7 +981,7 @@ public class StreamBufferScannerTest extends OfficeFrameTestCase {
 	 * @return {@link StreamBuffer}.
 	 */
 	private static StreamBuffer<ByteBuffer> createBuffer(byte[] data) {
-		MockBufferPool pool = new MockBufferPool(() -> ByteBuffer.allocate(data.length));
+		MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocate(data.length));
 		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
 		buffer.write(data);
 		return buffer;

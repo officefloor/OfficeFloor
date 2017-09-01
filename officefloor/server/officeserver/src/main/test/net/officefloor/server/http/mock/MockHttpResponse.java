@@ -24,7 +24,7 @@ import java.util.List;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
-import net.officefloor.server.http.impl.WritableHttpHeader;
+import net.officefloor.server.http.WritableHttpHeader;
 
 /**
  * Mock {@link HttpResponse}.

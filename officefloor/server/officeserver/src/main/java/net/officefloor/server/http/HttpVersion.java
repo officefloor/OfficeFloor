@@ -19,6 +19,9 @@ package net.officefloor.server.http;
 
 import java.io.Serializable;
 
+import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.StreamBufferPool;
+
 /**
  * HTTP version.
  * 
@@ -109,7 +112,7 @@ public class HttpVersion implements Serializable {
 	private final String name;
 
 	/**
-	 * UTF-8 content for this {@link HttpVersion}.
+	 * HTTP encoded content for this {@link HttpVersion}.
 	 */
 	private final byte[] byteContent;
 
@@ -141,7 +144,7 @@ public class HttpVersion implements Serializable {
 	 * @param httpMethodEnum
 	 *            {@link HttpVersionEnum}.
 	 */
-	HttpVersion(String name, HttpVersionEnum httpMethodEnum) {
+	private HttpVersion(String name, HttpVersionEnum httpMethodEnum) {
 		this.name = name;
 		if (name == null) {
 			this.byteContent = new byte[0];
@@ -190,17 +193,16 @@ public class HttpVersion implements Serializable {
 	}
 
 	/**
-	 * <p>
-	 * Obtains the bytes to write this {@link HttpVersion}.
-	 * <p>
-	 * Do NOT change the returned contents, as this can corrupt the
-	 * {@link HttpServer}. The return byte array is a singleton for efficiency
-	 * reasons.
+	 * Writes this {@link HttpStatus} to the {@link StreamBuffer}.
 	 * 
-	 * @return Bytes to write this {@link HttpVersion}.
+	 * @param head
+	 *            Head {@link StreamBuffer} of the linked list of
+	 *            {@link StreamBuffer} instances.
+	 * @param bufferPool
+	 *            {@link StreamBufferPool}.
 	 */
-	byte[] getBytes() {
-		return this.byteContent;
+	public <B> void write(StreamBuffer<B> head, StreamBufferPool<B> bufferPool) {
+		StreamBuffer.write(this.byteContent, 0, this.byteContent.length, head, bufferPool);
 	}
 
 	/*

@@ -15,29 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.server.http.impl;
+package net.officefloor.server;
 
-import java.io.IOException;
+import java.nio.ByteBuffer;
 
-import net.officefloor.server.http.HttpHeader;
-import net.officefloor.server.stream.ServerWriter;
+import net.officefloor.server.buffer.ThreadLocalStreamBufferPool;
+import net.officefloor.server.stream.StreamBufferPool;
 
 /**
- * Writable {@link HttpHeader}.
+ * Tests the {@link SocketManager} with {@link ThreadLocalStreamBufferPool}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WritableHttpHeader extends HttpHeader {
+public class ThreadLocalPoolSocketManagerTest extends AbstractSocketManagerTestCase {
 
-	/**
-	 * Writes the {@link HttpHeader} to the {@link ServerWriter}.
-	 * 
-	 * @param writer
-	 *            {@link ServerWriter}.
-	 * @throws IOException
-	 *             If fails to write the {@link HttpHeader}.
-	 */
-	@Deprecated // pass StreamBuffer with StreamBufferPool (so can append content)
-	void writeHttpHeader(ServerWriter writer) throws IOException;
+	@Override
+	protected StreamBufferPool<ByteBuffer> createStreamBufferPool(int bufferSize) {
+		return new ThreadLocalStreamBufferPool(() -> ByteBuffer.allocateDirect(bufferSize), 10, 10);
+	}
 
 }

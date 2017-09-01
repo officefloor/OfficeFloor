@@ -17,12 +17,11 @@
  */
 package net.officefloor.server.http.impl;
 
-import java.util.Iterator;
-
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
+import net.officefloor.server.http.WritableHttpHeader;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**
@@ -41,7 +40,8 @@ public interface HttpResponseWriter<B> {
 	 *            {@link HttpVersion}.
 	 * @param status
 	 *            {@link HttpStatus}.
-	 * @param httpHeaders
+	 * @param headHttpHeader
+	 *            Head {@link WritableHttpHeader} to the linked list of
 	 *            {@link WritableHttpHeader} instances for the
 	 *            {@link HttpResponse}.
 	 * @param contentLength
@@ -49,12 +49,12 @@ public interface HttpResponseWriter<B> {
 	 * @param contentType
 	 *            <code>Content-Type</code> of the HTTP entity.
 	 * @param contentHeadStreamBuffer
-	 *            Head {@link StreamBuffer} instance to the linked list of
+	 *            Head {@link StreamBuffer} to the linked list of
 	 *            {@link StreamBuffer} instances containing the
 	 *            {@link HttpResponse} entity. May be <code>null</code> if no
 	 *            entity content.
 	 */
-	void writeHttpResponse(HttpVersion version, HttpStatus status, Iterator<WritableHttpHeader> httpHeaders,
+	void writeHttpResponse(HttpVersion version, HttpStatus status, WritableHttpHeader headHttpHeader,
 			long contentLength, HttpHeaderValue contentType, StreamBuffer<B> contentHeadStreamBuffer);
 
 }

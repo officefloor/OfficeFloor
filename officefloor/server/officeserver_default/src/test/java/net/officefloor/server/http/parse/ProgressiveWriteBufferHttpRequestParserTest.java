@@ -20,7 +20,7 @@ package net.officefloor.server.http.parse;
 import java.nio.ByteBuffer;
 
 import net.officefloor.server.http.HttpException;
-import net.officefloor.server.http.mock.MockBufferPool;
+import net.officefloor.server.http.mock.MockStreamBufferPool;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**
@@ -35,7 +35,7 @@ public class ProgressiveWriteBufferHttpRequestParserTest extends AbstractHttpReq
 	protected boolean parse(HttpRequestParser parser, byte[] request) throws HttpException {
 
 		// Create single buffer to progressively write the data
-		MockBufferPool pool = new MockBufferPool(() -> ByteBuffer.allocate(request.length));
+		MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocate(request.length));
 		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
 
 		// Progressively write and parse a byte at a time

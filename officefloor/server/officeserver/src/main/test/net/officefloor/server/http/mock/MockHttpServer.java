@@ -44,11 +44,11 @@ import net.officefloor.server.http.HttpServerImplementationContext;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.WritableHttpHeader;
 import net.officefloor.server.http.impl.HttpResponseWriter;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeader;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
-import net.officefloor.server.http.impl.WritableHttpHeader;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.impl.ByteArrayByteSequence;
 import net.officefloor.server.stream.impl.ByteSequence;
@@ -120,20 +120,20 @@ public class MockHttpServer implements HttpServerImplementation {
 		ByteSequence requestEntity = new ByteArrayByteSequence(impl.entity.toByteArray());
 
 		// Mock buffer pool
-		MockBufferPool bufferPool = new MockBufferPool();
+		MockStreamBufferPool bufferPool = new MockStreamBufferPool();
 
 		// Create the mock HTTP response
 		MockHttpResponseImpl response = new MockHttpResponseImpl();
 
 		// Handle response
-		HttpResponseWriter<ByteBuffer> responseWriter = (responseVersion, status, responseHttpHeaders,
+		HttpResponseWriter<ByteBuffer> responseWriter = (responseVersion, status, responseHttpHeader,
 				httpEntityContentLength, httpEntityContentType, responseHttpEntity) -> {
 
 			// Obtain the listing of response HTTP headers
 			List<WritableHttpHeader> headers = new ArrayList<>();
-			while (responseHttpHeaders.hasNext()) {
-				WritableHttpHeader header = responseHttpHeaders.next();
-				headers.add(header);
+			while (responseHttpHeader != null) {
+				headers.add(responseHttpHeader);
+				responseHttpHeader = responseHttpHeader.next;
 			}
 
 			// Release all the buffers (as now considered written)
@@ -144,7 +144,7 @@ public class MockHttpServer implements HttpServerImplementation {
 			}
 
 			// Create the input stream to the response HTTP entity
-			InputStream responseEntityInputStream = MockBufferPool.createInputStream(responseHttpEntity);
+			InputStream responseEntityInputStream = MockStreamBufferPool.createInputStream(responseHttpEntity);
 
 			// Load response successful
 			response.setSuccessful(responseVersion, status, headers, responseEntityInputStream);

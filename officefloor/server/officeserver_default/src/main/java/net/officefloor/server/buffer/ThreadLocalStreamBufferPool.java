@@ -18,16 +18,15 @@
 package net.officefloor.server.buffer;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListenerFactory;
-import net.officefloor.server.stream.StreamBufferPool;
-import net.officefloor.server.stream.impl.AbstractStreamBufferPool;
 import net.officefloor.server.stream.ByteBufferFactory;
 import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.StreamBufferPool;
+import net.officefloor.server.stream.impl.AbstractStreamBufferPool;
 
 /**
  * {@link StreamBufferPool} of {@link ByteBuffer} instances that utilises
@@ -35,31 +34,23 @@ import net.officefloor.server.stream.StreamBuffer;
  * 
  * @author Daniel Sagenschneider
  */
-public class ThreadLocalByteBufferPool extends AbstractStreamBufferPool<ByteBuffer>
+public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBuffer>
 		implements ThreadCompletionListenerFactory, ThreadCompletionListener {
 
 	/**
-	 * {@link ThreadLocal} pool.
+	 * {@link ThreadLocalPool}.
 	 */
-	private final ThreadLocal<List<StreamBuffer<ByteBuffer>>> threadLocalPool = new ThreadLocal<List<StreamBuffer<ByteBuffer>>>() {
+	private final ThreadLocal<ThreadLocalPool> threadLocalPool = new ThreadLocal<ThreadLocalPool>() {
 		@Override
-		protected List<StreamBuffer<ByteBuffer>> initialValue() {
-			/*
-			 * Note: growing the array will occur when many buffers are being
-			 * released. This typically occurs when low request load, hence
-			 * there should be typically more CPU available to handle this.
-			 * 
-			 * Therefore, keep memory smaller (especially when thread completion
-			 * listener tidies up a thread without requiring buffers).
-			 */
-			return new ArrayList<>();
+		protected ThreadLocalPool initialValue() {
+			return new ThreadLocalPool();
 		}
 	};
 
 	/**
-	 * Core pool.
+	 * Number of {@link StreamBuffer} instances in circulation.
 	 */
-	private final List<StreamBuffer<ByteBuffer>> corePool = new ArrayList<>();
+	private final AtomicInteger bufferCount = new AtomicInteger(0);
 
 	/**
 	 * {@link ByteBufferFactory}.
@@ -67,14 +58,24 @@ public class ThreadLocalByteBufferPool extends AbstractStreamBufferPool<ByteBuff
 	private final ByteBufferFactory byteBufferFactory;
 
 	/**
-	 * {@link ThreadLocal} pool size.
+	 * Maximum {@link ThreadLocal} pool size.
 	 */
-	private final int threadLocalPoolSize;
+	private final int maxThreadLocalPoolSize;
+
+	/**
+	 * Maximum core pool size.
+	 */
+	private final int maxCorePoolSize;
+
+	/**
+	 * Head {@link StreamBuffer} within the core pool.
+	 */
+	private StreamBuffer<ByteBuffer> coreHead = null;
 
 	/**
 	 * Core pool size.
 	 */
-	private final int corePoolSize;
+	private int corePoolSize = 0;
 
 	/**
 	 * <p>
@@ -88,15 +89,25 @@ public class ThreadLocalByteBufferPool extends AbstractStreamBufferPool<ByteBuff
 	 * 
 	 * @param byteBufferFactory
 	 *            {@link ByteBufferFactory}.
-	 * @param threadLocalPoolSize
-	 *            {@link ThreadLocal} pool size.
-	 * @param corePoolSize
-	 *            Core pool size.
+	 * @param maxThreadLocalPoolSize
+	 *            Maximum {@link ThreadLocal} pool size.
+	 * @param maxCorePoolSize
+	 *            Maximum core pool size.
 	 */
-	public ThreadLocalByteBufferPool(ByteBufferFactory byteBufferFactory, int threadLocalPoolSize, int corePoolSize) {
+	public ThreadLocalStreamBufferPool(ByteBufferFactory byteBufferFactory, int maxThreadLocalPoolSize,
+			int maxCorePoolSize) {
 		this.byteBufferFactory = byteBufferFactory;
-		this.threadLocalPoolSize = threadLocalPoolSize;
-		this.corePoolSize = corePoolSize;
+		this.maxThreadLocalPoolSize = maxThreadLocalPoolSize;
+		this.maxCorePoolSize = maxCorePoolSize;
+	}
+
+	/**
+	 * Obtains the number of {@link StreamBuffer} instances in circulation.
+	 * 
+	 * @return Number of {@link StreamBuffer} instances in circulation.
+	 */
+	public int getStreamBufferCount() {
+		return this.bufferCount.get();
 	}
 
 	/**
@@ -105,34 +116,30 @@ public class ThreadLocalByteBufferPool extends AbstractStreamBufferPool<ByteBuff
 	 * @param buffer
 	 *            {@link StreamBuffer}.
 	 */
-	private synchronized void releaseToCorePool(StreamBuffer<ByteBuffer> buffer) {
+	private void unsafeReleaseToCorePool(StreamBuffer<ByteBuffer> buffer) {
 
 		// Determine if release
-		if (this.corePool.size() < this.corePoolSize) {
-			this.corePool.add(buffer);
-			return; // released to core buffer
+		if (this.corePoolSize < this.maxCorePoolSize) {
+
+			// Released to core pool
+			buffer.next = this.coreHead;
+			this.coreHead = buffer;
+			this.corePoolSize++;
+			return;
 		}
 
-		// Allow buffer to be garbage collected
+		// Allow buffer to be garbage collected (too many buffers)
+		this.bufferCount.decrementAndGet();
 	}
 
 	/**
-	 * Releases the {@link List} of {@link StreamBuffer} to the core pool.
+	 * {@link Thread} safe release to core pool.
 	 * 
-	 * @param buffers
-	 *            {@link List} of {@link StreamBuffer} instances to release.
+	 * @param buffer
+	 *            {@link StreamBuffer}.
 	 */
-	private synchronized void releaseAllToCorePool(List<StreamBuffer<ByteBuffer>> buffers) {
-
-		// Obtain number to release
-		int numberToRelease = Math.min(this.corePoolSize - this.corePool.size(), buffers.size());
-
-		// Release the buffers to the pool
-		for (int i = 0; i < numberToRelease; i++) {
-			this.corePool.add(buffers.get(i));
-		}
-
-		// Remaining buffers to be garbage collected
+	private synchronized void safeReleaseToCorePool(StreamBuffer<ByteBuffer> buffer) {
+		this.unsafeReleaseToCorePool(buffer);
 	}
 
 	/**
@@ -143,13 +150,17 @@ public class ThreadLocalByteBufferPool extends AbstractStreamBufferPool<ByteBuff
 	private synchronized StreamBuffer<ByteBuffer> getCorePoolBuffer() {
 
 		// Determine if buffers in the core pool
-		int poolSize = this.corePool.size();
-		if (poolSize <= 0) {
+		if (this.corePoolSize <= 0) {
 			return null; // empty pool
 		}
 
-		// Return the last in core pool (avoids array copies)
-		return this.corePool.remove(poolSize - 1);
+		// Obtain the buffer from core pool
+		StreamBuffer<ByteBuffer> buffer = this.coreHead;
+		this.coreHead = this.coreHead.next;
+		this.corePoolSize--;
+
+		// Return the buffer
+		return buffer;
 	}
 
 	/**
@@ -163,22 +174,29 @@ public class ThreadLocalByteBufferPool extends AbstractStreamBufferPool<ByteBuff
 		StreamBuffer<ByteBuffer> pooledBuffer = null;
 
 		// Attempt to obtain from thread local pool
-		List<StreamBuffer<ByteBuffer>> threadLocalPool = this.threadLocalPool.get();
-		if (threadLocalPool.size() > 0) {
-			// Obtain last from pool (avoids array copies)
-			// Note: buffer just used by thread so likely also cached
-			pooledBuffer = threadLocalPool.remove(threadLocalPool.size() - 1);
+		ThreadLocalPool pool = threadLocalPool.get();
+		if (pool.threadHead != null) {
+			// Obtain from thread pool
+			pooledBuffer = pool.threadHead;
+			pool.threadHead = pool.threadHead.next;
+			pool.threadPoolSize--;
 
 		} else {
-			// Attempt to obtain buffer form core pool
+			// No thread buffers, so attempt core pool
 			pooledBuffer = this.getCorePoolBuffer();
 		}
 
-		// If not pooled, create new buffer
+		// Ensure have a buffer
 		if (pooledBuffer == null) {
 			// Create new buffer
 			ByteBuffer byteBuffer = this.byteBufferFactory.createByteBuffer();
 			pooledBuffer = new PooledStreamBuffer(byteBuffer);
+
+			// Capture created buffer
+			int totalBuffers = this.bufferCount.incrementAndGet();
+
+			// TODO REMOVE
+			System.out.println("CREATE " + totalBuffers);
 
 		} else {
 			// Pooled buffer, so reset for use
@@ -204,19 +222,23 @@ public class ThreadLocalByteBufferPool extends AbstractStreamBufferPool<ByteBuff
 	 */
 
 	@Override
-	public void threadComplete() {
+	public synchronized void threadComplete() {
 
-		// Obtain the thread local pool
-		List<StreamBuffer<ByteBuffer>> threadLocalPool = this.threadLocalPool.get();
-		if (threadLocalPool.size() == 0) {
-			return; // nothing to clean up
+		// Obtain the thread pool
+		ThreadLocalPool pool = threadLocalPool.get();
+
+		// Release all to pool
+		StreamBuffer<ByteBuffer> buffer = pool.threadHead;
+		while (buffer != null) {
+
+			// Obtain the release buffer (must obtain next, as release sets
+			// next)
+			StreamBuffer<ByteBuffer> release = buffer;
+			buffer = buffer.next;
+
+			// Release the buffer
+			this.unsafeReleaseToCorePool(release);
 		}
-
-		// Release the thread local pool buffers to core pool
-		this.releaseAllToCorePool(threadLocalPool);
-
-		// Release from thread memory
-		threadLocalPool.clear();
 	}
 
 	/**
@@ -268,19 +290,40 @@ public class ThreadLocalByteBufferPool extends AbstractStreamBufferPool<ByteBuff
 		public void release() {
 
 			// Easy access to pool
-			ThreadLocalByteBufferPool bufferPool = ThreadLocalByteBufferPool.this;
+			ThreadLocalStreamBufferPool bufferPool = ThreadLocalStreamBufferPool.this;
+
+			// Obtain the thread local pool
+			ThreadLocalPool pool = threadLocalPool.get();
 
 			// Attempt to release to thread local pool
-			List<StreamBuffer<ByteBuffer>> threadLocalPool = bufferPool.threadLocalPool.get();
-			if (threadLocalPool.size() < bufferPool.threadLocalPoolSize) {
+			if (pool.threadPoolSize < bufferPool.maxThreadLocalPoolSize) {
 				// Release to thread pool
-				threadLocalPool.add(this);
+				this.next = pool.threadHead;
+				pool.threadHead = this;
+				pool.threadPoolSize++;
 				return; // released
 			}
 
 			// As here, release to core pool
-			bufferPool.releaseToCorePool(this);
+			bufferPool.safeReleaseToCorePool(this);
 		}
+	}
+
+	/**
+	 * {@link Thread} local pool of {@link StreamBuffer} instances.
+	 */
+	private static class ThreadLocalPool {
+
+		/**
+		 * Head {@link StreamBuffer} to linked list of {@link StreamBuffer}
+		 * instances.
+		 */
+		private StreamBuffer<ByteBuffer> threadHead = null;
+
+		/**
+		 * Number of {@link StreamBuffer} instances within this pool.
+		 */
+		private int threadPoolSize = 0;
 	}
 
 }

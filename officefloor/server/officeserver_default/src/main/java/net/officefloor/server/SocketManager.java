@@ -88,13 +88,17 @@ public class SocketManager {
 	 *            Number of {@link SocketListener} instances.
 	 * @param bufferPool
 	 *            {@link StreamBufferPool}.
+	 * @param socketBufferSize
+	 *            Buffer size for the {@link Socket}. This should match the
+	 *            {@link StreamBuffer} size.
 	 * @throws IOException
 	 *             If fails to initialise {@link Socket} management.
 	 */
-	public SocketManager(int listenerCount, StreamBufferPool<ByteBuffer> bufferPool) throws IOException {
+	public SocketManager(int listenerCount, StreamBufferPool<ByteBuffer> bufferPool, int socketBufferSize)
+			throws IOException {
 		this.listeners = new SocketListener[listenerCount];
 		for (int i = 0; i < listeners.length; i++) {
-			listeners[i] = new SocketListener(bufferPool);
+			listeners[i] = new SocketListener(bufferPool, socketBufferSize);
 		}
 	}
 
@@ -194,6 +198,11 @@ public class SocketManager {
 		private final StreamBufferPool<ByteBuffer> bufferPool;
 
 		/**
+		 * {@link Socket} buffer size.
+		 */
+		private final int socketBufferSize;
+
+		/**
 		 * {@link Selector}.
 		 */
 		private final Selector selector;
@@ -218,12 +227,15 @@ public class SocketManager {
 		 * 
 		 * @param bufferPool
 		 *            {@link StreamBufferPool}.
+		 * @param socketBufferSize
+		 *            {@link Socket} buffer size.
 		 * @throws IOException
 		 *             If fails to establish necessary {@link Socket} and
 		 *             {@link Pipe} facilities.
 		 */
-		private SocketListener(StreamBufferPool<ByteBuffer> bufferPool) throws IOException {
+		private SocketListener(StreamBufferPool<ByteBuffer> bufferPool, int socketBufferSize) throws IOException {
 			this.bufferPool = bufferPool;
+			this.socketBufferSize = socketBufferSize;
 
 			// Create the selector
 			this.selector = Selector.open();
@@ -381,6 +393,8 @@ public class SocketManager {
 								Socket socket = socketChannel.socket();
 								socket.setTcpNoDelay(true);
 								socket.setReuseAddress(true);
+								socket.setReceiveBufferSize(this.socketBufferSize);
+								socket.setSendBufferSize(this.socketBufferSize);
 								handler.acceptedSocketDecorator.decorate(socket);
 
 								// Manage the accepted socket
@@ -631,14 +645,19 @@ public class SocketManager {
 
 					// Buffer written, move to next (releasing written buffer)
 					this.head.headResponseBuffer = streamBuffer.next;
+
+					// Must release buffer (after released from chain)
 					streamBuffer.release();
 				}
 
-				// As here, response written (so release all buffers)
+				// Response written (so release all request buffers)
 				StreamBuffer<ByteBuffer> requestBuffer = this.head.headRequestBuffer;
 				while (requestBuffer != null) {
-					requestBuffer.release();
+					StreamBuffer<ByteBuffer> release = requestBuffer;
 					requestBuffer = requestBuffer.next;
+
+					// Must release buffer after released from chain
+					release.release();
 				}
 
 				// Write head response, so move onto next request

@@ -28,10 +28,9 @@ import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderName;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.mock.MockBufferPool;
-import net.officefloor.server.stream.ServerWriter;
+import net.officefloor.server.http.WritableHttpHeader;
+import net.officefloor.server.http.mock.MockStreamBufferPool;
 import net.officefloor.server.stream.StreamBuffer;
-import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
 
 /**
  * Tests the {@link ProcessAwareHttpResponseHeaders}.
@@ -167,27 +166,40 @@ public class ProcessAwareHttpResponseHeadersTest extends OfficeFrameTestCase {
 	public void testWrittenHeaderBytes() throws IOException {
 
 		// Obtain writer
-		MockBufferPool bufferPool = new MockBufferPool();
-		@SuppressWarnings("resource")
-		BufferPoolServerOutputStream<ByteBuffer> outputStream = new BufferPoolServerOutputStream<>(bufferPool);
-		ServerWriter writer = outputStream.getServerWriter(ServerHttpConnection.HTTP_CHARSET);
+		MockStreamBufferPool bufferPool = new MockStreamBufferPool();
+		StreamBuffer<ByteBuffer> buffer = bufferPool.getPooledStreamBuffer();
 
 		// Write the headers
-		Iterator<WritableHttpHeader> iterator = this.headers.getWritableHttpHeaders();
-		while (iterator.hasNext()) {
-			WritableHttpHeader header = iterator.next();
-			header.writeHttpHeader(writer);
+		WritableHttpHeader header = this.headers.getWritableHttpHeaders();
+		while (header != null) {
+			header.write(buffer, bufferPool);
+			header = header.next;
 		}
-		writer.flush();
 
 		// Obtain the content
-		StreamBuffer<ByteBuffer> buffers = outputStream.getBuffers();
-		MockBufferPool.releaseStreamBuffers(buffers);
-		String content = MockBufferPool.getContent(buffers, ServerHttpConnection.HTTP_CHARSET);
+		MockStreamBufferPool.releaseStreamBuffers(buffer);
+		String content = MockStreamBufferPool.getContent(buffer, ServerHttpConnection.HTTP_CHARSET);
 
 		// Ensure correct content
 		String expectedContent = "one: 1\r\ntwo: 2\r\nsame: First\r\nthree: 3\r\nsame: Second\r\n";
 		assertEquals("Incorrect HTTP headers content", expectedContent, content);
+	}
+
+	/**
+	 * Asserts the {@link WritableHttpHeader} instances.
+	 * 
+	 * @param head
+	 *            Head {@link WritableHttpHeader} to the linked list of
+	 *            {@link WritableHttpHeader} instances.
+	 * @param expectedHeaderNames
+	 *            Expected {@link HttpHeader} names in order.
+	 */
+	private static void assertHeaderNames(WritableHttpHeader head, String... expectedHeaderNames) {
+		for (int i = 0; i < expectedHeaderNames.length; i++) {
+			assertEquals("Incorrect header " + i, expectedHeaderNames[i], head.getName());
+			head = head.next;
+		}
+		assertNull("Incorrect number of headers", head);
 	}
 
 	/**

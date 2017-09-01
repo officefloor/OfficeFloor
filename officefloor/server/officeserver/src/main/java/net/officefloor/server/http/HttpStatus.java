@@ -17,6 +17,9 @@
  */
 package net.officefloor.server.http;
 
+import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.StreamBufferPool;
+
 /**
  * HTTP status.
  * 
@@ -379,7 +382,7 @@ public class HttpStatus {
 	private final String statusMessage;
 
 	/**
-	 * UTF-8 content for this {@link HttpStatus}.
+	 * HTTP encoded content for this {@link HttpStatus}.
 	 */
 	private final byte[] byteContent;
 
@@ -410,7 +413,7 @@ public class HttpStatus {
 	 * @param httpStatusEnum
 	 *            {@link HttpStatusEnum}.
 	 */
-	HttpStatus(int statusCode, String statusMessage, HttpStatusEnum httpStatusEnum) {
+	private HttpStatus(int statusCode, String statusMessage, HttpStatusEnum httpStatusEnum) {
 		this.statusCode = statusCode;
 		this.statusMessage = statusMessage;
 		this.byteContent = (this.statusCode + " " + this.statusMessage).getBytes(ServerHttpConnection.HTTP_CHARSET);
@@ -456,17 +459,16 @@ public class HttpStatus {
 	}
 
 	/**
-	 * <p>
-	 * Obtains the bytes to write this {@link HttpStatus}.
-	 * <p>
-	 * Do NOT change the returned contents, as this can corrupt the
-	 * {@link HttpServer}. The return byte array is a singleton for efficiency
-	 * reasons.
+	 * Writes this {@link HttpStatus} to the {@link StreamBuffer}.
 	 * 
-	 * @return Bytes to write this {@link HttpStatus}.
+	 * @param head
+	 *            Head {@link StreamBuffer} of the linked list of
+	 *            {@link StreamBuffer} instances.
+	 * @param bufferPool
+	 *            {@link StreamBufferPool}.
 	 */
-	byte[] getBytes() {
-		return this.byteContent;
+	public <B> void write(StreamBuffer<B> head, StreamBufferPool<B> bufferPool) {
+		StreamBuffer.write(this.byteContent, 0, this.byteContent.length, head, bufferPool);
 	}
 
 	/*

@@ -29,6 +29,74 @@ import java.nio.ByteBuffer;
 public abstract class StreamBuffer<B> {
 
 	/**
+	 * Writes the bytes to the {@link StreamBuffer} stream.
+	 * 
+	 * @param bytes
+	 *            Bytes to be written to the {@link StreamBuffer} stream.
+	 * @param offset
+	 *            Offset into the bytes to start writing.
+	 * @param length
+	 *            Length of bytes to write.
+	 * @param headBuffer
+	 *            Head {@link StreamBuffer} in the linked list of
+	 *            {@link StreamBuffer} instances.
+	 * @param bufferPool
+	 *            {@link StreamBufferPool} should additional
+	 *            {@link StreamBuffer} instances be required in writing the
+	 *            bytes.
+	 */
+	public static <B> void write(byte[] bytes, int offset, int length, StreamBuffer<B> headBuffer,
+			StreamBufferPool<B> bufferPool) {
+
+		// Obtain the write stream buffer
+		headBuffer = getWriteStreamBuffer(headBuffer, bufferPool);
+
+		// Write the data to the buffer
+		int bytesWritten = headBuffer.write(bytes, offset, length);
+		length -= bytesWritten;
+		while (length > 0) {
+			offset += bytesWritten;
+
+			// Append another buffer for remaining content
+			headBuffer.next = bufferPool.getPooledStreamBuffer();
+			headBuffer = headBuffer.next;
+
+			// Attempt to complete writing bytes
+			bytesWritten = headBuffer.write(bytes, offset, length);
+			length -= bytesWritten;
+		}
+	}
+
+	/**
+	 * Obtains the {@link StreamBuffer} to use for writing.
+	 * 
+	 * @param headBuffer
+	 *            Head {@link StreamBuffer} in the linked list of
+	 *            {@link StreamBuffer} instances.
+	 * @param bufferPool
+	 *            {@link StreamBufferPool} should additional
+	 *            {@link StreamBuffer} instances be required in writing the
+	 *            bytes.
+	 * @return {@link StreamBuffer} within the linked list to next write data.
+	 */
+	public static <B> StreamBuffer<B> getWriteStreamBuffer(StreamBuffer<B> headBuffer, StreamBufferPool<B> bufferPool) {
+
+		// Only append to end of linked list
+		while (headBuffer.next != null) {
+			headBuffer = headBuffer.next;
+		}
+
+		// Ensure writing to pooled buffer
+		if (!headBuffer.isPooled) {
+			headBuffer.next = bufferPool.getPooledStreamBuffer();
+			headBuffer = headBuffer.next;
+		}
+
+		// Return the write stream buffer
+		return headBuffer;
+	}
+
+	/**
 	 * Indicates if pooled.
 	 * 
 	 * @return <code>true</code> if pooled.

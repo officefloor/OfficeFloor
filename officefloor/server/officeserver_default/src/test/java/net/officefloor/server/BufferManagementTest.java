@@ -15,33 +15,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.server.http.parse;
+package net.officefloor.server;
 
 import java.nio.ByteBuffer;
 
-import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.mock.MockStreamBufferPool;
 import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.StreamBufferPool;
 
 /**
- * {@link AbstractHttpRequestParserTestCase} that uses a single
- * {@link ByteBuffer}.
+ * Ensures all {@link StreamBuffer} instances are released.
  * 
  * @author Daniel Sagenschneider
  */
-public class SingleBufferHttpRequestParserTest extends AbstractHttpRequestParserTestCase {
+public class BufferManagementTest extends AbstractSocketManagerTestCase {
 
 	@Override
-	protected boolean parse(HttpRequestParser parser, byte[] request) throws HttpException {
+	protected StreamBufferPool<ByteBuffer> createStreamBufferPool(int bufferSize) {
+		return new MockStreamBufferPool(() -> ByteBuffer.allocate(bufferSize));
+	}
 
-		// Create single buffer with data
-		MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocateDirect(request.length));
-		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
-		buffer.write(request);
-
-		// Return parsing of the data
-		parser.appendStreamBuffer(buffer);
-		return parser.parse();
+	@Override
+	protected void handleCompletion(StreamBufferPool<ByteBuffer> bufferPool) {
+		((MockStreamBufferPool) bufferPool).assertAllBuffersReturned();
 	}
 
 }

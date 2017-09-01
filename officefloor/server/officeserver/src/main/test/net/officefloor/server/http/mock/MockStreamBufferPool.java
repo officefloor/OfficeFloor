@@ -38,7 +38,7 @@ import net.officefloor.server.stream.StreamBufferPool;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockBufferPool implements StreamBufferPool<ByteBuffer> {
+public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 
 	/**
 	 * Releases the {@link StreamBuffer} instances.
@@ -106,7 +106,7 @@ public class MockBufferPool implements StreamBufferPool<ByteBuffer> {
 	/**
 	 * Instantiate with default buffer size for testing.
 	 */
-	public MockBufferPool() {
+	public MockStreamBufferPool() {
 		// small buffer to ensure handling filling buffer
 		this(() -> ByteBuffer.allocate(3));
 	}
@@ -117,7 +117,7 @@ public class MockBufferPool implements StreamBufferPool<ByteBuffer> {
 	 * @param byteBufferFactory
 	 *            {@link ByteBufferFactory}.
 	 */
-	public MockBufferPool(ByteBufferFactory byteBufferFactory) {
+	public MockStreamBufferPool(ByteBufferFactory byteBufferFactory) {
 		this.byteBufferFactory = byteBufferFactory;
 	}
 

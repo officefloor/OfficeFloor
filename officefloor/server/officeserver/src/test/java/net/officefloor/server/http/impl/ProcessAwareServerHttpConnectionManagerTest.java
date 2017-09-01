@@ -24,7 +24,6 @@ import java.io.Serializable;
 import java.io.StringWriter;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.Iterator;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
@@ -36,9 +35,10 @@ import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.mock.MockBufferPool;
+import net.officefloor.server.http.WritableHttpHeader;
 import net.officefloor.server.http.mock.MockNonMaterialisedHttpHeaders;
 import net.officefloor.server.http.mock.MockProcessAwareContext;
+import net.officefloor.server.http.mock.MockStreamBufferPool;
 import net.officefloor.server.stream.ServerOutputStream;
 import net.officefloor.server.stream.ServerWriter;
 import net.officefloor.server.stream.StreamBuffer;
@@ -74,9 +74,9 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 	private MockNonMaterialisedHttpHeaders requestHeaders = new MockNonMaterialisedHttpHeaders();
 
 	/**
-	 * {@link MockBufferPool}.
+	 * {@link MockStreamBufferPool}.
 	 */
-	private final MockBufferPool bufferPool = new MockBufferPool();
+	private final MockStreamBufferPool bufferPool = new MockStreamBufferPool();
 
 	/**
 	 * {@link ProcessAwareServerHttpConnectionManagedObject} to be tested.
@@ -142,7 +142,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		// Validate the default details
 		assertEquals("Incorrect version", this.requestVersion, this.responseVersion);
 		assertEquals("Incorect status", HttpStatus.OK, this.status);
-		assertFalse("Should be no headers", this.responseHeaders.hasNext());
+		assertNull("Should be no headers", this.responseHeader);
 		assertEquals("Should be no entity", 0, this.contentLength);
 		assertNull("No Content-Type for no entity", this.contentType);
 		assertNull("No entity content", this.contentHeadStreamBuffer);
@@ -173,17 +173,17 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		// Validate the response
 		assertEquals("Incorrect version", HttpVersion.HTTP_1_0, this.responseVersion);
 		assertEquals("Incorect status", HttpStatus.CREATED, this.status);
-		assertTrue("Should be a headers", this.responseHeaders.hasNext());
-		assertEquals("Incorrect header", "name", this.responseHeaders.next().getName());
-		assertFalse("Should be just the one header", this.responseHeaders.hasNext());
+		assertNotNull("Should be a headers", this.responseHeader);
+		assertEquals("Incorrect header", "name", this.responseHeader.getName());
+		assertNull("Should be just the one header", this.responseHeader.next);
 
 		// Validate the content details
 		assertEquals("Incorrect content length", expectedContent.length, this.contentLength);
 		assertEquals("Incorrect content type", "text/html; charset=" + charset.name(), this.contentType.getValue());
 
 		// Validate the content
-		MockBufferPool.releaseStreamBuffers(this.contentHeadStreamBuffer);
-		String content = MockBufferPool.getContent(this.contentHeadStreamBuffer, charset);
+		MockStreamBufferPool.releaseStreamBuffers(this.contentHeadStreamBuffer);
+		String content = MockStreamBufferPool.getContent(this.contentHeadStreamBuffer, charset);
 		assertEquals("Incorrect content", "TEST RESPONSE", content);
 	}
 
@@ -352,7 +352,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 
 	private HttpStatus status = null;
 
-	private Iterator<WritableHttpHeader> responseHeaders = null;
+	private WritableHttpHeader responseHeader = null;
 
 	private long contentLength;
 
@@ -361,11 +361,11 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 	private StreamBuffer<ByteBuffer> contentHeadStreamBuffer = null;
 
 	@Override
-	public void writeHttpResponse(HttpVersion version, HttpStatus status, Iterator<WritableHttpHeader> httpHeaders,
+	public void writeHttpResponse(HttpVersion version, HttpStatus status, WritableHttpHeader httpHeader,
 			long contentLength, HttpHeaderValue contentType, StreamBuffer<ByteBuffer> contentHeadStreamBuffer) {
 		this.responseVersion = version;
 		this.status = status;
-		this.responseHeaders = httpHeaders;
+		this.responseHeader = httpHeader;
 		this.contentLength = contentLength;
 		this.contentType = contentType;
 		this.contentHeadStreamBuffer = contentHeadStreamBuffer;

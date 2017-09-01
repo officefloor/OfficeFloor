@@ -31,11 +31,11 @@ import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
 
 /**
- * Tests the {@link MockBufferPool}.
+ * Tests the {@link MockStreamBufferPool}.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockBufferPoolTest extends OfficeFrameTestCase {
+public class MockStreamBufferPoolTest extends OfficeFrameTestCase {
 
 	/**
 	 * Size of the {@link StreamBuffer}.
@@ -43,9 +43,9 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 	private static final int BUFFER_SIZE = 4;
 
 	/**
-	 * {@link MockBufferPool}.
+	 * {@link MockStreamBufferPool}.
 	 */
-	private final MockBufferPool pool = new MockBufferPool(() -> ByteBuffer.allocate(BUFFER_SIZE));
+	private final MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocate(BUFFER_SIZE));
 
 	/**
 	 * {@link ServerOutputStream} to write data to buffers.
@@ -54,7 +54,7 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure can release pooled {@link StreamBuffer} back to
-	 * {@link MockBufferPool}.
+	 * {@link MockStreamBufferPool}.
 	 */
 	public void testReleasePooledStreamBuffer() {
 
@@ -76,7 +76,7 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure can release unpooled {@link StreamBuffer} back to
-	 * {@link MockBufferPool}.
+	 * {@link MockStreamBufferPool}.
 	 */
 	public void testReleaseUnpooledStreamBuffer() {
 
@@ -216,7 +216,7 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 		}
 
 		// Create the input stream to read in content
-		InputStream input = MockBufferPool.createInputStream(this.output.getBuffers());
+		InputStream input = MockStreamBufferPool.createInputStream(this.output.getBuffers());
 		assertEquals("Should read the single byte", 1, input.read());
 		assertEquals("Should now be end of stream", -1, input.read());
 	}
@@ -248,7 +248,7 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 		}
 
 		// Ensure can read in the large string
-		InputStream input = MockBufferPool.createInputStream(this.output.getBuffers());
+		InputStream input = MockStreamBufferPool.createInputStream(this.output.getBuffers());
 		InputStreamReader reader = new InputStreamReader(input, ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
 
 		// Read in the text
@@ -296,7 +296,7 @@ public class MockBufferPoolTest extends OfficeFrameTestCase {
 		}
 
 		// Read in the text
-		InputStream input = MockBufferPool.createInputStream(this.output.getBuffers());
+		InputStream input = MockStreamBufferPool.createInputStream(this.output.getBuffers());
 		InputStreamReader reader = new InputStreamReader(input, ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
 		StringWriter response = new StringWriter();
 		for (int character = reader.read(); character != -1; character = reader.read()) {

@@ -31,7 +31,7 @@ import java.util.function.Function;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.mock.MockBufferPool;
+import net.officefloor.server.http.mock.MockStreamBufferPool;
 import net.officefloor.server.stream.ServerWriter;
 import net.officefloor.server.stream.StreamBuffer;
 
@@ -44,9 +44,9 @@ import net.officefloor.server.stream.StreamBuffer;
 public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link MockBufferPool}.
+	 * {@link MockStreamBufferPool}.
 	 */
-	private final MockBufferPool bufferPool = new MockBufferPool();
+	private final MockStreamBufferPool bufferPool = new MockStreamBufferPool();
 
 	/**
 	 * {@link BufferPoolServerOutputStream}.
@@ -78,10 +78,10 @@ public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 		StreamBuffer<ByteBuffer> headBuffer = this.outputStream.getBuffers();
 
 		// Release the buffers (as consider request written)
-		MockBufferPool.releaseStreamBuffers(headBuffer);
+		MockStreamBufferPool.releaseStreamBuffers(headBuffer);
 
 		// Obtain the content
-		return MockBufferPool.getContent(headBuffer, ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
+		return MockStreamBufferPool.getContent(headBuffer, ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
 	}
 
 	/**
@@ -137,12 +137,12 @@ public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 
 		// Obtain the buffers
 		StreamBuffer<ByteBuffer> headBuffer = this.outputStream.getBuffers();
-		MockBufferPool.releaseStreamBuffers(headBuffer);
+		MockStreamBufferPool.releaseStreamBuffers(headBuffer);
 
 		// Ensure stream in correct data
 		byte[] expectedData = "Hello World".getBytes(charset);
 		InputStream expectedInput = new ByteArrayInputStream(expectedData);
-		InputStream actualInput = MockBufferPool.createInputStream(headBuffer);
+		InputStream actualInput = MockStreamBufferPool.createInputStream(headBuffer);
 		for (int i = 0; i < expectedData.length; i++) {
 			assertEquals("Incorrect byte " + i + "(" + Character.valueOf((char) expectedData[i]) + ")",
 					expectedInput.read(), actualInput.read());
@@ -151,14 +151,14 @@ public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 
 		// Ensure stream data
 		StringWriter result = new StringWriter();
-		InputStreamReader reader = new InputStreamReader(MockBufferPool.createInputStream(headBuffer), charset);
+		InputStreamReader reader = new InputStreamReader(MockStreamBufferPool.createInputStream(headBuffer), charset);
 		for (int character = reader.read(); character != -1; character = reader.read()) {
 			result.write(character);
 		}
 		assertEquals("Incorrect write/read UTF-16 content", "Hello World", result.toString());
 
 		// Ensure can read in content
-		String content = MockBufferPool.getContent(headBuffer, charset);
+		String content = MockStreamBufferPool.getContent(headBuffer, charset);
 		assertEquals("Incorrect written content", "Hello World", content);
 	}
 

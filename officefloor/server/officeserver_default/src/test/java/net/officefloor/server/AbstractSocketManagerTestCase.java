@@ -28,7 +28,6 @@ import java.nio.ByteBuffer;
 import java.util.function.Function;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.server.http.mock.MockBufferPool;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
 
@@ -37,12 +36,40 @@ import net.officefloor.server.stream.StreamBufferPool;
  * 
  * @author Daniel Sagenschneider
  */
-public class SocketManagerTest extends OfficeFrameTestCase {
+public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase {
+
+	/**
+	 * Buffer size.
+	 */
+	private static final int BUFFER_SIZE = 1024;
 
 	/**
 	 * Wraps the {@link SocketManager} for easier testing.
 	 */
 	private SocketManagerTester tester = null;
+
+	/**
+	 * Creates the {@link StreamBufferPool}.
+	 * 
+	 * @param bufferSize
+	 *            Size of the pooled {@link StreamBuffer}.
+	 * @return {@link StreamBufferPool}.
+	 */
+	protected abstract StreamBufferPool<ByteBuffer> createStreamBufferPool(int bufferSize);
+
+	/**
+	 * <p>
+	 * Handles completion.
+	 * <p>
+	 * Allows overriding to handle completion (such as checking all
+	 * {@link StreamBuffer} instances have been released).
+	 * 
+	 * @param bufferPool
+	 *            {@link StreamBufferPool} used by the {@link SocketManager}.
+	 */
+	protected void handleCompletion(StreamBufferPool<ByteBuffer> bufferPool) {
+		// By default do nothing
+	}
 
 	@Override
 	protected void tearDown() throws Exception {
@@ -512,7 +539,8 @@ public class SocketManagerTest extends OfficeFrameTestCase {
 		/**
 		 * {@link StreamBufferPool}.
 		 */
-		private final MockBufferPool bufferPool = new MockBufferPool(() -> ByteBuffer.allocateDirect(1024));
+		private final StreamBufferPool<ByteBuffer> bufferPool = AbstractSocketManagerTestCase.this
+				.createStreamBufferPool(BUFFER_SIZE);
 
 		/**
 		 * {@link SocketManager} to test.
@@ -531,7 +559,11 @@ public class SocketManagerTest extends OfficeFrameTestCase {
 		 *            Number of {@link SocketListener} instances.
 		 */
 		private SocketManagerTester(int listenerCount) throws IOException {
-			this.manager = new SocketManager(1, this.bufferPool);
+
+			// Create the Socket Manager
+			this.manager = new SocketManager(1, this.bufferPool, BUFFER_SIZE);
+
+			// Start servicing the sockets
 			Runnable[] runnables = this.manager.getRunnables();
 			this.threads = new TestThread[runnables.length];
 			for (int i = 0; i < runnables.length; i++) {
@@ -572,8 +604,8 @@ public class SocketManagerTest extends OfficeFrameTestCase {
 				this.threads[i].waitForCompletion(startTime);
 			}
 
-			// As all complete, should have release all buffers
-//			this.bufferPool.assertAllBuffersReturned();
+			// As all complete, handle completion
+			AbstractSocketManagerTestCase.this.handleCompletion(this.bufferPool);
 		}
 	}
 
@@ -598,13 +630,13 @@ public class SocketManagerTest extends OfficeFrameTestCase {
 			while (this.completion == null) {
 
 				// Determine if timed out
-				SocketManagerTest.this.timeout(startTime, secondsToRun);
+				AbstractSocketManagerTestCase.this.timeout(startTime, secondsToRun);
 
 				// Not timed out, so wait a little longer
 				try {
 					this.wait(10);
 				} catch (InterruptedException ex) {
-					throw SocketManagerTest.fail(ex);
+					throw AbstractSocketManagerTestCase.fail(ex);
 				}
 			}
 
