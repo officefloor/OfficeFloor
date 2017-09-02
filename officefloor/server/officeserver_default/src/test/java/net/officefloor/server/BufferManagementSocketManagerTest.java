@@ -28,7 +28,7 @@ import net.officefloor.server.stream.StreamBufferPool;
  * 
  * @author Daniel Sagenschneider
  */
-public class BufferManagementTest extends AbstractSocketManagerTestCase {
+public class BufferManagementSocketManagerTest extends AbstractSocketManagerTestCase {
 
 	@Override
 	protected StreamBufferPool<ByteBuffer> createStreamBufferPool(int bufferSize) {

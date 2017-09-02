@@ -17,30 +17,28 @@
  */
 package net.officefloor.server;
 
-import java.net.Socket;
 import java.nio.ByteBuffer;
 
-import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.StreamBufferPool;
 
 /**
- * Writes the response.
+ * Provides means to write header content before the response
+ * {@link StreamBuffer} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ResponseWriter {
+public interface ResponseHeaderWriter {
 
 	/**
-	 * Writes the {@link StreamBuffer} instances as the response.
+	 * Writes the header content.
 	 * 
-	 * @param responseHeaderWriter
-	 *            {@link ResponseHeaderWriter}.
-	 * @param headResponseBuffer
-	 *            Head {@link StreamBuffer} for the linked list of
-	 *            {@link StreamBuffer} instances for the response. Once the
-	 *            {@link StreamBuffer} is written back to the {@link Socket}, it
-	 *            is released back to its {@link StreamBufferPool}.
+	 * @param head
+	 *            Head {@link StreamBuffer} to the linked list of
+	 *            {@link StreamBuffer} instances to write the response.
+	 * @param bufferPool
+	 *            {@link StreamBufferPool}.
 	 */
-	void write(ResponseHeaderWriter responseHeaderWriter, StreamBuffer<ByteBuffer> headResponseBuffer);
+	void write(StreamBuffer<ByteBuffer> head, StreamBufferPool<ByteBuffer> bufferPool);
 
 }

@@ -236,7 +236,7 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 		this.tester.manager.bindServerSocket(7878, null, null, (buffer, requestHandler) -> {
 			requestHandler.handleRequest("SEND");
 		}, (request, responseWriter) -> {
-			responseWriter.write(this.tester.createStreamBuffer(1));
+			responseWriter.write(null, this.tester.createStreamBuffer(1));
 		});
 
 		this.tester.start();
@@ -284,10 +284,12 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 
 			case 2:
 				// Second request, so write (out of order)
-				responseWriter.write(this.tester.createStreamBuffer(2));
+				StreamBuffer<ByteBuffer> responseTwo = this.tester.createStreamBuffer(2);
+				responseWriter.write(null, responseTwo);
 
 				// Now write the first request (out of order)
-				writer[0].write(this.tester.createStreamBuffer(1));
+				StreamBuffer<ByteBuffer> responseOne = this.tester.createStreamBuffer(1);
+				writer[0].write(null, responseOne);
 				break;
 
 			default:
@@ -356,7 +358,7 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 			}
 
 			// Send large response
-			responseWriter.write(buffers);
+			responseWriter.write(null, buffers);
 		});
 
 		this.tester.start();
@@ -417,7 +419,7 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 					Thread.sleep(1);
 
 					// Write the delayed response
-					responseWriter.write(this.tester.createStreamBuffer(1));
+					responseWriter.write(null, this.tester.createStreamBuffer(1));
 				} catch (Throwable ex) {
 					synchronized (failure) {
 						failure[0] = ex;
@@ -482,7 +484,7 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 						Thread.sleep(1);
 
 						// Write the delayed response
-						responseWriter.write(this.tester.createStreamBuffer(index));
+						responseWriter.write(null, this.tester.createStreamBuffer(index));
 					} catch (Throwable ex) {
 						synchronized (failure) {
 							failure[0] = ex;
@@ -491,7 +493,7 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 				}).start();
 			} else {
 				// Send the response immediately
-				responseWriter.write(this.tester.createStreamBuffer(index));
+				responseWriter.write(null, this.tester.createStreamBuffer(index));
 			}
 		});
 
@@ -527,9 +529,11 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 		}
 	}
 
-	// TODO delay creating request (via another thread)
+	// TODO write multi-threaded
 
-	// TODO put in checks to ensure on shutdown that all buffers released
+	// TODO write header with no content
+
+	// TODO write header before content
 
 	/**
 	 * Tester to wrap testing the {@link SocketManager}.
@@ -652,7 +656,9 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 			try {
 				this.runnable.run();
 			} catch (Throwable ex) {
-				this.completion = ex;
+				synchronized (this) {
+					this.completion = ex;
+				}
 			} finally {
 				// Notify complete
 				synchronized (this) {

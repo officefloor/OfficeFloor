@@ -74,7 +74,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * HTTPS secure port.
 	 */
 	private static final int HTTPS_PORT = 7979;
-	
+
 	static {
 		// Hook in for GC
 		for (GarbageCollectorMXBean gcBean : ManagementFactory.getGarbageCollectorMXBeans()) {
@@ -630,13 +630,17 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 								byte[] responseBytes = new byte[bytesRead];
 								responseBuffer.clear();
 								responseBuffer.get(responseBytes);
-								String responseText = UsAsciiUtil.convertToString(responseBytes);
+								StringBuilder responseText = new StringBuilder(
+										UsAsciiUtil.convertToString(responseBytes));
+
+								// Add in quotes to identify incorrect character
+								responseText.insert(i, "{");
+								responseText.insert(i + 2, "}");
 
 								// Provide the error
-								assertEquals(
-										"Incorrect character " + responseDataPosition + " ("
-												+ UsAsciiUtil.convertToChar(expectedCharacter) + " != "
-												+ UsAsciiUtil.convertToChar(actualCharacter) + "): " + responseText,
+								assertEquals("Incorrect character " + i + " of response " + responseReceivedCount + " ("
+										+ UsAsciiUtil.convertToChar(expectedCharacter) + " != "
+										+ UsAsciiUtil.convertToChar(actualCharacter) + "): " + responseText.toString(),
 										expectedCharacter, actualCharacter);
 							}
 							responseDataPosition = (responseDataPosition + 1) % responseData.length;

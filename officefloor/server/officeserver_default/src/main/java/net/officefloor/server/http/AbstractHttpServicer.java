@@ -56,25 +56,31 @@ public abstract class AbstractHttpServicer extends HttpRequestParser
 	private final boolean isSecure;
 
 	/**
-	 * {@link StreamBufferPool}.
+	 * {@link StreamBufferPool} for servicing requests to capture the response
+	 * entity.
 	 */
-	private final StreamBufferPool<ByteBuffer> bufferPool;
+	private final StreamBufferPool<ByteBuffer> serviceBufferPool;
+
+	/**
+	 * {@link HttpException} in attempting to parse {@link HttpRequest}.
+	 */
+	private HttpException parseFailure = null;
 
 	/**
 	 * Instantiate.
 	 * 
 	 * @param isSecure
 	 *            Indicates if over secure {@link Socket}.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool}.
+	 * @param serviceBufferPool
+	 *            {@link StreamBufferPool} used to service requests.
 	 * @param metaData
 	 *            {@link HttpRequestParserMetaData}.
 	 */
-	public AbstractHttpServicer(boolean isSecure, StreamBufferPool<ByteBuffer> bufferPool,
+	public AbstractHttpServicer(boolean isSecure, StreamBufferPool<ByteBuffer> serviceBufferPool,
 			HttpRequestParserMetaData metaData) {
 		super(metaData);
 		this.isSecure = isSecure;
-		this.bufferPool = bufferPool;
+		this.serviceBufferPool = serviceBufferPool;
 	}
 
 	/**
@@ -101,9 +107,15 @@ public abstract class AbstractHttpServicer extends HttpRequestParser
 		this.appendStreamBuffer(readBuffer);
 
 		// Parse out the requests
-		while (this.parse()) {
+		try {
+			while (this.parse()) {
 
-			// Create request from parser
+				// Create request from parser
+				requestHandler.handleRequest(this);
+			}
+		} catch (HttpException ex) {
+			// Failed to parse request
+			this.parseFailure = ex;
 			requestHandler.handleRequest(this);
 		}
 	}
@@ -114,6 +126,15 @@ public abstract class AbstractHttpServicer extends HttpRequestParser
 
 	@Override
 	public void service(HttpRequestParser request, ResponseWriter responseWriter) {
+
+		// Determine if parse failure
+		if (this.parseFailure != null) {
+			// Write parse failure
+			responseWriter.write((responseHead, socketBufferPool) -> {
+				this.parseFailure.writeHttpResponse(HttpVersion.HTTP_1_1, false, responseHead, socketBufferPool);
+			}, null);
+			return;
+		}
 
 		// Request ready, so obtain details
 		Supplier<HttpMethod> methodSupplier = this.getMethod();
@@ -126,67 +147,42 @@ public abstract class AbstractHttpServicer extends HttpRequestParser
 		HttpResponseWriter<ByteBuffer> writer = (responseVersion, status, httpHeader, contentLength, contentType,
 				content) -> {
 
-			// Create buffer for response header
-			StreamBuffer<ByteBuffer> responseHeader = this.bufferPool.getPooledStreamBuffer();
-			try {
-				// Write the response
-				responseVersion.write(responseHeader, this.bufferPool);
-				StreamBuffer.write(SPACE, 0, SPACE.length, responseHeader, this.bufferPool);
-				status.write(responseHeader, this.bufferPool);
-				StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHeader, bufferPool);
+			// Write the response
+			responseWriter.write((responseHead, socketBufferPool) -> {
 
-				// Write the header
+				// Write the status line
+				responseVersion.write(responseHead, socketBufferPool);
+				StreamBuffer.write(SPACE, 0, SPACE.length, responseHead, socketBufferPool);
+				status.write(responseHead, socketBufferPool);
+				StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHead, socketBufferPool);
+
+				// Write the headers
 				if (contentType != null) {
-					CONTENT_TYPE_NAME.write(responseHeader, this.bufferPool);
-					StreamBuffer.write(COLON_SPACE, 0, COLON_SPACE.length, responseHeader, this.bufferPool);
-					contentType.write(responseHeader, this.bufferPool);
-					StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHeader, this.bufferPool);
+					CONTENT_TYPE_NAME.write(responseHead, socketBufferPool);
+					StreamBuffer.write(COLON_SPACE, 0, COLON_SPACE.length, responseHead, socketBufferPool);
+					contentType.write(responseHead, socketBufferPool);
+					StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHead, socketBufferPool);
 				}
 				if (contentLength > 0) {
-					CONTENT_LENGTH_NAME.write(responseHeader, this.bufferPool);
-					StreamBuffer.write(COLON_SPACE, 0, COLON_SPACE.length, responseHeader, this.bufferPool);
-					HttpHeaderValue.writeInteger(contentLength, responseHeader, this.bufferPool);
-					StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHeader, this.bufferPool);
+					CONTENT_LENGTH_NAME.write(responseHead, socketBufferPool);
+					StreamBuffer.write(COLON_SPACE, 0, COLON_SPACE.length, responseHead, socketBufferPool);
+					HttpHeaderValue.writeInteger(contentLength, responseHead, socketBufferPool);
+					StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHead, socketBufferPool);
 				}
-				while (httpHeader != null) {
-					httpHeader.write(responseHeader, this.bufferPool);
-					httpHeader = httpHeader.next;
+				WritableHttpHeader header = httpHeader;
+				while (header != null) {
+					header.write(responseHead, socketBufferPool);
+					header = header.next;
 				}
-				StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHeader, bufferPool);
+				StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHead, socketBufferPool);
 
-				// Append entity buffers
-				StreamBuffer<ByteBuffer> lastHeader = responseHeader;
-				while (lastHeader.next != null) {
-					lastHeader = lastHeader.next;
-				}
-				lastHeader.next = content;
-
-				// Write the response
-				responseWriter.write(responseHeader);
-
-			} catch (HttpException ex) {
-
-				// Release the attempted response
-				while (responseHeader != null) {
-					responseHeader.release();
-					responseHeader = responseHeader.next;
-				}
-				while (content != null) {
-					content.release();
-					content = content.next;
-				}
-
-				// Send HTTP exception
-				StreamBuffer<ByteBuffer> response = this.bufferPool.getPooledStreamBuffer();
-				ex.writeHttpResponse(version, true, response, this.bufferPool);
-				responseWriter.write(response);
-			}
+			}, content);
 		};
 
 		// Create the connection
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>(
 				this.isSecure, methodSupplier, requestUriSupplier, version, requestHeaders, requestEntity, writer,
-				this.bufferPool);
+				this.serviceBufferPool);
 
 		try {
 			try {
@@ -200,9 +196,9 @@ public abstract class AbstractHttpServicer extends HttpRequestParser
 			}
 		} catch (HttpException ex) {
 			// Send HTTP exception
-			StreamBuffer<ByteBuffer> response = this.bufferPool.getPooledStreamBuffer();
-			ex.writeHttpResponse(version, true, response, this.bufferPool);
-			responseWriter.write(response);
+			responseWriter.write((responseHead, socketBufferPool) -> {
+				ex.writeHttpResponse(version, true, responseHead, socketBufferPool);
+			}, null);
 		}
 	}
 

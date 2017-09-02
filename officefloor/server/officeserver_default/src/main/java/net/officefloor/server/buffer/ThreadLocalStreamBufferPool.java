@@ -164,6 +164,21 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 	}
 
 	/**
+	 * Creates a pooled {@link StreamBuffer}.
+	 * 
+	 * @return New pooled {@link StreamBuffer}.
+	 */
+	private StreamBuffer<ByteBuffer> createPooledStreamBuffer() {
+
+		// Capture created buffer
+		this.bufferCount.incrementAndGet();
+
+		// Create and return new buffer
+		ByteBuffer byteBuffer = this.byteBufferFactory.createByteBuffer();
+		return new PooledStreamBuffer(byteBuffer);
+	}
+
+	/**
 	 * =============== BufferPool ===========================
 	 */
 
@@ -189,14 +204,7 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 		// Ensure have a buffer
 		if (pooledBuffer == null) {
 			// Create new buffer
-			ByteBuffer byteBuffer = this.byteBufferFactory.createByteBuffer();
-			pooledBuffer = new PooledStreamBuffer(byteBuffer);
-
-			// Capture created buffer
-			int totalBuffers = this.bufferCount.incrementAndGet();
-
-			// TODO REMOVE
-			System.out.println("CREATE " + totalBuffers);
+			pooledBuffer = this.createPooledStreamBuffer();
 
 		} else {
 			// Pooled buffer, so reset for use

@@ -96,7 +96,7 @@ public class HttpHeaderValue {
 
 		// Write the value
 		long lessMagnitude = value / 10;
-		writeBuffer = recusiveWriteInteger(lessMagnitude, head, bufferPool);
+		writeBuffer = recusiveWriteInteger(lessMagnitude, writeBuffer, bufferPool);
 
 		// Always write the first digit
 		writeCharacter(onesDigit, writeBuffer, bufferPool);
