@@ -156,17 +156,17 @@ public class SocketManager {
 	 * @param acceptedSocketDecorator
 	 *            Optional {@link AcceptedSocketDecorator}. May be
 	 *            <code>null</code>.
-	 * @param socketServicer
-	 *            {@link SocketServicer} to service accepted connections.
-	 * @param requestServicer
-	 *            {@link RequestServicer} to service requests on the
+	 * @param socketServicerFactory
+	 *            {@link SocketServicerFactory} to service accepted connections.
+	 * @param requestServicerFactory
+	 *            {@link RequestServicerFactory} to service requests on the
 	 *            {@link Socket}.
 	 * @throws IOException
 	 *             If fails to bind the {@link ServerSocket}.
 	 */
 	public synchronized <R> void bindServerSocket(int port, ServerSocketDecorator serverSocketDecorator,
-			AcceptedSocketDecorator acceptedSocketDecorator, SocketServicer<R> socketServicer,
-			RequestServicer<R> requestServicer) throws IOException {
+			AcceptedSocketDecorator acceptedSocketDecorator, SocketServicerFactory<R> socketServicerFactory,
+			RequestServicerFactory<R> requestServicerFactory) throws IOException {
 
 		// Spread acceptances listening across the listeners
 		int next = this.nextServerSocketListener;
@@ -174,7 +174,7 @@ public class SocketManager {
 
 		// Register server socket listening
 		ServerSocket serverSocket = this.listeners[next].bindServerSocket(port, serverSocketDecorator,
-				acceptedSocketDecorator, socketServicer, requestServicer);
+				acceptedSocketDecorator, socketServicerFactory, requestServicerFactory);
 		this.boundServerSockets.add(serverSocket);
 	}
 
@@ -307,17 +307,17 @@ public class SocketManager {
 		 * @param acceptedSocketDecorator
 		 *            Optional {@link AcceptedSocketDecorator}. May be
 		 *            <code>null</code>.
-		 * @param socketServicer
-		 *            {@link SocketServicer}.
-		 * @param requestServicer
-		 *            {@link RequestServicer}.
+		 * @param socketServicerFactory
+		 *            {@link SocketServicerFactory}.
+		 * @param requestServicerFactory
+		 *            {@link RequestServicerFactory}.
 		 * @return Bound {@link ServerSocket}.
 		 * @throws IOException
 		 *             If fails to bind the {@link ServerSocket}.
 		 */
 		private <R> ServerSocket bindServerSocket(int port, ServerSocketDecorator serverSocketDecorator,
-				AcceptedSocketDecorator acceptedSocketDecorator, SocketServicer<R> socketServicer,
-				RequestServicer<R> requestServicer) throws IOException {
+				AcceptedSocketDecorator acceptedSocketDecorator, SocketServicerFactory<R> socketServicerFactory,
+				RequestServicerFactory<R> requestServicerFactory) throws IOException {
 
 			// Create the port socket address
 			InetSocketAddress portAddress = new InetSocketAddress(port);
@@ -343,8 +343,8 @@ public class SocketManager {
 			}
 
 			// Register the channel with the selector
-			channel.register(this.selector, SelectionKey.OP_ACCEPT,
-					new AcceptHandler<R>(channel, acceptedSocketDecorator, socketServicer, requestServicer));
+			channel.register(this.selector, SelectionKey.OP_ACCEPT, new AcceptHandler<R>(channel,
+					acceptedSocketDecorator, socketServicerFactory, requestServicerFactory));
 
 			// Return the server socket
 			return socket;
@@ -424,9 +424,15 @@ public class SocketManager {
 								socket.setSendBufferSize(this.socketBufferSize);
 								handler.acceptedSocketDecorator.decorate(socket);
 
+								// Create the socket and request servicer
+								SocketServicer<Object> socketServicer = handler.socketServicerFactory
+										.createSocketServicer();
+								RequestServicer<Object> requestServicer = handler.requestServicerFactory
+										.createRequestServicer(socketServicer);
+
 								// Manage the accepted socket
 								AcceptedSocket<Object> acceptedSocket = new AcceptedSocket<>(socketChannel,
-										handler.socketServicer, handler.requestServicer);
+										socketServicer, requestServicer);
 								SocketManager.this.manageAcceptedSocket(acceptedSocket);
 
 							} catch (IOException ex) {
@@ -1279,14 +1285,14 @@ public class SocketManager {
 		private final AcceptedSocketDecorator acceptedSocketDecorator;
 
 		/**
-		 * {@link SocketServicer}.
+		 * {@link SocketServicerFactory}.
 		 */
-		private final SocketServicer<R> socketServicer;
+		private final SocketServicerFactory<R> socketServicerFactory;
 
 		/**
-		 * {@link RequestServicer}.
+		 * {@link RequestServicerFactory}.
 		 */
-		private final RequestServicer<R> requestServicer;
+		private final RequestServicerFactory<R> requestServicerFactory;
 
 		/**
 		 * Instantiate.
@@ -1295,17 +1301,17 @@ public class SocketManager {
 		 *            {@link ServerSocketChannel}.
 		 * @param acceptedSocketDecorator
 		 *            {@link AcceptedSocketDecorator}.
-		 * @param socketServicer
+		 * @param socketServicerFactory
 		 *            {@link SocketServicer}.
-		 * @param requestServicer
+		 * @param requestServicerFactory
 		 *            {@link RequestServicer}.
 		 */
 		private AcceptHandler(ServerSocketChannel channel, AcceptedSocketDecorator acceptedSocketDecorator,
-				SocketServicer<R> socketServicer, RequestServicer<R> requestServicer) {
+				SocketServicerFactory<R> socketServicerFactory, RequestServicerFactory<R> requestServicerFactory) {
 			this.channel = channel;
 			this.acceptedSocketDecorator = acceptedSocketDecorator;
-			this.socketServicer = socketServicer;
-			this.requestServicer = requestServicer;
+			this.socketServicerFactory = socketServicerFactory;
+			this.requestServicerFactory = requestServicerFactory;
 		}
 	}
 

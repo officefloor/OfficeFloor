@@ -65,8 +65,8 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 		final int serviceBufferSize = 1024;
 		StreamBufferPool<ByteBuffer> serviceBufferPool = new ThreadLocalStreamBufferPool(
 				() -> ByteBuffer.allocate(serviceBufferSize), Integer.MAX_VALUE, Integer.MAX_VALUE);
-		RawHttpServicer servicer = new RawHttpServicer(serviceBufferPool);
-		manager.bindServerSocket(httpPort, null, null, servicer, servicer);
+		manager.bindServerSocket(httpPort, null, null, () -> new RawHttpServicer(serviceBufferPool),
+				(servicer) -> (RawHttpServicer) servicer);
 
 		// Start servicing
 		Executor executor = Executors.newCachedThreadPool();

@@ -118,9 +118,9 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 				acceptedSocket[0] = socket;
 				acceptedSocket.notify();
 			}
-		}, (buffer, requestHandler) -> {
+		}, () -> (buffer, requestHandler) -> {
 			fail("Should not be invoked, as only accepting connection");
-		}, (request, responseWriter) -> {
+		}, (requestServicer) -> (request, responseWriter) -> {
 			fail("Should not be invoked, as no requests");
 		});
 		assertNotNull("Should have bound server socket", serverSocket[0]);
@@ -150,12 +150,12 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 
 		// Bind to server socket
 		byte[] data = new byte[] { 0 };
-		this.tester.manager.bindServerSocket(7878, null, null, (buffer, requestHandler) -> {
+		this.tester.manager.bindServerSocket(7878, null, null, () -> (buffer, requestHandler) -> {
 			synchronized (data) {
 				data[0] = buffer.pooledBuffer.get(0);
 				data.notify();
 			}
-		}, (request, responseWriter) -> {
+		}, (requestServicer) -> (request, responseWriter) -> {
 			fail("Should not be invoked, as no requests");
 		});
 
@@ -193,9 +193,9 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 
 		// Bind to server socket
 		Object[] receivedRequest = new Object[] { null };
-		this.tester.manager.bindServerSocket(7878, null, null, (buffer, requestHandler) -> {
+		this.tester.manager.bindServerSocket(7878, null, null, () -> (buffer, requestHandler) -> {
 			requestHandler.handleRequest(REQUEST);
-		}, (request, responseWriter) -> {
+		}, (requestServicer) -> (request, responseWriter) -> {
 			synchronized (receivedRequest) {
 				receivedRequest[0] = request;
 				receivedRequest.notify();
@@ -233,9 +233,9 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 		this.tester = new SocketManagerTester(1);
 
 		// Bind to server socket
-		this.tester.manager.bindServerSocket(7878, null, null, (buffer, requestHandler) -> {
+		this.tester.manager.bindServerSocket(7878, null, null, () -> (buffer, requestHandler) -> {
 			requestHandler.handleRequest("SEND");
-		}, (request, responseWriter) -> {
+		}, (requestServicer) -> (request, responseWriter) -> {
 			responseWriter.write(null, this.tester.createStreamBuffer(1));
 		});
 
@@ -272,10 +272,10 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 
 		// Bind to server socket
 		ResponseWriter[] writer = new ResponseWriter[] { null };
-		this.tester.manager.bindServerSocket(7878, null, null, (buffer, requestHandler) -> {
+		this.tester.manager.bindServerSocket(7878, null, null, () -> (buffer, requestHandler) -> {
 			requestHandler.handleRequest((byte) 1);
 			requestHandler.handleRequest((byte) 2);
-		}, (request, responseWriter) -> {
+		}, (requestServicer) -> (request, responseWriter) -> {
 			switch ((byte) request) {
 			case 1:
 				// First request, so capture writer for later
@@ -341,9 +341,9 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 					throw fail(ex);
 				}
 			}
-		}, (buffer, requestHandler) -> {
+		}, () -> (buffer, requestHandler) -> {
 			requestHandler.handleRequest((byte) 1);
-		}, (request, responseWriter) -> {
+		}, (requestServicer) -> (request, responseWriter) -> {
 			// Create very large response
 			StreamBuffer<ByteBuffer> buffers = this.tester.bufferPool.getPooledStreamBuffer();
 			StreamBuffer<ByteBuffer> buffer = buffers;
@@ -409,9 +409,9 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 
 		// Bind to server socket
 		Throwable[] failure = new Throwable[] { null };
-		this.tester.manager.bindServerSocket(7878, null, null, (buffer, requestHandler) -> {
+		this.tester.manager.bindServerSocket(7878, null, null, () -> (buffer, requestHandler) -> {
 			requestHandler.handleRequest("SEND");
-		}, (request, responseWriter) -> {
+		}, (requestServicer) -> (request, responseWriter) -> {
 			// Delay sending the response
 			new Thread(() -> {
 				try {
@@ -469,11 +469,11 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 
 		// Bind to server socket
 		Throwable[] failure = new Throwable[] { null };
-		this.tester.manager.bindServerSocket(7878, null, null, (buffer, requestHandler) -> {
+		this.tester.manager.bindServerSocket(7878, null, null, () -> (buffer, requestHandler) -> {
 			for (byte i = 0; i < RESPONSE_COUNT; i++) {
 				requestHandler.handleRequest(i);
 			}
-		}, (request, responseWriter) -> {
+		}, (requestServicer) -> (request, responseWriter) -> {
 			// Delay only the even responses
 			byte index = (byte) request;
 			if ((index % 2) == 0) {
