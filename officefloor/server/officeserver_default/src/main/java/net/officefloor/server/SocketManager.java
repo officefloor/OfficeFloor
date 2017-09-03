@@ -486,7 +486,7 @@ public class SocketManager {
 							AcceptedSocket<?> acceptedSocket = (AcceptedSocket<?>) selectedKey.attachment();
 
 							// Write further data to the socket
-							if (acceptedSocket.unsafeFlushWrites()) {
+							if (acceptedSocket.unsafeSendWrites()) {
 								// All content written, no longer write interest
 								selectedKey.interestOps(SelectionKey.OP_READ);
 							}
@@ -554,7 +554,7 @@ public class SocketManager {
 	/**
 	 * Accepted {@link Socket}.
 	 */
-	private static class AcceptedSocket<R> extends AbstractReadHandler implements RequestHandler<R> {
+	private static class AcceptedSocket<R> extends AbstractReadHandler implements RequestHandler<R>, ResponseHandler {
 
 		/**
 		 * {@link SocketChannel} for the accepted {@link Socket}.
@@ -755,7 +755,7 @@ public class SocketManager {
 					writeBuffer = writeBuffer.next;
 				}
 
-				// Write the content
+				// Compact the content
 				while (this.head.headResponseBuffer != null) {
 
 					// Obtain the next buffer
@@ -807,26 +807,17 @@ public class SocketManager {
 		}
 
 		/**
-		 * Undertakes writing the response data to the {@link SocketChannel}.
-		 * 
-		 * @return <code>true</code> if all response data written.
+		 * Undertakes flushing the response data to the {@link SocketChannel}.
 		 */
-		private boolean unsafeFlushWrites() {
+		private void unsafeFlushWrites() {
 
-			// Obtain the tail write buffer
-			StreamBuffer<ByteBuffer> tailWriteBuffer = this.writeResponseHead;
-			if (tailWriteBuffer != null) {
-				while (tailWriteBuffer.next != null) {
-					tailWriteBuffer = tailWriteBuffer.next;
-				}
+			// Do nothing if no compact responses to flush
+			if (this.compactedResponseHead == null) {
+				return;
 			}
 
-			// Join the compacted buffers for writing
-			if (tailWriteBuffer == null) {
-				this.writeResponseHead = this.compactedResponseHead;
-			} else {
-				tailWriteBuffer.next = this.compactedResponseHead;
-			}
+			// Capture head for sending
+			StreamBuffer<ByteBuffer> response = this.compactedResponseHead;
 
 			// Prepare compacted buffers for writing
 			while (this.compactedResponseHead != null) {
@@ -834,7 +825,19 @@ public class SocketManager {
 				this.compactedResponseHead = this.compactedResponseHead.next;
 			}
 
-			// Note: result at this point all buffers writing and no compact
+			// Send the response (allowing socket servicer to translate)
+			this.compactedResponseHead = null; // as sending
+			this.socketServicer.translateResponse(response, this);
+		}
+
+		/**
+		 * Undertakes sending the response data.
+		 * 
+		 * @return <code>true</code> if all response data written. Otherwise,
+		 *         <code>false</code> indicating the {@link Socket} buffer
+		 *         filled.
+		 */
+		private boolean unsafeSendWrites() {
 
 			// Flush the compacted buffers to the socket
 			while (this.writeResponseHead != null) {
@@ -869,6 +872,40 @@ public class SocketManager {
 
 			// As here, all data written
 			return true;
+		}
+
+		/*
+		 * ================ ResponseHandler =========================
+		 */
+
+		@Override
+		public void sendResponse(StreamBuffer<ByteBuffer> headBuffer) {
+
+			// Determine if thread safe
+			SocketListener threadSocketListener = threadSocketLister.get();
+			boolean isThreadSafe = (this.socketListener == threadSocketListener);
+			
+			// TODO ensure safe sending of response
+
+			// Obtain the tail write buffer
+			StreamBuffer<ByteBuffer> tailWriteBuffer = this.writeResponseHead;
+			if (tailWriteBuffer != null) {
+				while (tailWriteBuffer.next != null) {
+					tailWriteBuffer = tailWriteBuffer.next;
+				}
+			}
+
+			// Join the send buffers for writing
+			if (tailWriteBuffer == null) {
+				this.writeResponseHead = headBuffer;
+			} else {
+				tailWriteBuffer.next = headBuffer;
+			}
+
+			// Note: result at this point all buffers writing
+
+			// Send the data
+			this.unsafeSendWrites();
 		}
 
 		/*
@@ -927,6 +964,11 @@ public class SocketManager {
 
 			// Service the request
 			this.requestServicer.service(request, socketRequest);
+		}
+
+		@Override
+		public void closeConnection() {
+			SocketManager.terminteSelectionKey(this.selectionKey);
 		}
 	}
 

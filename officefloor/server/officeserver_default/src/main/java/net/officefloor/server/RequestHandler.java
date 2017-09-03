@@ -32,4 +32,9 @@ public interface RequestHandler<R> {
 	 */
 	void handleRequest(R request);
 
+	/**
+	 * Allows to close connection.
+	 */
+	void closeConnection();
+
 }

@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2017 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,24 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.server.http.protocol;
+package net.officefloor.server;
 
 import java.nio.ByteBuffer;
 
-import net.officefloor.server.stream.StreamBufferPool;
+import net.officefloor.server.stream.StreamBuffer;
 
 /**
- * Context for the {@link CommunicationProtocolSource}.
+ * Handles responses.
  * 
  * @author Daniel Sagenschneider
  */
-public interface CommunicationProtocolContext {
+public interface ResponseHandler {
 
 	/**
-	 * Obtains the {@link StreamBufferPool}.
+	 * Sends the response.
 	 * 
-	 * @return {@link StreamBufferPool}.
+	 * @param headBuffer
+	 *            Head {@link StreamBuffer} to the linked list of
+	 *            {@link StreamBuffer} instances for the response.
 	 */
-	StreamBufferPool<ByteBuffer> getBufferPool();
+	void sendResponse(StreamBuffer<ByteBuffer> headBuffer);
 
 }

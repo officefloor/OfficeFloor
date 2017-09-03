@@ -41,4 +41,17 @@ public interface SocketServicer<R> {
 	 */
 	void service(StreamBuffer<ByteBuffer> readBuffer, RequestHandler<R> requestHandler);
 
+	/**
+	 * Enables translating responses.
+	 * 
+	 * @param headResponseBuffer
+	 *            Head {@link StreamBuffer} to the linked list of
+	 *            {@link StreamBuffer} instances for the response.
+	 * @param responseHandler
+	 *            {@link ResponseHandler}.
+	 */
+	default void translateResponse(StreamBuffer<ByteBuffer> headResponseBuffer, ResponseHandler responseHandler) {
+		responseHandler.sendResponse(headResponseBuffer);
+	}
+
 }
