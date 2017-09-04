@@ -27,8 +27,10 @@ public interface SocketServicerFactory<R> {
 	/**
 	 * Creates the {@link SocketServicer}.
 	 * 
+	 * @param requestHandler
+	 *            {@link RequestHandler}.
 	 * @return {@link SocketServicer}.
 	 */
-	SocketServicer<R> createSocketServicer();
+	SocketServicer<R> createSocketServicer(RequestHandler<R> requestHandler);
 
 }

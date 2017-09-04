@@ -22,7 +22,7 @@ package net.officefloor.server;
  * 
  * @author Daniel Sagenschneider
  */
-public interface RequestHandler<R> {
+public interface RequestHandler<R> extends ResponseHandler {
 
 	/**
 	 * Handles a request.

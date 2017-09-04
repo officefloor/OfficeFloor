@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.server.ssl.protocol;
+package net.officefloor.server.ssl;
 
 import java.net.InetSocketAddress;
 
@@ -35,7 +35,7 @@ import net.officefloor.server.http.protocol.CommunicationProtocolContext;
 import net.officefloor.server.http.protocol.CommunicationProtocolSource;
 import net.officefloor.server.http.protocol.Connection;
 import net.officefloor.server.ssl.SslContextSource;
-import net.officefloor.server.ssl.protocol.SslFunction.SslTaskDependencies;
+import net.officefloor.server.ssl.SslFunction.SslTaskDependencies;
 
 /**
  * SSL {@link CommunicationProtocolSource} that wraps another
@@ -156,7 +156,7 @@ public class SslCommunicationProtocol implements CommunicationProtocolSource, Co
 	 */
 
 	@Override
-	public SslConnectionHandler createConnectionHandler(Connection connection,
+	public SslSocketServicerFactory createConnectionHandler(Connection connection,
 			ManagedObjectExecuteContext<Indexed> executeContext) {
 
 		// Obtain the remote connection details
@@ -169,7 +169,7 @@ public class SslCommunicationProtocol implements CommunicationProtocolSource, Co
 		engine.setUseClientMode(false); // Always in server mode
 
 		// Create the SSL connection wrapping the connection
-		SslConnectionHandler connectionHandler = new SslConnectionHandler(connection, engine, this.sendBufferSize,
+		SslSocketServicerFactory connectionHandler = new SslSocketServicerFactory(connection, engine, this.sendBufferSize,
 				this.wrappedCommunicationProtocol, executeContext, this.sslRunnableFlowIndex);
 
 		// Return the SSL connection handler

@@ -22,6 +22,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
+import java.sql.Connection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -39,17 +40,15 @@ import net.officefloor.server.Old_SocketListener.SocketListenerFlows;
 import net.officefloor.server.http.protocol.CommunicationProtocol;
 import net.officefloor.server.http.protocol.CommunicationProtocolContext;
 import net.officefloor.server.http.protocol.CommunicationProtocolSource;
-import net.officefloor.server.http.protocol.Connection;
-import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.StreamBufferPool;
 
 /**
  * Abstract {@link ManagedObjectSource} for a {@link ServerSocketChannel}.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractServerSocketManagedObjectSource extends AbstractManagedObjectSource<None, Indexed>
-		implements CommunicationProtocolContext {
+public abstract class AbstractServerSocketManagedObjectSource extends AbstractManagedObjectSource<None, Indexed> {
 
 	/**
 	 * {@link Logger}.
@@ -74,9 +73,9 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	public static final String PROPERTY_SOCKET_LISTENER_COUNT = "socket.listener.count";
 
 	/**
-	 * Singleton {@link Old_SocketManager} for all {@link Connection} instances.
+	 * Singleton {@link SocketManager} for all {@link Connection} instances.
 	 */
-	private static Old_SocketManager singletonSocketManager;
+	private static SocketManager singletonSocketManager;
 
 	/**
 	 * Registered {@link AbstractServerSocketManagedObjectSource} instances.
@@ -84,7 +83,7 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	private static Set<AbstractServerSocketManagedObjectSource> registeredServerSocketManagedObjectSources = new HashSet<AbstractServerSocketManagedObjectSource>();
 
 	/**
-	 * Obtains the {@link Old_SocketManager}.
+	 * Obtains the {@link SocketManager}.
 	 * 
 	 * @param mosContext
 	 *            {@link ManagedObjectSourceContext}.
@@ -96,11 +95,13 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	 *            Number of {@link Old_SocketListener} instances.
 	 * @param bufferPool
 	 *            {@link StreamBufferPool}.
-	 * @return {@link Old_SocketManager}.
+	 * @param socketBufferSize
+	 *            {@link Socket} buffer size.
+	 * @return {@link SocketManager}.
 	 */
-	private static synchronized Old_SocketManager getSocketManager(ManagedObjectSourceContext<Indexed> mosContext,
+	private static synchronized SocketManager getSocketManager(ManagedObjectSourceContext<Indexed> mosContext,
 			AbstractServerSocketManagedObjectSource instance, int numberOfSocketListeners,
-			StreamBufferPool<ByteBuffer> bufferPool) throws IOException {
+			StreamBufferPool<ByteBuffer> bufferPool, int socketBufferSize) throws IOException {
 
 		// Ensure consistent interface for teams
 		mosContext.addManagedFunction("consistency", () -> (context) -> null).setResponsibleTeam("listener");
@@ -113,27 +114,24 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 		// Lazy create the singleton socket manager
 		if (singletonSocketManager == null) {
 
-			// Create the array of socket listeners
-			Old_SocketListener[] socketListeners = new Old_SocketListener[numberOfSocketListeners];
-
-			// Create the connection manager
-			singletonSocketManager = new Old_SocketManager(socketListeners);
+			// Create the singleton socket manager
+			singletonSocketManager = new SocketManager(numberOfSocketListeners, bufferPool, socketBufferSize);
 
 			// Load the socket listeners
-			for (int i = 0; i < socketListeners.length; i++) {
+			Runnable[] runnables = singletonSocketManager.getRunnables();
+			for (int i = 0; i < runnables.length; i++) {
 
-				// Create the socket listener
-				Old_SocketListener socketListener = new Old_SocketListener(singletonSocketManager, bufferPool);
+				// Obtain the runnable
+				Runnable runnable = runnables[i];
 
-				// Register the socket listener
-				socketListeners[i] = socketListener;
-
-				// Register the listening of connections
+				// Register the runnable
 				String listenerName = "listener-" + i;
-				ManagedObjectFunctionBuilder<None, SocketListenerFlows> listenerFunction = mosContext
-						.addManagedFunction(listenerName, socketListener);
+				ManagedObjectFunctionBuilder<?, ?> listenerFunction = mosContext.addManagedFunction(listenerName,
+						() -> (context) -> {
+							runnable.run();
+							return null;
+						});
 				listenerFunction.setResponsibleTeam("listener");
-				listenerFunction.linkFlow(SocketListenerFlows.REPEAT, listenerName, null, false);
 
 				// Flag to start listener on server start up
 				mosContext.addStartupFunction(listenerName);
@@ -165,10 +163,7 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 		// Determine if active connection manager
 		if (singletonSocketManager != null) {
 			// Close the socket listener selectors
-			singletonSocketManager.closeSocketSelectors();
-
-			// Wait for close
-			singletonSocketManager.waitForClose();
+			singletonSocketManager.shutdown();
 		}
 
 		// Close (release) the connection manager to create again
@@ -206,11 +201,6 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	private int port;
 
 	/**
-	 * {@link CommunicationProtocolSource}.
-	 */
-	private final CommunicationProtocolSource communicationProtocolSource;
-
-	/**
 	 * {@link StreamBuffer} size.
 	 */
 	private int bufferSize;
@@ -221,9 +211,9 @@ public abstract class AbstractServerSocketManagedObjectSource extends AbstractMa
 	private int serverSocketBackLogSize;
 
 	/**
-	 * {@link Old_SocketManager}.
+	 * {@link SocketManager}.
 	 */
-	private Old_SocketManager socketManager;
+	private SocketManager socketManager;
 
 	/**
 	 * {@link CommunicationProtocol}.

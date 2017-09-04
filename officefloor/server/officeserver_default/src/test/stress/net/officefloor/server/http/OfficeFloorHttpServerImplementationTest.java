@@ -27,6 +27,7 @@ import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.server.SocketManager;
 import net.officefloor.server.buffer.ThreadLocalStreamBufferPool;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
+import net.officefloor.server.http.parse.HttpRequestParser.HttpRequestParserMetaData;
 import net.officefloor.server.stream.StreamBufferPool;
 
 /**
@@ -65,8 +66,8 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 		final int serviceBufferSize = 1024;
 		StreamBufferPool<ByteBuffer> serviceBufferPool = new ThreadLocalStreamBufferPool(
 				() -> ByteBuffer.allocate(serviceBufferSize), Integer.MAX_VALUE, Integer.MAX_VALUE);
-		manager.bindServerSocket(httpPort, null, null, () -> new RawHttpServicer(serviceBufferPool),
-				(servicer) -> (RawHttpServicer) servicer);
+		RawHttpServicerFactory serviceFactory = new RawHttpServicerFactory(serviceBufferPool);
+		manager.bindServerSocket(httpPort, null, null, serviceFactory, serviceFactory);
 
 		// Start servicing
 		Executor executor = Executors.newCachedThreadPool();
@@ -84,9 +85,9 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 	}
 
 	/**
-	 * Raw {@link AbstractHttpServicer}.
+	 * Raw {@link AbstractHttpServicerFactory}.
 	 */
-	private static class RawHttpServicer extends AbstractHttpServicer {
+	private static class RawHttpServicerFactory extends AbstractHttpServicerFactory {
 
 		/**
 		 * {@link ProcessAwareContext}.
@@ -100,12 +101,12 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 
 		/**
 		 * Instantiate.
-		 * 
-		 * @param bufferPool
+		 *
+		 * @param serviceBufferPool
 		 *            {@link StreamBufferPool}.
 		 */
-		public RawHttpServicer(StreamBufferPool<ByteBuffer> bufferPool) {
-			super(false, bufferPool, new HttpRequestParserMetaData(100, 1000, 1000000));
+		public RawHttpServicerFactory(StreamBufferPool<ByteBuffer> serviceBufferPool) {
+			super(false, new HttpRequestParserMetaData(100, 1000, 1000000), serviceBufferPool);
 		}
 
 		/*

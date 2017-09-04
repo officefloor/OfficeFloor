@@ -32,7 +32,7 @@ import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.protocol.CommunicationProtocolSource;
 import net.officefloor.server.http.protocol.HttpCommunicationProtocol;
-import net.officefloor.server.ssl.protocol.SslCommunicationProtocol;
+import net.officefloor.server.ssl.SslCommunicationProtocol;
 
 /**
  * {@link ManagedObjectSource} for a secure {@link ServerHttpConnection}.

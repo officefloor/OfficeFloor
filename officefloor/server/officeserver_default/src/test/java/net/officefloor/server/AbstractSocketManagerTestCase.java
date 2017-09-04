@@ -20,66 +20,20 @@ package net.officefloor.server;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.function.Function;
 
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.stream.StreamBuffer;
-import net.officefloor.server.stream.StreamBufferPool;
 
 /**
  * Tests the {@link SocketListener}.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase {
-
-	/**
-	 * Buffer size.
-	 */
-	private static final int BUFFER_SIZE = 1024;
-
-	/**
-	 * Wraps the {@link SocketManager} for easier testing.
-	 */
-	private SocketManagerTester tester = null;
-
-	/**
-	 * Creates the {@link StreamBufferPool}.
-	 * 
-	 * @param bufferSize
-	 *            Size of the pooled {@link StreamBuffer}.
-	 * @return {@link StreamBufferPool}.
-	 */
-	protected abstract StreamBufferPool<ByteBuffer> createStreamBufferPool(int bufferSize);
-
-	/**
-	 * <p>
-	 * Handles completion.
-	 * <p>
-	 * Allows overriding to handle completion (such as checking all
-	 * {@link StreamBuffer} instances have been released).
-	 * 
-	 * @param bufferPool
-	 *            {@link StreamBufferPool} used by the {@link SocketManager}.
-	 */
-	protected void handleCompletion(StreamBufferPool<ByteBuffer> bufferPool) {
-		// By default do nothing
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-
-		// Ensure shut down tester
-		if (this.tester != null) {
-			this.tester.manager.shutdown();
-			this.tester.waitForCompletion();
-		}
-	}
+public abstract class AbstractSocketManagerTestCase extends AbstractSocketManagerTester {
 
 	/**
 	 * Ensure can shutdown the {@link SocketListener}.
@@ -87,7 +41,7 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 	public void testShutdown() throws IOException {
 		SocketManagerTester tester = new SocketManagerTester(1);
 		tester.start();
-		tester.manager.shutdown();
+		tester.shutdown();
 		tester.waitForCompletion();
 	}
 
@@ -97,7 +51,7 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 	public void testShutdownMultipleListeners() throws IOException {
 		SocketManagerTester tester = new SocketManagerTester(4);
 		tester.start();
-		tester.manager.shutdown();
+		tester.shutdown();
 		tester.waitForCompletion();
 	}
 
@@ -110,7 +64,7 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 		// Bind to server socket
 		ServerSocket[] serverSocket = new ServerSocket[] { null };
 		Socket[] acceptedSocket = new Socket[] { null };
-		this.tester.manager.bindServerSocket(7878, (socket) -> {
+		this.tester.bindServerSocket((socket) -> {
 			serverSocket[0] = socket;
 			return 1000;
 		}, (socket) -> {
@@ -118,9 +72,9 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 				acceptedSocket[0] = socket;
 				acceptedSocket.notify();
 			}
-		}, () -> (buffer, requestHandler) -> {
+		}, (requestHandler) -> (buffer) -> {
 			fail("Should not be invoked, as only accepting connection");
-		}, (requestServicer) -> (request, responseWriter) -> {
+		}, (socketServicer) -> (request, responseWriter) -> {
 			fail("Should not be invoked, as no requests");
 		});
 		assertNotNull("Should have bound server socket", serverSocket[0]);
@@ -128,7 +82,7 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 		this.tester.start();
 
 		// Undertake connect (will occur asynchronously)
-		try (Socket client = new Socket(InetAddress.getLocalHost(), 7878)) {
+		try (Socket client = this.tester.getClient()) {
 			assertTrue("Should be connected", client.isConnected());
 
 			// Ensure connects (must wait for connection)
@@ -150,19 +104,19 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 
 		// Bind to server socket
 		byte[] data = new byte[] { 0 };
-		this.tester.manager.bindServerSocket(7878, null, null, () -> (buffer, requestHandler) -> {
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer) -> {
 			synchronized (data) {
 				data[0] = buffer.pooledBuffer.get(0);
 				data.notify();
 			}
-		}, (requestServicer) -> (request, responseWriter) -> {
+		}, (socketServicer) -> (request, responseWriter) -> {
 			fail("Should not be invoked, as no requests");
 		});
 
 		this.tester.start();
 
 		// Undertake connect and send data
-		try (Socket client = new Socket(InetAddress.getLocalHost(), 7878)) {
+		try (Socket client = this.tester.getClient()) {
 
 			// Send some data
 			OutputStream outputStream = client.getOutputStream();
@@ -193,9 +147,9 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 
 		// Bind to server socket
 		Object[] receivedRequest = new Object[] { null };
-		this.tester.manager.bindServerSocket(7878, null, null, () -> (buffer, requestHandler) -> {
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer) -> {
 			requestHandler.handleRequest(REQUEST);
-		}, (requestServicer) -> (request, responseWriter) -> {
+		}, (socketServicer) -> (request, responseWriter) -> {
 			synchronized (receivedRequest) {
 				receivedRequest[0] = request;
 				receivedRequest.notify();
@@ -205,7 +159,7 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 		this.tester.start();
 
 		// Undertake connect and send data
-		try (Socket client = new Socket(InetAddress.getLocalHost(), 7878)) {
+		try (Socket client = this.tester.getClient()) {
 
 			// Send some data
 			OutputStream outputStream = client.getOutputStream();
@@ -233,16 +187,16 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 		this.tester = new SocketManagerTester(1);
 
 		// Bind to server socket
-		this.tester.manager.bindServerSocket(7878, null, null, () -> (buffer, requestHandler) -> {
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer) -> {
 			requestHandler.handleRequest("SEND");
-		}, (requestServicer) -> (request, responseWriter) -> {
+		}, (socketServicer) -> (request, responseWriter) -> {
 			responseWriter.write(null, this.tester.createStreamBuffer(1));
 		});
 
 		this.tester.start();
 
 		// Undertake connect and send data
-		try (Socket client = new Socket(InetAddress.getLocalHost(), 7878)) {
+		try (Socket client = this.tester.getClient()) {
 
 			// Send some data (to trigger request)
 			OutputStream outputStream = client.getOutputStream();
@@ -272,10 +226,10 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 
 		// Bind to server socket
 		ResponseWriter[] writer = new ResponseWriter[] { null };
-		this.tester.manager.bindServerSocket(7878, null, null, () -> (buffer, requestHandler) -> {
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer) -> {
 			requestHandler.handleRequest((byte) 1);
 			requestHandler.handleRequest((byte) 2);
-		}, (requestServicer) -> (request, responseWriter) -> {
+		}, (socketServicer) -> (request, responseWriter) -> {
 			switch ((byte) request) {
 			case 1:
 				// First request, so capture writer for later
@@ -300,7 +254,7 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 		this.tester.start();
 
 		// Undertake connect and send data
-		try (Socket client = new Socket(InetAddress.getLocalHost(), 7878)) {
+		try (Socket client = this.tester.getClient()) {
 
 			// Trigger the requests
 			OutputStream outputStream = client.getOutputStream();
@@ -332,7 +286,7 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 
 		// Bind to server socket
 		final int[] bufferSize = new int[] { -1 };
-		this.tester.manager.bindServerSocket(7878, null, (socket) -> {
+		this.tester.bindServerSocket(null, (socket) -> {
 			synchronized (bufferSize) {
 				try {
 					bufferSize[0] = socket.getSendBufferSize() * 5;
@@ -341,9 +295,9 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 					throw fail(ex);
 				}
 			}
-		}, () -> (buffer, requestHandler) -> {
+		}, (requestHandler) -> (buffer) -> {
 			requestHandler.handleRequest((byte) 1);
-		}, (requestServicer) -> (request, responseWriter) -> {
+		}, (socketServicer) -> (request, responseWriter) -> {
 			// Create very large response
 			StreamBuffer<ByteBuffer> buffers = this.tester.bufferPool.getPooledStreamBuffer();
 			StreamBuffer<ByteBuffer> buffer = buffers;
@@ -364,7 +318,7 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 		this.tester.start();
 
 		// Undertake connect and send data
-		try (Socket client = new Socket(InetAddress.getLocalHost(), 7878)) {
+		try (Socket client = this.tester.getClient()) {
 
 			// Trigger the request
 			OutputStream outputStream = client.getOutputStream();
@@ -409,9 +363,9 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 
 		// Bind to server socket
 		Throwable[] failure = new Throwable[] { null };
-		this.tester.manager.bindServerSocket(7878, null, null, () -> (buffer, requestHandler) -> {
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer) -> {
 			requestHandler.handleRequest("SEND");
-		}, (requestServicer) -> (request, responseWriter) -> {
+		}, (socketServicer) -> (request, responseWriter) -> {
 			// Delay sending the response
 			new Thread(() -> {
 				try {
@@ -431,7 +385,7 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 		this.tester.start();
 
 		// Undertake connect and send data
-		try (Socket client = new Socket(InetAddress.getLocalHost(), 7878)) {
+		try (Socket client = this.tester.getClient()) {
 
 			// Send some data (to trigger request)
 			OutputStream outputStream = client.getOutputStream();
@@ -469,11 +423,11 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 
 		// Bind to server socket
 		Throwable[] failure = new Throwable[] { null };
-		this.tester.manager.bindServerSocket(7878, null, null, () -> (buffer, requestHandler) -> {
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer) -> {
 			for (byte i = 0; i < RESPONSE_COUNT; i++) {
 				requestHandler.handleRequest(i);
 			}
-		}, (requestServicer) -> (request, responseWriter) -> {
+		}, (socketServicer) -> (request, responseWriter) -> {
 			// Delay only the even responses
 			byte index = (byte) request;
 			if ((index % 2) == 0) {
@@ -500,7 +454,7 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 		this.tester.start();
 
 		// Undertake connect and send data
-		try (Socket client = new Socket(InetAddress.getLocalHost(), 7878)) {
+		try (Socket client = this.tester.getClient()) {
 
 			// Send some data (to trigger request)
 			OutputStream outputStream = client.getOutputStream();
@@ -534,141 +488,5 @@ public abstract class AbstractSocketManagerTestCase extends OfficeFrameTestCase 
 	// TODO write header with no content
 
 	// TODO write header before content
-
-	/**
-	 * Tester to wrap testing the {@link SocketManager}.
-	 */
-	private class SocketManagerTester {
-
-		/**
-		 * {@link StreamBufferPool}.
-		 */
-		private final StreamBufferPool<ByteBuffer> bufferPool = AbstractSocketManagerTestCase.this
-				.createStreamBufferPool(BUFFER_SIZE);
-
-		/**
-		 * {@link SocketManager} to test.
-		 */
-		private final SocketManager manager;
-
-		/**
-		 * {@link Thread} instances for the {@link SocketManager}.
-		 */
-		private final TestThread[] threads;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param listenerCount
-		 *            Number of {@link SocketListener} instances.
-		 */
-		private SocketManagerTester(int listenerCount) throws IOException {
-
-			// Create the Socket Manager
-			this.manager = new SocketManager(1, this.bufferPool, BUFFER_SIZE);
-
-			// Start servicing the sockets
-			Runnable[] runnables = this.manager.getRunnables();
-			this.threads = new TestThread[runnables.length];
-			for (int i = 0; i < runnables.length; i++) {
-				this.threads[i] = new TestThread(runnables[i]);
-			}
-		}
-
-		/**
-		 * Creates a {@link StreamBuffer} with bytes.
-		 * 
-		 * @param bytes
-		 *            Bytes to write to the {@link StreamBuffer}.
-		 * @return {@link StreamBuffer} for the bytes.
-		 */
-		private StreamBuffer<ByteBuffer> createStreamBuffer(int... bytes) {
-			StreamBuffer<ByteBuffer> streamBuffer = this.bufferPool.getPooledStreamBuffer();
-			for (int i = 0; i < bytes.length; i++) {
-				streamBuffer.write((byte) bytes[i]);
-			}
-			return streamBuffer;
-		}
-
-		/**
-		 * Starts the {@link TestThread} instances.
-		 */
-		private void start() {
-			for (int i = 0; i < this.threads.length; i++) {
-				this.threads[i].start();
-			}
-		}
-
-		/**
-		 * Waits on completion of the {@link TestThread} instances.
-		 */
-		private void waitForCompletion() {
-			long startTime = System.currentTimeMillis();
-			for (int i = 0; i < this.threads.length; i++) {
-				this.threads[i].waitForCompletion(startTime);
-			}
-
-			// As all complete, handle completion
-			AbstractSocketManagerTestCase.this.handleCompletion(this.bufferPool);
-		}
-	}
-
-	/**
-	 * {@link Thread} for testing.
-	 */
-	private class TestThread extends Thread {
-
-		private final Runnable runnable;
-
-		private Object completion = null;
-
-		private TestThread(Runnable runnable) {
-			this.runnable = runnable;
-		}
-
-		private void waitForCompletion(long startTime) {
-			this.waitForCompletion(startTime, 3);
-		}
-
-		private synchronized void waitForCompletion(long startTime, int secondsToRun) {
-			while (this.completion == null) {
-
-				// Determine if timed out
-				AbstractSocketManagerTestCase.this.timeout(startTime, secondsToRun);
-
-				// Not timed out, so wait a little longer
-				try {
-					this.wait(10);
-				} catch (InterruptedException ex) {
-					throw AbstractSocketManagerTestCase.fail(ex);
-				}
-			}
-
-			// Determine if failure
-			if (this.completion instanceof Throwable) {
-				throw fail((Throwable) this.completion);
-			}
-		}
-
-		@Override
-		public void run() {
-			// Run
-			try {
-				this.runnable.run();
-			} catch (Throwable ex) {
-				synchronized (this) {
-					this.completion = ex;
-				}
-			} finally {
-				// Notify complete
-				synchronized (this) {
-					if (this.completion == null) {
-						this.completion = "COMPLETE";
-					}
-					this.notify();
-				}
-			}
-		}
-	}
 
 }

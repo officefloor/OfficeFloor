@@ -19,14 +19,8 @@ package net.officefloor.server.stream;
 
 import java.io.InputStream;
 
-import net.officefloor.server.tcp.NoAvailableInputException;
-
 /**
- * <p>
  * Provides non-blocking {@link InputStream} for servicing.
- * <p>
- * Should an attempt be made to read more than the available bytes, a
- * {@link NoAvailableInputException} will be thrown.
  * 
  * @author Daniel Sagenschneider
  */

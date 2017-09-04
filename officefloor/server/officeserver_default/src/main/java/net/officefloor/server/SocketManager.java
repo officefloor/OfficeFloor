@@ -424,15 +424,9 @@ public class SocketManager {
 								socket.setSendBufferSize(this.socketBufferSize);
 								handler.acceptedSocketDecorator.decorate(socket);
 
-								// Create the socket and request servicer
-								SocketServicer<Object> socketServicer = handler.socketServicerFactory
-										.createSocketServicer();
-								RequestServicer<Object> requestServicer = handler.requestServicerFactory
-										.createRequestServicer(socketServicer);
-
 								// Manage the accepted socket
 								AcceptedSocket<Object> acceptedSocket = new AcceptedSocket<>(socketChannel,
-										socketServicer, requestServicer);
+										handler.socketServicerFactory, handler.requestServicerFactory);
 								SocketManager.this.manageAcceptedSocket(acceptedSocket);
 
 							} catch (IOException ex) {
@@ -620,17 +614,21 @@ public class SocketManager {
 		 * 
 		 * @param socketChannel
 		 *            {@link SocketChannel}.
-		 * @param socketServicer
-		 *            {@link SocketServicer}.
-		 * @param requestServicer
-		 *            {@link RequestServicer}.
+		 * @param socketServicerFactory
+		 *            {@link SocketServicerFactory}.
+		 * @param requestServicerFactory
+		 *            {@link RequestServicerFactory}.
 		 */
-		public AcceptedSocket(SocketChannel socketChannel, SocketServicer<R> socketServicer,
-				RequestServicer<R> requestServicer) {
+		public AcceptedSocket(SocketChannel socketChannel, SocketServicerFactory<R> socketServicerFactory,
+				RequestServicerFactory<R> requestServicerFactory) {
 			super(socketChannel);
 			this.socketChannel = socketChannel;
-			this.socketServicer = socketServicer;
-			this.requestServicer = requestServicer;
+
+			// Create the socket servicer
+			this.socketServicer = socketServicerFactory.createSocketServicer(this);
+
+			// Create the request servicer
+			this.requestServicer = requestServicerFactory.createRequestServicer(this.socketServicer);
 		}
 
 		/**
@@ -842,9 +840,13 @@ public class SocketManager {
 			// Flush the compacted buffers to the socket
 			while (this.writeResponseHead != null) {
 
+				// Obtain the write buffer
+				ByteBuffer writeBuffer = this.writeResponseHead.isPooled ? this.writeResponseHead.pooledBuffer
+						: this.writeResponseHead.unpooledByteBuffer;
+
 				// Write the buffer to the socket
 				try {
-					this.socketChannel.write(this.writeResponseHead.pooledBuffer);
+					this.socketChannel.write(writeBuffer);
 				} catch (IOException ex) {
 					// Failed to write to channel, so close
 					SocketManager.terminteSelectionKey(this.selectionKey);
@@ -852,7 +854,7 @@ public class SocketManager {
 				}
 
 				// Determine if written all bytes
-				if (this.writeResponseHead.pooledBuffer.remaining() != 0) {
+				if (writeBuffer.remaining() != 0) {
 					// Not all bytes written, so write when buffer emptied
 
 					// Flag interest in write (as buffer full)
@@ -884,7 +886,7 @@ public class SocketManager {
 			// Determine if thread safe
 			SocketListener threadSocketListener = threadSocketLister.get();
 			boolean isThreadSafe = (this.socketListener == threadSocketListener);
-			
+
 			// TODO ensure safe sending of response
 
 			// Obtain the tail write buffer
@@ -924,7 +926,7 @@ public class SocketManager {
 			this.previousRequestBuffer = this.readBuffer;
 
 			// Service the socket
-			this.socketServicer.service(this.readBuffer, this);
+			this.socketServicer.service(this.readBuffer);
 
 			// Ensure flush writes
 			this.unsafeFlushWrites();

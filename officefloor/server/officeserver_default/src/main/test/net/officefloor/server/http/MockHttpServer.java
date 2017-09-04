@@ -36,7 +36,7 @@ import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.server.AbstractServerSocketManagedObjectSource;
 import net.officefloor.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.server.http.source.HttpsServerSocketManagedObjectSource;
-import net.officefloor.server.ssl.protocol.SslCommunicationProtocol;
+import net.officefloor.server.ssl.SslCommunicationProtocol;
 
 /**
  * <p>

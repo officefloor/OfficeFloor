@@ -36,10 +36,8 @@ public interface SocketServicer<R> {
 	 *            {@link StreamBuffer} containing the just read bytes. Note that
 	 *            this could be the same {@link StreamBuffer} as previous, with
 	 *            just further bytes written.
-	 * @param requestHandler
-	 *            Services the requests from the {@link Socket}.
 	 */
-	void service(StreamBuffer<ByteBuffer> readBuffer, RequestHandler<R> requestHandler);
+	void service(StreamBuffer<ByteBuffer> readBuffer);
 
 	/**
 	 * Enables translating responses.
