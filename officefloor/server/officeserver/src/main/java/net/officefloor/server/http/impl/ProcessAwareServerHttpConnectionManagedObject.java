@@ -23,6 +23,7 @@ import java.util.function.Supplier;
 
 import net.officefloor.compile.spi.officefloor.ExternalServiceCleanupEscalationHandler;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
+import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
@@ -45,7 +46,7 @@ import net.officefloor.server.stream.impl.ByteSequence;
  * @author Daniel Sagenschneider
  */
 public class ProcessAwareServerHttpConnectionManagedObject<B>
-		implements ServerHttpConnection, ProcessAwareManagedObject {
+		implements ServerHttpConnection, ProcessAwareManagedObject, FlowCallback {
 
 	/**
 	 * Obtains the {@link ExternalServiceCleanupEscalationHandler}.
@@ -99,11 +100,6 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	private final StreamBufferPool<B> bufferPool;
 
 	/**
-	 * Indicates whether to delay sending the {@link HttpResponse}.
-	 */
-	private final boolean isDelaySend;
-
-	/**
 	 * {@link HttpResponseWriter}.
 	 */
 	private final HttpResponseWriter<B> httpResponseWriter;
@@ -130,9 +126,6 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	 *            {@link HttpRequest}.
 	 * @param requestEntity
 	 *            {@link ByteSequence} for the {@link HttpRequest} entity.
-	 * @param isDelaySend
-	 *            <code>true</code> to delay flushing the response to the
-	 *            {@link HttpResponseWriter}.
 	 * @param writer
 	 *            {@link HttpResponseWriter}.
 	 * @param bufferPool
@@ -140,14 +133,10 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	 */
 	public ProcessAwareServerHttpConnectionManagedObject(boolean isSecure, Supplier<HttpMethod> methodSupplier,
 			Supplier<String> requestUriSupplier, HttpVersion version, NonMaterialisedHttpHeaders requestHeaders,
-			ByteSequence requestEntity, boolean isDelaySend, HttpResponseWriter<B> writer,
-			StreamBufferPool<B> bufferPool) {
+			ByteSequence requestEntity, HttpResponseWriter<B> writer, StreamBufferPool<B> bufferPool) {
 
 		// Indicate if secure
 		this.isSecure = isSecure;
-
-		// Indicate if delay send
-		this.isDelaySend = isDelaySend;
 
 		// Create the HTTP request
 		this.clientHeaders = new MaterialisingHttpRequestHeaders(requestHeaders);
@@ -162,14 +151,12 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	}
 
 	/**
-	 * Flushes the {@link HttpResponse} to the {@link HttpResponseWriter}.
+	 * Obtains the service {@link FlowCallback}.
 	 * 
-	 * @throws IOException
-	 *             If fails to flush the {@link HttpResponse} to the
-	 *             {@link HttpResponseWriter}.
+	 * @return {@link FlowCallback} to use for servicing this.
 	 */
-	public void flushResponseToResponseWriter() throws IOException {
-		this.response.flushResponseToHttpResponseWriter();
+	public FlowCallback getServiceFlowCallback() {
+		return this;
 	}
 
 	/**
@@ -194,8 +181,8 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 		this.processAwareContext = context;
 
 		// Create the HTTP response (with context awareness)
-		this.response = new ProcessAwareHttpResponse<B>(this.isDelaySend, this.request.getHttpVersion(),
-				this.bufferPool, context, this.httpResponseWriter);
+		this.response = new ProcessAwareHttpResponse<B>(this.request.getHttpVersion(), this.bufferPool, context,
+				this.httpResponseWriter);
 	}
 
 	@Override
@@ -252,6 +239,15 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	@Override
 	public HttpRequestHeaders getClientHttpHeaders() {
 		return this.clientHeaders;
+	}
+
+	/*
+	 * ================ FlowCallback =======================
+	 */
+
+	@Override
+	public void run(Throwable escalation) throws Throwable {
+		this.response.flushResponseToHttpResponseWriter(escalation);
 	}
 
 }

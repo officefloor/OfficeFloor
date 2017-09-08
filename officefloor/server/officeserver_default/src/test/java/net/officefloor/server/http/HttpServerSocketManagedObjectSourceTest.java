@@ -32,6 +32,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.HttpServerSocketManagedObjectSource;
+import net.officefloor.server.http.HttpServerSocketManagedObjectSource.Flows;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 
@@ -72,14 +73,20 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 			OfficeFloorManagedObjectSource httpMos = deployer.addManagedObjectSource("HTTP",
 					HttpServerSocketManagedObjectSource.class.getName());
 			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_PORT, String.valueOf(7878));
-			OfficeFloorInputManagedObject inputHttp = deployer.addInputManagedObject("HTTP",
-					ServerHttpConnection.class.getName());
-			inputHttp.addTypeQualification(null, ServerHttpConnection.class.getName());
-			deployer.link(httpMos, inputHttp);
 
 			// Configure input
+			OfficeFloorInputManagedObject inputHttp = deployer.addInputManagedObject("HTTP",
+					ServerHttpConnection.class.getName());
+			deployer.link(httpMos, inputHttp);
+
+			// Configure office
 			DeployedOffice office = extension.getDeployedOffice();
 			deployer.link(httpMos.getManagingOffice(), office);
+
+			// Configure handling request
+			deployer.link(httpMos.getManagedObjectFlow(Flows.HANDLE_REQUEST.name()),
+					office.getDeployedOfficeInput("SECTION", "service"));
+
 		});
 		compile.office((extension) -> {
 			extension.addSection("SECTION", MockSection.class);

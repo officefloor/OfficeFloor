@@ -57,12 +57,6 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	private static final HttpHeaderValue TEXT_CONTENT = new HttpHeaderValue("text/plain");
 
 	/**
-	 * Indicates whether to delay flushing {@link HttpResponse} to the
-	 * {@link HttpResponseWriter}.
-	 */
-	private final boolean isDelaySend;
-
-	/**
 	 * Client {@link HttpVersion}.
 	 */
 	private final HttpVersion clientVersion;
@@ -131,9 +125,6 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param isDelaySend
-	 *            Indicates whether to delay flushing {@link HttpResponse} to
-	 *            the {@link HttpResponseWriter}.
 	 * @param version
 	 *            {@link HttpVersion}.
 	 * @param bufferPool
@@ -143,9 +134,8 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	 * @param responseWriter
 	 *            {@link HttpResponseWriter}.
 	 */
-	public ProcessAwareHttpResponse(boolean isDelaySend, HttpVersion version, StreamBufferPool<B> bufferPool,
+	public ProcessAwareHttpResponse(HttpVersion version, StreamBufferPool<B> bufferPool,
 			ProcessAwareContext processAwareContext, HttpResponseWriter<B> responseWriter) {
-		this.isDelaySend = isDelaySend;
 		this.clientVersion = version;
 		this.version = version;
 		this.headers = new ProcessAwareHttpResponseHeaders(processAwareContext);
@@ -158,13 +148,16 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	/**
 	 * Flushes the {@link HttpResponse} to the {@link HttpResponseWriter}.
 	 * 
+	 * @param escalation
+	 *            Possible escalation in servicing. Will be <code>null</code> if
+	 *            successful.
 	 * @throws IOException
 	 *             If fails to flush {@link HttpResponse} to the
 	 *             {@link HttpResponseWriter}.
 	 */
-	void flushResponseToHttpResponseWriter() throws IOException {
+	void flushResponseToHttpResponseWriter(Throwable escalation) throws IOException {
 		this.safe(() -> {
-			this.unsafeFlushResponseToHttpResponseWriter();
+			this.unsafeFlushResponseToHttpResponseWriter(escalation);
 			return null;
 		});
 	}
@@ -227,15 +220,36 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	/**
 	 * Flushes this {@link HttpResponse} to the {@link HttpResponseWriter}.
 	 * 
+	 * @param escalation
+	 *            Possible escalation in servicing. Will be <code>null</code> if
+	 *            successful.
 	 * @throws IOException
 	 *             If fails to flush {@link HttpResponse} to the
 	 *             {@link HttpResponseWriter}.
 	 */
-	private void unsafeFlushResponseToHttpResponseWriter() throws IOException {
+	private void unsafeFlushResponseToHttpResponseWriter(Throwable escalation) throws IOException {
 
 		// Determine if already written
 		if (this.isWritten) {
 			return; // already written
+		}
+
+		// Handle escalation
+		if (escalation != null) {
+
+			// Clear sent to allow writing content
+			this.isSent = false;
+
+			// Reset the response to send an error
+			this.unsafeReset();
+
+			// Send the error
+			this.status = HttpStatus.INTERNAL_SERVER_ERROR;
+			this.contentType = TEXT_CONTENT;
+			PrintWriter writer = new PrintWriter(
+					this.bufferPoolOutputStream.getServerWriter(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
+			escalation.printStackTrace(writer);
+			writer.flush();
 		}
 
 		// Ensure send
@@ -468,15 +482,8 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	public void send() throws IOException {
 		this.safe(() -> {
 
-			// Determine if delay response
-			if (this.isDelaySend) {
-				// Flag only as sent
-				this.unsafeSend();
-
-			} else {
-				// Send immediately
-				this.unsafeFlushResponseToHttpResponseWriter();
-			}
+			// Send
+			this.unsafeSend();
 
 			// Void return
 			return null;

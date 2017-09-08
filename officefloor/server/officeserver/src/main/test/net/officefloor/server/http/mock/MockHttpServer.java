@@ -146,29 +146,20 @@ public class MockHttpServer implements HttpServerImplementation {
 			// Create the input stream to the response HTTP entity
 			InputStream responseEntityInputStream = MockStreamBufferPool.createInputStream(responseHttpEntity);
 
-			// Load response successful
-			response.setSuccessful(responseVersion, status, headers, responseEntityInputStream);
+			// Load response
+			response.loadResponse(responseVersion, status, headers, responseEntityInputStream);
+
+			// Response received
+			callback.response(response);
 		};
 
 		// Create the server HTTP connection
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
-				isSecure, methodSupplier, requestUriSupplier, requestVersion, requestHeaders, requestEntity, false,
+				isSecure, methodSupplier, requestUriSupplier, requestVersion, requestHeaders, requestEntity,
 				responseWriter, bufferPool);
 
 		// Service the request
-		this.serviceInput.service(connection, (escalation) -> {
-
-			// Flag potential escalation
-			if (escalation != null) {
-				response.setFailed(escalation);
-			}
-
-			// Ensure send response
-			connection.getHttpResponse().send();
-
-			// Response received
-			callback.response(response);
-		});
+		this.serviceInput.service(connection, connection.getServiceFlowCallback());
 	}
 
 	/**
@@ -354,11 +345,6 @@ public class MockHttpServer implements HttpServerImplementation {
 	private static class MockHttpResponseImpl implements MockHttpResponse {
 
 		/**
-		 * Potential failure in servicing.
-		 */
-		private Throwable failure = null;
-
-		/**
 		 * {@link HttpVersion}.
 		 */
 		private HttpVersion version;
@@ -379,7 +365,7 @@ public class MockHttpServer implements HttpServerImplementation {
 		private InputStream entityInputStream;
 
 		/**
-		 * Flags the {@link MockHttpResponse} as successful.
+		 * Loads the response.
 		 * 
 		 * @param version
 		 *            {@link HttpVersion}.
@@ -390,37 +376,12 @@ public class MockHttpServer implements HttpServerImplementation {
 		 * @param entityInputStream
 		 *            HTTP entity {@link InputStream}.
 		 */
-		private synchronized void setSuccessful(HttpVersion version, HttpStatus status,
-				List<WritableHttpHeader> headers, InputStream entityInputStream) {
+		private synchronized void loadResponse(HttpVersion version, HttpStatus status, List<WritableHttpHeader> headers,
+				InputStream entityInputStream) {
 			this.version = version;
 			this.status = status;
 			this.headers = headers;
 			this.entityInputStream = entityInputStream;
-		}
-
-		/**
-		 * Flags the {@link MockHttpResponse} has failed.
-		 * 
-		 * @param failure
-		 *            Failure.
-		 */
-		private synchronized void setFailed(Throwable failure) {
-			this.failure = failure;
-		}
-
-		/**
-		 * Ensures successful.
-		 */
-		private void ensureSuccessful() {
-			if (this.failure != null) {
-				if (this.failure instanceof RuntimeException) {
-					throw (RuntimeException) this.failure;
-				} else if (this.failure instanceof Error) {
-					throw (Error) this.failure;
-				} else {
-					throw new Error(this.failure);
-				}
-			}
 		}
 
 		/*
@@ -429,19 +390,16 @@ public class MockHttpServer implements HttpServerImplementation {
 
 		@Override
 		public synchronized HttpVersion getHttpVersion() {
-			this.ensureSuccessful();
 			return this.version;
 		}
 
 		@Override
 		public synchronized HttpStatus getHttpStatus() {
-			this.ensureSuccessful();
 			return this.status;
 		}
 
 		@Override
 		public synchronized List<WritableHttpHeader> getHttpHeaders() {
-			this.ensureSuccessful();
 			return this.headers;
 		}
 

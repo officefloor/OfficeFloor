@@ -17,7 +17,6 @@
  */
 package net.officefloor.server.http.netty;
 
-import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.function.Supplier;
@@ -35,10 +34,8 @@ import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
-import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpServerImplementation;
 import net.officefloor.server.http.HttpServerImplementationContext;
-import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.impl.HttpResponseWriter;
@@ -243,31 +240,11 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 
 		// Create the Server HTTP connection
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuf> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
-				false, methodSupplier, requestUriSupplier, version, requestHeaders, requestEntity, true, responseWriter,
+				false, methodSupplier, requestUriSupplier, version, requestHeaders, requestEntity, responseWriter,
 				bufferPool);
 
 		// Service the request
-		NettyHttpServerImplementation.this.serviceInput.service(connection, (escalation) -> {
-
-			// Obtain the response
-			HttpResponse sendResponse = connection.getHttpResponse();
-
-			// Handle escalation
-			if (escalation != null) {
-
-				// Reset the response to send an error
-				sendResponse.reset();
-
-				// Send the error
-				sendResponse.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-				PrintWriter writer = new PrintWriter(sendResponse.getEntityWriter());
-				escalation.printStackTrace(writer);
-				writer.flush();
-			}
-
-			// Send response
-			connection.flushResponseToResponseWriter();
-		});
+		NettyHttpServerImplementation.this.serviceInput.service(connection, connection.getServiceFlowCallback());
 	}
 
 }

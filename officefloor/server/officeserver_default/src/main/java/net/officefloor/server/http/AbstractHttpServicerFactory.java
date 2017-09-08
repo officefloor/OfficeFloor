@@ -60,11 +60,6 @@ public abstract class AbstractHttpServicerFactory
 	private final boolean isSecure;
 
 	/**
-	 * Indicates whether to delay sending the {@link HttpResponse}.
-	 */
-	private final boolean isDelaySend;
-
-	/**
 	 * {@link HttpRequestParserMetaData}.
 	 */
 	private final HttpRequestParserMetaData metaData;
@@ -113,16 +108,13 @@ public abstract class AbstractHttpServicerFactory
 	 *            Indicates if over secure {@link Socket}.
 	 * @param serviceBufferPool
 	 *            {@link StreamBufferPool} used to service requests.
-	 * @param isDelaySend
-	 *            Indicates whether to delay sending the {@link HttpResponse}.
 	 * @param metaData
 	 *            {@link HttpRequestParserMetaData}.
 	 */
-	public AbstractHttpServicerFactory(boolean isSecure, HttpRequestParserMetaData metaData, boolean isDelaySend,
+	public AbstractHttpServicerFactory(boolean isSecure, HttpRequestParserMetaData metaData,
 			StreamBufferPool<ByteBuffer> serviceBufferPool) {
 		this.isSecure = isSecure;
 		this.metaData = metaData;
-		this.isDelaySend = isDelaySend;
 		this.serviceBufferPool = serviceBufferPool;
 	}
 
@@ -239,8 +231,7 @@ public abstract class AbstractHttpServicerFactory
 			// Create the connection
 			ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>(
 					AbstractHttpServicerFactory.this.isSecure, methodSupplier, requestUriSupplier, version,
-					requestHeaders, requestEntity, AbstractHttpServicerFactory.this.isDelaySend, writer,
-					AbstractHttpServicerFactory.this.serviceBufferPool);
+					requestHeaders, requestEntity, writer, AbstractHttpServicerFactory.this.serviceBufferPool);
 
 			try {
 				try {

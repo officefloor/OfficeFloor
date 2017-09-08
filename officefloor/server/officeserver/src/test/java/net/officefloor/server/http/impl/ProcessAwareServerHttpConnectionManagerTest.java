@@ -86,7 +86,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 	 * {@link ProcessAwareServerHttpConnectionManagedObject} to be tested.
 	 */
 	private final ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = this
-			.createServerHttpConnection("TEST", false);
+			.createServerHttpConnection("TEST");
 
 	/**
 	 * Creates a {@link ProcessAwareServerHttpConnectionManagedObject} for
@@ -96,12 +96,12 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 	 *            Content for the {@link HttpRequest} entity.
 	 */
 	private ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> createServerHttpConnection(
-			String requestEntityContent, boolean isDelaySend) {
+			String requestEntityContent) {
 		ByteSequence requestEntity = new ByteArrayByteSequence(
 				requestEntityContent.getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
 				true, () -> this.method, () -> this.requestUri, this.requestVersion, this.requestHeaders, requestEntity,
-				isDelaySend, this, this.bufferPool);
+				this, this.bufferPool);
 		connection.setProcessAwareContext(new MockProcessAwareContext());
 		return connection;
 	}
@@ -252,11 +252,10 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 	 * Ensure can delay sending the {@link HttpResponse} to allow
 	 * {@link CleanupEscalation} to be considered in the response.
 	 */
-	public void testDelaySend() throws IOException {
+	public void testDelaySend() throws Throwable {
 
 		// Create the connection
-		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = this.createServerHttpConnection("DELAY",
-				true);
+		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = this.createServerHttpConnection("DELAY");
 		assertNull("Should not send on creation", this.status);
 
 		// Send the response (but should delay)
@@ -264,27 +263,26 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		assertNull("Should delay sending", this.status);
 
 		// Flush response
-		connection.flushResponseToResponseWriter();
+		connection.getServiceFlowCallback().run(null);
 		assertSame("Should now write response", HttpStatus.OK, this.status);
 	}
 
 	/**
 	 * Ensure can flush {@link HttpResponse} without a send.
 	 */
-	public void testFlushResponseWithoutSend() throws IOException {
+	public void testFlushResponseWithoutSend() throws Throwable {
 
 		// Create the connection
-		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = this.createServerHttpConnection("DELAY",
-				true);
+		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = this.createServerHttpConnection("DELAY");
 		assertNull("Should not send on creation", this.status);
 
 		// Flush response
-		connection.flushResponseToResponseWriter();
+		connection.getServiceFlowCallback().run(null);
 		assertSame("Should now write response", HttpStatus.OK, this.status);
 
 		// Ensure only flushes once
 		this.status = null;
-		connection.flushResponseToResponseWriter();
+		connection.getServiceFlowCallback().run(null);
 		assertNull("Should not write response again on flush", this.status);
 	}
 
@@ -294,8 +292,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 	public void testSendCleanupEscalation() throws Throwable {
 
 		// Create the connection
-		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = this.createServerHttpConnection("DELAY",
-				true);
+		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = this.createServerHttpConnection("DELAY");
 
 		// Write a response (should be reset)
 		HttpResponse response = connection.getHttpResponse();
@@ -338,7 +335,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 				cleanupEscalations);
 
 		// Flush the response
-		connection.flushResponseToResponseWriter();
+		connection.getServiceFlowCallback().run(null);
 
 		// Ensure correct response
 		assertSame("Incorrect status", HttpStatus.INTERNAL_SERVER_ERROR, this.status);
@@ -380,7 +377,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		this.requestUri = "/serialise";
 		this.requestVersion = HttpVersion.HTTP_1_0;
 		this.requestHeaders.addHttpHeader("serialise", "serialised");
-		ServerHttpConnection connection = this.createServerHttpConnection("SERIALISE", false);
+		ServerHttpConnection connection = this.createServerHttpConnection("SERIALISE");
 		assertServerHttpConnection(connection, HttpMethod.POST, "/serialise", HttpVersion.HTTP_1_0,
 				new String[] { "serialise", "serialised" }, "SERIALISE", HttpMethod.POST,
 				new String[] { "serialise", "serialised" });
@@ -394,7 +391,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		this.requestVersion = HttpVersion.HTTP_1_1;
 		this.requestHeaders = new MockNonMaterialisedHttpHeaders();
 		this.requestHeaders.addHttpHeader("input", "header");
-		ServerHttpConnection newConnection = this.createServerHttpConnection("TEST", false);
+		ServerHttpConnection newConnection = this.createServerHttpConnection("TEST");
 		assertServerHttpConnection(newConnection, HttpMethod.GET, "/", HttpVersion.HTTP_1_1,
 				new String[] { "input", "header" }, "TEST", HttpMethod.GET, new String[] { "input", "header" });
 

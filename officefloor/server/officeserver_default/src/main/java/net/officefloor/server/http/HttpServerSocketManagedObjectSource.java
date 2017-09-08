@@ -62,8 +62,16 @@ import net.officefloor.server.stream.StreamBufferPool;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSource<None, Indexed>
+public class HttpServerSocketManagedObjectSource
+		extends AbstractManagedObjectSource<None, HttpServerSocketManagedObjectSource.Flows>
 		implements ManagedFunction<Indexed, None> {
+
+	/**
+	 * Flows for this {@link HttpServerSocketManagedObjectSource}.
+	 */
+	public static enum Flows {
+		HANDLE_REQUEST
+	}
 
 	/**
 	 * {@link Logger}.
@@ -287,6 +295,21 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	private int port;
 
 	/**
+	 * {@link HttpRequestParserMetaData}.
+	 */
+	private HttpRequestParserMetaData httpRequestParserMetaData;
+
+	/**
+	 * {@link StreamBuffer} size of pooled {@link ByteBuffer} for servicing.
+	 */
+	private int serviceBufferSize;
+
+	/**
+	 * Indicates if secure HTTP connection.
+	 */
+	private boolean isSecure;
+
+	/**
 	 * {@link SSLContext}.
 	 */
 	private SSLContext sslContext;
@@ -302,18 +325,13 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	private AcceptedSocketDecorator acceptedSocketDecorator;
 
 	/**
-	 * {@link ManagedObjectSourceHttpServicerFactory}.
-	 */
-	private ManagedObjectSourceHttpServicerFactory servicerFactory;
-
-	/**
 	 * Enables overriding to configure a {@link ServerSocketDecorator}.
 	 * 
 	 * @param context
 	 *            {@link MetaDataContext}.
 	 * @return {@link ServerSocketDecorator}.
 	 */
-	protected ServerSocketDecorator getServerSocketDecorator(MetaDataContext<None, Indexed> context) {
+	protected ServerSocketDecorator getServerSocketDecorator(MetaDataContext<None, Flows> context) {
 		return null;
 	}
 
@@ -324,7 +342,7 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	 *            {@link MetaDataContext}.
 	 * @return {@link AcceptedSocketDecorator}.
 	 */
-	protected AcceptedSocketDecorator getAcceptedSocketDecorator(MetaDataContext<None, Indexed> context) {
+	protected AcceptedSocketDecorator getAcceptedSocketDecorator(MetaDataContext<None, Flows> context) {
 		return null;
 	}
 
@@ -338,37 +356,37 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<None, Indexed> context) throws Exception {
+	protected void loadMetaData(MetaDataContext<None, Flows> context) throws Exception {
 
 		// Configure meta-data
 		context.setObjectClass(ServerHttpConnection.class);
 		context.setManagedObjectClass(ProcessAwareServerHttpConnectionManagedObject.class);
 
+		// Create the flow meta-data
+		context.addFlow(Flows.HANDLE_REQUEST, null);
+
 		// Obtain the managed object source context
-		ManagedObjectSourceContext<Indexed> mosContext = context.getManagedObjectSourceContext();
+		ManagedObjectSourceContext<Flows> mosContext = context.getManagedObjectSourceContext();
 
 		// Load the configuration
 		this.port = Integer.parseInt(mosContext.getProperty(PROPERTY_PORT));
-		boolean isSecure = Boolean.parseBoolean(mosContext.getProperty(PROPERTY_SECURE, String.valueOf(false)));
+		this.isSecure = Boolean.parseBoolean(mosContext.getProperty(PROPERTY_SECURE, String.valueOf(false)));
 		int maxHeaderCount = Integer.parseInt(mosContext.getProperty(PROPERTY_MAX_HEADER_COUNT, String.valueOf(50)));
 		int maxTextLength = Integer.parseInt(mosContext.getProperty(PROPERTY_MAX_TEXT_LENGTH, String.valueOf(2048)));
 		long maxEntityLength = Long
 				.parseLong(mosContext.getProperty(PROPERTY_MAX_ENTITY_LENGTH, String.valueOf(20 * 1024 * 1024)));
-		int serviceBufferSize = Integer
+		this.serviceBufferSize = Integer
 				.parseInt(mosContext.getProperty(PROPERTY_SERVICE_BUFFER_SIZE, String.valueOf(4096)));
+
+		// Create the request parser meta-data
+		this.httpRequestParserMetaData = new HttpRequestParserMetaData(maxHeaderCount, maxTextLength, maxEntityLength);
 
 		// Obtain the decorators
 		this.serverSocketDecorator = this.getServerSocketDecorator(context);
 		this.acceptedSocketDecorator = this.getAcceptedSocketDecorator(context);
 
-		// Create the HTTP servicer factory
-		ThreadLocalStreamBufferPool serviceBufferPool = new ThreadLocalStreamBufferPool(
-				() -> ByteBuffer.allocate(serviceBufferSize), 3, 1000);
-		this.servicerFactory = new ManagedObjectSourceHttpServicerFactory(isSecure,
-				new HttpRequestParserMetaData(maxHeaderCount, maxTextLength, maxEntityLength), serviceBufferPool);
-
 		// Obtain the SSL context
-		if (isSecure) {
+		if (this.isSecure) {
 			String sslContextSourceClassName = mosContext.getProperty(PROPERTY_SSL_CONTEXT_SOURCE, null);
 			if (sslContextSourceClassName != null) {
 				sslContextSourceClassName = OfficeFloorDefaultSslContextSource.class.getName();
@@ -397,17 +415,23 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void start(ManagedObjectExecuteContext<Indexed> context) throws Exception {
+	public void start(ManagedObjectExecuteContext<Flows> context) throws Exception {
 
 		// Obtain the socket manager
 		SocketManager socketManager = getSocketManager(this);
 
+		// Create the HTTP servicer factory
+		ThreadLocalStreamBufferPool serviceBufferPool = new ThreadLocalStreamBufferPool(
+				() -> ByteBuffer.allocate(this.serviceBufferSize), 3, 1000);
+		ManagedObjectSourceHttpServicerFactory servicerFactory = new ManagedObjectSourceHttpServicerFactory(context,
+				this.isSecure, this.httpRequestParserMetaData, serviceBufferPool);
+
 		// Create the SSL servicer factory
-		SocketServicerFactory socketServicerFactory = this.servicerFactory;
-		RequestServicerFactory requestServicerFactory = this.servicerFactory;
+		SocketServicerFactory socketServicerFactory = servicerFactory;
+		RequestServicerFactory requestServicerFactory = servicerFactory;
 		if (this.sslContext != null) {
 			SslSocketServicerFactory<?> sslServicerFactory = new SslSocketServicerFactory<>(this.sslContext,
-					this.servicerFactory, this.servicerFactory, socketManager.getStreamBufferPool(), executor);
+					servicerFactory, servicerFactory, socketManager.getStreamBufferPool(), executor);
 			socketServicerFactory = sslServicerFactory;
 			requestServicerFactory = sslServicerFactory;
 		}
@@ -465,6 +489,12 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	private class ManagedObjectSourceHttpServicerFactory extends AbstractHttpServicerFactory {
 
 		/**
+		 * {@link ManagedObjectExecuteContext} to service the
+		 * {@link ServerHttpConnection}.
+		 */
+		private final ManagedObjectExecuteContext<Flows> context;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param isSecure
@@ -474,9 +504,10 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 		 * @param serviceBufferPool
 		 *            Service {@link StreamBufferPool}.
 		 */
-		public ManagedObjectSourceHttpServicerFactory(boolean isSecure, HttpRequestParserMetaData metaData,
-				StreamBufferPool<ByteBuffer> serviceBufferPool) {
-			super(isSecure, metaData, true, serviceBufferPool);
+		public ManagedObjectSourceHttpServicerFactory(ManagedObjectExecuteContext<Flows> context, boolean isSecure,
+				HttpRequestParserMetaData metaData, StreamBufferPool<ByteBuffer> serviceBufferPool) {
+			super(isSecure, metaData, serviceBufferPool);
+			this.context = context;
 		}
 
 		@Override
@@ -484,6 +515,7 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 				throws IOException, HttpException {
 
 			// Service request
+			this.context.invokeProcess(Flows.HANDLE_REQUEST, null, connection, 0, connection.getServiceFlowCallback());
 		}
 	}
 
