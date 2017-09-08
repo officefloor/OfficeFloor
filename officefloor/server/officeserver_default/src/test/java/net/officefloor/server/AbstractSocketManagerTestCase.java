@@ -36,6 +36,23 @@ import net.officefloor.server.stream.StreamBuffer;
 public abstract class AbstractSocketManagerTestCase extends AbstractSocketManagerTester {
 
 	/**
+	 * <p>
+	 * Checks for available data (or times out the test).
+	 * <p>
+	 * Available to override (e.g. SSL does not provide available data).
+	 * 
+	 * @param inputStream
+	 *            To check available data.
+	 */
+	protected void doAvailableCheck(InputStream inputStream) throws IOException {
+		long startTime = System.currentTimeMillis();
+		while (inputStream.available() == 0) {
+			this.timeout(startTime);
+			Thread.yield(); // allow processing
+		}
+	}
+
+	/**
 	 * Ensure can shutdown the {@link SocketListener}.
 	 */
 	public void testShutdown() throws IOException {
@@ -190,7 +207,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer) -> {
 			requestHandler.handleRequest("SEND");
 		}, (socketServicer) -> (request, responseWriter) -> {
-			responseWriter.write(null, this.tester.createStreamBuffer(1));
+			responseWriter.write(null, this.tester.createStreamBuffer(2));
 		});
 
 		this.tester.start();
@@ -205,15 +222,11 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 			// Receive the response
 			InputStream inputStream = client.getInputStream();
-			long startTime = System.currentTimeMillis();
-			while (inputStream.available() == 0) {
-				this.timeout(startTime);
-				Thread.yield(); // allow processing
-			}
+			this.doAvailableCheck(inputStream);
 
 			// Ensure correct byte
 			int value = inputStream.read();
-			assertEquals("Incorrect response", 1, value);
+			assertEquals("Incorrect response", 2, value);
 		}
 	}
 
@@ -221,7 +234,43 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 	 * Ensure can pipeline response. Ensure responses are sent in the same order
 	 * requests are received.
 	 */
-	public void testPipelineResponse() throws IOException {
+	public void testInOrderPipelineResponse() throws IOException {
+		this.tester = new SocketManagerTester(1);
+
+		// Bind to server socket
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer) -> {
+			requestHandler.handleRequest((byte) 1);
+			requestHandler.handleRequest((byte) 2);
+		}, (socketServicer) -> (request, responseWriter) -> {
+			StreamBuffer<ByteBuffer> response = this.tester.createStreamBuffer((byte) request);
+			responseWriter.write(null, response);
+		});
+
+		this.tester.start();
+
+		// Undertake connect and send data
+		try (Socket client = this.tester.getClient()) {
+
+			// Trigger the requests
+			OutputStream outputStream = client.getOutputStream();
+			outputStream.write(1);
+			outputStream.flush();
+
+			// Ensure receive the response
+			InputStream inputStream = client.getInputStream();
+			this.doAvailableCheck(inputStream);
+
+			// Ensure correct order of responses
+			assertEquals("Incorrect first response", 1, inputStream.read());
+			assertEquals("Incorrect second response", 2, inputStream.read());
+		}
+	}
+
+	/**
+	 * Ensure can pipeline response. Ensure responses are sent in the same order
+	 * requests are received.
+	 */
+	public void testOutOfOrderPipelineResponse() throws IOException {
 		this.tester = new SocketManagerTester(1);
 
 		// Bind to server socket
@@ -263,11 +312,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 			// Ensure receive the response
 			InputStream inputStream = client.getInputStream();
-			long startTime = System.currentTimeMillis();
-			while (inputStream.available() == 0) {
-				this.timeout(startTime);
-				Thread.yield(); // allow processing
-			}
+			this.doAvailableCheck(inputStream);
 
 			// Ensure correct order of responses
 			assertEquals("Incorrect first response", 1, inputStream.read());
@@ -394,11 +439,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 			// Receive the response
 			InputStream inputStream = client.getInputStream();
-			long startTime = System.currentTimeMillis();
-			while (inputStream.available() == 0) {
-				this.timeout(startTime);
-				Thread.yield(); // allow processing
-			}
+			this.doAvailableCheck(inputStream);
 
 			// Ensure correct byte
 			int value = inputStream.read();
@@ -463,11 +504,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 			// Receive the response
 			InputStream inputStream = client.getInputStream();
-			long startTime = System.currentTimeMillis();
-			while (inputStream.available() == 0) {
-				this.timeout(startTime);
-				Thread.yield(); // allow processing
-			}
+			this.doAvailableCheck(inputStream);
 
 			// Ensure correct results
 			for (byte i = 0; i < RESPONSE_COUNT; i++) {

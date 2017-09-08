@@ -57,6 +57,7 @@ import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
 import net.officefloor.compile.officefloor.OfficeFloorType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
@@ -317,9 +318,9 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	}
 
 	@Override
-	public OfficeFloorInputManagedObject addInputManagedObject(String inputManagedObjectName) {
+	public OfficeFloorInputManagedObject addInputManagedObject(String inputManagedObjectName, String inputObjectType) {
 		return NodeUtil.getInitialisedNode(inputManagedObjectName, this.inputManagedObjects, this.context,
-				() -> this.context.createInputManagedNode(inputManagedObjectName, this),
+				() -> this.context.createInputManagedNode(inputManagedObjectName, inputObjectType, this),
 				(inputManagedObject) -> inputManagedObject.initialise());
 	}
 
@@ -604,6 +605,17 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 						// Load the dependencies for the managed object
 						managedObject.autoWireDependencies(autoWirer, officeNode, compileContext);
 					});
+
+			// Iterate over mo sources (auto-wiring unlinked input dependencies)
+			this.managedObjectSources.values().stream().sorted((a, b) -> CompileUtil
+					.sortCompare(a.getOfficeFloorManagedObjectSourceName(), b.getOfficeFloorManagedObjectSourceName()))
+					.forEachOrdered((managedObjectSource) -> {
+						// Obtain the managing office for the managed object
+						OfficeNode officeNode = managedObjectSource.getManagingOfficeNode();
+
+						// Load input dependencies for managed object source
+						managedObjectSource.autoWireInputDependencies(autoWirer, officeNode, compileContext);
+					});
 		}
 
 		// Undertake auto-wire of teams
@@ -639,8 +651,20 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 		this.inputManagedObjects.values().forEach((inputMo) -> {
 
 			// Create the auto-wires
-			AutoWire[] targetAutoWires = Arrays.stream(inputMo.getTypeQualifications(compileContext))
-					.map((type) -> new AutoWire(type.getQualifier(), type.getType())).toArray(AutoWire[]::new);
+			AutoWire[] targetAutoWires;
+			TypeQualification[] typeQualifications = inputMo.getTypeQualifications(compileContext);
+			if (typeQualifications.length == 0) {
+				// Use the input type (if available)
+				String inputObjectType = inputMo.getInputObjectType();
+				if (inputObjectType == null) {
+					return; // no input type
+				}
+				targetAutoWires = new AutoWire[] { new AutoWire(inputObjectType) };
+			} else {
+				// Use the type qualifications
+				targetAutoWires = Arrays.stream(typeQualifications)
+						.map((type) -> new AutoWire(type.getQualifier(), type.getType())).toArray(AutoWire[]::new);
+			}
 
 			// Add the target
 			autoWirer.addAutoWireTarget(inputMo, targetAutoWires);

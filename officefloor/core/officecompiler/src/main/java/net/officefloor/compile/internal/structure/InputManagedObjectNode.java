@@ -40,6 +40,13 @@ public interface InputManagedObjectNode extends LinkObjectNode, BoundManagedObje
 	void initialise();
 
 	/**
+	 * Obtains the input object type.
+	 * 
+	 * @return Input object type.
+	 */
+	String getInputObjectType();
+
+	/**
 	 * Obtains the bound {@link ManagedObjectSourceNode} for this
 	 * {@link InputManagedObjectNode}.
 	 * 

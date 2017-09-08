@@ -152,7 +152,7 @@ public class MockHttpServer implements HttpServerImplementation {
 
 		// Create the server HTTP connection
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
-				isSecure, methodSupplier, requestUriSupplier, requestVersion, requestHeaders, requestEntity,
+				isSecure, methodSupplier, requestUriSupplier, requestVersion, requestHeaders, requestEntity, false,
 				responseWriter, bufferPool);
 
 		// Service the request
@@ -197,7 +197,8 @@ public class MockHttpServer implements HttpServerImplementation {
 
 	@Override
 	public void configureHttpServer(HttpServerImplementationContext context) {
-		this.serviceInput = context.getExternalServiceInput(ProcessAwareManagedObject.class);
+		this.serviceInput = context.getExternalServiceInput(ProcessAwareManagedObject.class,
+				ProcessAwareServerHttpConnectionManagedObject.getCleanupEscalationHandler());
 	}
 
 	/**

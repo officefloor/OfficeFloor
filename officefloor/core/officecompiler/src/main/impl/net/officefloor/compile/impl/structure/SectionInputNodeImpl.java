@@ -35,12 +35,16 @@ import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
+import net.officefloor.compile.spi.officefloor.ExternalServiceCleanupEscalationHandler;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.section.SubSectionInput;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
@@ -53,6 +57,7 @@ import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
+import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
@@ -272,11 +277,11 @@ public class SectionInputNodeImpl implements SectionInputNode {
 
 	@Override
 	public <O, M extends ManagedObject> ExternalServiceInput<O, M> addExternalServiceInput(Class<O> objectType,
-			Class<M> managedObjectType) {
+			Class<M> managedObjectType, ExternalServiceCleanupEscalationHandler<M> cleanupEscalationHandler) {
 
 		// Create the external service input
 		ExternalServiceInputManagedObjectSource<O, M> input = new ExternalServiceInputManagedObjectSource<>(objectType,
-				managedObjectType);
+				managedObjectType, cleanupEscalationHandler);
 
 		// Add to OfficeFloor (to make available for auto-wiring)
 		OfficeNode office = this.section.getOfficeNode();
@@ -289,7 +294,8 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		LinkUtil.linkFlow(mos.getManagedObjectFlow(Flows.SERVICE.name()), this, this.context.getCompilerIssues(), this);
 
 		// Configure external service input
-		OfficeFloorInputManagedObject inputMo = officeFloor.addInputManagedObject(inputObjectName);
+		OfficeFloorInputManagedObject inputMo = officeFloor.addInputManagedObject(inputObjectName,
+				objectType.getName());
 		inputMo.addTypeQualification(null, objectType.getName());
 		LinkUtil.linkManagedObjectSourceInput(mos, inputMo, this.context.getCompilerIssues(), this);
 
@@ -357,7 +363,8 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	 *            {@link ExternalServiceInput} object type.
 	 */
 	private static class ExternalServiceInputManagedObjectSource<O, M extends ManagedObject>
-			extends AbstractManagedObjectSource<None, Flows> implements ExternalServiceInput<O, M> {
+			extends AbstractManagedObjectSource<None, Flows>
+			implements ExternalServiceInput<O, M>, ManagedFunction<None, None> {
 
 		/**
 		 * {@link ExternalServiceInput} object type.
@@ -368,6 +375,11 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		 * {@link ManagedObject} type.
 		 */
 		private final Class<M> managedObjectType;
+
+		/**
+		 * {@link ExternalServiceCleanupEscalationHandler}.
+		 */
+		private final ExternalServiceCleanupEscalationHandler<M> cleanupEscalationHandler;
 
 		/**
 		 * {@link ManagedObjectExecuteContext}.
@@ -381,10 +393,14 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		 *            {@link ExternalServiceInput} object type.
 		 * @param managedObjectType
 		 *            {@link ManagedObject} type.
+		 * @param cleanupEscalationHandler
+		 *            {@link ExternalServiceCleanupEscalationHandler}.
 		 */
-		private ExternalServiceInputManagedObjectSource(Class<O> objectType, Class<M> managedObjectType) {
+		private ExternalServiceInputManagedObjectSource(Class<O> objectType, Class<M> managedObjectType,
+				ExternalServiceCleanupEscalationHandler<M> cleanupEscalationHandler) {
 			this.objectType = objectType;
 			this.managedObjectType = managedObjectType;
+			this.cleanupEscalationHandler = cleanupEscalationHandler;
 		}
 
 		/*
@@ -409,6 +425,16 @@ public class SectionInputNodeImpl implements SectionInputNode {
 			context.setObjectClass(this.objectType);
 			context.setManagedObjectClass(this.managedObjectType);
 			context.addFlow(Flows.SERVICE, null);
+
+			// Configure clean up escalation handling
+			if (this.cleanupEscalationHandler != null) {
+				context.getManagedObjectSourceContext().getRecycleFunction(new ManagedFunctionFactory<None, None>() {
+					@Override
+					public ManagedFunction<None, None> createManagedFunction() throws Throwable {
+						return ExternalServiceInputManagedObjectSource.this;
+					}
+				}).linkParameter(0, RecycleManagedObjectParameter.class);
+			}
 		}
 
 		@Override
@@ -420,6 +446,30 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		protected ManagedObject getManagedObject() throws Throwable {
 			// Not externally servicing, so no object
 			return new NullManagedObject();
+		}
+
+		/*
+		 * ================ Recycle ManagedFunction ======================
+		 */
+
+		@Override
+		public Object execute(ManagedFunctionContext<None, None> context) throws Throwable {
+
+			// Obtain the recycle parameter
+			RecycleManagedObjectParameter<M> parameter = RecycleManagedObjectParameter
+					.getRecycleManagedObjectParameter(context);
+
+			// Obtain the managed object
+			M managedObject = parameter.getManagedObject();
+
+			// Handle clean up escalations
+			this.cleanupEscalationHandler.handleCleanupEscalations(managedObject, parameter.getCleanupEscalations());
+
+			// Enable re-use of the object
+			parameter.reuseManagedObject(managedObject);
+
+			// Nothing further
+			return null;
 		}
 	}
 

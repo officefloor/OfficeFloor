@@ -602,7 +602,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		for (OfficeFloorListener listener : this.officeFloorListeners) {
 			builder.addOfficeFloorListener(listener);
 		}
-		
+
 		// Add deployer configured OfficeFloor listeners
 		for (OfficeFloorListener listener : node.getOfficeFloorListeners()) {
 			builder.addOfficeFloorListener(listener);
@@ -918,8 +918,9 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
-	public InputManagedObjectNode createInputManagedNode(String inputManagedObjectName, OfficeFloorNode officeFloor) {
-		return new InputManagedObjectNodeImpl(inputManagedObjectName, officeFloor, this);
+	public InputManagedObjectNode createInputManagedNode(String inputManagedObjectName, String inputObjectType,
+			OfficeFloorNode officeFloor) {
+		return new InputManagedObjectNodeImpl(inputManagedObjectName, inputObjectType, officeFloor, this);
 	}
 
 	@Override

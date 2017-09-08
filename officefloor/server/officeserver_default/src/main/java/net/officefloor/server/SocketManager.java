@@ -51,6 +51,11 @@ import net.officefloor.server.stream.StreamBufferPool;
 public class SocketManager {
 
 	/**
+	 * Default {@link ServerSocket} backlog size.
+	 */
+	public static final int DEFAULT_SERVER_SOCKET_BACKLOG_SIZE = 25000;
+
+	/**
 	 * {@link ThreadLocal} to determine if {@link SocketListener}
 	 * {@link Thread}.
 	 */
@@ -106,6 +111,15 @@ public class SocketManager {
 		for (int i = 0; i < listeners.length; i++) {
 			listeners[i] = new SocketListener(bufferPool, socketBufferSize);
 		}
+	}
+
+	/**
+	 * Obtains the {@link StreamBufferPool} used by this {@link SocketManager}.
+	 * 
+	 * @return {@link StreamBufferPool} used by this {@link SocketManager}.
+	 */
+	public StreamBufferPool<ByteBuffer> getStreamBufferPool() {
+		return this.listeners[0].bufferPool;
 	}
 
 	/**
@@ -327,7 +341,7 @@ public class SocketManager {
 			channel.configureBlocking(false);
 			ServerSocket socket = channel.socket();
 			socket.setReuseAddress(true);
-			int serverSocketBackLogSize = 25000;
+			int serverSocketBackLogSize = DEFAULT_SERVER_SOCKET_BACKLOG_SIZE;
 			if (serverSocketDecorator != null) {
 				// Override the defaults
 				serverSocketBackLogSize = serverSocketDecorator.decorate(socket);
@@ -825,7 +839,7 @@ public class SocketManager {
 
 			// Send the response (allowing socket servicer to translate)
 			this.compactedResponseHead = null; // as sending
-			this.socketServicer.translateResponse(response, this);
+			this.sendResponse(response);
 		}
 
 		/**
@@ -940,6 +954,8 @@ public class SocketManager {
 
 			// Release buffers for accepted sockets
 
+			// Allow socket servicer to release buffers
+			this.socketServicer.release();
 		}
 
 		/*
@@ -966,6 +982,11 @@ public class SocketManager {
 
 			// Service the request
 			this.requestServicer.service(request, socketRequest);
+		}
+
+		@Override
+		public ResponseHandler getImmediateResponseHandler() {
+			return this;
 		}
 
 		@Override

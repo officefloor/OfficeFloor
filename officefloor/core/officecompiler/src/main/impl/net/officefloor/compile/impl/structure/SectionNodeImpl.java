@@ -364,7 +364,7 @@ public class SectionNodeImpl implements SectionNode {
 
 		// Ensure the section is initialised
 		if (!this.isInitialised()) {
-			this.context.getCompilerIssues().addIssue(this, "Section is not initialised");
+			this.context.getCompilerIssues().addIssue(this, "Section '" + this.sectionName + "' is not initialised");
 			return false; // must be initialised
 		}
 

@@ -27,6 +27,7 @@ import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
+import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
@@ -413,6 +414,46 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", TeamManagedObject.class, 0);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_officeBuilder_registerTeam("MANAGED_OBJECT_SOURCE.MANAGED_OBJECT_SOURCE_TEAM", "TEAM");
+
+		// Compile the OfficeFloor
+		this.compile(true);
+	}
+
+	/**
+	 * Ensure issue if {@link OfficeFloorInputManagedObject} linked to
+	 * {@link ManagedObjectSource} that does not input into the application.
+	 */
+	public void testInputManagedObjectLinkedToNonInputManagedObjectSource() {
+
+		// Record building the OfficeFloor
+		this.record_init();
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
+				"class.name", SimpleManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.issues.recordIssue("MANAGED_OBJECT_SOURCE", ManagedObjectSourceNodeImpl.class,
+				"Attempting to configure managed object source MANAGED_OBJECT_SOURCE as input managed object, when does not input into the application");
+
+		// Compile the OfficeFloor
+		this.compile(true);
+	}
+
+	/**
+	 * Ensure issue if {@link OfficeFloorInputManagedObject} type is not
+	 * compatible with a linked {@link ManagedObjectSource}.
+	 */
+	public void testInputManagedObjectTypeNotCompatibleToManagedObjectSourceType() {
+
+		// Record building the OfficeFloor
+		this.record_init();
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
+				"class.name", ProcessManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.issues.recordIssue("MANAGED_OBJECT_SOURCE", ManagedObjectSourceNodeImpl.class,
+				"Managed Object Source MANAGED_OBJECT_SOURCE object " + ProcessManagedObject.class.getName()
+						+ " is not compatible with input managed object INPUT_MO (input object type "
+						+ String.class.getName() + ")");
 
 		// Compile the OfficeFloor
 		this.compile(true);

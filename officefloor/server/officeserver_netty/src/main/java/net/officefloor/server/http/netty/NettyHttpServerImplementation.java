@@ -76,7 +76,8 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 		this.context = context;
 
 		// Obtain the service input for handling requests
-		this.serviceInput = context.getExternalServiceInput(ProcessAwareServerHttpConnectionManagedObject.class);
+		this.serviceInput = context.getExternalServiceInput(ProcessAwareServerHttpConnectionManagedObject.class,
+				ProcessAwareServerHttpConnectionManagedObject.getCleanupEscalationHandler());
 
 		// Hook into OfficeFloor life-cycle (to start/stop server)
 		context.getOfficeFloorDeployer().addOfficeFloorListener(this);
@@ -242,7 +243,7 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 
 		// Create the Server HTTP connection
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuf> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
-				false, methodSupplier, requestUriSupplier, version, requestHeaders, requestEntity, responseWriter,
+				false, methodSupplier, requestUriSupplier, version, requestHeaders, requestEntity, true, responseWriter,
 				bufferPool);
 
 		// Service the request
@@ -264,8 +265,8 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 				writer.flush();
 			}
 
-			// Ensure send response
-			sendResponse.send();
+			// Send response
+			connection.flushResponseToResponseWriter();
 		});
 	}
 

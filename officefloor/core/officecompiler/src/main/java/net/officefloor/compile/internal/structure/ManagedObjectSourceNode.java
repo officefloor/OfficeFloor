@@ -172,6 +172,19 @@ public interface ManagedObjectSourceNode extends LinkPoolNode, SectionManagedObj
 	InputManagedObjectNode getInputManagedObjectNode();
 
 	/**
+	 * Auto-wires the input dependencies for this {@link ManagedObjectSource}.
+	 * 
+	 * @param autoWirer
+	 *            {@link AutoWirer}.
+	 * @param office
+	 *            {@link OfficeNode} requiring the auto-wiring.
+	 * @param compileContext
+	 *            {@link CompileContext}.
+	 */
+	void autoWireInputDependencies(AutoWirer<LinkObjectNode> autoWirer, OfficeNode office,
+			CompileContext compileContext);
+
+	/**
 	 * Auto-wires the {@link Team} instances for this
 	 * {@link ManagedObjectSource}.
 	 * 

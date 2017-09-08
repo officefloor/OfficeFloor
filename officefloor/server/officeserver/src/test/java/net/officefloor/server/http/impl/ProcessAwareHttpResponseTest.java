@@ -54,8 +54,8 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 	/**
 	 * {@link ProcessAwareHttpResponse} to test.
 	 */
-	private final ProcessAwareHttpResponse<ByteBuffer> response = new ProcessAwareHttpResponse<>(HttpVersion.HTTP_1_1,
-			this.bufferPool, new MockProcessAwareContext(), this);
+	private final ProcessAwareHttpResponse<ByteBuffer> response = new ProcessAwareHttpResponse<>(false,
+			HttpVersion.HTTP_1_1, this.bufferPool, new MockProcessAwareContext(), this);
 
 	/**
 	 * Ensure correct defaults on writing.

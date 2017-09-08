@@ -19,12 +19,16 @@ package net.officefloor.server.http.impl;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.sql.Connection;
+import java.sql.SQLException;
 
+import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderValue;
@@ -82,7 +86,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 	 * {@link ProcessAwareServerHttpConnectionManagedObject} to be tested.
 	 */
 	private final ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = this
-			.createServerHttpConnection("TEST");
+			.createServerHttpConnection("TEST", false);
 
 	/**
 	 * Creates a {@link ProcessAwareServerHttpConnectionManagedObject} for
@@ -92,12 +96,12 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 	 *            Content for the {@link HttpRequest} entity.
 	 */
 	private ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> createServerHttpConnection(
-			String requestEntityContent) {
+			String requestEntityContent, boolean isDelaySend) {
 		ByteSequence requestEntity = new ByteArrayByteSequence(
 				requestEntityContent.getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
 				true, () -> this.method, () -> this.requestUri, this.requestVersion, this.requestHeaders, requestEntity,
-				this, this.bufferPool);
+				isDelaySend, this, this.bufferPool);
 		connection.setProcessAwareContext(new MockProcessAwareContext());
 		return connection;
 	}
@@ -245,6 +249,128 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 	}
 
 	/**
+	 * Ensure can delay sending the {@link HttpResponse} to allow
+	 * {@link CleanupEscalation} to be considered in the response.
+	 */
+	public void testDelaySend() throws IOException {
+
+		// Create the connection
+		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = this.createServerHttpConnection("DELAY",
+				true);
+		assertNull("Should not send on creation", this.status);
+
+		// Send the response (but should delay)
+		connection.getHttpResponse().send();
+		assertNull("Should delay sending", this.status);
+
+		// Flush response
+		connection.flushResponseToResponseWriter();
+		assertSame("Should now write response", HttpStatus.OK, this.status);
+	}
+
+	/**
+	 * Ensure can flush {@link HttpResponse} without a send.
+	 */
+	public void testFlushResponseWithoutSend() throws IOException {
+
+		// Create the connection
+		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = this.createServerHttpConnection("DELAY",
+				true);
+		assertNull("Should not send on creation", this.status);
+
+		// Flush response
+		connection.flushResponseToResponseWriter();
+		assertSame("Should now write response", HttpStatus.OK, this.status);
+
+		// Ensure only flushes once
+		this.status = null;
+		connection.flushResponseToResponseWriter();
+		assertNull("Should not write response again on flush", this.status);
+	}
+
+	/**
+	 * Ensure reports {@link CleanupEscalation}.
+	 */
+	public void testSendCleanupEscalation() throws Throwable {
+
+		// Create the connection
+		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = this.createServerHttpConnection("DELAY",
+				true);
+
+		// Write a response (should be reset)
+		HttpResponse response = connection.getHttpResponse();
+		response.getHttpHeaders().addHeader("TEST", "HEADER");
+		response.setContentType("text/html", Charset.forName("UTF-16"));
+		response.getEntityWriter().write("Content to be reset");
+
+		// Create the clean up escalations
+		final SQLException connectionEscalation = new SQLException("TEST");
+		final NumberFormatException integerEscalation = new NumberFormatException("TEST");
+		CleanupEscalation[] cleanupEscalations = new CleanupEscalation[] { new CleanupEscalation() {
+
+			@Override
+			public Class<?> getObjectType() {
+				return Connection.class;
+			}
+
+			@Override
+			public Throwable getEscalation() {
+				return connectionEscalation;
+			}
+		}, new CleanupEscalation() {
+
+			@Override
+			public Class<?> getObjectType() {
+				return Integer.class;
+			}
+
+			@Override
+			public Throwable getEscalation() {
+				return integerEscalation;
+			}
+		} };
+
+		// Send the response (should delay to allow reset)
+		response.send();
+
+		// Load the clean up escalations
+		ProcessAwareServerHttpConnectionManagedObject.getCleanupEscalationHandler().handleCleanupEscalations(connection,
+				cleanupEscalations);
+
+		// Flush the response
+		connection.flushResponseToResponseWriter();
+
+		// Ensure correct response
+		assertSame("Incorrect status", HttpStatus.INTERNAL_SERVER_ERROR, this.status);
+		assertSame("Incorrect version", this.requestVersion, this.responseVersion);
+		assertNull("Should be no headers", this.responseHeader);
+
+		// Create the expected response
+		StringWriter expected = new StringWriter();
+		PrintWriter writer = new PrintWriter(expected);
+		writer.println("Clean up failure with object of type " + Connection.class.getName());
+		connectionEscalation.printStackTrace(writer);
+		writer.println();
+		writer.println();
+		writer.println("Clean up failure with object of type " + Integer.class.getName());
+		integerEscalation.printStackTrace(writer);
+		writer.println();
+		writer.println();
+		writer.flush();
+		String expectedContent = expected.toString();
+
+		// Ensure correct content details
+		assertEquals("Incorrect content-type value", "text/plain", this.contentType.getValue());
+		assertEquals("Incorrect content-length value", this.contentLength, expectedContent.length());
+
+		// Ensure correct content
+		MockStreamBufferPool.releaseStreamBuffers(this.contentHeadStreamBuffer);
+		String content = MockStreamBufferPool.getContent(this.contentHeadStreamBuffer,
+				ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
+		assertEquals("Incorrect content", expectedContent, content);
+	}
+
+	/**
 	 * Ensure can serialise the {@link ServerHttpConnection} state.
 	 */
 	public void testSerialiseState() throws IOException {
@@ -254,7 +380,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		this.requestUri = "/serialise";
 		this.requestVersion = HttpVersion.HTTP_1_0;
 		this.requestHeaders.addHttpHeader("serialise", "serialised");
-		ServerHttpConnection connection = this.createServerHttpConnection("SERIALISE");
+		ServerHttpConnection connection = this.createServerHttpConnection("SERIALISE", false);
 		assertServerHttpConnection(connection, HttpMethod.POST, "/serialise", HttpVersion.HTTP_1_0,
 				new String[] { "serialise", "serialised" }, "SERIALISE", HttpMethod.POST,
 				new String[] { "serialise", "serialised" });
@@ -268,7 +394,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		this.requestVersion = HttpVersion.HTTP_1_1;
 		this.requestHeaders = new MockNonMaterialisedHttpHeaders();
 		this.requestHeaders.addHttpHeader("input", "header");
-		ServerHttpConnection newConnection = this.createServerHttpConnection("TEST");
+		ServerHttpConnection newConnection = this.createServerHttpConnection("TEST", false);
 		assertServerHttpConnection(newConnection, HttpMethod.GET, "/", HttpVersion.HTTP_1_1,
 				new String[] { "input", "header" }, "TEST", HttpMethod.GET, new String[] { "input", "header" });
 

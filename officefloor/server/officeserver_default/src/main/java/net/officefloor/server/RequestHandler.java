@@ -22,7 +22,7 @@ package net.officefloor.server;
  * 
  * @author Daniel Sagenschneider
  */
-public interface RequestHandler<R> extends ResponseHandler {
+public interface RequestHandler<R> {
 
 	/**
 	 * Handles a request.
@@ -31,6 +31,17 @@ public interface RequestHandler<R> extends ResponseHandler {
 	 *            Request.
 	 */
 	void handleRequest(R request);
+
+	/**
+	 * <p>
+	 * Provides means to send immediate data.
+	 * <p>
+	 * An example use, is SSL handshakes that need to negotiate back and forth
+	 * before requests become available.
+	 * 
+	 * @return {@link ResponseHandler}.
+	 */
+	ResponseHandler getImmediateResponseHandler();
 
 	/**
 	 * Allows to close connection.

@@ -24,6 +24,7 @@ import net.officefloor.compile.impl.structure.OfficeObjectNodeImpl;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
@@ -31,6 +32,7 @@ import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
@@ -49,6 +51,7 @@ import net.officefloor.extension.AutoWireOfficeFloorExtensionService;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.function.ManagedFunction;
@@ -61,6 +64,7 @@ import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
@@ -103,7 +107,7 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
 
 		// Build the office
-		CompileOfficeSource.registerOffice(CompileManagedObject.class, "MANAGED_OBJECT", null, this);
+		CompileOfficeSource.registerOffice(null, CompileManagedObject.class, "MANAGED_OBJECT", null, this);
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -141,7 +145,7 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		dependencyMo.mapDependency(0, "SIMPLE_OBJECT");
 
 		// Build the office
-		CompileOfficeSource.registerOffice(DependencyManagedObject.class, "DEPENDENCY_OBJECT", null, this);
+		CompileOfficeSource.registerOffice(null, DependencyManagedObject.class, "DEPENDENCY_OBJECT", null, this);
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -157,16 +161,19 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeFloorBuilder_addOffice("OFFICE");
 
 		// Build the Managed Object
 		this.record_officeFloorBuilder_addManagedObject("INPUT_SOURCE", ClassManagedObjectSource.class, 0, "class.name",
-				CompileManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		office.setBoundInputManagedObject("INPUT_OBJECT", "INPUT_SOURCE");
+				ProcessManagedObject.class.getName());
+		ManagingOfficeBuilder<?> managingOffice = this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_OBJECT");
 
 		// Build the office
-		CompileOfficeSource.registerOffice(CompileManagedObject.class, "INPUT_OBJECT", null, this);
+		CompileOfficeSource.registerOffice(null, CompileManagedObject.class, "INPUT_OBJECT", null, this);
+
+		// Link the input
+		managingOffice.linkFlow(0, "SECTION.FUNCTION");
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -182,16 +189,19 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeFloorBuilder_addOffice("OFFICE");
 
 		// Build the Managed Object
 		this.record_officeFloorBuilder_addManagedObject("INPUT_SOURCE", ClassManagedObjectSource.class, 0, "class.name",
-				CompileManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		office.setBoundInputManagedObject("INPUT_OBJECT", "INPUT_SOURCE");
+				ProcessManagedObject.class.getName());
+		ManagingOfficeBuilder<?> managingOffice = this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_OBJECT");
 
 		// Build the office
-		CompileOfficeSource.registerOffice(DependencyManagedObject.class, "INPUT_OBJECT", null, this);
+		CompileOfficeSource.registerOffice("QUALIFIED", CompileManagedObject.class, "INPUT_OBJECT", null, this);
+
+		// Link the input
+		managingOffice.linkFlow(0, "SECTION.FUNCTION");
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -212,12 +222,13 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 
 		// Build the Managed Object
 		this.record_officeFloorBuilder_addManagedObject("DEPENDENCY_SOURCE", ClassManagedObjectSource.class, 0,
-				"class.name", DependencyManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		office.setBoundInputManagedObject("DEPENDENCY_OBJECT", "DEPENDENCY_SOURCE");
+				"class.name", DependencyProcessManagedObject.class.getName());
+		ManagingOfficeBuilder<?> managingOffice = this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		DependencyMappingBuilder inputMo = this
+				.record_managingOfficeBuilder_setInputManagedObjectName("DEPENDENCY_OBJECT");
 
 		// Build the office
-		CompileOfficeSource.registerOffice(DependencyManagedObject.class, "DEPENDENCY_OBJECT", null, this);
+		CompileOfficeSource.registerOffice(null, DependencyManagedObject.class, "DEPENDENCY_OBJECT", null, this);
 
 		// Build the Managed Object
 		this.record_officeFloorBuilder_addManagedObject("SIMPLE_SOURCE", ClassManagedObjectSource.class, 0,
@@ -225,6 +236,12 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		office.registerManagedObjectSource("SIMPLE_OBJECT", "SIMPLE_SOURCE");
 		this.record_officeBuilder_addProcessManagedObject("SIMPLE_OBJECT", "SIMPLE_OBJECT");
+
+		// Map the auto-wired dependency
+		inputMo.mapDependency(0, "SIMPLE_OBJECT");
+
+		// Link the input
+		managingOffice.linkFlow(0, "SECTION.FUNCTION");
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -262,7 +279,7 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		two.mapDependency(0, "DEPENDENCY_ONE_OBJECT");
 
 		// Build the office
-		CompileOfficeSource.registerOffice(CycleManagedObject.class, "DEPENDENCY_ONE_OBJECT", null, this);
+		CompileOfficeSource.registerOffice(null, CycleManagedObject.class, "DEPENDENCY_ONE_OBJECT", null, this);
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -293,7 +310,7 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		this.record_officeBuilder_addThreadManagedObject(moName, mosName);
 
 		// Build the office
-		CompileOfficeSource.registerOffice(CompileManagedObject.class, moName, null, this);
+		CompileOfficeSource.registerOffice(null, CompileManagedObject.class, moName, null, this);
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -334,7 +351,7 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		dependency.mapDependency(0, moName);
 
 		// Build the office
-		CompileOfficeSource.registerOffice(DependencyManagedObject.class, "DEPENDENCY", null, this);
+		CompileOfficeSource.registerOffice(null, DependencyManagedObject.class, "DEPENDENCY", null, this);
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -370,7 +387,7 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 
 		// Build the office
 		CompileOfficeSource.isBuild = false;
-		CompileOfficeSource.registerOffice(CompileManagedObject.class, "OBJECT", null, this);
+		CompileOfficeSource.registerOffice(null, CompileManagedObject.class, "OBJECT", null, this);
 		this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
 
 		// Compile the OfficeFloor
@@ -407,7 +424,7 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 
 		// Build the office
 		CompileOfficeSource.isBuild = false;
-		CompileOfficeSource.registerOffice(CompileManagedObject.class, "OBJECT", null, this);
+		CompileOfficeSource.registerOffice(null, CompileManagedObject.class, "OBJECT", null, this);
 		this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
 
 		// Compile the OfficeFloor
@@ -431,7 +448,7 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		office.registerTeam("OFFICE_TEAM", "OFFICEFLOOR_TEAM");
 
 		// Build the office
-		CompileOfficeSource.registerOffice(CompileManagedObject.class, null, "OFFICE_TEAM", this);
+		CompileOfficeSource.registerOffice(null, CompileManagedObject.class, null, "OFFICE_TEAM", this);
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -448,6 +465,21 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 	public static class CycleManagedObject extends CompileManagedObject {
 		@Dependency
 		private DependencyManagedObject dependency;
+	}
+
+	public static class ProcessManagedObject extends CompileManagedObject {
+
+		@FlowInterface
+		public static interface Flows {
+			void doFlow();
+		}
+
+		Flows flows;
+	}
+
+	public static class DependencyProcessManagedObject extends ProcessManagedObject {
+		@Dependency
+		private CompileManagedObject dependency;
 	}
 
 	@TestSource
@@ -511,21 +543,25 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 
 		private static CompileSectionSource sectionSource = null;
 
+		private static String objectQualifier = null;
+
 		private static String officeTeamName = null;
 
 		private static boolean isBuild = true;
 
 		public static void reset() {
 			sectionSource = null;
+			objectQualifier = null;
 			officeTeamName = null;
 			isBuild = true;
 		}
 
-		public static void registerOffice(Class<?> dependencyType, String managedObjectName, String teamName,
-				AutoWireOfficeFloorTest testCase) {
+		public static void registerOffice(String dependencyQualifier, Class<?> dependencyType, String managedObjectName,
+				String teamName, AutoWireOfficeFloorTest testCase) {
 
 			// Register the section source for use
 			sectionSource = new CompileSectionSource(dependencyType, managedObjectName);
+			objectQualifier = dependencyQualifier;
 			officeTeamName = teamName;
 
 			// Determine if build (helps debugging)
@@ -557,7 +593,11 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 			if (sectionSource.namespace.managedObjectName != null) {
 				OfficeObject object = officeArchitect.addOfficeObject("OBJECT",
 						sectionSource.namespace.dependencyType.getName());
-				officeArchitect.link(section.getOfficeSectionObject("OBJECT"), object);
+				if (objectQualifier != null) {
+					object.setTypeQualifier(objectQualifier);
+				}
+				OfficeSectionObject sectionObject = section.getOfficeSectionObject("OBJECT");
+				officeArchitect.link(sectionObject, object);
 			}
 
 			// Register the office team (if required)
@@ -585,9 +625,10 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		@Override
 		public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
 
-			// Add the managed function
+			// Add the managed function (with input)
 			SectionFunction function = designer.addSectionFunctionNamespace("NAMESPACE", namespace)
 					.addSectionFunction("FUNCTION", "FUNCTION");
+			designer.link(designer.addSectionInput("INPUT", null), function);
 
 			// Add the dependency (if required)
 			if (this.namespace.managedObjectName != null) {
@@ -620,7 +661,8 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 			ManagedFunctionTypeBuilder<Indexed, None> function = functionNamespaceTypeBuilder
 					.addManagedFunctionType("FUNCTION", () -> this, Indexed.class, None.class);
 			if (this.managedObjectName != null) {
-				function.addObject(this.dependencyType).setLabel("OBJECT");
+				ManagedFunctionObjectTypeBuilder<?> dependency = function.addObject(this.dependencyType);
+				dependency.setLabel("OBJECT");
 			}
 		}
 

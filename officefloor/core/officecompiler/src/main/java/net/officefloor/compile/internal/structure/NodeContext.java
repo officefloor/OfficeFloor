@@ -459,11 +459,14 @@ public interface NodeContext {
 	 * 
 	 * @param inputManagedObjectName
 	 *            Name of the {@link InputManagedObjectNode}.
+	 * @param inputObjectType
+	 *            Input object type.
 	 * @param officeFloor
 	 *            Parent {@link OfficeFloorNode}.
 	 * @return {@link InputManagedObjectNode}.
 	 */
-	InputManagedObjectNode createInputManagedNode(String inputManagedObjectName, OfficeFloorNode officeFloor);
+	InputManagedObjectNode createInputManagedNode(String inputManagedObjectName, String inputObjectType,
+			OfficeFloorNode officeFloor);
 
 	/**
 	 * Creates a {@link ManagedObjectDependencyNode} for a

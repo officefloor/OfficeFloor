@@ -86,9 +86,11 @@ public interface DeployedOfficeInput {
 	 * @param managedObjectType
 	 *            Type of the {@link ManagedObject} to the
 	 *            {@link ExternalServiceInput}.
+	 * @param cleanupEscalationHandler
+	 *            {@link ExternalServiceCleanupEscalationHandler}.
 	 * @return {@link ExternalServiceInput}.
 	 */
 	<O, M extends ManagedObject> ExternalServiceInput<O, M> addExternalServiceInput(Class<O> objectType,
-			Class<M> managedObjectType);
+			Class<M> managedObjectType, ExternalServiceCleanupEscalationHandler<M> cleanupEscalationHandler);
 
 }

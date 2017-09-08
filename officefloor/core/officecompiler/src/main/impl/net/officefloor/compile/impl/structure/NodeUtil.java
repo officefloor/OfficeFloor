@@ -248,7 +248,14 @@ public class NodeUtil {
 		// Create the listing of children
 		final List<Node> childNodes = new ArrayList<>();
 		for (final Map<String, ? extends Node> childMap : children) {
-			childMap.keySet().stream().sorted().forEach((key) -> childNodes.add(childMap.get(key)));
+			childMap.keySet().stream().sorted().forEach((key) -> {
+				
+				if (key == null) {
+					System.out.println("FOUND");
+				}
+				
+				childNodes.add(childMap.get(key));
+			});
 		}
 
 		// Return the children

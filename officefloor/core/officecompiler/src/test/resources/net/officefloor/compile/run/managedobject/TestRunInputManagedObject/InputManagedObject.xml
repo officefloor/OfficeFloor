@@ -24,9 +24,7 @@
 			</managed-object-source>
 		</managed-object-sources>
 		<input-managed-objects>
-			<input-managed-object name="DEPENDENCY_OBJECT">
-				<bound-managed-object-source name="DEPENDENCY_SOURCE" />
-			</input-managed-object>
+			<input-managed-object name="DEPENDENCY_OBJECT" />
 		</input-managed-objects>
 		<managed-objects>
 			<managed-object name="SIMPLE_OBJECT" scope="PROCESS">

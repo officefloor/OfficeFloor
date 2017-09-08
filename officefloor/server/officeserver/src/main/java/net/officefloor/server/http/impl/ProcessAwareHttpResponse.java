@@ -18,20 +18,22 @@
 package net.officefloor.server.http.impl;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
+import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpResponseHeaders;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.ServerOutputStream;
 import net.officefloor.server.stream.ServerWriter;
+import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
 import net.officefloor.server.stream.impl.CloseHandler;
 import net.officefloor.server.stream.impl.ProcessAwareServerOutputStream;
@@ -53,6 +55,12 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	 * Text <code>Content-Type</code>.
 	 */
 	private static final HttpHeaderValue TEXT_CONTENT = new HttpHeaderValue("text/plain");
+
+	/**
+	 * Indicates whether to delay flushing {@link HttpResponse} to the
+	 * {@link HttpResponseWriter}.
+	 */
+	private final boolean isDelaySend;
 
 	/**
 	 * Client {@link HttpVersion}.
@@ -115,8 +123,17 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	private boolean isSent = false;
 
 	/**
+	 * Indicates if this {@link HttpResponse} has been written to the
+	 * {@link HttpResponseWriter}.
+	 */
+	private boolean isWritten = false;
+
+	/**
 	 * Instantiate.
 	 * 
+	 * @param isDelaySend
+	 *            Indicates whether to delay flushing {@link HttpResponse} to
+	 *            the {@link HttpResponseWriter}.
 	 * @param version
 	 *            {@link HttpVersion}.
 	 * @param bufferPool
@@ -126,8 +143,9 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	 * @param responseWriter
 	 *            {@link HttpResponseWriter}.
 	 */
-	public ProcessAwareHttpResponse(HttpVersion version, StreamBufferPool<B> bufferPool,
+	public ProcessAwareHttpResponse(boolean isDelaySend, HttpVersion version, StreamBufferPool<B> bufferPool,
 			ProcessAwareContext processAwareContext, HttpResponseWriter<B> responseWriter) {
+		this.isDelaySend = isDelaySend;
 		this.clientVersion = version;
 		this.version = version;
 		this.headers = new ProcessAwareHttpResponseHeaders(processAwareContext);
@@ -135,6 +153,152 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 		this.safeOutputStream = new ProcessAwareServerOutputStream(this.bufferPoolOutputStream, processAwareContext);
 		this.processAwareContext = processAwareContext;
 		this.responseWriter = responseWriter;
+	}
+
+	/**
+	 * Flushes the {@link HttpResponse} to the {@link HttpResponseWriter}.
+	 * 
+	 * @throws IOException
+	 *             If fails to flush {@link HttpResponse} to the
+	 *             {@link HttpResponseWriter}.
+	 */
+	void flushResponseToHttpResponseWriter() throws IOException {
+		this.safe(() -> {
+			this.unsafeFlushResponseToHttpResponseWriter();
+			return null;
+		});
+	}
+
+	/**
+	 * Sets the {@link CleanupEscalation} instances.
+	 * 
+	 * @param cleanupEscalations
+	 *            {@link CleanupEscalation} instances.
+	 * @throws IOException
+	 *             If fails to send {@link CleanupEscalation} details for this
+	 *             {@link HttpResponse}.
+	 */
+	void setCleanupEscalations(CleanupEscalation[] cleanupEscalations) throws IOException {
+
+		// Determine if have escalations
+		if (cleanupEscalations.length == 0) {
+			return; // no escalations
+		}
+
+		// Need to reset response to write the escalations
+		this.processAwareContext.run(() -> {
+
+			// If written, do nothing
+			if (this.isWritten) {
+				return null;
+			}
+
+			// Clear sent to allow writing content
+			this.isSent = false;
+
+			// Reset the response to write escalations
+			this.unsafeReset();
+
+			// Send error
+			this.status = HttpStatus.INTERNAL_SERVER_ERROR;
+			this.contentType = TEXT_CONTENT;
+
+			// Obtain the content
+			PrintWriter writer = new PrintWriter(
+					this.bufferPoolOutputStream.getServerWriter(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
+			for (int i = 0; i < cleanupEscalations.length; i++) {
+				CleanupEscalation cleanupEscalation = cleanupEscalations[i];
+
+				// Write the clean up escalation
+				writer.println("Clean up failure with object of type " + cleanupEscalation.getObjectType().getName());
+				cleanupEscalation.getEscalation().printStackTrace(writer);
+				writer.println();
+				writer.println();
+			}
+			writer.flush();
+
+			// Consider now sent
+			this.isSent = true;
+
+			return null;
+		});
+	}
+
+	/**
+	 * Flushes this {@link HttpResponse} to the {@link HttpResponseWriter}.
+	 * 
+	 * @throws IOException
+	 *             If fails to flush {@link HttpResponse} to the
+	 *             {@link HttpResponseWriter}.
+	 */
+	private void unsafeFlushResponseToHttpResponseWriter() throws IOException {
+
+		// Determine if already written
+		if (this.isWritten) {
+			return; // already written
+		}
+
+		// Ensure send
+		this.unsafeSend();
+
+		// Determine content details
+		long contentLength = this.bufferPoolOutputStream.getContentLength();
+		HttpHeaderValue contentType = null;
+		if (contentLength > 0) {
+			contentType = this.deriveContentType();
+		}
+
+		// Write the response (and consider written)
+		this.isWritten = true;
+		this.responseWriter.writeHttpResponse(this.version, this.status, this.headers.getWritableHttpHeaders(),
+				contentLength, contentType, this.bufferPoolOutputStream.getBuffers());
+	}
+
+	/**
+	 * Unsafe send {@link HttpResponse}.
+	 * 
+	 * @throws IOException
+	 *             If fails to send.
+	 */
+	private void unsafeSend() throws IOException {
+
+		// Determine if already sent
+		if (this.isSent) {
+			return; // already sent
+		}
+
+		// If writer, ensure flushed
+		if (this.entityWriter != null) {
+			this.entityWriter.flush();
+		}
+
+		// Consider sent
+		this.isSent = true;
+	}
+
+	/**
+	 * Unsafe reset {@link HttpResponse}.
+	 * 
+	 * @throws IOException
+	 *             If fails to reset.
+	 */
+	private void unsafeReset() throws IOException {
+
+		// Reset the response
+		this.version = this.clientVersion;
+		this.status = HttpStatus.OK;
+		this.headers = new ProcessAwareHttpResponseHeaders(processAwareContext);
+
+		// Release writing content
+		this.contentType = null;
+		this.charset = ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET;
+		this.entityWriter = null;
+
+		// Release the buffers
+		if (this.entityWriter != null) {
+			this.entityWriter.flush(); // clear content
+		}
+		this.bufferPoolOutputStream.clear();
 	}
 
 	/**
@@ -287,23 +451,13 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	public void reset() throws IOException {
 		this.safe(() -> {
 
-			// Ensure not sent
+			// Ensure not written
 			if (this.isSent) {
 				throw new IOException("Already committed to send response");
 			}
 
 			// Reset the response
-			this.version = this.clientVersion;
-			this.status = HttpStatus.OK;
-			this.headers = new ProcessAwareHttpResponseHeaders(processAwareContext);
-
-			// Release writing content
-			this.contentType = null;
-			this.charset = ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET;
-			this.entityWriter = null;
-
-			// Release the buffers
-			this.bufferPoolOutputStream.clear();
+			this.unsafeReset();
 
 			// Void return
 			return null;
@@ -314,27 +468,15 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	public void send() throws IOException {
 		this.safe(() -> {
 
-			// Determine if already sent
-			if (this.isSent) {
-				return null; // already sent
-			}
+			// Determine if delay response
+			if (this.isDelaySend) {
+				// Flag only as sent
+				this.unsafeSend();
 
-			// If writer, ensure flushed
-			if (this.entityWriter != null) {
-				this.entityWriter.flush();
+			} else {
+				// Send immediately
+				this.unsafeFlushResponseToHttpResponseWriter();
 			}
-
-			// Determine content details
-			long contentLength = this.bufferPoolOutputStream.getContentLength();
-			HttpHeaderValue contentType = null;
-			if (contentLength > 0) {
-				contentType = this.deriveContentType();
-			}
-
-			// Write the response (and consider sent)
-			this.isSent = true;
-			this.responseWriter.writeHttpResponse(this.version, this.status, this.headers.getWritableHttpHeaders(),
-					contentLength, contentType, this.bufferPoolOutputStream.getBuffers());
 
 			// Void return
 			return null;

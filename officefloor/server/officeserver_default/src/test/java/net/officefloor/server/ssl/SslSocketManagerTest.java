@@ -18,6 +18,7 @@
 package net.officefloor.server.ssl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
@@ -40,6 +41,11 @@ import net.officefloor.server.stream.StreamBufferPool;
 public class SslSocketManagerTest extends BufferManagementSocketManagerTest {
 
 	private SslSocketServicerFactory<?> prevousSslSocketServicerFactory;
+
+	@Override
+	protected void doAvailableCheck(InputStream inputStream) throws IOException {
+		// SSL does not provide available, so don't check
+	}
 
 	@Override
 	protected <R> SocketServicerFactory<R> adaptSocketServicerFactory(SocketServicerFactory<R> socketServicerFactory,

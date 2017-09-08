@@ -25,6 +25,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Assert;
 
@@ -94,6 +95,11 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 	}
 
 	/**
+	 * Identifier for the next {@link StreamBuffer}.
+	 */
+	private final AtomicInteger nextBufferId = new AtomicInteger(0);
+
+	/**
 	 * {@link ByteBufferFactory}.
 	 */
 	private final ByteBufferFactory byteBufferFactory;
@@ -145,7 +151,8 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 	 */
 	public void assertAllBuffersReturned() {
 		for (AbstractMockStreamBuffer buffer : this.createdBuffers) {
-			Assert.assertTrue("Buffer should be released", buffer.isReleased);
+			Assert.assertTrue("Buffer " + buffer.id + " (of " + this.createdBuffers.size() + ") should be released",
+					buffer.isReleased);
 		}
 	}
 
@@ -170,7 +177,12 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 	/**
 	 * Abstract mock {@link StreamBuffer}.
 	 */
-	private static abstract class AbstractMockStreamBuffer extends StreamBuffer<ByteBuffer> {
+	private abstract class AbstractMockStreamBuffer extends StreamBuffer<ByteBuffer> {
+
+		/**
+		 * Id of this {@link StreamBuffer}.
+		 */
+		private int id;
 
 		/**
 		 * Indicates if released.
@@ -187,6 +199,7 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 		 */
 		public AbstractMockStreamBuffer(ByteBuffer pooledBuffer, ByteBuffer unpooledByteBuffer) {
 			super(pooledBuffer, unpooledByteBuffer);
+			this.id = MockStreamBufferPool.this.nextBufferId.getAndIncrement();
 		}
 
 		@Override
@@ -198,7 +211,7 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 	/**
 	 * Mock pooled {@link StreamBuffer}.
 	 */
-	private static class MockPooledStreamBuffer extends AbstractMockStreamBuffer {
+	private class MockPooledStreamBuffer extends AbstractMockStreamBuffer {
 
 		/**
 		 * Instantiate.
@@ -244,7 +257,7 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 	/**
 	 * Mock unpooled {@link StreamBuffer}.
 	 */
-	private static class MockUnpooledStreamBuffer extends AbstractMockStreamBuffer {
+	private class MockUnpooledStreamBuffer extends AbstractMockStreamBuffer {
 
 		/**
 		 * Instantiate.
@@ -361,7 +374,8 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 				Assert.assertTrue("Should only be mock buffer " + streamBuffer.getClass().getName(),
 						streamBuffer instanceof AbstractMockStreamBuffer);
 				this.currentBuffer = (AbstractMockStreamBuffer) streamBuffer;
-				Assert.assertTrue("Mock buffer should be released", this.currentBuffer.isReleased);
+				Assert.assertTrue("Mock buffer " + this.currentBuffer.id + " should be released",
+						this.currentBuffer.isReleased);
 			}
 		}
 	}

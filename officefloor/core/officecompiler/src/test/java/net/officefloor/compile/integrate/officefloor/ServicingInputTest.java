@@ -36,7 +36,6 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
-import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
@@ -108,25 +107,26 @@ public class ServicingInputTest extends OfficeFrameTestCase {
 
 			// External service input
 			this.externalServiceInput = office.getDeployedOfficeInput("SECTION", "externalServiceInput")
-					.addExternalServiceInput(ServiceInputObject.class, ServiceInputObject.class);
+					.addExternalServiceInput(ServiceInputObject.class, ServiceInputObject.class,
+							(inputManagedObject, escalations) -> fail("Should have no escalations"));
 
 			// Internally invoke from managed object
 			OfficeFloorManagedObjectSource internalMos = deployer.addManagedObjectSource("MOS_INTERNAL",
 					ClassManagedObjectSource.class.getName());
 			internalMos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, MockObject.class.getName());
 			deployer.link(internalMos.getManagingOffice(), office);
-			deployer.link(internalMos, deployer.addInputManagedObject("INPUT_INTERNAL"));
+			deployer.link(internalMos, deployer.addInputManagedObject("INPUT_INTERNAL", MockObject.class.getName()));
 			DeployedOfficeInput internalMoInput = office.getDeployedOfficeInput("SECTION",
 					"managedObjectInternalThread");
 			deployer.link(internalMos.getManagedObjectFlow("doProcess"), internalMoInput);
-			internalMos.addOfficeFloorManagedObject("MOS", ManagedObjectScope.PROCESS);
 
 			// Externally invoke from managed object
 			this.externalManagdObjectSource = new ExternalManagedObjectSource();
 			OfficeFloorManagedObjectSource externalMos = deployer.addManagedObjectSource("MOS_EXTERNAL",
 					this.externalManagdObjectSource);
 			deployer.link(externalMos.getManagingOffice(), office);
-			deployer.link(externalMos, deployer.addInputManagedObject("INPUT_EXTERNAL"));
+			deployer.link(externalMos,
+					deployer.addInputManagedObject("INPUT_EXTERNAL", ExternalManagedObjectSource.class.getName()));
 			DeployedOfficeInput externalMoInput = office.getDeployedOfficeInput("SECTION",
 					"managedObjectExternalThread");
 			deployer.link(externalMos.getManagedObjectFlow("0"), externalMoInput);

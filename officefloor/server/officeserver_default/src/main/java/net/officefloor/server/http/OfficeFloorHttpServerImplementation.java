@@ -18,7 +18,6 @@
 package net.officefloor.server.http;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.server.http.source.HttpsServerSocketManagedObjectSource;
 
 /**
  * {@link OfficeFloor} {@link HttpServerImplementation}.
@@ -29,11 +28,6 @@ public class OfficeFloorHttpServerImplementation implements HttpServerImplementa
 
 	@Override
 	public void configureHttpServer(HttpServerImplementationContext context) {
-
-		// Configure HTTP and HTTPS
-		HttpsServerSocketManagedObjectSource.configure(context.getOfficeFloorDeployer(), context.getHttpPort(),
-				context.getHttpsPort(), context.getSslContext(), context.getInternalServiceInput());
-
 	}
 
 }

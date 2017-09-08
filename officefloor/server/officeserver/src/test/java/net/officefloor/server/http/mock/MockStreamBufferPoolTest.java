@@ -66,7 +66,7 @@ public class MockStreamBufferPoolTest extends OfficeFrameTestCase {
 		try {
 			this.pool.assertAllBuffersReturned();
 		} catch (AssertionError ex) {
-			assertEquals("Incorrect failure", "Buffer should be released", ex.getMessage());
+			assertEquals("Incorrect failure", "Buffer 0 (of 1) should be released", ex.getMessage());
 		}
 
 		// Release to pool
@@ -88,7 +88,7 @@ public class MockStreamBufferPoolTest extends OfficeFrameTestCase {
 		try {
 			this.pool.assertAllBuffersReturned();
 		} catch (AssertionError ex) {
-			assertEquals("Incorrect failure", "Buffer should be released", ex.getMessage());
+			assertEquals("Incorrect failure", "Buffer 0 (of 1) should be released", ex.getMessage());
 		}
 
 		// Release

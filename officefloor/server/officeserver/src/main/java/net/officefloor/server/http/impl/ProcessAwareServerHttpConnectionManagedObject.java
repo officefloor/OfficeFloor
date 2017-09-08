@@ -21,9 +21,11 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.function.Supplier;
 
+import net.officefloor.compile.spi.officefloor.ExternalServiceCleanupEscalationHandler;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
+import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpRequestHeaders;
@@ -44,6 +46,17 @@ import net.officefloor.server.stream.impl.ByteSequence;
  */
 public class ProcessAwareServerHttpConnectionManagedObject<B>
 		implements ServerHttpConnection, ProcessAwareManagedObject {
+
+	/**
+	 * Obtains the {@link ExternalServiceCleanupEscalationHandler}.
+	 * 
+	 * @return {@link ExternalServiceCleanupEscalationHandler}.
+	 */
+	public static <B> ExternalServiceCleanupEscalationHandler<ProcessAwareServerHttpConnectionManagedObject<? extends B>> getCleanupEscalationHandler() {
+		return (inputManagedObject, cleanupEscalations) -> {
+			inputManagedObject.setCleanupEscalations(cleanupEscalations);
+		};
+	}
 
 	/**
 	 * Indicates if secure.
@@ -86,6 +99,11 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	private final StreamBufferPool<B> bufferPool;
 
 	/**
+	 * Indicates whether to delay sending the {@link HttpResponse}.
+	 */
+	private final boolean isDelaySend;
+
+	/**
 	 * {@link HttpResponseWriter}.
 	 */
 	private final HttpResponseWriter<B> httpResponseWriter;
@@ -112,6 +130,9 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	 *            {@link HttpRequest}.
 	 * @param requestEntity
 	 *            {@link ByteSequence} for the {@link HttpRequest} entity.
+	 * @param isDelaySend
+	 *            <code>true</code> to delay flushing the response to the
+	 *            {@link HttpResponseWriter}.
 	 * @param writer
 	 *            {@link HttpResponseWriter}.
 	 * @param bufferPool
@@ -119,10 +140,14 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	 */
 	public ProcessAwareServerHttpConnectionManagedObject(boolean isSecure, Supplier<HttpMethod> methodSupplier,
 			Supplier<String> requestUriSupplier, HttpVersion version, NonMaterialisedHttpHeaders requestHeaders,
-			ByteSequence requestEntity, HttpResponseWriter<B> writer, StreamBufferPool<B> bufferPool) {
+			ByteSequence requestEntity, boolean isDelaySend, HttpResponseWriter<B> writer,
+			StreamBufferPool<B> bufferPool) {
 
 		// Indicate if secure
 		this.isSecure = isSecure;
+
+		// Indicate if delay send
+		this.isDelaySend = isDelaySend;
 
 		// Create the HTTP request
 		this.clientHeaders = new MaterialisingHttpRequestHeaders(requestHeaders);
@@ -136,6 +161,30 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 		this.httpResponseWriter = writer;
 	}
 
+	/**
+	 * Flushes the {@link HttpResponse} to the {@link HttpResponseWriter}.
+	 * 
+	 * @throws IOException
+	 *             If fails to flush the {@link HttpResponse} to the
+	 *             {@link HttpResponseWriter}.
+	 */
+	public void flushResponseToResponseWriter() throws IOException {
+		this.response.flushResponseToHttpResponseWriter();
+	}
+
+	/**
+	 * Sets the {@link CleanupEscalation} instances.
+	 * 
+	 * @param cleanupEscalations
+	 *            {@link CleanupEscalation} instances.
+	 * @throws IOException
+	 *             If fails to send the {@link CleanupEscalation} details in the
+	 *             {@link HttpResponse}.
+	 */
+	public void setCleanupEscalations(CleanupEscalation[] cleanupEscalations) throws IOException {
+		this.response.setCleanupEscalations(cleanupEscalations);
+	}
+
 	/*
 	 * =============== ProcessAwareContext ============================
 	 */
@@ -145,8 +194,8 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 		this.processAwareContext = context;
 
 		// Create the HTTP response (with context awareness)
-		this.response = new ProcessAwareHttpResponse<B>(this.request.getHttpVersion(), this.bufferPool, context,
-				this.httpResponseWriter);
+		this.response = new ProcessAwareHttpResponse<B>(this.isDelaySend, this.request.getHttpVersion(),
+				this.bufferPool, context, this.httpResponseWriter);
 	}
 
 	@Override

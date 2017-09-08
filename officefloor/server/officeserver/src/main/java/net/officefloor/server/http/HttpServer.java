@@ -20,6 +20,7 @@ package net.officefloor.server.http;
 import javax.net.ssl.SSLContext;
 
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
+import net.officefloor.compile.spi.officefloor.ExternalServiceCleanupEscalationHandler;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
@@ -96,8 +97,9 @@ public class HttpServer {
 
 			@Override
 			public <M extends ManagedObject> ExternalServiceInput<ServerHttpConnection, M> getExternalServiceInput(
-					Class<M> managedObjectType) {
-				return serviceInput.addExternalServiceInput(ServerHttpConnection.class, managedObjectType);
+					Class<M> managedObjectType, ExternalServiceCleanupEscalationHandler cleanupEscalationHandler) {
+				return serviceInput.addExternalServiceInput(ServerHttpConnection.class, managedObjectType,
+						cleanupEscalationHandler);
 			}
 
 			@Override

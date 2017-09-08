@@ -115,7 +115,7 @@ public interface OfficeFloorDeployer {
 	 *            Name of the {@link OfficeFloorInputManagedObject}.
 	 * @return Added {@link OfficeFloorInputManagedObject}.
 	 */
-	OfficeFloorInputManagedObject addInputManagedObject(String inputManagedObjectName);
+	OfficeFloorInputManagedObject addInputManagedObject(String inputManagedObjectName, String inputObjectType);
 
 	/**
 	 * Adds an {@link OfficeFloorManagedObjectPool}.

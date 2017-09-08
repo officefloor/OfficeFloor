@@ -106,7 +106,7 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 		 *            {@link StreamBufferPool}.
 		 */
 		public RawHttpServicerFactory(StreamBufferPool<ByteBuffer> serviceBufferPool) {
-			super(false, new HttpRequestParserMetaData(100, 1000, 1000000), serviceBufferPool);
+			super(false, new HttpRequestParserMetaData(100, 1000, 1000000), false, serviceBufferPool);
 		}
 
 		/*

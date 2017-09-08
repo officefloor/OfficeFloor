@@ -15,34 +15,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.server;
+package net.officefloor.compile.spi.officefloor;
 
-import java.net.Socket;
-import java.nio.ByteBuffer;
-
-import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 
 /**
- * Services the {@link Socket}.
+ * Handles {@link CleanupEscalation} instances from other {@link ManagedObject}
+ * instances used to service the input.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SocketServicer<R> {
+public interface ExternalServiceCleanupEscalationHandler<M extends ManagedObject> {
 
 	/**
-	 * Services the {@link Socket}.
+	 * Invoked to handle the {@link CleanupEscalation} instances.
 	 * 
-	 * @param readBuffer
-	 *            {@link StreamBuffer} containing the just read bytes. Note that
-	 *            this could be the same {@link StreamBuffer} as previous, with
-	 *            just further bytes written.
+	 * @param inputManagedObject
+	 *            Input {@link ManagedObject}.
+	 * @param cleanupEscalations
+	 *            {@link CleanupEscalation} instances.
+	 * @throws Throwable
+	 *             If fails to handle {@link CleanupEscalation} instances.
 	 */
-	void service(StreamBuffer<ByteBuffer> readBuffer);
-
-	/**
-	 * Releases this {@link SocketServicer} from use.
-	 */
-	default void release() {
-	}
+	void handleCleanupEscalations(M inputManagedObject, CleanupEscalation[] cleanupEscalations) throws Throwable;
 
 }
