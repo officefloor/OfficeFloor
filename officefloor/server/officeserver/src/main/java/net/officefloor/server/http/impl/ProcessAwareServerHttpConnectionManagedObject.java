@@ -53,7 +53,8 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	 * 
 	 * @return {@link ExternalServiceCleanupEscalationHandler}.
 	 */
-	public static <B> ExternalServiceCleanupEscalationHandler<ProcessAwareServerHttpConnectionManagedObject<? extends B>> getCleanupEscalationHandler() {
+	@SuppressWarnings("rawtypes")
+	public static ExternalServiceCleanupEscalationHandler<ProcessAwareServerHttpConnectionManagedObject> getCleanupEscalationHandler() {
 		return (inputManagedObject, cleanupEscalations) -> {
 			inputManagedObject.setCleanupEscalations(cleanupEscalations);
 		};

@@ -33,13 +33,10 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 import net.officefloor.plugin.xml.XmlUnmarshaller;
 import net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshallerFactory;
 import net.officefloor.server.http.HttpClientTestUtil;
-import net.officefloor.server.http.HttpServicerBuilder;
-import net.officefloor.server.http.HttpServicerFunction;
-import net.officefloor.server.http.MockHttpServer;
+import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.server.http.request.config.CommunicationConfig;
 import net.officefloor.server.http.request.config.HeaderConfig;
 import net.officefloor.server.http.request.config.ProcessConfig;
@@ -66,7 +63,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 		try {
 
 			// Create an instance of the test to obtain test methods
-			HttpRequestTest util = new HttpRequestTest(null, null, null, false, null);
+			HttpRequestTest util = new HttpRequestTest(null, null, null, false);
 
 			// Obtain the file containing XML Unmarshaller configuration
 			File unmarshallerConfigFile = util.findFile(HttpRequestTest.class, "UnmarshallConfiguration.xml");
@@ -75,39 +72,29 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 			XmlUnmarshaller unmarshaller = TreeXmlUnmarshallerFactory.getInstance()
 					.createUnmarshaller(new FileInputStream(unmarshallerConfigFile));
 
-			// Create the HTTP servicer builder
-			HttpServicerBuilder httpServicerBuilder = new HttpServicerBuilder() {
-				@Override
-				public HttpServicerFunction buildServicer(String managedObjectName, MockHttpServer server)
-						throws Exception {
-					// Register the function to process messages
-					ReflectiveFunctionBuilder functionBuilder = server.constructFunction(new RequestWork(), "service");
-					functionBuilder.buildObject(managedObjectName);
-
-					// Return the reference to the service function
-					return new HttpServicerFunction("service");
-				}
-			};
-
-			// Load the non-secure tests
-			final MockHttpServer httpServer = new MockHttpServer() {
-			};
-			loadTests("http", unmarshallerConfigFile.getParentFile(), unmarshaller, httpServer, false,
-					httpServicerBuilder, suite);
-
-			// Load the secure tests
-			final MockHttpServer httpsServer = new MockHttpServer() {
-			};
-			httpsServer.setupSecure();
-			loadTests("https", unmarshallerConfigFile.getParentFile(), unmarshaller, httpsServer, true,
-					httpServicerBuilder, suite);
-
-			// Add a task to shutdown the servers
+			// Add test to start server
 			suite.addTest(new TestCase("Shutdown HTTP Server") {
 				@Override
 				protected void runTest() throws Throwable {
-					httpServer.shutdown();
-					httpsServer.shutdown();
+
+					// TODO implement start server
+					System.out.println("TODO start server");
+				}
+			});
+
+			// Load non-secure tests
+			loadTests("http", unmarshallerConfigFile.getParentFile(), unmarshaller, false, suite);
+
+			// Load the secure tests
+			loadTests("https", unmarshallerConfigFile.getParentFile(), unmarshaller, true, suite);
+
+			// Add test to shutdown server
+			suite.addTest(new TestCase("Shutdown HTTP Server") {
+				@Override
+				protected void runTest() throws Throwable {
+
+					// TODO implement stop server
+					System.out.println("TODO stop server");
 				}
 			});
 
@@ -130,18 +117,13 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 	 *            Directory to search for tests.
 	 * @param unmarshaller
 	 *            {@link XmlUnmarshaller} to unmarshal the test.
-	 * @param server
-	 *            {@link MockHttpServer}.
 	 * @param isSecure
 	 *            Indicates if to be secure.
-	 * @param httpServicerBuilder
-	 *            {@link HttpServicerBuilder}.
 	 * @param suite
 	 *            {@link TestSuite} to add the tests.
 	 */
-	private static void loadTests(String testNamePrefix, File directory, XmlUnmarshaller unmarshaller,
-			MockHttpServer server, boolean isSecure, HttpServicerBuilder httpServicerBuilder, TestSuite suite)
-			throws Exception {
+	private static void loadTests(String testNamePrefix, File directory, XmlUnmarshaller unmarshaller, boolean isSecure,
+			TestSuite suite) throws Exception {
 
 		// Obtain the tests
 		for (File file : directory.listFiles()) {
@@ -152,7 +134,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 			// Determine if child directory
 			if (file.isDirectory()) {
 				// Child directory, so find tests recursively
-				loadTests(testName, file, unmarshaller, server, isSecure, httpServicerBuilder, suite);
+				loadTests(testName, file, unmarshaller, isSecure, suite);
 
 			} else {
 				// File and ensure is a test file
@@ -166,7 +148,8 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 				unmarshaller.unmarshall(new FileInputStream(file), configuration);
 
 				// Create the test
-				suite.addTest(new HttpRequestTest(testName, configuration, server, isSecure, httpServicerBuilder));
+				suite.addTest(new HttpRequestTest(testName, configuration,
+						(isSecure ? "https://localhost:7979" : "http://localhost:7878"), isSecure));
 			}
 		}
 	}
@@ -177,19 +160,14 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 	private final RunConfig configuration;
 
 	/**
-	 * {@link MockHttpServer}.
+	 * Base URL to the server.
 	 */
-	private final MockHttpServer server;
+	private String serverBaseUrl;
 
 	/**
 	 * Indicates if the {@link MockHttpServer} is to be secure.
 	 */
 	private final boolean isSecure;
-
-	/**
-	 * {@link HttpServicerBuilder}.
-	 */
-	private final HttpServicerBuilder httpServicerBuilder;
 
 	/**
 	 * Instantiate.
@@ -198,20 +176,14 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 	 *            Name of the test.
 	 * @param configuration
 	 *            {@link RunConfig}.
-	 * @param server
-	 *            {@link MockHttpServer}.
 	 * @param isSecure
 	 *            Indicates if the {@link MockHttpServer} is to be secure.
-	 * @param httpServicerBuilder
-	 *            {@link HttpServicerBuilder}.
 	 */
-	public HttpRequestTest(String testName, RunConfig configuration, MockHttpServer server, boolean isSecure,
-			HttpServicerBuilder httpServicerBuilder) {
+	public HttpRequestTest(String testName, RunConfig configuration, String serverBaseUrl, boolean isSecure) {
 		this.setName(testName);
 		this.configuration = configuration;
-		this.server = server;
+		this.serverBaseUrl = serverBaseUrl;
 		this.isSecure = isSecure;
-		this.httpServicerBuilder = httpServicerBuilder;
 	}
 
 	/*
@@ -220,10 +192,6 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 
 	@Override
 	protected void runTest() throws Throwable {
-
-		// Start the server
-		this.server.startup(this.httpServicerBuilder);
-		assertEquals("Incorrect secureness for server", this.isSecure, this.server.isServerSecure());
 
 		// Validate the configuration
 		assertTrue("Must have at least 1 communication", this.configuration.communications.size() > 0);
@@ -234,7 +202,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 		}
 
 		// Create the HTTP Client to send requests
-		HttpClient client = this.server.createHttpClient();
+		HttpClient client = HttpClientTestUtil.createHttpClient(this.isSecure);
 
 		System.out.println("====== " + this.getName() + " ======");
 
@@ -254,7 +222,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 			RequestWork.setConfiguration(communication);
 
 			// Create the method
-			String requestUrl = this.server.getServerUrl() + request.path;
+			String requestUrl = this.serverBaseUrl + "/" + request.path;
 			HttpUriRequest method;
 			if ("GET".equals(request.method)) {
 				method = new HttpGet(requestUrl);
@@ -283,9 +251,6 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 
 			// Obtain the response body
 			String actualResponseBody = HttpClientTestUtil.getEntityBody(methodResponse);
-
-			// Validate no failure in processing
-			this.server.validateNoTopLevelEscalation();
 
 			// Indicate the expected response
 			ResponseConfig response = communication.response;

@@ -106,7 +106,7 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 		 *            {@link StreamBufferPool}.
 		 */
 		public RawHttpServicerFactory(StreamBufferPool<ByteBuffer> serviceBufferPool) {
-			super(false, new HttpRequestParserMetaData(100, 1000, 1000000), false, serviceBufferPool);
+			super(false, new HttpRequestParserMetaData(100, 1000, 1000000), serviceBufferPool);
 		}
 
 		/*
@@ -124,7 +124,13 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 			HttpResponse response = connection.getHttpResponse();
 			response.getEntity().write(helloWorld);
 			response.setContentType(textPlain, null);
-			response.send();
+
+			// Send response
+			try {
+				connection.getServiceFlowCallback().run(null);
+			} catch (Throwable ex) {
+				throw new IOException(ex);
+			}
 		}
 	}
 

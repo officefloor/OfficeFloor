@@ -53,7 +53,7 @@ public class SocketManager {
 	/**
 	 * Default {@link ServerSocket} backlog size.
 	 */
-	public static final int DEFAULT_SERVER_SOCKET_BACKLOG_SIZE = 25000;
+	public static final int DEFAULT_SERVER_SOCKET_BACKLOG_SIZE = 8192;
 
 	/**
 	 * {@link ThreadLocal} to determine if {@link SocketListener}

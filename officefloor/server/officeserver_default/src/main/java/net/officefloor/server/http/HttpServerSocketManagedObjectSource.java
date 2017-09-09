@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -256,7 +257,14 @@ public class HttpServerSocketManagedObjectSource
 		if (singletonSocketManager != null) {
 			// Shutdown the socket manager
 			singletonSocketManager.shutdown();
+
+			// Wait on shut down
 			executor.shutdown();
+			try {
+				executor.awaitTermination(10, TimeUnit.SECONDS);
+			} catch (InterruptedException ex) {
+				throw new IOException("Interrupted waiting on Socket Manager shut down", ex);
+			}
 		}
 
 		// Close (release) the socket manager to create again
@@ -388,7 +396,7 @@ public class HttpServerSocketManagedObjectSource
 		// Obtain the SSL context
 		if (this.isSecure) {
 			String sslContextSourceClassName = mosContext.getProperty(PROPERTY_SSL_CONTEXT_SOURCE, null);
-			if (sslContextSourceClassName != null) {
+			if (sslContextSourceClassName == null) {
 				sslContextSourceClassName = OfficeFloorDefaultSslContextSource.class.getName();
 			}
 			switch (sslContextSourceClassName) {

@@ -277,11 +277,12 @@ public class SectionInputNodeImpl implements SectionInputNode {
 
 	@Override
 	public <O, M extends ManagedObject> ExternalServiceInput<O, M> addExternalServiceInput(Class<O> objectType,
-			Class<M> managedObjectType, ExternalServiceCleanupEscalationHandler<M> cleanupEscalationHandler) {
+			Class<? extends M> managedObjectType,
+			ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler) {
 
 		// Create the external service input
-		ExternalServiceInputManagedObjectSource<O, M> input = new ExternalServiceInputManagedObjectSource<>(objectType,
-				managedObjectType, cleanupEscalationHandler);
+		ExternalServiceInputManagedObjectSource<O, M> input = new ExternalServiceInputManagedObjectSource<O, M>(
+				objectType, managedObjectType, cleanupEscalationHandler);
 
 		// Add to OfficeFloor (to make available for auto-wiring)
 		OfficeNode office = this.section.getOfficeNode();
@@ -374,12 +375,12 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		/**
 		 * {@link ManagedObject} type.
 		 */
-		private final Class<M> managedObjectType;
+		private final Class<? extends M> managedObjectType;
 
 		/**
 		 * {@link ExternalServiceCleanupEscalationHandler}.
 		 */
-		private final ExternalServiceCleanupEscalationHandler<M> cleanupEscalationHandler;
+		private final ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler;
 
 		/**
 		 * {@link ManagedObjectExecuteContext}.
@@ -396,8 +397,8 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		 * @param cleanupEscalationHandler
 		 *            {@link ExternalServiceCleanupEscalationHandler}.
 		 */
-		private ExternalServiceInputManagedObjectSource(Class<O> objectType, Class<M> managedObjectType,
-				ExternalServiceCleanupEscalationHandler<M> cleanupEscalationHandler) {
+		private ExternalServiceInputManagedObjectSource(Class<O> objectType, Class<? extends M> managedObjectType,
+				ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler) {
 			this.objectType = objectType;
 			this.managedObjectType = managedObjectType;
 			this.cleanupEscalationHandler = cleanupEscalationHandler;

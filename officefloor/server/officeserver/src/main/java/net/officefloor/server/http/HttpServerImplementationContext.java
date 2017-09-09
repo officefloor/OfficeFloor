@@ -43,7 +43,8 @@ public interface HttpServerImplementationContext {
 	/**
 	 * Obtains the HTTPS port.
 	 * 
-	 * @return HTTPS port.
+	 * @return HTTPS port. May be <code>-1</code> if separate HTTPS port is not
+	 *         required.
 	 */
 	int getHttpsPort();
 
@@ -78,7 +79,7 @@ public interface HttpServerImplementationContext {
 	 * @return {@link ExternalServiceInput}.
 	 */
 	<M extends ManagedObject> ExternalServiceInput<ServerHttpConnection, M> getExternalServiceInput(
-			Class<M> managedObjectType, ExternalServiceCleanupEscalationHandler cleanupEscalationHandler);
+			Class<? extends M> managedObjectType, ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler);
 
 	/**
 	 * Obtains the {@link OfficeFloorDeployer} to configure the

@@ -138,10 +138,10 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 	/**
 	 * Ensure can send default response.
 	 */
-	public void testDefaultSend() throws IOException {
+	public void testDefaultSend() throws Throwable {
 
 		// Send
-		this.connection.getHttpResponse().send();
+		this.connection.getServiceFlowCallback().run(null);
 
 		// Validate the default details
 		assertEquals("Incorrect version", this.requestVersion, this.responseVersion);
@@ -155,7 +155,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 	/**
 	 * Ensure can send altered information.
 	 */
-	public void testAlteredSend() throws IOException {
+	public void testAlteredSend() throws Throwable {
 
 		Charset charset = Charset.forName("UTF-16");
 
@@ -169,7 +169,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		writer.write("TEST RESPONSE");
 
 		// Send response
-		response.send();
+		this.connection.getServiceFlowCallback().run(null);
 
 		// Obtain the expected content
 		byte[] expectedContent = "TEST RESPONSE".getBytes(charset);
@@ -189,82 +189,6 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		MockStreamBufferPool.releaseStreamBuffers(this.contentHeadStreamBuffer);
 		String content = MockStreamBufferPool.getContent(this.contentHeadStreamBuffer, charset);
 		assertEquals("Incorrect content", "TEST RESPONSE", content);
-	}
-
-	/**
-	 * Ensure sends the {@link HttpResponse} on closing the
-	 * {@link ServerOutputStream}.
-	 */
-	public void testSendOnCloseServerOutputStream() throws IOException {
-
-		// Close the output stream
-		this.connection.getHttpResponse().getEntity().close();
-
-		// Ensure response sent
-		assertEquals("Should be sent", HttpStatus.OK, this.status);
-	}
-
-	/**
-	 * Ensure sends the {@link HttpResponse} on closing the
-	 * {@link ServerWriter}.
-	 */
-	public void testSendOnCloseServerWriter() throws IOException {
-
-		// Close the server writer
-		this.connection.getHttpResponse().getEntityWriter().close();
-
-		// Ensure response sent
-		assertEquals("Should be sent", HttpStatus.OK, this.status);
-	}
-
-	/**
-	 * Ensure send only once. Repeated sends will not do anything.
-	 */
-	public void testSendOnlyOnce() throws IOException {
-
-		// Set altered status (to check does not change on sending again)
-		HttpResponse response = this.connection.getHttpResponse();
-		response.setHttpStatus(HttpStatus.BAD_REQUEST);
-
-		// Obtain the entity (must be before close, otherwise exception)
-		ServerOutputStream entity = response.getEntity();
-		ServerWriter entityWriter = response.getEntityWriter();
-
-		// Send
-		response.send();
-		assertEquals("Should be sent", HttpStatus.BAD_REQUEST, this.status);
-
-		// Change response and send (but now should not send)
-		response.setHttpStatus(HttpStatus.OK);
-		response.send();
-		assertEquals("Should not re-send", HttpStatus.BAD_REQUEST, this.status);
-
-		// Ensure close output stream does not re-send
-		entity.close();
-		assertEquals("Should not re-send", HttpStatus.BAD_REQUEST, this.status);
-
-		// Ensure close writer does not re-send
-		entityWriter.close();
-		assertEquals("Should not re-send", HttpStatus.BAD_REQUEST, this.status);
-	}
-
-	/**
-	 * Ensure can delay sending the {@link HttpResponse} to allow
-	 * {@link CleanupEscalation} to be considered in the response.
-	 */
-	public void testDelaySend() throws Throwable {
-
-		// Create the connection
-		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = this.createServerHttpConnection("DELAY");
-		assertNull("Should not send on creation", this.status);
-
-		// Send the response (but should delay)
-		connection.getHttpResponse().send();
-		assertNull("Should delay sending", this.status);
-
-		// Flush response
-		connection.getServiceFlowCallback().run(null);
-		assertSame("Should now write response", HttpStatus.OK, this.status);
 	}
 
 	/**

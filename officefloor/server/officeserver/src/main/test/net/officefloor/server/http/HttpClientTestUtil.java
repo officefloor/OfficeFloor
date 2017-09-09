@@ -18,16 +18,9 @@
 package net.officefloor.server.http;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolException;
@@ -36,7 +29,6 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.RedirectStrategy;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.conn.socket.LayeredConnectionSocketFactory;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -44,6 +36,7 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
 
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
 
 /**
@@ -63,7 +56,7 @@ public class HttpClientTestUtil {
 	 *             If fails to obtain content.
 	 */
 	public static String getEntityBody(HttpResponse response) throws IOException {
-		return getEntityBody(response, Charset.defaultCharset());
+		return getEntityBody(response, ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
 	}
 
 	/**
@@ -131,8 +124,12 @@ public class HttpClientTestUtil {
 	 * @see #createTestServerSslContext()
 	 */
 	public static void configureHttps(HttpClientBuilder builder) {
-		// Provide SSL Socket Factory
-		builder.setSSLSocketFactory(new OfficeFloorDefaultSocketFactory());
+		try {
+			// Provide SSL Context
+			builder.setSSLContext(OfficeFloorDefaultSslContextSource.createClientSslContext(null));
+		} catch (Exception ex) {
+			throw OfficeFrameTestCase.fail(ex);
+		}
 	}
 
 	/**
@@ -191,61 +188,6 @@ public class HttpClientTestUtil {
 	 * All access via static methods.
 	 */
 	private HttpClientTestUtil() {
-	}
-
-	/**
-	 * <p>
-	 * {@link LayeredConnectionSocketFactory} to connect to the
-	 * {@link MockHttpServer} over secure connection.
-	 * <p>
-	 * This allows working with a {@link OfficeFloorDefaultSslContextSource}.
-	 */
-	private static class OfficeFloorDefaultSocketFactory implements LayeredConnectionSocketFactory {
-
-		/*
-		 * ============== ConnectionSocketFactory ==================
-		 */
-
-		@Override
-		public Socket createSocket(HttpContext context) throws IOException {
-
-			// Create the secure connected socket
-			SSLContext sslContext;
-			try {
-				sslContext = OfficeFloorDefaultSslContextSource.createClientSslContext(null);
-
-			} catch (Exception ex) {
-				// Propagate failure in configuring OfficeFloor default key
-				throw new IOException(ex);
-			}
-
-			// Create the socket
-			SSLSocketFactory socketFactory = sslContext.getSocketFactory();
-			Socket socket = socketFactory.createSocket();
-			Assert.assertFalse("Socket should not be connected", socket.isConnected());
-
-			// Return the socket
-			return socket;
-		}
-
-		@Override
-		public Socket connectSocket(int connectTimeout, Socket socket, HttpHost host, InetSocketAddress remoteAddress,
-				InetSocketAddress localAddress, HttpContext context) throws IOException {
-
-			// Connect the socket
-			socket.connect(new InetSocketAddress(host.getAddress(), host.getPort()));
-			Assert.assertTrue("Socket should now be connected", socket.isConnected());
-
-			// Return the connected socket
-			return socket;
-		}
-
-		@Override
-		public Socket createLayeredSocket(Socket socket, String target, int port, HttpContext context)
-				throws IOException, UnknownHostException {
-			// Should be already secure socket
-			return socket;
-		}
 	}
 
 }

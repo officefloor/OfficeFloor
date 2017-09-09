@@ -18,6 +18,9 @@
 package net.officefloor.server.http;
 
 import java.io.IOException;
+import java.util.function.Consumer;
+
+import javax.net.ssl.SSLException;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -30,11 +33,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.server.http.HttpClientTestUtil;
-import net.officefloor.server.http.HttpServerSocketManagedObjectSource;
 import net.officefloor.server.http.HttpServerSocketManagedObjectSource.Flows;
-import net.officefloor.server.http.HttpStatus;
-import net.officefloor.server.http.ServerHttpConnection;
 
 /**
  * Tests the {@link HttpServerSocketManagedObjectSource}.
@@ -62,6 +61,71 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 	 */
 	public void testServiceRequest() throws Exception {
 
+		// Start non-secure server
+		this.startServer((httpMos) -> {
+			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_PORT, String.valueOf(7878));
+		});
+
+		// Ensure can get response
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
+			HttpResponse response = client.execute(new HttpGet("http://localhost:7878"));
+			assertEquals("Should be succesful", HttpStatus.OK.getStatusCode(),
+					response.getStatusLine().getStatusCode());
+			assertEquals("Incorrect content", "test", HttpClientTestUtil.getEntityBody(response));
+		}
+	}
+	
+	/**
+	 * Ensure can configure and service secure request.
+	 */
+	public void testServiceSecureRequest() throws Exception {
+
+		// Start secure server
+		this.startServer((httpMos) -> {
+			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_PORT, String.valueOf(7979));
+			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_SECURE, String.valueOf(true));
+		});
+
+		// Ensure can get response
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient(true)) {
+			HttpResponse response = client.execute(new HttpGet("https://localhost:7979"));
+			assertEquals("Should be succesful", HttpStatus.OK.getStatusCode(),
+					response.getStatusLine().getStatusCode());
+			assertEquals("Incorrect content", "test", HttpClientTestUtil.getEntityBody(response));
+		}
+	}
+
+	public void testRejectInsecureReqeust() throws Exception {
+
+		// Start secure server
+		this.startServer((httpMos) -> {
+			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_PORT, String.valueOf(7979));
+			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_SECURE, String.valueOf(true));
+		});
+
+		// Use default SslContext which should not match on cypher
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient(false)) {
+
+			// Send request
+			try {
+				client.execute(new HttpGet("https://localhost:7979"));
+				fail("Should not be successful");
+
+			} catch (SSLException ex) {
+				assertEquals("Incorrect cause", "Unrecognized SSL message, plaintext connection?", ex.getMessage());
+			}
+		}
+	}
+
+	/**
+	 * Starts the {@link HttpServerSocketManagedObjectSource} to service
+	 * requests.
+	 * 
+	 * @param httpConfigurer
+	 *            Configures the {@link HttpServerSocketManagedObjectSource}.
+	 */
+	private void startServer(Consumer<OfficeFloorManagedObjectSource> httpConfigurer) throws Exception {
+
 		// Compile the OfficeFloor to service request
 		CompileOfficeFloor compile = new CompileOfficeFloor();
 		compile.officeFloor((extension) -> {
@@ -72,7 +136,7 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 			// Configure the HTTP managed object source
 			OfficeFloorManagedObjectSource httpMos = deployer.addManagedObjectSource("HTTP",
 					HttpServerSocketManagedObjectSource.class.getName());
-			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_PORT, String.valueOf(7878));
+			httpConfigurer.accept(httpMos);
 
 			// Configure input
 			OfficeFloorInputManagedObject inputHttp = deployer.addInputManagedObject("HTTP",
@@ -92,14 +156,6 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 			extension.addSection("SECTION", MockSection.class);
 		});
 		this.officeFloor = compile.compileAndOpenOfficeFloor();
-
-		// Ensure can get response
-		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
-			HttpResponse response = client.execute(new HttpGet("http://localhost:7878"));
-			assertEquals("Should be succesful", HttpStatus.OK.getStatusCode(),
-					response.getStatusLine().getStatusCode());
-			assertEquals("Incorrect content", "test", HttpClientTestUtil.getEntityBody(response));
-		}
 	}
 
 	/**

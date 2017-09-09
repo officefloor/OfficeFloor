@@ -288,7 +288,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * Undertakes a single request.
 	 */
 	private void doSingleRequest(boolean isSecure) throws IOException {
-		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient(isSecure)) {
 			HttpResponse response = client.execute(new HttpGet(
 					(isSecure ? "https" : "http") + "://localhost:" + (isSecure ? HTTPS_PORT : HTTP_PORT) + "/test"));
 			assertEquals("Incorrect status", 200, response.getStatusLine().getStatusCode());

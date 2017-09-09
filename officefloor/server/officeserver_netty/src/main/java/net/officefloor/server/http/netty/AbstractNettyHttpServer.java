@@ -21,6 +21,7 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelHandlerContext;
@@ -43,6 +44,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslHandler;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.ResourceLeakDetector.Level;
@@ -138,19 +141,40 @@ public abstract class AbstractNettyHttpServer {
 			Class<? extends ServerChannel> serverChannelClass) throws InterruptedException {
 		this.loopGroup = loopGroup;
 
-		// Configure the port
-		InetSocketAddress port = new InetSocketAddress(httpPort);
+		// Configure and start the non-secure server
+		this.startPortServicing(httpPort, new ServerChannelInitialiser(), serverChannelClass);
 
-		// Configure and start the server
+		// Configure and start the secure server
+		if (httpsPort > 0) {
+			ChannelInitializer<SocketChannel> channelInitialiser = (sslContext != null
+					? new SecureServerChannelInitialiser(sslContext) : new ServerChannelInitialiser());
+			this.startPortServicing(httpsPort, channelInitialiser, serverChannelClass);
+		}
+	}
+
+	/**
+	 * Starts servicing the port.
+	 * 
+	 * @param port
+	 *            Port.
+	 * @param channelInitializer
+	 *            {@link ChannelInitializer}.
+	 * @param serverChannelClass
+	 *            {@link ServerChannel} {@link Class}.
+	 * @throws InterruptedException
+	 *             If fails to start.
+	 */
+	private void startPortServicing(int port, ChannelInitializer<SocketChannel> channelInitializer,
+			Class<? extends ServerChannel> serverChannelClass) throws InterruptedException {
 		ServerBootstrap bootstrap = new ServerBootstrap();
 		if (loopGroup instanceof EpollEventLoopGroup) {
 			bootstrap.option(EpollChannelOption.SO_REUSEPORT, true);
 		}
 		bootstrap.option(ChannelOption.SO_BACKLOG, 8192);
 		bootstrap.option(ChannelOption.SO_REUSEADDR, true);
-		bootstrap.group(loopGroup).channel(serverChannelClass).childHandler(new ServerChannelInitialiser());
+		bootstrap.group(loopGroup).channel(serverChannelClass).childHandler(channelInitializer);
 		bootstrap.childOption(ChannelOption.SO_REUSEADDR, true);
-		bootstrap.bind(port).sync();
+		bootstrap.bind(new InetSocketAddress(port)).sync();
 	}
 
 	/**
@@ -165,6 +189,45 @@ public abstract class AbstractNettyHttpServer {
 		@Override
 		protected void initChannel(SocketChannel channel) throws Exception {
 			ChannelPipeline pipeline = channel.pipeline();
+			pipeline.addLast("encoder", new HttpResponseEncoder());
+			pipeline.addLast("decoder", new HttpRequestDecoder(4096, 8192, 8192, false));
+			pipeline.addLast("handler", new ServiceServerHandler());
+		}
+	}
+
+	/**
+	 * Netty Server {@link ChannelInitializer}.
+	 */
+	private class SecureServerChannelInitialiser extends ChannelInitializer<SocketChannel> {
+
+		/**
+		 * {@link SslContext}.
+		 */
+		private final SSLContext sslContext;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param sslContext
+		 *            {@link SslContext}.
+		 */
+		private SecureServerChannelInitialiser(SSLContext sslContext) {
+			this.sslContext = sslContext;
+		}
+
+		/*
+		 * ================== ChannelInitializer =====================
+		 */
+
+		@Override
+		protected void initChannel(SocketChannel channel) throws Exception {
+
+			// Create the engine
+			SSLEngine engine = this.sslContext.createSSLEngine();
+
+			// Create the secure pipeline
+			ChannelPipeline pipeline = channel.pipeline();
+			pipeline.addLast("ssl", new SslHandler(engine));
 			pipeline.addLast("encoder", new HttpResponseEncoder());
 			pipeline.addLast("decoder", new HttpRequestDecoder(4096, 8192, 8192, false));
 			pipeline.addLast("handler", new ServiceServerHandler());

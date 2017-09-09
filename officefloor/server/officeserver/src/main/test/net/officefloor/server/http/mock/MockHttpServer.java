@@ -33,7 +33,6 @@ import java.util.function.Supplier;
 
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
-import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
@@ -77,7 +76,7 @@ public class MockHttpServer implements HttpServerImplementation {
 	/**
 	 * {@link ExternalServiceInput}.
 	 */
-	private ExternalServiceInput<ServerHttpConnection, ProcessAwareManagedObject> serviceInput;
+	private ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>> serviceInput;
 
 	/**
 	 * Instantiated via static methods.
@@ -188,7 +187,7 @@ public class MockHttpServer implements HttpServerImplementation {
 
 	@Override
 	public void configureHttpServer(HttpServerImplementationContext context) {
-		this.serviceInput = context.getExternalServiceInput(ProcessAwareManagedObject.class,
+		this.serviceInput = context.getExternalServiceInput(ProcessAwareServerHttpConnectionManagedObject.class,
 				ProcessAwareServerHttpConnectionManagedObject.getCleanupEscalationHandler());
 	}
 
