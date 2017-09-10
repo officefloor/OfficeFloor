@@ -36,23 +36,6 @@ import net.officefloor.server.stream.StreamBuffer;
 public abstract class AbstractSocketManagerTestCase extends AbstractSocketManagerTester {
 
 	/**
-	 * <p>
-	 * Checks for available data (or times out the test).
-	 * <p>
-	 * Available to override (e.g. SSL does not provide available data).
-	 * 
-	 * @param inputStream
-	 *            To check available data.
-	 */
-	protected void doAvailableCheck(InputStream inputStream) throws IOException {
-		long startTime = System.currentTimeMillis();
-		while (inputStream.available() == 0) {
-			this.timeout(startTime);
-			Thread.yield(); // allow processing
-		}
-	}
-
-	/**
 	 * Ensure can shutdown the {@link SocketListener}.
 	 */
 	public void testShutdown() throws IOException {
@@ -222,11 +205,66 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 			// Receive the response
 			InputStream inputStream = client.getInputStream();
-			this.doAvailableCheck(inputStream);
+			assertEquals("Incorrect response", 2, inputStream.read());
+		}
+	}
 
-			// Ensure correct byte
-			int value = inputStream.read();
-			assertEquals("Incorrect response", 2, value);
+	/**
+	 * Ensure can send header.
+	 */
+	public void testSendHeaderOnly() throws IOException {
+		this.tester = new SocketManagerTester(1);
+
+		// Bind to server socket
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer) -> {
+			requestHandler.handleRequest("SEND");
+		}, (socketServicer) -> (request, responseWriter) -> {
+			responseWriter.write((head, pool) -> head.write((byte) 2), null);
+		});
+
+		this.tester.start();
+
+		// Undertake connect and send data
+		try (Socket client = this.tester.getClient()) {
+
+			// Send some data (to trigger request)
+			OutputStream outputStream = client.getOutputStream();
+			outputStream.write(1);
+			outputStream.flush();
+
+			// Receive the response
+			InputStream inputStream = client.getInputStream();
+			assertEquals("Incorrect response", 2, inputStream.read());
+		}
+	}
+
+	/**
+	 * Ensure can send header and body.
+	 */
+	public void testSendHeaderAndBody() throws IOException {
+		this.tester = new SocketManagerTester(1);
+
+		// Bind to server socket
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer) -> {
+			requestHandler.handleRequest("SEND");
+		}, (socketServicer) -> (request, responseWriter) -> {
+			responseWriter.write((head, pool) -> head.write((byte) 2), this.tester.createStreamBuffer(3));
+		});
+
+		this.tester.start();
+
+		// Undertake connect and send data
+		try (Socket client = this.tester.getClient()) {
+
+			// Send some data (to trigger request)
+			OutputStream outputStream = client.getOutputStream();
+			outputStream.write(1);
+			outputStream.flush();
+
+			// Receive the response
+			InputStream inputStream = client.getInputStream();
+			assertEquals("Incorrect header value", 2, inputStream.read());
+			assertEquals("Incorrect body value", 3, inputStream.read());
 		}
 	}
 
@@ -258,9 +296,6 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 			// Ensure receive the response
 			InputStream inputStream = client.getInputStream();
-			this.doAvailableCheck(inputStream);
-
-			// Ensure correct order of responses
 			assertEquals("Incorrect first response", 1, inputStream.read());
 			assertEquals("Incorrect second response", 2, inputStream.read());
 		}
@@ -312,9 +347,6 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 			// Ensure receive the response
 			InputStream inputStream = client.getInputStream();
-			this.doAvailableCheck(inputStream);
-
-			// Ensure correct order of responses
 			assertEquals("Incorrect first response", 1, inputStream.read());
 			assertEquals("Incorrect second response", 2, inputStream.read());
 		}
@@ -439,11 +471,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 			// Receive the response
 			InputStream inputStream = client.getInputStream();
-			this.doAvailableCheck(inputStream);
-
-			// Ensure correct byte
-			int value = inputStream.read();
-			assertEquals("Incorrect response", 1, value);
+			assertEquals("Incorrect response", 1, inputStream.read());
 		}
 
 		// Ensure no failures
@@ -504,9 +532,6 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 			// Receive the response
 			InputStream inputStream = client.getInputStream();
-			this.doAvailableCheck(inputStream);
-
-			// Ensure correct results
 			for (byte i = 0; i < RESPONSE_COUNT; i++) {
 				assertEquals("Incorrect response", i, inputStream.read());
 			}
@@ -521,9 +546,5 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 	}
 
 	// TODO write multi-threaded
-
-	// TODO write header with no content
-
-	// TODO write header before content
 
 }

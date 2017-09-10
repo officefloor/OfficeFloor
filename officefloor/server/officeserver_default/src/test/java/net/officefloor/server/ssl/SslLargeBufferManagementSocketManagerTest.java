@@ -15,28 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.server;
+package net.officefloor.server.ssl;
 
-import java.nio.ByteBuffer;
-
-import net.officefloor.server.buffer.ThreadLocalStreamBufferPool;
-import net.officefloor.server.stream.StreamBufferPool;
+import net.officefloor.server.LargeBufferManagementSocketManagerTest;
 
 /**
- * Tests the {@link SocketManager} with {@link ThreadLocalStreamBufferPool}.
+ * SSL {@link LargeBufferManagementSocketManagerTest}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ThreadLocalPoolSocketManagerTest extends AbstractSocketManagerTestCase {
+public class SslLargeBufferManagementSocketManagerTest extends LargeBufferManagementSocketManagerTest {
 
-	@Override
-	protected int getBufferSize() {
-		return 4096;
-	}
-
-	@Override
-	protected StreamBufferPool<ByteBuffer> createStreamBufferPool(int bufferSize) {
-		return new ThreadLocalStreamBufferPool(() -> ByteBuffer.allocateDirect(bufferSize), 10, 10);
+	public SslLargeBufferManagementSocketManagerTest() {
+		this.isSecure = true;
 	}
 
 }

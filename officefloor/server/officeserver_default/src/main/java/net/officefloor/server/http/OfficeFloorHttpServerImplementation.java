@@ -17,6 +17,11 @@
  */
 package net.officefloor.server.http;
 
+import net.officefloor.compile.spi.officefloor.DeployedOffice;
+import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
+import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -28,6 +33,39 @@ public class OfficeFloorHttpServerImplementation implements HttpServerImplementa
 
 	@Override
 	public void configureHttpServer(HttpServerImplementationContext context) {
+
+		// Obtain the deployer
+		OfficeFloorDeployer deployer = context.getOfficeFloorDeployer();
+
+		// Configure the input
+		OfficeFloorInputManagedObject input = deployer.addInputManagedObject("HTTP",
+				ServerHttpConnection.class.getName());
+
+		// Obtain the handling
+		DeployedOfficeInput serviceInput = context.getInternalServiceInput();
+		DeployedOffice office = serviceInput.getDeployedOffice();
+
+		// Configure the non-secure HTTP
+		OfficeFloorManagedObjectSource http = deployer.addManagedObjectSource("HTTP",
+				new HttpServerSocketManagedObjectSource(context.getHttpPort()));
+		deployer.link(http.getManagingOffice(), office);
+		deployer.link(http.getManagedObjectFlow(HttpServerSocketManagedObjectSource.Flows.HANDLE_REQUEST.name()),
+				serviceInput);
+		deployer.link(http, input);
+
+		// Configure the secure HTTP
+		int httpsPort = context.getHttpsPort();
+		if (httpsPort > 0) {
+			OfficeFloorManagedObjectSource https = deployer.addManagedObjectSource("HTTPS",
+					new HttpServerSocketManagedObjectSource(httpsPort, context.getSslContext()));
+			deployer.link(https.getManagingOffice(), office);
+			deployer.link(https.getManagedObjectFlow(HttpServerSocketManagedObjectSource.Flows.HANDLE_REQUEST.name()),
+					serviceInput);
+			deployer.link(https, input);
+
+			// Specify default bound name
+			input.setBoundOfficeFloorManagedObjectSource(http);
+		}
 	}
 
 }

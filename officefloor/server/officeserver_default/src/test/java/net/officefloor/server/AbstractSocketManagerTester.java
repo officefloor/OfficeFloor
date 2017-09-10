@@ -22,8 +22,13 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.util.concurrent.Executor;
+
+import javax.net.ssl.SSLContext;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
+import net.officefloor.server.ssl.SslSocketServicerFactory;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
 
@@ -35,14 +40,21 @@ import net.officefloor.server.stream.StreamBufferPool;
 public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 
 	/**
-	 * Buffer size.
-	 */
-	private static final int BUFFER_SIZE = 1024;
-
-	/**
 	 * Wraps the {@link SocketManager} for easier testing.
 	 */
 	protected SocketManagerTester tester = null;
+
+	/**
+	 * Indicates if secure.
+	 */
+	protected boolean isSecure = false;
+
+	/**
+	 * Obtains the buffer size.
+	 * 
+	 * @return Buffer size.
+	 */
+	protected abstract int getBufferSize();
 
 	/**
 	 * Creates the {@link StreamBufferPool}.
@@ -54,6 +66,11 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 	protected abstract StreamBufferPool<ByteBuffer> createStreamBufferPool(int bufferSize);
 
 	/**
+	 * {@link SslSocketServicerFactory}.
+	 */
+	private SslSocketServicerFactory<?> sslSocketServicerFactory = null;
+
+	/**
 	 * Creates a client {@link Socket}.
 	 * 
 	 * @param port
@@ -61,7 +78,18 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 	 * @return Client {@link Socket}.
 	 */
 	protected Socket createClient(int port) throws IOException {
-		return new Socket(InetAddress.getLocalHost(), 7878);
+		if (this.isSecure) {
+			// Secure client
+			try {
+				return OfficeFloorDefaultSslContextSource.createClientSslContext(null).getSocketFactory()
+						.createSocket(InetAddress.getLocalHost(), port);
+			} catch (Exception ex) {
+				throw fail(ex);
+			}
+		} else {
+			// Non-secure client
+			return new Socket(InetAddress.getLocalHost(), 7878);
+		}
 	}
 
 	/**
@@ -77,7 +105,33 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 	 */
 	protected <R> SocketServicerFactory<R> adaptSocketServicerFactory(SocketServicerFactory<R> socketServicerFactory,
 			RequestServicerFactory<R> requestServicerFactory, StreamBufferPool<ByteBuffer> bufferPool) {
-		return socketServicerFactory;
+
+		// Use as is, if not secure
+		if (!this.isSecure) {
+			return socketServicerFactory;
+		}
+
+		// Secure, so adapt
+		try {
+			// Obtain the SSL context
+			SSLContext sslContext = OfficeFloorDefaultSslContextSource.createServerSslContext(null);
+
+			// Create the executor
+			Executor executor = (task) -> new TestThread(task).start();
+
+			// Create the SSL socket servicer
+			SslSocketServicerFactory<R> sslSocketServicerFactory = new SslSocketServicerFactory<>(sslContext,
+					socketServicerFactory, requestServicerFactory, bufferPool, executor);
+
+			// Capture for adapting the request servicer factory
+			this.sslSocketServicerFactory = sslSocketServicerFactory;
+
+			// Return the SSL socket servicer
+			return sslSocketServicerFactory;
+
+		} catch (Exception ex) {
+			throw fail(ex);
+		}
 	}
 
 	/**
@@ -87,9 +141,17 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 	 *            {@link RequestServicerFactory}.
 	 * @return Adapted {@link RequestServicerFactory}.
 	 */
+	@SuppressWarnings("unchecked")
 	protected <R> RequestServicerFactory<R> adaptRequestServicerFactory(
 			RequestServicerFactory<R> requestServicerFactory) {
-		return requestServicerFactory;
+
+		// Use as is, if not secure
+		if (!this.isSecure) {
+			return requestServicerFactory;
+		}
+
+		// Secure, so adapt
+		return (RequestServicerFactory<R>) this.sslSocketServicerFactory;
 	}
 
 	/**
@@ -130,7 +192,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 		 * {@link StreamBufferPool}.
 		 */
 		protected final StreamBufferPool<ByteBuffer> bufferPool = AbstractSocketManagerTester.this
-				.createStreamBufferPool(BUFFER_SIZE);
+				.createStreamBufferPool(AbstractSocketManagerTester.this.getBufferSize());
 
 		/**
 		 * {@link SocketManager} to test.
@@ -151,7 +213,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 		protected SocketManagerTester(int listenerCount) throws IOException {
 
 			// Create the Socket Manager
-			this.manager = new SocketManager(1, this.bufferPool, BUFFER_SIZE);
+			this.manager = new SocketManager(1, this.bufferPool, AbstractSocketManagerTester.this.getBufferSize());
 
 			// Start servicing the sockets
 			Runnable[] runnables = this.manager.getRunnables();
@@ -198,7 +260,9 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 		 * @return Client {@link Socket}.
 		 */
 		protected Socket getClient() throws IOException {
-			return AbstractSocketManagerTester.this.createClient(DEFAULT_PORT);
+			Socket socket = AbstractSocketManagerTester.this.createClient(DEFAULT_PORT);
+			socket.setSoTimeout(1000); // ensure timeout tests
+			return socket;
 		}
 
 		/**

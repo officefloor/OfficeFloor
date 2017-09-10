@@ -17,21 +17,10 @@
  */
 package net.officefloor.server.ssl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.util.concurrent.Executor;
-
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 
 import net.officefloor.server.BufferManagementSocketManagerTest;
-import net.officefloor.server.RequestServicerFactory;
 import net.officefloor.server.SocketManager;
-import net.officefloor.server.SocketServicerFactory;
-import net.officefloor.server.stream.StreamBufferPool;
 
 /**
  * Tests {@link SSLSocket} communication with {@link SocketManager}.
@@ -40,53 +29,8 @@ import net.officefloor.server.stream.StreamBufferPool;
  */
 public class SslSocketManagerTest extends BufferManagementSocketManagerTest {
 
-	private SslSocketServicerFactory<?> prevousSslSocketServicerFactory;
-
-	@Override
-	protected void doAvailableCheck(InputStream inputStream) throws IOException {
-		// SSL does not provide available, so don't check
-	}
-
-	@Override
-	protected <R> SocketServicerFactory<R> adaptSocketServicerFactory(SocketServicerFactory<R> socketServicerFactory,
-			RequestServicerFactory<R> requestServicerFactory, StreamBufferPool<ByteBuffer> bufferPool) {
-		try {
-			// Obtain the SSL context
-			SSLContext sslContext = OfficeFloorDefaultSslContextSource.createServerSslContext(null);
-
-			// Create the executor
-			Executor executor = (task) -> new TestThread(task).start();
-
-			// Create the SSL socket servicer
-			SslSocketServicerFactory<R> sslSocketServicerFactory = new SslSocketServicerFactory<>(sslContext,
-					socketServicerFactory, requestServicerFactory, bufferPool, executor);
-
-			// Capture for adapting the request servicer factory
-			this.prevousSslSocketServicerFactory = sslSocketServicerFactory;
-
-			// Return the SSL socket servicer
-			return sslSocketServicerFactory;
-
-		} catch (Exception ex) {
-			throw fail(ex);
-		}
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	protected <R> RequestServicerFactory<R> adaptRequestServicerFactory(
-			RequestServicerFactory<R> requestServicerFactory) {
-		return (RequestServicerFactory<R>) this.prevousSslSocketServicerFactory;
-	}
-
-	@Override
-	protected Socket createClient(int port) throws IOException {
-		try {
-			return OfficeFloorDefaultSslContextSource.createClientSslContext(null).getSocketFactory()
-					.createSocket(InetAddress.getLocalHost(), port);
-		} catch (Exception ex) {
-			throw fail(ex);
-		}
+	public SslSocketManagerTest() {
+		this.isSecure = true;
 	}
 
 }

@@ -387,8 +387,8 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 
 					case NEED_TASK:
 						// Trigger processing of the delegated task
-						Runnable delegatedTask = this.engine.getDelegatedTask();
-						SslSocketServicerFactory.this.executor.execute(new SslRunnable(delegatedTask, this));
+						this.sslRunnable = new SslRunnable(this.engine.getDelegatedTask(), this);
+						SslSocketServicerFactory.this.executor.execute(this.sslRunnable);
 						return; // Must wait on task to complete
 
 					case NOT_HANDSHAKING:

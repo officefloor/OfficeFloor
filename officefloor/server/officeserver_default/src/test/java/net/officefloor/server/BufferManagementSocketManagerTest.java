@@ -31,6 +31,11 @@ import net.officefloor.server.stream.StreamBufferPool;
 public class BufferManagementSocketManagerTest extends AbstractSocketManagerTestCase {
 
 	@Override
+	protected int getBufferSize() {
+		return 1024;
+	}
+
+	@Override
 	protected StreamBufferPool<ByteBuffer> createStreamBufferPool(int bufferSize) {
 		return new MockStreamBufferPool(() -> ByteBuffer.allocate(bufferSize));
 	}

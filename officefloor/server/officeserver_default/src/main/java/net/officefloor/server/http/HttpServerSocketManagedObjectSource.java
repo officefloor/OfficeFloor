@@ -33,6 +33,7 @@ import javax.net.ssl.SSLContext;
 
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
@@ -300,7 +301,7 @@ public class HttpServerSocketManagedObjectSource
 	/**
 	 * Port.
 	 */
-	private int port;
+	private int port = -1;
 
 	/**
 	 * {@link HttpRequestParserMetaData}.
@@ -331,6 +332,39 @@ public class HttpServerSocketManagedObjectSource
 	 * {@link AcceptedSocketDecorator}.
 	 */
 	private AcceptedSocketDecorator acceptedSocketDecorator;
+
+	/**
+	 * Default constructor to configure from {@link PropertyList}.
+	 */
+	public HttpServerSocketManagedObjectSource() {
+	}
+
+	/**
+	 * Instantiate for non-secure servicing.
+	 * 
+	 * @param port
+	 *            Port.
+	 */
+	public HttpServerSocketManagedObjectSource(int port) {
+		this.port = port;
+		this.isSecure = false;
+		this.sslContext = null;
+	}
+
+	/**
+	 * Instantiate for secure servicing.
+	 * 
+	 * @param port
+	 *            Port.
+	 * @param sslContext
+	 *            {@link SSLContext}. May be <code>null</code> if behind reverse
+	 *            proxy handling secure communication.
+	 */
+	public HttpServerSocketManagedObjectSource(int port, SSLContext sslContext) {
+		this.port = port;
+		this.isSecure = true;
+		this.sslContext = sslContext;
+	}
 
 	/**
 	 * Enables overriding to configure a {@link ServerSocketDecorator}.
@@ -376,9 +410,7 @@ public class HttpServerSocketManagedObjectSource
 		// Obtain the managed object source context
 		ManagedObjectSourceContext<Flows> mosContext = context.getManagedObjectSourceContext();
 
-		// Load the configuration
-		this.port = Integer.parseInt(mosContext.getProperty(PROPERTY_PORT));
-		this.isSecure = Boolean.parseBoolean(mosContext.getProperty(PROPERTY_SECURE, String.valueOf(false)));
+		// Load configuration
 		int maxHeaderCount = Integer.parseInt(mosContext.getProperty(PROPERTY_MAX_HEADER_COUNT, String.valueOf(50)));
 		int maxTextLength = Integer.parseInt(mosContext.getProperty(PROPERTY_MAX_TEXT_LENGTH, String.valueOf(2048)));
 		long maxEntityLength = Long
@@ -393,22 +425,30 @@ public class HttpServerSocketManagedObjectSource
 		this.serverSocketDecorator = this.getServerSocketDecorator(context);
 		this.acceptedSocketDecorator = this.getAcceptedSocketDecorator(context);
 
-		// Obtain the SSL context
-		if (this.isSecure) {
-			String sslContextSourceClassName = mosContext.getProperty(PROPERTY_SSL_CONTEXT_SOURCE, null);
-			if (sslContextSourceClassName == null) {
-				sslContextSourceClassName = OfficeFloorDefaultSslContextSource.class.getName();
-			}
-			switch (sslContextSourceClassName) {
-			case SSL_REVERSE_PROXIED:
-				// Let be secure, without SSL
-				break;
-			default:
-				// Create the SSL context
-				Class<?> sslContextSourceClass = mosContext.loadClass(sslContextSourceClassName);
-				SslContextSource sslContextSource = (SslContextSource) sslContextSourceClass.newInstance();
-				this.sslContext = sslContextSource.createSslContext(mosContext);
-				break;
+		// Determine if need to configure from properties
+		if (this.port == -1) {
+
+			// Default constructor, so load the configuration
+			this.port = Integer.parseInt(mosContext.getProperty(PROPERTY_PORT));
+			this.isSecure = Boolean.parseBoolean(mosContext.getProperty(PROPERTY_SECURE, String.valueOf(false)));
+
+			// Obtain the SSL context
+			if (this.isSecure) {
+				String sslContextSourceClassName = mosContext.getProperty(PROPERTY_SSL_CONTEXT_SOURCE, null);
+				if (sslContextSourceClassName == null) {
+					sslContextSourceClassName = OfficeFloorDefaultSslContextSource.class.getName();
+				}
+				switch (sslContextSourceClassName) {
+				case SSL_REVERSE_PROXIED:
+					// Let be secure, without SSL
+					break;
+				default:
+					// Create the SSL context
+					Class<?> sslContextSourceClass = mosContext.loadClass(sslContextSourceClassName);
+					SslContextSource sslContextSource = (SslContextSource) sslContextSourceClass.newInstance();
+					this.sslContext = sslContextSource.createSslContext(mosContext);
+					break;
+				}
 			}
 		}
 

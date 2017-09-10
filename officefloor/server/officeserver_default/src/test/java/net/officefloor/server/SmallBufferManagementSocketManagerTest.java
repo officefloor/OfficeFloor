@@ -17,26 +17,18 @@
  */
 package net.officefloor.server;
 
-import java.nio.ByteBuffer;
-
-import net.officefloor.server.buffer.ThreadLocalStreamBufferPool;
-import net.officefloor.server.stream.StreamBufferPool;
+import net.officefloor.server.stream.StreamBuffer;
 
 /**
- * Tests the {@link SocketManager} with {@link ThreadLocalStreamBufferPool}.
+ * Ensures all {@link StreamBuffer} instances are released.
  * 
  * @author Daniel Sagenschneider
  */
-public class ThreadLocalPoolSocketManagerTest extends AbstractSocketManagerTestCase {
+public class SmallBufferManagementSocketManagerTest extends BufferManagementSocketManagerTest {
 
 	@Override
 	protected int getBufferSize() {
-		return 4096;
-	}
-
-	@Override
-	protected StreamBufferPool<ByteBuffer> createStreamBufferPool(int bufferSize) {
-		return new ThreadLocalStreamBufferPool(() -> ByteBuffer.allocateDirect(bufferSize), 10, 10);
+		return 1;
 	}
 
 }
